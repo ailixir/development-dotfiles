@@ -1,0 +1,60 @@
+--- frontend/src/services/mocks/studio/fixtures.ts
++++ frontend/src/services/mocks/studio/fixtures.ts
+@@ -69,7 +69,7 @@
+     steps: [...MOCK_STEPS],
+     variables: [
+       { name: 'USER_ID', kind: 'plain', value: 'pilot-user' },
+-      { name: 'LOGIN_PW', kind: 'secretRef', secretId: 'vault://studio/pilot-pw' },
++      { name: 'LOGIN_PW', kind: 'secretRef', secretId: 'LOGIN_PW' },
+     ],
+     configuration: defaultConfiguration(),
+     status: 'PAUSED',
+--- frontend/src/services/mocks/studio/readinessFixtures.ts
++++ frontend/src/services/mocks/studio/readinessFixtures.ts
+@@ -34,7 +34,7 @@
+     variables: [
+       { name: 'USER_ID', kind: 'plain', value: 'pilot-user' },
+       // A reference, never a resolved value: resolved secrets never travel on this contract.
+-      { name: 'LOGIN_PW', kind: 'secretRef', secretId: 'vault://studio/pilot-pw' },
++      { name: 'LOGIN_PW', kind: 'secretRef', secretId: 'LOGIN_PW' },
+     ],
+     configuration: defaultConfiguration(),
+     status: 'PAUSED',
+--- frontend/src/services/mocks/studio/studioContract.test.ts
++++ frontend/src/services/mocks/studio/studioContract.test.ts
+@@ -255,13 +255,20 @@
+ });
+ 
+ describe('story 10.11c: ADR-002 §21’s two properties, and the examples that carry them', () => {
+-  it('every getTest example validates against the amended TestDto', () => {
++  it("every getTest example validates against the schema getTest's 200 declares", () => {
+     // §18.5: an example that does not validate is the decorative artefact §14.6 complains about.
+     // This runs over the **document's own** examples rather than over the fixtures, which is the
+     // half AC-25 adds — the fixture half is 10.10's and is below.
+-    const validate = componentValidator('TestDto');
+-    const examples: Record<string, { value: unknown }> =
+-      openapi.paths['/tests/{id}'].get.responses['200'].content['application/json'].examples;
++    // The schema is read from the operation, not named here: the single-path authoring contract
++    // (STUDIO-OBS-015) answers `GET /tests/{id}` with `TestDetailDto` (`AuthoringStep` objects),
++    // while `TestDto` stays the list projection, so naming either would test the wrong shape.
++    const content = openapi.paths['/tests/{id}'].get.responses['200'].content['application/json'];
++    const declaredRef: string = content.schema.$ref;
++    expect(declaredRef, 'getTest 200 declares a component schema').toMatch(
++      /^#\/components\/schemas\/[A-Za-z]+$/,
++    );
++    const validate = componentValidator(declaredRef.split('/').pop() as string);
++    const examples: Record<string, { value: unknown }> = content.examples;
+ 
+     expect(Object.keys(examples).length, 'getTest declares no examples to validate').toBeGreaterThan(
+       0,
+--- frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx
++++ frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx
+@@ -262,7 +262,7 @@
+     await waitFor(() => expect(bodies).toHaveLength(1), WAIT);
+     expect(bodies[0].variables).toEqual([
+       { name: 'USER_ID', kind: 'plain', value: 'other-user' },
+-      { name: 'LOGIN_PW', kind: 'secretRef', secretId: 'vault://studio/pilot-pw' },
++      { name: 'LOGIN_PW', kind: 'secretRef', secretId: 'LOGIN_PW' },
+     ]);
+     expect(requests('POST', /\/studio\/tests$/)).toHaveLength(0);
+ 

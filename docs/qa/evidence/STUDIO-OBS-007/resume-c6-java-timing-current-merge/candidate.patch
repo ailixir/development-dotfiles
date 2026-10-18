@@ -1,0 +1,351 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -274,6 +274,7 @@
+     volatile long c6FocusAt, c6PendingAt, c6CutAt, c6DeadlineMarginMs;
+     volatile boolean c6NativeClose, c6FenceAvailable, c6InterruptedNotification, c6ProducerSealed;
+     C5Capture c6Capture;
++    P8PendingTiming c6Timing;
+     List<P6OwnedPid> c6BrowserTree = List.of();
+     final java.util.concurrent.CountDownLatch c6Pending =
+         new java.util.concurrent.CountDownLatch(1);
+@@ -7178,6 +7179,7 @@
+       throws IOException {
+     boolean accepted = false, flipped = false;
+     int sequence = 0;
++    int timingSite = 100;
+     P4RevocationState state = p4Revocation;
+     try {
+       byte[] bytes = exchange.getRequestBody().readNBytes(1025);
+@@ -7206,6 +7208,8 @@
+         }
+         state.sequences.put(producer, sequence);
+         if (state.c6Kind != 0 && event == 10) {
++          timingSite = 110;
++          if (state.c6Timing != null) { state.c6Timing.mark(5); }
+           if (!state.started
+               || state.c6FocusAt == 0
+               || state.c6PendingSamples >= (state.c6Kind == 1 ? 1 : 2)
+@@ -7219,6 +7223,7 @@
+           state.inFlightOrdinal = ordinal;
+           state.c6DeadlineMarginMs = p4Number(body, "deltaMicros");
+           state.c6PendingAt = System.nanoTime();
++          if (state.c6Timing != null) { state.c6Timing.mark(6); }
+           if (++state.c6PendingSamples == 1) state.c6Pending.countDown();
+           else state.c6CutPending.countDown();
+         } else if (state.c6Kind != 0 && event == 11) {
+@@ -7241,6 +7246,8 @@
+           }
+           state.started = true;
+         } else if (event == 2) {
++          timingSite = 112;
++          if (operation == 1 && state.c6Timing != null) { state.c6Timing.nativeNotice(true, ordinal, false); }
+           if (state.c6Kind != 0 && state.c6CutAt != 0) {
+             throw new IllegalArgumentException("C6 unexpected later native entry after cut");
+           }
+@@ -7250,7 +7257,10 @@
+               || state.active.putIfAbsent(ordinal, operation) != null) {
+             throw new IllegalArgumentException("Native entry outside original authority");
+           }
++          if (operation == 1 && state.c6Timing != null) { state.c6Timing.nativeNotice(true, ordinal, true); }
+         } else if (event == 3) {
++          timingSite = 113;
++          if (operation == 1 && state.c6Timing != null) { state.c6Timing.nativeNotice(false, ordinal, false); }
+           Integer entered = state.active.remove(ordinal);
+           if (entered == null || entered != operation) {
+             throw new IllegalArgumentException("Unmatched original native settlement");
+@@ -7269,6 +7279,7 @@
+                   "Duplicate or mismatched identified click settlement");
+             }
+           }
++          if (operation == 1 && state.c6Timing != null) { state.c6Timing.nativeNotice(false, ordinal, true); }
+         } else if (event == 4) {
+           if (!body.path("ok").booleanValue() || (state.path == 2 && producer != 2)) {
+             throw new IllegalArgumentException("Invalid real complete acknowledgement");
+@@ -7338,10 +7349,12 @@
+       }
+       accepted = true;
+     } catch (RuntimeException failure) {
++      p8TimingRefusal(state, timingSite, timingSite >= 110);
+       if (state != null) {
+         state.failed = true;
+       }
+     } catch (IOException failure) {
++      p8TimingRefusal(state, timingSite, timingSite >= 110);
+       if (state != null) {
+         state.failed = true;
+       }
+@@ -7359,6 +7372,7 @@
+       exchange.sendResponseHeaders(accepted ? 200 : 409, response.length);
+       exchange.getResponseBody().write(response);
+     } catch (IOException failure) {
++      p8TimingRefusal(state, 114);
+       if (state != null) {
+         state.failed = true;
+       }
+@@ -7751,12 +7765,104 @@
+     assertThat(P3_REPORT_REQUESTS.get()).isZero();
+   }
+ 
++  private static final class P8PendingTiming {
++    private static final String[] POINTS = {"WaitBegin", "WaitExit", "NativeEntryIngress",
++        "FocusAccepted", "Probe1WriteComplete", "PendingIngress", "PendingAccepted", "NativeSettleIngress"};
++    final long origin = System.nanoTime();
++    final long[] times = new long[8];
++    final boolean[] observed = new boolean[8];
++    boolean selected, waitResultObserved, waitResult, nativeEntryAccepted, nativeSettleAccepted;
++    int nativeOrdinal, refusalOrdinal;
++    boolean refusalScopeKnown, diagnosticFailed;
++    long refusalNanos;
++    boolean provisionalFocusLossObserved;
++    ObjectNode early;
++
++    synchronized void mark(int point) {
++      if (!observed[point]) { observed[point] = true; times[point] = System.nanoTime() - origin; }
++    }
++
++    synchronized void nativeNotice(boolean entry, int ordinal, boolean accepted) {
++      if (entry && !observed[2]) { nativeOrdinal = ordinal; mark(2); }
++      if (ordinal != nativeOrdinal || !observed[2]) { return; }
++      if (entry) { nativeEntryAccepted |= accepted; }
++      else { mark(7); nativeSettleAccepted |= accepted; }
++    }
++
++    synchronized void refuse(int site, boolean scopeKnown) {
++      if (refusalOrdinal == 0) { refusalOrdinal = site; refusalNanos = System.nanoTime() - origin;
++        refusalScopeKnown = scopeKnown; }
++    }
++
++    synchronized void waitExit(boolean returned, boolean result) {
++      mark(1); waitResultObserved = returned; waitResult = returned && result;
++      early = snapshot(); // Memory only before the original assertion/exception exits.
++    }
++
++    synchronized ObjectNode snapshot() {
++      ObjectNode out = C.object().put("diagSelectedStateObserved", selected)
++          .put("diagSameJavaMonotonicClock", true).put("diagIngressNotNativeApiClock", true)
++          .put("diagWaitResultObserved", waitResultObserved).put("diagWaitResult", waitResult)
++          .put("diagNativeOrdinalObserved", observed[2]).put("diagNativeOrdinal", nativeOrdinal)
++          .put("diagNativeEntryAccepted", nativeEntryAccepted).put("diagNativeSettleAccepted", nativeSettleAccepted)
++          .put("diagFirstRefusalObserved", refusalOrdinal != 0).put("diagFirstRefusalOrdinal", refusalOrdinal)
++          .put("diagFirstRefusalElapsedNanos", refusalNanos).put("diagFirstRefusalScopeKnown", refusalScopeKnown)
++          .put("diagProvisionalFocusLossObserved", provisionalFocusLossObserved)
++          .put("diagObservationFailed", diagnosticFailed);
++      for (int i = 0; i < POINTS.length; i++) {
++        out.put("diag" + POINTS[i] + "Observed", observed[i]);
++        out.put("diag" + POINTS[i] + "ElapsedNanos", times[i]);
++      }
++      return out;
++    }
++  }
++
++  private static void p8TimingRefusal(P4RevocationState state, int site) {
++    if (state != null && state.c6Timing != null) { state.c6Timing.refuse(site, false); }
++  }
++
++  private static void p8TimingRefusal(P4RevocationState state, int site, boolean scopeKnown) {
++    if (state != null && state.c6Timing != null) { state.c6Timing.refuse(site, scopeKnown); }
++  }
++
++  private static boolean p8CaptureFirstPendingWait(P4RevocationState state) throws InterruptedException {
++    boolean returned = false, result = false;
++    state.c6Timing.mark(0);
++    try {
++      result = state.c6Pending.await(15, java.util.concurrent.TimeUnit.SECONDS);
++      returned = true;
++      return result;
++    } finally {
++      try { state.c6Timing.waitExit(returned, result); }
++      catch (Throwable diagnosticFailure) {
++        // Preserve the original await result/exception/interrupt; retain no raw throwable.
++        state.c6Timing.diagnosticFailed = true;
++      }
++    }
++  }
++
++  private static void p8WritePendingTiming(int kind, C5Capture capture, boolean quarantine) throws Exception {
++    P8PendingTiming timing = capture.c6Timing;
++    ObjectNode record = capture.c6Acceptance == null ? C.object() : capture.c6Acceptance.deepCopy();
++    ObjectNode late = timing.snapshot();
++    record.setAll(late);
++    record.put("diagSnapshotPartialNotClosureWitness", true)
++        .put("diagQuarantineRetained", quarantine).put("diagEarlySnapshotObserved", timing.early != null);
++    if (timing.early != null) {
++      for (var fields = timing.early.fields(); fields.hasNext();) {
++        var field = fields.next(); record.set("early" + field.getKey(), field.getValue().deepCopy());
++      }
++    }
++    p3WriteEvidence("c6-" + kind, record); // Only original numeric receipt, only case-finally.
++  }
++
+   // C6 adds four concrete cuts to the existing fixture. All observers forward original methods;
+   // receipts below establish observation/ownership only, never execution or usage authority.
+   private void p8C6Case(int kind) throws Exception {
+     String value = "C6-PRIVATE-" + UUID.randomUUID() + "-+/界";
+     C5Capture capture = new C5Capture(List.of(value), false);
+     capture.cacheNonemptyRequired = kind <= 2;
++    capture.c6Timing = kind == 2 || kind == 3 ? new P8PendingTiming() : null;
+     c5Capture = capture;
+     Throwable primary = null;
+     try {
+@@ -7819,6 +7925,16 @@
+       } else {
+         failures.add(new IllegalStateException("C6 original owner cleanup remains unconfirmed"));
+       }
++      if (capture.c6Timing != null) {
++        if (capture.c6Timing.diagnosticFailed) {
++          failures.add(new IllegalStateException("C6 numeric timing observation failed"));
++        }
++        try { p8WritePendingTiming(kind, capture, cleanupUnconfirmed); }
++        catch (Exception | Error diagnosticWriteFailure) {
++          // No raw throwable/cause/value is exported; preserve original primary and quarantine.
++          failures.add(new IllegalStateException("C6 numeric timing receipt persistence failed"));
++        }
++      }
+       if (!failures.isEmpty()) {
+         if (primary != null) failures.forEach(primary::addSuppressed);
+         else throwTeardownFailures(failures);
+@@ -7850,6 +7966,8 @@
+         new P4RevocationState(P4_REVOCATION_CASE.incrementAndGet(), kind <= 2 ? 2 : 1, test, jdbc);
+     state.c6Kind = kind;
+     state.c6Capture = capture;
++    state.c6Timing = capture.c6Timing;
++    if (state.c6Timing != null) { state.c6Timing.selected = true; }
+     state.c6Phase = p4StartObserverPhase(1);
+     p4Revocation = state;
+     p4WriteRevocationMode(state);
+@@ -7865,7 +7983,9 @@
+     }
+     List<P6OwnedPid> browserTree = List.of();
+     if (kind < 4) {
+-      assertThat(state.c6Pending.await(15, java.util.concurrent.TimeUnit.SECONDS))
++      assertThat(state.c6Timing == null
++              ? state.c6Pending.await(15, java.util.concurrent.TimeUnit.SECONDS)
++              : p8CaptureFirstPendingWait(state))
+           .as(
+               "real password focus ingress plus contemporaneous original Node pending acknowledgement")
+           .isTrue();
+@@ -8023,9 +8143,7 @@
+       }
+     }
+     p3Scan(List.of(value));
+-    p3WriteEvidence(
+-        "c6-" + kind,
+-        C.object()
++    ObjectNode acceptance = C.object()
+             .put("kind", kind)
+             .put("realFocusIngress", state.c6FocusAt > 0)
+             .put("originalPendingAck", state.c6PendingAt > 0)
+@@ -8044,7 +8162,9 @@
+             .put("rawEncodedHits", state.c6EncodedHits)
+             .put("producedRedactedCallback", state.c6CallbackRedacted)
+             .put("realReleasedReads", 1)
+-            .put("ownedBrowserTreeGone", !browserTree.isEmpty()));
++            .put("ownedBrowserTreeGone", !browserTree.isEmpty());
++    if (capture.c6Timing != null) capture.c6Acceptance = acceptance.deepCopy();
++    p3WriteEvidence("c6-" + kind, acceptance);
+   }
+ 
+   private void p8AssertUnknownUsageLineage(P4RevocationState state) {
+@@ -9871,6 +9991,8 @@
+       throws IOException {
+     boolean accepted = false;
+     int sequence = 0;
++    int timingSite = 200;
++    boolean timingScopeKnown = false;
+     P4DocumentWitness completion = null;
+     try {
+       if (!exchange.getRequestMethod().equals("POST")) {
+@@ -9912,6 +10034,7 @@
+         if (query.size() != 2 || witness == null || P4_CLOSED_PHASES.contains(witness.phase)) {
+           throw new IllegalArgumentException("Missing actual observer document");
+         }
++        timingScopeKnown = p4Revocation != null && witness.phase == p4Revocation.c6Phase;
+         sequence = p4Number(body, "seq");
+         if (sequence < 1 || sequence > 1024) {
+           throw new IllegalArgumentException("Private observer sequence bound");
+@@ -9943,14 +10066,19 @@
+               case "write" -> P4_PASSWORD_WRITES.incrementAndGet();
+               case "submit" -> P4_NATIVE_SUBMITS.incrementAndGet();
+               case "focus-enter" -> {
++                timingSite = 230;
+                 P4RevocationState selected = p4Revocation;
+                 if (selected.c6FocusAt != 0 || selected.c6Kind == 4) {
+                   throw new IllegalArgumentException("Duplicate C6 native focus");
+                 }
+                 selected.c6FocusAt = System.nanoTime();
++                if (selected.c6Timing != null) { selected.c6Timing.mark(3); }
++                timingSite = 240;
+                 p8WritePendingProbe(selected, 1);
++                if (selected.c6Timing != null) { selected.c6Timing.mark(4); }
+               }
+               case "focus-exit" -> {
++                timingSite = 231;
+                 if (p4Revocation.c6FocusAt == 0) {
+                   throw new IllegalArgumentException("C6 focus exit without entry");
+                 }
+@@ -9958,12 +10086,14 @@
+               default -> throw new IllegalArgumentException("Invalid original event kind");
+             }
+           } else if ("ack".equals(kind)) {
++            timingSite = 250;
+             if (body.size() != 1
+                 || !witness.events.containsKey(sequence)
+                 || !witness.acknowledged.add(sequence)) {
+               throw new IllegalArgumentException("Invalid actual event ACK");
+             }
+           } else if ("fence".equals(kind)) {
++            timingSite = 260;
+             if (body.size() != 5
+                 || p4Number(body, "pending") != 0
+                 || !body.path("failed").isBoolean()
+@@ -9991,8 +10121,10 @@
+       }
+       accepted = true;
+     } catch (RuntimeException failure) {
++      p8TimingRefusal(p4Revocation, timingSite, timingScopeKnown);
+       P4_NOTIFICATION_FAILED.set(true);
+     } catch (IOException failure) {
++      p8TimingRefusal(p4Revocation, timingSite, timingScopeKnown);
+       P4_NOTIFICATION_FAILED.set(true);
+       throw failure;
+     }
+@@ -10024,6 +10156,7 @@
+     } catch (IOException | RuntimeException failure) {
+       P4RevocationState selected = p4Revocation;
+       if (failure instanceof RuntimeException) {
++        p8TimingRefusal(selected, 300);
+         P4_NOTIFICATION_FAILED.set(true);
+       } else {
+         Map<String, String> query = Map.of();
+@@ -10032,6 +10165,7 @@
+           query = p4Query(exchange.getRequestURI().getRawQuery());
+           actual = P4_DOCUMENTS.get(p4PositiveOrdinal(query.get("document")));
+         } catch (RuntimeException invalid) {
++          p8TimingRefusal(selected, 301);
+           P4_NOTIFICATION_FAILED.set(true);
+         }
+         if (accepted
+@@ -10044,7 +10178,13 @@
+           // Provisional transport unavailability, not a healthy ACK or no-effect receipt.
+           // Terminal proof below must independently confirm the realm was genuinely closed.
+           selected.c6InterruptedNotification = true;
+-        } else P4_NOTIFICATION_FAILED.set(true);
++          if (selected.c6Timing != null) {
++            synchronized (selected.c6Timing) { selected.c6Timing.provisionalFocusLossObserved = true; }
++          }
++        } else {
++          p8TimingRefusal(selected, 302);
++          P4_NOTIFICATION_FAILED.set(true);
++        }
+       }
+       throw failure;
+     }
+@@ -10992,6 +11132,8 @@
+         streamedLogsFinalChecked;
+     private boolean failed, c4WindowsExecuted, traceArmed;
+     private final boolean traceFromStart;
++    private P8PendingTiming c6Timing;
++    private ObjectNode c6Acceptance;
+     private boolean cacheNonemptyRequired = true;
+     private JsonNode poolRefusalTarget;
+     private ObjectNode poolRefusalDiagnostic;

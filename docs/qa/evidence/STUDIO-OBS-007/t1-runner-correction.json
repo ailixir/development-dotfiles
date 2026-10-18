@@ -1,0 +1,64 @@
+{
+  "story": "STUDIO-OBS-007",
+  "scope": "Mechanical T1 correction only; not T3 or story PASS",
+  "recordedAt": "2026-10-10T04:49:04.829580+00:00",
+  "commands": [
+    {
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "log": "docs/qa/evidence/STUDIO-OBS-007/t1-runner-correction-typecheck.log",
+      "logSha256": "bf2aa029bb2deb5530591dca1207249f7f0da44a20b8feef1b5decba7e510c7b"
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "log": "docs/qa/evidence/STUDIO-OBS-007/t1-runner-correction-build.log",
+      "logSha256": "50d8b286b802e2ce024ca6690dd1f1000b4bcd043b5615565d354c439374330a"
+    },
+    {
+      "command": [
+        "npx",
+        "vitest",
+        "run",
+        "test/observedV3TupleValidation.test.ts"
+      ],
+      "exitCode": 1,
+      "log": "docs/qa/evidence/STUDIO-OBS-007/t1-runner-correction-validator.log",
+      "logSha256": "71f7461a3ea40b9442a7b9f35061a6eb22a119ff3d49cf51f106fd5ed0b973c8"
+    }
+  ],
+  "focusedAssertions": {
+    "files": 1,
+    "tests": 11,
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0
+  },
+  "coverage": "Focused command exits 1 because unchanged full-runner coverage thresholds are unmet; global gates remain owed at T3. No threshold disabled or lowered.",
+  "sourceSha256": {
+    "studio-runner/src/validator/observedReplay.ts": "6f6a73f2433e45695fe47b12d643166b0e5f7f440ec3de195e2f2af5a6393927",
+    "studio-runner/test/observedV3TupleValidation.test.ts": "ce28e0fc653dacf97bfbfa84e30373ed313b66911c5a67ab1414e4dfc80ad35c",
+    "studio-runner/src/executor/observedOperations.ts": "73de3085e070d3a1c9971457be445597e2965de9902cf57c839d679b6eaca49a",
+    "studio-runner/src/guided/types.ts": "57232b111145f52a835adaae386b5be5cfdefe4fd09bfb348d39fe3bd382a4fb",
+    "studio-runner/src/guided/schemas.json": "70093928a531b99fe21d736644f53f7dfaf708a82fab60063b1a12af76ed20b7",
+    "studio-runner/src/validator/observedSchemas.json": "b8e387ca0392c289b0d1a91fb14e4adb7d99ccdea1ad1f1e875192730fa19a0c",
+    "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json": "e8fe85c0c36287fb9eca01deb683958aa261c989e1b19f3c294230a4e1c12c6e"
+  },
+  "implemented": [
+    "Active proof versions tuple updated to v3",
+    "Source-free Execute3 validation skeleton supplies empty secrets and secretOrigins maps",
+    "Actual v3 fixture basis derives expected artifact and passes immutable artifact and request validators; old v2 and all nine mutated proof pins refused"
+  ],
+  "budget": {
+    "sharedCeilingUsd": 500,
+    "actualSpendAvailable": false
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "scope": "SOURCE_ONLY_MINIMAL_EXISTING_RECORDER_TRANSLATION_PHASE_REFINEMENT",
+  "disposition": "FROZEN_DESIGN_FOR_ROOT_REVIEW_NO_AUTHOR_OR_RUNTIME_RELEASE",
+  "sourceDependencies": {
+    "translationPath": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+    "translationSha256": "da7f3e4546afe3cca3fba1dfe2b3e772316d4e4fed9580ff7975e5a8aaf4f8a2",
+    "fixturePath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "fixtureSha256": "f2f5c8298c5b0941fd56e076eed24efcf13fc2d6de9883e6c57f6a17e04bbef7",
+    "currentCompiledTranslationSha256": "86e03b9df2f584d5b10f4780cd2e05449124d8e41786c58f8365604b200bc33c",
+    "compiledEvidence": "existing-compiled-call-method.txt",
+    "compiledEvidenceSha256": "4ca0d173d2e0f528ce6d1c689130c2116bc4dd01411ecae911d000d59f4f4a7f"
+  },
+  "currentFacts": {
+    "C5": "RED",
+    "lastClaimMs": 1119.547416,
+    "latestUnprofiledSamplerEnabled": false,
+    "historicalMatchedHolderFamily": "TRANSLATION8",
+    "actualLatestHolderPhase": "UNOBSERVED",
+    "exclusiveCost": "UNOBSERVED"
+  },
+  "phaseMapping": [
+    {
+      "appendedCode": 13,
+      "fixedPhase": "RESERVE",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+      "method": "call",
+      "sourceFile": "GuidedTranslationService.java",
+      "exactSourceAndDebugLine": 708,
+      "existingCompiledInvokeOffset": 56
+    },
+    {
+      "appendedCode": 14,
+      "fixedPhase": "SEND",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+      "method": "call",
+      "sourceFile": "GuidedTranslationService.java",
+      "exactSourceAndDebugLine": 844,
+      "existingCompiledInvokeOffset": 216
+    },
+    {
+      "appendedCode": 15,
+      "fixedPhase": "APPLY",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+      "method": "call",
+      "sourceFile": "GuidedTranslationService.java",
+      "exactSourceAndDebugLine": 879,
+      "existingCompiledInvokeOffset": 350
+    },
+    {
+      "appendedCode": 16,
+      "fixedPhase": "DUPLICATE",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+      "method": "call",
+      "sourceFile": "GuidedTranslationService.java",
+      "exactSourceAndDebugLine": 827,
+      "existingCompiledInvokeOffset": 189
+    },
+    {
+      "appendedCode": 17,
+      "fixedPhase": "REJECT_ACCOUNTING",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+      "method": "call",
+      "sourceFile": "GuidedTranslationService.java",
+      "exactSourceAndDebugLine": 978,
+      "existingCompiledInvokeOffset": 430
+    },
+    {
+      "appendedCode": 18,
+      "fixedPhase": "LATE_ACCOUNTING",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+      "method": "call",
+      "sourceFile": "GuidedTranslationService.java",
+      "exactSourceAndDebugLine": 1008,
+      "existingCompiledInvokeOffset": 466
+    }
+  ],
+  "minimalDataflow": [
+    "Extend existing SourceSample with one fixed phase integer (UNKNOWN=-1); reuse the SAME already-acquired StackTraceElement array and SAME authentic outer repository boundary/first immediate business caller. Do not seek another frame, distant caller, lambda or parent context for phase.",
+    "Only source family8 with exact class/method/file/one of six debug lines receives phase13..18. Source family remains8 for any otherwise supported translation caller with unknown/missing/negative line/source metadata or a different callsite. No ranges or broad OTHER-phase inference.",
+    "Capture family and phase from that single selected source frame; attach both only to SAME immutable active callback binding under original gate. Existing target/blocker PID match, active pre/post and successful snapshot-finalization identity rules retain exact timing and historical latching.",
+    "Every original SQL increment0..6 and source7..12 increment is unchanged. Add at most ONE phase increment to appended13..18 only for the SAME authentic matched blocker SourceSample; phase UNKNOWN appends no positive count.",
+    "Export phase bins only through original joined OBSERVED/exact target/no bindingUnconfirmed/failure/truncation/ambiguity/nonquiescence masks. Failed/unconfirmed mapping yields zero confirmed phase matches, not absence of such activity. Normal later callback retirement cannot erase a genuinely finalized past match.",
+    "Existing rawstack/temporary identity erasure and PGsnapshot-finally cleanup unchanged. No exported line/method/SQL/PID/thread identity; only fixed numeric phase counters in SAME existing blocker-count array."
+  ],
+  "partitions": {
+    "existingKey": "pgSnapshotBlockerStageCounts",
+    "lengthAfter": 19,
+    "SQL": "0..6 unchanged original SQL stages",
+    "sourceFamily": "7..12 unchanged independent source family match counts",
+    "transactionPhase": "13..18 new independent matched immediate callsite phase counts",
+    "nonadditive": "These three partitions may refer to the same blocker. Summing whole array is invalid; phase is not CPU time or exclusive cost.",
+    "unknown": "Other supported TRANSLATION8 remains family8; no phase-positive claim."
+  },
+  "frozenBuildBindingPrerequisite": [
+    "Current offline class debug proof demonstrates feasibility only. After approved candidate canonical compilation, build owner must externally verify eventual frozen source hash and actual compiled class/method LineNumberTable six points against this mapping before any single diagnostic.",
+    "Bind those actual source/class/debug proof hashes to eventual existing diagnostic invocation/receipt and verify post-run unchanged. Do not assume current offline class hash survives rebuild; no new JVM/global guard, loader, callback stack lookup or runtime class-resource I/O.",
+    "Missing/mismatched debug/source mapping invalidates phase interpretation and leaves phase UNKNOWN, preserving source-family/SQL meaning and diagnostic-only status. Existing selected build source-drift guard remains mandatory."
+  ],
+  "unchangedBounds": [
+    "Original20ms/30s/MAX8 combined identity union, registeredclaim-only counts/empty/unattributed, one original getStackTrace acquisition site, existing original callback native physical no-acquisition PID binding/finally retirement.",
+    "One original PGsnapshot/query/caps/trigger, actual target and blocker edge and joined observers. No new thread/poll/query/event/endpoint/key/framework/browsercase or authority/logging/deadline change.",
+    "Default-off/filter selection/privacy/fullROOTAPP30/original1000ms unchanged; no sampled acceptance or measured improvement claim."
+  ],
+  "alternatives": [
+    {
+      "option": "Broad method/class family only",
+      "tradeoff": "Already proves TRANSLATION but cannot choose among transaction phases; not enough for a concrete source fix."
+    },
+    {
+      "option": "Exact six existing-frame debug points",
+      "tradeoff": "Minimal reuse and explicit source/build coupling; metadata drift or unsupported callers remain UNKNOWN. Recommended."
+    },
+    {
+      "option": "Ranges, added stage markers or extra stack acquisition",
+      "tradeoff": "Broader inference/observer scope not justified; excluded."
+    },
+    {
+      "option": "Cold validation eager preparation or out-of-lock state reuse",
+      "tradeoff": "Separate D source report has unproved cold identity or missing writer/row authority guarantees; no author release here."
+    }
+  ],
+  "next": "Root exact design review before isolated candidate. No diagnostic authorized by this report; if later released, one existing bounded optional run only, never new mandatory E2E.",
+  "sourceAuthored": false,
+  "buildOrRuntimeExecuted": false,
+  "existingClassMetadataReadOnly": true,
+  "performanceClaim": false,
+  "qaOrLifecycleChanged": false
+}

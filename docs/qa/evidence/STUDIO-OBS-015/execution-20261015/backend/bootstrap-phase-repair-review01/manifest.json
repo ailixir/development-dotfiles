@@ -1,0 +1,204 @@
+{
+  "artifact": "STUDIO-OBS-015 bootstrap phase repair independent Aria source review01",
+  "at": "2026-10-15T10:42:42.644346+00:00",
+  "owner": "Aria/aria015_bootstrap_review01",
+  "status": "BOUNDED_SOURCE_REVIEW_NO_ACTIONABLE_PHASE_BLOCKER",
+  "checkpoint": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-joined02-bootstrap-phase-repair01.json",
+    "sha256": "b644229305b3782e0510de8d4055d1f1df2b4fe789e9b1aa50a28f2330d6e1bd",
+    "allTenInputHashesMatch": true
+  },
+  "review": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bootstrap-phase-repair-review01/review.md",
+    "sha256": "63b9341522d63f5083ad40f79cae1f7b372e7dfc430306c4c328196b45ca5a28"
+  },
+  "inspectedInputs": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedAcceptedPlan.java",
+      "role": "touchedSource",
+      "sha256": "5171f387690ad3bc94574dcedce24fa52d8d702364cff48b290941195599a964",
+      "matchesCheckpoint": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanHistoryAudit.java",
+      "role": "touchedSource",
+      "sha256": "b69b48bee651b8b7c83d02a96836af986d23a888b38b4fad2460e8b77bbd02ee",
+      "matchesCheckpoint": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "role": "touchedSource",
+      "sha256": "745223f046be477593a8f701a2fc4ed24d29dcfab6d19d32acabb011ed181165",
+      "matchesCheckpoint": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "role": "touchedSource",
+      "sha256": "82b8401722224d5277da5080b9475c32318284cf32abb0a7aa33cc9aca86938b",
+      "matchesCheckpoint": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedBootstrapPlanHistoryIT.java",
+      "role": "touchedSource",
+      "sha256": "55b0876d61994cc922c94bbd0949cca702dc475e182435430431b2907ba4d4f3",
+      "matchesCheckpoint": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedAcceptedPlanTest.java",
+      "role": "protectedInput",
+      "sha256": "685594b600f4c6f38fe128d6d3a27e62969c1d07ea163d92d39db71c6924a9a8",
+      "matchesCheckpoint": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+      "role": "protectedInput",
+      "sha256": "417e605d25ca8b68039b9aa4dafc07ec4390994bb58630766e9dd92bd5f7b359",
+      "matchesCheckpoint": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+      "role": "protectedInput",
+      "sha256": "80357798b080ab6f8cb1ba38c7828915fa37663e203b0280997c7937ebc432d0",
+      "matchesCheckpoint": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/source-selection.schema.json",
+      "role": "protectedInput",
+      "sha256": "df429534e7b827b556d52b7d39790e62d6d40360884d0e388ab70787ed53558f",
+      "matchesCheckpoint": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json",
+      "role": "protectedInput",
+      "sha256": "40d547d9891561541947b591ffa6ba1d07ae2caff7349fd780db4acc8d5313d7",
+      "matchesCheckpoint": true
+    },
+    {
+      "path": ".codex/skills/aiox-architect/SKILL.md",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "376153f250f0d4142f19fe0835e43cc2157072ee881db6daf33ca033efab3962"
+    },
+    {
+      "path": ".aiox-core/development/agents/architect.md",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "c45b1e71af39b5da34a832dcc3d1c9b41b6270de61f79d4bada3c27b46be19df"
+    },
+    {
+      "path": ".aiox-core/constitution.md",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/joined-edit4-and-preimages-attempt02-receipt.json",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "81db8d3097d3e0921899cd65077a49b3d16f6e79d46e28bdde04556a3104b78a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "7a2bce45abe0483ba2f77f5a281a03697115983cf5eac8a8695f2bb5b8f271fd"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "2411f9ac24c1d21db7b43ee22ae91055b3aaefbce7f7652b276d4fc3d21e8b40"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "970e028452274874b6e55f15c8e7b2e4b06740405d14529c0222b94f60eb32fe"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "83ed8fa26c304d5b2b8d8df9be51681598908c36be27cf0791c20a632f07063b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedSourceReferenceValidator.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "f611158fcecb2eb6d3a5bc10a94b57424c65aa7557d0c68a1cdefc49abeade95"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "705ad5f372ba0e455b404233cf6ac27fa4255329eca45b79a9c69594be9e2cf8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "0e98da660358acd128b468bb28660bcf5a7378dbe7427a85464ae4e3caa9fd1f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "8aa40c60582007a59ba406d47832bf30d06627cf227fc0c3ce942ab7d58b07df"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "ac801042dd7a94468ff68a5ad7e4efe48ab310a9f12a93d290730243d755d128"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "c9a36bac3fe1cbd5d98b4599734013bb3aa64cdac2922406e1df865d8e909b09"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedEffectiveGraph.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "259807221afbb9ac4fa7b1c68974c42205b4b15d3eab9a8f344be6285ea9197b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedBasisValidator.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "a05efebc4fb7ea1698103773e1877fa9aafafd9d2d1b23c0fdacceab268cfc4c"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConcurrencyTest.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "5adb851cb9892315cda1ea33a89d2a793567cfb678b3ab47c378b0bfe5fe8b67"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationMigrationTest.java",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "2eef0d9d68bf7d5d1383cb704821df05a24bbd55f0b5300004a575efdb5c4e60"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/source-reference.schema.json",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "184a99cc4018f5899eb8dc743dcb0a9283c19f3ff7371da99098eeee432e229c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/ruling.md",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "96b15fbe740a4d89ce4db418db4880e4c374b08d91fce9fa9ce84ae4aa3a87da"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-remaining-uncertainties05/ruling.md",
+      "role": "targetedCallgraphOrContractRead",
+      "sha256": "0529c8881c6f6a7ceecfc3623b23b7a5bc8dd5a75408fecebab6753a4a7e53b0"
+    }
+  ],
+  "execution": {
+    "compilation": false,
+    "tests": false,
+    "database": false,
+    "native": false,
+    "processMutation": false,
+    "externalCombined03Update": "Parent-reported terminal summary attributed in review; not independently audited here.",
+    "testBuildDatabaseNativeCommandsRunByReviewer": 0
+  },
+  "scope": {
+    "writes": "Only review.md and manifest.json in this new QA evidence directory",
+    "productionTestSpecGeneratedDistStoryWrites": false,
+    "lifecycleOrQualityGateDecision": false,
+    "full015Then008Unchanged": true,
+    "original86_24_55_35NativeFullGatesRemainOpenAsApplicable": true,
+    "row85UserDecision": "OPEN_UNCHANGED"
+  },
+  "limitations": [
+    "Inspected direct relevant source paths; not a whole-tree stability assertion.",
+    "No service recovery, publication, native or replay execution proof supplied by reviewer.",
+    "Historical immutable failed joined02 evidence preserved."
+  ]
+}

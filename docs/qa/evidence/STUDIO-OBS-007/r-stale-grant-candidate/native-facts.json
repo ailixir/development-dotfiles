@@ -1,0 +1,783 @@
+{
+  "primaryFailed": false,
+  "facts": [
+    {
+      "kind": "callback-scan",
+      "route": "claim",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "claim-http-finish",
+      "label": "A",
+      "status": 202,
+      "at": 378.128708
+    },
+    {
+      "kind": "claim-ack",
+      "label": "A",
+      "candidateIsA": true,
+      "unchangedA": false,
+      "at": 379.05875
+    },
+    {
+      "kind": "checkGrant",
+      "label": "A",
+      "accepted": true,
+      "code": "OK",
+      "at": 379.323333
+    },
+    {
+      "kind": "runtime-entry",
+      "label": "A",
+      "method": "start",
+      "at": 381.986125
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "merge",
+      "phase": "before",
+      "size": 0,
+      "bytes": 0,
+      "containsA": false,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "merge",
+      "phase": "after",
+      "size": 2,
+      "bytes": 62,
+      "containsA": false,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "callback-scan",
+      "route": "bootstrap-evidence",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "callback",
+      "label": "A",
+      "route": "bootstrap-evidence"
+    },
+    {
+      "kind": "runtime-entry",
+      "label": "A",
+      "method": "dispatch",
+      "at": 915.75
+    },
+    {
+      "kind": "callback-scan",
+      "route": "outcomes",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "callback",
+      "label": "A",
+      "route": "outcomes"
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "snapshot",
+      "phase": "before",
+      "size": 2,
+      "bytes": 62,
+      "containsA": false,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "snapshot",
+      "phase": "after",
+      "size": 2,
+      "bytes": 62,
+      "containsA": false,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "merge",
+      "phase": "before",
+      "size": 2,
+      "bytes": 62,
+      "containsA": false,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "merge",
+      "phase": "after",
+      "size": 2,
+      "bytes": 62,
+      "containsA": false,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "callback-scan",
+      "route": "observations",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "callback",
+      "label": "A",
+      "route": "observations"
+    },
+    {
+      "kind": "runtime-entry",
+      "label": "A",
+      "method": "dispatch",
+      "at": 969.0305
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "merge",
+      "phase": "before",
+      "size": 2,
+      "bytes": 62,
+      "containsA": false,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "merge",
+      "phase": "after",
+      "size": 3,
+      "bytes": 88,
+      "containsA": true,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "merge",
+      "phase": "before",
+      "size": 3,
+      "bytes": 88,
+      "containsA": true,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "merge",
+      "phase": "after",
+      "size": 3,
+      "bytes": 88,
+      "containsA": true,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "native-entry",
+      "label": "A",
+      "at": 972.202208
+    },
+    {
+      "kind": "native-end",
+      "label": "A",
+      "at": 973.175291
+    },
+    {
+      "kind": "callback-scan",
+      "route": "outcomes",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "callback",
+      "label": "A",
+      "route": "outcomes"
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "merge",
+      "phase": "before",
+      "size": 3,
+      "bytes": 88,
+      "containsA": true,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "merge",
+      "phase": "after",
+      "size": 3,
+      "bytes": 88,
+      "containsA": true,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "callback-scan",
+      "route": "observations",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "callback",
+      "label": "A",
+      "route": "observations"
+    },
+    {
+      "kind": "runtime-entry",
+      "label": "A",
+      "method": "dispatch",
+      "at": 989.502125
+    },
+    {
+      "kind": "callback-scan",
+      "route": "outcomes",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "callback",
+      "label": "A",
+      "route": "outcomes"
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "snapshot",
+      "phase": "before",
+      "size": 3,
+      "bytes": 88,
+      "containsA": true,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "snapshot",
+      "phase": "after",
+      "size": 3,
+      "bytes": 88,
+      "containsA": true,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "merge",
+      "phase": "before",
+      "size": 3,
+      "bytes": 88,
+      "containsA": true,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "merge",
+      "phase": "after",
+      "size": 3,
+      "bytes": 88,
+      "containsA": true,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "callback-scan",
+      "route": "observations",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "callback",
+      "label": "A",
+      "route": "observations"
+    },
+    {
+      "kind": "scan",
+      "label": "JOURNAL",
+      "phase": "before-delete",
+      "scanned": true,
+      "hits": 0,
+      "status": "SCANNED"
+    },
+    {
+      "kind": "scan",
+      "label": "A",
+      "phase": "before-original-close",
+      "scanned": true,
+      "hits": 0,
+      "status": "SCANNED"
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "dispose",
+      "phase": "before",
+      "size": 3,
+      "bytes": 88,
+      "containsA": true,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "A",
+      "tag": 1,
+      "method": "dispose",
+      "phase": "after",
+      "size": 0,
+      "bytes": 0,
+      "containsA": false,
+      "disposed": true,
+      "failed": false
+    },
+    {
+      "kind": "scan",
+      "label": "JOURNAL",
+      "phase": "before-delete",
+      "scanned": true,
+      "hits": 0,
+      "status": "SCANNED"
+    },
+    {
+      "kind": "scan",
+      "label": "A",
+      "phase": "before-original-close",
+      "scanned": true,
+      "hits": 0,
+      "status": "SCANNED"
+    },
+    {
+      "kind": "actual-close",
+      "label": "A",
+      "at": 1177.100458
+    },
+    {
+      "kind": "callback-scan",
+      "route": "lifecycle",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "callback",
+      "label": "A",
+      "route": "lifecycle"
+    },
+    {
+      "kind": "callback-scan",
+      "route": "claim",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "probe-claim-delivered",
+      "label": "PROBE",
+      "at": 1199.972375,
+      "remainingLeaseMs": 29178,
+      "remainingExpiryMs": 119136
+    },
+    {
+      "kind": "claim-http-finish",
+      "label": "PROBE",
+      "status": 202,
+      "at": 1200.066958
+    },
+    {
+      "kind": "claim-ack",
+      "label": "PROBE",
+      "candidateIsA": true,
+      "unchangedA": true,
+      "at": 1200.477875
+    },
+    {
+      "kind": "checkGrant",
+      "label": "PROBE",
+      "accepted": false,
+      "code": "IDENTITY_MISMATCH",
+      "candidateIsA": true,
+      "scopeIsA": true,
+      "intendedSessionMatches": false,
+      "remainingLeaseMs": 29177,
+      "remainingExpiryMs": 119135,
+      "at": 1200.603291
+    },
+    {
+      "kind": "callback-scan",
+      "route": "lifecycle",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "callback",
+      "label": "PROBE",
+      "route": "lifecycle"
+    },
+    {
+      "kind": "callback-scan",
+      "route": "claim",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "claim-http-finish",
+      "label": "B",
+      "status": 202,
+      "at": 1217.716
+    },
+    {
+      "kind": "claim-ack",
+      "label": "B",
+      "candidateIsA": false,
+      "unchangedA": false,
+      "at": 1217.950041
+    },
+    {
+      "kind": "checkGrant",
+      "label": "B",
+      "accepted": true,
+      "code": "OK",
+      "at": 1218.051541
+    },
+    {
+      "kind": "runtime-entry",
+      "label": "B",
+      "method": "start",
+      "at": 1219.567333
+    },
+    {
+      "kind": "inventory",
+      "label": "B",
+      "tag": 2,
+      "method": "merge",
+      "phase": "before",
+      "size": 0,
+      "bytes": 0,
+      "containsA": false,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "B",
+      "tag": 2,
+      "method": "merge",
+      "phase": "after",
+      "size": 2,
+      "bytes": 62,
+      "containsA": false,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "callback-scan",
+      "route": "bootstrap-evidence",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "callback",
+      "label": "B",
+      "route": "bootstrap-evidence"
+    },
+    {
+      "kind": "scan",
+      "label": "JOURNAL",
+      "phase": "before-delete",
+      "scanned": true,
+      "hits": 0,
+      "status": "SCANNED"
+    },
+    {
+      "kind": "scan",
+      "label": "A",
+      "phase": "before-original-close",
+      "scanned": false,
+      "hits": null,
+      "status": "UNAVAILABLE_UNSCANNED"
+    },
+    {
+      "kind": "scan",
+      "label": "B",
+      "phase": "before-original-close",
+      "scanned": true,
+      "hits": 0,
+      "status": "SCANNED"
+    },
+    {
+      "kind": "inventory",
+      "label": "B",
+      "tag": 2,
+      "method": "dispose",
+      "phase": "before",
+      "size": 2,
+      "bytes": 62,
+      "containsA": false,
+      "disposed": false,
+      "failed": false
+    },
+    {
+      "kind": "inventory",
+      "label": "B",
+      "tag": 2,
+      "method": "dispose",
+      "phase": "after",
+      "size": 0,
+      "bytes": 0,
+      "containsA": false,
+      "disposed": true,
+      "failed": false
+    },
+    {
+      "kind": "scan",
+      "label": "JOURNAL",
+      "phase": "before-delete",
+      "scanned": true,
+      "hits": 0,
+      "status": "SCANNED"
+    },
+    {
+      "kind": "scan",
+      "label": "A",
+      "phase": "before-original-close",
+      "scanned": false,
+      "hits": null,
+      "status": "UNAVAILABLE_UNSCANNED"
+    },
+    {
+      "kind": "scan",
+      "label": "B",
+      "phase": "before-original-close",
+      "scanned": true,
+      "hits": 0,
+      "status": "SCANNED"
+    },
+    {
+      "kind": "actual-close",
+      "label": "B",
+      "at": 1817.943208
+    },
+    {
+      "kind": "callback-scan",
+      "route": "lifecycle",
+      "hits": 0,
+      "certificateAuthorized": true,
+      "certificateMatches": true,
+      "jwtVerified": true
+    },
+    {
+      "kind": "callback",
+      "label": "B",
+      "route": "lifecycle"
+    },
+    {
+      "kind": "scan",
+      "label": "JOURNAL",
+      "phase": "before-delete",
+      "scanned": true,
+      "hits": 0,
+      "status": "SCANNED"
+    },
+    {
+      "kind": "scan",
+      "label": "A",
+      "phase": "before-original-close",
+      "scanned": false,
+      "hits": null,
+      "status": "UNAVAILABLE_UNSCANNED"
+    },
+    {
+      "kind": "scan",
+      "label": "B",
+      "phase": "before-original-close",
+      "scanned": false,
+      "hits": null,
+      "status": "UNAVAILABLE_UNSCANNED"
+    },
+    {
+      "kind": "scan",
+      "label": "JOURNAL",
+      "phase": "before-delete",
+      "scanned": true,
+      "hits": 0,
+      "status": "SCANNED"
+    },
+    {
+      "kind": "scan",
+      "label": "A",
+      "phase": "before-original-close",
+      "scanned": false,
+      "hits": null,
+      "status": "UNAVAILABLE_UNSCANNED"
+    },
+    {
+      "kind": "scan",
+      "label": "B",
+      "phase": "before-original-close",
+      "scanned": false,
+      "hits": null,
+      "status": "UNAVAILABLE_UNSCANNED"
+    }
+  ],
+  "pids": [
+    {
+      "label": "A",
+      "pid": 33322
+    },
+    {
+      "label": "A",
+      "pid": 33344
+    },
+    {
+      "label": "A",
+      "pid": 33328
+    },
+    {
+      "label": "A",
+      "pid": 33329
+    },
+    {
+      "label": "A",
+      "pid": 33330
+    },
+    {
+      "label": "A",
+      "pid": 33332
+    },
+    {
+      "label": "A",
+      "pid": 33333
+    },
+    {
+      "label": "A",
+      "pid": 33334
+    },
+    {
+      "label": "B",
+      "pid": 33378
+    },
+    {
+      "label": "B",
+      "pid": 33400
+    },
+    {
+      "label": "B",
+      "pid": 33384
+    },
+    {
+      "label": "B",
+      "pid": 33385
+    },
+    {
+      "label": "B",
+      "pid": 33386
+    },
+    {
+      "label": "B",
+      "pid": 33388
+    },
+    {
+      "label": "B",
+      "pid": 33389
+    },
+    {
+      "label": "B",
+      "pid": 33390
+    }
+  ],
+  "cleanup": [
+    {
+      "label": "worker",
+      "confirmed": true
+    },
+    {
+      "label": "callbacks",
+      "confirmed": true
+    },
+    {
+      "label": "descriptors",
+      "confirmed": true
+    },
+    {
+      "label": "journal",
+      "confirmed": true
+    },
+    {
+      "label": "fixture",
+      "confirmed": true
+    }
+  ],
+  "outputHits": {},
+  "outputObserved": {},
+  "pendingDescriptorRestorations": 0,
+  "unresolved": false,
+  "allTrackedPidsGone": true,
+  "sourceGuidedWorker": true,
+  "compiledWorker": false,
+  "coreVaultAuthorizationProved": false,
+  "physicalHeapErasureProved": false
+}

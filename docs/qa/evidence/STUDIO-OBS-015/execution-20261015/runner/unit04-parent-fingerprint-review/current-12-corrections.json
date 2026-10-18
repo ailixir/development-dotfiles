@@ -1,0 +1,1490 @@
+{
+  "artifact": "CURRENT independent rebase correction; prior descriptors preserved historical",
+  "canonicalImplementation": "Independent Python canonical-v1 ASCII sorted keys, safe integers, original well-formed Unicode strings; not importing/running application oracle",
+  "currentCanonicalFixtureSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+  "cause": "C-int install.rebase computed historical before/after hashes while applying old mutations to current resealed parents; two graph malicious hashes then recomputed after inventory capture. Prior Quinn review copied this historical descriptor without current per-pointer fingerprint verification.",
+  "wrongCurrentParentSelections": 0,
+  "canonicalSourceContradictions": 0,
+  "rows": [
+    {
+      "name": "publication-preimage-must-commit-raw-failed-edge",
+      "section": "graph",
+      "parent": "admitted-binding-replacement",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "sourceFiles": {
+        "current": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "currentSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+        "historicalBefore": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/current-vector-preservation-implementation/before/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "historicalBeforeSha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9"
+      },
+      "hashChanges": [
+        {
+          "pointer": "/expectedArtifact/replayPolicy/publicationEvidenceHash",
+          "historicalDescriptor": {
+            "pointer": "/expectedArtifact/replayPolicy/publicationEvidenceHash",
+            "remove": false,
+            "oldHash": "c2bc9beefc738f8afc31c662c20d93453516950c8aba45b1e75875892cad5d63",
+            "newHash": "452a9aa0c81bfb58be24a446bee2e4b39aa8b5c2c2e9390f62a7e026866b45f0"
+          },
+          "currentOldHash": "7500a8cceb2953574f29bc7920463462e207386a66ad349ce03545a114d70e1a",
+          "currentNewHash": "644c2163d21337cd07049d035eaeb451c8223143ae0c251be4db418992a24c03"
+        }
+      ],
+      "exactPointerValuesAndRoles": [
+        {
+          "pointer": "/expectedArtifact/replayPolicy/publicationEvidenceHash",
+          "role": "MALICIOUS_VALIDATION_INPUT_OR_DECLARED_EXTERNAL_AUTHORITY",
+          "beforePresent": true,
+          "afterPresent": true,
+          "currentBeforeValue": "b61f7631eacdeac00e478215d57b69aabc57a89c45676e263a2dfca1b4c494a3",
+          "currentAfterValue": "55d4240831909ff69c9ae40a74a3a6ee429d0c28a8293499cd00c0cedb569d02",
+          "historicalBeforeCanonicalSha256": "c2bc9beefc738f8afc31c662c20d93453516950c8aba45b1e75875892cad5d63",
+          "historicalAfterCanonicalSha256": "452a9aa0c81bfb58be24a446bee2e4b39aa8b5c2c2e9390f62a7e026866b45f0",
+          "currentBeforeCanonicalSha256": "7500a8cceb2953574f29bc7920463462e207386a66ad349ce03545a114d70e1a",
+          "currentAfterCanonicalSha256": "644c2163d21337cd07049d035eaeb451c8223143ae0c251be4db418992a24c03",
+          "maliciousInputValuePreservedFromArchivedOriginal": "POST_REBASE_FORMULA_CHECKED_SEPARATELY"
+        }
+      ],
+      "currentDeclaredPointersAreExhaustive": true,
+      "exactOnlyDeclaredDeltaAfterMasking": true,
+      "parentSelectionCorrect": true,
+      "correctedCurrentDescriptor": {
+        "name": "publication-preimage-must-commit-raw-failed-edge",
+        "section": "graph",
+        "parent": "admitted-binding-replacement",
+        "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+        "mutations": [
+          {
+            "pointer": "/expectedArtifact/replayPolicy/publicationEvidenceHash",
+            "remove": false,
+            "oldHash": "7500a8cceb2953574f29bc7920463462e207386a66ad349ce03545a114d70e1a",
+            "newHash": "644c2163d21337cd07049d035eaeb451c8223143ae0c251be4db418992a24c03"
+          }
+        ],
+        "requiredBackendCompanion": "Validate coherent positive request first, pass exact mutated expectedArtifact into actual validateObservedRequest with recomputed genuine request basisHash/build/profile; assert ok:false/errorCode OPERATION_MISMATCH or applicable closed shape refusal. Java must compare independently derived full candidate and exercise production commit reject where the original tier requires it. Never assert a valid basis itself must throw.",
+        "actualBackendStatus": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE"
+      },
+      "negativeValidationStatus": "NOT_RERUN; ORIGINAL_UNIT04_CASE_FAILED_PREIMAGE_GUARD",
+      "actualCurrentPositiveParentEvidence": "At unit04 exact unchanged test source executes deriveObservedArtifact(parent).artifact equality and validateObservedRequest(parent).ok:true before assertExactNegativeMutation. The captured failure is at helper original-preimage guard, so these parent preconditions had already passed. This credits only the positive parent preconditions, never the failing negative case."
+    },
+    {
+      "name": "publication-preimage-envelope-cannot-change",
+      "section": "graph",
+      "parent": "admitted-binding-replacement",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "sourceFiles": {
+        "current": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "currentSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+        "historicalBefore": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/current-vector-preservation-implementation/before/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "historicalBeforeSha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9"
+      },
+      "hashChanges": [
+        {
+          "pointer": "/expectedArtifact/replayPolicy/publicationEvidenceHash",
+          "historicalDescriptor": {
+            "pointer": "/expectedArtifact/replayPolicy/publicationEvidenceHash",
+            "remove": false,
+            "oldHash": "c2bc9beefc738f8afc31c662c20d93453516950c8aba45b1e75875892cad5d63",
+            "newHash": "57bb0981601f3164e6a899c53dfd2a5dafb0c6e8f91c0b4e02682042ad6fbe47"
+          },
+          "currentOldHash": "7500a8cceb2953574f29bc7920463462e207386a66ad349ce03545a114d70e1a",
+          "currentNewHash": "2f7a155fd43698e8125bc76cc86c050ddeb1ebe070aacc3ebda3fb24bdcab9a9"
+        }
+      ],
+      "exactPointerValuesAndRoles": [
+        {
+          "pointer": "/expectedArtifact/replayPolicy/publicationEvidenceHash",
+          "role": "MALICIOUS_VALIDATION_INPUT_OR_DECLARED_EXTERNAL_AUTHORITY",
+          "beforePresent": true,
+          "afterPresent": true,
+          "currentBeforeValue": "b61f7631eacdeac00e478215d57b69aabc57a89c45676e263a2dfca1b4c494a3",
+          "currentAfterValue": "aaa0f0682fb25c5b33076e07284efb8967434d2d14cb847dcdbb0dcbe88ab99b",
+          "historicalBeforeCanonicalSha256": "c2bc9beefc738f8afc31c662c20d93453516950c8aba45b1e75875892cad5d63",
+          "historicalAfterCanonicalSha256": "57bb0981601f3164e6a899c53dfd2a5dafb0c6e8f91c0b4e02682042ad6fbe47",
+          "currentBeforeCanonicalSha256": "7500a8cceb2953574f29bc7920463462e207386a66ad349ce03545a114d70e1a",
+          "currentAfterCanonicalSha256": "2f7a155fd43698e8125bc76cc86c050ddeb1ebe070aacc3ebda3fb24bdcab9a9",
+          "maliciousInputValuePreservedFromArchivedOriginal": "POST_REBASE_FORMULA_CHECKED_SEPARATELY"
+        }
+      ],
+      "currentDeclaredPointersAreExhaustive": true,
+      "exactOnlyDeclaredDeltaAfterMasking": true,
+      "parentSelectionCorrect": true,
+      "correctedCurrentDescriptor": {
+        "name": "publication-preimage-envelope-cannot-change",
+        "section": "graph",
+        "parent": "admitted-binding-replacement",
+        "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+        "mutations": [
+          {
+            "pointer": "/expectedArtifact/replayPolicy/publicationEvidenceHash",
+            "remove": false,
+            "oldHash": "7500a8cceb2953574f29bc7920463462e207386a66ad349ce03545a114d70e1a",
+            "newHash": "2f7a155fd43698e8125bc76cc86c050ddeb1ebe070aacc3ebda3fb24bdcab9a9"
+          }
+        ],
+        "requiredBackendCompanion": "Validate coherent positive request first, pass exact mutated expectedArtifact into actual validateObservedRequest with recomputed genuine request basisHash/build/profile; assert ok:false/errorCode OPERATION_MISMATCH or applicable closed shape refusal. Java must compare independently derived full candidate and exercise production commit reject where the original tier requires it. Never assert a valid basis itself must throw.",
+        "actualBackendStatus": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE"
+      },
+      "negativeValidationStatus": "NOT_RERUN; ORIGINAL_UNIT04_CASE_FAILED_PREIMAGE_GUARD",
+      "actualCurrentPositiveParentEvidence": "At unit04 exact unchanged test source executes deriveObservedArtifact(parent).artifact equality and validateObservedRequest(parent).ok:true before assertExactNegativeMutation. The captured failure is at helper original-preimage guard, so these parent preconditions had already passed. This credits only the positive parent preconditions, never the failing negative case."
+    },
+    {
+      "name": "wrong-private-input-hash",
+      "section": "incrementalBasis",
+      "parent": "ordinary",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "sourceFiles": {
+        "current": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "currentSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+        "historicalBefore": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/current-vector-preservation-implementation/before/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "historicalBeforeSha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9"
+      },
+      "hashChanges": [
+        {
+          "pointer": "/expectedArtifact",
+          "historicalDescriptor": {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "e3e1a4a75086c27342a38dc77e7e8ed03535580bcca627dc0f582e2ad1c78b8a",
+            "newHash": null
+          },
+          "currentOldHash": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c",
+          "currentNewHash": null
+        }
+      ],
+      "exactPointerValuesAndRoles": [
+        {
+          "pointer": "/basis/materializationEvidence/entries/0/inputHash",
+          "role": "MALICIOUS_VALIDATION_INPUT_OR_DECLARED_EXTERNAL_AUTHORITY",
+          "beforePresent": true,
+          "afterPresent": true,
+          "currentBeforeValue": "d4946735c9b8a17eb6bda65f75628a373d93cd9e986cdab5e3ccf3c7d95ee9d0",
+          "currentAfterValue": "0000000000000000000000000000000000000000000000000000000000000000",
+          "historicalBeforeCanonicalSha256": "9f83a15e0c49c8133b6f28b26ed71801c1c45e2ddd6565bb25afeed34d2519e4",
+          "historicalAfterCanonicalSha256": "1aa8e8443881742e66fe8cd523a31bb4199c05a7bcfe27f89f3d48d20764ac49",
+          "currentBeforeCanonicalSha256": "9f83a15e0c49c8133b6f28b26ed71801c1c45e2ddd6565bb25afeed34d2519e4",
+          "currentAfterCanonicalSha256": "1aa8e8443881742e66fe8cd523a31bb4199c05a7bcfe27f89f3d48d20764ac49",
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        },
+        {
+          "pointer": "/expectedArtifact",
+          "role": "FIXTURE_EXPECTATION_MARKER_NOT_OFFERED_VALIDATION_INPUT",
+          "beforePresent": true,
+          "afterPresent": false,
+          "currentBeforeValue": {
+            "sourceFile": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+            "section": "incrementalBasis",
+            "parentName": "ordinary",
+            "pointer": "/expectedArtifact",
+            "canonicalSha256": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c"
+          },
+          "currentAfterValue": null,
+          "historicalBeforeCanonicalSha256": "e3e1a4a75086c27342a38dc77e7e8ed03535580bcca627dc0f582e2ad1c78b8a",
+          "historicalAfterCanonicalSha256": null,
+          "currentBeforeCanonicalSha256": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c",
+          "currentAfterCanonicalSha256": null,
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        }
+      ],
+      "currentDeclaredPointersAreExhaustive": true,
+      "exactOnlyDeclaredDeltaAfterMasking": true,
+      "parentSelectionCorrect": true,
+      "correctedCurrentDescriptor": {
+        "name": "wrong-private-input-hash",
+        "section": "incrementalBasis",
+        "parent": "ordinary",
+        "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+        "mutations": [
+          {
+            "pointer": "/basis/materializationEvidence/entries/0/inputHash",
+            "remove": false,
+            "oldHash": "9f83a15e0c49c8133b6f28b26ed71801c1c45e2ddd6565bb25afeed34d2519e4",
+            "newHash": "1aa8e8443881742e66fe8cd523a31bb4199c05a7bcfe27f89f3d48d20764ac49"
+          },
+          {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c",
+            "newHash": null
+          }
+        ],
+        "requiredBackendCompanion": "Backend GuidedMaterializationEvidence actual value-bearing rows/hash reconstruction, no raw value leaked;52.",
+        "actualBackendStatus": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE",
+        "backendObligationIndices0": [
+          52
+        ],
+        "actualBackendCompanionSourceGap": "IncrementalMaterializationEvidenceTest.reconstructsEveryPrivateHistoricalEnvelopeAndExportsOnlyMetadata + GuidedPublicationReplayIT.assertIncrementalAppendAckHistory: actual PG private value/hash tamper inventory remains required."
+      },
+      "negativeValidationStatus": "NOT_RERUN; ORIGINAL_UNIT04_CASE_FAILED_PREIMAGE_GUARD",
+      "actualCurrentPositiveParentEvidence": "At unit04 exact unchanged test source executes deriveObservedArtifact(parent).artifact equality and validateObservedRequest(parent).ok:true before assertExactNegativeMutation. The captured failure is at helper original-preimage guard, so these parent preconditions had already passed. This credits only the positive parent preconditions, never the failing negative case."
+    },
+    {
+      "name": "preparation-substitutes-birth-for-actual",
+      "section": "incrementalBasis",
+      "parent": "appendedHistorical",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "sourceFiles": {
+        "current": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "currentSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+        "historicalBefore": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/current-vector-preservation-implementation/before/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "historicalBeforeSha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9"
+      },
+      "hashChanges": [
+        {
+          "pointer": "/expectedArtifact",
+          "historicalDescriptor": {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "24c6c3bdd881774da493e37003efa2e26947fde442271aa77285b35098b29ae1",
+            "newHash": null
+          },
+          "currentOldHash": "5d01f5fd79e511c2bf22aadd13fb504b006e46e5e3af3808a061358d8182e9ce",
+          "currentNewHash": null
+        }
+      ],
+      "exactPointerValuesAndRoles": [
+        {
+          "pointer": "/basis/preparations/0/materializationRevision",
+          "role": "MALICIOUS_VALIDATION_INPUT_OR_DECLARED_EXTERNAL_AUTHORITY",
+          "beforePresent": true,
+          "afterPresent": true,
+          "currentBeforeValue": 2,
+          "currentAfterValue": 1,
+          "historicalBeforeCanonicalSha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "historicalAfterCanonicalSha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "currentBeforeCanonicalSha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "currentAfterCanonicalSha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        },
+        {
+          "pointer": "/expectedArtifact",
+          "role": "FIXTURE_EXPECTATION_MARKER_NOT_OFFERED_VALIDATION_INPUT",
+          "beforePresent": true,
+          "afterPresent": false,
+          "currentBeforeValue": {
+            "sourceFile": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+            "section": "incrementalBasis",
+            "parentName": "appendedHistorical",
+            "pointer": "/expectedArtifact",
+            "canonicalSha256": "5d01f5fd79e511c2bf22aadd13fb504b006e46e5e3af3808a061358d8182e9ce"
+          },
+          "currentAfterValue": null,
+          "historicalBeforeCanonicalSha256": "24c6c3bdd881774da493e37003efa2e26947fde442271aa77285b35098b29ae1",
+          "historicalAfterCanonicalSha256": null,
+          "currentBeforeCanonicalSha256": "5d01f5fd79e511c2bf22aadd13fb504b006e46e5e3af3808a061358d8182e9ce",
+          "currentAfterCanonicalSha256": null,
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        }
+      ],
+      "currentDeclaredPointersAreExhaustive": true,
+      "exactOnlyDeclaredDeltaAfterMasking": true,
+      "parentSelectionCorrect": true,
+      "correctedCurrentDescriptor": {
+        "name": "preparation-substitutes-birth-for-actual",
+        "section": "incrementalBasis",
+        "parent": "appendedHistorical",
+        "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+        "mutations": [
+          {
+            "pointer": "/basis/preparations/0/materializationRevision",
+            "remove": false,
+            "oldHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "newHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+          },
+          {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "5d01f5fd79e511c2bf22aadd13fb504b006e46e5e3af3808a061358d8182e9ce",
+            "newHash": null
+          }
+        ],
+        "requiredBackendCompanion": "Backend actual preparation copied evidence/current historical version query compares exact issued materializationRevision;18/52/54/74.",
+        "actualBackendStatus": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE",
+        "backendObligationIndices0": [
+          18,
+          52,
+          54,
+          74
+        ],
+        "actualBackendCompanionSourceGap": "GuidedPublicationReplayIT.assertIncrementalAppendAckHistory + GuidedPublicationEvidenceRepository: exact persisted issued preparation revision versus historical birth revision and actual expiry/append race remain required."
+      },
+      "negativeValidationStatus": "NOT_RERUN; ORIGINAL_UNIT04_CASE_FAILED_PREIMAGE_GUARD",
+      "actualCurrentPositiveParentEvidence": "At unit04 exact unchanged test source executes deriveObservedArtifact(parent).artifact equality and validateObservedRequest(parent).ok:true before assertExactNegativeMutation. The captured failure is at helper original-preimage guard, so these parent preconditions had already passed. This credits only the positive parent preconditions, never the failing negative case."
+    },
+    {
+      "name": "unrelated-failed-ledger-cannot-be-omitted",
+      "section": "incrementalBasis",
+      "parent": "ordinary",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "sourceFiles": {
+        "current": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "currentSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+        "historicalBefore": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/current-vector-preservation-implementation/before/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "historicalBeforeSha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9"
+      },
+      "hashChanges": [
+        {
+          "pointer": "/expectedArtifact",
+          "historicalDescriptor": {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "e3e1a4a75086c27342a38dc77e7e8ed03535580bcca627dc0f582e2ad1c78b8a",
+            "newHash": null
+          },
+          "currentOldHash": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c",
+          "currentNewHash": null
+        }
+      ],
+      "exactPointerValuesAndRoles": [
+        {
+          "pointer": "/authority/ledgers",
+          "role": "MALICIOUS_VALIDATION_INPUT_OR_DECLARED_EXTERNAL_AUTHORITY",
+          "beforePresent": true,
+          "afterPresent": true,
+          "currentBeforeValue": [
+            {
+              "schemaVersion": 3,
+              "sessionId": "session-1",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000001",
+                "ordinal": 0
+              },
+              "idempotencyKey": "admission-request-0",
+              "requestDigest": "b33d4e922a13353eaa079d46a75babe78609c2027c1fa112963d7798509c4ee6",
+              "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+              "operationHash": "0d468ced1744419c45b238648a1460bdbf53fe961a3f3864429a6292ac365271",
+              "generation": 0,
+              "documentId": "blank-document-1",
+              "ownerFence": 1,
+              "admission": {
+                "admissionId": "admission-0",
+                "authorizationId": "authorization-1",
+                "admittedAt": "2026-10-08T03:00:10Z",
+                "policyDecisionHash": "0e36e3a9630596b316cdcdb84fa92d3fe2f102394017c7cee46ce4bc18dccc33"
+              },
+              "state": "SUCCEEDED",
+              "dispatchCount": 1,
+              "outcomeCode": "OK",
+              "assertionPassed": null,
+              "executionEvidence": {
+                "kind": "initialBlank",
+                "sessionId": "session-1",
+                "contextId": "context-1",
+                "creationId": "creation-1",
+                "documentId": "blank-document-1",
+                "bootstrapId": "bootstrap-1",
+                "url": "about:blank",
+                "origin": null,
+                "generation": 0
+              },
+              "evidenceHash": "d0cdaf24158c5890fe6e87f01a554efe5f1b86c8c3ce7b297a689e27ac483262",
+              "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+              "contextRevision": 1,
+              "preparationId": "preparation-0",
+              "attemptOrdinal": 0
+            },
+            {
+              "schemaVersion": 3,
+              "sessionId": "session-1",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "idempotencyKey": "admission-request-1",
+              "requestDigest": "ada134f9a38cf9268db5912452251443c3e79421139a795ea8ff39412131083c",
+              "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+              "operationHash": "52b94ab1c572f4e4a65de7bf3d33e999a03cb6f74d6e6cb946ed8b274669cdba",
+              "generation": 1,
+              "documentId": "document-1",
+              "ownerFence": 1,
+              "admission": {
+                "admissionId": "admission-1",
+                "authorizationId": "authorization-1",
+                "admittedAt": "2026-10-08T03:00:10Z",
+                "policyDecisionHash": "9f96fffdc89952762362c46ba81680dfa8e98b3bfa766f56e33f8d844304bb6f"
+              },
+              "state": "SUCCEEDED",
+              "dispatchCount": 1,
+              "outcomeCode": "OK",
+              "assertionPassed": null,
+              "executionEvidence": {
+                "kind": "observedDocument",
+                "sessionId": "session-1",
+                "contextId": "context-1",
+                "documentId": "document-1",
+                "generation": 1,
+                "origin": "https://orders.example.test",
+                "observationHash": "6fc94371d5f32ce94b1475bed9a58cb1c419725843326e2cf273fc68e6a89c8e"
+              },
+              "evidenceHash": "6c7c65da64ac00b860209feb367d93d274e7c07a33c1904b723a580838d72e8c",
+              "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+              "contextRevision": 1,
+              "preparationId": "preparation-1",
+              "attemptOrdinal": 0
+            },
+            {
+              "schemaVersion": 3,
+              "sessionId": "session-1",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000003",
+                "ordinal": 0
+              },
+              "idempotencyKey": "admission-request-2",
+              "requestDigest": "a060d1d772cc72afb685cf76016b135ab3fe0655ad43a166b4bef36e9120b9d8",
+              "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+              "operationHash": "7402c4d4d31b3fd5dac6ab5c6e71689ea64eb4e3da0af8be8fa075230e338a6e",
+              "generation": 1,
+              "documentId": "document-1",
+              "ownerFence": 1,
+              "admission": {
+                "admissionId": "admission-2",
+                "authorizationId": "authorization-1",
+                "admittedAt": "2026-10-08T03:00:10Z",
+                "policyDecisionHash": "7e49caf820ea098c632eaddf46aa97cb52cf57a3948922773e4a8e93da9d83e8"
+              },
+              "state": "SUCCEEDED",
+              "dispatchCount": 1,
+              "outcomeCode": "OK",
+              "assertionPassed": null,
+              "executionEvidence": {
+                "kind": "observedDocument",
+                "sessionId": "session-1",
+                "contextId": "context-1",
+                "documentId": "document-1",
+                "generation": 1,
+                "origin": "https://orders.example.test",
+                "observationHash": "6fc94371d5f32ce94b1475bed9a58cb1c419725843326e2cf273fc68e6a89c8e"
+              },
+              "evidenceHash": "6c7c65da64ac00b860209feb367d93d274e7c07a33c1904b723a580838d72e8c",
+              "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+              "contextRevision": 1,
+              "preparationId": "preparation-2",
+              "attemptOrdinal": 0
+            },
+            {
+              "schemaVersion": 3,
+              "sessionId": "session-1",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000003",
+                "ordinal": 1
+              },
+              "idempotencyKey": "admission-request-3",
+              "requestDigest": "20d2e39fc165734aed9727c45c7c1e4156868c0706ebde0e31d767b8261453e4",
+              "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+              "operationHash": "bbe83609643db3d2755f9199ab3548b94fc5422fdc3cddf0c41d3a522682a637",
+              "generation": 2,
+              "documentId": "document-1",
+              "ownerFence": 1,
+              "admission": {
+                "admissionId": "admission-3",
+                "authorizationId": "authorization-1",
+                "admittedAt": "2026-10-08T03:00:10Z",
+                "policyDecisionHash": "a7941f1167437074ff07960a0ad46120aff4e424065c1764f7e0b32a3667a8cf"
+              },
+              "state": "SUCCEEDED",
+              "dispatchCount": 1,
+              "outcomeCode": "OK",
+              "assertionPassed": null,
+              "executionEvidence": {
+                "kind": "observedDocument",
+                "sessionId": "session-1",
+                "contextId": "context-1",
+                "documentId": "document-1",
+                "generation": 2,
+                "origin": "https://orders.example.test",
+                "observationHash": "dcb63ecf630930adf1704913f2cabab41e17384d97906697218bdc257d56d4e2"
+              },
+              "evidenceHash": "62fb9505d92f35c699147dab890f8d13eb4c46e558f229531e422f39e4b173f3",
+              "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+              "contextRevision": 1,
+              "preparationId": "preparation-3",
+              "attemptOrdinal": 0
+            },
+            {
+              "schemaVersion": 3,
+              "sessionId": "session-1",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000003",
+                "ordinal": 2
+              },
+              "idempotencyKey": "admission-request-4",
+              "requestDigest": "c509b6323d7a84078742178892f956a00e9263b9fca0f2e1004652f8cd68d7f8",
+              "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+              "operationHash": "717d72d7f4cee0a4832da57d732341591fb1fadc37a4e36fd18c38d4ded584f5",
+              "generation": 3,
+              "documentId": "document-1",
+              "ownerFence": 1,
+              "admission": {
+                "admissionId": "admission-4",
+                "authorizationId": "authorization-1",
+                "admittedAt": "2026-10-08T03:00:10Z",
+                "policyDecisionHash": "e8164fabeb23f95575f3d0cee544e720d4bbcefeefb84bf9c66be30839dda38e"
+              },
+              "state": "SUCCEEDED",
+              "dispatchCount": 1,
+              "outcomeCode": "OK",
+              "assertionPassed": true,
+              "executionEvidence": {
+                "kind": "observedDocument",
+                "sessionId": "session-1",
+                "contextId": "context-1",
+                "documentId": "document-1",
+                "generation": 3,
+                "origin": "https://orders.example.test",
+                "observationHash": "d9137602a7a7ca3d36a776f35c00f1140e5dcefa2205d046c19466c03d767540"
+              },
+              "evidenceHash": "d751728b6b19c195e1c19b3033330f0cf937c251f833966935bfc9891d14a8e4",
+              "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+              "contextRevision": 1,
+              "preparationId": "preparation-4",
+              "attemptOrdinal": 0
+            }
+          ],
+          "currentAfterValue": [
+            {
+              "schemaVersion": 3,
+              "sessionId": "session-1",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000001",
+                "ordinal": 0
+              },
+              "idempotencyKey": "admission-request-0",
+              "requestDigest": "b33d4e922a13353eaa079d46a75babe78609c2027c1fa112963d7798509c4ee6",
+              "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+              "operationHash": "0d468ced1744419c45b238648a1460bdbf53fe961a3f3864429a6292ac365271",
+              "generation": 0,
+              "documentId": "blank-document-1",
+              "ownerFence": 1,
+              "admission": {
+                "admissionId": "admission-0",
+                "authorizationId": "authorization-1",
+                "admittedAt": "2026-10-08T03:00:10Z",
+                "policyDecisionHash": "0e36e3a9630596b316cdcdb84fa92d3fe2f102394017c7cee46ce4bc18dccc33"
+              },
+              "state": "SUCCEEDED",
+              "dispatchCount": 1,
+              "outcomeCode": "OK",
+              "assertionPassed": null,
+              "executionEvidence": {
+                "kind": "initialBlank",
+                "sessionId": "session-1",
+                "contextId": "context-1",
+                "creationId": "creation-1",
+                "documentId": "blank-document-1",
+                "bootstrapId": "bootstrap-1",
+                "url": "about:blank",
+                "origin": null,
+                "generation": 0
+              },
+              "evidenceHash": "d0cdaf24158c5890fe6e87f01a554efe5f1b86c8c3ce7b297a689e27ac483262",
+              "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+              "contextRevision": 1,
+              "preparationId": "preparation-0",
+              "attemptOrdinal": 0
+            },
+            {
+              "schemaVersion": 3,
+              "sessionId": "session-1",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "idempotencyKey": "admission-request-1",
+              "requestDigest": "ada134f9a38cf9268db5912452251443c3e79421139a795ea8ff39412131083c",
+              "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+              "operationHash": "52b94ab1c572f4e4a65de7bf3d33e999a03cb6f74d6e6cb946ed8b274669cdba",
+              "generation": 1,
+              "documentId": "document-1",
+              "ownerFence": 1,
+              "admission": {
+                "admissionId": "admission-1",
+                "authorizationId": "authorization-1",
+                "admittedAt": "2026-10-08T03:00:10Z",
+                "policyDecisionHash": "9f96fffdc89952762362c46ba81680dfa8e98b3bfa766f56e33f8d844304bb6f"
+              },
+              "state": "SUCCEEDED",
+              "dispatchCount": 1,
+              "outcomeCode": "OK",
+              "assertionPassed": null,
+              "executionEvidence": {
+                "kind": "observedDocument",
+                "sessionId": "session-1",
+                "contextId": "context-1",
+                "documentId": "document-1",
+                "generation": 1,
+                "origin": "https://orders.example.test",
+                "observationHash": "6fc94371d5f32ce94b1475bed9a58cb1c419725843326e2cf273fc68e6a89c8e"
+              },
+              "evidenceHash": "6c7c65da64ac00b860209feb367d93d274e7c07a33c1904b723a580838d72e8c",
+              "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+              "contextRevision": 1,
+              "preparationId": "preparation-1",
+              "attemptOrdinal": 0
+            },
+            {
+              "schemaVersion": 3,
+              "sessionId": "session-1",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000003",
+                "ordinal": 0
+              },
+              "idempotencyKey": "admission-request-2",
+              "requestDigest": "a060d1d772cc72afb685cf76016b135ab3fe0655ad43a166b4bef36e9120b9d8",
+              "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+              "operationHash": "7402c4d4d31b3fd5dac6ab5c6e71689ea64eb4e3da0af8be8fa075230e338a6e",
+              "generation": 1,
+              "documentId": "document-1",
+              "ownerFence": 1,
+              "admission": {
+                "admissionId": "admission-2",
+                "authorizationId": "authorization-1",
+                "admittedAt": "2026-10-08T03:00:10Z",
+                "policyDecisionHash": "7e49caf820ea098c632eaddf46aa97cb52cf57a3948922773e4a8e93da9d83e8"
+              },
+              "state": "SUCCEEDED",
+              "dispatchCount": 1,
+              "outcomeCode": "OK",
+              "assertionPassed": null,
+              "executionEvidence": {
+                "kind": "observedDocument",
+                "sessionId": "session-1",
+                "contextId": "context-1",
+                "documentId": "document-1",
+                "generation": 1,
+                "origin": "https://orders.example.test",
+                "observationHash": "6fc94371d5f32ce94b1475bed9a58cb1c419725843326e2cf273fc68e6a89c8e"
+              },
+              "evidenceHash": "6c7c65da64ac00b860209feb367d93d274e7c07a33c1904b723a580838d72e8c",
+              "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+              "contextRevision": 1,
+              "preparationId": "preparation-2",
+              "attemptOrdinal": 0
+            },
+            {
+              "schemaVersion": 3,
+              "sessionId": "session-1",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000003",
+                "ordinal": 1
+              },
+              "idempotencyKey": "admission-request-3",
+              "requestDigest": "20d2e39fc165734aed9727c45c7c1e4156868c0706ebde0e31d767b8261453e4",
+              "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+              "operationHash": "bbe83609643db3d2755f9199ab3548b94fc5422fdc3cddf0c41d3a522682a637",
+              "generation": 2,
+              "documentId": "document-1",
+              "ownerFence": 1,
+              "admission": {
+                "admissionId": "admission-3",
+                "authorizationId": "authorization-1",
+                "admittedAt": "2026-10-08T03:00:10Z",
+                "policyDecisionHash": "a7941f1167437074ff07960a0ad46120aff4e424065c1764f7e0b32a3667a8cf"
+              },
+              "state": "SUCCEEDED",
+              "dispatchCount": 1,
+              "outcomeCode": "OK",
+              "assertionPassed": null,
+              "executionEvidence": {
+                "kind": "observedDocument",
+                "sessionId": "session-1",
+                "contextId": "context-1",
+                "documentId": "document-1",
+                "generation": 2,
+                "origin": "https://orders.example.test",
+                "observationHash": "dcb63ecf630930adf1704913f2cabab41e17384d97906697218bdc257d56d4e2"
+              },
+              "evidenceHash": "62fb9505d92f35c699147dab890f8d13eb4c46e558f229531e422f39e4b173f3",
+              "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+              "contextRevision": 1,
+              "preparationId": "preparation-3",
+              "attemptOrdinal": 0
+            },
+            {
+              "schemaVersion": 3,
+              "sessionId": "session-1",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000003",
+                "ordinal": 2
+              },
+              "idempotencyKey": "admission-request-4",
+              "requestDigest": "c509b6323d7a84078742178892f956a00e9263b9fca0f2e1004652f8cd68d7f8",
+              "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+              "operationHash": "717d72d7f4cee0a4832da57d732341591fb1fadc37a4e36fd18c38d4ded584f5",
+              "generation": 3,
+              "documentId": "document-1",
+              "ownerFence": 1,
+              "admission": {
+                "admissionId": "admission-4",
+                "authorizationId": "authorization-1",
+                "admittedAt": "2026-10-08T03:00:10Z",
+                "policyDecisionHash": "e8164fabeb23f95575f3d0cee544e720d4bbcefeefb84bf9c66be30839dda38e"
+              },
+              "state": "SUCCEEDED",
+              "dispatchCount": 1,
+              "outcomeCode": "OK",
+              "assertionPassed": true,
+              "executionEvidence": {
+                "kind": "observedDocument",
+                "sessionId": "session-1",
+                "contextId": "context-1",
+                "documentId": "document-1",
+                "generation": 3,
+                "origin": "https://orders.example.test",
+                "observationHash": "d9137602a7a7ca3d36a776f35c00f1140e5dcefa2205d046c19466c03d767540"
+              },
+              "evidenceHash": "d751728b6b19c195e1c19b3033330f0cf937c251f833966935bfc9891d14a8e4",
+              "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+              "contextRevision": 1,
+              "preparationId": "preparation-4",
+              "attemptOrdinal": 0
+            },
+            {
+              "schemaVersion": 3,
+              "sessionId": "session-1",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000001",
+                "ordinal": 0
+              },
+              "idempotencyKey": "admission-request-0",
+              "requestDigest": "b33d4e922a13353eaa079d46a75babe78609c2027c1fa112963d7798509c4ee6",
+              "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+              "operationHash": "0d468ced1744419c45b238648a1460bdbf53fe961a3f3864429a6292ac365271",
+              "generation": 0,
+              "documentId": "blank-document-1",
+              "ownerFence": 1,
+              "admission": {
+                "admissionId": "unrelated-failed",
+                "authorizationId": "authorization-1",
+                "admittedAt": "2026-10-08T03:00:10Z",
+                "policyDecisionHash": "0e36e3a9630596b316cdcdb84fa92d3fe2f102394017c7cee46ce4bc18dccc33"
+              },
+              "state": "FAILED",
+              "dispatchCount": 1,
+              "outcomeCode": "POLICY_DENIED",
+              "assertionPassed": null,
+              "executionEvidence": {
+                "kind": "initialBlank",
+                "sessionId": "session-1",
+                "contextId": "context-1",
+                "creationId": "creation-1",
+                "documentId": "blank-document-1",
+                "bootstrapId": "bootstrap-1",
+                "url": "about:blank",
+                "origin": null,
+                "generation": 0
+              },
+              "evidenceHash": "d0cdaf24158c5890fe6e87f01a554efe5f1b86c8c3ce7b297a689e27ac483262",
+              "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+              "contextRevision": 1,
+              "preparationId": "preparation-0",
+              "attemptOrdinal": 0
+            }
+          ],
+          "historicalBeforeCanonicalSha256": "4cb66a1218704b4e65d67feb6ed6a7bfb9d83621aa2810858ee78eef53ab73b5",
+          "historicalAfterCanonicalSha256": "a54253f130a8c5fbbbadef5170547db1a10f8c969f731efce7392c8dacd023c7",
+          "currentBeforeCanonicalSha256": "4cb66a1218704b4e65d67feb6ed6a7bfb9d83621aa2810858ee78eef53ab73b5",
+          "currentAfterCanonicalSha256": "a54253f130a8c5fbbbadef5170547db1a10f8c969f731efce7392c8dacd023c7",
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        },
+        {
+          "pointer": "/expectedArtifact",
+          "role": "FIXTURE_EXPECTATION_MARKER_NOT_OFFERED_VALIDATION_INPUT",
+          "beforePresent": true,
+          "afterPresent": false,
+          "currentBeforeValue": {
+            "sourceFile": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+            "section": "incrementalBasis",
+            "parentName": "ordinary",
+            "pointer": "/expectedArtifact",
+            "canonicalSha256": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c"
+          },
+          "currentAfterValue": null,
+          "historicalBeforeCanonicalSha256": "e3e1a4a75086c27342a38dc77e7e8ed03535580bcca627dc0f582e2ad1c78b8a",
+          "historicalAfterCanonicalSha256": null,
+          "currentBeforeCanonicalSha256": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c",
+          "currentAfterCanonicalSha256": null,
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        }
+      ],
+      "currentDeclaredPointersAreExhaustive": true,
+      "exactOnlyDeclaredDeltaAfterMasking": true,
+      "parentSelectionCorrect": true,
+      "correctedCurrentDescriptor": {
+        "name": "unrelated-failed-ledger-cannot-be-omitted",
+        "section": "incrementalBasis",
+        "parent": "ordinary",
+        "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+        "mutations": [
+          {
+            "pointer": "/authority/ledgers",
+            "remove": false,
+            "oldHash": "4cb66a1218704b4e65d67feb6ed6a7bfb9d83621aa2810858ee78eef53ab73b5",
+            "newHash": "a54253f130a8c5fbbbadef5170547db1a10f8c969f731efce7392c8dacd023c7"
+          },
+          {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c",
+            "newHash": null
+          }
+        ],
+        "requiredBackendCompanion": "Actual repository complete action inventory rejects other failed/unknown/dispatching omission;31/54.",
+        "actualBackendStatus": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE",
+        "backendObligationIndices0": [
+          31,
+          54
+        ],
+        "actualBackendCompanionSourceGap": "GuidedPublicationReplayIT.assertIncrementalImmutableSourceAndPlanHistory + GuidedPublicationEvidenceRepository action inventory: actual complete immutable ledgers versus omitted/pending supplied facts companion remains required."
+      },
+      "negativeValidationStatus": "NOT_RERUN; ORIGINAL_UNIT04_CASE_FAILED_PREIMAGE_GUARD",
+      "actualCurrentPositiveParentEvidence": "At unit04 exact unchanged test source executes deriveObservedArtifact(parent).artifact equality and validateObservedRequest(parent).ok:true before assertExactNegativeMutation. The captured failure is at helper original-preimage guard, so these parent preconditions had already passed. This credits only the positive parent preconditions, never the failing negative case."
+    },
+    {
+      "name": "hash-is-not-transport-authentication",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "sourceFiles": {
+        "current": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "currentSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+        "historicalBefore": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/current-vector-preservation-implementation/before/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "historicalBeforeSha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9"
+      },
+      "hashChanges": [
+        {
+          "pointer": "/expectedArtifact",
+          "historicalDescriptor": {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+            "newHash": null
+          },
+          "currentOldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentNewHash": null
+        }
+      ],
+      "exactPointerValuesAndRoles": [
+        {
+          "pointer": "/authority/authenticatedReceipt",
+          "role": "MALICIOUS_VALIDATION_INPUT_OR_DECLARED_EXTERNAL_AUTHORITY",
+          "beforePresent": true,
+          "afterPresent": true,
+          "currentBeforeValue": {
+            "jwtAlgorithm": "RS256",
+            "mtlsVerified": true,
+            "subject": "worker-1",
+            "assignmentSessionId": "session-1",
+            "ownerFence": 1,
+            "receiptHash": "b1af606b7d5de4d1d40a05c561a8f44f02e7c584004e9449c7983f1c74ae5438",
+            "liveOwner": true,
+            "nativeFence": "REFUSED_BEFORE_INVOCATION"
+          },
+          "currentAfterValue": null,
+          "historicalBeforeCanonicalSha256": "eaf5480235ce4c3812cda1a41c4ee1b709cb3e0a1d7b382ab35a173a75812100",
+          "historicalAfterCanonicalSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "currentBeforeCanonicalSha256": "eaf5480235ce4c3812cda1a41c4ee1b709cb3e0a1d7b382ab35a173a75812100",
+          "currentAfterCanonicalSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        },
+        {
+          "pointer": "/expectedArtifact",
+          "role": "FIXTURE_EXPECTATION_MARKER_NOT_OFFERED_VALIDATION_INPUT",
+          "beforePresent": true,
+          "afterPresent": false,
+          "currentBeforeValue": {
+            "sourceFile": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+            "section": "incrementalBasis",
+            "parentName": "admittedDrift",
+            "pointer": "/expectedArtifact",
+            "canonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03"
+          },
+          "currentAfterValue": null,
+          "historicalBeforeCanonicalSha256": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+          "historicalAfterCanonicalSha256": null,
+          "currentBeforeCanonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentAfterCanonicalSha256": null,
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        }
+      ],
+      "currentDeclaredPointersAreExhaustive": true,
+      "exactOnlyDeclaredDeltaAfterMasking": true,
+      "parentSelectionCorrect": true,
+      "correctedCurrentDescriptor": {
+        "name": "hash-is-not-transport-authentication",
+        "section": "incrementalBasis",
+        "parent": "admittedDrift",
+        "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+        "mutations": [
+          {
+            "pointer": "/authority/authenticatedReceipt",
+            "remove": false,
+            "oldHash": "eaf5480235ce4c3812cda1a41c4ee1b709cb3e0a1d7b382ab35a173a75812100",
+            "newHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+          },
+          {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+            "newHash": null
+          }
+        ],
+        "requiredBackendCompanion": "Actual owning-worker callback refuses absent authentication despite correct receiptHash;48/54.",
+        "actualBackendStatus": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE",
+        "backendObligationIndices0": [
+          48,
+          54
+        ],
+        "actualBackendCompanionSourceGap": "GuidedPublicationReplayIT.assertActualDriftCallbackAuthorityThenRelease (drift-auth/drift-auth-pre): exact original owning-worker token/mTLS/assignment/current-owner/fence mutation must execute through actual authenticated HTTP+PG+runner seam; no synthetic credit."
+      },
+      "negativeValidationStatus": "NOT_RERUN; ORIGINAL_UNIT04_CASE_FAILED_PREIMAGE_GUARD",
+      "actualCurrentPositiveParentEvidence": "At unit04 exact unchanged test source executes deriveObservedArtifact(parent).artifact equality and validateObservedRequest(parent).ok:true before assertExactNegativeMutation. The captured failure is at helper original-preimage guard, so these parent preconditions had already passed. This credits only the positive parent preconditions, never the failing negative case."
+    },
+    {
+      "name": "forged-jwt-algorithm",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "sourceFiles": {
+        "current": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "currentSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+        "historicalBefore": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/current-vector-preservation-implementation/before/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "historicalBeforeSha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9"
+      },
+      "hashChanges": [
+        {
+          "pointer": "/expectedArtifact",
+          "historicalDescriptor": {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+            "newHash": null
+          },
+          "currentOldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentNewHash": null
+        }
+      ],
+      "exactPointerValuesAndRoles": [
+        {
+          "pointer": "/authority/authenticatedReceipt/jwtAlgorithm",
+          "role": "MALICIOUS_VALIDATION_INPUT_OR_DECLARED_EXTERNAL_AUTHORITY",
+          "beforePresent": true,
+          "afterPresent": true,
+          "currentBeforeValue": "RS256",
+          "currentAfterValue": "none",
+          "historicalBeforeCanonicalSha256": "edd9a9263bcd11892f0de53c856b33027b54fc485c78296d4f4b372cbfeed6be",
+          "historicalAfterCanonicalSha256": "30a0924a3360be687d1df9fcbbfdff62c01bc0fd14036ab9076cf7f451568666",
+          "currentBeforeCanonicalSha256": "edd9a9263bcd11892f0de53c856b33027b54fc485c78296d4f4b372cbfeed6be",
+          "currentAfterCanonicalSha256": "30a0924a3360be687d1df9fcbbfdff62c01bc0fd14036ab9076cf7f451568666",
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        },
+        {
+          "pointer": "/expectedArtifact",
+          "role": "FIXTURE_EXPECTATION_MARKER_NOT_OFFERED_VALIDATION_INPUT",
+          "beforePresent": true,
+          "afterPresent": false,
+          "currentBeforeValue": {
+            "sourceFile": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+            "section": "incrementalBasis",
+            "parentName": "admittedDrift",
+            "pointer": "/expectedArtifact",
+            "canonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03"
+          },
+          "currentAfterValue": null,
+          "historicalBeforeCanonicalSha256": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+          "historicalAfterCanonicalSha256": null,
+          "currentBeforeCanonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentAfterCanonicalSha256": null,
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        }
+      ],
+      "currentDeclaredPointersAreExhaustive": true,
+      "exactOnlyDeclaredDeltaAfterMasking": true,
+      "parentSelectionCorrect": true,
+      "correctedCurrentDescriptor": {
+        "name": "forged-jwt-algorithm",
+        "section": "incrementalBasis",
+        "parent": "admittedDrift",
+        "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+        "mutations": [
+          {
+            "pointer": "/authority/authenticatedReceipt/jwtAlgorithm",
+            "remove": false,
+            "oldHash": "edd9a9263bcd11892f0de53c856b33027b54fc485c78296d4f4b372cbfeed6be",
+            "newHash": "30a0924a3360be687d1df9fcbbfdff62c01bc0fd14036ab9076cf7f451568666"
+          },
+          {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+            "newHash": null
+          }
+        ],
+        "requiredBackendCompanion": "Real HTTP token verifier refuses forged algorithm; no model/caller trust;48/54.",
+        "actualBackendStatus": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE",
+        "backendObligationIndices0": [
+          48,
+          54
+        ],
+        "actualBackendCompanionSourceGap": "GuidedPublicationReplayIT.assertActualDriftCallbackAuthorityThenRelease (drift-auth/drift-auth-pre): exact original owning-worker token/mTLS/assignment/current-owner/fence mutation must execute through actual authenticated HTTP+PG+runner seam; no synthetic credit."
+      },
+      "negativeValidationStatus": "NOT_RERUN; ORIGINAL_UNIT04_CASE_FAILED_PREIMAGE_GUARD",
+      "actualCurrentPositiveParentEvidence": "At unit04 exact unchanged test source executes deriveObservedArtifact(parent).artifact equality and validateObservedRequest(parent).ok:true before assertExactNegativeMutation. The captured failure is at helper original-preimage guard, so these parent preconditions had already passed. This credits only the positive parent preconditions, never the failing negative case."
+    },
+    {
+      "name": "missing-mtls",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "sourceFiles": {
+        "current": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "currentSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+        "historicalBefore": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/current-vector-preservation-implementation/before/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "historicalBeforeSha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9"
+      },
+      "hashChanges": [
+        {
+          "pointer": "/expectedArtifact",
+          "historicalDescriptor": {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+            "newHash": null
+          },
+          "currentOldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentNewHash": null
+        }
+      ],
+      "exactPointerValuesAndRoles": [
+        {
+          "pointer": "/authority/authenticatedReceipt/mtlsVerified",
+          "role": "MALICIOUS_VALIDATION_INPUT_OR_DECLARED_EXTERNAL_AUTHORITY",
+          "beforePresent": true,
+          "afterPresent": true,
+          "currentBeforeValue": true,
+          "currentAfterValue": false,
+          "historicalBeforeCanonicalSha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+          "historicalAfterCanonicalSha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa",
+          "currentBeforeCanonicalSha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+          "currentAfterCanonicalSha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa",
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        },
+        {
+          "pointer": "/expectedArtifact",
+          "role": "FIXTURE_EXPECTATION_MARKER_NOT_OFFERED_VALIDATION_INPUT",
+          "beforePresent": true,
+          "afterPresent": false,
+          "currentBeforeValue": {
+            "sourceFile": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+            "section": "incrementalBasis",
+            "parentName": "admittedDrift",
+            "pointer": "/expectedArtifact",
+            "canonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03"
+          },
+          "currentAfterValue": null,
+          "historicalBeforeCanonicalSha256": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+          "historicalAfterCanonicalSha256": null,
+          "currentBeforeCanonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentAfterCanonicalSha256": null,
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        }
+      ],
+      "currentDeclaredPointersAreExhaustive": true,
+      "exactOnlyDeclaredDeltaAfterMasking": true,
+      "parentSelectionCorrect": true,
+      "correctedCurrentDescriptor": {
+        "name": "missing-mtls",
+        "section": "incrementalBasis",
+        "parent": "admittedDrift",
+        "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+        "mutations": [
+          {
+            "pointer": "/authority/authenticatedReceipt/mtlsVerified",
+            "remove": false,
+            "oldHash": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+            "newHash": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+          },
+          {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+            "newHash": null
+          }
+        ],
+        "requiredBackendCompanion": "Actual HTTP connection without client certificate refuses;48/54.",
+        "actualBackendStatus": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE",
+        "backendObligationIndices0": [
+          48,
+          54
+        ],
+        "actualBackendCompanionSourceGap": "GuidedPublicationReplayIT.assertActualDriftCallbackAuthorityThenRelease (drift-auth/drift-auth-pre): exact original owning-worker token/mTLS/assignment/current-owner/fence mutation must execute through actual authenticated HTTP+PG+runner seam; no synthetic credit."
+      },
+      "negativeValidationStatus": "NOT_RERUN; ORIGINAL_UNIT04_CASE_FAILED_PREIMAGE_GUARD",
+      "actualCurrentPositiveParentEvidence": "At unit04 exact unchanged test source executes deriveObservedArtifact(parent).artifact equality and validateObservedRequest(parent).ok:true before assertExactNegativeMutation. The captured failure is at helper original-preimage guard, so these parent preconditions had already passed. This credits only the positive parent preconditions, never the failing negative case."
+    },
+    {
+      "name": "wrong-worker-subject",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "sourceFiles": {
+        "current": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "currentSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+        "historicalBefore": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/current-vector-preservation-implementation/before/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "historicalBeforeSha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9"
+      },
+      "hashChanges": [
+        {
+          "pointer": "/expectedArtifact",
+          "historicalDescriptor": {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+            "newHash": null
+          },
+          "currentOldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentNewHash": null
+        }
+      ],
+      "exactPointerValuesAndRoles": [
+        {
+          "pointer": "/authority/authenticatedReceipt/subject",
+          "role": "MALICIOUS_VALIDATION_INPUT_OR_DECLARED_EXTERNAL_AUTHORITY",
+          "beforePresent": true,
+          "afterPresent": true,
+          "currentBeforeValue": "worker-1",
+          "currentAfterValue": "other-worker",
+          "historicalBeforeCanonicalSha256": "e50fbe76491523bde76bfa56b0787f22343a91cede914adee72fef56e9ff11bd",
+          "historicalAfterCanonicalSha256": "130335a04c1ca3aecf00df034f1c1be9640c730d7a9a80b3ce57f98e11110dfa",
+          "currentBeforeCanonicalSha256": "e50fbe76491523bde76bfa56b0787f22343a91cede914adee72fef56e9ff11bd",
+          "currentAfterCanonicalSha256": "130335a04c1ca3aecf00df034f1c1be9640c730d7a9a80b3ce57f98e11110dfa",
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        },
+        {
+          "pointer": "/expectedArtifact",
+          "role": "FIXTURE_EXPECTATION_MARKER_NOT_OFFERED_VALIDATION_INPUT",
+          "beforePresent": true,
+          "afterPresent": false,
+          "currentBeforeValue": {
+            "sourceFile": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+            "section": "incrementalBasis",
+            "parentName": "admittedDrift",
+            "pointer": "/expectedArtifact",
+            "canonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03"
+          },
+          "currentAfterValue": null,
+          "historicalBeforeCanonicalSha256": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+          "historicalAfterCanonicalSha256": null,
+          "currentBeforeCanonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentAfterCanonicalSha256": null,
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        }
+      ],
+      "currentDeclaredPointersAreExhaustive": true,
+      "exactOnlyDeclaredDeltaAfterMasking": true,
+      "parentSelectionCorrect": true,
+      "correctedCurrentDescriptor": {
+        "name": "wrong-worker-subject",
+        "section": "incrementalBasis",
+        "parent": "admittedDrift",
+        "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+        "mutations": [
+          {
+            "pointer": "/authority/authenticatedReceipt/subject",
+            "remove": false,
+            "oldHash": "e50fbe76491523bde76bfa56b0787f22343a91cede914adee72fef56e9ff11bd",
+            "newHash": "130335a04c1ca3aecf00df034f1c1be9640c730d7a9a80b3ce57f98e11110dfa"
+          },
+          {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+            "newHash": null
+          }
+        ],
+        "requiredBackendCompanion": "Actual authenticated wrong worker subject/assignment refuses;48/54.",
+        "actualBackendStatus": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE",
+        "backendObligationIndices0": [
+          48,
+          54
+        ],
+        "actualBackendCompanionSourceGap": "GuidedPublicationReplayIT.assertActualDriftCallbackAuthorityThenRelease (drift-auth/drift-auth-pre): exact original owning-worker token/mTLS/assignment/current-owner/fence mutation must execute through actual authenticated HTTP+PG+runner seam; no synthetic credit."
+      },
+      "negativeValidationStatus": "NOT_RERUN; ORIGINAL_UNIT04_CASE_FAILED_PREIMAGE_GUARD",
+      "actualCurrentPositiveParentEvidence": "At unit04 exact unchanged test source executes deriveObservedArtifact(parent).artifact equality and validateObservedRequest(parent).ok:true before assertExactNegativeMutation. The captured failure is at helper original-preimage guard, so these parent preconditions had already passed. This credits only the positive parent preconditions, never the failing negative case."
+    },
+    {
+      "name": "stale-callback-owner",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "sourceFiles": {
+        "current": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "currentSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+        "historicalBefore": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/current-vector-preservation-implementation/before/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "historicalBeforeSha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9"
+      },
+      "hashChanges": [
+        {
+          "pointer": "/expectedArtifact",
+          "historicalDescriptor": {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+            "newHash": null
+          },
+          "currentOldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentNewHash": null
+        }
+      ],
+      "exactPointerValuesAndRoles": [
+        {
+          "pointer": "/authority/authenticatedReceipt/liveOwner",
+          "role": "MALICIOUS_VALIDATION_INPUT_OR_DECLARED_EXTERNAL_AUTHORITY",
+          "beforePresent": true,
+          "afterPresent": true,
+          "currentBeforeValue": true,
+          "currentAfterValue": false,
+          "historicalBeforeCanonicalSha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+          "historicalAfterCanonicalSha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa",
+          "currentBeforeCanonicalSha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+          "currentAfterCanonicalSha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa",
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        },
+        {
+          "pointer": "/expectedArtifact",
+          "role": "FIXTURE_EXPECTATION_MARKER_NOT_OFFERED_VALIDATION_INPUT",
+          "beforePresent": true,
+          "afterPresent": false,
+          "currentBeforeValue": {
+            "sourceFile": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+            "section": "incrementalBasis",
+            "parentName": "admittedDrift",
+            "pointer": "/expectedArtifact",
+            "canonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03"
+          },
+          "currentAfterValue": null,
+          "historicalBeforeCanonicalSha256": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+          "historicalAfterCanonicalSha256": null,
+          "currentBeforeCanonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentAfterCanonicalSha256": null,
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        }
+      ],
+      "currentDeclaredPointersAreExhaustive": true,
+      "exactOnlyDeclaredDeltaAfterMasking": true,
+      "parentSelectionCorrect": true,
+      "correctedCurrentDescriptor": {
+        "name": "stale-callback-owner",
+        "section": "incrementalBasis",
+        "parent": "admittedDrift",
+        "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+        "mutations": [
+          {
+            "pointer": "/authority/authenticatedReceipt/liveOwner",
+            "remove": false,
+            "oldHash": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+            "newHash": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+          },
+          {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+            "newHash": null
+          }
+        ],
+        "requiredBackendCompanion": "Actual owner transfer/loss or stale callback after terminal, with real HTTP current ownership check;48/54/81.",
+        "actualBackendStatus": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE",
+        "backendObligationIndices0": [
+          48,
+          54,
+          81
+        ],
+        "actualBackendCompanionSourceGap": "GuidedPublicationReplayIT.assertActualDriftCallbackAuthorityThenRelease (drift-auth/drift-auth-pre): exact original owning-worker token/mTLS/assignment/current-owner/fence mutation must execute through actual authenticated HTTP+PG+runner seam; no synthetic credit."
+      },
+      "negativeValidationStatus": "NOT_RERUN; ORIGINAL_UNIT04_CASE_FAILED_PREIMAGE_GUARD",
+      "actualCurrentPositiveParentEvidence": "At unit04 exact unchanged test source executes deriveObservedArtifact(parent).artifact equality and validateObservedRequest(parent).ok:true before assertExactNegativeMutation. The captured failure is at helper original-preimage guard, so these parent preconditions had already passed. This credits only the positive parent preconditions, never the failing negative case."
+    },
+    {
+      "name": "wrong-assignment",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "sourceFiles": {
+        "current": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "currentSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+        "historicalBefore": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/current-vector-preservation-implementation/before/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "historicalBeforeSha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9"
+      },
+      "hashChanges": [
+        {
+          "pointer": "/expectedArtifact",
+          "historicalDescriptor": {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+            "newHash": null
+          },
+          "currentOldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentNewHash": null
+        }
+      ],
+      "exactPointerValuesAndRoles": [
+        {
+          "pointer": "/authority/authenticatedReceipt/assignmentSessionId",
+          "role": "MALICIOUS_VALIDATION_INPUT_OR_DECLARED_EXTERNAL_AUTHORITY",
+          "beforePresent": true,
+          "afterPresent": true,
+          "currentBeforeValue": "session-1",
+          "currentAfterValue": "other-session",
+          "historicalBeforeCanonicalSha256": "a3083c2052e51dc13f8a2048fd212e7f94b8b72d7fe9699193c37f0f30dcf0d3",
+          "historicalAfterCanonicalSha256": "1185c4adc62c749322cdd27b832b460baf5bf7173c836b433d806478b3d6ed78",
+          "currentBeforeCanonicalSha256": "a3083c2052e51dc13f8a2048fd212e7f94b8b72d7fe9699193c37f0f30dcf0d3",
+          "currentAfterCanonicalSha256": "1185c4adc62c749322cdd27b832b460baf5bf7173c836b433d806478b3d6ed78",
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        },
+        {
+          "pointer": "/expectedArtifact",
+          "role": "FIXTURE_EXPECTATION_MARKER_NOT_OFFERED_VALIDATION_INPUT",
+          "beforePresent": true,
+          "afterPresent": false,
+          "currentBeforeValue": {
+            "sourceFile": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+            "section": "incrementalBasis",
+            "parentName": "admittedDrift",
+            "pointer": "/expectedArtifact",
+            "canonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03"
+          },
+          "currentAfterValue": null,
+          "historicalBeforeCanonicalSha256": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+          "historicalAfterCanonicalSha256": null,
+          "currentBeforeCanonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentAfterCanonicalSha256": null,
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        }
+      ],
+      "currentDeclaredPointersAreExhaustive": true,
+      "exactOnlyDeclaredDeltaAfterMasking": true,
+      "parentSelectionCorrect": true,
+      "correctedCurrentDescriptor": {
+        "name": "wrong-assignment",
+        "section": "incrementalBasis",
+        "parent": "admittedDrift",
+        "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+        "mutations": [
+          {
+            "pointer": "/authority/authenticatedReceipt/assignmentSessionId",
+            "remove": false,
+            "oldHash": "a3083c2052e51dc13f8a2048fd212e7f94b8b72d7fe9699193c37f0f30dcf0d3",
+            "newHash": "1185c4adc62c749322cdd27b832b460baf5bf7173c836b433d806478b3d6ed78"
+          },
+          {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+            "newHash": null
+          }
+        ],
+        "requiredBackendCompanion": "Actual callback worker/assignmentSessionId mismatch against persisted assignment, no writes;48/54.",
+        "actualBackendStatus": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE",
+        "backendObligationIndices0": [
+          48,
+          54
+        ],
+        "actualBackendCompanionSourceGap": "GuidedPublicationReplayIT.assertActualDriftCallbackAuthorityThenRelease (drift-auth/drift-auth-pre): exact original owning-worker token/mTLS/assignment/current-owner/fence mutation must execute through actual authenticated HTTP+PG+runner seam; no synthetic credit."
+      },
+      "negativeValidationStatus": "NOT_RERUN; ORIGINAL_UNIT04_CASE_FAILED_PREIMAGE_GUARD",
+      "actualCurrentPositiveParentEvidence": "At unit04 exact unchanged test source executes deriveObservedArtifact(parent).artifact equality and validateObservedRequest(parent).ok:true before assertExactNegativeMutation. The captured failure is at helper original-preimage guard, so these parent preconditions had already passed. This credits only the positive parent preconditions, never the failing negative case."
+    },
+    {
+      "name": "wrong-owner-fence",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "sourceFiles": {
+        "current": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "currentSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+        "historicalBefore": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/current-vector-preservation-implementation/before/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "historicalBeforeSha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9"
+      },
+      "hashChanges": [
+        {
+          "pointer": "/expectedArtifact",
+          "historicalDescriptor": {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+            "newHash": null
+          },
+          "currentOldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentNewHash": null
+        }
+      ],
+      "exactPointerValuesAndRoles": [
+        {
+          "pointer": "/authority/authenticatedReceipt/ownerFence",
+          "role": "MALICIOUS_VALIDATION_INPUT_OR_DECLARED_EXTERNAL_AUTHORITY",
+          "beforePresent": true,
+          "afterPresent": true,
+          "currentBeforeValue": 1,
+          "currentAfterValue": 2,
+          "historicalBeforeCanonicalSha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "historicalAfterCanonicalSha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "currentBeforeCanonicalSha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "currentAfterCanonicalSha256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        },
+        {
+          "pointer": "/expectedArtifact",
+          "role": "FIXTURE_EXPECTATION_MARKER_NOT_OFFERED_VALIDATION_INPUT",
+          "beforePresent": true,
+          "afterPresent": false,
+          "currentBeforeValue": {
+            "sourceFile": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+            "section": "incrementalBasis",
+            "parentName": "admittedDrift",
+            "pointer": "/expectedArtifact",
+            "canonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03"
+          },
+          "currentAfterValue": null,
+          "historicalBeforeCanonicalSha256": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+          "historicalAfterCanonicalSha256": null,
+          "currentBeforeCanonicalSha256": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+          "currentAfterCanonicalSha256": null,
+          "maliciousInputValuePreservedFromArchivedOriginal": true
+        }
+      ],
+      "currentDeclaredPointersAreExhaustive": true,
+      "exactOnlyDeclaredDeltaAfterMasking": true,
+      "parentSelectionCorrect": true,
+      "correctedCurrentDescriptor": {
+        "name": "wrong-owner-fence",
+        "section": "incrementalBasis",
+        "parent": "admittedDrift",
+        "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+        "mutations": [
+          {
+            "pointer": "/authority/authenticatedReceipt/ownerFence",
+            "remove": false,
+            "oldHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "newHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35"
+          },
+          {
+            "pointer": "/expectedArtifact",
+            "remove": true,
+            "oldHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+            "newHash": null
+          }
+        ],
+        "requiredBackendCompanion": "Actual wrong authenticated X-Owner-Fence/current owner fence against stored assignment;48/54.",
+        "actualBackendStatus": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE",
+        "backendObligationIndices0": [
+          48,
+          54
+        ],
+        "actualBackendCompanionSourceGap": "GuidedPublicationReplayIT.assertActualDriftCallbackAuthorityThenRelease (drift-auth/drift-auth-pre): exact original owning-worker token/mTLS/assignment/current-owner/fence mutation must execute through actual authenticated HTTP+PG+runner seam; no synthetic credit."
+      },
+      "negativeValidationStatus": "NOT_RERUN; ORIGINAL_UNIT04_CASE_FAILED_PREIMAGE_GUARD",
+      "actualCurrentPositiveParentEvidence": "At unit04 exact unchanged test source executes deriveObservedArtifact(parent).artifact equality and validateObservedRequest(parent).ok:true before assertExactNegativeMutation. The captured failure is at helper original-preimage guard, so these parent preconditions had already passed. This credits only the positive parent preconditions, never the failing negative case."
+    }
+  ]
+}

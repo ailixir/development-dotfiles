@@ -1,0 +1,62 @@
+{
+  "at": "2026-10-16T01:48:11.397603+00:00",
+  "supplements": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/runtime06-recovery01/20261016T014748Z-docker-prerequisite-metadata.json",
+  "facts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-prefix-sync-core-feedback-attempt06-artifacts/recovery01-20261016T014423Z-before-cleanup/fixed-fresh/backend/build/test-results/guidedIncrementalTest/binary/output.bin",
+      "foundDockerEnvironmentSegments": 1,
+      "endpointMetadataMatches": [
+        {
+          "scheme": "unix",
+          "pathValueExported": false,
+          "equalsCliSocketPath": false,
+          "resolvedPathEqualsCliSocketResolvedPath": true,
+          "lexists": true,
+          "targetExists": true,
+          "isSymlink": true,
+          "targetIsSocket": true
+        },
+        {
+          "scheme": "unix",
+          "pathValueExported": false,
+          "equalsCliSocketPath": false,
+          "resolvedPathEqualsCliSocketResolvedPath": false,
+          "lexists": true,
+          "targetExists": true,
+          "isSymlink": false,
+          "targetIsSocket": true
+        }
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-prefix-sync-authority-core-feedback-attempt05-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+      "foundDockerEnvironmentSegments": 1,
+      "endpointMetadataMatches": [
+        {
+          "scheme": "unix",
+          "pathValueExported": false,
+          "equalsCliSocketPath": false,
+          "resolvedPathEqualsCliSocketResolvedPath": true,
+          "lexists": true,
+          "targetExists": true,
+          "isSymlink": true,
+          "targetIsSocket": true
+        },
+        {
+          "scheme": "unix",
+          "pathValueExported": false,
+          "equalsCliSocketPath": false,
+          "resolvedPathEqualsCliSocketResolvedPath": false,
+          "lexists": true,
+          "targetExists": true,
+          "isSymlink": false,
+          "targetIsSocket": true
+        }
+      ]
+    }
+  ],
+  "sameEndpointProved": true,
+  "differentHarnessSocketObserved": true,
+  "noConnectionOrContainerAction": true,
+  "valuesNotExported": true
+}

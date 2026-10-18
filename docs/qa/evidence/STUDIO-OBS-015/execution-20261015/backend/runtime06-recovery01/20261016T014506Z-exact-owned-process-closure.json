@@ -1,0 +1,83 @@
+{
+  "at": "2026-10-16T01:45:07.036076+00:00",
+  "inventoryBinding": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/runtime06-recovery01/20261016T014331Z-process-ownership-before-cleanup.json",
+    "sha256": "909708960ba15c3348b807d624f440bf6a255999a74c54060db3dafe9e42a43d"
+  },
+  "beforeCaptureManifest": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-prefix-sync-core-feedback-attempt06-artifacts/recovery01-20261016T014423Z-before-cleanup/capture-manifest.json",
+  "signals": [
+    {
+      "pid": 57923,
+      "role": "guided",
+      "generation": 5,
+      "before": {
+        "pid": 57923,
+        "ppid": 1,
+        "status": 2,
+        "kernelStartEpochSeconds": 1792114482,
+        "kernelStartMicroseconds": 305942,
+        "commandSha256": "33155de2a4f7e1e333cdfb4bd878618687db0946ae1838594bc7a8a41bb06c1a"
+      },
+      "proof": "Immediately rechecked original kernel sec/usec, recorded canonical command hash, exact wrapper argv+bytes and registry READY nonce marker",
+      "signal": "SIGTERM",
+      "sentAt": "2026-10-16T01:45:06.721776+00:00",
+      "after": null,
+      "absentAfterSignal": true,
+      "exitCode": null,
+      "exitCodeReason": "Not a child of this recovery; kernel absence is observed, exit status unavailable"
+    },
+    {
+      "pid": 57944,
+      "role": "ordinary",
+      "generation": 5,
+      "before": {
+        "pid": 57944,
+        "ppid": 1,
+        "status": 2,
+        "kernelStartEpochSeconds": 1792114482,
+        "kernelStartMicroseconds": 603983,
+        "commandSha256": "c1c422fec10ded914cabf58406f19b03f8ba6ae89be531b8ae31de5769f338f0"
+      },
+      "proof": "Immediately rechecked original kernel sec/usec, recorded canonical command hash, exact wrapper argv+bytes and registry READY nonce marker",
+      "signal": "SIGTERM",
+      "sentAt": "2026-10-16T01:45:06.826877+00:00",
+      "after": null,
+      "absentAfterSignal": true,
+      "exitCode": null,
+      "exitCodeReason": "Not a child of this recovery; kernel absence is observed, exit status unavailable"
+    },
+    {
+      "pid": 55855,
+      "role": "secret",
+      "generation": 0,
+      "before": {
+        "pid": 55855,
+        "ppid": 1,
+        "status": 2,
+        "kernelStartEpochSeconds": 1792114426,
+        "kernelStartMicroseconds": 105084,
+        "commandSha256": "84f830a883b548bc04d54f934c372009c5c78e1890da0cd9877165ad46e3620e"
+      },
+      "proof": "Immediately rechecked original kernel sec/usec, recorded canonical command hash, exact wrapper argv+bytes and registry READY nonce marker",
+      "signal": "SIGTERM",
+      "sentAt": "2026-10-16T01:45:06.934191+00:00",
+      "after": null,
+      "absentAfterSignal": true,
+      "exitCode": null,
+      "exitCodeReason": "Not a child of this recovery; kernel absence is observed, exit status unavailable"
+    }
+  ],
+  "allThreeAbsent": true,
+  "limits": [],
+  "inheritedUntouched": [
+    22246,
+    67717,
+    13577,
+    13581,
+    44737
+  ],
+  "serviceConnections": false,
+  "containerOperations": false,
+  "noBroadSignal": true,
+  "registryOriginalUntouchedSha256": "eef1378c4ac481e579f91d5bd7c706f375d830a836ccd4243235e8d74d4502a6"
+}

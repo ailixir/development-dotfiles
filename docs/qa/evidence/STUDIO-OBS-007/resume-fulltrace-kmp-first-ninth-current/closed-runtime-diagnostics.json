@@ -1,0 +1,62 @@
+{
+  "scope": "SelectedfailedfullTRACEjoin, notwholeC5",
+  "records": {
+    "c5-claim-server-diagnostic.jsonl": [
+      {
+        "ordinal": 1,
+        "status": 202,
+        "handlerNanos": 127119791,
+        "consumed": true
+      },
+      {
+        "ordinal": 2,
+        "status": 202,
+        "handlerNanos": 1066481709,
+        "consumed": true
+      }
+    ],
+    "c5-lifecycle-diagnostic.jsonl": [
+      {
+        "ordinal": 1,
+        "status": 202,
+        "kind": "RUNTIME",
+        "reason": "LEASE_LOST",
+        "consumed": true
+      }
+    ],
+    "c5-grant-validation-diagnostic.jsonl": [
+      {
+        "ordinal": 1,
+        "initial": true,
+        "success": true,
+        "code": 0,
+        "previousValid": false,
+        "nextValid": true,
+        "expiryValid": true,
+        "previousRemainingMs": 0,
+        "nextRemainingMs": 29891,
+        "assignmentRemainingMs": 599528,
+        "leaseAdvanceMs": 0,
+        "validationMicros": 108
+      }
+    ],
+    "c5-profile-counts.jsonl": [
+      {
+        "files": 143,
+        "bytes": 8501243,
+        "hits": 0,
+        "links": 4,
+        "failed": false,
+        "stage": 0,
+        "errno": 0,
+        "linkName": 0,
+        "linkRoot": false,
+        "linkType": 0,
+        "linkBytes": 0,
+        "linkTargetRead": false,
+        "linkTargetIsVersion": false
+      }
+    ]
+  },
+  "exclusiveCost": "UNOBSERVED"
+}

@@ -1,0 +1,56 @@
+schema: 1
+story: STUDIO-OBS-012B
+story_title: Compile-path retirement (frontend) and learn vocabulary
+gate: PASS
+status_reason: All six acceptance criteria and every originally planned applicable local QA validation are green on the unchanged scoped frontend source. Independent Uma UX also passes; no local concerns, waiver or substituted validation remains.
+reviewer: Quinn (independent strict QA)
+reviewed_revision: scoped-source-sha256:d39ca2799673251f7ca1cc36c797e29e931338034c1975ae1b08fa74a23f6d6f
+updated: '2026-10-14T23:08:56.800821+00:00'
+top_issues: []
+waiver:
+  active: false
+evidence:
+  strict_plan_audit: docs/qa/evidence/STUDIO-OBS-012B/strict-qa/strict-plan-audit.json
+  source_binding: docs/qa/evidence/STUDIO-OBS-012B/strict-qa/final-source-binding.json
+  execution_receipt: docs/qa/evidence/STUDIO-OBS-012B/strict-qa/execution-receipt.json
+  baseline_resolution: docs/qa/evidence/STUDIO-OBS-012B/strict-qa/baseline-failure-resolution.json
+  name_reconciliation: docs/qa/evidence/STUDIO-OBS-012B/strict-qa/name-reconciliation.json
+  final_ux_gate: docs/qa/evidence/STUDIO-OBS-012B/strict-qa/final-ux-gate.json
+  final_ux_gate_sha256: 52d1d08c17cea011363e4785f96009286eca6e05bf097425ae578ee539005ec8
+  prior_canonical_gate: docs/qa/evidence/STUDIO-OBS-012B/strict-qa/history/canonical-gate-before-strict-pass.yml
+  frontend_full:
+    files: 56
+    passed: 701
+    failed: 0
+    skipped: 0
+    worker_override: false
+  wcag_cases_passed: 7
+  typecheck_exit: 0
+  lint_exit: 0
+  existing_lint_warnings: 302
+  production_build_exit: 0
+  existing_build_warnings: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6]
+    ac_gaps: []
+nfr_validation:
+  security:
+    status: PASS
+    notes: Central API client retained; retirement scope reviewed independently.
+  performance:
+    status: PASS
+    notes: Production build green and polling bounds preserved; no load benchmark claim.
+  reliability:
+    status: PASS
+    notes: Fresh default-worker full suite passed in the exclusive frontend window, closing the prior default-worker concern for this gate.
+  maintainability:
+    status: PASS
+    notes: Exact retirement/import scans, contract coverage controls and test-name reconciliation pass.
+  accessibility:
+    status: PASS
+    notes: All seven originally required existing automated scans and dynamic dirty-save RTL oracle pass; independent Uma gate PASS. Browser conformance and guided surface rewrite are original OBS-008 scope.
+release_boundary: No intermediate shared release before STUDIO-OBS-008. No deployment or browser WCAG conformance authorization.
+lifecycle:
+  from: InReview
+  to: Done
+  change_log_version: 0.3.6

@@ -1,0 +1,131 @@
+{
+  "artifact": "ARCH015-05 exact held implementation patch map",
+  "status": "PLANNED_NOT_AUTHORIZED_BY_THIS_DOCUMENT",
+  "schema": {
+    "owner": "cint015",
+    "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-ipc.schema.json",
+    "precondition": "Execute3 is closed; retainedArtifact property absent; current full generated bundle canonical hash ce58d620c27bb84f4233151275373aba24467f748c7152a12f1ef3d2d85381aa",
+    "jsonPatch": [
+      {
+        "op": "test",
+        "path": "/definitions/Execute3/additionalProperties",
+        "value": false
+      },
+      {
+        "op": "add",
+        "path": "/definitions/Execute3/properties/retainedArtifact",
+        "value": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/replay-artifact.schema.json"
+        }
+      }
+    ],
+    "requiredUnchanged": true,
+    "semanticPresence": "hasOwn(retainedArtifact) iff at least one binding has no transfers; exact Z equality to artifact empty consumers",
+    "rawModelMinItems1Unchanged": true,
+    "publicOpenAPIUnchanged": true
+  },
+  "runtime": [
+    {
+      "owner": "runner015_resume",
+      "path": "studio-runner/src/run/launcher.ts",
+      "seam": "launchObservedChild",
+      "delta": "Construct/validate Launch3 first; project Execute as today; attach exact job.artifact iff empty-consumer binding exists; call validateObservedExecute with accepted launch; retain same launch for send. Do not validate zero graph before providing provenance."
+    },
+    {
+      "owner": "runner015_resume",
+      "path": "studio-runner/src/executor/observedReplay.ts",
+      "seam": "validateObservedExecute, validateObservedReplayGraph, executeObservedReplay",
+      "delta": "Add optional typed accepted Launch3 context, absent-context remains strict; implement exact rules1-7 in ruling. Keep internally derived Z private to this branch; executor revalidation receives same accepted context. No public/caller set/boolean override. Preserve ordinary proof-absent path."
+    },
+    {
+      "owner": "runner015_resume",
+      "path": "studio-runner/src/validator/observedReplay.ts",
+      "seam": "validateReplayArtifact and reusable projection joins",
+      "delta": "Reuse existing independent artifact parse/semantic check. Factor pure exact projection helpers if needed without relaxing full-basis authority or accepting claimed candidate outputs. Artifact-only validation is not a historical success proof."
+    },
+    {
+      "owner": "runner015_resume",
+      "path": "studio-runner/src/run/childRuntime.ts",
+      "seam": "accepted Launch3 state and READY Execute dispatch",
+      "delta": "Bind private immutable accepted launch facts for this run; pass same accepted Launch3 to both boundary validator and executor. Keep one Execute/state/deadline/cancellation/build/policy checks. Do not reapply startDeadline after Ready."
+    },
+    {
+      "owner": "runner015_resume",
+      "path": "studio-runner/src/validator/observedReferencePolicy.ts",
+      "seam": "OBSERVED_LIMITS/boundedObserved call sites",
+      "delta": "Keep execute2097152/artifact1048576 unchanged. Proof branch combined cap3145792=execute+artifact+64; independent base frame and proof caps plus original Unicode/depth32/node1000000. Combined preflight first. Ordinary branch remains2097152."
+    },
+    {
+      "owner": "runner015_resume",
+      "path": "studio-runner/src/run/protocol.ts",
+      "seam": "protocol documentation",
+      "delta": "Document the sole optional closed metadata witness and retained Launch commitment. Clarify no executable code/source or resolved values in witness. Existing generic artifact/source/code fields remain invalid."
+    }
+  ],
+  "backend": {
+    "owner": "backend015_resume",
+    "productionDelta": "NONE",
+    "tests": "Carry existing deleted/excluded/orphan/full-basis and actual ordinary replay obligations through the held transport once released. Do not substitute a synthetic child proof for joined success."
+  },
+  "cintUnit": {
+    "owner": "cint015",
+    "order": [
+      "Preserve exact prior checkpoint/receipts/witnesses and measured evidence",
+      "Verify before source hashes/full bundle and serialize writers",
+      "Apply one source property; invoke existing generator once in authorized window",
+      "Update shared canonical fixtures and every live derived build/hash pin coherently; add complete proof branch and semantic negatives",
+      "Check source/generated/consumer/fixture parity and raw model full hash/minItems1",
+      "Freeze after manifest, changed file list, quoted old/new source/file/canonical/build hashes and receipt; provide to runner/backend"
+    ],
+    "generator": "tools/build-studio-observed-schemas.cjs",
+    "generatedOutputs": [
+      "studio-runner/src/guided/schemas.json",
+      "studio-runner/src/guided/types.ts",
+      "studio-runner/src/validator/observedSchemas.json",
+      "studio-runner/src/executor/observedOperations.ts"
+    ],
+    "expectedContentChanges": [
+      "observedSchemas.json canonical bundle includes replay-validation and replay-ipc; whole canonical bundle changes",
+      "observedOperations.ts Execute3 gains optional readonly retainedArtifact:Artifact3",
+      "guided outputs must be regenerated/checked; do not assume bytes changed if closure remains identical"
+    ],
+    "sharedFixtureAndOracleOwnerPaths": [
+      "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json",
+      "docs/specs/studio-observed-authoring/contracts/v3/wire-parity.fixtures.json",
+      "tools/check-studio-observed-contracts.cjs",
+      "tools/studio-snapshot-contract-oracle.cjs"
+    ],
+    "pinConsumerOwnerPaths": [
+      "studio-runner/test/run/confinement.test.ts",
+      "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java"
+    ],
+    "dependentPins": [
+      "BuildIdentity.schemaBundleHash everywhere including ValidationBasis.build if present: because replay-validation is in same observed closure this can change full basisHash/publicationEvidenceHash/artifactHash/revisionDigest",
+      "validationRequest.requiredBuild and expected verdict.build",
+      "job.binding.requiredBuild and replayGrant.buildHash",
+      "admissionRequest.build, receipt.request.build, launch.build and launch.admission.request.build",
+      "all build-bearing full witnesses, fixtures, accepted oracle outputs and examples; recompute downstream commitments, never blanket text replacement"
+    ],
+    "historicalEvidence": "Do not edit prior immutable fixtures/receipts/manifests or SQL55 tested-snapshot evidence to look current. Preserve exact scenario meaning under newly versioned current vectors; old run evidence remains historical and cannot validate the new source/dist identity.",
+    "newPins": "Measure only after authorized generation; this design does not predict new canonical hash.",
+    "unchanged": [
+      "public OpenAPI43 operations and its pins",
+      "all raw model schema bytes/minItems1",
+      "all non-replay-ipc source schemas unless separately authorized",
+      "V1-V20 exact bytes",
+      "V21/SQL55 source and historical evidence",
+      "all previous architecture manifests",
+      "all story/gate/lifecycle artifacts"
+    ]
+  },
+  "sizeArithmetic": {
+    "ordinaryExecuteBytes": 2097152,
+    "retainedArtifactBytes": 1048576,
+    "actualWrapperBytes": 20,
+    "proofCombinedBytes": 3145792,
+    "extraHeadroomBytes": 44,
+    "meaning": "A nonempty object E becomes E plus comma and quoted retainedArtifact key colon and A. Removing only property returns exact original frame projection. Bound components separately and combined first. No unexplained budget increase."
+  },
+  "releaseHold": "Independent Quinn + Orion before C-int production patch/generation and runner held delta. Other owned work continues disjointly."
+}

@@ -1,0 +1,17 @@
+{
+  "status": "SOURCE_PROPOSAL_ONLY_FOR_INDEPENDENT_REVIEW",
+  "sourceSha": "02b135c25b11bcc8be6804e68a5461a4007552150039dad85fec8b5460b37be4",
+  "actualEvidence": "resume-c14-profile-category-current/closed-profile-hit-categories.json: positive/PW0, mandatoryTEXT5 hits allHTTP_CACHE, fullsamefdscan failedfalse; oldprivacyFAIL retained",
+  "sourceFacts": [
+    "Original p14 served page embeds mandatory actual TEXT_CANARY in real input markup; existing APP HTML response sets Content-Type only, no Cache-Control",
+    "Same fixture existing p4 page/witness producer already uses Cache-Control:no-store; proposed scope only p14Recipe != NONE real page response"
+  ],
+  "exactDelta": "After html selection/p14Markup and before original sendResponseHeaders, set Cache-Control:no-store only when p14Recipe != P14Recipe.NONE. Preserve exact original responsebody/status/nativeDOM/value/headersotherthannewpolicy/realnavigation/targetguards.",
+  "preserved": "Mandatory actualcanary remains delivered to actualbrowser and textassertion mustfail exactASSERTION_FAILED. Full originalprofiles/HTTP/SSE/cache/log/PG/scratch scans and zero-hit guards unchanged; no diskdeletion/filter/readskip/cacheflush/profileexemption or canaryreplacement. Alloriginalbounds/TRACEsecurityphase/publication/source/recipes/model/provider/read0/ownerclosure intact.",
+  "tradeoff": "Controlled testpage declares legitimate no-store retention policy for its generated canary-bearing response; browsers standard policy should prevent HTTPcache storage. Doesnot prove privacy for arbitrary cacheable external target pages, nor any productcachecleaning. Actual freshsameworkflow mustPASS allstrictscans; categoryalone doesnot guaranteeheaderwillresolve.",
+  "newCases": 0,
+  "newFrameworks": 0,
+  "sourceWrites": 0,
+  "runtime": "UNRUN",
+  "wholeWaveBudgetUsd": 500
+}

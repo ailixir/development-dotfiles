@@ -1,0 +1,207 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -1050,9 +1050,6 @@
+           (request, response, chain) -> {
+             var http = (jakarta.servlet.http.HttpServletRequest) request;
+             C5Capture activeC5 = c5Capture;
+-            if (activeC5 != null && activeC5.claimSamplerSelected) {
+-              activeC5.armClaimSampler(http);
+-            }
+             P4RevocationState c6 = p4Revocation;
+             if (c6 != null
+                 && c6.c6Kind == 4
+@@ -1079,15 +1076,14 @@
+                   new org.springframework.web.util.ContentCachingRequestWrapper(http, 262144);
+               boolean claim = activeC5.selectedClaim(http);
+               long ingress = System.nanoTime();
+-              C5ClaimSampler selectedSampler = claim ? activeC5.claimSampler : null;
+-              if (selectedSampler != null) {
+-                selectedSampler.enterCurrent();
++              if (claim && activeC5.claimSampler != null) {
++                activeC5.claimSampler.enterCurrent();
+               }
+               try {
+                 chain.doFilter(wrapped, response);
+               } finally {
+-                if (selectedSampler != null) {
+-                  selectedSampler.leaveCurrent();
++                if (claim && activeC5.claimSampler != null) {
++                  activeC5.claimSampler.leaveCurrent();
+                 }
+                 int status = ((jakarta.servlet.http.HttpServletResponse) response).getStatus();
+                 if (claim) {
+@@ -11919,13 +11915,11 @@
+     }
+ 
+     private volatile PgStatus pgStatus = PgStatus.NOT_TRIGGERED;
+-    // Separate fixed scalar; the original forty aggregate bins retain their meanings.
+-    private int pgBlockerCallerPoint = -1;
+     private final long[][] pgStagesAndWaits = new long[7][10];
+     // Independent nonadditive partitions: SQL 0..6, source family 7..12, caller 13..39.
+     // Never sum partitions: the same confirmed blocker can contribute to each.
+     // Source codes: 7 claim, 8 translation, 9 observation/materialization, 10 consume/outcome,
+-    // 11 read/start/command (including publication), 12 stop/reconcile. Exact Translation.call phases:
++    // 11 read/start/command, 12 stop/reconcile. Exact Translation.call phases:
+     // 13 reserve, 14 send, 15 apply, 16 duplicate, 17 reject accounting, 18 late accounting,
+     // 19 preparation capture. Family 9 method labels: 20 observe, 21 observeV2, 22 materialize,
+     // 23 allocateBinding, 24 runnerContext, 25 storePreparation, 26 bootstrap, 27 beginRefresh,
+@@ -12259,13 +12253,6 @@
+       }
+     }
+ 
+-    private int blockerCallerPointEvidence() {
+-      synchronized (gate) {
+-        // Reuse the original joined/clean/exact source-evidence guards, including failed sampling.
+-        return blockerStageEvidence()[11] > 0 ? pgBlockerCallerPoint : -1;
+-      }
+-    }
+-
+     private static boolean claimSessionValidationPresence(StackTraceElement[] stack) {
+       int validation = -1, renewal = -1;
+       for (int index = 0; index < stack.length; index++) {
+@@ -12283,7 +12270,7 @@
+                 .equals("com.citi.put.checks.studio.guided.session.GuidedSessionRepository")
+             && frame.getMethodName().equals("saveRenewalAndCommand")
+             && "GuidedSessionRepository.java".equals(frame.getFileName())
+-            && frame.getLineNumber() == 79) {
++            && frame.getLineNumber() == 112) {
+           if (renewal >= 0) {
+             return false;
+           }
+@@ -12293,7 +12280,7 @@
+                 .equals("com.citi.put.checks.studio.guided.session.GuidedSessionService")
+             && frame.getMethodName().equals("claim")
+             && "GuidedSessionService.java".equals(frame.getFileName())
+-            && frame.getLineNumber() == 751) {
++            && frame.getLineNumber() == 753) {
+           return validation >= 0 && validation < renewal && renewal < index;
+         }
+       }
+@@ -12396,16 +12383,6 @@
+             default -> new SourceClassification(-1, -1);
+           };
+         }
+-        if (type.equals("com.citi.put.checks.studio.guided.publication.GuidedPlanPublisher")
+-            && "GuidedPlanPublisher.java".equals(stack[i].getFileName())) {
+-          // Exact compiled call sites only; these private phase values are not aggregate indices.
+-          if (method.equals("prepareLowering") && stack[i].getLineNumber() == 378) {
+-            return new SourceClassification(11, 40);
+-          }
+-          if (method.equals("finalizeForUser") && stack[i].getLineNumber() == 100) {
+-            return new SourceClassification(11, 41);
+-          }
+-        }
+         return null; // Unsupported immediate caller: never borrow a more distant broad class.
+       }
+       return null;
+@@ -12562,7 +12539,6 @@
+         }
+       }
+       boolean targetRowMatched = false;
+-      int targetBlockerEdges = 0;
+       pgExactClaimAttribution = false;
+       var privatePids = new java.util.HashSet<Integer>();
+       var candidates = new java.util.HashSet<Integer>();
+@@ -12636,7 +12612,6 @@
+                   targetRowMatched = true;
+                   // Supplement ONLY the actual triggering target's authentic blocker edge.
+                   if (!rows.wasNull()) {
+-                    targetBlockerEdges++;
+                     Thread matchedThread = null;
+                     SourceSample matchedSample = null;
+                     int matches = 0;
+@@ -12687,15 +12662,6 @@
+               && pgExactClaimAttribution
+               && !bindingUnconfirmed
+               && activeTriggerBinding(target, expected)) {
+-            if (targetBlockerEdges == 1 && matchedHolders.size() == 1) {
+-              var holder = matchedHolders.entrySet().iterator().next();
+-              SourceSample sample = holder.getValue();
+-              if (activeHolderBinding(holder.getKey(), sample)
+-                  && sample.family() == 11
+-                  && (sample.phase() == 40 || sample.phase() == 41)) {
+-                pgBlockerCallerPoint = sample.phase();
+-              }
+-            }
+             for (var holder : matchedHolders.entrySet()) {
+               if (activeHolderBinding(holder.getKey(), holder.getValue())) {
+                 pgBlockerStages[holder.getValue().family()]++;
+@@ -12852,9 +12818,7 @@
+ 
+   private final class C5Capture implements AutoCloseable {
+     private static final int MAX_BYTES = 128 * 1024 * 1024;
+-    private volatile C5ClaimSampler claimSampler;
+-    private final boolean claimSamplerSelected;
+-    private boolean claimSamplerArmed, claimSamplerClosed;
++    private final C5ClaimSampler claimSampler;
+     private ObjectNode claimSamplerEvidence;
+     private final List<String> values;
+     private volatile String selectedGuidedSession;
+@@ -12970,28 +12934,10 @@
+       if (traceFromStart) {
+         armTrace();
+       }
+-      claimSamplerSelected = "true".equals(System.getenv("STUDIO_C5_CLAIM_DIAGNOSTIC"));
+-    }
+-
+-    synchronized void armClaimSampler(jakarta.servlet.http.HttpServletRequest request) {
+-      String selected = selectedGuidedSession;
+-      if (!claimSamplerSelected
+-          || claimSamplerArmed
+-          || claimSamplerClosed
+-          || !secretLoginScenario
+-          || selected == null
+-          || !request.getMethod().equals("POST")
+-          || !request.getRequestURI()
+-              .equals("/api/v3/studio/guided-sessions/" + selected + "/finalize")) {
+-        return;
+-      }
+-      // One selected finalize window; retries and late callbacks cannot reset or re-arm it.
+-      claimSamplerArmed = true;
+-      try {
+-        claimSampler = new C5ClaimSampler(true);
+-      } catch (RuntimeException unavailable) {
+-        lifecycleDiagnosticFailed = true;
+-      }
++      claimSampler =
++          "true".equals(System.getenv("STUDIO_C5_CLAIM_DIAGNOSTIC"))
++              ? new C5ClaimSampler(true)
++              : null;
+     }
+ 
+     void armTrace() {
+@@ -13603,7 +13549,6 @@
+               "pgSnapshotBlockers",
+               "pgSnapshotStageWaitCounts",
+               "pgSnapshotBlockerStageCounts",
+-              "pgSnapshotBlockerCallerPoint",
+               "pgSnapshotRelationCounts",
+               "pgSnapshotWaitEventCounts"));
+       evidence
+@@ -13615,7 +13560,6 @@
+                   && claimSampler.pgStatus == C5ClaimSampler.PgStatus.OBSERVED
+                   && !claimSampler.bindingUnconfirmed
+                   && claimSampler.pgExactClaimAttribution);
+-      evidence.put("pgSnapshotBlockerCallerPoint", claimSampler.blockerCallerPointEvidence());
+       if (pgJoined) {
+         evidence
+             .put("pgSnapshotRows", claimSampler.pgRows)
+@@ -13661,7 +13605,6 @@
+               "pgSnapshotBlockers",
+               "pgSnapshotStageWaitCounts",
+               "pgSnapshotBlockerStageCounts",
+-              "pgSnapshotBlockerCallerPoint",
+               "pgSnapshotRelationCounts",
+               "pgSnapshotWaitEventCounts")) {
+         if (evidence.has(key)) {
+@@ -13676,10 +13619,6 @@
+ 
+     @Override
+     public void close() throws Exception {
+-      synchronized (this) {
+-        // Shares the arm monitor: close-before-finalize permanently prevents a new sampler.
+-        claimSamplerClosed = true;
+-      }
+       var failures = new java.util.ArrayList<Throwable>();
+       boolean producersDrained = false;
+       try {

@@ -1,0 +1,188 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java
+@@ -263,12 +263,6 @@
+         });
+   }
+ 
+-  private record LoweringCapture(
+-      PublicationContracts.Base base,
+-      PublicationContracts.CurrentSource source,
+-      PublicationContracts.Evidence evidence,
+-      ObjectNode document) {}
+-
+   private record LoweringInput(
+       ObjectNode basis,
+       ObjectNode profile,
+@@ -336,7 +330,7 @@
+         : null;
+   }
+ 
+-  private LoweringCapture captureLoweringInput(String id, JsonNode expected) {
++  private LoweringInput captureLoweringInput(String id, JsonNode expected) {
+     var session = sessions.lock(id);
+     JsonNode document = session.document();
+     require(document.path("state").asText().equals("FINALIZING"), "PUBLICATION_CONFLICT", 409);
+@@ -352,17 +346,13 @@
+     bases.requireCurrent(base, source);
+     access.checkCurrent(document);
+     var raw = evidence.read(id);
+-    return new LoweringCapture(base, source, raw, session.document().deepCopy());
+-  }
+-
+-  private LoweringInput prepareLoweringInput(LoweringCapture capture) {
+     ObjectNode basis =
+         builder.basis(
+-            capture.base(),
+-            capture.source(),
+-            capture.evidence(),
+-            capture.document(),
+-            builder.learningProvenance(capture.evidence().document().path("sourceManifest")));
++            base,
++            source,
++            raw,
++            document,
++            builder.learningProvenance(raw.document().path("sourceManifest")));
+     ObjectNode supported = pins.selected();
+     ObjectNode capturedBasis = ownLoweringInput(basis);
+     ObjectNode profile = ownLoweringInput(supported.path("profile"));
+@@ -385,9 +375,7 @@
+       return null;
+     }
+     try {
+-      LoweringCapture capture = sessions.transaction(() -> captureLoweringInput(id, expected));
+-      // Validation, hashing and lowering cannot retain the preliminary session/source locks.
+-      LoweringInput input = prepareLoweringInput(capture);
++      LoweringInput input = sessions.transaction(() -> captureLoweringInput(id, expected));
+       if (input == null) {
+         return null;
+       }
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java
+@@ -251,12 +251,6 @@
+     var callbacks = new java.util.concurrent.atomic.AtomicInteger();
+     var pinCalls = new java.util.concurrent.atomic.AtomicInteger();
+     var learnedPlanDepths = new java.util.ArrayList<Integer>();
+-    var basisDepths = new java.util.ArrayList<Integer>();
+-    var pinDepths = new java.util.ArrayList<Integer>();
+-    var sourceReadDepths = new java.util.ArrayList<Integer>();
+-    var evidenceReadDepths = new java.util.ArrayList<Integer>();
+-    var currentGuardDepths = new java.util.ArrayList<Integer>();
+-    var lastSessionRead = new java.util.concurrent.atomic.AtomicReference<ObjectNode>();
+     var captured = new java.util.concurrent.atomic.AtomicReference<PublicationContracts.Claim>();
+     var checked = org.mockito.Mockito.spy(new GuidedContracts());
+     org.mockito.Mockito.doAnswer(
+@@ -267,15 +261,6 @@
+         .when(checked)
+         .validate(
+             org.mockito.ArgumentMatchers.eq("v3/learned-plan"), org.mockito.ArgumentMatchers.any());
+-    org.mockito.Mockito.doAnswer(
+-            invocation -> {
+-              basisDepths.add(depth.get());
+-              int expectedDepth = callbacks.get() == 2 && !mode.equals("ambient") ? 0 : 1;
+-              assertThat(depth.get()).isEqualTo(expectedDepth);
+-              return invocation.callRealMethod();
+-            })
+-        .when(checked)
+-        .validate(org.mockito.ArgumentMatchers.eq("v3/ledger"), org.mockito.ArgumentMatchers.any());
+     var sessions =
+         org.mockito.Mockito.mock(
+             com.citi.put.checks.studio.guided.session.GuidedSessionRepository.class);
+@@ -294,49 +279,30 @@
+               }
+               depth.incrementAndGet();
+               try {
+-                Object result = ((java.util.function.Supplier<?>) invocation.getArgument(0)).get();
+-                if (ordinal == 2 && !mode.equals("ambient")) {
+-                  // A caller retaining the read node cannot change the detached capture.
+-                  lastSessionRead.get().put("scopeHash", "changed-after-capture");
+-                }
+-                return result;
++                return ((java.util.function.Supplier<?>) invocation.getArgument(0)).get();
+               } finally {
+                 depth.decrementAndGet();
+               }
+             });
+     org.mockito.Mockito.when(sessions.lock(id))
+         .thenAnswer(
+-            invocation -> {
+-              ObjectNode document = original.session.deepCopy();
+-              lastSessionRead.set(document);
+-              return new com.citi.put.checks.studio.guided.session.GuidedSessionRepository.Session(
+-                  document, C.object());
+-            });
++            invocation ->
++                new com.citi.put.checks.studio.guided.session.GuidedSessionRepository.Session(
++                    original.session.deepCopy(), C.object()));
+     var bases = org.mockito.Mockito.mock(GuidedPublicationBaseRepository.class);
+     org.mockito.Mockito.when(bases.find(id))
+         .thenAnswer(
+             invocation -> java.util.Optional.of(new PublicationContracts.Base(original.base)));
+     org.mockito.Mockito.when(bases.lockCurrent(org.mockito.ArgumentMatchers.any()))
+-        .thenAnswer(
+-            invocation -> {
+-              sourceReadDepths.add(depth.get());
+-              assertThat(depth.get()).isEqualTo(1);
+-              return new PublicationContracts.CurrentSource(original.current);
+-            });
++        .thenAnswer(invocation -> new PublicationContracts.CurrentSource(original.current));
+     var evidence = org.mockito.Mockito.mock(GuidedPublicationEvidenceRepository.class);
+     org.mockito.Mockito.when(evidence.read(id))
+-        .thenAnswer(
+-            invocation -> {
+-              evidenceReadDepths.add(depth.get());
+-              assertThat(depth.get()).isEqualTo(1);
+-              return new PublicationContracts.Evidence(original.raw);
+-            });
++        .thenAnswer(invocation -> new PublicationContracts.Evidence(original.raw));
+     var pins = org.mockito.Mockito.mock(ObservedReplayPins.class);
+     var fatal = new AssertionError("fixed-optional-fatal");
+     org.mockito.Mockito.when(pins.selected())
+         .thenAnswer(
+             invocation -> {
+-              pinDepths.add(depth.get());
+               int ordinal = pinCalls.incrementAndGet();
+               if (ordinal == 1 && mode.equals("runtime")) {
+                 throw new IllegalStateException("fixed-optional-unavailable");
+@@ -375,14 +341,6 @@
+             })
+         .when(access)
+         .checkUser(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+-    org.mockito.Mockito.doAnswer(
+-            invocation -> {
+-              currentGuardDepths.add(depth.get());
+-              assertThat(depth.get()).isEqualTo(1);
+-              return null;
+-            })
+-        .when(access)
+-        .checkCurrent(org.mockito.ArgumentMatchers.any());
+     var validator = org.mockito.Mockito.mock(ObservedValidationClient.class);
+     var publisher =
+         new GuidedPlanPublisher(
+@@ -436,27 +394,6 @@
+           .setActualTransactionActive(priorActive);
+     }
+     assertThat(depth.get()).isZero();
+-    assertThat(basisDepths).isNotEmpty();
+-    if (mode.equals("ambient")) {
+-      assertThat(basisDepths).containsOnly(1);
+-    } else {
+-      assertThat(basisDepths.getFirst()).isZero();
+-      if (!mode.equals("invalid") && !mode.equals("fatal")) {
+-        assertThat(basisDepths).contains(1);
+-      }
+-    }
+-    assertThat(pinDepths)
+-        .containsExactlyElementsOf(
+-            mode.equals("ambient")
+-                ? List.of(1)
+-                : mode.equals("invalid") || mode.equals("fatal") ? List.of(0) : List.of(0, 1));
+-    int guardedPasses = mode.equals("ambient") || mode.equals("fatal") ? 1 : 2;
+-    var guardedDepths = java.util.Collections.nCopies(guardedPasses, 1);
+-    assertThat(sourceReadDepths).containsExactlyElementsOf(guardedDepths);
+-    assertThat(evidenceReadDepths).containsExactlyElementsOf(guardedDepths);
+-    assertThat(currentGuardDepths).containsExactlyElementsOf(guardedDepths);
+-    org.mockito.Mockito.verify(bases, org.mockito.Mockito.times(guardedPasses))
+-        .requireCurrent(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+     org.mockito.Mockito.verifyNoInteractions(validator);
+     org.mockito.Mockito.verify(sessions, org.mockito.Mockito.never())
+         .save(org.mockito.ArgumentMatchers.any());

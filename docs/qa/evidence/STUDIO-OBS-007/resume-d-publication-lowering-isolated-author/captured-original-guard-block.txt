@@ -1,0 +1,23 @@
+    var session = sessions.lock(id);
+    JsonNode document = session.document();
+    require(document.path("state").asText().equals("FINALIZING"), "PUBLICATION_CONFLICT", 409);
+    var base = bases.find(id).orElseThrow(() -> new GuidedSessionException("MISSING_SOURCE", 409));
+    require(
+        expected.path("expectedSourceRevision").equals(base.document().path("sourceRevision"))
+            && expected
+                .path("expectedConfigurationRevision")
+                .equals(base.document().path("configurationRevision")),
+        "REVISION_CONFLICT",
+        409);
+    var source = bases.lockCurrent(UUID.fromString(text(base.document(), "testId")));
+    bases.requireCurrent(base, source);
+    access.checkCurrent(document);
+    var raw = evidence.read(id);
+    ObjectNode basis =
+        builder.basis(
+            base,
+            source,
+            raw,
+            document,
+            builder.learningProvenance(raw.document().path("sourceManifest")));
+    ObjectNode supported = pins.selected();

@@ -1,0 +1,193 @@
+{
+  "schema": 2,
+  "story": "STUDIO-OBS-014",
+  "author": "Pax (@po), independent administrative closure",
+  "closedAt": "2026-10-15T03:22:31.415086+00:00",
+  "verdict": "PASS",
+  "reviewer": "Quinn (independent security/SDC QA)",
+  "reviewed_revision": "worktree-strict:sha256:cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+  "closureKey": "STUDIO-OBS-014:digest:worktree-strict:sha256:cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+  "statusBefore": "Done",
+  "statusAfter": "Done",
+  "lifecycleTransitionByPo": false,
+  "storyVersionBefore": "0.1.17",
+  "administrativeVersion": "0.1.18",
+  "storySha256Before": "253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140",
+  "storySha256After": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42",
+  "normalizedStorySha256": "253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140",
+  "restoresExactQaReviewedStory": true,
+  "QAResultsSha256Before": "581045f5a93a7b72f6dfbe9a0da6da71519895785158c0588c408f77fb823ce4",
+  "QAResultsSha256After": "581045f5a93a7b72f6dfbe9a0da6da71519895785158c0588c408f77fb823ce4",
+  "qaResultsUnchanged": true,
+  "preQaGroupsByteExact": true,
+  "protectedStorySha256": "bc222a40a66ab22a4225a9c4b73e7f827950972b15059721fc6b7d4933883043",
+  "protectedStoryNormalization": "Status\u2192NORMALIZED before QA Results",
+  "acTextUnchanged": true,
+  "taskTextUnchanged": true,
+  "fileListPreserved": true,
+  "administrativeFileListPolicy": "No implementation File List edit needed: already actual/reconciled by Dex and QA. Administrative owned-file inventory resides in the aggregate closure receipt; changing pre-QA File List during close would invalidate protected content.",
+  "sourceManifest": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/integration-final-all-gates-after.json",
+  "sourceManifestSha256": "cd69f52f93f591932276b75eb5185f48e4c9d047890c62bdab64c7ae54c222ec",
+  "sourceDigest": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+  "distDigest": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+  "sourceFilesCompared": 1583,
+  "distFilesCompared": 238,
+  "sourceMismatches": [],
+  "distMismatches": [],
+  "gatePath": "docs/qa/gates/STUDIO-OBS-014-action-safety-and-governance-for-the-learning-run.yml",
+  "gateSha256": "3af7b7d6e87dd5541987389e2475b26d0e1685e73d41d174309e0a453a5ef005",
+  "reviewReport": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-story-review.json",
+  "reviewReportSha256": "61efb21d40d9d315d99d77ff5d118a941e8a8849be8547676540309c9f821a82",
+  "quality": {
+    "allPlannedApplicableLocalValidationGreen": true,
+    "localWaiver": false,
+    "backend": {
+      "total": 2102,
+      "passed": 2077,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 25
+    },
+    "crossReplicaTest": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "orderedJoinedClasses": {
+      "Planning": 57,
+      "Replay": 40,
+      "Session": 44,
+      "Bridge": 37,
+      "requiredLocalSkipped": 0
+    },
+    "runner": {
+      "unitPassed": 1529,
+      "unitHistoricalSkippedUncredited": 29,
+      "typeCheckExit": 0,
+      "fullLintExit": 0,
+      "allConfiguredCoverageThresholds": "PASS",
+      "profilePassed": 10,
+      "nativePassed": 232,
+      "nativeHistoricalSkippedUncredited": 9,
+      "deploymentPassed": 313,
+      "deploymentSkipped": 0
+    },
+    "frontend012B": {
+      "passed": 701,
+      "unchangedPreviouslyClosed": true
+    },
+    "coverage": {
+      "globalLine": {
+        "covered": 18987,
+        "total": 21237,
+        "requiredPercent": 70
+      },
+      "activePackageBarsPercent": [
+        75,
+        75,
+        75,
+        75
+      ],
+      "mappedGatewayLine": {
+        "covered": 393,
+        "total": 424,
+        "requiredPercent": 80
+      },
+      "legacyCompilerLiteralScopes": "NO_CURRENT_CLASSES; not matched passes; compiler pipeline explicitly retired; future automatic-selector enforcement limitation remains disclosed",
+      "noInventedRetentionOrAllGuided80Bar": true,
+      "configurationChanged": false
+    },
+    "codeRabbit": "Unavailable; explicit configured independent manual fallback actually used; no automated CodeRabbit pass claimed",
+    "noSkippedCaseCreditedAsPassed": true,
+    "backendFreshXmlFilesRecounted": 287
+  },
+  "rawArtifactReferencesIndependentlyRehashed": 1319,
+  "rawHashMismatches": [],
+  "acceptanceTrace": {
+    "allApplicableAcMet": true,
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-story-review.json",
+    "pointer": "/acceptanceTrace",
+    "originalPlannedNegatives": "All original planned local proof and named guard/corpus/no-guard obligations verified",
+    "scopeOnly": "AC2/AC11 design-document scope only; no compliance/HMAC deployment credit"
+  },
+  "coverageApplicability": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa013/coverage-scope-applicability.json",
+      "sha256": "982fb5d69589be7456d8d087dd406e1296798eeb5f28bd806d1a3f8a0fd900c2"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/coverage-scope-applicability.json",
+      "sha256": "f627e1dd5776e8d043b2769a5f30382830cf78ec3aef802706a0f5a443b1f67f"
+    }
+  ],
+  "executorHandoff": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/final-executor-handoff/final-applied-receipt.json",
+    "sha256": "69edecbf1e80d672507a359ce1351656c2647c4daea8d9d1f5cfe96d7c53396e"
+  },
+  "supersededClosure": {
+    "verdict": "CONCERNS",
+    "archivedReport": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/history/close-before-strict-pass.json",
+    "sha256": "01f348287bf1d9dd01e497ca61974c70f289117b62817cba0319513dc55ebe91",
+    "historicalGate": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/prior-canonical-gate-before-final.yml",
+      "sha256": "0f5e995c2902662a85c7d8be660462f9d3e47e3e4e23f8481be1a6cfaa6a8fa6"
+    },
+    "historicalKey": "STUDIO-OBS-014:digest:worktree-s4c:sha256:af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137",
+    "historicalMarkersPreserved": true,
+    "supersededBy": "STUDIO-OBS-014:digest:worktree-strict:sha256:cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467"
+  },
+  "administrativeNormalization": {
+    "removeExactChangeLogRowWithInsertedBlank": "| 2026-10-14 | 0.1.18 | Administrative reclosure after independent strict Quinn approval; exact current QA/story/source provenance, protected content and all planned local green evidence verified. Status Done and QA Results unchanged; no lifecycle transition by PO. Historical CONCERNS report archived and twenty carry-forward dispositions reconciled without external approval. [closure-key: STUDIO-OBS-014:digest:worktree-strict:sha256:cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467] | @po (Pax) |\n\n",
+    "removeExactHistoricalDisclaimer": "These paragraphs preserve the superseded CONCERNS administrative closure. The strict administrative reclosure below is current.\n\n",
+    "removeExactAppendedSection": "\n\n## Strict administrative reclosure \u2014 2026-10-14\n\nIndependent Quinn completed the lifecycle at version 0.1.17. Pax verified the current canonical gate, final source-bound review and exact QA-reviewed Done story, then appended this administrative version 0.1.18. Status Done, QA Results, acceptance criteria, tasks and the actual implementation File List remain byte-identical to that review. The reviewed revision remains `worktree-strict:sha256:cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467`; the post-administration story hash is recorded separately in `.ai/STUDIO-OBS-014-close.json`.\n\nAll originally planned applicable local checks are complete and green. Final normal backend: 2,077 standard passes / 25 historical uncredited skips, plus two cross-replica passes; Planning57/Replay40/Session44/Bridge37. Final runner: 1,529 unit passes / 29 historical uncredited skips; type/full lint/coverage green; profile10, native232 / nine historical uncredited skips; deployment313 / zero skips. Source `cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467` and dist `af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2` were independently rehashed. Actual global70, four75 and relocated gateway393/424\u226580 coverage pass; retired compiler selector literals have no current classes, not matched passes, and their future enforcement limitation remains explicit. The configured independent manual review fallback applies; no automated CodeRabbit result is claimed.\n\nStrict guard integrations, exact refused-context replay, SAVED_INPUT, two actual model-zero replays after pruning, real policy-context forgery, mounted-worker baseline/three negative variants, catalog names and empty-directory cleanup are complete. SAME_THREAD and class-owned reset/confirmed cleanup are the accepted fixture design; no per-test conversion is claimed. The original six-pair array remains historical, with two supplemental positive sites giving eight and exact named negative/no-guard reasons. One legitimate frozen materialization remains preserved; no zero-materialization claim is made.\n\nThe old `.ai` CONCERNS report is preserved byte-exact at `docs/qa/evidence/STUDIO-OBS-014/strict-qa/history/close-before-strict-pass.json`. The current `.ai` report and strict closure receipt bind this administrative delta; the twenty carried obligations are reconciled in `docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json`. Local completed obligations are no longer deferred downstream; original playback/UX/load and folded/deployed reliability work remains. Real provider/Sonic/Vault/SIEM/staging/manual C-17, Security/Compliance, D-2b, targetLabelHash privacy and F01\u2013F04 retain their original gates. Artifact HMAC does not fix audit-label hashing. No external approval or deployment occurred. OBS-012B is unchanged; OBS-015 production is unstarted and technical signoff unresolved. Root retains close-phase CLI verification and wave advancement.\n",
+    "restoredSha256": "253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140",
+    "restoresExactQaReviewedDoneStory": true
+  },
+  "closureArtifacts": [
+    "docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md"
+  ],
+  "placementRecord": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json",
+  "placementRecordSha256": "201c2e617b4a80708da676862994d06bb8843f874e7fb44525fa9940ed25ff2e",
+  "twentyCarryForwardDispositions": "Current local proof resolved; original downstream/external gates preserved; no downstream lifecycle/AC/task changes.",
+  "idempotency": {
+    "markerCountPerStory": 1,
+    "markerCountPerIndex": 1,
+    "bothArtifactKeysUnique": true,
+    "exactQaReviewedStoryRestoredByReversingAdministrativeDelta": true,
+    "pureSecondRunNoOp": "See aggregate administrative-closure-receipt; target artifact presence checked independently"
+  },
+  "phaseVerification": {
+    "rootReviewPreviouslyPassed": {
+      "status": "passed",
+      "at": "2026-10-15T03:14:55.973Z",
+      "notes": null
+    },
+    "closeOwner": "root Orion",
+    "performedByPo": false,
+    "pendingRootCloseVerification": true
+  },
+  "strictClosureReceipt": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/strict-closure-receipt.json",
+  "aggregateClosureReceipt": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-closure-receipt.json",
+  "scopeBoundaries": [
+    "External provider/model, real Sonic/Vault/SIEM/ingress/staging, manual masked-dots C17 and Security/Compliance approvals are not obtained.",
+    "008 guided UX/consumers/playback cost and copy,009 real D-C/folded deployed reliability,010 security/operations/pilot readiness remain open.",
+    "D2b cached response reauthorization and reversible targetLabelHash remain open. Artifact HMAC F04 does not fix audit-label hashing.",
+    "F01-F04 retain original entry/exit/external gates; F04 design only, E1-E8 UNCONFIRMED.",
+    "SAME_THREAD/class-owned reset accepted; no per-test conversion. One legitimate frozen materialization preserved, never zero. Historical six pairs plus two positive mapped sites total eight; named negative/no-guard exclusions remain exact.",
+    "012B strict closure and0.3.7 unchanged;015 production unstarted and technical signoff unresolved; epic not complete."
+  ],
+  "next": {
+    "story": "STUDIO-OBS-015",
+    "productionImplementationStarted": false,
+    "implementationReady": false,
+    "condition": "Root close verification and wave reconciliation first; independent technical READY_FOR_IMPLEMENTATION still required."
+  },
+  "budget": {
+    "wholeWaveCeilingUsd": 500,
+    "actualBilling": "unavailable"
+  },
+  "noTestsBuildsNativeProcessesCliGitGateRuntimeSourceConfigDistInstallCommitPushDeployOrDevDbChanges": true
+}

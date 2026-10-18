@@ -1,0 +1,488 @@
+--- before/studio-runner/test/observedIncrementalValidation.test.ts
++++ after/studio-runner/test/observedIncrementalValidation.test.ts
+@@ -1,17 +1,20 @@
+ import { describe, expect, it } from 'vitest';
+ import {readFileSync} from 'node:fs';
++import {createHash} from 'node:crypto';
+ import {negativeBoundaries,assertExactNegativeMutation,validateSyntheticDeclaredAuthority,SYNTHETIC_AUTHORITY_SCOPE} from './helpers/incrementalNegativeBoundaries.js';
+ import type {NegativeSection,NegativeCase} from './helpers/incrementalNegativeBoundaries.js';
+ import {publicationFixture} from './helpers/publicationFixture.js';
+ import {parseDocumentJson} from './helpers/documentJson.js';
+-interface Case extends NegativeCase {expected:string;expectedArtifact:unknown}
+-interface Fixture {basis:unknown;artifact:{learnedPlan:Parameters<typeof deriveSnapshotMaps>[1]&{stepSnapshotHashes:unknown}};snapshotCorrection:{positives:Case[];negatives:Case[]};graphTimingConformance:{graphCases:Case[]};incrementalContracts:{basisCases:Case[]}}
++interface Case extends NegativeCase {expected:string;basis:ValidationBasis;expectedArtifact:Artifact3}
++interface CanonicalVector {name:string;input:unknown;canonical:string;canonicalUtf8Hex:string;sha256:string}
++interface Fixture {basis:ValidationBasis;artifact:Artifact3;snapshotCorrection:{positives:Case[];negatives:Case[];normalization:{identity:ValidationBasis['snapshotEvidence']['current']};underdeterminationCounterexample:{oldBasis:Record<string,unknown>;equalBeforeCorrection:boolean;identityA:ValidationBasis['snapshotEvidence']['current'];identityB:ValidationBasis['snapshotEvidence']['current'];snapshotMapA:unknown;snapshotMapB:unknown}};graphTimingConformance:{graphCases:Case[]};incrementalContracts:{basisCases:Case[];canonicalVectors:CanonicalVector[]}}
+ const fixtures=parseDocumentJson(readFileSync(new URL('../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json',import.meta.url)),33554432) as Fixture;
+ import { deriveObservedArtifact,validateObservedRequest } from '../src/validator/observedReplay.js';
+-import { deriveSnapshotMaps, inputChains } from '../src/validator/observedSnapshots.js';
++import { deriveSnapshotMaps, inputChains, stepSnapshots } from '../src/validator/observedSnapshots.js';
+ import { validateMaterializationHistory, validateIncrementalHistory, effectiveGraph } from '../src/validator/observedHistory.js';
+-import { validateObserved,hashObserved,OBSERVED_SCHEMA_BUNDLE_HASH,OBSERVED_PROFILE,ObservedRefusal } from '../src/validator/observedReferencePolicy.js';
+-import type { ValidationBasis } from '../src/executor/observedOperations.js';
++import { validateObserved,hashObserved,canonicalObserved,OBSERVED_SCHEMA_BUNDLE_HASH,OBSERVED_PROFILE,ObservedRefusal } from '../src/validator/observedReferencePolicy.js';
++import type { Artifact3, ValidationBasis } from '../src/executor/observedOperations.js';
++import type {TestDocument} from './helpers/publicationFixture.js';
+ const basis = (raw: unknown): ValidationBasis => validateObserved<ValidationBasis>('replay-validation#/definitions/ValidationBasis',raw);
+ const build={...publicationFixture.build,schemaBundleHash:OBSERVED_SCHEMA_BUNDLE_HASH};
+ const request=(row:NegativeCase)=>({...publicationFixture.validationRequest,requiredBuild:build,requiredProfile:OBSERVED_PROFILE,validationBasis:row.basis,basisHash:hashObserved(row.basis),artifact:row.expectedArtifact});
+@@ -80,3 +83,181 @@
+     const b=basis(positive?.basis), before=JSON.stringify(b);validateIncrementalHistory(b);effectiveGraph(b);expect(JSON.stringify(b)).toBe(before);
+   });
+ });
++
++// Independent expected preimages: no lowerer/policy output supplies an expected hash.
++function expectedCanonical(value:unknown):string {
++  if(Array.isArray(value))return '['+value.map(expectedCanonical).join(',')+']';
++  if(value!==null&&typeof value==='object')return '{'+Object.keys(value).sort().map(key=>JSON.stringify(key)+':'+expectedCanonical((value as Record<string,unknown>)[key])).join(',')+'}';
++  return JSON.stringify(value);
++}
++const expectedHash=(value:unknown)=>createHash('sha256').update(expectedCanonical(value),'utf8').digest('hex');
++const evidencePreimage=(b:ValidationBasis)=>({version:1,basisHash:expectedHash(b),runAuthorizationHash:expectedHash(b.runAuthorization),translationHash:b.translationHash,bootstrapHash:expectedHash(b.bootstrap),sourceManifestHash:b.sourceManifestHash});
++const admissionTuples=(b:ValidationBasis)=>b.actions.map(({ledger:l})=>({coordinate:l.coordinate,admission:l.admission,operationHash:l.operationHash,scopeHash:l.scopeHash}));
++function required<T>(value:T|null|undefined):T {if(value===null||value===undefined)throw Error('MISSING_FIXED_FACT');return value;}
++function record(value:unknown):Record<string,unknown> {if(value===null||typeof value!=='object')throw Error('MISSING_FIXED_OBJECT');return value as Record<string,unknown>;}
++function commitmentLeaves(value:unknown,path:string,out:string[]):void {
++  if(Array.isArray(value)&&value.length)value.forEach((child,index)=>{commitmentLeaves(child,path+'/'+String(index),out);});
++  else if(value!==null&&typeof value==='object'&&Object.keys(value).length)for(const [key,child]of Object.entries(value))commitmentLeaves(child,path+'/'+key.replaceAll('~','~0').replaceAll('/','~1'),out);
++  else out.push(path);
++}
++function mutateLeaf(root:unknown,path:string):void {
++  const parts=path.split('/').slice(1).map(part=>part.replaceAll('~1','/').replaceAll('~0','~'));
++  const key=required(parts.pop());let parent=root;for(const part of parts)parent=record(parent)[part];
++  const object=record(parent),old=object[key];
++  // Null/empty containers and constant lexemes are commitment-only shape negatives.
++  object[key]=typeof old==='string'?(old.length?(old.startsWith('a')?'b':'a')+old.slice(1):'changed'):typeof old==='number'?old+1:typeof old==='boolean'?!old:old===null?'changed-null':null;
++}
++function fullReseal(offered:Artifact3):TestDocument<Artifact3> {
++  const artifact=structuredClone(offered) as TestDocument<Artifact3>;
++  artifact.learnedPlanHash=expectedHash(artifact.learnedPlan);artifact.replayPolicy.learnedPlanHash=artifact.learnedPlanHash;
++  return artifact;
++}
++describe('remaining original incremental basis commitments',()=>{
++  it('old basis cannot distinguish unused step2 context',()=>{
++    const counter=fixtures.snapshotCorrection.underdeterminationCounterexample,before=expectedCanonical(counter);
++    expect(counter.equalBeforeCorrection).toBe(true);expect(counter.oldBasis).not.toHaveProperty('snapshotEvidence');
++    const other=structuredClone(counter.identityB) as TestDocument<typeof counter.identityB>;
++    required(other.authoring.steps[1]).context=structuredClone(required(counter.identityA.authoring.steps[1]).context) as TestDocument<ValidationBasis['snapshotEvidence']['current']['authoring']['steps'][number]['context']>;
++    expect(other).toEqual(counter.identityA);
++    expect(required(required(counter.identityB.authoring.steps[1]).context.entries[0])).toEqual({kind:'text',value:'A distinct unused authored hint'});
++    const parent=required(fixtures.snapshotCorrection.positives.find(row=>row.name==='ordinary'));
++    expect(deriveObservedArtifact(parent.basis).artifact).toEqual(parent.expectedArtifact);
++    expect(validateObservedRequest(request(parent),build).ok).toBe(true);
++    for(const [identity,map]of [[counter.identityA,counter.snapshotMapA],[counter.identityB,counter.snapshotMapB]]as const){
++      const current=structuredClone(parent.basis) as TestDocument<ValidationBasis>;current.snapshotEvidence.current=structuredClone(identity) as TestDocument<typeof identity>;
++      const old=structuredClone(current) as Record<string,unknown>;delete old.snapshotEvidence;old.sourceManifestHash=counter.oldBasis.sourceManifestHash;
++      expect(old).toEqual(counter.oldBasis);
++      const original=expectedCanonical(current);
++      expect(stepSnapshots(identity,parent.basis.configuration,parent.expectedArtifact.learnedPlan)).toEqual(map);
++      expect(deriveSnapshotMaps(current as ValidationBasis,parent.expectedArtifact.learnedPlan).stepSnapshotHashes).toEqual(map);
++      expect(expectedCanonical(current)).toBe(original);
++    }
++    for(const [index,step]of counter.identityA.authoring.steps.entries()){
++      if(index===0)expect(record(counter.snapshotMapA)[step.id]).toBe(record(counter.snapshotMapB)[step.id]);
++      else expect(record(counter.snapshotMapA)[step.id]).not.toBe(record(counter.snapshotMapB)[step.id]);
++    }
++    expect(expectedCanonical(counter)).toBe(before);
++  });
++  it.each(['numeric-captured-at','lone-surrogate-context','unsafe-evidence-revision']as const)('normalized snapshot source refuses malformed metadata %s',name=>{
++    const identity=fixtures.snapshotCorrection.normalization.identity,before=JSON.stringify(identity);
++    expect(validateObserved('authoring-snapshot#/definitions/AuthoringSnapshotIdentity',identity)).toEqual(identity);
++    const parent=required(fixtures.snapshotCorrection.positives.find(row=>row.name==='ordinary'));
++    const current=structuredClone(parent.basis) as TestDocument<ValidationBasis>;current.snapshotEvidence.current=structuredClone(identity) as TestDocument<typeof identity>;
++    expect(()=>deriveSnapshotMaps(current as ValidationBasis,parent.expectedArtifact.learnedPlan)).not.toThrow();
++    const malformed=structuredClone(identity),second=record(record(required(malformed.authoring.steps[1]).context.evidenceReferences[0]));
++    if(name==='numeric-captured-at')second.capturedAt=1792036800;
++    if(name==='unsafe-evidence-revision')second.revision=9007199254740992;
++    if(name==='lone-surrogate-context')record(required(required(malformed.authoring.steps[2]).context.entries[1])).value='\uD800';
++    const malformedBefore=JSON.stringify(malformed);
++    expect(()=>validateObserved('authoring-snapshot#/definitions/AuthoringSnapshotIdentity',malformed)).toThrow('INVALID_CONTRACT');
++    current.snapshotEvidence.current=malformed as TestDocument<typeof identity>;
++    expect(()=>deriveObservedArtifact(current)).toThrow('INVALID_CONTRACT');
++    expect(JSON.stringify(malformed)).toBe(malformedBefore);expect(JSON.stringify(identity)).toBe(before);
++  });
++  it('commits each of 538 original complete-basis leaves through the unchanged six-field envelope',()=>{
++    let total=0;
++    for(const [index,parent]of fixtures.incrementalContracts.basisCases.slice(0,3).entries()){
++      const b=parent.basis,before=expectedCanonical(b),derived=deriveObservedArtifact(b);
++      expect(derived.artifact).toEqual(parent.expectedArtifact);expect(validateObservedRequest(request(parent),build).ok).toBe(true);
++      const paths:string[]=[];
++      for(const root of ['snapshotEvidence/current','materializationEvidence/versions','materializationEvidence/entries']){
++        const [one,two]=root.split('/');commitmentLeaves(record(record(b)[required(one)])[required(two)],'/'+root,paths);
++      }
++      if(b.incrementalEvidence)for(const key of ['plan','program','switch','prefixRequests','driftReceipt','firstSuffixAcceptance','excludedAttempts']as const)commitmentLeaves(b.incrementalEvidence[key],'/incrementalEvidence/'+key,paths);
++      expect(new Set(paths).size).toBe(paths.length);expect(paths).toHaveLength(required([79,175,284][index]));
++      const envelope=evidencePreimage(b),tuples=admissionTuples(b);
++      expect(expectedHash(envelope)).toBe(parent.expectedArtifact.replayPolicy.publicationEvidenceHash);
++      for(const path of paths){
++        const changed=structuredClone(b);mutateLeaf(changed,path);const next=evidencePreimage(changed),original=expectedCanonical(changed);
++        expect(expectedHash(changed),parent.name+path).not.toBe(expectedHash(b));
++        expect(hashObserved(changed),parent.name+path).toBe(expectedHash(changed));
++        expect(Object.keys(next).sort()).toEqual(['basisHash','bootstrapHash','runAuthorizationHash','sourceManifestHash','translationHash','version']);
++        expect(next.version).toBe(1);expect(expectedHash(next),parent.name+path).not.toBe(expectedHash(envelope));
++        expect(hashObserved(next),parent.name+path).toBe(expectedHash(next));
++        expect(admissionTuples(changed)).toEqual(tuples);expect(expectedCanonical(changed)).toBe(original);
++      }
++      expect(expectedCanonical(b)).toBe(before);total+=paths.length;
++    }
++    expect(total).toBe(538);
++  });
++  it.each([0,1,2])('keeps whole-basis, six-field evidence, effective tuple array and final-plan domains distinct for parent %i',index=>{
++    const parent=required(fixtures.incrementalContracts.basisCases[index]),b=parent.basis,before=expectedCanonical(b),artifact=parent.expectedArtifact;
++    const actual=deriveObservedArtifact(b);expect(actual.artifact).toEqual(artifact);
++    const tuples=admissionTuples(b),vector=required(fixtures.incrementalContracts.canonicalVectors[26]);
++    expect(vector.name).toBe('effective-admission-provenance-array');expect(tuples).toEqual(vector.input);
++    expect(expectedCanonical(tuples)).toBe(vector.canonical);expect(Buffer.from(expectedCanonical(tuples)).toString('hex')).toBe(vector.canonicalUtf8Hex);
++    expect(expectedHash(tuples)).toBe(vector.sha256);expect(actual.hashes.admissionProvenanceHash).toBe(vector.sha256);
++    expect(expectedHash({admissions:tuples})).not.toBe(vector.sha256);
++    for(const key of ['coordinate','admission','operationHash','scopeHash']){
++      const incomplete=structuredClone(tuples);Reflect.deleteProperty(required(incomplete[0]),key);expect(expectedHash(incomplete)).not.toBe(vector.sha256);
++    }
++    const envelope=evidencePreimage(b);expect(actual.hashes.publicationEvidenceHash).toBe(expectedHash(envelope));
++    expect(expectedHash({publicationEvidence:envelope})).not.toBe(expectedHash(envelope));expect(expectedHash({...envelope,version:2})).not.toBe(expectedHash(envelope));
++    for(const key of Object.keys(envelope)){const missing=record(structuredClone(envelope));Reflect.deleteProperty(missing,key);expect(expectedHash(missing)).not.toBe(expectedHash(envelope));}
++    if(index<2){
++      const basisVector=required(fixtures.incrementalContracts.canonicalVectors[index===0?24:27]),evidenceVector=required(fixtures.incrementalContracts.canonicalVectors[index===0?25:28]);
++      expect(b).toEqual(basisVector.input);expect(expectedCanonical(b)).toBe(basisVector.canonical);expect(expectedHash(b)).toBe(basisVector.sha256);
++      expect(expectedHash({basis:b})).not.toBe(basisVector.sha256);
++      expect(envelope).toEqual(evidenceVector.input);expect(expectedCanonical(envelope)).toBe(evidenceVector.canonical);expect(expectedHash(envelope)).toBe(evidenceVector.sha256);
++      expect(Buffer.from(expectedCanonical(envelope)).toString('hex')).toBe(evidenceVector.canonicalUtf8Hex);
++    }
++    expect(actual.hashes.learnedPlanHash).toBe(expectedHash(artifact.learnedPlan));expect(actual.artifact.replayPolicy.learnedPlanHash).toBe(expectedHash(artifact.learnedPlan));
++    for(const key of ['stepSnapshotHashes','reusedFrom','incremental']){const premature=record(structuredClone(artifact.learnedPlan));Reflect.deleteProperty(premature,key);expect(expectedHash(premature)).not.toBe(actual.hashes.learnedPlanHash);}
++    if(b.incrementalEvidence?.excludedAttempts.length){
++      const excluded=required(b.incrementalEvidence.excludedAttempts[0]).action.ledger;
++      expect(excluded.admission.admissionId).toBe('admission-spent');expect(expectedCanonical(tuples)).not.toContain('admission-spent');
++      expect(expectedHash([...tuples,{coordinate:excluded.coordinate,admission:excluded.admission,operationHash:excluded.operationHash,scopeHash:excluded.scopeHash}])).not.toBe(vector.sha256);
++      const erased=structuredClone(b) as TestDocument<ValidationBasis>;required(erased.incrementalEvidence).excludedAttempts=[];
++      expect(expectedHash(erased)).not.toBe(expectedHash(b));expect(admissionTuples(erased as ValidationBasis)).toEqual(tuples);
++    }
++    expect(expectedCanonical(b)).toBe(before);
++  });
++  it.each(['materialization-version','materialization-entry','prefix-program','relearn-switch','prefix-request','drift-receipt','first-suffix-acceptance','excluded-attempt']as const)('recomputed basis/evidence commitments cannot bypass semantic join %s',name=>{
++    const parent=required(fixtures.incrementalContracts.basisCases.find(row=>row.name==='admittedDrift')),b=parent.basis;
++    expect(deriveObservedArtifact(b).artifact).toEqual(parent.expectedArtifact);expect(validateObservedRequest(request(parent),build).ok).toBe(true);
++    const changed=structuredClone(b) as TestDocument<ValidationBasis>,inc=required(changed.incrementalEvidence);
++    if(name==='materialization-version')required(changed.materializationEvidence.versions[0]).authoredInputsHash='f'.repeat(64);
++    if(name==='materialization-entry')required(changed.materializationEvidence.entries[0]).inputId='foreign-input';
++    if(name==='prefix-program')required(inc.program.actions[0]).operationHash='f'.repeat(64);
++    if(name==='relearn-switch')inc.switch.retainedPrefixAdmissionsHash='f'.repeat(64);
++    if(name==='prefix-request')required(inc.prefixRequests[0]).evidenceHash='f'.repeat(64);
++    if(name==='drift-receipt')required(inc.driftReceipt).operationHash='f'.repeat(64);
++    if(name==='first-suffix-acceptance')inc.firstSuffixAcceptance.planRevision=3;
++    if(name==='excluded-attempt')required(inc.excludedAttempts[0]).action.ledger.operationHash='f'.repeat(64);
++    expect(expectedHash(changed)).not.toBe(expectedHash(b));expect(expectedHash(evidencePreimage(changed as ValidationBasis))).not.toBe(expectedHash(evidencePreimage(b)));
++    expect(admissionTuples(changed as ValidationBasis)).toEqual(admissionTuples(b));
++    const offered=fullReseal(parent.expectedArtifact);offered.replayPolicy.publicationEvidenceHash=expectedHash(evidencePreimage(changed as ValidationBasis));
++    const r={...request(parent),validationBasis:changed,basisHash:expectedHash(changed),artifact:offered},before=expectedCanonical(r);
++    expect(()=>validateObservedRequest(r,build)).toThrow('EVIDENCE_MISMATCH');expect(expectedCanonical(r)).toBe(before);
++  });
++  for(const boundary of negativeBoundaries.filter(item=>item.route==='OFFERED_CANDIDATE_REQUEST_VALIDATION'))it('fully resealed offered candidate still refuses '+boundary.name,()=>{
++    const parent=required(rows(boundary.section).find(row=>row.name===boundary.parent)),original=required(rows(boundary.section).find(row=>row.name===boundary.name));
++    expect(deriveObservedArtifact(parent.basis).artifact).toEqual(parent.expectedArtifact);expect(validateObservedRequest(request(parent),build).ok).toBe(true);
++    const frozen=expectedCanonical(original);assertExactNegativeMutation(parent,original,boundary);
++    const offered=fullReseal(original.expectedArtifact),r={...request(parent),artifact:offered,basisHash:expectedHash(parent.basis)};
++    expect(offered.learnedPlanHash).toBe(expectedHash(offered.learnedPlan));expect(offered.replayPolicy.learnedPlanHash).toBe(offered.learnedPlanHash);
++    // All candidate-side hashes present in the real request are now coherent; basis authority stays independent.
++    expect(canonicalObserved(r)).toBe(expectedCanonical(r));
++    expect(validateObservedRequest(r,build)).toMatchObject({ok:false,errorCode:'OPERATION_MISMATCH'});expect(expectedCanonical(original)).toBe(frozen);
++  });
++  it.each(['admittedDrift','preAdmissionDrift'])('uses the chosen current-prefix basis at drift j and refuses reuse at j for %s',name=>{
++    const parent=required(fixtures.incrementalContracts.basisCases.find(row=>row.name===name)),b=parent.basis,inc=required(b.incrementalEvidence),pin=required(b.snapshotEvidence.pinnedBase);
++    const before=expectedCanonical(parent),j=inc.switch.effectiveFirstLearnIndex,jId=required(b.sourceSteps[j]).stepId;
++    expect(inc.plan.initialFirstLearnIndex).toBe(2);expect(j).toBe(1);expect(inc.switch.nextSemanticOrdinal).toBe(0);
++    expect(deriveObservedArtifact(b).artifact).toEqual(parent.expectedArtifact);expect(validateObservedRequest(request(parent),build).ok).toBe(true);
++    const maps=deriveSnapshotMaps(b,parent.expectedArtifact.learnedPlan);
++    expect(maps.stepSnapshotHashes).toEqual(stepSnapshots(b.snapshotEvidence.current,b.configuration,parent.expectedArtifact.learnedPlan));
++    expect(Object.keys(maps.reusedFrom)).toEqual(b.sourceSteps.slice(0,j).map(step=>step.stepId));expect(maps.reusedFrom).not.toHaveProperty(jId);
++    // Equal semantics at j still come from the chosen current prefix and do not authorize reuse there.
++    expect(record(maps.stepSnapshotHashes)[jId]).toBe(record(required(b.snapshotEvidence.baseProof).revision.stepSnapshotHashes)[jId]);
++    for(const kind of ['reuse-at-j','substitute-current-map-at-j','omit-retained-prefix']as const){
++      const offered=fullReseal(parent.expectedArtifact);
++      if(kind==='reuse-at-j')record(offered.learnedPlan.reusedFrom)[jId]={revisionId:pin.revisionId,stepId:jId};
++      if(kind==='substitute-current-map-at-j')record(offered.learnedPlan.stepSnapshotHashes)[jId]='f'.repeat(64);
++      if(kind==='omit-retained-prefix')Reflect.deleteProperty(offered.learnedPlan.reusedFrom,required(b.sourceSteps[0]).stepId);
++      const sealed=fullReseal(offered as Artifact3);
++      expect(sealed).not.toEqual(parent.expectedArtifact);expect(validateObservedRequest({...request(parent),artifact:sealed},build)).toMatchObject({ok:false,errorCode:'OPERATION_MISMATCH'});
++    }
++    expect(expectedCanonical(parent)).toBe(before);
++  });
++});
+--- before/studio-runner/test/observedReplayValidation.test.ts
++++ after/studio-runner/test/observedReplayValidation.test.ts
+@@ -2,7 +2,9 @@
+ import type {ValidationBasis} from '../src/executor/observedOperations.js';
+ import type {TestDocument} from './helpers/publicationFixture.js';
+ import controlFixture from '../fixtures/observed-reference/control-value-reference.json' with { type: 'json' };
+-import { describe, expect, it } from 'vitest';
++import { describe, expect, it, vi } from 'vitest';
++import * as observedPolicy from '../src/validator/observedReferencePolicy.js';
++import {incrementalBoundaryFixture,oneByteOverBoundary,boundaryHash,BOUNDARY_CLASSIFICATION} from './helpers/incrementalBoundaryFixture.js';
+ import fixture from '../fixtures/observed-reference/fresh-order-reference.json' with { type: 'json' };
+ import { deriveObservedArtifact, validateReplayArtifact, validateObservedRequest } from '../src/validator/observedReplay.js';
+ import { OBSERVED_LIMITS, OBSERVED_PROFILE, OBSERVED_SCHEMA_BUNDLE_HASH, boundedObserved, canonicalObserved, hashObserved, parseObservedBytes, validateObserved } from '../src/validator/observedReferencePolicy.js';
+@@ -317,4 +319,47 @@
+     expect(validateObservedRequest(parseObservedBytes(exact,OBSERVED_LIMITS.validation),build).ok).toBe(true);
+     expect(()=>parseObservedBytes(Buffer.concat([exact,Buffer.from(' ')]),OBSERVED_LIMITS.validation)).toThrow('LIMIT_EXCEEDED');
+   });
+-});
++  it('accepts the lawful fully joined semantic 6291456-byte parent and refuses one legal byte before hashing',()=>{
++    const parent=incrementalBoundaryFixture(),b=parent.basis,before=canonicalObserved(b);
++    expect(parent.classification).toBe(BOUNDARY_CLASSIFICATION);
++    expect(parent.construction.targetBytes).toBe(6291456);expect(bytes(b)).toBe(6291456);expect(canonicalObserved(b).length).toBeLessThan(6291456);
++    expect(b.sourceSteps).toHaveLength(100);expect(b.actions).toHaveLength(100);expect(b.preparations).toHaveLength(100);expect(b.obligationAssociations).toHaveLength(100);expect(b.translationPlan.obligations).toHaveLength(100);
++    for(const ids of [b.sourceSteps.map(s=>s.stepId),b.actions.map(a=>a.ledger.admission.admissionId),b.preparations.map(p=>p.preparationId),b.obligationAssociations.map(a=>a.obligationId),b.actions.map(a=>a.ledger.idempotencyKey)])expect(new Set(ids).size).toBe(100);
++    expect(b.materializationEvidence.versions).toHaveLength(1);expect(b.materializationEvidence.entries).toHaveLength(1);expect(b.inputs).toHaveLength(1);
++    expect(boundaryHash(parent.privateInputEnvelope)).toBe(b.authoredInputsHash);
++    for(const collection of [b.allocations,b.producers,b.consumerEdges,b.bindings,b.transfers])expect(collection).toEqual([]);
++    const inc=required(b.incrementalEvidence);expect(inc.plan.initialFirstLearnIndex).toBe(0);expect(inc.switch.reason).toBe('EMPTY_PREFIX');expect(inc.program.actions).toEqual([]);expect(inc.program.sourceStepIds).toEqual([]);expect(b.snapshotEvidence.baseProof).toBeNull();expect(b.snapshotEvidence.pinnedBase).not.toBeNull();
++    const witnesses=b.preparations.flatMap(p=>p.observedChoice?[p.observedChoice]:[]);expect(witnesses).toHaveLength(99);
++    for(const ids of [witnesses.map(w=>w.context.clarificationId),witnesses.map(w=>w.receipt.obligationId),witnesses.map(w=>w.attempt.attemptId),witnesses.map(w=>w.attempt.requestId)])expect(new Set(ids).size).toBe(99);
++    for(const w of witnesses){
++      expect(w.questionPlan.plan).toEqual(b.translationPlan);expect(w.meanings).toHaveLength(2);
++      expect(w.context.questionCapture.executionEvidence.generation).toBeLessThan(required(b.preparations.find(p=>p.preparationId===w.receipt.preparationId)).executionEvidence.generation);
++      for(const [value,cap]of [[w,262144],[w.context,65536],[w.meanings,65536],[w.receipt,16384]]as const)expect(boundedObserved(value,cap)).toBeLessThanOrEqual(cap);
++      for(const choice of w.attempt.modelQuestion.choices)expect(Array.from(choice.safeLabel).length).toBeLessThanOrEqual(256);
++    }
++    expect(b.observations).toHaveLength(198);expect(new Set(b.observations.map(o=>o.observationHash)).size).toBe(198);
++    for(const row of b.observations){expect(row.observation.nodes).toHaveLength(2);expect(boundedObserved(row.observation,32768)).toBeLessThanOrEqual(32768);}
++    expect(b.observations.reduce((sum,row)=>sum+bytes(row.observation),0)).toBeLessThanOrEqual(1048576);
++    expect(b.sourceSteps.reduce((sum,step)=>sum+Buffer.byteLength(step.source),0)).toBeLessThanOrEqual(1048576);
++    for(const obligation of b.translationPlan.obligations)expect(Array.from(obligation.targetIntent).length).toBeLessThanOrEqual(500);
++    expect(boundedObserved(parent.expectedArtifact,OBSERVED_LIMITS.artifact)).toBeLessThanOrEqual(OBSERVED_LIMITS.artifact);
++    expect(boundedObserved(parent.expectedArtifact.replayPolicy,OBSERVED_LIMITS.policy)).toBeLessThanOrEqual(OBSERVED_LIMITS.policy);
++    // The offered expected candidate was built from declared fixture facts before the subject runs.
++    expect(deriveObservedArtifact(b)).toEqual({artifact:parent.expectedArtifact,hashes:parent.expectedHashes});
++    const r={...request(),validationBasis:b,basisHash:boundaryHash(b),artifact:parent.expectedArtifact};
++    expect(bytes(r)).toBeLessThan(OBSERVED_LIMITS.validation);expect(validateObservedRequest(r,build)).toMatchObject({ok:true,errorCode:null,artifactHash:parent.expectedHashes.artifactHash});
++    const over=oneByteOverBoundary(b);expect(bytes(over)).toBe(6291457);
++    const overWitness=required(required(over.preparations[1]).observedChoice);expect(Array.from(required(overWitness.attempt.modelQuestion.choices[0]).safeLabel).length).toBeLessThanOrEqual(256);
++    // The shape remains closed and legal with the transport allowance; the component cap owns refusal.
++    expect(validateObserved('replay-validation#/definitions/ValidationBasis',over,OBSERVED_LIMITS.validation)).toEqual(over);
++    const overRequest={...r,validationBasis:over};expect(bytes(overRequest)).toBeLessThan(OBSERVED_LIMITS.validation);
++    // Installed only after all module initialization and expected-fixture construction hashes.
++    const hash=vi.spyOn(observedPolicy,'hashObserved');
++    try{
++      expect(validateObservedRequest(r,build).ok).toBe(true);expect(hash).toHaveBeenCalled();
++      hash.mockClear();expect(()=>deriveObservedArtifact(over)).toThrow('LIMIT_EXCEEDED');expect(hash).not.toHaveBeenCalled();
++      hash.mockClear();expect(()=>validateObservedRequest(overRequest,build)).toThrow('LIMIT_EXCEEDED');expect(hash).not.toHaveBeenCalled();
++    }finally{hash.mockRestore();}
++    expect(canonicalObserved(b)).toBe(before);
++  });
++});
+--- before/studio-runner/src/validator/observedReplay.ts
++++ after/studio-runner/src/validator/observedReplay.ts
+@@ -360,6 +360,7 @@
+ /** Actual packaged pure endpoint validator; all expected semantics come from original basis. */
+ export function validateObservedRequest(raw: unknown, build: BuildIdentity): ValidationVerdict {
+     const request = validateObserved<ValidationRequest>('replay-validation', raw, OBSERVED_LIMITS.validation);
++    boundedObserved(request.validationBasis, OBSERVED_LIMITS.basis);
+     assertProfile(request.requiredProfile);
+     assertBuild(request.requiredBuild, build);
+     same(hashObserved(request.validationBasis), request.basisHash);
+--- before/studio-runner/test/server/observedReplayRoutes.test.ts
++++ after/studio-runner/test/server/observedReplayRoutes.test.ts
+@@ -1,11 +1,13 @@
+-import {describe,it,expect} from 'vitest';
++import {describe,it,expect,vi} from 'vitest';
+ import {publicationFixture as fixture} from '../helpers/publicationFixture.js';
+ import {createApplication} from '../../src/server/application.js';
+ import {loadConfig} from '../../src/server/config.js';
+ import {createFakeScratchStore} from '../helpers/runner.js';
+ import {createRecordingLogSink} from '../../src/server/logging.js';
+ import type {TrustedPolicy} from '../../src/executor/observedOperations.js';
+-import {OBSERVED_SCHEMA_BUNDLE_HASH,hashObserved} from '../../src/validator/observedReferencePolicy.js';
++import {OBSERVED_SCHEMA_BUNDLE_HASH,OBSERVED_LIMITS,canonicalObserved,hashObserved} from '../../src/validator/observedReferencePolicy.js';
++import * as observedPolicy from '../../src/validator/observedReferencePolicy.js';
++import * as observedValidator from '../../src/validator/observedReplay.js';
+ const currentBuild={...fixture.build,schemaBundleHash:OBSERVED_SCHEMA_BUNDLE_HASH};
+ const validationRequest={...fixture.validationRequest,requiredBuild:currentBuild};
+ describe('actual authenticated observed validation HTTP route',()=>{
+@@ -27,6 +29,32 @@
+       const chosen=await send(JSON.stringify(choiceRequest));expect(chosen.status).toBe(200);expect(await chosen.json()).toMatchObject({ok:true,artifactHash:fixture.observedChoice.hashes.artifactHash});
+       expect((await send(JSON.stringify({oversize:'a'.repeat(8388608)}))).status).toBe(413);
+       expect(network).toBe(0);expect(launches).toBe(0);expect(app.pool.inUse).toBe(0);expect(logs.lines.join('\n')).not.toContain('UNKNOWN-CANARY');
++    }finally{await app.drain();}
++  });
++  it('accepts authenticated raw 8388608-byte whitespace JSON and refuses byte 8388609 before validator/hash/effects',async()=>{
++    const launch=vi.fn(()=>Promise.reject(Error('unexpected browser/native launch')));
++    const callback=vi.fn(()=>Promise.resolve({kind:'timeout' as const}));
++    // This application composition has no model gateway: validation uses only the packaged pure validator.
++    const app=createApplication(loadConfig({STUDIO_RUNNER_HOST:'127.0.0.1',STUDIO_RUNNER_PORT:'0',STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test'}),{runtimeVersions:{},scratch:createFakeScratchStore(),launcher:{launch},http:{send:callback},observed:{build:currentBuild,policies:[fixture.trustedPolicy as TrustedPolicy],validationEnabled:true,replayEnabled:false},logSink:createRecordingLogSink()});
++    try{
++      const port=await app.start(),url=`http://127.0.0.1:${String(port)}/v2/validate-observed`;
++      const json=canonicalObserved(validationRequest),exact=json+' '.repeat(OBSERVED_LIMITS.validation-Buffer.byteLength(json)),over=exact+' ';
++      expect(Buffer.byteLength(exact)).toBe(8388608);expect(Buffer.byteLength(over)).toBe(8388609);
++      expect(JSON.parse(exact)).toEqual(validationRequest);
++      // Spies call through to the real existing route/coordinator/validator; installed after initialization.
++      const coordinator=vi.spyOn(app.coordinator as {validateObserved:NonNullable<typeof app.coordinator.validateObserved>},'validateObserved'),validator=vi.spyOn(observedValidator,'validateObservedRequest'),hash=vi.spyOn(observedPolicy,'hashObserved'),acquire=vi.spyOn(app.pool,'tryAcquire');
++      try{
++        const send=(body:string,authorization='Bearer service')=>fetch(url,{method:'POST',headers:{authorization,'content-type':'application/json'},body});
++        const accepted=await send(exact);expect(accepted.status).toBe(200);expect(await accepted.json()).toMatchObject({ok:true,errorCode:null,basisHash:validationRequest.basisHash,artifactHash:fixture.job.binding.artifactHash});
++        expect(coordinator).toHaveBeenCalledTimes(1);expect(validator).toHaveBeenCalledTimes(1);expect(hash).toHaveBeenCalled();
++        expect(coordinator.mock.calls[0]?.[0]).toEqual(validationRequest);
++        coordinator.mockClear();validator.mockClear();hash.mockClear();
++        const refused=await send(over);expect(refused.status).toBe(413);expect(await refused.json()).toEqual({code:'BODY_TOO_LARGE'});
++        expect(coordinator).not.toHaveBeenCalled();expect(validator).not.toHaveBeenCalled();expect(hash).not.toHaveBeenCalled();
++        const wrongBearer=await send(over,'Bearer wrong');expect(wrongBearer.status).toBe(403);await wrongBearer.text();
++        expect(coordinator).not.toHaveBeenCalled();expect(validator).not.toHaveBeenCalled();expect(hash).not.toHaveBeenCalled();
++        expect(launch).not.toHaveBeenCalled();expect(callback).not.toHaveBeenCalled();expect(acquire).not.toHaveBeenCalled();expect(app.pool.inUse).toBe(0);expect(app.coordinator.inFlight).toBe(0);
++      }finally{coordinator.mockRestore();validator.mockRestore();hash.mockRestore();acquire.mockRestore();}
+     }finally{await app.drain();}
+   });
+ });
+--- before/studio-runner/test/helpers/incrementalBoundaryFixture.ts
++++ after/studio-runner/test/helpers/incrementalBoundaryFixture.ts
+@@ -0,0 +1,152 @@
++import {createHash} from 'node:crypto';
++import {readFileSync} from 'node:fs';
++import {strictEqual} from 'node:assert';
++import {publicationFixture} from './publicationFixture.js';
++import type {TestDocument} from './publicationFixture.js';
++import {parseDocumentJson} from './documentJson.js';
++import type {Artifact3,ValidationBasis,LearnedPlan,Guard,ReplayAction,InputRecipe,Policy4} from '../../src/executor/observedOperations.js';
++import type {ObservedHashes} from '../../src/validator/observedReplay.js';
++
++/** Explicit conformance history only: no database, callback, browser or native authority.
++ * Expected values use this independent serializer and literal action/guard/snapshot facts.
++ * This module never imports or calls the production derivation/hash implementation. */
++export const BOUNDARY_CLASSIFICATION='SYNTHETIC_CONFORMANCE_HISTORY_NO_DB_CALLBACK_OR_NATIVE_AUTHORITY';
++function canonical(value:unknown):string {
++  if(Array.isArray(value))return '['+value.map(canonical).join(',')+']';
++  if(value!==null&&typeof value==='object')return '{'+Object.keys(value).sort().map(key=>JSON.stringify(key)+':'+canonical((value as Record<string,unknown>)[key])).join(',')+'}';
++  return JSON.stringify(value);
++}
++export const boundaryHash=(value:unknown):string=>createHash('sha256').update(canonical(value),'utf8').digest('hex');
++const bytes=(value:unknown):number=>Buffer.byteLength(canonical(value),'utf8');
++function need<T>(value:T|null|undefined):T {if(value===null||value===undefined)throw Error('MISSING_BOUNDARY_FACT');return value;}
++const uuid=(n:number):string=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
++type MutableBasis=TestDocument<ValidationBasis>;
++type Witness=NonNullable<MutableBasis['preparations'][number]['observedChoice']>;
++interface BoundaryParent {basis:ValidationBasis;expectedArtifact:Artifact3;expectedHashes:ObservedHashes;classification:typeof BOUNDARY_CLASSIFICATION;construction:{baselineBytes:number;planBytesAdded:number;labelResidue:number;targetBytes:number};privateInputEnvelope:unknown}
++
++function sealWitness(w:Witness):void {
++  const capture=w.context.questionCapture;
++  w.questionPlan.planHash=boundaryHash(w.questionPlan.plan);capture.planHash=w.questionPlan.planHash;
++  capture.modelQuestionHash=boundaryHash(w.attempt.modelQuestion);
++  w.receipt.contextIdentityHash=boundaryHash(w.context);w.receipt.questionCaptureHash=boundaryHash(capture);w.receipt.meaningsHash=boundaryHash(w.meanings);
++}
++function expectedCandidate(b:MutableBasis):{artifact:Artifact3;hashes:ObservedHashes} {
++  const origin='https://orders.example.test',scopeHash=boundaryHash(b.scope),ids=b.sourceSteps.map(s=>s.stepId);
++  // Literal descriptor: one blank-page navigation, then one selected Proceed click per step.
++  const actions:LearnedPlan['actions'][number][]=ids.map((stepId,index)=>{
++    const coordinate={stepId,ordinal:0 as const},operation=index===0?{kind:'navigate' as const,destinationInputId:'input-destination'}:{kind:'click' as const};
++    const locator=index===0?null:{kind:'testId' as const,value:`proceed-${String(index).padStart(3,'0')}`,exact:true as const};
++    const actionOrigin=index===0?null:origin;
++    const admissionId=`boundary-admission-${String(index).padStart(3,'0')}`,operationHash=boundaryHash({coordinate,origin:actionOrigin,locator,operation});
++    return index===0?{coordinate,origin:null,locator:null,operation:{kind:'navigate',destinationInputId:'input-destination'},admissionId,operationHash}:{coordinate,origin,locator:need(locator),operation:{kind:'click'},admissionId,operationHash};
++  });
++  const guards:Guard[]=ids.map((_,index)=>index===0?{guardId:'g0',origin:null,target:{kind:'initialBlank'}}:{guardId:'g'+String(index),origin,target:{kind:'element',locator:{kind:'testId',value:`proceed-${String(index).padStart(3,'0')}`,exact:true},role:'button',elementType:'button',controlType:'none',classification:'structuralOnly',visible:true,actionable:true,readRuleId:null}});
++  const replay:ReplayAction[]=actions.map((action,index)=>({coordinate:action.coordinate,guardId:'g'+String(index),operation:action.operation}));
++  const context={entries:[],evidenceReferences:[]};
++  let previous=boundaryHash({domain:'studio.test-config',version:1,...b.configuration,globalContextHash:boundaryHash(context),globalReferences:[]});
++  const stepSnapshotHashes:Record<string,string>={};
++  for(const [index,source]of b.sourceSteps.entries()){
++    const stepInputHash=boundaryHash({domain:'studio.step-input',version:1,stepId:source.stepId,text:source.source,context,references:[]});
++    previous=boundaryHash({domain:'studio.step-chain',version:1,stepId:source.stepId,stepInputHash,previous});
++    const action=need(actions[index]),semanticAction={coordinate:action.coordinate,origin:action.origin,locator:action.locator,operation:action.operation,operationHash:action.operationHash};
++    stepSnapshotHashes[source.stepId]=boundaryHash({domain:'studio.step-snapshot',version:1,stepId:source.stepId,inputChain:previous,learnedStepHash:boundaryHash({actions:[semanticAction],producedBindings:[],consumedBindings:[]})});
++  }
++  const pin=need(b.snapshotEvidence.pinnedBase),first=need(ids[0]);
++  const plan:LearnedPlan={schemaVersion:3,planId:'plan-'+boundaryHash({sessionId:b.sessionId}),scopeHash,sourceRevision:b.sourceRevision,configurationRevision:b.configurationRevision,authoredInputsHash:b.authoredInputsHash,initialContext:{kind:'initialBlank'},sourceSteps:ids,versions:{contract:3},actions,bindings:[],stepSnapshotHashes,reusedFrom:{},incremental:{baseRevisionId:pin.revisionId,initialFirstLearnStepId:first,effectiveFirstLearnStepId:first,retainedPrefixAdmissionIds:[],driftReceiptHash:null}};
++  const learnedPlanHash=boundaryHash(plan),runAuthorizationHash=boundaryHash(b.runAuthorization);
++  const admissions=actions.map((action,index)=>({coordinate:action.coordinate,admission:{admissionId:action.admissionId,authorizationId:b.runAuthorization.authorizationId,admittedAt:'2026-10-08T03:00:10Z',policyDecisionHash:need(b.actions[index]).ledger.admission.policyDecisionHash},operationHash:action.operationHash,scopeHash}));
++  const admissionProvenanceHash=boundaryHash(admissions),publicationEvidenceHash=boundaryHash({version:1,basisHash:boundaryHash(b),runAuthorizationHash,translationHash:b.translationHash,bootstrapHash:boundaryHash(b.bootstrap),sourceManifestHash:b.sourceManifestHash});
++  const inputRecipes:InputRecipe[]=[{inputId:'input-destination',stepId:first,kind:'destination',intendedSlot:'navigate.destination',provenance:{kind:'sourceSpan',start:5,end:38,sourceHash:b.sourceHash}}];
++  const policy:Policy4={schemaVersion:4,learnedPlanHash,admissionProvenanceHash,publicationEvidenceHash,runAuthorizationHash,scope:b.replayRequirements as ValidationBasis['replayRequirements'],inputs:inputRecipes,bindings:[],transfers:[]};
++  const artifact:Artifact3={version:3,kind:'observed',profile:{contract:3},sourceHash:b.sourceHash,configurationHash:b.configurationHash,authoringHash:b.authoringHash,learnedPlan:plan,learnedPlanHash,inputRecipes,guards,replayPolicy:policy,steps:ids.map((stepId,stepIndex)=>({stepId,stepIndex,operations:[need(replay[stepIndex])]}))};
++  const hashes:ObservedHashes={sourceHash:b.sourceHash,configurationHash:b.configurationHash,authoringHash:b.authoringHash,learnedPlanHash,artifactHash:boundaryHash(artifact),referencePolicyHash:boundaryHash(policy),operationEquivalenceHash:boundaryHash({operations:replay,guards,inputRecipes,bindings:[],transfers:[]}),admissionProvenanceHash,publicationEvidenceHash,runAuthorizationHash,profileHash:boundaryHash({contract:3})};
++  return {artifact,hashes};
++}
++
++export function incrementalBoundaryFixture():BoundaryParent {
++  const document=parseDocumentJson(readFileSync(new URL('../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json',import.meta.url)),33554432) as {incrementalContracts:{basisCases:{name:string;basis:ValidationBasis}[]}};
++  const seed=need(document.incrementalContracts.basisCases.find(row=>row.name==='emptyPrefix'));
++  const b=structuredClone(seed.basis) as MutableBasis;
++  const firstPrep=structuredClone(need(b.preparations[0])),firstAction=structuredClone(need(b.actions[0]));
++  const choiceTemplate=need(need(publicationFixture.observedChoice.basis.preparations[3]).observedChoice);
++  const scopeHash=boundaryHash(b.scope),contextId=b.bootstrap.contextId,header=need(b.materializationEvidence.versions[0]),worker=header.workerId;
++  b.sourceSteps=Array.from({length:100},(_,ordinal)=>({stepId:uuid(ordinal+1),ordinal,source:ordinal===0?'Open https://orders.example.test/start':'Click Proceed'}));
++  b.sourceHash=boundaryHash(b.sourceSteps.map(s=>s.source));b.authoringHash=boundaryHash(b.sourceSteps);b.configurationHash=boundaryHash(b.configuration);
++  b.snapshotEvidence.current={authoringIdentityVersion:1,authoring:{authoringSchemaVersion:2,globalContext:{entries:[],evidenceReferences:[]},steps:b.sourceSteps.map(s=>({id:s.stepId,text:s.source,context:{entries:[],evidenceReferences:[]}}))},authoredDeclarations:[]};
++  // Keep the original small EMPTY_PREFIX base pin; a proof body is lawfully null here.
++  b.snapshotEvidence.baseProof=null;
++  const ref={referenceKind:'sourceSpan' as const,sourceRevision:b.sourceRevision,stepId:uuid(1),startUtf16:5,endUtf16:38,kind:'destination' as const,intendedSlot:'navigate.destination' as const};
++  b.inputs=[{inputId:'input-destination',stepId:uuid(1),kind:'destination',intendedSlot:'navigate.destination',provenance:ref}];
++  const metadata={inputId:'input-destination',sourceStepId:uuid(1),kind:'destination' as const,intendedSlot:'navigate.destination' as const,provenance:ref};
++  const privateInput={...metadata,value:'https://orders.example.test/start'};
++  const privateInputEnvelope={schemaVersion:3,sessionId:b.sessionId,scopeHash,sourceRevision:b.sourceRevision,configurationRevision:b.configurationRevision,inputs:[privateInput]};
++  b.authoredInputsHash=boundaryHash(privateInputEnvelope);
++  b.materializationEvidence={versions:[{...header,contextRevision:1,authoredInputsHash:b.authoredInputsHash,birthMaterializationRevision:1,inputCount:1,previousInputsHash:null}],entries:[{inputOrdinal:0,inputId:'input-destination',introducedContextRevision:1,inputHash:boundaryHash(privateInput),metadata}]};
++  b.bootstrap.contextRevision=1;b.bootstrap.materializationRevision=1;b.bootstrap.inputsHash=b.authoredInputsHash;b.bootstrap.allocationHash=boundaryHash([]);
++  b.configurationReferences=[];b.sourceSelections=[];b.allocations=[];b.producers=[];b.consumerEdges=[];b.bindings=[];b.transfers=[];
++  b.translationRevision='2';
++  b.translationPlan={sourceReferences:[ref],needs:[],obligations:b.sourceSteps.map((step,index)=>({obligationId:uuid(1001+index),stepId:step.stepId,occurrence:0,operationKind:index===0?'navigate':'click',targetIntent:index===0?'page':'Proceed',referenceIndex:index===0?0:null,needId:null,predicate:null}))};
++  const inc=need(b.incrementalEvidence);inc.firstSuffixAcceptance.previousPlanRevision=1;inc.firstSuffixAcceptance.planRevision=2;
++  b.preparations=[];b.actions=[];b.observations=[];b.obligationAssociations=[];
++  const origin='https://orders.example.test';
++  for(const [index,step]of b.sourceSteps.entries()){
++    const suffix=String(index).padStart(3,'0'),coordinate={stepId:step.stepId,ordinal:0},preparationId='boundary-preparation-'+suffix,admissionId='boundary-admission-'+suffix,obligation=need(b.translationPlan.obligations[index]);
++    const p=structuredClone(firstPrep),fact=structuredClone(firstAction);
++    let evidence:MutableBasis['preparations'][number]['executionEvidence']=structuredClone(b.bootstrap.initialEvidence);
++    if(index>0){
++      const documentId='boundary-document-'+suffix,oldGeneration=index*2-1,freshGeneration=index*2;
++      const observe=(generation:number)=>{
++        const observation={schemaVersion:3,sessionId:b.sessionId,scopeHash,documentId,generation,origin,observedAt:'2026-10-08T03:00:05.123456789Z',coverage:{mode:'semantic' as const,complete:true,truncated:false,withheldRegions:0,reason:'complete' as const,passwordControls:0},nodes:[0,1].map(alternative=>({nodeId:`${alternative===0?'alternate':'proceed'}-${suffix}-${String(generation)}`,documentId,generation,role:'button',name:alternative===0?'Alternate':'Proceed',elementType:'button' as const,controlType:'none' as const,classification:'structuralOnly' as const,policyRuleId:'structure-only',visible:true,actionable:true,depth:0,parentNodeId:null,regionId:null,formId:null,labelNodeIds:[],locatorHints:[{kind:'testId' as const,value:`${alternative===0?'alternate':'proceed'}-${suffix}`,exact:true}]}))};
++        const row={observationHash:boundaryHash(observation),observation};b.observations.push(row);return row;
++      };
++      const old=observe(oldGeneration),fresh=observe(freshGeneration);
++      const oldEvidence={kind:'observedDocument' as const,sessionId:b.sessionId,contextId,documentId,generation:oldGeneration,origin,observationHash:old.observationHash};
++      evidence={...oldEvidence,generation:freshGeneration,observationHash:fresh.observationHash};
++      p.proposal.target={nodeId:need(fresh.observation.nodes[1]).nodeId,documentId,generation:freshGeneration,locator:need(need(fresh.observation.nodes[1]).locatorHints[0])};
++      p.proposal.operation={kind:'click'};
++      const w=structuredClone(choiceTemplate),clarificationId='boundary-question-'+suffix,requestId='boundary-question-request-'+suffix,attemptId='boundary-question-attempt-'+suffix;
++      w.acceptedChoiceId='boundary-choice-'+suffix+'-1';
++      w.meanings=old.observation.nodes.map((node,alternative)=>({choiceId:`boundary-choice-${suffix}-${String(alternative)}`,meaning:{obligationId:obligation.obligationId,nodeId:node.nodeId,bindingId:null,locator:need(node.locatorHints[0])}}));
++      w.context={sessionId:b.sessionId,scopeHash,sourceRevision:b.sourceRevision,configurationRevision:b.configurationRevision,clarificationId,question:{...w.context.question,clarificationId,sessionId:b.sessionId,scopeHash,coordinate,documentId,generation:oldGeneration,choices:w.meanings.map((mapping,alternative)=>({choiceId:mapping.choiceId,safeLabel:alternative===0?'Alternate':'Proceed',labelSource:'PAGE',role:'button',region:null,nodeId:mapping.meaning.nodeId,bindingId:null}))},questionCapture:{...w.context.questionCapture,attemptId,requestId,planRevision:'2',obligationId:obligation.obligationId,workerId:worker,ownerFence:b.bootstrap.ownerFence,contextId,contextRevision:1,authoredInputsHash:b.authoredInputsHash,executionEvidence:oldEvidence,evidenceHash:boundaryHash(oldEvidence),observationHash:old.observationHash}};
++      w.attempt={...w.attempt,attemptId,requestId,responseRequestId:requestId,planRevision:'2',scopeHash,scope:structuredClone(b.scope),owner:{...w.attempt.owner,workerId:worker,fence:b.bootstrap.ownerFence},documentId,generation:oldGeneration,executionEvidence:oldEvidence,projectionHash:boundaryHash({sessionId:b.sessionId,coordinate,observationHash:old.observationHash}),modelQuestion:{reason:'AMBIGUOUS_TARGET',choices:w.meanings.map((mapping,alternative)=>({choiceId:`boundary-provider-${suffix}-${String(alternative)}`,safeLabel:alternative===0?'Alternate':'Proceed',meaning:structuredClone(mapping.meaning)}))}};
++      w.questionPlan={revision:'2',planHash:boundaryHash(b.translationPlan),plan:structuredClone(b.translationPlan)};
++      w.receipt={...w.receipt,sessionId:b.sessionId,preparationId,clarificationId,obligationId:obligation.obligationId,acceptedChoiceId:w.acceptedChoiceId,answer:{...w.receipt.answer,sessionId:b.sessionId,scopeHash,clarificationId,coordinate,documentId,generation:oldGeneration,choiceId:w.acceptedChoiceId,nodeId:need(need(w.meanings[1]).meaning.nodeId),bindingId:null,sourceRevision:b.sourceRevision,configurationRevision:b.configurationRevision}};
++      sealWitness(w);p.observedChoice=w;
++    }
++    const evidenceHash=boundaryHash(evidence);
++    p.preparationId=preparationId;p.materializationRevision=1;p.observationHash=evidence.kind==='observedDocument'?need(evidence.observationHash):null;p.executionEvidence=structuredClone(evidence);
++    p.proposal={...p.proposal,sessionId:b.sessionId,coordinate,scopeHash,generation:evidence.generation,executionEvidence:structuredClone(evidence),evidenceHash,authoredInputsHash:b.authoredInputsHash,contextRevision:1};
++    p.proof={...p.proof,sessionId:b.sessionId,workerId:worker,ownerFence:b.bootstrap.ownerFence,scopeHash,contextId,contextRevision:1,sourceRevision:b.sourceRevision,configurationRevision:b.configurationRevision,preparationId,requestDigest:boundaryHash(p.proposal),evidenceHash,authoredInputsHash:b.authoredInputsHash};
++    const operationHash=boundaryHash({coordinate,origin:evidence.origin,locator:'locator'in p.proposal.target?p.proposal.target.locator:null,operation:p.proposal.operation});
++    fact.obligationId=obligation.obligationId;fact.preparationId=preparationId;
++    fact.ledger={...fact.ledger,sessionId:b.sessionId,coordinate,idempotencyKey:'boundary-request-'+suffix,requestDigest:p.proof.requestDigest,scopeHash,operationHash,generation:evidence.generation,documentId:evidence.documentId,ownerFence:b.bootstrap.ownerFence,admission:{admissionId,authorizationId:b.runAuthorization.authorizationId,admittedAt:'2026-10-08T03:00:10Z',policyDecisionHash:boundaryHash({scopeHash,preparation:p.proof,requestDigest:p.proof.requestDigest})},state:'SUCCEEDED',dispatchCount:1,outcomeCode:'OK',assertionPassed:null,executionEvidence:structuredClone(evidence),evidenceHash,authoredInputsHash:b.authoredInputsHash,contextRevision:1,preparationId,attemptOrdinal:0};
++    b.preparations.push(p);b.actions.push(fact);b.obligationAssociations.push({obligationId:obligation.obligationId,coordinate,admissionId,proposalHash:p.proof.requestDigest});
++  }
++  b.translationHash=boundaryHash(b.translationPlan);
++  b.sourceManifestHash=boundaryHash({sessionId:b.sessionId,sourceSteps:b.sourceSteps,current:b.snapshotEvidence.current,materializationEvidence:b.materializationEvidence});
++  // One measured baseline, then exact integer arithmetic. No validation/derivation retry loop.
++  // Every added intent byte occurs once in the current plan and in all 99 genuine question plans.
++  const baselineBytes=bytes(b),targetBytes=6291456,available=targetBytes-baselineBytes;
++  if(available<0)throw Error('BOUNDARY_BASELINE_ALREADY_OVER_CAP');
++  const planBytesAdded=Math.floor(available/100),labelResidue=available%100;
++  let remaining=planBytesAdded;
++  for(const obligation of b.translationPlan.obligations.slice(1)){
++    const add=Math.min(remaining,986);obligation.targetIntent='Proceed'+'é'.repeat(Math.floor(add/2))+(add%2?'a':'');remaining-=add;
++  }
++  strictEqual(remaining,0,'100 lawful obligations have enough bounded intent capacity');
++  b.translationHash=boundaryHash(b.translationPlan);
++  for(const p of b.preparations){if(p.observedChoice){p.observedChoice.questionPlan.plan=structuredClone(b.translationPlan);sealWitness(p.observedChoice);}}
++  const residueWitness=need(need(b.preparations[1]).observedChoice);
++  need(residueWitness.attempt.modelQuestion.choices[0]).safeLabel+='a'.repeat(labelResidue);sealWitness(residueWitness);
++  strictEqual(bytes(b),targetBytes,'deterministic quotient/residue construction reaches exact UTF-8 cap');
++  const expected=expectedCandidate(b);
++  return {basis:b as ValidationBasis,expectedArtifact:expected.artifact,expectedHashes:expected.hashes,classification:BOUNDARY_CLASSIFICATION,construction:{baselineBytes,planBytesAdded,labelResidue,targetBytes},privateInputEnvelope};
++}
++
++/** Add exactly one legal model-label byte and reseal the original witness commitments.
++ * No new candidate is derived from this oversized input. */
++export function oneByteOverBoundary(parent:ValidationBasis):ValidationBasis {
++  const b=structuredClone(parent) as MutableBasis,w=need(need(b.preparations[1]).observedChoice);
++  need(w.attempt.modelQuestion.choices[0]).safeLabel+='a';sealWitness(w);
++  strictEqual(bytes(b),6291457);return b as ValidationBasis;
++}

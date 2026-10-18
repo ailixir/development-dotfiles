@@ -1,0 +1,243 @@
+diff --git a/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/49497aae-dbea-402b-a9a6-2d80f4cd2e4e/scratchpad/dexfix015-r2/GuidedPublicationReplayIT.before.java b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+index ea88bb020..2744d14b6 100644
+--- a/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/49497aae-dbea-402b-a9a6-2d80f4cd2e4e/scratchpad/dexfix015-r2/GuidedPublicationReplayIT.before.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -455,7 +455,11 @@ class GuidedPublicationReplayIT {
+   }
+ 
+   private static String ownedCommandHash(ProcessHandle handle) {
+-    return GuidedContracts.hash(com.fasterxml.jackson.databind.node.TextNode.valueOf(handle.info().commandLine().orElseThrow()));
++    return ownedCommandHash(handle.info().commandLine().orElseThrow());
++  }
++
++  private static String ownedCommandHash(String commandLine) {
++    return GuidedContracts.hash(com.fasterxml.jackson.databind.node.TextNode.valueOf(commandLine));
+   }
+ 
+   private static void ownedProcessEvent(String event, OwnedFixtureProcess root) {
+@@ -555,12 +559,13 @@ class GuidedPublicationReplayIT {
+       if (started.isPresent() && command.isPresent()) root.descendants.removeIf(old -> old.handle().pid() == child.pid()
+           && (old.started() == null || old.commandHash() == null));
+       var ancestry = new ArrayList<Long>(); ProcessHandle cursor = child; boolean linked = false;
+-      while (cursor.parent().isPresent() && ancestry.size() < 128) {
+-        cursor = cursor.parent().orElseThrow(); ancestry.add(cursor.pid());
++      // One parent() read per hop: an ancestor that exits between two reads ends the walk unlinked.
++      for (var next = cursor.parent(); next.isPresent() && ancestry.size() < 128; next = cursor.parent()) {
++        cursor = next.get(); ancestry.add(cursor.pid());
+         if (cursor.pid() == root.handle.pid()) { linked = true; break; }
+       }
+       if (!linked && !child.isAlive()) continue;
+-      OwnedFixtureDescendant captured = new OwnedFixtureDescendant(child, started.orElse(null), command.isEmpty() ? null : ownedCommandHash(child),
++      OwnedFixtureDescendant captured = new OwnedFixtureDescendant(child, started.orElse(null), command.map(GuidedPublicationReplayIT::ownedCommandHash).orElse(null),
+           child.parent().map(ProcessHandle::pid).orElse(-1L), List.copyOf(ancestry));
+       root.descendants.add(captured);
+       ownedProcessEvent("DESCENDANT_RECORDED", root, captured);
+@@ -650,11 +655,15 @@ class GuidedPublicationReplayIT {
+             "SELECT count(*) FROM studio_guided_session_recordings WHERE session_id=? AND state IN ('AVAILABLE','FAILED','UNAVAILABLE')", Integer.class, id) == 1;
+         closed &= terminal && (!assigned || progress.path("teardownStatus").asText().equals("CONFIRMED")) && recording;
+       }
+-      for (var row : jdbc.queryForList("SELECT e.id,e.status,e.video_status,l.state AS ledger_state,l.attempt_id,l.admission_id FROM ui_test_executions e LEFT JOIN studio_dispatch_ledger l ON l.execution_id=e.id AND l.execution_accepted_at=e.started_at")) {
++      for (var row : jdbc.queryForList("SELECT e.id,e.status,e.error_code,e.video_status,l.state AS ledger_state,l.attempt_id,l.admission_id FROM ui_test_executions e LEFT JOIN studio_dispatch_ledger l ON l.execution_id=e.id AND l.execution_accepted_at=e.started_at")) {
+         UUID id = (UUID) row.get("id"); if (generationExecutionBaseline.contains(id)) continue;
+         boolean noSend = row.get("attempt_id") == null && row.get("admission_id") == null;
++        // A RunningReaper ERROR/STALE close (P6 owner crash) is final with no video: closeByReaper
++        // never settles evidence and findEvidenceUnsettled selects FINALIZING rows only. Live
++        // processes are still checked below.
++        boolean reaperStale = "ERROR".equals(row.get("status")) && "STALE".equals(row.get("error_code")) && row.get("video_status") == null;
+         closed &= List.of("PASSED", "FAILED", "ERROR").contains(String.valueOf(row.get("status")))
+-            && "DONE".equals(row.get("ledger_state")) && (noSend || row.get("video_status") != null && !"PROCESSING".equals(row.get("video_status")));
++            && "DONE".equals(row.get("ledger_state")) && (noSend || reaperStale || row.get("video_status") != null && !"PROCESSING".equals(row.get("video_status")));
+       }
+       for (OwnedFixtureProcess root : OWNED_FIXTURE_PROCESSES) if (root.generation == ownedGeneration && root.wrapper != null) {
+         recordOwnedDescendants(root);
+@@ -663,9 +672,41 @@ class GuidedPublicationReplayIT {
+       if (closed) return;
+       Thread.sleep(30); // No database transaction/session lock is held across this wait.
+     } while (System.nanoTime() < until);
++    writeOpenGenerationDiagnostic();
+     throw new IllegalStateException("Prior generation actual sessions/browser/recordings remain unconfirmed; no restart authorized");
+   }
+ 
++  /** Value-free facts naming which prior-generation item kept the restart guard closed. */
++  private void writeOpenGenerationDiagnostic() {
++    try {
++      ObjectNode out = C.object().put("generation", ownedGeneration);
++      var open = out.putArray("sessions");
++      for (var row : jdbc.queryForList("SELECT session_id,state,progress::text AS progress FROM studio_guided_sessions")) {
++        String id = String.valueOf(row.get("session_id")); if (generationSessionBaseline.contains(id)) continue;
++        JsonNode progress = C.parse(String.valueOf(row.get("progress")));
++        open.addObject().put("sessionOrdinal", budgetSessionOrdinal(jdbc, id)).put("state", String.valueOf(row.get("state")))
++            .put("errorCode", progress.path("errorCode").asText()).put("teardownStatus", progress.path("teardownStatus").asText())
++            .put("assigned", jdbc.queryForObject("SELECT count(*) FROM studio_guided_assignments WHERE session_id=?", Integer.class, id))
++            .put("hasExecutionEvidence", progress.has("executionEvidence"))
++            .put("recordingStates", String.valueOf(jdbc.queryForList(
++                "SELECT state FROM studio_guided_session_recordings WHERE session_id=?", String.class, id)));
++      }
++      var executions = out.putArray("executions");
++      for (var row : jdbc.queryForList("SELECT e.id,e.status,e.error_code,e.video_status,l.state AS ledger_state,l.attempt_id,l.admission_id FROM ui_test_executions e LEFT JOIN studio_dispatch_ledger l ON l.execution_id=e.id AND l.execution_accepted_at=e.started_at")) {
++        if (generationExecutionBaseline.contains((UUID) row.get("id"))) continue;
++        executions.addObject().put("status", String.valueOf(row.get("status"))).put("errorCode", String.valueOf(row.get("error_code")))
++            .put("videoStatus", String.valueOf(row.get("video_status"))).put("ledgerState", String.valueOf(row.get("ledger_state")))
++            .put("attemptPresent", row.get("attempt_id") != null).put("admissionPresent", row.get("admission_id") != null);
++      }
++      var processes = out.putArray("liveDescendants");
++      for (OwnedFixtureProcess root : OWNED_FIXTURE_PROCESSES) if (root.generation == ownedGeneration && root.wrapper != null)
++        processes.add(root.descendants.stream().filter(child -> child.handle().isAlive()).count());
++      Files.writeString(TEMP.resolve("open-generation-" + ownedGeneration + ".json"), out.toPrettyString());
++    } catch (Exception | AssertionError diagnosticFailure) {
++      // Diagnostic only; the guard's own refusal below is unchanged.
++    }
++  }
++
+   private static void archiveOwnedGeneration(long generation) throws Exception {
+     if (generation == 0) return;
+     Path folder = ownedFixtureTemp.resolve("owned-generations/generation-" + generation);
+@@ -1220,6 +1261,9 @@ class GuidedPublicationReplayIT {
+    */
+   static volatile String primaryCsi = "CSI-123";
+ 
++  /** A failed incremental case keeps its CSI until @AfterEach has cancelled its sessions. */
++  static volatile boolean incrementalCsiRestorePending;
++
+   static volatile UUID preReadyId;
+   static final java.util.concurrent.atomic.AtomicBoolean FAIL_TERMINAL_COMMIT =
+       new java.util.concurrent.atomic.AtomicBoolean();
+@@ -2041,7 +2085,7 @@ class GuidedPublicationReplayIT {
+                             .put("validatorLine", line)
+                             .put(
+                                 "validatorCountPredicate",
+-                                line == 363 && policyDenied && original.status() == 422)
++                                line == 381 && policyDenied && original.status() == 422)
+                             .put(
+                                 "actualCallbackRollbackObserved",
+                                 !org.springframework.transaction.support
+@@ -2759,6 +2803,11 @@ class GuidedPublicationReplayIT {
+       invocationFailure = failure;
+       throw failure;
+     } finally {
++      if (incrementalCsiRestorePending) {
++        incrementalCsiRestorePending = false;
++        primaryCsi = "CSI-123";
++        forgetCachedCoreIdentity();
++      }
+       FixtureInvocation invocation = activeFixtureInvocation;
+       invocation.passed = failedTest == null && invocationFailure == null;
+       invocation.afterEachComplete = invocationFailure == null;
+@@ -4909,6 +4958,25 @@ class GuidedPublicationReplayIT {
+   }
+ 
+   private void incrementalJoined(String variant) throws Exception {
++    // Same per-case CSI isolation as the P3/PFXSYNC/B1A subjects (see primaryCsi): AR-2 c charges
++    // each model call's ceiling to the CSI's UTC day, and the incremental cases on one CSI exhaust
++    // the ruled daily budget (R2: BUDGET_EXCEEDED from confirm-long-wait on). On failure the CSI
++    // stays until @AfterEach has cancelled this case's sessions as their CSI owner.
++    primaryCsi = "CSI-INC-" + (++p3CsiOrdinal);
++    forgetCachedCoreIdentity();
++    boolean completed = false;
++    try {
++      jdbc.update("INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
++          + " VALUES (?,'Orders','Ops','HIGH','fixture@example.invalid','Production')", primaryCsi);
++      incrementalJoinedCase(variant);
++      completed = true;
++    } finally {
++      if (completed) { primaryCsi = "CSI-123"; forgetCachedCoreIdentity(); }
++      else incrementalCsiRestorePending = true;
++    }
++  }
++
++  private void incrementalJoinedCase(String variant) throws Exception {
+     AUDIT_CANARIES.addAll(List.of("Operations", "Order reference", "Destination", "Submit", "Confirmation", "literal-control"));
+     startWorkers();
+     seedGovernedPolicies(primaryCsi);
+@@ -5049,8 +5117,10 @@ class GuidedPublicationReplayIT {
+       if (explicitReady) start.put("firstLearnStepId", currentSteps.get(boundary).path("id").asText());
+       if (boundary < 0) {
+         String before = incrementalAuthoritySnapshot(test);
+-        JsonNode refused = publicCall("/api/v1/studio/guided-sessions", start, 422, UUID.randomUUID().toString());
+-        assertThat(refused.path("code").asText()).isEqualTo("INVALID_CONTRACT");
++        // T0/acceptance-delta: an empty draft keeps the existing start refusal, which is
++        // GuidedSourceClassifier's 409 RUNTIME_INCOMPATIBLE (unchanged since HEAD).
++        JsonNode refused = publicCall("/api/v1/studio/guided-sessions", start, 409, UUID.randomUUID().toString());
++        assertThat(refused.path("code").asText()).isEqualTo("RUNTIME_INCOMPATIBLE");
+         assertThat(incrementalAuthoritySnapshot(test)).isEqualTo(before);
+         assertThat(MODEL_WIRE).hasSize(beforeCalls);
+         assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(beforeLegacy);
+@@ -5170,6 +5240,12 @@ class GuidedPublicationReplayIT {
+           if (variant.equals("before4at2") && index < 3)
+             assertThat(artifact.path("learnedPlan").path("stepSnapshotHashes").path(stepId))
+                 .isEqualTo(baseArtifact.path("learnedPlan").path("stepSnapshotHashes").path(stepId));
++          else if (variant.equals("tail7") && index == boundary)
++            // Strict tail deletion relearns the last surviving step (T0). Its id, input chain and
++            // deterministic learned step are unchanged, so H(stepId, inputChain, learnedStepHash)
++            // must equal the base; reusedFrom (above) already proves it was relearned.
++            assertThat(artifact.path("learnedPlan").path("stepSnapshotHashes").path(stepId))
++                .isEqualTo(baseArtifact.path("learnedPlan").path("stepSnapshotHashes").path(stepId));
+           else if (!explicitReady && !drifted && baseArtifact.path("learnedPlan").path("stepSnapshotHashes").has(stepId))
+             assertThat(artifact.path("learnedPlan").path("stepSnapshotHashes").path(stepId))
+                 .isNotEqualTo(baseArtifact.path("learnedPlan").path("stepSnapshotHashes").path(stepId));
+@@ -5457,7 +5533,8 @@ class GuidedPublicationReplayIT {
+     ObjectNode command = C.object().put("schemaVersion", 3).put("sessionId", id)
+         .put("expectedSourceRevision", current.path("scope").path("sourceRevision").asText())
+         .put("expectedConfigurationRevision", current.path("scope").path("configurationRevision").asText())
+-        .put("expectedPlanRevision", plans.state(id).path("planRevision").asLong());
++        // GuidedTranslationStore reads only inside a transaction (RUNTIME_INCOMPATIBLE otherwise).
++        .put("expectedPlanRevision", sessions.transaction(() -> plans.state(id).path("planRevision").asLong()));
+     String pending = incrementalPendingSnapshot(id);
+     incrementalControllerProbe(id, current.path("owner").path("fence").asLong() + 1, command, 409);
+     assertThat(incrementalPendingSnapshot(id)).isEqualTo(pending);
+@@ -7612,7 +7689,6 @@ class GuidedPublicationReplayIT {
+       for (String value : List.of(first, rotated)) assertJoinedSinkAbsent(sinks, value);
+       p3WriteEvidence("incremental-secret-prefix", C.object().put("prefixValueReads", 1).put("ordinaryValueReads", 1)
+           .put("prefixModelCalls", 0).put("suffixModelCalls", finalizedModels - beforeModels)
+-          .put("baseRevisionId", base.revision().toString()).put("revisionId", merged.revision().toString())
+           .put("sameGuidedBrowser", true).put("currentSessionAuditJoined", true));
+     });
+   }
+@@ -13665,10 +13741,28 @@ class GuidedPublicationReplayIT {
+   // still accepts SIGKILL; only a reaped pid refuses. Release is still proven by p6AwaitProcesses.
+   private static boolean p8KillRefusedWhileAlive(ProcessHandle pinned) {
+     if (!pinned.isAlive()) return false;
+-    verifyRecordedOwnedHandle(pinned);
++    try {
++      verifyRecordedOwnedHandle(pinned);
++    } catch (RuntimeException | AssertionError unverifiable) {
++      // macOS keeps a zombie's PID/start but drops its command line, so its identity cannot be
++      // re-proven. A terminated process needs no signal: send none (as p6KillOwnedTree skips X/Z)
++      // and leave release to p6AwaitProcesses. A live unverifiable process stays refused.
++      if (p8TerminatedUnsignalled(pinned)) return false;
++      throw unverifiable;
++    }
+     return !pinned.destroyForcibly() && pinned.isAlive();
+   }
+ 
++  private static boolean p8TerminatedUnsignalled(ProcessHandle pinned) {
++    try {
++      if (!pinned.isAlive()) return true;
++      String state = p6Status(pinned).state();
++      return "X".equals(state) || state.startsWith("Z");
++    } catch (RuntimeException | AssertionError unknown) {
++      return false; // Unknown state keeps the original verification failure.
++    }
++  }
++
+   // R10-rev2 I3: in C6 kinds 1-2 a runner 'control-window' self-stop (it missed a secret control
+   // window by itself) fails as a precondition, with the I2 control-read numbers and the R10-rev2-2
+   // IPC diagnostic in the description. Nothing is retried or relaxed.
+@@ -14755,7 +14849,7 @@ class GuidedPublicationReplayIT {
+       assertThat(refusal.path("policyDenied").asBoolean()).isTrue();
+       assertThat(refusal.path("status").asInt()).isEqualTo(422);
+       assertThat(refusal.path("validatorCountPredicate").asBoolean()).isTrue();
+-      assertThat(refusal.path("validatorLine").asInt()).isEqualTo(363);
++      assertThat(refusal.path("validatorLine").asInt()).isEqualTo(381);
+       assertThat(refusal.path("actualCallbackRollbackObserved").asBoolean()).isTrue();
+       assertThat(refusal.path("passwordCount").asInt(-1)).isEqualTo(count);
+       assertThat(
+@@ -14824,7 +14918,7 @@ class GuidedPublicationReplayIT {
+             .put("actualFirstGuardCaptured", guard != null)
+             .put("actualRequestCaptured", request != null)
+             .put("observerFailed", P4_WITNESS_FAILED.get())
+-            .put("expectedGuardLine", 363);
++            .put("expectedGuardLine", 381);
+     if (guard != null) {
+       diagnostic
+           .put("actualActionLine", guard.path("validatorLine").asInt())

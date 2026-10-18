@@ -1,0 +1,129 @@
+{
+  "artifact": "STUDIO-OBS-014 contract step C2a (sync point S2): ledger",
+  "author": "Dex (@dev), C-lane integrator 'cint2'",
+  "date": "2026-10-13",
+  "authority": [
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json (AR-2a clarification codes, AR-2f side-effect question shape, AR-3a AC-9 missing key, AR-3b P1 deletion and pins)",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-1-c1-deviations.json (E-1 switch at S2, D-1 one-definition condition, D-2 checker ownership and before/after sha256)",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/s0-plan-refresh.json contractSequence[C2a], lanes.C",
+    "docs/qa/evidence/STUDIO-OBS-014/b14/ledger.json t1a (emitted labelSource shape, 400 handler)",
+    "docs/qa/evidence/STUDIO-OBS-013/c1-contract/ledger.json (method)"
+  ],
+  "mode": "No git add/commit/stash/reset. No full Gradle; one compileTestJava via gradle-locked.sh (AGENT_NAME=cint2). No backend main code edited; no other lane's test edited. T0 = sha256 + copy of every C-lane file (57 files) captured in a scratch directory before the first edit. T0 equals the C1 ledger's 'now' values for every file C1 touched (openapi d40c744d..., checker 485841a5..., StudioContractTest 3ee7335a..., confinement 5efe5d7a..., ADR-002 41feff00...), so no file drifted between C1 and C2a. Old/new below are T0 -> now. C2b items (applicationPolicy/policyHash, refusal schema, canonical vectors, policy routes) were NOT touched.",
+
+  "unit": {
+    "order": "spec edit -> regen -> --check -> checker -> shasum -> pins -> ADR-002 row (one unit)",
+    "regen": "node tools/build-studio-observed-schemas.cjs -> 'Generated v3: 22 guided schemas, 29 replay schemas; four byte-identical outputs.' Guided outputs (src/guided/schemas.json, types.ts) are byte-unchanged: clarification is not in the guided closure. Replay outputs (src/validator/observedSchemas.json, src/executor/observedOperations.ts) moved: replay-validation ObservedQuestionContext.question $refs clarification.schema.json.",
+    "check": "node tools/build-studio-observed-schemas.cjs --check -> 'Verified v3: 22 guided schemas, 29 replay schemas; four byte-identical outputs.' exit 0",
+    "checker": {
+      "now": "node tools/check-studio-observed-contracts.cjs -> 'PASS v3: 41 schemas with every definition compiled and one actionTiming definition; 361 fixture/semantic/canonical checks; 42 planning fixtures; 79 replay/publication checks.' / 'PASS public OpenAPI: 38 operations, eight guided-session routes, 18 validated examples; no retired generation or compile route.' / 'PASS codegen: 22 guided schemas, 29 replay schemas; four byte-identical outputs.' exit 0",
+      "t0": "C1 ledger values (re-confirmed: T0 file hashes equal C1 'now'): 41 schemas; 347 fixture checks; 42 planning; 79 replay; 39 operations; 18 examples.",
+      "delta": "+14 fixture checks (the 14 new clarification cases); -1 operation (claimAdmission). The example count stays 18: the clarification example was already validated and now carries labelSource; the new execute 400 example is on a non-guided route the checker does not validate."
+    }
+  },
+
+  "changes": {
+    "docs/specs/studio-observed-authoring/contracts/v3/clarification.schema.json": "AR-2a/AR-2f: reason enum + SIDE_EFFECT_CONFIRMATION; promptCode enum + CONFIRM_ACTION. choices.items: + labelSource enum [AUTHORED, SAVED_INPUT, PAGE] (required), + role {string 1..256} (the observation node role bound), + region {string|null} (the observation node regionId type); items.allOf if labelSource=PAGE then role and region required, else role and region absent ('present iff PAGE', matching the B14 emitter, which writes no role/region keys on AUTHORED/SAVED_INPUT). The existing source-phase nodeId/bindingId null rule is untouched. No coupling between labelSource and phase, or between reason and promptCode, was added (not ruled).",
+    "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json": "documents.labelledQuestion (observed phase, two PAGE choices: region string and region null). 14 cases validated against 'clarification': 4 VALID (PAGE pair; source AUTHORED; source SAVED_INPUT 'Saved input choice 1'; AR-2f side-effect confirmation = one AUTHORED choice with the proposed nodeId) and 10 SCHEMA (labelSource absent on a choice without role/region; value outside the set; PAGE without role; PAGE without region; PAGE with empty role; AUTHORED with role; SAVED_INPUT with region; AUTHORED with null region; unknown reason; unknown promptCode). Existing cases untouched (appended only).",
+    "docs/specs/studio-observed-authoring/contracts/v3/planning-fixtures.json": "The three existing clarification cases ('Use authored text: London', source phase) gain labelSource AUTHORED (the B14 emitter's value for that label). No case added or reordered (GuidedTranslationTest reads cases by index). [AUTO-DECISION] planning-fixtures.json is not named in lanes.C.files but is a contracts/v3 fixture owned by no other lane and validated by the C-lane checker -> edited by C-int (reason: it must validate against the changed schema).",
+    "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json": "observedChoice witness (basis.preparations[3].observedChoice.context.question): both choices gain labelSource PAGE, role and region taken from the witness's own observation nodes (label-input and backup-label-old: role textbox, regionId null). Resealed bottom-up with the checker's canonical hash: receipt.contextIdentityHash 7663dff8...596bf -> b27711a7...86d7e; artifact.replayPolicy.publicationEvidenceHash = hashes.publicationEvidenceHash 45cbf249...10dd9 -> 1e3385f2...60b4e; hashes.referencePolicyHash (= hash(artifact.replayPolicy)) 77644cd0...1cc01 -> 00711917...c38ff6d; hashes.artifactHash 0ec194f5...34961 -> 8623b2ad...a9242. The runner's independent deriveObservedArtifact(observedChoice.basis) equals {artifact, hashes} of the fixture after the reseal (probe, and observedV3TupleValidation.test.ts green). The main publication sample, its job binding and canonical vectors are unchanged.",
+    "docs/specs/studio/openapi.yaml": "AR-3b: path /internal/studio/executions/{id}/admission (operationId claimAdmission, incl. the '/v1/runs' 409 prose) deleted; components.schemas.AdmissionRequest and AdmissionResponse deleted (referenced only by claimAdmission; the observed route uses the v3 replay-job AdmissionRequest). AR-3a: executeTest Idempotency-Key required: true, description names both 400 producers; '400' becomes operation-local: description of the two producers, schema oneOf [ErrorResponse, PlatformErrorResponse] (the filter's INVALID_IDEMPOTENCY_KEY is the nested platform envelope, the precedent is the getExecutionVideo 503), example idempotencyKeyRequired {error: IDEMPOTENCY_KEY_REQUIRED, message: 'Idempotency-Key header is required'}; status set unchanged. E-1: getExecutionVideo 404/410/416 -> $ref VideoNoEvidence/VideoExpired/VideoRangeNotSatisfiable; the components comment updated. readGuidedSessionClarification 200 example: choice gains labelSource AUTHORED. 38 operationIds, 8 x-internal.",
+    "docs/specs/studio-observed-authoring/contracts/README.md": "One paragraph sentence pair after 'clarification is the production question union': labelSource values and meaning, role/region present exactly when PAGE (region null when the node has none), SIDE_EFFECT_CONFIRMATION/CONFIRM_ACTION is the side-effect confirmation question.",
+    "tools/check-studio-observed-contracts.cjs": "E-1: the C1 literal drift guard (schema/example-code/header comparisons) replaced by $ref equality for BOTH video routes (each of 404/410/416 deep-equals {$ref: '#/components/responses/<shared>'} and the component exists); status-set pins and 200/206 media + 206 header equality kept. D-1 condition: new oneActionTimingDefinition() called from runSchemas: result#/definitions/actionTiming deep-equals {$ref: <action-timing $id>}, bridge recordingEvidence.timings.items deep-equals the same, and both result.actionTimings.items and bridge timings.items resolve (following $ref chains) to the identical action-timing document object. Output line names it.",
+    "generated (byte-identical to regen)": "studio-runner/src/validator/observedSchemas.json and studio-runner/src/executor/observedOperations.ts (clarification in the replay closure). studio-runner/src/guided/{schemas.json,types.ts} unchanged.",
+    "studio-runner/test/run/confinement.test.ts": "BASE_SHA256 only (+ provenance comment).",
+    "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java": "Internal list 9 -> 8 (entry 'POST /internal/studio/executions/{id}/admission' removed, assertion text names AR-3); status map row 'POST /internal/studio/executions/{id}/admission' removed; execute row '202,400,401,403,409,429,503' unchanged; total 39 -> 38 (both hasSize); authorized-movement message names the OBS-014 deletion; parity rows assertSchemaMatchesRecord AdmissionRequest/AdmissionResponse and their two imports removed (AR-3b: the openapi schemas are gone, the records survive as internal value types); the DEF-02 control's 'eight' -> 'six' (Javadoc + message). google-java-format 1.22 --skip-reflowing-long-strings --dry-run: clean (T0 file also clean).",
+    "docs/architecture/ADR-002-internal-contract-surface.md": "One §13 amendment-log row dated 2026-10-13 after the C1 row: internal deletion under §19, executeTest key Class C (§34.1), E-1 document-only restructuring, v3 Class B clarification shape; SIDE_EFFECT_CONFIRMATION/CONFIRM_ACTION marked AUTHORIZED, NOT YET LANDED until the B14 T2 emitter exists; StudioContractTest stated as compiled, not run."
+  },
+
+  "pins": {
+    "BASE_SHA256": {"old": "d40c744d924ceb3d90f1711d53c6d714105e95a37a85c54a0a270687cdf1608e", "new": "61181c8457bb50cbc111812a57805ce8687618bfa4bb32a0d373d202ee2bd087", "source": "shasum -a 256 docs/specs/studio/openapi.yaml after the last openapi edit; old equalled the measured T0 digest"},
+    "StudioContractTest.internalList": {"old": 9, "new": 8},
+    "StudioContractTest.statusMap": {"removed": "POST /internal/studio/executions/{id}/admission -> 200,400,401,403,409", "retained": "POST /tests/{id}/execute -> 202,400,401,403,409,429,503 (400 retained; set unchanged)"},
+    "StudioContractTest.totalOperations": {"old": 39, "new": 38},
+    "StudioContractTest.schemaRecordParity": {"removed": ["AdmissionRequest", "AdmissionResponse"]},
+    "GuidedContracts epochs": {
+      "method": "Epochs.java overlay (JDK 21 toolchain + the main runtime classpath file): an overlay of the 41 T0 v3 schema files reproduced all four current constants; an overlay of the 41 current files measured the new values.",
+      "session": "UNCHANGED e9f57e1e...7e5b17",
+      "replay-validation": {"old": "2a55e780afc6cfdc7c010d15c5000c6b5ed737dc28ebb7270343be4c11fac519", "new": "6ed940df7b77a0524bae9bb4e56550a82a16bc9f44f175f649b579a9ba4fb32d", "why": "replay-validation ObservedQuestionContext.question $refs clarification.schema.json"},
+      "ledger": "UNCHANGED 2f365ba0...70d6cb",
+      "observation": "UNCHANGED 9be57abe...ac2d2",
+      "consequenceProbe": "Reflection probe of compileSchema: current constant + current schemas -> replay-validation compiledProperties=0 (silent fallback to native validation); current constant + T0 schemas -> 9; constant patched to 6ed940df... (scratch javac of a copy) + current schemas -> 9. Session 14 in all three.",
+      "notApplied": "The constant lives in backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java:116-117 (backend main code, outside this lane by instruction). Handed to its owner, see redPendingOtherLanes."
+    },
+    "OBSERVED_SCHEMA_BUNDLE_HASH (runtime-derived, not a literal pin)": {"old": "829195b335f01328b5d45f40ceed765ece4f775fa60024d996cc268f377e88eb", "new": "cc99d746ca7c5a2b33c2a35abdbd89ce4c89e68fac157ae1d3ced575f0242a94", "method": "runner hashObserved over observedSchemas.json in a scratch-root vitest probe; the T0 value reproduced the C1 ledger's 'new' exactly. No literal pin found by grep."},
+    "observedChoice fixture hashes": {
+      "contextIdentityHash": ["7663dff8844e2aae40eaac0d6d43200eab89084f90858ae965eb70278b5596bf", "b27711a7be6e9e6039672b239096334d59c737c6de55220dc1951f3b21b86d7e"],
+      "publicationEvidenceHash": ["45cbf249d114ee254379f1d2d9c73bb0efeaa3d9c53639d77d329ce2dca10dd9", "1e3385f28e2f0ae112e711f0aeef9ed1a37ed7fd84f0e64a2f3e939913760b4e"],
+      "referencePolicyHash": ["77644cd0c93b2f7186d50b9429a9df288f80f7398d6cae78f90df338d6d1cc01", "0071191727b6ad349b7778b19e215edbb07892d630057ec19862e4495c38ff6d"],
+      "artifactHash": ["0ec194f5b9e9be3f078a46229a629d2ccab25142fa10b5449d2677448c634961", "8623b2ad1f7d95cb7f50a6a4cf48bfbea6ba88d7ac4c4825d038debde0ba9242"]
+    }
+  },
+
+  "changedFiles_t0_to_now": {
+    "docs/specs/studio/openapi.yaml": ["d40c744d924ceb3d90f1711d53c6d714105e95a37a85c54a0a270687cdf1608e", "61181c8457bb50cbc111812a57805ce8687618bfa4bb32a0d373d202ee2bd087"],
+    "docs/specs/studio-observed-authoring/contracts/v3/clarification.schema.json": ["ba7e7331620e0608f7f7c486aa997be9b78c8ecfaff1733bc81b7ef9c09357fe", "ef13f34218bc2ca83c1ea736b2817b01161131931ce097341441625c480ef79a"],
+    "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json": ["a3dbdf7aaa4323c803e448579641962256a6eb4a5a6144822ffe7185133924a2", "52e620c6ac58e8a3e8b94c464f6840f6b53814b95877637270d2f43f4b25b27b"],
+    "docs/specs/studio-observed-authoring/contracts/v3/planning-fixtures.json": ["61ca2b3c7a682934fb7af5f11b839b281228305fb1845383ea1203f357cacb45", "ae45b91d11a9422530536e39bdf0d0039ce78fded5e3d7e9bbbf3408c8582b8c"],
+    "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json": ["f776d8af3dc0ee15ff7fc2d40721e9bf79e581ead2566473ef48ce7baba8c228", "b26a29636ceace81eba139fd648a8bfb0845f01d4f170b17bfa4a4471cf4ab5a"],
+    "docs/specs/studio-observed-authoring/contracts/README.md": ["8c055f8883a89172574ede022dc4664776d27419319d6da13e59711af2827543", "76f734aabecec2a7a3a1ffe65720088e04e9f6ac1faec70c413c55ae3826c561"],
+    "studio-runner/src/validator/observedSchemas.json": ["51b07592bcb0b9c9f9eabb78151b471672bc3853f1f5352c0ac079e49153d1a5", "5bb6b08e2b613525a8c854cf5c1cda84ae606148fbca52b82312c2e05b3d2481"],
+    "studio-runner/src/executor/observedOperations.ts": ["a8bb403e629f217a106cd7378c8a9fc950d63491964359555036467429f5196d", "095c309abcafb82e4de2d7cd3a2117e37d5ef40f5545039581e6f5b36f8d05a4"],
+    "studio-runner/test/run/confinement.test.ts": ["5efe5d7a44e1bdcedfec26663a541b04dfc6d651f7431a849bd72b5e79b021af", "62cf37f92c221877af85d7fbd1e9936d4091b99fb2106ae7a234d7a508b7aa93"],
+    "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java": ["3ee7335a848ae70cd6eaf752022410f182149ffee670d39c3ba8647442cdf3c0", "44da9de3e5630c8af1b1af14f1efd6f082c31994ea923b03348acc44fb84d78f"],
+    "docs/architecture/ADR-002-internal-contract-surface.md": ["41feff007ba926d921bf51be560e0433126c3aabc0f05c4bd88a60912e4fefd8", "511c737f40abac8732b62a0f9eb24d81e93d9b820588b1fa935cf3fc91202ce7"],
+    "tools/check-studio-observed-contracts.cjs": ["485841a58664f45b15819de59c4dab0bae6ca97949f68749118344febb2f4558", "eb495ae653c8f75244c7d2225f0e471c4ef503a867d43cf53778275dd7d6400c"]
+  },
+  "checkerSha256": {"before": "485841a58664f45b15819de59c4dab0bae6ca97949f68749118344febb2f4558", "after": "eb495ae653c8f75244c7d2225f0e471c4ef503a867d43cf53778275dd7d6400c", "note": "D-2 condition: recorded before/after. 'before' equals the C1 ledger's 'now'."},
+  "unchangedConfirmed": ["studio-runner/src/guided/schemas.json", "studio-runner/src/guided/types.ts", "v3 result/bridge/action-timing/runner-context/session-view/error/replay-validation schemas", "v3/publication-canonical-vectors.json", "v3/wire-parity.fixtures.json", "tools/build-studio-observed-schemas.cjs"],
+  "fileHashesNote": "This ledger file and the ADR row were written after the hashes above; the ADR-002 'now' hash is the value before this ledger was created and the ADR row was not edited after it was measured.",
+
+  "verification": {
+    "checkerNegativeControls": {
+      "method": "Scratch mirror of tools/, docs/specs/studio, docs/specs/studio-observed-authoring and the four generated runner files, with node_modules symlinked; rebuilt fresh for every mutation, one mutation each; unmutated mirror exit 0.",
+      "results": [
+        "N1 guided 404 restored as a literal -> 'guided 404 is shared' exit 1 (C1 control, re-run)",
+        "N2 getExecutionVideo 410 restored as a literal with example code VIDEO_GONE -> 'execution 410 is shared' exit 1 (C1's '410 example code drift' control, re-expressed for $ref equality)",
+        "N3 recordingEvidence.timings maxItems 201 -> 'bridge#/definitions/recordingEvidence.timings with 201 items' exit 1 (C1 control, re-run)",
+        "N4 result#/definitions/actionTiming replaced by an inline copy of action-timing.schema.json -> 'result#/definitions/actionTiming is a pure $ref alias' exit 1 (D-1 inline-copy negative)",
+        "N5 bridge recordingEvidence.timings.items replaced by an inline copy -> 'bridge recordingEvidence.timings items reference action-timing.schema.json' exit 1 (D-1, bridge side)",
+        "N6 clarification items.allOf (PAGE => role/region) removed -> 'AR-2 labelSource: PAGE without role is refused: accepted' exit 1",
+        "N7 labelSource dropped from items.required -> 'AR-2 labelSource: a choice without labelSource is refused: accepted' exit 1"
+      ],
+      "selfCorrection": "The first version of the 'labelSource absent' case removed labelSource from a PAGE choice that still carried role/region, so it was refused by the else-branch and N7 did NOT fail on it (only on stale codegen). The case was rewritten to a choice with no role/region; N7 now fails on the intended assertion."
+    },
+    "runnerContractTests": "cd studio-runner && ./node_modules/.bin/vitest run test/generated-contracts.test.ts test/contract*.test.ts test/run/confinement.test.ts --coverage.enabled=false -> 4 files, 40/40 passed (confinement 19/19 at the new BASE_SHA256)",
+    "runnerWiderNarrow": "same binary, + test/guided test/observedReplayValidation.test.ts test/observedV3TupleValidation.test.ts test/runtime-versions.test.ts test/observedReplayExecutor.test.ts test/server/{observedReplayRoutes,observedReplayAuthorization,routes,concurrency}.test.ts -> 19 files, 376 passed / 1 failed. The failure is observedReplayValidation.test.ts 'accepts ten complete original alternatives and still preserves the selected target' (see redPendingOtherLanes R-1). Before the referencePolicyHash reseal there were 3 failures; the other two are green after it.",
+    "runnerTypecheck": "./node_modules/.bin/tsc --noEmit -p . -> exit 2, one error: test/observedReplayValidation.test.ts(121,241) TS2345 (same line as R-1: the pushed question choice lacks labelSource/role/region). ./node_modules/.bin/eslint test/run/confinement.test.ts src/executor/observedOperations.ts -> exit 0.",
+    "frontendNarrow": "frontend: pnpm exec vitest run src/services/mocks/studio/studioContract.test.ts -> 69/69 passed against the new openapi (getExecutionVideo $refs included).",
+    "backendCompile": "AGENT_NAME=cint2 gradle-locked.sh compileTestJava -> BUILD SUCCESSFUL (exit 0). compileJava and compileTestJava were UP-TO-DATE: another holder had compiled after the last StudioContractTest edit (class 19:55:24 vs source 19:54:44); the compiled class contains the new 'STUDIO-OBS-014 (AR-3)' text and no internal/dto/AdmissionRequest reference.",
+    "notRun": "No StudioContractTest execution, no ExecutionVideoContractTest/ExecutionVideoEvidenceIT, no GuidedWireContractTest, no backend guided ITs, no full Gradle, no runner fixtures tier, no studio-runner/dist rebuild (backend guided ITs spawn dist; the replay bundle moved, so ROOT rebuilds dist before the S2 window)."
+  },
+
+  "redPendingOtherLanes": {
+    "GC-1 GuidedContracts REPLAY_VALIDATION_SCHEMA_EPOCH (backend main; owner B14 or ROOT, S2 unit)": "Change GuidedContracts.java:116-117 '2a55e780afc6cfdc7c010d15c5000c6b5ed737dc28ebb7270343be4c11fac519' -> '6ed940df7b77a0524bae9bb4e56550a82a16bc9f44f175f649b579a9ba4fb32d' (+ a comment: OBS-014 C2a, replay-validation reaches clarification). Until then the compiled replay-validation path silently falls back to native validation (measured: 0 compiled properties) and GuidedWireContractTest's compiled-plan property assertions are expected red (inferred from the assertion and the probe; not run).",
+    "B13 ExecutionVideoContractTest (not edited by C-int)": "OPERATIONS_CARRYING_ATTRIBUTION (:57) and CALLBACK_OPERATIONS_DECLARING_UNAUTHENTICATED (:155) still name 'claimAdmission' -> expected RED (the operation no longer exists). E-1 re-points (:223, :233, :878 resolve through a $ref-following accessor; add execution-route $ref equality) and ExecutionVideoEvidenceIT.expiredCodeFromContract (:347) are B13's per the E-1 ruling; not verified whether B13 has landed them.",
+    "R-1 studio-runner/test/observedReplayValidation.test.ts:121 (runner replay test owner, R14 classification per plan)": "The test pushes a question choice {choiceId, safeLabel:'Alternate field', nodeId, bindingId} without labelSource/role/region, so the witness is now schema-invalid (vitest fail + tsc TS2345). Probe on a scratch copy: adding labelSource:'PAGE', role:node.role, region:node.regionId to that object makes the test pass at runtime (tsc of the patched copy not run).",
+    "B-OAL backend ObservedArtifactLowererTest.java:685 (owner of guided publication tests)": "Literal artifact-hash oracle '0ec194f5b9e9be3f078a46229a629d2ccab25142fa10b5449d2677448c634961' -> '8623b2ad1f7d95cb7f50a6a4cf48bfbea6ba88d7ac4c4825d038debde0ba9242' (the observedChoice witness question gained labelSource). Its hash-field loop compares against the resealed fixture and should agree if the Java lowerer matches the runner (inferred; not run).",
+    "B-SIT backend src/test/resources/studio/guided/session-it-documents.json (GuidedSessionIT owner)": "Its observed-phase 'clarification' document (choice 'Order reference', node-1) has no labelSource/role/region, so any test that submits it through contracts.validate('v3/clarification') now gets INVALID_CONTRACT (inferred from the schema; not run). B14 already updated GuidedPublicationEvidenceTest, GuidedBridgeIntegrationTest and GuidedPlanningIntegrationTest.",
+    "StudioContractTest": "Document-side pins are consistent (checker: 38 operations, 8 x-internal). Route-presence assertions depend on B14 T1a's deletion of the controller route (b14 ledger says done). Not run here: ROOT's S2 window.",
+    "C2b": "Not started (applicationPolicy/policyHash, refusal schema, canonical vectors, policy routes, startGuidedSession 429)."
+  },
+
+  "autoDecisions": [
+    "[AUTO-DECISION] region type -> {type: [string, null]} unbounded, mirroring observation.nodes[].regionId exactly (reason: a bound tighter than the source could refuse a valid emitted region; role mirrors node.role's 1..256).",
+    "[AUTO-DECISION] role/region on non-PAGE choices -> forbidden (else-branch), not merely optional (reason: architect 'required iff PAGE' and the B14 emitter writes no keys on AUTHORED/SAVED_INPUT; 'iff' read as present exactly when PAGE).",
+    "[AUTO-DECISION] executeTest 400 schema -> oneOf [ErrorResponse, PlatformErrorResponse] instead of the shared BadRequest (ErrorResponse only) (reason: AR-3 order names the filter's INVALID_IDEMPOTENCY_KEY as PlatformErrorResponse; same-status distinct-producer precedent is getExecutionVideo 503). Status set unchanged.",
+    "[AUTO-DECISION] The C1 '410 example code drift' negative control cannot run against a tree without literals; re-expressed as N2 (restore a literal with a drifted code; the $ref-equality guard must refuse it).",
+    "[AUTO-DECISION] planning-fixtures.json edited by the C lane (contracts/v3 fixture, no other owner, required by the schema change).",
+    "[AUTO-DECISION] GuidedContracts epoch constant NOT edited (instruction: no backend main code); measured, proven by probe, handed off as GC-1."
+  ],
+
+  "selfCritique": [
+    "No field invented: labelSource values, the iff-PAGE rule, role/region types and the two new codes are AR-2/AR-2f and the B14 emitter verbatim; role/region bounds are copied from the observation node schema.",
+    "Every new SCHEMA fixture is attributable: N6/N7 prove the two schema rules are what refuse their cases (after one self-corrected case).",
+    "Witness reseal is independent: the runner's deriveObservedArtifact reproduces the resealed artifact and all hashes.",
+    "Prose not touched beyond the ruling: the stale 'two internal callbacks keep Unauthorized' (openapi SessionUnauthorized) and 'the other two callbacks' sentences predate C2a and were left as they are (now 3 Unauthorized users: observed-admission, control, progress).",
+    "Not done: SAVED_INPUT has no backend test (B14 open item); this contract adds its schema fixture only."
+  ]
+}

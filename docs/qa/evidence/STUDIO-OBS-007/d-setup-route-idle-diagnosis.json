@@ -1,0 +1,120 @@
+{
+  "schema": "d-setup-route-idle-diagnosis/1",
+  "state": "READONLY_SOURCE_BOUND_DIAGNOSIS_AND_NARROW_PROPOSAL_NO_FIX_OR_EXECUTION",
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-idle-diagnosis-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-idle-diagnosis-context.txt"
+  ],
+  "bindings": {
+    "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "sourceSha256": "b4369d3d1b88a972b192c3c7a2b7a33537421ee95e6cca7e4bb02c29ca14667b",
+    "actualResult": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-topology-heldrow-seven-current/result.json",
+    "actualResultSha256": "7ad05fcba17b04d3632226ce610277ddf332b7ea120accb9a6ddbf514ff07f24",
+    "actualDxml": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-topology-heldrow-seven-current/TEST-com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.xml",
+    "actualDxmlSha256": "10bc5fad53ec782bbedf344ebff4c1f0a88a714490b1ba0a6efaac5e12bff4ec",
+    "sourceZip": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-topology-heldrow-seven-current/sources.zip",
+    "sourceZipSha256": "7e3af4959907651dcc92d8543ca081a7cf6bef8ae99d46c7609c4a98a856fb27",
+    "matchingZipEntry": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "matchingZipEntrySha256": "b4369d3d1b88a972b192c3c7a2b7a33537421ee95e6cca7e4bb02c29ca14667b"
+  },
+  "actualEvidence": {
+    "enclosing": {
+      "tests": 7,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "sourceDrift": [],
+      "gradleExitCode": 1
+    },
+    "D": {
+      "tests": 3,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased()",
+          "result": "PASS",
+          "failureTypes": [],
+          "failureLocation": null,
+          "suppressedMarkersInFailureText": 0
+        },
+        {
+          "name": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork()",
+          "result": "FAIL",
+          "failureTypes": [
+            "org.opentest4j.AssertionFailedError"
+          ],
+          "failureLocation": "actualHeldSetupObservationControl:1649",
+          "suppressedMarkersInFailureText": 0
+        },
+        {
+          "name": "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent()",
+          "result": "FAIL",
+          "failureTypes": [
+            "org.opentest4j.AssertionFailedError"
+          ],
+          "failureLocation": "actualHeldSetupObservationControl:1649",
+          "suppressedMarkersInFailureText": 0
+        }
+      ]
+    },
+    "conclusion": "Held-row case PASS; both new controls fail only at final immediate route.idle assertion line1649. Sequential preceding exact-primary/no-suppression/real state/stop-owner/zero-effect assertions passed. Class remains FAIL, not partial QA PASS."
+  },
+  "exactSourceSemantics": {
+    "idle": "activeTransfers.get()==0 && sockets.isEmpty(). False proves at least one predicate was false at that instant; actual split/count is unknown.",
+    "accept": "Accepted application socket and actual PG socket are registered before target connection/transfer. Two opaque copy tasks each increment activeTransfers before submit. Submission rejection decrements its own count and closes tracked sockets through existing catch.",
+    "transfer": "Each original copy task finally erases its own byte buffer, closes both sides, then decrements activeTransfers. Another transfer can still be unwinding after its peer closes both sockets.",
+    "closeSocket": "A socket is removed from the tracked set only when actual socket.isClosed. Close failure is queued; failed unclosed ownership is not removed.",
+    "lifecycleDistinction": "Driver/JDBC query completion and real sender/confirmation transaction return establish their own operation/resource cleanup. They do not synchronously execute the independent proxy copy task finalizers. Bridge termination/elapsed time alone cannot substitute for actual owner completion."
+  },
+  "sourceOrdering": {
+    "earlierDrain": "closeHeldRowSetup performs real owner drain/closed-state checks and a5second positive idle poll before returning.",
+    "laterRoutedWork": "actualHeldSetupObservationControl then calls setup.jdbc for CANCELLED/no-effects and branch-specific persisted assertions. DriverManagerDataSource is unpooled and these are outside its completed transaction, so those queries can create fresh route sockets/copy tasks after the earlier idle observation.",
+    "lastNoNotifyQuery": "SELECT progress->>teardownStatus from studio_guided_sessions through setup.jdbc, followed only by non-I/O assertions then immediate idle.",
+    "lastAssignmentQuery": "SELECT count(*) from studio_guided_assignments WHERE session_id=? AND receipt IS NOT NULL through setup.jdbc, followed only by non-I/O assertions then immediate idle.",
+    "knowledgeLimit": "Asynchronous last-query proxy close is a source-supported candidate explanation, not a measured runtime cause. No activeTransfers/socket/closeFailure counts were recorded at1649, so do not certify a transient race or exclude a retained-resource defect."
+  },
+  "smallestProposedFix": {
+    "sourceScope": "Only setup-control final route-drain site and, if needed, count-only proxy snapshot helper; preserve all source/owner/state/primary/timeout/17case assertions.",
+    "sequence": [
+      "Keep actual sender+confirmation and genuine no-notify ownership checks already completed.",
+      "After the LAST routed query and all expected-state checks, poll only actual route.idle while route remains open; do not query SQL inside this poll or open new bridges.",
+      "Use the same finite5second harness observation bound already present in closeHeldRowSetup. This is proxy-resource observation only, not a JDBC/production deadline.",
+      "Then retain the unchanged strict route.closed=false and route.idle=true assertions. No route.close/unavailable/socket-count reset/executor shutdown is used to make idle true.",
+      "If not actually idle within the bound, fail with actual safe count diagnostics. Preserve original observation/cleanup error evidence and existing dependency lifetime; do not label timed-out ownership drained or skip the assertion."
+    ],
+    "whyNarrow": "Move/add actual resource observation to the correct post-last-query boundary; do not weaken real operation completion, database checks or resource criteria. Outcome remains real idle or explicit FAIL."
+  },
+  "minimalCountOnlyDiagnosticProposal": {
+    "need": "Current archive cannot split the false predicate. A tiny source-only approved diagnostic can observe the actual failure before forced resource close; no guess may replace this evidence.",
+    "safeFields": [
+      "activeTransfers integer",
+      "trackedSockets size",
+      "queuedCloseFailures size",
+      "listenerOpen boolean",
+      "bridgeExecutorShutdown/Terminated booleans"
+    ],
+    "capture": "Count-only snapshot immediately before/finally on the final idle failure, while route remains open, and optionally after positive poll completion. No raw socket objects/addresses/URL/PID/body/source/session/credentials/bytes/secret values.",
+    "failurePreservation": "Append a distinct count-only diagnostic to the real primary in failure-finally without masking or accepting it. Snapshot does not complete a latch, erase ownership or supply missing sender/confirmation proof."
+  },
+  "execution": {
+    "sourceEdits": false,
+    "runtime": false,
+    "SQL": false,
+    "Postgres": false,
+    "tests": false,
+    "checks": false,
+    "Gradle": false,
+    "Docker": false,
+    "processActions": [],
+    "IObounds": "Read exact D source, immutable archived result/XML/ZIP only; did not inspect B mutable Java.",
+    "soleWrittenArtifact": "docs/qa/evidence/STUDIO-OBS-007/d-setup-route-idle-diagnosis.json"
+  },
+  "limits": [
+    "No actual proxy counts/witness until a separately approved coordinator run.",
+    "No assumed transient cause, fixed pass or source/coverage assertion removal.",
+    "No optional timeout, product deadline, primary/pool/general DB/Core/native/browser/all19/QA/lifecycle claim."
+  ],
+  "nextOwner": "Coordinator/parent approves narrow source edit/diagnostic and exclusively executes current-source focused controls; author parked."
+}

@@ -1,0 +1,116 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
+@@ -2212,6 +2212,18 @@
+   @Test
+   void actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost()
+       throws Exception {
++    runGuidedControllerCut(false);
++  }
++
++  @Test
++  void actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost()
++      throws Exception {
++    runGuidedControllerCut(true);
++  }
++
++  private void runGuidedControllerCut(boolean beforeResolve) throws Exception {
++    int expectedReads = beforeResolve ? 0 : 1;
++    String expectedStage = beforeResolve ? "GUIDED_CONSUMED_BEFORE_RESOLVE" : "READ_BEFORE_DECISION";
+     var owner = new SourceStopOwner(actualJdbc.getDataSource());
+     Scenario[] created = new Scenario[1];
+     GuidedSessionService[] controllerService = new GuidedSessionService[1];
+@@ -2284,6 +2296,7 @@
+               .put("password", source.getPassword())
+               .put("provider", "http://127.0.0.1:" + provider.getAddress().getPort() + path)
+               .put("stage", scratch.resolve("stage").toString())
++              .put("beforeResolve", beforeResolve)
+               .put("sessionId", id)
+               .put("testId", scenario.testId.toString())
+               .put("consumeKey", "controller-crash-consume")
+@@ -2320,11 +2333,20 @@
+         Thread.sleep(10);
+       }
+       assertThat(Files.exists(scratch.resolve("stage"))).isTrue();
+-      assertThat(Files.readString(scratch.resolve("stage"))).isEqualTo("READ_BEFORE_DECISION");
++      assertThat(Files.readString(scratch.resolve("stage"))).isEqualTo(expectedStage);
+       assertThat(providerFailure.get() == null).isTrue();
+-      assertThat(committedCountAtRead.get()).isEqualTo(1);
+-      assertThat(scenario.reads.get()).isEqualTo(1);
++      assertThat(committedCountAtRead.get()).isEqualTo(beforeResolve ? -1 : 1);
++      assertThat(scenario.reads.get()).isEqualTo(expectedReads);
+       assertThat(scenario.posts.get()).isZero();
++      JsonNode committed = action(id);
++      assertThat(committed.path("state").asText()).isEqualTo("DISPATCHING");
++      assertThat(committed.path("dispatchCount").asInt()).isEqualTo(1);
++      assertThat(committed.path("admission").path("admissionId").asText()).isEqualTo(admissionId);
++      assertThat(committed.path("coordinate").equals(fixture.admission().path("coordinate"))).isTrue();
++      assertThat(committed.path("ownerFence").asLong()).isEqualTo(1);
++      assertThat(actualJdbc.queryForObject(
++          "SELECT count(*) FROM studio_secret_use_audit WHERE session_id=?", Integer.class, id))
++          .isZero();
+       assertThat(action(id).path("dispatchCount").asInt()).isEqualTo(1);
+       assertThat(action(id).has("lastSecretReleaseId")).isFalse();
+       long killedPid = child.pid();
+@@ -2353,7 +2375,7 @@
+                 recovery.dispatch(controller, id, 1, key, fixture.advance()).path("state").asText())
+             .isEqualTo("DISPATCHING");
+       }
+-      assertThat(scenario.reads.get()).isEqualTo(1);
++      assertThat(scenario.reads.get()).isEqualTo(expectedReads);
+       assertThat(scenario.posts.get()).isZero();
+       assertThat(action(id).path("dispatchCount").asInt()).isEqualTo(1);
+       JsonNode pending = action(id);
+@@ -2443,7 +2465,7 @@
+                   actualJdbc.queryForList(
+                       "SELECT * FROM studio_secret_use_audit WHERE session_id=?", id)))
+           .isTrue();
+-      assertThat(scenario.reads.get()).isEqualTo(1);
++      assertThat(scenario.reads.get()).isEqualTo(expectedReads);
+       assertThat(scenario.posts.get()).isZero();
+       assertThat(Files.readString(scratch.resolve("child.log")).contains(scenario.canary))
+           .isFalse();
+@@ -2856,14 +2878,36 @@
+               Path.of(cfg.path("stage").asText()),
+               com.citi.put.checks.studio.guided.publication.ObservedResolverProcessCrashIT.Cut
+                   .READ_BEFORE_DECISION);
+-      dispatch.installReferences(
+-          new VaultStudioReferenceResolver(
+-              provider,
+-              (principal, csi, environment, secret) ->
+-                  principal.equals("user-1")
+-                      && csi.equals("CSI-123")
+-                      && environment.equals("fixture")
+-                      && secret.equals("PASS")));
++      var originalResolver = new VaultStudioReferenceResolver(
++          provider,
++          (principal, csi, environment, secret) ->
++              principal.equals("user-1") && csi.equals("CSI-123")
++                  && environment.equals("fixture") && secret.equals("PASS"));
++      if (cfg.path("beforeResolve").asBoolean()) {
++        dispatch.installReferences(new com.citi.put.checks.studio.dispatch.StudioReferenceResolver() {
++          @Override
++          public void preflight(String csi, String environment, UUID test, String principal,
++              com.citi.put.checks.studio.dispatch.ReferenceDeclarations declarations) {
++            originalResolver.preflight(csi, environment, test, principal, declarations);
++          }
++
++          @Override
++          public Resolved resolve(String csi, String environment, UUID test, String principal,
++              com.citi.put.checks.studio.dispatch.ReferenceDeclarations declarations) {
++            require(csi.equals("CSI-123") && environment.equals("fixture")
++                && test.toString().equals(cfg.path("testId").asText())
++                && principal.equals("user-1") && declarations.variables().isEmpty()
++                && declarations.secrets().equals(List.of("PASS")), "FORBIDDEN_SCOPE", 403);
++            // The genuine service consume has committed. The original value resolver/provider
++            // has not been entered; the parent verifies that cut independently from PostgreSQL.
++            com.citi.put.checks.studio.guided.publication.ObservedResolverProcessCrashIT
++                .pauseGuidedBeforeResolution(Path.of(cfg.path("stage").asText()));
++            return originalResolver.resolve(csi, environment, test, principal, declarations);
++          }
++        });
++      } else {
++        dispatch.installReferences(originalResolver);
++      }
+       dispatch.dispatch(
+           new GuidedInternalSecurity.Identity("controller-1", "backend-controller"),
+           cfg.path("sessionId").asText(),

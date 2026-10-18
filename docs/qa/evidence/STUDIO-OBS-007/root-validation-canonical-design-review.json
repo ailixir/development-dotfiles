@@ -1,0 +1,17 @@
+{
+  "decision": "GO_ISOLATED_VALIDATE_CANONICAL_RETURN_SIMPLIFICATION",
+  "developerDesignSha256": "16ca20ed9cf1ae2239fc4d94057e32b02564b7ca21462e4080a08ca8bca17189",
+  "independentReviewSha256": "67755d8d9d247d5a9a258bee545e1ff1d22295e67c3ab5e56f6227806e4d0b30",
+  "selection": "ExistingGuidedContracts exactcanonical+schema validation mayreturnitscanonicalString through specializedhelper; existingvoidvalidate semantics retained, ClientusesreturnedUTF8 bytes",
+  "scope": "Twoexistingproductionclasses+existingdoc/nearestdefiningtest, no cache/token/framework/newcase infrastructure",
+  "conditions": [
+    "Same originalcanonical-before-schema/refusal normalization/order and schemaepoch.",
+    "Callerinput notmutated byactualschema traversal; defineunsupported/stub behavior explicitly, no bypass/null payload trust.",
+    "Endpoint/activeTX/size/token/budget/send/read/verdict/deadline guards unchanged; immutablebudget notreset.",
+    "Existingpublicvoidvalidate behavior preserved; no changegoldens/pins/timeouts/loglevels."
+  ],
+  "tradeoff": "APIcoupling/returnvalue contract vsone removedwholecanonical traversal; alreadyofflock/no cost or latency guarantee.",
+  "next": "Docfirst isolatedpatch/fullinverse/root+peer source review beforeactualchecks/originalC5",
+  "runtime": "NONE",
+  "lifecycle": "No QA/Done"
+}

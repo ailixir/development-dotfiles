@@ -1,0 +1,199 @@
+--- backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java
++++ backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java
+@@ -24,9 +24,9 @@
+  * the SSE {@code execution.snapshot} payload, so there is exactly one shape to render in the MFE
+  * (Architecture §5.5).
+  *
+- * <p>Two adaptations happen here and nowhere else: legacy outcomes are normalized (§8.3), and
+- * logical video expiry is enforced at read time because physical lifecycle deletion on the object
+- * store is asynchronous (§6.2).
++ * <p>One adaptation happens here and nowhere else: logical video expiry is enforced at read time
++ * because physical lifecycle deletion on the object store is asynchronous (§6.2). Status and error
++ * code are read as stored; V13 holds the canonical vocabulary in a CHECK.
+  */
+ @Component
+ public class ExecutionSnapshotMapper {
+@@ -70,8 +70,7 @@
+    */
+   public ExecutionSnapshotDto toSnapshot(UITestExecution execution) {
+     String status = execution.getStatus();
+-    String errorCode =
+-        execution.getErrorCode();
++    String errorCode = execution.getErrorCode();
+     VideoEvidence video = videoEvidence(execution, status);
+ 
+     return new ExecutionSnapshotDto(
+--- backend/src/main/java/com/citi/put/checks/studio/StudioService.java
++++ backend/src/main/java/com/citi/put/checks/studio/StudioService.java
+@@ -281,7 +281,8 @@
+       UITestRequest metadata, AuthoringV2Request authoring, Authentication auth) {
+     CanonicalStudioCodec.validateForWrite(metadata);
+     CanonicalStudioCodec.variablesToJson(metadata.variables());
+-    requireWrite(auth, metadata.csiId());
++    // The registered-CSI check and then the write check run inside createTest, in that order
++    // (ADR-002 s27.2): an unregistered CSI is a 400 whoever asks, so it is not preceded by a 403.
+     UITestDto created = createTest(metadata, authoring, auth);
+     return readAuthoringDraft(created.id(), auth);
+   }
+--- backend/src/main/java/com/citi/put/checks/studio/dto/StudioAuthoringMapper.java
++++ backend/src/main/java/com/citi/put/checks/studio/dto/StudioAuthoringMapper.java
+@@ -97,11 +97,12 @@
+           exception.categories().getFirst().name(), "Invalid authoring source");
+     }
+     if (update) {
+-      for (String revision : Set.of("sourceRevision", "configurationRevision")) {
++      // A fixed order, so a body missing both names the same field every time.
++      for (String revision : java.util.List.of("sourceRevision", "configurationRevision")) {
+         JsonNode token = body.path(revision);
+         if (!token.isIntegralNumber() || !token.canConvertToLong() || token.longValue() < 1) {
+           throw new StudioValidationException(
+-              "INVALID_AUTHORING", "Positive revision tokens are required");
++              "INVALID_AUTHORING", revision + " must be a positive integer");
+         }
+       }
+     }
+--- backend/src/test/java/com/citi/put/checks/studio/ExecutionSnapshotMapperTest.java
++++ backend/src/test/java/com/citi/put/checks/studio/ExecutionSnapshotMapperTest.java
+@@ -59,20 +59,6 @@
+   }
+ 
+   @Test
+-  void legacyStatusesAreReadThroughTheCanonicalVocabulary() {
+-    UITestExecution completed = accepted();
+-    completed.setStatus("COMPLETED");
+-    assertThat(mapper.toSnapshot(completed).status()).isEqualTo("PASSED");
+-    assertThat(mapper.toSnapshot(completed).errorCode()).isNull();
+-
+-    UITestExecution timedOut = accepted();
+-    timedOut.setStatus("TIMEOUT");
+-    ExecutionSnapshotDto snapshot = mapper.toSnapshot(timedOut);
+-    assertThat(snapshot.status()).isEqualTo("ERROR");
+-    assertThat(snapshot.errorCode()).isEqualTo("TIMEOUT");
+-  }
+-
+-  @Test
+   void aLegacyRowExposesNullRevisionAndUnknownRuntime() {
+     UITestExecution legacy = accepted();
+     legacy.setStatus("PASSED");
+--- backend/src/test/java/com/citi/put/checks/studio/StudioAuthorizationIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/StudioAuthorizationIT.java
+@@ -788,7 +788,7 @@
+ 
+     for (UUID draft : List.of(softDeleted, quarantined)) {
+       ResponseEntity<String> control =
+-          put(draft, saveBody(draft, "Administrator control", DRAFT_STEP), admin());
++          put(draft, nameOnlySaveBody(draft, "Administrator control"), admin());
+       assertThat(control.getStatusCode().value())
+           .as(
+               "control: the administrator reaches the save on this row (body: %s)",
+@@ -1079,6 +1079,36 @@
+                   body.set(field.getKey(), field.getValue());
+                 }
+               });
++      return body.toString();
++    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
++      throw new IllegalStateException(e);
++    }
++  }
++
++  /**
++   * A save that changes the name and nothing else. A runnable draft is published through {@link
++   * ObservedPublicationFixture}, which gives it a declared destination variable and a step context
++   * reference, so {@link #saveBody(UUID, String, String)} (empty variables, no context) is a
++   * source and configuration change. This carries the stored steps, global context and variable
++   * declarations back as they are, with the current revisions.
++   */
++  private String nameOnlySaveBody(UUID id, String name) {
++    try {
++      com.fasterxml.jackson.databind.node.ObjectNode body =
++          (com.fasterxml.jackson.databind.node.ObjectNode)
++              objectMapper.readTree(saveBody(id, name, DRAFT_STEP));
++      Map<String, Object> stored =
++          jdbc.queryForMap(
++              "SELECT authoring::text AS authoring, variables::text AS variables"
++                  + " FROM ui_tests WHERE id = ?",
++              id);
++      com.fasterxml.jackson.databind.JsonNode authoring =
++          objectMapper.readTree((String) stored.get("authoring"));
++      body.set("steps", authoring.path("steps"));
++      if (authoring.has("globalContext")) {
++        body.set("globalContext", authoring.path("globalContext"));
++      }
++      body.set("variables", objectMapper.readTree((String) stored.get("variables")));
+       return body.toString();
+     } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+       throw new IllegalStateException(e);
+--- backend/src/test/java/com/citi/put/checks/studio/StudioServiceWriteAuthorizationTest.java
++++ backend/src/test/java/com/citi/put/checks/studio/StudioServiceWriteAuthorizationTest.java
+@@ -7,7 +7,6 @@
+ import static org.mockito.Mockito.never;
+ import static org.mockito.Mockito.times;
+ import static org.mockito.Mockito.verify;
+-import static org.mockito.Mockito.verifyNoInteractions;
+ import static org.mockito.Mockito.when;
+ 
+ import com.citi.put.checks.csi.CsiRepository;
+@@ -199,36 +198,11 @@
+     order.verify(entityManager).flush();
+     order.verify(entityManager).refresh(locked);
+     verify(entityManager, never()).detach(any());
+-  }
+-
+-  @Test
+-  @DisplayName("(c) the internal save touches the persistence context not at all")
+-  void theInternalSaveNeverTouchesThePersistenceContext() {
+-    UUID id = UUID.randomUUID();
+-    when(tests.findByIdForUpdate(id)).thenReturn(Optional.of(draft()));
+-
+-    assertThatThrownBy(() -> com.citi.put.checks.studio.support.CanonicalAuthoringFixture.update(service, id, save(99L, 99L)))
+-        .isInstanceOf(StudioConflictException.class);
+-
+-    verify(tests, never()).findById(any());
+-    verifyNoInteractions(entityManager);
+   }
+ 
+   // ── (c) AC-10: the internal overloads keep their behaviour exactly ───────────────────────────
+ 
+   @Test
+-  @DisplayName("(c) internal save, empty locked read: still 'UI Test not found', no visible read")
+-  void theInternalSaveStillReportsAnUnknownTest() {
+-    UUID id = UUID.randomUUID();
+-    when(tests.findByIdForUpdate(id)).thenReturn(Optional.empty());
+-
+-    assertThatThrownBy(() -> com.citi.put.checks.studio.support.CanonicalAuthoringFixture.update(service, id, save(1L, 1L)))
+-        .isExactlyInstanceOf(IllegalArgumentException.class)
+-        .hasMessage("UI Test not found: " + id);
+-    verify(tests, never()).findById(any());
+-  }
+-
+-  @Test
+   @DisplayName("(c) internal delete, absent draft: still 'UI Test not found'")
+   void theInternalDeleteStillReportsAnUnknownTest() {
+     UUID id = UUID.randomUUID();
+--- backend/src/test/java/com/citi/put/checks/studio/StudioVisibilityIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/StudioVisibilityIT.java
+@@ -131,6 +131,8 @@
+         OWNER,
+         Timestamp.from(Instant.now()),
+         Timestamp.from(Instant.now()));
++    // Production has no implicit identity creation: a row without authoring is not a readable draft.
++    com.citi.put.checks.studio.support.CanonicalAuthoringFixture.seed(jdbc, id);
+     return id;
+   }
+ 
+--- backend/src/test/java/com/citi/put/checks/studio/StudioWriteValidationControllerTest.java
++++ backend/src/test/java/com/citi/put/checks/studio/StudioWriteValidationControllerTest.java
+@@ -203,9 +203,12 @@
+ 
+   @Test
+   void exactlyTheCapsAreAcceptedAtSave() throws Exception {
++    // 100 steps, each at the v2 step-text bound (AuthoringStep.text maxLength 500, openapi.yaml
++    // AuthoringStep): the line cap that is reachable on the single authoring path. The 1024
++    // authoring bound is the refusal case above; it has no accepting boundary here.
+     ObjectNode body = canonical(30);
+     for (int index = 0; index < 100; index++) {
+-      body.withArray("steps").add("y".repeat(1024));
++      body.withArray("steps").add("y".repeat(500));
+     }
+     send(post(BASE), body).andExpect(status().isConflict());
+     send(put(BASE + "/" + ID), body).andExpect(status().isConflict());

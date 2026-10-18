@@ -1,0 +1,42 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -15872,6 +15872,9 @@
+     Files.writeString(guidedMain, p3GuidedLaunchCounter());
+     var guided = new ProcessBuilder("node", guidedMain.toString());
+     guided.environment().put("STUDIO_GUIDED_CONFIG_FILE", TEMP.resolve("worker.json").toString());
++    // STUDIO-OBS-013/014 S3: the worker records into the same local store the backend serves
++    // video from (studio.execution.video-store.directory = TEMP/objects).
++    guided.environment().put("STUDIO_RUNNER_OBJECT_STORE_DIR", TEMP.resolve("objects").toString());
+     guided.redirectErrorStream(true).redirectOutput(TEMP.resolve("guided.log").toFile());
+     guidedWorker = guided.start();
+     String root = Path.of("../studio-runner/dist").toAbsolutePath().normalize().toUri().toString();
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java
+@@ -848,6 +848,8 @@
+     var process =
+         new ProcessBuilder("node", WORKER_SNAPSHOT.resolve("run/guidedMain.js").toString());
+     process.environment().put("STUDIO_GUIDED_CONFIG_FILE", mounted.toString());
++    // STUDIO-OBS-013/014 S3: a per-class object store, never a shared default directory.
++    process.environment().put("STUDIO_RUNNER_OBJECT_STORE_DIR", TEMP.resolve("objects").toString());
+     process.redirectErrorStream(true).redirectOutput(workerLog.toFile());
+     worker = process.start();
+     await(
+@@ -1863,6 +1865,7 @@
+     var process =
+         new ProcessBuilder("node", WORKER_SNAPSHOT.resolve("run/guidedMain.js").toString());
+     process.environment().put("STUDIO_GUIDED_CONFIG_FILE", TEMP.resolve("worker.json").toString());
++    process.environment().put("STUDIO_RUNNER_OBJECT_STORE_DIR", TEMP.resolve("objects").toString());
+     process
+         .redirectErrorStream(true)
+         .redirectOutput(ProcessBuilder.Redirect.appendTo(workerLog.toFile()));
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+@@ -2882,6 +2882,8 @@
+       var process =
+           new ProcessBuilder("node", WORKER_SNAPSHOT.resolve("run/guidedMain.js").toString());
+       process.environment().put("STUDIO_GUIDED_CONFIG_FILE", mounted.toString());
++      // STUDIO-OBS-013/014 S3: a per-class object store, never a shared default directory.
++      process.environment().put("STUDIO_RUNNER_OBJECT_STORE_DIR", TEMP.resolve("objects").toString());
+       process.redirectErrorStream(true).redirectOutput(workerLog.toFile());
+       worker = process.start();
+       await(

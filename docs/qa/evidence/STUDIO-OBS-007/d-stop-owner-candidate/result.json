@@ -1,0 +1,91 @@
+{
+  "schema": "d-stop-owner-candidate/1",
+  "state": "FROZEN_SOURCE_ONLY_AWAITING_COORDINATOR_FORMAT_COMPILE_RUNTIME_AND_INDEPENDENT_REVIEW",
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-stop-owner-author-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-stop-owner-author-context.txt",
+    "docs/qa/evidence/STUDIO-OBS-007/d-async-stop-completion-plan.json"
+  ],
+  "sourceHashes": {
+    "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "beforeSha256": "770a33a35c6d449e68bb356404eae131871fae6cee63e6842704ceecb15aa26b",
+    "afterSha256": "ea7fb2b07d040747973d17be78953271933b09089765e73fa322cd5ee0ae0e37",
+    "patchSha256": "d0a824bb64f37eeb19d1941744998de81e7deaabbe2b0c457730116acaac858b",
+    "originalNineMethodSha256": "ec8ce679e86bd1c931aa3006e5d79af2fe7387fdfb4557874bd257303d2d724b",
+    "originalNineMethodByteIdentical": true,
+    "originalModeBlockByteIdentical": true,
+    "originalNineModeCount": 9,
+    "existingPrivateFaultMethodPreserved": true,
+    "newExplicitMethods": [
+      "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose",
+      "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose",
+      "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation",
+      "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose"
+    ],
+    "expectedRuntimeInvocations": 14
+  },
+  "pinnedProductionReferences": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "ceeec5a8ef899dced36c556b44ce2e1099fefe65084b7ffc4e3b0f69c4bc68dd"
+  },
+  "ownedWorkTopology": [
+    "One preregistered per-case/session SourceStopOwner before actual cancellation commits. Never-started expected work remains incomplete; actual no-context cancellation has no expected sender.",
+    "Initial/recovered dispatch use the same routed materializer. Routed repository receives TrackingTransactionTemplate with the same original DataSourceTransactionManager/source. Preparation/binding/assignment/audit/translation/access/materialization remain routed; direct observer/callback same physical PG is intentional.",
+    "Actual stop sender forwarded once. Only after real return is the owner armed on its actual thread for the pinned immediately following real repository confirmation. Genuine sender failure completes only after sender-wrapper finally; original failure is retained.",
+    "Tracking template invokes original super.execute with unchanged callback once, verifies exact source/thread/attempt, and completes only after original return/throw and transaction cleanup. Arm removed in finally.",
+    "Observation failure is independent of ownership drain. Original private-fault cleanup and the attached proxy lifetime both drain actual handles uninterruptibly while recording/restoring cleanup-thread interrupt; route is retained through actual sender/confirmation completion. No timeout, elapsed wait, bridge flag, forced cancellation or invented CONFIRMED supplies completion.",
+    "Finite test-only gates always released in cleanup. Optional JDBC driver/server timeouts were not added. Unbounded ownership drain can require external harness watchdog in an unforeseen permanent block; watchdog destruction is FAILURE, never drained/PASS.",
+    "Actual captured class-owned Spring context closes before PG. Explicit owned TaskScheduler retains a real executor handle; actual supported scheduler/executor beans are shut down/reaped and isTerminated asserted before PG stop. Unsupported scheduler type is a failure, never silent termination. AFTER_CLASS DirtiesContext evicts the already-closed context. Relay remains available during context/owned-operation shutdown."
+  ],
+  "outerFutureLimit": "The production CompletableFuture remains unexposed; this does not join the JVM common-pool worker or claim whole-Future termination. On the pinned production continuation, after the tracked sender failure or original confirmation execute return/throw there is only catch/return, no further fixture I/O. Parent explicitly approved this operation-completion seam.",
+  "controls": [
+    {
+      "method": "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose",
+      "genuineWork": "Authenticated actual stop HTTP is held at the fixture relay. Actual premature-completion assertion fails; gate is then released, actual sender/confirmation drained independently, original transaction persists CONFIRMED/live=false before route destruction.",
+      "status": "SOURCE_AUTHORED_RUNTIME_UNRUN"
+    },
+    {
+      "method": "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose",
+      "genuineWork": "Authenticated actual stop held at relay; actual observation thread interruption causes real InterruptedException. Releasing the gate and draining clears/restores cleanup interrupt without cancelling ownership proof, then requires real confirmation before destruction.",
+      "status": "SOURCE_AUTHORED_RUNTIME_UNRUN"
+    },
+    {
+      "method": "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation",
+      "genuineWork": "Authenticated fixture relay actually returns HTTP503. Original transport produces UNKNOWN_OUTCOME409; sender completion records real failure, confirmation calls zero; committed cancellation/materialization closure retained with PENDING, never fake CONFIRMED.",
+      "status": "SOURCE_AUTHORED_RUNTIME_UNRUN"
+    },
+    {
+      "method": "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose",
+      "genuineWork": "Actual sender succeeds. Case gate pauses before original confirmation execute; only private PG route is cut, direct physical PG SELECT1 remains available, and original transaction begins through closed route and must really fail CannotCreateTransactionException/PSQL class08. Handle completes after original execute throw/resource cleanup, retained PENDING/live=false facts checked; same-port route restored separately.",
+      "status": "SOURCE_AUTHORED_RUNTIME_UNRUN"
+    }
+  ],
+  "preservation": [
+    "Original nine parameterized method and Mode block byte-identical to current770a before source.",
+    "Private PG fault original real read1/POST1/consume1, actual driver08/UNKNOWN409/interrupt/zero-array assertions, unresolved pre-rescue rows, same-port recovery/no-resend and separate authorized cancellation remain.",
+    "No production, migration, role, canonical, schema, generated, pin, B/R, acceptance or budget edits; only the approved test source changed."
+  ],
+  "execution": {
+    "compilation": "NOT_RUN",
+    "formatting": "NOT_RUN",
+    "runtime": "NOT_RUN",
+    "tests": "NOT_RUN",
+    "Gradle": "NOT_RUN",
+    "Docker": "NOT_RUN",
+    "processActions": []
+  },
+  "limits": [
+    "All four controls and updated14-invocation matrix need coordinator actual current-source execution.",
+    "Prior private-route normal PASS and original9 PASS are historical separate evidence, not proof of this new candidate.",
+    "No production DB deadline, held-row/pool/primary outage/general cleanup bound, physical Chromium effect, full Core/browser, all19AC, QA or lifecycle claim."
+  ],
+  "archives": {
+    "before.java": "docs/qa/evidence/STUDIO-OBS-007/d-stop-owner-candidate/before.java",
+    "after.java": "docs/qa/evidence/STUDIO-OBS-007/d-stop-owner-candidate/after.java",
+    "source.patch": "docs/qa/evidence/STUDIO-OBS-007/d-stop-owner-candidate/source.patch",
+    "hashes.json": "docs/qa/evidence/STUDIO-OBS-007/d-stop-owner-candidate/hashes.json",
+    "matrix.json": "docs/qa/evidence/STUDIO-OBS-007/d-stop-owner-candidate/matrix.json"
+  },
+  "nextOwner": "Coordinator alone performs scoped Gradle formatting/compile/current14-case execution and independent review. Candidate is frozen."
+}

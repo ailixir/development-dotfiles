@@ -1,0 +1,612 @@
+diff --git a/studio-runner/test/deployment/backend-env.test.ts b/studio-runner/test/deployment/backend-env.test.ts
+index 247a336..c0a0054 100644
+--- a/studio-runner/test/deployment/backend-env.test.ts
++++ b/studio-runner/test/deployment/backend-env.test.ts
+@@ -19,6 +19,7 @@ import { tmpdir } from 'node:os';
+ import { join } from 'node:path';
+ 
+ import { afterAll, describe, expect, it } from 'vitest';
++import { parseAllDocuments } from 'yaml';
+ 
+ import { loadConfig } from '../../src/server/config.js';
+ import { packageRoot } from '../helpers/corpus.js';
+@@ -29,6 +30,8 @@ import {
+   deploymentNamed,
+   envNames,
+   envValues,
++  mountedSpringProperties,
++  OBSERVED_FIXTURE,
+   one,
+   podSpec,
+   render,
+@@ -38,6 +41,7 @@ import {
+   soleContainer,
+   VALUE_SETS,
+   valueSetName,
++  writeValuesOverlay,
+ } from './helm.js';
+ import type { Container, K8sDocument, RenderOutcome } from './helm.js';
+ 
+@@ -356,3 +360,81 @@ describe('AC-5 — the studio audit stream is marked for the SIEM forwarder by v
+     expect(siemViolations(render({ guided: true, set: SIEM_ON }))).toEqual([]);
+   });
+ });
++
++/**
++ * STUDIO-OBS-009 OI-06 B5 — the backend's trusted catalog and policies are delivered by the chart.
++ *
++ * `application.yml` defaults `studio.observed-replay.catalog-json` and `policies-json` to `[]`, and
++ * with an empty catalog `ObservedReplayPins.selected()` answers 409 RUNTIME_INCOMPATIBLE, so a
++ * chart-deployed stack could not publish a plan, authorize a replay or run any Studio test. The
++ * chart renders both properties from the SAME `studioObserved` values the runner's files come from,
++ * into the mounted `application.yaml` (never an environment variable). The fixture values are TEST
++ * VALUES.
++ */
++describe('STUDIO-OBS-009 OI-06 B5 — the backend receives the same catalog and policies as the runner', () => {
++  const CATALOG_KEY = 'studio.observed-replay.catalog-json';
++  const POLICIES_KEY = 'studio.observed-replay.policies-json';
++
++  it('uses the property names the backend binds (read out of application.yml, not restated)', () => {
++    const documents = parseAllDocuments(
++      readFileSync(join(packageRoot, '..', 'backend', 'src', 'main', 'resources', 'application.yml'), 'utf8'),
++    ).map((document) => document.toJS() as { studio?: Record<string, Record<string, unknown> | undefined> } | null);
++    const bound = documents.map((document) => document?.studio?.['observed-replay']).find((value) => value !== undefined);
++    expect(bound, 'application.yml no longer binds studio.observed-replay').toBeDefined();
++    const prefix = 'studio.observed-replay.';
++    expect(Object.keys(bound ?? {})).toEqual(
++      expect.arrayContaining([CATALOG_KEY, POLICIES_KEY].map((key) => key.slice(prefix.length))),
++    );
++  });
++
++  it.each(['api', 'worker'] as const)('%s: both properties are delivered as JSON strings, the runner’s entry first', (role) => {
++    const properties = mountedSpringProperties(render({ observed: true }), role);
++    expect(typeof properties[CATALOG_KEY]).toBe('string');
++    expect(typeof properties[POLICIES_KEY]).toBe('string');
++    expect(JSON.parse(String(properties[CATALOG_KEY]))).toEqual([OBSERVED_FIXTURE.catalog]);
++    expect(JSON.parse(String(properties[POLICIES_KEY]))).toEqual(OBSERVED_FIXTURE.policies);
++  });
++
++  it.each(['api', 'worker'] as const)('%s: neither property is delivered through the environment', (role) => {
++    const container = role === 'api' ? api(render({ observed: true })) : worker(render({ observed: true }));
++    expect(envNames(container).filter((name) => /OBSERVED_(CATALOG|POLICIES)_JSON/u.test(name))).toEqual([]);
++  });
++
++  it('puts additionalBackendCatalog after the runner’s entry, and the runner never receives it', () => {
++    const older = {
++      profile: { placeholder: 'TEST-ONLY older profile' },
++      build: { ...OBSERVED_FIXTURE.catalog.build, executableImageDigest: '8'.repeat(64) },
++    };
++    const outcome = render({
++      observed: true,
++      args: ['-f', writeValuesOverlay('observed-additional-catalog.json', { studioObserved: { additionalBackendCatalog: [older] } })],
++    });
++    for (const role of ['api', 'worker'] as const) {
++      const catalog = JSON.parse(String(mountedSpringProperties(outcome, role)[CATALOG_KEY])) as unknown[];
++      expect(catalog, role).toEqual([OBSERVED_FIXTURE.catalog, older]);
++    }
++    const runnerFile = one(
++      byKind(outcome, 'ConfigMap').filter((d) => (d.metadata?.name ?? '').endsWith('-studio-observed-trust')),
++      'observed trust ConfigMap',
++    ).data?.['catalog.json'];
++    expect(JSON.parse(runnerFile ?? 'null')).toEqual(OBSERVED_FIXTURE.catalog);
++  });
++
++  it('delivers neither property while both flags are off, and the pod rolls when the catalog or policies change', () => {
++    const off = render({ set: { 'studioObserved.validationEnabled': 'false', 'studioObserved.replayEnabled': 'false' } });
++    for (const role of ['api', 'worker'] as const) {
++      const properties = mountedSpringProperties(off, role);
++      expect(properties).not.toHaveProperty(CATALOG_KEY);
++      expect(properties).not.toHaveProperty(POLICIES_KEY);
++    }
++    const changed = render({
++      observed: true,
++      args: ['-f', writeValuesOverlay('observed-policies-rolled.json', { studioObserved: { policies: [{ ...OBSERVED_FIXTURE.policies[0], policyVersion: '2' }] } })],
++    });
++    const annotation = (outcome: RenderOutcome, role: string): unknown =>
++      (deploymentNamed(outcome, `-${role}`).spec?.template as { metadata: { annotations: Record<string, unknown> } }).metadata.annotations['checksum/config'];
++    for (const role of ['api', 'worker']) {
++      expect(annotation(changed, role), role).not.toBe(annotation(render({ observed: true }), role));
++    }
++  });
++});
+diff --git a/studio-runner/test/deployment/chart.test.ts b/studio-runner/test/deployment/chart.test.ts
+index 723d4c1..a2cc1f1 100644
+--- a/studio-runner/test/deployment/chart.test.ts
++++ b/studio-runner/test/deployment/chart.test.ts
+@@ -47,9 +47,11 @@ import {
+   valueSetName,
+   CHART_DIR,
+   GUIDED_FIXTURE,
++  OBSERVED_FIXTURE,
+   TEST_PIN,
++  writeValuesOverlay,
+ } from './helm.js';
+-import type { Container, K8sDocument, PodSpec, RenderOutcome } from './helm.js';
++import type { Container, K8sDocument, PodSpec, RenderOptions, RenderOutcome } from './helm.js';
+ import { imageFacts, imageUnavailableReason } from './image.js';
+ 
+ /**
+@@ -1848,4 +1850,304 @@ function springPropertiesOf(outcome: RenderOutcome, role: string): Record<string
+   return parseYaml(configMap.data?.['application.yaml'] ?? '') as Record<string, unknown>;
+ }
+ 
++
++// ══════════════════════════════════════════════════════════════════════════════════════════════
++// STUDIO-OBS-009 residue (architect ruling OI-06, section B5) — observed replay is chart-renderable.
++//
++// Before this, `put-checks.studioRunner.acceptedEnvKeys` had no `OBSERVED_*` name and `runnerEnv`
++// failed the render for any key off that list, so a chart-deployed runner answered 503 to
++// `/v2/validate-observed` and `/v2/runs`, and the backend's trusted catalog and policies were empty
++// (409 RUNTIME_INCOMPATIBLE on every publication and replay). One top-level `studioObserved` block
++// now feeds both images. Every assertion reads `helm template` output; the fixture catalog and
++// policies are TEST VALUES (`OBSERVED_FIXTURE`), supplied the way a release supplies the real ones.
++// ══════════════════════════════════════════════════════════════════════════════════════════════
++
++const OBSERVED_FLAG_KEYS = [
++  'STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED',
++  'STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED',
++] as const;
++const OBSERVED_FILE_KEYS = [
++  'STUDIO_RUNNER_OBSERVED_CATALOG_FILE',
++  'STUDIO_RUNNER_OBSERVED_POLICY_FILE',
++  'STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST',
++] as const;
++const OBSERVED_KEYS: readonly string[] = [...OBSERVED_FLAG_KEYS, ...OBSERVED_FILE_KEYS];
++/** The runner volume and mount of the trust ConfigMap; the ConfigMap's name ends with the same words. */
++const OBSERVED_TRUST = 'studio-observed-trust';
++const UAT = 'values-uat.yaml';
++
++/** The catalog and policies that reached the runner pod as files, read out of the ConfigMap the render produced. */
++function observedTrustData(outcome: RenderOutcome): { catalog: unknown; policies: unknown } {
++  const configMap = one(named(outcome, OBSERVED_TRUST).filter((d) => d.kind === 'ConfigMap'), 'observed trust ConfigMap');
++  return {
++    catalog: JSON.parse(configMap.data?.['catalog.json'] ?? 'null') as unknown,
++    policies: JSON.parse(configMap.data?.['policies.json'] ?? 'null') as unknown,
++  };
++}
++
++/** The runner pod's template annotations. */
++function runnerPodAnnotations(outcome: RenderOutcome): Record<string, string> {
++  const spec = runnerDeployment(outcome).spec as { template?: { metadata?: { annotations?: Record<string, string> } } };
++  return spec.template?.metadata?.annotations ?? {};
++}
++
++describe('STUDIO-OBS-009 OI-06 B5 — the closed list and the chart-managed rule', () => {
++  it('names the five observed keys: 53 names, each one the runner loader accepts', () => {
++    // The one source read in this block, because no render exposes the list: it is the vocabulary of
++    // `runnerEnv`, and the comparison is against the runner's OWN ACCEPTED_KEYS (never a second copy).
++    const helpers = readFileSync(join(CHART_DIR, 'templates', '_helpers.tpl'), 'utf8');
++    const block = /define "put-checks\.studioRunner\.acceptedEnvKeys" -\}\}\n([^\n]+)\n/u.exec(helpers);
++    const names = (block?.[1] ?? '').trim().split(' ');
++    expect(names, 'the closed list moved or was emptied').toHaveLength(53);
++    expect(new Set(names).size, 'a name is listed twice').toBe(names.length);
++    for (const key of OBSERVED_KEYS) expect(names, `${key} is not on the closed list`).toContain(key);
++    expect(names.filter((name) => !ACCEPTED_KEYS.includes(name))).toEqual([]);
++  });
++
++  it.each([...OBSERVED_KEYS, 'STUDIO_RUNNER_OBSERVED_FUTURE_KEY'])(
++    'refuses %s through runnerEnv, pointing at studioObserved.* (prefix test, so a future key is covered)',
++    (key) => {
++      const outcome = renderOutcome({ valuesFile: UAT, args: ['--set-string', `studioRunner.runnerEnv.${key}=x`] });
++      expect(outcome.ok, `${key} rendered from runnerEnv`).toBe(false);
++      expect(outcome.error).toContain(`${key} is managed by the chart`);
++      expect(outcome.error).toContain('studioObserved');
++    },
++  );
++});
++
++describe('STUDIO-OBS-009 OI-06 B5 — observed replay OFF (the chart default)', () => {
++  const OFF: readonly (readonly [string, string | null, Record<string, string>])[] = [
++    ...VALUE_SETS.filter((file) => file !== UAT).map(
++      (file) => [valueSetName(file), file, {}] as const,
++    ),
++    [
++      'values-uat.yaml with both flags turned off',
++      UAT,
++      { 'studioObserved.validationEnabled': 'false', 'studioObserved.replayEnabled': 'false' },
++    ],
++  ];
++
++  it.each(OFF)(
++    '%s: both flags render "false", and no file key, digest pin, ConfigMap, mount or backend property',
++    (_label, valuesFile, set) => {
++      const outcome = render({ valuesFile, set });
++      const deployment = runnerDeployment(outcome);
++      const container = soleContainer(deployment);
++      const env = envValues(container);
++      for (const key of OBSERVED_FLAG_KEYS) expect(env[key], key).toBe('false');
++      for (const key of OBSERVED_FILE_KEYS) {
++        expect(env, `${key} rendered while both flags are off: no half configuration`).not.toHaveProperty(key);
++      }
++      expect(container.image ?? '', 'the image is digest-pinned while observed replay is off').not.toContain('@sha256:');
++      expect(named(outcome, OBSERVED_TRUST)).toEqual([]);
++      expect(volumeNamed(podSpec(deployment), OBSERVED_TRUST)).toBeUndefined();
++      expect((container.volumeMounts ?? []).map((mount) => mount.name)).not.toContain(OBSERVED_TRUST);
++      expect(runnerPodAnnotations(outcome)).not.toHaveProperty('checksum/studio-observed-trust');
++      for (const role of ['api', 'worker']) {
++        const delivered = Object.keys(springPropertiesOf(outcome, role));
++        expect(delivered.filter((key) => key.startsWith('studio.observed-replay.'))).toEqual([]);
++      }
++    },
++  );
++});
++
++describe('STUDIO-OBS-009 OI-06 B5 — observed replay ON', () => {
++  const EACH = VALUE_SETS.map((file) => [valueSetName(file), file] as const);
++
++  it('is on in values-uat.yaml, with no catalog or policy committed', () => {
++    const env = envValues(soleContainer(runnerDeployment(render({ valuesFile: UAT }))));
++    for (const key of OBSERVED_FLAG_KEYS) expect(env[key], key).toBe('true');
++  });
++
++  it.each(EACH)(
++    '%s: renders the five keys, a digest-pinned image, a read-only ConfigMap mount and one catalog in three places',
++    (_label, valuesFile) => {
++      const outcome = render({ valuesFile, observed: true });
++      const deployment = runnerDeployment(outcome);
++      const container = soleContainer(deployment);
++      const env = envValues(container);
++      const digest = OBSERVED_FIXTURE.catalog.build.executableImageDigest;
++
++      for (const key of OBSERVED_FLAG_KEYS) expect(env[key], key).toBe('true');
++      // The digest is DERIVED from the catalog (no second value), and the image reference names the
++      // same digest: both are compared inside one manifest, never to a literal in this test.
++      expect(env['STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST']).toBe(digest);
++      const image = container.image ?? '';
++      expect(image.endsWith(`@sha256:${env['STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST'] ?? ''}`), image).toBe(true);
++      expect(/:[^/@]+@/u.test(image), `${image} still carries a tag in front of the digest`).toBe(false);
++
++      // The two file keys point inside the mount of the volume that carries them.
++      const mount = (container.volumeMounts ?? []).find((entry) => entry.name === OBSERVED_TRUST);
++      expect(mount, 'no mount for the trust ConfigMap').toBeDefined();
++      expect(mount?.readOnly).toBe(true);
++      expect(mount?.subPath, 'a subPath mount would never receive an update').toBeUndefined();
++      const volume = volumeNamed(podSpec(deployment), OBSERVED_TRUST);
++      const configMap = one(
++        named(outcome, OBSERVED_TRUST).filter((d) => d.kind === 'ConfigMap'),
++        'observed trust ConfigMap',
++      );
++      expect(volume?.configMap?.name).toBe(configMap.metadata?.name);
++      expect(volume?.configMap?.defaultMode, 'same 0440 as every other mounted file').toBe(0o440);
++      const projected = (volume?.configMap?.items ?? []).map((item) => `${mount?.mountPath ?? ''}/${item.path ?? ''}`);
++      expect(projected).toContain(env['STUDIO_RUNNER_OBSERVED_CATALOG_FILE']);
++      expect(projected).toContain(env['STUDIO_RUNNER_OBSERVED_POLICY_FILE']);
++
++      // One catalog entry, in the file the runner reads and in the backend's catalog (runner entry first).
++      const files = observedTrustData(outcome);
++      expect(files.catalog).toEqual(OBSERVED_FIXTURE.catalog);
++      expect(files.policies).toEqual(OBSERVED_FIXTURE.policies);
++      for (const role of ['api', 'worker']) {
++        const props = springPropertiesOf(outcome, role);
++        const backendCatalog = JSON.parse(String(props['studio.observed-replay.catalog-json'])) as { build: { executableImageDigest: string } }[];
++        expect(backendCatalog[0]?.build.executableImageDigest, `${role}: first backend catalog entry`).toBe(digest);
++        expect(JSON.parse(String(props['studio.observed-replay.policies-json']))).toEqual(files.policies);
++      }
++    },
++  );
++
++  it.each(EACH)('%s: the rendered env passes the runner’s own loader with the observed fields set', (_label, valuesFile) => {
++    const env = renderedRunnerEnv(render({ valuesFile, observed: true }));
++    const config = loadConfig(env);
++    expect(config.observedValidationEnabled).toBe(true);
++    expect(config.observedReplayEnabled).toBe(true);
++    expect(config.observedCatalogFile).toBe(env['STUDIO_RUNNER_OBSERVED_CATALOG_FILE']);
++    expect(config.observedPolicyFile).toBe(env['STUDIO_RUNNER_OBSERVED_POLICY_FILE']);
++    expect(config.observedImageDigest).toBe(env['STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST']);
++  });
++
++  it.each([
++    ['validation only', { 'studioObserved.replayEnabled': 'false' }, 'true', 'false'],
++    ['replay only', { 'studioObserved.validationEnabled': 'false' }, 'false', 'true'],
++  ] as const)('%s: the flags render as set and the files and the pin are still rendered', (_label, set, validation, replay) => {
++    const outcome = render({ valuesFile: UAT, set });
++    const container = soleContainer(runnerDeployment(outcome));
++    const env = envValues(container);
++    expect(env['STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED']).toBe(validation);
++    expect(env['STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED']).toBe(replay);
++    // Either flag needs the build identity (application.ts loadObservedRunnerSupport).
++    for (const key of OBSERVED_FILE_KEYS) expect(env[key], key).toBeTruthy();
++    expect(container.image).toContain('@sha256:');
++  });
++
++  it('ignores studioRunner.image.tag while on: the digest is the reference', () => {
++    const image = soleContainer(runnerDeployment(render({ valuesFile: UAT, set: { 'studioRunner.image.tag': '9.9.9' } }))).image ?? '';
++    expect(image).toContain('@sha256:');
++    expect(image).not.toContain('9.9.9');
++  });
++
++  it('adds no Secret volume and no container, so the shareProcessNamespace one-container bound is unchanged', () => {
++    for (const valuesFile of VALUE_SETS) {
++      const before = podSpec(runnerDeployment(render({ valuesFile, set: { 'studioObserved.validationEnabled': 'false', 'studioObserved.replayEnabled': 'false' } })));
++      const after = podSpec(runnerDeployment(render({ valuesFile, observed: true })));
++      const secrets = (pod: PodSpec): (string | undefined)[] => (pod.volumes ?? []).filter((v) => v.secret !== undefined).map((v) => v.secret?.secretName);
++      expect(secrets(after), valueSetName(valuesFile)).toEqual(secrets(before));
++      expect(after.containers ?? []).toHaveLength(1);
++      expect(sharedNamespaceViolations(after)).toEqual([]);
++    }
++  });
++
++  it('rolls the runner pod when only the policies change (the files are read once at start-up)', () => {
++    const changed = writeValuesOverlay('observed-policies-changed.json', {
++      studioObserved: { policies: [{ ...OBSERVED_FIXTURE.policies[0], policyVersion: '2' }] },
++    });
++    const before = runnerPodAnnotations(render({ valuesFile: UAT }))['checksum/studio-observed-trust'];
++    const after = runnerPodAnnotations(render({ valuesFile: UAT, args: ['-f', changed] }))['checksum/studio-observed-trust'];
++    expect(before).toBeTruthy();
++    expect(after).toBeTruthy();
++    expect(after).not.toBe(before);
++  });
++
++  it('keeps AC-9a’s no-policy-environment-key rule everywhere except the one chart-managed file path', () => {
++    const names = envNames(soleContainer(runnerDeployment(render({ valuesFile: UAT }))));
++    expect(names.filter((name) => /POLICY|APPROVED_ORIGINS|DESTINATIONS/u.test(name))).toEqual([
++      'STUDIO_RUNNER_OBSERVED_POLICY_FILE',
++    ]);
++  });
++});
++
++describe('STUDIO-OBS-009 OI-06 B5 — the four render guards (and the boolean check) fire, each naming the key', () => {
++  const CATALOG = OBSERVED_FIXTURE.catalog;
++  const policy = (index: number, padding = ''): Record<string, unknown> => ({
++    ...OBSERVED_FIXTURE.policies[0],
++    policyId: `test-only-policy-${String(index)}${padding}`,
++    applicationId: `test-only-application-${String(index)}`,
++  });
++  const policiesFile = (name: string, policies: readonly unknown[]): readonly string[] => [
++    '-f',
++    writeValuesOverlay(name, { studioObserved: { policies } }),
++  ];
++  /** An all-digit hash written without quotes is a YAML number: it loses digits, so the chart refuses it. */
++  const unquoted = ((): string => {
++    const directory = mkdtempSync(join(tmpdir(), 'studio-chart-observed-yaml-'));
++    scratchDirs.push(directory);
++    const file = join(directory, 'numeric-hash.yaml');
++    writeFileSync(file, `studioObserved:\n  catalog:\n    build:\n      profileHash: ${'1'.repeat(64)}\n`, 'utf8');
++    return file;
++  })();
++
++  const GUARDS: readonly (readonly [string, RenderOptions, readonly string[]])[] = [
++    ['G-O0 a string flag (--set-string)', { valuesFile: UAT, args: ['--set-string', 'studioObserved.replayEnabled=false'] }, ['studioObserved.replayEnabled must be a boolean']],
++
++    ['G-O1 both flags on, runner off', { observed: true, set: { 'studioRunner.enabled': 'false' } }, ['studioObserved', 'studioRunner.enabled']],
++    ['G-O1 validation only, runner off', { observedInputs: true, set: { 'studioRunner.enabled': 'false', 'studioObserved.validationEnabled': 'true' } }, ['studioObserved', 'studioRunner.enabled']],
++    ['G-O1 replay only, runner off', { observedInputs: true, set: { 'studioRunner.enabled': 'false', 'studioObserved.replayEnabled': 'true' } }, ['studioObserved', 'studioRunner.enabled']],
++
++    ['G-O2 no catalog (UAT, inputs not supplied)', { valuesFile: UAT, observedInputs: false }, ['studioObserved.catalog']],
++    ['G-O2 catalog with an extra key', { valuesFile: UAT, set: { 'studioObserved.catalog.extra': '1' } }, ['studioObserved.catalog', 'build and profile']],
++    ['G-O2 catalog profile not a map', { valuesFile: UAT, args: ['--set-string', 'studioObserved.catalog.profile=text'] }, ['studioObserved.catalog.profile']],
++    ['G-O2 build with an extra key', { valuesFile: UAT, set: { 'studioObserved.catalog.build.extra': '1' } }, ['studioObserved.catalog.build']],
++    ['G-O2 build without chromiumBuild', { valuesFile: UAT, set: { 'studioObserved.catalog.build.chromiumBuild': 'null' } }, ['studioObserved.catalog.build.chromiumBuild']],
++    ['G-O2 digest with a sha256: prefix', { valuesFile: UAT, set: { 'studioObserved.catalog.build.executableImageDigest': `sha256:${'4'.repeat(64)}` } }, ['studioObserved.catalog.build.executableImageDigest', '64 lower-case hex']],
++    ['G-O2 digest in upper case', { valuesFile: UAT, set: { 'studioObserved.catalog.build.executableImageDigest': 'A'.repeat(64) } }, ['studioObserved.catalog.build.executableImageDigest']],
++    ['G-O2 hash too short', { valuesFile: UAT, set: { 'studioObserved.catalog.build.schemaBundleHash': 'abc123' } }, ['studioObserved.catalog.build.schemaBundleHash']],
++    ['G-O2 hash written as a YAML number', { valuesFile: UAT, args: ['-f', unquoted] }, ['studioObserved.catalog.build.profileHash', 'quoted string']],
++    ['G-O2 additionalBackendCatalog entry of the wrong shape', { valuesFile: UAT, set: { 'studioObserved.additionalBackendCatalog[0].x': '1' } }, ['studioObserved.additionalBackendCatalog[0]']],
++
++    ['G-O3 no policies (UAT, only the catalog supplied)', { valuesFile: UAT, observedInputs: false, args: ['-f', writeValuesOverlay('observed-catalog-only.json', { studioObserved: { catalog: CATALOG } })] }, ['studioObserved.policies must not be empty']],
++    ['G-O3 17 policies (the backend takes 16)', { valuesFile: UAT, args: policiesFile('observed-policies-17.json', Array.from({ length: 17 }, (_unused, index) => policy(index))) }, ['studioObserved.policies has 17 entries', '16']],
++    ['G-O3 policies over 65,536 bytes', { valuesFile: UAT, args: policiesFile('observed-policies-big.json', Array.from({ length: 16 }, (_unused, index) => policy(index, 'x'.repeat(4200)))) }, ['studioObserved.policies is', '65536']],
++
++    ['G-O4 backend.configOverrides catalog-json', { valuesFile: UAT, set: { 'backend.configOverrides.studio\\.observed-replay\\.catalog-json': 'x' } }, ['backend.configOverrides sets studio.observed-replay.catalog-json']],
++    ['G-O4 worker.configOverrides policies-json', { valuesFile: UAT, set: { 'worker.configOverrides.studio\\.observed-replay\\.policies-json': 'x' } }, ['worker.configOverrides sets studio.observed-replay.policies-json']],
++    ['G-O4 backend.env STUDIO_OBSERVED_CATALOG_JSON', { valuesFile: UAT, set: { 'backend.env.STUDIO_OBSERVED_CATALOG_JSON': 'x' } }, ['backend.env sets STUDIO_OBSERVED_CATALOG_JSON']],
++    ['G-O4 worker.env STUDIO_OBSERVED_POLICIES_JSON', { valuesFile: UAT, set: { 'worker.env.STUDIO_OBSERVED_POLICIES_JSON': 'x' } }, ['worker.env sets STUDIO_OBSERVED_POLICIES_JSON']],
++    ['G-O4 nested and relaxed spelling in configOverrides', { valuesFile: UAT, args: ['-f', writeValuesOverlay('observed-nested-override.json', { backend: { configOverrides: { studio: { 'observed-replay': { Catalog_JSON: 'x' } } } } })] }, ['backend.configOverrides sets studio.observed-replay.Catalog_JSON']],
++  ];
++
++  it.each(GUARDS)('%s', (_label, options, fragments) => {
++    const outcome = renderOutcome(options);
++    expect(outcome.ok, 'the guard did not fire: the render succeeded').toBe(false);
++    for (const fragment of fragments) expect(outcome.error).toContain(fragment);
++  });
++
++  it('G-O3 admits 16 policies: the bound is the backend’s, not stricter', () => {
++    const outcome = renderOutcome({ valuesFile: UAT, args: policiesFile('observed-policies-16.json', Array.from({ length: 16 }, (_unused, index) => policy(index))) });
++    expect(outcome.ok, outcome.error).toBe(true);
++  });
++
++  it('G-O4 applies only while observed replay is on: the same overrides render with both flags off', () => {
++    const outcome = renderOutcome({
++      set: {
++        'backend.configOverrides.studio\\.observed-replay\\.catalog-json': 'x',
++        'worker.env.STUDIO_OBSERVED_POLICIES_JSON': 'x',
++      },
++    });
++    expect(outcome.ok, outcome.error).toBe(true);
++  });
++
++  it('chart mutation: with the 16-entry comparison removed from a scratch copy, 17 policies render', () => {
++    const chart = mutatedChart('observed-policy-bound', '_helpers.tpl', '{{- if gt (len $o.policies) 16 -}}', '{{- if false -}}');
++    const seventeen = policiesFile('observed-policies-17-mutated.json', Array.from({ length: 17 }, (_unused, index) => policy(index)));
++    expect(renderOutcome({ chartDir: chart, valuesFile: UAT, args: seventeen }).ok, 'the mutation did not remove the guard').toBe(true);
++    expect(renderOutcome({ valuesFile: UAT, args: seventeen }).ok, 'the unmutated chart accepted 17 policies').toBe(false);
++  });
++
++  it('chart mutation: with the runner-enabled check removed from a scratch copy, the runner-off set renders nothing for the runner', () => {
++    const chart = mutatedChart('observed-runner-off', '_helpers.tpl', '{{- if not .Values.studioRunner.enabled -}}', '{{- if false -}}');
++    const mutated = renderOutcome({ chartDir: chart, observed: true, set: { 'studioRunner.enabled': 'false' } });
++    expect(mutated.ok, 'the mutation did not remove G-O1').toBe(true);
++    expect(named(mutated, RUNNER_FRAGMENT), 'the values were silently ignored').toEqual([]);
++  });
++});
++
+ export type { K8sDocument };
+diff --git a/studio-runner/test/deployment/envfrom-keys.test.ts b/studio-runner/test/deployment/envfrom-keys.test.ts
+index ff55010..6d630b3 100644
+--- a/studio-runner/test/deployment/envfrom-keys.test.ts
++++ b/studio-runner/test/deployment/envfrom-keys.test.ts
+@@ -103,6 +103,12 @@ function springProperties(outcome: RenderOutcome, role: 'api' | 'worker'): Recor
+   return parse(yaml ?? '') as Record<string, unknown>;
+ }
+ 
++/** The two properties the chart adds while `studioObserved` is on. Names read from `ObservedReplayProperties`'s prefix. */
++const OBSERVED_REPLAY_PROPERTIES: readonly string[] = [
++  'studio.observed-replay.catalog-json',
++  'studio.observed-replay.policies-json',
++];
++
+ interface ChartValues {
+   backend: { configOverrides: Record<string, unknown> };
+   worker: { configOverrides: Record<string, unknown> };
+@@ -126,10 +132,14 @@ describe('AC-18 — envFrom names and lossless Spring configuration delivery', (
+         // Every configured key arrives unchanged...
+         expect(delivered).toMatchObject(expected);
+         // ...and the ONLY additions are the chart-owned runner-chain properties (STUDIO-OBS-009:
+-        // `studio.runner.tls.*`, and the guided set while guided mode is on). Compared against the
+-        // delivered map itself, so a stray extra key still reddens this.
++        // `studio.runner.tls.*`, and the guided set while guided mode is on) and, while observed
++        // replay is on (values-uat.yaml), the two `studio.observed-replay.*-json` properties
++        // (architect ruling OI-06, B5). Compared against the delivered map itself, so a stray extra
++        // key still reddens this.
+         const extras = Object.keys(delivered).filter((key) => !(key in expected));
+-        expect(extras.filter((key) => !key.startsWith('studio.runner.tls.'))).toEqual([]);
++        expect(
++          extras.filter((key) => !key.startsWith('studio.runner.tls.') && !OBSERVED_REPLAY_PROPERTIES.includes(key)),
++        ).toEqual([]);
+         expect(extras.length, 'the runner TLS properties were not delivered').toBeGreaterThan(0);
+       }
+     });
+diff --git a/studio-runner/test/deployment/helm.ts b/studio-runner/test/deployment/helm.ts
+index ff62d7d..2f6b2eb 100644
+--- a/studio-runner/test/deployment/helm.ts
++++ b/studio-runner/test/deployment/helm.ts
+@@ -31,7 +31,7 @@ import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+ import { tmpdir } from 'node:os';
+ import { join } from 'node:path';
+ 
+-import { parseAllDocuments } from 'yaml';
++import { parse as parseYaml, parseAllDocuments } from 'yaml';
+ 
+ import { packageRoot } from '../helpers/corpus.js';
+ 
+@@ -106,6 +106,65 @@ export const GUIDED_OVERLAY_FILE: string = (() => {
+   return file;
+ })();
+ 
++/**
++ * TEST VALUES ONLY: a syntactically valid, obviously fake catalog entry and trusted policy for the
++ * `studioObserved` block (architect ruling OI-06, B5).
++ *
++ * The chart commits neither: the catalog entry is specific to one runner image (CI generates it from
++ * the pushed image) and the policies are reviewed per-environment configuration, so a real release
++ * supplies both with `-f`, as this harness does. Every hash is a repeated placeholder digit so it
++ * cannot be mistaken for a measurement. The chart checks the SHAPE (key set, 64 lower-case hex), not
++ * that `profileHash` is the hash of `profile`; that equality is the runner's and the backend's.
++ */
++export const OBSERVED_FIXTURE = {
++  catalog: {
++    profile: { placeholder: 'TEST-ONLY replay profile; not a real profile' },
++    build: {
++      profileHash: '1'.repeat(64),
++      schemaBundleHash: '2'.repeat(64),
++      referenceBundleHash: '3'.repeat(64),
++      executableImageDigest: '4'.repeat(64),
++      chromiumBuild: 'TEST-ONLY-chromium-0',
++    },
++  },
++  policies: [
++    {
++      version: 1,
++      policyId: 'test-only-policy',
++      policyVersion: '1',
++      applicationId: 'test-only-application',
++      environment: 'uat',
++      allowedOrigins: ['https://app.example.test'],
++      entryPolicyId: 'test-only-entry',
++      applicationPolicy: null,
++      rules: [],
++    },
++  ],
++} as const;
++
++/**
++ * Writes a values overlay (JSON, which Helm reads as YAML) into the process-scoped scratch directory
++ * and returns its path, for the inputs `--set` cannot express (multi-line, long or nested values).
++ */
++export function writeValuesOverlay(name: string, values: unknown): string {
++  const file = join(guidedScratch, name);
++  writeFileSync(file, JSON.stringify(values), 'utf8');
++  return file;
++}
++
++/**
++ * The fixture catalog and policies as a values overlay, with the flags untouched.
++ *
++ * `values-uat.yaml` turns observed replay ON and commits no catalog or policies on purpose (they come
++ * at deploy time), so a UAT render fails by design without them. This is the deploy-time input every
++ * UAT render in this tier is given, exactly as {@link TEST_PIN} is, so the criteria that are not
++ * about observed replay keep rendering. The negative cases (`observedInputs: false`) prove that
++ * dropping it still fails the render.
++ */
++export const OBSERVED_OVERLAY_FILE: string = writeValuesOverlay('observed-overlay.json', {
++  studioObserved: { catalog: OBSERVED_FIXTURE.catalog, policies: OBSERVED_FIXTURE.policies },
++});
++
+ /** Why `helm` cannot be used, or `null` when it can. Never a bare boolean: the reason is the test. */
+ export function helmUnavailableReason(): string | null {
+   try {
+@@ -177,6 +236,14 @@ export interface RenderOptions {
+   readonly guided?: boolean;
+   /** Leaves the controller pin unset, to prove the render refuses without it. */
+   readonly omitPin?: boolean;
++  /** Turns observed replay ON (both flags) and supplies {@link OBSERVED_FIXTURE}. */
++  readonly observed?: boolean;
++  /**
++   * Layers {@link OBSERVED_OVERLAY_FILE} (the fixture catalog and policies, flags untouched).
++   * Defaults to true for `values-uat.yaml`, which enables observed replay without committing the
++   * inputs, and for `observed: true`. Pass `false` to prove the render refuses without them.
++   */
++  readonly observedInputs?: boolean;
+ }
+ 
+ /**
+@@ -192,6 +259,12 @@ export function renderOutcome(options: RenderOptions = {}): RenderOutcome {
+     args.push('-f', join(chartDir, options.valuesFile));
+   }
+   if (options.guided === true) args.push('-f', GUIDED_OVERLAY_FILE);
++  const observedInputs =
++    options.observedInputs ?? (options.observed === true || options.valuesFile === 'values-uat.yaml');
++  if (observedInputs) args.push('-f', OBSERVED_OVERLAY_FILE);
++  if (options.observed === true) {
++    args.push('--set', 'studioObserved.validationEnabled=true', '--set', 'studioObserved.replayEnabled=true');
++  }
+   if (options.enableRunner !== false) args.push('--set', 'studioRunner.enabled=true');
+   // Set BEFORE the caller's `--set`s so a test that supplies its own pin (or a bad one) wins. It is
+   // `--set` and not `--set-string` on purpose: Helm applies every `--set-string` AFTER every `--set`
+@@ -346,7 +419,11 @@ export interface Volume {
+     readonly defaultMode?: number;
+     readonly items?: readonly { key?: string; path?: string }[];
+   };
+-  readonly configMap?: { readonly name?: string; readonly defaultMode?: number };
++  readonly configMap?: {
++    readonly name?: string;
++    readonly defaultMode?: number;
++    readonly items?: readonly { key?: string; path?: string }[];
++  };
+   readonly persistentVolumeClaim?: { readonly claimName?: string };
+ }
+ 
+@@ -357,6 +434,23 @@ export function podSpec(deployment: K8sDocument): PodSpec {
+   return pod;
+ }
+ 
++/**
++ * The Spring properties the chart mounts for `role` (the `application.yaml` of the ConfigMap that
++ * the `spring-config` volume names), parsed. Dotted names stay flat keys, as the backend reads them.
++ */
++export function mountedSpringProperties(
++  outcome: RenderOutcome,
++  role: 'api' | 'worker',
++): Record<string, unknown> {
++  const deployment = deploymentNamed(outcome, `-${role}`);
++  const volume = podSpec(deployment).volumes?.find((entry) => entry.name === 'spring-config');
++  const configMap = one(
++    byKind(outcome, 'ConfigMap').filter((entry) => entry.metadata?.name === volume?.configMap?.name),
++    'mounted Spring config',
++  );
++  return parseYaml(configMap.data?.['application.yaml'] ?? '') as Record<string, unknown>;
++}
++
+ export function soleContainer(deployment: K8sDocument): Container {
+   const containers = podSpec(deployment).containers ?? [];
+   return one(containers as unknown as K8sDocument[], 'container') as unknown as Container;

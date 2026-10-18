@@ -1,0 +1,55 @@
+{
+  "status": "PASS_THREE_COMPONENT_STALENESS_DETECTORS",
+  "counterexamples": [
+    {
+      "name": "accepted-observed-choice.json",
+      "guard": "accepted-observed-choice exact current authoritative counterpart",
+      "componentBaselinePassed": true,
+      "mutantRejected": true,
+      "mutantFailureNames": [
+        "accepted-observed-choice exact current authoritative counterpart",
+        "control-value-reference.json current closed complete basis",
+        "control-value-reference.json current closed artifact",
+        "control-value-reference.json snapshot authority",
+        "accepted-observed-choice.json current closed complete basis",
+        "accepted-observed-choice.json current closed artifact",
+        "accepted-observed-choice.json snapshot authority"
+      ],
+      "wholeCatalogBaseline": "NOT_GREEN_CONTROL_VALUE_UNRESOLVED"
+    },
+    {
+      "name": "fresh-order-reference.json",
+      "guard": "fresh-order exact current authoritative basis",
+      "componentBaselinePassed": true,
+      "mutantRejected": true,
+      "mutantFailureNames": [
+        "fresh-order exact current authoritative basis",
+        "fresh-order exact current authoritative artifact",
+        "fresh-order exact immutable snapshot authority counterpart",
+        "fresh-order complete recomputed hash map",
+        "fresh-order-reference.json current closed complete basis",
+        "fresh-order-reference.json current closed artifact",
+        "fresh-order-reference.json snapshot authority",
+        "control-value-reference.json current closed complete basis",
+        "control-value-reference.json current closed artifact",
+        "control-value-reference.json snapshot authority"
+      ],
+      "wholeCatalogBaseline": "NOT_GREEN_CONTROL_VALUE_UNRESOLVED"
+    },
+    {
+      "name": "manifest.json",
+      "guard": "canonical manifest exact current vector counterpart",
+      "componentBaselinePassed": true,
+      "mutantRejected": true,
+      "mutantFailureNames": [
+        "canonical manifest exact current vector counterpart",
+        "control-value-reference.json current closed complete basis",
+        "control-value-reference.json current closed artifact",
+        "control-value-reference.json snapshot authority"
+      ],
+      "wholeCatalogBaseline": "NOT_GREEN_CONTROL_VALUE_UNRESOLVED"
+    }
+  ],
+  "negativeOperationDeclarationsUnchanged": true,
+  "negativeOperationExecutionCredit": false
+}

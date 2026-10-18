@@ -1,0 +1,160 @@
+{
+  "schema": "fresh-owner-b-budget-schedule-delta-review/1",
+  "recordedAt": "2026-10-10T19:39:33.232711+00:00",
+  "scope": "Independent static review of exact frozen scheduler and fixture against password-policy first/ninth sources.zip, independent disposition and existing recorded evidence. Only this review JSON written; no source edits or execution.",
+  "verdict": "CONCERNS_NUMERIC_ONLY_EVIDENCE_CONTRACT_NOT_MET",
+  "scopedVerdicts": {
+    "schedulerDelta": "APPROVE_EXACT_STATIC_DELTA",
+    "fixtureConfigurationAndPreservedBodies": "APPROVE_EXACT_STATIC_DELTA",
+    "numericOnlyBudgetEvidence": "FAIL_RAW_SESSION_ID_EXPORT; RESERVATION_COUNTER_PROOF_NOT_EXPORTED",
+    "recordedFirstNinth": "EXISTING_ACTUAL_2_PASS_CONFIRMED_FROM_XML_AND_RESULT_ONLY",
+    "defaultTestProposal": "ACCEPT_CONSTRAINED_AUTHORING_DESIGN_ONLY; NOT_WRITTEN_OR_EXECUTED",
+    "wholeWave": "NO_QA_OR_LIFECYCLE_VERDICT"
+  },
+  "boundSources": {
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java": "86b36ee2e157be9d34161d5c2ff754b40a572f7862ba6e6b03e67fc7fedda4c6",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "6f2dc64c582b49d2dfaa0cf3d4aa5a5a288690a543c19817c12689211ab0b2aa",
+    "baselineArchive": {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-password-policy-unit-first-ninth/sources.zip",
+      "sha256": "6bd9309a57a9650bfc834266d7bad6b74e05d6e9351393c8d334abb37072de5b"
+    },
+    "independentDisposition": {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-budget-schedule-disposition.json",
+      "sha256": "7cff08cf04bfede93399863b9508aa0d628c041380a60defacda9d8e898aafd7"
+    },
+    "candidateProposal": {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/b-approved-budget-schedule-candidate.json",
+      "sha256": "0ab7babcb216bc42bb4a6f277d677799de7833a11e40230956b8d5eef923b7b0"
+    },
+    "passingArchive": "fresh-owner-budget-schedule-first-ninth/sources.zip; both reviewed files byte-identical to current sources"
+  },
+  "findings": [
+    {
+      "id": "B-01",
+      "severity": "blocking_for_numeric_only_claim",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "line": 917,
+      "finding": "persistActualBudgetEvidence calls putDiagnosticUuid for sessionId. The helper at line1389 writes the raw canonical UUID, and both recorded model-budget evidence files contain raw sessionId strings. UUID format validation is not anonymization. No request ID, body, context, value, header or bearer token is serialized by this added collector, but the no-raw-ID/numeric-only claim is false.",
+      "requiredDisposition": "Keep source frozen in this review. Any separately authorized repair must replace exported identity with local numeric ordinals or omit it, retaining raw joins only transiently; use a numeric/boolean-only export allowlist. Existing evidence cannot be relabeled numeric-only."
+    },
+    {
+      "id": "B-02",
+      "severity": "evidence_limit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "line": 928,
+      "finding": "Collector reads persisted attempt identity ceilings and actual wire, but does not read/export service reservation counters or per-attempt charged reservation values. Production call source passes the same request ceiling to reserveAttempt and reserveModel before gateway I/O, which establishes static wiring, not an independent runtime reservation-counter witness.",
+      "requiredDisposition": "Distinguish actual wire4000 == persisted4000 from source-derived reserved4000. For a complete numeric budget proof, assert actual service/store persisted reservation/accounting effects before send and committed cumulative counters, exporting only numbers/booleans. Do not manufacture or patch reservations."
+    },
+    {
+      "id": "B-03",
+      "severity": "provenance_note",
+      "finding": "Candidate proposal records fixture candidateSHA256129d6671c9bc128a4f541299650ba8560113d5d64bc1e4c15ad297908312dfce, which is not the requested/current fixture hash6f2dc64c582b49d2dfaa0cf3d4aa5a5a288690a543c19817c12689211ab0b2aa. Its runtime-pending wording also predates the recorded passing gate.",
+      "requiredDisposition": "This review binds the exact user-specified hash and matching passing source archive. Treat candidate JSON as historical design/proposal, not the exact final fixture manifest."
+    }
+  ],
+  "schedulerVerification": {
+    "exactDiff": "Only Integer.valueOf(2).equals(artifactFamily) becomes artifactFamily != null && artifactFamily >= 2 at line272; same refuse(testId, occurrenceId, OBSERVED_SCHEDULE_AUTH_REQUIRED).",
+    "precedence": "Lifecycle, readiness and activated revision identity remain first. Observed refusal remains before overlap, uncertainty, dispatch-enabled, background authorization and scheduled acceptance.",
+    "acceptanceAlignment": "Unchanged StudioAcceptanceService observedFamily = revision.getArtifactSchemaVersion() >= 2 at line319 rejects scheduled observed executions.",
+    "preserved": "Null and legacy1 fall through as before; readiness and activation mismatch remain authoritative; background denial/grant rechecks and occurrence insert/refuse/advance behavior unchanged. No unattended authority or grants added.",
+    "currentV3Flow": "Unchanged schedulerAndNewHead uses genuine separately learned/published revisions, verifies activation mismatch then current observed refusal, unchanged activation identities, zero additional executions/dispatch/model calls. Recorded scheduler-history corroborates zero executions and both refusals.",
+    "requiredControls": [
+      "StudioScheduleApiIT.aScheduledOccurrenceIsAcceptedWithNoRequestAuthentication",
+      "StudioScheduleApiIT.authorizationWithdrawalBeforeAdmissionAndBeforeSendFailsClosed",
+      "StudioScheduleApiIT.graceAndGrantAreRecheckedAfterPreflightBeforeAnyAcceptedWrite"
+    ],
+    "controlStatus": "StudioScheduleApiIT byte-identical to baseline; controls must remain required in coordinator gate. No fresh execution or inference of their pass from selected2 XML."
+  },
+  "fixtureVerification": {
+    "configuration": "Existing DynamicPropertySource startup property max-output-tokens4000 only; no live policy mutation.",
+    "unchanged": {
+      "productionOutputDefault": 4096,
+      "sessionOutputTotal": 32000,
+      "sessionInputTotal": 128000,
+      "translationInputPerCallDefault": 65536,
+      "callSecondsDefault": 60,
+      "testBodies": 9,
+      "secretActions": 7,
+      "HomeAndReportsAssertions": true
+    },
+    "delta": "Only import/autowired gateway properties, startup4000, AfterEach evidence hook and evidence helper added. Unified diff has no edits to nine test bodies or source/actions/Home/Reports assertions. Original failure receives suppressed evidence errors and existing cancellation path remains.",
+    "productionAccounting": "GuidedTranslationProperties, GuidedSessionProperties, GuidedTranslationService, GuidedTranslationStore and GuidedSessionService byte-identical to baseline. No new clamp/refund/truncation/budget increase. Existing transport min(request ceiling, transport ceiling) unchanged; actual transport32768 exceeds4000.",
+    "wireWitness": "MODEL_WIRE is populated from real controlled HTTP server request body reached through SDK. Collector transiently parses actual requestId to join stored attempts; APPLIED requires wireFound true. Complete raw UTF8 body bytes, including encoded wrappers/schema, are checked <= persisted inputCeiling. This is controlled SDK HTTP evidence, not enterprise-provider proof.",
+    "numericSummaries": {
+      "secretSession": {
+        "attempts": 8,
+        "persistedOutputCeilingsSum": 32000,
+        "persistedInputCeilingsSum": 123050,
+        "completeEncodedInputBytesSum": 108226
+      },
+      "firstFlowSession1": {
+        "attempts": 6,
+        "persistedOutputCeilingsSum": 24000,
+        "persistedInputCeilingsSum": 90482,
+        "completeEncodedInputBytesSum": 79364
+      },
+      "firstFlowSession2": {
+        "attempts": 6,
+        "persistedOutputCeilingsSum": 24000,
+        "persistedInputCeilingsSum": 90482,
+        "completeEncodedInputBytesSum": 79364
+      },
+      "all20WireWitnessesMatchPersisted4000AndInputBound": true
+    },
+    "qualification": "Bounds apply per actual session, not summed across the two first-flow sessions. Collector does not export attempt status or enforce wire multiplicity; its APPLIED requirement is source assertion plus passing enclosing tests."
+  },
+  "existingRuntimeEvidence": {
+    "path": "fresh-owner-budget-schedule-first-ninth",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sourceDrift": [],
+    "newExecutionByReviewer": false,
+    "secretFlow": {
+      "guidedReads": 1,
+      "publicationReads": 0,
+      "replayReads": 2,
+      "learningModelCalls": 8,
+      "publicationReplayModelCalls": 0,
+      "decodedNativeVideos": 2
+    },
+    "limits": "Image provenance unasserted; TRACE/SSE/metrics/profile/fault joins open. Strict provider actual1PASS supplied status is not expanded into wave closure. All9 coordinator-owned, full19/wave QA/lifecycle pending; runner repair/native isolation outside scope."
+  },
+  "defaultTestConstraints": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java",
+    "status": "Proposed only; file absent at review. No author release or execution granted here.",
+    "configuration": "Separate class/context/datasource; no inheritance/import of publication fixture RuntimeHooks/DynamicPropertySource. Real Spring property binding with budget keys absent must yield4096/32000/128000; never constructors with explicit replacement defaults or lowered totals.",
+    "graph": "Actual PostgreSQL/Flyway through V34 with guards intact; genuine seeded UI/CSI/user source; production repository and service start/original-worker claim, actual owner/fence/access scope; real prompt assembler/model request from approved value-free source/session projection; production translation store reserveAttempt plus service preflight/reserve/settle in the owner-locked transaction. Scope is service/store budget proof. If the actual supported producer path cannot form seven legitimate requests, report missing seam; do not fabricate progress/authority or use reflection/private-method bypass.",
+    "sevenThenEighth": "Seven distinct legitimate frozen request identities commit4096 each before a counted controlled gateway send. Assert persisted attempt digest/identity, reservation effects and committed output28672, proposals7, actual sends7. Eighth production preflight must commit FAILED/BUDGET_EXCEEDED before attempt insert/reservation/provider call, retain seven rows and output28672, and have actual additional sends0. Read terminal status/owner/counters after commit. Ensure real complete input bounds fit128000 so output ceiling is the demonstrated cause; otherwise report truthful input refusal.",
+    "identity": "Duplicate identical request/attempt returns send=false; no extra reservation/charge/send. Changed same-ID ceiling/digest refuses without mutation. Digest binds request/attempt/kind/projection hash/plan revision/input/output ceilings; compare internally without exporting raw identities. Distinct retries/recovery remain fully charged with frozen ceilings.",
+    "unknownSettlement": "Known low output40 and missing/unknown usage through real functions retain ceiling charges; timeout/unknown settlement must permit subsequent legitimate distinct requests under production rules without refunds. Do not fake APPLIED status or settlement rows.",
+    "rollback": "Rollback actual joined caller transaction before send; no partial attempt/reservation/counters or provider effect. Gateway side effects are not rollbackable: never send and then assert database rollback undid the send.",
+    "lateUsage": "Actual late-usage/reconciliation path retains charges, charges overage if applicable, cannot revive terminal owner or reset counters. No new lease/forced state SQL or manually patched expiry/usage/counters.",
+    "evidence": "Numeric/boolean allowlisted exports with local ordinals only; record genuine ceiling/counter/input-byte/send-count witnesses. Provider-boundary count may be a controlled port for service proof if clearly labeled. Only actual SDK HTTP witness may be labeled wire proof; neither is enterprise gateway/Core/browser authentication proof.",
+    "prohibited": [
+      "Fake counters or consumption/admission/browser/attempt/reservation rows",
+      "Manufactured sends or hardcoded success counters",
+      "Protected TRUNCATE or disabled triggers",
+      "Changing existing GuidedSessionIT30, schedule controls or nine publication bodies",
+      "Budget clamp/refund/truncation/allowance increase or omitted actions",
+      "Treating configured4000 completion as default4096 completion"
+    ],
+    "preserveDefaultNegative": "Existing authentic default stops at28672+4096=32768>32000; retain failure evidence. New isolated test proves default refusal, not default ninth completion.",
+    "requiredNames": [
+      "realDefaultsSevenKnownUsageReservationsRefuseEighthBeforeProvider",
+      "realDefaultsUnknownUsageKeepsCeilingsAndRefusesEighth",
+      "duplicateRequestIdentityCannotChargeOrSendTwiceAndChangedCeilingRefuses",
+      "rollbackAndLateUsageCannotLeavePartialReservationOrReviveBudgetStop"
+    ]
+  },
+  "operations": {
+    "wholeWaveCeilingUSD": 500,
+    "billingAvailable": false,
+    "cap": 4,
+    "agentsSpawned": 0,
+    "sourcesEdited": false,
+    "testsRuntimeBuildBrowsersGradleModelsContactsGoalDispatchLifecycleChanges": false,
+    "onlyWrite": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-b-budget-schedule-delta-review.json"
+  }
+}

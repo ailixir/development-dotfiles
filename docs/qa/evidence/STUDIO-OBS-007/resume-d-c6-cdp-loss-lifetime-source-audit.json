@@ -1,0 +1,98 @@
+{
+  "scope": "READ_ONLY_PINNED_SDK_CDP_PROMISE_LIFETIME_AFTER_ACTUAL_BROWSER_LOSS",
+  "status": "SOURCE_PROVEN_LIFETIME_GAP_COMPATIBLE_WITH_CLOSED_COUNTERS_NOT_EXACT_RUNTIME_CAUSE",
+  "sourceBindings": {
+    "studio-runner/src/run/browser.ts": "a397ece7c7dec06e643bc82b6a4862c5accf154c1c6b28d314ad3c7fab4ac02d",
+    "studio-runner/src/guided/runtime.ts": "75fc33b1cd1cbc59bcb746811caff879d7217b22de8b08b374eec173dacf271c",
+    "studio-runner/src/run/passwordControl.ts": "5312b614a53ae14eedb574161831168ec404ff5f700875b0883eec083a045882",
+    "studio-runner/node_modules/playwright-core/lib/coreBundle.js": "549070af3acabb3efcc4f55bfe6210f9f7c2fcf633cf7eaa59bfe60719969171",
+    "studio-runner/node_modules/playwright-core/package.json": "f061c58427e47e843e26d201f0a57076c734e57c734ecbbd87d4a23b7a20db9b",
+    "studio-runner/package-lock.json": "ae1c6030fcf933dfd3b92fdf2c683641c306595cc2194b2a97db76c3c65154ba"
+  },
+  "installedPlaywrightCoreVersion": "1.63.0",
+  "evidence": {
+    "path": "resume-c6-loss-gone-race-current/closed-counter-first-boundary.json",
+    "sha256": "53f593fabd7df3582e9e53b5cc28a1a89ad20d16b890bfff1a2149327a67eb71",
+    "publicationSha256": "6b7d8f12a7f0473db598f73c6411079e64527a313193a7dc652fa203605bbc54"
+  },
+  "actualClosedFacts": {
+    "primaryAndCapturedResidualReleaseChecksPassed": true,
+    "workerAlive": true,
+    "sdkCloseFulfilled": true,
+    "state": "UNKNOWN_OUTCOME",
+    "physicalProviderReadDelta": 1,
+    "highPending": 1,
+    "nativeActive": 1,
+    "busy": 1,
+    "cdpCreationPending": 0,
+    "restoreAttempt": 0,
+    "restoreRefusal": 1,
+    "producerFailed": true,
+    "producerSealed": false,
+    "meaning": "Original rawsend settlement remains unobserved; highlevelfill and dispatchfinally remain outstanding. The10s pendingguard refused before any descriptorrestore attempt. Actualprocessrelease andSDKclose are not thatpromise completion."
+  },
+  "applicationCallGraph": [
+    {
+      "anchor": "passwordControl.ts:36-40 / browser.ts:350-353",
+      "fact": "Originalfill awaits withhold/guards then originalportcall awaiting exactCDPSession.send. No outer native timeout/cancellation added here. Fixturewrapper invokes originalsend once and returns samepromise; its settlement observer doesnotcreate a replacementpromise."
+    },
+    {
+      "anchor": "runtime.ts:269-276,309-332",
+      "fact": "stop clears sharedinventory and starts originalcloseResources; dispose starts before browserclose, originalclose/disposal/lifecycle awaited. Stop doesnotjoin currentdispatch. Action-local failureValues/redactor/diagnostics remain until actualdispatchfinally; busyfalse onlythere."
+    },
+    {
+      "anchor": "browser.ts:513-519,552-558,571",
+      "fact": "Observationdispose drops localinventory immediately, sends originalcollectordispose/release/detach sequentially and catches individualerrors. Browserclose closes originalcontext/scratch. Fulfillment of newteardown commands doesnotexplicitlysettle an earlier independent rawfill request."
+    }
+  ],
+  "pinnedSdkSourceContracts": [
+    {
+      "anchor": "coreBundle.js:57540-57567,57469-57476",
+      "contract": "ClientCDPSession.send/detach use kNoTimeout (timeout0/no signal) and await channelrequest. CDPSession close event onlyemits; it doesnotreject its pendingclientrequest by itself."
+    },
+    {
+      "anchor": "coreBundle.js:34921-34968,34970-35043",
+      "contract": "CRSession.send creates an entry in THATsession callbackmap. CRConnection transportclose sets connectionclosed, disablestransport callbacks and calls rootSession.dispose only. CRSession.dispose rejects its own callbackmap; it doesnotiterate allregisteredchildsessions. Child rawsessions therefore need their own disposal/response tosettle already-pendingcallbacks. Future sends reject on connectionclosed, which doesnotretroactivelyreject the existingchildmap."
+    },
+    {
+      "anchor": "coreBundle.js:35046-35079,38561-38565,38778-38791",
+      "contract": "UserCDPSession owns a childCRSession and closes on parentTarget.detachedFromTarget event. Its explicit_onClose disposes thatsession and emitsclosed. Browsertransportloss can end receiving events before that per-target detach event; manualbrowser/targetsessions are not recursivelydisposed by rootSession.dispose."
+    },
+    {
+      "anchor": "coreBundle.js:52767-52784,54435-54441,18914-18944",
+      "contract": "CDPSessionDispatcher is child of contextdispatcher, disposal removesobject/listeners recursively. The disposalbody receiveserror but doesnotabort activeprogresscontrollers. stopPendingOperations is a separate explicit mechanism; no such call is in this disposal path."
+    },
+    {
+      "anchor": "coreBundle.js:57369-57378,63960-63968",
+      "contract": "ClientChannelOwner disposal removesobject entries/children, not outstandingconnectioncallbacks. WholeclientConnection.close rejects allcallbacks; closingonecontext/object is not thatwholeconnectionclosure."
+    },
+    {
+      "anchor": "coreBundle.js:12291-12299,18977-18987,19120-19135",
+      "contract": "CDPsend progress race canbeaborted by its realprogresscontroller, but context/object disposal itselfdoesnotinvoke the separateabortControllersForGuids mechanism. kNoTimeout provides no independentsettlementdeadline."
+    }
+  ],
+  "concreteGap": "The current expectation browser/contextclose fulfillment \u2192 every outstandingrawCDPSession.send rejects/settles is stronger than the pinnedSDKsourcecontract. Transportclose onlyrejects rootcallbacks; per-child pendingcallbacks + corresponding activeRPC canoutlive object/contextdisposal without a response/per-sessiondispose/wholeconnectionclose. Applicationstop cannotthenfree action-localredactionstate because rawfill remainsawaited. This is source-proven missing completion guarantee, not evidence of a wrongwrapper return or an attempteddescriptorrestore failure.",
+  "compatibleSequence": "Abruptbrowserloss can close/remove context+CDPdispatcher; newdispose/release/detach requests failfast and catcheslet disposalreturn, while earlierchildrawsession send remainspending. Runtime reports lifecycleclose but dispatchbusy/highPending/nativeActive stay1. This sequence fits existingcounters; actualexactsession/disconnect/target-detach event order was notretained, so it is not conclusivelyattributed.",
+  "missingRuntimePremises": [
+    "Actualper-session detach/dispose event for the samepending rawsend",
+    "Whether exactrawCRConnection transportclose path executed andwhich callbackmap retainedentry",
+    "Whether clientwholeconnectionclose or realprogressabort occurred",
+    "No rawsession/connection identity/argument inspection isauthorized orperformed here"
+  ],
+  "notProposed": "No Promise-race fakecompletion, authoredsessioncancel/additionalnativecall, privateSDKcallbackmutation, connectionkill, timeoutincrease, newlogger/probe/watcher or closureguard drop. Root must dispose product/dependency lifetime separately before any source release; normalSDKclose cannotbecredited as rawfillsettlement.",
+  "sourceTierLimits": "Installedbundlesource is a pinned primarysource, not a runtime frame or upstreambug verdict. Currentclosed counters stronglylocalize unresolvedrawnative/highlevel lifetime; they do notprove which low-level session callback alone causedit. C11 frozencandidate remainsuntouched.",
+  "actions": {
+    "reports": 1,
+    "sourceEdits": 0,
+    "runtime": 0,
+    "sql": 0,
+    "models": 0,
+    "diagnosticsExecuted": 0
+  },
+  "lifecycleVerdict": null,
+  "acceptanceWaiver": false,
+  "whole19AcPass": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE",
+  "privacy": "Only repositorybundle/modulelocations/sourcehashes/fixednumericbooleans/contracts, no rawCDParguments/results/errors/sessionIDs/paths/logs exported."
+}

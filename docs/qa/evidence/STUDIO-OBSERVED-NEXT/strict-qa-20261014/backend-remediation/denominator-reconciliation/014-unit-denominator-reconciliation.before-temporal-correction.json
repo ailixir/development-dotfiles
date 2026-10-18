@@ -1,0 +1,194 @@
+{
+  "createdUtc": "2026-10-15T00:43:13.865890+00:00",
+  "story": "STUDIO-OBS-014",
+  "role": "Dex executor evidence reconciliation; no quality verdict or lifecycle authority",
+  "sourceBindings": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "sha256": "c1194e0ab31cf6253b9d974fb78de8e98f6daa15ca0309c58fe7defe5d27714b"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuardTest.java",
+      "sha256": "aedda22df7b43a464e2b3258ee043515ef9e60825989fa886717c27610e74fa6"
+    }
+  ],
+  "historicalSixPairInventory": "GuidedActionGuardTest.theJoinedItCorpusStaysEligibleUnderTheDefaultVocabulary contains original6entries and assertion6. That historicalmatrix is preserved; it is not finalexhaustiveinventory after newtests.",
+  "originalSixStillPassed": "PASS",
+  "newInvocations": [
+    {
+      "invocation": "aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch()",
+      "parameters": null,
+      "guardOperation": "click",
+      "authoredText": "Click Submit then check Confirmation appears.",
+      "target": "Archive",
+      "governedStance": "ALLOW",
+      "expectedReason": "UNGROUNDED_TARGET",
+      "inventoryDisposition": "NAMED_EXCLUSION_FROM_GROUNDED_POSITIVE_DENOMINATOR",
+      "originalExclusionRule": "AC4 clarificationc2 / PO ruling_a_AC4_substituteCorpus.requiredEvidence a2 explicitly permits individuallynamed unit-denominator sites with reasons. a3 applies only to fourcontractsemanticCases and is NOTauthorityfor these exclusions.",
+      "relatedPureCounterpart": "aTargetTheAuthoredStepDoesNotNameIsUngrounded()",
+      "pureCounterpartPassed": "PASS",
+      "mappingLimit": "pure authored Open reports differs from exact joined authoredSubmit; same missing-Archive grounding result",
+      "joinedPass": "PASS",
+      "notAnExclusionFromStoryValidation": true,
+      "preciseClassification": "PLANTED_SEMANTIC_INVALID_NEGATIVE_NOT_EXPECTED_ELIGIBLE_ALLOW_CALIBRATION"
+    },
+    {
+      "invocation": "aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch()",
+      "parameters": null,
+      "guardOperation": "click",
+      "authoredText": "Open reports then check Confirmation appears.",
+      "target": "Delete account",
+      "governedStance": "ALLOW",
+      "expectedReason": "DESTRUCTIVE_VERB",
+      "inventoryDisposition": "NAMED_EXCLUSION_FROM_GROUNDED_POSITIVE_DENOMINATOR",
+      "originalExclusionRule": "AC4 clarificationc2 / PO ruling_a_AC4_substituteCorpus.requiredEvidence a2 explicitly permits individuallynamed unit-denominator sites with reasons. a3 applies only to fourcontractsemanticCases and is NOTauthorityfor these exclusions.",
+      "relatedPureCounterpart": "thePlantedDeleteAccountClickForOpenReportsIsRefusedBeforeAnyDispatch()",
+      "pureCounterpartPassed": "PASS",
+      "mappingLimit": "pure authoredOpen reports lacks harmless trailing assertion; not literalbyteidentity",
+      "joinedPass": "PASS",
+      "notAnExclusionFromStoryValidation": true,
+      "preciseClassification": "PLANTED_SEMANTIC_INVALID_NEGATIVE_NOT_EXPECTED_ELIGIBLE_ALLOW_CALIBRATION"
+    },
+    {
+      "invocation": "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence()",
+      "parameters": null,
+      "guardOperation": "click",
+      "authoredText": "Open reports then check Confirmation appears.",
+      "target": "absent node-1-999999; locatorDelete account",
+      "governedStance": "ALLOW",
+      "expectedReason": "UNGROUNDED_TARGET",
+      "inventoryDisposition": "NAMED_EXCLUSION_FROM_GROUNDED_POSITIVE_DENOMINATOR",
+      "originalExclusionRule": "AC4 clarificationc2 / PO ruling_a_AC4_substituteCorpus.requiredEvidence a2 explicitly permits individuallynamed unit-denominator sites with reasons. a3 applies only to fourcontractsemanticCases and is NOTauthorityfor these exclusions.",
+      "relatedPureCounterpart": "anElementTargetMissingFromTheObservationIsRefusedUngrounded()",
+      "pureCounterpartPassed": "PASS",
+      "mappingLimit": "pure missingnode usesSubmit; joinedcase specificallyproves absent-before-destructiveprecedence",
+      "joinedPass": "PASS",
+      "notAnExclusionFromStoryValidation": true,
+      "preciseClassification": "PLANTED_SEMANTIC_INVALID_NEGATIVE_NOT_EXPECTED_ELIGIBLE_ALLOW_CALIBRATION"
+    },
+    {
+      "invocation": "anAuthoredDeleteStillFailsTheGovernedDenyStance()",
+      "parameters": null,
+      "guardOperation": "click",
+      "authoredText": "Click Delete then check Confirmation appears.",
+      "target": "Delete",
+      "governedStance": "DENY",
+      "expectedReason": "SIDE_EFFECT_DENIED",
+      "inventoryDisposition": "NAMED_EXCLUSION_FROM_GROUNDED_POSITIVE_DENOMINATOR",
+      "originalExclusionRule": "AC4 clarificationc2 / PO ruling_a_AC4_substituteCorpus.requiredEvidence a2 explicitly permits individuallynamed unit-denominator sites with reasons. a3 applies only to fourcontractsemanticCases and is NOTauthorityfor these exclusions.",
+      "relatedPureCounterpart": "anAuthoredDestructiveVerbAllowsTheControl()",
+      "pureCounterpartPassed": "PASS",
+      "mappingLimit": "pure authoredDelete underALLOW plus separateformsubmitDENY test is compositionalonly; joinedexactDeleteDENY nowexecuted",
+      "joinedPass": "PASS",
+      "notAnExclusionFromStoryValidation": true,
+      "preciseClassification": "AUTHORED_GROUNDED_ACTION_UNDER_GOVERNED_DENY_POLICY_NEGATIVE",
+      "notUngroundedOrHostile": true,
+      "calibrationExclusionReason": "IntentionallyDENY despiteauthoredgroundedDelete; thereforeoutsideALLOWeligiblecalibration only. ExactDENYintegratedrefusal/nativeneffect/fullcorpuscount remainmandatory and executed."
+    },
+    {
+      "invocation": "anAuthoredSaveOrDestructiveClickUnderAllowRunsExactlyOnce",
+      "rawXmlName": "[1] label=Save",
+      "parameters": {
+        "label": "Save"
+      },
+      "guardOperation": "click",
+      "authoredText": "Click Save then check Confirmation appears.",
+      "observedSafeLabel": "Save",
+      "governedStance": "ALLOW",
+      "inventoryDisposition": "INCLUDED_ADDITIONAL_GROUNDED_POSITIVE_SITE",
+      "pureCounterpart": "clickSaveOnAPageWithSaveAndDeleteMakesOnlySaveEligible()",
+      "pureAuthoredText": "Click Save",
+      "pureObservedSafeLabel": "Save",
+      "pureStance": "ALLOW",
+      "pureCounterpartPassed": "PASS",
+      "joinedPass": "PASS",
+      "mapping": "Exactlabel,operation,stanceandapplicabledestructivephrase match. Actualauthoredtext retains Click Save wholephrase; trailingassertion adds no other governeddestructivevocabulary and cannot remove grounding. This is semantic branch coverage paired with literal actualjoinedexecution, not a claim of identicalinputbytes or membership in originalsix-array assertion.",
+      "notExcluded": true
+    },
+    {
+      "invocation": "anAuthoredSaveOrDestructiveClickUnderAllowRunsExactlyOnce",
+      "rawXmlName": "[2] label=Delete",
+      "parameters": {
+        "label": "Delete"
+      },
+      "guardOperation": "click",
+      "authoredText": "Click Delete then check Confirmation appears.",
+      "observedSafeLabel": "Delete",
+      "governedStance": "ALLOW",
+      "inventoryDisposition": "INCLUDED_ADDITIONAL_GROUNDED_POSITIVE_SITE",
+      "pureCounterpart": "anAuthoredDestructiveVerbAllowsTheControl()",
+      "pureAuthoredText": "Click Delete",
+      "pureObservedSafeLabel": "Delete",
+      "pureStance": "ALLOW",
+      "pureCounterpartPassed": "PASS",
+      "joinedPass": "PASS",
+      "mapping": "Exactlabel,operation,stanceandapplicabledestructivephrase match. Actualauthoredtext retains Click Delete wholephrase; trailingassertion adds no other governeddestructivevocabulary and cannot remove grounding. This is semantic branch coverage paired with literal actualjoinedexecution, not a claim of identicalinputbytes or membership in originalsix-array assertion.",
+      "notExcluded": true
+    },
+    {
+      "invocation": "aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue()",
+      "parameters": null,
+      "inventoryDisposition": "NAMED_EXCLUSION_NO_GUARD_ELIGIBLE_ACTION",
+      "reason": "Actual SOURCE_PLAN question emits SAVED_INPUT/AUTHORED, exactlyone provider call, before materialization/NEXT_ACTION. Noclickpresscheckproposal,admission,nativeeffector guard decision. Source emitter is separately required and actualexecutedPASS.",
+      "joinedPass": "PASS"
+    }
+  ],
+  "arithmetic": {
+    "actualNewPlanningInvocations": 7,
+    "newGroundedPositiveSitesMappedToExecutedPureTests": 2,
+    "newNamedPlantedNegativeExclusionsFromPositiveDenominator": 4,
+    "newNamedNoGuardExclusion": 1,
+    "partition": "7 = 2 grounded mapped positives +3 named semantic negatives +1 named grounded DENY policy negative +1 no-guard sourcequestion",
+    "mappedPositiveSiteInventory": "original6 + newSave + newDelete =8; this is the supplemental mapping inventory, not a falseclaim the original6-entry test asserted8.",
+    "planningInvocations": "49 historical +7new =56 actualpassed in attempt01standardruntime",
+    "actualPlanningTally": {
+      "passed": {
+        "click": 7,
+        "press": 0,
+        "check": 0
+      },
+      "refused": {
+        "SIDE_EFFECT_DENIED": 6,
+        "UNGROUNDED_TARGET": 2,
+        "DESTRUCTIVE_VERB": 1
+      },
+      "confirmFirst": 2
+    }
+  },
+  "runtimeEvidence": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-xml/TEST-com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest.xml",
+      "sha256": "bda81b42ba056f3f6cf92624a7aff99afa8790b863828a554607ca25631caa9e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-xml/TEST-com.citi.put.checks.studio.guided.translation.GuidedActionGuardTest.xml",
+      "sha256": "5a3966c6021a60ce23d587d67d04c4873a99248144b344740fb20fb591cf5118"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-guard-tally/GuidedPlanningIntegrationTest.json",
+      "sha256": "49a5d4c5b87f75fe68658d224b488cabbcbc90bd8307182aaa9ab0e880cc5d97"
+    }
+  ],
+  "proofLimits": [
+    "Original full cleancheckattempt01 aggregateFAILED static; these individual runtimepasses remain historical sourceboundproof.",
+    "Both currentJavafiles differ from runtime snapshot only in approvedformatting; exactcompilednondebugidentityproved in checkstyle-correction/compiled-equivalence.json.",
+    "Mandatorynormalfullcheckonfinalsource remains required; no test executed by this evidence reconciliation.",
+    "No source modification,puretestaddition,denominatorassertionrewrite,waiveror testexclusion performed."
+  ],
+  "additionalLiveProofInvocation": {
+    "name": "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch()",
+    "guardInventoryDisposition": "NAMED_NO_GUARD_ELIGIBLE_ACTION_BEFORE_CONTEXT_REFUSAL",
+    "reason": "Real contextpolicybinding refuses beforeGuidedRuntime/browser/observation/NEXT_ACTION; no click/press/check action is proposed. Thislivebootstrapnegative supplementsfullcorpus butadds0guarddecisions.",
+    "actualExecutionStatus": "PASS1/0SKIP_FIRST_TARGETED_ATTEMPT",
+    "currentExpectedFullClassInvocations": "56previous +1new=57; no priorcase removed",
+    "proof": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-targeted-attempt01-results.json",
+    "proofSha256": "7c37e0958220743f0d6bc9ea902356da4a5a829fdebf36de629f7ae8dbb1c7a7"
+  },
+  "updatedUtc": "2026-10-15T00:53:53.096520+00:00",
+  "priorArtifactSha256": "d58493ddf9b4d3836423403fd94180d459cae63730cef89d52b4bb48bfe6e314",
+  "newSourceBindingPendingFinalExecution": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+    "sha256": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b",
+    "prior56RuntimeProof": "Historical56preserved;currentnewlivecaseactualPASS;normalfinalaggregatepending"
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "artifact": "STUDIO-OBS-015 Java03 narrow three publicly inferable semantic repairs01",
+  "at": "2026-10-15T08:48:17.993230+00:00",
+  "owner": "Dex/backend015_resume",
+  "status": "SOURCE_ONLY_UNCOMPILED_ATOMIC_HOLD",
+  "sourceHold": true,
+  "authority": "Root narrow3semantic source release; checkpoint05/compilerrepair01 and actual225case Java03 results remain unchanged. No current command live.",
+  "priorActualExecution": {
+    "cases": 225,
+    "passed": 204,
+    "failed": 21,
+    "backendFailures": 4,
+    "newExecutionAfterRepair": false,
+    "xml": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt03-xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.xml",
+        "sha256": "194cbd5fd23a0178a4420e4a356bb8e8c1b7d423fe8368487f56fc362c755259"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt03-xml/TEST-com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest.xml",
+        "sha256": "f53ec2ff38439c95fbabfd19fbc449bce9b644cb26da276decb6176cfa0e4a7c"
+      }
+    ]
+  },
+  "touchedSources": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedAcceptedPlan.java",
+      "beforeSha256": "35cc9e25796090ae9c60b87bc31fa86b030925d3c17c3ec66a8ebe378039e20d",
+      "afterSha256": "e18e4524e51de6a462bada8c466c0e5a1505ec5b6b69c76797058057dbe5a39a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedBasisValidator.java",
+      "beforeSha256": "db6c10acd57baab12c11d773e653bde9300e5d0e9054b61820ff58ecb589e186",
+      "afterSha256": "a05efebc4fb7ea1698103773e1877fa9aafafd9d2d1b23c0fdacceab268cfc4c"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+      "beforeSha256": "256e19b2ba7c584373c4f1583422b6ef8c329605a9221a84c856005a7fb026eb",
+      "afterSha256": "7224e8c31d2bd80ef3af5c266fb5bf483baae5282476b6446c887c0f8c5e98d9"
+    }
+  ],
+  "unchangedProtectedInputs": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedAcceptedPlanTest.java",
+      "beforeSha256": "685594b600f4c6f38fe128d6d3a27e62969c1d07ea163d92d39db71c6924a9a8",
+      "afterSha256": "685594b600f4c6f38fe128d6d3a27e62969c1d07ea163d92d39db71c6924a9a8",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java",
+      "beforeSha256": "2c44c6a50a42b3c654aa87f6ed0b3fd32a60e4946a4cb772ac3632851a99f3df",
+      "afterSha256": "2c44c6a50a42b3c654aa87f6ed0b3fd32a60e4946a4cb772ac3632851a99f3df",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/source-selection.schema.json",
+      "beforeSha256": "df429534e7b827b556d52b7d39790e62d6d40360884d0e388ab70787ed53558f",
+      "afterSha256": "df429534e7b827b556d52b7d39790e62d6d40360884d0e388ab70787ed53558f",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "beforeSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+      "afterSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "beforeSha256": "2ebcedc49b31ae191f0f04e6360c916de7417b2a4f7876ca718178494cc30215",
+      "afterSha256": "2ebcedc49b31ae191f0f04e6360c916de7417b2a4f7876ca718178494cc30215",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "beforeSha256": "ac801042dd7a94468ff68a5ad7e4efe48ab310a9f12a93d290730243d755d128",
+      "afterSha256": "ac801042dd7a94468ff68a5ad7e4efe48ab310a9f12a93d290730243d755d128",
+      "unchanged": true
+    }
+  ],
+  "methodMappings": [
+    {
+      "actualMethod": "GuidedAcceptedPlanTest.pendingNewNeedUsesRawDefinitionAndCannotClaimAnUnconsumedImport",
+      "code": "GuidedAcceptedPlan.validateBeforeAllocation",
+      "repair": "After closed leaf validation, any need without bindingId requires a nonempty consumers array. Bound retained need may still represent0consumer, pending downstream actual graph/history authority.",
+      "positiveNegativePreservation": "Original valid unbound need accepted; missing binding still rejected by fully accepted definition; unbound0consumer refused; original assertions unchanged."
+    },
+    {
+      "actualMethod": "GuidedAcceptedPlanTest.beforeAllocationKeepsBoundImportedZeroNeedAndFreshRawNeedDistinct",
+      "code": "GuidedAcceptedPlan.validateBeforeAllocation",
+      "repair": "Applies min1 independently to each fresh unbound leaf in the mixed trusted/fresh plan. Never substitutes a binding or clears raw server IDs.",
+      "positiveNegativePreservation": "Mixed bound retained0 + fresh rawnonzero stays valid beforeallocation, untouchedbytes; freshraw0 refused. Existing downstream retainedproducer/noorphan tests remain unchanged."
+    },
+    {
+      "actualMethod": "IncrementalPublicationConformanceTest.rejectsForgedGraphOrDerivesAnArtifactDifferentFromTheForgedCandidate(graphTimingConformance:unanchored-generation3-observation-refused)",
+      "code": "GuidedBasisValidator.validate/validateAction/observedEvidence/choiceObservation/validatePrefix",
+      "repair": "Accumulate only exact validated observation anchors from exercised action/excluded preparation executionEvidence, exact issued-prefix execution-envelope hash, and original choice capture joined through actual exercised preparation/obligation/context/receipt hashes. Require accounted hashset equals complete observations hashset. No currentgeneration cutoff or arbitrary unusedrow allowance.",
+      "positiveNegativePreservation": "Canonical unanchored d913generation3 negative retained unchanged; issued6fc observation can remain when originalread unperformed; actual older choicecapture observation remains; lawful excluded action/receipt checked beforecounted. Publicbasis only, no authority sidecar."
+    }
+  ],
+  "callsiteOrderingPreserved": [
+    "GuidedTranslationService.mergeSuffix calls validateBeforeAllocation before cumulative dependency allocate.",
+    "source plan raw admission already independently rejects empty raw consumers in GuidedProposalValidator.admitPlan; no rawmodel shortcut added.",
+    "dependencies.allocate remains before store.acceptPlan and before suffix materialization/pendingACK; GuidedTranslationService/GuidedDependencyPlanner unedited.",
+    "Fully accepted validate still requires server obligationId/bindingId and closedshapes; IDs/rawhistory never rewritten.",
+    "Actual GuidedPlanBuilder.basis already requires seenObservations equals indexed observations; pureplan now accounts the available completebasis observations consistently with existing TS usedObservations."
+  ],
+  "newOwnedRegressionSource": [
+    {
+      "method": "IncrementalPublicationConformanceTest.issuedPrefixReadObservationRemainsAnchoredWithoutAnEffectiveReadAction",
+      "subject": "Frozen unperformed-read positive6fc has no effectiveaction observationuse but valid original issuedprefixrequest; validator accepts and does not mutatebasis."
+    },
+    {
+      "method": "IncrementalPublicationConformanceTest.historicalChoiceCaptureAnchorsItsOlderObservationButAnUnusedSnapshotDoesNot",
+      "subject": "Frozen current observedchoice positive keeps olderquestion-only snapshot; remove actual witness from owneddeepcopy without changing snapshot and observationaccounting refuses. No canonicalfixture edit."
+    }
+  ],
+  "originalNamedVectors": [
+    {
+      "name": "raw-edge-cannot-name-pending-action",
+      "expected": "REJECT",
+      "fixtureJsonSha256": "565553719b2cbf394371d39cc495aa9554d94f810cc7f2aa8ffc70b7c0d18205",
+      "changed": false
+    },
+    {
+      "name": "unanchored-generation3-observation-refused",
+      "expected": "REJECT",
+      "fixtureJsonSha256": "4093c3229d04324260bea0480ee52afe78cad8a2f69b0c37f9c5446c58e9e617",
+      "changed": false
+    }
+  ],
+  "explicitOpenScope": {
+    "authorityOnlyFourthFailure": {
+      "name": "graphTimingConformance:raw-edge-cannot-name-pending-action",
+      "state": "OPEN_UNREPAIRED_UNCHANGED_NAMED_NEGATIVE",
+      "boundary": "Mutates only authority.ledgers; complete publicbasis unchanged. Must route under actual repository/read/builder/PG independent authority; pure lowerer has no access. No filter/removal/skip or sidecar API added; currently selected puremethod may still fail until authorized correcttier source."
+    },
+    "minimumTwoPublicRawHistoryJoins": "OPEN_NEXT_ROOT_RELEASE: admitted excluded binding-use requires exact raw consumeredge once and exact allocated consumerpair beforeprojection; no changes to GuidedEffectiveGraph in this narrow slot.",
+    "candidateRequestFour": "OPEN_NEXT_ROOT_RELEASE: offeredcandidate-only snapshot attacks require actual candidate/request boundary, not only validbasis lowerer.",
+    "fullEight86AndRemainingSourceFacets": "All checkpoint05/full86/24ARCH05 facets and Quinn remaining review stay open as applicable; no semanticscope reduction or inference of acceptance from these3source repairs."
+  },
+  "schemaClarification": "Current shared source-selection needs leaf allows0 to represent retained internal import. It remains byteunchanged. Required fresh rawmodel min1 is enforced semantically at admitPlan and now mixed beforeallocation; no schema/generated/pin widening or expectednegative edit.",
+  "executionAfterRepair": {
+    "compilation": "NOT_RUN",
+    "testsExecuted": 0,
+    "gradleDatabaseNativeBuildDistGenerationFormatInstallCommands": 0,
+    "commandsLive": false
+  },
+  "hold": "All owned Java/test/story/disclosure source now HOLD; root must allocate actual compile/test feedback. No source-only PASS, QAverdict, Done, commit or deploy."
+}

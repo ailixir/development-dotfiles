@@ -1,0 +1,133 @@
+{
+  "scope": "READ_ONLY_ORDINARY_CUTOFF_DIAGNOSIS",
+  "sourceBindings": {
+    "publicationSha256": "d0843ceba40c833d557ae894624284bf3b1060aff54a8fb72e89c2f0b3d40367",
+    "mainSweepSha256": "884ddb3c7bc119998b91eb6b7649b148bc3054222c56f1c880c92aa5da9b66a8",
+    "archivedSourceZipSha256": "2ad64bdbde8e902d81376dd83bbb9bd38c38a105f02899b8ccc6904a36e55efb",
+    "publicationMatchesArchive": true
+  },
+  "gate": {
+    "archive": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-current-pair-audit-five-current",
+    "actualTests": 5,
+    "passes": 4,
+    "failures": 1,
+    "errors": 0,
+    "skips": 0,
+    "drift": 0,
+    "ordinaryFailure": "cutoff.await20seconds false before timing assertion; not a measured two-second bound failure"
+  },
+  "existingWitnesses": {
+    "privateProducerLedgers": {
+      "1-1": {
+        "safeNumericClosedFields": {
+          "case": 1,
+          "producer": 1,
+          "epoch": 1,
+          "role": 1,
+          "sent": 16,
+          "acked": 16,
+          "pending": 0,
+          "originalPending": 0,
+          "failed": false,
+          "sealed": true
+        },
+        "bytesSha256": "7b8d87223386f988c6a86d831cb6c7ee02c6ed684b13b3d86b4038244ee952e7"
+      },
+      "2-2": {
+        "safeNumericClosedFields": {
+          "case": 2,
+          "producer": 2,
+          "epoch": 2,
+          "role": 2,
+          "sent": 20,
+          "acked": 1,
+          "pending": 0,
+          "originalPending": 0,
+          "failed": true,
+          "sealed": false
+        },
+        "bytesSha256": "9a4dd1fb2e9dcdce96b7cc9a3b54a3f534532b1d4800328604fd6ebe0633e6d9"
+      },
+      "2-3": {
+        "safeNumericClosedFields": {
+          "case": 2,
+          "producer": 3,
+          "epoch": 2,
+          "role": 3,
+          "sent": 13,
+          "acked": 12,
+          "pending": 0,
+          "originalPending": 0,
+          "failed": true,
+          "sealed": true
+        },
+        "bytesSha256": "4a3b1a309c047528e7a40a1d4c6f1326b31deb3c643d8b63255108185e969e96"
+      }
+    },
+    "guidedPassingNumericEvidence": {
+      "path": 1,
+      "cutoffNanosIncludingQueues": 1017286541,
+      "ackBracketMicrosSameNodeClock": 13970,
+      "identifiedInFlightOrdinal": 3,
+      "freshSecretReads": 1,
+      "residualSettlementCount": 1,
+      "residualFulfilled": false,
+      "residualRejected": true,
+      "acceptedPostDistinctFromPromiseSettlement": true,
+      "priorPositiveUsagePreserved": true,
+      "actualLiveRecheckRows": 1,
+      "nativeEntryOnlyNotDomWrite": true,
+      "originalOwnerCleanupConfirmed": true
+    },
+    "ordinaryStateFileCase": 2,
+    "ordinaryStateFileEpoch": 2,
+    "ordinaryStateFilePath": 2,
+    "stickyFailurePresent": true,
+    "stickyFailureBytes": 40,
+    "ordinaryOwnedFailureMetadata": {
+      "sendKind": "ACCEPTED",
+      "status": "ERROR",
+      "errorCode": "CANCELLED",
+      "admissionPresent": true,
+      "observedReceiptPresent": true,
+      "browserStarted": true,
+      "videoPresent": true,
+      "manifestPresent": true,
+      "elapsedMs": 21451
+    }
+  },
+  "cause": {
+    "sourceDefectProven": true,
+    "exactThrownExceptionFromRunCaptured": false,
+    "defect": "Ordinary p4AuditOwnerIdentity projects observed_admission_receipt from studio_dispatch_ledger l; V33 adds this column only to ui_test_executions e, already joined by authentic execution/accepted timestamp.",
+    "line": 4733,
+    "schema": "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql:290",
+    "guardOrder": "Real event4 control ACK reaches flip only after started/native fill/SignIn entry/one active click and p4RevocationUsed. That calls p4AuditOwnerIdentity before state.flippedAt, tuple removal or cutoff. Query exception is swallowed by existing RuntimeException observer branch, marks failed and produces accepted=false/409.",
+    "expectedDatabaseFailureIfReached": "Undefined column SQLSTATE42703; actual exception not retained by current observer.",
+    "actualEvidenceSupports": "Producer2 sent20/acked1 failedtrue shows matching real GET URL/execution validation did emit multiple ACK witnesses; repeated observer acceptance failure is present. Actual accepted admission/receipt/browser also retained. Precise event-by-event timeline and failed SQLSTATE not captured, so no invented causal trace.",
+    "notEstablished": [
+      "No measured ordinary tuple-flip-to-cutoff interval.",
+      "No ordinary product revocation timeout established.",
+      "No raw frame/body/opaque identity export or new observation architecture required."
+    ]
+  },
+  "existingHookSelection": {
+    "parentHttp": "Original http.send forwarded once; event4 only after selected current execution control URL GET, actual200 and validSecretControl exact execution identity, nonrevoked/noncancelled ACK. Existing emitted20 witnesses rules out complete URL-selection loss.",
+    "child": "Ready3 validates current mode execution equality and original process.send=true; Stop validates original message after original listener forward; native observer installed only after revReady. Existing child13sent/12acked cannot alone identify which event was refused; no frame dump added.",
+    "sdkSource": "studio-runner/src/server/runCoordinator.ts startControlPoll; studio-runner/src/reporting/reportClient.ts validSecretControl/ackRequestsCancel; studio-runner/src/run/childRuntime.ts Ready3 and stop handler."
+  },
+  "minimalProposedRepair": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "oldProjection": "l.observed_admission_receipt::text AS receipt",
+    "newProjection": "e.observed_admission_receipt::text AS receipt",
+    "sourceChangesAuthorizedByThisTask": false,
+    "semantics": "Use original authentic execution receipt from same joined row; retain every attempt/admission/binding/principal/USED uniqueness/scope predicate, clock, barrier, SDK forwarding and25 test bodies. No new read, observer channel or guard waiver.",
+    "focusedSelectors": [
+      "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+      "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+      "com.citi.put.checks.studio.secrets.SecretRevocationSweepIT"
+    ],
+    "futureVerificationOwner": "fresh coordinator sole runtime/build lease; exact source release required before repair"
+  },
+  "actions": "Only this report written; no source edit/probe/SQL/Node/browser/Gradle/build/model dispatch. All19 and full-wave obligations remain open."
+}

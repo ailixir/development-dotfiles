@@ -1,0 +1,30 @@
+{
+  "decision": "PASS source candidate; release coordinator strict gate and defining tests only",
+  "candidateReceiptSha256": "fde467d6f4d1844d862ff61f19c9f8d2bca80c801ffa07dcc00a0dd73ec472eb",
+  "patchSha256": "4bb31e20d76969aa5e2f7f92ca0ec0611daf8340062370826d4c5cf8ede9191e",
+  "independentReviewer": "root",
+  "checks": [
+    "All four base/candidate/live hashes verified",
+    "Whole GSS exact inverse verified independently",
+    "Ledger post-schema body raw exact verified independently",
+    "Original entire ledger test restored exactly after removing additions and their separator",
+    "Installed Jackson metadata hash verified; standard containers copy recursively; known scalar leaves immutable",
+    "Same selected envelope across bridge/path/internal digest/materialization/report/availability",
+    "Private constructor token owner/original identity/closed tree/snapshot/representation; no package skip API",
+    "Fixed code-status only; old-point deferral and unknown nonfatal fallback; Error timing explicit"
+  ],
+  "limitations": [
+    "Exact known-node copy proof does not promise arbitrary backing collection or concurrently mutating package-peer semantics; actual route privately owns envelope",
+    "No test has run; no latency/acceptance claim",
+    "Main source changed so any sampled diagnostic requires fresh debug metadata; next C5 should be original unprofiled"
+  ],
+  "verificationCorrection": "Initial test inverse assertion included one added separator blank line; corrected exact inverse passed. No source issue or pass claim from failed assertion.",
+  "definingTests": [
+    "GuidedActionLedgerTest",
+    "GuidedSessionIT",
+    "GuidedBridgeIntegrationTest"
+  ],
+  "newMandatoryE2E": false,
+  "formalQA": false,
+  "runtimeRelease": "Only after fresh strict and defining PASS, separate preflight for original unprofiled seed+C5; no diagnostics or additional cases now"
+}

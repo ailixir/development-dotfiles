@@ -1,0 +1,143 @@
+{
+  "file": "guidedCloseBound.test.ts",
+  "ruling": "W1.5 part 1 section 2",
+  "takenAt": "2026-10-18T04:59:57.325Z",
+  "platform": "darwin",
+  "node": "v24.20.0",
+  "graceMs": 3000,
+  "startBudgetMs": 12000,
+  "results": {
+    "F1": {
+      "path": "i: close of a started session, frozen",
+      "browserFrozen": true,
+      "browserLeadersFrozen": 1,
+      "processesFrozen": 7,
+      "scratchDirectories": 1,
+      "stop": {
+        "replySent": true,
+        "status": 200,
+        "code": null,
+        "connectionEndedWithoutReply": false,
+        "afterSentMs": 3106
+      },
+      "slotHeldAfterReply": {
+        "held": false,
+        "status": 200,
+        "code": null
+      },
+      "close": {
+        "closeKind": "close",
+        "closeCalledAfterMs": 5,
+        "closeSettledAfterMs": 3101,
+        "closeTookMs": 3096,
+        "closeOutcome": "resolved",
+        "frozenProcessesAliveWhenCloseSettled": 0
+      },
+      "survivorsAfterReply": 0
+    },
+    "F2": {
+      "path": "ii: start deadline in WITHHOLD, frozen",
+      "browserFrozen": true,
+      "browserLeadersFrozen": 1,
+      "processesFrozen": 7,
+      "scratchDirectories": 1,
+      "start": {
+        "replySent": true,
+        "status": 409,
+        "code": "CONTEXT_LOST",
+        "connectionEndedWithoutReply": false,
+        "afterSentMs": 12114
+      },
+      "slotHeldAfterReply": {
+        "held": false,
+        "status": 200,
+        "code": null
+      },
+      "close": {
+        "closeKind": "terminate",
+        "closeCalledAfterMs": 12004,
+        "closeSettledAfterMs": 12109,
+        "closeTookMs": 105,
+        "closeOutcome": "resolved",
+        "frozenProcessesAliveWhenCloseSettled": 0
+      },
+      "closeSettledAfterLaunchEnteredMs": 12090,
+      "survivorsAfterReply": 0
+    },
+    "F3": {
+      "path": "iii: non-deadline launch failure, frozen",
+      "browserFrozen": true,
+      "browserLeadersFrozen": 1,
+      "processesFrozen": 7,
+      "scratchDirectories": 1,
+      "start": {
+        "replySent": true,
+        "status": 409,
+        "code": "CONTEXT_LOST",
+        "connectionEndedWithoutReply": false,
+        "afterSentMs": 982
+      },
+      "slotHeldAfterReply": {
+        "held": false,
+        "status": 200,
+        "code": null
+      },
+      "close": {
+        "closeKind": "failure.close",
+        "closeCalledAfterMs": 976,
+        "closeSettledAfterMs": 976,
+        "closeTookMs": 0,
+        "closeOutcome": "resolved",
+        "frozenProcessesAliveWhenCloseSettled": 0
+      },
+      "closeSettledAfterFailureMs": 133,
+      "survivorsAfterReply": 0
+    },
+    "F4": {
+      "path": "iv-a: stop 1 s into a launch that never spawns",
+      "chromeSpawned": false,
+      "stop": {
+        "replySent": true,
+        "status": 200,
+        "code": null,
+        "connectionEndedWithoutReply": false,
+        "afterSentMs": 14035
+      },
+      "start": {
+        "replySent": true,
+        "status": 409,
+        "code": "CONTEXT_LOST",
+        "connectionEndedWithoutReply": false,
+        "afterSentMs": 15061
+      },
+      "stopRepliedAfterLaunchEnteredMs": 15037,
+      "slotHeldAfterReply": {
+        "held": false,
+        "status": 200,
+        "code": null
+      }
+    },
+    "H": {
+      "iterations": 5,
+      "closeMs": [
+        156,
+        159,
+        174,
+        161,
+        162
+      ],
+      "maxMs": 174,
+      "orderly": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "thresholdsMs": {
+        "graceMs": 3000,
+        "architectReturnAbove": 1500
+      }
+    }
+  }
+}

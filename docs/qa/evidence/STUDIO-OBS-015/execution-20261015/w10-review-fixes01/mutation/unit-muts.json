@@ -1,0 +1,219 @@
+[
+ {
+  "name": "U1-runtime-timer-abort-without-reason",
+  "edits": [
+   [
+    "src/guided/runtime.ts",
+    "this.startAbort.abort(error);",
+    "this.startAbort.abort();"
+   ]
+  ],
+  "files": [
+   "test/guided/runtime.test.ts",
+   "test/guided/ownership.test.ts"
+  ]
+ },
+ {
+  "name": "U2-stop-abort-without-reason",
+  "edits": [
+   [
+    "src/guided/runtime.ts",
+    "this.startAbort.abort(new Error('CANCELLED'));",
+    "this.startAbort.abort();"
+   ]
+  ],
+  "files": [
+   "test/guided/runtime.test.ts",
+   "test/guided/ownership.test.ts"
+  ]
+ },
+ {
+  "name": "U3-cause-mapping-removed",
+  "edits": [
+   [
+    "src/run/guidedBrowser.ts",
+    "return reason instanceof Error && (reason.message === 'TIMEOUT' || reason.message === 'CANCELLED') ? reason : error;",
+    "return error;"
+   ]
+  ],
+  "files": [
+   "test/guided/runtime.test.ts",
+   "test/guided/ownership.test.ts"
+  ]
+ },
+ {
+  "name": "U3b-cause-mapping-open-vocabulary",
+  "edits": [
+   [
+    "src/run/guidedBrowser.ts",
+    "return reason instanceof Error && (reason.message === 'TIMEOUT' || reason.message === 'CANCELLED') ? reason : error;",
+    "return reason instanceof Error ? reason : error;"
+   ]
+  ],
+  "files": [
+   "test/guided/runtime.test.ts",
+   "test/guided/ownership.test.ts"
+  ]
+ },
+ {
+  "name": "U4-args-form-not-checked",
+  "edits": [
+   [
+    "src/run/tree.ts",
+    "return withArgs === undefined || withArgs.some((row) => row.pid === self && row.args.length > 0);",
+    "return true;"
+   ]
+  ],
+  "files": [
+   "test/run/tree.test.ts",
+   "test/run/processTableUnavailable.test.ts"
+  ]
+ },
+ {
+  "name": "U5-kill-never-throws",
+  "edits": [
+   [
+    "src/run/tree.ts",
+    "if (!Number.isInteger(parentPid) || parentPid <= 1 || !canEnumerateProcessTree(table, parentPid)) throw new Error('PROCESS_TABLE_UNREADABLE');",
+    ""
+   ]
+  ],
+  "files": [
+   "test/run/tree.test.ts",
+   "test/run/processTableUnavailable.test.ts"
+  ]
+ },
+ {
+  "name": "U5b-kill-allows-pid1",
+  "edits": [
+   [
+    "src/run/tree.ts",
+    "parentPid <= 1 || !canEnumerateProcessTree(table, parentPid)",
+    "!canEnumerateProcessTree(table, parentPid)"
+   ]
+  ],
+  "files": [
+   "test/run/tree.test.ts"
+  ]
+ },
+ {
+  "name": "U5c-kill-allows-missing-worker-row",
+  "edits": [
+   [
+    "src/run/tree.ts",
+    "parentPid <= 1 || !canEnumerateProcessTree(table, parentPid)",
+    "parentPid <= 1"
+   ]
+  ],
+  "files": [
+   "test/run/tree.test.ts",
+   "test/run/processTableUnavailable.test.ts"
+  ]
+ },
+ {
+  "name": "U6-guard-allows-pid1",
+  "edits": [
+   [
+    "src/run/tree.ts",
+    "if (!Number.isInteger(self) || self <= 1) return false;",
+    ""
+   ]
+  ],
+  "files": [
+   "test/run/tree.test.ts"
+  ]
+ },
+ {
+  "name": "U6b-guard-skips-args-listing",
+  "edits": [
+   [
+    "src/run/tree.ts",
+    "canEnumerateProcessTree((readers.readTable ?? readProcessTable)(), self, withArgs)",
+    "canEnumerateProcessTree((readers.readTable ?? readProcessTable)(), self)"
+   ]
+  ],
+  "files": [
+   "test/run/tree.test.ts"
+  ]
+ },
+ {
+  "name": "U7-guidedMain-guard-removed",
+  "edits": [
+   [
+    "src/run/guidedMain.ts",
+    "insist(canEnumerateLaunchTree(), 'CONFIGURATION_DENIED');",
+    "insist(true, 'CONFIGURATION_DENIED');"
+   ]
+  ],
+  "files": [
+   "test/run/guidedMain.test.ts"
+  ]
+ },
+ {
+  "name": "U8-reply-delayed-one-second",
+  "edits": [
+   [
+    "src/guided/ownership.ts",
+    "await this.stopEntry(entry,'CONTEXT_LOST').catch(()=>undefined);throw new GuidedStartFailure",
+    "await this.stopEntry(entry,'CONTEXT_LOST').catch(()=>undefined);await new Promise<void>(r=>{setTimeout(r,1000);});throw new GuidedStartFailure"
+   ]
+  ],
+  "files": [
+   "test/guided/ownership.test.ts"
+  ]
+ },
+ {
+  "name": "U9-failed-close-swallowed",
+  "edits": [
+   [
+    "src/guided/runtime.ts",
+    "else await this.failedLaunchClose?.().catch(() => { throw new Error('CONTEXT_LOST'); });",
+    "else await this.failedLaunchClose?.().catch(() => undefined);"
+   ]
+  ],
+  "files": [
+   "test/guided/runtime.test.ts",
+   "test/guided/ownership.test.ts"
+  ]
+ },
+ {
+  "name": "U9b-ignoring-launcher-waits-longer",
+  "edits": [
+   [
+    "src/guided/runtime.ts",
+    "const ended = await endedWithin(launching, GUIDED_START_RESERVE_MS);",
+    "const ended = await endedWithin(launching, GUIDED_START_RESERVE_MS + 1000);"
+   ]
+  ],
+  "files": [
+   "test/guided/runtime.test.ts",
+   "test/guided/ownership.test.ts"
+  ]
+ },
+ {
+  "name": "U10-probe-filter-removed",
+  "edits": [
+   [
+    "src/run/versionProbe.ts",
+    "await page.locator(selector).filter({ hasText: /\\S/u }).waitFor(",
+    "await page.locator(selector).waitFor("
+   ]
+  ],
+  "files": [
+   "test/run/versionProbe.test.ts"
+  ]
+ },
+ {
+  "name": "U10b-probe-filter-accepts-whitespace",
+  "edits": [
+   [
+    "src/run/versionProbe.ts",
+    "filter({ hasText: /\\S/u })",
+    "filter({ hasText: /./u })"
+   ]
+  ],
+  "files": [
+   "test/run/versionProbe.test.ts"
+  ]
+ }
+]

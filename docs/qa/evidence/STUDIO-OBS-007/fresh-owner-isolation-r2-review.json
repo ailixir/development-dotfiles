@@ -1,0 +1,293 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "scope": "READONLY_INDEPENDENT_ARCHITECTURE_PRIVACY_EXECUTABLE_DESIGN_REVIEW_ONLY",
+  "createdAtUtc": "2026-10-10T17:56:09.611001+00:00",
+  "design": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/r-isolation-execution-design-r2.json",
+    "sha256": "3e0ddd0760b19935e39d1748d0d22cd74e140d6cacd6cba8e8f93a0e86fa1be4",
+    "expectedSha256": "3e0ddd0760b19935e39d1748d0d22cd74e140d6cacd6cba8e8f93a0e86fa1be4",
+    "exactMatch": true
+  },
+  "priorReview": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-isolation-review.json",
+    "sha256": "d4027a5c2313f395b489b279555024ba4c76c4503bf23c97f2f701e08fe50ac2",
+    "preserved": true
+  },
+  "verdict": "APPROVE_EXACT_R2_DESIGN_WITH_CONSTRAINTS_NOT_EXECUTION_RELEASE",
+  "reason": "R2 resolves the prior Home producer blocker using the original regionVisible Operations OUTPUT at F and the existing F-only region-read grant. The unchanged server-only extraction is a finite test support seam. ISO1/ISO2/ISO3 and the separately counted no-browser ISO4 are valid executable designs subject to exact diff review, scalar witness constraints and coordinator preflight/release. No implementation or test pass is asserted.",
+  "decisions": {
+    "sameAPersistentContextSequence": "APPROVE",
+    "existingFOperationsReadPolicy": "APPROVE_NO_NEW_POLICY_OR_HOME_GRANT",
+    "genuineProducerFromActualReadAvailabilityUpdateConsumer": "APPROVE",
+    "smallestServerOnlyTestExtraction": "APPROVE_DESIGN_EXACT_DIFF_STILL_REQUIRED",
+    "ISO1": "APPROVE_WITH_TLS_COUNTER_PROOF_LIMIT",
+    "ISO2": "APPROVE_WITH_REAL_PRE_CLOSE_GATE",
+    "ISO3": "APPROVE_WITH_GENUINE_A_PRODUCER_AND_FRESH_B_NEGATIVES",
+    "ISO4_DIRECT_STALE_A_GRANT": "APPROVE_SEPARATE_FOURTH_DESIGN_REQUIRES_SEPARATE_RELEASE",
+    "strictScalarPrivateWrappers": "APPROVE_PRESERVE_PRIOR_CONTRACT",
+    "acceptedArchitecture": "NOT_REOPENED",
+    "executionRelease": false,
+    "lifecycleVerdict": null
+  },
+  "exactPaths": {
+    "existingDataflowOwner": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+    "newServerOnlyFixture": "studio-runner/test/fixtures/guided-dataflow/server.ts",
+    "futureIsolationThreeOwner": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+    "unchangedSecretFixture": "studio-runner/test/fixtures/secret-login/server.ts",
+    "fourthProbeFile": "Not specified by R2; separate owner preflight must bind its exact test path and registration. Do not silently add it to the isolation-three count.",
+    "onlyWriteThisReview": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-isolation-r2-review.json"
+  },
+  "policyAndSequence": {
+    "F": "Actual ephemeral loopback origin returned by unchanged regionVisible server closure; no historical port or origin rewriting.",
+    "S": "Actual distinct loopback origin returned by existing secret-login starter with default reportsRoleCollision=false.",
+    "approvedOrigins": [
+      "F",
+      "S"
+    ],
+    "regionReadOrigin": "F only; preserve approvedOrigins[0]=F",
+    "secretAllowedOrigins": {
+      "PASS": [
+        "S"
+      ]
+    },
+    "applicationPolicy": {
+      "policyRuleId": "app-structural",
+      "allowStructuralDiscovery": true,
+      "readGrants": [
+        {
+          "policyRuleId": "region-read",
+          "origin": "F = context.approvedOrigins[0]",
+          "region": {
+            "kind": "role",
+            "role": "main",
+            "name": "Operations",
+            "exact": true
+          },
+          "visibleText": {
+            "classification": "permittedBusinessData"
+          },
+          "controlValue": {
+            "classification": "nonsecretApproved",
+            "types": [
+              "text",
+              "textarea"
+            ]
+          }
+        }
+      ]
+    },
+    "ASequence": [
+      "Freeze all inputs/source steps/allocations and CSI-A scope before assignment/context/hash; names-only claim acknowledges exact ordered F+S scope.",
+      "Same actual persistent A context: admitted S/login navigation, PASS=A native password fill, observed Sign in submit, accepted private receipt and scalar cookie presence.",
+      "Original nav to F/source; observe Operations main and Business reference OUTPUT; real prepare/admit/dispatch region-read with SUCCEEDED and nonnull availability.",
+      "Construct value-free Producer from actual read admission/coordinate/F/recipe/availability; increment materializationRevision and real context update without changing input hash, context/fence/scope or extending authority.",
+      "Original next to F/destination; real binding-one fill using exact sameOrigin edge and real Submit; one private matching receipt. Actual values cache and exercised edge remain live.",
+      "Admitted S/reports navigation; protected document and valid cookie; scalar hasBinding=true immediately before stop.",
+      "Original stop/disposal, pending dispatch finally settlement if any, actual process/writer/profile teardown before B."
+    ],
+    "BSequence": [
+      "Keep S sessions valid; rotate only expected password to B. No reset/expire. Fresh CSI-B session, independent scope/authored hash, same PASS identifier; A/B application contexts never overlap.",
+      "Before any B credential delivery or dataflow read: distinct context/profile/runtime/inventory identities, cookiecount=0, hasBinding=false, containsPlantedA=false. Nonsecret URLs/inputs may already occupy inventory.",
+      "Send only actual A Producer metadata in a higher-materialization B update with B envelope/context/scope/hash otherwise unchanged. Original local equality join refuses; record actual status and closed code.",
+      "B initial input-login is frozen to S/reports before start; its admitted first navigation redirects to S/login while A server session remains valid.",
+      "Actual PASS=B native fill and observed submit produce a distinct accepted private receipt with valueMatchesB=true; containsB only after actual withholding and containsA=false; both-canary sink/profile scans before and after actual close."
+    ],
+    "genuineProducerSourceReferences": [
+      "studio-runner/test/fixtures-tier/guided-dataflow.test.ts:30",
+      "studio-runner/test/fixtures-tier/guided-dataflow.test.ts:50",
+      "studio-runner/src/guided/runtime.ts:123",
+      "studio-runner/src/guided/runtime.ts:249"
+    ],
+    "collectorReadPolicyReference": "studio-runner/src/run/observationCollector.ts:215",
+    "forbidden": [
+      "New Home H1 grant or S region-read",
+      "New read policy/rule/role/flag/production wire/API",
+      "Injected markup/data-testid/role/status",
+      "Seeded Runtime.values or fake availability/producer",
+      "Transfer of F binding into S password",
+      "Old A public echo or A secret planted into B DOM/model/observation/sink",
+      "Mutation of frozen live scope/inputs or artificial deadline renewal"
+    ]
+  },
+  "extractionContract": {
+    "allowed": "Move only original canary constant and HTTP server closure, existing routes/modes/counters/receipt oracle, listen(0,127.0.0.1) and original close behavior into a test-only starter. Test-only access to unchanged canary/receipts/counter is allowed for existing assertions; no production API.",
+    "mustPreserve": [
+      "Exact original /source password/input prefix and exact/regionVisible/regionControl bodies byte-for-byte, including whitespace and canary.",
+      "Exact original /receipt handler, /destination fallback branch, selectors, script, mode-specific removal/replacement, receipt and sourceRequest semantics.",
+      "No imports of runtime/browser/test-registration modules in server helper; module import must not start server/runtime/browser.",
+      "Original harness order: server creation/listen/address validation, register server cleanup, create directory/register rm, construct original context and 65 private inputs/hash, construct original runtime/rules/policy, register runtime.stop, await runtime.start.",
+      "Original reverse cleanup order: runtime.stop then directory rm then server.closeAllConnections/server.close; keep duplicate explicit stop semantics and failure cleanup registrations.",
+      "All three original it.each modes/names/counts and every original assertion unchanged. Preserve default exact mode, regionControl recipe and source/consumer flow.",
+      "Isolation starter call must create only F server, with no hidden extra runtime/browser and no importing the dataflow test to register cases."
+    ],
+    "exactDiffStatus": "No extraction diff exists or was approved by this review. Before authoring/execution release, review the exact two-path extraction diff against design-bound original bytes and runtime mount grant equality.",
+    "notAllowed": [
+      "Export/call nonexported harness",
+      "Duplicate or alter fixture markup in isolation tests",
+      "Refactor original runtime/context/act/target/refresh logic",
+      "Change original runtime/browser creation or cleanup order",
+      "Change original three case names/assertions/counts"
+    ]
+  },
+  "wrapperContract": {
+    "mechanism": "Test-local descriptors/Proxy with opaque WeakMap instance tags; inspect current private fields locally. No production export/getter/schema/CDP field.",
+    "delegate": "merge/snapshot/dispose and Runtime.stop/actual browser.close must invoke their original method on the original receiver with unchanged arguments, return value, promise and errors. snapshot returns its original result only to its original trusted caller; the witness stores no snapshot result.",
+    "allowedRetainedFields": [
+      "opaque instance tag",
+      "numeric map/set size",
+      "numeric inventory byte count",
+      "boolean failed/disposed/accepting/active",
+      "boolean containsPlantedA",
+      "boolean containsPlantedB",
+      "boolean hasBinding",
+      "boolean sameInstance",
+      "numeric monotonic event time"
+    ],
+    "forbidden": [
+      "raw arrays/entries/map/set/strings retained by instrumentation",
+      "raw snapshot return retained",
+      "vi.spyOn/mock.calls/mock.results retaining private arguments/results",
+      "secret-derived hashes/digests",
+      "instrumentation closures capturing inventory/runtime/browser instances after teardown",
+      "new production API",
+      "old A canary in B DOM/production observation/model/sink"
+    ],
+    "ephemeralComparison": "Compare known planted constants locally using membership booleans only; never export comparison operands or assertion diffs containing strings/maps. Do not retain snapshot arrays for comparison: direct private Map.has checks avoid creating copies. Transient original arguments/results are forwarded, never archived. Restore descriptors and drop strong instance references in finally, including failure cleanup; keep opaque tags/scalars only.",
+    "inventoryAssertions": "After original A.dispose, values.size=0, bytes=0, disposed=true; original snapshot must throw CONTEXT_LOST. B uses a distinct instance and containsPlantedA=false before and after its admitted fill; containsPlantedB=true only after actual withholding. Do not require initial B inventory size zero: current nonsecret inputs/URLs are withheld too.",
+    "runtimeAssertions": "Inspect before and immediately after original stop call: accepting=false, values/secretValues/prepared empty, evidence absent, context authoredInputs.inputs/allocations/producers/consumerEdges empty. After original closeResources completion inspect dispatched/ordinals/exercisedEdges empty and browser/launching/journal/diagnostics absent. Observe pending dispatch settlement separately; failureValues/failureRedactor release happens in real dispatch finally.",
+    "closeGate": "A test gate before original browser.close may demonstrate capacity occupancy while A processes still live; release within existing cleanup budget and await original close. A stopped flag or disposal invocation does not prove browser closure or slot release.",
+    "renderer": "browser.ts disposal clears options.knownSecrets and Node inventory synchronously before renderer await; collector.ts:757 clears its logical state. Require actual disposal acknowledgement when available; if interrupted, record acknowledgement unavailable and independently observed actual world/process destruction. Never fabricate renderer counts.",
+    "claimLimit": "Logical reference release, distinct instance identity and actual process/profile teardown only; no physical heap erasure/overwrite claim. Immutable strings, action-local redactors until finally, SDK/CDP/TLS buffers and browser/kernel state remain outside this logical witness."
+  },
+  "additionalWitnessClarifications": [
+    "No vi.spyOn/mock call/result arrays holding private arguments; no retained raw arrays/entries/maps/sets/snapshot strings/results or secret-derived digests. Original trusted fixture receipt arrays remain private fixture oracles, not instrumentation archives; export scalar matches/counts only.",
+    "Use original receivers/arguments/results/errors/promises for merge/snapshot/dispose/stop. Do not make transparent async wrappers that manufacture replacement promises. The expressly declared pre-close gate is an intentional timing witness; after release call original close exactly once and preserve its completion/error. It is not evidence of in-flight typing.",
+    "Restore descriptors and clear strong references in finally even on failure; keep only opaque tags/scalars. After disposal the original snapshot must throw, not return a fabricated empty snapshot.",
+    "Stop synchronous cache release, asynchronous closeResources cleanup and pending-dispatch finally are separate observation points. No renderer acknowledgement fabricated from the swallowed CDP error path.",
+    "Logical reference release and actual process/profile destruction only; no physical heap erasure, overwrite or SDK/CDP/TLS/kernel-buffer claim."
+  ],
+  "testProofRequirements": {
+    "ISO1": [
+      "Otherwise-valid actual createGuidedServer mount capacity=2 must throw CONFIGURATION_DENIED; ensure DEBUG/PWDEBUG/NODE_DEBUG/NODE_OPTIONS do not cause an earlier refusal.",
+      "Narrow worker-TLS factory counter delegates real HTTPS factory; excludes already-started controller fixture; assert worker TLS creation, SDK launch, claim HTTP, source context and secret/native frames all zero.",
+      "If ESM interception cannot be implemented without production changes, report TLS counter unavailable and retain transport.ts:65 constructor ordering as source proof. No socket/listen inference and no full measured TLS-zero verdict with a missing counter. Preserve separate secretReplay unit coverage."
+    ],
+    "ISO2": [
+      "Real mTLS A assignment/context/login fill and private focus witness establish actual A/browser/PID/profile.",
+      "Concurrent B names-only fresh-session assignment receives actual 409 CAPACITY before B claim/context/launch/native/profile effect.",
+      "After authenticated stop and accepting=false, gate before original A close keeps actual A writers/processes live; same-digest B retry under legitimate transport idempotency still CAPACITY.",
+      "Release within existing cleanup budget, await real original close/writer quiescence/profile removal; only then B acquisition/context creation. Measure max simultaneous live application contexts=1.",
+      "Replay-cache entry for refused B is not ownership; no fake server/browser/lease extension or altered production counterfactual."
+    ],
+    "ISO3": [
+      "Execute entire same-A sequence above and prove actual successful read/availability/local producer update/sameOrigin consumer receipt plus pre-stop cached binding.",
+      "Independent CSI scope hashes/names-only claims/authored input hashes/admissions; preserve 65 original nonsecret input declarations before hash.",
+      "Keep A server session valid through B redirect test; cookie presence alone is insufficient without protected A reports and fresh B reports-to-login result.",
+      "Fresh B cache negative before B read/credential delivery; actual A producer equality refusal is distinct from wrong-grant response validation.",
+      "Scalar original inventory/runtime cleanup and identity, both-canary callbacks/journal/diagnostic/profile scans, effective four profile preferences, actual browser/process/scratch cleanup, original pending dispatch settlement.",
+      "No A secret/value/hash/length/bytes in public outputs or assertion diffs. Private receipt comparisons retain only scalar matching evidence."
+    ],
+    "ISO4_DIRECT_STALE_A_GRANT": [
+      "Separate fourth case and separately bound owner/path/preflight/release; not part of isolation-three count.",
+      "After real A teardown retain only actual names-only A grant; fresh dedicated probe assignment is distinct from B.",
+      "Real authenticated claim endpoint delivers actual unchanged A grant; actual claim request observed. Original checkGrant identity join rejects and acquire normalizes to CONTEXT_LOST before application context/browser/native/secret frame.",
+      "Confirm probe tombstone/refusal; never reuse failed probe identity for legitimate B; discard A grant after probe. A normal assignment lifecycle callback may occur; do not require all callbacks zero.",
+      "No secret delivery or browser for probe. Scope is authenticated local worker response validation, not backend/Vault wrong-CSI resolution proof."
+    ],
+    "futureExecutionEvidence": [
+      "Coordinator exclusively owns Gradle/browser/dist and execution metadata. Exact released source/test/helper/production/dist/runtime/browser hashes and supported provenance required; identify source versus compiled lane accurately.",
+      "Run original dataflow three and new isolation three as separately counted actual cases; fourth probe separately counted. No skips, drift, test-registration imports, fabricated results or promotion of historical passes.",
+      "If required counter/proof unavailable or actual test fails, report that limitation/failure and leave corresponding oracle open. Design approval is not evidence of passing execution."
+    ]
+  },
+  "sourceReadBindingComparison": {
+    "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": {
+      "expected": "3db23983b89cc5edbb34a79df914c9cdb4d9c7ea8394c6430357775fa9b782ea",
+      "actual": "3db23983b89cc5edbb34a79df914c9cdb4d9c7ea8394c6430357775fa9b782ea",
+      "matches": true
+    },
+    "studio-runner/test/helpers/guided.ts": {
+      "expected": "5ef1cf85ab03602a9a2b35c0c08cb03ab92499a8c698e910b01254abd88bf94e",
+      "actual": "5ef1cf85ab03602a9a2b35c0c08cb03ab92499a8c698e910b01254abd88bf94e",
+      "matches": true
+    },
+    "studio-runner/test/helpers/guidedTls.ts": {
+      "expected": "bb06b80734a892d526890eb0efaaea61e061c2f8442e7f807ea1d62b4b0e07fb",
+      "actual": "bb06b80734a892d526890eb0efaaea61e061c2f8442e7f807ea1d62b4b0e07fb",
+      "matches": true
+    },
+    "studio-runner/test/fixtures/secret-login/server.ts": {
+      "expected": "4dfdb95e5a57d3ced6122d59fe190dd84ef58f722ce63fc5557785c51bb611f9",
+      "actual": "4dfdb95e5a57d3ced6122d59fe190dd84ef58f722ce63fc5557785c51bb611f9",
+      "matches": true
+    },
+    "studio-runner/src/guided/runtime.ts": {
+      "expected": "75fc33b1cd1cbc59bcb746811caff879d7217b22de8b08b374eec173dacf271c",
+      "actual": "75fc33b1cd1cbc59bcb746811caff879d7217b22de8b08b374eec173dacf271c",
+      "matches": true
+    },
+    "studio-runner/src/guided/ownership.ts": {
+      "expected": "030443d7478791e2f980763a4e30a4b2daba922836d0c5ac9650e141995b31c4",
+      "actual": "030443d7478791e2f980763a4e30a4b2daba922836d0c5ac9650e141995b31c4",
+      "matches": true
+    },
+    "studio-runner/src/guided/transport.ts": {
+      "expected": "fc447a2efdf666c9b4ed319685e1d59875787fa11ec3a3e070171ae5da5ae3bf",
+      "actual": "fc447a2efdf666c9b4ed319685e1d59875787fa11ec3a3e070171ae5da5ae3bf",
+      "matches": true
+    },
+    "studio-runner/src/run/observationInventory.ts": {
+      "expected": "42732ad738c567f8fc5c513253cf445c0c5e3288958faf9f70677838b5f0d294",
+      "actual": "42732ad738c567f8fc5c513253cf445c0c5e3288958faf9f70677838b5f0d294",
+      "matches": true
+    },
+    "studio-runner/src/run/observationCollector.ts": {
+      "expected": "ba31be90d04885e6329ae02f6559205325740cbd46960a438150a890557c27a2",
+      "actual": "ba31be90d04885e6329ae02f6559205325740cbd46960a438150a890557c27a2",
+      "matches": true
+    },
+    "studio-runner/src/run/browser.ts": {
+      "expected": "a397ece7c7dec06e643bc82b6a4862c5accf154c1c6b28d314ad3c7fab4ac02d",
+      "actual": "a397ece7c7dec06e643bc82b6a4862c5accf154c1c6b28d314ad3c7fab4ac02d",
+      "matches": true
+    }
+  },
+  "limitsAndDisposition": {
+    "backendVaultCore": "OPEN_SEPARATE: runner supplied values/CSI scope do not prove actual Vault authorization; real CoreHTTP/PG/Vault resolver/read/send/audit/all-sink joins remain required.",
+    "currentFocusedDiagnostic": "User reports actual 2/2 FAIL with no skip/drift; not rerun or reinterpreted here. Ordinary 409 closed cause pending and ninth next-prompt ModelProjection guard product fix remain isolated owner work.",
+    "all19AC": "OPEN",
+    "allTenStories": "OPEN",
+    "qaApproved": false,
+    "lifecycleChanged": false,
+    "executionAuthority": "Coordinator sole Gradle/browser/dist owner; root standby; R parked unchanged and B source projection fix active as user states. No contacts or dispatch changes.",
+    "beforeAnyFutureRelease": [
+      "Exact extraction diff review",
+      "Exact bounded test preflight including fourth path/registration",
+      "Coordinator owner release after shared lane availability",
+      "Fresh hash/provenance validation"
+    ]
+  },
+  "budget": {
+    "wholeWaveCeilingUsd": 500,
+    "billingTelemetry": "UNAVAILABLE",
+    "cap": 4,
+    "spawns": 0,
+    "noSpendClaim": true
+  },
+  "workPerformed": {
+    "sourceWrites": 0,
+    "testAuthoring": 0,
+    "runtimeRuns": 0,
+    "testRuns": 0,
+    "buildRuns": 0,
+    "browserLaunches": 0,
+    "distWrites": 0,
+    "modelSpawns": 0,
+    "contacts": 0,
+    "dispatchChanges": 0,
+    "lifecycleChanges": 0,
+    "goalChanges": 0,
+    "onlyWrite": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-isolation-r2-review.json"
+  }
+}

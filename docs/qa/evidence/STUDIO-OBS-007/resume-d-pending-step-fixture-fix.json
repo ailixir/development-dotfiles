@@ -1,0 +1,43 @@
+{
+  "scope": "Source-only initial acceptance pending-step seed in new shared complete-artifact helper",
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-pending-step-fixture-source-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-pending-step-fixture-source-context.txt"
+  ],
+  "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+  "beforeSha256": "0d6bf1f40b7ff894cb36a542d3527da3af132d49d98aefff9f3daa80e0acce1e",
+  "afterSha256": "24364c5e1947f33ac050c21c795fc52bded1ada2956beb32db30a739b21486ef",
+  "patchPath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-pending-step-fixture-fix/source.patch",
+  "patchSha256": "a4f5235c2a257e7f4ae3fe7b75edb9eb50bbb2f4892529064ee1899463b5948e",
+  "sourceCorrelation": {
+    "committedPublicationTransactionPrecedesSourceRead": true,
+    "sourceRead": "Committed ui_test_revisions.source by actual command.revisionId",
+    "parser": "LegacyStudioAdapter.parseSteps",
+    "pendingDto": "StepResult.pending(index, originalText)",
+    "orderedZeroBasedIndices": true,
+    "initialState": "PENDING",
+    "nullTimingsAndMessage": true,
+    "serializer": "Existing JSON ObjectMapper",
+    "initialInsertIncludesStepResults": true,
+    "lateHistoryUpdate": false,
+    "productionAnchors": [
+      "StudioAcceptanceService:333",
+      "StudioAcceptanceService:405",
+      "StudioAcceptanceService:568"
+    ]
+  },
+  "preservation": {
+    "prefixBeforeSharedOverloadByteIdentical": true,
+    "suffixAfterSharedOverloadByteIdentical": true,
+    "allExistingTestMethodsAndNamesUnchanged": true,
+    "oldDefaultHelperOverloadsUnchanged": true,
+    "reportIndexReceiptSecretUseCasGuardsAssertionsUnchanged": true,
+    "artifactAndOperationCountUnchanged": true,
+    "seededUsedFinalRelease": false,
+    "otherSourceFilesEdited": false
+  },
+  "candidateState": "FROZEN_UNFORMATTED_UNCOMPILED_RUNTIME_UNRUN",
+  "runtimeActions": [],
+  "remainingGate": "Coordinator-owned scoped formatter/compiler and unchanged ProgressCallbackIT20; current red preserved",
+  "proofLimits": "Fixture acceptance metadata only; no native/Core/live-Vault/browser effect proof"
+}

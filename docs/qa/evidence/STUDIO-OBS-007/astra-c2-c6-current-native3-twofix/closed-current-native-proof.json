@@ -1,0 +1,82 @@
+{
+  "scope": "Three existing native C2/C6 cases on current fixture; source-bound C5/AC16 original30 receipt is separate",
+  "gate": {
+    "gradleExitCode": 0,
+    "sourceDrift": [],
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "freshResult": true,
+    "results": [
+      {
+        "test": "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope",
+        "pass": true
+      },
+      {
+        "test": "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect",
+        "pass": true
+      },
+      {
+        "test": "actualPublishedPublicCancelWhileNativePasswordWorldPending",
+        "pass": true
+      }
+    ],
+    "diagnosticEnabled": false,
+    "privateArtifactJoined": true,
+    "pass": true
+  },
+  "concurrentReplayAndDrain": {
+    "distinctCsiScopes": 2,
+    "simultaneousOwnedChildren": 2,
+    "actualOwnReceipts": 2,
+    "privateEnvArgvScans": 2,
+    "canaryVariants": 30,
+    "canaryHits": 0,
+    "actualDrainingInFlight": 2,
+    "gracefulDrainCompleted": true,
+    "parentWipeEvents": 2,
+    "ownedProcessCount": 18,
+    "ownedProcessesGone": true
+  },
+  "currentFailureAndCancelExits": [
+    {
+      "kind": 1,
+      "originalPendingAck": true,
+      "originalCloseConfirmed": true,
+      "originalNativeFillEntries": 1,
+      "realReleasedReads": 1,
+      "parentValuesWipedObserved": true,
+      "ownedOrdinaryChildTreeGone": true,
+      "ownedOrdinaryChildTreeCount": 9
+    },
+    {
+      "kind": 2,
+      "originalPendingAck": true,
+      "originalCloseConfirmed": true,
+      "originalNativeFillEntries": 1,
+      "realReleasedReads": 1,
+      "parentValuesWipedObserved": true,
+      "ownedOrdinaryChildTreeGone": true,
+      "ownedOrdinaryChildTreeCount": 9
+    }
+  ],
+  "lastC6CapturePrivacy": {
+    "encodedBytes": 9014579,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 15,
+    "rootTraceObserved": true,
+    "appTraceObserved": true
+  },
+  "privateValuesRemoved": true,
+  "limits": [
+    "No heap-zeroization or killed-parent telemetry claim",
+    "Current C6 wipe and PID witnesses belong to their own invocations",
+    "No new browser flow or exit matrix",
+    "Full30 original C5 capture is independently preserved in astra-c2-c6-current-c5pair"
+  ]
+}

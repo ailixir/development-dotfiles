@@ -1,0 +1,303 @@
+{
+  "numeric": [
+    {
+      "encodedBytes": 43472386,
+      "encodedPatternHits": 0,
+      "streamedLogsFinalChecked": true,
+      "captureTargetClosed": true,
+      "patternCount": 30,
+      "rootTraceObserved": true,
+      "appTraceObserved": true,
+      "sseStreams": 0,
+      "cacheEntries": 2,
+      "profileFiles": 167,
+      "traceArmed": true,
+      "claimSamplerStatus": 2,
+      "claimSamplerJoined": true,
+      "claimSamplerCleanupConfirmed": true,
+      "claimSamplerDiagnosticOnly": true,
+      "claimSamplerCycles": 432,
+      "claimSamplerEmpty": 0,
+      "claimSamplerUnattributed": 0,
+      "claimSamplerCounts": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0,
+          79,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          23,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          4,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "pgSnapshotStatus": 2,
+      "pgSnapshotJoined": true,
+      "pgSnapshotExactClaimAttribution": false,
+      "pgSnapshotRows": 2,
+      "pgSnapshotCandidates": 1,
+      "pgSnapshotBlockers": 1,
+      "pgSnapshotStageWaitCounts": [
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "pgSnapshotBlockerStageCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "pgSnapshotRelationCounts": [
+        2,
+        1,
+        0
+      ],
+      "pgSnapshotWaitEventCounts": [
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "status": 202,
+      "handlerMs": 18.2945,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 27.513542,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 198.834375,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 129.785125,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 269.885834,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 347.949458,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 122.864417,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 339.283792,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 1506.61575,
+      "consumed": true
+    }
+  ],
+  "lifecycle": [
+    {
+      "status": 202,
+      "kind": "RUNTIME",
+      "reason": "LEASE_LOST",
+      "consumed": true
+    }
+  ],
+  "failures": [
+    {
+      "test": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "frames": [
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.awaitFinalizing(GuidedPublicationReplayIT.java:13192)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel(GuidedPublicationReplayIT.java:3654)"
+      ]
+    }
+  ],
+  "state": [
+    {
+      "state": "FAILED",
+      "errorCode": "OTHER",
+      "bootstrapPhase": "READY",
+      "materializationPresent": true,
+      "fixtureModelHttpCalls": 4,
+      "fixturePhysicalProviderReads": 1,
+      "fixtureProviderFailures": 0,
+      "fixtureModelKinds": {
+        "SOURCE_PLAN": 1,
+        "NEXT_ACTION": 3,
+        "VERIFY_STEP": 0
+      }
+    }
+  ]
+}

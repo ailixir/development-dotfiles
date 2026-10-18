@@ -1,0 +1,38 @@
+{
+  "scope": "DEFINING_REAL_PG_CLAIM_COMPOSITION_PLAN_NO_NEW_E2E",
+  "mainCandidate": "806c026b516ceac7e7b5ed7a070a4e860dd6138098e2f2ce13ea7f595e124bc9",
+  "testOwner": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+  "existingHelper": "prepareGuidedControllerCut / original repository, same actual datasource and fixture service/materialization/access",
+  "fixtureBasis": "Existing real source row + production GuidedTranslationStore initialize + real assignment/materialization/preparation/admission (actual secretRef sourceInput/ref-PASS) from existing helper. Consume through original sessions.consume then recordSecretDecision RESOLVED with explicit controlled test metadata through real service/lifecycle. No manual release/USED/FINAL rows, no provider/native/browser claim from controlled metadata.",
+  "minimalTestOnlySeam": "An overload/optional Consumer<JsonNode> on existing FixtureAccess, default null and all original checks unchanged, observes original checkCurrent after its original SQL guard. New local service uses same repository/materialization/original helper factory and supplied access; no second PG/context/framework.",
+  "realSweep": "Original SecretRevocationSweep with same actual DS/manager and real SecretUseAuditRecorder. Original installGuidedStop(service::secretRevoked); original stopSender via existing SourceStopOwner authenticated relay/confirmation, no invented wire.",
+  "tests": [
+    {
+      "name": "composedClaimRevocationCommitsBeforeRefusalAndOriginalStop",
+      "steps": [
+        "Establish genuine consumed secretRef admission and real recordSecretDecision controlled metadata, snapshot actual RELEASE row.",
+        "Install real sweep with scoped authorization false; invoke actual claim and assert exact SECRET_USE_REVOKED409.",
+        "Separate committed PG reads verify revoked_at, terminal CANCELLED/errorCode SECRET_USE_REVOKED, exactly one LIVE_RECHECK row and original RELEASE unchanged, no claim command inserted.",
+        "Existing original SourceStopOwner completion/confirmation observes after-commit delivery; verify committed revocation/audit from independent connection before ACK and exact authenticated identity closure. No extra stop request/native call."
+      ]
+    },
+    {
+      "name": "permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback",
+      "steps": [
+        "Same genuine fixture/release, real sweep authorization true. Its original authorization callback records actual TransactionSynchronizationManager DS resource holder (no SQL or extra authorization call). Optional original access checkCurrent records same resource holder. Assert same physical tx resource within each actual claim, using existing plain owned datasource; never count wrapper method calls as proof.",
+        "Original successful renewal writes genuine lease+command snapshot; identical-key replay preserves response/lease/one command, source guards stillrun.",
+        "Changed valid expectedFence under same key yields exact IDEMPOTENCY_CONFLICT; committed document/progress/release/audit/command unchanged.",
+        "Existing outer repository.transaction calls successful actual permitted claim then throws controlled rollback; verify actual inside lease/command visible, after rollback no new lease/command and all prior rows exact. This proves nonnull precheck participation unlike existing null-sweep Session34."
+      ]
+    }
+  ],
+  "oldCases": "Original19 Transport test bodies and existing3 resolver bodies unchanged. Existing Session34 and Sweep3 remain finite regressions; no browser Cartesian expansion.",
+  "grade": "Service+real PG/controlled authenticated relay only; no Core/browser/provider value/native execution or timing/performance claim.",
+  "requiredBeforeApply": "Root review of exact plan and added fixture seam/source, then limited reversible candidate apply/compile/realPG gate. No acceptance or one-second benefit claim before actual proof.",
+  "actions": {
+    "sourceEdits": 0,
+    "runtime": 0,
+    "newFrameworks": 0
+  },
+  "wholeWaveCeilingUsd": 500
+}

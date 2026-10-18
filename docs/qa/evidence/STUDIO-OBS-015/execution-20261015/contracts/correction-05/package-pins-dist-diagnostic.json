@@ -1,0 +1,51 @@
+{
+  "ok": false,
+  "failures": [
+    "Observed packaged reference bundle is stale.",
+    "Observed packaged schema bundle is stale."
+  ],
+  "notAsserted": [
+    "dist/runtime-versions.json chromiumBuild is not asserted (it is null): this build did not run inside the pinned Playwright image, or ran there without being told which image it was, so the browser build was not asserted (ED-05).",
+    "dist/runtime-versions.json image is not asserted (it is null): this build did not run inside the pinned Playwright image, or ran there without being told which image it was, so the browser build was not asserted (ED-05)."
+  ],
+  "pins": {
+    "declared": "1.63.0",
+    "locked": "1.63.0",
+    "image": "1.63.0",
+    "recorded": "1.63.0",
+    "declaredTypescript": "5.9.3",
+    "engines": ">=22.11.0 <25.0.0",
+    "nvmrc": "22",
+    "runtime": {
+      "playwright": "1.63.0",
+      "playwrightLocked": "1.63.0",
+      "playwrightImageTag": "1.63.0",
+      "chromiumBuild": null,
+      "node": "v23.10.0",
+      "nodeEngineRange": ">=22.11.0 <25.0.0",
+      "nodeMajorPin": "22",
+      "validatorSchema": "2.0.0",
+      "validatorParser": "typescript@5.9.3",
+      "syntaxReference": "2.1.0",
+      "executor": "2.1.0",
+      "artifact": 1,
+      "image": null,
+      "observedSchemaBundleHash": "6a4b35b5c5446a0b0d4e76ae3ee7252a7144c42001d827030c1fdc4065fa7789",
+      "observedReferenceBundleHash": "4478293e3f5faaf6370bbc49e9109f6f186fa40aa487fc914bee6efe916b7389",
+      "observedChromiumBuild": "1243",
+      "observedBrowserProvenance": {
+        "channel": "chromium",
+        "headless": true,
+        "chromiumSandbox": true,
+        "args": [],
+        "platform": "darwin",
+        "arch": "arm64",
+        "revision": "1243",
+        "executableRelativePath": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+        "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+      },
+      "observedBrowserLauncherSha256": "f1409ce23bc45c7cb6016053dd58f9d0fd371fd2d0773cc042fadaeee2d3356a"
+    },
+    "runtimePresent": true
+  }
+}

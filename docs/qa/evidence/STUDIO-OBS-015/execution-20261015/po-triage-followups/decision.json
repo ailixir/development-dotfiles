@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "artifact": "STUDIO-OBS-015 full-suite triage follow-ups: S1/S2 authorization order, historical V18 fixture adapter, runtime DB role grant on studio_guided_materialization_snapshots",
+  "date": "2026-10-16T18:19:20Z",
+  "owner": "Pax (@po)",
+  "authority": "Coordinator relayed the task; ADR-SC-005 placement map. No user decision is claimed.",
+  "head": "734ad704f6ae508dbb10d9b5127a315bb0df5f81",
+  "method": "Working tree and git show HEAD:<path> read on 2026-10-16. No build or test run.",
+  "sources": {
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-source-review-final02/review.md": "658cb13c9b8ba09a842dd0f9020af033b43b61507f02c2c6b5789e792b69f3d5",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/fullsuite-triage-BC/review.md": "719d65a6e64b70779af563c228416b220460e1713f21181819509911d3036a12",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/fullsuite-triage-A/review.md": "58b5ea0177ba6b211631503fed4b61b778ac9fa514347a8d80a3875d1d62ba15",
+    "docs/architecture/ADR-002-internal-contract-surface.md": "e4e92521b6518dbe50186b475e43cfe8f874c87e244037c95b5fff5228e998cf",
+    "docs/architecture/ADR-SC-005-single-path-observed-authoring.md": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/data/interface-and-test-spec.json": "b0f3c1e8cd3149a16fc7be917378ba96e0c8d25a75b2df235870990c8c2ee477"
+  },
+  "anchorFileHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/StudioService.java": "aeacda850f83e550d84d3b233da8f5c27b704e9f82187fdbeba0516b9152ce50",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioController.java": "ad76cb5d6f2b19ce08add8a1ab2c75a7ac1bea958c53c06262ef49c201425d42",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioRepository.java": "916e93478dffc798eeac77018a16ac3d3ff8f15a60e10a3f59ff22f407a634a3",
+    "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql": "b012ddddb44b599c4f8699be39281dd6f407b2cb93b41386a79eb22c06c4d179",
+    "backend/src/main/resources/application.yml": "272736619835ac434ff9d4c69e2e4a42009e57cd4091ee4fb9bf6769ca728494",
+    "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java": "5299170683418a1b3b950834e68487eab28731e078be023cff43722c08cd8266",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java": "3f8d75c258a1a0e827524a54ee1c822ac0374eebcdef148a21b4f21a7be5d2d0",
+    "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java": "e1e4acd9410a1764b186cc4f9e54be0bfc62bddfcff6246d812e73ddda00b7aa"
+  },
+  "headVsTree": {
+    "readAuthoringDraft": {"head": "StudioService:325-335, findByIdForUpdate :328 before requireRead :329; StudioController HEAD :93 routes GET v2 here", "tree": ":291-300, findByIdForUpdate :294 before requireRead :295", "verdict": "PRE_EXISTING"},
+    "findAuthoringV2ById": {"head": ":385-393, findById :386 then requireRead :387, no lock (compliant)", "tree": ":343-347, @Transactional (triage BC cluster C hunk) delegating to readAuthoringDraft: lock before requireRead", "srcMainCallers": 0, "verdict": "INTRODUCED_BY_015_TREE"},
+    "lockForAuthoringWrite": {"head": ":729-747, lock :732 before requireWrite :733 (no auth guards)", "tree": ":464-475, visible read + requireWrite under auth != null :466; refresh under auth != null && entityManager != null :471; requireWrite unconditional :475", "verdict": "GUARDS_INTRODUCED_BY_015_TREE (ordering itself improved vs HEAD)"},
+    "historicalV18Adapter": {"head": "fixture file absent (untracked); GuidedPublicationMigrationTest 0 hits for HistoricalV18|requireV18", "tree": "fixture :43-44, :140, :313-321; GuidedPublicationMigrationTest :1064, :1298, :1428, :1570, :1607-1662; InferenceMigrationIT :187, :190, :299", "designedIn": "015 final-design interface-and-test-spec.json ('historical V18 target stays')", "verdict": "INTRODUCED_BY_015_TREE (by design)"},
+    "snapshotsViewGrant": {"head": "no GRANT/SECURITY DEFINER in backend/src/main/resources or backend/db", "tree": "V21 :114 creates the view; :837-880 audit functions read it; still no GRANT/SECURITY DEFINER; application.yml flyway has no separate user; helm-chart passes SPRING_DATASOURCE_* only", "verdict": "INTRODUCED_BY_015_TREE (V21); deployment impact UNKNOWN"}
+  },
+  "placements": [
+    {"id": "TF-1", "item": "findAuthoringV2ById locks before requireRead", "destination": "STUDIO-OBS-015", "anchor": "Known limitations → PO placement block (required change)", "blocks015Gate": true, "requirement": "No row lock before requireRead. (a) delete the method (0 src/main callers; port test callers by name) or (b) restore HEAD order findById -> requireRead -> canonical projection without lock. @dev chooses. The cluster C @Transactional alone does not satisfy this. The 11 cluster C tests pass afterwards.", "owner": "@dev; @qa verifies"},
+    {"id": "TF-2", "item": "S2 dead auth != null guards in lockForAuthoringWrite", "destination": "STUDIO-OBS-015", "anchor": "Known limitations → PO placement block (required change)", "blocks015Gate": true, "requirement": "Unconditional visible read + requireWrite (remove auth != null at :466; drop auth != null at :471; entityManager != null out of scope unless shown dead). Behaviour-neutral: StudioServiceWriteAuthorizationTest and StudioAuthorizationIT pass unchanged; grep 'auth != null' in lockForAuthoringWrite = 0.", "owner": "@dev; @qa verifies"},
+    {"id": "TF-3", "item": "S1 GET readAuthoringDraft locks before requireRead (ADR-002 §27.2)", "destination": "STUDIO-OBS-009", "anchor": "AC-9 obligation a-e; T5 sub-item", "blocks015Gate": false, "rulingFirst": "@architect: (i) visible non-locking read -> requireRead, or (ii) visible read -> requireRead -> locked read only if a lock is needed. @po does not pick.", "deadline": "before the first human pilot (AC-7)", "whyNot011": "behaviour change on a public route", "whyNot015": "pre-existing at HEAD; QA advisory, not blocking"},
+    {"id": "TF-4", "item": "Historical V18 fixture adapter (freezeHistoricalV18Source, requireV18, publishHistoricalV18Observed, commitHistoricalV18, prepareHistoricalV18Observed)", "destination": "STUDIO-OBS-011", "anchor": "AC-1 new candidate CLN-F2 (class C) a-d; T1 sub-item", "blocks015Gate": false, "rulingFirst": "@architect with @data-engineer: retire (port V18 cases to head writer or retire by name with covering test) or keep as named AC-7 exception. @po does not pick.", "inference": "No re-baselined V18 population exists (unreleased; ADR-SC-005 'Dev databases recreated after D-B')."},
+    {"id": "TF-5", "item": "Runtime DB role SELECT on studio_guided_materialization_snapshots", "destination": "STUDIO-OBS-009 (+ STUDIO-OBS-015 KL-015-GRANT)", "anchor": "AC-4 obligation a-e; T2 sub-item; 015 Known limitations", "blocks015Gate": false, "requirement": "Record role model per environment; if runtime role != owner, GRANT SELECT on the view and check the V19-V21 privilege delta; live proof a secret-referencing guided terminal writes its audit row under the runtime role; owner-is-runtime => 'not applicable' with evidence; unconfirmed => 'unrun, owner Platform DBA / @devops'.", "owner": "@devops + @data-engineer; Platform DBA external"}
+  ],
+  "storyEdits": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "Known limitations: PO placement block (TF-1, TF-2, KL-015-GRANT, pointers TF-3/TF-4); Change Log 0.1.10; Status unchanged",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md": "AC-4 obligation TF-5 a-e; AC-9 obligation TF-3 a-e; T2/T5 sub-items; Change Log 0.3.14; Status unchanged",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md": "AC-1 candidate CLN-F2 a-d; T1 sub-item; Change Log 0.2.6; Status unchanged"
+  },
+  "autoDecisions": [
+    "[AUTO-DECISION] S1 home among 009/011/015 -> OBS-009 AC-9 (reason: pre-existing at HEAD, behaviour change so not 011, cross-principal interference matches AC-9 isolation gate)",
+    "[AUTO-DECISION] S2 home -> 015 (reason: guards are 015-introduced in a security-sensitive function; QA asked for the 015 sweep; two-line behaviour-neutral change)",
+    "[AUTO-DECISION] findAuthoringV2ById lock-first -> 015 required fix (reason: compliant at HEAD, regressed in the 015 tree; lead rule: 015-introduced authorization regression is fixed in 015)",
+    "[AUTO-DECISION] DB grant -> OBS-009 AC-4 plus 015 KL (reason: deployment/roles per ADR-SC-005 Operations; three-part convention minus pilot row, which was not requested)"
+  ],
+  "notRun": ["Gradle", "JUnit", "any DB probe"]
+}

@@ -1,0 +1,113 @@
+{
+  "existingParameterLabels": [
+    "insert4",
+    "delete4",
+    "reorder4",
+    "config",
+    "tail1",
+    "tail7",
+    "append11",
+    "ready6",
+    "confirm-prefix",
+    "empty",
+    "drift2",
+    "admitted-drift2",
+    "unknown2",
+    "assert-fail",
+    "policy-prefix",
+    "confirm-long-wait",
+    "confirm-cancel",
+    "confirm-expire",
+    "confirm-source-change",
+    "confirm-recover",
+    "confirm-owner-loss",
+    "append-input",
+    "deleted-consumers",
+    "admitted-literal2",
+    "pre-literal2",
+    "same-pair-literal",
+    "unused-declaration",
+    "drift-plan-fail",
+    "drift-first",
+    "confirm-edit4",
+    "confirm-race",
+    "drift-auth",
+    "drift-auth-pre",
+    "before4at2",
+    "equal4"
+  ],
+  "existingParameterLabelCount": 35,
+  "ownership": {
+    "minimalAuthorizedNextSourceBatchAfterRootRelease": [
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java"
+    ],
+    "conditionallyOwnedIfConcreteFailure": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java"
+    ],
+    "readOnlyProtected": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedAcceptedPlan.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanHistoryAudit.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+      "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java"
+    ],
+    "noOverlap": "B2/B3/B4 also own JOIN file: serialize exclusive JOIN ownership and hold/hash handoff after B1. newDex3files and Data helpers/migrations remain held. All new test support stays nested in JOIN; no runner source change presumed. If real needed native hook unavailable, root must release separate disjoint R1 fixture file; never edit runner/private schema/shared helpers unilaterally."
+  },
+  "priorityOrder": [
+    {
+      "batch": "B1a",
+      "rows": [
+        14,
+        15,
+        16
+      ],
+      "delta": "Deleted UUID + trusted ceiling start refusals, reusable stable callback/transaction checkpoints, aligned completeStep state fix."
+    },
+    {
+      "batch": "B1b",
+      "rows": [
+        20,
+        48,
+        54
+      ],
+      "delta": "Actual recovered next coordinates + concurrent duplicate drift + one exact auth matrix/helper, broaden snapshots."
+    },
+    {
+      "batch": "B1c",
+      "rows": [
+        26,
+        27,
+        80,
+        81,
+        82
+      ],
+      "delta": "Exact step2/policy/native guards, fresh post-consent matrix and independent natural lease expiry."
+    },
+    {
+      "batch": "B1d",
+      "rows": [
+        55,
+        56
+      ],
+      "delta": "Actual empty-prefix context deliveries/rebootstrap + boundary/empty SOURCE_PLAN failures/result negatives."
+    }
+  ],
+  "commandsAreNotExecuted": true,
+  "cwd": "backend",
+  "baselineSelectors": [
+    "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+    "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+    "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof"
+  ],
+  "limitations": [
+    "Gradle --tests class.method selects whole parameterized method; existing PARAM executes all35 ValueSource labels. Do not claim drift-auth or label-only execution from method selector, and do not use unsupported [label] filters. New dedicated methods are proposed, not present/runnable until implemented.",
+    "Use root actual runtime harness/capture settings, original configured thresholds, genuine PG15 and built held runner dist, actual browser/ffmpeg/Core/mTLS. Do not run alongside root Core/browser03. Commands shown are selectors, not permission or source release.",
+    "compileJava+compileTestJava before smallest meaningful new methods; full original 35 variants plus edit4/historical and new dedicated methods afterward. Exact class+method receipt, XML names/labels/test count/skips/source+dist hashes needed. Never run only easy positive variant as B1 completion.",
+    "No fullcheck/coverage/native/media/auth completion claim from this source-only handoff. Broader normal configured check/crossReplica/coverage and all86/24/55 fan-in remain root duties.",
+    "SOURCE_PLAN successful fixture one distinct attempt/reservation/gateway call expected; failure fixture may exercise configured repair attempts: preserve policy, capture exact count, do not weaken retries/thresholds."
+  ]
+}

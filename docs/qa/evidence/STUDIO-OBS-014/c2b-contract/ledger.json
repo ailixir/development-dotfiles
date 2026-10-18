@@ -1,0 +1,298 @@
+{
+ "artifact": "STUDIO-OBS-014 contract step C2b (sync point S3) + Step 0 observed-reference resync: ledger",
+ "author": "Dex (@dev), C-lane integrator 'cint3'",
+ "date": "2026-10-13",
+ "authority": [
+  "docs/qa/evidence/STUDIO-OBSERVED-NEXT/c2b-spec.json (RULED, binding; every edit below is taken from it verbatim unless listed under autoDecisions)",
+  "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-ac11-and-refusal-codes.json ruling2 residual 2.N1 (optional trim)",
+  "docs/qa/evidence/STUDIO-OBSERVED-NEXT/s0-plan-refresh.json lanes.C (files, unit rule)",
+  "docs/qa/evidence/STUDIO-OBS-013/c1-contract/ledger.json and docs/qa/evidence/STUDIO-OBS-014/c2a-contract/ledger.json (method)"
+ ],
+ "mode": "No git add/commit/stash/reset. Gradle only via gradle-locked.sh (AGENT_NAME=cint3, compileTestJava). The studio-runner dist build of Step 0 ran while holding the shared orchestration lock (mkdir lock, owner 'cint3', trap release), acquired exactly as gradle-locked.sh does. No backend main code, migration, other-lane test, R14 patch, B14 unit or frontend file edited. T0 = sha256 + copy of 63 C-int files, taken after Step 0 and before the first C2b edit. Every T0 hash equals the C2a ledger's 'now' value for the files C2a touched, so nothing drifted between C2a and C2b. Scratch paths are omitted from this file.",
+ "step0_observedReferenceResync": {
+  "problem": "studio-runner/scripts/write-runtime-versions.mjs threw 'Observed choice reference evidence is stale'. fixtures/observed-reference/accepted-observed-choice.json still carried the pre-C2a observedChoice: no labelSource/role/region on the two question choices, and the old contextIdentityHash, publicationEvidenceHash, referencePolicyHash and artifactHash.",
+  "change": "accepted-observed-choice.json := publication-fixtures.json observedChoice, written as JSON.stringify(value, null, 2) + newline. That is the file's existing format; the round trip was verified before the write.",
+  "sha256": [
+   "852fa752a3c9b56588d239b0a62d45c4ca26d452685a3210a58280eaf98807aa",
+   "ec9f1b8f8bad8a5a6ab8933c9dbb95c1c544f190e2bbc97ae58d03762666b683"
+  ],
+  "otherMirrors": "fresh-order-reference.json and control-value-reference.json: basis and artifact were already canonically equal to publication-fixtures.json basis/artifact (measured). manifest.json and operation-mutations.json have no v3 source that C2a/C2b changed. None of these were edited. C2b does not touch observedChoice, so the resynced mirror is still equal after C2b (re-measured: canonical hashes equal).",
+  "verification": {
+   "underLock": "Lock acquired 20:49:03 (after waiting for b13's Gradle run). From studio-runner: node_modules/.bin/tsc -p tsconfig.build.json exit 0; node scripts/write-runtime-versions.mjs exit 0; node scripts/check-pins.mjs exit 0 ('check:pins OK'; chromiumBuild/image NOT ASSERTED, as on every plain Node build); vitest test/runtime-versions.test.ts 13/13 and test/pins.test.ts 44/44 (57 passed). Lock released on exit.",
+   "note": "This dist was built from the pre-C2b tree. C2b changed src/validator/observedSchemas.json, so dist is stale again until ROOT rebuilds it at S3 (see redPendingOtherLanes)."
+  }
+ },
+ "unit": {
+  "order": "schema/fixture/vector edits -> regen -> --check -> checker -> openapi edit -> checker -> shasum -> confinement pin -> StudioContractTest pins -> README/publication-contracts -> ADR-002 row (one unit)",
+  "regen": "node tools/build-studio-observed-schemas.cjs -> 'Generated v3: 22 guided schemas, 29 replay schemas; four byte-identical outputs.' All four outputs moved: runner-context and bridge are in the guided closure, and bridge is in the observed closure.",
+  "check": "node tools/build-studio-observed-schemas.cjs --check -> 'Verified v3: 22 guided schemas, 29 replay schemas; four byte-identical outputs.' exit 0",
+  "checker": {
+   "t0": "Measured on a scratch mirror of the T0 files: 41 schemas; 361 fixture/semantic/canonical checks; 42 planning fixtures; 79 replay/publication checks; 38 operations; 18 validated examples; codegen 22/29. exit 0",
+   "now": "node tools/check-studio-observed-contracts.cjs -> 'PASS v3: 42 schemas with every definition compiled and one actionTiming definition; 443 fixture/semantic/canonical checks; 42 planning fixtures; 80 replay/publication checks.' / 'PASS public OpenAPI: 43 operations, eight guided-session routes, five guided-policy routes, 25 validated examples; no retired generation or compile route.' / 'PASS codegen: 22 guided schemas, 29 replay schemas; four byte-identical outputs.' exit 0",
+   "delta": "+1 schema (guided-policy). Fixture checks 361 -> 397 from the 36 new cases, then -> 443 from runGovernedPolicy: 4x2 policy-vector checks, 9 document-vector/copy assertions, 14 context policyHash assertions, 6 grants x2 subset checks, 3 refusal-enum checks. Replay 79 -> 80 (c0-controls). Operations 38 -> 43. Examples 18 -> 25 (start 409 x1, start 429 x3, createGuidedPolicy request and 201, approval request).",
+   "intermediate": "After the JSON edits and before the openapi edit, the checker failed only in runPublicApi, on readGuidedResult's 'video: null' example (videoEvidence 'must be object'). So the tightening was live and every v3, fixture, planning and publication check already passed.",
+   "sha256": {
+    "before": "eb495ae653c8f75244c7d2225f0e471c4ef503a867d43cf53778275dd7d6400c",
+    "after": "0edd2459ec90897e741a25c15c790ae409917abcb12030ca570c5f1489765ed2"
+   }
+  },
+  "SC2_ajvAndRunnerAudit": "ajv strict (the checker's construction) compiled every schema and definition, including guided-policy and the new runner-context definitions. The runner's auditSchemaBundle accepted the regenerated guided closure: every test file that imports src/guided/contracts.ts collected with no SCHEMA_CONFIGURATION at module load (for example test/guided/evidence.test.ts 20/20, browser 11/11, diagnostics 3/3)."
+ },
+ "changes": {
+  "contracts/v3/runner-context.schema.json": "Appended properties.applicationPolicy {$ref #/definitions/ObservationApplicationPolicy} and policyHash (^[a-f0-9]{64}$); required += applicationPolicy, policyHash after limits; top-level definitions ObservationApplicationPolicy and ObservationReadGrant, verbatim from c2b-spec runnerContextSchema.",
+  "contracts/v3/guided-policy.schema.json (NEW)": "Verbatim c2b-spec guidedPolicySchema.content (policyDocument, policyDocumentInput, createPolicyRequest, createVersionRequest, approvalRequest, approval, policyVersion, policyView). It is in no runner closure. The backend classpath copy comes from processResources, which ran during compileTestJava.",
+  "contracts/v3/error.schema.json": "POLICY_NOT_APPROVED appended as the last member of the code enum (27 -> 28).",
+  "contracts/v3/bridge.schema.json": "definitions.refusal, verbatim: the code enum is the R14 patch's GUIDED_REFUSAL_CODES in order plus POLICY_DENIED, the reason enum is GUIDED_REFUSAL_REASONS, and a reason is allowed only with POLICY_DENIED. SC-4: both lists equal the R14 s3-cutover.patch lists (read from the patch), and the patch's transport.test.ts equality assertion passes in the scratch S3 simulation.",
+  "contracts/v3/result.schema.json": "properties.evidence.properties.video := {$ref: #/definitions/videoEvidence}, so null is invalid. The allOf on actionTimings is byte-identical.",
+  "contracts/v3/publication-canonical-vectors.json": "positive += c0-controls (verbatim).",
+  "contracts/v3/publication-fixtures.json": "positive[0] and negative[0] evidence.video null -> {status: UNAVAILABLE, error: null, expiresAt: null, partial: false}. SC-5: neither literal is inside a sealed hash. Both results carry placeholder receipt hashes (1111…, 2222…, …), and no checker or runner aggregate covers the positive/negative values. observedChoice, basis, artifact and job are unchanged, so nothing was resealed.",
+  "contracts/v3/fixtures.json": "documents.loginResult and tooLongResult: video null -> the UNAVAILABLE object (SC-5: not sealed; no hash covers them). Every runner-context instance gains applicationPolicy = the structural-no-grants policy and policyHash f68dc4b2…16f5. There are 14: documents.context, flow.contexts[0..3], source.context, materializations.contexts[0..3], assignmentTrace events[2]/[4].context, assignmentContextWithoutOwner events[0].context and observationRefreshFlow.context. New documents: contextRefusal; guidedPolicyView (= the createGuidedPolicy 201 example); guidedPolicyCreateRequest; guidedPolicyApprovalRequest; guidedPolicyDocument and guidedPolicyRequestDocument (copies of guidedPolicyDocumentVector, asserted equal by the checker); observationReadGrant (the status-text grant); policyNotApprovedError. 36 new 'OBS-014 C2b: …' cases cover every row of c2b-spec fixtures.cases_validator_document_patches_expected, plus VALID baselines for the grant, the create request and the approval request, so every negative is attributable. The case 'S1 widening: evidence.video null with empty timings stays valid until the S3 tightening' is renamed 'S3 tightening (OBS-014 C2b, AR-1): a result with evidence.video null is refused' and its expected result changes from VALID to SCHEMA (the spec's negativeCase). New top-level keys observationPolicyHashVectors (4 entries) and guidedPolicyDocumentVector, verbatim.",
+  "tools/check-studio-observed-contracts.cjs": "New runGovernedPolicy, called from runFixtures, asserts: (1) every observationPolicyHashVectors entry is structurally valid and its hash matches; (2) guidedPolicyDocumentVector requestDocument and document are structurally valid and both hashes match; (3) the case-document copies and the 201 view equal the vector; (4) every fixture runner-context has policyHash = hash(applicationPolicy); (5) every governed ObservationReadGrant fixture is also a valid replay-ipc ReadGrant; (6) the refusal enum ends with POLICY_DENIED and has no duplicate code or reason. runPublicApi additions: startGuidedSession's status set is {202,400,401,403,409,429,503}. Its 409 schema is the v3 error, and the 409 example validates with POLICY_NOT_APPROVED. Its 429 declares Retry-After {type: integer, minimum: 1} and carries three examples (two v3 BUDGET_EXCEEDED, one platform RATE_LIMITED). Exactly five guided-policy operations exist, each with its operationId and tag, no security or x-internal, and the shared 401/403. Their request and 2xx bodies use guided-policy definitions, and their examples are validated. The 201 example equals fixtures.documents.guidedPolicyView. The output line names the five routes.",
+  "docs/specs/studio/openapi.yaml": "Verbatim inserts from c2b-spec: the guided-policies tag after guided-sessions; five paths after /guided-sessions/{id}/video, before the internal-surface comment that precedes /v2/runs/{id}; components.parameters GuidedPolicyId and GuidedPolicyVersion after GuidedIdempotencyKey; startGuidedSession's 409 replaced and 429 inserted; readGuidedResult's 200/202 examples video: null -> {status: PROCESSING, error: null, expiresAt: null, partial: false}. Optional 2.N1: the observed-admission 409 x-conflict-codes drops EXECUTION_SETTLED only (see optional2N1). operationIds 38 -> 43; x-internal count unchanged at 8.",
+  "docs/specs/studio-observed-authoring/contracts/README.md": "Verbatim from c2b-spec: the bridge table's context row Success is now '200 bridge#/definitions/identity; 409 bridge#/definitions/refusal'; the refusal sentence and the governed-policy paragraph follow the Status mapping paragraph; the canonical escape rule paragraph precedes 'The replay family'. Two consistency edits beyond the spec (see autoDecisions): the stale S1 sentence about video null, and a Files-table row for guided-policy.",
+  "docs/specs/studio-observed-authoring/publication-contracts.md": "The escaping clause on line 11 replaced verbatim. It is a clarification, and 'Canonical-v1 remains unchanged' is kept.",
+  "generated (byte-identical to regen)": "studio-runner/src/guided/schemas.json; studio-runner/src/guided/types.ts (RunnerContext now requires applicationPolicy/policyHash; new ObservationApplicationPolicy, ObservationReadGrant and Refusal types); studio-runner/src/validator/observedSchemas.json; studio-runner/src/executor/observedOperations.ts.",
+  "studio-runner/test/run/confinement.test.ts": "BASE_SHA256 only (+ provenance comment).",
+  "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java": "The POST /guided-sessions row moves from 202,400,401,403,409,503 to 202,400,401,403,409,429,503. Five rows added: GET /guided-policies 200,400,401,403,404; POST /guided-policies 201,400,401,403,409; GET /guided-policies/{id} 200,400,401,403; POST /guided-policies/{id}/versions 201,400,401,403,409; POST …/versions/{version}/approval 200,400,401,403,409. Total hasSize(38) -> hasSize(43) at both assertions, with the C2b re-anchor comment. The authorized-movement message names C2b. Internal hasSize(8) is unchanged. No parity row (c2b-spec parityRows: none). google-java-format 1.22 --skip-reflowing-long-strings --dry-run: clean.",
+  "docs/architecture/ADR-002-internal-contract-surface.md": "One §13 row after the C2a row: c2b-spec adr002_section13_row, with the date and the measured values filled in."
+ },
+ "pins": {
+  "BASE_SHA256": {
+   "old": "61181c8457bb50cbc111812a57805ce8687618bfa4bb32a0d373d202ee2bd087",
+   "new": "afec6c04cdd5bcc19e42b83f83656a342165c5e04407e90a7206de0b40c46183",
+   "source": "shasum -a 256 docs/specs/studio/openapi.yaml after the last openapi edit. SC-1 did not trigger: the old value equalled the measured T0 digest, and the T0 document had 38 operationIds."
+  },
+  "StudioContractTest.totalOperations": {
+   "old": 38,
+   "new": 43
+  },
+  "StudioContractTest.internalList": {
+   "old": 8,
+   "new": 8
+  },
+  "StudioContractTest.statusMap": {
+   "changed": {
+    "POST /guided-sessions": [
+     "202,400,401,403,409,503",
+     "202,400,401,403,409,429,503"
+    ]
+   },
+   "added": [
+    "GET /guided-policies",
+    "POST /guided-policies",
+    "GET /guided-policies/{id}",
+    "POST /guided-policies/{id}/versions",
+    "POST /guided-policies/{id}/versions/{version}/approval"
+   ]
+  },
+  "OBSERVED_SCHEMA_BUNDLE_HASH (runtime-derived, not a literal pin)": {
+   "old": "cc99d746ca7c5a2b33c2a35abdbd89ce4c89e68fac157ae1d3ced575f0242a94",
+   "new": "6a4b35b5c5446a0b0d4e76ae3ee7252a7144c42001d827030c1fdc4065fa7789",
+   "method": "Canonical-v1 SHA-256 of src/validator/observedSchemas.json, using the write-runtime-versions/check-pins canonicalizer. The T0 file reproduces C2a's measured 'new' value cc99d746… exactly, so this method matches hashObserved."
+  },
+  "GuidedContracts epochs": {
+   "method": "Epochs.java overlay with the toolchain JDK 21 and the main runtime classpath. The T0 overlay reproduced all four current constants, and the current overlay gives the same four values.",
+   "session": "UNCHANGED e9f57e1e8ce11fdf76901a21047106655cd3342a435be61c9e1e26d1ce7e5b17",
+   "replay-validation": "UNCHANGED 6ed940df7b77a0524bae9bb4e56550a82a16bc9f44f175f649b579a9ba4fb32d",
+   "ledger": "UNCHANGED 2f365ba04a6254df0fb6c3930b01bdcecea5a494415f25cae4653e1aa870d6cb",
+   "observation": "UNCHANGED 9be57abe1679bafcf7dbbcf3452a515dab7032c999ad630a241c7cbb856ac2d2"
+  }
+ },
+ "vectors_SC3": {
+  "node_checker": "The checker's canonicalizer reproduces c0-controls, all four observationPolicyHashVectors and both guidedPolicyDocumentVector hashes (checker PASS).",
+  "runner": "vite-node probe: src/guided/policyHash.ts observationPolicyHash and src/guided/contracts.ts hash each equal all four vectors; contracts.hash also equals c0-controls and both document-vector hashes.",
+  "java": "Single-file probe of GuidedContracts.hash against build/classes (the class is newer than its source): all four policy vectors match, including c0-in-policy-rule-id 221efae4…c172; c0-controls matches; the document vector matches. So B14's S-5 lowercase-escape fix is already in the compiled backend (measured, not read).",
+  "postgres": "Not run by C-int. The architect's VF-3 ran PostgreSQL 14.17."
+ },
+ "optional2N1": {
+  "applied": "EXECUTION_SETTLED removed from the observed-admission 409 x-conflict-codes.",
+  "why": "Verified by reading. AdmissionCasService.claimObserved locks the ledger and execution rows (FOR UPDATE OF l,e). ObservedReplayAuthorization.check then refuses cancel_requested_at, revoked_at and state='DONE' with 409 CANCELLED, before claimAt runs. Both EXECUTION_SETTLED branches of refusal() depend on exactly those row facts, which cannot change while the lock is held.",
+  "notApplied": "ATTEMPT_SUPERSEDED kept, because it is still reachable (inferred by reading, not exercised). StudioDispatchLedgerStatements.returnAfterDefiniteRefusal sets attempt_id = NULL (state QUEUED) while e.observed_revision_binding still holds the old attemptId; V15 only rewrites it at the next dispatch. A late admission for the old attempt then passes binding equality and check(), admit/confirm match zero rows, and refusal() answers ATTEMPT_SUPERSEDED (attemptId == null).",
+  "pins": "No test pins this list (grep of StudioContractTest, runner tests, tools, frontend). The digest re-anchor above includes the change."
+ },
+ "verification": {
+  "runnerContract": "From studio-runner: node_modules/.bin/vitest run test/generated-contracts.test.ts test/contract*.test.ts test/run/confinement.test.ts --coverage.enabled=false -> 4 files, 40/40 passed (generated-contracts 2, confinement 19, contract-integrity 3, contract 16).",
+  "runnerWider_tree": "vitest over test/guided, pins, runtime-versions, observedV3TupleValidation, observedReplayValidation and run/observation: 243 passed, 56 failed. Every failure is listed under redPendingOtherLanes.",
+  "runnerS3Simulation": "Scratch copy of studio-runner, docs/specs and tools, with R14's docs/qa/evidence/STUDIO-OBS-014/r14/s3-cutover.patch applied by git apply (clean). Results, all passing: test/guided/* (browser 11, diagnostics 3, evidence 20, ownership 13, policyHash 6, runtime 47, transport 14), run/guidedMain 6, run/secretReplay 43, contract 16, generated-contracts 2. tsc --noEmit clean. tsc -p tsconfig.build.json, write-runtime-versions and check-pins exit 0; pins 44/44 and runtime-versions 13/13. This is a simulation, not the tree.",
+  "runnerTypecheck_tree": "tsc --noEmit: one error, test/helpers/guided.ts(13,3): the context literal lacks applicationPolicy/policyHash. R14 owns that file; the R14 patch fixes it (see the simulation).",
+  "runnerLint": "eslint test/run/confinement.test.ts src/guided/types.ts exit 0.",
+  "backendCompile": "AGENT_NAME=cint3 gradle-locked.sh compileTestJava -> BUILD SUCCESSFUL (compileJava UP-TO-DATE; processResources and compileTestJava executed). StudioContractTest was compiled, NOT run.",
+  "frontend": "pnpm exec vitest run src/services/mocks/studio/studioContract.test.ts -> 67 passed, 2 failed. Both failures are P2 'no MSW handler and no PO-ruled allowlist entry' for exactly the five new operations (F-012B allowlist).",
+  "negativeControls_checker": [
+   {
+    "control": "policy vector hash altered",
+    "exit": 1,
+    "refusal": "AssertionError [ERR_ASSERTION]: structural-no-grants: observationPolicyHash"
+   },
+   {
+    "control": "fixture context policyHash altered",
+    "exit": 1,
+    "refusal": "AssertionError [ERR_ASSERTION]: fixture context policyHash"
+   },
+   {
+    "control": "document vector hash altered",
+    "exit": 1,
+    "refusal": "AssertionError [ERR_ASSERTION]: guidedPolicyDocumentVector documentHash"
+   },
+   {
+    "control": "governed grant widened beyond replay ReadGrant",
+    "exit": 1,
+    "refusal": "AssertionError [ERR_ASSERTION]: a valid ObservationReadGrant must be a valid replay ReadGrant: [{\"instancePath\":\"/region\",\"schemaPath\":\"#/properties/region/oneOf/0/additionalProperties\",\"keyword\":\"add"
+   },
+   {
+    "control": "refusal enum POLICY_DENIED not last",
+    "exit": 1,
+    "refusal": "AssertionError [ERR_ASSERTION]: the refusal code enum ends with POLICY_DENIED"
+   },
+   {
+    "control": "start 429 Retry-After schema loosened",
+    "exit": 1,
+    "refusal": "AssertionError [ERR_ASSERTION]: Retry-After is whole seconds >= 1"
+   },
+   {
+    "control": "start 409 example code not in v3 enum",
+    "exit": 1,
+    "refusal": "AssertionError [ERR_ASSERTION]: [{\"instancePath\":\"/code\",\"schemaPath\":\"#/properties/code/enum\",\"keyword\":\"enum\",\"params\":{\"allowedValues\":[\"INVALID_CONTRACT\",\"UNAUTHENTICATED\",\"FORBIDDEN_SCOPE\",\"REVIS"
+   },
+   {
+    "control": "readGuidedResult example video null again",
+    "exit": 1,
+    "refusal": "AssertionError [ERR_ASSERTION]: [{\"instancePath\":\"/evidence/video\",\"schemaPath\":\"#/definitions/videoEvidence/allOf/0/else/type\",\"keyword\":\"type\",\"params\":{\"type\":\"object\"},\"message\":\"must be object\"},"
+   },
+   {
+    "control": "createGuidedPolicy 201 example drifts from fixture view",
+    "exit": 1,
+    "refusal": "AssertionError [ERR_ASSERTION]: the createGuidedPolicy 201 example is the fixture view"
+   },
+   {
+    "control": "one policy route tag changed",
+    "exit": 1,
+    "refusal": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+   },
+   {
+    "control": "unmutated copy",
+    "exit": 0,
+    "refusal": "PASS v3: 42 schemas with every definition compiled and one actionTiming definiti"
+   }
+  ],
+  "negativeControls_fixtureAttribution": "Each of the 36 new cases was run on its own with ajv strict. Every SCHEMA case fails on the keyword/path of the rule it names: for example required:applicationPolicy, /policyHash pattern, /applicationPolicy additionalProperties:rules, required:controlValue via the if/else, /code const for a reason on a non-POLICY_DENIED code, /allowedOrigins maxItems, and /active type for both view mismatches. Every VALID baseline passes."
+ },
+ "changedFiles_t0_to_now": {
+  "docs/specs/studio/openapi.yaml": [
+   "61181c8457bb50cbc111812a57805ce8687618bfa4bb32a0d373d202ee2bd087",
+   "afec6c04cdd5bcc19e42b83f83656a342165c5e04407e90a7206de0b40c46183"
+  ],
+  "docs/specs/studio-observed-authoring/contracts/README.md": [
+   "76f734aabecec2a7a3a1ffe65720088e04e9f6ac1faec70c413c55ae3826c561",
+   "51808d1b16d5ffdb5ea9e65cfba00d522bfa7cd1dc71372514f34c82c5c7d7f1"
+  ],
+  "docs/specs/studio-observed-authoring/publication-contracts.md": [
+   "96e356682463bf8e13facfe4f5f5d5bcff44564c7192ae16dc5a952961e91c09",
+   "b42fadc164748245c23c55318486fb2afc03dbd52e309c35d20df1bf8a2f6cb2"
+  ],
+  "studio-runner/src/guided/schemas.json": [
+   "c5374279ac5d5f88ad8fb18a3260b9906f94e918960531f15c1f12611521cf61",
+   "859dcacebc81b3b8cfbea3b3c864f2965cde5532df5665edfe4048de92974f40"
+  ],
+  "studio-runner/src/guided/types.ts": [
+   "334b4657687abda8621f4c6cab3f748e2dcc704646f043f1adb5b9b09dfd328c",
+   "b909f37cd84d01e0b35f36a687e918a4690b5abbeabd6f472d44062ce29eb433"
+  ],
+  "studio-runner/src/validator/observedSchemas.json": [
+   "5bb6b08e2b613525a8c854cf5c1cda84ae606148fbca52b82312c2e05b3d2481",
+   "57e7367ec981a17b9c9fe01ec63fc88150c9817075fc4d5ca6c78a3c61314968"
+  ],
+  "studio-runner/src/executor/observedOperations.ts": [
+   "095c309abcafb82e4de2d7cd3a2117e37d5ef40f5545039581e6f5b36f8d05a4",
+   "dbab19d45e496c590e0323b0d60fb7f1dfb725944338ee248bce5b4501ff6da5"
+  ],
+  "studio-runner/test/run/confinement.test.ts": [
+   "62cf37f92c221877af85d7fbd1e9936d4091b99fb2106ae7a234d7a508b7aa93",
+   "47d116379dfb9dd99cecc1753cdd42c80509ed3cfd31db3b3f3c520a09f49d4a"
+  ],
+  "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java": [
+   "44da9de3e5630c8af1b1af14f1efd6f082c31994ea923b03348acc44fb84d78f",
+   "8f19f8a3b44a9b4d566feb2182b3ce81a8957a98547b1c1b50f0b28992371cdb"
+  ],
+  "docs/architecture/ADR-002-internal-contract-surface.md": [
+   "511c737f40abac8732b62a0f9eb24d81e93d9b820588b1fa935cf3fc91202ce7",
+   "19e6273b94599c0dee4e0ac44343a52eeec43d98b22a132b35bf343f2b12d984"
+  ],
+  "tools/check-studio-observed-contracts.cjs": [
+   "eb495ae653c8f75244c7d2225f0e471c4ef503a867d43cf53778275dd7d6400c",
+   "0edd2459ec90897e741a25c15c790ae409917abcb12030ca570c5f1489765ed2"
+  ],
+  "docs/specs/studio-observed-authoring/contracts/v3/bridge.schema.json": [
+   "b98c84dc88991134e414b542fea80a0239c1182daf30a98016441335b4aec4e7",
+   "dbee5659714291ec52beccb6ab1b6ad654fc16876546a0b437c646a5914248f5"
+  ],
+  "docs/specs/studio-observed-authoring/contracts/v3/error.schema.json": [
+   "0585f43f499091601a0466a769b6fe092c1ccdedaad2d451e4ecfb1a900da6bc",
+   "4bf2846a3bafdc9fdee29d3bbd9c1dcbda53bffeae3406666d1857a7af355f3d"
+  ],
+  "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json": [
+   "52e620c6ac58e8a3e8b94c464f6840f6b53814b95877637270d2f43f4b25b27b",
+   "bdbd595696a6950799a1feb99ca338b1408e74f21eb37c8624d6d322203742c6"
+  ],
+  "docs/specs/studio-observed-authoring/contracts/v3/guided-policy.schema.json": [
+   null,
+   "9536507b5a3b6fe68f1afbcffaeb26fee26bd18e1c854a0d51024407ce1bb276"
+  ],
+  "docs/specs/studio-observed-authoring/contracts/v3/publication-canonical-vectors.json": [
+   "9d26ba2b23dfbeb8c0b5c6bc09adc6aa2b9d3008036a7f49ad62836940c3d6e6",
+   "bea8fec23d9b5fc1b0bdc117d3e49b72d1c41a1a841141914380b204e8520841"
+  ],
+  "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json": [
+   "b26a29636ceace81eba139fd648a8bfb0845f01d4f170b17bfa4a4471cf4ab5a",
+   "2bbca6b2c550fe2330a242349e15982759a547b9f92e4e16b0b32dec437192f8"
+  ],
+  "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json": [
+   "018909435454d27e5ee8b78ef6e52ee37bbe4ff37f386bd9c871061f9438c084",
+   "b30feddf1f0ead9fcb2e39cddaf25b40166a1ef76fe80f251905b1bed7741cf9"
+  ],
+  "docs/specs/studio-observed-authoring/contracts/v3/runner-context.schema.json": [
+   "d49429fc360c3351e9ff7a3bcdc6f5bdb981f42063a262651167789e123e92fc",
+   "b415b4d308356c7a91e1014950962284e701a14c03ae6d71555054cb94db9465"
+  ]
+ },
+ "redPendingOtherLanes": [
+  {
+   "what": "studio-runner test/guided/runtime.test.ts 45/46 red, ownership.test.ts 7/9 red, transport.test.ts 1/11 red ('enforces lowered limits…'); tsc error in test/helpers/guided.ts",
+   "cause": "Contexts built by test/helpers/guided.ts lack the now-required applicationPolicy/policyHash, so they fail with SCHEMA.",
+   "owner": "R14 (apply docs/qa/evidence/STUDIO-OBS-014/r14/s3-cutover.patch; green in the scratch S3 simulation)"
+  },
+  {
+   "what": "studio-runner test/pins.test.ts 3/44 red ('Observed packaged schema bundle is stale'); check-pins FAILED in the tree",
+   "cause": "dist/validator/observedSchemas.json is the Step 0 (pre-C2b) build, and src changed with bridge.",
+   "owner": "ROOT, by rebuilding dist under the lock at S3. write-runtime-versions will pass because observedChoice is unchanged (green in the scratch simulation). C-int did not rebuild dist after C2b: guided ITs in other lanes spawn dist, and the R14 runtime is not in the tree yet."
+  },
+  {
+   "what": "Backend: StudioContractTest route presence (five guided-policies routes are declared and no controller exists yet). Guided ITs that build a runner context: GuidedMaterializationService validates v3/runner-context, which now requires applicationPolicy/policyHash. Anything that emits POLICY_NOT_APPROVED or 429. Results built with GuidedEvidenceProjection.NONE (video null), which now fail v3/result.",
+   "cause": "The C2b contract is live; processResources has already copied the new schemas into backend/build/resources/main.",
+   "owner": "The B14 T1b unit (s3-b14-unit.patch: GuidedPolicyController, the start order, the context policy, the installEvidence/result projection) and B13 installEvidence per AR-1"
+  },
+  {
+   "what": "frontend studioContract.test.ts: 2 tests red (P2 for lookupGuidedPolicy, createGuidedPolicy, readGuidedPolicy, createGuidedPolicyVersion, approveGuidedPolicyVersion)",
+   "cause": "Five public operations have neither an MSW handler nor an allowlist entry.",
+   "owner": "F-012B (five class-C UNCOVERED_PUBLIC_OPERATIONS entries)"
+  },
+  {
+   "what": "D-lane V19 delta (studio_guided_policy_document function, two hash CHECKs) and GuidedGovernanceMigrationIT",
+   "cause": "Not a C-lane file.",
+   "owner": "D-lane, per c2b-spec governedDocumentKeySet_DLane"
+  }
+ ],
+ "autoDecisions": [
+  "[AUTO-DECISION] The spec names only documents.context, but 13 other runner-context instances in fixtures.json would turn their flow/materialization/assignment/refresh cases SCHEMA -> all 14 get the same structural-no-grants policy and hash (reason: a mechanical consequence of the required fields; the checker now asserts policyHash = hash(applicationPolicy) on each). The planning-fixtures.json semanticCases contexts are left unchanged, because no checker or code path validates them as runner-context (GuidedProviderEvaluationTest only reads fields).",
+  "[AUTO-DECISION] The spec's 'result with evidence.video null -> SCHEMA' case -> implemented by flipping the existing S1-widening case to SCHEMA and renaming it (reason: it is literally that case, its name announced the S3 flip, and no consumer reads it by name).",
+  "[AUTO-DECISION] VALID baselines added for observationReadGrant, the create request and the approval request (reason: negatives must be attributable).",
+  "[AUTO-DECISION] README: the sentence 'Until the S3 tightening lands…video may also be null' is replaced by 'Since the S3 tightening (STUDIO-OBS-014 C2b), video is never null', and a Files-table row for guided-policy is added (reason: without them the README is false or incomplete after this unit; no digest pins the README, VF-12).",
+  "[AUTO-DECISION] Checker additions beyond the spec's list: startGuidedSession 409/429 shape and examples, the five policy routes and their examples, the 201 example equal to the fixture view, and policyHash = hash(applicationPolicy) for fixture contexts (reason: otherwise nothing would validate the spec's new examples and rules; each addition has a negative control above). Not added: applicationPolicy as an immutable materialization field (a README rule, not requested).",
+  "[AUTO-DECISION] 2.N1 applied partially, EXECUTION_SETTLED only (reason: reading shows a reachable path for ATTEMPT_SUPERSEDED)."
+ ],
+ "residuals": [
+  "An empty, untracked directory literally named '*.json' exists under contracts/v3 (created 19:46, not by this lane). The generator and checker filter on '.schema.json' and are unaffected, but a glob-based tool that opens every *.json entry would hit EISDIR. Not removed, since C-int did not create it; flagged for ROOT.",
+  "c2b-spec residuals R-1..R-5 stand unchanged."
+ ],
+ "selfCritique": "Schemas, vectors, openapi text, README/publication-contracts text and the ADR row template follow the spec verbatim; the only deviations are the listed auto-decisions. No PASS is claimed for StudioContractTest (compiled only), backend ITs, PostgreSQL vectors or the fixtures tier, none of which were run. The R14 result comes from a scratch simulation and is labelled as such."
+}

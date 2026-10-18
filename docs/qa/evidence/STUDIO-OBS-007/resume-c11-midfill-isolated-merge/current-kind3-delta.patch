@@ -1,0 +1,36 @@
+--- docs/qa/evidence/STUDIO-OBS-007/resume-d-c11-midfill-isolated-author/before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java	2026-10-11 18:13:42
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java	2026-10-11 18:26:15
+@@ -8153,6 +8153,33 @@
+         assertThat(guidedWorker.isAlive())
+             .as("genuine browser loss leaves owning worker alive")
+             .isTrue();
++        var residualFailures = new java.util.ArrayList<Throwable>();
++        for (P6OwnedPid member : browserTree) {
++          if (member.handle().pid() == primaryBrowser.handle().pid()) continue;
++          p3AttemptTeardown(
++              residualFailures,
++              () -> {
++                if (member.handle().isAlive()) {
++                  p6SameProcess(member.handle(), member.started());
++                  P6ProcessStatus actual = p6Status(member.handle());
++                  if ("X".equals(actual.state()) && !member.handle().isAlive()) return;
++                  assertThat(actual.group()).isEqualTo(member.group());
++                  p6SameProcess(member.handle(), member.started());
++                  if (!member.handle().destroyForcibly()) {
++                    throw new IllegalStateException("C6 captured browser descendant kill refused");
++                  }
++                }
++              });
++        }
++        assertThat(guidedWorker.isAlive())
++            .as("captured browser descendant release leaves owning worker alive")
++            .isTrue();
++        if (!residualFailures.isEmpty()) {
++          var unresolved =
++              new IllegalStateException("C6 captured browser descendant release unconfirmed");
++          residualFailures.forEach(unresolved::addSuppressed);
++          throw unresolved;
++        }
+       }
+       // kind1 has no synthetic timeout: the unchanged original step timer supplies the cut.
+     }

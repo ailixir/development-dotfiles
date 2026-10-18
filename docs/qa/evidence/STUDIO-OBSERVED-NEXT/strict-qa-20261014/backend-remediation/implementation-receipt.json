@@ -1,0 +1,149 @@
+{
+  "timestamp": "2026-10-14T23:09:16.499101+00:00",
+  "status": "TWO_ORIGINAL_LIVE_ORACLES_EXECUTED_GREEN_FINAL_AGGREGATE_STILL_REQUIRED",
+  "doneAllowed": false,
+  "files": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/VideoObjectServer.java",
+      "beforeSha256": "a64ab5d06239043b03bde48ce0a958afa925a2ecda7c8cd8a1442badc0478999",
+      "afterSha256": "28f34dde03953b0cc40a71bd297da624bb1419b0a10dbeec3d3f8b20a7c4bb37",
+      "originalBytesRetained": false,
+      "newFile": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/ExecutionVideoException.java",
+      "beforeSha256": "f23cad8cd095d8e8797fe301092a1b3098d2511a581f81b68ab4319e8da6636a",
+      "afterSha256": "6127cc3dc0cf8c5ef073ec5f5c225362fae5d2421a800e143bfcae03be2c79cf",
+      "originalBytesRetained": false,
+      "newFile": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/evidence/VideoObjectServerTest.java",
+      "beforeSha256": null,
+      "afterSha256": "d43ce1d9e21aceb7721e3ab93da5cd266456811ed5e0e121bff958f9974498ff",
+      "originalBytesRetained": false,
+      "newFile": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/RecordedGuidedEvidenceProjectionTest.java",
+      "beforeSha256": "13cccc3bde60906eb2ac5e2e840f96ea095b19677ef58a989fcf34838859494d",
+      "afterSha256": "72df5249aeff2a6dc07aaf69ae6f5b789c001872b49ba6f7c581e29b9a1ea11f",
+      "originalBytesRetained": false,
+      "newFile": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceTest.java",
+      "beforeSha256": "bb3361460bb4a9e2af9815bb3c38290fd792f397305c2f128cb319b1d6b55ba3",
+      "afterSha256": "7204b45fa9249060c80a55db91adb76a29d13e367ced25e85aa58cb1ec44af98",
+      "originalBytesRetained": false,
+      "newFile": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionVideoIT.java",
+      "beforeSha256": "e2c6c47ee85f3ea977467d840e58110dbe71f50f053163bdd2da95af5fb6ec9e",
+      "afterSha256": "61b43626881e6a29030f426a9ada7b88a25d01aef4f65ad24b751e1bd6b3bc07",
+      "originalBytesRetained": false,
+      "newFile": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedRecordingMigrationIT.java",
+      "beforeSha256": "1a1220e4fdf6e95a707015abff5ffd63d241e149d72a51c377cd68540d744e19",
+      "afterSha256": "187b19d0e5ce1f865e1d7b5818651c1b66f08c5ecdfec3e8d629b2ba99247891",
+      "originalBytesRetained": false,
+      "newFile": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "beforeSha256": "8d0659b08f9a0fdea64084111f50caef7deb0428e4370655ea066f691789e089",
+      "afterSha256": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b",
+      "originalBytesRetained": false,
+      "newFile": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "beforeSha256": "9e22002ca290bddb0043dfcf1e661885337e45e2e6cfcdd2b9773d56da0b3c4d",
+      "afterSha256": "dd95b792082935c2be4cecc38400919a313c73327cd041113d11cdddd4f3fb6c",
+      "originalBytesRetained": false,
+      "newFile": false
+    }
+  ],
+  "changes": [
+    "Fixed shared VideoObjectServer WARN to omit raw exception/cause chain;503 semantics unchanged.",
+    "New4-case captured full throwable rendering canary test covers metadata/range x execution/guided subjects.",
+    "Actual Java NONE result validation refusal and installed recorded projection positive control; existing null-emission test retained.",
+    "A13-1 second range/download authorization and authority-unavailable parity, with zero object-store calls after first range.",
+    "A13-2 accepted duplicate after DB window and identity-before-duplicate cases including stored materialization mutation.",
+    "A13-3 disabled+expired combined precedence.",
+    "A13-4 actual V20 insertion boundaries0/1/255/256/257,slash,dot,traversal,nonASCII; migration untouched.",
+    "014 structurally valid joined Archive/Delete-account/absent-destructive/authored Delete DENY refusals; exact code/error/audit/rejected-attempt/no-admission/no-prepare/no-native-effect.",
+    "014 authored Save/Delete ALLOW positive native controls and real source configuration SAVED_INPUT emitter.",
+    "014 actual learning->publish->backdate ONLY source expiry->production pruner->two existing native ordinary replays; six publication tables/artifact/learned plan/receipt remain asserted.",
+    "TEST006 SAME_THREAD enforces class-owned external Core/worker identity serialization; role reset before every test and p3Run finally cleanup+scope reset remain unchanged."
+  ],
+  "limitations": [
+    "Root owns all Gradle/browser runs; no test result claimed by implementation.",
+    "No before byte copies existed for untracked baseline sources. Before hashes are exact root starting manifest; final checkpoint copies retained; no fabricated baseline diff.",
+    "Standalone formatter first used defaultJava11 and rejected existingJava21 syntax; rerun cachedGoogleJavaFormat1.22 using /opt/homebrew/opt/openjdk@21/bin/java passed exit0 all9 owned files."
+  ],
+  "harnessOwnership": {
+    "sharedRequiredState": [
+      "publishedTestId from ordered Order1 reused Order2; actual production Context/worker replicas live across methods",
+      "Core HTTP endpoint reads class-owned volatile coreRole and primaryCsi; these cannot become instance-only without replacing shared endpoint ownership"
+    ],
+    "invariants": [
+      "JUnit class PER_CLASS+OrderAnnotation remains; SAME_THREAD added explicitly.",
+      "beginOwnedSessionTracking resets coreRole owner before fixture authentication, asserts no unconfirmed cleanup, asserts primaryCsi CSI-123, refreshes cached credentials.",
+      "p3Run sets unique CSI before minting Core identity; finally waits for p3CleanupOwnedResources success, restores CSI-123 and clears cached identity only after confirmation.",
+      "On unconfirmed cleanup the sticky guard blocks later cases; it is not weakened."
+    ]
+  },
+  "validationFeedback": [
+    {
+      "time": "2026-10-14T23:10:03.667938+00:00",
+      "attempt": "backend-focused-attempt01",
+      "result": "COMPILE_FAILURE_NO_TESTS_EXECUTED",
+      "fix": "Explicit JsonNode local resolves generic transaction/deepCopy AssertJ overload ambiguity",
+      "file": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java"
+    },
+    {
+      "time": "2026-10-14T23:11:55.589122+00:00",
+      "attempt": "backend-focused-attempt02",
+      "executedBy": "root coordinator",
+      "result": "PASS",
+      "passed": 46,
+      "skipped": 0,
+      "evidence": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-focused-attempt02-results.json",
+      "sha256": "cbc523772101770f0e5552addffa7bb635a9a7bd72dceadd33d848c8a0677a24",
+      "credit": "Focused five suite execution only; does not complete joined Planning/Replay or full final gate."
+    },
+    {
+      "time": "2026-10-14T23:26:41.608359+00:00",
+      "attempt": "backend-joined-targeted-attempt01",
+      "result": "11_TOTAL_10_PASS_1_FAIL_ZERO_SKIP",
+      "failure": "aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue: expectedAWAITING_CLARIFICATION actualPROPOSING",
+      "diagnosis": "Classifier plain configurationReferences include referenceName but frozen source-reference plain configuration branch additionalProperties=false forbids it. First controlled provider source question was invalid; one-shot flag consumed and repair returned default plan.",
+      "fix": "Strip referenceName only for nonsecret configuration provenance. Validate controlled model response before sending. Assert exactly one SOURCE_PLAN delivery so automatic repair can never make this emission test appear green. All existing labels,value secrecy,no-materialization,no-submit assertions retained.",
+      "beforeSha256": "82b484c96a18477c50e2b2e56eb41cf12f30a313c919c84e0067fe946ebd8d23",
+      "afterSha256": "f42d344edc08188804a326ac4c3730858adc07c8925112c89e2a11bddeb6c7f8",
+      "patch": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/saved-input-correction.patch",
+      "execution": "NO_TESTS_RUN_BY_DEVELOPER_ROOT_OWNS_RETRY",
+      "productionChanged": false
+    },
+    {
+      "time": "2026-10-15T00:40:25.525461+00:00",
+      "attempt": "backend-final-clean-check-attempt01",
+      "result": "STATIC_FAILURE_PRESERVED_NO_AGGREGATE_PASS",
+      "correctionReceipt": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/checkstyle-correction/receipt.json",
+      "correction": "Exact runtime literal-preserving chunk splits and configured whitespace;46class executablebinaryequivalence;static gates exit0;mandatorynormalfullcheckpending"
+    },
+    {
+      "time": "2026-10-15T00:54:55.859918+00:00",
+      "event": "twoOriginal014LiveProofs",
+      "receipt": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/receipt.json",
+      "targetedJavaPass": 1,
+      "mountedGoodBaselinePass": 1,
+      "mountedBadVariantsPass": 3,
+      "fullAggregatePending": true
+    }
+  ]
+}

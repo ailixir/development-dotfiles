@@ -1,0 +1,1248 @@
+{
+  "artifact": "STUDIO-OBS-015 actual Java57/65 + joined outcome diagnostic/trusted-ceiling feedback04 receipt",
+  "createdAt": "2026-10-15T11:22:00.082597+00:00",
+  "owner": "backend015_resume / Dex execution-only",
+  "sourceHold": true,
+  "commandsLive": false,
+  "formalQAVerdict": null,
+  "lifecycleTransition": null,
+  "invocation": {
+    "oneAuthorizedInvocationOnly": true,
+    "wrapper": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend.py backend-joined-edit4-outcome-capture-attempt04",
+    "command": [
+      "caffeinate",
+      "-i",
+      "./gradlew",
+      "test",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStartCannotWidenTrustedOriginCeiling",
+      "--rerun-tasks"
+    ],
+    "cwd": "backend",
+    "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+    "handle": 28536,
+    "terminal": true,
+    "active": false,
+    "exit": 1,
+    "elapsedSeconds": 29.67,
+    "counts": {
+      "total": 4,
+      "passed": 1,
+      "failed": 3,
+      "errors": 0,
+      "skipped": 0
+    },
+    "perClass": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "tests": 2,
+        "failures": 2,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest",
+        "tests": 1,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 1
+      }
+    ],
+    "actualTestcases": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "name": "incrementalStartCannotWidenTrustedOriginCeiling()",
+        "status": "FAIL"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "name": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays()",
+        "status": "FAIL"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest",
+        "name": "reconstructsAllFiveHashEnvelopesFromCompleteSource()",
+        "status": "FAIL"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest",
+        "name": "baseArtifactAndRevisionDigestHaveExactPreimages()",
+        "status": "PASS"
+      }
+    ],
+    "mainCompile": "PASS",
+    "allTestCompile": "PASS",
+    "retryOrAdditionalTestInvocation": false
+  },
+  "stability": {
+    "sourceStable": true,
+    "testInputStable": true,
+    "distStable": true,
+    "testInputDigestBefore": "74c02ba9aae1ce9dc780fabcc7b8d48ad138c910de59bd56850808985e96c1c8",
+    "testInputDigestAfter": "74c02ba9aae1ce9dc780fabcc7b8d48ad138c910de59bd56850808985e96c1c8",
+    "sourceDigestBefore": "74c02ba9aae1ce9dc780fabcc7b8d48ad138c910de59bd56850808985e96c1c8",
+    "sourceDigestAfter": "74c02ba9aae1ce9dc780fabcc7b8d48ad138c910de59bd56850808985e96c1c8",
+    "distDigestBefore": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "distDigestAfter": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "scope": "Captured interval only; root subsequently released disjoint Dex05 source repair after terminal. This does not amend captured inputs."
+  },
+  "actualEngine": {
+    "java": "JDK21 existing wrapper",
+    "database": "Owned disposable PostgreSQL15.19; Data10 valid V20 preboot seed and normal V21 Spring migration passed",
+    "core": "Actual controlled Core HTTP/mTLS/BFF/guided Node/Chromium runtime and recording launched for both joined initial sessions",
+    "inheritedUntouched": [
+      22246,
+      67717,
+      13577,
+      13581,
+      44737
+    ],
+    "noConnectionToInheritedServersOrBrowser": true
+  },
+  "failureSummary": {
+    "joined": "Both actual JOIN methods fail awaitFinalizing at17795, called by incrementalJoined2623 immediately after initial startLearning. Shared diagnostic label second explicit learning is misleading here: initial ten-step learning never completed. Both backend ledgers UNKNOWN_OUTCOME/ACK_LOST, dispatchCount1, SOURCE_PLAN1 and NEXT_ACTION1 APPLIED, VERIFY_STEP0, materialization/bootstrap READY, observations0, no publication snapshot/revision. No old UNKNOWN admission retried.",
+    "parity": "SnapshotBasisParityTest.normalizationAndEvidence271 ClassCastException BooleanNode cannot cast to NullNode from heterogeneous List.of NullNode + generic M.valueToTree(false). Exact subject remains incomplete; root assigned separate NewDex05 test-source repair. No hash-envelope mismatch asserted for this exception.",
+    "validation": "SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages PASS",
+    "sourceStacks": [
+      {
+        "method": "incrementalStartCannotWidenTrustedOriginCeiling()",
+        "type": "org.opentest4j.AssertionFailedError",
+        "sourceFrames": [
+          "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.awaitFinalizing(GuidedPublicationReplayIT.java:17795)",
+          "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalJoined(GuidedPublicationReplayIT.java:2623)",
+          "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStartCannotWidenTrustedOriginCeiling(GuidedPublicationReplayIT.java:2539)"
+        ]
+      },
+      {
+        "method": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays()",
+        "type": "org.opentest4j.AssertionFailedError",
+        "sourceFrames": [
+          "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.awaitFinalizing(GuidedPublicationReplayIT.java:17795)",
+          "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalJoined(GuidedPublicationReplayIT.java:2623)",
+          "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays(GuidedPublicationReplayIT.java:2525)"
+        ]
+      },
+      {
+        "method": "reconstructsAllFiveHashEnvelopesFromCompleteSource()",
+        "type": "java.lang.ClassCastException",
+        "sourceFrames": [
+          "at com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.normalizationAndEvidence(SnapshotBasisParityTest.java:271)",
+          "at com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource(SnapshotBasisParityTest.java:140)"
+        ]
+      }
+    ],
+    "backendCodeStack": "GuidedContracts.validatedCanonical104 -> validate90 -> GuidedRunnerClient.send245/81 -> GuidedDispatchService.dispatch182 -> GuidedTranslationService.admitAndDispatch2147 -> advance847 -> GuidedPlanningController.proposal50"
+  },
+  "outcomeBoundary": {
+    "classification": "Actual same-canonical-body Node/Java validation disagreement; not a transport body mismatch",
+    "capturedCohortMethod": "incrementalStartCannotWidenTrustedOriginCeiling (first actual selected JOIN method)",
+    "cohortLimit": "Exactly first session cohort intentionally captured. Main edit4 second-session raw body is NOT captured; its separate exact backend stack/state exists. Do not generalize capture to unavailable second body.",
+    "node": {
+      "kind": "original-outcome-return",
+      "canonicalBodySha256": "df249e3a41e16d33c4dff8b428007f3268c28f18b303a4cc874a8224162c65b7",
+      "canonicalBodyBytes": 1852,
+      "sessionHash": "a3a2e5dd58c954e6d7f4bb0972c724f8f0464d35b25fd104fdef680a46638c0c",
+      "admissionHash": "4182a9385ac09e1fb51d5ebe184f2a60d0eb54d3ead5a3602632cc4409c38491",
+      "nodeOutcomeValid": true,
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "instrumentationError": false,
+      "truncated": false
+    },
+    "java": {
+      "accepted": false,
+      "admissionHash": "4182a9385ac09e1fb51d5ebe184f2a60d0eb54d3ead5a3602632cc4409c38491",
+      "canonicalBodyBytes": 1852,
+      "canonicalBodySha256": "df249e3a41e16d33c4dff8b428007f3268c28f18b303a4cc874a8224162c65b7",
+      "expandedOutcomeSchemaHash": "UNAVAILABLE",
+      "instrumentationError": false,
+      "kind": "original-outcome-validation",
+      "outcomeCode": "OK",
+      "sessionHash": "a3a2e5dd58c954e6d7f4bb0972c724f8f0464d35b25fd104fdef680a46638c0c",
+      "state": "SUCCEEDED",
+      "threw": true,
+      "truncated": false
+    },
+    "bodyHashEqual": true,
+    "bodyByteLengthEqual": true,
+    "sessionHashEqual": true,
+    "admissionHashEqual": true,
+    "shapePathTypeSetsEqual": true,
+    "nodeValidatorTrue": true,
+    "javaAccepted": false,
+    "javaThrew": true,
+    "javaKeywordCounts": {
+      "additionalProperties": 36,
+      "const": 1,
+      "oneOf": 2,
+      "required": 8,
+      "type": 8
+    },
+    "boundedValidationErrors": [
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630/ledger/executionEvidence/kind",
+        "keyword": "const",
+        "schemaPointer": "/oneOf/0/properties/ledger/properties/executionEvidence/oneOf/1/properties/kind/sha256:afdcfda288588d140846399cee3027403cd233b47b392f0211711a9f8e3edd81"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630/ledger/executionEvidence/origin",
+        "keyword": "type",
+        "schemaPointer": "/oneOf/0/properties/ledger/properties/executionEvidence/oneOf/1/properties/origin/type"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630/ledger/executionEvidence",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/0/properties/ledger/properties/executionEvidence/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630/ledger/executionEvidence",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/0/properties/ledger/properties/executionEvidence/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630/ledger/executionEvidence",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/0/properties/ledger/properties/executionEvidence/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630/ledger/executionEvidence",
+        "keyword": "required",
+        "schemaPointer": "/oneOf/0/properties/ledger/properties/executionEvidence/oneOf/1/required"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630/availability",
+        "keyword": "type",
+        "schemaPointer": "/oneOf/0/properties/availability/oneOf/0/type"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "required",
+        "schemaPointer": "/oneOf/0/allOf/0/sha256:4ee12a43d6977784fe2d43092a877b3c5c6f948dd80eaa0681b70de1aca4c701/required"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630/ledger",
+        "keyword": "type",
+        "schemaPointer": "/oneOf/1/allOf/0/sha256:5240b67121f5d825b710af47fe3ddb69e2efefd528ecd2c5edbb862f7044e559/properties/ledger/type"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630/ledger",
+        "keyword": "type",
+        "schemaPointer": "/oneOf/1/allOf/0/sha256:5240b67121f5d825b710af47fe3ddb69e2efefd528ecd2c5edbb862f7044e559/properties/ledger/type"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630/ledger",
+        "keyword": "type",
+        "schemaPointer": "/oneOf/1/allOf/0/sha256:5240b67121f5d825b710af47fe3ddb69e2efefd528ecd2c5edbb862f7044e559/properties/ledger/type"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "required",
+        "schemaPointer": "/oneOf/1/required"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "required",
+        "schemaPointer": "/oneOf/1/required"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630/ledger",
+        "keyword": "type",
+        "schemaPointer": "/oneOf/1/allOf/0/sha256:5240b67121f5d825b710af47fe3ddb69e2efefd528ecd2c5edbb862f7044e559/properties/ledger/type"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "oneOf",
+        "schemaPointer": "/oneOf"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "required",
+        "schemaPointer": "/oneOf/1/required"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "required",
+        "schemaPointer": "/oneOf/1/required"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630/ledger",
+        "keyword": "type",
+        "schemaPointer": "/oneOf/1/allOf/0/sha256:5240b67121f5d825b710af47fe3ddb69e2efefd528ecd2c5edbb862f7044e559/properties/ledger/type"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "oneOf",
+        "schemaPointer": "/oneOf"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "additionalProperties",
+        "schemaPointer": "/oneOf/1/additionalProperties"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "required",
+        "schemaPointer": "/oneOf/1/required"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630",
+        "keyword": "required",
+        "schemaPointer": "/oneOf/1/required"
+      },
+      {
+        "instancePointer": "/sha256:7d94fa1a89dc4b75264c21da835b61327349b46655a72d794d196a4c971e6630/ledger",
+        "keyword": "type",
+        "schemaPointer": "/oneOf/1/allOf/0/sha256:5240b67121f5d825b710af47fe3ddb69e2efefd528ecd2c5edbb862f7044e559/properties/ledger/type"
+      }
+    ],
+    "schemaFragmentHashes": [
+      "3547f2fbe5f29e0197f7fa326eaa5a2e3da92bbe164a2deb9a74043751a872c0",
+      "682ddeb19c02278306fa79ed3c0e172aaeb908bfe6aca64869ed08beb81dee52",
+      "7337895988e7bfcab42204b5132c401f078f65f5d8c979e526e00d479b95bab9",
+      "864d90fa2023ac4372e34da7cf0ca991c09f32d9b57cabe06899b1fcb1df3b26",
+      "95f7878408ce7d089646898aef3d528bc2e3c62d7f2bf8f228134556dfe451e8",
+      "bcde375ebd4cbacf651311181173836b169d5a360c6ac158c6a2cdaf49be3f61",
+      "cbf45051732175e27f82074a05226aa502d382d7e2dc078b8c191a141535d963",
+      "e90d25de5a78b4a5b9710aa56b49b62532a400f06565944a2fc5b48a054010de",
+      "ef298bac11d98515bec5746854e07643b3dafaefdd1549137c12fe807bb288f8",
+      "f9757109fae32f55a22a6fe81eec0503fb3976db0fb4c7fc85a3d794d8014521"
+    ],
+    "expandedSchemaHash": "UNAVAILABLE; fragment hashes are actual native node hashes, not inferred expanded-root hash",
+    "instrumentationError": false,
+    "truncated": false,
+    "files0600": true,
+    "events": {
+      "node": 1,
+      "java": 13,
+      "javaErrors": 55
+    },
+    "privacy": "No raw replies/values/validation messages/arguments/keys/JWT/credential configs captured; known schema/instance pointers and hashed dynamic path segments only. Original outcome returned unchanged and Java original validation exception preserved.",
+    "preciseOwnerDiagnosis": "Backend native outcome schema-validation boundary rejects the exact frozen-Node-accepted body. Read-only inspection locates expanded v3/bridge outcome oneOf ordinaryOutcome/PrefixDriftCallback and ordinaryOutcome conditional errorMessage rule. Nested alternative/if validation errors may be normal internal evaluations, so this receipt does not infer which recorded nested error is the decisive defect or declare Node/schema/backend implementation correct. Independent engine-boundary/schema review required; no proven Runner projection/transport mutation. No production repair authorized or performed."
+  },
+  "pure19Clauses": {
+    "actualJUnitMethods": 2,
+    "clauseCount": 19,
+    "mapping": [
+      {
+        "clauseId": "57/TestConfig",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/config/base",
+          "57/config/environment",
+          "57/config/viewport-width",
+          "57/config/viewport-height",
+          "57/config/timeout",
+          "57/config/wait",
+          "57/config/browser-included",
+          "57/config/global-literal",
+          "57/config/global-evidence",
+          "57/config/global-declaration"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "INCOMPLETE_FAILED_METHOD_PARTIAL_OR_UNREACHED",
+        "reached": "All canonical positive constructors/independent base and configurationAndInputMutations/scopedReferencesAndEmptyValues returned. normalizationAndEvidence completed absent/null/empty context cases, omitted-hint canonical equality and fractional ISO assertion through269. At271 List.of inferred NullNode for M.valueToTree(false), causing BooleanNode->NullNode ClassCastException before either targethint exact loop iteration. Subsequent scopeOrderAndCoordinates/learnedProjection unreached; no full57 pass."
+      },
+      {
+        "clauseId": "57/StepInput",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/input/text",
+          "57/input/context-literal",
+          "57/input/targethint-null",
+          "57/input/targethint-false",
+          "57/input/scoped-reference",
+          "57/input/evidence-each-field"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "INCOMPLETE_FAILED_METHOD_PARTIAL_OR_UNREACHED",
+        "reached": "All canonical positive constructors/independent base and configurationAndInputMutations/scopedReferencesAndEmptyValues returned. normalizationAndEvidence completed absent/null/empty context cases, omitted-hint canonical equality and fractional ISO assertion through269. At271 List.of inferred NullNode for M.valueToTree(false), causing BooleanNode->NullNode ClassCastException before either targethint exact loop iteration. Subsequent scopeOrderAndCoordinates/learnedProjection unreached; no full57 pass."
+      },
+      {
+        "clauseId": "57/StepChain",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/chain/all-golden-rows",
+          "57/chain/predecessor",
+          "57/chain/mutate-j",
+          "57/chain/wrong-wrapper"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "INCOMPLETE_FAILED_METHOD_PARTIAL_OR_UNREACHED",
+        "reached": "All canonical positive constructors/independent base and configurationAndInputMutations/scopedReferencesAndEmptyValues returned. normalizationAndEvidence completed absent/null/empty context cases, omitted-hint canonical equality and fractional ISO assertion through269. At271 List.of inferred NullNode for M.valueToTree(false), causing BooleanNode->NullNode ClassCastException before either targethint exact loop iteration. Subsequent scopeOrderAndCoordinates/learnedProjection unreached; no full57 pass."
+      },
+      {
+        "clauseId": "57/LearnedContent",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/learned/all-golden-rows",
+          "57/learned/unsorted-multiple",
+          "57/learned/utf8-ties",
+          "57/learned/retained-semantic-fields",
+          "57/learned/removed-ids",
+          "57/learned/consumer-deletion"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "INCOMPLETE_FAILED_METHOD_PARTIAL_OR_UNREACHED",
+        "reached": "All canonical positive constructors/independent base and configurationAndInputMutations/scopedReferencesAndEmptyValues returned. normalizationAndEvidence completed absent/null/empty context cases, omitted-hint canonical equality and fractional ISO assertion through269. At271 List.of inferred NullNode for M.valueToTree(false), causing BooleanNode->NullNode ClassCastException before either targethint exact loop iteration. Subsequent scopeOrderAndCoordinates/learnedProjection unreached; no full57 pass."
+      },
+      {
+        "clauseId": "57/StepSnapshot",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/snapshot/golden-all-steps",
+          "57/snapshot/normalized-metadata",
+          "57/snapshot/source-graph-preserved"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "INCOMPLETE_FAILED_METHOD_PARTIAL_OR_UNREACHED",
+        "reached": "All canonical positive constructors/independent base and configurationAndInputMutations/scopedReferencesAndEmptyValues returned. normalizationAndEvidence completed absent/null/empty context cases, omitted-hint canonical equality and fractional ISO assertion through269. At271 List.of inferred NullNode for M.valueToTree(false), causing BooleanNode->NullNode ClassCastException before either targethint exact loop iteration. Subsequent scopeOrderAndCoordinates/learnedProjection unreached; no full57 pass."
+      },
+      {
+        "clauseId": "57/EmptyValue",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/value/empty",
+          "57/value/whitespace",
+          "57/value/missing",
+          "57/value/null"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "ASSERTIONS_COMPLETED_BEFORE_LATER_METHOD_FAILURE",
+        "reached": "All canonical positive constructors/independent base and configurationAndInputMutations/scopedReferencesAndEmptyValues returned. normalizationAndEvidence completed absent/null/empty context cases, omitted-hint canonical equality and fractional ISO assertion through269. At271 List.of inferred NullNode for M.valueToTree(false), causing BooleanNode->NullNode ClassCastException before either targethint exact loop iteration. Subsequent scopeOrderAndCoordinates/learnedProjection unreached; no full57 pass."
+      },
+      {
+        "clauseId": "57/Normalization",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/normalize/absent-context",
+          "57/normalize/null-context",
+          "57/normalize/empty-arrays",
+          "57/normalize/hint-null",
+          "57/normalize/hint-false",
+          "57/normalize/fractional-iso",
+          "57/normalize/unicode-order"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "INCOMPLETE_FAILED_METHOD_PARTIAL_OR_UNREACHED",
+        "reached": "All canonical positive constructors/independent base and configurationAndInputMutations/scopedReferencesAndEmptyValues returned. normalizationAndEvidence completed absent/null/empty context cases, omitted-hint canonical equality and fractional ISO assertion through269. At271 List.of inferred NullNode for M.valueToTree(false), causing BooleanNode->NullNode ClassCastException before either targethint exact loop iteration. Subsequent scopeOrderAndCoordinates/learnedProjection unreached; no full57 pass."
+      },
+      {
+        "clauseId": "65/sourceHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/source/array",
+          "65/source/wrapper",
+          "65/source/omit-line",
+          "65/source/reorder",
+          "65/source/current-draft"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Complete SnapshotBasisValidationTest method returned normally in this actual invocation, including all called commitment/omission/inner-change/pin-program-map/historical equality negative constructions. Supplied immutable-base preimages only; not DB/private historical authority."
+      },
+      {
+        "clauseId": "65/authoringHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/authoring/array",
+          "65/authoring/wrapper",
+          "65/authoring/omit-stepId",
+          "65/authoring/omit-ordinal",
+          "65/authoring/omit-source",
+          "65/authoring/reorder"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Complete SnapshotBasisValidationTest method returned normally in this actual invocation, including all called commitment/omission/inner-change/pin-program-map/historical equality negative constructions. Supplied immutable-base preimages only; not DB/private historical authority."
+      },
+      {
+        "clauseId": "65/configurationHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/config/full",
+          "65/config/wrapper",
+          "65/config/each-required-omission",
+          "65/config/legal-field-change"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Complete SnapshotBasisValidationTest method returned normally in this actual invocation, including all called commitment/omission/inner-change/pin-program-map/historical equality negative constructions. Supplied immutable-base preimages only; not DB/private historical authority."
+      },
+      {
+        "clauseId": "65/artifactHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/artifact/full",
+          "65/artifact/wrapper",
+          "65/artifact/subset",
+          "65/artifact/required-omission",
+          "65/artifact/valid-inner-change"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Complete SnapshotBasisValidationTest method returned normally in this actual invocation, including all called commitment/omission/inner-change/pin-program-map/historical equality negative constructions. Supplied immutable-base preimages only; not DB/private historical authority."
+      },
+      {
+        "clauseId": "65/learnedPlanHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/plan/full",
+          "65/plan/wrapper",
+          "65/plan/required-omission",
+          "65/plan/semantic-change",
+          "65/plan/duplicate-field-mismatch"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Complete SnapshotBasisValidationTest method returned normally in this actual invocation, including all called commitment/omission/inner-change/pin-program-map/historical equality negative constructions. Supplied immutable-base preimages only; not DB/private historical authority."
+      },
+      {
+        "clauseId": "65/referencePolicyHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/policy/full",
+          "65/policy/wrapper",
+          "65/policy/subset",
+          "65/policy/required-omission",
+          "65/policy/semantic-change"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Complete SnapshotBasisValidationTest method returned normally in this actual invocation, including all called commitment/omission/inner-change/pin-program-map/historical equality negative constructions. Supplied immutable-base preimages only; not DB/private historical authority."
+      },
+      {
+        "clauseId": "65/profileHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/profile/full",
+          "65/profile/wrapper-claim",
+          "65/profile/omission",
+          "65/profile/unsupported-constant"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Complete SnapshotBasisValidationTest method returned normally in this actual invocation, including all called commitment/omission/inner-change/pin-program-map/historical equality negative constructions. Supplied immutable-base preimages only; not DB/private historical authority."
+      },
+      {
+        "clauseId": "65/operationEquivalenceHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/equivalence/full",
+          "65/equivalence/wrapper",
+          "65/equivalence/omit-operations",
+          "65/equivalence/omit-guards",
+          "65/equivalence/omit-inputRecipes",
+          "65/equivalence/omit-bindings",
+          "65/equivalence/omit-transfers",
+          "65/equivalence/order"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Complete SnapshotBasisValidationTest method returned normally in this actual invocation, including all called commitment/omission/inner-change/pin-program-map/historical equality negative constructions. Supplied immutable-base preimages only; not DB/private historical authority."
+      },
+      {
+        "clauseId": "65/RevisionIdentity",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/identity/exact16",
+          "65/identity/wrapper",
+          "65/identity/whole-revision",
+          "65/identity/unknown-field",
+          "65/identity/omit-version",
+          "65/identity/omit-testId",
+          "65/identity/omit-csiId",
+          "65/identity/omit-sourceRevision",
+          "65/identity/omit-configurationRevision",
+          "65/identity/omit-sourceHash",
+          "65/identity/omit-configurationHash",
+          "65/identity/omit-authoringHash",
+          "65/identity/omit-learnedPlanHash",
+          "65/identity/omit-artifactHash",
+          "65/identity/omit-referencePolicyHash",
+          "65/identity/omit-operationEquivalenceHash",
+          "65/identity/omit-admissionProvenanceHash",
+          "65/identity/omit-publicationEvidenceHash",
+          "65/identity/omit-runAuthorizationHash",
+          "65/identity/omit-profileHash"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Complete SnapshotBasisValidationTest method returned normally in this actual invocation, including all called commitment/omission/inner-change/pin-program-map/historical equality negative constructions. Supplied immutable-base preimages only; not DB/private historical authority."
+      },
+      {
+        "clauseId": "65/PinProgram",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/pin/each-id-copy",
+          "65/pin/each-digest-copy",
+          "65/program/wrapper",
+          "65/program/required-omission",
+          "65/program/guard-resealed",
+          "65/program/action-resealed"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Complete SnapshotBasisValidationTest method returned normally in this actual invocation, including all called commitment/omission/inner-change/pin-program-map/historical equality negative constructions. Supplied immutable-base preimages only; not DB/private historical authority."
+      },
+      {
+        "clauseId": "65/Maps",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/maps/resealed-claimed-map",
+          "65/maps/missing-key",
+          "65/maps/extra-key",
+          "65/maps/reuse-copy-mismatch"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Complete SnapshotBasisValidationTest method returned normally in this actual invocation, including all called commitment/omission/inner-change/pin-program-map/historical equality negative constructions. Supplied immutable-base preimages only; not DB/private historical authority."
+      },
+      {
+        "clauseId": "65/HistoricalReceipts",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/receipt/admission-one-sided",
+          "65/receipt/publication-one-sided",
+          "65/receipt/authorization-one-sided",
+          "65/receipt/actual-stored-authority"
+        ],
+        "privateAuthorityLimit": true,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Complete SnapshotBasisValidationTest method returned normally in this actual invocation, including all called commitment/omission/inner-change/pin-program-map/historical equality negative constructions. Supplied immutable-base preimages only; not DB/private historical authority."
+      }
+    ],
+    "noNineteenIndependentJUnitMultiplicityClaim": true
+  },
+  "joinedActualStates": [
+    {
+      "testMethod": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+      "state": "UNKNOWN_OUTCOME",
+      "errorCode": "OTHER",
+      "bootstrapPhase": "READY",
+      "materializationPresent": true,
+      "publicationSnapshotPresent": false,
+      "publicationRevisionPresent": false,
+      "counters": {
+        "actions": 1,
+        "observations": 0,
+        "modelProposals": 2,
+        "modelInputTokens": 26582,
+        "modelOutputTokens": 8000,
+        "sanitizedEvidenceBytes": 0
+      },
+      "coordinate": {
+        "generation": 0
+      },
+      "observationCounts": {},
+      "fixtureModelHttpCalls": 2,
+      "fixturePhysicalProviderReads": 0,
+      "fixtureProviderFailures": 0,
+      "fixtureModelKinds": {
+        "SOURCE_PLAN": 1,
+        "NEXT_ACTION": 1,
+        "VERIFY_STEP": 0
+      },
+      "continuation": "NEXT",
+      "translationCounters": {
+        "planRevision": 2
+      },
+      "actions": [
+        {
+          "operationKind": "navigate",
+          "state": "UNKNOWN_OUTCOME",
+          "outcomeCode": "ACK_LOST",
+          "stepId": "909c70ba-a416-38c6-87e2-e0b94fe8162f",
+          "admissionId": "da421d23-99f6-4be3-94b4-5ea545194542",
+          "ordinal": 0,
+          "dispatchCount": 1,
+          "ownerFence": 1,
+          "generation": 0
+        }
+      ],
+      "modelAttempts": [
+        {
+          "kind": "SOURCE_PLAN",
+          "status": "APPLIED",
+          "providerCode": "OTHER",
+          "responseStatus": "OTHER",
+          "responseOperationKind": "OTHER",
+          "responseSchemaVersion": 3,
+          "attemptnumber": 1,
+          "inputtokens": 20,
+          "outputtokens": 40
+        },
+        {
+          "kind": "NEXT_ACTION",
+          "status": "APPLIED",
+          "providerCode": "OTHER",
+          "responseStatus": "ACTION",
+          "responseOperationKind": "navigate",
+          "responseSchemaVersion": 3,
+          "attemptnumber": 1,
+          "inputtokens": 20,
+          "outputtokens": 40
+        }
+      ],
+      "originSha256": "520b5a37f408daa4739533d92a64e524f3efe5130ad1e8ec29867fe35323333a"
+    },
+    {
+      "testMethod": "incrementalStartCannotWidenTrustedOriginCeiling",
+      "state": "UNKNOWN_OUTCOME",
+      "errorCode": "OTHER",
+      "bootstrapPhase": "READY",
+      "materializationPresent": true,
+      "publicationSnapshotPresent": false,
+      "publicationRevisionPresent": false,
+      "counters": {
+        "actions": 1,
+        "observations": 0,
+        "modelProposals": 2,
+        "modelInputTokens": 26582,
+        "modelOutputTokens": 8000,
+        "sanitizedEvidenceBytes": 0
+      },
+      "coordinate": {
+        "generation": 0
+      },
+      "observationCounts": {},
+      "fixtureModelHttpCalls": 2,
+      "fixturePhysicalProviderReads": 0,
+      "fixtureProviderFailures": 0,
+      "fixtureModelKinds": {
+        "SOURCE_PLAN": 1,
+        "NEXT_ACTION": 1,
+        "VERIFY_STEP": 0
+      },
+      "continuation": "NEXT",
+      "translationCounters": {
+        "planRevision": 2
+      },
+      "actions": [
+        {
+          "operationKind": "navigate",
+          "state": "UNKNOWN_OUTCOME",
+          "outcomeCode": "ACK_LOST",
+          "stepId": "909c70ba-a416-38c6-87e2-e0b94fe8162f",
+          "admissionId": "95e533a1-ddb2-4ac0-9124-c7f5ea57f9c5",
+          "ordinal": 0,
+          "dispatchCount": 1,
+          "ownerFence": 1,
+          "generation": 0
+        }
+      ],
+      "modelAttempts": [
+        {
+          "kind": "SOURCE_PLAN",
+          "status": "APPLIED",
+          "providerCode": "OTHER",
+          "responseStatus": "OTHER",
+          "responseOperationKind": "OTHER",
+          "responseSchemaVersion": 3,
+          "attemptnumber": 1,
+          "inputtokens": 20,
+          "outputtokens": 40
+        },
+        {
+          "kind": "NEXT_ACTION",
+          "status": "APPLIED",
+          "providerCode": "OTHER",
+          "responseStatus": "ACTION",
+          "responseOperationKind": "navigate",
+          "responseSchemaVersion": 3,
+          "attemptnumber": 1,
+          "inputtokens": 20,
+          "outputtokens": 40
+        }
+      ],
+      "originSha256": "e018714b99b1abf76ef1f8ec61b75bc6a3d58de1c91c3ba3842a8a0cf335d3f0"
+    }
+  ],
+  "mainAssertionReachability": [
+    {
+      "subject": "Initial authored ten-step real learning",
+      "status": "ATTEMPTED_INCOMPLETE",
+      "evidence": "Both real start sessions bootstrap/source plan/materialization + first native navigation dispatch reached; zero successful backend action receipt/observations and no VERIFY_STEP."
+    },
+    {
+      "subject": "Trusted-ceiling current-context positive and409zero-write refusal",
+      "status": "UNREACHED",
+      "evidence": "Helper b1AssertTrustedCeilingStart is after successful initial finalize/edit at2740; both stop at2623. New test failing earlier is not proof of trusted-ceiling behavior."
+    },
+    {
+      "subject": "Actual edit4/relearn base and same recorded handle+ObservationSession",
+      "status": "UNREACHED",
+      "evidence": "No original base publication or editor PUT reached."
+    },
+    {
+      "subject": "Prefix1..3 model0 and fresh retained binding",
+      "status": "UNREACHED"
+    },
+    {
+      "subject": "Suffix4..10 always relearn / merged exact snapshot/provenance / READY",
+      "status": "UNREACHED"
+    },
+    {
+      "subject": "Finalize zero native/model effects",
+      "status": "UNREACHED"
+    },
+    {
+      "subject": "Continuous decoded recording/step offsets/white-frame and privacy assertions",
+      "status": "UNREACHED",
+      "evidence": "Two original initial-action WebMs/manifests preserved; no test video decoder/PNG proof reached, no additional decoder/native invocation run."
+    },
+    {
+      "subject": "Same immutable artifact ordinary replay/model0/fresh read",
+      "status": "UNREACHED"
+    }
+  ],
+  "ownedMedia": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-artifacts/owned-temp/objects/studio/CSI-123/guided/88c2be57-27c3-4ef2-9c11-ec0405b78bd5.manifest.json",
+      "sha256": "c56d7f0d266000fe61b6ce6f61f6dfc5d7560c15d18e159af968fc24286fb187",
+      "bytes": 735,
+      "evidenceState": "STORED",
+      "evidencePartial": false,
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "909c70ba-a416-38c6-87e2-e0b94fe8162f",
+          "admissionId": "da421d23-99f6-4be3-94b4-5ea545194542",
+          "ordinal": 0,
+          "startMs": 374,
+          "endMs": 384
+        }
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-artifacts/owned-temp/objects/studio/CSI-123/guided/88c2be57-27c3-4ef2-9c11-ec0405b78bd5.webm",
+      "sha256": "582b3dbe8e099c96a6f7693013fe4da1af9f08688aef49a043a546321792e32e",
+      "bytes": 3074
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-artifacts/owned-temp/objects/studio/CSI-123/guided/c752211c-d5b9-4b23-976d-dbb9103eeb4c.manifest.json",
+      "sha256": "6bb82f71a5b69966f3693b01313160cd46cf87b0c4cfc5be89f19de80dffec0e",
+      "bytes": 735,
+      "evidenceState": "STORED",
+      "evidencePartial": false,
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "909c70ba-a416-38c6-87e2-e0b94fe8162f",
+          "admissionId": "95e533a1-ddb2-4ac0-9124-c7f5ea57f9c5",
+          "ordinal": 0,
+          "startMs": 484,
+          "endMs": 505
+        }
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-artifacts/owned-temp/objects/studio/CSI-123/guided/c752211c-d5b9-4b23-976d-dbb9103eeb4c.webm",
+      "sha256": "b30f4d36c2a62815ac3733f07d8e24b032fd3dc4f9a8db9b454cfcca15edc5d0",
+      "bytes": 6686
+    }
+  ],
+  "guardTallies": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-guard-tally/GuidedPublicationReplayIT.json",
+      "sha256": "4cdeefd92edf1d21093abf8b67b2eb8d8571db91044fb7e93ebcd000923807cc"
+    }
+  ],
+  "cleanup": {
+    "actualSessionTeardowns": [
+      {
+        "testMethod": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+        "sessions": [
+          {
+            "sessionId": "88c2be57-27c3-4ef2-9c11-ec0405b78bd5",
+            "beforeState": "UNKNOWN_OUTCOME",
+            "teardownStatus": "CONFIRMED"
+          }
+        ],
+        "allActualTeardownsConfirmed": true
+      },
+      {
+        "testMethod": "incrementalStartCannotWidenTrustedOriginCeiling",
+        "sessions": [
+          {
+            "sessionId": "c752211c-d5b9-4b23-976d-dbb9103eeb4c",
+            "beforeState": "UNKNOWN_OUTCOME",
+            "teardownStatus": "CONFIRMED"
+          }
+        ],
+        "allActualTeardownsConfirmed": true
+      }
+    ],
+    "actualContextTeardown": {
+      "owningContextIdentity": 1165801584,
+      "cancelledScheduledTasks": 12,
+      "fixedDelayTasks": 8,
+      "fixedRateTasks": 2,
+      "cronTasks": 2,
+      "terminatedSchedulerServices": 1,
+      "terminatedAsyncDelegates": 4,
+      "trackedSchedulerBodiesEmpty": true,
+      "contextClosed": true,
+      "afterClassCacheEvictionConfigured": true,
+      "actualFrameworkCacheEntryEvicted": true,
+      "commonPoolTerminationClaimed": false
+    },
+    "historicalPostRunOrphans": [
+      {
+        "pid": 39365,
+        "ppid": 1,
+        "started": "Thu Oct 15 07:16:57 2026",
+        "commandSha256": "1021509bf8a68493a95944a3fdf34a88571f452d5f8cd1af762939e750ebc394",
+        "classification": "actual owned TEMP reference"
+      },
+      {
+        "pid": 39366,
+        "ppid": 1,
+        "started": "Thu Oct 15 07:16:57 2026",
+        "commandSha256": "5b323a2ee252277d4222e2d0bb5f5b640465e88e955c187e3971d9cc47a4baa1",
+        "classification": "actual owned TEMP reference"
+      }
+    ],
+    "subsequentRootCleanup": {
+      "receipt": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-owned-fixture-cleanup.json",
+        "sha256": "e24cebe846bfe181213ae0ebf45cf09dd97082c84d6ea4caada72bf75ca5057a"
+      },
+      "event": {
+        "at": "2026-10-15T11:20:23.589057+00:00",
+        "captureManifestSha256": "578fd3175b2874445ad1f80f562a3a15ded54721f55d01159685d7390f3a7e3a",
+        "processes": [
+          {
+            "pid": 39365,
+            "result": "OWNED_PROCESS_TERMINATED",
+            "ppid": 1,
+            "started": "Thu Oct 15 07:16:57 2026",
+            "commandSha256": "1021509bf8a68493a95944a3fdf34a88571f452d5f8cd1af762939e750ebc394",
+            "signal": "SIGTERM"
+          },
+          {
+            "pid": 39366,
+            "result": "OWNED_PROCESS_TERMINATED",
+            "ppid": 1,
+            "started": "Thu Oct 15 07:16:57 2026",
+            "commandSha256": "5b323a2ee252277d4222e2d0bb5f5b640465e88e955c187e3971d9cc47a4baa1",
+            "signal": "SIGTERM"
+          }
+        ],
+        "inheritedProcessesTouched": false,
+        "artifactsPreserved": true
+      },
+      "currentOwnedOrphansRemaining": [],
+      "attribution": "Root separately verified exact PID/start/PPID/command hashes and SIGTERM39365/39366 after artifacts captured. Historical capture manifest remains unchanged; backend executor killed nothing."
+    },
+    "noInheritedProcessTouched": true
+  },
+  "artifacts": {
+    "results": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-results.json",
+      "sha256": "3d9c9ae7e0a83eb2d6dacb6d74077412c5869317094dae05258092d0a0d431d5"
+    },
+    "beforeInputs": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-before.json",
+      "sha256": "82e96a3f0095b21ca678de40e461b246b2b6235f01b30ad13c1b8f09f6641914"
+    },
+    "afterInputs": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-after.json",
+      "sha256": "e4ea70ff78e542654dba846210843f2adaf8431dd4b5d01b80c49f8702f94dda"
+    },
+    "log": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04.log",
+      "sha256": "f63121763bc1d175259d28163f26f982197a984849b0ac6c935966c865b34169"
+    },
+    "xml": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+        "sha256": "98e7b56047b95e1941599fa86285c297f32a813adda0cba9aac3a15024c3f7cb"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-xml/TEST-com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.xml",
+        "sha256": "feec8f1a6729a8208a3e1e726965cd15753c2fa514f504e5d0190f7b8041d284"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-xml/TEST-com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.xml",
+        "sha256": "c696ff1373cbb3acd2a95aa1a835ee51c5ff51539c6e5300951808173664d9fe"
+      }
+    ],
+    "captureManifest": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-artifacts/capture-manifest.json",
+      "sha256": "578fd3175b2874445ad1f80f562a3a15ded54721f55d01159685d7390f3a7e3a"
+    },
+    "prelaunch": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-artifacts/prelaunch.json",
+      "sha256": "0e9c5aa3176c99451a562be7a4b8e82fdf4e9bb67108b93e663c649354d5f665"
+    },
+    "restoration": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-outcome-capture-attempt04-artifacts/fixed-output-restoration.json",
+      "sha256": "ad6bf2842ae0d5d66e60a43b0a791f3c21502d7c9d35e1794d226a967085501b"
+    },
+    "safeOwnedFiles": 21,
+    "excludedPrivateOrRawFiles": 30,
+    "fixedOutputRestoration": {
+      "priorFileCount": 56,
+      "newArchivedFileCount": 16,
+      "restoredFileCount": 56,
+      "byteExact": true,
+      "mismatches": [],
+      "currentRunArchivedBeforeRestore": true,
+      "currentRunFiles": [
+        {
+          "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+          "sha256": "98e7b56047b95e1941599fa86285c297f32a813adda0cba9aac3a15024c3f7cb"
+        },
+        {
+          "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.xml",
+          "sha256": "feec8f1a6729a8208a3e1e726965cd15753c2fa514f504e5d0190f7b8041d284"
+        },
+        {
+          "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.xml",
+          "sha256": "c696ff1373cbb3acd2a95aa1a835ee51c5ff51539c6e5300951808173664d9fe"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/output.bin",
+          "sha256": "a4117e34fae2e516c6fa3c7a13880d95167c8dcbe469cc2f609f404c50bd363d"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/output.bin.idx",
+          "sha256": "0dfe018afc065374a52f0dc2e1bfa8e8e4500799530050ab5f22911baa196c29"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/results.bin",
+          "sha256": "bc4c0f06be112d30dd0b575d007d678c7f401f88db710d33292a2f3dda613e5e"
+        },
+        {
+          "path": "backend/build/reports/tests/test/classes/com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.html",
+          "sha256": "738f92537a7bc376262c56d927e1cdf026693f0a2add4ad732ab35287edd034e"
+        },
+        {
+          "path": "backend/build/reports/tests/test/classes/com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.html",
+          "sha256": "6bbe82c4165c8fa57034ab072bf37949b9dd5565cc90de431032350f3972d1ea"
+        },
+        {
+          "path": "backend/build/reports/tests/test/classes/com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.html",
+          "sha256": "7211eaec3ae5528ba1602f28f34b238f006d29b3733ddb8975c6e8b394a6a702"
+        },
+        {
+          "path": "backend/build/reports/tests/test/css/base-style.css",
+          "sha256": "a10a4ef75ca2601b44bfdaf3112a5854f6376f68d7cbaf6958286f04488d293b"
+        },
+        {
+          "path": "backend/build/reports/tests/test/css/style.css",
+          "sha256": "61866908fd7eb09c79e96239f69db2e8cc5c6526cdb308eba0535ed2a0f6a263"
+        },
+        {
+          "path": "backend/build/reports/tests/test/index.html",
+          "sha256": "0ff037fc9679030122d94ab2a91b04c1e60b7174a279e9b99b89f6c5c3f5b351"
+        },
+        {
+          "path": "backend/build/reports/tests/test/js/report.js",
+          "sha256": "fc89c6d002d18f4662065c9887b2cda8f8486f2737d4ad0f2fdeac0ad58a44dc"
+        },
+        {
+          "path": "backend/build/reports/tests/test/packages/com.citi.put.checks.studio.guided.publication.html",
+          "sha256": "5a5a3e8a192e2aa430946e3cf539ac5274aa3fb4360289c4ec2974d0adbcbba1"
+        },
+        {
+          "path": "backend/build/guard-tally/GuidedPlanningIntegrationTest.json",
+          "sha256": "49877687fdc0fe0b3f5640e61f647d165fc6ba88836c6a4fe162dc073cdfc3b2"
+        },
+        {
+          "path": "backend/build/guard-tally/GuidedPublicationReplayIT.json",
+          "sha256": "4cdeefd92edf1d21093abf8b67b2eb8d8571db91044fb7e93ebcd000923807cc"
+        }
+      ]
+    },
+    "originalOwnedTempPreserved": true,
+    "allPriorFailedReceiptsMediaPreserved": true
+  },
+  "remaining": [
+    "B1 same full13 rows incomplete; intermediate checkpointd9fc9c59 remains source scope truth",
+    "Full35 parameterized variants NOT selected; no inferred results",
+    "R1 new native fixture NOT selected; full R1 remaining still open",
+    "Full86 acceptance/subcases,24ARCH05,55SQL mappings and15private authorities",
+    "All remaining secret faults/guard/consent/recovery/naturallease/empty-prefix/result/callback/native proof",
+    "Full configured normal static/check/coverage and current final-source validation",
+    "Cross-replica/deployment/independent QA015/PO/root closure then008",
+    "Row85 original pending user decision remains unamended"
+  ],
+  "noRepairRetryOrSourceEditsByExecutor": true
+}

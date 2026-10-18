@@ -1,0 +1,67 @@
+{
+  "story": "STUDIO-OBS-007",
+  "status": "SOURCE_ONLY_CURRENT_CRITICAL_PATH_DISPOSITION",
+  "currentMainSha256": "618e976fbe2c23de42892226fb9e5e12a37cb7e0cbd5a0afa63a5f32b4e37a5a",
+  "currentPublicationSha256": "ea827f2296d515d9203c7a96cc0b47626528414bd76e0b360fdd271c80b48e90",
+  "actualClaimHandlersMs": [
+    9.286917,
+    14.056167,
+    141.75675,
+    172.191167,
+    404.535292,
+    551.569875,
+    292.044375,
+    669.631042,
+    412.419125,
+    1090.834
+  ],
+  "requestBudgetMs": 1000,
+  "lastHandlerMs": 1090.834,
+  "actualLifecycleReason": "LEASE_LOST",
+  "definingPgTests": {
+    "new": 2,
+    "affected": 61,
+    "passed": true,
+    "tier": "guarded component transaction semantics; no latency guarantee"
+  },
+  "originalOrder": [
+    {
+      "source": "GuidedSessionService.java:742",
+      "work": "full request schema/path/key/worker role and identity validation before transaction"
+    },
+    {
+      "source": "GuidedSessionService.java:750",
+      "work": "outer REQUIRED; original SecretRevocationSweep guidedRevoked recheck participates same physical transaction"
+    },
+    {
+      "source": "SecretRevocationSweep.java:90",
+      "work": "state/revoked_at owner SELECT FOR UPDATE; releases and source declarations; same scoped mayUse checks/audit/aftercommit stop"
+    },
+    {
+      "source": "GuidedSessionService.java:758",
+      "work": "original nested REQUIRED; same session document/progress SELECT FOR UPDATE + strict parse; current/active/source/assignment/duplicate/fence/lease guards"
+    },
+    {
+      "source": "GuidedSessionService.java:811",
+      "work": "same/live original renewal update; full schema validation, document serialize once, atomic dependent owner UPDATE+command INSERT/count1, original deep copy"
+    },
+    {
+      "source": "GuidedSessionService.java:855",
+      "work": "outer normal return commits; true revocation identical409 aftercommit; response serialization/logging/transport outside method still part client budget"
+    }
+  ],
+  "attributionLimits": [
+    "latest unprofiled handler duration includes original guarded transaction/logging chain, not per-stage exclusive timing",
+    "earlier fixed sampler JDBC WAITING/owner-lock transactionid with unknown ClientRead blocker supports DB contention only; source/runtime different before composition",
+    "source retains repeated owner SELECT under same physical lock; reuse would require new authentic document/progress dataflow equivalence and is not authorized or proposed as causal fix",
+    "new GuidedContracts inside sweep parses only; no demonstrated schema compilation cost bypass to fix"
+  ],
+  "nextMinimalPermittedMeasurement": {
+    "proposal": "one diagnostic original seed-first+ninth using EXISTING default-off bounded C5ClaimSampler and existing one-shot PG snapshot on current composed source, no new observer/event/file/authority calls",
+    "purpose": "discriminate remaining current JDBC wait vs guarded schema/JSON/log encoder sampled CPU after changed transaction composition; exact holder/claim attribution stays false unless actually bound",
+    "prerequisites": "root review and exact runtime preflight; source frozen; numeric whitelist capture-local preservation; FAILED/NON_QUIESCENT invalid; sampled run not acceptance",
+    "after": "only concrete source-bound fix justified by that actual evidence; original unprofiled ninth required after real source change"
+  },
+  "sourceChangesAuthorizedByReport": 0,
+  "deadlineSchemaAuthSqlTraceChanges": false
+}

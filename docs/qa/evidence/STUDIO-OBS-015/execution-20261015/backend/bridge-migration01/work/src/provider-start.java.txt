@@ -1,0 +1,37 @@
+      PROVIDER = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+      PROVIDER.createContext(
+          "/",
+          exchange -> {
+            try {
+              JsonNode wire =
+                  CONTRACTS.parse(
+                      new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+              JsonNode request =
+                  CONTRACTS.parse(
+                      wire.path("contents").get(0).path("parts").get(0).path("text").asText());
+              ObjectNode envelope = CONTRACTS.object();
+              envelope
+                  .putArray("candidates")
+                  .addObject()
+                  .put("finishReason", "STOP")
+                  .putObject("content")
+                  .putArray("parts")
+                  .addObject()
+                  .put("text", providerResponse(request).toString());
+              envelope
+                  .putObject("usageMetadata")
+                  .put("promptTokenCount", 100)
+                  .put("candidatesTokenCount", 100);
+              byte[] output = envelope.toString().getBytes(StandardCharsets.UTF_8);
+              exchange.getResponseHeaders().add("Content-Type", "application/json");
+              exchange.sendResponseHeaders(200, output.length);
+              exchange.getResponseBody().write(output);
+            } catch (RuntimeException failure) {
+              // Fail fast and visibly: the @AfterEach provider-kind check names the fault.
+              PROVIDER_KINDS.add("PROVIDER_FAULT:" + failure.getMessage());
+              exchange.sendResponseHeaders(500, -1);
+            } finally {
+              exchange.close();
+            }
+          });
+      PROVIDER.start();

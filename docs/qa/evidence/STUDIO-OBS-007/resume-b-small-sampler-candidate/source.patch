@@ -1,0 +1,192 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java.before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -937,9 +937,15 @@
+                   new org.springframework.web.util.ContentCachingRequestWrapper(http, 262144);
+               boolean claim = activeC5.selectedClaim(http);
+               long ingress = System.nanoTime();
++              if (claim && activeC5.claimSampler != null) {
++                activeC5.claimSampler.enterCurrent();
++              }
+               try {
+                 chain.doFilter(wrapped, response);
+               } finally {
++                if (claim && activeC5.claimSampler != null) {
++                  activeC5.claimSampler.leaveCurrent();
++                }
+                 int status = ((jakarta.servlet.http.HttpServletResponse) response).getStatus();
+                 if (claim) {
+                   activeC5.recordClaim(
+@@ -8073,8 +8079,120 @@
+   }
+ 
+   /** Private capture of actual existing sinks; usable around the required C4 sub-runs too. */
++  private static final class C5ClaimSampler implements AutoCloseable {
++    private enum Segment { OWNER_LOCK, JDBC_PATH, CURRENT_AUTH, SOURCE_CHECK, SCHEMA,
++      JSON_RENDER, LOG_ENCODER, COMMIT, OTHER }
++    private enum Status { OFF, UNOBSERVED, OBSERVED, FAILED, NON_QUIESCENT }
++    private static final int MAX_THREADS = 8;
++    private final Object gate = new Object();
++    private final java.util.Set<Thread> executing = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
++    private final long[][] counts = new long[Segment.values().length][Thread.State.values().length];
++    private volatile boolean stopping;
++    private volatile Status status = Status.OFF;
++    private long empty, unattributed, cycles;
++    private final Thread sampler;
++    private final long end;
++
++    C5ClaimSampler(boolean selected) {
++      if (!selected) { sampler = null; end = 0; return; }
++      status = Status.UNOBSERVED;
++      end = System.nanoTime() + java.time.Duration.ofSeconds(30).toNanos();
++      sampler = Thread.ofPlatform().daemon().name("private-c5-claim-sampler").unstarted(this::sample);
++      try { sampler.start(); } catch (Throwable unavailable) { status = Status.FAILED; }
++    }
++    void enterCurrent() {
++      if (sampler == null || stopping || System.nanoTime() >= end) return;
++      try {
++        synchronized (gate) {
++          if (stopping) return;
++          if (executing.size() >= MAX_THREADS) { status = Status.FAILED; return; }
++          executing.add(Thread.currentThread()); // Only original selected filter's executing thread.
++        }
++      } catch (Throwable unsupported) { status = Status.FAILED; }
++    }
++    void leaveCurrent() {
++      try { synchronized (gate) { executing.remove(Thread.currentThread()); } }
++      catch (Throwable unsupported) { status = Status.FAILED; }
++    }
++
++    private void sample() {
++      try {
++        while (!stopping && System.nanoTime() < end) {
++          Thread[] snapshot;
++          synchronized (gate) { snapshot = executing.toArray(Thread[]::new); }
++          try {
++            for (Thread target : snapshot) {
++              if (stopping || System.nanoTime() >= end) break;
++              StackTraceElement[] stack = target.getStackTrace();
++              try {
++                Thread.State state = target.getState(); // Observed state; not atomic with stack.
++                if (stack.length == 0 || stack.length > 512) { empty++; continue; }
++                Segment segment = classify(stack);
++                if (segment == Segment.OTHER) unattributed++;
++                counts[segment.ordinal()][state.ordinal()]++;
++                if (segment != Segment.OTHER && status != Status.FAILED
++                    && status != Status.NON_QUIESCENT) status = Status.OBSERVED;
++              } finally { java.util.Arrays.fill(stack, null); }
++            }
++          } finally { java.util.Arrays.fill(snapshot, null); }
++          cycles++;
++          Thread.sleep(20); // Diagnostic cadence only; no authority poll/action changed.
++        }
++      } catch (InterruptedException stopped) {
++        Thread.currentThread().interrupt();
++      } catch (Throwable unsupported) {
++        status = Status.FAILED; // No exception/message/raw stack retained or emitted.
++      } finally { synchronized (gate) { executing.clear(); } }
++    }
++
++    private static Segment classify(StackTraceElement[] stack) {
++      boolean claim = java.util.Arrays.stream(stack).anyMatch(frame -> frame.getClassName().equals(
++          "com.citi.put.checks.studio.guided.session.GuidedSessionService")
++          && (frame.getMethodName().equals("claim") || frame.getMethodName().startsWith("lambda$claim$")));
++      if (!claim) return Segment.OTHER;
++      // Fixed source categories only; no arbitrary class/method/file/line/name/ID export.
++      for (StackTraceElement frame : stack) {
++        String type = frame.getClassName(), method = frame.getMethodName();
++        if (type.startsWith("ch.qos.logback.") || type.startsWith("net.logstash.logback.")) return Segment.LOG_ENCODER;
++        if (type.startsWith("com.networknt.") || type.endsWith("GuidedContracts")) return Segment.SCHEMA;
++        if (type.startsWith("com.fasterxml.jackson.")) return Segment.JSON_RENDER;
++        if (type.startsWith("org.postgresql.") || type.startsWith("org.springframework.jdbc.")) return Segment.JDBC_PATH;
++        if (type.endsWith("GuidedSessionRepository") && method.equals("lock")) return Segment.OWNER_LOCK;
++        if (type.endsWith("GuidedProductionSessionAccess") && method.equals("checkCurrent")) return Segment.CURRENT_AUTH;
++        if (type.endsWith("GuidedProductionSessionAccess") && method.equals("checkSourceCurrent")
++            || type.endsWith("GuidedSourceSnapshotRepository")) return Segment.SOURCE_CHECK;
++        if (type.startsWith("org.springframework.transaction.") && method.equals("commit")) return Segment.COMMIT;
++      }
++      return Segment.OTHER;
++    }
++
++    @Override public void close() {
++      stopping = true;
++      synchronized (gate) { executing.clear(); }
++      if (sampler == null) return;
++      boolean restoreInterrupt = Thread.interrupted();
++      long deadline = System.nanoTime() + java.time.Duration.ofSeconds(1).toNanos();
++      try {
++        sampler.interrupt();
++        while (sampler.isAlive()) {
++          long remaining = deadline - System.nanoTime(); if (remaining <= 0) break;
++          try { sampler.join(java.time.Duration.ofNanos(remaining)); }
++          catch (InterruptedException interrupted) { restoreInterrupt = true; }
++        }
++        if (sampler.isAlive()) status = Status.NON_QUIESCENT;
++      } finally {
++        synchronized (gate) { executing.clear(); }
++        if (restoreInterrupt) Thread.currentThread().interrupt();
++      }
++      // Export counts ONLY if sampler joined. NON_QUIESCENT never claims all refs discarded:
++      // public virtual-thread getStackTrace can retry/yield without honoring interruption.
++      // Future caller uses fixed status/segment/thread-state ordinal and counts only.
++    }
++  }
++
+   private final class C5Capture implements AutoCloseable {
+     private static final int MAX_BYTES = 128 * 1024 * 1024;
++    private final C5ClaimSampler claimSampler;
+     private final List<String> values;
+     private volatile String selectedGuidedSession;
+     private int lifecycleOrdinal, claimOrdinal;
+@@ -8168,6 +8286,8 @@
+       assertThat(appender.getEncoder()).isSameAs(originalEncoder);
+       rootLogger.setLevel(ch.qos.logback.classic.Level.TRACE);
+       appLogger.setLevel(ch.qos.logback.classic.Level.TRACE);
++      claimSampler = "true".equals(System.getenv("STUDIO_C5_CLAIM_DIAGNOSTIC"))
++          ? new C5ClaimSampler(true) : null;
+     }
+ 
+     void writeProfileValues() throws Exception {
+@@ -8494,10 +8614,43 @@
+       Files.writeString(TEMP.resolve("c5-numeric-evidence.json"), evidence.toString());
+     }
+ 
++    private void closeClaimSampler() throws Exception {
++      try {
++        claimSampler.close();
++      } finally {
++        if (claimSampler.sampler.isAlive()) {
++          cleanupUnconfirmed = true;
++        }
++      }
++      boolean joined = !claimSampler.sampler.isAlive();
++      Path path = TEMP.resolve("c5-numeric-evidence.json");
++      ObjectNode evidence = Files.exists(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)
++          ? (ObjectNode) C.parse(Files.readString(path, StandardCharsets.UTF_8)) : C.object();
++      evidence.put("claimSamplerStatus", claimSampler.status.ordinal())
++          .put("claimSamplerJoined", joined).put("claimSamplerCleanupConfirmed", joined)
++          .put("claimSamplerDiagnosticOnly", true);
++      if (!joined) {
++        evidence.remove(List.of("claimSamplerCycles", "claimSamplerEmpty", "claimSamplerUnattributed", "claimSamplerCounts"));
++      }
++      if (joined) {
++        evidence.put("claimSamplerCycles", claimSampler.cycles)
++            .put("claimSamplerEmpty", claimSampler.empty)
++            .put("claimSamplerUnattributed", claimSampler.unattributed);
++        evidence.set("claimSamplerCounts", JSON.valueToTree(claimSampler.counts));
++      }
++      Files.writeString(path, evidence.toString(), StandardCharsets.UTF_8);
++      if (!joined) {
++        throw new IllegalStateException("Private claim sampler cleanup remains unconfirmed");
++      }
++    }
++
+     @Override
+     public void close() throws Exception {
+       var failures = new java.util.ArrayList<Throwable>();
+       try {
++        if (claimSampler != null) {
++          p3AttemptTeardown(failures, this::closeClaimSampler);
++        }
+         for (C5Stream stream : streams) {
+           p3AttemptTeardown(failures, stream::close);
+         }

@@ -1,0 +1,7 @@
+    JsonNode first = incremental.path("firstSuffixAcceptance");
+    require(first.path("sessionId").equals(basis.path("sessionId"))
+        && first.path("retainedPrefixAdmissionIds").equals(incremental.path("switch").path("retainedPrefixAdmissionIds"))
+        && first.path("planRevision").asLong() == first.path("previousPlanRevision").asLong() + 1
+        && java.math.BigInteger.valueOf(first.path("planRevision").asLong())
+            .compareTo(new java.math.BigInteger(basis.path("translationRevision").asText())) <= 0,
+        "EVIDENCE_MISMATCH", 422);

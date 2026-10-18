@@ -1,0 +1,239 @@
+{
+  "status": "PASS_SELECTED_PRESERVATION_AUDIT",
+  "schemas": 43,
+  "schemaStructuralChanges": 1,
+  "allSixConsumerDefinitions": [
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/allocation.schema.json",
+      "pointer": "/properties/consumers/minItems",
+      "minimum": 0
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/guided-model-response.schema.json",
+      "pointer": "/oneOf/0/properties/needs/items/properties/consumers/minItems",
+      "minimum": 1
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json",
+      "pointer": "/definitions/AcceptedTranslationPlan/properties/needs/items/properties/consumers/minItems",
+      "minimum": 0
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/planning-context.schema.json",
+      "pointer": "/properties/needs/items/properties/consumers/minItems",
+      "minimum": 0
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/binding.schema.json",
+      "pointer": "/properties/consumers/minItems",
+      "minimum": 0
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/source-selection.schema.json",
+      "pointer": "/properties/needs/items/properties/consumers/minItems",
+      "minimum": 0
+    }
+  ],
+  "rawModelByteExact": true,
+  "correction01HelperByteExact": true,
+  "allOriginalCasePayloadsByteEquivalentAsJSON": true,
+  "onlyNecessaryOldBuildReferencePaths": [
+    "/build/schemaBundleHash",
+    "/job/binding/requiredBuild/schemaBundleHash",
+    "/job/binding/replayGrant/buildHash",
+    "/admissionRequest/build/schemaBundleHash",
+    "/admissionReceipt/request/build/schemaBundleHash",
+    "/launch/admission/request/build/schemaBundleHash",
+    "/launch/build/schemaBundleHash",
+    "/validationRequest/requiredBuild/schemaBundleHash",
+    "/examples/ValidationRequest/value/requiredBuild/schemaBundleHash",
+    "/examples/ValidationVerdict/value/build/schemaBundleHash",
+    "/examples/ObservedJob/value/binding/requiredBuild/schemaBundleHash",
+    "/examples/ObservedJob/value/binding/replayGrant/buildHash",
+    "/examples/AdmissionRequest/value/build/schemaBundleHash",
+    "/examples/AdmissionReceipt/value/request/build/schemaBundleHash"
+  ],
+  "frozenHistoricalFilesVerified": 90,
+  "graphCaseClassifications": {
+    "positive": 4,
+    "negative": 43
+  },
+  "rejectionReasons": [
+    {
+      "name": "unknown-raw-edge-admission",
+      "code": "GRAPH_UNKNOWN_EDGE"
+    },
+    {
+      "name": "raw-edge-cannot-name-pending-action",
+      "code": "OMITTED_ATTEMPT"
+    },
+    {
+      "name": "native-started-edge-is-not-excludable",
+      "code": "SCHEMA"
+    },
+    {
+      "name": "policy-failure-is-not-edge-exclusion",
+      "code": "EXCLUDED_ATTEMPT"
+    },
+    {
+      "name": "assertion-failure-is-not-edge-exclusion",
+      "code": "EXCLUDED_ATTEMPT"
+    },
+    {
+      "name": "unknown-outcome-is-not-edge-exclusion",
+      "code": "EXCLUDED_ATTEMPT"
+    },
+    {
+      "name": "second-excluded-attempt-forbidden",
+      "code": "SCHEMA"
+    },
+    {
+      "name": "pre-admission-cannot-acquire-failed-edge",
+      "code": "GRAPH_UNKNOWN_EDGE"
+    },
+    {
+      "name": "edge-wrong-origin",
+      "code": "GRAPH_EDGE"
+    },
+    {
+      "name": "edge-wrong-binding",
+      "code": "GRAPH_EDGE"
+    },
+    {
+      "name": "edge-wrong-producer-admission",
+      "code": "GRAPH_EDGE"
+    },
+    {
+      "name": "edge-wrong-coordinate",
+      "code": "GRAPH_EDGE"
+    },
+    {
+      "name": "edge-wrong-slot",
+      "code": "GRAPH_EDGE"
+    },
+    {
+      "name": "duplicate-raw-edge",
+      "code": "GRAPH_EDGE"
+    },
+    {
+      "name": "successful-same-pair-edge-cannot-disappear",
+      "code": "GRAPH_MISSING_SUCCESSFUL_EDGE"
+    },
+    {
+      "name": "raw-allocation-cannot-be-replaced-with-effective-empty-copy",
+      "code": "GRAPH_RAW_AUTHORITY"
+    },
+    {
+      "name": "raw-failed-edge-history-cannot-be-erased",
+      "code": "GRAPH_RAW_AUTHORITY"
+    },
+    {
+      "name": "bootstrap-cannot-hash-effective-projection",
+      "code": "GRAPH_RAW_ALLOCATION_HASH"
+    },
+    {
+      "name": "model-only-orphan-allocation-refused",
+      "code": "GRAPH_ORPHAN_ALLOCATION"
+    },
+    {
+      "name": "missing-base-proof-cannot-authorize-import",
+      "code": "GRAPH_IMPORT_ONLY"
+    },
+    {
+      "name": "foreign-base-pin-cannot-authorize-import",
+      "code": "SNAPSHOT_ORIGINAL_PIN"
+    },
+    {
+      "name": "prefix-read-must-match-verified-program",
+      "code": "PREFIX_REQUEST"
+    },
+    {
+      "name": "missing-base-binding-cannot-authorize-zero-consumer",
+      "code": "GRAPH_IMPORT_ONLY"
+    },
+    {
+      "name": "producer-historical-availability-context-must-match",
+      "code": "GRAPH_AVAILABILITY"
+    },
+    {
+      "name": "producer-historical-availability-fence-must-match",
+      "code": "GRAPH_AVAILABILITY"
+    },
+    {
+      "name": "successful-read-producer-cannot-be-hidden",
+      "code": "GRAPH_EDGE"
+    },
+    {
+      "name": "unread-producer-cannot-be-fabricated",
+      "code": "GRAPH_EDGE"
+    },
+    {
+      "name": "retained-producer-provenance-required",
+      "code": "RETAINED_ADMISSIONS"
+    },
+    {
+      "name": "new-model-consumer-intent-cannot-use-import-exception",
+      "code": "GRAPH_IMPORT_ONLY"
+    },
+    {
+      "name": "final-need-identity-cannot-change",
+      "code": "GRAPH_PRODUCER"
+    },
+    {
+      "name": "first-suffix-acceptance-cannot-follow-frozen-head",
+      "code": "GRAPH_FIRST_SUFFIX"
+    },
+    {
+      "name": "receipt-transport-authority-cannot-be-inferred-from-hash",
+      "code": "RECEIPT_AUTHENTICATION"
+    },
+    {
+      "name": "effective-transfer-cannot-disappear",
+      "code": "GRAPH_TRANSFER_BIJECTION"
+    },
+    {
+      "name": "effective-transfer-producer-cannot-change",
+      "code": "GRAPH_TRANSFER_BIJECTION"
+    },
+    {
+      "name": "excluded-failed-edge-is-not-executable-transfer",
+      "code": "GRAPH_TRANSFER_BIJECTION"
+    },
+    {
+      "name": "candidate-policy-cannot-omit-successful-transfer",
+      "code": "GRAPH_CANDIDATE_TRANSFERS"
+    },
+    {
+      "name": "candidate-policy-binding-cannot-drop-successful-consumer",
+      "code": "GRAPH_CANDIDATE_BINDINGS"
+    },
+    {
+      "name": "publication-preimage-must-commit-raw-failed-edge",
+      "code": "GRAPH_PUBLICATION_PREIMAGE"
+    },
+    {
+      "name": "publication-preimage-envelope-cannot-change",
+      "code": "GRAPH_PUBLICATION_PREIMAGE"
+    },
+    {
+      "name": "admission-preimage-must-exclude-spent-attempt",
+      "code": "GRAPH_ADMISSION_PREIMAGE"
+    },
+    {
+      "name": "admission-preimage-is-array-not-wrapper",
+      "code": "GRAPH_ADMISSION_PREIMAGE"
+    },
+    {
+      "name": "candidate-authorization-preimage-is-exact",
+      "code": "GRAPH_AUTHORIZATION_PREIMAGE"
+    },
+    {
+      "name": "candidate-source-identity-cannot-be-substituted",
+      "code": "GRAPH_CANDIDATE_IDENTITY"
+    }
+  ],
+  "generatedCanonicalBundle": "ce58d620c27bb84f4233151275373aba24467f748c7152a12f1ef3d2d85381aa",
+  "generationWritesSinceCheckpoint": 0,
+  "applicationAcceptanceCredit": false,
+  "nativeConsentHistoryProof": false
+}

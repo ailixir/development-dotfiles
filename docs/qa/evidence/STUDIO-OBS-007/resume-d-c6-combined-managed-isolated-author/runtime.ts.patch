@@ -1,0 +1,37 @@
+--- before/studio-runner/src/guided/runtime.ts
++++ candidate/studio-runner/src/guided/runtime.ts
+@@ -54,6 +54,9 @@
+   private evidenceBytes = 0;
+   private readonly started = Date.now();
+   private closing: Promise<void> | null = null;
++  private confirmBrowserLoss: (() => void) | null = null;
++  // Fulfilled only by original launch-loss stop completion, never generic stop or early stopped state.
++  private readonly browserLossConfirmation = new Promise<void>(resolve => { this.confirmBrowserLoss = resolve; });
+   constructor(private context: RunnerContext, private readonly options: GuidedRuntimeOptions) { this.context = structuredClone(context); }
+   get hasSecretInputs(): boolean { return this.context.authoredInputs.inputs.some(input => input.kind === 'secretRef'); }
+   get active(): boolean { return !this.stopped || !this.browserClosed; }
+@@ -93,7 +96,11 @@
+     const config: ObservationConfig = { sessionId: this.context.sessionId, scopeHash: this.context.scopeHash, approvedOrigins: this.context.approvedOrigins, rules: this.options.rules,
+       knownSecrets: [], limits: { nodes: limits.maxObservationNodes, bytes: limits.maxObservationBytes, depth: limits.maxObservationDepth },
+       ...(this.options.applicationPolicy ? { applicationPolicy: this.options.applicationPolicy } : {}) };
+-    this.launching = this.options.launch(config, this.context.contextId, () => { void this.stop('CONTEXT_LOST').catch(() => undefined); });
++    this.launching = this.options.launch(config, this.context.contextId, () => {
++      const originalStop = this.stop('CONTEXT_LOST');
++      // Same original launch loss/stop promise; rejection is never confirmation.
++      void originalStop.then(() => { this.confirmBrowserLoss?.(); this.confirmBrowserLoss = null; }, () => undefined);
++    });
+     try { this.browser = await this.launching; } catch (error) {
+       if (error instanceof GuidedLaunchFailure) this.failedLaunchClose = error.close;
+       throw new Error('CONTEXT_LOST');
+@@ -231,7 +238,10 @@
+         delete (request as { secret?: BridgeDispatch['secret'] }).secret;
+         this.options.beforeSecretFill?.(resolvedValue);
+         secretCallStarted=true;
+-        await this.browser.observations.fillPassword(p.target, p.executionEvidence.origin, allowedOrigins, resolvedValue);
++        const nativeOperation = this.browser.observations.fillPassword(p.target, p.executionEvidence.origin, allowedOrigins, resolvedValue);
++        // Both rejection handlers are installed immediately. A late losing SDK rejection cannot
++        // re-enter this dispatch catch or publish another application outcome/diagnostic.
++        await Promise.race([nativeOperation, this.browserLossConfirmation.then(() => { throw new Error('CONTEXT_LOST'); })]);
+         resolvedValue = null;
+       } else if ('kind' in p.target) {
+         insist(p.operation.kind === 'assert' && (p.operation.predicate === 'url' || p.operation.predicate === 'title') && resolvedValue !== null, 'POLICY_DENIED');

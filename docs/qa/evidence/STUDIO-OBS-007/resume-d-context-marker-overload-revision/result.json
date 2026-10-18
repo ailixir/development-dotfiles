@@ -1,0 +1,37 @@
+{
+  "disposition": "FROZEN_REVISED_ISOLATED_OPTIONAL_MARKER_SOURCE_CANDIDATE_FOR_ROOT_REVIEW; NO_INTEGRATION",
+  "parent": {
+    "receipt_path": "docs/qa/evidence/STUDIO-OBS-007/resume-d-context-presence-marker-isolated-author/result.json",
+    "receipt_sha256": "39f42ff0bac5b46fae13485129bb3ccbb94cd3713622b3aa2c9f9ebc41572745",
+    "candidate_sha256": "e00fdda0998262f0df2462c1fdd5aa8435ca802712d7d48aa3a524839b27dcb7",
+    "original_parent_patch_sha256": "f2c28ba3f861f68d20cabaf912dd38417eb7d858be0bc298549e12a291ed4c5a",
+    "parent_artifact_unchanged": true
+  },
+  "paths": {
+    "before": "docs/qa/evidence/STUDIO-OBS-007/resume-d-context-marker-overload-revision/before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "parent": "docs/qa/evidence/STUDIO-OBS-007/resume-d-context-marker-overload-revision/parent/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "candidate": "docs/qa/evidence/STUDIO-OBS-007/resume-d-context-marker-overload-revision/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "full_patch": "docs/qa/evidence/STUDIO-OBS-007/resume-d-context-marker-overload-revision/candidate.patch",
+    "parent_delta": "docs/qa/evidence/STUDIO-OBS-007/resume-d-context-marker-overload-revision/parent-delta.patch"
+  },
+  "hashes": {
+    "original_base": "6ff9fb276ca4a3c196b156702d1f76ca133656d6960dfd87ac2a00d2d2eb2d3f",
+    "revised_candidate": "ba835def1074de5124938b98fa23dba3488a01f9f704751f6a39227c638a221b",
+    "full_patch": "afb517750ea5612a359fb336abe4fad78fb0d5003c582c1f02cbe9a1cf640b82",
+    "parent_delta": "8db5a4b401e31b5faa2a4becee12e559332a1642452142b3a660c8a74097a9a2"
+  },
+  "exact_amended_delta": "Delete only unused delegating3arg overload AFTER changing its sole invalid/oversized-stack caller to same direct4arg call with explicit UNKNOWN-1. This preserves old delegation semantics and closes the previously remaining3arg call; no new path/helper or counter behavior.",
+  "proof": {
+    "revised_to_parent_two_edit_inverse_exact": true,
+    "revised_to_original_complete_inverse_exact": true,
+    "original_synchronized_four_arg_body_raw_exact": true,
+    "all_bytes_outside_private_sampler_raw_identical": true,
+    "all_original37_tests_generatedscripts_otherhelpers_raw_identical": true,
+    "original_classifiers_inventories_SQL0_to39_bindings_masks_histograms": "same frozen parent, unchanged",
+    "live_source_written": false
+  },
+  "unknown_branch": "Null classification still removes sourceSamples under same gate and same original expectedbinding/stop/end guards; -1 argument is ignored for null classification exactly as prior delegating wrapper. No new clean-absence/default semantics.",
+  "preserved_marker": "Same acquired qualified stack/context132+abovevalidate89/94/source9phase21; single40 presence slot and original masking/counter binding unchanged. Historical sample may precedePGedge, no cost/cause/duration/acceptance/context author credit.",
+  "metadata_authority": "Frozen d9b02/root757/coordinator320 receipt unchanged; actual source/class/debug/invoke binding still coordinator prerequisite before use.",
+  "actions": "No livewrites/build/tests/runtime/SQL/browser/dist/lifecycle/QA/Done/DAG/commit/push/deploy; sharedUSD500 billing unavailable."
+}

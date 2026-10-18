@@ -1,0 +1,41 @@
+  @Test
+  void lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction() throws Exception {
+    String id = prepareSession();
+    dispatch.pushContext(controller, id, 1);
+    JsonNode first = admit(id, navigation(id));
+    advance(id, first, "first");
+    ObjectNode fill = proposal(id, 1, "fill", "destination");
+    fill.withObject("/operation")
+        .set(
+            "value",
+            CONTRACTS
+                .object()
+                .put("kind", "authoredLiteral")
+                .put(
+                    "sourceInputId",
+                    sessions
+                        .runnerContext(controller, id, 1)
+                        .path("authoredInputs")
+                        .path("inputs")
+                        .get(1)
+                        .path("inputId")
+                        .asText()));
+    JsonNode second = admit(id, fill);
+    sessions.consume(controller, id, 1, "second", advanceRequest(id, second));
+    sessions.lostAcknowledgment(id, first.path("admission").path("admissionId").asText());
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT document->>'state' FROM studio_guided_actions WHERE admission_id=?",
+                String.class,
+                second.path("admission").path("admissionId").asText()))
+        .isEqualTo("DISPATCHING");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT state FROM studio_guided_sessions WHERE session_id=?", String.class, id))
+        .isEqualTo("ACTING");
+    sessions.lostAcknowledgment(id, second.path("admission").path("admissionId").asText());
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT state FROM studio_guided_sessions WHERE session_id=?", String.class, id))
+        .isEqualTo("UNKNOWN_OUTCOME");
+  }

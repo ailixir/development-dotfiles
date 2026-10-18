@@ -1,0 +1,29 @@
+{
+  "story": "STUDIO-OBS-015",
+  "reviewer": "Aria",
+  "root": "Orion",
+  "status": "READ_ONLY_B1A_PREPARATION_COMPLETE_HOLD",
+  "liveRuntime": {"handle": 31432, "outputsInspected": false, "interference": false},
+  "sourceRelease": false,
+  "runtimeExecution": false,
+  "formalQaVerdict": null,
+  "lifecycleChange": null,
+  "originalSubject": {"ledgerIndex0": 16, "name": "IncrementalSessionIT.prefixCallbacksNeverOpenModelReservation", "tier": "Java+Postgres", "unchanged": true},
+  "recommendation": {"newMethod": "incrementalPrefixCallbacksKeepStateAndFenceBothReservations", "newId": "B1A-CB-01", "additionalSingletons": 1, "proposedLeaseOnly": ["backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java", "backend/build.gradle.kts"]},
+  "checks": [
+    {"id": "B1ACB-01", "result": "SOURCE_FEASIBLE", "claim": "Existing actual base/finalize/teardown/edit4/mixed parent provides native navigation/read and current prefix associations without fake rows."},
+    {"id": "B1ACB-02", "result": "EXACT_COMMIT_CUTS_IDENTIFIED", "claim": "Existing test TransactionTemplate after-real-new-commit can observe selected observeV2/admit/consume/outcomeV2 metadata outsideSQL; no WonConsumption serialization/reuse."},
+    {"id": "B1ACB-03", "result": "COMPLETESTEP_MAPPING_CORRECTED", "claim": "No step-complete HTTPcallback. Prefix driver does not call completeCurrent. Real service completeStep after actual nav+read reaches actual StepVerifier, advances0to1 and keeps prefix state/continuation."},
+    {"id": "B1ACB-04", "result": "HTTP_GUARD_ORDER_IDENTIFIED", "claim": "SOURCE_PLAN fence dependency-admissions→learnSuffix pending check; /plans is prefixdriver. Proposal NEXT_ACTION fence requires unfinishedstep/no recovery/actualavailabletarget, then reserveAttempt pending refusal."},
+    {"id": "B1ACB-05", "result": "DIRECT_BOTH_APIS_IDENTIFIED", "claim": "reserveModel and reserveAttempt deny before reservations/INSERT; validcurrentparameters/typedprojectionpositive required, not malformedinputs."},
+    {"id": "B1ACB-06", "result": "DESTRUCTIVE_NEGATIVE_DISCLOSED", "claim": "Proposal call reservation failure invokes stopRejected and may terminallyfail its parent. Use fresh sibling or runlast; do not claim continuedprefix state afterward."},
+    {"id": "B1ACB-07", "result": "GATEWAY_AUTHORITY_SPLIT", "claim": "Typed gateway propose is after actual committedreservation+claimSend; bare transport has no pending-session authority. Actualbase SOURCE_PLAN/NEXT_ACTION typedcalls are validpositivecontrols."},
+    {"id": "B1ACB-08", "result": "NO_RUNTIME_CREDIT", "claim": "No live/private outputs read; all new cuts/probes/selectors are plannednotrun. Existing accountingafterprefixexit is not callback proof."}
+  ],
+  "callbackStages": ["actualpostnavigationobservationgen1", "actualcommittedADMITTEDdispatch0", "actualwonconsumeDISPATCHINGdispatch1", "actualauthenticatednavigation/readsuccess", "realcontrollercompleteStepafterStepVerifierpositive"],
+  "negativeProbeOrder": ["freshcurrentauthorityandschema", "bothdirectreservationAPIswithvalidargs", "dependency-admissionsSOURCE_PLANpendingguard", "proposalunfinishedavailableobservationfreshsiblinglast"],
+  "cohort": {"originalDefault": 43, "originalLow": 37, "existingPfxSyncAdditions": 5, "newB1aAddition": 1, "futureLow": 43, "futureUnion": 86, "originalAcceptanceSubjectsSeparate": 86, "profile": "incremental2048"},
+  "limits": {"noProductionChangePresumed": true, "noFakePendingOrLedger": true, "noFictionalEndpoint": true, "noNetworkOrWaitUnderSql": true, "noCapOrTimeoutChange": true, "noDirectGatewayDenialClaim": true},
+  "retainedOpen": ["currentaccess+freshproducer exactcut", "ADMITTED exactrecovery cut", "all original35/all80+5/finalprivateCoreVaultnativegates", "item85originalOPENunamended"],
+  "sequence": "FULL015_THEN008"
+}

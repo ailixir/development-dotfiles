@@ -1,0 +1,59 @@
+{
+  "scope": "ISOLATED_SOURCE_ONLY_ONE_LOCAL_OBSERVATION_ENCODING_REUSE",
+  "disposition": "FROZEN_FOR_INDEPENDENT_SOURCE_REVIEW",
+  "sourcePath": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+  "baseSha256": "618e976fbe2c23de42892226fb9e5e12a37cb7e0cbd5a0afa63a5f32b4e37a5a",
+  "candidateSha256": "cdb6d8ad2a822fb9bcf8af0e9cd7d738637f0ed507211b8b25113e6520b079c6",
+  "patchSha256": "f2553af78e42ca44e3cd0be5173ce63da6f31c82ea2a124a1fbba87c3301a892",
+  "beforePath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c5-observation-encoding-isolated-author/before/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+  "candidatePath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c5-observation-encoding-isolated-author/candidate/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+  "authority": {
+    "dispatchIntent": ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-c5-observation-encoding-isolated-author-intent.txt",
+    "rootReview": "docs/qa/evidence/STUDIO-OBS-007/root-c5-observation-encoding-design-review.json"
+  },
+  "proof": {
+    "wholeSourceInverseExact": true,
+    "uniqueTransformations": 3,
+    "unchangedBetweenSizeAndHash": true,
+    "interveningBlockSha256": "0d65dce14529637b89b2bda241a6f3ac69f2cb7c504f80bca94a9348c43a35ff",
+    "reserveSourceSha256": "52f7dc54f2560400f2b9dd84f01a4617fe177645dc7f290adbe50200b0bc9b25",
+    "publicHashApiPath": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+    "publicHashApiSha256": "a5034ee98707552d927f48bc0a30e07896df913f3b706f42f15ee16c7b52144b",
+    "publicHashApiUnchanged": true,
+    "liveSourceUnchanged": true,
+    "reserveMutationTarget": "session.document().counters"
+  },
+  "semantics": [
+    "The exact first canonicalization/UTF8 encoding now retains its private byte array and reads its length at the same size point.",
+    "Depth, generation, origin and both budget reservations remain byte-identical and in the same order before digest creation.",
+    "Intervening observation accesses are read-only; reserve mutates only session.document().counters, not the incoming observation. Equivalence is scoped to the original source-owned detached observation, not unsupported concurrent external mutation.",
+    "SHA-256 factory lookup/digest/HexFormat still execute at the original later observationHash point. The private helper catches the same NoSuchAlgorithmException and wraps the same exception in IllegalStateException.",
+    "Existing public GuidedContracts.hash and the separate evidenceHash call remain unchanged. No cache, SQL, authority, clock, transaction, schema, guard or public API change."
+  ],
+  "tradeoff": "One local canonical byte array remains reachable until the later hash within the same callback; no persistence/value channel, heap-wipe claim or quantified latency benefit.",
+  "coordinatorCheckPlan": [
+    {
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "purpose": "Existing canonicalUnicodeParityAndClosedSchema, observationBudgetAndGenerationAreSharedAcrossActions, evidence and original session/fence/budget/idempotency cases."
+    },
+    {
+      "selector": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest.reproducesIndependentCanonicalUnicodeAndNumericVectors",
+      "purpose": "Existing independent canonical UTF8/Unicode/numeric hash vectors; no packaged runtime rebuild is implied by this source-only plan."
+    },
+    {
+      "selector": "com.citi.put.checks.studio.dispatch.InternalBodyContractConformanceTest",
+      "purpose": "Existing strict schema/wire conformance remains unchanged."
+    },
+    {
+      "workflow": "original unprofiled C5 first/ninth",
+      "purpose": "Evaluate the unchanged 1-second secret renewal requirement after root-approved apply; source reduction alone gives no passing or bottleneck attribution."
+    }
+  ],
+  "runtimeExecuted": false,
+  "buildExecuted": false,
+  "liveSourceApplied": false,
+  "newTests": 0,
+  "performanceClaim": false,
+  "whole19AcPass": false,
+  "holderRoleObserver": "ON_HOLD_UNIMPLEMENTED"
+}

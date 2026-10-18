@@ -1,0 +1,741 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "reportKind": "Independent Aria app-video ownership/partial recovery architecture impact disposition; develop support only",
+  "reviewer": "Aria (@architect), resumed independent technical review; no spawned models/agents",
+  "capturedAt": "2026-10-10T10:41:16.800434+00:00",
+  "workspace": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "branchContext": "brunobuger/ui-studio (user supplied)",
+  "overallDisposition": "APPROVED_ARCHITECTURE",
+  "notQaVerdict": true,
+  "implementationApproved": false,
+  "summary": "Approve one closed write-once private scratch receipt of the actual clean app page Video.path as the minimal observed forced-loss recovery selector. Bind it to the real existing launch/admission/process/scratch identity and seal acceptance before stop. Reject largest/stray selection and receipt-based execution/finalization claims. Pre-Ready UNAVAILABLE is correct for unproven app ownership, not a universal rule after an authenticated app capability exists. No canonical/wire/status/configuration delta is needed under the exact applied Pax text; implementation remains proposed and root-release gated. Actual capture/receipt/kill/partial proofs remain open.",
+  "task": {
+    "skill": ".codex/skills/aiox-architect/SKILL.md",
+    "SOT": ".aiox-core/development/agents/architect.md",
+    "declaredDependency": ".aiox-core/development/tasks/architect-analyze-impact.md",
+    "constitution": ".aiox-core/constitution.md",
+    "mode": "yolo",
+    "parameters": {
+      "modificationType": "modify",
+      "componentPaths": [
+        "studio-runner/src/run/browser.ts",
+        "studio-runner/src/run/childRuntime.ts",
+        "studio-runner/src/run/launcher.ts",
+        "studio-runner/src/run/recording.ts"
+      ],
+      "depth": "deep, bounded to runner app video ownership/recovery",
+      "includeTests": true,
+      "excludeExternal": true,
+      "outputFormat": "json",
+      "saveReport": "docs/qa/evidence/STUDIO-OBS-007/t3-video-ownership-disposition.json"
+    },
+    "executionMethod": "Manual execution of declared prerequisite/dependency/propagation/risk/report stages, using bounded read-only inspection and hashes. No repository evidence/test snippets or task example code executed. Requested report is the only workspace write; no generic .ai/task/lifecycle state mutation.",
+    "log": [
+      "Resumed Aria SOT/task/constitution; read exact prior12 corrected Pax replacements/application.",
+      "Inspected parked/current R production source, actual native/process facts and red/current fixture assertions.",
+      "Verified28 owned sources/copies,248 whole runner sources,271dist files and three aggregate hashes.",
+      "Selected bounded exact private app-video receipt; separated phase/ownership from execution and physical recording facts.",
+      "Wrote report without implementation or shared gates."
+    ]
+  },
+  "authority": {
+    "priorArchitecture": "docs/qa/evidence/STUDIO-OBS-007/t2-t3-bootstrap-closure-disposition.json",
+    "priorArchitectureSha256": "65d90f73505d80506ee43a8d88ea9936b962c80ce3e678367da55c1c701017da",
+    "freshPax": "docs/qa/evidence/STUDIO-OBS-007/t2-t3-po-bootstrap-closure-revalidation.json",
+    "freshPaxSha256": "9b0229944a487677f04a6ac0c135ad78ea9289c3829add3dcce27640f845b68f",
+    "applicationReceipt": "docs/qa/evidence/STUDIO-OBS-007/bootstrap-closure-application/receipt.json",
+    "applicationReceiptSha256": "8603358fa7852b308dc0b341ad170c5b95bd7217103521abcbcd71bf1867b56a",
+    "exact12ScopedAfterFragmentsPresent": true,
+    "canonicalPaths": [
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "docs/specs/studio-observed-authoring/secret-login-design.md",
+      "docs/architecture/studio-execution.md"
+    ],
+    "existingVideoRuling": "docs/architecture/ADR-002-internal-contract-surface.md §§17.3/17.4/17.7 and studio-execution §§5.2/6.1/6.2/6.4",
+    "exactOperativeText": [
+      "Only this application page supplies native app video; no rewrite, merge, transcode, diagnostic-prefix subtraction or altered application recording is allowed.",
+      "Native partial/evidence state remains determined by actual application recording finalization, independently of outcome.",
+      "The close result may return only the actual application page-owned recording after awaited app/context closure, never a directory-selected fallback.",
+      "That startup artifact is never app evidence, a manifest/video key candidate or an uploaded recording; deletion never edits application video."
+    ],
+    "interpretation": "Pax approves a sequential startup exception and preserves native app partial/evidence independently of outcome. It does not prohibit authentic clean app recording before parent receipt of Ready. The staged comment/test claim that all pre-Ready video is inadmissible overstates this authority. Ready delivery is not app-video identity. All19AC/C6/C7/security conditions and prior exact rulings remain.",
+    "releaseRule": "Architecture approval here is for the described private mechanism and conditional phase classification only. R must remain parked until root explicitly releases this new source/private-file scope. No current implementation/peer/QA PASS or gate credit is assigned; no canonical application is performed."
+  },
+  "items": [
+    {
+      "id": "V1-PRIVATE-APP-OWNERSHIP",
+      "title": "One exact private app-video recovery receipt",
+      "disposition": "APPROVED_ARCHITECTURE",
+      "severity": "HIGH correctness/privacy boundary",
+      "ruling": "Select the one actual app page-owned native file by a private closed write-once receipt derived from that page Video.path. It is an internal file identity, not execution/admission authority. Existing in-memory app handle and actual close path remain the live producer; neither survives a silent forced child kill in the parent today. Existing Result3.recording.path can carry a live close result but cannot solve result-loss recovery and confinement alone does not prove app ownership.",
+      "observations": [
+        {
+          "path": "studio-runner/src/run/browser.ts",
+          "line": 160,
+          "anchor": "page=await boundedStartup(()=>context.newPage()"
+        },
+        {
+          "path": "studio-runner/src/run/browser.ts",
+          "line": 218,
+          "anchor": "observedStartupReady(){"
+        },
+        {
+          "path": "studio-runner/src/run/browser.ts",
+          "line": 247,
+          "anchor": "const video = page.video();"
+        },
+        {
+          "path": "studio-runner/src/run/launcher.ts",
+          "line": 347,
+          "anchor": "async function observeScratchRecording("
+        },
+        {
+          "path": "studio-runner/src/run/launcher.ts",
+          "line": 367,
+          "anchor": "stats.size > best.bytes"
+        },
+        {
+          "path": "studio-runner/src/run/launcher.ts",
+          "line": 1022,
+          "anchor": "async function confineObservedRecording("
+        }
+      ],
+      "producer": "R trusted browser factory/observed child runtime under exact compiled build; never application/model/job text",
+      "consumer": "R observed parent launcher recovery, then existing coordinator/evidence/manifest pipeline",
+      "privateDataContract": {
+        "file": "Proposed fixed runner-private/app-video-owner.json inside the existing exact per-admission scratch; one committed receipt per observed launch. Parent creates/verifies a fresh private0700 directory before spawn, refuses an existing directory/receipt instead of reusing stale ownership. Receipt0600. No Chromium profile/video directory is used for registry metadata.",
+        "closedFields": {
+          "schemaVersion": "literal1, private only",
+          "kind": "literal observed-app-video",
+          "runId": "actual Launch3.runId/executionId",
+          "attemptId": "actual accepted binding/Launch3.attemptId",
+          "admissionId": "actual existing AdmissionReceipt.admissionId",
+          "runnerInstanceId": "actual admission.request.runnerInstanceId",
+          "parentPid": "actual child process.ppid, matched to parent retained process identity",
+          "childPid": "actual child process.pid, matched to the spawned production handle.pid",
+          "scratchDev": "string form of actual canonical scratch directory dev",
+          "scratchIno": "string form of actual canonical scratch directory ino",
+          "videoBasename": "bounded exact basename of actual clean app page Video.path; no path separators or dot segments; native .webm name, at most255 UTF-8 bytes"
+        },
+        "privateParentIdentity": "Parent retains its launch lifetime, real admission/execution/attempt/runner identity, spawned process identity and canonical scratch directory dev/ino in its closure. The existing fresh admission UUID and freshly exclusively created private directory provide per-launch freshness. The child obtains the same existing launch fields and its real pid/ppid/scratch stat; no parent identity/nonce is added to job, IPC, environment or public wire. Production pid identity must be present; no wildcard/fallback matching for virtual fakes. PID alone or a caller filename is never identity. Parent restart is not supported as durable execution recovery by this scratch receipt.",
+        "sizeAndParsing": "Maximum4096 UTF-8 bytes, exact required keys/no extras, literal version/kind, existing UUID/runner ID bounds, safe positive pid bounds and canonical decimal dev/ino strings. Open receipt without following symlinks, require regular private file, bounded read plus over-limit detection and strict closed parse. Duplicate keys, torn/trailing content, unknown fields/version and duplicates are refused; do not print receipt bytes or full paths in diagnostics.",
+        "excludedFields": "No secret/reference value/value digest, secretId, source/action ordinal, status/outcome/step/Ready claim, browserStartedAt, timestamp-based permission, observed body, public object key, callback URL or new pin/contract/mode.",
+        "trustLimit": "This is a capability record from trusted pinned Node producer plus exclusive scratch access; it is not cryptographic proof against a compromised same-UID Node/host writer. Matching public IDs or a syntactically safe filename alone does not authenticate native origin. Application renderer/DOM/job/model must have no registry filesystem write capability, and profile/download permissions must not give that capability. If an adversary can write this registry with its valid launch/process identity, this mechanism cannot establish ownership; fail scope/evidence rather than claim a nonce/signature makes a compromised producer trustworthy.",
+        "publication": "Construct once from native capability, not from Result3/raw supplied path. Use bounded closed temporary write and atomic exclusive no-overwrite publication (e.g. confined regular temp file plus no-replace link/publish and cleanup, with appropriate fsync/close). Never rename over an existing receipt, revise it on navigation/close or accept partial publication. Temp artifacts are not candidates. Parent verifies committed file identity/content and immutable single-publication invariants. A collision is an ownership failure, not idempotent acceptance of caller content.",
+        "ownershipNotFinalization": "Receipt can precede file creation/data flush and Ready; it identifies only the exact app native filename. It must not stat a currently missing native file into a false completed/playable claim, await Video.saveAs/context closure to obtain ownership or create its own synthetic .webm file."
+      },
+      "captureAndLifecycle": [
+        "Factory first proves sole startup capability finalized/deleted, zero pages/artifacts, specifically issued sole app newPage, about:blank and guard identity/latch. It captures only that actual app page Video capability; no directory lookup, largest/newest file, fixed guessed .webm name, popup/stray selection or bootstrap capability reuse.",
+        "Expose a private observedAppVideoPath() capability on the actual BrowserHandle, or an equivalent bounded factory-to-runtime callback; it calls/caches that exact app Video.path and validates the actual native directory/basename. It is not PageLike/model-visible and no Launch3/Ready3/Result3 schema changes. Use one selected interface, not parallel competing ownership channels.",
+        "Observed child validates the real launch, startup readiness/latch and current signal/deadline, obtains exact path and publishes receipt before the existing paired origin sample and Ready. Verify liveness again after publication and before Ready. Factory may return its app handle without a native file already existing; the private path call must finish within the continuous startup budget.",
+        "Receipt is not published on startup page/failed startup deletion, wrong page/latch, invalid confinement or late factory resolution after stop. Missing path/capability or receipt write failure fails before Ready; dispose actual context and preserve bounded parent tree cleanup. A child whose receipt was committed and then loses Ready still has app ownership, not authority to Execute.",
+        "Parent seals one immutable ownership snapshot at its launch terminal/stop boundary before sending stop/kill; only a fully published matching receipt already visible at that cut can become a recovery candidate. It may cache the same validated receipt after authenticated Ready, but cannot require Ready just to discover an existing pre-Ready owner. On spontaneous child loss, take one bounded snapshot of committed receipt and then quiesce descendants. Late receipt writes/callbacks after sealing are ignored and cleaned, never adopted into an ended launch.",
+        "A captured native path with no committed receipt at the cut is unproven to the parent. An incomplete/late publication does not retroactively establish ownership. Late completion must not recreate registry/scratch after parent cleanup; hold cleanup until bounded writer/tree teardown and reject writes on the aborted/sealed producer. boundedStartup Promise timeout alone does not cancel the underlying filesystem operation.",
+        "After actual ordered close or forced tree quiescence, inspect only the pinned native candidate; no directory fallback even on receipt failure. Existing authenticated child Result3 path, if present, must match that candidate and the actual live app close capability. Conflicting result path is a recording failure, never fallback/rebinding.",
+        "Receipt and native scratch file are never uploaded or copied to journals/logs/manifests as new metadata. Only the actual app native recording may enter the existing videoKey upload. Upload/manifest attempts remain within existing evidence budget before scratch clear; all paths wipe registry/temp/native scratch and release capacity after actual teardown.",
+        "Parent receipt lookup/sealing and file inspection are bounded inside existing stop/cleanup/evidence windows, never a renewed admission/start/runtime budget. A timeout cannot leave a pending ownership writer that later reopens cleared scratch. If bounded quiescence cannot be established, do not stream mutable evidence; preserve existing evidence failure and force/finish cleanup."
+      ],
+      "canonicalDelta": false,
+      "rationale": "Exact approved ownership-only app recording plus existing scratch confinement/partial recovery already require this behavior. A private metadata file/function does not create a new contract requirement, actor, mode or execution authority. No new acceptance amendment is needed to prohibit an already prohibited directory-selected app fallback."
+    },
+    {
+      "id": "V2-PRE-READY-CLASSIFICATION",
+      "title": "Conditional pre-Ready evidence, not a blanket downgrade",
+      "disposition": "APPROVED_ARCHITECTURE",
+      "severity": "HIGH completeness/evidence truthfulness",
+      "observations": [
+        {
+          "path": "studio-runner/src/run/launcher.ts",
+          "line": 986,
+          "anchor": "if (!ready || violation || launchOptions.signal?.aborted)"
+        },
+        {
+          "path": "studio-runner/src/run/launcher.ts",
+          "line": 992,
+          "anchor": "const recording:SessionRecording={path:null,bytes:null,error:null,state:'UNAVAILABLE',partial:false}"
+        },
+        {
+          "path": "studio-runner/src/server/runCoordinator.ts",
+          "line": 711,
+          "anchor": "error instanceof ObservedPreReadyFailure"
+        },
+        {
+          "path": "studio-runner/test/run/observedReplayProtocol.test.ts",
+          "line": 109,
+          "anchor": "The approved sequential startup never admits pre-Ready video"
+        }
+      ],
+      "ruling": "Retain staged no-Ready UNAVAILABLE as a fail-closed correction only where no authenticated app capability exists. Its unconditional application after a real committed app capability would discard genuine native evidence and confuse Ready delivery with recording identity. Approved canonical text has no blanket prohibition on authentic pre-Ready clean-app video.",
+      "phaseMatrix": [
+        {
+          "phase": "No app created; bootstrap/probe/deletion failure or kill while startup context is unresolved",
+          "ownership": "No app receipt; any startup/native/stray file excluded",
+          "evidenceDisposition": "UNAVAILABLE, path/bytes null, partialfalse, zero WebM uploads. Known production/startup faults remain existing outcome/error and diagnostics. A legitimate terminal manifest may still be written.",
+          "executionAndTiming": "No Ready/STARTED/effect; browserStartedAt null, skipped/unstarted timing null. No backend zero-read/release conclusion."
+        },
+        {
+          "phase": "Clean app created, native capability captured, receipt NOT committed/accepted before seal",
+          "ownership": "Child may privately own a page, parent recovery has no accepted selector",
+          "evidenceDisposition": "Parent cannot guess a file; UNAVAILABLE for no proven recoverable app owner. A known malformed/forged receipt is an explicit recording-integrity failure instead. No fabricated PENDING or startup upload.",
+          "executionAndTiming": "No Ready/execution inferred from app creation or capture; no guessed origin."
+        },
+        {
+          "phase": "Clean app receipt committed/accepted, before Ready send",
+          "ownership": "Exact file candidate only, no existence/flush claim",
+          "evidenceDisposition": "After bounded teardown inspect that native file: genuine recoverable playable file PENDING with truthful partial; missing/unplayable known attempted app recorder FAILED, partialfalse. Upload only existing PENDING candidate; no forced UNAVAILABLE solely from absent Ready.",
+          "executionAndTiming": "Launch remains pre-Ready failure/cancel/timeout; no STARTED/browserStartedAt invention. All steps unstarted/skipped; no browser secret/action may run."
+        },
+        {
+          "phase": "Ready sent by child, not received/validated by parent",
+          "ownership": "Same receipt candidate; send/delivery not encoded in receipt",
+          "evidenceDisposition": "Same exact-native inspection/finalization rules as previous row. Ownership cannot prove delivery/acknowledgement loss.",
+          "executionAndTiming": "Parent cannot claim RUNNING/STARTED or origin from receipt. No Execute permission without actual validated Ready. Missing message alone is not ACK_LOST."
+        },
+        {
+          "phase": "Ready received/authenticated, Execute not entered",
+          "ownership": "Exact app owner remains; Ready adds actual existing origin/identity facts only",
+          "evidenceDisposition": "Use normal native finalization/recovery irrespective of whether a step ran. A full blank app recording can be complete; an abruptly ended playable prefix is partial.",
+          "executionAndTiming": "Existing origin may be reported via real STARTED path. No step/use or send effect inferred from receipt/blank video/Ready. Preserve existing backend state/CAS semantics."
+        },
+        {
+          "phase": "Execute transport entered, actual step started but completion missing",
+          "ownership": "App owner unchanged; separate authenticated step receipts only",
+          "evidenceDisposition": "Recovery inspection and partial depend on app recorder close, not step failure/missing FINAL.",
+          "executionAndTiming": "Keep authentic start timing; stop/failure remainder semantics unchanged. Missing effect completion remains sparse unknown; video ownership/playability cannot establish USED/NOT_USED/REFUSED."
+        },
+        {
+          "phase": "Actual step completed; final result may be lost",
+          "ownership": "App owner unchanged; separate actual finished PASS/failure evidence only",
+          "evidenceDisposition": "Same native ownership/inspection/partial rules; never infer entire run outcome from a playable/full file.",
+          "executionAndTiming": "Retain authenticated completed receipts and previously committed USED positives. Receipt adds no completed step, action ordinal, resolution/Vault version or outcome."
+        }
+      ],
+      "missingAndInvalid": "Absent unproven ownership safely means UNAVAILABLE. A receipt exists but violates identity/path/schema/size or contradicts native close path: fail the evidence integrity check with existing recording failure diagnostics/state, zero WebM upload and no fallback; do not silently call malformed ownership a harmless missing result. Actual owned recording attempt whose file never appears or is unplayable stays FAILED under existing evidenceFor.",
+      "canonicalDelta": false,
+      "testRuling": "The two staged virtual pre-ready-result/outside-recording tests have no actual app capability and therefore may continue expecting UNAVAILABLE/no fallback. Their broad comment is not general authority; add separate real app-cap-before-Ready/Ready-loss cases. Preserve prior red logs and explicitly record the narrower interpretation; do not delete the original negative/origin/outside-path oracles."
+    },
+    {
+      "id": "V3-EXACT-FILE-CONFINEMENT",
+      "title": "Strict path, forgery, race and bounded native inspection",
+      "disposition": "APPROVED_ARCHITECTURE",
+      "severity": "HIGH path/privacy; MEDIUM unbounded inspection memory",
+      "observations": [
+        {
+          "path": "studio-runner/src/run/launcher.ts",
+          "line": 370,
+          "anchor": "const head = await readFile(best.path);"
+        },
+        {
+          "path": "studio-runner/src/run/launcher.ts",
+          "line": 1024,
+          "anchor": "if(!file.startsWith(root+sep)"
+        },
+        {
+          "path": "studio-runner/src/run/objectStore.ts",
+          "line": 140,
+          "anchor": "createReadStream(request.body.path)"
+        },
+        {
+          "path": "studio-runner/src/run/childRuntime.ts",
+          "line": 190,
+          "anchor": "async function inspectRecordingFile("
+        },
+        {
+          "path": "studio-runner/src/run/launcher.ts",
+          "line": 313,
+          "anchor": "if (child.exitCode !== null || child.signalCode !== null) return;"
+        }
+      ],
+      "ruling": "Canonical-root prefix and isFile alone are not sufficient to prove app ownership or prevent symlink/reopen races. Bind the exact native basename to the canonical video directory and accepted launch, reject links/escapes and inspect a bounded prefix through a verified descriptor after all writers stop.",
+      "exactChecks": [
+        "Parent canonicalizes/pins existing scratch root and video/private directory identities. Require real videoDir exactly scratch/video, no symlink in root-relative ancestry/private/video/receipt/native final component, and parent-private permissions. Resolve a safe native basename only under that pinned directory; reject absolute paths, traversal, encodings used as path syntax, separators, NUL, alternate stream names and other-run/profile/download/trace/temp/manifest files.",
+        "Capture may precede native-file existence: validate lexical exact directory/name and canonical existing ancestors then; when it exists, open without following links, fstat regular file and reject hardlinked/replaced/outside-owned objects. Do not precreate or copy native file. Stable receipt file identity/content must match the parent accepted snapshot and actual factory close path; invalid identities/duplicates/wrong attempt/admission/parent/process/root are recording failures.",
+        "Reject startup or popup video even if larger/newer/valid WebM. Startup must already be actually deleted before legitimate app registration; native path must come from the exact guard-recognized app capability. No file count, type/name pattern, same scratch root or header substitutes for trusted producer identity.",
+        "Stop/kill and boundedly establish recorder/tree/writer quiescence before native inspection and upload. Child exit, kill() invocation, stable stat or a receipt alone does not prove all encoders/descendants have stopped. No writer may replace the video/private directory or recreate scratch after sealing/clear.",
+        "Open exact candidate with no-follow protections, fstat size as a finite safe integer and read only the existing four-byte WebM header, keeping the existing512-byte threshold. Keep memory bounded independently of native recording size; do not retain readFile(video) contents. Large/10x-size tests must count bounded inspection reads as well as existing zero whole-file uploader reads. Native decoding remains the fixture proof, not a new production decoder or threshold.",
+        "Uploader currently reopens a path for each streamed attempt. Validate/pin identity immediately before every reopen and make the open/stream resistant to final-component replacement; retain immutable/quiesced parent-private ancestry or equivalent directory/descriptor confinement. Merely realpath-check then createReadStream(path) while an adversarial writer is active fails TOCTOU. A private filesystem adapter may enforce no-follow open/fstat plus same-file streamed transfer without changing ObjectStore/public schemas; no whole-file copy or new wire field.",
+        "No arbitrary new recording-size/config mode is introduced. Receipt4096/filename255/prefix4 are private metadata/read bounds; native recording duration, geometry, upload retry/time/disk/confinement limits remain existing policy. Size/header establish only the existing production eligibility predicate; they never certify full decode, duration, finalization, step completion or usage."
+      ],
+      "canonicalDelta": false,
+      "quiescenceLimitation": "Current fork-handle kill returns once the Node fork has exited; that alone does not terminate already orphaned Chromium/encoder descendants. Parent recovery must establish actual writer/process-tree quiescence within existing authority/budgets before selecting or streaming the owned file. This receipt does not repair process teardown by itself. No broader process gate was run or credited here."
+    },
+    {
+      "id": "V4-NATIVE-PARTIAL-OUTCOME",
+      "title": "Preserve native finalization and genuine partial recovery",
+      "disposition": "APPROVED_ARCHITECTURE",
+      "severity": "HIGH truthful evidence",
+      "observations": [
+        {
+          "path": "studio-runner/src/run/launcher.ts",
+          "line": 977,
+          "anchor": "ordered = requestedWhileLive&&await wait"
+        },
+        {
+          "path": "studio-runner/src/run/launcher.ts",
+          "line": 666,
+          "anchor": "if (!input.killed) return input.reported;"
+        },
+        {
+          "path": "studio-runner/src/run/recording.ts",
+          "line": 112,
+          "anchor": "export function partialFor("
+        },
+        {
+          "path": "studio-runner/src/run/recording.ts",
+          "line": 128,
+          "anchor": "export function evidenceFor("
+        },
+        {
+          "path": "studio-runner/src/run/evidenceUpload.ts",
+          "line": 112,
+          "anchor": "const carried = request.partial;"
+        }
+      ],
+      "ruling": "Ownership selects one native file; evaluate actual recorded attempt, native eligibility and bounded orderly app-recorder close independently. After forced tree kill without verified app finalization, a recoverable playable owned prefix is PENDING/partialtrue; no usable owned file remains FAILED for a known attempted app recorder, or UNAVAILABLE when app ownership/attempt is unproven. A timeout/cancel with authentically completed orderly app close is PENDING/partialfalse. No receipt, Ready, file size, step completion or outcome proves orderly close.",
+      "sourceConcern": "performStop currently treats any observed child exit within grace as ordered=true. Preserve ADR17.3/17.7 actual flush requirement: an unexpected crash/invalid-result exit during stop must not turn a salvaged prefix into partialfalse. Only the existing trustworthy production close/result/stop observation may establish bounded orderly app-recorder finalization; if it is unproven, keep conservative partialtrue for playable owned recovery. Receipt carries no clean-close marker. Do not add an IPC status/field to solve this.",
+      "recoveryCases": [
+        "Use exact ownership inspection when final is lost after forced kill or unexpected child loss, not only when killReason is nonnull. Current killed=false/reported UNAVAILABLE early return must not hide an authenticated recoverable owned prefix after a spontaneous exit.",
+        "An authenticated child result remains better actual recorder observation after live close, but its native path must match the app owner. Parent stop facts can correct truncation only with real finalization knowledge; final/parent contradiction must fail evidence truthfully, never select another file.",
+        "Preserve native WebM, exact readable geometry, no rewrite/merge/transcode/native-prefix subtraction. Outcome remains independent; known PASS/FAIL is never replaced because video/receipt/upload failed. Genuine failed/missing recording has partialfalse; actual uploaded prefix retains partialtrue unchanged through STORED and existing projection.",
+        "Before valid Ready, browserStartedAt/timings remain null even if app evidence can be recovered. No receipt timestamp or file mtime rebases video/run origin. After authenticated Ready use the existing single paired origin and actual measured pinned-native calibration.",
+        "Existing immutable videoKey/manifestKey derivation, manifest serialization/redaction and legitimate failure manifest, storage confirmation-before-STORED, bounded streaming retry, existing30-day expiry/authenticated serving and OBS009 masking remain. OBS013 recording scope is unchanged."
+      ],
+      "canonicalDelta": false
+    },
+    {
+      "id": "V5-ACTUAL-PROOF",
+      "title": "Current parked facts and required independent execution",
+      "disposition": "NEEDS_EVIDENCE",
+      "ruling": "The selected receipt is unimplemented. Local source/API evidence and retained native/process reports support the design, not final candidate/runtime ownership proof. No reviewer gate was executed.",
+      "requiredProof": [
+        "Actual pinned full Chromium app Video.path capture before app close/Ready, while file may be absent/in-progress; path identity equals eventual app close path. Distinct startup capability, actual native deletion/absence before app and no diagnostic upload.",
+        "Compiled real parent/child receipt publication and independent seal/identity validation across no-app, captured-but-unpublished, committed-before-Ready, ReadySent/not received, Ready received/no Execute, actual step start, completed PASS/lost FINAL. Drop/delay actual delivery without claiming ACK_LOST from missing delivery alone.",
+        "Actual forced process-tree kill after app registration, with a decodable playable owned native prefix → truthful partialtrue and preserved outcome; ordered-stop flush → partialfalse; no/tiny/malformed owned file → proper FAILED; no app ownership → UNAVAILABLE. Decode the exact selected native bytes with fixture tools; do not create handcrafted production evidence files for these browser claims.",
+        "Controller/parent cancellation, startup/run deadlines and private capture/publication stalls or late callbacks: no Ready/effect/late registry adoption/scratch recreation, original budgets unchanged, actual Chromium/encoder descendants gone and production scratch/capacity released. Explicit PID/encoder labels and source attribution.",
+        "Closed schema/size/duplicate-key/torn/unknown/overwrite/permission/forged-binding/cross-run/cross-attempt/admission/parent-PID/root-inode tests; missing-file-before-Ready case; symlink/hardlink/parent-dir replacement and race-at-reopen negatives. Larger startup/stray video must never win selection; invalid receipt must never trigger fallback.",
+        "Actual prefix/header inspection counted at constant memory for large/10x native files; normal stream retries use the same pinned file and bounded upload budget; no receipt bytes/secret values in journal/manifest/logs and startup WebUI never uploaded. Native timing/initial navigation/failure≤500ms fixture proof retained, vacuous scaled-pixel absence not promoted.",
+        "Corrected real pre-Ready tree harness rerun and final-source default/focused/full Chromium/deployment/internal-image pins and independent runner lane rereview, owned/serialized by root/R. No image/ED05/Node pin waiver. Existing CoreHTTP/PG/Vault/compiled-child joins, all19AC/C6/C7/SEC sink/LOGIN/revocation/default/worker proofs and lifecycle QA remain pending."
+      ]
+    }
+  ],
+  "privateApiImpact": {
+    "owner": "R runner only; root approves exact new scope and holds serialized gates. No review of evolving B/D terminal implementation.",
+    "producerPaths": [
+      "studio-runner/src/run/browser.ts",
+      "studio-runner/src/run/browserFactory.ts",
+      "studio-runner/src/run/childRuntime.ts",
+      "studio-runner/src/run/observedBootstrap.ts"
+    ],
+    "newPrivateModule": "Proposed studio-runner/src/run/appVideoOwnership.ts: closed bounded read/write/validate/seal helpers inside existing allowed Node run boundary. Not implemented here.",
+    "apiProposal": [
+      "BrowserHandle.observedAppVideoPath():Promise<string> on the actual observed trusted handle, backed only by the captured app Video capability. Optional type allowance for unrelated compile/browser-free fakes is not a production observed-mode fallback.",
+      "create/seal/validate an AppVideoOwner record via private helper using existing Launch3/admission/scratch/real process context; no changes to serialized Launch3/Ready3/Result3/RunJob or configuration.",
+      "observeOwnedAppRecording accepted parent snapshot→bounded actual file inspection. Observed settleRecording receives this private owner instead of scratch-directory selection. Live reported paths must equal the owner.",
+      "ObservedPreReadyFailure keeps its existing recording property and current coordinator terminal flow; conditional authentic app evidence can use it without new error/status/wire fields."
+    ],
+    "consumerPaths": [
+      "studio-runner/src/run/launcher.ts",
+      "studio-runner/src/run/recording.ts",
+      "studio-runner/src/server/runCoordinator.ts",
+      "studio-runner/src/run/evidenceUpload.ts",
+      "studio-runner/src/run/objectStore.ts",
+      "studio-runner/src/run/manifest.ts",
+      "studio-runner/src/server/scratch.ts"
+    ],
+    "mechanicalIdentityPaths": [
+      "studio-runner/scripts/browser-provenance.mjs",
+      "studio-runner/scripts/write-runtime-versions.mjs",
+      "studio-runner/src/compat/runtime-versions.ts",
+      "studio-runner/README.md",
+      "studio-runner/test/run/confinement.test.ts"
+    ],
+    "identityRule": "Regenerate actual owned compiled launcher/source/build/provenance hashes after root-authorized fix; bind exact final bytes and applicable private scratch inventory/static checks. Keep existing executor observed-4/catalog observed-replay-3/closed tuple. Do not silently reuse old byte identities or claim actual internal/production image from controlled local catalog.",
+    "minimality": "One receipt plus bounded temporary publication artifacts in one exclusive private directory; no second IPC/path selector, random token env injection, additional context/page/mode, synthetic native artifact, file-list scan, HMAC that purports to defeat a compromised trusted child, or durable recovery database. Equivalent existing private capability is acceptable only if actual exact owner survives in parent across loss and all same constraints are proven; none is demonstrated in current parent recovery source."
+  },
+  "testImpact": {
+    "existingPaths": [
+      "studio-runner/test/run/observedReplayProtocol.test.ts",
+      "studio-runner/test/run/observedChildRuntime.test.ts",
+      "studio-runner/test/run/observedBootstrap.test.ts",
+      "studio-runner/test/run/recording.test.ts",
+      "studio-runner/test/run/manifest.test.ts",
+      "studio-runner/test/run/confinement.test.ts",
+      "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts",
+      "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts"
+    ],
+    "proposedNewUnit": "studio-runner/test/run/appVideoOwnership.test.ts: closed parsing/identity/atomic publication/seal/path-bound/race tests; no virtual native-browser proof",
+    "preservation": "Retain actual native video and startup capability oracles, two no-owner pre-Ready negatives, every C6 native/injected/supplementary/all-sink assertion, current native partial/complete/no-file/error/upload/outcome tests and original thresholds/counts/skips. Add owned pre-Ready/forced-loss cases; narrow the misleading universal pre-Ready comment without fabricating supersession of a canonical prohibition. Keep all historical red archives, including incorrect object-store-empty harness assertion, explicitly corrected only to zero WebM uploads while a legitimate manifest remains."
+  },
+  "canonicalDisposition": {
+    "requirementDelta": false,
+    "proposedCanonicalAmendments": [],
+    "beforeAfter": "Not applicable: exact applied A-LIFECYCLE/A-NATIVE-VIDEO/AC11/C3/AC19 plus ADR17 already require exact app ownership and truthful native partial state independently of outcome. The receipt is a private implementation mechanism. No new wire property/status/config mode/const/canonical wording is proposed or applied. A policy intentionally forbidding every authentic pre-Ready app video or marking owned attempted-missing recording UNAVAILABLE would change preserved requirements and would require a separate exact Aria proposal and independent Pax; it is not approved here.",
+    "freshPaxTrigger": "Any root/owner request to broaden trust, change native evidence/partial semantics, exclude genuine owned app evidence solely by Ready phase, add fields/modes/status/authority or alter the twelve applied constraints requires fresh independent PO, not an inference from this approval."
+  },
+  "retainedEvidence": {
+    "park": {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-review-park.json",
+      "sha256": "a09fdf9c8bc9d1ede87b383631693e86b3a4803fcc05040d85c8b000b8018c80",
+      "ownedAggregate": "56560359473bdbecad5e49b5da25e3250ad4eb670f944575142704d300d1803b",
+      "sourceAggregate": "5797bb253b89d45f4cadb51d1d9e40a550efc659a0c131b2ccd2e29332e09434",
+      "distAggregate": "b2c37f03ffff971f21fef5f9a2f625cfc60cd69f681d21e189dd1954c1be09ea",
+      "attribution": "Owner parked snapshot read only. Type/lint/build/localpins16 exit0, real image NOT_ASSERTED; no new receipt or final full coverage/native loss proof. No live R process reported; reviewer did not run process/gates."
+    },
+    "native": {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-review-park/runner-bootstrap-native-video.json",
+      "attribution": "Retained owner actual compiled local full Chromium/native decoding report; not reviewer execution or deployed image/staging proof.",
+      "measurements": [
+        {
+          "stepIndex": 0,
+          "reportedMs": 2.8468330000000606,
+          "nativeFrameMs": 0,
+          "absoluteDifferenceMs": 2.8468330000000606
+        },
+        {
+          "stepIndex": 1,
+          "reportedMs": 25.087083000000007,
+          "nativeFrameMs": 80,
+          "absoluteDifferenceMs": 54.91291699999999
+        }
+      ],
+      "correction": "The exact archived failure measurement is approximately54.9ms, rather than the user shorthand approximately59ms. Both are within existing500ms target; no staging/general app calibration claim.",
+      "absenceLimit": "prefixFrameCount0: decodedPrefixWhite predicate is vacuous and report explicitly does not independently establish diagnostic-frame absence. Startup capability/deletion is a separate actual oracle; neither substitutes for receipt/kill recovery."
+    },
+    "nativeCapabilities": {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-review-park/runner-bootstrap-capability-oracle.json",
+      "attribution": "Retained actual same sandboxed full-Chromium context/distinct startup and app capabilities, zero pages/artifacts before app, startupNativeDeleteCount1/startupArtifactAbsent and sole app at Ready. Current test compares app path after browser.close; it does not execute receipt publication or prove app Video.path captured before Ready/file existence."
+    },
+    "localPlaywrightSource": {
+      "path": "studio-runner/node_modules/playwright-core/lib/coreBundle.js",
+      "line": 61181,
+      "attribution": "Installed primary implementation inspected, not executed. Video.path returns native artifact initializer absolutePath and does not await artifact finalization. Supports bounded early-path design; exact pinned browser/factory early capture still needs actual proof. No external search/contact was made."
+    },
+    "processRed": {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-red/obs007-r-bootstrap-process-tree2.log",
+      "attribution": "Retained real compiled tree run is RED exit1. Production log explicitly records UNAVAILABLE/partialfalse/uploadAttempts0 and terminal delivery/capacity drain. Test source orders actual descendant suspension/kill and checks PIDs/scratch/capacity before failing on expected empty object store; source now corrects only zero .webm files. No overall test PASS, corrected rerun or precise encoder-PID label proof is credited.",
+      "correctedHarness": "Current observed-bootstrap-process-tree.test.ts changed object-store assertion to zero WebM files; owner/user says rerun UNRUN. Legitimate manifest is compatible with no app video."
+    },
+    "defaultRed": {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-red/obs007-r-bootstrap-default1.log",
+      "counts": {
+        "passed": 1681,
+        "failed": 4,
+        "skipped": 29,
+        "errors": 1
+      },
+      "attribution": "Historical actual RED retained; two preReady expectations plus static async shape/file-copy import cases. Later local gate16/focused oracles are separately scoped; no final whole/default/full coverage PASS inferred."
+    },
+    "rootAndData": "User attributes root143 pure/PG cases0fail/error/skip/drift, D41 names and B6 new resolver/PG cases. Not re-executed or independently audited here; B/D evolving code is explicitly outside this bounded runner disposition."
+  },
+  "sourceBinding": {
+    "capturedAt": "2026-10-10T10:34:20.254590+00:00",
+    "sha256": {
+      "AGENTS.md": "a3e2fe4c0bebc01d91b0fa0b062c49d031e203ab2a522ee9b04d9f06df797198",
+      ".codex/skills/aiox-architect/SKILL.md": "376153f250f0d4142f19fe0835e43cc2157072ee881db6daf33ca033efab3962",
+      ".aiox-core/development/agents/architect.md": "c45b1e71af39b5da34a832dcc3d1c9b41b6270de61f79d4bada3c27b46be19df",
+      ".aiox-core/development/tasks/architect-analyze-impact.md": "73ad65e2263dac7a5a3aa64736d2c803c8a532c269b83fb98a61cb5729b689db",
+      ".aiox-core/constitution.md": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+      ".aiox/waves/STUDIO-OBS-SINGLE-PATH/execution-audit.json": "ee5be271b4761aecbe4a42d5d417e7f2230f562bd9063ded2eae6d17afd2b2ae",
+      "docs/stories/STUDIO-OBSERVED/README.md": "ac4f4364fdad5aabcc6eee6c93dba4a1d970d96bff3fa53b51f5063d839cb673",
+      "docs/architecture/ADR-SC-005-single-path-observed-authoring.md": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4",
+      "docs/architecture/ADR-002-internal-contract-surface.md": "e75b82a83cb9b2e40fb4c31e6178ab38bab87a883f978cdf7945c72b97d2bca6",
+      "docs/architecture/studio-execution.md": "8d499bd8928bb59681f5426e9807b6af9ea5abf4df1fe6ecf3293abab2a125e6",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "826e6fbe22db4994424406bef63cef0f682f0855502e36ea07b8bdd0965e32ae",
+      "docs/specs/studio-observed-authoring/secret-login-design.md": "d78f249319ffebc0cad9a423d81cca2b21907a7b39462e3fcbea31960d8f51b9",
+      "docs/specs/studio-observed-authoring/secret-login-security-review.md": "c5ce3be4543ae51618455b14909caabaf9cc46b9dd7fce0a2ff57516394cde49",
+      "studio-runner/src/run/recording.ts": "0a3f3f29feda2d4f2611a1070bd7f03b253a51b26314985925e9725ac531b3bb",
+      "studio-runner/src/run/evidenceUpload.ts": "62c49e965e8101ceabaeb9c4de694c12e4b1e8368d119982927f988acea0508d",
+      "studio-runner/src/run/manifest.ts": "b885e4e4717e0d221fc134c9bf16ba991e97ccec601bf146abe9a9cadc3dc03a",
+      "studio-runner/src/run/objectStore.ts": "d44e537e75ac158264573b9ee958c7d24531557b4e3cc3d56c3e60e405fd99d9",
+      "studio-runner/src/run/tree.ts": "4a9eb8ce16dd46ce0a1aea3b0f27c9b1cfe3814936a2f0aef956c8e061e663ce",
+      "studio-runner/src/run/child.ts": "d5b6fade1ec55e7e745e691a9e34a7be64be4a4544ee32ec230f4033af548888",
+      "studio-runner/src/run/timeline.ts": "7d7e0bfd91065b61f426b6da42830568f674427bbfbba428524a6d31d5619de3",
+      "studio-runner/src/server/scratch.ts": "54366f3c432578e94e2eb91c1376b428cbef9088a9608be66adb3632ea11aec4",
+      "studio-runner/node_modules/playwright-core/lib/coreBundle.js": "549070af3acabb3efcc4f55bfe6210f9f7c2fcf633cf7eaa59bfe60719969171",
+      "studio-runner/node_modules/playwright-core/package.json": "f061c58427e47e843e26d201f0a57076c734e57c734ecbbd87d4a23b7a20db9b",
+      "studio-runner/test/run/recording.test.ts": "1c16d79969a0c0a02e8d4c750394a6ded12dcceb2f2d951b3eecb671e019cd56",
+      "studio-runner/test/run/manifest.test.ts": "8a08db09d447d7d8edeab03118ed6ccd8f9623ca740796cd0fbdc4c05dd108b0",
+      "studio-runner/test/run/confinement.test.ts": "7cb79fa0785153292928c801b731c48f022f82dd41f792d2ff5c8d35921727ab",
+      "studio-runner/Dockerfile": "5246d243ff1706ac8b3f818d71d56bce2a3494be154426736829bbcb25a084cb",
+      "studio-runner/README.md": "c17b3841861525b8c7146bbb5bbbef542606c6ca6ceba9223613fcf5d27c7adb",
+      "studio-runner/fixtures/observed-reference/accepted-observed-choice.json": "5bb10f85850617608e5b9a4edee78af2b19a8baccde18190dc847173fc53dacb",
+      "studio-runner/scripts/browser-provenance.d.mts": "a56ea0aaedf24021be59f187ba3d07ee7ee32c002cdf19da8278b91289e90901",
+      "studio-runner/scripts/browser-provenance.mjs": "e55e2916f70fb453c0a8039de9ee739596c53be8d8a44bcfc0cc65b19c6417fb",
+      "studio-runner/scripts/check-pins.mjs": "63a15ec6c29cc8c6f3da1b9d79718802f7de1e49bc71bee9bb57d7fd6cfbd04a",
+      "studio-runner/scripts/write-runtime-versions.mjs": "44043491492139560b6e5c7ac4f95a04a25ccd3e007d8ef0b04de692e2b23ad9",
+      "studio-runner/src/compat/runtime-versions.ts": "ab1d7176f3480de872b4b85d474a99d48f03c744c9843234632853be42164616",
+      "studio-runner/src/reporting/snapshot.ts": "57d828418cf4d46fcbf485d1e8bd9571af784fed0e4ce1265ff77d9a17f1654c",
+      "studio-runner/src/run/browser.ts": "bba00c8d19cfd98d0dfceb1c71d0595ec33456769d5f4b4f48b453ab2c707a37",
+      "studio-runner/src/run/browserFactory.ts": "0afdb2d482436b211e8c0d43db35ca170d041fd116e9237c4b08e0a5d3a97355",
+      "studio-runner/src/run/childRuntime.ts": "0a5fd2a1dd15a151106b904bcf0ecb936c78e4f7eaef4fb1e8c6c28a42a2943e",
+      "studio-runner/src/run/guidedBrowser.ts": "e22ec61544c212696e84d472d6b2f0e93e95cfcb5fc19cdb97d7f99d8fa3e3e4",
+      "studio-runner/src/run/guidedMain.ts": "5148b8915e48af7718ad5986c8053d7ba5e66c40bbe22e4487cb116708a94a2a",
+      "studio-runner/src/run/launcher.ts": "7dbc9a12cb6d8cb2ec5eea61772e0a46c1225b5f1f4c285f228178dc989d89ee",
+      "studio-runner/src/run/observedBootstrap.ts": "bbb3436035c9fcbe2fd787412ccb2a039dae3152a902dd4d1f3bbeeb533728d5",
+      "studio-runner/src/run/scratchLayout.ts": "1a3760c6baab12999b5705fdfc7c595d702e1cdea893cbe9c3be5dbbea0cbc48",
+      "studio-runner/src/run/secretUse.ts": "a4a2d79500d2159bdcad4be2bbff9102c6e02e696e66bb81e95c75f24c506e8b",
+      "studio-runner/src/server/runCoordinator.ts": "cc729e4abf48dc9ef8831b02e8f07edc72002a522cdf75f30b4ffc84067c161a",
+      "studio-runner/test/browser-provenance.test.ts": "f0818194c932510e89a75621a1ca422ad012e43e85756181f12a4bb24d9733ce",
+      "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts": "c3bde91a164c4977837bf47b7b9237dcfc926b264ef08c6ee6a937a0462e8aa7",
+      "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts": "8674f9b60525175101aae81c8c4f66d74e360b19778890f2ba7de23ff2c5287d",
+      "studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts": "63b2fb473f75b0b8a38d29f2b2b4c1ef48ed7a78c73d603ded797eb73bc991b1",
+      "studio-runner/test/reporting/observedProgressUse.test.ts": "c5e417e40efd7f56253dbee38929ce804e7e36000048c85354f97c6de179896f",
+      "studio-runner/test/run/observedBootstrap.test.ts": "07d9a14d9752bb698cbdacdaeb18872f64450dfd5ce10fc00d95b39122273675",
+      "studio-runner/test/run/observedChildRuntime.test.ts": "8ccd14411dc0300d1d083b83c89f9489aafe1666c08e4398f036ec40f6bf56fb",
+      "studio-runner/test/run/observedReplayProtocol.test.ts": "2573ed301bc51cffc5835b780db653ec2e4c16baee16cca03b117f03e0ffa269",
+      "studio-runner/test/runtime-versions.test.ts": "f41fd53beb03e78a0d10356fb3bf24326bb3e789f4c950842977a3b4bff30f22",
+      "docs/qa/evidence/STUDIO-OBS-007/t3-technical-peer.json": "82475eee0b4b6bfa31b62ad24caae63d3a9780ad34203430bdfb9dfa3d614731",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-architecture-disposition.json": "c886057dbc31bb427378e29393ba29a8f20d27470bcdbf8ae7846628a62c3edd",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-po-architecture-revalidation.json": "9c6ff6de3e2f6ff9f0925a2efc9b84b91880ef4c144b013e634c7bc2f71ea2b5",
+      "docs/qa/evidence/STUDIO-OBS-007/architecture-application/receipt.json": "008fd8398a41c36fd906c4a652ae510f619ab5ec74d5e7f30825a69c146e9922",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-bootstrap-closure-disposition.json": "65d90f73505d80506ee43a8d88ea9936b962c80ce3e678367da55c1c701017da",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-po-bootstrap-closure-revalidation.json": "9b0229944a487677f04a6ac0c135ad78ea9289c3829add3dcce27640f845b68f",
+      "docs/qa/evidence/STUDIO-OBS-007/bootstrap-closure-application/receipt.json": "8603358fa7852b308dc0b341ad170c5b95bd7217103521abcbcd71bf1867b56a",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-review-park.json": "a09fdf9c8bc9d1ede87b383631693e86b3a4803fcc05040d85c8b000b8018c80",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-review-park/runner-bootstrap-native-video.json": "30331f0a3dcb6f8326a0270a7645792825ba2fcc427b7c40790ed6ce1efc1e95",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-review-park/runner-bootstrap-capability-oracle.json": "083dda0f4dce0b3e880fd79737caeed91269c1819ce768857dec59394e9853cd",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-red/scope.json": "537f542baec0de38baed3af86475e39ce6a9a06555273b50f91028cebf779245",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-red/obs007-r-bootstrap-default1.log": "a4681e5c8e62d7d773975d9b1a1e38f902e68ba6d8b4305084c5b092a6b03616",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-red/obs007-r-bootstrap-process-tree2.log": "c292e300cffc03f99d30108f035692dd0569ee5a0ac36e8bbe4bdd06164cd992"
+    },
+    "canonicalAuthorityChecks": [
+      {
+        "id": "A-AC11",
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "exactAfterPresent": true,
+        "line": 54,
+        "method": "Exact approved fragment once in actual corresponding scope; lifecycle/native replacement changes historical line prefix."
+      },
+      {
+        "id": "A-BROWSER-ROW",
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "exactAfterPresent": true,
+        "line": 104,
+        "method": "Exact approved fragment once in actual corresponding scope; lifecycle/native replacement changes historical line prefix."
+      },
+      {
+        "id": "A-C3",
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "exactAfterPresent": true,
+        "line": 201,
+        "method": "Exact approved fragment once in actual corresponding scope; lifecycle/native replacement changes historical line prefix."
+      },
+      {
+        "id": "A-LIFECYCLE",
+        "path": "docs/architecture/studio-execution.md",
+        "exactAfterPresent": true,
+        "line": 162,
+        "method": "Exact approved fragment once in actual corresponding scope; lifecycle/native replacement changes historical line prefix."
+      },
+      {
+        "id": "A-NATIVE-VIDEO",
+        "path": "docs/architecture/studio-execution.md",
+        "exactAfterPresent": true,
+        "line": 204,
+        "method": "Exact approved fragment once in actual corresponding scope; lifecycle/native replacement changes historical line prefix."
+      },
+      {
+        "id": "B-AC14-COUNT",
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "exactAfterPresent": true,
+        "line": 62,
+        "method": "Exact approved fragment once in actual corresponding scope; lifecycle/native replacement changes historical line prefix."
+      },
+      {
+        "id": "B-AC14-TERMINAL",
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "exactAfterPresent": true,
+        "line": 62,
+        "method": "Exact approved fragment once in actual corresponding scope; lifecycle/native replacement changes historical line prefix."
+      },
+      {
+        "id": "B-DESIGN41-COUNT",
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "exactAfterPresent": true,
+        "line": 108,
+        "method": "Exact approved fragment once in actual corresponding scope; lifecycle/native replacement changes historical line prefix."
+      },
+      {
+        "id": "B-DESIGN41-TERMINAL",
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "exactAfterPresent": true,
+        "line": 108,
+        "method": "Exact approved fragment once in actual corresponding scope; lifecycle/native replacement changes historical line prefix."
+      },
+      {
+        "id": "B-HISTORICAL-MAPPING",
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "exactAfterPresent": true,
+        "line": 108,
+        "method": "Exact approved fragment once in actual corresponding scope; lifecycle/native replacement changes historical line prefix."
+      },
+      {
+        "id": "B-C11",
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "exactAfterPresent": true,
+        "line": 209,
+        "method": "Exact approved fragment once in actual corresponding scope; lifecycle/native replacement changes historical line prefix."
+      },
+      {
+        "id": "AB-AC19",
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "exactAfterPresent": true,
+        "line": 78,
+        "method": "Exact approved fragment once in actual corresponding scope; lifecycle/native replacement changes historical line prefix."
+      }
+    ],
+    "parkChecks": {
+      "owned": {
+        "entries": 28,
+        "drift": [],
+        "aggregateSortedJson": "56560359473bdbecad5e49b5da25e3250ad4eb670f944575142704d300d1803b",
+        "retainedAggregate": "56560359473bdbecad5e49b5da25e3250ad4eb670f944575142704d300d1803b",
+        "aggregateMatches": true
+      },
+      "source": {
+        "entries": 248,
+        "drift": [],
+        "aggregateSortedJson": "5797bb253b89d45f4cadb51d1d9e40a550efc659a0c131b2ccd2e29332e09434",
+        "retainedAggregate": "5797bb253b89d45f4cadb51d1d9e40a550efc659a0c131b2ccd2e29332e09434",
+        "aggregateMatches": true
+      },
+      "dist": {
+        "entries": 271,
+        "drift": [],
+        "aggregateSortedJson": "b2c37f03ffff971f21fef5f9a2f625cfc60cd69f681d21e189dd1954c1be09ea",
+        "retainedAggregate": "b2c37f03ffff971f21fef5f9a2f625cfc60cd69f681d21e189dd1954c1be09ea",
+        "aggregateMatches": true
+      },
+      "retainedCopies": {
+        "entries": 28,
+        "drift": []
+      }
+    },
+    "endCapturedAt": "2026-10-10T10:41:16.805076+00:00",
+    "endSha256": {
+      "AGENTS.md": "a3e2fe4c0bebc01d91b0fa0b062c49d031e203ab2a522ee9b04d9f06df797198",
+      ".codex/skills/aiox-architect/SKILL.md": "376153f250f0d4142f19fe0835e43cc2157072ee881db6daf33ca033efab3962",
+      ".aiox-core/development/agents/architect.md": "c45b1e71af39b5da34a832dcc3d1c9b41b6270de61f79d4bada3c27b46be19df",
+      ".aiox-core/development/tasks/architect-analyze-impact.md": "73ad65e2263dac7a5a3aa64736d2c803c8a532c269b83fb98a61cb5729b689db",
+      ".aiox-core/constitution.md": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+      ".aiox/waves/STUDIO-OBS-SINGLE-PATH/execution-audit.json": "ee5be271b4761aecbe4a42d5d417e7f2230f562bd9063ded2eae6d17afd2b2ae",
+      "docs/stories/STUDIO-OBSERVED/README.md": "ac4f4364fdad5aabcc6eee6c93dba4a1d970d96bff3fa53b51f5063d839cb673",
+      "docs/architecture/ADR-SC-005-single-path-observed-authoring.md": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4",
+      "docs/architecture/ADR-002-internal-contract-surface.md": "e75b82a83cb9b2e40fb4c31e6178ab38bab87a883f978cdf7945c72b97d2bca6",
+      "docs/architecture/studio-execution.md": "8d499bd8928bb59681f5426e9807b6af9ea5abf4df1fe6ecf3293abab2a125e6",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "826e6fbe22db4994424406bef63cef0f682f0855502e36ea07b8bdd0965e32ae",
+      "docs/specs/studio-observed-authoring/secret-login-design.md": "d78f249319ffebc0cad9a423d81cca2b21907a7b39462e3fcbea31960d8f51b9",
+      "docs/specs/studio-observed-authoring/secret-login-security-review.md": "c5ce3be4543ae51618455b14909caabaf9cc46b9dd7fce0a2ff57516394cde49",
+      "studio-runner/src/run/recording.ts": "0a3f3f29feda2d4f2611a1070bd7f03b253a51b26314985925e9725ac531b3bb",
+      "studio-runner/src/run/evidenceUpload.ts": "62c49e965e8101ceabaeb9c4de694c12e4b1e8368d119982927f988acea0508d",
+      "studio-runner/src/run/manifest.ts": "b885e4e4717e0d221fc134c9bf16ba991e97ccec601bf146abe9a9cadc3dc03a",
+      "studio-runner/src/run/objectStore.ts": "d44e537e75ac158264573b9ee958c7d24531557b4e3cc3d56c3e60e405fd99d9",
+      "studio-runner/src/run/tree.ts": "4a9eb8ce16dd46ce0a1aea3b0f27c9b1cfe3814936a2f0aef956c8e061e663ce",
+      "studio-runner/src/run/child.ts": "d5b6fade1ec55e7e745e691a9e34a7be64be4a4544ee32ec230f4033af548888",
+      "studio-runner/src/run/timeline.ts": "7d7e0bfd91065b61f426b6da42830568f674427bbfbba428524a6d31d5619de3",
+      "studio-runner/src/server/scratch.ts": "54366f3c432578e94e2eb91c1376b428cbef9088a9608be66adb3632ea11aec4",
+      "studio-runner/node_modules/playwright-core/lib/coreBundle.js": "549070af3acabb3efcc4f55bfe6210f9f7c2fcf633cf7eaa59bfe60719969171",
+      "studio-runner/node_modules/playwright-core/package.json": "f061c58427e47e843e26d201f0a57076c734e57c734ecbbd87d4a23b7a20db9b",
+      "studio-runner/test/run/recording.test.ts": "1c16d79969a0c0a02e8d4c750394a6ded12dcceb2f2d951b3eecb671e019cd56",
+      "studio-runner/test/run/manifest.test.ts": "8a08db09d447d7d8edeab03118ed6ccd8f9623ca740796cd0fbdc4c05dd108b0",
+      "studio-runner/test/run/confinement.test.ts": "7cb79fa0785153292928c801b731c48f022f82dd41f792d2ff5c8d35921727ab",
+      "studio-runner/Dockerfile": "5246d243ff1706ac8b3f818d71d56bce2a3494be154426736829bbcb25a084cb",
+      "studio-runner/README.md": "c17b3841861525b8c7146bbb5bbbef542606c6ca6ceba9223613fcf5d27c7adb",
+      "studio-runner/fixtures/observed-reference/accepted-observed-choice.json": "5bb10f85850617608e5b9a4edee78af2b19a8baccde18190dc847173fc53dacb",
+      "studio-runner/scripts/browser-provenance.d.mts": "a56ea0aaedf24021be59f187ba3d07ee7ee32c002cdf19da8278b91289e90901",
+      "studio-runner/scripts/browser-provenance.mjs": "e55e2916f70fb453c0a8039de9ee739596c53be8d8a44bcfc0cc65b19c6417fb",
+      "studio-runner/scripts/check-pins.mjs": "63a15ec6c29cc8c6f3da1b9d79718802f7de1e49bc71bee9bb57d7fd6cfbd04a",
+      "studio-runner/scripts/write-runtime-versions.mjs": "44043491492139560b6e5c7ac4f95a04a25ccd3e007d8ef0b04de692e2b23ad9",
+      "studio-runner/src/compat/runtime-versions.ts": "ab1d7176f3480de872b4b85d474a99d48f03c744c9843234632853be42164616",
+      "studio-runner/src/reporting/snapshot.ts": "57d828418cf4d46fcbf485d1e8bd9571af784fed0e4ce1265ff77d9a17f1654c",
+      "studio-runner/src/run/browser.ts": "bba00c8d19cfd98d0dfceb1c71d0595ec33456769d5f4b4f48b453ab2c707a37",
+      "studio-runner/src/run/browserFactory.ts": "0afdb2d482436b211e8c0d43db35ca170d041fd116e9237c4b08e0a5d3a97355",
+      "studio-runner/src/run/childRuntime.ts": "0a5fd2a1dd15a151106b904bcf0ecb936c78e4f7eaef4fb1e8c6c28a42a2943e",
+      "studio-runner/src/run/guidedBrowser.ts": "e22ec61544c212696e84d472d6b2f0e93e95cfcb5fc19cdb97d7f99d8fa3e3e4",
+      "studio-runner/src/run/guidedMain.ts": "5148b8915e48af7718ad5986c8053d7ba5e66c40bbe22e4487cb116708a94a2a",
+      "studio-runner/src/run/launcher.ts": "7dbc9a12cb6d8cb2ec5eea61772e0a46c1225b5f1f4c285f228178dc989d89ee",
+      "studio-runner/src/run/observedBootstrap.ts": "bbb3436035c9fcbe2fd787412ccb2a039dae3152a902dd4d1f3bbeeb533728d5",
+      "studio-runner/src/run/scratchLayout.ts": "1a3760c6baab12999b5705fdfc7c595d702e1cdea893cbe9c3be5dbbea0cbc48",
+      "studio-runner/src/run/secretUse.ts": "a4a2d79500d2159bdcad4be2bbff9102c6e02e696e66bb81e95c75f24c506e8b",
+      "studio-runner/src/server/runCoordinator.ts": "cc729e4abf48dc9ef8831b02e8f07edc72002a522cdf75f30b4ffc84067c161a",
+      "studio-runner/test/browser-provenance.test.ts": "f0818194c932510e89a75621a1ca422ad012e43e85756181f12a4bb24d9733ce",
+      "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts": "c3bde91a164c4977837bf47b7b9237dcfc926b264ef08c6ee6a937a0462e8aa7",
+      "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts": "8674f9b60525175101aae81c8c4f66d74e360b19778890f2ba7de23ff2c5287d",
+      "studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts": "63b2fb473f75b0b8a38d29f2b2b4c1ef48ed7a78c73d603ded797eb73bc991b1",
+      "studio-runner/test/reporting/observedProgressUse.test.ts": "c5e417e40efd7f56253dbee38929ce804e7e36000048c85354f97c6de179896f",
+      "studio-runner/test/run/observedBootstrap.test.ts": "07d9a14d9752bb698cbdacdaeb18872f64450dfd5ce10fc00d95b39122273675",
+      "studio-runner/test/run/observedChildRuntime.test.ts": "8ccd14411dc0300d1d083b83c89f9489aafe1666c08e4398f036ec40f6bf56fb",
+      "studio-runner/test/run/observedReplayProtocol.test.ts": "2573ed301bc51cffc5835b780db653ec2e4c16baee16cca03b117f03e0ffa269",
+      "studio-runner/test/runtime-versions.test.ts": "f41fd53beb03e78a0d10356fb3bf24326bb3e789f4c950842977a3b4bff30f22",
+      "docs/qa/evidence/STUDIO-OBS-007/t3-technical-peer.json": "82475eee0b4b6bfa31b62ad24caae63d3a9780ad34203430bdfb9dfa3d614731",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-architecture-disposition.json": "c886057dbc31bb427378e29393ba29a8f20d27470bcdbf8ae7846628a62c3edd",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-po-architecture-revalidation.json": "9c6ff6de3e2f6ff9f0925a2efc9b84b91880ef4c144b013e634c7bc2f71ea2b5",
+      "docs/qa/evidence/STUDIO-OBS-007/architecture-application/receipt.json": "008fd8398a41c36fd906c4a652ae510f619ab5ec74d5e7f30825a69c146e9922",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-bootstrap-closure-disposition.json": "65d90f73505d80506ee43a8d88ea9936b962c80ce3e678367da55c1c701017da",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-po-bootstrap-closure-revalidation.json": "9b0229944a487677f04a6ac0c135ad78ea9289c3829add3dcce27640f845b68f",
+      "docs/qa/evidence/STUDIO-OBS-007/bootstrap-closure-application/receipt.json": "8603358fa7852b308dc0b341ad170c5b95bd7217103521abcbcd71bf1867b56a",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-review-park.json": "a09fdf9c8bc9d1ede87b383631693e86b3a4803fcc05040d85c8b000b8018c80",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-review-park/runner-bootstrap-native-video.json": "30331f0a3dcb6f8326a0270a7645792825ba2fcc427b7c40790ed6ce1efc1e95",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-review-park/runner-bootstrap-capability-oracle.json": "083dda0f4dce0b3e880fd79737caeed91269c1819ce768857dec59394e9853cd",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-red/scope.json": "537f542baec0de38baed3af86475e39ce6a9a06555273b50f91028cebf779245",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-red/obs007-r-bootstrap-default1.log": "a4681e5c8e62d7d773975d9b1a1e38f902e68ba6d8b4305084c5b092a6b03616",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-red/obs007-r-bootstrap-process-tree2.log": "c292e300cffc03f99d30108f035692dd0569ee5a0ac36e8bbe4bdd06164cd992"
+    },
+    "changedDuringReview": []
+  },
+  "reviewerVerification": {
+    "executed": [
+      "Read-only bounded source/canonical/primary local library/evidence inspection",
+      "SHA256 comparison:28 owned files+copies,248 source,271dist and3 sorted-JSON aggregate hashes",
+      "Exact twelve Pax after-fragment scope verification",
+      "Requested report JSON creation and source/hash validation"
+    ],
+    "notExecuted": [
+      "Gradle",
+      "runner or browser gates",
+      "native decode/probe",
+      "process tree kill",
+      "CoreHTTP/PG/Vault join",
+      "image/deployment/staging/manual gates",
+      "QA/lifecycle/phase verify"
+    ],
+    "reportValidation": {
+      "jsonParse": "PASS for report integrity only",
+      "itemLabels": "PASS",
+      "twelveApprovedFragmentsVerified": true,
+      "parkedBindingsVerified": true,
+      "changedSinceEndSnapshot": [],
+      "canonicalAndPriorReportsUnchanged": true,
+      "qaOrRuntimeVerdict": false
+    }
+  },
+  "openList": [
+    "Root explicit release of this private receipt/API/consumer scope; R stays parked until then.",
+    "Actual early native capture, strict closed receipt, seal/late write and exact-file stream/TOCTOU proof.",
+    "Real compiled app-owned pre-Ready/Ready-loss/step/lost-final process kill and native partial recovery, corrected no-app tree rerun.",
+    "Final-source default/full coverage/focused/Chromium/deployment/local internal-image gate and independent runner re-review.",
+    "All19AC/C6/C7/SEC/LOGIN, CoreHTTP/PG/countedVault/compiled-child/all-sink9-flow joins, queued revocation/default/worker/crash proof, lane peers and lifecycle QA.",
+    "External gateway/staging/Vault/SIEM/benchmark/human pilot/production image/release prerequisites and remaining nine stories stay pending."
+  ],
+  "handoff": [
+    "Root may release only the exact described private receipt/app capability/seal/observed recovery implementation and corresponding bounded tests under existing canonical authority. No release is performed here.",
+    "R replaces observed largest-directory fallback, keeps conditional no-owner pre-Ready UNAVAILABLE and preserves owned native partial evidence even without Ready; no new job/IPC/public field or authority.",
+    "Owner returns final source/provenance-bound actual receipt/native/process and full serialized gate evidence for independent re-review; current staged source has no peer/QA PASS."
+  ],
+  "constraints": {
+    "onlyWorkspaceWrite": "docs/qa/evidence/STUDIO-OBS-007/t3-video-ownership-disposition.json",
+    "noSourceTestsSchemaPinsCanonicalStatusTaskEdits": true,
+    "noSharedGatesModelsGoalsPhaseCommitPushDeployScheduleContactSecretsEnvDump": true,
+    "backendDataCodeReviewed": false,
+    "wholeWaveCeilingUsd": 500,
+    "actualBillingAvailable": false
+  },
+  "wave": {
+    "fullObjectivePreserved": true,
+    "order": "007→012A→{012B∥013∥014}→015→008→009→010→011",
+    "noQaDoneOrScopeClosure": true
+  },
+  "sourceDriftDisposition": "All parked R sources/dist/copies matched at comparison. During-review changes are explicitly listed; coordinator checkpoint may change independently. No B/D source binding or implementation judgment."
+}

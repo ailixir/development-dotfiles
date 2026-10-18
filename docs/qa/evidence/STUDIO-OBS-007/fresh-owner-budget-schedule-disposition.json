@@ -1,0 +1,54 @@
+{
+  "scope": "Independent read-only architecture/product disposition; only this requested review artifact written. No implementation, runtime, tests, builds, models, contacts, dispatch, allowance, canonical, metadata or lifecycle changes.",
+  "verdict": "APPROVE_EXACT_IMPLEMENTATION_SCOPE_WITH_RUNTIME_PENDING",
+  "budget": {
+    "selectedPath": "Existing controlled-fixture configuration: studio.guided-authoring.translation.max-output-tokens=4000; immutable session output total remains 32000. Keep production/default 4096 unchanged. No production clamp.",
+    "approvedScope": [
+      "Set the existing configuration key in the controlled GuidedPublicationReplayIT Spring fixture, preferably its existing DynamicPropertySource. Do not mutate a live session, singleton properties, persisted counters or attempted requests.",
+      "Retain all seven genuine actions, every Home/Reports assertion, source steps, publication, two ordinary fresh-secret replays, native evidence and sink/privacy assertions. Preserve every existing integration body and negative expectation.",
+      "Add an isolated real-default 4096/32000 reservation negative control outside the configured fixture context; retain the existing authentic failure evidence. No simulated PASS or lowered total to imitate the default."
+    ],
+    "acceptedBounds": {
+      "translationOutputPerCall": "GuidedTranslationProperties and GuidedModelRequest both accept 1..32000; default 4096, so 4000 is already legal.",
+      "sessionOutputTotal": "GuidedSessionProperties defaults 32000; snapshot validates canonical v3 limits minimum 1, maximum/default 32000. Session input maximum/default remains 128000.",
+      "inputPerCall": "Translation maxInputBytes accepts 1..131072, default 65536; callSeconds accepts 1..600, default 60. Leave these unchanged."
+    },
+    "sourceInspection": [
+      "GuidedTranslationService.request:1157 supplies configured output ceiling to GuidedPromptAssembler/GuidedModelRequest. call:743-811 bounds complete escaped wire content plus schema/instruction and 2048 overhead, checks current locked counters, persists attempt, and reserves the identical request ceiling before gateway I/O.",
+      "GuidedSessionService.translationTransaction:100 locks the session and checks current access, owner/fence, active state and source. modelReservationFitsLocked:184-205 commits FAILED/BUDGET_EXCEEDED on any proposal/input/output overflow.",
+      "GuidedTranslationStore.reserveAttempt:811-918 hashes request ID, attempt number, kind, projection hash, plan revision, input/output ceilings; persists identity, reservation/settlement keys, owner/scope and authoritative progress. Existing attempts require matching digest, return send=false, and consume no new reservation.",
+      "GuidedTranslationService.call:725-742 settles expired active attempts as unknown without refund and allocates a new recovery request key. Its three-attempt repair loop charges each new attempt. recover:1455 restores admitted action dispatch rather than granting model retry authority.",
+      "GuidedSessionService.reserveModel:1284 and settleModel:1309 retain reserved ceilings even for reported output40/missing usage; only excess adds charges. Late usage reconciliation can stop the session and cannot revive it.",
+      "GenAiGuidedLlmGatewayClient.config:158 sends min(request ceiling, transport ceiling); assert actual fixture transport ceiling is >=4000 and wire maxOutputTokens equals persisted/reserved4000. Leave transport configuration unchanged."
+    ],
+    "defaultNegativeProof": {
+      "evidence": "b-final-three-authentic-diagnosis.json and its bound authentic ninth failure snapshot; reviewed evidence, not a fresh run.",
+      "chargedOutput": 28672,
+      "reservations": "7 x 4096 (SOURCE_PLAN1 + NEXT_ACTION6)",
+      "nextRequest": 4096,
+      "nextTotal": 32768,
+      "totalLimit": 32000,
+      "requiredResult": "FAILED/BUDGET_EXCEEDED before eighth reservation/provider send, leaving six genuine successful actions and the Reports assertion unreached. One actual PASS secret read is progress, not full ninth PASS.",
+      "inputQualification": "Existing charged input107955 leaves at most20045. Next complete prompt bytes were not saved; output alone proves rejection. No claim that lowering output makes input fit."
+    },
+    "arithmeticAndRisk": "Eight successful requests at4000 reserve32000 exactly; this covers SOURCE_PLAN plus seven actions only if no additional repair/verification/recovery call or reported overage is required. Those remain legitimate charged failures. Complete next input still must fit128000; truncation, field removal, refunds, extra budget and omitted actions are forbidden.",
+    "poDelta": "None for fixture-only legal configuration plus preserved default negative control: existing contract reserves configured maximum, not mandatory4096 on every fixture. Fixture completion will not establish default4096 can complete this flow. A product promise of default completion or adoption of dynamic remaining-output clamp would require an explicit separately reviewed product/design delta; neither is approved here.",
+    "clampDisposition": "Not selected or approved. A future proposal must freeze effective ceiling with persisted request/digest/reservation identity, reuse original ceiling for existing attempts despite charged counters, reconcile late usage before computing new capacity under the session lock, fully charge new retries/recovery, retain complete input bounds and reject zero before request/send. A naive min(configured, remaining) on every re-entry conflicts with stored attempt identity."
+  },
+  "schedule": {
+    "approvedExactChange": "StudioScheduleProcessor:272: replace Integer.valueOf(2).equals(artifactFamily) with artifactFamily != null && artifactFamily >= 2. Keep the same refuse(..., OBSERVED_SCHEDULE_AUTH_REQUIRED) branch and position after readiness/activation checks, before overlap/background authorization/admission.",
+    "basis": "StudioAcceptanceService:319 already classifies artifact schema>=2 as observed and refuses scheduled observed runs. Processor==2 omits currentv3, reaching ConfiguredBackgroundAuthorization first and returning BACKGROUND_AUTHORIZATION_DENIED. The background denial is correct; precedence/classification is defective.",
+    "preserve": "All legacyfamily1 paths and background grants/withdrawal/denial checks, null behavior, readiness and activation mismatch precedence, occurrence refusal behavior and unchanged activation identity. No administrator grant, caller flag or background authorization enablement.",
+    "poDelta": "None: align processor with existing accepted observed-family>=2 refusal and publication-design scheduled fail-closed requirement. This grants no unattended authority.",
+    "risk": "Guard also covers future supported observed families>=2; unsupported revisions remain subject to readiness first. Do not synthesize v3 by changing only a v1/v2 schema column."
+  },
+  "concreteNextImplementationAndTests": [
+    "Implement only controlled fixture max-output-tokens4000 and the processor predicate change, plus focused regressions. Implementation and execution belong to the authorized coordinator; no new allowance is implied.",
+    "Isolated default configuration negative control: actual request/reservation/store/service path, default4096 and total32000, seven committed ceilings with low usage40 and/or unknown settlement; assert next call commits FAILED/BUDGET_EXCEEDED, preserves28672 and reservation identity, and sends zero additional provider calls. Check real default binding, not the4000 fixture.",
+    "Configured actual ninth: record wire/persisted/reservation4000, unchanged32000/128000 limits and complete encoded input; require all seven actions including final Reports assertion, publication and both ordinary fresh-secret replays with native receipts/video and all existing sink assertions. Any remaining refusal remains FAIL/needs diagnosis.",
+    "Actual currentv3 schedule regression through existing schedulerAndNewHead in actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues: assert OBSERVED_SCHEDULE_AUTH_REQUIRED before background authorization/acceptance, unchanged activation, zero scheduler executions/model calls/secret reads/sends. Preserve activation mismatch case and historicalv2 control where already supported.",
+    "Run actual legacyfamily1 permitted schedule/admission and revoked/missing background-grant denial regressions in StudioScheduleApiIT, including authorizationWithdrawalBeforeAdmissionAndBeforeSendFailsClosed. Require unchanged BACKGROUND_AUTHORIZATION_DENIED and zero unauthorized dispatch; do not add grants to the observed fixture.",
+    "Coordinator reruns the repaired strict provider duplicate-negative unit and selected actual first/ninth integration bodies after implementation. Review fresh native results before any broader gate claim."
+  ],
+  "statusLimits": "No runtime executed here; no full PASS, nineteen-AC, ten-story, external-gate waiver or lifecycle completion. Prior first-flow ordinary PASSED/native evidence does not make its enclosing schedule assertion pass. Repaired strict duplicate-negative source remains awaiting runtime. Runner/privacy review findings remain outside this disposition. Whole-wave500USD/billing unknown and cap4 remain unchanged; no agents spawned."
+}

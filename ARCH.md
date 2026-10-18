@@ -43,8 +43,8 @@ The current implementation is a **frontend-only micro-frontend module** designed
    - Enables full application functionality without backend dependency
 
 3. **Platform Integration:**
-   - **Federated Mode:** Webpack dev server on port 3002 (`npm run dev`)
-   - **Standalone Mode:** Vite dev server on port 5173 (`npm run dev:standalone`)
+   - **Federated Mode:** Webpack dev server on port 3002 (`pnpm run dev`)
+   - **Standalone Mode:** Vite dev server on port 5173 (`pnpm run dev:standalone`)
    - Shared dependencies with host application: React, MUI, React Router, Emotion
    - Event-based communication with platform shell for navigation updates
 

@@ -1,0 +1,12 @@
+== TEST-com.citi.put.checks.studio.dispatch.PreReadyRevocationJoinedIT.xml tests=1 failures=0 errors=0 time=4.549
+   case aPreReadyRevocationOfARealHeldRunIsSettledAsAuthorizationRevoked() 4.549s
+ADJ1-USAGE [UNKNOWN_OUTCOME]
+== TEST-com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT.xml tests=2 failures=0 errors=0 time=9.715
+   case aSessionEndedWhileAnAppendIsPendingKeepsARecordingThatSettlesPlaysAndSeeks() 5.487s
+   case aSessionLosingItsBrowserWhileAnAppendIsPendingStillRecordsTheRunnersOwnFact() 4.225s
+R1D-SESSION-STATE CANCELLED
+R1D-ROW {recording_id=3e5c5450-7067-4a45-a701-530ef421c099, state=AVAILABLE, partial=false, worker_id=worker-1, owner_fence=1, video_key=studio/CSI-123/guided/9f2d7740-b5dc-415e-a8b7-815b011e41b9.webm, manifest_key=studio/CSI-123/guided/9f2d7740-b5dc-415e-a8b7-815b011e41b9.manifest.json, timings=[{"kind": "step", "endMs": 2077, "stepId": "3838d6fd-9582-4c87-be0f-6317ff5ee9c2", "ordinal": null, "startMs": 1325, "admissionId": null}, {"kind": "action", "endMs": 1341, "stepId": "3838d6fd-9582-4c87-be0f-6317ff5ee9c2", "ordinal": 0, "startMs": 1325, "admissionId": "987fbf12-ab09-4c4d-b6fa-12b37f1acaf1"}, {"kind": "action", "endMs": 2077, "stepId": "3838d6fd-9582-4c87-be0f-6317ff5ee9c2", "ordinal": 1, "startMs": 2075, "admissionId": "d1a8e6f5-0558-45ca-bb89-dbe7b70615a1"}]}
+R1D-RESULT-VIDEO {"status":"AVAILABLE","error":null,"expiresAt":"2026-11-17T17:51:46.972138Z","partial":false}
+R1D-VIDEO bytes=12135 key=studio/CSI-123/guided/9f2d7740-b5dc-415e-a8b7-815b011e41b9.webm
+R1D-LOSS-SESSION-STATE FAILED
+R1D-LOSS-ROW {recording_id=f5ee524c-0a88-471b-84ca-d87aa43da21d, state=UNAVAILABLE, partial=false, worker_id=worker-1, owner_fence=1, timings=[]}

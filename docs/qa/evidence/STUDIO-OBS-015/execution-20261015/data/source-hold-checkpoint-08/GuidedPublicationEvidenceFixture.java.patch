@@ -1,0 +1,36 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java
++++ backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java
+@@ -218,7 +218,12 @@
+             .put("sourceRevision",base.document().path("sourceRevision").asText()).put("configurationRevision",base.document().path("configurationRevision").asText())
+             .put("preparationId",preparation).put("requestDigest",digest).put("evidenceHash",GuidedContracts.hash(execution)).put("authoredInputsHash",inputsHash).put("expiresAt",PublicationContracts.time(Instant.now().plusSeconds(30)));
+         proof.putObject("versions").put("contract",3);
+-        current=sessions.lock(id);current.progress().set("executionEvidence",execution);if(observed!=null)current.progress().set("observation",observed);sessions.save(current);
++        current=sessions.lock(id);current.progress().set("executionEvidence",execution);
++        if(observed!=null) {
++          current.progress().set("observation",observed);
++          current.progress().put("observationHash",GuidedContracts.hash(observed));
++        }
++        sessions.save(current);
+         jdbc.update("INSERT INTO studio_guided_preparations(session_id,preparation_id,context_id,owner_fence,request_digest,proof,expires_at) VALUES (?,?,?,?,?,?::jsonb,?::timestamptz)",id,preparation,contextId,fence,digest,proof.toString(),proof.path("expiresAt").asText());
+         evidence.capturePreparation(current,proposal,proof,Instant.now());
+         ObjectNode operation=C.object();operation.set("coordinate",exercise.coordinate());operation.set("origin",execution.path("origin"));operation.putNull("locator");operation.set("operation",exercise.operation());
+@@ -307,6 +312,19 @@
+         || jdbc.queryForObject("SELECT count(*) FROM studio_guided_publication_observations WHERE session_id=?",Integer.class,id)!=0)
+       throw new IllegalStateException("Historical V18 fixture scope exceeded");
+     raw.putArray("observations");raw.putArray("sourceSelections");raw.putNull("incrementalEvidence");
++    JsonNode progress=C.parse(jdbc.queryForObject("SELECT progress::text FROM studio_guided_sessions WHERE session_id=?",String.class,id));
++    ObjectNode bootstrap=raw.putObject("bootstrap");
++    bootstrap.set("marker",progress.path("translationBootstrap").deepCopy());
++    bootstrap.set("receipt",progress.path("translationBootstrapEvidence").deepCopy());
++    JsonNode initial=null;
++    for(JsonNode prepared:preps) {
++      if(prepared.path("executionEvidence").path("kind").asText().equals("initialBlank")) {
++        if(initial!=null&&!initial.equals(prepared.path("executionEvidence")))throw new IllegalStateException("Historical fixture has inconsistent original blank evidence");
++        initial=prepared.path("executionEvidence");
++      }
++    }
++    if(initial==null)throw new IllegalStateException("Historical fixture lacks captured original blank evidence");
++    C.validate("v3/execution-evidence",initial);bootstrap.set("initialEvidence",initial.deepCopy());
+     return new PublicationContracts.Evidence(raw);
+   }
+ 

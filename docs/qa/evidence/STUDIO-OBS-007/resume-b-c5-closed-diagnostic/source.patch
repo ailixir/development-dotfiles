@@ -1,0 +1,157 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java.before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -930,6 +930,17 @@
+       jakarta.servlet.Filter filter =
+           (request, response, chain) -> {
+             var http = (jakarta.servlet.http.HttpServletRequest) request;
++            C5Capture activeC5 = c5Capture;
++            if (activeC5 != null && activeC5.selectedLifecycle(http)) {
++              var wrapped = new org.springframework.web.util.ContentCachingRequestWrapper(http, 262144);
++              try {
++                chain.doFilter(wrapped, response);
++              } finally {
++                activeC5.recordLifecycle(wrapped.getContentAsByteArray(),
++                    ((jakarta.servlet.http.HttpServletResponse) response).getStatus());
++              }
++              return;
++            }
+             UUID p3Execution =
+                 P3_EXECUTIONS.stream()
+                     .filter(
+@@ -985,7 +996,7 @@
+             }
+           };
+       var registration = new org.springframework.boot.web.servlet.FilterRegistrationBean<>(filter);
+-      registration.addUrlPatterns("/internal/studio/executions/*");
++      registration.addUrlPatterns("/internal/studio/executions/*", "/internal/v2/studio/guided-sessions/*");
+       return registration;
+     }
+   }
+@@ -6412,7 +6423,7 @@
+             unicode,unicode.toUpperCase().replaceAll('U','u'),json,json.slice(1,-1)].map(text=>Buffer.from(text,'utf8'))];
+         };
+         const c5ProfileScan=directory=>{
+-          let files=0,bytes=0,hits=0,links=0,failed=false;
++          let files=0,bytes=0,hits=0,links=0,failed=false,stage=0,errno=0;
+           try{
+             const root=p4Fs.realpathSync(directory),stat=p4Fs.lstatSync(directory);
+             const canonical=p4Fs.lstatSync(root);
+@@ -6453,10 +6464,16 @@
+                 }finally{p4Fs.closeSync(fd);}
+               }
+             };walk(root);
+-          }catch{failed=true;}
++          }catch(error){
++            failed=true;
++            stage=['ROOT','VALUES','SYMLINK','LINKBOUND','BOUND','PATH','FD','CHANGED'].indexOf(error?.message)+1;
++            errno=['EACCES','EPERM','ENOENT','ELOOP','ENOTDIR','EISDIR','EIO','EBADF','EMFILE','ENFILE'].indexOf(error?.code)+1;
++            if(stage===0){const operation=['open','read','scandir','lstat','realpath','fstat','close','readlink'].indexOf(error?.syscall);
++              if(operation>=0)stage=9+operation;}
++          }
+           try{const fd=p4Fs.openSync(c5CountsFile,p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|
+             p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);
+-            try{p4Fs.writeSync(fd,JSON.stringify({files,bytes,hits,links,failed})+'\\n');}finally{p4Fs.closeSync(fd);}}
++            try{p4Fs.writeSync(fd,JSON.stringify({files,bytes,hits,links,failed,stage,errno})+'\\n');}finally{p4Fs.closeSync(fd);}}
+           catch{try{const fd=p4Fs.openSync(c5CountsFile+'-failed',p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|
+             p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);try{p4Fs.writeSync(fd,'1');}finally{p4Fs.closeSync(fd);}}catch{}}
+         };
+@@ -7332,6 +7349,9 @@
+   private final class C5Capture implements AutoCloseable {
+     private static final int MAX_BYTES = 128 * 1024 * 1024;
+     private final List<String> values;
++    private volatile String selectedGuidedSession;
++    private int lifecycleOrdinal;
++    private volatile boolean lifecycleDiagnosticFailed;
+     private final Map<String, byte[]> produced = new java.util.LinkedHashMap<>();
+     private final List<C5Stream> streams = new java.util.ArrayList<>();
+     private final java.io.ByteArrayOutputStream encoded = new java.io.ByteArrayOutputStream();
+@@ -7448,6 +7468,54 @@
+             java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+       } finally {
+         Files.deleteIfExists(temporary);
++      }
++    }
++
++    boolean selectedLifecycle(jakarta.servlet.http.HttpServletRequest request) {
++      String selected = selectedGuidedSession;
++      return selected != null && request.getMethod().equals("POST")
++          && request.getRequestURI().equals("/internal/v2/studio/guided-sessions/" + selected + "/lifecycle");
++    }
++
++    synchronized void recordLifecycle(byte[] bytes, int status) {
++      String kind = "UNCLASSIFIED", reason = "UNCLASSIFIED";
++      boolean consumed = bytes.length > 0 && bytes.length < 262144;
++      try {
++        if (consumed) {
++          JsonNode original = C.parseWire(bytes);
++          String session = original.path("kind").asText().equals("assignment")
++              ? original.path("assignment").path("sessionId").asText()
++              : original.path("sessionId").asText();
++          if (session.equals(selectedGuidedSession)) {
++            kind = original.path("kind").asText().equals("assignment") ? "ASSIGNMENT"
++                : original.has("contextId") ? "RUNTIME" : "UNCLASSIFIED";
++            String actualReason = original.path("reason").asText();
++            if (List.of("CANCELLED", "EXPIRED", "UNKNOWN_OUTCOME", "LEASE_LOST", "CONTEXT_LOST", "REVOKED")
++                .contains(actualReason)) {
++              reason = actualReason;
++            }
++          }
++        }
++      } catch (RuntimeException invalid) {
++        // The original chain already owns parsing/errors; export no diagnostic parser exception.
++      }
++      try {
++        ObjectNode sample = C.object().put("ordinal", ++lifecycleOrdinal).put("status", status)
++            .put("kind", kind).put("reason", reason).put("consumed", consumed);
++        Path file = TEMP.resolve("c5-lifecycle-diagnostic.jsonl");
++        if (!Files.exists(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
++          Files.createFile(file, java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
++              java.nio.file.attribute.PosixFilePermissions.fromString("rw-------")));
++        }
++        if (Files.isSymbolicLink(file) || !Files.isRegularFile(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)
++            || !Files.getPosixFilePermissions(file).equals(
++                java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"))) {
++          throw new IOException("Unsafe private lifecycle diagnostic target");
++        }
++        Files.writeString(file, sample.toString() + "\n", StandardCharsets.UTF_8,
++            java.nio.file.StandardOpenOption.APPEND);
++      } catch (Exception failure) {
++        lifecycleDiagnosticFailed = true;
+       }
+     }
+ 
+@@ -7582,12 +7650,14 @@
+           .isGreaterThanOrEqualTo(streams.size() + 1);
+       for (String line : profileSamples) {
+         JsonNode sample = C.parse(line);
+-        assertThat(sample.size()).isEqualTo(5);
++        assertThat(sample.size()).isEqualTo(7);
+         assertThat(sample.path("failed").isBoolean()).isTrue();
+-        for (String field : List.of("files", "bytes", "hits", "links")) {
++        for (String field : List.of("files", "bytes", "hits", "links", "stage", "errno")) {
+           assertThat(sample.path(field).isIntegralNumber()).isTrue();
+           assertThat(sample.path(field).asLong()).isGreaterThanOrEqualTo(0);
+         }
++        assertThat(sample.path("stage").asInt()).isBetween(0, 16);
++        assertThat(sample.path("errno").asInt()).isBetween(0, 10);
+         assertThat(sample.path("failed").asBoolean(true)).isFalse();
+         assertThat(sample.path("hits").asLong(-1)).isZero();
+         assertThat(sample.path("files").asInt()).isPositive();
+@@ -7633,6 +7703,7 @@
+             failures,
+             () -> {
+               synchronized (this) {
++                assertThat(lifecycleDiagnosticFailed).as("private lifecycle diagnostic integrity").isFalse();
+                 assertThat(failed).as("final private appender capture integrity").isFalse();
+                 var finalBytes = new java.util.LinkedHashMap<>(produced);
+                 finalBytes.put("c5-final-original-JSON_CONSOLE", encoded.toByteArray());
+@@ -8245,6 +8316,9 @@
+       assertThat(sessionId).isNotBlank();
+       assertThat(testId).isEqualTo(body.path("testId").asText());
+       testOwnedSessions.put(sessionId, testId);
++      if (capture != null) {
++        capture.selectedGuidedSession = sessionId;
++      }
+     }
+     return parsed;
+   }

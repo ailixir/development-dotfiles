@@ -1,0 +1,138 @@
+{
+  "schema": "resume-d-report-cas-owned-tests-candidate/1",
+  "state": "FROZEN_SOURCE_ONLY_UNRUN",
+  "sources": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java",
+      "beforeSha256": "49c6c9de553392b83b1fc930a0d11935ae4d1af8488d28f2adc0d2ce3d9b8c11",
+      "afterSha256": "833556cc7acb3916c83d473e40487d0bea68cb96b253803aa71772b380f3bd66",
+      "patchPath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-report-cas-owned-tests/ProgressCallbackIT.patch",
+      "patchSha256": "bd6e3d6628c0feb9d4f5e88a5ec97e71182fc79ea652be47192c6c2fb1b31707",
+      "oldDirectTestBodiesUnchanged": true,
+      "oldDirectTestNamesCompared": [
+        "runningAndBrowserStartedAtAreWrittenOnlyByACommittedStartedReport",
+        "acceptedAtIsThePartitionKeyAndIsNeverChangedWhenTheBrowserBegins",
+        "aStartedReportWithoutABrowserStartIsRefused",
+        "threeIdenticalFinalDeliveriesGiveOneStateThreeAcknowledgementsAndOneRevision",
+        "aLowerSequenceThanTheAppliedOneIsRefusedAndAppliesNothing",
+        "aReportFromASupersededAttemptIsRefused",
+        "aReportFromADifferentAdmissionIdentityIsRefused",
+        "aStaleCallbackCannotRegressAFinalStateAndLeavesTheHistoryRowUnchanged",
+        "everyVisibleChangeIncrementsTheRevisionAndTheRunnerSequenceIsNeverTheRevision",
+        "aRunnerReportCarryingAReaperOwnedCodeDoesNotPersistThatCode",
+        "evidenceSettlesSeparatelyAndStreamCompleteFlipsWithANewRevision",
+        "aReportOverTheStepOrLogBoundIsRefusedAndChangesNothing",
+        "logsTruncatedAndPayloadReducedArePersistedRatherThanDropped",
+        "anOlderLateCompletionDoesNotOverwriteANewerRun",
+        "aPartialStepReportStillPersistsOneEntryPerOriginalStep",
+        "aLogLinesStepIndexReachesThePublicSnapshot"
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/secrets/ObservedProgressSecretEvidenceTest.java",
+      "beforeSha256": "9e4fe20f1a3be9229c06dc0990d736cc4a7fbef1346853272eddbf9f64825fed",
+      "afterSha256": "6ca64f60c8f26a2ad462bec1b72b90a939496ba65209aafaa995a1ffc96524e0",
+      "patchPath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-report-cas-owned-tests/ObservedProgressSecretEvidenceTest.patch",
+      "patchSha256": "01cf33c4d48abe839c15da343b2fcb632c816e36da70387ad699df0c31ea2804",
+      "oldDirectTestBodiesUnchanged": true,
+      "oldDirectTestNamesCompared": [
+        "genuineFractionalCompletedPasswordReceiptSupportsOnlyItsFrozenSecret"
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+      "beforeSha256": "701657d46d0fbb4f4eb6e8a98149e7ef9f8b98a8c761eb9fec66f52747bf010e",
+      "afterSha256": "f88eb0133e82a505a4614deac3e1fc97a102872da88780a6048770f9d0104228",
+      "patchPath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-report-cas-owned-tests/GuidedSecretLoginMigrationTest.patch",
+      "patchSha256": "b173f0e64c51cf5d6c43f73af7d17b9723d4984c281d3bc8e9b5adcf12e9b527",
+      "oldDirectTestBodiesUnchanged": true,
+      "oldDirectTestNamesCompared": [
+        "freshAndBothStagedCutoverOrdersReachV34WithoutChangingOrdinaryCapability",
+        "guardsFailLoudlyOnAwaitingAuthOrObservedBindingRows",
+        "exactV3ProfileAccountFreeScopeAndObservationCountsAreClosed",
+        "scopedReleaseUsageRetryAndAppendOnlyRowsNeverContainTheCanary",
+        "unreachedNotUsedHasNoFabricatedResolutionAndRejectsOtherNullableVariants",
+        "liveRecheckIsUniqueAndPreservesOneTerminalUsageAndWriteOnceRevocation",
+        "concurrentUsageSummariesHaveExactlyOneWinner",
+        "replayUsageUsesClosedCodesAndTheActualExecutionScope",
+        "ordinaryWriterCannotAlterOrDropRetentionPartitions",
+        "crossMonthUsageAndLiveRecheckExpireWithReleaseWhileUnlinkedUsageKeepsOwnMonth",
+        "definiteRefusalAllowsOnlyOneOwnedFreshAttemptAndKeepsAcceptedIdentities",
+        "realNoSendOutageDecisionGrantsDifferentAuthorityAndCannotBeFabricated",
+        "concurrentRetryRefreshersHaveExactlyOneWinner",
+        "additiveStoredSecretLengthCodeKeepsEveryPriorTerminalValueAndRefusesUnknown",
+        "consumedNoDecisionRequiresAuthenticAdmissionAndKeepsNullResolutionHonest",
+        "consumedAckLossIsEvidenceBoundAndMissingMaterializationCannotBecomeUnused",
+        "releasedReplayUncertaintyRequiresRealScopedReleaseAndNeverFakeAckStatus",
+        "rawConcurrentConsumedUncertaintyHasOneWinnerAcrossRetentionClock",
+        "ordinaryReplayReleaseRequiresAcceptedDeclarationAndAuthenticAttempt",
+        "unreachedDeclaringSummaryCannotRepeatWithCallerOrdinalSequenceOrClock",
+        "terminalRawBeforeImageScopeAndCompleteClassificationCannotBeForged",
+        "rawTerminalReceiptCannotCommitWithoutCompleteExactSummaries",
+        "terminalCrossMonthClockCannotEvadeActualAttemptReceiptIdentity"
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "beforeSha256": "14ff3056d00c92fc054e6dc8738effe11bd3b8b0781ac3cf29ca14e646c52af5",
+      "afterSha256": "2797ca76d9ab21cc54926bcbceb0788987e3505e9288bf26bf7fa56e062ca273",
+      "patchPath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-report-cas-owned-tests/GuidedPublicationMigrationTest.patch",
+      "patchSha256": "f018affd3b1b029dcce410f64846886c4ccdafa0136470106517ac91e4fb0d97",
+      "oldDirectTestBodiesUnchanged": true,
+      "oldDirectTestNamesCompared": [
+        "installedScheduleCodeConstraintKeepsLegacyVocabularyAndAddsOnlyObservedRefusal",
+        "upgradeBaseEpochAndImmutableHistory",
+        "bothCutoverOrdersPreserveLegacyRows",
+        "claimIsSingleSendRenewalStableAndSessionBudgetCannotReset",
+        "halfRevisionAndMissingObservationCannotCommit",
+        "validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry",
+        "directSqlClaimsAndNewPartitionsKeepTheirIndependentGuards",
+        "realLegacyChromeUpgradeAndMillisecondNormalization",
+        "observedChoiceReceiptIsOptionalImmutableAndRollsBackWithPreparation",
+        "observedChoiceReceiptRejectsMissingExtraNullWrongTypesAndRowIdentity",
+        "observedChoiceCanonicalBytesAndUnicodeIdsUseIndependentBounds"
+      ]
+    }
+  ],
+  "designReceipts": [
+    "resume-d-report-cas-owned-tests/before-design.json",
+    "resume-d-report-cas-owned-tests/helper-amendment-before-design.json"
+  ],
+  "helperApi": "public RetryFixture publishedRetry(JdbcTemplate sharedJdbc, TransactionTemplate sharedTransactions, String fixtureNamespace, ObjectNode canonicalObservedBasis, ObjectNode requiredProfile, ObjectNode requiredBuild)",
+  "helperScope": "Borrow caller JDBC/transactions; namespace actual session/commands; no borrowed container start/Flyway/source stop; retain old owned constructors/default overloads. Complete candidate derived by production lowerer and validated before reservation/immutable publication. Existing guarded publication/acceptance lineage is used; no USED/FINAL/RELEASE seed.",
+  "reportFixture": "Canonical publication basis is prepared as controlled secret-ref/password-control metadata before lowerer/publication. Same Spring/JPA datasource; trusted exact fixture catalog/policy and scoped dev entitlement only. Existing real admission authorization/CAS, read-entry callback, controlled provider resolver/version and dispatch-state+RELEASE transaction precede report; no native/Core/live-Vault claim.",
+  "newSelectors": [
+    "ProgressCallbackIT.observedWinningProgressAndDuplicateCommitOneUsedSummaryWithTheSnapshotCas",
+    "ProgressCallbackIT.observedProgressCommitHookFailureRollsBackSnapshotSequenceAndActualUsageTogether",
+    "ProgressCallbackIT.observedProgressMissingScopedResolutionRefusesAndRollsBackItsWinningSnapshotCas",
+    "ProgressCallbackIT.observedLosingProgressAndRealTerminalOwnerKeepTheEarlierUsedRowImmutable",
+    "ObservedProgressSecretEvidenceTest.reducedPayloadRetainsPositiveOnlyWhenItsCompletedPassReceiptSurvives",
+    "ObservedProgressSecretEvidenceTest.reducedPayloadCannotCarryPositiveWhoseCompletedPassReceiptWasShed"
+  ],
+  "expectedCounts": {
+    "ProgressCallbackIT": 20,
+    "ObservedProgressSecretEvidenceTest": 24,
+    "helperMigrationTests": "No new cases; preserve their original names/counts, actual XML governs."
+  },
+  "tiers": {
+    "newReportCases": "Real production service/JPA/PG transaction boundary with controlled protocol PASS metadata; not authenticated HTTP or physical browser proof.",
+    "unitReduction": "Pure receipt/recipe validator qualifier, original22 retained.",
+    "missingRelease": "Deliberate missing decision lineage negative; no fabricated value/read/release is inserted.",
+    "commitHook": "Existing production ReportCommitHook beforeCommit, default no-op except exact selected execution. Hook sees tentative USAGE, then throws the controlled observation fault; external state must roll back.",
+    "terminalLoser": "Actual ledger terminal writer and stale report CAS; simulated report/owner control, not an actual process kill."
+  },
+  "scopeLimits": "Genuine Core/compiled-child/native positive and kill/lost FINAL/C11 effects stay separate pending joins. No architecture/QA/AC/status/Done approval.",
+  "execution": {
+    "compiler": "UNRUN",
+    "format": "UNRUN",
+    "tests": "UNRUN",
+    "SQL": "UNRUN",
+    "PG": "UNRUN",
+    "runtime": "UNRUN",
+    "Node": "UNRUN",
+    "build": "UNRUN",
+    "modelsSpawned": false
+  },
+  "nextGate": "Coordinator scoped formatter/compiler then two report selectors/classes plus both modified helper regression suites; no current-source PASS inferred from source only.",
+  "remainingRisks": "Shared fixture schema/lineage/runtime catalog wiring and exact JDBC diagnostics must be decided by the coordinator actual gate; no assertions/guards weakened to preempt failures."
+}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Quinn (@qa), independent",
+  "createdAt": "2026-10-16T07:46:35Z",
+  "subject": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r2-diagnosis01 (Dex-FIX) + r2-default-diagnosis01/fix.patch",
+  "mode": "static review; no Gradle, no runtime, no source or git write; ReplayIT reviewed from saved diff only",
+  "creditReleased": false,
+  "lifecycleChanged": false,
+  "overallDecision": "NEEDS_WORK",
+  "reviewedChangesDecision": "APPROVED",
+  "byteVerification": {
+    "replayITRebuiltFromScratchBeforePlusDiff": {"before": "4242ac27020814fe57355116a06ef1271b4a0c2f247d2847ea3c28888ec55b33", "diff": "replayit-4242ac27-to-final.diff", "diffSha256": "b7e7ff7417935ba35c4af74d619db1c5aed83084fe6b672af6d516c55c825f48", "result": "9d13eeb762f56dbe095b5540ff97d6e63169ec95c7a7dfa084036e7a1755c656", "matchesManifest": true},
+    "fixPatchApplied": {"patchSha256": "42d7e8bad06632868e3817f2b8b564988cfbe00ffad90c9a9340ad1fff742b35", "result": "25f12ca218ccb50b2a9f282f38192b91d1dc9b61f3abf158b913ac3e8055c33e", "matchesManifest": true},
+    "repositoryRebuilt": {"before": "8aa40c60582007a59ba406d47832bf30d06627cf227fc0c3ce942ab7d58b07df", "diffSha256": "d67b10b77645bb52c7752ce6955b221c3c0f01e91130dd9d702d4b1238a856e7", "result": "ffb8ffd4fd87bf903337fdd32f92a96ac4a534003cbc828b61a5fbc10804e60d", "live": "ffb8ffd4fd87bf903337fdd32f92a96ac4a534003cbc828b61a5fbc10804e60d"},
+    "fixtureRebuilt": {"before": "417e605d25ca8b68039b9aa4dafc07ec4390994bb58630766e9dd92bd5f7b359", "diffSha256": "534820967ede3bad77830577af9f6a82f169672c7a0e4c237828223460f9754c", "result": "ae407fefa0a428d7f73ce2791ab04ad277f79706255e75a3f68a6c2e5b77aa92", "live": "ae407fefa0a428d7f73ce2791ab04ad277f79706255e75a3f68a6c2e5b77aa92"},
+    "liveReplayITAtReview": "daa97aeed961afbffad2cd13b2db60e79dfe21bfdb7577144f475c1b59378cee (already edited by another developer; not reviewed)"
+  },
+  "verdicts": {
+    "H3": {"verdict": "ACCEPT", "defectReal": true, "minimal": true, "widensAdmission": false, "followUps": ["MEDIUM focused negative regression (request evidenceHash names no observation -> 422)", "LOW stale comment at repository 638-639", "LOW observedDocument correlation duplicated in 4 places"]},
+    "H1": {"verdict": "ACCEPT"},
+    "H2": {"verdict": "ACCEPT"},
+    "H4": {"verdict": "ACCEPT", "rule": "t0-architect-rulings.json ruling2 snapshotHash_stored.composition + k (pure tail deletion) + whyThisShape ('never a forced hash difference')"},
+    "H5": {"verdict": "ACCEPT", "productDefect": false, "rule": "acceptance-delta IncrementalStartIT.deleteAllRefusesWithoutAnyWrite 'start409/422 existing'; ruling2 k 'existing rule'; GuidedSourceClassifier steps.isEmpty -> 409 RUNTIME_INCOMPATIBLE, same at HEAD"},
+    "H9": {"verdict": "ACCEPT", "basis": "closeByReaper never sets video_status; findEvidenceUnsettled selects FINALIZING only (both HEAD behaviour); ledger DONE and live-descendant checks retained"},
+    "H10": {"verdict": "ACCEPT"},
+    "fixPatch": {"A_validatorLine381": "ACCEPT", "B_zombieNoSignal": "ACCEPT", "C_singleParentRead": "ACCEPT", "F2_dropStringEvidence": "ACCEPT"},
+    "H8diagnostic": {"verdict": "ACCEPT", "oracleChange": false},
+    "H7": {
+      "ruling": "Refusal is the variant's intended oracle (ruling3 frozen governed policy, sideEffectStance DENY -> GuidedActionGuard SIDE_EFFECT_DENIED on prefix step INCREMENTAL_STEPS[4]); register as planted per po-qa014 a1",
+      "rejectedMechanism": "adding the shared @ParameterizedTest method name to planted (would whitelist all 35 variants)",
+      "requiredMechanism": [
+        "ReplayIT AfterEach: tally testName = method + '[' + displayName + ']' for 'incremental joined ' invocations",
+        "planted = Set.of('incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser[incremental joined policy-prefix]')",
+        "policy-prefix body: exactly one GUIDED_ACTION_REFUSED in this invocation's audit slice with reasonCode=SIDE_EFFECT_DENIED (bind to mixed session / step 4 if carried)"
+      ],
+      "status": "NOT_APPLIED"
+    }
+  },
+  "openBlockingLaneCredit": ["H7 mechanism not applied", "H6 runner text extraction (Aria/runner owner)", "H8 expiry teardown (Aria); 17 labels never executed", "executionError both lanes", "no full-lane run with fixture ae407fef + ReplayIT 9d13eeb7 together"],
+  "inputsRead": {
+    "r2-diagnosis01/review.md": "7232a8f026b784c8d0675c52a4959b922301e0aa9303914e716a0c596c285a3b",
+    "r2-diagnosis01/manifest.json": "c22290a0d6a254e84f69cbaed11cc3308700cd4a295971b57023f5e6150e7a8f",
+    "r2-default-diagnosis01/review.md": "4c708dd3509607d4afed6f7d7684149b5c455f9e269eff6e1f6c4b36f8744af8",
+    "t0-architect-rulings.json": "58a75633d2dcf1aa94f80e17172612fae6b31cab08f8fc498eda1ccac00cbf24",
+    "final-design/architect/acceptance-delta.json": "02b2fdb232a141de8ad3c2358aa37020a1ff8fabb3458abe192eab80b411fc46",
+    "STUDIO-OBSERVED-NEXT/po-qa014-rulings.json": "158d4c3301cea820510e72210ea01af8c008295ae012881cab638613bbbc3528",
+    "GuidedPlanBuilder.java": "23f102d7beeeeb8bd483328da00bb3d1e9bc963218c83b37b14dce3938e0da52",
+    "GuidedBasisValidator.java": "2d6016aa0ac8bc1057273676baa1a3583aea39521fd1bddd806c171ba5d8c63e",
+    "GuidedIncrementalStore.java": "0e98da660358acd128b468bb28660bcf5a7378dbe7427a85464ae4e3caa9fd1f",
+    "GuidedSourceClassifier.java": "b3769877088421d7d4690d663efecc35cf016044cc9ee4849fbed74ef722b23f",
+    "StudioDispatchLedgerStatements.java": "8861f33186f1219b119535fa1a496d33c3be649d9ec323984ab837333cc5a813",
+    "GuardDecisionTally.java": "f357604e753b0b7cbd28943211510df9ac8dc9e8238795bb956a1d6fb916a236",
+    "GuidedProposalValidator.java": "2411f9ac24c1d21db7b43ee22ae91055b3aaefbce7f7652b276d4fc3d21e8b40"
+  },
+  "files": {"review.md": "qa-review01/review.md"}
+}

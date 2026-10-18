@@ -1,0 +1,330 @@
+--- a/isolated/GuidedPublicationReplayIT.java
++++ b/isolated/GuidedPublicationReplayIT.java
+@@ -244,7 +244,7 @@
+     // Default zero preserves every existing revocation case and producer schema.
+     volatile int c6Kind, c6Phase, c6FillEntries, c6RawCalls, c6LiteralHits, c6EncodedHits, c6CallbackRedacted, c6PendingSamples;
+     volatile long c6FocusAt, c6PendingAt, c6CutAt, c6DeadlineMarginMs;
+-    volatile boolean c6NativeClose, c6FenceAvailable, c6InterruptedNotification;
++    volatile boolean c6NativeClose, c6FenceAvailable, c6InterruptedNotification, c6ProducerSealed;
+     List<P6OwnedPid> c6BrowserTree = List.of();
+     final java.util.concurrent.CountDownLatch c6Pending = new java.util.concurrent.CountDownLatch(1);
+     final java.util.concurrent.CountDownLatch c6CutPending = new java.util.concurrent.CountDownLatch(1);
+@@ -6491,14 +6491,26 @@
+         p3AttemptTeardown(failures, () -> p6AwaitProcesses(owned.c6BrowserTree, true));
+       }
+       if (!cleanupUnconfirmed) {
++        if (owned != null && owned.c6Kind != 0 && !owned.c6ProducerSealed) {
++          p3AttemptTeardown(failures, () -> {
++            p4SealPrivateProducersAfterOwnerCleanup(owned);owned.c6ProducerSealed=true;
++          });
++        }
++        if (owned != null && owned.c6Kind != 0
++            && (!owned.restored || !owned.active.isEmpty())) {
++          cleanupUnconfirmed = true;
++          failures.add(new IllegalStateException("C6 exact restoration or original native drain remains unresolved"));
++        }
+         // Retain capture/hooks until actual owner closure and final producer acknowledgements.
+-        p3AttemptTeardown(failures, () -> p3Scan(List.of(value)));
+-        p3AttemptTeardown(failures, capture::writeNumericEvidence);
+-        p3AttemptTeardown(failures, capture::close);
+-        p3AttemptTeardown(failures, () -> Files.writeString(
+-            TEMP.resolve("p4-revocation-state.json"), "{\"active\":false}", StandardCharsets.UTF_8));
+-        c5Capture = null;
+-        p4Revocation = null;
++        if (!cleanupUnconfirmed) {
++          p3AttemptTeardown(failures, () -> p3Scan(List.of(value)));
++          p3AttemptTeardown(failures, capture::writeNumericEvidence);
++          p3AttemptTeardown(failures, capture::close);
++          p3AttemptTeardown(failures, () -> Files.writeString(
++              TEMP.resolve("p4-revocation-state.json"), "{\"active\":false}", StandardCharsets.UTF_8));
++          c5Capture = null;
++          p4Revocation = null;
++        }
+       } else {
+         failures.add(new IllegalStateException("C6 original owner cleanup remains unconfirmed"));
+       }
+@@ -6635,6 +6647,7 @@
+         + " AND secret_id='PASS'", Long.class, owner)).isZero();
+     p3AssertAuditScope(state.guidedSession, state.execution, scope);
+     p3CleanupOwnedResources();
++    p8AssertUnknownUsageLineage(state);
+     if (!browserTree.isEmpty()) p6AwaitProcesses(browserTree, true);
+     p8AwaitC6Closed(state);
+     if (kind == 2) {
+@@ -6643,6 +6656,7 @@
+           .isPositive().isLessThanOrEqualTo(Duration.ofSeconds(2).toNanos());
+     }
+     p4SealPrivateProducersAfterOwnerCleanup(state);
++    state.c6ProducerSealed = true;
+     assertThat(state.active).isEmpty();
+     assertThat(state.c6FillEntries).isEqualTo(kind == 4 ? 0 : 1);
+     assertThat(P3_RECEIPTS).isEmpty();
+@@ -6677,6 +6691,31 @@
+         .put("realReleasedReads", 1).put("ownedBrowserTreeGone", !browserTree.isEmpty()));
+   }
+ 
++  private void p8AssertUnknownUsageLineage(P4RevocationState state) {
++    String ownerColumn = state.path == 1 ? "session_id" : "execution_id";
++    Object owner = state.path == 1 ? state.guidedSession : state.execution;
++    List<Map<String, Object>> releases = jdbc.queryForList(
++        "SELECT * FROM studio_secret_use_audit WHERE " + ownerColumn + "=? AND secret_id='PASS'"
++            + " AND row_kind='RELEASE' AND decision_stage='DISPATCH' AND outcome='RESOLVED'", owner);
++    List<Map<String, Object>> usages = jdbc.queryForList(
++        "SELECT * FROM studio_secret_use_audit WHERE " + ownerColumn + "=? AND secret_id='PASS'"
++            + " AND row_kind='USAGE'", owner);
++    assertThat(releases.size()).as("one real resolved release").isEqualTo(1);
++    assertThat(usages.size()).as("one actual terminal usage summary").isEqualTo(1);
++    Map<String, Object> release = releases.getFirst(), usage = usages.getFirst();
++    assertThat("UNKNOWN_OUTCOME".equals(usage.get("usage_outcome")))
++        .as("actual terminal unknown effect, never missing summary").isTrue();
++    assertThat("RESOLVED".equals(usage.get("outcome")) && release.get("vault_version") != null)
++        .as("actual released version lineage").isTrue();
++    assertThat(java.util.Objects.equals(release.get("id"), release.get("release_id"))
++        && java.util.Objects.equals(release.get("id"), usage.get("release_id"))
++        && release.get("affected_release_id") == null && usage.get("affected_release_id") == null)
++        .as("actual immutable release usage linkage").isTrue();
++    p4CompareAuditScope(release, usage);
++    assertThat(p4AuditOwnerIdentity(state, release))
++        .as("actual consumed admission or accepted observed attempt lineage").isTrue();
++  }
++
+   private static void p8WritePendingProbe(P4RevocationState state, int probe) throws IOException {
+     Path root = TEMP.resolve("p4-revocation-producers");
+     p4RequirePrivateProducerRoot(root);
+@@ -6705,6 +6744,13 @@
+     assertThat(state.active).isEmpty();
+     if (state.path == 1) assertThat(state.closed).isTrue();
+     assertThat(state.failed).isFalse();
++    if (state.c6InterruptedNotification) {
++      assertThat(state.c6Kind > 0 && state.c6Kind < 4 && state.c6PendingSamples > 0
++          && state.c6NativeClose && !state.c6FenceAvailable
++          && P8_C6_CLOSED_UNKNOWN.contains(state.c6Phase))
++          .as("provisional focus response loss requires actual native pending and original realm closure")
++          .isTrue();
++    }
+     assertThat(P4_NOTIFICATION_FAILED.get()).as("no unexplained page observer loss").isFalse();
+     assertThat(Files.exists(TEMP.resolve("p4-native-observer-failed")))
+         .as("malformed ACK/fence and original close failures remain sticky").isFalse();
+@@ -6783,6 +6829,9 @@
+     try {
+       if (status < 200 || status >= 300 || bytes.length < 1 || bytes.length > 262144)
+         throw new IllegalArgumentException("C6 actual callback acceptance/bound mismatch");
++      C5Capture capture = c5Capture;
++      if (capture == null) throw new IllegalArgumentException("C6 original sink capture unavailable");
++      for (String value : capture.values) assertJoinedSinkAbsent(Map.of("c6-actual-callback", bytes), value);
+       JsonNode outcome = C.parseWire(bytes);
+       if (!outcome.path("errorMessage").isTextual()) return; // Earlier successes are not positives.
+       if (!outcome.path("sessionId").asText().equals(state.guidedSession)
+@@ -6794,9 +6843,6 @@
+       if (!message.contains("C6_RELEASED") || !message.contains("REDACTED")
+           || message.getBytes(StandardCharsets.UTF_8).length > 2048 || message.length() > 2048)
+         throw new IllegalArgumentException("C6 real callback is not bounded/redacted");
+-      C5Capture capture = c5Capture;
+-      if (capture == null) throw new IllegalArgumentException("C6 original sink capture unavailable");
+-      for (String value : capture.values) assertJoinedSinkAbsent(Map.of("c6-actual-callback", bytes), value);
+       synchronized (state) { state.c6CallbackRedacted++; }
+     } catch (RuntimeException | AssertionError failure) {
+       state.failed = true; // Sticky even if the original HTTP endpoint returns an error or retries.
+@@ -6808,19 +6854,27 @@
+     assertThat(Files.isSymbolicLink(diagnostic)).isFalse();
+     assertThat(Files.isRegularFile(diagnostic, java.nio.file.LinkOption.NOFOLLOW_LINKS)).isTrue();
+     assertThat(Files.size(diagnostic)).isPositive().isLessThanOrEqualTo(262144);
+-    List<String> lines = Files.readAllLines(diagnostic, StandardCharsets.UTF_8);
+-    assertThat(lines).hasSize(1);
+-    JsonNode line = C.parse(lines.getFirst());
+-    assertThat(line.path("sessionId").asText()).isEqualTo(state.guidedSession);
+-    assertThat(line.path("stepId").asText()).isEqualTo(TWO);
++    byte[] diagnosticBytes = Files.readAllBytes(diagnostic);
++    byte[] stderr = Files.readAllBytes(TEMP.resolve("guided.log"));
++    // Scan privately before parse/content checks; assertion failures only show fixed scalars.
++    assertJoinedSinkAbsent(Map.of("c6-original-stderr", stderr,
++        "c6-real-diagnostic", diagnosticBytes), value);
++    List<String> lines = new String(diagnosticBytes, StandardCharsets.UTF_8).lines().toList();
++    assertThat(lines.size()).as("actual bounded diagnostic record count").isEqualTo(1);
++    JsonNode line;
++    try { line = C.parse(lines.getFirst()); }
++    catch (RuntimeException invalid) { throw new AssertionError("C6 privately scanned diagnostic parse failed"); }
++    assertThat(line.path("sessionId").asText().equals(state.guidedSession)
++        && line.path("stepId").asText().equals(TWO))
++        .as("actual selected diagnostic identity").isTrue();
+     String message = line.path("errorMessage").asText();
+-    assertThat(message).contains("C6_RELEASED", "REDACTED");
+-    assertThat(message.getBytes(StandardCharsets.UTF_8).length).isLessThanOrEqualTo(2048);
+-    assertThat(message.length()).isLessThanOrEqualTo(2048);
+-    byte[] stderr = Files.readAllBytes(TEMP.resolve("guided.log"));
+-    assertThat(new String(stderr, StandardCharsets.UTF_8)).contains(message);
+-    assertJoinedSinkAbsent(Map.of("c6-original-stderr", stderr,
+-        "c6-real-diagnostic", Files.readAllBytes(diagnostic)), value);
++    assertThat(message.contains("C6_RELEASED") && message.contains("REDACTED"))
++        .as("actual diagnostic marker and redacted value").isTrue();
++    assertThat(message.getBytes(StandardCharsets.UTF_8).length)
++        .as("actual diagnostic UTF8 bytes").isLessThanOrEqualTo(2048);
++    assertThat(message.length()).as("actual diagnostic character count").isLessThanOrEqualTo(2048);
++    assertThat(new String(stderr, StandardCharsets.UTF_8).contains(message))
++        .as("actual original stderr contains the privately scanned redacted diagnostic").isTrue();
+   }
+ 
+   private P3Publication p4PositiveNativeControl(UUID test) throws Exception {
+@@ -7662,7 +7716,7 @@
+         let revPending=0,revOriginalPending=0,revAcked=0,revFailed=false,revSealing=false,revSealed=false;
+         let revLocalMode=null,revWatching=false,revC6Probed=0;
+         let revC6ProfileDev=0,revC6ProfileIno=0,revC6ContextBound=false;
+-        let revC6RunDeadline=0,revC6StepMs=0;
++        let revC6RunDeadline=0,revC6StepMs=0,revC6Restored=false,revC6RetryRestore=null;
+         const revActive=new Map(),revGroups=new Set();
+         const revMode=()=>{try{return revFs.existsSync(revStateFile)?JSON.parse(revFs.readFileSync(revStateFile,'utf8')):null;}catch{return null;}};
+         const revMarker=()=>{try{const fd=revFs.openSync(revFailedFile,
+@@ -7700,7 +7754,7 @@
+           if(revCase===mode.case)return;
+           if(revLocalMode&&!revSealed){revFail();return;}
+           revCase=mode.case;revSeq=0;revPending=0;revAcked=0;revOriginalPending=0;
+-          if(mode.c6){revNativeOrdinal=0;revC6Probed=0;}
++          if(mode.c6){revNativeOrdinal=0;revC6Probed=0;revC6Restored=false;}
+           revTail=Promise.resolve();revLocalMode=mode;revSealing=false;revSealed=false;
+           if((revProducer!==3||mode.c6)&&!revWatching){
+             revCheckRoot();
+@@ -7723,6 +7777,14 @@
+                 }
+                 if(Object.keys(seal).sort().join(',')!=='case,epoch,producer,seal'||seal.case!==mode.case
+                   ||seal.epoch!==mode.epoch||seal.producer!==revProducer||seal.seal!==true)throw new Error('EPOCH');
++                if(mode.c6&&revC6RetryRestore){
++                  // Existing teardown seal retries the retained selected restoration task.
++                  // No action/stop/native authority is created by this observation command.
++                  const retry=revC6RetryRestore;
++                  retry().then(restored=>{if(!restored){revFail();return;}
++                    revSealing=true;revFs.unwatchFile(command);revWatching=false;revMaybeSeal();
++                  },()=>{revFail();}).catch(()=>{revFail();});return;
++                }
+                 revSealing=true;revFs.unwatchFile(command);revWatching=false;revMaybeSeal();
+               }catch{revFail();revSealing=true;revFs.unwatchFile(command);revWatching=false;revMaybeSeal();}
+             });
+@@ -7821,7 +7883,9 @@
+         const revStart=RevRuntime.prototype.start;
+         RevRuntime.prototype.start=function(...args){const result=Reflect.apply(revStart,this,args),mode=revMode();
+           if(mode?.active&&mode.path===1){const runtime=this;
+-            result.then(()=>{try{if(!runtime.accepting||revStarted)throw new Error('OWNER');
++            result.then(()=>{try{
++              if(mode.c6){revInit(mode);if(!revGroups.size&&!revC6RetryRestore)revStarted=false;}
++              if(!runtime.accepting||revStarted)throw new Error('OWNER');
+               if(mode.c6&&mode.path===1){const profile=revFs.lstatSync(runtime.browser.scratchDirectory+'/browser-profile');
+                 if(profile.isSymbolicLink()||profile.dev!==revC6ProfileDev||profile.ino!==revC6ProfileIno)
+                   throw new Error('C6_CONTEXT');revC6ContextBound=true;}
+@@ -7875,12 +7939,38 @@
+           if(mode){const reason=['REVOKED','LEASE_LOST','EXPIRED','CANCELLED','CONTEXT_LOST',...(mode.c6?['UNKNOWN_OUTCOME']:[])].indexOf(args[0])+1;
+             if(this.accepting===false&&reason>0)revEmit(mode,5,1,0,reason);else revFail();
+             const runtime=this;
+-            result.then(async()=>{
+-              if(mode.c6){const deadline=performance.now()+10000;
+-                while(runtime.busy&&performance.now()<deadline)await new Promise(resolve=>setTimeout(resolve,10));
+-                if(runtime.busy){revFail();return;}revEmit(mode,6,1,0,0,revRestore());}
+-              revEmit(mode,9,1);
+-            },()=>{revFail();}).catch(()=>{revFail();});revRuntimes.delete(this);}
++            if(mode.c6){
++              if(!revC6RetryRestore){
++                let restoring=null,closeSucceeded=false,closedRecorded=false;
++                const retry=()=>{
++                  if(restoring)return restoring;
++                  restoring=(async()=>{
++                    const deadline=performance.now()+10000;
++                    while(runtime.busy&&performance.now()<deadline)
++                      await new Promise(resolve=>setTimeout(resolve,10));
++                    if(runtime.busy){revFail();return false;}
++                    const restored=revRestore();revEmit(mode,6,1,0,0,restored);
++                    if(!restored){revFail();return false;}
++                    revC6Restored=true;
++                    if(closeSucceeded&&!closedRecorded){closedRecorded=true;revEmit(mode,9,1);}
++                    // Drop only after actual dispatch settlement and exact descriptor restore.
++                    revRuntimes.delete(runtime);revC6RetryRestore=null;return true;
++                  })().catch(()=>{revFail();return false;}).finally(()=>{restoring=null;});
++                  return restoring;
++                };
++                revC6RetryRestore=retry;
++                result.then(()=>{closeSucceeded=true;return retry();},()=>{
++                  // Original rejection remains on the unchanged result; restoration is distinct.
++                  revFail();return retry();
++                }).catch(()=>{revFail();});
++              } else {
++                result.then(()=>revC6RetryRestore?.(),()=>{revFail();return revC6RetryRestore?.();})
++                  .catch(()=>{revFail();});
++              }
++            } else {
++              result.then(()=>revEmit(mode,9,1),()=>{revFail();}).catch(()=>{revFail();});
++              revRuntimes.delete(this);
++            }}
+           return result;};
+         """
+             .formatted(
+@@ -7934,7 +8024,8 @@
+             if(mode?.active&&mode.path===2&&args[0]?.kind==='stop'){
+               try{revValidateObserved('replay-ipc#/definitions/Stop',args[0],128);
+                 if(!revReady||!revStarted)throw new Error('READY');
+-                revEmit(mode,6,1,0,0,revRestore());revEmit(mode,5,1,0,4);
++                if(!mode.c6)revEmit(mode,6,1,0,0,revRestore());
++                revEmit(mode,5,1,0,4);
+               }catch{revFail();}}return result;}]);},
+           send(...args){const result=Reflect.apply(process.send,process,args),mode=revMode();
+             if(mode?.active&&mode.path===2&&args[0]?.kind==='ready'){
+@@ -7943,7 +8034,9 @@
+                 revReady=true;revStarted=true;revEmit(mode,1,1);
+               }catch{revFail();}}return result;},
+           exit(...args){const mode=revMode();try{
+-            if(mode?.active&&mode.path===2){revInit(mode);revSealing=true;revSealed=true;revPublish(mode,true);}
++            if(mode?.active&&mode.path===2){revInit(mode);
++              if(mode.c6&&!revC6Restored)revFail();
++              revSealing=true;revSealed=true;revPublish(mode,true);}
+           }catch{revFail();}finally{return Reflect.apply(process.exit,process,args);}}
+         };
+         """
+@@ -8097,11 +8190,21 @@
+                   try{result=await Reflect.apply(originalClose,receiver,closeArgs);}
+                   catch(originalFailure){fail();throw originalFailure;}
+                   if(selected?.c6){
++                    // Original close has settled, and the original native promise must also
++                    // settle before descriptor removal. Neither timeout nor Stop grants this.
++                    const observerDeadline=performance.now()+1000;
++                    if(selected.path===2){
++                      while(revActive.size&&performance.now()<observerDeadline)
++                        await new Promise(resolve=>setTimeout(resolve,10));
++                      if(revActive.size)revFail();
++                      else{revC6Restored=revRestore();revEmit(selected,6,1,0,0,revC6Restored);}
++                    }
+                     revEmit(selected,13,phase,fenceSucceeded?1:0,0,true);
+-                    // The original close already settled. Bound only observer ACK drain; no
+-                    // renewed run/step/lease permissions or delay of the native call itself.
+-                    let timer;try{await Promise.race([revTail,new Promise((_,reject)=>{
+-                      timer=setTimeout(()=>reject(new Error('C6_ACK_DRAIN')),1000);})]);}
++                    // Reuse the same finite post-close observer budget for final ACK drain.
++                    let timer;try{const remaining=observerDeadline-performance.now();
++                      if(remaining<=0)throw new Error('C6_ACK_DRAIN');
++                      await Promise.race([revTail,new Promise((_,reject)=>{
++                        timer=setTimeout(()=>reject(new Error('C6_ACK_DRAIN')),remaining);})]);}
+                     catch{revFail();}finally{clearTimeout(timer);}
+                   }
+                   if(fenceSucceeded){try{p4Fs.appendFileSync(p4SettledFile,phase+'\\n',{mode:0o600});}
+@@ -8465,9 +8568,23 @@
+       exchange.getResponseBody().close();
+     } catch (IOException | RuntimeException failure) {
+       P4RevocationState selected = p4Revocation;
+-      if (selected != null && selected.c6Kind > 0 && selected.c6Kind < 4
+-          && selected.c6CutAt != 0 && !accepted) selected.c6InterruptedNotification = true;
+-      else P4_NOTIFICATION_FAILED.set(true);
++      if (failure instanceof RuntimeException) {
++        P4_NOTIFICATION_FAILED.set(true);
++      } else {
++        Map<String, String> query = Map.of();
++        P4DocumentWitness actual = null;
++        try {
++          query = p4Query(exchange.getRequestURI().getRawQuery());
++          actual = P4_DOCUMENTS.get(p4PositiveOrdinal(query.get("document")));
++        } catch (RuntimeException invalid) { P4_NOTIFICATION_FAILED.set(true); }
++        if (accepted && selected != null && selected.c6Kind > 0 && selected.c6Kind < 4
++            && "focus-enter".equals(query.get("kind")) && actual != null
++            && actual.phase == selected.c6Phase) {
++          // Provisional transport unavailability, not a healthy ACK or no-effect receipt.
++          // Terminal proof below must independently confirm the realm was genuinely closed.
++          selected.c6InterruptedNotification = true;
++        } else P4_NOTIFICATION_FAILED.set(true);
++      }
+       throw failure;
+     }
+   }

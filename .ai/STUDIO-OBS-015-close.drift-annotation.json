@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "kind": "close-file source-digest drift annotation (append-only sibling)",
+  "annotates": {
+    "path": ".ai/STUDIO-OBS-015-close.json",
+    "sha256": "9a686bb5ef7c24aafeb63fe8ba7d2df0a02069ad9e4200c40637bd7c12f33644",
+    "unchanged": true
+  },
+  "story": "STUDIO-OBS-015",
+  "author": "root (coordinator)",
+  "annotatedAt": "2026-10-17T19:25:45.541861+00:00",
+  "whySiblingFile": "Adding a field would change the close file's sha256, which other receipts bind byte-exact.",
+  "recordedSourceDigest": "9d18f5550ac830bd2164bf4b4261f6d10ec8fd43b837e4bf9e9c990dc7cb5884",
+  "currentSourceDigest": "feec0891286f5c6275dd13be51196c4fb1520dcbb6dd2ad8c4fc5f8d748d3c2b",
+  "currentManifest": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/baseline/w0-baseline-manifest.json",
+  "comparedAgainst": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-unit07-after.json (1651 files, same capture scope)",
+  "matches": false,
+  "changedFiles": [
+    {
+      "path": "AGENTS.md",
+      "sha256Now": "4e31c5e152494cd5e15235c55130b0e9d467b359231c13343f3202c3e7ba5ab9"
+    }
+  ],
+  "reason": "Post-close documentation edit only: the 'Accessibility Scope' section (user decision 2026-10-17, ADR-SC-006) was added to AGENTS.md. No code, spec, test or package file in the capture scope changed. distDigest unchanged (897182d5...).",
+  "recordedHashesRewritten": false
+}

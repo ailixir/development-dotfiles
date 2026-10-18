@@ -1,0 +1,50 @@
+{
+  "status": "GO_SOURCE_CANDIDATE_REVIEW_NO_RUNTIME_CREDIT",
+  "receiptSha256": "6d641faea22fee0bb743dd4efaaf416dd97a5b23cdd56421a3131004fb00f378",
+  "candidateHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "4480679c739df25742ed901828b91b8ccf9c0169cd8164f6c9f4ed37a00dd000",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "781018b1bbcc6d0c151f63d2056762545b90c3b787b1f0cf1772355003814ef2",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "424289eaae6ac07add2faed9324744a31f3c529a2a1e01fcdeda9d154e9312af",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": "1a8273595b0f3e42c5d239535d186d7090fa2201dafcef6272f89155d808bf53",
+    "docs/specs/studio-observed-authoring/secret-login-design.md": "079b32167b5c75b7e3f01b33e64ad90e108550f55efb090d7e70de7b3e4a22a6"
+  },
+  "mechanicalProof": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": {
+      "liveBaseAndCandidateHashExact": true,
+      "wholeInverseExact": true
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": {
+      "liveBaseAndCandidateHashExact": true,
+      "wholeInverseExact": true
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": {
+      "liveBaseAndCandidateHashExact": true,
+      "wholeInverseExact": true
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": {
+      "liveBaseAndCandidateHashExact": true,
+      "wholeInverseExact": true
+    },
+    "docs/specs/studio-observed-authoring/secret-login-design.md": {
+      "liveBaseAndCandidateHashExact": true,
+      "wholeInverseExact": true
+    }
+  },
+  "findings": [
+    "Actual successful full-session validate precedes exact independent expanded-root pin; original root PropertiesValidator owns exact matching fullOWNER child. Private no-getter token carries Contracts/root identity and owned parser copy, same-class/tree/JSON/repr. No generic skip/certificate exposed.",
+    "GSS adds one optional prelude only after original request/path/key/worker checks; v3 only and ambient actual TX prevents repository read. All original revocation/currentness/auth/source/assignment/digest/duplicate/lease/acquisition guards unchanged by whole inverse.",
+    "Prelease bind is same Contracts/root/fullsnapshot/repr plus exact current ObjectNode reference. Save-point adjusted private copy proves only lease delta; fresh canonical is outside Runtime fallback catch, fullOWNER invalid becomes original fixed422 outsidecatch. Runtime unavailable calls original public fullvalidation; Error propagates.",
+    "Public saveRenewalAndCommand original transaction guard/fullvalidate unchanged; SQL body lifted verbatim to private writer, same CTE/parameters/rowcount refusal. Null/mismatch returns direct original public save invocation.",
+    "Four additions are actual existing-PG seams for offlock preparation and ambient no-read, sameContracts/foreign/currentref/JSON/repr/type fallback, typed owner rejection and command collision rollback, null/public default and Runtime/Error observation. Original43 test bodies reconstruct byte-exact."
+  ],
+  "apiAndTypeReview": [
+    "Installed JsonSchema.getSchemaNode/getValidators and PropertiesValidator.getSchemas signatures fit source; imported PropertiesValidator direct public accessor, no reflection/new schema compilation. Java List.getFirst requires existing Java21+toolchain, already repository supported.",
+    "Exact parser roundtrip intentionally refuses LongNode/IntNode representation changes and unsupported custom trees; this may reduce hit rate but preserves fallback. Tests use standard owned ObjectNode snapshots.",
+    "JdbcTemplate query overload typed RowMapper<JsonNode> and generic var return are source-compatible by inspection; compiler remains genuine gate, no execution credit.",
+    "Static exact expanded-schema fingerprint covers no-crossfield/root constraints; child map lookup plus node equality gives same root child provenance. No mutable map/config is exposed."
+  ],
+  "tradeoffs": "Added readonly DB/fullschema/TRACE observations, copies and Error timing explicitly documented; internal OWNER-root diagnostics differ, fixed public refusal retained. No latency/exclusivecost/authority/rollback proof claimed before actual tests.",
+  "testLimits": "New count4 and total47 are source expectations only, UNRUN. No fullCore/browser/new mandatoryE2E or model/provider credit.",
+  "concerns": [],
+  "actions": "Source-only frozen candidate review; no integration/build/runtime/query/fixture or schema edits. USD500 ceiling billing unavailable"
+}

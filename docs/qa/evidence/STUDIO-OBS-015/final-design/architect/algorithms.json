@@ -1,0 +1,165 @@
+{
+  "authority": "Final Aria technical ruling; supersedes proposed A1-A6 only; PO-approved behavior preserved",
+  "canonical": {
+    "algorithm": "canonical-v1 via GuidedContracts.canonical",
+    "objectKeys": "ASCII keys, ascending code unit order; no extra whitespace",
+    "strings": "Exact Unicode scalar sequence; no normalization; standard lower-case JSON control escapes; reject unpaired surrogate",
+    "numbers": "safe integers only [-9007199254740991,9007199254740991], no -0 or decimal",
+    "hash": "SHA-256 UTF-8 lowercase hex",
+    "referenceArraySort": "unsigned UTF-8 byte comparison; BMP U+E000 sorts before astral U+10000"
+  },
+  "identity": {
+    "source": "locked current raw AuthoringV2Request + StudioVariable declarations; base revision frozen columns only",
+    "contextLookup": "exact referenceId==StudioVariable.name; do not parse URI/name suffix",
+    "tokenLookup": {
+      "var": "plain.name exact",
+      "secret": "actual secretId exact, aliases to same ID dedupe"
+    },
+    "collectPaths": [
+      "steps[*].text canonical var/secret tokens",
+      "steps[*].context.entries[kind=variableRef].referenceId",
+      "steps[*].context.entries[kind=secretRef].referenceId",
+      "steps[*].context.entries[kind=default].value[kind=variableRef].referenceId",
+      "globalContext.entries[kind=default].value[kind=variableRef].referenceId"
+    ],
+    "literalPaths": [
+      "ContextText.value",
+      "literal.value",
+      "targetHint fields",
+      "literal default values"
+    ],
+    "dedup": "referenceId/kind exact; conflicting kinds or different secretId at same key are refused, never merged",
+    "plainValueHash": "hash(exact non-null string); empty/whitespace valid",
+    "sortAndBounds": "<=500 unique referenced declaration keys; exact names<=64 Unicode scalars; total referenced arrays within inherited request and canonical limits",
+    "derivedDraftCache": "Recompute current identity regardless of old authoring_revision_inputs cache. At publication verify frozen manifest identity equals recomputed locked current identity, refresh only derived cache in same transaction before V12 capture trigger copies it. No revision counter/authored data/history rewrite.",
+    "frozenSessionSource": "manifest gains authoringIdentityVersion=1, authoredDeclarations and complete AuthoringRevisionInputs; positive model projection does not copy private values or entire manifest"
+  },
+  "hashes": {
+    "stepInputHash": "hash(StepInput schema object: exact stepId,text,normalized stored StepAuthoringContext,sorted per-step declarations)",
+    "testConfigHash": "hash(TestConfig schema object); globalContextHash=hash(normalized exact globalContext); references used globally only in globalReferences",
+    "inputChain": "hash(StepChain); previous=testConfigHash for position1 then previous chain",
+    "learnedStepHash": "hash({actions,producedBindings,consumedBindings}) with exact projections below",
+    "snapshotHash": "hash(StepSnapshot schema object)",
+    "actions": "select by coordinate.stepId, ascending semantic ordinal, remove ONLY admissionId; operationHash and sourceInputId retained",
+    "producedBindings": "select by producer.stepId; remove consumers and provenance.sessionId/provenance.producerAdmissionId, retain all other/new semantic fields; sort producer.ordinal then bindingId UTF-8",
+    "consumedBindings": "flatten full binding.consumers where coordinate.stepId==step; remove ONLY producerAdmissionId/consumerAdmissionId; sort coordinate.ordinal,argumentSlot,bindingId UTF-8",
+    "notInLearnedContent": [
+      "snapshot maps",
+      "reuse maps",
+      "incremental session metadata",
+      "attemptOrdinal (ledger only, not learned action)",
+      "receipt/evidence values not present in learned action shape"
+    ],
+    "wholeGraphCommitment": "learnedPlanHash commits all actions/bindings incl consumers, stepSnapshotHashes,reusedFrom,incremental metadata; publicationEvidenceHash commits all attempt/version/switch/request proofs"
+  },
+  "boundaryAlgorithm": [
+    "No confirmed revision=>UNLEARNED; empty draft cannot start.",
+    "Verify immutable base and complete authoringIdentityVersion1 + snapshots. Insufficient=>NEEDS_RELEARN at first draft step reason BASE_IDENTITY_INCOMPLETE, omitted-start409; explicit first step enables full learn with no reuse.",
+    "Different testConfigHash=>k1; otherwise first differing current/base UUID or inputChain by position.",
+    "Strict tail deletion=>last current step. Append=>new first appended step. UUID lexical order irrelevant.",
+    "Identical complete identities=>READY even if draft source/config counters advanced for unused declarations.",
+    "Client boundary after computed k=>FIRST_LEARN_STEP_NARROWED; unknown=>FIRST_LEARN_STEP_UNKNOWN; wrong base=>BASE_REVISION_MISMATCH. READY explicit N allowed."
+  ],
+  "ordinaryReadinessParity": {
+    "replace": "ExecutionReadinessService.evaluate term5 draft-vs-base source/config counter equality only; use shared complete identity comparator",
+    "retain": [
+      "lifecycle/deleted/quarantine",
+      "confirmed immediate revision of same test/CSI",
+      "confirmation/provenance family",
+      "artifact hash and ObservedRevisionVerifier integrity",
+      "ordered authoring UUID/text hash and actual execution configuration hash",
+      "current authorization/TrustedPolicy checks"
+    ],
+    "counterScope": "Guided start request and active session current-source checks/publication CAS still require current counters. Ordinary acceptance snapshot and grant remain pinned to immutable revision counters/digest (StudioAcceptanceService:533-534).",
+    "schedule": "Existing updateTest schedule invalidation for any changed variable/config counter stays; semantic READY never reenables a schedule.",
+    "source": "ExecutionReadinessService:179-208; StudioAcceptanceService:305,533-534; ObservedReplayAuthorizer:52-120"
+  },
+  "materialization": {
+    "maxInputs": 200,
+    "maxContextVersions": 201,
+    "maxCanonicalInputBytes": 1048576,
+    "maxEntryBytes": 32768,
+    "metadataRevisionRange": "1..2147483647 with checked increment",
+    "appendOnly": "Existing ordered entry prefix byte-identical; source/config/worker/fence/context immutable; new entry identifiers unique; introducedRevision=current+1",
+    "noOp": "Exact existing union returns old version/delivery identity; no insert or revision bump",
+    "blockAppend": [
+      "live ADMITTED/DISPATCHING action",
+      "native invocation/inflight runtime",
+      "unexpired unconsumed preparation",
+      "unacknowledged context delivery"
+    ],
+    "staleProof": "After append, expired/unaccepted old proof cannot be admitted or consumed against latest context; old successful proof remains valid by pinned historical version",
+    "delivery": "Freeze full RunnerContext metadata minus authoredInputs once, reconstruct exact pinned inputs, hash full issued context. Original payload/lease frozen across retry. ACK verifies current owner live plus exact issued contextHash/version/inputs/metadata revision/deliveryId; no model/action while pending."
+  },
+  "attemptAndDrift": {
+    "maxDriftSwitchesPerSession": 1,
+    "maxReceiptPerSession": 1,
+    "attemptOrdinal": "0..1; required immutable ledger field+column, server assigned; proposal coordinate unchanged",
+    "semanticOrdinal": "0..7 and configured maxStatementsPerStep; effective successful coordinates contiguous",
+    "quota": "All admitted attempts charge existing maxActions<=200; request probes charge observation/time budgets, maxPrefixRequests=min(maxObservations,400)",
+    "preAdmission": "no spent action; receipt exact prefix request; first learned replacement uses attempt0",
+    "admitted": "DISPATCHING/count1 attempt0 becomes immutable FAILED/TARGET_CHANGED plus accepted receipt; fresh attempt1 permitted only same semantic coordinate, no live/invoked/successful prior attempt",
+    "nativeFence": "Persist NOT_BEGUN -> INVOKING before native API OR -> REFUSED_BEFORE_INVOCATION on recognized pre-native drift; no transition out of REFUSED; journal uncertainty=>UNKNOWN_OUTCOME",
+    "authority": "current owning-worker RS256 identity and connector mTLS, exact assignment/subject/fence/lease/context/version/request/preparation/operation/evidence; hash alone is not authentication",
+    "secretAudit": "Per-version joins; prior RELEASE and conservative non-OK USAGE=UNKNOWN_OUTCOME preserved; no fabricated NOT_USED/REFUSED; replacement fresh authorization/read/release",
+    "firstSuffix": "One immutable acceptance authorizes replacing only unexecuted imported/positively noninvoked failed meanings; exact successful earlier meanings retained. Later plans retain normal strict monotonicity."
+  },
+  "publicationJoin": {
+    "effective": "Every actual SUCCEEDED action exactly once at semantic coordinate, current final obligation association and exact historical input version",
+    "excluded": "At most one FAILED/TARGET_CHANGED consumed attempt with exact authenticated no-invocation receipt; no other failure/unknown/admitted/dispatching row omitted",
+    "reuse": "Exact contiguous fully replayed steps before effective boundary, immediate pinned base only, same test/CSI/step/equal recomputed hash. Retained earlier ordinals of drift step are execution evidence but j has no reusedFrom.",
+    "zeroConsumer": "Only exact successful retained-prefix producer, verified origin/recipe/availability; never fabricate consumer; model-created standalone unconsumed need refused.",
+    "inputOutput": "Immutable full materialization proof retained; candidate replay inputs/reference arrays filtered to those used by effective actions; authoredDeclarations remains complete.",
+    "retention": "V19 prune behavior unchanged, immutable bounded summaries remain separate; raw materialization/history/proposals/plan/commands remain disclosed F01 residual; no generic prune or compliance waiver"
+  },
+  "sourceAnchors": [
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringRevisionIdentity.java",
+    "backend/src/main/java/com/citi/put/checks/studio/validation/VariableReferenceValidator.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/StudioVariable.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceSnapshotRepository.java",
+    "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+    "backend/src/main/resources/db/migration/V12__tests_revisions.sql",
+    "backend/src/main/resources/db/migration/V14__guided_sessions.sql",
+    "backend/src/main/resources/db/migration/V15__publication.sql",
+    "backend/src/main/resources/db/migration/V17__secret_use_audit.sql",
+    "backend/src/main/resources/db/migration/V19__guided_governance.sql",
+    "studio-runner/src/guided/runtime.ts",
+    "studio-runner/src/guided/journal.ts",
+    "studio-runner/src/run/observedReplayAdapter.ts",
+    "studio-runner/src/executor/observedReplay.ts"
+  ],
+  "resultSemantics": {
+    "relearnedFromBeforeSwitch": null,
+    "relearnedFromAfterSwitch": "entered learning boundary, effective stepId and driftSwitchStepId=j when drift, even if subsequent SOURCE_PLAN fails",
+    "successAuthority": "learnedFromThisRun/publication, not relearnedFrom",
+    "noImplicitFallback": "No switch => no fallback to initial plan k; first ever unlearned=>null"
+  },
+  "validationBasisExtension": {
+    "requiredFields": {
+      "materializationEvidence": "MaterializationEvidence exact schema: versions1..201 + entries0..200",
+      "incrementalEvidence": "null for no base; IncrementalEvidence exact schema otherwise"
+    },
+    "order": {
+      "versions": "contextRevision ascending",
+      "entries": "inputOrdinal ascending",
+      "prefixRequests": "draft step order, semantic ordinal, observation generation at issued request; tie requestDigest lexicographic",
+      "excludedAttempts": "0..1, only actual consumed failed attempt; original full action/preparation/obligation association",
+      "existingActions": "effective successful semantic coordinates in draft step order, ordinal ascending"
+    },
+    "privateInputProof": "InputEvidenceEntry.inputHash hashes exact full private input; metadata is exact input minus nonsecret value. SQL/backend recompute from immutable stored inputs before freezing basis; runner pure validator checks provenance/version/hash-reference joins without receiving private values. Header inputCount cutoff determines exact membership.",
+    "publicationEvidenceHashExact": "hash({version:1,basisHash:hash(entire extended ValidationBasis),runAuthorizationHash:hash(basis.runAuthorization),translationHash:basis.translationHash,bootstrapHash:hash(basis.bootstrap),sourceManifestHash:basis.sourceManifestHash})",
+    "source": "ObservedReferencePolicyDeriver.java:26-41; studio-runner/src/validator/observedReplay.ts:340, unchanged formula",
+    "admissionProvenanceHashExact": "hash(ordered array of effective ledger tuples {coordinate,admission,operationHash,scopeHash}); excluded spent attempt is committed by extended basis/publicationEvidenceHash instead",
+    "fullLearn": "materializationEvidence still required; incrementalEvidence=null; all old fixture heads upgraded in same generation",
+    "admissionProvenanceSourceParity": "Java ObservedReferencePolicyDeriver:16 declares ArrayNode admissions=ObjectNode.putArray(admissions), whose return value is the child ARRAY; line40 hashes array, not temporary wrapper. TS hashes identical ordered tuples. Preserve exact array and test wrapper negative; no pre-existing parity correction is required."
+  }
+}

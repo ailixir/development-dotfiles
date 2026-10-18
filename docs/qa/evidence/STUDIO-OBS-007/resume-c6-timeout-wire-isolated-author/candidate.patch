@@ -1,0 +1,15 @@
+--- docs/qa/evidence/STUDIO-OBS-007/resume-c6-timeout-wire-isolated-author/before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java	2026-10-11 17:56:51
++++ docs/qa/evidence/STUDIO-OBS-007/resume-c6-timeout-wire-isolated-author/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java	2026-10-11 17:56:51
+@@ -8151,7 +8151,11 @@
+       JsonNode result = p3AwaitExecution(state.execution, "ERROR");
+       JsonNode report = p3RunnerReport(state.execution);
+       assertThat(report.path("outcome").path("errorCode").asText())
+-          .isEqualTo(kind == 1 ? "OUTCOME_UNKNOWN" : "CANCELLED");
++          .isEqualTo(kind == 1 ? "RUN_ERROR" : "CANCELLED");
++      if (kind == 1) {
++        assertThat(report.path("outcome").path("errorMessage").asText())
++            .isEqualTo("OUTCOME_UNKNOWN");
++      }
+       if (kind == 2) assertThat(result.path("errorCode").asText()).isEqualTo("CANCELLED");
+       assertThat(report.path("steps").get(1).path("failure").asText())
+           .isEqualTo(kind == 1 ? "OUTCOME_UNKNOWN" : "CANCELLED");

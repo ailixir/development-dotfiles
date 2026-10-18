@@ -1,0 +1,21 @@
+schema: 1
+story: "STUDIO-OBS-014"
+gate: PASS
+status_reason: "Every originally applicable local QA oracle executed green on the final frozen source/dist, including actual guard refusals, post-prune native replay, SAVED_INPUT, real policy-context forgery and mounted-worker refusal. External approvals and release gates remain explicitly outside this story completion."
+reviewer: "Quinn (independent security/SDC QA)"
+reviewed_revision: "worktree-strict:sha256:cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467"
+protected_story_content_sha256: "bc222a40a66ab22a4225a9c4b73e7f827950972b15059721fc6b7d4933883043"
+updated: "2026-10-15T03:14:08.027516+00:00"
+story_version: "0.1.17"
+review_report: "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-story-review.json"
+final_proof: "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/formal-final-proof-rechecks.json"
+source_manifest: "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/integration-final-all-gates-after.json"
+source_digest: "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467"
+dist_digest: "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2"
+top_issues: []
+waiver: {"active": false}
+acceptance_criteria: {"AC-1": "PASS", "AC-2": "PASS AS SCOPED DESIGN DOCUMENT", "AC-3": "PASS", "AC-4": "PASS", "AC-5": "PASS", "AC-6": "PASS", "AC-7": "PASS", "AC-8": "PASS", "AC-9": "PASS", "AC-10": "PASS", "AC-11": "PASS AS SCOPED DESIGN DOCUMENT", "P1_legacy_admission": "PASS", "dead_v2_matcher": "PASS"}
+verification: {"backend": "Normal unfiltered check exit0;2077 standardpassed/25historicskips;2additionalcrossReplicaPASS;287freshXML.No requiredlocalskip.", "joined": "Planning57/Replay40/Session44/Bridge37 allPASS;allprior testcaseoccurrencesretained+1realforgery.", "runner": "1529unitPASS29historicskips;10profilePASS;232nativePASS9historicskips;313deploymentPASS0skip;type/lint/coveragegreen.", "coverage": "Global18987/21237>=70;4active75scopes;source-mappedgateway393/424>=80 byexplicitXMLproof.Legacy80selectorliteralsNO_CURRENT_CLASSES,notmatchedPASS.", "audit_corpus": "Planning7admitted,6SIDE_EFFECT_DENIED/2UNGROUNDED_TARGET/1DESTRUCTIVE_VERB plantedrefusals,2confirmations;Replay55admitted0refused.Nounplantedrefusal.", "method": "Independentmanualsource/security/requirementsreview;CodeRabbitunavailableconfiguredfallback(core-config230/story014208/qa-gate224).NoautomatedPASS.", "history": "Originalstatic/nativefailedattempts and priorCONCERNSreview retained,neverrewritten."}
+scope_limits: ["OBS009realmodelDCcalibration/capacity,actualSIEM/deployment/staging/foldedrunner", "OBS010SecurityComplianceapproval/ED01gatewayretention/D2bcachedresponseauthority/targetLabelHashprivacy", "ManualmaskC17andrealSonic/Vault/ingress/pinnedproductionimageproofnotclaimed", "F01nonAC3indefiniteretention,F02policysources,F03governedexactfieldreads,F04artifactHMACimplementation/E1-E8remainunconfirmed;AC11designonly", "FutureCIlegacycoverageincludelimitationdisclosed;currentmappedcoverageexplicitlyasserted,no falsematchorcoveragewaiver"]
+previous_gate_archive: "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/prior-canonical-gate-before-final.yml"
+completion_policy: "PASS only;allplannedapplicablelocalactualgreen.No localwaiver/deferredcriterion."

@@ -1,0 +1,44 @@
+{
+  "exitCode": 1,
+  "firstBoundary": "compileJava",
+  "compilerErrors": [
+    {
+      "class": "GuidedSessionService",
+      "line": 991,
+      "code": "UNRESOLVED_GUIDED_MATERIALIZATION_SERVICE_TYPE"
+    },
+    {
+      "class": "GuidedSessionService",
+      "line": 2060,
+      "code": "UNRESOLVED_GUIDED_MATERIALIZATION_SERVICE_TYPE"
+    }
+  ],
+  "causeSource": "New simple-name nested type references lack import; original materialization references fully qualified",
+  "compileTestJava": "UNEXECUTED",
+  "styleSpotbugs": "UNEXECUTED",
+  "defining": "UNEXECUTED",
+  "C5": "UNEXECUTED",
+  "sourceProof": {
+    "docs/specs/studio-observed-authoring/translation-design.md": {
+      "formattedSha256": "1c954660e28c553302532b8d8e1ce233e0af6f0578d8608f16b46fa64f800786",
+      "tokensRawLiteralsCookedExact": true,
+      "outsideApprovedDeltaInheritedInverseExact": true
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": {
+      "formattedSha256": "004e570ec18c43fa2eb4507037bea684d0621d272fa88cf65c40754dbd2860b9",
+      "tokensRawLiteralsCookedExact": true,
+      "outsideApprovedDeltaInheritedInverseExact": true
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java": {
+      "formattedSha256": "c5cd9ae8a3881351e3f66dd36deedf4b8cb4c56645988913730589f586261dc5",
+      "tokensRawLiteralsCookedExact": true,
+      "outsideApprovedDeltaInheritedInverseExact": true
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": {
+      "formattedSha256": "706e1d183ea96c680c34774481f67e9c5e74d31e19033029b62d5101d76855f6",
+      "tokensRawLiteralsCookedExact": true,
+      "outsideApprovedDeltaInheritedInverseExact": true
+    }
+  },
+  "noSilentRepair": true
+}

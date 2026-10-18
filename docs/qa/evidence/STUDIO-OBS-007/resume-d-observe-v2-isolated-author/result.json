@@ -1,0 +1,71 @@
+{
+  "disposition": "FROZEN_ISOLATED_SOURCE_CANDIDATE_FOR_INDEPENDENT_REVIEW; NO_INTEGRATION_OR_RUNTIME",
+  "authority": {
+    "design_sha256": "93eb5c50a5c73b72b5aec2fcf370ee17a1d2e210fa6e1d2acac051874de920d1",
+    "root_review_sha256": "bbb46ae70ccac4922dd1adb441f0a173bb3ff49a42ddca3285a5e213c9ef3de9",
+    "coordinator_GO_sha256": "3346def48f0fb7b9c4f0fc83d3ee1b70015fae60c679bdd6f4840b2891a25448"
+  },
+  "files": {
+    "docs/specs/studio-observed-authoring/translation-design.md": {
+      "base_sha256": "573a0aa07f0032f83cfe1cf9803a27fc16864a823ce3674c86223694da58db4d",
+      "candidate_sha256": "acebbef799b52d02954950fb01ef4a194b253318bb5103f1d4a3c20077cab295",
+      "live_base_unchanged": true,
+      "whole_inverse_exact": true
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": {
+      "base_sha256": "d1ee0e799d8b6d6c5b9710c0063af75328b3c24f754d69d32b6dbcb15240e99a",
+      "candidate_sha256": "26b9efc61f521fca24dfc118b869d7a1c8b6de7babe544b45a1681538500ed40",
+      "live_base_unchanged": true,
+      "private_observe_transition_body_raw_sha256": "1d76d097f52bcf22765002f093562bd5301d540250ffd1107b07b1cef7feb70e",
+      "private_observe_callback_raw_exact": true,
+      "outcome_ledger_seam_and_all_unrelated_methods_raw_exact_after_inverse": true,
+      "whole_inverse_exact": true
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": {
+      "base_sha256": "8509a9fc40327b2658cab210f37299d2ca0fa0aa8c6a3c3c56aa6b5c5e9d333e",
+      "candidate_sha256": "5be06a22a11a4cf456e63e0d65c9d28eb3ad33ac28b74155cc28aa6dc04b8083",
+      "live_base_unchanged": true,
+      "all_original_test_and_helper_bodies_raw_exact": true,
+      "old_test_annotation_count": 34,
+      "new_test_annotation_count": 38,
+      "whole_inverse_exact": true
+    }
+  },
+  "patch": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/resume-d-observe-v2-isolated-author/candidate.patch",
+    "sha256": "2abefa273e13cc49e30c8d0f124e99e5ce911eb5c3499ec1fdcc1c535a1a6b92"
+  },
+  "documentation_first": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/resume-d-observe-v2-isolated-author/documentation-first.json",
+    "sha256": "0e9ddd4f3a3dbc1f4c8a7240244d5c92ee0cbb4895d52cb52d311bee434e8c68",
+    "before_java_edits": true
+  },
+  "helper_reuse": {
+    "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java",
+    "sha256_unchanged": "5e08c5da589554f66f62aa23b0cd6c8a0774a0813e14edc51aa8d21f95e4b6c5",
+    "metadata_proof": "resume-d-outcome-ledger-isolated-author/source-preservation.json Jackson2.17.2 metadata; existing copy helper and14 source-bound defining tests unchanged",
+    "new_node_framework": false
+  },
+  "minimum_seam": "One service-private final result/private constructor binding exact service+observation reference+private owned snapshot+representation+fixed enum. Only after original bridge/path does private preparation call SAME contracts.validate(observation,snapshot). At original logical881 point accept exact match or run original validation; all public/default six-arg paths pass null.",
+  "ownership_dataflow": "Only selected owned envelope or original unsupported request is read by all original bridge/path/hash/duplicate/materialization/refresh/command/inner observe; original owned tree never exposed/mutated. Snapshot uses same unchanged reviewed ledger copy helper. No public/package skip API, result getters, certificate/cache/flag or payload printing.",
+  "priority": "Fresh outer owner/current/active/fullmaterialization/duplicate/refresh remain before logical881 result. Later path/internal role/source/state/schema/scope/budget/generation/origin/canonical/hash/evidence/accounting/write behavior preserved raw. Existing outcomeV2 token integration untouched.",
+  "failure": "Only fixed INVALID_CONTRACT422 or RUNTIME_INCOMPATIBLE409 matching BOTH code/status; no Throwable stored. Unknown nonfatal copy/prep/match uses original path/validator at logical881. Error is uncaught and explicitly early during copy/prep. No raw cause/value diagnostic or invented code.",
+  "focused_test_source": {
+    "selector": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+    "old_methods": 34,
+    "new_methods": 38,
+    "added_tests": [
+      "preparedObservationOwnsTheWholeEnvelopeBeforeCallerMutation",
+      "preparedObservationFailureKeepsOwnerMaterializationRefreshAndDuplicatePriority",
+      "unsupportedObservationEnvelopeUsesOriginalLockedValidation",
+      "unavailableObservationPreparationFallsBackAndFatalRemainsEarly"
+    ],
+    "tier": "existing realPG service fixture/public API+controlled existing contracts dependency; no browser/native/Core effect claim",
+    "coverage": "Owner/current/materialization/refresh precedence and rollback, original public successful observation then real duplicate bypasses typed failure, entire caller envelope mutation cannot alter actual guarded input/committed hash, unsupported standard-subclass route validates inside TX, unavailable retry-in-original validation and early Error preserve actual generation",
+    "execution": "UNRUN; source counts only"
+  },
+  "test_seams": "Original observing()/frozenCallbackIdentities/materialization/assignments/repository/TestAccess/clock reused; alternate service installs those same existing bridge components on SAME datasource. No reflection/private-field mocking/new Spring context/framework/manual DB state/trigger waiver or mandatory E2E.",
+  "next_checks": "Root full source review then coordinator scoped formatter/compiler and existing SessionIT/Bridge defining suites plus unchanged unprofiled joinedC5 if released. Current compiled source/debugline metadata changes require coordinator source/class remapping before sampled reuse.",
+  "limits": "Extra copy/snapshot/representation match/fallback/early Error/cache observations explicit; confirmed observeV2 target may differ from lastclaim and exclusivecost unknown. No performance/acceptance promise. Same-epoch context58566 separate/unimplemented.",
+  "actions": "No live writes/build/tests/runtime/browser/SQL/diagnostic/dist/lifecycle/QA/Done/DAG/commit/push/deploy; USD500 actual billing unavailable."
+}

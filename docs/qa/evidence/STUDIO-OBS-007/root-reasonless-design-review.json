@@ -1,0 +1,19 @@
+{
+  "scope": "SOURCE_ONLY_BOUNDED_AUTHOR_APPROVAL",
+  "proposalSha": "ad695bc209f00f90f427d63646dfafea0251c3571585af14cf6c3be9531a31e2",
+  "sourceSha": "4e2e21bec4c017cef3b2ec4fed6221c111afef70f76c0c25a7439e86189f0f9d",
+  "disposition": "APPROVE_EXACT_MINIMAL_DELTA",
+  "approved": "Gate only reasonless revInvalidate revEmit behind !mode.c6. Preserve original Reflect.apply, stopped-state failure check, receiver/args/result, legacy emission, strict validator and actual reason-coded revStop notification.",
+  "sourceFacts": [
+    "Runtime.stop synchronously calls original onStopping",
+    "Ownership onStopping invokes invalidate",
+    "revEmit default reason0 conflicts with C6 required reason1..6",
+    "revStop emits reason-coded event5 after original stop invocation"
+  ],
+  "limits": [
+    "Actual first rejected sequence was not persisted",
+    "Other observer failures may remain",
+    "No runtime or whole acceptance PASS",
+    "No validator relaxation or new telemetry"
+  ]
+}

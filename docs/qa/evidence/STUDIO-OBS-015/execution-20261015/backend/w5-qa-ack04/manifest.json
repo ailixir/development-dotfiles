@@ -1,0 +1,42 @@
+{
+  "story": "STUDIO-OBS-015",
+  "artifact": "w5-qa-ack04",
+  "agent": "Quinn (@qa)",
+  "date": "2026-10-16",
+  "reviewed": "w5-window01",
+  "verdicts": {
+    "1_B3B-3_edge_selection": "ACK",
+    "2_B3B-1_valid_uri_substitute": "ACK",
+    "3_ledger56_E1_E2": "ACK_CLOSED_PROVEN-BY-RULING aria-ledger56-ruling01",
+    "4_observer_counter_and_TFIT_bc": "ACK"
+  },
+  "gate": "test-change ACK only; story gate NOT approved: B3B-1 red on W5-F3 (PUBLICATION_CONFLICT never requests runtime stop), needs Aria ruling",
+  "advisories": [
+    "A1: keep non-URI destination substitution as extra label pinning INVALID_CONTRACT / WRITER_REFUSED (do not pin readsDelta until observed)",
+    "A2: optional RECEIPT_SWITCH negative row (non-null receipt) in resultCases",
+    "R1: no post-fix run recorded native0-first ordering; fix proven by code reading",
+    "Disclosure correction: GuidedPublicationAuthorityIT does read publication-fixtures.json (basis paths only); no source references resultCases",
+    "Runner checkpoints quoting publication-fixtures 86e42679 need re-anchor to a7c9f595"
+  ],
+  "verifiedLiveSha256": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "0bae32b3e5df20c398c33de5660778ae4f67bd71d6abfa02202e495218f218ee",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "5679a6500c24f974bcb9f8800fa5c6e9ec31195584c426b07124b07ee2e9a467",
+    "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json": "a7c9f5956bb153694ea08730adde1ac0d3c47042f14a87819ed4089458c0885f",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java": "0e37ff859ce695d745914c0e91b6d275c304c071ad755ec586aba40cf1cc4b12"
+  },
+  "commandsRun": [
+    "node tools/check-studio-observed-contracts.cjs -> exit 0, PASS incremental: 140",
+    "shasum of 5 files vs manifest",
+    "python comparison of b3-outcomes (targets01 vs incr01: identical, 13 labels)",
+    "grep resultCases/publication-fixtures in backend/src, studio-runner, frontend"
+  ],
+  "notRun": [
+    "Gradle",
+    "spotless/checkstyle/spotbugs",
+    "CodeRabbit",
+    "frontend lint"
+  ],
+  "reviewSha256": "d9f3be2bb9df235ddb0f4ec23ee45b6292a0ae1648b5ad61d8aa7c63863bd377",
+  "committed": false,
+  "sourceModified": false
+}

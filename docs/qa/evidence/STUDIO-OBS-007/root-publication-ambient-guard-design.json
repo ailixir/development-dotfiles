@@ -1,0 +1,9 @@
+{
+  "decision": "GO_ISOLATED_AMBIENT_GUARD_AMENDMENT",
+  "parentPublisherSha256": "a60b5e812ff2fc65b6a75d77dfb096cc3ae1673c902cca2bc280bed21548a061",
+  "fact": "TransactionTemplate defaultREQUIRED canjoinambientcallerTX; returningcapturedoesnotprove lockrelease",
+  "fix": "AtentryprivateprepareLowering, ifTransactionSynchronizationManager.isActualTransactionActive returnnull BEFOREoptionalcapture. No changeactualprepare/defaultlowering/validator originalguard.",
+  "scope": "Tiny isolatedPublisher guard +existingcandidate docclarification; unit author may add bounded publiccomponent ambientfallback check with actualSpring transaction marker restoredfinally. No livecode/runtime.",
+  "tradeoff": "Ambient callers keep originalpath/no speculative reads orlowering; normalcontroller remainseligible. ControlledSupplier callback tests are notphysicalTXproof.",
+  "independentReview": "Coordinatorconfirmed ambientissue/sourceonly; sourcecandidate remainsCONCERNS untilamendedreview"
+}

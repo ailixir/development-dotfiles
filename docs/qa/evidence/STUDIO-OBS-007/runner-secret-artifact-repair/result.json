@@ -1,0 +1,189 @@
+{
+  "story": "STUDIO-OBS-007",
+  "status": "STATIC_RUNTIME_REPAIR_FOCUSED_GREEN_CONTROL_INSTRUMENTATION_RED",
+  "capturedAtUtc": "2026-10-10T16:15:16.319826+00:00",
+  "architectureDisposition": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/secret-artifact-validation-disposition.json",
+    "sha256": "16f2dd856fc8f688c9b88b2e74f551950b08c2320284b0bb8ad139522a62afbf"
+  },
+  "changedSourcePaths": [
+    "studio-runner/src/executor/observedReplay.ts",
+    "studio-runner/src/validator/observedReplay.ts",
+    "studio-runner/test/run/secretReplay.test.ts",
+    "studio-runner/test/fixtures-tier/observed-secret-control.test.ts"
+  ],
+  "changedDistPaths": [
+    "studio-runner/dist/executor/observedReplay.d.ts",
+    "studio-runner/dist/executor/observedReplay.js",
+    "studio-runner/dist/executor/observedReplay.js.map",
+    "studio-runner/dist/validator/observedReplay.js",
+    "studio-runner/dist/validator/observedReplay.js.map"
+  ],
+  "sourceCount": 253,
+  "distCount": 274,
+  "repair": "Shared schema-parsed typed graph projection excludes secret maps/secretOrigins and returns void. Strict Execute schema/value bounds and referenced own-membership retained; artifact checks configuration provenance/canonical name/fill.value before static helper. Actual Job still checks declared released values. No placeholders, mode flag, caller bypass, wire/schema/pin/config changes. Valid extra UNREACHED retained.",
+  "gates": [
+    {
+      "command": "npm run type-check",
+      "session": 50555,
+      "exitCode": 0,
+      "log": "type.log"
+    },
+    {
+      "command": "npm exec -- eslint src/executor/observedReplay.ts src/validator/observedReplay.ts test/run/secretReplay.test.ts test/fixtures-tier/observed-secret-control.test.ts",
+      "session": 96226,
+      "exitCode": 0,
+      "log": "lint.log"
+    },
+    {
+      "command": "npm run build",
+      "session": 40790,
+      "exitCode": 0,
+      "log": "build.log"
+    },
+    {
+      "command": "npm exec -- vitest run test/run/secretReplay.test.ts test/server/observedReplayAuthorization.test.ts --coverage.enabled=false --reporter=default --reporter=json --outputFile.json=../docs/qa/evidence/STUDIO-OBS-007/runner-secret-artifact-repair/selected.json",
+      "exitCode": 0,
+      "passed": 58,
+      "failed": 0,
+      "skipped": 0,
+      "log": "selected.log",
+      "scope": "Focused boundary tests; full unchanged-threshold coverage remains mandatory, not run/credited here"
+    },
+    {
+      "command": "npm run test:fixtures -- test/fixtures-tier/observed-secret-control.test.ts --bail=1 --reporter=default --reporter=json --outputFile.json=../docs/qa/evidence/STUDIO-OBS-007/runner-secret-artifact-repair/control-tests.json",
+      "session": 93371,
+      "exitCode": 1,
+      "passed": 0,
+      "failed": 1,
+      "runnerReportedPending": 0,
+      "log": "control.log",
+      "scope": "Stop at first authentic new failure per intent; remaining3 unrun, none credited"
+    }
+  ],
+  "controlCases": [
+    {
+      "name": "proves actual secret-bearing observed control cutoff: worst-phase",
+      "status": "failed"
+    },
+    {
+      "name": "proves actual secret-bearing observed control cutoff: slow-revoked",
+      "status": "pending"
+    },
+    {
+      "name": "proves actual secret-bearing observed control cutoff: lost-control-body",
+      "status": "pending"
+    },
+    {
+      "name": "proves actual secret-bearing observed control cutoff: progress-revoked",
+      "status": "pending"
+    }
+  ],
+  "actualControlFacts": {
+    "artifactSchemaValid": true,
+    "productionArtifactValidation": "PASS",
+    "ordinaryAdmissionResponse": {
+      "status": 202,
+      "body": "{\"code\":\"ADMITTED\"}"
+    },
+    "realControlReads": 10,
+    "allRequestBoundsMs": [
+      1000,
+      1000,
+      1000,
+      1000,
+      1000,
+      1000,
+      1000,
+      1000,
+      1000,
+      1000
+    ],
+    "nativeEntries": [
+      2328.569959
+    ],
+    "nativeEnds": [
+      10994.451542
+    ],
+    "focusMarkerReceived": false,
+    "revocationArmed": false,
+    "cutoffProved": false,
+    "actualCause": "After real202/browser/native request, controlled main-world focus HTTP beacon never reaches Node during synchronous busy renderer focus handler. No genuine-focus receipt so revoke t0 is intentionally not fabricated. Test waits10s then fails, finally real drain closes context/tree. Real native request was pending until cleanup; this is not an executed revocation cutoff.",
+    "inputEvents": 0,
+    "effectRequests": 0,
+    "pids": [
+      1772,
+      1929,
+      2717,
+      2209,
+      2210,
+      2257,
+      2589,
+      2700,
+      2701
+    ],
+    "allObservedPidsGone": true,
+    "capacityInUse": 0,
+    "scratchEntries": [],
+    "limits": "No native JS focus-entry/effect no-write or<=2s revocation claim without genuine seam receipt. Missing HTTP beacon alone is not proof of no typing. Teardown is actual drain cleanup, not measured revocation stop."
+  },
+  "proposedNextInstrument": {
+    "path": "Only owned observed-secret-control.test.ts",
+    "mechanism": "Test-only value-free Runtime.bindingCalled/context.exposeBinding focus signal instead of route/network-dependent fetch beacon; retain original CDP send pending instrumentation and every cutoff/effect assertion. Do not add production channel/second fill/secret-bearing event. Correct expected FINAL field from code to closed actual errorCode when actual control runs reach that assertion.",
+    "authorization": "NOT_IMPLEMENTED; parent notified, awaiting explicit release after actual new red as instructed"
+  },
+  "cleanup": {
+    "newRelevantProcessesStillAlive": [],
+    "recentMatchingScratchRemaining": [],
+    "actualCompiledChildAndBrowserOpened": true,
+    "actualObservedPidsGone": true,
+    "capacityInUse": 0
+  },
+  "bindings": {
+    "source": "source-manifest.json",
+    "dist": "dist-manifest.json",
+    "runtime": "runtime-versions.json",
+    "actualExecutable": "browser-provenance.json"
+  },
+  "preservedRed": [
+    "runner-observed-control-candidate first400REFERENCE_MISMATCH c5a48955 (immutable)",
+    "selected-initial-red validunit Job historicalschema-bundle binding mismatch corrected only in owned test",
+    "type/lint initial red snapshots",
+    "current control new genuine instrumentation red",
+    "prior28/2 LOGIN red and7290byte missing native pixels"
+  ],
+  "remaining": [
+    "3control cases not executed; all4cutoff/inflight facts unproved",
+    "Actual Core/PG/learned publication/expiry/guided/usage/revocation/all-sink joins and independent delta review",
+    "Full current source-bound default coverage/Chromium/deployment/pins gates",
+    "Fresh actual image build: prior localimage evidence predates repaired validator/executor compiled bytes; Node24vs22/internalED05 stays red"
+  ],
+  "liveProcesses": [],
+  "qaApproved": false,
+  "artifactSha256": {
+    "before.json": "bac1413d603434cbb3f200eeb38f4d3d827c395ec31bb921635cdadde4ad7d1b",
+    "browser-provenance.json": "d5c19b48a4d37659821441b462c3f131c6101d2e2145de464d130c55412b2a91",
+    "source-manifest.json": "ae299ec4f9c77fb3620303eb8dd96ac64b83d27ce1d875d215d7bc7f4f156e1f",
+    "lint-initial-red.log": "fc5023e73c59767239b0d52c0384587768f462591eb3c13249ce346c1ca789c7",
+    "before-bindings.json": "ccafd669d2eadf6687294a70330461d2a531c2a73b8fb89f341f564527708874",
+    "control-tests.json": "def33b44a15f5d37db2dbe15be8b50d17df8b43893a8d6e5326a81dc617f8844",
+    "selected-initial-red.json": "59b1f6c47d3e51172bc9917405b9a3da1eddf846eda2f0d5f4789df4074942b9",
+    "lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "before-2-secretReplay.test.ts": "98aca8fb248925de27e6ec24601ea20d526110201f1e864b636d3aee6f23f775",
+    "runtime-versions.json": "ff9d2b4c8867c6cd1fa27c2019838b0ce25d2ee39c219fa0b6c24e2fa0928b8c",
+    "selected.json": "a1c682c25ff5c31a9cd654e666d95e3cdcd14ec3c315f764573b19dd15429c37",
+    "control.log": "3fdc466f638da584833cc92baf180cab4172b222105563589b53902acc87377c",
+    "processes-before.txt": "701add3506f6fae152552e1ea6e9931b14503a4e49cf5600a739f9175a8e15a0",
+    "before-3-observed-secret-control.test.ts": "ec4686aec8627a0b558ef2ee11626783186cf8275dfd82e199840a9b682e6f9c",
+    "processes-after.txt": "115a2e1c8c49b548e515e8b77efb53f44e2e04d8e87f57c6d369662278f88ed9",
+    "selected-initial-red.log": "01ec6132f00cfad9ea224829fb991abb20a434f73696fecaa6c142a19f9d85f9",
+    "type-initial-red.log": "887b90f45c64e66883b429ef7107fe152c0a4cb05d57e129b1666f3edd8e7d99",
+    "oracle-worst-phase.json": "24e63f3fce7662f8077e1de4b57652e89d3f5bf24f1633ecc3f0ba5eab18e42b",
+    "selected.log": "0b6774a8d1f8f9ae07c2af13436553bd5414d04ce9b10cb54e9547d694907451",
+    "before-0-observedReplay.ts": "2e55d5fde016475bc7c7ad8dd7cf5a0561b371a4d827b0abd5264a0955876353",
+    "dist-manifest.json": "6e9d8338e70d69936ef6298052d712044bb523cc963294477ad71daa8a171bb0",
+    "before-1-observedReplay.ts": "f34b6d26368c2cc805ac8e89b05858236ded34e611effa2b80114e8a19018e3a",
+    "type.log": "66cb0d88cd3e949228a13daec3e65de0ce0c25b1b7278f1ffdb96dcd2886dfc9",
+    "build.log": "50d8b286b802e2ce024ca6690dd1f1000b4bcd043b5615565d354c439374330a"
+  }
+}

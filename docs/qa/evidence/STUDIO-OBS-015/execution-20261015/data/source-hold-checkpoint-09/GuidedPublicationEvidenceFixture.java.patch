@@ -1,0 +1,57 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java
++++ backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java
+@@ -77,6 +77,54 @@
+       if(jdbc.queryForObject("SELECT count(*) FROM studio_guided_session_policies WHERE session_id=?",Integer.class,id)==0)policies.freeze(id,active);
+       }
+       return manifest;
++    });
++  }
++
++  /** Original controlled metadata for the ordinary shared report fixture, before any action.
++   * All values are read from actual fixture rows; ACK success is explicitly synthetic test input.
++   */
++  public static void captureSharedBootstrap(JdbcTemplate jdbc,TransactionTemplate tx,String id,JsonNode initial) {
++    tx.executeWithoutResult(status->{
++      var sessions=new GuidedSessionRepository(jdbc,tx,C);var current=sessions.lock(id);JsonNode session=current.document();
++      if(current.progress().has("translationBootstrap")
++          || jdbc.queryForObject("SELECT count(*) FROM studio_guided_actions WHERE session_id=?",Integer.class,id)!=0
++          || jdbc.queryForObject("SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",Integer.class,id)!=0)
++        throw new IllegalStateException("Shared original bootstrap must precede every action/preparation and cannot be replaced");
++      JsonNode material=C.parse(jdbc.queryForObject("SELECT to_jsonb(m)::text FROM studio_guided_materializations m WHERE session_id=?",String.class,id));
++      JsonNode inputs=material.path("authored_inputs");C.validate("v3/authored-inputs",inputs);C.validate("v3/execution-evidence",initial);
++      String worker=session.path("owner").path("workerId").asText();int fence=session.path("owner").path("fence").asInt();
++      if(!GuidedContracts.hash(inputs).equals(material.path("authored_inputs_hash").asText())
++          || !material.path("scope_hash").equals(session.path("scopeHash")) || !material.path("worker_id").asText().equals(worker)
++          || material.path("owner_fence").asInt()!=fence || !initial.path("sessionId").asText().equals(id)
++          || !initial.path("kind").asText().equals("initialBlank") || !initial.path("contextId").equals(material.path("context_id"))
++          || initial.path("generation").asInt(-1)!=0)throw new IllegalArgumentException("Shared original bootstrap lacks its exact stored context authority");
++      ObjectNode context=C.object().put("schemaVersion",3).put("sessionId",id).put("workerId",worker).put("ownerFence",fence)
++          .put("scopeHash",session.path("scopeHash").asText()).put("contextId",material.path("context_id").asText())
++          .put("contextRevision",material.path("context_revision").asInt()).put("materializationRevision",material.path("materialization_revision").asInt())
++          .put("authoredInputsHash",material.path("authored_inputs_hash").asText()).put("expiresAt",session.path("expiresAt").asText())
++          .put("leaseExpiresAt",session.path("owner").path("leaseExpiresAt").asText());
++      context.putObject("versions").put("contract",3);context.set("authoredInputs",inputs.deepCopy());
++      context.set("approvedOrigins",session.path("scope").path("approvedOrigins").deepCopy());context.set("limits",session.path("limits").deepCopy());
++      ArrayNode sourceIds=context.putArray("sourceStepIds");session.path("sourceSteps").forEach(step->sourceIds.add(step.path("stepId")));
++      for(String[] table:new String[][]{{"allocations","studio_guided_allocations"},{"producers","studio_guided_producers"},{"consumerEdges","studio_guided_consumer_edges"}}) {
++        ArrayNode values=context.putArray(table[0]);jdbc.queryForList("SELECT document::text FROM "+table[1]+" WHERE session_id=? ORDER BY document::text",String.class,id).forEach(json->values.add(C.parse(json)));
++      }
++      JsonNode policy=C.parse(jdbc.queryForObject("SELECT v.document::text FROM studio_guided_session_policies s JOIN studio_guided_policy_versions v ON v.policy_id=s.policy_id AND v.version=s.policy_version WHERE s.session_id=?",String.class,id)).path("applicationPolicy");
++      context.set("applicationPolicy",policy.deepCopy());context.put("policyHash",GuidedContracts.hash(policy));
++      ObjectNode identity=C.object().put("workerId",worker).put("fence",fence).put("scopeHash",session.path("scopeHash").asText());
++      for(String field:List.of("sourceRevision","configurationRevision")) {
++        JsonNode value=material.path(field.equals("sourceRevision")?"source_revision":"configuration_revision");
++        if(!value.equals(session.path("scope").path(field)))throw new IllegalArgumentException("Shared bootstrap source/configuration differs");
++        context.set(field,value);identity.set(field,value);
++      }
++      C.validate("v3/runner-context",context);
++      ObjectNode marker=current.progress().putObject("translationBootstrap").put("phase","READY");marker.set("context",context);marker.set("identity",identity);
++      marker.putObject("metadataAcknowledgement").put("version",2).put("deliveryId",id+"-metadata")
++          .put("contextHash",GuidedContracts.hash(context)).put("identityHash",GuidedContracts.hash(identity));
++      ObjectNode receipt=current.progress().putObject("translationBootstrapEvidence").put("contextId",context.path("contextId").asText())
++          .put("contextRevision",context.path("contextRevision").asInt()).put("scopeHash",session.path("scopeHash").asText()).put("workerId",worker).put("ownerFence",fence);
++      receipt.set("sourceRevision",identity.path("sourceRevision"));receipt.set("configurationRevision",identity.path("configurationRevision"));
++      current.progress().set("executionEvidence",initial.deepCopy());sessions.save(current);
+     });
+   }
+ 

@@ -1,0 +1,257 @@
+{
+  "artifact": "Independent Quinn ARCH015-03 bounded design review",
+  "reviewer": "Quinn /root/quinn015_design independent from Aria/backend/data/runner owners",
+  "story": "STUDIO-OBS-015",
+  "createdAt": "2026-10-15T05:24:48.579738+00:00",
+  "reviewKind": "DESIGN_MAPPING_AND_ABSTRACT_PROOF_ONLY",
+  "status": "READY_FOR_IMPLEMENTATION_MAPPING",
+  "readyForImplementationMapping": true,
+  "amendedSqlReviewedOrExecuted": false,
+  "sourceIntegrationComplete": false,
+  "storyQualityVerdict": null,
+  "storyDone": false,
+  "manifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/manifest.json",
+    "sha256": "0bf2a5a9ea32f79b27563809b68ba6e2de9f0ccbf2633f54302e2f3bd031e311",
+    "boundFiles": 11,
+    "mismatches": [],
+    "priorFrozenFilesRehashed": 71,
+    "priorMismatches": []
+  },
+  "requirementsReview": [
+    {
+      "id": "P1-GUARD",
+      "status": "DESIGN_SUFFICIENT_IMPLEMENTATION_PENDING",
+      "authority": "OriginalOBS015AC3/4+T0singlefrozenpolicy; OBS014AC4/5/6 and AR-SEC001-FM",
+      "assessment": "Prefix must invoke same current GuidedActionGuard on fresh acknowledged observation/proposal, authored text/savedinputs and current session frozen policy BEFORE reservation/storePreparation/admission/native/actionbudget. Grounding/destructive/order/origin/secret checks remain. DENY fails POLICY_DENIED and is never drift; ALLOW may proceed; omitted/defaultCLARIFY_FIRST asks current explicit question. Run/base-session consent cannot authorize a new run. Shared admission-level evaluation closes direct internal bypass without turning normal default policy into blanketdenial. Confirmation suppresses only repeated stance question, never current guards."
+    },
+    {
+      "id": "P1-STATE",
+      "status": "DESIGN_SUFFICIENT_IMPLEMENTATION_PENDING",
+      "authority": "Existing AWAITING_CLARIFICATION enum/question/clarify schemas and unchanged durable prefix pending predicate",
+      "assessment": "Public AWAITING may coexist with private continuationREPLAYING_PREFIX and initialIndex>0/no-switch predicate. Exact existing observed SIDE_EFFECT_CONFIRMATION/CONFIRM_ACTION has one AUTHORED choice, current scope/step/doc/gen, hard session expiry; no new public state/body/operation/preparekind. Prefix-only private marker closed {clarificationId,status,prefixRequestDigest} references immutable PREPARED request and current live worker/fence/context/source/input/evidence. Ordinary nonprefix two-field marker/answer flow must remain scoped separately. Both model entrypoints, SQL attemptINSERT and all direct model counters remain fenced by pending predicate even whilePREPARING/AWAITING."
+    },
+    {
+      "id": "P1-WAIT-ANSWER",
+      "status": "DESIGN_SUFFICIENT_IMPLEMENTATION_PENDING",
+      "authority": "Existing original-principal/CSI/source/policy/secret/owner/lease/question guards; recording same-owner runtime lifecycle",
+      "assessment": "runnable and direct advance return without work while waiting. Owner renewal preserves same browser/recording/clock/current values. Answer must match exact live current principal/question/choice/gen/doc/request owner/context/source/input, not old volatile preparation expiry. It atomically confirms sameID/digest, removesquestion, returns publicREPLAY with privateprefix continuation. It never admits/dispatches. Old evidence/proposal cannot execute: durable fresh observation refresh and ACK, new request/preparation and every current guard precede admission; freshcontext ACK if required. Controller restart reconciles existing durable refresh/question; no new browser or ported consent. Cancellation/hardexpiry/revocation/UNKNOWN_OUTCOME win and cannot resurrect. Existing PREPARED-request/no-action predicates prohibit turning wait into no-native drift."
+    },
+    {
+      "id": "P1-SQL",
+      "status": "DESIGN_SPEC_SUFFICIENT_ACTUAL_SQL_UNREVIEWED",
+      "authority": "sql-change-spec.json; existingV14/V19/V21 source examined",
+      "assessment": "Dara-only narrow unshippedV21 helper/functions amendment is needed, with original exacta4e0 SQL/evidence archived. BEFORE helper must inspect NEWdocument/progress for atomic question creation; deferred mode check examines finaltransaction. Allow REPLAY→AWAIT only exact current frozenCLARIFY_FIRST/PREPARED question/markerproof, same-ownerrenewal, exact pending→CONFIRMED answerbackREPLAY, and existing terminalstops. Disallow genericmodelclarification/mode/owner/context escape. Keep continuationprefix or terminalSTOPPED, never genericREFRESH/SOURCE_PLAN. Pendingprefix actionINSERT requiresREPLAY state; no actionduringwait. Preserve immutablehistories, FKcycle, quota, no-invocation/switch/attempt/version/ACK guards; session-first lock order and exact scope/source lock discipline remain. No table/column/publicwire extension. V1–V20 frozen. This design review is not review or execution of future amendedSQL."
+    },
+    {
+      "id": "T1-TOTALORDER",
+      "status": "DESIGN_SUFFICIENT_IMPLEMENTATION_PENDING",
+      "authority": "OBS013 measured clocks/recording acceptance and currentGuidedRecordingTimings ORDER/steps plusrunnerwireTimings",
+      "assessment": "Append existingadmissionId scalar/codepoint FINAL tie-break after unchanged startMs/kindrank/null-firstordinal/scalarstepId; runneractiontuple omits commonkindrank. Strict complete order and separate seen(admissionId) checks remain. Exact ledgeradmission/dispatch1/step/ordinal/bounds/sixfields preserved. No duplicate reading accepted, no attemptcollapsed, no +1ms/rebase/reround/newtimingfield. Step minimumstart and last complete-ORDER action among maximum-startreadings selects its actualend/null; scalarID ordering is not invented chronology within one measuredmillisecond. Emptyreadings remainempty; no pre-native timestamp invented whenruntimebegin neverran."
+    }
+  ],
+  "independentChecks": {
+    "ownerReadOnly": {
+      "command": "node architecture-correction-03/check-design.cjs --verify",
+      "abstractStateCases": 32,
+      "syntheticTimingCases": 7,
+      "status": "PASS"
+    },
+    "independentPython": {
+      "status": "PASS",
+      "total": 57,
+      "originalStateCases": 32,
+      "additionalStateCases": 11,
+      "originalTimingCases": 7,
+      "additionalTimingCases": 6,
+      "kindNullOrderCase": 1,
+      "additionalEdges": [
+        "pending delivery/observation refresh/model attempt reject",
+        "request notPREPARED/currentcontextversion/worker mismatch reject",
+        "question deadline/hardexpiry reject",
+        "onlyactualCLARIFY_FIRST cancreate this question,ALLOWandDENY followtheiractualguardbranches",
+        "priornon-side-effectnative actions do not imply consent or prohibit a legitimate stance question",
+        "humanwait beyond oldpreparation under renewedliveowner accepted without executingoldproposal",
+        "unknownadmission/negativeclock/endbeforestart/extraattemptwire/duplicateadmissionatdifferenttime reject",
+        "emptytimings produce no fabricated step; existingnull/kindorder retained"
+      ],
+      "scope": "Abstract state transitions/comparator only. Actual guard decisions are fixture inputs; no claim to have executed GuidedActionGuard/currentCore/SQL/HTTP/native/clock."
+    },
+    "independentSchemas": {
+      "status": "PASS",
+      "cases": 24,
+      "scope": "Closedprefixprivate marker and existing publicobservedconfirmation/question/actiontiming/sessionstate compatibility. Ordinarytwo-field marker intentionally not subject to prefix-only3-field schema."
+    },
+    "diagnosticSourceDrift": [
+      {
+        "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+        "captured": "cf1c90915ac34fbfd148abc1a59ae37fc8fd111bbdd050be1f9322788d29be99",
+        "observed": "1886d18e44619a19ac9b34eedfa3433375ea276e6fc63ec2950eeab5ac6e739c",
+        "unchanged": false
+      },
+      {
+        "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+        "captured": "6b7f8ce7e4cdfb49ae00cf39fb8c6ba30278adb074913b0c1cb5a38c81c59849",
+        "observed": "07976ffe0cfe7e32203b481bc443542df3ea5a1800c1794506fa207072d8bdd0",
+        "unchanged": false
+      },
+      {
+        "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+        "captured": "5d2d76d0b28099060a3e8f83ed5901e0fd61da4e8b00b2f5068b00b5b259d325",
+        "observed": "d51bee068b07dbc890e1a67bf684d6271660a1860888e7a31dc7df71e5fc3203",
+        "unchanged": false
+      }
+    ],
+    "sourceScope": "Working backend source was active; captured/observed diagnostic hashes are not final executableproof. No historical source hash claimedcurrent. Frozen owner/prior artifacts were exact.",
+    "applicationTestsExecuted": 0,
+    "databaseCommandsExecuted": 0,
+    "browserCommandsExecuted": 0,
+    "buildCommandsExecuted": 0
+  },
+  "actualOldMigrationEvidence": {
+    "receipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration48-attempt03-receipt.json",
+    "receiptSha256": "e5ec03a013138d056412ce422473a469bd7db25199e415d04936bae0bfe1f669",
+    "rawXmlSha256": "c628f6d3ea2e96b0fc4ca4373f833444efba5551eefa03d1f8c4b4270d1f9fd6",
+    "rawXmlCounts": {
+      "tests": 48,
+      "failures": 7,
+      "errors": 0,
+      "skipped": 0
+    },
+    "engine": "PostgreSQL15.19",
+    "oldV21Sha256": "a4e0c441ebcda29f00cc382fb7ed8eb6ce408a44b53a758e8c20277ee05f4a91",
+    "credit": "ActualoldSQL48executed=41PASS7FAIL0skip. Pairedreceipt-FK fixtureboundary failures are preserved and do not permitFKrelaxation. Previouscompile-only attempts remain failures. NoamendedV21/new55case/completeupgraderow proof claimed."
+  },
+  "scopeAndHandoff": {
+    "scope": "OriginalOBS015sixAC+O1 and OBS014governeddefault/consent +OBS013measuredtiming preserved; no productcapability removal/defaultdenial shortcut.",
+    "data": "Daraarchivesolda4e0SQL/manifests/executionhistory then amends unshippedV21functions/guards under explicitrootwindow; exactnewhash and actual freshPG15/populatedV20upgrade/oldrowbytes required. No user/dev/sharedDB or deployment authorized by this review.",
+    "cint": "No structural public/session/clarify/prepare/timing field/enum/operation/type change. Optional actiontiming description/fixture vector port only through separatelyassignedC-intowner/freeze; private marker remains design-only, never public/runnerwire.",
+    "backendRunner": "Backend implements freshguard/currentquestion/state/wait/answer/refresh/admission/runnable; runner retainsliveowner samebrowser/clock, clearsvolatilepreparedauthority through existingrefresh and adds scalaradmissiontie. No broadclaim/checkCommandrefactor."
+  },
+  "blockingDesignFindings": [],
+  "requiredBeforeIntegrationCredit": [
+    "Dara submits exact amendedV21hash/archive and independent code review of actual NEW-row helper/mode/action/counter guards. This artifact approves mapping only, not unseenSQL.",
+    "Run original48 plus7new migrationmethods on actualPG15 fresh andpopulatedV20upgrade, oldrow-byte andV1–V20checksum/FK/guard preservation, zero skippedstorycases. Old41pass does not validateamendedbytes.",
+    "Execute8new actualapplication/timing cases with freshdefaultpolicy prefixconfirmation, longwaitrenewal/freshproof, bothgatewaymodel0, samebrowser/clock/video, terminal/race/directbypass andordinarynonprefix regressions.",
+    "Preserveoriginal78applicationcoverageobligations and48migration plusnew8application/7migration delta; actual scopedfoundationtests retain only their existingrecords. No unexecuted or syntheticcase promoted to livepass.",
+    "Allrequired finalsource/dist/Java/runner/native/joined/secret/video/ordinaryreplay/finalize gates plus independenttechnical/completionQA remain necessary."
+  ],
+  "additionalActualTestPlan": {
+    "artifact": "ARCH015-03 additional actual-test delta",
+    "status": "ALL_PLANNED_NOT_RUN",
+    "preserves": "Original57 acceptance,48 migration cases and01/02 correction cases; abstract proof is not a replacement.",
+    "additionalMigrationMethods": [
+      {
+        "name": "GuidedReplayingPrefixMigrationIT.pendingPrefixAllowsOnlyExactServerSideEffectQuestion",
+        "assertions": "Legitimate current CLARIFY_FIRST + PREPARED request/marker/question permits AWAIT while continuation prefix; same-owner lease renewal remains valid after old volatile preparation expires.",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedReplayingPrefixMigrationIT.pendingPrefixRejectsGenericStaleOrForgedWaitProof",
+        "assertions": "Reject wrong reason/extra marker/request/status/coordinate/scope/doc/gen/owner/fence/context/input/source/config/deadline/policy stance; no generic clarification escape.",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedReplayingPrefixMigrationIT.pendingPrefixWaitFencesBothGatewaysAttemptInsertAndModelCounters",
+        "assertions": "SQL model INSERT and each model-counter update fail in AWAIT; actual both Java reservation entrypoints remain model0.",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedReplayingPrefixMigrationIT.pendingPrefixWaitCannotAdmitConsumeOrSwitch",
+        "assertions": "Reject action INSERT and generic state/continuation/proposal/REFRESH/SOURCE_PLAN escapes during wait; native0, original no-invocation/switch guards stay strict.",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedReplayingPrefixMigrationIT.currentAnswerResumesOnlySamePrefixIdentity",
+        "assertions": "Exact pending marker/question->sameID/digest CONFIRMED/removal/stateREPLAY allowed; changed owner/context, forged confirmation or absent old proof rejected.",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedReplayingPrefixMigrationIT.prefixWaitCancellationExpiryAndOwnerLossNeverResurrect",
+        "assertions": "Existing CANCELLED/EXPIRED/UNKNOWN stops allowed, late answer/fence/context rewrite never resumes; original immutable initial identity and model fences retained.",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedReplayingPrefixMigrationIT.prefixConfirmationAmendmentPreservesPopulatedV20AndAllExistingGuards",
+        "assertions": "Actual V20->newV21 old-row byte preservation, all48 original cases and V1-V20 checksums; fixture receipt cycles repaired without weakening production FK.",
+        "status": "PLANNED_NOT_RUN"
+      }
+    ],
+    "additionalApplicationCases": [
+      {
+        "name": "IncrementalPolicyIT.defaultCurrentPolicyPromptsPrefixWithoutModelOrNative",
+        "tier": "Real Spring+PG+runner+Chromium",
+        "assertions": "Publish base under ALLOW/old consent; approve omitted-stance defaultCLARIFY_FIRST, edit4of10. New prefix asks one current AUTHORED question before admission/native, both gateways0; old consent ignored.",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "IncrementalPolicyIT.confirmationResumesFreshSameBrowserThenSuffixWithoutSecondPrompt",
+        "tier": "Real joined",
+        "assertions": "Wait beyond old preparation deadline while same owner renews; exact answer -> fresh observation ACK/newrequest/preparation/currentguards -> one effect on same browser/clock/video; prefixmodel0, suffix afterswitch, no second stance prompt, pure finalize.",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "IncrementalPolicyIT.prefixGuardDeniesGroundingDestructionAndDenyEvenAfterConsent",
+        "tier": "Real HTTP+PG+runner",
+        "assertions": "Fresh Save/Delete/unobserved-target/form-Enter guard cases under frozen policy stop POLICY_DENIED before effect/model, never drift reinterpretation, even current confirmed stance.",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "IncrementalPolicyIT.waitingRecoveryCancellationAndAnswerRacesRemainAtMostOnce",
+        "tier": "HTTP+PG concurrency+runner",
+        "assertions": "Duplicate keys/controller restart preserve one question; wrong user/choice/gen/source/context/lease/fence reject; cancel/expiry wins, no late effect/new browser/clock/uncertain retry.",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "IncrementalPolicyIT.directPrefixAdmissionCannotBypassConfirmation",
+        "tier": "HTTP+PG",
+        "assertions": "Unconfirmed direct internal admit is stale/state refusal with no action; normal coordinator asks instead of denying. Fresh post-answer proposal reruns actual guards; no model/private-marker injection.",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedRecordingTimingsTest.distinctAdmissionsWithIdenticalMeasuredKeysRemainDistinct",
+        "tier": "Java+TS parity",
+        "assertions": "Equal measured keys/different admissions accepted in scalar ID order, six fields/readings exact; duplicate admission/unknown/dispatch0/wrong coordinate/unsorted reject.",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedRecordingTimingsTest.tieEndSelectionAndUnicodeOrderMatchRunner",
+        "tier": "Java+TS",
+        "assertions": "BMP/astral codepoint order, null-first and original kind order; derived minimum start/actual selected end-null match old selection rule; no +1ms/rebase/reround/new wire field.",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "IncrementalRecordingIT.tieTolerancePreservesActualRecordedEvidence",
+        "tier": "Real joined recording+callback fixture",
+        "assertions": "Carry legal actually measured ties through manifest/backend/result and per-admission seek. Keep both measured attempts, never invent absent pre-native stamp; original continuous video/privacy/native proof still required.",
+        "status": "PLANNED_NOT_RUN"
+      }
+    ],
+    "actualMigrationBaseline": "Olda4e0SQL attempt03 actualPG15.19=48executed41PASS7FAIL0skip; historical only after amendment.",
+    "designEvidenceOnly": "32 abstract state +7 synthetic timing cases; no real guard/SQL/auth/native/clock/application execution."
+  },
+  "notClaimed": [
+    "ActualSQLamendmentrevieworPGexecution",
+    "Executedapplicationguard/authorization/HTTP/native/browser/clockproof",
+    "Defaultpolicyjoinedconfirmation/no-nativeintegration",
+    "Completedsourceintegrationorfinalgreenstorygate",
+    "Publicwire/operationexpansion",
+    "StoryPASS/Done",
+    "User/devdatabaseorcommit/push/install/deployaction"
+  ],
+  "auditFiles": {
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/qa/independent-audit.json": "0a5b2bccd7c831d8b05f6e5ad0208890813db5eb80fee46f46837d71a2be60d8",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/qa/independent.py": "d4179c02536de299217f60f35b3e2348e009cce1e6b918f881a8e8e5f680effe",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/qa/owner-readonly-check.json": "7cd1a9c415b7dc2f35e566251e44d82023e471d001e0b4b8457232456b95babc",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/qa/schema-results.json": "fcb411da14ea439f34b5b305294c1d6c6ce10e57696105130566e8fb33437cb9",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/qa/schema.cjs": "aa4e99d1676f09c9524538ab7e333017ab53b5dcefb7b44198baaf4dfa3e7625"
+  },
+  "writeScope": [
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/qa-review.json",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/qa/**"
+  ],
+  "budget": {
+    "wholeWaveCeilingUSD": 500,
+    "actualBilling": "unavailable"
+  }
+}

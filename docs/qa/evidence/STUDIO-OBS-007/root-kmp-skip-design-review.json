@@ -1,0 +1,18 @@
+{
+  "scope": "INDEPENDENT_EXISTING_KMP_FAST_PATH_DESIGN_REVIEW",
+  "proposalSha": "9be46e95ed45fc242e47fd38f674e133f010d1def78d66b3492a0dad589dcdf9",
+  "disposition": "APPROVE_BOUNDED_ISOLATED_AUTHORING",
+  "approved": "One256boolean firstbyte map and exact countpositive states; skip only allstateszero and input cannotstart anypattern, after original bytecounter/integrity. Original perpattern KMP transitions/hitfallback for otherbytes unchanged.",
+  "conditions": [
+    "Count update uses old and actual new state including fullmatch fallback; 0\u2192positive increment/positive\u21920 decrement only",
+    "Bounds0..patterns and exact positive-state count consistency checked at existing final observer integrity assertion, no O(patterns) extra perbyte",
+    "Late/invalid/overflow remain sticky and every later valid byte counted/matched",
+    "Constructor failure cannot bypass original failclosed inventory check",
+    "Map/count wiped with original states/patterns",
+    "Existing synthetic support gains independent overlapping/reset controls in same method only; all current encoded/split/volume controls unchanged",
+    "Independent source review before runtime"
+  ],
+  "tradeoff": "Small bounded invariant/state addition may reduce synchronous observer CPU for irrelevant bytes; actual speedup and cause attribution unproved. Avoids a replacement matching framework and adds no E2E case.",
+  "runtime": "UNRUN",
+  "wholeAcceptanceClaim": false
+}

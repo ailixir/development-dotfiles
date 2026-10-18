@@ -1,0 +1,50 @@
+{
+  "decision": "NO_GO_CONCRETE_TOOLPLAN_NO_IMPLEMENTATION",
+  "scope": "Source-only prerequisite audit per root instruction; no new discovery/framework/toolscript/config or attach/runtime",
+  "authority": {
+    "designSha256": "385a90d96ddb7a287711c5152c00e59fbcf72733aa8e3664fbd926296d975d2e",
+    "independentReviewSha256": "7b851ea2891ca2813cf4ea1207bd4ddbf70ea3ee6b1390b885f0181bdbb71d9e",
+    "rootToolplanSha256": "768f9ab68a3ccc39cbaee4d327a97b6b9590d600586a93f4c6037d56d6b869da"
+  },
+  "evidenceHashes": {
+    "currentInvocation": "48251f9a9faeee1b9d4cebad6a8c1f2d4bfa7b89fb0f3656d9c046a046d992bb",
+    "currentClosedResult": "5a5f0564e4b53ce48440bfc56252bd0b568dbef73620dd387beca35b3bf42202",
+    "currentRuntimeLog": "73cafd9abd306f0ec79bac11bbfd9ab31f0951ee3c5f419840d09d9e55866f67",
+    "existingRunner": "33657a4015e58de3ae4ced75c703060352c7880b5311f21ae2e2c110d0d275b6",
+    "buildSource": "dab809b9129368c1643d80169bcdb773f9290af61e153a1e45069832f5db7289"
+  },
+  "actualRecordedPrerequisites": {
+    "lexicalJavaHome": true,
+    "selectedClassesAndGradleCommand": true,
+    "coordinatorStartTime": true,
+    "actualTestWorkerLaunchCommand": false,
+    "actualTestWorkerJvmVersion": false,
+    "ownedTestWorkerHandleStartAncestryUid": false,
+    "actualWorkerExecutableClasspath": false,
+    "existingBlockingGradleSubprocess": true
+  },
+  "blocker": "Existing selected runner records no exact testworker PID/start/ancestry/UID/runtime executable/classpath. It runs Gradle synchronously rather than holding a verified descendant handle. Current selected runtime log contains no actual test-executor launcher or JVM version record. Therefore future exact owned worker cannot be source-proven from existing launch records without new discovery/lifecycle machinery.",
+  "jdkMismatchLimit": "Build toolchain requests Java21 but invocation lexicalJAVA_HOME alias resolves reviewedlocalOpenJDK23.0.2. Neither declares actual testworker resolved executable/release. Cannot attach using23ThreadDumper source assumptions or relabel21 runtime without authentic launcher proof.",
+  "planArtifactStatus": {
+    "script": "UNPRODUCED_PRECONDITION_BLOCKED",
+    "scriptSha256": null,
+    "config": "UNPRODUCED_PRECONDITION_BLOCKED",
+    "configSha256": null,
+    "jcmdArgvExecuted": false,
+    "snapshotCount": 0,
+    "rawDumpFilesCreated": 0,
+    "newEventsHooksQueriesThreads": 0,
+    "sourceModified": false
+  },
+  "staticSourceChecks": "Exact invocation keyset/runtime runner mechanism/no actuallaunchorversion log/build21 language source assertions passed. No script exists to syntaxcompile; not a syntaxPASS claim.",
+  "preservedFutureConstraints": [
+    "Atmost3owned snapshots/private32768stdout8192stderr/2s+2s/complete16kJSON+normalexit only",
+    "Any missing identity/version/truncation/unsupported metadata UNKNOWN; no partialcounts/rawIDs/names/paths/frame/bodyexport",
+    "Toolkill nottargetoperationcompletion; eventualoriginalownedJVMexit/reap required",
+    "OriginalC5ROOTAPP30/1000ms2000ms/allprivacyclosureunchanged and supportingonly/no ownercostcauseacceptance"
+  ],
+  "nextDecision": "RetainbaselineUNKNOWN and stopforrootreview. No newtestworker discovery/helper/framework or additionalC5run authorized bythisreceipt.",
+  "previousEvidence": "C5unprofiledFAIL2369.706834ms/finalize409PUBLICATION_CONFLICT; strictPASS+79definingPASS retained, oldmarkerunknown",
+  "billing": "USD500ceilingactualunavailable",
+  "lifecycle": "QA/Done/DAGheld/no commitpushdeploy"
+}

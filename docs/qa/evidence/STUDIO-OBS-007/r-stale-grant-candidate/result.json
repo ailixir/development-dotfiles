@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "scope": "ONE_NEW_TEST_SOURCE_ONLY_GENUINE_UNEXPIRED_RETIRED_A_GRANT_PRIVATE_IDENTITY_NEGATIVE",
+  "createdAtUtc": "2026-10-10T20:41:51.333875+00:00",
+  "status": "FROZEN_SOURCE_CANDIDATE_UNCHECKED_UNEXECUTED",
+  "intentBindings": {
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-r-stale-grant-author-intent.txt": "ead59bd6b0ec3a70d47a1675d50f23562a5d096e0a04f63b41f0b9f5a2bb5df7",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-r-stale-grant-author-context.txt": "4f949a2a40593ca88f3f567db547bc9ce8e6429b69b51623b026de34e82c72b8",
+    "docs/qa/evidence/STUDIO-OBS-007/r-next-scope-execution-inventory.json": "8665f8d47655d60ebe655ec2c59126961fc0017e5120ace81e829f6094933a50"
+  },
+  "newPath": "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts",
+  "beforeNewPath": "ABSENT",
+  "afterSha256": "dff3b1f98bc041ed2f90c7a470494a731a2ac6ec09bab2c5122eba2092e313c1",
+  "existingSourcePathsRehashed": 256,
+  "sourceFilesIncludingNewTest": 257,
+  "existingSourceDriftPaths": [],
+  "distFilesRehashed": 274,
+  "distDriftPaths": [],
+  "bindings": {
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-candidate/before-bindings.json": "53b7851e3ee71740fade6462787aa9467ccd6711d8e335dc252b73e83566ef90",
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-candidate/source-manifest.json": "2661235c118f949ea6811720c3f7f0a4b37aaad659d36c303fb63096119e3845",
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-candidate/dist-manifest.json": "602b6b0d5a73aaedef04d1126819d8a5ba6f4ddb211d6f82848fbf58c0b760fb",
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-candidate/candidate.test.ts": "dff3b1f98bc041ed2f90c7a470494a731a2ac6ec09bab2c5122eba2092e313c1",
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-candidate/candidate.patch": "df96163c45112b7470a691d35b3927b2b2095a0c06ceb7cd863522a099896d34"
+  },
+  "immutableCases": {
+    "isolatedThreeTestSha256": "3a52cc9aebec7dc9ea7184d6d3c96bb00e67b571aca41e6c5145a10544af8566",
+    "dataflowOwnerSha256": "417c8ae2f6fb845eb4f7f802b037efc5638ee53ab0fcab41e4a7d8553bf763ad",
+    "dataflowHelperSha256": "c8420f7dc5420a085b0c5b51f92251b8418e6f6c7e4d891d2eb084cd15ee1f61"
+  },
+  "caseCount": 1,
+  "selector": "rejects the genuine retired CSI-A grant for a fresh CSI-B assignment before context or secret effects",
+  "constructionMatrix": [
+    {
+      "claim": "Genuine accepted A authority",
+      "line": 173,
+      "construction": "Original private checkGrant is invoked once with original receiver/args. Only its returned accepted names-only Session is cloned/retained. Real guidedClaimClient receives real controller mTLS/JWT response and its original promise is returned. Fixture-generated pre-ack authority is not treated as an accepted grant."
+    },
+    {
+      "claim": "Actual positive native/effect precondition",
+      "line": 278,
+      "construction": "A authentic assign/context, trusted nav, original native passwordControl secretRef fill, genuine Sign in target click and accepted private fixture receipt. Require one actual SDK launch attempt/settlement, native entry, nonempty inventory containing planted A, actual live descendant PID and effective four preferences/profile. Before PROBE require original A stop/close/PID gone/scratch gone/inventory dispose."
+    },
+    {
+      "claim": "Unchanged unexpired A response under different CSI-B intent",
+      "line": 231,
+      "construction": "Fresh probe session/context/scopeCSI-B frozen before assignment. Actual authenticated claim endpoint returns retained A unchanged with HTTP202. Original parsed acknowledgement is compared transiently by canonical authority equality; no retained canonical string/hash. Original remaining lease and absolute expiry required positive before request, on controller delivery and at original private identity rejection; no probe lease/expiry rewrite or extension."
+    },
+    {
+      "claim": "Private cause versus normalized outer response",
+      "line": 291,
+      "construction": "Require actual probe claim delivery/HTTP202 finish/parsed unchanged acknowledgement; original private checkGrant throws exact IDENTITY_MISMATCH with candidate A/session mismatch/scopeA and positive remaining original lease/expiry; outer actual assign must return409/CONTEXT_LOST. No context or secret frame sent to PROBE."
+    },
+    {
+      "claim": "Zero effects with nonvacuous counts",
+      "line": 290,
+      "construction": "Positive A launch/native/receipt precede measured zero total launch/native/submission deltas for PROBE. Require PROBE runtime starts/dispatches/launches0, scratch/evidence/observation absent and no bootstrap/observation callback. Counter interception itself remains unproved until execution."
+    },
+    {
+      "claim": "Separate legitimate B recovery",
+      "line": 298,
+      "construction": "Drop both test-owned retained-A references after probe. Fresh B assignment has distinct session from tombstoned probe; actual assign/context200 starts one genuine new browser, has zero cookies, distinct/no-A logical inventory and four effective preferences, no secret dispatch/submission, then authentic stop/PID/scratch cleanup. No retry of failed probe and no A public echo."
+    },
+    {
+      "claim": "Failure-safe all-resource cleanup",
+      "line": 158,
+      "construction": "Register fixture/journal/descriptors/callback releases immediately after acquisition; retain worker when created for finally. SDK launch captures actual profile root before original invocation and scans synchronous/original-promise rejection before production disposal. Post-SDK/factory setup failures attempt original context/owned scratch close and restore descriptors before rethrow. Finally attempts worker, every extant SDK context and every registered release under existing absolute5000ms await budget; retains failed descriptor capabilities for bounded retry, drops other roots, scans before close/delete, preserves primary error and fails clean paths on unconfirmed cleanup."
+    },
+    {
+      "claim": "Scalar sinks and evidence",
+      "line": 69,
+      "construction": "Forward original stdout/stderr receiver/all args/return; numeric streaming prefixes/hits/calls/bytes only. Diagnostic callback retains original stderr effect. Actual authenticated callbacks/outcomes/profile/journal scans check literal/NFC/NFD/URI/double URI/UTF16LE/BE/hex/base64/Unicode escape. Final scalar facts JSON scanned before write. Missing/deleted root is UNAVAILABLE_UNSCANNED/hitsnull, not zero-hit proof. No mock call/result archive, raw inventory snapshot, retained chunks or secret-derived digest."
+    }
+  ],
+  "instrumentationLimits": [
+    "All assertions and interception/timing constructions are authored only. No actual authority acknowledgement, identity rejection, native effect, cleanup, scan or test pass is asserted by this source-only task.",
+    "Only names-only accepted Session authority is intentionally retained for the negative. Workflow context/public observation/fixture oracle data drive real actions; private instrumentation emits scalars and opaque WeakMap inventory tags, not raw values/arrays.",
+    "Source guided worker plus real SDK/mTLS construction is not a compiled worker/Core/PostgreSQL/scoped Vault authorization or read/send/audit proof. No backend read counter0 is fabricated.",
+    "The original claim/SDK/CDP/private method promises and receivers/args are forwarded; test-owned async launch adapter performs normal acquisition and awaits its scalar setup. No second password primitive, browser mode/options or production API change.",
+    "Tracked descendant PIDs are sampled at actual SDK settlement, not continuous future-child discovery; allTrackedPidsGone is scoped. Native/model/process-tree full-AC proofs remain separate.",
+    "5000ms bounds cleanup awaits, not synchronous scans or forced underlying promise/kernel settlement. Unconfirmed cleanup remains failure; retained failed restorers may necessarily retain references. No physical heap erasure claim.",
+    "This new test adds one scoped restricted-import annotation for the approved original SDK witness, consistent with existing fixture tests. No ESLint rule/config/threshold or production boundary is relaxed.",
+    "Current live coordinator gates and historical isolation3/source-bound passes are not relabeled as this new-source current gates."
+  ],
+  "futureCommand": {
+    "cwd": "studio-runner",
+    "argv": [
+      "npm",
+      "exec",
+      "--",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.fixtures.config.ts",
+      "test/fixtures-tier/guided-secret-stale-grant.test.ts"
+    ],
+    "executed": false,
+    "needs": "Independent exact source review + coordinator exclusive browser/dist/globalSetup release"
+  },
+  "checks": {
+    "type": "UNRUN",
+    "lint": "UNRUN",
+    "build": "UNRUN",
+    "nativeCase": "UNRUN",
+    "gradle": "UNRUN"
+  },
+  "actions": {
+    "sourceFilesAdded": 1,
+    "existingSourceFilesEdited": 0,
+    "typeChecks": 0,
+    "lintRuns": 0,
+    "testRuns": 0,
+    "builds": 0,
+    "runtimeStarts": 0,
+    "browserLaunches": 0,
+    "processActions": 0,
+    "gradle": 0,
+    "distWrites": 0,
+    "models": 0,
+    "lifecycleActions": 0
+  },
+  "executionRelease": false,
+  "sourceCompilationEquivalence": "NOT_ASSERTED",
+  "qaApproved": false,
+  "whole19AcPass": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE_NOT_MEASURED"
+}

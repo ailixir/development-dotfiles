@@ -1,0 +1,137 @@
+{
+  "scope": "SOURCE_ONLY_EXISTING_C2_MAPPING_NO_CODE_OR_RUNTIME",
+  "originalObligation": {
+    "file": "docs/specs/studio-observed-authoring/secret-login-design.md",
+    "lines": [
+      199,
+      202
+    ],
+    "requirements": [
+      "Concurrent same-name-secret CSI isolation",
+      "Two concurrent ordinary observed runs with different values, each actual child argv/env free of values, exact own fixture receipts",
+      "Named exit paths success/step-failure/cancel/drain/parent-kill: truthful parent values_wiped evidence and child PID gone, respecting killed-SDK limitation"
+    ]
+  },
+  "currentClosedWork": [
+    "Original unprofiled C5 secret publication and two ordinary replays PASS",
+    "Real worker AC16 second nonsecret replay and three delegate cleanup PASS",
+    "These ordinary replays are sequential; neither claims C2 overlap"
+  ],
+  "proofMap": [
+    {
+      "scope": "Guided isolation ISO1/2/3",
+      "receipts": [
+        "fresh-owner-node22-native-isolation-three/result.json",
+        "fresh-owner-node22-native-isolation-three/before.json",
+        "fresh-owner-isolation-native3/result.json",
+        "r-isolation-execution-design-r2.json"
+      ],
+      "facts": "Three actual native tests PASS; current ownership/transport/test source hashes match retained before hashes. ISO1 refuses capacity2; ISO2 refuses concurrent B while A remains occupied; ISO3 explicitly never has A/B application contexts active simultaneously.",
+      "credit": "Capacity1 isolation and sequential cross-CSI freshness only; no two ordinary observed children concurrency."
+    },
+    {
+      "scope": "Current joined same-secret ordinary scope case",
+      "source": "GuidedPublicationReplayIT.actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope:4232",
+      "facts": "Four scope axes run a sequential learn/publish/execute/refusal loop with real Core/PG/Vault/child/browser; one mutable expected password and fixed username; each replay terminal is awaited before next axis.",
+      "credit": "Actual per-scope authority/read/effect/audit behavior; no temporal overlap."
+    },
+    {
+      "scope": "Native secret-login two replays",
+      "source": "studio-runner/test/fixtures-tier/secret-login.test.ts:282",
+      "facts": "Sequential for loop, direct executeObservedReplay browser adapter, rotated values and own receipts/video.",
+      "credit": "Native per-replay behavior; neither concurrent children nor parent RunCoordinator wipe event."
+    },
+    {
+      "scope": "C11 actual public-clear compiled-child cut",
+      "receipts": [
+        "resume-c11-public-clear-current/closed-actual-midfill-profile-proof.json",
+        "resume-final-c11-midfill-one-current/closed-actual-scope-proof.json"
+      ],
+      "facts": {
+        "compiledChildTerminated": true,
+        "capturedDescendantsGone": true,
+        "parentAlive": true,
+        "normalSdkCloseObserved": false,
+        "normalDescriptorRestoreObserved": false,
+        "normalChildSealObserved": false,
+        "terminatedProducerDrain": true,
+        "originalQuiescentTrue": true,
+        "fullFaultSinkClosureClaimed": false
+      },
+      "credit": "Real parent-surviving child kill and honest scope/profile cleanup; never synthesize killed SDK settlement or a parent values_wiped event not actually recorded."
+    },
+    {
+      "scope": "Bootstrap process-tree stop",
+      "receipts": [
+        "runner-bootstrap-process-tree-ready-received-stop.json",
+        "runner-bootstrap-process-tree-committed-before-ready.json"
+      ],
+      "facts": "Actual compiled Chromium trees gone, production scratch empty and capacity0; ready-received-stop has executeSends0 and applicationVisits0.",
+      "credit": "Startup/stop process ownership only, not released-secret execution exit."
+    },
+    {
+      "scope": "Native forced-step-loss and complete-pass/lost-FINAL",
+      "receipts": [
+        "runner-bootstrap-native-video-forced-step-loss.json",
+        "runner-bootstrap-native-video-completed-pass-lost-final.json"
+      ],
+      "facts": "Actual compiled child/full Chromium and all observed PIDs gone; actualFinalDropped false/true respectively.",
+      "credit": "Native video/process and distinct delivered-versus-lost result position; no closed per-exit values_wiped field."
+    },
+    {
+      "scope": "SDK component terminal/wipe and drain",
+      "sources": [
+        "studio-runner/test/server/terminal-order.test.ts:153",
+        "studio-runner/test/server/drain.test.ts:38",
+        "studio-runner/test/run/canary.test.ts:643",
+        "studio-runner/test/run/launcher.test.ts:96"
+      ],
+      "facts": "Terminal-order records actual parent values_wiped in /v1 fake-launcher harness; launcher uses fake spawner env/argv; canary kill component asserts FINAL/capacity rather than observed compiled child wipe event; drain SIGKILL case is an explicit reaper-owned skip.",
+      "credit": "Defining component order/config behavior only. Cannot promote to actual observed secret concurrency or all named exits."
+    }
+  ],
+  "productionMechanics": {
+    "wipe": "RunCoordinator968-978 wipes parent resolver and actual observed input/secret maps then emits run.values_wiped before FINAL; parent remains alive. This is distinct from child SDK close/seal.",
+    "capacity": "Ordinary config POOL_SIZE default1,min1; guided transport fixed capacity1. Ordinary fixture generated loadConfig takes a literal fixture env object, so ProcessBuilder-only pool env would not alter it.",
+    "route": "Existing same-secret joined case uses real API accepted observed binding and actual dispatcher/runner; no need for another server or browser architecture."
+  },
+  "qualifiedGaps": [
+    "No authentic two-live-ordinary-child different-value receipt was found in reviewed current/native/joined proofs.",
+    "No reviewed closed receipt explicitly joins actual parent run.values_wiped to each named observed-secret exit. Existing source/terminal outcomes cannot fabricate that event.",
+    "An active ordinary drain with released secrets is not shown by teardown drain after completion. Parent SIGKILL itself cannot emit a later wipe; parent-directed child kill can allow the surviving parent to emit one."
+  ],
+  "minimumNextTask": {
+    "first": "Root may reduce already-retained private original parent logs/child-closure evidence, if present, to exact execution-joined boolean event/PID facts using existing safe receipt reduction. Export no IDs/values/raw logs; do not rerun already-proved exits just to make another matrix.",
+    "concurrentPositive": "Extend only existing joined same-secret scope fixture obligation: retain two genuinely learned scoped revisions, temporarily start existing ordinary parent with explicit pool2 and restore pool1, run A until its authentic accepted login POST is recorded and response held, then rotate existing expectation to B and dispatch B; demonstrate two exact owned children alive while A response remains held, then release within unchanged step budget. Each own value/receipt and per-scope physical reads/auth/audit remain asserted. This needs no credential map, new server, fake revision, or simultaneous-typing claim.",
+    "privacyAndLifecycle": "Use existing real fork/child ownership seam for private argv/env checking and PID lineage; emit only booleans/counts. Require real parent wipe events after completion and exact child closure. Keep C11 killed-SDK observations false.",
+    "exits": "Only after receipt mapping, fill any still-missing named exit at its existing native/parent fixture tier. Do not cross concurrency by five exits or repeat CSI/env/source axes.",
+    "optionalDrainReuse": "Independent runtime peer suggests, only after verifying the existing shutdown budget, initiating genuine ordinary-parent SIGTERM/drain after both children are admitted and active, then releasing the authentic response hold and letting both finish normally. This can satisfy overlap plus graceful drain with the same two flows and original deadlines, followed by existing restart/pool1 restoration. Require actual drain-start evidence; timeout/tree-kill is not a successful graceful-drain substitute."
+  },
+  "complexityTradeoffs": [
+    "Reuse one existing joined concurrent positive avoids new browser workflow and scope matrix. Holding an already-authenticated HTTP response gives actual overlap using existing singleton expectation without new credential-routing infrastructure.",
+    "One scoped pool2 mode is needed only for ordinary runner; globally raising pool capacity would alter unrelated refusal oracles and is rejected.",
+    "Private source-bound existing-event reduction is smaller than a new profiler or exit recorder. A missing event stays unproved if original private evidence no longer exists.",
+    "No proposed product edits, timeout changes, weaker TRACE/canary scans, success caches or mandatory-case proliferation."
+  ],
+  "receiptHashes": {
+    "fresh-owner-node22-native-isolation-three/result.json": "2154d9cf9380f3990df59c5aa0a326d21056cf08ef8841875b98a78c9094f055",
+    "fresh-owner-node22-native-isolation-three/before.json": "239d3a60ec9b5348dfb8cbdd5b5979f7d7a17d1cfc4bba7e47f9911d7d4a2d5d",
+    "fresh-owner-isolation-native3/result.json": "4b6e1ea9932fc525c461fcfe2fcdbc66f67b73d4e75f44f50128f0e173c0e89b",
+    "r-isolation-execution-design-r2.json": "3e0ddd0760b19935e39d1748d0d22cd74e140d6cacd6cba8e8f93a0e86fa1be4",
+    "resume-c11-public-clear-current/closed-actual-midfill-profile-proof.json": "dcb5571922655e8e10af15f2bcfbdba57775bb9c0314dba2aec49b0f3480ff08",
+    "resume-final-c11-midfill-one-current/closed-actual-scope-proof.json": "59aed7008a545613fc3f34cbe274dbfd1774e7a4b607dc8be1dfe10cf3d4b5ab",
+    "runner-bootstrap-process-tree-ready-received-stop.json": "41e6ea8918b7017ea96f111bf1ce6c5dc55e74e38dbbcf92cef746df14a95757",
+    "runner-bootstrap-process-tree-committed-before-ready.json": "f770d03203b5f3edf89a810dd87de979e93ec8e6e0c8aa9ba2e42d48aa0d3e31",
+    "runner-bootstrap-native-video-forced-step-loss.json": "d4baedfac7001a700731f27e188ed22dbd6986d9e9d59e12c23106e69f291c43",
+    "runner-bootstrap-native-video-completed-pass-lost-final.json": "3fa560cb8e795b7e99a976b7fd5bb26ac1a76cf3f780afe7b567a5e0c7109e2a",
+    "root-d-c11-tier-disposition.json": "87e5eb6a2795ccac0c6cb64367a3312a5e6382fd1f5ee5b60cb88917b5d10342",
+    "root-evidence-tier-amendment-review.json": "e5bcfa8075694fdba95ff8bf3ff9751b492d42140308f3c54a44733148573610"
+  },
+  "workPerformed": {
+    "sharedSourceEdits": false,
+    "builds": false,
+    "runtime": false,
+    "newTests": false,
+    "qaOrLifecycleVerdict": false
+  }
+}

@@ -25,10 +25,11 @@ put-checks/
 ### Frontend
 ```bash
 cd frontend/
-npm install
-npm run msw:init
-npm run dev              # Webpack/MF on :3002
-npm run dev:standalone   # Vite standalone on :5173
+pnpm install             # frontend uses pnpm (frontend/.npmrc: node-linker=hoisted)
+pnpm run dev              # Webpack/MF on :3002
+pnpm run dev:standalone   # Vite standalone on :5173
+pnpm exec vitest run      # unit tests; MSW runs in Node, there is no browser mock worker
+pnpm run test:e2e         # Playwright specs against the MSW proxy (e2e/mswProxy.ts)
 ```
 See [`frontend/README.md`](./frontend/README.md) for full details.
 

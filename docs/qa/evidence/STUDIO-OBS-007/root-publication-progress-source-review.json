@@ -1,0 +1,34 @@
+{
+  "scope": "Root independent source-only publication progress metadata audit",
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": "87e9a1da8028ecf341aa3c7102069acb223ce44eb81d00e665c9650088a2a650",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java": "aeb534126b39be519976059d1d6ceb9a55493403110e642c85d25fc172bfef0e",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "a386ec76d26281771e50b470eddaf54bbe7e509b1e3d9ef0115471d32665eaf3",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "c4da9c0ee696fd17f43ced25fdc3749906e7bc141c3ad3865695ca8e3da09eb1"
+  },
+  "facts": [
+    "Publisher prepare332\u2013333 saves an object publicationSnapshotIdentity after lower/build/reserve/max-attempt guard within preparation transaction.",
+    "Repository commit369\u2013380 merges publicationRevisionId and digest into progress; writer key is split across Java SQL literals.",
+    "Publisher194\u2013231 wraps repository commit and lifecycle publicationCommitted in same owner transaction.",
+    "Session stop2377\u20132453 mutates teardown/status and saves current progress; does not explicitly remove either publication marker.",
+    "ReplayIT safeFailureMetadata1562 already reads locked progress."
+  ],
+  "proposal": "At most two fixed booleans using existing progress.path(key).isObject()/isTextual(), named as marker presence; extend existing closed extraction whitelist only.",
+  "limits": [
+    "False is no saved marker observed at failure capture, not proof preparation was never entered or identification of exact guard.",
+    "True preparation marker can originate from an earlier attempt; not attempt-specific validation or current commit proof.",
+    "Commit marker presence is durable progress evidence, not independent receipt query verification.",
+    "Preparation transaction rollback can remove otherwise reached marker writes; commit rollback can remove revision marker.",
+    "Capture timing and generic progress saves require independent writer audit before authoring."
+  ],
+  "tradeoffs": {
+    "baseline": "No change; failure remains phase-ambiguous.",
+    "minimal": "Two scalar reads and existing extraction whitelist maintenance; no new query, hook, sampler, profiler, framework or case; limited durable boundary distinction.",
+    "broad": "Reject new phase event infrastructure or publication repository read for this diagnostic scope."
+  },
+  "status": "CONDITIONAL_SOURCE_ONLY; await independent writer/extraction audits",
+  "businessOrFixtureAuthored": false,
+  "runtime": false,
+  "qaOrAcceptanceCredit": false,
+  "independentDeveloperInterim": "Two booleans feasible; current named stop/conflict paths preserve keys. Generic repository full-progress save has no field immutability guard; arbitrary stale/manual Session retention unproved. Existing Java safeFailureMetadata is known; coordinator exporter whitelist pending."
+}

@@ -1,0 +1,181 @@
+{
+  "schemaVersion" : 1,
+  "sessionId" : "130ed231-02fc-4fe2-a8fe-9756f8acf97b",
+  "testId" : "25d1ac5a-c245-4e1a-8937-d86f3065e3d9",
+  "state" : "FAILED",
+  "errorCode" : "BUDGET_EXCEEDED",
+  "bootstrapPhase" : "READY",
+  "materializationPresent" : true,
+  "counters" : {
+    "actions" : 2,
+    "observations" : 4,
+    "modelProposals" : 7,
+    "modelInputTokens" : 111548,
+    "modelOutputTokens" : 28000,
+    "sanitizedEvidenceBytes" : 14748
+  },
+  "coordinate" : {
+    "stepIndex" : 1,
+    "generation" : 4
+  },
+  "activeSourceStepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "observationCounts" : {
+    "passwordControls" : 0,
+    "withheldRegions" : 1
+  },
+  "acquisition" : {
+    "allowanceMs" : 1000,
+    "totalExtraPolls" : 0
+  },
+  "activeAcquisition" : {
+    "extraPolls" : 0
+  },
+  "fixtureModelHttpCalls" : 7,
+  "fixturePhysicalProviderReads" : 0,
+  "fixtureProviderFailures" : 0,
+  "fixtureModelKinds" : {
+    "SOURCE_PLAN" : 1,
+    "NEXT_ACTION" : 6,
+    "VERIFY_STEP" : 0
+  },
+  "continuation" : "NEXT",
+  "translationCounters" : {
+    "planRevision" : 2
+  },
+  "declarations" : [ ],
+  "obligations" : [ {
+    "operationKind" : "navigate",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 0,
+    "referenceIndex" : 0
+  }, {
+    "operationKind" : "read",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 1
+  }, {
+    "operationKind" : "fill",
+    "stepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "click",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "assert",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 1
+  } ],
+  "actions" : [ {
+    "operationKind" : "navigate",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "admissionId" : "7bef9fea-cff9-447a-92e3-73d56ce4f049",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 0
+  }, {
+    "operationKind" : "read",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "admissionId" : "d3493aeb-e2a8-4a7d-81d5-5c26c9503bbb",
+    "ordinal" : 1,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 1
+  } ],
+  "obligationAdmissions" : [ {
+    "admitted" : true,
+    "operationKind" : "navigate",
+    "planrevision" : 2,
+    "occurrence" : 0,
+    "ordinal" : 0
+  }, {
+    "admitted" : true,
+    "operationKind" : "read",
+    "planrevision" : 2,
+    "occurrence" : 1,
+    "ordinal" : 1
+  }, {
+    "admitted" : false,
+    "operationKind" : "fill",
+    "planrevision" : 2,
+    "occurrence" : 0,
+    "ordinal" : 0
+  } ],
+  "modelAttempts" : [ {
+    "kind" : "SOURCE_PLAN",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "responseStatus" : "OTHER",
+    "responseOperationKind" : "OTHER",
+    "responseSchemaVersion" : 3,
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "responseStatus" : "ACTION",
+    "responseOperationKind" : "navigate",
+    "responseSchemaVersion" : 3,
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "responseStatus" : "ACTION",
+    "responseOperationKind" : "read",
+    "responseSchemaVersion" : 3,
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "responseStatus" : "CLARIFICATION",
+    "responseOperationKind" : "OTHER",
+    "responseSchemaVersion" : 3,
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "responseStatus" : "ACTION",
+    "responseOperationKind" : "fill",
+    "responseSchemaVersion" : 3,
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "responseStatus" : "ACTION",
+    "responseOperationKind" : "fill",
+    "responseSchemaVersion" : 3,
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "responseStatus" : "ACTION",
+    "responseOperationKind" : "fill",
+    "responseSchemaVersion" : 3,
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  } ],
+  "testMethod" : "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays",
+  "executions" : [ ]
+}

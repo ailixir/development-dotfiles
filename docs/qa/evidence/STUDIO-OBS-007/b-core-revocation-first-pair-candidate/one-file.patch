@@ -1,0 +1,575 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java candidate
+@@ -211,6 +211,34 @@
+ 
+     P4DocumentWitness(int phase) {
+       this.phase = phase;
++    }
++  }
++
++  private static final AtomicInteger P4_REVOCATION_CASE = new AtomicInteger();
++  private static volatile P4RevocationState p4Revocation;
++
++  private static final class P4RevocationState {
++    final int ordinal;
++    final int path;
++    final UUID test;
++    final JdbcTemplate actualJdbc;
++    final java.util.concurrent.CountDownLatch cutoff = new java.util.concurrent.CountDownLatch(1);
++    final java.util.concurrent.CountDownLatch releaseSignIn = new java.util.concurrent.CountDownLatch(1);
++    final Map<Integer, Integer> sequences = new java.util.HashMap<>();
++    final Map<Integer, Integer> active = new java.util.HashMap<>();
++    final java.util.concurrent.atomic.AtomicBoolean revoked = new java.util.concurrent.atomic.AtomicBoolean();
++    volatile String guidedSession;
++    volatile UUID execution;
++    volatile boolean failed;
++    boolean started, filled, signInEntered, reasonProved, restored, closed;
++    int inFlightOrdinal;
++    long flippedAt, cutoffAt, ackBracketMicros;
++
++    P4RevocationState(int ordinal, int path, UUID test, JdbcTemplate actualJdbc) {
++      this.ordinal = ordinal;
++      this.path = path;
++      this.test = test;
++      this.actualJdbc = actualJdbc;
+     }
+   }
+ 
+@@ -4142,6 +4170,18 @@
+     p3Case(() -> p4OrdinaryPasswordCount(2));
+   }
+ 
++  @Test
++  @org.junit.jupiter.api.Order(24)
++  void actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds() throws Exception {
++    p3Case(() -> p4RevocationPair(1));
++  }
++
++  @Test
++  @org.junit.jupiter.api.Order(25)
++  void actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds() throws Exception {
++    p3Case(() -> p4RevocationPair(2));
++  }
++
+   private String p3Cookie;
+   private final Map<String, String> p3OwnedGuidedCookies = new java.util.LinkedHashMap<>();
+   private final Map<UUID, String> p3OwnedOrdinaryCookies = new java.util.LinkedHashMap<>();
+@@ -4432,6 +4472,16 @@
+         failures.add(failure);
+       }
+     }
++    if (failures.isEmpty() && p4Revocation != null) {
++      try {
++        p4AwaitRevocationObserverCompletion(p4Revocation);
++        Files.writeString(TEMP.resolve("p4-revocation-state.json"), "{\"active\":false}",
++            StandardCharsets.UTF_8);
++        p4Revocation = null;
++      } catch (Exception | AssertionError failure) {
++        failures.add(failure);
++      }
++    }
+     if (!failures.isEmpty()) {
+       var unconfirmed = new IllegalStateException("Actual owned P3 cleanup remains unconfirmed");
+       failures.forEach(unconfirmed::addSuppressed);
+@@ -4527,6 +4577,262 @@
+     assertThat(manager).isInstanceOf(org.springframework.orm.jpa.JpaTransactionManager.class);
+     assertThat(((org.springframework.orm.jpa.JpaTransactionManager) manager).getDataSource())
+         .isSameAs(jdbc.getDataSource());
++  }
++
++  private static boolean p4RevocationUsed(P4RevocationState state) {
++    Long count = state.path == 1
++        ? state.actualJdbc.queryForObject(
++            "SELECT count(*) FROM studio_secret_use_audit WHERE session_id=? AND secret_id='PASS'"
++                + " AND row_kind='USAGE' AND usage_outcome='USED'",
++            Long.class, state.guidedSession)
++        : state.actualJdbc.queryForObject(
++            "SELECT count(*) FROM studio_secret_use_audit WHERE execution_id=? AND secret_id='PASS'"
++                + " AND row_kind='USAGE' AND usage_outcome='USED'",
++            Long.class, state.execution);
++    return count != null && count == 1;
++  }
++
++  private static void p4RevocationNotice(com.sun.net.httpserver.HttpExchange exchange)
++      throws IOException {
++    boolean accepted = false, flipped = false;
++    int sequence = 0;
++    P4RevocationState state = p4Revocation;
++    try {
++      byte[] bytes = exchange.getRequestBody().readNBytes(1025);
++      if (!exchange.getRequestMethod().equals("POST") || bytes.length > 1024 || state == null) {
++        throw new IllegalArgumentException("Invalid scalar revocation observer");
++      }
++      JsonNode body = C.parse(new String(bytes, StandardCharsets.UTF_8));
++      if (!body.isObject() || body.size() != 9 || p4Number(body, "case") != state.ordinal
++          || !body.path("ok").isBoolean()) {
++        throw new IllegalArgumentException("Invalid scalar observer identity");
++      }
++      int producer = p4Number(body, "producer"), event = p4Number(body, "event"),
++          ordinal = p4Number(body, "ordinal"), operation = p4Number(body, "operation"),
++          reason = p4Number(body, "reason");
++      sequence = p4Number(body, "seq");
++      synchronized (state) {
++        if (producer < 1 || producer > 3 || (state.path == 1 ? producer != 1 : producer == 1)
++            || sequence != state.sequences.getOrDefault(producer, 0) + 1) {
++          throw new IllegalArgumentException("Invalid scalar observer sequence");
++        }
++        state.sequences.put(producer, sequence);
++        if (event == 1) {
++          if (state.started || ordinal != 1) {
++            throw new IllegalArgumentException("Unexpected selected owner");
++          }
++          state.started = true;
++        } else if (event == 2) {
++          if (!state.started || state.flippedAt != 0 || state.active.putIfAbsent(ordinal, operation) != null) {
++            throw new IllegalArgumentException("Native entry outside original authority");
++          }
++        } else if (event == 3) {
++          Integer entered = state.active.remove(ordinal);
++          if (entered == null || entered != operation) {
++            throw new IllegalArgumentException("Unmatched original native settlement");
++          }
++          if (operation == 1 && body.path("ok").booleanValue()) {
++            state.filled = true;
++          }
++          if (state.flippedAt != 0 && ordinal != state.inFlightOrdinal) {
++            throw new IllegalArgumentException("Unidentified residual primitive");
++          }
++        } else if (event == 4) {
++          if (!body.path("ok").booleanValue() || (state.path == 2 && producer != 2)) {
++            throw new IllegalArgumentException("Invalid real complete acknowledgement");
++          }
++          if (state.flippedAt == 0 && state.started && state.filled && state.signInEntered
++              && state.active.size() == 1 && state.active.containsValue(2)
++              && p4RevocationUsed(state)) {
++            state.inFlightOrdinal = state.active.keySet().iterator().next();
++            if (state.inFlightOrdinal != 3) {
++              throw new IllegalArgumentException("Unexpected original Sign in invocation ordinal");
++            }
++            state.flippedAt = System.nanoTime();
++            state.revoked.set(true);
++            for (String actor : List.of("user-1", "fixture@example.invalid")) {
++              if (!P3_PERMITTED.remove(new P3Entitlement(actor, "CSI-456", "fixture-other", "PASS"))) {
++                throw new IllegalArgumentException("Missing genuine granted tuple");
++              }
++            }
++            flipped = true;
++          }
++        } else if (event == 5) {
++          if (!state.started || state.flippedAt == 0 || ordinal != 1
++              || (state.path == 2 && (producer != 3 || reason != 4))) {
++            throw new IllegalArgumentException("Unproved original authority cutoff");
++          }
++          if (state.cutoffAt == 0) {
++            state.cutoffAt = System.nanoTime();
++            state.cutoff.countDown();
++          }
++          if ((state.path == 1 && reason == 1) || (state.path == 2 && reason == 4)) {
++            state.reasonProved = true;
++          }
++        } else if (event == 6) {
++          state.restored = body.path("ok").booleanValue();
++          if (!state.restored) {
++            throw new IllegalArgumentException("Native descriptor restoration incomplete");
++          }
++        } else if (event == 8) {
++          if (state.flippedAt == 0) {
++            throw new IllegalArgumentException("Unmatched real ACK bracket");
++          }
++          state.ackBracketMicros = p4Number(body, "deltaMicros");
++        } else if (event == 9) {
++          if (state.path != 1 || !body.path("ok").booleanValue()) {
++            throw new IllegalArgumentException("Unproved original owner closure");
++          }
++          state.closed = true;
++        } else {
++          throw new IllegalArgumentException("Unknown scalar observer phase");
++        }
++      }
++      accepted = true;
++    } catch (RuntimeException failure) {
++      if (state != null) {
++        state.failed = true;
++      }
++    } catch (IOException failure) {
++      if (state != null) {
++        state.failed = true;
++      }
++      throw failure;
++    }
++    byte[] response = C.object().put("accepted", accepted).put("flipped", flipped).put("seq", sequence)
++        .toString().getBytes(StandardCharsets.UTF_8);
++    try {
++      exchange.getResponseHeaders().set("Content-Type", "application/json");
++      exchange.sendResponseHeaders(accepted ? 200 : 409, response.length);
++      exchange.getResponseBody().write(response);
++    } catch (IOException failure) {
++      if (state != null) {
++        state.failed = true;
++      }
++      throw failure;
++    }
++  }
++
++  private void p4WriteRevocationMode(P4RevocationState state) throws IOException {
++    ObjectNode mode = C.object().put("active", true).put("case", state.ordinal).put("path", state.path);
++    if (state.execution != null) {
++      mode.put("executionId", state.execution.toString());
++      mode.put("controlUrl", "https://localhost:" + port + "/internal/studio/executions/"
++          + state.execution + "/control");
++    }
++    Files.writeString(TEMP.resolve("p4-revocation-state.json"), mode.toString(), StandardCharsets.UTF_8);
++  }
++
++  private void p4AwaitRevocationObserverCompletion(P4RevocationState state) throws Exception {
++    long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
++    boolean complete;
++    do {
++      synchronized (state) {
++        complete = state.active.isEmpty() && state.reasonProved && state.restored
++            && state.ackBracketMicros > 0 && (state.path == 2 || state.closed);
++      }
++      if (complete) {
++        break;
++      }
++      Thread.sleep(20);
++    } while (System.nanoTime() < deadline);
++    assertThat(complete).as("all required original scalar witnesses settled").isTrue();
++    assertThat(state.failed).as("no lost malformed or failed observer").isFalse();
++    assertThat(Files.exists(TEMP.resolve("p4-revocation-observer-failed"))).isFalse();
++  }
++
++  private void p4RevocationPair(int path) throws Exception {
++    p3Mode = P3Mode.LOGIN;
++    p3Grant("CSI-456", "fixture-other");
++    UUID test = p3CreateSource("CSI-456", "fixture-other", true);
++    VaultScope scope = VaultScope.of("CSI-456", "fixture-other", test);
++    String value = "P4-REVOKE-" + UUID.randomUUID();
++    p3ExpectedPassword = value;
++    p3Seed(scope, value);
++    P3Publication publication = null;
++    if (path == 2) {
++      String control = p3Start(test, "fixture-other");
++      awaitFinalizing(control);
++      publication = p3Publish(control);
++      p3CleanupOwnedResources();
++      p3OwnedGuidedCookies.clear();
++      P3_RECEIPTS.clear();
++      P3_NATIVE_SESSIONS.clear();
++      P3_REPORT_REQUESTS.set(0);
++    }
++    int models = MODEL_WIRE.size();
++    int reads = COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
++    P4RevocationState state = new P4RevocationState(P4_REVOCATION_CASE.incrementAndGet(), path, test, jdbc);
++    p4Revocation = state;
++    p4WriteRevocationMode(state);
++    try {
++      if (path == 1) {
++        state.guidedSession = p3Start(test, "fixture-other");
++      } else {
++        state.execution = p3Execute(test);
++        p4WriteRevocationMode(state);
++        p3AssertBinding(state.execution, scope, publication);
++        assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
++      }
++      assertThat(state.cutoff.await(20, java.util.concurrent.TimeUnit.SECONDS))
++          .as("original cutoff ingress after genuine ACK and exact tuple flip").isTrue();
++      assertThat(state.cutoffAt - state.flippedAt).isPositive().isLessThanOrEqualTo(
++          Duration.ofMillis(2000).toNanos());
++      assertThat(state.filled).isTrue();
++      assertThat(state.signInEntered).isTrue();
++      state.releaseSignIn.countDown();
++      Object revokedAt;
++      if (path == 1) {
++        awaitState(state.guidedSession, "CANCELLED");
++        p3AwaitTeardown(state.guidedSession);
++        revokedAt = jdbc.queryForObject("SELECT revoked_at FROM studio_guided_sessions WHERE session_id=?",
++            Object.class, state.guidedSession);
++        p3AssertUsed(state.guidedSession, null);
++        assertThat(sessions.transaction(() -> sessions.lock(state.guidedSession).progress()
++            .path("errorCode").asText())).isEqualTo("SECRET_USE_REVOKED");
++      } else {
++        JsonNode result = p3AwaitExecution(state.execution, "ERROR");
++        assertThat(result.path("errorCode").asText()).isEqualTo("AUTHORIZATION_REVOKED");
++        assertThat(p3RunnerReport(state.execution).path("outcome").path("errorCode").asText())
++            .isEqualTo("CANCELLED");
++        revokedAt = jdbc.queryForObject("SELECT revoked_at FROM studio_dispatch_ledger WHERE execution_id=?",
++            Object.class, state.execution);
++        assertThat(jdbc.queryForObject("SELECT cancel_requested_at FROM studio_dispatch_ledger WHERE execution_id=?",
++            Object.class, state.execution)).isNull();
++        assertThat(MODEL_WIRE.size()).isEqualTo(models);
++        p3AssertBinding(state.execution, scope, publication);
++        p3AssertUsed(null, state.execution);
++      }
++      assertThat(revokedAt).isNotNull();
++      String ownerColumn = path == 1 ? "session_id" : "execution_id";
++      Object owner = path == 1 ? state.guidedSession : state.execution;
++      assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_secret_use_audit WHERE " + ownerColumn
++          + "=? AND secret_id='PASS' AND row_kind='RELEASE' AND outcome='RESOLVED'", Long.class, owner))
++          .isEqualTo(1);
++      assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_secret_use_audit WHERE " + ownerColumn
++          + "=? AND secret_id='PASS' AND decision_stage='LIVE_RECHECK' AND outcome='REVOKED_MID_RUN'",
++          Long.class, owner)).isEqualTo(1);
++      assertThat(COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS") - reads)
++          .isEqualTo(1);
++      assertThat(P3_RECEIPTS).hasSize(1);
++      assertThat(P3_RECEIPTS.getFirst().accepted()).isTrue();
++      assertThat(P3_REPORT_REQUESTS.get()).isZero();
++      p3AssertAuditScope(state.guidedSession, state.execution, scope);
++      p3CleanupOwnedResources();
++      p4AwaitRevocationObserverCompletion(state);
++      String table = path == 1 ? "studio_guided_sessions" : "studio_dispatch_ledger";
++      assertThat(jdbc.queryForObject("SELECT revoked_at FROM " + table + " WHERE " + ownerColumn + "=?",
++          Object.class, owner)).isEqualTo(revokedAt);
++      p3Scan(List.of(value));
++      p3WriteEvidence("revocation-first-pair-" + path, C.object().put("path", path)
++          .put("cutoffNanosIncludingQueues", state.cutoffAt - state.flippedAt)
++          .put("ackBracketMicrosSameNodeClock", state.ackBracketMicros)
++          .put("identifiedInFlightOrdinal", state.inFlightOrdinal).put("freshSecretReads", 1)
++          .put("priorPositiveUsagePreserved", true).put("actualLiveRecheckRows", 1)
++          .put("nativeEntryOnlyNotDomWrite", true).put("originalOwnerCleanupConfirmed", true));
++    } finally {
++      state.releaseSignIn.countDown();
++    }
+   }
+ 
+   private int p4StartObserverPhase(int count) throws Exception {
+@@ -5122,6 +5428,12 @@
+   }
+ 
+   private static boolean p3Entitled(String principal, String csi, String environment, String name) {
++    P4RevocationState current = p4Revocation;
++    if (current != null && current.revoked.get()
++        && List.of("user-1", "fixture@example.invalid").contains(principal)
++        && csi.equals("CSI-456") && environment.equals("fixture-other") && name.equals("PASS")) {
++      return false;
++    }
+     return P3_PERMITTED.contains(new P3Entitlement(principal, csi, environment, name));
+   }
+ 
+@@ -5418,6 +5730,145 @@
+   private static void p3WriteEvidence(String name, ObjectNode evidence) throws Exception {
+     requireNumericBudgetEvidence(evidence);
+     Files.writeString(TEMP.resolve("p3-" + name + ".json"), evidence.toPrettyString());
++  }
++
++  private static String p4RevocationScalarSupport(int producer) throws Exception {
++    return """
++        import * as revFs from 'node:fs';
++        const revStateFile=%s,revFailedFile=%s,revOrigin=%s,revProducer=%d;
++        let revCase=0,revSeq=0,revTail=Promise.resolve(),revStarted=false,revNativeOrdinal=0;
++        const revActive=new Map(),revGroups=new Set();
++        const revMode=()=>{try{return revFs.existsSync(revStateFile)?JSON.parse(revFs.readFileSync(revStateFile,'utf8')):null;}catch{return null;}};
++        const revFail=()=>{try{revFs.appendFileSync(revFailedFile,'1\\n',{mode:0o600});}catch{}};
++        const revEmit=(mode,event,ordinal=0,operation=0,reason=0,ok=true,deltaMicros=0)=>{
++          if(!mode?.active)return;
++          if(revCase!==mode.case){revCase=mode.case;revSeq=0;revTail=Promise.resolve();}
++          const body={case:mode.case,producer:revProducer,seq:++revSeq,event,ordinal,operation,reason,ok,deltaMicros};
++          const acknowledgedAt=performance.now();
++          revTail=revTail.then(async()=>{
++            const response=await fetch(revOrigin+'/p3/revocation-observer',{method:'POST',
++              headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(1000)});
++            const ack=await response.json();
++            if(response.status!==200||Object.keys(ack).sort().join(',')!=='accepted,flipped,seq'
++              ||ack.accepted!==true||ack.seq!==body.seq||typeof ack.flipped!=='boolean')throw new Error('OBSERVER');
++            if(event===4&&ack.flipped)revEmit(mode,8,0,0,0,true,Math.ceil((performance.now()-acknowledgedAt)*1000));
++          }).catch(()=>{revFail();});
++        };
++        const revRestore=()=>{
++          let restored=true;
++          for(const group of [...revGroups]){
++            for(const [name,descriptor,wrapped] of [...group.methods]){
++              const current=Object.getOwnPropertyDescriptor(group.cap,name);
++              let success=false;
++              try{if(current?.value===wrapped)success=descriptor?
++                Reflect.defineProperty(group.cap,name,descriptor):Reflect.deleteProperty(group.cap,name);}catch{}
++              if(success)group.methods=group.methods.filter(item=>item[0]!==name);else{restored=false;revFail();}
++            }
++            if(!group.methods.length){group.cap=null;revGroups.delete(group);}
++          }
++          return restored;
++        };
++        const revObserveNative=(cap,mode)=>{
++          if(!mode?.active)return;
++          if(!cap||revGroups.size||typeof cap.fillPassword!=='function'||typeof cap.invoke!=='function'){revFail();return;}
++          const group={cap,methods:[]};revGroups.add(group);
++          for(const name of ['fillPassword','invoke']){
++            const descriptor=Object.getOwnPropertyDescriptor(cap,name),original=cap[name];
++            const wrapped=function(...args){
++              const operation=name==='fillPassword'?1:args[0]?.operation?.kind==='click'?2:3;
++              const ordinal=++revNativeOrdinal;revActive.set(ordinal,operation);revEmit(mode,2,ordinal,operation);
++              const settled=ok=>{revActive.delete(ordinal);revEmit(mode,3,ordinal,operation,0,ok);};
++              let result;try{result=Reflect.apply(original,this,args);}catch(error){settled(false);throw error;}
++              try{result.then(()=>settled(true),()=>settled(false)).catch(()=>{revFail();});}catch{revFail();}
++              return result;
++            };
++            try{if(!Reflect.defineProperty(cap,name,{...(descriptor??{configurable:true,writable:true,enumerable:true}),value:wrapped}))throw new Error('DESCRIPTOR');
++              group.methods.push([name,descriptor,wrapped]);}catch{revFail();}
++          }
++        };
++        """.formatted(JSON.writeValueAsString(TEMP.resolve("p4-revocation-state.json").toString()),
++            JSON.writeValueAsString(TEMP.resolve("p4-revocation-observer-failed").toString()),
++            JSON.writeValueAsString(ORIGIN), producer);
++  }
++
++  private static String p4GuidedRevocationObservers() throws Exception {
++    String root = Path.of("../studio-runner/dist").toAbsolutePath().normalize().toUri().toString();
++    return p4RevocationScalarSupport(1) + """
++        import {GuidedRuntime as RevRuntime} from %s;
++        import {GuidedOwnership as RevOwnership} from %s;
++        const revOwners=new WeakMap(),revRuntimes=new WeakMap();
++        const revStart=RevRuntime.prototype.start;
++        RevRuntime.prototype.start=function(...args){const result=Reflect.apply(revStart,this,args),mode=revMode();
++          if(mode?.active&&mode.path===1){const runtime=this;
++            result.then(()=>{try{if(!runtime.accepting||revStarted)throw new Error('OWNER');
++              revStarted=true;revRuntimes.set(runtime,mode);revObserveNative(runtime.browser?.observations,mode);
++              revEmit(mode,1,1);}catch{revFail();}},()=>{revFail();}).catch(()=>{revFail();});}
++          return result;};
++        const revCheck=RevOwnership.prototype.checkGrant;
++        RevOwnership.prototype.checkGrant=function(...args){const result=Reflect.apply(revCheck,this,args),mode=revMode();
++          if(mode?.active&&mode.path===1){try{const entry=args[0];
++            if(entry.stopped!==false)throw new Error('OWNER');
++            if(args[2]===true)revOwners.set(entry,mode.case);
++            else if(revStarted&&revOwners.get(entry)===mode.case)revEmit(mode,4,1);
++          }catch{revFail();}}return result;};
++        const revInvalidate=RevOwnership.prototype.invalidate;
++        RevOwnership.prototype.invalidate=function(...args){const result=Reflect.apply(revInvalidate,this,args),mode=revMode();
++          if(mode?.active&&mode.path===1&&revOwners.get(args[0])===mode.case){
++            if(args[0].stopped===true)revEmit(mode,5,1);else revFail();}return result;};
++        const revStop=RevRuntime.prototype.stop;
++        RevRuntime.prototype.stop=function(...args){const mode=revRuntimes.get(this);
++          if(mode){const restored=revRestore();revEmit(mode,6,1,0,0,restored);}
++          const result=Reflect.apply(revStop,this,args);
++          if(mode){const reason=['REVOKED','LEASE_LOST','EXPIRED','CANCELLED','CONTEXT_LOST'].indexOf(args[0])+1;
++            if(this.accepting===false&&reason>0)revEmit(mode,5,1,0,reason);else revFail();
++            result.then(()=>revEmit(mode,9,1),()=>{revFail();}).catch(()=>{revFail();});revRuntimes.delete(this);}
++          return result;};
++        """.formatted(JSON.writeValueAsString(root + "guided/runtime.js"),
++            JSON.writeValueAsString(root + "guided/ownership.js"));
++  }
++
++  private static String p4OrdinaryRevocationHttp() throws Exception {
++    String root = Path.of("../studio-runner/dist").toAbsolutePath().normalize().toUri().toString();
++    return p4RevocationScalarSupport(2) + """
++        import {createFetchHttpClient as revRealClient} from %s;
++        import {validSecretControl as revValidControl,ackRequestsCancel as revRequestsCancel} from %s;
++        const revHttp=revRealClient(),revSend=revHttp.send;
++        revHttp.send=function(...args){const mode=revMode();
++          const selected=mode?.active&&mode.path===2&&args[0]?.method==='GET'
++            &&args[0]?.url===mode.controlUrl;
++          const result=Reflect.apply(revSend,this,args);
++          if(selected){result.then(outcome=>{try{
++            if(outcome.kind==='response'&&outcome.status===200&&revValidControl(outcome.body,mode.executionId)){
++              if(!revRequestsCancel(outcome.body))revEmit(mode,4,1);
++            }
++          }catch{revFail();}},()=>{revFail();}).catch(()=>{revFail();});}
++          return result;};
++        """.formatted(JSON.writeValueAsString(root + "reporting/httpClient.js"),
++            JSON.writeValueAsString(root + "reporting/reportClient.js"));
++  }
++
++  private static String p4OrdinaryRevocationChild() throws Exception {
++    String root = Path.of("../studio-runner/dist").toAbsolutePath().normalize().toUri().toString();
++    return p4RevocationScalarSupport(3) + """
++        import {validateObserved as revValidateObserved} from %s;
++        let revReady=false;
++        const revProcess={
++          on(event,listener){return Reflect.apply(process.on,process,[event,function(...args){
++            const result=Reflect.apply(listener,this,args),mode=revMode();
++            if(mode?.active&&mode.path===2&&args[0]?.kind==='stop'){
++              try{revValidateObserved('replay-ipc#/definitions/Stop',args[0],128);
++                if(!revReady||!revStarted)throw new Error('READY');
++                revEmit(mode,6,1,0,0,revRestore());revEmit(mode,5,1,0,4);
++              }catch{revFail();}}return result;}]);},
++          send(...args){const result=Reflect.apply(process.send,process,args),mode=revMode();
++            if(mode?.active&&mode.path===2&&args[0]?.kind==='ready'){
++              try{const ready=revValidateObserved('replay-ipc#/definitions/Ready3',args[0],16384);
++                if(result!==true||ready.runId!==mode.executionId)throw new Error('BINDING');
++                revReady=true;revStarted=true;revEmit(mode,1,1);
++              }catch{revFail();}}return result;},
++          exit(...args){return Reflect.apply(process.exit,process,args);}
++        };
++        """.formatted(JSON.writeValueAsString(root + "validator/observedReferencePolicy.js"));
+   }
+ 
+   private static String p4NativeCloseObserverSdk() throws Exception {
+@@ -5521,6 +5972,7 @@
+         + file
+         + ",JSON.stringify(state),{mode:0o600});return Reflect.apply(original,this,args);};}"
+         + p4NativeCloseObserverSdk()
++        + p4GuidedRevocationObservers()
+         + "await import('"
+         + main
+         + "');";
+@@ -5534,6 +5986,10 @@
+         return;
+       }
+       String path = exchange.getRequestURI().getPath();
++      if (path.equals("/p3/revocation-observer") && p4Revocation != null) {
++        p4RevocationNotice(exchange);
++        return;
++      }
+       if (path.equals("/p3/password-effects") && p4PasswordControls >= 0) {
+         p4HandleObserver(exchange);
+         return;
+@@ -5552,6 +6008,23 @@
+         String password = values.getOrDefault("password", "");
+         boolean accepted = password.equals(p3ExpectedPassword);
+         P3_RECEIPTS.add(new P3Receipt(password, values.getOrDefault("username", ""), accepted));
++        P4RevocationState held = p4Revocation;
++        if (held != null) {
++          synchronized (held) {
++            held.signInEntered = accepted;
++            if (!accepted) {
++              held.failed = true;
++            }
++          }
++          try {
++            if (!held.releaseSignIn.await(20, java.util.concurrent.TimeUnit.SECONDS)) {
++              held.failed = true;
++            }
++          } catch (InterruptedException interrupted) {
++            Thread.currentThread().interrupt();
++            held.failed = true;
++          }
++        }
+         if (p4PasswordControls >= 0) {
+           p4AwaitNativeSubmitFence(exchange.getRequestURI().getRawQuery());
+         }
+@@ -6619,6 +7092,7 @@
+             + root
+             + "run/browser.js';"
+             + p4NativeCloseObserverSdk()
++            + p4OrdinaryRevocationChild()
+             + initialContextCheck
+             + "const launch=playwrightBrowserFactory.launch.bind(playwrightBrowserFactory);"
+             + "playwrightBrowserFactory.launch=async request=>{const handle=await launch(request);"
+@@ -6636,8 +7110,9 @@
+             + "await fetch('"
+             + ORIGIN
+             + "/invocation',{method:'POST',body:args[0].operation.kind});"
+-            + "return result;};return session;};return handle;};"
+-            + "startChild(process,{observedBuild:loadObservedBuild("
++            + "return result;};const revSelected=revMode();if(revSelected?.active&&revSelected.path===2){"
++            + "if(!revReady)revFail();else revObserveNative(session,revSelected);}return session;};return handle;};"
++            + "startChild(revProcess,{observedBuild:loadObservedBuild("
+             + startup
+             + ")});");
+     ObjectNode env =
+@@ -6666,6 +7141,7 @@
+             + "run/browser.js';"
+             + initialContextCheck
+             + ordinaryAdmissionRefusalTap()
++            + p4OrdinaryRevocationHttp()
+             + "const launch=playwrightBrowserFactory.launch.bind(playwrightBrowserFactory);"
+             + "playwrightBrowserFactory.launch=async request=>{const handle=await launch(request);"
+             + ("if(request.observedScope){const matches=handle.observedInitialContextMatches.bind(han"
+@@ -6692,7 +7168,7 @@
+             + JSON.writeValueAsString(child.toString())
+             + "});const app=createApplication(loadConfig("
+             + env
+-            + "),{launcher,runtimeVersions:loadRuntimeVersions(),observed:{build,policies:["
++            + "),{launcher,http:revHttp,runtimeVersions:loadRuntimeVersions(),observed:{build,policies:["
+             + POLICY
+             + ","
+             + P3_OTHER_POLICY

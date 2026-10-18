@@ -1,0 +1,57 @@
+{
+  "modelAttempts": [
+    {
+      "kind": "SOURCE_PLAN",
+      "status": "APPLIED",
+      "attemptnumber": 1,
+      "providerCode": "OTHER",
+      "responseStatus": "OTHER",
+      "operationKind": "UNCLASSIFIED"
+    },
+    {
+      "kind": "NEXT_ACTION",
+      "status": "APPLIED",
+      "attemptnumber": 1,
+      "providerCode": "OTHER",
+      "responseStatus": "ACTION",
+      "operationKind": "navigate"
+    },
+    {
+      "kind": "NEXT_ACTION",
+      "status": "APPLIED",
+      "attemptnumber": 1,
+      "providerCode": "OTHER",
+      "responseStatus": "ACTION",
+      "operationKind": "read"
+    },
+    {
+      "kind": "NEXT_ACTION",
+      "status": "REJECTED",
+      "attemptnumber": 1,
+      "providerCode": "OTHER",
+      "responseStatus": "OTHER",
+      "operationKind": "UNCLASSIFIED"
+    }
+  ],
+  "actions": [
+    {
+      "operationKind": "read",
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "dispatchCount": 1,
+      "ordinal": 0
+    },
+    {
+      "operationKind": "navigate",
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "dispatchCount": 1,
+      "ordinal": 0
+    }
+  ],
+  "terminal": "FAILED",
+  "code": "INVALID_CONTRACT",
+  "publication": "UNREACHED",
+  "passwordMutation": "UNREACHED",
+  "firstValidationCode": "UNOBSERVED"
+}

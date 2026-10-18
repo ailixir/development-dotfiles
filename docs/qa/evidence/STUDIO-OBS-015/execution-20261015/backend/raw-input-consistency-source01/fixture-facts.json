@@ -1,0 +1,154 @@
+{
+  "classification": "READ_ONLY_FROZEN_FACT_INSPECTION_NOT_JAVA_ACCEPTANCE",
+  "fixture": {
+    "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+    "sha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+    "bytes": 22720135
+  },
+  "ordinary": {
+    "rawCompleteInputIds": [
+      "input-destination",
+      "input-label",
+      "input-config"
+    ],
+    "normalizedCount": 3,
+    "effectiveInputIds": [
+      "input-destination",
+      "input-label"
+    ],
+    "effectiveRecipeIds": [
+      "input-destination",
+      "input-label"
+    ],
+    "unusedInput": "input-config"
+  },
+  "appendedHistorical": {
+    "pointer": "/incrementalContracts/basisCases[name=appendedHistorical]",
+    "versions": [
+      {
+        "schemaVersion": 3,
+        "sessionId": "session-1",
+        "workerId": "worker-1",
+        "ownerFence": 1,
+        "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+        "contextId": "context-1",
+        "contextRevision": 1,
+        "authoredInputsHash": "935d2b50699a20e72c8fad85bd495e4f292e7cc1ee17e1799c7815afde847d3e",
+        "sourceRevision": "1",
+        "configurationRevision": "1",
+        "inputCount": 1,
+        "previousInputsHash": null,
+        "birthMaterializationRevision": 1
+      },
+      {
+        "schemaVersion": 3,
+        "sessionId": "session-1",
+        "workerId": "worker-1",
+        "ownerFence": 1,
+        "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+        "contextId": "context-1",
+        "contextRevision": 2,
+        "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+        "sourceRevision": "1",
+        "configurationRevision": "1",
+        "inputCount": 3,
+        "previousInputsHash": "935d2b50699a20e72c8fad85bd495e4f292e7cc1ee17e1799c7815afde847d3e",
+        "birthMaterializationRevision": 3
+      }
+    ],
+    "entryIds": [
+      "input-destination",
+      "input-label",
+      "input-config"
+    ],
+    "entryIntroducedRevisions": [
+      1,
+      2,
+      2
+    ],
+    "privateDocumentHashes": [
+      {
+        "inputId": "input-destination",
+        "privateDocumentHash": "d4946735c9b8a17eb6bda65f75628a373d93cd9e986cdab5e3ccf3c7d95ee9d0",
+        "frozenInputHash": "d4946735c9b8a17eb6bda65f75628a373d93cd9e986cdab5e3ccf3c7d95ee9d0",
+        "metadataHashIsDifferent": true
+      },
+      {
+        "inputId": "input-label",
+        "privateDocumentHash": "b2b1da963201e590c9cb5c0cd6d775e979d5ab6a11cbaa639788cd7e68db02f8",
+        "frozenInputHash": "b2b1da963201e590c9cb5c0cd6d775e979d5ab6a11cbaa639788cd7e68db02f8",
+        "metadataHashIsDifferent": true
+      },
+      {
+        "inputId": "input-config",
+        "privateDocumentHash": "a0ad7c294ad8142c91ef412c73a07e6da877c47ffd6742bbda7525b7dd55bd27",
+        "frozenInputHash": "a0ad7c294ad8142c91ef412c73a07e6da877c47ffd6742bbda7525b7dd55bd27",
+        "metadataHashIsDifferent": true
+      }
+    ],
+    "privateFullEnvelopeHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+    "currentHead": {
+      "contextRevision": 2,
+      "materializationRevision": 4,
+      "version2birthMaterializationRevision": 3
+    },
+    "preparations": [
+      {
+        "preparationId": "preparation-0",
+        "materializationRevision": 2,
+        "contextRevision": 1,
+        "authoredInputsHash": "935d2b50699a20e72c8fad85bd495e4f292e7cc1ee17e1799c7815afde847d3e"
+      },
+      {
+        "preparationId": "preparation-1",
+        "materializationRevision": 2,
+        "contextRevision": 1,
+        "authoredInputsHash": "935d2b50699a20e72c8fad85bd495e4f292e7cc1ee17e1799c7815afde847d3e"
+      },
+      {
+        "preparationId": "preparation-2",
+        "materializationRevision": 4,
+        "contextRevision": 2,
+        "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734"
+      },
+      {
+        "preparationId": "preparation-3",
+        "materializationRevision": 4,
+        "contextRevision": 2,
+        "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734"
+      },
+      {
+        "preparationId": "preparation-4",
+        "materializationRevision": 4,
+        "contextRevision": 2,
+        "authoredInputsHash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734"
+      }
+    ],
+    "earlierActionsDifferentFromLatestHash": true,
+    "frozenActionLedgersEqualDeclaredAuthority": true,
+    "bootstrapUnchanged": {
+      "contextId": "context-1",
+      "contextRevision": 1,
+      "ownerFence": 1,
+      "materializationRevision": 1,
+      "inputsHash": "935d2b50699a20e72c8fad85bd495e4f292e7cc1ee17e1799c7815afde847d3e",
+      "allocationHash": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+      "metadataAcknowledged": true,
+      "initialEvidence": {
+        "kind": "initialBlank",
+        "sessionId": "session-1",
+        "contextId": "context-1",
+        "creationId": "creation-1",
+        "documentId": "blank-document-1",
+        "bootstrapId": "bootstrap-1",
+        "url": "about:blank",
+        "origin": null,
+        "generation": 0
+      }
+    },
+    "independentSyntheticManifestHash": "a0f81a1b0a4a5f621affec90247af610f28ff85354eb5113f87db8ba2a55fb24",
+    "expectedBasisDiffersOnlyAtSourceManifestHash": true,
+    "expectedBasisHashFromFrozenFacts": "9a06c57d78f46dc54f19d375e9215ebf5c78a25fd438bf284cb939dca6b74670",
+    "proofLimit": "Declared synthetic history and metadata head only. No SQL/private reader/native/ACK execution evidence."
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "story": "STUDIO-OBS-007",
+  "status": "FROZEN_PARENT_LINKED_AMBIENT_AND_PUBLIC_COMPONENT_TEST_SOURCE_REVISION_UNRUN",
+  "parentReceiptPath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-publication-lowering-isolated-author/result.json",
+  "parentReceiptSha256": "cb93dc11055223aa3de1b31f8803f4fdc8f8dfad0c01bf5bb328bc036b13774e",
+  "independentConcernsReceiptSha256": "a996f30ae5f95ed269dcec40b5de5bc7a1a1e038162fcbcc4b1538192ddf1db3",
+  "files": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": {
+      "parentSha256": "a60b5e812ff2fc65b6a75d77dfb096cc3ae1673c902cca2bc280bed21548a061",
+      "candidateSha256": "4d822593d5fe0aeeb63ea3eb2a1fd538bc36099ee6aa5327462e21ad1a615481",
+      "originalLiveBaseSha256": "87e9a1da8028ecf341aa3c7102069acb223ce44eb81d00e665c9650088a2a650",
+      "beforePath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-publication-lowering-component-revision/before/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-publication-lowering-component-revision/candidate/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java": {
+      "parentSha256": "a8ac5bc8faa8289f04d4bcb3806e31abc73070a5e3e8bdd2101b96abf347c213",
+      "candidateSha256": "ed5a96026ebe78c8cfb5bd41619989942c8c620af5e5c46c5e286d5ca59f84a6",
+      "originalLiveBaseSha256": "42b44db77ea93fb124ae81893af41e474c854074edb08f13e5503942affb91c7",
+      "beforePath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-publication-lowering-component-revision/before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-publication-lowering-component-revision/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java"
+    },
+    "docs/specs/studio-observed-authoring/secret-login-design.md": {
+      "parentSha256": "6a08f7353a33722c17d36d884497373111712571b5d3994f52ce26a3091e1ed2",
+      "candidateSha256": "7040f97c269d423bf186fc7a0682709fff3e44ba744c4d30ad70652295ab4a7a",
+      "originalLiveBaseSha256": "0fdd8f75df61761ece1bfab44c32bf507fa6593e72a21333a51141b2e9ea5bfb",
+      "beforePath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-publication-lowering-component-revision/before/docs/specs/studio-observed-authoring/secret-login-design.md",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-publication-lowering-component-revision/candidate/docs/specs/studio-observed-authoring/secret-login-design.md"
+    }
+  },
+  "ambientDocFirstSha256": "a0d112f63d806679ae89a4eed9f2812bece7a0f0177f8c038a3796c89be1cf02",
+  "patchPath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-publication-lowering-component-revision/candidate.patch",
+  "patchSha256": "f103d982b3b79122a2f07947eee0e320820091817dc4313c187db5de675e87fd",
+  "parentDeltaSha256": "b277749617c98a35513b9e396fed54b43f66234e6a9eb356e10d9b2e748beb1e",
+  "inversePatchSha256": "0daeb8141e9be1982e8ae7f7a1aca82c6fece91bfb465e1adb96ce514cab1e04",
+  "preservationProofSha256": "d7d1079cb725ed980b0ce9626eeb94f7998710ae1d48ac13e869802c39c08ca8",
+  "newSelector": "ObservedArtifactLowererTest.publicPublisherUsesOnlyMatchingDetachedSuccessWithFreshInputs",
+  "newVariants": [
+    "matched",
+    "build",
+    "representation",
+    "invalid",
+    "runtime",
+    "fatal",
+    "ambient"
+  ],
+  "parentSourceMethods": 12,
+  "candidateSourceMethods": 13,
+  "newRuntimeCasesUnrun": 7,
+  "limits": "Controlled public component proof design, not real PG rollback/locks/Core/model/learning/browser acceptance. Original independent vectors + actual PG suites + original acceptance remain separate required tiers. No latency/exclusivecost/PASS promise.",
+  "actions": "No live source integration/formatter/build/tests/SQL/runtime/JFR/diagnostic/lifecycle/QA/commit/push/deploy; root+independent full source review before coordinator-only gates.",
+  "budget": "Shared USD500 ceiling; actual billing unavailable."
+}

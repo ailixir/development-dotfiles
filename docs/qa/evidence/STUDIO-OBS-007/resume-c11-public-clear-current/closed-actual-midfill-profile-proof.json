@@ -1,0 +1,92 @@
+{
+  "scope": "EXACT_REQUIRED_COMPILED_CHILD_MIDFILL_POSITION_AND_SELECTED_POSTFAULT_PROFILE",
+  "sourceSha256": "ea827f2296d515d9203c7a96cc0b47626528414bd76e0b360fdd271c80b48e90",
+  "mainSha256": "6431f46bc00ae7077e0363cda68d8782f4eb3d2307f5df4be9b3da2ca8e35754",
+  "caseResult": "PASS",
+  "allSelectorGuardsExecuted": true,
+  "case": {
+    "actualReadyStarted": true,
+    "soleCdpPending": true,
+    "compiledChildTerminated": true,
+    "capturedDescendantsGone": true,
+    "parentAlive": true,
+    "authenticScopedFinalObserved": true,
+    "knownUsedBeforeCut": false,
+    "physicalReadDelta": 1,
+    "unknownUsageCount": 1,
+    "normalSdkCloseObserved": false,
+    "normalDescriptorRestoreObserved": false,
+    "normalChildSealObserved": false,
+    "terminatedProducerDrain": true,
+    "retainedFiles": 151,
+    "retainedFilesPreCutOnly": true,
+    "postFaultScratchProfileObserved": true,
+    "postFaultProfileSampleOrdinal": 2,
+    "originalQuiesceObserved": true,
+    "originalQuiescentTrue": true,
+    "fullFaultSinkClosureClaimed": false
+  },
+  "sinks": {
+    "mappedAppenders": 1,
+    "encodedBytes": 7916156,
+    "encodedWriteCalls": 12723,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 15,
+    "rootTraceObserved": true,
+    "appTraceObserved": true,
+    "sseStreams": 1,
+    "metricBytes": 74951,
+    "cacheEntries": 1,
+    "cacheNonemptyRequired": true,
+    "cacheProduced": true,
+    "profileFiles": 316,
+    "knownRootLinks": 5,
+    "traceArmed": true
+  },
+  "profiles": [
+    {
+      "files": 168,
+      "links": 4,
+      "hits": 0,
+      "failed": false,
+      "bytes": 8856398,
+      "hitCategories": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "files": 148,
+      "links": 1,
+      "hits": 0,
+      "failed": false,
+      "bytes": 8487261,
+      "hitCategories": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "profileSampleCount": 2,
+  "same15VariantsAndStrictFdNoFollowLinkInventory": true,
+  "scopedProfileBeforeOriginalClear": true,
+  "killedNormalSdkReceiptNotInvented": true,
+  "normalSdkOrOpaqueRpcSettlementClaim": false,
+  "wholeC5OrStoryQa": false
+}

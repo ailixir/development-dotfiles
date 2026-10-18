@@ -1,0 +1,181 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -2264,16 +2264,7 @@
+             String.class,
+             UUID.fromString(receipt.path("revisionId").asText()));
+     String artifactHash = GuidedContracts.hash(C.parse(artifact));
+-    assertThat(ownedApplicationContext.getEnvironment().getActiveProfiles())
+-        .doesNotContain("worker");
+-    org.springframework.context.ConfigurableApplicationContext observedWorker = null;
+-    var closedWorkerExecutors = new AtomicInteger();
+-    try {
+-      for (int run = 0; run < 2; run++) {
+-        if (run == 1) {
+-          observedWorker = observedWorkerReplica(closedWorkerExecutors);
+-          assertObservedWorker(observedWorker, testId);
+-        }
++    for (int run = 0; run < 2; run++) {
+       JsonNode accepted =
+           publicCall(
+               "/api/v1/studio/tests/" + testId + "/execute",
+@@ -2281,9 +2272,7 @@
+               202,
+               UUID.randomUUID().toString());
+       UUID executionId = UUID.fromString(accepted.path("executionId").asText());
+-      StudioDispatcher activeDispatcher =
+-          observedWorker == null ? dispatcher : observedWorker.getBean(StudioDispatcher.class);
+-      assertThat(activeDispatcher.dispatchOnce()).isEqualTo(1);
++      assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+       long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+       String state;
+       do {
+@@ -2307,23 +2296,10 @@
+           .isTrue();
+       assertThat(
+               jdbc.queryForObject(
+-                  "SELECT observed_admission_receipt->>'kind' FROM ui_test_executions WHERE id=?",
+-                  String.class,
+-                  executionId))
+-          .isEqualTo("observed");
+-      assertThat(
+-              jdbc.queryForObject(
+                   "SELECT artifact_hash FROM ui_test_revisions WHERE id=?",
+                   String.class,
+                   UUID.fromString(receipt.path("revisionId").asText())))
+           .isEqualTo(artifactHash);
+-    }
+-    } finally {
+-      if (observedWorker != null) {
+-        observedWorker.close();
+-        assertThat(observedWorker.isActive()).isFalse();
+-        assertThat(closedWorkerExecutors.get()).isEqualTo(3);
+-      }
+     }
+     assertThat(NAVIGATIONS.get()).isEqualTo(3);
+     assertThat(RECEIPTS).containsExactlyElementsOf(VALUES);
+@@ -14520,125 +14496,6 @@
+         schedule);
+   }
+ 
+-  private org.springframework.context.ConfigurableApplicationContext observedWorkerReplica(
+-      AtomicInteger closedExecutors) {
+-    Map<String, Object> settings = new java.util.LinkedHashMap<>();
+-    properties((name, value) -> settings.put(name, value.get()));
+-    settings.put("spring.flyway.enabled", "false");
+-    settings.put("server.port", "0");
+-    settings.put("server.ssl.enabled", "false");
+-    settings.put("management.server.port", "-1");
+-    settings.put("spring.jmx.enabled", "false");
+-    settings.put("spring.main.banner-mode", "off");
+-    settings.put("logging.level.root", "WARN");
+-    settings.put("checks.scheduling.dispatcher-enabled", "false");
+-    settings.put("checks.scheduling.retry-enabled", "false");
+-    settings.put("checks.scheduling.partition-scheduler-enabled", "false");
+-    settings.put("checks.scheduling.retention-pruner-enabled", "false");
+-    settings.put("checks.reports.delivery-enabled", "false");
+-    settings.put("studio.scheduling.enabled", "false");
+-    settings.put("studio.execution.dispatcher.enabled", "false");
+-    settings.put("studio.guided-authoring.translation.enabled", "false");
+-    settings.put("studio.guided.publication.enabled", "false");
+-    settings.put("studio.compile.gateway.provider", "disabled");
+-    return new org.springframework.boot.builder.SpringApplicationBuilder(ChecksApplication.class)
+-        .profiles("test", "worker")
+-        .initializers(
+-            context -> {
+-              context
+-                  .getEnvironment()
+-                  .getPropertySources()
+-                  .addFirst(
+-                      new org.springframework.core.env.MapPropertySource(
+-                          "observed-worker-fixture", settings));
+-              context.addBeanFactoryPostProcessor(
+-                  factory -> {
+-                    var local =
+-                        (org.springframework.beans.factory.support.DefaultListableBeanFactory)
+-                            factory;
+-                    // Suppress timers before registration; every domain bean remains production.
+-                    local.removeBeanDefinition(
+-                        org.springframework.scheduling.config.TaskManagementConfigUtils
+-                            .SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME);
+-                    local.addBeanPostProcessor(
+-                        new org.springframework.beans.factory.config.BeanPostProcessor() {
+-                          @Override
+-                          public Object postProcessAfterInitialization(Object bean, String name) {
+-                            if (java.util.Set.of(
+-                                    "applicationTaskExecutor", "checkExecutor", "dispatchExecutor")
+-                                .contains(name)) {
+-                              assertThat(bean)
+-                                  .isInstanceOf(
+-                                      org.springframework.core.task.support.TaskExecutorAdapter.class);
+-                              Object bounded =
+-                                  org.springframework.test.util.ReflectionTestUtils.getField(
+-                                      bean, "concurrentExecutor");
+-                              assertThat(bounded)
+-                                  .isInstanceOf(com.citi.put.checks.config.SemaphoreBoundedExecutor.class);
+-                              var delegate =
+-                                  (java.util.concurrent.ExecutorService)
+-                                      org.springframework.test.util.ReflectionTestUtils.getField(
+-                                          bounded, "delegate");
+-                              assertThat(delegate).isNotNull();
+-                              // The adapter has no destroy method. Register its real owned delegate
+-                              // before a later startup failure can discard the context reference.
+-                              local.registerDisposableBean(
+-                                  name,
+-                                  () -> {
+-                                    delegate.shutdown();
+-                                    awaitOwnedExecutorTermination(
+-                                        delegate, System.nanoTime() + Duration.ofSeconds(10).toNanos());
+-                                    closedExecutors.incrementAndGet();
+-                                  });
+-                            }
+-                            return bean;
+-                          }
+-                        });
+-                  });
+-            })
+-        .run("--spring.profiles.active=test,worker", "--checks.local-dev-auth.enabled=false");
+-  }
+-
+-  private void assertObservedWorker(
+-      org.springframework.context.ConfigurableApplicationContext worker, UUID testId) {
+-    assertThat(worker.getEnvironment().getActiveProfiles()).containsExactly("test", "worker");
+-    assertThat(
+-            worker.containsBean(
+-                org.springframework.scheduling.config.TaskManagementConfigUtils
+-                    .SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME))
+-        .isFalse();
+-    assertThat(worker.getBeansOfType(
+-            com.citi.put.checks.studio.dispatch.StudioDispatchScheduler.class))
+-        .isEmpty();
+-    assertThat(worker.getBeansOfType(com.citi.put.checks.studio.StudioController.class)).isEmpty();
+-    assertThat(worker.getBeansOfType(
+-            com.citi.put.checks.studio.internal.StudioInternalController.class))
+-        .isEmpty();
+-    assertThat(worker.getBeansOfType(GuidedPublicationController.class)).isEmpty();
+-    assertThat(
+-            worker.getBean(com.citi.put.checks.studio.StudioExecutionProperties.class)
+-                .callbackOrDefault().serviceToken().equals(CALLBACK))
+-        .isTrue();
+-    var actual = worker.getBean(StudioDispatcher.class);
+-    var client = worker.getBean(HttpRunnerDispatchClient.class);
+-    var verifier = worker.getBean(ObservedRevisionVerifier.class);
+-    var authorization = worker.getBean(ObservedReplayAuthorization.class);
+-    var readiness =
+-        worker.getBean(com.citi.put.checks.studio.readiness.ExecutionReadinessService.class);
+-    assertThat(actual.getClass()).isEqualTo(StudioDispatcher.class);
+-    assertThat(client.getClass()).isEqualTo(HttpRunnerDispatchClient.class);
+-    assertThat(verifier.getClass()).isEqualTo(ObservedRevisionVerifier.class);
+-    assertThat(org.springframework.test.util.ReflectionTestUtils.getField(actual, "runnerClient"))
+-        .isSameAs(client);
+-    assertThat(org.springframework.test.util.ReflectionTestUtils.getField(actual, "observed"))
+-        .isSameAs(authorization);
+-    assertThat(org.springframework.test.util.ReflectionTestUtils.getField(authorization, "verifier"))
+-        .isSameAs(verifier);
+-    assertThat(org.springframework.test.util.ReflectionTestUtils.getField(readiness, "observed"))
+-        .isSameAs(verifier);
+-    assertThat(readiness.evaluate(testId).ready()).isTrue();
+-  }
+-
+   private void historicalReplica(
+       String id, JsonNode receipt, boolean replay, boolean support, String readinessCode)
+       throws Exception {

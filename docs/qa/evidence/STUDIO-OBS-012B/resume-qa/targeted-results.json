@@ -1,0 +1,1446 @@
+{
+  "numTotalTestSuites": 37,
+  "numPassedTestSuites": 37,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 126,
+  "numPassedTests": 126,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "startTime": 1792016398596,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState reads typed defaults from an empty URL",
+          "status": "passed",
+          "title": "reads typed defaults from an empty URL",
+          "duration": 9,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState reads state from the URL and ignores invalid values",
+          "status": "passed",
+          "title": "reads state from the URL and ignores invalid values",
+          "duration": 2,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState falls back to defaults for unknown sort, filter value and page",
+          "status": "passed",
+          "title": "falls back to defaults for unknown sort, filter value and page",
+          "duration": 1,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState debounces q by 300 ms, replaces history, trims and resets the page",
+          "status": "passed",
+          "title": "debounces q by 300 ms, replaces history, trims and resets the page",
+          "duration": 5,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState clearing the search removes q from the URL",
+          "status": "passed",
+          "title": "clearing the search removes q from the URL",
+          "duration": 2,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState pushes filter changes, resets the page and omits defaults",
+          "status": "passed",
+          "title": "pushes filter changes, resets the page and omits defaults",
+          "duration": 2,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState pushes page changes and omits page 1",
+          "status": "passed",
+          "title": "pushes page changes and omits page 1",
+          "duration": 2,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState toggles sort: same field flips, new field takes its first direction",
+          "status": "passed",
+          "title": "toggles sort: same field flips, new field takes its first direction",
+          "duration": 3,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState back navigation restores the previous state, including the search box",
+          "status": "passed",
+          "title": "back navigation restores the previous state, including the search box",
+          "duration": 3,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState clearAll keeps the sort and parameters it does not own",
+          "status": "passed",
+          "title": "clearAll keeps the sort and parameters it does not own",
+          "duration": 1,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState clearAll with nothing to clear adds no history entry",
+          "status": "passed",
+          "title": "clearAll with nothing to clear adds no history entry",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState reads and sets the page size, resetting the page; invalid sizes read as the default",
+          "status": "passed",
+          "title": "reads and sets the page size, resetting the page; invalid sizes read as the default",
+          "duration": 2,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState a pending search keeps a sort or filter changed while it was debouncing",
+          "status": "passed",
+          "title": "a pending search keeps a sort or filter changed while it was debouncing",
+          "duration": 3,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "useUrlListState"
+          ],
+          "fullName": " useUrlListState a pending search does not fire after clearAll",
+          "status": "passed",
+          "title": "a pending search does not fire after clearAll",
+          "duration": 0,
+          "failureMessages": []
+        }
+      ],
+      "startTime": 1792016431232,
+      "endTime": 1792016431268,
+      "status": "passed",
+      "message": "",
+      "name": "frontend/src/hooks/useUrlListState.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "",
+            "AC-2: the page’s own Run control is governed by the server and not by the editor"
+          ],
+          "fullName": " AC-2: the page’s own Run control is governed by the server and not by the editor a READY draft produces exactly one POST /execute from the page, with no step grammar check",
+          "status": "passed",
+          "title": "a READY draft produces exactly one POST /execute from the page, with no step grammar check",
+          "duration": 6443,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "AC-2: the page’s own Run control is governed by the server and not by the editor"
+          ],
+          "fullName": " AC-2: the page’s own Run control is governed by the server and not by the editor STUDIO-OBS-012B: an unlearned draft shows the interim state, with no Code tab and no review controls",
+          "status": "passed",
+          "title": "STUDIO-OBS-012B: an unlearned draft shows the interim state, with no Code tab and no review controls",
+          "duration": 1438,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "AC-2: the page’s own Run control is governed by the server and not by the editor"
+          ],
+          "fullName": " AC-2: the page’s own Run control is governed by the server and not by the editor STUDIO-OBS-012B: a draft with no steps shows the never-learned empty state verbatim",
+          "status": "passed",
+          "title": "STUDIO-OBS-012B: a draft with no steps shows the never-learned empty state verbatim",
+          "duration": 249,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "the simple Save and Run workflow"
+          ],
+          "fullName": " the simple Save and Run workflow marks edits unsaved, keeps Run available because Run saves first, and protects navigation until the user decides",
+          "status": "passed",
+          "title": "marks edits unsaved, keeps Run available because Run saves first, and protects navigation until the user decides",
+          "duration": 9907,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "the draft the page sends carries a timeout the contract would accept"
+          ],
+          "fullName": " the draft the page sends carries a timeout the contract would accept Save sends a timeoutSeconds inside the declared bound, observed at the mock server",
+          "status": "passed",
+          "title": "Save sends a timeoutSeconds inside the declared bound, observed at the mock server",
+          "duration": 1940,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "VAL-042: the first Run press on a freshly opened saved test acts"
+          ],
+          "fullName": " VAL-042: the first Run press on a freshly opened saved test acts READY: one press, with nothing touched first, starts exactly one execute and no save",
+          "status": "passed",
+          "title": "READY: one press, with nothing touched first, starts exactly one execute and no save",
+          "duration": 2627,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Story 10.48 AC-10b: on the page, a caller who may not run sees why before pressing Run"
+          ],
+          "fullName": " Story 10.48 AC-10b: on the page, a caller who may not run sees why before pressing Run canManage false disables the page’s Run with on-page text and sends no execute",
+          "status": "passed",
+          "title": "canManage false disables the page’s Run with on-page text and sends no execute",
+          "duration": 1250,
+          "failureMessages": []
+        }
+      ],
+      "startTime": 1792016406683,
+      "endTime": 1792016430537,
+      "status": "passed",
+      "message": "",
+      "name": "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "",
+            "AC-1: Run replays a READY draft and only a READY draft"
+          ],
+          "fullName": " AC-1: Run replays a READY draft and only a READY draft enumerating every readiness the document declares — FX-RUNGATE-STATE-UNLEARNED, FX-RUNGATE-STATE-LEARNING, FX-RUNGATE-STATE-READY, FX-RUNGATE-STATE-NEEDS_RELEARN",
+          "status": "passed",
+          "title": "enumerating every readiness the document declares — FX-RUNGATE-STATE-UNLEARNED, FX-RUNGATE-STATE-LEARNING, FX-RUNGATE-STATE-READY, FX-RUNGATE-STATE-NEEDS_RELEARN",
+          "duration": 197,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "AC-1: Run replays a READY draft and only a READY draft"
+          ],
+          "fullName": " AC-1: Run replays a READY draft and only a READY draft a state the document does not declare is a loud failure rather than a permissive default",
+          "status": "passed",
+          "title": "a state the document does not declare is a loud failure rather than a permissive default",
+          "duration": 22,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available"
+          ],
+          "fullName": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (a) READY: Run sends one execute and nothing else",
+          "status": "passed",
+          "title": "(a) READY: Run sends one execute and nothing else",
+          "duration": 69,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available"
+          ],
+          "fullName": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (b) every non-READY readiness: Run is disabled and states the interim sentence, and sends nothing",
+          "status": "passed",
+          "title": "(b) every non-READY readiness: Run is disabled and states the interim sentence, and sends nothing",
+          "duration": 128,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available"
+          ],
+          "fullName": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (c) a 409 LEARN_REQUIRED from execute is shown as itself, once, with no preparation narrative",
+          "status": "passed",
+          "title": "(c) a 409 LEARN_REQUIRED from execute is shown as itself, once, with no preparation narrative",
+          "duration": 48,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available"
+          ],
+          "fullName": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (d) a dirty READY draft whose save leaves it unlearned stops after the save and says why",
+          "status": "passed",
+          "title": "(d) a dirty READY draft whose save leaves it unlearned stops after the save and says why",
+          "duration": 43,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available"
+          ],
+          "fullName": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (e) the learned chip says \"Learned · ready to repeat\" for READY",
+          "status": "passed",
+          "title": "(e) the learned chip says \"Learned · ready to repeat\" for READY",
+          "duration": 7,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available"
+          ],
+          "fullName": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (f) UX-A11Y-001: unsaved edits hide the learned chip, and the stop after the save is announced by a persistent polite live region",
+          "status": "passed",
+          "title": "(f) UX-A11Y-001: unsaved edits hide the learned chip, and the stop after the save is announced by a persistent polite live region",
+          "duration": 45,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available"
+          ],
+          "fullName": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (g) the busy spinner is decorative and names no retired phase",
+          "status": "passed",
+          "title": "(g) the busy spinner is decorative and names no retired phase",
+          "duration": 52,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "AC-2: client-side English-grammar validation is no longer an execution gate"
+          ],
+          "fullName": " AC-2: client-side English-grammar validation is no longer an execution gate the discriminating half: a draft runs when the server says READY",
+          "status": "passed",
+          "title": "the discriminating half: a draft runs when the server says READY",
+          "duration": 38,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "AC-2: client-side English-grammar validation is no longer an execution gate"
+          ],
+          "fullName": " AC-2: client-side English-grammar validation is no longer an execution gate the companion half: the client’s opinion of the English still gates nothing — the server’s state decides what Run does",
+          "status": "passed",
+          "title": "the companion half: the client’s opinion of the English still gates nothing — the server’s state decides what Run does",
+          "duration": 32,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "AC-2: client-side English-grammar validation is no longer an execution gate"
+          ],
+          "fullName": " AC-2: client-side English-grammar validation is no longer an execution gate a programmatic run request is governed by the same predicate as the button",
+          "status": "passed",
+          "title": "a programmatic run request is governed by the same predicate as the button",
+          "duration": 58,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "AC-2: client-side English-grammar validation is no longer an execution gate"
+          ],
+          "fullName": " AC-2: client-side English-grammar validation is no longer an execution gate a second activation while the first is in flight produces one request, not two",
+          "status": "passed",
+          "title": "a second activation while the first is in flight produces one request, not two",
+          "duration": 39,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "AC-3(a): client-generated Python is retired"
+          ],
+          "fullName": " AC-3(a): client-generated Python is retired renders no generator-derived text for any fixture",
+          "status": "passed",
+          "title": "renders no generator-derived text for any fixture",
+          "duration": 55,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run"
+          ],
+          "fullName": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run canManage false: Run stays visible, disabled, described by on-page text, and sends nothing",
+          "status": "passed",
+          "title": "canManage false: Run stays visible, disabled, described by on-page text, and sends nothing",
+          "duration": 78,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run"
+          ],
+          "fullName": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run canManage true: Run is enabled and carries no reason",
+          "status": "passed",
+          "title": "canManage true: Run is enabled and carries no reason",
+          "duration": 19,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run"
+          ],
+          "fullName": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run a failed capabilities read is unknown, never a denial: Run stays enabled",
+          "status": "passed",
+          "title": "a failed capabilities read is unknown, never a denial: Run stays enabled",
+          "duration": 17,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run"
+          ],
+          "fullName": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run a pending capabilities read does not disable Run",
+          "status": "passed",
+          "title": "a pending capabilities read does not disable Run",
+          "duration": 16,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run"
+          ],
+          "fullName": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run reads the capability once per selected test, not once per render or refresh",
+          "status": "passed",
+          "title": "reads the capability once per selected test, not once per render or refresh",
+          "duration": 23,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B)"
+          ],
+          "fullName": " story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B) imports neither the legacy grammar parser nor the Python generator",
+          "status": "passed",
+          "title": "imports neither the legacy grammar parser nor the Python generator",
+          "duration": 5,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B)"
+          ],
+          "fullName": " story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B) the import scanner sees every specifier form, so its silence means something",
+          "status": "passed",
+          "title": "the import scanner sees every specifier form, so its silence means something",
+          "duration": 2,
+          "failureMessages": []
+        }
+      ],
+      "startTime": 1792016402711,
+      "endTime": 1792016403705,
+      "status": "passed",
+      "message": "",
+      "name": "frontend/src/components/studio/run/runGate.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B COPY-002/COPY-003: schedule refusal copy uses learn vocabulary and stays true in the interim build"
+          ],
+          "fullName": " STUDIO-OBS-012B COPY-002/COPY-003: schedule refusal copy uses learn vocabulary and stays true in the interim build LEARN_REQUIRED, RUNTIME_INCOMPATIBLE and ACTIVATION_REVISION_MISMATCH read as the UX gate worded them",
+          "status": "passed",
+          "title": "LEARN_REQUIRED, RUNTIME_INCOMPATIBLE and ACTIVATION_REVISION_MISMATCH read as the UX gate worded them",
+          "duration": 1,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows opens from the test row menu and returns focus to the row action after closing",
+          "status": "passed",
+          "title": "opens from the test row menu and returns focus to the row action after closing",
+          "duration": 1096,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows shows five due slots, creates Paused and explicitly resumes the exact confirmed revision by keyboard",
+          "status": "passed",
+          "title": "shows five due slots, creates Paused and explicitly resumes the exact confirmed revision by keyboard",
+          "duration": 612,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows dirty authoring blocks create and Resume, while Pause ignores an invalid unsaved cron",
+          "status": "passed",
+          "title": "dirty authoring blocks create and Resume, while Pause ignores an invalid unsaved cron",
+          "duration": 653,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows an enabled schedule blocked by executable edits can still be explicitly paused",
+          "status": "passed",
+          "title": "an enabled schedule blocked by executable edits can still be explicitly paused",
+          "duration": 471,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows STUDIO-OBS-012B COPY-002: a never-learned test says Resume waits for a learning Run, without sending the author to Run",
+          "status": "passed",
+          "title": "STUDIO-OBS-012B COPY-002: a never-learned test says Resume waits for a learning Run, without sending the author to Run",
+          "duration": 336,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows preserves edits on version conflict and reloads only when the operator chooses",
+          "status": "passed",
+          "title": "preserves edits on version conflict and reloads only when the operator chooses",
+          "duration": 1025,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows requires investigation acknowledgment for the exact uncertainty set before Resume",
+          "status": "passed",
+          "title": "requires investigation acknowledgment for the exact uncertainty set before Resume",
+          "duration": 760,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows new manual uncertainty blocks presentation before the producer updates ENABLED, and investigated Resume acknowledges the exact set",
+          "status": "passed",
+          "title": "new manual uncertainty blocks presentation before the producer updates ENABLED, and investigated Resume acknowledges the exact set",
+          "duration": 563,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows disabled scheduling remains readable and cannot advertise an available mutation",
+          "status": "passed",
+          "title": "disabled scheduling remains readable and cannot advertise an available mutation",
+          "duration": 416,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows list summary labels persisted enabled intent without implying that a disabled producer runs",
+          "status": "passed",
+          "title": "list summary labels persisted enabled intent without implying that a disabled producer runs",
+          "duration": 11,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows summary distinguishes new uncertainty from enabled intent and preserves an explicitly Paused choice",
+          "status": "passed",
+          "title": "summary distinguishes new uncertainty from enabled intent and preserves an explicitly Paused choice",
+          "duration": 19,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows schedule dialog labels and structure pass the automated accessibility rules supported by jsdom",
+          "status": "passed",
+          "title": "schedule dialog labels and structure pass the automated accessibility rules supported by jsdom",
+          "duration": 722,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows standalone uncertainty links stay under /studio rather than the federated route",
+          "status": "passed",
+          "title": "standalone uncertainty links stay under /studio rather than the federated route",
+          "duration": 535,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "Studio schedule operator flows"
+          ],
+          "fullName": " Studio schedule operator flows pages actual occurrence links and refusals without inventing browser evidence; removal retains history",
+          "status": "passed",
+          "title": "pages actual occurrence links and refusals without inventing browser evidence; removal retains history",
+          "duration": 1167,
+          "failureMessages": []
+        }
+      ],
+      "startTime": 1792016402669,
+      "endTime": 1792016411056,
+      "status": "passed",
+      "message": "",
+      "name": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "",
+            "the mock fixtures match the OpenAPI component schemas"
+          ],
+          "fullName": " the mock fixtures match the OpenAPI component schemas every execution fixture carries every required snapshot field",
+          "status": "passed",
+          "title": "every execution fixture carries every required snapshot field",
+          "duration": 5,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "the mock fixtures match the OpenAPI component schemas"
+          ],
+          "fullName": " the mock fixtures match the OpenAPI component schemas every execution fixture validates against the snapshot schema",
+          "status": "passed",
+          "title": "every execution fixture validates against the snapshot schema",
+          "duration": 9,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "the mock fixtures match the OpenAPI component schemas"
+          ],
+          "fullName": " the mock fixtures match the OpenAPI component schemas every test fixture validates against the test schema",
+          "status": "passed",
+          "title": "every test fixture validates against the test schema",
+          "duration": 5,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "the mock fixtures match the OpenAPI component schemas"
+          ],
+          "fullName": " the mock fixtures match the OpenAPI component schemas only the canonical engine appears in any fixture",
+          "status": "passed",
+          "title": "only the canonical engine appears in any fixture",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "the fixtures exercise the whole contract surface"
+          ],
+          "fullName": " the fixtures exercise the whole contract surface covers every terminal outcome",
+          "status": "passed",
+          "title": "covers every terminal outcome",
+          "duration": 1,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "the fixtures exercise the whole contract surface"
+          ],
+          "fullName": " the fixtures exercise the whole contract surface covers every evidence state",
+          "status": "passed",
+          "title": "covers every evidence state",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "the fixtures exercise the whole contract surface"
+          ],
+          "fullName": " the fixtures exercise the whole contract surface represents a timeout as ERROR with a code, never as a status",
+          "status": "passed",
+          "title": "represents a timeout as ERROR with a code, never as a status",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "the fixtures exercise the whole contract surface"
+          ],
+          "fullName": " the fixtures exercise the whole contract surface gives skipped and unstarted steps null timings",
+          "status": "passed",
+          "title": "gives skipped and unstarted steps null timings",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "the fixtures exercise the whole contract surface"
+          ],
+          "fullName": " the fixtures exercise the whole contract surface never exposes a storage key or an external URL as the video source",
+          "status": "passed",
+          "title": "never exposes a storage key or an external URL as the video source",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "the fixtures exercise the whole contract surface"
+          ],
+          "fullName": " the fixtures exercise the whole contract surface invents no confirmation metadata for legacy history",
+          "status": "passed",
+          "title": "invents no confirmation metadata for legacy history",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "the fixtures exercise the whole contract surface"
+          ],
+          "fullName": " the fixtures exercise the whole contract surface contains data for a CSI the mock principal cannot read",
+          "status": "passed",
+          "title": "contains data for a CSI the mock principal cannot read",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B: the readiness vocabulary is read from the document, never transcribed"
+          ],
+          "fullName": " STUDIO-OBS-012B: the readiness vocabulary is read from the document, never transcribed TestDto.readiness matches the runtime carrier in both directions",
+          "status": "passed",
+          "title": "TestDto.readiness matches the runtime carrier in both directions",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B: the readiness vocabulary is read from the document, never transcribed"
+          ],
+          "fullName": " STUDIO-OBS-012B: the readiness vocabulary is read from the document, never transcribed the tests-list chip words every declared readiness, each distinctly",
+          "status": "passed",
+          "title": "the tests-list chip words every declared readiness, each distinctly",
+          "duration": 1,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B: the readiness vocabulary is read from the document, never transcribed"
+          ],
+          "fullName": " STUDIO-OBS-012B: the readiness vocabulary is read from the document, never transcribed LEARN_REQUIRED is the execute conflict a non-READY draft answers",
+          "status": "passed",
+          "title": "LEARN_REQUIRED is the execute conflict a non-READY draft answers",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11c: ADR-002 §21’s two properties, and the examples that carry them"
+          ],
+          "fullName": " story 10.11c: ADR-002 §21’s two properties, and the examples that carry them every getTest example validates against the amended TestDto",
+          "status": "passed",
+          "title": "every getTest example validates against the amended TestDto",
+          "duration": 10,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11c: ADR-002 §21’s two properties, and the examples that carry them"
+          ],
+          "fullName": " story 10.11c: ADR-002 §21’s two properties, and the examples that carry them declares the confirmed artifact pair on TestDto and nulls it on the list projection",
+          "status": "passed",
+          "title": "declares the confirmed artifact pair on TestDto and nulls it on the list projection",
+          "duration": 1,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B: every published artifact fixture is the v3 replay artifact"
+          ],
+          "fullName": " STUDIO-OBS-012B: every published artifact fixture is the v3 replay artifact every non-null confirmedRevisionArtifact fixture validates against contracts/v3/replay-artifact.schema.json",
+          "status": "passed",
+          "title": "every non-null confirmedRevisionArtifact fixture validates against contracts/v3/replay-artifact.schema.json",
+          "duration": 113,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B: the readiness fixtures match the contract"
+          ],
+          "fullName": " STUDIO-OBS-012B: the readiness fixtures match the contract every readiness fixture validates against TestDto",
+          "status": "passed",
+          "title": "every readiness fixture validates against TestDto",
+          "duration": 3,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B: the readiness fixtures match the contract"
+          ],
+          "fullName": " STUDIO-OBS-012B: the readiness fixtures match the contract no readiness fixture carries a field the contract does not declare",
+          "status": "passed",
+          "title": "no readiness fixture carries a field the contract does not declare",
+          "duration": 4,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the terminal error vocabulary is asserted against the document (O-12)"
+          ],
+          "fullName": " story 10.11a: the terminal error vocabulary is asserted against the document (O-12) ExecutionErrorCode matches the runtime carrier in both directions",
+          "status": "passed",
+          "title": "ExecutionErrorCode matches the runtime carrier in both directions",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the terminal error vocabulary is asserted against the document (O-12)"
+          ],
+          "fullName": " story 10.11a: the terminal error vocabulary is asserted against the document (O-12) every declared code has a rendered narrative, and every narrative a declared code",
+          "status": "passed",
+          "title": "every declared code has a rendered narrative, and every narrative a declared code",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the terminal error vocabulary is asserted against the document (O-12)"
+          ],
+          "fullName": " story 10.11a: the terminal error vocabulary is asserted against the document (O-12) a code outside the document is an error rather than a generic failure",
+          "status": "passed",
+          "title": "a code outside the document is an error rather than a generic failure",
+          "duration": 1,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the terminal error vocabulary is asserted against the document (O-12)"
+          ],
+          "fullName": " story 10.11a: the terminal error vocabulary is asserted against the document (O-12) [PROV-ERRCODE] the expectation is read from the document rather than transcribed",
+          "status": "passed",
+          "title": "[PROV-ERRCODE] the expectation is read from the document rather than transcribed",
+          "duration": 4,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the execute route’s refusals are read from the document"
+          ],
+          "fullName": " story 10.11a: the execute route’s refusals are read from the document execute's conflict codes match the UI's, in both directions",
+          "status": "passed",
+          "title": "execute's conflict codes match the UI's, in both directions",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the execute route’s refusals are read from the document"
+          ],
+          "fullName": " story 10.11a: the execute route’s refusals are read from the document every execute refusal names who clears it, and the two definite ones offer no retry",
+          "status": "passed",
+          "title": "every execute refusal names who clears it, and the two definite ones offer no retry",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the execute route’s refusals are read from the document"
+          ],
+          "fullName": " story 10.11a: the execute route’s refusals are read from the document the 429 and 503 narratives exist without borrowing a code the document only exemplifies",
+          "status": "passed",
+          "title": "the 429 and 503 narratives exist without borrowing a code the document only exemplifies",
+          "duration": 1,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry"
+          ],
+          "fullName": " STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry derives the public operations from the document, so the check has something to cover",
+          "status": "passed",
+          "title": "derives the public operations from the document, so the check has something to cover",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry"
+          ],
+          "fullName": " STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry no handler for a route that no longer exists; every surviving public route has a handler",
+          "status": "passed",
+          "title": "no handler for a route that no longer exists; every surviving public route has a handler",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry"
+          ],
+          "fullName": " STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry every allowlist entry carries a class, an owner and a reason",
+          "status": "passed",
+          "title": "every allowlist entry carries a class, an owner and a reason",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry"
+          ],
+          "fullName": " STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry fails closed: a new public operation with no handler and no entry is reported",
+          "status": "passed",
+          "title": "fails closed: a new public operation with no handler and no entry is reported",
+          "duration": 2,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the run gate covers the readiness states the document declares"
+          ],
+          "fullName": " story 10.11a: the run gate covers the readiness states the document declares every readiness maps to an action, and exactly one of them dispatches directly",
+          "status": "passed",
+          "title": "every readiness maps to an action, and exactly one of them dispatches directly",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the run gate covers the readiness states the document declares"
+          ],
+          "fullName": " story 10.11a: the run gate covers the readiness states the document declares every other declared state needs a learning Run",
+          "status": "passed",
+          "title": "every other declared state needs a learning Run",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the run gate covers the readiness states the document declares"
+          ],
+          "fullName": " story 10.11a: the run gate covers the readiness states the document declares a readiness outside the document is an error rather than a permissive default",
+          "status": "passed",
+          "title": "a readiness outside the document is an error rather than a permissive default",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the execution corpus matches the contract"
+          ],
+          "fullName": " story 10.11a: the execution corpus matches the contract every 10.11a execution fixture validates against the snapshot schema",
+          "status": "passed",
+          "title": "every 10.11a execution fixture validates against the snapshot schema",
+          "duration": 4,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the execution corpus matches the contract"
+          ],
+          "fullName": " story 10.11a: the execution corpus matches the contract no 10.11a execution fixture carries a field the contract does not declare",
+          "status": "passed",
+          "title": "no 10.11a execution fixture carries a field the contract does not declare",
+          "duration": 2,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11b: the scripted transport frames match the contract"
+          ],
+          "fullName": " story 10.11b: the scripted transport frames match the contract every scenario frame validates against ExecutionSnapshot",
+          "status": "passed",
+          "title": "every scenario frame validates against ExecutionSnapshot",
+          "duration": 3,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11b: the scripted transport frames match the contract"
+          ],
+          "fullName": " story 10.11b: the scripted transport frames match the contract every scenario frame carries every required field and nothing the contract does not declare",
+          "status": "passed",
+          "title": "every scenario frame carries every required field and nothing the contract does not declare",
+          "duration": 5,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: [VAC-18] the AC-22 required set is the document’s, not an editable literal"
+          ],
+          "fullName": " story 10.11a: [VAC-18] the AC-22 required set is the document’s, not an editable literal the matrix ids are exactly the ids the document’s vocabularies imply, in both directions",
+          "status": "passed",
+          "title": "the matrix ids are exactly the ids the document’s vocabularies imply, in both directions",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: [VAC-18] the AC-22 required set is the document’s, not an editable literal"
+          ],
+          "fullName": " story 10.11a: [VAC-18] the AC-22 required set is the document’s, not an editable literal the matrix carries one entry per required id and no duplicates, counted rather than sampled",
+          "status": "passed",
+          "title": "the matrix carries one entry per required id and no duplicates, counted rather than sampled",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the configured timeout is inside the bound the contract declares"
+          ],
+          "fullName": " story 10.11a: the configured timeout is inside the bound the contract declares the declared bound is narrow enough for the old value to violate it",
+          "status": "passed",
+          "title": "the declared bound is narrow enough for the old value to violate it",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the configured timeout is inside the bound the contract declares"
+          ],
+          "fullName": " story 10.11a: the configured timeout is inside the bound the contract declares defaultConfiguration() is inside it, and validates against TestConfiguration",
+          "status": "passed",
+          "title": "defaultConfiguration() is inside it, and validates against TestConfiguration",
+          "duration": 1,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.11a: the configured timeout is inside the bound the contract declares"
+          ],
+          "fullName": " story 10.11a: the configured timeout is inside the bound the contract declares the legacy millisecond value would be caught by this schema, so the check discriminates",
+          "status": "passed",
+          "title": "the legacy millisecond value would be caught by this schema, so the check discriminates",
+          "duration": 2,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.16a: every VideoStatus renders a distinct, named state (AC-1)"
+          ],
+          "fullName": " story 10.16a: every VideoStatus renders a distinct, named state (AC-1) the evidence narratives cover VideoStatus exactly, in both directions",
+          "status": "passed",
+          "title": "the evidence narratives cover VideoStatus exactly, in both directions",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.16a: every VideoStatus renders a distinct, named state (AC-1)"
+          ],
+          "fullName": " story 10.16a: every VideoStatus renders a distinct, named state (AC-1) no two states render the same name, and none renders the same statement",
+          "status": "passed",
+          "title": "no two states render the same name, and none renders the same statement",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.16a: every VideoStatus renders a distinct, named state (AC-1)"
+          ],
+          "fullName": " story 10.16a: every VideoStatus renders a distinct, named state (AC-1) no fixture anywhere says partial: true without an AVAILABLE or PROCESSING recording (AC-14(c))",
+          "status": "passed",
+          "title": "no fixture anywhere says partial: true without an AVAILABLE or PROCESSING recording (AC-14(c))",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.16a: every VideoStatus renders a distinct, named state (AC-1)"
+          ],
+          "fullName": " story 10.16a: every VideoStatus renders a distinct, named state (AC-1) a VideoStatus outside the document is an error rather than a generic panel",
+          "status": "passed",
+          "title": "a VideoStatus outside the document is an error rather than a generic panel",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.16a: every VideoStatus renders a distinct, named state (AC-1)"
+          ],
+          "fullName": " story 10.16a: every VideoStatus renders a distinct, named state (AC-1) the playback-failure, partial and no-run wordings are none of the five states",
+          "status": "passed",
+          "title": "the playback-failure, partial and no-run wordings are none of the five states",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.16a: the mock video route answers only as the document declares (AC-13)"
+          ],
+          "fullName": " story 10.16a: the mock video route answers only as the document declares (AC-13) every refusal body validates against ErrorResponse, and names the declared example code",
+          "status": "passed",
+          "title": "every refusal body validates against ErrorResponse, and names the declared example code",
+          "duration": 47,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.16a: the mock video route answers only as the document declares (AC-13)"
+          ],
+          "fullName": " story 10.16a: the mock video route answers only as the document declares (AC-13) every status the route produces over the whole fixture set is declared for getExecutionVideo",
+          "status": "passed",
+          "title": "every status the route produces over the whole fixture set is declared for getExecutionVideo",
+          "duration": 113,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the demo-scale list fixtures match the contract"
+          ],
+          "fullName": " story 10.46: the demo-scale list fixtures match the contract every demo test validates against TestDto",
+          "status": "passed",
+          "title": "every demo test validates against TestDto",
+          "duration": 2,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the demo-scale list fixtures match the contract"
+          ],
+          "fullName": " story 10.46: the demo-scale list fixtures match the contract every demo run validates against ExecutionSnapshot and carries only declared fields",
+          "status": "passed",
+          "title": "every demo run validates against ExecutionSnapshot and carries only declared fields",
+          "duration": 18,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the demo-scale list fixtures match the contract"
+          ],
+          "fullName": " story 10.46: the demo-scale list fixtures match the contract is rich enough to demo the lists",
+          "status": "passed",
+          "title": "is rich enough to demo the lists",
+          "duration": 0,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares tests: default sort is updatedAt,desc with an id tie-breaker, and pages do not overlap",
+          "status": "passed",
+          "title": "tests: default sort is updatedAt,desc with an id tie-breaker, and pages do not overlap",
+          "duration": 14,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares tests: q, environment, csiId and lastRun narrow the list",
+          "status": "passed",
+          "title": "tests: q, environment, csiId and lastRun narrow the list",
+          "duration": 16,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares tests: name sort is case-insensitive and lastRunAt keeps never-run drafts last",
+          "status": "passed",
+          "title": "tests: name sort is case-insensitive and lastRunAt keeps never-run drafts last",
+          "duration": 13,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares caps size at 100",
+          "status": "passed",
+          "title": "caps size at 100",
+          "duration": 7,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares executions: default sort is acceptedAt,desc with an id tie-breaker",
+          "status": "passed",
+          "title": "executions: default sort is acceptedAt,desc with an id tie-breaker",
+          "duration": 6,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares executions: every item carries testName, null for a deleted test",
+          "status": "passed",
+          "title": "executions: every item carries testName, null for a deleted test",
+          "duration": 9,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares executions: deleting a test turns its runs into testName null and hides the test",
+          "status": "passed",
+          "title": "executions: deleting a test turns its runs into testName null and hides the test",
+          "duration": 13,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares executions: status filter maps CANCELLED like isCancelledOutcome, and ERROR excludes it",
+          "status": "passed",
+          "title": "executions: status filter maps CANCELLED like isCancelledOutcome, and ERROR excludes it",
+          "duration": 11,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares executions: q matches the test name, csiId narrows, durationMs sorts with nulls last",
+          "status": "passed",
+          "title": "executions: q matches the test name, csiId narrows, durationMs sorts with nulls last",
+          "duration": 12,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares executions: unfinished runs order newest accepted first in both duration directions (QA 10.46)",
+          "status": "passed",
+          "title": "executions: unfinished runs order newest accepted first in both duration directions (QA 10.46)",
+          "duration": 13,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares answers 400 for /tests?sort=createdAt,desc",
+          "status": "passed",
+          "title": "answers 400 for /tests?sort=createdAt,desc",
+          "duration": 2,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares answers 400 for /tests?sort=name,sideways",
+          "status": "passed",
+          "title": "answers 400 for /tests?sort=name,sideways",
+          "duration": 2,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares answers 400 for /tests?lastRun=SKIPPED",
+          "status": "passed",
+          "title": "answers 400 for /tests?lastRun=SKIPPED",
+          "duration": 2,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares answers 400 for /executions?sort=name,asc",
+          "status": "passed",
+          "title": "answers 400 for /executions?sort=name,asc",
+          "duration": 3,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares answers 400 for /executions?status=TIMEOUT",
+          "status": "passed",
+          "title": "answers 400 for /executions?status=TIMEOUT",
+          "duration": 8,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares lastRun and status filter values are case-insensitive, as on the backend (MNT-001)",
+          "status": "passed",
+          "title": "lastRun and status filter values are case-insensitive, as on the backend (MNT-001)",
+          "duration": 10,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": [
+            "",
+            "story 10.46: the list query parameters are emulated as the contract declares"
+          ],
+          "fullName": " story 10.46: the list query parameters are emulated as the contract declares an unknown execution answers 404 (MNT-001)",
+          "status": "passed",
+          "title": "an unknown execution answers 404 (MNT-001)",
+          "duration": 4,
+          "failureMessages": []
+        }
+      ],
+      "startTime": 1792016402791,
+      "endTime": 1792016403298,
+      "status": "passed",
+      "message": "",
+      "name": "frontend/src/services/mocks/studio/studioContract.test.ts"
+    }
+  ]
+}

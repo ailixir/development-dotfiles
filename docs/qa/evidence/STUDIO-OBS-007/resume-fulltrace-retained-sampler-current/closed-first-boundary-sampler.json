@@ -1,0 +1,277 @@
+{
+  "failures": [
+    {
+      "test": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "sourceFrames": [
+        "GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues(GuidedPublicationReplayIT.java:2172)"
+      ]
+    },
+    {
+      "test": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "sourceFrames": [
+        "GuidedPublicationReplayIT.awaitFinalizing(GuidedPublicationReplayIT.java:12039)",
+        "GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel(GuidedPublicationReplayIT.java:3640)"
+      ]
+    }
+  ],
+  "retainedDiagnosticNumeric": [
+    {
+      "claimSamplerStatus": 2,
+      "claimSamplerJoined": true,
+      "claimSamplerCleanupConfirmed": true,
+      "claimSamplerDiagnosticOnly": true,
+      "claimSamplerCycles": 401,
+      "claimSamplerEmpty": 0,
+      "claimSamplerUnattributed": 0,
+      "claimSamplerCounts": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          86,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          24,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "pgSnapshotStatus": 2,
+      "pgSnapshotJoined": true,
+      "pgSnapshotExactClaimAttribution": false,
+      "pgSnapshotRows": 2,
+      "pgSnapshotCandidates": 1,
+      "pgSnapshotBlockers": 1,
+      "pgSnapshotStageWaitCounts": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "pgSnapshotBlockerStageCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "pgSnapshotRelationCounts": [
+        2,
+        1,
+        0
+      ],
+      "pgSnapshotWaitEventCounts": [
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "sourceDrift": [],
+  "originalClosedRequestDiagnostics": [
+    {
+      "c5-claim-server-diagnostic.jsonl": [
+        {
+          "ordinal": 1,
+          "status": 202,
+          "handlerNanos": 142661875,
+          "consumed": true
+        },
+        {
+          "ordinal": 2,
+          "status": 202,
+          "handlerNanos": 893829583,
+          "consumed": true
+        },
+        {
+          "ordinal": 3,
+          "status": 202,
+          "handlerNanos": 133680250,
+          "consumed": true
+        },
+        {
+          "ordinal": 4,
+          "status": 202,
+          "handlerNanos": 217376125,
+          "consumed": true
+        },
+        {
+          "ordinal": 5,
+          "status": 202,
+          "handlerNanos": 399826625,
+          "consumed": true
+        },
+        {
+          "ordinal": 6,
+          "status": 202,
+          "handlerNanos": 1159729792,
+          "consumed": true
+        }
+      ],
+      "c5-lifecycle-diagnostic.jsonl": [
+        {
+          "ordinal": 1,
+          "status": 409,
+          "kind": "RUNTIME",
+          "reason": "LEASE_LOST",
+          "consumed": true
+        }
+      ]
+    }
+  ],
+  "interpretation": {
+    "sampler": "OBSERVED/joined, JDBC WAITING86 vs LOG_ENCODER RUNNABLE24, JSON_RENDER RUNNABLE1; approximate samples only",
+    "pgSnapshot": "One owner SELECT FOR UPDATE waiting Lock/transactionid; one blocker unclassified query, ClientRead; exactClaimAttribution false",
+    "acceptance": "Both original cases FAIL; first learning expectedFINALIZING failed, ninth awaitFinalizing failed. No deadline/guard change justified."
+  }
+}

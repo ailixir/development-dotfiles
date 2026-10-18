@@ -1,0 +1,69 @@
+diff --git a/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/49497aae-dbea-402b-a9a6-2d80f4cd2e4e/scratchpad/merge22/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+index 10a668ba0..ba2990a6a 100644
+--- a/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/49497aae-dbea-402b-a9a6-2d80f4cd2e4e/scratchpad/merge22/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -2741,14 +2741,24 @@ class GuidedPublicationReplayIT {
+     Throwable invocationFailure = null;
+     try {
+     try {
+-      // AC-4 tally (po-qa014-rulings a1): this class plants no guard refusal.
++      // AC-4 tally (po-qa014-rulings a1; qa-review01 H7): keyed per invocation, so each joined
++      // variant is listed by name. Only the policy-prefix variant plants a guard refusal (its
++      // governed DENY side-effect stance); its body pins that refusal to exactly one
++      // SIDE_EFFECT_DENIED. The shared method name is never planted.
++      String tallyMethod = testInfo.getTestMethod().orElseThrow().getName();
++      String tallyName =
++          testInfo.getDisplayName().startsWith("incremental joined ")
++              ? tallyMethod + "[" + testInfo.getDisplayName() + "]"
++              : tallyMethod;
+       com.citi.put.checks.studio.support.GuardDecisionTally.record(
+           GuidedPublicationReplayIT.class,
+-          testInfo.getTestMethod().orElseThrow().getName(),
++          tallyName,
+           jdbc,
+           tallyBefore,
+           List.copyOf(AUDIT_EVENTS.list.subList(tallyAuditStart, AUDIT_EVENTS.list.size())),
+-          java.util.Set.of());
++          java.util.Set.of(
++              "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
++                  + "[incremental joined policy-prefix]"));
+     } catch (Exception | AssertionError tallyFailure) {
+       if (failedTest == null) {
+         throw tallyFailure;
+@@ -13174,6 +13184,7 @@ RevRuntime.prototype.dispatch=async function(...args){
+       }
+       if (List.of("assert-fail", "policy-prefix", "unknown2").contains(variant)) {
+         assertIncrementalTerminalRefusal(mixed, variant, test, base, beforeCalls, beforeLegacy, beforeEffects);
++        if (variant.equals("policy-prefix")) assertPolicyPrefixPlantedRefusal(mixed);
+         return;
+       }
+       awaitFinalizing(mixed);
+@@ -13348,6 +13359,28 @@ RevRuntime.prototype.dispatch=async function(...args){
+     }
+   }
+ 
++  /**
++   * qa-review01 H7: the planted policy-prefix refusal is exactly one GUIDED_ACTION_REFUSED, with
++   * reasonCode SIDE_EFFECT_DENIED, on the mixed session. The audit event carries no step or
++   * coordinate field, so the binding is to the session only.
++   */
++  private void assertPolicyPrefixPlantedRefusal(String mixed) {
++    var refusals = new ArrayList<java.util.Map<String, String>>();
++    for (var event : List.copyOf(AUDIT_EVENTS.list.subList(tallyAuditStart, AUDIT_EVENTS.list.size()))) {
++      if (!"GUIDED_ACTION_REFUSED".equals(event.getFormattedMessage())) continue;
++      var fields = new java.util.HashMap<String, String>();
++      for (Object argument : event.getArgumentArray()) {
++        String field = String.valueOf(argument);
++        int at = field.indexOf('=');
++        if (at > 0) fields.put(field.substring(0, at), field.substring(at + 1));
++      }
++      refusals.add(fields);
++    }
++    assertThat(refusals).as("policy-prefix plants exactly one guard refusal").hasSize(1);
++    assertThat(refusals.get(0).get("reasonCode")).isEqualTo("SIDE_EFFECT_DENIED");
++    assertThat(refusals.get(0).get("sessionId")).isEqualTo(mixed);
++  }
++
+   private void assertIncrementalTerminalRefusal(String id, String variant, UUID test, JsonNode base,
+       int model, int legacy, int effects) throws Exception {
+     String expected = variant.equals("unknown2") ? "UNKNOWN_OUTCOME" : "FAILED";

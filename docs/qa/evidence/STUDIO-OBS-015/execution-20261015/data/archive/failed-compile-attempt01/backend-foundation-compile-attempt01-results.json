@@ -1,0 +1,31 @@
+{
+  "command": [
+    "caffeinate",
+    "-i",
+    "./gradlew",
+    "compileJava",
+    "compileTestJava",
+    "--console=plain"
+  ],
+  "cwd": "backend",
+  "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "started": "2026-10-15T04:31:49.221830+00:00",
+  "elapsedSeconds": 10.35,
+  "exit": 1,
+  "counts": {
+    "total": 0,
+    "passed": 0,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "testcases": [],
+  "xmlFiles": [],
+  "guardTallies": [],
+  "logSha256": "e5e887dd99e1608d0d784d6e9da8852cbe280f0d2b2018fb7660056e60785a77",
+  "sourceStable": true,
+  "distStable": true,
+  "testInputStable": true,
+  "testInputDigestBefore": "a096cc45c3a0bb7290ce26a75c60036f722177654837390a99d13c5fe74788dc",
+  "testInputDigestAfter": "a096cc45c3a0bb7290ce26a75c60036f722177654837390a99d13c5fe74788dc"
+}

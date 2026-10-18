@@ -1,0 +1,25 @@
+{
+  "scope": "ONE_ORIGINAL_REFUSAL_BOUNDARY_TEST_WRAPPER_SOURCE_ONLY",
+  "sourceSha": "591e372f6d06fff8255d20500a681e7c8385dbbe3c8a0e0dc4c05ef84dc92c29",
+  "seamConstraint": "ObservedReplayAuthorization is FINAL; public dispatcher catches/masks original error. settleObservedFailure is package-private. No reflection, guard bypass or final-class proxy.",
+  "proposedOwnedFiles": [
+    "Existing studio/dispatch/StudioDispatcherFailureIT.java",
+    "Existing guided/publication/GuidedPublicationReplayIT.java"
+  ],
+  "minimalSeam": "Make existing failure-test outer class public (no initializer/database); add one nested public static StudioDispatcher subclass in SAME dispatch package. Override existing package-private settleObservedFailure, transiently notify selected fixture callback then super with original binding/failure/code/now exactly once. Constructor invokes unchanged public original9-dependency constructor.",
+  "fixtureGraph": "One default-off selected-case recording callback with @Primary test bean using exact same Spring ledger/revisions/auth/reference/runner/properties/mapper/Jdbc/TransactionTemplate; inherited original autowired observed/audit fields. No second context/DS/clock/schema/runner. Other paths execute original super methods; no additional authority calls.",
+  "capturedFixedFields": [
+    "Original exact allowed refusal-code ordinal (unknown unclassified)",
+    "Original source class/line fixed categories, no raw stack/message/cause export",
+    "Selected execution/attempt/principal/CSI/env/test/reference identity-equality booleans only",
+    "Original binding grant issue/expiry epochMs; original dispatch now epochMs and refusal-observed epochMs labelled separately, not exact check time",
+    "Recording failure sticky test-invalid, always original settlement once; never mask original transaction exception"
+  ],
+  "persistence": "Existing numeric C5 receipt fields only, no new observer/channel/files/raw IDs/value/hash export",
+  "limits": [
+    "Test bean identity becomes subclass, same dependency graph; must verify actual graph/forwarding source/runtime",
+    "No performance/authorization fix inferred; exact failure code selects next step",
+    "Not a new acceptance case/framework or production API"
+  ],
+  "authorStatus": "NOT_AUTHORED_REQUEST_EXACT_SEAM_REVIEW"
+}

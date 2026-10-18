@@ -1,0 +1,53 @@
+{
+  "scope": "SOURCE_ONLY_ALL_ORIGINAL_STARTUP_DEFAULT_RELATIONSHIPS",
+  "relationships": [
+    {
+      "resource": "runtimeVersions",
+      "module": "owned-root/dist/compat/runtime-versions.js",
+      "relative": "../runtime-versions.json",
+      "resolved": "owned-root/dist/runtime-versions.json",
+      "originalSourceExists": true
+    },
+    {
+      "resource": "originalLauncher",
+      "module": "owned-root/dist/compat/runtime-versions.js",
+      "relative": "../../dist/run/browser.js",
+      "resolved": "owned-root/dist/run/browser.js",
+      "originalSourceExists": true
+    },
+    {
+      "resource": "playwrightRegistry",
+      "module": "owned-root/dist/compat/runtime-versions.js",
+      "relative": "../../node_modules/playwright-core/browsers.json",
+      "resolved": "owned-root/node_modules/playwright-core/browsers.json",
+      "originalSourceExists": true
+    },
+    {
+      "resource": "referenceBundle",
+      "module": "owned-root/dist/compat/runtime-versions.js",
+      "relative": "../observed-reference.json",
+      "resolved": "owned-root/dist/observed-reference.json",
+      "originalSourceExists": true
+    },
+    {
+      "resource": "originalProvenanceImport",
+      "module": "owned-root/dist/compat/runtime-versions.js",
+      "relative": "../../scripts/browser-provenance.mjs",
+      "resolved": "owned-root/scripts/browser-provenance.mjs",
+      "originalSourceExists": true
+    }
+  ],
+  "candidateCopyMechanism": "Original recursive dist copy now uses same owned-root/dist as default guard; original copied helper/package/node_modules unchanged.",
+  "recordedChromiumRevisionMatchesOriginalRegistry": true,
+  "originalLauncherHashMatchesRuntimePin": true,
+  "originalHelperSha256": "ea0dcc15b943a935766ba5cb953a0c6b6b1cdfc94c0520e20f99d04e9171dc42",
+  "mountedConfigAndTls": "Existing worker.json/config keys and owned TLS/publickey/JWT/journal creation unchanged; original guidedMain reads these at original points.",
+  "externalDependencies": [
+    "Original debug-environment refusal unchanged; inherited actual values remain checked by original guard.",
+    "Original envBrowserRoot still chooses installed full Chromium path from original environment/default platform; INSTALLATION_COMPLETE/executable hash/provenance are validated only by unchanged runtime guard. No installedFS/imageimmutability claim.",
+    "Original node_modules dependency symlink and TLS/mountedconfiguration authority unchanged."
+  ],
+  "runtimeGuardExecuted": false,
+  "newTestOrDiagnostic": false,
+  "exactPriorCaughtSubcause": "UNOBSERVED"
+}

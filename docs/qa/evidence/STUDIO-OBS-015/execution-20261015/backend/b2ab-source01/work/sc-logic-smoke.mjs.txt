@@ -1,0 +1,72 @@
+import fs from 'node:fs';
+const calls=[];
+class RevRuntime{constructor(o){Object.assign(this,o);} async update(){return 'ack'} async preparePrefix(){return 'p'} async dispatch(){return 'd'}}
+async function pfxEvent(c,phase){calls.push(phase+':'+c.stepId+'/'+c.ordinal);}
+async function pfxSignal(c,next,phase){calls.push('signal:'+phase);}
+// B2A-03: separately named secret-context ACK cut; values and contexts are never exported.
+const scControl=process.env.SC_CONTROL,scCases=new Map();
+function scRead(){
+ if(!fs.existsSync(scControl))return null;
+ const b=fs.readFileSync(scControl);if(b.length>4096)throw new Error('SC_CONTROL_BOUND');
+ const c=JSON.parse(b.toString('utf8'));if(Object.keys(c).length===0)return null;
+ if(Object.keys(c).sort().join(',')!=='caseId,mode,ordinal,stepId'
+  ||!/^[0-9a-f-]{36}$/u.test(c.caseId)||typeof c.stepId!=='string'
+  ||!Number.isInteger(c.ordinal)||c.ordinal<0||c.ordinal>31||c.mode!=='SECRET_HOLD')
+  throw new Error('SC_CONTROL_SHAPE');
+ return c;
+}
+function scSelect(runtime,next){
+ const control=scRead();if(!control||scCases.has(control.caseId))return null;
+ const program=next?.prefixProgram;
+ if(!program?.actions?.length||next.contextRevision!==1||runtime.prefixExited
+  ||!runtime.hasSecretInputs)return null;
+ const at=program.actions.findIndex(a=>a.coordinate.stepId===control.stepId
+  &&a.coordinate.ordinal===control.ordinal);
+ if(at<0)return null;
+ const target=program.actions[at];
+ if(target.operation.kind!=='fill'||target.operation.value?.kind!=='secretRef'
+  ||target.guard?.target?.kind!=='passwordControl')return null;
+ for(let i=0;i<program.actions.length;i++){
+  const a=program.actions[i];
+  const done=(runtime.ordinals.get(a.coordinate.stepId)??0)>a.coordinate.ordinal;
+  if((i<at)!==done)return null;}
+ const c={...control,sessionId:next.sessionId,browser:runtime.browser,
+  observations:runtime.browser?.observations,count:1};
+ scCases.set(control.caseId,c);return c;
+}
+const scFind=(id,coordinate)=>[...scCases.values()].find(c=>c.sessionId===id
+ &&c.stepId===coordinate?.stepId&&c.ordinal===coordinate?.ordinal);
+const scUpdate=RevRuntime.prototype.update;
+RevRuntime.prototype.update=async function(...args){
+  const sc=scSelect(this,args[0]);
+  const result=await Reflect.apply(scUpdate,this,args);
+  if(sc){await pfxEvent(sc,'UPDATED_BEFORE_ACK',this,args[0]);await pfxSignal(sc,args[0],'AFTER');
+    await pfxEvent(sc,'ACK_RELEASED',this,args[0]);}
+  return result;};
+const scPrepare=RevRuntime.prototype.preparePrefix;
+RevRuntime.prototype.preparePrefix=async function(...args){
+  const sc=scFind(args[0]?.request?.sessionId,args[0]?.request?.coordinate);
+  if(sc)await pfxEvent(sc,'TARGET_PREPARE_ENTER',this,this.context);
+  return Reflect.apply(scPrepare,this,args);};
+const scDispatch=RevRuntime.prototype.dispatch;
+RevRuntime.prototype.dispatch=async function(...args){
+  const sc=scFind(args[0]?.sessionId,args[0]?.proposal?.coordinate);
+  if(sc)await pfxEvent(sc,'TARGET_DISPATCH_ENTER',this,this.context);
+  return Reflect.apply(scDispatch,this,args);};
+
+const ctl=process.env.SC_CONTROL;
+fs.writeFileSync(ctl,JSON.stringify({caseId:'11111111-2222-4333-8444-555555555555',mode:'SECRET_HOLD',stepId:'T',ordinal:1}));
+const prog={actions:[{coordinate:{stepId:'O',ordinal:0},operation:{kind:'navigate'},guard:{target:{kind:'page'}}},
+ {coordinate:{stepId:'T',ordinal:0},operation:{kind:'fill',value:{kind:'authoredLiteral'}},guard:{target:{kind:'node'}}},
+ {coordinate:{stepId:'T',ordinal:1},operation:{kind:'fill',value:{kind:'secretRef'}},guard:{target:{kind:'passwordControl'}}}]};
+const next={sessionId:'s1',contextRevision:1,prefixProgram:prog};
+const early=new RevRuntime({ordinals:new Map([['O',1]]),prefixExited:false,hasSecretInputs:true,browser:{observations:{}}});
+await early.update(next);
+console.log('beforeTWO0', JSON.stringify(calls));
+const atCut=new RevRuntime({ordinals:new Map([['O',1],['T',1]]),prefixExited:false,hasSecretInputs:true,browser:{observations:{}}});
+await atCut.update(next);
+await atCut.update(next);
+await atCut.preparePrefix({request:{sessionId:'s1',coordinate:{stepId:'T',ordinal:1}}});
+await atCut.preparePrefix({request:{sessionId:'s1',coordinate:{stepId:'T',ordinal:0}}});
+await atCut.dispatch({sessionId:'s1',proposal:{coordinate:{stepId:'T',ordinal:1}}});
+console.log('cut', JSON.stringify(calls));

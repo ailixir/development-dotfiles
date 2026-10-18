@@ -1,0 +1,32 @@
+node                               v24.20.0
+other gates running                none
+load average (1 min)               10.43
+                                   load above 4: wait or accept a noisy baseline
+swap                               total = 4096.00M  used = 3623.69M  free = 472.31M  (encrypted)
+disk free on /System/Volumes/Data  126 GB
+chrome for testing                 <HOME>/Library/Caches/ms-playwright/chromium-1243 
+NODE_OPTIONS/DEBUG/PWDEBUG         
+scratch build (ab)                 <SCRATCH>/repro-run/ab/studio-runner
+protected pids (never signalled)   22246 44737 13577 13581
+PREFLIGHT OK
+results: <SCRATCH>/repro-run/results/ab-smoke   variant: ab   n: 100   modes: chromebg+cpu   scratch: <TMP>//rel001.0Q2mLi
+--- chromebg+cpu: start 04:17:57, load { 10.55 14.98 14.66 }, swap total = 4096.00M  used = 3623.69M  free = 472.31M  (encrypted)
+[chromebg+cpu/ab] 10/100 done, 0 failed
+[chromebg+cpu/ab] 20/100 done, 0 failed
+[chromebg+cpu/ab] 30/100 done, 0 failed
+[chromebg+cpu/ab] 40/100 done, 0 failed
+[chromebg+cpu/ab] 50/100 done, 0 failed
+[chromebg+cpu/ab] 60/100 done, 0 failed
+[chromebg+cpu/ab] 70/100 done, 0 failed
+[chromebg+cpu/ab] 80/100 done, 0 failed
+[chromebg+cpu/ab] 90/100 done, 0 failed
+[chromebg+cpu/ab] 100/100 done, 0 failed
+--- chromebg+cpu: harness exit 0 at 04:26:48
+
+== chromebg+cpu (variant ab) ==  n=100 ok=100 failed=0 (0.00%, 95% upper bound 2.95%)  close!=ok: 0
+   window: 2026-10-17T08:17:57.996Z .. 2026-10-17T08:26:48.587Z  node v24.20.0  playwright 1.63.0
+   launchMs          ok p50/p95/max 3220/3673/5648 ms
+   contextMs         ok p50/p95/max 3238/3693/5677 ms
+   bootstrapMs       ok p50/p95/max 3254/3707/5695 ms
+   recordingReadyMs  ok p50/p95/max 3188/3665/5519 ms
+done. Raw per-iteration files hold local paths: keep *.raw.jsonl out of committed evidence.

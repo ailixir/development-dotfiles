@@ -1,0 +1,288 @@
+{
+  "status": "FAIL_CURRENT_PACKAGED_CATALOG",
+  "scope": "PURE_SOURCE_CATALOG_NOT_PACKAGED_DIST_OR_EXECUTION",
+  "files": 5,
+  "canonicalReferenceBundleHash": "3b1fcc67f83f5b2653eac2807b9fea0bdd6816ca08fb2d55f0c03d702040afe9",
+  "canonicalSchemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
+  "canonicalObservedChoiceHash": "1c10d4f0165574e2d9e9a58f6d93f775529ad30631baf828265eca8478991c18",
+  "packagedObservedChoiceHash": "1c10d4f0165574e2d9e9a58f6d93f775529ad30631baf828265eca8478991c18",
+  "checks": [
+    {
+      "name": "exact five-file catalog inventory",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted-observed-choice exact current authoritative counterpart",
+      "status": "PASS"
+    },
+    {
+      "name": "exactly one version1 observed-choice preparation",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh-order exact current authoritative basis",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh-order exact current authoritative artifact",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh-order exact immutable snapshot authority counterpart",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh-order complete recomputed hash map",
+      "status": "PASS"
+    },
+    {
+      "name": "canonical manifest exact current vector counterpart",
+      "status": "PASS"
+    },
+    {
+      "name": "manifest workflow identity unchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "all twelve original operation mutation declarations preserved",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh-order-reference.json current closed complete basis",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh-order-reference.json current closed artifact",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh-order-reference.json exact aggregate hash preimages",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh-order-reference.json publication evidence full-basis preimage",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh-order-reference.json authoritative snapshot/graph joins",
+      "status": "PASS"
+    },
+    {
+      "name": "control-value-reference.json current closed complete basis",
+      "status": "FAIL"
+    },
+    {
+      "name": "control-value-reference.json current closed artifact",
+      "status": "FAIL"
+    },
+    {
+      "name": "control-value-reference.json exact aggregate hash preimages",
+      "status": "PASS"
+    },
+    {
+      "name": "control-value-reference.json publication evidence full-basis preimage",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted-observed-choice.json current closed complete basis",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted-observed-choice.json current closed artifact",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted-observed-choice.json exact aggregate hash preimages",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted-observed-choice.json publication evidence full-basis preimage",
+      "status": "PASS"
+    },
+    {
+      "name": "accepted-observed-choice.json authoritative snapshot/graph joins",
+      "status": "PASS"
+    },
+    {
+      "name": "current source schema/build commitment",
+      "status": "PASS"
+    }
+  ],
+  "failures": [
+    {
+      "name": "control-value-reference.json current closed complete basis",
+      "message": "control-value-reference.json/basis: [{\"instancePath\":\"\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"materializationEvidence\"},\"message\":\"must have required property 'materializationEvidence'\"},{\"instancePath\":\"\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"incrementalEvidence\"},\"message\":\"must have required property 'incrementalEvidence'\"},{\"instancePath\":\"\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"snapshotEvidence\"},\"message\":\"must have required property 'snapshotEvidence'\"},{\"instancePath\":\"/preparations/0\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"materializationRevision\"},\"message\":\"must have required property 'materializationRevision'\"},{\"instancePath\":\"/preparations/1\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"materializationRevision\"},\"message\":\"must have required property 'materializationRevision'\"},{\"instancePath\":\"/preparations/2\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"materializationRevision\"},\"message\":\"must have required property 'materializationRevision'\"},{\"instancePath\":\"/preparations/3\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"materializationRevision\"},\"message\":\"must have required property 'materializationRevision'\"},{\"instancePath\":\"/preparations/4\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"materializationRevision\"},\"message\":\"must have required property 'materializationRevision'\"},{\"instancePath\":\"/actions/0/ledger\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"attemptOrdinal\"},\"message\":\"must have required property 'attemptOrdinal'\"},{\"instancePath\":\"/actions/1/ledger\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"attemptOrdinal\"},\"message\":\"must have required property 'attemptOrdinal'\"},{\"instancePath\":\"/actions/2/ledger\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"attemptOrdinal\"},\"message\":\"must have required property 'attemptOrdinal'\"},{\"instancePath\":\"/actions/3/ledger\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"attemptOrdinal\"},\"message\":\"must have required property 'attemptOrdinal'\"},{\"instancePath\":\"/actions/4/ledger\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"attemptOrdinal\"},\"message\":\"must have required property 'attemptOrdinal'\"}]",
+      "code": null
+    },
+    {
+      "name": "control-value-reference.json current closed artifact",
+      "message": "control-value-reference.json/artifact: [{\"instancePath\":\"/learnedPlan\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"stepSnapshotHashes\"},\"message\":\"must have required property 'stepSnapshotHashes'\"},{\"instancePath\":\"/learnedPlan\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"reusedFrom\"},\"message\":\"must have required property 'reusedFrom'\"},{\"instancePath\":\"/learnedPlan\",\"schemaPath\":\"#/required\",\"keyword\":\"required\",\"params\":{\"missingProperty\":\"incremental\"},\"message\":\"must have required property 'incremental'\"}]",
+      "code": null
+    },
+    {
+      "name": "control-value-reference.json snapshot authority",
+      "code": "MISSING_CURRENT_AUTHORITATIVE_FACTS",
+      "message": "No current snapshotEvidence/immutable source counterpart is present; do not synthesize private history."
+    }
+  ],
+  "schemaErrors": [
+    {
+      "name": "control-value-reference.json/basis",
+      "errors": [
+        {
+          "instancePath": "",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "materializationEvidence"
+          },
+          "message": "must have required property 'materializationEvidence'"
+        },
+        {
+          "instancePath": "",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "incrementalEvidence"
+          },
+          "message": "must have required property 'incrementalEvidence'"
+        },
+        {
+          "instancePath": "",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "snapshotEvidence"
+          },
+          "message": "must have required property 'snapshotEvidence'"
+        },
+        {
+          "instancePath": "/preparations/0",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "materializationRevision"
+          },
+          "message": "must have required property 'materializationRevision'"
+        },
+        {
+          "instancePath": "/preparations/1",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "materializationRevision"
+          },
+          "message": "must have required property 'materializationRevision'"
+        },
+        {
+          "instancePath": "/preparations/2",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "materializationRevision"
+          },
+          "message": "must have required property 'materializationRevision'"
+        },
+        {
+          "instancePath": "/preparations/3",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "materializationRevision"
+          },
+          "message": "must have required property 'materializationRevision'"
+        },
+        {
+          "instancePath": "/preparations/4",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "materializationRevision"
+          },
+          "message": "must have required property 'materializationRevision'"
+        },
+        {
+          "instancePath": "/actions/0/ledger",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "attemptOrdinal"
+          },
+          "message": "must have required property 'attemptOrdinal'"
+        },
+        {
+          "instancePath": "/actions/1/ledger",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "attemptOrdinal"
+          },
+          "message": "must have required property 'attemptOrdinal'"
+        },
+        {
+          "instancePath": "/actions/2/ledger",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "attemptOrdinal"
+          },
+          "message": "must have required property 'attemptOrdinal'"
+        },
+        {
+          "instancePath": "/actions/3/ledger",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "attemptOrdinal"
+          },
+          "message": "must have required property 'attemptOrdinal'"
+        },
+        {
+          "instancePath": "/actions/4/ledger",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "attemptOrdinal"
+          },
+          "message": "must have required property 'attemptOrdinal'"
+        }
+      ]
+    },
+    {
+      "name": "control-value-reference.json/artifact",
+      "errors": [
+        {
+          "instancePath": "/learnedPlan",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "stepSnapshotHashes"
+          },
+          "message": "must have required property 'stepSnapshotHashes'"
+        },
+        {
+          "instancePath": "/learnedPlan",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "reusedFrom"
+          },
+          "message": "must have required property 'reusedFrom'"
+        },
+        {
+          "instancePath": "/learnedPlan",
+          "schemaPath": "#/required",
+          "keyword": "required",
+          "params": {
+            "missingProperty": "incremental"
+          },
+          "message": "must have required property 'incremental'"
+        }
+      ]
+    }
+  ],
+  "operationMutationDeclarations": 12,
+  "nativeExecution": false,
+  "hiddenHistoryProof": false,
+  "rebuiltDist": false
+}

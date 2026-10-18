@@ -1,0 +1,36 @@
+{
+  "finding": "I-02",
+  "status": "PROPOSAL ONLY; not implemented or authorized as acceptance",
+  "currentContract": "RunnerReport.secretUse is optional bounded map with exactly USED/NOT_USED/REFUSED; current internal OpenAPI describes FINAL usage. DTO permits map structure on all report kinds, but ProgressReportService consumes usage only on applied FINAL. No implied PROGRESS authority from DTO acceptance.",
+  "currentCAS": "ProgressReportService.apply is transactional. applyProgress locks exact execution/accepted timestamp + attempt + admission + runner instance + strictly newer sequence and RUNNING state; writes cumulative steps/logs/runtime and history revision/ledger sequence together. Duplicate/stale/reaper losers must not append audit.",
+  "knowledgeBoundary": "runCoordinator assigns secretUse only after launcher.execute resolves and assembles terminal outcome. Child Result3 carries actual SecretUseEvidence; launcher validates/merges current result and authenticated PASS receipts. Existing PROGRESS producer does not establish early per-secret map delivery. A step PASS can prove a completed consuming fill only when sealed artifact/recipe/coordinate associates that step with the declared secret. Interrupted individual operations without a completed receipt remain uncertain. No synthetic callback alone proves the current production collector emitted the fact.",
+  "proposedChange": [
+    "Aria/PO clarify current existing field allowed on authenticated applied PROGRESS as monotone positive facts, amend FINAL-only OpenAPI description/pin without new enums or IPC fields.",
+    "R uses only actual authenticated completed password-consuming PASS receipts mapped through accepted sealed artifact/secretRef input recipes to emit existing secretUse USED entries; never infer from started-step/error text or missing result.",
+    "B appends/preserves only existing-field USED on successfully applied PROGRESS in same report transaction after exact attempt/admission/worker/sequence CAS. Validate declarations and actual RESOLVED release scope; fail closed on undeclared/inconsistent usage.",
+    "Keep early NOT_USED/REFUSED out of terminal persistence; future uses must not conflict with an early unused snapshot. Final or authoritative terminal decision writes those strong known states; absent uncertainty stays UNKNOWN_OUTCOME.",
+    "Maintain one summary per exact declared secret scope/attempt; positive USED is monotone and preserved by later sparse FINAL/reaper uncertainty. Do not introduce unsafe upgrade of an already terminal contradictory summary."
+  ],
+  "requiredProof": [
+    "Actual compiled worker/Core HTTP/PostgreSQL flow with one confirmed secret fill PASS receipt, later step held, applied positive PROGRESS, then child kill/missing FINAL and real reaper; actual reads/sends/effects and one retained USED row.",
+    "Force report audit append rollback; history/sequence/positive row roll back together; real retry applies once.",
+    "Race exact positive report with terminal owner closure in both lock orders, proving only actual state-change winner appends and unknown does not erase a committed positive.",
+    "Reject unknown secret/unresolved or wrong attempt/admission/worker and duplicate/stale sequence with zero added events.",
+    "Actual interrupted fill without positive receipt produces sparse unknown and audit UNKNOWN_OUTCOME, never USED/NOT_USED/REFUSED from absent effects."
+  ],
+  "notClaimed": [
+    "No new wire semantic authorization",
+    "No runtime oracle PASS",
+    "No whole story or C6 completion"
+  ],
+  "sourceSha256": {
+    "backend/src/main/java/com/citi/put/checks/studio/internal/dto/RunnerReport.java": "afe1e812bc887155d42f947547fb3b2a1b097248be8b878a26a85f2f27a8a554",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java": "e5670621ab53ccbf351562901651059b3fe5114befdc853eb3990cf9082071a7",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java": "e3bc0ab9b9d1d2d37321f7b4747adf430f3c1ebf978a6b38dbc9a65fa4f43d81",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java": "71547da9de2de97cd9138c86960cfa564a60b4da6489ea397584556b1722f7b2",
+    "studio-runner/src/server/runCoordinator.ts": "01597820a462b393660cae56dcb2a8ceea1235a5703431b5b0eabdb1a013835e",
+    "studio-runner/src/run/launcher.ts": "429d87d3ce9a7fbb635591e52127bbd468588b12f50e976a74ed8a08c47a6a11",
+    "studio-runner/src/run/secretUse.ts": "f9313aac0a061a8cf7cb57c3afc84109cfe05e11df1552cf7cd95e6093b3bd82",
+    "docs/specs/studio/openapi.yaml": "9626b166e9607a47361c337475f3d077e9d82bdbfadff2bf1d10f0d486c265a6"
+  }
+}

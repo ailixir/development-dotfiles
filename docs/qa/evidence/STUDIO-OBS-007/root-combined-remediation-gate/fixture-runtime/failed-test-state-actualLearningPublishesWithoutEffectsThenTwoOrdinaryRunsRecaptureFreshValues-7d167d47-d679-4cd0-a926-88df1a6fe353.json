@@ -1,0 +1,160 @@
+{
+  "schemaVersion" : 1,
+  "sessionId" : "7d167d47-d679-4cd0-a926-88df1a6fe353",
+  "testId" : "dab91ece-4904-4145-b75c-f1f1019d6555",
+  "state" : "SUCCEEDED",
+  "errorCode" : "OTHER",
+  "counters" : {
+    "actions" : 5,
+    "observations" : 7,
+    "modelProposals" : 6,
+    "modelInputTokens" : 90482,
+    "modelOutputTokens" : 24576,
+    "sanitizedEvidenceBytes" : 20255
+  },
+  "coordinate" : {
+    "stepIndex" : 3,
+    "generation" : 7
+  },
+  "observationCounts" : {
+    "passwordControls" : 0,
+    "withheldRegions" : 0
+  },
+  "acquisition" : {
+    "allowanceMs" : 30000,
+    "totalExtraPolls" : 0
+  },
+  "activeAcquisition" : {
+    "extraPolls" : 0
+  },
+  "fixtureModelHttpCalls" : 6,
+  "fixturePhysicalProviderReads" : 0,
+  "fixtureProviderFailures" : 0,
+  "fixtureModelKinds" : {
+    "SOURCE_PLAN" : 1,
+    "NEXT_ACTION" : 5,
+    "VERIFY_STEP" : 0
+  },
+  "continuation" : "FINALIZING",
+  "translationCounters" : {
+    "planRevision" : 2
+  },
+  "declarations" : [ ],
+  "obligations" : [ {
+    "operationKind" : "navigate",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 0,
+    "referenceIndex" : 0
+  }, {
+    "operationKind" : "read",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 1
+  }, {
+    "operationKind" : "fill",
+    "stepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "click",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "assert",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 1
+  } ],
+  "actions" : [ {
+    "operationKind" : "fill",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "admissionId" : "d3436113-931b-42f5-9278-19fb9c3fa4df",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 3
+  }, {
+    "operationKind" : "click",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "admissionId" : "7b3efb89-e9d8-400c-afc0-d05c65082b2c",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 5
+  }, {
+    "operationKind" : "assert",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "admissionId" : "28469ecc-e957-40dd-a427-191dbf3657b0",
+    "ordinal" : 1,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 6
+  }, {
+    "operationKind" : "navigate",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "admissionId" : "a2afd8c9-2410-4f1e-b5ba-57a5a9d42184",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 0
+  }, {
+    "operationKind" : "read",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "admissionId" : "90a24a58-cafa-4bd7-968c-8e9583044e83",
+    "ordinal" : 1,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 1
+  } ],
+  "modelAttempts" : [ {
+    "kind" : "SOURCE_PLAN",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  } ],
+  "testMethod" : "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+}

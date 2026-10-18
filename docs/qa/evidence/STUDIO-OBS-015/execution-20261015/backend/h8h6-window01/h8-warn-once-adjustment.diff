@@ -1,0 +1,87 @@
+--- h8.patch-result/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java
++++ live/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java
+@@ -223,17 +223,18 @@
+         limit);
+   }
+ 
+-  /** The number of unacknowledged teardowns whose re-drive window has passed; no identifiers. */
+-  public int abandonedTeardowns(Instant now, Duration window) {
+-    Integer count =
+-        jdbc.queryForObject(
+-            "SELECT count(*) FROM studio_guided_sessions WHERE state IN "
+-                + TERMINAL_STATES
+-                + PENDING_TEARDOWN
+-                + " AND expires_at<=?",
+-            Integer.class,
+-            Timestamp.from(now.minus(window)));
+-    return count == null ? 0 : count;
++  /**
++   * The unacknowledged teardowns whose re-drive window has passed. The caller only counts them;
++   * the identifiers are never logged.
++   */
++  public List<String> abandonedTeardowns(Instant now, Duration window) {
++    return jdbc.queryForList(
++        "SELECT session_id FROM studio_guided_sessions WHERE state IN "
++            + TERMINAL_STATES
++            + PENDING_TEARDOWN
++            + " AND expires_at<=?",
++        String.class,
++        Timestamp.from(now.minus(window)));
+   }
+ 
+   /** The durable value-free stop request while teardown is still unacknowledged, else null. */
+--- h8.patch-result/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ live/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -38,6 +38,9 @@
+    */
+   private final java.util.concurrent.ThreadPoolExecutor teardowns = teardownExecutor();
+ 
++  /** STUDIO-OBS-015 H8: past-window rows already counted in a warning by this process. */
++  private final Set<String> warnedTeardowns = java.util.concurrent.ConcurrentHashMap.newKeySet();
++
+   private final GuidedSessionRepository repository;
+   private final GuidedContracts contracts;
+   private final GuidedSessionAccess access;
+@@ -1554,7 +1557,7 @@
+    * STUDIO-OBS-015 H8: re-sends the durable idempotent stop of every terminal session whose
+    * teardown is still unacknowledged and whose hard expiry is inside {@code window}. The caller's
+    * thread never blocks on the network. Rows past the window stay PENDING (no proof of teardown)
+-   * and are only counted in one value-free warning per sweep.
++   * and are counted in a value-free warning once per row per process, not on every sweep.
+    */
+   public void redriveTeardowns(java.time.Duration window, int batch) {
+     if (stopSender == null) {
+@@ -1575,10 +1578,19 @@
+       String reason = request.path("reason").asText();
+       teardowns.execute(() -> teardownAttempt(id, target, reason));
+     }
+-    int abandoned = repository.abandonedTeardowns(now, window);
+-    if (abandoned > 0) {
+-      LOG.warn("Guided teardown unacknowledged past the re-drive window: {} session(s)", abandoned);
++    List<String> abandoned = repository.abandonedTeardowns(now, window);
++    int newlyAbandoned = 0;
++    for (String id : abandoned) {
++      if (warnedTeardowns.add(id)) {
++        newlyAbandoned++;
++      }
+     }
++    // Bounded by the rows still abandoned: confirmed or pruned rows leave the set.
++    warnedTeardowns.retainAll(new java.util.HashSet<>(abandoned));
++    if (newlyAbandoned > 0) {
++      LOG.warn(
++          "Guided teardown unacknowledged past the re-drive window: {} session(s)", newlyAbandoned);
++    }
+   }
+ 
+   public void lostAcknowledgment(String id) {
+--- h8.patch-result/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
++++ live/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
+@@ -3869,7 +3869,7 @@
+         appender.list.stream()
+             .filter(event -> event.getLevel() == ch.qos.logback.classic.Level.WARN)
+             .toList();
+-    assertThat(warnings).as("one value-free warning per sweep").hasSize(2);
++    assertThat(warnings).as("one value-free warning per abandoned row, not per sweep").hasSize(1);
+     for (var warning : warnings) {
+       assertThat(warning.getArgumentArray()).hasSize(1);
+       assertThat(warning.getArgumentArray()[0]).isInstanceOf(Integer.class);

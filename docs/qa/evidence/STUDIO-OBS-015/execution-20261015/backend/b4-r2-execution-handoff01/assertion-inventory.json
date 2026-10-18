@@ -1,0 +1,2780 @@
+{
+  "artifact": "Exact9row B4/R2 current source inventory; recommendations only",
+  "rows": [
+    {
+      "ledgerIndex0": 6,
+      "plannedName": "ChangeDetectionTest.configurationChangesSelectFirstStep",
+      "requiredTier": "Java pure unit",
+      "dispositionAtInspectedSource": "SMALL_SOURCE_GAP; original environment/timeout execution historical",
+      "existingExactAssertions": [
+        "ChangeDetectionTest.configurationChangesSelectFirstStep: config Staging/30 and Production/31 each boundary0.",
+        "viewportWaitAndGlobalContextChangesSelectFirstStep: viewport.width1440, waitdomcontentloaded and global ContextText each boundary0.",
+        "textOnlyPlainValueChangeIsDetected: exact referenced ACCOUNT alpha→beta boundary0/nonsecretReferencedValues size1; contextSecretDeclarationChangeUsesFrozenBase covers old→new secret mapping.",
+        "SnapshotBasisParityTest 57/config/browser-included tests chromium field presence/omission in exact construction; this is not an independent changed-browser boundary. CanonicalStudioCodecTest.onlyCanonicalChromiumIsAccepted explicitly rejects firefox/chrome."
+      ],
+      "genuinelyMissing": [
+        "Direct browser-key difference in pure configuration-envelope boundary assertion missing; do not enable unsupported production browser."
+      ],
+      "minimalDelta": [
+        "Append one independent CONFIG deepCopy browser=firefox (or explicit alternate sentinel) boundary0 assertion inside existing configurationChangesSelectFirstStep pure test. This tests hash-envelope sensitivity only. Preserve separate strict production Chromium-only parser test; no browser runtime/config support change.",
+        "No new57 browser test or new production source."
+      ],
+      "futureRuntimeSelectors": [
+        "./gradlew test --tests com.citi.put.checks.studio.authoring.ChangeDetectionTest.configurationChangesSelectFirstStep",
+        "./gradlew test --tests com.citi.put.checks.studio.authoring.ChangeDetectionTest.viewportWaitAndGlobalContextChangesSelectFirstStep",
+        "./gradlew test --tests com.citi.put.checks.studio.CanonicalStudioCodecTest.onlyCanonicalChromiumIsAccepted"
+      ],
+      "sourceAnchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java",
+          "line": 73,
+          "anchor": "void configurationChangesSelectFirstStep"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java",
+          "line": 81,
+          "anchor": "void viewportWaitAndGlobalContextChangesSelectFirstStep"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java",
+          "line": 125,
+          "anchor": "void textOnlyPlainValueChangeIsDetected"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+          "line": 160,
+          "anchor": "57/config/browser-included"
+        }
+      ],
+      "proofLimits": [
+        "Pure unit only, model/dispatch/native0 by construction; existing source declaration/reference tests retained."
+      ],
+      "runtimeCreditFromThisHandoff": false
+    },
+    {
+      "ledgerIndex0": 53,
+      "plannedName": "IncrementalValidationBasisTest.publicationHashCommitsEntireExtendedBasis",
+      "requiredTier": "Java+runner canonical",
+      "dispositionAtInspectedSource": "SOURCE_PARTLY_COMPLETE; exact construction/commitment additions only",
+      "existingExactAssertions": [
+        "ObservedArtifactLowererTest.policyUsesOriginalAdmissionTupleHashAndSeparateEvidenceBundle builds actual policy for fresh-order-reference; tuples are ArrayNode returned by putArray(items), each {coordinate,admission,operationHash,scopeHash}; policy admission hash == independent hash(array), and learningProvenance.outputContractHash mutation changes only publication evidence hash.",
+        "Current TS deriveObservedArtifact computes ordered.map tuple ARRAY then hash, and exact six-field evidence preimage. Java ObservedReferencePolicyDeriver does same with ArrayNode, not {admissions:array}.",
+        "Frozen current publication-canonical-vectors positives already include incremental/publication-evidence-preimage, incremental/incremental-publication-evidence-preimage, incremental/effective-admission-provenance-array and both complete basis vectors; observedReplayEquivalence.test.ts serializer/hash loop consumes these exact vectors. Java IncrementalHashTest consumes older final-design vector file; cite its serialization coverage without claiming it consumes current corrected corpus.",
+        "Current graph cases admission-preimage-is-array-not-wrapper, admission-preimage-must-exclude-spent-attempt, publication-preimage-must-commit-raw-failed-edge and publication-preimage-envelope-cannot-change already run through TS offered candidate request route. Java graph negatives compare independent full artifact inequality or semantic refusal. Current four snapshot offered attacks run exact Java writer verifyCandidate after valid parent."
+      ],
+      "genuinelyMissing": [
+        "Direct production policy/evidence construction against both current complete-basis preimage vectors, plus explicit one-field mutation inventory for version,entry,program,switch,prefixRequest,receipt,firstSuffixAcceptance,excludedAttempt not yet explicit in relevant tests.",
+        "Java tuple array positive exists; explicit wrapper inequality/rejection after full resealing and exact excluded-attempt basis-vs-effective admission commitments need direct map. TS original partially resealed candidate negatives must be preserved; add only full-reseal companion where needed."
+      ],
+      "minimalDelta": [
+        "Extend existing policyUsesOriginalAdmissionTupleHashAndSeparateEvidenceBundle in OL with exact current frozen tuple-array and wrapper negative, both current complete basis/evidence preimages and excluded admitted attempt: recompute expected from explicit unchanged six-field envelope and independent frozen facts, never H(production returned policy) as its own oracle.",
+        "Add parameterized actual policy projection commitment test in IC with labels materialization-version,materialization-entry,prefix-program,relearn-switch,prefix-request,drift-receipt,first-suffix-acceptance,excluded-attempt. For each actual field change H(entire basis) and H(six-field preimage) must change; admission tuple hash remains unchanged for excluded-only changes. Hash-sensitivity proof does not grant validity: pair invalid join mutation with lowerer/request semantic rejection.",
+        "Extend TI with same direct preimage/array assertions and fully resealed offered candidate companion using existing valid parent/request helper. Retain every original name and mutation exactly; do not rewrite current negative corpus or synthetic backend authority routing."
+      ],
+      "futureRuntimeSelectors": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest.policyUsesOriginalAdmissionTupleHashAndSeparateEvidenceBundle",
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "npm test -- observedIncrementalValidation.test.ts",
+        "npm test -- observedReplayEquivalence.test.ts"
+      ],
+      "sourceAnchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+          "line": 610,
+          "anchor": "void policyUsesOriginalAdmissionTupleHashAndSeparateEvidenceBundle"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReferencePolicyDeriver.java",
+          "line": 17,
+          "anchor": "ArrayNode admissions"
+        },
+        {
+          "path": "studio-runner/src/validator/observedReplay.ts",
+          "line": 351,
+          "anchor": "admissionProvenanceHash ="
+        },
+        {
+          "path": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "line": 27,
+          "anchor": "if(boundary.route==='OFFERED_CANDIDATE_REQUEST_VALIDATION')"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+          "line": 108,
+          "anchor": "void actualWriterComparisonRefusesOfferedSnapshotCandidateAfterItsValidParent"
+        }
+      ],
+      "proofLimits": [
+        "Original Java+runner canonical tier; pure commitment construction/rejection is not DB/JWT/mTLS authority for15 private/auth rows. No new model/native effects or publication writes."
+      ],
+      "runtimeCreditFromThisHandoff": false
+    },
+    {
+      "ledgerIndex0": 57,
+      "plannedName": "SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+      "requiredTier": "Java+TS",
+      "dispositionAtInspectedSource": "SOURCE_COMPLETE_IN_HELD_NEW3FILES; EXECUTION_ONLY",
+      "existingExactAssertions": [
+        "Held SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource invokes configurationAndInputMutations,scopedReferencesAndEmptyValues,normalizationAndEvidence,scopeOrderAndCoordinates,learnedProjection.",
+        "All seven approved57 clauses already implemented: TestConfig,StepInput,StepChain,LearnedContent,StepSnapshot,EmptyValue,Normalization; exact19 total57/65 clauses copied separately from checkpoint04.",
+        "Four domain envelopes remain studio.test-config,studio.step-input,studio.step-chain,studio.step-snapshot version1; LearnedContent has no added wrapper. Exact source/reference/UTF8/empty/metadata/semantic graph assertions already present.",
+        "Actual03 Java parity reached normalization and failed only IntNode/LongNode internal subtype equality; checkpoint04 changes exactly two equality assertions to canonical byte equality. Java rest after that failure was unreached, corrected04 unrun. TS255 actualunit10 PASS and Java65 actual03 PASS are retained as reported checkpoint evidence, not rerun here."
+      ],
+      "genuinelyMissing": [],
+      "minimalDelta": [
+        "No source delta and no re-open/redesign/repeat implementation of the seven57/twelve65 clauses. Root schedules corrected Java parity execution once alongside required gates; no repeat TS-only run without source change/new failure."
+      ],
+      "futureRuntimeSelectors": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource"
+      ],
+      "sourceAnchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+          "line": 112,
+          "anchor": "void reconstructsAllFiveHashEnvelopesFromCompleteSource"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+          "line": 138,
+          "anchor": "configurationAndInputMutations(doc);"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+          "line": 251,
+          "anchor": "Compare exact canonical-v1 bytes"
+        }
+      ],
+      "proofLimits": [
+        "newDex owns all3 new files, held. No B4/R2 edits there. Canonical comparison keeps independent frozen expected source; no expected-from-actual or numeric coercion."
+      ],
+      "runtimeCreditFromThisHandoff": false
+    },
+    {
+      "ledgerIndex0": 58,
+      "plannedName": "SnapshotBasisParityTest.oldBasisCannotDistinguishUnexecutedContextChange",
+      "requiredTier": "Java+TS",
+      "dispositionAtInspectedSource": "TRUE_SOURCE_GAP; exact frozen unused-step2 counterexample",
+      "existingExactAssertions": [
+        "Existing TI current snapshot maps test changes GLOBAL context and checks inputChains inequality; existing Java ChangeDetectionTest.stepContextChangeSelectsOnlyItsStableStepAndTail targets step4 boundary.",
+        "New57 text/context cases include step2 text and step3 literal context, plus metadata context mutations. They do not explicitly consume original underdeterminationCounterexample identityA/identityB with same oldBasis.",
+        "Frozen /snapshotCorrection/underdeterminationCounterexample contains oldBasis once, identityA/B differing only unused step2 ContextText, expected mapA/B, equal position[1], different[2,3]."
+      ],
+      "genuinelyMissing": [
+        "Direct Java+TS production derivation of exact frozen A/B with old facts equal and snapshot2..tail changes; existing fixture/oracle statement alone is not executable proof."
+      ],
+      "minimalDelta": [
+        "Add method oldBasisCannotDistinguishUnexecutedContextChange in IC (keep plannedName mapped; cannot touch held SnapshotBasisParityTest). Load existing counterexample; assert oldBasis shared by both and derive maps using production snapshot/apply on separately copied corrected current evidence. Keep plan/actions/config/old facts exact equal; compare both derived maps against fixed snapshotMapA/B; step1 equal,2/3 differ; source/current raw bytes unmodified.",
+        "Use IncrementalAuthoringIdentity.snapshot/chains/snapshots for pure construction; exercise GuidedSnapshotDeriver.apply/ObservedArtifactLowerer on coherent corrected basis for public authority proof, not default missing contexts. TI equivalent uses inputChains/stepSnapshots or deriveSnapshotMaps and original frozen maps. Do not introduce new57 fixture/oracle or regenerate expected hashes."
+      ],
+      "futureRuntimeSelectors": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.oldBasisCannotDistinguishUnexecutedContextChange",
+        "npm test -- observedIncrementalValidation.test.ts -t \"old basis cannot distinguish unused step2 context\""
+      ],
+      "sourceAnchors": [
+        {
+          "path": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "line": 64,
+          "anchor": "it('current snapshot maps derive independently"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java",
+          "line": 94,
+          "anchor": "void stepContextChangeSelectsOnlyItsStableStepAndTail"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+          "line": 174,
+          "anchor": "new Mutation(\"57/input/text\""
+        }
+      ],
+      "proofLimits": [
+        "No native/model/DB tier required. Assert exact expected maps, not just notEqual chain; original oldBasis lacks corrected evidence and is explanatory fixed facts, not accepted new-schema object."
+      ],
+      "runtimeCreditFromThisHandoff": false
+    },
+    {
+      "ledgerIndex0": 59,
+      "plannedName": "SnapshotBasisParityTest.normalizesTargetHintsDatesAndEmptyContextsExactly",
+      "requiredTier": "Java+TS+contract",
+      "dispositionAtInspectedSource": "NORMALIZATION_SOURCE_PRESENT; SMALL_SOURCE_FIELD_NEGATIVE_GAP",
+      "existingExactAssertions": [
+        "Held57 normalization already executes real Java DTO omitted/null/empty context normalization, omitted TargetHint.scope/exact→null, exact=false distinct, scope string, preserved context/evidence array order, Unicode/control bytes and capturedAt2026-10-15T04:00:00.123456789Z.",
+        "Java+TS each mutate ten supplied evidence fields independently incl capturedAt...123456788Z (one nanosecond difference), source=supplied constant refusal; TS closed normalized identity rejects missing context/arrays rather than inventing Java input normalization at TS internal boundary.",
+        "GuidedContractsCanonicalTest rejects lone surrogates and tests all C0 escapes; GuidedWireContractTest rejects unsafe9007199254740992 at root/session counter. observedReplayEquivalence consumes frozen raw lone-surrogate/unsafe integer canonical negatives. These are generic wire/canonical companions, not evidence-source-field-specific normalization assertions."
+      ],
+      "genuinelyMissing": [
+        "Direct normalized snapshot-source numeric capturedAt, lone surrogate inside exact context value, unsafe evidence revision cases not yet explicit in inspected targeted source."
+      ],
+      "minimalDelta": [
+        "Do not duplicate TargetHint/empty arrays/ISO-nanosecond tests in held new3. Add only three source-field mutation cases to IC and TI using frozen normalization identity positive: capturedAt numeric, ContextText.value lone surrogate, evidence revision9007199254740992. Assert actual closed authoring-snapshot validation and production snapshot/derivation refuse; unchanged valid identity passes first. Preserve exact current canonical hash/timestamp values.",
+        "Do not extend scope to new HTTP authoring behavior or assume DTO numeric timestamp refusal from normalized schema rejection. If separately required direct request DTO accepts numeric dates, record that as a distinct boundary; no unsolicited parser redesign here."
+      ],
+      "futureRuntimeSelectors": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.normalizedSnapshotSourceRejectsNumericTimeSurrogatesAndUnsafeRevision",
+        "npm test -- observedIncrementalValidation.test.ts -t \"normalized snapshot source refuses malformed metadata\"",
+        "./gradlew test --tests com.citi.put.checks.studio.guided.session.GuidedContractsCanonicalTest",
+        "npm test -- observedReplayEquivalence.test.ts"
+      ],
+      "sourceAnchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+          "line": 247,
+          "anchor": "private static void normalizationAndEvidence"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+          "line": 269,
+          "anchor": "\"2026-10-15T04:00:00.123456789Z\""
+        },
+        {
+          "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+          "line": 177,
+          "anchor": "'57/normalize/absent-context'"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/authoring/IncrementalAuthoringIdentity.java",
+          "line": 114,
+          "anchor": "public static Snapshot snapshot"
+        }
+      ],
+      "proofLimits": [
+        "Normalization59 shares source proof with57; preserve current source-only Java04 limits, TS255 pass. No schema/DTO/clock modification proposed."
+      ],
+      "runtimeCreditFromThisHandoff": false
+    },
+    {
+      "ledgerIndex0": 64,
+      "plannedName": "SnapshotBasisValidationTest.candidateMapsAreDerivedBeforeArtifactHash",
+      "requiredTier": "Java+TS",
+      "dispositionAtInspectedSource": "CANDIDATE_BOUNDARY_SOURCE_REPAIRED; full-reseal/driftj precise additions only",
+      "existingExactAssertions": [
+        "IC.candidateSnapshotNegatives returns exact four labels candidate-snapshot-map-cannot-be-copied-even-if-resealed,candidate-gap-in-reused-prefix,candidate-older-same-test-revision-id,candidate-suffix-reuse-is-forbidden. actualWriterComparisonRefusesOfferedSnapshotCandidateAfterItsValidParent proves complete parent lowerer, valid writer control, malicious offered candidate with recomputed hashes rejected EVIDENCE_MISMATCH, input immutable and mockJdbc no interactions.",
+        "TI.rejectsAtOriginalBoundary routes all12 offered candidate subjects to actual validateObservedRequest after valid complete parent; exact29 mapping retained12offered+15external+2minimum joins. Candidate-only cases keep valid basis and expect okfalse OPERATION_MISMATCH or closed shape refusal.",
+        "Held65 maps missing/extra/conflicting/resealed base map cases source present; these concern historical proof claims, not offered current artifact maps.",
+        "Held57 scoped step3 declaration and ContextText mutations assert boundary tail changes, including suffix chain. No duplicate source-sensitivity implementation is needed."
+      ],
+      "genuinelyMissing": [
+        "TS exact four original offered attacks preserve original partial resealing; add fully resealed companion if original candidate does not rehash plan/policy/artifact consistently.",
+        "Explicit offered reuse at effective drift stepj after admitted/pre drift valid control not among four named snapshot candidate rows; actual older immediate-base authority remains B3 tier61."
+      ],
+      "minimalDelta": [
+        "Extend same current offered-candidate helper with full-reseal companion retaining original input record untouched. Recompute learnedPlanHash, policy.learnedPlanHash, referencePolicyHash/artifact claims/equivalence and all request claims present; request basis unchanged. After validparent, exact derived maps/reuse still force rejection.",
+        "Add actual offered driftj reusedFrom entry using existing valid drift complete basis parent, exact program initial boundary and effective j; pin to current immediate base correctly, then illegal reuse entry atj (not malformed unknownstep). Java verifyCandidate rejects and TS actual request okfalse. Do not duplicate historical same-test authority tests or demand valid basis derivation throws on offered-only mutation."
+      ],
+      "futureRuntimeSelectors": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.actualWriterComparisonRefusesOfferedSnapshotCandidateAfterItsValidParent",
+        "npm test -- observedIncrementalValidation.test.ts"
+      ],
+      "sourceAnchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+          "line": 100,
+          "anchor": "static Stream<Vector> candidateSnapshotNegatives"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+          "line": 108,
+          "anchor": "void actualWriterComparisonRefusesOfferedSnapshotCandidateAfterItsValidParent"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+          "line": 135,
+          "anchor": "private static PublicationContracts.Candidate offeredCandidate"
+        },
+        {
+          "path": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "line": 27,
+          "anchor": "if(boundary.route==='OFFERED_CANDIDATE_REQUEST_VALIDATION')"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+          "line": 218,
+          "anchor": "private static void pinProgramAndMaps"
+        }
+      ],
+      "proofLimits": [
+        "No routing repair duplicate. Pure writer comparison has mock JDBC/no commit; actual immutable original immediate base authority remains rows61/B3. Preserve original4labels,29subjects and15declared-fact authority disclaimers."
+      ],
+      "runtimeCreditFromThisHandoff": false
+    },
+    {
+      "ledgerIndex0": 65,
+      "plannedName": "SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+      "requiredTier": "Java+TS",
+      "dispositionAtInspectedSource": "SOURCE_COMPLETE_IN_HELD_NEW3FILES; recorded Java65/TS evidence",
+      "existingExactAssertions": [
+        "SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages plus helpers wrappedAndPartialCommitments,shapeOmissions,semanticInnerChanges,pinProgramAndMaps,historicalEqualities implement all12 reviewed65 clauses.",
+        "Exact16 RevisionIdentity keys/version1/decimal revision strings; source array,authoring rows,configuration/artifact/plan/policy/profile/equivalence complete preimages; wrappers/subsets/omissions/valid semantic inner changes; header pins/program equality/reseal/map keys/old historical receipt equalities all present.",
+        "checkpoint04 records Java65 actual03 PASS full12clause body and unchanged TS255 actualunit10 pass; those two sources unchanged by04 and no rerun requested by this source-only plan. Historical receipt authentication remains immutable DB authority outside pure proof."
+      ],
+      "genuinelyMissing": [],
+      "minimalDelta": [
+        "No source additions/reimplementation/reopening. Preserve newDex3files exclusive HOLD and all nineteen clauses. Root maps recorded evidence to exact source and actual required final gates; do not count pure supplied receipt equality as authentication or fabricate past basis."
+      ],
+      "futureRuntimeSelectors": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages"
+      ],
+      "sourceAnchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+          "line": 105,
+          "anchor": "void baseArtifactAndRevisionDigestHaveExactPreimages"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+          "line": 130,
+          "anchor": "private static void wrappedAndPartialCommitments"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+          "line": 252,
+          "anchor": "private static void historicalEqualities"
+        }
+      ],
+      "proofLimits": [
+        "Original past publicationEvidenceHash is stored historical receipt authority, not H(current basis)/recursive prior proof. Actual rows31/52/54/60/61/63 companions remain other batches."
+      ],
+      "runtimeCreditFromThisHandoff": false
+    },
+    {
+      "ledgerIndex0": 66,
+      "plannedName": "SnapshotBasisValidationTest.correctedBasisEvidenceHashUsesUnchangedEnvelope",
+      "requiredTier": "Java+TS+contract",
+      "dispositionAtInspectedSource": "PARTIAL_SOURCE; per-snapshot fact commitment/final-plan hash additions",
+      "existingExactAssertions": [
+        "OL policy test already isolates outputContractHash mutation; IC.extendedEvidenceEnvelopeIsRequiredAndClosed has seven original labels materializationEvidence,incrementalEvidence,snapshotEvidence,extra-root,extra-version,extra-entry,extra-current-source.",
+        "Current snapshot negatives reject claimed-current-step-input-is-forbidden,extra-snapshot-evidence-field,missing-current-global-context,missing-step-evidence-reference-array and required baseProof null. Current offered graph negatives include publication envelope substitution.",
+        "ObservedArtifactLowerer.lower calls builder.plan first (apply derives stepSnapshotHashes/reusedFrom/incremental), then derives policy and learnedPlanHash; TS deriveSnapshotMaps precedes learnedPlanHash. Production source order already correct."
+      ],
+      "genuinelyMissing": [
+        "Direct per complete current snapshot fact→basisHash→unchanged evidence envelope commitment map not explicit; exact final hash commits post-derivation maps/incremental rather than pre-insertion plan needs targeted assertion.",
+        "No source rewrite needed for existing derivation order; final assertion gap only."
+      ],
+      "minimalDelta": [
+        "Share row53 preimage helper in OL/IC/TI. For every normalized current source fact category (schema version/stepID/source text/global or local literal/default/TargetHint scope/exact/evidence each field/declaration ID,kind,valueHash or secretId) enumerate actual leaf pointer and whether mutation remains shape+semantic valid. H(entire exact basis) and H(original six-field preimage) change regardless; semantic-invalid mutation must separately fail proper validation, valid corrected source must derive new maps and correct final plan.",
+        "Using current valid ordinary/boundary pair assert learnedPlanHash equals H(exact independently expected full plan after maps,reuse,incremental insertion), differs from explicit copy with each one omitted, policy.learnedPlanHash matches; no added top-level publication field/wrapper/claimedStepInput substitute. Share original fixed expected facts and19existing57/65 clauses, no new goldens."
+      ],
+      "futureRuntimeSelectors": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.extendedEvidenceEnvelopeIsRequiredAndClosed",
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest.correctedBasisFactsCommitTheUnchangedEvidenceEnvelope",
+        "npm test -- observedIncrementalValidation.test.ts"
+      ],
+      "sourceAnchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+          "line": 206,
+          "anchor": "void extendedEvidenceEnvelopeIsRequiredAndClosed"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java",
+          "line": 34,
+          "anchor": "ObjectNode plan = builder.plan"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java",
+          "line": 43,
+          "anchor": "artifact.put(\"learnedPlanHash\""
+        },
+        {
+          "path": "studio-runner/src/validator/observedReplay.ts",
+          "line": 351,
+          "anchor": "const learnedPlanHash ="
+        }
+      ],
+      "proofLimits": [
+        "Commitment hashing on mutated supplied objects alone is not semantic/authenticated acceptance. Shared53/66 helper does not collapse two original obligations. No new closed schema fields."
+      ],
+      "runtimeCreditFromThisHandoff": false
+    },
+    {
+      "ledgerIndex0": 67,
+      "plannedName": "SnapshotBasisValidationTest.keepsOriginalGlobalByteLimits",
+      "requiredTier": "Java+TS+wire",
+      "dispositionAtInspectedSource": "GENERIC/STRUCTURAL_SOURCE_PRESENT; semantic6MiB+actualwire8MiB+earlyguard gaps",
+      "existingExactAssertions": [
+        "Java OL.independentUtf8LimitsDoNotBorrowTheLargerTransportAllowance already tests exact/+1 UTF8 generic objects at16384/262144/6MiB/8MiB, explicitly utility-only; +1 basis object accepted at larger transport utility cap. Do not add same utility test.",
+        "TS observedReplayValidation independent composed ceilings covers witness/receipt caps, structural200preparations, shape-valid100 duplicated witnesses tuned6MiB, generic exactcaps, raw8MiB parser+whitespace exact/+1. It explicitly says duplicate action associations are not a publishable100action session.",
+        "Actual authenticated server observedReplayRoutes.test.ts validates genuine frozen requests with network0/launches0/pool0; oversize object currently exceeds8MiB but is neither exact+1 nor valid parent shape.",
+        "Java builder.plan size check occurs before schema/GuidedBasisValidator/semantic hashes; actual publication client serializes canonical request and checks8MiB before token supplier or HttpClient.send. TS validateObservedRequest currently hashes validationBasis before deriveObservedArtifact applies6MiB cap."
+      ],
+      "genuinelyMissing": [
+        "Lawful semantic6MiB complete basis with distinct actions/preparations/witnesses and valid small base, exact/+1 UTF8 Java and TS; current duplicated structural test not substitute.",
+        "Actual existing authenticated endpoint valid raw8MiB/+1 with whitespace plus before validator/hash/dispatch counters, distinct from parser-only utility.",
+        "TS early basis bound before H(validationBasis); preserve original Java BUDGET_EXCEEDED413 versus runner LIMIT_EXCEEDED and HTTP BODY_TOO_LARGE413 code layers."
+      ],
+      "minimalDelta": [
+        "Use wire-boundary-feasibility.json plan:100source steps,100unique exact action/preparation/admission/obligation associations,99 distinct actual choice witnesses over one coherent100obligation plan, two distinct observed meanings each,198small anchored old/fresh observations under aggregate1MiB, no bindings/unused references; base-backed EMPTY_PREFIX with unchanged valid small pinned base and nullbaseProof. Repeated genuine historical plan text gives >6MiB capacity within262144 perwitness; tune only legal text facts and reseal all affected joins, with exact expected artifact/preimages constructed independently. No duplicated completed action/unknownstep/historical orphan.",
+        "Add semantic basis test in IC and TR; share only test-owned definitions through explicit rootreleased new helper if truly needed, never existing canonical fixture/oracle/generated files. Before code choose expected fixture description independent of production lowerer; parent must pass complete lowerer/request oktrue, then exact+1 refuses at size before semantic hash. No claim this planned fixture has executed.",
+        "Add boundedObserved(request.validationBasis,OBSERVED_LIMITS.basis) immediately after root closed request validate in observedReplay.ts and before assertBuild/basisHash; no limits changed, request schema unchanged. Add hash call-spy proof that overbasis object is not hashed, keeping valid request positive.",
+        "Extend server/observedReplayRoutes.test.ts with canonical valid small frozen request plus permitted raw JSON spaces to8MiB, and exact+1. Use current correct serviceBearer/header; wrong bearer remains403 beforebody. Exact8MiB HTTP200oktrue; +1 HTTP413BODY_TOO_LARGE and validator call delta0, hash/effect0. Retain parseObservedBytes +1LIMIT_EXCEEDED test separately.",
+        "Java canonical request mathematically smaller maximum is explanatory only; no inferred demand for a canonical8MiB otherwise-valid outgoing request and no owner decision/waiver needed for this. Retain actual client size-beforetoken/send utility evidence, normal configured cap and existing original test."
+      ],
+      "futureRuntimeSelectors": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest.independentUtf8LimitsDoNotBorrowTheLargerTransportAllowance",
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.semanticBasisKeepsExactSixMiBUtf8Boundary",
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest.validationCanonicalRetainsPublicNameRefusalAndImmutableInputBytes",
+        "npm test -- observedReplayValidation.test.ts",
+        "npm test -- server/observedReplayRoutes.test.ts"
+      ],
+      "sourceAnchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+          "line": 902,
+          "anchor": "void independentUtf8LimitsDoNotBorrowTheLargerTransportAllowance"
+        },
+        {
+          "path": "studio-runner/test/observedReplayValidation.test.ts",
+          "line": 295,
+          "anchor": "it('keeps the 6291456 basis ceiling separate"
+        },
+        {
+          "path": "studio-runner/test/observedReplayValidation.test.ts",
+          "line": 313,
+          "anchor": "it('counts the raw request envelope independently"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+          "line": 979,
+          "anchor": "public ObjectNode plan"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java",
+          "line": 65,
+          "anchor": "byte[] payload ="
+        },
+        {
+          "path": "studio-runner/src/validator/observedReplay.ts",
+          "line": 361,
+          "anchor": "export function validateObservedRequest"
+        },
+        {
+          "path": "studio-runner/test/server/observedReplayRoutes.test.ts",
+          "line": 11,
+          "anchor": "describe('actual authenticated observed validation HTTP route'"
+        }
+      ],
+      "proofLimits": [
+        "Original Java+TS+wire tier preserved. Real wire browser/model/native/slot admissions0. No required new browser test or public attacker endpoint; no synthetic fixture claimed actual original database/auth history. Raw actualwire8MiB does not satisfy separate basis6MiB proof."
+      ],
+      "runtimeCreditFromThisHandoff": false
+    }
+  ],
+  "new57and65SourceAlreadyPresent": {
+    "clauseCount": 19,
+    "clauses": [
+      {
+        "clauseId": "57/TestConfig",
+        "ledgerIndex0": 57,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "57/config/base",
+          "57/config/environment",
+          "57/config/viewport-width",
+          "57/config/viewport-height",
+          "57/config/timeout",
+          "57/config/wait",
+          "57/config/browser-included",
+          "57/config/global-literal",
+          "57/config/global-evidence",
+          "57/config/global-declaration"
+        ],
+        "sourceAssertion": "Exact frozen TestConfig feeds the first actual chain; legal environment/width/height/timeout/wait changes, chromium omission/wrapper, full global literal/evidence and global-only declaration ordering/dedup mutations. Global declaration changes affect every predecessor.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 138,
+            "source": "configurationAndInputMutations(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 139,
+            "source": "scopedReferencesAndEmptyValues(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 141,
+            "source": "scopeOrderAndCoordinates(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 145,
+            "source": "private static void configurationAndInputMutations(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 199,
+            "source": "private static void scopedReferencesAndEmptyValues(JsonNode doc) throws Exception {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 293,
+            "source": "private static void scopeOrderAndCoordinates(JsonNode doc) {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 68,
+            "source": "construction('57/config/base;57/snapshot/source-graph-preserved', current(), configuration(), learned(), computation(ordinary));"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 73,
+            "source": "const actual = construction('57/config/base', i, c, p, expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 96,
+            "source": "] as const) it(`57/config/${label}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 99,
+            "source": "construction(`57/config/${label}`, i, c, learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 103,
+            "source": "it('57/config/browser-included; 57/chain/wrong-wrapper', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 137,
+            "source": "for (const [label, scope] of [['57/config/global-literal', 'entries'], ['57/config/global-evidence', 'evidenceReferences']] as const) it(label, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 145,
+            "source": "it('57/config/global-declaration; 57/normalize/unicode-order', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 152,
+            "source": "construction('57/config/global-declaration', i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 154,
+            "source": "construction('57/config/global-declaration: changed value', changed, configuration(), learned(), changedExpected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 231,
+            "source": "for (const [field, value] of evidenceMutations) it(`57/config/global-evidence/${field}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 234,
+            "source": "construction(`57/config/global-evidence/${field}`, i, configuration(), learned(), expected);"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "57/StepInput",
+        "ledgerIndex0": 57,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "57/input/text",
+          "57/input/context-literal",
+          "57/input/targethint-null",
+          "57/input/targethint-false",
+          "57/input/scoped-reference",
+          "57/input/evidence-each-field"
+        ],
+        "sourceAssertion": "Frozen exact StepInput references/text/context hash checked through every actual chain; token/context/default/direct-secret union, unexecuted authored reference retention, wrong-kind/missing-hash/duplicate/collision refusal; each mutable evidence metadata field, target hint null/false/scope and original strings.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 138,
+            "source": "configurationAndInputMutations(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 139,
+            "source": "scopedReferencesAndEmptyValues(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 140,
+            "source": "normalizationAndEvidence(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 141,
+            "source": "scopeOrderAndCoordinates(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 145,
+            "source": "private static void configurationAndInputMutations(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 199,
+            "source": "private static void scopedReferencesAndEmptyValues(JsonNode doc) throws Exception {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 247,
+            "source": "private static void normalizationAndEvidence(JsonNode doc) throws Exception {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 293,
+            "source": "private static void scopeOrderAndCoordinates(JsonNode doc) {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 119,
+            "source": "['57/input/text', 'authoring/steps/1/text', 'Read  the reference\\nCafé é 🧪\\u0001', 1],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 120,
+            "source": "['57/input/context-literal', 'authoring/steps/2/context/entries/1/value', '  é Café\\t\\n\\u0001  ', 2],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 129,
+            "source": "it('57/chain/mutate-j; 57/input/scoped-reference; 57/snapshot/source-graph-preserved', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 132,
+            "source": "const old = chains(current(), configuration()); construction('57/input/scoped-reference', i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 158,
+            "source": "for (const exact of [null, false] as const) it(`57/input/targethint-${String(exact)}; 57/normalize/hint-${String(exact)}; 57/snapshot/normalized-metadata`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 161,
+            "source": "construction(`57/input/targethint-${String(exact)}`, i, at(normalization, 'configuration'), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 165,
+            "source": "for (const [field, value] of evidenceMutations) it(`57/input/evidence-each-field/${field}; 57/normalize/fractional-iso`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 168,
+            "source": "construction(`57/input/evidence-each-field/${field}`, i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 171,
+            "source": "it('57/input/evidence-each-field/source is a closed constant', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 194,
+            "source": "for (const mutation of ['wrong-kind', 'duplicate', 'unused', 'direct-secret-collision']) it(`57/input/scoped-reference/${mutation}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 203,
+            "source": "it('57/input/scoped-reference/token-context-default-union; unexecuted authored reference', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 210,
+            "source": "construction('57/input/scoped-reference/token-context-default-union', i, configuration(), p, expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 226,
+            "source": "it('57/input/targethint-scope', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 229,
+            "source": "construction('57/input/targethint-scope', i, configuration(), learned(), expected);"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "57/StepChain",
+        "ledgerIndex0": 57,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "57/chain/all-golden-rows",
+          "57/chain/predecessor",
+          "57/chain/mutate-j",
+          "57/chain/wrong-wrapper"
+        ],
+        "sourceAssertion": "Every actual chain equals independently frozen row hash and expected immediate predecessor; local j mutation preserves prefix and changes tail; reordered UUID/source positions, skipped predecessor, array/wrapper/raw-envelope counterexamples.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 74,
+            "source": "static ObjectNode construction(String label, JsonNode identity, JsonNode configuration,"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 118,
+            "source": "ObjectNode actual = construction(label, identity, config, plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 131,
+            "source": "ObjectNode oldMaps = construction(\"57/snapshot/independent-base\", at(base, \"authoringIdentity\"), at(base, \"configuration\"), at(base, \"artifact/learnedPlan\"), at(historical, \"snapshotComputation\"));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 138,
+            "source": "configurationAndInputMutations(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 141,
+            "source": "scopeOrderAndCoordinates(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 145,
+            "source": "private static void configurationAndInputMutations(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 154,
+            "source": "construction(mutation.label(), identity, config, learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 178,
+            "source": "construction(mutation.label(), identity, configuration(doc), learned(doc), exp);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 187,
+            "source": "construction(\"57/config/global-\" + kind, identity, configuration(doc), learned(doc), exp);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 202,
+            "source": "construction(\"57/input/scoped-reference\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 216,
+            "source": "construction(\"57/config/global-declaration;57/normalize/unicode-order\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 219,
+            "source": "construction(\"57/config/global-declaration: changed\", changed, configuration(doc), learned(doc), changedExpected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 230,
+            "source": "construction(value.isEmpty() ? \"57/value/empty\" : \"57/value/whitespace\", frozen, configuration(doc), learned(doc), exp);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 263,
+            "source": "construction(\"57/normalize/\" + variant, frozen, configuration(doc), learned(doc), normalizedComputation(doc));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 274,
+            "source": "construction(\"57/input/targethint-\" + exact + \";57/normalize/hint-\" + exact + \";57/snapshot/normalized-metadata\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 286,
+            "source": "construction(\"57/input/evidence-each-field/\" + mutation.label(), identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 293,
+            "source": "private static void scopeOrderAndCoordinates(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 306,
+            "source": "construction(\"57/input/scoped-reference/token-context-default-union;unexecuted authored reference\", identity, configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 313,
+            "source": "construction(\"57/normalize/context-evidence-array-order\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 316,
+            "source": "construction(\"57/normalize/context-evidence-array-order:reversed\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 321,
+            "source": "construction(\"57/chain/predecessor/source-position-not-uuid-order\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 324,
+            "source": "construction(\"57/input/targethint-scope\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 342,
+            "source": "construction(\"57/config/global-evidence/\" + field, identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 350,
+            "source": "construction(\"57/learned/retained-semantic-fields/coordinate\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 361,
+            "source": "construction(\"57/learned/utf8-ties/argumentSlot\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 367,
+            "source": "construction(\"57/learned/retained-semantic-fields/coordinate-stepId\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 371,
+            "source": "construction(\"57/learned/retained-semantic-fields/producer-stepId\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 375,
+            "source": "construction(\"57/learned/retained-semantic-fields/consumer-stepId\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 407,
+            "source": "construction(\"57/learned/unsorted-multiple;57/learned/utf8-ties\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 415,
+            "source": "construction(\"57/learned/retained-semantic-fields/\" + paths[0] + leaf, current(doc), configuration(doc), changedPlan, exp);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 421,
+            "source": "construction(\"57/learned/removed-ids/\" + path, current(doc), configuration(doc), changedPlan, computation(doc));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 424,
+            "source": "ObjectNode actual = construction(\"57/learned/consumer-deletion\", current(doc), configuration(doc), plan, expected);"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 71,
+            "source": "for (const row of positives) it(`57/chain/all-golden-rows; 57/learned/all-golden-rows; 57/snapshot/golden-all-steps: ${str(at(row, 'name'))}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 76,
+            "source": "expect(at(r, 'stepChain/previous'), '57/chain/predecessor').toBe(previous);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 103,
+            "source": "it('57/config/browser-included; 57/chain/wrong-wrapper', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 129,
+            "source": "it('57/chain/mutate-j; 57/input/scoped-reference; 57/snapshot/source-graph-preserved', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 221,
+            "source": "it('57/chain/predecessor/source-position-not-uuid-order', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 224,
+            "source": "construction('57/chain/predecessor/source-position-not-uuid-order', i, configuration(), learned(), expected);"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "57/LearnedContent",
+        "ledgerIndex0": 57,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "57/learned/all-golden-rows",
+          "57/learned/unsorted-multiple",
+          "57/learned/utf8-ties",
+          "57/learned/retained-semantic-fields",
+          "57/learned/removed-ids",
+          "57/learned/consumer-deletion"
+        ],
+        "sourceAssertion": "Java directly checks learnedStepHash. TS checks exact public snapshot composition with independently expected content hashes; original frozen projections, unsorted actions/multiple producers/consumers, binding/slot UTF8 ties, every retained scalar plus coordinate membership/ordinal, removed evidence IDs and suffix-consumer deletion. Projection mutations are not presented as admitted publications.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 74,
+            "source": "static ObjectNode construction(String label, JsonNode identity, JsonNode configuration,"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 118,
+            "source": "ObjectNode actual = construction(label, identity, config, plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 131,
+            "source": "ObjectNode oldMaps = construction(\"57/snapshot/independent-base\", at(base, \"authoringIdentity\"), at(base, \"configuration\"), at(base, \"artifact/learnedPlan\"), at(historical, \"snapshotComputation\"));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 141,
+            "source": "scopeOrderAndCoordinates(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 142,
+            "source": "learnedProjection(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 154,
+            "source": "construction(mutation.label(), identity, config, learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 178,
+            "source": "construction(mutation.label(), identity, configuration(doc), learned(doc), exp);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 187,
+            "source": "construction(\"57/config/global-\" + kind, identity, configuration(doc), learned(doc), exp);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 202,
+            "source": "construction(\"57/input/scoped-reference\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 216,
+            "source": "construction(\"57/config/global-declaration;57/normalize/unicode-order\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 219,
+            "source": "construction(\"57/config/global-declaration: changed\", changed, configuration(doc), learned(doc), changedExpected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 230,
+            "source": "construction(value.isEmpty() ? \"57/value/empty\" : \"57/value/whitespace\", frozen, configuration(doc), learned(doc), exp);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 263,
+            "source": "construction(\"57/normalize/\" + variant, frozen, configuration(doc), learned(doc), normalizedComputation(doc));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 274,
+            "source": "construction(\"57/input/targethint-\" + exact + \";57/normalize/hint-\" + exact + \";57/snapshot/normalized-metadata\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 286,
+            "source": "construction(\"57/input/evidence-each-field/\" + mutation.label(), identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 293,
+            "source": "private static void scopeOrderAndCoordinates(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 306,
+            "source": "construction(\"57/input/scoped-reference/token-context-default-union;unexecuted authored reference\", identity, configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 313,
+            "source": "construction(\"57/normalize/context-evidence-array-order\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 316,
+            "source": "construction(\"57/normalize/context-evidence-array-order:reversed\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 321,
+            "source": "construction(\"57/chain/predecessor/source-position-not-uuid-order\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 324,
+            "source": "construction(\"57/input/targethint-scope\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 342,
+            "source": "construction(\"57/config/global-evidence/\" + field, identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 350,
+            "source": "construction(\"57/learned/retained-semantic-fields/coordinate\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 361,
+            "source": "construction(\"57/learned/utf8-ties/argumentSlot\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 367,
+            "source": "construction(\"57/learned/retained-semantic-fields/coordinate-stepId\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 371,
+            "source": "construction(\"57/learned/retained-semantic-fields/producer-stepId\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 375,
+            "source": "construction(\"57/learned/retained-semantic-fields/consumer-stepId\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 387,
+            "source": "private static void learnedProjection(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 407,
+            "source": "construction(\"57/learned/unsorted-multiple;57/learned/utf8-ties\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 415,
+            "source": "construction(\"57/learned/retained-semantic-fields/\" + paths[0] + leaf, current(doc), configuration(doc), changedPlan, exp);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 421,
+            "source": "construction(\"57/learned/removed-ids/\" + path, current(doc), configuration(doc), changedPlan, computation(doc));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 424,
+            "source": "ObjectNode actual = construction(\"57/learned/consumer-deletion\", current(doc), configuration(doc), plan, expected);"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 71,
+            "source": "for (const row of positives) it(`57/chain/all-golden-rows; 57/learned/all-golden-rows; 57/snapshot/golden-all-steps: ${str(at(row, 'name'))}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 236,
+            "source": "it('57/learned/retained-semantic-fields/coordinates;57/learned/utf8-ties/argumentSlot', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 241,
+            "source": "] as const) { const p = learned(), expected = computation(ordinary); put(p, source, value); put(expected, target, value); construction('57/learned/retained-semantic-fields/coordinate', current(), configuration(), p, expected); }"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 247,
+            "source": "targets.reverse(); construction('57/learned/utf8-ties/argumentSlot', current(), configuration(), p, expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 252,
+            "source": "construction('57/learned/retained-semantic-fields/coordinate-stepId', current(), configuration(), moved, exp);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 256,
+            "source": "construction('57/learned/retained-semantic-fields/producer-stepId', current(), configuration(), producerPlan, producerExpected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 260,
+            "source": "construction('57/learned/retained-semantic-fields/consumer-stepId', current(), configuration(), consumerPlan, consumerExpected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 263,
+            "source": "it('57/learned/unsorted-multiple; 57/learned/utf8-ties', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 278,
+            "source": "construction('57/learned/utf8-ties', current(), configuration(), p, expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 290,
+            "source": "it(`57/learned/retained-semantic-fields/${source}${leaf}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 294,
+            "source": "construction('57/learned/retained-semantic-fields', current(), configuration(), p, expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 298,
+            "source": "for (const path of ['actions/0/admissionId', 'bindings/0/provenance/sessionId', 'bindings/0/provenance/producerAdmissionId', 'bindings/0/consumers/0/producerAdmissionId', 'bindings/0/consumers/0/consumerAdmissionId', 'stepSnapshotHashes', 'reusedFrom', 'incremental']) it(`57/learned/removed-ids/${path}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 300,
+            "source": "construction('57/learned/removed-ids', current(), configuration(), p, computation(ordinary));"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 302,
+            "source": "it('57/learned/consumer-deletion', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 304,
+            "source": "const actual = construction('57/learned/consumer-deletion', current(), configuration(), p, expected), old = stepSnapshots(identity(current()), config(configuration()), plan(learned()));"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "57/StepSnapshot",
+        "ledgerIndex0": 57,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "57/snapshot/golden-all-steps",
+          "57/snapshot/normalized-metadata",
+          "57/snapshot/source-graph-preserved"
+        ],
+        "sourceAssertion": "Exact per-step snapshot envelopes/maps for all five frozen positives and immediate base independently matched to permanent historical-ordinary computation; normalized metadata and referenced declarations propagate while original source/config/plan remain byte-identical.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 74,
+            "source": "static ObjectNode construction(String label, JsonNode identity, JsonNode configuration,"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 112,
+            "source": "void reconstructsAllFiveHashEnvelopesFromCompleteSource() throws Exception {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 118,
+            "source": "ObjectNode actual = construction(label, identity, config, plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 131,
+            "source": "ObjectNode oldMaps = construction(\"57/snapshot/independent-base\", at(base, \"authoringIdentity\"), at(base, \"configuration\"), at(base, \"artifact/learnedPlan\"), at(historical, \"snapshotComputation\"));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 140,
+            "source": "normalizationAndEvidence(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 154,
+            "source": "construction(mutation.label(), identity, config, learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 178,
+            "source": "construction(mutation.label(), identity, configuration(doc), learned(doc), exp);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 187,
+            "source": "construction(\"57/config/global-\" + kind, identity, configuration(doc), learned(doc), exp);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 202,
+            "source": "construction(\"57/input/scoped-reference\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 216,
+            "source": "construction(\"57/config/global-declaration;57/normalize/unicode-order\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 219,
+            "source": "construction(\"57/config/global-declaration: changed\", changed, configuration(doc), learned(doc), changedExpected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 230,
+            "source": "construction(value.isEmpty() ? \"57/value/empty\" : \"57/value/whitespace\", frozen, configuration(doc), learned(doc), exp);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 247,
+            "source": "private static void normalizationAndEvidence(JsonNode doc) throws Exception {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 263,
+            "source": "construction(\"57/normalize/\" + variant, frozen, configuration(doc), learned(doc), normalizedComputation(doc));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 274,
+            "source": "construction(\"57/input/targethint-\" + exact + \";57/normalize/hint-\" + exact + \";57/snapshot/normalized-metadata\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 286,
+            "source": "construction(\"57/input/evidence-each-field/\" + mutation.label(), identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 306,
+            "source": "construction(\"57/input/scoped-reference/token-context-default-union;unexecuted authored reference\", identity, configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 313,
+            "source": "construction(\"57/normalize/context-evidence-array-order\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 316,
+            "source": "construction(\"57/normalize/context-evidence-array-order:reversed\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 321,
+            "source": "construction(\"57/chain/predecessor/source-position-not-uuid-order\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 324,
+            "source": "construction(\"57/input/targethint-scope\", identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 342,
+            "source": "construction(\"57/config/global-evidence/\" + field, identity, configuration(doc), learned(doc), expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 350,
+            "source": "construction(\"57/learned/retained-semantic-fields/coordinate\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 361,
+            "source": "construction(\"57/learned/utf8-ties/argumentSlot\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 367,
+            "source": "construction(\"57/learned/retained-semantic-fields/coordinate-stepId\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 371,
+            "source": "construction(\"57/learned/retained-semantic-fields/producer-stepId\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 375,
+            "source": "construction(\"57/learned/retained-semantic-fields/consumer-stepId\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 407,
+            "source": "construction(\"57/learned/unsorted-multiple;57/learned/utf8-ties\", current(doc), configuration(doc), plan, expected);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 415,
+            "source": "construction(\"57/learned/retained-semantic-fields/\" + paths[0] + leaf, current(doc), configuration(doc), changedPlan, exp);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 421,
+            "source": "construction(\"57/learned/removed-ids/\" + path, current(doc), configuration(doc), changedPlan, computation(doc));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 424,
+            "source": "ObjectNode actual = construction(\"57/learned/consumer-deletion\", current(doc), configuration(doc), plan, expected);"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 45,
+            "source": "function construction(label: string, i: J, c: J, p: J, expected: J): Record<string, string> {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 68,
+            "source": "construction('57/config/base;57/snapshot/source-graph-preserved', current(), configuration(), learned(), computation(ordinary));"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 71,
+            "source": "for (const row of positives) it(`57/chain/all-golden-rows; 57/learned/all-golden-rows; 57/snapshot/golden-all-steps: ${str(at(row, 'name'))}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 73,
+            "source": "const actual = construction('57/config/base', i, c, p, expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 86,
+            "source": "const oldMaps = construction('57/snapshot/independent-base', at(base, 'authoringIdentity'), at(base, 'configuration'), at(base, 'artifact/learnedPlan'), computation(historical));"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 99,
+            "source": "construction(`57/config/${label}`, i, c, learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 125,
+            "source": "construction(label, i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 129,
+            "source": "it('57/chain/mutate-j; 57/input/scoped-reference; 57/snapshot/source-graph-preserved', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 132,
+            "source": "const old = chains(current(), configuration()); construction('57/input/scoped-reference', i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 141,
+            "source": "construction(label, i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 152,
+            "source": "construction('57/config/global-declaration', i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 154,
+            "source": "construction('57/config/global-declaration: changed value', changed, configuration(), learned(), changedExpected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 158,
+            "source": "for (const exact of [null, false] as const) it(`57/input/targethint-${String(exact)}; 57/normalize/hint-${String(exact)}; 57/snapshot/normalized-metadata`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 161,
+            "source": "construction(`57/input/targethint-${String(exact)}`, i, at(normalization, 'configuration'), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 168,
+            "source": "construction(`57/input/evidence-each-field/${field}`, i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 188,
+            "source": "construction(label, i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 210,
+            "source": "construction('57/input/scoped-reference/token-context-default-union', i, configuration(), p, expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 217,
+            "source": "put(expected, 'rows/1/stepInput/context', copy(context)); construction('57/normalize/context-evidence-array-order', i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 219,
+            "source": "construction('57/normalize/context-evidence-array-order: reversed', i, configuration(), learned(), expected); expect(chains(i, configuration())[1]).not.toBe(old[1]);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 224,
+            "source": "construction('57/chain/predecessor/source-position-not-uuid-order', i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 229,
+            "source": "construction('57/input/targethint-scope', i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 234,
+            "source": "construction(`57/config/global-evidence/${field}`, i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 241,
+            "source": "] as const) { const p = learned(), expected = computation(ordinary); put(p, source, value); put(expected, target, value); construction('57/learned/retained-semantic-fields/coordinate', current(), configuration(), p, expected); }"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 247,
+            "source": "targets.reverse(); construction('57/learned/utf8-ties/argumentSlot', current(), configuration(), p, expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 252,
+            "source": "construction('57/learned/retained-semantic-fields/coordinate-stepId', current(), configuration(), moved, exp);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 256,
+            "source": "construction('57/learned/retained-semantic-fields/producer-stepId', current(), configuration(), producerPlan, producerExpected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 260,
+            "source": "construction('57/learned/retained-semantic-fields/consumer-stepId', current(), configuration(), consumerPlan, consumerExpected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 278,
+            "source": "construction('57/learned/utf8-ties', current(), configuration(), p, expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 294,
+            "source": "construction('57/learned/retained-semantic-fields', current(), configuration(), p, expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 300,
+            "source": "construction('57/learned/removed-ids', current(), configuration(), p, computation(ordinary));"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 304,
+            "source": "const actual = construction('57/learned/consumer-deletion', current(), configuration(), p, expected), old = stepSnapshots(identity(current()), config(configuration()), plan(learned()));"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "57/EmptyValue",
+        "ledgerIndex0": 57,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "57/value/empty",
+          "57/value/whitespace",
+          "57/value/missing",
+          "57/value/null"
+        ],
+        "sourceAssertion": "Java resolve hashes actual empty/whitespace values; empty hash fixed 12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126 asserted and propagated to actual chains. Java absent/null values refuse; TS frozen missing/null valueHash refuses shape and performs no private lookup.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 139,
+            "source": "scopedReferencesAndEmptyValues(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 199,
+            "source": "private static void scopedReferencesAndEmptyValues(JsonNode doc) throws Exception {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 183,
+            "source": "for (const [label, value] of [['57/value/empty', ''], ['57/value/whitespace', ' ']] as const) it(label, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 190,
+            "source": "for (const [label, value] of [['57/value/missing', undefined], ['57/value/null', null]] as const) it(label, () => {"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "57/Normalization",
+        "ledgerIndex0": 57,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "57/normalize/absent-context",
+          "57/normalize/null-context",
+          "57/normalize/empty-arrays",
+          "57/normalize/hint-null",
+          "57/normalize/hint-false",
+          "57/normalize/fractional-iso",
+          "57/normalize/unicode-order"
+        ],
+        "sourceAssertion": "Actual Java StudioAuthoringValidation.read + ObjectMapper normalization equals permanent normalized TS source; absent/null contexts and arrays normalize to empty arrays, omitted hint exact/scope stay null, nanosecond capturedAt retained. TS requires normalized closed fields. Context/evidence array order, control bytes, whitespace, composed/decomposed Unicode and U+E000 versus U+10000 ordering are asserted.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 140,
+            "source": "normalizationAndEvidence(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 141,
+            "source": "scopeOrderAndCoordinates(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 247,
+            "source": "private static void normalizationAndEvidence(JsonNode doc) throws Exception {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 293,
+            "source": "private static void scopeOrderAndCoordinates(JsonNode doc) {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 145,
+            "source": "it('57/config/global-declaration; 57/normalize/unicode-order', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 158,
+            "source": "for (const exact of [null, false] as const) it(`57/input/targethint-${String(exact)}; 57/normalize/hint-${String(exact)}; 57/snapshot/normalized-metadata`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 165,
+            "source": "for (const [field, value] of evidenceMutations) it(`57/input/evidence-each-field/${field}; 57/normalize/fractional-iso`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 168,
+            "source": "construction(`57/input/evidence-each-field/${field}`, i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 171,
+            "source": "it('57/input/evidence-each-field/source is a closed constant', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 177,
+            "source": "['57/normalize/absent-context', 'authoring/globalContext', undefined], ['57/normalize/null-context', 'authoring/steps/0/context', null], ['57/normalize/empty-arrays', 'authoring/steps/0/context/evidenceReferences', undefined],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 212,
+            "source": "it('57/normalize/context-evidence-array-order; exact stored strings', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 217,
+            "source": "put(expected, 'rows/1/stepInput/context', copy(context)); construction('57/normalize/context-evidence-array-order', i, configuration(), learned(), expected);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 219,
+            "source": "construction('57/normalize/context-evidence-array-order: reversed', i, configuration(), learned(), expected); expect(chains(i, configuration())[1]).not.toBe(old[1]);"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false,
+        "representationCorrection04": "Exact DTO-versus-independent-frozen-source equality compares canonical-v1 strings instead of Jackson IntNode/LongNode representation equality; all fields/arrays/literals/nullable keys/nanosecond text and constructor/hash assertions remain.",
+        "canonicalNormalizationComparisonAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 260,
+            "source": "assertThat(GuidedContracts.canonical(normalized)).as(\"57/normalize/\" + variant)"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 261,
+            "source": ".isEqualTo(GuidedContracts.canonical(at(normal, \"authoring\")));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 267,
+            "source": "assertThat(GuidedContracts.canonical(normalized)).as(\"57/normalize/hint-null;57/normalize/fractional-iso\")"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+            "line": 268,
+            "source": ".isEqualTo(GuidedContracts.canonical(at(normal, \"authoring\")));"
+          }
+        ]
+      },
+      {
+        "clauseId": "65/sourceHash",
+        "ledgerIndex0": 65,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "65/source/array",
+          "65/source/wrapper",
+          "65/source/omit-line",
+          "65/source/reorder",
+          "65/source/current-draft"
+        ],
+        "sourceAssertion": "H(ordered old text array), wrapper, omitted line, reorder and actual changed-current-draft substitution. Changed current text/sourceSteps and their current header hashes agree while the old identity wrongly claims that new array. Omitted source fields are closed-shape cases.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 45,
+            "source": "private static Map<String, JsonNode> preimages(JsonNode basis) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 113,
+            "source": "assertThat(GuidedContracts.hash(preimages(control).get(entry.getValue()))).as(label).isEqualTo(identity.path(entry.getValue()).asText());"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 123,
+            "source": "wrappedAndPartialCommitments(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 124,
+            "source": "shapeOmissions(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 130,
+            "source": "private static void wrappedAndPartialCommitments(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 133,
+            "source": "put(basis, IDENTITY + \"/\" + key, GuidedContracts.hash(C.object().set(\"value\", preimages(basis).get(key))));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 139,
+            "source": "ObjectNode basis = fresh(doc); ArrayNode preimage = preimages(basis).get(key).deepCopy();"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 176,
+            "source": "private static void shapeOmissions(JsonNode doc) {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 309,
+            "source": "// Reseal only enclosing commitments. The selected inner mismatch remains wrong. The closed"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 331,
+            "source": "function preimages(b: J): Record<string, J> {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 335,
+            "source": "const commitments = [['source', 'sourceHash'], ['authoring', 'authoringHash'], ['config', 'configurationHash'], ['artifact', 'artifactHash'], ['plan', 'learnedPlanHash'], ['policy', 'referencePolicyHash'], ['profile', 'profileHash'], ['equivalence', 'operationEquivalenceHash']] as const;"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 353,
+            "source": "for (const [label, key] of commitments) it(`65/${label}/${key === 'profileHash' ? 'wrapper-claim' : 'wrapper'}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 356,
+            "source": "for (const [label, key] of commitments) it(`65/${label}/${key === 'sourceHash' || key === 'authoringHash' ? 'array' : 'full'}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 366,
+            "source": "it('65/source/current-draft', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 372,
+            "source": "put(b, `${identityPath}/sourceHash`, hashObserved(text)); reseal(b, 'sourceHash'); reject('65/source/current-draft', b);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 389,
+            "source": "['65/source/required-omission', `${basePath}/authoringIdentity/authoring/steps/0`, ['id', 'text', 'context']],"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "65/authoringHash",
+        "ledgerIndex0": 65,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "65/authoring/array",
+          "65/authoring/wrapper",
+          "65/authoring/omit-stepId",
+          "65/authoring/omit-ordinal",
+          "65/authoring/omit-source",
+          "65/authoring/reorder"
+        ],
+        "sourceAssertion": "H(ordered old {stepId,ordinal,source} array); wrapper/reorder and separately omitted stepId/ordinal/source reference preimages remain schema-valid wrong hash claims with only outer links resealed.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 45,
+            "source": "private static Map<String, JsonNode> preimages(JsonNode basis) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 113,
+            "source": "assertThat(GuidedContracts.hash(preimages(control).get(entry.getValue()))).as(label).isEqualTo(identity.path(entry.getValue()).asText());"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 123,
+            "source": "wrappedAndPartialCommitments(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 130,
+            "source": "private static void wrappedAndPartialCommitments(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 133,
+            "source": "put(basis, IDENTITY + \"/\" + key, GuidedContracts.hash(C.object().set(\"value\", preimages(basis).get(key))));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 139,
+            "source": "ObjectNode basis = fresh(doc); ArrayNode preimage = preimages(basis).get(key).deepCopy();"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 309,
+            "source": "// Reseal only enclosing commitments. The selected inner mismatch remains wrong. The closed"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 331,
+            "source": "function preimages(b: J): Record<string, J> {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 335,
+            "source": "const commitments = [['source', 'sourceHash'], ['authoring', 'authoringHash'], ['config', 'configurationHash'], ['artifact', 'artifactHash'], ['plan', 'learnedPlanHash'], ['policy', 'referencePolicyHash'], ['profile', 'profileHash'], ['equivalence', 'operationEquivalenceHash']] as const;"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 353,
+            "source": "for (const [label, key] of commitments) it(`65/${label}/${key === 'profileHash' ? 'wrapper-claim' : 'wrapper'}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 354,
+            "source": "const b = fresh(); put(b, `${identityPath}/${key}`, hashObserved({ value: required(preimages(b)[key]) })); reseal(b, key); reject(`65/${label}/wrapper`, b);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 356,
+            "source": "for (const [label, key] of commitments) it(`65/${label}/${key === 'sourceHash' || key === 'authoringHash' ? 'array' : 'full'}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 360,
+            "source": "for (const variant of ['reorder', ...(key === 'sourceHash' ? ['omit-line'] : ['omit-stepId', 'omit-ordinal', 'omit-source'])]) it(`65/${label}/${variant}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 363,
+            "source": "put(b, `${identityPath}/${key}`, hashObserved(preimage)); reseal(b, key); reject(`65/${label}/${variant}`, b);"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "65/configurationHash",
+        "ledgerIndex0": 65,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "65/config/full",
+          "65/config/wrapper",
+          "65/config/each-required-omission",
+          "65/config/legal-field-change"
+        ],
+        "sourceAssertion": "Whole old configuration preimage, wrapper, all required top-level and viewport width/height omissions, lawful per-field changes. Chromium stays a closed constant.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 45,
+            "source": "private static Map<String, JsonNode> preimages(JsonNode basis) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 113,
+            "source": "assertThat(GuidedContracts.hash(preimages(control).get(entry.getValue()))).as(label).isEqualTo(identity.path(entry.getValue()).asText());"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 123,
+            "source": "wrappedAndPartialCommitments(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 124,
+            "source": "shapeOmissions(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 125,
+            "source": "semanticInnerChanges(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 130,
+            "source": "private static void wrappedAndPartialCommitments(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 133,
+            "source": "put(basis, IDENTITY + \"/\" + key, GuidedContracts.hash(C.object().set(\"value\", preimages(basis).get(key))));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 139,
+            "source": "ObjectNode basis = fresh(doc); ArrayNode preimage = preimages(basis).get(key).deepCopy();"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 176,
+            "source": "private static void shapeOmissions(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 199,
+            "source": "private static void semanticInnerChanges(JsonNode doc) {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 331,
+            "source": "function preimages(b: J): Record<string, J> {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 378,
+            "source": "for (const [label, key, value] of [['environment', 'environment', 'other'], ['width', 'viewport/width', 1281], ['height', 'viewport/height', 721], ['timeout', 'timeoutSeconds', 11], ['wait', 'waitStrategy', 'networkidle']] as const) it(`65/config/legal-field-change/${label}`, () => { const b = fresh(); put(b, `${basePath}/configuration/${key}`, value); reseal(b); reject(`65/config/legal-field-change/${label}`, b); });"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 380,
+            "source": "const omissionGroups = ["
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 381,
+            "source": "['65/config/each-required-omission', `${basePath}/configuration`, ['browser', 'viewport', 'timeoutSeconds', 'waitStrategy', 'environment']],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 388,
+            "source": "['65/config/each-required-omission/viewport', `${basePath}/configuration/viewport`, ['width', 'height']],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 391,
+            "source": "for (const [label, path, keys] of omissionGroups) for (const key of keys) it(`${label}${label.endsWith('omit') ? '-' : '/'}${key}`, () => { const b = fresh(); remove(b, `${path}/${key}`); reject(label, b, true); });"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "65/artifactHash",
+        "ledgerIndex0": 65,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "65/artifact/full",
+          "65/artifact/wrapper",
+          "65/artifact/subset",
+          "65/artifact/required-omission",
+          "65/artifact/valid-inner-change"
+        ],
+        "sourceAssertion": "Whole old artifact preimage, wrapper/subset, each required member omission and legal planId inner mutation; outer policy/plan/revision/pin/program links resealed while claimed artifact hash remains wrong.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 45,
+            "source": "private static Map<String, JsonNode> preimages(JsonNode basis) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 113,
+            "source": "assertThat(GuidedContracts.hash(preimages(control).get(entry.getValue()))).as(label).isEqualTo(identity.path(entry.getValue()).asText());"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 123,
+            "source": "wrappedAndPartialCommitments(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 124,
+            "source": "shapeOmissions(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 125,
+            "source": "semanticInnerChanges(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 130,
+            "source": "private static void wrappedAndPartialCommitments(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 133,
+            "source": "put(basis, IDENTITY + \"/\" + key, GuidedContracts.hash(C.object().set(\"value\", preimages(basis).get(key))));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 139,
+            "source": "ObjectNode basis = fresh(doc); ArrayNode preimage = preimages(basis).get(key).deepCopy();"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 176,
+            "source": "private static void shapeOmissions(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 199,
+            "source": "private static void semanticInnerChanges(JsonNode doc) {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 309,
+            "source": "// Reseal only enclosing commitments. The selected inner mismatch remains wrong. The closed"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 335,
+            "source": "const commitments = [['source', 'sourceHash'], ['authoring', 'authoringHash'], ['config', 'configurationHash'], ['artifact', 'artifactHash'], ['plan', 'learnedPlanHash'], ['policy', 'referencePolicyHash'], ['profile', 'profileHash'], ['equivalence', 'operationEquivalenceHash']] as const;"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 353,
+            "source": "for (const [label, key] of commitments) it(`65/${label}/${key === 'profileHash' ? 'wrapper-claim' : 'wrapper'}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 356,
+            "source": "for (const [label, key] of commitments) it(`65/${label}/${key === 'sourceHash' || key === 'authoringHash' ? 'array' : 'full'}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 380,
+            "source": "const omissionGroups = ["
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 382,
+            "source": "['65/artifact/required-omission', artifactPath, ['version', 'kind', 'profile', 'sourceHash', 'configurationHash', 'authoringHash', 'learnedPlan', 'learnedPlanHash', 'guards', 'inputRecipes', 'steps', 'replayPolicy']],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 391,
+            "source": "for (const [label, path, keys] of omissionGroups) for (const key of keys) it(`${label}${label.endsWith('omit') ? '-' : '/'}${key}`, () => { const b = fresh(); remove(b, `${path}/${key}`); reject(label, b, true); });"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 399,
+            "source": "['65/artifact/valid-inner-change', `${artifactPath}/learnedPlan/planId`, 'different-plan', 'artifactHash'],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 404,
+            "source": "for (const [label, key, preimage] of [['65/artifact/subset', 'artifactHash', 'learnedPlan'], ['65/policy/subset', 'referencePolicyHash', 'bindings']] as const) it(label, () => { const b = fresh(), a = at(b, artifactPath); put(b, `${identityPath}/${key}`, hashObserved(at(a, preimage === 'bindings' ? 'replayPolicy/bindings' : preimage))); reseal(b, key); reject(label, b); });"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "65/learnedPlanHash",
+        "ledgerIndex0": 65,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "65/plan/full",
+          "65/plan/wrapper",
+          "65/plan/required-omission",
+          "65/plan/semantic-change",
+          "65/plan/duplicate-field-mismatch"
+        ],
+        "sourceAssertion": "Whole old learned plan preimage, wrapper, all required map/metadata members omitted separately, semantic operation input mutation and separate duplicate artifact.learnedPlanHash mismatch. Unrelated artifact/revision/pin/program commitments resealed.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 45,
+            "source": "private static Map<String, JsonNode> preimages(JsonNode basis) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 113,
+            "source": "assertThat(GuidedContracts.hash(preimages(control).get(entry.getValue()))).as(label).isEqualTo(identity.path(entry.getValue()).asText());"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 123,
+            "source": "wrappedAndPartialCommitments(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 124,
+            "source": "shapeOmissions(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 125,
+            "source": "semanticInnerChanges(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 130,
+            "source": "private static void wrappedAndPartialCommitments(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 133,
+            "source": "put(basis, IDENTITY + \"/\" + key, GuidedContracts.hash(C.object().set(\"value\", preimages(basis).get(key))));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 139,
+            "source": "ObjectNode basis = fresh(doc); ArrayNode preimage = preimages(basis).get(key).deepCopy();"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 176,
+            "source": "private static void shapeOmissions(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 199,
+            "source": "private static void semanticInnerChanges(JsonNode doc) {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 309,
+            "source": "// Reseal only enclosing commitments. The selected inner mismatch remains wrong. The closed"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 335,
+            "source": "const commitments = [['source', 'sourceHash'], ['authoring', 'authoringHash'], ['config', 'configurationHash'], ['artifact', 'artifactHash'], ['plan', 'learnedPlanHash'], ['policy', 'referencePolicyHash'], ['profile', 'profileHash'], ['equivalence', 'operationEquivalenceHash']] as const;"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 353,
+            "source": "for (const [label, key] of commitments) it(`65/${label}/${key === 'profileHash' ? 'wrapper-claim' : 'wrapper'}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 356,
+            "source": "for (const [label, key] of commitments) it(`65/${label}/${key === 'sourceHash' || key === 'authoringHash' ? 'array' : 'full'}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 380,
+            "source": "const omissionGroups = ["
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 383,
+            "source": "['65/plan/required-omission', `${artifactPath}/learnedPlan`, Object.keys(obj(at(fresh(), `${artifactPath}/learnedPlan`)))],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 391,
+            "source": "for (const [label, path, keys] of omissionGroups) for (const key of keys) it(`${label}${label.endsWith('omit') ? '-' : '/'}${key}`, () => { const b = fresh(); remove(b, `${path}/${key}`); reject(label, b, true); });"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 400,
+            "source": "['65/plan/semantic-change', `${artifactPath}/learnedPlan/actions/0/operation/destinationInputId`, 'input-other', 'learnedPlanHash'],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 402,
+            "source": "['65/plan/duplicate-field-mismatch', `${artifactPath}/learnedPlanHash`, altered, 'learnedPlanHash'],"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "65/referencePolicyHash",
+        "ledgerIndex0": 65,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "65/policy/full",
+          "65/policy/wrapper",
+          "65/policy/subset",
+          "65/policy/required-omission",
+          "65/policy/semantic-change"
+        ],
+        "sourceAssertion": "Whole policy preimage versus wrapper/bindings subset; all required fields omitted separately. Legal binding sourceOrigin mutation isolates wrong claimed policy hash; transferPolicy remains sameOrigin constant.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 45,
+            "source": "private static Map<String, JsonNode> preimages(JsonNode basis) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 113,
+            "source": "assertThat(GuidedContracts.hash(preimages(control).get(entry.getValue()))).as(label).isEqualTo(identity.path(entry.getValue()).asText());"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 123,
+            "source": "wrappedAndPartialCommitments(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 124,
+            "source": "shapeOmissions(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 125,
+            "source": "semanticInnerChanges(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 130,
+            "source": "private static void wrappedAndPartialCommitments(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 133,
+            "source": "put(basis, IDENTITY + \"/\" + key, GuidedContracts.hash(C.object().set(\"value\", preimages(basis).get(key))));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 139,
+            "source": "ObjectNode basis = fresh(doc); ArrayNode preimage = preimages(basis).get(key).deepCopy();"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 176,
+            "source": "private static void shapeOmissions(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 199,
+            "source": "private static void semanticInnerChanges(JsonNode doc) {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 309,
+            "source": "// Reseal only enclosing commitments. The selected inner mismatch remains wrong. The closed"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 335,
+            "source": "const commitments = [['source', 'sourceHash'], ['authoring', 'authoringHash'], ['config', 'configurationHash'], ['artifact', 'artifactHash'], ['plan', 'learnedPlanHash'], ['policy', 'referencePolicyHash'], ['profile', 'profileHash'], ['equivalence', 'operationEquivalenceHash']] as const;"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 353,
+            "source": "for (const [label, key] of commitments) it(`65/${label}/${key === 'profileHash' ? 'wrapper-claim' : 'wrapper'}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 356,
+            "source": "for (const [label, key] of commitments) it(`65/${label}/${key === 'sourceHash' || key === 'authoringHash' ? 'array' : 'full'}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 380,
+            "source": "const omissionGroups = ["
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 384,
+            "source": "['65/policy/required-omission', `${artifactPath}/replayPolicy`, Object.keys(obj(at(fresh(), `${artifactPath}/replayPolicy`)))],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 391,
+            "source": "for (const [label, path, keys] of omissionGroups) for (const key of keys) it(`${label}${label.endsWith('omit') ? '-' : '/'}${key}`, () => { const b = fresh(); remove(b, `${path}/${key}`); reject(label, b, true); });"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 401,
+            "source": "['65/policy/semantic-change', `${artifactPath}/replayPolicy/bindings/0/sourceOrigin`, 'https://other.example.test', 'referencePolicyHash'],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 404,
+            "source": "for (const [label, key, preimage] of [['65/artifact/subset', 'artifactHash', 'learnedPlan'], ['65/policy/subset', 'referencePolicyHash', 'bindings']] as const) it(label, () => { const b = fresh(), a = at(b, artifactPath); put(b, `${identityPath}/${key}`, hashObserved(at(a, preimage === 'bindings' ? 'replayPolicy/bindings' : preimage))); reseal(b, key); reject(label, b); });"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "65/profileHash",
+        "ledgerIndex0": 65,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "65/profile/full",
+          "65/profile/wrapper-claim",
+          "65/profile/omission",
+          "65/profile/unsupported-constant"
+        ],
+        "sourceAssertion": "Exact {contract:3} preimage and schema-valid wrong wrapper-hash claim with outer links resealed; missing contract and unsupported contract2 are separate shape refusals. No alternate supported profile invented.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 105,
+            "source": "void baseArtifactAndRevisionDigestHaveExactPreimages() throws Exception {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 123,
+            "source": "wrappedAndPartialCommitments(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 124,
+            "source": "shapeOmissions(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 130,
+            "source": "private static void wrappedAndPartialCommitments(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 176,
+            "source": "private static void shapeOmissions(JsonNode doc) {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 309,
+            "source": "// Reseal only enclosing commitments. The selected inner mismatch remains wrong. The closed"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 335,
+            "source": "const commitments = [['source', 'sourceHash'], ['authoring', 'authoringHash'], ['config', 'configurationHash'], ['artifact', 'artifactHash'], ['plan', 'learnedPlanHash'], ['policy', 'referencePolicyHash'], ['profile', 'profileHash'], ['equivalence', 'operationEquivalenceHash']] as const;"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 343,
+            "source": "it('65/identity/exact16; 65/profile/full; coherent complete parent', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 353,
+            "source": "for (const [label, key] of commitments) it(`65/${label}/${key === 'profileHash' ? 'wrapper-claim' : 'wrapper'}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 356,
+            "source": "for (const [label, key] of commitments) it(`65/${label}/${key === 'sourceHash' || key === 'authoringHash' ? 'array' : 'full'}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 387,
+            "source": "['65/profile/omission', `${artifactPath}/profile`, ['contract']],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 392,
+            "source": "it('65/profile/unsupported-constant', () => { const b = fresh(); put(b, `${artifactPath}/profile/contract`, 2); reject('65/profile/unsupported-constant', b, true); });"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "65/operationEquivalenceHash",
+        "ledgerIndex0": 65,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "65/equivalence/full",
+          "65/equivalence/wrapper",
+          "65/equivalence/omit-operations",
+          "65/equivalence/omit-guards",
+          "65/equivalence/omit-inputRecipes",
+          "65/equivalence/omit-bindings",
+          "65/equivalence/omit-transfers",
+          "65/equivalence/order"
+        ],
+        "sourceAssertion": "Exact ordered flat operations/guards/inputRecipes/bindings/transfers preimage; wrapper, individually omitted five members and operation order. Existing frozen fully resealed operation-equivalence negative exercised at direct map and full builder boundaries.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 57,
+            "source": "result.put(\"profileHash\", at(artifact, \"profile\")); result.put(\"operationEquivalenceHash\", equivalence(artifact));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 61,
+            "source": "private static ObjectNode equivalence(JsonNode artifact) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 123,
+            "source": "wrappedAndPartialCommitments(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 126,
+            "source": "pinProgramAndMaps(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 130,
+            "source": "private static void wrappedAndPartialCommitments(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 155,
+            "source": "ObjectNode basis = fresh(doc), preimage = equivalence(at(basis, ARTIFACT));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 218,
+            "source": "private static void pinProgramAndMaps(JsonNode doc) {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 330,
+            "source": "function equivalence(a: J): J { return { operations: arr(at(a, 'steps')).flatMap(s => arr(at(s, 'operations'))), guards: at(a, 'guards'), inputRecipes: at(a, 'inputRecipes'), bindings: at(a, 'replayPolicy/bindings'), transfers: at(a, 'replayPolicy/transfers') }; }"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 374,
+            "source": "for (const key of ['operations', 'guards', 'inputRecipes', 'bindings', 'transfers']) it(`65/equivalence/omit-${key}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 375,
+            "source": "const b = fresh(), preimage = copy(required(preimages(b).operationEquivalenceHash)); remove(preimage, key); put(b, `${identityPath}/operationEquivalenceHash`, hashObserved(preimage)); reseal(b); reject(`65/equivalence/omit-${key}`, b);"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 377,
+            "source": "it('65/equivalence/order', () => { const b = fresh(), e = copy(required(preimages(b).operationEquivalenceHash)); arr(at(e, 'operations')).reverse(); put(b, `${identityPath}/operationEquivalenceHash`, hashObserved(e)); reseal(b); reject('65/equivalence/order', b); });"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 418,
+            "source": "for (const name of ['base-operation-equivalence-is-recomputed', 'base-claimed-map-resealed-still-not-source-derived']) it(`65/maps/resealed-claimed-map; ${name}`, () => {"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "65/RevisionIdentity",
+        "ledgerIndex0": 65,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "65/identity/exact16",
+          "65/identity/wrapper",
+          "65/identity/whole-revision",
+          "65/identity/unknown-field",
+          "65/identity/omit-version",
+          "65/identity/omit-testId",
+          "65/identity/omit-csiId",
+          "65/identity/omit-sourceRevision",
+          "65/identity/omit-configurationRevision",
+          "65/identity/omit-sourceHash",
+          "65/identity/omit-configurationHash",
+          "65/identity/omit-authoringHash",
+          "65/identity/omit-learnedPlanHash",
+          "65/identity/omit-artifactHash",
+          "65/identity/omit-referencePolicyHash",
+          "65/identity/omit-operationEquivalenceHash",
+          "65/identity/omit-admissionProvenanceHash",
+          "65/identity/omit-publicationEvidenceHash",
+          "65/identity/omit-runAuthorizationHash",
+          "65/identity/omit-profileHash"
+        ],
+        "sourceAssertion": "Exact existing16-field identity and stored decimal revision strings; whole-revision/{identity:...} wrong digest with outer pin/program links agreeing. All16 omissions and unknown field refuse closed shape; no historical authenticity invented.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 30,
+            "source": "private static final List<String> IDENTITY_FIELDS = List.of(\"version\", \"testId\", \"csiId\", \"sourceRevision\", \"configurationRevision\", \"sourceHash\", \"configurationHash\", \"authoringHash\", \"learnedPlanHash\", \"artifactHash\", \"referencePolicyHash\", \"operationEquivalenceHash\", \"admissionProvenanceHash\", \"publicationEvidenceHash\", \"runAuthorizationHash\", \"profileHash\");"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 79,
+            "source": "digestLinks(basis, GuidedContracts.hash(identity));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 82,
+            "source": "private static void digestLinks(ObjectNode basis, String digest) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 110,
+            "source": "assertThat(fields(identity)).containsExactlyInAnyOrderElementsOf(IDENTITY_FIELDS);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 123,
+            "source": "wrappedAndPartialCommitments(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 124,
+            "source": "shapeOmissions(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 130,
+            "source": "private static void wrappedAndPartialCommitments(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 163,
+            "source": "digestLinks(basis, GuidedContracts.hash(preimage)); reject(\"65/identity/\" + kind, basis, doc, false);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 176,
+            "source": "private static void shapeOmissions(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 183,
+            "source": "groups.put(IDENTITY, IDENTITY_FIELDS); groups.put(ARTIFACT + \"/profile\", List.of(\"contract\"));"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 343,
+            "source": "it('65/identity/exact16; 65/profile/full; coherent complete parent', () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 380,
+            "source": "const omissionGroups = ["
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 386,
+            "source": "['65/identity/omit', identityPath, Object.keys(obj(at(fresh(), identityPath)))],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 391,
+            "source": "for (const [label, path, keys] of omissionGroups) for (const key of keys) it(`${label}${label.endsWith('omit') ? '-' : '/'}${key}`, () => { const b = fresh(); remove(b, `${path}/${key}`); reject(label, b, true); });"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 393,
+            "source": "it('65/identity/unknown-field', () => { const b = fresh(); put(b, `${identityPath}/extra`, true); reject('65/identity/unknown-field', b, true); });"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 394,
+            "source": "for (const kind of ['wrapper', 'whole-revision']) it(`65/identity/${kind}`, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 396,
+            "source": "put(b, `${basePath}/revision/revisionDigest`, digest); put(b, 'snapshotEvidence/pinnedBase/revisionDigest', digest); put(b, 'incrementalEvidence/program/baseRevisionDigest', digest); put(b, 'incrementalEvidence/plan/prefixProgramHash', hashObserved(at(b, 'incrementalEvidence/program'))); reject(`65/identity/${kind}`, b);"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "65/PinProgram",
+        "ledgerIndex0": 65,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "65/pin/each-id-copy",
+          "65/pin/each-digest-copy",
+          "65/program/wrapper",
+          "65/program/required-omission",
+          "65/program/guard-resealed",
+          "65/program/action-resealed"
+        ],
+        "sourceAssertion": "Each revision/pin/plan/program/switch base ID copy and each revision/pin/program digest copy mutated separately. Exact whole program hash, wrong wrapper, each required member omitted. Guard/action changed with program hash resealed still rejects old verified-base projection.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 79,
+            "source": "digestLinks(basis, GuidedContracts.hash(identity));"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 82,
+            "source": "private static void digestLinks(ObjectNode basis, String digest) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 124,
+            "source": "shapeOmissions(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 126,
+            "source": "pinProgramAndMaps(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 163,
+            "source": "digestLinks(basis, GuidedContracts.hash(preimage)); reject(\"65/identity/\" + kind, basis, doc, false);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 176,
+            "source": "private static void shapeOmissions(JsonNode doc) {"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 218,
+            "source": "private static void pinProgramAndMaps(JsonNode doc) {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 380,
+            "source": "const omissionGroups = ["
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 385,
+            "source": "['65/program/required-omission', 'incrementalEvidence/program', ['schemaVersion', 'baseRevisionId', 'baseRevisionDigest', 'sourceStepIds', 'actions']],"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 391,
+            "source": "for (const [label, path, keys] of omissionGroups) for (const key of keys) it(`${label}${label.endsWith('omit') ? '-' : '/'}${key}`, () => { const b = fresh(); remove(b, `${path}/${key}`); reject(label, b, true); });"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 405,
+            "source": "for (const path of [`${basePath}/revision/id`, 'snapshotEvidence/pinnedBase/revisionId', 'incrementalEvidence/plan/baseRevisionId', 'incrementalEvidence/program/baseRevisionId', 'incrementalEvidence/switch/baseRevisionId']) it(`65/pin/each-id-copy/${path}`, () => { const b = fresh(); put(b, path, '00000000-0000-4000-8000-000000000902'); if (path.includes('/program/')) put(b, 'incrementalEvidence/plan/prefixProgramHash', hashObserved(at(b, 'incrementalEvidence/program'))); reject('65/pin/each-id-copy', b); });"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 406,
+            "source": "for (const path of [`${basePath}/revision/revisionDigest`, 'snapshotEvidence/pinnedBase/revisionDigest', 'incrementalEvidence/program/baseRevisionDigest']) it(`65/pin/each-digest-copy/${path}`, () => { const b = fresh(); put(b, path, altered); if (path.includes('/program/')) put(b, 'incrementalEvidence/plan/prefixProgramHash', hashObserved(at(b, 'incrementalEvidence/program'))); reject('65/pin/each-digest-copy', b); });"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 407,
+            "source": "it('65/program/wrapper', () => { const b = fresh(); put(b, 'incrementalEvidence/plan/prefixProgramHash', hashObserved({ program: at(b, 'incrementalEvidence/program') })); reject('65/program/wrapper', b); });"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 408,
+            "source": "for (const [label, path, value] of [['guard', 'actions/1/guard/target/visible', false], ['action', 'actions/0/operation/destinationInputId', 'other-input']] as const) it(`65/program/${label}-resealed`, () => { const b = fresh(); put(b, `incrementalEvidence/program/${path}`, value); put(b, 'incrementalEvidence/plan/prefixProgramHash', hashObserved(at(b, 'incrementalEvidence/program'))); reject(`65/program/${label}-resealed`, b); });"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "65/Maps",
+        "ledgerIndex0": 65,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "65/maps/resealed-claimed-map",
+          "65/maps/missing-key",
+          "65/maps/extra-key",
+          "65/maps/reuse-copy-mismatch"
+        ],
+        "sourceAssertion": "Independent base source/config/graph map equals both stored copies; missing/extra keys resealed through plan/policy/artifact/identity/pin/program, reuse-copy mismatch and existing permanent fully resealed claimed-map attack all reach semantic map verification.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 126,
+            "source": "pinProgramAndMaps(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 218,
+            "source": "private static void pinProgramAndMaps(JsonNode doc) {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 86,
+            "source": "const oldMaps = construction('57/snapshot/independent-base', at(base, 'authoringIdentity'), at(base, 'configuration'), at(base, 'artifact/learnedPlan'), computation(historical));"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 410,
+            "source": "for (const [label, variant] of [['65/maps/missing-key', 'missing'], ['65/maps/extra-key', 'extra'], ['65/maps/reuse-copy-mismatch', 'reuse']] as const) it(label, () => {"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 418,
+            "source": "for (const name of ['base-operation-equivalence-is-recomputed', 'base-claimed-map-resealed-still-not-source-derived']) it(`65/maps/resealed-claimed-map; ${name}`, () => {"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": false
+      },
+      {
+        "clauseId": "65/HistoricalReceipts",
+        "ledgerIndex0": 65,
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "runnerFile": "studio-runner/test/observedSnapshotPreimages.test.ts",
+        "reviewedCaseLabels": [
+          "65/receipt/admission-one-sided",
+          "65/receipt/publication-one-sided",
+          "65/receipt/authorization-one-sided",
+          "65/receipt/actual-stored-authority"
+        ],
+        "sourceAssertion": "Three one-sided old policy/identity receipt mismatches reject after unrelated outer reseal. Pure tests grant no actual stored authority credit. Exact retained backend companions mapped separately; no invented historical/recursive basis.",
+        "javaAnchors": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 127,
+            "source": "historicalEqualities(doc);"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+            "line": 252,
+            "source": "private static void historicalEqualities(JsonNode doc) {"
+          }
+        ],
+        "runnerAnchors": [
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 409,
+            "source": "for (const [label, field] of [['admission', 'admissionProvenanceHash'], ['publication', 'publicationEvidenceHash'], ['authorization', 'runAuthorizationHash']] as const) it(`65/receipt/${label}-one-sided`, () => { const b = fresh(); put(b, `${artifactPath}/replayPolicy/${field}`, altered); reseal(b); reject(`65/receipt/${label}-one-sided`, b); });"
+          },
+          {
+            "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+            "line": 421,
+            "source": "// 65/receipt/actual-stored-authority is deliberately not a pure test claim. The required real"
+          }
+        ],
+        "executionStatus": "NOT_RUN",
+        "acceptanceCredit": false,
+        "privateAuthorityLimit": true
+      }
+    ],
+    "owned3files": {
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java": {
+        "sha256": "40aff79e77261500b6ca5f5963c68c4869d1c00b81cb451a56f0a6b1aedcc6f4",
+        "bytes": 35975
+      },
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java": {
+        "sha256": "008f61117ce90c31d9a0abddaa4a91d2d142ba7ef8fabf734265a3940d45ee85",
+        "bytes": 19663
+      },
+      "studio-runner/test/observedSnapshotPreimages.test.ts": {
+        "sha256": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa",
+        "bytes": 41590
+      }
+    },
+    "actualJava65": "actual03PASS full12clause body recorded in checkpoint04",
+    "actualJava57": "actual03fail at first normalize IntNodevsLongNode comparison; corrected04two canonical comparisons unrun",
+    "actualTS": "unit10PASS255 cases, reported source unchanged; no requested redundant rerun"
+  },
+  "sourceReleaseGranted": false,
+  "formalVerdict": null,
+  "lifecycleTransition": null
+}

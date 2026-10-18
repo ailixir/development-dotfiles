@@ -1,0 +1,168 @@
+{
+  "artifact": "Runner015 resumed coherent source checkpoint",
+  "at": "2026-10-15T06:21:54.262955+00:00",
+  "owner": "/root/runner015_resume",
+  "status": "ATOMIC_SOURCE_HOLD_FOR_ROOT_BACKEND_FEEDBACK",
+  "story": "STUDIO-OBS-015",
+  "sourceComplete": false,
+  "testsExecuted": 0,
+  "buildsExecuted": 0,
+  "nativeExecuted": 0,
+  "authority": "Root released owned source/read-only compile/lint only; now requested hold after this checkpoint. All six increments and original57 case obligations remain assigned.",
+  "contractBundle": "ce58d620c27bb84f4233151275373aba24467f748c7152a12f1ef3d2d85381aa",
+  "contractFeedback": "C-int reports corrected full selected semantic freeze green; no application/native/story credit.",
+  "increments": [
+    {
+      "id": "R1",
+      "status": "SOURCE_WRITTEN_NOT_EXECUTED",
+      "facts": [
+        "Prefix transport/runtime/ownership closed program and nested receipt identity retained from checkpoint",
+        "Program identity/hash checked and no ordinary prefix execute path"
+      ]
+    },
+    {
+      "id": "R2",
+      "status": "SOURCE_WRITTEN_TESTS_NOT_EXECUTED",
+      "facts": [
+        "prepareObservedAction/performPreparedObservedAction use supplied same handle and existing ObservationSession",
+        "Exact preparation target used for dispatch, no reacquisition after admission",
+        "WAIT per-coordinate32 and total200 source-written"
+      ],
+      "remaining": [
+        "Meaningful WAIT exhaustion test not yet written; concurrency and native reliability unverified"
+      ]
+    },
+    {
+      "id": "R3",
+      "status": "SOURCE_WRITTEN_PARTIAL_TEST_MAPPING",
+      "facts": [
+        "Append immutable envelope/prefix/version bounds, withhold before ACK, exact issued lease hash versus live authority",
+        "Historical delivery ACK and metadata monotonicity source-written"
+      ],
+      "remaining": [
+        "Concurrent delivery/source mutation negative matrix and historical ACK after later metadata unexecuted/incomplete"
+      ]
+    },
+    {
+      "id": "R4",
+      "status": "SOURCE_WRITTEN_TESTS_NOT_EXECUTED",
+      "facts": [
+        "Synchronous fsynced monotonic native fence",
+        "Authenticated positive no-invocation only, one switch, admitted spent0/replacement1, native-started UNKNOWN",
+        "Attempt budgets include every consumption and prefix assertion FAIL stops"
+      ],
+      "remaining": [
+        "Callback-loss/drift replay/policy/secret/WAIT fault source tests still require expansion",
+        "Actual native final-check-race, secret and policy acceptance remains mandatory"
+      ]
+    },
+    {
+      "id": "R5",
+      "status": "SOURCE_WRITTEN_CHILD_PROVENANCE_MAPPING_HELD",
+      "facts": [
+        "Independent current/base source/declaration/config/input-chain/learned snapshots and immediate base/artifact digest validation",
+        "Materialization versions and action/preparation joins use captured historical version",
+        "Raw arrays unchanged; effective graph and sole excluded spent attempt derived",
+        "Observed-choice original witness retained; unchanged publication hash whole-basis envelope and effective admission tuple array"
+      ],
+      "remaining": [
+        "Child Execute3 has no retained-zero proof: exact Aria/Quinn mapping pending; no IPC expansion made",
+        "Full pure conformance cases source-written but not run; any failures remain to fix"
+      ]
+    },
+    {
+      "id": "R6",
+      "status": "NATIVE_FIXTURE_AND_CORPUS_SOURCE_WRITTEN_NOT_RUN",
+      "facts": [
+        "Actual10step base and prefix3/suffix7 fixture launches recorded GuidedRuntime per session and retains same handle/observations within mixed session",
+        "Fresh stable binding consumed in suffix; native WebM finalized/decode/duration/offset checks source-written",
+        "Two stable OBS009 input corpus artifacts in story evaluation path"
+      ],
+      "remaining": [
+        "Native fixture reliability and exact actual execution evidence absent",
+        "Authenticated Java HTTP+PG15+worker gateway/consent/negative/media oracle belongs joined window; fixture proposal-supply spy is explicitly not real gateway accounting",
+        "Corpus presence is not benchmark success"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "command": "npm run type-check",
+      "log": "type-resume-07.log",
+      "exitCode": 0,
+      "scope": "Whole runner tsconfig source/test type analysis; no emitted dist"
+    },
+    {
+      "command": "scoped eslint of13owned source/test paths",
+      "log": "lint-resume-05.log",
+      "exitCode": 0,
+      "scope": "Read-only ESLint; no --fix"
+    }
+  ],
+  "runnableSelectors": [
+    {
+      "kind": "focused source unit feedback",
+      "cwd": "studio-runner",
+      "command": "./node_modules/.bin/vitest run test/guided/incrementalRuntime.test.ts test/observedIncrementalValidation.test.ts --coverage.enabled=false",
+      "status": "NOT_RUN_ROOT_WINDOW_REQUIRED",
+      "sourceCaseCounts": {
+        "snapshotPositives": 5,
+        "snapshotNegatives": 36,
+        "classifiedGraphCases": 47,
+        "originalBasisCases": 29,
+        "directSnapshotHistoryPurity": 3,
+        "incrementalRuntime": 9
+      },
+      "warning": "Focused feedback only; full coverage thresholds unchanged and still required later"
+    },
+    {
+      "kind": "predecessor regression feedback",
+      "cwd": "studio-runner",
+      "command": "./node_modules/.bin/vitest run test/guided/runtime.test.ts test/guided/ownership.test.ts test/guided/transport.test.ts test/guided/evidence.test.ts test/observedReplayValidation.test.ts test/observedReplayEquivalence.test.ts test/observedReplayExecutor.test.ts --coverage.enabled=false",
+      "status": "NOT_RUN_ROOT_WINDOW_REQUIRED"
+    },
+    {
+      "kind": "actual browser fixture feedback",
+      "cwd": "studio-runner",
+      "command": "npm run test:fixtures -- test/fixtures-tier/mixed-mode-prefix.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "NOT_RUN_SEPARATE_NATIVE_BUILD_WINDOW_REQUIRED"
+    }
+  ],
+  "changedFiles": {
+    "studio-runner/evaluation/observed-authoring/cases/incremental-edit-step-4.json": "f04e70016563076decb46292ce0f18d6a819d488f94212bb2bdb11d4f6546b4a",
+    "studio-runner/evaluation/observed-authoring/cases/incremental-insert-step.json": "9a1831f52911dbddc8d7dc1575c7b6e22480b00098b11bea51b6f94f0bfabbc1",
+    "studio-runner/src/executor/observedReplay.ts": "250fc0a1af5aa510931a9be78baa9e2c2f47557e4b3fdf884fe26d16f7239dac",
+    "studio-runner/src/guided/contracts.ts": "e38f5e1c2f53776f98602cfacc9e3e2c9737372a004cbf55b69a3077b56b8950",
+    "studio-runner/src/guided/evidence.ts": "03afea081e543fc920d2e8012b85951bde9ffd737eb5ba858af959c006340279",
+    "studio-runner/src/guided/journal.ts": "15da758e2e287926a7d404926323791ab3e1f72931bc3c4cb1741de8de9d86dd",
+    "studio-runner/src/guided/ownership.ts": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf",
+    "studio-runner/src/guided/runtime.ts": "ce920611d1fd746ac47572f9713018adabefdacaceb3d44c37b43a57c8bde1d0",
+    "studio-runner/src/guided/transport.ts": "1e8627c5668ce8834bbc779002779b170d784bd6af5782aea763840e786424aa",
+    "studio-runner/src/run/loginRequired.ts": "f46ef274506a4e9ec51df04e081c2e321f1b1088e22a2732751845fe2b001b27",
+    "studio-runner/src/run/observedReplayAdapter.ts": "743d1564f192e865dd9377083037272031223607e33c31a5bcc57129567babb6",
+    "studio-runner/src/validator/observedHistory.ts": "114b3d64dc3966651c3d70df491ab3a9f981278da08a16da6a2a138206bba973",
+    "studio-runner/src/validator/observedReferencePolicy.ts": "3f57d0acb304df8a5dc626c6fe4f3161f90444f97d2d2a3cc12a8787ada6a948",
+    "studio-runner/src/validator/observedReplay.ts": "829eeac9d27180b78a3b18b445cf315df97730ad36361cc74e3cea7bd7ed5ac5",
+    "studio-runner/src/validator/observedSnapshots.ts": "a8a53dedfa041aa9a671e1e03361fee5572cdfa9bc3abca91b5d53e160332928",
+    "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "f5b613f5486b43a70c043b01a801f4ec8590bd8db2cd3ace8bf5510ca8fed685",
+    "studio-runner/test/fixtures-tier/guided-recording.test.ts": "3522915df575e7a0e98e71e74728545bdcb96fcf9b48b3178762c2ab5cc23574",
+    "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "10d97ab585a5af13a69b128a231eab0c6fd5e18780aec17cb3abcb803f752fd6",
+    "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts": "d1d524272fba634063ec6cf9491b6e14179f8d66dbc53898cffb47c2a84a6186",
+    "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts": "d6af50904a1a3187ae5b9b49478dd4232b28cf0b44e97807db765609876194d8",
+    "studio-runner/test/fixtures-tier/guided-wire.test.ts": "082e00e6de1af226c2d20a907cf28da0d9a70c49844c483ed06f1e75641b3a8f",
+    "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts": "16b3f04302969ff5602b6fb5f1a330cf04b0311096c36e28c61c2dce01926553",
+    "studio-runner/test/fixtures-tier/secret-login.test.ts": "3edd5a500b3b9628b15f29fad5d6815bfa3d0fb64c80cdcc5b003d8895a4f322",
+    "studio-runner/test/fixtures/guided-dataflow/server.ts": "7b226210744c0531acace3309fdf661098c1455531e31ff4d0323faee35586eb",
+    "studio-runner/test/guided/incrementalRuntime.test.ts": "daf98ea7d11f07d6bae174d1fffe690803fb1dd7621fc5164a0d1f4cbd2da38f",
+    "studio-runner/test/guided/runtime.test.ts": "13fc6c777789e54cff437a97fbc2cbc0094e492168ed7507c032afde99a21253",
+    "studio-runner/test/helpers/guided.ts": "af3c5687dcf62682253a58a2564177b507cfc0f61e57ee600cd81fda5255dc4d",
+    "studio-runner/test/observedIncrementalValidation.test.ts": "be4dcb0e6f39c99e4ce4ec4691cc5b972b6c8469c1e8f7f0c229c416731437b8"
+  },
+  "noClaims": [
+    "No application/unit/native/coverage verdict",
+    "No story or QA status change",
+    "No backend/frontend/schema/generated/pin/migration/gate/design edit",
+    "No build/dist/dependency/git commit/push/deploy/subagent"
+  ],
+  "next": "Wait for explicit root release; preserve atomic source snapshot through backend compile/head-regression feedback."
+}

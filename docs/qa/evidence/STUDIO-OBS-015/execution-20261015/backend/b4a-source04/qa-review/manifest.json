@@ -1,0 +1,54 @@
+{
+  "artifact": "STUDIO-OBS-015 independent Quinn B4a-source04 bounded delta review",
+  "capturedAt": "2026-10-15T18:33:50.039747+00:00",
+  "classification": "BOUNDED_SOURCE04_DELTA_REVIEW_NO_FINDINGS_UNCOMPILED_UNEXECUTED",
+  "checkpoint": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-b4a-source04.json",
+    "sha256": "3b69b9298e513dd65c1ff0d3c2976bfc06be943a5f19e462d37ad021555f0e29",
+    "bytes": 10398
+  },
+  "ownedAfter": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java": {
+      "sha256": "975026f4aaf4b6d890c088719205393230ddbab2789a0bcb53e21f6f8a600528",
+      "bytes": 47914
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java": {
+      "sha256": "a9c76b547a77901bb122b2d1835b5d545bc0dddf6f62c0c6daab80a3472e750f",
+      "bytes": 42814
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java": {
+      "sha256": "37a160856fac0a0c25c05d98d4e6fb532c7f7ae615c3c0e1fe49b7cc83016d59",
+      "bytes": 69787
+    }
+  },
+  "findings": [],
+  "staticCounterexamples": {
+    "count": 18,
+    "mismatches": 0,
+    "runtimeMutationTest": false
+  },
+  "payloads": {
+    "review.md": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source04/qa-review/review.md",
+      "sha256": "b8b90cb602419bc29152e79ebd5c3f27c41eaf2876be36fe90e23bcd17c9bf86",
+      "bytes": 4896
+    },
+    "checks.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source04/qa-review/checks.json",
+      "sha256": "9751233e419d2aaeb681869bb2807788de7786e4f9d9cf1c1887832985b55d82",
+      "bytes": 8370
+    },
+    "source-inventory.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source04/qa-review/source-inventory.json",
+      "sha256": "ec260ac621adfe797698eef8c665b25fc2790b668bbcf376e496fb1894afd61c",
+      "bytes": 10633
+    }
+  },
+  "source04Compile": "UNCOMPILED",
+  "source04Execution": "UNEXECUTED",
+  "formalVerdict": null,
+  "lifecycleTransition": null,
+  "sourceReleaseGranted": false,
+  "runtimeExecutedByReviewer": false,
+  "sourceEditedByReviewer": false
+}

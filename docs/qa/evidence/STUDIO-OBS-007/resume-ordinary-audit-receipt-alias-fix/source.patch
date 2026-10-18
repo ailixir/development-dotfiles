@@ -1,0 +1,11 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java.before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -4730,7 +4730,7 @@
+     } else {
+       var owners =
+           state.actualJdbc.queryForList(
+-              "SELECT l.attempt_id,l.admission_id,l.observed_admission_receipt::text AS receipt,"
++              "SELECT l.attempt_id,l.admission_id,e.observed_admission_receipt::text AS receipt,"
+                   + " e.observed_revision_binding::text AS binding FROM studio_dispatch_ledger l"
+                   + " JOIN ui_test_executions e ON e.id=l.execution_id"
+                   + " AND e.started_at=l.execution_accepted_at WHERE l.execution_id=?",

@@ -1,0 +1,25 @@
+{
+  "6": {
+    "method": "ChangeDetectionTest.configurationChangesSelectFirstStep",
+    "addition": "browser=firefox sentinel at pure hash-envelope boundary0; production Chromium-only codec untouched",
+    "tier": "pure Java; no alternate browser support"
+  },
+  "58": {
+    "method": "IncrementalPublicationConformanceTest.oldBasisCannotDistinguishUnexecutedContextChange",
+    "addition": "Exact frozen identityA/B differ only unused step2 ContextText; same frozen old facts modulo explicitly documented current sourceManifestHash pin; exact frozen maps A/B independently compared to snapshot construction and current GuidedSnapshotDeriver.apply; step1 equal, steps2/3 different; current ordinary full lowerer accepted control asserted; immutable frozen/current inputs",
+    "tier": "supplied-preimage pure construction + current ordinary lowerer/derivation; historical oldBasis not publishable proof"
+  },
+  "59": {
+    "method": "IncrementalPublicationConformanceTest.normalizedSnapshotSourceRejectsNumericTimeSurrogatesAndUnsafeRevision",
+    "cases": [
+      "numeric-captured-at",
+      "lone-surrogate-context",
+      "unsafe-evidence-revision"
+    ],
+    "addition": "Unchanged frozen nanosecond normalized positive passes first; closed identity schema/canonical validation, production snapshot constructor and current GuidedSnapshotDeriver.apply must each refuse exact malformed source field INVALID_CONTRACT and leave plan/input unchanged",
+    "tier": "normalized internal snapshot boundary, no HTTP DTO numeric timestamp claim"
+  },
+  "64": {
+    "status": "No independent candidate-boundary change in this increment; original four offered snapshot attacks retained byte-exact. New source-field refusals contribute only shared normalized-source coverage. Fully resealed/driftj companions remain deferred."
+  }
+}

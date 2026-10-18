@@ -1,0 +1,101 @@
+{
+  "artifact": "independent-Aria-test-only-padding-source-review",
+  "capturedAt": "2026-10-14T23:47:02.554444+00:00",
+  "reviewer": "Aria / strict_architecture",
+  "verdict": "REQUIRES_TWO_CONTROL_FIXES_BEFORE_NATIVE_PROOF",
+  "notStoryQaApproval": true,
+  "testsOrBuildsRunByReviewer": false,
+  "productionEditedByReviewer": false,
+  "sources": [
+    {
+      "path": "studio-runner/test/helpers/nativeBlankSurface.ts",
+      "sha256": "66db2ee2b1bd9f4adcecfa62f677aea92930af3e0e9e71238991d1ef44a8adbc",
+      "matchesDeveloperCheckpoint": true
+    },
+    {
+      "path": "studio-runner/test/nativeBlankSurface.test.ts",
+      "sha256": "e8b9139be893667d90a8431087c5b08b8967c4888ae4f1aaaa3346d137b48fb5",
+      "matchesDeveloperCheckpoint": true
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/nativeBlankVideo.ts",
+      "sha256": "1223b32160a0878a6ba9897d24c3324dbbfd17d1c2d97412d2b2d64c31d99d14",
+      "matchesDeveloperCheckpoint": true
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+      "sha256": "671ffe3b79d5cea137a73c3ac1c1cb9eb46a419108b3ccf764505ec9b0327bd3",
+      "matchesDeveloperCheckpoint": true
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "sha256": "b56bb90cc2d427512f65cb2109ef40247e5aeea10cc52c19488eefd66fe195c6",
+      "matchesDeveloperCheckpoint": true
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts",
+      "sha256": "d8c90763a8779eb5a7466a2912781396cf48397d5283f5695c1647fb612edf14",
+      "matchesDeveloperCheckpoint": true
+    }
+  ],
+  "ruling": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/bootstrap-padding-ruling.md",
+    "sha256": "70548c0ff0f5bbddde3941b947c46606d2042d9d7fcd07e33527fdfdefe29d56"
+  },
+  "verifiedSourceOnly": [
+    {
+      "id": "F1",
+      "verdict": "PASS",
+      "finding": "Exact whole-white or one anchored WHITE rectangle and complete strictPAD complement. WHITE>=245; PAD126..129 spread<=1 exactly matches ruling. Every pixel checked; allgray/holes/nonrectangles/text/wrongpadding refused; no ignored seam or app region."
+    },
+    {
+      "id": "F2",
+      "verdict": "PASS",
+      "finding": "Pure control cases cover synthetic geometry and hostile pixels; reported26 passes are developer evidence, not rerun by Aria."
+    },
+    {
+      "id": "F3",
+      "verdict": "PASS",
+      "finding": "Probe dimensions correspond exactly: corpus viewport1280x720 -> recording640x360 and explicit timing viewport800x600 -> recording800x600. VERSION and PREFS each have separate context/page/video at each pair."
+    },
+    {
+      "id": "F4",
+      "verdict": "PASS",
+      "finding": "Streaming decoder validates one video stream native dimensions, finite nonnegative nondecreasing PTS,1..400 total frames, max32MiB/frame and exact requested decoded frame count/remainder. Prefix is exact firstN frames before first red-effect frame; no scaling/cropping in blank classifier. Existing scaled effect locator remains timing-only."
+    },
+    {
+      "id": "F5",
+      "verdict": "PASS",
+      "finding": "Original<=500ms timing, firstred<=500ms, outcome/partial flags, actual control/stop/capability ownership, zeroeffect counters, PID disappearance, scratch and capacity assertions retained in patch. No production/pin/clock/fixturepage change in reviewed sixfile patch."
+    },
+    {
+      "id": "F6",
+      "verdict": "PASS_WITH_LIMIT",
+      "finding": "Unique mkdtemp evidence dirs, exclusive archive/json and ffmpeg-n extraction prevent historical overwrites. Native selectedapp archive occurs before relevant assertions; successful probe controls persist counts not rawprobe. Control error cleanup has separate findingC2."
+    }
+  ],
+  "requiredFixes": [
+    {
+      "id": "C1",
+      "severity": "HIGH_FOR_TEST_PROOF",
+      "file": "studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+      "finding": "Whole-video rejectedFrames>0 can be satisfied by an initial black/allgray or other nonconforming blank compositor frame. DOMvisible then close does not bind rejected decoded frame to actual information-bearing VERSION/PREFS content. Thus four passing controls could be vacuous despite separate videos.",
+      "required": "Establish specific actualprobe DOM/paint and require at least one SAME decoded frame both rejected by exact classifier and information-bearing under the existing013 maxRowRuns>6/perchannel tolerance12 signal. Restrict rowcomplexity to positivecontrol discrimination, never acceptance. Record numeric informationBearingRejectedFrames separately for each VERSION/PREFS geometry and assert>=1. Final NONBLANK alone is insufficient because allgray/black also NONBLANK. No new pixels/DOMtext persisted."
+    },
+    {
+      "id": "C2",
+      "severity": "MEDIUM_SECURITY_TEST_CLEANUP",
+      "file": "studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+      "finding": "finally awaits context.close before releaseBrowserProfile and rm. A rejected close exits finally and retains sensitive rawchrome probe video/profile.",
+      "required": "Nested try/finally must always release and remove the owned scratch even if close fails, while preserving close/cleanup failure as a red test. Never log/store close exception body containing paths or content."
+    }
+  ],
+  "executionStillOwed": [
+    "Fix C1/C2 then independently inspect changed bytes and freeze new sixfile manifest.",
+    "Actual four native discriminators + affectedblank/timingcases + required fullfixture gate under rootwindow.",
+    "Type/lint/defaulttests on finaltestbytes as required by root.",
+    "Preserve original226pass2fail9skip as failed snapshot.",
+    "Forcedstep loss specificpixelcause remains unknown until actualcurrentnative prefix retained and decoded; no inferred historicalrecovery."
+  ],
+  "permissionBoundary": "Only six exact test paths reviewed; no runtime/build/config/dist/Java/page/SDK changes authorized by this review.015unstarted."
+}

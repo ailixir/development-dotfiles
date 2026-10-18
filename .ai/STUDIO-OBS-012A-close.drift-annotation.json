@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "kind": "close-file story-hash drift annotation (append-only sibling)",
+  "annotates": {
+    "path": ".ai/STUDIO-OBS-012A-close.json",
+    "sha256": "a2d232511399cfefbcc260bd49c849c9381e9b14178851e722fa511d8f2d922e",
+    "unchanged": true
+  },
+  "story": "STUDIO-OBS-012A",
+  "author": "Pax (@po)",
+  "annotatedAt": "2026-10-17T19:13:23.824932+00:00",
+  "whySiblingFile": "Adding a top-level field would change the close file's sha256, which other receipts bind byte-exact; a sibling keeps those bindings valid.",
+  "closeFileHashBoundIn": [
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/resume-20261014/start-manifest.json"
+  ],
+  "recordedHashesRewritten": false,
+  "recordedStoryHash": {
+    "field": "artifactHashes.storyAfter",
+    "sha256": "b0b79c1354227da2882241272c3f77ade52507e91a3af3e01dc7336075ada150"
+  },
+  "currentStoryHash": {
+    "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012A.story.md",
+    "sha256": "026e8f62bf0ef23834cf3784c0d7e6a19b6fd9561b390995fcfac521cc49f71e"
+  },
+  "matches": false,
+  "reason": {
+    "summary": "Append-only @po placements after closure added text to the story; nothing that existed at closure was edited or removed.",
+    "date": "2026-10-16",
+    "source": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-bridge-disclosure/decision.json",
+      "sha256": "99b58e57446266a44db1498aff793024d5f5a98215bcd024c8469712cd614f6d",
+      "ruling": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w2-window01/aria-bridge-ruling01/ruling.md §5"
+    },
+    "changeLogRows": [
+      "| 2026-10-16 | 0.2.7 | Post-closure dated note on the GuidedBridgeIntegrationTest port-proof count ... | @po (Pax) |"
+    ],
+    "addedBlocks": [
+      {
+        "kind": "section \"## Post-closure note — bridge port-proof count (2026-10-16)\", inserted between QA Results and Change Log",
+        "firstLineCurrent": 430,
+        "lastLineCurrent": 439,
+        "sha256": "55c4bd783ae7ed7f0e592c8db88a313350164f3ca6e1da05597788321498ef56"
+      },
+      {
+        "kind": "Change Log row 0.2.7",
+        "firstLineCurrent": 453,
+        "lastLineCurrent": 453,
+        "sha256": "7d80e9b578baf55c8dbe660a149b20122b7734a0e03116eefb1df369561a2f5b"
+      }
+    ]
+  },
+  "verification": {
+    "method": "Remove the exact post-closure blocks from the current story, then sha256 the result; per-section hashes are bytes from the \"## <name>\" heading to (excluding) the next \"## \" heading (reproduces the 014 close QAResultsSha256Before); line diff of reconstructed vs current with difflib.",
+    "reconstructedClosureSha256": "b0b79c1354227da2882241272c3f77ade52507e91a3af3e01dc7336075ada150",
+    "reconstructionEqualsRecorded": true,
+    "diffIsInsertOnly": true,
+    "sections": {
+      "QA Results": {
+        "atClosureSha256": "d4b95c4d1979d18a23fcf423fbf0eeaac919048b4dbdd9327c771c9bd9fbc043",
+        "currentSha256": "d4b95c4d1979d18a23fcf423fbf0eeaac919048b4dbdd9327c771c9bd9fbc043",
+        "byteIdentical": true
+      },
+      "Acceptance Criteria": {
+        "atClosureSha256": "be7f653101258b56681f5e597a3287ec83fdbe844c6b52251541042853193d10",
+        "currentSha256": "be7f653101258b56681f5e597a3287ec83fdbe844c6b52251541042853193d10",
+        "byteIdentical": true
+      },
+      "Tasks / Subtasks": {
+        "atClosureSha256": "0d1b2c0ee722527b8cbac76d40b65b635e0c97da15c06fec22efae1e0f779af3",
+        "currentSha256": "0d1b2c0ee722527b8cbac76d40b65b635e0c97da15c06fec22efae1e0f779af3",
+        "byteIdentical": true
+      },
+      "Story": {
+        "atClosureSha256": "b67e0b05ccd89ff74624a21196b0a35d827615580d21337b8a7760f808f7c522",
+        "currentSha256": "b67e0b05ccd89ff74624a21196b0a35d827615580d21337b8a7760f808f7c522",
+        "byteIdentical": true
+      },
+      "File List": {
+        "atClosureSha256": "9155c9f646712d7ce6a914a3616434341d8daff71872643deafc0e96581ea0be",
+        "currentSha256": "9155c9f646712d7ce6a914a3616434341d8daff71872643deafc0e96581ea0be",
+        "byteIdentical": true
+      },
+      "Dev Agent Record": {
+        "atClosureSha256": "b23f6a5dd8613b8261cd4c561d8cbabf103b7d170bfd6f9fa3a5211626f7c927",
+        "currentSha256": "b23f6a5dd8613b8261cd4c561d8cbabf103b7d170bfd6f9fa3a5211626f7c927",
+        "byteIdentical": true
+      }
+    },
+    "statusAtClosure": "**Done**",
+    "statusCurrent": "**Done**",
+    "note": "The 012A close recorded no QA Results section hash; the closure-time section is taken from the story reconstructed to the recorded storyAfter hash."
+  },
+  "statement": "The QA-reviewed sections are unchanged: QA Results, Acceptance Criteria, Tasks / Subtasks, Story, File List and Dev Agent Record are byte-identical between the closure-time story (reconstructed to the recorded hash) and the current story. Status is Done in both. The only differences are the appended post-closure blocks listed above.",
+  "idempotency": {
+    "closureKeyMarkerCountInStory": 1
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "artifact": "Closing reread of two concurrent repair paths; initial hashes remain historical",
+  "capturedAtUtc": "2026-10-15T08:55:24.035783+00:00",
+  "sourceFiles": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "sha256": "6bf5985e220e30f169e1d9bd58a8e3f738608fa85d872b6fb61a567a2d1e3061",
+      "bytes": 27093,
+      "anchors": [
+        {
+          "selector": "void verifyCandidate(",
+          "matches": [
+            {
+              "line": 411,
+              "text": "void verifyCandidate("
+            }
+          ]
+        },
+        {
+          "selector": "PublicationContracts.Candidate recomputed = new ObservedArtifactLowerer",
+          "matches": [
+            {
+              "line": 413,
+              "text": "PublicationContracts.Candidate recomputed = new ObservedArtifactLowerer(contracts)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "sha256": "c140d89e3bcc397211b4283d8f9a9c83c60286b6ef0efb85c060461b25e92de4",
+      "bytes": 7551,
+      "anchors": [
+        {
+          "selector": "function rejectsAtOriginalBoundary",
+          "matches": [
+            {
+              "line": 19,
+              "text": "function rejectsAtOriginalBoundary(row:Case,section:NegativeSection):void {"
+            }
+          ]
+        },
+        {
+          "selector": "validateObservedRequest(request(row),build)",
+          "matches": [
+            {
+              "line": 30,
+              "text": "const outcome=(()=>{try{return {verdict:validateObservedRequest(request(row),build)};}catch(error){return {error};}})();"
+            }
+          ]
+        },
+        {
+          "selector": "current snapshot maps derive independently",
+          "matches": [
+            {
+              "line": 64,
+              "text": "it('current snapshot maps derive independently of a candidate artifact claim',()=>{"
+            }
+          ]
+        },
+        {
+          "selector": "for(const row of fixtures.snapshotCorrection.positives)",
+          "matches": [
+            {
+              "line": 50,
+              "text": "for(const row of fixtures.snapshotCorrection.positives)it(row.name,()=>{"
+            }
+          ]
+        },
+        {
+          "selector": "for(const row of fixtures.snapshotCorrection.negatives)",
+          "matches": [
+            {
+              "line": 53,
+              "text": "for(const row of fixtures.snapshotCorrection.negatives)it(`rejects snapshot authority ${row.name}`,()=>{"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "effectOnThreeRulings": "No new exact57/65 intermediate/normalization/preimage inventory assertions or native85 proof observed; no execution credit. Do not request duplicate negative-routing repair.",
+  "runnerChange": "Routes candidate-only to real validateObservedRequest, external authority to explicit synthetic declaration checks, admitted minimum graph joins to pure graph validation. Sidecar checks remain explicitly unfulfilled by actual backend authority.",
+  "backendChange": "Writer candidate comparison now independently lowers basis and compares complete candidate before hash/receipt joins.",
+  "wholeTreeStable": false
+}

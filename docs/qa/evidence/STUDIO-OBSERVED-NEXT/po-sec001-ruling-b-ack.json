@@ -1,0 +1,95 @@
+{
+  "artifact": "PO acknowledgement of @architect ruling AR-SEC001-FM (option B) for QA finding SEC-001 on STUDIO-OBS-014, with AC-6 reading and placement of the author-facing consequence",
+  "author": "Pax (@po)",
+  "date": "2026-10-14",
+  "mode": "Docs-only. Story docs and this record were edited. No code, test, contract or Gradle file was edited; no build or test was run (root holds the frozen-identity test window); nothing committed. Status of both stories is unchanged.",
+  "anchoredOn": {
+    "head": "734ad704f (uncommitted working tree with B14 qa-fixes 01-14 applied)",
+    "inputsSha256": {
+      "docs/qa/evidence/STUDIO-OBS-014/ar-sec001-form-membership.json": "4faefd79b3625963fb1af848bb632e3eacd09cd669af5f5d1af1c270d8d8506a",
+      "docs/qa/evidence/STUDIO-OBS-014/b14/ledger.json": "805f76e41bd996cc35e2e3c3783fa30a39e446434b6f75393f6507a3ac772f8f",
+      "docs/qa/evidence/STUDIO-OBS-014/b14/qa-fixes/README.json": "0d54dcc045f0f958616482bb2e8a9d28dc2c802ae5c319474fe15f7562034872",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuard.java": "edd27f4973e4d3fe247cd7a1cdc9ab3d5e1288aa92ad617b7f34c69e6e546606",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuardTest.java": "aedda22df7b43a464e2b3258ee043515ef9e60825989fa886717c27610e74fa6",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java": "8d0659b08f9a0fdea64084111f50caef7deb0428e4370655ea066f691789e089",
+      "backend/src/test/java/com/citi/put/checks/studio/support/ObservedPublicationFixture.java": "3d2822065f0d13b23c646cef997416b9d77d2a2e286d7d621b5682d4e956807c",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "9b6233bfe7133255a6d0e720b95d2cf009a416946048a23269644d1d0d04acd9",
+      "docs/specs/studio-observed-authoring/guided-data-flow.md": "41d4100808a59f15aa36d4a550e75dab0d6415df24404263959ae907e321ab05",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md (before edit, v0.1.9)": "2256b28915d70981b0cfef815603591e60cec858c74cfdf09b5919e249d7f8c1",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md (before edit, v0.3.3)": "2e20107b50460bd82c3bd4a430f603c2b437483e04aaab6b0c5599f92020183c"
+    }
+  },
+
+  "readByPo": {
+    "ruling": "ar-sec001-form-membership.json in full: rule (click allow-list of three triples; press = Enter || inForm), falsePositiveCost, ownerLanes.@po, oracles U1-U7 / I-1..I-3.",
+    "storyACs": "STUDIO-OBS-014 AC-4, AC-5, AC-6 and their existing clarifications (AC-4 a-c).",
+    "ledger": "b14/ledger.json `arSec001Fm` (patch 14 applied; 3 namedTestChanges; 7 new tests; blocker note) and qa-fixes/README.json `verificationAfterRuling`.",
+    "threeChangedTests": [
+      "GuidedActionGuardTest.clarifyFirstAsksOnceBeforeTheFirstSideEffectAndNotAfterConfirmation (:153-170): button(\"Next\", null) confirmFirst isFalse -> isTrue, with .as() text naming AR-SEC001-FM. A strengthening: formless button now classified side-effecting.",
+      "GuidedActionGuardTest.provenNonActivatingTargetsStayEligibleOnClickUnderDeny (:224-244), renamed from nonSubmittingInputsInsideAFormStayEligibleUnderDeny: the seven allow-list targets (input textbox/text, searchbox/search, combobox/email, textbox/password; textarea/textbox/textarea; select/combobox; select/listbox) stay eligible under DENY with formId null and set. Checkbox/radio click cases moved to U3 (now side-effecting).",
+      "GuidedActionGuardTest.submitResetAndButtonInputsInsideAFormAreSideEffectingUnderDenyAndClarifyFirst (:178-192), renamed from submitAndImageInputsInsideAFormAreSideEffectingUnderDenyAndClarifyFirst: image input dropped because image/file inputs are never exported (ruling V7; SEC-002 refuses them as UNGROUNDED_TARGET at :128-132)."
+    ],
+    "testAssessment": "All three changes move assertions toward refusal or keep them; none weakens a refusal. No test was run by @po."
+  },
+
+  "decision1_ac6Reading": {
+    "verdict": "MATCHES INTENT. Recorded as a clarification (OBS-014 AC-6 clarification a-e). No AC wording change.",
+    "reading": "AC-6 'actions the observation marks as form submission / navigation-causing' is enforced fail-closed as 'actions the observation cannot prove non-activating' for both DENY and CLARIFY_FIRST.",
+    "verifiedInCode": "GuidedActionGuard.sideEffecting (:168-176): non click/press kinds -> false; press -> \"Enter\".equals(key) || inForm(node); click -> node == null || !provenNonActivating(node). provenNonActivating (:183-192) is exactly the three triples. Stance branch (:154-164): DENY -> SIDE_EFFECT_DENIED; CLARIFY_FIRST unconfirmed -> confirmFirst; otherwise (ALLOW) Decision(null, sideEffecting, false), so ALLOW never refuses on this axis.",
+    "reasons": [
+      "The AC defines the class by effect (submission, navigation); the observation is the evidence source. The observation cannot mark submission reliably: formId is null for unlabelled forms, withheld forms and form= association (ruling V1-V3), role spoofs pass the old exemption (V8), and label/descendant activation is invisible (I1, inferred by @architect).",
+      "AC-6's own oracle ('fixture login form under DENY => the submit click is refused') failed on the real OBS-007 fixture shape under the literal reading (V4: secret-login/server.ts:12 `<form method=\"post\" action=\"/login\">` is unlabelled). Verified by @po at studio-runner/test/fixtures/secret-login/server.ts:12.",
+      "Story goal ('the first Run can never click, submit … something nobody asked for') and the QA focus area 'fail-closed defaults' (story Self-Healing line) require fail-closed.",
+      "Monotone: every action refused before is still refused; AC-6 nowhere promises that non-marked actions pass under DENY."
+    ],
+    "acWordingChange": "None. Considered: replacing 'actions the observation marks as form submission / navigation-causing' with 'actions the observation cannot prove non-activating'. Rejected because the AC text is an example list ('e.g.') whose intent is unchanged, and the clarification records the exact enforced reading for QA.",
+    "ac4ac5Impact": "None. Guard order unchanged (absent target, destructive verb, grounding, stance); AC-4 grounding and AC-5 vocabulary are evaluated before the stance and are not touched by ruling B. The AC-4 corpus is evaluated under ALLOW; the post-ruling Planning tally shows no unplanted refusal (README verificationAfterRuling: refused SIDE_EFFECT_DENIED 5, all planted DENY tests; confirmFirst 2, both planted CLARIFY_FIRST tests)."
+  },
+
+  "decision2_userVisibleConsequence": {
+    "secretLoginUnderDeny": "The OBS-007 secret-login flow (fill username, fill <secret>, click 'Sign in', click 'Reports'; ReplayIT secretLoginModel obligations :41/:44) cannot run under DENY. Before ruling B it was already refused at the 'Reports' link click (links were always side-effecting); after B it is refused one step earlier at 'Sign in'. This is the behaviour AC-6's DENY oracle specifies, not a need DENY wrongly takes away. Authors need CLARIFY_FIRST (default) or ALLOW to learn a login.",
+    "defaultsConfirmed": {
+      "fixtures": "ALLOW. ObservedPublicationFixture.seedApprovedPolicies -> seedPolicies(jdbc, \"ALLOW\", …) (:676-678, Javadoc 'ALLOW, as the OBS-007 end-to-end regression requires; AR-2 f'); installGovernance seeds ALLOW (:814); GuidedPublicationReplayIT.seedGovernedPolicies ALLOW (:8311-8322, called :8367 and :16519); GuidedPlanningIntegrationTest worker start ALLOW (:3309-3316); GuidedBridgeIntegrationTest:808 ALLOW; GuidedSessionIT:1596 ALLOW; ObservedProfileDriftTest:271 ALLOW.",
+      "ac6JoinedTests": "ALLOW oracle = GuidedPublicationReplayIT OBS-007 end-to-end (ALLOW-seeded). DENY/CLARIFY_FIRST oracles set the stance explicitly via governedStance(...) and reset to ALLOW in finally (GuidedPlanningIntegrationTest:1081/1116, :1156/1201). No fixture or joined test defaults to DENY.",
+      "production": "An omitted stance is materialized as CLARIFY_FIRST (ObservationPolicyDocuments:81-87, DEFAULT_STANCE); the guard's fallback is also CLARIFY_FIRST (GuidedActionGuard:156). Story Decisions-pending default CLARIFY_FIRST is unchanged."
+    },
+    "allowOracleStatus": "OPEN. ALLOW is unaffected by code reading, but the AC-6 ALLOW end-to-end evidence is not green after the ruling: ReplayIT 40 run / 31 failed from the Order 9 secret-login teardown (awaitS2Completion), reproduced with the pre-ruling guard restored, attributed by B14 to B13's TEST-001 ReplayIT patch, routed to root/B13 (qa-fixes/README.json verificationAfterRuling; ledger arSec001Fm.blocker). @po did not run it. @qa verifies the ALLOW oracle on a green ReplayIT run.",
+    "uxImpact": {
+      "found": true,
+      "facts": [
+        "OBS-008 AC-3 has exactly one POLICY_DENIED narrative, the secret-fill copy 'Secrets can only be typed into a password box.' (OBS-008:36).",
+        "frontend/src has 0 hits for POLICY_DENIED (grep, 2026-10-14).",
+        "A reasonless POLICY_DENIED (password-control refusal, GuidedProposalValidator:350-368) ends the session INVALID_CONTRACT; only a governed reason ends it POLICY_DENIED (GuidedTranslationService.stopRejected, comment and code at ~:1333-1345). So a session-level POLICY_DENIED now means a governed refusal.",
+        "The governed reason is never in a public schema (GuidedPolicyReason Javadoc); the session result exposes only errorCode (GuidedSessionService ~:2430-2433).",
+        "SIDE_EFFECT_CONFIRMATION / CONFIRM_ACTION exist in v3 clarification.schema.json (:69, :77) with one AUTHORED choice (Planning I-2 asserts it); OBS-008 has no rendering or copy for it (grep: 0 hits for CONFIRM_ACTION/SIDE_EFFECT_CONFIRMATION in OBS-008 and frontend/src).",
+        "No frontend policy UI exists in this wave (PO ruling 012B: 'OBS-008 has no policy AC/UI'); the owner-facing DENY scope statement is guided-data-flow.md:147, landed by B14 per the ruling's ownerLanes. The guided-policy schema carries no stance prose, so no contract text became inaccurate."
+      ],
+      "placement": "STUDIO-OBS-008 (frontend owner), inherited obligation a-e after the v2-authoring obligation, T2 sub-item, Change Log v0.3.4. Not OBS-009: OBS-009 owns runner/ops/benchmark, not author copy.",
+      "obligationSummary": "(a) governed POLICY_DENIED narrative distinct from the secret copy, naming no specific cause (reason not public), may point to the ruling's two escapes; (b) SIDE_EFFECT_CONFIRMATION/CONFIRM_ACTION rendered as a confirmation, not with the disambiguation copy; (c) copy by @ux-design-expert; (d) AC-9 Vitest+MSW tests; (e) POLICY_NOT_APPROVED not placed here. No API field or contract change.",
+      "notInvented": "Every item traces to ruling B falsePositiveCost (DENY/CLARIFY_FIRST rows), AR-2 a_closedCodes.frontendCoupling ('OBS-008 add narratives … for terminal POLICY_DENIED') and the verified code facts above."
+    }
+  },
+
+  "decision3_versions": {
+    "STUDIO-OBS-014": "0.1.9 -> 0.1.10; AC-6 clarification a-e + Change Log row; Status InProgress unchanged.",
+    "STUDIO-OBS-008": "0.3.3 -> 0.3.4; inherited obligation a-e + T2 sub-item + Change Log row; Status Ready unchanged."
+  },
+
+  "outputsSha256": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md (after edit, v0.1.10)": "00415c68a69018d49b0555391dace73dd5b084f60ffaa5e21d786a4f74c814df",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md (after edit, v0.3.4)": "dcc44e4195ad51a6d77d69ddfebc06182b15f4a50528e4be4874a4bbd5d8343b"
+  },
+
+  "flaggedToLead": [
+    "AR-2 a_closedCodes.frontendCoupling also asks for a POLICY_NOT_APPROVED start-refusal narrative in 012B/OBS-008. @po found no placement in any story or PO record (grep). Not placed here because it is not a consequence of ruling B; needs a separate placement decision.",
+    "OBS-009 AC-7 (D-C benchmark) does not state the side-effect stance the benchmark sessions run under. Under the CLARIFY_FIRST default every session with a button or link click now asks once. Observation only; not placed."
+  ],
+
+  "autoDecisions": [
+    "[AUTO-DECISION] Clarification or AC edit for AC-6? -> Clarification, no wording change (reason: intent and oracle unchanged; text is an 'e.g.' list with no 'only'; the ruling's own auto-decision concurs).",
+    "[AUTO-DECISION] Place the CLARIFY_FIRST confirmation rendering together with the DENY refusal narrative? -> Yes, as item b of the same OBS-008 obligation (reason: ruling B's falsePositiveCost names both; under the production default the confirmation is the most frequent author-visible effect, and OBS-008 has no copy for it).",
+    "[AUTO-DECISION] OBS-008 or OBS-009 for the UX consequence? -> OBS-008 (reason: it owns frontend/src and AC-3 copy; OBS-009 has no author-copy surface)."
+  ],
+
+  "notExecuted": "No Gradle, vitest or browser run. Test counts quoted are B14's (README verificationAfterRuling). The SYNAPSE diagnostics and checklist-runner skill payloads attached to the spawn prompt are outside this mission and were not run."
+}

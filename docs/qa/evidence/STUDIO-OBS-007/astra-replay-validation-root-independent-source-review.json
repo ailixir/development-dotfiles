@@ -1,0 +1,94 @@
+{
+  "verdict": "GO_FROZEN_EXACT_REPLAY_REQUEST_ROOT_EXTENSION_AND_ROOT_COORDINATED_GATES",
+  "scope": "Independent source-semantic review; no execution, performance, C5 acceptance or QA verdict",
+  "candidatePatchSha256": "e71abcbfcb8fb524575fcf2ae5e9f4fc35b82e7d66c0b69d31d38cc62a0b0ded",
+  "candidateReceiptSha256": "a4e7418b1a09bf011282838d8810a1cd0ff45ddcaef1e6cb0311a27c4582f463",
+  "preservation": {
+    "files": [
+      {
+        "source": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+        "baseSha256": "92793bb530ae379e642c20f1898973b426dfcce172f7066372da25c1dd69b13b",
+        "candidateSha256": "45f65cc6978d2085d2d1dd77cbf9b2ceaeb86d69dc563f0f208aef55eac91857",
+        "baseMatches": true,
+        "candidateMatches": true,
+        "forwardExact": true,
+        "inverseExact": true
+      },
+      {
+        "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java",
+        "baseSha256": "f94da685b470e4ca878ba777491e919a471ef147d43f5307723204701490c43c",
+        "candidateSha256": "8c9b927cf8db4458e3dfb60a7320f11bbce2708a2015486625bef2c757533ea1",
+        "baseMatches": true,
+        "candidateMatches": true,
+        "forwardExact": true,
+        "inverseExact": true
+      }
+    ],
+    "candidatePatchSha256": "e71abcbfcb8fb524575fcf2ae5e9f4fc35b82e7d66c0b69d31d38cc62a0b0ded",
+    "patchMatches": true,
+    "candidateReceiptSha256": "a4e7418b1a09bf011282838d8810a1cd0ff45ddcaef1e6cb0311a27c4582f463",
+    "childRecordByteIdentical": true,
+    "nativeExpansionCanonicalHashSuffixByteIdentical": true,
+    "configAndShellCodeIdentical": true,
+    "caseCountBefore": 7,
+    "caseCountAfter": 7
+  },
+  "independentSchemaAudit": {
+    "actualName": "v3/replay-validation",
+    "rootKeys": [
+      "$schema",
+      "title",
+      "type",
+      "additionalProperties",
+      "properties",
+      "required"
+    ],
+    "properties": 9,
+    "required": 9,
+    "rootClosedObject": true,
+    "declaredEpochMatchesIndependentResourceExpansionHash": true,
+    "defaults": 0,
+    "remainingReferencesOrDataReferences": 0,
+    "dependenciesOrUnevaluatedKeywords": 0,
+    "nestedNativeKeywords": {
+      "allOf": 13,
+      "oneOf": 71,
+      "if": 17,
+      "then": 17,
+      "else": 7,
+      "not": 5,
+      "contains": 1,
+      "uniqueItems": 9
+    }
+  },
+  "sourceReview": [
+    "Only an exact additional root name and its exact expanded-schema epoch select the already reviewed compiled strategy. The existing session epoch is unchanged and all other names, including definition fragments, retain original native root validation.",
+    "The complete canonical pass still precedes schema evaluation and the same fixed INVALID_CONTRACT 422 refusal remains. The implementation does not alter request bytes, size bounds, credential lookup, immutable budget checks or HTTP behavior.",
+    "The root shell retains all original root constraints and property names. Every present property, including explicit null, runs its original compiled native child schema without short circuit.",
+    "All nested conditional, composition, array and uniqueness assertions remain inside unchanged native child subtrees. The strategy does not split them recursively or reinterpret them.",
+    "Independent expansion confirms no remaining references, dynamic data pointers, dependency or unevaluated-property semantics that would require another top-level field as an instance root. Existing disabled defaults/listeners/customizer/discriminator guards remain unchanged.",
+    "The existing schema cache holds only compiled schema metadata. No runtime data, grant, authority proof or successful-validation result is cached.",
+    "Client, budget, publisher, the prior capture fix and original Lowerer request-byte and refusal-order checks are outside the two-file patch."
+  ],
+  "testReview": [
+    "The existing Wire class remains seven test cases; two existing cases now cover both exact root contracts. The original recursive session corpus remains selected in full.",
+    "The replay corpus is bounded to twenty-seven root-field missing/null/array mutations, root shape and unknown-field cases, canonical refusals and five focused nested cases.",
+    "The original private schema(name) method compiles a fresh native oracle directly from actual resources; it never invokes the optimized strategy. Positive fixture acceptance and specialized property counts fourteen and nine prevent silent fallback or invalid-fixture vacuity.",
+    "Focused nested cases explicitly require native rejection for invalid secret-reference slot, unknown oneOf operation, duplicate unique source step and nested extra property, with native acceptance for the allowed secret-reference slot. Static schema audit independently confirms the secretRef-to-fill.value conditional and unique source-step constraint.",
+    "Unknown changed epochs require native baseline metadata and both accepted and rejected cross-property controls. The ValidationBasis fragment explicitly requires baseline metadata and valid/extra-field refusal controls.",
+    "All successful candidate representations are checked against the original canonical form; fixed refusal message/status and unchanged input representation are asserted."
+  ],
+  "minimumVerification": [
+    "Root integrates only the two frozen files after base-hash confirmation and runs strict checks.",
+    "Root runs the affected Wire7, Lowerer36, Session43 and Ledger16 scope. Any Bridge37 reuse must retain the explicit disjoint-name/unchanged-strategy impact justification rather than claiming an unchanged whole GuidedContracts class hash.",
+    "After green defining checks, root runs one original unprofiled C5 with original deadlines, full ROOT plus APP TRACE and all thirty canary variants."
+  ],
+  "limits": [
+    "The latest EXPIRED boundary proves that the first pre-send budget check failed after request validation, encoding, size and credential checks. It does not by itself allocate elapsed time exclusively to schema validation.",
+    "The source proves original whole-request diagnostic-root amplification. The extension reduces diagnostic roots while retaining all validation; achieved elapsed-time improvement remains unproved.",
+    "Artifact and validationBasis remain potentially large child roots. No further schema generalization or recursive split is authorized by this review.",
+    "No SDK acknowledgement, deadline success, publication plus two replay success, QA approval or lifecycle advancement is inferred."
+  ],
+  "reviewerChangedSharedSource": false,
+  "reviewerRanBuildsOrRuntime": false
+}

@@ -1,0 +1,53 @@
+[ {
+  "admission" : "ADMISSION_LEDGER_ABSENT",
+  "availability" : "UNAVAILABLE_NOT_RUN",
+  "ed01Gateway" : "ABSENT (owner TBD, GA plan D-3)",
+  "realProviderRequestsBeforeGate" : "0"
+}, {
+  "claim" : "a rejection is a named blocker, not a fallback",
+  "sends" : "3",
+  "statuses" : "BLOCKED_TRANSPORT,BLOCKED_TRANSPORT,BLOCKED_TRANSPORT",
+  "target" : "STUB_GATEWAY_REJECTING"
+}, {
+  "claim" : "stub round trip of the probe code path; not provider acceptance",
+  "kind" : "SOURCE_PLAN",
+  "schemaSha256" : "4c45f285974114c7ab8fb6ddcbcd8bf3f0bd8f859f11e1bff4f3e2bebb05aa06",
+  "status" : "ACCEPTED",
+  "target" : "STUB_GATEWAY"
+}, {
+  "claim" : "stub round trip of the probe code path; not provider acceptance",
+  "kind" : "NEXT_ACTION",
+  "schemaSha256" : "af3f16050c7c1b21a2d87d32807dfb35b8a237e9cc4a34b7db5ba2861e597e4f",
+  "status" : "ACCEPTED",
+  "target" : "STUB_GATEWAY"
+}, {
+  "claim" : "stub round trip of the probe code path; not provider acceptance",
+  "kind" : "VERIFY_STEP",
+  "schemaSha256" : "bf583f16865d6cebcb8c358d966ff4ef37167b14273fcda636df46442f32661b",
+  "status" : "ACCEPTED",
+  "target" : "STUB_GATEWAY"
+}, {
+  "claim" : "offline structure only; whether the configured provider accepts it is the external half (ED-01)",
+  "keywordCensus" : "$defs,$ref,additionalProperties,anyOf,enum,items,maxItems,maximum,minItems,minimum,properties,required,type",
+  "kind" : "SOURCE_PLAN",
+  "maxDepth" : "10",
+  "rootForm" : "anyOf(3)",
+  "schemaBytes" : "4910",
+  "schemaSha256" : "4c45f285974114c7ab8fb6ddcbcd8bf3f0bd8f859f11e1bff4f3e2bebb05aa06"
+}, {
+  "claim" : "offline structure only; whether the configured provider accepts it is the external half (ED-01)",
+  "keywordCensus" : "$defs,$ref,additionalProperties,anyOf,enum,items,maxItems,maximum,minItems,minimum,properties,required,type",
+  "kind" : "NEXT_ACTION",
+  "maxDepth" : "14",
+  "rootForm" : "anyOf(2)",
+  "schemaBytes" : "5298",
+  "schemaSha256" : "af3f16050c7c1b21a2d87d32807dfb35b8a237e9cc4a34b7db5ba2861e597e4f"
+}, {
+  "claim" : "offline structure only; whether the configured provider accepts it is the external half (ED-01)",
+  "keywordCensus" : "additionalProperties,anyOf,enum,maximum,minimum,properties,required,type",
+  "kind" : "VERIFY_STEP",
+  "maxDepth" : "5",
+  "rootForm" : "anyOf(2)",
+  "schemaBytes" : "756",
+  "schemaSha256" : "bf583f16865d6cebcb8c358d966ff4ef37167b14273fcda636df46442f32661b"
+} ]

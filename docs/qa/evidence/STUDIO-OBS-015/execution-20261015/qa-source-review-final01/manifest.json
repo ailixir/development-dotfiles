@@ -1,0 +1,109 @@
+{
+  "artifact": "STUDIO-OBS-015 qa-source-review-final01: independent source review of CB-6 production changes",
+  "reviewer": "Quinn (@qa)",
+  "date": "2026-10-16",
+  "readOnly": true,
+  "testsOrBuildsRunByQa": "none (no Gradle/JUnit/vitest/Chromium); read-only checks only: sha256, reverse-apply on scratch copies, generator --check, runner tsc --noEmit, gjf 1.22.0 to scratch",
+  "formalVerdict": "NEEDS_WORK (no FAIL; required changes are format, one architect ack, re-runs, one PO KL disposition)",
+  "lifecycleChange": "none",
+  "review": "review.md",
+  "liveTreeBinding": {
+    "equalsCapture": "execution/w5-w01-full-incr01-before.json (1644 files, 0 differences)",
+    "hashChainsVerifiedByReverseApply": {
+      "GuidedTranslationService": "78b2fcd5 -W3-> d8c494b2",
+      "GuidedRunnerClient": "99d4f288 -W3-> e4c48761",
+      "GuidedDispatchService": "cb6f3703 -W3-> 89b6301a -h8-> 174d99ac",
+      "GuidedSessionService": "bda27005 -L1-> d10ec5cb -W3-> 8d67a251 -warnOnce-> 351e393d -h8-> 055081ff",
+      "GuidedSessionRepository": "7fd81750 -warnOnce-> 043250e0 -h8-> a7eccb02",
+      "GuidedSessionReaper": "3cbae036 -h8-> 67c62def",
+      "GuidedMaterializationService": "0247251e -L1-> ad8742a8 (L1 ACKed in w4-qa-ack03)",
+      "GuidedPublicationEvidenceRepository": "8f5c0e0c (= merge-new22-01 final)",
+      "GuidedPublicationEvidenceTest": "647c6556 (= merge-new22-01 final)",
+      "runnerG": "config.ts 613f9bc2, values.yaml 03d34de9, dist/server/config.js 394e0f8c (= sha256-after.txt)",
+      "runnerH6": "observationCollector.ts e073909b (= h8h6 final)",
+      "generator": "tools/build-studio-observed-schemas.cjs 6557931c; observedOperations.ts f4314697; guided/types.ts 36bf59b7; schemas.json 8d21a515 and observedSchemas.json 357f6c42 unchanged",
+      "generatorPreImageReconstruction": "removing the property-less branch and restoring the !patternProperties interface condition reproduces f7213950/f0e06949 exactly"
+    }
+  },
+  "verdicts": [
+    {"id": "P1", "change": "sync head before append (GuidedTranslationService)", "verdict": "PASS_WITH_REQUIRED_CHANGES", "required": ["R1"]},
+    {"id": "P2", "change": "keyed append retry bound / closed refusal terminal / frozen-lease deadline (GuidedRunnerClient, GuidedDispatchService, pushMaterializedContext)", "verdict": "PASS_WITH_REQUIRED_CHANGES", "required": ["R1"]},
+    {"id": "P3", "change": "append teardown target = assignment (GuidedSessionService.stop)", "verdict": "PASS", "required": []},
+    {"id": "H8", "change": "durable teardown redrive, bounded executor, deterministic stop key", "verdict": "PASS", "required": []},
+    {"id": "H8-WARN-once", "change": "warn once per abandoned row per process", "verdict": "PASS_WITH_REQUIRED_CHANGES", "required": ["R1", "R2"]},
+    {"id": "H3-followup", "change": "prefixRequestObservations extract + negative regression", "verdict": "PASS_WITH_REQUIRED_CHANGES", "required": ["R1", "R3"]},
+    {"id": "G-ceiling", "change": "MAX_STEP_TIMEOUT_MS 120000 floor + helm value", "verdict": "PASS", "required": [], "gateCondition": "GB-3 (image pins, deployment tier) unchanged"},
+    {"id": "H6", "change": "containsText whitespace normalization", "verdict": "PASS", "required": ["R4"]},
+    {"id": "lint-cleanup+generator", "change": "test typed views, await; property-less objects -> Readonly<Record<...>>", "verdict": "PASS", "required": [], "backendImpact": "none (JSON outputs byte-identical; backend reads source schemas and the unchanged JSON bundles)"}
+  ],
+  "requiredChanges": {
+    "R1": {
+      "owner": "Dex-W5 (Gradle owner)",
+      "what": "google-java-format 1.22.0 on the deviating reviewed hunks, then spotlessCheck/checkstyle/spotbugs green at the final digest; re-run the final set on the reformatted digest",
+      "deviatingHunks": {
+        "GuidedTranslationService.java": "1026, 1045-1059, 1067-1075, 1084-1085",
+        "GuidedRunnerClient.java": "333",
+        "GuidedDispatchService.java": "100-102",
+        "GuidedSuffixMaterializationTest.java": "38-40, 64, 98",
+        "GuidedDispatchContextDeadlineTest.java": "64",
+        "GuidedSessionRepository.java": "227-228",
+        "GuidedPublicationEvidenceRepository.java": "466-469",
+        "GuidedPublicationEvidenceTest.java": "449, 452, 468-469, 482-492"
+      },
+      "note": "W3 review section 5 understated the gjf deviations. All of these files are already non-gjf elsewhere (CB-5). GuidedTranslationService:1012 (127 columns, over checkstyle 120) is pre-existing context, not a W3 line."
+    },
+    "R2": {
+      "owner": "@architect Aria",
+      "what": "Ack or rule that WARN-once-per-row-per-process supersedes H8.4(5)/H8.5 'one WARN per sweep' (a coordinator decision, never ruled), and decide whether the unbounded abandonedTeardowns id list (every 10 s, up to 30-day retention) is acceptable or needs a cap"
+    },
+    "R3": {
+      "owner": "final run set",
+      "what": "Execute GuidedPublicationEvidenceTest at the final digest (last run at as-run 5d3cdcde, not at final 8f5c0e0c); after R1, re-run GuidedSuffixMaterializationTest, GuidedDispatchContextDeadlineTest, GuidedRunnerContextRefusalTest, GuidedDispatchStopKeyTest, GuidedServiceTransportFaultIT and GuidedBridgeIntegrationTest"
+    },
+    "R4": {
+      "owner": "@po Pax",
+      "what": "Disposition of a whitespace-only assert.expected under H6 (always passes, by ruled Playwright parity): refuse at planning, or record as a known limitation"
+    }
+  },
+  "advisories": [
+    "P1: a non-definite failure of the unkeyed syncContext is retried on every continuation poll, bounded only by session/lease expiry (same as advancePrefix)",
+    "P2: no test for 'runner ACKed but acknowledgeContext failed' leading to a counted resend",
+    "H8: pendingTeardowns ORDER BY expires_at LIMIT 32 can starve newer rows while 32 or more older rows fail persistently (runner lost); the outcome stays truthful (PENDING)",
+    "H8: if expire() throws, that tick's redrive is skipped",
+    "H8: the H8.5 runner ownership.test.ts pins were not added (disclosed)",
+    "H8-WARN-once: no persistent signal after the first WARN for a row; consider a gauge metric",
+    "lint-cleanup: the root cause is the uncommitted 22.7 MB publication-fixtures.json (tsserver 4 MiB limit); repo hygiene for @architect/@po"
+  ],
+  "resultsRelied": {
+    "w3-w01-unit01-results.json": "17/17 (P2 unit, deadline, refusal)",
+    "w5-w01-tfit-bridge01-results.json": "60/60 at the live tree (H8 TransportFaultIT cases, P3 cases, StopKey, bridge stopRetryAfterClose, L1)",
+    "w5-w01-full-test01-results.json": "73/73 (ReplayIT + AuthorityIT), completed after the pregate capture",
+    "w4-full-incr02-results.json": "incremental joined config / assert-fail / append-input PASS",
+    "backend-merge-h7h3-attempt01-results.json": "H3 regression PASS at as-run 5d3cdcde"
+  },
+  "notRun": [
+    "Gradle, JUnit, vitest tiers, Chromium",
+    "CodeRabbit (WSL-only; host is darwin)",
+    "SYNAPSE diagnostics (outside this review mission)",
+    "gjf over GuidedServiceTransportFaultIT hunks (large file, already non-gjf)"
+  ],
+  "inputs": {
+    "pregate": "qa-pregate01/map.json (CB-6)",
+    "rulings": [
+      "backend/b2-d3-diagnosis01/aria-append-ruling01/ruling.md",
+      "backend/r2-diagnosis01/aria-h8-h6-ruling01/ruling.md",
+      "backend/r1-diagnosis01/aria-g-ruling01/ruling.md (sha256 532b21eb)"
+    ],
+    "diffs": [
+      "backend/w3-window01/w3.diff",
+      "backend/h8-source01/h8.patch",
+      "backend/h8h6-window01/h8-warn-once-adjustment.diff",
+      "backend/w4-bridge01/l1/l1.diff",
+      "backend/merge-new22-01/evidence-repository-h3-followup.diff",
+      "backend/merge-new22-01/evidence-test-h3-regression.diff",
+      "runner/h6-source01/h6.patch",
+      "runner/g-ceiling-source01/{sha256-before,sha256-after}.txt",
+      "runner/lint-cleanup01/manifest.json (round2)"
+    ]
+  }
+}

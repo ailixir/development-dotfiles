@@ -1,0 +1,794 @@
+{
+  "artifact": "Independent migration55 actual assertion/requirement observations",
+  "at": "2026-10-15T05:53:06.049208+00:00",
+  "scope": "SQL/Flyway55 only, no story or C-int final gate",
+  "testSource": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+  "sourceSha256": "f927ee53627d1656c4e388029d055589e372f338731b65362e9f9f08bec1e6e1",
+  "amendedV21Sha256": "b012ddddb44b599c4f8699be39281dd6f407b2cb93b41386a79eb22c06c4d179",
+  "canonicalObservedBundleSha256": "ce58d620c27bb84f4233151275373aba24467f748c7152a12f1ef3d2d85381aa",
+  "counts": {
+    "total": 55,
+    "passed": 54,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0
+  },
+  "all55ActualCases": [
+    {
+      "method": "pendingDeliveryFencesActionsModelReservationsAndMetadataBumps",
+      "sourceLine": 527,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.187",
+      "newArch03Case": false
+    },
+    {
+      "method": "preAdmissionReceiptRequiresIssuedExactRequestAndNoActionAtCoordinate",
+      "sourceLine": 630,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.125",
+      "newArch03Case": false
+    },
+    {
+      "method": "prefixConfirmationAmendmentPreservesPopulatedV20AndAllExistingGuards",
+      "sourceLine": 968,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.133",
+      "newArch03Case": true
+    },
+    {
+      "method": "prefixFailureBeforeSwitchReportsNoRelearnedFrom",
+      "sourceLine": 798,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.04",
+      "newArch03Case": false
+    },
+    {
+      "method": "pendingPrefixWaitCannotAdmitConsumeOrSwitch",
+      "sourceLine": 923,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.078",
+      "newArch03Case": true
+    },
+    {
+      "method": "unknownStateAndUnknownContinuationAreRefused",
+      "sourceLine": 355,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.034",
+      "newArch03Case": false
+    },
+    {
+      "method": "completeMetadataRequiredForNewRevisionWithoutHistoricalBackfill",
+      "sourceLine": 741,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.074",
+      "newArch03Case": false
+    },
+    {
+      "method": "spentAndReplacementAttemptsBothConsumeActionBudget",
+      "sourceLine": 652,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.056",
+      "newArch03Case": false
+    },
+    {
+      "method": "prefixWaitCancellationExpiryAndOwnerLossNeverResurrect",
+      "sourceLine": 949,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "2.412",
+      "newArch03Case": true
+    },
+    {
+      "method": "wrongOwnerScopeSourceVersionHashProgramOperationOrEvidenceReceiptIsRefused",
+      "sourceLine": 641,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.457",
+      "newArch03Case": false
+    },
+    {
+      "method": "oldSecretReleaseAndUseJoinTheirHistoricalVersion",
+      "sourceLine": 574,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.059",
+      "newArch03Case": false
+    },
+    {
+      "method": "appendCommitCreatesPendingDeliveryAtomically",
+      "sourceLine": 524,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.033",
+      "newArch03Case": false
+    },
+    {
+      "method": "oldCompletedPreparationJoinsItsVersionAfterHeadAdvances",
+      "sourceLine": 571,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.037",
+      "newArch03Case": false
+    },
+    {
+      "method": "issuedContextRequiresExactImmutableProgramPairForEveryPinnedBaseSession",
+      "sourceLine": 533,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.046",
+      "newArch03Case": false
+    },
+    {
+      "method": "appendRefusesAdmittedDispatchingUnknownAndUnexpiredUnconsumedPreparation",
+      "sourceLine": 514,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.138",
+      "newArch03Case": false
+    },
+    {
+      "method": "livePrefixCannotPruneAndExpiredPrefixFirstBecomesTerminal",
+      "sourceLine": 815,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.036",
+      "newArch03Case": false
+    },
+    {
+      "method": "pendingPrefixWaitFencesBothGatewaysAttemptInsertAndModelCounters",
+      "sourceLine": 912,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.053",
+      "newArch03Case": true
+    },
+    {
+      "method": "recordingFactAndGovernedPolicyRemainUnchangedAcrossPrefixSuffix",
+      "sourceLine": 826,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.045",
+      "newArch03Case": false
+    },
+    {
+      "method": "reuseMustNameImmediatePinnedBaseAndExactContiguousPrefix",
+      "sourceLine": 752,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.064",
+      "newArch03Case": false
+    },
+    {
+      "method": "failedPlanningAfterCommittedSwitchRetainsEnteredBoundaryWithoutSuccessClaim",
+      "sourceLine": 801,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.039",
+      "newArch03Case": false
+    },
+    {
+      "method": "concurrentPrefixEntryAndModelReservationSerializeBothOrders",
+      "sourceLine": 381,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.567",
+      "newArch03Case": false
+    },
+    {
+      "method": "ackRequiresExactVersionHashContextHashBirthMetadataOwnerAndLiveOriginalLease",
+      "sourceLine": 544,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.136",
+      "newArch03Case": false
+    },
+    {
+      "method": "concurrentAppendRetriesProduceOneVersionAndOneDeliveryIdentity",
+      "sourceLine": 566,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.288",
+      "newArch03Case": false
+    },
+    {
+      "method": "appendNoopReturnsExistingVersionWithoutWrite",
+      "sourceLine": 447,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.071",
+      "newArch03Case": false
+    },
+    {
+      "method": "currentAnswerResumesOnlySamePrefixIdentity",
+      "sourceLine": 935,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.129",
+      "newArch03Case": true
+    },
+    {
+      "method": "effectiveActionsAreUniqueCompleteSuccessfulAndMatchLedger",
+      "sourceLine": 773,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.078",
+      "newArch03Case": false
+    },
+    {
+      "method": "freshV1ToV21HasExpectedHeadDescriptionAndNoPendingMigrations",
+      "sourceLine": 264,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.041",
+      "newArch03Case": false
+    },
+    {
+      "method": "frozenV1ToV20ResourceChecksumsRemainUnchanged",
+      "sourceLine": 339,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.031",
+      "newArch03Case": false
+    },
+    {
+      "method": "canonicalByteBoundsAcceptSupportedUnicodeAndControlEscapes",
+      "sourceLine": 466,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.434",
+      "newArch03Case": false
+    },
+    {
+      "method": "explicitPrefixStateWithoutProgramCannotInsertModelAttempt",
+      "sourceLine": 375,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.032",
+      "newArch03Case": false
+    },
+    {
+      "method": "publicationReceiptRejectsWrongRelearnedBoundaryOrExtraKeys",
+      "sourceLine": 787,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.066",
+      "newArch03Case": false
+    },
+    {
+      "method": "publicationReceiptRequiresExplicitNullBeforeAnyCommittedSwitch",
+      "sourceLine": 795,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.05",
+      "newArch03Case": false
+    },
+    {
+      "method": "onlyProvenNoInvocationAllowsAttemptOneAtSameSemanticCoordinate",
+      "sourceLine": 648,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.075",
+      "newArch03Case": false
+    },
+    {
+      "method": "postDriftSuffixAndWrongSameTestBaseCannotBeMarkedReused",
+      "sourceLine": 760,
+      "actualStatus": "FAIL",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.114",
+      "newArch03Case": false
+    },
+    {
+      "method": "prefixCallbacksCannotChangeToGenericActingObservingOrProposing",
+      "sourceLine": 364,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.067",
+      "newArch03Case": false
+    },
+    {
+      "method": "populatedV20UpgradePreservesExistingDocumentBytesAndAddsExactHistory",
+      "sourceLine": 273,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.875",
+      "newArch03Case": false
+    },
+    {
+      "method": "excludedFailureRequiresExactImmutableNoInvocationReceipt",
+      "sourceLine": 783,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.203",
+      "newArch03Case": false
+    },
+    {
+      "method": "admittedReceiptRequiresExactConsumedAttemptZeroAndPreparation",
+      "sourceLine": 634,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.076",
+      "newArch03Case": false
+    },
+    {
+      "method": "pendingPrefixAllowsOnlyExactServerSideEffectQuestion",
+      "sourceLine": 867,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.054",
+      "newArch03Case": true
+    },
+    {
+      "method": "preparingWithPendingPrefixCannotReserveModelOrIncrementCounters",
+      "sourceLine": 367,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.034",
+      "newArch03Case": false
+    },
+    {
+      "method": "initialMaterializationCreatesOneHeaderAndNormalizedInputEntries",
+      "sourceLine": 441,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.026",
+      "newArch03Case": false
+    },
+    {
+      "method": "appendRefusesMutationDeletionCollisionGapOrOverflow",
+      "sourceLine": 450,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.082",
+      "newArch03Case": false
+    },
+    {
+      "method": "boundariesIncludeEmptyPrefixAtK1ButNeverEmptySuffix",
+      "sourceLine": 731,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.053",
+      "newArch03Case": false
+    },
+    {
+      "method": "issuedContextMetadataAndHashAreWriteOnceAcrossRetryAndLeaseRenewal",
+      "sourceLine": 530,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.035",
+      "newArch03Case": false
+    },
+    {
+      "method": "driftReceiptAndSwitchCommitAtomicallyOrNotAtAll",
+      "sourceLine": 638,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.039",
+      "newArch03Case": false
+    },
+    {
+      "method": "replayingPrefixInsertRequiresRealProgramAndContinuation",
+      "sourceLine": 345,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.033",
+      "newArch03Case": false
+    },
+    {
+      "method": "ordinaryContextRejectsHalfOrForgedProgramPair",
+      "sourceLine": 541,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.038",
+      "newArch03Case": false
+    },
+    {
+      "method": "pendingPrefixRejectsGenericStaleOrForgedWaitProof",
+      "sourceLine": 881,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.193",
+      "newArch03Case": true
+    },
+    {
+      "method": "oldTerminalCannotReopenPrefix",
+      "sourceLine": 361,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.03",
+      "newArch03Case": false
+    },
+    {
+      "method": "contextHeaderBirthMetadataDoesNotRejectLaterGraphMetadataRevision",
+      "sourceLine": 597,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.041",
+      "newArch03Case": false
+    },
+    {
+      "method": "prunePreservesSafeSwitchReceiptHistoryAndExistingF01Residual",
+      "sourceLine": 805,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.041",
+      "newArch03Case": false
+    },
+    {
+      "method": "suffixAcceptancePreservesEverySuccessfulPriorMeaning",
+      "sourceLine": 716,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.044",
+      "newArch03Case": false
+    },
+    {
+      "method": "appendPreservesEveryPriorEntryAndBindsPreviousHash",
+      "sourceLine": 444,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.03",
+      "newArch03Case": false
+    },
+    {
+      "method": "oneDriftReceiptAndOneSwitchPerSessionCannotBeRewritten",
+      "sourceLine": 645,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.039",
+      "newArch03Case": false
+    },
+    {
+      "method": "appendVersusPrepareAdmitConsumeSerializesWithoutStaleExecution",
+      "sourceLine": 518,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.253",
+      "newArch03Case": false
+    }
+  ],
+  "passEvidence": "Actual statuses are from fresh XML, reconciled to55 source methods; source names alone are never pass evidence. Assertion boundaries are based on inspected code and actual failure frames.",
+  "old7FixtureRepairCases": [
+    {
+      "method": "completeMetadataRequiredForNewRevisionWithoutHistoricalBackfill",
+      "sourceLine": 741,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.074",
+      "newArch03Case": false
+    },
+    {
+      "method": "reuseMustNameImmediatePinnedBaseAndExactContiguousPrefix",
+      "sourceLine": 752,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.064",
+      "newArch03Case": false
+    },
+    {
+      "method": "postDriftSuffixAndWrongSameTestBaseCannotBeMarkedReused",
+      "sourceLine": 760,
+      "actualStatus": "FAIL",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.114",
+      "newArch03Case": false
+    },
+    {
+      "method": "effectiveActionsAreUniqueCompleteSuccessfulAndMatchLedger",
+      "sourceLine": 773,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.078",
+      "newArch03Case": false
+    },
+    {
+      "method": "excludedFailureRequiresExactImmutableNoInvocationReceipt",
+      "sourceLine": 783,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.203",
+      "newArch03Case": false
+    },
+    {
+      "method": "publicationReceiptRejectsWrongRelearnedBoundaryOrExtraKeys",
+      "sourceLine": 787,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.066",
+      "newArch03Case": false
+    },
+    {
+      "method": "publicationReceiptRequiresExplicitNullBeforeAnyCommittedSwitch",
+      "sourceLine": 795,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.05",
+      "newArch03Case": false
+    }
+  ],
+  "new7Arch03Cases": [
+    {
+      "method": "currentAnswerResumesOnlySamePrefixIdentity",
+      "sourceLine": 935,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.129",
+      "newArch03Case": true
+    },
+    {
+      "method": "pendingPrefixAllowsOnlyExactServerSideEffectQuestion",
+      "sourceLine": 867,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.054",
+      "newArch03Case": true
+    },
+    {
+      "method": "pendingPrefixRejectsGenericStaleOrForgedWaitProof",
+      "sourceLine": 881,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.193",
+      "newArch03Case": true
+    },
+    {
+      "method": "pendingPrefixWaitCannotAdmitConsumeOrSwitch",
+      "sourceLine": 923,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.078",
+      "newArch03Case": true
+    },
+    {
+      "method": "pendingPrefixWaitFencesBothGatewaysAttemptInsertAndModelCounters",
+      "sourceLine": 912,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.053",
+      "newArch03Case": true
+    },
+    {
+      "method": "prefixConfirmationAmendmentPreservesPopulatedV20AndAllExistingGuards",
+      "sourceLine": 968,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "0.133",
+      "newArch03Case": true
+    },
+    {
+      "method": "prefixWaitCancellationExpiryAndOwnerLossNeverResurrect",
+      "sourceLine": 949,
+      "actualStatus": "PASS",
+      "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "timeSeconds": "2.412",
+      "newArch03Case": true
+    }
+  ],
+  "observations": [
+    {
+      "requirement": "Original publication/revision FK fixture repairs",
+      "cases": [
+        {
+          "method": "completeMetadataRequiredForNewRevisionWithoutHistoricalBackfill",
+          "sourceLine": 741,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.074",
+          "newArch03Case": false
+        },
+        {
+          "method": "reuseMustNameImmediatePinnedBaseAndExactContiguousPrefix",
+          "sourceLine": 752,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.064",
+          "newArch03Case": false
+        },
+        {
+          "method": "postDriftSuffixAndWrongSameTestBaseCannotBeMarkedReused",
+          "sourceLine": 760,
+          "actualStatus": "FAIL",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.114",
+          "newArch03Case": false
+        },
+        {
+          "method": "effectiveActionsAreUniqueCompleteSuccessfulAndMatchLedger",
+          "sourceLine": 773,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.078",
+          "newArch03Case": false
+        },
+        {
+          "method": "excludedFailureRequiresExactImmutableNoInvocationReceipt",
+          "sourceLine": 783,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.203",
+          "newArch03Case": false
+        },
+        {
+          "method": "publicationReceiptRejectsWrongRelearnedBoundaryOrExtraKeys",
+          "sourceLine": 787,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.066",
+          "newArch03Case": false
+        },
+        {
+          "method": "publicationReceiptRequiresExplicitNullBeforeAnyCommittedSwitch",
+          "sourceLine": 795,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.05",
+          "newArch03Case": false
+        }
+      ],
+      "inspectedAssertions": "Six methods now complete their intended negative diagnostics and positive paired revision/publication assertions. postDriftSuffixAndWrongSameTestBaseCannotBeMarkedReused completes its first post-drift branch but fails in second-branch historical source setup.",
+      "boundary": "6 of 7 old failures nowPASS; wrong same-test non-immediate-base rejection and hash-equality assertion remain unverified. V15 FK/guards were not relaxed."
+    },
+    {
+      "requirement": "Populated V20->amendedV21 preservation",
+      "cases": [
+        {
+          "method": "populatedV20UpgradePreservesExistingDocumentBytesAndAddsExactHistory",
+          "sourceLine": 273,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.875",
+          "newArch03Case": false
+        }
+      ],
+      "inspectedAssertions": "Origin-only V20 Fixture(...historicalBase=false), two real successful actions, complete revision/publication validated-claim transaction, confirmed pointer and policy/approval/recording. Snapshots and compares to_jsonb(row)::text for all11 existing families; preserves all original action columns via to_jsonb(action)-attempt_ordinal; checks two attemptOrdinal0 defaults, input/version1:7, snapshot hash, zero deliveries, publication join, legacy missing authoringIdentityVersion/null snapshot/reuse maps, and rejects implicit incremental reuse of insufficient legacy metadata.",
+      "boundary": "This previously missing upgrade-preservation obligation now has passing SQL evidence for these11 families and all original action columns. It proves deterministic JSON serialization equality for all existing columns; no Java gateway/native/browser/video or production deployment proof."
+    },
+    {
+      "requirement": "Fresh migration/head and frozen V1-V20",
+      "cases": [
+        {
+          "method": "freshV1ToV21HasExpectedHeadDescriptionAndNoPendingMigrations",
+          "sourceLine": 264,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.041",
+          "newArch03Case": false
+        },
+        {
+          "method": "frozenV1ToV20ResourceChecksumsRemainUnchanged",
+          "sourceLine": 339,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.031",
+          "newArch03Case": false
+        }
+      ],
+      "inspectedAssertions": "Pending migrations empty; history head21 expected description/21successes; SHA256 matches20 frozen resource hashes and Flyway validates.",
+      "boundary": "Only this focused migration class executed; separate six head regressions and publication/secret suites remain open."
+    },
+    {
+      "requirement": "Exact CLARIFY_FIRST pending-prefix wait",
+      "cases": [
+        {
+          "method": "pendingPrefixAllowsOnlyExactServerSideEffectQuestion",
+          "sourceLine": 867,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.054",
+          "newArch03Case": true
+        },
+        {
+          "method": "pendingPrefixRejectsGenericStaleOrForgedWaitProof",
+          "sourceLine": 881,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.193",
+          "newArch03Case": true
+        }
+      ],
+      "inspectedAssertions": "Admits exact stored server side-effect proof under frozenCLARIFY_FIRST; preserves REPLAYING_PREFIX continuation through lease renewal, permits expired unused preparation and keeps0actions/model rows. Refuses marker extras/forged status/digest, generic/stale/wrong prompt/scope/document/phase/coordinate/generation/expiry/choice/binding/evidence/owner/fence/source/config proof, pending refresh, ALLOW/DENY stance and unprepared request.",
+      "boundary": "Passing SQL stored-authority/state checks; no authenticated application answer, native dispatch or live gateway behavior verified."
+    },
+    {
+      "requirement": "Model and action fences during wait",
+      "cases": [
+        {
+          "method": "pendingPrefixWaitFencesBothGatewaysAttemptInsertAndModelCounters",
+          "sourceLine": 912,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.053",
+          "newArch03Case": true
+        },
+        {
+          "method": "pendingPrefixWaitCannotAdmitConsumeOrSwitch",
+          "sourceLine": 923,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.078",
+          "newArch03Case": true
+        }
+      ],
+      "inspectedAssertions": "Rejects model-attempt row and all3counter changes; asserts0model rows and unchanged counter JSON. Rejects ADMITTED/DISPATCHING action inserts, PROPOSING/OBSERVING/ACTING/FINALIZING escape, generic continuation, premature boundary and no-invocation receipt; asserts0actions/switches.",
+      "boundary": "The method name mentioning both gateways is not runtime gateway evidence. Only direct relational fences/counters are exercised."
+    },
+    {
+      "requirement": "Current answer and terminal wait transitions",
+      "cases": [
+        {
+          "method": "currentAnswerResumesOnlySamePrefixIdentity",
+          "sourceLine": 935,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.129",
+          "newArch03Case": true
+        },
+        {
+          "method": "prefixWaitCancellationExpiryAndOwnerLossNeverResurrect",
+          "sourceLine": 949,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "2.412",
+          "newArch03Case": true
+        }
+      ],
+      "inspectedAssertions": "Rejects forged question/digest/fence/generation and direct fabricated CONFIRMED transition; valid answer resumes same REPLAYING_PREFIX:CONFIRMED with prefix continuation and0actions. CANCELLED/EXPIRED/UNKNOWN_OUTCOME cannot reopen; owner/context changes refused; actual2100ms expiry invalidates answer.",
+      "boundary": "SQL transition/clock checks only, not transport authentication/current-session callback/native reprepare behavior."
+    },
+    {
+      "requirement": "Original guards retained by amendment",
+      "cases": [
+        {
+          "method": "prefixConfirmationAmendmentPreservesPopulatedV20AndAllExistingGuards",
+          "sourceLine": 968,
+          "actualStatus": "PASS",
+          "xmlPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+          "timeSeconds": "0.133",
+          "newArch03Case": true
+        }
+      ],
+      "inspectedAssertions": "Explicitly rejects unpaired revision by original fk_observed_revision_receipt, then permits real paired publication; verifies join count1. Prefix wait retains immutable plan/policy and REPLAYING_PREFIX continuation.",
+      "boundary": "This added method delegates actual V20 upgrade/frozen20resource proof to the separately executed original methods; its name alone is not that proof."
+    }
+  ],
+  "upgradeFamilyCount": 11,
+  "upgradeFamilies": [
+    "studio_guided_sessions",
+    "studio_guided_materializations",
+    "ui_test_revisions",
+    "ui_tests",
+    "studio_guided_publications",
+    "studio_guided_publication_attempts",
+    "studio_guided_policies",
+    "studio_guided_policy_versions",
+    "studio_guided_policy_approvals",
+    "studio_guided_session_policies",
+    "studio_guided_session_recordings"
+  ],
+  "cintGreen": false,
+  "cintPending": [
+    "Run final full bounded oracle, generator parity and pin/status checks and archive exact final source logs.",
+    "Finish explicit effective-transfer bijection and full-basis publication/admission preimage assertions on appended witnesses; keep all raw arrays/hash evidence unmodified.",
+    "Record negative-rejection reason inventory and final raw/model/six-copy audit.",
+    "Freeze complete immutable final receipt and consumer handoff only after all selected checks green."
+  ],
+  "remainingUnverified": [
+    "Wrong same-test non-immediate-base branch of remaining failing migration method",
+    "Six separate head regressions",
+    "Two publication/head fixture suites",
+    "Full HTTP/application and original/correction acceptance cases",
+    "Runner source/runtime tests",
+    "Actual joined/native/browser/gateway behavior",
+    "Coverage thresholds and normal full quality gates",
+    "C-int effective-transfer bijection and full-basis publication/admission preimage assertions and final oracle/parity/pin receipt",
+    "Independent final story gate"
+  ]
+}

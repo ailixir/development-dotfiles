@@ -1,0 +1,72 @@
+{
+  "scope": "local public-base image primitives only; no Core/ready/execution/usage or internal-deployment proof",
+  "results": [
+    {
+      "name": "inspect",
+      "command": [
+        "docker",
+        "image",
+        "inspect",
+        "checks-studio-obs007-local:20261010-peerrepair",
+        "checks-studio-obs007-local:20261010-peerrepair-build"
+      ],
+      "exitCode": 0,
+      "log": "docs/qa/evidence/STUDIO-OBS-007/root-peerrepair-local-image/inspect.log"
+    },
+    {
+      "name": "provenance",
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--entrypoint",
+        "node",
+        "checks-studio-obs007-local:20261010-peerrepair",
+        "--input-type=module",
+        "-e",
+        "import {assertObservedBrowserStartup} from './dist/compat/runtime-versions.js'; import {readFileSync} from 'node:fs'; assertObservedBrowserStartup(); console.log(JSON.stringify({node:process.version,arch:process.arch,uid:process.getuid(),runtime:JSON.parse(readFileSync('./dist/runtime-versions.json','utf8')),provenance:'PASS'}));"
+      ],
+      "exitCode": 0,
+      "log": "docs/qa/evidence/STUDIO-OBS-007/root-peerrepair-local-image/provenance.log"
+    },
+    {
+      "name": "strict-pins",
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--entrypoint",
+        "node",
+        "checks-studio-obs007-local:20261010-peerrepair-build",
+        "scripts/check-pins.mjs",
+        "--require-image",
+        "--json"
+      ],
+      "exitCode": 1,
+      "log": "docs/qa/evidence/STUDIO-OBS-007/root-peerrepair-local-image/strict-pins.log"
+    },
+    {
+      "name": "native-fixed-mode",
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--entrypoint",
+        "node",
+        "checks-studio-obs007-local:20261010-peerrepair",
+        "--input-type=module",
+        "-e",
+        "import {chromium} from 'playwright'; let browser; try { browser=await chromium.launch({channel:'chromium',headless:true,chromiumSandbox:true,args:[],timeout:15000}); const page=await browser.newPage(); console.log(JSON.stringify({nativeLaunch:'PASS',url:page.url(),version:browser.version(),uid:process.getuid()})); } finally {if(browser)await browser.close();}"
+      ],
+      "exitCode": 0,
+      "log": "docs/qa/evidence/STUDIO-OBS-007/root-peerrepair-local-image/native-fixed-mode.log"
+    }
+  ],
+  "finishedAt": "2026-10-10T15:24:29.574580+00:00"
+}

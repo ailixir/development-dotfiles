@@ -1,0 +1,19 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -5594,7 +5594,7 @@
+     UUID test = p14CreateSource(recipe);
+     VaultScope scope = VaultScope.of("CSI-123", "fixture", test);
+     int reads = COUNTED_VAULT.reads.size();
+-    capture.armTrace();
++    if (!published) capture.armTrace();
+     int receiptBaseline = RECEIPTS.size();
+     String session = p3Start(test, "fixture");
+     capture.selectedGuidedSession = session;
+@@ -5725,6 +5725,7 @@
+       // not the ordinary-only exported-session invocation observer.
+       p14AssertPositiveLearning(session, recipe, receiptBaseline);
+       P3Publication publication = p3Publish(session);
++      capture.armTrace();
+       int models = MODEL_WIRE.size();
+       p14Page = P14Page.PASSWORD;
+       UUID passwordRun = p14Ordinary(test, scope, publication, capture, "TARGET_DRIFT", "ERROR");

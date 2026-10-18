@@ -1,0 +1,204 @@
+{
+ "lane": "DE",
+ "story": "STUDIO-OBS-009",
+ "agent": "@data-engineer (Dara)",
+ "date": "2026-10-18",
+ "verdict": "GREEN",
+ "ac": {
+  "local": [
+   "AC-4 TF-5 b: delta check V19..head(V22) green; grant statement prepared and proven exact"
+  ],
+  "external": [
+   {
+    "item": "TF-5 a",
+    "owner": "Platform DBA / @devops (U14)",
+    "state": "unrun"
+   },
+   {
+    "item": "TF-5 c",
+    "owner": "Platform DBA / @devops (U14) with AC-4 Vault test",
+    "state": "unrun"
+   },
+   {
+    "item": "TF-5 e",
+    "owner": "Platform DBA / @devops (U14)",
+    "state": "report 'unrun, owner Platform DBA / @devops'"
+   },
+   {
+    "item": "TF-5 d",
+    "state": "applies instead of b/c if U14 shows runtime role == owner"
+   }
+  ]
+ },
+ "v23": {
+  "written": false,
+  "reason": "U14 unconfirmed; repo config makes runtime user the owner [I]; GRANT to an env-specific role does not belong in Flyway; T0 U14 row: no V23 grant in 009 local; ADJ-1 needs no SQL (W1.5 part 2)",
+  "headVersion": "V22"
+ },
+ "files": [
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/GuidedRuntimeRolePrivilegeIT.java",
+   "before": null,
+   "after": "e0fea7e29aa01bbed211e81f982d14a8473c35ae49d22c335625a5a6ee7ef0ea"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/runtime-role-grants-v19-v22.sql",
+   "before": null,
+   "after": "02c13ee62d39710cee760dfcced16aa41604233ae65517e5a6ebe1d13f448e86"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/delta-table-obs009-de-03.md",
+   "before": null,
+   "after": "e80486de6a08d8a06d52190a5f9603568d578f9435636b1cfd351c191eeb1ec5"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/application-sql-grep.txt",
+   "before": null,
+   "after": "68d54093bdad3b0231c51937988e3b3830ce96da4e91c9aae0cac8f74261e68a"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/role-model-facts.txt",
+   "before": null,
+   "after": "49e5e045981898ebc6ee4066fb5ce8386b173406d7b1ad4f5a0efacf1338db3f"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/mutation-obs009-de-04.diff",
+   "before": null,
+   "after": "048c99ae55bd5712cd514130296047de652659575388c224cd6ec3f60c938210"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/mutation-obs009-de-04-summary.txt",
+   "before": null,
+   "after": "0aa61e15b5f963b522e44d4c8b1fdcaa0129ef8a86350603b9972be678720f2c"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/receipt.md",
+   "before": null,
+   "after": "129182a686799362caa9bd4f5f9de5bf63c01ab579bc90fa7a966a34ee15a9a7"
+  }
+ ],
+ "grantBlocks": {
+  "PREPARED_GRANT": "5c6005834466e0199947b252d1715c06c1627b80d0d5c880bd7e93e49eacbb3d",
+  "PREPARED_COLUMN_GRANT": "a66d23fffe2e29a725d4d37e5cc8f936aea3a77c5836a72939b02221d4dd6783",
+  "byteIdenticalInEvidence": true
+ },
+ "commands": [
+  {
+   "label": "obs009-de-01",
+   "classes": [
+    "GuidedRuntimeRolePrivilegeIT"
+   ],
+   "exit": 1,
+   "counts": {
+    "total": 0
+   },
+   "note": "BUILD FAILED: foreign mid-edit of backend/build.gradle.kts (java.time unresolved); waited, not edited; non-evidentiary"
+  },
+  {
+   "label": "obs009-de-02",
+   "classes": [
+    "GuidedRuntimeRolePrivilegeIT"
+   ],
+   "exit": 1,
+   "counts": {
+    "total": 6,
+    "passed": 5,
+    "failed": 1
+   },
+   "note": "RED: fixture expected a delivery row at context revision 1; corrected"
+  },
+  {
+   "label": "obs009-de-03",
+   "classes": [
+    "GuidedRuntimeRolePrivilegeIT",
+    "SecretUseAuditIT"
+   ],
+   "exit": 0,
+   "counts": {
+    "total": 42,
+    "passed": 42,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+   },
+   "note": "GREEN lane verify; IT sha e0fea7e2"
+  },
+  {
+   "label": "obs009-de-04",
+   "classes": [
+    "GuidedRuntimeRolePrivilegeIT"
+   ],
+   "exit": 1,
+   "counts": {
+    "total": 6,
+    "passed": 3,
+    "failed": 3
+   },
+   "note": "mutation run M1-M5, all detected; file restored to green sha"
+  },
+  {
+   "cmd": "google-java-format 1.22.0 --dry-run on the IT",
+   "exit": 0
+  },
+  {
+   "cmd": "standalone checkstyle 10.18.1",
+   "exit": null,
+   "note": "not run: commons-logging jar missing from cache; owed to F-merge ./gradlew check"
+  }
+ ],
+ "mutations": [
+  {
+   "id": "M1",
+   "what": "drop view grant",
+   "detectedBy": [
+    "exact-delta test",
+    "materialization test (studio_015_version_commit)"
+   ]
+  },
+  {
+   "id": "M2",
+   "what": "drop pre-V19 prune DELETE grant",
+   "detectedBy": [
+    "exact-delta test"
+   ]
+  },
+  {
+   "id": "M3",
+   "what": "extra DELETE on policy audit",
+   "detectedBy": [
+    "exact-delta test"
+   ]
+  },
+  {
+   "id": "M4",
+   "what": "classifier ignores row locks",
+   "detectedBy": [
+    "exact-delta test"
+   ]
+  },
+  {
+   "id": "M5",
+   "what": "view-only test grants base table instead of view",
+   "detectedBy": [
+    "view-only variant test"
+   ]
+  }
+ ],
+ "deviations": [
+  "no Gradle red for the pre-V19 grant section (added from a Python approximation before the first run)",
+  "application-access map pinned from grep, not derived at test time",
+  "deliveries INSERT path covered by catalog derivation only",
+  "psql interpolation of :\"runtime_role\" not exercised with psql",
+  "checkstyle not run"
+ ],
+ "findings": [
+  "F1 delta broader than view-only: 17 new relations + UPDATE materializations/model_attempts, DELETE on 3 publication tables (pruner), SELECT translation_plans/state",
+  "F2 deferred trigger studio_015_version_commit reads the view: materialization writes need the view grant",
+  "F3 GuidedRuntimeRolePrivilegeIT is a new head tripwire (delta pin); add to head-pin list",
+  "F4 split role model needs Flyway as owner (chart passes only SPRING_DATASOURCE_*) and partition maintenance as owner"
+ ],
+ "batons": [
+  "IT and de/runtime-role-grants-v19-v22.sql land together, blocks byte-identical",
+  "any V23 in 009 moves atomically with this IT's pinned maps/grant and the existing head pins"
+ ]
+}

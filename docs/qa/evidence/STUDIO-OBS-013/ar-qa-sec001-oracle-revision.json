@@ -1,0 +1,87 @@
+{
+  "artifact": "AR-QA amendment: architect ruling on R13's revised SEC-001 oracle A for STUDIO-OBS-013 (guided learning-run video recording)",
+  "author": "@architect (Aria)",
+  "date": "2026-10-14",
+  "amends": "docs/qa/evidence/STUDIO-OBS-013/ar-qa-sec001-test001.json SEC001.proofOracles (A_startupFramesAbsent replaced; B_trimBeforeOffsets rationale corrected; C extended). The SEC001 FIX verdict, the browser.ts change and the TEST001 ruling are unchanged.",
+  "reviewed": [
+    "docs/qa/evidence/STUDIO-OBS-013/r13/qa-fixes/README.json (oracleRevision, including proposedRulingText; results; risks)",
+    "docs/qa/evidence/STUDIO-OBS-013/r13/qa-fixes/sec001-guided-recording-test.v2.patch (sha256 7086309b1b00740bd66cf81dc4541ff39794820c8d9afd1a05c35da92e92a14e, as recorded by R13)",
+    "docs/qa/evidence/STUDIO-OBS-013/r13/sec001-guided-video-oracle.json (latest green: a0 39, t1 40, appRegion [0,0,408,103], offendingFrames [])",
+    "docs/qa/evidence/STUDIO-OBS-013/r13/qa-fixes/sec001-red2-oracle.json, sec001-red-oracle.json, sec001-green-oracle.json, sec001-triage-v1-oracle-frame0-login.json, sec001-triage-v1b-oracle-frame0-initial-surface.json",
+    "docs/qa/evidence/STUDIO-OBS-013/r13/ledger.json qaFixSec001 and qaFixSec001OracleRevision"
+  ],
+  "verified": [
+    "sha256 of the working tree: studio-runner/src/run/browser.ts = dadcbb9f13c4e98de041478583bad6ae19a5e12e8c85fdca71c2a48be3d986b5 and studio-runner/test/fixtures-tier/guided-recording.test.ts = f964969488ca8baa45a70c945734fb95f5e83034beecee25973aaa98112ba5e0. Both match R13's README.results.final.hashes and the ledger.",
+    "studio-runner/src/run/browser.ts:545-561, read: in the recorded branch the probe runs on the startup page, which is then closed; its video passes the realpath/lstat checks and is deleted; readdir must be empty; the new page must be about:blank; and only then recording.ready(video !== null). This is the sequence ruled on 2026-10-13. browser.ts was not changed by the oracle revision.",
+    "red2 (fix reverted): frames 2-3 have box [240,4..6,1039,719], maxRowRuns 437-457 and outsideApp 90933-91297. Frame 4 has box [8,16,639,719], maxRowRuns 379 and outsideApp 46027 (R13 decoded frames 2-4 as chrome://version; frame 4's left-aligned full-height layout is consistent with prefs-internals, which is an inference). Frame 0 is the initial surface: contentFree with outsideApp 880700.",
+    "red2 B values: t1 80 (a probe frame), a0 208, t1-a0 -128. That is inside [-250, +500]. B passes on the reverted tree, so B does not discriminate SEC-001. A alone carries the security property.",
+    "Measured probe cost Δ (a0 on the reverted tree): 341 ms (red) and 208 ms (red2), not about 600 ms as estimated in the 2026-10-13 ruling."
+  ],
+  "q1_doesRevisedAProveSec001": {
+    "answer": "YES, with two holes that T1 and T2 below close. The property is that no information-bearing chrome:// probe frame appears in the uploaded guided video. Revised A proves it, and it is non-vacuous: on the reverted tree it was RED 3/3, with 46k-91k pixels outside the app region on the probe frames, and on the fixed tree it was GREEN 10/10, 12/12 under load and twice on the full tier. The red margin is large: the smallest offending frame has more than 46k outside pixels against a pass threshold of 0.",
+    "whyTheV1OracleWasWrong": "Accepted, and my error. The 2026-10-13 oracle assumed that video pts 0 equals the origin instant. Playwright starts the webm at the first composited frame, so frames before a0 can legitimately be the app's own first paint, or Chromium's initial solid surface over the gray pad (triage v1 and v1b, decoded). A boundary-based 'all white before a0' predicate therefore contradicts B's allowance of t1 down to a0-250. The content-based restatement is the correct shape.",
+    "windowCoverage_thinA0": "Resolved by the revision. The concern applied to v1, where the checked set was [0, a0) and held one frame when a0 is 14-39 ms. v2 checks [0, a0+1000 ms], about 26 frames. Coverage is also guaranteed by causality, not by window width: any regression that records the probe records it during launch, before the first action is admitted. The webm's pts 0 is at or after ready(), and a0 is measured from ready(), so every probe frame has pts below a0, which is inside the window regardless of how small a0 is. When the fix is reverted, a0 grows by Δ (208-341 ms measured), and the window grows with it.",
+    "contentFreeClassifier": "Sound for the security property. A frame passes as content-free only if no row has more than 6 solid-colour runs at per-channel tolerance 12. Any row of glyphs produces dozens to hundreds of runs (login 73, home 49-56, chrome://version 437). A content-free frame can at most show a solid surface or a rule, which discloses nothing. Text whose colour is within 12 per channel of its background would also pass, but it is not legible, and Chromium's chrome:// pages do not render that way.",
+    "appRegionRobustness": {
+      "loginBox": "Measured independently by a separate recorded guided launch that navigates to /login, using the last decoded frame. This is good: it does not depend on the run under test. Weakness: if that reference navigation lands on a Chromium error or interstitial page (centered, large), the box inflates and A weakens silently. Nothing bounds it today.",
+      "finalBox": "Taken from the run under test (-sseof -1), so it is self-referential. If a regression or an environmental fault leaves the run's last frame on a large page (an error page, an interstitial, or a chrome:// page), the region absorbs it and A can go vacuous while still reporting green. Nothing bounds it today. This is the main weakness.",
+      "currentSize": "appRegion [0,0,408,103] = 409 x 104 = 42,536 px, which is 4.6% of the 1280x720 frame. Every observed probe frame extends to y=719, far outside it."
+    },
+    "chromePageResemblingApp": "To pass A, a non-content-free chrome:// frame would need every non-white pixel inside the roughly 409x104 top-left region. Measured: chrome://version spans [240..1039] x [4..719], and the prefs-internals frame spans [8..639] x [16..719]. Chromium rasterises in tiles about 256 px tall, so even a partially rastered first frame of either page reaches past y=103. No decoded frame came close. Residual: this is an observation for one Chromium build (Chrome for Testing, pinned by Playwright 1.63), not an invariant. A Playwright bump that changed the probe pages' layout would not be noticed by the test. T2 makes it a per-run fact.",
+    "B_correction": "The 2026-10-13 claim that B's lower bound (-250) catches the half-fix mutant (startup video deleted but ready() taken before the probe) is RETRACTED. Measured Δ is 208-341 ms, so that mutant gives t1-a0 between roughly -210 and -340 and passes B whenever Δ plus normal latency stays under 250. The consequence is bounded and is not a security issue: the probe footage is still deleted, and the residual seek skew is at most Δ, which is inside the replay seek budget B already tolerates. Guard for that mutant: the code at browser.ts:545-561, as read, together with C. No deterministic black-box oracle was found that is not timing-dependent, so none is required. B stays as ruled, as a seek-alignment oracle with t1 = the first non-content-free frame, and it is not counted as SEC-001 evidence."
+  },
+  "q2_verdict": {
+    "verdict": "APPROVE WITH TIGHTENING",
+    "owner": "R13 (@dev, runner lane). Test-only change in studio-runner/test/fixtures-tier/guided-recording.test.ts. No product, contract, schema or backend change, and browser.ts is not touched.",
+    "required": [
+      {
+        "id": "T1",
+        "name": "Bound the app region (closes the self-referential and error-page vacuity holes)",
+        "change": "After computing `app`, and before any oracle assertion: let area = (app[2]-app[0]+1) * (app[3]-app[1]+1). Assert area <= 0.10 * size.width * size.height. Also assert that loginBox and finalBox are each non-null (already done) and that each box's own area is <= 0.10 of the frame. Write appRegionArea and appRegionAreaRatio into the facts JSON before the asserts. Current value 4.6%, so the cap leaves 2x headroom.",
+        "why": "A region that grows to cover the viewport makes outsideApp 0 for any frame, chrome:// included. The cap means at least 90% of the frame is always checked, and every observed probe frame is full height. If the reference navigation or the run's final page is an error page, the test fails loudly instead of passing vacuously.",
+        "tradeOff": "This is fixture-coupled: if the login or home fixture grows beyond 10% of the viewport, the cap must be revisited. That is accepted, because the fixture is test-owned and the failure is loud, never silent."
+      },
+      {
+        "id": "T2",
+        "name": "Per-run positive control (non-vacuity stated as a fact, not as a one-off revert)",
+        "change": "In the same test, launch a plain recorded Chromium context at the same size, using direct chromium as other fixtures-tier files already do (e.g. browser-profile-safety.test.ts). Go to chrome://version/, wait 300 ms, go to chrome://prefs-internals/, wait 300 ms, then close. Decode the whole recording at full resolution with the same decodeRgb/maxRowRuns/outsideBox helpers and the same `app` region. Assert that at least one frame is non-content-free with outsideApp >= 10,000. Write only counts into the facts (positiveControl: {frames, flaggedFrames, maxOutsideApp}). Never write frames, PNGs or text: they contain the local profile path and the command line. Remove the control's directory in a finally block.",
+        "why": "This makes the classifier's discrimination of the actual probe pages a per-run assertion that survives Chromium and Playwright bumps. Today non-vacuity rests on R13's manual revert (red2), which is not re-run.",
+        "tradeOff": "One extra browser launch (about 1-2 s) on the fixtures tier. The threshold of 10,000 sits below the measured 46k-91k."
+      }
+    ],
+    "C_extension": "Kept as in the v2 patch (handle.page about:blank before the first navigation; exactly one file in the recording dir, equal to basename(recordedVideo())). No further C change is required.",
+    "ratifiedOracleText": {
+      "A_startupFramesAbsent": "Decode the uploaded objects/studio/fixture-csi/guided/{sessionId}.webm at full resolution (no scale filter) over [0, a0+1000 ms], where a0 = timings[0].startMs. Every decoded frame is either content-free (no row has more than 6 solid-colour runs at per-channel tolerance 12) or has zero non-white pixels (any channel < 245) outside the app region. The app region is the union, padded by 8 px and clamped to the frame, of the non-white box of a separate recorded guided launch's settled /login frame and the non-white box of this run's settled final frame. [T1] The region's area, and each box's area, is at most 10% of the frame. [T2] In the same test, a recorded plain context showing chrome://version and chrome://prefs-internals produces at least one frame that is not content-free and has outsideApp >= 10,000 against the same region. If ffmpeg or ffprobe is missing, the test fails and is never skipped. Facts are written before the asserts.",
+      "B_trimBeforeOffsets": "Unchanged: -250 <= t1-a0 <= +500, where t1 = the pts of the first non-content-free frame in the window; no such frame = fail (NO_FIRST_PAINT). B is a seek-alignment oracle. It is NOT SEC-001 evidence, and it does not reliably catch the half-fix mutant (see B_correction).",
+      "C_structural": "As in the v2 patch."
+    }
+  },
+  "nonBlockingNotes": [
+    "The test writes docs/qa/evidence/STUDIO-OBS-013/r13/sec001-guided-video-oracle.json on every fixtures-tier run (resolve('../docs/...')), which dirties the evidence tree outside R13's lane, as the ledger already records for the STUDIO-OBS-007 runner-*.json files. Recommendation only: gate the write behind an env flag such as R13_PROBE_REPORT. Not required for this gate.",
+    "The facts record probedFrames as the whole video's frame count and frames as only the window's frames (for example 29 vs 26). That is consistent, not a defect.",
+    "Re-freeze: the T1 and T2 changes touch only the test file. browser.ts is already changed (dadcbb9f…), so root's S4 re-freeze is owed anyway. Re-freeze after T1 and T2 land, not before."
+  ],
+  "security": [
+    "SEC-001 property: proven by A as tightened. The fix itself (browser.ts:545-561) is verified by reading and is unchanged.",
+    "The positive control (T2) records real chrome:// pages, which show the local profile path and command line. Its recording must stay in a mkdtemp directory removed in a finally block, and only numeric facts may be persisted.",
+    "Residual (unchanged): the guided probe is still unbounded in time (OBS-009 P3 scope)."
+  ],
+  "verificationOwed": {
+    "owner": "R13",
+    "runs": [
+      "Fixed tree with T1 and T2: guided-recording.test.ts green, with facts showing appRegionAreaRatio <= 0.10 and positiveControl.maxOutsideApp >= 10,000.",
+      "Reverted browser.ts fix (test kept): A RED, recorded as before. B may pass; that is expected and must not be reported as a defect.",
+      "Full fixtures tier once under the Gradle lock. Report skips as skips."
+    ],
+    "status": "Not run by @architect."
+  },
+  "autoDecisions": [
+    "[AUTO-DECISION] Cap value for the app region → 10% of the frame (reason: the measured region is 4.6% and every probe frame is full height, so the cap gives 2x headroom while leaving at least 90% of the frame checked).",
+    "[AUTO-DECISION] Positive-control threshold → outsideApp >= 10,000 on at least one frame (reason: the measured minimum on a probe frame is 46,027 and the maximum 91,297, so the threshold has more than 4x margin against layout drift and still rejects a near-empty frame).",
+    "[AUTO-DECISION] Require a deterministic black-box oracle for the half-fix mutant? → No (reason: none found that is not timing-dependent; the mutant is not a security exposure, its seek skew is at most Δ ≤ 341 ms measured, and the code is verified by reading)."
+  ],
+  "notExecuted": [
+    "No test, build, Gradle or ffmpeg run was made by @architect. All frame facts are R13's decoded evidence, as read. Only sha256 hashes were recomputed.",
+    "The synapse-diagnostics and architect-first skills attached to the spawn were not run. They do not relate to this ruling."
+  ]
+}

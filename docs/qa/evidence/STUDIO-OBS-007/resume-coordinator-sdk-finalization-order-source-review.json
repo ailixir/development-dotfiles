@@ -1,0 +1,93 @@
+{
+  "decision": "CLOSED_SOURCE_ORDERING_AUDIT_NO_AUTHOR_OR_RUNTIME",
+  "sourceHashes": {
+    "sdkOwnership": "030443d7478791e2f980763a4e30a4b2daba922836d0c5ac9650e141995b31c4",
+    "sdkRuntime": "6f640f78ab5b1adf522d3971471f2a4de0613b644f82d62427535ed64ca59e7e",
+    "publisher": "87e9a1da8028ecf341aa3c7102069acb223ce44eb81d00e665c9650088a2a650",
+    "publicationRepository": "aeb534126b39be519976059d1d6ceb9a55493403110e642c85d25fc172bfef0e",
+    "sessionService": "a386ec76d26281771e50b470eddaf54bbe7e509b1e3d9ef0115471d32665eaf3",
+    "validationClient": "e321b8378f81f6d78ad027449bad3e385f0ac6089b0eabd67a865b6817cbdf5b",
+    "fixture": "c12b979b6467679222cbefd3626820a5320bb85d0ddf103d74fbcc6a3679b9cb"
+  },
+  "existingEvidence": {
+    "invocationSha256": "f3c13d60cfc9aa426e667585b3a82dafcf302455bd37bb1d4535306c079e48bb",
+    "closedReceiptSha256": "11dbb15ae918326cbf43db755eba4e648d229e9bb4f6db275844be157f40ae03",
+    "ownedCaptureJoin": "Exactlyone numericcapture withinactualinvocation start/finish; fixedfinalizediagnostic andlifecycle readfromSAMEownedTEMP only",
+    "finalizeDiagnosticSource": "ExistingpersistFinalizeDiagnostic14824/helperroute919, no newcapture",
+    "finalizeDiagnosticSha256": "b8c73cc4d28a645a250084243234be6aa17f207d639ea39b900ece9d966778fd",
+    "fixedCode": "PUBLICATION_CONFLICT",
+    "closedSourceFrames": [
+      {
+        "source": "PUBLICATION_REPOSITORY",
+        "line": 500
+      },
+      {
+        "source": "PUBLICATION_REPOSITORY",
+        "line": 122
+      },
+      {
+        "source": "PUBLISHER",
+        "line": 112
+      },
+      {
+        "source": "PUBLISHER",
+        "line": 109
+      }
+    ],
+    "lifecycleSource": "ExistingrecordLifecycle13110\u201313169/selectedGuidedSessionequality/fixedenums, no newcapture",
+    "lifecycleJournalSha256": "18ac38df45414bc4cf2d89d91531126ac9fcf3c4e5a9ac634771a1869419790a",
+    "fixedLifecycleRecords": [
+      {
+        "ordinal": 1,
+        "status": 202,
+        "kind": "RUNTIME",
+        "reason": "LEASE_LOST",
+        "consumed": true
+      }
+    ]
+  },
+  "provedCurrentAttemptOrder": [
+    "FixtureawaitFinalizing thenexplicitpublicCall3715; no SDKfinalizeoperation exists in guidedimplementation, only type declaration",
+    "Publisherprepare99 returned priorRESERVEDattempt andsnapshot marker save332/333; nextsessiontransaction109 entered publications.claim112",
+    "Repo.claim122 enteredauthority andfailed document.state FINALIZINGguard500",
+    "Thisclaim didnot reachVALIDATINGupdate123\u2013132; validator134 andreadycommit194\u2013231 UNREACHED forthisattempt",
+    "Failurecapture latershowsFAILED/OTHER/snapshotTRUE/revisionFALSE; these latermarkersnot standalonephaseproof"
+  ],
+  "sdkSourceMechanism": [
+    "ACTIVE26 includesFINALIZING, so no deterministic state-enum refusal",
+    "schedule52\u201353 secretabsolute1000ms; requestClaim75 timeout<=1000 withAbortController/race77\u201382; latebackend202 doesnotprove SDKacknowledgedlease",
+    "renew111\u2013116 mapsANYnonREVOKEDerror tostopEntryLEASE_LOST, includingtimeout/identity/live errors; expiry49 alsoLEASE_LOST",
+    "stopEntry135invalidates/cancelstimers, runtime.stop137\u2192closeResources330lifecycle callback; currentGSSlifecycle2253 choosesFAILED whennoDISPATCHING action. CurrentRUNTIMELEASE_LOST202fitsmechanism butnotexclusive timerproof"
+  ],
+  "stateWriterLimits": [
+    "Renewalclaim maintenance changeslease/fence/doc andreturnsactivecurrentstate; itdoesnot itself transitionworkflow toFAILED",
+    "GSSlifecycle/assignment loss/expiry/cancel/revocation/outcome/model failures can transitionterminalstate underfreshguardedTX; recordedlaterFAILED cannotidentify firstwriter",
+    "Finalizingmaystillrenew; preparedsaved snapshot isnot workerstop/control immunity or publication authority",
+    "Claim/lifecycle records useSEPARATEordinals andduration only, no sharedtimer/validator/guard chronology. Cannotprove renewalaborted or lifecyclecommitprecededauthority500 solelyfromthesejournals"
+  ],
+  "claimPrecision": "RecordClaim13079 storesserverstatus/handlerduration/nonemptyboundedcapturedresponse bytes. consumedTRUE isnot SDKreceipt/ACK/applyAcknowledgedLease proof; lastbackend2022201.178708ms can outlive caller1000ms deadline.",
+  "validatorFixtureLimit": "ObservedValidationClient validatesoutsideTX andmapsHTTP409toRUNTIME_INCOMPATIBLE106\u2013107; thisattempt authority500 failedbefore invokingvalidator. No validatorfixture fix or postvalidationbasis/commit rewrite justified bythisfailure.",
+  "minimalAlternatives": [
+    {
+      "option": "BASELINE_HOLD",
+      "disposition": "No source change, preserve exactguard+acceptedlossrecord/C5RED; ownerrenewal/stateinterval remains causal investigation target"
+    },
+    {
+      "option": "NARROW_OWNER_CRITICAL_WORK_REDUCTION",
+      "disposition": "Only sourceproven redundant work inexistingrenewal/save orpreparelockinterval couldbe consideredafterseparateexactdesign; preservefullcurrentguards/schemaepoch/errororder/1000msdeadline.111samples establishpresence notindividualcost; no currentauthorrelease"
+    },
+    {
+      "option": "RELAX_DEADLINE_OR_FINALIZING_RENEWAL",
+      "disposition": "NO_GO: would altergenuineSDK1000ms/control authority andprivacy/stop behavior; saved snapshot cannotgrantimmunity"
+    },
+    {
+      "option": "BROAD_CACHE_DETACHED_LOWERING_VALIDATOR_REWRITE",
+      "disposition": "NO_GO_NOW: additionalfreshness/error/transaction semantics andexclusivecostunproved; validatorunreached. Existingconditionalpublicationdesign notauthorpermission"
+    }
+  ],
+  "nextStep": "Rootreview narrowedownerrenewal/stateinterval source/proof gaps; no newtelemetry/runtime/retry/businessfixauthorized",
+  "retained": "Strict+96definingPASS; originalC5REDfinalize409PUBLICATION_CONFLICT/lastclaim2201.178708ms, fullROOTAPP30/0hits/finalclosed. NoQA/Done/DAGcredit.",
+  "actions": "Source/existingprivatefixedscalar reads andthisreport only; no rawmarkers/IDs/bodies/logs/stackstrings/canary output; no code/build/test/runtime/SQL/query/hook/exporter",
+  "budget": "USD500ceilingactualbillingunavailable",
+  "lifecycle": "QA/Done/DAGheld/no commitpushdeploy"
+}

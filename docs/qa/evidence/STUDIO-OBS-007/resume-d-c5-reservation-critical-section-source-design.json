@@ -1,0 +1,128 @@
+{
+  "scope": "SOURCE_ONLY_CURRENT_RESERVATION_CRITICAL_SECTION_ALTERNATIVES",
+  "disposition": "NO_GO_IMMEDIATE_OPTIMIZER_RECOMMEND_EXISTING_BOUNDED_RECORDER_PHASE_REFINEMENT",
+  "sourceBindings": {
+    "translation": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "da7f3e4546afe3cca3fba1dfe2b3e772316d4e4fed9580ff7975e5a8aaf4f8a2"
+    },
+    "main": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "cdb6d8ad2a822fb9bcf8af0e9cd7d738637f0ed507211b8b25113e6520b079c6"
+    },
+    "contracts": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "sha256": "a5034ee98707552d927f48bc0a30e07896df913f3b706f42f15ee16c7b52144b"
+    },
+    "projection": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedModelProjection.java",
+      "sha256": "5561f8414e827d8691315dd73445b044faa2b5a6234df670cc81d6f767e0184f"
+    },
+    "assembler": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java",
+      "sha256": "76381f41eb51194bc8a21998b0c7f403f48d7baabfeb955c66b5fff31262386f"
+    },
+    "store": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "sha256": "cdf8b6235226e53f6cc167aa1583cab459e5fd365ce5c6b783cfeb0cfdc4ffe9"
+    },
+    "questions": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java",
+      "sha256": "6e13ce0398ef27a2b5f704af511477228eaba574b4b898fea055495e818021ab"
+    },
+    "materialization": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+      "sha256": "d026d97c0b7f3f1de223d0d4bef742b39ac12d00d0c245278ba592b04c0a6569"
+    },
+    "gateway": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GenAiGuidedLlmGatewayClient.java",
+      "sha256": "2c14465b287f575de17446a6effe51826e1c36ae48b73bdd61e3b4d636bc6526"
+    },
+    "fixture": {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "f2f5c8298c5b0941fd56e076eed24efcf13fc2d6de9883e6c57f6a17e04bbef7"
+    },
+    "questionGuard": {
+      "path": "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql",
+      "sha256": "898990b29a4705e0de662a756ba86fad7cfc57cfa1c8775a9a922628781688b7"
+    }
+  },
+  "actualEvidence": {
+    "mode": "ORIGINAL_UNPROFILED_C5",
+    "lastClaimMs": 1119.547416,
+    "unchangedBudgetMs": 1000,
+    "ninth": "FAIL_LEASE_LOST",
+    "models": 4,
+    "reads": 1,
+    "replaysReached": false,
+    "rootAppBytes": 17140845,
+    "hits": 0,
+    "patterns": 30,
+    "finalClosed": true,
+    "priorExactHolder": "TRANSLATION_FAMILY",
+    "innerPhaseAndExclusiveCost": "UNOBSERVED"
+  },
+  "findings": [
+    {
+      "anchor": "Translation708-814,1087-1158",
+      "fact": "RESERVE reconciles accounting, can settle abandoned attempt, assembles live locked source/materialization/remaining obligation projection, sizes escaped wire, checks current pins twice in the workflow, and atomically reserves attempt plus nested budget. Provider call870 is already outside this transaction."
+    },
+    {
+      "anchor": "Translation1101-1110; Materialization74-133",
+      "fact": "Projection uses only selected input metadata/hash/revision, but full materialization also validates owner/fence/live, parses all allocations/producers/consumer edges and validates original runner context. A cheaper metadata-only read would remove existing malformed-context refusals; not an equivalent drop-in."
+    },
+    {
+      "anchor": "Translation1121-1138,1198-1230; Questions172-184,200-239; V32 guards",
+      "fact": "Repeated per-obligation acceptedObserved reads are real work. Application clarify acquires owner lock, but Store public mutators assert transaction only and V32 single-assignment/meaning guards do not universally acquire parent owner lock. Same transaction alone does not prove one snapshot equals all original reads."
+    },
+    {
+      "anchor": "Translation731-740,784-811; Store905-931; Main1330-1408,2140-2195",
+      "fact": "Replacing nested reserveModel fresh lock with outer current is unsound: abandoned settleModel obtains and updates a separate detached session wrapper/counters/reservations. reserveAttempt writes attempt only. Later original fresh row/auth/source/active/budget checks preserve that updated accounting and refusal."
+    },
+    {
+      "anchor": "Translation1087-1158; Projection11-18; Assembler assemble",
+      "fact": "Dynamic projection construction/canonical strict validation, copy and wire serialization remain pure work under owner lock. Their inputs are derived from current source/plan/observation/binding/clarification/step state. Moving them outside requires a new split transaction with complete freshness/error-order proof; no sufficient existing immutable cut/version covering these authorities was identified."
+    }
+  ],
+  "alternatives": [
+    {
+      "idea": "Request-local completed-coordinate membership index from already loaded action list",
+      "assessment": "Pure-local metadata reuse can preserve original exact step/state/JsonNode ordinal equality and per-obligation ordinal count with no SQL changes; however the tiny actual C5 action set gives no evidence of material lock reduction. Adds code and potential hash/equality edge complexity. Root rejects authoring now; no candidate/test expansion."
+    },
+    {
+      "idea": "Collapse acceptedObserved/sourceSelections/store.state queries into a generic callback snapshot",
+      "assessment": "NO_GO. Clarification INSERT or accepted_choice assignment can change across read-committed statements without universally enforced parent lock; store.state includes mutable plan head/continuation/active attempt. Preserve original current reads/guard order, not a generic transaction cache."
+    },
+    {
+      "idea": "Reuse current session wrapper for nested reserveModel to avoid lock/parse",
+      "assessment": "NO_GO. Concrete nested accounting stale-wrapper counterexample above. No authorization/source doublecheck/SQL/fence/budget shortcut."
+    },
+    {
+      "idea": "Move projection/strict validation/escaped byte sizing outside current lock",
+      "assessment": "NOT_APPROVED. Could be substantial pure CPU work, but existing reservation/accounting/source guard atomicity and original failure order would change. Requires an exact detached preparation cut, exhaustive fresh identity comparison and accounting protocol review; no existing sufficient seam proved, so no new record/phase/schema/framework proposed today."
+    }
+  ],
+  "coldSchemaCompilation": {
+    "sourceProof": "GuidedContracts88-106 uses per-instance ConcurrentHashMap computeIfAbsent; on first schema identity it reads/expands static resources and calls JsonSchemaFactory.getSchema. expand120-156 recursively resolves static references. B provider/provenance epoch parses/transforms/hashes metadata; it does not prepare these strict validators.",
+    "distinctLifetime": "GuidedModelProjection8 owns its own STATIC GuidedContracts instance, separate from the Spring bean; its constructor validates v3/planning-context inside prompts.assemble under RESERVE. Service/validator/materialization share the configured bean, while wire-advice owns another instance outside HTTP method lock. Dispatch new GuidedContracts sites inspected only construct object/parse wire, not compile validation schemas.",
+    "causalLimit": "Cold compilation is a real source-possible first-use cost, not proof of the ninth delay. Ordered first/ninth share PER_CLASS context and classloader in the fixture; an earlier successful request through projection would warm that same static planning-context identity. Which schema identity/instance was cold during this failing callback is UNOBSERVED. No repeated diagnostic promised.",
+    "coherentFutureOption": "If independently warranted, explicitly extend startup static preparation to the EXISTING exact validator instances/names without dummy request validation: perform the original resource expansion/factory preparation before bean publication, leaving canonical(instance) and every .validate(instance) at its original guarded point. This is additional startup/restart failure semantics requiring root review, not an equivalent micro-refactor or implementation authorization.",
+    "prerequisite": "A pinned validator API/source review must distinguish eager factory preparation from any lazy first-validate initialization; computeIfAbsent\u2192getSchema alone does not prove all validator work is warmed. Do not invent a warm API/dummy validation or precompile every business schema. Static preparation must not include request/auth/source/owner/projection/results."
+  },
+  "minimumNextDesign": {
+    "recommendation": "Coordinate the already-dispatched existing bounded recorder phase review; this author proposes no duplicate diagnostic candidate or execution.",
+    "seam": "Same already-acquired stack, same exact outermost Repository.transaction boundary and first supported active business caller. Preserve existing target/holder immutable native already-physical PID binding and pre/post/finalization match, union TOTAL8/30s/cadence/join/status masking. No new stack acquisition/global search/thread/poll/query/endpoint/key/framework.",
+    "phasePlan": "Coordinator owns the separately preflighted minimal phase design. Current source callsites are RESERVE708, duplicate-result827, SEND_CLAIM844, APPLY879, REJECTION_ACCOUNTING978 and direct late accounting1008; these are source anchors, not verified compiled debug ranges. Preserve broad source family8 and SQL0..6; unsupported/missing/ambiguous debug mapping stays UNKNOWN.",
+    "encoding": "If root approves author, append a separately documented fixed phase partition to existing blocker count array; broad family8 can coexist with one phase count and must not be summed. No raw line/class/stack/PID export. Genuine phase match latches only same successful exact snapshot; later normal retirement does not erase it.",
+    "debugPrerequisite": "Verify current source and compiled class identity/LineNumberTable before coding ranges. Missing/stripped/mismatched debug mapping gives no phase. No causal/exclusive-cost claim from a phase count; supports only the original active callback position."
+  },
+  "conclusion": "No justified substantial immediate owner-lock shortening with all current authority/error/SQL/accounting semantics proved. Prefer precise reuse of existing bounded recorder over another tiny optimizer or new test infrastructure. Startup validator preparation is coherent only as separately reviewed static lifetime extension and remains source-design conditional.",
+  "sourceAuthored": false,
+  "runtimeExecuted": false,
+  "newTests": 0,
+  "newFramework": false,
+  "performanceClaim": false,
+  "budgetOrTraceChanged": false,
+  "whole19AcPass": false,
+  "lifecycleChanged": false
+}

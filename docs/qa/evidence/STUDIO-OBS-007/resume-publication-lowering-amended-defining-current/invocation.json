@@ -1,0 +1,33 @@
+{
+  "command": [
+    "./gradlew",
+    "test",
+    "--rerun-tasks",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceTest",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest"
+  ],
+  "classes": [
+    "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest",
+    "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceTest",
+    "com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest"
+  ],
+  "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "startedAt": "2026-10-12T17:15:22.115371+00:00",
+  "fixturePrerequisites": {
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+  },
+  "prerequisiteSelected": false
+}

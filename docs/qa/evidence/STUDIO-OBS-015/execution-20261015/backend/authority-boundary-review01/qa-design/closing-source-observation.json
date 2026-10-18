@@ -1,0 +1,63 @@
+{
+  "artifact": "Closing source reread of Data09 A02 seam/Backend exact lineage",
+  "sourceAnchors": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "line": 474,
+      "anchor": "void preparePendingBindingConsumer",
+      "sha256": "3f8d75c258a1a0e827524a54ee1c822ac0374eebcdef148a21b4f21a7be5d2d0"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "line": 585,
+      "anchor": "if(admittedPending){ledger.put(\"state\",\"ADMITTED\")",
+      "sha256": "3f8d75c258a1a0e827524a54ee1c822ac0374eebcdef148a21b4f21a7be5d2d0"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "line": 597,
+      "anchor": "if(admittedPending)break;",
+      "sha256": "3f8d75c258a1a0e827524a54ee1c822ac0374eebcdef148a21b4f21a7be5d2d0"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "sha256": "3f8d75c258a1a0e827524a54ee1c822ac0374eebcdef148a21b4f21a7be5d2d0",
+      "line": 615,
+      "anchor": "persistSharedEvidence: SET CONSTRAINTS ALL IMMEDIATE"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+      "line": 111,
+      "anchor": "JOIN studio_guided_allocations al",
+      "sha256": "d552398ccb6cc8c9d851acb81f0af35c5a5672e685e2f2543f83784a36a037b5"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+      "line": 142,
+      "anchor": "ObjectNode exactEdge =",
+      "sha256": "d552398ccb6cc8c9d851acb81f0af35c5a5672e685e2f2543f83784a36a037b5"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+      "line": 157,
+      "anchor": "assertThat(pairs).isEqualTo(1)",
+      "sha256": "d552398ccb6cc8c9d851acb81f0af35c5a5672e685e2f2543f83784a36a037b5"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+      "line": 191,
+      "anchor": "var omitted = new PublicationContracts.Snapshot",
+      "sha256": "d552398ccb6cc8c9d851acb81f0af35c5a5672e685e2f2543f83784a36a037b5"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+      "line": 194,
+      "anchor": "new PublicationContracts.Claim(id, \"omitted-pending\"",
+      "sha256": "d552398ccb6cc8c9d851acb81f0af35c5a5672e685e2f2543f83784a36a037b5"
+    }
+  ],
+  "supersedes": "initial-a02-source-observation.json only for source presence and allocation/proof lineage assertions",
+  "stageLimit": "Reserve rejection before attempt allocation and complete reader/builder refusal only; no fabricated VALIDATED pending history, auth/native or later-phase acceptance.",
+  "compilationAndExecution": "NOT_RUN_BY_REVIEW",
+  "sourceStableClaim": false
+}

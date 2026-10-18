@@ -1,0 +1,35 @@
+{
+  "status": "FROZEN_CANDIDATE_AWAITING_PEER_REVIEW",
+  "files": [
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "baseSha256": "e6c132a979cdf7546abf0b2056dec351a38ea8c58c7da5b34ae429f85e6acaab",
+      "candidateSha256": "c9a36bac3fe1cbd5d98b4599734013bb3aa64cdac2922406e1df865d8e909b09",
+      "beforeLines": 487,
+      "afterLines": 499
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "baseSha256": "bd78e11ede42c6b4fd77f86640f21b2acc1947c95dce3e0f662b9d4b1d5926a6",
+      "candidateSha256": "a07aae4fec5ab4f514f4e0978a3d80e13dc34ffbbeebbaaf1669b349004544d0",
+      "beforeLines": 952,
+      "afterLines": 1015
+    }
+  ],
+  "candidatePatchSha256": "3b775a8e3557876a0720d7087e8589c84fe353b8a77818c3ac10c48c39340b5e",
+  "inversePatchSha256": "e469cf4d3ffc919a391773ef80a4dbe60e8d1ceac3aaa6b6e6783b3c9941560c",
+  "forwardPatchCheckExit": 0,
+  "inversePatchCheckExit": 0,
+  "authoritativePrepareEqualityAndSuffixByteIdentical": true,
+  "finalizeOrchestrationPrefixByteIdentical": true,
+  "guardedRawReadSequenceByteIdentical": true,
+  "allProductionStringLiteralsIdentical": true,
+  "onlyExistingSevenModeTestModified": true,
+  "remainingTestSourceByteIdentical": true,
+  "newTestCases": 0,
+  "productionAddedLines": 12,
+  "sharedEdits": false,
+  "buildsExecuted": false,
+  "runtimeStarted": false,
+  "performanceOrAcceptanceClaim": false
+}

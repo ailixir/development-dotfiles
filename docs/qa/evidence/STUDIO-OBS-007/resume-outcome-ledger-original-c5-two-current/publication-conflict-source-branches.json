@@ -1,0 +1,53 @@
+{
+  "scope": "Source-only reachable fixed publication-conflict branches, not runtime branch attribution",
+  "closedReceiptSha": "5a187a2f70ffcb1e383cc80a4ace6175aa16707d3493e18a23cdf404f9c20966",
+  "runtimeFacts": {
+    "finalizeStatus": 409,
+    "fixedCode": "PUBLICATION_CONFLICT",
+    "lastClaimHandlerMs": 1986.335125,
+    "lastClaimStatus": 202,
+    "stateAfterFailure": "FAILED",
+    "bootstrap": "READY",
+    "modelCalls": 8,
+    "physicalReads": 1
+  },
+  "reachableBranches": [
+    {
+      "source": "GuidedPlanPublisher",
+      "lines": [
+        268
+      ],
+      "condition": "Preparation current state is not FINALIZING; compatible with prior lease-loss state transition but actual branch unobserved"
+    },
+    {
+      "source": "GuidedPublicationBaseRepository",
+      "lines": [
+        188,
+        207
+      ],
+      "condition": "Captured base/source revision or identity fields, source/authoring/configuration hashes differ from current source"
+    },
+    {
+      "source": "GuidedPlanPublisher",
+      "lines": [
+        214
+      ],
+      "condition": "Fresh reconstructed basis hash differs from prepared snapshot basis hash"
+    },
+    {
+      "source": "GuidedPublicationRepository",
+      "lines": [
+        203,
+        284,
+        500,
+        525,
+        539,
+        367,
+        379
+      ],
+      "condition": "Attempt validation/finalize digest, inserted authoring equality, current FINALIZING state, translation head, action/model-attempt completion, or conditional publication/session update failed"
+    }
+  ],
+  "distinction": "Direct owner lease/session/validation deadline refusal at repository authority515-517 is EXPIRED, not PUBLICATION_CONFLICT. A preceding lease-loss state transition can instead cause FINALIZING guard conflict; fixed code alone does not distinguish that from basis/current-source mismatch. No exact internal branch or exclusive latency cause retained.",
+  "status": "NO_SOURCE_CHANGE_NO_RUNTIME_RETRY"
+}

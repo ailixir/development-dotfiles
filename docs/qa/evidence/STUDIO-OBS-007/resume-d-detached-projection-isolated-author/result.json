@@ -1,0 +1,94 @@
+{
+  "scope": "ISOLATED_DOCUMENTATION_FIRST_OPTIONAL_FACTORY_OWNED_PROJECTION_PREPARATION",
+  "disposition": "FROZEN_FOR_INDEPENDENT_ROOT_SOURCE_REVIEW_NO_APPLY",
+  "authority": "docs/qa/evidence/STUDIO-OBS-007/root-detached-projection-architecture-review.json",
+  "documentationFirst": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/resume-d-detached-projection-isolated-author/documentation-first-receipt.json",
+    "sha256": "24f958a7d7dcfffb3e62137a817246faeb927cd0031a8821fd896b2fe1ac822f",
+    "allJavaCandidatesBaseAtDocReceipt": true
+  },
+  "files": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java",
+      "beforeSha256": "76381f41eb51194bc8a21998b0c7f403f48d7baabfeb955c66b5fff31262386f",
+      "candidateSha256": "74168f66f244958d465432432b273f85316b1c97986ce2da70663c5c8298e784",
+      "wholeInverseExact": true,
+      "liveUnchanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "beforeSha256": "da7f3e4546afe3cca3fba1dfe2b3e772316d4e4fed9580ff7975e5a8aaf4f8a2",
+      "candidateSha256": "2193861e88c1fa021d080085d0c122b349a40b4c6f0ddbe3a94373ab9c48d13a",
+      "wholeInverseExact": true,
+      "liveUnchanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java",
+      "beforeSha256": "168e4bb93c39c8b935296054432819dec22fa65c5910e560840e66a5c2c56f1e",
+      "candidateSha256": "beca0fefed65929abe514e2baed23735de26ff5e5e1576cae2b096c4ada6916e",
+      "wholeInverseExact": true,
+      "liveUnchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/translation-design.md",
+      "beforeSha256": "83ea2139e8c941c8fe1c5661016503abccb7d7baba8e451a4d9d9d6d21bfbff5",
+      "candidateSha256": "a3a9ba0feae3d02173eea7000a4b7e292742f7b329c380fd9e6d51652df5ea05",
+      "wholeInverseExact": true,
+      "liveUnchanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+      "beforeSha256": "cea6a1039a6e024b27b1980be850edf330b5978f499a2969658eaa2f995c925b",
+      "candidateSha256": "2625442659adea52353d0e656038a0decf3deed61654f3aa2f9b88c1d433e4f6",
+      "wholeInverseExact": true,
+      "liveUnchanged": true
+    }
+  ],
+  "combinedPatch": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/resume-d-detached-projection-isolated-author/candidate.patch",
+    "sha256": "f2e7ff35874de30fb712cacf0394347557a26a5290dd883fa8a55c37af212d34"
+  },
+  "sourceProof": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/resume-d-detached-projection-isolated-author/source-preservation-proof.json",
+    "sha256": "d72e2ddcc5fafc1bd35b5ef48c589b1d3a74c1fa9cc5aa838f2321ed903ab3df",
+    "allFiveWholeInverseExact": true,
+    "originalPositiveContextLiftRawExact": true,
+    "originalRequestCollectionRawExact": true,
+    "fullMaterializationSelectionObligationMethodsExact": true,
+    "provenanceCallCountUnchanged": true,
+    "all33OldTestBodiesAndAssertionsExact": true,
+    "addedFocusedMethods": [
+      "projectionPreparationIsPrivateFactoryAndSameOwnerOnly",
+      "projectionPreparationRequiresFreshCutKeyAndOutputMetadata",
+      "typedPreparationFailureRequiresSameFreshValidationInput",
+      "nonfatalPreparationIsUnavailableAndFatalErrorPropagates"
+    ],
+    "candidateDefiningMethods": 37
+  },
+  "capabilityProof": "Assembler public constructor creates NO capability. Only package-private production factory reaches private factory constructor; capability private constructor pins assembler identity. Service public constructor passes null; package factory accepts only capability owned by the SAME assembler. PreparedProjection also pins SAME capability, so foreign completion falls back. No public setter, job/controller/body/config flag or mocking detection.",
+  "actualProductionWiring": "Existing GuidedTranslationConfiguration assembler bean uses createForProductionFactory; existing service bean uses fromPureAssemblerFactory with SAME assembler; existing classifier wiring unchanged and shares it. Root source review confirmed original ReplayIT uses ChecksApplication/production beans without assembler/service replacement; no fixture/toy path edited.",
+  "captureProof": "Factory-only read prep uses original translationTransaction and exact extracted request inputs/full materialized validation; no accounting/settlement/reserve/send. Positive context is privately deep-copied under capture; preparation retains only its owned masked/model-safe fields/static metadata, not current permission decision or full runner-context certificate.",
+  "cutProof": "Fresh actual captured inputs repeat unchanged materialized/source-selection/effective-obligation helpers. Complete checks key/attempt/kind/output cap, exact context JsonNode equality PLUS exact toString representation, and actual output/provider metadata. Mismatch invokes original public assembly. Every full hidden context/lease validation stays fresh under lock; lease is not a cached comparison authority.",
+  "byteProof": "Escaped sizing mirrors original payload/context + contents/systemInstruction/responseJsonSchema and UTF8+2048. Cached byte count available only when completion returns IDENTICAL privately prepared request. Context representation and actual schema representation match exactly; key/recovery/metadata mismatch produces another request and original serializer. Original projection document/digest still evaluated at actual reservation.",
+  "failureProof": "Only fixed INVALID_CONTRACT422/RUNTIME_INCOMPATIBLE409 from pure validation retained as literal code/status, no cause/stack. Matching fresh input replays at original planning validation point; mismatched input computes original result. Unknown RuntimeException makes prep unavailable, actual guarded fallback decides; Error propagates immediately. Capture failures are nonauthority/unavailable, not cached permission.",
+  "accountingProof": "Preparation writes no account/attempt/recovery rows. Actual original prelude retains role/source/owner/acquisition/reconcile/abandoned settlement. Factory path rereads owner after nested settlement and uses it for fresh request, reservation-fit/deadline/reserveAttempt; manual path aliases original current unchanged. Nested reserveModel remains fresh/authenticated/atomic; claimSend/gateway untouched.",
+  "pinProof": "NO preparation schemaProvenance call. Original actual manifest-pins compare and later projection-hash provenance call remain in their order; planning sequential pin spy/late-accounting tests untouched. Current public provider getter remains completion metadata authority; unsupported owner/candidate and schema mismatch use original fallback.",
+  "testScope": "Four focused defining methods cover manual/foreign eligibility, fresh-cut/recovery-key/output metadata fallback and immutable prepared input, matched typed-failure replay vs fresh repaired input, and nonfatal unavailable/fatal propagation. No actual PG/service/browser/Core effects claimed; all tests UNRUN.",
+  "limits": [
+    "Extra read/auth/validation/Error observations, possible repeated work and fresh-after-settlement read are documented intentional semantics.",
+    "Full runner-context validation remains in both lock holds; exact-context serialization remains needed for representation comparison. No timing/causal/PASS benefit promised; original1119.547416ms C5 RED retained.",
+    "Old RESERVE13 diagnostic is old source/class-bound SUPPORT ONLY. These Service edits invalidate six hardcoded debugpoints; ReplayIT untouched and planned unprofiled gates must keep sampler unset. Future sampled interpretation requires new mapping source review.",
+    "Metadata mismatch may add original fallback getter observations in eligible path; manual/nonstandard wiring is disabled and preserves original public path. No arbitrary stateful override equivalence claimed."
+  ],
+  "coordinatorNext": [
+    "Independent root full-patch/source review before apply.",
+    "Coordinator-only scoped formatter/compiler/strictstatic, full GuidedTranslationTest37 plus original session/conformance/planning/accounting/privacy selectors; no new mandatory E2E/framework.",
+    "Original UNPROFILED first/ninth fullTRACE/30patterns/1000ms only after approved defining checks; no new diagnostic."
+  ],
+  "liveSourceApplied": false,
+  "buildRuntimeOrTestsExecuted": false,
+  "newProductionFilesSchemaProtocolFramework": false,
+  "performanceClaim": false,
+  "whole19AcPass": false,
+  "lifecycleOrQaChanged": false
+}

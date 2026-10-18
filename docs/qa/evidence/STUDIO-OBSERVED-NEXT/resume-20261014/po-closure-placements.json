@@ -1,0 +1,331 @@
+{
+  "schema": 1,
+  "date": "2026-10-14T22:31:16.631327+00:00",
+  "owner": "Pax (@po)",
+  "authority": "Coordinator explicitly accepts documented nonblocking CONCERNS for scoped administrative completion; no external release waiver.",
+  "sources": [
+    "docs/qa/evidence/STUDIO-OBS-012B/resume-qa/review-report.json",
+    "docs/qa/evidence/STUDIO-OBS-013/resume-qa/review-report.json",
+    "docs/qa/evidence/STUDIO-OBS-014/resume-qa/review-report.json"
+  ],
+  "placements": [
+    {
+      "id": "FE-WORKERS",
+      "sources": [
+        "012B:TEST-001"
+      ],
+      "destination": "008",
+      "anchor": "T5",
+      "owner": "@dev frontend / CI owner",
+      "action": "Retain --minWorkers=1 --maxWorkers=3 on this shared host. Verify default-worker behavior on the next dedicated frontend gate and attribute any reproducible timeout by file; no timeout increase or default-worker pass is implied.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "FE-A11Y",
+      "sources": [
+        "012B:TEST-003",
+        "012B:OBS-UX-2",
+        "012B:OBS-UX-3",
+        "012B:OBS-UX-EMPTY"
+      ],
+      "destination": "008",
+      "anchor": "AC-8/AC-9 and RunControl",
+      "owner": "@ux-design-expert + @dev frontend",
+      "action": "Replace duplicate UNLEARNED WCAG surfaces 4/5 with distinct guided states and regenerated keys; check browser contrast/target size, keyboard/focus, busy-state accessible label-in-name, supplementary tooltip reachability and Add-a-step aria-describedby association. Existing jsdom audit is limited evidence.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "PLAYBACK-COST",
+      "sources": [
+        "013:ARCH-001"
+      ],
+      "destination": "008",
+      "anchor": "Playback verification / T5",
+      "owner": "@architect + @dev playback",
+      "action": "Obtain a dated ratification of controller-read authorization on every range request, identity-before-idempotent-echo and no-store-before-expired projection; measure repeated range-read locking/Core cost under playback load. Stronger present authorization is retained; this is not authorization to bypass it.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "PLAYBACK-COPY",
+      "sources": [
+        "013:MNT-001"
+      ],
+      "destination": "008",
+      "anchor": "Playback error copy",
+      "owner": "@ux-design-expert + @dev playback",
+      "action": "Refine shared unavailable/expired wording to neutral recording language for guided sessions while preserving response codes and statuses; coordinate the OBS-010 runbook.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "FE-CONSUMERS",
+      "sources": [
+        "012B:class-A-allowlist",
+        "014:Policy refusal/confirmation UX"
+      ],
+      "destination": "008",
+      "anchor": "T1/T2/T3/T5 existing obligations",
+      "owner": "@dev frontend + @ux-design-expert",
+      "action": "Remove all ten class-A contract allowlist entries when guided/secrets handlers land; retain class B scripted SSE and class C first-policy-client ownership. Implement the already-placed governed refusal/confirmation wording and labelSource rendering. No intermediate shared deployment or release before OBS-008.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "RUNNER-LAUNCH",
+      "sources": [
+        "013:REL-002",
+        "014:REL-001"
+      ],
+      "destination": "009",
+      "anchor": "AC-11 k / P3 and AC-12",
+      "owner": "@dev runner/backend + @architect + @qa",
+      "action": "Preserve the reported CONTEXT_LOST launch before any oracle under load about 20 separately from the historical S3b runner 503. Capture correlated admission/coordinator/IPC codes and host load, establish the launch bound, and attribute any recurrence before accepting that run. Later S4c success is not a root-cause finding and neither failed attempt is credited.",
+      "status": "OPEN",
+      "completion_condition": "Resolve or explicitly attribute launch/reliability evidence before the deployed integrated gate; retain existing AC-12 classification rules."
+    },
+    {
+      "id": "RUNNER-SCRATCH",
+      "sources": [
+        "013:REL-001"
+      ],
+      "destination": "009",
+      "anchor": "AC-11 k / P3 startup and termination",
+      "owner": "@dev runner",
+      "action": "Add a bounded startup sweep for stale TMPDIR/checks-recording-* WebM scratch left by SIGKILL, with crash-residue proof in the folded runner; normal-settlement cleanup alone does not close this item.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "MODEL-SIZING",
+      "sources": [
+        "014:OPS-001"
+      ],
+      "destination": "009",
+      "anchor": "AC-7 D-C benchmark / existing tuning path",
+      "owner": "@architect + @pm",
+      "action": "Size from real D-C measurements. Defaults remain concurrency 3, input 5,242,880 and output 640,000; full-ceiling reservation without refund explains about 20–21 full-budget sessions per CSI/day. Change limits only through the existing architect ruling and PM acknowledgement; preserve UTC-midnight Retry-After.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "LIVE-RECORDING",
+      "sources": [
+        "013:external-Sonic",
+        "013:C-17",
+        "014:SIEM sink and audit-retention Q3"
+      ],
+      "destination": "009",
+      "anchor": "Live evidence, C-17 and ops inputs",
+      "owner": "@dev runner + Platform/SRE + @qa",
+      "action": "Execute real Sonic range/lifecycle/ingress and manual password-masking inspection C-17; obtain actual SIEM sink and retention inputs. Local object-store, controlled Chromium and audit-canary results do not satisfy these external checks. Carry sign-off into OBS-010.",
+      "status": "OPEN",
+      "completion_condition": "Unavailable services and human inspections remain unrun, with named owners; no simulated pass."
+    },
+    {
+      "id": "VIDEO-LOGGING",
+      "sources": [
+        "013:TEST-003"
+      ],
+      "destination": "010",
+      "anchor": "AC-4 evidence access / AC-5 runbook",
+      "owner": "@architect + @dev evidence owner",
+      "action": "Reconcile AR-1 INFO+ bucket/endpoint log prohibition with shared VideoObjectServer WARN cause logging. Record a dated ruling and implement the agreed log-capture assertion if required. Body/header tests do not prove logs; no plaintext secret leak was identified.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "CACHE-REAUTH",
+      "sources": [
+        "014:D-2b cached 2xx reauthorization"
+      ],
+      "destination": "010",
+      "anchor": "AC-4 security readiness / UI-STUDIO-GA-PLAN D-2b",
+      "owner": "@qa security + platform/backend",
+      "action": "Keep D-2b open for cached 2xx responses, including governed-policy POST caching. The five policy operations are two GET and three POST. Record the security disposition and supporting reauthorization evidence; current idempotency tests do not resolve it.",
+      "status": "OPEN",
+      "completion_condition": "Open security-readiness item; release record may not silently mark it resolved."
+    },
+    {
+      "id": "AUDIT-LABEL-PRIVACY",
+      "sources": [
+        "014:SEC-003"
+      ],
+      "destination": "010",
+      "anchor": "AC-4 Security & Compliance decision",
+      "owner": "Security & Compliance; @pm for any mitigation follow-up",
+      "action": "Carry the disclosed dictionary-recovery risk of truncated unkeyed SHA-256(scopeHash:label) targetLabelHash into the explicit compliance decision. If keyed audit-label hashing is required, @pm owns a separate architect-first mitigation backlog/story before the affected approval. F04 remains artifact HMAC only and supplies no audit-label mitigation.",
+      "status": "OPEN",
+      "completion_condition": "No compliance acceptance is claimed. A required mitigation stays a pending external approval item until implemented and reviewed."
+    },
+    {
+      "id": "EXTERNAL-READINESS",
+      "sources": [
+        "014:R-1 indefinite guided stores",
+        "014:R-2 learning versus replay policy sources",
+        "014:Exact-field nonscalar reads",
+        "014:Artifact HMAC / external E1-E8",
+        "014:Compliance approval and gateway retention ED-01"
+      ],
+      "destination": "010",
+      "anchor": "AC-4 existing F01–F04 rows / AC-5",
+      "owner": "@pm + @architect + Security & Compliance + Platform/SRE + gateway owner",
+      "action": "Retain F01 indefinite-store retention, F02 separate learning/replay policy, F03 evidence-gated nonscalar reads and F04 artifact-HMAC conditions exactly as the README states. F04 is pilot-blocking by default unless externally accepted as a named residual; E1–E8 remain UNCONFIRMED and E1–E4 gate implementation. Keep ED-01 retention, compliance approval, D-B, ED-02, G-1/G-2/G-3, C-2/C-3, SIEM/Q3 and dev-DB recreation explicitly open where recorded. No source or gate promotion occurs here.",
+      "status": "OPEN",
+      "completion_condition": "The closure accepts scoped CONCERNS only, never external release approval."
+    },
+    {
+      "id": "RECORDING-RUNBOOK-COPY",
+      "sources": [
+        "013:MNT-001"
+      ],
+      "destination": "010",
+      "anchor": "AC-5 playback runbook",
+      "owner": "@dev evidence owner",
+      "action": "Use the neutral recording wording agreed in OBS-008 for unavailable/expired guided evidence; keep status/code semantics and actual storage limitations explicit.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "GUARD-INTEGRATION",
+      "sources": [
+        "014:TEST-001"
+      ],
+      "destination": "011",
+      "anchor": "AC-5/T3 harness verification and T5",
+      "owner": "@dev backend guard owner + @qa",
+      "action": "Add dedicated structurally valid UNGROUNDED_TARGET and DESTRUCTIVE_VERB integrations that reach guardAction, then assert exact audited reason, terminal refusal and zero prepare/admission/dispatch side effect. Preserve the authored-destructive allowance control. These are coverage improvements over accepted unit plus common DENY-path composition, not claims that the named integrations already ran.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "HARNESS-EXACTNESS",
+      "sources": [
+        "014:TEST-003",
+        "014:TEST-005",
+        "014:TEST-006"
+      ],
+      "destination": "011",
+      "anchor": "AC-5/T3 and T5 harness follow-up",
+      "owner": "@dev runner/backend test-harness",
+      "action": "Assert the exact same-key refused-context replay code (current IDENTITY_MISMATCH) or obtain an explicit normalization ruling; add a SAVED_INPUT configuration-reference clarification assertion with no secret value; move mutable primaryCsi/coreRole into per-test fixture ownership during the harness split. Keep behavior and existing assertions intact.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "GUARD-PRECEDENCE",
+      "sources": [
+        "014:ARCH-001"
+      ],
+      "destination": "011",
+      "anchor": "T0 ruling / AC-6 T4 dated notes",
+      "owner": "@architect",
+      "action": "Ratify the current absent-target → destructive → grounding → stance precedence in a dated ruling; AR-SEC001-FM does not decide it. Both current destructive/ungrounded paths refuse before dispatch. A required behavior change needs separate scope review, not an unreviewed cleanup edit.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "DDL-DOCUMENTATION",
+      "sources": [
+        "013:ARCH-002",
+        "014:DB-001"
+      ],
+      "destination": "011",
+      "anchor": "AC-6/T4 dated documentation; before any affected constraint alteration",
+      "owner": "@architect + @data-engineer",
+      "action": "Amend the AR-1 normative {1,256} text by dated addendum to the verified PostgreSQL equivalent varchar(256) plus ASCII and regex. Record actual V19 generated CHECK catalog names before any future alteration. V20 boundary tests and V19 enforcement already passed; do not rewrite applied migrations.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "CLEANUP-OBSERVATIONS",
+      "sources": [
+        "012B:OBS-UX-1",
+        "014:MNT-001"
+      ],
+      "destination": "011",
+      "anchor": "T1 vocabulary review / T4 cleanup",
+      "owner": "@dev + @ux-design-expert; coordinator for directory",
+      "action": "Review RunDetailsDrawer confirmed revision wording for Learned revision and remove the literal empty contracts/v3/*.json directory in coordinator-owned cleanup only after proving it empty. Retain the OBS-010 Live surface and evidence history protections.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "REVIEW-EVIDENCE-HYGIENE",
+      "sources": [
+        "012B:TEST-002",
+        "012B:EVD-001"
+      ],
+      "destination": "011",
+      "anchor": "AC-6/T4 and AC-7/T5",
+      "owner": "@dev test-harness + @qa",
+      "action": "Retain the historical commented-import mutation as text-scanner proof only; a future guard strengthening may use a live import without rewriting that history. Preserve historical raw logs and apply the existing archive-first evidence policy; prefer relative paths/hashes in new summaries. These retained observations do not add a mandatory product behavior change.",
+      "status": "OPEN",
+      "completion_condition": "Open follow-up; no pass or waiver supplied by closure."
+    },
+    {
+      "id": "RECORDING-FIXTURE-APPLICABILITY",
+      "sources": [
+        "013:DOC-002"
+      ],
+      "destination": "013",
+      "anchor": "Administrative closure notes",
+      "owner": "@po",
+      "status": "RECORDED",
+      "action": "AC-6 and Testing references to retired recording-coverage.test.ts apply to replacement studio-runner/test/fixtures-tier/guided-recording.test.ts. All four real-browser cases, including adapter parity and recorder loss, passed. No guided coverage is waived.",
+      "completion_condition": "Applicability recorded with unchanged AC/task text."
+    }
+  ],
+  "downstreamVerification": {
+    "008": {
+      "beforeSha256": "dcc44e4195ad51a6d77d69ddfebc06182b15f4a50528e4be4874a4bbd5d8343b",
+      "afterSha256": "b5c100073debfe970abaac8698210b6c6f56693c96945e68cdfeeb76603a62cd",
+      "acTextUnchanged": true,
+      "tasksUnchanged": true,
+      "status": "Ready",
+      "placementCount": 5
+    },
+    "009": {
+      "beforeSha256": "46a43abcc72221b5d1b76f4d5412f57a3a8bf69c41663c1fe92113d586d9cbad",
+      "afterSha256": "d060b162fec1378d21b218311db83b05df9500f6c2780dfd5647d99764fe4c49",
+      "acTextUnchanged": true,
+      "tasksUnchanged": true,
+      "status": "Ready",
+      "placementCount": 4
+    },
+    "010": {
+      "beforeSha256": "c2f3e1acb92800ef96f2cdd734c63a2a3f482ac5cc75ebae94a864ab3e5f82f2",
+      "afterSha256": "08241b6f9fb86622108fd82783c9270d404d2526d326ffc8d74ce513ecd97c8b",
+      "acTextUnchanged": true,
+      "tasksUnchanged": true,
+      "status": "Ready",
+      "placementCount": 5
+    },
+    "011": {
+      "beforeSha256": "d2388d579bb403c0d5809b9bd5ece3e6929f61fe7f6c0dd31bbba0eb295c7d49",
+      "afterSha256": "6f7efb4753ba4ff1440bfad0846708bbf0cd9d8dec45f6a1c368404349383cff",
+      "acTextUnchanged": true,
+      "tasksUnchanged": true,
+      "status": "Ready",
+      "placementCount": 6
+    }
+  },
+  "scopePreserved": [
+    "Completed-story AC/task/implementation substance unchanged",
+    "013 administrative QA checkbox only; exact reversal proof in close report",
+    "F04 artifact HMAC scope and entry/exit gates unchanged",
+    "No OBS-015/source/test/spec/QA-verdict/CLI-state edit"
+  ],
+  "next": {
+    "story": "STUDIO-OBS-015",
+    "dependencyEligible": true,
+    "implementationReady": false,
+    "condition": "Await architect/data readiness resolution for base input hashes/context secrets, materialization and reused hash semantics; root owns CLI verification and serialized handoff."
+  },
+  "budget": {
+    "wholeWaveCeilingUsd": 500,
+    "actualBilling": "unavailable"
+  }
+}

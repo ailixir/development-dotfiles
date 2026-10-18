@@ -1,0 +1,105 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "lane": "runner-coverage (src/run/** gate after Lane K artifact-1 deletion) + fixtures-tier flake diagnosis",
+  "agent": "@qa (Quinn), YOLO",
+  "date": "2026-10-13",
+  "verdict": "NEEDS_WORK — gate NOT restored; 85% is unattainable in the unit tier without breaching the AC-25 confinement tripwire or changing config. Owner ruling required.",
+  "constraintsHonoured": {
+    "thresholdsChanged": false,
+    "includesExcludesChanged": false,
+    "skipsAdded": 0,
+    "v8IgnoreAdded": 0,
+    "srcChanged": false,
+    "laneCFilesTouched": false,
+    "gitWrites": "none (no add/commit/stash/reset/checkout/restore)"
+  },
+  "autoDecisions": [
+    "[AUTO-DECISION] Cover browser.ts by vi.mock('playwright') as the lead suggested? -> NO (reason: test/run/confinement.test.ts 'AC-25 — no test outside the fixtures tier imports the browser module or Playwright' fails on any test source containing 'run/browser.js'; reaching browser.ts transitively via child.ts/guidedMain.ts would only evade that textual tripwire, which is gaming the gate; confinement.test.ts also holds Lane C's pin and is do-not-edit)",
+    "[AUTO-DECISION] Fix the observed-secret-control flake? -> NO (reason: root cause is product-side event-loop blocking plus a zero-margin deadline; any test-side change would loosen the 2000 ms bound)",
+    "[AUTO-DECISION] Fix the observed-bootstrap-video flake? -> NO (reason: not reproduced 5/5 isolated, no failing artifact is retained, root cause not established)"
+  ],
+  "newTests": {
+    "files": [
+      { "path": "studio-runner/test/run/childRuntimeTeardown.test.ts", "tests": 8, "targets": "childRuntime real inspectRecordingFile (playable / no EBML magic / truncated / unopenable path -> RECORDING_FAILED, no errno leak), production TAIL_SETTLE_HOLD_MS timer, stop cutting the hold short, malformed stop frame -> INVALID_CONTRACT" },
+      { "path": "studio-runner/test/run/evidenceStoreFaults.test.ts", "tests": 14, "targets": "uploadRecording stat failure (FAILED, 0 attempts, redacted, non-Error -> unknown); evidence window closed before first attempt; last real store error reported when window closes mid-retry; per-attempt abort budget; local store root uncreatable -> ObjectStoreUnavailableError; vanished source / aborted signal -> ObjectStorePutError; S3 mounted credentials missing/empty/unreadable -> CredentialsProviderError without path; split key files" },
+      { "path": "studio-runner/test/run/processTableUnavailable.test.ts", "tests": 4, "targets": "tree.readProcessTable when spawnSync throws -> [], timeout clamp, canEnumerateProcessTree false, signalProcessTree degrades to root+group without throwing" },
+      { "path": "studio-runner/test/run/forkKillTree.test.ts", "tests": 2, "targets": "createForkSpawner().kill() on a LIVE leader that ignores stop: leader exits SIGKILL and a detached own-group grandchild dies (AC-11a, real Node processes, no browser); no signal after exit" },
+      { "path": "studio-runner/test/run/observationCollectorInvoke.test.ts", "tests": 15, "targets": "collector invoke: fill writes + input/change; POST_FOCUS_CHANGED when focus handler retypes/steals focus/makes read-only; null value refused; selectOption single enabled match, refuses disabled/ambiguous/missing/multiple; hasValue/containsText live assertions; navigate never in-page" },
+      { "path": "studio-runner/test/run/observationCollectorNaming.test.ts", "tests": 10, "targets": "native <label> association naming + label hint; ambiguity (aria-label on label, hidden label, empty label, >8 labels); dt/dd bounded fallback without value export; exact read rule granted vs withheld when hidden text inside; open-shadow password controls counted" },
+      { "path": "studio-runner/test/run/outputRelayContainment.test.ts", "tests": 1, "targets": "close() contains a sink that throws on the truncation notice; notice attempted once" }
+    ],
+    "total": 54,
+    "typecheck": "./node_modules/.bin/tsc -p tsconfig.json --noEmit -> exit 0",
+    "lint": "./node_modules/.bin/eslint <7 new files> -> exit 0",
+    "confinementAndStaticScans": "vitest run test/run/confinement.test.ts test/lint-boundary.test.ts test/no-dynamic-evaluation.test.ts test/static test/isolation.test.ts test/deferred.test.ts -> 147 passed, 19 skipped, 0 failed"
+  },
+  "defaultTier": {
+    "command": "./node_modules/.bin/vitest run --coverage.reportOnFailure (vitest.config.ts thresholds unchanged)",
+    "laneKBaseline": { "tests": "1245 total (Lane K ledger)", "srcRunLines": "77.77% (2180/2803)" },
+    "final": {
+      "exitCode": 1,
+      "files": "81 passed, 1 skipped (82)",
+      "tests": "1270 passed, 29 skipped, 0 failed (1299)",
+      "global": { "lines": 88.63, "statements": 88.63, "branches": 88.17, "functions": 95.95 },
+      "srcRun": { "lines": "81.09% (2273/2803)", "statements": "81.09%", "branches": "85.36% (1714/2008)", "functions": "98.76% (239/242)" },
+      "onlyGateFailure": "src/run/** lines and statements 81.09% < 85%"
+    },
+    "note": "An intermediate run during Lane C's in-flight edits showed 203 failures in Lane C-affected files (contract/generated/pins); the final run above is clean."
+  },
+  "coverageCeilingAnalysis": {
+    "needFor85": "2383/2803 covered lines; 110 more than now",
+    "uncoveredAfterThisLane": [
+      { "file": "src/run/browser.ts", "uncovered": 485, "lines": "all", "why": "the only Playwright importer (AC-1); test/run/confinement.test.ts AC-25 forbids any non-fixtures test from importing it or Playwright, so no unit test may load it, mocked or not" },
+      { "file": "src/run/guidedMain.ts", "uncovered": 24, "lines": "3-5,7-8,17-35", "why": "process entry: imports ./browser.js (loads Playwright transitively) and runs main() on import (reads env/mounted config, listens, sets process.exitCode)" },
+      { "file": "src/run/child.ts", "uncovered": 19, "lines": "1-2,16,18-19,30-38,40-44", "why": "process entry: imports ./browser.js; its entry block is already /* v8 ignore */ (pre-existing); importing it loads browser.ts transitively, evading AC-25 by indirection" },
+      { "file": "src/run/observationCollector.ts", "uncovered": 2, "lines": "752-753", "why": "defensive: invoke() first calls validateInvocation(), which only admits assert predicates visible/hasValue/containsText and rejects navigate, so these throws are unreachable through the public API" }
+    ],
+    "unitTierCeiling": "2275/2803 = 81.16% (every line outside browser.ts/child.ts/guidedMain.ts covered)",
+    "browserTsShareNeeded": "≥108 of browser.ts's 485 lines (≈22%) would close the gap if an owner allowed a mocked-Playwright unit test of browser.ts",
+    "laneKEstimateCorrection": "Lane K's 82.7% ceiling counted child.ts and guidedMain.ts as coverable; both import ./browser.js, so the real unit-tier ceiling is 81.16%",
+    "ownerOptions": [
+      "@architect: rule whether AC-25 (10.12) permits one unit test that imports browser.ts with Playwright mocked (no Chromium launched); requires amending the confinement tripwire in test/run/confinement.test.ts",
+      "@architect/@po: measure src/run/browser.ts, child.ts and guidedMain.ts in the fixtures tier (real Chromium) and exclude them from the unit-tier src/run/** denominator — a vitest.config.ts change, do-not-edit for lanes",
+      "@po: explicitly waive the src/run/** 85% line gate for 012A (10.12 AC-25 says no threshold is lowered, so this needs a recorded ruling)"
+    ]
+  },
+  "flakes": {
+    "observed-secret-control > lost-control-body": {
+      "assertion": "stopAt - revokedAt <= 2000 ms (OBS-007 AC-13 bound: '≤2 s including request/queue time')",
+      "preExists012A": true,
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-007/resume-final-runner-existing-native-thirtyseven/{result.json,run.log,lost-body-fixed-first-boundary.json}: FAILED 2021.67 ms at 2026-10-12T01:35Z, before Lane K, against a frozen pre-012A source/dist zip",
+        "pre-012A passing runs in OBS-007 evidence: 1992.85, 1995.44, 1997.08, 1998.75 ms (all within 8 ms of the bound)",
+        "pre-012A frozen zips (2026-10-10 and 2026-10-11) contain the same launcher trackTree setInterval(remember, 25) as today",
+        "compiled observed runtime unchanged by 012A: dist attachObservedChildRuntime byte-identical; launchObservedChild differs only in the session object shape (adapter/clock removed); child.js identical; browser.js differs only 'page: page' -> 'page'"
+      ],
+      "reruns": {
+        "command": "./node_modules/.bin/vitest run --config vitest.fixtures.config.ts test/fixtures-tier/observed-secret-control.test.ts -t lost-control-body (x5, isolated)",
+        "result": "3 passed / 2 failed",
+        "cutoffMs": [2001.92, 1990.02, 2006.06, 1998.55, 1999.60],
+        "nominalWindowEndAfterRevocationMs": [1991.78, 1981.97, 1992.05, 1993.85, 1999.42],
+        "stopTimerLatenessMs": [10.14, 8.05, 14.01, 4.70, 0.18]
+      },
+      "rootCause": "Product-side. (1) startControlPoll schedules the secret-bearing stop at windowEnd = nominal poll start + 2000 ms, and revocation can land only a few ms after that start (late timer + request latency), so the designed headroom is ~1-18 ms. (2) The parent event loop that runs that timer is blocked by the production tree tracker: launcher.ts trackTree() runs spawnSync('ps -A') every 25 ms during an observed run; on this machine one call blocks 14.2-15.9 ms (604 processes). Controlled probe with the real dist createForkSpawner: setTimeout lateness without trackTree median 1.62 / p90 2.12 / max 12.9 ms; with trackTree median 6.78 / p90 26.53 / max 50.47 ms. The overrun (0.2-20 ms past the bound) matches that lateness.",
+      "classification": "not a test-side timing defect; not caused by 012A; not fixed (any test-side change would loosen the 2000 ms product bound)",
+      "recommendation": "@dev/@architect: make tree tracking non-blocking (async ps or a coarser interval off the timer-critical path) and/or give the secret-control stop an explicit scheduling margin under the 2000 ms bound. The synchronous 25 ms ps loop also blocks the runner's HTTP server about 60% of the time per active run, which is a performance concern beyond this test."
+    },
+    "observed-bootstrap-video > normal-failure": {
+      "assertion": "every decoded frame before the first red frame is white (r,g,b > 245, 1x1 area-scaled)",
+      "preExists012A": "cannot be proven from history (no earlier failing log found); not attributable to 012A: the recording/navigation path (browser.js, child.js, attachObservedChildRuntime) is runtime-identical pre/post 012A as above",
+      "reruns": {
+        "command": "./node_modules/.bin/vitest run --config vitest.fixtures.config.ts test/fixtures-tier/observed-bootstrap-video.test.ts -t normal-failure (x5, isolated)",
+        "result": "5 passed / 0 failed",
+        "blankPrefixMs": [40, 0, 0, 0, 0],
+        "prefixFrames": [1, 0, 0, 0, 0]
+      },
+      "diagnosis": "Inference, not verified: under full-tier CPU load a transitional (partly painted or codec-blended) frame before the first fully red frame fails both the red and the white predicates. The test deletes the video in finally and writes its facts file only on success, so a failing run leaves no artifact to confirm this.",
+      "classification": "intermittent under load; root cause unconfirmed; not fixed",
+      "recommendation": "Test owner: on failure, keep the per-frame RGB/timestamp facts (or the webm) so the next occurrence can be classified."
+    }
+  },
+  "sideEffects": [
+    "The fixtures runs rewrote docs/qa/evidence/STUDIO-OBS-007/runner-control-focus-candidate/oracle-*.json, runner-native-file-facts-*.json and runner-bootstrap-native-video*.json; all 10 files were backed up first and restored byte-identical afterwards (cmp verified)",
+    "fixtures globalSetup re-emitted studio-runner/dist (untracked build output)"
+  ]
+}

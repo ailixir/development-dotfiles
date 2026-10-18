@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "scope": "SOURCE_ONLY_ONE_EXISTING_NATIVE_FILE_THREE_ORIGIN_PARAMETERS",
+  "createdAtUtc": "2026-10-11T08:42:18.355828+00:00",
+  "status": "FROZEN_CANDIDATE_UNCHECKED_UNEXECUTED",
+  "intentBindings": {
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-r-minimum-origin-native-family-intent.txt": "e8d1a3b71d1141212970e58715808b9a1d0e03edcf191a96bc3992f6a61ada7e",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-r-minimum-origin-native-family-context.txt": "a34c27694625aa7011b5e55fbdc325b1897cb07b37a735da8998bcdaac964dc2"
+  },
+  "ownedPath": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+  "beforeSha256": "7198c88dce004781783e3e873ce08e468406fb3a2b8678900e7e8e32425fdd0b",
+  "afterSha256": "4cd95983d578fa22e0d7d0c010b9ec5ce114d967a87935ab424b2d3296197811",
+  "patch": "--- before/studio-runner/test/fixtures-tier/secret-login.test.ts\n+++ after/studio-runner/test/fixtures-tier/secret-login.test.ts\n@@ -24,12 +24,13 @@\n import publication from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with {type: 'json'};\n \n const CANARY = 'obs007-Chromium-canary-4f19';\n-let fixture: Awaited<ReturnType<typeof startSecretLoginFixture>>, scratch: string, browser: BrowserHandle, page: Page;\n+let fixture: Awaited<ReturnType<typeof startSecretLoginFixture>>, scratch: string, browser: BrowserHandle, page: Page, declaredAliasOrigin: string;\n const sessions: ObservationSession[] = [];\n beforeAll(async () => {\n   fixture = await startSecretLoginFixture(CANARY); scratch = await mkdtemp(join(tmpdir(), 'secret-login-oracle-'));\n   prepareBrowserProfile(scratch);\n-  browser = await playwrightBrowserFactory.launch({ browser: 'chromium', scratchPath: scratch,observedScope:{...publication.job.binding.scope as Scope,policyVersion:'observed-4-full-chromium-1',allowedOrigins:[fixture.origin],initialContext:{kind:'initialBlank'}}, viewport: {width: 800, height: 600}, recording: {width: 800, height: 600} });\n+  const alias = new URL(fixture.origin); alias.hostname = 'localhost'; declaredAliasOrigin = alias.origin;\n+  browser = await playwrightBrowserFactory.launch({ browser: 'chromium', scratchPath: scratch,observedScope:{...publication.job.binding.scope as Scope,policyVersion:'observed-4-full-chromium-1',allowedOrigins:[fixture.origin,declaredAliasOrigin],initialContext:{kind:'initialBlank'}}, viewport: {width: 800, height: 600}, recording: {width: 800, height: 600} });\n   page = browser.page as unknown as Page;\n });\n afterEach(async () => { for (const session of sessions.splice(0)) await session.dispose(); fixture.reset(); await page.goto('about:blank'); });\n@@ -72,6 +73,36 @@\n     await page.locator('button').click(); await page.goto(fixture.origin + '/echo');\n     const export_ = await h.session.observe(); expect(export_.json).not.toContain(CANARY);\n     expect(export_.observation.nodes).toEqual([]);\n+  });\n+  it.each(['nonempty-allowed-exclusion', 'approved-exclusion', 'formless-declared-navigation'] as const)('refuses the native origin boundary at its first guard: %s', async mode => {\n+    expect(declaredAliasOrigin === fixture.origin).toBe(false);\n+    await page.goto(fixture.origin + (mode === 'formless-declared-navigation' ? '/no-password' : '/login'));\n+    if (mode === 'formless-declared-navigation') await page.setContent('<input name=\"password\" type=\"password\">');\n+    const approvedOrigins = mode === 'approved-exclusion' ? [declaredAliasOrigin] : mode === 'formless-declared-navigation' ? [fixture.origin, declaredAliasOrigin] : [fixture.origin];\n+    const session = browser.createObservationSession?.({sessionId: 'controlled-origin', scopeHash: 'a'.repeat(64), approvedOrigins, rules: [], knownSecrets: [], applicationPolicy: {policyRuleId: 'structural', allowStructuralDiscovery: true}});\n+    if (!session) throw new Error('OBSERVATION_SESSION'); sessions.push(session);\n+    if (mode === 'approved-exclusion') {\n+      // Actual collection refuses before a password observation/target/pin exists.\n+      await expect(session.observe()).rejects.toMatchObject({message: 'SCOPE_DENIED'});\n+    } else {\n+      const observation = (await session.observe()).observation;\n+      expect(observation.coverage.passwordControls).toBe(1);\n+      expect(observation.nodes.some(node => node.controlType === 'password')).toBe(false);\n+      const target: PasswordTarget = {kind: 'passwordControl', documentId: observation.documentId, generation: observation.generation};\n+      await session.preparePassword?.(target, fixture.origin);\n+      if (mode === 'nonempty-allowed-exclusion') {\n+        await expect(session.fillPassword?.(target, fixture.origin, [declaredAliasOrigin], CANARY)).rejects.toMatchObject({message: 'POLICY_DENIED', noEffect: true});\n+      } else {\n+        expect(await page.locator('input').evaluateAll(elements => elements.every(element => (element as HTMLInputElement).form === null))).toBe(true);\n+        const response = await page.goto(declaredAliasOrigin + '/no-password');\n+        expect(response?.status()).toBe(200); expect(page.url()).toBe(declaredAliasOrigin + '/no-password');\n+        expect(await page.evaluate(() => location.origin)).toBe(declaredAliasOrigin);\n+        await expect(session.fillPassword?.(target, fixture.origin, [fixture.origin, declaredAliasOrigin], CANARY)).rejects.toMatchObject({message: 'TARGET_CHANGED', noEffect: true});\n+      }\n+    }\n+    expect(await page.locator('input').count()).toBeGreaterThan(0);\n+    expect(await page.locator('input').evaluateAll(elements => elements.every(element => (element as HTMLInputElement).value === ''))).toBe(true);\n+    expect(fixture.receipts().length).toBe(0);\n   });\n   it.each(['shadow-plus-light', 'offscreen', 'iframe', 'closed-shadow'] as const)('counts adversarial %s candidates identically at prepare', async mode => {\n     const h = await observed('/no-password');\n",
+  "patchSha256": "bddd0d9c7edaab447b3079bca1d0c51c9c0006852860ecb07e6154e9327fe89e",
+  "oldPreservation": {
+    "oldLogicalCount": 30,
+    "allOldNamesBodiesAssertionsBytePreserved": true,
+    "reconstruction": "Remove exact three-case it.each insertion, revert only added declaredAliasOrigin binding/declaration and second admitted test origin before existing browser launch. Complete old test file bytes restored exactly.",
+    "reconstructedOldSha256": "7198c88dce004781783e3e873ce08e468406fb3a2b8678900e7e8e32425fdd0b",
+    "oldObservedHelperUnchanged": true,
+    "sharedSetupDelta": "Add same existing fixture server localhost/same-port origin to actual test browser observedScope before launch, only to permit genuinely declared document navigation. Existing sessions/helpers still approve original127 origin by default. No production policy/config/server/context change."
+  },
+  "counts": {
+    "newFamilyGroups": 1,
+    "newLogicalCases": 3,
+    "expectedTotal": 33,
+    "executed": false
+  },
+  "selectors": [
+    "isolated-world password control production boundary refuses the native origin boundary at its first guard: nonempty-allowed-exclusion",
+    "isolated-world password control production boundary refuses the native origin boundary at its first guard: approved-exclusion",
+    "isolated-world password control production boundary refuses the native origin boundary at its first guard: formless-declared-navigation"
+  ],
+  "guards": [
+    {
+      "mode": "nonempty-allowed-exclusion",
+      "firstCode": "POLICY_DENIED",
+      "phase": "Actual observed/pinned original127 document; approved127 but allowedOrigins is nonempty localhost alias only. Collector fill confirm origin intersection559 refuses; original PasswordNoEffect marker true.",
+      "assertions": "Real count1/no PW node, original prepare, exact error code/noEffect and scalar all inputs empty/submissions0. Existing empty-list and allowed-positive tests unchanged; no duplicate."
+    },
+    {
+      "mode": "approved-exclusion",
+      "firstCode": "SCOPE_DENIED",
+      "phase": "Current document127 but actual observation session approves alias only. collect270 and browser observation334/345 refuse before observation target/pin; no target fabricated or fill performed.",
+      "assertions": "Exact observe error and scalar empty inputs/submissions0. This is earlier native observation scope evidence, NOT executed fill POLICY_DENIED or public Core code; any SEC5 wording disposition is coordinator/independent-owner scope."
+    },
+    {
+      "mode": "formless-declared-navigation",
+      "firstCode": "TARGET_CHANGED",
+      "phase": "Real form-less password DOM observed and pinned127; old genuine target retained. Actual successful200 navigation to alias/no-password in existing declared browser scope; pageURL and in-page location.origin verified. Original passwordControl guard observedNavigation!=navigation refuses before world call/write.",
+      "assertions": "Form-less boolean, count1/no PW node, successful declared response/origin, exact TARGET_CHANGED/noEffect, current document inputs empty/submissions0. Missing/failed navigation cannot satisfy test."
+    }
+  ],
+  "navigationDeclaration": {
+    "source": "beforeAll, before playwrightBrowserFactory.launch",
+    "origin": "Same existing loopback fixture port with hostname localhost",
+    "reason": "A genuinely distinct origin without a new server/context or policy bypass. Actual Chrome navigation must reach200 and actual location.origin. IPv6/DNS/connection failure remains a real failed test, not navigation proof.",
+    "afterEach": "Existing disposal fixture.reset and aboutblank cleanup retained; original helper/config contexts untouched."
+  },
+  "privacyAndScope": [
+    "Same existing fixture/page/browser context and original observation/password primitive; no new helper/proxy/framework/server/fixture file or private guard bypass.",
+    "Fixture input values/forms inspected only by boolean oracle; no raw arrays/value strings retained/exported. CANARY is supplied only to original fill of the two already-pinned cases, with trusted no-effect refusal asserted.",
+    "Existing old30 profiles/redaction/disk/diagnostics/video scenarios retained. New component tests are not Core/Vault/model/publication evidence.",
+    "No fake password observation node, invalid artifact, synthetic navigation success or arbitrary error-code acceptance.",
+    "No source provenance/image/full19/QA/lifecycle claim."
+  ],
+  "sourceGuardBindings": {
+    "studio-runner/src/run/observationCollector.ts": "ba31be90d04885e6329ae02f6559205325740cbd46960a438150a890557c27a2",
+    "studio-runner/src/run/passwordControl.ts": "5312b614a53ae14eedb574161831168ec404ff5f700875b0883eec083a045882",
+    "studio-runner/src/run/browser.ts": "a397ece7c7dec06e643bc82b6a4862c5accf154c1c6b28d314ad3c7fab4ac02d",
+    "studio-runner/test/fixtures/secret-login/server.ts": "4dfdb95e5a57d3ced6122d59fe190dd84ef58f722ce63fc5557785c51bb611f9"
+  },
+  "futureInvocation": {
+    "cwd": "studio-runner",
+    "argv": [
+      "npm",
+      "run",
+      "test:fixtures",
+      "--",
+      "test/fixtures-tier/secret-login.test.ts"
+    ],
+    "expectedCount": 33,
+    "executed": false,
+    "owner": "Coordinator sole Node22 static/build/browser lane after freeze"
+  },
+  "actions": {
+    "sourceFilesEdited": 1,
+    "otherSourceFilesEdited": 0,
+    "NodeCommands": 0,
+    "SDKCommands": 0,
+    "tests": 0,
+    "runtimeStarts": 0,
+    "builds": 0,
+    "typeChecks": 0,
+    "lintRuns": 0,
+    "formatter": 0,
+    "SQL": 0,
+    "Gradle": 0,
+    "distWrites": 0,
+    "modelsOrSpawns": 0,
+    "evidenceWrites": 1
+  },
+  "executionRelease": false,
+  "qaApproved": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNKNOWN_NOT_MEASURED",
+  "zeroEffectNonvacuity": "Require actual current document has at least one input before all-input-empty boolean; private fixture submission count remains0."
+}

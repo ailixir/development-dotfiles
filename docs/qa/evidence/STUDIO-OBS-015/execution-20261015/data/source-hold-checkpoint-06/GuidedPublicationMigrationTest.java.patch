@@ -1,0 +1,81 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java
+@@ -1207,6 +1207,19 @@
+       String csiId,
+       String environment,
+       String principal) {
++    return prepareObserved(source,sessionId,existingTestId,csiId,environment,principal,false);
++  }
++
++  /** Explicit historical V18 test fixture; current runtime compatibility is not claimed. */
++  public static Published publishHistoricalV18Observed(javax.sql.DataSource source,String sessionId,String csiId,String environment,String principal) {
++    return publishObserved(source,prepareObserved(source,sessionId,null,csiId,environment,principal,true),true);
++  }
++
++  public static Prepared prepareHistoricalV18Observed(javax.sql.DataSource source,String sessionId,UUID existingTestId,String csiId,String environment,String principal) {
++    return prepareObserved(source,sessionId,existingTestId,csiId,environment,principal,true);
++  }
++
++  private static Prepared prepareObserved(javax.sql.DataSource source,String sessionId,UUID existingTestId,String csiId,String environment,String principal,boolean historicalV18) {
+     var jdbc = new JdbcTemplate(source);
+     var tx = new TransactionTemplate(new DataSourceTransactionManager(source));
+     var sessions = new GuidedSessionRepository(jdbc, tx, C);
+@@ -1228,7 +1241,7 @@
+           first.path("text").asText(),
+           csiId,
+           environment,
+-          principal);
++          principal,historicalV18);
+     }
+     UUID testId = UUID.randomUUID(), stepId = UUID.randomUUID();
+     String sourceText = "Open https://orders.example.test/start";
+@@ -1271,7 +1284,7 @@
+         sourceText,
+         csiId,
+         environment,
+-        principal);
++        principal,historicalV18);
+   }
+ 
+   private static Prepared prepare(
+@@ -1285,7 +1298,7 @@
+       String sourceText,
+       String csiId,
+       String environment,
+-      String principal) {
++      String principal,boolean historicalV18) {
+     String sourceRevision =
+         jdbc.queryForObject(
+             "SELECT source_revision::text FROM ui_tests WHERE id=?", String.class, testId);
+@@ -1328,7 +1341,8 @@
+         status -> {
+           completeSessionMetadata(session);
+             sessions.insert(session);
+-          com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.freezeSource(jdbc,tx,session);
++          if(historicalV18)com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.freezeHistoricalV18Source(jdbc,tx,session);
++          else com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.freezeSource(jdbc,tx,session);
+         });
+     var requirements =
+         C.object()
+@@ -1352,6 +1366,10 @@
+ 
+   /** Finalizes and commits {@code prepared} through reserve/claim/finish/commit. */
+   public static Published publishObserved(javax.sql.DataSource source, Prepared prepared) {
++    return publishObserved(source,prepared,false);
++  }
++
++  private static Published publishObserved(javax.sql.DataSource source,Prepared prepared,boolean historicalV18) {
+     var jdbc = new JdbcTemplate(source);
+     var tx = new TransactionTemplate(new DataSourceTransactionManager(source));
+     var sessions = new GuidedSessionRepository(jdbc, tx, C);
+@@ -1365,7 +1383,9 @@
+       var current=sessions.lock(sessionId);current.document().put("state","OBSERVING");
+       current.document().putObject("owner").put("workerId","worker").put("fence",1)
+           .put("leaseExpiresAt",Instant.now().plusSeconds(120).toString());sessions.save(current);
+-      ObjectNode exercised=com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(jdbc,tx,sessionId,base);
++      ObjectNode exercised=historicalV18
++          ?com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeHistoricalV18Session(jdbc,tx,sessionId,base)
++          :com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(jdbc,tx,sessionId,base);
+       current=sessions.lock(sessionId);current.document().put("state","FINALIZING");sessions.save(current);return exercised;
+     });
+     JsonNode plan=basis.path("translationPlan");var profile=currentProfile();var build=observedBuild(profile);

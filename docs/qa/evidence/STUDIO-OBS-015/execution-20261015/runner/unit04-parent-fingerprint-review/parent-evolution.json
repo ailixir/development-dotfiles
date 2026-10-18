@@ -1,0 +1,88 @@
+{
+  "artifact": "Historical before vs current coherent positive parent differences",
+  "parents": [
+    {
+      "section": "snapshot",
+      "parent": "boundary",
+      "historicalBasisHash": "83ab77e5d6405f05a4b34727fdefdab27b17340f7695bb9c82ea4c3455dc7d70",
+      "currentBasisHash": "6acf62d3c0de3a129e7a5dd1b8d998ed76dc280bcf20d6afd7f375d2040b800a",
+      "historicalArtifactHash": "a2443c50be753fd50a6174aea9de6ffe7e225c413d7e6dda26ae16df57334569",
+      "currentArtifactHash": "909eea6bb2bfc452e0659d1e3787f14de43ffa76855051df286add241c63ebb4",
+      "parentChanges": [
+        "/basis/configurationReferences/0",
+        "/basis/inputs/2",
+        "/basis/translationRevision",
+        "/expectedArtifact/replayPolicy/publicationEvidenceHash"
+      ]
+    },
+    {
+      "section": "graph",
+      "parent": "admitted-binding-replacement",
+      "historicalBasisHash": "61e73f2298fa0fac1c5ba2f8b3615e360ef702e2d0deee03fcce9fde062d5ae5",
+      "currentBasisHash": "d1d3be3d654a7bbcd7cc0c66d892be89715175ba3d557f13e8c9913d4c56a96d",
+      "historicalArtifactHash": "338b1a4a44ee017410138d93c5cdd5e1091984867c7a1405ccccc83fe87da798",
+      "currentArtifactHash": "1836f66cc3ca5291b418dc1290a64e650be97412878afe228c98c907aa3b99e5",
+      "parentChanges": [
+        "/basis/observations/2",
+        "/expectedArtifact/replayPolicy/publicationEvidenceHash"
+      ]
+    },
+    {
+      "section": "graph",
+      "parent": "same-pair",
+      "historicalBasisHash": "9f02486a6c7fda42af230e4b02e928c69b024ca537b0a9559069d7267b1772c9",
+      "currentBasisHash": "dbfa9b810166dc40586ee156f0021470fa37af31f587af7559bd690e79f793e7",
+      "historicalArtifactHash": "7e0df194d36f77169f73e3e46decf330c48833cf238755202d0591c1b2e5b8da",
+      "currentArtifactHash": "58cc3dfedd38337fb6ea399175414edda7ebdfc66e7490ea0c35b6c7d31ac82e",
+      "parentChanges": [
+        "/basis/observations/2",
+        "/expectedArtifact/replayPolicy/publicationEvidenceHash"
+      ]
+    },
+    {
+      "section": "incrementalBasis",
+      "parent": "ordinary",
+      "historicalBasisHash": "e4a311c5f29710c1eac5c7c7bf2a7423a8c61a99635ab96eb6172ec639d7cc83",
+      "currentBasisHash": "e8f3f7d55f2d70bfdfe9fba230ad0d3fa0c2dc7a4981d18823fb1c3eb1506403",
+      "historicalArtifactHash": "e3e1a4a75086c27342a38dc77e7e8ed03535580bcca627dc0f582e2ad1c78b8a",
+      "currentArtifactHash": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c",
+      "parentChanges": [
+        "/basis/configurationReferences/0",
+        "/basis/inputs/2",
+        "/expectedArtifact/replayPolicy/publicationEvidenceHash"
+      ]
+    },
+    {
+      "section": "incrementalBasis",
+      "parent": "appendedHistorical",
+      "historicalBasisHash": "d59fe891c9cb29cb0c9b2280efae828d59bb9fe9aaa91ce5709474a96ffb33ef",
+      "currentBasisHash": "4dad7797db759fb5a0cff8c02c467e32e48d370a0787ae15c3df9f7a091ba8ff",
+      "historicalArtifactHash": "24c6c3bdd881774da493e37003efa2e26947fde442271aa77285b35098b29ae1",
+      "currentArtifactHash": "5d01f5fd79e511c2bf22aadd13fb504b006e46e5e3af3808a061358d8182e9ce",
+      "parentChanges": [
+        "/basis/bootstrap/contextRevision",
+        "/basis/bootstrap/inputsHash",
+        "/basis/bootstrap/materializationRevision",
+        "/basis/configurationReferences/0",
+        "/basis/inputs/2",
+        "/basis/translationRevision",
+        "/expectedArtifact/replayPolicy/publicationEvidenceHash"
+      ]
+    },
+    {
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "historicalBasisHash": "549f22a96f689d15867cde6939c0360b9d39615fdff1efd847fd597222a8451f",
+      "currentBasisHash": "15089ad1ac5babc4c800c7e660e8a700aebe3b8e40ab7ad6b9b1e7e2905bb2e6",
+      "historicalArtifactHash": "f3093c9e793e2e10e71e9583b45528bea4294e945b4b17b06298b705e9da50b7",
+      "currentArtifactHash": "259aab6f643462694b03b5c3586acac0bb8bc69cfc5c3a2214ca680c15531c03",
+      "parentChanges": [
+        "/basis/configurationReferences/0",
+        "/basis/inputs/2",
+        "/basis/translationRevision",
+        "/expectedArtifact/replayPolicy/publicationEvidenceHash"
+      ]
+    }
+  ],
+  "scope": "Source-data integrity only; actual parent validity is separately recorded in unit04 predecessor assertions / prior C-int pure receipts."
+}

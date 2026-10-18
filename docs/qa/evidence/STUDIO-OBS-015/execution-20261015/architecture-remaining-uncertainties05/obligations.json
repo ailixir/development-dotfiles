@@ -1,0 +1,120 @@
+{
+  "scope": "Only three original disposition C rows, verbatim; no execution credit or waiver",
+  "inputManifestSha256": "958d4bc12a54db1bb4285f2ee1622c06a292ceb9fb4dc08124fc0da64562d5ea",
+  "rows": [
+    {
+      "ledgerIndex0": 57,
+      "plannedName": "SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+      "originalRequiredTier": "Java+TS",
+      "originalRequiredAssertions": "Same normalized context/global source, exact scoped declarations and graph yield identical TestConfig/StepInput/chain/learned hash/snapshot maps; Unicode order, empty value hashes, literal/context/evidence metadata covered.",
+      "originalRemainingSourceFacets": [
+        "Cross-language exact facet inventory/execution remains separate; source mapping does not equate all fields to tested assertions."
+      ],
+      "disposition": "C",
+      "dispositionMeaning": "PRECISE_SOURCE_COMPLETENESS_OR_FIXTURE_DESIGN_UNRESOLVED",
+      "owner": "Backend + Runner",
+      "inspectedSource": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+          "line": 48,
+          "anchor": "void derivesCompleteIndependentArtifactWithoutMutatingRawEvidence"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/authoring/IncrementalHashTest.java",
+          "line": 18,
+          "anchor": "void matchesCanonicalVectors"
+        },
+        {
+          "path": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "line": 27,
+          "anchor": "current snapshot maps derive independently"
+        },
+        {
+          "path": "studio-runner/test/observedReplayEquivalence.test.ts",
+          "line": 8,
+          "anchor": "it.each(vectors.positive)"
+        }
+      ],
+      "sourceSelectorsFromOwnerMap": [
+        "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.derivesCompleteIndependentArtifactWithoutMutatingRawEvidence",
+        "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.rejectsSuppliedSourceBaseAndSnapshotAttacks"
+      ],
+      "originalParameterLabels": [],
+      "independentFinding": "Whole artifact/map golden positives and serialization of all five approved domain envelopes exist, but the map does not identify direct builder-derived intermediate envelopes for Unicode/declaration/context/evidence combinations. Produce exact per-domain/source assertion map first; add only genuinely absent derivation cases, rather than crediting serializer vectors as construction tests.",
+      "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+      "sourceReleaseGranted": false
+    },
+    {
+      "ledgerIndex0": 65,
+      "plannedName": "SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+      "originalRequiredTier": "Java+TS",
+      "originalRequiredAssertions": "Recompute identity/artifact/plan/policy/config/source/profile/equivalence hashes, exact existing RevisionIdentity digest, header pin/program hashes; wrapper or omitted field rejected. Past basis evidence hash is stored historical receipt authority, not fabricated revalidation.",
+      "originalRemainingSourceFacets": [
+        "Cross-language exact facet inventory/execution remains separate; source mapping does not equate all fields to tested assertions."
+      ],
+      "disposition": "C",
+      "dispositionMeaning": "PRECISE_SOURCE_COMPLETENESS_OR_FIXTURE_DESIGN_UNRESOLVED",
+      "owner": "Backend + Runner",
+      "inspectedSource": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedSnapshotDeriver.java",
+          "line": 136,
+          "anchor": "public void verifyBase"
+        },
+        {
+          "path": "studio-runner/src/validator/observedSnapshots.ts",
+          "line": 57,
+          "anchor": "export function deriveSnapshotMaps"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+          "line": 58,
+          "anchor": "static Stream<Vector> snapshotNegatives"
+        }
+      ],
+      "sourceSelectorsFromOwnerMap": [
+        "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.derivesCompleteIndependentArtifactWithoutMutatingRawEvidence",
+        "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.rejectsSuppliedSourceBaseAndSnapshotAttacks"
+      ],
+      "originalParameterLabels": [],
+      "independentFinding": "Both production derivers recompute base identity/artifact/plan/policy/config/source/profile/equivalence and exact revision digest, and many local negative vectors exercise them. Exact wrapper/omitted-field and each historical receipt-vs-live authority assertion mapping is missing. Inspect/cite precise current negative subcases before deciding any additional source; do not invent past basis revalidation or substitute a current draft preimage.",
+      "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+      "sourceReleaseGranted": false
+    },
+    {
+      "ledgerIndex0": 85,
+      "plannedName": "IncrementalRecordingIT.tieTolerancePreservesActualRecordedEvidence",
+      "originalRequiredTier": "Real joined recording+callback fixture",
+      "originalRequiredAssertions": "Carry legal actually measured ties through manifest/backend/result and per-admission seek. Keep both measured attempts, never invent absent pre-native stamp; original continuous video/privacy/native proof still required.",
+      "originalRemainingSourceFacets": [
+        "Dedicated actual naturally measured tie through manifest/backend/result/seek is not guaranteed by current scenarios; unit synthetic ties do not complete this actual obligation."
+      ],
+      "disposition": "C",
+      "dispositionMeaning": "PRECISE_SOURCE_COMPLETENESS_OR_FIXTURE_DESIGN_UNRESOLVED",
+      "owner": "Runner recording + Backend callback/joined",
+      "inspectedSource": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 3255,
+          "anchor": "private void assertIncrementalRecordingSpansBothHalves"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimingsTest.java",
+          "line": 19,
+          "anchor": "class GuidedRecordingTimingsTest"
+        }
+      ],
+      "sourceSelectorsFromOwnerMap": [
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+      ],
+      "originalParameterLabels": [
+        "admitted-drift2",
+        "same-pair-literal"
+      ],
+      "independentFinding": "Existing real test only orders prefixEnd<=suffixStart and synthetic unit vectors cover ties. It does not require an actually measured equal-key tie, preserve both attempts and demonstrate callback/manifest/result/per-admission seek. A deterministic lawful actual-measurement fixture is not specified; Aria/recording expert must design one under unchanged real clock/readings before source release. No fabricated timestamps, forced +1ms, dropped row, coarse clock replacement or waived tie.",
+      "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+      "sourceReleaseGranted": false
+    }
+  ]
+}

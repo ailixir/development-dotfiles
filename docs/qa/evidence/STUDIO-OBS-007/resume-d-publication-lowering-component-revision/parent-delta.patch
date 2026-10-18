@@ -1,0 +1,212 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java
+@@ -362,6 +362,9 @@
+   }
+ 
+   private LoweringPreparation prepareLowering(String id, JsonNode expected) {
++    if (org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive()) {
++      return null;
++    }
+     try {
+       LoweringInput input = sessions.transaction(() -> captureLoweringInput(id, expected));
+       if (input == null) {
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java
+@@ -20,6 +20,7 @@
+ import java.nio.file.Files;
+ import java.nio.file.Path;
+ import java.time.Duration;
++import java.time.Instant;
+ import java.util.HexFormat;
+ import java.util.List;
+ import java.util.concurrent.TimeUnit;
+@@ -51,6 +52,170 @@
+       assertThat(retainedBasis.toString().equals(basisRepresentation)).isTrue();
+       assertThat(retainedProfile.toString().equals(profileRepresentation)).isTrue();
+       assertThat(candidate.artifact().equals(independent.path("artifact"))).isTrue();
++    }
++  }
++
++  @ParameterizedTest
++  @ValueSource(strings = {"matched", "build", "representation", "invalid", "runtime", "fatal", "ambient"})
++  void publicPublisherUsesOnlyMatchingDetachedSuccessWithFreshInputs(String mode) throws Exception {
++    // Complete existing Original input, with honest current synthetic schema provenance.
++    var original = new GuidedPlanBuilderTest.Original(fixture("fresh-order-reference").path("basis"));
++    ObjectNode schemaPins = new com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler(C)
++        .schemaProvenance();
++    object(original.raw, "sourceManifest").set("schemaPins", schemaPins);
++    String manifestHash = hash(original.raw.path("sourceManifest"));
++    original.base.put("sourceManifestHash", manifestHash);
++    original.expected.put("sourceManifestHash", manifestHash);
++    original.expected.set("learningProvenance",
++        new GuidedPlanBuilder(C).learningProvenance(original.raw.path("sourceManifest")));
++    var now = Instant.parse("2026-10-12T12:00:00Z");
++    original.session.put("state", "FINALIZING").put("expiresAt", now.plusSeconds(300).toString());
++    object(original.session, "owner").put("leaseExpiresAt", now.plusSeconds(3).toString());
++    String id = original.session.path("sessionId").asText();
++    ObjectNode profile = copy(fixture("fresh-order-reference").path("artifact").path("profile"));
++    ObjectNode selection = C.object();
++    selection.set("profile", profile);
++    selection.set("build", C.object().put("profileHash", hash(profile))
++        .put("schemaBundleHash", "b".repeat(64)).put("referenceBundleHash", "c".repeat(64))
++        .put("executableImageDigest", "d".repeat(64)).put("chromiumBuild", "synthetic-component"));
++    var depth = new java.util.concurrent.atomic.AtomicInteger();
++    var callbacks = new java.util.concurrent.atomic.AtomicInteger();
++    var pinCalls = new java.util.concurrent.atomic.AtomicInteger();
++    var learnedPlanDepths = new java.util.ArrayList<Integer>();
++    var captured = new java.util.concurrent.atomic.AtomicReference<PublicationContracts.Claim>();
++    var checked = org.mockito.Mockito.spy(new GuidedContracts());
++    org.mockito.Mockito.doAnswer(invocation -> {
++      learnedPlanDepths.add(depth.get());
++      return invocation.callRealMethod();
++    }).when(checked).validate(org.mockito.ArgumentMatchers.eq("v3/learned-plan"),
++        org.mockito.ArgumentMatchers.any());
++    var sessions = org.mockito.Mockito.mock(
++        com.citi.put.checks.studio.guided.session.GuidedSessionRepository.class);
++    org.mockito.Mockito.when(sessions.transaction(org.mockito.ArgumentMatchers.any()))
++        .thenAnswer(invocation -> {
++          int ordinal = callbacks.incrementAndGet();
++          int actualPrepare = mode.equals("ambient") ? 2 : 3;
++          if (ordinal == actualPrepare) {
++            object(original.session, "owner").put("leaseExpiresAt", now.plusSeconds(8).toString());
++            if (mode.equals("invalid")) {
++              object(object(original.raw, "sourceManifest"), "schemaPins")
++                  .put("strictSchemaHash", "invalid-provenance");
++            }
++          }
++          depth.incrementAndGet();
++          try {
++            return ((java.util.function.Supplier<?>) invocation.getArgument(0)).get();
++          } finally {
++            depth.decrementAndGet();
++          }
++        });
++    org.mockito.Mockito.when(sessions.lock(id)).thenAnswer(invocation ->
++        new com.citi.put.checks.studio.guided.session.GuidedSessionRepository.Session(
++            original.session.deepCopy(), C.object()));
++    var bases = org.mockito.Mockito.mock(GuidedPublicationBaseRepository.class);
++    org.mockito.Mockito.when(bases.find(id)).thenAnswer(invocation -> java.util.Optional.of(
++        new PublicationContracts.Base(original.base)));
++    org.mockito.Mockito.when(bases.lockCurrent(org.mockito.ArgumentMatchers.any()))
++        .thenAnswer(invocation -> new PublicationContracts.CurrentSource(original.current));
++    var evidence = org.mockito.Mockito.mock(GuidedPublicationEvidenceRepository.class);
++    org.mockito.Mockito.when(evidence.read(id)).thenAnswer(invocation ->
++        new PublicationContracts.Evidence(original.raw));
++    var pins = org.mockito.Mockito.mock(ObservedReplayPins.class);
++    var fatal = new AssertionError("fixed-optional-fatal");
++    org.mockito.Mockito.when(pins.selected()).thenAnswer(invocation -> {
++      int ordinal = pinCalls.incrementAndGet();
++      if (ordinal == 1 && mode.equals("runtime")) {
++        throw new IllegalStateException("fixed-optional-unavailable");
++      }
++      if (ordinal == 1 && mode.equals("fatal")) {
++        throw fatal;
++      }
++      if (ordinal == 2 && mode.equals("build")) {
++        object(selection, "build").put("chromiumBuild", "synthetic-current-build");
++      }
++      if (ordinal == 2 && mode.equals("representation")) {
++        var first = profile.fieldNames().next();
++        var unchangedValue = profile.remove(first);
++        profile.set(first, unchangedValue);
++      }
++      return selection.deepCopy();
++    });
++    var publications = org.mockito.Mockito.mock(GuidedPublicationRepository.class);
++    org.mockito.Mockito.when(publications.receipt(id)).thenReturn(java.util.Optional.empty());
++    org.mockito.Mockito.when(publications.reserve(org.mockito.ArgumentMatchers.any(),
++        org.mockito.ArgumentMatchers.any())).thenAnswer(invocation -> {
++          captured.set(invocation.getArgument(0));
++          throw new GuidedSessionException("BUDGET_EXCEEDED", 429);
++        });
++    var access = org.mockito.Mockito.mock(
++        com.citi.put.checks.studio.guided.session.GuidedSessionAccess.class);
++    org.mockito.Mockito.doAnswer(invocation -> {
++      assertThat(depth.get()).isZero(); // Logical supplied callback depth, not physical JDBC TX.
++      return null;
++    }).when(access).checkUser(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
++    var validator = org.mockito.Mockito.mock(ObservedValidationClient.class);
++    var publisher = new GuidedPlanPublisher(sessions,
++        org.mockito.Mockito.mock(com.citi.put.checks.studio.guided.session.GuidedSessionService.class),
++        bases, evidence, publications, checked, pins, validator,
++        org.mockito.Mockito.mock(GuidedPublicationAuthorization.class), access,
++        new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608),
++        new ObservedReplayProperties(true, 30000, 1048576, 4194304, 2097152, "[]", "[]", 1280, 720),
++        java.time.Clock.fixed(now, java.time.ZoneOffset.UTC));
++    ObjectNode body = C.object().put("schemaVersion", 3)
++        .put("expectedSourceRevision", original.base.path("sourceRevision").asText())
++        .put("expectedConfigurationRevision", original.base.path("configurationRevision").asText());
++    boolean priorActive = org.springframework.transaction.support.TransactionSynchronizationManager
++        .isActualTransactionActive();
++    try {
++      if (mode.equals("ambient")) {
++        org.springframework.transaction.support.TransactionSynchronizationManager.setActualTransactionActive(true);
++      }
++      var assertion = assertThatThrownBy(() -> publisher.finalizeForUser(
++          org.mockito.Mockito.mock(org.springframework.security.core.Authentication.class),
++          new org.springframework.mock.web.MockHttpServletRequest(), id, "component-finalize", body));
++      if (mode.equals("fatal")) {
++        assertion.isSameAs(fatal);
++      } else {
++        assertion.hasMessage(mode.equals("invalid") ? "EVIDENCE_MISMATCH" : "BUDGET_EXCEEDED");
++      }
++    } finally {
++      org.springframework.transaction.support.TransactionSynchronizationManager.setActualTransactionActive(priorActive);
++    }
++    assertThat(depth.get()).isZero();
++    org.mockito.Mockito.verifyNoInteractions(validator);
++    org.mockito.Mockito.verify(sessions, org.mockito.Mockito.never())
++        .save(org.mockito.ArgumentMatchers.any());
++    if (mode.equals("invalid") || mode.equals("fatal")) {
++      assertThat(captured.get()).isNull();
++      assertThat(learnedPlanDepths).containsExactlyElementsOf(mode.equals("invalid") ? List.of(0) : List.of());
++      org.mockito.Mockito.verify(publications, org.mockito.Mockito.never()).reserve(
++          org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
++    } else {
++      assertThat(captured.get()).isNotNull();
++      assertThat(learnedPlanDepths).containsExactlyElementsOf(
++          mode.equals("matched") ? List.of(0)
++              : mode.equals("runtime") || mode.equals("ambient") ? List.of(1) : List.of(0, 1));
++      // Honest freshly reconstructed synthetic input, not the original opaque golden provenance.
++      ObjectNode freshBasis = original.build();
++      var reference = new ObservedArtifactLowerer(C).lower(freshBasis, profile);
++      assertThat(captured.get().snapshot().basis().equals(freshBasis)).isTrue();
++      for (String key : List.of("learnedPlanHash", "artifactHash", "referencePolicyHash",
++          "operationEquivalenceHash", "publicationEvidenceHash", "profileHash")) {
++        assertThat(captured.get().snapshot().identity().path(key).equals(reference.hashes().path(key))).isTrue();
++      }
++      assertThat(captured.get().snapshot().identity().path("validationBuildHash").asText())
++          .isEqualTo(hash(selection.path("build")));
++      assertThat(captured.get().snapshot().identity().path("validationDeadline").asText())
++          .isEqualTo(PublicationContracts.time(now.plusSeconds(8)));
++      assertThat(captured.get().snapshot().identity().path("ownerFence"))
++          .isEqualTo(original.session.path("owner").path("fence"));
++      org.mockito.Mockito.verify(publications).reserve(org.mockito.ArgumentMatchers.any(),
++          org.mockito.ArgumentMatchers.any());
++    }
++    if (mode.equals("ambient")) {
++      assertThat(callbacks.get()).isEqualTo(2);
++      assertThat(pinCalls.get()).isEqualTo(1);
++      org.mockito.Mockito.verify(evidence).read(id);
+     }
+   }
+ 
+--- a/docs/specs/studio-observed-authoring/secret-login-design.md
++++ b/docs/specs/studio-observed-authoring/secret-login-design.md
+@@ -299,3 +299,16 @@
+ This may add cost or worsen timing. There is no exclusive-cost, latency or C5 PASS guarantee.
+ No new model, Vault/native call, value read or output sink is added; all existing full TRACE,
+ privacy, authority and real 1000ms secret renewal requirements remain unchanged.
++
++### Ambient transaction fallback
++
++Optional detached lowering is unavailable when the current thread already has an actual
++Spring transaction. The private preparation entry returns null before its extra capture;
++default REQUIRED participation cannot be assumed to release existing owner/source locks.
++The original prefix, authorization, guarded preparation and downstream validator no-TX
++rule remain unchanged. This fallback adds no speculative reads under an ambient transaction.
++
++The optional capture also repeats production current-policy/current-manifest checks and
++Core `secretUse.mayUse` permission reads through the original access guard; this is
++additional authorized read work, not merely SQL or pure computation. No permission is
++cached and no resolved Vault value read is added by lowering preparation.

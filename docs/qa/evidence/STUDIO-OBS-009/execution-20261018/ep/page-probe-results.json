@@ -1,0 +1,327 @@
+[
+  {
+    "id": "C01-rf-example-url",
+    "class": "P",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": true,
+    "actionsSeen": 0,
+    "viewsSeen": [
+      "home"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "rejected",
+      "literalSubstitution": "n/a",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "C02-rf-wiki-url",
+    "class": "P",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": true,
+    "actionsSeen": 0,
+    "viewsSeen": [
+      "wiki"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "rejected",
+      "literalSubstitution": "n/a",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "C03-rf-wiki-search-var",
+    "class": "P",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": true,
+    "actionsSeen": 1,
+    "viewsSeen": [
+      "wiki",
+      "wiki"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "rejected",
+      "literalSubstitution": "rejected",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "C04-account-save",
+    "class": "P",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": true,
+    "actionsSeen": 2,
+    "viewsSeen": [
+      "trial"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "rejected",
+      "literalSubstitution": "n/a",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "C05-login-var-secret",
+    "class": "P",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": true,
+    "actionsSeen": 1,
+    "viewsSeen": [
+      "login",
+      "dashboard"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "rejected",
+      "literalSubstitution": "rejected",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "C06-forms-fill-save",
+    "class": "P",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": true,
+    "actionsSeen": 1,
+    "viewsSeen": [
+      "forms"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "rejected",
+      "literalSubstitution": "rejected",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "C07-ambiguous-search-locator",
+    "class": "P",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": "n/a",
+    "actionsSeen": 1,
+    "viewsSeen": [
+      "search"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "rejected",
+      "literalSubstitution": "rejected",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "C08-intended-assertion-fail",
+    "class": "F",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": true,
+    "actionsSeen": 0,
+    "viewsSeen": [
+      "orders"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "n/a",
+      "literalSubstitution": "n/a",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "C09-negation-trap",
+    "class": "N",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": true,
+    "actionsSeen": 0,
+    "viewsSeen": [
+      "forms"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "n/a",
+      "literalSubstitution": "n/a",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "C10-unsupported-cpu",
+    "class": "N",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": "n/a",
+    "actionsSeen": 0,
+    "viewsSeen": [],
+    "mutants": {
+      "wrongTarget": "n/a",
+      "droppedSubmit": "n/a",
+      "literalSubstitution": "n/a",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "C11-unsupported-second-tab",
+    "class": "N",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": "n/a",
+    "actionsSeen": 0,
+    "viewsSeen": [
+      "home"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "n/a",
+      "literalSubstitution": "n/a",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "C12-clarify-click-button",
+    "class": "N",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": "n/a",
+    "actionsSeen": 0,
+    "viewsSeen": [
+      "forms"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "n/a",
+      "literalSubstitution": "n/a",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "C13-ambiguous-wiki-placeholder",
+    "class": "P",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": "n/a",
+    "actionsSeen": 1,
+    "viewsSeen": [
+      "wikimain"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "rejected",
+      "literalSubstitution": "rejected",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "E2-shadow-dom-open",
+    "class": "P",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": true,
+    "actionsSeen": 1,
+    "viewsSeen": [
+      "shadow"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "rejected",
+      "literalSubstitution": "rejected",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "E3-iframe",
+    "class": "N",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": "n/a",
+    "actionsSeen": 0,
+    "viewsSeen": [
+      "frame",
+      "inner"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "n/a",
+      "literalSubstitution": "n/a",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "E4-virtualised-list",
+    "class": "P",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": "n/a",
+    "actionsSeen": 1,
+    "viewsSeen": [
+      "list"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "rejected",
+      "literalSubstitution": "n/a",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "Q1-focus-time-helper-autocomplete",
+    "class": "P",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": "n/a",
+    "actionsSeen": 1,
+    "viewsSeen": [
+      "form"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "rejected",
+      "literalSubstitution": "rejected",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "Q2-authored-echo-assert-same-name",
+    "class": "P",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": true,
+    "actionsSeen": 0,
+    "viewsSeen": [
+      "home",
+      "reports"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "rejected",
+      "literalSubstitution": "n/a",
+      "reversedAssertion": "rejected"
+    }
+  },
+  {
+    "id": "Q3-authored-echo-select-option",
+    "class": "P",
+    "positive": true,
+    "positiveFailures": [],
+    "endStateAssertionTrue": true,
+    "actionsSeen": 1,
+    "viewsSeen": [
+      "city"
+    ],
+    "mutants": {
+      "wrongTarget": "rejected",
+      "droppedSubmit": "rejected",
+      "literalSubstitution": "rejected",
+      "reversedAssertion": "rejected"
+    }
+  }
+]

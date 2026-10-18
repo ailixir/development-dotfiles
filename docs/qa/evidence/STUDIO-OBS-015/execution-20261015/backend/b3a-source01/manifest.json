@@ -1,0 +1,214 @@
+{
+ "artifact": "STUDIO-OBS-015 B3a source01: GuidedPublicationAuthorityIT apply-ready patch (B3A-1, B3A-2)",
+ "author": "Dex-AUTH (@dev)",
+ "createdAt": "2026-10-16T03:01:13Z",
+ "classification": "SOURCE_PATCH_UNAPPLIED_JAVAC_PRECHECKED_UNEXECUTED",
+ "constraint": "Live backend Gradle validation run by another developer: no file under backend/, frontend/, studio-runner/, tools/, docs/specs/, .github/ modified; Gradle not run.",
+ "base": {
+  "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+  "sha256": "e6228117d0e9844075603c3b011166ddffb74ddb4533d4524111bd5a665bb9fd",
+  "matchesDesignBase": true
+ },
+ "result": {
+  "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-source01/work/GuidedPublicationAuthorityIT.java",
+  "sha256": "a0dd022dbb3cee409ef0aaac793de311ab4c05f7f772ff35df13d64a28363acc"
+ },
+ "patch": {
+  "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-source01/b3a.patch",
+  "sha256": "556c146a4fbc31a10118cd9a72967d6df5dfbf0901f6350c2a4d9d39dcd1a11c",
+  "hunks": 1,
+  "linesRemoved": 0,
+  "linesAdded": 425,
+  "apply": [
+   "git apply -p0 docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-source01/b3a.patch",
+   "patch -p0 < docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-source01/b3a.patch"
+  ],
+  "checks": {
+   "gitApplyCheckP0": "OK",
+   "patchP0DryRun": "OK",
+   "scratchApplySha256EqualsResult": true
+  }
+ },
+ "invocations": {
+  "before": 24,
+  "after": 26,
+  "lane": "test (default)",
+  "buildRegistration": "none",
+  "selector": "test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT"
+ },
+ "preChecks": {
+  "javac": "javac -proc:none (JDK 21.0.10) of patched and unpatched file against backend/build/classes/java/{main,test} (15:09 local, newer than sources read) + maincp.txt + gradle-cache test jars: both compile. Pre-check, not proof.",
+  "googleJavaFormat": "gjf 1.22.0 CLI --skip-reflowing-long-strings: added region gjf-stable, no added line >100 cols. Original file is NOT gjf-clean (230 lines differ; 59 lines >120 cols) before and after the patch."
+ },
+ "notRun": [
+  "gradle",
+  "tests",
+  "spotlessCheck/spotlessApply",
+  "checkstyle",
+  "coderabbit"
+ ],
+ "methods": [
+  {
+   "id": "B3A-1",
+   "name": "offeredBasisOriginalPointersRequireStoredPrivatePreimageAtCurrentCommit",
+   "ledger": [
+    {
+     "ledgerIndex0": 31,
+     "plannedName": "IncrementalPublicationIT.mergedProofCannotReuseOldAdmissionsOrForeignSnapshots",
+     "tier": "Java + Postgres + pure runner validator"
+    },
+    {
+     "ledgerIndex0": 52,
+     "plannedName": "IncrementalValidationBasisTest.reconstructsPrivateInputsBeforePublicEvidence",
+     "tier": "Java+runner canonical+Postgres"
+    },
+    {
+     "ledgerIndex0": 60,
+     "plannedName": "IncrementalPublicationIT.snapshotFactsMatchImmutableOriginalSourceManifest",
+     "tier": "HTTP+Postgres"
+    }
+   ],
+   "assertions": [
+    {
+     "label": "positive-0..3",
+     "expect": "COMMITTED (rolled back), reads +1, privateAuthoritySnapshot unchanged"
+    },
+    {
+     "label": "wrong-private-input-hash",
+     "pointer": "/basis/materializationEvidence/entries/0/inputHash",
+     "expect": "STORED (lowerer ACCEPTS, PUBLICATION_CONFLICT, reads +1)",
+     "privateRoute": 6,
+     "ledgerIndex0": [
+      52,
+      31
+     ]
+    },
+    {
+     "label": "immutable-source-manifest-hash-is-exact",
+     "pointer": "/basis/sourceManifestHash",
+     "expect": "STORED",
+     "privateRoute": 3,
+     "ledgerIndex0": [
+      60
+     ]
+    },
+    {
+     "label": "immutable-original-source-cannot-be-replaced",
+     "pointer": "/basis/snapshotEvidence/current/authoring/steps/2/context/entries/1/value",
+     "expect": "STORED",
+     "privateRoute": 1,
+     "ledgerIndex0": [
+      60,
+      31
+     ]
+    }
+   ]
+  },
+  {
+   "id": "B3A-2",
+   "name": "offeredBasisFromAnotherStoredSessionCannotBorrowItsAuthority",
+   "ledger": [
+    {
+     "ledgerIndex0": 31,
+     "plannedName": "IncrementalPublicationIT.mergedProofCannotReuseOldAdmissionsOrForeignSnapshots",
+     "tier": "Java + Postgres + pure runner validator"
+    }
+   ],
+   "assertions": [
+    {
+     "label": "bases differ",
+     "expect": "foreign vs own stored base csiId/testId/sessionId all differ"
+    },
+    {
+     "label": "positive-b, positive-b-after",
+     "expect": "COMMITTED (rolled back), snapshot unchanged"
+    },
+    {
+     "label": "foreign-session-basis",
+     "expect": "EVIDENCE_MISMATCH, reads +0 (verifyCandidate base join)",
+     "ledgerIndex0": [
+      31
+     ]
+    },
+    {
+     "label": "foreign-session-resealed-authorization",
+     "expect": "never COMMITTED; lowerer-pure (same code, reads +0) or STORED (PUBLICATION_CONFLICT, reads +1)",
+     "ledgerIndex0": [
+      31
+     ]
+    },
+    {
+     "label": "foreign-admission-substitution",
+     "expect": "same oracle; foreign admission asserted as actual SUCCEEDED row of b3a-foreign-a",
+     "ledgerIndex0": [
+      31
+     ]
+    }
+   ]
+  }
+ ],
+ "tierDisclosure": "Real head PostgreSQL; actual current writer and stored evidence reader. Upstream rows are inserted by the shared relational fixture; validator verdict and grant are test-built controlled inputs. Not runner-validator/Core/HTTP/native proof and not production-written private-authority rows per authority-tier-ruling01 T3.",
+ "deviationsFromDesignText": [
+  "gjf layout; braces on for/try",
+  "split multi-variable declaration and two-statement line",
+  "Grant extracted to a local",
+  "comments shortened",
+  "tier-disclosure comment block added"
+ ],
+ "unsure": [
+  "R-STAGE: B3A-1 STORED pins predicted (lowerer copies top-level hashes; GuidedSnapshotDeriver checks id/text only) - if a label lands elsewhere it is OPEN, do not re-point",
+  "Design prose says B3A-2 (2)/(3) may be pure or stored, but the verbatim b3aRefused fails on a writer-only refusal (lowerer ACCEPTS, verifyCandidate EVIDENCE_MISMATCH, reads 0) - needs Aria/Quinn ruling if it occurs",
+  "R-A2: shared Database constructor never run with a foreign csiId (CSI-B3A-FOREIGN, varchar(20) ok); fallback per design is canonical CSI with cross-CSI OPEN",
+  "Runtime vs 120 s owner lease set by finalizing() (B3A-1: 7 staged commits + 8 whole-schema snapshots)"
+ ],
+ "inputsRead": [
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3abc-design01/design.md",
+   "sha256": "2c991e96929e4ebce2d77a0697e145a3e873504ec1248be0e9dfc1612325583f"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/authority-tier-ruling01/ruling.md",
+   "sha256": "061ba35d9cdf2d86db35f4e214d8c8e05a490f7194697ada4b54c6b34c35155a"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/validation-ledger.json",
+   "sha256": "429b4fc71055d8752265541fc3a9582b1d6341ff67209e52c6d16161f1ad6cde"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+   "sha256": "28aafe98ebdbbd3dcd59d061b671131713c5b5c2db4330a3e5252bd106011b48"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java",
+   "sha256": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java",
+   "sha256": "2e16253959c1cb97ac3ce895a0d59ed5f185603564d3a59d38b5d107ccb1be2b"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java",
+   "sha256": "c61619225cd95f4e2dbfb37e03bec71e53ed2460af46f8cb0e41497e98eac658"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedSnapshotDeriver.java",
+   "sha256": "5e382805c47f5e0be45a09675515fa49a838699b15a2a7e601785e9f5b74f134"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+   "sha256": "8aa40c60582007a59ba406d47832bf30d06627cf227fc0c3ce942ab7d58b07df"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+   "sha256": "3f8d75c258a1a0e827524a54ee1c822ac0374eebcdef148a21b4f21a7be5d2d0"
+  },
+  {
+   "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+   "sha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2"
+  },
+  {
+   "path": "backend/build.gradle.kts",
+   "sha256": "1cc4cee0f683661eb5373738d00e30cbc53c3f4716ba3b008a33ec270bdbdef8"
+  }
+ ]
+}

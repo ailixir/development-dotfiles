@@ -1,0 +1,62 @@
+{
+  "checks": [
+    {
+      "check": "type",
+      "exitCode": 0
+    },
+    {
+      "check": "lint",
+      "exitCode": 0
+    },
+    {
+      "check": "whole-file-coverage",
+      "exitCode": 1
+    }
+  ],
+  "actualStatuses": {
+    "passed": 6,
+    "failed": 1
+  },
+  "fixedFailureStages": [
+    [
+      [
+        1,
+        386
+      ],
+      [
+        2,
+        2052
+      ],
+      [
+        3,
+        2826
+      ],
+      [
+        4,
+        4505
+      ],
+      [
+        5,
+        5843
+      ],
+      [
+        6,
+        8091
+      ],
+      [
+        7,
+        9884
+      ],
+      [
+        8,
+        16621
+      ],
+      [
+        9,
+        16639
+      ]
+    ]
+  ],
+  "timeouts": 2,
+  "coverageThresholdErrors": []
+}

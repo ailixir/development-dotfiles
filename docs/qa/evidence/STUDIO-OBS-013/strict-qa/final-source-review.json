@@ -1,0 +1,533 @@
+{
+  "story": "STUDIO-OBS-013",
+  "reviewer": "Quinn independent strict013",
+  "createdUtc": "2026-10-14T23:26:22.955708+00:00",
+  "decision": "SOURCE_REMEDIATION_ACCEPTED_FINAL_RUNTIME_VALIDATION_PENDING",
+  "doneAllowed": false,
+  "scope": "Read-only production/test/source/dist review and exact filesystem/raw result rehash. No test/build/Gradle/browser/git/lifecycle action.",
+  "frozenIdentityVerification": {
+    "source": {
+      "files": 1575,
+      "mismatches": [],
+      "coordinatorDigest": "622ff1f29563cfc9dfb74587187db246f9d723af3b8f81b65883f3ae5f3d5f29"
+    },
+    "dist": {
+      "files": 238,
+      "mismatches": [],
+      "coordinatorDigest": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2"
+    }
+  },
+  "runnerOwnedSources": [
+    {
+      "path": "studio-runner/src/run/recordingScratch.ts",
+      "sha256": "e83f9a26e862579112c423df4ddd687e068155fd953d7f9404c04c83c898c821",
+      "beforeSha256": null,
+      "new": true,
+      "actualSha256": "e83f9a26e862579112c423df4ddd687e068155fd953d7f9404c04c83c898c821",
+      "matchesFinalReceipt": true
+    },
+    {
+      "path": "studio-runner/src/run/guidedShutdown.ts",
+      "sha256": "31d7e9eb9c006e40a4470d8ba4fc5471349dd24193ebbb1ff12ff5f80e5ac303",
+      "beforeSha256": null,
+      "new": true,
+      "actualSha256": "31d7e9eb9c006e40a4470d8ba4fc5471349dd24193ebbb1ff12ff5f80e5ac303",
+      "matchesFinalReceipt": true
+    },
+    {
+      "path": "studio-runner/src/run/browser.ts",
+      "sha256": "19893b2aeda17b4d94b4ddb45977fb170cea45035a78cc4e6a1b3f904de21dd9",
+      "beforeSha256": "dadcbb9f13c4e98de041478583bad6ae19a5e12e8c85fdca71c2a48be3d986b5",
+      "new": false,
+      "actualSha256": "19893b2aeda17b4d94b4ddb45977fb170cea45035a78cc4e6a1b3f904de21dd9",
+      "matchesFinalReceipt": true,
+      "beforeCopySha256": "dadcbb9f13c4e98de041478583bad6ae19a5e12e8c85fdca71c2a48be3d986b5",
+      "beforeCopyMatches": true
+    },
+    {
+      "path": "studio-runner/src/guided/evidence.ts",
+      "sha256": "cf69ca5f59e392dc518638844c9777094648c8c0153f0862802cd7b288bc6a27",
+      "beforeSha256": "8151f3a24b1e5aaaf793072a66389cfd762f3bbe198a72dfc9c3fb4493a6c0ca",
+      "new": false,
+      "actualSha256": "cf69ca5f59e392dc518638844c9777094648c8c0153f0862802cd7b288bc6a27",
+      "matchesFinalReceipt": true,
+      "beforeCopySha256": "8151f3a24b1e5aaaf793072a66389cfd762f3bbe198a72dfc9c3fb4493a6c0ca",
+      "beforeCopyMatches": true
+    },
+    {
+      "path": "studio-runner/src/run/guidedMain.ts",
+      "sha256": "3add4221c0bc51885be00b16fc2a9716e74b223efc154c6bc91b9d6fcb6cc666",
+      "beforeSha256": "11e8f02a988f31d091f1a1705a8071727e4af142fdcfedea79fa52d3ea51d687",
+      "new": false,
+      "actualSha256": "3add4221c0bc51885be00b16fc2a9716e74b223efc154c6bc91b9d6fcb6cc666",
+      "matchesFinalReceipt": true,
+      "beforeCopySha256": "11e8f02a988f31d091f1a1705a8071727e4af142fdcfedea79fa52d3ea51d687",
+      "beforeCopyMatches": true
+    },
+    {
+      "path": "studio-runner/test/run/recordingScratch.test.ts",
+      "sha256": "4ef07c3cc581ace86be3ec0906842316dea1dc4ba7745e22e0cd1bc95df70ee5",
+      "beforeSha256": null,
+      "new": true,
+      "actualSha256": "4ef07c3cc581ace86be3ec0906842316dea1dc4ba7745e22e0cd1bc95df70ee5",
+      "matchesFinalReceipt": true
+    },
+    {
+      "path": "studio-runner/test/guided/transport.test.ts",
+      "sha256": "923d54920369929b34b1ef5cca0dd60f935de2f0e9fba471363e3ce31026b3da",
+      "beforeSha256": "a76e9842f23aed320cc5cf25f8dbd646a9e9c920aea5eee8e1e426e67009b979",
+      "new": false,
+      "actualSha256": "923d54920369929b34b1ef5cca0dd60f935de2f0e9fba471363e3ce31026b3da",
+      "matchesFinalReceipt": true,
+      "beforeCopySha256": "a76e9842f23aed320cc5cf25f8dbd646a9e9c920aea5eee8e1e426e67009b979",
+      "beforeCopyMatches": true
+    },
+    {
+      "path": "studio-runner/test/guided/evidence.test.ts",
+      "sha256": "69cc689da27b59737cb2a1b4661a4f5d423af76bd886e0947761d9ce19cf12ee",
+      "beforeSha256": "a1991daf6a1896bc320abe0d575c245ba3090e9f22d4d4576d0a2ee1e5fcdaaa",
+      "new": false,
+      "actualSha256": "69cc689da27b59737cb2a1b4661a4f5d423af76bd886e0947761d9ce19cf12ee",
+      "matchesFinalReceipt": true,
+      "beforeCopySha256": "a1991daf6a1896bc320abe0d575c245ba3090e9f22d4d4576d0a2ee1e5fcdaaa",
+      "beforeCopyMatches": true
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-recording.test.ts",
+      "sha256": "75452ecd2686358e87144fafe03a5819262248bf755b7cb9cbeb0d84d6fc2cf7",
+      "beforeSha256": "e4cf54b2fbe3d2393fb466c2e2f1b2b00195c38bbf9d1a1bb0445885e60eae2f",
+      "new": false,
+      "actualSha256": "75452ecd2686358e87144fafe03a5819262248bf755b7cb9cbeb0d84d6fc2cf7",
+      "matchesFinalReceipt": true,
+      "beforeCopySha256": "e4cf54b2fbe3d2393fb466c2e2f1b2b00195c38bbf9d1a1bb0445885e60eae2f",
+      "beforeCopyMatches": true
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-recording-kill.test.ts",
+      "sha256": "fb9e1b2336ab2023fc7396c24c164da7185a768eac91bc30740e3260c3d13c1a",
+      "beforeSha256": null,
+      "new": true,
+      "actualSha256": "fb9e1b2336ab2023fc7396c24c164da7185a768eac91bc30740e3260c3d13c1a",
+      "matchesFinalReceipt": true
+    },
+    {
+      "path": "studio-runner/test/helpers/recordingScratchWorker.mjs",
+      "sha256": "e6ad5a92455a5cf2f23432d86b041b8b18b4ade62692aa6339be34ba271ffa7f",
+      "beforeSha256": null,
+      "new": true,
+      "actualSha256": "e6ad5a92455a5cf2f23432d86b041b8b18b4ade62692aa6339be34ba271ffa7f",
+      "matchesFinalReceipt": true
+    }
+  ],
+  "runnerRawReceiptHashes": [
+    {
+      "name": "before-reconstruction.json",
+      "sha256": "1f644748f84a3033e04fa790e745f4481ee7d138577bf502d7a194d712506092",
+      "matches": true
+    },
+    {
+      "name": "final-source-manifest.json",
+      "sha256": "e6ca0b80c7418c68011ba435f996bad955726bc405cde0829f7f0df1fd7dd49d",
+      "matches": true
+    },
+    {
+      "name": "implementation.patch",
+      "sha256": "5654a5aeb0d7e23b03443b7f0b0b216fced71660a0188dde524a524e7f22baba",
+      "matches": true
+    },
+    {
+      "name": "kill-attempt01-results.json",
+      "sha256": "006de92989b2bfe715e502ea4b09221fbd26fbf7eadf593f0d3e0cec97cdaa1f",
+      "matches": true
+    },
+    {
+      "name": "kill-attempt01-source-manifest.json",
+      "sha256": "a20559776d724e30cbfc34763c11596fc6050f364c36916f529c55582a2a7bbc",
+      "matches": true
+    },
+    {
+      "name": "kill-attempt01.log",
+      "sha256": "69a3f0d9d1bff421b1b5cba8e32a66cb345cec9973a89ac52a52b2f31b34dbfd",
+      "matches": true
+    },
+    {
+      "name": "kill-attempt02-results.json",
+      "sha256": "718c9874868996ea196c49702ce6a9b7d4a9eaac9714535692bc27f461163177",
+      "matches": true
+    },
+    {
+      "name": "kill-attempt02.log",
+      "sha256": "3c8a2302f712b84ac62dca5e286976222d0135137d5468f462ea21b04a9dc27a",
+      "matches": true
+    },
+    {
+      "name": "kill-attempt03-dist-manifest.json",
+      "sha256": "976d714fcf79eaf5766fc925efc38626a29184548944c772d81a45f29e0cbde1",
+      "matches": true
+    },
+    {
+      "name": "kill-attempt03-results.json",
+      "sha256": "96527a52a8bc435bc5a45ed1ec7088c678d3ec3fb2697370f75368419157321d",
+      "matches": true
+    },
+    {
+      "name": "kill-attempt03-source-manifest.json",
+      "sha256": "7647631404fd0e5dbeb0823acb6ac1372bce02aa96de29c63131fed15a841328",
+      "matches": true
+    },
+    {
+      "name": "kill-attempt03.log",
+      "sha256": "eac453f22a0cf5b14db002b45781eea6da854c93f0f247e0ff7d540854b0286b",
+      "matches": true
+    },
+    {
+      "name": "kill-attempt04-results.json",
+      "sha256": "02c789a21227b4c7c9a64d6e59407dcd0385e6017a2241447ec925ddc8d0c05d",
+      "matches": true
+    },
+    {
+      "name": "kill-attempt04.log",
+      "sha256": "c1fc6f0ac0efd391f6ccd794fcf8d496ef195cb6eafce45d4330a896985a94a3",
+      "matches": true
+    },
+    {
+      "name": "kill-facts-false.json",
+      "sha256": "4f910177ed828e89c5499e4d0854b91b56959d189bfb41d9e6bcebfac659ce52",
+      "matches": true
+    },
+    {
+      "name": "kill-facts-true.json",
+      "sha256": "547ee87f7c47bd3be332000e3741127cbb89c934a954d988723f15af67f3fc47",
+      "matches": true
+    },
+    {
+      "name": "lint-attempt10.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "name": "lint-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "name": "macos-fd-directory-probe.json",
+      "sha256": "0d2cb412d078db65f832f5f58dc743c18bef91b4b521b8cb7f0c93b38fbec69e",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-lint-03.log",
+      "sha256": "65fb3c8d006a789d5e80dc8ab9690a134466c4c9fe37b3c5255579e9498033f0",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-lint-04.log",
+      "sha256": "e1d514ccdabe7fe56c7cf671a007cfc50bfc3192e317ede97052c84d0ebba5e6",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-lint-05.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-lint-08.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-lint-09.log",
+      "sha256": "09665987cb335baab020147683be607a6de36f32c19b32577924eac1b4e33c58",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-tsc-02.log",
+      "sha256": "eba0a3520cde6024f182ed7cfcf59006a5813b409da156c7686357dd347f1ac4",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-tsc-04.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-tsc-08.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-tsc-09.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-unit-01.log",
+      "sha256": "b85a36b2a32285a903cc5cdf736dd435154f6c1294e88052eda775ea9bc4e6a7",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-unit-02.log",
+      "sha256": "ffee4bc76f785708c97f2a95b62eecdd4f4caace90c649a9212cac0d6c8e8cfa",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-unit-03.log",
+      "sha256": "4117c1e0c0a36b34db75d1f860c01cd0aaa17c93cd5fdaeffc19e56d945a6a1c",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-unit-06.log",
+      "sha256": "838dc7f11b9ff815810eaea78ddea4a7c3ecc844cf84668b68a2aff7894a9c35",
+      "matches": true
+    },
+    {
+      "name": "strict-runner-unit-07.log",
+      "sha256": "ec34aa03d888fec7911f5e9f6e5ea74211c797140b4a306060cbbcb621393790",
+      "matches": true
+    },
+    {
+      "name": "typecheck-attempt10.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "name": "typecheck-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "name": "unit-attempt08.log",
+      "sha256": "a0e50de2d9f74d51aa36c60460c5648913d64dace28e68055f274ad1b5bdb06f",
+      "matches": true
+    },
+    {
+      "name": "unit-final.log",
+      "sha256": "1a7d274e87dc3d4a711c22b926e9e8e1e996e466928cec55aa8439616e80a9f4",
+      "matches": true
+    }
+  ],
+  "backend": "Previous independent re-review-notes.json verifies46 actual unskipped backend tests and receipt hashes; final joined/execution regressions and fullcheck remain pending.",
+  "technicalReview": {
+    "quarantineRace": "Resolved in source: quarantine inc-ownerNonce-q-reaperPID-randomNonce is skipped unless reaperPID definitelydead; original owner marker remains independently required and must be definitelydead. live/unknown/reusedPID conservatively skips. DeterministicA afterquarantine pause/B startup/live allocation test and deadreaperq recovery test present.",
+    "partialDelete": "Traversal gathers bounded checked nodes before mutations; owner marker moved immediatelybefore incarnation root, preserving marker if cooperative deadline stops earlier deletion. Bound restores candidate atomically; restoration errors now refuse readiness. Deterministic middelete elapsed injection verifies retained marker and nextstartup completion. No hardcancellable syscall claim.",
+    "ownershipAndLinks": "Exact worker+journal canonical scope; UID/private mode dirs; exclusive0600 closed bounded metadata;nlink1;O_NOFOLLOW directory/marker opens;device/inode fences;normal disposal exact allocation map;static symlink entries unlinked only;root/scope/incarnation links refused/preserved;no externaltarget recursion. Hardlink/privacy/detectedinode tests present. No arbitrary malicious sameUID racefree claim.",
+    "liveness": "DefiniteESRCH only;live/unknown/EPERM/PIDreuse preserve;different scope andlegacy unmarked preserve. No arbitrary process signaling by cleanup.",
+    "signals": "Only guided launchPersistentContext sets handleSIGINT:false,handleSIGTERM:false; replay launch unchanged. Shared guarded once-only installGuidedShutdown awaits app.close and existing ownership.close waits runtime recordingSettled.3actual child fixture cases establish victimSIGKILL residuecleanup and separateSIGTERM/INT orderlySTORED on source justbefore last2nonfunctionalpath corrections. Finalfullfixtures required to bindlast2changes.",
+    "composition": "guidMain prepares scratch before createConfiguredObjectStore and listen,so owneddead failure refusesreadiness without storewatcher creation. Recorder delegates allocation/dispose through same scratchutility;existing recording/upload/manifest pipeline retained.",
+    "trustAndBudget": "Linux actual/procanchored helper tested;mac checkedpaths tested. Trusted kernel/runtime/startupconfig/serviceUID boundary as documented,not defenseagainst arbitrary unsandboxed malicioussameUID processes.5s cooperative betweensyscalls schedulingbudget,not hardwalltime guarantee."
+  },
+  "actualEvidence": {
+    "runnerFocused": {
+      "passed": 73,
+      "failed": 0,
+      "skipped": 0,
+      "log": "runner-remediation/unit-final.log",
+      "note": "Focused nocoverage result; doesnotreplacefullunitcoveragegate"
+    },
+    "macKillAttempt04": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "testNames": [
+        "parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=false)",
+        "parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=true)",
+        "actual SIGINT gracefully settles real guided recorder and removes its owned recording bytes"
+      ],
+      "facts": [
+        {
+          "platform": "darwin",
+          "parentOnlySignal": "SIGKILL",
+          "victimBytesBeforeKill": 262144,
+          "victimCallbackCount": 0,
+          "victimSettlementCount": 0,
+          "recordingDirectoryRemovedByRestart": true,
+          "ownedVictimDescendantCount": 8,
+          "ownedVictimDescendantsGone": true,
+          "liveBytesBeforeSweep": 262144,
+          "liveCallbackCount": 1,
+          "liveSettlement": "STORED",
+          "liveSignal": "SIGTERM",
+          "outsideCanaryPreserved": true,
+          "symlinkVariant": false,
+          "backendEvidenceProjection": "NOT_ASSERTED: recorder-only process fixture; no victim callback/upload invented"
+        },
+        {
+          "platform": "darwin",
+          "parentOnlySignal": "SIGKILL",
+          "victimBytesBeforeKill": 262144,
+          "victimCallbackCount": 0,
+          "victimSettlementCount": 0,
+          "recordingDirectoryRemovedByRestart": true,
+          "ownedVictimDescendantCount": 8,
+          "ownedVictimDescendantsGone": true,
+          "liveBytesBeforeSweep": 262144,
+          "liveCallbackCount": 1,
+          "liveSettlement": "STORED",
+          "liveSignal": "SIGTERM",
+          "outsideCanaryPreserved": true,
+          "symlinkVariant": true,
+          "backendEvidenceProjection": "NOT_ASSERTED: recorder-only process fixture; no victim callback/upload invented"
+        }
+      ],
+      "sourceLimit": "Late mainordering+boundrestorefailure changes postdateattempt04; finalfixturesnotyetcredited."
+    },
+    "linuxActual": {
+      "result": {
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--network",
+          "none",
+          "--user",
+          "node",
+          "--read-only",
+          "--tmpfs",
+          "/tmp:rw,nosuid,nodev,mode=1777",
+          "-v",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/dist:/runner/dist:ro",
+          "-v",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/package.json:/runner/package.json:ro",
+          "-v",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/linux-recording-scratch-smoke.mjs:/smoke.mjs:ro",
+          "node:22-bookworm",
+          "node",
+          "/smoke.mjs"
+        ],
+        "exit": 0,
+        "stdout": "{\"status\":\"PASS\",\"platform\":\"linux\",\"node\":\"v22.23.2\",\"uid\":1000,\"cases\":[\"actual exited child dead-owner namespace reclaimed through Linux descriptor branch\",\"same-scope live owner directory and bytes preserved\",\"nested symlink unlinked without deleting external canary\",\"normal owned leaf disposal\"],\"scope\":\"actual built filesystem helper in isolated Linux Node22 container; no browser/Flyway/deployment attestation\"}\n",
+        "stderr": "",
+        "scriptSha256": "4ecfdc114b3f63c965e5203b6525bcb0b3597e9aefa9581b5de7a9f32cd8decd"
+      },
+      "parsed": {
+        "status": "PASS",
+        "platform": "linux",
+        "node": "v22.23.2",
+        "uid": 1000,
+        "cases": [
+          "actual exited child dead-owner namespace reclaimed through Linux descriptor branch",
+          "same-scope live owner directory and bytes preserved",
+          "nested symlink unlinked without deleting external canary",
+          "normal owned leaf disposal"
+        ],
+        "scope": "actual built filesystem helper in isolated Linux Node22 container; no browser/Flyway/deployment attestation"
+      },
+      "credit": "ActualbuiltNode22/Linuxuid1000helper and4filesystemcasesonly,noLinuxbrowser/deploymentattestation"
+    }
+  },
+  "startupOracleOriginalPlanVerification": {
+    "authority": "architecture/startup-oracle-erratum.md",
+    "authoritySha256": "92e31af9ac0856085a1eaebaebab1ffa2dcf2af1ca2915fa0549f14374b08fb1",
+    "historicalRed3Source": {
+      "fixedBrowserSha256": "dadcbb9f13c4e98de041478583bad6ae19a5e12e8c85fdca71c2a48be3d986b5",
+      "onlyBrowserFixRevertedSha256": "f0e33dcebdb590922f6f6690dc34e28c5d18e305b7f919a2a1af80721b5b748c",
+      "matchesOriginalR13READMEBase": true,
+      "historicalTightenedTestSha256": "e4cf54b2fbe3d2393fb466c2e2f1b2b00195c38bbf9d1a1bb0445885e60eae2f",
+      "matchesOriginalT1T2e4cfHash": true,
+      "browserPatchSha256": "25173d1263d2e869d2435a3f8e3188f6965993432b478aa0a3a8832d2549e0c0",
+      "sourceBindingLimitation": "Historicalexecution source identity is recorded in contemporaneousREADME/ledger and independently reconstructable patch,not fresh periteration cryptographic source/distmanifest. Raw3actual logs+factsverifytightened T1T2 present and Ared;no fabricatednewexecution."
+    },
+    "actualHistoricalRed3": [
+      {
+        "iteration": 1,
+        "logPath": "/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/009f819d-5e88-49fc-b7b4-6f36928034e8/scratchpad/r13-sec001/repro/red3/1/log",
+        "logSha256": "43dbb0f7fae1c44fa95b7ac084b8133b2eec3a7b827562e319a43d2d3229e0ff",
+        "factsPath": "/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/009f819d-5e88-49fc-b7b4-6f36928034e8/scratchpad/r13-sec001/repro/red3/1/oracle.json",
+        "factsSha256": "c6c21eaab0fd1e0dd01f70519271af776c338cd182aeb03123738603f24e284c",
+        "oracleA": "EXPECTED_RED_AT_OFFENDING_FRAME_ASSERTION",
+        "offendingFrames": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "appRegionAreaRatio": 0.042604166666666665,
+        "T1Caps": true,
+        "T2PositiveControl": {
+          "frames": 42,
+          "flaggedFrames": 40,
+          "maxOutsideApp": 91472
+        },
+        "T2PassedBeforeA": true,
+        "BComputedDeltaMs": -214,
+        "BInAllowedRange": true,
+        "BAssertionCaveat": "A throws before later B matcher, so B numerical predicate holds in facts; do not claim its later matcher executed in this failing method."
+      },
+      {
+        "iteration": 2,
+        "logPath": "/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/009f819d-5e88-49fc-b7b4-6f36928034e8/scratchpad/r13-sec001/repro/red3/2/log",
+        "logSha256": "472b408318605f865f4ad4a38639327c227e1c82a64cd1d32fcb9bff97364fbd",
+        "factsPath": "/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/009f819d-5e88-49fc-b7b4-6f36928034e8/scratchpad/r13-sec001/repro/red3/2/oracle.json",
+        "factsSha256": "5f8857d87b498f49331608f8aab800112496533e5840153e1a32f2b7224f81e9",
+        "oracleA": "EXPECTED_RED_AT_OFFENDING_FRAME_ASSERTION",
+        "offendingFrames": [
+          2,
+          3,
+          4
+        ],
+        "appRegionAreaRatio": 0.04526692708333333,
+        "T1Caps": true,
+        "T2PositiveControl": {
+          "frames": 42,
+          "flaggedFrames": 41,
+          "maxOutsideApp": 91294
+        },
+        "T2PassedBeforeA": true,
+        "BComputedDeltaMs": -163,
+        "BInAllowedRange": true,
+        "BAssertionCaveat": "A throws before later B matcher, so B numerical predicate holds in facts; do not claim its later matcher executed in this failing method."
+      },
+      {
+        "iteration": 3,
+        "logPath": "/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/009f819d-5e88-49fc-b7b4-6f36928034e8/scratchpad/r13-sec001/repro/red3/3/log",
+        "logSha256": "6f87516a6a56f6ccd656db8d55dbaacfa4dd8b80f33916ee4ff3ae3725871233",
+        "factsPath": "/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/009f819d-5e88-49fc-b7b4-6f36928034e8/scratchpad/r13-sec001/repro/red3/3/oracle.json",
+        "factsSha256": "e2dd66ddf70f91f5a378e28550040b39bde26fa4ad6c4b4e40118dbe0cfcab24",
+        "oracleA": "EXPECTED_RED_AT_OFFENDING_FRAME_ASSERTION",
+        "offendingFrames": [
+          1,
+          2,
+          3
+        ],
+        "appRegionAreaRatio": 0.044379340277777776,
+        "T1Caps": true,
+        "T2PositiveControl": {
+          "frames": 38,
+          "flaggedFrames": 36,
+          "maxOutsideApp": 91290
+        },
+        "T2PassedBeforeA": true,
+        "BComputedDeltaMs": -201,
+        "BInAllowedRange": true,
+        "BAssertionCaveat": "A throws before later B matcher, so B numerical predicate holds in facts; do not claim its later matcher executed in this failing method."
+      }
+    ],
+    "red2": "Preservedseparatelyv2;notmislabelledtightenedT1T2proof.",
+    "currentRequired": "Finalfrozenfixture executesunskipped fullresA,10%T1caps,actualchromeperrunT2>=10000,alignmentBseparate,structuralC. No finalsource/distmutantrebuildrequired bycorrected originalplan.",
+    "REL002": "OnehistoricalpreoracleCONTEXT_LOSTcauseunknown;retaineduncredited. Repeatedgreensnotcalledcauseproof;noinventednewloadgate."
+  },
+  "remainingFinalRuntimeGates": [
+    "Currentfinalsourcefullrealfixturesincludingguided-recording4,kill3,secretlogin/profile/knownsecret/inventory canaries,recorderfault,adapterparity;rawfactsA/T1/T2/B/C verified",
+    "CurrentfinalbackendexactjoinedloginAVAILABLE/206/action+stepoffsets/canarymanifest/replayregression;exactrecorderfaultUNAVAILABLEterminalproof;fullGuidedPublicationReplayITandsharedExecutionVideo*regressions",
+    "Currentfinalfullrunnerunitwithcoverage,type/lint,pins,full deploymenttier;contractcheck+codegencheck;fullbackendcleancheck+JaCoCo and source/dist stableafterconsumers",
+    "Independent finalfan-in verifiesevery original plannedlocalmatrix row green,allskipsexcluded,failedattemptsretained,scope-onlyexternalgatesexplicit. StoryPASS/Done onlythen."
+  ],
+  "openSourceDefects": [],
+  "retainedFailures": [
+    "OriginalstrictauditFAIL",
+    "OriginalunexplainedpreoracleCONTEXT_LOST",
+    "Initialkillstaticvideo0bytesfailure",
+    "macOSdevfdunsupportedreproduction",
+    "SIGINTattempt03exit130beforefixedguidedonlyPlaywrightsignalownership",
+    "Earlyunits/coverage/buildfailedattempts"
+  ],
+  "noExternalPassClaims": [
+    "Sonic",
+    "manualC17",
+    "stagingseek",
+    "deployedfoldedrunner",
+    "OBS015prefixpopulation",
+    "SecurityComplianceapproval"
+  ]
+}

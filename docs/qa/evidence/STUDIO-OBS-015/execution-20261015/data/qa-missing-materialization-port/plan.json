@@ -1,0 +1,92 @@
+{
+  "artifact": "Independent Quinn missing-materialization coverage-port plan",
+  "verdict": "READY",
+  "verdictScope": "Coverage-port plan only. Static source reachability review, not executed PostgreSQL acceptance, implementation release, story review or lifecycle verdict.",
+  "owner": "Dara migration-test owner data015_freeze after explicit root release",
+  "testFile": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+  "originalMethod": "consumedAckLossIsEvidenceBoundAndMissingMaterializationCannotBecomeUnused",
+  "originalAssertionMeaning": [
+    {
+      "id": "O1",
+      "assertion": "authentic consumed ACK_LOST evidence accepts exactly ACK_LOST",
+      "mapping": "Keep first normal head branch unchanged; genuine current materialized source input and consumed ledger evidence"
+    },
+    {
+      "id": "O2",
+      "assertion": "missing consumed reference lineage cannot become NOT_USED; original message assertion unreached",
+      "mapping": "Head actual audit INSERT with null admission; committed current version/preparation/action but proposal sourceInputId absent from version; expect unreached cannot conceal consumed admission"
+    },
+    {
+      "id": "O3",
+      "assertion": "missing lineage cannot mint an admission-bound UNKNOWN_OUTCOME summary; original message assertion admission source reference declaration lineage invalid",
+      "mapping": "Same head setup; actual second audit INSERT with admission; assert original exact lineage refusal"
+    }
+  ],
+  "selectedMapping": "Head-only missing proposal sourceInputId within existing valid materialization plus separate actual head physical-delete FK refusal. No historical target or current Java-on-old-schema claim.",
+  "exactFixtureDelta": {
+    "scope": "Only selected negative setup and private helper overload in same migration test",
+    "defaultSourceInputId": "input-PASS",
+    "negativeSourceInputId": "input-NOT-MATERIALIZED",
+    "applyWhen": "Construct proposal before digest/proof/action INSERT; never mutate an existing action or normalized input",
+    "unchanged": "Original materialization PASS/UNREACHED input documents and source manifest; exact contextRevision/authoredInputsHash/proposal digest/preparation identity/owner/attempt/coordinate/dispatchCount and all DB guards"
+  },
+  "requiredFacets": [
+    {
+      "id": "F1",
+      "tier": "head SQL positive",
+      "assert": "Original ACK_LOST branch unchanged"
+    },
+    {
+      "id": "F2",
+      "tier": "head committed fixture probes",
+      "assert": "Real materialization and snapshot recomputed hash exist; preparation/action exact current version+digest join; missing selected sourceInputId; valid PASS declaration and exact ref-PASS remain; input_reference returns NULL; audit rows0"
+    },
+    {
+      "id": "F3",
+      "tier": "head actual audit trigger",
+      "assert": "Original NOT_USED and UNKNOWN_OUTCOME INSERTs fail at their expected audit guards, not at setup; audit0 and lineage rows unchanged afterward"
+    },
+    {
+      "id": "F4",
+      "tier": "head relational negative and honest positive",
+      "assert": "Separate normal consumed fixture physical DELETE raises DataIntegrityViolationException expected SQLSTATE23503; capture actual FK currently preparations_session_id_fkey. All lineage remains; independently NOT_USED refuses and valid UNKNOWN_OUTCOME inserts with no fabricated release/version/outcome"
+    },
+    {
+      "id": "F5",
+      "tier": "existing full migration class",
+      "assert": "All23current methods remain; normal defaults, genuinely unreached NOT_USED, no-decision/authentic lineage, duplicate/clock/concurrency/append-only tests unchanged"
+    }
+  ],
+  "authorityBoundary": "Original database-only adversarial SQL audit guard subject preserved. Missing input is relationally reachable at that guard; GuidedProposalValidator/GuidedDispatchService reject it at Java prepare/admit. No production Java admits malformed input claim, no live transport/native/Vault proof.",
+  "javaAndPruning": "Current SecretAuditLifecycle requires V21 snapshots/context/hash and remains covered by backend-owned current-head Java tests. V19 pruning does not delete source/actions/materialization or normalized history; stop sets live=false. Do not manufacture absence via pruning or run current Java against preV21.",
+  "historicalAlternative": "Not selected; no need to introduce schema/version compatibility adapter or historical fixture. If head reachability fails at actual setup, stop and request Aria ruling rather than silently switching target.",
+  "requiredCommandsNotExecuted": [
+    "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.consumedAckLossIsEvidenceBoundAndMissingMaterializationCannotBecomeUnused' --rerun-tasks",
+    "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest' --rerun-tasks"
+  ],
+  "executionPrerequisites": "Root serialized Gradle/DB window and explicit Dara repair release; use actual PostgreSQL15 Testcontainers and full head Flyway, no skip/ignore/guard disable; force committed setup including deferred constraints.",
+  "futureReceiptRequirements": [
+    "exact current source/migration hashes and Flyway head/checksums",
+    "committed setup probe results",
+    "real SQL exception statement/location/state/constraint",
+    "actual focused and23method full-class XML counts and assertions",
+    "before/after audit and lineage identities"
+  ],
+  "limits": [
+    "No production/business/helper/schema/generated/migration edit",
+    "No disabled triggers/FKs or deleted guards",
+    "No materialization/source/action UPDATE or DELETE to fake missing input",
+    "No raising production limits or changing pruning",
+    "No false SQL setup rejection as original audit pass",
+    "No historic Java compatibility, native/Vault/browser, release or story Done credit"
+  ],
+  "backendOwnership": "Business Java and GuidedPublicationEvidenceTest remain backend-owned; this port requires neither change. SecretAuditLifecycleIT remains separately required and is not waived.",
+  "blockers": [],
+  "unexecutedRequirements": "All port facets and planned commands remain not run. Reachability must be proven by actual guarded committed SQL after release; if setup fails, audit assertions remain unexecuted.",
+  "applicationTestsExecuted": 0,
+  "databaseCommandsExecuted": 0,
+  "gradleCommandsExecuted": 0,
+  "sourceEdits": 0,
+  "storyLifecycleOrGateEdits": 0,
+  "historicalFeedbackQualification": "Previously executed head feedback reached DELETE after first ACK_LOST assertion and failed before both missing-lineage assertions. This review adds no application execution credit."
+}

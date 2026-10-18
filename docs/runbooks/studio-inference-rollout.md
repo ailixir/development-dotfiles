@@ -1,5 +1,7 @@
 # Studio inference persistence rollout
 
+> **SUPERSEDED (2026-10-12):** Superseded by [ADR-SC-005](../architecture/ADR-SC-005-single-path-observed-authoring.md) (single observed path; compile-to-READY removed in STUDIO-OBS-012A).
+
 Owner: Dara/Gage. Story 10.23; [C0 contract](../architecture/studio-inference-contract-v1.md). This is a staged procedure, not evidence that a shared database or gateway has been enabled.
 
 ## Additive V18 interface

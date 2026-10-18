@@ -1,0 +1,47 @@
+{
+  "session": 91352,
+  "exitCode": 1,
+  "tests": 74,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "com.citi.put.checks.studio.guided.publication.SecretAuditLifecycleIT"
+    },
+    {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "com.citi.put.checks.studio.dispatch.DispatcherIT"
+    },
+    {
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT"
+    },
+    {
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest"
+    },
+    {
+      "tests": 9,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "com.citi.put.checks.studio.dispatch.StudioDispatcherFailureIT"
+    }
+  ],
+  "failure": "one new atomic case failed real PostgreSQL connection during Flyway setup; no unavailable oracle PASS",
+  "claim": "all26 dispatcher cases green, one atomic setup failed; no full combined PASS"
+}

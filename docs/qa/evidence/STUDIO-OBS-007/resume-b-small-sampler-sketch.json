@@ -1,0 +1,49 @@
+{
+  "scope": "ISOLATED_READ_ONLY_SMALL_PUBLIC_THREAD_SAMPLER_SKETCH_NOT_APPLIED",
+  "archive": "docs/qa/evidence/STUDIO-OBS-007/resume-d-child-one-static/formatted.java",
+  "archiveSha256": "a967a0f254e251e6290bbb7aae2e20ceeaa943fcdda37ba1be62c17f59607d07",
+  "sketch": "docs/qa/evidence/STUDIO-OBS-007/resume-b-small-sampler-sketch/C5ClaimSampler.sketch.java",
+  "sketchSha256": "6aa7c2a0bdfff9d8ea3169ba4a59d5d162d1e603d3cc42e03fa42be81dbb6042",
+  "settings": "docs/qa/evidence/STUDIO-OBS-007/resume-b-small-sampler-sketch/settings-limits.json",
+  "settingsSha256": "99b42d868b4dddc30086dff4dae90fc6844b26bf615e4afcb71d454b2da52642",
+  "integration": "docs/qa/evidence/STUDIO-OBS-007/resume-b-small-sampler-sketch/integration-plan.txt",
+  "integrationSha256": "e53eb18e00c3879985a9d08eb6962724df1a151eb186f0923128c3a77198b42d",
+  "replacement": "Prior optional JFR sketch superseded by simpler selected-thread diagnostic concept; no recording/repository/file/events infrastructure.",
+  "apiProof": "Exact pinned JDK21 src Thread.getStackTrace calls virtual-thread asyncGetStackTrace; unlike ThreadMXBean, actual virtual-thread public API is available. Source asyncGetStackTrace retries/yields until mounted/unmounted snapshot available, without a timed/interruptible guarantee. No runtime/javap/compiler performed.",
+  "sourceMechanism": "Only current selected executing /claim Thread enters transient identity set before unchanged original chain ONCE and leaves finally. One private daemon sampler copies at most8 refs, public getStackTrace, fixed source classification and Thread.State count, discards raw stack/snapshot refs immediately. Raw frames/names/IDs/args/body/value/hash/date/Throwable never persisted or exported.",
+  "boundsAndCleanup": {
+    "defaultSelected": false,
+    "samplePauseMs": 20,
+    "initiationWindowSeconds": 30,
+    "maxConcurrentExecutingRefs": 8,
+    "maxClassifiedFrames": 512,
+    "closeJoinSeconds": 1,
+    "exports": "fixed enum/state/sample counts only",
+    "noJfrRepositoryFilesEvents": true,
+    "perGetStackTraceHardDeadline": false,
+    "nonJoinedStatus": "NON_QUIESCENT_INVALID"
+  },
+  "closureGuarantee": "Stop/clear registry, interrupt ONLY sampler, bounded join, restore caller interruption. Only joined closure claims sampler-local raw refs discarded; if public API does not return, NON_QUIESCENT diagnosticinvalid and no clean/no-reference claim. Root explicitly accepted this limitation; no force-stop, retry framework or hidden timer.",
+  "privacyAndAuthority": "No authority/provider/schema/validation/model/browser/HTTP/SQL call added/replayed, no clock/TRACE/deadline/poll change. Observer exceptions mark only diagnosticfailed; original chain/results/errors remain unchanged. Sample Thread.State not atomic with stack; no guessed row-lock ownership.",
+  "attributionLimits": [
+    "Counts are sampling frequency, not exactCPU/wallnanoseconds.",
+    "Only fixed claim/lambda$claim frame membership; unrelated, empty/deep/unsupported stacks unobserved, zero notabsencePASS.",
+    "Innermost genericJSON/JDBC frame categories can overlap logging/schema/source work; fixed counters do not by themselves justify a product optimization.",
+    "JDBC path/waiting state does not prove database row-lock versus network/commit/resource wait.",
+    "Public virtual stack collection may suspend or delay target briefly; sampler startup/getStackTrace/cadence/cleanup overhead can perturb near1000ms behavior. Instrumented gate diagnostic only, repeat original unprofiled acceptance."
+  ],
+  "rootPrerequisites": [
+    "Exact source/privacy/defaultOFF flag and filter-registration/independentcleanup review",
+    "No export/read of counters while sampler stillalive; NON_QUIESCENT invalid/nonclaimed",
+    "Root author release required before applying to Publication; all original25/currentsource assertion bodies preserved",
+    "Coordinator sole sourceformatter/compiler/runtime execution after freeze"
+  ],
+  "verification": {
+    "applied": false,
+    "compiler": "UNRUN",
+    "runtime": "UNRUN",
+    "sampling": "UNRUN",
+    "models": "NONE"
+  },
+  "actions": "Only own isolated sketch/evidence artifacts written; no live Publication/main/SDK/source/runtime/SQL/Node/Gradle/model changes. All19/fullwave active."
+}

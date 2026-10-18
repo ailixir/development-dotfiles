@@ -1,0 +1,16 @@
+# run obs009-de-04 (mutated copy; restored afterwards), source: execution/obs009-de-04-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.secret.GuidedRuntimeRolePrivilegeIT.xml
+preparedGrantLetsTheRuntimeRoleWriteMaterializationHistoryAndTheGuidedSecretAudit() FAIL
+   org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [INSERT INTO studio_guided_materializations(session_id,scope_hash,context_id,context_revision,materialization_revision,worker_id,owner_fence,source_revision,configuration_revision,authored_inputs_hash,authored_inputs,live) VALUES ('session',?,'context',1,1,'worker',1,'1','1',?,?::jsonb,true)]
+viewOnlyVariantWritesTheGuidedSecretAuditOnceTheViewAloneIsGranted() FAIL
+   org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [INSERT INTO studio_secret_use_audit (id,occurred_at,release_occurred_at,path,row_kind,release_id,affected_release_id,decision_stage,attempt_id,release_seq,execution_id,session_id,admission_id,principal_id,csi_id,environment,test_id,secret_id,vault_version,coordinate_step_id,coordinate_ordinal,source_refere
+everyObjectV19ThroughHeadIsRuledAndThePreparedGrantIsExactlyTheDelta() FAIL
+  message head: org.opentest4j.AssertionFailedError: [prepared grant == required delta (least privilege, nothing missing, nothing extra)]  expected: {"studio_guided_csi_guards"=["INSERT", "SELECT", "UPDATE"], "studio
+    studio_guided_materialization_snapshots | required: studio_guided_materialization_snapshots"=["SELECT"] | granted: ABSENT
+    studio_guided_publication_admissions | required: studio_guided_publication_admissions"=["DELETE"] | granted: ABSENT
+    studio_guided_publication_preparations | required: studio_guided_publication_preparations"=["DELETE"] | granted: ABSENT
+    studio_guided_publication_observations | required: studio_guided_publication_observations"=["DELETE"] | granted: ABSENT
+    studio_guided_policy_audit | required: studio_guided_policy_audit"=["INSERT"] | granted: studio_guided_policy_audit"=["DELETE", "INSERT"]
+    studio_guided_materializations | required: ABSENT | granted: studio_guided_materializations"=["UPDATE"]
+columnLevelVariantCoversExactlyTheColumnsV19ThroughHeadAdded() PASS
+triggerOnlyPolicyAuditNeedsInsertButNoSequenceGrant() PASS
+migrationsGrantNothingRunNoDefinerRightsAndTheViewKeepsOwnerRights() PASS

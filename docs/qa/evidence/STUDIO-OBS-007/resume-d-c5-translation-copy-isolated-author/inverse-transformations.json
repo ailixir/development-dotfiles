@@ -1,0 +1,10 @@
+[
+  {
+    "before": "                  payload.set(\"context\", request.projection().document());\n",
+    "after": "                  ObjectNode projectionDocument = request.projection().document();\n                  payload.set(\"context\", projectionDocument);\n"
+  },
+  {
+    "before": "                                          \"context\",\n                                          request.projection().document(),\n                                          \"schemaPins\",\n                                          prompts.schemaProvenance()))),",
+    "after": "                                          \"context\",\n                                          projectionDocument,\n                                          \"schemaPins\",\n                                          prompts.schemaProvenance()))),"
+  }
+]

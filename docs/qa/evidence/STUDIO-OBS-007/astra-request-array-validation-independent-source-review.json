@@ -1,0 +1,70 @@
+{
+  "verdict": "GO_SOURCE_REVIEW_PENDING_ROOT_STRICT_AND_139_AND_ORIGINAL_C5",
+  "candidatePatchSha256": "4864a7354f1eb884a6cd098ecbc4a881f4f1b025680c8a797c3af48e78cb5c9c",
+  "inversePatchSha256": "2246beb3eb58d22ecdcbd6d138f44624aa46696e84da90a0ddde4633667859fd",
+  "files": [
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "baseSha256": "398648c589598b15b0e93165302824d91c5e595a4d97454f5ff41e35806f2e04",
+      "candidateSha256": "3470deb4d527005743888a45242754a87563f9a0e3a3c3fbbda50570fbd769ee",
+      "baseMatches": true,
+      "candidateMatches": true,
+      "sharedBaseMatches": true,
+      "forwardExact": true,
+      "inverseExact": true
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java",
+      "baseSha256": "d1a815255c4fbbf2f50b04ff044bea077a93a5a3bc82435921e18cf36f2fde12",
+      "candidateSha256": "537a20a5fd09795ad3af6aec459718039d96b354d6efef9baac3bd51ffc8cf90",
+      "baseMatches": true,
+      "candidateMatches": true,
+      "sharedBaseMatches": true,
+      "forwardExact": true,
+      "inverseExact": true
+    }
+  ],
+  "checks": {
+    "patchHash": true,
+    "inverseHash": true,
+    "publicPrefixAndEpochsExact": true,
+    "nativeExpansionCanonicalSuffixExact": true,
+    "compilePropertiesBodyExact": true,
+    "wireSevenCases": true,
+    "sixOtherTestBodiesExact": true,
+    "twoFileScope": true,
+    "allFileBindingsAndPatchApplication": true
+  },
+  "nativeSemantics": {
+    "finitePaths": [
+      "validationBasis.observations -> item wrapper -> observation -> nodes",
+      "validationBasis.actions -> item wrapper -> ledger",
+      "validationBasis.preparations -> complete original native item"
+    ],
+    "allCollectionKeywordsRetained": true,
+    "originalCompiledItemsAndConfigIdentityChecked": true,
+    "embeddedObservationAndLedgerEpochsIndependentlyMatched": true,
+    "existingObservationNodesAndLedgerStrategiesReused": true,
+    "everyPresentChildAndArrayItemEvaluated": true,
+    "nativePreparationItemUnchanged": true,
+    "allHelperFailuresUseWholeOriginalNamedRoot": true,
+    "unknownNamesEpochsConfigRemainNative": true,
+    "canonicalPrefixFixed422AndByteRepresentationPreserved": true,
+    "noRequestSuccessCacheOrGenericSchemaWalk": true
+  },
+  "testReview": {
+    "independentOriginalNativeOracleRetained": true,
+    "exactPositivePathActivation": true,
+    "newVectors": 26,
+    "covered": "Three native array min/max+one over, null/nonarray/nullitem/missing wrapper field; invalid embedded observation timestamp/node required field, ledger bound, preparation proof required field, proposal operation. Existing unknown/config/fragment/canonical/nonmutation cases retained.",
+    "focusedFieldsVerifiedAgainstActualSchemaAndFixture": true
+  },
+  "limits": [
+    "Qualified supporting samples identify the request schema/cache/native path, not exclusive nested-property cost or CPU time.",
+    "No latency or acceptance claim before the original unprofiled C5 result.",
+    "Root owns integration, formatting, strict gates, all139 tests and original C5."
+  ],
+  "sharedEdits": false,
+  "buildOrRuntimeExecuted": false,
+  "formalQaOrLifecycleAdvance": false
+}

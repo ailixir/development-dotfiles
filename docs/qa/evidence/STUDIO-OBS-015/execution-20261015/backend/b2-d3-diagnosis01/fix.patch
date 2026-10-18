@@ -1,0 +1,62 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -6332,6 +6332,10 @@
+   private static volatile B2PasswordPage b2PasswordPage = B2PasswordPage.SINGLE;
+   private static volatile boolean b2Combined;
+   private static volatile boolean b2aTitleSuffix;
++  // The appended title literal is an authored nonsecret input: the runner withholds every node
++  // whose name contains it (runtime.ts update; observationCollector echo scrub). It must never be
++  // a substring of a target name such as the "Reports" link or heading.
++  private static final String B2A_TITLE = "Reports overview";
+   // Private fixture values and receipts (like P3_RECEIPTS): never printed or used in messages.
+   private static final List<String> B2_ORDER_VALUES = new CopyOnWriteArrayList<>();
+   private static final List<String> B2_REFERENCE_RECEIPTS = new CopyOnWriteArrayList<>();
+@@ -6835,7 +6839,9 @@
+                     test,
+                     2,
+                     "Click Sign in, click the Reports link and check protected Reports heading."
+-                        + " Check page title is Reports.");
++                        + " Check page title is "
++                        + B2A_TITLE
++                        + ".");
+             assertThat(edited.path("firstChangedStepId").asText()).isEqualTo(THREE);
+             String used = "B2A-V1-" + UUID.randomUUID();
+             String rotated = "B2A-V2-" + UUID.randomUUID();
+@@ -8201,7 +8207,9 @@
+                     test,
+                     2,
+                     "Click Sign in, click the Reports link and check protected Reports heading."
+-                        + " Check page title is Reports.");
++                        + " Check page title is "
++                        + B2A_TITLE
++                        + ".");
+             int orders = B2_ORDER_VALUES.size();
+             Files.writeString(TEMP.resolve("obs015-native-mode.json"), "{}");
+             String mixed =
+@@ -8778,7 +8786,7 @@
+ 
+   private static String b2TitleHead(String path) {
+     return b2aTitleSuffix && path.equals("/p3/reports")
+-        ? "<head><title>Reports</title></head>"
++        ? "<head><title>" + B2A_TITLE + "</title></head>"
+         : "";
+   }
+ 
+@@ -8933,7 +8941,7 @@
+     obligations.add(
+         obligation(THREE, 2, "assert", "Reports", null, null).put("predicate", "visible"));
+     if (b2aTitleSuffix) {
+-      String sentence = "Check page title is Reports.";
++      String sentence = "Check page title is " + B2A_TITLE + ".";
+       for (JsonNode step : context.path("sourceSteps")) {
+         String text = step.path("text").asText();
+         int at = text.indexOf(sentence);
+@@ -8948,7 +8956,7 @@
+             .put("sourceRevision", context.path("sourceRevision").asText())
+             .put("stepId", THREE)
+             .put("startUtf16", offset)
+-            .put("endUtf16", offset + "Reports".length())
++            .put("endUtf16", offset + B2A_TITLE.length())
+             .put("kind", "nonsecretText")
+             .put("intendedSlot", "assert.expected");
+         obligations.add(

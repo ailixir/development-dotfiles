@@ -1,0 +1,106 @@
+{
+  "scope": "READ_ONLY_ARCHITECT_QA_MANAGED_GUIDED_LOSS_COMPLETION",
+  "status": "CONDITIONAL_MINIMUM_PRODUCTION_DESIGN_WITH_RAW_RETIREMENT_BLOCKER_NOT_AUTHOR_RELEASE",
+  "sourceBindings": {
+    "studio-runner/src/guided/runtime.ts": "75fc33b1cd1cbc59bcb746811caff879d7217b22de8b08b374eec173dacf271c",
+    "studio-runner/src/guided/ownership.ts": "030443d7478791e2f980763a4e30a4b2daba922836d0c5ac9650e141995b31c4",
+    "studio-runner/src/guided/diagnostics.ts": "cd355ead668fc54953c8a06acf8da13a317b103ced1357d68eef516c6f2a7637",
+    "studio-runner/src/run/passwordControl.ts": "5312b614a53ae14eedb574161831168ec404ff5f700875b0883eec083a045882",
+    "studio-runner/src/run/browser.ts": "a397ece7c7dec06e643bc82b6a4862c5accf154c1c6b28d314ad3c7fab4ac02d",
+    "studio-runner/src/executor/observedReplay.ts": "da04d4ddaca0c3c0a3b0572fc181c3bd7874d7d03d3b26ccd1cd9eb6123add4a",
+    "studio-runner/src/run/observedReplayAdapter.ts": "07af47170a6050e7973c17355809a65b3d9219eaea6bc4b115b84b57e311c5c7"
+  },
+  "dependencyAudit": "resume-d-c6-cdp-loss-lifetime-source-audit.json",
+  "actualFacts": {
+    "trueCdpPendingAtCut": true,
+    "ownedNativeResourcesReleased": true,
+    "stopSdkCloseFulfilled": true,
+    "effect": "UNKNOWN",
+    "rawNativeActive": 1,
+    "highPending": 1,
+    "managedRuntimeBusy": 1,
+    "creationPending": 0,
+    "restoreAttempt": 0,
+    "restoreRefusal": 1,
+    "rawSdkSettlement": "UNOBSERVED"
+  },
+  "currentSourceBlocker": [
+    {
+      "anchor": "runtime.ts:231-276",
+      "fact": "The actualdispatch coroutine directlyawaits originalfillPassword; it cannotreach originalcatch/callback/finally/busyfalse untilthatpromise settles. Settingbusyfalse in an observer/stop callback would fabricateoperationcompletion."
+    },
+    {
+      "anchor": "runtime.ts:309-332",
+      "fact": "Authenticstop closesresources/disposal/lifecycle but doesnotjoin dispatch. Existingclosing isnull untilstopbegins, not a future signal one canrace at invocation. Inventoryclear isnot late-action-local redactor retirement."
+    },
+    {
+      "anchor": "passwordControl.ts:36-40 / browser.ts:350-353",
+      "fact": "Underlying portcall has no managed cancellation/confirmed-resource-close signal. RawSDK kNoTimeout has no guaranteedsettlement after contextclosed."
+    },
+    {
+      "anchor": "diagnostics.ts:5-32 / runtime.ts:212-216,269-276",
+      "fact": "Current rawerror path invokes originalrawfailure hook then redactsbeforetruncate/stderr/journal/callback using per-actioncapturedvalues. Those values/diagnostics must remainavailable for any legitimate lateerror producer; deleting them at managedstop without removing/emplacing that late producer isunsafe."
+    }
+  ],
+  "existingPatternToReuse": {
+    "anchor": "ObservedInvocationControl.run:219-245",
+    "fact": "Ordinary control poisonsauthority before racingwork against genuinecancel/deadline; managedrun can reject without claiming underlyingwork finished. Checks preventlatework fromcommitting or issuingnextstep. It doesnotcancel rawCDD or byitselfretireitsvalue/redactor lifetime.",
+    "guidedLimit": "Guided dispatch currentlyhas no InvocationControl instance/futureabortsignal; a sourcechange isrequired, not an existingtestwrapper assertion."
+  },
+  "minimumConditionalManagedDesign": [
+    {
+      "step": 1,
+      "path": "GuidedRuntime existingstop/closeResources/dispatch only",
+      "proposal": "Add private per-runtime confirmed-stop completion signaling, no publicAPI/wirefield/watchers. Resolve onlyfrom the existing genuine stop path after originalownedbrowserclose+disposal+scopedlifecycle completion; originalauthority ispoisoned immediately by existingstopped/onStopping. Never use earlyclosed=true, elapsedtimer, genericterminalstatus or physicalsignal alone."
+    },
+    {
+      "step": 2,
+      "path": "Actual guided dispatch await at originalpassword call",
+      "proposal": "Invoke the originalsoleprimitiveonce, then await a managed result that distinguishes its actualsettlement from the privateconfirmedstop signal. Confirmedloss rejects the managedawait with existingdata-free contextloss/UNKNOWN semantics; originalcatch/callback/finally genuinelyexecutes and busyfalse resultsfrom that originalfinally. No actionretry, secondresolver/send, falseREFUSED/NOT_USED, inferredwrite/USED or inventednativeexception."
+    },
+    {
+      "step": 3,
+      "path": "Late rawSDK continuation ownership",
+      "proposal": "Attach a rejection/fulfillment handler immediately to originalrawpromise; after stopped it cannotpublishsuccess, observations, nextstep/model/frame or invokeanunredacted hook. Keep the required per-actionredactor and scopedsafeidentity under a distinct quarantinedrawtail lifetime until actualrawsettlement or genuineownedproducer retirement. Any permittedlateerror sink must use originalredact-beforetruncate/serialize/persist; alternatively a reviewedclosed sink maydiscardlate rawerror without claiming itwasobserved/redacted as productionfailure. Never publish managedcontrol error as an authenticallyobserved rawSDK failure."
+    },
+    {
+      "step": 4,
+      "path": "ExistingGuidedOwnership scope and privatefixture receipts",
+      "proposal": "Keep rawNativeActive/highPending unresolvedtruthfully; distinguish manageddispatch/callback completion from rawSDK status. Existingunconfirmed/quarantine ownership mustblock unsafe reuse/restoration while a permitted sensitive lateproducer remains. Newmanagedbusyfalse is not raw0, descriptorrestore, sealedproducer, nativeeffect or heapwipe."
+    },
+    {
+      "step": 5,
+      "path": "Actualfinal cleanup boundary",
+      "proposal": "If rawSDK remainspermanentlypending, fullprivate redactor/value/lateproducer drainage needs a genuine existing scoped retirement mechanism. Actualownedprocess exit canretire thatproducer with rawsettlementUNOBSERVED, as a terminationfact not a normalSDKreceipt. Do not synthesizePromise rejection, mutateSDKcallbacktables, resetcounters, signalunknownprocesses or extendcurrentbudgets."
+    }
+  ],
+  "preciseRemainingPremise": {
+    "blocker": "Currentguidedbrowserclose doesnotretirethe sharedSDK connection or rawpendingcallbacks; nodeworker remainsalive. No existing scoped rawtail retirement/join isavailable inside GuidedRuntime. Retainingthelate redactor indefinitely preservesprivacy but cannotprove boundedvalue/producer cleanup or justifycapture restore/slotreuse.",
+    "noFullClaim": "The privateconfirmed-stop race can genuinelycomplete MANAGEDapp code, but it alone isnot a soundfullclosing solution. A separately reviewed productionretirement/late-sink contract isrequired beforeauthoring; currenttask cannotrelease a fakecompletion simplification.",
+    "existingFixtureOption": "Existingownedworkerprocess cleanup can prove terminatedproducer lifetime after authenticmanagedUNKNOWN and resourcegone; it is cleanup ratherthan browserfault trigger, and mustpreserveactualoutputs/processstartidentity. Applyingthat to fixture or productrestart semantics requires rootsource review; no newcase/framework proposedhere.",
+    "scopeToReview": "GuidedRuntime/GuidedOwnership and originallate diagnostics/nativeport boundary, not tests-onlycounterrewrites. Any laterSDK-close/cancellation/worker-lifecycle change is substantive andnot authorizedby this report."
+  },
+  "acceptancePreservation": "True soleprimitive pending at actualcut, originalfault/resourceidentity/timers, UNKNOWN/no nextstep/no retries, exactimmutable linkedaudit and existingdeclaredpositivefacts remainmandatory. Actualcallbackcompletion canbeproved after managedloss, while rawSDKsettlement staysUNOBSERVED. Native/rawfailure producercredit mustremain truthful; data-free managedloss isnot a rawnative exception or a canary-hit substitute.",
+  "latePrivacyConstraints": [
+    "Do notnull sensitive matcher/value inventories whileanexistinglate sink couldstill emit them.",
+    "Do notrestoreC5quarantine/descriptors simplybecausemanagedbusyfalse whenrawtail isunconfirmed.",
+    "No model/export/Bridge rawpayloads or newsecret-bearingextra channel; rawtail handler consumes originalerrors privately.",
+    "Source-proven entirelydata-free/discarded latework mayremain source-tier; permitting newlatejournal/stderr output needs actualcapture/drain proof."
+  ],
+  "bounds": "All current1s/2s/10s/deadlines remain; confirmedresourceclose isnot a timerextension, and no timeout isrelabeledSDKsettlement.",
+  "actions": {
+    "reports": 1,
+    "sourceEdits": 0,
+    "runtime": 0,
+    "sql": 0,
+    "models": 0,
+    "newTests": 0,
+    "newFrameworks": 0
+  },
+  "lifecycleVerdict": null,
+  "acceptanceWaiver": false,
+  "whole19AcPass": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE",
+  "privacy": "Repositoryanchors/sourcehashes/fixedcontracts/numericbooleans only; no rawvalues/args/IDs/messages/paths/logs."
+}

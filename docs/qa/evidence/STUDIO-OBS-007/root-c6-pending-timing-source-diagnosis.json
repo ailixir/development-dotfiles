@@ -1,0 +1,22 @@
+{
+  "scope": "ACTUAL_KIND2_PENDING_FIRST_REFUSAL_SOURCE_DIAGNOSIS",
+  "sourceSha256": "a2fed633182be340236451f75575cb50112880e64d2e3a30b73cf763567fb926",
+  "actualFacts": [
+    "Nativeentryordinal2accepted followednative settle; firstrefusal231 scopeKnowntrue",
+    "Focus/probe/pending allUNOBSERVED, original15s waitfalse"
+  ],
+  "guardMapping": {
+    "231": "focus-exit handler requires c6FocusAt nonzero; actual first refusal focus exit without accepted entry"
+  },
+  "sourceFacts": [
+    "Page focusin calls void notify(focus-enter) then blocks same page event loop8000ms before notify(focus-exit)",
+    "Each notify original request/ACK deadline1000ms, request awaits fetch and response.json before ACK",
+    "Thus observer protocol requires asynchronous receipt inside synchronous blocked realm; no accepted focus-enter/probe in actual receipt"
+  ],
+  "limits": [
+    "Actual packet dispatch/abort ordering UNOBSERVED; exact transport causal ordering not proved",
+    "No extension of notification/lease/step/pending wait authorized",
+    "No native cancellation/effect/UNKNOWN/closure PASS claim"
+  ],
+  "recommendation": "Coordinator inspect existing one-source native entry observer boundary for genuine pending witness independent of page ACK completed during blocked realm; preserve actual native API and all exact scope/identity/deadline/effect/closure guards. Propose concrete minimal correction before authoring, no new test."
+}

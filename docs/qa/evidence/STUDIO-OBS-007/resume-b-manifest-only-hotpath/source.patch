@@ -1,0 +1,157 @@
+--- backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java.before
++++ backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java
+@@ -631,6 +631,17 @@
+     continuation(current.document().path("sessionId").asText(), "NEXT");
+     return acquisitionResult(
+         available ? AcquisitionDisposition.READY : AcquisitionDisposition.WAIT, null);
++  }
++
++  /** Current authorization needs only immutable provenance, not plan or active attempt state. */
++  public JsonNode currentManifest(String sessionId) {
++    transaction();
++    var rows = jdbc.query(
++        "SELECT m.manifest::text FROM studio_guided_translation_state s"
++            + " JOIN studio_guided_source_manifests m USING(session_id) WHERE s.session_id=?",
++        (rs, n) -> contracts.parse(rs.getString(1)), sessionId);
++    require(!rows.isEmpty(), "MISSING_SOURCE", 409);
++    return rows.getFirst();
+   }
+ 
+   public ObjectNode state(String sessionId) {
+--- backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java.before
++++ backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java
+@@ -117,10 +117,7 @@
+     classifier.requireCurrentPolicy(scope);
+     if (store.exists(session.path("sessionId").asText())) {
+       for (JsonNode reference :
+-          store
+-              .state(session.path("sessionId").asText())
+-              .path("manifest")
+-              .path("configurationReferences")) {
++          store.currentManifest(session.path("sessionId").asText()).path("configurationReferences")) {
+         if (reference.path("kind").asText().equals("secretRef")) {
+           require(
+               secretUse.mayUse(
+--- backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java.before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java
+@@ -43,6 +43,10 @@
+     final ObjectNode second;
+ 
+     DelayedFixture(boolean strict) throws Exception {
++      this(strict, List.of());
++    }
++
++    DelayedFixture(boolean strict, List<String> referenceNames) throws Exception {
+       var fixtures = new com.citi.put.checks.studio.StudioExecutionFixtures(delayedDb.jdbc);
+       fixtures.seedUser("delayed-owner@citi.com");
+       fixtures.seedCsi("60457", "delayed-owner@citi.com");
+@@ -121,6 +125,16 @@
+           .addObject()
+           .put("stepId", second.path("stepId").asText())
+           .put("text", "Click Done");
++      if (!referenceNames.isEmpty()) {
++        var references = manifest.putArray("configurationReferences");
++        int ordinal = 0;
++        for (String name : referenceNames) {
++          int index = ordinal++;
++          references.addObject().put("referenceId", "cfg-controlled-" + index)
++              .put("stepId", (index < 2 ? obligation : second).path("stepId").asText()).put("referenceName", name)
++              .put("kind", "secretRef").put("intendedSlot", "fill.value");
++        }
++      }
+       delayedDb.tx.executeWithoutResult(
+           tx -> {
+             delayedDb.sessions.insert(document);
+@@ -1100,6 +1114,92 @@
+         .hasMessage("INVALID_CONTRACT");
+   }
+ 
++  private GuidedProductionSessionAccess currentAccess(
++      com.citi.put.checks.studio.secrets.StudioSecretUseAuthorization authorization) {
++    var properties = new GuidedTranslationProperties(true, true, List.of("orders"),
++        List.of("Production"), 65536, 4096, 60, "worker-1");
++    var classifier = new GuidedSourceClassifier(c, properties,
++        new com.citi.put.checks.studio.compile.CredentialPatternScreen());
++    // Only checkCurrent is exercised: its real classifier/store and controlled authorization port.
++    return new GuidedProductionSessionAccess(null, classifier, null, delayedDb.store,
++        null, null, null, null, authorization);
++  }
++
++  @Test
++  void currentManifestMatchesFullStateAndReturnsFreshPersistedProvenance() throws Exception {
++    var fixture = new DelayedFixture(false, List.of("PASS", "SECOND", "PASS"));
++    delayedDb.tx.executeWithoutResult(tx -> {
++      JsonNode manifest = delayedDb.store.currentManifest(fixture.id);
++      assertThat(manifest).isEqualTo(delayedDb.store.state(fixture.id).path("manifest"));
++      ((ObjectNode) manifest).put("policy", "caller-mutated-copy");
++      assertThat(delayedDb.store.currentManifest(fixture.id).path("policy").asText())
++          .isEqualTo("INPUT-POLICY-01-A");
++    });
++  }
++
++  @Test
++  void currentAuthorizationWithoutTranslationStateSkipsReferencesButStillChecksPolicy() {
++    ObjectNode document = delayedDb.seed(java.util.UUID.randomUUID().toString());
++    document.withObject("/scope").put("applicationId", "orders").put("environmentId", "Production");
++    AtomicInteger calls = new AtomicInteger();
++    var access = currentAccess((principal, csi, environment, secret) -> {
++      calls.incrementAndGet();
++      return false;
++    });
++    delayedDb.tx.executeWithoutResult(tx -> {
++      assertThat(delayedDb.store.exists(document.path("sessionId").asText())).isFalse();
++      access.checkCurrent(document);
++    });
++    assertThat(calls.get()).isZero();
++    document.withObject("/scope").put("environmentId", "unapproved");
++    assertThatThrownBy(() -> delayedDb.tx.executeWithoutResult(tx -> access.checkCurrent(document)))
++        .hasMessage("FORBIDDEN_SCOPE");
++    assertThat(calls.get()).isZero();
++  }
++
++  @Test
++  void currentManifestWithoutJoinedStateRefusesAndRequiresCallerTransaction() {
++    ObjectNode document = delayedDb.seed(java.util.UUID.randomUUID().toString());
++    String id = document.path("sessionId").asText();
++    assertThatThrownBy(() -> delayedDb.tx.execute(tx -> delayedDb.store.currentManifest(id)))
++        .hasMessage("MISSING_SOURCE");
++    assertThatThrownBy(() -> delayedDb.tx.execute(tx -> delayedDb.store.state(id)))
++        .hasMessage("MISSING_SOURCE");
++    assertThatThrownBy(() -> delayedDb.store.currentManifest(id))
++        .hasMessage("RUNTIME_INCOMPATIBLE");
++  }
++
++  @Test
++  void currentAuthorizationPreservesScopedReferenceOrderDuplicatesAndRevocation() throws Exception {
++    var fixture = new DelayedFixture(false, List.of("PASS", "SECOND", "PASS"));
++    var calls = new java.util.ArrayList<List<String>>();
++    var revoked = new java.util.concurrent.atomic.AtomicBoolean();
++    var access = currentAccess((principal, csi, environment, secret) -> {
++      calls.add(List.of(principal, csi, environment, secret));
++      return !revoked.get() && principal.equals("delayed-owner@citi.com")
++          && csi.equals("60457") && environment.equals("Production");
++    });
++    delayedDb.tx.executeWithoutResult(tx -> access.checkCurrent(delayedDb.sessions.lock(fixture.id).document()));
++    assertThat(calls).containsExactly(
++        List.of("delayed-owner@citi.com", "60457", "Production", "PASS"),
++        List.of("delayed-owner@citi.com", "60457", "Production", "SECOND"),
++        List.of("delayed-owner@citi.com", "60457", "Production", "PASS"));
++    calls.clear();
++    revoked.set(true);
++    assertThatThrownBy(() -> delayedDb.tx.executeWithoutResult(tx ->
++        access.checkCurrent(delayedDb.sessions.lock(fixture.id).document())))
++        .hasMessage("SECRET_USE_REVOKED");
++    assertThat(calls).containsExactly(List.of("delayed-owner@citi.com", "60457", "Production", "PASS"));
++    calls.clear();
++    revoked.set(false);
++    delayedDb.tx.executeWithoutResult(tx -> {
++      ObjectNode wrongScope = delayedDb.sessions.lock(fixture.id).document().deepCopy();
++      wrongScope.withObject("/scope").put("csiId", "OTHER-CSI");
++      assertThatThrownBy(() -> access.checkCurrent(wrongScope)).hasMessage("SECRET_USE_REVOKED");
++    });
++    assertThat(calls).containsExactly(List.of("delayed-owner@citi.com", "OTHER-CSI", "Production", "PASS"));
++  }
++
+   @Test
+   void cancellationAndAbsoluteDeadlineNeverRenewAProviderCall() throws Exception {
+     Instant now = Instant.parse("2026-10-08T00:00:00Z");

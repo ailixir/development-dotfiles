@@ -122,8 +122,9 @@
 
 ### 12) Theming and accessibility polish
 - Unify headings, spacing, and chip styles.
-- Ensure keyboard focus order and ARIA labels for tabs, accordions, and toggle groups.
-- Color contrast check on hero/status components.
+- ~~Ensure keyboard focus order and ARIA labels for tabs, accordions, and toggle groups.~~
+- ~~Color contrast check on hero/status components.~~
+- *2026-10-17: Superseded by ADR-SC-006 (user decision 2026-10-17): accessibility limited to functional must-haves; no WCAG target. The two items above are struck; theming items in this section still apply.*
 
 ### 13) QA checklist (static)
 - All routes load without errors; sidebar reflects current page.

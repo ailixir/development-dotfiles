@@ -1,0 +1,520 @@
+{
+  "artifact": "STUDIO-OBS-015 focused actual pure Java snapshot57/65 feedback05 receipt",
+  "createdAt": "2026-10-15T11:24:05.164929+00:00",
+  "owner": "backend015_resume / Dex execution-only",
+  "sourceHold": true,
+  "commandsLive": false,
+  "formalQAVerdict": null,
+  "lifecycleTransition": null,
+  "invocation": {
+    "exactlyOnce": true,
+    "wrapper": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend.py backend-snapshot57-65-feedback-attempt05",
+    "command": [
+      "caffeinate",
+      "-i",
+      "./gradlew",
+      "test",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest",
+      "--rerun-tasks"
+    ],
+    "cwd": "backend",
+    "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+    "handle": 53428,
+    "terminal": true,
+    "active": false,
+    "exit": 0,
+    "elapsedSeconds": 11.36,
+    "counts": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "perClass": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "testcases": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest",
+        "name": "reconstructsAllFiveHashEnvelopesFromCompleteSource()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest",
+        "name": "baseArtifactAndRevisionDigestHaveExactPreimages()",
+        "status": "PASS"
+      }
+    ],
+    "mainCompile": "PASS",
+    "allTestCompile": "PASS",
+    "rerunOrAdditionalSelectors": false
+  },
+  "stability": {
+    "sourceStable": true,
+    "testInputStable": true,
+    "distStable": true,
+    "testInputDigestBefore": "99c3e07e6f43e6f0ac5a848e7c23cd39ba60440db78bd2edee4156bf6f13be49",
+    "testInputDigestAfter": "99c3e07e6f43e6f0ac5a848e7c23cd39ba60440db78bd2edee4156bf6f13be49",
+    "sourceDigestBefore": "99c3e07e6f43e6f0ac5a848e7c23cd39ba60440db78bd2edee4156bf6f13be49",
+    "sourceDigestAfter": "99c3e07e6f43e6f0ac5a848e7c23cd39ba60440db78bd2edee4156bf6f13be49",
+    "distDigestBefore": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "distDigestAfter": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "ownedSnapshotInputs": {
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java": {
+        "before": "c26da8acc7a253139fc3bece3cc7e5df156d50ea3e7704bc36861805e06bd0a5",
+        "after": "c26da8acc7a253139fc3bece3cc7e5df156d50ea3e7704bc36861805e06bd0a5"
+      },
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java": {
+        "before": "008f61117ce90c31d9a0abddaa4a91d2d142ba7ef8fabf734265a3940d45ee85",
+        "after": "008f61117ce90c31d9a0abddaa4a91d2d142ba7ef8fabf734265a3940d45ee85"
+      },
+      "studio-runner/test/observedSnapshotPreimages.test.ts": {
+        "before": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa",
+        "after": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa"
+      }
+    }
+  },
+  "actualPureScope": {
+    "actualJUnitMethodCount": 2,
+    "reviewedClauseGroups": 19,
+    "completedClauseGroups": 19,
+    "mapping": [
+      {
+        "clauseId": "57/TestConfig",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/config/base",
+          "57/config/environment",
+          "57/config/viewport-width",
+          "57/config/viewport-height",
+          "57/config/timeout",
+          "57/config/wait",
+          "57/config/browser-included",
+          "57/config/global-literal",
+          "57/config/global-evidence",
+          "57/config/global-declaration"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "57/StepInput",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/input/text",
+          "57/input/context-literal",
+          "57/input/targethint-null",
+          "57/input/targethint-false",
+          "57/input/scoped-reference",
+          "57/input/evidence-each-field"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "57/StepChain",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/chain/all-golden-rows",
+          "57/chain/predecessor",
+          "57/chain/mutate-j",
+          "57/chain/wrong-wrapper"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "57/LearnedContent",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/learned/all-golden-rows",
+          "57/learned/unsorted-multiple",
+          "57/learned/utf8-ties",
+          "57/learned/retained-semantic-fields",
+          "57/learned/removed-ids",
+          "57/learned/consumer-deletion"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "57/StepSnapshot",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/snapshot/golden-all-steps",
+          "57/snapshot/normalized-metadata",
+          "57/snapshot/source-graph-preserved"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "57/EmptyValue",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/value/empty",
+          "57/value/whitespace",
+          "57/value/missing",
+          "57/value/null"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "57/Normalization",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/normalize/absent-context",
+          "57/normalize/null-context",
+          "57/normalize/empty-arrays",
+          "57/normalize/hint-null",
+          "57/normalize/hint-false",
+          "57/normalize/fractional-iso",
+          "57/normalize/unicode-order"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "65/sourceHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/source/array",
+          "65/source/wrapper",
+          "65/source/omit-line",
+          "65/source/reorder",
+          "65/source/current-draft"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "65/authoringHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/authoring/array",
+          "65/authoring/wrapper",
+          "65/authoring/omit-stepId",
+          "65/authoring/omit-ordinal",
+          "65/authoring/omit-source",
+          "65/authoring/reorder"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "65/configurationHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/config/full",
+          "65/config/wrapper",
+          "65/config/each-required-omission",
+          "65/config/legal-field-change"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "65/artifactHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/artifact/full",
+          "65/artifact/wrapper",
+          "65/artifact/subset",
+          "65/artifact/required-omission",
+          "65/artifact/valid-inner-change"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "65/learnedPlanHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/plan/full",
+          "65/plan/wrapper",
+          "65/plan/required-omission",
+          "65/plan/semantic-change",
+          "65/plan/duplicate-field-mismatch"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "65/referencePolicyHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/policy/full",
+          "65/policy/wrapper",
+          "65/policy/subset",
+          "65/policy/required-omission",
+          "65/policy/semantic-change"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "65/profileHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/profile/full",
+          "65/profile/wrapper-claim",
+          "65/profile/omission",
+          "65/profile/unsupported-constant"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "65/operationEquivalenceHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/equivalence/full",
+          "65/equivalence/wrapper",
+          "65/equivalence/omit-operations",
+          "65/equivalence/omit-guards",
+          "65/equivalence/omit-inputRecipes",
+          "65/equivalence/omit-bindings",
+          "65/equivalence/omit-transfers",
+          "65/equivalence/order"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "65/RevisionIdentity",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/identity/exact16",
+          "65/identity/wrapper",
+          "65/identity/whole-revision",
+          "65/identity/unknown-field",
+          "65/identity/omit-version",
+          "65/identity/omit-testId",
+          "65/identity/omit-csiId",
+          "65/identity/omit-sourceRevision",
+          "65/identity/omit-configurationRevision",
+          "65/identity/omit-sourceHash",
+          "65/identity/omit-configurationHash",
+          "65/identity/omit-authoringHash",
+          "65/identity/omit-learnedPlanHash",
+          "65/identity/omit-artifactHash",
+          "65/identity/omit-referencePolicyHash",
+          "65/identity/omit-operationEquivalenceHash",
+          "65/identity/omit-admissionProvenanceHash",
+          "65/identity/omit-publicationEvidenceHash",
+          "65/identity/omit-runAuthorizationHash",
+          "65/identity/omit-profileHash"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "65/PinProgram",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/pin/each-id-copy",
+          "65/pin/each-digest-copy",
+          "65/program/wrapper",
+          "65/program/required-omission",
+          "65/program/guard-resealed",
+          "65/program/action-resealed"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "65/Maps",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/maps/resealed-claimed-map",
+          "65/maps/missing-key",
+          "65/maps/extra-key",
+          "65/maps/reuse-copy-mismatch"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      },
+      {
+        "clauseId": "65/HistoricalReceipts",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/receipt/admission-one-sided",
+          "65/receipt/publication-one-sided",
+          "65/receipt/authorization-one-sided",
+          "65/receipt/actual-stored-authority"
+        ],
+        "privateAuthorityLimit": true,
+        "status": "PASS_ACTUAL_SELECTED_PURE_METHOD",
+        "reached": "Entire selected Java method returned normally in feedback05, including all called positive constructions and negative mutation loops for this reviewed clause group. No skipped test or altered expected envelope. Supplied public basis/base preimages only; actual stored history/PG/HTTP/native authority is separate."
+      }
+    ],
+    "multiplicityLimit": "Nineteen clause groups are assertions within two actual JUnit methods, not nineteen independently executed JUnit tests.",
+    "SnapshotBasisParityTest": "Complete golden positive worlds/independent base/config and step inputs/scoped references/empty values/normalization + both distinct null/false targethint cases/scope order and coordinate metadata/learned projection mutations returned normally. Frozen golden envelope expectations retained.",
+    "SnapshotBasisValidationTest": "Complete exact base16identity/preimage commitments/wrapped-partial claims/closed omissions/semantic inner mutations/pin-program-map/historical supplied-equality negative constructions returned normally.",
+    "privateAuthorityLimit": "This proves reconstruction/semantic rejection over supplied complete basis/base preimages only. No actual immutable stored history, insufficient-old-row upgrade, source HTTP authorization, database lineage, browser/session behavior or application acceptance is inferred."
+  },
+  "runtimeScope": {
+    "coreHttpReached": false,
+    "postgresStarted": false,
+    "nativeBrowserReached": false,
+    "recordingReached": false,
+    "newNativeFixturesSelected": false,
+    "NodeRuntimeOrUnitCommandExecuted": false,
+    "schemaOrDistBuildOrGenerationExecuted": false,
+    "noOldTempMediaOrProcessOperations": true
+  },
+  "artifacts": {
+    "results": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-snapshot57-65-feedback-attempt05-results.json",
+      "sha256": "a3ad0576bdf2c05a44148f90a9631713d922b1d6089cff507fbac5cda1883817"
+    },
+    "log": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-snapshot57-65-feedback-attempt05.log",
+      "sha256": "da4c2a46ac9fd88255ce49fec717eed353497a7a52417511fd7b4424dfe8eb77"
+    },
+    "before": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-snapshot57-65-feedback-attempt05-before.json",
+      "sha256": "2283075d1d269d5e96e7d0afbf0f10ff4c7601c69a7af103963cd4e4e77223aa"
+    },
+    "after": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-snapshot57-65-feedback-attempt05-after.json",
+      "sha256": "8179daf3e64233f4ead1b730dafc33300427249f56c740b0acb70d99dc9193a5"
+    },
+    "xml": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-snapshot57-65-feedback-attempt05-xml/TEST-com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.xml",
+        "sha256": "9d8d041bb25d6551b890e7996ae9c28295745e177415d020a672dc8593575451"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-snapshot57-65-feedback-attempt05-xml/TEST-com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.xml",
+        "sha256": "62c917e5477bea44c19e2100014b1763568b8eada9d63903b952519e9590d412"
+      }
+    ],
+    "guards": [],
+    "prelaunch": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-snapshot57-65-feedback-attempt05-artifacts/prelaunch.json",
+      "sha256": "eda98c389cd4075d9b74214b13635924e9a8f0fe167f7d1ba16fc47827ff1940"
+    },
+    "restoration": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-snapshot57-65-feedback-attempt05-artifacts/fixed-output-restoration.json",
+      "sha256": "136df933be66e3d2e2824abd34eb5448809bfea2f33785ad45ab5baf4280515b"
+    },
+    "fixedOutputRestoration": {
+      "at": "2026-10-15T11:24:05.160993+00:00",
+      "priorFiles": 56,
+      "freshArchivedFiles": 14,
+      "restoredFiles": 56,
+      "byteExact": true,
+      "mismatches": [],
+      "freshArchivedBeforeRestore": true,
+      "freshFiles": [
+        {
+          "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.xml",
+          "sha256": "9d8d041bb25d6551b890e7996ae9c28295745e177415d020a672dc8593575451"
+        },
+        {
+          "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.xml",
+          "sha256": "62c917e5477bea44c19e2100014b1763568b8eada9d63903b952519e9590d412"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/output.bin",
+          "sha256": "138ed77b48ab2d52e25d2224bb521ec147f02290fcb881d9067b798ad9feb825"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/output.bin.idx",
+          "sha256": "316e6cf5e786731386664e737d7235d2c405e5b86067adebd99883f412db69c0"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/results.bin",
+          "sha256": "c67ebd15b2608b17cede03bdeca2f57df93849426e0bae0769f9a2b44602cbbd"
+        },
+        {
+          "path": "backend/build/reports/tests/test/classes/com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.html",
+          "sha256": "458251d3e4ce2b3e616af4c4f2e2513cd7dc0bbff014413ebbfae4a89d211a39"
+        },
+        {
+          "path": "backend/build/reports/tests/test/classes/com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.html",
+          "sha256": "93c1a15fc1242629a6e5d6d948c205378949419caeddf8b5f72923709df8fef5"
+        },
+        {
+          "path": "backend/build/reports/tests/test/css/base-style.css",
+          "sha256": "a10a4ef75ca2601b44bfdaf3112a5854f6376f68d7cbaf6958286f04488d293b"
+        },
+        {
+          "path": "backend/build/reports/tests/test/css/style.css",
+          "sha256": "61866908fd7eb09c79e96239f69db2e8cc5c6526cdb308eba0535ed2a0f6a263"
+        },
+        {
+          "path": "backend/build/reports/tests/test/index.html",
+          "sha256": "c26b50c92a5a4b2ca2a71df0536bdf7683a296c1fc2eaf559134c9ec282a212b"
+        },
+        {
+          "path": "backend/build/reports/tests/test/js/report.js",
+          "sha256": "fc89c6d002d18f4662065c9887b2cda8f8486f2737d4ad0f2fdeac0ad58a44dc"
+        },
+        {
+          "path": "backend/build/reports/tests/test/packages/com.citi.put.checks.studio.guided.publication.html",
+          "sha256": "8aa1c5fd6557789b1725ddf0086e7d314745b069327288268adcb809e6d938d9"
+        },
+        {
+          "path": "backend/build/guard-tally/GuidedPlanningIntegrationTest.json",
+          "sha256": "49877687fdc0fe0b3f5640e61f647d165fc6ba88836c6a4fe162dc073cdfc3b2"
+        },
+        {
+          "path": "backend/build/guard-tally/GuidedPublicationReplayIT.json",
+          "sha256": "e783782a1e0729c02240ec2912139d3adf8ea3ffe196ca4c068e66f4723dd1a7"
+        }
+      ]
+    },
+    "priorFailedReceiptsMediaAndOriginalFixedBytesPreserved": true
+  },
+  "outcome04Investigation": "Actual04 same-body Node-valid/Java-rejected native outcome remains a separate independently active Aria read-only review. No speculation/production repair or UNKNOWN admission retry in this window.",
+  "remaining": [
+    "Full86 acceptance/subcase obligations and24ARCH05 facets at original tiers",
+    "55SQL obligations and final current-source whole-suite checks",
+    "35 actual joined variants plus main edit4 native prefix/suffix/video/ordinary replay",
+    "Full B1 and R1 remaining source/execution; B2/B3/B4-R2",
+    "15 private/history authority companions and secret/fault matrices",
+    "Normal full static check and configured unchanged coverage",
+    "Cross-replica/deployment/independentQA015Done/PO/rootclosure then008",
+    "Row85 original pending user choice remains unamended"
+  ],
+  "noSourceEditsOrExpectedOutputChangesByExecutor": true,
+  "noQAVerdictOrStoryCompletionClaim": true
+}

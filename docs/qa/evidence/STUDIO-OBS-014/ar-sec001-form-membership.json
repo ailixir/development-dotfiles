@@ -1,0 +1,129 @@
+{
+  "artifact": "Architect ruling AR-SEC001-FM: SEC-001 residual (form membership) escalated by B14 under ar-2-3-obs014 S-6",
+  "author": "Aria (@architect)",
+  "date": "2026-10-14",
+  "mode": "Read-only analysis. No code, test or contract was edited. Gradle, vitest and builds were not run (root holds the lock). Nothing committed.",
+  "anchoredOn": {
+    "head": "734ad704f (uncommitted working tree, B14 qa-fixes 01-13 applied per qa-fixes/README.json)",
+    "inputsSha256Prefix": {
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuard.java": "dddfa5e50abb03ab",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuardTest.java": "28354cab4275df42",
+      "studio-runner/src/run/observationCollector.ts": "ba31be90d04885e6",
+      "docs/qa/evidence/STUDIO-OBS-014/b14/ledger.json": "f8ffcec84d906114",
+      "docs/qa/evidence/STUDIO-OBS-014/b14/qa-fixes/README.json": "ebeae9466343e7b5",
+      "docs/qa/gates/STUDIO-OBS-014-action-safety-and-governance-for-the-learning-run.yml": "44fe2644446bdf70",
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json": "abcdf0b512d6a776"
+    }
+  },
+
+  "ruling": "B. The gap is closed by a fail-closed rule in GuidedActionGuard.sideEffecting that uses only signals the sanitized node already carries (elementType, role, controlType, formId) plus the press key from the proposal. No new observation signal. No runner, schema or contract change. Form membership stops being a precondition for click side effects. A click is side-effecting unless its target is positively proven non-activating; an Enter press is side-effecting on any target. The rule only widens the side-effecting set, never narrows it. A is rejected. C is rejected because exposure is not nil: it is the common case.",
+
+  "s6Disposition": "B14 was right to stop. S-6 is satisfied by B: the classification needs no page signal the observation does not already carry, and nothing more is exported to the model.",
+
+  "verifiedFacts": [
+    "V1 The collector sets a child's formId only when the <form> itself is emitted (observationCollector.ts:457: `emitted && tag === 'form' ? emitted.nodeId : entry.form`). A form gets role 'form' only with aria-label/aria-labelledby (:364-366), else role 'generic', which is not relevant and not emitted. So every control in an unlabelled form has formId null.",
+    "V2 formId is also nulled when a labelled form node is not retained, for example withheld by echo scrubbing (:526 `if (!retained.has(node.formId ?? '')) node.formId = null`).",
+    "V3 Form association is DOM ancestry only. The `form=` attribute (a control outside the <form> element) is never seen, so formId is null although element.form !== null (:457; element.form is read only in navigationExpected :675 and the password pin :560).",
+    "V4 The OBS-007 and P3 login fixtures, which are the AC-6 oracle's own 'fixture login form', are unlabelled: studio-runner/test/fixtures/secret-login/server.ts:12 `<form method=\"post\" action=\"/login\">`, GuidedPublicationReplayIT.java:13225/13230 `<form method='post' action='/p3/login'>`, studio-runner/fixtures/pages/login.html:17. Only the TEST-001 variant in GuidedPlanningIntegrationTest.java:263 is labelled (`aria-label='Order form'`). So at HEAD the AC-6 oracle ('fixture login form under DENY => the submit click is refused') holds only on the specially labelled variant. On the real fixture, 'Sign in' (<button type=submit>, formId null) passes DENY.",
+    "V5 GuidedActionGuardTest encodes the bypass as expected behaviour: clarifyFirstAsksOnceBeforeTheFirstSideEffectAndNotAfterConfirmation asserts `button(\"Next\", null)` is 'not side-effecting'. In the observation, a button with formId null cannot be told apart from a submit button in an unlabelled form.",
+    "V6 Press: GuidedActionGuard.sideEffecting returns `inForm` for press, whatever the key or target. So Enter in a text field of an unlabelled form (implicit submission) and Enter on a link (navigation) are both non-side-effecting. Press always targets an element: runtime.ts:169 refuses a page target for anything except navigate or assert url/title. Keys are Enter|Tab|Escape|ArrowDown|ArrowUp (v3 action schema; nativeInput.ts:15).",
+    "V7 <input type=image|file> is never exported (unsupportedControl :329 makes the node blocked :330, so it is not safe :420). SEC-002 (patch 02) refuses a target absent from the observation UNGROUNDED_TARGET, so image/file inputs are already covered fail-closed. The guard Javadoc claim that type=image 'is exported as element input, role button' is inaccurate.",
+    "V8 An explicit ARIA role overrides the native role (:372 `role = explicit && !presentation ? explicit : nativeRole`), and controlType collapses checkbox/radio/number/range/submit/reset/button to 'other'. So `<input type=submit role=checkbox|radio|spinbutton|slider>` is exported as input/checkbox|radio|...; 'other' and passes today's NON_SUBMITTING_INPUT_ROLES exemption even inside a labelled form. ARIA-in-HTML allows role checkbox/radio on type=submit, so this is valid markup, not only hostile markup. A text-entry role on a submit input is detectable: real text-entry inputs carry controlType text|search|email|tel|url|password, never 'other'.",
+    "V9 The check/uncheck kinds are natively verified at the runner: validateInvocation (:654) admits them only on HTMLInputElement of type checkbox (or radio for check). They are not EFFECT_KINDS and stay a proven non-submitting path for toggles.",
+    "V10 v3 observation.schema.json node items are closed (`additionalProperties: false`, line 88). Any new node field is a contract change."
+  ],
+
+  "inferredNotRun": [
+    "I1 (HTML spec knowledge, not exercised here) A click on a <label> fires the labelled control's activation, so a label for a submit button submits. A click on an element inside a <button>/<a href> (for example an emitted heading child) runs the ancestor's activation behaviour. The collector can emit such descendants (headings are relevant, :322), so they are click targets with formId null and role heading/generic.",
+    "I2 SPA buttons outside any form commonly trigger side effects through JS handlers. Form membership was therefore never a complete proxy for side effects; it is only the native-semantics subset."
+  ],
+
+  "rule": {
+    "where": "GuidedActionGuard.sideEffecting (backend only). The call site GuidedTranslationService.guardAction passes the proposal's operation.key (null when not a press).",
+    "click": {
+      "sideEffecting": "true UNLESS the target is a proven non-activating class (allow-list), whatever its formId",
+      "provenNonActivating": [
+        "elementType 'input' AND role in {textbox, searchbox, combobox} AND controlType in {text, search, email, tel, url, password} (clicking a text-entry field focuses it; a submit input can never carry these controlTypes, so a role spoof is excluded)",
+        "elementType 'textarea' AND role 'textbox' AND controlType 'textarea'",
+        "elementType 'select' AND role in {combobox, listbox}"
+      ],
+      "consequences": [
+        "Closes the escalated gap: <button> (any or no type), <input type=submit|reset|button>, role=button custom controls, in unlabelled forms, in withheld forms, or associated through form= (V1-V3).",
+        "Closes the role-spoof residual (V8): input with role checkbox/radio/spinbutton/slider is side-effecting on click. Authors toggle with check/uncheck, which the runner verifies natively (V9) and which is never side-effecting.",
+        "Closes label and descendant activation (I1) and JS-handler custom controls (I2) without an ancestor walk.",
+        "Links (element or role) stay side-effecting, as today."
+      ]
+    },
+    "press": {
+      "sideEffecting": "key == 'Enter' (any target: activation, implicit submission, link navigation) OR inForm (kept, so the rule stays monotone)",
+      "notSideEffecting": "Tab, Escape, ArrowDown or ArrowUp outside an exported form. None of these has a native submission, activation or navigation behaviour."
+    },
+    "monotonicity": "Every action side-effecting under the current rule stays side-effecting. The allow-list roles (textbox, searchbox, combobox, listbox) are never button or link, and every input role in them was already in NON_SUBMITTING_INPUT_ROLES. A <select role=button> or <textarea role=button> stays side-effecting because the triples require a consistent role.",
+    "unchanged": "Guard order (absent target, then destructive verb, then grounding, then stance), the stance semantics (DENY refuses SIDE_EFFECT_DENIED; CLARIFY_FIRST asks at most once per session with an AUTHORED label; ALLOW passes), the confirmation record, the audit shape and every closed code. No new GuidedPolicyReason."
+  },
+
+  "falsePositiveCost": {
+    "ALLOW": "None. sideEffecting only affects the stance branch.",
+    "CLARIFY_FIRST (default)": "At most one extra question per session, and only in a session whose first non-text click would not have been classified before. In practice the first such click is the login submit or a navigation link. For the unlabelled-form login fixtures, asking is the correct (previously missed) behaviour, not a false positive. After confirmation nothing further is asked.",
+    "DENY": "Real narrowing. Clicks on non-submitting buttons (menus, disclosure, dialog close), click-toggling a checkbox or radio, and clicks on headings or labels are refused, and Enter is refused. DENY becomes: navigate to authored URLs, fill, check/uncheck, select, read, assert, and click only to focus a text field or select. That matches the story goal ('the first Run can never click, submit ... something nobody asked for'). Every refusal is fail-closed and visible (session FAILED POLICY_DENIED, GUIDED_ACTION_REFUSED/SIDE_EFFECT_DENIED audited), never a silent allow. The owner's escape is CLARIFY_FIRST, and the author's escape for toggles is check/uncheck wording.",
+    "corpus": "The AC-4 unit denominator (6 clicks: Submit, Sign in, Reports) is all buttons and links, already side-effecting, evaluated under ALLOW, so 6/6 stay eligible. ReplayIT seeds ALLOW, so its 54 passed clicks are unchanged."
+  },
+
+  "rejected": {
+    "A_newSignal": "Minimal form: node field `formAssociated: boolean` (runner, collector at :431-435 from `element.form !== null` for button/input/select/textarea), or emitting every <form> as a node. Rejected for OBS-014. (1) It exports more page structure to the model, which S-6 and the Dev Notes put out of bounds. (2) The closed v3 observation schema (V10) changes, routed through C-int: regenerate types.ts/schemas.json and the backend resource copy, fixtures.json, the contract-bundle BASE_SHA256 and digest pins, StudioContractTest/confinement pins, and a joined runner+backend rebuild. The OpenAPI operation count stays 43 because no operation is added, but the bundle digests still move. (3) It still misses label or descendant activation (I1), JS handlers (I2) and the role spoof (V8). Its only gain over B is fewer DENY false positives. That is an FP-reduction refinement, not a security fix, and the PO may place it later as a backlog candidate (not a story ID invented here).",
+    "C_deferral": "Rejected. Exposure is not nil: the AC-6 oracle's own fixture login forms are unlabelled (V4), and unlabelled forms are the norm on real login pages. A deferral would ship DENY and CLARIFY_FIRST as bypassable on the common path while the policy owner believes they hold."
+  },
+
+  "ownerLanes": {
+    "B14 (@dev, T2)": [
+      "GuidedActionGuard.sideEffecting: the rule above. Remove the inForm gate on click and add the allow-list triples. press = Enter || inForm. Add the key parameter to the targetNodeId overload; the 7-arg overload passes null. Replace NON_SUBMITTING_INPUT_ROLES with the allow-list.",
+      "GuidedTranslationService.guardAction: pass proposal.operation.key.",
+      "Javadoc: state the fail-closed rule, correct V7 (image/file are never exported and SEC-002 covers them), and delete the 'escalated under S-6' sentence, citing this ruling.",
+      "Unit and IT oracles below. Old to new assertions recorded by test name in the ledger (strengthening, not weakening).",
+      "docs/specs/studio-observed-authoring/guided-data-flow.md:147: one sentence defining 'side-effecting' as above, so the policy owner sees DENY's real scope (AC-2 compliance surface)."
+    ],
+    "root": "Run B14's targeted set under the lock (gradle-locked.sh), then the S-9/AC-4 tally re-run.",
+    "@qa": "Re-verify SEC-001 against this ruling. Confirm the runner and contracts have zero diff for this fix.",
+    "@po": "Acknowledge in the story Change Log that AC-6 'actions the observation marks as form submission / navigation-causing' is enforced fail-closed as 'actions the observation cannot prove non-activating', and the resulting DENY scope. Non-blocking for B14; required before Done.",
+    "C-int / runner lanes": "None. No contract, schema, runner or BASE_SHA256 change, and the operation count is unchanged."
+  },
+
+  "oracles": {
+    "unit_GuidedActionGuardTest": [
+      "U1 Unlabelled-form submit (formId null): button/button, input/button controlType other, other/button. Each gives DENY => SIDE_EFFECT_DENIED, CLARIFY_FIRST => confirmFirst then not after confirmation, ALLOW => passes.",
+      "U2 Flip clarifyFirstAsksOnceBeforeTheFirstSideEffectAndNotAfterConfirmation: `button(\"Next\", null)` now confirmFirst=true. Rename its .as() text and record old to new.",
+      "U3 Role spoof: input with role checkbox|radio|spinbutton|slider|textbox and controlType other gives click side-effecting under DENY. The same nodes with kind check give sideEffecting false.",
+      "U4 Proven classes stay eligible under DENY on click, with formId null and with formId set: input textbox/text, searchbox/search, combobox/email, password control type, textarea/textbox/textarea, select/combobox/none, select/listbox/none. Rework nonSubmittingInputsInsideAFormStayEligibleUnderDeny: the textbox fixture gains controlType 'text'; the checkbox and radio click cases move to U3. Record by name.",
+      "U5 Label and descendant: other/generic (label) and other/heading on click give side-effecting.",
+      "U6 Press: Enter on input textbox/text formId null => side-effecting; Enter on link => side-effecting; Tab formId null => not; Tab with formId set => side-effecting (monotone).",
+      "U7 Closed-world enumeration: over the product of elementType {button,input,textarea,select,text,link,other}, the collector's supported roles plus generic, controlType (10 values), formId {null,'f'} and kind {click, press Enter, press Tab}, the non-side-effecting click set equals exactly the three allow-list triples, and every case the pre-ruling rule classified side-effecting is still side-effecting (pre-ruling predicate frozen as a private test copy)."
+    ],
+    "it_GuidedPlanningIntegrationTest": [
+      "I-1 An unlabelled-form fixture variant (`<form onsubmit=...>` with no aria-label, matching the OBS-007 login shape), parametrized <button>Submit</button> and <input type=submit value=Submit>, under governed DENY: 422 POLICY_DENIED, session FAILED POLICY_DENIED, zero submits (dataset.submitted absent), zero Submit-step admissions, GUIDED_ACTION_REFUSED/SIDE_EFFECT_DENIED audited.",
+      "I-2 The same variant under governed CLARIFY_FIRST: exactly one SIDE_EFFECT_CONFIRMATION/CONFIRM_ACTION with one AUTHORED choice before any dispatch; confirm gives one real submit, FINALIZING, no second question.",
+      "I-3 The existing labelled-form DENY/CLARIFY_FIRST tests (patch 03) stay green, unchanged."
+    ],
+    "calibration_S9": "Re-run the GuardDecisionTally (patch 09) for GuidedPlanningIntegrationTest and GuidedPublicationReplayIT. Expected: ReplayIT click passed 54, refused 0 (ALLOW); Planning refusals only in the planted list, plus the new I-1 test added to planted. Report any confirmFirst count change by test name. An unplanted refusal is an S-9 stop: report the label, do not adjust the rule.",
+    "runner": "None required. Oracle: `git diff --stat -- studio-runner/ docs/specs/studio-observed-authoring/contracts/` shows no hunk from this fix."
+  },
+
+  "security": [
+    "Fail-closed in every unknown: an unexported form, a withheld form, form= association, shadow-hosted controls (formId already null across shadow :457) and role spoofs all classify as side-effecting.",
+    "No new data leaves the page. The model-visible observation is byte-identical.",
+    "Residual (named, not deferred as a bypass): JS keydown handlers on Tab/Escape/Arrow keys, and hover-triggered JS, are outside native semantics. That is the same class as I2, which the click rule now absorbs for clicks. Exposure for these keys is not a submission or navigation path the observation can describe. It is recorded for the AC-11 compliance description, not for OBS-014 code."
+  ],
+
+  "tradeOffs": [
+    "B vs A: B is about 20 backend lines, no contract, no runner, and closes more bypass classes. Its cost is DENY false positives. A has fewer false positives but changes the contract and the runner, exports more structure, and stays incomplete.",
+    "Allow-list vs extended deny-list of submit types: the allow-list is closed and provable (3 triples), and new element classes default to side-effecting. A deny-list must keep chasing spoofs, labels and descendants.",
+    "Enter-only for press (plus the old inForm) vs every press: Enter is the only native activating key, so this keeps Escape/Tab usable under DENY at the cost of one extra parameter."
+  ],
+
+  "autoDecisions": [
+    "[AUTO-DECISION] Close the role-spoof (V8) and label/descendant (I1) classes in the same change, or rule only on the escalated unlabelled-form case? -> Close them now (reason: same method, same false-positive analysis, no extra lane, and a deferred bypass needs nil exposure, which V8 does not have).",
+    "[AUTO-DECISION] Press rule: every press side-effecting, or Enter || inForm? -> Enter || inForm (reason: Enter is the only native activating key; it stays monotone with today's rule; one parameter).",
+    "[AUTO-DECISION] Does the AC-6 interpretation need a PO AC edit? -> No AC edit; a PO acknowledgment in the Change Log before Done (reason: within the AC's security intent and story goal, and DENY's scope becomes visibly stricter to the owner)."
+  ],
+
+  "notExecuted": "No Gradle, vitest, build or browser run. V1-V10 are from reading the cited lines. I1-I2 are HTML/DOM specification knowledge, not exercised here. QA's ARCH-001 (guard order) is not ruled in this artifact. The SYNAPSE diagnostics and architect-first skill payloads attached to the spawn prompt are outside this mission and were not run."
+}

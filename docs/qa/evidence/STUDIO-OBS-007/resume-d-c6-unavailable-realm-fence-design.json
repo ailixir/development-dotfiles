@@ -1,0 +1,86 @@
+{
+  "scope": "SOURCE_ONLY_SELECTED_GUIDED_KIND3_UNAVAILABLE_REALM_BEFORE_CLOSED_FENCE_REQUEST",
+  "disposition": "MINIMUM_PUBLIC_METADATA_CONSTRUCTION_PROPOSED_FOR_ROOT_SOURCE_REVIEW_NO_AUTHOR_RELEASE",
+  "sourceHashes": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "ea827f2296d515d9203c7a96cc0b47626528414bd76e0b360fdd271c80b48e90",
+    "studio-runner/src/run/browser.ts": "a397ece7c7dec06e643bc82b6a4862c5accf154c1c6b28d314ad3c7fab4ac02d",
+    "studio-runner/src/guided/runtime.ts": "75fc33b1cd1cbc59bcb746811caff879d7217b22de8b08b374eec173dacf271c",
+    "studio-runner/node_modules/playwright-core/lib/coreBundle.js": "549070af3acabb3efcc4f55bfe6210f9f7c2fcf633cf7eaa59bfe60719969171",
+    "studio-runner/node_modules/playwright-core/types/types.d.ts": "2806f6d7810fba0306066d500cd716a6d1128d90af2c3cf71723e3ea0a8904c4"
+  },
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-c6-unavailable-realm-fence-design-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-c6-unavailable-realm-fence-design-context.txt",
+    "docs/qa/evidence/STUDIO-OBS-007/root-complete-managed-loss-design-review.json"
+  ],
+  "firstHazard": {
+    "fixtureAnchor": "Publication context.close wrapper:10449-10502; closed server:10740-10755",
+    "fact": "The original fence loops current pages, then always POSTs kind=closed. A vanished/empty page set cannot supply actual per-document seal/ACK/fence-complete; the original server correctly rejects. This is a genuine invalid request introduced by fixture construction, not a failure that can be cleared afterward."
+  },
+  "publicSourceAuthority": [
+    {
+      "anchor": "coreBundle.js:62432-62439",
+      "fact": "BrowserContext.browser() returns the original bound browser; pages() returns current in-memory page inventory. Context.isClosed() is true when closingStatus differs from none, including closing in progress. Empty pages or isClosed alone therefore do not establish genuine browser loss."
+    },
+    {
+      "anchor": "coreBundle.js:62760-62762,62798-62801",
+      "fact": "Browser.isConnected() returns the original private connection Boolean. The SDK Browser close channel invokes _didClose, sets it false, then emits Disconnected. Reading this public metadata issues no CDP/network command and adds no listener."
+    },
+    {
+      "anchor": "run/browser.ts:534-545,550-567",
+      "fact": "Original guided launch owns one actual persistent context/profile, captures its browser and installs the original disconnected->onLost path. Original close is memoized and closes that acquired context then disposes scratch. Do not add or replace callbacks."
+    },
+    {
+      "anchor": "Publication c6BindContext:10401-10420; actual native entry/probe:10384-10394,7622-7652",
+      "fact": "Existing holder is keyed by the SAME actual returned context, with selected mode/case/epoch/path and captured actual profile dev/ino; original creation/collector metadata and native entry establish that selected context. Existing real pending/probe protocol establishes one actual primitive at cut, without inspecting value arguments."
+    }
+  ],
+  "exactPredicateBeforeAnyFenceRequest": [
+    "Select ONLY guided path1 and c6 kind3 from the original launch mode and current active mode, with equal positive case/epoch and unchanged phase; all other modes take byte-equivalent original fence path.",
+    "Look up the existing holder by this exact original context; require holder.context===context, holder.mode matching that selected launch/current mode, captured holder dev/ino matching revC6ProfileDev/ino, contextBound true and the already-authenticated started/native-entry/probe facts for this selected owner. No foreign context, null browser or missing metadata receives unavailable status.",
+    "Read the SAME context.browser() public metadata and require a real non-null bound Browser whose original isConnected() returns strict false BEFORE calling the original context.close. This proves the browser SDK observed genuine disconnection, unlike an intended close or elapsed cut time. Do not call close, issue a probe or add an event listener to manufacture it.",
+    "Keep the original Java selected fault facts independent: actual authenticated Ready/profile/worker binding and last fresh pending ACK; ownership/start/group verified primary signal at the original<=250ms boundary; captured browser descendants actually gone; owning worker alive. The Node disconnection predicate does not itself prove physical process exit, so these original assertions remain mandatory."
+  ],
+  "minimumFixtureOnlyDelta": [
+    {
+      "site": "original context.close wrapper, immediately before original fence() construction/execution",
+      "proposal": "Evaluate the above selected predicate from existing context/holder/mode facts plus public browser.isConnected metadata. If true, classify realm unavailable locally and omit the entire unsupported live-page fence, including ONLY its kind=closed POST. Keep fenceSucceeded=false. This avoids manufacturing a request that claims pages are fenced. The normal fence implementation/server/schema/ACK rules remain unchanged for every nonselected or connected case."
+    },
+    {
+      "site": "same original finally:10480-10507",
+      "proposal": "Forward the SAME originalClose exactly once with original receiver/arguments, preserve returned result/rejection. Only its real fulfillment permits original event13 with operation0/ok=true; c6ClosedContext and subsequent source-managed close signals occur only at their existing completion points. No healthy fence file/phase registration is written. OriginalClose failure remains failed and cannot publish a confirmed unavailable-realm close."
+    },
+    {
+      "site": "event13:7653-7659; p4AssertObserverPhaseCompleted:8150-8178; p8AwaitC6Closed:8760-8805",
+      "proposal": "Reuse existing unavailable-realm effect knowledge: actual original SDK close, no P4_CLOSED_PHASES/healthy settled fence, effect UNKNOWN. Do not report zero password write/submit, native settlement, sealed page producer or successful ACK. Existing physical exit, exact UNKNOWN audit lineage, no nextstep, managed output completion/descriptor guards and produced-sink scans remain independent mandatory evidence."
+    }
+  ],
+  "failureAndStickyRules": [
+    "Never reset P4_NOTIFICATION_FAILED, state.failed, revFailed or native-observer-failed files. Any earlier malformed schema, sequence, wrong/duplicate ACK, invalid fence, notification after fence, runtime exception, rejected original close or unrelated I/O error remains red even if browser is later disconnected.",
+    "Do not broaden existing TIME/TargetClosed exception whitelist. The new branch acts BEFORE request from independent exact identity+actual disconnection, rather than converting a received rejected ACK to unavailability.",
+    "Missing/contradictory scope/holder/profile/connected metadata cannot invoke the omission. Preserve original close forwarding and failure behavior; unknown metadata stays unobserved. No fallback from empty pages, context.isClosed, cut timestamp or generic terminalstatus.",
+    "Actual page notifications already issued retain original acceptance/ACK/error semantics. Only the never-issued unsupported closed-fence request is absent. Actual queued handler completion and privacy cannot be inferred from disconnection.",
+    "If browser disconnection metadata has not arrived when the original close wrapper starts, do not add wait/poll/native request. Original fence path remains and can fail honestly; proposal makes no timing-success guarantee."
+  ],
+  "ordering": "Existing genuine cut/pending proof -> original SDK browser disconnection observed -> selected bound close wrapper entry evaluates predicate -> omit unsupported fence only -> same original SDK close and resource/disposal/lifecycle completion -> original unavailable close receipt and UNKNOWN -> actual all-owned-tree exit + managed application/ACK tail completion + descriptors + full produced-sink scans. No normal SDK seal or raw promise settlement is implied.",
+  "remainingPrerequisites": [
+    "Root substantive source review must approve this exact metadata predicate and combined managed-production/fixture closure candidate before authoring.",
+    "Runtime must actually observe bound Browser.isConnected false at wrapper entry; source does not prove when this arrives. Missing metadata remains red without added budget.",
+    "Existing holder/profile and selected-mode joins must be checked in the concrete candidate, preserving original case/default byteproof. Actual raw SDK/highPending remain truthful and separate.",
+    "Any existing retained real ACK/notification refusal still needs exact source disposition; this construction cannot erase an earlier failure."
+  ],
+  "actions": {
+    "sourceEdits": 0,
+    "runtime": 0,
+    "newListeners": 0,
+    "newProtocolFields": 0,
+    "newEndpoints": 0,
+    "newNativeCalls": 0,
+    "newWaits": 0,
+    "lifecycleChanges": 0
+  },
+  "whole19AcPass": false,
+  "waiver": false,
+  "wholeWaveCeilingUsd": 500,
+  "billingTelemetry": "UNAVAILABLE"
+}

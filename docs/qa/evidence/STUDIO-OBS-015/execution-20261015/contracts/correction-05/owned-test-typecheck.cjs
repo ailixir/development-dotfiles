@@ -1,0 +1,12 @@
+'use strict';
+const path=require('node:path'),root=path.resolve(__dirname,'../../../../../../..');
+const ts=require(path.join(root,'studio-runner/node_modules/typescript'));
+const directory=path.join(root,'studio-runner'),target=path.join(directory,'test/run/confinement.test.ts');
+process.chdir(directory);
+const config=ts.readConfigFile(path.join(directory,'tsconfig.json'),ts.sys.readFile);
+if(config.error)throw Error(ts.flattenDiagnosticMessageText(config.error.messageText,'\n'));
+const parsed=ts.parseJsonConfigFileContent(config.config,ts.sys,directory);
+const program=ts.createProgram([target],{...parsed.options,noEmit:true});
+const all=ts.getPreEmitDiagnostics(program);
+const owned=all.filter(d=>d.category===ts.DiagnosticCategory.Error&&d.file&&path.resolve(d.file.fileName)===target);
+console.log(JSON.stringify({status:owned.length?'FAIL_OWNED_SOURCE_TYPECHECK':'PASS_OWNED_SOURCE_TYPECHECK',target,ownedDiagnostics:owned.map(d=>({code:d.code,line:d.file.getLineAndCharacterOfPosition(d.start??0).line+1,message:ts.flattenDiagnosticMessageText(d.messageText,'\n')})),scope:'Only C-int-owned confinement file strict semantic diagnostics; not a full package type-check or build',otherDependencyDiagnosticsNotCredited:all.filter(d=>!owned.includes(d)).map(d=>({code:d.code,file:d.file?.fileName,message:ts.flattenDiagnosticMessageText(d.messageText,'\n')})),noEmit:true},null,2));process.exitCode=owned.length?1:0;

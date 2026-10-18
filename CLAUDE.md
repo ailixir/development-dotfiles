@@ -27,8 +27,8 @@ Almost all FE commands below must be run from `frontend/`. Backend commands run 
 ### Technology Stack
 - **Framework:** React 18 with TypeScript (strict mode)
 - **Build Tools:** 
-  - Vite for standalone development (`npm run dev`)
-  - Webpack with Module Federation for production (`npm run dev:fed`)
+  - Vite for standalone development (`pnpm run dev:standalone`)
+  - Webpack with Module Federation for production (`pnpm run dev`)
 - **UI Library:** Material-UI (MUI) v7 with Emotion styling
 - **Routing:** React Router v7
 - **State Management:** Redux Toolkit + React Context
@@ -37,8 +37,8 @@ Almost all FE commands below must be run from `frontend/`. Backend commands run 
 - **API Mocking:** Mock Service Worker (MSW) for development
 
 ### Deployment Modes
-1. **Standalone Mode** (`npm run dev` - port 5173): Full development with welcome page and sidebar
-2. **Federated Mode** (`npm run dev:fed` - port 3002): Module Federation integration testing
+1. **Standalone Mode** (`pnpm run dev:standalone` - port 5173): Full development with welcome page and sidebar
+2. **Federated Mode** (`pnpm run dev` - port 3002): Module Federation integration testing
 
 ## Common Development Commands
 
@@ -46,23 +46,25 @@ Almost all FE commands below must be run from `frontend/`. Backend commands run 
 ```bash
 cd frontend/
 
-# Setup
-npm install
-npm run msw:init
+# Setup (pnpm only; frontend/.npmrc sets node-linker=hoisted, which the webpack build needs)
+pnpm install
+# No msw:init step: there is no browser mock worker and no public/mockServiceWorker.js.
+# MSW runs in Node: the Vitest server (src/services/mocks/studio/server.ts) and the
+# Playwright proxy (e2e/mswProxy.ts).
 
 # Development servers
-npm run dev              # Webpack/Module Federation (port 3002)
-npm run dev:standalone   # Vite standalone (port 5173)
+pnpm run dev              # Webpack/Module Federation (port 3002)
+pnpm run dev:standalone   # Vite standalone (port 5173)
 
 # Quality
-npm run type-check
-npm run lint
-npm run lint:fix
+pnpm run type-check
+pnpm run lint
+pnpm run lint:fix
 
 # Tests
-npm run test             # Vitest
-npm run test:ui
-npm run test:e2e         # Playwright
+pnpm run test             # Vitest
+pnpm run test:ui
+pnpm run test:e2e         # Playwright, MSW project (CHECKS_E2E_REAL_BACKEND=1 selects real-backend)
 ```
 
 ### Backend (run from `backend/`)
@@ -140,6 +142,9 @@ backend/src/main/resources/db/migration/     # Flyway forward-only SQL
 - Environment variables in `.env.development` control MSW enablement and API URLs
 
 ## Development Rules
+
+### Accessibility Scope
+- **Functional must-haves only, no WCAG target** (user decision 2026-10-17; `docs/architecture/ADR-SC-006-accessibility-scope-functional-only.md`, rule `.claude/rules/accessibility-scope.md`). Do not add screen-reader, live-region, keyboard-shortcut, reduced-motion, axe/contrast or a11y-review work. Keep focus behaviour that is part of a flow, visible labels, the responsive layout, and the existing WCAG audit green as a regression guard only.
 
 ### Code Quality
 - **TypeScript:** Strict mode enabled, no `any` types without justification

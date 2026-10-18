@@ -1,0 +1,122 @@
+{
+  "scope": "ONE originalunprofiled C5 closedfixedfacts only/noQAorperformancecredit",
+  "result": {
+    "scope": "Exact selected current backend gate only; no whole-story QA verdict",
+    "gradleExitCode": 1,
+    "sourceDrift": [],
+    "results": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "tests": 2,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "finishedAt": "2026-10-12T15:51:01.910737+00:00",
+    "tests": 2,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "pass": false
+  },
+  "seedPass": true,
+  "mandatoryC5Pass": false,
+  "samplerEnabled": false,
+  "publicationSnapshotPresent": true,
+  "publicationRevisionPresent": false,
+  "firstProjectFrames": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.publicCall(GuidedPublicationReplayIT.java:14828)",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel(GuidedPublicationReplayIT.java:3715)"
+  ],
+  "finalizeFixedCode": "PUBLICATION_CONFLICT",
+  "capture": {
+    "mappedAppenders": 1,
+    "rootEvents": null,
+    "appEvents": null,
+    "eventCountsStatus": "SUPPORT_UNOBSERVED",
+    "logCoverage": "STREAMED_ORIGINAL_ENCODED_OUTPUT",
+    "encodedBytes": 177186545,
+    "encodedWriteCalls": 90585,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsCollected": true,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 30,
+    "patternBytes": 3308,
+    "rootTraceObserved": true,
+    "appTraceObserved": true,
+    "httpBodies": 2,
+    "httpErrors": 1,
+    "jsonBodies": 2,
+    "problemBodies": 0,
+    "sseStreams": 0,
+    "metricBytes": 81971,
+    "cacheEntries": 2,
+    "cacheNonemptyRequired": true,
+    "cacheProduced": true,
+    "cacheUnproducedOutsideFilterRoutes": false,
+    "profileFiles": 171,
+    "knownRootLinks": 4,
+    "externalLinkTargetBytesScanned": false,
+    "c4WindowsExecuted": false,
+    "traceFromStart": false,
+    "traceArmed": true
+  },
+  "claimCount": 36,
+  "lastClaim": {
+    "status": 202,
+    "handlerNanos": 2180234875,
+    "consumed": true
+  },
+  "state": {
+    "state": "FAILED",
+    "errorCode": "OTHER",
+    "bootstrapPhase": "READY",
+    "materializationPresent": true,
+    "fixtureModelHttpCalls": 8,
+    "fixturePhysicalProviderReads": 1,
+    "fixtureProviderFailures": 0,
+    "fixtureModelKinds": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 7,
+      "VERIFY_STEP": 0
+    }
+  },
+  "captureFailure": false,
+  "fixedLifecycle": [
+    {
+      "ordinal": 1,
+      "status": 202,
+      "kind": "RUNTIME",
+      "reason": "LEASE_LOST",
+      "consumed": true
+    }
+  ],
+  "fixedFinalizeGuard": [
+    {
+      "code": "PUBLICATION_CONFLICT",
+      "sourceFrames": [
+        {
+          "source": "PUBLICATION_REPOSITORY",
+          "line": 500
+        },
+        {
+          "source": "PUBLICATION_REPOSITORY",
+          "line": 122
+        },
+        {
+          "source": "PUBLISHER",
+          "line": 112
+        },
+        {
+          "source": "PUBLISHER",
+          "line": 109
+        }
+      ]
+    }
+  ],
+  "limits": "Typedmarkersdurablepresenceonly/falseNOTphaseabsence; server202capturedbytesNOTSDKACK; lossreasonaggregatescauses/no timer/exclusivecostproof. No retry."
+}

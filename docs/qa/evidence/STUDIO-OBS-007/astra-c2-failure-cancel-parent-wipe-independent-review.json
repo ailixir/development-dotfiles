@@ -1,0 +1,128 @@
+{
+  "status": "CURRENT_PARENT_WIPE_PRODUCER_SEMANTIC_REUSE_PASS",
+  "recoveryReceiptSha256": "efa09e795d337e67cfc12fc5344aa17d0a677a80da3e64e19509acca4a484ea6",
+  "proof": [
+    {
+      "exit": "STEP_FAILURE",
+      "originalGateReceipt": "resume-c6-timeout-wire-current/result.json",
+      "originalGateSha256": "39bf1d85abfe596a126f01cbcba259b831f5684255278bd3e88feb294eaf9ff2",
+      "archivedSdkManifestSha256": "c9a1e07bd08739485265843a879bad30dea89583d4d318ab961d17a49629c4ce",
+      "sdkEntries": 364,
+      "unchangedEntries": 357,
+      "changedFiles": [
+        "studio-runner/dist/guided/runtime.d.ts",
+        "studio-runner/dist/guided/runtime.js",
+        "studio-runner/dist/guided/runtime.js.map",
+        "studio-runner/dist/server/runCoordinator.js",
+        "studio-runner/dist/server/runCoordinator.js.map",
+        "studio-runner/src/guided/runtime.ts",
+        "studio-runner/src/server/runCoordinator.ts"
+      ],
+      "producerBlocks": [
+        {
+          "source": "studio-runner/src/server/runCoordinator.ts",
+          "archivedFileSha256": "f2fb612e7312cf26768d6bc3ccc687a7735b5182a4b4a1be1578b8b2548ac77b",
+          "currentFileSha256": "2060af4f77e6edc6016203127dbac542eed0fae6ec88203260630be8ba62931d",
+          "executeAndCleanupSuffixSha256": "11c30ce1aca8224047b4c5d1e086578fbd0dd79b949c6f08c0fd1b4ab4952f07",
+          "executeAndCleanupSuffixByteIdentical": true,
+          "onlyControlPollFunctionDiffers": true
+        },
+        {
+          "source": "studio-runner/dist/server/runCoordinator.js",
+          "archivedFileSha256": "a5184e2de92db7e467cf315c341f2051edb13d4281456535dc834f194a4dabee",
+          "currentFileSha256": "19384a0361cf41a396f0f5f5b8cb235ae7bc0f7c14720ac127302891e6267d4c",
+          "executeAndCleanupSuffixSha256": "6a506ea8f32df9ec0bd0aa2b3ddc668362fe316f3f4a433dab7aa4f10a44d8b5",
+          "executeAndCleanupSuffixByteIdentical": true,
+          "onlyControlPollFunctionDiffers": true
+        }
+      ],
+      "ordinaryLiteralModuleGraph": {
+        "roots": [
+          "studio-runner/dist/server/application.js",
+          "studio-runner/dist/run/launcher.js",
+          "studio-runner/dist/run/child.js",
+          "studio-runner/dist/run/browser.js",
+          "studio-runner/dist/compat/runtime-versions.js"
+        ],
+        "visitedModules": 67,
+        "guidedRuntimeReachable": false,
+        "limit": "Literal own-module imports from actual ordinary entry roots; controlled generated fixture wrapper authority remains separately source-bound."
+      },
+      "closedHistoricalEventLineage": {
+        "invocationCandidates": 1,
+        "nativeWitnessCandidates": 1,
+        "runIdentities": 1,
+        "parentWipeEvents": 1,
+        "parentCancelRequests": 0
+      },
+      "directCompiledChildPidEvidence": "NOT_EXPORTED_IN_OLD_WITNESS",
+      "realFocusIngress": false
+    },
+    {
+      "exit": "CANCEL",
+      "originalGateReceipt": "resume-c6-cdp-cancel-current/result.json",
+      "originalGateSha256": "a5e2dd3bfdcdf96971ad6805a73a8fac263b83da7b1fb5ed95ec58e24f4b2fe4",
+      "archivedSdkManifestSha256": "453e8dd25bd24c0f9d959cedee5f56399209a2b4fd3bd09bbc4a82acd723ae27",
+      "sdkEntries": 364,
+      "unchangedEntries": 357,
+      "changedFiles": [
+        "studio-runner/dist/guided/runtime.d.ts",
+        "studio-runner/dist/guided/runtime.js",
+        "studio-runner/dist/guided/runtime.js.map",
+        "studio-runner/dist/server/runCoordinator.js",
+        "studio-runner/dist/server/runCoordinator.js.map",
+        "studio-runner/src/guided/runtime.ts",
+        "studio-runner/src/server/runCoordinator.ts"
+      ],
+      "producerBlocks": [
+        {
+          "source": "studio-runner/src/server/runCoordinator.ts",
+          "archivedFileSha256": "f2fb612e7312cf26768d6bc3ccc687a7735b5182a4b4a1be1578b8b2548ac77b",
+          "currentFileSha256": "2060af4f77e6edc6016203127dbac542eed0fae6ec88203260630be8ba62931d",
+          "executeAndCleanupSuffixSha256": "11c30ce1aca8224047b4c5d1e086578fbd0dd79b949c6f08c0fd1b4ab4952f07",
+          "executeAndCleanupSuffixByteIdentical": true,
+          "onlyControlPollFunctionDiffers": true
+        },
+        {
+          "source": "studio-runner/dist/server/runCoordinator.js",
+          "archivedFileSha256": "a5184e2de92db7e467cf315c341f2051edb13d4281456535dc834f194a4dabee",
+          "currentFileSha256": "19384a0361cf41a396f0f5f5b8cb235ae7bc0f7c14720ac127302891e6267d4c",
+          "executeAndCleanupSuffixSha256": "6a506ea8f32df9ec0bd0aa2b3ddc668362fe316f3f4a433dab7aa4f10a44d8b5",
+          "executeAndCleanupSuffixByteIdentical": true,
+          "onlyControlPollFunctionDiffers": true
+        }
+      ],
+      "ordinaryLiteralModuleGraph": {
+        "roots": [
+          "studio-runner/dist/server/application.js",
+          "studio-runner/dist/run/launcher.js",
+          "studio-runner/dist/run/child.js",
+          "studio-runner/dist/run/browser.js",
+          "studio-runner/dist/compat/runtime-versions.js"
+        ],
+        "visitedModules": 67,
+        "guidedRuntimeReachable": false,
+        "limit": "Literal own-module imports from actual ordinary entry roots; controlled generated fixture wrapper authority remains separately source-bound."
+      },
+      "closedHistoricalEventLineage": {
+        "invocationCandidates": 1,
+        "nativeWitnessCandidates": 1,
+        "runIdentities": 1,
+        "parentWipeEvents": 1,
+        "parentCancelRequests": 1
+      },
+      "directCompiledChildPidEvidence": "NOT_EXPORTED_IN_OLD_WITNESS",
+      "realFocusIngress": false
+    }
+  ],
+  "meaning": "Actual recovered historical step-failure and cancellation parent wipe events retain current producer/cleanup semantics. TS and compiled JS execute/cleanup suffixes are exact; the sole coordinator delta tightens absolute control-poll queue/request timing before execute. Guided runtime deltas are outside the ordinary literal import graph.",
+  "limits": [
+    "Retain seven changed SDK files; do not claim all364 current hashes match.",
+    "No direct old compiled-child PID export: browser close, pending ACK, FINAL or false focus metadata does not establish PID disappearance.",
+    "Closed private event/run association is supplied by root-owned sanitized recovery; this reviewer read no raw logs or private identifiers.",
+    "No heap zeroization, dead-parent telemetry, killed-child normal SDK seal, concurrency, drain or whole-C2 credit."
+  ],
+  "newRuntimeExecuted": false,
+  "sharedSourceEdits": false,
+  "formalQaOrLifecycleAdvance": false
+}

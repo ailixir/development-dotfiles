@@ -1,0 +1,20 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java.before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -5054,7 +5054,7 @@
+       if (capacity) {
+         var actual = ACTUAL_DISPATCH_DIAGNOSTICS.get(execution);
+         assertThat(actual != null).isTrue();
+-        JsonNode refusal = actual.deepCopy();
++        JsonNode refusal = actual.path("sendOutcome").deepCopy();
+         assertThat(
+                 "DEFINITE_REFUSAL".equals(refusal.path("kind").asText())
+                     && refusal.path("retryable").asBoolean()
+@@ -5138,7 +5138,7 @@
+                       Instant.parse(grant.path("expiresAt").asText()))
+                   .toMillis())
+           .isBetween(1L, 30000L);
+-      assertThat(ACTUAL_DISPATCH_DIAGNOSTICS.get(execution).path("kind").asText())
++      assertThat(ACTUAL_DISPATCH_DIAGNOSTICS.get(execution).path("sendOutcome").path("kind").asText())
+           .isEqualTo("ACCEPTED");
+       assertThat(
+               jdbc.queryForObject(

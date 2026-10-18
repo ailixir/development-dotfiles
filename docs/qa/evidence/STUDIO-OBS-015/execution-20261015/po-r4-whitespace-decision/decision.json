@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "artifact": "R4 disposition: containsText expected value empty after whitespace normalization",
+  "date": "2026-10-16T13:45:02Z",
+  "owner": "Pax (@po)",
+  "authority": "Quinn qa-source-review-final01 §9 R4 assigns the disposition to @po; Aria ruling H6.1 flags the product question to Pax ('whether planning should refuse a blank assert.expected ... separate decision'). Relayed by the coordinator. No user decision is claimed.",
+  "appendOnly": true,
+  "sources": {
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-source-review-final01/review.md": "fdfa4254d64a731d52bc3c2c77cb910235d73c89a90750b387bbaf8292fb3c12",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r2-diagnosis01/aria-h8-h6-ruling01/ruling.md": "86a53bec8dd6e80fa504c4764239c9ff8c54ec6d61dc31f52677ac3e6762730a",
+    "studio-runner/src/run/observationCollector.ts": "e073909b9b13cf8103abea4032bd78e4af3ba357b229718e9d4cf20392a72315",
+    "studio-runner/test/run/observationCollectorInvoke.test.ts": "912767a1c2a4ac756ba15aabd08cf348c54d2ca4e92cdc7a31b62bd6bac0f0d9",
+    "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts": "46099d1c1bbdbec9cdec3331620c57810cee1c682c927392daa811b3d39714b4",
+    "studio-runner/src/run/browser.ts": "19893b2aeda17b4d94b4ddb45977fb170cea45035a78cc4e6a1b3f904de21dd9",
+    "studio-runner/src/guided/runtime.ts": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+    "studio-runner/src/executor/observedReplay.ts": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedSourceReferenceValidator.java": "f611158fcecb2eb6d3a5bc10a94b57424c65aa7557d0c68a1cdefc49abeade95",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java": "2411f9ac24c1d21db7b43ee22ae91055b3aaefbce7f7652b276d4fc3d21e8b40",
+    "docs/architecture/studio-inference-contract-v1.md": "68f67d605102aa34932b68f0bd0785fbc1dd4d98b85859e09e7725b936953629"
+  },
+  "anchorsVerifiedByPo": {
+    "method": "read at working tree 2026-10-16; no build or test run",
+    "verified": [
+      "observationCollector.ts:52 normalizeName strips U+200B/U+00AD, collapses \\s+ (u), trims",
+      "observationCollector.ts:752 containsText = normalizeName(innerText).includes(normalizeName(value())) (H6)",
+      "observationCollector.ts:728 read refuses !captured.trim() (POLICY_DENIED); runtime.ts:415 READ_DENIED on blank capture",
+      "observationCollector.ts:627 url/title exact equality; :750 hasValue exact",
+      "browser.ts:504 begin() before in-page invoke; :509 any other in-page exception -> TARGET_CHANGED",
+      "runtime.ts:428 assertionPassed false -> FAILED/ASSERTION_FAILED; :432 stop; :440-443 post-fence TARGET_CHANGED -> UNKNOWN_OUTCOME",
+      "executor/observedReplay.ts:386 demand(result.assertionPassed === true, 'ASSERTION_FAILED')",
+      "guided/types.ts:24 Ledger.outcomeCode closed enum (PENDING|OK|ASSERTION_FAILED|TARGET_CHANGED|POLICY_DENIED|TIMEOUT|ACK_LOST|CANCELLED)",
+      "GuidedSourceReferenceValidator.java:88-94 sourceSpan requires start<end only; no blank check on spans or configuration values; slot has no predicate",
+      "GuidedProposalValidator.java:340-363 proposal checks ids only, never values",
+      "GuidedTranslationService.java:1628-1632 INVALID_CONTRACT/BINDING_ORDER repair loop (<=3)",
+      "observationCollectorInvoke.test.ts:234 row ['Order 42 confirmed','   ',true] pins the vacuous pass",
+      "studio-inference-contract-v1.md:124 F4"
+    ],
+    "checkedWithNode": [
+      "node: '\\u200b\\u00ad'.trim().length === 2 (trim keeps ZWSP/SHY); normalizeName('   '), normalizeName('\\u200b'), normalizeName('\\u00a0\\n\\t\\u00ad') all === '' (copy of the :52 expression, not the runner module)"
+    ]
+  },
+  "decision": {
+    "id": "R4",
+    "disposition": "REFUSE_NEVER_PASSES",
+    "acceptedAsParity": false,
+    "statement": "A containsText assertion whose expected value is empty after Playwright normalizeWhiteSpace never passes; it reports ASSERTION_FAILED. F4 parity is unchanged for every non-empty expected value.",
+    "rationale": [
+      "Vacuous pass is a false pass; OBS-009 AC-7 D-C has zero false passes as a hard gate and OBS-010 AC-1 gates the pilot on it",
+      "Introduced by H6 (a 015 change); before H6 the case usually failed",
+      "Not invented (Article IV): extends the existing blank-value read refusal (observationCollector.ts:728, runtime.ts:415) to the expected side",
+      "Rare in plain-English steps, so a runner backstop suffices; rarity does not justify a vacuous path"
+    ],
+    "story": "STUDIO-OBS-015 (now)"
+  },
+  "requiredChange": {
+    "owner": "Dex-R (@dev runner); Quinn re-gates",
+    "file": "studio-runner/src/run/observationCollector.ts",
+    "location": "invoke -> case 'assert' -> containsText (line 752 at e073909b)",
+    "replacement": "if (operation.predicate === 'containsText') { const expected = normalizeName(value()); return { assertionPassed: expected !== '' && normalizeName((element as HTMLElement).innerText).includes(expected) }; }",
+    "comment": "Keep the F4 comment; add: // PO R4 (2026-10-16): an expected value that is empty after normalization is not an assertion and never passes.",
+    "signal": "assertionPassed:false -> ledger FAILED/ASSERTION_FAILED (runtime.ts:428; observedReplay.ts:386)",
+    "mustNot": [
+      "throw in page (browser.ts:509 maps to TARGET_CHANGED; post-begin -> UNKNOWN_OUTCOME; replay reads as drift)",
+      "add an outcome code (closed v3 enum)",
+      "change read, businessText, hasValue, assertPage, contracts, schemas, backend or EXECUTOR_VERSION 2.1.0"
+    ],
+    "coverage": ["authoredLiteral sourceSpan", "authoredLiteral configuration", "binding (ZWSP/SHY-only capture)", "guided learning", "guided prefix replay", "published observed replay"],
+    "tests": [
+      "observationCollectorInvoke.test.ts: F4 table row ['Order 42 confirmed','   ',true] -> false; add ['Order 42 confirmed','\\u200b',false] and ['Order 42 confirmed','\\u00a0\\n\\t\\u00ad',false]; add it('containsText never passes an expected value that is empty after whitespace normalization (PO R4)') with empty-innerText element and expected '  ' -> false",
+      "observed-contains-text-parity.test.ts: whitespace-only row removed from the parity comparison and asserted as labelled 'PO R4 divergence' (runner false AND pinned toContainText('   ') passes); all other rows stay parity",
+      "red-before against H6 collector e073909b: only the changed/added R4 rows fail"
+    ],
+    "buildAndRunSet": [
+      "runner build script; record new dist/run/observationCollector.js and dist manifest hashes ('dist stable' changes once more)",
+      "final run set against post-R4 dist: the two test files, full runner unit tier, joined assert-fail label (base learning passes step 3; deliberate variant failure still fails)"
+    ],
+    "documentation": {
+      "owner": "@architect",
+      "blocking": false,
+      "action": "Append dated note to docs/architecture/studio-inference-contract-v1.md F4 (:124): exception (PO R4, 2026-10-16) - a string toContainText expectation empty after whitespace normalization never passes."
+    },
+    "status": "OPEN",
+    "completion_condition": "Change applied, tests green with red-before, dist rebuilt and hashed, final run set at post-R4 digest, Quinn re-gate; R4 recorded in the 015 gate record by @qa."
+  },
+  "rejectedOptions": [
+    {"option": "Accept as Playwright parity + known limitation", "reason": "False pass vs D-C hard gate; 015 regression"},
+    {"option": "Proposal validator refusal", "reason": "Sees ids only, never values (privacy boundary)"},
+    {"option": "Source-reference validator refusal on slot assert.expected", "reason": "No predicate at that layer; would refuse legitimate hasValue \"\" configuration checks; misses bindings"},
+    {"option": "Plan-admission predicate-aware refusal (GuidedTranslationService :202, :986, refine, answer paths)", "reason": "Not required now: runner guard already removes the false pass on every path; benefit is only earlier message/model repair at >=3 sites for an unobserved case", "revisitTrigger": "Any D-C benchmark run or pilot session that fails a containsText step because expected is empty after normalization -> @po reopens and places an authoring-time refusal"},
+    {"option": "New outcome code", "reason": "Ledger.outcomeCode is a closed v3 enum; contract/generator/pins change not justified; ASSERTION_FAILED is truthful"},
+    {"option": "In-page throw POLICY_DENIED", "reason": "Misreported as TARGET_CHANGED/UNKNOWN_OUTCOME (browser.ts:509)"}
+  ],
+  "autoDecisions": [
+    "[AUTO-DECISION] Accept vs refuse -> refuse/never passes (reason: D-C zero-false-pass; reuses existing blank-value read rule)",
+    "[AUTO-DECISION] Where -> runner invoke, the single containsText implementation (reason: covers literal, configuration and binding across learning and replay)",
+    "[AUTO-DECISION] Signal -> ASSERTION_FAILED (reason: closed enum; in-page throw misreports)",
+    "[AUTO-DECISION] Story -> 015 now (reason: H6 introduced it; small change; final run set pending anyway)",
+    "[AUTO-DECISION] Authoring-time refusal -> not required, revisit trigger recorded"
+  ],
+  "storyRecord": {
+    "015": {
+      "beforeSha256": "e01f18806b5c537cf9da3981c1868bc91b19489d0942a6fbebb3a3b8e53d8d64",
+      "afterSha256": "d4fbf055d99f1aebe49c37cb588207bf5e9e7efe59fda70deb7925452c54fd2d",
+      "anchor": "PO decision R4 block appended after the Known limitations entries (before Dev Agent Record); Change Log 0.1.9",
+      "acTextUnchanged": true,
+      "tasksUnchanged": true,
+      "fileListUnchanged": true,
+      "ledgerUnchanged": true,
+      "status": "InProgress",
+      "followUps": ["@dev adds observationCollector.ts and the two runner test files to the File List (H6 files not yet listed)", "@qa records R4 in the 015 gate record"]
+    }
+  },
+  "scopePreserved": [
+    "No write under backend/, frontend/, studio-runner/, tools/, docs/specs/, .github/",
+    "docs/architecture not edited (F4 note owned by @architect)",
+    "No Status change; no QA verdict, waiver or credit",
+    "No other story edited"
+  ],
+  "notRun": ["Gradle", "runner vitest tiers", "dist build", "Chromium", "synapse diagnostics and checklist-runner skills (not related to this mission)"]
+}

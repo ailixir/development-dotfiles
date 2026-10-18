@@ -1,0 +1,14 @@
+setup-pwuser-identity	pass	uid=1001 gid=1001 (the TLS mode check below expects gid 1001)
+setup-tls-volume	pass	docker cp exit=0, chown/chmod exit=0
+step2-listens	pass	runner.started in logs within 90 s: yes
+step2-node-pid-gt-1	pass	node pid=7; pid 1 is: /sbin/docker-init -- sh -c ulimit -c 0 && exec node dist/main.js
+step2-exec-probe-health	pass	node dist/probe.js /health exit=0
+step7-tls-key-0440-gid1001-readable	pass	mode=-r--r----- gid=1001 readable-by-process exit=0
+step3-no-init-exit-78	pass	exit=78
+step3-no-init-stderr-LAUNCH_TREE	pass	stderr=CONFIGURATION_DENIED LAUNCH_TREE|
+step3-no-init-nothing-listened	pass	runner.started absent from stdout: 0
+step4-node-options-exit-78	pass	exit=78
+step4-node-options-stderr-DEBUG_ENV	pass	stderr=CONFIGURATION_DENIED DEBUG_ENV|
+step5-stop-draining-then-drained	pass	runner.draining at stdout line 2, runner.drained at line 3
+step5-stop-within-grace	pass	docker stop exit=0 after 0s of a 30 s grace
+step5-container-exit-0	pass	container ExitCode=0

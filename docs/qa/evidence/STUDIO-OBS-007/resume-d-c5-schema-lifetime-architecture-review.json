@@ -1,0 +1,174 @@
+{
+  "scope": "SOURCE_ONLY_A_B_C_STATIC_GUIDED_SCHEMA_LIFETIME_ARCHITECTURE_REVIEW",
+  "disposition": "RECOMMEND_B_WITH_EXPLICIT_STARTUP_RESTART_SEMANTICS_FOR_ROOT_REVIEW",
+  "sourceBindings": {
+    "translation": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "da7f3e4546afe3cca3fba1dfe2b3e772316d4e4fed9580ff7975e5a8aaf4f8a2"
+    },
+    "main": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "cdb6d8ad2a822fb9bcf8af0e9cd7d738637f0ed507211b8b25113e6520b079c6"
+    },
+    "fixture": {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "f2f5c8298c5b0941fd56e076eed24efcf13fc2d6de9883e6c57f6a17e04bbef7"
+    },
+    "assembler": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java",
+      "sha256": "2f5dd5e4b13e2657f45f3739d1d2c66859be7c002ae04445a94d8ccd507a7b16"
+    },
+    "configuration": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java",
+      "sha256": "e12dfadf42a5c21dbb9390d36d5c168c530ec382569da9072250b5ac23d24e78"
+    },
+    "classifier": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java",
+      "sha256": "47d6c0da0487f58f2fdacacce954469a659358827d47b183a8508f8b60d13095"
+    },
+    "store": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "sha256": "cdf8b6235226e53f6cc167aa1583cab459e5fd365ce5c6b783cfeb0cfdc4ffe9"
+    },
+    "contracts": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "sha256": "a5034ee98707552d927f48bc0a30e07896df913f3b706f42f15ee16c7b52144b"
+    },
+    "profileAuthority": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayPins.java",
+      "sha256": "da4dcec91b65cc4d44e0212c06632b6c90c7199b5297c93fcaaac0aa022212fa"
+    },
+    "gradle": {
+      "path": "backend/build.gradle.kts",
+      "sha256": "dab809b9129368c1643d80169bcdb773f9290af61e153a1e45069832f5db7289"
+    }
+  },
+  "staticResourceBindings": [
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/guided-model-response.schema.json",
+      "sha256": "775c90a1e7001bb742bd9ee0de05e270d9d27307016c8a5dac494653d90f5c0f"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/source-selection.schema.json",
+      "sha256": "31ed206874170e43a5426752ffdd9a6380865e35a57199bf892f65318b3b7121"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/planning-context.schema.json",
+      "sha256": "16fea20079cd63c30700ae7e0632b5774f15da59eb5b37f53e303b5b95211277"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/source-reference.schema.json",
+      "sha256": "184a99cc4018f5899eb8dc743dcb0a9283c19f3ff7371da99098eeee432e229c"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/observation.schema.json",
+      "sha256": "31afe5aa601b10ea1c81434797ff401ceef16ef5df90d49ffb700dfe7ff58963"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/execution-evidence.schema.json",
+      "sha256": "5f9eda27221c948decd17ff876cb110dc3f9df9195a521bf5dac97ba8187edd9"
+    },
+    {
+      "path": "backend/src/main/resources/studio/guided-output-contract.md",
+      "sha256": "a33eba248fb967db2bcf5274f62483cb02227b8fbd07c2eaa443a1a67593cb26"
+    }
+  ],
+  "actualState": {
+    "C5": "RED",
+    "lastClaimMs": 1067.999708,
+    "holderFamily": "TRANSLATION8",
+    "innerCallbackCost": "UNOBSERVED",
+    "newRuntime": false
+  },
+  "dependencyGraph": {
+    "alreadyStartupLocal": "Assembler16-21 loads immutable output String and private root guided-model-response JsonNode at construction.",
+    "repeatedAtRequest": "providerSchema147-179 expands approved references, recursively canonicalizes/counts/compacts and rebuilds local $defs; schemaProvenance221-243 hashes root/output, rereads source-selection/planning-context and builds/hashes every SOURCE_PLAN/NEXT_ACTION/VERIFY_STEP provider schema.",
+    "minimumBundleInputs": [
+      "output-contract text",
+      "guided-model-response schema",
+      "source-selection schema",
+      "planning-context schema",
+      "source-reference schema needed by current provider ref closure"
+    ],
+    "declaredGraph": "guided-model-response\u2192source-selection/source-reference; source-selection\u2192its local definitions/source-reference; planning-context\u2192source-selection/source-reference/observation/execution-evidence. Raw planning-context hash need not eagerly preload its external validation dependencies: existing GuidedContracts validation keeps that separate authority.",
+    "minimumSnapshotOutputs": [
+      "private strict root/output",
+      "private provider schema per exact Kind",
+      "private schemaProvenance pins with original strict/sourceSelection/planningContext/output and provider hashes"
+    ],
+    "excluded": [
+      "permissions/entitlements",
+      "current source/configuration/manifest rows",
+      "owner/fence/admission/attempt/lifecycle",
+      "per-request projection/model response/result",
+      "Vault values/credentials",
+      "replay catalogs/policies/current runtime profile authority",
+      "extra schema-validation precompilation"
+    ],
+    "underLockLocations": "Translation745-814: original providerSchema through assemble plus two original schemaProvenance accesses; successful path structurally rebuilds one requested provider schema plus everyKind twice. No duration or dominance is inferred."
+  },
+  "supportedLifetimeFacts": [
+    "Gradle processResources338-343 packages the exact versioned canonical schema files into classpath; output contract lives in ordinary classpath resources. No guided assembler setter/reload/RefreshScope/WatchService is present in the reviewed guided production source.",
+    "Schema identity is not accepted by name/version alone: classifier83 records schemaPins in immutable source manifest; Store54-76 binds manifest/current revision/hash; Translation438-441 and775-799 compare current pins at original guards; publication learning provenance retains schema/output/provider hashes.",
+    "The repository has developmentOnly Spring Boot DevTools at Gradle47. Thus development context restart is compatible with recreating a new snapshot; this review does not prove deployed container/filesystem immutability or exact DevTools watcher behavior.",
+    "B explicitly defines one snapshot per assembler BEAN/instance deployment epoch, not a Java static cache shared across differing constructors/classloaders. Runtime filesystem editing without restarting that epoch is intentionally not a supported schema-update operation. Resource replacement becomes rebuild/restart; old manifests retain existing hash mismatch refusal.",
+    "ObservedReplayPins still parses/checks configured catalog/policy/profile at each existing authority boundary. This proposal never freezes or shortcuts it."
+  ],
+  "comparison": [
+    {
+      "option": "A_CURRENT",
+      "lifetime": "Partial startup root/output, then repeated resources/provider transforms per public getter under owner callbacks.",
+      "capability": "Later classpath changes or stream failure can be observed on a later getter; there is no coherent supported schema hot-reload API. Mixed fixed root/output and fresh reference/pin inputs are possible if filesystem resources are externally changed.",
+      "failureOrder": "Static resource/reference/canonical failure may happen after owner/source/accounting/budget guards at its existing getter, including a second-read failure after a successful first read.",
+      "tradeoff": "Preserves exact current error order and public fresh reconstruction; repeats pure work and resource I/O in owner lock. Existing C5 red is not solely attributed to this work."
+    },
+    {
+      "option": "B_BEAN_STARTUP_SNAPSHOT",
+      "lifetime": "Build complete private metadata bundle eagerly before bean publication; all public providerSchema/schemaProvenance getters return detached deep copies. Output is immutable String.",
+      "capability": "One coherent immutable schema epoch until instance/context restart. No request-time static-resource rereads or provider reconstruction. Getters and every existing request guard remain called in the same service order.",
+      "failureOrder": "Deliberate change: previously later missing/malformed/transitive/reference/canonical resource failure is startup failure; no corresponding second-read failure within a healthy epoch. No fallback/partial publication/refresh. Existing unconditional assembler bean means expanding startup validation can fail even before translation is used; root must accept this capability explicitly.",
+      "tradeoff": "Startup work/memory and restart needed for schema updates; getter defensive-copy allocation remains. Avoids proven repeated static work without moving dynamic authority; no latency or1s sufficiency guarantee."
+    },
+    {
+      "option": "C_CALLBACK_PINS_REUSE",
+      "lifetime": "Compute one schemaProvenance value at its first original callback point and reuse locally only for that callback; public builder/provider paths otherwise fresh.",
+      "capability": "Smaller source change, retains next-callback resource reload/failure opportunities; first expensive build still holds owner lock and requested provider schema still rebuilds.",
+      "failureOrder": "First guarded getter stays in original position, but a later same-callback read failure/different-resource result disappears. This is a documented semantic change, not equivalence. Public test spies changing getter results can observe altered call sequence.",
+      "tradeoff": "Partial reduction with callback-sized lifetime and less coherent epoch than B. No authority data cache, but does not eliminate most static construction or give measured timing relief."
+    }
+  ],
+  "minimumBDesign": [
+    "Keep existing assembler constructor/API. Compute all current provider schema kinds with the SAME original expansion/count/compact/$defs algorithm and insertion order during construction; compute original provenance hashes from those exact built schemas/static input bytes. Publish only after successful full construction. Do not alter provider-supported projection, strict validation, hashes, names/Shape order or output contract.",
+    "Use private final bundle fields and a structurally immutable Kind map whose mutable JsonNodes never escape. providerSchema(kind) and schemaProvenance return deepCopy on EVERY call; returned mutation cannot affect later getters, model request, manifest or cached metadata. No process-global/static cross-classloader cache or new config flag/framework is needed.",
+    "Minimal integration prerequisite: SourceClassifier83 currently constructs a new assembler inside classify. Inject the SAME startup assembler through the existing configuration bean into the classifier; retain old constructors via constructor-time instance creation if needed for current standalone callers. Never construct/rebuild the static bundle per classify or put current policy/source state in it.",
+    "Leave TranslationService original public getter calls at their original guarded positions. This retains request pin comparison/hash/body/budget/source/fence/clock/usage ordering and existing pin-drift spy seams while getters become static snapshot copies. Do not implement C in addition or remove guards.",
+    "No mutation of canonical schemas, tuple/version pins, output contract, catalog/policies, SQL, migrations or live authority. Original captured body/schema/structural/$defs canonical hashes must equal baseline exactly for unchanged resource bytes."
+  ],
+  "distinguishedPerspectives": {
+    "architect": {
+      "conclusion": "Prefer B because classpath contract metadata is deployment-epoch state, while per-request owner/source/permission decisions remain live. Coherent startup publication is clearer than A mixed lifetimes or C partial snapshots.",
+      "condition": "Root must explicitly accept fail-fast startup and restart-only schema changes; source cannot prove external deployment immutability."
+    },
+    "qa": {
+      "conclusion": "B is a semantic lifetime change, not an error-equivalence refactor. Preserve every old case and exact method-family/TRACE/1000ms gates.",
+      "checks": "Reuse existing provider-schema structural/local-$defs/hash tests, projection-isolation tests, provider-wire/privacy and planning pin-refusal/accounting cases. Add only meaningful focused getter-mutation isolation/all-Kind canonical baseline and failed-construction-no-publication coverage where the existing constructor/parser seam suffices; no new loader framework or mandatory Core/browser E2E. Keep every existing test assertion, including mocked pin changes, before/after evidence."
+    },
+    "data": {
+      "conclusion": "Static metadata carries no owner lock authority; snapshot can remove static transform work from owner transactions without caching rows or reducing locks.",
+      "checks": "Manifest equality/hash and attempt projection digest stay current and identical; changed deployment pins must still reject old accepted manifests. No SQL/transaction/fence/deadline/accounting/read-entry/audit change; isolated PG proofs remain their defining tier, not new E2E obligations."
+    }
+  },
+  "minimumDocsAndCheckPlan": [
+    "Record accepted startup/restart/failure-lifetime semantics in existing translation-design static schema/provenance section (and relevant SecretLogin design implementation note if root chooses), not a new policy/version/acceptance waiver. Proposed future source scope only assembler/classifier/existing configuration plus nearest existing defining tests.",
+    "Independent root exact-source/semantic review before isolated author; canonical source/output/hash pins unchanged. Then scoped strict static/compiler and original complete GuidedTranslationTest, relevant GuidedPlanningIntegrationTest pin/accounting cases and existing conformance checks.",
+    "Explicit defining oracles: providerSchemaIsSelfContainedSupportedAndBothIdentitiesArePinned; projectionValidatesMalformedAfterValidAndKeepsBothCopiesIsolated; bootstrapOnlyResumeChecksPinsAndDirectProposalsRecoverBeforeInference; pinRefusalAfterLockedLateAccountingPreservesTheDeltaAndStop. Preserve real public getter calls/mocks and every previous assertion.",
+    "After approved implementation defining checks, original unprofiled C5 first+ninth remains mandatory. No repeated holder diagnostic, relaxedTRACE/deadline, profiler or new E2E/case matrix is proposed by this report."
+  ],
+  "perspectiveReviewStatus": "Three distinguished analyses by the same expert; not three independent reviewer/model approvals.",
+  "sourceAuthored": false,
+  "runtimeExecuted": false,
+  "newConfiguration": false,
+  "newInfrastructure": false,
+  "performanceClaim": false,
+  "whole19AcPass": false
+}

@@ -1,0 +1,102 @@
+{
+  "artifact": "STUDIO-OBS-015 narrow F1 Kotlin fixture class imports source repair01",
+  "createdAt": "2026-10-15T17:24:33.632765+00:00",
+  "owner": "Dex/backend015_resume",
+  "status": "SOURCE_ONLY_ATOMIC_JAVA_BUILD_HOLD_PENDING_REVIEW_AND_COMPILE02",
+  "commandsLive": false,
+  "javaBuildHold": true,
+  "compileStatus": "UNCOMPILED",
+  "executionStatus": "UNEXECUTED",
+  "qaVerdict": null,
+  "lifecycleChange": null,
+  "soleSource": {
+    "path": "backend/build.gradle.kts",
+    "beforeSha256": "592f75a45ff14f6fefe3ec8d0c0e3ce643ddfdd0bc3d172d5a8b2a91c66c2f13",
+    "afterSha256": "f77c28b83c96b8a0e59c8cfd2419e4faaecacc9b1438e0237ee7bc3d61d61490"
+  },
+  "review": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/core05-budget-fixture-source01/qa-review/manifest.json",
+    "sha256": "8afa23c429674c091b1591bd4050f55d23d50c5170502ebddf2d39b0de0b1181",
+    "payloadsVerified": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/core05-budget-fixture-source01/qa-review/review.md",
+        "expected": "fcbccaad65167702fd2a638c8dc87eef3f0ac77e2b404b3202f7246b88a98438",
+        "actual": "fcbccaad65167702fd2a638c8dc87eef3f0ac77e2b404b3202f7246b88a98438"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/core05-budget-fixture-source01/qa-review/checks.json",
+        "expected": "2141573191ed06537d639f9b90d48a6bc5729e3f6582713f09a97e91eb66e875",
+        "actual": "2141573191ed06537d639f9b90d48a6bc5729e3f6582713f09a97e91eb66e875"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/core05-budget-fixture-source01/qa-review/source-inventory.json",
+        "expected": "6f17c4ba2c7c5c49e5f6486aa031db362553e50415c0a69e0dedee61994b5af8",
+        "actual": "6f17c4ba2c7c5c49e5f6486aa031db362553e50415c0a69e0dedee61994b5af8"
+      }
+    ],
+    "F1": "Actual Kotlin configuration package reference failure only; F2/F3 outside source lease and untouched"
+  },
+  "actualFailurePreserved": {
+    "path": "backend/budget-fixture-compile-attempt01-receipt.json",
+    "sha256": "6b1fd4b46937f7268cdddb5ec349ec8ca118b4cf0f16d1fecf8fd2fb96614bd3",
+    "actual": "8configurationerrors beforemain/alltestJava compile,0tests/DB/native; never retroactivePASS"
+  },
+  "exactCorrection": {
+    "beforeSha256": "592f75a45ff14f6fefe3ec8d0c0e3ce643ddfdd0bc3d172d5a8b2a91c66c2f13",
+    "afterSha256": "f77c28b83c96b8a0e59c8cfd2419e4faaecacc9b1438e0237ee7bc3d61d61490",
+    "inverseSha256": "592f75a45ff14f6fefe3ec8d0c0e3ce643ddfdd0bc3d172d5a8b2a91c66c2f13",
+    "inverseByteExact": true,
+    "addedImports": [
+      "java.util.UUID",
+      "java.util.concurrent.ConcurrentHashMap",
+      "java.util.concurrent.atomic.AtomicInteger"
+    ],
+    "replacedClassReferences": {
+      "java.util.UUID": 1,
+      "java.util.concurrent.ConcurrentHashMap": 3,
+      "java.util.concurrent.atomic.AtomicInteger": 2
+    },
+    "changedExistingLines": 5,
+    "fullyQualifiedTokenCountIncludingMapGeneric": 6,
+    "allOtherScriptBytesIdenticalByExactInverse": true,
+    "javaToolchainDslUntouched": true,
+    "longComparisonsUntouched": true,
+    "allTaskBodiesSelectorsProfilesSystemPropertiesFreshnessGuardsCoverageThresholdsCrossReplicaUntouchedExceptImportedClassNames": true,
+    "45SingletonPlusParameterized35BodiesRulesUnchanged": true,
+    "sourceOnly": true,
+    "compilation": "UNCOMPILED",
+    "tests": "UNEXECUTED"
+  },
+  "protectedFileCount": 64,
+  "unexpectedProtectedChanges": [],
+  "casePartition": "Original46methods/80invocations:43default4000 +37incremental2048 inclall35labels; entire JOIN9f56 unchanged. No rule/scanner/limit/usage/threshold/filter/assertion changes.",
+  "validation": "Only source read/hash/diff/inverse bookkeeping; no compiler/JVM/Gradle/test/DB/browser/native/build/dist/formatter/static CPU/install/subagents commands. Next actual compile02 must determine whether further independent diagnostics remain.",
+  "remaining": "Full01586acceptance+24IPC+55SQL+35joined/B1R1B2B3B4R2/Core/privateauthority/Vault/native/allconfiguredgates+coverage/crossReplica/deployment/independent015QA/PO/rootclosure then008; original85OPENpendingunamended.",
+  "artifacts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/budget-fixture-kotlin-imports01/build.gradle.after.kts",
+      "sha256": "f77c28b83c96b8a0e59c8cfd2419e4faaecacc9b1438e0237ee7bc3d61d61490",
+      "bytes": 25423
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/budget-fixture-kotlin-imports01/build.gradle.before.kts",
+      "sha256": "592f75a45ff14f6fefe3ec8d0c0e3ce643ddfdd0bc3d172d5a8b2a91c66c2f13",
+      "bytes": 25434
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/budget-fixture-kotlin-imports01/imports-only.patch",
+      "sha256": "060bd8c7aa3d3c79566892f4abbccab2c9a36ec332e4fb40f0a8edb44afdb663",
+      "bytes": 1682
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/budget-fixture-kotlin-imports01/inverse-proof.json",
+      "sha256": "aa900cb039e68d0b75cbf9c26c072f590ee978cff44f1fff49fb18acff4111f0",
+      "bytes": 1075
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/budget-fixture-kotlin-imports01/protected-hashes.json",
+      "sha256": "dc6e3cacd9b695e018577022a5d18feaef4aaf2c60508def5c169f1eb75b1fb3",
+      "bytes": 17849
+    }
+  ]
+}

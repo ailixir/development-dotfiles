@@ -1,0 +1,58 @@
+{
+  "scope": "Original unprofiled required C5 flow",
+  "samplerEnabled": false,
+  "samplerFieldsAbsent": true,
+  "gate": {
+    "gradleExitCode": 0,
+    "sourceDrift": [],
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "freshResult": true,
+    "results": [
+      {
+        "test": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+        "pass": true
+      },
+      {
+        "test": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+        "pass": true
+      }
+    ],
+    "diagnosticEnabled": false,
+    "privateArtifactJoined": true,
+    "pass": true
+  },
+  "privacy": {
+    "encodedBytes": 468583235,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsCollected": true,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 30,
+    "rootTraceObserved": true,
+    "appTraceObserved": true
+  },
+  "diagnostic": {},
+  "privateValuesRemoved": true,
+  "claims": {
+    "count": 41,
+    "last202Ms": 42.721292,
+    "max202Ms": 764.395667,
+    "lastStatus": 409
+  },
+  "failureStates": [],
+  "finalizeDiagnostics": [],
+  "limits": [
+    "backend202 alone is not SDK acknowledgement",
+    "pass applies to the two selected original flows; no whole-story QA verdict"
+  ],
+  "acceptanceFacts": [
+    "nonsecret publication and two ordinary fresh-value replays",
+    "secret publication and two ordinary fresh-value replays",
+    "full ROOT+APP TRACE and all30 secret-pattern variants zero hits after quiescent closed capture"
+  ]
+}

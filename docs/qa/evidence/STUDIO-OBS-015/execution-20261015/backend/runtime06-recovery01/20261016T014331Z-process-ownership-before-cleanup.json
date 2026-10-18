@@ -1,0 +1,2445 @@
+{
+  "at": "2026-10-16T01:43:31.877913+00:00",
+  "ownedTemp": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-3940496970655255505",
+  "tempAbsentFromPriorInventory": true,
+  "tempBirthAfterPriorSnapshot": true,
+  "tempBirthUtc": "2026-10-16T01:33:46.103090+00:00",
+  "registryRecords": 178,
+  "registeredRoots": 11,
+  "registeredDescendants": 132,
+  "identities": [
+    {
+      "kind": "root",
+      "pid": 55855,
+      "role": "secret",
+      "generation": 0,
+      "recordedStarted": "2026-10-16T01:33:46.105Z",
+      "recordedCommandSha256": "84f830a883b548bc04d54f934c372009c5c78e1890da0cd9877165ad46e3620e",
+      "observedPresent": true,
+      "current": {
+        "pid": 55855,
+        "ppid": 1,
+        "status": 2,
+        "kernelStartEpochSeconds": 1792114426,
+        "kernelStartMicroseconds": 105084,
+        "kernelStartUtc": "2026-10-16T01:33:46.105084Z",
+        "javaStartUtcMillis": "2026-10-16T01:33:46.105Z",
+        "currentCommandSha256": "84f830a883b548bc04d54f934c372009c5c78e1890da0cd9877165ad46e3620e"
+      },
+      "startMatches": true,
+      "commandMatches": true,
+      "wrapperHashMatches": true,
+      "wrapperArgumentMatches": true,
+      "readyNonceMatches": true,
+      "readyMarkerPaths": [
+        "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-3940496970655255505/owned-ready-4c27971f-70cc-443b-961e-e8bf84c09986.json"
+      ],
+      "exactIdentityProved": true
+    },
+    {
+      "kind": "root",
+      "pid": 56262,
+      "role": "guided",
+      "generation": 1,
+      "recordedStarted": "2026-10-16T01:33:58.332Z",
+      "recordedCommandSha256": "33155de2a4f7e1e333cdfb4bd878618687db0946ae1838594bc7a8a41bb06c1a",
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "root",
+      "pid": 56292,
+      "role": "ordinary",
+      "generation": 1,
+      "recordedStarted": "2026-10-16T01:33:58.691Z",
+      "recordedCommandSha256": "c1c422fec10ded914cabf58406f19b03f8ba6ae89be531b8ae31de5769f338f0",
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "root",
+      "pid": 56741,
+      "role": "guided",
+      "generation": 2,
+      "recordedStarted": "2026-10-16T01:34:11.120Z",
+      "recordedCommandSha256": "33155de2a4f7e1e333cdfb4bd878618687db0946ae1838594bc7a8a41bb06c1a",
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "root",
+      "pid": 56751,
+      "role": "ordinary",
+      "generation": 2,
+      "recordedStarted": "2026-10-16T01:34:11.412Z",
+      "recordedCommandSha256": "c1c422fec10ded914cabf58406f19b03f8ba6ae89be531b8ae31de5769f338f0",
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "root",
+      "pid": 57143,
+      "role": "guided",
+      "generation": 3,
+      "recordedStarted": "2026-10-16T01:34:21.594Z",
+      "recordedCommandSha256": "33155de2a4f7e1e333cdfb4bd878618687db0946ae1838594bc7a8a41bb06c1a",
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "root",
+      "pid": 57144,
+      "role": "ordinary",
+      "generation": 3,
+      "recordedStarted": "2026-10-16T01:34:21.892Z",
+      "recordedCommandSha256": "c1c422fec10ded914cabf58406f19b03f8ba6ae89be531b8ae31de5769f338f0",
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "root",
+      "pid": 57558,
+      "role": "guided",
+      "generation": 4,
+      "recordedStarted": "2026-10-16T01:34:31.890Z",
+      "recordedCommandSha256": "33155de2a4f7e1e333cdfb4bd878618687db0946ae1838594bc7a8a41bb06c1a",
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "root",
+      "pid": 57568,
+      "role": "ordinary",
+      "generation": 4,
+      "recordedStarted": "2026-10-16T01:34:32.190Z",
+      "recordedCommandSha256": "c1c422fec10ded914cabf58406f19b03f8ba6ae89be531b8ae31de5769f338f0",
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "root",
+      "pid": 57923,
+      "role": "guided",
+      "generation": 5,
+      "recordedStarted": "2026-10-16T01:34:42.305Z",
+      "recordedCommandSha256": "33155de2a4f7e1e333cdfb4bd878618687db0946ae1838594bc7a8a41bb06c1a",
+      "observedPresent": true,
+      "current": {
+        "pid": 57923,
+        "ppid": 1,
+        "status": 2,
+        "kernelStartEpochSeconds": 1792114482,
+        "kernelStartMicroseconds": 305942,
+        "kernelStartUtc": "2026-10-16T01:34:42.305942Z",
+        "javaStartUtcMillis": "2026-10-16T01:34:42.305Z",
+        "currentCommandSha256": "33155de2a4f7e1e333cdfb4bd878618687db0946ae1838594bc7a8a41bb06c1a"
+      },
+      "startMatches": true,
+      "commandMatches": true,
+      "wrapperHashMatches": true,
+      "wrapperArgumentMatches": true,
+      "readyNonceMatches": true,
+      "readyMarkerPaths": [
+        "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-3940496970655255505/owned-ready-222e6d7d-41a8-4c9d-8a85-f4e5bed33fed.json"
+      ],
+      "exactIdentityProved": true
+    },
+    {
+      "kind": "root",
+      "pid": 57944,
+      "role": "ordinary",
+      "generation": 5,
+      "recordedStarted": "2026-10-16T01:34:42.603Z",
+      "recordedCommandSha256": "c1c422fec10ded914cabf58406f19b03f8ba6ae89be531b8ae31de5769f338f0",
+      "observedPresent": true,
+      "current": {
+        "pid": 57944,
+        "ppid": 1,
+        "status": 2,
+        "kernelStartEpochSeconds": 1792114482,
+        "kernelStartMicroseconds": 603983,
+        "kernelStartUtc": "2026-10-16T01:34:42.603983Z",
+        "javaStartUtcMillis": "2026-10-16T01:34:42.603Z",
+        "currentCommandSha256": "c1c422fec10ded914cabf58406f19b03f8ba6ae89be531b8ae31de5769f338f0"
+      },
+      "startMatches": true,
+      "commandMatches": true,
+      "wrapperHashMatches": true,
+      "wrapperArgumentMatches": true,
+      "readyNonceMatches": true,
+      "readyMarkerPaths": [
+        "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-3940496970655255505/owned-ready-8a4c6acc-a23f-4982-becc-bfdf653b299e.json"
+      ],
+      "exactIdentityProved": true
+    },
+    {
+      "kind": "descendant",
+      "pid": 56340,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:00.190Z",
+      "recordedCommandSha256": "b91dd6b95e1b3d01567a4a043f628e4bb1e16cc171c100919bf6f7eaa816f72c",
+      "recordedAncestry": [
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56345,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:00.485Z",
+      "recordedCommandSha256": "a021e75f5c4c6bb4a601e0fd6f9f74a9309ad2bbd75cd124f748455e3307e6ff",
+      "recordedAncestry": [
+        56340,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56351,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:00.783Z",
+      "recordedCommandSha256": "aa22368957aa1253488b0b162e3fd0781e32b653f23fbc2e69f67b4b44c0a6c3",
+      "recordedAncestry": [
+        56340,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56350,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:00.771Z",
+      "recordedCommandSha256": "e62cb41366c8aa451ba1e42f6122c5c18752478fc82db7f42ce36448e9b9aab1",
+      "recordedAncestry": [
+        56340,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56361,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:00.878Z",
+      "recordedCommandSha256": "a9bf6a1398d7a57388ee0d9b6d4a9917c7acb34fc4a74722d6150cb89ec0e397",
+      "recordedAncestry": [
+        56340,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56362,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:00.879Z",
+      "recordedCommandSha256": "17770528c66571f758b3d76573c95e996c4e18242bd38b473035d6f77cd9f1e6",
+      "recordedAncestry": [
+        56340,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56372,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:01.074Z",
+      "recordedCommandSha256": "1a332eb4f530b75cbb4f20f1b59a292082cf95d211e0813e535d98d4bfa12cb1",
+      "recordedAncestry": [
+        56340,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56384,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:01.220Z",
+      "recordedCommandSha256": "9b23eab463e3b143b6c4074813c12584aaeb5b612d325a32d923a15b0c02e2e4",
+      "recordedAncestry": [
+        56340,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56385,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:01.220Z",
+      "recordedCommandSha256": "2b30669817b848afa49f103fdcd6572ae3471f507b2bfee3ff57964f49a014a7",
+      "recordedAncestry": [
+        56340,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56386,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:01.307Z",
+      "recordedCommandSha256": "98771eceb424ff9fb2c88c3eaeb160980f51d35a82e83cb1d42c81950d0b6061",
+      "recordedAncestry": [
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56388,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:01.401Z",
+      "recordedCommandSha256": "d5c9ce6c2270a5fd2889b4a0b284585f27268e2a77c7fa3336ab5e23674cf942",
+      "recordedAncestry": [
+        56340,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56389,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:01.502Z",
+      "recordedCommandSha256": "2e6c3a2093fbae5f82f835065d1550807452459a64d1526cc5289450495a29d0",
+      "recordedAncestry": [
+        56340,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56402,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:01.742Z",
+      "recordedCommandSha256": "240c96cf993d61ed7562b5b2a87afa348656ef80d2d0674cfaa097901ea55386",
+      "recordedAncestry": [
+        56340,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56399,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:01.728Z",
+      "recordedCommandSha256": "fc487b379616c44a70f67f7c8c17141b089e97bb402055c8961cb047364ec13e",
+      "recordedAncestry": [
+        56340,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56403,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:01.763Z",
+      "recordedCommandSha256": "063654437a017671a284d78a00f161803d1bbeb78e773d3b52526960f38a1db2",
+      "recordedAncestry": [
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56675,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:09.448Z",
+      "recordedCommandSha256": "e34b7c8b8cee216e771c84a761ba02bd3438811ec6fe13af1b07277c21935ee5",
+      "recordedAncestry": [
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56681,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:09.548Z",
+      "recordedCommandSha256": "9c0273bc4ac05eaad123bede7592ef7049825cdb9ce59897f2ba483da1ca5dd3",
+      "recordedAncestry": [
+        56675,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56682,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:09.549Z",
+      "recordedCommandSha256": "2341aea4a5e5645adaf1c67ce27f9bef826947f0befb021ce7f77e1fae3c3056",
+      "recordedAncestry": [
+        56675,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56685,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:09.629Z",
+      "recordedCommandSha256": "9584bd4e335db15953b4f7313ad118119f96beddac38ca92cb5194d4016d75a0",
+      "recordedAncestry": [
+        56675,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56684,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:09.579Z",
+      "recordedCommandSha256": "c0c9924c2a69eb73b0b5b361e64f62c552f82dcfbfea2e020c6d07216bd0487d",
+      "recordedAncestry": [
+        56675,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56683,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:09.578Z",
+      "recordedCommandSha256": "9a38622efd36e6a47aa8f4cfd7b520706536893e6d1656d3e16d92201f3c73db",
+      "recordedAncestry": [
+        56675,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56697,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:09.762Z",
+      "recordedCommandSha256": "597de74bbde57052429f64b972b84b93a67a307263477aa4b22bb3ae0d4f680e",
+      "recordedAncestry": [
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56695,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:09.695Z",
+      "recordedCommandSha256": "920d221aa193d6d2ada98500b327daf58044b6cc2533d4e06aca2fd1dc3b6e92",
+      "recordedAncestry": [
+        56675,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56696,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:09.695Z",
+      "recordedCommandSha256": "f9e7625fda7414650bf038f3e373fbc04e600cc2b096e7891eb16235da65fe8e",
+      "recordedAncestry": [
+        56675,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56699,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:09.886Z",
+      "recordedCommandSha256": "04ec701b391a505aa5a809bc04b09d14a358fe97310d6a3b15b9405bfc5d379f",
+      "recordedAncestry": [
+        56675,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56698,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:09.843Z",
+      "recordedCommandSha256": "c92d35940e5388278f357fc9e7a64b39878776c2f4373c8e41dda0ab51e9073b",
+      "recordedAncestry": [
+        56675,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56711,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:10.091Z",
+      "recordedCommandSha256": "b0851ffd4cee4f6c8f4eb428db58ea6cda83ac95c16b54cd52a9a7002213fac9",
+      "recordedAncestry": [
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56709,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:10.060Z",
+      "recordedCommandSha256": "3206e592bf15dda4c77c5a3c5681736a5740a865633073be60df47cc774c6724",
+      "recordedAncestry": [
+        56675,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56710,
+      "rootPid": 56262,
+      "recordedStarted": "2026-10-16T01:34:10.071Z",
+      "recordedCommandSha256": "802d5e91a1acb272c09e5156ddeb9b58c87391c3ff28c89e78c69ada430245e9",
+      "recordedAncestry": [
+        56675,
+        56262
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56763,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.041Z",
+      "recordedCommandSha256": "e493bcd97c833fe8b5fc7ea1756dda7fe0d57516b0f155a2fc1530db73078289",
+      "recordedAncestry": [
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56771,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.169Z",
+      "recordedCommandSha256": "72c01fbb1f66dffb81d59dc90a6aaf26844cc1287a763ec49de3949b5af136ed",
+      "recordedAncestry": [
+        56763,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56770,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.143Z",
+      "recordedCommandSha256": "6e748994ea9dc8e84cf50bcaec8c9b7aac05b9517efd1b84f1d78ef5785e2572",
+      "recordedAncestry": [
+        56763,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56769,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.142Z",
+      "recordedCommandSha256": "9fcd55de01646f4dc132515fd11c602ac5c16f1f15e63be957e99091de6da197",
+      "recordedAncestry": [
+        56763,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56772,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.169Z",
+      "recordedCommandSha256": "65261c3d637bfa082df842d510b0907c110bec59f18069dd646ab6e99d8b1092",
+      "recordedAncestry": [
+        56763,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56803,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.309Z",
+      "recordedCommandSha256": "19cff7c5534bb3130bf6b14199cbd2aeec96e8019b99c5afcde0cdc4556422f0",
+      "recordedAncestry": [
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56801,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.248Z",
+      "recordedCommandSha256": "7f8518754b177cd09c6fd04f631c56fb4c1e9046c90d4d209af9c89c69d55849",
+      "recordedAncestry": [
+        56763,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56800,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.219Z",
+      "recordedCommandSha256": "8c03269ef7260c4bccd1525224194f5d30549905d939d163de0c4f2f15dcb0e8",
+      "recordedAncestry": [
+        56763,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56802,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.248Z",
+      "recordedCommandSha256": "43145e64bd9acbcdd2a9ace44acd144cdcf32d8f2ab63d9023a35989a38ccb99",
+      "recordedAncestry": [
+        56763,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56804,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.374Z",
+      "recordedCommandSha256": "c01fd14865dffaa6b7f68baf21d792e387f3cdba59a534026f597ef83a6bf678",
+      "recordedAncestry": [
+        56763,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56805,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.427Z",
+      "recordedCommandSha256": "e1ffe5ca1e342647d8c42f49302ab5a891b7d37b30731426d192db54efec833f",
+      "recordedAncestry": [
+        56763,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56808,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.632Z",
+      "recordedCommandSha256": "042230edc0a6da00a0e521d96831a2dd3dd6050fbbcf2abaa5dcd20b634edfe2",
+      "recordedAncestry": [
+        56763,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56810,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.663Z",
+      "recordedCommandSha256": "08c939dc1479bf4c849579baaf412acfdd488c8165ad28203e7c7926531eedaf",
+      "recordedAncestry": [
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 56809,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:12.643Z",
+      "recordedCommandSha256": "e25aa9fc151970dba18e9f0f50ddcef9a5855b8704ef5f7ff22f2405c2452a80",
+      "recordedAncestry": [
+        56763,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57048,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:19.638Z",
+      "recordedCommandSha256": "7bd256f7dff67d735e3a3504fb2781d5627f4896a4468687e9b928c05ca7cfad",
+      "recordedAncestry": [
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57065,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:19.762Z",
+      "recordedCommandSha256": "f8f268273f7b15411f9666757f41996cf1e1d509bf49c676e42c646ffa7d9ceb",
+      "recordedAncestry": [
+        57048,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57064,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:19.736Z",
+      "recordedCommandSha256": "d819dbeab8757612085e06d2b6f27675b3bc7d136a769c9c40d643c28c2d13eb",
+      "recordedAncestry": [
+        57048,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57063,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:19.734Z",
+      "recordedCommandSha256": "e6dd5107064e2ef83c3a48e51c842268f4f1cfb6f52d23dae1d1cdd75282ee4a",
+      "recordedAncestry": [
+        57048,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57066,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:19.762Z",
+      "recordedCommandSha256": "f083cb5f52b411b52f85d802c9df8c54067d4e378ccf1b0e171d05d5d073cf89",
+      "recordedAncestry": [
+        57048,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57077,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:19.899Z",
+      "recordedCommandSha256": "5f1276aeadaa63f5bc1974bd1ea6ab24139530bbd2f35915c28915dcecc10bd1",
+      "recordedAncestry": [
+        57048,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57067,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:19.809Z",
+      "recordedCommandSha256": "57b62557f90086f08072c1f72947f29f2d4cd1ade43080e84d01ecb85d1f7102",
+      "recordedAncestry": [
+        57048,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57078,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:19.899Z",
+      "recordedCommandSha256": "0ae5d92291bbefecf3e2caa20c6d84939342d488774c8cb7ebcbc9dae81d1848",
+      "recordedAncestry": [
+        57048,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57079,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:19.949Z",
+      "recordedCommandSha256": "2b5176f1e109d45b048abeb71d0b5e80f8223da2d9a1aa9ea09e19b8a91aa4c0",
+      "recordedAncestry": [
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57080,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:20.023Z",
+      "recordedCommandSha256": "6f8695b6f220976eca9d924ba5497a4fb4e6912e3c6baa866fa7fce79450a08b",
+      "recordedAncestry": [
+        57048,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57083,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:20.085Z",
+      "recordedCommandSha256": "99c3a546d1db5c24ac22135b053fe75486ae85b5bc690f712504014204d30f72",
+      "recordedAncestry": [
+        57048,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57095,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:20.324Z",
+      "recordedCommandSha256": "ec04038b32bd42c36262a21fccb9e1b282014523500d009b31548d7753c1f35c",
+      "recordedAncestry": [
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57093,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:20.290Z",
+      "recordedCommandSha256": "72dbdc18153b2d2ef936bbe301f375a761bee7d6659c4f4a6a78c185e17a5f44",
+      "recordedAncestry": [
+        57048,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57094,
+      "rootPid": 56741,
+      "recordedStarted": "2026-10-16T01:34:20.303Z",
+      "recordedCommandSha256": "9d1c0fcb65338a98a711c5154de6cb9e94beeaff33837e83471d51d1ba076682",
+      "recordedAncestry": [
+        57048,
+        56741
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57173,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:22.459Z",
+      "recordedCommandSha256": "8fa519f155c02abdf296e0e1567e318e6883aec3bfc9ae06da85d948c117e625",
+      "recordedAncestry": [
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57182,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:22.585Z",
+      "recordedCommandSha256": "6ec8862b00e9f1bcb046fb90e5e91c89790f15ab551eb09e25dddf06ca07f747",
+      "recordedAncestry": [
+        57173,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57181,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:22.584Z",
+      "recordedCommandSha256": "1305e70321abc53ed8af5ecc76fa3af545947041489647b9ac51b7ba663e7450",
+      "recordedAncestry": [
+        57173,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57180,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:22.554Z",
+      "recordedCommandSha256": "8e63466132e2f42f3313b3124f22abcc7dfdd5ff6611279fa3cebfece664a935",
+      "recordedAncestry": [
+        57173,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57179,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:22.553Z",
+      "recordedCommandSha256": "b2c2fbc3d676e63f2d1babab54dd2fbef5f0fd0786f72fbcab27fc981f03e2e1",
+      "recordedAncestry": [
+        57173,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57193,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:22.714Z",
+      "recordedCommandSha256": "734b6b42efc5a40f7febb1cd5d571b079fb5346efbc172fa9748ba5172a9fde8",
+      "recordedAncestry": [
+        57173,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57192,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:22.649Z",
+      "recordedCommandSha256": "6192620072d8c4e54e86f73049ff2d0976cb3ab08d010b52b1216494e9024d12",
+      "recordedAncestry": [
+        57173,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57194,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:22.715Z",
+      "recordedCommandSha256": "20765c9b24a7d5587a2bfb2e8dbc0332f1736d9c3fe6decf202bf0f7d6d2c7a2",
+      "recordedAncestry": [
+        57173,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57195,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:22.790Z",
+      "recordedCommandSha256": "8548927dc63d4fe7c3e57134e6208042dd5c7b402041b438929cb946e0ad6445",
+      "recordedAncestry": [
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57225,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:22.870Z",
+      "recordedCommandSha256": "f5b20b41e08c75587780a02059ce18a44ee1076b7227ddfcd0fe4faccc0e96ab",
+      "recordedAncestry": [
+        57173,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57226,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:22.967Z",
+      "recordedCommandSha256": "f41bfff82738cfc8e452bbfe3a8efcd236327c2bfb4e5c8c1484bd62325aec5f",
+      "recordedAncestry": [
+        57173,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57238,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:23.199Z",
+      "recordedCommandSha256": "ec3d1b4e57a0fbbf98ce7e418d956791b57c69ddfc57a98ac9df776a9d6f014e",
+      "recordedAncestry": [
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57236,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:23.169Z",
+      "recordedCommandSha256": "6a89b3423ed1a3357e2af9299d7ea8ee088cbd256ec868903d1bf1e6cd68cebe",
+      "recordedAncestry": [
+        57173,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57237,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:23.181Z",
+      "recordedCommandSha256": "9bc9e141f27a2a98df17bdd5fca23bfbabc5027edd52403cd311283ffc415d59",
+      "recordedAncestry": [
+        57173,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57481,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.211Z",
+      "recordedCommandSha256": "14b343e1d1ca9cc9dc0ce8c532d31bb5b1705cc0809a0fa490488db5e5c006cd",
+      "recordedAncestry": [
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57487,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.322Z",
+      "recordedCommandSha256": "91b142350c5aace3e40a0259c41373ed192187ee25f9151fbf7d3d5af8e35930",
+      "recordedAncestry": [
+        57481,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57488,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.324Z",
+      "recordedCommandSha256": "0c5be3573345c1c1d47da9dea2f2b90d01ede08c2efe749ecfb531032932ee8f",
+      "recordedAncestry": [
+        57481,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57501,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.432Z",
+      "recordedCommandSha256": "c49b4d420f3af7e066a208b01195aef7eef4291ab0bdb9132eff2684db27f264",
+      "recordedAncestry": [
+        57481,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57500,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.412Z",
+      "recordedCommandSha256": "9c674f42863cea1de42cc9ec0240f213b11bd4f89ece2b5a2479c7084b83900b",
+      "recordedAncestry": [
+        57481,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57490,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.351Z",
+      "recordedCommandSha256": "20f4aeebb8675b9382b60492387471d14c1763a13d5c6248e2e550d3261aeea3",
+      "recordedAncestry": [
+        57481,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57489,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.351Z",
+      "recordedCommandSha256": "f0e0e9c1d3be94084de10a427ba2c16a677b00404f67f1fa94390ceb33ed96ba",
+      "recordedAncestry": [
+        57481,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57502,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.433Z",
+      "recordedCommandSha256": "02dc31a8105ebf9c733e5f3a4f2fae9374bf28ce7606636a5ac8a734d8f5839b",
+      "recordedAncestry": [
+        57481,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57503,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.491Z",
+      "recordedCommandSha256": "e1795624d1214df33465d5ee014c70784f15516d44d3fa5eae927938865f6cba",
+      "recordedAncestry": [
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57504,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.512Z",
+      "recordedCommandSha256": "64c82231a4c6a694d5dd134494e67429a5dd60d4f0d59b27ed041bbd4f9a3604",
+      "recordedAncestry": [
+        57481,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57514,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.611Z",
+      "recordedCommandSha256": "a6bff09e714c6001f5d4fa9afbf9428a60706cf4d2ed334291705da7ab5f41d9",
+      "recordedAncestry": [
+        57481,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57528,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.839Z",
+      "recordedCommandSha256": "2b512ea9b4111567f349950f901b81f4e2df747dedf5d8282eb7a9e837c7c69b",
+      "recordedAncestry": [
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57526,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.806Z",
+      "recordedCommandSha256": "27020bf3ce86329745d9c97968ad169176c2d4706537bfdd14c07b4018a85331",
+      "recordedAncestry": [
+        57481,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57527,
+      "rootPid": 57143,
+      "recordedStarted": "2026-10-16T01:34:30.817Z",
+      "recordedCommandSha256": "424e99264935e3d5e1f78544e7d2103aad11a86188d9e7d5e36481ea94cf270d",
+      "recordedAncestry": [
+        57481,
+        57143
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57578,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:32.771Z",
+      "recordedCommandSha256": "4f0c18faf9b419227f67881e243a50ffc630a9cfb2ef14a0881c155a3a994033",
+      "recordedAncestry": [
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57598,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:32.896Z",
+      "recordedCommandSha256": "a4fd3b18d7cbf9de3b418abcf198b1d1d3394b1fbc3fe40c937e5908463b6f5a",
+      "recordedAncestry": [
+        57578,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57597,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:32.896Z",
+      "recordedCommandSha256": "d54b59fdbcfc545577205cc5120aa6b467307bbfbd7cf66342e9860b43cb9b2b",
+      "recordedAncestry": [
+        57578,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57587,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:32.869Z",
+      "recordedCommandSha256": "b2e50a0c30d6b548dd71b4bf594e31032d5c2ca82b24433c9d081c47b568c4ac",
+      "recordedAncestry": [
+        57578,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57586,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:32.868Z",
+      "recordedCommandSha256": "ae8b3819b45b087f9e8710a0b3d99a3c4658cc2d8fadaf60cb3db19dffe0595e",
+      "recordedAncestry": [
+        57578,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57599,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:32.944Z",
+      "recordedCommandSha256": "bb0fe13334eda754779243e0e4da93b76f9aa75d793c1814173263ef6a67326b",
+      "recordedAncestry": [
+        57578,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57602,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:33.037Z",
+      "recordedCommandSha256": "06b566e58051dbc6e356e1b339ec2dbc25945cdc031b66627471fdd71dae6c86",
+      "recordedAncestry": [
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57600,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:32.977Z",
+      "recordedCommandSha256": "fe18e242def1a85b579b28d17c6797e315d76ee6e05396ce0a0b9d1d254f19dd",
+      "recordedAncestry": [
+        57578,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57601,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:32.978Z",
+      "recordedCommandSha256": "33767e871afad5d264a834bcc7c0f4315762201af042b21d3e3c22014ea702db",
+      "recordedAncestry": [
+        57578,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57621,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:33.130Z",
+      "recordedCommandSha256": "c023e59299074fbbe8d235ae50b7faef43a4ea024b041ced2d2c584fa50cf825",
+      "recordedAncestry": [
+        57578,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57622,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:33.177Z",
+      "recordedCommandSha256": "406c98d8cd2a2530d70bcdde307f802842f5775dbea4ce886b8ceda33cf48b02",
+      "recordedAncestry": [
+        57578,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57625,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:33.420Z",
+      "recordedCommandSha256": "53fde7825f9dcaff8ea704b833821f6167984c2c8f885263b97e2cb0825194bf",
+      "recordedAncestry": [
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57623,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:33.389Z",
+      "recordedCommandSha256": "6413da0cceb5d60fb07b9f7986d2cd614b9cf6e6c7bf3220365fd6510dfc6eab",
+      "recordedAncestry": [
+        57578,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57624,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:33.400Z",
+      "recordedCommandSha256": "b2206eafdf67e6fbc7a09cb6a77d36b80b962fb5479572a0ba9ccb7f3bc0e009",
+      "recordedAncestry": [
+        57578,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57857,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:40.500Z",
+      "recordedCommandSha256": "d737197503f2190d6cbd72572bdb88bde39d18e331d774d990a740d066921ce5",
+      "recordedAncestry": [
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57874,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:40.629Z",
+      "recordedCommandSha256": "480989b9f212b16fd8199428f7ee969c62cd8f5b50407d4ff5cbe7b619ba7eb7",
+      "recordedAncestry": [
+        57857,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57873,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:40.603Z",
+      "recordedCommandSha256": "dedf2319c6e8b0ad29ef066829420c5c01f518f02791d601600e23a323e4aa97",
+      "recordedAncestry": [
+        57857,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57872,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:40.601Z",
+      "recordedCommandSha256": "c0298f858acc78026d9f93afa59d5323f8c49b8845cc29944b98d9664f7250e4",
+      "recordedAncestry": [
+        57857,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57875,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:40.629Z",
+      "recordedCommandSha256": "5a4a02e3d12222dfb9c41b354b49345ac94c402f6eb2a285f4dc375a0ec7b661",
+      "recordedAncestry": [
+        57857,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57879,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:40.767Z",
+      "recordedCommandSha256": "a675e46d4d58beb49e5d4168e2e955e43b8463f9b04dd50c4b252b17e81849fe",
+      "recordedAncestry": [
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57877,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:40.710Z",
+      "recordedCommandSha256": "2ff20917ec8e0ff1a3b65059eb52cc9898d3d840b2730f77547ee35a879c7192",
+      "recordedAncestry": [
+        57857,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57876,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:40.676Z",
+      "recordedCommandSha256": "56ff6f3632ed27e35fd0cc40d328d9cd6a6a3713721d510d7929f4c1fb651e87",
+      "recordedAncestry": [
+        57857,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57878,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:40.710Z",
+      "recordedCommandSha256": "68699d242f262ced1e027874fa4a83f593e2c302146919b5c3b19bea8438e395",
+      "recordedAncestry": [
+        57857,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57889,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:40.852Z",
+      "recordedCommandSha256": "00007b3321ee3d0b3c5ed6e1dbbacc4478451e15180c2a45efe52ac4b221b9b6",
+      "recordedAncestry": [
+        57857,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57890,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:40.906Z",
+      "recordedCommandSha256": "bfbb9ed65dd74ebf251d9c98561f773e8b062c8695f47383c5a8920924517956",
+      "recordedAncestry": [
+        57857,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57893,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:41.172Z",
+      "recordedCommandSha256": "4865e78e33a006c524629feafe1897183619b063396fac9db13e24400c026058",
+      "recordedAncestry": [
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57891,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:41.140Z",
+      "recordedCommandSha256": "6128d4ead07a6cb28fa38530a38f1739d922533440c3d438404ab890a0e45c99",
+      "recordedAncestry": [
+        57857,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57892,
+      "rootPid": 57558,
+      "recordedStarted": "2026-10-16T01:34:41.151Z",
+      "recordedCommandSha256": "a5a741b291272c2ab98c3b3d4bf55cfd3e6b2463808737b1d891ba7453fbdf34",
+      "recordedAncestry": [
+        57857,
+        57558
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57954,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.151Z",
+      "recordedCommandSha256": "035a5d087a64f48eb735e076aabcbd57567192d447ec17e4ca88fe41bb67596e",
+      "recordedAncestry": [
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57963,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.282Z",
+      "recordedCommandSha256": "e6f23f96b080b28f26e8a64b116d2b932c7a584297e17d79726f7ece079bd2d3",
+      "recordedAncestry": [
+        57954,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57962,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.281Z",
+      "recordedCommandSha256": "d25932be98169d55edfb48d7f32c5cdc669dae474bd54f64a9068106de8ae1e0",
+      "recordedAncestry": [
+        57954,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57961,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.252Z",
+      "recordedCommandSha256": "7cbb02b856c80fe52b80bf9c20c6d9c0f47c60e2fe80628bad16872ea2105471",
+      "recordedAncestry": [
+        57954,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57960,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.251Z",
+      "recordedCommandSha256": "e7a7249626fdd8ec9b928bbdd4d826a67df1f8dba400315b5c79f07ca4a80167",
+      "recordedAncestry": [
+        57954,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57974,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.358Z",
+      "recordedCommandSha256": "a3ee14d535ca7fe631b4799419a226a56a8610afbcffa9897f7e9e56e8533d55",
+      "recordedAncestry": [
+        57954,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57973,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.321Z",
+      "recordedCommandSha256": "2397ef91035ff6772ac919ea07457ceedd34053a498ee5fa7b6fc22323cc4243",
+      "recordedAncestry": [
+        57954,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57975,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.358Z",
+      "recordedCommandSha256": "207dc316a3053b32defeeef22bca81f234342af9c6d0f09bf43b3786915e5237",
+      "recordedAncestry": [
+        57954,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57976,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.437Z",
+      "recordedCommandSha256": "ec86d9c508c873b87935d5f2ead989b87e60a3e943ed0b98443e603dd5b864ac",
+      "recordedAncestry": [
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57978,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.517Z",
+      "recordedCommandSha256": "d3e2531c33fb13f4326f6184eaa647de0fbcb6000848c98dba990d863aeed995",
+      "recordedAncestry": [
+        57954,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57979,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.573Z",
+      "recordedCommandSha256": "8695c4dec8e8b2b6f201b8d6acc55aa89f74f958e0c102fd12ef59894856b0cc",
+      "recordedAncestry": [
+        57954,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57994,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.814Z",
+      "recordedCommandSha256": "3b5d705f7edcacaa12831948851df6cdc0356d7ed17ba1e66beefe1a1dffad07",
+      "recordedAncestry": [
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57992,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.781Z",
+      "recordedCommandSha256": "aeca1ec4c9349cdd8910cdffb13b39d33e2d7008d4cba778c9ba42a29791da0e",
+      "recordedAncestry": [
+        57954,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 57993,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:43.792Z",
+      "recordedCommandSha256": "5646ff0314785fe3c519d56ad46284062b20e85e8df38fe49f44e81af6049cac",
+      "recordedAncestry": [
+        57954,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 58212,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:51.074Z",
+      "recordedCommandSha256": "172478ec91274df117cb4a029854db5191dfd8a01dbb8237afd26d467cfc1160",
+      "recordedAncestry": [
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 58221,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:51.250Z",
+      "recordedCommandSha256": "93105fed68122134fb8e287da959a0063feadfc42720f84df4bf672e3c9c59a0",
+      "recordedAncestry": [
+        58212,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 58220,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:51.223Z",
+      "recordedCommandSha256": "147ba34a4c82dfd6ae11a022e2f874edb3b3d48751beda2f3f33818732b4164e",
+      "recordedAncestry": [
+        58212,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 58219,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:51.221Z",
+      "recordedCommandSha256": "df4465dbf7243caf5b0b8f7aadd801942e3d0ca04cd04f823caf745b4be3db04",
+      "recordedAncestry": [
+        58212,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    },
+    {
+      "kind": "descendant",
+      "pid": 58222,
+      "rootPid": 57923,
+      "recordedStarted": "2026-10-16T01:34:51.250Z",
+      "recordedCommandSha256": "3ecf687ba8765ec3335d2bf5d8d4db133b6a3d67eb1f76d69ef5cbb5322719a7",
+      "recordedAncestry": [
+        58212,
+        57923
+      ],
+      "observedPresent": false,
+      "current": null
+    }
+  ],
+  "liveRegistered": [
+    55855,
+    57923,
+    57944
+  ],
+  "provedLiveRegistered": [
+    55855,
+    57923,
+    57944
+  ],
+  "ownedPathProcessMatches": [
+    {
+      "pid": 55855,
+      "ppid": 1,
+      "commandSha256": "84f830a883b548bc04d54f934c372009c5c78e1890da0cd9877165ad46e3620e",
+      "registered": true
+    },
+    {
+      "pid": 57923,
+      "ppid": 1,
+      "commandSha256": "33155de2a4f7e1e333cdfb4bd878618687db0946ae1838594bc7a8a41bb06c1a",
+      "registered": true
+    },
+    {
+      "pid": 57944,
+      "ppid": 1,
+      "commandSha256": "c1c422fec10ded914cabf58406f19b03f8ba6ae89be531b8ae31de5769f338f0",
+      "registered": true
+    }
+  ],
+  "programIdentityOnlyNoArgv": [
+    "    1     0 Fri Sep 25 21:14:09 2026     /sbin/launchd",
+    "  292     1 Fri Sep 25 21:14:23 2026     /usr/libexec/logd",
+    "  294     1 Fri Sep 25 21:14:23 2026     /usr/libexec/UserEventAgent",
+    "  296     1 Fri Sep 25 21:14:23 2026     /System/Library/PrivateFrameworks/Uninstall.framework/Resources/uninstalld",
+    "  297     1 Fri Sep 25 21:14:23 2026     /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/FSEvents.framework/Versions/A/Support/fseventsd",
+    "  298     1 Fri Sep 25 21:14:23 2026     /System/Library/PrivateFrameworks/MediaRemote.framework/Support/mediaremoted",
+    "  301     1 Fri Sep 25 21:14:23 2026     /usr/sbin/systemstats",
+    "  304     1 Fri Sep 25 21:14:23 2026     /usr/libexec/configd",
+    "  306     1 Fri Sep 25 21:14:23 2026     /System/Library/CoreServices/powerd.bundle/powerd",
+    "  307     1 Fri Sep 25 21:14:23 2026     /usr/libexec/IOMFB_bics_daemon",
+    "  312     1 Fri Sep 25 21:14:23 2026     /usr/libexec/remoted",
+    "  317     1 Fri Sep 25 21:14:23 2026     /usr/libexec/watchdogd",
+    "  321     1 Fri Sep 25 21:14:23 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Support/mds",
+    "  323     1 Fri Sep 25 21:14:23 2026     /usr/libexec/kernelmanagerd",
+    "  324     1 Fri Sep 25 21:14:23 2026     /usr/libexec/diskarbitrationd",
+    "  328     1 Fri Sep 25 21:14:23 2026     /usr/sbin/syslogd",
+    "  331     1 Fri Sep 25 21:14:23 2026     /usr/libexec/thermalmonitord",
+    "  332     1 Fri Sep 25 21:14:23 2026     /usr/libexec/opendirectoryd",
+    "  333     1 Fri Sep 25 21:14:23 2026     /System/Library/PrivateFrameworks/ApplePushService.framework/apsd",
+    "  334     1 Fri Sep 25 21:14:23 2026     /System/Library/CoreServices/launchservicesd",
+    "  335     1 Fri Sep 25 21:14:23 2026     /usr/libexec/timed",
+    "  337     1 Fri Sep 25 21:14:23 2026     /usr/sbin/securityd",
+    "  339     1 Fri Sep 25 21:14:23 2026     /usr/libexec/locationd",
+    "  341     1 Fri Sep 25 21:14:23 2026     autofsd",
+    "  342     1 Fri Sep 25 21:14:23 2026     /usr/libexec/dasd",
+    "  344     1 Fri Sep 25 21:14:23 2026     /usr/sbin/distnoted",
+    "  348     1 Fri Sep 25 21:14:23 2026     /System/Library/CoreServices/logind",
+    "  349     1 Fri Sep 25 21:14:23 2026     /System/Library/PrivateFrameworks/GenerationalStorage.framework/Versions/A/Support/revisiond",
+    "  350     1 Fri Sep 25 21:14:23 2026     /usr/sbin/KernelEventAgent",
+    "  354     1 Fri Sep 25 21:14:23 2026     /usr/sbin/notifyd",
+    "  356     1 Fri Sep 25 21:14:23 2026     /usr/libexec/corebrightnessd",
+    "  357     1 Fri Sep 25 21:14:23 2026     /usr/libexec/AirPlayXPCHelper",
+    "  358     1 Fri Sep 25 21:14:23 2026     /System/Library/Frameworks/CoreMediaIO.framework/Versions/A/Resources/com.apple.cmio.registerassistantservice",
+    "  362     1 Fri Sep 25 21:14:23 2026     /usr/sbin/cfprefsd",
+    "  365     1 Fri Sep 25 21:14:23 2026     /usr/libexec/runningboardd",
+    "  369     1 Fri Sep 25 21:14:23 2026     /System/Library/PrivateFrameworks/CoreDuetContext.framework/Resources/contextstored",
+    "  371     1 Fri Sep 25 21:14:23 2026     /System/Library/CoreServices/coreservicesd",
+    "  377     1 Fri Sep 25 21:14:23 2026     /usr/libexec/airportd",
+    "  380     1 Fri Sep 25 21:14:23 2026     /usr/sbin/coreaudiod",
+    "  382     1 Fri Sep 25 21:14:23 2026     /usr/libexec/apfsd",
+    "  383     1 Fri Sep 25 21:14:23 2026     /usr/libexec/nsurlsessiond",
+    "  386     1 Fri Sep 25 21:14:24 2026     /System/Library/PrivateFrameworks/CoreAnalytics.framework/Support/analyticsd",
+    "  393     1 Fri Sep 25 21:14:24 2026     /usr/libexec/lsd",
+    "  396     1 Fri Sep 25 21:14:24 2026     /usr/libexec/trustd",
+    "  400     1 Fri Sep 25 21:14:24 2026     /usr/sbin/distnoted",
+    "  417     1 Fri Sep 25 21:14:24 2026     /usr/sbin/distnoted",
+    "  441     1 Fri Sep 25 21:14:24 2026     /usr/libexec/symptomsd",
+    "  466     1 Fri Sep 25 21:14:24 2026     /usr/sbin/distnoted",
+    "  474     1 Fri Sep 25 21:14:24 2026     /System/Library/PrivateFrameworks/SystemStatusServer.framework/Support/systemstatusd",
+    "  486     1 Fri Sep 25 21:14:24 2026     /usr/sbin/distnoted",
+    "  488     1 Fri Sep 25 21:14:24 2026     /System/Library/Frameworks/Security.framework/Versions/A/XPCServices/authd.xpc/Contents/MacOS/authd",
+    "  495     1 Fri Sep 25 21:14:24 2026     /usr/local/bin/deemd",
+    "  497     1 Fri Sep 25 21:14:24 2026     /usr/local/bin/ws1etlm",
+    "  498     1 Fri Sep 25 21:14:24 2026     /Library/PrivilegedHelperTools/com.docker.vmnetd",
+    "  508     1 Fri Sep 25 21:14:24 2026     /usr/libexec/storagekitd",
+    "  513     1 Fri Sep 25 21:14:24 2026     /usr/sbin/mDNSResponder",
+    "  515     1 Fri Sep 25 21:14:24 2026     /usr/libexec/syspolicyd",
+    "  524     1 Fri Sep 25 21:14:24 2026     /usr/sbin/mDNSResponderHelper",
+    "  527     1 Fri Sep 25 21:14:25 2026     /Library/SystemExtensions/924BD205-7FB6-4689-A2C8-568119136010/com.obsproject.obs-studio.mac-camera-extension.systemextension/Contents/MacOS/com.obsproject.obs-studio.mac-camera-extension",
+    "  528     1 Fri Sep 25 21:14:25 2026     /usr/sbin/appleh13camerad",
+    "  529     1 Fri Sep 25 21:14:25 2026     /usr/libexec/audioclocksyncd",
+    "  530     1 Fri Sep 25 21:14:25 2026     /usr/libexec/cameracaptured",
+    "  531     1 Fri Sep 25 21:14:25 2026     /System/Library/CoreServices/appleeventsd",
+    "  532     1 Fri Sep 25 21:14:25 2026     /System/Library/CoreServices/sharedfilelistd",
+    "  533     1 Fri Sep 25 21:14:25 2026     /System/Library/Frameworks/CoreMediaIO.framework/Versions/A/Resources/UVCAssistant.systemextension/Contents/MacOS/UVCAssistant",
+    "  536     1 Fri Sep 25 21:14:25 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mds_stores",
+    "  541     1 Fri Sep 25 21:14:25 2026     /System/Library/CoreServices/Software Update.app/Contents/Resources/softwareupdated",
+    "  542     1 Fri Sep 25 21:14:25 2026     /usr/sbin/distnoted",
+    "  547     1 Fri Sep 25 21:14:25 2026     /System/Library/CoreServices/Software Update.app/Contents/Resources/suhelperd",
+    "  548     1 Fri Sep 25 21:14:25 2026     /usr/sbin/distnoted",
+    "  550     1 Fri Sep 25 21:14:25 2026     /usr/sbin/distnoted",
+    "  563     1 Fri Sep 25 21:14:25 2026     /usr/libexec/eligibilityd",
+    "  564     1 Fri Sep 25 21:14:25 2026     /usr/libexec/gamepolicyd",
+    "  571     1 Fri Sep 25 21:14:25 2026     /usr/sbin/distnoted",
+    "  575     1 Fri Sep 25 21:14:25 2026     /System/Library/DriverExtensions/com.apple.DriverKit-IOUserDockChannelSerial.dext/com.apple.DriverKit-IOUserDockChannelSerial",
+    "  576     1 Fri Sep 25 21:14:25 2026     /System/Library/DriverExtensions/com.apple.AppleUserHIDDrivers.dext/com.apple.AppleUserHIDDrivers",
+    "  583     1 Fri Sep 25 21:14:26 2026     /usr/libexec/wifianalyticsd",
+    "  586     1 Fri Sep 25 21:14:26 2026     /System/Library/Frameworks/LocalAuthentication.framework/Support/coreauthd",
+    "  587     1 Fri Sep 25 21:14:26 2026     /usr/sbin/distnoted",
+    "  588     1 Fri Sep 25 21:14:26 2026     /usr/sbin/cfprefsd",
+    "  589     1 Fri Sep 25 21:14:26 2026     /usr/libexec/securityd_service",
+    "  590     1 Fri Sep 25 21:14:26 2026     /usr/sbin/distnoted",
+    "  606     1 Fri Sep 25 21:14:26 2026     /usr/sbin/BTLEServer",
+    "  608     1 Fri Sep 25 21:14:26 2026     /usr/libexec/lsd",
+    "  612     1 Fri Sep 25 21:14:26 2026     /usr/libexec/searchpartyd",
+    "  662     1 Fri Sep 25 21:14:27 2026     /usr/sbin/filecoordinationd",
+    "  666     1 Fri Sep 25 21:14:27 2026     /System/Library/Frameworks/CryptoTokenKit.framework/ctkd",
+    "  670     1 Fri Sep 25 21:14:27 2026     /System/Library/PrivateFrameworks/WirelessDiagnostics.framework/Support/awdd",
+    "  672     1 Fri Sep 25 21:14:27 2026     automountd",
+    "  673     1 Fri Sep 25 21:14:27 2026     /System/Library/PrivateFrameworks/FileProvider.framework/Support/fileproviderd",
+    "  683     1 Fri Sep 25 21:14:27 2026     /usr/libexec/nearbyd",
+    "  689     1 Fri Sep 25 21:14:27 2026     /usr/libexec/rosetta/oahd",
+    "  785     1 Fri Sep 25 21:14:30 2026     /usr/sbin/distnoted",
+    "  787     1 Fri Sep 25 21:14:30 2026     /usr/sbin/distnoted",
+    "  799     1 Fri Sep 25 21:14:31 2026     /usr/sbin/distnoted",
+    " 1310     1 Fri Sep 25 21:14:32 2026     /usr/sbin/distnoted",
+    " 1944     1 Fri Sep 25 21:14:33 2026     /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/CVMServer",
+    " 1969     1 Fri Sep 25 21:14:33 2026     /System/Library/Frameworks/CryptoTokenKit.framework/ctkahp.bundle/Contents/MacOS/ctkahp",
+    " 2207     1 Fri Sep 25 21:14:35 2026     /System/Library/CoreServices/CrashReporterSupportHelper",
+    " 2229   301 Fri Sep 25 21:14:35 2026     /usr/sbin/systemstats",
+    " 2584     1 Fri Sep 25 21:14:42 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdbulkimport",
+    " 2585     1 Fri Sep 25 21:14:42 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdbulkimport",
+    " 3745     1 Fri Sep 25 21:16:28 2026     /usr/sbin/distnoted",
+    " 3906     1 Thu Oct  8 08:00:48 2026     /usr/sbin/bluetoothd",
+    " 4589     1 Thu Oct  8 08:01:03 2026     /System/Library/DriverExtensions/IOUserBluetoothSerialDriver.dext/IOUserBluetoothSerialDriver",
+    " 4590     1 Thu Oct  8 08:01:03 2026     /System/Library/DriverExtensions/IOUserBluetoothSerialDriver.dext/IOUserBluetoothSerialDriver",
+    " 4591     1 Thu Oct  8 08:01:03 2026     /System/Library/DriverExtensions/IOUserBluetoothSerialDriver.dext/IOUserBluetoothSerialDriver",
+    " 6256     1 Fri Sep 25 21:21:03 2026     /System/Library/CoreServices/SubmitDiagInfo",
+    "11004     1 Thu Oct 15 08:39:33 2026     /usr/libexec/wifivelocityd",
+    "11588     1 Wed Oct  7 14:28:55 2026     /Applications/Visual Studio Code.app/Contents/Frameworks/Electron Framework.framework/Helpers/chrome_crashpad_handler",
+    "11748     1 Thu Oct 15 13:14:57 2026     /usr/libexec/audiomxd",
+    "11856     1 Wed Oct  7 14:28:58 2026     tmux",
+    "11976     1 Thu Oct 15 13:15:03 2026     /usr/libexec/audioanalyticsd",
+    "13577     1 Tue Oct 13 15:35:54 2026     /Users/brunobuger/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+    "13581 13577 Tue Oct 13 15:35:54 2026     /Users/brunobuger/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+    "14122     1 Thu Oct 15 13:16:02 2026     /usr/libexec/rtcreportingd",
+    "14536     1 Sun Oct  4 23:27:48 2026     /Applications/Docker.app/Contents/MacOS/Docker Desktop.app/Contents/MacOS/Docker Desktop",
+    "14602 14536 Sun Oct  4 23:27:49 2026     /Applications/Docker.app/Contents/MacOS/Docker Desktop.app/Contents/Frameworks/Docker Desktop Helper (GPU).app/Contents/MacOS/Docker Desktop Helper (GPU)",
+    "14604     1 Fri Sep 25 22:32:46 2026     /System/Library/PrivateFrameworks/CoreFP.framework/Versions/A/fairplayd",
+    "14605 14536 Sun Oct  4 23:27:49 2026     /Applications/Docker.app/Contents/MacOS/Docker Desktop.app/Contents/Frameworks/Docker Desktop Helper.app/Contents/MacOS/Docker Desktop Helper",
+    "16918     1 Thu Oct 15 15:38:04 2026     /usr/libexec/mobileassetd",
+    "17117     1 Sat Sep 26 00:39:54 2026     /System/Library/CoreServices/Applications/Feedback Assistant.app/Contents/Library/LaunchServices/fbahelperd",
+    "17403     1 Thu Oct 15 15:38:16 2026     /usr/libexec/aned",
+    "17686     1 Thu Oct 15 15:38:22 2026     /usr/libexec/secinitd",
+    "19542     1 Sat Sep 26 20:09:37 2026     node",
+    "22246     1 Wed Oct 14 19:09:12 2026     /Users/brunobuger/.jdks/jdk-21.0.10+7/Contents/Home/bin/java",
+    "23126     1 Thu Oct 15 15:40:17 2026     /usr/libexec/pkd",
+    "23138     1 Thu Oct 15 15:40:17 2026     /System/Library/PrivateFrameworks/CoreADI.framework/adid",
+    "23283     1 Thu Oct 15 15:40:21 2026     /usr/libexec/sandboxd",
+    "25909     1 Thu Oct 15 15:41:22 2026     /usr/libexec/wifip2pd",
+    "30419     1 Thu Oct 15 15:43:16 2026     /usr/libexec/findmybeaconingd",
+    "31074     1 Thu Oct 15 20:36:27 2026     /usr/sbin/netbiosd",
+    "31547     1 Thu Oct 15 11:26:00 2026     /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/HIServices.framework/Versions/A/XPCServices/com.apple.hiservices-xpcservice.xpc/Contents/MacOS/com.apple.hiservices-xpcservice",
+    "33570     1 Sun Oct  4 22:52:33 2026     /System/Library/PrivateFrameworks/TCC.framework/Support/tccd",
+    "33709     1 Sat Sep 26 20:20:21 2026     node",
+    "34487     1 Thu Oct 15 15:45:07 2026     /usr/libexec/coreduetd",
+    "37541     1 Wed Oct 14 12:20:56 2026     Core Audio Driver (ZoomAudioDevice.driver)",
+    "38141     1 Wed Oct 14 12:21:23 2026     /System/Library/CoreServices/backupd.bundle/Contents/Resources/backupd",
+    "38328     1 Thu Oct 15 11:29:07 2026     /System/Library/PrivateFrameworks/BiomeStreams.framework/Support/biomed",
+    "40631     1 Thu Oct 15 21:26:34 2026     /System/Library/Frameworks/Security.framework/Versions/A/XPCServices/TrustedPeersHelper.xpc/Contents/MacOS/TrustedPeersHelper",
+    "43906     1 Thu Oct 15 21:28:04 2026     /usr/sbin/systemsoundserverd",
+    "43958     1 Thu Oct 15 21:28:05 2026     /System/Library/Frameworks/AudioToolbox.framework/AudioComponentRegistrar",
+    "43959     1 Thu Oct 15 21:28:05 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper",
+    "44737     1 Sat Oct 10 11:36:14 2026     node",
+    "45979     1 Tue Oct 13 17:22:19 2026     /System/Library/Frameworks/Security.framework/Versions/A/XPCServices/com.apple.CodeSigningHelper.xpc/Contents/MacOS/com.apple.CodeSigningHelper",
+    "47270     1 Thu Oct 15 21:29:45 2026     /usr/libexec/online-auth-agent",
+    "47940     1 Thu Oct 15 21:30:03 2026     /usr/libexec/ospredictiond",
+    "48278     1 Thu Oct 15 21:30:14 2026     /usr/libexec/mobileactivationd",
+    "48279     1 Thu Oct 15 21:30:15 2026     /System/Library/Frameworks/CryptoTokenKit.framework/ctkd",
+    "48629     1 Thu Oct 15 21:30:23 2026     /System/Library/PrivateFrameworks/TVIdleServices.framework/idleassetsd",
+    "48697     1 Thu Oct 15 21:30:25 2026     /usr/sbin/WirelessRadioManagerd",
+    "48818     1 Thu Oct 15 15:07:16 2026     Core Audio Driver (TVRemoteAudio.driver)",
+    "48954     1 Thu Oct 15 15:07:20 2026     /usr/libexec/usermanagerd",
+    "49214     1 Thu Oct 15 21:30:40 2026     /usr/libexec/nehelper",
+    "49215     1 Thu Oct 15 21:30:40 2026     /usr/libexec/securityd_system",
+    "49517     1 Thu Oct 15 21:30:49 2026     /System/Library/PrivateFrameworks/CoreSymbolication.framework/coresymbolicationd",
+    "49518     1 Thu Oct 15 21:30:49 2026     /System/Library/Frameworks/ExtensionFoundation.framework/Versions/A/XPCServices/extensionkitservice.xpc/Contents/MacOS/extensionkitservice",
+    "50052     1 Thu Oct 15 15:07:50 2026     /System/Library/PrivateFrameworks/GeoServices.framework/Versions/A/XPCServices/com.apple.geod.xpc/Contents/MacOS/com.apple.geod",
+    "50224     1 Thu Oct 15 15:07:53 2026     /System/Library/PrivateFrameworks/AccountPolicy.framework/XPCServices/com.apple.AccountPolicyHelper.xpc/Contents/MacOS/com.apple.AccountPolicyHelper",
+    "50829     1 Thu Oct 15 15:08:11 2026     /usr/libexec/gamecontrollerd",
+    "54145     1 Thu Oct 15 15:09:47 2026     /usr/libexec/amfid",
+    "54732     1 Thu Oct 15 16:41:53 2026     /System/Library/PrivateFrameworks/AppSSO.framework/Support/AppSSODaemon",
+    "55855     1 Thu Oct 15 21:33:46 2026     node",
+    "56373     1 Thu Oct 15 21:34:01 2026     /usr/libexec/smd",
+    "56374     1 Thu Oct 15 21:34:01 2026     /usr/libexec/biometrickitd",
+    "57923     1 Thu Oct 15 21:34:42 2026     node",
+    "57944     1 Thu Oct 15 21:34:42 2026     node",
+    "58241     1 Thu Oct 15 21:34:51 2026     /System/Library/CoreServices/ReportCrash",
+    "58296     1 Thu Oct 15 21:34:54 2026     /System/Library/CoreServices/osanalyticshelper",
+    "58320     1 Thu Oct 15 21:34:54 2026     /System/Library/PrivateFrameworks/ContextKit.framework/Versions/A/XPCServices/ContextService.xpc/Contents/MacOS/ContextService",
+    "58327     1 Thu Oct 15 21:34:54 2026     /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/CarbonCore.framework/Versions/A/XPCServices/csnameddatad.xpc/Contents/MacOS/csnameddatad",
+    "58538     1 Thu Oct 15 21:35:01 2026     /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+    "58541     1 Thu Oct 15 21:35:01 2026     /System/Library/CoreServices/backupd.bundle/Contents/Resources/backupd-helper",
+    "58544     1 Thu Oct 15 21:35:01 2026     /usr/libexec/hidd",
+    "58556     1 Thu Oct 15 21:35:01 2026     /usr/libexec/secinitd",
+    "58559     1 Thu Oct 15 21:35:01 2026     /System/Library/PrivateFrameworks/AppleCredentialManager.framework/AppleCredentialManagerDaemon",
+    "58560     1 Thu Oct 15 21:35:01 2026     /usr/libexec/containermanagerd_system",
+    "58561     1 Thu Oct 15 21:35:01 2026     /System/Library/CoreServices/loginwindow.app/Contents/MacOS/loginwindow",
+    "58579     1 Thu Oct 15 21:35:02 2026     /usr/libexec/seld",
+    "58599     1 Thu Oct 15 21:35:02 2026     /System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Resources/backgroundtaskmanagementd",
+    "58702     1 Thu Oct 15 21:35:02 2026     /usr/libexec/colorsync.displayservices",
+    "58712     1 Thu Oct 15 21:35:02 2026     /System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XProtectBridgeService.xpc/Contents/MacOS/XProtectBridgeService",
+    "58724     1 Thu Oct 15 21:35:03 2026     /System/Library/Frameworks/ColorSync.framework/Versions/A/XPCServices/com.apple.ColorSyncXPCAgent.xpc/Contents/MacOS/com.apple.ColorSyncXPCAgent",
+    "58734     1 Thu Oct 15 21:35:03 2026     /usr/libexec/colorsyncd",
+    "58739     1 Thu Oct 15 21:35:03 2026     /System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+    "58770     1 Thu Oct 15 21:35:03 2026     /usr/libexec/nfcd",
+    "58974     1 Thu Oct 15 21:35:08 2026     /usr/libexec/secinitd",
+    "58975     1 Thu Oct 15 21:35:08 2026     /usr/sbin/cfprefsd",
+    "58976     1 Thu Oct 15 21:35:08 2026     /usr/libexec/trustd",
+    "58977     1 Thu Oct 15 21:35:08 2026     /usr/libexec/trustdFileHelper",
+    "58978     1 Thu Oct 15 21:35:09 2026     /usr/libexec/containermanagerd",
+    "59027     1 Thu Oct 15 21:35:32 2026     /System/Library/PrivateFrameworks/MobileDevice.framework/Versions/A/Resources/usbmuxd",
+    "59029     1 Thu Oct 15 21:36:11 2026     /System/Library/CoreServices/iconservicesagent",
+    "59030     1 Thu Oct 15 21:36:11 2026     /System/Library/CoreServices/iconservicesd",
+    "59031     1 Thu Oct 15 21:36:11 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService",
+    "59032     1 Thu Oct 15 21:36:11 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService",
+    "59034     1 Thu Oct 15 21:36:15 2026     /System/Library/Frameworks/GSS.framework/Helpers/GSSCred",
+    "59039     1 Thu Oct 15 21:36:15 2026     /usr/libexec/keybagd",
+    "59040     1 Thu Oct 15 21:36:16 2026     /usr/libexec/UserEventAgent",
+    "59042     1 Thu Oct 15 21:36:16 2026     /usr/libexec/bluetoothuserd",
+    "59043     1 Thu Oct 15 21:36:16 2026     /System/Library/CoreServices/ControlCenter.app/Contents/MacOS/ControlCenter",
+    "59044     1 Thu Oct 15 21:36:16 2026     /System/Library/Frameworks/SystemExtensions.framework/Versions/A/Helpers/sysextd",
+    "59045     1 Thu Oct 15 21:36:16 2026     /System/Library/CoreServices/CoreServicesUIAgent.app/Contents/MacOS/CoreServicesUIAgent",
+    "59046     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/CoreDuetContext.framework/Resources/ContextStoreAgent",
+    "59047     1 Thu Oct 15 21:36:16 2026     /usr/sbin/universalaccessd",
+    "59048     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/CloudServices.framework/Helpers/com.apple.sbd",
+    "59049     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app/Contents/MacOS/BackgroundTaskManagementAgent",
+    "59050     1 Thu Oct 15 21:36:16 2026     /usr/libexec/pboard",
+    "59051     1 Thu Oct 15 21:36:16 2026     /System/Library/Frameworks/CoreTelephony.framework/Support/CommCenter",
+    "59052     1 Thu Oct 15 21:36:16 2026     /System/Library/CoreServices/APFSUserAgent",
+    "59053     1 Thu Oct 15 21:36:16 2026     /usr/libexec/nsurlsessiond",
+    "59055     1 Thu Oct 15 21:36:16 2026     /usr/libexec/rapportd",
+    "59056     1 Thu Oct 15 21:36:16 2026     /System/Library/CoreServices/lockoutagent",
+    "59057     1 Thu Oct 15 21:36:16 2026     /usr/sbin/usernoted",
+    "59058     1 Thu Oct 15 21:36:16 2026     /usr/libexec/routined",
+    "59059     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/UserNotificationsCore.framework/Support/usernotificationsd",
+    "59060     1 Thu Oct 15 21:36:16 2026     /System/Library/CoreServices/WiFiAgent.app/Contents/MacOS/WiFiAgent",
+    "59061     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/VoiceShortcuts.framework/Versions/A/Support/siriactionsd",
+    "59062     1 Thu Oct 15 21:36:16 2026     /usr/libexec/PowerUIAgent",
+    "59063     1 Thu Oct 15 21:36:16 2026     /System/Library/CoreServices/CoreLocationAgent.app/Contents/MacOS/CoreLocationAgent",
+    "59064     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/CalendarDaemon.framework/Support/calaccessd",
+    "59065     1 Thu Oct 15 21:36:16 2026     /usr/libexec/triald",
+    "59066     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/ScreenTimeCore.framework/Versions/A/ScreenTimeAgent",
+    "59067     1 Thu Oct 15 21:36:16 2026     /System/Library/CoreServices/talagent",
+    "59068     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/TelephonyUtilities.framework/callservicesd",
+    "59069     1 Thu Oct 15 21:36:16 2026     /System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+    "59070     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/SyncedDefaults.framework/Support/syncdefaultsd",
+    "59071     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/IDS.framework/identityservicesd.app/Contents/MacOS/identityservicesd",
+    "59072     1 Thu Oct 15 21:36:16 2026     /System/Library/Frameworks/Accounts.framework/Versions/A/Support/accountsd",
+    "59073     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/CloudDocsDaemon.framework/Versions/A/Support/bird",
+    "59074     1 Thu Oct 15 21:36:16 2026     /usr/libexec/dmd",
+    "59075     1 Thu Oct 15 21:36:16 2026     /usr/libexec/networkserviceproxy",
+    "59076     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/TCC.framework/Support/tccd",
+    "59077     1 Thu Oct 15 21:36:16 2026     /usr/libexec/transparencyd",
+    "59078     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/DoNotDisturbServer.framework/Support/donotdisturbd",
+    "59079     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/CloudKitDaemon.framework/Support/cloudd",
+    "59080     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/CoreFollowUp.framework/Versions/A/Support/followupd",
+    "59081     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/iCloudDriveService.framework/XPCServices/ContainerMetadataExtractor.xpc/Contents/MacOS/ContainerMetadataExtractor",
+    "59082     1 Thu Oct 15 21:36:16 2026     /System/Library/CoreServices/sharedfilelistd",
+    "59083     1 Thu Oct 15 21:36:16 2026     /usr/libexec/knowledge-agent",
+    "59084     1 Thu Oct 15 21:36:16 2026     /System/Library/Frameworks/Contacts.framework/Support/contactsd",
+    "59085     1 Thu Oct 15 21:36:16 2026     /usr/libexec/neagent",
+    "59086     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/HomeKitDaemon.framework/Support/homed",
+    "59088     1 Thu Oct 15 21:36:16 2026     /System/Library/CoreServices/NotificationCenter.app/Contents/MacOS/NotificationCenter",
+    "59089     1 Thu Oct 15 21:36:16 2026     /System/Library/Frameworks/FamilyControls.framework/Versions/A/FamilyControlsAgent",
+    "59090     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/FamilyCircle.framework/Versions/A/Resources/familycircled",
+    "59091     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/DataAccess.framework/Support/dataaccessd",
+    "59092     1 Thu Oct 15 21:36:16 2026     /usr/libexec/diagnosticextensionsd",
+    "59093     1 Thu Oct 15 21:36:16 2026     /System/Library/CoreServices/diagnostics_agent",
+    "59094     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/UsageTracking.framework/Versions/A/UsageTrackingAgent",
+    "59095     1 Thu Oct 15 21:36:16 2026     /usr/libexec/adprivacyd",
+    "59096     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/WeatherDaemon.framework/weatherd",
+    "59097     1 Thu Oct 15 21:36:16 2026     /System/Cryptexes/App/System/Library/CoreServices/SafariSupport.bundle/Contents/MacOS/SafariBookmarksSyncAgent",
+    "59098     1 Thu Oct 15 21:36:16 2026     /System/Library/Frameworks/FinanceKit.framework/financed",
+    "59099     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/NewDeviceOutreach.framework/ndoagent",
+    "59100     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/LockdownMode.framework/Versions/A/XPCServices/lockdownmoded",
+    "59101     1 Thu Oct 15 21:36:16 2026     /usr/libexec/replayd",
+    "59102     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/SocialLayer.framework/sociallayerd.app/Contents/MacOS/sociallayerd",
+    "59103     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/CoreSuggestions.framework/Versions/A/Support/suggestd",
+    "59104     1 Thu Oct 15 21:36:16 2026     /System/Library/CoreServices/iconservicesagent",
+    "59105     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/HearingCore.framework/heard",
+    "59106     1 Thu Oct 15 21:36:16 2026     /System/Library/PrivateFrameworks/ChronoCore.framework/Support/chronod",
+    "59107     1 Thu Oct 15 21:36:16 2026     /usr/libexec/intelligentroutingd",
+    "59108     1 Thu Oct 15 21:36:17 2026     /usr/libexec/ContinuityCaptureAgent",
+    "59109     1 Thu Oct 15 21:36:17 2026     /System/Library/Frameworks/ManagedSettings.framework/Versions/A/ManagedSettingsAgent",
+    "59110     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/AppleMediaServices.framework/Resources/amsaccountsd",
+    "59111     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/AssistantServices.framework/Versions/A/Support/assistantd",
+    "59112     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/AppleMediaServicesUI.framework/amsengagementd",
+    "59113     1 Thu Oct 15 21:36:17 2026     /System/Library/CoreServices/UIKitSystem.app/Contents/MacOS/UIKitSystem",
+    "59114     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/BiomeStreams.framework/Support/BiomeAgent",
+    "59116     1 Thu Oct 15 21:36:17 2026     /usr/libexec/findmydeviced",
+    "59117     1 Thu Oct 15 21:36:17 2026     /Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "59118     1 Thu Oct 15 21:36:17 2026     /usr/libexec/sharingd",
+    "59119     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/MobileTimer.framework/Executables/mobiletimerd",
+    "59120     1 Thu Oct 15 21:36:17 2026     /System/Library/Frameworks/AudioToolbox.framework/AudioComponentRegistrar",
+    "59121     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/AppSSO.framework/Support/AppSSOAgent.app/Contents/MacOS/AppSSOAgent",
+    "59122     1 Thu Oct 15 21:36:17 2026     /usr/libexec/findmydevice-user-agent",
+    "59123     1 Thu Oct 15 21:36:17 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/CarbonComponentScannerXPC.xpc/Contents/MacOS/CarbonComponentScannerXPC",
+    "59125     1 Thu Oct 15 21:36:17 2026     /usr/libexec/swcd",
+    "59126     1 Thu Oct 15 21:36:17 2026     /Applications/Orca.app/Contents/MacOS/Orca",
+    "59127     1 Thu Oct 15 21:36:17 2026     /usr/libexec/fmfd",
+    "59128     1 Thu Oct 15 21:36:17 2026     /Applications/Omnissa Horizon Client.app/Contents/MacOS/horizon-client",
+    "59129     1 Thu Oct 15 21:36:17 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService",
+    "59130     1 Thu Oct 15 21:36:17 2026     /Applications/Sublime Text.app/Contents/MacOS/Sublime Text",
+    "59132     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/EmailDaemon.framework/Versions/A/maild",
+    "59134     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/ContinuousDialogManagerService.framework/assistant_cdmd",
+    "59135     1 Thu Oct 15 21:36:17 2026     /System/Library/CoreServices/Dock.app/Contents/MacOS/Dock",
+    "59136     1 Thu Oct 15 21:36:17 2026     /System/Library/CoreServices/SystemUIServer.app/Contents/MacOS/SystemUIServer",
+    "59137     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/SiriTTSService.framework/sirittsd",
+    "59138     1 Thu Oct 15 21:36:17 2026     /System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+    "59139     1 Thu Oct 15 21:36:17 2026     /usr/libexec/WiFiVelocityAgent",
+    "59140     1 Thu Oct 15 21:36:17 2026     /System/Library/Frameworks/ApplicationServices.framework/Frameworks/ATS.framework/Support/fontd",
+    "59143     1 Thu Oct 15 21:36:17 2026     /System/Library/CoreServices/WallpaperAgent.app/Contents/MacOS/WallpaperAgent",
+    "59144     1 Thu Oct 15 21:36:17 2026     /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ATS.framework/Versions/A/Support/fontworker",
+    "59145     1 Thu Oct 15 21:36:17 2026     /System/Library/Frameworks/QuickLookUI.framework/Versions/A/XPCServices/QuickLookUIService.xpc/Contents/MacOS/QuickLookUIService",
+    "59146     1 Thu Oct 15 21:36:17 2026     /usr/libexec/wallpaperexportd",
+    "59147     1 Thu Oct 15 21:36:17 2026     /System/Library/Frameworks/ColorSync.framework/Versions/A/XPCServices/com.apple.ColorSyncXPCAgent.xpc/Contents/MacOS/com.apple.ColorSyncXPCAgent",
+    "59148     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/CommunicationsFilter.framework/CMFSyncAgent",
+    "59149     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/ViewBridge.framework/Versions/A/XPCServices/ViewBridgeAuxiliary.xpc/Contents/MacOS/ViewBridgeAuxiliary",
+    "59150     1 Thu Oct 15 21:36:17 2026     /System/Library/Frameworks/ExtensionFoundation.framework/Versions/A/XPCServices/extensionkitservice.xpc/Contents/MacOS/extensionkitservice",
+    "59152     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/AMPDevices.framework/Versions/A/Support/AMPDeviceDiscoveryAgent",
+    "59153     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/IntlPreferences.framework/Support/localizationswitcherd",
+    "59155     1 Thu Oct 15 21:36:17 2026     /System/Library/ExtensionKit/Extensions/WallpaperDynamicExtension.appex/Contents/MacOS/WallpaperDynamicExtension",
+    "59156     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/Categories.framework/Versions/A/XPCServices/CategoriesService.xpc/Contents/MacOS/CategoriesService",
+    "59157     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/CloudDocs.framework/PlugIns/com.apple.CloudDocs.iCloudDriveFileProvider.appex/Contents/MacOS/com.apple.CloudDocs.iCloudDriveFileProvider",
+    "59158     1 Thu Oct 15 21:36:17 2026     /System/Library/PrivateFrameworks/Categories.framework/Versions/A/XPCServices/CategoriesService.xpc/Contents/MacOS/CategoriesService",
+    "59159     1 Thu Oct 15 21:36:18 2026     /System/Library/PrivateFrameworks/CoreCDP.framework/Versions/A/Resources/cdpd",
+    "59160     1 Thu Oct 15 21:36:18 2026     /System/Library/PrivateFrameworks/AuthKit.framework/Versions/A/Support/akd",
+    "59161     1 Thu Oct 15 21:36:18 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService",
+    "59162     1 Thu Oct 15 21:36:18 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService",
+    "59163     1 Thu Oct 15 21:36:18 2026     /System/Library/PrivateFrameworks/UserActivity.framework/Agents/useractivityd",
+    "59164     1 Thu Oct 15 21:36:18 2026     /System/Library/CoreServices/Dock.app/Contents/XPCServices/com.apple.dock.extra.xpc/Contents/MacOS/com.apple.dock.extra",
+    "59165     1 Thu Oct 15 21:36:18 2026     /System/Library/Frameworks/QuickLookThumbnailing.framework/Support/com.apple.quicklook.ThumbnailsAgent",
+    "59166     1 Thu Oct 15 21:36:18 2026     /System/Library/CoreServices/ReportCrash",
+    "59168     1 Thu Oct 15 21:36:18 2026     /usr/libexec/trustd",
+    "59169     1 Thu Oct 15 21:36:18 2026     /System/Library/PrivateFrameworks/Categories.framework/Versions/A/XPCServices/CategoriesService.xpc/Contents/MacOS/CategoriesService",
+    "59170     1 Thu Oct 15 21:36:18 2026     /System/Library/PrivateFrameworks/iCloudNotification.framework/iCloudNotificationAgent",
+    "59171     1 Thu Oct 15 21:36:18 2026     /System/Library/CoreServices/pbs",
+    "59172     1 Thu Oct 15 21:36:19 2026     /System/Library/PrivateFrameworks/Categories.framework/Versions/A/XPCServices/CategoriesService.xpc/Contents/MacOS/CategoriesService",
+    "59173     1 Thu Oct 15 21:36:19 2026     /System/Library/Frameworks/ExtensionFoundation.framework/Versions/A/XPCServices/extensionkitservice.xpc/Contents/MacOS/extensionkitservice",
+    "59174     1 Thu Oct 15 21:36:19 2026     /System/Applications/Calendar.app/Contents/PlugIns/CalendarWidgetExtension.appex/Contents/MacOS/CalendarWidgetExtension",
+    "59175     1 Thu Oct 15 21:36:19 2026     /System/Library/PrivateFrameworks/CallHistory.framework/Support/CallHistoryPluginHelper",
+    "59176     1 Thu Oct 15 21:36:19 2026     /System/Library/CoreServices/Dock.app/Contents/XPCServices/com.apple.dock.external.extra.arm64.xpc/Contents/MacOS/com.apple.dock.external.extra.arm64",
+    "59177     1 Thu Oct 15 21:36:19 2026     /System/Applications/Weather.app/Contents/PlugIns/WeatherWidget.appex/Contents/MacOS/WeatherWidget",
+    "59178     1 Thu Oct 15 21:36:19 2026     /System/Applications/Clock.app/Contents/PlugIns/WorldClockWidget.appex/Contents/MacOS/WorldClockWidget",
+    "59179     1 Thu Oct 15 21:36:19 2026     /System/Applications/News.app/Contents/PlugIns/NewsToday2.appex/Contents/MacOS/NewsToday2",
+    "59180     1 Thu Oct 15 21:36:19 2026     /System/Applications/Stocks.app/Contents/PlugIns/StocksWidget.appex/Contents/MacOS/StocksWidget",
+    "59181     1 Thu Oct 15 21:36:19 2026     /System/Library/PrivateFrameworks/AssetCacheServices.framework/Versions/A/XPCServices/AssetCacheLocatorService.xpc/Contents/MacOS/AssetCacheLocatorService",
+    "59182     1 Thu Oct 15 21:36:19 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+    "59184     1 Thu Oct 15 21:36:19 2026     /System/Library/CoreServices/Screen Time.app/Contents/PlugIns/ScreenTimeWidgetExtension.appex/Contents/MacOS/ScreenTimeWidgetExtension",
+    "59185     1 Thu Oct 15 21:36:19 2026     /System/Library/CoreServices/Spotlight.app/Contents/MacOS/Spotlight",
+    "59186     1 Thu Oct 15 21:36:19 2026     /System/Library/PrivateFrameworks/Categories.framework/Versions/A/XPCServices/CategoriesService.xpc/Contents/MacOS/CategoriesService",
+    "59187     1 Thu Oct 15 21:36:19 2026     /System/Library/PrivateFrameworks/CoreParsec.framework/parsecd",
+    "59188     1 Thu Oct 15 21:36:20 2026     /System/Library/PrivateFrameworks/iTunesCloud.framework/Support/itunescloudd",
+    "59189     1 Thu Oct 15 21:36:20 2026     /System/Library/PrivateFrameworks/CommerceKit.framework/Versions/A/Resources/commerce",
+    "59211     1 Thu Oct 15 21:36:20 2026     /Applications/Orca.app/Contents/Frameworks/Electron Framework.framework/Helpers/chrome_crashpad_handler",
+    "59218 59126 Thu Oct 15 21:36:20 2026     /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper",
+    "59221 59126 Thu Oct 15 21:36:20 2026     /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper",
+    "59274     1 Thu Oct 15 21:36:21 2026     /usr/libexec/gamecontrolleragentd",
+    "59275     1 Thu Oct 15 21:36:21 2026     /System/Library/PrivateFrameworks/CoreParsec.framework/parsec-fbf",
+    "59298 59126 Thu Oct 15 21:36:21 2026     /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)",
+    "59301     1 Thu Oct 15 21:36:21 2026     /System/Library/PrivateFrameworks/NewsDaemon.framework/newsd",
+    "59302     1 Thu Oct 15 21:36:21 2026     /usr/libexec/linkd",
+    "59303     1 Thu Oct 15 21:36:21 2026     /usr/libexec/metrickitd",
+    "59307     1 Thu Oct 15 21:36:21 2026     /Library/Application Support/Omnissa/Omnissa Horizon Client/Services/Contents/Library/Horizon Client Services",
+    "59310     1 Thu Oct 15 21:36:21 2026     /usr/sbin/spindump",
+    "59311     1 Thu Oct 15 21:36:21 2026     /usr/libexec/spindump_agent",
+    "59333     1 Thu Oct 15 21:36:21 2026     ./horizon-eucusbarbitrator",
+    "59344     1 Thu Oct 15 21:36:22 2026     /System/Library/Frameworks/InputMethodKit.framework/Resources/imklaunchagent",
+    "59354     1 Thu Oct 15 21:36:22 2026     /System/Library/Input Methods/PressAndHold.app/Contents/PlugIns/PAH_Extension.appex/Contents/MacOS/PAH_Extension",
+    "59363     1 Thu Oct 15 21:36:22 2026     /System/Library/CoreServices/ScopedBookmarkAgent",
+    "59364     1 Thu Oct 15 21:36:22 2026     /System/Library/PrivateFrameworks/DeviceCheckInternal.framework/devicecheckd",
+    "59368     1 Thu Oct 15 21:36:22 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/chrome_crashpad_handler",
+    "59374 59126 Thu Oct 15 21:36:22 2026     /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper",
+    "59376 59126 Thu Oct 15 21:36:22 2026     /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper",
+    "59378     1 Thu Oct 15 21:36:23 2026     /System/Library/Frameworks/StoreKit.framework/Support/storekitagent",
+    "59408     1 Thu Oct 15 21:36:23 2026     /usr/libexec/siriknowledged",
+    "59555     1 Thu Oct 15 21:36:23 2026     /System/Library/PrivateFrameworks/CoreSpeech.framework/corespeechd",
+    "59626     1 Thu Oct 15 21:36:23 2026     /usr/libexec/sysmond",
+    "59636     1 Thu Oct 15 21:36:23 2026     /System/Library/PrivateFrameworks/TextInputUIMacHelper.framework/Versions/A/XPCServices/CursorUIViewService.xpc/Contents/MacOS/CursorUIViewService",
+    "59710 59117 Thu Oct 15 21:36:24 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+    "59719 59117 Thu Oct 15 21:36:24 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+    "59739 59117 Thu Oct 15 21:36:24 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+    "59740     1 Thu Oct 15 21:36:24 2026     /usr/libexec/aneuserd",
+    "59747 59126 Thu Oct 15 21:36:24 2026     /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper",
+    "59994     1 Thu Oct 15 21:36:25 2026     Contents/MacOS/DisplayLinkXpcService",
+    "59995 59117 Thu Oct 15 21:36:25 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "59996     1 Thu Oct 15 21:36:25 2026     /bin/bash",
+    "59998     1 Thu Oct 15 21:36:25 2026     /System/Library/PrivateFrameworks/AXAssetLoader.framework/Support/axassetsd",
+    "60001 59117 Thu Oct 15 21:36:25 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "60004 59117 Thu Oct 15 21:36:25 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "60006     1 Thu Oct 15 21:36:25 2026     /System/Library/CoreServices/Siri.app/Contents/MacOS/Siri",
+    "60007     1 Thu Oct 15 21:36:25 2026     /System/Library/Image Capture/Support/icdd",
+    "60008     1 Thu Oct 15 21:36:25 2026     Contents/Frameworks/Squirrel.framework/Versions/A/Squirrel",
+    "60009     1 Thu Oct 15 21:36:25 2026     /System/Library/PrivateFrameworks/AskPermission.framework/Versions/A/Resources/askpermissiond",
+    "60011     1 Thu Oct 15 21:36:25 2026     /usr/local/bin/MacUIEvents",
+    "60012     1 Thu Oct 15 21:36:25 2026     /System/Library/CoreServices/AirPlayUIAgent.app/Contents/MacOS/AirPlayUIAgent",
+    "60014     1 Thu Oct 15 21:36:25 2026     /System/Library/PrivateFrameworks/IMCore.framework/imagent.app/Contents/MacOS/imagent",
+    "60016     1 Thu Oct 15 21:36:25 2026     /System/Library/CoreServices/audioaccessoryd",
+    "60018     1 Thu Oct 15 21:36:25 2026     /usr/local/bin/ws1etlmu",
+    "60019     1 Thu Oct 15 21:36:25 2026     /System/Library/CoreServices/TextInputMenuAgent.app/Contents/MacOS/TextInputMenuAgent",
+    "60020     1 Thu Oct 15 21:36:25 2026     /Library/Application Support/Casablanca/Casablanca Streaming Status Monitor.app/Contents/MacOS/Casablanca Streaming Status Monitor",
+    "60021     1 Thu Oct 15 21:36:25 2026     /usr/libexec/remindd",
+    "60023     1 Thu Oct 15 21:36:25 2026     /System/Library/Frameworks/CryptoTokenKit.framework/ctkahp.bundle/Contents/MacOS/ctkahp",
+    "60025     1 Thu Oct 15 21:36:25 2026     /System/Library/PrivateFrameworks/AOSKit.framework/Versions/A/XPCServices/com.apple.iCloudHelper.xpc/Contents/MacOS/com.apple.iCloudHelper",
+    "60026     1 Thu Oct 15 21:36:25 2026     /Applications/BetterDisplay.app/Contents/MacOS/BetterDisplay",
+    "60030     1 Thu Oct 15 21:36:25 2026     /System/Cryptexes/App/usr/libexec/SafariLaunchAgent",
+    "60031     1 Thu Oct 15 21:36:25 2026     /Applications/Rectangle.app/Contents/MacOS/Rectangle",
+    "60032     1 Thu Oct 15 21:36:25 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService",
+    "60033     1 Thu Oct 15 21:36:25 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService",
+    "60034 59117 Thu Oct 15 21:36:25 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "60035     1 Thu Oct 15 21:36:25 2026     /System/Library/CoreServices/TextInputSwitcher.app/Contents/MacOS/TextInputSwitcher",
+    "60036     1 Thu Oct 15 21:36:25 2026     /Applications/Adobe Acrobat DC/Adobe Acrobat.app/Contents/Helpers/AdobeResourceSynchronizer.app/Contents/MacOS/AdobeResourceSynchronizer",
+    "60037     1 Thu Oct 15 21:36:25 2026     /usr/libexec/MTLAssetUpgraderD",
+    "60039     1 Thu Oct 15 21:36:25 2026     /System/Library/PrivateFrameworks/IMDPersistence.framework/XPCServices/IMDPersistenceAgent.xpc/Contents/MacOS/IMDPersistenceAgent",
+    "60044     1 Fri Oct  2 10:30:52 2026     /System/Library/Frameworks/CoreMediaIO.framework/Resources/VDC.plugin/Contents/Resources/VDCAssistant",
+    "60050 60008 Thu Oct 15 21:36:26 2026     /Applications/Ollama.app/Contents/MacOS/Ollama",
+    "60054     1 Thu Oct 15 21:36:26 2026     /System/Library/Frameworks/ColorSync.framework/Versions/A/XPCServices/com.apple.ColorSyncXPCAgent.xpc/Contents/MacOS/com.apple.ColorSyncXPCAgent",
+    "60055     1 Thu Oct 15 21:36:27 2026     /System/Library/Frameworks/ColorSync.framework/Support/colorsync.useragent",
+    "60056     1 Thu Oct 15 21:36:27 2026     /System/Library/Frameworks/ColorSync.framework/Versions/A/XPCServices/com.apple.ColorSyncXPCAgent.xpc/Contents/MacOS/com.apple.ColorSyncXPCAgent",
+    "60082 59130 Thu Oct 15 21:36:27 2026     /Applications/Sublime Text.app/Contents/MacOS/plugin_host",
+    "60085 59117 Thu Oct 15 21:36:28 2026     /Users/brunobuger/.local/bin/claude",
+    "60089 59117 Thu Oct 15 21:36:28 2026     /Users/brunobuger/.codex/plugins/cache/openai-bundled/chrome/latest/extension-host/macos/arm64/ChatGPT for Chrome",
+    "60100 60050 Thu Oct 15 21:36:28 2026     /Applications/Ollama.app/Contents/Resources/ollama",
+    "60135     1 Thu Oct 15 21:36:29 2026     /System/Library/PrivateFrameworks/CascadeSets.framework/Versions/A/XPCServices/SetStoreUpdateService.xpc/Contents/MacOS/SetStoreUpdateService",
+    "60137     1 Thu Oct 15 21:36:29 2026     /Library/Apple/System/Library/CoreServices/XProtect.app/Contents/XPCServices/XProtectPluginService.xpc/Contents/MacOS/XProtectPluginService",
+    "60264     1 Thu Oct 15 21:36:31 2026     /System/Library/PrivateFrameworks/IntelligencePlatformCompute.framework/Versions/A/XPCServices/IntelligencePlatformComputeService.xpc/Contents/MacOS/IntelligencePlatformComputeService",
+    "60366     1 Thu Oct 15 21:36:32 2026     /System/Library/Frameworks/ExtensionFoundation.framework/Versions/A/XPCServices/extensionkitservice.xpc/Contents/MacOS/extensionkitservice",
+    "60367     1 Thu Oct 15 21:36:32 2026     /System/Applications/Calendar.app/Contents/Extensions/CalendarFocusConfigurationExtension.appex/Contents/MacOS/CalendarFocusConfigurationExtension",
+    "60368     1 Thu Oct 15 21:36:32 2026     /System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app/Contents/Extensions/SafariLinkExtension.appex/Contents/MacOS/SafariLinkExtension",
+    "60369     1 Thu Oct 15 21:36:32 2026     /System/Applications/Mail.app/Contents/Extensions/MailShortcutsExtension.appex/Contents/MacOS/MailShortcutsExtension",
+    "60370     1 Thu Oct 15 21:36:32 2026     /System/Applications/Messages.app/Contents/Extensions/MessagesActionExtension.appex/Contents/MacOS/MessagesActionExtension",
+    "60399     1 Thu Oct 15 21:36:33 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.ComponentTagHelper.xpc/Contents/MacOS/com.apple.audio.ComponentTagHelper",
+    "60400     1 Thu Oct 15 21:36:33 2026     /System/Library/PrivateFrameworks/SiriTTSService.framework/Versions/A/XPCServices/com.apple.SiriTTSService.TrialProxy.xpc/Contents/MacOS/com.apple.SiriTTSService.TrialProxy",
+    "60532     1 Thu Oct 15 21:36:35 2026     /System/Library/PrivateFrameworks/SoftwareUpdate.framework/Resources/SoftwareUpdateNotificationManager.app/Contents/MacOS/SoftwareUpdateNotificationManager",
+    "60533     1 Thu Oct 15 21:36:35 2026     /System/Library/PrivateFrameworks/UIFoundation.framework/Versions/A/XPCServices/nsattributedstringagent.xpc/Contents/MacOS/nsattributedstringagent",
+    "60537     1 Thu Oct 15 21:36:36 2026     /System/Library/Frameworks/MediaAccessibility.framework/Versions/A/XPCServices/com.apple.accessibility.mediaaccessibilityd.xpc/Contents/MacOS/com.apple.accessibility.mediaaccessibilityd",
+    "60670     1 Thu Oct 15 21:36:37 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService",
+    "60678     1 Thu Oct 15 21:36:37 2026     /System/Library/PrivateFrameworks/MobileSoftwareUpdate.framework/Support/softwareupdated",
+    "60696     1 Thu Oct 15 21:36:37 2026     /System/Library/PrivateFrameworks/MobileSoftwareUpdate.framework/Versions/A/XPCServices/com.apple.MobileSoftwareUpdate.CleanupPreparePathService.xpc/Contents/MacOS/com.apple.MobileSoftwareUpdate.CleanupPreparePathService",
+    "60816     1 Thu Oct 15 21:36:38 2026     /System/Library/PrivateFrameworks/IASUtilities.framework/Versions/A/Resources/installerauthagent",
+    "60818     1 Thu Oct 15 21:36:38 2026     /usr/libexec/NRDUpdated",
+    "60870     1 Thu Oct 15 21:36:39 2026     /private/var/db/com.apple.xpc.roleaccountd.staging/exec/16777229.180032067.xpc/Contents/MacOS/com.apple.NRD.UpdateBrainService",
+    "60874     1 Thu Oct 15 21:36:39 2026     /usr/libexec/xpcroleaccountd",
+    "60917 59126 Thu Oct 15 21:36:39 2026     /usr/bin/caffeinate",
+    "60931     1 Thu Oct 15 21:36:40 2026     /System/Library/PrivateFrameworks/UIFoundation.framework/Versions/A/XPCServices/nsattributedstringagent.xpc/Contents/MacOS/nsattributedstringagent",
+    "60932     1 Thu Oct 15 21:36:40 2026     /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/HIServices.framework/Versions/A/XPCServices/com.apple.hiservices-xpcservice.xpc/Contents/MacOS/com.apple.hiservices-xpcservice",
+    "60933     1 Thu Oct 15 21:36:40 2026     /usr/sbin/cfprefsd",
+    "60935     1 Thu Oct 15 21:36:40 2026     /System/Library/Frameworks/MediaAccessibility.framework/Versions/A/XPCServices/com.apple.accessibility.mediaaccessibilityd.xpc/Contents/MacOS/com.apple.accessibility.mediaaccessibilityd",
+    "61154     1 Thu Oct 15 21:36:48 2026     /System/Library/PrivateFrameworks/StatusKit.framework/StatusKitAgent",
+    "61492     1 Thu Oct 15 21:36:58 2026     /System/Library/PrivateFrameworks/Categories.framework/Versions/A/XPCServices/CategoriesService.xpc/Contents/MacOS/CategoriesService",
+    "61493     1 Thu Oct 15 21:36:58 2026     /Applications/WhatsApp.app/Contents/PlugIns/ServiceExtension.appex/Contents/MacOS/ServiceExtension",
+    "61494     1 Thu Oct 15 21:36:58 2026     /System/Library/PrivateFrameworks/TelephonyUtilities.framework/XPCServices/com.apple.FaceTime.FTConversationService.xpc/Contents/MacOS/com.apple.FaceTime.FTConversationService",
+    "61516     1 Thu Oct 15 21:36:59 2026     /System/Library/PrivateFrameworks/MediaRemote.framework/Support/mediaremoteagent",
+    "61517     1 Thu Oct 15 21:36:59 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService",
+    "61518     1 Thu Oct 15 21:36:59 2026     /usr/libexec/avconferenced",
+    "61519     1 Thu Oct 15 21:36:59 2026     /usr/libexec/findmylocateagent",
+    "61520     1 Thu Oct 15 21:36:59 2026     /usr/libexec/powerdatad",
+    "61530     1 Thu Oct 15 21:36:59 2026     /usr/libexec/SidecarRelay",
+    "61531     1 Thu Oct 15 21:36:59 2026     /System/Library/CoreServices/UniversalControl.app/Contents/MacOS/UniversalControl",
+    "61618     1 Thu Oct 15 21:37:02 2026     /System/Library/PrivateFrameworks/AssistantServices.framework/Versions/A/Support/assistant_service",
+    "61686     1 Thu Oct 15 21:37:04 2026     /System/Library/PrivateFrameworks/Categories.framework/Versions/A/XPCServices/CategoriesService.xpc/Contents/MacOS/CategoriesService",
+    "62090     1 Wed Oct 14 23:16:01 2026     /Library/PrivilegedHelperTools/com.adobe.ARMDC.Communicator",
+    "62092     1 Wed Oct 14 23:16:01 2026     /Library/PrivilegedHelperTools/com.adobe.ARMDC.SMJobBlessHelper",
+    "62312     1 Thu Oct 15 21:37:17 2026     /usr/libexec/trustd",
+    "62740     1 Thu Oct 15 21:37:28 2026     /System/Library/CoreServices/Siri.app/Contents/XPCServices/SiriNCService.xpc/Contents/MacOS/SiriNCService",
+    "64486     1 Thu Oct 15 21:38:19 2026     /System/Library/PrivateFrameworks/AppStoreDaemon.framework/Support/appstoreagent",
+    "64487     1 Thu Oct 15 21:38:19 2026     /System/Library/PrivateFrameworks/InstallCoordination.framework/Support/installcoordinationd",
+    "64490     1 Thu Oct 15 21:38:20 2026     /System/Library/PrivateFrameworks/AppStoreDaemon.framework/Versions/A/XPCServices/com.apple.AppStoreDaemon.StorePrivilegedODRService.xpc/Contents/MacOS/com.apple.AppStoreDaemon.StorePrivilegedODRService",
+    "64509     1 Thu Oct 15 21:38:20 2026     /usr/libexec/promotedcontentd",
+    "65701     1 Thu Oct 15 21:39:09 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared",
+    "66017     1 Thu Oct 15 21:39:23 2026     /System/Library/PrivateFrameworks/GeoServices.framework/Versions/A/XPCServices/com.apple.geod.xpc/Contents/MacOS/com.apple.geod",
+    "66018     1 Thu Oct 15 21:39:23 2026     /System/Library/PrivateFrameworks/GeoServices.framework/Versions/A/XPCServices/com.apple.geod.xpc/Contents/MacOS/com.apple.geod",
+    "66020     1 Thu Oct 15 21:39:23 2026     /usr/libexec/secinitd",
+    "66021     1 Thu Oct 15 21:39:24 2026     /usr/sbin/cfprefsd",
+    "66022     1 Thu Oct 15 21:39:24 2026     /usr/libexec/containermanagerd",
+    "66182     1 Thu Oct 15 21:39:32 2026     /usr/libexec/mlhostd",
+    "66422 59117 Thu Oct 15 21:39:38 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "66424 59117 Thu Oct 15 21:39:38 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "66483 59117 Thu Oct 15 21:39:39 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+    "66505     1 Thu Oct 15 21:39:40 2026     /System/Library/PrivateFrameworks/Synapse.framework/Support/contentlinkingd",
+    "66506 59117 Thu Oct 15 21:39:40 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "66511 59117 Thu Oct 15 21:39:40 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "66547 59117 Thu Oct 15 21:39:42 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "66577 59117 Thu Oct 15 21:39:43 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "66580 59117 Thu Oct 15 21:39:44 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "66590 59117 Thu Oct 15 21:39:44 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "66591 59117 Thu Oct 15 21:39:44 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+    "66592 59117 Thu Oct 15 21:39:44 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+    "66856 59117 Thu Oct 15 21:39:46 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "66903 59117 Thu Oct 15 21:39:47 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "66924 59117 Thu Oct 15 21:39:47 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "67210 59117 Thu Oct 15 21:39:58 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+    "67245     1 Thu Oct 15 21:40:00 2026     /System/Library/CoreServices/OSDUIHelper.app/Contents/MacOS/OSDUIHelper",
+    "67975     1 Thu Oct 15 21:40:33 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTEncoderXPCService.xpc/Contents/MacOS/VTEncoderXPCService",
+    "67976     1 Thu Oct 15 21:40:33 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecoderXPCService.xpc/Contents/MacOS/VTDecoderXPCService",
+    "68281 59117 Thu Oct 15 21:40:46 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "68339 59117 Thu Oct 15 21:40:48 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "68401     1 Thu Oct 15 21:40:51 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared",
+    "69053     1 Thu Oct 15 21:41:19 2026     /System/Cryptexes/App/usr/libexec/PasswordBreachAgent",
+    "69328 59117 Thu Oct 15 21:41:32 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "69874     1 Thu Oct  8 03:15:45 2026     /usr/libexec/logd_helper",
+    "70026 59117 Thu Oct 15 21:42:13 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.41/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+    "70591     1 Thu Oct 15 21:42:43 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared",
+    "70592     1 Thu Oct 15 21:42:43 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared",
+    "70593     1 Thu Oct 15 21:42:43 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared",
+    "70594     1 Thu Oct 15 21:42:43 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared",
+    "70699     1 Sat Oct 10 16:19:58 2026     /usr/libexec/secd",
+    "71665 59996 Thu Oct 15 21:43:30 2026     sleep",
+    "71685 60681 Thu Oct 15 21:43:31 2026     /opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+    "71686 71685 Thu Oct 15 21:43:31 2026     ps",
+    "73330     1 Sun Sep 27 00:42:17 2026     /usr/libexec/logd_reporter",
+    "73473     1 Sun Sep 27 00:42:43 2026     /usr/sbin/distnoted",
+    "78543     1 Wed Oct 14 04:18:16 2026     /usr/libexec/containermanagerd",
+    "83331     1 Wed Oct 14 20:30:39 2026     /usr/libexec/PerfPowerServices",
+    "85277     1 Sun Oct  4 09:25:15 2026     /usr/libexec/trustd",
+    "89923     1 Tue Oct 13 15:59:07 2026     /usr/libexec/taskgated",
+    "96614     1 Sat Sep 26 19:50:24 2026     /usr/sbin/distnoted",
+    "98861     1 Tue Oct 13 06:33:25 2026     /System/Library/Frameworks/LocalAuthentication.framework/Support/coreauthd",
+    "11857 11856 Wed Oct  7 14:28:58 2026     -zsh",
+    "11954     1 Wed Oct  7 14:28:59 2026     -zsh",
+    "11956     1 Wed Oct  7 14:28:59 2026     -zsh",
+    "11958     1 Wed Oct  7 14:28:59 2026     -zsh",
+    "11963 11958 Wed Oct  7 14:28:59 2026     /Users/brunobuger/.cache/gitstatus/gitstatusd-darwin-arm64",
+    "14179 11954 Wed Oct  7 14:30:00 2026     <defunct>",
+    "66605 59376 Thu Oct 15 21:39:44 2026     /usr/bin/login",
+    "66606 66605 Thu Oct 15 21:39:44 2026     -/bin/zsh",
+    "66619     1 Thu Oct 15 21:39:44 2026     -/bin/zsh",
+    "66701     1 Thu Oct 15 21:39:45 2026     -/bin/zsh",
+    "66702     1 Thu Oct 15 21:39:45 2026     -/bin/zsh",
+    "66704 66619 Thu Oct 15 21:39:45 2026     /Users/brunobuger/.cache/gitstatus/gitstatusd-darwin-arm64",
+    "66721 66606 Thu Oct 15 21:39:45 2026     claude",
+    "59641 59376 Thu Oct 15 21:36:23 2026     /usr/bin/login",
+    "59651 59641 Thu Oct 15 21:36:23 2026     -/bin/zsh",
+    "59673     1 Thu Oct 15 21:36:23 2026     -/bin/zsh",
+    "59705     1 Thu Oct 15 21:36:24 2026     -/bin/zsh",
+    "59706     1 Thu Oct 15 21:36:24 2026     -/bin/zsh",
+    "59709 59673 Thu Oct 15 21:36:24 2026     /Users/brunobuger/.cache/gitstatus/gitstatusd-darwin-arm64",
+    "59713 59705 Thu Oct 15 21:36:24 2026     <defunct>",
+    "59725 59651 Thu Oct 15 21:36:24 2026     /Users/brunobuger/.local/bin/cursor-agent",
+    "60375 59725 Thu Oct 15 21:36:32 2026     npm exec @agentdeskai/browser-tools-mcp@latest",
+    "60380 59725 Thu Oct 15 21:36:32 2026     npm exec @browsermcp/mcp@latest",
+    "60440 60380 Thu Oct 15 21:36:34 2026     node",
+    "60458 60375 Thu Oct 15 21:36:34 2026     node",
+    "60581 59376 Thu Oct 15 21:36:36 2026     /usr/bin/login",
+    "60583 60581 Thu Oct 15 21:36:36 2026     -/bin/zsh",
+    "60616     1 Thu Oct 15 21:36:36 2026     -/bin/zsh",
+    "60655     1 Thu Oct 15 21:36:37 2026     -/bin/zsh",
+    "60656     1 Thu Oct 15 21:36:37 2026     -/bin/zsh",
+    "60658 60616 Thu Oct 15 21:36:37 2026     /Users/brunobuger/.cache/gitstatus/gitstatusd-darwin-arm64",
+    "60681 60583 Thu Oct 15 21:36:37 2026     codex",
+    "60768 60681 Thu Oct 15 21:36:38 2026     /Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl",
+    "61786 60681 Thu Oct 15 21:37:08 2026     /opt/homebrew/Caskroom/codex/0.162.1/bin/codex-code-mode-host"
+  ],
+  "inheritedUntouched": [
+    22246,
+    67717,
+    13577,
+    13581,
+    44737
+  ],
+  "signalsOrConnectionsMade": false,
+  "dockerMetadata": {
+    "command": "docker ps -a --format limited ID/image/status/Testcontainers session labels",
+    "exit": 1,
+    "error": "Docker daemon unavailable at existing configured unix socket",
+    "containerIdsProved": [],
+    "containerCleanupPerformed": false
+  },
+  "precision": "Kernel sec/microsec recorded; exact Java registry start identity is millisecond truncation used by ProcessHandle on this host; command is SHA256 of canonical JSON text from sysctl executable+argv, environment never exported."
+}

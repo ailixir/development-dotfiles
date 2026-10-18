@@ -1,0 +1,345 @@
+{
+  "schema": 1,
+  "story": "STUDIO-OBS-014",
+  "reviewer": "Quinn independent strict QA",
+  "updated": "2026-10-15T00:57:36.075302+00:00",
+  "decision": "PASS_FOR_TWO_ORIGINAL_LIVE_PROOFS_AND_CORRECTED_DENOMINATOR_ROW_CLASSIFICATIONS;NOT_FINAL_STORY_GATE",
+  "doneAllowed": false,
+  "formalStoryVerdict": "PENDING_FINAL_SHARED_GATES_AND_INDEPENDENT_REVIEW",
+  "reviewedSource": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+    "sha256": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b",
+    "expectedShaMatches": true,
+    "archiveAfterMatches": true,
+    "exactPatchMatchesArchivedBeforeAfter": true,
+    "backendSourcesCompared": 812,
+    "backendChanged": [
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java"
+    ],
+    "runnerDistFiles": 238,
+    "distBeforeAfterEqual": true,
+    "currentManifestDrift": []
+  },
+  "independentArtifactHashes": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/GuidedPlanningIntegrationTest.after.java.txt",
+      "sha256": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/GuidedPlanningIntegrationTest.before.java.txt",
+      "sha256": "c1194e0ab31cf6253b9d974fb78de8e98f6daa15ca0309c58fe7defe5d27714b",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/actual-live-policy-proof.json",
+      "sha256": "0d30a5a7ab638c3f7d09399cb6afe1019d14228bf9185bd019137436fcbbf543",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/after-manifest.json",
+      "sha256": "50d51556db7df9b8a6c6bb05db4b20edbba5e8e58190a5917dcc69f982cd5f8a",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/before-manifest.json",
+      "sha256": "fe73ae8a909f689cb4a574d278aaabcc997e62cdd414badc7a5bb0cd39554129",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/compile-static-command.json",
+      "sha256": "69aa2d851dbac1ab208ba3e712275bd058ff023285e2c8101b2bd3438c1e0e37",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/compile-static.log",
+      "sha256": "191ffea11d3a9ec43ea83b70fad3b862fc7bf77a8dfe3e4e259ea0fbf30f25d3",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/format01-command.json",
+      "sha256": "155d496c65f683eda7a0b0d13a291b8620acf64f464321ceb25447233d00bc8d",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/format01.log",
+      "sha256": "7f2d50536152bcdd482712da1a80cc5bf3b846bb3804be1730bfe5c9ed6d49c0",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/format02-command.json",
+      "sha256": "0f4c71163189df48f6578116053067af06c735aba85768872cf0a9bff0a70ef0",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/format02.log",
+      "sha256": "21cc49b53464fc9bd23faafac41c9c63bedde64882e0a9c25c6cf1cfa463cf8b",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/implementation.patch",
+      "sha256": "0fe16540d9211ded8cc425a3d4897b658b47bc9fdf297775173714332b395efe",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-counter-54fd6276-48c9-4e94-a68d-bca9cdf5f270.json",
+      "sha256": "36328cf9be0f352b0265700183477164ccb788a9ed3640a76755b8189bb8654c",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-guard-tally.json",
+      "sha256": "f098bc3ddbcbea2820fc3fd2d1e29b2f337414c883dd8b3c1926f802d18e9d36",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-targeted-attempt01-results.json",
+      "sha256": "7c37e0958220743f0d6bc9ea902356da4a5a829fdebf36de629f7ae8dbb1c7a7",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-targeted-attempt01.log",
+      "sha256": "f47ce5ecb1332087317bd2c4031112e359ecebc6d223c4d4043f056d787f0db2",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-targeted-attempt01.xml",
+      "sha256": "be623108c63b341c691a49ad6f924a96119b98c14881255939c7f7baa7c66dda",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-wrapper-73013f98-ceef-46b6-bddf-19ac4767ad13.mjs",
+      "sha256": "a00ab5a9a6910109e57ec3367e155379779116ac53a9c1db2d37943e950985c7",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-wrapper-process-cleanup.json",
+      "sha256": "b5317fa77b47359303c6f4bf1dd1da688b6bd4e7a5bee946fd77dd3ebdf7bf3e",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-baseline.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-baseline.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-nonsecretApproved.stderr.log",
+      "sha256": "67cdbcc9560fe2ac5c8515b13e222f49778f5052bcdd8fc9fa7428e595f85d3c",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-nonsecretApproved.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-permittedBusinessData.stderr.log",
+      "sha256": "67cdbcc9560fe2ac5c8515b13e222f49778f5052bcdd8fc9fa7428e595f85d3c",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-permittedBusinessData.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-process-attempt01-command.json",
+      "sha256": "f237533c851f3a456f85c19cc5f7a005603256cdae5a03b305c8b47fee3b2513",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-process-attempt01.log",
+      "sha256": "0c1f1d222ccc8a81f7c0739aed4cedc2a88ce36bee5ed87d7f99bbcf5056c053",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-process-harness.cjs",
+      "sha256": "cb87e0da858c5c501cae5d56e569edfe348f820302bc9b1a4b9c837d6fa3e0ee",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-process-results.json",
+      "sha256": "2ba3da6c6121dde68c3ea59f2f68fe97431e934789ea221dafe86c2bcaea3ccc",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-structuralOnly.stderr.log",
+      "sha256": "67cdbcc9560fe2ac5c8515b13e222f49778f5052bcdd8fc9fa7428e595f85d3c",
+      "matchesReceipt": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-structuralOnly.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matchesReceipt": true
+    }
+  ],
+  "allReceiptArtifactHashesMatch": true,
+  "liveForgery": {
+    "status": "PASS_EXACT_ORIGINAL_LOCAL_ORACLE",
+    "authority": "ar-2-r14-stops.json ruling2_contextRefusal.tests[4]",
+    "xml": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-targeted-attempt01.xml",
+      "sha256": "be623108c63b341c691a49ad6f924a96119b98c14881255939c7f7baa7c66dda",
+      "test": "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch()",
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "actualPathReview": "ActualSpring/Postgres/provider+NodeWORKER_SNAPSHOT. Spy intercepts only2argcontextsend; separateunspiedrealclient performs schema/auth/mTLS/HTTP/bodyclassification. NoStubRunner/fakebrowser/syntheticrefusal. ActualrawXMLsafe logger confirms same-sessionforged-contexthash IDENTITY_MISMATCH.",
+    "mutationReview": "Only deep-copied policyHash changes to different valid64hex. Frozenrunner-contextschema validates forgedbody; restoredhashcopyequalsgenuineallfields; approveddocumenthash/genuinehash agree. Sessionpolicy/source/assignment/materialization protectedbytes compared before/after (only legitimate terminal liveflags excluded).",
+    "terminalProof": "Actual409 RUNTIME_INCOMPATIBLE,retryablefalse,CONTEXT_REFUSED; firstcontinuation durablyFAILED/errorCode; exactlyonebootstrapdeliveryREFUSED; confirmedteardown beforesecondcontinuation. ModelSOURCE_PLAN exactly1.",
+    "negativeEffects": "Observedcounter0,missingobservationpayload,0actions/preparations/obligationadmissions/publicationobservations,navigate0,submit0,ownedbrowserchildren0. Genuine backendmaterialization is legitimately created before contextdelivery and remainsidentity-equal exceptteardown liveflag; do not misreport zero backendmaterializations.",
+    "wireMeasurements": {
+      "assign": 1,
+      "context": 1,
+      "stop": 1
+    },
+    "secondContinuation": "CompleteactualHTTPSrequestmap and allspyinteractioncount unchanged,modelcount unchanged,sessiondocument+progressbytes unchanged and terminalFAILED. First legitimate stop1 belongs to failureteardown, not repeatedcontinuation.",
+    "instrumentation": {
+      "registered": true,
+      "launches": 0,
+      "rawWrapperHash": "a00ab5a9a6910109e57ec3367e155379779116ac53a9c1db2d37943e950985c7",
+      "matchesCleanupRawHash": true,
+      "canonicalScriptObjectHash": "ec1fe161319459f2174d0b121bac738e5b1d3fee4dd31730187a972e2e165442",
+      "matchesActualProofHash": true,
+      "implementation": "ExactPlaywrightmodule object retainsoriginallaunchPersistentContext and Reflect.apply callthrough; actualhttps.createServer wrapper forwardsunchangedfactory and addsrequestcountonly. Snapshotnode_modules resolves samepackageproductionbrowseruses; noalternatebrowser/recorder returned.",
+      "ownedWorkerTerminatedAfterJUnitAfterEach": true
+    },
+    "limitations": "Focused1case execution only; all57Planning+fullbackendnormalcheck stillrequired. RawXMLgenerateddevelopmentauth output is not a proof of real enterprisecredentials; no externalclaim."
+  },
+  "mountedProcess": {
+    "status": "PASS_EXACT_ORIGINAL_LOCAL_PROCESS_ORACLE",
+    "authority": "ar-mounted-rules.qaOracles[0] explicitlyallowsmanualcheck",
+    "harness": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-process-harness.cjs",
+      "sha256": "cb87e0da858c5c501cae5d56e569edfe348f820302bc9b1a4b9c837d6fa3e0ee",
+      "matchesRunHash": true
+    },
+    "variants": [
+      {
+        "label": "baseline",
+        "exit": {
+          "code": 0,
+          "signal": null
+        },
+        "sameArgsEnv": true,
+        "baselineConfigExceptRulesEqualHash": true,
+        "onlyDelta": [],
+        "listeningSampleCount": 11,
+        "anyListeningSample": true,
+        "finalPortListening": false,
+        "stdoutEmpty": true,
+        "stderrMatchesRecordedHash": true,
+        "exactFixedRefusalStderr": null,
+        "callbackCount": 0,
+        "childPids": []
+      },
+      {
+        "label": "permittedBusinessData",
+        "exit": {
+          "code": 1,
+          "signal": null
+        },
+        "sameArgsEnv": true,
+        "baselineConfigExceptRulesEqualHash": true,
+        "onlyDelta": [
+          "rules"
+        ],
+        "listeningSampleCount": 10,
+        "anyListeningSample": false,
+        "finalPortListening": false,
+        "stdoutEmpty": true,
+        "stderrMatchesRecordedHash": true,
+        "exactFixedRefusalStderr": true,
+        "callbackCount": 0,
+        "childPids": []
+      },
+      {
+        "label": "nonsecretApproved",
+        "exit": {
+          "code": 1,
+          "signal": null
+        },
+        "sameArgsEnv": true,
+        "baselineConfigExceptRulesEqualHash": true,
+        "onlyDelta": [
+          "rules"
+        ],
+        "listeningSampleCount": 12,
+        "anyListeningSample": false,
+        "finalPortListening": false,
+        "stdoutEmpty": true,
+        "stderrMatchesRecordedHash": true,
+        "exactFixedRefusalStderr": true,
+        "callbackCount": 0,
+        "childPids": []
+      },
+      {
+        "label": "structuralOnly",
+        "exit": {
+          "code": 1,
+          "signal": null
+        },
+        "sameArgsEnv": true,
+        "baselineConfigExceptRulesEqualHash": true,
+        "onlyDelta": [
+          "rules"
+        ],
+        "listeningSampleCount": 11,
+        "anyListeningSample": false,
+        "finalPortListening": false,
+        "stdoutEmpty": true,
+        "stderrMatchesRecordedHash": true,
+        "exactFixedRefusalStderr": true,
+        "callbackCount": 0,
+        "childPids": []
+      }
+    ],
+    "baselineReview": "Actualentrypoint under exactsameargs/env reaches realTCPport whilealive, then normalSIGTERM exits0. PublictestTLS/generatedissuer and ownedtoken/journal/objectstore inputs valid. Badvariants addonlyrules; baselinefiles preserved through allvariants.",
+    "noFalseEnvironmentalRefusal": "Sameenvhash and baselinewithoutRuleshash pervariant plus actualbaseline success; reviewed parser rejectskey beforeTLS/evidence/server/listen, finalcatchsets1andnevercontinues. No missingTLS/malformedconfig/disabledruntime substituted.",
+    "portEvidenceLimit": "Finitepolling observednolisten inbadvariants; it is not certainty for unobservedinstants. Decisivecomplement is frozenentrypoint/parserordering. Both recorded, withfinalclosedportcheck.",
+    "sourceOrdering": {
+      "positions": {
+        "parse": 1426,
+        "tls": 1499,
+        "server": 2407,
+        "listen": 3345
+      },
+      "mainSha256": "3add4221c0bc51885be00b16fc2a9716e74b223efc154c6bc91b9d6fcb6cc666",
+      "parserSha256": "5e3d31c66f5a864c40886342bf24dfffa443b0fc8ae46ccf39642c5daf5bffda",
+      "entrypointSha256": "d895976fb9f0eee4bcf4d2a1d9ca734ade8cf7e25b3f7bd2a428aeaec53995ae",
+      "reasoning": "Actual parse rejects rules before TLS/evidence/server construction/listen. Catch sets exit1 and cannot continue. Port polling is finite sampling and is not claimed alone to prove every instant."
+    },
+    "ownedScratchRemoved": true,
+    "outsideCanaryPreserved": true,
+    "noCallbacksOrBrowserEffects": true,
+    "scope": "Baselinecreatesmanagedscratchnamespace (1retainedentry beforefinalcleanup); badvariantscause noadditional scratch/object/journalmutation and all ownedtemp isremoved. No globalcleanup/pidsignalling."
+  },
+  "denominator": {
+    "artifact": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/denominator-reconciliation/014-unit-denominator-reconciliation.json",
+    "sha256": "68f0794a704af76452ba113cde3a7b2096afccf2912c340904cb03e2bb476818",
+    "rowClassificationDecision": "ACCEPTED",
+    "namedMechanism": "NowcorrectAC4c2/POa2; a3 explicitlylimitedtofourcontractsemanticCases. Threeadditionalsemanticinvalid negatives andoneAUTHOREDGROUNDEDDENYpolicynegative separatelyclassified. Allremainmandatoryexecutedstory/corpustallycases.",
+    "positiveInventory": "Original6assertedarraystayshistorical. Save/Delete groundedpositives included supplementarysiteinventory8 with actualtrailingassertiondifference disclosed+actualnativepositivepass. No claim originalarrayasserted8.",
+    "noGuardExclusions": "SAVED_INPUT isrequiredsourceemitter proof with noNEXT_ACTION; newliveforgeryrefusescontextbeforeruntime/observation/NEXT_ACTION,adds0guarddecisions. ExpectedfullPlanning57=56prior+1new.",
+    "historicalPassesNotRewritten": "Priorfullaggregate remainsfailedstatic;56individualruntimepasses+newtargeted1explicitlydifferent snapshots.",
+    "remainingMetadataCorrection": {
+      "needed": false,
+      "resolution": "Final denominator SHA68f0794a704af76452ba113cde3a7b2096afccf2912c340904cb03e2bb476818 explicitly separates historical pre-live formatting-only equivalence from later executable live-test delta. Temporal-scope correction accepted; no remaining denominator finding."
+    }
+  },
+  "staticProof": "Actualcompile-static log BUILD SUCCESSFUL; compileTestJava/checkstyleTest executed,spotlessCheck/checkstyleMain naturallyUPTODATE undernormalGradle; configuredformatter secondapplicationidempotent. This isnotthenormalfullcheckrequiredforfinalgate.",
+  "finalGatePending": [
+    "Mandatorynormalunfilteredfullbackendcheck onfinalJava+production+dist;wholeorderedReplay40,Planning57,fourclasstally,alloriginalunit/DB/contracts/security/JaCoCo/staticdependenciesgreen.",
+    "Finalrunnerunit/type/lint/nativefocused/fullfixtures/deploymentaftercurrentnativefailurecorrection;failed231/1/9nativeattemptremainsfailed.",
+    "Independentexactsource/runtimeevidencereviewafterrootpreflightedrelease;nostoryPASS/Donefromthisboundedreview."
+  ],
+  "noReviewerExecution": "Onlyreadsource/archive/log/XML/JSONandwritethisreviewevidence. No test/build/process/native/CLI/source/dist/config/story/gate/lifecycle/gitactions.015unstarted;declaredUSD500actualbillingunavailable."
+}

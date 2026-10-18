@@ -1,0 +1,144 @@
+{
+  "story": "STUDIO-OBS-015",
+  "reviewer": "Quinn",
+  "root": "Orion",
+  "classification": "INDEPENDENT_BOUNDED_FINAL_TEST_SOURCE_DELTA_REVIEW",
+  "decision": "NO_REMAINING_CONCRETE_CODE_FINDING_IN_BOUND_DELTA_HOLD_WITH_EXPLICIT_OPEN_COVERAGE",
+  "sourceDistHold": true,
+  "sourceRelease": false,
+  "runtimeRelease": false,
+  "formalQaVerdict": null,
+  "lifecycleTransition": null,
+  "compilation": "UNCOMPILED",
+  "execution": "UNEXECUTED",
+  "findings": [],
+  "checks": [
+    {
+      "id": "QPX-01",
+      "result": "CONFIRMED_STATIC",
+      "claim": "Final checkpoint and two live/archived after-source hashes match after author/root atomic HOLD; all14 checkpoint artifact hashes match."
+    },
+    {
+      "id": "QPX-02",
+      "result": "CONFIRMED_STATIC",
+      "claim": "New private parent uses real source identity, actual learning/finalize/teardown, public edit4 and pinned mixed start. PG facts require actual successful read producer, two preceding successes and one ISSUED next-fill request matching selected public mixed session."
+    },
+    {
+      "id": "QPX-03",
+      "result": "CONFIRMED_STATIC_NOT_REACHABILITY",
+      "claim": "Inactive fixture selector excludes base/bootstrap/append, latches actual session and retains live browser/ObservationSession. Selected positive update invokes real update exactly once and returns its original identity after the barrier; no ACK/contextHash is synthesized."
+    },
+    {
+      "id": "QPX-04",
+      "result": "SOURCE_ASSERTIONS_PRESENT_UNEXECUTED",
+      "claim": "PFXSYNC01 requires no target prepare/admission/edge/native/model while held, actual same-fence renewal, fixed evidence/generation/scope/counters, unchanged issued request/input history, independent mutable metadata accounting, genuine fresh fill once, suffix/publication/video and ordinary model0 replay."
+    },
+    {
+      "id": "QPX-05",
+      "result": "SOURCE_ASSERTIONS_PRESENT_UNEXECUTED",
+      "claim": "SCHEMA/IDENTITY_MISMATCH faults occur before real update; each has a separate lawful base/mixed parent, FAILED/RUNTIME_INCOMPATIBLE, one selected response and no target state/effect with earlier successes intact."
+    },
+    {
+      "id": "QPX-06",
+      "result": "SOURCE_ASSERTIONS_PRESENT_UNEXECUTED",
+      "claim": "BUSY and LOST remain armed through cancellation; UNKNOWN_OUTCOME must be observed at advancePrefix397. Coordinator revisits are allowed; no exactly-one uncertain context claim or uncertain admission retry is introduced."
+    },
+    {
+      "id": "QPX-07",
+      "result": "SOURCE_ASSERTIONS_PRESENT_UNEXECUTED",
+      "claim": "Cancel/source/evidence controls require original post-push gate405 diagnostics, plus evidence-predicate428..433 for evidence. Actual authenticated observation callback/generation/hash is independently joined; setup STALE_GENERATION is excluded from the fresh gate interval."
+    },
+    {
+      "id": "QPX-08",
+      "result": "SOURCE_ASSERTIONS_PRESENT_UNEXECUTED",
+      "claim": "Concurrent control holds only first ACK; independent authenticated plans continuation must complete actual target SUCCEEDED/dispatchCount1 before release. First request must refuse at gate405 and coordinate predicate417..418. Earlier refusal or missing cut fails, with no coverage credit."
+    },
+    {
+      "id": "QPX-09",
+      "result": "CONFIRMED_STATIC",
+      "claim": "4096-byte closed control,1024-byte closed callback,200 records/65536 UTF8 event bytes,0600 files and20s latch ceiling retained. Event append/bound errors mark fixture ERROR; missing cut fails. Positive15s client/actual authority deadlines are unchanged."
+    },
+    {
+      "id": "QPX-10",
+      "result": "CONFIRMED_STATIC",
+      "claim": "Per-case files join generation/final privacy inventories; cleanup releases both latches, uses real cancel/teardown and resets new/shared controls and CSI/fixture state. Cancelled ACK rows may truthfully lose browser; positive ACK/target live-handle assertions remain."
+    },
+    {
+      "id": "QPX-11",
+      "result": "CONFIRMED_STATIC",
+      "claim": "Original46 JUnit bodies/35labels/indexed3 methods/original80 identities remain intact. Five distinct low singletons join both in-class registries, guided includes/default excludes and expected-low union:43default+42low=85."
+    },
+    {
+      "id": "QPX-12",
+      "result": "CONFIRMED_STATIC",
+      "claim": "Immutable2048/4000 profiles, original caps/budget/no-refund/model/wire/audit/security/ACK/native/privacy/coverage rules remain unchanged. No fake REPLAY_DISPATCHED, authority/proof row, native0 grant or acceptance waiver was introduced."
+    }
+  ],
+  "correctedMapping": {
+    "ariaManifestSha256": "559dc18eeae9029bf86b93b5493e93c02cbadd98df5f90052653914af2eb0ac4",
+    "rootDecisionSha256": "0a2d0457d319abf11531288fdd41e69183d61b2861dc1f327a8c5c8e7bcc8e1c",
+    "disposition": "Public Core403 does not reach worker checkCurrent; false expectation removed. No-secret parent and existing needs-empty secret parent do not provide combined producer/grant cut. This is an explicit test-boundary correction, not a waiver or new production authorization defect."
+  },
+  "openCoverage": [
+    "POST_ACK_SECRET_USE_GRANT_REVOCATION_WITH_FRESH_PRODUCER remains OPEN",
+    "Separate lawful worker current-access secret-prefix proof remains OPEN",
+    "Exact ADMITTED recovery cut and done/refresh/recovery RPC matrix remain OPEN",
+    "All new branch reachability, real compiler/API behavior and native/runtime assertions remain UNEXECUTED",
+    "Original80 plus5/full85 actual proof and all remaining original acceptance/gates remain required"
+  ],
+  "resolvedDraftFindings": [
+    "Java text-block JS newline escaping corrected",
+    "Generation assertion reads separate actual proposal column",
+    "Uncertainty requires exact UNKNOWN_OUTCOME and permits repeated context faults",
+    "Delivery metadata check uses independent PG materialization revision and expected two real edge bumps",
+    "Positive ACK ordering asserted; cancelled browser identity is scoped truthfully",
+    "Native control reset and per-case generation/sink inventory added",
+    "Evidence setup commit correlated and excluded from post-ACK diagnostic interval",
+    "False Core-role worker-access mapping explicitly corrected and retained OPEN"
+  ],
+  "cohort": {
+    "originalDefault": 43,
+    "originalLow": 37,
+    "originalTotal": 80,
+    "additions": 5,
+    "fullDefault": 43,
+    "fullLow": 42,
+    "fullTotal": 85,
+    "originalLabels": 35,
+    "immutableProfiles": [
+      2048,
+      4000
+    ]
+  },
+  "nextAction": "No further correction requested within these two frozen files. Orion may schedule controlled compilation/tests only after both source writers and independent reviews return HOLD. Separately design/lease lawful worker-current-access proof; keep combined producer/grant and recovery gaps OPEN. Passing five methods cannot close them.",
+  "retained": {
+    "sequence": "FULL015_THEN_FULL008",
+    "acceptance": 86,
+    "ipc": 24,
+    "sql": 55,
+    "originalVariants": 35,
+    "originalJoinInvocations": 80,
+    "additions": 5,
+    "item85": "ORIGINAL_OPEN_PENDING_UNAMENDED",
+    "originalCore04": "UNKNOWN_ACK_LOST_NO_RETRY_NO_AUTHENTICATED_NO_EFFECT_GRANT; MIXED_HTTP_STATUS_BODY_UNRETAINED",
+    "remaining": "B1/B2/B3/B4/fullCore/Vault/native/privatePG/configuredchecks/crossReplica/deployment/coverage/independent015QA/PO/rootclosure"
+  },
+  "globalSourceStableClaim": false,
+  "inspectionOnly": [
+    "file reads",
+    "textual diff",
+    "metadata analysis",
+    "SHA-256 hashing"
+  ],
+  "notRun": [
+    "tests/compiler/Gradle/JVM/Node/build",
+    "DB/service/native/process/decoder",
+    "install/format/git/subagents/external contacts"
+  ],
+  "writes": [
+    "review.md",
+    "checks.json",
+    "source-inventory.json",
+    "manifest.json"
+  ]
+}

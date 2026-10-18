@@ -1,0 +1,2121 @@
+{
+  "artifact": "STUDIO-OBS-015 actual full pure Java outcome/current-epoch feedback08 receipt",
+  "createdAt": "2026-10-15T12:26:35.433804+00:00",
+  "owner": "backend015_resume / Dex execution-only",
+  "javaSourceHold": true,
+  "commandsLive": false,
+  "formalQAVerdict": null,
+  "lifecycleTransition": null,
+  "invocation": {
+    "exactlyOnce": true,
+    "wrapper": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend.py backend-wire-outcome-alignment-feedback-attempt08 --source-exclusions .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/runner-r1-pure-java-exclusions.json",
+    "command": [
+      "caffeinate",
+      "-i",
+      "./gradlew",
+      "test",
+      "--tests",
+      "com.citi.put.checks.studio.guided.session.GuidedWireContractTest",
+      "--rerun-tasks"
+    ],
+    "cwd": "backend",
+    "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+    "handle": 55146,
+    "terminal": true,
+    "active": false,
+    "exit": 0,
+    "elapsedSeconds": 20.32,
+    "counts": {
+      "total": 18,
+      "passed": 18,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "mainCompile": "PASS",
+    "allTestCompile": "PASS",
+    "actualMethods": [
+      {
+        "method": "outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+        "displayName": "outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts()",
+        "status": "PASS",
+        "timeSeconds": "1.19"
+      },
+      {
+        "method": "textualPersistenceParserAlsoRejectsDuplicatesAndTrailingObjects",
+        "displayName": "textualPersistenceParserAlsoRejectsDuplicatesAndTrailingObjects()",
+        "status": "PASS",
+        "timeSeconds": "0.002"
+      },
+      {
+        "method": "outcomeCachedSchemasSupportRepeatedAndInterleavedPublicCalls",
+        "displayName": "outcomeCachedSchemasSupportRepeatedAndInterleavedPublicCalls()",
+        "status": "PASS",
+        "timeSeconds": "0.761"
+      },
+      {
+        "method": "currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+        "displayName": "currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback()",
+        "status": "PASS",
+        "timeSeconds": "0.877"
+      },
+      {
+        "method": "bareSessionNameResolvesToTheOneV3ContractWithNativeValidation",
+        "displayName": "bareSessionNameResolvesToTheOneV3ContractWithNativeValidation()",
+        "status": "PASS",
+        "timeSeconds": "0.318"
+      },
+      {
+        "method": "currentEpochsPreserveNamedOriginalPropertySetsAndExactApprovedAdditions",
+        "displayName": "currentEpochsPreserveNamedOriginalPropertySetsAndExactApprovedAdditions()",
+        "status": "PASS",
+        "timeSeconds": "0.064"
+      },
+      {
+        "method": "currentPlansEvaluateLaterPresentNullAndEveryNativeItemAfterEarlierRefusal",
+        "displayName": "currentPlansEvaluateLaterPresentNullAndEveryNativeItemAfterEarlierRefusal()",
+        "status": "PASS",
+        "timeSeconds": "0.058"
+      },
+      {
+        "method": "rawByteVectorsRejectAmbiguityBeforeParsingCanDiscardIt",
+        "displayName": "rawByteVectorsRejectAmbiguityBeforeParsingCanDiscardIt()",
+        "status": "PASS",
+        "timeSeconds": "0.004"
+      },
+      {
+        "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+        "displayName": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths()",
+        "status": "PASS",
+        "timeSeconds": "2.767"
+      },
+      {
+        "method": "unknownRootEpochPreservesNativeCrossPropertyRefusal",
+        "displayName": "unknownRootEpochPreservesNativeCrossPropertyRefusal()",
+        "status": "PASS",
+        "timeSeconds": "0.135"
+      },
+      {
+        "method": "originalNativeOutcomeUnionRejectsLegalOrdinaryWhileFreshFullBranchAccepts",
+        "displayName": "originalNativeOutcomeUnionRejectsLegalOrdinaryWhileFreshFullBranchAccepts(TestReporter)",
+        "status": "PASS",
+        "timeSeconds": "0.01"
+      },
+      {
+        "method": "outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+        "displayName": "outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot()",
+        "status": "PASS",
+        "timeSeconds": "0.099"
+      },
+      {
+        "method": "rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults",
+        "displayName": "rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults()",
+        "status": "PASS",
+        "timeSeconds": "0.657"
+      },
+      {
+        "method": "absentSchemaDefinitionNeverBecomesAnEmptyPermissiveSchema",
+        "displayName": "absentSchemaDefinitionNeverBecomesAnEmptyPermissiveSchema()",
+        "status": "PASS",
+        "timeSeconds": "0.002"
+      },
+      {
+        "method": "currentNewClauseCallsRemainStableUnderRepeatedAndParallelInterleaving",
+        "displayName": "currentNewClauseCallsRemainStableUnderRepeatedAndParallelInterleaving()",
+        "status": "PASS",
+        "timeSeconds": "3.928"
+      },
+      {
+        "method": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+        "displayName": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration()",
+        "status": "PASS",
+        "timeSeconds": "0.105"
+      },
+      {
+        "method": "frozenDateTimeOracleMatchesOnEnforcedAssignmentSchema",
+        "displayName": "frozenDateTimeOracleMatchesOnEnforcedAssignmentSchema()",
+        "status": "PASS",
+        "timeSeconds": "0.004"
+      },
+      {
+        "method": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+        "displayName": "outcomeFullNativeBranchesRetainEveryFrozenConstraint()",
+        "status": "PASS",
+        "timeSeconds": "0.184"
+      }
+    ],
+    "failureStacks": [],
+    "noRetryOrExtraSelector": true
+  },
+  "stability": {
+    "sourceStable": true,
+    "testInputStable": true,
+    "distStable": true,
+    "testInputDigestBefore": "c355eebb2f1a16ed9dc9b8bb8bc7a8de0b9a835faab64b4012955b6deca791eb",
+    "testInputDigestAfter": "c355eebb2f1a16ed9dc9b8bb8bc7a8de0b9a835faab64b4012955b6deca791eb",
+    "sourceDigestBefore": "f9c92cdd08b1728b24191082711b2e11c046bde939eecf1dcc8751e329472434",
+    "sourceDigestAfter": "f9c92cdd08b1728b24191082711b2e11c046bde939eecf1dcc8751e329472434",
+    "distDigestBefore": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "distDigestAfter": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "protectedJavaHashes": {
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": {
+        "before": "2f74c1fcb596f09ed630e674185f7f3ba7cfac78f5540f8aa61d8ce2efe8df84",
+        "after": "2f74c1fcb596f09ed630e674185f7f3ba7cfac78f5540f8aa61d8ce2efe8df84"
+      },
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java": {
+        "before": "7c87231fd3704035f333c2c779085ef5f7e98d47ea9f042aca907e00e3feec9d",
+        "after": "7c87231fd3704035f333c2c779085ef5f7e98d47ea9f042aca907e00e3feec9d"
+      }
+    },
+    "scope": "Captured interval only; explicit disjoint source authority does not grant final global stable/gate claim."
+  },
+  "explicitDisjointSourceLane": {
+    "rootAuthorized": true,
+    "exclusionScope": "PURE_JAVA_FEEDBACK_ONLY_NOT_FINAL_GLOBAL_STABILITY",
+    "paths": [
+      "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+      "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "studio-runner/test/observedReplayExecutor.test.ts",
+      "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "studio-runner/test/retainedExecute.test.ts"
+    ],
+    "declaration": {
+      "paths": [
+        "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+        "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "studio-runner/test/observedReplayExecutor.test.ts",
+        "studio-runner/test/guided/incrementalRuntime.test.ts",
+        "studio-runner/test/retainedExecute.test.ts"
+      ],
+      "reason": "Explicit root-owned disjoint Runner R1 test-source lane during PURE Java GuidedWireContractTest/selected Java validation only. No product TS/schema/generated/fixtures JSON/dist/backend writes; selected Java methods read none of these five test files.",
+      "scope": "PURE_JAVA_FEEDBACK_ONLY_NOT_FINAL_GLOBAL_STABILITY",
+      "globalSourceStableClaim": false,
+      "nativeCoreParallelAuthorization": false,
+      "requiredFinalValidation": "All owners held for final full configured gates; all R1 source separately type/lint/unit/native validated."
+    },
+    "declarationFileSha256": "a748b2af57fe861ddc8f84bca1c5001441e7babb021172e5961bfdb03750da85",
+    "all5ExcludedBeforeAfterHashes": [
+      {
+        "path": "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+        "before": "dd95be15a59c377765ad52a4ca475af72e714916fb6f88931de5109561439689",
+        "after": "dd95be15a59c377765ad52a4ca475af72e714916fb6f88931de5109561439689"
+      },
+      {
+        "path": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "before": "3edd5a500b3b9628b15f29fad5d6815bfa3d0fb64c80cdcc5b003d8895a4f322",
+        "after": "3edd5a500b3b9628b15f29fad5d6815bfa3d0fb64c80cdcc5b003d8895a4f322"
+      },
+      {
+        "path": "studio-runner/test/guided/incrementalRuntime.test.ts",
+        "before": "1bf99299123559405e8ab4fa1a2ca30fab29d81cceb8946e6f53b5d283ccbbb2",
+        "after": "1bf99299123559405e8ab4fa1a2ca30fab29d81cceb8946e6f53b5d283ccbbb2"
+      },
+      {
+        "path": "studio-runner/test/observedReplayExecutor.test.ts",
+        "before": "d58c6d5c78516e1eb3442ae3ad59a46bec808b194ec70e73ba7791eef77805e7",
+        "after": "d58c6d5c78516e1eb3442ae3ad59a46bec808b194ec70e73ba7791eef77805e7"
+      },
+      {
+        "path": "studio-runner/test/retainedExecute.test.ts",
+        "before": "72c55adc93e466a58116e7726fec4e8f5c3b0ba862fdfc895b3f549857585342",
+        "after": "72c55adc93e466a58116e7726fec4e8f5c3b0ba862fdfc895b3f549857585342"
+      }
+    ],
+    "actualExcludedChanges": [],
+    "observedExcludedFilesChangedInCapturedInterval": 0,
+    "noOtherSourceExclusions": true,
+    "runtimeIndependence": "Five TS TEST files are not read/loaded by selected Java wire class or Java compilation. ProdNode/src/schemas/generated/currentpublicJSONfixtures/dist/ALLJava held. Runner source-only lane had no runtime command authority.",
+    "noNativeCoreParallelAuthorization": true,
+    "finalRequirement": "All source owners held for later final configured gates and native/Core windows; R1 source independently validated."
+  },
+  "actualCompletedOutcomeSubjects": {
+    "independentFrozenPublicMatrix": "Complete selected ordinary initialBlank/observed/null+read availability/legalFAILED+UNKNOWNdiagnostics/bothprefixphases positives and every named conditional/required/closed/evidence/version/bounds/hash/time/hybrid/neither negative returned. Independent frozen expected booleans checked through both complete real native branches and both public validate/validateAndCanonical entrypoints.",
+    "optionalModeStructure": "Exact normalized95f root onlyoneOf2fullnativebranches, original branch/config identity and canonicalschema/input invariance verified; bare public alias exact mode works.",
+    "exactOnePrivateTruthTable": "TTfalse/TFtrue/FTtrue/FFfalse using2complete real native validators per actual private production mode.2repetitions each, both native publicvalidate calls and4distinct createExecutionContext callRealMethod-spy results verified per truthrow. Exceptions propagate as exceptions, no match fallback.",
+    "freshRepeatedInterleaving": "3complete sequential matrix passes +4workers*16 publicpairs over samecached+independent contracts completed with canonical input/schema unchanged.",
+    "configurationFallback": "All10outcomeconfig exclusions actual lawful config domain inclfailFasttrue and coupled(true,true,false)null-default; fulloriginal native root identity/no optional mode and independent original disposition retained, no productionconfigmutation.",
+    "unknownFallback": "Unknownname/SIBLINGpositive-negative/OVERLAPunknown/XORnative/changedleafconditionalcountorder5roots/wrongV6dialect fullroot fallback/no-mode assertions completed.",
+    "containerSetupRepair": "Whole fixtures/publications parsed deepCopy equality preserved intentional invalid surrogate vectors; all7lawful original parent canonicalbytes/hash witnesses and every selected-case beforeafter invariance completed."
+  },
+  "actualCompletedCurrentEpochSubjects": {
+    "strictKnownPaths": "Named14/20/33oldliteralsets+approved additions/exactrequiredunions strict16/21/36; original9/12/2/3/9 and nativeprep7/node17 retained; old12states+exactREPLAYING_PREFIX13; actualfullcurrentfinitepaths, never native-or-optimized alternative.",
+    "original7Subjects": "All7original date/raw/parser/barealias/unknownfallback/fullsame-currentroot mutation/conditional/collection/item/canonical subjects returned. Previous06/07failed receipts remain immutable historical results.",
+    "currentExplicitClauses": "Allpair/absent/half/null/type/lowercaseUUID/state/attempt0-1/missing/type/range/materializationheader1null-vs2hash/historycaps+closedmetadata/preprevision/snapshotcomplete+leaves/trustedbound0consumer grammar cases returned. All publicpairs+native expectations and input/schema immutability checked.",
+    "scopeLimits": "Nullable proof/pin and64hex-but-wrongproof controls deliberately show grammar is not cross-proof or private-history authentication. Trustedbound0consumer is accepted structural shape only; raw-model min1 and actual retained-producer authority remain separate.",
+    "allOld4ConfigPaths": "Nine existing excluded configuration settings x4roots nativefallback/no-mode/fullrootidentity/independent inputcopies/config+schema invariance completed. All4failFasttrue finitepath assertions completed, demonstrating outcome-only newfailFast exclusion did not widen old4policy.",
+    "laterChildAndItemSpies": "Complete real native sourceStepsnull still called after earlier invalidschemaVersion; bothledger and nativeprepnullitems called2times after earlier root and row failures, proving no shortcircuit/Java-null confusion; duplicated rows are structural probes only.",
+    "repeatedInterleaving": "2full sequential currentcase passes+4workers*12cached/separate publicpairs completed."
+  },
+  "nativeEngineControl": {
+    "status": "PASS_UNCHANGED_ORIGINAL_ENGINE_CONTROL",
+    "version": "1.4.0",
+    "loadedJarSha256": "5d7b6ce4c7b2a3ed189511cbaa913808c7cd2b570d70b923426352785bffbdd0",
+    "fixtureCanonicalSha256": "6dd0ed43b9b77aba88c075c8a5b84064510baa3d330601f62c03b537d0c71d5b",
+    "expandedOriginalRootSha256": "95f7878408ce7d089646898aef3d528bc2e3c62d7f2bf8f228134556dfe451e8",
+    "nativeWholeAccepted": false,
+    "fullOrdinaryAccepted": true,
+    "fullPrefixAccepted": false,
+    "canonicalInputUnchanged": true,
+    "provenance": "Exact loaded JAR/location/Maven properties and source-pinned hashes proved by retained actual passing regression assertions, not static build dependency inference. Public repaired compiler separately passed lawful positive controls in actual08.",
+    "TestReporterPayloadRetained": false,
+    "exactNonemptyErrorCounts": "UNAVAILABLE; >0 assertions completed, ordinary0 completed. Do not invent lost telemetry.",
+    "stdoutBytes": 817,
+    "stderrBytes": 526
+  },
+  "outcome91CaseMapping": [
+    {
+      "id": "MECH-01",
+      "kind": "actual-engine-prerequisite",
+      "javaMethod": "originalNativeOutcomeUnionRejectsLegalOrdinaryWhileFreshFullBranchAccepts",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.originalNativeOutcomeUnionRejectsLegalOrdinaryWhileFreshFullBranchAccepts",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": false,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "ORD-BLANK",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "ORD-OBS-READ",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "ORD-OBS-NULL",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "ORD-FAIL-DIAG",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "ORD-UNKNOWN-DIAG",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "PRE-NULL",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "ADMITTED-LEDGER",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "DIAG-success",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "DIAG-pending",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "DIAG-dispatch-zero",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "DIAG-other-state",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "DIAG-TYPE-nonstring",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "DIAG-TYPE-null",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "DIAG-TYPE-empty",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "DIAG-TYPE-oversize",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "DIAG-EXACT2048",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-blank-url",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-blank-origin",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-blank-generation",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-obs-kind",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-obs-origin",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-hash-length",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-hash-charset",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-negative-owner",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-negative-context",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-dispatch-over",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-attempt-over",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-old-version",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-tuple-extra",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-invalid-time",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-numeric-time",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "LEAF-offset-time",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "TIME-NANO",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CLOSED-ORD-BLANK:root",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CLOSED-ORD-BLANK:/ledger",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CLOSED-ORD-BLANK:/ledger/admission",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CLOSED-ORD-BLANK:/ledger/executionEvidence",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CLOSED-ORD-OBS-READ:/availability",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CLOSED-PRE-NULL:/receipt",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CLOSED-PRE-NULL:root",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/versions",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/availability",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/versions/contract",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/preparationId",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/assertionPassed",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/admission/admittedAt",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/executionEvidence/creationId",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/executionEvidence/bootstrapId",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "REQUIRED-ORD-OBS-NULL:/ledger/executionEvidence/observationHash",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "REQUIRED-ORD-OBS-READ:/availability/producerAdmissionId",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "REQUIRED-PRE-NULL:/receipt/requestDigest",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "REQUIRED-ADMITTED-LEDGER:/receipt/preparationId",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "AVAIL-MALFORMED",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 3,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "PHASE-pre-nonnull",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "PHASE-admitted-null",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "PHASE-admitted-malformed",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "PHASE-bad-envelopekind",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "PHASE-bad-phase",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "PHASE-native-started",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "PHASE-receipt-attempt",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "PHASE-receipt-fence",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "PHASE-receipt-context",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "HYBRID",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "ROOT-null",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "ROOT-[]",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "ROOT-1",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "ROOT-{}",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "XOR-TT",
+      "kind": "private aggregate unit",
+      "javaMethod": "outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": false,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "XOR-TF",
+      "kind": "private aggregate unit",
+      "javaMethod": "outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": false,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "XOR-FT",
+      "kind": "private aggregate unit",
+      "javaMethod": "outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": false,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "XOR-FF",
+      "kind": "private aggregate unit",
+      "javaMethod": "outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": false,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "EXCEPTION",
+      "kind": "private aggregate unit",
+      "javaMethod": "outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": false,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "FRESH-INTERLEAVING",
+      "kind": "mode+public",
+      "javaMethod": "outcomeCachedSchemasSupportRepeatedAndInterleavedPublicCalls",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeCachedSchemasSupportRepeatedAndInterleavedPublicCalls",
+      "sourceMultiplicity": "3 complete sequential passes +4workers*16 publicpairs, cached/shared and separate instances",
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CONFIG-type-loose",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CONFIG-fail-fast",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CONFIG-property-defaults",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CONFIG-null-defaults",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CONFIG-array-defaults",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CONFIG-context-customizer",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CONFIG-keyword-listener",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CONFIG-property-listener",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CONFIG-array-listener",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CONFIG-discriminator",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "NAME",
+      "kind": "native fallback",
+      "javaMethod": "outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "SIBLING",
+      "kind": "native fallback",
+      "javaMethod": "outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "OVERLAP-UNKNOWN",
+      "kind": "native fallback",
+      "javaMethod": "outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "CHANGED-BRANCH",
+      "kind": "native fallback",
+      "javaMethod": "outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "sourceMultiplicity": 5,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "WRONG-DIALECT",
+      "kind": "native fallback",
+      "javaMethod": "outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    },
+    {
+      "id": "OLD-GATES",
+      "kind": "unchanged gates",
+      "javaMethod": "original7unchanged tests + enhanced assertNativePlan/assertFinitePlan optional-modeabsence + known-outcome method explicit old4no-mode",
+      "selector": null,
+      "sourceMultiplicity": "original7tests unchanged +4old-plan absence assertions",
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD_OR_ORIGINAL_METHOD_GROUP",
+      "actualReach": "Mapped broad method(s) returned normally in actual08; full source branches/loops including both public APIs where required completed. No independent JUnit multiplicity or application authority inferred."
+    }
+  ],
+  "current64GroupMapping": [
+    {
+      "id": "BASELINE-OLD-COUNTS",
+      "method": "currentEpochsPreserveNamedOriginalPropertySetsAndExactApprovedAdditions",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentEpochsPreserveNamedOriginalPropertySetsAndExactApprovedAdditions",
+      "sourceSubject": "Independent named14/20/33 sets+exactaddednames/required unions; strict16/21/36 and unchanged9/12/2/3/9; nativeitem7/node17; complete child/item/config identities, unavailable-validator spy fullnativefallback, alternativesempty. Optional-mode absence also in original finite/native helpers.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "KNOWN-FOUR-PATHS",
+      "method": "currentEpochsPreserveNamedOriginalPropertySetsAndExactApprovedAdditions",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentEpochsPreserveNamedOriginalPropertySetsAndExactApprovedAdditions",
+      "sourceSubject": "Independent named14/20/33 sets+exactaddednames/required unions; strict16/21/36 and unchanged9/12/2/3/9; nativeitem7/node17; complete child/item/config identities, unavailable-validator spy fullnativefallback, alternativesempty. Optional-mode absence also in original finite/native helpers.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "NESTED-REPLAY",
+      "method": "currentEpochsPreserveNamedOriginalPropertySetsAndExactApprovedAdditions",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentEpochsPreserveNamedOriginalPropertySetsAndExactApprovedAdditions",
+      "sourceSubject": "Independent named14/20/33 sets+exactaddednames/required unions; strict16/21/36 and unchanged9/12/2/3/9; nativeitem7/node17; complete child/item/config identities, unavailable-validator spy fullnativefallback, alternativesempty. Optional-mode absence also in original finite/native helpers.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SESSION-PAIR-ABSENT",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SESSION-PAIR-PRESENT",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SESSION-HALF-baseRevisionId",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SESSION-baseRevisionId-null",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SESSION-baseRevisionId-badUUID",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SESSION-baseRevisionId-uppercaseUUID",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SESSION-baseRevisionId-wrongtype",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SESSION-HALF-firstLearnStepId",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SESSION-firstLearnStepId-null",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SESSION-firstLearnStepId-badUUID",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SESSION-firstLearnStepId-uppercaseUUID",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SESSION-firstLearnStepId-wrongtype",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SESSION-STATE",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "ATTEMPT-POSITIVE-0",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "ATTEMPT-POSITIVE-1",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "ATTEMPT-NEGATIVE-missing",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "ATTEMPT-NEGATIVE-null",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "ATTEMPT-NEGATIVE-string",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "ATTEMPT-NEGATIVE-fraction",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "ATTEMPT-NEGATIVE-negative",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "ATTEMPT-NEGATIVE-over",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "BASIS-MISSING-materializationEvidence",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "BASIS-TYPE-materializationEvidence",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "BASIS-MISSING-incrementalEvidence",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "BASIS-TYPE-incrementalEvidence",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "BASIS-MISSING-snapshotEvidence",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "BASIS-TYPE-snapshotEvidence",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "INCREMENTAL-NULL",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "BASIS-NULL-materializationEvidence",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "BASIS-NULL-snapshotEvidence",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "HISTORY-first",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "HISTORY-first-hash",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "HISTORY-later",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "HISTORY-later-null",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "HISTORY-LEAFS",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "INPUT-SECRET-CONDITIONAL",
+      "method": "rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults",
+      "sourceSubject": "Original complete same-current-native/mutation/cardinality/item/conditional cases retained unchanged except separately reviewed finitecounts. Duplicate rows are structural probes only; no private history or publication credit.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "PREP-REVISION",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SNAPSHOT-COMPLETE",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SNAPSHOT-LEAFS",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "SNAPSHOT-AUTHORITY-LIMIT",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "TRUSTED-EMPTY-CONSUMER",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Explicit currentCases literal delta(s); complete native + public validate/validateAndCanonical, unchanged input/schema bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "COLLECTION-observations",
+      "method": "rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults",
+      "sourceSubject": "Original complete same-current-native/mutation/cardinality/item/conditional cases retained unchanged except separately reviewed finitecounts. Duplicate rows are structural probes only; no private history or publication credit.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "COLLECTION-actions",
+      "method": "rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults",
+      "sourceSubject": "Original complete same-current-native/mutation/cardinality/item/conditional cases retained unchanged except separately reviewed finitecounts. Duplicate rows are structural probes only; no private history or publication credit.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "COLLECTION-preparations",
+      "method": "rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults",
+      "sourceSubject": "Original complete same-current-native/mutation/cardinality/item/conditional cases retained unchanged except separately reviewed finitecounts. Duplicate rows are structural probes only; no private history or publication credit.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "OBSERVATION-NODES",
+      "method": "rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults",
+      "sourceSubject": "Original complete same-current-native/mutation/cardinality/item/conditional cases retained unchanged except separately reviewed finitecounts. Duplicate rows are structural probes only; no private history or publication credit.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "EACH-PRESENT-NULL",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Each present current root property explicitly null; same current native/public parity; additional exact latechild/item spy subject proves no short circuit rather than relying on overallfalse.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "LATE-CHILD-SPY",
+      "method": "currentPlansEvaluateLaterPresentNullAndEveryNativeItemAfterEarlierRefusal",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentPlansEvaluateLaterPresentNullAndEveryNativeItemAfterEarlierRefusal",
+      "sourceSubject": "Complete real sourceSteps native spy receives null after invalid earlier schemaVersion; full native ledger and preparation item spies receive both nulls after root snapshotHash failure/earlier invalid rows. Exact2calls on each nativeitem, inputbytes unchanged. No boolean mock validation oracle.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "CANONICAL-IMMUTABLE",
+      "method": "currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentClausePositiveAndNegativeCasesMatchCompleteNativeAndBothPublicPaths",
+      "sourceSubject": "Every explicit current case uses both public APIs, canonical success equality,422refusal, boolean input/schema byte equality; original raw/UTF/date/barealias/mutation checks retained.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "CONFIG-FALLBACK-typeLoose",
+      "method": "currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "sourceSubject": "Nine separately configured original roots x four paths; nativeplan identity + no alternatives + independent inputcopies/native disposition/config+schema immutability. Existing failFast eligibility separately retained on all4paths, outcome-only exclusion not copied.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "CONFIG-FALLBACK-propertyDefaults",
+      "method": "currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "sourceSubject": "Nine separately configured original roots x four paths; nativeplan identity + no alternatives + independent inputcopies/native disposition/config+schema immutability. Existing failFast eligibility separately retained on all4paths, outcome-only exclusion not copied.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "CONFIG-FALLBACK-nullDefaults",
+      "method": "currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "sourceSubject": "Nine separately configured original roots x four paths; nativeplan identity + no alternatives + independent inputcopies/native disposition/config+schema immutability. Existing failFast eligibility separately retained on all4paths, outcome-only exclusion not copied.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "CONFIG-FALLBACK-arrayDefaults",
+      "method": "currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "sourceSubject": "Nine separately configured original roots x four paths; nativeplan identity + no alternatives + independent inputcopies/native disposition/config+schema immutability. Existing failFast eligibility separately retained on all4paths, outcome-only exclusion not copied.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "CONFIG-FALLBACK-executionContextCustomizer",
+      "method": "currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "sourceSubject": "Nine separately configured original roots x four paths; nativeplan identity + no alternatives + independent inputcopies/native disposition/config+schema immutability. Existing failFast eligibility separately retained on all4paths, outcome-only exclusion not copied.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "CONFIG-FALLBACK-keywordWalkListener",
+      "method": "currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "sourceSubject": "Nine separately configured original roots x four paths; nativeplan identity + no alternatives + independent inputcopies/native disposition/config+schema immutability. Existing failFast eligibility separately retained on all4paths, outcome-only exclusion not copied.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "CONFIG-FALLBACK-propertyWalkListener",
+      "method": "currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "sourceSubject": "Nine separately configured original roots x four paths; nativeplan identity + no alternatives + independent inputcopies/native disposition/config+schema immutability. Existing failFast eligibility separately retained on all4paths, outcome-only exclusion not copied.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "CONFIG-FALLBACK-arrayItemWalkListener",
+      "method": "currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "sourceSubject": "Nine separately configured original roots x four paths; nativeplan identity + no alternatives + independent inputcopies/native disposition/config+schema immutability. Existing failFast eligibility separately retained on all4paths, outcome-only exclusion not copied.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "CONFIG-FALLBACK-OpenAPIDiscriminator",
+      "method": "currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentFourPlansKeepEveryExistingExcludedConfigAsNativeFallback",
+      "sourceSubject": "Nine separately configured original roots x four paths; nativeplan identity + no alternatives + independent inputcopies/native disposition/config+schema immutability. Existing failFast eligibility separately retained on all4paths, outcome-only exclusion not copied.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "UNKNOWN-ROOTS",
+      "method": "unknownRootEpochPreservesNativeCrossPropertyRefusal",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.unknownRootEpochPreservesNativeCrossPropertyRefusal",
+      "sourceSubject": "Original unknown epoch/sibling/const/uniqueItems/unrelated root/ValidationBasis fragment positive+negative subjects unchanged; same helper now explicitly inspects no alternatives.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "NODE-CONFIG-IDENTITY",
+      "method": "currentEpochsPreserveNamedOriginalPropertySetsAndExactApprovedAdditions",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentEpochsPreserveNamedOriginalPropertySetsAndExactApprovedAdditions",
+      "sourceSubject": "Independent named14/20/33 sets+exactaddednames/required unions; strict16/21/36 and unchanged9/12/2/3/9; nativeitem7/node17; complete child/item/config identities, unavailable-validator spy fullnativefallback, alternativesempty. Optional-mode absence also in original finite/native helpers.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "OPTIONAL-OUTCOME-MODE-ABSENT",
+      "method": "currentEpochsPreserveNamedOriginalPropertySetsAndExactApprovedAdditions",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentEpochsPreserveNamedOriginalPropertySetsAndExactApprovedAdditions",
+      "sourceSubject": "Independent named14/20/33 sets+exactaddednames/required unions; strict16/21/36 and unchanged9/12/2/3/9; nativeitem7/node17; complete child/item/config identities, unavailable-validator spy fullnativefallback, alternativesempty. Optional-mode absence also in original finite/native helpers.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    },
+    {
+      "id": "REPEATED-INTERLEAVING",
+      "method": "currentNewClauseCallsRemainStableUnderRepeatedAndParallelInterleaving",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.currentNewClauseCallsRemainStableUnderRepeatedAndParallelInterleaving",
+      "sourceSubject": "2complete sequential passes +4workers*12 publicpairs; shared cached and separate contracts, current cases valid/invalid, complete native expected eachcase, unchanged bytes.",
+      "execution": "UNEXECUTED_AFTER_SOURCE_CHANGE",
+      "authorityLimit": "Pure grammar/decomposition/config only; DB/base/history/owner/receipt authentication and native application obligations remain separate.",
+      "executionStatus": "PASS_COMPLETE_MAPPED_PURE_METHOD",
+      "actualReach": "Mapped broad method returned normally on final08testsetup source; all called assertions/loops completed. Pure complete-current native/compiled grammar/config constraints, no authenticated historical/HTTP/browser credit."
+    }
+  ],
+  "multiplicityLimit": "18actualJUnit methods;91outcome IDs and64groups are internal source subjects/multiplicities, not155independentJUnit invocations. Completion credit is pureJava grammar/compiler tier only.",
+  "pureTierLimit": {
+    "actualBrowserGuidedNodeCoreHttpPostgresRecordingPrivateHistoryOrUiAcceptance": false,
+    "noTempMediaOrProcessOperations": true,
+    "noUnknownNativeAdmissionRetried": true,
+    "selectedGradleOnly": "No normalcheck/fullcoverage/otherJava tests/Nodeunit/nativefixture/build/distgeneration executed."
+  },
+  "artifacts": {
+    "results": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-alignment-feedback-attempt08-results.json",
+      "sha256": "bd2983eb77a8715be895bc690e1d72faa3355859140e6f63be53b060b408bff1",
+      "bytes": 7058,
+      "mode": "0o644"
+    },
+    "log": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-alignment-feedback-attempt08.log",
+      "sha256": "f92f6d54775443a1c37c5a43ae5389bfbffb9435f3aa304ee66039cab36f364d",
+      "bytes": 3370,
+      "mode": "0o644"
+    },
+    "xml": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-alignment-feedback-attempt08-xml/TEST-com.citi.put.checks.studio.guided.session.GuidedWireContractTest.xml",
+      "sha256": "884021f3b2668e5e3e1f7e238e2e88cecd102f6bb77d3f02a58da44aa668a880",
+      "bytes": 4916,
+      "mode": "0o644"
+    },
+    "before": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-alignment-feedback-attempt08-before.json",
+      "sha256": "59a8310106ffb2e4c488a77fb8028f0855795375a25d1c44db6f3aad1b92e530",
+      "bytes": 327786,
+      "mode": "0o644"
+    },
+    "after": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-alignment-feedback-attempt08-after.json",
+      "sha256": "10ac8c81f441bc5c00c3d223bf1505a96e31a2434f9173a70939f846b6532df8",
+      "bytes": 327786,
+      "mode": "0o644"
+    },
+    "prelaunch": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-alignment-feedback-attempt08-artifacts/prelaunch.json",
+      "sha256": "58a94a0745dad3fe99e98561de1b6705434c7e47765c489b758e518b7df7fe05",
+      "bytes": 13351,
+      "mode": "0o644"
+    },
+    "restoration": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-alignment-feedback-attempt08-artifacts/fixed-output-restoration.json",
+      "sha256": "495c6cff3609524b62cf20cf9310904caf6f22e8758398e432f14a28f87d5588",
+      "bytes": 2311,
+      "mode": "0o644"
+    },
+    "guardTallies": [],
+    "fixedOutputRestoration": {
+      "priorFileCount": 56,
+      "freshArchivedFileCount": 12,
+      "restoredFileCount": 56,
+      "byteExact": true,
+      "mismatches": [],
+      "freshArchivedBeforeRestore": true,
+      "freshFiles": [
+        {
+          "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.session.GuidedWireContractTest.xml",
+          "sha256": "884021f3b2668e5e3e1f7e238e2e88cecd102f6bb77d3f02a58da44aa668a880"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/output.bin",
+          "sha256": "6da59c3d0c1ed08b0c53e82e5f0cded339fb80fb7aefb92606aa67dae6354d24"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/output.bin.idx",
+          "sha256": "12618d0408aeca6bb9f2def426a0abe5fff33e617fa331a96c512ae93b2447ef"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/results.bin",
+          "sha256": "f8075a0775693d957e811ee1e85b7b646ed7843d2a67b94546a0d97029f8c1e5"
+        },
+        {
+          "path": "backend/build/reports/tests/test/classes/com.citi.put.checks.studio.guided.session.GuidedWireContractTest.html",
+          "sha256": "1c4c2cc4dfd4c783de3b4d081b260616a963f2e18b9598a51a3f53c06572163b"
+        },
+        {
+          "path": "backend/build/reports/tests/test/css/base-style.css",
+          "sha256": "a10a4ef75ca2601b44bfdaf3112a5854f6376f68d7cbaf6958286f04488d293b"
+        },
+        {
+          "path": "backend/build/reports/tests/test/css/style.css",
+          "sha256": "61866908fd7eb09c79e96239f69db2e8cc5c6526cdb308eba0535ed2a0f6a263"
+        },
+        {
+          "path": "backend/build/reports/tests/test/index.html",
+          "sha256": "a080fa12439a976f8a34fefa6c65e161f96e1486a2346d7fb5d84be527528058"
+        },
+        {
+          "path": "backend/build/reports/tests/test/js/report.js",
+          "sha256": "fc89c6d002d18f4662065c9887b2cda8f8486f2737d4ad0f2fdeac0ad58a44dc"
+        },
+        {
+          "path": "backend/build/reports/tests/test/packages/com.citi.put.checks.studio.guided.session.html",
+          "sha256": "52ea8c8075b61e2604a7bfeb550e9401f9671b114d6fe40d6470bd719323ce40"
+        },
+        {
+          "path": "backend/build/guard-tally/GuidedPlanningIntegrationTest.json",
+          "sha256": "49877687fdc0fe0b3f5640e61f647d165fc6ba88836c6a4fe162dc073cdfc3b2"
+        },
+        {
+          "path": "backend/build/guard-tally/GuidedPublicationReplayIT.json",
+          "sha256": "e783782a1e0729c02240ec2912139d3adf8ea3ffe196ca4c068e66f4723dd1a7"
+        }
+      ]
+    },
+    "allPriorFailedAndSuccessfulHistoriesPreserved": true
+  },
+  "remaining": [
+    "Whole story015/008 completion not granted by selected class18PASS",
+    "Actual freshCoremain10/edit4/trustedceiling+samehandle/session/nativeprefixfreshbinding/suffix/video/publication/ordinaryreplay after exact ownedfixture lifetime fix",
+    "Full86/24/55/35/B1R1B2B3B4R2/secretfaults/15privateauthorities/currentJavahead/migrations/finalnormalchecks+coverage/crossReplica/deployment/independentQA015/POrootclosure then008",
+    "RunnerR1 source-only test lane and all remaining native companion obligations require own final validation",
+    "Row85originalpendinguser/unamended"
+  ],
+  "noSourceEditsOrExpectedOracleChangesByExecutor": true,
+  "allJavaHoldAndReturnSlot": true
+}

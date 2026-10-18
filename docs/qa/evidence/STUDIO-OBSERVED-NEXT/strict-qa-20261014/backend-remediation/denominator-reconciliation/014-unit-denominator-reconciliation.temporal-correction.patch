@@ -1,0 +1,23 @@
+--- before/014-unit-denominator-reconciliation.json
++++ after/014-unit-denominator-reconciliation.json
+@@ -171,9 +171,9 @@
+   ],
+   "proofLimits": [
+     "Original full cleancheckattempt01 aggregateFAILED static; these individual runtimepasses remain historical sourceboundproof.",
+-    "Both currentJavafiles differ from runtime snapshot only in approvedformatting; exactcompilednondebugidentityproved in checkstyle-correction/compiled-equivalence.json.",
++    "Historical pre-live snapshot only: the formatting correction changed ReplayIT607f57... to dd95b7... and PlanningITf42d34... to c1194e..., with compiled nondebug equivalence proved for that specific snapshot in checkstyle-correction/compiled-equivalence.json. The later real live policy test adds executable PlanningIT code c1194e... ->96a1e2... and is a separate source delta, preserved and executed in live-original-proofs/implementation.patch and live-original-proofs/receipt.json. Formatting-only equivalence does not describe the final PlanningIT source or replace its required final full check.",
+     "Mandatorynormalfullcheckonfinalsource remains required; no test executed by this evidence reconciliation.",
+-    "No source modification,puretestaddition,denominatorassertionrewrite,waiveror testexclusion performed."
++    "This denominator reconciliation and metadata correction are evidence-only. Separately, the later authorized live-proof implementation added one PlanningIT method and test-owned conditional instrumentation; see live-original-proofs/receipt.json. No pure unit denominator assertion was rewritten and no validation/test exclusion or waiver was introduced."
+   ],
+   "additionalLiveProofInvocation": {
+     "name": "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch()",
+@@ -190,5 +190,7 @@
+     "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+     "sha256": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b",
+     "prior56RuntimeProof": "Historical56preserved;currentnewlivecaseactualPASS;normalfinalaggregatepending"
+-  }
++  },
++  "metadataCorrectionUtc": "2026-10-15T00:57:15.219517+00:00",
++  "metadataCorrectionReason": "Independent Quinn014 identified stale current-source formatting-only claim after genuine later live-test addition; corrected temporal scope without changing historical hashes/results."
+ }

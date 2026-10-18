@@ -1,0 +1,349 @@
+  int actionCount(String id) {
+    return jdbc.queryForObject(
+        "SELECT count(*) FROM studio_guided_actions WHERE session_id=?", Integer.class, id);
+  }
+
+  JsonNode action(String id) {
+    return CONTRACTS.parse(
+        jdbc.queryForObject(
+            "SELECT document::text FROM studio_guided_actions WHERE session_id=? ORDER BY "
+                + "ordinal LIMIT 1",
+            String.class,
+            id));
+  }
+
+  ObjectNode navigation(String id) {
+    ObjectNode proposal = proposal(id, 0, "navigate", null);
+    proposal.withObject("/operation").put("destinationInputId", inputId(id, 0));
+    return proposal;
+  }
+
+  ObjectNode advanceRequest(String id, JsonNode ledger) {
+    return CONTRACTS
+        .object()
+        .put("schemaVersion", 3)
+        .put("sessionId", id)
+        .put("ownerFence", 1)
+        .put("admissionId", ledger.path("admission").path("admissionId").asText())
+        .put("operationHash", ledger.path("operationHash").asText());
+  }
+
+  @SafeVarargs
+  static <T> List<T> race(Callable<T>... calls) throws Exception {
+    var start = new CountDownLatch(1);
+    try (var pool = Executors.newVirtualThreadPerTaskExecutor()) {
+      var futures = new ArrayList<Future<T>>();
+      for (var call : calls) {
+        futures.add(
+            pool.submit(
+                () -> {
+                  start.await();
+                  return call.call();
+                }));
+      }
+      start.countDown();
+      var results = new ArrayList<T>();
+      for (var future : futures) {
+        results.add(future.get(20, TimeUnit.SECONDS));
+      }
+      return results;
+    }
+  }
+
+  JsonNode session(String id) {
+    return CONTRACTS.parse(
+        jdbc.queryForObject(
+            "SELECT document::text FROM studio_guided_sessions WHERE session_id=?",
+            String.class,
+            id));
+  }
+
+  JsonNode assignment(String id) {
+    return CONTRACTS.parse(
+        jdbc.queryForObject(
+            "SELECT intent::text FROM studio_guided_assignments WHERE session_id=?",
+            String.class,
+            id));
+  }
+
+  int claimCount(String id) {
+    return jdbc.queryForObject(
+        "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND route='claim'",
+        Integer.class,
+        id);
+  }
+
+  ObjectNode refreshRequest(String id) {
+    ObjectNode request = materialization.identity(sessions.runnerContext(controller, id, 1));
+    request.put("expectedGeneration", progress(id).path("generation").asInt());
+    return request;
+  }
+
+  /** Production start: GuidedProductionSessionAccess initializes translation state in `start`. */
+  String createSession() throws Exception {
+    var connection =
+        HttpClient.newHttpClient()
+            .send(
+                HttpRequest.newBuilder(URI.create(ORIGIN + "/connect")).GET().build(),
+                HttpResponse.BodyHandlers.ofString());
+    assertThat(connection.statusCode()).isEqualTo(200);
+    assertThat(connection.body()).isEqualTo("controlled-public-fixture-account");
+    ObjectNode start =
+        CONTRACTS
+            .object()
+            .put("schemaVersion", 3)
+            .put("testId", testId.toString())
+            .put("sourceRevision", "1")
+            .put("configurationRevision", "1")
+            .put("environmentId", "fixture")
+            .put("applicationId", "orders");
+    start.set("versions", versions());
+    return sessions.start(user, UUID.randomUUID().toString(), start).path("sessionId").asText();
+  }
+
+  /** GuidedPlanningIntegrationTest's planning command, verbatim. */
+  ObjectNode command(String id) {
+    return repository.transaction(
+        () -> {
+          var session = repository.lock(id);
+          return CONTRACTS
+              .object()
+              .put("schemaVersion", 3)
+              .put("sessionId", id)
+              .put("expectedSourceRevision", "1")
+              .put("expectedConfigurationRevision", "1")
+              .put("expectedPlanRevision", store.state(id).path("planRevision").asInt());
+        });
+  }
+
+  /**
+   * aria-bridge-ruling01 N7: start through production access, then the real planner plans,
+   * materializes, allocates and delivers the bootstrap context against the controlled provider.
+   */
+  String plannedSession(ObjectNode template) throws Exception {
+    sourcePlan = template;
+    String id = createSession();
+    translation.plan(controller, id, 0, "plan-" + id, command(id));
+    assertThat(progress(id).path("translationBootstrap").path("phase").asText())
+        .isEqualTo("READY");
+    assertThat(session(id).path("state").asText()).isEqualTo("PROPOSING");
+    return id;
+  }
+
+  ObjectNode span(String kind, String slot, int start, int end) {
+    return CONTRACTS
+        .object()
+        .put("referenceKind", "sourceSpan")
+        .put("sourceRevision", "1")
+        .put("stepId", step.toString())
+        .put("startUtf16", start)
+        .put("endUtf16", end)
+        .put("kind", kind)
+        .put("intendedSlot", slot);
+  }
+
+  /** The authored navigation destination. */
+  ObjectNode destinationReference() {
+    return span("destination", "navigate.destination", 6, 6 + (ORIGIN + "/start").length());
+  }
+
+  /** The authored literal {@code fixture-input}. */
+  ObjectNode literalReference() {
+    int start = sourceText().lastIndexOf("fixture-input");
+    return span("nonsecretText", "fill.value", start, start + "fixture-input".length());
+  }
+
+  ObjectNode planTemplate(List<ObjectNode> references, List<ObjectNode> obligations) {
+    ObjectNode plan = CONTRACTS.object();
+    references.forEach(plan.putArray("sourceReferences")::add);
+    obligations.forEach(plan.putArray("obligations")::add);
+    plan.putArray("needs");
+    return plan;
+  }
+
+  /** PLAN_NAV: refs [R0]; navigate(0, page, ref 0). */
+  ObjectNode planNav() {
+    return planTemplate(
+        List.of(destinationReference()),
+        List.of(obligation(step.toString(), 0, "navigate", "page", 0, null)));
+  }
+
+  /** PLAN_NAV_LIT: refs [R0, R1]; navigate(0, page, ref 0), fill(1, destination, ref 1). */
+  ObjectNode planNavLit() {
+    return planTemplate(
+        List.of(destinationReference(), literalReference()),
+        List.of(
+            obligation(step.toString(), 0, "navigate", "page", 0, null),
+            obligation(step.toString(), 1, "fill", "destination", 1, null)));
+  }
+
+  /**
+   * PLAN_DATAFLOW: refs [R0]; navigate(0, page, ref 0), read(1, source, need order), fill(2,
+   * destination, need order); need order produced and consumed by the one step.
+   */
+  ObjectNode planDataflow() {
+    ObjectNode plan =
+        planTemplate(
+            List.of(destinationReference()),
+            List.of(
+                obligation(step.toString(), 0, "navigate", "page", 0, null),
+                obligation(step.toString(), 1, "read", "source", null, "order"),
+                obligation(step.toString(), 2, "fill", "destination", null, "order")));
+    plan.withArray("needs")
+        .addObject()
+        .put("needId", "order")
+        .put("producerStepId", step.toString())
+        .putArray("consumers")
+        .addObject()
+        .put("stepId", step.toString())
+        .put("argumentSlot", "fill.value");
+    return plan;
+  }
+
+  /**
+   * PLAN_CONFIG: refs [R0] plus the classified configuration reference the provider appends as
+   * index 1; navigate(0, page, ref 0), fill(1, destination, ref 1).
+   */
+  ObjectNode planConfig() {
+    ObjectNode plan =
+        planTemplate(
+            List.of(destinationReference()),
+            List.of(
+                obligation(step.toString(), 0, "navigate", "page", 0, null),
+                obligation(step.toString(), 1, "fill", "destination", 1, null)));
+    plan.put("useConfiguration", true);
+    return plan;
+  }
+
+  String stepId(String id) {
+    return session(id).path("sourceSteps").get(0).path("stepId").asText();
+  }
+
+  /** The planner's binding for a need, from the accepted plan (read only). */
+  String bindingId(String id, String needId) {
+    return repository.transaction(
+        () -> {
+          for (JsonNode need : store.state(id).path("plan").path("needs")) {
+            if (need.path("needId").asText().equals(needId)) {
+              return need.path("bindingId").asText();
+            }
+          }
+          throw new IllegalStateException("NEED_MISSING");
+        });
+  }
+
+  /**
+   * The authored input whose provenance equals the accepted plan's source reference (the
+   * validator's own equality, GuidedProposalValidator.action).
+   */
+  JsonNode input(String id, int referenceIndex) {
+    JsonNode reference =
+        repository.transaction(
+            () ->
+                store
+                    .state(id)
+                    .path("plan")
+                    .path("sourceReferences")
+                    .path(referenceIndex)
+                    .deepCopy());
+    JsonNode found = null;
+    for (JsonNode candidate :
+        sessions.runnerContext(controller, id, 1).path("authoredInputs").path("inputs")) {
+      if (candidate.path("provenance").equals(reference)) {
+        assertThat(found).as("one input per planned reference").isNull();
+        found = candidate;
+      }
+    }
+    assertThat(found).as("materialized input for planned reference %s", referenceIndex).isNotNull();
+    return found;
+  }
+
+  String inputId(String id, int referenceIndex) {
+    return input(id, referenceIndex).path("inputId").asText();
+  }
+
+  /**
+   * aria-bridge-ruling01 N8: the planner issues the association. The hand-built proposal only
+   * supplies the controlled model's selection ({target, operation} without document/generation
+   * and the occurrence); the real advance builds, validates, guards and reserves the obligation,
+   * and the spy stops the controller at prepareAndAdmit after that reservation committed (R-3).
+   */
+  JsonNode reserve(String id, JsonNode hand) throws Exception {
+    for (ObjectNode prior : repository.transaction(() -> repository.actions(id))) {
+      assertThat(prior.path("state").asText())
+          .as("reserve only after prior actions settle")
+          .isEqualTo("SUCCEEDED");
+    }
+    ObjectNode action = CONTRACTS.object();
+    ObjectNode target = hand.path("target").deepCopy();
+    target.remove(List.of("documentId", "generation"));
+    action.set("target", target);
+    action.set("operation", hand.path("operation").deepCopy());
+    int occurrence = hand.path("coordinate").path("ordinal").asInt();
+    nextSelection = new Selection(occurrence, action);
+    var stopped = org.mockito.Mockito.spy(dispatch);
+    org.mockito.Mockito.doThrow(new AssertionError("process-stop"))
+        .when(stopped)
+        .prepareAndAdmit(
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.eq(id),
+            org.mockito.ArgumentMatchers.anyLong(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.any());
+    var reserving =
+        new GuidedTranslationService(
+            sessions,
+            repository,
+            store,
+            questions,
+            stopped,
+            gateway,
+            CONTRACTS,
+            new GuidedPromptAssembler(CONTRACTS),
+            inputs,
+            new GuidedProposalValidator(CONTRACTS),
+            new GuidedDependencyPlanner(sessions),
+            properties,
+            Clock.systemUTC());
+    reserving.installDatabase(jdbc);
+    boolean reached = false;
+    // Acquisition may answer WAIT before the NEXT_ACTION call; each retry is a new continuation.
+    for (int n = 0; n < 3 && !reached; n++) {
+      try {
+        reserving.advance(controller, id, 1, "reserve-" + UUID.randomUUID(), command(id));
+      } catch (AssertionError stop) {
+        assertThat(stop).hasMessage("process-stop");
+        reached = true;
+      }
+    }
+    assertThat(reached).as("planner reached prepareAndAdmit").isTrue();
+    JsonNode association =
+        sessions.translationTransaction(
+            controller,
+            id,
+            1,
+            current -> {
+              for (JsonNode obligation : store.state(id).path("plan").path("obligations")) {
+                if (obligation.path("occurrence").asInt() == occurrence) {
+                  return store.obligation(id, obligation.path("obligationId").asText());
+                }
+              }
+              return null;
+            });
+    assertThat(association).as("planner-issued association").isNotNull();
+    assertThat(association.path("admissionId").isNull()).isTrue();
+    assertThat(association.path("admissionKey").asText()).startsWith("obligation-");
+    return association;
+  }
+
+  /** The production internal admissions route with the planner-issued key and proposal bytes. */
+  JsonNode admit(String id, JsonNode association) throws Exception {
+    return post(
+        id,
+        "admissions",
+        association.path("proposal"),
+        association.path("admissionKey").asText(),
+        token("backend-controller", "controller-1", "studio-guided-controller"),
+        202);
+  }
+

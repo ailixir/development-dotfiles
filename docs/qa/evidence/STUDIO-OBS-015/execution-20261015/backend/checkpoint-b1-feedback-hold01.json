@@ -1,0 +1,440 @@
+{
+  "artifact": "STUDIO-OBS-015 intermediate B1 foundation feedback HOLD01",
+  "createdAt": "2026-10-15T11:12:43.989319+00:00",
+  "owner": "backend015_resume / Dex",
+  "status": "PARTIAL_B1_FOUNDATION_SOURCE_UNCOMPILED_ATOMIC_HOLD_FOR_MAIN04_FEEDBACK",
+  "sourceHold": true,
+  "commandsLive": false,
+  "commandsLiveScope": "This owner has no active execution handle and launched no test/JVM/Gradle/DB/native/browser/build command in this source slot; root serializes all owners.",
+  "formalQAVerdict": null,
+  "lifecycleTransition": null,
+  "fullB1Complete": false,
+  "sourceValidation": "Bounded manual source inspection only. No compile, type-check, lint, tests, native execution or source-only pass claim.",
+  "ownedFiles": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": {
+      "beforeSha256": "2256f3148e9dab679b261a3134deaeffe4673642e0faa782fb1b5aa5b73bddd8",
+      "afterSha256": "71f19112f82117fc1f0f3090ffd476d48f51cdd026b919092c5b673ff748b0b7"
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": {
+      "beforeSha256": "705ad5f372ba0e455b404233cf6ac27fa4255329eca45b79a9c69594be9e2cf8",
+      "afterSha256": "597942a8fdf2e8b366bb7a180073db1542943631ba1478750c0a1fdadb0baa15"
+    }
+  },
+  "conditionalCoordinator": {
+    "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+    "beforeSha256": "07976ffe0cfe7e32203b481bc443542df3ea5a1800c1794506fa207072d8bdd0",
+    "afterSha256": "07976ffe0cfe7e32203b481bc443542df3ea5a1800c1794506fa207072d8bdd0",
+    "edited": false
+  },
+  "sourceAnchors": {
+    "class B1OutcomeCapture": 175,
+    "class B1OutcomeAdvice": 287,
+    "class B1SchemaAdvice": 293,
+    "void incrementalStartCannotWidenTrustedOriginCeiling": 2537,
+    "private void b1AssertTrustedCeilingStart": 2543,
+    "private String b1ScopedSnapshot": 3416,
+    "private static String incrementalNativeFaultObserver": 14154,
+    "void incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser": 2532,
+    "void incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays": 2524
+  },
+  "implementedFoundation": [
+    "completeStep preserves REPLAYING_PREFIX while incremental.pending(id), retaining original native/StepVerifier/dispatch checks, step increment and continuation. Actual callback positive and both model fence proofs are still absent.",
+    "delete4 separately submits the actual deleted original step UUID and asserts 409 REVISION_CONFLICT/FIRST_LEARN_STEP_UNKNOWN plus scoped DB/counter equality; accepted delete4 flow retained.",
+    "New actual start endpoint trusted-ceiling control uses owned replica with frozen-valid narrowed policy, independently asserts approved source policy/current trusted ceiling and 409 RUNTIME_INCOMPATIBLE distinct from origin403. Test support setup has not been compiled/executed.",
+    "b1ScopedSnapshot digests complete owned-test session/source/base/translation/plan/attempt/action/preparation/admission/relearn/materialization/command/test/revision/budget rows; no values in assertions/logs. Existing long-wait snapshot deliberately unchanged to avoid treating lawful lease renewals as negative writes.",
+    "Existing waiting direct-admit probe now asserts exact STALE_GENERATION and unchanged current question. Existing human wait/consent branches and native protected-action zero assertions retained."
+  ],
+  "outcomeDiagnostics": {
+    "classification": "JOIN-only test instrumentation; original result/error/business state unchanged",
+    "nodeObserver": "Existing generated incrementalNativeFaultObserver wraps actual RevRuntime dispatch; awaits original, captures metadata and returns same object. Held contracts import performs validate(bridge, original, outcome).",
+    "javaObserver": "ByteBuddy Advice exact GuidedContracts.validatedCanonical(v3/bridge#/definitions/outcome), only GuidedRunnerClient.send stack, plus nested JsonSchema.validate returned nonempty ValidationMessage Set. Never reads validation messages/arguments/raw values.",
+    "files": [
+      "obs015-outcome-boundary-node.jsonl",
+      "obs015-outcome-boundary-java.jsonl"
+    ],
+    "location": "New test-owned TEMP obs007-joined-* only",
+    "mode": "0600; Java creates private file then appends; Node appends with mode0600",
+    "limits": {
+      "cohorts": 1,
+      "eventsPerFile": 200,
+      "bytesPerFileMaximum": 1040000,
+      "shapeEntriesPerEvent": 200,
+      "javaValidationErrorsMaximum": 64
+    },
+    "fields": [
+      "canonical-v1 body SHA256",
+      "canonical byte length",
+      "known-field JSON paths/types",
+      "allowlisted ledger state/outcomeCode enums",
+      "hashed session/admission joins",
+      "Node frozen outcome validator boolean",
+      "Java original accepted/throw",
+      "bounded keyword/schema/instance pointers"
+    ],
+    "unknownDynamicPathnames": "SHA256 hashed; no payload values, key material, JWT, credential or config dumps",
+    "schemaHash": "Expanded outcome schema hash explicitly UNAVAILABLE; actual native schema node hash included only if reflection exposes actual JsonNode and is not claimed expanded.",
+    "failureSemantics": "Instrumentation exceptions suppressed; original native result/exception/fence/no-retry behavior preserved. Explicit instrumentationError/truncated records when writable; missing output is inconclusive, never success.",
+    "actualCapture": "UNEXECUTED; no rawreply diagnosis or Runner/backend counterexample inferred."
+  },
+  "originalVariants": {
+    "count": 35,
+    "labels": [
+      "insert4",
+      "delete4",
+      "reorder4",
+      "config",
+      "tail1",
+      "tail7",
+      "append11",
+      "ready6",
+      "confirm-prefix",
+      "empty",
+      "drift2",
+      "admitted-drift2",
+      "unknown2",
+      "assert-fail",
+      "policy-prefix",
+      "confirm-long-wait",
+      "confirm-cancel",
+      "confirm-expire",
+      "confirm-source-change",
+      "confirm-recover",
+      "confirm-owner-loss",
+      "append-input",
+      "deleted-consumers",
+      "admitted-literal2",
+      "pre-literal2",
+      "same-pair-literal",
+      "unused-declaration",
+      "drift-plan-fail",
+      "drift-first",
+      "confirm-edit4",
+      "confirm-race",
+      "drift-auth",
+      "drift-auth-pre",
+      "before4at2",
+      "equal4"
+    ],
+    "preservedExactly": true,
+    "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+    "sourceOnlyNoInvocationCredit": true
+  },
+  "rowMap": [
+    {
+      "ledgerIndex0": 14,
+      "plannedName": "IncrementalStartIT.clientCannotNarrowServerBoundary",
+      "originalRequiredTier": "Java HTTP + Postgres",
+      "sourceStatus": "PARTIAL_FOUNDATION_UNEXECUTED",
+      "remaining": "New exact deleted-UUID/trusted-ceiling controls and existing start refusal subjects are source only; actual real HTTP/PG proof remains pending."
+    },
+    {
+      "ledgerIndex0": 15,
+      "plannedName": "IncrementalStartIT.governedPrefixOriginPreflightWritesNothing",
+      "originalRequiredTier": "Java HTTP + Postgres",
+      "sourceStatus": "PARTIAL_FOUNDATION_UNEXECUTED",
+      "remaining": "New exact deleted-UUID/trusted-ceiling controls and existing start refusal subjects are source only; actual real HTTP/PG proof remains pending."
+    },
+    {
+      "ledgerIndex0": 16,
+      "plannedName": "IncrementalSessionIT.prefixCallbacksNeverOpenModelReservation",
+      "originalRequiredTier": "Java + Postgres",
+      "sourceStatus": "PARTIAL_FOUNDATION_UNEXECUTED",
+      "remaining": "Actual intermediate observe/admit/consume/success callback snapshots, both model reservation fences, and genuine native navigation/read + StepVerifier completeStep positive are not implemented. Service pending-state correction alone is not coverage."
+    },
+    {
+      "ledgerIndex0": 20,
+      "plannedName": "IncrementalSessionIT.restartAndConcurrentDriftTransitionAreIdempotent",
+      "originalRequiredTier": "Java + Postgres",
+      "sourceStatus": "REMAINING_ASSERTION_SOURCE_UNEXECUTED",
+      "remaining": "Recovery at each actual next unconsumed program coordinate and concurrent authenticated drift once-only assertions remain. No Coordinator defect or edit established."
+    },
+    {
+      "ledgerIndex0": 26,
+      "plannedName": "IncrementalRelearnIT.prefixAssertionFailureStopsWithoutReinterpretation",
+      "originalRequiredTier": "REAL JOINED assertion fixture",
+      "sourceStatus": "REMAINING_ASSERTION_SOURCE_UNEXECUTED",
+      "remaining": "Existing assert-fail targets step3; exact step2 fill/assert companion remains absent."
+    },
+    {
+      "ledgerIndex0": 27,
+      "plannedName": "IncrementalRelearnIT.prefixPolicyRefusalStopsWithoutReinterpretation",
+      "originalRequiredTier": "REAL JOINED redirect/policy fixture",
+      "sourceStatus": "REMAINING_ASSERTION_SOURCE_UNEXECUTED",
+      "remaining": "Actual redirect-origin/navigation/password policy-prefix refusal matrix remains absent; default-policy denial does not substitute."
+    },
+    {
+      "ledgerIndex0": 48,
+      "plannedName": "IncrementalDriftIT.preAdmissionAndAdmittedReceiptsUseAuthenticatedAuthority",
+      "originalRequiredTier": "HTTP+Postgres+real runner fault seam",
+      "sourceStatus": "REMAINING_ASSERTION_SOURCE_UNEXECUTED",
+      "remaining": "Complete authenticated pre/admitted receipt, crossed preparation/admission/assignment/context/config/fence/late callback matrix with exact codes and stable scoped zero-write barriers remains incomplete."
+    },
+    {
+      "ledgerIndex0": 54,
+      "plannedName": "IncrementalPublicationIT.excludedAttemptRequiresEveryExactAuthenticatedJoin",
+      "originalRequiredTier": "HTTP+Postgres+pure runner",
+      "sourceStatus": "REMAINING_ASSERTION_SOURCE_UNEXECUTED",
+      "remaining": "Exact every-field exclusion joins/refusal matrix and no omission for other FAILED/UNKNOWN/DISPATCHING states remain incomplete at real authority tier."
+    },
+    {
+      "ledgerIndex0": 55,
+      "plannedName": "IncrementalMaterializationIT.emptyPrefixContextKeepsExactProgramPair",
+      "originalRequiredTier": "HTTP+Postgres+runner context",
+      "sourceStatus": "REMAINING_ASSERTION_SOURCE_UNEXECUTED",
+      "remaining": "Actual EMPTY_PREFIX initial delivery plus append2, duplicate ACK and rebootstrap exact pair/tamper assertions remain absent."
+    },
+    {
+      "ledgerIndex0": 56,
+      "plannedName": "IncrementalResultIT.receiptAndResultDistinguishBoundaryFromSuccess",
+      "originalRequiredTier": "HTTP+Postgres",
+      "sourceStatus": "REMAINING_ASSERTION_SOURCE_UNEXECUTED",
+      "remaining": "BOUNDARY/EMPTY_PREFIX post-switch SOURCE_PLAN failure and actual result projector/frozen-result contradictory-field rejection assertions remain incomplete."
+    },
+    {
+      "ledgerIndex0": 80,
+      "plannedName": "IncrementalPolicyIT.prefixGuardDeniesGroundingDestructionAndDenyEvenAfterConsent",
+      "originalRequiredTier": "Real HTTP+PG+runner",
+      "sourceStatus": "REMAINING_ASSERTION_SOURCE_UNEXECUTED",
+      "remaining": "Fresh post-consent Save/Delete/unobserved/hostile-form Enter guard matrix remains absent; valid authored Enter cannot be universally denied."
+    },
+    {
+      "ledgerIndex0": 81,
+      "plannedName": "IncrementalPolicyIT.waitingRecoveryCancellationAndAnswerRacesRemainAtMostOnce",
+      "originalRequiredTier": "HTTP+PG concurrency+runner",
+      "sourceStatus": "REMAINING_ASSERTION_SOURCE_UNEXECUTED",
+      "remaining": "Changed context/generation, cancellation/recovery/race exact at-most-once assertions and original natural lease deadline expiry distinct from graceful LEASE_LOST and 600s human wait remain incomplete."
+    },
+    {
+      "ledgerIndex0": 82,
+      "plannedName": "IncrementalPolicyIT.directPrefixAdmissionCannotBypassConfirmation",
+      "originalRequiredTier": "HTTP+PG",
+      "sourceStatus": "PARTIAL_FOUNDATION_UNEXECUTED",
+      "remaining": "Waiting direct admission now asserts exact STALE_GENERATION and unchanged question; full freshly observed/ACKed/prepared post-consent guard and owner/context/generation matrix remains incomplete."
+    }
+  ],
+  "remainingB1": {
+    "16": "Actual intermediate observe/admit/consume/success callback snapshots, both model reservation fences, and genuine native navigation/read + StepVerifier completeStep positive are not implemented. Service pending-state correction alone is not coverage.",
+    "20": "Recovery at each actual next unconsumed program coordinate and concurrent authenticated drift once-only assertions remain. No Coordinator defect or edit established.",
+    "26": "Existing assert-fail targets step3; exact step2 fill/assert companion remains absent.",
+    "27": "Actual redirect-origin/navigation/password policy-prefix refusal matrix remains absent; default-policy denial does not substitute.",
+    "48": "Complete authenticated pre/admitted receipt, crossed preparation/admission/assignment/context/config/fence/late callback matrix with exact codes and stable scoped zero-write barriers remains incomplete.",
+    "54": "Exact every-field exclusion joins/refusal matrix and no omission for other FAILED/UNKNOWN/DISPATCHING states remain incomplete at real authority tier.",
+    "55": "Actual EMPTY_PREFIX initial delivery plus append2, duplicate ACK and rebootstrap exact pair/tamper assertions remain absent.",
+    "56": "BOUNDARY/EMPTY_PREFIX post-switch SOURCE_PLAN failure and actual result projector/frozen-result contradictory-field rejection assertions remain incomplete.",
+    "80": "Fresh post-consent Save/Delete/unobserved/hostile-form Enter guard matrix remains absent; valid authored Enter cannot be universally denied.",
+    "81": "Changed context/generation, cancellation/recovery/race exact at-most-once assertions and original natural lease deadline expiry distinct from graceful LEASE_LOST and 600s human wait remain incomplete.",
+    "82": "Waiting direct admission now asserts exact STALE_GENERATION and unchanged question; full freshly observed/ACKed/prepared post-consent guard and owner/context/generation matrix remains incomplete."
+  },
+  "naturalLeaseHook": {
+    "rootApprovedTestOnlyDirection": true,
+    "implemented": false,
+    "pending": "JOIN generated launcher may suppress only GuidedOwnership.renew(entry) for exact selected waiting session, preserving original signed grant deadline/expiry timer/browser/recorder. No clock shortening, early request timeout, graceful stop or fake renewal may substitute. Needs source implementation and actual original walldeadline proof."
+  },
+  "unexecutedSelectors": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStartCannotWidenTrustedOriginCeiling",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+  ],
+  "protectedObservedInputs": {
+    ".codex/skills/aiox-qa/SKILL.md": {
+      "handoffSha256": "17afd341497b8e535b80c05b7aafe61305f56cdabb2742f8396eb98eec655d99",
+      "observedSha256": "17afd341497b8e535b80c05b7aafe61305f56cdabb2742f8396eb98eec655d99",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    ".aiox-core/development/agents/qa.md": {
+      "handoffSha256": "42e0f57a5d2eaca345d074ec53100faabebd42047081325cde2123911aa88b00",
+      "observedSha256": "42e0f57a5d2eaca345d074ec53100faabebd42047081325cde2123911aa88b00",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    ".aiox-core/constitution.md": {
+      "handoffSha256": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+      "observedSha256": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/validation-ledger.json": {
+      "handoffSha256": "9e58edc0e566b118aa83c184d66907136347844ce1f2bce2ae074c9a97404024",
+      "observedSha256": "9e58edc0e566b118aa83c184d66907136347844ce1f2bce2ae074c9a97404024",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/remaining-facet-review05/manifest.json": {
+      "handoffSha256": "958d4bc12a54db1bb4285f2ee1622c06a292ceb9fb4dc08124fc0da64562d5ea",
+      "observedSha256": "958d4bc12a54db1bb4285f2ee1622c06a292ceb9fb4dc08124fc0da64562d5ea",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/remaining-facet-review05/prioritized-disjoint-source-batches.json": {
+      "handoffSha256": "b0ccae534d6490d03842db302e016411b54bd608baa141c071b0f0d5b8613be5",
+      "observedSha256": "b0ccae534d6490d03842db302e016411b54bd608baa141c071b0f0d5b8613be5",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/remaining-facet-review05/remaining-49-dispositions.json": {
+      "handoffSha256": "1e22dbffdd7a8f613817e4ab80becb5d53a8659a6c1b760e4adf907cace532b3",
+      "observedSha256": "1e22dbffdd7a8f613817e4ab80becb5d53a8659a6c1b760e4adf907cace532b3",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-joined02-bootstrap-phase-repair01.json": {
+      "handoffSha256": "b644229305b3782e0510de8d4055d1f1df2b4fe789e9b1aa50a28f2330d6e1bd",
+      "observedSha256": "b644229305b3782e0510de8d4055d1f1df2b4fe789e9b1aa50a28f2330d6e1bd",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/test-delta.json": {
+      "handoffSha256": "e5b642c3170f4a44005715cbb6a8f674eab9e962b07650ca0a6b0a8ee253194a",
+      "observedSha256": "e5b642c3170f4a44005715cbb6a8f674eab9e962b07650ca0a6b0a8ee253194a",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java": {
+      "handoffSha256": "07976ffe0cfe7e32203b481bc443542df3ea5a1800c1794506fa207072d8bdd0",
+      "observedSha256": "07976ffe0cfe7e32203b481bc443542df3ea5a1800c1794506fa207072d8bdd0",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": {
+      "handoffSha256": "82b8401722224d5277da5080b9475c32318284cf32abb0a7aa33cc9aca86938b",
+      "observedSha256": "82b8401722224d5277da5080b9475c32318284cf32abb0a7aa33cc9aca86938b",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java": {
+      "handoffSha256": "0e98da660358acd128b468bb28660bcf5a7378dbe7427a85464ae4e3caa9fd1f",
+      "observedSha256": "0e98da660358acd128b468bb28660bcf5a7378dbe7427a85464ae4e3caa9fd1f",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": {
+      "handoffSha256": "745223f046be477593a8f701a2fc4ed24d29dcfab6d19d32acabb011ed181165",
+      "observedSha256": "745223f046be477593a8f701a2fc4ed24d29dcfab6d19d32acabb011ed181165",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedStepVerifier.java": {
+      "handoffSha256": "77cd0b15eeac4a220f785d6f68d960b54dd1104a44cd91a9efb81023a95e732a",
+      "observedSha256": "77cd0b15eeac4a220f785d6f68d960b54dd1104a44cd91a9efb81023a95e732a",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuard.java": {
+      "handoffSha256": "a74b03e4e54401b1f3ddaf21eefab581fadbd5cef6533620cf88378ed461385d",
+      "observedSha256": "a74b03e4e54401b1f3ddaf21eefab581fadbd5cef6533620cf88378ed461385d",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyService.java": {
+      "handoffSha256": "0f5e4a3b1ba0769338c1a8433edf9ce07da01af919793b7b4e4f102839578452",
+      "observedSha256": "0f5e4a3b1ba0769338c1a8433edf9ce07da01af919793b7b4e4f102839578452",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalController.java": {
+      "handoffSha256": "b94aed29b8eea89d5e7cb460655d93581f3cafe649b48b4e413da7a85cb6b106",
+      "observedSha256": "b94aed29b8eea89d5e7cb460655d93581f3cafe649b48b4e413da7a85cb6b106",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java": {
+      "handoffSha256": "eccc57318faafd672e04060995b91ce783d72bd2bd7c66f09899ad335146880c",
+      "observedSha256": "eccc57318faafd672e04060995b91ce783d72bd2bd7c66f09899ad335146880c",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java": {
+      "handoffSha256": "80357798b080ab6f8cb1ba38c7828915fa37663e203b0280997c7937ebc432d0",
+      "observedSha256": "80357798b080ab6f8cb1ba38c7828915fa37663e203b0280997c7937ebc432d0",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java": {
+      "handoffSha256": "417e605d25ca8b68039b9aa4dafc07ec4390994bb58630766e9dd92bd5f7b359",
+      "observedSha256": "417e605d25ca8b68039b9aa4dafc07ec4390994bb58630766e9dd92bd5f7b359",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql": {
+      "handoffSha256": "b012ddddb44b599c4f8699be39281dd6f407b2cb93b41386a79eb22c06c4d179",
+      "observedSha256": "b012ddddb44b599c4f8699be39281dd6f407b2cb93b41386a79eb22c06c4d179",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/bridge.schema.json": {
+      "handoffSha256": "039ad4017a8256481d4109d37dfcfc919767094fd1610988d16706fef1065817",
+      "observedSha256": "039ad4017a8256481d4109d37dfcfc919767094fd1610988d16706fef1065817",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "studio-runner/src/guided/runtime.ts": {
+      "handoffSha256": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+      "observedSha256": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts": {
+      "handoffSha256": "f974ba2c570fd025f039dfd7af77a537dc8efbdc77b30bfae531d176f7384c1e",
+      "observedSha256": "dd95be15a59c377765ad52a4ca475af72e714916fb6f88931de5109561439689",
+      "equalsHandoff": false,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/build.gradle.kts": {
+      "handoffSha256": "4833ddd1f67b6d21f3c3ddec847349e2eea316bb8538386ef69f772a6157ce3b",
+      "observedSha256": "4833ddd1f67b6d21f3c3ddec847349e2eea316bb8538386ef69f772a6157ce3b",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java": {
+      "handoffSha256": "da8c971da064ee06adb05ffbd0744e96a28399bf4a18e7eb1a847e7f83c64f5b",
+      "observedSha256": "da8c971da064ee06adb05ffbd0744e96a28399bf4a18e7eb1a847e7f83c64f5b",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java": {
+      "handoffSha256": "176c6cbb7a089a68a59008bd19d6f36fe88667d2a6aead53246e3488b378d795",
+      "observedSha256": "176c6cbb7a089a68a59008bd19d6f36fe88667d2a6aead53246e3488b378d795",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json": {
+      "handoffSha256": "7accd138c4b8385142e9c2b20f308912e2d0cc7b9afccf2d4aac4155ea0197ca",
+      "observedSha256": "7accd138c4b8385142e9c2b20f308912e2d0cc7b9afccf2d4aac4155ea0197ca",
+      "equalsHandoff": true,
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java": {
+      "observedSha256": "40aff79e77261500b6ca5f5963c68c4869d1c00b81cb451a56f0a6b1aedcc6f4",
+      "writtenByBackendInThisSlot": false
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java": {
+      "observedSha256": "008f61117ce90c31d9a0abddaa4a91d2d142ba7ef8fabf734265a3940d45ee85",
+      "writtenByBackendInThisSlot": false
+    },
+    "studio-runner/test/observedSnapshotPreimages.test.ts": {
+      "observedSha256": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa",
+      "writtenByBackendInThisSlot": false
+    }
+  },
+  "protectedScope": "Backend wrote only two owned source files plus this checkpoint. Other owners may have legitimate disjoint source changes; observed hashes are not a global stability claim. No source/contracts/Runner/dist/newDex/Data/story edits by backend.",
+  "priorEvidence": {
+    "joined03Receipt": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/joined-edit4-and-bootstrap-attempt03-receipt.json",
+      "sha256": "b1c905dd667c4c81357235e3ec3c4f4f268018657d4609fdfc0500022a00ce31"
+    },
+    "preservation": "Failed01/02/03 original receipts/media and restored fixed outputs remain preserved; no execution or artifact rewrite in B1 source slot."
+  },
+  "continuation": "After root captured main04 feedback, resume SAME full B1a-d original13 rows and35 variants under exact source release. No narrowed success redefinition.",
+  "stillRequired": [
+    "full86 acceptance/subcase ledger",
+    "24 ARCH05 facets",
+    "55 SQL obligations/current final source validation",
+    "all35 actual joined variants and secrets/fault matrix",
+    "15 private authority companions and actual native assertions",
+    "full configured static checks and unchanged coverage thresholds",
+    "actual final dist native/browser/video/ordinary replay proofs",
+    "independent QA015, PO/root closure then008",
+    "row85 original pending user choice remains unamended"
+  ]
+}

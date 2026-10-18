@@ -1,0 +1,101 @@
+{
+  "schema": "d-held-setup-failure-control-design/1",
+  "state": "READONLY_TWO_OBSERVATION_CONTROLS_PROPOSED_NOT_AUTHORED_OR_EXECUTED",
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-setup-failure-control-design-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-setup-failure-control-design-context.txt"
+  ],
+  "sourceBindings": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "80b3cd18d98f2a31fc0a4c16142170435cee18eabbccfc45e8323049f2769ffa",
+    "docs/qa/evidence/STUDIO-OBS-007/d-held-row-setup-repair/result.json": "01a50526ac5479bd25eb8fbcd38996937785da0428b4eddb49ebe04e054f7a68",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "ceeec5a8ef899dced36c556b44ce2e1099fefe65084b7ffc4e3b0f69c4bc68dd"
+  },
+  "smallestFutureScope": {
+    "ownedSource": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "newTestMethods": [
+      "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+      "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent"
+    ],
+    "existingDomainInvocations": 15,
+    "futureDomainInvocations": 17,
+    "controls": "Exactly two additional @Test methods, default-off case-local hook/AssertionError fields and small shared protected fixture runner. No production/new network/JDBC fault, timeout, row/state/fence writes, private auth bypass or old15 weakening."
+  },
+  "hookDesign": {
+    "fields": "HeldRowSetup controlled failure enum NONE/AFTER_START_RETURNED/AFTER_ASSIGNMENT_PREPARED plus test-owned AssertionError reference; NONE default retains original15 paths. No global mutable hook or injected production exception.",
+    "stage1": "In heldRowFixture immediately after actual session.start returns, real ID captured into scenario/trace, START_RETURNED observed, and BY_SESSION registered, but before translation initialization/prepareAssignment/materialization. Hook asserts actual owned committed receipt/session and no notify-context rows, then throws the exact test-owned observation error.",
+    "stage2": "For the opt-in AFTER_ASSIGNMENT_PREPARED control only, invoke the exact existing public sessions.prepareAssignment(controller,id,\"assign\",\"worker-1\") first suboperation used by GuidedDispatchService.assign. It genuinely commits the canonical assignment intent after translation succeeds. Retain actual returned intent, verify equality to stored row, then throw observation error before any runner assign/claim/materialization. Default path still calls the unchanged complete dispatch.assign.",
+    "whyReachable": "Source GuidedDispatchService.assign commits sessions.prepareAssignment before runner.send assign and acknowledgement. Public prepareAssignment uses real controller-role guard/current-source/access/active checks, actual row lock, assignment store and command commit. Calling that exact suboperation and stopping after genuine success is an authentic pre-delivery observation boundary, not a fabricated successful full assign or skipped production failure."
+  },
+  "commonExecutionConstruction": [
+    "Instantiate HeldRowSetup before fixture creation and route lifetime, set only per-case observation hook/failure.",
+    "Run actual fixture creation under the same protected setup runner/lifetime used by held-row case; original observation Throwable retained as primary.",
+    "On either actual successful hook boundary, throw the exact supplied AssertionError only after actual returned ID/intent capture and physical SQL evidence confirms the intended stage. Never throw from a production resolver/transport/database substitute.",
+    "Existing closeHeldRowSetup performs real authenticated user cancel joined to the locked actual owner transaction. COMMITTED-only high-order expectation registration requires actual notify context; real original sender plus confirmation transaction must return/throw before route/context/PG closes.",
+    "After cleanup and before resource closure, assert exact primary Throwable identity and intended message; successful cleanup has no suppressed errors. Unexpected real cleanup errors are attached distinctly and make the control fail, never swallowed as expected.",
+    "Preserve actual keyed start namespace/key/requestDigest/session join authority and real no-context/assignment-liveness state. Any unknown/mismatched creation identity remains failed unresolved cleanup, never fabricated ID or blanket erasure."
+  ],
+  "controls": [
+    {
+      "method": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+      "positiveBoundary": "Original start commit/actual ID plus owned start receipt join; no assignment/materialization/action/admission row yet.",
+      "beforeFailure": "Require true START_RETURNED phase, actual case test/principal/session identity, zero assignment/materialization rows, zero secret reads/dispatch POST/consumed commands.",
+      "afterRealCleanup": [
+        "Actual session CANCELLED from public user cancel.",
+        "No assignment/materialization/action remains live; no actual stop request exists.",
+        "owner.expected false, initiated0/confirmationCalls0, real completed latch still pending (absence of expected work, not fabricated completion).",
+        "Actual teardownStatus null, never CONFIRMED/PENDING invented.",
+        "Secret read/dispatch POST/consume remain0; no resolver value read or admission imported.",
+        "Original controlled AssertionError remains the primary and has no suppressed failure when real cleanup succeeds.",
+        "Route idle after genuine operations; normal listener3500/context/PG dependency lifetime unchanged."
+      ],
+      "auditLimit": "At this before-translation stage the controlled FixtureAccess start has not initialized a production declaration manifest. Do not manufacture a secret RELEASE/USAGE or claim terminal declaration coverage from these lifecycle assertions."
+    },
+    {
+      "method": "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent",
+      "positiveBoundary": "Real sessions.prepareAssignment return and committed actual intent row, prior to runner assign/claim/materialize.",
+      "beforeFailure": "Require actual persisted intent equals returned canonical intent, actual owner unclaimed/fence==expectedFence, receipt null, zero materializations/actions/consumes/value reads/dispatch POST. No forced owner reset or synthetic fence.",
+      "afterRealCleanup": [
+        "Public user cancel actually commits CANCELLED and assignment live=false.",
+        "Original backend sends real authenticated nested assignment-stop to existing case-gated relay; exact stored intent/session path/closed reason checked under unchanged mTLS/JWT issuer/role.",
+        "Controlled relay actually marks assignment terminated and responds canonical HTTP200 STOPPED with actual intent and both ownerFence/leaseExpiresAt null because no genuine grant ever occurred.",
+        "Backend original sender returns and original real confirmation transaction alone persists CONFIRMED; owner expectedtrue/initiated1/finished1/confirmationCalls1 and no failure/guard/observer error.",
+        "No actual launch/claim/renew/materialization/dispatch/consume/value read takes place; counters stay0 except one authentic stop.",
+        "Original observation AssertionError stays primary; any unexpected real cleanup/confirmation errors are separately attached and fail the control.",
+        "No fake ACK, grant, clock, manual state/SQL row mutation or replay frame import."
+      ],
+      "auditLimit": "Translation at this stage genuinely persisted declaring reference identity, so any truthful unlinked NOT_USED summary must come from existing real terminal lifecycle. Never fabricate resolution, admission, ordinal, release or Vault version."
+    }
+  ],
+  "historyAndReachabilityLimits": {
+    "currentASSIGN_RETURNED": "In the original helper full dispatch.assign returns only after the relay actually claims and backend acknowledges. A failure hook there would exercise real historical grant fields, not null/unclaimed.",
+    "proposedChosenStage": "The second control uses the genuine earlier prepareAssignment API, so null-pair STOPPED is truly reachable without deleting/replacing any grant.",
+    "uncoveredBranch": "These exact two controls do not prove the claimed/historical assignment-only STOPPED branch. Its source validates only real persisted worker/fence/lease; a separate future AFTER_ASSIGN_RETURNED-before-materialization control would be needed for runtime coverage, under separate authorization. Do not claim it from the unclaimed control."
+  },
+  "futureEvidence": [
+    "Current source manifests and all17 names/counts/fresh zero-skip XML.",
+    "Explicit positive actual owned start receipt and actual assignment intent/no-notify-state assertions at each hook, not a guessed phase label alone.",
+    "Same DataSource/auth graph, actual stop/confirmation/closed-state and fixed read/send/consume counters, source-bound original/suppressed error identity.",
+    "Parent original15 proof preserved; observation controls are lifecycle support, not real provider/network/Core/browser fault cuts."
+  ],
+  "execution": {
+    "sourceEdits": false,
+    "runtime": false,
+    "SQL": false,
+    "Postgres": false,
+    "tests": false,
+    "checks": false,
+    "Gradle": false,
+    "Docker": false,
+    "processActions": [],
+    "soleWrittenArtifact": "docs/qa/evidence/STUDIO-OBS-007/d-held-setup-failure-control-design.json"
+  },
+  "limits": [
+    "Report only; no test/source authored or runtime phase proven.",
+    "Exactly reachable preparatory API success boundary; no fake full assign success or production fault.",
+    "No optional timeouts/generalDBbound/wholeFuture/Core/Vault/native/browser/all19/QA/lifecycle claim.",
+    "Coordinator alone authorizes implementation and controls future current-source execution; B mutable source untouched."
+  ]
+}

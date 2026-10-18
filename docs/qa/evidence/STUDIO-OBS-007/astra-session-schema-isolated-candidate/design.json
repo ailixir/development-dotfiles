@@ -1,0 +1,82 @@
+{
+  "status": "CANDIDATE_AUTHORED_AWAITING_PEER_SOURCE_REVIEW",
+  "scope": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java"
+  ],
+  "authorization": "Parent authorized isolated candidate after source-design review; runtime peer independently agreed; no shared edits or builds.",
+  "mechanism": {
+    "demonstrated": "Every v3 claim currently performs full session validation before authoritative row lock. networknt1.4.0 PropertiesValidator propagates original root to child validators; BaseJsonValidator.debug logs node and root for each validator. Full ROOT TRACE repeats full session serialization. Optional proof can repeat full validation after mismatch.",
+    "unproved": "No measured exclusive allocation of failed claim latency to schema, TRACE, JDBC or other current authorization. No claim that this change alone meets1s."
+  },
+  "alternatives": [
+    {
+      "choice": "A_KEEP_PROOF",
+      "tradeoff": "Moves full schema outside lock but keeps work inside same1s response budget, extra read/copies and fallback duplication."
+    },
+    {
+      "choice": "B_REVERT_PROOF_ONLY",
+      "tradeoff": "Simpler but restores full-root schema amplification at locked save, no demonstrated latency remedy."
+    },
+    {
+      "choice": "C_COMPILED_SESSION_STRATEGY",
+      "selected": true,
+      "tradeoff": "Retains full native semantic validation but changes diagnostic root/path/order; modest schema-only cache metadata replaces all request proof plumbing."
+    }
+  ],
+  "architecture": "claim native request validation -> unchanged current revocation/source/policy/assignment checks under same transaction -> mutate only lease -> canonical complete current document -> root-shell validation + original compiled child schemas on all present values -> unchanged atomic renewal+command SQL -> response",
+  "schemaProof": {
+    "expandedRootKeys": [
+      "$schema",
+      "title",
+      "type",
+      "additionalProperties",
+      "properties",
+      "required"
+    ],
+    "properties": 14,
+    "required": 14,
+    "crossPropertyReferencesOrComposition": false,
+    "defaultAnnotations": 15,
+    "defaultApplicationEnabled": false,
+    "customExecutionContextOrListeners": false,
+    "knownExpandedEpochMatches": true,
+    "rootShell": "Keep every root keyword/annotation and property name; replace only nested property schemas with empty native schemas. Native root still enforces type/required/additionalProperties.",
+    "children": "Use original compiled property JsonSchema instances, evaluate every present child exactly once including explicit NullNode; no short circuit after root or prior child failure.",
+    "originalFallback": "Unknown version/expanded epoch, unexpected compiled properties shape or unsupported config retains original native whole-root validation.",
+    "canonical": "Full original canonical validation first; no serialization/canonical representation substitution.",
+    "errors": "Same fixed INVALID_CONTRACT422 on any root or child violation; detailed diagnostics not returned. Missing schema behavior unchanged.",
+    "immutability": "Schema strategy contains only immutable compiled metadata; no session data, successful-validation cache, runtime documents or authority reuse."
+  },
+  "invariants": [
+    "Real secret renewal1000ms unchanged",
+    "Stop2000ms unchanged",
+    "Publication immutable deadline unchanged",
+    "ROOT+APP TRACE enabled unchanged",
+    "All30 canary scan variants unchanged",
+    "Fresh policy/source/current secret authorization and assignment guards unchanged",
+    "Atomic locked SQL unchanged",
+    "No runtime authority or state changes",
+    "All43 prior session scenarios retained"
+  ],
+  "minimumVerification": [
+    "Strict compile/style checks by root",
+    "Existing WireContract native differential/refusal/canonical/default/version/fallback checks",
+    "Existing43 Session scenarios and16 Ledger scenarios including renewal SQL atomicity",
+    "Existing source-bound related suites only when source invalidates prior receipts",
+    "One existing mandatory original unprofiled C5 after source-review and gates; zero new mandatory E2E or supporting obligations"
+  ],
+  "baseHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "aece5e3e50a2696314f09407a087cb19ce4222728dde2816c282d10f77eeabe8",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "3d7ac2983354fdf98628c5668a23b0c2d3f49877c686b309c1a1ea5c9913b621",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "cc79311d3055e3887b7ee723a389bd3e25faa75ae5b0993ee8e6ad95df0fd72f",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": "b46069d29def0c0adf00f7c0e309c12b0a29e0c492f2b2a584c0ad5ac7dcd67d",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java": "5d26de1ae4d580a4ad2ca3674f3ee9a4be1f58f227b3f194fb20b97e0da4eaf8"
+  },
+  "runtimeStarted": false,
+  "sharedFilesChanged": false,
+  "lockOccupancyTradeoff": "Complete fresh session validation returns to original locked save. Prior successful proof ran only owner validation while locked. Total work and diagnostic amplification reduce structurally, but improved total latency or row-lock occupancy has not yet been measured."
+}

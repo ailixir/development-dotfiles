@@ -1,0 +1,125 @@
+{
+  "artifact": "HistoricalV18 exact held test-only patch/ownership map",
+  "status": "PENDING_INDEPENDENT_QUINN_AND_ROOT_RELEASE",
+  "ownerRules": [
+    "Data owns migration/head/helper tests",
+    "Backend owns production Java and current nonmigration tests",
+    "No simultaneous helper writers; no production or migration delta"
+  ],
+  "files": [
+    {
+      "owner": "Data",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "seams": [
+        "publishHistoricalV18Observed",
+        "publishObserved historical-only branch after actual reserve/claim/finish",
+        "new explicitly named commitHistoricalV18 fixture helper",
+        "validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry"
+      ],
+      "patch": "Route only historical branch to test-only SQL commit writer with full recomputation/identity/authority preconditions and actual V15paired transaction per ruling. All nonhistorical paths retain actual production commit. Add explicit current-head ordinary returned receipt has relearnedFrom:null check; preserve rollback, CAS and receipt assertions. Correct helper docs to disclose historical SQL commit exception."
+    },
+    {
+      "owner": "Data",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+      "seams": [
+        "requireV18",
+        "completeHistoricalV18Session",
+        "readHistoricalV18"
+      ],
+      "patch": "Keep complete actual historical evidence projection/current typed source+lowerer; explicit single ordinary navigation scope. Assert successful exact18 and absent later function/stores; never fabricate normalized/policy/ACKhistory or zero-action preimage. No general compatibility switch."
+    },
+    {
+      "owner": "Data",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java",
+      "seams": [
+        "three existing publication-dependent methods",
+        "revisionWithStepMetadata"
+      ],
+      "patch": "Preserve all4methods/original assertions/target18. Use explicitly named historical publication setup. Keep raw rollback-only step guard probes honest; add same-coordinate/same-test unequal snapshot hash negative within original reuse method. Do not replace complete committed candidate with raw guard probe."
+    },
+    {
+      "owner": "Data",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+      "seams": [
+        "everyObservedRevisionColumnRemainsImmutableOnTheHeadSchema",
+        "historicalExecutionCannotBeRelabelledAsFullEvidence"
+      ],
+      "patch": "Keep actual head21+production publishObserved. Add explicit capture equality/later-draft-edit isolation to first; publish via current Java and assert revision survives old execution deletion in rolledback probe in second. Preserve all prior assertions and schema parity/partition/confirmation cases."
+    }
+  ],
+  "productionDelta": "NONE. Current GuidedPublicationRepository.commit and GuidedIncrementalStore remain unchanged; no missing-function catching/fallback/interception.",
+  "sqlWriterStatements": [
+    "BEGIN via real test TransactionTemplate; session/draft/base/attempt locks and exact current authority/typed preimage assertions",
+    "UPDATE ui_tests SET authoring_revision_inputs=?::jsonb WHERE id=? (derived cache only, exact recomputed value)",
+    "INSERT INTO ui_test_revisions full24columns from recomputed complete candidate/current source, allowing installed V12capture trigger",
+    "INSERT INTO studio_guided_publications full historical columns/closed V15receipt WITHOUT relearnedFrom, paired exact real VALIDATEDattempt",
+    "UPDATE ui_tests SET confirmed_revision_id=? with original source/config/publication epoch/confirmed pointer/live authority CAS; require1",
+    "UPDATE studio_guided_sessions FINALIZING->SUCCEEDED with publication identity; require1",
+    "SET CONSTRAINTS ALL IMMEDIATE; commit real DB transaction; independently read durable pair after commit"
+  ],
+  "sqlSubjects": {
+    "V12": [
+      "capture_ui_test_revision_authoring",
+      "trg_ui_test_revisions_capture_authoring",
+      "ui_test_revisions_write_once",
+      "trg_ui_test_revisions_write_once",
+      "ck_ui_test_revisions_v2_reference_policy"
+    ],
+    "V13": [
+      "ck_ui_test_execution_scope",
+      "idx_ui_test_exec_full_baseline",
+      "studio_execution_scope_immutable",
+      "trg_studio_execution_scope_immutable"
+    ],
+    "V15": [
+      "ck_observed_revision_origin",
+      "fk_observed_revision_base",
+      "uq_observed_revision_pair",
+      "uq_observed_revision_scope",
+      "fk_observed_revision_receipt",
+      "studio_guided_publications reciprocal scope/revision/attempt FKs",
+      "studio_publication_attempt_guard",
+      "studio_publication_receipt_guard",
+      "tr_publication_receipt_guard",
+      "studio_publication_step_metadata_guard",
+      "tr_publication_step_metadata_guard",
+      "ck_observed_revision_step_metadata",
+      "studio_publication_immutable",
+      "tr_studio_publication_epoch"
+    ]
+  },
+  "exactHistoricalPublicReceiptKeys": [
+    "schemaVersion",
+    "sessionId",
+    "revisionId",
+    "revisionDigest",
+    "learnedPlanHash",
+    "artifactHash",
+    "publicationEvidenceHash",
+    "publishedAt",
+    "learnedFromThisRun",
+    "replayVerified"
+  ],
+  "prohibited": [
+    "V1-V20 or V21 bytes changed",
+    "target18 raised",
+    "studio_015function installed at18",
+    "DDL or disabled triggers/constraints",
+    "production fallback or generic schema-version route",
+    "current commit intercepted/caught/ignored",
+    "toy or zero-action committed basis",
+    "fake V19policy/V21normalized metadata or ACKhistory",
+    "head tests routed to historical adapter",
+    "earlier frozen evidence overwritten",
+    "method skip/removal or uncredited missing runtime claim"
+  ],
+  "releaseOrder": [
+    "Freeze proposed exact test source/diff and installed historical SQLfingerprints",
+    "Independent Quinn mapping review binds this manifest",
+    "Root exact source ownership release",
+    "Data implements only named held adapter/test facets; backend disjoint production/current nonmigration work unchanged",
+    "Root separately grants serialized compile/PGwindow",
+    "Preserve actual failure logs and fresh positive/negative counts with exact fixture/source/schema identities",
+    "Independent integration review before any QA/lifecycle completion"
+  ]
+}

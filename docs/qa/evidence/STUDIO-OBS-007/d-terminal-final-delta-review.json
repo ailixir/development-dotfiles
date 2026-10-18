@@ -1,0 +1,327 @@
+{
+  "at": "2026-10-10T15:25:49.058161+00:00",
+  "reviewer": "Independent Dara/data-engineer reviewer; independent of native contracts author",
+  "intent": ".aiox/sdc/STUDIO-OBS-007/dispatch/continuation-d-review-intent.txt",
+  "context": ".aiox/sdc/STUDIO-OBS-007/dispatch/continuation-d-review-context.txt",
+  "scope": "Read-only current D terminal-remediation and exact diagnostic delta; development-support verdict only, no story lifecycle QA",
+  "verdict": "PASS",
+  "findings": [],
+  "sourceHashes": {
+    "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql": "f644a055a2942939f4cd6a1f295757ebf769e706134ec12fa8b29f3e9f8ce380",
+    "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java": "92c33abf1f453fcd941c435c2eb32348a91b440e0e920ee82e979849da42dc72",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java": "cb3329c3f290e7a409c3c2da98f890da2cf070e8c8102c4d1683f38abbc22ab2",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java": "8c539ea40560f8c658c7cd6ecb3c61593c67baf2762a5c19497ec4d409eb9e7e",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java": "701657d46d0fbb4f4eb6e8a98149e7ef9f8b98a8c761eb9fec66f52747bf010e",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/ObservedTerminalSettlementIT.java": "9345a2c9581dcf936465c7cabd8d8c55b1258e26fefa2d87f10b5374c275f6bb"
+  },
+  "hashBinding": {
+    "rootCurrent264Manifest": {
+      "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql": true,
+      "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java": true,
+      "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java": true,
+      "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java": true,
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java": true,
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/ObservedTerminalSettlementIT.java": true
+    },
+    "rootStrictJavaManifest": {
+      "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql": true,
+      "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java": true,
+      "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java": true,
+      "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java": true,
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java": true,
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/ObservedTerminalSettlementIT.java": true
+    },
+    "rootCurrent264SourcesArchive": {
+      "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql": true,
+      "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java": true,
+      "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java": true,
+      "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java": true,
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java": true,
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/ObservedTerminalSettlementIT.java": true
+    },
+    "expectedV34Match": true
+  },
+  "assessments": [
+    {
+      "id": "TERM01",
+      "verdict": "PASS",
+      "historicalFindingPreserved": true,
+      "sourceProof": [
+        "V34:243 shared terminal check requires receipt, history, owner and summary xmin equal top pg_current_xact_id(); exact code/time/accepted locator/binding and before snapshot+1.",
+        "V34:286 regular history AFTER UPDATE guard binds authoritative locator/cause/time and rejects changed current-cut snapshot/child-XID after early SET CONSTRAINTS. It allows initial history-before-DONE CTE ordering, then checks complete winner once owner is DONE.",
+        "V34:316 regular owner AFTER UPDATE guard checks top-XID current winner and committed terminal owner; V34:346 fences retry/admission. Committed-cut metadata remains monotone with same winner."
+      ],
+      "runtimeEvidence": [
+        "earlyConstraintFlushCannotPermitLaterTerminalCauseTimeOrSnapshotMismatch()",
+        "earlyFlushCannotHideLaterSubtransactionWinnerVersion()",
+        "committedTerminalCutAllowsLaterGenuineEvidenceMetadataWithoutChangingItsWinner()",
+        "terminalSavepointReceiptOrWinnerWritesAreExplicitlyProhibited()"
+      ],
+      "qualification": "Root-executed archived tests, independently inspected current source/XML; no new reviewer runtime execution."
+    },
+    {
+      "id": "TERM02",
+      "verdict": "PASS",
+      "historicalFindingPreserved": true,
+      "sourceProof": [
+        "PartitionManager:127 ensurePartition emits one DO statement: transaction advisory lock, existing-leaf ACCESS EXCLUSIVE repair or CREATE PARTITION, applicable guard installer before commit. Failure rolls back creation/repair. ensurePartitions records a leaf only after successful call.",
+        "V34:733 installer restricts family/name/lineage and installs direct TRUNCATE plus deferred leaf terminal/no-send checks. Insert/update/delete parent triggers clone; V34:757 migration leaves attach and install in one DO."
+      ],
+      "runtimeEvidence": [
+        "actualProductionPartitionPublishesAllGuardsAtomicallyWithOrWithoutOuterTransaction()",
+        "productionPartitionFailureRollsBackNewAttachmentAndAllApplicableGuards()",
+        "productionExistingLeafRepairIsAtomicIdempotentAndDoesNotNeedDefaultOrMutation()"
+      ],
+      "qualification": "Current new-leaf and missing-guard repair protected. Installer fills missing named triggers; no claim that it repairs already committed inconsistent rows or malicious same-name trigger replacement by privileged DDL."
+    },
+    {
+      "id": "D-REREVIEW01",
+      "verdict": "PASS",
+      "sourceProof": [
+        "SecretUseAuditIT:1475 method preserves receipt-only exact top-transaction refusal.",
+        "Mismatch loop still iterates List.of(true,false): actual wrong code REFERENCE_UNAVAILABLE, then actual wrong time ended+1s. Corrected assertions unwrap PostgreSQL PSQLException, require P0001, exact server message terminal secret settlement authoritative history locator immutable and studio_observed_terminal_history_update_guard() identity.",
+        "After both iterations, zero receipts, zero audit rows and QUEUED owner assertions remain. Fresh passing method XML plus hash-identical archived source supports both iterations and rollback tail being reached; no inner branch telemetry or separate iteration testcase is claimed."
+      ],
+      "runtimeEvidence": [
+        "terminalReceiptRequiresExactActualWinnerCodeTimeAndPhysicalTransaction()"
+      ],
+      "qualification": "Correction follows current earlier regular guard cause; it does not weaken V34 or replace the receipt-only/top-XID oracle."
+    }
+  ],
+  "receipts": {
+    "current264": {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-2/result.json",
+      "sha256": "b2160cb4dcd3c11ebd0e5f485508a0581eed1a26cd788f37e6c6092c68caecc0",
+      "reported": {
+        "scope": "Exact selected current backend gate only; no whole-story QA verdict",
+        "gradleExitCode": 0,
+        "sourceDrift": [],
+        "results": [
+          {
+            "class": "com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest",
+            "tests": 22,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.secrets.VaultResolutionDecisionTest",
+            "tests": 5,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.dispatch.StudioDispatcherFailureIT",
+            "tests": 15,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.publication.SecretAuditLifecycleIT",
+            "tests": 7,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+            "tests": 36,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+            "tests": 23,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.dispatch.DispatcherIT",
+            "tests": 26,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.secrets.VaultStreamingReadTest",
+            "tests": 3,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.recovery.RecoveryIT",
+            "tests": 25,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.publication.ObservedReadEntryProtocolIT",
+            "tests": 11,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.dispatch.ObservedTerminalSettlementIT",
+            "tests": 20,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+            "tests": 5,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+            "tests": 30,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.session.GuidedActionLedgerTest",
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+            "tests": 23,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.secret.LoginRequiredDetectionTest",
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.publication.ObservedResolverProcessCrashIT",
+            "tests": 3,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        ],
+        "finishedAt": "2026-10-10T12:39:09.210773+00:00",
+        "tests": 264,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "pass": true
+      },
+      "independentlySummedXml": {
+        "tests": 264,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "xmlSuiteCount": 17,
+      "targetCaseReceipts": {
+        "terminalReceiptRequiresExactActualWinnerCodeTimeAndPhysicalTransaction()": [
+          {
+            "time": "2.387",
+            "failureErrorSkipChildren": []
+          }
+        ],
+        "earlyConstraintFlushCannotPermitLaterTerminalCauseTimeOrSnapshotMismatch()": [
+          {
+            "time": "3.53",
+            "failureErrorSkipChildren": []
+          }
+        ],
+        "earlyFlushCannotHideLaterSubtransactionWinnerVersion()": [
+          {
+            "time": "2.685",
+            "failureErrorSkipChildren": []
+          }
+        ],
+        "committedTerminalCutAllowsLaterGenuineEvidenceMetadataWithoutChangingItsWinner()": [
+          {
+            "time": "2.873",
+            "failureErrorSkipChildren": []
+          }
+        ],
+        "terminalSavepointReceiptOrWinnerWritesAreExplicitlyProhibited()": [
+          {
+            "time": "2.317",
+            "failureErrorSkipChildren": []
+          }
+        ],
+        "actualProductionPartitionPublishesAllGuardsAtomicallyWithOrWithoutOuterTransaction()": [
+          {
+            "time": "4.218",
+            "failureErrorSkipChildren": []
+          }
+        ],
+        "productionPartitionFailureRollsBackNewAttachmentAndAllApplicableGuards()": [
+          {
+            "time": "3.456",
+            "failureErrorSkipChildren": []
+          }
+        ],
+        "productionExistingLeafRepairIsAtomicIdempotentAndDoesNotNeedDefaultOrMutation()": [
+          {
+            "time": "3.682",
+            "failureErrorSkipChildren": []
+          }
+        ]
+      }
+    },
+    "strictJava": {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-static-3/result.json",
+      "sha256": "00c779651d56ced6164dd2428c86a5dd1f6543ec7106e537ece8c1e36390af56",
+      "reported": {
+        "scope": "Current strict format/Checkstyle/Spotbugs task outcomes only, no wholeStoryQA",
+        "exitCode": 0,
+        "sourceDrift": [],
+        "finishedAt": "2026-10-10T12:33:54.476167+00:00"
+      },
+      "invocation": {
+        "command": [
+          "./gradlew",
+          "spotlessCheck",
+          "checkstyleMain",
+          "checkstyleTest",
+          "spotbugsMain",
+          "--continue"
+        ],
+        "startedAt": "2026-10-10T12:33:26.067052+00:00"
+      },
+      "runLogSha256": "868da1ac238f8cc79fd4952765fe49dc88fdba6393e974d08920295384e7ccb3",
+      "runLogObservation": "spotlessCheck, checkstyleMain, checkstyleTest and spotbugsMain tasks present; BUILD SUCCESSFUL; exitCode0/sourceDrift[]. Checkstyle archived summaries show main477/test345 checked, zero violations."
+    }
+  },
+  "independentExecution": {
+    "gradleRuns": 0,
+    "sqlProbes": 0,
+    "binaryProbes": 0,
+    "sharedDbReadsOrWrites": false,
+    "sourceEdits": false,
+    "lifecycleChanges": false,
+    "writes": [
+      "docs/qa/evidence/STUDIO-OBS-007/d-terminal-final-delta-review.json"
+    ],
+    "method": "Current source, historical scoped finding/correction reports, source manifests/archive and root-owned receipts/XML inspected; root runtime evidence explicitly attributed."
+  },
+  "unexecutedLimitations": [
+    "No independent rerun, deployment, real provider/browser or shared database probe.",
+    "No whole-story QA, all19/AC/security/C6 completion, release or pilot approval; existing broader runtime/privacy/crash obligations remain uncredited by this delta.",
+    "Archived XML is method-level; both mismatch iterations and rollback tail are supported by straight-line current source plus whole-method PASS, not separately instrumented branch receipts."
+  ],
+  "handoff": "Exact TERM01/TERM02 remediation and D-REREVIEW01 correction supported by current hash-bound 264 PASS/no skips/no drift and strictJava zero receipt. Scoped development-support PASS only; historical findings unchanged; no lifecycle transition."
+}

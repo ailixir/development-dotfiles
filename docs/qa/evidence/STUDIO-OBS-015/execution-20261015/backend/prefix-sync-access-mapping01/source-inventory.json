@@ -1,0 +1,99 @@
+{
+  "story": "STUDIO-OBS-015",
+  "reviewer": "Aria",
+  "scope": "PFXSYNC04 currentaccess mapping correction only",
+  "hashAlgorithm": "SHA-256",
+  "references": [
+    {
+      "role": "production_current_access_held",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+      "sha256": "d7b56a9e930f01b00e7c2d24fd9bddad146b601cdc89812235f2c1b2c674deeb"
+    },
+    {
+      "role": "production_gate_immutable_source_after",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/source-after/GuidedTranslationService.java",
+      "sha256": "d8c494b290fdecff883d3e6b38de2b7cb6470cddfd42db84db84d7cf85c45fc3"
+    },
+    {
+      "role": "test_existing_harness_immutable_before",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/source-before/GuidedPublicationReplayIT.java",
+      "sha256": "246e355b2cdc237957a519d17fdfab81f6fc230102f94176b6df99799fb56bf4"
+    },
+    {
+      "role": "prior_mapping_manifest",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-test-seam01/manifest.json",
+      "sha256": "9f276ecf59569c6e4bbd6cf3687f3fb8d3b05063e798a6b1d68effa4bc04e367"
+    },
+    {
+      "role": "normative",
+      "path": "docs/specs/studio-observed-authoring/bridge-design.md",
+      "sha256": "8510bb7426c17bd91e261d0a1960ca86b05a2e630254575086fd36b362445179"
+    },
+    {
+      "role": "prior_design_required_existing_checks",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-design/review.md",
+      "sha256": "2148ea36037a49961b363e789d272d0f389defb1604d88502fabd3e2e9e6d01c"
+    },
+    {
+      "role": "production_worker_transaction_held",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "e3b1f3c06f7f6ac6dcc2eb3ef609a0047ad1b34c536eed1363ac68e405c78b82"
+    }
+  ],
+  "movingDraft": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "status": "PROVISIONAL_ACTIVE_DEX_TEST_IMPLEMENTATION_NOT_FINAL_QA",
+    "observedSubjects": [
+      "PFXSYNC04 accesscase coreRole none/public403 then falseworkerFORBIDDEN_SCOPE expectation",
+      "ordinary prefixSyncParent no-secret10steps",
+      "controlledLoginEntitlement defaultgrant",
+      "P3 secretprefix/grant helpers"
+    ],
+    "noStableWholeDraftClaim": true
+  },
+  "anchors": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+      "lines": [
+        59,
+        116,
+        126,
+        139,
+        153
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/source-after/GuidedTranslationService.java",
+      "lines": [
+        395,
+        405
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/source-before/GuidedPublicationReplayIT.java",
+      "lines": [
+        5977,
+        11720,
+        13563,
+        13614,
+        13627,
+        15578,
+        15636,
+        19610
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "lines": [
+        142,
+        150,
+        154
+      ]
+    }
+  ],
+  "correction": "Prior mapping conflated public Core checkUser with worker checkCurrent; originalacceptance unchanged.",
+  "observationsNotExecution": true,
+  "sourceOrTestEdited": false,
+  "globalSourceStableClaim": false,
+  "unexecuted": "No newsecretparent/currentACKgrantcut/native/Vault/2048fit proof; combinedproducer-secretgrantcut remainsOPEN."
+}

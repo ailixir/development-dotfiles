@@ -1,0 +1,1908 @@
+{
+  "artifact": "STUDIO-OBS-015 exact complete default Node unit03 feedback",
+  "at": "2026-10-15T08:36:19.279844+00:00",
+  "status": "FAILED47_PLUS4_UNHANDLED_NO_SOURCE_REPAIR_RETRY",
+  "authorization": "Root one exact full default ./node_modules/.bin/vitest run after actual build03PASS, with unchanged V8 coverage/thresholds/filter/skip/oracle. Source and dist held.",
+  "buildPrerequisite": {
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-15T08:28:14.160730+00:00",
+    "elapsedSeconds": 2.0,
+    "exit": 0,
+    "sourceStable": true,
+    "sourceDigestBefore": "1c0d3c7a77ef8c86ce655eac09585488c3b417b01372ca88d7587e278c693e80",
+    "sourceDigestAfter": "1c0d3c7a77ef8c86ce655eac09585488c3b417b01372ca88d7587e278c693e80",
+    "distMutationAuthorized": true,
+    "distDigestBefore": "f707cb6041b9d8355aa3f6ada30d0774614e9f3a3aeeb66554e011a7e6448c8c",
+    "distDigestAfter": "0622b77620f47f2d456ef2855d93bc3fd4c6542ff5b35db7db6223c238ea9d85",
+    "changedDistFiles": [
+      "executor/observedReplay.js",
+      "executor/observedReplay.js.map",
+      "guided/contracts.js",
+      "guided/contracts.js.map",
+      "observed-reference.json",
+      "run/observedReplayAdapter.js",
+      "run/observedReplayAdapter.js.map",
+      "runtime-versions.json",
+      "validator/observedReplay.js",
+      "validator/observedReplay.js.map"
+    ],
+    "logSha256": "50d8b286b802e2ce024ca6690dd1f1000b4bcd043b5615565d354c439374330a",
+    "testsExecuted": 0,
+    "nativeExecuted": false,
+    "scope": "Real configured runner build; dist mutation is expected, source mutation is not"
+  },
+  "actualUnit": {
+    "command": [
+      "./node_modules/.bin/vitest",
+      "run",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-unit-feedback-attempt03-vitest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-15T08:29:24.856799+00:00",
+    "elapsedSeconds": 11.16,
+    "exit": 1,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "6d02da92a8697be7c4336d8e9fca0cbfb19f0a02ae6e63e0ffaa451ae4da633b",
+    "vitest": {
+      "success": false,
+      "numPassedTests": 1849,
+      "numFailedTests": 47,
+      "numPendingTests": 29,
+      "numTotalTests": 1925,
+      "numPassedTestSuites": 324,
+      "numFailedTestSuites": 9
+    },
+    "vitestReportSha256": "e8a27a172476a8651db93bb0d2676eb8add24767c4e9303672de68067370fdf0"
+  },
+  "actualFileCounts": {
+    "selected": 103,
+    "passedWithExecutedCases": 98,
+    "historicalSkipOnly": 1,
+    "failedFiles": 4,
+    "failedModuleLoad": 0,
+    "failedBeforeAll": 0
+  },
+  "actualCases": {
+    "collected": 1925,
+    "passed": 1849,
+    "failed": 47,
+    "skippedUncredited": 29,
+    "unhandledRejections": 4
+  },
+  "multiplicityAgainstUnit02": {
+    "oldCollected": 1691,
+    "newCollected": 1925,
+    "increase": 234,
+    "preservedOldCases": 1691,
+    "removedOrRenamedMultiplicity": 0,
+    "removedDetails": [],
+    "addedMultiplicity": 234,
+    "addedOrRestoredByFile": {
+      "studio-runner/test/controlReferencePreservation.test.ts": 13,
+      "studio-runner/test/currentWorldFactories.test.ts": 7,
+      "studio-runner/test/documentJson.test.ts": 15,
+      "studio-runner/test/observedIncrementalValidation.test.ts": 1,
+      "studio-runner/test/observedReplayValidation.test.ts": 19,
+      "studio-runner/test/retainedExecute.test.ts": 3,
+      "studio-runner/test/guided/diagnostics.test.ts": 3,
+      "studio-runner/test/guided/evidence.test.ts": 20,
+      "studio-runner/test/guided/incrementalRuntime.test.ts": 14,
+      "studio-runner/test/guided/ownership.test.ts": 13,
+      "studio-runner/test/guided/policyHash.test.ts": 6,
+      "studio-runner/test/guided/runtime.test.ts": 47,
+      "studio-runner/test/guided/schemaAudit.test.ts": 8,
+      "studio-runner/test/guided/transport.test.ts": 14,
+      "studio-runner/test/run/guidedMain.test.ts": 6,
+      "studio-runner/test/run/observedPreparedAdapter.test.ts": 2,
+      "studio-runner/test/run/secretReplay.test.ts": 43
+    },
+    "explanation": "Nested suite counts are not case/file scope. Actual inventory comparison uses exact file+fullName multiplicities: all1691previously collected cases remain;234newly added or restored cases collect. Guided suites now register instead of disappearing, and the distinct canonical unanchored observation negative remains. No scope removal is credited."
+  },
+  "skipClassification": {
+    "historicalIntentional": 29,
+    "abortedBeforeAll": 0,
+    "newSkips": 0,
+    "files": [
+      {
+        "file": "studio-runner/test/deferred.test.ts",
+        "count": 19
+      },
+      {
+        "file": "studio-runner/test/run/canary.test.ts",
+        "count": 8
+      },
+      {
+        "file": "studio-runner/test/run/sandbox.test.ts",
+        "count": 1
+      },
+      {
+        "file": "studio-runner/test/server/drain.test.ts",
+        "count": 1
+      }
+    ],
+    "note": "All29historical skips remain uncredited: deferred19/canary8/sandbox1/drain1. Unit02 additional16contract beforeAll-aborted cases now execute; none were reclassified deferred/resolved."
+  },
+  "newAndChangedSuiteOutcomes": [
+    {
+      "file": "studio-runner/test/controlReferencePreservation.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 13
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/currentWorldFactories.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 7
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/documentJson.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 15
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "status": "failed",
+      "counts": {
+        "passed": 92,
+        "failed": 29
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/observedReplayValidation.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 119
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/pins.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 44
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/retainedExecute.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 105
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/schemaSemantics.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 15
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "status": "failed",
+      "counts": {
+        "failed": 12,
+        "passed": 2
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/guided/runtime.test.ts",
+      "status": "failed",
+      "counts": {
+        "passed": 42,
+        "failed": 5
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/guided/schemaAudit.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 8
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/observedChildRuntime.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 25
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/observedPreparedAdapter.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 2
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/secretReplay.test.ts",
+      "status": "failed",
+      "counts": {
+        "passed": 42,
+        "failed": 1
+      },
+      "hookOrLoadError": ""
+    }
+  ],
+  "passingScopeHighlights": [
+    "Actual current guided bundle audit8 and unchanged schema semantics15 passed;0failed-load files.",
+    "All current control preservation13, original replay validation119, factory7, document reader15 passed, with positive parents accepted before mutations.",
+    "Retained Execute105passed including50frozen complete witness cases and explicit crossed-build/foreign-source/unused-recipe negatives.",
+    "Actual parent/child browser-free lifecycle25 and positive-prewrite-versus-INVOKING adapter2 passed; this is not actual native/DB authority.",
+    "Actual built package pins44passed on exact dist0622b776...; no stale-dist result substituted."
+  ],
+  "failureGroups": [
+    {
+      "id": "INCREMENTAL_VECTOR_EVIDENCE_TIER_ROUTING",
+      "failures": 29,
+      "owner": "runner test boundary mapping with independent Quinn plan; runtime gaps only where genuinely available basis facts require enforcement",
+      "source": "studio-runner/test/observedIncrementalValidation.test.ts:16",
+      "subfamilies": {
+        "snapshotNegatives": 7,
+        "graphNegatives": 12,
+        "originalBasisNegatives": 10
+      },
+      "observedFailure": "All29calls expected deriveObservedArtifact(row.basis) to throw, but it returned a derived artifact.",
+      "exactCases": [
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction rejects snapshot authority immutable-original-source-cannot-be-replaced",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction rejects snapshot authority private-plain-hash-must-match-before-freeze",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction rejects snapshot authority immutable-source-manifest-hash-is-exact",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction rejects snapshot authority candidate-snapshot-map-cannot-be-copied-even-if-resealed",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction rejects snapshot authority candidate-gap-in-reused-prefix",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction rejects snapshot authority candidate-older-same-test-revision-id",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction rejects snapshot authority candidate-suffix-reuse-is-forbidden",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction REJECT: raw-edge-cannot-name-pending-action",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction REJECT: raw-allocation-cannot-be-replaced-with-effective-empty-copy",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction REJECT: raw-failed-edge-history-cannot-be-erased",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction REJECT: receipt-transport-authority-cannot-be-inferred-from-hash",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction REJECT: candidate-policy-cannot-omit-successful-transfer",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction REJECT: candidate-policy-binding-cannot-drop-successful-consumer",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction REJECT: publication-preimage-must-commit-raw-failed-edge",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction REJECT: publication-preimage-envelope-cannot-change",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction REJECT: admission-preimage-must-exclude-spent-attempt",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction REJECT: admission-preimage-is-array-not-wrapper",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction REJECT: candidate-authorization-preimage-is-exact",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction REJECT: candidate-source-identity-cannot-be-substituted",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction INPUT_HASH: wrong-private-input-hash",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction PREPARATION_REVISION: preparation-substitutes-birth-for-actual",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction OMITTED_ATTEMPT: unrelated-failed-ledger-cannot-be-omitted",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: hash-is-not-transport-authentication",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: forged-jwt-algorithm",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: missing-mtls",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: wrong-worker-subject",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: stale-callback-owner",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: wrong-assignment",
+          "message": "AssertionError: expected [Function] to throw an error"
+        },
+        {
+          "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+          "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: wrong-owner-fence",
+          "message": "AssertionError: expected [Function] to throw an error"
+        }
+      ],
+      "diagnosis": "The loop uniformly supplies basis only. Rows can instead mutate offered expectedArtifact/candidate maps or authority sidecars (sourceManifest/privateInputs/preparations/ledgers/rawGraph/authenticatedReceipt) not serialized in that basis. A basis-only pure function does not inspect offered candidate or hidden authority. Four candidate-only snapshot map/reuse mutations have basis identical to valid boundary. Candidate/hash-only graph rows likewise require actual request/candidate comparison. Hidden private/hash/preparation-history/transport callback facts require actual private DB/authenticated boundary tier.",
+      "preservation": "Route each named case through basis validation, offered-candidate/request validation, or hidden authoritative DB/transport checks exactly per frozen rules and Quinn disposition. No vector deletion/skip, changed expected code, caller-trusted sidecars/flags, or fabricated private reconstruction. Two public raw-allocation/failed-edge erasures also change basis arrays; Quinn must distinguish independently derivable program/base/excluded joins from truly hidden raw-history authority, not blanket-dismiss all29.",
+      "publicMinimumJoinRefinement": {
+        "affectedCases": [
+          "raw-allocation-cannot-be-replaced-with-effective-empty-copy",
+          "raw-failed-edge-history-cannot-be-erased"
+        ],
+        "status": "POTENTIAL_REAL_PUBLIC_BASIS_JOIN_DEFECT_NOT_AUTHORITY_ONLY",
+        "TS": "studio-runner/src/validator/observedHistory.ts effectiveGraph validates excluded edges only if supplied; does not require exact admitted excluded binding edge and allocation pair once",
+        "backend": "GuidedEffectiveGraph has same existing-edge-only gap. GuidedBindingStore.java:165 requires raw allocation before binding admission; GuidedSessionService.java:1364 attaches consumer atomically at admit; GuidedBindingStore.java:208\u2013236 persists it before dispatch.",
+        "availablePublicEvidence": "excludedAttempts includes admitted FAILED/TARGET_CHANGED dispatch1 attempt0 and exact binding-fill proposal. This suffices to require exact excluded binding use edge exactly once and raw allocation pair inclusion without guessing hidden complete history.",
+        "remainingPrivateAuthority": "Exact complete original rawGraph equality, hidden ledger inventory and actual authenticated callback/DB/private value facts remain separate real authority tier.",
+        "sourceRelease": "No code changes; independent Quinn exact disposition and root release required."
+      }
+    },
+    {
+      "id": "PREFIX_HARNESS_INVALID_STABLE_IDENTITIES",
+      "failures": 12,
+      "owner": "runner nonpin unit harness",
+      "source": "studio-runner/test/guided/incrementalRuntime.test.ts:19",
+      "observedFailure": "Every prefix runtime case fails at GuidedRuntime.start -> validate runner-context before its intended behavior. Only2standalone durable fence cases pass.",
+      "exactCause": "PrefixProgram.sourceStepIds uses nav/read whereas runner-context#/definitions/PrefixProgram/items requires stable UUIDs. Ordinary guidedContext IDs are legal ordinary fixtures but cannot be imported as frozen prefix IDs. PrefixRequestIdentity also requires numeric decimal source/config revisions; harness uses source-1/config-1, a second issue to preserve in the coherent parent repair.",
+      "repairConstraint": "Build a fully coherent UUID/counter parent, with all coordinate/input provenance/allocation/program/hash/evidence joins regenerated before intended faults. Do not relax schema or bypass start."
+    },
+    {
+      "id": "AWAITED_CONTEXT_UPDATE_ORACLES",
+      "failures": 4,
+      "owner": "runner inherited runtime test port",
+      "sourceLines": [
+        "studio-runner/test/guided/runtime.test.ts:158",
+        "studio-runner/test/guided/runtime.test.ts:173",
+        "studio-runner/test/guided/runtime.test.ts:216"
+      ],
+      "observedFailure": "Tests retain synchronous expect(()=>runtime.update()).toThrow after update became Promise-returning for withhold-before-ACK. Actual update rejects correctly; test checks sync throw and leaves rejected Promise unhandled. One allocation case, two aggregate-bound parameter cases, one identity case fail.",
+      "unhandledRejections": 4,
+      "actualRejectedCodes": [
+        "CONTEXT_REVISION",
+        "CONTEXT_LOST",
+        "CONTEXT_LOST",
+        "INPUT_IDENTITY"
+      ],
+      "repairConstraint": "Await successful updates and awaited rejects; keep exact original cumulative identity/budget/refusal assertions and codes. No runtime guard weakening or swallowing unhandled errors."
+    },
+    {
+      "id": "TARGET_CHANGED_AFTER_NATIVE_FENCE_TIMING",
+      "failures": 1,
+      "owner": "runner runtime/recording fixture classification; independent frozen safety rule",
+      "source": "studio-runner/test/guided/runtime.test.ts:291",
+      "observedFailure": "Fixture throws generic TARGET_CHANGED from navigateBlank after beginInvocation/fence; actual state UNKNOWN_OUTCOME, test expects FAILED and measured endMs21.",
+      "repairConstraint": "Generic post-native failure cannot provide positive no-invocation proof or fabricated completion end. Preserve actual pre-invocation target refusal as a distinct before-native fixture with no native stamp, and native-started uncertain failure with null endMs; keep exact existing007/013/014timing/no-repeat oracles. Any expected transition change must follow frozen semantics, not accidental code."
+    },
+    {
+      "id": "STRICT_WRAPPER_STATIC_ASSERTION_STALE_SIGNATURE",
+      "failures": 1,
+      "owner": "runner source-architecture test port",
+      "source": "studio-runner/test/run/secretReplay.test.ts:102",
+      "observedFailure": "Old exact source string validateObservedExecute(message, scope) and direct graph call assumptions no longer match the stronger acceptedLaunch3argument/current artifact structural helper integration.42other secretReplay cases pass.",
+      "repairConstraint": "Assert actual strict wrapper/current accepted context through child/executor and constrain the value-free published graph helper/private retained set at current call sites. Keep no secrets/value-return/exception bypass intent; do not restore an unbound2arg executable path to satisfy string matching."
+    }
+  ],
+  "allFailedCases": [
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction rejects snapshot authority immutable-original-source-cannot-be-replaced",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction rejects snapshot authority private-plain-hash-must-match-before-freeze",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction rejects snapshot authority immutable-source-manifest-hash-is-exact",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction rejects snapshot authority candidate-snapshot-map-cannot-be-copied-even-if-resealed",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction rejects snapshot authority candidate-gap-in-reused-prefix",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction rejects snapshot authority candidate-older-same-test-revision-id",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction rejects snapshot authority candidate-suffix-reuse-is-forbidden",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction REJECT: raw-edge-cannot-name-pending-action",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction REJECT: raw-allocation-cannot-be-replaced-with-effective-empty-copy",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction REJECT: raw-failed-edge-history-cannot-be-erased",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction REJECT: receipt-transport-authority-cannot-be-inferred-from-hash",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction REJECT: candidate-policy-cannot-omit-successful-transfer",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction REJECT: candidate-policy-binding-cannot-drop-successful-consumer",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction REJECT: publication-preimage-must-commit-raw-failed-edge",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction REJECT: publication-preimage-envelope-cannot-change",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction REJECT: admission-preimage-must-exclude-spent-attempt",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction REJECT: admission-preimage-is-array-not-wrapper",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction REJECT: candidate-authorization-preimage-is-exact",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction REJECT: candidate-source-identity-cannot-be-substituted",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction INPUT_HASH: wrong-private-input-hash",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction PREPARATION_REVISION: preparation-substitutes-birth-for-actual",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction OMITTED_ATTEMPT: unrelated-failed-ledger-cannot-be-omitted",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: hash-is-not-transport-authentication",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: forged-jwt-algorithm",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: missing-mtls",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: wrong-worker-subject",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: stale-callback-owner",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: wrong-assignment",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "name": "independent complete incremental publication reconstruction RECEIPT_AUTHENTICATION: wrong-owner-fence",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "name": "incremental prefix retains live guided authority prepares and performs on the same handle/session then learns suffix without another launch",
+      "message": "Error: SCHEMA"
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "name": "incremental prefix retains live guided authority persists exact admitted pre-native refusal and keeps spent admission unusable",
+      "message": "Error: SCHEMA"
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "name": "incremental prefix retains live guided authority allows exactly attempt1 after a spent admitted refusal, with all attempts still budgeted",
+      "message": "Error: SCHEMA"
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "name": "incremental prefix retains live guided authority pre-admission authenticated drift spends no admission and preserves attempt0",
+      "message": "Error: SCHEMA"
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "name": "incremental prefix retains live guided authority native-started target failure is terminal unknown and cannot authorize drift",
+      "message": "Error: SCHEMA"
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "name": "incremental prefix retains live guided authority appends only after withhold and ACKs exact issued context despite a newer live lease",
+      "message": "Error: SCHEMA"
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "name": "incremental prefix retains live guided authority bounds ABSENT/VISIBILITY_PENDING acquisition at32fresh observations with no invocation",
+      "message": "Error: SCHEMA"
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "name": "incremental prefix retains live guided authority lost authenticated drift acknowledgement is terminal unknown and cannot grant a replacement",
+      "message": "Error: SCHEMA"
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "name": "incremental prefix retains live guided authority lost pre-admission drift callback also stops instead of granting suffix authority",
+      "message": "Error: SCHEMA"
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "name": "incremental prefix retains live guided authority native policy refusal is terminal and never converted into target drift",
+      "message": "Error: SCHEMA"
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "name": "incremental prefix retains live guided authority serializes context deliveries and returns the original historical ACK after later metadata",
+      "message": "Error: SCHEMA"
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "name": "incremental prefix retains live guided authority fresh observation after human wait invalidates the pre-confirmation preparation",
+      "message": "Error: SCHEMA"
+    },
+    {
+      "file": "studio-runner/test/guided/runtime.test.ts",
+      "name": "durable worker consumption and recovery retains cumulative allocations while admitting appended prospective consumers",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/guided/runtime.test.ts",
+      "name": "durable worker consumption and recovery enforces aggregate/count bounds without exporting a read value: {\"maxRuntimeValues\":1}",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/guided/runtime.test.ts",
+      "name": "durable worker consumption and recovery enforces aggregate/count bounds without exporting a read value: {\"maxRuntimeValuesBytesTotal\":3}",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/guided/runtime.test.ts",
+      "name": "durable worker consumption and recovery rejects mismatched owner/tuple, raised caps, fabricated origin and context rewrites",
+      "message": "AssertionError: expected [Function] to throw an error"
+    },
+    {
+      "file": "studio-runner/test/guided/runtime.test.ts",
+      "name": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) stamps endMs per outcome for targetChanged effects",
+      "message": "AssertionError: expected 'UNKNOWN_OUTCOME' to be 'FAILED' // Object.is equality"
+    },
+    {
+      "file": "studio-runner/test/run/secretReplay.test.ts",
+      "name": "value-free artifact graph versus strict released-value boundaries keeps execution callers on the strict wrapper and static helper limited to its two production consumers",
+      "message": "AssertionError: expected 'import { SecretUseEvidence } from \\'.\u2026' to contain 'validateObservedExecute(message, scop\u2026'"
+    }
+  ],
+  "allSelectedFileOutcomes": [
+    {
+      "file": "studio-runner/test/browser-provenance.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 17
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/compat.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 6
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/contract-integrity.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 3
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/contract.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 16
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/controlReferencePreservation.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 13
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/currentWorldFactories.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 7
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/deferred.test.ts",
+      "status": "passed",
+      "counts": {
+        "skipped": 19
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/deployment-tier-wiring.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 6
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/disclosure.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 14
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/documentJson.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 15
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/generated-contracts.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 2
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/isolation.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 29
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/lint-boundary.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 89
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/nativeBlankSurface.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 27
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/nativeControlReadiness.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 51
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/no-dynamic-evaluation.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 8
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "status": "failed",
+      "counts": {
+        "passed": 92,
+        "failed": 29
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/observedReplayEquivalence.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 76
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 32
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/observedReplayValidation.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 119
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/observedV3TupleValidation.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 16
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/pins.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 44
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/profileSafetyFixture.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 67
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/redaction.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 8
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/retainedExecute.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 105
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/runtime-versions.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 13
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/schemaSemantics.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 15
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/evaluation/fixture-run.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 3
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/evaluation/report.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 10
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/guided/browser.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 11
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/guided/diagnostics.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 3
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/guided/evidence.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 20
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "status": "failed",
+      "counts": {
+        "failed": 12,
+        "passed": 2
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/guided/ownership.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 13
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/guided/policyHash.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 6
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/guided/runtime.test.ts",
+      "status": "failed",
+      "counts": {
+        "passed": 42,
+        "failed": 5
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/guided/schemaAudit.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 8
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/guided/transport.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 14
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/reporting/httpClient.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 11
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/reporting/observedProgressUse.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 10
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/reporting/reporting.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 37
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/appVideoOwnership.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 57
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/browserProfilePreferences.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 15
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/canary.test.ts",
+      "status": "passed",
+      "counts": {
+        "skipped": 8,
+        "passed": 1
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/childRuntimeTeardown.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 8
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/confinement.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 19
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/deadline.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 14
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/errors.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 12
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/evidenceStoreFaults.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 14
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/forkKillTree.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 2
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/guidedMain.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 6
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/launcher.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 28
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/manifest.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 11
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/objectStore.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 10
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/objectStoreFactory.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 3
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/observation.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 21
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/observationCollectorInvoke.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 15
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/observationCollectorNaming.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 10
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/observationInventory.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 5
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/observedBootstrap.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 12
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/observedChildRuntime.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 25
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/observedPreparedAdapter.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 2
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/observedReplayProtocol.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 40
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/observedWriterQuiescence.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 1
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/outputRelay.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 23
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/outputRelayContainment.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 1
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/passwordControlResolution.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 15
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/passwordControlTransport.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 26
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/processTableUnavailable.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 4
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/production-seams.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 5
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/recording.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 10
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/recordingScratch.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 33
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/s3ObjectStore.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 6
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/s3Sonic.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 2
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/s3Wire.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 1
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/sandbox.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 14,
+        "skipped": 1
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/secretReplay.test.ts",
+      "status": "failed",
+      "counts": {
+        "passed": 42,
+        "failed": 1
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/timeline.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 9
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/trackTreeSampling.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 4
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/tree.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 12
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/treeAsyncReader.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 2
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/run/treeAsyncReaderFaults.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 4
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/admission.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 25
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/cancel.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 16
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/concurrency.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 13
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/deadline-outcome.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 19
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/drain.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 10,
+        "skipped": 1
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/evidence.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 6
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/evidenceConfig.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 8
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/hung-child.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 8
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/observedReplayAdmission.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 16
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/observedReplayAuthorization.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 15
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/observedReplayRoutes.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 15
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/prelaunch.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 3
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/probe.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 1
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/resolved-value-guards.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 5
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/routes.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 28
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/scratch.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 8
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/storage-lifecycle.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 1
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/surface.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 12
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/terminal-order.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 10
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/server/timeline.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 4
+      },
+      "hookOrLoadError": ""
+    },
+    {
+      "file": "studio-runner/test/static/noRunnerSinks.test.ts",
+      "status": "passed",
+      "counts": {
+        "passed": 2
+      },
+      "hookOrLoadError": ""
+    }
+  ],
+  "coverage": {
+    "enabled": true,
+    "unchangedConfiguredThresholds": true,
+    "globalThresholds": {
+      "lines": 85,
+      "statements": 85,
+      "functions": 80,
+      "branches": 80
+    },
+    "directoryThresholds": "Every configured compat/scripts/server/reporting/main/run gate unchanged",
+    "tableProduced": false,
+    "summaryProduced": false,
+    "percentages": null,
+    "thresholdVerdict": "NO_EVALUATED_REPORTED_VERDICT_NO_PASS_CREDIT",
+    "details": "Log says Coverage enabled with v8, but no table, threshold evaluation result or coverage-summary.json was emitted after failed tests/unhandled rejections. Passing test counts do not imply coverage success."
+  },
+  "unhandledErrorEvidence": {
+    "count": 4,
+    "log": "execution/runner-unit-feedback-attempt03.log:1087",
+    "note": "Vitest explicitly warns unhandled errors may cause false-positive tests. They are separately reported, not added to47case failures or ignored."
+  },
+  "reviewed24FacetMappingPreserved": [
+    {
+      "id": "P01",
+      "requiredCase": "deletedLastConsumerRetainsProvenPrefixRead publishes actual successful retained read with empty consumers",
+      "expected": "Full Java/basis publication accepted; original producer snapshot equal; subsequent ordinary replay accepted model0, read executes fresh once",
+      "testSourceMapping": [
+        "backend-owned full publication/joined ordinary replay; runner/test/observedIncrementalValidation.test.ts complete-basis cases"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Full backend/basis and real published revision ordinary replay, not only corpus or structural acceptance",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "P02",
+      "requiredCase": "excludedBindingConsumerRetainsRawIntentAndPublishesLiteralReplacement (admitted-pre-invocation and pre-admission variants)",
+      "expected": "Raw intent/edge/history preserved; effective empty graph valid; full pure artifact and subsequent ordinary replay succeed",
+      "testSourceMapping": [
+        "backend-owned full publication/actual ordinary replay; test/observedIncrementalValidation.test.ts + all50retainedExecute witnesses"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Full backend/basis and real published revision ordinary replay, not only corpus or structural acceptance",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "P03",
+      "requiredCase": "Boundary retained producer with final consumer deleted + partial drift-step earlier successful producer",
+      "expected": "Exact pinned proof accepted; each original read recaptures new bytes, withheld, no fabricated consumer or cached value; assertion/policy drift behavior unchanged",
+      "testSourceMapping": [
+        "test/observedIncrementalValidation.test.ts",
+        "test/retainedExecute.test.ts executor revalidates and recaptures read"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Pure/executor tests plus inherited real backend/native/secret regressions where required; static listing is not execution",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "P04",
+      "requiredCase": "Run same finalized merged revision twice through actual launcher->child boundary",
+      "expected": "Same IR; fresh read values each run; no model calls; original operation order and one Execute maintained",
+      "testSourceMapping": [
+        "test/run/observedChildRuntime.test.ts replays identical bytes twice through actual launcher/child browser-free seam with fresh values"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "P05",
+      "requiredCase": "Normal graph with consumers and existing wire fixture, no retainedArtifact",
+      "expected": "Existing strict frame succeeds unchanged; no optional proof emitted",
+      "testSourceMapping": [
+        "test/run/observedReplayProtocol.test.ts composed normal closed launch/execute",
+        "test/run/observedChildRuntime.test.ts existing ordinary lifecycle"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N01",
+      "requiredCase": "zeroConsumerRequiresRetainedActualProducer: missing/failed/unretained/new suffix producer, unknown base/program, changed recipe/origin/coordinate, hidden successful use",
+      "expected": "Backend/full-basis refuses; no admitted publishable artifact; raw model empty consumers refuses",
+      "testSourceMapping": [
+        "test/observedIncrementalValidation.test.ts complete-basis negatives",
+        "test/retainedExecute.test.ts local published joins",
+        "backend and C-int raw-model min1 gates remain distinct"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Pure/executor tests plus inherited real backend/native/secret regressions where required; static listing is not execution",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N02",
+      "requiredCase": "Zero binding but omitted/null proof or missing accepted Launch context (also direct executor call)",
+      "expected": "Reject before replay action",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts missing/null/no-context/direct executor"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N03",
+      "requiredCase": "Proof supplied for nonzero consumer graph; unknown outer key; proof trusted flag, value/code/source/recursive basis extension",
+      "expected": "Closed shape/presence refuses; existing artifact/source/code negatives remain",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts unknown/trusted/raw-source/recursive/unnecessary witness",
+        "test/run/observedReplayProtocol.test.ts unchanged forbidden fields"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N04",
+      "requiredCase": "Mutate artifact retained list/base ID/read recipe/producer provenance or any otherwise-valid metadata without changing retained Launch",
+      "expected": "Canonical artifact hash mismatch refuses even if supplied hashes are adjusted",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts altered artifact against unchanged Launch"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N05",
+      "requiredCase": "Supply valid artifact from other revision/run, replay prior proof under different admitted artifact, forge expected hash inside Execute",
+      "expected": "Unknown expected-hash field or retained Launch hash mismatch refuses; proof cannot replace Launch",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts crossed launch authority + all50frozen witnesses"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N06",
+      "requiredCase": "Mutate Execute actions/order/coordinate/guard metadata/recipe/origin/binding/transfer while artifact remains pinned; remove/extra/duplicate entries",
+      "expected": "Exact projection/graph refuses every variant",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts altered executable steps/guards/bindings/transfers"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N07",
+      "requiredCase": "Omit actual binding use/consumer transfer or add orphan RuntimeBinding/read",
+      "expected": "Exact artifact projection plus complete graph accounting refuses",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts complete projection/graph negatives + all50witnesses"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N08",
+      "requiredCase": "Change input ID/order/kind/step/slot/secret referenceName or add/drop input",
+      "expected": "Exact recipe metadata projection refuses; secret values remain separate",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts input order/ID/kind/step/slot/extra + secret referenceName"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N09",
+      "requiredCase": "Change run/attempt/config/profile/scope/principal/current policy/build; second Execute, Execute before Ready, launch replacement",
+      "expected": "Existing launch identity/state/policy/build checks refuse; proof is no authorization",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts run/attempt/config/profile/principal/scope/policy/build",
+        "test/run/observedChildRuntime.test.ts Execute-before-Launch/Launch replacement/one result"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N10",
+      "requiredCase": "Artifact with internally consistent forged retained membership but current accepted Launch still pins actual original artifact",
+      "expected": "Hash rejects; do not call schema-valid altered artifact evidence of historical failure/success",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts changed retained metadata still pinned to old artifact"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Pure/executor tests plus inherited real backend/native/secret regressions where required; static listing is not execution",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N11",
+      "requiredCase": "Actual read mismatches operation binding ID/coordinate/recipe/origin/guard/provenance admission/sourceIntentStepId; retained list duplicate/non-prefix/unknown admission; initial/effective boundary invalid",
+      "expected": "Local published joins refuse (hash fixture updated only through genuine test admission setup); no hidden basis proof claimed",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts duplicate/non-prefix/unknown/boundary/recipe/producer local joins with recomputed unit admission"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Pure/executor tests plus inherited real backend/native/secret regressions where required; static listing is not execution",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N12",
+      "requiredCase": "Live target drift/password read/invalid read rule/policy refusal/cross-origin/oversize read/cancel/timeout",
+      "expected": "Existing adapter/invocation checks unchanged and run stops; valid proof grants no live authority",
+      "testSourceMapping": [
+        "test/run/observedChildRuntime.test.ts original read/target/secret/cancel cases",
+        "test/observedReplayExecutor.test.ts inherited full live invocation/safety suite",
+        "test/guided/incrementalRuntime.test.ts native policy/started failure and callbacks",
+        "actual native/secret/policy regression remains later window"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Pure/executor tests plus inherited real backend/native/secret regressions where required; static listing is not execution",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N13",
+      "requiredCase": "Artifact-over1MiB, stripped Execute-over2MiB, combined-over3145792, combined depth>32/nodes>1000000, invalid Unicode",
+      "expected": "Each cap refuses before semantic work/action; ordinary frame remains2MiB",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts artifact/base/combined/depth/Unicode/node bounds; combined1.03Mnodes under both byte caps"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "P06",
+      "requiredCase": "JSON wrapper byte arithmetic and legal boundary component sizes incl nonASCII and escaping; ordinary near-cap frame",
+      "expected": "New witness adds exact20 wrapper bytes; admitted within each component and combined bounds accepted by bound preflight; schema/semantics separately required",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts exact2MiB/1MiB+20wrapper/UTF8 preflight"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "P07",
+      "requiredCase": "Launch accepted before startDeadline; legal Ready+Execute after startDeadline but before runDeadline",
+      "expected": "Do not invalidate accepted launch by reapplying startDeadline; existing live run timeout still stops",
+      "testSourceMapping": [
+        "test/run/observedChildRuntime.test.ts accepted Launch Ready then Execute after startDeadline",
+        "test/retainedExecute.test.ts validator accepted-start no recheck"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "N14",
+      "requiredCase": "Attempt to alter retained Launch object in same-process seam or reuse context after terminal; native replay call counts on malformed proof",
+      "expected": "Private accepted snapshot remains fixed; second/terminal use rejected by runtime; replay action count0 for malformed proofs (browser may already be open)",
+      "testSourceMapping": [
+        "test/run/observedChildRuntime.test.ts immutable accepted Launch after caller mutation + malformed proof zero invoke/navigation + one Execute"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "P08",
+      "requiredCase": "Private canaries in fresh read/resolved secret/input values with retained proof",
+      "expected": "No proof enrichment; current withholding/clear/usage behavior; provider/log/report/result/media/argv/env outputs do not contain values",
+      "testSourceMapping": [
+        "test/run/observedChildRuntime.test.ts retained proof secret withholding/frame erasure/value-free result",
+        "test/retainedExecute.test.ts proof carries no released secret/read value"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Pure/executor tests plus inherited real backend/native/secret regressions where required; static listing is not execution",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "C01",
+      "requiredCase": "One source pointer addition, four generator outputs/closures, exact old/new pins and complete full witnesses",
+      "expected": "Source/generated/type/fixture/oracle semantic parity; raw model full SHA and minItems1 unchanged; public operation count43",
+      "testSourceMapping": [
+        "C-int-owned generation/schema/pins; all50new fixture rows consumed by runner tests, no contract proof substitute"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "C-int authorized source/generated/fixture/pin full semantic parity",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    },
+    {
+      "id": "C02",
+      "requiredCase": "Recompute build-bound basis/request/verdict/job/grant/admission/launch examples and every downstream digest under new bundle",
+      "expected": "Preserve witness scenario meaning; exact regenerated outputs match actual after pins; old SQL55 measured evidence remains its own tested snapshot",
+      "testSourceMapping": [
+        "C-int-owned canonical closure/build pins/fixture rebase; no dist build or SQL55 replay by runner"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "C-int authorized source/generated/fixture/pin full semantic parity",
+      "executedByRunnerThisRepair": false,
+      "unit03Status": "REQUIRED_TIER_NOT_CLOSED_BY_DEFAULT_UNIT_FEEDBACK",
+      "unit03Note": "Relevant actual cases/file outcomes preserved below; pure/fake-browser passes are not actual backend/native acceptance.29evidence-tier mapping failures and12prefix startup failures remain open."
+    }
+  ],
+  "stability": {
+    "sourceStable": true,
+    "distStable": true,
+    "sourceDigest": "1c0d3c7a77ef8c86ce655eac09585488c3b417b01372ca88d7587e278c693e80",
+    "distDigest": "0622b77620f47f2d456ef2855d93bc3fd4c6542ff5b35db7db6223c238ea9d85"
+  },
+  "preservedArtifacts": [
+    "execution/runner-unit-feedback-attempt03-before.json",
+    "execution/runner-unit-feedback-attempt03-after.json",
+    "execution/runner-unit-feedback-attempt03-results.json",
+    "execution/runner-unit-feedback-attempt03-vitest.json",
+    "execution/runner-unit-feedback-attempt03.log"
+  ],
+  "remaining": "All original6increments/86acceptance/24facets/fullcoverage/native/deployment/headPG/actualHTTP+PG+worker+Chromium/video/joined and independentQA remain required. Exact29three-tier mapping remains under Quinn/root; no case deleted or expectations changed here.",
+  "hold": "All owned source/test/schema/canonical/config/oracles/story and dist remain atomically HELD. Exactly one test command ran; no source fix/retry/selective invocation/build/native/Gradle/DB/install/generation. Returning slot."
+}

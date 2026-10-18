@@ -1,0 +1,20 @@
+--- before/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java
++++ candidate/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java
+@@ -65,7 +65,7 @@
+ 
+   @Bean
+   GuidedPromptAssembler guidedPromptAssembler(GuidedContracts contracts) {
+-    return new GuidedPromptAssembler(contracts);
++    return GuidedPromptAssembler.createForProductionFactory(contracts);
+   }
+ 
+   @Bean
+@@ -93,7 +93,7 @@
+       GuidedTranslationProperties properties,
+       JdbcTemplate jdbc) {
+     var service =
+-        new GuidedTranslationService(
++        GuidedTranslationService.fromPureAssemblerFactory(
+             sessions,
+             repository,
+             store,

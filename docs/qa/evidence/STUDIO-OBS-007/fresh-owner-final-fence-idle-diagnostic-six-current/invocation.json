@@ -1,0 +1,33 @@
+{
+  "command": [
+    "./gradlew",
+    "test",
+    "--rerun-tasks",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent"
+  ],
+  "classes": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution",
+    "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+    "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent"
+  ],
+  "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "startedAt": "2026-10-11T00:54:29.796494+00:00",
+  "fixturePrerequisites": {
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+  },
+  "prerequisiteSelected": false
+}

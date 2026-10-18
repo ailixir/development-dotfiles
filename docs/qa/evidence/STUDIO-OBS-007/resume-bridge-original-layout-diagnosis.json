@@ -1,0 +1,27 @@
+{
+  "story": "STUDIO-OBS-007",
+  "scope": "Read-only actual Bridge startup layout diagnosis; no runtime probe or source fix",
+  "actualGate": "resume-bridge-five-helper-current/result.json",
+  "tests": 5,
+  "failures": 5,
+  "errors": 0,
+  "skips": 0,
+  "sourceDrift": [],
+  "fixedWorkerMessage": "GUIDED_WORKER_UNAVAILABLE",
+  "matchingOwnedLogs": 5,
+  "sourceBindings": {
+    "studio-runner/src/compat/runtime-versions.ts": "ab1d7176f3480de872b4b85d474a99d48f03c744c9843234632853be42164616",
+    "studio-runner/src/run/guidedMain.ts": "5148b8915e48af7718ad5986c8053d7ba5e66c40bbe22e4487cb116708a94a2a",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java": "a54811772e50c00af972c417c5aeb3d3d8a472d9cc733ee5a993739f018bfb07"
+  },
+  "originalDefaultLauncherRelativeLayout": "dist/run/browser.js",
+  "fixtureSnapshotDirectoryName": "worker-dist",
+  "defaultLauncherFileExists": false,
+  "actualCopiedLauncherExists": true,
+  "actualCopiedLauncherHashMatchesLive": true,
+  "proposedMinimalFixtureChange": "Use TEMP/dist as WORKER_SNAPSHOT, matching original package layout; preserve original byte copy/hash/startup validation",
+  "causality": "Static missing original launcher path proven. Outer catch discards actual exception; exclusive physical thrown boundary unobserved.",
+  "sourceWrites": 0,
+  "runtimeProbes": 0,
+  "createdAtUtc": "2026-10-11T13:33:50.046488+00:00"
+}

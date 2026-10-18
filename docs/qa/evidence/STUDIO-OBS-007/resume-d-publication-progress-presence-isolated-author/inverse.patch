@@ -1,0 +1,11 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -1563,8 +1563,6 @@
+     JsonNode document = locked.document(), progress = locked.progress();
+     String id = document.path("sessionId").asText();
+     var out = C.object().put("schemaVersion", 1);
+-    out.put("publicationSnapshotPresent", progress.path("publicationSnapshotIdentity").isObject());
+-    out.put("publicationRevisionPresent", progress.path("publicationRevisionId").isTextual());
+     putDiagnosticUuid(out, "sessionId", id);
+     putDiagnosticUuid(out, "testId", document.path("testId").asText());
+     out.put(

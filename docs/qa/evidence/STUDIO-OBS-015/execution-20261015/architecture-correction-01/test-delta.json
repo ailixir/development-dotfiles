@@ -1,0 +1,90 @@
+{
+  "artifact": "015 correction01 additional acceptance obligations",
+  "status": "ALL_PLANNED_NOT_RUN",
+  "inherits": {
+    "effectiveOriginalCases": 57,
+    "migrationMethods": 48,
+    "scope": "Preserve every original obligation; these are additional or explicit subcases, no count-based substitution"
+  },
+  "cases": [
+    {
+      "name": "SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+      "tier": "Java+TS",
+      "assertions": "Same normalized context/global source, exact scoped declarations and graph yield identical TestConfig/StepInput/chain/learned hash/snapshot maps; Unicode order, empty value hashes, literal/context/evidence metadata covered.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "SnapshotBasisParityTest.oldBasisCannotDistinguishUnexecutedContextChange",
+      "tier": "Java+TS",
+      "assertions": "Old facts held equal, changed unused step2 context alters snapshots2..tail; pure derivation must consume corrected evidence, never default contexts or trust maps.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "SnapshotBasisParityTest.normalizesTargetHintsDatesAndEmptyContextsExactly",
+      "tier": "Java+TS+contract",
+      "assertions": "Omitted/empty context arrays, TargetHint nullable scope/exact versus false, supplied evidence ISO timestamp including fractional seconds, exact Unicode/control strings retain agreed canonical shape; numeric timestamps/unpaired surrogate/unsafe integers reject.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "IncrementalPublicationIT.snapshotFactsMatchImmutableOriginalSourceManifest",
+      "tier": "HTTP+Postgres",
+      "assertions": "Freeze private authoringSnapshot at start, then attempted context/declaration/default/evidence tamper or changed source/config fails original CAS; unknown/unreferenced declaration extras and raw value in proof reject. SourceManifestHash preimage retains authoringSnapshot, removes configurationValues only.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "IncrementalPublicationIT.baseProofUsesPinnedRevisionOwnImmutableRows",
+      "tier": "Postgres+pure Java+TS",
+      "assertions": "No live draft values, no unrelated/older same-test revision even equal claimed hashes; actual original confirmed ID/digest, stored publication identity and baseartifact map/config/hash all agree; altered source/context/declaration/graph/map rejects after recomputation.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "IncrementalPublicationIT.explicitFirstStepFullLearnDoesNotRequireOldIdentity",
+      "tier": "HTTP+Postgres+joined runner",
+      "assertions": "Persist genuinely incomplete historical identity. Omitted/reuse boundary409 BASE_IDENTITY_INCOMPLETE zero writes; explicit first currentstep creates EMPTY_PREFIX, pinned digest + nullbaseProof, empty reusedFrom and fully new maps; publish succeeds without old metadata backfill/model-free prefix requirement.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "IncrementalPublicationIT.nonemptyOriginalPrefixCannotDropBaseProofAfterDriftAtOne",
+      "tier": "HTTP+Postgres+pure validator",
+      "assertions": "Original initialindex>0 then authenticated driftj1 leaves zero reusedsteps yet still requires full immutablebaseproof. Attempt null, changedprogram or changedpin rejects. No repeat of possibly native effect.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "SnapshotBasisValidationTest.candidateMapsAreDerivedBeforeArtifactHash",
+      "tier": "Java+TS",
+      "assertions": "Alter claimed stepSnapshotHashes/reusedFrom with recomputed candidate artifact/policy hashes still refuses: independent map/reuse derives from corrected basis. Wrong same-test older revision, gaps, suffix and driftj reuse reject; changing suffix context/declaration changes chain tail.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+      "tier": "Java+TS",
+      "assertions": "Recompute identity/artifact/plan/policy/config/source/profile/equivalence hashes, exact existing RevisionIdentity digest, header pin/program hashes; wrapper or omitted field rejected. Past basis evidence hash is stored historical receipt authority, not fabricated revalidation.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "SnapshotBasisValidationTest.correctedBasisEvidenceHashUsesUnchangedEnvelope",
+      "tier": "Java+TS+contract",
+      "assertions": "Changing any complete snapshot fact changes hash(entire basis) and publicationEvidenceHash under original envelope; no extra/top-level/claimedStepInput substitution accepted. Candidate whole plan committed only after derived maps/incremental metadata inserted.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "SnapshotBasisValidationTest.keepsOriginalGlobalByteLimits",
+      "tier": "Java+TS+wire",
+      "assertions": "Exactly existing6MiB basis and8MiB fullrequest boundaries, valid smallbaseartifact and maximal currentlysupported closed cases; oversized corrective facts refuse LIMIT_EXCEEDED before hashing/dispatch without raising cap, omission, recursive proof or partial publication.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "SnapshotBasisPrivacyIT.authoringSourceNeverEscapesPrivateValidation",
+      "tier": "source+HTTP+runner no-leak fixture",
+      "assertions": "Secret and referenced plain value canaries absent corrected purebasis declarations/provider/public/log/media sinks; IDs and valueHash present. Authored context source may enter internalvalidation only. Real originalOBS007 sinks remain mandatory; no rawmaterialization input values copied.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "IncrementalRelearnIT.editStep4OfTenUsesCorrectedSnapshotAuthority",
+      "tier": "original central realstack",
+      "assertions": "RealSpring+PG+guidedrunner+Chromium still proves model0prefix1..3, suffix4..10learned, snapshot1..3equal/4..10diff, samecontinuousvideo, finalize model/browser0, nextordinaryreplaymodel0. Correction adds actual sourceidentity assertions; does not replace original centraltest.",
+      "status": "PLANNED_NOT_RUN"
+    }
+  ],
+  "designExamples": "Four schema/hash illustration fixtures and16semantic negative mutations; these are bounded design evidence only, no actual application acceptance."
+}

@@ -1,0 +1,1979 @@
+{
+  "status": "PASS_VALID_BASELINES_AND_INTENDED_MUTANTS",
+  "graph": [
+    {
+      "name": "unknown-raw-edge-admission",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_UNKNOWN_EDGE",
+      "currentTargetCode": "GRAPH_UNKNOWN_EDGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "88b7a1a9704ecde41a4195b273a2d8181703d501e7b509b3953b1476dff1d9f0"
+        },
+        {
+          "pointer": "/authority/rawGraph/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "88b7a1a9704ecde41a4195b273a2d8181703d501e7b509b3953b1476dff1d9f0"
+        }
+      ]
+    },
+    {
+      "name": "raw-edge-cannot-name-pending-action",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "OMITTED_ATTEMPT",
+      "currentTargetCode": "OMITTED_ATTEMPT",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/authority/ledgers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "749ee4e8ed463bb695cf7e952303fa36f9a720b47794800cd32068500954f311",
+          "afterHash": "5671971f3ea8a2b2b353f2a20bae3998e0c831a6fafd3cc0f99d1ec703be1d74"
+        }
+      ]
+    },
+    {
+      "name": "native-started-edge-is-not-excludable",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "SCHEMA",
+      "currentTargetCode": "SCHEMA",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/incrementalEvidence/driftReceipt/nativeInvocationStarted",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa",
+          "afterHash": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+          "before": false,
+          "after": true
+        }
+      ]
+    },
+    {
+      "name": "policy-failure-is-not-edge-exclusion",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "EXCLUDED_ATTEMPT",
+      "currentTargetCode": "EXCLUDED_ATTEMPT",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/incrementalEvidence/excludedAttempts",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "7f4a4a8aa57cda903b5a69cc90a63c16890a1eaa2b4a67f6e4e0bc9b8728fccc",
+          "afterHash": "962e647f955b649ee69932b60aa724a58165a168b3d9d903e56167c82bd7e166"
+        },
+        {
+          "pointer": "/authority/ledgers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "749ee4e8ed463bb695cf7e952303fa36f9a720b47794800cd32068500954f311",
+          "afterHash": "fa4d1cde694f55fc4f34c7f45777036f31a267bad996a7a73c54d406ebbd149a"
+        }
+      ]
+    },
+    {
+      "name": "assertion-failure-is-not-edge-exclusion",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "EXCLUDED_ATTEMPT",
+      "currentTargetCode": "EXCLUDED_ATTEMPT",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/incrementalEvidence/excludedAttempts",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "7f4a4a8aa57cda903b5a69cc90a63c16890a1eaa2b4a67f6e4e0bc9b8728fccc",
+          "afterHash": "a6acbf46b5f788694970aceaf9f4ad6ecf6a74f1ed5d7a8992e5601a3afd4f92"
+        },
+        {
+          "pointer": "/authority/ledgers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "749ee4e8ed463bb695cf7e952303fa36f9a720b47794800cd32068500954f311",
+          "afterHash": "71752efd1a4d9884af403f126a22d07ad8f4889a5e6203090e24a2d8d2b2c2c7"
+        }
+      ]
+    },
+    {
+      "name": "unknown-outcome-is-not-edge-exclusion",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "EXCLUDED_ATTEMPT",
+      "currentTargetCode": "EXCLUDED_ATTEMPT",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/incrementalEvidence/excludedAttempts",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "7f4a4a8aa57cda903b5a69cc90a63c16890a1eaa2b4a67f6e4e0bc9b8728fccc",
+          "afterHash": "351c0a9a92061f90bce5da3d3797f4ec8b362e8829213a97b99436f8f8b4d821"
+        },
+        {
+          "pointer": "/authority/ledgers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "749ee4e8ed463bb695cf7e952303fa36f9a720b47794800cd32068500954f311",
+          "afterHash": "5a01a55a800503e125fb1c67a40c3673c745aef1080e74910e69a5a49d7125de"
+        }
+      ]
+    },
+    {
+      "name": "second-excluded-attempt-forbidden",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "SCHEMA",
+      "currentTargetCode": "SCHEMA",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/incrementalEvidence/excludedAttempts",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "7f4a4a8aa57cda903b5a69cc90a63c16890a1eaa2b4a67f6e4e0bc9b8728fccc",
+          "afterHash": "8ce6e05813275eb1644ade6bde6254e85d9c836cd7428873676b3eff911905c2"
+        }
+      ]
+    },
+    {
+      "name": "pre-admission-cannot-acquire-failed-edge",
+      "baseline": "pre-admission",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_UNKNOWN_EDGE",
+      "currentTargetCode": "GRAPH_UNKNOWN_EDGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "afterHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855"
+        },
+        {
+          "pointer": "/authority/rawGraph/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "afterHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855"
+        }
+      ]
+    },
+    {
+      "name": "edge-wrong-origin",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_EDGE",
+      "currentTargetCode": "GRAPH_EDGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "9da99c6895302ddf7479e4d065212cedb95e9a2628dfe165ef7231731a8e21c5"
+        },
+        {
+          "pointer": "/authority/rawGraph/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "9da99c6895302ddf7479e4d065212cedb95e9a2628dfe165ef7231731a8e21c5"
+        }
+      ]
+    },
+    {
+      "name": "edge-wrong-binding",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_EDGE",
+      "currentTargetCode": "GRAPH_EDGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "46eefbcf38eb5126268c41dea5cf5d11bb8ad270beae2c8599c47c486b091191"
+        },
+        {
+          "pointer": "/authority/rawGraph/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "46eefbcf38eb5126268c41dea5cf5d11bb8ad270beae2c8599c47c486b091191"
+        }
+      ]
+    },
+    {
+      "name": "edge-wrong-producer-admission",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_EDGE",
+      "currentTargetCode": "GRAPH_EDGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "644f61ed8ad5e645adb1e87c8b25b994e48237275b610a5d43bf7b28d562c526"
+        },
+        {
+          "pointer": "/authority/rawGraph/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "644f61ed8ad5e645adb1e87c8b25b994e48237275b610a5d43bf7b28d562c526"
+        }
+      ]
+    },
+    {
+      "name": "edge-wrong-coordinate",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_EDGE",
+      "currentTargetCode": "GRAPH_EDGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "31b1ad30f6cf1c9740a35bb25b9ae1951114544b99ac6c611257f9ffdd83bbdf"
+        },
+        {
+          "pointer": "/authority/rawGraph/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "31b1ad30f6cf1c9740a35bb25b9ae1951114544b99ac6c611257f9ffdd83bbdf"
+        }
+      ]
+    },
+    {
+      "name": "edge-wrong-slot",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_EDGE",
+      "currentTargetCode": "GRAPH_EDGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "b912132a5d8347a11aa55453a8f3b10243e846880ef76f2bb9d14615a27341fa"
+        },
+        {
+          "pointer": "/authority/rawGraph/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "b912132a5d8347a11aa55453a8f3b10243e846880ef76f2bb9d14615a27341fa"
+        }
+      ]
+    },
+    {
+      "name": "duplicate-raw-edge",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_EDGE",
+      "currentTargetCode": "GRAPH_EDGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "3e0747f18f6992bb591b841f262141b4fcf31486bf8ddd69c2be6547e7f661c1"
+        },
+        {
+          "pointer": "/authority/rawGraph/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "3e0747f18f6992bb591b841f262141b4fcf31486bf8ddd69c2be6547e7f661c1"
+        }
+      ]
+    },
+    {
+      "name": "successful-same-pair-edge-cannot-disappear",
+      "baseline": "same-pair",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_MISSING_SUCCESSFUL_EDGE",
+      "currentTargetCode": "GRAPH_MISSING_SUCCESSFUL_EDGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "21309bd374a25ec4cd9ef7561ae05d59572b84c78641dc957880262b59e06524",
+          "afterHash": "253360c00008ab8f2180ad65e017ef26a5d380e6895d8b92d43134d7f9d1d49b"
+        },
+        {
+          "pointer": "/authority/rawGraph/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "21309bd374a25ec4cd9ef7561ae05d59572b84c78641dc957880262b59e06524",
+          "afterHash": "253360c00008ab8f2180ad65e017ef26a5d380e6895d8b92d43134d7f9d1d49b"
+        }
+      ]
+    },
+    {
+      "name": "raw-allocation-cannot-be-replaced-with-effective-empty-copy",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_RAW_AUTHORITY",
+      "currentTargetCode": "GRAPH_RAW_AUTHORITY",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/bootstrap/allocationHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "fdad8b31a42fb523f682cc13d41f467ac708e994e8b81bc0409536a3f078230f",
+          "afterHash": "5603008fbfa122616a51c857ce5b45aac638db41261864cbf028743e3362350d",
+          "before": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+          "after": "3d01ab867dd9569946de82b3cab49a16b45c29ad8d927edf4bf32f3e9f8c4c93"
+        },
+        {
+          "pointer": "/basis/allocations",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+          "afterHash": "3d01ab867dd9569946de82b3cab49a16b45c29ad8d927edf4bf32f3e9f8c4c93"
+        }
+      ]
+    },
+    {
+      "name": "raw-failed-edge-history-cannot-be-erased",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_RAW_AUTHORITY",
+      "currentTargetCode": "GRAPH_RAW_AUTHORITY",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/consumerEdges",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "e1c6a89eefbaf56406d8e91b819dbf7f57fb7ba8c762c14435ff024b04039855",
+          "afterHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      ]
+    },
+    {
+      "name": "bootstrap-cannot-hash-effective-projection",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_RAW_ALLOCATION_HASH",
+      "currentTargetCode": "GRAPH_RAW_ALLOCATION_HASH",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/bootstrap/allocationHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "fdad8b31a42fb523f682cc13d41f467ac708e994e8b81bc0409536a3f078230f",
+          "afterHash": "5603008fbfa122616a51c857ce5b45aac638db41261864cbf028743e3362350d",
+          "before": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+          "after": "3d01ab867dd9569946de82b3cab49a16b45c29ad8d927edf4bf32f3e9f8c4c93"
+        },
+        {
+          "pointer": "/authority/rawGraph/bootstrapAllocationHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "fdad8b31a42fb523f682cc13d41f467ac708e994e8b81bc0409536a3f078230f",
+          "afterHash": "5603008fbfa122616a51c857ce5b45aac638db41261864cbf028743e3362350d",
+          "before": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+          "after": "3d01ab867dd9569946de82b3cab49a16b45c29ad8d927edf4bf32f3e9f8c4c93"
+        }
+      ]
+    },
+    {
+      "name": "model-only-orphan-allocation-refused",
+      "baseline": "unperformed-read",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_ORPHAN_ALLOCATION",
+      "currentTargetCode": "GRAPH_ORPHAN_ALLOCATION",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/bootstrap/allocationHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "fdad8b31a42fb523f682cc13d41f467ac708e994e8b81bc0409536a3f078230f",
+          "afterHash": "49f68c9ea25442c08425d1ad8f6689015add3b4160945f6f2a140d001b6391af",
+          "before": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+          "after": "3cf55e5837683c78c50e45e8d860392324b3b2a2c95f1a73435e875ddd0fac0a"
+        },
+        {
+          "pointer": "/basis/allocations",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+          "afterHash": "3cf55e5837683c78c50e45e8d860392324b3b2a2c95f1a73435e875ddd0fac0a"
+        },
+        {
+          "pointer": "/authority/rawGraph/allocations",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+          "afterHash": "3cf55e5837683c78c50e45e8d860392324b3b2a2c95f1a73435e875ddd0fac0a"
+        },
+        {
+          "pointer": "/authority/rawGraph/bootstrapAllocationHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "fdad8b31a42fb523f682cc13d41f467ac708e994e8b81bc0409536a3f078230f",
+          "afterHash": "49f68c9ea25442c08425d1ad8f6689015add3b4160945f6f2a140d001b6391af",
+          "before": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+          "after": "3cf55e5837683c78c50e45e8d860392324b3b2a2c95f1a73435e875ddd0fac0a"
+        }
+      ]
+    },
+    {
+      "name": "missing-base-proof-cannot-authorize-import",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_IMPORT_ONLY",
+      "currentTargetCode": "GRAPH_IMPORT_ONLY",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/snapshotEvidence/baseProof",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "cadb5ff097732b6c06bf1421c7d377a0192e19cf9b4038eb70a3c79cd2638e91",
+          "afterHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+        }
+      ]
+    },
+    {
+      "name": "foreign-base-pin-cannot-authorize-import",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "SNAPSHOT_ORIGINAL_PIN",
+      "currentTargetCode": "SNAPSHOT_ORIGINAL_PIN",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/snapshotEvidence/pinnedBase/revisionId",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "1171657b673849751c1fd1c5cc470d491e7530a8ecdd7135f479f00cf49293cc",
+          "afterHash": "e627c0c6b897e555f7593f5adc4ddc20dbc9be5ec4e6a4e23c72fd4f4da1556d",
+          "before": "00000000-0000-4000-8000-000000000901",
+          "after": "00000000-0000-4000-8000-000000000902"
+        }
+      ]
+    },
+    {
+      "name": "prefix-read-must-match-verified-program",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "PREFIX_REQUEST",
+      "currentTargetCode": "PREFIX_REQUEST",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/incrementalEvidence/plan/prefixProgramHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "947182135297bb7c08a5d3aa2f4f25616d0262d91c342bc0d2b720dfd1ff0d59",
+          "afterHash": "d5e82985272273341d84f42c46589f50ac783d99dfbcc5118fade04850cd0807",
+          "before": "08e5d2be033952274beb382af4650babac99280a7c69b6abe33970d190732b18",
+          "after": "16a3a2b982694e3f5c381b9615e4e1c342cb9651505ff4d295ba784ddfb783e6"
+        },
+        {
+          "pointer": "/basis/incrementalEvidence/program/actions",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "95b43c71cb6089dcff64a831b008790e606389e7647714a01dafe8d72d3e7245",
+          "afterHash": "34ada2a9acf545e123b601d7cdaf3972b486661b189a040d466785be3bde1c65"
+        }
+      ]
+    },
+    {
+      "name": "missing-base-binding-cannot-authorize-zero-consumer",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_IMPORT_ONLY",
+      "currentTargetCode": "GRAPH_IMPORT_ONLY",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/snapshotEvidence/baseProof/artifact/learnedPlan/bindings",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "17c5b6c2921b99c07a737690b6e93bd91ad2e0a75a0c0a2b07427fa0ce8994bd",
+          "afterHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      ]
+    },
+    {
+      "name": "producer-historical-availability-context-must-match",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_AVAILABILITY",
+      "currentTargetCode": "GRAPH_AVAILABILITY",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/producers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "43fd01f7c33c34ca43fdcc71748bfb91a853ddf38f3c082b97c8f0c33e76eddf",
+          "afterHash": "adcce18d03f32d4fa7aac40e57da2f5971c53bfe91cee2cc427cceef41bd556b"
+        },
+        {
+          "pointer": "/authority/rawGraph/producers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "43fd01f7c33c34ca43fdcc71748bfb91a853ddf38f3c082b97c8f0c33e76eddf",
+          "afterHash": "adcce18d03f32d4fa7aac40e57da2f5971c53bfe91cee2cc427cceef41bd556b"
+        }
+      ]
+    },
+    {
+      "name": "producer-historical-availability-fence-must-match",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_AVAILABILITY",
+      "currentTargetCode": "GRAPH_AVAILABILITY",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/producers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "43fd01f7c33c34ca43fdcc71748bfb91a853ddf38f3c082b97c8f0c33e76eddf",
+          "afterHash": "152b88893aaebc17481164032dc36a20414fe5a19590c639f3873ffa85295d3e"
+        },
+        {
+          "pointer": "/authority/rawGraph/producers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "43fd01f7c33c34ca43fdcc71748bfb91a853ddf38f3c082b97c8f0c33e76eddf",
+          "afterHash": "152b88893aaebc17481164032dc36a20414fe5a19590c639f3873ffa85295d3e"
+        }
+      ]
+    },
+    {
+      "name": "successful-read-producer-cannot-be-hidden",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_EDGE",
+      "currentTargetCode": "GRAPH_EDGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/translationHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "d174d193e8177784eb6697d01759f20d643db0538dd9bc9ea7a62853c56c4f7c",
+          "afterHash": "9cb4f2423d9512bba0d08b2418b5c55adafb2ff4bc1d217fb1ed0e666e80b910",
+          "before": "6ddf6c14680bd557fb22449b009d6bb844b156efcf5aa8bf47abfb301713566b",
+          "after": "fe424626e824c5092e1f4ea4fe3ac0cc6b441821fc998ddd76179aea06b4195f"
+        },
+        {
+          "pointer": "/basis/translationPlan/needs",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "3d01ab867dd9569946de82b3cab49a16b45c29ad8d927edf4bf32f3e9f8c4c93",
+          "afterHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "pointer": "/basis/producers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "43fd01f7c33c34ca43fdcc71748bfb91a853ddf38f3c082b97c8f0c33e76eddf",
+          "afterHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "pointer": "/basis/bindings",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "ad55d729a498325e353eec7ca7179561102c1266c849a5c0a938b8fd9a6d5f2e",
+          "afterHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "pointer": "/authority/rawGraph/producers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "43fd01f7c33c34ca43fdcc71748bfb91a853ddf38f3c082b97c8f0c33e76eddf",
+          "afterHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      ]
+    },
+    {
+      "name": "unread-producer-cannot-be-fabricated",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_EDGE",
+      "currentTargetCode": "GRAPH_EDGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/producers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "43fd01f7c33c34ca43fdcc71748bfb91a853ddf38f3c082b97c8f0c33e76eddf",
+          "afterHash": "eade2d79d1a7fb48004fcbfcee1085e5a0e977c2de9a2b36d725f41e0f6a3f47"
+        },
+        {
+          "pointer": "/authority/rawGraph/producers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "43fd01f7c33c34ca43fdcc71748bfb91a853ddf38f3c082b97c8f0c33e76eddf",
+          "afterHash": "eade2d79d1a7fb48004fcbfcee1085e5a0e977c2de9a2b36d725f41e0f6a3f47"
+        }
+      ]
+    },
+    {
+      "name": "retained-producer-provenance-required",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "RETAINED_ADMISSIONS",
+      "currentTargetCode": "RETAINED_ADMISSIONS",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/incrementalEvidence/switch/retainedPrefixAdmissionIds",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "069c387a39aa8e9435f8410ecf1ae55407338b2eb60f491b490f03d7f924710b",
+          "afterHash": "aaaf8dea93034dbee3d79a41d205dbbc7b3c0d2a3afde50628c2d6dfe4eb2e3d"
+        },
+        {
+          "pointer": "/basis/incrementalEvidence/switch/retainedPrefixAdmissionsHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "bf87926efb6d4eda1c1a3b6c06d2290136ca05ef96431cc7bddbb23219c60ec2",
+          "afterHash": "03e2ae15b4d92029bf8437b046292ae27c2d4d3b0e822bee621d255cf5273b96",
+          "before": "069c387a39aa8e9435f8410ecf1ae55407338b2eb60f491b490f03d7f924710b",
+          "after": "aaaf8dea93034dbee3d79a41d205dbbc7b3c0d2a3afde50628c2d6dfe4eb2e3d"
+        },
+        {
+          "pointer": "/basis/incrementalEvidence/firstSuffixAcceptance/retainedPrefixAdmissionIds",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "069c387a39aa8e9435f8410ecf1ae55407338b2eb60f491b490f03d7f924710b",
+          "afterHash": "aaaf8dea93034dbee3d79a41d205dbbc7b3c0d2a3afde50628c2d6dfe4eb2e3d"
+        }
+      ]
+    },
+    {
+      "name": "new-model-consumer-intent-cannot-use-import-exception",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_IMPORT_ONLY",
+      "currentTargetCode": "GRAPH_IMPORT_ONLY",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/bootstrap/allocationHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "fdad8b31a42fb523f682cc13d41f467ac708e994e8b81bc0409536a3f078230f",
+          "afterHash": "6c267f01d806ca5f35922df9c9bffe2457d6780d0f2d7767dc1b575c884aa7bd",
+          "before": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+          "after": "426a29bc449685ba1940283e341e8f07bc7dabd8c8afe8e13df2a806781c3db0"
+        },
+        {
+          "pointer": "/basis/allocations",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+          "afterHash": "426a29bc449685ba1940283e341e8f07bc7dabd8c8afe8e13df2a806781c3db0"
+        },
+        {
+          "pointer": "/authority/rawGraph/allocations",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+          "afterHash": "426a29bc449685ba1940283e341e8f07bc7dabd8c8afe8e13df2a806781c3db0"
+        },
+        {
+          "pointer": "/authority/rawGraph/bootstrapAllocationHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "fdad8b31a42fb523f682cc13d41f467ac708e994e8b81bc0409536a3f078230f",
+          "afterHash": "6c267f01d806ca5f35922df9c9bffe2457d6780d0f2d7767dc1b575c884aa7bd",
+          "before": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+          "after": "426a29bc449685ba1940283e341e8f07bc7dabd8c8afe8e13df2a806781c3db0"
+        }
+      ]
+    },
+    {
+      "name": "final-need-identity-cannot-change",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_PRODUCER",
+      "currentTargetCode": "GRAPH_PRODUCER",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/translationHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "d174d193e8177784eb6697d01759f20d643db0538dd9bc9ea7a62853c56c4f7c",
+          "afterHash": "16d1a9102fdce5c9727d487ef5666c85b754622a39e82b0f0b48eb01beeaee00",
+          "before": "6ddf6c14680bd557fb22449b009d6bb844b156efcf5aa8bf47abfb301713566b",
+          "after": "2c869ee730079cab6bd983ceab75270c8a653a6276c2b88d7af5ef7b27feec29"
+        },
+        {
+          "pointer": "/basis/translationPlan/needs",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "3d01ab867dd9569946de82b3cab49a16b45c29ad8d927edf4bf32f3e9f8c4c93",
+          "afterHash": "47dfe43c2e8d87e967055e90facbb970fdc9b1f1af9fe7db873ec12da4eef188"
+        }
+      ]
+    },
+    {
+      "name": "first-suffix-acceptance-cannot-follow-frozen-head",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_FIRST_SUFFIX",
+      "currentTargetCode": "GRAPH_FIRST_SUFFIX",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/incrementalEvidence/firstSuffixAcceptance/previousPlanRevision",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "afterHash": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+          "before": 1,
+          "after": 4
+        },
+        {
+          "pointer": "/basis/incrementalEvidence/firstSuffixAcceptance/planRevision",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "afterHash": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d",
+          "before": 2,
+          "after": 5
+        }
+      ]
+    },
+    {
+      "name": "receipt-transport-authority-cannot-be-inferred-from-hash",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "RECEIPT_AUTHENTICATION",
+      "currentTargetCode": "RECEIPT_AUTHENTICATION",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/authority/authenticatedReceipt",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "99cac3fd987ce239f8abf8d7cd8d318e8367a0f8f81af2c6931992616c209587",
+          "afterHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+        }
+      ]
+    },
+    {
+      "name": "effective-transfer-cannot-disappear",
+      "baseline": "same-pair",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_TRANSFER_BIJECTION",
+      "currentTargetCode": "GRAPH_TRANSFER_BIJECTION",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/transfers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "4cd0a5a4e3e4c92ecd127a2ab1815cf75a00a32d44156090905c12ac803bc314",
+          "afterHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      ]
+    },
+    {
+      "name": "effective-transfer-producer-cannot-change",
+      "baseline": "same-pair",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_TRANSFER_BIJECTION",
+      "currentTargetCode": "GRAPH_TRANSFER_BIJECTION",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/transfers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "4cd0a5a4e3e4c92ecd127a2ab1815cf75a00a32d44156090905c12ac803bc314",
+          "afterHash": "d5c1b1f857653af6f64f0003be455d5c57a8c9d446a6aa8656056b51fa6e2f45"
+        }
+      ]
+    },
+    {
+      "name": "excluded-failed-edge-is-not-executable-transfer",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_TRANSFER_BIJECTION",
+      "currentTargetCode": "GRAPH_TRANSFER_BIJECTION",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/basis/transfers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "afterHash": "4cd0a5a4e3e4c92ecd127a2ab1815cf75a00a32d44156090905c12ac803bc314"
+        }
+      ]
+    },
+    {
+      "name": "candidate-policy-cannot-omit-successful-transfer",
+      "baseline": "same-pair",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_CANDIDATE_TRANSFERS",
+      "currentTargetCode": "GRAPH_CANDIDATE_TRANSFERS",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/expectedArtifact/replayPolicy/transfers",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "4cd0a5a4e3e4c92ecd127a2ab1815cf75a00a32d44156090905c12ac803bc314",
+          "afterHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      ]
+    },
+    {
+      "name": "candidate-policy-binding-cannot-drop-successful-consumer",
+      "baseline": "same-pair",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_CANDIDATE_BINDINGS",
+      "currentTargetCode": "GRAPH_CANDIDATE_BINDINGS",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/expectedArtifact/replayPolicy/bindings",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "98ed14d4e1744d87b27a4108449ca8817db3df6e98d56b74899e5d21c40c9100",
+          "afterHash": "ad55d729a498325e353eec7ca7179561102c1266c849a5c0a938b8fd9a6d5f2e"
+        }
+      ]
+    },
+    {
+      "name": "publication-preimage-must-commit-raw-failed-edge",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_PUBLICATION_PREIMAGE",
+      "currentTargetCode": "GRAPH_PUBLICATION_PREIMAGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/expectedArtifact/replayPolicy/publicationEvidenceHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "40df2c277791fdd4c5e055f3e9085c6046130a6215de8275ffbf8de5650dc750",
+          "afterHash": "f71333dd530d78b87ae08c130852eceabf43f3a22ed3edbb74a232254168cd19",
+          "before": "839f8a97016731087431e44f713d9c0c87af0a0988ccd7bae06f05bf838c3a3f",
+          "after": "30ffe059cc7214af04792b14a537953b2ba68aee6b86c21b2d1d2d6df6bd9ab2"
+        }
+      ]
+    },
+    {
+      "name": "publication-preimage-envelope-cannot-change",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_PUBLICATION_PREIMAGE",
+      "currentTargetCode": "GRAPH_PUBLICATION_PREIMAGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/expectedArtifact/replayPolicy/publicationEvidenceHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "40df2c277791fdd4c5e055f3e9085c6046130a6215de8275ffbf8de5650dc750",
+          "afterHash": "fafdb534cc900678d8b0a4968f42ca98c2ce23506b5384c5d720ba900d7db920",
+          "before": "839f8a97016731087431e44f713d9c0c87af0a0988ccd7bae06f05bf838c3a3f",
+          "after": "5055887d7183ac005eae6d3d3cd1bf1633973a7d802ebdb2c1555c43178bfcc6"
+        }
+      ]
+    },
+    {
+      "name": "admission-preimage-must-exclude-spent-attempt",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_ADMISSION_PREIMAGE",
+      "currentTargetCode": "GRAPH_ADMISSION_PREIMAGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/expectedArtifact/replayPolicy/admissionProvenanceHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "dbb4823fd21c3ccdc9859a7c72704482efee4e8dec93c0ea2e0fbddfbcfac128",
+          "afterHash": "c3dfce5277587bf880f00d29b2525dbbd9a36ae31ba81d9b2770a86d6d4353c3",
+          "before": "abe82c86ced92326e6a2e6c267a9e74b4a7525d09a199783297a397d6610c55e",
+          "after": "498382534ea960ef28a4715886787d12c13ab2ad628f6e9ee55a6547c3070ae0"
+        }
+      ]
+    },
+    {
+      "name": "admission-preimage-is-array-not-wrapper",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_ADMISSION_PREIMAGE",
+      "currentTargetCode": "GRAPH_ADMISSION_PREIMAGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/expectedArtifact/replayPolicy/admissionProvenanceHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "dbb4823fd21c3ccdc9859a7c72704482efee4e8dec93c0ea2e0fbddfbcfac128",
+          "afterHash": "bd2252c73ba66525c46177766d16fee769198ccc59637d8c40f0595a4b3c2b0f",
+          "before": "abe82c86ced92326e6a2e6c267a9e74b4a7525d09a199783297a397d6610c55e",
+          "after": "f72edc2b71bca9e05a3942f51144c16f66c94bf130812af1fdb46c655a59d4b6"
+        }
+      ]
+    },
+    {
+      "name": "candidate-authorization-preimage-is-exact",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_AUTHORIZATION_PREIMAGE",
+      "currentTargetCode": "GRAPH_AUTHORIZATION_PREIMAGE",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/expectedArtifact/replayPolicy/runAuthorizationHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "311685f07d4c32e6647a3593d0727dfb90c595ebac541d01eb6b1fc1d14d8aa5",
+          "afterHash": "cf863090129c1e00c180d5f60daa8599e2497f32d5e726104ac4ec5f68b4a14e",
+          "before": "18714bc2b1a152d048d8999d0da9f259cb3891f82346a91e8d0984b1fa856235",
+          "after": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      ]
+    },
+    {
+      "name": "candidate-source-identity-cannot-be-substituted",
+      "baseline": "admitted-binding-replacement",
+      "baselineValidated": true,
+      "priorTargetCode": "GRAPH_CANDIDATE_IDENTITY",
+      "currentTargetCode": "GRAPH_CANDIDATE_IDENTITY",
+      "originalAdversarialPointers": [
+        {
+          "pointer": "/expectedArtifact/sourceHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "63739a2597f3c6727f143eeaedb4f00b56e459b91f53a29637c27564f2cb0be7",
+          "afterHash": "cf863090129c1e00c180d5f60daa8599e2497f32d5e726104ac4ec5f68b4a14e",
+          "before": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6",
+          "after": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      ]
+    }
+  ],
+  "execute": [
+    {
+      "name": "zero-binding-requires-proof",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_PROOF_PRESENCE",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact",
+          "beforeAbsent": false,
+          "afterAbsent": true,
+          "beforeHash": "338b1a4a44ee017410138d93c5cdd5e1091984867c7a1405ccccc83fe87da798",
+          "afterHash": null
+        }
+      ]
+    },
+    {
+      "name": "null-proof-is-not-artifact",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "SCHEMA",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "338b1a4a44ee017410138d93c5cdd5e1091984867c7a1405ccccc83fe87da798",
+          "afterHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+        }
+      ]
+    },
+    {
+      "name": "zero-binding-requires-retained-launch",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_ACCEPTED_LAUNCH",
+      "mutations": [
+        {
+          "pointer": "/acceptedLaunch",
+          "beforeAbsent": false,
+          "afterAbsent": true,
+          "beforeHash": "4de0dbafc8b66dee0e00758fcbb5de0b08953d1d01ee69b112b28e0078569656",
+          "afterHash": null
+        }
+      ]
+    },
+    {
+      "name": "ordinary-graph-cannot-carry-unnecessary-proof",
+      "baseline": "ordinary-with-consumers-omits-proof",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_PROOF_PRESENCE",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact",
+          "beforeAbsent": true,
+          "afterAbsent": false,
+          "beforeHash": null,
+          "afterHash": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c"
+        }
+      ]
+    },
+    {
+      "name": "outer-trusted-boolean-forbidden",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "SCHEMA",
+      "mutations": [
+        {
+          "pointer": "/execute/trusted",
+          "beforeAbsent": true,
+          "afterAbsent": false,
+          "beforeHash": null,
+          "afterHash": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+          "after": true
+        }
+      ]
+    },
+    {
+      "name": "outer-expected-artifact-hash-forbidden",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "SCHEMA",
+      "mutations": [
+        {
+          "pointer": "/execute/expectedArtifactHash",
+          "beforeAbsent": true,
+          "afterAbsent": false,
+          "beforeHash": null,
+          "afterHash": "8e50fffef91ab788afd70ca79927c825e69eb0ea7a35fe4e9c0e076bcbb6cc87",
+          "after": "338b1a4a44ee017410138d93c5cdd5e1091984867c7a1405ccccc83fe87da798"
+        }
+      ]
+    },
+    {
+      "name": "proof-trusted-boolean-forbidden",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "SCHEMA",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact/trusted",
+          "beforeAbsent": true,
+          "afterAbsent": false,
+          "beforeHash": null,
+          "afterHash": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+          "after": true
+        }
+      ]
+    },
+    {
+      "name": "proof-source-enrichment-forbidden",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "SCHEMA",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact/source",
+          "beforeAbsent": true,
+          "afterAbsent": false,
+          "beforeHash": null,
+          "afterHash": "a5c3e01129a47c58ad49522d660230e7b15782bd23bf5b9e8c3c7830b7d7fcde",
+          "after": "RAW_SOURCE_CANARY"
+        }
+      ]
+    },
+    {
+      "name": "proof-recursive-basis-enrichment-forbidden",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "SCHEMA",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact/validationBasis",
+          "beforeAbsent": true,
+          "afterAbsent": false,
+          "beforeHash": null,
+          "afterHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+        }
+      ]
+    },
+    {
+      "name": "proof-resolved-value-enrichment-forbidden",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "SCHEMA",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact/value",
+          "beforeAbsent": true,
+          "afterAbsent": false,
+          "beforeHash": null,
+          "afterHash": "ff20025feca1daacd6979d11b84886ed5ce751c7c53c9165b74c484f7d268422",
+          "after": "PRIVATE_VALUE_CANARY"
+        }
+      ]
+    },
+    {
+      "name": "artifact-mutation-does-not-replace-launch-pin",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "REUSE_BASE",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact/learnedPlan/incremental/baseRevisionId",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "1171657b673849751c1fd1c5cc470d491e7530a8ecdd7135f479f00cf49293cc",
+          "afterHash": "28ef33232ef376e6680090cc745c4e96dfcfc8c7f12b16f46c72393fbb4fc7a2",
+          "before": "00000000-0000-4000-8000-000000000901",
+          "after": "00000000-0000-4000-8000-000000002998"
+        }
+      ]
+    },
+    {
+      "name": "different-artifact-commitment-refused",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_ADMITTED_ARTIFACT",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact/learnedPlan/incremental/driftReceiptHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "1b48af1bfd3331c0e52ed34a72df925347afc22cffae8210aae65840aae01561",
+          "afterHash": "fd66d9607f2430c79c71f1c87bd34b606f2d1ad689ef152686e9b3eb94c0b010",
+          "before": "9f9a60b713a0cf421d95c51baf99554bdebcc49f419f96ce57abab48a95e9f59",
+          "after": "31cf557469d67fa0c95fc0c271d3807a557c9d4466043ccea12c27a8e12f528a"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "7ca25718b6c8969ab2d8e11658c53d60fe5b1fe28a4be96436626127d1d73668",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "a7c2749afd7e73c7362ad35a261b78e8839bfdc3a2fa4f089ab09df4feaef42e"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/replayPolicy/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "7ca25718b6c8969ab2d8e11658c53d60fe5b1fe28a4be96436626127d1d73668",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "a7c2749afd7e73c7362ad35a261b78e8839bfdc3a2fa4f089ab09df4feaef42e"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/replayPolicy/publicationEvidenceHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "c2bc9beefc738f8afc31c662c20d93453516950c8aba45b1e75875892cad5d63",
+          "afterHash": "874896a57afa4d1ce11ea4ff31b8b22f56dee7bb7a74eb1b5de1e78d2c00e5aa",
+          "before": "77cbd70ba1b66cea74b78ad50f4ccb46190ee0791951449076ea68ad3c77e03d",
+          "after": "e0ab8fc1bad574cf7d271f3e26f124ec16f53498a6ac2e0adaeebe5615157210"
+        }
+      ]
+    },
+    {
+      "name": "crossed-execute-run-under-fresh-launch-refused",
+      "baseline": "same-serialized-artifact-independently-admitted-run-two",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_LAUNCH_IDENTITY",
+      "mutations": [
+        {
+          "pointer": "/execute/runId",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "56cbbd304b25a2a5c96286251a5fa438667a2fe0ee770082633df60204d3904b",
+          "afterHash": "0de9b002744a0852018cab76952892977a2a828058f4182d3edb8d3395e9c224",
+          "before": "00000000-0000-4000-8000-000000003040",
+          "after": "00000000-0000-4000-8000-000000003030"
+        }
+      ]
+    },
+    {
+      "name": "prior-launch-context-cannot-authorize-fresh-execute",
+      "baseline": "same-serialized-artifact-independently-admitted-run-two",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_LAUNCH_IDENTITY",
+      "mutations": [
+        {
+          "pointer": "/acceptedLaunch/runId",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "56cbbd304b25a2a5c96286251a5fa438667a2fe0ee770082633df60204d3904b",
+          "afterHash": "0de9b002744a0852018cab76952892977a2a828058f4182d3edb8d3395e9c224",
+          "before": "00000000-0000-4000-8000-000000003040",
+          "after": "00000000-0000-4000-8000-000000003030"
+        },
+        {
+          "pointer": "/acceptedLaunch/attemptId",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "335fe03d00182d7d266ba7fabb5ab63bd3af3c9e69153ebcf13dde84229d7a7e",
+          "afterHash": "995b856a3b29225e8b72dd107d8a017d42cabf7bb975b3e70ca9e9b166f53abf",
+          "before": "00000000-0000-4000-8000-000000003041",
+          "after": "00000000-0000-4000-8000-000000003031"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/admissionId",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "c31157278c2ada6006b4ee6d120c2333eac17f61373eafde1fb7a427cc79011f",
+          "afterHash": "8f0a0e4ff883b73d56accc54d8f8d08f6603d744875fe98a8b14a60f9c956d81",
+          "before": "00000000-0000-4000-8000-000000003042",
+          "after": "00000000-0000-4000-8000-000000003032"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/executionId",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "56cbbd304b25a2a5c96286251a5fa438667a2fe0ee770082633df60204d3904b",
+          "afterHash": "0de9b002744a0852018cab76952892977a2a828058f4182d3edb8d3395e9c224",
+          "before": "00000000-0000-4000-8000-000000003040",
+          "after": "00000000-0000-4000-8000-000000003030"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/attemptId",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "335fe03d00182d7d266ba7fabb5ab63bd3af3c9e69153ebcf13dde84229d7a7e",
+          "afterHash": "995b856a3b29225e8b72dd107d8a017d42cabf7bb975b3e70ca9e9b166f53abf",
+          "before": "00000000-0000-4000-8000-000000003041",
+          "after": "00000000-0000-4000-8000-000000003031"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/admissionId",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "c31157278c2ada6006b4ee6d120c2333eac17f61373eafde1fb7a427cc79011f",
+          "afterHash": "8f0a0e4ff883b73d56accc54d8f8d08f6603d744875fe98a8b14a60f9c956d81",
+          "before": "00000000-0000-4000-8000-000000003042",
+          "after": "00000000-0000-4000-8000-000000003032"
+        }
+      ]
+    },
+    {
+      "name": "execute-attempt-mismatch",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_LAUNCH_IDENTITY",
+      "mutations": [
+        {
+          "pointer": "/execute/attemptId",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "884eb2f85ad2e1ef7e4fa29d2ff03034e460bf41f7d10d19aa116f2fffab3144",
+          "afterHash": "49dd928b52cabb03032e5a36530c1b020383e524e74c826d0697c55906f26f06",
+          "before": "00000000-0000-4000-8000-000000003001",
+          "after": "00000000-0000-4000-8000-000000002999"
+        }
+      ]
+    },
+    {
+      "name": "execute-profile-mismatch",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_LAUNCH_IDENTITY",
+      "mutations": [
+        {
+          "pointer": "/execute/profileHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "7af40709a29196ee7baf0014c53bb411b2dacb6f2de505e476c5862536e350a4",
+          "afterHash": "cf863090129c1e00c180d5f60daa8599e2497f32d5e726104ac4ec5f68b4a14e",
+          "before": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+          "after": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      ]
+    },
+    {
+      "name": "execute-configuration-mismatch",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_LAUNCH_IDENTITY",
+      "mutations": [
+        {
+          "pointer": "/execute/configurationHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "44589774f8a5b4f8b3622ea84b3702f30ff9a9cc8e4035b2b6bc33f29cc8167d",
+          "afterHash": "cf863090129c1e00c180d5f60daa8599e2497f32d5e726104ac4ec5f68b4a14e",
+          "before": "dc52a6ec856c6e30b512d428302844a530a3dc1b3dcf83ffa27e2e42401e23ee",
+          "after": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      ]
+    },
+    {
+      "name": "accepted-scope-cannot-change-without-admitted-pin",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_LAUNCH_SCOPE",
+      "mutations": [
+        {
+          "pointer": "/acceptedLaunch/scope/principalId",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "ede61cc915fe17a77ff12e16dbf73d7d820e0402dde4d6d3f0769670a99f9271",
+          "afterHash": "75f095b429ffee4f2cdf4d1761bf035fd33333b2a7d640d4f50f81d688d1a75b",
+          "before": "fresh-replay-principal",
+          "after": "different-principal"
+        }
+      ]
+    },
+    {
+      "name": "accepted-policy-cannot-change-without-admitted-pin",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_LAUNCH_SCOPE",
+      "mutations": [
+        {
+          "pointer": "/acceptedLaunch/policy/allowedOrigins",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "a8f162c7c67ad5118636fc5e60884e015ea1d5f4984e7134444e148611ac0277",
+          "afterHash": "fca6f070ba9c34139502ae4ce491a5892b3b72e6680803989beefca21d9ae7f8"
+        }
+      ]
+    },
+    {
+      "name": "accepted-build-and-request-must-match",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_LAUNCH_BUILD",
+      "mutations": [
+        {
+          "pointer": "/acceptedLaunch/build/chromiumBuild",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "2e28057198b3621df24e3dc0aec52aa4c1f406be22c29c08769c4d40ec55fec9",
+          "afterHash": "21a90b3fe92cf6c5d66ea63deb3ab49cb0eee6c66011882552109c5d835e9843",
+          "before": "fixture-123",
+          "after": "different-build"
+        }
+      ]
+    },
+    {
+      "name": "current-source-schema-build-cannot-be-crossed",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_CURRENT_SOURCE_BUILD",
+      "mutations": [
+        {
+          "pointer": "/acceptedLaunch/admission/request/build/schemaBundleHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "5a085cdfbea8973ba145f077da7bbd82fc56b8cb12b680b8e789eeb5860f347d",
+          "afterHash": "cf863090129c1e00c180d5f60daa8599e2497f32d5e726104ac4ec5f68b4a14e",
+          "before": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
+          "after": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        {
+          "pointer": "/acceptedLaunch/build/schemaBundleHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "5a085cdfbea8973ba145f077da7bbd82fc56b8cb12b680b8e789eeb5860f347d",
+          "afterHash": "cf863090129c1e00c180d5f60daa8599e2497f32d5e726104ac4ec5f68b4a14e",
+          "before": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
+          "after": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      ]
+    },
+    {
+      "name": "execute-steps-cannot-reorder",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_STEP",
+      "mutations": [
+        {
+          "pointer": "/execute/steps",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "37d33b5898876a6422aae9ca2ddbac8c31fbe3148dd9cd3366d0705fb1262651",
+          "afterHash": "5b80ce48b14af49f4403cb8a35a6e1a9a9f0f87153595528b1acbeab9f8172f9"
+        }
+      ]
+    },
+    {
+      "name": "execute-cannot-drop-action",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "SCHEMA",
+      "mutations": [
+        {
+          "pointer": "/execute/steps",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "37d33b5898876a6422aae9ca2ddbac8c31fbe3148dd9cd3366d0705fb1262651",
+          "afterHash": "0c268ba99206f64ece1118a2e4fb8b935ea12fd4a9ae2f1842d166fef5285f02"
+        }
+      ]
+    },
+    {
+      "name": "execute-guard-metadata-cannot-change",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_GUARDS",
+      "mutations": [
+        {
+          "pointer": "/execute/guards",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "5692e505c4eb772ee260a0b1485e01188e8dcabaf09aa5dad0af1968578f0e0a",
+          "afterHash": "2b220b5c449bd0f28323e06aab45a63b007a4016958037466f65e1bec0303a4b"
+        }
+      ]
+    },
+    {
+      "name": "runtime-binding-recipe-cannot-change",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_RUNTIME_READ",
+      "mutations": [
+        {
+          "pointer": "/execute/bindings",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "5999c2a08fd57641f75d9208e65d96594eb57c0e8c496cbed94c606b02dad6b6",
+          "afterHash": "268a23dd11629110163f042be5c31335780282737bec51b3578b14504a4ab5e0"
+        }
+      ]
+    },
+    {
+      "name": "runtime-binding-cannot-add-cached-value",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "SCHEMA",
+      "mutations": [
+        {
+          "pointer": "/execute/bindings",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "5999c2a08fd57641f75d9208e65d96594eb57c0e8c496cbed94c606b02dad6b6",
+          "afterHash": "89fe2e19addef216392663f81f60574063c8a165eb86fdc250d928736f925ec1"
+        }
+      ]
+    },
+    {
+      "name": "runtime-binding-cannot-be-duplicated",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_BINDING",
+      "mutations": [
+        {
+          "pointer": "/execute/bindings",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "5999c2a08fd57641f75d9208e65d96594eb57c0e8c496cbed94c606b02dad6b6",
+          "afterHash": "9f0e59fca524be8acb593a2aca32c1b3df19e5df485cd8c36d9692e1d2919d27"
+        }
+      ]
+    },
+    {
+      "name": "runtime-orphan-binding-forbidden",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_RUNTIME_READ",
+      "mutations": [
+        {
+          "pointer": "/execute/bindings",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "5999c2a08fd57641f75d9208e65d96594eb57c0e8c496cbed94c606b02dad6b6",
+          "afterHash": "cd67ad1ec3cefcc03700367e75656589da2b04ee39d151d081b326747fb48c9a"
+        }
+      ]
+    },
+    {
+      "name": "binding-use-cannot-hide-missing-transfer",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_TRANSFER",
+      "mutations": [
+        {
+          "pointer": "/execute/steps",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "37d33b5898876a6422aae9ca2ddbac8c31fbe3148dd9cd3366d0705fb1262651",
+          "afterHash": "597df0ea9dffc5ba3ce9c05614c69e3b0364899bc2e1741744c5c7ba6988f2ad"
+        }
+      ]
+    },
+    {
+      "name": "input-order-is-exact",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_INPUT_PROJECTION",
+      "mutations": [
+        {
+          "pointer": "/execute/inputs",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "a40ca5928eafeb4f4126f7ab822eecb5a0f4d763815ba2b87c4df6431716a44b",
+          "afterHash": "2bac52cb8b8db781eb14a012485493be5ce4edb85c0a77463235ee169a0850be"
+        }
+      ]
+    },
+    {
+      "name": "input-cannot-be-dropped",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_INPUT_PROJECTION",
+      "mutations": [
+        {
+          "pointer": "/execute/inputs",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "a40ca5928eafeb4f4126f7ab822eecb5a0f4d763815ba2b87c4df6431716a44b",
+          "afterHash": "1b97d5350492ae6bb7af40bd3e66f8e4a7c5b0db370f4d8a3717fb98964a152a"
+        }
+      ]
+    },
+    {
+      "name": "extra-input-is-not-admitted",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_INPUT_PROJECTION",
+      "mutations": [
+        {
+          "pointer": "/execute/inputs",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "a40ca5928eafeb4f4126f7ab822eecb5a0f4d763815ba2b87c4df6431716a44b",
+          "afterHash": "8680aad82ce90a07ca21b5ce44ea3313c65aafe1b8b170c95009e761b6b6f63f"
+        }
+      ]
+    },
+    {
+      "name": "input-step-is-exact",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_INPUT_PROJECTION",
+      "mutations": [
+        {
+          "pointer": "/execute/inputs",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "a40ca5928eafeb4f4126f7ab822eecb5a0f4d763815ba2b87c4df6431716a44b",
+          "afterHash": "ca5a9e62c2ab80afcb2801516f9a52f5e1c2b0b79eb22e0e67f4aef260ba7985"
+        }
+      ]
+    },
+    {
+      "name": "input-slot-is-exact",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_INPUT_PROJECTION",
+      "mutations": [
+        {
+          "pointer": "/execute/inputs",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "a40ca5928eafeb4f4126f7ab822eecb5a0f4d763815ba2b87c4df6431716a44b",
+          "afterHash": "062976cc3cb08c9251aad484032530bfe0b5bbc6d8c7681a77a877160098559d"
+        }
+      ]
+    },
+    {
+      "name": "secret-reference-metadata-cannot-be-invented",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_INPUT_PROJECTION",
+      "mutations": [
+        {
+          "pointer": "/execute/inputs",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "a40ca5928eafeb4f4126f7ab822eecb5a0f4d763815ba2b87c4df6431716a44b",
+          "afterHash": "c514e6b667d4c33fb4f2a151e275f193652421563343a8be7f48cb59fad807e0"
+        }
+      ]
+    },
+    {
+      "name": "admitted-local-retained-list-must-be-initial-segment",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_RETAINED_PREFIX",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact/learnedPlan/incremental/retainedPrefixAdmissionIds",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "069c387a39aa8e9435f8410ecf1ae55407338b2eb60f491b490f03d7f924710b",
+          "afterHash": "21a24e342d33a6cf5b6911f98760e3fa67def2b419196a43a5c366587d99b7e2"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "e31b4fde28e6297a272632e62fcf211544b289e4a90a2e86fc6a05461a21d5b2",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "130a8f12504b3bfae123176d1d6d08f6a4332245db939f52032e8c5b7e10e03b"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/replayPolicy/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "e31b4fde28e6297a272632e62fcf211544b289e4a90a2e86fc6a05461a21d5b2",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "130a8f12504b3bfae123176d1d6d08f6a4332245db939f52032e8c5b7e10e03b"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/artifactHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "8e50fffef91ab788afd70ca79927c825e69eb0ea7a35fe4e9c0e076bcbb6cc87",
+          "afterHash": "4fb5a400c09a85a24326da825e4a59ce18173349a5bd3c89154b2c4700c0fea6",
+          "before": "338b1a4a44ee017410138d93c5cdd5e1091984867c7a1405ccccc83fe87da798",
+          "after": "e35be99c42d93270900b9637e47b6a94199929be91bde6b767cfdff898f7b879"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "e31b4fde28e6297a272632e62fcf211544b289e4a90a2e86fc6a05461a21d5b2",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "130a8f12504b3bfae123176d1d6d08f6a4332245db939f52032e8c5b7e10e03b"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/referencePolicyHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "391000d699be7d7e2c6b4f5df1a2f04ff3804703230be9447b29d2c6a8d18ee4",
+          "afterHash": "ce42d8e8f2d91ab4124b42d5395e6fa27cf7c8562f1f096f5e817cfdf4bb6969",
+          "before": "f5ae202f35746a25c8d978d64833c6cef16bf4f25ebf8af1b519cb8599db504f",
+          "after": "b86624c526865688e0c887c1326949536389bd17e69fa28ae872c34eb5e4712a"
+        }
+      ]
+    },
+    {
+      "name": "admitted-local-retained-list-cannot-have-duplicates",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "SCHEMA",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact/learnedPlan/incremental/retainedPrefixAdmissionIds",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "069c387a39aa8e9435f8410ecf1ae55407338b2eb60f491b490f03d7f924710b",
+          "afterHash": "8f55867fd131f464318f73354923bfa5adf29c81598f2c8fa133d808b134a64f"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "1d6086d37a8376facbf874d0fc7706f68973b8591e03511cd12a395c583ab3bf",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "706c7331b07cb69ed7355e5fe82e9581e7a9748ab7037b7f60db2fd1574f16ff"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/replayPolicy/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "1d6086d37a8376facbf874d0fc7706f68973b8591e03511cd12a395c583ab3bf",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "706c7331b07cb69ed7355e5fe82e9581e7a9748ab7037b7f60db2fd1574f16ff"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/artifactHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "8e50fffef91ab788afd70ca79927c825e69eb0ea7a35fe4e9c0e076bcbb6cc87",
+          "afterHash": "5fe735657f52abb2491b9def70a942e10902b070d79f32c896447d3f2b95fe3c",
+          "before": "338b1a4a44ee017410138d93c5cdd5e1091984867c7a1405ccccc83fe87da798",
+          "after": "45dcc801bc80cd5ff35883a9d3714786da7ec52e2abcaa5f6a871401465ee158"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "1d6086d37a8376facbf874d0fc7706f68973b8591e03511cd12a395c583ab3bf",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "706c7331b07cb69ed7355e5fe82e9581e7a9748ab7037b7f60db2fd1574f16ff"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/referencePolicyHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "391000d699be7d7e2c6b4f5df1a2f04ff3804703230be9447b29d2c6a8d18ee4",
+          "afterHash": "119f9197a2977a9078b8f403a8e97eff933b311c8fe618602c503c1cd603e2a2",
+          "before": "f5ae202f35746a25c8d978d64833c6cef16bf4f25ebf8af1b519cb8599db504f",
+          "after": "d46b509a32c564ba6e0ddf136fe6a6e14ca7bc09e1bc15a39b2cd53ba1a097b7"
+        }
+      ]
+    },
+    {
+      "name": "admitted-local-producer-admission-must-exist",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "BINDING_PRODUCER",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact/learnedPlan/bindings",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "ad55d729a498325e353eec7ca7179561102c1266c849a5c0a938b8fd9a6d5f2e",
+          "afterHash": "3eac1b16fdd375733eafd3e48f28d5762e3815f735e7f29af3ca609e4cafe814"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "d1c7e038f2458f001b32f36bd7fe838edfab66638f3ea3b4ab41282d7994dde2",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "7527924f124889036fa49312c64c34910a5d071e4960330b04d1b4b3a2e371c5"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/replayPolicy/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "d1c7e038f2458f001b32f36bd7fe838edfab66638f3ea3b4ab41282d7994dde2",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "7527924f124889036fa49312c64c34910a5d071e4960330b04d1b4b3a2e371c5"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/replayPolicy/bindings",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "ad55d729a498325e353eec7ca7179561102c1266c849a5c0a938b8fd9a6d5f2e",
+          "afterHash": "3eac1b16fdd375733eafd3e48f28d5762e3815f735e7f29af3ca609e4cafe814"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/artifactHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "8e50fffef91ab788afd70ca79927c825e69eb0ea7a35fe4e9c0e076bcbb6cc87",
+          "afterHash": "1fbd82c8bdbf24273cf1108698c2f25cebc5398f667b6cf4a27beb268c9fddd3",
+          "before": "338b1a4a44ee017410138d93c5cdd5e1091984867c7a1405ccccc83fe87da798",
+          "after": "cfd1e13bb0b73426f498e4fd17f3d0825aa3ac7049a7718143b45a8cef100d96"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "d1c7e038f2458f001b32f36bd7fe838edfab66638f3ea3b4ab41282d7994dde2",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "7527924f124889036fa49312c64c34910a5d071e4960330b04d1b4b3a2e371c5"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/referencePolicyHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "391000d699be7d7e2c6b4f5df1a2f04ff3804703230be9447b29d2c6a8d18ee4",
+          "afterHash": "eadb404ebbfd6bda5fc9b43c935adc137e939a387823abd42a2e2b8143481568",
+          "before": "f5ae202f35746a25c8d978d64833c6cef16bf4f25ebf8af1b519cb8599db504f",
+          "after": "2f49cf50425056cc15b14488add48d0ad5d64bea963fa148078e790bb67d4674"
+        }
+      ]
+    },
+    {
+      "name": "admitted-local-producer-source-step-must-match",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "BINDING_PRODUCER",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact/learnedPlan/bindings",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "ad55d729a498325e353eec7ca7179561102c1266c849a5c0a938b8fd9a6d5f2e",
+          "afterHash": "f3edd96e97bf7762c19e6382153bb9fd69fa668ff15889a02d319a30027e07c3"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "8763d577a02c6f7478450b77e2cb72b77f978b50cdf78b028453812e14a171cf",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "8dd4aff34c9f9b31c59ac63c5e20bcc640ffd7be43d8d47f0106ec6d5c9f67ea"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/replayPolicy/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "8763d577a02c6f7478450b77e2cb72b77f978b50cdf78b028453812e14a171cf",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "8dd4aff34c9f9b31c59ac63c5e20bcc640ffd7be43d8d47f0106ec6d5c9f67ea"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/replayPolicy/bindings",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "ad55d729a498325e353eec7ca7179561102c1266c849a5c0a938b8fd9a6d5f2e",
+          "afterHash": "f3edd96e97bf7762c19e6382153bb9fd69fa668ff15889a02d319a30027e07c3"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/artifactHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "8e50fffef91ab788afd70ca79927c825e69eb0ea7a35fe4e9c0e076bcbb6cc87",
+          "afterHash": "fc87d6f1be93cf8dd983642b3844caf53330b0b28f80433d680d06858ae8f8f0",
+          "before": "338b1a4a44ee017410138d93c5cdd5e1091984867c7a1405ccccc83fe87da798",
+          "after": "8e99ab443089fae2dec004e51461e9287536c94fd67f1e1f0721b296990c771f"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "8763d577a02c6f7478450b77e2cb72b77f978b50cdf78b028453812e14a171cf",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "8dd4aff34c9f9b31c59ac63c5e20bcc640ffd7be43d8d47f0106ec6d5c9f67ea"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/referencePolicyHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "391000d699be7d7e2c6b4f5df1a2f04ff3804703230be9447b29d2c6a8d18ee4",
+          "afterHash": "09ed373ec8c1a30762c8c0b4f0bf4e78ab830bbcaf0d3b373d42b1dfeceaf7e9",
+          "before": "f5ae202f35746a25c8d978d64833c6cef16bf4f25ebf8af1b519cb8599db504f",
+          "after": "09205bfc26d59161689811e5e655381d1824c543afeef515b79583d00b506afb"
+        }
+      ]
+    },
+    {
+      "name": "admitted-local-effective-boundary-cannot-follow-initial",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_RETAINED_BOUNDARY",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact/learnedPlan/incremental/initialFirstLearnStepId",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "2f47cc2a3de79e24ac5260eb1fe6e857ee07fb108f7fd228a13a56e45c8d7f71",
+          "afterHash": "59c47a0098c86f6ec503f79945750d1c1e2d49db6e2a70865db321398b42a9f6",
+          "before": "00000000-0000-4000-8000-000000000004",
+          "after": "00000000-0000-4000-8000-000000000002"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "e616ffcd0d0ad1c34cd354acb03d27b96a6675ae831717f691ced072d808b73b",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "2a09bdbbe432c7cb5d118a68c0c67d35276b7bc769524b06be069f1c0fa03d11"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/replayPolicy/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "e616ffcd0d0ad1c34cd354acb03d27b96a6675ae831717f691ced072d808b73b",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "2a09bdbbe432c7cb5d118a68c0c67d35276b7bc769524b06be069f1c0fa03d11"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/artifactHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "8e50fffef91ab788afd70ca79927c825e69eb0ea7a35fe4e9c0e076bcbb6cc87",
+          "afterHash": "07315aa102ebba8b674605ee97095b7987d7bb36f278f9f4db973f5538cb859b",
+          "before": "338b1a4a44ee017410138d93c5cdd5e1091984867c7a1405ccccc83fe87da798",
+          "after": "e9c44227dfb601e8648832de930b7a798fd399609f11edfdee7746877f5d1420"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/learnedPlanHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "6baac23449cb458253e7aed65f414e631e98d5020d8f4a91a1520ff22fe1cd90",
+          "afterHash": "e616ffcd0d0ad1c34cd354acb03d27b96a6675ae831717f691ced072d808b73b",
+          "before": "738716dcce533f62c453b05a0252806b6d86ba39149c15a00a680f744fc82a9d",
+          "after": "2a09bdbbe432c7cb5d118a68c0c67d35276b7bc769524b06be069f1c0fa03d11"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/referencePolicyHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "391000d699be7d7e2c6b4f5df1a2f04ff3804703230be9447b29d2c6a8d18ee4",
+          "afterHash": "a9f46db46291ee02fb7aed492d3fb8e119de339238f04351fd42f9ca32da6200",
+          "before": "f5ae202f35746a25c8d978d64833c6cef16bf4f25ebf8af1b519cb8599db504f",
+          "after": "1695b337ba86c570ac852000bd62e415c50ba8f2c0d9d6126957fbcad26bda76"
+        }
+      ]
+    },
+    {
+      "name": "admitted-local-retained-read-rule-must-match-guard",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_RETAINED_GUARD",
+      "mutations": [
+        {
+          "pointer": "/execute/guards",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "5692e505c4eb772ee260a0b1485e01188e8dcabaf09aa5dad0af1968578f0e0a",
+          "afterHash": "0b40eacdec96c87380ea3b6e83526520c0872292d3cfb12432a361231482d742"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/guards",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "5692e505c4eb772ee260a0b1485e01188e8dcabaf09aa5dad0af1968578f0e0a",
+          "afterHash": "0b40eacdec96c87380ea3b6e83526520c0872292d3cfb12432a361231482d742"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/artifactHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "8e50fffef91ab788afd70ca79927c825e69eb0ea7a35fe4e9c0e076bcbb6cc87",
+          "afterHash": "968591091326b26ffd759987e50ff023fc8fbf7cc38a5f3e6fdce68b8c26987c",
+          "before": "338b1a4a44ee017410138d93c5cdd5e1091984867c7a1405ccccc83fe87da798",
+          "after": "1e6115a4a777984169730de267911c5e9eac8605b588c83450dbe9f4c6cc6c6d"
+        }
+      ]
+    },
+    {
+      "name": "admitted-local-artifact-cannot-name-foreign-source-recipe",
+      "baseline": "qualified-retained-read-projection",
+      "baselineValidated": true,
+      "targetCode": "EXECUTE_ARTIFACT_SOURCE",
+      "mutations": [
+        {
+          "pointer": "/execute/retainedArtifact/inputRecipes",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "651e22c3db4e06d4127d28b20fd350da3727c60144ff42c115c3cecc20eb0ffb",
+          "afterHash": "4c41089448d7fae0f8f8e949eeac973f875940607ae44f89ed51bc9fd242a74d"
+        },
+        {
+          "pointer": "/execute/retainedArtifact/replayPolicy/inputs",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "651e22c3db4e06d4127d28b20fd350da3727c60144ff42c115c3cecc20eb0ffb",
+          "afterHash": "4c41089448d7fae0f8f8e949eeac973f875940607ae44f89ed51bc9fd242a74d"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/artifactHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "8e50fffef91ab788afd70ca79927c825e69eb0ea7a35fe4e9c0e076bcbb6cc87",
+          "afterHash": "f406b3112a77a9a2accd4ede8b611b5fed6e8f5884dc9d92742796ec212fd715",
+          "before": "338b1a4a44ee017410138d93c5cdd5e1091984867c7a1405ccccc83fe87da798",
+          "after": "77f6fd4a6bf39c6c8b6aa4265c4f1dd4f152e7a5c52dd90fb2f3a0a971779b5e"
+        },
+        {
+          "pointer": "/acceptedLaunch/admission/request/referencePolicyHash",
+          "beforeAbsent": false,
+          "afterAbsent": false,
+          "beforeHash": "391000d699be7d7e2c6b4f5df1a2f04ff3804703230be9447b29d2c6a8d18ee4",
+          "afterHash": "0d3b29131b243085636947866384d3c05aff21bb38fbd82b07a2ab2800f25a17",
+          "before": "f5ae202f35746a25c8d978d64833c6cef16bf4f25ebf8af1b519cb8599db504f",
+          "after": "29fa32a74823b6980292acafbaecb3f64a58eb93dad2385466d5917401af7e54"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "story": "STUDIO-OBS-015",
+  "reviewer": "Quinn",
+  "root": "Orion",
+  "classification": "INDEPENDENT_READ_ONLY_ACTUAL_FEEDBACK05_DIAGNOSIS",
+  "status": "DIAGNOSIS_COMPLETE_FOUR_NARROW_TEST_REPAIRS_RECOMMENDED_HOLD",
+  "sourceHold": true,
+  "distHold": true,
+  "runtimeRelease": false,
+  "formalQaVerdict": null,
+  "lifecycleChange": null,
+  "actual": {
+    "handle": 31432,
+    "terminal": true,
+    "exit": 1,
+    "elapsedSeconds": 247.29,
+    "total": 32,
+    "passed": 26,
+    "failed": 6,
+    "skipped": 0,
+    "authorityDefaultPassed": 24,
+    "lowPassed": 2,
+    "lowFailed": 6,
+    "configurationAndMainAndTestCompile": "PASS_REPORTED_BY_FINAL_RECEIPT; no compiler run by diagnoser"
+  },
+  "finalReceiptSha256": "03fae10501336f2845a265eb6ba36a35f61b3e37fd11f0bb0927e64b7b7fdb2b",
+  "findings": [
+    {
+      "id": "F05-01",
+      "category": "TEST_CONTRACT_ACCESSOR_DEFECT",
+      "subjects": [
+        "main original Core",
+        "trusted original Core"
+      ],
+      "actual": "Both fail JOIN4149 after successful mixed completion/publication because sourceSteps[index].stepId reads empty",
+      "primary": "v3 learned-plan.schema.json sourceSteps.items is string; frozen examples use ordered UUID strings; GuidedPlanBuilder1015-1016 writes strings",
+      "minimumRepair": "Keep size/order/exact UUID equality and textual-kind assertion; compare sourceSteps[index].asText(), not child stepId. Preserve every later snapshot/reuse/video/replay assertion.",
+      "notProved": "Assertions after the first failed loop comparison, continuous recorded-video acceptance and ordinary replay remain unrun"
+    },
+    {
+      "id": "F05-02",
+      "category": "TEST_DIAGNOSTIC_LINE_DEFECT",
+      "subjects": [
+        "PFXSYNC-03 uncertainty"
+      ],
+      "actual": "119 UNKNOWN_OUTCOME diagnostics at advancePrefix398; fixture matcher expects397; BUSY parent is real, LOST not entered",
+      "primary": "Frozen d8c494 source line397 is try; actual pushContext call is398; JDK21 XML/safe stacks report398",
+      "minimumRepair": "Change only exact context-call binding397 to398 for this held production hash. Retain UNKNOWN_OUTCOME, gate405 and stale-predicate precision; do not accept any exception or timeout as coverage.",
+      "notProved": "Later uncertainty assertions and LOST branch remain unexecuted"
+    },
+    {
+      "id": "F05-03",
+      "category": "TEST_TRANSACTION_SETUP_DEFECT",
+      "subjects": [
+        "PFXSYNC-05 concurrent"
+      ],
+      "actual": "JOIN3500 plans.state throws RUNTIME_INCOMPATIBLE via TranslationStore.state650/transaction30 before contenderHTTP",
+      "primary": "GuidedTranslationStore.state requires active transaction and session/source lock ownership contract",
+      "minimumRepair": "Read planRevision in one short existing session-locked/authenticated translation transaction; commit before constructing/sending contender HTTP. Keep actual202/SUCCEEDED/dispatchCount1/first stale predicate/one native winner assertions.",
+      "notProved": "Contender HTTP, actual coordinate race and stale first-gate/native multiplicity remain unreached"
+    },
+    {
+      "id": "F05-04",
+      "category": "TEST_PARENT_FIXTURE_DISCRIMINATOR_DEFECT_SOURCE_DIAGNOSIS",
+      "subjects": [
+        "PFXSYNC-01 ACKpositive suffix"
+      ],
+      "actual": "Held update/real renewal/four actual prefix actions succeeded; session18 suffix provider model evaluated then RuntimeFailure before text/envelope encoding/serving; attempt REJECTED/not APPLIED; INVALID_CONTRACT at call1567",
+      "primary": "prefixSyncParent never sets incrementalDomVariant; previous cleanup leaves null. Suffix first>0 reaches incrementalTenModel20432 List.of(...).contains(null), which local JDK immutable ListN rejects. Provider catch maps RuntimeException to500; no returned plan reaches validator.",
+      "minimumRepair": "Set the narrow parent's existing discriminator to established non-replacement edit4 mode immediately before mixed start; restore null in normal and partial-construction failure cleanup. Keep actual source/edit4/fresh parent, model fixture meaning and caps unchanged. No shared model-oracle/production/schema repair.",
+      "evidenceLimit": "Null-query NPE is source-derived mechanism, not a captured runtime exception class; only providerRuntimeFailure was retained. No actual returned source-plan body exists.",
+      "notProved": "Successful suffix/finalization and later request/materialization/continuous recording/ordinary-replay assertions remain unrun"
+    },
+    {
+      "id": "F05-05",
+      "category": "PRESERVED_ADVERSE_FINAL_GATE_CONSEQUENCE",
+      "subjects": [
+        "final audit executionError"
+      ],
+      "actual": "Real GUIDED_ACTION_ADMITTED events exist; no real REPLAY_DISPATCHED, audit-final missing, final audit FAIL",
+      "minimumRepair": "Preserve audit requirement and red result. Complete lawful replay through repaired tests in a newly authorized cohort; never plant an audit event or weaken final scan.",
+      "notProved": "Full cohort audit/coverage/replay acceptance remains open"
+    }
+  ],
+  "scopedPasses": [
+    "24 AuthorityIT real repository/PG invocations only:11original+13new; not all15route/HTTP/native closure",
+    "PFXSYNC02 both controlled before-update SCHEMA/IDENTITY_MISMATCH handling",
+    "PFXSYNC04 real cancel/source/evidence post-ACK gate controls; worker-current-access cut remains OPEN"
+  ],
+  "actualProgressWithoutPassingMethods": [
+    "Both original Core mixed sessions SUCCEEDED with12successful actions,9model calls and actual zero-effect publication before wrong typed accessor; later snapshot/video/replay assertions unrun",
+    "ACKpositive held update/no-target/actual renewal/fixed evidence assertions reached, then four actual prefix actions/model0 before suffix fixture failure"
+  ],
+  "providerCorrection": {
+    "actualUniqueCalls": 149,
+    "served": 148,
+    "applied": 148,
+    "notEncoded": 1,
+    "failedSessionOrdinal": 18,
+    "requestBytes": 16633,
+    "persistedInputCeiling": 18486,
+    "outputCeiling": 2048,
+    "attemptApplied": false,
+    "attemptStatus": "REJECTED",
+    "textEncoded": false,
+    "envelopeEncoded": false,
+    "bodyServed": false,
+    "actualFailedResponseBytes": "ABSENT_NOT_ZERO",
+    "noReturnedPlan": true,
+    "counters": "18486input/2048output are charged reservation accounting, not measured returned text/token usage; no-refund unchanged"
+  },
+  "priorStaticReviewCorrection": "Earlier bounded source review missed these test defects and incorrectly accepted context line397. Runtime/source diagnosis now binds398. Prior evidence remains immutable; no retrospective PASS or source review rewrite.",
+  "excludedClaims": [
+    "No new production defect established by these six failures",
+    "No fix verified or expected assertion deleted",
+    "No intrinsic Core04 response code/no-effect inference",
+    "No original uncertain admission retry",
+    "No earlier setup refusal credited to the requested race",
+    "No five-method PASS claim or story closure"
+  ],
+  "open": [
+    "LOST uncertainty branch",
+    "Actual contender coordinate/native winner race",
+    "ACKpositive suffix and finish-helper assertions",
+    "Original Core later ordered snapshot/provenance/continuous video/ordinary replay",
+    "Final audit/whole42low/35variants/original80plus5",
+    "Combined fresh-producer/current-access and separate worker secret-access proof",
+    "Exact ADMITTED/done/refresh/recovery matrix",
+    "All other original86/24/55/B1B2B3B4/configuredCore/Vault/native/privatePG/crossReplica/deployment/coverage/independent015QA/PO/rootclosure then full008"
+  ],
+  "nextAction": "Root may issue a JOIN-only source lease for the four precise test repairs after final fan-in; source review and a separately scheduled fresh execution must follow. No production/model-contract/budget/timeout change or retry is authorized by this diagnosis.",
+  "preservation": {
+    "sequence": "FULL015_THEN_FULL008",
+    "acceptance": 86,
+    "ipc": 24,
+    "sql": 55,
+    "originalLabels": 35,
+    "originalJoinInvocations": 80,
+    "disclosedAdditions": 5,
+    "item85": "ORIGINAL_OPEN_PENDING_UNAMENDED",
+    "originalCore04Unknown": "UNTOUCHED_NO_RETRY"
+  },
+  "cleanup": "Final owner receipt reports25owned roots+279descendants gone,1064backend+6Planning prior outputs restored; no live command; diagnoser did no process probes",
+  "inspections": [
+    "file reads",
+    "metadata/jq analysis",
+    "source-archive reads",
+    "SHA-256 hashing"
+  ],
+  "notRun": [
+    "tests/compiler/Gradle/JVM/Node/build",
+    "DB/service/native/process/decoder",
+    "install/format/git/subagents/external contacts"
+  ],
+  "sourceOrOldEvidenceEdits": false,
+  "writes": [
+    "review.md",
+    "checks.json",
+    "source-inventory.json",
+    "manifest.json"
+  ]
+}

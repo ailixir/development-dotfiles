@@ -1,0 +1,117 @@
+{
+  "artifact": "Independent source phase/DI assessment",
+  "designDisposition": "CONDITIONALLY_READY_FOR_EXACT_IMPLEMENTATION_AND_EXECUTION",
+  "sourceFinalAcceptance": "NOT_GRANTED",
+  "productionAnchors": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "line": 28,
+      "anchor": "GuidedPublicationRepository(JdbcTemplate jdbc, GuidedContracts contracts,",
+      "sha256": "28aafe98ebdbbd3dcd59d061b671131713c5b5c2db4330a3e5252bd106011b48"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "line": 234,
+      "anchor": "var raw = evidence.get().read",
+      "sha256": "28aafe98ebdbbd3dcd59d061b671131713c5b5c2db4330a3e5252bd106011b48"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "line": 238,
+      "anchor": "require(currentBasis.equals(basis)",
+      "sha256": "28aafe98ebdbbd3dcd59d061b671131713c5b5c2db4330a3e5252bd106011b48"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "line": 247,
+      "anchor": "UPDATE ui_tests SET authoring_revision_inputs",
+      "sha256": "28aafe98ebdbbd3dcd59d061b671131713c5b5c2db4330a3e5252bd106011b48"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "line": 525,
+      "anchor": "private void authority",
+      "sha256": "28aafe98ebdbbd3dcd59d061b671131713c5b5c2db4330a3e5252bd106011b48"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "line": 575,
+      "anchor": "WHERE session_id=? FOR UPDATE",
+      "sha256": "28aafe98ebdbbd3dcd59d061b671131713c5b5c2db4330a3e5252bd106011b48"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java",
+      "line": 539,
+      "anchor": "public boolean excluded",
+      "sha256": "0e98da660358acd128b468bb28660bcf5a7378dbe7427a85464ae4e3caa9fd1f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayRuntimeConfiguration.java",
+      "line": 19,
+      "anchor": "evidence::getObject",
+      "sha256": "42020fc5f9871e36cce79db2dee21df473ff80bc303c33a3c7c7fdf315c62600"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "line": 38,
+      "anchor": "evidence.installRevisionVerifier",
+      "sha256": "5b6566e3e24b8cc1179150a833ae7db7a19efbc8ecd2023499bf1b140a272fd6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+      "line": 782,
+      "anchor": "require(revisionVerifier != null",
+      "sha256": "8aa40c60582007a59ba406d47832bf30d06627cf227fc0c3ce942ab7d58b07df"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+      "line": 465,
+      "anchor": "public PublicationContracts.Evidence read",
+      "sha256": "8aa40c60582007a59ba406d47832bf30d06627cf227fc0c3ce942ab7d58b07df"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+      "line": 588,
+      "anchor": "SELECT document::text FROM studio_guided_actions WHERE session_id=? ORDER BY",
+      "sha256": "8aa40c60582007a59ba406d47832bf30d06627cf227fc0c3ce942ab7d58b07df"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "line": 476,
+      "anchor": "private void verifyExcluded",
+      "sha256": "ac801042dd7a94468ff68a5ad7e4efe48ab310a9f12a93d290730243d755d128"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "line": 2245,
+      "anchor": "private JsonNode prefixDrift",
+      "sha256": "705ad5f372ba0e455b404233cf6ac27fa4255329eca45b79a9c69594be9e2cf8"
+    },
+    {
+      "path": "studio-runner/src/guided/runtime.ts",
+      "line": 440,
+      "anchor": "const provenBeforeEffect=",
+      "sha256": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V15__publication.sql",
+      "line": 221,
+      "anchor": "THEN RAISE EXCEPTION 'publication claim authority expired'",
+      "sha256": "ef092dfff93a24c4a05dc9afee6ba4a3b9a054f6cf39ca4059c186ff10777b40"
+    }
+  ],
+  "observedSafeComposition": [
+    "Lazy ObjectProvider/Supplier does not resolve configured reader at publication repository bean construction; configured evidence installs lazy real revisionVerifier.",
+    "Only current new-write commit calls complete evidence.read -> builder.basis under actual session/source locks, equals caller snapshot basis and stored VALIDATED attempt basisHash before cache/revision/receipt/pointer writes.",
+    "Shared reserve/claim/finish retains actual full ledger state gate, scalar authority and no live model attempts. All SUCCEEDED/dispatch1 avoids V21 excluded query; historical18 current commit compatibility is not invented.",
+    "Qualifier max1 FAILED TARGET_CHANGED dispatch1 attempt0 requires persisted receipt/switch exact admission; actual native legitimacy composes with authenticated original callback, durable journal and immutable SQL/full builder\u2014not hash alone.",
+    "Direct current commit cannot use publisher reread as substitute; final CAS/live SQL trigger and transaction rollback remain required."
+  ],
+  "unsafeConcreteSourceDefectsFound": [],
+  "importantLimits": [
+    "Two-arg repository default is verifierless and strict, useful only where required dependencies permit ordinary path; no supported nonempty-prefix fallback.",
+    "Worker has no API publication evidence bean; provider must remain unused until head commit. Real Spring worker/API composition tests are required.",
+    "No guarantee against arbitrary superuser bypass; inspect application/session/source locks and guard-enabled SQL paths.",
+    "Actual source/compile/PG/auth/native/direct-nonempty/rollback/concurrency execution remains mandatory."
+  ]
+}

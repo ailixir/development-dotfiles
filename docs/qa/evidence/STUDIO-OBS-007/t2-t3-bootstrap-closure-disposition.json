@@ -1,0 +1,1102 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "reportKind": "Independent Aria narrow architecture impact disposition; develop support, no implementation or SDC QA",
+  "reviewer": "Aria (@architect), resumed independent technical review; no subagents/models spawned",
+  "capturedAt": "2026-10-10T09:26:28.928250+00:00",
+  "workspace": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "branchContext": "brunobuger/ui-studio (user-supplied)",
+  "overallDisposition": "PROPOSED_PO_AMENDMENT",
+  "notQaVerdict": true,
+  "implementationApproved": false,
+  "summary": "Permit only an explicit sequential trusted startup-page exception and narrowly authenticated terminal declaration settlement. Preserve successful actual resolution metadata under the already approved linked RELEASE contract. Bootstrap replacement and new terminal data shape need fresh independent Pax plus root scope release; no acceptance application or peer PASS.",
+  "task": {
+    "skill": ".codex/skills/aiox-architect/SKILL.md",
+    "SOT": ".aiox-core/development/agents/architect.md",
+    "declaredDependency": ".aiox-core/development/tasks/architect-analyze-impact.md",
+    "constitution": ".aiox-core/constitution.md",
+    "mode": "yolo",
+    "parameters": {
+      "modificationType": "modify",
+      "componentPaths": [
+        "studio-runner/src/run/browser.ts",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+        "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+        "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql"
+      ],
+      "depth": "deep within the two requested issues",
+      "includeTests": true,
+      "excludeExternal": true,
+      "outputFormat": "json",
+      "saveReport": "docs/qa/evidence/STUDIO-OBS-007/t2-t3-bootstrap-closure-disposition.json"
+    },
+    "executionMethod": "Read-only manual execution of declared task stages: prerequisite/registered dependency validation, dependency and propagation analysis, risk assessment, concrete contract/remediation recommendations and saved report. No repository evidence snippets, task example implementation, generic task wrapper, tests or shared gates were executed. User-specific report replaces generic .ai state/log outputs; no lifecycle/handoff state mutation.",
+    "log": [
+      "Resumed current Aria thread; read skill/SOT/task/constitution and canonical authority.",
+      "Inspected exact production caller/data/browser/recording/timing and current tests.",
+      "Compared retained source manifests against current bytes; recorded drift instead of inheriting gate credit.",
+      "Separated approved linked-fact correction from proposed bootstrap/terminal requirement deltas.",
+      "Wrote only this requested report in the workspace."
+    ]
+  },
+  "authority": {
+    "priorTechnicalPeer": "docs/qa/evidence/STUDIO-OBS-007/t3-technical-peer.json",
+    "priorArchitecture": "docs/qa/evidence/STUDIO-OBS-007/t2-t3-architecture-disposition.json",
+    "freshPriorPax": "docs/qa/evidence/STUDIO-OBS-007/t2-t3-po-architecture-revalidation.json",
+    "exactPriorApplication": "docs/qa/evidence/STUDIO-OBS-007/architecture-application/receipt.json",
+    "approvedDataDesign": "docs/qa/evidence/STUDIO-OBS-007/t2-approved-data-design.md",
+    "rule": "All prior approved A–F rulings and exact 15 canonical +3const amendments remain authority. This report does not supersede them, apply acceptance or permit owners to implement the new bootstrap/data shape before independent Pax and root release. Original nineteen ACs/security conditions and history are preserved.",
+    "pins": "Approved executor observed-4/catalog observed-replay-3 remain current; no new tuple member/mode/status/wire field proposed. Recompute applicable actual source/launcher/browser provenance/profile/policy/build/confinement hashes through owners; never reuse obsolete identities or assert unavailable executableImageDigest/image proof."
+  },
+  "items": [
+    {
+      "id": "A-BOOTSTRAP-PAGE-VIDEO",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "architectureDecision": "Sequential trusted startup page, finalized/deleted startup artifact, then sole application page in the same persistent context is the selected design. Moving run origin earlier is rejected because it exposes diagnostic frames and changes timing/deadline semantics.",
+      "severity": "HIGH: app-video evidence and timing correctness; current startup diagnostic screens are recorded before run origin.",
+      "observations": [
+        {
+          "path": "studio-runner/src/run/browser.ts",
+          "line": 56,
+          "anchor": "async function verifyBrowserPreferences"
+        },
+        {
+          "path": "studio-runner/src/run/browser.ts",
+          "line": 127,
+          "anchor": "recordVideo: {"
+        },
+        {
+          "path": "studio-runner/src/run/browser.ts",
+          "line": 139,
+          "anchor": "const page: Page = first"
+        },
+        {
+          "path": "studio-runner/src/run/browser.ts",
+          "line": 176,
+          "anchor": "context.on('page', (opened)"
+        },
+        {
+          "path": "studio-runner/src/run/childRuntime.ts",
+          "line": 377,
+          "anchor": "const origin = takeRunOrigin"
+        },
+        {
+          "path": "studio-runner/src/run/timeline.ts",
+          "line": 90,
+          "anchor": "one call, two adjacent reads"
+        }
+      ],
+      "owner": "R runner; root serializes final gates and releases exact scope after fresh Pax",
+      "producerConsumerPaths": {
+        "producer": [
+          "studio-runner/src/run/browser.ts",
+          "studio-runner/src/run/guidedBrowser.ts",
+          "studio-runner/src/run/scratchLayout.ts"
+        ],
+        "privateContract": [
+          "studio-runner/src/run/browserFactory.ts"
+        ],
+        "consumer": [
+          "studio-runner/src/run/childRuntime.ts",
+          "studio-runner/src/run/timeline.ts",
+          "studio-runner/src/run/launcher.ts",
+          "studio-runner/src/server/runCoordinator.ts",
+          "studio-runner/src/run/recording.ts",
+          "studio-runner/src/run/manifest.ts"
+        ],
+        "tests": [
+          "studio-runner/test/run/browserProfilePreferences.test.ts",
+          "studio-runner/test/run/childRuntime.test.ts",
+          "studio-runner/test/run/timeline.test.ts",
+          "studio-runner/test/run/recording.test.ts",
+          "studio-runner/test/run/manifest.test.ts",
+          "studio-runner/test/fixtures-tier/recording-coverage.test.ts",
+          "studio-runner/test/fixtures-tier/secret-login.test.ts",
+          "studio-runner/test/guided/browser.test.ts"
+        ]
+      },
+      "requiredPrivateLifecycle": [
+        "BOOTSTRAP: assert exactly one startup page; fixed trusted WebUI navigation/limited effective preference projection only. Guard unexpected pages from the first post-launch inspection, with no arbitrary-page exception window.",
+        "CLOSED_STARTUP: capture startup page-owned video capability; close startup page; bounded await native finalization and confined deletion; confirm no remaining page and no retained startup artifact before newPage. Only the specifically issued newPage operation is authorized; any other event/page fails.",
+        "APP: create exactly one about:blank page, bind CDP isolated blank-world capability to this page, install ordinary popup refusal and return only this page to the child. No bootstrap page/element/world is reused as source evidence. Latch every unexpected-page event and refuse readiness even if it occurs before the child registers onExtraPage; never drop an early callback or clear the latch during page replacement.",
+        "Child takes the existing paired wall/monotonic origin exactly once after factory app-readiness, checks actual blank identity and liveness, then Ready. No browser secret execution or observation precedes Ready. Application video may have a measured bounded blank prefix; removing diagnostic video alone does not prove seek calibration.",
+        "StartDeadline covers launch/probe/close/delete/app readiness. Absolute admission runDeadline and parent process-tree deadline remain continuous. Runtime budget uses existing admitted totalRuntime/window; no extension, reset, fresh grant, early RUNNING or new origin field.",
+        "On any bootstrap failure/cancel/deadline: fail closed before Ready, dispose actual context/browser; parent bounds/forces process-tree teardown and clears scratch/capacity. Late launch resolution after stop is disposed. No orphan video upload, chosen stray-file fallback, swallowed deletion error or indefinite page-video wait.",
+        "Factory close returns only actual app page video after awaited app/context closure. Native geometry, evidence-vs-outcome, actual partial rules, upload/manifest key derivation and masking policy are unchanged. Do not use broad best-effort removeStrayRecordings as startup proof."
+      ],
+      "acceptanceDelta": "Literal one-page-over-entire-context/no-second-page language and single-page recording lifecycle need an explicit sequential startup exception. Preserve one active page/context and exactly one application recording. App readiness refines recording readiness; no new wire contract.",
+      "reversibility": "Before root release this is report-only. After authorized implementation, revert the isolated factory lifecycle change and its regenerated byte identities if proof fails; retain diagnostic contamination as an open failure, never hide it by shifting/rebasing/rewriting video.",
+      "evidenceDisposition": "NEEDS_EVIDENCE: pinned full Chromium supports closing/finalizing/deleting startup native video while context remains alive; no implementation/probe for replacement currently credited."
+    },
+    {
+      "id": "B-TERMINAL-DECLARATION-NO-DECISION",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "severity": "HIGH: required terminal summary missing for authentic accepted declarations after possible read/controller loss or generic pre-resolver terminal closure.",
+      "architectureDecision": "Add terminal-winner proof distinct from the live-owned completed-resolution no-send receipt. Classify only accepted declared IDs without a committed resolution using enforced read-entry protocol and actual pre-send terminal CAS: no read-entry with positive protocol/zero-send proof→NOT_USED; exact read-entry with no committed resolution→UNKNOWN_OUTCOME. Neither is a resolution outcome or execution/retry authority.",
+      "observations": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+          "line": 185,
+          "anchor": "public void replayOwnerTerminal"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+          "line": 834,
+          "anchor": "public Optional<String> requestCancel"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+          "line": 1042,
+          "anchor": "if (changed == 1 && secretAudit"
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 101,
+          "anchor": "path='OBSERVED_REPLAY' AND usage_outcome='NOT_USED'"
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 150,
+          "anchor": "CREATE FUNCTION studio_observed_secret_evidence_guard"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java",
+          "line": 159,
+          "anchor": "void lostControllerDecisionAfterActualRead"
+        }
+      ],
+      "owner": "B backend caller/lifecycle, Dara data guard/retention/partition design; root release after fresh Pax. Existing serialized handles remain with their owners.",
+      "producerConsumerPaths": {
+        "caller": [
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+          "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+          "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java",
+          "backend/src/main/java/com/citi/put/checks/studio/recovery/PendingReaper.java",
+          "backend/src/main/java/com/citi/put/checks/studio/recovery/RunningReaper.java"
+        ],
+        "producer": [
+          "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioReferenceResolver.java",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java"
+        ],
+        "data": [
+          "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+          "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+          "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java"
+        ],
+        "consumer": [
+          "Existing names-only audit queries/retention and owner terminal lifecycle; no RunnerReport, RunJob, admission request, BridgeOutcome or public projection field changes."
+        ],
+        "tests": [
+          "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java",
+          "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatcherIT.java",
+          "backend/src/test/java/com/citi/put/checks/studio/dispatch/LedgerCancelTransitionsIT.java",
+          "backend/src/test/java/com/citi/put/checks/studio/dispatch/LedgerStateMachineIT.java",
+          "backend/src/test/java/com/citi/put/checks/studio/dispatch/LedgerStateMachineMigrationIT.java",
+          "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+          "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+          "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SecretAuditLifecycleIT.java"
+        ]
+      },
+      "minimalProposedDataContract": {
+        "receiptFamily": "Separate internal studio_observed_terminal_secret_settlements proposed, not implemented. Do not widen studio_observed_no_send_decisions live-lease guard or its outage-only REQUEUED semantics.",
+        "fields": "id, occurred_at; exact execution_id/execution_accepted_at, accepted attempt_id, revision_id/revision_digest/binding_digest/scope_hash, principal_id/csi_id/environment/test_id; actual preceding_state, terminal_error_code/terminal_error_at; bounded unique possible_read_ids and positively_no_read_ids for still-unsettled declarations. Every field/set is constructed and independently checked from locked authoritative rows and immutable declarations, never a caller boolean. No value/value digest/provider body, borrowed lease owner, admission, ordinal, release/version/sequence or new wire status.",
+        "identity": "Receipt unique per execution/accepted-history/accepted attempt; unlinked summary identity per that exact tuple + declared secret, independent of caller sequence/time/partition. Read-entry creator metadata stays immutable across actual owners; a changed/retried binding cannot relabel earlier evidence.",
+        "rowShape": "USAGE only, path OBSERVED_REPLAY, actual accepted attempt nonnull. Unlinked NOT_USED or UNKNOWN_OUTCOME requires null outcome/release_id/release_seq/vault_version/admission_id/source_reference_id/coordinate_step_id/coordinate_ordinal; occurrence timestamp is a retention locator, never a fictional release time. Exact immutable declaration/scope authenticated. ACK_LOST is excluded.",
+        "guard": "Capture authentic pre-transition QUEUED/CLAIMED/no dispatch attempt/admission/observed receipt under the owner row lock. Terminal winner alone may create proof. Receipt, terminal state/history, and complete new summaries share one physical transaction; deferred leaf guard verifies actual current transaction owner-row version and exact terminal locator/identity/facts. Savepoint/subtransaction row-version behavior must be proven or prohibited, never assumed from top-level transaction labels. Failed or losing transitions/receipt-only commits roll back all writes. At receipt insertion the database guard independently verifies the actual locked pre-transition row and captures/compares its before-image; a caller-supplied preceding_state is insufficient. Do not authorize direct receipt insert against an already-DONE row merely because it has the same error label.",
+        "classification": "Under owner-row lock, obtain a fresh authoritative read-entry view after any waited-for writer completes (avoid stale statement-snapshot absence). Compute remaining accepted IDs after authentic existing decisions/summaries. Partition them into exact scoped durable possible-read markers and positively no-read IDs under universally enforced write-before-read. Terminal state fences future read-entry/dispatched release; the successful pre-send transition fences sends. Neither set alone proves a physical read count.",
+        "knownFacts": "Settle all existing authentic scoped RELEASE rows via existing linked UNKNOWN or authentic refusal/no-effect facts; preserve early USED and every committed positive. Do not append new unlinked rows for linked/already summarized IDs, repeat a summary or mutate history. Missing required RELEASE after dispatch is a lineage error outside this new shape.",
+        "retentionAndLocks": "Append-only parent/leaf UPDATE/DELETE/TRUNCATE guards, no DEFAULT partition, bounded 12-month Q3 retention aligned with audit/read evidence, current/future partition bootstrap/pruner coverage. Owner row→owner advisory→event locks, cross-month stable dedup and concurrent classification/link rejection. No retention-blocking self-FK or permanent row-version identity; xmin is same-transaction proof only."
+      },
+      "requiredCallerSemantics": [
+        "All actual terminal winners, including requestCancel immediate DONE, generic closeWithError, pending reaper expiry, kill-switch/dispatch-disabled closure and admitted cancel/reconciliation when applicable, invoke settlement in the same winning physical transaction. Merely recording a cancel request for DISPATCHING/ADMITTED/RUNNING is not terminal permission.",
+        "Do not impersonate expired CLAIMED owners through lockObservedResolutionOwner; cancellation/reaper use their actual existing terminal authority and exact accepted binding. No extra provider call, browser send, lease refresh, grant or retry.",
+        "No marker plus no FINAL/decision is insufficient without the enforced protocol and actual zero-send terminal cut. If protocol coverage or binding/transition proof is unavailable, retain explicit unmet completeness/NEEDS_EVIDENCE; never emit a negative guess.",
+        "Controller loss after marker/before call and after actual read/before committed decision both settle UNKNOWN. Marker does not reveal which happened. Tests use independent provider counters and actual crash barriers to distinguish them.",
+        "Keep existing genuine outage/fresh retry and definite transport refusal unchanged; all prior known/linked facts and retries retain exact authentic attempts. Terminal receipt is CLOSED-only.",
+        "Make requestCancel immediate closure and any affected close/reconcile public entrypoint actually transactional with the audit/receipt append; do not rely on self-invoked proxy annotations. An external caller transaction must also cover rollback on injected audit failure. Preserve exact cancel/reaper state-matrix semantics and no append on request-only/losing transitions."
+      ],
+      "acceptanceDelta": "Current AC14/design4.1 explicitly allow three variants and exclude crash-after-possible-read. Add observed no-committed-decision uncertainty as fourth variant and expand third variant only with the new terminal-winning guarded no-read/no-send proof. New database row/producer authority requires fresh independent Pax; not an implementation shortcut.",
+      "reversibility": "Report only until PO/root. Owners should isolate the new receipt/guard/caller adapter. If proof fails, stop scope and preserve old unmet completeness; never backfill guessed usage or delete historical rows. Append-only data changes are not reversed by mutating accepted history; pre-release baseline changes require existing ADR authority and owner-managed regression."
+    },
+    {
+      "id": "B-SUCCESSFUL-RESOLUTION-FACTS",
+      "disposition": "APPROVED_ARCHITECTURE",
+      "severity": "HIGH: successful resolver facts can be discarded before dispatch by current refusal/ownership loss.",
+      "architectureDecision": "Capture bounded immutable per-ID actual RESOLVED/version metadata immediately after successful resolvedJob construction, before the owned check/begin transaction and before array close. On a subsequent genuine pre-send refusal, carry only these safe facts to the existing winning live-owner atomic settlement and produce actual RELEASE plus linked REFUSED. The existing approved shape already permits genuine resolved-but-refused values. No canonical acceptance delta or new wire shape is needed.",
+      "observations": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+          "line": 410,
+          "anchor": "RunJob job = resolvedJob.runJob();"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+          "line": 414,
+          "anchor": "observed.check(binding);"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+          "line": 356,
+          "anchor": "if (began == null || began != 1)"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+          "line": 451,
+          "anchor": "if (sendCommitted) return true;"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+          "line": 258,
+          "anchor": "public record ResolvedJob"
+        }
+      ],
+      "owner": "B backend, using already root-released actual resolution/linked no-send scope; root controls any broader change",
+      "affectedPaths": [
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioReferenceResolver.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+        "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+        "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+        "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java",
+        "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatcherIT.java"
+      ],
+      "exactRemediation": [
+        "Copy only authenticated declared IDs, actual DecisionOutcome.RESOLVED and validated opaque version identifiers from the successful Resolved before any later check can throw. Preserve exact accepted binding/attempt; do not retain values, RunJob, origins, raw exceptions, value hashes or new read/send operations for bookkeeping. Existing ResolvedJob.close still erases arrays on every exit.",
+        "If current cancellation/revocation/refusal happens before begin succeeds and the same live CLAIMED owner wins: append the real decisions and linked pre-send REFUSED and close in one physical caller transaction, with cancel/revocation precedence. Do not relabel actual RESOLVED as a fabricated REVOKED resolution solely from terminal state.",
+        "If began=0, owner expired, wrong owner/attempt or a terminal winner already committed: loser appends nothing and cannot borrow terminal authority or late append safe transient facts. The actual terminal winner uses only independently authenticated durable facts; if resolution was never committed, proposed B terminal shape is needed.",
+        "If begin/sendCommitted already succeeded, existing actual RELEASE/uncertainty/recovery stays authoritative; no refusal reinterpretation, resend or replay of old RunJob. Throwing after an audited write rolls back audit and state together.",
+        "Add actual dispatcher-path tests for successful real provider read followed by owned-check cancellation/revocation; verify exact retained RESOLVED/version plus linked REFUSED, arrays erased, sendCount0 and one summary. Add began=0/barrier/stale-owner loser tests and audit rollback; a direct helper-only test does not prove dispatchObserved integration."
+      ],
+      "canonicalAmendments": [],
+      "implementationState": "Not implemented or tested by this reviewer; approval is architecture consistency only under prior release, never code/QA PASS."
+    },
+    {
+      "id": "AB-EXECUTED-PROOF",
+      "disposition": "NEEDS_EVIDENCE",
+      "architectureDecision": "No source-only/report-only observation closes real browser/video/physical Vault crash/joined audit obligations. Current tests encode an honest missing summary, not a completeness PASS.",
+      "requiredEvidence": [
+        "Pinned sandboxed full Chromium actual bootstrap page close/finalization/delete with same context alive; clean native app video decoded/inspected including initial navigation/failure; app-page CDP identity and actual seek origin.",
+        "Effective four registered prefs plus active Default/executable confinement, complete pre-close profile canary scan and negative launches in recorded and guided lanes.",
+        "Real counted provider reads and zero sends for no-read and read-entry-before-call cases; actual controller process crash after read and before resolution commit; authoritative terminal PostgreSQL receipt/history/ledger/summary atomicity and races.",
+        "Successful resolution→current owned refusal and began=0 production caller integration; marker/no-decision UNKNOWN and zero-read/no-send NOT_USED both positive and negative variants.",
+        "Fresh final-source lane peer re-review and root-serialized full regression; all19AC/SEC/C, CoreHTTP/PG/countedVault/compiled child/full Chromium joins, native/injected/supplementary C6 and complete stdout/stderr/relay/failure/manifest/callback/journals/parent-log scans.",
+        "Lifecycle QA/close, real image/deployment/staging/proxy, external provider/Vault/SIEM/gateway, benchmark, human pilot and release prerequisites remain independent/unexecuted here. No production/manual gate is earned by reading reports."
+      ]
+    }
+  ],
+  "proposedCanonicalAmendments": [
+    {
+      "id": "A-AC11",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "line": 54,
+      "scopeExactLinePrefix": "11. **AC-11",
+      "baseFileSha256": "22c895d83b5871bd184a3e1acb4ca8e6b09807ad72347cbd1b8fe9a94d83b153",
+      "baseScopeSha256": "63bf14cf48dea44c5ff320e189b01bd9b7c902b9262382d40448136b8f013532",
+      "operation": "replace exact fragment once within this scoped line; retain every other byte",
+      "before": "Re-anchor the runtime/profile/policy/catalog identities under the approved mode change; no obsolete identity or image-provenance reuse.",
+      "after": "Re-anchor the runtime/profile/policy/catalog identities under the approved mode change; no obsolete identity or image-provenance reuse. For recorded observed replay, the same fixed persistent context may use one trusted startup page solely for chrome://version, chrome://prefs-internals and about:blank verification. At most one page is active at any instant. Before application navigation, source/blank-world evidence, browser secret delivery or action, run-origin sampling and Ready, close that page, await finalization and delete only its owned no-secret startup native video inside confined per-run scratch, then create the sole about:blank application page. Install phase-specific page guards from startup and the ordinary extra-application-page refusal before exposing the application page. Unexpected pages, unsafe paths, failed or unbounded close/delete, missing effective preferences or confinement mismatch fail before Ready; no fallback or diagnostic video upload is permitted. Parent/child start and absolute admission/run deadlines continue across every startup step and cleanup; neither page replacement nor clock sampling resets or extends them. Sample the existing paired wall/monotonic run origin once at clean application-page recording readiness, validate its blank world before Ready, and retain measured pinned-recorder seek calibration. Only this application page supplies native app video; no rewrite, merge, transcode, diagnostic-prefix subtraction or altered application recording is allowed. Native partial/evidence state remains determined by actual application recording finalization, independently of outcome. Guided unrecorded startup currently stays unchanged; OBS-013 must record the same sole clean application page in its existing guided context. This sequential trusted bootstrap exception does not permit popups, multi-page application workflows, extra contexts, browser modes, arguments, sandbox bypass, new wire fields or image-provenance waiver. Backend resolution may already precede launch; this rule makes no claim of zero backend Vault reads or releases during startup.",
+      "reason": "Make the sequential trusted startup page/video exception explicit; preserve fixed mode, effective preferences and every privacy oracle.",
+      "application": "NOT_APPLIED; fresh independent Pax and explicit root release required"
+    },
+    {
+      "id": "A-BROWSER-ROW",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+      "line": 104,
+      "scopeExactLinePrefix": "| Browser profile (disk, F-3)",
+      "baseFileSha256": "940233de23e35ebfdeb76a62d6a02c95492cd003428cdb137451d834cdc2d769",
+      "baseScopeSha256": "143fb0a2e4ea0f3b678966aeed30f41c3191fb181aef7f8b5dbab66b0046064f",
+      "operation": "replace exact fragment once within this scoped line; retain every other byte",
+      "before": "Re-anchor the runtime/profile/policy/catalog identities under the approved mode change; no obsolete identity or image-provenance reuse.",
+      "after": "Re-anchor the runtime/profile/policy/catalog identities under the approved mode change; no obsolete identity or image-provenance reuse. For recorded observed replay, the same fixed persistent context may use one trusted startup page solely for chrome://version, chrome://prefs-internals and about:blank verification. At most one page is active at any instant. Before application navigation, source/blank-world evidence, browser secret delivery or action, run-origin sampling and Ready, close that page, await finalization and delete only its owned no-secret startup native video inside confined per-run scratch, then create the sole about:blank application page. Install phase-specific page guards from startup and the ordinary extra-application-page refusal before exposing the application page. Unexpected pages, unsafe paths, failed or unbounded close/delete, missing effective preferences or confinement mismatch fail before Ready; no fallback or diagnostic video upload is permitted. Parent/child start and absolute admission/run deadlines continue across every startup step and cleanup; neither page replacement nor clock sampling resets or extends them. Sample the existing paired wall/monotonic run origin once at clean application-page recording readiness, validate its blank world before Ready, and retain measured pinned-recorder seek calibration. Only this application page supplies native app video; no rewrite, merge, transcode, diagnostic-prefix subtraction or altered application recording is allowed. Native partial/evidence state remains determined by actual application recording finalization, independently of outcome. Guided unrecorded startup currently stays unchanged; OBS-013 must record the same sole clean application page in its existing guided context. This sequential trusted bootstrap exception does not permit popups, multi-page application workflows, extra contexts, browser modes, arguments, sandbox bypass, new wire fields or image-provenance waiver. Backend resolution may already precede launch; this rule makes no claim of zero backend Vault reads or releases during startup.",
+      "reason": "Make the sequential trusted startup page/video exception explicit; preserve fixed mode, effective preferences and every privacy oracle.",
+      "application": "NOT_APPLIED; fresh independent Pax and explicit root release required"
+    },
+    {
+      "id": "A-C3",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+      "line": 201,
+      "scopeExactLinePrefix": "| C-3 (I-A2 residual; F-3)",
+      "baseFileSha256": "940233de23e35ebfdeb76a62d6a02c95492cd003428cdb137451d834cdc2d769",
+      "baseScopeSha256": "612d0864d021098d6e30b2057609ec6ef963dace6367de749f0a5272d3612f39",
+      "operation": "replace exact fragment once within this scoped line; retain every other byte",
+      "before": "Re-anchor the runtime/profile/policy/catalog identities under the approved mode change; no obsolete identity or image-provenance reuse.",
+      "after": "Re-anchor the runtime/profile/policy/catalog identities under the approved mode change; no obsolete identity or image-provenance reuse. For recorded observed replay, the same fixed persistent context may use one trusted startup page solely for chrome://version, chrome://prefs-internals and about:blank verification. At most one page is active at any instant. Before application navigation, source/blank-world evidence, browser secret delivery or action, run-origin sampling and Ready, close that page, await finalization and delete only its owned no-secret startup native video inside confined per-run scratch, then create the sole about:blank application page. Install phase-specific page guards from startup and the ordinary extra-application-page refusal before exposing the application page. Unexpected pages, unsafe paths, failed or unbounded close/delete, missing effective preferences or confinement mismatch fail before Ready; no fallback or diagnostic video upload is permitted. Parent/child start and absolute admission/run deadlines continue across every startup step and cleanup; neither page replacement nor clock sampling resets or extends them. Sample the existing paired wall/monotonic run origin once at clean application-page recording readiness, validate its blank world before Ready, and retain measured pinned-recorder seek calibration. Only this application page supplies native app video; no rewrite, merge, transcode, diagnostic-prefix subtraction or altered application recording is allowed. Native partial/evidence state remains determined by actual application recording finalization, independently of outcome. Guided unrecorded startup currently stays unchanged; OBS-013 must record the same sole clean application page in its existing guided context. This sequential trusted bootstrap exception does not permit popups, multi-page application workflows, extra contexts, browser modes, arguments, sandbox bypass, new wire fields or image-provenance waiver. Backend resolution may already precede launch; this rule makes no claim of zero backend Vault reads or releases during startup.",
+      "reason": "Make the sequential trusted startup page/video exception explicit; preserve fixed mode, effective preferences and every privacy oracle.",
+      "application": "NOT_APPLIED; fresh independent Pax and explicit root release required"
+    },
+    {
+      "id": "A-LIFECYCLE",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "path": "docs/architecture/studio-execution.md",
+      "line": 162,
+      "scopeExactLinePrefix": "Validate request/artifact → acquire slot",
+      "baseFileSha256": "3ff31f9054e4d55b132658f1b30bc86ef0682a5806d44a5005bff54b4c47d89c",
+      "baseScopeSha256": "10e64ba81aaa41817c8f0b8a15356b6fcb258c0a9c0e9cae999a5af931a67446",
+      "operation": "replace exact fragment once within this scoped line; retain every other byte",
+      "before": "Validate request/artifact → acquire slot → admission handshake → launch Chromium → create one context/page with native recording → report browser start → execute permitted operations with step-start/finish reporting.",
+      "after": "Validate request/artifact → acquire slot → admission handshake → launch Chromium → create one persistent context with native recording → perform fixed trusted preference/profile verification on its sole startup page → close that page and await/delete only its confined no-secret native video → create the sole clean application page at about:blank → establish its blank world and recording readiness → sample the existing paired run origin once → validate blank evidence and report browser start → execute permitted operations with step-start/finish reporting. For recorded observed replay, the same fixed persistent context may use one trusted startup page solely for chrome://version, chrome://prefs-internals and about:blank verification. At most one page is active at any instant. Before application navigation, source/blank-world evidence, browser secret delivery or action, run-origin sampling and Ready, close that page, await finalization and delete only its owned no-secret startup native video inside confined per-run scratch, then create the sole about:blank application page. Install phase-specific page guards from startup and the ordinary extra-application-page refusal before exposing the application page. Unexpected pages, unsafe paths, failed or unbounded close/delete, missing effective preferences or confinement mismatch fail before Ready; no fallback or diagnostic video upload is permitted. Parent/child start and absolute admission/run deadlines continue across every startup step and cleanup; neither page replacement nor clock sampling resets or extends them. Sample the existing paired wall/monotonic run origin once at clean application-page recording readiness, validate its blank world before Ready, and retain measured pinned-recorder seek calibration. Only this application page supplies native app video; no rewrite, merge, transcode, diagnostic-prefix subtraction or altered application recording is allowed. Native partial/evidence state remains determined by actual application recording finalization, independently of outcome. Guided unrecorded startup currently stays unchanged; OBS-013 must record the same sole clean application page in its existing guided context. This sequential trusted bootstrap exception does not permit popups, multi-page application workflows, extra contexts, browser modes, arguments, sandbox bypass, new wire fields or image-provenance waiver. Backend resolution may already precede launch; this rule makes no claim of zero backend Vault reads or releases during startup.",
+      "reason": "Explicit narrow exception to historical one-page lifecycle, not a second active application page or a new browser mode.",
+      "application": "NOT_APPLIED; fresh independent Pax and explicit root release required"
+    },
+    {
+      "id": "A-NATIVE-VIDEO",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "path": "docs/architecture/studio-execution.md",
+      "line": 204,
+      "scopeExactLinePrefix": "Record native webm on the single page's context.",
+      "baseFileSha256": "3ff31f9054e4d55b132658f1b30bc86ef0682a5806d44a5005bff54b4c47d89c",
+      "baseScopeSha256": "34385b0f27e5137a5476ffbde1444adf029f3fe07d84f63754c32e82be41c86a",
+      "operation": "replace exact fragment once within this scoped line; retain every other byte",
+      "before": "Record native webm on the single page's context.",
+      "after": "Record native webm on the sole application page in the single persistent context. The fixed trusted sequential startup page may produce a separate no-secret native video solely for preference/profile verification; close it and await/delete only that owned startup video before application-page creation and Ready. That startup artifact is never app evidence, a manifest/video key candidate or an uploaded recording; deletion never edits application video.",
+      "reason": "Preserve native application recording/finalization; explicitly scope proof to the app page.",
+      "application": "NOT_APPLIED; fresh independent Pax and explicit root release required"
+    },
+    {
+      "id": "B-AC14-COUNT",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "line": 62,
+      "scopeExactLinePrefix": "14. **AC-14",
+      "baseFileSha256": "22c895d83b5871bd184a3e1acb4ca8e6b09807ad72347cbd1b8fe9a94d83b153",
+      "baseScopeSha256": "a9bab2c3e85b3c651daf6f4bd13cbfa257d79589e03a73b748a8c3de89ccb8ba",
+      "operation": "replace exact fragment once within this scoped line; retain every other byte",
+      "before": "Three distinct no-decision variants are permitted:",
+      "after": "Four distinct guarded no-decision variants are permitted:",
+      "reason": "Add truthful observed no-committed-decision terminal uncertainty rather than silently weakening completeness.",
+      "application": "NOT_APPLIED; fresh independent Pax and explicit root release required"
+    },
+    {
+      "id": "B-AC14-TERMINAL",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "line": 62,
+      "scopeExactLinePrefix": "14. **AC-14",
+      "baseFileSha256": "22c895d83b5871bd184a3e1acb4ca8e6b09807ad72347cbd1b8fe9a94d83b153",
+      "baseScopeSha256": "a9bab2c3e85b3c651daf6f4bd13cbfa257d79589e03a73b748a8c3de89ccb8ba",
+      "operation": "replace exact fragment once within this scoped line; retain every other byte",
+      "before": "Every other USAGE requires its actual scoped RELEASE.",
+      "after": "For an accepted observed declaration with no actual committed DISPATCH resolution and no existing usage summary, variant (3) also permits a terminal-winner NOT_USED summary when an actual locked QUEUED/CLAIMED-to-DONE transition and a separate durable names-only terminal settlement receipt prove that no dispatch attempt/admission/observed admission receipt or transport entry existed, that every existing secret-value provider path was required to commit its exact scoped read-entry before entry, and that this ID had no such read-entry at the serialized terminal cut. Zero read follows from that enforced write-before-read protocol plus the winning pre-send transition, not from missing FINAL/decision/marker rows alone. Read-entry acquisition and terminal closure serialize on the same owner row; no read may proceed if its required entry fails, and no new entry or RELEASE may be appended after settlement. An expired claimant is not impersonated as a live lease owner. The terminal winner authenticates the accepted history locator, immutable revision/declaration, exact binding digest/attempt and full scope. Its receipt, history/ledger transition and all new summaries commit or roll back in one physical transaction; deferred per-leaf guards verify the actual owner row version written by that transaction. This terminal-only proof grants no requeue, refreshRetry, deadline, grant, admission, dispatch or send authority. Existing live-owned completed-resolution CLOSED/REQUEUED receipts and their outage-only retry guards remain unchanged. (4) accepted OBSERVED_REPLAY declared secret with a durable exact-scoped read-entry but no committed DISPATCH resolution/release decision has one unlinked terminal USAGE/UNKNOWN_OUTCOME only with that same authenticated winning pre-send terminal transition and terminal settlement receipt. Null outcome/release_id/release_seq/vault_version/admission_id/source_reference_id/guided coordinates means no committed resolution, release or action identity, never zero physical reads or proven use/refusal. The accepted binding attempt_id is real and remains nonnull even when ledger dispatch attempt_id is absent. A read-entry proves possible provider entry only: it may precede a crash before the call or a real read whose decision was lost. Do not infer a Vault version or any of the six resolution outcomes, ACK_LOST, NOT_USED, REFUSED or USED from this marker or a terminal error label. Physically counted reads/sends and actual crash positions remain separate test evidence. Unlinked terminal identity is exact execution/accepted-history/attempt/declared secret, independent of timestamp, caller sequence, guessed ordinal or retention partition. Existing actual RELEASE links and immutable USED summaries always take precedence; never append an unlinked substitute or a second summary. Post-send/no-admission ambiguity stays on actual linked uncertainty and is excluded from the new pre-send proof. A dispatched declaration lacking its required actual RELEASE is a lineage defect requiring evidence/remediation, not permission to fabricate an unlinked row. Every other USAGE requires its actual scoped RELEASE.",
+      "reason": "Preserve existing linked facts and distinguish authoritative no-read/no-send closure from possible-read/no-decision uncertainty.",
+      "application": "NOT_APPLIED; fresh independent Pax and explicit root release required"
+    },
+    {
+      "id": "B-DESIGN41-COUNT",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+      "line": 108,
+      "scopeExactLinePrefix": "**4.1 Audit (SEC-9).",
+      "baseFileSha256": "940233de23e35ebfdeb76a62d6a02c95492cd003428cdb137451d834cdc2d769",
+      "baseScopeSha256": "86e93475426dfa709ccfc1a3e4566de517b682d733b10c04fc8333476893f2ac",
+      "operation": "replace exact fragment once within this scoped line; retain every other byte",
+      "before": "Three distinct no-decision variants are permitted:",
+      "after": "Four distinct guarded no-decision variants are permitted:",
+      "reason": "Add truthful observed no-committed-decision terminal uncertainty rather than silently weakening completeness.",
+      "application": "NOT_APPLIED; fresh independent Pax and explicit root release required"
+    },
+    {
+      "id": "B-DESIGN41-TERMINAL",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+      "line": 108,
+      "scopeExactLinePrefix": "**4.1 Audit (SEC-9).",
+      "baseFileSha256": "940233de23e35ebfdeb76a62d6a02c95492cd003428cdb137451d834cdc2d769",
+      "baseScopeSha256": "86e93475426dfa709ccfc1a3e4566de517b682d733b10c04fc8333476893f2ac",
+      "operation": "replace exact fragment once within this scoped line; retain every other byte",
+      "before": "Every other USAGE requires its actual scoped RELEASE.",
+      "after": "For an accepted observed declaration with no actual committed DISPATCH resolution and no existing usage summary, variant (3) also permits a terminal-winner NOT_USED summary when an actual locked QUEUED/CLAIMED-to-DONE transition and a separate durable names-only terminal settlement receipt prove that no dispatch attempt/admission/observed admission receipt or transport entry existed, that every existing secret-value provider path was required to commit its exact scoped read-entry before entry, and that this ID had no such read-entry at the serialized terminal cut. Zero read follows from that enforced write-before-read protocol plus the winning pre-send transition, not from missing FINAL/decision/marker rows alone. Read-entry acquisition and terminal closure serialize on the same owner row; no read may proceed if its required entry fails, and no new entry or RELEASE may be appended after settlement. An expired claimant is not impersonated as a live lease owner. The terminal winner authenticates the accepted history locator, immutable revision/declaration, exact binding digest/attempt and full scope. Its receipt, history/ledger transition and all new summaries commit or roll back in one physical transaction; deferred per-leaf guards verify the actual owner row version written by that transaction. This terminal-only proof grants no requeue, refreshRetry, deadline, grant, admission, dispatch or send authority. Existing live-owned completed-resolution CLOSED/REQUEUED receipts and their outage-only retry guards remain unchanged. (4) accepted OBSERVED_REPLAY declared secret with a durable exact-scoped read-entry but no committed DISPATCH resolution/release decision has one unlinked terminal USAGE/UNKNOWN_OUTCOME only with that same authenticated winning pre-send terminal transition and terminal settlement receipt. Null outcome/release_id/release_seq/vault_version/admission_id/source_reference_id/guided coordinates means no committed resolution, release or action identity, never zero physical reads or proven use/refusal. The accepted binding attempt_id is real and remains nonnull even when ledger dispatch attempt_id is absent. A read-entry proves possible provider entry only: it may precede a crash before the call or a real read whose decision was lost. Do not infer a Vault version or any of the six resolution outcomes, ACK_LOST, NOT_USED, REFUSED or USED from this marker or a terminal error label. Physically counted reads/sends and actual crash positions remain separate test evidence. Unlinked terminal identity is exact execution/accepted-history/attempt/declared secret, independent of timestamp, caller sequence, guessed ordinal or retention partition. Existing actual RELEASE links and immutable USED summaries always take precedence; never append an unlinked substitute or a second summary. Post-send/no-admission ambiguity stays on actual linked uncertainty and is excluded from the new pre-send proof. A dispatched declaration lacking its required actual RELEASE is a lineage defect requiring evidence/remediation, not permission to fabricate an unlinked row. Every other USAGE requires its actual scoped RELEASE.",
+      "reason": "Preserve existing linked facts and distinguish authoritative no-read/no-send closure from possible-read/no-decision uncertainty.",
+      "application": "NOT_APPLIED; fresh independent Pax and explicit root release required"
+    },
+    {
+      "id": "B-HISTORICAL-MAPPING",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+      "line": 108,
+      "scopeExactLinePrefix": "**4.1 Audit (SEC-9).",
+      "baseFileSha256": "940233de23e35ebfdeb76a62d6a02c95492cd003428cdb137451d834cdc2d769",
+      "baseScopeSha256": "86e93475426dfa709ccfc1a3e4566de517b682d733b10c04fc8333476893f2ac",
+      "operation": "replace exact fragment once within this scoped line; retain every other byte",
+      "before": "This exact §4.1 amendment governs I-C10 and C-11 references to §4.1: their historical two-variant and terminal-only summary prose is expanded only by the three guarded no-decision variants and early verified replay USED above.",
+      "after": "This exact §4.1 amendment governs I-C10 and C-11 references to §4.1: their historical two-variant and terminal-only summary prose is expanded only by the four guarded no-decision variants, the narrowly authenticated terminal-winner variant (3) proof and early verified replay USED above. The original impossibility of a replay terminal summary after possible read with no committed decision remains historically unmet; only fresh independent PO approval of this exact terminal shape supersedes that linkage demand. No historical assertion is marked passed by this mapping.",
+      "reason": "Explicit historical supersession mapping while retaining all original crash/kill/positive/negative cases.",
+      "application": "NOT_APPLIED; fresh independent Pax and explicit root release required"
+    },
+    {
+      "id": "B-C11",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+      "line": 209,
+      "scopeExactLinePrefix": "| C-11 (I-C10)",
+      "baseFileSha256": "940233de23e35ebfdeb76a62d6a02c95492cd003428cdb137451d834cdc2d769",
+      "baseScopeSha256": "bdee9a3b8607ded2acb4934d9521c06783d2ac4e1a1836ce7bced714e09cee07",
+      "operation": "replace exact fragment once within this scoped line; retain every other byte",
+      "before": "Keep original forced-retry/two-attempt/declaring-coordinate/table-canary assertions.",
+      "after": "Keep original forced-retry/two-attempt/declaring-coordinate/table-canary assertions. Additional C-11 terminal declaration cases exercise generic pre-resolver deadline/refresh refusal, literal/ref-validation refusal, kill-switch closure, queued cancellation, live/expired claimed cancellation and pending reaper closure. With positively enforced no-read/no-send proof require exactly one unlinked NOT_USED per actual declared ID without a committed resolution; with a committed read-entry and no committed resolution require exactly one unlinked UNKNOWN_OUTCOME, no RELEASE/version/admission/ordinal/sequence and no false NOT_USED. Run controlled controller crashes both after read-entry commit/before provider entry (physical read counter zero) and after a real provider read/before committed decision (counter positive), plus cancellation/reaper races. Successful actual resolution followed by current cancel/revocation refusal before dispatch retains its real RESOLVED/version metadata and linked REFUSED only when its live owner wins atomic settlement. A began=0 or stale/losing dispatcher appends nothing; the authentic terminal winner settles only facts it can authenticate. Verify audit/receipt/history/ledger all-or-nothing rollback, owner-row/advisory/event lock order, duplicate/cross-month/future-partition/direct-leaf TRUNCATE negatives, unchanged forced retry/fresh attempt/grant/CAS and positive USED monotonicity. Simulated loss tests establish only their actual controlled position, never an executed process-kill claim. All nineteen ACs, security conditions, C6 controls and joined sinks remain required.",
+      "reason": "Add exact terminal/crash/atomicity controls without rewriting the retained historical oracle.",
+      "application": "NOT_APPLIED; fresh independent Pax and explicit root release required"
+    },
+    {
+      "id": "AB-AC19",
+      "disposition": "PROPOSED_PO_AMENDMENT",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "line": 78,
+      "scopeExactLinePrefix": "19. **AC-19",
+      "baseFileSha256": "22c895d83b5871bd184a3e1acb4ca8e6b09807ad72347cbd1b8fe9a94d83b153",
+      "baseScopeSha256": "fc7d8efd004dd4aea327ddc26e39924f265b88a98067f2753a2fbee200b68007",
+      "operation": "replace exact fragment once within this scoped line; retain every other byte",
+      "before": "Actual sole-primitive timeout/cancel/context-loss, all C-6 controls and all original sinks remain mandatory.",
+      "after": "Actual sole-primitive timeout/cancel/context-loss, all C-6 controls and all original sinks remain mandatory. Additional C-11 terminal declaration cases exercise generic pre-resolver deadline/refresh refusal, literal/ref-validation refusal, kill-switch closure, queued cancellation, live/expired claimed cancellation and pending reaper closure. With positively enforced no-read/no-send proof require exactly one unlinked NOT_USED per actual declared ID without a committed resolution; with a committed read-entry and no committed resolution require exactly one unlinked UNKNOWN_OUTCOME, no RELEASE/version/admission/ordinal/sequence and no false NOT_USED. Run controlled controller crashes both after read-entry commit/before provider entry (physical read counter zero) and after a real provider read/before committed decision (counter positive), plus cancellation/reaper races. Successful actual resolution followed by current cancel/revocation refusal before dispatch retains its real RESOLVED/version metadata and linked REFUSED only when its live owner wins atomic settlement. A began=0 or stale/losing dispatcher appends nothing; the authentic terminal winner settles only facts it can authenticate. Verify audit/receipt/history/ledger all-or-nothing rollback, owner-row/advisory/event lock order, duplicate/cross-month/future-partition/direct-leaf TRUNCATE negatives, unchanged forced retry/fresh attempt/grant/CAS and positive USED monotonicity. Simulated loss tests establish only their actual controlled position, never an executed process-kill claim. All nineteen ACs, security conditions, C6 controls and joined sinks remain required. Actual fixed-mode recorded startup also proves that diagnostic WebUI frames are absent from the finalized application native video, exactly one application page/context is active, startup video is awaited/deleted before Ready and never uploaded, the recorded app page is the sole returned handle/blank-world page, and initial navigation/failure seeks retain the pinned-recorder timing target. Exercise slow/failed probe, close/delete failure, unexpected page, confinement/path/symlink mismatch, pre-Ready cancellation, start/absolute deadline expiry, forced child kill and scratch/capacity cleanup. No deterministic timing test claims the outstanding staging calibration or production/image gates.",
+      "reason": "Required actual full-browser/bootstrap and terminal joined proofs remain open, with no acceptance reduction.",
+      "application": "NOT_APPLIED; fresh independent Pax and explicit root release required"
+    }
+  ],
+  "noConstOrWireAmendment": "None proposed in this narrow disposition. Existing executor4/catalog3 and all other closed tuple members/statuses/contracts are preserved. New terminal data shape is internal audit-only and still requires PO/root. Bootstrap byte/provenance identity refresh is mechanical owner work, not invented image proof.",
+  "impact": {
+    "risk": "HIGH",
+    "dependencyPropagation": [
+      "R browser factory→private single app handle/blank-world→child Ready/run clock→coordinator evidence upload/manifest/playback.",
+      "B resolver safe facts/read-entry→owner-CAS caller→audit lifecycle/recorder→D row/receipt/leaf guards→all terminal callers and partition lifecycle."
+    ],
+    "leastNewAuthority": "Only a sequential trusted no-secret startup-page exception and a CLOSED-only authenticated terminal settlement producer; no value channel, action identity, permission, grant, retry, mode, status or wire field. Safe successful resolution capture requires no new authority.",
+    "scopePreserved": [
+      "Password-only sole collector CDP primitive, uniqueness/pinning/TOCTOU/origin constraints.",
+      "Redaction before interpolation/bounds/writes, prior/current value cancellation lifetime and complete diagnostics sinks.",
+      "Fixed sandbox/full Chromium/effective supported prefs/profile/scratch/environment/privacy policy.",
+      "Sparse authenticated replay USED-only PROGRESS and immutable positives; missing/partial/generic no-effect knowledge remains conservative.",
+      "Guided OK→USED/non-success→UNKNOWN, label-only ACK_LOST rejected, no BridgeOutcome.secretUse.",
+      "C6 native code-only plus genuine production/injected/supplementary controls, historical supersessions only through fresh PO, every sink/join unchanged."
+    ]
+  },
+  "evidence": {
+    "reviewerExecuted": [
+      "Read-only bounded source/canonical/evidence inspection",
+      "SHA256 comparison of 18 parked files, 446 retained runner source entries, 268 retained dist entries and 64 contract/baseline entries",
+      "Requested report creation and JSON/exact-fragment/source verification only"
+    ],
+    "reviewerDidNotExecute": [
+      "Gradle",
+      "runner/default/global/Chromium/deployment gates",
+      "browser probe",
+      "actual provider read/send",
+      "CoreHTTP/PostgreSQL join",
+      "process kill",
+      "phase verify/QA/lifecycle"
+    ],
+    "retainedMechanicalResult": {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/root-approved-tuple-green/result.json",
+      "attribution": "Read retained result only; not executed by reviewer. Report records backend276 tests with0failure/error/skip, current executor4/catalog3 mechanical scope. User separately attributes181contract+199focused runner checks; not an independent current-source re-execution. Historical in-scope class StudioDispatcherFailureIT count9 does not cover the later added cases at lines158+.",
+      "scopeLimit": "Implementation/peer/full joins pending; current drift means retained green cannot be silently reused for current bytes."
+    },
+    "parkedRunner": {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-park.json",
+      "hashes18MatchAtSnapshot": true,
+      "attribution": "Owner report: no live R handles; bootstrap replacement NOT implemented, focused68 pass0skip, latest typecheck before last edits, lint2 failures, build stopped/current dist not final candidate. Read only, not reviewer-executed."
+    },
+    "closureGapTests": {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java",
+      "method": "lostControllerDecisionAfterActualReadRetainsPossibleReadAndNeverFabricatesUnused",
+      "attribution": "Current source has cancel/reaper parameterized simulated transient-metadata-loss cases, real resolver/counter fixtures and auditRows0 assertion. User states new cases not run. Not a real controller process-kill or a terminal completeness PASS.",
+      "history": "Preserve current zero-fabricated-RELEASE/NOT_USED/version/admission assertions and original report/history. After exact new PO scope, add required one UNKNOWN terminal summary oracle; explicitly supersede only zero-summary expectation without marking its old assertion passed."
+    }
+  },
+  "sourceBinding": {
+    "capturedAt": "2026-10-10T09:20:01.473496+00:00",
+    "sha256": {
+      "AGENTS.md": "a3e2fe4c0bebc01d91b0fa0b062c49d031e203ab2a522ee9b04d9f06df797198",
+      ".codex/skills/aiox-architect/SKILL.md": "376153f250f0d4142f19fe0835e43cc2157072ee881db6daf33ca033efab3962",
+      ".aiox-core/development/agents/architect.md": "c45b1e71af39b5da34a832dcc3d1c9b41b6270de61f79d4bada3c27b46be19df",
+      ".aiox-core/development/tasks/architect-analyze-impact.md": "73ad65e2263dac7a5a3aa64736d2c803c8a532c269b83fb98a61cb5729b689db",
+      ".aiox-core/constitution.md": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+      ".aiox/waves/STUDIO-OBS-SINGLE-PATH/execution-audit.json": "b7aeb5fe77111ede4804e89dbedb7c684e970f59cc07e04ce9336cee1544de92",
+      "docs/stories/STUDIO-OBSERVED/README.md": "f06e52681e43bd4273b6a5be7938f737aebe7bd2a37dc5f3b2563c5069404db6",
+      "docs/architecture/ADR-SC-005-single-path-observed-authoring.md": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4",
+      "docs/architecture/studio-execution.md": "3ff31f9054e4d55b132658f1b30bc86ef0682a5806d44a5005bff54b4c47d89c",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "22c895d83b5871bd184a3e1acb4ca8e6b09807ad72347cbd1b8fe9a94d83b153",
+      "docs/specs/studio-observed-authoring/secret-login-design.md": "940233de23e35ebfdeb76a62d6a02c95492cd003428cdb137451d834cdc2d769",
+      "docs/specs/studio-observed-authoring/secret-login-security-review.md": "c5ce3be4543ae51618455b14909caabaf9cc46b9dd7fce0a2ff57516394cde49",
+      ".ai/STUDIO-OBS-007-architect-t0-rulings.json": "df94f7d40de5f026856aa959427cbdb09ce71ba7f99a144c081f7f59e3d01cd2",
+      "studio-runner/src/run/browser.ts": "b19c4efeab53c8923a2a464369b60954d599b5ccfcefe757e65ddc024678f802",
+      "studio-runner/src/run/browserFactory.ts": "b051bd366f0ceaa3ebc4b5d790d0e190b277b4a2c58e7e475731ff4dd062c592",
+      "studio-runner/src/run/scratchLayout.ts": "1a3760c6baab12999b5705fdfc7c595d702e1cdea893cbe9c3be5dbbea0cbc48",
+      "studio-runner/src/run/childRuntime.ts": "920b240bbd9ba22ee51e9150b8e0dc5162e2df9a234ea1177abead69625d6f31",
+      "studio-runner/src/run/timeline.ts": "7d7e0bfd91065b61f426b6da42830568f674427bbfbba428524a6d31d5619de3",
+      "studio-runner/src/run/recording.ts": "0a3f3f29feda2d4f2611a1070bd7f03b253a51b26314985925e9725ac531b3bb",
+      "studio-runner/src/run/manifest.ts": "b885e4e4717e0d221fc134c9bf16ba991e97ccec601bf146abe9a9cadc3dc03a",
+      "studio-runner/src/run/launcher.ts": "b9ca298405b3a0e2aa85bc022ba7e90985d96add01122a74695cb2f08ad6a110",
+      "studio-runner/src/run/guidedBrowser.ts": "e22ec61544c212696e84d472d6b2f0e93e95cfcb5fc19cdb97d7f99d8fa3e3e4",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java": "d5d055619562e2698e293bd72fa25549aa1d59b51b7ece5d1b3ce4c9e282a062",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java": "e3bc0ab9b9d1d2d37321f7b4747adf430f3c1ebf978a6b38dbc9a65fa4f43d81",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioReferenceResolver.java": "226e7e186924a38d6f91f9de252f1664805fcb6da3d17d1965fa6aefa6acb0f4",
+      "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java": "209892c4b55c40c4aacb4ff5ee6983555889411ca8f5d69ce085d52f01783f29",
+      "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java": "6bcd8447ae03480036e4014ca1ce91b81f3df05ec74995b03375c329d0daedb8",
+      "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java": "fe6fb59e87d34d2ae9210dfdf16c02822820bd62a70af6bd33d8284adbd31484",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java": "9fcdcaf4caa8ebe0e414eefeffde54fb140f5400ba4106391bf81719a92c85a4",
+      "backend/src/main/java/com/citi/put/checks/studio/recovery/PendingReaper.java": "4f643583b8739682a3482f13396d47b461fc41f2b67fddcfcde583abf3d8caff",
+      "backend/src/main/java/com/citi/put/checks/studio/recovery/RunningReaper.java": "37cec126c9581dff3c16f030b49bdfdf8eee9babc8437a11a407266b8139da68",
+      "backend/src/main/java/com/citi/put/checks/studio/StudioService.java": "03b4c3277ea23f6fd63e3bd2cdf60504d97ab1a55303755d0121d3169dd4f100",
+      "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql": "89425e97caa4756141ecfb8d404d2e105c14e1b78f27ccc0fa0b44bd4dc327d6",
+      "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java": "29d20cdf26ad8404a19b99ae7820fc61a19f2a508108e5e91d3b1e6e78a3d56c",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java": "47a0c972cc11ad421efab443fa5a0d06174b79e50158709253a48fa401098546",
+      "studio-runner/test/run/browserProfilePreferences.test.ts": "9b922022dc4eb3c4f2fa6a9bb7f3b3bebdc4775e986ea2229acad4e191b65f17",
+      "studio-runner/test/run/childRuntime.test.ts": "8405a51a37a97c77f2b9cbe376f417912713f4981340077873aa3dade06d4824",
+      "studio-runner/test/run/timeline.test.ts": "595dee643080c0d6cb1fc7f3a7876bff4407e48a487ce194d9884a625c7d49f8",
+      "studio-runner/test/run/manifest.test.ts": "8a08db09d447d7d8edeab03118ed6ccd8f9623ca740796cd0fbdc4c05dd108b0",
+      "studio-runner/test/run/recording.test.ts": "1c16d79969a0c0a02e8d4c750394a6ded12dcceb2f2d951b3eecb671e019cd56",
+      "studio-runner/test/fixtures-tier/recording-coverage.test.ts": "a94d95e6b4712f7693b0543d285a5ce905fe6ebfd64a83a7282be5192cf9e4f1",
+      "studio-runner/test/fixtures-tier/secret-login.test.ts": "997250ad046919e3314286d90c1125718f5504c19a3c3de7f5872f84283a5cf7",
+      "studio-runner/test/guided/browser.test.ts": "2e516344ced18a49855a70b8c7e71dee09386984f5a08c8a4f112884cf83d3c7",
+      "docs/architecture/ADR-SC-002-versioned-intent-derivation-at-readiness.md": "d3b288ee8624552afc70762dc235105195b563e4ab1260a37ff5ae4531d5e9bd",
+      "docs/qa/evidence/STUDIO-OBS-007/t3-technical-peer.json": "82475eee0b4b6bfa31b62ad24caae63d3a9780ad34203430bdfb9dfa3d614731",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-architecture-disposition.json": "c886057dbc31bb427378e29393ba29a8f20d27470bcdbf8ae7846628a62c3edd",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-po-architecture-revalidation.json": "9c6ff6de3e2f6ff9f0925a2efc9b84b91880ef4c144b013e634c7bc2f71ea2b5",
+      "docs/qa/evidence/STUDIO-OBS-007/architecture-application/receipt.json": "008fd8398a41c36fd906c4a652ae510f619ab5ec74d5e7f30825a69c146e9922",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-approved-data-design.md": "700e1f3e3f63019cabae3cde022ab77835bbe4f4ee1c0232ddbde51b4f6bad21",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-park.json": "7b917b60c0f52943c00e9a1cac5e8e96c6c16cca7cccfbff2dae184fef0b9a15",
+      "docs/qa/evidence/STUDIO-OBS-007/root-approved-tuple-green/result.json": "498ba1014063c4a2f3707dba9ec35a5ffd1112062b8c888cf0b2b06f62039c39",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-po-consistency-delta.json": "3ad3336670648b4ba64ff02ea206c292307241cbe4c0e86b361ed2a1a813aa5c",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-po-delta-application.json": "11b311125fe812c4ddf8ee20837901ced44244914545b33e55073f843bfcf702",
+      "studio-runner/src/server/runCoordinator.ts": "cc729e4abf48dc9ef8831b02e8f07edc72002a522cdf75f30b4ffc84067c161a",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatcherIT.java": "9ed6f8a967005ae39c9e55a4f15ca4f8901261a9da21ec67ef0b4263a8b495ad",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/LedgerCancelTransitionsIT.java": "2fa6475142e93eeae6af17c2c3a28d0e2b09119da94fb87a9e14ce3bfd171c28",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/LedgerStateMachineIT.java": "28eb75776e547965dc326c28513648923442c2cdb07fe1a06463bb0ea2df1f48",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/LedgerStateMachineMigrationIT.java": "f58b5dfc0e61373c170dfec3dac025018f468b8cda66aec735f542a124cf4969",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java": "6fc8b290e312dd1a051d789dbf5b697cbc85bfd58ee4b3400408ff5e5f786cc6",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java": "5842b9d8453275cfe83bfc40843326ee9a5f961bd3cb88dbcfee5799fb57e9d5",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SecretAuditLifecycleIT.java": "181a1ced7d76a84c3a3ab1ad92b4cd670617c8a826b2192399447a8946834dd2"
+    },
+    "missing": [
+      "studio-runner/src/run/coordinator.ts"
+    ],
+    "candidateChecks": [
+      {
+        "manifest": "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-park.json",
+        "manifestSha256": "7b917b60c0f52943c00e9a1cac5e8e96c6c16cca7cccfbff2dae184fef0b9a15",
+        "entries": 18,
+        "drift": []
+      },
+      {
+        "manifest": "docs/qa/evidence/STUDIO-OBS-007/runner-approved-tuple/source-hashes.json",
+        "manifestSha256": "c1f01fa055822ffd6b7e9d592bad17e2caade413ed2fb01679e117a8bf18d11e",
+        "entries": 446,
+        "drift": [
+          {
+            "path": "studio-runner/scripts/check-pins.mjs",
+            "retained": "b0b9dc9936fbfabee41dcb25527eb6e342a700e8a7c46b91f35e54f7f9695c76",
+            "current": "63a15ec6c29cc8c6f3da1b9d79718802f7de1e49bc71bee9bb57d7fd6cfbd04a"
+          },
+          {
+            "path": "studio-runner/scripts/write-runtime-versions.mjs",
+            "retained": "f42f81787cf7184623040c09d5215b285de71b68933a430b551da9bec2720757",
+            "current": "44043491492139560b6e5c7ac4f95a04a25ccd3e007d8ef0b04de692e2b23ad9"
+          },
+          {
+            "path": "studio-runner/src/compat/runtime-versions.ts",
+            "retained": "de2e257b6fb4f2006c905b7bcac63f404e8497c907f2a31501ab9e675caf476e",
+            "current": "58c48cde3df9fd64d2f017091c655385a14b1c5d29c887e70589b64372afa085"
+          },
+          {
+            "path": "studio-runner/src/reporting/snapshot.ts",
+            "retained": "131bdd58916e20e82bdfb02eb8b3e60b387585c95ef8c4b6d00557b4c652ddfa",
+            "current": "57d828418cf4d46fcbf485d1e8bd9571af784fed0e4ce1265ff77d9a17f1654c"
+          },
+          {
+            "path": "studio-runner/src/run/browser.ts",
+            "retained": "93aabd835c1a90ecc90934af677cc111919cf08eb687b24368961790b76a0ae3",
+            "current": "b19c4efeab53c8923a2a464369b60954d599b5ccfcefe757e65ddc024678f802"
+          },
+          {
+            "path": "studio-runner/src/run/browserFactory.ts",
+            "retained": "10f1515607fb2eb866a00d8a03e2be8853d9700a23ec5c192c566d048364d4d7",
+            "current": "b051bd366f0ceaa3ebc4b5d790d0e190b277b4a2c58e7e475731ff4dd062c592"
+          },
+          {
+            "path": "studio-runner/src/run/guidedBrowser.ts",
+            "retained": "7ef61eece121bfc2637088b8e8bb2fc92818c95863f1850f5d6db762cd5de2de",
+            "current": "e22ec61544c212696e84d472d6b2f0e93e95cfcb5fc19cdb97d7f99d8fa3e3e4"
+          },
+          {
+            "path": "studio-runner/src/run/launcher.ts",
+            "retained": "122a73247d6e63ca7086ef078ca60ba2c8c5134255d12c2d5d6e43f8e13b2d35",
+            "current": "b9ca298405b3a0e2aa85bc022ba7e90985d96add01122a74695cb2f08ad6a110"
+          },
+          {
+            "path": "studio-runner/src/run/scratchLayout.ts",
+            "retained": "e100cffa2fc00382b084c91d11e6cf5aa2fffed79396d07c7141d727fb09da74",
+            "current": "1a3760c6baab12999b5705fdfc7c595d702e1cdea893cbe9c3be5dbbea0cbc48"
+          },
+          {
+            "path": "studio-runner/src/run/secretUse.ts",
+            "retained": "78c044e02e319b0ff7f7b77ec1e5bc7af547b41ec5f63c41f9762a016fa9b05a",
+            "current": "a4a2d79500d2159bdcad4be2bbff9102c6e02e696e66bb81e95c75f24c506e8b"
+          },
+          {
+            "path": "studio-runner/src/server/runCoordinator.ts",
+            "retained": "01597820a462b393660cae56dcb2a8ceea1235a5703431b5b0eabdb1a013835e",
+            "current": "cc729e4abf48dc9ef8831b02e8f07edc72002a522cdf75f30b4ffc84067c161a"
+          },
+          {
+            "path": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+            "retained": "2e65d06e2b3fc30621241d9649da8e6eb1a15b8892caa253185779ef992e55b7",
+            "current": "997250ad046919e3314286d90c1125718f5504c19a3c3de7f5872f84283a5cf7"
+          },
+          {
+            "path": "studio-runner/test/run/browserProfilePreferences.test.ts",
+            "retained": "c80724c15a0a68b1d75b9c02d31998f4ecc8cc20acb612e1de788fc31e78b8e2",
+            "current": "9b922022dc4eb3c4f2fa6a9bb7f3b3bebdc4775e986ea2229acad4e191b65f17"
+          },
+          {
+            "path": "studio-runner/test/runtime-versions.test.ts",
+            "retained": "972bc26e734704dcfef18b58f261db50f7498c11fd0bd8ec70a404e1c89aecda",
+            "current": "55803f4704b75c7f5497f7e8802bb68699a0f2eabc0b86e2e6bf5d9b8f61475b"
+          }
+        ]
+      },
+      {
+        "manifest": "docs/qa/evidence/STUDIO-OBS-007/runner-approved-tuple/dist-hashes.json",
+        "manifestSha256": "16d70d0041230308c3359b9b7e018856677e09afce04d0570658f4908c6e9a79",
+        "entries": 268,
+        "drift": [
+          {
+            "path": "studio-runner/dist/reporting/snapshot.d.ts",
+            "retained": "72cf98c92dea03f6bdeeed3198e6959c01d61e4bf51b61da2830e72b50d186b1",
+            "current": "dd761be896d66cb6d11eff6a85f42cdb565dd38bba4ad89affcf0eaede439148"
+          },
+          {
+            "path": "studio-runner/dist/reporting/snapshot.js",
+            "retained": "f5754aa3f1a9e21893eea2dfec2cdb29626453a32d9f2d4392665d330603cc38",
+            "current": "97add1a0511c9239c13b9b08bb1983d94084cb3cfa409be0ba7122eb355ee5a4"
+          },
+          {
+            "path": "studio-runner/dist/reporting/snapshot.js.map",
+            "retained": "c14ee968b9dc8d17eed4a8002919cb15eccdceb0b71043bf34e2411b987e661d",
+            "current": "40e9e5ea15e1316496f161a2181e4ddf1c7230248bbe953d491e515b52e5bbc4"
+          },
+          {
+            "path": "studio-runner/dist/run/browser.js",
+            "retained": "acc346ab714f00e08a01e121fc809ef3c7fee962a1bdea2304144435c7e65303",
+            "current": "7c3b36819f9a1649ffd92ec54e8519b41ba2b48e89628dae7cce9156cc7ffa32"
+          },
+          {
+            "path": "studio-runner/dist/run/browser.js.map",
+            "retained": "24734a8d782d96e83255da080090fb3903b3f6e969f0bc6b4b42baad755d8af5",
+            "current": "7b0cabdc58141909dd95578fa5788b33d7da314c61745a307c845f998f49be0a"
+          },
+          {
+            "path": "studio-runner/dist/run/browserFactory.d.ts",
+            "retained": "7eeb63040304c6006ffe7dac18132d2e01071cc67a7da2f4f8f00a688c2cd0e4",
+            "current": "f9aa899c2f1742cdc335163cfab1b05e189e27606e4e776d066871d2d552ad76"
+          },
+          {
+            "path": "studio-runner/dist/run/guidedBrowser.d.ts",
+            "retained": "4bc3ac191837e5e22239d568e7f795dd3257600f63619d3ff9f78c21c824a870",
+            "current": "d911b58458c61c4f2243f646e4036a2d4026dc2b4ccb75e872c603c152f14a2b"
+          },
+          {
+            "path": "studio-runner/dist/run/guidedBrowser.js.map",
+            "retained": "2d0b49654a69a102bfee885c15a8497e20eab1047883654909c7ba738ae7fbf6",
+            "current": "aec16f278452b4bde880e09cb502735b82940726febb57a480f435ef7a59f661"
+          },
+          {
+            "path": "studio-runner/dist/run/launcher.js",
+            "retained": "7a9f8509e2f83477dca8272da9cadf7f19ba9ddeed295f2a35c0ef6cb6a223c5",
+            "current": "a85649c7c77d2659415444851c3e66eb3743330c6d0914d837ea1f0bc156f848"
+          },
+          {
+            "path": "studio-runner/dist/run/launcher.js.map",
+            "retained": "908b92bfb112ed0b5001b13e0571f4da59e770c79a30c81da403e85c59479b0e",
+            "current": "8afa1898830c43efd2f17cb45d66fedcc2ce0b2e6d2446ef5d97d8689a8ff09e"
+          },
+          {
+            "path": "studio-runner/dist/run/scratchLayout.d.ts",
+            "retained": "063dc879988357f117598093a431f9c3389039f5a7c2fcdcfda8f5ff78a633d8",
+            "current": "3e07beac7b7f71df834448169993e216e82b4c1b6076b9075c11a038a0524016"
+          },
+          {
+            "path": "studio-runner/dist/run/scratchLayout.js",
+            "retained": "3d8e2751759121a52e6479a2c68e2935be65a9bb13f2f8ee35e584ea750486aa",
+            "current": "9aa3bab6dc776c80e009f2cc1a081a118ed01a4e5ac723a47de0dbb5f3ced8ca"
+          },
+          {
+            "path": "studio-runner/dist/run/scratchLayout.js.map",
+            "retained": "cc315a598901105d985a76a16f8e19de971cdcc7f7a03d9b471569a87ffe7517",
+            "current": "edc0bce31f0ffa256c625dad46e90d81694609b42294b872080fd62bbf5c45b4"
+          },
+          {
+            "path": "studio-runner/dist/run/secretUse.d.ts",
+            "retained": "65abb911974ca32241806e696cadbb0c19c76407446ad0b20609b4c857c90aca",
+            "current": "34f4768f90eaef0fcb0f376f5f98f4c4954835887c27acd6b339f2f12f403d1a"
+          },
+          {
+            "path": "studio-runner/dist/run/secretUse.js",
+            "retained": "b71610d8f88ca0cacf67bbdb393c681f1beed7181c93c41ff69ceffcbefbed43",
+            "current": "046a2603f96c641456f772d512ab4d460ee8766bd64d5b572fffad764f96f622"
+          },
+          {
+            "path": "studio-runner/dist/run/secretUse.js.map",
+            "retained": "66e9ec9bd95f8ea0982531d57566776849ab34a24c828a1a68195f7a9a9e5e48",
+            "current": "867d8e3f398237fb5497f10976600982bb1a98b42a21f9897d6d928298f7ee4b"
+          },
+          {
+            "path": "studio-runner/dist/server/runCoordinator.js",
+            "retained": "13f591b7ee4b5ca8afbdab3bcfbe345cd0ea3e4e7b17c0f6063e856581a8bd21",
+            "current": "17a7aa529c8892a631233cf5843feb1cd7e556e5e8f7b3ac6b351e269a6975ce"
+          },
+          {
+            "path": "studio-runner/dist/server/runCoordinator.js.map",
+            "retained": "a3474352e0b97a9c20a4a31f484f6ed74e19a38502ad043fa452b2b11293bf02",
+            "current": "54aba57042b8136b2020fddad28f0a88dbd1ee7750d473ab6432097bcf22edad"
+          }
+        ]
+      },
+      {
+        "manifest": "docs/qa/evidence/STUDIO-OBS-007/c-approved-tuple-guard-order/source-hashes.json",
+        "manifestSha256": "ed24fbf5ebc4a81b3086afa8e2b15204a09160e4a14541aafb21f0298efbc870",
+        "entries": 64,
+        "drift": [
+          {
+            "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+            "retained": "819d2c2f54038f328f7766f0c749f52b717a8d0656d6a56277622694fb191fe6",
+            "current": "89425e97caa4756141ecfb8d404d2e105c14e1b78f27ccc0fa0b44bd4dc327d6"
+          }
+        ]
+      }
+    ],
+    "endCapturedAt": "2026-10-10T09:26:28.944201+00:00",
+    "changedDuringReview": [
+      {
+        "path": ".aiox/waves/STUDIO-OBS-SINGLE-PATH/execution-audit.json",
+        "snapshot": "b7aeb5fe77111ede4804e89dbedb7c684e970f59cc07e04ce9336cee1544de92",
+        "end": "a11aab656ffa4a64717bf0631986a217f53d15ff11c1bbbfa7722d53494a6410"
+      }
+    ],
+    "endSha256": {
+      "AGENTS.md": "a3e2fe4c0bebc01d91b0fa0b062c49d031e203ab2a522ee9b04d9f06df797198",
+      ".codex/skills/aiox-architect/SKILL.md": "376153f250f0d4142f19fe0835e43cc2157072ee881db6daf33ca033efab3962",
+      ".aiox-core/development/agents/architect.md": "c45b1e71af39b5da34a832dcc3d1c9b41b6270de61f79d4bada3c27b46be19df",
+      ".aiox-core/development/tasks/architect-analyze-impact.md": "73ad65e2263dac7a5a3aa64736d2c803c8a532c269b83fb98a61cb5729b689db",
+      ".aiox-core/constitution.md": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+      ".aiox/waves/STUDIO-OBS-SINGLE-PATH/execution-audit.json": "a11aab656ffa4a64717bf0631986a217f53d15ff11c1bbbfa7722d53494a6410",
+      "docs/stories/STUDIO-OBSERVED/README.md": "f06e52681e43bd4273b6a5be7938f737aebe7bd2a37dc5f3b2563c5069404db6",
+      "docs/architecture/ADR-SC-005-single-path-observed-authoring.md": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4",
+      "docs/architecture/studio-execution.md": "3ff31f9054e4d55b132658f1b30bc86ef0682a5806d44a5005bff54b4c47d89c",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "22c895d83b5871bd184a3e1acb4ca8e6b09807ad72347cbd1b8fe9a94d83b153",
+      "docs/specs/studio-observed-authoring/secret-login-design.md": "940233de23e35ebfdeb76a62d6a02c95492cd003428cdb137451d834cdc2d769",
+      "docs/specs/studio-observed-authoring/secret-login-security-review.md": "c5ce3be4543ae51618455b14909caabaf9cc46b9dd7fce0a2ff57516394cde49",
+      ".ai/STUDIO-OBS-007-architect-t0-rulings.json": "df94f7d40de5f026856aa959427cbdb09ce71ba7f99a144c081f7f59e3d01cd2",
+      "studio-runner/src/run/browser.ts": "b19c4efeab53c8923a2a464369b60954d599b5ccfcefe757e65ddc024678f802",
+      "studio-runner/src/run/browserFactory.ts": "b051bd366f0ceaa3ebc4b5d790d0e190b277b4a2c58e7e475731ff4dd062c592",
+      "studio-runner/src/run/scratchLayout.ts": "1a3760c6baab12999b5705fdfc7c595d702e1cdea893cbe9c3be5dbbea0cbc48",
+      "studio-runner/src/run/childRuntime.ts": "920b240bbd9ba22ee51e9150b8e0dc5162e2df9a234ea1177abead69625d6f31",
+      "studio-runner/src/run/timeline.ts": "7d7e0bfd91065b61f426b6da42830568f674427bbfbba428524a6d31d5619de3",
+      "studio-runner/src/run/recording.ts": "0a3f3f29feda2d4f2611a1070bd7f03b253a51b26314985925e9725ac531b3bb",
+      "studio-runner/src/run/manifest.ts": "b885e4e4717e0d221fc134c9bf16ba991e97ccec601bf146abe9a9cadc3dc03a",
+      "studio-runner/src/run/launcher.ts": "b9ca298405b3a0e2aa85bc022ba7e90985d96add01122a74695cb2f08ad6a110",
+      "studio-runner/src/run/guidedBrowser.ts": "e22ec61544c212696e84d472d6b2f0e93e95cfcb5fc19cdb97d7f99d8fa3e3e4",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java": "d5d055619562e2698e293bd72fa25549aa1d59b51b7ece5d1b3ce4c9e282a062",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java": "e3bc0ab9b9d1d2d37321f7b4747adf430f3c1ebf978a6b38dbc9a65fa4f43d81",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioReferenceResolver.java": "226e7e186924a38d6f91f9de252f1664805fcb6da3d17d1965fa6aefa6acb0f4",
+      "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java": "209892c4b55c40c4aacb4ff5ee6983555889411ca8f5d69ce085d52f01783f29",
+      "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java": "6bcd8447ae03480036e4014ca1ce91b81f3df05ec74995b03375c329d0daedb8",
+      "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java": "fe6fb59e87d34d2ae9210dfdf16c02822820bd62a70af6bd33d8284adbd31484",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java": "9fcdcaf4caa8ebe0e414eefeffde54fb140f5400ba4106391bf81719a92c85a4",
+      "backend/src/main/java/com/citi/put/checks/studio/recovery/PendingReaper.java": "4f643583b8739682a3482f13396d47b461fc41f2b67fddcfcde583abf3d8caff",
+      "backend/src/main/java/com/citi/put/checks/studio/recovery/RunningReaper.java": "37cec126c9581dff3c16f030b49bdfdf8eee9babc8437a11a407266b8139da68",
+      "backend/src/main/java/com/citi/put/checks/studio/StudioService.java": "03b4c3277ea23f6fd63e3bd2cdf60504d97ab1a55303755d0121d3169dd4f100",
+      "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql": "89425e97caa4756141ecfb8d404d2e105c14e1b78f27ccc0fa0b44bd4dc327d6",
+      "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java": "29d20cdf26ad8404a19b99ae7820fc61a19f2a508108e5e91d3b1e6e78a3d56c",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java": "47a0c972cc11ad421efab443fa5a0d06174b79e50158709253a48fa401098546",
+      "studio-runner/test/run/browserProfilePreferences.test.ts": "9b922022dc4eb3c4f2fa6a9bb7f3b3bebdc4775e986ea2229acad4e191b65f17",
+      "studio-runner/test/run/childRuntime.test.ts": "8405a51a37a97c77f2b9cbe376f417912713f4981340077873aa3dade06d4824",
+      "studio-runner/test/run/timeline.test.ts": "595dee643080c0d6cb1fc7f3a7876bff4407e48a487ce194d9884a625c7d49f8",
+      "studio-runner/test/run/manifest.test.ts": "8a08db09d447d7d8edeab03118ed6ccd8f9623ca740796cd0fbdc4c05dd108b0",
+      "studio-runner/test/run/recording.test.ts": "1c16d79969a0c0a02e8d4c750394a6ded12dcceb2f2d951b3eecb671e019cd56",
+      "studio-runner/test/fixtures-tier/recording-coverage.test.ts": "a94d95e6b4712f7693b0543d285a5ce905fe6ebfd64a83a7282be5192cf9e4f1",
+      "studio-runner/test/fixtures-tier/secret-login.test.ts": "997250ad046919e3314286d90c1125718f5504c19a3c3de7f5872f84283a5cf7",
+      "studio-runner/test/guided/browser.test.ts": "2e516344ced18a49855a70b8c7e71dee09386984f5a08c8a4f112884cf83d3c7",
+      "docs/architecture/ADR-SC-002-versioned-intent-derivation-at-readiness.md": "d3b288ee8624552afc70762dc235105195b563e4ab1260a37ff5ae4531d5e9bd",
+      "docs/qa/evidence/STUDIO-OBS-007/t3-technical-peer.json": "82475eee0b4b6bfa31b62ad24caae63d3a9780ad34203430bdfb9dfa3d614731",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-architecture-disposition.json": "c886057dbc31bb427378e29393ba29a8f20d27470bcdbf8ae7846628a62c3edd",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-po-architecture-revalidation.json": "9c6ff6de3e2f6ff9f0925a2efc9b84b91880ef4c144b013e634c7bc2f71ea2b5",
+      "docs/qa/evidence/STUDIO-OBS-007/architecture-application/receipt.json": "008fd8398a41c36fd906c4a652ae510f619ab5ec74d5e7f30825a69c146e9922",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-approved-data-design.md": "700e1f3e3f63019cabae3cde022ab77835bbe4f4ee1c0232ddbde51b4f6bad21",
+      "docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-park.json": "7b917b60c0f52943c00e9a1cac5e8e96c6c16cca7cccfbff2dae184fef0b9a15",
+      "docs/qa/evidence/STUDIO-OBS-007/root-approved-tuple-green/result.json": "498ba1014063c4a2f3707dba9ec35a5ffd1112062b8c888cf0b2b06f62039c39",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-po-consistency-delta.json": "3ad3336670648b4ba64ff02ea206c292307241cbe4c0e86b361ed2a1a813aa5c",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-po-delta-application.json": "11b311125fe812c4ddf8ee20837901ced44244914545b33e55073f843bfcf702",
+      "studio-runner/src/server/runCoordinator.ts": "cc729e4abf48dc9ef8831b02e8f07edc72002a522cdf75f30b4ffc84067c161a",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatcherIT.java": "9ed6f8a967005ae39c9e55a4f15ca4f8901261a9da21ec67ef0b4263a8b495ad",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/LedgerCancelTransitionsIT.java": "2fa6475142e93eeae6af17c2c3a28d0e2b09119da94fb87a9e14ce3bfd171c28",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/LedgerStateMachineIT.java": "28eb75776e547965dc326c28513648923442c2cdb07fe1a06463bb0ea2df1f48",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/LedgerStateMachineMigrationIT.java": "f58b5dfc0e61373c170dfec3dac025018f468b8cda66aec735f542a124cf4969",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java": "6fc8b290e312dd1a051d789dbf5b697cbc85bfd58ee4b3400408ff5e5f786cc6",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java": "5842b9d8453275cfe83bfc40843326ee9a5f961bd3cb88dbcfee5799fb57e9d5",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SecretAuditLifecycleIT.java": "181a1ced7d76a84c3a3ab1ad92b4cd670617c8a826b2192399447a8946834dd2"
+    },
+    "pathCorrections": {
+      "studio-runner/src/run/coordinator.ts": "not present; actual consumer studio-runner/src/server/runCoordinator.ts inspected and bound",
+      "studio-runner/src/run/timing.ts": "not present; actual origin module studio-runner/src/run/timeline.ts inspected and bound"
+    }
+  },
+  "historyPolicy": "No prior report is edited. Original one-page and no-committed-decision-linkage assertions remain historically unmet; the proposed narrow supersessions take effect only after independent Pax exact-text approval/application and explicit root release. No canonical/status/tasks changes were made.",
+  "releaseHandoff": [
+    "Pax independently revalidate exact proposed A/B canonical fragments against all19AC/security, preserve prior approved15+3 scope and historical assertions.",
+    "Root release exact new scope only after Pax; R remains parked meanwhile. B may preserve safe actual resolved metadata solely within already released linked-fact scope; new unlinked shape/terminal receipt waits.",
+    "B/D coordinate one physical winning terminal transaction and exact source/schema/fixtures; no concurrent shared gates. R implements only approved startup lifecycle/provenance changes, then owners provide final-bound evidence and lane peer rereviews.",
+    "Root continues all joined/full regression/lifecycle/external obligations across the full wave; no QA or Done disposition here."
+  ],
+  "constraints": {
+    "onlyWorkspaceWrite": "docs/qa/evidence/STUDIO-OBS-007/t2-t3-bootstrap-closure-disposition.json",
+    "canonicalAcceptanceApplied": false,
+    "statusOrTasksChanged": false,
+    "sourceTestsSchemaPinsEdited": false,
+    "sharedGatesRun": false,
+    "agentsSpawned": false,
+    "commitPushDeployContact": false,
+    "secretsEnvDump": false,
+    "billingAvailable": false,
+    "wholeWaveCeilingUsd": 500,
+    "canonicalReadHashesUnchangedBeforeReport": true
+  },
+  "wave": {
+    "objective": "Full ten-story SDC wave remains active with all external prerequisites; this is bounded develop architecture support only.",
+    "order": "007→012A→{012B∥013∥014}→015→008→009→010→011",
+    "goalOrPhaseChanged": false,
+    "authoritativeCheckpoint": {
+      "path": ".aiox/waves/STUDIO-OBS-SINGLE-PATH/execution-audit.json",
+      "sha256": "a11aab656ffa4a64717bf0631986a217f53d15ff11c1bbbfa7722d53494a6410",
+      "currentWork": {
+        "story": "STUDIO-OBS-007",
+        "phase": "develop",
+        "tasks": "T1 approved identity delta verified; exact T2/T3 behavior scopes released; T4/QA/close incomplete",
+        "activeAgentTasks": [
+          "/root/obs007_backend (mechanical tuple only)",
+          "/root/obs007_runner (mechanical tuple + no false unused inference)",
+          "/root/obs007_contracts (C shared corpus/generator/profile consts)"
+        ],
+        "externalReviewer": {
+          "command": "codex exec independent Pax",
+          "session": 86966,
+          "terminal": true,
+          "exitCode": 0,
+          "report": "docs/qa/evidence/STUDIO-OBS-007/t2-po-consistency-delta.json",
+          "application": "docs/qa/evidence/STUDIO-OBS-007/t2-po-delta-application.json"
+        },
+        "verifiedEvidence": [
+          {
+            "scope": "B scoped Vault/erasure/source/login tests",
+            "tests": 50,
+            "failures": 0,
+            "skips": 0,
+            "evidence": "docs/qa/evidence/STUDIO-OBS-007/lane-b-focused-green/"
+          },
+          {
+            "scope": "D source-bound SQL/recorder/retry/partition tests before new uncertainty delta",
+            "tests": 20,
+            "failures": 0,
+            "skips": 0,
+            "evidence": "docs/qa/evidence/STUDIO-OBS-007/data-persistence-green/"
+          },
+          {
+            "scope": "root preserved JWT/HTTP/wire test scenarios",
+            "tests": 20,
+            "failures": 0,
+            "skips": 0,
+            "evidence": "docs/qa/evidence/STUDIO-OBS-007/root-guided-security-ports-green/"
+          },
+          {
+            "scope": "R source-bound default/coverage before diagnostic/uncertainty changes",
+            "tests": 1597,
+            "historicalSkips": 29
+          },
+          {
+            "scope": "R source-bound Chromium tier before diagnostic/uncertainty changes",
+            "tests": 320,
+            "historicalSkips": 10
+          },
+          {
+            "scope": "R deployment tier",
+            "tests": 313
+          },
+          {
+            "scope": "Root lifecycle30 realPG v3 port before formatting; exact original test names preserved",
+            "tests": 30,
+            "failures": 0,
+            "skips": 0,
+            "evidence": "docs/qa/evidence/STUDIO-OBS-007/root-session-port-green/"
+          },
+          {
+            "scope": "Dara actualPG uncertainty29; source-bound snapshot before B integration/testfixturevisibility delta",
+            "tests": 29,
+            "failures": 0,
+            "skips": 0,
+            "evidence": "docs/qa/evidence/STUDIO-OBS-007/data-uncertainty-green/"
+          },
+          {
+            "scope": "Runner revision2 frozen local gates; nojoined/backend/nativecanary/image proof",
+            "defaultPassed": 1610,
+            "defaultSkips": 29,
+            "chromiumPassed": 326,
+            "chromiumSkips": 10,
+            "deploymentPassed": 313,
+            "deploymentSkips": 0,
+            "coverageThresholds": "unchanged; run85.16% lines",
+            "evidence": "docs/qa/evidence/STUDIO-OBS-007/runner-t3-candidate/",
+            "resultSha256": "916412ab74e6a45f95df418f4caa407b7200cd1a6e1ffb9f5f569c4b3b95f7c6"
+          }
+        ],
+        "pending": [
+          "implement and independently review exact approved audit/browser/PROGRESS behavior on current executor4/catalog3 baseline",
+          "release exact PO-approved owner scopes: honest guided source-declaration absence, durable positive not-entered-read/no-send replay receipt, supported fullChromium policy/identities, USED-only PROGRESS receipt/CAS",
+          "R fixes independent prior/current/new-value cancellation privacy + typed no-effect + sparsepositive merge require independent re-review; possible Execute/IPC loss cannot inferunused from missing starts",
+          "all19AC/SEC/C actual joinedCore/Vault/PG/compiledbrowser proofs incl actual login/publish/tworeplay/crash/kill/revocation/all-sink; preserved scoped gates not substitutes",
+          "independentper-lanepeer/finalsource regression/style/build/coverage/lifecycle QA and close before012A"
+        ],
+        "serializedGradleOwner": null,
+        "latestRootTestSession": {
+          "id": 89886,
+          "terminal": true,
+          "exitCode": 0,
+          "tests": 30,
+          "failures": 0,
+          "skipped": 0
+        },
+        "contracts": {
+          "v3Checks": 131,
+          "examples": 12,
+          "routes": 7,
+          "fullOpenApiPin": "08f091eca8a25ffe6df38ce8100d081b8a22f8fe7cd700cd7db03e84df510d49",
+          "codegen": "four outputs regenerated byroot initially; Cexclusivefinal writer",
+          "coverageClaim": "No full final-source story gate yet; earlier individual source bindings preserved",
+          "latestRootCheckerSession": {
+            "id": 50780,
+            "terminal": true,
+            "exitCode": 0,
+            "v3Checks": 131
+          },
+          "executor": "observed-4",
+          "catalog": "observed-replay-3",
+          "language": "observed-3",
+          "checkerStatus": "root reproduced181/12/7/codegen parity current identity; no full business/native/image/QA claim",
+          "quotingReceipt": "docs/qa/evidence/STUDIO-OBS-007/architecture-application/yaml-quoting-receipt.json"
+        },
+        "noProgressClassification": "progress: actual code, real PostgreSQL/Chromium/unit/HTTP evidence and exact independently reviewed scope amendments; no full-goal completion claimed",
+        "technicalReviewer": {
+          "session": 36018,
+          "terminal": true,
+          "exitCode": 0,
+          "verdict": "scoped FAIL",
+          "report": "docs/qa/evidence/STUDIO-OBS-007/t3-technical-peer.json",
+          "remediation": "R active, private no-effect/sparse merge/redaction; native C6 and profile/guided completeness decisions pending"
+        },
+        "runnerCandidate": {
+          "revision": 4,
+          "sourceManifest": "docs/qa/evidence/STUDIO-OBS-007/runner-t3-remediated/source-hashes.json",
+          "sourceSha256": "2ff0879775191856d3dd4223290bb2a5bf182e2816077e3523220803e302a3a0",
+          "distSha256": "d198fb07583c7f01c761f71369d354a4999fd8b6824d0602837462f123787959",
+          "runtimeJsSha256": "a80962b926aa986d3c47e6f4be9822b1de9a3a8ee842cb7e032d28199ddbd9cf",
+          "gates": "R final-source gates active; unchanged default headless mode, C3 effective key/channel OPEN; no peer/whole-story PASS"
+        },
+        "latestBackendTestSession": {
+          "id": 71282,
+          "terminal": true,
+          "exitCode": 0,
+          "tests": 35,
+          "failures": 0,
+          "skipped": 0,
+          "evidence": "docs/qa/evidence/STUDIO-OBS-007/lane-b-revocation-gate-1/",
+          "scope": "oldtuple3sweep+9atomiccaller+23projection; no currentnewtuple/fullbehaviorPASS"
+        },
+        "dataReviewer": {
+          "session": 78516,
+          "terminal": true,
+          "exitCode": 0,
+          "verdict": "scoped FAIL",
+          "report": "docs/qa/evidence/STUDIO-OBS-007/t2-data-independent-peer.json",
+          "remediation": "D DB02/04+duplicate bypass addressed candidate; exact absence identity and B03 atomic caller still open"
+        },
+        "architectureDisposition": {
+          "session": 88562,
+          "terminal": true,
+          "preflight": "PASS",
+          "threadId": "01a1248d-0747-7b00-b360-232fc8c702d6",
+          "report": "docs/qa/evidence/STUDIO-OBS-007/t2-t3-architecture-disposition.json",
+          "items": [
+            "Honest source declaration identity vs missing action ordinal",
+            "Ordinary replay unattempted terminal summary",
+            "Supported effective prefs/fixed browser channel/version and pin mapping",
+            "Positive PROGRESS usage vs FINAL-only current semantics",
+            "C6/guided completeness exact PO amendment proposals"
+          ],
+          "exitCode": 0
+        },
+        "latestDataTestSession": {
+          "id": 61021,
+          "terminal": true,
+          "exitCode": 0,
+          "tests": 39,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "evidence": "docs/qa/evidence/STUDIO-OBS-007/data-peer-remediation-green/",
+          "scope": "DB02/04 guards+mixed lock+original29+5B ownercases; DB01 first absent ordinal not solved",
+          "manifestSha256": "e4c805e5834b4907b4f81ed3d27e3267ec6b87b70a8e6a418a58e47debbf55e4"
+        },
+        "generatorOwner": null,
+        "poArchitectureRevalidation": {
+          "session": 95573,
+          "terminal": true,
+          "exitCode": 0,
+          "overallVerdict": "GO all6 design items only",
+          "report": "docs/qa/evidence/STUDIO-OBS-007/t2-t3-po-architecture-revalidation.json",
+          "sha256": "9c6ff6de3e2f6ff9f0925a2efc9b84b91880ef4c144b013e634c7bc2f71ea2b5",
+          "applied": "exact15canonical+3consts; architecture-application/receipt.json",
+          "implementationApproved": false
+        },
+        "mechanicalDelta": {
+          "status": "verified",
+          "backendSession": 47126,
+          "terminal": true,
+          "exitCode": 0,
+          "backendTests": 276,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "classpathSchemas": 40,
+          "classpathMismatches": 0,
+          "CSourceEntries": 64,
+          "runnerSourceEntries": 446,
+          "runnerDistEntries": 268,
+          "manifestDrift": 0,
+          "runnerFocused": 199,
+          "v3ContractChecks": 181,
+          "examples": 12,
+          "routes": 7,
+          "evidence": "docs/qa/evidence/STUDIO-OBS-007/root-approved-tuple-green/"
+        }
+      },
+      "updatedAt": "2026-10-10T09:24:10.432947+00:00",
+      "attribution": "Read-only live coordinator checkpoint; changed during review as logged in sourceBinding. No reviewer goal/phase/status operation."
+    }
+  },
+  "openList": [
+    "Every NEEDS_EVIDENCE item above remains open.",
+    "Fresh independent Pax exact new scope and root release pending; no acceptance application.",
+    "D active SQL/test source may drift; reread/rebind final bytes before implementation judgment.",
+    "Current source/dist is not a frozen final regression candidate; runner lint/build and source drift remain open.",
+    "All19AC, security conditions, C6 joined sinks, timing/privacy/default/worker/full joins and independent lane/lifecycle QA still required."
+  ],
+  "verification": {
+    "reportJson": "PASS: parse and item/fragment validation only, not a test/QA verdict",
+    "exactCanonicalFragmentChecks": 12,
+    "priorReportsAndApplicationImmutable": true,
+    "changedSinceEndSnapshot": [],
+    "noGatesExecuted": true
+  }
+}

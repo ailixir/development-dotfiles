@@ -1,0 +1,84 @@
+diff --git a/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/49497aae-dbea-402b-a9a6-2d80f4cd2e4e/scratchpad/EvidenceRepository.before.java b/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java
+index 814e8755e..3285c9ae0 100644
+--- a/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/49497aae-dbea-402b-a9a6-2d80f4cd2e4e/scratchpad/EvidenceRepository.before.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java
+@@ -462,6 +462,39 @@ public final class GuidedPublicationEvidenceRepository {
+         Timestamp.from(PublicationContracts.millisecond(now)));
+   }
+ 
++  /**
++   * The observation hashes that this session's own prefix requests committed to. An observation
++   * row is bound only when the observedDocument execution evidence over this session id, the
++   * request's contextId, the row's documentId/generation/origin and its observationHash hashes to
++   * the request's evidenceHash. Nothing is admitted on a partial match.
++   */
++  static java.util.Set<String> prefixRequestObservations(
++      GuidedContracts contracts, String id, JsonNode incremental, JsonNode observations) {
++    var bound = new java.util.HashSet<String>();
++    if (incremental == null) {
++      return bound;
++    }
++    for (JsonNode request : incremental.path("prefixRequests")) {
++      for (JsonNode observation : observations) {
++        JsonNode snapshot = observation.path("observation");
++        ObjectNode execution =
++            contracts
++                .object()
++                .put("kind", "observedDocument")
++                .put("sessionId", id)
++                .put("contextId", request.path("contextId").asText());
++        for (String field : List.of("documentId", "generation", "origin")) {
++          execution.set(field, snapshot.path(field));
++        }
++        execution.put("observationHash", observation.path("observationHash").asText());
++        if (GuidedContracts.hash(execution).equals(request.path("evidenceHash").asText())) {
++          bound.add(observation.path("observationHash").asText());
++        }
++      }
++    }
++    return bound;
++  }
++
+   public PublicationContracts.Evidence read(String id) {
+     GuidedPublicationBaseRepository.transaction();
+     new com.citi.put.checks.studio.guided.translation.GuidedPlanHistoryAudit(jdbc, contracts).audit(id);
+@@ -635,8 +668,9 @@ public final class GuidedPublicationEvidenceRepository {
+     }
+     require(acceptedQuestions.equals(witnessedQuestions), "EVIDENCE_MISMATCH", 422);
+     require(witnessedQuestions.size() <= 200, "BUDGET_EXCEEDED", 413);
+-    // Only original observations actually used by successful actions or their question proof
+-    // belong to the independent basis. Captured but unexercised facts remain in immutable SQL.
++    // Only original observations actually used by successful actions or their question proof,
++    // or committed to by this session's own prefix requests (prefixRequestObservations), belong
++    // to the independent basis. Captured but unexercised facts remain in immutable SQL.
+     var neededObservations = new java.util.HashSet<String>();
+     for (JsonNode association : associations) {
+       boolean successful = false;
+@@ -667,26 +701,7 @@ public final class GuidedPublicationEvidenceRepository {
+     // A prefix request names the original observation it was issued against. A drifted request
+     // has no successful action, but the basis still binds that observation (GuidedPlanBuilder
+     // derive, GuidedBasisValidator validatePrefix), so it belongs to the independent basis too.
+-    if (incremental != null) {
+-      for (JsonNode request : incremental.path("prefixRequests")) {
+-        for (JsonNode observation : observations) {
+-          JsonNode snapshot = observation.path("observation");
+-          ObjectNode execution =
+-              contracts
+-                  .object()
+-                  .put("kind", "observedDocument")
+-                  .put("sessionId", id)
+-                  .put("contextId", request.path("contextId").asText());
+-          for (String field : List.of("documentId", "generation", "origin")) {
+-            execution.set(field, snapshot.path(field));
+-          }
+-          execution.put("observationHash", observation.path("observationHash").asText());
+-          if (GuidedContracts.hash(execution).equals(request.path("evidenceHash").asText())) {
+-            neededObservations.add(observation.path("observationHash").asText());
+-          }
+-        }
+-      }
+-    }
++    neededObservations.addAll(prefixRequestObservations(contracts, id, incremental, observations));
+     var usedObservations = contracts.object().putArray("observations");
+     for (JsonNode observation : observations) {
+       if (neededObservations.remove(observation.path("observationHash").asText())) {

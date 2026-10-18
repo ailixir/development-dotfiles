@@ -1,0 +1,76 @@
+--- a/studio-runner/test/fixtures-tier/guided-recording.test.ts
++++ b/studio-runner/test/fixtures-tier/guided-recording.test.ts
+@@ -10,14 +10,18 @@
+  * - The observed replay adapter runs on the guided-mode recorded handle (adapter parity).
+  * - A recorder-side fault mid-session settles as UNAVAILABLE and the session still terminates.
+  * - Zero canary hits in the callback body, the guided manifest and the stored objects.
++ * - AR-QA SEC-001: no startup-probe (chrome://) frame before the first action, decoded at full
++ *   resolution, and the first page paint lands at that action's offset (-250..+500 ms).
+  *
+  * `test/fixtures-tier/recording-coverage.test.ts` named by the story was deleted by STUDIO-OBS-012A
+  * (artifact-1 replay path), so the guided mode gets this file instead of an extension.
+  */
+ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
++// eslint-disable-next-line no-restricted-imports -- Actual native WebM decoding oracle only; fixed ffmpeg/ffprobe executables, never production execution.
++import { execFileSync } from 'node:child_process';
+ import { existsSync } from 'node:fs';
+-import { mkdir, mkdtemp, readFile, readdir, rm, unlink } from 'node:fs/promises';
+-import { join } from 'node:path';
++import { mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'node:fs/promises';
++import { basename, join, resolve } from 'node:path';
+ import { tmpdir } from 'node:os';
+ import { launchGuidedBrowser } from '../../src/run/browser.js';
+ import { GuidedRuntime } from '../../src/guided/runtime.js';
+@@ -57,6 +61,14 @@
+   return hits;
+ }
+ function webm(bytes: Uint8Array): boolean { return bytes.length >= MIN_PLAYABLE_RECORDING_BYTES && WEBM_MAGIC.every((b, i) => bytes[i] === b); }
++/** Blank white, per channel (the replay bootstrap-video oracle's threshold). */
++const WHITE = 245;
++/** Index of the first channel byte below {@link WHITE}, or -1 when every byte is blank white. */
++function firstNonWhite(bytes: Uint8Array): number { for (let i = 0; i < bytes.length; i++) if ((bytes[i] ?? 0) < WHITE) return i; return -1; }
++/** Full-resolution rgb24 decode (no scale filter: area scaling cannot establish frame absence). */
++function decodeRgb(video: string, seconds: number): Buffer {
++  return execFileSync('ffmpeg', ['-v', 'error', '-i', video, '-t', String(seconds), '-vsync', '0', '-pix_fmt', 'rgb24', '-f', 'rawvideo', 'pipe:1'], { timeout: 60_000, maxBuffer: 1024 * 1024 * 1024 });
++}
+ 
+ async function guidedLearnRun(fault: 'none' | 'recorderFileLost') {
+   const root = await mkdtemp(join(tmpdir(), 'guided-recording-')); const objects = join(root, 'objects'), evidenceRoot = join(root, 'evidence'), journal = join(root, 'journal');
+@@ -117,6 +129,22 @@
+       for (const t of body.timings) { expect(t.kind).toBe('action'); expect(t.startMs).toBeGreaterThanOrEqual(0); expect(t.endMs).not.toBeNull(); expect(t.startMs).toBeLessThan(120_000); }
+       const prefix = join(run.objects, 'studio', 'fixture-csi', 'guided', run.context.sessionId);
+       expect(webm(await readFile(`${prefix}.webm`))).toBe(true); // SC-2: finalized on context close
++      // AR-QA SEC-001 A/B: decode the uploaded object, not the evidence-dir file. a0 = the navigate.
++      const video = `${prefix}.webm`, a0 = body.timings[0]?.startMs, size = run.request?.size;
++      if (a0 === undefined || !size) throw new Error('TIMING');
++      const frameBytes = size.width * size.height * 3;
++      const probe = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_frames', '-show_entries', 'frame=best_effort_timestamp_time', '-of', 'json', video], { encoding: 'utf8', timeout: 60_000, maxBuffer: 64 * 1024 * 1024 })) as { frames: { best_effort_timestamp_time: string }[] };
++      const prefixPixels = decodeRgb(video, a0 / 1000), windowPixels = decodeRgb(video, (a0 + 1000) / 1000), dark = firstNonWhite(windowPixels);
++      const darkFrame = dark < 0 ? undefined : probe.frames[Math.floor(dark / frameBytes)], t1 = darkFrame ? Math.round(Number(darkFrame.best_effort_timestamp_time) * 1000) : undefined;
++      const facts = { oracle: 'AR-QA SEC-001 A/B (ar-qa-sec001-test001.json)', decode: 'ffmpeg full-resolution rgb24, no scale filter', frameSize: size, whiteThreshold: WHITE, a0, t1: t1 ?? null, t1MinusA0: t1 === undefined ? null : t1 - a0, prefixFrames: prefixPixels.length / frameBytes, prefixAllWhite: prefixPixels.length > 0 && firstNonWhite(prefixPixels) < 0, firstNonWhiteFrameIndex: dark < 0 ? null : Math.floor(dark / frameBytes), probedFrames: probe.frames.length, actionTimings: body.timings.length };
++      await writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-013/r13/sec001-guided-video-oracle.json'), JSON.stringify(facts, null, 2) + '\n');
++      expect(prefixPixels.length % frameBytes).toBe(0); expect(windowPixels.length % frameBytes).toBe(0);
++      expect(windowPixels.length / frameBytes).toBeLessThanOrEqual(probe.frames.length);
++      // A: every frame before the first action is blank white (red on a tree that records the probe).
++      expect(prefixPixels.length).toBeGreaterThan(0); expect(firstNonWhite(prefixPixels)).toBe(-1);
++      // B: the first paint lands within -250..+500 ms of a0 (the lower bound catches ready() before the probe).
++      if (t1 === undefined) throw new Error('NO_FIRST_PAINT');
++      expect(t1 - a0).toBeGreaterThanOrEqual(-250); expect(t1 - a0).toBeLessThanOrEqual(500);
+       const manifest = JSON.parse(await readFile(`${prefix}.manifest.json`, 'utf8')) as Record<string, unknown>;
+       expect(manifest).toMatchObject({ kind: 'guidedRecording', evidenceState: 'STORED', recordingId: body.recordingId, timings: body.timings, disclosure: GUIDED_RECORDING_DISCLOSURE });
+       expect(run.ordering[0]).toEqual({ key: `studio/fixture-csi/guided/${run.context.sessionId}.webm`, fileExists: true, scratchGone: true });
+@@ -166,9 +194,14 @@
+     const adapter = createObservedReplayAdapter(handle, scope, policy, 'guided-parity', () => undefined);
+     try {
+       expect(ready).toBe(1);
++      // AR-QA SEC-001 C: the handle drives the fresh app page, still blank before the first navigation.
++      expect((handle.page as { url(): string }).url()).toBe('about:blank');
+       const result = await executeObservedReplay(frame, adapter, scope, { now: () => performance.now() }, { stepStarted() { return; }, stepFinished() { return; } }, new AbortController().signal);
+       expect(result).toMatchObject({ ok: true, errorCode: null, secretUse: { PASS: 'USED' } });
+       expect(fixture.receipts().at(-1)).toMatchObject({ accepted: true });
++      // AR-QA SEC-001 C: before close, the only file in the recording dir is the app page's video.
++      const files = await readdir(root); expect(files).toHaveLength(1);
++      const recorded = await guided.recordedVideo?.(); expect(recorded ? basename(recorded) : null).toBe(files[0]);
+       await adapter.dispose();
+       const video = await handle.close(); expect(video?.startsWith(root)).toBe(true); if (!video) throw new Error('VIDEO');
+       expect(webm(await readFile(video))).toBe(true);

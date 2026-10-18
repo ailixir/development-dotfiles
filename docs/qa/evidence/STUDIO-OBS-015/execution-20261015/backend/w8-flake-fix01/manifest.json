@@ -1,0 +1,142 @@
+{
+  "story": "STUDIO-OBS-015",
+  "agent": "Dex-W8",
+  "date": "2026-10-16",
+  "files": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256Before": "713381a5b9dc1e3d9809ae6826deabeb95dcec03441c4716c2701f84654c2f96",
+      "sha256AfterPatch": "457b51b8afec82e4c8ae116d0be8ddcbee0fa3a82cfa0be4da99e9a349131b58",
+      "sha256Final": "533fbee213a2adf3dbff16ed22d6bb9482372e159003246f4cbf7d569a91783f"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyIT.java",
+      "sha256Before": "7efd8977bb7fd37646601b8aaa31e96e03d6cf0e97d4565e675a84aab552c9dc",
+      "sha256AfterPatch": "65145633393e90f959fbfdd382c54538f282d2ff7e4c1bf8255daca35d4ebab1",
+      "sha256Final": "65145633393e90f959fbfdd382c54538f282d2ff7e4c1bf8255daca35d4ebab1"
+    }
+  ],
+  "patch": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/attempt02-diagnosis01/fix.patch",
+    "sha256": "ff1f2a35c87541208f570b0686cac7c15e46e36419b5c58a5bb837970a14334a",
+    "applyCheck": "ok",
+    "applied": true
+  },
+  "runnerSrcChanged": false,
+  "runnerDistChanged": false,
+  "runnerDistDigest": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e",
+  "runnerSourceDigest": "f071984a46af15a039140e11135c0223092b338fd79d3a985757421ab323cabe",
+  "runs": {
+    "w8-flake-obs01": {
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w8-flake-obs01-results.json",
+      "exit": 0,
+      "counts": {
+        "total": 11,
+        "passed": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 21.9,
+      "sourceStable": true,
+      "distStable": true,
+      "resultsSha256": "33c1c468d0ebf8f206e7bba507f4149b64b513b1631266e4c8060e60f85abaa3"
+    },
+    "w8-flake-obs02": {
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w8-flake-obs02-results.json",
+      "exit": 0,
+      "counts": {
+        "total": 11,
+        "passed": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 16.74,
+      "sourceStable": true,
+      "distStable": true,
+      "resultsSha256": "dd22033354a33c9b62bb2d6a1b3ffb61a88ffb5b0264c75d9ecf3ccf8dafe479"
+    },
+    "w8-flake-obs03": {
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w8-flake-obs03-results.json",
+      "exit": 0,
+      "counts": {
+        "total": 11,
+        "passed": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 16.85,
+      "sourceStable": true,
+      "distStable": true,
+      "resultsSha256": "e30e6f21634ce3b4ad23107230c27324a09160bf4019c11f36c57800b66caf06"
+    },
+    "w8-flake-p7-01": {
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w8-flake-p7-01-results.json",
+      "exit": 1,
+      "counts": {
+        "total": 3,
+        "passed": 0,
+        "failed": 3,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 49.04,
+      "sourceStable": true,
+      "distStable": true,
+      "resultsSha256": "88c052a0c94ff15e8e43754fb70f090058fb789ff06a06e083ef6161f46e0017"
+    },
+    "w8-flake-p7-02": {
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w8-flake-p7-02-results.json",
+      "exit": 1,
+      "counts": {
+        "total": 3,
+        "passed": 1,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 63.69,
+      "sourceStable": true,
+      "distStable": true,
+      "resultsSha256": "8738840743a71f682ba4cf34d1bc680d01642c553d259cbc7a6b62e7d1f9ea85"
+    },
+    "w8-flake-p7-03": {
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w8-flake-p7-03-results.json",
+      "exit": 1,
+      "counts": {
+        "total": 4,
+        "passed": 0,
+        "failed": 4,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 200.86,
+      "sourceStable": true,
+      "distStable": true,
+      "resultsSha256": "c046c524623b6453d70f75772cf51532646e67a6d57ba5ac50ed1617d4ff5c00"
+    },
+    "w8-flake-full01": {
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w8-flake-full01-results.json",
+      "exit": 0,
+      "counts": {
+        "total": 73,
+        "passed": 73,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 1180.07,
+      "sourceStable": true,
+      "distStable": true,
+      "resultsSha256": "241bac8d58a97442f7e04899a1202b7929e804faaeeb7b63a97436bd5e0d1797"
+    }
+  },
+  "static": {
+    "command": "./gradlew --no-daemon checkstyleTest checkstyleMain spotlessCheck",
+    "exit": 0,
+    "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w8-flake-fix01/static.log"
+  },
+  "gjf": "google-java-format 1.22.0 --skip-reflowing-long-strings on JDK 21: both files byte-identical to formatter output"
+}

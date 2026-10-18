@@ -1,0 +1,286 @@
+{
+  "window": "merge-new22-01",
+  "agent": "Dex-MERGE (@dev)",
+  "date": "2026-10-16",
+  "nonCredit": "Merge/compile/registration evidence only. No QA credit, no lifecycle change, no commit.",
+  "inputs": {
+    "replayitBaseVerified": "9d13eeb762f56dbe095b5540ff97d6e63169ec95c7a7dfa084036e7a1755c656",
+    "patches": {
+      "b1bcd.patch": "248d4a2f5462376b27b92d7f0f446eaaa908994da811b50cb2cc8ee33267243b",
+      "b2ab.patch": "f088b290b1a4f773383ca5ef5174cc9f77c6199014269076702ebd6b84de5548",
+      "b3bc.patch": "ac04aaf11d5f326931f7a5fe6e598bac448be1574dd176bf86d0dcf32826c3e9"
+    },
+    "qaReview": "backend/r2-diagnosis01/qa-review01/review.md (H7, H3 follow-ups; coordinator addendum)"
+  },
+  "files": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": {
+      "before": "9d13eeb762f56dbe095b5540ff97d6e63169ec95c7a7dfa084036e7a1755c656",
+      "afterThreePatches": "7f401b30b2856e58cbb3fc567b0a18fed9cce529d68286e56fd4d88c6f823b63",
+      "afterResolutionAndRegistration": "daa97aeed961afbffad2cd13b2db60e79dfe21bfdb7577144f475c1b59378cee",
+      "final": "217950c7422aadbceaaf2ab34417d5a932f4e616ff76efc6a2a5e3a04a09aec8"
+    },
+    "backend/build.gradle.kts": {
+      "before": "92bfae6d53140e172e1948bcf6e4f328e1b0b49b7fa497fed1ebf245dfcc5991",
+      "final": "2d43ae4d6660b2f440a903ba15c1eb1a51a6a2cb665a8ec215ed364812174a1b"
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java": {
+      "before": "ffb8ffd4fd87bf903337fdd32f92a96ac4a534003cbc828b61a5fbc10804e60d",
+      "asRunInH7H3": "5d3cdcde36b31f7dbec8273dd053ca4a252cda128d64cee74c648f5ca2b3c795",
+      "final": "8f5c0e0cb880539710355167bde125eaf67eb9f6949c0345baa23cad07a87acc",
+      "finalVsAsRun": "one statement re-joined onto a single 99-col line (gjf shape); recompiled OK, not re-run"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceTest.java": {
+      "before": "2a2aa3770bee4c886816bce74541888b2ab801d91a3a986d865a09228ef04daa",
+      "final": "647c6556b394db6a999b907150e9b837c4989e3b4b105ec66f8cc206a77417a1"
+    }
+  },
+  "diffs": {
+    "replayit-resolution-and-registration.diff": "765cca79bc7ec66126a38ecbcc44b02c99ec7b787112089c1b6ef9743289d540",
+    "replayit-h7.diff": "9d785f5f33a15b45a2d75e1567e54bd631d19a281d2b0224c518d581823d6c16",
+    "build-gradle-registration.diff": "fa98d69fc387ef4ad1944889b45eae98a7a8c022110dda4d9579477c1dc157d2",
+    "evidence-repository-h3-followup.diff": "46cdbeac22befc2c0ecd551f242853d7849320c80d8ee75a14710285d7b977f0",
+    "evidence-test-h3-regression.diff": "2f7b50392c83dbd7ef90bb644021c88f55050efaeae6061cb77c7e8aee4a9aab"
+  },
+  "apply": {
+    "method": "git apply -p0 sequential b1bcd -> b2ab -> b3bc on a scratch copy of 9d13eeb7",
+    "textConflicts": 0,
+    "fuzz": "none (git apply exact context; offsets only)",
+    "semanticConflicts": 1
+  },
+  "inventory": {
+    "joinedDefaultMethods": 48,
+    "joinedAddedLowMethods": 18,
+    "lowExpectedPartition": 60,
+    "defaultExpectedPartition": 48,
+    "SINGLETON_METHODS": 73,
+    "INCREMENTAL_METHODS": 26
+  },
+  "runs": [
+    {
+      "label": "backend-merge-new22-default-attempt01",
+      "replayit": "daa97aee",
+      "result": "INVALID: zsh passed all --tests as one Gradle task name; 0 tests ran",
+      "results": "execution/backend-merge-new22-default-attempt01-results.json",
+      "sha256": "6d043c7692d4cf816d6ddda062014d44c76f652e57e3b15a8e6d35d33ec85ff2"
+    },
+    {
+      "label": "backend-merge-new22-default-attempt02",
+      "task": "test",
+      "replayit": "daa97aee",
+      "counts": {
+        "total": 6,
+        "passed": 1,
+        "failed": 5
+      },
+      "note": "5 methods + class-level executionError (scanCompleteAuditStream: no replay-dispatch events in a subset run)",
+      "results": "execution/backend-merge-new22-default-attempt02-results.json",
+      "sha256": "44e6612ecf5cd3b06a98e8425bd26c428241ba366efde58e288132b51b7d8aea"
+    },
+    {
+      "label": "backend-merge-new22-low-attempt01",
+      "task": "guidedIncrementalTest",
+      "replayit": "daa97aee",
+      "counts": {
+        "total": 18,
+        "passed": 7,
+        "failed": 11
+      },
+      "note": "17 methods + executionError (ApplicationContext: Testcontainers 'Mapped port can only be obtained after the container is started')",
+      "results": "execution/backend-merge-new22-low-attempt01-results.json",
+      "sha256": "f781cc6f0a942289d44d89b3ff6daae837946f674129719abc4f15647505a12c"
+    },
+    {
+      "label": "backend-merge-h7h3-attempt01",
+      "tasks": [
+        "test",
+        "guidedIncrementalTest"
+      ],
+      "replayit": "217950c7",
+      "repository": "5d3cdcde",
+      "counts": {
+        "total": 37,
+        "passed": 18,
+        "failed": 19
+      },
+      "results": "execution/backend-merge-h7h3-attempt01-results.json",
+      "sha256": "e9405289503ab8ea3a6a4170cac6bce2b309da342d760272b23d09aa0d73d94b",
+      "h3UnitTest": "PASS GuidedPublicationEvidenceTest.prefixRequestBindsOnlyTheObservationItsOwnSessionContextAndHashCommitTo",
+      "h7PolicyPrefix": "PASS incremental joined policy-prefix (per-variant tally + exactly one SIDE_EFFECT_DENIED on mixed)",
+      "joinedVariants": {
+        "pass": 17,
+        "fail": 18,
+        "failDetail": "assert-fail: second explicit learning FAILED (errorCode OTHER); confirm-source-change..equal4 (17): restart guard 'Prior generation ... remain unconfirmed' after confirm-expire left EXPIRED session teardown PENDING (open-generation-18.json) = known H8; plus executionError (same Testcontainers context-load failure)"
+      }
+    }
+  ],
+  "perMethod": [
+    {
+      "method": "incrementalSecretPrefixPreservesEveryVaultFaultOracle",
+      "lane": "test",
+      "batch": "B2A-01",
+      "result": "FAIL",
+      "firstFailure": "publicCall /guided-sessions/{id}/result expected 200 but was 202 (outcome FINALIZING, video PROCESSING) at awaitGuidedVideoSettled<-assertGuidedLearnRunRecorded"
+    },
+    {
+      "method": "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck",
+      "lane": "test",
+      "batch": "B2A-02",
+      "result": "FAIL",
+      "firstFailure": "[second explicit learning] expected FINALIZING but was FAILED (session errorCode BUDGET_EXCEEDED) at awaitFinalizing"
+    },
+    {
+      "method": "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent",
+      "lane": "test",
+      "batch": "B2A-03",
+      "result": "PASS",
+      "firstFailure": null
+    },
+    {
+      "method": "incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation",
+      "lane": "test",
+      "batch": "B2A-04",
+      "result": "FAIL",
+      "firstFailure": "[second explicit learning] expected FINALIZING but was FAILED (errorCode BUDGET_EXCEEDED)"
+    },
+    {
+      "method": "incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication",
+      "lane": "test",
+      "batch": "B2B-02",
+      "result": "FAIL",
+      "firstFailure": "[second explicit learning] expected FINALIZING but was FAILED (errorCode BUDGET_EXCEEDED)"
+    },
+    {
+      "method": "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+      "lane": "guidedIncrementalTest",
+      "batch": "B1B-01",
+      "result": "PASS",
+      "firstFailure": null
+    },
+    {
+      "method": "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch",
+      "lane": "guidedIncrementalTest",
+      "batch": "B1B-02",
+      "result": "FAIL",
+      "firstFailure": "publicCall .../result expected 200 but was 202 (FINALIZING, video PROCESSING) at method line 9833"
+    },
+    {
+      "method": "incrementalDriftAuthorityRejectsEveryExactJoin",
+      "lane": "guidedIncrementalTest",
+      "batch": "B1B-03",
+      "result": "PASS",
+      "firstFailure": null
+    },
+    {
+      "method": "incrementalExcludedAttemptCannotHideOtherUnsettledActions",
+      "lane": "guidedIncrementalTest",
+      "batch": "B1B-04",
+      "result": "FAIL",
+      "firstFailure": "[second explicit learning] expected FINALIZING but was FAILED at awaitFinalizing (method line 10234)"
+    },
+    {
+      "method": "incrementalPrefixContinuationMatrixDoneAndRefreshRows",
+      "lane": "guidedIncrementalTest",
+      "batch": "B1B-05",
+      "result": "FAIL",
+      "firstFailure": "GuidedSessionException: RUNTIME_INCOMPATIBLE at method line 10380"
+    },
+    {
+      "method": "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned",
+      "lane": "guidedIncrementalTest",
+      "batch": "B1C-01",
+      "result": "FAIL",
+      "firstFailure": "[second explicit learning] expected FINALIZING but was FAILED at awaitFinalizing<-b1Parent"
+    },
+    {
+      "method": "incrementalPrefixPolicyRefusalsNeverBecomeDrift",
+      "lane": "guidedIncrementalTest",
+      "batch": "B1C-02",
+      "result": "PASS",
+      "firstFailure": null
+    },
+    {
+      "method": "incrementalFreshPostConsentGuardsDenyDangerousProposals",
+      "lane": "guidedIncrementalTest",
+      "batch": "B1C-03",
+      "result": "FAIL",
+      "firstFailure": "AC-4 tally (@AfterEach): 3 unplanted guard refusals {DESTRUCTIVE_VERB:3}; method is not in the planted set"
+    },
+    {
+      "method": "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry",
+      "lane": "guidedIncrementalTest",
+      "batch": "B1C-04",
+      "result": "PASS",
+      "firstFailure": null
+    },
+    {
+      "method": "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery",
+      "lane": "guidedIncrementalTest",
+      "batch": "B1D-01",
+      "result": "FAIL",
+      "firstFailure": "AssertionError: Expected size: 2 but was: 0 at method line 11061"
+    },
+    {
+      "method": "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary",
+      "lane": "guidedIncrementalTest",
+      "batch": "B1D-02",
+      "result": "FAIL",
+      "firstFailure": "publicCall .../result expected 200 but was 202 (FINALIZING, video PROCESSING) at method line 11097"
+    },
+    {
+      "method": "incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority",
+      "lane": "guidedIncrementalTest",
+      "batch": "B2B-01",
+      "result": "FAIL",
+      "firstFailure": "GuidedSessionException: RUNTIME_INCOMPATIBLE at b2bAppendAuthority:7789<-b2bAppendParent"
+    },
+    {
+      "method": "incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution",
+      "lane": "guidedIncrementalTest",
+      "batch": "B3B-1",
+      "result": "FAIL",
+      "firstFailure": "POST /guided-sessions expected 202 but was 404 SECRET_UNAVAILABLE in b3AliasDeclarationsRefuseAtActualStartWithoutWrites (alias leg, before any parent)"
+    },
+    {
+      "method": "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne",
+      "lane": "guidedIncrementalTest",
+      "batch": "B3B-2",
+      "result": "FAIL",
+      "firstFailure": "expected switch reason DRIFT but was BOUNDARY at incrementalJoinedCase:13183"
+    },
+    {
+      "method": "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear",
+      "lane": "guidedIncrementalTest",
+      "batch": "B3B-3",
+      "result": "PASS",
+      "firstFailure": null
+    },
+    {
+      "method": "incrementalPartialDriftStepReadPublishesAndReplaysTwice",
+      "lane": "guidedIncrementalTest",
+      "batch": "B3C-1",
+      "result": "PASS",
+      "firstFailure": null
+    },
+    {
+      "method": "incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek",
+      "lane": "guidedIncrementalTest",
+      "batch": "B3C-2",
+      "result": "PASS",
+      "firstFailure": null
+    }
+  ],
+  "summary": {
+    "new22": {
+      "pass": 8,
+      "fail": 14
+    },
+    "default": {
+      "pass": 1,
+      "fail": 4
+    },
+    "low": {
+      "pass": 7,
+      "fail": 10
+    }
+  }
+}

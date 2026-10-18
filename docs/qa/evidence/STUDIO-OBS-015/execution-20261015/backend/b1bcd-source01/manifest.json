@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "id": "b1bcd-source01",
+  "subject": "B1B-01..05, B1C-01..04, B1D-01..02",
+  "author": "Dex (@dev, JOIN)",
+  "date": "2026-10-16",
+  "status": "HOLD; apply-ready patch, not executed, no QA credit; must land with the registration lines in notes.md",
+  "lane": "guidedIncrementalTest (incremental2048), all 11",
+  "inputs": {
+    "design": {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b1bcd-design01/design.md", "sha256": "5d74d55dadf21f9a418aed813c06a3b4c42b4c25119ca87eb4609ba08015b12f"},
+    "qaD1F2F3Review": {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b1bcd-design01/qa-d1-review01/review.md", "sha256": "946cdaaa9f9884a284a9d44ec2685a2084ed9cd3723cce9ca3b79c86e03a47f1"},
+    "qaSourceReview02": {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r1-diagnosis01/qa-source-review02/review.md", "sha256": "cf2b880926a7c0d5b7e078933757a91ba9b50fba543d5031e45aebd003db1ab5"},
+    "b1aNotes": {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b1a-source01/notes.md", "sha256": "b3dac9331f49565731afeb2a0f6e98d6d453b336e356ba4cfeaad0e22005c6a4"},
+    "productionReadOnly": {
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "055081ff6551de8eb640e589ffa8f5dd6d18876f64fd7264c1a1a6d432d1e3f8",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java": "ad8742a8426d757b198883be5fe089eae558e90e02d7b256340e24ac4dbf8fbe",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningController.java": "554179db4185238b69add376330941a1a5e0e76a5ed5635cc4a140b868222cf6",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java": "0e98da660358acd128b468bb28660bcf5a7378dbe7427a85464ae4e3caa9fd1f",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "d8c494b290fdecff883d3e6b38de2b7cb6470cddfd42db84db84d7cf85c45fc3",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "174d99ace9c47eeb85904002156eddc595c352590076917135e153411d5df963",
+      "backend/build.gradle.kts": "92bfae6d53140e172e1948bcf6e4f328e1b0b49b7fa497fed1ebf245dfcc5991"
+    }
+  },
+  "patch": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b1bcd-source01/b1bcd.patch",
+    "sha256": "248d4a2f5462376b27b92d7f0f446eaaa908994da811b50cb2cc8ee33267243b",
+    "hunks": 12,
+    "applyCommand": "git apply -p0 docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b1bcd-source01/b1bcd.patch",
+    "checkResult": "git apply --check -p0: OK against live file (read-only); scratch apply reproduces patchedSha256"
+  },
+  "files": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "baseSha256": "4242ac27020814fe57355116a06ef1271b4a0c2f247d2847ea3c28888ec55b33",
+      "patchedSha256": "b888d4738adaa91d123312d84793e84e5711d4c09c798ba902fde144012bec07",
+      "liveSha256AtPatch": "4242ac27020814fe57355116a06ef1271b4a0c2f247d2847ea3c28888ec55b33"
+    }
+  ],
+  "ownBlock": {
+    "insertAfter": "end of method incrementalPrefixCallbacksKeepStateAndFenceBothReservations",
+    "addedLines": 2834,
+    "markers": ["// STUDIO-OBS-015 B1b/B1c/B1d (b1bcd-design01", "// ---- end STUDIO-OBS-015 B1b/B1c/B1d"]
+  },
+  "sharedHunks": [
+    {"id": "H1", "anchor": "RuntimeHooks.observedOriginalSessionRepository execute, after B1A-CB-01 branch, before 'if (observer == null'", "added": 21},
+    {"id": "H2", "anchor": "observedReportCapture lambda, before 'UUID target = preReadyId;'", "added": 4},
+    {"id": "H3", "anchor": "APP /flow handler, after assert-fail block, before 'byte[] bytes = html.getBytes'", "added": 5},
+    {"id": "H4a", "anchor": "incrementalTenModel SOURCE_PLAN, before 'var references = result.putArray(\"sourceReferences\")'", "added": 4},
+    {"id": "H4b", "anchor": "incrementalTenModel bindingConsumers loop, after step-1 fill.value line", "added": 6},
+    {"id": "H4c", "anchor": "incrementalTenModel step-1 non-literal branch, after contains(\"click Submit\") line", "added": 5},
+    {"id": "H4d", "anchor": "incrementalTenModel, before final else (String target = ...)", "added": 2},
+    {"id": "H4e", "anchor": "incrementalTenModel NEXT_ACTION, after final else-if assert branch", "added": 2},
+    {"id": "H5a", "anchor": "incrementalNativeFaultObserver JS RevRuntime.prototype.start line", "changed": "1 -> 2"},
+    {"id": "H5b", "anchor": "JS RevRuntime.prototype.update first line", "added": 1},
+    {"id": "H5c", "anchor": "JS 'const result=await Reflect.apply(i15Update,this,args);'", "changed": "1 -> 1"},
+    {"id": "H5d", "anchor": "JS template end, after dispatch wrapper, before '\"\"\".formatted('", "added": 26}
+  ],
+  "registrationRequired": {
+    "gradle": "append 11 names to joinedAddedLowMethods (comma after the B1a entry)",
+    "replayIT": "insert the 11 names after the B1a entry in both SINGLETON_METHODS and INCREMENTAL_METHODS",
+    "methods": [
+      "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+      "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch",
+      "incrementalDriftAuthorityRejectsEveryExactJoin",
+      "incrementalExcludedAttemptCannotHideOtherUnsettledActions",
+      "incrementalPrefixContinuationMatrixDoneAndRefreshRows",
+      "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned",
+      "incrementalPrefixPolicyRefusalsNeverBecomeDrift",
+      "incrementalFreshPostConsentGuardsDenyDangerousProposals",
+      "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry",
+      "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery",
+      "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary"
+    ],
+    "inventoryAfter": {"default": 43, "low": 54, "total": 97}
+  },
+  "verification": {
+    "javac": "JDK 21.0.10 -proc:none, base and patched: 0 errors; approximate classpath (build classes/resources + newest Gradle-cache jars), not Gradle testCompileClasspath",
+    "gjf": "google-java-format 1.22.0 --skip-reflowing-long-strings --lines on block, H1, H2: stable; added Java lines <=100 cols",
+    "checkstyle": "10.18.1 CLI, backend/config/checkstyle: base 1010 violations, patched 1010, 0 on added lines",
+    "observerJs": "node --check OK base and patched; placeholders 10 -> 10",
+    "notRun": "Gradle, JVM tests, database, runner, browser"
+  },
+  "work": {
+    "build": {"path": "work/build.py", "sha256": "36381ca93b769339fd233019c686d83af8a7981090296109147cf77148bb8396"},
+    "block": {"path": "work/block.java.txt", "sha256": "c97770b268e3cf5b474bde69f0e18971799518eb93623b3c8c90d90029aaf081"},
+    "base": "work/base/GuidedPublicationReplayIT.java",
+    "patched": "work/GuidedPublicationReplayIT.java",
+    "tools": ["work/tools/javac.sh", "work/tools/gjf.sh", "work/tools/cs.sh"]
+  }
+}

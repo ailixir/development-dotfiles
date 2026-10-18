@@ -1,0 +1,32 @@
+{
+  "checks": [
+    {
+      "check": "full-coverage",
+      "exitCode": 1
+    }
+  ],
+  "tests": 958,
+  "passed": 955,
+  "failed": 3,
+  "pending": 0,
+  "failures": [
+    {
+      "file": "frontend/src/pages/SplunkPrototypePage/SplunkPrototypePage.test.tsx",
+      "test": " SplunkPrototypePage accepts a metric typed by hand",
+      "timeout": true
+    },
+    {
+      "file": "frontend/src/pages/SplunkPrototypePage/SplunkPrototypePage.test.tsx",
+      "test": " SplunkPrototypePage combines thresholds across columns",
+      "timeout": true
+    },
+    {
+      "file": "frontend/src/pages/StudioRunsPage/StudioRunsPage.test.tsx",
+      "test": " Runs page \u2014 run details drawer follows a moving run live and merges by revision into the list",
+      "timeout": true
+    }
+  ],
+  "sourceDrift": [],
+  "finishedAt": "2026-10-12T01:21:42.072915+00:00",
+  "productionBuild": "NOT_RUN_AFTER_UNIT_FAILURE"
+}

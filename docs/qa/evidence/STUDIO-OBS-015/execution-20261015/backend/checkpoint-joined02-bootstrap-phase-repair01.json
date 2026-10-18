@@ -1,0 +1,154 @@
+{
+  "artifact": "STUDIO-OBS-015 actualjoined02 bootstrap phase validation source repair01",
+  "at": "2026-10-15T10:33:13.545840+00:00",
+  "owner": "Dex/backend015_resume",
+  "status": "SOURCE_ONLY_UNCOMPILED_ATOMIC_HOLD",
+  "sourceHold": true,
+  "rootScope": "Narrow actual initialbootstrap/history validation failure only; no B1/B2 or newDex-owned source expansion.",
+  "originalFailedRun": {
+    "receipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/joined-edit4-and-preimages-attempt02-receipt.json",
+    "sha256": "81db8d3097d3e0921899cd65077a49b3d16f6e79d46e28bdde04556a3104b78a",
+    "capture": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-and-preimages-attempt02-artifacts/capture-manifest.json",
+    "captureSha256": "9704132f484dd01e3819761ec101092cf75e7a406479c6b4878052d612a3cd54",
+    "fixedOutputsRestored": 48,
+    "restoreMismatches": 0,
+    "oldOutcome": "24.43s,compilemain/alltestPASS,3methods/1PASS2FAIL0skip,source/input/diststable; initialSOURCE_PLAN3rejected beforebrowser. Immutablefailedrun preserved BEFOREsourcewrites."
+  },
+  "touchedSources": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedAcceptedPlan.java",
+      "beforeSha256": "e18e4524e51de6a462bada8c466c0e5a1505ec5b6b69c76797058057dbe5a39a",
+      "afterSha256": "5171f387690ad3bc94574dcedce24fa52d8d702364cff48b290941195599a964"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanHistoryAudit.java",
+      "beforeSha256": "5a59ac3f849eabecd411e422fb454c2adde8bc48582e9d2669fcaf2e15648dec",
+      "afterSha256": "b69b48bee651b8b7c83d02a96836af986d23a888b38b4fad2460e8b77bbd02ee"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "beforeSha256": "28497dc35089eceecf8786771baff3f991a714a1ba990779d6c96d43fa19c695",
+      "afterSha256": "745223f046be477593a8f701a2fc4ed24d29dcfab6d19d32acabb011ed181165"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "beforeSha256": "2ebcedc49b31ae191f0f04e6360c916de7417b2a4f7876ca718178494cc30215",
+      "afterSha256": "82b8401722224d5277da5080b9475c32318284cf32abb0a7aa33cc9aca86938b"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedBootstrapPlanHistoryIT.java",
+      "beforeSha256": null,
+      "afterSha256": "55b0876d61994cc922c94bbd0949cca702dc475e182435430431b2907ba4d4f3"
+    }
+  ],
+  "protectedInputs": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedAcceptedPlanTest.java",
+      "beforeSha256": "685594b600f4c6f38fe128d6d3a27e62969c1d07ea163d92d39db71c6924a9a8",
+      "afterSha256": "685594b600f4c6f38fe128d6d3a27e62969c1d07ea163d92d39db71c6924a9a8",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+      "beforeSha256": "417e605d25ca8b68039b9aa4dafc07ec4390994bb58630766e9dd92bd5f7b359",
+      "afterSha256": "417e605d25ca8b68039b9aa4dafc07ec4390994bb58630766e9dd92bd5f7b359",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+      "beforeSha256": "80357798b080ab6f8cb1ba38c7828915fa37663e203b0280997c7937ebc432d0",
+      "afterSha256": "80357798b080ab6f8cb1ba38c7828915fa37663e203b0280997c7937ebc432d0",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/source-selection.schema.json",
+      "beforeSha256": "df429534e7b827b556d52b7d39790e62d6d40360884d0e388ab70787ed53558f",
+      "afterSha256": "df429534e7b827b556d52b7d39790e62d6d40360884d0e388ab70787ed53558f",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json",
+      "beforeSha256": "40d547d9891561541947b591ffa6ba1d07ae2caff7349fd780db4acc8d5313d7",
+      "afterSha256": "40d547d9891561541947b591ffa6ba1d07ae2caff7349fd780db4acc8d5313d7",
+      "unchanged": true
+    }
+  ],
+  "phaseAndCallsiteMap": [
+    {
+      "phase": "Initial normal SOURCE_PLAN acceptance",
+      "callsite": "GuidedTranslationService.plan -> validator.admitPlan -> inputs/dependencies/sourceSelections -> GuidedTranslationStore.acceptPlan -> GuidedPlanHistoryAudit.transition",
+      "requiredShape": "ServerassignedobligationIDs + rawfresh unboundneeds with min1consumer. No bindingID minted yet.",
+      "repair": "transition uses existing validateBeforeAllocation; store rechecks beforewrite, including IDs/closedshape/source/reference/producer/consumer coordinate/order. Store rawimmutable row1 as-is; bootstrapStagePLAN_ACCEPTED/MATERIALIZE order unchanged."
+    },
+    {
+      "phase": "Prefiximport initial PLAN_ACCEPTED",
+      "callsite": "GuidedIncrementalStore.prefixPlan -> GuidedAcceptedPlan.validate -> store.acceptPlan",
+      "requiredShape": "Trusted imported fullyboundneedshape;0consumer may be represented onlywith laterretained-history authority.",
+      "repair": "No prefixPlan/rawgraph changes. History transitional validation accepts boundneed shape, never createsqualifying producer/base/receipt."
+    },
+    {
+      "phase": "Initial bootstrap PLAN_ACCEPTED -> MATERIALIZED -> ALLOCATED",
+      "callsite": "GuidedTranslationService bootstrap: materialize first; actual dependencies.allocate or importPrefixBinding; strictGuidedAcceptedPlan.validate(plan); appendnewboundhistoryrowonlyif changed; markALLOCATED",
+      "requiredShape": "Fullyallocatedcurrentplan beforeALLOCATED/currentexecution.",
+      "repair": "Explicit fullyboundcheck after realallocation and before allocatedplan history/stagewrite. No earlyallocation or placeholderID. Existing sourceinput/bootstrap/ACK semantics unchanged."
+    },
+    {
+      "phase": "Ordinary refinement",
+      "callsite": "validator.refinePlan -> dependencies.validate -> dependencies.allocate -> strictvalidate(refined) -> store.acceptPlan",
+      "requiredShape": "Fullyboundrefinedcurrentplan with immutable oldmeanings/consumerprefix preserved.",
+      "repair": "Explicit strictpostallocation guard; monotonic history stillapplies."
+    },
+    {
+      "phase": "Mixed first/later suffix",
+      "callsite": "mergeSuffix -> validateBeforeAllocation -> dependencies.validate -> cumulativeallocate -> strictvalidate(merged) -> store.acceptPlan -> appendmaterialization/ACK",
+      "requiredShape": "Trusted retainedbound + freshunbound beforeallocate; fullybound afterallocate.",
+      "repair": "Explicit strictpostallocation guard; allocation-beforehistory/materialization ordering unchanged; exactfirstsuffixexception andstrictlaterjoins unchanged."
+    },
+    {
+      "phase": "Publication authority and basis read",
+      "callsite": "GuidedPublicationEvidenceRepository.read -> GuidedPlanHistoryAudit.audit -> every rawimmutable rowtransition -> strictfullyallocatedfinalhead",
+      "requiredShape": "Historicalunboundrows legitimate, currentexportedheadfullybound.",
+      "repair": "Allrow parent/hash/old-first-later/meaning/need/consumer checksretained. Finalhead validate added after completeaudit, so exportedAcceptedTranslationPlan remainsclosedfullybound. No history bypass or storedbyte rewriting."
+    }
+  ],
+  "beforeWriteInvariants": {
+    "existingShapeGuards": "validateBeforeAllocation retains existingleafschemas/IDs/refbounds/need-binding-consumer uniqueness and explicit unbound min1.",
+    "sourceCoordinates": "Actualimmutablemanifest sourceStep order; references must namecurrentknownsource; obligations strictly current-sourceposition/semanticordinal order; referencedstep/slot mustmatchobligation; usedneedID exists; readproducer belongssource andhas actualreadmeaning; consumerstep exists/notbeforeproducer. No assertion that cumulative allocationintent equals effective successful graph.",
+    "graphAuthority": "Finalgraph/retainedproducer/base/program/actualhistory/receipt/privateinputs/admission joins unchanged. Bound0 shape alone supplies no retainedproducer authority."
+  },
+  "newRegressionSource": {
+    "class": "com.citi.put.checks.studio.guided.translation.GuidedBootstrapPlanHistoryIT",
+    "positive": "unboundBootstrapAcceptanceThenActualAllocationPreservesImmutableOriginalHistory",
+    "positiveSubject": "ActualPG15 ownedData database infrastructure; production validator.admitPlan serverIDs, store.acceptPlan rawunboundrow1, realnormalized materialization andGuidedBindingStore.allocate mintedbinding, fullyboundrow2/currentstate, audit originalrawhistory. Assert row1SQLbytes/hash and alloldobligationIDs unchanged,1actualallocation/0actions. No browser/model-send/publication proof claimed.",
+    "negative": "malformedPreallocationPlansWriteNeitherHistoryNorAllocation",
+    "parameterLabels": [
+      "fresh-zero",
+      "duplicate-id",
+      "foreign-reference",
+      "foreign-producer",
+      "foreign-consumer",
+      "source-order"
+    ],
+    "negativeSubject": "Validserveradmittedparent then singlemutation; actualstore.acceptPlan refuses beforehistory/allocationwrite; session/state/plan/alloc/modelattempt/materialization/action snapshotunchanged. No fixturemutationguardsdisabled.",
+    "original13AcceptedPlanTests": "GuidedAcceptedPlanTest.java hashunchanged; all13originalsubjects retained."
+  },
+  "runnableSelectors": [
+    "com.citi.put.checks.studio.guided.translation.GuidedBootstrapPlanHistoryIT",
+    "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+    "com.citi.put.checks.studio.guided.translation.GuidedTranslationConcurrencyTest",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays"
+  ],
+  "scopeLimits": [
+    "Current newregression source nevercompiled/executed; root must schedule actualPG/newbootstrap and originalunit/store/application feedback.",
+    "No actualmainedit4/prefix/suffix/freshbinding/video/replay success inferred from repairedsource; originalfailure stays evidence.",
+    "NoData9/10helper/schema/migration/newDex3files/runner/frontend/generated/oracle/pin changes; raw min1/closedwire unchanged.",
+    "All86/24/55/35variants/15privateauthority/fullstaticcheck+coverage/native/joined/secret/video/deployment/independentQA015closurethen008 remain open as applicable; row85originalpending subject unchanged."
+  ],
+  "executionAfterSourceChanges": {
+    "compile": "NOT_RUN",
+    "tests": 0,
+    "GradleDatabaseNativeBuildDistGenerationFormatInstallCommands": 0,
+    "commandsLive": false
+  },
+  "hold": "AtomicallownedJava/nonmigrationtest/story/disclosureHOLD aftercheckpoint; no further source writes until exactrootrelease. No source-onlyPASS/QA/Done/threshold/skip/commit/deploy."
+}

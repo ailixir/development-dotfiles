@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "scope": "READONLY_INDEPENDENT_EXACT_TWO_PATH_EXTRACTION_DIFF_REVIEW_ONLY",
+  "createdAtUtc": "2026-10-10T18:29:25.680606+00:00",
+  "verdict": "APPROVE_EXACT_EXTRACTION_CANDIDATE_WITH_CONSTRAINTS_NOT_APPLY_OR_EXECUTION_RELEASE",
+  "reason": "Independent reconstruction and direct byte comparisons satisfy the R2 server-only extraction contract. No blocking diff findings. Approval binds only the exact two-path parked patch and candidate bytes; isolation implementation, application and runtime proof remain unreleased.",
+  "inputBindings": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/r-isolation-extraction-candidate.patch",
+      "expectedSha256": "facb90d6997284b988fcb5d55b3649fb277c47ca1e6f437586cf81d93166f3b2",
+      "actualSha256": "facb90d6997284b988fcb5d55b3649fb277c47ca1e6f437586cf81d93166f3b2",
+      "exactMatch": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/r-isolation-extraction-candidate/result.json",
+      "expectedSha256": "ef259215539cce840142acdda4b9110aa834ba00c32678ea5fea4fac48e73c3c",
+      "actualSha256": "ef259215539cce840142acdda4b9110aa834ba00c32678ea5fea4fac48e73c3c",
+      "exactMatch": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-isolation-r2-review.json",
+      "expectedSha256": "f88159a6e6cc88b5379923f1ae51301434aef5a70b35cbdfe88044b16d358a99",
+      "actualSha256": "f88159a6e6cc88b5379923f1ae51301434aef5a70b35cbdfe88044b16d358a99",
+      "exactMatch": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/r-isolation-execution-design-r2.json",
+      "expectedSha256": "3e0ddd0760b19935e39d1748d0d22cd74e140d6cacd6cba8e8f93a0e86fa1be4",
+      "actualSha256": "3e0ddd0760b19935e39d1748d0d22cd74e140d6cacd6cba8e8f93a0e86fa1be4",
+      "exactMatch": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/r-isolation-extraction-candidate/proposed-source-manifest.json",
+      "expectedSha256": "640530909c5b3e76937e649dfb790e7b969b8326421831dd8e309e8dda56ac11",
+      "actualSha256": "640530909c5b3e76937e649dfb790e7b969b8326421831dd8e309e8dda56ac11",
+      "exactMatch": true
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+      "expectedSha256": "3db23983b89cc5edbb34a79df914c9cdb4d9c7ea8394c6430357775fa9b782ea",
+      "actualSha256": "3db23983b89cc5edbb34a79df914c9cdb4d9c7ea8394c6430357775fa9b782ea",
+      "exactMatch": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/r-isolation-extraction-candidate/before/studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+      "expectedSha256": "3db23983b89cc5edbb34a79df914c9cdb4d9c7ea8394c6430357775fa9b782ea",
+      "actualSha256": "3db23983b89cc5edbb34a79df914c9cdb4d9c7ea8394c6430357775fa9b782ea",
+      "exactMatch": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/r-isolation-extraction-candidate/after/studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+      "expectedSha256": "417c8ae2f6fb845eb4f7f802b037efc5638ee53ab0fcab41e4a7d8553bf763ad",
+      "actualSha256": "417c8ae2f6fb845eb4f7f802b037efc5638ee53ab0fcab41e4a7d8553bf763ad",
+      "exactMatch": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/r-isolation-extraction-candidate/after/studio-runner/test/fixtures/guided-dataflow/server.ts",
+      "expectedSha256": "c8420f7dc5420a085b0c5b51f92251b8418e6f6c7e4d891d2eb084cd15ee1f61",
+      "actualSha256": "c8420f7dc5420a085b0c5b51f92251b8418e6f6c7e4d891d2eb084cd15ee1f61",
+      "exactMatch": true
+    }
+  ],
+  "approvedHashes": {
+    "patchSha256": "facb90d6997284b988fcb5d55b3649fb277c47ca1e6f437586cf81d93166f3b2",
+    "resultManifestSha256": "ef259215539cce840142acdda4b9110aa834ba00c32678ea5fea4fac48e73c3c",
+    "independentR2ReviewSha256": "f88159a6e6cc88b5379923f1ae51301434aef5a70b35cbdfe88044b16d358a99",
+    "r2DesignSha256": "3e0ddd0760b19935e39d1748d0d22cd74e140d6cacd6cba8e8f93a0e86fa1be4",
+    "originalOwnerSha256": "3db23983b89cc5edbb34a79df914c9cdb4d9c7ea8394c6430357775fa9b782ea",
+    "candidateOwnerSha256": "417c8ae2f6fb845eb4f7f802b037efc5638ee53ab0fcab41e4a7d8553bf763ad",
+    "candidateHelperSha256": "c8420f7dc5420a085b0c5b51f92251b8418e6f6c7e4d891d2eb084cd15ee1f61",
+    "proposedSourceManifestSha256": "640530909c5b3e76937e649dfb790e7b969b8326421831dd8e309e8dda56ac11",
+    "proposedSourceAggregateSha256": "0ce1bfbd504de223f8a27dc973bfa374d033e9b066893072d42766f1d7b0c300"
+  },
+  "exactPaths": [
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+      "beforeSha256": "3db23983b89cc5edbb34a79df914c9cdb4d9c7ea8394c6430357775fa9b782ea",
+      "afterSha256": "417c8ae2f6fb845eb4f7f802b037efc5638ee53ab0fcab41e4a7d8553bf763ad",
+      "reconstructedFromActualOriginal": true,
+      "matchesAfterSnapshot": true
+    },
+    {
+      "path": "studio-runner/test/fixtures/guided-dataflow/server.ts",
+      "before": "ABSENT",
+      "afterSha256": "c8420f7dc5420a085b0c5b51f92251b8418e6f6c7e4d891d2eb084cd15ee1f61",
+      "reconstructedFromPatchNewFile": true,
+      "matchesAfterSnapshot": true,
+      "newFileMode": "100644"
+    }
+  ],
+  "method": "Read exact patch and actual original bytes; parse unified hunks with strict context/removal/count/offset checks entirely in memory; compare reconstructed files to snapshots; compare original server/close/canary/modes/core/test suffix bytes; inspect full helper/import graph boundary; independently hash proposed file map. No git apply, import/evaluation of candidate, tests or builds.",
+  "findings": [
+    {
+      "id": "R-EXTRACT-01",
+      "status": "PASS_STATIC_DIFF_REVIEW",
+      "severity": "NONE",
+      "subject": "Exact patch scope and reconstruction",
+      "evidence": "Parsed both diff sections and all four unified hunks in memory. Validated every removed/context byte and hunk old/new count against actual original source, including new helper from empty bytes. Reconstructed bytes equal both after snapshots and approved hashes. Exactly two paths; helper new file mode 100644; no rename, binary patch or additional path."
+    },
+    {
+      "id": "R-EXTRACT-02",
+      "status": "PASS_STATIC_DIFF_REVIEW",
+      "severity": "NONE",
+      "subject": "Verbatim server and oracle",
+      "evidence": "Original owner lines 16-23 equal helper lines 5-12 byte-for-byte: receipts and sourceRequests declarations, complete createServer request closure, /receipt data/end handling, content-type, /source password/input prefix, exact DIV, regionVisible Operations OUTPUT, regionControl TEXTAREA, destination fallback, selectors, buttons, script and mode replacements. Block SHA256 58439e636ee4a70020f26ab42491c3a4249db9a6c36c79415dfc64dc00ae67cf. Receipt array is returned by identity; sourceRequests is captured by the original per-starter closure and forwarded by the harness without copying/resetting."
+    },
+    {
+      "id": "R-EXTRACT-03",
+      "status": "PASS_STATIC_DIFF_REVIEW",
+      "severity": "NONE",
+      "subject": "Canary modes origin and close",
+      "evidence": "Original canary declaration equals helper declaration after stripping only export; declaration SHA256 f2e36e124cbf679b1e203f1bd098bd9812633b79ea22d8c4a21274df19eeeff7. Mode union/default exact unchanged. Listen uses port 0 and 127.0.0.1; address validation unchanged. Returned origin uses original formatter and actual address.port. Close arrow expression is verbatim, SHA256 ee5156349fccfbc64066967c4c26d4d18c07591c3d5b6fae80c7b1980a4911de: closeAllConnections then await server.close with original callback/error behavior."
+    },
+    {
+      "id": "R-EXTRACT-04",
+      "status": "PASS_STATIC_DIFF_REVIEW",
+      "severity": "NONE",
+      "subject": "Import safety and no hidden runtime",
+      "evidence": "Manually inspected all 14 helper lines. Only import is node:http createServer. Module scope has the canary literal and exported async function declaration; createServer/listen are inside explicit invocation. No module evaluation server launch, runtime/browser constructor, Vitest import/registration, dynamic import or test-owner import. Starter creates only the F HTTP server; no second runtime/context/browser. Existing owner retains its single GuidedRuntime and original launch callback. This is static source evidence; no module was executed."
+    },
+    {
+      "id": "R-EXTRACT-05",
+      "status": "PASS_STATIC_DIFF_REVIEW",
+      "severity": "NONE",
+      "subject": "Original context runtime policy and grants",
+      "evidence": "Original owner lines 27-44 equal reconstructed owner lines 19-36 byte-for-byte. Preserves all 65 private declarations and provenance, authoredInputsHash computation, messages callback, GuidedRuntime construction, rules, structural policy, F=approvedOrigins[0] exact Operations region-read grant, visibleText/controlValue classifications and types, runtime stop/start, evidence, act preparation/admission/dispatch and sameOrigin consumer edge, target and refresh. guidedContext now receives fixture.origin computed from the same actual original address formatter; original guidedContext helper unchanged. No Home/S read grant, authority/scope or production API change."
+    },
+    {
+      "id": "R-EXTRACT-06",
+      "status": "PASS_STATIC_DIFF_REVIEW",
+      "severity": "NONE",
+      "subject": "Original three cases and assertions",
+      "evidence": "Complete describe suffix original lines 47-68 equals reconstructed lines 39-60 byte-for-byte. Same exact/regionVisible/regionControl it.each expansion, case name, source-request assertions including duplicate dispatch refusal, recipes, actual read/availability/Producer/materialization update, refresh, consumer fill/submit/one matching receipt, privacy assertions and explicit stop/CONTEXT_LOST assertion. No case added/removed/skipped or assertion altered."
+    },
+    {
+      "id": "R-EXTRACT-07",
+      "status": "PASS_STATIC_DIFF_REVIEW",
+      "severity": "NONE",
+      "subject": "Cleanup and failure registration order",
+      "evidence": "Resource declaration and reverse afterEach loop are verbatim. Starter listens and validates address before returning; owner immediately registers fixture.close before mkdtemp. Original directory/rm registration and runtime.stop registration before start are verbatim. Reverse order remains runtime.stop(CANCELLED) then rm then closeAllConnections/await close. Existing explicit successful-test stop and later registered stop both remain. Cleanup for mkdtemp/start/later failures is registered at the corresponding original stages; original pre-registration listen/address failure behavior remains. No new teardown gate or lifecycle semantics introduced."
+    },
+    {
+      "id": "R-EXTRACT-08",
+      "status": "PASS_STATIC_DIFF_REVIEW",
+      "severity": "NONE",
+      "subject": "Independent manifest cross-check and parked state",
+      "evidence": "All 255 proposed manifest entries independently rehashed from 253 current unchanged paths plus the two reconstructed candidate byte strings; zero missing files or mismatches. Sorted compact JSON aggregate independently equals 0ce1bfbd504de223f8a27dc973bfa374d033e9b066893072d42766f1d7b0c300. Actual owner still has bound original hash; actual helper absent. Result/manifest boolean claims were not used as proof. No compiler or execution validation asserted."
+    }
+  ],
+  "blockingFindings": [],
+  "actualStateAtReview": {
+    "ownerSha256": "3db23983b89cc5edbb34a79df914c9cdb4d9c7ea8394c6430357775fa9b782ea",
+    "ownerUnchanged": true,
+    "newHelperAbsent": true,
+    "candidateParked": true,
+    "newIsolationThreeImplementedByThisPatch": false,
+    "separateFourthGrantImplementedByThisPatch": false
+  },
+  "releaseConstraints": [
+    "Coordinator alone owns shared Gradle/browser/dist and execution metadata; root remains standby. This review grants no apply/source-authoring/build/test/browser/runtime permission. Coordinator must bind exact source authoring preflight/release to these two paths and hashes, rechecking original owner and helper absence immediately before apply. Any candidate byte change needs another exact diff review.",
+    "After separately authorized apply, verify exact approved owner/helper bytes and unchanged original core/production grants. Only coordinator-released checks may run; record fresh source, test/helper, production, compiled dist, runtime/browser and supported provenance hashes. Clearly identify source versus compiled lane. This static review is no type/lint/build/runtime PASS.",
+    "Run original dataflow three modes as three actual retained cases and future isolation three as a separately counted set after implementation review/release. No skips, registration imports, invented results or reuse of historical passes. ISO4_DIRECT_STALE_A_GRANT is a separate fourth design requiring exact owner/path/registration/preflight/release; not covered or counted by this patch.",
+    "Future ISO3 must use same persistent A: S/login then exact original F regionVisible Operations producer read with real successful availability, real value-free producer update, sameOrigin F consumer and private receipt, S/reports, real stop/teardown, then fresh CSI-B. F+S scope frozen before hash/assignment; F is approvedOrigins[0], region grant F-only, PASS S-only. No Home/S read grant, seeded values, fake availability, origin rewrite or markup injection.",
+    "Preserve strict scalar private witness contract from R2: original receivers/arguments/results/promises/errors delegated; opaque tags/scalars only; no retained raw arrays/maps/sets/snapshots, spy call/result archives, secret-derived hashes or post-teardown strong instance references. Restore descriptors/drop references in finally. Original fixture receipts remain private oracles; public evidence scalar only. No old A echo into B DOM/model/observation/sinks.",
+    "Fresh B negative must precede credential delivery or B dataflow read, while genuine A binding existed before A stop and S A session remains valid. Actual A producer metadata under unchanged B envelope must fail original local join; B reports-to-login and independent identities/scope/input hashes remain required. Separate stale grant probe is not equivalent to stale producer refusal.",
+    "Preserve runtime.stop then directory rm then original server close, explicit duplicate stop and failure registrations. Logical disposal, pending-dispatch finally, actual browser/writer/process/profile closure and capacity release are distinct witnesses. No fabricated renderer acknowledgement or physical heap erasure/SDK/CDP/TLS/kernel-buffer claim.",
+    "Retain ISO1 TLS counter limitations, ISO2 real pre-close gate/actual closure before B and max simultaneous application contexts=1, all ISO3 scans/profile preferences and separate backend/Vault CSI authorization proof. Missing counters or actual failures leave their oracles open.",
+    "No lifecycle/QA/story completion or goal/contact action follows this review. Reported focused execution remains 2 actual/2 FAIL (ordinary POLICY_REFUSED; ninth projection advances navigation+USER then password passive-acquisition budget) without promoting candidate review to runtime proof; full19/all-ten-story scope remains open."
+  ],
+  "executionRelease": false,
+  "applyRelease": false,
+  "qaApproved": false,
+  "lifecycleVerdict": null,
+  "limitations": [
+    "Static exact diff review only; no compiler/type/lint/runtime results.",
+    "No actual isolation3 or separate fourth grant case implemented or executed by this patch.",
+    "No current live-runtime assertion independently measured; no runtime tools used.",
+    "No historical or current dist drift claim inferred from candidate manifest; reviewer performed zero dist writes."
+  ],
+  "coordination": {
+    "newSubagentsOrModels": 0,
+    "concurrencyCap": 4,
+    "userWaveRoles": [
+      "root",
+      "coordinator",
+      "B",
+      "reviewer"
+    ],
+    "wholeWaveBillingCap": 500,
+    "billing": "UNKNOWN_NOT_MEASURED",
+    "authority": "Coordinator sole Gradle/browser/dist owner; root standby; this turn review only"
+  },
+  "workPerformed": {
+    "sourceWrites": 0,
+    "patchApplications": 0,
+    "testRuns": 0,
+    "buildRuns": 0,
+    "browserLaunches": 0,
+    "gradleRuns": 0,
+    "runtimeStarts": 0,
+    "modelSpawns": 0,
+    "lifecycleChanges": 0,
+    "contacts": 0,
+    "goalActions": 0,
+    "distWrites": 0,
+    "evidenceWrites": 1,
+    "onlyWrite": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-r-extraction-diff-review.json"
+  }
+}

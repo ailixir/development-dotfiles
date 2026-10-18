@@ -1,0 +1,76 @@
+{
+  "story": "STUDIO-OBS-007",
+  "owner": "Dara persistence lane",
+  "session": 31466,
+  "command": "./gradlew spotlessJavaApply -PspotlessIdeHook=src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java,src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java,src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java test --tests '*SecretUseAuditIT' --tests '*GuidedSecretLoginMigrationTest'",
+  "workingDirectory": "backend",
+  "exitCode": 0,
+  "duration": "57 seconds",
+  "classes": [
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-10-10T06:36:59",
+      "sha256": "90fdb982f7480c7cb5cbe2eaa073987aae2c1196e75c96e544758cf462cfac67",
+      "testNames": [
+        "concurrentRetryRefreshersHaveExactlyOneWinner()",
+        "definiteRefusalAllowsOnlyOneOwnedFreshAttemptAndKeepsAcceptedIdentities()",
+        "freshAndBothStagedCutoverOrdersReachV34WithoutChangingOrdinaryCapability()",
+        "scopedReleaseUsageRetryAndAppendOnlyRowsNeverContainTheCanary()",
+        "exactV3ProfileAccountFreeScopeAndObservationCountsAreClosed()",
+        "crossMonthUsageAndLiveRecheckExpireWithReleaseWhileUnlinkedUsageKeepsOwnMonth()",
+        "consumedAckLossIsEvidenceBoundAndMissingMaterializationCannotBecomeUnused()",
+        "unreachedNotUsedHasNoFabricatedResolutionAndRejectsOtherNullableVariants()",
+        "realNoSendOutageDecisionGrantsDifferentAuthorityAndCannotBeFabricated()",
+        "guardsFailLoudlyOnAwaitingAuthOrObservedBindingRows()",
+        "additiveStoredSecretLengthCodeKeepsEveryPriorTerminalValueAndRefusesUnknown()",
+        "liveRecheckIsUniqueAndPreservesOneTerminalUsageAndWriteOnceRevocation()",
+        "ordinaryWriterCannotAlterOrDropRetentionPartitions()",
+        "consumedNoDecisionRequiresAuthenticAdmissionAndKeepsNullResolutionHonest()",
+        "rawConcurrentConsumedUncertaintyHasOneWinnerAcrossRetentionClock()",
+        "concurrentUsageSummariesHaveExactlyOneWinner()",
+        "replayUsageUsesClosedCodesAndTheActualExecutionScope()",
+        "releasedReplayUncertaintyRequiresRealScopedReleaseAndNeverFakeAckStatus()"
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-10-10T06:37:37",
+      "sha256": "baff46571536eb5e47607a564d2654067b5be36713f40f21ddd1328de6027034",
+      "testNames": [
+        "concurrentConsumedUnknownWritersAreIdempotentAndCannotInventTwoSummaries()",
+        "leastWriterCanRecordUsageButCannotRewriteOrPrunePartitions()",
+        "concurrentDuplicateWritersProduceOneRelease()",
+        "consumedWithoutDecisionIsHonestUnlinkedUncertaintyNeverUnreached()",
+        "committedResolutionCannotBeRelabelledNoDecisionAndLateUnknownPreservesPositive()",
+        "actualJavaBootstrapHealthSchedulerAndPrunerManageAuditLifecycle()",
+        "mixedKnownAndUnknownReplayUsageKeepsSparseWireSeparateAndRejectsAckWithoutEvidence()",
+        "releaseUsageAndRevocationAreIdempotentImmutableScopedMetadata()",
+        "unreachedDeclarationHasOnlyOneTerminalNotUsedWithoutRelease()",
+        "auditAndDispatchStateCommitOrRollbackTogetherAndRequireTransaction()",
+        "consumedScopeRequiresActualAdmissionDeclarationFenceAndAckLossEvidence()"
+      ]
+    }
+  ],
+  "database": "Actual Testcontainers PostgreSQL15-alpine",
+  "sourceManifest": "source-hashes.json",
+  "preservedBaseline": "preserved-baseline.json",
+  "priorRed": "../data-uncertainty-red",
+  "scope": "SQL/recorder transactions/partition lifecycle only; no joined Vault/browser/Core crash or native-canary C6 proof",
+  "pending": [
+    "Independent persistence peer before T4",
+    "B integration lifecycle and zero-send/refusal/reaper summaries",
+    "Actual joined crash/kill/resolve/send and native diagnostic C6 oracles"
+  ],
+  "totalTests": 29,
+  "totalFailures": 0,
+  "totalErrors": 0,
+  "totalSkipped": 0
+}

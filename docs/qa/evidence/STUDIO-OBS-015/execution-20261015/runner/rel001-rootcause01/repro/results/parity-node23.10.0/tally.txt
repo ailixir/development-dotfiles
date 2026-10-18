@@ -1,0 +1,11 @@
+
+== chromebg+cpu (variant a) ==  n=300 ok=299 failed=1 (0.33%, 95% upper bound 1.86%)  close!=ok: 1
+   window: 2026-10-17T07:44:54.940Z .. 2026-10-17T08:13:12.443Z  node v23.10.0  playwright 1.63.0
+      1  D4 hang (start did not finish in time) at LAUNCH
+   launchMs          ok p50/p95/max 3255/3515/5879 ms
+   contextMs         ok p50/p95/max 3272/3567/5913 ms
+   bootstrapMs       ok p50/p95/max 3289/3580/5932 ms
+   recordingReadyMs  ok p50/p95/max 3206/3484/5763 ms
+
+== version probe chromebg+cpu.probe.jsonl ==  n=100 launchFailed=0  EMPTY at pre-patch read: 0/100  never filled: 0
+   fill relative to load (ms; positive = after load): observed 100, positive 100, p50 61.2, p95 126.9, max 159.3   wait after goto p95/max 98/132 ms

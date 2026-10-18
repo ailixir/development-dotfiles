@@ -1,0 +1,160 @@
+{
+  "schemaVersion" : 1,
+  "sessionId" : "da01ce32-753c-4626-b38a-0358a16c759a",
+  "testId" : "267c8fda-8b52-48b5-953b-4f807d703993",
+  "state" : "SUCCEEDED",
+  "errorCode" : "OTHER",
+  "counters" : {
+    "actions" : 5,
+    "observations" : 9,
+    "modelProposals" : 6,
+    "modelInputTokens" : 90467,
+    "modelOutputTokens" : 24576,
+    "sanitizedEvidenceBytes" : 25722
+  },
+  "coordinate" : {
+    "stepIndex" : 3,
+    "generation" : 9
+  },
+  "observationCounts" : {
+    "passwordControls" : 0,
+    "withheldRegions" : 0
+  },
+  "acquisition" : {
+    "allowanceMs" : 30000,
+    "totalExtraPolls" : 2
+  },
+  "activeAcquisition" : {
+    "extraPolls" : 2
+  },
+  "fixtureModelHttpCalls" : 6,
+  "fixturePhysicalProviderReads" : 0,
+  "fixtureProviderFailures" : 0,
+  "fixtureModelKinds" : {
+    "SOURCE_PLAN" : 1,
+    "NEXT_ACTION" : 5,
+    "VERIFY_STEP" : 0
+  },
+  "continuation" : "FINALIZING",
+  "translationCounters" : {
+    "planRevision" : 2
+  },
+  "declarations" : [ ],
+  "obligations" : [ {
+    "operationKind" : "navigate",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 0,
+    "referenceIndex" : 0
+  }, {
+    "operationKind" : "read",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 1
+  }, {
+    "operationKind" : "fill",
+    "stepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "click",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "assert",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 1
+  } ],
+  "actions" : [ {
+    "operationKind" : "fill",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "admissionId" : "b589135e-c825-4be5-93a7-0d50758aacb7",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 3
+  }, {
+    "operationKind" : "click",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "admissionId" : "0bb681f0-86d7-4eca-be23-49aeea62760c",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 5
+  }, {
+    "operationKind" : "assert",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "admissionId" : "9ee6858a-ec24-4dd9-91e0-1ca27bf5de0a",
+    "ordinal" : 1,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 8
+  }, {
+    "operationKind" : "navigate",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "admissionId" : "71cdb797-e0cc-4ea0-9907-9d7d66915c0b",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 0
+  }, {
+    "operationKind" : "read",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "admissionId" : "3bb8b671-7e3c-4879-8840-52491086566c",
+    "ordinal" : 1,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 1
+  } ],
+  "modelAttempts" : [ {
+    "kind" : "SOURCE_PLAN",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  } ],
+  "testMethod" : "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays"
+}

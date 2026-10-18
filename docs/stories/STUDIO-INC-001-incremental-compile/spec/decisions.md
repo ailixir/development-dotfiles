@@ -160,3 +160,9 @@ bytes.
 - `docs/runbooks/studio-inference-rollout.md` was not edited. The correction is S2 scope, and this
   record is the warning until then.
 - INC-001 `implementation.yaml` was not rewritten. A supersession note is appended to it.
+
+# 2026-10-12 — Superseded by ADR-SC-005
+
+Superseded by [ADR-SC-005](../../../architecture/ADR-SC-005-single-path-observed-authoring.md) (single observed path; compile-to-READY removed in STUDIO-OBS-012A). STUDIO-INC-001 as a compile-path specification, including its deferrals above (`InferenceStudio` mount, V19 cutover), no longer applies. Its requirement (change step 4 of 10 → regenerate only 4…10) carries over to the observed path as D-D / STUDIO-OBS-015.
+
+ADR-SC-005 lifts the Story 10.51 AC-9 protected list for compile-path items: V2 engine methods, `EvidenceReference`, `temperature`, V18/V19, `openapi.yaml` and `confinement.test.ts`. STUDIO-OBS-012A may remove or change them without a per-path ruling.

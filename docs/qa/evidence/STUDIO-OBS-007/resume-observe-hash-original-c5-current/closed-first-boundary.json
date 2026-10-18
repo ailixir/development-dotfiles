@@ -1,0 +1,150 @@
+{
+  "firstFailures": [
+    {
+      "test": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "frames": [
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.awaitFinalizing(GuidedPublicationReplayIT.java:12586)",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel(GuidedPublicationReplayIT.java:3650)"
+      ]
+    }
+  ],
+  "fixedFacts": [
+    {
+      "state": {
+        "state": "FAILED",
+        "bootstrapPhase": "READY",
+        "materializationPresent": true,
+        "fixtureModelHttpCalls": 4,
+        "fixturePhysicalProviderReads": 1,
+        "fixtureProviderFailures": 0,
+        "fixtureModelKinds": {
+          "SOURCE_PLAN": 1,
+          "NEXT_ACTION": 3,
+          "VERIFY_STEP": 0
+        }
+      }
+    }
+  ],
+  "sourceDrift": [],
+  "numeric": {
+    "traceArmed": true,
+    "rootTraceObserved": true,
+    "appTraceObserved": true,
+    "encodedBytes": 42297564,
+    "encodedPatternHits": 0,
+    "streamedLogsFinalChecked": true,
+    "sseStreams": 0,
+    "profileFiles": 167
+  },
+  "c5-claim-server-diagnostic.jsonl": [
+    {
+      "status": 202,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "consumed": true
+    },
+    {
+      "status": 409,
+      "consumed": true
+    }
+  ],
+  "c5-lifecycle-diagnostic.jsonl": [
+    {
+      "status": 202,
+      "consumed": true
+    }
+  ],
+  "s2": {
+    "failed": false,
+    "closed": true,
+    "restored": true,
+    "stopFulfilled": true,
+    "active": false,
+    "busy": false,
+    "operations": 0,
+    "callbacks": 0,
+    "starts": 1
+  },
+  "claims": [
+    {
+      "status": 202,
+      "handlerMs": 16.504625,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 30.162333,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 10.243417,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 123.388375,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 200.178875,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 368.485625,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 125.1655,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerMs": 368.78425,
+      "consumed": true
+    },
+    {
+      "status": 409,
+      "handlerMs": 2225.26375,
+      "consumed": true
+    }
+  ],
+  "lifecycle": [
+    {
+      "status": 202,
+      "kind": "RUNTIME",
+      "reason": "LEASE_LOST",
+      "consumed": true
+    }
+  ]
+}

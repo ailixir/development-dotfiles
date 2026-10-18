@@ -1,0 +1,9 @@
+{
+  "scope": "No new mandatory E2E, cache/SQL/auth/deadline/logger changes. Final non-C5 defining gates continue while root/coordinator selects minimum cause discriminator.",
+  "candidateSha256": "fd890a858cb38e7a8d6c75f57fd7ef2a622b23f162a8b566990b0fbfe03b81e9",
+  "disposition": "RETAIN_CURRENT_READS_NO_OPAQUE_CARRIER_OR_NEW_INFRASTRUCTURE",
+  "finding": "Same physical lock and pure current authorization make row reuse plausible, but extra carrier/overloads and early projection change are not justified by current latency attribution. General injected authorization mutation is an unproven equivalence condition, not a newly mandatory E2E counterexample; column/TOAST error order likewise no new test matrix. Retain original reads rather than build infrastructure for speculative reduction.",
+  "minimumNext": "Existing passive public backend connection metadata association is technically possible but observing mayUse occurs AFTER initial owner-lock wait; cannot resolve that wait by itself. No diagnostic author release from this review. Request exact existing datasource/registry source seam before any new wrapper/event/SQL or further unchanged scenario. Source-bound supported alternative simplifications should remain small and independently verifiable.",
+  "whole19AcPass": false,
+  "runtime": false
+}

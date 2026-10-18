@@ -1,0 +1,16 @@
+{
+  "command": [
+    "./gradlew",
+    "test",
+    "--rerun-tasks",
+    "-x",
+    "compileJava",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel"
+  ],
+  "samplerEnabled": true,
+  "freshSevenBindings": true,
+  "acceptanceCredit": false
+}

@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "kind": "architect-ruling",
+  "story": "STUDIO-OBS-015",
+  "label": "aria-e-ruling01",
+  "subject": "r1-diagnosis01/review.md section 6.1 item E (C5 TRACE x in-lock ValidationBasis validation -> lease lost -> PUBLICATION_CONFLICT)",
+  "author": "Aria (@architect)",
+  "capturedAtUtc": "2026-10-16T03:38:48Z",
+  "hashAlgorithm": "SHA-256",
+  "releasesQaCredit": false,
+  "lifecycleChanged": false,
+  "sourceOrBuildTouched": false,
+  "gradleRun": false,
+  "testsExecutedByAuthor": false,
+  "payloads": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r1-diagnosis01/aria-e-ruling01/ruling.md",
+      "sha256": "481db58acf0e70a926b88f7ed70b73a21ed53ae5499f4a134840788796018de7"
+    }
+  ],
+  "decision": {
+    "adopted": [
+      {
+        "id": "E-1",
+        "summary": "Production cap logging.level.com.networknt=WARN in application.yml; C-5 inherits it unchanged (root+app TRACE per OBS-007 AC-9) and asserts the cap at armTrace and at final collection; new SchemaValidatorLogCapTest (hazard oracle, cap oracle, profile-yaml oracle)",
+        "kind": "production-security-control + test assertion",
+        "unblocksOrder9Alone": true,
+        "unblockBasis": "tap9 counterfactual pinned com.networknt at INFO; the library has no INFO log statements, so INFO == WARN in effect (verified by bytecode inventory)"
+      },
+      {
+        "id": "E-2",
+        "summary": "GuidedPlanBuilder.basis split into derive (locked-state reads + bounded) + validate; new basisMatching(..., validated) skips only the repeated pure ValidationBasis schema check when the in-lock derived basis equals a document this process already validated; used at GuidedPlanPublisher.prepare (witness = pre-lock lowering basis), the GuidedPlanPublisher commit transaction (witness = prepared snapshot basis) and GuidedPublicationRepository.commit (witness = snapshot basis already validated by verifyCandidate->plan in the same transaction)",
+        "kind": "production design conformance (GuidedPlanPublisher.java:369 invariant)",
+        "verdictPreserving": true,
+        "requiredBefore": "STUDIO-OBS-015 QA gate (may trail E-1 if review lags)"
+      }
+    ],
+    "rejected": [
+      "a: test-only C-5 exclusion of com.networknt (carve-out; production keeps the DEBUG content sink)",
+      "b-prime: decouple lease renewal from the session row lock (concurrency-model change)",
+      "c: SecretMasker speed-up as the fix (volume is the cause; about 19/74 samples remain; sink stays open)",
+      "lease/tolerance lengthening (policy change)"
+    ]
+  },
+  "findings": {
+    "emitter": {
+      "artifact": "com.networknt:json-schema-validator:1.4.0",
+      "jarSha256": "5d7b6ce4c7b2a3ed189511cbaa913808c7cd2b570d70b923426352785bffbdd0",
+      "call": "BaseJsonValidator.debug(logger, node, rootNode, path) -> logger.debug(\"validate( {}, {}, {})\", node, rootNode, path), unguarded at entry of about 45 keyword validators",
+      "verified": "javap -c on the cached jar"
+    },
+    "logsDocumentContent": "yes at DEBUG/TRACE (instance + whole root instance); no instance values at WARN/ERROR",
+    "secretMaskerCoversIt": false,
+    "secretValuesInValidatedDocuments": "not by design (SecretValue/char[] path; basis inputs require no value); inferred, historical OBS-007 C5 zero hits",
+    "privateContentInValidatedDocuments": "yes: basis copies snapshotEvidence (authored step text; B2b A68-3 CTX canaries), configuration, observations",
+    "productionReachability": "unreachable in shipped profiles (root INFO, no com.networknt override, no actuator loggers endpoint); reachable via env root DEBUG/TRACE override (inferred)",
+    "validationInsideLockRequiredForCorrectness": false,
+    "derivationInsideLockRequiredForCorrectness": true,
+    "inLockWholeNativeValidationsPerFinalizeBefore": 4,
+    "inLockWholeNativeValidationsPerFinalizeAfterE2": 1,
+    "replayItHashDriftVsReview64": "current f7f87136... != recorded 84c3d496..."
+  },
+  "verificationRequired": [
+    "SchemaValidatorLogCapTest 3/3; new GuidedPublicationAuthorityIT method; unchanged AuthorityIT, MigrationTest, SnapshotBasisValidationTest, ObservedArtifactLowererTest, TypedReferenceAdapterTest pass; compileTestJava green",
+    "Joined --no-daemon: ReplayIT Order 1, Order 9, auditStream; Order 9 PASS, finalize 200, no LEASE_LOST, teardown CONFIRMED, root/app TRACE observed, cap assertions pass, zero canary hits",
+    "Diagnostic (no credit): STUDIO_C5_CLAIM_DIAGNOSTIC=true Order 9; every finalize-window claim < 1 s",
+    "Invariants: identities 85, labels 35, no assertion/budget lowered, build.gradle.kts unchanged"
+  ],
+  "residuals": [
+    "R-1: verifyCandidate->plan ValidationBasis validation (+GuidedBasisValidator) remains in the commit lock; INFO cost near MAX_BASIS_BYTES unmeasured",
+    "R-2: B2B-02 does not scan backend JSON_CONSOLE at TRACE; E-1 closes the networknt path by policy"
+  ],
+  "inputsRelied": [
+    {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r1-diagnosis01/review.md", "sha256": "ea90eccde24e2ce798a1dc7c92151483dc7e144eaeaba32185adae64a5255a08"},
+    {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r1-diagnosis01/manifest.json", "sha256": "cdb63154318270217ddecd42b1402c5279b3868423225d022faa6a5a467a07f0"},
+    {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b2ab-design01/design.md", "sha256": "a030ca76dd63ad91eb5430897d198cb7f89896ad790bb1c4d31e81fd42111aef"},
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md", "sha256": "5eb2cd50003afe356fbfb6bb5c80306c939159b1c19ee8e06f7364dec4d321bd"},
+    {"path": "backend/build.gradle.kts", "sha256": "1cc4cee0f683661eb5373738d00e30cbc53c3f4716ba3b008a33ec270bdbdef8"},
+    {"path": "backend/src/main/resources/application.yml", "sha256": "d34f91345cdc6afc0315b67c3f6e25b12549acccf9b3695953f7ffd51aea18fb"},
+    {"path": "backend/src/main/resources/application-dev.yml", "sha256": "b8aee7b549f99473e02adb5eacac093a2b253703b6b30e59b24430a11b58ff13"},
+    {"path": "backend/src/main/resources/application-test.yml", "sha256": "eec357d5cec8d7b8fdc88f7f57b1a6f878e581c54af875b8450027e987045594"},
+    {"path": "backend/src/main/resources/logback-spring.xml", "sha256": "a5ed56e2bfc45b2ae0b547faaeea1cab927c7a1fcb244a7e02ccaa1d46ec002b"},
+    {"path": "backend/src/main/java/com/citi/put/checks/config/logging/SecretMasker.java", "sha256": "a40ca381f0b67e8ea57d6705f7c5c6b14eea6718df444ce3814757442c59ee0f"},
+    {"path": "backend/src/main/java/com/citi/put/checks/config/logging/MaskingMessageJsonProvider.java", "sha256": "ea02ab1f17fec7fd0bb006ce83219f768844bfe6bf1d23be892db0f33f7d87f0"},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java", "sha256": "2f74c1fcb596f09ed630e674185f7f3ba7cfac78f5540f8aa61d8ce2efe8df84"},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java", "sha256": "9289948874fdce24bf319782fbc69a380d7936388b40bb6a4923ab6add0b01c6"},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java", "sha256": "c9a36bac3fe1cbd5d98b4599734013bb3aa64cdac2922406e1df865d8e909b09"},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java", "sha256": "28aafe98ebdbbd3dcd59d061b671131713c5b5c2db4330a3e5252bd106011b48"},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java", "sha256": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd"},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java", "sha256": "055081ff6551de8eb640e589ffa8f5dd6d18876f64fd7264c1a1a6d432d1e3f8"},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretRevocationSweep.java", "sha256": "884ddb3c7bc119998b91eb6b7649b148bc3054222c56f1c880c92aa5da9b66a8"},
+    {"path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java", "sha256": "f7f87136ee60a2e9e4e9be52c1be3a67e9586c643a6907e1ea03f2b16f46bb98"}
+  ]
+}

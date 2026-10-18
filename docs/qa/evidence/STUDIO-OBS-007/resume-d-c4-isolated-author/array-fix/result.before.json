@@ -1,0 +1,96 @@
+{
+  "status": "ISOLATED_FROZEN_SOURCE_ONLY_UNFORMATTED_UNCOMPILED_RUNTIME_UNRUN",
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-c4-isolated-author-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-c4-isolated-author-context.txt",
+    "docs/qa/evidence/STUDIO-OBS-007/root-d-c4-design-review.json"
+  ],
+  "designSha256": "2cc54845503309448c978bb02bb202070230548a9c6485a3f961a1abcd677434",
+  "manifest": [
+    {
+      "intendedPath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "beforeCopy": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-author/before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "candidateCopy": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-author/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "beforeSha256": "4a61d60f9a4ab65b78198b17afd676cd76c665ec864b6bf84a0a18a01397c289",
+      "candidateSha256": "b354d1bc0a3fc09efd22bda2edd564f44e48495b54bb82cc87ee8ea0d0d58ee6",
+      "currentLiveSha256": "4a61d60f9a4ab65b78198b17afd676cd76c665ec864b6bf84a0a18a01397c289",
+      "liveStillEqualsBefore": true
+    },
+    {
+      "intendedPath": "backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java",
+      "beforeCopy": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-author/before/backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java",
+      "candidateCopy": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-author/candidate/backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java",
+      "beforeSha256": "92b20b5a3cf02a317340e8316cb8396a002fc78f5d264484dd4878990c7512ad",
+      "candidateSha256": "08c9ff21b40e7d14d895fa7bd4f20c1d5f146934d9136746a2a3c0cb2542ced6",
+      "currentLiveSha256": "92b20b5a3cf02a317340e8316cb8396a002fc78f5d264484dd4878990c7512ad",
+      "liveStillEqualsBefore": true
+    }
+  ],
+  "patch": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-author/source.patch",
+  "patchSha256": "204fe73d2855f387cf494570c131844e9b9571663a5a454e791dd095c3a031e6",
+  "liveSourceWrites": 0,
+  "selectors": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue"
+  ],
+  "namedTests": {
+    "original": 26,
+    "candidate": 28,
+    "new": 2,
+    "allOriginalBodiesByteIdentical": true,
+    "proof": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-author/original26-body-proof.json"
+  },
+  "preservation": {
+    "samplerClassByteIdentical": true,
+    "samplerEnvironmentGateDefaultOffUnchanged": true,
+    "existingFakeMethodsByteIdenticalAfterRemovingSetter": true,
+    "providerCountersEntriesVersionsNeverReset": true,
+    "mainBackendRunnerSchemaSqlChanges": 0,
+    "newContextsWatchersQueuesLedgersProxiesFrameworks": 0
+  },
+  "authorMatrix": [
+    {
+      "seam": "capacity",
+      "source": "Original initial-context pause/failfalse and entered marker; nonsecret actualADMITTED/preREADY browser holder; same default pool1. Selected secret accepted only after actual holder barrier. Actual original classified429/DEFINITE_REFUSAL+retryable, no receipt/browser/effect and genuine RESOLVED RELEASE/REFUSED."
+    },
+    {
+      "seam": "holder cleanup",
+      "source": "Only completed nonsecret holder is cleaned before target retry; global cleanup cannot accidentally cancel the queued secret owner. Original configured5s Retry-After pacing is not closure authority; next actualACCEPTED/admission/nativePASS supplies capacity proof, another429 fails."
+    },
+    {
+      "seam": "outage",
+      "source": "Default-null exact-scope PASS CAS gate from existing CountedLoginVault, genuine makeUnavailable around exactly original FakeVault.read and finallymakeAvailable. Original read counter increments before real requireAvailable exception. No invented exception, entry deletion, reset or extra read."
+    },
+    {
+      "seam": "outage lineage",
+      "source": "Actual attempted1/successful0, no actual runner client invocation/admission/browser/effect; committed read marker, VAULT_UNAVAILABLE nullable version, linked truthfulREFUSED, empty-positive REQUEUED no-send receipt and zero-send token. Scoped CAS is value-equality checked before expected-reference CAS."
+    },
+    {
+      "seam": "fresh retries",
+      "source": "Same accepted execution/publication/profile/scope identities, changed actual attempt/grant and boundedTTL, production tokens consumed, actual provider attempts2 total and successful values2(capacity)/1(outage), actual new native password accepted and video decoded, first audit snapshot immutable, no ordinary model call."
+    },
+    {
+      "seam": "capture",
+      "source": "Same existing C5Capture/c5Capture/writeProfileValues/TRACE remains active before setup through actual fault, rotate/retry, original owner closure and independent late scans. Existing p3Call observes only original returned HTTP response AFTER recording genuine successful owner identity, before status assertions; no extra request. Original capture metadata c4WindowsExecuted defaultsfalse, becomestrue only after whole new workflow+original p3Case cleanup returned. Counter-only fallback forbidden."
+    },
+    {
+      "seam": "cleanup",
+      "source": "Own pause release/provider availability recovery independent and preserve original primary/suppressed failures. Unconfirmed actual owners retain quarantine/capture and fail; outputs are not restored as if timedout owners had drained."
+    }
+  ],
+  "actualProducerLimits": {
+    "plannedCanariesVersusReturnedValues": "Two planned fixture values known without provider reads; actual successful old/fresh deliveries measured by original per-scope Counted records. Outage returns no value, never successful release credit. Failed/unreached fresh retry cannot count as a returned fresh canary.",
+    "captureScope": "Existing real TRACE/HTTP-return/DB/log/cache/metrics/profile collectors. No invented product logger, native fault, HTTP body, SSE stream or cache producer; unexercised collectors retain original honest counts.",
+    "C5LeaseDependency": "Original required TRACE and deadlines preserved. Current C5 timing failure can block warmup; first-guard failure remains FAIL/UNREACHED, not waived."
+  },
+  "applicationPrerequisite": "Coordinator must end diagnostic38021, independently review isolated patch, and bind current live publication before logical/exact application. No wholesale overwrite if another owner changed it.",
+  "requestedGates": [
+    "Coordinator application after review and live-source freeze",
+    "Scoped actual formatter/compiler on exact two intended test paths",
+    "Exact two selectors with sourceZIP/XML/provider/HTTP/native/capture current binding; original26 regression cases retained"
+  ],
+  "runtimeActions": [],
+  "metadataOrLifecycleEdits": [],
+  "budget": "Whole-waveUSD500; spend telemetry unavailable",
+  "noWholeC4C5P6OrNineteenAcPassClaim": true
+}

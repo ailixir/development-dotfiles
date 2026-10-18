@@ -1,0 +1,40 @@
+{
+  "createdAt": "2026-10-15T04:50:14.742198+00:00",
+  "scope": "PURE_CONTRACT_GENERATOR_PARITY_PIN_CHECKS_ONLY",
+  "commands": [
+    {
+      "argv": [
+        "node",
+        "tools/check-studio-observed-contracts.cjs"
+      ],
+      "exitCode": 0,
+      "log": "contract-oracle.log",
+      "logSHA256": "61cf26f48f6f80e73e7c64c523e04d775825d8b332ed0c0b6605f8ad9cb4ee98"
+    },
+    {
+      "argv": [
+        "node",
+        "tools/build-studio-observed-schemas.cjs",
+        "--check"
+      ],
+      "exitCode": 0,
+      "log": "generator-parity.log",
+      "logSHA256": "785745b252f39a1a2f24ec7875449b8ba3b4c9c77edf14aa0cd21db7a714eead"
+    },
+    {
+      "argv": [
+        "node",
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/check-pins.cjs"
+      ],
+      "exitCode": 0,
+      "log": "pin-status-check.json",
+      "logSHA256": "e9c9ef8d63856b307dcb76a7565536708f00a2c071e30eb77bde7e6ae37d8ddf"
+    }
+  ],
+  "applicationAcceptanceExecuted": 0,
+  "databaseCommands": 0,
+  "browserCommands": 0,
+  "gradleWindows": 0,
+  "runnerBuilds": 0,
+  "coverageCredit": false
+}

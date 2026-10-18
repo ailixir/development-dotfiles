@@ -1,0 +1,23 @@
+{
+  "artifact": "ARCH015-05 bounded design validation",
+  "status": "PASS_DESIGN_ONLY",
+  "checks": [
+    "only in-memory schema property added; required and closed fields unchanged",
+    "raw model full hash and consumers minimum unchanged",
+    "current full canonical bundle equals ce58 baseline and includes replay-validation",
+    "exact JSON wrapper20bytes; old frame2MiB + artifact1MiB +64headroom",
+    "complete 8positive/14negative/2contract facets remain planned",
+    "explicit authority/limit/lifetime/release statements"
+  ],
+  "canonicalBundleBefore": "ce58d620c27bb84f4233151275373aba24467f748c7152a12f1ef3d2d85381aa",
+  "sourceDiagnosticDriftAtValidation": [
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md"
+  ],
+  "harnessHistory": "Initial design validator resolved root one parent too high and stopped on FileNotFoundError before validation or writes; corrected to HERE.parents[5]. No product source or schema failure was observed or waived.",
+  "applicationTestsExecuted": 0,
+  "databaseCommandsExecuted": 0,
+  "browserCommandsExecuted": 0,
+  "buildCommandsExecuted": 0,
+  "generatorCommandsExecuted": 0,
+  "qualification": "Standard-library in-memory design/manifest checks only. Not a schema semantic oracle, application test, authentication proof, source release, story QA or lifecycle completion. Active source hashes are diagnostic."
+}

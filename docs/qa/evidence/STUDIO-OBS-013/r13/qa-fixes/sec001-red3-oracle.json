@@ -1,0 +1,460 @@
+{
+  "oracle": "AR-QA SEC-001 A (content) and B (offset); r13/qa-fixes/README.json oracleRevision",
+  "decode": "ffmpeg full-resolution rgb24, no scale filter",
+  "frameSize": {
+    "width": 1280,
+    "height": 720
+  },
+  "whiteThreshold": 245,
+  "contentFreeMaxRowRuns": 6,
+  "loginBox": [
+    8,
+    7,
+    400,
+    30
+  ],
+  "finalBox": [
+    6,
+    15,
+    89,
+    87
+  ],
+  "appRegion": [
+    0,
+    0,
+    408,
+    95
+  ],
+  "appRegionArea": 39264,
+  "appRegionAreaRatio": 0.042604166666666665,
+  "loginBoxAreaRatio": 0.010234375,
+  "finalBoxAreaRatio": 0.0066536458333333335,
+  "positiveControl": {
+    "frames": 42,
+    "flaggedFrames": 40,
+    "maxOutsideApp": 91472
+  },
+  "a0": 294,
+  "t1": 80,
+  "t1MinusA0": -214,
+  "firstAppFrameIndex": 2,
+  "offendingFrames": [
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "probedFrames": 40,
+  "actionTimings": [
+    294,
+    448,
+    472
+  ],
+  "frames": [
+    {
+      "index": 0,
+      "ms": 0,
+      "box": [
+        0,
+        0,
+        1279,
+        719
+      ],
+      "maxRowRuns": 2,
+      "contentFree": true,
+      "outsideApp": 882336
+    },
+    {
+      "index": 1,
+      "ms": 40,
+      "box": null,
+      "maxRowRuns": 1,
+      "contentFree": true,
+      "outsideApp": 0
+    },
+    {
+      "index": 2,
+      "ms": 80,
+      "box": [
+        240,
+        6,
+        1039,
+        719
+      ],
+      "maxRowRuns": 437,
+      "contentFree": false,
+      "outsideApp": 91472
+    },
+    {
+      "index": 3,
+      "ms": 120,
+      "box": [
+        240,
+        4,
+        1039,
+        719
+      ],
+      "maxRowRuns": 457,
+      "contentFree": false,
+      "outsideApp": 91112
+    },
+    {
+      "index": 4,
+      "ms": 160,
+      "box": [
+        240,
+        4,
+        1039,
+        719
+      ],
+      "maxRowRuns": 453,
+      "contentFree": false,
+      "outsideApp": 91056
+    },
+    {
+      "index": 5,
+      "ms": 200,
+      "box": [
+        240,
+        4,
+        1039,
+        719
+      ],
+      "maxRowRuns": 453,
+      "contentFree": false,
+      "outsideApp": 91008
+    },
+    {
+      "index": 6,
+      "ms": 240,
+      "box": [
+        8,
+        16,
+        639,
+        719
+      ],
+      "maxRowRuns": 378,
+      "contentFree": false,
+      "outsideApp": 46076
+    },
+    {
+      "index": 7,
+      "ms": 280,
+      "box": null,
+      "maxRowRuns": 1,
+      "contentFree": true,
+      "outsideApp": 0
+    },
+    {
+      "index": 8,
+      "ms": 320,
+      "box": null,
+      "maxRowRuns": 1,
+      "contentFree": true,
+      "outsideApp": 0
+    },
+    {
+      "index": 9,
+      "ms": 360,
+      "box": null,
+      "maxRowRuns": 1,
+      "contentFree": true,
+      "outsideApp": 0
+    },
+    {
+      "index": 10,
+      "ms": 400,
+      "box": null,
+      "maxRowRuns": 1,
+      "contentFree": true,
+      "outsideApp": 0
+    },
+    {
+      "index": 11,
+      "ms": 440,
+      "box": [
+        8,
+        7,
+        403,
+        31
+      ],
+      "maxRowRuns": 71,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 12,
+      "ms": 480,
+      "box": [
+        8,
+        6,
+        403,
+        33
+      ],
+      "maxRowRuns": 201,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 13,
+      "ms": 520,
+      "box": [
+        8,
+        4,
+        401,
+        33
+      ],
+      "maxRowRuns": 198,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 14,
+      "ms": 560,
+      "box": [
+        8,
+        6,
+        402,
+        31
+      ],
+      "maxRowRuns": 194,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 15,
+      "ms": 600,
+      "box": [
+        8,
+        6,
+        400,
+        31
+      ],
+      "maxRowRuns": 193,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 16,
+      "ms": 640,
+      "box": [
+        8,
+        12,
+        90,
+        87
+      ],
+      "maxRowRuns": 51,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 17,
+      "ms": 680,
+      "box": [
+        8,
+        13,
+        90,
+        87
+      ],
+      "maxRowRuns": 51,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 18,
+      "ms": 720,
+      "box": [
+        8,
+        13,
+        89,
+        87
+      ],
+      "maxRowRuns": 48,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 19,
+      "ms": 760,
+      "box": [
+        8,
+        13,
+        89,
+        85
+      ],
+      "maxRowRuns": 48,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 20,
+      "ms": 800,
+      "box": [
+        6,
+        15,
+        89,
+        87
+      ],
+      "maxRowRuns": 47,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 21,
+      "ms": 840,
+      "box": [
+        6,
+        15,
+        89,
+        87
+      ],
+      "maxRowRuns": 47,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 22,
+      "ms": 880,
+      "box": [
+        6,
+        15,
+        89,
+        87
+      ],
+      "maxRowRuns": 47,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 23,
+      "ms": 920,
+      "box": [
+        6,
+        15,
+        89,
+        87
+      ],
+      "maxRowRuns": 47,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 24,
+      "ms": 960,
+      "box": [
+        6,
+        15,
+        89,
+        87
+      ],
+      "maxRowRuns": 47,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 25,
+      "ms": 1000,
+      "box": [
+        6,
+        15,
+        89,
+        87
+      ],
+      "maxRowRuns": 47,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 26,
+      "ms": 1040,
+      "box": [
+        6,
+        15,
+        89,
+        87
+      ],
+      "maxRowRuns": 47,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 27,
+      "ms": 1080,
+      "box": [
+        6,
+        15,
+        89,
+        87
+      ],
+      "maxRowRuns": 47,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 28,
+      "ms": 1120,
+      "box": [
+        6,
+        15,
+        89,
+        87
+      ],
+      "maxRowRuns": 47,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 29,
+      "ms": 1160,
+      "box": [
+        6,
+        15,
+        89,
+        87
+      ],
+      "maxRowRuns": 47,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 30,
+      "ms": 1200,
+      "box": [
+        6,
+        15,
+        89,
+        87
+      ],
+      "maxRowRuns": 47,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 31,
+      "ms": 1240,
+      "box": [
+        6,
+        15,
+        89,
+        87
+      ],
+      "maxRowRuns": 47,
+      "contentFree": false,
+      "outsideApp": 0
+    },
+    {
+      "index": 32,
+      "ms": 1280,
+      "box": [
+        6,
+        15,
+        89,
+        87
+      ],
+      "maxRowRuns": 47,
+      "contentFree": false,
+      "outsideApp": 0
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+--- a/src/guided/transport.ts	2026-10-13 19:35:53
++++ b/src/guided/transport.ts	2026-10-13 19:35:53
+@@ -142,7 +142,7 @@
+ }
+ export function guidedCallback(options: GuidedCallbackOptions): GuidedRuntimeOptions['callback'] {
+   return async(route,message,idempotencyKey)=>{
+-    const definition=route==='bootstrap-evidence'?'bootstrap':route==='observations'?'observation':route==='outcomes'?'outcome':'lifecycle';
++    const definition=route==='bootstrap-evidence'?'bootstrap':route==='observations'?'observation':route==='outcomes'?'outcome':route==='recording-evidence'?'recordingEvidence':'lifecycle';
+     const notice=validate<BridgeIdentity|AssignmentLifecycle>('bridge',message,definition);
+     const assignment='kind' in notice ? notice.assignment : null;
+     const result=await controllerRequest(options,assignment?.sessionId??(notice as BridgeIdentity).sessionId,route,message,assignment?undefined:(notice as BridgeIdentity).ownerFence,idempotencyKey??randomUUID(),10_000);

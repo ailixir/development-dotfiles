@@ -1,0 +1,61 @@
+{
+  "scope": "B terminal-winner/committed-entry source candidate; uncompiled/unexecuted current delta, no QA or acceptance verdict",
+  "authority": "t2-t3-po-bootstrap-closure-revalidation.json and bootstrap-closure-application/receipt.json; parent exact terminal release",
+  "priorBaseline": "Root verified143/0fail/0error/0skip/0drift in root-approved-behavior-gate-3. Original143 names retained; only five terminal-gap case expectations superseded explicitly below.",
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java": "d74783d0d0ad0f2bfeb771f2341e95b0b15db66ed16283b0f5eb359815f689a8",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java": "75b958d082504fea50e0635aabb7b9ff7ebe3977035647f18ba570b5ec8a0afe",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java": "f1c88d087b83905a44ed38e1acace2cd35be65dccda048cb92dbb89f3adfef5d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java": "bd632c6f91246b48da118de7a2814ae0b35c6f0a8b65fe7f4286c8e53648f273",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java": "9f38f2de03ba0432cf4867d1205a2f6a5a72b2d37fdc8f78e2ce83782318195a",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/ObservedTerminalSettlementIT.java": "b342b59306a34dcc1557d025298c5121a7dbaf344e5b66f25ac8fc12eb961621",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedReadEntryProtocolIT.java": "60c68294923d62113f927f1351cdf9db37322405ef699248d5292c53fd0226c6"
+  },
+  "api": "D recordObservedTerminalSettlement(UUID executionId,String plannedErrorCode,Instant plannedEndedAt) MANDATORY pretransition; DB independently authenticates locked beforeimage/fresh sets/actual terminal code+time/top-XID",
+  "callerBoundary": "Statements REQUIRED TransactionTemplate uses injected real manager or standalone same-datasource JDBC manager; public/selfinvoke/direct/external rollback covered, no proxy-only assumption. Eligible pre-send cuts append before actual transition; receipt+CAS0 throws rollback. Request-only/stale/DONE skips. Finalization/reconciliation use authentic linked settlement. Kill switch intrinsically restricts QUEUED/CLAIMED.",
+  "valueEntry": "Ordinary observed job enforces no active/bound transaction and fresh committed exact-scope marker after callback before provider; old2arg secret callback failsclosed, unsupported interface default preserved. Current live owner must equal immutable marker creator; old marker is possible-read evidence, not different-owner readpermission. Missing observed runtime cannot fallthrough legacy value path.",
+  "newTests": {
+    "ObservedReadEntryProtocolIT": 11,
+    "ObservedTerminalSettlementIT": 20
+  },
+  "mappedBaselineCases": [
+    {
+      "name": "realCompetingTerminalWinnerPreventsBlockedFailureCallerFromAppendingFacts[cancel,reaper]",
+      "old": "zero total audit rows after possible read",
+      "new": "authentic terminal winner writes one unlinked UNKNOWN; blocked losing caller writes no RELEASE/decision; independent reads1/sends0 retained"
+    },
+    {
+      "name": "lostControllerDecisionAfterActualReadRetainsPossibleReadAndNeverFabricatesUnused[cancel,reaper]",
+      "old": "zero summary was an explicit completeness gap",
+      "new": "one authenticated terminal UNKNOWN with null fictional resolution/action fields; reaper now invokes actual PendingReaper.reapOnce; simulated position not processkill"
+    },
+    {
+      "name": "actualResolvedMetadataSurvivesDispatchCheckRefusalWhileOwnerLosersAppendNothing[cancel-winner]",
+      "old": "zero total audit rows for already-terminal cancel winner",
+      "new": "winner already persisted authentic UNKNOWN; late resolved-metadata loser still zero RELEASE/no new no-send receipt"
+    }
+  ],
+  "nextSelectors": [
+    "com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest",
+    "com.citi.put.checks.studio.secrets.VaultResolutionDecisionTest",
+    "com.citi.put.checks.studio.dispatch.StudioDispatcherFailureIT",
+    "com.citi.put.checks.studio.guided.publication.SecretAuditLifecycleIT",
+    "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+    "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+    "com.citi.put.checks.studio.dispatch.DispatcherIT",
+    "com.citi.put.checks.studio.secrets.VaultStreamingReadTest",
+    "com.citi.put.checks.studio.recovery.RecoveryIT",
+    "com.citi.put.checks.studio.guided.publication.ObservedReadEntryProtocolIT",
+    "com.citi.put.checks.studio.dispatch.ObservedTerminalSettlementIT"
+  ],
+  "limitations": [
+    "New sources not compiled or run; source formatting/gates require rootserialized lease and Dstable inputs",
+    "Direct/counted PostgreSQL fixtures and simulated positions do not prove executed controller processcrash/CoreHTTP/native browser transport/keystrokes",
+    "Actual admitted/running/full cancel state matrix, generic refresh refusal current-source joins, report-CAS/progressive USED\u2192kill/positive preservation remain required on frozen compiled runner path",
+    "Nine-flow current CoreHTTP/PG/guided+ordinaryfullChromium join still pending Rstable source/dist, including exact USERvar/PASSsecret mandated end2end semantics and all C/SEC/sink/time-bound oracles",
+    "All143 prior cases must rerun current source plus newdata cases; full backend regressions/style/build/coverage and fresh independent review stillpending",
+    "No real image build or staging/manual oracle is asserted"
+  ],
+  "backendSourceFrozen": true,
+  "liveProcesses": []
+}

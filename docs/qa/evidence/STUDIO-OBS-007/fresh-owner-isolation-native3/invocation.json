@@ -1,0 +1,14 @@
+{
+  "command": [
+    "npm",
+    "run",
+    "test:fixtures",
+    "--",
+    "test/fixtures-tier/guided-secret-isolation.test.ts",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-007/fresh-owner-isolation-native3/tests.json"
+  ],
+  "startedAt": "2026-10-10T20:09:44.875917+00:00",
+  "scope": "actual ISO1-3 source-guided SDK only; no Core/Vault/fullQA"
+}

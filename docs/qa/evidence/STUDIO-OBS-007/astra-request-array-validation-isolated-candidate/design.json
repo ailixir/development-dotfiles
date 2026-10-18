@@ -1,0 +1,89 @@
+{
+  "status": "FROZEN_CANDIDATE_AWAITING_PEER_GO",
+  "scope": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java"
+  ],
+  "qualifiedEvidence": {
+    "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-postclaim-presend-supporting-current/closed-supporting-diagnostic.json",
+    "remainingNanosAfterOriginalClaimCommit": 14884045000,
+    "schema104Samples": 851,
+    "firstOffsetNanos": 31987416,
+    "lastOffsetNanos": 22562716083,
+    "failure": "OriginalEXPIRED atBudget19/Client69/Publisher135 beforeHTTP",
+    "limits": "Positive schema/cache/native wallpresence consumesavailablebudget; notexclusiveCPU orspecificsubtreecost/cache-hit proof. No negativeabsence inference."
+  },
+  "alternatives": [
+    {
+      "choice": "Onlyanothernamed-root epoch",
+      "selected": false,
+      "tradeoff": "Doesnotreach embedded request arrays."
+    },
+    {
+      "choice": "All13basis arrays/genericrecursive decomposition",
+      "selected": false,
+      "tradeoff": "Unmeasured extra scope/maintenance; no needtoinspect arbitraryschemas."
+    },
+    {
+      "choice": "Exactthree exercised-fact arrays",
+      "selected": true,
+      "tradeoff": "Removes cross-snapshot/node, cross-action/ledger andcross-preparation root repetition whilekeeping allotherarrays/nativeleafcompositions untouched. No predictedtiming/acceptance guarantee."
+    }
+  ],
+  "paths": [
+    {
+      "path": "replay-validation.validationBasis.observations",
+      "bounds": [
+        0,
+        400
+      ],
+      "item": "closed2property ObservationFact",
+      "nested": "exactoriginalcompiled observation9 plus existingnodes0..500/native17propertyitem"
+    },
+    {
+      "path": "replay-validation.validationBasis.actions",
+      "bounds": [
+        1,
+        200
+      ],
+      "item": "closed3property ActionFact",
+      "nested": "exactoriginalcompiled ledger20 withcomplete nativechildren"
+    },
+    {
+      "path": "replay-validation.validationBasis.preparations",
+      "bounds": [
+        1,
+        200
+      ],
+      "item": "completeoriginalnative6property PreparationFact",
+      "nested": "No itemdecomposition; allproposal/proof/evidence/choice conditional/oneOf rulesremainnative"
+    }
+  ],
+  "layout": "Reuseprivatearraymetadata as ArraySchema(shape,originalItem,optionalCompiledItem). Replace single nodesfield withimmutableliteral arraysmap: nodes onlyfornamed/embeddedobservation; observations/actions/preparations onlyforreplaybasis. Existingoriginalnativepropertymap andliteralobjectoverrides retained. Compileonlytheexplicitpaths; no genericwalk, arbitraryschema discovery, publicAPI orinstancedata cache.",
+  "proof": [
+    "Existingfrozenreplayepoch validatesentire path tree; embeddedobservation/ledger mustalso equalexistingnamedepoch hashes. No newepochconstants.",
+    "Eacharrayextracts exactoriginalnativeItemsValidator item, requiresobjectitem/emptytuple/sharedstrictconfig anddeclarationequality.",
+    "Arrayshell copiesalloriginalkeywords andsetsitems{}; fulltype/min/max andanyoriginalcollectionkeyword retained.",
+    "Optionalcompileditem replaces nativeitem evaluation once, notaddedduplicate; everyitemincludingnull evaluatesafterarrayfailure.",
+    "ObservationFact/ActionFact retainallclosedobjectrequired/propertyconstraints; theironeexplicit childoverride reuses originalcompiledobservation/ledger schemas.",
+    "Everyhelper/config/schema/identity failure returnsoriginalwhole namedreplayroot baseline, notpartialplan.",
+    "Unknownnames/epochs/config retainoriginalnativebehavior; originalcanonical first/bytes/fixedINVALID_CONTRACT422 remain.",
+    "Native cache/classpath/TRACE effects remain; no loggingfilter, SQL/network/provider/authority/deadline orrequest manipulation."
+  ],
+  "tests": "ExtendexistingWire7 only: exactarraykeys/itemplans/nativepreparationactivation; sameindependentnative schemaoracle oncompleteactualfixture-backedrequest; eachselectedarraynull/nonarray/nullitem,min-1/max/max+1 andnestedbadwrapper/observation/node/ledger/preparation/choice constraints, positivebounds whereoriginalschemaallows. Unknownreplayepoch/config/collectionconstraint fallback andnonmutation. No newtest/E2E/framework/server.",
+  "preservation": "Noimports/publicmethodprefix89\u2013104 change. Publisher/client/budget/helperfixture remainbyteidentical; helperproductionclasshashbindings requirefreshverification ifdiagnosticrerun, neverstale reuse.",
+  "knownLimits": "Otherbasis arrays/artifact nativeleafschemas remain; currentphase104includescachecompilation aswell asvalidation/logging. OnlyoriginalunprofiledC5 withbothsecret replays canproveacceptance.",
+  "baseHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "398648c589598b15b0e93165302824d91c5e595a4d97454f5ff41e35806f2e04",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java": "d1a815255c4fbbf2f50b04ff044bea077a93a5a3bc82435921e18cf36f2fde12"
+  },
+  "unchangedHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": "c9a36bac3fe1cbd5d98b4599734013bb3aa64cdac2922406e1df865d8e909b09",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationBudget.java": "ccababf7de7f83f6b516496962dd6c1ee419855782a4606fc2bc284a64be4437",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "cafa3f0359e8e49a50eb096a0b0c1430e666cc3119a4a04347ed42399f556faa"
+  },
+  "sharedEdits": false,
+  "buildsExecuted": false,
+  "runtimeStarted": false
+}

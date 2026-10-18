@@ -1,0 +1,26 @@
+{
+  "status": "QUALIFIED_SUPPORTING_PHASE_OBSERVATION",
+  "acceptanceCredit": false,
+  "sourceReceiptSha256": "bab1558839857c55d2ae8d06f8f87bafc1de898c55dd6c8943d03e78b98bc173",
+  "samplerSourceReviewSha256": "7ffa5fb9ed82e00e9695420f4b85495410eff9d7a84a400a66751ed4d488abe0",
+  "originalPostCommitRemainingNanos": 14884045000,
+  "schemaCacheNativePhase": {
+    "samples": 851,
+    "firstOffsetNanos": 31987416,
+    "lastOffsetNanos": 22562716083,
+    "lastOffsetExceedsOriginalRemaining": true
+  },
+  "actualLaterFailure": {
+    "code": "EXPIRED",
+    "source": "ObservedValidationClient",
+    "line": 69,
+    "beforeHttpSend": true
+  },
+  "supportedInference": "The same selected synchronous finalizer was positively observed in Client59 plus Contracts104 before and after the original remaining budget; the later actual budget check refused. This qualifies the schema/cache/native call path as material wall-clock work in this request.",
+  "limits": [
+    "Samples do not isolate CPU time, compile versus native-validation cost, every contiguous instant, or a single nested property.",
+    "Zero samples do not establish absence of canonicalization, encoding, budget evaluation or HTTP delivery.",
+    "This supporting failure does not satisfy mandatory secret publication and two ordinary replays."
+  ],
+  "nextSourceScope": "Exact frozen replay validationBasis arrays and embedded observation/native nodes retain whole-array root logging amplification despite the existing standalone observation specialization."
+}

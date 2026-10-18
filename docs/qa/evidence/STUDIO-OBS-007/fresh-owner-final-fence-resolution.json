@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "status": "SOURCE_RESOLUTION_PASS",
+  "reviewKind": "Independent exact bounded immutable source resolution ONLY PT001-R1/R2",
+  "reviewedSource": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-final-fence-authored-freeze/GuidedPublicationReplayIT.java",
+  "sourceSHA256": "367302d4338798c29c525fd221f56998a0ee0eda475e95e413008cffbdde8841",
+  "beforeSource": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-topology-heldrow-final-format/GuidedPublicationReplayIT-formatted.java",
+  "beforeSHA256": "49b3ce05cb874852e44080ac2b16f9dff1b81bcc3aeb254dd2a8473ee4c8f76d",
+  "readBindings": {
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-final-fence-authored-freeze/GuidedPublicationReplayIT.java": "367302d4338798c29c525fd221f56998a0ee0eda475e95e413008cffbdde8841",
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-topology-heldrow-final-format/GuidedPublicationReplayIT-formatted.java": "49b3ce05cb874852e44080ac2b16f9dff1b81bcc3aeb254dd2a8473ee4c8f76d",
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-topology-repair-resolution.json": "5f8f60a714a329a3317d1c59ce8a9b4cac174706026147b5e834ce71553bda7f",
+    "docs/qa/evidence/STUDIO-OBS-007/b-final-fence-diagnostic-repair/result.json": "bd598282be53d8b354b3828f420ef2d0d8a1526ef91222550576a50e2f47abdd",
+    "docs/qa/evidence/STUDIO-OBS-007/b-final-fence-diagnostic-repair/one-file.patch": "e5515290aa8141e8579670efddb24dd1a75b46610928e4da8a94b97716d14116",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java": "0c9b1532ee790d7e9f76930705997d1374c7c76ae7f53b3fa35efe40c4f2ca33"
+  },
+  "authority": {
+    "writeScope": "Only docs/qa/evidence/STUDIO-OBS-007/fresh-owner-final-fence-resolution.json",
+    "sourceOnly": true,
+    "mutableJavaRead": false,
+    "runtimeOrLifecycleApproval": false,
+    "scope": "PT-001-R1 and PT-001-R2 from fresh-owner-topology-repair-resolution.json only; PT-002 disposition not reopened. Approved public SDK/test-owned APP names/counts protocol and promise chain assumed as explicitly supplied by task."
+  },
+  "findings": {
+    "PT-001-R1": {
+      "status": "RESOLVED_SOURCE_ONLY",
+      "lines": [
+        5616,
+        5643,
+        5650,
+        5664,
+        5668,
+        5728,
+        5731,
+        5740,
+        5747,
+        5764,
+        5770,
+        5800,
+        5813,
+        5816,
+        5541,
+        5552,
+        5561
+      ],
+      "assessment": "Page request validates exact HTTP200/accepted=true/seq ACK before returning. seal awaits final fence request, then separately awaits fence-complete with same document ordinal and sequence under the same absolute2500ms deadline. Server validates this receipt against fenced/events/acknowledged counts, publishes fenceCompleted only after response headers/body write/body close succeed under document monitor, and wakes native POST wait. Native POST now waits for fenceCompleted rather than fenced before original accepted302/body/cookie path. Closed-phase validation and final Java gate enumerate EVERY phase document, including navigated old documents, and require fenced plus fenceCompleted and event/receipt equality.",
+      "failureHandling": "Missing/invalid completion, invalid ordering, native wait timeout/interruption, observer request IO and response headers/body/write/close errors fail sticky. Native timeout resumes original behavior with sticky failure; it does not constitute successful fence proof. No extra native submission or deadline reset."
+    },
+    "PT-001-R2": {
+      "status": "RESOLVED_SOURCE_ONLY",
+      "lines": [
+        4413,
+        4424,
+        4429,
+        4534,
+        4549,
+        4565,
+        4566,
+        4569,
+        4572,
+        4575,
+        4582,
+        4592,
+        4595,
+        4719,
+        4720,
+        4840,
+        5421,
+        5438,
+        5443,
+        5446,
+        5449,
+        5452,
+        5454,
+        5455
+      ],
+      "assessment": "Selected public SDK validates phase-close ACK after page seals. Only fenceSucceeded plus successful awaited ORIGINAL close writes phase settlement. Original close is invoked exactly once with captured receiver and original arguments in finally; eventual return and identical original rejection are preserved. Fence failure does not replace original close result/error. Default OFF returns original launch promise and installs no observer close chain. Server closed-phase bit is provisional and insufficient on its own: decisive Java gate requires settlement marker, current Java sticky=false, absent SDK failure sentinel, phase bit and every document completion. Guided awaits existing actual teardown and ordinary performs existing owned cleanup before zero/sink assertions. Owned cleanup repeats gate before OFF/restoration; phase-start gates previous phase before counters reset, so current/last failure cannot be delegated to next case.",
+      "pendingTimeout": "Timed-out page drain cannot send successful fence-complete. Timed-out SDK fence never sets fenceSucceeded or writes settlement, even if raced work later finishes; current/final gates reject missing settlement or sticky failure. No timeout receives success merely from request arrival."
+    }
+  },
+  "preservation": {
+    "verification": "Read-only in-memory lexical brace-body comparison skipping comments, quoted strings and Java text blocks; exact patch reconstruction against archived before and immutable freeze. No compile/test/runtime invoked.",
+    "patchExactAgainstBeforeAndFreeze": true,
+    "same23TestNamesAndOrder": true,
+    "all23TestBodiesByteEqual": true,
+    "original19BodiesByteEqual": true,
+    "testBodyBindings": {
+      "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues": "28d7c9b9ca3c89c08c666a658433939e2b93d14afe299b7a75e7167b3c1768aa",
+      "queuedAndPreReadyRefusals": "176764116caa9b2b2a888e41614d2b8943ab3ffcc71fcbd5eb2e80bc40446fe2",
+      "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness": "b2b18a1cff1085824c8ac09b561efe46d38c98c3ab728e9c1becd283ce5ed092",
+      "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays": "59660e2d186fd03689d0821917dbe5f07854215ca289e15977ccc7d23dd88a91",
+      "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance": "c0659fd070d72f2f7db61628bf048e80886e64ceb2c2b10adbdaa721c25aa4a0",
+      "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork": "dffbae752985258dd6ffc6fa47d51f15b0f04e2c6882187900526ec1f55f9c01",
+      "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays": "64720145b7a6c8ec0fe1583e7b06b69ae066e1441a601924e05e5c6b4083a53b",
+      "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall": "57e079812b59835aad63295aa42bbcbab3a1a7743bd89e1620062ecba74d4d60",
+      "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel": "25b2a49aeff294db15738f897263825433a8ef92c9e40cf1ceebc93fa667ce4b",
+      "actualCoreMayUseDenialStartsNoSessionAndNoBrowser": "084ed8d8bae38e710a01f29fb12db6c5b3c4f4f2b15a1e61f12d91931e723584",
+      "actualCoreGuidedSameSecretIdStaysWithinPersistedScope": "9aea0e535955d2fa31dca097165b1c43b4b0eb9a4b03a2b83379d0714980b7a2",
+      "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope": "eb3fa71eda4eb37f220904ac77659873ad735501602755b9d322f6031423d0ec",
+      "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure": "cd6a35d30ec0b3f0033e360aabf20591f9801bd0b50e8d5ee605f1429893b1c2",
+      "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch": "0f285ad906e0a2f9a5881f891c9d390c087d16e99031b1ab65c46ef7f985af62",
+      "actualGuidedRegistrationPassingAssertRemainsPassed": "b098b465c2b4807a52c91259422c684d203b35471fb5dc414c1838a376e9eaf1",
+      "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection": "4aefde250348f75c499345a2b09e23bb1aeefa8faa7aa31faa5ceb51f70a287a",
+      "actualPublishedWrongPasswordAnnotatesEarlierSecretFill": "dbbe744aae8c2898f20e40e9e50fb6d4ff6175993858624731a703e3e9f12fa4",
+      "actualPublishedRegistrationPassingAssertRemainsPassed": "d0bab847f0fc462d79e00613a08d2c8aaafbe55b4e005d3e90eb0ecfc69adf4f",
+      "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls": "9fe41ba5cc7b93e571b29132c0a88813455b4cde6ed0e0ca840cd2533459f327",
+      "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead": "5f9f0c9c762cdef76bab4893d81efa08d185ff354b3b52258dd528813e9570ce",
+      "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead": "552e16a27550f466b452946f0cc04f057d7225611865fd9dd4cdbfcb67f34a11",
+      "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution": "06de6d22e34e07df7ca6f415f95eb83f38daf184a08b0d086dae293ba482269c",
+      "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution": "1699a76755163e559a9c8e8c2c62f0e46e18c1b5a0367388860100fc369389af"
+    },
+    "protectedHelpers": {
+      "stop": {
+        "byteEqual": true,
+        "bodySha256": "74098f0b55ab2b3fa60dd7bc0fecd5e4335eeff7a019ee67e3dd3236b3a6ba1d"
+      },
+      "containsBytes": {
+        "byteEqual": true,
+        "bodySha256": "403bf5523c62e01c1ffb0b47b5299bfc69ce000006d1f4bbd754b90970930d52"
+      },
+      "p3Scan": {
+        "byteEqual": true,
+        "bodySha256": "0f6abdb89360414b30b8e37e966a890bf1feb924118fa4c438c77259965648cd"
+      },
+      "p3Call": {
+        "byteEqual": true,
+        "bodySha256": "3e6e2c45ea74181417b022baacdfecd57dbb018ed69e3785b1e8ce756d6a09c0"
+      },
+      "observedOriginalSessionRepository": {
+        "byteEqual": true,
+        "bodySha256": "3b56b1ed2b705693c669650e4a93869df26be6ee39846770d2bf2b7c975e3a8e"
+      },
+      "p3Case": {
+        "byteEqual": true,
+        "bodySha256": "6db3ad77891132bc92177e84e15256e2e0bdc884b1af479c4e119673d971d38f"
+      },
+      "p3CleanupOrdinary": {
+        "byteEqual": true,
+        "bodySha256": "de4e3d6b66638fcb218f3c4b41051ee15f12c3fa1899be1dbb451fb8328190a8"
+      },
+      "p3AwaitTeardown": {
+        "byteEqual": true,
+        "bodySha256": "92731aa78a7e3446976608d6f704af502999ce00cd820838b6aa7e6047b26dc4"
+      },
+      "p4AssertRepositoryGraph": {
+        "byteEqual": true,
+        "bodySha256": "bf8cb1933224c03d975894854365b1ae0d3aa62a71ed96dc28ea2c0dd5881134"
+      },
+      "p4PositiveNativeControl": {
+        "byteEqual": true,
+        "bodySha256": "633ad0f5ca2994d8bea2552d70bcf0bf23655100550f1db3565eb7e8f2d0b7f0"
+      }
+    },
+    "transactionFactory": "Entire observedOriginalSessionRepository body byte-equal, including original manager, super.execute(callback), rollback witness and original rethrow.",
+    "positiveSameListenerControl": "p4PositiveNativeControl byte-equal: genuine original learning/publication/native accepted POST, positive writes and exactly1 submit, teardown and phase gate before reset.",
+    "privacyAndScope": "Delta stores/exports only fixed names, numeric sequence/phase/count/status/line/code ordinal, booleans and digests. No new raw payload/value/error storage/export; no new browser events/native POST/product primitive/DOM or Playwright selectors/value/cookie/private worker/origin authority/deadline reset. Existing fixture data paths and test-owned public SDK protocol preserved."
+  },
+  "supplementalDiagnostic": {
+    "status": "SOURCE_ACCEPTABLE_SUPPLEMENTAL_ONLY",
+    "lines": [
+      733,
+      736,
+      738,
+      4694,
+      4695,
+      4737,
+      4740,
+      4753,
+      4757,
+      4760,
+      4766,
+      4775,
+      4780,
+      4784
+    ],
+    "assessment": "Guided-negative finally writes retained FIRST action stackline/status/code ordinal/count/phase/rollback flags and actual request numeric counts, plus validator source and loaded class resource SHA256. No raw Throwable/message/stack/payload/source/class bytes export. Original helper failure is rethrown; diagnostic failure is suppressed on original or raised if no primary. Existing p3Case cleanup/primary behavior byte-equal.",
+    "literal364": "UNCHANGED in original count predicate, strict assertion and diagnostic expectation.",
+    "runtimeFirstPredicate": "Reported failed boolean remains FAILED; actual runtime line UNARCHIVED. Source text cannot establish compiled LineNumberTable or runtime first-predicate semantics. No guessed363 adjustment, widened line/range, or semantic proof approved."
+  },
+  "blockingFindings": [],
+  "limits": [
+    "PASS applies ONLY to PT001-R1/R2 immutable source resolution, not to actual counts, first guard, setup idle, runtime, lifecycle or all19 QA.",
+    "User-supplied current7 at49b3/b436 remains actual3PASS4FAIL: ordinary0/2 and heldrow PASS; guided2 literalLine predicate false; setup2 idle false. No new actual result established.",
+    "Actual runtime first predicate failure and actual line require archived numeric diagnostic and independently bound compiled class evidence; supplemental diagnostic is not semantic proof.",
+    "Focused final-source runtime, independent peer review then actual full23/allold19, PG/runtime, Node22/image, external named gates, privacy sinks and lifecycle remain required and cannot be waived by this source report."
+  ],
+  "execution": "Only read-only source/report shell inspection and this single report write; no mutable Java/private worker/runtime/SQL/Gradle/tests/build/process/model/spawn operations."
+}

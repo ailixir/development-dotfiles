@@ -1,0 +1,73 @@
+{
+  "schema": "interrupted-db-fault-executable-design/1",
+  "at": "2026-10-10T17:10:05.621593+00:00",
+  "status": "DESIGN_ONLY_UNEXECUTED_NO_GENERAL_DB_BOUND",
+  "authority": "Root design-only followup and interrupted-settlement-disposition d9639576ca0fba6ff3c32e5fa4c5ce496e1d73e4bc2c8492cd0772773e7d2bb7",
+  "currentAuthority": {
+    "gate": "docs/qa/evidence/STUDIO-OBS-007/root-combined-remediation-gate",
+    "resultSha256": "8bc65c6024edfdeef881780d54f6cb07d4d9223f779f5934873b385a35920fef",
+    "credit": "Current actual nine service rows healthyDB PASS plus existing control suites, source-bound; no unavailable/blockedDB runtime proof"
+  },
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "ceeec5a8ef899dced36c556b44ce2e1099fefe65084b7ffc4e3b0f69c4bc68dd",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java": "c6f424bab316112ed9b03cc07176df84afd87142a6804a91d7fa835ef8d97503",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "88be098d8b8cf0c5b790eb1f5f0bd8e837b9cd790ec11de43b84c26fcc7b3dbe"
+  },
+  "currentArchiveMatches": true,
+  "currentMechanism": "Dispatcher clears alreadyobserved interrupt only around one admission-scoped lostAck after send/resolved unwinding; restoresfinally; genuine reconciliation DBerror is propagated with suppressed fixed UNKNOWN transportcode. Repository starts a new real TransactionTemplate transaction and locks session FOR UPDATE.",
+  "firstGenuineUnavailableProbe": {
+    "futureOwnership": "Only GuidedServiceTransportFaultIT.java after a new exact root release: two test-only construction helpers and one added @Test, retaining all nine parameterized cases. No production/R/canonical/migration/role edits. If testhelpers become unwieldy, separately release GuidedInterruptedDatabaseUnavailableIT.java rather than inherit current nine tests.",
+    "mechanism": "Wire-transparent loopback PostgreSQL TCP proxy forwarding to the already owned test PostgreSQL. A per-scenario controller graph uses actual PostgreSQL JDBC through this private proxy; backend callback service and parent observer keep their direct connection to the SAME real PG database. Close only the case-owned proxy listener/bridges after actual dispatchPOST/headers. This produces a genuine driver connection-refused failure on lostAck, not a DataSource mock throwing SQLException and not stopping shared/current containers. Scope is unavailable application PG route, not a power failure of the PostgreSQL primary.",
+    "requiredGraph": "Test-only service factory overload accepts explicit JdbcTemplate/DataSource. Repository TransactionTemplate, materializer, preparation/binding/assignment stores, FixtureAccess, SecretAuditLifecycle and recorder MUST all use that identical routed DataSource; otherwise writes do not join the actual physical transaction. Existing nine-row factory delegates with original actualJdbc unchanged. Parent callback uses same underlying PG/real HTTPS security so worker claim/preparation/admission remain authentic.",
+    "setup": [
+      "Create fresh genuine test/session with existing trusted source accessor, actual materialization/preparation/admit, provider and relay; maxSessionSeconds600, real clocks, no authority mutation.",
+      "Use actual INTERRUPT_AFTER_HEADERS relay behavior but assert outside the nine-row method, with the private routed controller graph. Wait for real dispatch body and headers, and independently query parent/direct PG for actiondispatchCount1, consume1 and RELEASE/RESOLVED/version1 with USAGE0.",
+      "Assert actual providerread1/dispatchPOST1, cert/JWT verified. Own proxy records no bodies/credentials and has no effect-count authority.",
+      "Close private PG proxy listening socket and any case bridges; confirm direct parent SELECT1 still works and a fresh application-route connection is genuinely refused. Only then interrupt the actual caller waiting on relay response. Do not substitute a fabricated JDBC exception.",
+      "Join caller under explicit harness safety budget; require actual CannotCreateTransactionException with causal PSQLException connection SQLSTATE class08 and actual socket/connection refusal facts as observed (do not guess a narrower SQLSTATE before execution). Require exactly one safely suppressed GuidedSessionException UNKNOWN_OUTCOME/409 and restored interrupt=true.",
+      "Require original owned request byte[] and provider/SecretValue char[] zero, response peer disconnect, no reread/resend/reconsume. Parent direct PG MUST still show unresolved actionDISPATCHING/sessionnonterminal, exactly real RESOLVED RELEASE and NO terminal USAGE; no stop/teardown success inferred.",
+      "Reopen the SAME private proxy port/route and reconstruct controller services with same persisted session/fence/admission. If original lease is still genuinely fresh, actual same/newkey dispatch must return AlreadyConsumed historical action and add zero value reads/dispatchPOST; cached command rows are not a second winning consumption. If the fault exhausted genuine authority, require exact actual stale/expired refusal instead, never renew it to force green.",
+      "Demonstrate later truthful closure using existing actual authorized user service.cancel or real expire()/worker-lifecycle authority. Record pre-rescue unreconciled state separately; subsequent genuine terminal UNKNOWN and USAGE must not be attributed to failed lostAck transaction."
+    ],
+    "instruments": "Independent direct-PG observer, normal PostgreSQL driver, application route proxy sockets, actual caller thread/PID-less virtual thread status, existing bytes observer, keyed provider/POST/callback counters. No mock WonConsumption, direct final rows, fake expired clock, disabled guards, raw secret/credential proxy log or extra read.",
+    "cleanup": [
+      "Proxy is case-owned only; never stop/remove current fixture PostgreSQL or R containers.",
+      "On failure reopen route/release bridges before cleanup so a blocked actual JDBC attempt can complete; distinguish cleanup-assisted exit from pass timing. Use another interrupt only as watchdog cleanup, never credit it as initial failure bound.",
+      "Join caller; stop proxy threads/listener, erase all captured byte/char oracle buffers; actual fixture cleanup follows existing owner lifecycle. Preserve only safe counts/errors/times/hashes, no JDBC credentials or wire bodies."
+    ],
+    "watchdogMeaning": "A proposed10\u201315second test join is only harness safety. It is not an invented production DB timeout or five-second guarantee. Local closed-port refusal may be fast; pool exhaustion/blackhole/heldrow behavior remains separate."
+  },
+  "heldRowFollowup": {
+    "status": "SEPARATE_EXPLICITLY_UNPROVED; no general bound claimed",
+    "minimalConstruction": "Dedicated fresh session in same legitimate fixture, actual interrupted transport after read/send/RELEASE. Parent opens a genuine separate PG Connection, BEGIN and SELECT session_id FROM studio_guided_sessions WHERE session_id=? FOR UPDATE before interrupting caller. Identify real helper waiter/locker backend PIDs via actual connections and pg_blocking_pids/pg_stat_activity; no caller supplied boolean.",
+    "observation": "Require actual PG Lock wait while helper has no terminal commit, bytes/chars erased and counters fixed. Observe for a declared short finite window; caller remaining blocked is evidence of lock dependency, not a test failure against an invented5s production contract.",
+    "release": "ROLLBACK real locker, then require actual healthy reconciliation UNKNOWN/audit commit and restored interrupt with no new read/send. Unreleased row/pool bounds cannot be credited by a released-lock observation.",
+    "futureBoundDecision": "Before claiming a general stop/cleanup deadline, separately inspect/capture effective TransactionTemplate timeout, driver connect/login/socket/network timeouts, JdbcTemplate querytimeout and server statement_timeout/lock_timeout using a safe timeout-only whitelist. Any bounded reconciliation production change needs independent design/release; no global timeout/outbox/background authority inferred here.",
+    "cleanup": "Always rollback/close locker in finally; do not leave a JDBC waiter holding testprocess alive. If cleanup release is required after watchdog, record probe fail/block and recovery separately."
+  },
+  "existingDeadlines": {
+    "transport": "GuidedRunnerClient min15seconds and real caller/session expiry uses monotonic remaining; already healthy tested",
+    "session": "Current actual maxSessionSeconds3 expiry fixture and normal600 bounds distinct from DB reconciliation",
+    "callback": "Test HTTP callback connect3/request5 seconds applies only fixture HTTPS, not PG lostAck",
+    "transaction": "GuidedSessionRepository/configuration shown uses plain TransactionTemplate/DataSourceTransactionManager with no explicit reconciliation timeout; test DriverManagerDataSource has no configured pool wait/query/lock timeout in shown source",
+    "driverDefaults": "Effective PG driver defaults have not been independently captured here; do not assert a specific connect/socket bound from memory",
+    "healthyJoin": "Existing callerjoin5seconds is a healthy test condition, not general unavailable/heldrow guarantee"
+  },
+  "budget": "One genuine application-PG-route unavailable scenario first; second held-row observation separately after source-bound result. No additional models or runtime started for this design. Wholewave ceilingUSD500; telemetry unavailable.",
+  "proposedRootCommands": [
+    "After exact new test scope release/root freeze: actual scoped Gradle Spotless and compileJava/compileTestJava, then new unavailable @Test plus allnine GuidedServiceTransportFaultIT rows and existing HTTPS/buffer controls",
+    "Capture allsource+class/resource identities, freshXML/counts, actual timeout/error/cleanup evidence; independent helper re-review before any general bound claim"
+  ],
+  "actions": {
+    "onlyThisDesignWritten": true,
+    "sourceTestOrCanonicalEdits": false,
+    "runtimeGradleOrContainerActions": false,
+    "qaStatusOrApprovalChanged": false
+  },
+  "limits": [
+    "No new unavailable/heldrow/runtime PASS",
+    "Application PG proxyroute refusal is not primary outage or pool exhaustion proof",
+    "No full CoreHTTP/browser/model/SIEM/enterpriseVault/all19AC/wave approval"
+  ]
+}

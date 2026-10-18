@@ -1,0 +1,170 @@
+{
+  "verdict": "GO_SUPPORTING_DIAGNOSTIC_ONLY",
+  "candidatePatchSha256": "f960bcc0bc14adaa0a1e9b1319fa125a66a3a6b5eea4b1ebff7774a644a3e10f",
+  "candidateSourceSha256": "904bac20b52090180f9a1192762aa65245dd12e6759809a8941182f6f5544ff6",
+  "currentFormattedSourceSha256": "cafa3f0359e8e49a50eb096a0b0c1430e666cc3119a4a04347ed42399f556faa",
+  "checks": {
+    "baseHash": true,
+    "candidateHash": true,
+    "patchHash": true,
+    "inverseHash": true,
+    "formattedCurrentHash": true,
+    "forwardExact": true,
+    "inverseExact": true,
+    "formatterTokenPreservation": true,
+    "originalTestBodiesExact": true,
+    "originalTests37": true,
+    "scriptsExact": true,
+    "scripts8": true,
+    "nineCurrentSourceCompiledBindings": true
+  },
+  "bindings": [
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "sourceSha256": "c9a36bac3fe1cbd5d98b4599734013bb3aa64cdac2922406e1df865d8e909b09",
+      "classSha256": "03e1a3d779cd36e3c532618929994a50973590a1178c35827c5cecf4346bdc9e",
+      "method": "finalizeForUser",
+      "target": "GuidedSessionRepository.transaction",
+      "requiredLines": [
+        110
+      ],
+      "actualLines": [
+        95,
+        100,
+        110,
+        138,
+        159,
+        182,
+        195,
+        235
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "sourceSha256": "c9a36bac3fe1cbd5d98b4599734013bb3aa64cdac2922406e1df865d8e909b09",
+      "classSha256": "03e1a3d779cd36e3c532618929994a50973590a1178c35827c5cecf4346bdc9e",
+      "method": "finalizeForUser",
+      "target": "ObservedValidationClient.validate",
+      "requiredLines": [
+        135
+      ],
+      "actualLines": [
+        135
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java",
+      "sourceSha256": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+      "classSha256": "47aa24bd5b5d5a0b92f0f447047e03799b26578db2d5110964e049283e921b97",
+      "method": "validate",
+      "target": "GuidedContracts.validateAndCanonical",
+      "requiredLines": [
+        59
+      ],
+      "actualLines": [
+        59
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java",
+      "sourceSha256": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+      "classSha256": "47aa24bd5b5d5a0b92f0f447047e03799b26578db2d5110964e049283e921b97",
+      "method": "validate",
+      "target": "String.getBytes",
+      "requiredLines": [
+        65
+      ],
+      "actualLines": [
+        65
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java",
+      "sourceSha256": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+      "classSha256": "47aa24bd5b5d5a0b92f0f447047e03799b26578db2d5110964e049283e921b97",
+      "method": "validate",
+      "target": "PublicationBudget.remaining",
+      "requiredLines": [
+        69
+      ],
+      "actualLines": [
+        69,
+        91,
+        126
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java",
+      "sourceSha256": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+      "classSha256": "47aa24bd5b5d5a0b92f0f447047e03799b26578db2d5110964e049283e921b97",
+      "method": "validate",
+      "target": "HttpClient.send",
+      "requiredLines": [
+        82
+      ],
+      "actualLines": [
+        82
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "sourceSha256": "398648c589598b15b0e93165302824d91c5e595a4d97454f5ff41e35806f2e04",
+      "classSha256": "d6b208f8a411daaa2446d5cc6acfe99e73525fa3bb4e5c4dcfce0b6707a76335",
+      "method": "validatedCanonical",
+      "target": "canonical",
+      "requiredLines": [
+        99
+      ],
+      "actualLines": [
+        99
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "sourceSha256": "398648c589598b15b0e93165302824d91c5e595a4d97454f5ff41e35806f2e04",
+      "classSha256": "d6b208f8a411daaa2446d5cc6acfe99e73525fa3bb4e5c4dcfce0b6707a76335",
+      "method": "validatedCanonical",
+      "target": "GuidedContracts$CompiledSchema.valid",
+      "requiredLines": [
+        104
+      ],
+      "actualLines": [
+        104
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "sourceSha256": "3ba95cb84ae5ad534c9d1bb83265a5e890496a501cf8c7b23508a3cbbb5efb6f",
+      "classSha256": "5c192099fbed433037da09139feee1735fb6a93d6c45a3c4c0ee32a8db2e30e8",
+      "method": "guidedPlanPublisher",
+      "target": "Clock.systemUTC",
+      "requiredLines": [
+        94
+      ],
+      "actualLines": [
+        94
+      ],
+      "bound": true
+    }
+  ],
+  "sourceReview": {
+    "callback": "Exactly one original callback and one real super.execute; normal return, new transaction, non-rollback result and no ambient transaction required before observation. Commit errors preserve original throw.",
+    "selection": "Existing diagnostic flag only; one exact selected public POST finalize; original chain remains unwrapped; no rearm.",
+    "boundary": "Returned VALIDATING Attempt deadline read transiently after committed callback at Publisher110; actual publisher private Clock field is the same clock used by original budget. Only signed remaining nanos and monotonic origin retained.",
+    "privacy": "No request, body, Attempt, deadline, Clock, identifiers, stack text or provider arguments retained or exported. Transient stack arrays cleared. No Mockito recorder.",
+    "bounds": "One original 30-second window, 20ms sampling, total unique thread union <=8; six fixed phase rows; original40 claim bins and one bounded PG query unchanged.",
+    "cleanup": "Selected finalizer cleared on request completion, sampler completion and close; publication fields require joined clean capture. Diagnostic OFF skips new hook monitor.",
+    "interpretation": "Slack is observed at claim return. Positive samples establish sampled presence and offsets only. Missing samples do not establish absence; spans are not CPU costs. Send-call sample does not establish HTTP delivery. No acceptance credit."
+  },
+  "sharedProductionOrTestEdits": false,
+  "buildOrRuntimeExecuted": false,
+  "formalQaOrLifecycleAdvancement": false
+}

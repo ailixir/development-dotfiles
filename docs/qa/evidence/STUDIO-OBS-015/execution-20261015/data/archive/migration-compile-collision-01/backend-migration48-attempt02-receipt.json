@@ -1,0 +1,105 @@
+{
+  "artifact": "Independent Quinn bounded migration48 execution receipt",
+  "at": "2026-10-15T05:06:02.252142+00:00",
+  "status": "COMPILETESTJAVA_BLOCKED_ZERO_ACTUAL_CASES",
+  "label": "backend-migration48-attempt02",
+  "authorizedCommand": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend.py backend-migration48-attempt02 test --tests com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT --console=plain",
+  "authorizedCommandsExecutedThisWindow": 1,
+  "liveExecSession": 9736,
+  "polledThroughTerminalCompletion": true,
+  "wrapperExit": 1,
+  "gradleExit": 1,
+  "elapsedSeconds": 5.16,
+  "actualCaseCounts": {
+    "total": 0,
+    "passed": 0,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "actualTestFailures": [],
+  "actualTestSkips": [],
+  "notExecutedPlannedMethods": 48,
+  "freshXmlFiles": [],
+  "sourceStable": true,
+  "testInputStable": true,
+  "distStable": true,
+  "sourceDigestBefore": "e91134acdc4455a49fa4344619431eef87dd46a22f3d46b957e9a94e97192df0",
+  "sourceDigestAfter": "e91134acdc4455a49fa4344619431eef87dd46a22f3d46b957e9a94e97192df0",
+  "distDigestBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+  "distDigestAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+  "sourceChangesDuringRun": [],
+  "mainCompile": "COMPLETED",
+  "failingStage": ":compileTestJava",
+  "compilerDiagnostic": "variable declarations is already defined in constructor Database(List<String>)",
+  "owningFile": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+  "ownerLane": "data015",
+  "ownerEvidence": "Publication migration fixture remains in data source-hold-checkpoint-04; not among five files transferred by fixture-target-handoff.json",
+  "rootCause": {
+    "constructorLine": 75,
+    "outerVariableDeclarationLine": 112,
+    "lambdaStartLine": 151,
+    "innerRedeclarationLine": 164,
+    "explanation": "Database(List<String>) declares local var declarations before tx.executeWithoutResult; its lambda declares another var declarations in an inner block. Java lambda bodies cannot shadow enclosing method/constructor local variables."
+  },
+  "frozenFiles": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java": "437015a43b2fab7ca0467b8fa2c9ad81bbe89256f31066aa104d0fa608db4070",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java": "84e4eaf0df2b2754c8b0198655bba550546e5d589da830657602f7bcec4cb340",
+    "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql": "a4e0c441ebcda29f00cc382fb7ed8eb6ce408a44b53a758e8c20277ee05f4a91"
+  },
+  "engine": {
+    "status": "NOT_STARTED_COMPILETESTJAVA_BLOCKED",
+    "actualServerVersion": null,
+    "actualServerImage": null,
+    "configuredImage": "postgres:15-alpine",
+    "cachedImageMetadata": {
+      "Id": "sha256:ed8478222652ed5ec9cd22a74417af86b61d7cf03bea9bb4d3193be315c16567",
+      "RepoDigests": [
+        "postgres@sha256:fe0737ba566a2c5b2a28f34433c0a423261900ec17b9bf7ad115e1aae7e57f1b"
+      ],
+      "Architecture": "arm64",
+      "Os": "linux",
+      "versionEnvironment": [
+        "PG_MAJOR=15",
+        "PG_VERSION=15.19"
+      ]
+    },
+    "metadataLimitation": "Cached image declares PG_VERSION=15.19; no server version query or actual run engine evidence. compileTestJava failed before JUnit/BeforeAll/PG.start. No PostgreSQL engine/version was exercised.",
+    "liveContainerObservation": "backend-migration48-attempt02-engine-live.json",
+    "testcontainersVersionFromBuildFile": "1.20.2"
+  },
+  "knownMandatoryGap": "No existing revision, policy or recording rows are seeded/snapshotted/compared in this upgrade method. Those byte-preservation assertions remain required before final completion, even if all48 later pass.",
+  "remainingUnverified": [
+    "Two publication/head fixture ports unverified: GuidedPublicationMigrationTest and GuidedSecretLoginMigrationTest",
+    "Full HTTP tests unverified",
+    "Runner tests unverified",
+    "Joined acceptance tests unverified",
+    "Native/browser execution unverified",
+    "Coverage thresholds unverified",
+    "Independent final story gate remains later"
+  ],
+  "nextActions": [
+    {
+      "owner": "data015 via root exclusive write release",
+      "action": "Correct duplicate declarations local name in GuidedPublicationMigrationTest.Database; this specialist made no source fix."
+    },
+    {
+      "owner": "root",
+      "action": "Re-freeze all writers after correction; a further run requires its own distinct authorized evidence window. No migration test result can be credited from attempt02."
+    },
+    {
+      "owner": "data015 via root source release",
+      "action": "Add populatedV20 upgrade revision/policy/recording byte-preservation assertions before final completion."
+    },
+    {
+      "owner": "independent final reviewers",
+      "action": "Assess complete requirement evidence later; no story verdict or Done transition issued."
+    }
+  ],
+  "noRetry": true,
+  "noSourceConfigurationThresholdFilterChange": true,
+  "storyStatusChanged": false,
+  "qaVerdictIssued": false,
+  "userDevDatabaseTouched": false,
+  "dependencyInstallDockerPruneNativeBuildDistCommands": false
+}

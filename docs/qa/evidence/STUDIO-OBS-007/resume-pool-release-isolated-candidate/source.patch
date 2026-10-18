@@ -1,0 +1,32 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java.before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -5187,6 +5187,19 @@
+         assertThat(P7_OUTAGE_SCOPE.compareAndSet(null, scope)).isTrue();
+       }
+       assertThat(dispatcher.dispatchOnce()).isEqualTo(capacity ? 1 : 0);
++      if (capacity) {
++        var original = ACTUAL_DISPATCH_DIAGNOSTICS.get(execution);
++        assertThat(original != null).isTrue();
++        JsonNode originalRefusal = original.path("sendOutcome");
++        assertThat(
++                "DEFINITE_REFUSAL".equals(originalRefusal.path("kind").asText())
++                    && originalRefusal.path("retryable").asBoolean()
++                    && originalRefusal.path("classifiedHttpStatus").asInt() == 429)
++            .isTrue();
++        Files.writeString(
++            TEMP.resolve("initial-context-state.json"), "{\"pause\":false,\"fail\":false}");
++        paused = false;
++      }
+       assertThat(VAULT.readCount() - attempted).isEqualTo(1);
+       assertThat(
+               COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS")
+@@ -5251,9 +5264,6 @@
+                     execution,
+                     UUID.fromString(attempt)))
+             .isZero();
+-        Files.writeString(
+-            TEMP.resolve("initial-context-state.json"), "{\"pause\":false,\"fail\":false}");
+-        paused = false;
+         p3AwaitExecution(blocker, "PASSED");
+         // Only the genuine holder is cleaned; global cleanup would cancel the queued retry owner.
+         p3CleanupOrdinary(blocker, p3Cookie, System.nanoTime() + Duration.ofSeconds(60).toNanos());

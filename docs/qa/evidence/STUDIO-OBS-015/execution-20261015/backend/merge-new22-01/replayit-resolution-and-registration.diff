@@ -1,0 +1,89 @@
+diff --git a/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/49497aae-dbea-402b-a9a6-2d80f4cd2e4e/scratchpad/replayit-patched-only.java b/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/49497aae-dbea-402b-a9a6-2d80f4cd2e4e/scratchpad/merge22/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+index ec51d90cf..10a668ba0 100644
+--- a/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/49497aae-dbea-402b-a9a6-2d80f4cd2e4e/scratchpad/replayit-patched-only.java
++++ b/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/49497aae-dbea-402b-a9a6-2d80f4cd2e4e/scratchpad/merge22/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -140,6 +140,23 @@ class GuidedPublicationReplayIT {
+       "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence",
+       "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce",
+       "incrementalPrefixCallbacksKeepStateAndFenceBothReservations",
++      "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
++      "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch",
++      "incrementalDriftAuthorityRejectsEveryExactJoin",
++      "incrementalExcludedAttemptCannotHideOtherUnsettledActions",
++      "incrementalPrefixContinuationMatrixDoneAndRefreshRows",
++      "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned",
++      "incrementalPrefixPolicyRefusalsNeverBecomeDrift",
++      "incrementalFreshPostConsentGuardsDenyDangerousProposals",
++      "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry",
++      "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery",
++      "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary",
++      "incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority",
++      "incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution",
++      "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne",
++      "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear",
++      "incrementalPartialDriftStepReadPublishesAndReplaysTwice",
++      "incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek",
+       "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache",
+       "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
+       "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+@@ -184,6 +201,11 @@ class GuidedPublicationReplayIT {
+       "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead",
+       "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead",
+       "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion",
++      "incrementalSecretPrefixPreservesEveryVaultFaultOracle",
++      "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck",
++      "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent",
++      "incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation",
++      "incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication",
+       "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass");
+   private static final java.util.Set<String> INCREMENTAL_METHODS = java.util.Set.of("prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest",
+       "prefixProducerContextDefiniteRefusalsStopBeforePreparation",
+@@ -191,6 +213,23 @@ class GuidedPublicationReplayIT {
+       "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence",
+       "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce",
+       "incrementalPrefixCallbacksKeepStateAndFenceBothReservations",
++      "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
++      "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch",
++      "incrementalDriftAuthorityRejectsEveryExactJoin",
++      "incrementalExcludedAttemptCannotHideOtherUnsettledActions",
++      "incrementalPrefixContinuationMatrixDoneAndRefreshRows",
++      "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned",
++      "incrementalPrefixPolicyRefusalsNeverBecomeDrift",
++      "incrementalFreshPostConsentGuardsDenyDangerousProposals",
++      "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry",
++      "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery",
++      "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary",
++      "incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority",
++      "incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution",
++      "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne",
++      "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear",
++      "incrementalPartialDriftStepReadPublishesAndReplaysTwice",
++      "incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek",
+       
+       "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+       "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+@@ -4130,8 +4169,9 @@ class GuidedPublicationReplayIT {
+   }
+ 
+   private void b3RestoreCsi() {
+-    primaryCsi = "CSI-123";
+-    forgetCachedCoreIdentity();
++    // As incrementalJoined: the B3 CSI stays until @AfterEach has cancelled this case's sessions
++    // as their CSI owner; @AfterEach then restores CSI-123 and forgets the cached identity.
++    incrementalCsiRestorePending = true;
+   }
+ 
+   /** Retains this invocation's value-free stage records beside the cohort exports. */
+@@ -12918,6 +12958,12 @@ RevRuntime.prototype.dispatch=async function(...args){
+     // each model call's ceiling to the CSI's UTC day, and the incremental cases on one CSI exhaust
+     // the ruled daily budget (R2: BUDGET_EXCEEDED from confirm-long-wait on). On failure the CSI
+     // stays until @AfterEach has cancelled this case's sessions as their CSI owner.
++    // A caller that already owns an isolated CSI (B3 parents, which run a second generation on the
++    // same test afterwards) keeps it for the whole case and owns its restore.
++    if (!"CSI-123".equals(primaryCsi)) {
++      incrementalJoinedCase(variant);
++      return;
++    }
+     primaryCsi = "CSI-INC-" + (++p3CsiOrdinal);
+     forgetCachedCoreIdentity();
+     boolean completed = false;

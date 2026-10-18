@@ -1,0 +1,9 @@
+Reproduction of the paused-run fixture hook (ReplayIT.checkInitial: readFileSync+JSON.parse every 20 ms)
+against the writer used by the test.
+Environment: macOS arm64 (APFS), node v23.10.0 reader, JDK 21 writer, 60,000 state-file writes each.
+
+W2.java (Files.writeString = open(O_TRUNC) then write; the pattern at ReplayIT before the patch):
+  polls=2756 bad=318   (318 polls read an empty file -> JSON.parse throws "Unexpected end of JSON input")
+  => 318 / 60,000 = 0.53% of writes were observed by a poll.
+W3.java (stage temp file + Files.move ATOMIC_MOVE, REPLACE_EXISTING; the pattern in fix.patch):
+  polls=2765 bad=0

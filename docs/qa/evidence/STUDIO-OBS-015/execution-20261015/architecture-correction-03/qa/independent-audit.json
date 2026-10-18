@@ -1,0 +1,948 @@
+{
+  "classification": "INDEPENDENT_ABSTRACT_STATE_AND_TIMING_DESIGN_ONLY",
+  "createdAt": "2026-10-15T05:22:59.593328+00:00",
+  "manifestSha256": "0bf2a5a9ea32f79b27563809b68ba6e2de9f0ccbf2633f54302e2f3bd031e311",
+  "boundFiles": [
+    {
+      "file": "check-design.cjs",
+      "expected": "9b77fa53e9bff5eb6558d97cacc79a7d668c6df86f6b8a0d81de403bb76bf321",
+      "observed": "9b77fa53e9bff5eb6558d97cacc79a7d668c6df86f6b8a0d81de403bb76bf321",
+      "ok": true
+    },
+    {
+      "file": "completion-receipt.json",
+      "expected": "add4a8861831472c6d7faab0fe3a3e9e584607db143138877ee8d64df084b0aa",
+      "observed": "add4a8861831472c6d7faab0fe3a3e9e584607db143138877ee8d64df084b0aa",
+      "ok": true
+    },
+    {
+      "file": "design-check-result.json",
+      "expected": "7cd1a9c415b7dc2f35e566251e44d82023e471d001e0b4b8457232456b95babc",
+      "observed": "7cd1a9c415b7dc2f35e566251e44d82023e471d001e0b4b8457232456b95babc",
+      "ok": true
+    },
+    {
+      "file": "fixtures.json",
+      "expected": "f66efc8dfbef5a6d50aad7ba29bc3d335efb4b85eb96cb6073bd76e2d81e7c28",
+      "observed": "f66efc8dfbef5a6d50aad7ba29bc3d335efb4b85eb96cb6073bd76e2d81e7c28",
+      "ok": true
+    },
+    {
+      "file": "generate-design.py",
+      "expected": "45e166c71edff3b2d66ea61c1f74b9d5aabf5c085ffd9542bf7ede2ef2ae2035",
+      "observed": "45e166c71edff3b2d66ea61c1f74b9d5aabf5c085ffd9542bf7ede2ef2ae2035",
+      "ok": true
+    },
+    {
+      "file": "implementation-mapping.json",
+      "expected": "b559f4bce6fd09aaaba3c2ea2ee3d4a1658332f935e7e33f290d1cc6d8e337a6",
+      "observed": "b559f4bce6fd09aaaba3c2ea2ee3d4a1658332f935e7e33f290d1cc6d8e337a6",
+      "ok": true
+    },
+    {
+      "file": "interfaces.schema.json",
+      "expected": "a2e5ed67cb44937619de915c6ee5d1c168873fd97f2942180b7c1b96b3316c91",
+      "observed": "a2e5ed67cb44937619de915c6ee5d1c168873fd97f2942180b7c1b96b3316c91",
+      "ok": true
+    },
+    {
+      "file": "ruling.md",
+      "expected": "a095c6221ed200f6802f8fc09f97a5fc26ef60ffe8ae6ef46093af3b24928d20",
+      "observed": "a095c6221ed200f6802f8fc09f97a5fc26ef60ffe8ae6ef46093af3b24928d20",
+      "ok": true
+    },
+    {
+      "file": "sql-change-spec.json",
+      "expected": "f63cb91d348eeff50dae54d77a2f4901d3439d77a2a51fd1cca6d645aa1e71de",
+      "observed": "f63cb91d348eeff50dae54d77a2f4901d3439d77a2a51fd1cca6d645aa1e71de",
+      "ok": true
+    },
+    {
+      "file": "test-delta.json",
+      "expected": "e5b642c3170f4a44005715cbb6a8f674eab9e962b07650ca0a6b0a8ee253194a",
+      "observed": "e5b642c3170f4a44005715cbb6a8f674eab9e962b07650ca0a6b0a8ee253194a",
+      "ok": true
+    },
+    {
+      "file": "write-mapping.py",
+      "expected": "5520d098eb3525e140ba4637dffd1b85afbf2adf8dd5886ff10593954b4562f9",
+      "observed": "5520d098eb3525e140ba4637dffd1b85afbf2adf8dd5886ff10593954b4562f9",
+      "ok": true
+    }
+  ],
+  "preservedHistoricalFiles": [
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/acceptance-delta.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/acceptance-inventory.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/algorithms.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/acceptance-delta.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/algorithms.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/archive-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/check-design.cjs",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/contract-edits.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/design-check-result.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/fixtures.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/generate-design-fixtures.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/implementation-ruling.md",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/interfaces.schema.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/manifest.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/check-design.cjs",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/completion-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/contract-edits.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/design-check-result.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/fixtures.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/generate-design-fixtures.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/implementation-ruling.md",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/interfaces.schema.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/V21__guided_session_replaying_prefix.sql",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/V21__guided_session_replaying_prefix.sql",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/archive-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/checkpoint.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-smoke.sql",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validate.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validation-attempt-01.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validation-attempt-02.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validation-attempt-03.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validation-attempt-04.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validation-attempt-05.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validation-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/interface-and-test-spec.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/make-draft-smoke.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/manifest.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/schema-surface-disposition.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/write-design-spec.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/checkpoint.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validate.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validation-attempt-01.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validation-attempt-02.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validation-attempt-03.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validation-attempt-04.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validation-attempt-05.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validation-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/final-parity.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/final-readiness-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/interface-and-test-spec.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/make-draft-smoke.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/schema-surface-disposition.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/write-design-spec.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/check-design.cjs",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/completion-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/design-check-result.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/fixtures.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/generate-design.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/implementation-mapping.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/interfaces.schema.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/ruling.md",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/test-delta.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/check-design.cjs",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/completion-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/design-check-result.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/fixtures.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/generate-design.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/implementation-mapping.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/ruling.md",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/test-delta.json",
+      "ok": true
+    }
+  ],
+  "diagnosticSources": [
+    {
+      "file": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+      "captured": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42",
+      "observed": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42",
+      "unchanged": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json",
+      "captured": "58a75633d2dcf1aa94f80e17172612fae6b31cab08f8fc498eda1ccac00cbf24",
+      "observed": "58a75633d2dcf1aa94f80e17172612fae6b31cab08f8fc498eda1ccac00cbf24",
+      "unchanged": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json",
+      "captured": "abcdf0b512d6a776a80b41badaab5f4b3a6b427512570cee98b4b4fc6bd9109a",
+      "observed": "abcdf0b512d6a776a80b41badaab5f4b3a6b427512570cee98b4b4fc6bd9109a",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "captured": "cf1c90915ac34fbfd148abc1a59ae37fc8fd111bbdd050be1f9322788d29be99",
+      "observed": "1886d18e44619a19ac9b34eedfa3433375ea276e6fc63ec2950eeab5ac6e739c",
+      "unchanged": false
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuard.java",
+      "captured": "edd27f4973e4d3fe247cd7a1cdc9ab3d5e1288aa92ad617b7f34c69e6e546606",
+      "observed": "edd27f4973e4d3fe247cd7a1cdc9ab3d5e1288aa92ad617b7f34c69e6e546606",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "captured": "9784a8d8f1c9279af8dcd790d32e4b2bacb7f6ef2503e1e61f185681a5087744",
+      "observed": "9784a8d8f1c9279af8dcd790d32e4b2bacb7f6ef2503e1e61f185681a5087744",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+      "captured": "6b7f8ce7e4cdfb49ae00cf39fb8c6ba30278adb074913b0c1cb5a38c81c59849",
+      "observed": "07976ffe0cfe7e32203b481bc443542df3ea5a1800c1794506fa207072d8bdd0",
+      "unchanged": false
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "captured": "5d2d76d0b28099060a3e8f83ed5901e0fd61da4e8b00b2f5068b00b5b259d325",
+      "observed": "d51bee068b07dbc890e1a67bf684d6271660a1860888e7a31dc7df71e5fc3203",
+      "unchanged": false
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimings.java",
+      "captured": "31f64d948a49ea8a9cc0a7fc696f4e0a596c81856475d8aa06fee6399120c5f7",
+      "observed": "31f64d948a49ea8a9cc0a7fc696f4e0a596c81856475d8aa06fee6399120c5f7",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql",
+      "captured": "a4e0c441ebcda29f00cc382fb7ed8eb6ce408a44b53a758e8c20277ee05f4a91",
+      "observed": "a4e0c441ebcda29f00cc382fb7ed8eb6ce408a44b53a758e8c20277ee05f4a91",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V14__guided_sessions.sql",
+      "captured": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357",
+      "observed": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V19__guided_governance.sql",
+      "captured": "628b47efbb656aef8a3260f03e7dc77d988555a306652b4d433b8796e3424855",
+      "observed": "628b47efbb656aef8a3260f03e7dc77d988555a306652b4d433b8796e3424855",
+      "unchanged": true
+    },
+    {
+      "file": "studio-runner/src/guided/evidence.ts",
+      "captured": "cf69ca5f59e392dc518638844c9777094648c8c0153f0862802cd7b288bc6a27",
+      "observed": "cf69ca5f59e392dc518638844c9777094648c8c0153f0862802cd7b288bc6a27",
+      "unchanged": true
+    },
+    {
+      "file": "studio-runner/src/guided/runtime.ts",
+      "captured": "86e4767622ee7c0c48583a755867bcbbda63b35fec005353b7429b1a456d86bc",
+      "observed": "86e4767622ee7c0c48583a755867bcbbda63b35fec005353b7429b1a456d86bc",
+      "unchanged": true
+    },
+    {
+      "file": "studio-runner/src/guided/ownership.ts",
+      "captured": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf",
+      "observed": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/clarification.schema.json",
+      "captured": "8ec215edc4334d4b4410c44ec3d6ca8da8ec69c3fe4e743093f842f7def17cca",
+      "observed": "8ec215edc4334d4b4410c44ec3d6ca8da8ec69c3fe4e743093f842f7def17cca",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/action-timing.schema.json",
+      "captured": "d2cb597f799dfac20a020d26142e568524eed7c24986eb4ae1566c569c729e7d",
+      "observed": "d2cb597f799dfac20a020d26142e568524eed7c24986eb4ae1566c569c729e7d",
+      "unchanged": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration48-attempt03-receipt.json",
+      "captured": "e5ec03a013138d056412ce422473a469bd7db25199e415d04936bae0bfe1f669",
+      "observed": "e5ec03a013138d056412ce422473a469bd7db25199e415d04936bae0bfe1f669",
+      "unchanged": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration48-attempt03-engine-evidence.json",
+      "captured": "6dde279508e5a10a8e400cf22d8151906b81275590c978231ba1a19031d0bb02",
+      "observed": "6dde279508e5a10a8e400cf22d8151906b81275590c978231ba1a19031d0bb02",
+      "unchanged": true
+    }
+  ],
+  "historicalMigration": {
+    "receipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration48-attempt03-receipt.json",
+    "sha256": "e5ec03a013138d056412ce422473a469bd7db25199e415d04936bae0bfe1f669",
+    "xmlSha256": "c628f6d3ea2e96b0fc4ca4373f833444efba5551eefa03d1f8c4b4270d1f9fd6",
+    "actualXmlCounts": {
+      "tests": 48,
+      "failures": 7,
+      "errors": 0,
+      "skipped": 0
+    },
+    "scope": "Old a4e0 V21 only; not proof of amendment."
+  },
+  "checks": [
+    {
+      "kind": "state",
+      "name": "default-prefix-asks-current-question-and-model0",
+      "ok": true,
+      "actual": "ACCEPT",
+      "expected": "ACCEPT"
+    },
+    {
+      "kind": "state",
+      "name": "explicit-allow-prefix-skips-question",
+      "ok": true,
+      "actual": "ACCEPT",
+      "expected": "ACCEPT"
+    },
+    {
+      "kind": "state",
+      "name": "deny-prefix-stops-with-policy-refusal",
+      "ok": true,
+      "actual": "TERMINAL_POLICY_DENIED",
+      "expected": "TERMINAL_POLICY_DENIED"
+    },
+    {
+      "kind": "state",
+      "name": "ungrounded-current-target-stops-even-old-base-was-authorized",
+      "ok": true,
+      "actual": "TERMINAL_POLICY_DENIED",
+      "expected": "TERMINAL_POLICY_DENIED"
+    },
+    {
+      "kind": "state",
+      "name": "destructive-current-target-stops-even-session-confirmed",
+      "ok": true,
+      "actual": "TERMINAL_POLICY_DENIED",
+      "expected": "TERMINAL_POLICY_DENIED"
+    },
+    {
+      "kind": "state",
+      "name": "accept-current-answer-resumes-prefix-with-refresh-required",
+      "ok": true,
+      "actual": "ACCEPT",
+      "expected": "ACCEPT"
+    },
+    {
+      "kind": "state",
+      "name": "pending-prefix-never-reserves-model-while-awaiting",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "both model paths fenced by durable pending"
+    },
+    {
+      "kind": "state",
+      "name": "pending-prefix-never-admits-action-while-awaiting",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "no wait/terminal admission"
+    },
+    {
+      "kind": "state",
+      "name": "pending-prefix-coordinator-returns-no-work",
+      "ok": true,
+      "actual": "ACCEPT",
+      "expected": "ACCEPT"
+    },
+    {
+      "kind": "state",
+      "name": "wrong-question",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "exact current answer"
+    },
+    {
+      "kind": "state",
+      "name": "wrong-choice",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "exact current answer"
+    },
+    {
+      "kind": "state",
+      "name": "stale-generation",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "exact current answer"
+    },
+    {
+      "kind": "state",
+      "name": "wrong-user-cannot-confirm",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "current original user and waiting state"
+    },
+    {
+      "kind": "state",
+      "name": "changed-document",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "question exact identity"
+    },
+    {
+      "kind": "state",
+      "name": "changed-owner-fence",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "current owner/context/source/evidence/request"
+    },
+    {
+      "kind": "state",
+      "name": "lost-live-lease",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "durable live prefix"
+    },
+    {
+      "kind": "state",
+      "name": "changed-source",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "current owner/context/source/evidence/request"
+    },
+    {
+      "kind": "state",
+      "name": "wrong-policy-hash",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "current frozen confirm-first policy"
+    },
+    {
+      "kind": "state",
+      "name": "changed-context",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "current owner/context/source/evidence/request"
+    },
+    {
+      "kind": "state",
+      "name": "wrong-prefix-request",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'"
+    },
+    {
+      "kind": "state",
+      "name": "hidden-inflight-action",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "no inflight work or delivery"
+    },
+    {
+      "kind": "state",
+      "name": "generic-model-question-cannot-escape-prefix",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "existing side-effect question only"
+    },
+    {
+      "kind": "state",
+      "name": "forged-marker-extra-field",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "closed pending marker"
+    },
+    {
+      "kind": "state",
+      "name": "terminal-cancelled-cannot-resume",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "current original user and waiting state"
+    },
+    {
+      "kind": "state",
+      "name": "terminal-expired-cannot-resume",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "current original user and waiting state"
+    },
+    {
+      "kind": "state",
+      "name": "terminal-unknown_outcome-cannot-resume",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "current original user and waiting state"
+    },
+    {
+      "kind": "state",
+      "name": "cancel-during-wait-closes-without-native-or-model",
+      "ok": true,
+      "actual": "ACCEPT",
+      "expected": "ACCEPT"
+    },
+    {
+      "kind": "state",
+      "name": "same-owner-renewal-retains-question-context-and-clock",
+      "ok": true,
+      "actual": "ACCEPT",
+      "expected": "ACCEPT"
+    },
+    {
+      "kind": "state",
+      "name": "old-preconfirmation-preparation-cannot-admit",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "old prepared authority cannot admit"
+    },
+    {
+      "kind": "state",
+      "name": "postconfirmation-refresh-invalidates-old-proof-same-browser",
+      "ok": true,
+      "actual": "ACCEPT",
+      "expected": "ACCEPT"
+    },
+    {
+      "kind": "state",
+      "name": "fresh-postconfirmation-proposal-can-pass-guard",
+      "ok": true,
+      "actual": "ACCEPT",
+      "expected": "ACCEPT"
+    },
+    {
+      "kind": "state",
+      "name": "base-confirmation-is-not-current-session-consent",
+      "ok": true,
+      "actual": "ACCEPT",
+      "expected": "ACCEPT"
+    },
+    {
+      "kind": "timing",
+      "name": "legal-distinct-admission-tie",
+      "ok": true,
+      "actual": "ACCEPT",
+      "derivedSteps": [
+        {
+          "kind": "step",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "admissionId": null,
+          "ordinal": null,
+          "startMs": 100,
+          "endMs": 101
+        }
+      ]
+    },
+    {
+      "kind": "timing",
+      "name": "duplicate-admission-still-rejected",
+      "ok": true,
+      "actual": "REJECT",
+      "reason": "duplicate admission always rejected"
+    },
+    {
+      "kind": "timing",
+      "name": "reversed-total-order-still-rejected",
+      "ok": true,
+      "actual": "REJECT",
+      "reason": "complete strict scalar order"
+    },
+    {
+      "kind": "timing",
+      "name": "wrong-ledger-coordinate",
+      "ok": true,
+      "actual": "REJECT",
+      "reason": "exact dispatched ledger"
+    },
+    {
+      "kind": "timing",
+      "name": "undispatched-admission",
+      "ok": true,
+      "actual": "REJECT",
+      "reason": "exact dispatched ledger"
+    },
+    {
+      "kind": "timing",
+      "name": "null-end-preserved-on-legal-tie",
+      "ok": true,
+      "actual": "ACCEPT",
+      "derivedSteps": [
+        {
+          "kind": "step",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "admissionId": null,
+          "ordinal": null,
+          "startMs": 100,
+          "endMs": null
+        }
+      ]
+    },
+    {
+      "kind": "timing",
+      "name": "admission-tie-break-is-codepoint-not-utf16-locale",
+      "ok": true,
+      "actual": "ACCEPT",
+      "derivedSteps": [
+        {
+          "kind": "step",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "admissionId": null,
+          "ordinal": null,
+          "startMs": 100,
+          "endMs": 101
+        }
+      ]
+    },
+    {
+      "kind": "state",
+      "name": "extra-ask-pending-delivery",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "no inflight work or delivery"
+    },
+    {
+      "kind": "state",
+      "name": "extra-ask-pending-observation-refresh",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "no inflight work or delivery"
+    },
+    {
+      "kind": "state",
+      "name": "extra-ask-active-model-attempt",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "no inflight work or delivery"
+    },
+    {
+      "kind": "state",
+      "name": "extra-ask-wrong-request-status",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "immutable original prepared request"
+    },
+    {
+      "kind": "state",
+      "name": "extra-ask-context-version-changed",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "current owner/context/source/evidence/request"
+    },
+    {
+      "kind": "state",
+      "name": "extra-ask-worker-changed",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "current owner/context/source/evidence/request"
+    },
+    {
+      "kind": "state",
+      "name": "extra-ask-question-expired",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "durable live prefix"
+    },
+    {
+      "kind": "state",
+      "name": "ask-requires-actual-confirm-first-DENY",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "current frozen confirm-first policy"
+    },
+    {
+      "kind": "state",
+      "name": "ask-requires-actual-confirm-first-ALLOW",
+      "ok": true,
+      "actual": "REJECT",
+      "expected": "REJECT",
+      "reason": "current frozen confirm-first policy"
+    },
+    {
+      "kind": "state",
+      "name": "prior-non-side-effect-native-actions-do-not-imply-consent",
+      "ok": true,
+      "actual": "ACCEPT",
+      "expected": "ACCEPT"
+    },
+    {
+      "kind": "state",
+      "name": "human-wait-outlives-old-preparation-under-renewed-current-owner",
+      "ok": true,
+      "actual": "ACCEPT",
+      "expected": "ACCEPT"
+    },
+    {
+      "kind": "timing",
+      "name": "extra-timing-unknown-admission",
+      "ok": true,
+      "actual": "REJECT",
+      "reason": "exact dispatched ledger"
+    },
+    {
+      "kind": "timing",
+      "name": "extra-timing-negative-measured-time",
+      "ok": true,
+      "actual": "REJECT",
+      "reason": "integer original session bound"
+    },
+    {
+      "kind": "timing",
+      "name": "extra-timing-end-before-start",
+      "ok": true,
+      "actual": "REJECT",
+      "reason": "actual end or null"
+    },
+    {
+      "kind": "timing",
+      "name": "extra-timing-extra-attempt-wire-field",
+      "ok": true,
+      "actual": "REJECT",
+      "reason": "six-field action wire"
+    },
+    {
+      "kind": "timing",
+      "name": "extra-timing-duplicate-admission-different-time",
+      "ok": true,
+      "actual": "REJECT",
+      "reason": "duplicate admission always rejected"
+    },
+    {
+      "kind": "timing",
+      "name": "empty-readings-stay-empty-no-fabricated-step",
+      "ok": true,
+      "actual": "ACCEPT",
+      "derivedSteps": []
+    },
+    {
+      "kind": "timing-order",
+      "name": "derived-kind-null-fields-remain-before-action-on-equal-time",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "applicationTestsExecuted": 0,
+  "databaseCommandsExecuted": 0,
+  "browserCommandsExecuted": 0,
+  "buildCommandsExecuted": 0,
+  "status": "PASS"
+}

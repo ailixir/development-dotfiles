@@ -1,0 +1,88 @@
+{
+  "artifact": "015 correction01 implementation mapping",
+  "status": "DESIGN_CORRECTION_PENDING_INDEPENDENT_QA_AND_CINT_INSTALL",
+  "basisDelta": "ValidationBasis required snapshotEvidence -> closed SnapshotEvidence; use existing Revision/Configuration/Artifact/Declaration refs and new normalized authoring source definitions in v3 proof schema. No new public operation or authoring generation.",
+  "facts": [
+    {
+      "field": "snapshotEvidence.current.authoring",
+      "source": "GuidedSourceClassifier.classify locked raw current authoring, normalized exactly as identity helper, saved as private source_manifests.manifest.authoringSnapshot before initialize/capture",
+      "join": "Exact byte/canonical equality to the immutable manifest field; basis.sourceSteps == authoring.steps mapped to stepId,ordinal,source. Current source/config counters and locked identity CAS rechecked before publication."
+    },
+    {
+      "field": "snapshotEvidence.current.authoredDeclarations",
+      "source": "Immutable manifest.authoredDeclarations from IncrementalAuthoringIdentity.resolve on complete raw declaration/value source",
+      "join": "authoringIdentityVersion1, exact sorted referenced union; hash exact private plain string before storing valueHash; never publish resolved value. Current private declaration map is not re-read for historical base."
+    },
+    {
+      "field": "snapshotEvidence.pinnedBase",
+      "source": "Original publication_bases.document.confirmedRevisionId + original relearn_plan/program pinned base digest, checked against immutable ui_test_revisions revision_digest and stored publication identity",
+      "join": "All session/test/CSI/plan/program/switch IDs and digest agree; new first learn null. No live current confirmed head substitutes."
+    },
+    {
+      "field": "snapshotEvidence.baseProof.revision",
+      "source": "Pinned immutable ui_test_revisions id/revision_digest/step_snapshot_hashes/step_reuse_provenance plus its exact studio_guided_publications.document identity tuple",
+      "join": "Existing Revision schema. Recompute exact existing RevisionIdentity digest and all available artifact/source/config/hash components; match original pin and program digest. Java verifies actual historical receipt and ObservedRevisionVerifier before constructing evidence."
+    },
+    {
+      "field": "snapshotEvidence.baseProof.authoringIdentity",
+      "source": "Same pinned revision row authoring + references.authoringIdentityVersion/authoredDeclarations + authoring_revision_inputs validation",
+      "join": "Do not read ui_tests variables/current authoring for old base. Normalize stored source using the same identity rule; verify existing complete hash-only declaration facts and every base snapshot. Missing historical metadata is BASE_IDENTITY_INCOMPLETE for reuse, not guessed."
+    },
+    {
+      "field": "snapshotEvidence.baseProof.configuration/artifact",
+      "source": "Exact immutable pinned revision configuration/artifact JSON, verified against stored hashes and own receipt",
+      "join": "Recompute TestConfig/source/learned semantics/snapshots, compare both stored map locations and reuse maps. Prefix actions/guards are exact contiguous projection of this base artifact; no older equal-hash revision accepted."
+    },
+    {
+      "field": "snapshotEvidence.baseProof=null",
+      "source": "Only no-base first learn or original index0 + EMPTY_PREFIX explicit full learn",
+      "join": "No prefix actions/source IDs/requests/drift/excluded/retained admissions/reuse. Keep actual pinned base ID/digest for base-backed full learn without requiring its unrecoverable source identity. Nonempty original prefix with later driftj1 still requires full proof."
+    }
+  ],
+  "backendFiles": [
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/IncrementalAuthoringIdentity.java (shared exact normalized source/identity projection, unchanged domain algorithms)",
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringRevisionIdentity.java (normalization parity for ISO dates/context null defaults; no changed hash envelopes)",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java (private original authoringSnapshot freeze)",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java (basis snapshotEvidence assembly and immutable joins)",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java (set recomputed maps before hash derivation)",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java (own-row recomputation and consistency)",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java (preserve manifest authoringSnapshot in sourceManifestHash; immutable original confirmed pin)",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java (unchanged digest preimage and fenced candidate identity checks)"
+  ],
+  "runnerFiles": [
+    "studio-runner/src/validator/observedReplay.ts (pure current/base identity, hash and immediate-pin checks; derived maps before learnedPlanHash)",
+    "studio-runner/src/validator/observedReferencePolicy.ts (only schema support/unchanged bounds if needed)",
+    "studio-runner/test/observedReplayValidation.test.ts or actual current validation suite (meaningful correction negatives/parity)"
+  ],
+  "cintFiles": [
+    "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v3/authoring-snapshot.schema.json (new internal proof definitions, same public authoring generation)",
+    "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+    "docs/specs/studio-observed-authoring/contracts/v3/publication-canonical-vectors.json",
+    "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json",
+    "docs/specs/studio-observed-authoring/contracts/v3/wire-parity.fixtures.json",
+    "tools/check-studio-observed-contracts.cjs (real independent new semantic/canonical assertions)",
+    "tools/build-studio-observed-schemas.cjs generated backend bundles and runner schema/types (never hand edit generated files)"
+  ],
+  "projectionExclusions": [
+    "No authoringSnapshot or snapshotEvidence in SOURCE_PLAN/NEXT_ACTION/provider request positive projections",
+    "No snapshotEvidence in public session/result/receipt/explanation, logs or media",
+    "No resolved plain variable, materialized input or Vault value copied into proof identity; hash-only declarations retain old privacy boundary"
+  ],
+  "unchanged": [
+    "Original six ACs and O-1",
+    "StepInput/TestConfig/StepChain/LearnedContent/StepSnapshot domains and preimages",
+    "PublicationEvidenceHash original envelope, whole corrected basis committed by basisHash",
+    "AdmissionProvenanceHash effective tuple array",
+    "6MiB basis/8MiB validation/1MiB artifact limits",
+    "All48migration planned methods, all57original planned acceptance cases",
+    "V1-V21 installed migrations, existing F01 residual disclosure, pure finalization"
+  ],
+  "noDdlAuthority": "Dara confirmed V14 immutable source_manifest JSON admits additive private authoringSnapshot within1MiB; V15 sourceManifestHash of manifest minus configurationValues commits it. No DDL/migration/backfill/recreation needed.",
+  "implementationOrder": [
+    "Independent Quinn rechecks correction closed schema/preimages/joins/fixtures/EMPTY_PREFIX/privacy",
+    "C-int archives its first installed contract receipt and applies correction as new atomic unit, then schema/generator/canonical/pin oracle gates and new immutable receipt",
+    "Backend and runner consume only that corrected generated contract with root exclusive ownership; runner remains checkpointed until release",
+    "Execute actual Java/runner parity plus original central joined/native/secret/video/finalization tests on final source/dist; no design vectors substituted for application acceptance"
+  ]
+}

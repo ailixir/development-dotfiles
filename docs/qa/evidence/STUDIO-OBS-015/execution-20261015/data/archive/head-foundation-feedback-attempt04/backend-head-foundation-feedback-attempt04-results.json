@@ -1,0 +1,1353 @@
+{
+  "command": [
+    "caffeinate",
+    "-i",
+    "./gradlew",
+    "test",
+    "--tests",
+    "*InferenceMigrationLatestIT",
+    "--tests",
+    "*ErrorCodeConstraintMigrationIT",
+    "--tests",
+    "*GuidedRecordingMigrationIT",
+    "--tests",
+    "*GuidedGovernanceMigrationIT",
+    "--tests",
+    "*GuidedSecretLoginMigrationTest",
+    "--tests",
+    "*GuidedPublicationMigrationTest",
+    "--tests",
+    "*InferenceMigrationIT",
+    "--tests",
+    "*GuidedTranslationMigrationTest",
+    "--tests",
+    "*CanonicalStudioCodecTest",
+    "--tests",
+    "*ChangeDetectionTest",
+    "--tests",
+    "*IncrementalIdentityTest",
+    "--tests",
+    "*IncrementalHashTest",
+    "--tests",
+    "*IncrementalPublicationConformanceTest",
+    "--tests",
+    "*IncrementalMaterializationEvidenceTest",
+    "--tests",
+    "*GuidedAcceptedPlanTest",
+    "--tests",
+    "*GuidedPublicationAuthorityIT",
+    "--rerun-tasks"
+  ],
+  "cwd": "backend",
+  "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "started": "2026-10-15T09:30:11.490757+00:00",
+  "elapsedSeconds": 152.96,
+  "exit": 0,
+  "counts": {
+    "total": 245,
+    "passed": 245,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "testcases": [
+    {
+      "class": "com.citi.put.checks.studio.CanonicalStudioCodecTest",
+      "name": "flattenedBodyIsRefusedByTheStrictMetadataComposition()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.CanonicalStudioCodecTest",
+      "name": "aBlankStepIsRejectedAtWriteNamingItsNumberButAnEmptyDraftIsAccepted()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.CanonicalStudioCodecTest",
+      "name": "typedVariablesRoundTripAndNestedOrAliasedFormsAreRefused()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.CanonicalStudioCodecTest",
+      "name": "canonicalArrayRoundTripsAndStringWrappedStepsAreRefused()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.CanonicalStudioCodecTest",
+      "name": "onlyCanonicalChromiumIsAccepted()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.CanonicalStudioCodecTest",
+      "name": "theCanonicalBodyDeserializesUnchanged()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.CanonicalStudioCodecTest",
+      "name": "anAbsentConfigurationFallsBackToTheDocumentedDefaults()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.CanonicalStudioCodecTest",
+      "name": "aTimeoutOutsideTheContractIsRejectedNotCoerced()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ErrorCodeConstraintMigrationIT",
+      "name": "appliesToADatabaseThatAlreadyHoldsRowsAcrossTwoPartitionsIncludingDefault()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ErrorCodeConstraintMigrationIT",
+      "name": "validatesTheConstraintOnTheParentAndOnEveryPartition()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ErrorCodeConstraintMigrationIT",
+      "name": "refusesAnUndeclaredValueOnANewWriteAndAcceptsEveryDeclaredOne()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ErrorCodeConstraintMigrationIT",
+      "name": "refusesToValidateAgainstARowHoldingAValueOutsideTheVocabulary()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ErrorCodeConstraintMigrationIT",
+      "name": "validatesOnceTheOffendingRowIsRepaired()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationIT",
+      "name": "revisionMustMatchCaptureAndProtectsEveryNewColumn()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationIT",
+      "name": "freshInstallStopsAtAdditiveVersionAndUpgradeInventsNoHistory()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationIT",
+      "name": "baselineIndexRequiresTruthfulFullMarkerAndSurvivesExecutionRetention()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationIT",
+      "name": "reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+      "name": "upgradeToHeadRewritesNoHistoryAndInventsNoEligibility()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+      "name": "scopeGuardAllowsNormalLifecycleUpdatesWithUnchangedScope()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+      "name": "fullExecutionCannotBeRelabelledToNull()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+      "name": "everyObservedRevisionColumnRemainsImmutableOnTheHeadSchema()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+      "name": "confirmationSourceIsGuidedRunOnlyAndImmutable()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+      "name": "historicalExecutionCannotBeRelabelledAsFullEvidence()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+      "name": "everyRevisionColumnIsImmutableOnTheHeadSchema()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+      "name": "scopeGuardCoversExistingAndFuturePartitions()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+      "name": "freshAndUpgradedDatabasesReachTheSameHeadWithoutStagedV19()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "contextSecretDeclarationChangeUsesFrozenBase()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "policyChangesDoNotMoveBoundary()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "textOnlyPlainValueChangeIsDetected()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "unusedDeclarationChangeDoesNotCreateAReferencedIdentityOrBoundary()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "multipleEditsSelectEarliestPosition()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "viewportWaitAndGlobalContextChangesSelectFirstStep()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "configurationChangesSelectFirstStep()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "insertAtFourSelectsNewStep()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "editFourthStepChangesOnlyFourthAndTailInputs()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "missingBaseContextSecretMappingRefusesReuse()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "deleteFourthSelectsNextSurvivingStep()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "swapFourAndFiveSelectsCurrentFourth()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "unchangedDraftIsReadyAndFirstRunUnlearned()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "stepContextChangeSelectsOnlyItsStableStepAndTail()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "name": "tailDeletionRelearnsLastRemainingStep()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.IncrementalHashTest",
+      "name": "matchesCanonicalVectors()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.IncrementalHashTest",
+      "name": "suffixConsumerChangeDoesNotChangePrefixProducerSnapshot()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.IncrementalIdentityTest",
+      "name": "absentPlainValueIsMissingButEmptyAndWhitespaceAreExactValues()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.IncrementalIdentityTest",
+      "name": "opaqueAliasRequiresExactDeclaredName()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.IncrementalIdentityTest",
+      "name": "duplicateNamesAndPlainSecretIdCollisionsAreAmbiguous()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "liveSessionsPerCsiHaveAPartialExpressionIndex()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "prunedSessionIsWriteOnceAndCannotRegainContent()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "pruneWindowHasADatabaseFloorOfOneHour()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "onAPrunedSessionOnlyNonNullToNullIsAccepted()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "pruneKeepsEveryPublicationRowOfAPublishedSessionByteIdentical()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "versionsAreDenseImmutableAndApprovalActivatesWithAnAuditChain()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "v19LeavesTheExecutionErrorVocabularyToV13()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "auditIsWrittenByTriggersOnlyAndIsImmutable()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "copyDeleteIsRefusedUnlessPrunedTerminalAndNeverPublished()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "pruneRemovesEveryUnlistedKeyNullsTerminalResultsAndKeepsAttemptTimestamps()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "policyDocumentShapeIsClosed()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "sessionFreezeBindsOnlyTheApprovedActiveVersionForTheSessionCsi()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "tokenDaysAreMonotoneAndUndeletableAndTheConditionalChargeIsTheVerdict()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "activationNeverRegressesAndIdentityIsImmutable()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "retainedKeysAreTheSevenKeyAllowlist()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "attemptDeleteIsRefusedForEveryStatusPrunedOrNot()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "unprunedSessionsKeepTheV14AttemptGuardVerbatim()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "theCsiGuardRowSerializesConcurrentStarts()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "liveAttemptsOnAPrunedSessionCannotSettle()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "pruneLeavesSessionsThatAreNotEligibleUntouched()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "versionInsertRequiresBothHashesToMatchPostgresCanonicalHash()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "prunedAtCanOnlyBeSetOnATerminalSessionWithPrunedProgress()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "upgradeFromV18KeepsExistingGuidedRowsUnchanged()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "pruneDeletesNeverPublishedCopiesAndKeepsBasesAndAttempts()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "onAPrunedSessionEveryOtherAttemptColumnStaysImmutable()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "name": "basesAttemptsAndPublicationsStayUndeletableAndNoPublicationRowIsUpdatable()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedRecordingMigrationIT",
+      "name": "timingsAreABoundedArrayAndEmptyUnlessAvailable()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedRecordingMigrationIT",
+      "name": "headIsV21AndTheTableHasExactlyTheRuledShape()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedRecordingMigrationIT",
+      "name": "oneFactPerSessionUniqueRecordingIdAndSafeRecordingId()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedRecordingMigrationIT",
+      "name": "derivedStatesAreNeverStored()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedRecordingMigrationIT",
+      "name": "eachStorableStateIsAcceptedWithItsRuledShape()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedRecordingMigrationIT",
+      "name": "theSessionAndScopeHashMustMatchAsAPair()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedRecordingMigrationIT",
+      "name": "updateOfAnyColumnAndDeleteAreRefused()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedRecordingMigrationIT",
+      "name": "partialIsOnlyForAvailableAndExpiryOnlyForAvailable()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+      "name": "direct writer authority claim",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+      "name": "direct writer authority snapshot",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+      "name": "direct writer authority finalize-digest",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+      "name": "direct writer authority grant-principal",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+      "name": "direct writer authority grant-csi",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+      "name": "direct writer authority grant-session",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+      "name": "direct writer authority grant-snapshot",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+      "name": "direct writer authority grant-expired",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+      "name": "direct writer authority grant-after-validation",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+      "name": "ordinaryCurrentCommitRechecksCompleteStoredEvidenceAndRollbackRemovesEveryWrite()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+      "name": "graphTimingConformance:raw-edge-cannot-name-pending-action",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "name": "observedChoiceCanonicalBytesAndUnicodeIdsUseIndependentBounds()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "name": "halfRevisionAndMissingObservationCannotCommit()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "name": "observedChoiceReceiptIsOptionalImmutableAndRollsBackWithPreparation()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "name": "freshCoreToHeadHasNoCutoverAndNoLegacyRevisionFamily()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "name": "claimIsSingleSendRenewalStableAndSessionBudgetCannotReset()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "name": "realLegacyChromeUpgradeAndMillisecondNormalization()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "name": "installedScheduleCodeConstraintKeepsSchedulerVocabularyAndAddsOnlyObservedRefusal()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "name": "directSqlClaimsAndNewPartitionsKeepTheirIndependentGuards()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "name": "validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "name": "postgresReproducesEveryPositiveCanonicalVector()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "name": "observedChoiceReceiptRejectsMissingExtraNullWrongTypesAndRowIdentity()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "name": "upgradeBaseEpochAndImmutableHistory()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "concurrentRetryRefreshersHaveExactlyOneWinner()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "definiteRefusalAllowsOnlyOneOwnedFreshAttemptAndKeepsAcceptedIdentities()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "scopedReleaseUsageRetryAndAppendOnlyRowsNeverContainTheCanary()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "awaitingAuthAndForgedObservedBindingRowsAreRefusedAtHead()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "terminalRawBeforeImageScopeAndCompleteClassificationCannotBeForged()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "exactV3ProfileAccountFreeScopeAndObservationCountsAreClosed()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "crossMonthUsageAndLiveRecheckExpireWithReleaseWhileUnlinkedUsageKeepsOwnMonth()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "unreachedDeclaringSummaryCannotRepeatWithCallerOrdinalSequenceOrClock()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "consumedAckLossIsEvidenceBoundAndMissingMaterializationCannotBecomeUnused()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "terminalCrossMonthClockCannotEvadeActualAttemptReceiptIdentity()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "unreachedNotUsedHasNoFabricatedResolutionAndRejectsOtherNullableVariants()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "ordinaryReplayReleaseRequiresAcceptedDeclarationAndAuthenticAttempt()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "freshInstallReachesHeadWithoutCutoverAndKeepsOrdinaryCapability()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "realNoSendOutageDecisionGrantsDifferentAuthorityAndCannotBeFabricated()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "additiveStoredSecretLengthCodeKeepsEveryPriorTerminalValueAndRefusesUnknown()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "rawTerminalReceiptCannotCommitWithoutCompleteExactSummaries()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "liveRecheckIsUniqueAndPreservesOneTerminalUsageAndWriteOnceRevocation()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "ordinaryWriterCannotAlterOrDropRetentionPartitions()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "consumedNoDecisionRequiresAuthenticAdmissionAndKeepsNullResolutionHonest()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "rawConcurrentConsumedUncertaintyHasOneWinnerAcrossRetentionClock()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "concurrentUsageSummariesHaveExactlyOneWinner()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "replayUsageUsesClosedCodesAndTheActualExecutionScope()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "name": "releasedReplayUncertaintyRequiresRealScopedReleaseAndNeverFakeAckStatus()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalMaterializationEvidenceTest",
+      "name": "alteredPrivateValueCannotKeepTheOriginalEntryAndHeaderHash()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalMaterializationEvidenceTest",
+      "name": "reconstructsEveryPrivateHistoricalEnvelopeAndExportsOnlyMetadata()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalMaterializationEvidenceTest",
+      "name": "headerIdentityAndCurrentPointerMustMatchReconstructedHistory()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalMaterializationEvidenceTest",
+      "name": "historicalEnvelopeCannotUseTheLatestInputsHashOrSkipAnOrdinal()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:missing-snapshot-evidence",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:null-base-for-nonempty-original-prefix",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:foreign-base-id",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:foreign-test-base-identity",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:forged-base-revision-digest",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:forged-base-artifact-hash",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:claimed-map-not-recomputed",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:changed-base-context-retains-old-snapshot",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:source-text-does-not-match-basis",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:duplicate-reference-declaration",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:missing-referenced-plain-identity",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:private-resolved-value-in-declaration",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:noncontiguous-original-prefix-program",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:program-action-not-from-base",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:current-prefix-context-cannot-be-reused",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:base-authoring-identity-version-absent",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:missing-current-global-context",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:missing-step-evidence-reference-array",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:claimed-current-step-input-is-forbidden",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:recursive-past-basis-is-forbidden",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:raw-configuration-values-in-current-evidence",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:extra-snapshot-evidence-field",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:missing-required-base-proof-null",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:base-operation-equivalence-is-recomputed",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:base-claimed-map-resealed-still-not-source-derived",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:empty-prefix-must-not-require-or-supply-old-proof",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:nonempty-original-prefix-cannot-null-proof-after-drift-at-one",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "issuedPrefixReadObservationRemainsAnchoredWithoutAnEffectiveReadAction()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "excluded binding multiplicity duplicate-edge",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "excluded binding multiplicity duplicate-pair",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:candidate-snapshot-map-cannot-be-copied-even-if-resealed",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:candidate-gap-in-reused-prefix",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:candidate-older-same-test-revision-id",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:candidate-suffix-reuse-is-forbidden",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "rawAllocationCommitmentCannotBeReplacedByItsEffectiveProjection()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "unusedMaterializedInputNeverBecomesFutureReplayRecipe()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:ordinary",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:boundary",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:empty-prefix-incomplete-base",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:base-historical-ordinary",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "snapshotCorrection:drift-at-first-step-retains-original-base-proof",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:admitted-binding-replacement",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:pre-admission",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:same-pair",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:unperformed-read",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "admitted raw history graphTimingConformance:raw-allocation-cannot-be-replaced-with-effective-empty-copy",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "admitted raw history graphTimingConformance:raw-failed-edge-history-cannot-be-erased",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:unknown-raw-edge-admission",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:native-started-edge-is-not-excludable",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:policy-failure-is-not-edge-exclusion",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:assertion-failure-is-not-edge-exclusion",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:unknown-outcome-is-not-edge-exclusion",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:second-excluded-attempt-forbidden",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:pre-admission-cannot-acquire-failed-edge",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:edge-wrong-origin",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:edge-wrong-binding",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:edge-wrong-producer-admission",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:edge-wrong-coordinate",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:edge-wrong-slot",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:duplicate-raw-edge",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:successful-same-pair-edge-cannot-disappear",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:raw-allocation-cannot-be-replaced-with-effective-empty-copy",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:raw-failed-edge-history-cannot-be-erased",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:bootstrap-cannot-hash-effective-projection",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:model-only-orphan-allocation-refused",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:missing-base-proof-cannot-authorize-import",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:foreign-base-pin-cannot-authorize-import",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:prefix-read-must-match-verified-program",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:missing-base-binding-cannot-authorize-zero-consumer",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:producer-historical-availability-context-must-match",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:producer-historical-availability-fence-must-match",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:successful-read-producer-cannot-be-hidden",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:unread-producer-cannot-be-fabricated",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:retained-producer-provenance-required",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:new-model-consumer-intent-cannot-use-import-exception",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:final-need-identity-cannot-change",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:first-suffix-acceptance-cannot-follow-frozen-head",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:effective-transfer-cannot-disappear",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:effective-transfer-producer-cannot-change",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:excluded-failed-edge-is-not-executable-transfer",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:candidate-policy-cannot-omit-successful-transfer",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:candidate-policy-binding-cannot-drop-successful-consumer",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:publication-preimage-must-commit-raw-failed-edge",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:publication-preimage-envelope-cannot-change",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:admission-preimage-must-exclude-spent-attempt",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:admission-preimage-is-array-not-wrapper",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:candidate-authorization-preimage-is-exact",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:candidate-source-identity-cannot-be-substituted",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "graphTimingConformance:unanchored-generation3-observation-refused",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "historicalChoiceCaptureAnchorsItsOlderObservationButAnUnusedSnapshotDoesNot()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "extended basis refuses materializationEvidence",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "extended basis refuses incrementalEvidence",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "extended basis refuses snapshotEvidence",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "extended basis refuses extra-root",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "extended basis refuses extra-version",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "extended basis refuses extra-entry",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "name": "extended basis refuses extra-current-source",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "name": "pendingNewNeedUsesRawDefinitionAndCannotClaimAnUnconsumedImport()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "name": "duplicateServerIdentitiesCoordinatesAndUnknownFieldsAreRefused()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "name": "acceptedZeroConsumerShapeCannotReplaceActualRetainedProducerAuthority()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "name": "internal accepted plan rejects duplicate-coordinate",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "name": "internal accepted plan rejects duplicate-need-id",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "name": "internal accepted plan rejects duplicate-binding-id",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "name": "internal accepted plan rejects duplicate-consumer-pair",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "name": "internal accepted plan rejects reference-out-of-range",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "name": "internal accepted plan rejects unknown-need-property",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "name": "internal accepted plan rejects unknown-obligation-property",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "name": "internalServerIdentitiesRemainExactWhileRawWireRejectsThem()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "name": "beforeAllocationKeepsBoundImportedZeroNeedAndFreshRawNeedDistinct()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "name": "ordinaryHistoryPreservesActualServerMeaningAndConsumerBytes()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest",
+      "name": "freshDatabaseInstallsAllMigrationsWithNoSyntheticTranslationRows()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest",
+      "name": "rollbackJoinsAttemptAndReservationAndQuestionAnswerMeaning()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest",
+      "name": "obligationLinksCommitWithLedgerAndRejectCrossSessionOrWrongMeaning()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest",
+      "name": "upgradePreservesRowsAndImmutableScopedConstraints()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest",
+      "name": "attemptsAreSingleSendTerminalAndLateUsageDoesNotRevive()",
+      "status": "PASS"
+    }
+  ],
+  "xmlFiles": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.CanonicalStudioCodecTest.xml",
+      "sha256": "8d2a425f5734d7c8a04e1e95694d8d368f155d4207920beb6968190772e79be4"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.ErrorCodeConstraintMigrationIT.xml",
+      "sha256": "d6e6b3ed6255389574afa9444f7200009cb7030c8003e35b8f9a9d8c40cf5c60"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.InferenceMigrationIT.xml",
+      "sha256": "ecaa85a7399bc110cac01ba87278a5acafdb452e0eed03b8704c2a655da238be"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.InferenceMigrationLatestIT.xml",
+      "sha256": "b3bc1217a9b6331f59eb3da186d031f47262df34adc5e9a9e721fa49f7e4bc0a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.authoring.ChangeDetectionTest.xml",
+      "sha256": "11ad315caa9d52b37a06d396f12fee974e52849080b7cfdd270713e529416626"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.authoring.IncrementalHashTest.xml",
+      "sha256": "15baa28578300d6113cf7dd4b9378109f67735b3553945bf7463c37b13a0501e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.authoring.IncrementalIdentityTest.xml",
+      "sha256": "b5caad4895ff21d02243ca7121878b130491da2e0f9ca8f9c0959c00f72189db"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT.xml",
+      "sha256": "428bf330cd73ea079f49b05013e21afdb2032759f91c492c8d42278b08df26b0"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedRecordingMigrationIT.xml",
+      "sha256": "28e16f509b41eb9460439c95edb08ebb60062f3b0cca5ecfd64a07fe128bb3a7"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.xml",
+      "sha256": "5c48cfa75c543dee7d6c725a88f9ec2709f1615460aca071c9658f641223c3a8"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.xml",
+      "sha256": "7818222aac2aeac82c6b8d8f7b45537862963e1faaa83df4fbd85304f774064e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "sha256": "e1d63257f75ec2ec558ba99adaa6292f7bf22b153223d7c8d93515d2d0f2c27d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalMaterializationEvidenceTest.xml",
+      "sha256": "6fbacc21e041070b47b3e8368ed5ccef242654e911ba24a39f9035ea610a4d12"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.xml",
+      "sha256": "86a2738c5216d15fa791d668027850a4d245023f612a98b6e4430cb531df4484"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest.xml",
+      "sha256": "c5e8f537e9eb3433213a2b91b3d23264545316277425002521e79119bf740328"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt04-xml/TEST-com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest.xml",
+      "sha256": "c76f2098df64e28ca68c330b7f28f79ea79c7bde89aed2e17dcb89b21ed0ff25"
+    }
+  ],
+  "guardTallies": [],
+  "logSha256": "f59a3cf40696e1f3e559a48ad26fa7f376dae148f4f74ead1f4530f056406ae4",
+  "sourceStable": true,
+  "distStable": true,
+  "testInputStable": true,
+  "testInputDigestBefore": "ace3079ce91e5728f2f91c989e90a8b095f2160a20b6712fcedf8c65afc50d8b",
+  "testInputDigestAfter": "ace3079ce91e5728f2f91c989e90a8b095f2160a20b6712fcedf8c65afc50d8b"
+}

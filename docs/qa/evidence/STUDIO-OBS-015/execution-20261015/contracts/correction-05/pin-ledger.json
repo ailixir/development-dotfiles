@@ -1,0 +1,89 @@
+{
+  "sourceSchema": {
+    "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-ipc.schema.json",
+    "beforeSHA256": "f3df0dcace0a9f6e2c575d86d7008e64b0351b7f488957050c488315141a9c6d",
+    "afterSHA256": "6bbf2c36dafb970fc1874c0c1ab31538a30d4e5222b1f5244000ccf0bc8b47cf",
+    "onlyAddition": "/definitions/Execute3/properties/retainedArtifact existingArtifact3ref,optional",
+    "requiredListUnchanged": true,
+    "additionalPropertiesStillFalse": true
+  },
+  "publicOpenAPI": {
+    "beforeSHA256": "54fd12cd9951cad6caa32e78693598eb0a23d4333a11749e2083b340d503cd0d",
+    "afterSHA256": "54fd12cd9951cad6caa32e78693598eb0a23d4333a11749e2083b340d503cd0d",
+    "pinValue": "54fd12cd9951cad6caa32e78693598eb0a23d4333a11749e2083b340d503cd0d",
+    "operations": 43,
+    "bothQuotedPinsUnchangedAndPassed": true
+  },
+  "canonicalBundle": {
+    "old": "ce58d620c27bb84f4233151275373aba24467f748c7152a12f1ef3d2d85381aa",
+    "new": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a"
+  },
+  "actualGeneratorOutputs": [
+    {
+      "path": "studio-runner/src/guided/schemas.json",
+      "beforeSHA256": "8d21a51550084780d3a4da7a1a482beb717886de57bae4de72a5274db18cdd95",
+      "afterSHA256": "8d21a51550084780d3a4da7a1a482beb717886de57bae4de72a5274db18cdd95",
+      "changed": false
+    },
+    {
+      "path": "studio-runner/src/guided/types.ts",
+      "beforeSHA256": "f72139502ca8c040ffed5546364c76af0a2473b547bac8c0f3c78020332ec3fa",
+      "afterSHA256": "f72139502ca8c040ffed5546364c76af0a2473b547bac8c0f3c78020332ec3fa",
+      "changed": false
+    },
+    {
+      "path": "studio-runner/src/validator/observedSchemas.json",
+      "beforeSHA256": "f84cf6ca767a13af7fa1df7e892b72f975f2652a51c7b2347a26f08c7d17b4f0",
+      "afterSHA256": "357f6c428f6b85c4bcc3894d6b4c564b291e9642cded402d2c1d0811750e9d29",
+      "changed": true
+    },
+    {
+      "path": "studio-runner/src/executor/observedOperations.ts",
+      "beforeSHA256": "46d8b23d5cc0e6cbe785c9b6e7a03a143d41b4efe2acae3cf2f613886a374fd4",
+      "afterSHA256": "f0e069494676314ab9898f7399b3ecd895d1740aeab963ab7d4d9eec9ba76856",
+      "changed": true
+    }
+  ],
+  "buildReferences": {
+    "beforeCanonicalBundle": "ce58d620c27bb84f4233151275373aba24467f748c7152a12f1ef3d2d85381aa",
+    "afterCanonicalBundle": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
+    "beforeBuildHash": "ccd8f45e43945e17b769ae642a2e35a79b2866966d02c9abff31e20c18e41669",
+    "afterBuildHash": "e96a1c587ea9fa763091f247fd9e5a8c1ff5aafb90ff813eafc67ed59792c9a4",
+    "exactChangedPaths": [
+      "/build/schemaBundleHash",
+      "/job/binding/requiredBuild/schemaBundleHash",
+      "/job/binding/replayGrant/buildHash",
+      "/admissionRequest/build/schemaBundleHash",
+      "/admissionReceipt/request/build/schemaBundleHash",
+      "/launch/admission/request/build/schemaBundleHash",
+      "/launch/build/schemaBundleHash",
+      "/validationRequest/requiredBuild/schemaBundleHash",
+      "/examples/ValidationRequest/value/requiredBuild/schemaBundleHash",
+      "/examples/ValidationVerdict/value/build/schemaBundleHash",
+      "/examples/ObservedJob/value/binding/requiredBuild/schemaBundleHash",
+      "/examples/ObservedJob/value/binding/replayGrant/buildHash",
+      "/examples/AdmissionRequest/value/build/schemaBundleHash",
+      "/examples/AdmissionReceipt/value/request/build/schemaBundleHash"
+    ],
+    "basisBuildFieldsPresent": false,
+    "basisChanges": "Only separately authorized recipe/base lineage reseal; no BuildIdentity field in closed ValidationBasis"
+  },
+  "generationWrites": 1,
+  "rawModelSHA256": "2d986c098548b604d6fe75a3597397eabe325705550a78286e76ae5ae2a176ca",
+  "rawModelConsumersMinimum": 1,
+  "productionCapsUnchanged": {
+    "ordinaryExecute": 2097152,
+    "artifact": 1048576,
+    "job": 4194304,
+    "basis": 6291456,
+    "validation": 8388608
+  },
+  "proofBranchCaps": {
+    "combined": 3145792,
+    "strippedExecute": 2097152,
+    "artifact": 1048576,
+    "wrapperBytes": 20,
+    "depth": 32,
+    "nodes": 1000000
+  }
+}

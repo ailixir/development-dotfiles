@@ -1,0 +1,155 @@
+{
+  "changed": [
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-canonical-vectors.json",
+      "beforeSha256": "264f86e108b6c40642469a5fe1f0e16e1db9ca4b7d205e85df81622b1a6b05f5",
+      "afterSha256": "995458217fdd08ae0454e8045077d7c14a0dbb3842d9e3c35a2271109d4a6185",
+      "beforeBytes": 577272,
+      "afterBytes": 520654
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "beforeSha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9",
+      "afterSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+      "beforeBytes": 22410793,
+      "afterBytes": 22720135
+    },
+    {
+      "path": "studio-runner/fixtures/observed-reference/fresh-order-reference.json",
+      "beforeSha256": "3816e6fffceeab29ab7db71cf7c6bf47584b771369debebdf39b307ae874811a",
+      "afterSha256": "9de3139c8b5896f364cfcfca4a4492c91ba74c5754ba9519facb5ece9b582152",
+      "beforeBytes": 68909,
+      "afterBytes": 68855
+    },
+    {
+      "path": "studio-runner/fixtures/observed-reference/control-value-reference.json",
+      "beforeSha256": "d6de790ae5d8c25cffcdce375150fbe3d5e9669781c5f2932512fee1baf1090c",
+      "afterSha256": "373bcd657e2f45b0a71284bed81e66c0e5c5de0f5608d8aab1d1dd6731ceeba1",
+      "beforeBytes": 63130,
+      "afterBytes": 74138
+    },
+    {
+      "path": "studio-runner/fixtures/observed-reference/accepted-observed-choice.json",
+      "beforeSha256": "7c90084a1f37b75d338cc1739640074567f92392d902a1f3adfa024bf6a8c044",
+      "afterSha256": "a863775ca803d112d18f7f98c883d0aa1766070ce211df632fead110693ac820",
+      "beforeBytes": 85580,
+      "afterBytes": 89985
+    },
+    {
+      "path": "studio-runner/fixtures/observed-reference/manifest.json",
+      "beforeSha256": "7c0fb5418184dcb9a4a4d1b21af96263412fe06da1a998b1f31424654fbfb02a",
+      "afterSha256": "ce5a79081ad7c95f7a44ac912232eee639f3d079b19d0208b4e587b3f71e1b0f",
+      "beforeBytes": 588915,
+      "afterBytes": 530923
+    },
+    {
+      "path": "tools/check-studio-observed-contracts.cjs",
+      "beforeSha256": "5eaa063af5de7536a68fd261b01250fe0541234d9a31c390913da689854c53e3",
+      "afterSha256": "685d92275f7057df877d95f644aab0f7f04b1d7446881eecb6e2f42e0fe0acc9",
+      "beforeBytes": 130871,
+      "afterBytes": 133790
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/check-pins.cjs",
+      "beforeSha256": "985fc9c8eafce4294f5fd3095be7c8869a33a344432fdd20480200a510e29e15",
+      "afterSha256": "48c7a41eddffe46f52516366a17f7675a2eeaf6e238bde8915c3f297103812f3",
+      "beforeBytes": 2427,
+      "afterBytes": 2427
+    }
+  ],
+  "newFiles": [
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/current-synthetic-worlds.json",
+      "sha256": "88abb9cb08689f2e96aa509fb3710f4da1b62cf25e44fd02c94fb66fa2fe4ad8",
+      "bytes": 32475
+    },
+    {
+      "path": "tools/studio-current-vector-factory.cjs",
+      "sha256": "300ef7958780e997d86b5f925e9c354392b8285193a7a314b343819ae2b9abc3",
+      "bytes": 10777
+    },
+    {
+      "path": "tools/check-studio-current-vectors.cjs",
+      "sha256": "a2b7bfbc5e8ecfbcaf2f2554ac81da07486d2bf13ff6985ae0e9bfb550b7ffe7",
+      "bytes": 14911
+    },
+    {
+      "path": "tools/check-studio-current-choice-vectors.cjs",
+      "sha256": "28bb4cd20520ff3ad7a6906d1c126eb1c01212d137f315fae821558cc5f2390f",
+      "bytes": 10135
+    },
+    {
+      "path": "tools/check-studio-current-catalog.cjs",
+      "sha256": "3a6d905ddefa39b3e036a1876298b6f0d73b75d61c3593934fdc8d13303fbc7c",
+      "bytes": 7674
+    }
+  ],
+  "originalCaseInventory": [
+    {
+      "pointer": "incrementalContracts/basisCases",
+      "before": 29,
+      "after": 29,
+      "preservedOriginalNamesAndClassifications": true
+    },
+    {
+      "pointer": "incrementalContracts/schemaCases",
+      "before": 54,
+      "after": 54,
+      "preservedOriginalNamesAndClassifications": true
+    },
+    {
+      "pointer": "incrementalContracts/semanticCases",
+      "before": 6,
+      "after": 6,
+      "preservedOriginalNamesAndClassifications": true
+    },
+    {
+      "pointer": "incrementalContracts/canonicalVectors",
+      "before": 29,
+      "after": 29,
+      "preservedOriginalNamesAndClassifications": true
+    },
+    {
+      "pointer": "snapshotCorrection/positives",
+      "before": 5,
+      "after": 5,
+      "preservedOriginalNamesAndClassifications": true
+    },
+    {
+      "pointer": "snapshotCorrection/negatives",
+      "before": 36,
+      "after": 36,
+      "preservedOriginalNamesAndClassifications": true
+    },
+    {
+      "pointer": "graphTimingConformance/graphCases",
+      "before": 47,
+      "after": 48,
+      "preservedOriginalNamesAndClassifications": true
+    },
+    {
+      "pointer": "graphTimingConformance/historyCases",
+      "before": 8,
+      "after": 8,
+      "preservedOriginalNamesAndClassifications": true
+    },
+    {
+      "pointer": "graphTimingConformance/timingCases",
+      "before": 15,
+      "after": 15,
+      "preservedOriginalNamesAndClassifications": true
+    },
+    {
+      "pointer": "graphTimingConformance/publicWaitingCases",
+      "before": 8,
+      "after": 8,
+      "preservedOriginalNamesAndClassifications": true
+    },
+    {
+      "pointer": "retainedExecuteConformance/cases",
+      "before": 50,
+      "after": 50,
+      "preservedOriginalNamesAndClassifications": true
+    }
+  ]
+}

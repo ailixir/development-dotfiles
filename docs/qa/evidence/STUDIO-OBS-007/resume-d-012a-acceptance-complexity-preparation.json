@@ -1,0 +1,55 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "disposition": "SOURCE_ONLY_ACCEPTANCE_COMPLEXITY_PREPARATION_NO_START_OR_QA_VERDICT",
+  "documentSha256": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012A.story.md": "bdb9bb85934e164286da6abe69f3654e844243d70edf9708a4ebcd1f434e5dde",
+    "docs/architecture/ADR-SC-005-single-path-observed-authoring.md": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md": "b2ee4bd6ba470228afaad54f3b268effd756394f17482ea23034095137467cd0"
+  },
+  "dependency": "StoryReady/ADR97 require OBS-007 Done before012A starts: same GSS/contracts/pins/migration lane. Current007 strict+96 scoped PASS does not satisfy Done; originalC5 pending. No dependent execution/source/lifecycle authorized.",
+  "requiredRemoval": "AC1\u20133/ADR16: retire compile-to-READY and artifact1/routes/flags by named scope, relocate live gateway/shared clients and CredentialPatternScreen, preserve validate-variables. ADR resolves old inventory standing-protection rulings; do not ask for a new per-file architecture ruling.",
+  "requiredContract": "AC4\u20135/ADR29\u201331/51: port existing guided guards before v1 removal; one v3 generation/internal mount/publicOpenAPI, guided public path/api/v1, collapsed contract+build identity, whole-document confinement pin and surviving-opcount; regenerate all prescribed runner/backend bundles with a named byte-identity check, never hand-edit.",
+  "requiredMigration": "AC6/ADR18/102: exactlyV1\u2013V18; untouchedcoreV1\u2013V11 againstd954a21c5; seven Studio area migrations incl007 auditDDL and V15 per-step/provenance columns; entities and17 target-pinned ITs updated; actualfresh install/countV18; removecutover/recreate devDB. External no-deployment confirmation remains owed/unconfirmed unless actually obtained, never faked.",
+  "requiredFinalVerification": "AC7/Testing107: recorded per-item HEADgreps/name reconciliation, dated supersession docs, full backendcheck, runnerdefault/fixtures/deployment tiers with skips, contracttool and regeneration parity. Independent QA re-runs grep/counts. These full gates remain mandatory; this audit waives none.",
+  "threeSimplifications": [
+    {
+      "id": "S1_EXISTING_DELETION_PIN_GENERATION_PROOFS",
+      "proposal": "Use one per-item existing cleanup ledger with recorded grep commands and named drop/port outcomes; retain current confinement/StudioContractTest/contracttool/pin mechanics and extend existing generator check for exact regeneration. Do not create a parallel deletion or contract-validation framework or a system-negative case for every removed symbol.",
+      "coverage": "AC1\u20135,7 and inventoryG1/G3/G5/G9. Unchanged source-bound checks can support unchanged obligations; final pins/resources must be newly bound after actual changes.",
+      "tradeoff": "Mechanical proof is strong for absence/coherence, not runtime behavior. Old receipt cannot supply new runtime PASS if schema/pin/classpath/resource inputs changed; required final gates still run."
+    },
+    {
+      "id": "S2_PORT_AT_DEFINING_TIER",
+      "proposal": "Port current named Session/HttpSecurity/Bridge tests and gateway tests in their existing service/HTTP/PG/unit fixtures; keep sandbox confinement, authoring-only gateway allowance and model-free replay guard. Route/schema/tuple failures belong to affected component/contract tests; reuse existing actual workflows on new paths rather than duplicate a browser/Core Cartesian case for every supporting negative.",
+      "coverage": "AC1,2,3,4,5 and ADR51/57. Every relevant old guard and named case preserved or explicitly retired by the approved deletion; all explicit runnerdefault/fixtures/deployment/fullbackend gates stay.",
+      "tradeoff": "Tier-specific negatives prove their exact contract/authority boundary, not physical effect. Any truly changed joined authority/process boundary needs its affected existing joined check; no automatic promotion of all supporting tests to mandatoryE2E."
+    },
+    {
+      "id": "S3_AREA_REBASE_USING_EXISTING_DB_MECHANICS",
+      "proposal": "Rewrite the existing target-pinned integration/fresh-install/count tests toV18 and retain audit/FK/least-role/atomicity guard assertions against the new area DDL. Reuse Flyway/Testcontainers/core bytehash/dev-recreation mechanics; do not add a historical compile-target upgrade matrix or a new migration/deletion framework for the pre-release reset.",
+      "coverage": "AC6 plus ADRD-B and inventoryG4 as superseded for Studio by ADR; V1\u2013V11 immutable remains. Migration+entity edits land together and current007 audit invariants survive.",
+      "tradeoff": "D-B explicitly changes development-baseline upgrade semantics; it is not proof of safe deployed upgrades. External deployment confirmation remains separate; never convert its absence into fabricated certainty."
+    }
+  ],
+  "minimalCountDrift": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": {
+      "sha256": "2c3bcd0b3fff200ab570f3a9cca21a0caad8e7eac7e05f63b2cfd04d220fce3e",
+      "testAnnotationMethods": 43
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedHttpSecurityIT.java": {
+      "sha256": "816d8a4e442394fa935d13d77c4aad93391690febd8dac5f4d70cf1b76224ca1",
+      "testAnnotationMethods": 6
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java": {
+      "sha256": "6c55ab1a1e9d399e1bdf5f3431ee50d6e35e8280e4db4d941e6937f4f2a8c91b",
+      "testAnnotationMethods": 37
+    }
+  },
+  "countPrecision": "Only three named port-target files counted, no broad suite/runtime census. Session43 differs from panel30; HttpSecurity6 equals snapshot6; Bridge37 current total is not comparable to the old1 sv1 case label. These are source methods, not parameterized runtime cases. Fresh named T0 baseline AFTER007Done is mandatory; historical383compile/60files and36v1 aggregate are dated snapshots, never permission to drop new guards to force old totals.",
+  "reconciliation": "Record per-name retained/moved/ported/dropped and independently reproduce final after=baseline\u2212named drops\u2212named deletions+named ports using consistent runtime discovery/filter/skip scope. A port is not a silent drop/add count shortcut. Do not edit story numbers or claim a current full census in this preparation.",
+  "scopeBoundaries": "012A is D-A/D-B retirement/rebaseline and prerequisite columns. ADRD-C >=20 workflows\u00d73 realmodel pilot gate and D-D incremental joined behavior remain mandatory in their assigned009/015 stages; do not add them as extra012A cases or waive them.012B frontend/013 evidence/014 security remain independently owned successors.",
+  "ownership": "Futuredev K+C implementation; data-engineer areaDDL/entity review; architect T0 package/client scope; one owner sequences sharedGSS and StudioContractTest/pins; independentQA counts/gates/Done. Devops handles eventualPR/push only after gates. Current coordinator sole007runtime/integration; this agent writes only this report.",
+  "guardrails": "Path-qualify live observed-1 validator strings until actual tuple collapse; retain live parseSteps and Spring setter seams unless current callers prove retirement. Preserve historical records with dated notes. Schedule refusal default and external deployment residual remain written decisions, not new inferred exceptions.",
+  "actions": "No story/AC/source/lifecycle change, no tests/scripts/framework/cases implemented, no build/runtime/SQL/contact/QA approval. At most the three proposals above; future source/design review before any dependent author.",
+  "budget": "Shared USD500 ceiling; actual billing unavailable."
+}

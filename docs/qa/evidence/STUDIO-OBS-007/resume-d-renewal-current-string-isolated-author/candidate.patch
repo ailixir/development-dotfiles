@@ -1,0 +1,17 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
+@@ -201,11 +201,12 @@
+               != proof.snapshot.path("owner").path("leaseExpiresAt").getClass()) {
+         return false;
+       }
+-      JsonNode copied = JSON.readTree(current.toString());
++      String currentRepresentation = current.toString();
++      JsonNode copied = JSON.readTree(currentRepresentation);
+       if (!(copied instanceof ObjectNode adjusted)
+           || !sameRenewalTree(current, adjusted)
+           || !current.equals(adjusted)
+-          || !current.toString().equals(adjusted.toString())) {
++          || !currentRepresentation.equals(adjusted.toString())) {
+         return false;
+       }
+       ((ObjectNode) adjusted.path("owner"))

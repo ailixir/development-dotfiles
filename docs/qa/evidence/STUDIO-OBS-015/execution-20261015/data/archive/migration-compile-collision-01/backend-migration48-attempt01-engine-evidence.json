@@ -1,0 +1,21 @@
+{
+  "status": "NOT_STARTED_COMPILER_BLOCKED",
+  "actualServerVersion": null,
+  "actualServerImage": null,
+  "configuredImage": "postgres:15-alpine",
+  "cachedImageMetadata": {
+    "Id": "sha256:ed8478222652ed5ec9cd22a74417af86b61d7cf03bea9bb4d3193be315c16567",
+    "RepoDigests": [
+      "postgres@sha256:fe0737ba566a2c5b2a28f34433c0a423261900ec17b9bf7ad115e1aae7e57f1b"
+    ],
+    "Architecture": "arm64",
+    "Os": "linux",
+    "versionEnvironment": [
+      "PG_MAJOR=15",
+      "PG_VERSION=15.19"
+    ]
+  },
+  "metadataLimitation": "Cached image declares PG_VERSION=15.19; this is not a server version query or actual run engine evidence. compileJava failed before JUnit/BeforeAll/PG.start, so no PostgreSQL engine/version was exercised.",
+  "liveContainerObservation": "backend-migration48-attempt01-engine-live.json",
+  "testcontainersVersionFromBuildFile": "1.20.2"
+}

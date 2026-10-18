@@ -1,0 +1,41 @@
+--- backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java before
++++ backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java candidate
+@@ -555,18 +555,19 @@
+             .put("referenceName", "PASS");
+       }
+     }
++    int selectedFills = 0;
++    int mutatedFills = 0;
+     for (var preparation : basis.path("preparations")) {
+       var proposal = (com.fasterxml.jackson.databind.node.ObjectNode) preparation.path("proposal");
+-      if (!proposal
+-          .path("operation")
+-          .path("value")
+-          .path("sourceInputId")
+-          .asText()
+-          .equals(inputId)) {
++      if (!proposal.path("operation").path("kind").asText().equals("fill")
++          || !proposal.path("coordinate").path("stepId").asText().equals(stepId)
++          || !proposal.path("operation").path("value").path("kind").asText().equals("authoredLiteral")
++          || !proposal.path("operation").path("value").path("sourceInputId").asText().equals("input-label")) {
+         continue;
+       }
++      selectedFills++;
+       ((com.fasterxml.jackson.databind.node.ObjectNode) proposal.path("operation").path("value"))
+-          .put("kind", "secretRef");
++          .put("kind", "secretRef").put("sourceInputId", inputId);
+       var target = proposal.putObject("target").put("kind", "passwordControl");
+       target.set("documentId", proposal.path("executionEvidence").path("documentId"));
+       target.set("generation", proposal.path("executionEvidence").path("generation"));
+@@ -579,7 +580,10 @@
+               .put("operationHash", operationHash);
+         }
+       }
+-    }
++      mutatedFills++;
++    }
++    assertThat(selectedFills).as("exactly one existing same-step fill selected").isEqualTo(1);
++    assertThat(mutatedFills).as("exactly one existing fill retargeted before immutable lowering").isEqualTo(1);
+     return basis;
+   }
+ 

@@ -1,0 +1,165 @@
+{
+  "schema": "studio-observed-nineflow-red-diagnosis/1",
+  "recordedAt": "2026-10-10T15:48:06.491569+00:00",
+  "scope": "READ_ONLY bounded diagnosis of archived actual eighteen-case gate; no acceptance verdict",
+  "gate": {
+    "scope": "Exact selected current backend gate only; no whole-story QA verdict",
+    "gradleExitCode": 1,
+    "sourceDrift": [],
+    "results": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "tests": 9,
+        "failures": 9,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "finishedAt": "2026-10-10T15:40:42.710758+00:00",
+    "tests": 18,
+    "failures": 9,
+    "errors": 0,
+    "skipped": 0,
+    "pass": false
+  },
+  "sourceBinding": {
+    "archive": "docs/qa/evidence/STUDIO-OBS-007/root-nineflow-buffer-gate/sources.zip",
+    "archiveSha256": "3316b0fb636e127c278f95fbbf38d152c2693b1783d292f7d06a2b3819d88ecd",
+    "publicationSourceSha256": "93063d375c0dd249b107c72f212489a96940bde22ee5a310b94eff4cbe7e2839",
+    "publicationXmlSha256": "72bb95455020101c2bb847e00e7bc678fe40662192e64f4749f148b079cc660e"
+  },
+  "cases": [
+    {
+      "name": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()",
+      "seconds": 6.325,
+      "classification": "PRIMARY_FINALIZE_REFUSAL",
+      "responseCode": "RUNTIME_INCOMPATIBLE"
+    },
+    {
+      "name": "queuedAndPreReadyRefusals()",
+      "seconds": 0.003,
+      "classification": "DEPENDENT_MISSING_PUBLICATION",
+      "responseCode": null
+    },
+    {
+      "name": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness()",
+      "seconds": 0.002,
+      "classification": "DEPENDENT_MISSING_PUBLICATION",
+      "responseCode": null
+    },
+    {
+      "name": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays()",
+      "seconds": 60.091,
+      "classification": "SUBSEQUENT_WORKER_ADMISSION_OR_CONTINUATION_UNPROVEN",
+      "responseCode": null
+    },
+    {
+      "name": "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance()",
+      "seconds": 20.138,
+      "classification": "SUBSEQUENT_WORKER_ADMISSION_OR_CONTINUATION_UNPROVEN",
+      "responseCode": null
+    },
+    {
+      "name": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork()",
+      "seconds": 30.141,
+      "classification": "SUBSEQUENT_WORKER_ADMISSION_OR_CONTINUATION_UNPROVEN",
+      "responseCode": null
+    },
+    {
+      "name": "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays()",
+      "seconds": 30.097,
+      "classification": "SUBSEQUENT_WORKER_ADMISSION_OR_CONTINUATION_UNPROVEN",
+      "responseCode": null
+    },
+    {
+      "name": "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall()",
+      "seconds": 30.093,
+      "classification": "SUBSEQUENT_WORKER_ADMISSION_OR_CONTINUATION_UNPROVEN",
+      "responseCode": null
+    },
+    {
+      "name": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+      "seconds": 90.145,
+      "classification": "SUBSEQUENT_WORKER_ADMISSION_OR_CONTINUATION_UNPROVEN",
+      "responseCode": null
+    }
+  ],
+  "firstFailureFacts": {
+    "learningState": "FINALIZING",
+    "actions": 5,
+    "modelKinds": [
+      "SOURCE_PLAN",
+      "NEXT_ACTION",
+      "NEXT_ACTION",
+      "NEXT_ACTION",
+      "NEXT_ACTION",
+      "NEXT_ACTION"
+    ],
+    "providerFailures": 0,
+    "submits": 1,
+    "navigations": 1,
+    "finalizeHttpStatus": 409,
+    "finalizeCode": "RUNTIME_INCOMPATIBLE",
+    "ordinaryStarted": true,
+    "guidedLogBytes": 0,
+    "catalogProfileHash": "22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386",
+    "independentProfileHash": "22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386",
+    "profileHashMatches": true,
+    "executor": "observed-4",
+    "catalog": "observed-replay-3",
+    "policyVersion": "observed-4-full-chromium-1"
+  },
+  "firstCauseStatus": "EARLIEST_THROWING_GUARD_NOT_OBSERVABLE_FROM_RETAINED_CLOSED_RESPONSE",
+  "firstCauseAnalysis": [
+    "Browser learning and provider controlled gateway completed before finalize; no evidence of a model/observed action failure in this first flow.",
+    "Catalog profile hash independently matches. Ordinary process reached runner.started, which requires current loadObservedBuild startup checks. This excludes an unsupported startup candidate for that ordinary worker; it does not prove Java runtime properties or actual publication verdict equality.",
+    "Current runner validator route returns400 on parser/derive refusals, and ObservedValidationClient maps400 toINVALID_CONTRACT rather than RUNTIME_INCOMPATIBLE. No actual validator-request/response capture exists in this red fixture, so a hidden stage must not be invented.",
+    "Production RUNTIME_INCOMPATIBLE sites remaining include selected catalog/support checks, required physical transaction checks, validator endpoint/transaction/verdict identity checks and fresh Core authorization transaction guard. Current XML does not retain the original exception stack or a safe publication stage/attempt snapshot, and database was destroyed by existing AfterAll."
+  ],
+  "cascadeAnalysis": {
+    "directDependencies": [
+      "queuedAndPreReadyRefusals",
+      "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness"
+    ],
+    "capacityInference": {
+      "source": "studio-runner/src/guided/ownership.ts: GuidedOwnership.assign/occupied/checkGrant; studio-runner/src/guided/transport.ts capacity===1",
+      "fact": "FINALIZING is an active grant state, renewal continues and default capacity is1. First assertion failure skips normal publication completion and fixture has no failed-test terminal cancellation. Later sessions therefore plausibly encounter CAPACITY and remainPREPARING.",
+      "status": "STRONG_SOURCE_INFERENCE_NOT_CAPTURED_ACTUAL_ASSIGN_RESPONSE",
+      "needs": "Capture safe actual assignment refusal/cancel acknowledgement and after-stop capacity release on next controlled run."
+    },
+    "tokenExpiry": "No expiry cause asserted; one initial299s JWT lifetime and total test timing must be independently correlated if later failure remains."
+  },
+  "proposedNextExactScope": {
+    "owner": "B, only GuidedPublicationReplayIT.java after root release",
+    "diagnostic": "Add a test-only WebMvcConfigurer resolver first in resolver list; for finalize GuidedSessionException retain code plus safe StackTraceElement class/method/line only, returnnull so unchanged existing production handler still owns response. Persist safe selected catalog/build/property/transaction-active probes before actual finalize; no repeated finalize or extra validator/model/provider effects.",
+    "cleanup": "On failure only, issue authentic cancellation of actual still-active fixture sessions and await acknowledged terminal/owned browser close before next flow. Preserve all nine names and original assertions; never force SQL terminal rows or increase worker capacity.",
+    "gate": "Root serialized all9 actual selector; retain original red and source snapshots. Production fix only after exact throwing stage is observed."
+  },
+  "limits": [
+    "No production root cause claimed from a closed code alone",
+    "Ninth never finalized and added USER/PASS/artifact/video/sink assertions were not reached; no new joined evidence PASS",
+    "Four owned-buffer and five actual HTTPS tests passed in this gate; these remain transport-scoped",
+    "No service consume/read/send/recovery/crash, full allSink/C/SEC/LOGIN or lifecycle completion claim"
+  ],
+  "actions": {
+    "sourceEdits": false,
+    "gradle": false,
+    "runnerOrSchemaEdits": false,
+    "newProcessesOrModels": false,
+    "reportOnly": true
+  }
+}

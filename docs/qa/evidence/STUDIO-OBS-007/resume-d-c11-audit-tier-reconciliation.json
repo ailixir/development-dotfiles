@@ -1,0 +1,390 @@
+{
+  "schema": "resume-d-c11-audit-tier-reconciliation/1",
+  "mode": "READONLY_COMPONENT_EVIDENCE_RECONCILIATION",
+  "authorityBindings": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "d634b3579e5bf0fd177bf474108b4513fea52b9635bb6932fcaf63d9cdab23e0",
+    "docs/specs/studio-observed-authoring/secret-login-design.md": "2fb230a817bc733afcf83463a41b016d71ab3578d3b3329a344b08f5021af37b",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-c11-audit-tier-reconcile-intent.txt": "2971221d6f7e16cecbc221b9d1b6d0f65aa9201902abdfd214026e938e896189",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-c11-audit-tier-reconcile-context.txt": "b9ceea1176bbd7d78251b24406c807649f1c36498dfb6ec2daca858430a92818",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-approved-tier-application-receipt.json": "349f578ee7d1088ff81a429bd36096b65f85b54bf6c46c52afc8a14a9b2ff2f8"
+  },
+  "frozenCurrent": {
+    "sourceZip": "docs/qa/evidence/STUDIO-OBS-007/resume-c5-required-first-ninth-current/sources.zip",
+    "zipSha256": "b10458c7d3b19b24d056a1be3a2f3002b3ebc945da481ea907fc5616197075a8",
+    "publicationSha256": "35cc2452e38b0d28a77e7e99f5c45d8cdb67475dd71783fbb7fb1052dc1b983c",
+    "BWorkingSourceRead": false
+  },
+  "summary": "Reuse defining PG and real resolver-JVM evidence at their actual boundaries. Do not convert every forged row/rollback/lock/leaf negative into a browser matrix. Required Core/compiled-child effect/usage/crash joins remain explicit; no C11/full-story approval.",
+  "sourceComponents": [
+    {
+      "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+      "frozenCurrentSha256": "f644a055a2942939f4cd6a1f295757ebf769e706134ec12fa8b29f3e9f8ce380",
+      "byteIdenticalTo264Gate": true,
+      "currentDiskHashMatchesFrozen": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+      "frozenCurrentSha256": "cb3329c3f290e7a409c3c2da98f890da2cf070e8c8102c4d1683f38abbc22ab2",
+      "byteIdenticalTo264Gate": true,
+      "currentDiskHashMatchesFrozen": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+      "frozenCurrentSha256": "7313046e049f40ff860119f1927de1bd326dcb9897ce0a5835eb77b450c30833",
+      "byteIdenticalTo264Gate": true,
+      "currentDiskHashMatchesFrozen": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/PendingReaper.java",
+      "frozenCurrentSha256": "4f643583b8739682a3482f13396d47b461fc41f2b67fddcfcde583abf3d8caff",
+      "byteIdenticalTo264Gate": true,
+      "currentDiskHashMatchesFrozen": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioReferenceResolver.java",
+      "frozenCurrentSha256": "7c7647decdba421b96cea9baa1f7ca1cdc0fcabf3b55213bc6a0ea636170a233",
+      "byteIdenticalTo264Gate": true,
+      "currentDiskHashMatchesFrozen": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+      "frozenCurrentSha256": "848b4c80050a7eb03e713093d707b9c32ee99a079c2767a4f05397063435edd6",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/entity/StudioDispatchLedger.java",
+      "frozenCurrentSha256": "149fe8a8972d9ddbb6de7f13adfac0945d1d2f186d6c7c8756271f63df7fe44d",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+      "frozenCurrentSha256": "d04f7760e5dfe7ed49ee082fffcfe7702bd05b15df33790bee34f274aaeeb14a",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java",
+      "frozenCurrentSha256": "4b6e7092e85d33d314bf10a3af0187247c186548ba4d4492b5a45fbf96e9ddd7",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java",
+      "frozenCurrentSha256": "f9c0f3915a543cb2d9230808ed55bf45684565b438fbf584b4885e6960d9ebfd",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "frozenCurrentSha256": "a5034ee98707552d927f48bc0a30e07896df913f3b706f42f15ee16c7b52144b",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java",
+      "frozenCurrentSha256": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "frozenCurrentSha256": "14ff3056d00c92fc054e6dc8738effe11bd3b8b0781ac3cf29ca14e646c52af5",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "frozenCurrentSha256": "8c539ea40560f8c658c7cd6ecb3c61593c67baf2762a5c19497ec4d409eb9e7e",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+      "frozenCurrentSha256": "701657d46d0fbb4f4eb6e8a98149e7ef9f8b98a8c761eb9fec66f52747bf010e",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedReadEntryProtocolIT.java",
+      "frozenCurrentSha256": "98eb87a14bb954e36ce0c10713d155d5a6910f888927b7625e0812b6d34fbf9a",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/ObservedTerminalSettlementIT.java",
+      "frozenCurrentSha256": "9345a2c9581dcf936465c7cabd8d8c55b1258e26fefa2d87f10b5374c275f6bb",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SecretAuditLifecycleIT.java",
+      "frozenCurrentSha256": "9b38e058ceaa28c767ee14c08be982624ab537de746bf7998268684f2d2ef34e",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java",
+      "frozenCurrentSha256": "b8d1013ebd2025fd7645e1be558f533acbe7aed36e60d8b25c55ea81c728ebc2",
+      "byteIdenticalTo264Gate": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/secrets/ObservedProgressSecretEvidenceTest.java",
+      "frozenCurrentSha256": "9e4fe20f1a3be9229c06dc0990d736cc4a7fbef1346853272eddbf9f64825fed",
+      "byteIdenticalTo264Gate": true
+    }
+  ],
+  "executedComponentEvidence": {
+    "gate": "root-peer-remediation-gate-2",
+    "gateResultSha256": "b2160cb4dcd3c11ebd0e5f485508a0581eed1a26cd788f37e6c6092c68caecc0",
+    "gateTotal": 264,
+    "gateFailures": 0,
+    "gateErrors": 0,
+    "gateSkips": 0,
+    "gateSourceDrift": 0,
+    "definingDataCases": 59,
+    "additionalProtocolTerminalLifecycleProcessCases": 41,
+    "totalSelectedPgAndProcessCases": 100,
+    "pureProgressEvidenceCases": 22,
+    "selectedXml": [
+      {
+        "class": "SecretUseAuditIT",
+        "xmlPath": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-2/TEST-com.citi.put.checks.studio.guided.secret.SecretUseAuditIT.xml",
+        "xmlSha256": "587a6eb2f1cda95ef794e35ef87dde8b0e91f2dd2bd5f3bd1dbbe0b48f55f315",
+        "tests": 36,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "class": "GuidedSecretLoginMigrationTest",
+        "xmlPath": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-2/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+        "xmlSha256": "b4bd4d0af6c0d28aac6a65e122732b783c2b3ac779e3f1dc969b20a28e440bca",
+        "tests": 23,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "class": "ObservedReadEntryProtocolIT",
+        "xmlPath": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-2/TEST-com.citi.put.checks.studio.guided.publication.ObservedReadEntryProtocolIT.xml",
+        "xmlSha256": "3dceb561004fcdbacf0332e527f9b6b1b9f1940b9fc31ab04c69b8ee655752d7",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "class": "ObservedTerminalSettlementIT",
+        "xmlPath": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-2/TEST-com.citi.put.checks.studio.dispatch.ObservedTerminalSettlementIT.xml",
+        "xmlSha256": "93996d83e065ba5240e2b9c17cc947f34b8c6d5e48ae547e4fb4668a20d7ad87",
+        "tests": 20,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "class": "SecretAuditLifecycleIT",
+        "xmlPath": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-2/TEST-com.citi.put.checks.studio.guided.publication.SecretAuditLifecycleIT.xml",
+        "xmlSha256": "6057073feda3820a774ad0ffdc5cc2b210ca7fe54ec0866619246f2d628047c9",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "class": "ObservedResolverProcessCrashIT",
+        "xmlPath": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-2/TEST-com.citi.put.checks.studio.guided.publication.ObservedResolverProcessCrashIT.xml",
+        "xmlSha256": "1adb47d5e63cf42a01b69a17da311a3a706593d6195825ec40330d3d8356d52d",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "class": "ObservedProgressSecretEvidenceTest",
+        "xmlPath": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-2/TEST-com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest.xml",
+        "xmlSha256": "a1a5a3d8f695f02e3e6179e9962603a0f09804605113ce7cdc0e8b3b6871c0ad",
+        "tests": 22,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      }
+    ],
+    "qualification": "Named source bytes, fixture source and relevant production classes match frozen current. This is reusable component proof, not a claim that the entire current source/resources/dist reran as264. Eight other main/contract paths differ from that archive."
+  },
+  "dependencyDifferencesFrom264": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretRevocationSweep.java",
+    "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+    "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json"
+  ],
+  "requirementTierMap": [
+    {
+      "requirement": "AC14 append-only/null/link/scope/admission/fence/version/clock/uniqueness/retention/forged beforeimage/savepoint/leaf guard/atomic partition cases",
+      "tier": "REAL_POSTGRES_DEFINING_BOUNDARY",
+      "reuse": "SecretUseAuditIT36 + GuidedSecretLoginMigrationTest23; exact V34/recorder/test source bytes carry forward. Includes early SET CONSTRAINTS counterexample repair and actual production partition visibility/failure/ordinary-role proof.",
+      "missingCoreBrowserDuplication": false
+    },
+    {
+      "requirement": "Owner/read-entry/fresh waited view/terminal winner/request-only/loser/receipt-only/rollback/cancel-close-reaper-kill-switch state matrix",
+      "tier": "AUTHENTIC_PRODUCTION_JAVA_CALLER_AND_PG",
+      "reuse": "ObservedReadEntryProtocolIT11 + ObservedTerminalSettlementIT20 + SecretAuditLifecycleIT7. Real provider entry counters distinguish marker protocol from physical read; guards/transactions and caller state matrix are exercised. SQL lineage negatives remain PG tier.",
+      "qualification": "These do not themselves prove Core authentication or native effects; those are shared joined authority anchors, not a separate browser for each transaction-negative."
+    },
+    {
+      "requirement": "C11 before marker / committed marker before provider / real read before committed decision",
+      "tier": "GENUINE_RESOLVER_JVM_KILL_PROVIDER_HTTP_AND_PG",
+      "reuse": "ObservedResolverProcessCrashIT3. Child is truly killed, exit/PID dead asserted, parent physical HTTP read count0/0/1, committed markers0/1/1, real PendingReaper writes NOT_USED/UNKNOWN/UNKNOWN, zero fabricated RELEASE/version/admission/ordinal/sequence and no extra read; repeated reaper/close no-op.",
+      "qualification": "Child executes real resolver + tracked-read protocol + guarded accepted fixture, not full controller/Core acceptance or compiled browser. Reuse these exact cut positions; do not relabel them full-stack or reproduce them merely to start a browser before a pre-send cut."
+    },
+    {
+      "requirement": "Immutable early positive USED, later genuine consumed same-reference admission and uncertainty",
+      "tier": "PG_LIFECYCLE_SUPPORT_PLUS_REQUIRED_JOIN",
+      "reuse": "SecretUseAuditIT/SecretAuditLifecycleIT preserve committed positives, separate real consumed coordinates and rollback. Lifecycle fixture uses guarded lineage/real read counter, not native typing or authentic PROGRESS HTTP.",
+      "remaining": "Actual guided controller cut and real replay positive-PROGRESS\u2192child kill/lost FINAL\u2192reaper cannot be replaced with lifecycle.replayTerminal(map USED)."
+    },
+    {
+      "requirement": "Positive PROGRESS frozen recipe/timing/PASS and negative forged/stale/unsupported facts, losing CAS/report-audit rollback",
+      "tier": "UNIT_VALIDATOR_PLUS_PRODUCTION_REPORT_CAS_PG_BOUNDARY",
+      "reuse": "ObservedProgressSecretEvidenceTest22 covers pure receipt/recipe/timing/status negatives; ProgressReportService applies validated positives only at applied1 and calls replayKnownUses in its report transaction. Legacy ProgressCallbackIT/AdmissionCasIT are useful existing caller fixtures, not yet observed-secret proof.",
+      "remaining": "Observed secret-use report/CAS/audit rollback and losing/stale report transaction oracles must be linked to actual report-service boundary; do not browser-promote every forged payload."
+    },
+    {
+      "requirement": "Actual Core two-path effect/audit authority and after-USED revocation preservation",
+      "tier": "CORE_HTTP_COMPILED_WORKER_BROWSER_PG_JOIN",
+      "reuse": "resume-cutoff-two-current has2 actual passes, no skips/drift. Current sweep884 bytes match; the two tested bodies and six audit/cleanup helper bodies are byte-identical to frozen35cc. Actual preflip USED row is preserved exactly through trusted revocation and real cleanup.",
+      "qualification": "Component/body-bound carry-forward, not whole35cc suite execution. Does not establish child kill or lost FINAL/reaper."
+    },
+    {
+      "requirement": "Normal secret typed USED; true declared-unreached NOT_USED; resolved-but-proven-never-invoked NOT_USED; pre-effect REFUSED; retry2attempts; table canaries",
+      "tier": "EXISTING_DEFINING_PG_SUPPORT_AND_REQUIRED_TWO_PATH_CORE_EFFECT_JOIN",
+      "reuse": "PG59 and lifecycle7 prove record/link/retry/refusal shape. Existing frozen actualSecretLogin... selector contains authentic guided USED + two fresh ordinary USED/read/receipt checks; current focused result failed at awaitFinalizing before those assertions.",
+      "remaining": "Complete existing joined secret flow before crediting its audit assertions; any missing unused/refusal effect subrun must use actual declaration/action/final evidence, not synthetic rows or absent FINAL."
+    }
+  ],
+  "passedRevocationPair": {
+    "gate": "resume-cutoff-two-current",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "sourceDrift": 0,
+    "resultSha256": "9983612613a7351f82b148e742d5e642ffb7808db8480b0116f700ec7036534a",
+    "historicalPubSha256": "228faa60695f62fe90056bd6ae663d09234d8136659ecc6b7a1b0669ad5fd6dc",
+    "currentSweepSha256": "884ddb3c7bc119998b91eb6b7649b148bc3054222c56f1c880c92aa5da9b66a8",
+    "sweepIdenticalToPair": true,
+    "bodyProof": [
+      {
+        "method": "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+        "bodySha256": "2351e1a31d14c38e3d7ad8fc362352fd39439e7485f10188f82169654cdd565a",
+        "identicalToPassedPair": true
+      },
+      {
+        "method": "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+        "bodySha256": "fb6bf1d975850e41533b61f1cd0825bf239bc2a7727def4328e2ea8a134b4659",
+        "identicalToPassedPair": true
+      },
+      {
+        "method": "p4RevocationPair",
+        "bodySha256": "928ebf7d247c3f87a931acba1c4d7a6e48d711cdababc41fa0fea8be63fbe696",
+        "identicalToPassedPair": true
+      },
+      {
+        "method": "p4AssertAuditLineageAfterCleanup",
+        "bodySha256": "a809b211304d724dad5e6e618b8216fa7f35aa424f066f0ef1fa704f8bb364b2",
+        "identicalToPassedPair": true
+      },
+      {
+        "method": "p4AuditOwnerIdentity",
+        "bodySha256": "84013ac0ca385eea57234e5777c275db223ae261b3765588667d27853c1b1d4d",
+        "identicalToPassedPair": true
+      },
+      {
+        "method": "p4CompareAuditScope",
+        "bodySha256": "85ed179a3f82b34c66f45fc39093e2573c730e165202bec6649bfd7657f45be2",
+        "identicalToPassedPair": true
+      },
+      {
+        "method": "p4AwaitRevocationObserverCompletion",
+        "bodySha256": "3904b4af5d6d169bd2c0ef972c9f779bc93bce770d6df37b3f327f2d3b9ec93c",
+        "identicalToPassedPair": true
+      },
+      {
+        "method": "p4SealPrivateProducersAfterOwnerCleanup",
+        "bodySha256": "187aac198d808b2790ae293e3a09d9b1b4d6f9a8bf6b4baaf335953790fb9d0b",
+        "identicalToPassedPair": true
+      }
+    ]
+  },
+  "retainedRedEvidence": [
+    {
+      "path": "root-peer-remediation-gate-1/result.json",
+      "fact": "264 cases, one obsolete diagnostic failure; preserved before repaired264 green."
+    },
+    {
+      "path": "root-combined-remediation-gate/result.json",
+      "fact": "27 cases,6 publication failures; service9 and buffers9 passed. Historical support, not latest joined proof."
+    },
+    {
+      "path": "fresh-owner-current-pair-audit-five-current/result.json",
+      "fact": "5 cases, ordinary revocation alias failure retained before passed pair repair."
+    },
+    {
+      "path": "resume-c5-required-first-ninth-current/result.json",
+      "fact": "Frozen35cc2 cases: actualLearning... PASS; actualSecretLogin... FAIL at awaitFinalizing. Secret read/effect/audit/finalize/replay tails are uncredited."
+    },
+    {
+      "path": "root-controller-crash-historical-harness/result.json",
+      "fact": "Historical separate harness before peer repair; superseded component execution is the source-bound264 gate XML, not promoted to current full stack."
+    }
+  ],
+  "minimumNextActions": [
+    {
+      "priority": 1,
+      "existingSelector": "GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+      "owner": "B existing publication file; coordinator sole runtime",
+      "action": "Repair/freeze the current awaitFinalizing blocker, then execute this existing real Core/PG/compiled-worker/Chromium selector. Preserve read1 learning, zero publication reads, two distinct replay attempts/receipts/fresh values, same artifact hash, USED rows/full scope and table-canary tails. Reuse existing controlled fixture and source binding; no replacement framework."
+    },
+    {
+      "priority": 2,
+      "existingAnchors": [
+        "GuidedPublicationReplayIT ordinary Core execution/report relay and native fixture",
+        "ProgressReportService.apply",
+        "SecretAuditLifecycle.replayKnownUses",
+        "PendingReaper.reapOnce"
+      ],
+      "owner": "B publication/actual report wiring; root process ownership/runtime",
+      "action": "At an actual completed secret-fill PASS, wait for the authenticated winning PROGRESS CAS and exactly one committed USED row before the cut. Kill the genuine owned compiled child after real invocation of the next controlled action; retain actual PID-death/physical read/send/native-effect counters and genuine missing FINAL. Drive the real reaper, then terminal/cancel/revocation/late-report race as applicable; same USED row remains immutable and other released uncertain IDs receive only honest linked UNKNOWN. A separate complete-child/drop-FINAL subrun is needed only where the inventory explicitly names that different position; a kill does not prove a completed-but-lost HTTP delivery.",
+      "forbidden": "No manufactured FINAL/USED rows, callback map claiming typing without native receipt, REFUSED from kill, or NOT_USED from absent result."
+    },
+    {
+      "priority": 3,
+      "existingAnchors": [
+        "ObservedResolverProcessCrashIT real child/owned provider counter infrastructure",
+        "GuidedDispatchService dispatch after sessions.consume and before references.resolve/committed decision",
+        "SecretAuditLifecycle.guidedTerminal"
+      ],
+      "owner": "Root bounded process harness; B actual guided Core/worker caller wiring",
+      "action": "Retain the verified ordinary resolver3 cuts. The genuinely missing guided cut uses an authentic Core-created/claimed/materialized/admitted action: kill its actual controller/resolver process after committed consume before value resolution and after physical provider read before decision commit. Counter0/1 distinguishes physical reads, but both consumed/no-decision summaries are truthful UNKNOWN with actual admission/coordinate/fence and null committed decision/version/release. Bind the shared Core/compiled-guided-worker authority setup once; no browser Cartesian repetition of the59 PG negatives. Earlier USED plus a later authentic consumed admission must retain its earlier positive while settling the later admission."
+    },
+    {
+      "priority": 4,
+      "existingAnchors": [
+        "ObservedProgressSecretEvidenceTest",
+        "ProgressCallbackIT/AdmissionCasIT production caller fixtures",
+        "ProgressReportService.ReportCommitHook and actual apply CAS",
+        "current publication authenticated progress relay"
+      ],
+      "owner": "Root report-boundary tests/B report integration",
+      "action": "Add only the missing observed-secret report/CAS/audit-transaction boundary assertions to existing fixtures: accepted positive receipt versus forged/stale/losing data; injected report/audit commit failure must roll back snapshot/CAS/USAGE together. Keep logical mutation families at unit/HTTP+PG defining tiers. Preserve real native positive anchor from joined execution; no native duplication for every metadata mutation."
+    }
+  ],
+  "neededUnusedRefusalAnchor": "Use actual guided manifest/no-consumption/zero-read/no-send evidence for unreached declarations; actual runner final positive no-invocation evidence for a resolved unused replay ID; actual pre-effect refusal for REFUSED. During child kill or missing FINAL, physical zero typing alone is not an authenticated backend NOT_USED fact. No fabricated action ordinal, admission, read, release or resolution outcome.",
+  "executionThisTurn": {
+    "sourceChanges": false,
+    "metadataLifecycleChanges": false,
+    "tests": "UNRUN",
+    "runtime": "UNRUN",
+    "SQL": "UNRUN",
+    "PG": "UNRUN",
+    "Gradle": "UNRUN",
+    "Node": "UNRUN",
+    "build": "UNRUN",
+    "modelsSpawned": false,
+    "onlyWrittenArtifact": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c11-audit-tier-reconciliation.json"
+  },
+  "credit": "Component/tier inventory only. No new QA/Done/AC14/C11/all19 verdict, no unavailable-oracle PASS, no live-production/image/browser promotion, no source-author approval."
+}

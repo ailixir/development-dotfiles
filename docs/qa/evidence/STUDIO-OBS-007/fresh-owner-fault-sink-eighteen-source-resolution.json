@@ -1,0 +1,573 @@
+{
+  "schema": "fresh-owner-fault-sink-eighteen-source-resolution/1",
+  "reviewMode": "FRESH_INDEPENDENT_ARIA_QUINN_SOURCE_ONLY",
+  "disposition": "BLOCKED_SOURCE",
+  "decision": "The exact corrected18 frozen source preserves the original17 method bodies under the approved insertion exception, but four source blockers prevent a scoped source PASS. Parent approval authorizes correction construction; it does not establish compliance or runtime success.",
+  "sourceBindings": {
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-fault-sink-authored-freeze/GuidedServiceTransportFaultIT.java": "46ca7dae139ef53a794193aa73295fa3968a83b2b527ad9c84e408a49f1f737f",
+    "docs/qa/evidence/STUDIO-OBS-007/d-corrected-fault-sink-eighteen-candidate/result.json": "6385e88a9365229425ec664dba28c768e5caa97086ef564f807a95ba9adc1b45",
+    "docs/qa/evidence/STUDIO-OBS-007/d-corrected-fault-sink-eighteen-candidate/before.java": "f3862d94539e8a94f31653f0ffeeda493f6c181310d509954d65bb289648720c",
+    "docs/qa/evidence/STUDIO-OBS-007/d-corrected-fault-sink-eighteen-candidate/after.java": "46ca7dae139ef53a794193aa73295fa3968a83b2b527ad9c84e408a49f1f737f",
+    "docs/qa/evidence/STUDIO-OBS-007/d-corrected-fault-sink-eighteen-candidate/candidate.patch": "f64677738001a66e23e52b79927caaa8ca73ab90ea37da125ef9603d266236fc",
+    "docs/qa/evidence/STUDIO-OBS-007/d-corrected-fault-sink-eighteen-candidate/original-body-preservation.json": "ea5dc7058bf3217f310ff12bac83775d2450a1662f8d4616008875eb8319d13d",
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-d-fault-sink-architecture-resolution.json": "f884e47d44c60e409d896588fd142d78d8ae887a3280ffbc0d508fd9e6aa8d2d",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-fault-sink-passive-return-amendment-intent.txt": "a25e583cfbe95273e7b2ca2c49e886b1eada4d342862ec8bbe8cf92fc9d344d7",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-fault-sink-passive-return-amendment-context.txt": "0d30454c9c6d34371b1ff03f9bfe807a7aeeafa762154c3b7dfbdccbb95a6c50"
+  },
+  "baselineArchive": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-publication23-transport17-current/sources.zip",
+    "sha256": "70d97415eb18ca41a8f307be59d2b44b2a81ec58d56e33088ec8ce5371dd0e8b",
+    "selectedImmutableMembers": {
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "f3862d94539e8a94f31653f0ffeeda493f6c181310d509954d65bb289648720c",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java": "66f3665f63de906f5b1a4285aaf904b8527a3231066c28be7ee5c3f713a4bd02",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+      "backend/src/main/resources/logback-spring.xml": "ea86a2075f19486361b270343ff191bc58582058bd7266968ec77fa3e7a922a3",
+      "backend/build.gradle.kts": "dab809b9129368c1643d80169bcdb773f9290af61e153a1e45069832f5db7289"
+    },
+    "baselineBeforeBytesMatch": true,
+    "authority": "Original f386 source in the immutable archive; no historical runtime result imported."
+  },
+  "architectureAuthority": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-d-fault-sink-architecture-resolution.json",
+    "sha256": "f884e47d44c60e409d896588fd142d78d8ae887a3280ffbc0d508fd9e6aa8d2d",
+    "requirements": [
+      "D-ARCH-01",
+      "D-ARCH-02",
+      "D-ARCH-03",
+      "D-ARCH-04",
+      "D-ARCH-05"
+    ],
+    "requestedNameResolution": "No correctedfresh-owner-d-fault-sink-architecture-resolution.json file was found; the candidate binds fresh-owner-d-fault-sink-architecture-resolution.json. Reviewed that exact bound architecture, the supplied parent approval, and the bound passive-return amendment.",
+    "parentApprovedCompleteCorrections": "ACCEPTED_AS_USER_AUTHORITY",
+    "originalDesignStatus": "f362 BLOCKED_AS_WRITTEN history remains unchanged; not re-reviewed or upgraded."
+  },
+  "independence": {
+    "sourceAuthorship": false,
+    "freshReviewOfExactFrozenInputs": true,
+    "roles": [
+      "Aria architecture",
+      "Quinn QA"
+    ],
+    "subagentsSpawned": false,
+    "modelOrCLISessionsStarted": false,
+    "otherSourceReviewReportsUsed": false,
+    "mutableBJavaRead": false,
+    "mutableDJavaRead": false
+  },
+  "concreteBlockingFindings": [
+    {
+      "id": "D18-SRC-01",
+      "severity": "BLOCKING",
+      "architectureRequirements": [
+        "D-ARCH-02"
+      ],
+      "locators": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-fault-sink-authored-freeze/GuidedServiceTransportFaultIT.java",
+          "lines": [
+            564,
+            568,
+            670,
+            747,
+            752,
+            974,
+            983,
+            986,
+            358,
+            360
+          ]
+        }
+      ],
+      "finding": "Marker delivery can satisfy the logging checks while actual non-marker production is zero; encoded delivery is checked only as a sum across all consoles.",
+      "sourceFacts": [
+        "PRODUCT_EVENTS increments for every non-marker callback without distinguishing application logger identity or duplicate additive deliveries.",
+        "countOnlyReport prints the product-event delta; finishCase never requires this delta to be positive.",
+        "probeRoutes requires a positive aggregate console byte-size delta, so one producing console can hide another console with no delivered marker. No per-console produced encoded-event count is enforced or reported.",
+        "The supplementary raw appender is attached to every logger. Raw callback totals can count the same event at multiple additive attachments; these are delivery counts, not unique application event counts."
+      ],
+      "consequence": "The source permits quiet actual logging targets to receive zero-hit credit from nonsensitive marker production alone, contrary to the required actual RAW and ORIGINAL-encoded produced-positive counts.",
+      "requiredCorrection": "Keep nonsensitive ROOT/application markers as support. Bind required actual non-marker raw production and original encoded production to each applicable case and original console route; fail unavailable/zero production rather than accepting quiet targets. Preserve attachment multiplicity separately from unique event counts. Validate each required console delivery instead of only a summed byte delta. Do not add a fake encoder or new product/service calls."
+    },
+    {
+      "id": "D18-SRC-02",
+      "severity": "BLOCKING",
+      "architectureRequirements": [
+        "D-ARCH-02",
+        "D-ARCH-05"
+      ],
+      "locators": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-fault-sink-authored-freeze/GuidedServiceTransportFaultIT.java",
+          "lines": [
+            312,
+            313,
+            318,
+            322,
+            675,
+            676,
+            677,
+            685,
+            946,
+            961,
+            993,
+            995,
+            996,
+            1003
+          ]
+        }
+      ],
+      "finding": "The release prerequisite does not inspect newly produced status errors or prove newly registered routes deliver before returning the actual provider value; status inventory can silently miss same-size turnover.",
+      "sourceFacts": [
+        "Status inspection occurs during initial installation and case/class finish, but not at beginCase after setup/probes or in FaultCase.release.",
+        "FaultCase.release calls verifyRoutes(false) and tests the existing FAILURES count. verifyRoutes does not inspect StatusManager errors or probe delivery.",
+        "verifyRoutes(false) can register a newly existing inherited logger during release without probing that route.",
+        "inspectStatus uses only list size and a numeric cursor. A replacement snapshot with the same size leaves no new entry inspected and no drift failure.",
+        "Several prerequisite branches throw a closed diagnostic without incrementing FAILURES. beginCase catch exports FAILURES+1 but does not persist that increment. This does not implement a universal sticky prerequisite failure ledger."
+      ],
+      "consequence": "A status ERROR created after the initial preflight can be discovered only after actual release. Equal-size status replacement can remain unobserved. The required fail-before-release and sticky drift/status contract is incomplete.",
+      "requiredCorrection": "Immediately before actual provider return, independently check supported route identity, required marker delivery, status errors and capture drops/overflow; persist prerequisite failure counts. Reject route/status turnover that cannot be fully inspected, including equal-size replacement. Keep this source-only observer work free of additional provider/service/SQL/auth operations."
+    },
+    {
+      "id": "D18-SRC-03",
+      "severity": "BLOCKING",
+      "architectureRequirements": [
+        "D-ARCH-04",
+        "D-ARCH-05"
+      ],
+      "locators": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-fault-sink-authored-freeze/GuidedServiceTransportFaultIT.java",
+          "lines": [
+            4167,
+            4171,
+            4175,
+            4180,
+            4194,
+            4289,
+            4290,
+            4294,
+            4295,
+            4298,
+            4302,
+            4303,
+            4309
+          ]
+        }
+      ],
+      "finding": "The actual relay callback has unowned error-graph and late-close exits outside the closed failure disposition.",
+      "sourceFacts": [
+        "A Throwable caught before Scenario identification is neither retained in the preregistered peerCase nor scanned nor counted as an observation failure.",
+        "The fallback sendResponseHeaders IOException is discarded without observation.",
+        "exchange.close executes before peer exit accounting and ThreadLocal removal, with no nested guard/finally. An unchecked close failure bypasses those operations and can escape into the executor as the original Throwable.",
+        "Method/template invocation interception protects the test thread; it does not intercept this relay executor callback."
+      ],
+      "consequence": "An owned relay error can disappear from the actual error-graph inventory, and a late-close failure can escape without a fixed enum/count-only diagnostic. Incomplete peer accounting may retain quarantine but does not itself provide the missing closed export boundary.",
+      "requiredCorrection": "Use the preregistered actual peer ledger for errors before Scenario lookup and for original response/close errors. Observe them transiently without replacing Scenario.failure or original expected product errors. Preserve original forwarding/order/status behavior; put exit accounting and ThreadLocal removal in an independent finally and prevent any unexpected owned callback exit from exporting its original cause/content. Export only a fresh fixed-code numeric AssertionError with null cause and no suppressed originals; retain quarantine if real peer/owner closure is unsafe."
+    },
+    {
+      "id": "D18-SRC-04",
+      "severity": "BLOCKING",
+      "architectureRequirements": [
+        "D-ARCH-05"
+      ],
+      "locators": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-fault-sink-authored-freeze/GuidedServiceTransportFaultIT.java",
+          "lines": [
+            390,
+            418,
+            422,
+            423,
+            424,
+            425,
+            427,
+            428,
+            430,
+            431,
+            433,
+            436,
+            438
+          ]
+        }
+      ],
+      "finding": "The final scan is not guaranteed before disposal after a restoration/status/scanner failure.",
+      "sourceFacts": [
+        "finishClass scans before restoration, then calls restore, sets restored=true, inspects status, and scans again.",
+        "If post-restoration inspectStatus or scanAll throws, the catch captures that new Throwable and increments failure counts but does not run another independent scan.",
+        "The finally block then wipes SINKS and quarantine and disposes all ledgers whenever restored is true, including that failure path.",
+        "If restore itself throws, the newly captured restoration Throwable is not scanned in this method before exit; quarantine is retained, but the required always-finally scan has not occurred."
+      ],
+      "consequence": "Newly captured late-close/restoration failure fields can be erased before being compared with actual releases. The closed JUnit outcome fails, but the demanded scan-before-disposal contract is still violated.",
+      "requiredCorrection": "Place independent bounded scans of applicable captured fields and actual late errors in a finally phase before any wipe/reference release. Continue other scans when one observation fails, record unavailability with sticky fixed counts, and keep quarantine/ledger ownership until real closure and required final scans are complete. Do not use successful restoration alone as permission to dispose after a failed terminal scan."
+    }
+  ],
+  "requirementResolution": {
+    "D-ARCH-01": {
+      "status": "SOURCE_MECHANISM_PRESENT_RUNTIME_UNRUN",
+      "locators": [
+        806,
+        824,
+        867,
+        887,
+        903,
+        1006
+      ],
+      "facts": "Exact ConsoleAppender class, nonJansi, original active exact composite encoder, empty header/footer, target stream identity, four loaded-jar digests and public get/setOutputStream are checked. No original appender stop/start, encoder replacement, target/filter mutation or context reset is added. Original nullable levels and stream identities are retained for restoration. Unsupported routes fail; actual loaded identity/restoration remains UNRUN."
+    },
+    "D-ARCH-02": {
+      "status": "BLOCKED",
+      "findingIds": [
+        "D18-SRC-01",
+        "D18-SRC-02"
+      ],
+      "present": "All existing logger attachments are inventoried; async/file/network/custom/nonadditive routes, filters/turbo/status listeners are rejected; overflow increments failures. Missing production and pre-release status/drift coverage prevent approval."
+    },
+    "D-ARCH-03": {
+      "status": "SOURCE_OBSERVATION_PRESENT_WITH_LIMITS",
+      "locators": [
+        4158,
+        4161,
+        4277,
+        4384,
+        4391,
+        4393,
+        4396,
+        4397,
+        4398
+      ],
+      "facts": "Existing callback is sent once and original assertions/parser remain. Existing respond serialization/header/write/wipe operations forward once in their original order. Two complete503 modes intentionally generate an allowed problem source from the actual received value after ledger equality; partial503 remains unchanged. Source-positive scan occurs on constructed bytes before write; responseAttempts and responseWrites remain separate. This is not client chunk receipt or redaction evidence.",
+      "callbackLimit": "BodyHandlers.ofString is unchanged. CALLBACK_RESPONSE_BYTES observes the already-decoded response.body re-encoded as UTF8; it does not prove exact original HTTP octets or original wire charset. No raw wire-byte claim is approved."
+    },
+    "D-ARCH-04": {
+      "status": "BLOCKED",
+      "findingIds": [
+        "D18-SRC-03"
+      ],
+      "present": "Test/test-template and owned before/after-each plus owned listener failures are guarded. closedFault constructs plain AssertionError(String) from enum and counts, with no original cause/suppressed/opentest expected-actual wrapper. Original expected errors and Scenario.failure remain unchanged through original assertions; relay executor exits remain incomplete."
+    },
+    "D-ARCH-05": {
+      "status": "BLOCKED",
+      "findingIds": [
+        "D18-SRC-02",
+        "D18-SRC-03",
+        "D18-SRC-04"
+      ],
+      "present": "Case ledger begins before test-body setup capable of release; the original BeforeEach backendReady only stores port/context and cannot release. Actual CountedProvider chars are cloned once before original erase, without a new provider call. Real caller/peer thread joins and original stop/confirmation barriers are used; original scheduler/context/peer/PG close ordering remains. Unsafe resource completion retains quarantine. Guaranteed terminal scanning is incomplete."
+    }
+  },
+  "preservation": {
+    "status": "INDEPENDENT_STATIC_PASS",
+    "patchExactlyMatchesIndependentBeforeAfterDiff": true,
+    "afterEqualsFrozenSource": true,
+    "originalCases": 17,
+    "originalJavaTestMethods": 9,
+    "sevenMethodBodiesByteIdentical": true,
+    "twoBodiesChangedOnlyByApprovedInsertions": true,
+    "allNineReconstructedExactlyRemovingOnlyNewObserverLines": true,
+    "methods": [
+      {
+        "method": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery",
+        "beforeBodySha256": "18f40ad026ae91888264c18651c1d1c752a97fc416c4366a3a8046338808c8b7",
+        "afterBodySha256": "311dea6a992000acc2df25633186abba2759d02fc5bd6f7a06753cb1fef7a818",
+        "byteIdentical": false,
+        "removedOnlyPassiveObserverLines": 4,
+        "reconstructedExactly": true
+      },
+      {
+        "method": "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit",
+        "beforeBodySha256": "37bb6aa7d05330d1aeb6a754327435b427d960f89b504ccde5b4674db4d2dd4c",
+        "afterBodySha256": "8d5a63c4613242091f0365c9228ef0130b84550d6fbcb28c30e565c9c8e0a45f",
+        "byteIdentical": false,
+        "removedOnlyPassiveObserverLines": 3,
+        "reconstructedExactly": true
+      },
+      {
+        "method": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased",
+        "beforeBodySha256": "24a929c6e1db1bc76e21c149d1b168551eb643b9d47dc44cd3e6765ccbf8ef9e",
+        "afterBodySha256": "24a929c6e1db1bc76e21c149d1b168551eb643b9d47dc44cd3e6765ccbf8ef9e",
+        "byteIdentical": true,
+        "removedOnlyPassiveObserverLines": 0,
+        "reconstructedExactly": true
+      },
+      {
+        "method": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+        "beforeBodySha256": "e464dc852bdb6c2620362f7491bec75ea9141c2925a2902d1752965c50213511",
+        "afterBodySha256": "e464dc852bdb6c2620362f7491bec75ea9141c2925a2902d1752965c50213511",
+        "byteIdentical": true,
+        "removedOnlyPassiveObserverLines": 0,
+        "reconstructedExactly": true
+      },
+      {
+        "method": "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent",
+        "beforeBodySha256": "39efe2da2c783fffe1bc42f0ef1f17d60c99dd0ba4810ff37f1e613af5b7eea7",
+        "afterBodySha256": "39efe2da2c783fffe1bc42f0ef1f17d60c99dd0ba4810ff37f1e613af5b7eea7",
+        "byteIdentical": true,
+        "removedOnlyPassiveObserverLines": 0,
+        "reconstructedExactly": true
+      },
+      {
+        "method": "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose",
+        "beforeBodySha256": "802a300347c78d99009521dba25587f9be1a3b504e80531a004473176abe9b2e",
+        "afterBodySha256": "802a300347c78d99009521dba25587f9be1a3b504e80531a004473176abe9b2e",
+        "byteIdentical": true,
+        "removedOnlyPassiveObserverLines": 0,
+        "reconstructedExactly": true
+      },
+      {
+        "method": "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose",
+        "beforeBodySha256": "92640760fa6664186c0278511db1db509ab0e31c9f949531f44287e0c6027dce",
+        "afterBodySha256": "92640760fa6664186c0278511db1db509ab0e31c9f949531f44287e0c6027dce",
+        "byteIdentical": true,
+        "removedOnlyPassiveObserverLines": 0,
+        "reconstructedExactly": true
+      },
+      {
+        "method": "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation",
+        "beforeBodySha256": "73386ec024b9c7b1db12c5d663000e12f13ad843ce533b2e74039bcdc744c2f0",
+        "afterBodySha256": "73386ec024b9c7b1db12c5d663000e12f13ad843ce533b2e74039bcdc744c2f0",
+        "byteIdentical": true,
+        "removedOnlyPassiveObserverLines": 0,
+        "reconstructedExactly": true
+      },
+      {
+        "method": "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose",
+        "beforeBodySha256": "4af87a84dea4fb9972d3bdd600d06e523c4148013f7665b5c8f7eff69259f4cd",
+        "afterBodySha256": "4af87a84dea4fb9972d3bdd600d06e523c4148013f7665b5c8f7eff69259f4cd",
+        "byteIdentical": true,
+        "removedOnlyPassiveObserverLines": 0,
+        "reconstructedExactly": true
+      }
+    ],
+    "helperPassiveInsertionSites": [
+      3071,
+      3105
+    ],
+    "allPassiveSites": [
+      {
+        "line": 1414,
+        "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", context);",
+        "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+        "newOriginalServiceOrSqlCalls": 0
+      },
+      {
+        "line": 1448,
+        "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", admission);",
+        "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+        "newOriginalServiceOrSqlCalls": 0
+      },
+      {
+        "line": 1526,
+        "statement": "FaultCapture.observe(\"ACTUAL_DB_READ_BYTES\", rows);",
+        "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+        "newOriginalServiceOrSqlCalls": 0
+      },
+      {
+        "line": 1587,
+        "statement": "FaultCapture.observe(\"ACTUAL_DB_READ_BYTES\", persisted);",
+        "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+        "newOriginalServiceOrSqlCalls": 0
+      },
+      {
+        "line": 1709,
+        "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", context);",
+        "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+        "newOriginalServiceOrSqlCalls": 0
+      },
+      {
+        "line": 1743,
+        "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", admission);",
+        "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+        "newOriginalServiceOrSqlCalls": 0
+      },
+      {
+        "line": 1858,
+        "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", prior);",
+        "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+        "newOriginalServiceOrSqlCalls": 0
+      },
+      {
+        "line": 3071,
+        "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", context);",
+        "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+        "newOriginalServiceOrSqlCalls": 0
+      },
+      {
+        "line": 3105,
+        "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", admission);",
+        "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+        "newOriginalServiceOrSqlCalls": 0
+      }
+    ],
+    "originalInnerSemantics": "Original statements/calls/args/assertions/control flow and inner cleanup bodies are preserved after removing only approved observer lines. This is source preservation, not runtime equivalence proof.",
+    "originalModeDefinitionUnchanged": true,
+    "originalCloseBodyRetainedInsideOuterGuard": true,
+    "sourceScope": "Candidate patch binds one TransportJava only; no mutable repository source diff or other candidate was read."
+  },
+  "caseMatrix": [
+    {
+      "mode": "COMPLETE_200_NO_CALLBACK",
+      "originalMethodBody": "EXACTLY_RECONSTRUCTED_INSERTION_ONLY",
+      "runtime": "UNRUN",
+      "controlled503Source": false
+    },
+    {
+      "mode": "COMPLETE_200_OWNER_OK",
+      "originalMethodBody": "EXACTLY_RECONSTRUCTED_INSERTION_ONLY",
+      "runtime": "UNRUN",
+      "controlled503Source": false
+    },
+    {
+      "mode": "COMPLETE_200_OWNER_FAILED",
+      "originalMethodBody": "EXACTLY_RECONSTRUCTED_INSERTION_ONLY",
+      "runtime": "UNRUN",
+      "controlled503Source": false
+    },
+    {
+      "mode": "COMPLETE_503_NO_CALLBACK",
+      "originalMethodBody": "EXACTLY_RECONSTRUCTED_INSERTION_ONLY",
+      "runtime": "UNRUN",
+      "controlled503Source": true
+    },
+    {
+      "mode": "COMPLETE_503_OWNER_OK",
+      "originalMethodBody": "EXACTLY_RECONSTRUCTED_INSERTION_ONLY",
+      "runtime": "UNRUN",
+      "controlled503Source": true
+    },
+    {
+      "mode": "PARTIAL_200_NO_EOF",
+      "originalMethodBody": "EXACTLY_RECONSTRUCTED_INSERTION_ONLY",
+      "runtime": "UNRUN",
+      "controlled503Source": false
+    },
+    {
+      "mode": "PARTIAL_503_NO_EOF",
+      "originalMethodBody": "EXACTLY_RECONSTRUCTED_INSERTION_ONLY",
+      "runtime": "UNRUN",
+      "controlled503Source": false
+    },
+    {
+      "mode": "CALLER_EXPIRY_AFTER_CONSUME",
+      "originalMethodBody": "EXACTLY_RECONSTRUCTED_INSERTION_ONLY",
+      "runtime": "UNRUN",
+      "controlled503Source": false
+    },
+    {
+      "mode": "INTERRUPT_AFTER_HEADERS",
+      "originalMethodBody": "EXACTLY_RECONSTRUCTED_INSERTION_ONLY",
+      "runtime": "UNRUN",
+      "controlled503Source": false
+    },
+    {
+      "testMethod": "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit",
+      "originalMethodBody": "EXACTLY_RECONSTRUCTED_INSERTION_ONLY",
+      "runtime": "UNRUN"
+    },
+    {
+      "testMethod": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased",
+      "originalMethodBody": "BYTE_IDENTICAL",
+      "runtime": "UNRUN"
+    },
+    {
+      "testMethod": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+      "originalMethodBody": "BYTE_IDENTICAL",
+      "runtime": "UNRUN"
+    },
+    {
+      "testMethod": "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent",
+      "originalMethodBody": "BYTE_IDENTICAL",
+      "runtime": "UNRUN"
+    },
+    {
+      "testMethod": "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose",
+      "originalMethodBody": "BYTE_IDENTICAL",
+      "runtime": "UNRUN"
+    },
+    {
+      "testMethod": "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose",
+      "originalMethodBody": "BYTE_IDENTICAL",
+      "runtime": "UNRUN"
+    },
+    {
+      "testMethod": "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation",
+      "originalMethodBody": "BYTE_IDENTICAL",
+      "runtime": "UNRUN"
+    },
+    {
+      "testMethod": "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose",
+      "originalMethodBody": "BYTE_IDENTICAL",
+      "runtime": "UNRUN"
+    },
+    {
+      "testMethod": "syntheticFaultSinkScannerDetectsIndependentEncodedControls",
+      "role": "SUPPORT_ONLY",
+      "runtime": "UNRUN",
+      "locators": [
+        1083,
+        1084,
+        1087,
+        1102,
+        1103,
+        1108
+      ],
+      "facts": "Independent hardcoded nonASCII positive encoding vectors and near miss are present; they are not actual producer or sink evidence."
+    }
+  ],
+  "producerSinkLimits": {
+    "actualProvider": "AUTHORIZED_SOURCE_COPY once before erase; actual runtime read/release counts UNRUN.",
+    "controlled503": "INTENTIONAL_ALLOWED_SOURCE in exactly two complete503 modes; source snapshots excluded from negative-target scans. No backend-redactor/client-receipt claim.",
+    "directReturns": "DIRECT_OBJECT_REPRESENTATION of already-returned typed JsonNode fields; no service call, arbitrary object toString, invented HTTP response or servlet tee added.",
+    "existingDbReads": "ACTUAL_DB_READ_BYTES denotes already-returned JDBC String/typed-row scalar encodings. Not physical PG protocol bytes; no new SQL query.",
+    "otherReturns": "UNOBSERVED where no original retained typed value is captured; no zero-absence credit.",
+    "directServiceHTTP": "NONAPPLICABLE",
+    "rawAndEncodedLogs": "Original active encoder writes to quarantine and raw supplementary observations are source-present. Actual production/drop-free coverage is BLOCKED and runtime UNRUN.",
+    "throwables": "Original cause/suppressed/SQL-next/stack fields are captured transiently; callback and terminal gaps identified above prevent complete coverage.",
+    "scanners": "Finite supported equality encodings only. No arbitrary transform, compression, encryption, partial-value or heap-wide proof."
+  },
+  "execution": {
+    "runtime": "UNRUN",
+    "tests": "UNRUN",
+    "compiler": "UNRUN",
+    "Gradle": "UNRUN",
+    "Node": "UNRUN",
+    "SQL": "UNRUN",
+    "browser": "UNRUN",
+    "Docker": "UNRUN",
+    "native": "UNRUN",
+    "formatter": "UNRUN",
+    "app": "UNRUN",
+    "checks": "UNRUN"
+  },
+  "credit": {
+    "scopedSourcePASS": false,
+    "runtimePASS": false,
+    "all18Runtime": "UNRUN",
+    "all19": false,
+    "allP6": false,
+    "Core": false,
+    "browser": false,
+    "SSE": false,
+    "metrics": false,
+    "cache": false,
+    "profile": false,
+    "lifecycle": false,
+    "runtimePrivacy": false,
+    "image": false,
+    "historicalFull40AndNodeCoverage": "User context only; neither reverified nor upgraded."
+  },
+  "writeScope": {
+    "soleWrittenArtifact": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-fault-sink-eighteen-source-resolution.json",
+    "sourceEdits": false,
+    "otherReportsWritten": false,
+    "productDriverContainerAuthSchemaPinsStateOperations": false,
+    "newTimeoutDeadlineOperations": false,
+    "originalRuntimeValuesOrCausesPersisted": false
+  },
+  "limits": [
+    "Source-only independent review of the two exact requested hashes and bound preservation/architecture inputs.",
+    "No runtime, compiler, test, Gradle, Node, SQL, browser, Docker, native, formatter, model session or spawn was run. Static Python was used only to compare immutable source text/hashes and write this JSON.",
+    "No mutable B/D Java or other source-resolution reports were used.",
+    "No actual release value, raw error/cause/content, runtime URL, session, credential or value-derived hash is persisted. Only source/artifact digests and code facts are reported.",
+    "Java immutable Strings, original Throwable objects, encoder internals and catastrophic JVM/OOM behavior are outside writable-copy erasure guarantees."
+  ]
+}

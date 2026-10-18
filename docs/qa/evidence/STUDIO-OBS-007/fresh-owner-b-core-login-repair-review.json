@@ -1,0 +1,85 @@
+{
+  "schema": "studio-observed-b-core-login-independent-repair-source-review/1",
+  "verdict": "SCOPED_SOURCE_RESOLUTION_PASS",
+  "mode": "EXACT_READ_ONLY_SOURCE_REVIEW",
+  "scope": {
+    "reviewed": "Only the nine repair hunks for B-CORE-LOGIN-001 through B-CORE-LOGIN-004 and necessary invocation, callback, ownership, cancellation, dispatch and terminal helper seams.",
+    "sourcePath": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-core-pg-repairs-format/GuidedPublicationReplayIT-authored.java",
+    "sourceSHA256": "882591fa6784e18e961d50c686b0b6cc695aeaf8fd9d8f85375f239772df78be",
+    "locationBasis": "Line numbers refer exclusively to the immutable authored archive above.",
+    "mutableWorkingPublicationSourceReadOrBoundToThisSHA": false,
+    "sourceEdits": false,
+    "onlyWrite": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-b-core-login-repair-review.json",
+    "runtimeBuildGradleTestsBrowserProcessManagementModelsSpawns": false,
+    "wholeQAOrLifecycleVerdict": false,
+    "waiver": false
+  },
+  "identity": {
+    "priorReviewPath": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-b-core-login-review.json",
+    "priorReviewedSourceSHA256": "35b10bba98b67f912af3abd24c96ae57979f2b105aa5ee1eead2f3611ccb658b",
+    "repairParentSHA256": "7f1a3be93f7262ea75e9ee533eecf9bd134144bb4c529b02654093ae3539563c",
+    "patchPath": "docs/qa/evidence/STUDIO-OBS-007/b-core-login-findings-repair/one-file.patch",
+    "patchSHA256": "f3504cfbfc64db9d999ebe0940e35db905e7ab435ef3e368e038fb583b9958fe",
+    "repairReportPath": "docs/qa/evidence/STUDIO-OBS-007/b-core-login-findings-repair/result.json",
+    "repairReportSHA256": "d2fdc024ec63111a37ad699f76576b0b56e9f8025f5bc992a613d6846e67bb8e",
+    "reversePatchExactParentConfirmed": true,
+    "reverseCheckedThrowOnlyExactPriorSourceConfirmed": true,
+    "verification": "Read-only byte hashing and exact unified-hunk reversal reconstructed 7f1a; reversing only the p3StartCommand throws Exception declaration reconstructed 35b10. No candidate Java or application code was executed."
+  },
+  "findings": [],
+  "resolutions": [
+    {
+      "id": "B-CORE-LOGIN-001",
+      "priorSeverity": "P1",
+      "result": "RESOLVED_SOURCE",
+      "locations": [194, 468, 472, 3962, 4177, 4243, 5412, 5458],
+      "evidence": "The actual /invocation receipt now appends to dedicated P3_INVOCATIONS whenever the P3 fixture is active. The old REPLAY_INVOCATIONS asynchronousPage/observedChoicePage condition is unchanged. p3PublishedLogin snapshots the dedicated list immediately before accepting its execution and checks the resulting delta, requiring exactly fill then click for wrong-password and zero invocations for the no-login branch. Existing generated child and ordinary wrappers await the original bound invoke exactly once before posting the actual operation receipt; neither forwarding wrapper was edited. The assertion is consequently connected to original native invocations without enabling old fixture flags.",
+      "boundary": "A repaired source witness, not a produced runtime invocation result."
+    },
+    {
+      "id": "B-CORE-LOGIN-002",
+      "priorSeverity": "P2",
+      "result": "RESOLVED_SOURCE",
+      "locations": [788, 798, 4188, 4191, 4197, 4481, 4491, 4508],
+      "evidence": "The successful published registration branch now invokes p3RunnerReport on its actual accepted execution. That helper requires the captured authenticated FINAL and matches executionId, attemptId, admissionId, runnerInstanceId and runnerSequence to the durable dispatch ledger. The branch asserts actual outcome.result PASSED, null errorCode and absent/null detail, exactly three ordered stepIndex receipts with status PASS and null failure. Capture still forwards the original filter chain once and retains only actual FINAL bodies following a successful original HTTP response. Public FAILED/null failure vocabulary is unchanged.",
+      "boundary": "Assertions on the original successful FINAL and ordered receipts are present; no runtime registration PASS is granted."
+    },
+    {
+      "id": "B-CORE-LOGIN-003",
+      "priorSeverity": "P2",
+      "result": "RESOLVED_SOURCE",
+      "locations": [3947, 3958, 3988, 4000, 4007, 4021, 4045, 4064, 4069, 4078, 4403],
+      "evidence": "Every actual ordinary execute 202 through p3Call records execution and actual caller cookie in the per-case map, and registers callback capture, before the expected-status assertion or caller binding/dispatch assertions. This also covers unexpected acceptance by the negative ordinary caller. Finally attempts all ordinary and guided owners, aggregating failures. Ordinary cleanup uses the genuine authenticated public cancel route with a 15-second HTTP bound when nonterminal, recognizes only the real terminal/already-requested conflict codes, then requires an authenticated terminal snapshot with streamComplete and its accepted-at joined ledger DONE. The no-transport branch additionally requires null durable attempt/admission/admission receipt and no retained actual sender diagnostic. Its justification is the genuine absorbing DONE boundary and dispatch protocol: attempt ownership is committed before sender entry and queued cancellation fences beginDispatch. Sender absence alone is not accepted. Any attempted-transport branch instead requires an actual captured FINAL and all existing durable identity/sequence checks. A reaper terminal or cancel response alone cannot confirm it. The 60-second observation loop fails closed if that boundary is missing.",
+      "failurePreservation": "Fixture authority and owner maps clear only when all owners confirm. Uncertainty sets the existing PER_CLASS sticky cleanupUnconfirmed flag, retains authority and blocks both the next BeforeEach and the next p3Case. Cleanup failures are aggregated and suppressed onto the primary operation error; without a primary they fail the case. The existing AfterEach does not reset the sticky flag.",
+      "boundary": "The repair requires actual protocol settlement evidence when executed. Source control-flow and unchanged runner close/wipe-before-FINAL helper seams support this requirement; they do not substitute for a produced runtime boundary or close broader process/quiescence obligations."
+    },
+    {
+      "id": "B-CORE-LOGIN-004",
+      "priorSeverity": "P2",
+      "result": "RESOLVED_SOURCE",
+      "locations": [3946, 4030, 4394, 4399, 4400, 4410],
+      "evidence": "p3Call branches on actual response status 202, parses the genuine guided-start session ID and retains its actual caller cookie before asserting the expected status. Tracking no longer depends on an expected 202, so the mayUse/missing-scope negative paths retain an unexpected successful session. The separate guided cookie map owns denied-principal sessions without putting them into the old user-1-only map. Cleanup authenticates the real guided cancellation with the retained owner cookie and requires the bounded actual CONFIRMED teardown seam. Unsupported or failed acknowledgement remains unconfirmed and sticky. The original expected-refusal assertion remains the primary failure.",
+      "boundary": "Real ownership and cleanup paths are wired before the refusal assertion; no simulated negative 202 or cancellation was run."
+    }
+  ],
+  "preservation": {
+    "originalNineBaselineArchive": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-contract-corrected-all9/sources.zip",
+    "originalNineBaselineSourceSHA256": "fcfc4ee93fb9802b5d28ef04caf98c1f153d8ac3f5083e73ea13fed38b20c90b",
+    "originalNineBodiesIndependentlyByteIdentical": true,
+    "all18TestNamesAndOrderPreserved": true,
+    "checkedThrowDeclarationPreserved": true,
+    "budgetHelperByteIdenticalToBaselineAndRepairParent": true,
+    "budgetOutput4000AndSessionTotals32000and128000Preserved": true,
+    "guardAndOriginalSourceAuthorityUnchangedByRepair": true,
+    "originalInvocationForwardersUnchanged": true,
+    "noManufacturedCancelAuditFinalLedgerOrAdmissionRowsInRepair": true,
+    "noNewIdBodyOrSecretExportInRepair": true,
+    "verification": "Exact reverse-patch identity accounts for the entire repair delta. Read-only extraction/comparison against the original-nine source archive independently confirmed all nine bodies and persistActualBudgetEvidence; all 18 test names/order match the exact repair parent. Existing guards, defaults, source authority and diagnostic exports outside these four findings were not reopened."
+  },
+  "limitations": [
+    "This is meaningful source correction of all four prior findings, with no concrete residual source gap found within the authorized scope.",
+    "No new Core/P3 runtime PASS, compile PASS, test PASS, cancellation receipt, actual FINAL, launch proof or process-boundary proof was produced. Prior compile-red/zero-test evidence remains unchanged.",
+    "The coordinator's separately formatted copy and runtime identity must be reanchored separately; neither is bound to the immutable authored SHA by this review.",
+    "Full P6, revocation, process, image/privacy and full19 obligations remain open and outside this review; no QA/lifecycle closure or waiver is granted."
+  ]
+}

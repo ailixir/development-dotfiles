@@ -1,0 +1,86 @@
+{
+  "phase": "ready-sent-dropped",
+  "actualCompiledChild": true,
+  "actualFullChromium": true,
+  "captureFacts": {
+    "phase": "ready-sent-dropped",
+    "actualReadyDropped": true
+  },
+  "actualSuspendedDescendantPids": [
+    57030,
+    57291,
+    57102,
+    57103,
+    57104,
+    57214,
+    57263,
+    57277
+  ],
+  "pidLabels": [
+    {
+      "pid": 57030,
+      "command": "/Users/brunobuger/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
+    },
+    {
+      "pid": 57291,
+      "command": "/Users/brunobuger/Library/Caches/ms-playwright/ffmpeg-1011/ffmpeg-mac"
+    },
+    {
+      "pid": 57102,
+      "command": "/Users/brunobuger/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/Frameworks/Google Chrome for Testing Framework.framework/Versions/153.0.8010.12/Helpers/Google Chrome for Testing Helper (GPU).app/Contents/MacOS/Google Chrome for Testing Helper (GPU)"
+    },
+    {
+      "pid": 57103,
+      "command": "/Users/brunobuger/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/Frameworks/Google Chrome for Testing Framework.framework/Versions/153.0.8010.12/Helpers/Google Chrome for Testing Helper.app/Contents/MacOS/Google Chrome for Testing Helper"
+    },
+    {
+      "pid": 57104,
+      "command": "/Users/brunobuger/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/Frameworks/Google Chrome for Testing Framework.framework/Versions/153.0.8010.12/Helpers/Google Chrome for Testing Helper.app/Contents/MacOS/Google Chrome for Testing Helper"
+    },
+    {
+      "pid": 57214,
+      "command": "/Users/brunobuger/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/Frameworks/Google Chrome for Testing Framework.framework/Versions/153.0.8010.12/Helpers/Google Chrome for Testing Helper (Renderer).app/Contents/MacOS/Google Chrome for Testing Helper (Renderer)"
+    },
+    {
+      "pid": 57263,
+      "command": "/Users/brunobuger/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/Frameworks/Google Chrome for Testing Framework.framework/Versions/153.0.8010.12/Helpers/Google Chrome for Testing Helper (Renderer).app/Contents/MacOS/Google Chrome for Testing Helper (Renderer)"
+    },
+    {
+      "pid": 57277,
+      "command": "/Users/brunobuger/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/Frameworks/Google Chrome for Testing Framework.framework/Versions/153.0.8010.12/Helpers/Google Chrome for Testing Helper (Renderer).app/Contents/MacOS/Google Chrome for Testing Helper (Renderer)"
+    }
+  ],
+  "childPid": 56885,
+  "allObservedPidsGone": true,
+  "actualReadySentCount": 1,
+  "actualReadyParentAccepted": false,
+  "executeSends": 0,
+  "applicationVisits": 0,
+  "productionScratchEmpty": true,
+  "productionCapacityInUse": 0,
+  "objectStoreVideoFiles": 0,
+  "terminalOutcome": {
+    "result": "ERROR",
+    "errorCode": "RUN_ERROR",
+    "errorMessage": "TIMEOUT"
+  },
+  "terminalEvidence": {
+    "videoKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.webm",
+    "manifestKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.result.json",
+    "state": "FAILED",
+    "partial": false
+  },
+  "provenance": {
+    "channel": "chromium",
+    "headless": true,
+    "chromiumSandbox": true,
+    "args": [],
+    "platform": "darwin",
+    "arch": "arm64",
+    "revision": "1243",
+    "executableRelativePath": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+    "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+  },
+  "imageProvenance": "NOT_ASSERTED: local controlled catalog",
+  "blankOracle": "Aria20261014 full-resolution WHITE or exact native gray pad; all pixels classified"
+}

@@ -1,0 +1,83 @@
+{
+  "artifact": "Runner015 temporary orchestration checkpoint",
+  "at": "2026-10-15T04:21:43.211778+00:00",
+  "status": "PARTIAL_IMPLEMENTATION_ARCHITECT_BASIS_DEPENDENCY",
+  "request": "Root requested bounded return after current atomic edit so Aria can resolve missing basis snapshot authority; all six increments remain assigned and incomplete.",
+  "frozenContractReceiptVerified": true,
+  "frozenContractFilesRehashed": 33,
+  "mismatches": [],
+  "changedFiles": {
+    "studio-runner/src/validator/observedReferencePolicy.ts": "3f57d0acb304df8a5dc626c6fe4f3161f90444f97d2d2a3cc12a8787ada6a948",
+    "studio-runner/src/guided/contracts.ts": "e38f5e1c2f53776f98602cfacc9e3e2c9737372a004cbf55b69a3077b56b8950",
+    "studio-runner/src/guided/runtime.ts": "86e4767622ee7c0c48583a755867bcbbda63b35fec005353b7429b1a456d86bc",
+    "studio-runner/src/guided/transport.ts": "1e8627c5668ce8834bbc779002779b170d784bd6af5782aea763840e786424aa",
+    "studio-runner/src/guided/journal.ts": "15da758e2e287926a7d404926323791ab3e1f72931bc3c4cb1741de8de9d86dd",
+    "studio-runner/src/guided/ownership.ts": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf",
+    "studio-runner/src/run/observedReplayAdapter.ts": "7696c3d050dfb32c2fa020097ee59f0fa72b2f191b3c12dfdd11c4f4d79dce07",
+    "studio-runner/test/guided/runtime.test.ts": "255578a778c7dcf23d29197759ef30f07fe050ec556e848664404dcd64e839c8",
+    "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts": "d1d524272fba634063ec6cf9491b6e14179f8d66dbc53898cffb47c2a84a6186",
+    "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts": "d6af50904a1a3187ae5b9b49478dd4232b28cf0b44e97807db765609876194d8",
+    "studio-runner/test/fixtures-tier/guided-recording.test.ts": "3522915df575e7a0e98e71e74728545bdcb96fcf9b48b3178762c2ab5cc23574",
+    "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "10d97ab585a5af13a69b128a231eab0c6fd5e18780aec17cb3abcb803f752fd6",
+    "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "f5b613f5486b43a70c043b01a801f4ec8590bd8db2cd3ace8bf5510ca8fed685",
+    "studio-runner/test/fixtures-tier/secret-login.test.ts": "3edd5a500b3b9628b15f29fad5d6815bfa3d0fb64c80cdcc5b003d8895a4f322",
+    "studio-runner/test/fixtures-tier/guided-wire.test.ts": "082e00e6de1af226c2d20a907cf28da0d9a70c49844c483ed06f1e75641b3a8f",
+    "studio-runner/test/helpers/guided.ts": "af3c5687dcf62682253a58a2564177b507cfc0f61e57ee600cd81fda5255dc4d"
+  },
+  "changesApplied": [
+    "Observed adapter factored into prepareObservedAction/performPreparedObservedAction accepting same handle and existing session; ordinary wrapper retained.",
+    "Journal synchronous durable native fence added.",
+    "Runtime private prefix prepare, fresh Action construction, exact current observation use, monotonic fence and positive no-invocation callback path partially wired.",
+    "Append input prefix/version bounds, async withhold-before-ACK, separate live lease; ownership accepts prefix and forwards exact issued payload.",
+    "Transport nested prefix identity/outcome callback and context deliveryId header handling.",
+    "Schema engine support for frozen bounded snapshot maps added to owned TS consumers.",
+    "Ordinary test type imports and helper ledger attemptOrdinal0 ports begun."
+  ],
+  "notComplete": [
+    "Full validator incremental/historical basis derivation and zero-consumer executor change",
+    "Full suffix attempt1 validation and native drift fault tests",
+    "Bounded WAIT exhaustion/drift completion tests and duplicate/version ACK concurrency coverage",
+    "Public result/video proof, native fixture source and two corpus files",
+    "Focused/full unit/lint green; all57 mapping executed evidence",
+    "Native/build/joined proof remains later root window"
+  ],
+  "checks": [
+    {
+      "command": "npm run type-check",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/type-initial.log",
+      "status": "FAILED_EXPECTED_PARTIAL_IMPLEMENTATION",
+      "details": "Initial compile identified new schema-map semantics, mutable/readonly observation type, timing closure narrowing, and required learned-plan snapshot fields. First three patched after log; no rerun before root checkpoint. No pass credit."
+    }
+  ],
+  "counterexample": {
+    "basisContract": "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json#/definitions/ValidationBasis",
+    "source": "studio-runner/src/validator/observedReplay.ts deriveObservedArtifact constructs LearnedPlan entirely from ValidationBasis",
+    "existingBasisIdentity": [
+      "sourceSteps: stepId/ordinal/source text",
+      "configuration: environment/browser/viewport/timeout/wait",
+      "inputs: effective InputIndex and provenance only",
+      "materializationEvidence: private document hashes and metadata minus values",
+      "incrementalEvidence: plan/program/switch/request/receipt/firstSuffix/excludedAttempts"
+    ],
+    "missing": [
+      "Full normalized step authoring contexts and globalContext",
+      "Complete referenced authoredDeclarations/value hashes and canonical stepInputHash/inputChain identities for every step",
+      "Base-side frozen authoring/input identity and immediate-base snapshot maps needed to recompute or verify byte-identical reused snapshots"
+    ],
+    "exactIssue": "Two authored drafts can have identical current ValidationBasis source text/effective executed graph/materialized inputs but differ in a nonexecuted StepAuthoringContext or referenced declaration identity. Ruled stepInputHash/inputChain/StepSnapshot must differ. Frozen basis has no such field and sourceManifestHash is opaque, so a pure function cannot distinguish them. PrefixProgram includes verified base actions/guard/digest but no base authoring identity/snapshot values. Cannot truthfully derive stepSnapshotHashes or immediate-base equal snapshot from these inputs, nor copy supplied artifact fields as independent proof.",
+    "requiredResolution": "Aria/C-int supply exact approved complete snapshot-authority basis fields/proof interface; do not fabricate defaults, hash source text alone, trust attacker artifact maps, or weaken validator."
+  },
+  "coordination": {
+    "backendConfirmed": "Existing /context Idempotency-Key=deliveryId for v>=2; body exact RunnerContext; contextHash before live lease substitution. Initial v1 bootstrap unchanged.",
+    "driftAuthority": "Backend confirms authenticated outcomes prefixDrift sole authority, HTTP dispatch response reconciliation uses stored switch and must not generic-stop committed drift. Runtime currently preserves ordinary failed HTTP return after callback ACK; callback loss terminal UNKNOWN_OUTCOME.",
+    "executionHolds": [
+      "No build/dist/native/browser/Gradle/DB/deployment",
+      "No schema/generated/pin/Java/frontend/migration/story/gate edits",
+      "No commits/install/subagents"
+    ]
+  },
+  "budget": {
+    "ceilingUSD": 500,
+    "actualBilling": "unavailable"
+  }
+}

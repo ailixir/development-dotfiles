@@ -1,0 +1,30 @@
+[
+  {
+    "selector": "bootstrapOnlyResumeChecksPinsAndDirectProposalsRecoverBeforeInference()",
+    "sqlStates": [
+      "P0001"
+    ],
+    "sqlErrorCodes": [
+      "0"
+    ],
+    "fixedConstraintNames": [],
+    "pgErrorClasses": [
+      "org.postgresql.util.PSQLException"
+    ],
+    "containsProfileMismatch": false
+  },
+  {
+    "selector": "pinRefusalAfterLockedLateAccountingPreservesTheDeltaAndStop()",
+    "sqlStates": [
+      "P0001"
+    ],
+    "sqlErrorCodes": [
+      "0"
+    ],
+    "fixedConstraintNames": [],
+    "pgErrorClasses": [
+      "org.postgresql.util.PSQLException"
+    ],
+    "containsProfileMismatch": false
+  }
+]

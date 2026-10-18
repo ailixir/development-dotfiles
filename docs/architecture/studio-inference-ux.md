@@ -1,5 +1,7 @@
 # Studio inference authoring and review interaction
 
+> **Superseded (2026-10-12):** Superseded by [ADR-SC-005](ADR-SC-005-single-path-observed-authoring.md) (single observed path; compile-to-READY removed in STUDIO-OBS-012A).
+
 Owner: Uma. 2026-09-16. Implementation handoff for story10.25, derived from the user-approved plan and [C0](studio-inference-contract-v1.md). Uses existing Studio page, MUI controls, centralized API and MSW; no new execution engine.
 
 ## Editing and scope review

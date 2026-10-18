@@ -1,0 +1,235 @@
+--- before/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java
++++ candidate/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java
+@@ -32,6 +32,7 @@
+   private final GuidedDependencyPlanner dependencies;
+   private final GuidedTranslationProperties properties;
+   private final Clock clock;
++  private final GuidedPromptAssembler.PreparationCapability preparationCapability;
+ 
+   public GuidedTranslationService(
+       GuidedSessionService sessions,
+@@ -47,6 +48,24 @@
+       GuidedDependencyPlanner dependencies,
+       GuidedTranslationProperties properties,
+       Clock clock) {
++    this(sessions, repository, store, questions, dispatch, gateway, contracts, prompts, inputs,
++        validator, dependencies, properties, clock, null);
++  }
++
++  private GuidedTranslationService(
++      GuidedSessionService sessions,
++      GuidedSessionRepository repository,
++      GuidedTranslationStore store,
++      GuidedClarificationContextStore questions,
++      GuidedDispatchService dispatch,
++      GuidedLlmGatewayClient gateway,
++      GuidedContracts contracts,
++      GuidedPromptAssembler prompts,
++      GuidedSourceInputResolver inputs,
++      GuidedProposalValidator validator,
++      GuidedDependencyPlanner dependencies,
++      GuidedTranslationProperties properties,
++      Clock clock, GuidedPromptAssembler.PreparationCapability capability) {
+     this.sessions = sessions;
+     this.repository = repository;
+     this.store = store;
+@@ -60,6 +79,18 @@
+     this.dependencies = dependencies;
+     this.properties = properties;
+     this.clock = clock;
++    preparationCapability = capability != null && capability.ownedBy(prompts) ? capability : null;
++  }
++
++  static GuidedTranslationService fromPureAssemblerFactory(
++      GuidedSessionService sessions, GuidedSessionRepository repository, GuidedTranslationStore store,
++      GuidedClarificationContextStore questions, GuidedDispatchService dispatch,
++      GuidedLlmGatewayClient gateway, GuidedContracts contracts, GuidedPromptAssembler prompts,
++      GuidedSourceInputResolver inputs, GuidedProposalValidator validator,
++      GuidedDependencyPlanner dependencies, GuidedTranslationProperties properties, Clock clock) {
++    return new GuidedTranslationService(sessions, repository, store, questions, dispatch, gateway,
++        contracts, prompts, inputs, validator, dependencies, properties, clock,
++        prompts.preparationCapability());
+   }
+ 
+   public JsonNode plan(
+@@ -702,6 +733,19 @@
+     for (int index = 1; index <= 3; index++) {
+       final int attemptNumber = index;
+       String translator = UUID.randomUUID().toString();
++      GuidedPromptAssembler.PreparedProjection prepared = null;
++      if (preparationCapability != null) {
++        try {
++          ObjectNode captured =
++              sessions.translationTransaction(controller, id, fence,
++                  current -> capturePromptInputsLocked(current, kind).positiveContext(kind, repairs));
++          prepared = prompts.preparePure(preparationCapability, captured, key, attemptNumber, kind,
++              properties.maxOutputTokens());
++        } catch (RuntimeException unavailable) {
++          // Preparation is not authority: original actual reservation supplies current refusal.
++        }
++      }
++      final GuidedPromptAssembler.PreparedProjection candidate = prepared;
+       Reserved reserved;
+       try {
+         reserved =
+@@ -724,6 +768,7 @@
+                       409);
+                   JsonNode abandoned = store.state(id).path("activeAttempt");
+                   String effectiveKey = key;
++                  boolean nestedSettlement = false;
+                   if (!abandoned.isNull()
+                       && !abandoned.isMissingNode()
+                       && !Instant.parse(abandoned.path("leaseUntil").asText())
+@@ -739,33 +784,44 @@
+                     store.finishAttempt(
+                         id, abandoned.path("attemptId").asText(), "UNKNOWN_CALL", null, null, null);
+                     effectiveKey = key + "-recovery-" + UUID.randomUUID();
++                    nestedSettlement = true;
+                   }
++                  // Nested settlement updates a different detached wrapper; never borrow it.
++                  var freshInputOwner = nestedSettlement && preparationCapability != null ? repository.lock(id) : current;
+                   GuidedModelRequest request =
+-                      request(current, effectiveKey, attemptNumber, kind, repairs);
+-                  ObjectNode payload =
+-                      contracts
+-                          .object()
+-                          .put("kind", request.kind().name())
+-                          .put("requestId", request.requestId())
+-                          .put("attempt", request.attempt());
+-                  ObjectNode projectionDocument = request.projection().document();
+-                  payload.set("context", projectionDocument);
+-                  ObjectNode wireBound =
+-                      contracts
+-                          .object()
+-                          .put("contents", payload.toString())
+-                          .put("systemInstruction", request.outputContract());
+-                  wireBound.set("responseJsonSchema", request.responseSchema());
+-                  // Count escaped content plus actual supplied schema; allowance covers SDK field
+-                  // wrappers.
+-                  int bytes = wireBound.toString().getBytes(StandardCharsets.UTF_8).length + 2048;
++                      request(freshInputOwner, effectiveKey, attemptNumber, kind, repairs, candidate);
++                  ObjectNode projectionDocument;
++                  Integer preparedBytes = candidate == null ? null : candidate.bytesFor(request);
++                  int bytes;
++                  if (preparedBytes != null) {
++                    projectionDocument = request.projection().document();
++                    bytes = preparedBytes;
++                  } else {
++                    ObjectNode payload =
++                        contracts
++                            .object()
++                            .put("kind", request.kind().name())
++                            .put("requestId", request.requestId())
++                            .put("attempt", request.attempt());
++                    projectionDocument = request.projection().document();
++                    payload.set("context", projectionDocument);
++                    ObjectNode wireBound =
++                        contracts
++                            .object()
++                            .put("contents", payload.toString())
++                            .put("systemInstruction", request.outputContract());
++                    wireBound.set("responseJsonSchema", request.responseSchema());
++                    // Count escaped content plus actual supplied schema; allowance covers SDK field
++                    // wrappers.
++                    bytes = wireBound.toString().getBytes(StandardCharsets.UTF_8).length + 2048;
++                  }
+                   if (bytes > properties.maxInputBytes()) {
+                     sessions.failTranslation(controller, id, fence, "BUDGET_EXCEEDED");
+                     return null;
+                   }
+                   if (!store.hasAttempt(id, request.requestId(), attemptNumber)
+                       && !sessions.modelReservationFitsLocked(
+-                          current, bytes, request.maxOutputTokens())) {
++                          freshInputOwner, bytes, request.maxOutputTokens())) {
+                     return null;
+                   }
+                   ObjectNode frozenState = store.state(id);
+@@ -778,13 +834,13 @@
+                       409);
+                   long revision = frozenState.path("planRevision").asLong();
+                   Instant deadline = clock.instant().plusSeconds(properties.callSeconds());
+-                  Instant hard = Instant.parse(current.document().path("expiresAt").asText());
++                  Instant hard = Instant.parse(freshInputOwner.document().path("expiresAt").asText());
+                   if (deadline.isAfter(hard)) {
+                     deadline = hard;
+                   }
+                   var attempt =
+                       store.reserveAttempt(
+-                          current.document(),
++                          freshInputOwner.document(),
+                           request.requestId(),
+                           attemptNumber,
+                           kind.name(),
+@@ -1084,12 +1140,45 @@
+     }
+   }
+ 
+-  private GuidedModelRequest request(
+-      GuidedSessionRepository.Session current,
+-      String key,
+-      int attempt,
+-      GuidedModelRequest.Kind kind,
+-      List<String> repairs) {
++  private GuidedModelRequest request(GuidedSessionRepository.Session current, String key,
++      int attempt, GuidedModelRequest.Kind kind, List<String> repairs) {
++    return request(current, key, attempt, kind, repairs, null);
++  }
++
++  private GuidedModelRequest request(GuidedSessionRepository.Session current, String key,
++      int attempt, GuidedModelRequest.Kind kind, List<String> repairs,
++      GuidedPromptAssembler.PreparedProjection prepared) {
++    return capturePromptInputsLocked(current, kind).complete(key, attempt, kind, repairs, prepared);
++  }
++
++  private final class PromptInputs {
++    private final JsonNode session, progress, state, safeInputs, remaining, selections;
++
++    private PromptInputs(JsonNode session, JsonNode progress, JsonNode state, JsonNode safeInputs,
++        JsonNode remaining, JsonNode selections) {
++      this.session = session;
++      this.progress = progress;
++      this.state = state;
++      this.safeInputs = safeInputs;
++      this.remaining = remaining;
++      this.selections = selections;
++    }
++
++    private ObjectNode positiveContext(GuidedModelRequest.Kind kind, List<String> repairs) {
++      return prompts.buildPositiveContext(kind, session, progress, state, safeInputs,
++          remaining, selections, repairs).deepCopy();
++    }
++
++    private GuidedModelRequest complete(String key, int attempt, GuidedModelRequest.Kind kind,
++        List<String> repairs, GuidedPromptAssembler.PreparedProjection prepared) {
++      return prompts.completePreparedOrOriginal(preparationCapability, prepared, key, attempt, kind,
++          session, progress, state, safeInputs, remaining, selections, repairs,
++          properties.maxOutputTokens());
++    }
++  }
++
++  private PromptInputs capturePromptInputsLocked(GuidedSessionRepository.Session current,
++      GuidedModelRequest.Kind kind) {
+     String id = current.document().path("sessionId").asText();
+     JsonNode state = store.state(id);
+     var safeInputs = contracts.object().putArray("items");
+@@ -1144,18 +1233,8 @@
+       state.path("plan").path("obligations").forEach(remaining::add);
+     }
+     progress.put("translationOrdinal", ordinal);
+-    return prompts.assemble(
+-        key,
+-        attempt,
+-        kind,
+-        current.document(),
+-        progress,
+-        state,
+-        safeInputs,
+-        remaining,
+-        sourceSelections(current),
+-        repairs,
+-        properties.maxOutputTokens());
++    return new PromptInputs(current.document(), progress, state, safeInputs, remaining,
++        sourceSelections(current));
+   }
+ 
+   private ObjectNode materialized(GuidedSessionRepository.Session current) {

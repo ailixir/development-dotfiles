@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "scope": "BOUNDED_READONLY_NEXT_P3_AND_JOIN_LOGIN6_EXECUTION_INVENTORY",
+  "createdAtUtc": "2026-10-10T20:31:09.336581+00:00",
+  "readBindings": {
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-r-next-scope-inventory-intent.txt": "faa168f3b13d05f03cdec3ba1b9ace8c354ca83b81896db53309631c8badcd25",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-r-next-scope-inventory-context.txt": "3e4e6b9881e7a6dd830c621318edec11ef81784336889647c0a78ebf4ef82364",
+    "docs/qa/evidence/STUDIO-OBS-007/remaining-runner-oracles-execution-design.json": "5a95a4714ec37b582ef06382830155640c2bfb0ea660bda85809357b0ae79d39",
+    "docs/qa/evidence/STUDIO-OBS-007/r-isolation-execution-design-r2.json": "3e0ddd0760b19935e39d1748d0d22cd74e140d6cacd6cba8e8f93a0e86fa1be4",
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-isolation-native3/result.json": "4b6e1ea9932fc525c461fcfe2fcdbc66f67b73d4e75f44f50128f0e173c0e89b",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-login-collision-candidate/result.json": "4e4755c25aff67e61856cfaf58b4949ac8476f44d5a89ee79a434657114e4880",
+    "studio-runner/src/guided/ownership.ts": "030443d7478791e2f980763a4e30a4b2daba922836d0c5ac9650e141995b31c4",
+    "studio-runner/src/guided/transport.ts": "fc447a2efdf666c9b4ed319685e1d59875787fa11ec3a3e070171ae5da5ae3bf",
+    "studio-runner/src/run/loginRequired.ts": "ff3ae364e27532ca35437cbcbbdf07c23c50888d09c3c81c571d6bef66e830bd",
+    "studio-runner/src/executor/observedReplay.ts": "da04d4ddaca0c3c0a3b0572fc181c3bd7874d7d03d3b26ccd1cd9eb6123add4a",
+    "studio-runner/test/helpers/guided.ts": "5ef1cf85ab03602a9a2b35c0c08cb03ab92499a8c698e910b01254abd88bf94e",
+    "studio-runner/test/helpers/guidedTls.ts": "bb06b80734a892d526890eb0efaaea61e061c2f8442e7f807ea1d62b4b0e07fb",
+    "studio-runner/test/fixtures-tier/guided-wire.test.ts": "ee3bcc4c8032025311bb24236a51f4d8ea64136be66cdcd0587e38fb0622bfcb",
+    "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts": "c6f789268dc25478d61d83204cf11ec4d97be4f2a8b04743d5c68af6a2e24df4",
+    "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "3a52cc9aebec7dc9ea7184d6d3c96bb00e67b571aca41e6c5145a10544af8566",
+    "studio-runner/test/fixtures-tier/secret-login.test.ts": "7198c88dce004781783e3e873ce08e468406fb3a2b8678900e7e8e32425fdd0b",
+    "studio-runner/test/fixtures/secret-login/server.ts": "4dfdb95e5a57d3ced6122d59fe190dd84ef58f722ce63fc5557785c51bb611f9",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "fcfc4ee93fb9802b5d28ef04caf98c1f153d8ac3f5083e73ea13fed38b20c90b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "168d894dfca9bf33f780a07414f5a4cc3b17be01db3579b6f041f3da9434a2ad",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c"
+  },
+  "performed": {
+    "sourceEdits": 0,
+    "testRuns": 0,
+    "typeChecks": 0,
+    "lintRuns": 0,
+    "builds": 0,
+    "runtimeStarts": 0,
+    "browserLaunches": 0,
+    "gradle": 0,
+    "distWrites": 0,
+    "processActions": 0,
+    "models": 0,
+    "evidenceWrites": 1
+  },
+  "existingEvidence": [
+    {
+      "id": "ISOLATION3",
+      "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-isolation-native3/result.json",
+      "receiptCounts": {
+        "passed": 3,
+        "failed": 0,
+        "pending": 0
+      },
+      "classification": "Read existing terminal receipt; not rerun. No repetition proposed. Foreign Producer/context refusals remain distinct from wrong claim-response grant validation; Core/Vault authorization is not claimed."
+    },
+    {
+      "id": "R_LOGIN_ADAPTER3_PLUS_DEFAULT2",
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-login-collision-candidate/result.json",
+      "fixtureReceipt": "Historical source-bound targeted30 passed/zero skipped",
+      "selectors": [
+        "executes the actual replay LOGIN_REQUIRED oracle: no-login",
+        "executes the actual replay LOGIN_REQUIRED oracle: wrong-password",
+        "executes the actual replay LOGIN_REQUIRED oracle: registration",
+        "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: no-login",
+        "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: wrong-password"
+      ],
+      "sourcePath": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "implemented": true,
+      "limit": "Direct controlled Execute3 adapter/executor + Chromium. None are guided learning, accepted publication or Core/PostgreSQL/Vault joins. Default missing target remains TIMEOUT; the existing optional real Reports button supplies authentic wrong-role drift in annotated cases."
+    },
+    {
+      "id": "EXISTING_CORE_SECRET_POSITIVE",
+      "selector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+      "implemented": true,
+      "sourcePath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "limit": "Existing ninth flow implements successful USER/PASS learning, publication and two rotated ordinary replays. It does not implement six JOIN-LOGIN failure/non-annotation outcomes. Current owner is running/rebinding broader gates; no status of live gates is inferred here."
+    }
+  ],
+  "firstNextBatch": {
+    "id": "P3_DIRECT_WRONG_A_PRIVATE_GRANT_1",
+    "priority": 1,
+    "status": "MISSING_TEST_SOURCE_NOT_AUTHORIZED_OR_EXECUTED",
+    "expectedNewCaseCount": 1,
+    "proposedPath": "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts",
+    "proposedSelector": "rejects the genuine retired CSI-A grant for a fresh CSI-B assignment before context or secret effects",
+    "nextDisjointSourceScope": [
+      "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts"
+    ],
+    "reuse": {
+      "helpers": [
+        "test/helpers/guided.ts: guidedContext, ownershipSession, assignmentFor, proposal, dispatch",
+        "test/helpers/guidedTls.ts: testTls, testFingerprint, jwtPolicy, jwt, post",
+        "src/guided/transport.ts: createGuidedServer, guidedClaimClient, guidedCallback, verifyGuidedJwt",
+        "src/run/browser.ts: original launchGuidedBrowser",
+        "test/fixtures/secret-login/server.ts: existing default fixture"
+      ],
+      "referenceConstruction": "Existing guided-wire real mTLS/JWT claim exchange and bounded repaired isolation scalar/original-delegation instrumentation. Do not import a test-registration module or change/extract the frozen isolation harness merely to reuse it."
+    },
+    "sequence": [
+      "Start actual default secret-login fixture, actual mutually authenticated names-only controller endpoint and capacity1 source guided worker. CSI-A scope and PASS declaration are frozen before authentic assignment/context. Actual controller claim response is accepted by original GuidedOwnership.checkGrant; retain only that accepted names-only grant, never private values or runtime snapshots.",
+      "A performs actual /login navigation and sole trusted PASS fill/submit, then authentic stop. Await original context close, tracked native writers gone and scratch gone before the wrong-grant attempt. Retain the accepted A grant unchanged only for this negative; choose a bounded sequence while its existing lease/absolute expiry are still valid, so expiry cannot substitute for the identity refusal.",
+      "Construct fresh probe context/assignment with distinct session/context and CSI-B scope, otherwise legitimate existing versions, worker/fence and limits. Probe is distinct from any later legitimate B assignment. Freeze it before sending. Real authenticated claim endpoint receives this probe CommandsClaim and responds with the exact retained A grant unchanged, using normal 202 schema; not a SCHEMA/auth/network denial.",
+      "Require the probe claim request and completed response to be observed, private original checkGrant identity rejection (if narrowly reviewed scalar original forwarding is used), and outer actual assign HTTP409 code CONTEXT_LOST. Record scalar session/scope equality flags and code/status; do not treat the earlier stale context/Producer tests as grant checks.",
+      "Measure deltas: zero probe launch/context/bootstrap/observation/native-password entry/fixture submission. No secret frame is sent for the probe. A prior positive actual launch/native entry makes zero deltas nonvacuous. Original acquire catches identity failure, normalizes CONTEXT_LOST and stops/tombstones the failed reservation.",
+      "Use a separate new legitimate B assignment if a positive capacity-recovery check is included in the same case; never retry the tombstoned probe as B. Drop retained names-only A grant after its single negative, scan all produced sinks and owned roots, restore original descriptors and release every acquired resource with unresolved cleanup recorded honestly."
+    ],
+    "actualSourceGuard": {
+      "path": "studio-runner/src/guided/ownership.ts",
+      "checkGrant": "Requires grant sessionId/scopeHash+hash(scope)/revisions/versions/expiresAt and worker/fence equality before lease checks. acquire catches failed authenticated acknowledgement and normalizes CONTEXT_LOST. No context/runtime/browser starts before accepted grant.",
+      "transport": "Actual initial claim is via guidedClaimClient; zero context/browser is not a fabricated no-effect receipt."
+    },
+    "suggestedFutureInvocation": {
+      "cwd": "studio-runner",
+      "argv": [
+        "npm",
+        "exec",
+        "--",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.fixtures.config.ts",
+        "test/fixtures-tier/guided-secret-stale-grant.test.ts",
+        "-t",
+        "rejects the genuine retired CSI-A grant for a fresh CSI-B assignment before context or secret effects"
+      ],
+      "currentlyRunnable": false,
+      "why": "New source does not exist; authoring/review and exclusive shared browser/dist release are required. Fixture globalSetup can rebuild dist."
+    },
+    "evidenceRequired": [
+      "Exact before/after source/dist/runtime bindings; terminal count1 and no fabricated skips",
+      "Actual authenticated A/probe request-response identity and names-only grant scalar joins",
+      "Nonzero A native/receipt precondition and zero probe native/launch/effect deltas",
+      "Actual original close/PID/scratch/capacity facts, sink/profile literal+encoded scalar scans and unresolved cleanup"
+    ],
+    "limits": [
+      "Local controller accepted names-only grant, not a real Core/Vault grant/resolver proof. The Core scoped wrong-CSI provider/release/read/send boundary remains separately joined.",
+      "No old A value in B public DOM/observation/model or passing sink; no new API, policy, browser flag, password primitive or physical heap claim."
+    ]
+  },
+  "joinedLogin6": {
+    "status": "SIX_JOINED_OUTCOMES_MISSING_SOURCE_AND_EXECUTION",
+    "owner": "Coordinator/root grants B Core/PostgreSQL test ownership and a separate R fixture-support scope if needed; R does not edit B files.",
+    "testHome": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "originalNineCases": "Preserve existing case names/assertions; the current positive ninth is a reuse seam, not six-case evidence.",
+    "proposedSelectors": [
+      {
+        "selector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualGuidedReportsWithoutLoginAnnotatesLoginRequiredFalse",
+        "exists": false,
+        "path": "learn",
+        "result": "FAILED/LOGIN_REQUIRED on authentic reached /login observation; detail.stepId is the genuine failed Reports source step; loginStepsPresent=false; no earlier dispatched secretRef fill or provider read."
+      },
+      {
+        "selector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPublishedReportsWithoutLoginAnnotatesLoginRequiredFalse",
+        "exists": false,
+        "path": "published ordinary",
+        "result": "Actual successful no-login learning/publication first, then protected replay with fresh initialBlank context; authentic published target guard fails eligible TARGET_DRIFT/POLICY_REFUSED at Reports; compiled Result3/report/DB FAILED+detail false; model0/value-read0."
+      },
+      {
+        "selector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualGuidedWrongPasswordAnnotatesLoginRequiredTrue",
+        "exists": false,
+        "path": "learn",
+        "result": "Actual scoped PASS value dispatch and rejected fixture submission, followed by genuine nonsecret Reports target/evidence rejection in reached /login observation; FAILED/LOGIN_REQUIRED detail true; actual read-entry/audit and sink scans."
+      },
+      {
+        "selector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPublishedWrongPasswordAnnotatesLoginRequiredTrue",
+        "exists": false,
+        "path": "published ordinary",
+        "result": "Learn/publish correct login plan, expire sessions and rotate fixture expected password while actual scoped Vault still supplies previous value. Same artifactHash, actual compiled fill PASS+USED and rejected submission; Reports link guard reaches genuine wrong-role drift; FAILED/detail true and model0."
+      },
+      {
+        "selector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualGuidedRegistrationAssertionPassDoesNotAnnotateLoginRequired",
+        "exists": false,
+        "path": "learn",
+        "result": "Real registration observation has structural signature, but genuine authored passing assertion proceeds through guided validation/dispatch; no annotation/error detail and no provider read."
+      },
+      {
+        "selector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPublishedRegistrationAssertionPassDoesNotAnnotateLoginRequired",
+        "exists": false,
+        "path": "published ordinary",
+        "result": "Actual accepted registration learn/publication then fresh compiled replay passes authentic published assertion; PASSED/no detail/all actual step receipts PASS/model0/value-read0."
+      }
+    ],
+    "sourceImplemented": [
+      "GuidedSessionService.annotateLoginFailure requires trusted controller, nonterminal current session and actual structural observation signature; derives prior dispatched secretRef presence from repository actions/proposals and stops FAILED.",
+      "GuidedTranslationService calls annotation only in existing eligible rejection/evidence branches (around926/1027); current secretLoginModel throws when a named node is missing, so that bare helper exception is not a meaningful eligible LOGIN oracle.",
+      "Observed executor annotation is only on nonsecret TARGET_DRIFT or POLICY_REFUSED plus actual adapter login signature; generic TIMEOUT and secret-fill failures are not annotation triggers.",
+      "Loopback fixture supports /login,/home,/reports,/registration plus /__rotate,/__expire,/__reset and a default-off reportsRoleCollision option. Existing CLI entry always starts default options.",
+      "Existing B test supplies real Core HTTP/PostgreSQL, counted scoped FakeVault, actual model request wire, mTLS guided worker, compiled ordinary child, native receipts/video and model/sink/audit evidence."
+    ],
+    "smallestMissingSupport": {
+      "classification": "Needs independent bounded fixture/test-construction review before source release; no broad policy blocker.",
+      "currentExactFactorySignature": "startSecretLoginFixture(password = plantedDefault, options: {reportsRoleCollision?: boolean} = {})",
+      "missingNoLoginPublicationConstruction": "Current /reports requires a session cookie, so fresh initialBlank no-login learning cannot legitimately publish a successful protected Reports guard. Expire alone cannot produce the successful no-login prerequisite. Never forge/remove login recipes or seed an authenticated context.",
+      "minimalRProposal": "Default-off, loopback fixture-only public Reports learning gate, with a narrow test control transition to protected behavior after actual publication; reuse the existing Reports page/heading and existing optional real Reports button on reached login. No global default change, new production wire/property, cookie seed, alternate context or model shortcut. A published Reports heading guard versus current real Reports button must be independently checked to cause authentic eligible drift; preserve red if it instead remains ABSENT/TIMEOUT.",
+      "minimalBScope": "Existing GuidedPublicationReplayIT only: explicit controlled fixture startup invokes the existing exported factory options (no production deployment change), true source-step plans and eligible closed model responses for reached login, actual learning/publication/expire/rotation/replay/status queries. Wrong-password plan should reach Reports directly after Sign in; do not let an earlier missing Home guard TIMEOUT substitute for the required eligible Reports failure.",
+      "candidateOwnerPaths": [
+        "studio-runner/test/fixtures/secret-login/server.ts (R, only if bounded fixture gate reviewed/released)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java (B/root)"
+      ],
+      "registrationNeedsFixtureChange": false,
+      "protectedTaxonomyConstraint": "Default absent target remains TIMEOUT and unannotated. A genuine learned/published guard/candidate mismatch is necessary for ordinary LOGIN_REQUIRED; no direct authored-literal guard replacement, generic timeout annotation or changed expected result."
+    },
+    "executionSequence": [
+      "First finish/rebind owner current nine-flow prerequisites and freeze trusted current source/dist/catalog identity.",
+      "Author/review the narrow fixture public-learning gate and six B test constructions with authentic source references/recipes/closed model eligibility.",
+      "For no-login ordinary case, learn and publish while Reports gate is public, save actual artifactHash, switch gate protected and expire fixture sessions; replay ordinary before any conflicting draft changes. Guided no-login failure uses a fresh session at protected phase with actual reached observation and eligible rejection.",
+      "For wrong-password cases, learn/publish correct scope-bound USER/PASS source; expire fixture sessions and rotate only fixture expected password, retain current counted Vault previous version as the actual wrong value; replay published plan and separately execute authentic failing learn.",
+      "For registration, learn actual passing assertion and publish it, then fresh ordinary replay; structural signature never itself creates a failure.",
+      "Coordinator alone executes exact selectors under serialized Gradle and exclusive shared browser/dist lane; collect current XML/named-counts/skips and all Core/provider/model/native/DB/sink facts."
+    ],
+    "coreVaultPrerequisites": [
+      "Actual CSI/principal/environment/test VaultScope, accepted authority/admission/build and declared PASS recipe must join; local runner-supplied values are insufficient.",
+      "Names-only mayUse at authorization/claim/preparation; exactly scoped provider read-entry and zeroable release only for actual password dispatch. Zero reads at publication and ordinary model0 must be counted against genuine prior positive events.",
+      "Authenticated completed PASS/PROGRESS USED and final DB audit joins must be immutable and bound to exact execution/attempt/sourceInputId/step/slot/reference; sparse unknown must not fabricate NOT_USED.",
+      "Fixture decoded native video/PID/scratch/profile/current executable evidence and every produced raw/public diagnostic/model/journal/report/database canary sink scan; no supplemental directPW.fill substituted for production C6.",
+      "A session-invalid login failure remains FAILED with LOGIN_REQUIRED detail; ordinary/guided API/DB status must not be rewritten or inferred solely from structural signature."
+    ]
+  },
+  "nextReleaseDecision": "First bounded new one-file P3 authoring/review scope can be independent of B Java test authoring. Browser/dist execution must still wait for coordinator current nine-flow readers. JOIN-LOGIN6 requires separate B scope and independent R fixture support disposition; neither is authorized by this inventory.",
+  "exclusions": [
+    "No repeat of passed isolation3",
+    "No fourth probe counted in original three",
+    "No old A public echo",
+    "No generic TIMEOUT taxonomy change",
+    "No source/runtime/build/check actions performed",
+    "No full19/QA/lifecycle/wave claim"
+  ],
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE_NOT_MEASURED",
+  "executionRelease": false,
+  "qaApproved": false
+}

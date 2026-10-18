@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "scope": "EXACT_TWO_FINDING_ONE_FILE_SOURCE_ONLY_REPAIR",
+  "beforeSha256": "dff3b1f98bc041ed2f90c7a470494a731a2ac6ec09bab2c5122eba2092e313c1",
+  "afterSha256": "117664104e79d066aafc0c61c2b842ddf1a0154fa5d340b645ec431ffe30ccbe",
+  "sourcePath": "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts",
+  "changedSourcePaths": [
+    "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts"
+  ],
+  "sourceFilesRehashed": 257,
+  "distFilesRehashed": 274,
+  "distDriftPaths": [],
+  "caseCount": 1,
+  "AProbeBSequenceAndAssertionsByteEqual": true,
+  "bindings": {
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-repair/before.test.ts": "dff3b1f98bc041ed2f90c7a470494a731a2ac6ec09bab2c5122eba2092e313c1",
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-repair/before-bindings.json": "958e5a5f7824656745d83de0886705bab6a6b57eef0d38f3dcc6b85f0970daac",
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-repair/after.test.ts": "117664104e79d066aafc0c61c2b842ddf1a0154fa5d340b645ec431ffe30ccbe",
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-repair/candidate.patch": "3a8672da627a8c084dadf490bb142a9be56ae3ffad84316f71f24c38943594b4",
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-repair/source-manifest.json": "959ed1c7a757494685cc35cb2210217895b3ba73e11eb66772b8d46256ce3eab",
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-repair/dist-manifest.json": "602b6b0d5a73aaedef04d1126819d8a5ba6f4ddb211d6f82848fbf58c0b760fb"
+  },
+  "findingMatrix": [
+    {
+      "id": "R-STALE-PUBLIC-CALLBACK-VERDICT",
+      "status": "SOURCE_REPAIRED_UNRUN",
+      "repair": "Persist unconfirmed public-callback-canary scalar cleanup fact immediately after actual callback hits are computed and before expect can throw/be swallowed into HTTP500. The existing final verdict observes this sticky fact after worker/callback cleanup, including lifecycle callbacks whose transport failure production deliberately ignores. No raw body or bytes are exported."
+    },
+    {
+      "id": "STATIC_NO_UNSAFE_FINALLY_321",
+      "status": "SOURCE_REPAIRED_UNCHECKED",
+      "repair": "Move existing success cleanup-failure guard after finally; original primary catch/rethrow unchanged. Primary failures still throw their original error after cleanup, so after-finally guard is reached only for normal completion and rejects sticky callback/other unresolved cleanup. No lint suppression/rule change."
+    }
+  ],
+  "preserved": {
+    "isolatedThreeSha256": "3a52cc9aebec7dc9ea7184d6d3c96bb00e67b571aca41e6c5145a10544af8566",
+    "dataflowOwnerSha256": "417c8ae2f6fb845eb4f7f802b037efc5638ee53ab0fcab41e4a7d8553bf763ad",
+    "dataflowHelperSha256": "c8420f7dc5420a085b0c5b51f92251b8418e6f6c7e4d891d2eb084cd15ee1f61",
+    "originalForwardingUnchanged": true,
+    "profilesScopesLeaseGrantCountsUnchanged": true,
+    "otherWrappersUnchanged": true,
+    "otherProductionSchemaDistWrites": 0
+  },
+  "reviewBinding": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-r-stale-grant-review.json",
+    "sha256": "50c25f6e92f480bab03b88ba9451dd0839d1c2bcace4fdab4b2bc413a8173460"
+  },
+  "checks": {
+    "type": "UNRUN",
+    "lint": "UNRUN",
+    "build": "UNRUN",
+    "native": "UNRUN",
+    "gradle": "UNRUN"
+  },
+  "actions": {
+    "sourceFilesEdited": 1,
+    "runtimeStarts": 0,
+    "processActions": 0,
+    "tests": 0,
+    "typeChecks": 0,
+    "lintRuns": 0,
+    "builds": 0,
+    "browserLaunches": 0,
+    "gradle": 0,
+    "models": 0,
+    "distWrites": 0,
+    "lifecycleActions": 0
+  },
+  "historicalStatic": "Read-only parent receipt: dff3 type0/lint1 no-unsafe-finally; not current-source evidence.",
+  "executionRelease": false,
+  "qaApproved": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE_NOT_MEASURED"
+}

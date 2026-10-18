@@ -1,0 +1,4 @@
+dockerfile CMD : ["sh", "-c", "ulimit -c 0 && exec node dist/main.js"]
+image Config.Cmd: ["sh", "-c", "ulimit -c 0 && exec node dist/main.js"]
+image Entrypoint: null
+PASS Config.Cmd equals the Dockerfile CMD (and the A6 literal); no ENTRYPOINT

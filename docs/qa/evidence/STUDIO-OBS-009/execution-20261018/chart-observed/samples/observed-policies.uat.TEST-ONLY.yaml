@@ -1,0 +1,14 @@
+# TEST VALUES ONLY. Placeholder application, environment and origin (example.test is reserved).
+# The real UAT policy file is reviewed configuration whose content owner is not yet named (open item).
+studioObserved:
+  policies:
+    - version: 1
+      policyId: test-only-policy
+      policyVersion: "1"
+      applicationId: test-only-application
+      environment: uat
+      allowedOrigins:
+        - https://app.example.test
+      entryPolicyId: test-only-entry
+      applicationPolicy: null
+      rules: []

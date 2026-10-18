@@ -1,0 +1,11 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java.before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java
+@@ -126,7 +126,7 @@
+   static {
+     try {
+       TEMP = Files.createTempDirectory("guided-bridge-");
+-      WORKER_SNAPSHOT = TEMP.resolve("worker-dist");
++      WORKER_SNAPSHOT = TEMP.resolve("dist");
+       Path sourceBuild = Path.of("../studio-runner/dist").toAbsolutePath().normalize();
+       try (var files = Files.walk(sourceBuild)) {
+         for (Path source : files.toList()) {

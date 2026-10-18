@@ -1,0 +1,21 @@
+{
+  "owner": "Dara",
+  "path": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+  "sha256": "901b0204e1686689019db0ef441c154cb0d9c1389d99a06495912311e42d52d3",
+  "status": "SOURCE_WRITTEN_NOT_COMPILED_EXECUTED",
+  "agreedWith": "backend015; ObservedPublicationFixture remains backend-owned",
+  "api": [
+    "freezeSource(jdbc,tx,JsonNode session) -> ObjectNode manifest before Base.capture; actual classifier, no manifest rewrite, synthetic approved policy and translation-state initialization",
+    "completeExistingSession(jdbc,tx,String sessionId,Base original) -> complete ordinary ValidationBasis while OBSERVING; no existing plans/actions; caller then FINALIZING and retains production reserve/claim/finish/commit"
+  ],
+  "productionSubjectsRetained": [
+    "GuidedSourceClassifier",
+    "GuidedSessionRepository.insertAction/save",
+    "GuidedPublicationEvidenceRepository.capturePreparation/attachAdmission/read",
+    "GuidedPlanBuilder.basis",
+    "ObservedArtifactLowerer and existing publication writer calls in caller"
+  ],
+  "controlledSyntheticInput": "Initial navigation from authored span or explicit configured destination, declared secret fills and plain title assertions, metadata ACK and successful ledgers. No model/worker/browser/native or real joined acceptance credit.",
+  "exactPolicyDecisionHash": "hash({scopeHash,preparation:proof,requestDigest:hash(proposal)})",
+  "privacy": "Source models/basis expose safe hash metadata, no resolved secret values; private nonsecret inputs remain fixture context only."
+}

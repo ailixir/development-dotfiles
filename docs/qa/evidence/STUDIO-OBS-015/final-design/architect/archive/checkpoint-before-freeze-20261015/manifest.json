@@ -1,0 +1,90 @@
+{
+  "artifact": "STUDIO-OBS-015 final technical design checkpoint",
+  "author": "Aria",
+  "capturedAt": "2026-10-14T22:59:49.860448+00:00",
+  "status": "DESIGN_CHECKPOINT__IMPLEMENTATION_UNSTARTED__INTEGRATED_SIGNOFF_PENDING",
+  "authority": "A1-A6 implementation choices recorded; user/PO product scope unchanged. Root now prioritizes all-green 012B/013/014 verification and requested immediate design-only checkpoint.",
+  "productionChanges": false,
+  "storyChanges": false,
+  "workflowChanges": false,
+  "applicationTestsRun": 0,
+  "internalChoicesRemaining": [],
+  "implementationRelease": "NOT_RELEASED; do not start 015 production work from this checkpoint",
+  "checks": {
+    "kind": "DESIGN_CHECK_ONLY",
+    "applicationTestsRun": 0,
+    "generatedAt": "2026-10-14T22:57:29.877Z",
+    "schemaCases": 44,
+    "canonicalVectors": 26,
+    "tenStepEqual": [
+      1,
+      2,
+      3
+    ],
+    "tenStepChanged": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "errors": [],
+    "status": "PASS"
+  },
+  "reviewFollowups": [
+    "Cross-artifact parity: Dara delivery context_metadata closed keys must admit paired optional prefixProgram/prefixProgramHash and verify exact relearn_plan; communicated to Dara before checkpoint.",
+    "Full-basis shape/hash example is not a joined runtime golden: sample reconstructed private-input hash differs from inherited example basis commitment. Scalar/domain/chain vectors remain exact; create coherent joined runtime fixture during implementation and do not credit this example as validator proof.",
+    "Independent integrated design review remains pending; no new QA dispatch requested."
+  ],
+  "dataSnapshot": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/manifest.json",
+    "sha256": "0fb63f42e4168bc5110a6d8d1e246fa9f04a144fddbf905b023665e9cd38b93b"
+  },
+  "files": {
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/acceptance-delta.json": "23d25ba07e5231da1c20d96356a917c11096c1ac8e0a92ac6c7a677ddf82cc1a",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/algorithms.json": "607e3ebebdf75f07c8ea1c9d0acf3167c7794cf337dec88feb92f60dcf85c412",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/check-design.cjs": "e019b416ede3f027eac0edd9022c15dcf4addf6dc5c736092b608373bd19d1e2",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/contract-edits.json": "da161f9ba5558ea6ea704a4eeb3c5a396305c673dda89836c7f121010ca2b870",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/design-check-result.json": "7586a4f2a8144827cae3ce270d4ce913fed097307621625b95a43dc9b1de3a0f",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/fixtures.json": "15c10de966bfd393643660ccdbf45c27cbffab9748a1c7c0153be46d8313b446",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/generate-design-fixtures.py": "d7b2ef5c9e533d3dd13bd4b62dce50a924ea18db4c68342767762337f6eb5bf3",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/implementation-ruling.md": "b24aaee201b27f911096f29a13d0281fb07075b0081c0665ac7d8a3f0b804030",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/interfaces.schema.json": "289ae7df8af4d488307592dcb33cdc4c664f9799701a95128c8033f417565518"
+  },
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringRevisionIdentity.java": "50047c7b1615f45610d5f84ab53c039b36c554bec8fadfe94a80181d033e895c",
+    "backend/src/main/java/com/citi/put/checks/studio/validation/VariableReferenceValidator.java": "63256da43cf60babf72e3f9cf6f8feb37e156a77559ee6ed02ca0884234eb637",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/StudioVariable.java": "db588856e4138219f453c5f7cc22d99f50b0d76d2e54d9ce481439424981a41c",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java": "040926543a49ca248d400a414a1cec466048517314a93ad766bff09011604e7f",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceSnapshotRepository.java": "8d87928ce342c600189d77baae2c604947e9a086608fdb182e06b2827d1800f5",
+    "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java": "be6947f3835171acb014f0b7327a7e945cdb6f21809850dcbadc4ee69f3a5cc2",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java": "eb136b55b982c775dd080d9a3d6c4042c94f10ebacf446341c3e6c85e335bb17",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java": "ec6448d6baef417ffb69366be9f01bd5da13fa87859a2d8c73a1e83956ce6792",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "994964975c26bf31259b7942011f43dc02fe74f031b93fa274965d41ce3a1642",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java": "2c44c6a50a42b3c654aa87f6ed0b3fd32a60e4946a4cb772ac3632851a99f3df",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java": "5347461b836ed3e87ef3024e83c9b8df78b902bc6c0e578d8353892c4edd8307",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java": "1e56ce648ff0c4720c13a0be5adacf82f6452caeb8819ebb47f51dc0a904ee8d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": "a728166231f8e1508e88a6bcf91b67933a95a7c5587f41613ce2109200878b96",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java": "7313046e049f40ff860119f1927de1bd326dcb9897ce0a5835eb77b450c30833",
+    "backend/src/main/resources/db/migration/V12__tests_revisions.sql": "274c26c4d41fbd991e157ec6372d08ca5c53ebe0a9e2d7a7252838228057d0d7",
+    "backend/src/main/resources/db/migration/V14__guided_sessions.sql": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357",
+    "backend/src/main/resources/db/migration/V15__publication.sql": "ef092dfff93a24c4a05dc9afee6ba4a3b9a054f6cf39ca4059c186ff10777b40",
+    "backend/src/main/resources/db/migration/V17__secret_use_audit.sql": "a5b6a89525f3b53769678361c204ba3a78564f9f108aeb0979c184a702bc3ba7",
+    "backend/src/main/resources/db/migration/V19__guided_governance.sql": "628b47efbb656aef8a3260f03e7dc77d988555a306652b4d433b8796e3424855",
+    "studio-runner/src/guided/runtime.ts": "e3d0da037141fb77ebd18d06c3de73f9356e516b5ba59fb44ae0f4826e252817",
+    "studio-runner/src/guided/journal.ts": "95705022bde07296e5609ea859809484dc6e7d442ae43489c7f49324855e8b83",
+    "studio-runner/src/run/observedReplayAdapter.ts": "07af47170a6050e7973c17355809a65b3d9219eaea6bc4b115b84b57e311c5c7",
+    "studio-runner/src/executor/observedReplay.ts": "23ebb53dcf4a932a29a59f55579d18503ac5e575e5938d0ee52a99c48584a9f1",
+    "docs/specs/studio/openapi.yaml": "afec6c04cdd5bcc19e42b83f83656a342165c5e04407e90a7206de0b40c46183",
+    "docs/qa/evidence/STUDIO-OBS-015/resume-po-review.json": "96f86c359860b1375bc870740509a420b8738df6ad6e7bff9afbb0ad4e5f5d50",
+    "docs/qa/evidence/STUDIO-OBS-015/resume-data-review.json": "7abbb6c9ceb535614605c14b95475448b6c9b89a0b8aa76c1942d4a5b5bf674a",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "0e3c81de45dc1b6ba39db082926d103728d16c9c5014db195ffda10ceea759a8"
+  },
+  "budget": {
+    "wholeWaveCeilingUSD": 500,
+    "actualSpend": "unavailable"
+  },
+  "preservedAudit": "docs/qa/evidence/STUDIO-OBS-015/resume-plan/ unchanged"
+}

@@ -1,0 +1,11 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -12280,7 +12280,7 @@
+             .put("STUDIO_RUNNER_CALLBACK_IDENTITY", CALLBACK)
+             .put("STUDIO_RUNNER_CALLBACK_BASE_URL", "https://localhost:" + port)
+             .put("STUDIO_RUNNER_INSTANCE_ID", "observed-fixture")
+-            .put("STUDIO_RUNNER_SCRATCH_DIR", TEMP.resolve("scratch").toString())
++            .put("STUDIO_RUNNER_SCRATCH_DIR", TEMP.toRealPath().resolve("scratch").toString())
+             .put("STUDIO_RUNNER_OBJECT_STORE_DIR", TEMP.resolve("objects").toString());
+     Path server = TEMP.resolve("ordinary.mjs");
+     Files.writeString(

@@ -1,0 +1,207 @@
+{
+  "artifact": "STUDIO-OBS-015 design-readiness checkpoint",
+  "story": "STUDIO-OBS-015",
+  "reviewer": "Quinn (independent QA/security)",
+  "updatedAt": "2026-10-14T22:57:08.043457+00:00",
+  "reviewKind": "DESIGN_READINESS_ONLY_NOT_STORY_COMPLETION",
+  "status": "CHECKPOINT_AWAITING_FINAL_FROZEN_INTERFACES",
+  "finalVerdict": null,
+  "readyForImplementation": false,
+  "reason": "Root requested status before implementation. Candidate contracts have passed bounded design checks, but Aria and Dara final frozen manifests and the just-agreed exact validation-basis extension have not yet been independently reviewed as one immutable snapshot. No final READY_FOR_IMPLEMENTATION verdict is invented.",
+  "authority": {
+    "methods": [
+      "review-story requirements traceability",
+      "aiox-qa security and risk-based review"
+    ],
+    "scopeOverride": "Explicit delegated task is a design gate only. It overrides normal completion-gate lifecycle/file mutations. No story status, QA gate, source, schema resource, migration resource or CLI state was edited.",
+    "wholeWaveCeilingUsd": 500,
+    "actualSpend": "unavailable"
+  },
+  "inputSnapshots": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "0e3c81de45dc1b6ba39db082926d103728d16c9c5014db195ffda10ceea759a8",
+    "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json": "58a75633d2dcf1aa94f80e17172612fae6b31cab08f8fc498eda1ccac00cbf24",
+    "docs/qa/evidence/STUDIO-OBS-015/resume-plan/completion-receipt.json": "00b2b086c8b68f6bd75ed2add14e4ec4dd53c9012b8b171c4112899c29079ff5",
+    "docs/qa/evidence/STUDIO-OBS-015/resume-data-review.json": "7abbb6c9ceb535614605c14b95475448b6c9b89a0b8aa76c1942d4a5b5bf674a",
+    "docs/qa/evidence/STUDIO-OBS-015/resume-po-review.json": "96f86c359860b1375bc870740509a420b8738df6ad6e7bff9afbb0ad4e5f5d50",
+    "docs/qa/evidence/STUDIO-OBS-007/qa-independent-final-review.json": "f7a9d10dfc0a71254d11547ca2b1c3903d1c7284a97bf72efa84b7c6151cfbf3"
+  },
+  "independentAudit": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/final-design/qa-design-audit.json",
+    "sha256": "4e42544e56567cbb6d6b2de2cc2f46eaf379f32dded8e78af4d5ca951a79ecbe",
+    "classification": "CANDIDATE DESIGN CHECKS ONLY",
+    "schemaCases": 41,
+    "canonicalVectors": 23,
+    "schemaReferenceOccurrences": 27,
+    "errors": [],
+    "baselineMismatches": [],
+    "edit4EqualPositions": [
+      1,
+      2,
+      3
+    ],
+    "edit4ChangedPositions": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "producerConsumerProjection": {
+      "producerEqualAfterLastConsumerDeletion": true,
+      "consumerHashChanged": true
+    },
+    "applicationTestsExecuted": 0,
+    "databaseCommandsExecutedByQA": 0,
+    "browserCommandsExecutedByQA": 0
+  },
+  "remainingReadinessConditions": [
+    {
+      "id": "Q015-C1",
+      "status": "OPEN_AT_CHECKPOINT",
+      "owner": "Aria and Dara",
+      "requirement": "Freeze final artifact sets and provide manifests with exact hashes. Recheck all files against both manifests; transient candidate corrections are not a final snapshot.",
+      "completionProof": "Two immutable final manifests, exact byte equality and a bounded independent cross-artifact review."
+    },
+    {
+      "id": "Q015-C2",
+      "status": "REMEDY_AGREED_NOT_YET_FROZEN_VERIFIED",
+      "owner": "Aria/C-int",
+      "requirement": "Freeze the closed extended ValidationBasis, exact field/cardinality/order rules, excluded-attempt joins and publicationEvidenceHash preimage, with a complete extended-basis fixture/hash.",
+      "candidateIssue": "At the audited candidate bytes, the final schema defined component records but not the full new validation basis, while prose said publicationEvidenceHash additionally commits them. Backend and runner could infer different envelopes.",
+      "agreedRemedy": "Required materializationEvidence={versions,entries}; incrementalEvidence=null or exact plan/program/switch/requests/receipt/first-suffix/excluded-attempt records; effective existing action/preparation/association arrays. Preserve existing publicationEvidenceHash preimage with basisHash=hash(entire extended basis). Private full input reconstruction checked before basis freeze.",
+      "completionProof": "New closed schema plus full fixture, independent reference/schema/canonical checks and reviewed exact joins on frozen bytes."
+    },
+    {
+      "id": "Q015-C3",
+      "status": "FINAL_PARITY_RECHECK_REQUIRED",
+      "owner": "Dara with Aria; independent Quinn verifies",
+      "requirement": "Verify final SQL/data design matches frozen shapes, particularly full-learn EMPTY_PREFIX and insufficient-base remedy, authoringIdentityVersion, exact ACK contextHash, metadata revision at version birth versus actual preparation metadata, bounded input bytes, stale preparation gates, required attemptOrdinal and effective-j result.",
+      "candidateCorrections": "Owners acknowledged/fixed the candidate mismatches during review. No claim is made that those fixes remain unverified implementation bugs.",
+      "completionProof": "Final aligned data interface/DDL manifest, exact cross-file clauses and falsifiable planned cases. Result is null before committed switch; after switch it names entered learning window, not successful learning/publication."
+    },
+    {
+      "id": "Q015-C4",
+      "status": "FINAL_TEST_DELTA_RECHECK_REQUIRED",
+      "owner": "Aria/QA",
+      "requirement": "Retain all six AC proofs and O-1, use HTTP+Postgres for zero-write assertions, accurate F01 retention assertions, and ensure final failure-result and exact extended-basis negatives are named.",
+      "completionProof": "Frozen combined inherited38 plus final add/replacement inventory, all labeled PLANNED_NOT_RUN. Real joined acceptance remains future work."
+    }
+  ],
+  "candidateDesignFindingsAndResolutions": [
+    {
+      "topic": "Model-free prefix",
+      "assessment": "Durable pending-prefix predicate covers PREPARING and REPLAYING_PREFIX; both reservation entrypoints/counters/attempt insertion fenced; no SOURCE_PLAN before prefix. Candidate SQL missing-plan INSERT bypass was reported and owner reports deferred mode guard plus explicit state check."
+    },
+    {
+      "topic": "Same browser and observation lineage",
+      "assessment": "One recorded GuidedBrowser.handle and existing ObservationSession feed prepare/performPrepared; switch keeps browser, recording ID and clock. Named real recording proof remains planned."
+    },
+    {
+      "topic": "Immutable authored identity",
+      "assessment": "Exact StudioVariable.name opaque mapping, direct secretId token identity, complete referenced plain hashes and UTF-8 ordering; historical insufficiency explicitly refuses implicit reuse and explicit first-step full learn captures new identity only."
+    },
+    {
+      "topic": "Append CAS and historical joins",
+      "assessment": "No old input mutation/removal; bounded versions1..201, input count<=200, checked metadata increments, same lock gates append/preparation/admission/consume and exact delivery ACK. Prior successful proof uses actual historical version; secret audit must do likewise."
+    },
+    {
+      "topic": "No repetition of consumed/possibly effected actions",
+      "assessment": "Positive trusted pre-native refusal only; monotonic durable native fence; spent admission immutable; one drift switch/receipt, attempts0..1, every admitted attempt charges action budget. Invocation started/unknown/lost acknowledgement and FAIL/policy never learn/retry."
+    },
+    {
+      "topic": "Producer versus changed consumer",
+      "assessment": "Independent projection of full historical graph preserved producer hash after last consumer deletion and changed consumer hash. Zero-consumer publication requires exact successfully executed retained-prefix producer; orphan/new model standalone needs refused."
+    },
+    {
+      "topic": "Publication reuse and closure",
+      "assessment": "Immediate pinned base, exact contiguous fully replayed prefix, no j-or-later reuse. Every actual successful action occurs exactly once; sole excluded consumed attempt needs authenticated no-invocation proof. Exact extended basis pending frozen review under Q015-C2."
+    },
+    {
+      "topic": "Truthful retention",
+      "assessment": "V19 scoped prune remains unchanged. Current and normalized materialized input/history and other F01 data remain retained and disclosed; no fabricated all-input-erasure or compliance approval."
+    },
+    {
+      "topic": "READY versus ordinary replay counters",
+      "assessment": "One semantic comparator shared by GET/evaluate/requireReady/execute. Immutable revision verification/configuration/authored integrity remain; draft-vs-base counters alone no longer refuse unused declaration edits. Guided start/current-source/publication CAS remain strict; execution bindings keep revision counters. Existing schedule invalidation remains."
+    }
+  ],
+  "requirementsTraceability": [
+    {
+      "ac": "AC-1",
+      "unit": "ChangeDetectionTest text/config/token/context/edit/insert/delete/reorder/earliest/tail cases; IncrementalHashTest.matchesCanonicalVectors",
+      "integration": "IncrementalReadinessIT.unusedDeclarationEditStaysReadyThroughAcceptanceAndDispatch; IncrementalStartIT.deleteAllRefusesWithoutAnyWrite; IncrementalIdentityIT.explicitFullLearnWorksWithStaleDraftIdentityCache",
+      "realStack": "IncrementalRelearnIT.editStep4OfTenUsesRealPrefixThenSuffixAndPlainReplay and insert/delete/reorder/tail/append joined variants",
+      "status": "NAMED_FALSIFIABLE_PLAN_NOT_RUN"
+    },
+    {
+      "ac": "AC-2",
+      "unit": "StudioContractTest and confinement.test.ts C3 pins; canonical schema negatives",
+      "integration": "IncrementalStartIT.clientCannotNarrowServerBoundary; GuidedReplayingPrefixMigrationIT.prefixStateContinuationAndAttemptGuards",
+      "realStack": "Central edit4 joined proof observes resolved boundary/state/result and refusal",
+      "status": "NAMED_FALSIFIABLE_PLAN_NOT_RUN"
+    },
+    {
+      "ac": "AC-3",
+      "unit": "mixed-mode-prefix.test.ts model-free-adapter-and-joined-receipts",
+      "integration": "IncrementalSessionIT.prefixCallbacksNeverOpenModelReservation; IncrementalMaterializationIT.appendedSuffixInputPreservesEarlierEvidence; stalePreparedCommandCannotCrossAppend; secretLineagePinsActualHistoricalVersion",
+      "realStack": "Central edit4 proof, secretPrefixPreservesOBS007Oracles, singleVideoSpansPrefixAndSuffix",
+      "status": "NAMED_FALSIFIABLE_PLAN_NOT_RUN"
+    },
+    {
+      "ac": "AC-4",
+      "unit": "Closed receipt negatives/native fence assertions; attempt and policy classification",
+      "integration": "IncrementalSessionIT.restartAndConcurrentDriftTransitionAreIdempotent; IncrementalDriftIT.preAdmissionAndAdmittedReceiptsUseAuthenticatedAuthority",
+      "realStack": "prefixDriftAtTwoRelearnsTwoThroughTen; prefixAssertionFailureStopsWithoutReinterpretation; prefixPolicyRefusalStopsWithoutReinterpretation; finalCheckRacePreservesOneNativeEffectAndVideo",
+      "status": "NAMED_FALSIFIABLE_PLAN_NOT_RUN"
+    },
+    {
+      "ac": "AC-5",
+      "unit": "IncrementalHashTest.suffixConsumerChangeDoesNotChangePrefixProducerSnapshot; exact merged pure validator checks",
+      "integration": "IncrementalPublicationIT.mergedProofCannotReuseOldAdmissionsOrForeignSnapshots; sameTestOlderBaseAndNoncontiguousReuseAreRefused; retention and per-version lineage cases",
+      "realStack": "Central edit4 publication/finalize model0/browser0; readyLearnAgainFromNUsesSameMechanism; deletedLastConsumerRetainsProvenPrefixRead",
+      "status": "NAMED_FALSIFIABLE_PLAN_NOT_RUN"
+    },
+    {
+      "ac": "AC-6",
+      "unit": "Named corpus artifact validation and canonical fixtures support but do not replace joined proof",
+      "integration": "Named HTTP/refusal/version/ledger checks support joined proof",
+      "realStack": "Real Spring HTTP + PostgreSQL migration head + actual guided runner + Chromium; both gateway counters by phase, actual finalized media and offsets, snapshot1..3 equal/4..10 different, new ordinary replay model0; two corpus artifacts",
+      "status": "NAMED_FALSIFIABLE_PLAN_NOT_RUN"
+    },
+    {
+      "ac": "O-1",
+      "unit": "T0 named legacy test drops/ports/count inventory",
+      "integration": "StudioAuthoringApiIT.aV1ShapedWriteIsRefusedAndWritesNothing",
+      "realStack": "One authoring generation and C-int old/new pin ledger; frontend remains OBS008",
+      "status": "NAMED_FALSIFIABLE_PLAN_NOT_RUN"
+    }
+  ],
+  "securityInvariantsPreservedInReviewedDesign": [
+    "Reference-only secrets; no resolved values in declaration/receipt/provider/public evidence shapes",
+    "Exact current declaring step/slot, password-only unique target, document/generation/origin/form-action guards remain",
+    "Current CSI/assignment/lease/fence/authorization and post-consume secret release remain",
+    "Append-only RELEASE/USAGE facts; positive no-native proof never fabricates NOT_USED or REFUSED after uncertainty; conservative UNKNOWN_OUTCOME retained",
+    "New admission obtains fresh authorization/read/release and its own exact version lineage",
+    "No model call during prefix or finalization; no secret value copied from base",
+    "One recorder/browser; runtime redaction updated before append ACK; no fabricated effect timing",
+    "Existing OBS007 no-leak sink/static/native regressions remain planned for touched paths; prior complete gate is not new proof",
+    "External live Vault/provider/production image/SIEM/human masking/compliance gates stay uncredited"
+  ],
+  "notExecuted": [
+    "application tests",
+    "Gradle/build",
+    "browser/real-stack run",
+    "database query or migration by QA",
+    "CodeRabbit scan",
+    "CLI lifecycle mutation",
+    "source/schema/migration/story/gate edits",
+    "remote message or git write"
+  ],
+  "writeScope": [
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/qa-readiness.json",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/qa-design-audit.json"
+  ],
+  "nextAction": "After both owners freeze, reopen only the bounded Q015-C1..C4 checks. READY_FOR_IMPLEMENTATION may then be issued if every material contract finding is closed. Root separately controls C6 ownership/windows and any implementation release; this checkpoint does not complete the story."
+}

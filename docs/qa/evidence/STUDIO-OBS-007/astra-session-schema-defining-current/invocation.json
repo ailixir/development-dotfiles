@@ -1,0 +1,17 @@
+{
+  "command": [
+    "./gradlew",
+    "test",
+    "--rerun-tasks",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedWireContractTest",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedActionLedgerTest",
+    "--tests",
+    "com.citi.put.checks.studio.guided.bridge.GuidedBridgeIntegrationTest",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest"
+  ]
+}

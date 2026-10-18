@@ -1,0 +1,52 @@
+{
+  "story":"STUDIO-OBS-015",
+  "artifact":"Prefix producer synchronization source01 independent bounded production-source QA review",
+  "date":"2026-10-15",
+  "reviewer":"Quinn",
+  "root":"Orion",
+  "skill":".codex/skills/aiox-qa/SKILL.md",
+  "canonicalRole":".aiox-core/development/agents/qa.md",
+  "status":"BOUNDED_SOURCE_REVIEW_COMPLETE_NO_CONCRETE_FINDINGS_HOLD_FOR_TESTS_AND_EXECUTION",
+  "sourceDistHold":true,
+  "sourceRelease":false,
+  "formalQaVerdict":null,
+  "lifecycleTransition":null,
+  "findingCount":0,
+  "compileStatus":"UNCOMPILED",
+  "executionStatus":"UNEXECUTED",
+  "newTestStatus":"NOT_WRITTEN_AT_REVIEWED_CHECKPOINT",
+  "globalSourceStableClaim":false,
+  "boundCheckpoint":{
+    "path":"docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-prefix-producer-sync-source01.json",
+    "sha256":"9e3ab4a290f0b44ca281478aced022ac86e6b19b34bdc365037ebcdaa3e3d8e1"
+  },
+  "productionBeforeSha256":"82b8401722224d5277da5080b9475c32318284cf32abb0a7aa33cc9aca86938b",
+  "productionAfterAndObservedLiveSha256":"d8c494b290fdecff883d3e6b38de2b7cb6470cddfd42db84db84d7cf85c45fc3",
+  "architectureManifestSha256":"5a2a54fca4b06c44e121538b7c0f9c3f0fc673aa5615c92a789abfdfd3d744d0",
+  "runnerDiagnosisManifestSha256":"9809067e27fd68c91be16d21f1d6e178cea187d9f7daa1a519800d170e0e7156",
+  "planningObservedWholeOriginalSha256":"1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+  "payloads":[
+    {"path":"docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/qa-production-review/review.md","sha256":"778a368df312eccdd521660836368616f19989bffd3d5b0011c5280f05aa81f7","bytes":8266},
+    {"path":"docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/qa-production-review/checks.json","sha256":"e7af4a1db475fb8a187a4ada0af6ccd0b676186b9504e83eec69c87e6c456e1d","bytes":5476},
+    {"path":"docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/qa-production-review/source-inventory.json","sha256":"56bc1469d532810caaac8ca013a828940d7676262eef1af3255969529b326066","bytes":7854}
+  ],
+  "metadataValidation":{"checksAndInventoryJsonParsed":true,"namedReferenceCount":34,"observedBindingMismatches":[]},
+  "commands":"Only file reads, textual diff, metadata inspection, SHA-256 hashing and writes to these four authorized artifacts",
+  "notRun":["application functions/tests/compiler/build/Gradle/JVM/Node","DB/service/native/process/decoder","install/format/git/subagents/external contacts"],
+  "writes":[
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/qa-production-review/review.md",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/qa-production-review/checks.json",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/qa-production-review/source-inventory.json",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/qa-production-review/manifest.json"
+  ],
+  "nextAction":"Finalize Aria lawful actual-prefix seam; Orion grants explicit replacement test-only JOIN/build lease; implement and disclose meaningful controls with original selectors preserved; then controlled compilation and actual Core/full execution. No production correction requested in this bounded source review.",
+  "retained":{
+    "sequence":"FULL015_THEN_FULL008",
+    "acceptance":86,"ipc":24,"sql":55,"originalJoinInvocations":80,"originalJoinedVariants":35,
+    "futureAdditions":"DISCLOSE_SEPARATELY",
+    "originalCore04UnknownAdmissions":"RETAINED_NO_RETRY_NO_AUTHENTICATED_NO_EFFECT_GRANT",
+    "originalMixedHttpStatusBody":"NOT_RETAINED_409_BINDING_UNAVAILABLE_IS_INFERENCE",
+    "item85":"ORIGINAL_OPEN_PENDING_UNAMENDED",
+    "allRemainingNativePrivateConfiguredGatesAndIndependentClosure":"REQUIRED"
+  }
+}

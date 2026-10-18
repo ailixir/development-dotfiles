@@ -1,0 +1,132 @@
+{
+  "schema": 2,
+  "story": "STUDIO-OBS-012B",
+  "author": "Pax (@po), independent administrative closure",
+  "closedAt": "2026-10-14T23:18:50.254590+00:00",
+  "verdict": "PASS",
+  "reviewer": "Quinn (independent strict QA)",
+  "independentUxReviewer": "Uma",
+  "reviewed_revision": "scoped-source-sha256:d39ca2799673251f7ca1cc36c797e29e931338034c1975ae1b08fa74a23f6d6f",
+  "closureKey": "STUDIO-OBS-012B:digest:scoped-source-sha256:d39ca2799673251f7ca1cc36c797e29e931338034c1975ae1b08fa74a23f6d6f",
+  "statusBefore": "Done",
+  "statusAfter": "Done",
+  "lifecycleTransitionByPo": false,
+  "storyVersionBefore": "0.3.6",
+  "administrativeVersion": "0.3.7",
+  "storySha256Before": "2472d8ee9faeb3a9fc84c90e5c330dae6d7b0a3fb9f7d5451ec74351d2d364c7",
+  "storySha256After": "201b6e2acfda857f8e6c589799ce37f67de3bf083dcd91a9b917fd2d77cf7161",
+  "normalizedStorySha256": "2472d8ee9faeb3a9fc84c90e5c330dae6d7b0a3fb9f7d5451ec74351d2d364c7",
+  "restoresExactQaReviewedStory": true,
+  "qaResultsUnchanged": true,
+  "acTextUnchanged": true,
+  "taskTextUnchanged": true,
+  "fileListPreserved": true,
+  "sourceManifest": "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/final-source-binding.json",
+  "sourceManifestSha256": "7d91da38c5764e29f31a52283f2cc305a4012bcf4a1fc6783e651adfa587fc8c",
+  "sourceFilesCompared": 372,
+  "sourceMismatches": [],
+  "rederivedSourceSetDigest": {
+    "sha256": "d39ca2799673251f7ca1cc36c797e29e931338034c1975ae1b08fa74a23f6d6f",
+    "method": "sha256 of sorted relative_path+NUL+file_sha256+LF records",
+    "matchesReviewedManifest": true
+  },
+  "executionInputFilesCompared": 286,
+  "executionInputMismatches": [],
+  "gatePath": "docs/qa/gates/STUDIO-OBS-012B-compile-path-retirement-frontend-and-learn-vocabulary.yml",
+  "gateSha256": "f69b02210ead4c6b950dc6cac2c7ed889a11a5355d0992e42a38de20a05ed10b",
+  "reviewReport": "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/final-gate-receipt.json",
+  "reviewReportSha256": "6e804233532199b4d97675ae288d5da8a65739d929399b94583bf01304b35850",
+  "quality": {
+    "frontendPassed": 701,
+    "frontendFailed": 0,
+    "frontendSkipped": 0,
+    "frontendFiles": 56,
+    "defaultWorkerOverride": false,
+    "wcagCasesPassed": 7,
+    "typecheckExit": 0,
+    "lintExit": 0,
+    "buildExit": 0,
+    "existingLintWarnings": 302,
+    "existingBuildWarnings": 1,
+    "allPlannedApplicableLocalValidationGreen": true,
+    "unresolvedLocalItems": [],
+    "waiver": false,
+    "validationMethod": "Independent rehash of executed raw logs and all701 passing named cases; no test/build rerun by PO.",
+    "accessibilityBoundary": "Original automated critical/serious threshold unchanged; moderate inherited findings disclosed; no browser WCAG conformance claim.",
+    "codeRabbit": "Unavailable; originally configured independent review fallback used; no CodeRabbit pass claimed."
+  },
+  "nameReconciliation": {
+    "formula": "854 - 216 + 57 + 4 + 3 - 1 = 701 (last pair includes1 unrelated title rename and2 unrelated new hook cases)",
+    "baselineFailedNamedCases": 28,
+    "baselineUnloadableSuitesUncredited": 5,
+    "path": "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/name-reconciliation.json",
+    "sha256": "9a424d3ba6071341164a6818f7de49a0691ab0f34a601fafcf9f6f4ceb35b2fd"
+  },
+  "provenanceRefresh": {
+    "path": "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/metadata-provenance-refresh.json",
+    "sha256": "430fe35546c64afd91e8cea986279c69152e5dbfc5f04ab507b91563b2303192",
+    "excludedDocument": {
+      "path": "docs/specs/studio-observed-authoring/guided-data-flow.md",
+      "previousExcludedHash": "116495d622cb84cc937fb092ba34155648a9d9f9eba72a7da96d4fdeb377a973",
+      "currentHash": "9c4ddc7ff1986245a6622fd8c9422cad360413c471076fcf44178063bd65baff",
+      "currentSectionsReviewed": [
+        "3.4 recording scratch ownership,kill cleanup and platform/UID/elapsed-work trust disclosure",
+        "3.6 validator-refused audit implementation tense"
+      ],
+      "notConsumedBy012B": true,
+      "proof": [
+        "Not in372-file scoped input manifest",
+        "Not in286-file execution input manifest",
+        "rg guided-data-flow|portability-addendum frontend/src and frontend package/build/test config:exit1/zero references",
+        "studioContract.test.ts:301 loads only contracts/v3/*.schema.json, not this Markdown compliance document"
+      ]
+    },
+    "wholeGlobalTreeEqualityClaimed": false
+  },
+  "supersededClosure": {
+    "verdict": "CONCERNS",
+    "archivedReport": "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/history/close-before-strict-pass.json",
+    "sha256": "e34840145c40bdee80064012bd663e24c37afa8126e8938953a76b3061f49bc0",
+    "historicalMarkersPreserved": true,
+    "supersededBy": "STUDIO-OBS-012B:digest:scoped-source-sha256:d39ca2799673251f7ca1cc36c797e29e931338034c1975ae1b08fa74a23f6d6f"
+  },
+  "closureArtifacts": [
+    "docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012B.story.md"
+  ],
+  "idempotency": {
+    "realArtifactsSecondRunNoOp": true,
+    "markerCountPerArtifact": 1,
+    "exactQaReviewedStoryRestoredByReversingAdministrativeDelta": true
+  },
+  "scopeBoundaries": [
+    "OBS-008 guided/browser accessibility rewrite and contract allowlist consumers remain original downstream scope, not skipped 012B planned validation.",
+    "No intermediate shared release before OBS-008.",
+    "013/014 remain InReview pending planned strict gates; their source editing is outside 012B scope and receives no 012B pass credit.",
+    "015 production implementation remains unstarted."
+  ],
+  "evidenceHashes": {
+    "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/final-gate-receipt.json": "6e804233532199b4d97675ae288d5da8a65739d929399b94583bf01304b35850",
+    "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/final-source-binding.json": "7d91da38c5764e29f31a52283f2cc305a4012bcf4a1fc6783e651adfa587fc8c",
+    "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/final-ux-gate.json": "52d1d08c17cea011363e4785f96009286eca6e05bf097425ae578ee539005ec8",
+    "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/execution-receipt.json": "aeac2c066708bebf3d9ce8dfc138ad8a8ac0c981a6fd0bdfb75dbd49c392fa30",
+    "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/fe-default-workers.json": "1b84c759de0240a2fb588b09f287afa7871cb4e106efaaebc2f183aa79fa39bc",
+    "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/strict-plan-audit.json": "0bde6f864707416cc3f2ea970ab0a603d08ee4073a29facef14f77e43505b4a2",
+    "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/baseline-failure-resolution.json": "2d2dc4b35683720b74e1aae26295a69dfb2d28bec7f1de30aa003ccd727dbba9",
+    "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/name-reconciliation.json": "9a424d3ba6071341164a6818f7de49a0691ab0f34a601fafcf9f6f4ceb35b2fd",
+    "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/metadata-provenance-refresh.json": "430fe35546c64afd91e8cea986279c69152e5dbfc5f04ab507b91563b2303192"
+  },
+  "phaseVerification": {
+    "owner": "root coordinator",
+    "performedByPo": false,
+    "pendingRootCloseVerification": true
+  },
+  "noTestsBuildsCliGitOrSourceChanges": true,
+  "administrativeNormalization": {
+    "removeExactChangeLogRow": "| 2026-10-14 | 0.3.7 | Administrative reclosure after independent strict Quinn PASS and final Uma PASS; every originally planned applicable local gate green. Rehashed 372 scoped inputs and 286 execution inputs; exact QA story/gate provenance verified. Prior CONCERNS closure superseded and archived. Status Done unchanged; no lifecycle transition by PO. [closure-key: STUDIO-OBS-012B:digest:scoped-source-sha256:d39ca2799673251f7ca1cc36c797e29e931338034c1975ae1b08fa74a23f6d6f] | @po (Pax) |\n",
+    "removeExactHistoricalDisclaimer": "These two paragraphs preserve the superseded CONCERNS closure. The strict PASS reclosure below is current.\n\n",
+    "removeExactAppendedSection": "\n\n## Strict PASS administrative reclosure — 2026-10-14\n\nIndependent Quinn completed the lifecycle at version 0.3.6 with PASS, and independent Uma completed the planned UX gate with PASS. All originally planned applicable local validation is green: 701/701 fresh default-worker cases across 56 files, all 7 WCAG scans, type-check, lint and production build. Existing 302 lint warnings and one webpack asset-size advisory remain disclosed. The unchanged automated accessibility gate checks its original critical/serious threshold; this is not a browser WCAG conformance claim.\n\nPax independently rehashed 372 scoped source/config/spec/tool inputs to `d39ca2799673251f7ca1cc36c797e29e931338034c1975ae1b08fa74a23f6d6f`, all 286 execution inputs, the raw logs and named test results, Quinn’s final receipt and Uma’s final gate. The already-excluded `guided-data-flow.md` documentary update has an independent bounded provenance refresh; no whole-tree source equality or 013/014 validation is claimed. Exact test names, 28 historical failed cases and 5 unloadable suites are reconciled without inventing missing baseline cases.\n\nThe prior CONCERNS report is preserved in `strict-qa/history/close-before-strict-pass.json`; `.ai/STUDIO-OBS-012B-close.json` and `strict-qa/strict-closure-receipt.json` record this superseding administrative closure. Status Done and QA Results remain unchanged. All original downstream scope remains: OBS-008 owns the guided/browser accessibility rewrite and the temporary contract allowlist consumers; no intermediate shared release before 008. OBS-013/014 remain InReview pending their strict planned gates; OBS-015 production is unstarted. No tests, source changes, CLI, commit, push or deployment were performed by this closure.\n",
+    "resultSha256": "2472d8ee9faeb3a9fc84c90e5c330dae6d7b0a3fb9f7d5451ec74351d2d364c7",
+    "method": "Reverse only these administrative additions to reconstruct byte-exact independent QA-reviewed story."
+  }
+}

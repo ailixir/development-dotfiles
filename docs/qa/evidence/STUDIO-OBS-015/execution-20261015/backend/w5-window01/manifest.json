@@ -1,0 +1,371 @@
+{
+  "story": "STUDIO-OBS-015",
+  "artifact": "w5-window01",
+  "agent": "Dex-W5 (@dev)",
+  "date": "2026-10-16",
+  "nonCredit": true,
+  "committed": false,
+  "productionChanges": [],
+  "inputs": {
+    "w4-bridge01-review": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w4-bridge01/review.md",
+      "sha256": "eefe459a3fb0bcd76ae7b15f116bbb85d4eb64a991d8733083b071bf574ffaf1"
+    },
+    "w4-qa-ack03": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w4-qa-ack03/review.md",
+      "sha256": "91dc335e6c99618b2b172b2f27f42dfa96685503a513f685a9e3e14318bbe3e3"
+    },
+    "aria-ledger56-ruling01": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/aria-ledger56-ruling01/ruling.md",
+      "sha256": "8a92643640798624d768f5c1e10a4872b253cabd78d0fd33a5a179dd4cb106da"
+    },
+    "b3abc-design01": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3abc-design01/design.md",
+      "sha256": "2c991e96929e4ebce2d77a0697e145a3e873504ec1248be0e9dfc1612325583f"
+    },
+    "b3bc-source01-notes": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3bc-source01/notes.md",
+      "sha256": "e702e4b98a3a5b9162b1afa5c094fd0c9eb9e581d38228174fc5463398a01533"
+    }
+  },
+  "files": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256Before": "bef430ba8e7bacf640b92ee1729169ab895a91017a125bad7c54d2aba4b98539",
+      "sha256AfterB3Fixes": "247be50b368111a8ab0f06ce3e5221ace5585b7570b93186061b3b79d754569b",
+      "sha256After": "0bae32b3e5df20c398c33de5660778ae4f67bd71d6abfa02202e495218f218ee",
+      "change": "B3B-3 edge selection by identity + b3EdgeOrder; B3B-1 kind-aware schema-valid substitute; ack03 1a observer-skip counter",
+      "diffs": [
+        "replayit-w5.diff",
+        "replayit-w5-observer-counter.diff"
+      ],
+      "preimageReconstructed": "reverse of B3 edits equals bef430ba"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "sha256Before": "beb28ec4447d25fb1f4fefa2ca78b7cdb2889ea7f9e7da706fbc3e402bef441e",
+      "sha256After": "25079c128ca45a25b5fc3a618845f49f489ffe3465ef5618ec6e571025d0db6c",
+      "change": "ack03 advisories 1 (full assignment|UNKNOWN_OUTCOME) and 2 (six terminal states)",
+      "diffs": [
+        "tfit-w5.diff"
+      ]
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "sha256Before": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+      "sha256After": "a7c9f5956bb153694ea08730adde1ac0d3c47042f14a87819ed4089458c0885f",
+      "change": "ledger-56 E1: +2 resultCases RESULT_SWITCH",
+      "diffs": [
+        "e1-publication-fixtures.diff"
+      ],
+      "reanchorNeeded": "runner checkpoints quoting 86e42679"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+      "sha256Before": "eccc57318faafd672e04060995b91ce783d72bd2bd7c66f09899ad335146880c",
+      "sha256After": "0e37ff859ce695d745914c0e91b6d275c304c071ad755ec586aba40cf1cc4b12",
+      "change": "ledger-56 E2: driftOnBoundary row",
+      "diffs": [
+        "e2-migration-it.diff"
+      ]
+    }
+  ],
+  "productionReadOnlyRelied": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedMaterializationEvidence.java": "7fbefe9db5f02682c6468d3495617a2468748d5a6405affe6bc205197061ef6e",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java": "8f5c0e0cb880539710355167bde125eaf67eb9f6949c0345baa23cad07a87acc",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedEffectiveGraph.java": "259807221afbb9ac4fa7b1c68974c42205b4b15d3eab9a8f344be6285ea9197b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java": "83ed8fa26c304d5b2b8d8df9be51681598908c36be27cf0791c20a632f07063b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": "42031c661fb07bb13f1e4348507e2715bb3a3f8028ab0eb910831ef711a6ca70",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java": "a6895c6280a760716ede2218f83b360f11d7c189e099a0ad90674a8de07c2368",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "bda270051c3a1a71b89970fafa90464750f121d695ce8ffae97e2db235fbb588",
+    "docs/specs/studio-observed-authoring/contracts/v3/authored-inputs.schema.json": "9ff02b3dd33bfb2c27e012adb3c0fd421085e67bbc5371e43bda9accd043b2e5",
+    "tools/check-studio-observed-contracts.cjs": "685d92275f7057df877d95f644aab0f7f04b1d7446881eecb6e2f42e0fe0acc9"
+  },
+  "findings": [
+    {
+      "id": "W5-F1",
+      "test": "B3B-3",
+      "kind": "latent fixture flake",
+      "cause": "consumer edges ORDER BY document::text with random consumerAdmissionId; edge0 could be the excluded native0 edge",
+      "fixed": "test-only"
+    },
+    {
+      "id": "W5-F2",
+      "test": "B3B-1",
+      "kind": "design stage prediction wrong",
+      "guard": "GuidedMaterializationEvidence.java:65 schema (destination format uri) precedes :66-68 hash",
+      "productDefect": false,
+      "fixed": "kind-aware schema-valid substitute; EVIDENCE_MISMATCH pin kept"
+    },
+    {
+      "id": "W5-F3",
+      "test": "B3B-1 gen-2",
+      "kind": "production gap, unfixed, @architect ruling needed",
+      "site": [
+        "GuidedPlanPublisher.java:248-266 conflictBeforeClaim",
+        "GuidedPublicationRepository.java:407-426 conflict"
+      ],
+      "detail": "PUBLICATION_CONFLICT never calls GuidedSessionService.stop; teardownStatus never PENDING/CONFIRMED"
+    }
+  ],
+  "runs": {
+    "w5-w01-targets01": {
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w5-w01-targets01-results.json",
+      "sha256": "466af62a46730f7496432b82b1eab5e865f60d33596d8a08d2b89b57ef89d7cd",
+      "counts": {
+        "total": 2,
+        "passed": 1,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit": 1,
+      "elapsedSeconds": 109.62,
+      "testInputDigest": "92911d0e8400d9eb206d4632a5623ce60b12311d7d9a047000b9c3a8e0fea7cf",
+      "sourceStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "--no-daemon",
+        "--continue",
+        "guidedIncrementalTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution"
+      ]
+    },
+    "w5-w01-tfit-bridge01": {
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w5-w01-tfit-bridge01-results.json",
+      "sha256": "5b0b457af2fd14205d30fff054166358e50ce78a8ce4163c089cd81f3906c011",
+      "counts": {
+        "total": 60,
+        "passed": 60,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit": 0,
+      "elapsedSeconds": 233.53,
+      "testInputDigest": "6c7db14b599167ff6eb9e7d7039c601eb36dcf1e45a8b51aa39bc78b73e6049c",
+      "sourceStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "--no-daemon",
+        "--continue",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+        "--tests",
+        "com.citi.put.checks.studio.guided.bridge.GuidedDispatchStopKeyTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT"
+      ]
+    },
+    "w5-w01-full-test01": {
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w5-w01-full-test01-results.json",
+      "sha256": "105d7cdba2202cccbfb61658bea61b978fb3e44479a10ed12c04c0ad6aae70d9",
+      "counts": {
+        "total": 73,
+        "passed": 73,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit": 0,
+      "elapsedSeconds": 1152.28,
+      "testInputDigest": "6c7db14b599167ff6eb9e7d7039c601eb36dcf1e45a8b51aa39bc78b73e6049c",
+      "sourceStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "--no-daemon",
+        "--continue",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT"
+      ]
+    },
+    "w5-w01-full-incr01": {
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w5-w01-full-incr01-results.json",
+      "sha256": "5743cb6f2982ad05fe3d2e06146971f68dfa198087fd0eea4cf593af5583ad4f",
+      "counts": {
+        "total": 62,
+        "passed": 61,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit": 1,
+      "elapsedSeconds": 2507.04,
+      "testInputDigest": "6c7db14b599167ff6eb9e7d7039c601eb36dcf1e45a8b51aa39bc78b73e6049c",
+      "sourceStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "--no-daemon",
+        "--continue",
+        "guidedIncrementalTest"
+      ]
+    },
+    "w5-w01-e2-migration01": {
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w5-w01-e2-migration01-results.json",
+      "sha256": "245ba0a7f2e29c21ab38ac41f8af386307081be5c5a06356a04b6724978c28b1",
+      "counts": {
+        "total": 55,
+        "passed": 55,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit": 0,
+      "elapsedSeconds": 16.76,
+      "testInputDigest": "dbeff8ebb1c5a201459f26009e7ab61b2c6e0330804f7fc2f3a900d33bc45b2b",
+      "sourceStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "--no-daemon",
+        "--continue",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT"
+      ]
+    }
+  },
+  "pid22246Signalled": false,
+  "artifacts": [
+    {
+      "path": "b3-outcomes/incr01-b3-outcomes-guidedIncrementalTest-52-incrementalPartialDriftStepReadPublishesAndReplaysTwice-singleton.json",
+      "sha256": "2a07bd245a5b0f45aaadc874e317b712274b62036d36b4667dc78aeadf7a60b7"
+    },
+    {
+      "path": "b3-outcomes/incr01-b3-outcomes-guidedIncrementalTest-54-incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear-singleton.json",
+      "sha256": "862a5a322fa6e5290cb8278ffbeefc607bab62fb684cb50f406fa330b222f520"
+    },
+    {
+      "path": "b3-outcomes/incr01-b3-outcomes-guidedIncrementalTest-56-incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek-singleton.json",
+      "sha256": "d29869b58a8db0258fc6d495c4aece09f3ac4250c52914379d074177211e63a5"
+    },
+    {
+      "path": "b3-outcomes/incr01-b3-outcomes-guidedIncrementalTest-61-incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne-singleton.json",
+      "sha256": "b855014bdcca385e5a0f638ead50db6e0e8c86b99ee18608fd20ce5217b03e99"
+    },
+    {
+      "path": "b3-outcomes/incr01-b3-outcomes-guidedIncrementalTest-62-incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution-singleton.json",
+      "sha256": "c342e142a3b6dcab1897bc54e95462dd543318f0aff9a237c329e069eba995fa"
+    },
+    {
+      "path": "b3-outcomes/targets01-b3-outcomes-guidedIncrementalTest-1-incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear-singleton.json",
+      "sha256": "d955db6ee8b7c8d07287e926f8c825dc00d28b7a0c582dfc6a07c16fea2bc9e0"
+    },
+    {
+      "path": "b3-outcomes/targets01-b3-outcomes-guidedIncrementalTest-2-incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution-singleton.json",
+      "sha256": "36b188829c961957b774b5b99ac21c27eedd95b6b28cdd612fe82052a0cc9fa3"
+    },
+    {
+      "path": "compile01.log",
+      "sha256": "b9c3b9092949d795ac0e8bdf0ea5e037acb70d546c77f2d4e5083549d71f62d1"
+    },
+    {
+      "path": "compile02.log",
+      "sha256": "56d0a6bd0d264af0a8c8dd6f212b5486ee1e129d860ec1d3792482e8f18a67c9"
+    },
+    {
+      "path": "compile03.log",
+      "sha256": "4f32debeade05508a14356788433e982c5187fc864f82ab2b440527455ac9aca"
+    },
+    {
+      "path": "e1-checker-after.log",
+      "sha256": "3a56a80b043dcdcd819965ee40def8611d4f33438f8f22656458a2f8885e3b38"
+    },
+    {
+      "path": "e1-checker-before.log",
+      "sha256": "7730d735b8adb6444f0c3527fdce26b500fecbf5bb1cf2cc1f54427284ae6946"
+    },
+    {
+      "path": "e1-publication-fixtures.diff",
+      "sha256": "3780202a006d3b9932a1e1746ef171a81634450a035615783d8a47cdb62a0943"
+    },
+    {
+      "path": "e1-runner-vitest-nocov.log",
+      "sha256": "61e7b7e80d32517ad83bbe24c9dce2f1728c507fc9fccbaf096e15b48a70f522"
+    },
+    {
+      "path": "e1-runner-vitest.log",
+      "sha256": "c2210f54c34605d881732a3bac6ea6faf991badc6600d9a93c9e9c22aa52a4c0"
+    },
+    {
+      "path": "e2-migration-it.diff",
+      "sha256": "951b6774842ccaa6904b2958e5d082247a9beb35c0a36a422b7a50c9c568f389"
+    },
+    {
+      "path": "replayit-w5-observer-counter.diff",
+      "sha256": "7e7b068fdbb8e0918415d593f68d820d1e2b7a200f32b5c9cb5267bafa73c94d"
+    },
+    {
+      "path": "replayit-w5.diff",
+      "sha256": "603e0990c65f7036c4601c813acc0e653287f7e9bea9b5c500f14168adb857ce"
+    },
+    {
+      "path": "replayit/failed-test-cleanup-guidedIncrementalTest-62-incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution-singleton.json",
+      "sha256": "8e48dd60621cc0ca8e012f6b04426085c00f556d4910fe585b85b331e4eeb482"
+    },
+    {
+      "path": "replayit/owned-worker-cleanup-incr01.json",
+      "sha256": "a7a38cebfa0609744b22292abd27768ec22ce3c0fc3cec106985cc39bdc04160"
+    },
+    {
+      "path": "replayit/owned-worker-cleanup-test01.json",
+      "sha256": "f541aa0e5c4daa73701013233108cc4d483d937593c9da1eaf5b59b790906848"
+    },
+    {
+      "path": "review.md",
+      "sha256": "8d51e598def487b353955c5836bd9e040e6e3133c5a9aea825ace0e558b5aeba"
+    },
+    {
+      "path": "tfit-w5.diff",
+      "sha256": "6ae564205a1048064d746271db9c418171265d3edc9760502626c636c1deac95"
+    },
+    {
+      "path": "w5-w01-e2-migration01.collector.log",
+      "sha256": "c9afb648891673756b63af704cea3f54dee5e1b8415d6e57e2abacbcc24e6042"
+    },
+    {
+      "path": "w5-w01-full-incr01.collector.log",
+      "sha256": "732697706ed4d6acc29cd5565bcf7ada6e7f62e61a5259f7bd28947afd9be0bc"
+    },
+    {
+      "path": "w5-w01-full-test01.collector.log",
+      "sha256": "eca9c1eedd0f446aede1eb3204360c4f0ef44a971fcf6edb0133fcaab5b0ae66"
+    },
+    {
+      "path": "w5-w01-targets01.collector.log",
+      "sha256": "bb40f34ea79e25bf73d85c7e0a389d88fa30c5db3d2d2737b0b9b2c9fca3e6c7"
+    },
+    {
+      "path": "w5-w01-tfit-bridge01.collector.log",
+      "sha256": "b20ec0e7c54a977e2dce85bdd1850afb06a31d8a85a1a33d068303353e35a6a0"
+    }
+  ]
+}

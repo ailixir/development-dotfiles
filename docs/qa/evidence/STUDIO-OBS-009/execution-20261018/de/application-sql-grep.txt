@@ -1,0 +1,96 @@
+# grep run 2026-10-18 by @data-engineer: application SQL touching V19..V22 relations/columns (backend/src/main/java)
+# cmd: grep -rn -E '<V19..V22 relation names>|studio_guided_prune_session|replay_failure_|attempt_ordinal|pruned_at' backend/src/main/java
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java:839:                + "b.document::text AS start_base FROM studio_guided_relearn_plans p "
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedMaterializationEvidence.java:30:                + " studio_guided_materialization_inputs WHERE session_id=? ORDER BY input_ordinal",
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedMaterializationEvidence.java:59:            "SELECT * FROM studio_guided_materialization_versions WHERE session_id=? ORDER BY context_revision",
+backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceRepository.java:11: * SQL for the guided recording fact, {@code studio_guided_session_recordings} (V20, ruling AR-1
+backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceRepository.java:110:            "SELECT count(*) FROM studio_guided_session_recordings WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceRepository.java:133:            + " INSERT INTO studio_guided_session_recordings"
+backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceRepository.java:164:                + " LEFT JOIN studio_guided_session_recordings r ON r.session_id=s.session_id"
+backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanHistoryAudit.java:53:                    + " FROM studio_guided_relearn_switches WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanHistoryAudit.java:142:            "SELECT previous_plan_revision,plan_revision FROM studio_guided_suffix_acceptances WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/retention/GuidedObservationPruner.java:17: * {@code studio_guided_prune_session}, which re-judges the predicate (terminal state, not yet
+backend/src/main/java/com/citi/put/checks/studio/guided/retention/GuidedObservationPruner.java:32:      "SELECT session_id FROM studio_guided_sessions WHERE pruned_at IS NULL AND state IN"
+backend/src/main/java/com/citi/put/checks/studio/guided/retention/GuidedObservationPruner.java:72:                        "SELECT studio_guided_prune_session(?, ?::interval)",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:141:        "INSERT INTO studio_guided_relearn_plans(session_id,base_revision_id,initial_step_id,"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:165:            "SELECT count(*) FROM studio_guided_relearn_plans WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:176:                    + " studio_guided_relearn_plans WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:186:                    + " studio_guided_relearn_plans p JOIN ui_test_revisions r ON r.id=p.base_revision_id"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:258:                    + " studio_guided_relearn_plans p JOIN ui_test_revisions r ON r.id=p.base_revision_id"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:344:                  + " session_id=? AND step_id=? AND ordinal=? ORDER BY attempt_ordinal DESC",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:383:            "SELECT document::text FROM studio_guided_prefix_requests"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:390:          "INSERT INTO studio_guided_prefix_requests(session_id,request_digest,step_id,ordinal,evidence_hash,document)"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:409:            "SELECT status FROM studio_guided_prefix_requests WHERE session_id=? AND request_digest=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:417:          "UPDATE studio_guided_prefix_requests SET status=? WHERE session_id=? AND request_digest=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:472:            "SELECT document::text FROM studio_guided_no_invocation_receipts WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:492:            + " studio_guided_no_invocation_receipts(session_id,request_digest,admission_id,preparation_id,"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:517:                      + " AND step_id=? AND ordinal=? AND attempt_ordinal=0 AND document->>'state'='SUCCEEDED'",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:527:        "INSERT INTO studio_guided_relearn_switches(session_id,reason,effective_step_id,effective_step_index,"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:549:        jdbc.queryForMap("SELECT * FROM studio_guided_relearn_plans WHERE session_id=?", id);
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:551:        jdbc.queryForMap("SELECT * FROM studio_guided_relearn_switches WHERE session_id=?", id);
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:553:        jdbc.queryForMap("SELECT * FROM studio_guided_suffix_acceptances WHERE session_id=?", id);
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:592:            "SELECT document::text FROM studio_guided_prefix_requests WHERE session_id=? ORDER BY"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:647:            "SELECT document::text FROM studio_guided_no_invocation_receipts WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:694:            "SELECT document::text,status FROM studio_guided_prefix_requests"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:757:                "SELECT count(*) FROM studio_guided_suffix_acceptances WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:768:                    + " studio_guided_relearn_switches WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:779:                + " studio_guided_relearn_switches WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:813:        "SELECT initial_step_index FROM studio_guided_relearn_plans WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:826:            "SELECT count(*) FROM studio_guided_no_invocation_receipts r"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:827:                + " JOIN studio_guided_relearn_switches s ON s.session_id=r.session_id AND"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java:838:        "SELECT count(*) FROM studio_guided_no_invocation_receipts WHERE session_id=?"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedPublicPresentationProjector.java:266:        "SELECT step_id,ordinal,attempt_ordinal,document::text,proposal::text FROM"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedPublicPresentationProjector.java:316:                + " studio_guided_relearn_plans WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedPublicPresentationProjector.java:326:            "SELECT reason,effective_step_index AS effective FROM studio_guided_relearn_switches"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedCsiBudget.java:42:        "INSERT INTO studio_guided_csi_guards(csi_id) VALUES (?) ON CONFLICT DO NOTHING", csiId);
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedCsiBudget.java:44:        "SELECT csi_id FROM studio_guided_csi_guards WHERE csi_id=? FOR UPDATE",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedCsiBudget.java:67:                + " AS retry FROM studio_guided_csi_token_days WHERE csi_id=? AND budget_day="
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedCsiBudget.java:88:            "UPDATE studio_guided_csi_token_days SET input_tokens = input_tokens + ?,"
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedCsiBudget.java:109:        "UPDATE studio_guided_csi_token_days SET input_tokens = input_tokens + ?, output_tokens ="
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedCsiBudget.java:130:        "INSERT INTO studio_guided_csi_token_days(csi_id, budget_day) VALUES (?, "
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java:149:            + "(admission_id,session_id,step_id,ordinal,attempt_ordinal,document,proposal) VALUES "
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java:163:            + "step_id,ordinal,attempt_ordinal",
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java:229:   * pruned_at IS NULL} only narrows the scan to ix_guided_session_prune.
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java:234:            "SELECT count(*) FROM studio_guided_sessions WHERE pruned_at IS NULL AND state IN "
+backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:759:          "INSERT INTO studio_guided_suffix_acceptances"
+backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:1193:        "INSERT INTO studio_guided_csi_token_days(csi_id,budget_day) SELECT"
+backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:1200:        "UPDATE studio_guided_csi_token_days d SET input_tokens = d.input_tokens +"
+backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:1221:            "SELECT v.document::text FROM studio_guided_session_policies s JOIN"
+backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:1222:                + " studio_guided_policy_versions v ON v.policy_id=s.policy_id AND"
+backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:1238:            "SELECT pruned_at FROM studio_guided_sessions WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:1284:            + "ision,meaning,proposal,proposal_digest,admission_key,attempt_ordinal)"
+backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java:66:  @Column(name = "replay_failure_code", insertable = false, updatable = false)
+backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java:69:  @Column(name = "replay_failure_step_id", insertable = false, updatable = false)
+backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java:72:  @Column(name = "replay_failure_step_index", insertable = false, updatable = false)
+backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java:75:  @Column(name = "replay_failure_login_steps_present", insertable = false, updatable = false)
+backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java:103:                + "t AS inputs FROM studio_guided_actions g JOIN studio_guided_materialization_snapshots m ON m.s"
+backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java:206:                + "ded_actions g JOIN studio_guided_materialization_snapshots m ON m.session_id=g.session_id"
+backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java:158:            "SELECT delivery_id::text FROM studio_guided_materialization_deliveries"
+backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java:174:            "SELECT ack::text FROM studio_guided_materialization_deliveries"
+backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java:186:                "UPDATE studio_guided_materialization_deliveries SET status='ACKNOWLEDGED',"
+backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java:206:                + " FROM studio_guided_materialization_deliveries WHERE session_id=? AND status='PENDING'",
+backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java:214:            "UPDATE studio_guided_materialization_deliveries SET context_metadata=?::jsonb,"
+backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java:224:                    + " studio_guided_materialization_snapshots WHERE session_id=? AND context_revision=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java:319:                + " FROM studio_guided_session_policies s JOIN studio_guided_policy_versions v ON"
+backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java:329:                + " studio_guided_relearn_plans WHERE session_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:38:            "SELECT count(*) FROM studio_guided_policies WHERE csi_id=? AND application_id=? AND"
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:54:        "SELECT DISTINCT application_id FROM studio_guided_policies WHERE csi_id=? AND"
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:64:        "INSERT INTO studio_guided_policies(policy_id,csi_id,application_id,environment_id,"
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:78:                + " studio_guided_policies WHERE policy_id=? FOR UPDATE",
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:88:                + " studio_guided_policies WHERE policy_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:97:            "SELECT COALESCE(max(version),0) FROM studio_guided_policy_versions WHERE policy_id=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:111:        "INSERT INTO studio_guided_policy_versions(policy_id,version,document,document_hash,"
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:128:            "SELECT count(*) FROM studio_guided_policy_approvals WHERE policy_id=? AND version=?",
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:137:        "INSERT INTO studio_guided_policy_approvals(policy_id,version,approved_by,approval_ref)"
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:150:                + " studio_guided_policies p JOIN studio_guided_policy_versions v ON"
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:152:                + " studio_guided_policy_approvals a ON a.policy_id=v.policy_id AND"
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:174:                + " studio_guided_policy_versions v WHERE v.policy_id=p.policy_id) FROM"
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:175:                + " studio_guided_policies p WHERE p.csi_id=? AND p.application_id=? AND"
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:191:        "INSERT INTO studio_guided_session_policies(session_id,policy_id,policy_version,"
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:204:                + " studio_guided_session_policies s JOIN studio_guided_policy_versions v ON"
+backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java:220:            + " studio_guided_policy_versions v LEFT JOIN studio_guided_policy_approvals a ON"
+backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java:661:                     replay_failure_code = CAST(? AS text),
+backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java:662:                     replay_failure_step_id = CAST(? AS text),
+backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java:663:                     replay_failure_step_index = CAST(? AS integer),
+backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java:664:                     replay_failure_login_steps_present = CAST(? AS boolean),
+# exit 

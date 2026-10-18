@@ -1,0 +1,7 @@
+gradle.projectsEvaluated {
+  def formatter = gradle.rootProject.extensions.findByName('spotless')
+  if (formatter == null) return
+  formatter.java {
+    target 'src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java', 'src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java', 'src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java'
+  }
+}

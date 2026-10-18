@@ -1,0 +1,809 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
+@@ -24,7 +24,7 @@
+       new ObjectMapper()
+           .enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
+           .enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+-  private final Map<String, CompiledSchema> schemas = new ConcurrentHashMap<>();
++  private final Map<String, JsonSchema> schemas = new ConcurrentHashMap<>();
+ 
+   public ObjectNode object() {
+     return JSON.createObjectNode();
+@@ -101,84 +101,192 @@
+       name = "v3/" + name;
+     }
+     require(
+-        schemas.computeIfAbsent(name, this::compileSchema).valid(value),
++        schemas.computeIfAbsent(name, this::schema).validate(value).isEmpty(),
+         "INVALID_CONTRACT",
+         422);
+     return representation;
+   }
+ 
+-  // Independent expanded v3/session oracle. Unknown contracts retain native root validation.
+-  private static final String SESSION_SCHEMA_EPOCH =
++  // Independent expanded v3/session source oracle; unknown schema epochs use strict baseline.
++  private static final String RENEWAL_SESSION_SCHEMA =
+       "0ac40665050057740ac8464cf0bd81ed1fdfb2d680326641c6eaff9aef6fb02d";
+ 
+-  private record CompiledSchema(JsonSchema shape, Map<String, JsonSchema> properties) {
+-    boolean valid(JsonNode value) {
+-      boolean valid = shape.validate(value).isEmpty();
+-      for (var property : properties.entrySet()) {
+-        JsonNode child = value.get(property.getKey());
+-        if (child != null) {
+-          // Explicit nulls still validate; no earlier refusal skips a present property.
+-          valid &= property.getValue().validate(child).isEmpty();
++  static final class RenewalValidation {
++    private final GuidedContracts contracts;
++    private final JsonSchema root;
++    private final JsonSchema owner;
++    private final ObjectNode snapshot;
++    private final String representation;
++    private final ObjectNode renewal;
++
++    private RenewalValidation(
++        GuidedContracts contracts,
++        JsonSchema root,
++        JsonSchema owner,
++        ObjectNode snapshot,
++        String representation,
++        ObjectNode renewal) {
++      this.contracts = contracts;
++      this.root = root;
++      this.owner = owner;
++      this.snapshot = snapshot;
++      this.representation = representation;
++      this.renewal = renewal;
++    }
++  }
++
++  RenewalValidation prepareRenewalValidation(ObjectNode document) {
++    try {
++      if (document == null || document.path("schemaVersion").asInt() != 3) {
++        return null;
++      }
++      String representation = document.toString();
++      JsonNode copied = JSON.readTree(representation);
++      if (!(copied instanceof ObjectNode snapshot)
++          || !sameRenewalTree(document, snapshot)
++          || !document.equals(snapshot)
++          || !representation.equals(snapshot.toString())) {
++        return null;
++      }
++      validate("session", snapshot);
++      JsonSchema root = schemas.get("v3/session");
++      if (root == null || !RENEWAL_SESSION_SCHEMA.equals(hash(root.getSchemaNode()))) {
++        return null;
++      }
++      JsonSchema owner = null;
++      for (var validator : root.getValidators()) {
++        if (validator instanceof PropertiesValidator properties) {
++          if (owner != null) {
++            return null;
++          }
++          owner = properties.getSchemas().get("owner");
+         }
+       }
+-      return valid;
+-    }
+-  }
+-
+-  private CompiledSchema compileSchema(String name) {
+-    return compileSchema(name, schema(name));
+-  }
+-
+-  private CompiledSchema compileSchema(String name, JsonSchema original) {
+-    CompiledSchema baseline = new CompiledSchema(original, Map.of());
+-    if (!name.equals("v3/session")) {
+-      return baseline;
+-    }
+-    try {
+-      if (!SESSION_SCHEMA_EPOCH.equals(hash(original.getSchemaNode()))) {
+-        return baseline;
+-      }
+-      var config = original.getValidationContext().getConfig();
+-      var defaults = config.getApplyDefaultsStrategy();
+-      if (defaults.shouldApplyPropertyDefaults()
+-          || defaults.shouldApplyPropertyDefaultsIfNull()
+-          || defaults.shouldApplyArrayDefaults()
+-          || config.getExecutionContextCustomizer() != null
+-          || !config.getKeywordWalkListenersMap().isEmpty()
+-          || !config.getPropertyWalkListeners().isEmpty()
+-          || !config.getArrayItemWalkListeners().isEmpty()
+-          || config.isOpenAPI3StyleDiscriminators()) {
+-        return baseline;
+-      }
+-      Map<String, JsonSchema> properties = null;
+-      for (var validator : original.getValidators()) {
+-        if (validator instanceof PropertiesValidator compiled) {
+-          if (properties != null) {
+-            return baseline;
+-          }
+-          properties = compiled.getSchemas();
++      if (owner == null
++          || !owner.getSchemaNode().equals(root.getSchemaNode().path("properties").path("owner"))) {
++        return null;
++      }
++      return new RenewalValidation(this, root, owner, snapshot, representation, null);
++    } catch (IOException | RuntimeException unavailable) {
++      return null;
++    }
++  }
++
++  RenewalValidation bindRenewalValidation(RenewalValidation proof, ObjectNode current) {
++    try {
++      if (proof == null
++          || proof.contracts != this
++          || proof.root != schemas.get("v3/session")
++          || !sameRenewalTree(proof.snapshot, current)
++          || !(current.path("owner") instanceof ObjectNode)
++          || current.path("owner").path("leaseExpiresAt").getClass()
++              != proof.snapshot.path("owner").path("leaseExpiresAt").getClass()) {
++        return null;
++      }
++      String representation = current.toString();
++      JsonNode copied = JSON.readTree(representation);
++      if (!(copied instanceof ObjectNode adjusted)
++          || !sameRenewalTree(current, adjusted)
++          || !current.equals(adjusted)
++          || !representation.equals(adjusted.toString())) {
++        return null;
++      }
++      ((ObjectNode) adjusted.path("owner"))
++          .set("leaseExpiresAt", proof.snapshot.path("owner").path("leaseExpiresAt"));
++      if (!sameRenewalTree(proof.snapshot, adjusted)
++          || !proof.snapshot.equals(adjusted)
++          || !proof.representation.equals(adjusted.toString())) {
++        return null;
++      }
++      return new RenewalValidation(
++          this, proof.root, proof.owner, proof.snapshot, proof.representation, current);
++    } catch (IOException | RuntimeException unavailable) {
++      return null;
++    }
++  }
++
++  boolean validateRenewalOwner(RenewalValidation proof, ObjectNode current) {
++    boolean matches;
++    try {
++      if (proof == null
++          || proof.contracts != this
++          || proof.root != schemas.get("v3/session")
++          || proof.renewal != current
++          || !(current.path("owner") instanceof ObjectNode)
++          || current.path("owner").path("leaseExpiresAt").getClass()
++              != proof.snapshot.path("owner").path("leaseExpiresAt").getClass()) {
++        return false;
++      }
++      String currentRepresentation = current.toString();
++      JsonNode copied = JSON.readTree(currentRepresentation);
++      if (!(copied instanceof ObjectNode adjusted)
++          || !sameRenewalTree(current, adjusted)
++          || !current.equals(adjusted)
++          || !currentRepresentation.equals(adjusted.toString())) {
++        return false;
++      }
++      ((ObjectNode) adjusted.path("owner"))
++          .set("leaseExpiresAt", proof.snapshot.path("owner").path("leaseExpiresAt"));
++      matches =
++          sameRenewalTree(proof.snapshot, adjusted)
++              && proof.snapshot.equals(adjusted)
++              && proof.representation.equals(adjusted.toString());
++    } catch (IOException | RuntimeException unavailable) {
++      return false;
++    }
++    if (!matches) {
++      return false;
++    }
++    // Original save-point canonical refusal is not an optional-preparation failure.
++    canonical(current);
++    boolean valid;
++    try {
++      valid = proof.owner.validate(current.path("owner")).isEmpty();
++    } catch (RuntimeException unavailable) {
++      return false;
++    }
++    require(valid, "INVALID_CONTRACT", 422);
++    return true;
++  }
++
++  private static boolean sameRenewalTree(JsonNode expected, JsonNode actual) {
++    if (expected == null || actual == null || expected.getClass() != actual.getClass()) {
++      return false;
++    }
++    if (expected.isObject()) {
++      if (expected.getClass() != ObjectNode.class || expected.size() != actual.size()) {
++        return false;
++      }
++      var fields = expected.fields();
++      while (fields.hasNext()) {
++        var field = fields.next();
++        if (!sameRenewalTree(field.getValue(), actual.get(field.getKey()))) {
++          return false;
+         }
+       }
+-      JsonNode declarations = original.getSchemaNode().path("properties");
+-      if (properties == null || properties.size() != declarations.size()) {
+-        return baseline;
+-      }
+-      ObjectNode shape = original.getSchemaNode().deepCopy();
+-      ObjectNode shapeProperties = shape.withObject("/properties");
+-      for (var property : properties.entrySet()) {
+-        if (!property.getValue().getSchemaNode().equals(declarations.get(property.getKey()))) {
+-          return baseline;
++    } else if (expected.isArray()) {
++      if (expected.getClass() != com.fasterxml.jackson.databind.node.ArrayNode.class
++          || expected.size() != actual.size()) {
++        return false;
++      }
++      for (int i = 0; i < expected.size(); i++) {
++        if (!sameRenewalTree(expected.get(i), actual.get(i))) {
++          return false;
+         }
+-        shapeProperties.set(property.getKey(), object());
+-      }
+-      // The exact schema has only independent property constraints. Keep every root keyword
+-      // and property name, then run the original child schemas with their own diagnostic root.
+-      return new CompiledSchema(
+-          JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7).getSchema(shape, config),
+-          java.util.Collections.unmodifiableMap(new java.util.LinkedHashMap<>(properties)));
+-    } catch (RuntimeException unavailable) {
+-      return baseline;
+-    }
++      }
++    } else {
++      Class<?> kind = expected.getClass();
++      return kind == com.fasterxml.jackson.databind.node.TextNode.class
++          || kind == com.fasterxml.jackson.databind.node.NullNode.class
++          || kind == com.fasterxml.jackson.databind.node.BooleanNode.class
++          || kind == com.fasterxml.jackson.databind.node.IntNode.class
++          || kind == com.fasterxml.jackson.databind.node.LongNode.class
++          || kind == com.fasterxml.jackson.databind.node.BigIntegerNode.class
++          || kind == com.fasterxml.jackson.databind.node.FloatNode.class
++          || kind == com.fasterxml.jackson.databind.node.DoubleNode.class
++          || kind == com.fasterxml.jackson.databind.node.DecimalNode.class;
++    }
++    return true;
+   }
+ 
+   private JsonSchema schema(String name) {
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java
+@@ -67,6 +67,39 @@
+         session.document().toString(),
+         session.progress().toString(),
+         session.document().path("sessionId").asText());
++  }
++
++  GuidedContracts.RenewalValidation prepareRenewalValidation(String id) {
++    if (org.springframework.transaction.support.TransactionSynchronizationManager
++        .isActualTransactionActive()) {
++      return null;
++    }
++    try {
++      var rows =
++          jdbc.query(
++              "SELECT document::text FROM studio_guided_sessions WHERE session_id=?",
++              (rs, n) -> contracts.parse(rs.getString(1)),
++              id);
++      return rows.size() == 1 && rows.getFirst() instanceof ObjectNode document
++          ? contracts.prepareRenewalValidation(document)
++          : null;
++    } catch (RuntimeException unavailable) {
++      return null;
++    }
++  }
++
++  void saveRenewalAndCommand(
++      Session session, String key, String digest, GuidedContracts.RenewalValidation proof) {
++    GuidedSessionException.require(
++        org.springframework.transaction.support.TransactionSynchronizationManager
++            .isActualTransactionActive(),
++        "RUNTIME_INCOMPATIBLE",
++        409);
++    if (!contracts.validateRenewalOwner(proof, session.document())) {
++      saveRenewalAndCommand(session, key, digest);
++      return;
++    }
++    writeRenewalAndCommand(session, key, digest);
+   }
+ 
+   /** Caller holds the same-owner live session lock; renewal leaves progress unchanged. */
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -746,6 +746,8 @@
+     key(key);
+     GuidedInternalSecurity.requireRole(worker, "owning-worker");
+     require(worker.getName().equals(request.path("workerId").asText()), "FORBIDDEN_SCOPE", 403);
++    GuidedContracts.RenewalValidation renewalValidation =
++        request.path("schemaVersion").asInt() == 3 ? repository.prepareRenewalValidation(id) : null;
+     record ClaimDecision(boolean revoked, JsonNode response) {}
+     ClaimDecision decision =
+         repository.transaction(
+@@ -807,8 +809,15 @@
+                           // Keeping the
+                           // fence also preserves outstanding admission/callback identities for this
+                           // live owner.
++                          GuidedContracts.RenewalValidation matchedRenewal =
++                              contracts.bindRenewalValidation(
++                                  renewalValidation, session.document());
+                           ((ObjectNode) owner).put("leaseExpiresAt", lease.toString());
+-                          repository.saveRenewalAndCommand(session, key, digest);
++                          if (matchedRenewal == null) {
++                            repository.saveRenewalAndCommand(session, key, digest);
++                          } else {
++                            repository.saveRenewalAndCommand(session, key, digest, matchedRenewal);
++                          }
+                           return session.document().deepCopy();
+                         }
+                         require(fence < Integer.MAX_VALUE, "STALE_FENCE", 409);
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
+@@ -899,6 +899,268 @@
+                 absent))
+         .isZero();
+     assertThat(persistedDocument(id)).isEqualTo(before);
++  }
++
++  @Test
++  void preparedRenewalUsesOneDetachedReadAndAmbientDefaultsWithoutRead() {
++    String id = observing();
++    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
++    JdbcTemplate queried = org.mockito.Mockito.spy(jdbc);
++    var selected =
++        new GuidedSessionRepository(
++            queried,
++            new TransactionTemplate(new DataSourceTransactionManager(jdbc.getDataSource())),
++            checked);
++    var proof = selected.prepareRenewalValidation(id);
++    assertThat(proof).isNotNull();
++    org.mockito.Mockito.verify(queried)
++        .query(
++            org.mockito.ArgumentMatchers.eq(
++                "SELECT document::text FROM studio_guided_sessions WHERE session_id=?"),
++            org.mockito.ArgumentMatchers.<org.springframework.jdbc.core.RowMapper<JsonNode>>any(),
++            org.mockito.ArgumentMatchers.eq(id));
++    org.mockito.Mockito.verify(checked)
++        .validate(org.mockito.ArgumentMatchers.eq("session"), org.mockito.ArgumentMatchers.any());
++    org.mockito.Mockito.clearInvocations(queried, checked);
++    selected.transaction(
++        () -> {
++          assertThat(selected.prepareRenewalValidation(id)).isNull();
++          org.mockito.Mockito.verifyNoInteractions(queried);
++          var session = selected.lock(id);
++          var bound = checked.bindRenewalValidation(proof, session.document());
++          assertThat(bound).isNotNull();
++          session
++              .document()
++              .withObject("/owner")
++              .put("leaseExpiresAt", clock.instant().plusSeconds(29).toString());
++          selected.saveRenewalAndCommand(session, "prepared-renewal", "prepared-digest", bound);
++          return null;
++        });
++    org.mockito.Mockito.verify(checked, org.mockito.Mockito.never())
++        .validate(org.mockito.ArgumentMatchers.eq("session"), org.mockito.ArgumentMatchers.any());
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_commands WHERE namespace=?"
++                    + " AND idempotency_key='prepared-renewal'",
++                Integer.class,
++                id))
++        .isEqualTo(1);
++  }
++
++  @Test
++  void renewalProofRejectsForeignChangedRepresentationAndUnsupportedInputs() {
++    String id = observing();
++    ObjectNode current = (ObjectNode) persistedDocument(id);
++    var proof = contracts.prepareRenewalValidation(current);
++    assertThat(proof).isNotNull();
++    assertThat(new GuidedContracts().bindRenewalValidation(proof, current)).isNull();
++    assertThat(contracts.bindRenewalValidation(null, current)).isNull();
++    assertThat(contracts.prepareRenewalValidation(null)).isNull();
++    assertThat(contracts.prepareRenewalValidation(current.deepCopy().put("schemaVersion", 1)))
++        .isNull();
++    ObjectNode changed = current.deepCopy().put("state", "FINALIZING");
++    ObjectNode typed = current.deepCopy();
++    typed.withObject("/owner").put("fence", 1L);
++    ObjectNode reordered = contracts.object();
++    java.util.List<String> names = new java.util.ArrayList<>();
++    current.fieldNames().forEachRemaining(names::add);
++    java.util.Collections.reverse(names);
++    names.forEach(name -> reordered.set(name, current.get(name).deepCopy()));
++    for (ObjectNode mismatch : java.util.List.of(changed, typed, reordered)) {
++      assertThat(contracts.bindRenewalValidation(proof, mismatch)).isNull();
++    }
++    var bound = contracts.bindRenewalValidation(proof, current);
++    assertThat(bound).isNotNull();
++    current.withObject("/owner").put("leaseExpiresAt", clock.instant().plusSeconds(29).toString());
++    assertThat(contracts.validateRenewalOwner(bound, current.deepCopy())).isFalse();
++    current.put("unexpectedRenewalField", true);
++    assertThat(contracts.validateRenewalOwner(bound, current)).isFalse();
++    assertThatThrownBy(() -> contracts.validate("session", current)).hasMessage("INVALID_CONTRACT");
++  }
++
++  @Test
++  void renewalOwnerRefusalAndCommandConflictKeepAtomicOriginalRollback() {
++    String id = observing();
++    JsonNode before = persistedDocument(id);
++    JsonNode progress = persistedProgress(id);
++    var proof = repository.prepareRenewalValidation(id);
++    assertThat(proof).isNotNull();
++    assertThatThrownBy(
++            () ->
++                repository.transaction(
++                    () -> {
++                      var session = repository.lock(id);
++                      var bound = contracts.bindRenewalValidation(proof, session.document());
++                      assertThat(bound).isNotNull();
++                      session.document().withObject("/owner").put("leaseExpiresAt", "not-a-date");
++                      repository.saveRenewalAndCommand(
++                          session, "invalid-owner-proof", "digest", bound);
++                      return null;
++                    }))
++        .hasMessage("INVALID_CONTRACT");
++    assertThat(persistedDocument(id).equals(before)).isTrue();
++    assertThat(persistedProgress(id).equals(progress)).isTrue();
++    repository.transaction(
++        () -> {
++          repository.command(id, "claim", "renewal-conflict", "first-digest", contracts.object());
++          return null;
++        });
++    assertThatThrownBy(
++            () ->
++                repository.transaction(
++                    () -> {
++                      var session = repository.lock(id);
++                      var bound = contracts.bindRenewalValidation(proof, session.document());
++                      assertThat(bound).isNotNull();
++                      session
++                          .document()
++                          .withObject("/owner")
++                          .put("leaseExpiresAt", clock.instant().plusSeconds(29).toString());
++                      repository.saveRenewalAndCommand(
++                          session, "renewal-conflict", "second-digest", bound);
++                      return null;
++                    }))
++        .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
++    assertThat(persistedDocument(id).equals(before)).isTrue();
++    assertThat(persistedProgress(id).equals(progress)).isTrue();
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_commands WHERE namespace=?"
++                    + " AND idempotency_key='invalid-owner-proof'",
++                Integer.class,
++                id))
++        .isZero();
++  }
++
++  @Test
++  void unavailableRenewalPreparationAndNullSaveRetainPublicValidation() {
++    String id = observing();
++    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
++    var selected =
++        new GuidedSessionRepository(
++            jdbc,
++            new TransactionTemplate(new DataSourceTransactionManager(jdbc.getDataSource())),
++            checked);
++    org.mockito.Mockito.doThrow(new IllegalStateException("controlled preparation unavailable"))
++        .when(checked)
++        .prepareRenewalValidation(org.mockito.ArgumentMatchers.any());
++    assertThat(selected.prepareRenewalValidation(id)).isNull();
++    org.mockito.Mockito.doCallRealMethod()
++        .when(checked)
++        .prepareRenewalValidation(org.mockito.ArgumentMatchers.any());
++    selected.transaction(
++        () -> {
++          var session = selected.lock(id);
++          selected.saveRenewalAndCommand(session, "null-proof-renewal", "digest", null);
++          return null;
++        });
++    org.mockito.Mockito.verify(checked)
++        .validate(org.mockito.ArgumentMatchers.eq("session"), org.mockito.ArgumentMatchers.any());
++    org.mockito.Mockito.doThrow(new AssertionError("controlled preparation fatal"))
++        .when(checked)
++        .prepareRenewalValidation(org.mockito.ArgumentMatchers.any());
++    assertThatThrownBy(() -> selected.prepareRenewalValidation(id))
++        .isInstanceOf(AssertionError.class);
++  }
++
++  @Test
++  void completedPublicRenewalLeaseDriftBindsWithoutMutatingEitherInputAndStillWritesFreshOwner() {
++    String id = observing();
++    ObjectNode original = (ObjectNode) persistedDocument(id);
++    String originalRepresentation = original.toString();
++    var proof = contracts.prepareRenewalValidation(original);
++    assertThat(proof).isNotNull();
++    clock.now = clock.now.plusSeconds(1);
++    JsonNode renewed =
++        service.claim(worker, id, "intervening-real-renewal", claim(id, "worker-1", 1));
++    assertThat(
++            renewed
++                .path("owner")
++                .path("leaseExpiresAt")
++                .equals(original.path("owner").path("leaseExpiresAt")))
++        .isFalse();
++    assertThat(original.toString().equals(originalRepresentation)).isTrue();
++    repository.transaction(
++        () -> {
++          var current = repository.lock(id);
++          String beforeBind = current.document().toString();
++          var bound = contracts.bindRenewalValidation(proof, current.document());
++          assertThat(bound).isNotNull();
++          assertThat(current.document().toString().equals(beforeBind)).isTrue();
++          assertThat(original.toString().equals(originalRepresentation)).isTrue();
++          assertThat(contracts.validateRenewalOwner(bound, current.document().deepCopy()))
++              .isFalse();
++          current
++              .document()
++              .withObject("/owner")
++              .put("leaseExpiresAt", clock.instant().plusSeconds(30).toString());
++          repository.saveRenewalAndCommand(current, "lease-drift-bound-renewal", "digest", bound);
++          return null;
++        });
++    assertThat(persistedDocument(id).path("owner").path("leaseExpiresAt").asText())
++        .isEqualTo(clock.instant().plusSeconds(30).toString());
++    JsonNode beforeInvalid = persistedDocument(id);
++    var freshProof = repository.prepareRenewalValidation(id);
++    assertThat(freshProof).isNotNull();
++    assertThatThrownBy(
++            () ->
++                repository.transaction(
++                    () -> {
++                      var current = repository.lock(id);
++                      var bound = contracts.bindRenewalValidation(freshProof, current.document());
++                      assertThat(bound).isNotNull();
++                      current.document().withObject("/owner").put("leaseExpiresAt", "not-a-date");
++                      repository.saveRenewalAndCommand(
++                          current, "lease-drift-invalid-final", "digest", bound);
++                      return null;
++                    }))
++        .hasMessage("INVALID_CONTRACT");
++    assertThat(persistedDocument(id).equals(beforeInvalid)).isTrue();
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_commands WHERE namespace=?"
++                    + " AND idempotency_key='lease-drift-invalid-final'",
++                Integer.class,
++                id))
++        .isZero();
++  }
++
++  @Test
++  void leaseDriftDoesNotBlessStateSourceCountersOwnerTypesRepresentationOrForeignProof() {
++    String id = observing();
++    ObjectNode original = (ObjectNode) persistedDocument(id);
++    var proof = contracts.prepareRenewalValidation(original);
++    assertThat(proof).isNotNull();
++    ObjectNode leaseOnly = original.deepCopy();
++    leaseOnly
++        .withObject("/owner")
++        .put("leaseExpiresAt", clock.instant().plusSeconds(31).toString());
++    assertThat(contracts.bindRenewalValidation(proof, leaseOnly)).isNotNull();
++    ObjectNode state = leaseOnly.deepCopy().put("state", "FINALIZING");
++    ObjectNode source = leaseOnly.deepCopy();
++    source.withObject("/scope").put("sourceRevision", "999");
++    ObjectNode counters = leaseOnly.deepCopy();
++    counters
++        .withObject("/counters")
++        .put("modelProposals", counters.path("counters").path("modelProposals").asInt() + 1);
++    ObjectNode workerChanged = leaseOnly.deepCopy();
++    workerChanged.withObject("/owner").put("workerId", "another-owned-fixture-worker");
++    ObjectNode fence = leaseOnly.deepCopy();
++    fence.withObject("/owner").put("fence", 2);
++    ObjectNode typedLease = leaseOnly.deepCopy();
++    typedLease.withObject("/owner").put("leaseExpiresAt", 1);
++    ObjectNode reordered = contracts.object();
++    java.util.List<String> names = new java.util.ArrayList<>();
++    leaseOnly.fieldNames().forEachRemaining(names::add);
++    java.util.Collections.reverse(names);
++    names.forEach(name -> reordered.set(name, leaseOnly.get(name).deepCopy()));
++    for (ObjectNode mismatch :
++        java.util.List.of(state, source, counters, workerChanged, fence, typedLease, reordered)) {
++      assertThat(contracts.bindRenewalValidation(proof, mismatch)).isNull();
++    }
++    assertThat(contracts.bindRenewalValidation(null, leaseOnly)).isNull();
++    assertThat(new GuidedContracts().bindRenewalValidation(proof, leaseOnly)).isNull();
++    assertThat(original.equals(persistedDocument(id))).isTrue();
+   }
+ 
+   private JsonNode persistedDocument(String id) {
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java
+@@ -1,12 +1,6 @@
+ package com.citi.put.checks.studio.guided.session;
+ 
+-import com.fasterxml.jackson.databind.JsonNode;
+ import com.fasterxml.jackson.databind.node.ObjectNode;
+-import com.networknt.schema.JsonSchema;
+-import com.networknt.schema.JsonSchemaFactory;
+-import com.networknt.schema.SpecVersion;
+-import java.util.ArrayList;
+-import java.util.List;
+ import java.nio.file.Files;
+ import java.nio.file.Path;
+ import org.assertj.core.api.SoftAssertions;
+@@ -83,182 +77,4 @@
+             () -> contracts.validate("v3/bridge#/definitions/missing", contracts.object()))
+         .hasMessage("RUNTIME_INCOMPATIBLE");
+   }
+-  @Test
+-  void sessionValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults() throws Exception {
+-    ObjectNode session = fixtureSession("v3/");
+-    JsonSchema original = originalSchema("v3/session");
+-    org.assertj.core.api.Assertions.assertThat(originalAccepts(original, session)).isTrue();
+-    Object strategy = compiledSchema(original);
+-    var properties = strategy.getClass().getDeclaredMethod("properties");
+-    properties.setAccessible(true);
+-    org.assertj.core.api.Assertions.assertThat(((java.util.Map<?, ?>) properties.invoke(strategy)).size())
+-        .isEqualTo(14);
+-    List<JsonNode> cases = new ArrayList<>();
+-    cases.add(session);
+-    collectMutations(session, "", session, cases);
+-    cases.add(contracts.parse("null"));
+-    cases.add(contracts.parse("[]"));
+-    cases.add(contracts.parse("1"));
+-    ObjectNode malformedDate = session.deepCopy();
+-    malformedDate.withObject("/owner").put("leaseExpiresAt", "not-a-date");
+-    cases.add(malformedDate);
+-    ObjectNode malformedUnicode = session.deepCopy();
+-    malformedUnicode.put("sessionId", Character.toString((char) 0xd800));
+-    cases.add(malformedUnicode);
+-    ObjectNode unsafeNumber = session.deepCopy();
+-    unsafeNumber.withObject("/counters").put("actions", 9007199254740992L);
+-    cases.add(unsafeNumber);
+-    var softly = new SoftAssertions();
+-    int index = 0;
+-    for (JsonNode value : cases) {
+-      String before = value.toString();
+-      boolean expected = originalAccepts(original, value);
+-      boolean accepted;
+-      try {
+-        String canonical = contracts.validateAndCanonical("v3/session", value);
+-        softly.assertThat(canonical.equals(GuidedContracts.canonical(value))).isTrue();
+-        accepted = true;
+-      } catch (GuidedSessionException refusal) {
+-        softly.assertThat(refusal.getMessage()).isEqualTo("INVALID_CONTRACT");
+-        softly.assertThat(refusal.status()).isEqualTo(422);
+-        accepted = false;
+-      }
+-      softly.assertThat(accepted).as("mutation %s", index++).isEqualTo(expected);
+-      softly.assertThat(before.equals(value.toString())).as("input unchanged").isTrue();
+-    }
+-    softly.assertAll();
+-  }
+-
+-  @Test
+-  void legacySessionContractsRetainTheirOriginalNativeValidation() throws Exception {
+-    var softly = new SoftAssertions();
+-    for (String version : List.of("", "v2/")) {
+-      ObjectNode session = fixtureSession(version);
+-      JsonSchema original = originalSchema(version + "session");
+-      List<JsonNode> cases = new ArrayList<>();
+-      cases.add(session);
+-      cases.add(session.deepCopy().put("unexpected", true));
+-      ObjectNode missing = session.deepCopy();
+-      missing.remove("owner");
+-      cases.add(missing);
+-      for (JsonNode value : cases) {
+-        boolean accepted;
+-        try {
+-          contracts.validate(version + "session", value);
+-          accepted = true;
+-        } catch (GuidedSessionException refusal) {
+-          accepted = false;
+-          softly.assertThat(refusal.getMessage()).isEqualTo("INVALID_CONTRACT");
+-          softly.assertThat(refusal.status()).isEqualTo(422);
+-        }
+-        softly.assertThat(accepted).isEqualTo(originalAccepts(original, value));
+-      }
+-    }
+-    softly.assertAll();
+-  }
+-
+-  @Test
+-  void unknownSessionEpochPreservesNativeCrossPropertyRefusal() throws Exception {
+-    ObjectNode changed = originalSchema("v3/session").getSchemaNode().deepCopy();
+-    changed.putArray("allOf").addObject().putObject("properties")
+-        .putObject("state").put("const", "FAILED");
+-    JsonSchema original = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7)
+-        .getSchema(changed);
+-    ObjectNode session = fixtureSession("v3/");
+-    session.put("state", "OBSERVING");
+-    org.assertj.core.api.Assertions.assertThat(compiledAccepts(original, session)).isFalse();
+-    session.put("state", "FAILED");
+-    org.assertj.core.api.Assertions.assertThat(compiledAccepts(original, session))
+-        .isEqualTo(original.validate(session).isEmpty());
+-    org.assertj.core.api.Assertions.assertThat(compiledAccepts(original, session)).isTrue();
+-  }
+-
+-  private ObjectNode fixtureSession(String version) throws Exception {
+-    return contracts.parse(Files.readString(Path.of(
+-        "../docs/specs/studio-observed-authoring/contracts/" + version + "fixtures.json")))
+-        .path("documents").path("session").deepCopy();
+-  }
+-
+-  // Compile the unchanged native resource path, not a second call to the optimized validation.
+-  private JsonSchema originalSchema(String name) throws Exception {
+-    var method = GuidedContracts.class.getDeclaredMethod("schema", String.class);
+-    method.setAccessible(true);
+-    return (JsonSchema) method.invoke(new GuidedContracts(), name);
+-  }
+-
+-  private Object compiledSchema(JsonSchema original) throws Exception {
+-    var compile = GuidedContracts.class.getDeclaredMethod("compileSchema", String.class, JsonSchema.class);
+-    compile.setAccessible(true);
+-    return compile.invoke(contracts, "v3/session", original);
+-  }
+-
+-  private boolean compiledAccepts(JsonSchema original, JsonNode value) throws Exception {
+-    Object compiled = compiledSchema(original);
+-    var validate = compiled.getClass().getDeclaredMethod("valid", JsonNode.class);
+-    validate.setAccessible(true);
+-    return (boolean) validate.invoke(compiled, value);
+-  }
+-
+-  private boolean originalAccepts(JsonSchema original, JsonNode value) {
+-    try {
+-      GuidedContracts.canonical(value);
+-      return original.validate(value).isEmpty();
+-    } catch (GuidedSessionException refusal) {
+-      return false;
+-    }
+-  }
+-
+-  private void collectMutations(
+-      ObjectNode original, String pointer, JsonNode node, List<JsonNode> cases) {
+-    if (node.isObject()) {
+-      ObjectNode extra = original.deepCopy();
+-      ((ObjectNode) extra.at(pointer)).put("unexpected", true);
+-      cases.add(extra);
+-      for (var fields = node.fields(); fields.hasNext(); ) {
+-        var field = fields.next();
+-        String name = field.getKey();
+-        ObjectNode absent = original.deepCopy();
+-        ((ObjectNode) absent.at(pointer)).remove(name);
+-        cases.add(absent);
+-        ObjectNode explicitNull = original.deepCopy();
+-        ((ObjectNode) explicitNull.at(pointer)).putNull(name);
+-        cases.add(explicitNull);
+-        ObjectNode wrongType = original.deepCopy();
+-        ((ObjectNode) wrongType.at(pointer)).putArray(name);
+-        cases.add(wrongType);
+-        if (field.getValue().isTextual()) {
+-          ObjectNode empty = original.deepCopy();
+-          ((ObjectNode) empty.at(pointer)).put(name, "");
+-          cases.add(empty);
+-          ObjectNode longText = original.deepCopy();
+-          ((ObjectNode) longText.at(pointer)).put(name, "x".repeat(257));
+-          cases.add(longText);
+-        }
+-        if (field.getValue().isIntegralNumber()) {
+-          for (long number : new long[] {-1, 0, 2147483648L}) {
+-            ObjectNode changed = original.deepCopy();
+-            ((ObjectNode) changed.at(pointer)).put(name, number);
+-            cases.add(changed);
+-          }
+-        }
+-        collectMutations(original, pointer + "/" + name, field.getValue(), cases);
+-      }
+-    } else if (node.isArray()) {
+-      ObjectNode empty = original.deepCopy();
+-      ((com.fasterxml.jackson.databind.node.ArrayNode) empty.at(pointer)).removeAll();
+-      cases.add(empty);
+-      if (!node.isEmpty()) {
+-        ObjectNode oversized = original.deepCopy();
+-        var items = (com.fasterxml.jackson.databind.node.ArrayNode) oversized.at(pointer);
+-        while (items.size() <= 100) {
+-          items.add(node.get(0).deepCopy());
+-        }
+-        cases.add(oversized);
+-      }
+-      for (int index = 0; index < node.size(); index++) {
+-        collectMutations(original, pointer + "/" + index, node.get(index), cases);
+-      }
+-    }
+-  }
+-
+ }

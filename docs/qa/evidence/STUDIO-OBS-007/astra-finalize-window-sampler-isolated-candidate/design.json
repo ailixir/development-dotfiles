@@ -1,0 +1,52 @@
+{
+  "status": "CANDIDATE_AUTHORED_AWAITING_INDEPENDENT_REVIEW",
+  "scope": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java"
+  ],
+  "sourceBaseSha256": "ec10aef4e265265b0f813720f64c2058065c50529834ea9b607055e65db96b02",
+  "authorization": "Parent authorized helper-only isolated correction of existing supporting recorder; root is sole shared integration/build/runtime owner. Runtime peer agrees source blind spots and oncearm/close invariant.",
+  "findings": [
+    "Publisher334 locks session and345 locks source throughout original evidence>=14reads, full basis validation, pin checks and private copies; guardedprepare repeats this capture.",
+    "Failure atPublisher418 proves terminal state before actualprepare;1633ms backendclaim is notSDKack and has no common event timeline with publisher.",
+    "Existing recorder30s starts beforelearning;44claim fixed1s cadence suggests boundary is later, not an exact timing proof.",
+    "Existing sourceFamily does not identify Publisher; first500ms JDBC sample may consume solePG query earlier."
+  ],
+  "complexityOptions": [
+    {
+      "option": "Retain constructor-start recorder",
+      "selected": false,
+      "tradeoff": "Zero code but likely misses finalization; unchanged run is not meaningful."
+    },
+    {
+      "option": "Add publisher aggregate bins40/41",
+      "selected": false,
+      "tradeoff": "Would expand counter arrays/partitions solely for two cases."
+    },
+    {
+      "option": "Same recorder once at selected finalize plus one joined scalar",
+      "selected": true,
+      "tradeoff": "Drops early-learning sampling intentionally for this supporting diagnostic; retains original40 aggregate bins and all existing query/cleanup/privacy machinery. New scalar is explicitly a new export, not an existing field."
+    }
+  ],
+  "selectedDesign": {
+    "arming": "Existing diagnostic environment flag remains. C5Capture creates no sampler at construction; selected secret finalize ingress atomically arms it once beforeoriginal chain. Arm andclose use same capture monitor; close permanently preventslatearm; sampler reference retained afterjoin, no reset/rearm.",
+    "window": "Same20ms cadence,30s bound,MAX8 combinedthreads,onePG query250ms/max64, unchanged threadjoins/erasure and fullTRACE+all30scans.",
+    "classification": "SourceSample.phase private scalar supportsPublisher capture40 fromprepareLowering378 andactualprepare41 fromfinalizeForUser100, sourcefile/class/method/line exact; existing broadfamily11 read/start/command includesPublisher. Unsupportedcaller unknown.",
+    "export": "One new fixed pgSnapshotBlockerCallerPoint scalar -1unknown/40capture/41prepare; latch only forone exact current PG triggeringclaim->blocker edge andoneactive matched holder, sourcefamily11 andknownphase. Joinedclean exactattribution guards apply; unsupported/ambiguous/nonquiescent=>-1. All40 originalaggregate counters unchanged.",
+    "schemaMarker": "Refresh only proven Repo112->79 andService753->751; Contracts90 andTranslationexactpoints unchanged andcompiledverified."
+  },
+  "invariants": [
+    "Original37test bodies/assertions/embedded scripts byte-identical",
+    "No productionchange",
+    "No runtime guard/deadline/authority change",
+    "OriginalSQLquery text andbounds unchanged",
+    "Originaldiagnostic counterpartitions unchanged",
+    "FullTRACEandall30canaryscanunchanged",
+    "No new testcase ormandatoryacceptance obligation"
+  ],
+  "nextMeaningfulExecution": "After independent sourceGO,root may run existing bounded supporting diagnostic once. Supporting only; noC5acceptance or exclusivecost claim.",
+  "runtimeStarted": false,
+  "sharedFilesChanged": false,
+  "observationLimit": "A claim already in flight before finalize arming was never registered atfilter/transaction entry and cannot gain retrospective exactattribution; supporting outcomes never establish absence or finalclaim identity fromaggregate samples.",
+  "constructorAudit": "No checked exceptions; allnew construction before native threadstart. Existing start catch remains unchanged and constructor performs no newthrowing work after successful start. Newouter arm catchRuntimeException only, fatalError propagates."
+}

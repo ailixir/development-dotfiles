@@ -1,0 +1,15 @@
+73a74
+>       GRANT DELETE ON studio_guided_policy_audit TO :"runtime_role";
+86d86
+<       GRANT SELECT ON studio_guided_materialization_snapshots TO :"runtime_role";
+97,98d96
+<       GRANT DELETE ON studio_guided_publication_admissions, studio_guided_publication_preparations,
+<        studio_guided_publication_observations TO :"runtime_role";
+390c388
+<         .execute("GRANT SELECT ON studio_guided_materialization_snapshots TO " + quoted(f.role()));
+---
+>         .execute("GRANT SELECT ON studio_guided_materialization_versions TO " + quoted(f.role()));
+626c624
+<               if (LOCK.matcher(statement).find()) {
+---
+>               if (false && LOCK.matcher(statement).find()) {

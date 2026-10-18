@@ -1,0 +1,298 @@
+{
+  "artifact": "Architect rulings AR-2 (OBS-014 T0; gates V19 authoring and B14 T1) and AR-3 (before contract step C2a)",
+  "author": "Aria (@architect)",
+  "date": "2026-10-13",
+  "mode": "Read-only on source. No product, test, story or migration edits. No Gradle/vitest/tsc runs. No git writes. Every item under 'verified' was read or grepped in the working tree on 2026-10-13. Items labelled 'inferred' were not executed. The SYNAPSE diagnostics and architect-first skill payloads attached to the spawn prompt were not run, because they are outside this mission.",
+  "anchoredOn": {
+    "head": "734ad704f + uncommitted working tree",
+    "inputsSha256Prefix": {
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT/s0-plan-refresh.json": "614b1714153bffb9",
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT/po-x6-and-leftovers.json": "e5d470a204e88966",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md (v0.1.3)": "b5a4a9a8e8db2498",
+      "docs/specs/studio/openapi.yaml": "f502160e0c7475eb (equals BASE_SHA256 in confinement.test.ts:270)",
+      "backend/src/main/resources/db/migration/V14__guided_sessions.sql": "bc28e43835aefe15",
+      "backend/src/main/resources/db/migration/V15__publication.sql": "ef092dfff93a24c4"
+    },
+    "poRulingsHonoured": [
+      "po-x6-and-leftovers.json decision1_X6 (a) published-session copies retained and byte-unchanged; (b) never-published copies pruned in V19 only. AR-2e below conforms. It names the mechanism and diverges on nothing in scope.",
+      "po-x6-and-leftovers.json decision2_X12: the dead /api/v2/studio/** matcher is deleted in OBS-014, and StudioV2IdempotencyFilterTest is re-pointed by name. AR-3e below conforms."
+    ]
+  },
+
+  "summary": "AR-2: V19 adds governed policy tables, per-CSI counters, `pruned_at` and a SQL prune function. It replaces two V14/V15 guard functions with CREATE OR REPLACE. Each replacement permits exactly one new transition, and every other column and table keeps its old behaviour. The execution error vocabulary (ExecutionErrorCode, openapi ExecutionErrorCode, V13 CHECK) is NOT touched. ErrorCodeVocabularyTest therefore stays as it is. New guided codes are POLICY_NOT_APPROVED (v3 error enum), the clarification reason SIDE_EFFECT_CONFIRMATION and the prompt CONFIRM_ACTION, and the internal audit reasons UNGROUNDED_TARGET, DESTRUCTIVE_VERB and SIDE_EFFECT_DENIED under the existing POLICY_DENIED. AR-3: the missing key is `400 IDEMPOTENCY_KEY_REQUIRED`, thrown as StudioValidationException from StudioController.executeTest. Neither IdempotencyFilter nor ChecksExceptionHandler is edited for it. The P1 deletion is narrower than the plan assumed: claimAt/refusal/admit are live code under claimObserved and stay. Eight further test files call AdmissionCasService.claim() directly and are re-pointed by name.",
+
+  "verifiedFactsBearingOnTheRulings": [
+    "The three-way 'one vocabulary' is the EXECUTION error vocabulary: dto/ExecutionErrorCode (10 values), openapi components.schemas.ExecutionErrorCode, and the V13 CHECK ck_ui_test_executions_error_code (V13:427-431). ErrorCodeVocabularyTest reads all three and also asserts that NO migration other than V13 names that constraint. A V19 that widened it would turn that test red by design.",
+    "Guided codes live in a different vocabulary set: v3 error.schema.json `code` (closed enum of 27 values that includes BUDGET_EXCEEDED, without POLICY_DENIED or CONFIGURATION_DENIED); v3 result.schema.json `errorCode` (an OPEN string 1..256 that excludes only AUTH_CONNECTION_REQUIRED); v3 ledger.schema.json outcomeCode (contains POLICY_DENIED); v3 clarification.schema.json `reason`/`promptCode` (closed). No DB CHECK constrains guided error codes. progress.errorCode is unconstrained jsonb.",
+    "GuidedSessionException.response() is the guided refusal envelope {schemaVersion 3, code, messageCode, requestId, retryable:false}. GuidedSessionController:103 maps it. No route in this backend emits application/problem+json. Studio handlers use ErrorResponse {error, message}. Filters use PlatformErrorResponse {error:{code,message}}.",
+    "startGuidedSession (openapi :1172) declares no 429, although GuidedSessionService.start already throws BUDGET_EXCEEDED 429 (maxSourceSteps, :530).",
+    "GuidedTranslationService.stopRejected (:1170) maps validator POLICY_DENIED/EVIDENCE_MISMATCH/REFERENCE_MISMATCH to terminal INVALID_CONTRACT. POLICY_DENIED is not repaired (repairs are only INVALID_CONTRACT and BINDING_ORDER, :1136). POLICY_DENIED is in the LOGIN_REQUIRED annotation set (:1124-1133).",
+    "V14 attempt guard (:351-360) refuses any change to an attempt whose status is not RESERVED/CALLING. GuidedTranslationStore.finishAttempt writes updated_at=clock_timestamp() on settlement only. GuidedPublicationEvidenceRepository.choiceWitness (:224) reads APPLIED safe_result NOT NULL only while publishing.",
+    "result() (GuidedSessionService:2272-2320) and GuidedPublicationResultProjector (:100-140) read only progress.stepIndex, errorCode and detail. publicationCommitted reads publicationRevisionId. Teardown writes teardownStatus after terminal (:2183). recordEvidence writes evidenceRef. annotateLoginFailure reads progress.observation, but only when NOT terminal (:273). read('clarification') returns null when terminal (:566).",
+    "studio_guided_sessions has no terminal timestamp column. expires_at is immutable (V14 identity trigger) and equals createdAt + maxSessionSeconds (default 600 s). V15 capture closes on a terminal/FINALIZING state OR expires_at <= clock_timestamp() (V15:158-159).",
+    "studio_publication_immutable() is ONE function bound BEFORE UPDATE OR DELETE to bases/observations/preparations/admissions/publications, and BEFORE DELETE to attempts (V15:298-304). FK chain: publication_admissions → publication_preparations → publication_observations. ui_test_revisions and publications reference bases.",
+    "Learning-session approvedOrigins come from ObservedReplayPins.policy(scope).allowedOrigins, which is the configured TrustedPolicy (GuidedProductionSessionAccess:67-68). Replay binds currentPolicyHash = hash(configured TrustedPolicy) (ObservedReplayAuthorizer:92,120).",
+    "AdmissionCasService.claimObserved (:136-220) calls the PRIVATE claimAt(…) with `new AdmissionRequest(…)` and reads AdmissionResponse fields. claimAt → statements.admit / confirmExistingAdmission / refusal() / validate(). So only the public claim() (:77-80) and the controller route are legacy-only. ObservedReplayAuthorization does NOT import the Java AdmissionRequest: its only 'AdmissionRequest' is the v3 schema pointer string `v3/replay-job#/definitions/AdmissionRequest` (:88). The PO note in story P1-a is a string-match false positive.",
+    "AdmissionCasService.claim() is called directly as a TEST SETUP helper outside AdmissionCasIT and StudioAuthorizationIT, in six files: CancelIT:504-506, StudioOverloadIT:377-379, sse/SseStreamingIT:133-134, sse/SseCrossReplicaIT:113-114, recovery/RecoveryIT:963-965, internal/EvidencePartialCallbackIT:130-131. StudioContractTest:414-415 has record-parity rows for AdmissionRequest/AdmissionResponse. openapi components.schemas.AdmissionRequest (:3669) and AdmissionResponse (:3686) are referenced only by claimAdmission (:1616, :1636). A fixture already exists: ObservedPublicationFixture.admitObserved(observed, admission, executionId, runner, admissionId) (:644-680), used by ProgressCallbackIT:95.",
+    "StudioAuthorizationIT has 29 @Test. The private admit() helper (:1113) posts to /admission and is used by AC-20 tests at :563 and :583. These were not in the story list. AdmissionCasIT has 16 @Test, and 13 of them call admissionService.claim (:96-330).",
+    "Runner: admissionClient.ts posts only to /observed-admission (contract.test.ts:376-384 asserts it). Its comment at :52 still names AdmissionRequest/AdmissionResponse (doc drift only).",
+    "Frontend: both production executeTest callers already pass a key (useRunGate.ts:325 activationKey; InferenceStudio.tsx:199 intent.key). studioApi.ts:88 keeps the parameter optional. InferenceStudio is deleted by 012B.",
+    "logback-spring.xml has one appender, JSON_CONSOLE, with providers timestamp/level/logger/thread/mdc/masked message/stackTrace, and no `arguments` provider. Only the `com.citi.put.checks` logger is declared."
+  ],
+
+  "AR-2": {
+    "a_closedCodes": {
+      "principle": "Reuse an existing code wherever its meaning fits. Add a code only where none fits, and add it only to the vocabulary that carries that kind of code. No AC-1/4/5/6 code is an execution error_code. The ExecutionErrorCode / openapi ExecutionErrorCode / V13 CHECK set is therefore NOT changed, and V19 MUST NOT name ck_ui_test_executions_error_code (ErrorCodeVocabularyTest would go red, correctly). Guided codes have no DB CHECK, so 'through the vocabulary incl. migration' means the following for guided codes: the v3 schema enum, regenerated bundles (tools/build-studio-observed-schemas.cjs), the Java emitter and the 012B/008 frontend narrative row, all in one C step. No migration is needed, and none is invented.",
+      "table": [
+        {"ac": "AC-1 start with no approved active policy for (csiId, applicationId, environmentId), including 'edited but not yet approved'", "code": "POLICY_NOT_APPROVED", "new": true, "status": 409, "envelope": "v3 error (GuidedSessionException), retryable:false", "vocabulary": "v3 error.schema.json code enum (+1), regenerated bundles. Lands in C2b with its emitter (GuidedSessionService.start)", "whyNotReuse": "FORBIDDEN_SCOPE means 'you may not' (an entitlement), RUNTIME_INCOMPATIBLE means a platform mismatch, and POLICY_DENIED is an action-level refusal. The author must be told to get the policy approved, which none of these say.", "dbEffect": "No session row, no publication base, no counter charge (refused before any write)."},
+        {"ac": "AC-1 the governed policy names origins outside the platform-trusted TrustedPolicy.allowedOrigins", "code": "RUNTIME_INCOMPATIBLE", "new": false, "status": 409, "note": "The same code pins.policy already uses when the trusted policy is missing. The governed origins must be a subset of the trusted origins. Governance may narrow and can never widen. The check runs again at start, because the trusted config can change after approval."},
+        {"ac": "AC-1 worker-mounted applicationPolicy key present", "code": "CONFIGURATION_DENIED", "new": false, "where": "runner guidedMain.ts start-up (existing runner code, transport.ts:64-65 precedent). The process refuses to start. No backend vocabulary change."},
+        {"ac": "AC-1 runner: hash(received applicationPolicy) ≠ context.policyHash", "code": "IDENTITY_MISMATCH", "new": false, "where": "runner context validation before the first observation, using the existing bridge refusal code in transport.ts:104's list. The backend's existing handling of a refused context applies unchanged.", "stopCondition": "If the existing backend handling of a refused context does not end the session terminal (for example, it retries or leaves it PREPARING until expiry), STOP and report to @architect. Do not add a new terminal code ad hoc."},
+        {"ac": "AC-4 grounding failure (click/press/check target not traceable to authored text or referenced saved input)", "code": "POLICY_DENIED", "new": false, "reason": "UNGROUNDED_TARGET", "status": "422 validator rejection (existing GuidedProposalValidator path)"},
+        {"ac": "AC-5 destructive-verb guard", "code": "POLICY_DENIED", "new": false, "reason": "DESTRUCTIVE_VERB", "status": "422 validator rejection"},
+        {"ac": "AC-6 stance DENY on a side-effecting action", "code": "POLICY_DENIED", "new": false, "reason": "SIDE_EFFECT_DENIED", "status": "422 validator rejection"},
+        {"ac": "AC-6 stance CLARIFY_FIRST", "code": "clarification reason SIDE_EFFECT_CONFIRMATION + promptCode CONFIRM_ACTION", "new": true, "vocabulary": "v3 clarification.schema.json `reason` (+1) and `promptCode` (+1). Lands in C2a together with labelSource (one clarification regen; RK-8). The emitter (B14 T2) must land before S4, and the §13 row stays 'AUTHORIZED, NOT YET LANDED' until it does. @qa checks that the emitter exists."},
+        {"ac": "AC-8 per-CSI concurrent-session or daily-token refusal", "code": "BUDGET_EXCEEDED", "new": false, "detail": "see d_budgetExceededResponse"}
+      ],
+      "policyReasonVocabulary": {
+        "values": ["UNGROUNDED_TARGET", "DESTRUCTIVE_VERB", "SIDE_EFFECT_DENIED"],
+        "carrier": "A closed Java enum (guided/policy/GuidedPolicyReason). It is carried on the validator rejection (a GuidedSessionException subclass or field, B14's choice) and in the AC-10 audit event field `reasonCode`. It never appears in a public schema.",
+        "terminalMapping": "stopRejected: a POLICY_DENIED rejection that CARRIES a GuidedPolicyReason ends the session FAILED with progress.errorCode = 'POLICY_DENIED'. result.errorCode is an open string, so there is no schema change. failTranslation's allowed set gains POLICY_DENIED. A POLICY_DENIED WITHOUT a reason (the existing password-control refusals, GuidedProposalValidator:350-368) keeps today's mapping to INVALID_CONTRACT byte-for-byte. OBS-007 behaviour is therefore unchanged.",
+        "loginRequired": "These rejections go through the existing rejected-proposal path, so annotateLoginFailure (POLICY_DENIED is already in its set, GuidedTranslationService:1124-1133) runs before stopRejected. A grounding rejection on a login page still yields LOGIN_REQUIRED, which is the AC-4 requirement.",
+        "repair": "Not repairable in this wave. That matches the existing rule that POLICY_DENIED is terminal. Trade-off: a grounding false-negative costs a whole session. OBS-009 D-C measures the rate against the ≥90% gate, and making it repairable later is a one-entry change to the repair set."
+      },
+      "frontendCoupling": "012B/OBS-008 add narratives for POLICY_NOT_APPROVED and for terminal POLICY_DENIED. FE allowlist class-C entries follow C2b (PO ruling 012B)."
+    },
+
+    "b_pruneDesign": {
+      "scope": "studio_guided_sessions.progress (key-level) and studio_guided_model_attempts.safe_result (nulled) for EVERY terminal session past the window. In addition, the V15 publication-table copies (admissions, preparations, observations rows, deleted) for terminal sessions with NO studio_guided_publications row (PO X6-b). Published sessions keep their four publication tables byte-unchanged (PO X6-a).",
+      "pruner": "New backend/src/main/java/com/citi/put/checks/studio/guided/retention/GuidedObservationPruner.java (@Component, @Scheduled fixedDelayString '${studio.guided-authoring.retention.pruner-delay-ms:3600000}'), next to GuidedSessionReaper and with the same thin shape. The core scheduling/partitioning/RetentionPruner is NOT used: it drops partitions, and these tables are not partitioned. The pruner selects up to batch-size candidates (`SELECT session_id FROM studio_guided_sessions WHERE pruned_at IS NULL AND state IN (<terminal>) AND expires_at + ?::interval <= clock_timestamp() ORDER BY expires_at LIMIT ? FOR UPDATE SKIP LOCKED`, in its own short transaction), then calls `SELECT studio_guided_prune_session(?, ?::interval)` once per session, each in its own transaction. The function re-checks everything under the row lock. Failure of one session is logged with sessionId + SQLState only and does not stop the batch.",
+      "predicate": "state ∈ {SUCCEEDED, PUBLICATION_CONFLICT, FAILED, UNKNOWN_OUTCOME, CANCELLED, EXPIRED} AND pruned_at IS NULL AND expires_at + window <= clock_timestamp(). This is judged ONLY in SQL, on the DB clock. Anchor = expires_at, because there is no terminal timestamp. It is immutable and ≥ the last possible capture instant (V15:159), so 'capture closed' holds by construction. A terminal state also closes capture (V15:158). FINALIZING is never terminal and is never pruned. No V19 terminal_at column is added: it would need a write in every stop() path, for at most 600 s of precision.",
+      "keyLevelProgressPrune": {
+        "rule": "RETAIN-LIST, not delete-list (fail-closed: any key added later is pruned unless it is listed explicitly).",
+        "retainedKeys": ["stepIndex", "errorCode", "detail", "teardownStatus", "publicationRevisionId", "publicationRevisionDigest", "evidenceRef"],
+        "why": "result(), the projector, publicationCommitted and the post-terminal teardown/evidence writers read or write only these keys. `detail` is the closed {stepId, loginStepsPresent} (IDs/booleans). Everything else is pruned, including observation, executionEvidence, clarification, resolvedClarifications, observationRefresh, origin, translationBootstrap(+Evidence), translationAcquisition, modelReservations, secretReleaseDecisions, publicationSnapshotIdentity, documentId, generation, observationHash and evidenceHash.",
+        "singleSource": "SQL function studio_guided_progress_retained_keys() RETURNS text[] IMMUTABLE in V19. The prune function and the session prune guard both read it. Java holds no copy. If OBS-013 needs a post-terminal progress key, V20 CREATE OR REPLACEs this function in the same D unit (AR-1 puts recording state in a V20 table, so none is expected)."
+      },
+      "sqlFunction_V19": "CREATE FUNCTION studio_guided_prune_session(p_session_id varchar, p_window interval) RETURNS boolean LANGUAGE plpgsql: (1) IF p_window IS NULL OR p_window < interval '1 hour' → RAISE. (2) SELECT the session FOR UPDATE; RETURN false if not found, pruned_at IS NOT NULL, state is not terminal, or expires_at + p_window > clock_timestamp(). (3) UPDATE studio_guided_sessions SET progress = (SELECT COALESCE(jsonb_object_agg(key,value),'{}'::jsonb) FROM jsonb_each(progress) WHERE key = ANY(studio_guided_progress_retained_keys())), pruned_at = clock_timestamp(). (4) UPDATE studio_guided_model_attempts SET safe_result = NULL WHERE session_id = p AND status IN ('APPLIED','REJECTED','SUPERSEDED','UNKNOWN_CALL') AND safe_result IS NOT NULL. Do NOT touch updated_at. (5) IF NOT EXISTS (SELECT 1 FROM studio_guided_publications WHERE session_id = p): DELETE FROM studio_guided_publication_admissions, then _preparations, then _observations WHERE session_id = p (FK order). (6) RETURN true. Bases and attempts are never deleted (see e).",
+      "sessionPruneGuard_V19": "ALTER TABLE studio_guided_sessions ADD COLUMN pruned_at timestamptz. New BEFORE UPDATE trigger function studio_guided_prune_guard: IF OLD.pruned_at IS NOT NULL: RAISE if NEW.pruned_at IS DISTINCT FROM OLD.pruned_at ('guided prune is write-once') or if (NEW.progress - studio_guided_progress_retained_keys()) <> '{}' ('pruned progress cannot regain content'). ELSIF NEW.pruned_at IS NOT NULL: RAISE unless OLD.state is terminal AND NEW.state = OLD.state AND (NEW.progress - retained) = '{}'. Partial index ix_guided_session_prune ON studio_guided_sessions(expires_at) WHERE pruned_at IS NULL.",
+      "d_attemptGuard_V19": {
+        "statement": "CREATE OR REPLACE FUNCTION studio_guided_translation_attempt_guard(). The trigger binding tr_guided_attempt_guard (V14) stays.",
+        "body": "IF TG_OP='DELETE' THEN RAISE 'guided attempt is immutable'. Then: IF the parent session (studio_guided_sessions.session_id = OLD.session_id) has pruned_at IS NOT NULL: RETURN NEW only if OLD.status IN ('APPLIED','REJECTED','SUPERSEDED','UNKNOWN_CALL') AND OLD.safe_result IS NOT NULL AND NEW.safe_result IS NULL AND (to_jsonb(NEW) - 'safe_result') = (to_jsonb(OLD) - 'safe_result'). Otherwise RAISE 'guided attempt is pruned' (this also closes any late non-null settlement on a pruned session). If the session is not pruned, run the V14 body VERBATIM (non-terminal transitions unchanged).",
+        "permits": "ONLY terminal safe_result non-null → NULL, ONLY after the session is pruned, with every other column byte-identical (updated_at included).",
+        "negativeTests_GuidedGovernanceMigrationIT": [
+          "For a terminal APPLIED attempt on a PRUNED session, changing each other column alone is refused: session_id, attempt_id, request_id, attempt_number, kind, identity, request_digest, translator_id, lease_until, reservation_key, settlement_key, status, input_tokens, output_tokens, created_at, updated_at (16 cases, one per column, each also with safe_result→NULL in the same UPDATE).",
+          "safe_result → a different non-null value is refused. safe_result NULL → non-null is refused.",
+          "safe_result → NULL on a terminal attempt of an UNPRUNED session is refused (V14 behaviour).",
+          "RESERVED/CALLING attempts on an unpruned session: the existing V14 transitions still pass (positive control). CALLING→RESERVED is still refused.",
+          "On a pruned session, a RESERVED/CALLING attempt settling with non-null safe_result is refused.",
+          "DELETE is refused for every status.",
+          "Positive: the one permitted transition succeeds, and to_jsonb(row) - 'safe_result' is identical before and after."
+        ]
+      },
+      "e_publicationCopies_X6": {
+        "ruling": "PO X6 (b) is SAFE for this wave and is implemented. Mechanism: row DELETE (not content nulling) of studio_guided_publication_admissions → _preparations → _observations for terminal, pruned sessions with no publication row. Nulling would need DROP NOT NULL plus a rewrite of the unnamed closed-shape CHECKs on the V15 tables, which is a larger and more fragile edit than one narrowed trigger.",
+        "guard_V19": "CREATE OR REPLACE FUNCTION studio_publication_immutable(). The V15 trigger bindings on all five tables and attempts stay. Body: IF TG_OP='DELETE' AND TG_TABLE_NAME IN ('studio_guided_publication_admissions','studio_guided_publication_preparations','studio_guided_publication_observations') AND EXISTS (session with pruned_at IS NOT NULL AND state terminal) AND NOT EXISTS (studio_guided_publications row for OLD.session_id) THEN RETURN OLD. Otherwise RAISE 'publication evidence immutable'.",
+        "whySafe": "(1) A terminal state is immutable (V14 identity trigger) and publication requires FINALIZING (V15 attempt guard), so a session pruned without a publication row can never gain one later. (2) Production readers of these rows run only while publishing (GuidedPlanPublisher:204,354,442, verified by @po). Replay verifies by hash (ObservedRevisionVerifier:205). (3) No other table has an FK to these three except admissions → preparations → observations, and the deletion order is FK order.",
+        "retained": "studio_guided_publication_bases and studio_guided_publication_attempts are retained for every session. They hold identity, hashes, runAuthorization, initialContext {kind, origin}, replayRequirements, validator receipts and failure codes, and no observation nodes, execution evidence or proposals. Deleting bases would also force deleting attempts (FK) and their audit value. This is consistent with X6-b, whose named content is observation, execution_evidence and proposal. AC-2 must disclose the retained base/attempt fields, including initialContext.origin.",
+        "negativeTests": [
+          "UPDATE of any column on any of the five tables is refused, pruned or not.",
+          "DELETE on bases, publications and attempts is refused even for a pruned, never-published session.",
+          "DELETE on the three tables is refused when (i) the session is non-terminal, (ii) the session is terminal but pruned_at IS NULL, or (iii) a studio_guided_publications row exists (a published session that is pruned).",
+          "AC-3 IT: after prune, a published session's rows in all four publication tables are byte-identical (compare to_jsonb row sets) and replay of its revision still verifies. A never-published session's three tables have zero rows and its base row is unchanged."
+        ]
+      },
+      "window": "application.yml (B14, SOLE OWNER): studio.guided-authoring.retention.observation-window: ${STUDIO_GUIDED_OBSERVATION_RETENTION:30d}. This equals studio.execution.evidence-retention, so video and observations age out together. Also pruner-delay-ms 3600000 and batch-size 100. Properties validation: window ≥ PT24H, otherwise start-up fails. The DB floor is 1 hour as defence in depth.",
+      "it_GuidedObservationPrunerIT": [
+        "result() and the projector output are byte-identical before and after prune for (i) a FAILED/LOGIN_REQUIRED session and (ii) a SUCCEEDED published session.",
+        "Pruned content is gone: progress keys equal the retained subset, and safe_result is NULL on every terminal attempt.",
+        "A session inside the window is not pruned. A FINALIZING session is not pruned. A second prune returns false.",
+        "Published session: publication rows unchanged and replay still verifies. Never-published session: the three copy tables are empty.",
+        "The window is judged on the DB clock: back-date expires_at via SQL (the identity trigger forbids changing it, so seed the session with an old expires_at). Do NOT use a JVM clock."
+      ]
+    },
+
+    "c_perCsiCounters": {
+      "tables_V19": [
+        "studio_guided_csi_guards(csi_id varchar(20) PRIMARY KEY). The per-CSI lock row, upserted (INSERT … ON CONFLICT DO NOTHING) and then SELECT … FOR UPDATE inside the start transaction.",
+        "studio_guided_csi_token_days(csi_id varchar(20), budget_day date, input_tokens bigint NOT NULL DEFAULT 0 CHECK(input_tokens>=0), output_tokens bigint NOT NULL DEFAULT 0 CHECK(output_tokens>=0), PRIMARY KEY(csi_id,budget_day)). A trigger refuses DELETE and refuses any decrease of either column (monotone).",
+        "Expression index ix_guided_session_live_csi ON studio_guided_sessions((document->'scope'->>'csiId')) WHERE state NOT IN (<terminal>)."
+      ],
+      "concurrency": "In GuidedSessionService.start, AFTER the idempotent-replay lookup (an existing key returns without counting) and BEFORE the session insert, in the same transaction: lock the guard row, then count sessions for the CSI WHERE state NOT IN (terminal) AND expires_at > clock_timestamp(). Refuse if count >= max-concurrent-sessions. The count is derived under the lock rather than kept as a counter, so there is no decrement to lose when a session ends.",
+      "dailyTokens": "UTC day on the DB clock: budget_day = (clock_timestamp() AT TIME ZONE 'UTC')::date, computed in SQL. At start: require remaining input > 0 AND remaining output > 0 (no charge). At each model reservation (the transaction that inserts the studio_guided_model_attempts row, in GuidedTranslationStore): upsert today's row, then ONE conditional UPDATE … SET input_tokens = input_tokens + :inCeiling, output_tokens = output_tokens + :outCeiling WHERE csi_id=? AND budget_day=<today> AND input_tokens + :inCeiling <= :inLimit AND output_tokens + :outCeiling <= :outLimit. The affected-row count is the verdict (AdmissionCas pattern). The charge is the attempt's identity.inputCeiling/outputCeiling with no refund. Late usage above the ceiling (recordLateUsage) adds the excess unconditionally (it is already spent). This matches studio_guided_model_usage_report's GREATEST(ceiling, actual). A zero-row verdict follows the existing acquisition REFUSED/BUDGET_EXCEEDED path, and the session ends FAILED with BUDGET_EXCEEDED.",
+      "defaults": {
+        "max-concurrent-sessions": "3",
+        "daily-model-input-tokens": "5,242,880 = 20 × the 262,144 per-session maxModelInputTokensTotal",
+        "daily-model-output-tokens": "640,000 = 20 × the 32,000 per-session maxModelOutputTokensTotal",
+        "keys": "studio.guided-authoring.csi-budget.{max-concurrent-sessions, daily-model-input-tokens, daily-model-output-tokens} with env overrides STUDIO_GUIDED_CSI_MAX_CONCURRENT / _DAILY_INPUT_TOKENS / _DAILY_OUTPUT_TOKENS",
+        "validation": "Start-up fails if daily input < maxModelInputTokensTotal, daily output < maxModelOutputTokensTotal, or concurrency < 1. Otherwise a single session could never fit.",
+        "rationale": "k = 20 full-ceiling sessions per CSI per day bounds gateway spend per CSI at 20× the worst single session while leaving normal authoring (sessions far below ceiling) unconstrained. It is configurable per deployment. This is an estimate, not a measurement. OBS-009 may tune it from D-C data."
+      },
+      "sessionLimitsUnchanged": "GuidedSessionProperties defaults are untouched. The GuidedPlanningIntegrationTest:742 pin stays.",
+      "it_GuidedCsiBudgetIT": "Two replicas through SecondApplicationContext against one DB. Limit 1: concurrent starts on one CSI give exactly one 202 and one 429 BUDGET_EXCEEDED. A different CSI is unaffected. Daily budget is seeded to limit − 1: the next reservation is refused and the session ends FAILED/BUDGET_EXCEEDED. Day rollover: seed yesterday's row at the limit, and today's start succeeds. Days are computed by the DB; the test never fakes the JVM clock."
+    },
+
+    "d_budgetExceededResponse": {
+      "envelope": "The v3 guided error envelope, NOT RFC 7807 application/problem+json. No route in this backend emits problem+json. A second error media type on one operation would give clients two parsers for one status. The story's 'problem+json' is read as 'closed machine-readable problem body', which the v3 envelope already is. This is a wording divergence and is recorded here; it is not a scope change.",
+      "body": "{schemaVersion:3, code:'BUDGET_EXCEEDED', messageCode:'CSI_CONCURRENT_SESSIONS_EXHAUSTED' | 'CSI_DAILY_TOKENS_EXHAUSTED', requestId, retryable:true}. messageCode is an existing free string, so error.schema is unchanged. All pre-existing BUDGET_EXCEEDED refusals keep retryable:false and carry no Retry-After, because per-session ceilings do not reset with time.",
+      "retryAfter": "Header Retry-After: integer seconds ≥ 1, computed in SQL on the DB clock. Daily = ceil(seconds until the next UTC midnight). Concurrent = ceil(min(expires_at) − clock_timestamp()) over the CSI's live sessions. That is the latest instant a slot is guaranteed to free, so it is an upper bound and not a guess.",
+      "where": "Only GuidedSessionController's handler (targeted) sets the header, from fields carried on the exception. ChecksExceptionHandler is not touched.",
+      "contract_C2b": "startGuidedSession gains '429' (Class C, ADR-002 §19/§34.1): oneOf [v3 error (BUDGET_EXCEEDED, per-CSI and the existing per-session source-step bound), PlatformErrorResponse (RATE_LIMITED from RateLimitFilter now that start is EXECUTE)], with header Retry-After {type: integer, minimum: 1}. StudioContractTest status-map row updated. AC-8 classifier: `.*/studio/guided-sessions$` with POST → EXECUTE only (not /cancel or other sub-routes). RateLimitClassifierTest names the positive case and two negatives (GET, POST …/{id}/cancel)."
+    },
+
+    "e_auditLogger": {
+      "category": "com.citi.put.checks.audit.studio",
+      "logbackEntry": "Add a dedicated appender AUDIT_JSON (ConsoleAppender, LoggingEventCompositeJsonEncoder with providers timestamp, loggerName, `arguments`, a constant pattern {\"service\":\"${SERVICE_NAME}\",\"stream\":\"studio-audit\"} and NO mdc provider, so unrelated MDC never leaks into SIEM) and `<logger name=\"com.citi.put.checks.audit.studio\" level=\"INFO\" additivity=\"false\"><appender-ref ref=\"AUDIT_JSON\"/></logger>`. INFO is pinned so that lowering com.citi.put.checks cannot silence the audit. additivity=false prevents double emission through JSON_CONSOLE. SIEM forwarding selects on stream=studio-audit; that is deployment (OBS-009).",
+      "emitter": "One final class guided/audit/StudioActionAudit with one method per event. The message is the constant eventType. All fields are passed as StructuredArguments, so no field is ever interpolated into the message. Emission happens in TransactionSynchronization.afterCommit, so a rolled-back admission is never audited as admitted.",
+      "eventShape_closed": {
+        "schemaVersion": "1",
+        "eventType": "GUIDED_ACTION_ADMITTED | GUIDED_ACTION_REFUSED | REPLAY_DISPATCHED",
+        "eventId": "uuid",
+        "principalId": "string id",
+        "csiId": "string id",
+        "testId": "uuid",
+        "sessionId|executionId": "id (exactly one)",
+        "admissionId|attemptId": "id",
+        "origin": "the approved-origin string, emitted ONLY after it is verified to be a member of the session's approvedOrigins. Otherwise the literal 'UNAPPROVED'. It is never page-derived text.",
+        "obligationKind": "operation kind enum (navigate, click, fill, …)",
+        "targetRole": "role from the closed ARIA role set, or 'page'/'none'",
+        "targetLabelHash": "first 32 hex of sha256(scopeHash + ':' + safeLabel). Residual: low-entropy labels are dictionary-reversible within one scope. Disclose this in AC-2. No keyed HMAC this wave (no key infrastructure; AC-11 territory).",
+        "outcome": "ADMITTED | REFUSED | DISPATCHED | DISPATCH_REFUSED | DISPATCH_UNKNOWN",
+        "reasonCode": "GuidedPolicyReason | an existing closed code | null"
+      },
+      "forbidden": "Any value, any authored or page text, any label, URL path/query, secret ID or value, or exception message.",
+      "volumeBound": "≤ maxActions (200) admitted + ≤ maxModelProposals (100) refused events per session. One per replay dispatch attempt. Each event ≤ 1 KiB (asserted in the canary IT).",
+      "canary_GuidedActionAuditCanaryIT": "Capture the logger with a test appender during the OBS-007 fixture end-to-end. Plant canaries in the authored literal, the secret value, page text and a page label, and assert zero hits across all captured events. Also assert that the event key set equals the closed shape."
+    },
+
+    "f_sideEffectDefault": "Default CLARIFY_FIRST. The governed policy document carries sideEffectStance ∈ {ALLOW, CLARIFY_FIRST, DENY} and destructiveVocabulary (1..64 lowercase phrases, each ≤ 64 chars). On create/version, an omitted stance is materialized server-side as CLARIFY_FIRST, and an omitted vocabulary as the baseline from application.yml studio.guided-authoring.policy.default-destructive-vocabulary: [delete, remove, erase, destroy, purge, pay, transfer, send money, submit order, place order, confirm payment, cancel subscription, close account, deactivate, revoke]. Both are stored IN the document, so the hash and the audit cover them. Bare 'submit' is deliberately excluded (login forms). Matching is case-insensitive whole-word/phrase on the sanitized safe label and on the authored step text, or on the referenced saved-input text. CLARIFY_FIRST raises at most ONE clarification per session, before the first side-effecting dispatch: reason SIDE_EFFECT_CONFIRMATION, promptCode CONFIRM_ACTION, exactly one choice {safeLabel = authored step text (truncated to 256), labelSource AUTHORED, nodeId = proposed target node id, bindingId null}. Declining = the existing cancel or clarification expiry. The confirmation is recorded in progress (a pruned key). The OBS-007 end-to-end regression seeds ALLOW explicitly. A separate test covers the default.",
+
+    "g_replayPolicy": "Replay keeps its published snapshot. The governed policy applies to LEARNING sessions only. ObservedReplayPins, ObservedReplayAuthorizer, currentPolicyHash and referencePolicyHash are not changed by OBS-014. Approving v2 changes no replay binding or verdict for an existing revision, and an IT asserts this (ObservationPolicyIT: approve v2 → replay of a v1-learned revision binds the same currentPolicyHash and verifies). Residual for PO placement, not fixed here: learning origins/read rules then come from the governed object while replay still reads the configured TrustedPolicy. That is two configuration sources for one application. Unifying them is a follow-up (candidate OBS-009/OBS-015), and it is named in AC-2.",
+
+    "h_governedPolicyDDL_V19": {
+      "tables": [
+        "studio_guided_policies(policy_id uuid PK, csi_id varchar(20) NOT NULL, application_id varchar(256) NOT NULL, environment_id varchar(256) NOT NULL, created_by varchar(256) NOT NULL, active_version integer CHECK(active_version>0), created_at timestamptz NOT NULL DEFAULT clock_timestamp(), UNIQUE(csi_id,application_id,environment_id)). Trigger: identity columns are immutable. active_version only increases and only to a version that has an approval row. No DELETE.",
+        "studio_guided_policy_versions(policy_id uuid REFERENCES studio_guided_policies, version integer CHECK(version>0), document jsonb NOT NULL (closed-key CHECK, octet ≤ 65536), document_hash char(64), observation_policy_hash char(64), created_by varchar(256) NOT NULL, created_at timestamptz DEFAULT clock_timestamp(), PRIMARY KEY(policy_id,version)). Trigger: version = max+1. Immutable (no UPDATE or DELETE).",
+        "studio_guided_policy_approvals(policy_id, version, approved_by varchar(256) NOT NULL, approval_ref varchar(256) NOT NULL, approved_at timestamptz DEFAULT clock_timestamp(), PRIMARY KEY(policy_id,version), FK → versions). BEFORE INSERT refuses approved_by = the version's created_by, and refuses version < active_version. AFTER INSERT sets studio_guided_policies.active_version = version (approval ⇒ activation). Immutable.",
+        "studio_guided_policy_audit(audit_id bigint GENERATED ALWAYS AS IDENTITY PK, policy_id uuid NOT NULL, version integer, event varchar(32) NOT NULL CHECK(event IN ('POLICY_CREATED','VERSION_CREATED','VERSION_APPROVED','VERSION_ACTIVATED')), principal_id varchar(256) NOT NULL, document_hash char(64), occurred_at timestamptz NOT NULL DEFAULT clock_timestamp()). Written ONLY by AFTER triggers on the three tables above, so application code cannot skip the chain. Immutable.",
+        "studio_guided_session_policies(session_id varchar(256) PK REFERENCES studio_guided_sessions, policy_id uuid NOT NULL, policy_version integer NOT NULL, observation_policy_hash char(64) NOT NULL, FK(policy_id,policy_version) → versions). BEFORE INSERT requires an approval row AND policies.active_version = policy_version. Immutable. This is the start-time freeze. The session document, scope and runAuthorization shapes are deliberately NOT changed: they are closed by the V14 identity trigger, the V15 base CHECK and the v3 session schema."
+      ],
+      "hashes": "observation_policy_hash = GuidedContracts.hash(applicationPolicy projection), where the projection = the closed ObservationApplicationPolicy the runner receives (C2b runner-context.applicationPolicy). The runner's pure policyHash.ts must reproduce it byte-for-byte. Shared vectors go in contracts v3 fixtures.json (C2b), and both the backend and runner tests read them.",
+      "approver": "studio.guided-authoring.policy.approver-groups (list, default EMPTY ⇒ every approval refused 403 STUDIO_FORBIDDEN: fail closed until OBS-010 provisions it). Approver ≠ author is enforced in Java AND in the DB trigger. Tests use synthetic approval records. The external Security approval is never marked obtained.",
+      "routes_C2b": "N = 4 public ops under /api/v1/studio (Class C, §19): createGuidedPolicy POST /guided-policies (201,400,401,403,409); readGuidedPolicy GET /guided-policies/{policyId} (200,400,401,403); createGuidedPolicyVersion POST /guided-policies/{policyId}/versions (201,400,401,403,409); approveGuidedPolicyVersion POST /guided-policies/{policyId}/versions/{version}/approval (200,400,401,403,409). Bodies are a new v3 policy.schema.json (closed; JsonNode + contracts.validate in the guided style, so there are no record-parity rows). Errors use the Studio ErrorResponse: 400 INVALID_POLICY (new, op-documented), 403 STUDIO_FORBIDDEN (unknown and forbidden alike, §27 non-disclosure), 409 STALE_REVISION (existing; expectedVersion mismatch, or approving a non-latest/already-approved version). Idempotency: the platform IdempotencyFilter already covers /api/v1/studio/** (UUID key, optional). No new exclusion, consistent with PO X12-c (the only IdempotencyFilter edit this story is the dead-matcher deletion). Total ops 38 → 42 after C2b."
+    }
+  },
+
+  "AR-3": {
+    "a_ac9MissingKey": {
+      "code": "IDEMPOTENCY_KEY_REQUIRED",
+      "status": 400,
+      "body": "Studio ErrorResponse {error:'IDEMPOTENCY_KEY_REQUIRED', message:'Idempotency-Key header is required'}",
+      "enforcement": "StudioController.executeTest keeps @RequestHeader(value=\"Idempotency-Key\", required=false). Before calling studioService.executeTest it throws new StudioValidationException(\"IDEMPOTENCY_KEY_REQUIRED\", …) when the header is absent. The existing type-targeted @ExceptionHandler(StudioValidationException) renders it. Because only this method throws that code, the effect is confined to this route.",
+      "whyNot": "Not required=true: that raises MissingRequestHeaderException, which has no handler today. Adding one to ChecksExceptionHandler would change every controller (RK-17). Not in IdempotencyFilter: the filter also serves /checks, /reports and /schedules, and missing-header pass-through (:90-93) is their contract.",
+      "order": "Malformed or blank header → the filter's 400 INVALID_IDEMPOTENCY_KEY (PlatformErrorResponse), unchanged. Absent → the controller's 400 IDEMPOTENCY_KEY_REQUIRED. Both refuse before any write.",
+      "serviceLayer": "StudioService.executeTest keeps accepting a null key. Internal callers (scheduler dispatch, test fixtures that pass null) are not HTTP clients and are unaffected. That is why enforcement is at the controller.",
+      "contract_C2a": "executeTest Idempotency-Key required: true. The description names both 400 producers. The 400 response gains example idempotencyKeyRequired. Class C (ADR-002 §34.1). Status set unchanged ('202,400,401,403,409,429,503'). The §13 row reads 'AUTHORIZED, NOT YET LANDED (owner OBS-014 B14 T1a)' until measured.",
+      "tests": "StudioApiIT: absent → 400 IDEMPOTENCY_KEY_REQUIRED with zero execution rows and zero ledger rows. Present → 202. Same key replay → the identical response with header Idempotent-Replayed (in-replica). D-2b (a cached 2xx replayed without re-authorization) is named OPEN for @qa and is not narrowed.",
+      "consumers": "Production frontend callers already send a key (verified: useRunGate.ts:325). OBS-008 may make the studioApi parameter required. The MSW handler for execute must require the header, so the mock does not silently accept what the backend refuses (012B/008 owner)."
+    },
+    "b_p1Deletion": {
+      "delete": [
+        "StudioInternalController.claimAdmission (:87-93) and its now-unused imports and bodyReader use for this route",
+        "AdmissionCasService.claim(UUID, AdmissionRequest) (:77-80), the only legacy-only method",
+        "openapi.yaml: path /internal/studio/executions/{id}/admission (:1579-…) including the /v1/runs prose, plus components.schemas.AdmissionRequest (:3669) and AdmissionResponse (:3686). Both are referenced only by claimAdmission.",
+        "StudioContractTest: internal list entry 'POST /internal/studio/executions/{id}/admission' (:154, list 9→8 with the assertion text updated), status-map row (:264), parity rows assertSchemaMatchesRecord AdmissionRequest/AdmissionResponse (:414-415). Total op pin: 39 → 38 if C1 has landed, 38 → 37 if C2a lands first (the C lane quotes the measured old/new)."
+      ],
+      "survives": [
+        "AdmissionCasService.claimAt, refusal(), requireRow, instant: the live CAS under claimObserved.",
+        "StudioDispatchLedgerStatements.admit and confirmExistingAdmission: called by claimAt.",
+        "internal/dto/AdmissionRequest and AdmissionResponse Java records: still used as claimAt's parameter and result. Their Javadoc must state 'internal value type of the admission CAS; no wire contract' (the openapi schemas are gone). Folding them into private nested records is ALLOWED but not required. If B14 does it, the two files are deleted in the same unit.",
+        "validate(): kept. Its checks are redundant with the v3 AdmissionRequest schema plus prepareAdmission's executionId equality, but it is cheap defence. Deleting it is not required."
+      ],
+      "testsAdmissionCasIT_16to15": [
+        {"test": "aFreshAdmissionOwnsTheAttempt", "action": "re-point → ObservedPublicationFixture.admitObserved", "oracle": "receipt.admissionId; ledger ADMITTED / admission_id / runner_instance_id"},
+        {"test": "theSameIdentityArrivingAgainIsAcknowledgedIdempotentlyAndNotByCloseEnough", "action": "re-point (admitObserved twice, same ids)", "oracle": "an identical receipt, deadlines equal"},
+        {"test": "aDifferentAdmissionIdentityOnAnOwnedAttemptIsRefused", "action": "re-point", "oracle": "409 ADMISSION_OWNED from claimAt (expected)"},
+        {"test": "aSupersededAttemptIsRefused", "action": "re-point with a request carrying the stale attemptId", "oracle": "refused before the CAS with 403 FORBIDDEN_SCOPE (prepareAdmission binds attemptId); ledger unchanged"},
+        {"test": "aRowPastItsPendingDeadlineIsRefused", "action": "re-point; back-date pending_deadline_at in SQL", "oracle": "409 ADMISSION_EXPIRED (expected)"},
+        {"test": "aSettledExecutionIsRefused", "action": "re-point", "oracle": "409 EXECUTION_SETTLED, or the observed path's earlier refusal; record the actual"},
+        {"test": "anUnknownExecutionIsA409AndNeverA404", "action": "re-point and RENAME → anUnknownExecutionIsRefusedAndNeverA404", "oracle": "403 FORBIDDEN_SCOPE (no binding), never 404; old→new name recorded"},
+        {"test": "twoAdmissionsInterleavedAcrossTwoContextsYieldExactlyOneOwner", "action": "re-point both contexts to claimObserved via prepareAdmission", "oracle": "exactly one owner"},
+        {"test": "aLostAdmissionResponseCannotProduceASecondOwner", "action": "re-point", "oracle": "unchanged"},
+        {"test": "pendingStartAndRunDeadlinesAreSeparateColumnsWithSeparateOrigins", "action": "re-point", "oracle": "unchanged (origin = DB wall clock now)"},
+        {"test": "legacyAdmissionCannotUseObservedPreReadyFailure", "action": "DROP by name", "why": "its subject is the deleted legacy admission. Covering case: the new 404/405 no-write negative proves the path no longer exists"},
+        {"test": "observedSqlCannotBorrowAnOrdinaryAdmissionOrAbsentProof", "action": "keep the name; re-point the SETUP to a direct StudioDispatchLedgerStatements.admit(…) inside TransactionTemplate", "why": "the SQL guard against an admission without an observed receipt is defence in depth, and no route can produce that state any more, so the test must build it at the statement level"},
+        {"test": "the remaining rawObservedFailure* / other cases", "action": "unchanged (they do not call claim)"}
+      ],
+      "testsStudioAuthorizationIT_29to30": [
+        {"lines": ":452-456 bothCallbacksAreUnreachableWithoutServiceIdentity", "action": "re-point /admission → /observed-admission", "oracle": "401 (chain), unchanged"},
+        {"lines": ":458-464 aBlankMalformedOrWrongCredentialIsRefusedBeforeAnyHandlerWork", "action": "re-point", "oracle": "401/401/401/403, unchanged"},
+        {"lines": ":466-477 theRejectionBodyCarriesACodeAndNoExecutionDetail", "action": "re-point", "oracle": "unchanged"},
+        {"lines": ":479-490 theCredentialIsNotAcceptedFromAurlOrAQueryParameter", "action": "re-point path to …/observed-admission?access_token=", "oracle": "401"},
+        {"lines": ":505-523 aValidServiceIdentityReachesTheHandler", "action": "re-point with a v3 AdmissionRequest-shaped body and a random attemptId", "oracle": "the answer comes from the HANDLER: status ∈ {403, 409} AND body has the handler envelope {code} (FORBIDDEN_SCOPE expected). A chain 403 is distinguished by its body, so the assertion must check the body code and not the status alone"},
+        {"lines": ":527-544 aFieldTheClosedSchemaDoesNotNameIsA400", "action": "re-point with an extra field on the v3 body", "oracle": "422 INVALID_CONTRACT per the observed-admission contract ('Strict UTF-8/JSON/schema contract refused'). Rename → aFieldTheClosedSchemaDoesNotNameIsRefused (old→new recorded)"},
+        {"lines": ":1113-1124 private admit() helper, used by :563 and :583 (AC-20)", "action": "re-point the helper to POST /observed-admission with the request built from observed.binding(executionId) exactly as admitObserved builds it, so the HTTP chain is still exercised", "oracle": "200 receipt"},
+        {"new": "theLegacyAdmissionRouteIsGoneAndWritesNothing", "oracle": "POST /internal/studio/executions/{id}/admission with a VALID service token and a well-formed legacy body → 404 or 405. Ledger row (state, attempt_id, admission_id, runner_instance_id, last_runner_sequence), ui_test_executions (status, observed_admission_receipt) and count(studio_secret_use_audit) are byte-identical before and after"}
+      ],
+      "hiddenDependents_rePointByName": [
+        "CancelIT.admit (:503-506) → admitObserved. The cancel-before-admission oracle may change from EXECUTION_SETTLED to the observed path's CANCELLED (openapi x-conflict-codes lists it). Record the actual. The execution MUST still end ERROR/CANCELLED.",
+        "RecoveryIT.admit (:962-965) → admitObserved",
+        "sse/SseStreamingIT (:133-134), sse/SseCrossReplicaIT (:113-114), internal/EvidencePartialCallbackIT (:130-131) → admitObserved",
+        "StudioOverloadIT (:377-379) → admitObserved (it already swallows refusals)",
+        "These six files are not in the story File List. They join B14's T1a unit (no other lane owns them) and are recorded in the File List by @dev."
+      ],
+      "pins": "C2a: internal 9→8, BASE_SHA256 re-measured, runner confinement.test.ts re-anchored. No runner source change is needed (the runner posts only to /observed-admission, contract.test.ts:376-384). The stale comment at admissionClient.ts:52 is R14's to fix, as doc only, optional.",
+      "classification": "claimAdmission deletion = an internal-surface change, recorded in an ADR-002 §13 row (owner OBS-014, under §19). AC-9 = Class C. Both land in C2a with B14 T1a in ONE unit, because StudioContractTest checks both directions."
+    },
+    "c_deadMatcher": {
+      "ruling": "Delete IdempotencyFilter.java:40 `new AntPathRequestMatcher(\"/api/v2/studio/**\")` in OBS-014 B14 T1a (PO placement X12, binding). No replacement. All other COVERED_PATHS and EXCLUDED_PATHS stay byte-identical. This is the ONLY IdempotencyFilter edit in OBS-014.",
+      "test": "RE-POINT (preferred over drop). Delete StudioV2IdempotencyFilterTest.java and add StudioExecuteIdempotencyFilterTest.java with: (1) retriedExecuteReplaysResponseWithoutASecondMutation on POST /api/v1/studio/tests/{id}/execute (one mutation, one replay); (2) theRemovedV2PrefixIsNoLongerCovered: POST /api/v2/studio/tests twice with the same key → the chain runs twice (shouldNotFilter = true). Counts: old 1 method × 2 invocations → new 2 methods × 1 invocation each. Reason for re-pointing: IdempotencyFilterIT does not cover /api/v1/studio (verified by @po), so a drop would leave the AC-9 route's filter replay without a unit guard.",
+      "oracle": "grep -rn \"api/v2/studio\" backend/src → zero hits (command + output in the Dev Agent Record)."
+    }
+  },
+
+  "stopConditions": [
+    "S-1 Any V19 statement that edits V12–V18 files, names ck_ui_test_executions_error_code, or adds an ExecutionErrorCode value → STOP (not ruled here; it would turn ErrorCodeVocabularyTest red by design).",
+    "S-2 A post-terminal PRODUCTION read of a pruned progress key, of a terminal attempt's safe_result, or of the three publication copy tables for a never-published session is found (beyond those listed in verifiedFacts) → STOP and report the reader. Do not add keys to the retain list to make a test pass.",
+    "S-3 GuidedObservationPrunerIT shows result()/projector output differing before vs after prune → STOP. Never relax the byte-equality.",
+    "S-4 GuidedTranslationStore.finishAttempt or recordLateUsage is reachable for a pruned session in production → add a precheck refusing with existing EXPIRED 409 before SQL. If that needs more than a precheck, STOP.",
+    "S-5 The runner and backend policy hashes differ on any shared vector → STOP. Canonicalization must be fixed at the contract (C lane), not in one side.",
+    "S-6 The side-effect classification (AC-6) needs a page signal that the sanitized observation does not already carry → STOP and escalate to @architect. Adding observation fields exported to the model is out of bounds for OBS-014 (Dev Notes: must not export more page content).",
+    "S-7 A re-pointed admission test's observed-path refusal differs from the oracle ruled above → record the actual code. If it is still a refusal with zero writes, update the oracle by name and record it. If the CAS property under test becomes unreachable through claimObserved, DROP it by name with the covering case named. Never keep AdmissionCasService.claim() (or any public legacy entry) for tests.",
+    "S-8 Approver-group membership cannot be read from BffAuthenticationToken/UserIdentity → STOP and escalate (the approval route stays fail-closed). Do not invent an identity source.",
+    "S-9 Under the default destructive vocabulary, the OBS-007 fixture end-to-end (seeded ALLOW) fails on a destructive-verb refusal → report the label. Do not trim the vocabulary silently.",
+    "S-10 Any partial C2b landing (policy routes without runner-context fields or the fixture seeding) → the whole S3 unit is rolled forward together or not at all (RK-2)."
+  ],
+
+  "tradeOffs": [
+    "SQL prune function vs Java prune logic: chosen SQL. The predicate, the DB clock, the retain list and the FK-ordered deletes are atomic under one row lock, matching the V14/V15 guard style. Cost: plpgsql is covered only by ITs (no unit tests).",
+    "Row delete vs nulling for the publication copies: chosen delete. Nulling needs DROP NOT NULL and a rewrite of unnamed V15 CHECKs. Cost: base and attempt rows survive (disclosed).",
+    "Charge the ceiling with no refund: monotone, simple, and consistent with the usage report. Cost: it over-counts real usage, so effective daily capacity is below the token number (mitigated by k = 20).",
+    "Count-under-lock for concurrency vs a counter: no lost decrement on crash or expiry. Cost: one indexed count per start.",
+    "POLICY_DENIED + internal reason vs three new public codes: one public code and an honest terminal errorCode, while OBS-007 password refusals keep their mapping. Cost: the reason is visible only in audit and the attempt record, not in the result body.",
+    "A separate session-policy freeze table vs extending scope/runAuthorization: avoids touching three closed shapes (V14 identity trigger, V15 base CHECK, v3 session schema). Cost: one extra join when the runner context is built."
+  ],
+
+  "residualsForPoAndAc2": [
+    "Other stores of page-derived or model-derived content that AC-3 (as clarified by X6) does not prune. Content class is inferred from the DDL and not traced field by field: studio_guided_actions.proposal and studio_guided_obligation_admissions.proposal (target locator/role/name), studio_guided_clarification_contexts.identity/meanings (question and choice text), studio_guided_translation_plans.plan (model output), studio_guided_preparations.proof, studio_guided_commands.response (cached responses that may embed clarification payloads), and publication bases' initialContext.origin. AC-2 must name them with their retention (indefinite, most behind immutability triggers). Whether to prune them is a PO-scope question. It is not decided here.",
+    "Two policy sources (governed policy for learning, configured TrustedPolicy for replay) → a follow-up story (g_replayPolicy).",
+    "targetLabelHash is dictionary-reversible for common labels within one scope → AC-2 disclosure. A keyed HMAC is deferred to AC-11 key infrastructure.",
+    "studio_guided_csi_token_days grows by one row per CSI per day (IDs and integers only). Pruning it is optional and not in scope."
+  ],
+
+  "autoDecisions": [
+    "[AUTO-DECISION] Story says 'problem+json'; the backend has no RFC 7807 route → keep the v3 guided envelope + Retry-After (reason: one error shape per operation; the story's intent is a closed machine-readable body).",
+    "[AUTO-DECISION] Prune anchor without a terminal timestamp → expires_at (reason: immutable, ≥ the last capture instant, at most 600 s off; a terminal_at column would touch every stop() path).",
+    "[AUTO-DECISION] Keep publication bases and attempts in X6-b → yes (reason: no observation/proposal content; deleting bases forces deleting attempts' audit; PO left the mechanism to @architect).",
+    "[AUTO-DECISION] StudioV2IdempotencyFilterTest drop vs re-point → re-point and rename (reason: there is no other unit guard on the /api/v1/studio execute replay).",
+    "[AUTO-DECISION] Daily token default k = 20 and concurrency 3 → chosen as estimates, configurable, with a start-up invariant against the per-session ceilings (reason: there is no usage data yet; OBS-009 tunes).",
+    "[AUTO-DECISION] Policy routes' idempotency → the platform IdempotencyFilter plus expectedVersion (reason: the PO limited IdempotencyFilter edits to the dead matcher; optimistic versioning already prevents double versions)."
+  ],
+
+  "notExecuted": [
+    "No test, build or migration was run. Every expected refusal code for the re-pointed admission tests is inferred from reading prepareAdmission/claimObserved/refusal(), and S-7 governs mismatches.",
+    "The runner's behaviour on IDENTITY_MISMATCH at context push and the backend's handling of a refused context were not traced (see the stopCondition on the AC-1 IDENTITY_MISMATCH row).",
+    "Whether UserIdentity carries a group/role usable for approvers was not verified (S-8).",
+    "The defaults for counters and the destructive vocabulary are design choices, not measurements."
+  ]
+}

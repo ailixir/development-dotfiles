@@ -1,0 +1,38 @@
+@Name("jdk.ExecutionSample")
+@Category({"Java Virtual Machine", "Profiling"})
+@Label("Method Profiling Sample")
+@Description("Snapshot of a threads state")
+class ExecutionSample extends jdk.jfr.Event {
+  @Label("Start Time")
+  @Timestamp("TICKS")
+  long startTime;
+
+  @Label("Thread")
+  Thread sampledThread;
+
+  @Label("Stack Trace")
+  StackTrace stackTrace;
+
+  @Label("Thread State")
+  String state;
+}
+
+@Name("jdk.NativeMethodSample")
+@Category({"Java Virtual Machine", "Profiling"})
+@Label("Method Profiling Sample Native")
+@Description("Snapshot of a threads state when in native")
+class NativeMethodSample extends jdk.jfr.Event {
+  @Label("Start Time")
+  @Timestamp("TICKS")
+  long startTime;
+
+  @Label("Thread")
+  Thread sampledThread;
+
+  @Label("Stack Trace")
+  StackTrace stackTrace;
+
+  @Label("Thread State")
+  String state;
+}
+

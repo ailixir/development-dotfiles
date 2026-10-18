@@ -1,0 +1,33 @@
+{
+  "command": [
+    "./gradlew",
+    "test",
+    "--rerun-tasks",
+    "--tests",
+    "com.citi.put.checks.studio.guided.translation.GuidedTranslationTest",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest",
+    "--tests",
+    "com.citi.put.checks.studio.secrets.SecretRevocationSweepIT",
+    "--tests",
+    "com.citi.put.checks.studio.internal.ProgressCallbackIT",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest"
+  ],
+  "classes": [
+    "com.citi.put.checks.studio.guided.translation.GuidedTranslationTest",
+    "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+    "com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest",
+    "com.citi.put.checks.studio.secrets.SecretRevocationSweepIT",
+    "com.citi.put.checks.studio.internal.ProgressCallbackIT",
+    "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest"
+  ],
+  "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "startedAt": "2026-10-11T09:57:26.852381+00:00",
+  "fixturePrerequisites": {
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+  },
+  "prerequisiteSelected": false
+}

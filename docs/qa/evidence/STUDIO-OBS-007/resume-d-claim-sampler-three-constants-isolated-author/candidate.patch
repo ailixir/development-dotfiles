@@ -1,0 +1,29 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -12260,7 +12260,7 @@
+         if (frame.getClassName().equals("com.citi.put.checks.studio.guided.session.GuidedContracts")
+             && frame.getMethodName().equals("validate")
+             && "GuidedContracts.java".equals(frame.getFileName())
+-            && (frame.getLineNumber() == 89 || frame.getLineNumber() == 94)) {
++            && frame.getLineNumber() == 90) {
+           if (validation >= 0) {
+             return false;
+           }
+@@ -12270,7 +12270,7 @@
+                 .equals("com.citi.put.checks.studio.guided.session.GuidedSessionRepository")
+             && frame.getMethodName().equals("saveRenewalAndCommand")
+             && "GuidedSessionRepository.java".equals(frame.getFileName())
+-            && frame.getLineNumber() == 79) {
++            && frame.getLineNumber() == 112) {
+           if (renewal >= 0) {
+             return false;
+           }
+@@ -12280,7 +12280,7 @@
+                 .equals("com.citi.put.checks.studio.guided.session.GuidedSessionService")
+             && frame.getMethodName().equals("claim")
+             && "GuidedSessionService.java".equals(frame.getFileName())
+-            && frame.getLineNumber() == 751) {
++            && frame.getLineNumber() == 753) {
+           return validation >= 0 && validation < renewal && renewal < index;
+         }
+       }

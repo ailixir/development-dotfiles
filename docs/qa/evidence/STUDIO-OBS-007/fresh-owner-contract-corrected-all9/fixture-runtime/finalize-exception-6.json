@@ -1,0 +1,576 @@
+{
+  "schemaVersion" : 1,
+  "exceptionCode" : "BUDGET_EXCEEDED",
+  "publicationEnabled" : true,
+  "replayEnabled" : true,
+  "resolverTransactionActive" : false,
+  "stackFrames" : [ {
+    "class" : "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+    "method" : "require",
+    "line" : 35
+  }, {
+    "class" : "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+    "method" : "call",
+    "line" : 822
+  }, {
+    "class" : "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+    "method" : "advance",
+    "line" : 535
+  }, {
+    "class" : "com.citi.put.checks.studio.guided.translation.GuidedPlanningController",
+    "method" : "proposal",
+    "line" : 50
+  }, {
+    "class" : "jdk.internal.reflect.DirectMethodHandleAccessor",
+    "method" : "invoke",
+    "line" : 103
+  }, {
+    "class" : "java.lang.reflect.Method",
+    "method" : "invoke",
+    "line" : 580
+  }, {
+    "class" : "org.springframework.web.method.support.InvocableHandlerMethod",
+    "method" : "doInvoke",
+    "line" : 255
+  }, {
+    "class" : "org.springframework.web.method.support.InvocableHandlerMethod",
+    "method" : "invokeForRequest",
+    "line" : 188
+  }, {
+    "class" : "org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod",
+    "method" : "invokeAndHandle",
+    "line" : 118
+  }, {
+    "class" : "org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter",
+    "method" : "invokeHandlerMethod",
+    "line" : 926
+  }, {
+    "class" : "org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter",
+    "method" : "handleInternal",
+    "line" : 831
+  }, {
+    "class" : "org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter",
+    "method" : "handle",
+    "line" : 87
+  }, {
+    "class" : "org.springframework.web.servlet.DispatcherServlet",
+    "method" : "doDispatch",
+    "line" : 1089
+  }, {
+    "class" : "org.springframework.web.servlet.DispatcherServlet",
+    "method" : "doService",
+    "line" : 979
+  }, {
+    "class" : "org.springframework.web.servlet.FrameworkServlet",
+    "method" : "processRequest",
+    "line" : 1014
+  }, {
+    "class" : "org.springframework.web.servlet.FrameworkServlet",
+    "method" : "doPost",
+    "line" : 914
+  }, {
+    "class" : "jakarta.servlet.http.HttpServlet",
+    "method" : "service",
+    "line" : 590
+  }, {
+    "class" : "org.springframework.web.servlet.FrameworkServlet",
+    "method" : "service",
+    "line" : 885
+  }, {
+    "class" : "jakarta.servlet.http.HttpServlet",
+    "method" : "service",
+    "line" : 658
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "internalDoFilter",
+    "line" : 195
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "doFilter",
+    "line" : 140
+  }, {
+    "class" : "org.apache.tomcat.websocket.server.WsFilter",
+    "method" : "doFilter",
+    "line" : 51
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "internalDoFilter",
+    "line" : 164
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "doFilter",
+    "line" : 140
+  }, {
+    "class" : "com.citi.put.checks.security.BffSessionAuthenticationFilter",
+    "method" : "doFilterInternal",
+    "line" : 76
+  }, {
+    "class" : "org.springframework.web.filter.OncePerRequestFilter",
+    "method" : "doFilter",
+    "line" : 116
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "internalDoFilter",
+    "line" : 164
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "doFilter",
+    "line" : 140
+  }, {
+    "class" : "com.citi.put.checks.config.RateLimitFilter",
+    "method" : "doFilterInternal",
+    "line" : 64
+  }, {
+    "class" : "org.springframework.web.filter.OncePerRequestFilter",
+    "method" : "doFilter",
+    "line" : 116
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "internalDoFilter",
+    "line" : 164
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "doFilter",
+    "line" : 140
+  }, {
+    "class" : "org.springframework.web.filter.OncePerRequestFilter",
+    "method" : "doFilter",
+    "line" : 101
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "internalDoFilter",
+    "line" : 164
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "doFilter",
+    "line" : 140
+  }, {
+    "class" : "org.springframework.web.filter.CompositeFilter$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 108
+  }, {
+    "class" : "org.springframework.security.web.FilterChainProxy",
+    "method" : "lambda$doFilterInternal$3",
+    "line" : 231
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$FilterObservation$SimpleFilterObservation",
+    "method" : "lambda$wrap$1",
+    "line" : 479
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation",
+    "method" : "lambda$wrap$1",
+    "line" : 340
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator",
+    "method" : "lambda$wrapSecured$0",
+    "line" : 82
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 128
+  }, {
+    "class" : "org.springframework.security.web.access.intercept.AuthorizationFilter",
+    "method" : "doFilter",
+    "line" : 100
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "wrapFilter",
+    "line" : 240
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "doFilter",
+    "line" : 227
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 137
+  }, {
+    "class" : "org.springframework.security.web.access.ExceptionTranslationFilter",
+    "method" : "doFilter",
+    "line" : 126
+  }, {
+    "class" : "org.springframework.security.web.access.ExceptionTranslationFilter",
+    "method" : "doFilter",
+    "line" : 120
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "wrapFilter",
+    "line" : 240
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "doFilter",
+    "line" : 227
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 137
+  }, {
+    "class" : "org.springframework.security.web.session.SessionManagementFilter",
+    "method" : "doFilter",
+    "line" : 131
+  }, {
+    "class" : "org.springframework.security.web.session.SessionManagementFilter",
+    "method" : "doFilter",
+    "line" : 85
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "wrapFilter",
+    "line" : 240
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "doFilter",
+    "line" : 227
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 137
+  }, {
+    "class" : "org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter",
+    "method" : "doFilter",
+    "line" : 179
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "wrapFilter",
+    "line" : 240
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "doFilter",
+    "line" : 227
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 137
+  }, {
+    "class" : "org.springframework.security.web.savedrequest.RequestCacheAwareFilter",
+    "method" : "doFilter",
+    "line" : 63
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "wrapFilter",
+    "line" : 240
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "doFilter",
+    "line" : 227
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 137
+  }, {
+    "class" : "com.citi.put.checks.studio.guided.session.GuidedInternalSecurity$IdentityFilter",
+    "method" : "doFilterInternal",
+    "line" : 130
+  }, {
+    "class" : "org.springframework.web.filter.OncePerRequestFilter",
+    "method" : "doFilter",
+    "line" : 116
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "wrapFilter",
+    "line" : 240
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "doFilter",
+    "line" : 227
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 137
+  }, {
+    "class" : "org.springframework.security.web.authentication.logout.LogoutFilter",
+    "method" : "doFilter",
+    "line" : 107
+  }, {
+    "class" : "org.springframework.security.web.authentication.logout.LogoutFilter",
+    "method" : "doFilter",
+    "line" : 93
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "wrapFilter",
+    "line" : 240
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "doFilter",
+    "line" : 227
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 137
+  }, {
+    "class" : "org.springframework.security.web.header.HeaderWriterFilter",
+    "method" : "doHeadersAfter",
+    "line" : 90
+  }, {
+    "class" : "org.springframework.security.web.header.HeaderWriterFilter",
+    "method" : "doFilterInternal",
+    "line" : 75
+  }, {
+    "class" : "org.springframework.web.filter.OncePerRequestFilter",
+    "method" : "doFilter",
+    "line" : 116
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "wrapFilter",
+    "line" : 240
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "doFilter",
+    "line" : 227
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 137
+  }, {
+    "class" : "org.springframework.security.web.context.SecurityContextHolderFilter",
+    "method" : "doFilter",
+    "line" : 82
+  }, {
+    "class" : "org.springframework.security.web.context.SecurityContextHolderFilter",
+    "method" : "doFilter",
+    "line" : 69
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "wrapFilter",
+    "line" : 240
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "doFilter",
+    "line" : 227
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 137
+  }, {
+    "class" : "org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter",
+    "method" : "doFilterInternal",
+    "line" : 62
+  }, {
+    "class" : "org.springframework.web.filter.OncePerRequestFilter",
+    "method" : "doFilter",
+    "line" : 116
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "wrapFilter",
+    "line" : 240
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "doFilter",
+    "line" : 227
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 137
+  }, {
+    "class" : "org.springframework.security.web.session.DisableEncodeUrlFilter",
+    "method" : "doFilterInternal",
+    "line" : 42
+  }, {
+    "class" : "org.springframework.web.filter.OncePerRequestFilter",
+    "method" : "doFilter",
+    "line" : 116
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "wrapFilter",
+    "line" : 240
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation",
+    "method" : "lambda$wrap$0",
+    "line" : 323
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter",
+    "method" : "doFilter",
+    "line" : 224
+  }, {
+    "class" : "org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 137
+  }, {
+    "class" : "org.springframework.security.web.FilterChainProxy",
+    "method" : "doFilterInternal",
+    "line" : 233
+  }, {
+    "class" : "org.springframework.security.web.FilterChainProxy",
+    "method" : "doFilter",
+    "line" : 191
+  }, {
+    "class" : "org.springframework.web.filter.CompositeFilter$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 113
+  }, {
+    "class" : "org.springframework.web.servlet.handler.HandlerMappingIntrospector",
+    "method" : "lambda$createCacheFilter$3",
+    "line" : 195
+  }, {
+    "class" : "org.springframework.web.filter.CompositeFilter$VirtualFilterChain",
+    "method" : "doFilter",
+    "line" : 113
+  }, {
+    "class" : "org.springframework.web.filter.CompositeFilter",
+    "method" : "doFilter",
+    "line" : 74
+  }, {
+    "class" : "org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy",
+    "method" : "doFilter",
+    "line" : 230
+  }, {
+    "class" : "org.springframework.web.filter.DelegatingFilterProxy",
+    "method" : "invokeDelegate",
+    "line" : 362
+  }, {
+    "class" : "org.springframework.web.filter.DelegatingFilterProxy",
+    "method" : "doFilter",
+    "line" : 278
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "internalDoFilter",
+    "line" : 164
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "doFilter",
+    "line" : 140
+  }, {
+    "class" : "org.springframework.web.filter.RequestContextFilter",
+    "method" : "doFilterInternal",
+    "line" : 100
+  }, {
+    "class" : "org.springframework.web.filter.OncePerRequestFilter",
+    "method" : "doFilter",
+    "line" : 116
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "internalDoFilter",
+    "line" : 164
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "doFilter",
+    "line" : 140
+  }, {
+    "class" : "org.springframework.web.filter.FormContentFilter",
+    "method" : "doFilterInternal",
+    "line" : 93
+  }, {
+    "class" : "org.springframework.web.filter.OncePerRequestFilter",
+    "method" : "doFilter",
+    "line" : 116
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "internalDoFilter",
+    "line" : 164
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "doFilter",
+    "line" : 140
+  }, {
+    "class" : "org.springframework.web.filter.ServerHttpObservationFilter",
+    "method" : "doFilterInternal",
+    "line" : 113
+  }, {
+    "class" : "org.springframework.web.filter.OncePerRequestFilter",
+    "method" : "doFilter",
+    "line" : 116
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "internalDoFilter",
+    "line" : 164
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "doFilter",
+    "line" : 140
+  }, {
+    "class" : "org.springframework.web.filter.CharacterEncodingFilter",
+    "method" : "doFilterInternal",
+    "line" : 201
+  }, {
+    "class" : "org.springframework.web.filter.OncePerRequestFilter",
+    "method" : "doFilter",
+    "line" : 116
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "internalDoFilter",
+    "line" : 164
+  }, {
+    "class" : "org.apache.catalina.core.ApplicationFilterChain",
+    "method" : "doFilter",
+    "line" : 140
+  }, {
+    "class" : "org.apache.catalina.core.StandardWrapperValve",
+    "method" : "invoke",
+    "line" : 167
+  }, {
+    "class" : "org.apache.catalina.core.StandardContextValve",
+    "method" : "invoke",
+    "line" : 90
+  }, {
+    "class" : "org.apache.catalina.authenticator.AuthenticatorBase",
+    "method" : "invoke",
+    "line" : 483
+  }, {
+    "class" : "org.apache.catalina.core.StandardHostValve",
+    "method" : "invoke",
+    "line" : 115
+  }, {
+    "class" : "org.apache.catalina.valves.ErrorReportValve",
+    "method" : "invoke",
+    "line" : 93
+  }, {
+    "class" : "org.apache.catalina.core.StandardEngineValve",
+    "method" : "invoke",
+    "line" : 74
+  }, {
+    "class" : "org.apache.catalina.connector.CoyoteAdapter",
+    "method" : "service",
+    "line" : 344
+  }, {
+    "class" : "org.apache.coyote.http11.Http11Processor",
+    "method" : "service",
+    "line" : 384
+  }, {
+    "class" : "org.apache.coyote.AbstractProcessorLight",
+    "method" : "process",
+    "line" : 63
+  }, {
+    "class" : "org.apache.coyote.AbstractProtocol$ConnectionHandler",
+    "method" : "process",
+    "line" : 905
+  }, {
+    "class" : "org.apache.tomcat.util.net.NioEndpoint$SocketProcessor",
+    "method" : "doRun",
+    "line" : 1741
+  }, {
+    "class" : "org.apache.tomcat.util.net.SocketProcessorBase",
+    "method" : "run",
+    "line" : 52
+  }, {
+    "class" : "java.lang.VirtualThread",
+    "method" : "run",
+    "line" : 329
+  } ],
+  "selectedRuntime" : {
+    "profile" : {
+      "catalog" : "observed-replay-3",
+      "playwright" : "1.63.0",
+      "browserEngine" : "chromium",
+      "contract" : 3,
+      "learnedPlan" : 3,
+      "observation" : 3,
+      "guidedPolicy" : 3,
+      "referencePolicy" : 4,
+      "lowering" : 2,
+      "artifact" : 3,
+      "language" : "observed-3",
+      "executor" : "observed-4",
+      "publicationEvidence" : 1,
+      "validationBasis" : 1,
+      "validator" : "observed-2",
+      "protocol" : 3,
+      "replayAuthorization" : 2
+    },
+    "build" : {
+      "profileHash" : "22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386",
+      "schemaBundleHash" : "305470ca02abcd9130ea039acf66721f95c0349373e13cc9176a3f2548ab48ca",
+      "referenceBundleHash" : "3ac8057b76aa69c9616692f740b95a3a3d6efd2d85d9dba9c8fa1a776f4cde0d",
+      "chromiumBuild" : "1243",
+      "executableImageDigest" : "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    }
+  }
+}

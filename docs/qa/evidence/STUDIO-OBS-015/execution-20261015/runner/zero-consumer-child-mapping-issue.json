@@ -1,0 +1,21 @@
+{
+  "artifact": "Runner Execute3 retained zero-consumer proof mapping request",
+  "status": "HELD_PENDING_ARCHITECT_MAPPING",
+  "story": "STUDIO-OBS-015",
+  "exactExecute3": "export interface Execute3 { readonly \"kind\": \"execute\"; readonly \"protocolVersion\": 3; readonly \"mode\": \"observed\"; readonly \"runId\": string; readonly \"attemptId\": string; readonly \"profileHash\": string; readonly \"configurationHash\": string; readonly \"waitStrategy\": \"load\" | \"domcontentloaded\" | \"networkidle\"; readonly \"stepTimeoutMs\": number; readonly \"steps\": readonly (Step)[]; readonly \"guards\": readonly (Guard)[]; readonly \"bindings\": readonly (RuntimeBinding)[]; readonly \"transfers\": readonly (Transfer)[]; readonly \"inputs\": readonly (({ readonly \"inputId\": string; readonly \"stepId\": string; readonly \"kind\": \"destination\" | \"nonsecretText\"; readonly \"intendedSlot\": \"navigate.destination\" | \"fill.value\" | \"selectOption.value\" | \"assert.expected\"; readonly \"value\": string; }) | ({ readonly \"inputId\": string; readonly \"stepId\": string; readonly \"kind\": \"secretRef\"; readonly \"intendedSlot\": \"fill.value\"; readonly \"referenceName\": string; }))[]; readonly \"secrets\": Readonly<Record<string, string>>; readonly \"secretOrigins\": Readonly<Record<string, readonly (string)[]>>; }",
+  "childEntry": "studio-runner/src/executor/observedReplay.ts validateObservedExecute(raw,scope) calls validateObservedReplayGraph(m,scope)",
+  "childCheck": "Every binding must join actual read operation, recipe, origin and guard, and currently requires m.transfers.some(bindingId). Execute3 binding has no admission provenance/base/program/incremental metadata.",
+  "artifactProof": "Full basis helper effectiveGraph verifies exact successful retained imported producer, original base recipe/origin/coordinate, current availability and retained admission; deriveSnapshotMaps independently verifies immutable base revision/artifact digest and expected prefix program.",
+  "heldDelta": "Optional retainedZeroConsumerBindings set currently used only at validated artifact structure call. No IPC fields or flag added. Child remains strict.",
+  "optionsForAria": [
+    "Existing trusted host+child validation composition with exact documented projection of proven zero consumer binding, if existing Execute3 immutable operation graph suffices after artifact admission. Explain how model or forged execute orphan remains refused.",
+    "Closed schema extension transporting hash-bound existing retained/base provenance and independently checking its joins at child. Requires C-int ownership and generator. No unrestricted trust boolean."
+  ],
+  "existingObligations": [
+    "IncrementalPublicationIT.deletedLastConsumerRetainsProvenPrefixRead",
+    "IncrementalPublicationIT.excludedBindingConsumerRetainsRawIntentAndPublishesLiteralReplacement",
+    "IncrementalGraphProjectionTest.zeroConsumerRequiresRetainedActualProducer",
+    "OBS007 ordinary replay model-free execution of finalized merged artifact"
+  ],
+  "authority": "Root directed HOLD only this child transport delta while other owned source work continues. No application/native claim."
+}

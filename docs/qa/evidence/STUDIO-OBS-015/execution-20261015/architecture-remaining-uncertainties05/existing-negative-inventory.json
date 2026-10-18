@@ -1,0 +1,487 @@
+{
+  "artifact": "Exact source pointers of existing snapshot negative cases; no vector generation or execution",
+  "fixtureSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+  "rows": [
+    {
+      "name": "missing-snapshot-evidence",
+      "fixturePointer": "/snapshotCorrection/negatives/0",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "null-base-for-nonempty-original-prefix",
+      "fixturePointer": "/snapshotCorrection/negatives/1",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "foreign-base-id",
+      "fixturePointer": "/snapshotCorrection/negatives/2",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/revision/id"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "foreign-test-base-identity",
+      "fixturePointer": "/snapshotCorrection/negatives/3",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/revision/identity/testId"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "forged-base-revision-digest",
+      "fixturePointer": "/snapshotCorrection/negatives/4",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/pinnedBase/revisionDigest"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "forged-base-artifact-hash",
+      "fixturePointer": "/snapshotCorrection/negatives/5",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/revision/identity/artifactHash"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "claimed-map-not-recomputed",
+      "fixturePointer": "/snapshotCorrection/negatives/6",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/artifact/learnedPlan/stepSnapshotHashes/00000000-0000-4000-8000-000000000001",
+        "/snapshotEvidence/baseProof/revision/stepSnapshotHashes/00000000-0000-4000-8000-000000000001"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "changed-base-context-retains-old-snapshot",
+      "fixturePointer": "/snapshotCorrection/negatives/7",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/authoringIdentity/authoring/steps/0/context/entries/0"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "source-text-does-not-match-basis",
+      "fixturePointer": "/snapshotCorrection/negatives/8",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoring/steps/0/text"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "duplicate-reference-declaration",
+      "fixturePointer": "/snapshotCorrection/negatives/9",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoredDeclarations/1"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "missing-referenced-plain-identity",
+      "fixturePointer": "/snapshotCorrection/negatives/10",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoredDeclarations/0"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "private-resolved-value-in-declaration",
+      "fixturePointer": "/snapshotCorrection/negatives/11",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoredDeclarations/0/value"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "noncontiguous-original-prefix-program",
+      "fixturePointer": "/snapshotCorrection/negatives/12",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/incrementalEvidence/program/sourceStepIds/0",
+        "/incrementalEvidence/program/sourceStepIds/1"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "program-action-not-from-base",
+      "fixturePointer": "/snapshotCorrection/negatives/13",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/incrementalEvidence/program/actions/0/operation/destinationInputId"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "current-prefix-context-cannot-be-reused",
+      "fixturePointer": "/snapshotCorrection/negatives/14",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoring/steps/0/context/entries/0"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "base-authoring-identity-version-absent",
+      "fixturePointer": "/snapshotCorrection/negatives/15",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/authoringIdentity/authoringIdentityVersion"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "missing-current-global-context",
+      "fixturePointer": "/snapshotCorrection/negatives/16",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoring/globalContext"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "missing-step-evidence-reference-array",
+      "fixturePointer": "/snapshotCorrection/negatives/17",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoring/steps/0/context/evidenceReferences"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "claimed-current-step-input-is-forbidden",
+      "fixturePointer": "/snapshotCorrection/negatives/18",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/stepInput"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "recursive-past-basis-is-forbidden",
+      "fixturePointer": "/snapshotCorrection/negatives/19",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/previousBasis"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "raw-configuration-values-in-current-evidence",
+      "fixturePointer": "/snapshotCorrection/negatives/20",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/configurationValues"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "extra-snapshot-evidence-field",
+      "fixturePointer": "/snapshotCorrection/negatives/21",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/extra"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "missing-required-base-proof-null",
+      "fixturePointer": "/snapshotCorrection/negatives/22",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "immutable-original-source-cannot-be-replaced",
+      "fixturePointer": "/snapshotCorrection/negatives/23",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoring/steps/2/context/entries/1/value"
+      ],
+      "javaLocalNegativeSelectorPresent": false,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "private-plain-hash-must-match-before-freeze",
+      "fixturePointer": "/snapshotCorrection/negatives/24",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [],
+      "javaLocalNegativeSelectorPresent": false,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "immutable-source-manifest-hash-is-exact",
+      "fixturePointer": "/snapshotCorrection/negatives/25",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/sourceManifestHash"
+      ],
+      "javaLocalNegativeSelectorPresent": false,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "candidate-snapshot-map-cannot-be-copied-even-if-resealed",
+      "fixturePointer": "/snapshotCorrection/negatives/26",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [],
+      "javaLocalNegativeSelectorPresent": false,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "candidate-gap-in-reused-prefix",
+      "fixturePointer": "/snapshotCorrection/negatives/27",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [],
+      "javaLocalNegativeSelectorPresent": false,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "candidate-older-same-test-revision-id",
+      "fixturePointer": "/snapshotCorrection/negatives/28",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [],
+      "javaLocalNegativeSelectorPresent": false,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "candidate-suffix-reuse-is-forbidden",
+      "fixturePointer": "/snapshotCorrection/negatives/29",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [],
+      "javaLocalNegativeSelectorPresent": false,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "base-operation-equivalence-is-recomputed",
+      "fixturePointer": "/snapshotCorrection/negatives/30",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/incrementalEvidence/plan/prefixProgramHash",
+        "/incrementalEvidence/program/baseRevisionDigest",
+        "/snapshotEvidence/baseProof/revision/identity/operationEquivalenceHash",
+        "/snapshotEvidence/baseProof/revision/revisionDigest",
+        "/snapshotEvidence/pinnedBase/revisionDigest"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "base-claimed-map-resealed-still-not-source-derived",
+      "fixturePointer": "/snapshotCorrection/negatives/31",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/incrementalEvidence/plan/prefixProgramHash",
+        "/incrementalEvidence/program/baseRevisionDigest",
+        "/snapshotEvidence/baseProof/artifact/learnedPlan/stepSnapshotHashes/00000000-0000-4000-8000-000000000001",
+        "/snapshotEvidence/baseProof/artifact/learnedPlanHash",
+        "/snapshotEvidence/baseProof/artifact/replayPolicy/learnedPlanHash",
+        "/snapshotEvidence/baseProof/revision/identity/artifactHash",
+        "/snapshotEvidence/baseProof/revision/identity/learnedPlanHash",
+        "/snapshotEvidence/baseProof/revision/identity/referencePolicyHash",
+        "/snapshotEvidence/baseProof/revision/revisionDigest",
+        "/snapshotEvidence/baseProof/revision/stepSnapshotHashes/00000000-0000-4000-8000-000000000001",
+        "/snapshotEvidence/pinnedBase/revisionDigest"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "original-immediate-base-authority-cannot-be-repinned",
+      "fixturePointer": "/snapshotCorrection/negatives/32",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/incrementalEvidence/plan/baseRevisionId",
+        "/incrementalEvidence/plan/prefixProgramHash",
+        "/incrementalEvidence/program/baseRevisionId",
+        "/incrementalEvidence/switch/baseRevisionId",
+        "/snapshotEvidence/baseProof/revision/id",
+        "/snapshotEvidence/pinnedBase/revisionId"
+      ],
+      "javaLocalNegativeSelectorPresent": false,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "empty-prefix-must-not-require-or-supply-old-proof",
+      "fixturePointer": "/snapshotCorrection/negatives/33",
+      "comparisonControl": "/snapshotCorrection/positives/2",
+      "controlName": "empty-prefix-incomplete-base",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "nonempty-original-prefix-cannot-null-proof-after-drift-at-one",
+      "fixturePointer": "/snapshotCorrection/negatives/34",
+      "comparisonControl": "/snapshotCorrection/positives/4",
+      "controlName": "drift-at-first-step-retains-original-base-proof",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof"
+      ],
+      "javaLocalNegativeSelectorPresent": true,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    },
+    {
+      "name": "immutable-current-configuration-cannot-change",
+      "fixturePointer": "/snapshotCorrection/negatives/35",
+      "comparisonControl": "/snapshotCorrection/positives/1",
+      "controlName": "boundary",
+      "changedBasisPointers": [
+        "/configuration/viewport/width",
+        "/configurationHash"
+      ],
+      "javaLocalNegativeSelectorPresent": false,
+      "tsDirectDerivationLoopPresent": true,
+      "executionCredit": false,
+      "limitation": "TS direct derivation loop does not establish rejection of candidate-only/private-authority mutations; retain Quinn routing."
+    }
+  ],
+  "sourceTimeBoundary": "tsDirectDerivationLoopPresent records initial source capture only, superseded by closing-source-notes.json; exact fixture pointers/diffs remain unchanged."
+}

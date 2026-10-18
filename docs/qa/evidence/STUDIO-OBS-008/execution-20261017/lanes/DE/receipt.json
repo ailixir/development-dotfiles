@@ -1,0 +1,645 @@
+{
+  "lane": "DE",
+  "story": "STUDIO-OBS-008",
+  "wave": "W1",
+  "agent": "aiox-data-engineer (Dara)",
+  "date": "2026-10-17",
+  "status": "RED_IN_WIDENED_RUN_EXIT_NOT_WRITTEN",
+  "exitMarkerWritten": false,
+  "exitCriteria": {
+    "v22MigratesAtHead": {
+      "met": true,
+      "evidence": "freshAndUpgradedDatabasesReachV22WithNothingPending; head pins at 22 green"
+    },
+    "checkAdmitsExactlyThreeShapes": {
+      "met": true,
+      "evidence": "1008-insert matrix: NONE 2, LOGIN_REQUIRED 24, TARGET_DRIFT 12 accepted; all others 23514 naming the constraint; NULL-code trap refused"
+    },
+    "futurePartitionInheritsColumns": {
+      "met": true,
+      "evidence": "PartitionManager.ensurePartitions creates now+2 month: 4 columns, CHECK inherited (conislocal=false, coninhcount=1, validated), DEFAULT row moved intact"
+    },
+    "noHeadPinTestLeftAt21": {
+      "met": true,
+      "evidence": "all pins edited; GuidedSecretLoginMigrationTest 23/23 green at head 22 (obs008-db-v22-04); LegacyV20ConfirmedBaseFixture:802 edited but NOT exercised (callers fail earlier in R3 cascade)"
+    },
+    "lockNotValidAnalysisRecorded": {
+      "met": true,
+      "evidence": "receipt.md section 3; measured by IT and scratch run"
+    }
+  },
+  "environment": {
+    "node": "v24.20.0 (N24 PATH)",
+    "postgres": "postgres:15-alpine (Testcontainers); scratch 15.19",
+    "collector": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/run-backend-tasked.py via with-gradle-lock.py, --no-daemon",
+    "collectorFixInEffect": true
+  },
+  "files": {
+    "backend/src/main/resources/db/migration/V22__execution_replay_failure.sql": {
+      "sha256": "29437d3bda6479fafdbdad0fc3d53e0a1bcbd8c4ed3bf23fe144e18cc0259cef",
+      "change": "new"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/ExecutionReplayFailureMigrationIT.java": {
+      "sha256": "0e6ea19ca102f3d3e04636bc67ac384013c845be688d39e47aaeff4c740cb3d8",
+      "change": "new, 9 cases"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java": {
+      "sha256Before": "59d501b33c96e4050549ed0ad628bee6e73e7054bb2b1eb185096fdcb4df50c6",
+      "sha256After": "14f748837bfd3f16c8c01c86574f80b0b72d5a3f1840c62e6f20623a847b4c42",
+      "change": "line 100 \"21\"->\"22\"; description list +\"22:execution replay failure\" (deviation D1) \u2014 accepted by root"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/ErrorCodeConstraintMigrationIT.java": {
+      "sha256Before": "003ce9a0807d8e062ca0e97bf8daf2f5025b4ad3ed624be99c40c2ab4c3913d6",
+      "sha256After": "b5cd9de77ce742e0dc114ac9045040fb72fa464066552e2634763d35943d511d",
+      "change": "line 73 HEAD=\"22\""
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedGovernanceMigrationIT.java": {
+      "sha256Before": "f5842d165e12afcc0684c47469076b123e7bbbb487a95e792456c5b6a0a5ce56",
+      "sha256After": "61b7be0f8f823cb27f6dd691252150177d2ea743575419a860cf75a350362977",
+      "change": "line 974 \"22\""
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedRecordingMigrationIT.java": {
+      "sha256Before": "26f607b782fe90c45079e66b0d1fcc3c83ab055df87b6dab6fc73411bb1695b5",
+      "sha256After": "de700c477b570b0ba0b95fbd500610016b34a855f77e53423c08a50c2fe22678",
+      "change": "line 53 \"22\""
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java": {
+      "sha256Before": "e4f19fcf54556517447815af750a75e786cac0a376803347606d06b58fa3ea64",
+      "sha256After": "dfbb264f4a061a1afcf5be59a940905ebde558d2da79783979d458a744049637",
+      "change": "lines 962, 969 \"22\"; V21 description assertion unchanged"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java": {
+      "sha256Before": "592948cea23e5940fac9db44d7f16b03ea6def9aa162c89892f4962e724f4a2f",
+      "sha256After": "9b8b38e4bd7bb2c04d8a222e3baa228bd0a4b622028bc8250227a01d05fc0abd",
+      "change": "line 1337 append \"22\""
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java": {
+      "sha256Before": "659853de0ec6be586f002a9c20231738dede4abc861f667d09b9d13b685693cc",
+      "sha256After": "46e7d47b002c54f40853ff57fd99eb3524addaed125e2b81415709d8eb53b923",
+      "change": "root-authorized: line 298 isEqualTo(22); line 301 version::int > 22"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java": {
+      "sha256Before": "03d5e84aacd91b1bbab5c04006ceb72d63215a5c3671c99f0b024efab4cf3d54",
+      "sha256After": "0f60fabce9dab238203682de49a031a8ec103e4ac18b1694375059f20ab312df",
+      "change": "root-authorized: line 802 isEqualTo(22)"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java": {
+      "sha256Before": "a0ab8e7e0196a51bab73f8ab4d91ea4ffff9b7ab7c7f3bdc46523dd851aad8c1",
+      "sha256After": "2bcc012036cb9af841cfe5da7261142a288836dc3997ad3a196847fc6adac34a",
+      "change": "root-authorized: line 379 .target(\"22\"), comment unchanged"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java": {
+      "sha256Before": "f21c9266afc92ff95072e4d7c7a0047e5c4db6bc9037ff398bd34cd037e37158",
+      "sha256After": "3760127c09c6e92609aef0e7659109fdf191191645119eb2ba0d23730eb63ec5",
+      "change": "root-authorized: line 471 .target(\"22\")"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": {
+      "sha256Before": "47c18e4f652379d31e100cd84bada6fa1ca0e1be19e46fabde6a24e21e508676",
+      "sha256After": "8cbc02074b7a2eb42722dedd56005b61e0b3cae4d6ce74cc2695485a3e3583f6",
+      "change": "root-authorized: line 159 .target(\"22\")"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": {
+      "sha256Before": "4c5236fd7056c292e9b9225340321282beed6589c5165ef02e8e97080613fa6a",
+      "sha256After": "21c0689d764206778641d3b347b33a0ca661f3d4fcab762c540076a36e81603c",
+      "change": "root-authorized: line 125 .target(\"22\")"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java": {
+      "sha256Before": "1a402fb857d93ce17c7335eea2af4524a3d73f2d6161c9e65c1bae3e991cc52d",
+      "sha256After": "22f144a5fc26f2349bbddae65661e2df6a731251caa82cb6b248e430c806e0c2",
+      "change": "root-authorized: line 130 .target(\"22\")"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java": {
+      "sha256Before": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+      "sha256After": "d1a3609e77764523f7cab46c8922185f8147ea546e519800d65a2938f066625e",
+      "change": "root-authorized: line 3663 .target(\"22\")"
+    }
+  },
+  "ddl": {
+    "table": "ui_test_executions (range-partitioned parent; recurses to 2026_05, 2026_06, 2026_07, default)",
+    "columns": [
+      "replay_failure_code text NULL",
+      "replay_failure_step_id text NULL",
+      "replay_failure_step_index integer NULL",
+      "replay_failure_login_steps_present boolean NULL"
+    ],
+    "constraint": "ck_ui_test_executions_replay_failure CHECK, added NOT VALID then VALIDATE in the same file",
+    "shapes": [
+      "all four NULL",
+      "LOGIN_REQUIRED + char_length(step_id) 1..256 + step_index>=0 + login NOT NULL",
+      "TARGET_DRIFT + char_length(step_id) 1..256 + step_index>=0 + login NULL"
+    ],
+    "backfill": "none",
+    "triggers": "none added",
+    "rls": "not applicable (no RLS in schema)",
+    "rollback": "no down migration; recreate and migrate to V21 or restore pg_dump taken before V22"
+  },
+  "lockAnalysis": {
+    "addColumn": "ACCESS EXCLUSIVE on parent and every partition until COMMIT; catalog only, 0 scans (verified)",
+    "addConstraintNotValid": "recursive, 0 seq scans per leaf (verified via pg_stat_xact_user_tables)",
+    "validate": "SHARE UPDATE EXCLUSIVE plus held ACCESS EXCLUSIVE; exactly 1 seq scan per leaf, parent not scanned (verified)",
+    "conclusion": "single Flyway transaction: the NOT VALID split does not shorten the blocking window; window = catalog time + one heap scan of execution history; VALIDATE cannot fail on data",
+    "scanCost": "inferred, not measured at production size"
+  },
+  "runs": [
+    {
+      "label": "obs008-db-v22-01",
+      "tests": "verify row + ErrorCodeVocabularyTest",
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-db-v22-01-results.json",
+      "resultsSha256": "330d1ea11430f9c3e3de8f23d27899d4f7af65fc7903a9e1d6b9df63a2d964bd",
+      "logPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-db-v22-01.log",
+      "counts": {
+        "total": 130,
+        "passed": 130,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "gradleExit": 0,
+      "wrapperExit": 2,
+      "sourceStable": false,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "started": "2026-10-17T19:39:09.108277+00:00",
+      "perClassPass": {
+        "ExecutionReplayFailureMigrationIT": 9,
+        "InferenceMigrationLatestIT": 9,
+        "ErrorCodeConstraintMigrationIT": 5,
+        "guided.GuidedGovernanceMigrationIT": 26,
+        "guided.GuidedRecordingMigrationIT": 8,
+        "guided.GuidedReplayingPrefixMigrationIT": 55,
+        "guided.publication.GuidedPublicationMigrationTest": 12,
+        "ErrorCodeVocabularyTest": 6
+      },
+      "changedDuringRun": [
+        "frontend/e2e/zz-mutation-scratch.spec.ts (removed)",
+        "frontend/e2e/zz-probe-sw.js (removed)"
+      ]
+    },
+    {
+      "label": "obs008-db-v22-02",
+      "tests": "probe: extra head pin GuidedSecretLoginMigrationTest.freshInstallReachesHeadWithoutCutoverAndKeepsOrdinaryCapability (expected red)",
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-db-v22-02-results.json",
+      "resultsSha256": "0bb5541d6f74e6621bbdd791528002dfe5fe748446e8bd117b19524440ed1954",
+      "logPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-db-v22-02.log",
+      "counts": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "gradleExit": 1,
+      "wrapperExit": 1,
+      "sourceStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "started": "2026-10-17T19:40:45.990885+00:00",
+      "failure": "expected: 21 but was: 22"
+    },
+    {
+      "label": "obs008-db-v22-03",
+      "tests": "verify row + ErrorCodeVocabularyTest (repeat)",
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-db-v22-03-results.json",
+      "resultsSha256": "879d8bb0dd153f8777b88ad3cefce376092aab8dc0b2e0b49e19d820980a9920",
+      "logPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-db-v22-03.log",
+      "counts": {
+        "total": 130,
+        "passed": 130,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "gradleExit": 0,
+      "wrapperExit": 2,
+      "sourceStable": false,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "started": "2026-10-17T19:41:18.605536+00:00",
+      "perClassPass": {
+        "ExecutionReplayFailureMigrationIT": 9,
+        "InferenceMigrationLatestIT": 9,
+        "ErrorCodeConstraintMigrationIT": 5,
+        "guided.GuidedGovernanceMigrationIT": 26,
+        "guided.GuidedRecordingMigrationIT": 8,
+        "guided.GuidedReplayingPrefixMigrationIT": 55,
+        "guided.publication.GuidedPublicationMigrationTest": 12,
+        "ErrorCodeVocabularyTest": 6
+      },
+      "changedDuringRun": [
+        "frontend/src/services/api/studioAuthoringTransport.ts",
+        "frontend/src/services/mocks/studio/authoringState.ts",
+        "frontend/src/types/studio/studioTypes.ts"
+      ]
+    },
+    {
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-db-v22-04-results.json",
+      "resultsSha256": "af3b4d90bd50a3937f9e57eb53df90de4622087d89aa911df83e7adb14ade281",
+      "logPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-db-v22-04.log",
+      "logSha256": "4c85bbc57dade8544fb286e71f1db9e3b36cbe3f3ee7fab742fb580cb434dff3",
+      "counts": {
+        "total": 284,
+        "passed": 156,
+        "failed": 128,
+        "errors": 0,
+        "skipped": 0
+      },
+      "gradleExit": 1,
+      "wrapperExit": 1,
+      "sourceStable": false,
+      "distStable": true,
+      "taskCollectionErrors": [
+        {
+          "task": "test",
+          "reason": "MISSING_FRESH_COHORT_FILE",
+          "file": "audit-final.json"
+        }
+      ],
+      "started": "2026-10-17T19:45:48.581570+00:00",
+      "perClass": {
+        "com.citi.put.checks.studio.ErrorCodeConstraintMigrationIT": {
+          "pass": 5,
+          "fail": 0,
+          "failing": []
+        },
+        "com.citi.put.checks.studio.ErrorCodeVocabularyTest": {
+          "pass": 6,
+          "fail": 0,
+          "failing": []
+        },
+        "com.citi.put.checks.studio.ExecutionReplayFailureMigrationIT": {
+          "pass": 9,
+          "fail": 0,
+          "failing": []
+        },
+        "com.citi.put.checks.studio.InferenceMigrationLatestIT": {
+          "pass": 9,
+          "fail": 0,
+          "failing": []
+        },
+        "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT": {
+          "pass": 26,
+          "fail": 0,
+          "failing": []
+        },
+        "com.citi.put.checks.studio.guided.GuidedRecordingMigrationIT": {
+          "pass": 8,
+          "fail": 0,
+          "failing": []
+        },
+        "com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT": {
+          "pass": 55,
+          "fail": 0,
+          "failing": []
+        },
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest": {
+          "pass": 12,
+          "fail": 0,
+          "failing": []
+        },
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT": {
+          "pass": 0,
+          "fail": 47,
+          "failing": [
+            "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork()",
+            "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper()",
+            "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead()",
+            "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead()",
+            "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds()",
+            "actualCoreGuidedSameSecretIdStaysWithinPersistedScope()",
+            "actualCoreMayUseDenialStartsNoSessionAndNoBrowser()",
+            "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds()",
+            "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope()",
+            "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead()",
+            "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion()",
+            "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending()",
+            "actualGuidedRegistrationPassingAssertRemainsPassed()",
+            "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks()",
+            "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure()",
+            "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead()",
+            "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch()",
+            "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead()",
+            "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache()",
+            "actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay()",
+            "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()",
+            "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending()",
+            "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue()",
+            "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect()",
+            "actualPublishedPublicCancelWhileNativePasswordWorldPending()",
+            "actualPublishedRegistrationPassingAssertRemainsPassed()",
+            "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection()",
+            "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution()",
+            "actualPublishedWrongPasswordAnnotatesEarlierSecretFill()",
+            "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution()",
+            "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue()",
+            "actualSecretControlWindowLossBeforeReadyReachesTerminalError()",
+            "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+            "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays()",
+            "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass()",
+            "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness()",
+            "executionError",
+            "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes()",
+            "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof()",
+            "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent()",
+            "incrementalSecretPrefixPreservesEveryVaultFaultOracle()",
+            "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck()",
+            "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance()",
+            "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays()",
+            "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall()",
+            "queuedAndPreReadyRefusals()",
+            "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls()"
+          ]
+        },
+        "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest": {
+          "pass": 23,
+          "fail": 0,
+          "failing": []
+        },
+        "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT": {
+          "pass": 1,
+          "fail": 39,
+          "failing": [
+            "[1] mode=COMPLETE_200_NO_CALLBACK",
+            "[2] mode=COMPLETE_200_OWNER_OK",
+            "[3] mode=COMPLETE_200_OWNER_FAILED",
+            "[4] mode=COMPLETE_503_NO_CALLBACK",
+            "[5] mode=COMPLETE_503_OWNER_OK",
+            "[6] mode=PARTIAL_200_NO_EOF",
+            "[7] mode=PARTIAL_503_NO_EOF",
+            "[8] mode=CALLER_EXPIRY_AFTER_CONSUME",
+            "[9] mode=INTERRUPT_AFTER_HEADERS",
+            "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost()",
+            "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost()",
+            "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased()",
+            "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent()",
+            "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork()",
+            "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose()",
+            "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose()",
+            "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose()",
+            "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation()",
+            "composedClaimRevocationCommitsBeforeRefusalAndOriginalStop()",
+            "concurrentAfterCompletionAndSweepSendOneStopAtATime()",
+            "consumingVerificationStaysRefusedWhilePending()",
+            "executionError",
+            "expiredTeardownConfirmsOnImmediateResendAfterAckTimeout()",
+            "expiredTeardownConfirmsOnSweepAfterResendsExhausted()",
+            "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit()",
+            "legacyPendingWithoutRequestIsNotRedriven()",
+            "lifecycleAtAnyOtherIdentityIsRefusedWhilePending()",
+            "lifecycleAtLastAcknowledgedIdentityEndsSession()",
+            "lifecycleAtPendingAppendIdentityEndsSessionAndChangesNothing()",
+            "lifecycleWithoutPendingDeliveryIsExactlyVerify()",
+            "noPendingDeliveryKeepsIdentityTarget()",
+            "pendingAppendDeliveryTeardownTargetsTheAssignment()",
+            "pendingAppendPublicationConflictTargetsTheAssignment()",
+            "permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback()",
+            "publicationConflictTeardownIsRedrivenAfterResendsExhausted()",
+            "publicationConflictTeardownTargetsTheAssignmentAndConfirms()",
+            "publicationConflictedIsIdempotentAndFailsClosed()",
+            "stopWithoutAStopTargetRecordsNoPendingTeardown()",
+            "teardownWithoutAckNeverConfirmsAndStopsAfterWindow()"
+          ]
+        },
+        "com.citi.put.checks.studio.guided.session.GuidedSessionIT": {
+          "pass": 2,
+          "fail": 42,
+          "failing": [
+            "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping()",
+            "accessIsolationRechecksPrincipalCsiAccountAndScope()",
+            "actionBudgetAndFalseAssertionReportsFailClosed()",
+            "atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit()",
+            "atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot()",
+            "atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand()",
+            "atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate()",
+            "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence()",
+            "clarificationIsBoundToGenerationChoiceAndOriginalDeadline()",
+            "clarificationSelectionAndPauseChangeRollBackTogether()",
+            "completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack()",
+            "concurrentConflictingStartsHaveOneWinner()",
+            "concurrentIdenticalStartsAndChangedDigestAreDurable()",
+            "conflictingAdmissionAndUniqueCoordinatesFail()",
+            "contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal()",
+            "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch()",
+            "entireSessionBudgetsAreReservedAndMissingUsageIsConservative()",
+            "evidenceReferencesAreScopedAndDoNotClaimReplay()",
+            "expiryCannotBeExtendedAndTrustedReaperRevokes()",
+            "gatewayOverrunIsDurablyChargedAndStopsFurtherWork()",
+            "liveOwnerRenewalPreservesAdmittedAndDispatchedActions()",
+            "lostAckNeverRetriesAndDelayedCallbackCannotRevive()",
+            "noStateCanPublishWithoutExactVerifier()",
+            "observationBudgetAndGenerationAreSharedAcrossActions()",
+            "observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults()",
+            "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent()",
+            "outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite()",
+            "preparedObservationFailureKeepsOwnerMaterializationRefreshAndDuplicatePriority()",
+            "preparedObservationOwnsTheWholeEnvelopeBeforeCallerMutation()",
+            "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery()",
+            "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer()",
+            "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge()",
+            "sameCallbackContextSuccessStillReadsAllRowsAndDefaultsStayStrict()",
+            "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState()",
+            "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed()",
+            "successfulLedgerStillCannotPublishWithoutExactPlanVerifier()",
+            "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown()",
+            "takeoverCannotReopenFinalizingAfterExecutedEffects()",
+            "theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash()",
+            "unavailableObservationPreparationFallsBackAndFatalRemainsEarly()",
+            "unsupportedObservationEnvelopeUsesOriginalLockedValidation()",
+            "workerSubjectFenceAndLeaseAreIndependent()"
+          ]
+        }
+      },
+      "label": "obs008-db-v22-04",
+      "tests": "root widened list (16 --tests; 4 names matched nothing: wrong package)",
+      "changedDuringRun": [
+        "frontend/e2e/start-servers.mjs",
+        "frontend/src/pages/ChecksStudioPage/pageAuthoringUx.test.tsx",
+        "frontend/src/services/mocks/studio/studioContract.test.ts"
+      ]
+    },
+    {
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-db-v22-05-results.json",
+      "resultsSha256": "a3e652a36725eeadb49e198e6d2201039e7ed950dd134570d661d61a1b370c8b",
+      "logPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-db-v22-05.log",
+      "logSha256": "72c3529a91af8a1caec7b1091492d881c9df374c385edddc82c4d13183024f4d",
+      "counts": {
+        "total": 86,
+        "passed": 0,
+        "failed": 86,
+        "errors": 0,
+        "skipped": 0
+      },
+      "gradleExit": 1,
+      "wrapperExit": 1,
+      "sourceStable": false,
+      "distStable": true,
+      "taskCollectionErrors": [],
+      "started": "2026-10-17T19:51:24.269291+00:00",
+      "perClass": {
+        "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest": {
+          "pass": 0,
+          "fail": 9,
+          "failing": [
+            "actualAuthenticatedRawBytesRejectAmbiguityAndUnknownSignedClaims()",
+            "actualRunnerResponseBoundaryRejectsMalformedUtf8DuplicatesTrailingAndTimestampProfiles()",
+            "actualServiceTransportRejectsWrongAudienceSubjectFenceAndTuple()",
+            "assignmentRenewsBeforeContextAndCancellationReleasesItsOnlyCapacitySlot()",
+            "callbackAcceptsValidUnicodeSessionLargerThan64KiB()",
+            "invalidAcknowledgedClaimNeverLaunchesAndUnassignedOrWrongWorkersCannotClaim()",
+            "legacyClarificationAnswerCannotResumeObservedV2Session()",
+            "maximumFenceCanBeRenewedBySameOwnerWithoutAnotherAcquisition()",
+            "stopRetryAfterCloseCompletesConfirmsWithSameKey()"
+          ]
+        },
+        "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT": {
+          "pass": 0,
+          "fail": 16,
+          "failing": [
+            "actualApplicationReplacementAfterPrepareNeverActsOnReplacement()",
+            "actualDeferredCommitFailureSendsNothingAndRollsBackConsumption()",
+            "authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly()",
+            "cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation()",
+            "committedObservationRecoversLostHttpResponseWithoutAnotherCollection()",
+            "concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission()",
+            "concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration()",
+            "concurrentSameAndNewKeysHaveOneRealDispatch()",
+            "currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased()",
+            "lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction()",
+            "lateRenewalResponseAfterStopCannotReviveContextOrOwnership()",
+            "nestedRollbackAndLostWinnerNeverManufactureSendAuthority()",
+            "producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay()",
+            "realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch()",
+            "realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue()",
+            "refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation()"
+          ]
+        },
+        "com.citi.put.checks.studio.guided.session.GuidedDefaultModelReservationIT": {
+          "pass": 0,
+          "fail": 4,
+          "failing": [
+            "duplicateRequestIdentityCannotChargeOrSendTwiceAndChangedCeilingRefuses()",
+            "realDefaultsSevenKnownUsageReservationsRefuseEighthBeforeProvider()",
+            "realDefaultsUnknownUsageKeepsCeilingsAndRefusesEighth()",
+            "rollbackAndLateUsageCannotLeavePartialReservationOrReviveBudgetStop()"
+          ]
+        },
+        "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest": {
+          "pass": 0,
+          "fail": 57,
+          "failing": [
+            "[1] afterEffect=false",
+            "[1] boundary=entry",
+            "[1] capacity=input",
+            "[1] choice=0",
+            "[1] chosenIndex=0",
+            "[1] control=button",
+            "[1] control=unlabelled-button",
+            "[1] label=Save",
+            "[1] mutation=operation",
+            "[1] point=plan",
+            "[1] timing=before, loseResponse=false",
+            "[2] afterEffect=true",
+            "[2] boundary=reservation",
+            "[2] capacity=output",
+            "[2] choice=1",
+            "[2] chosenIndex=1",
+            "[2] control=input",
+            "[2] control=unlabelled-input",
+            "[2] label=Delete",
+            "[2] mutation=target",
+            "[2] point=materialized",
+            "[2] timing=after, loseResponse=false",
+            "[3] boundary=repair",
+            "[3] capacity=proposals",
+            "[3] control=form-attribute",
+            "[3] mutation=value",
+            "[3] point=allocation",
+            "[3] timing=before, loseResponse=true",
+            "[4] mutation=assertion",
+            "[4] point=next",
+            "[4] timing=after, loseResponse=true",
+            "[5] point=lost-context-response",
+            "[6] point=prior-bootstrap",
+            "aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue()",
+            "aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried()",
+            "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch()",
+            "aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch()",
+            "aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch()",
+            "aTimedOutBootstrapContextStillRetriesAndExhaustsAfterThreeDeliveries()",
+            "acknowledgedOlderSnapshotCannotMarkChangedAllocationsReady()",
+            "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence()",
+            "anAuthoredDeleteStillFailsTheGovernedDenyStance()",
+            "bootstrapOnlyResumeChecksPinsAndDirectProposalsRecoverBeforeInference()",
+            "chosenSourceCannotBeAppendedUnusedWhileTheRejectedDestinationIsUsed()",
+            "contextMetadataRetryLimitStopsWithoutAnotherBrowserOrModelCall()",
+            "futureNonzeroSourceQuestionCannotBeRedefinedByChangingItsOperation()",
+            "governedClarifyFirstAsksOnceBeforeAnUnlabelledFormSubmit()",
+            "governedClarifyFirstAsksOnceBeforeTheFormSubmitAndConfirmingContinues()",
+            "lateKnownOverageStopsActiveSessionBeforeAnotherProviderSend()",
+            "malformedProviderReplyRepairsThroughDurableChargedAttemptsWithoutEcho()",
+            "optionalChargedVerificationCannotOverrideMissingExecution()",
+            "pinRefusalAfterLockedLateAccountingPreservesTheDeltaAndStop()",
+            "reportedThoughtOutputOverageStopsBeforeMaterializationDespiteSmallVisibleOutput()",
+            "sourceChangeDuringProviderCallCannotRestampAndLateUsageRetainsReservation()",
+            "terminalCancellationAcceptsLateAccountingWithoutRevivingAuthority()",
+            "thoughtAndToolUsageOnStaleReplyRemainInImmutableLateAudit()",
+            "typedUnsupportedOutcomeStopsWithoutInventingAnAction()"
+          ]
+        }
+      },
+      "label": "obs008-db-v22-05",
+      "tests": "the 4 classes with corrected package com.citi.put.checks.studio.guided.session",
+      "changedDuringRun": [
+        "frontend/src/services/mocks/studio/executionFixtures.ts",
+        "frontend/src/types/studio/studioTypes.ts"
+      ]
+    }
+  ],
+  "grepClassification": [
+    {
+      "hit": "ExecutionReplayFailureMigrationIT.java:111 flyway(upgradeUrl,\"21\")",
+      "class": "V21-specific (upgrade source)"
+    },
+    {
+      "hit": "ExecutionReplayFailureMigrationIT.java:466 isEqualTo(\"21\")",
+      "class": "V21-specific (lock measurement rolled back)"
+    },
+    {
+      "hit": "GuidedPublicationMigrationTest.java:1265 isEqualTo(21)",
+      "class": "not a version (probe row count)"
+    },
+    {
+      "hit": "GuidedPublicationMigrationTest.java:1337",
+      "class": "updated pin, list ends \"22\""
+    },
+    {
+      "hit": "LegacyV20ConfirmedBaseFixture target(\"20\") / count=20 max=20",
+      "class": "V20-specific, unchanged"
+    },
+    {
+      "note": "no other \"21\", isEqualTo(21), > 21 or .target(\"21\") remains in backend/src/test/java"
+    }
+  ],
+  "deviations": [
+    "D1 InferenceMigrationLatestIT description list appended (same assertion as line 100) \u2014 accepted by root",
+    "D2 ErrorCodeVocabularyTest added to verify run",
+    "D3 probe run -02 and scratch container dara-v22-scratch (removed)",
+    "D4 stale V21/V19-V20 method names and javadoc left (line-only scope)",
+    "D5 pre-existing google-java-format deviations in 4 pin files at untouched lines",
+    "D6 DE agent-memory update",
+    "D7 run -05 added: GuidedBridgeIntegrationTest, GuidedBridgePlannedIT, GuidedDefaultModelReservationIT, GuidedPlanningIntegrationTest declare package ...guided.session, so root list FQCNs matched nothing in -04"
+  ],
+  "openQuestions": [
+    "Q1 EXIT withheld per root rule; all reds attributed to ledger R3 (verified for GuidedSessionIT, inferred for six). Root may accept R3 for these 7 classes and write EXIT, or wait for L1-P projector + green re-run",
+    "Q2 LegacyV20ConfirmedBaseFixture:802 unexercised until GuidedPublicationReplayIT passes R3",
+    "Q3 all runs except -02 non-evidentiary under R1 (frontend edits only)"
+  ],
+  "rootAuthorization": "2026-10-17: edit 3 extra head pins + 6 .target bumps; D1 accepted; widened run; EXIT only if everything green",
+  "redAttribution": {
+    "mechanism": "guided session start/view/result fails v3 JSON-schema validation -> GuidedSessionException INVALID_CONTRACT / HTTP 422 (GuidedContracts.validate <- GuidedSessionService.view); cascades in GuidedPublicationReplayIT",
+    "ledger": "R3 (L0 P2/P3: session-view 378ab88d->38dd5ddd, result 7accd138->22ce88ae; required progress/explanation) until L1-P projector",
+    "verified": "GuidedSessionIT: identical 42 FAIL / 2 PASS name sets in L0 run obs008-c-r3-01 (target 21, 19:37:32Z, docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/obs008-c-r3-01-results.json) and obs008-db-v22-04 (target 22)",
+    "inferred": "GuidedServiceTransportFaultIT, GuidedPublicationReplayIT, GuidedBridgeIntegrationTest, GuidedBridgePlannedIT, GuidedDefaultModelReservationIT, GuidedPlanningIntegrationTest: same stacks/422 bodies; no target-21 counterfactual run",
+    "migrationTo22": "succeeded in every bumped class (failures after setup; GuidedSessionIT.migrationPreservesExistingDataAndFreshInstallWorks passes; no missing-column/JPA error)",
+    "notExercised": "LegacyV20ConfirmedBaseFixture:802 (callers historicalIncompleteBase... and actualHttpExplicitFullLearn... fail in beginOwnedSessionTracking cascade guard)"
+  }
+}

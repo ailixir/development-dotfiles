@@ -1,0 +1,17 @@
+{
+ "label": "obs009-b-mut03",
+ "evid": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/execution-20261018/b/mutations",
+ "edits": [
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+   "old": "    if (!appendPending) {\n      return Set.of(head);\n    }\n    require(head >= 2",
+   "new": "    require(head >= 2"
+  }
+ ],
+ "gradle": [
+  "test",
+  "--tests",
+  "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT",
+  "--no-daemon"
+ ]
+}

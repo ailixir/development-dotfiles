@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "story": "STUDIO-OBS-012B",
+  "gate": "ux-design-expert",
+  "reviewer": "Uma (@ux-design-expert)",
+  "date": "2026-10-13",
+  "verdict": "CONCERNS",
+  "verdict_reason": "The run gate, the interim sentence, the learned chip and the never-learned empty state match ADR-SC-005 and the UX panel 2026-10-09 verbatim. There are no high or critical findings. Remaining issues: compile-era copy residue (COPY-001, COPY-003, COPY-004), interim contradictions in the schedule surfaces (COPY-002), and one a11y/affordance gap on the dirty-READY path (UX-A11Y-001). Each has an exact replacement below. None blocks while PO condition C4 holds (no release between 012B and OBS-008).",
+  "method": {
+    "mode": "static review only",
+    "reviewed": "working tree on HEAD 734ad704f (uncommitted 012B changes). Files read: run/runEnablement.ts, run/RunControl.tsx, run/useRunGate.ts (run flow 252-335), run/executeRefusals.ts, tests/testListPresentation.ts, tests/TestRow.tsx, scheduling/schedulePresentation.ts, scheduling/StudioScheduleDialog.tsx, pages/ChecksStudioPage/ChecksStudioPage.tsx (198-199, 884-889, 1127-1141), test/a11y/studioWcagAudit.test.tsx (96-104, 312-349). git diff HEAD for RunControl.tsx was used to separate pre-existing items from 012B changes.",
+    "not_run": "No build, test, axe or browser run, because root has frozen S4. Every a11y statement here is a code-reading inference, not a measured result. No frontend code or tests were edited. SYNAPSE diagnostics and the checklist-runner skill text in the spawn prompt are outside this mission and were not run.",
+    "auto_decisions": [
+      "[AUTO-DECISION] Interim copy outside RunControl: should it name the build limitation or stay build-independent? Build-independent conditional wording (reason: it is true now and after OBS-008, so it does not instruct the user to press a disabled Run and needs no second rewrite in OBS-008. RunControl already states the limitation in ADR words).",
+      "[AUTO-DECISION] Copy outside the AC-5 file list (runs/RunDetailsDrawer.tsx) is recorded as an observation and deferred, not a 012B finding (reason: AC-5 scope is enumerated)."
+    ]
+  },
+  "verified_conforming": {
+    "run_gate": "PASS. RUN_ACTION (runEnablement.ts:32-37) is total over UNLEARNED/LEARNING/READY/NEEDS_RELEARN and throws on a fifth value (:45-55). Only READY maps to execute. canRun (useRunGate.ts:253-257) requires runAvailableFor, idle and not denied. run() re-reads after save and dispatches only on READY (:313-319).",
+    "interim_sentence": "PASS. LEARNING_UNAVAILABLE_REASON (runEnablement.ts:79-80) = 'Learning is not yet available in this build, so Run can only repeat a test whose steps are already learned.' It contains the ADR words and is rendered as visible text, not a tooltip (RunControl.tsx:225-235). It is tied to the button by aria-describedby (:175-182) and merged with the 10.48 not-permitted id. It shows for every non-READY state in idle phase (:104).",
+    "execute_refusal": "PASS. LEARN_REQUIRED narrative (executeRefusals.ts:54-58) is non-retryable, has no compile wording, and repeats the interim limitation.",
+    "learned_chip": "PASS (wording). 'Learned · ready to repeat' (runEnablement.ts:72) is verbatim from the UX panel and is reused by the tests-list READY chip (testListPresentation.ts:24), so both surfaces use the same word.",
+    "never_learned_empty_state": "PASS (verbatim). ChecksStudioPage.tsx:198-199 equals the AC-5 sentence character for character. Rendered at :884-889. Observation: in this interim build its promise 'The first Run works through them' cannot be honoured yet. AC-5 mandates it verbatim and C4 forbids a release before OBS-008, so it is accepted, not a finding.",
+    "needs_relearn": "PASS. The 'Steps changed — next Run learns from step k' copy is not introduced (reserved for OBS-008). The tests-list label 'Steps changed' (testListPresentation.ts:39-41) is generic and safe."
+  },
+  "findings": [
+    {
+      "id": "COPY-001",
+      "severity": "low",
+      "file_line": "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:1140",
+      "current": "Run saves your steps, prepares them, and records proof.",
+      "issue": "'Prepares' is the retired compile-phase verb. PREPARING_LABEL was removed, and the runGate.test.tsx AC-4 (c) oracle forbids /prepar/. This Proof-tab empty state renders for both READY and UNLEARNED drafts.",
+      "proposed_fix": "Run saves your steps and records proof.",
+      "rationale": "True for READY now and for a learning Run after OBS-008. It promises nothing the interim build cannot do beyond what RunControl already qualifies. The heading 'Run your test' stays.",
+      "blocking": false
+    },
+    {
+      "id": "COPY-002",
+      "severity": "low",
+      "file_line": "frontend/src/components/studio/scheduling/schedulePresentation.ts:48-49; frontend/src/components/studio/scheduling/StudioScheduleDialog.tsx:144,174",
+      "current": {
+        "schedulePresentation.ts:48": "The saved steps are not learned. Learn them with Run, then reload and explicitly resume its schedule.",
+        "schedulePresentation.ts:49": "Learn the test again for the supported runtime before resuming.",
+        "StudioScheduleDialog.tsx:144": "Learn the saved steps with Run if required, then reload and explicitly Resume. Learning alone does not restart scheduling.",
+        "StudioScheduleDialog.tsx:174": "Learn the saved steps with Run before resuming its schedule."
+      },
+      "issue": "These lines instruct the author to learn with Run, but Run is disabled for every non-READY state with LEARNING_UNAVAILABLE_REASON, so two surfaces contradict each other. QA flagged :48-49. The same pattern also appears in the schedule dialog at :144 and :174 (StudioScheduleDialog.tsx is in the 012B File List).",
+      "proposed_fix": {
+        "schedulePresentation.ts:48": "The saved steps are not learned yet. Once a Run has learned them, reload and explicitly resume the schedule.",
+        "schedulePresentation.ts:49": "The runtime changed, so the steps must be learned again. Once a Run has relearned them, reload and explicitly resume the schedule.",
+        "StudioScheduleDialog.tsx:144": "If the saved steps need learning, resume only after a Run has learned them: reload, then explicitly Resume. Learning alone does not restart scheduling.",
+        "StudioScheduleDialog.tsx:174": "Resume becomes available once a Run has learned the saved steps."
+      },
+      "rationale": "This is conditional wording. It does not send the author to a disabled control and stays true after OBS-008, so OBS-008 does not have to rewrite it. Any test that pins the old strings (StudioScheduleDialog.test.tsx) must be updated in the same change.",
+      "blocking": false
+    },
+    {
+      "id": "COPY-003",
+      "severity": "low",
+      "file_line": "frontend/src/components/studio/scheduling/schedulePresentation.ts:46",
+      "current": "The confirmed test changed. Reload and review it before resuming.",
+      "issue": "'Confirmed' is compile-review vocabulary (the confirm step no longer exists). The same file already uses learn vocabulary. The runGate oracle forbids /confirm the/; this line escapes it only because it says 'confirmed test'.",
+      "proposed_fix": "The learned steps changed. Reload and review them before resuming.",
+      "rationale": "This matches StudioScheduleDialog.tsx:173 'Current learned revision'.",
+      "blocking": false
+    },
+    {
+      "id": "COPY-004",
+      "severity": "low",
+      "file_line": "frontend/src/components/studio/run/RunControl.tsx:189",
+      "current": "<CircularProgress aria-label=\"Preparing test\" … />",
+      "issue": "This accessible name still uses the compile verb. It is pre-existing at HEAD:268, but its visible counterpart PREPARING_LABEL was removed by 012B, so screen-reader users now hear a state that sighted users never see. The visible busy text is 'Saving…' or 'Starting…'.",
+      "proposed_fix": "Make the spinner decorative: <CircularProgress aria-hidden=\"true\" size={16} color=\"inherit\" />. The busy state is already conveyed by the button text and the role=status preparationMessage ('Saving your changes…' / 'Starting the browser…').",
+      "rationale": "This removes the residue and a duplicate announcement. If an accessible name is kept, use 'Starting test'.",
+      "blocking": false
+    },
+    {
+      "id": "UX-A11Y-001",
+      "severity": "medium",
+      "file_line": "frontend/src/components/studio/run/RunControl.tsx:237-246 and :225-235; frontend/src/components/studio/run/useRunGate.ts:302-319",
+      "issue": "Dirty-READY path. The draft is READY and the author edits a step. The chip still says 'Learned · ready to repeat' and Run is enabled. Pressing Run saves, the mocks/server move readiness to UNLEARNED, and run() settles silently. The button becomes disabled under the pointer or keyboard focus, so in most browsers focus is lost (WCAG 2.4.3). The interim caption appears without a live region, so screen-reader users get no outcome (WCAG 4.1.3 Status Messages). Sighted users see an enabled Run that does nothing except replace the chip with a caption. Inferred from code; no browser run.",
+      "proposed_fix": "(1) Hide the chip while edits are unsaved: render it only when `!isRunning && learned && !isDirty`. (2) Announce the interim stop: wrap the learning-unavailable caption in a persistent polite live region, i.e. a container with role=\"status\" that is always mounted and holds LEARNING_UNAVAILABLE_REASON only when learningUnavailable is true. Keep the id/aria-describedby on the inner Typography. (3) Optional: while dirty on a READY draft, add the caption 'Saving will change the steps, so Run will need to learn them again.' so the outcome is predictable before activation.",
+      "rationale": "Without (1), the chip overstates readiness. Without (2), the only feedback after an activation is visual. If root prefers not to touch code before S4 credit, both can move to OBS-008, which rewrites RunControl. Record that placement explicitly.",
+      "blocking": false
+    }
+  ],
+  "observations": [
+    {
+      "id": "OBS-UX-1",
+      "file_line": "frontend/src/components/studio/runs/RunDetailsDrawer.tsx:357",
+      "note": "'Confirmed revision:' is compile vocabulary in user-facing text, outside the AC-5 file list. Proposed later text: 'Learned revision:'. Defer to OBS-008 or OBS-011."
+    },
+    {
+      "id": "OBS-UX-2",
+      "file_line": "frontend/src/components/studio/run/RunControl.tsx:174",
+      "note": "Pre-existing, not 012B. The button's aria-label is fixed to 'Run Test' while its visible text reads 'Saving…' or 'Starting…', which violates WCAG 2.5.3 Label in Name during busy phases. Recommend that OBS-008 drop the aria-label and let the visible text be the name."
+    },
+    {
+      "id": "OBS-UX-3",
+      "file_line": "frontend/src/components/studio/tests/TestRow.tsx:77-84",
+      "note": "Pre-existing (10.46). The readiness hint is only in a Tooltip on a non-focusable Chip, so keyboard users cannot reach it. The label carries the essential meaning; the hint is supplementary. Not a 012B regression."
+    }
+  ],
+  "accessibility": {
+    "wcag_surfaces_in_story": "AC-6 keeps studioWcagAudit.test.tsx surfaces 4/5 as pending rewrite. Surface 3 (:312) scans readyDraft, which covers the learned chip. Surfaces 4 (:324) and 5 (:335) both scan unlearnedDraft, which covers the disabled Run and the interim caption. Surface 5 also still searches for /confirm/ buttons and logs 0.",
+    "TEST-003_ruling": "Accept as disclosed. Effective coverage of the interim state is one surface, scanned twice under retired names. That is enough for a pure removal story, because the new user-facing elements (chip, caption, empty-state sentence) are reached by surfaces 3 and 4. OBS-008 AC-8 must replace both with distinct guided states and regenerate the pinned keys. One check is not covered by axe in any surface: the dynamic dirty-READY to UNLEARNED transition (UX-A11Y-001), which is behavioural. It needs an RTL assertion (live region or focus), not a static scan.",
+    "disabled_state_affordance": "PASS with one gap. Disabled Run always has a visible, programmatically associated reason: not-permitted (10.48), 'Add a step to run this test.', or the interim sentence. It is never tooltip-only. Gap: the 'Add a step' caption (RunControl.tsx:214-223) has no id and is not in aria-describedby, unlike the other two reasons. It is pre-existing; when touched, add it to aria-describedby. Disabled controls are exempt from 1.4.3 contrast; captions use text.secondary (default MUI ≈5.7:1 on white, inferred from the theme default, not measured).",
+    "chip": "The color=success outlined chip carries its meaning in text, not colour (1.4.1 OK). Contrast is assessed by the surface 3 axe scan. That scan's result is dev-reported (axe-results.json sha 65da2253…) and not re-run by UX.",
+    "status_messages": "preparationMessage uses role=status (RunControl.tsx:250). The interim caption and refusal outcome: refusals use role=alert (OK); the interim caption has no live region (UX-A11Y-001)."
+  },
+  "conditions_for_pass": [
+    "Apply COPY-001, COPY-002 and COPY-003 text (and update any pinned test strings), or record in the story that they are deferred to OBS-008 with this file as the reference.",
+    "UX-A11Y-001 is either fixed in 012B or written into OBS-008's RunControl scope as a named item.",
+    "Any code change after S4 voids S4 credit for the touched files (QA next_steps). Root decides the ordering."
+  ]
+}

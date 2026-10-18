@@ -1,0 +1,148 @@
+{
+  "verdict": "GO_FROZEN_FINITE_NATIVE_VALIDATION_CANDIDATE_AND_ROOT_139_GATE",
+  "scope": "Independent source-semantic review; no runtime, timing, C5 acceptance or QA verdict",
+  "candidatePatchSha256": "366843ea019311ffa8fd6ed29b6f487f543f558b8aecd2583b12530147b83ccc",
+  "candidateReceiptSha256": "525c2ccbf0a20706e7063780b5735abdb8e382a13b9c52945e70631116e71d0d",
+  "preservation": {
+    "files": [
+      {
+        "source": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+        "baseSha256": "1b971992a670c20225667a1c2f9bf1a09f10aaaa6ddcf37fa45c7394072e3a01",
+        "candidateSha256": "618a7cc844402ff3702c3ea8710be35bc13e212fcc2929810cc5de6d7d6ba058",
+        "baseMatches": true,
+        "candidateMatches": true,
+        "forwardExact": true,
+        "inverseExact": true
+      },
+      {
+        "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java",
+        "baseSha256": "f0e8a7a026f3eb6a14c7d8175bf964e2e723bd80cb70ada514663fbc8eac0bec",
+        "candidateSha256": "8237c0ea70e2a36f82b49b761eaaa9b7a116298943a2ddb6ee0001634b18338c",
+        "baseMatches": true,
+        "candidateMatches": true,
+        "forwardExact": true,
+        "inverseExact": true
+      }
+    ],
+    "candidatePatchSha256": "366843ea019311ffa8fd6ed29b6f487f543f558b8aecd2583b12530147b83ccc",
+    "patchMatchesReceipt": true,
+    "candidateReceiptSha256": "525c2ccbf0a20706e7063780b5735abdb8e382a13b9c52945e70631116e71d0d",
+    "publicCanonicalPrefixByteIdentical": true,
+    "nativeExpansionCanonicalSuffixByteIdentical": true,
+    "wireCaseCounts": [
+      7,
+      7
+    ],
+    "compilePropertiesRecursiveCallCount": 0
+  },
+  "independentSchemas": [
+    {
+      "name": "session",
+      "epochMatches": true,
+      "propertyCount": 14,
+      "rootKeywords": [
+        "$schema",
+        "additionalProperties",
+        "properties",
+        "required",
+        "title",
+        "type"
+      ]
+    },
+    {
+      "name": "replay-validation",
+      "epochMatches": true,
+      "propertyCount": 9,
+      "rootKeywords": [
+        "$schema",
+        "additionalProperties",
+        "properties",
+        "required",
+        "title",
+        "type"
+      ]
+    },
+    {
+      "name": "ledger",
+      "epochMatches": true,
+      "propertyCount": 20,
+      "rootKeywords": [
+        "$schema",
+        "additionalProperties",
+        "properties",
+        "required",
+        "title",
+        "type"
+      ]
+    },
+    {
+      "name": "observation",
+      "epochMatches": true,
+      "propertyCount": 9,
+      "rootKeywords": [
+        "$schema",
+        "additionalProperties",
+        "properties",
+        "required",
+        "title",
+        "type"
+      ],
+      "nodesKeywords": [
+        "items",
+        "maxItems",
+        "minItems",
+        "type"
+      ],
+      "nodesMinimum": 0,
+      "nodesMaximum": 500,
+      "nodePropertyCount": 17,
+      "coveragePasswordControlsMaximum": 500
+    }
+  ],
+  "nativeArrayApiProof": {
+    "publicGetSchema": true,
+    "publicGetTupleSchema": true,
+    "tupleListConstructor": "Installed ItemsValidator allocates new ArrayList at bytecode offsets22\u201330; getter directly returns this field. Homogeneous object items retain nonnull empty tuple list.",
+    "nodesKeywords": [
+      "type",
+      "items",
+      "minItems",
+      "maxItems"
+    ],
+    "nodesMinimum": 0,
+    "nodesMaximum": 500,
+    "nativeItemProperties": 17
+  },
+  "sourceReview": [
+    "Four exact root-name and epoch pairs alone select optimization. Independently expanded resources match all four declared epochs. Other names and definition fragments use their complete original native roots.",
+    "compileProperties is shallow and contains no recursive call. It preserves every root keyword and all property names, verifies native child schema and configuration identity, then returns immutable original-property metadata.",
+    "Only the replay request installs the two literal object overrides artifact and validationBasis. Both are independently audited closed object roots with12 and33 original property schemas. Their override maps are empty, bounding object specialization to two levels.",
+    "Only the named observation installs ObservationNodes. Its original nodes child was checked against the frozen parent declaration; exactly one homogeneous native ItemsValidator supplies its unchanged complete item schema. Strict configuration, empty tuple list, item/config equality and full-array shape constraints are required.",
+    "The array shell changes only items to an empty schema and preserves original array type/minimum/maximum. It then applies the original compiled item validator to every array item. Explicit nulls and scalars are refused by native shape or item checks; no short circuit or skipped native item occurs.",
+    "ObservationNodes replaces the original nodes property evaluation instead of adding a second full-array pass. All other properties and all nested leaf compositions use native validation unchanged.",
+    "Any unavailable helper, unsupported shape/configuration, child mismatch or array mismatch returns the original whole named-root baseline. RuntimeException fallback remains conservative; fatal errors are not swallowed.",
+    "The existing schema cache contains compiled metadata only. No request values, grant, authority decision, successful-validation memo, new global cache, schema discovery framework or server is added.",
+    "The public canonical-validation prefix and native resource expansion/canonical/hash suffix are byte-identical. The candidate changes only Contracts and its existing Wire test class, with no client, publication, budget, guard, TRACE, canary or runtime ownership change."
+  ],
+  "testReview": [
+    "Existing Wire test count remains seven; only two existing cases and their helpers expand. The original session recursive corpus and replay corpus remain, with bounded ledger and observation root mutations.",
+    "Native oracles compile original resources directly and require valid fixtures. Exact root property counts14/9/20/9, literal replay override keys and child counts12/33, empty child overrides and exclusive observation-array activation rule out silent fallback or unintended expansion.",
+    "Array cases cover0/500/501 items, null/scalar arrays, null/scalar items, missing item fields, native locator alternatives and refusal, invalid date and coverage bounds. Native expected outcomes are asserted before differential comparison.",
+    "Unknown root epochs, loose configuration, added array uniqueness and unselected names/fragments require fully native metadata and matching accepted/refused controls. Canonical result, fixed422 refusal and input nonmutation remain checked.",
+    "The existing fixture has two object nodes and valid ledger admission/evidence structures, matching the added mutation seams. The installed public tuple getter eligibility was independently confirmed; actual positive tests still must run."
+  ],
+  "requiredExecution": [
+    "Root may integrate only the exact two-file patch after confirming frozen base hashes.",
+    "Run strict checks and all139 existing affected tests: Wire7, Lowerer36, Session43, Ledger16 and Bridge37. Ledger/observation changes invalidate the earlier Bridge reuse argument.",
+    "After green gates, run one original unprofiled C5 with diagnostic disabled, real1000ms renewal,2000ms stop, immutable publication budget, full ROOT plus APP TRACE and all30 canary variants."
+  ],
+  "limits": [
+    "Positive phase41 evidence proves an instantaneous lock relation, not exclusive cost or duration.",
+    "The prior pre-send expiry remains unsolved until actual execution proves otherwise; the earlier nine-property request split did not establish budget success.",
+    "Inlined observation arrays inside the request remain native within their selected property root; independent per-node roots apply only to named observation validation.",
+    "Additional schema metadata and literal-path maintenance are the tradeoff for avoiding repeated full-root diagnostics. Future schema epochs conservatively fall back and require renewed eligibility proof.",
+    "No publication plus two replay success, independent QA approval or lifecycle advancement is claimed."
+  ],
+  "reviewerChangedSharedSource": false,
+  "reviewerRanBuildOrRuntime": false
+}

@@ -1,0 +1,370 @@
+{
+  "story": "STUDIO-OBS-015",
+  "step": "final source-frozen gates (final-gates06, attempt05)",
+  "agent": "Gage (@devops)",
+  "date": "2026-10-17 05:35 EDT to 07:17 EDT (09:35Z to 11:17Z)",
+  "head": "734ad704f6ae508dbb10d9b5127a315bb0df5f81",
+  "verdict": "RED: runner fixtures tier 1 failed test (hard-expiry, classified transient, NOT rerun per the rules). Every other step GREEN, including the full backend check attempt05.",
+  "attempt05_slot": {
+    "receiptPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates06/receipt.json",
+    "label": "final-gate-attempt05-20261017T0543",
+    "exit": 0,
+    "counts": {
+      "test": "2412 total / 2387 passed / 0 failed / 0 errors / 25 skipped (= approved 25)",
+      "guidedIncrementalTest": "62 / 62",
+      "crossReplicaTest": "2 / 2",
+      "all": "2476 total / 2451 passed / 0 failed / 0 errors / 25 skipped"
+    },
+    "elapsedSeconds": 5511.54,
+    "jacoco": "jacocoTestReport and jacocoTestCoverageVerification executed and passed (Gradle BUILD SUCCESSFUL). Bundle line 0.9087 (min 0.70); dispatch 0.8620, internal 0.9093, recovery 0.8889, sse 0.9258 (min 0.75 each); studio.compile and studio.compile.gateway rules vacuous (packages no longer exist)",
+    "requireFreshGuidedPartitions": "executed and passed (retainOriginalGuidedCohort, retainIncrementalGuidedCohort, requireFreshGuidedPartitions all ran after the two lanes; no failure; collector found exactly 1 fresh JOIN cohort per lane)",
+    "sourceDigest": "7d696ae8f1d482a12bc6d10cb44bf3615da8024e0c3d1a7038ddb094acba2ae6",
+    "distDigest": "379c0deddd255cf1bc64349132a9122a962d10ca8ce24acf4c93592c13a7c6e5",
+    "newFailures": [],
+    "note": "Backend newFailures is empty. The runner fixtures tier (not part of this slot) had 1 failure in this cycle: guided-secret-ownership hard-expiry, classified transient [inference]; see gates[fixtures] in receipt.json."
+  },
+  "node": {
+    "N24": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin first on PATH for every runner step, the image/contract steps and the backend launch",
+    "runnerSteps": {
+      "nodeV": "v24.20.0",
+      "whichNode": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+      "file": "final-gates06/env.txt"
+    },
+    "backendLaunch": {
+      "nodeV": "v24.20.0",
+      "whichNode": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+      "file": "final-gates06/backend-node.txt"
+    },
+    "note": "The ITs spawn the runner worker with a bare `node`, which resolved through this PATH."
+  },
+  "binding": {
+    "source": "7d696ae8f1d482a12bc6d10cb44bf3615da8024e0c3d1a7038ddb094acba2ae6",
+    "sourceFiles": 1650,
+    "dist": "379c0deddd255cf1bc64349132a9122a962d10ca8ce24acf4c93592c13a7c6e5",
+    "previousFinalGates05": {
+      "source": "650e5294fe74bf45629b4c784aab1acc8e348f2e35160fbd04a55589fd36666c",
+      "dist": "01df6c38341a7b56a239ce264f8d8cc3194e82c72004c8f5371c7a681c6a9a2e"
+    },
+    "diffVsFinalGates05": "13 files changed, 0 added, 0 removed, all under studio-runner/ (5 src: guided/runtime.ts, run/browser.ts, run/guidedBrowser.ts, run/guidedMain.ts, run/tree.ts; 8 test). frontend/ backend/ tools/ docs/specs/ .github/ and root package files identical to final-gates05 and final-gates04 (final-gates06/carry-forward-inputs.json, diff-vs-final-gates05.json).",
+    "distNote": "The dist digest changed from final-gates05 because runner src changed. The full build rewrote dist with identical bytes (379c0ded... before and after)."
+  },
+  "freeze": {
+    "before": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates06/capture-before.json (2026-10-17T09:35Z)",
+    "after": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates06/capture-after.json (2026-10-17T11:17Z)",
+    "sourceIdentical": true,
+    "distIdentical": true,
+    "filesIdentical": true,
+    "collectorManifests": "execution/final-gate-attempt05-20261017T0543-before.json / -after.json: sourceStable, distStable, testInputStable all true"
+  },
+  "host": {
+    "before": {
+      "file": "final-gates06/host-before.txt",
+      "vmSwapusage": "total 4096.00M used 3423.56M free 672.44M",
+      "memoryFreePercent": 76
+    },
+    "after": {
+      "file": "final-gates06/host-after.txt",
+      "vmSwapusage": "total 4096.00M used 3571.12M free 524.88M",
+      "memoryFreePercent": 53
+    },
+    "note": "Memory free was 53% at the end, with the Gradle run just finished. No swap growth beyond about 150M."
+  },
+  "gates": [
+    {
+      "gate": "step 1 capture-before",
+      "verdict": "DONE",
+      "source": "7d696ae8f1d482a12bc6d10cb44bf3615da8024e0c3d1a7038ddb094acba2ae6",
+      "dist": "379c0deddd255cf1bc64349132a9122a962d10ca8ce24acf4c93592c13a7c6e5",
+      "files": 1650
+    },
+    {
+      "gate": "runner type-check",
+      "label": "runner-final-typecheck06",
+      "verdict": "PASS",
+      "exit": 0,
+      "elapsedSeconds": 6.69
+    },
+    {
+      "gate": "runner lint",
+      "label": "runner-final-lint06",
+      "verdict": "PASS",
+      "exit": 0,
+      "elapsedSeconds": 10.3
+    },
+    {
+      "gate": "runner unit with coverage (s03c)",
+      "label": "runner-final-unit06",
+      "verdict": "PASS",
+      "exit": 0,
+      "elapsedSeconds": 12.99,
+      "counts": {
+        "files": "105 passed | 1 skipped (106)",
+        "tests": "2280 passed / 0 failed / 29 skipped (2309)",
+        "suites": "352 passed"
+      },
+      "coverage": {
+        "lines": 97.32,
+        "branches": 89.25,
+        "functions": 97.36,
+        "statements": 97.32
+      },
+      "coverageThresholds": "vitest exited 0, so the configured V8 thresholds passed",
+      "summary": "final-gates06/runner-final-unit06-coverage-summary.json"
+    },
+    {
+      "gate": "runner full dist build",
+      "verdict": "PASS",
+      "exit": 0,
+      "distDigest": "379c0deddd255cf1bc64349132a9122a962d10ca8ce24acf4c93592c13a7c6e5",
+      "distChangedByBuild": false,
+      "file": "final-gates06/runner-final-build06-receipt.json"
+    },
+    {
+      "gate": "runner host check:pins",
+      "label": "runner-final-pins06",
+      "verdict": "PASS",
+      "exit": 0
+    },
+    {
+      "gate": "runner test:fixtures (s04c)",
+      "label": "runner-final-fixtures06",
+      "verdict": "RED",
+      "exit": 1,
+      "elapsedSeconds": 254.52,
+      "counts": {
+        "files": "21 passed | 1 failed | 3 skipped (25)",
+        "tests": "259 passed / 1 failed / 9 skipped (269)"
+      },
+      "sourceStable": true,
+      "distStable": true,
+      "failedTest": "test/fixtures-tier/guided-secret-ownership.test.ts > uses actual mTLS and native focus for guided secret ownership: hard-expiry. AssertionError at line 130: expected stopReason 'LEASE_LOST' to be 'EXPIRED'. Test took 5.07 s. The other 3 modes (revoked, slow-grant, lost-body-late-grant) passed.",
+      "classification": "TRANSIENT [inference, not a proof]. Evidence: (1) the same test passed in final-gates05 (test file and ownership.ts unchanged since; neither is in the 13-file W10 diff) and in Dex's W10 full fixtures run on N24 (w10-review-fixes01/gates/fixtures-full.*: 260 passed / 0 failed / 9 skipped, hard-expiry passed in 5065 ms), which looks like the same tree; (2) mechanism: the test sets expiresAt = now+5 s. In src/guided/ownership.ts the renewal path throws LEASE_LOST when the remaining lease minus 100 ms is not positive (line 80), while the expiry timer (line 54) reports EXPIRED. A renewal landing in the last 100 ms before expiry stops the session first with LEASE_LOST, so the outcome depends on renewal phase (about a 100 ms window in each 1000 ms renewal period). I did not prove the race by instrumentation. The W10 changes to runtime.ts and guidedMain.ts are not excluded as a contributing factor, because I did not rerun. Rule applied: transient, not rerun, reported.",
+      "newW10Tests": {
+        "browser-profile-safety.test.ts": "10 passed (the 2 final-gates05 failures are fixed)",
+        "guided-start-deadline.test.ts": "7 passed",
+        "guided-recording.test.ts": "5 passed"
+      },
+      "mediaProtection": "protect_media.py: 3238 files backed up; 22 changed during the run and the originals restored (final-gates06/runner-final-fixtures06-artifact-index.json)",
+      "vitestJson": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-fixtures06-vitest.json"
+    },
+    {
+      "gate": "image build (s05a)",
+      "verdict": "PASS",
+      "buildStageExit": 0,
+      "runtimeExit": 0,
+      "tag": "put-checks-studio-runner:obs015-final06-local",
+      "imageId": "sha256:dc39cc053ad0c25ef02c25e583a8788a55c6801a0176cc51ba9844c5fd6eed67",
+      "buildStageTag": "put-checks-studio-runner:obs015-final06-buildstage-local",
+      "buildStageImageId": "sha256:2cd893b90f67f143276599a6ffa68757b56584210b9cc459f467650f13fa2839",
+      "cachedStepsInRuntimeBuild": 11
+    },
+    {
+      "gate": "image dist parity (s05b)",
+      "verdict": "PASS",
+      "detail": "/app/dist file-list sha256 equal in both images: f6eef2e59d43f31124173aabe05bcafa3e603548fe681b6f6a9f709a651e71ba",
+      "note": "parity between the two images, not against the host dist"
+    },
+    {
+      "gate": "in-image check-pins --require-image (s05c) - ED-05 Node-pin verdict",
+      "verdict": "PASS",
+      "exit": 0,
+      "result": {
+        "ok": true,
+        "failures": [],
+        "notAsserted": [],
+        "node": "v24.20.0",
+        "nodeMajorPin": "24",
+        "nvmrc": "24",
+        "engines": ">=24.11.0 <25.0.0",
+        "chromiumBuild": "1243",
+        "image": "put-checks-studio-runner:obs015-final06-local",
+        "playwright": "1.63.0",
+        "browserProvenance": "linux/arm64 revision 1243"
+      },
+      "files": [
+        "final-gates06/image-final06-check-pins.json",
+        "final-gates06/image-final06-check-pins.exit",
+        "final-gates06/image-final06-runtime-versions.json"
+      ],
+      "scope": "The Node-pin sub-item of ED-05 only; internal image, non-root user, seccomp and CA bundle stay with Platform/SRE."
+    },
+    {
+      "gate": "runner test:deployment (s05d)",
+      "label": "runner-final-deployment06",
+      "verdict": "PASS",
+      "exit": 0,
+      "elapsedSeconds": 46.34,
+      "counts": "8 files / 322 passed / 0 failed / 0 skipped",
+      "env": "STUDIO_RUNNER_IMAGE=put-checks-studio-runner:obs015-final06-local"
+    },
+    {
+      "gate": "contracts + build-studio-observed-schemas --check (contracts-final06)",
+      "verdict": "PASS (re-run, not carried)",
+      "exit": [
+        0,
+        0
+      ],
+      "reason": "studio-runner/src is in its inputs and changed",
+      "noWrite": true,
+      "files": [
+        "final-gates06/contracts-final06.log",
+        "final-gates06/codegen-check-final06.log",
+        "final-gates06/contracts-final06-nowrite.json"
+      ]
+    },
+    {
+      "gate": "frontend (frontend-final01)",
+      "verdict": "CARRIED_FORWARD (PASS 701/701, type-check 0, lint 0 errors)",
+      "method": "frontend/ subset 274 files, digest 5988e69777c973aa1a64c92bc643d11a0e4b573e1ebd7048f7615db3d17982a2, equal to final-gates04 and final-gates05 (carry-forward-inputs.json)"
+    },
+    {
+      "gate": "standalone backend static (spotless, checkstyle, spotbugs)",
+      "verdict": "CARRIED_FORWARD (PASS, static03) and also re-executed inside attempt05's check",
+      "method": "backend/ 872 files, digest b6fbde38..., equal to attempt04 and final-gates05"
+    },
+    {
+      "gate": "backend final check attempt05 (collector)",
+      "verdict": "PASS",
+      "command": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py final-gate-attempt05-20261017T0543 --test-tasks test,guidedIncrementalTest,crossReplicaTest --require-exec-tasks test,guidedIncrementalTest --allowed-skips-file docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/approved-historical-skips.json -- --no-daemon --continue check --rerun-tasks",
+      "launch": "nohup, PID 14338, 2026-10-17T09:42:53Z, N24 first on PATH",
+      "exit": 0,
+      "gradleExit": 0,
+      "elapsedSeconds": 5511.54,
+      "gradleReported": "BUILD SUCCESSFUL in 1h 31m 50s; 25 actionable tasks: 25 executed",
+      "validationSucceeded": true,
+      "sourceStable": true,
+      "distStable": true,
+      "testInputStable": true,
+      "taskCollectionComplete": true,
+      "taskCollectionErrors": [],
+      "counts": {
+        "total": 2476,
+        "passed": 2451,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 25
+      },
+      "taskResults": {
+        "test": {
+          "counts": {
+            "total": 2412,
+            "passed": 2387,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 25
+          },
+          "freshXmlFiles": 305,
+          "freshExec": true,
+          "freshJoinCohorts": 1
+        },
+        "guidedIncrementalTest": {
+          "counts": {
+            "total": 62,
+            "passed": 62,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "freshXmlFiles": 1,
+          "freshExec": true,
+          "freshJoinCohorts": 1
+        },
+        "crossReplicaTest": {
+          "counts": {
+            "total": 2,
+            "passed": 2,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "freshXmlFiles": 1,
+          "freshExec": true,
+          "freshJoinCohorts": 0
+        }
+      },
+      "skips": "25, equal to the approved file (collector exit 0 requires exact multiset equality); approved file sha256 5a0755a49408fdc1645f5f47ea2a6f44280f174b25c632c8b93f80225a907a81, same as attempt01 to 04",
+      "collectorSha256": "b81dbb25086aaebe4a001512cabdb4c8a071f3c3c2c43908adf298a140ab3b3b (same as attempt04)",
+      "gradleTaskOrderTail": [
+        "retainOriginalGuidedCohort",
+        "guidedIncrementalTest",
+        "retainIncrementalGuidedCohort",
+        "requireFreshGuidedPartitions",
+        "jacocoTestReport",
+        "jacocoTestCoverageVerification",
+        "rdsParityLint",
+        "spotbugsTest (SKIPPED, disabled by design)",
+        "spotlessCheck",
+        "testcontainersAlignmentCheck",
+        "spotbugsMain",
+        "check"
+      ],
+      "jacoco": {
+        "summary": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates06/jacoco-line-summary.json",
+        "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates06/reports/jacoco/test/jacocoTestReport.xml",
+        "lineCoveredRatio": {
+          "bundle": {
+            "min": 0.7,
+            "actual": 0.9087,
+            "covered": 22467,
+            "missed": 2257
+          },
+          "studio.dispatch": {
+            "min": 0.75,
+            "actual": 0.862
+          },
+          "studio.internal": {
+            "min": 0.75,
+            "actual": 0.9093
+          },
+          "studio.recovery": {
+            "min": 0.75,
+            "actual": 0.8889
+          },
+          "studio.sse": {
+            "min": 0.75,
+            "actual": 0.9258
+          },
+          "studio.compile": {
+            "min": 0.8,
+            "vacuous": true
+          },
+          "studio.compile.gateway": {
+            "min": 0.8,
+            "vacuous": true
+          }
+        },
+        "disclosure": "ratios computed by me from the report XML; the Gradle verification task passing is the authoritative result"
+      },
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/final-gate-attempt05-20261017T0543-results.json",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/final-gate-attempt05-20261017T0543.log",
+      "collectorLog": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates06/backend-final-check-attempt05.collector.log",
+      "taskOutputs": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/final-gate-attempt05-20261017T0543-task-outputs/",
+      "postRunAudit": {
+        "dockerBefore": "final-gates06/backend-final-check-attempt05-docker-before.txt",
+        "dockerAfter": "final-gates06/backend-final-check-attempt05-docker-after.txt",
+        "containerSetUnchanged": true,
+        "runningContainers": 0,
+        "remainingProcesses": "only pre-existing PID 44737 (guidedMain.js, started 2026-10-10) and 13577/13581, none signalled; no Gradle or worker process left"
+      }
+    }
+  ],
+  "guidedStartFailed": {
+    "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates06/guided-start-failed-lines.json",
+    "runnerLogs": "fixtures: 11 lines, all classified injected-by-test, max elapsedMs 22, no TIMEOUT. unit 0, deployment 0.",
+    "backend": "Gradle stdout and test XML: 0 GUIDED_START_FAILED lines. 2 backend WARN lines 'Guided runner refused the context ... CONTEXT_LOST' (1 verified injected, 1 injected by inference). 5 runner-side lines recovered from worker temp logs, max elapsedMs 64, no TIMEOUT.",
+    "realRel001RecurrenceSignal": false,
+    "d4EdgeCase15sRule": "no UNKNOWN_OUTCOME + GUIDED_START_FAILED pair at elapsedMs >= 15000 occurred, so nothing needed classifying under the coordinator's 15 s rule"
+  },
+  "processes": {
+    "neverSignalled": [
+      22246,
+      44737,
+      13577,
+      13581
+    ],
+    "stillPresent": "44737, 13577, 13581"
+  },
+  "containers": "I started, stopped and removed none (docker ps -a set identical before and after). The only Docker changes are the two images I built. supabase_*_outvo stayed stopped. Testcontainers cleaned up its own.",
+  "noCommitsNoPushNoSourceEdits": true,
+  "labelNotes": "Fresh labels runner-final-{typecheck,lint,unit,pins,fixtures,deployment}06, contracts/build 06, collector label final-gate-attempt05-20261017T0543. Each run once, no reruns. Scratch drivers g6.sh and write06.py are in the session scratchpad. I used /tmp for two zero-byte timestamp marker files while scanning for worker logs (deleted)."
+}

@@ -1,0 +1,647 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -4234,6 +4234,7 @@
+         () -> {
+           List<VaultScope> scopes = new java.util.ArrayList<>();
+           List<String> canaries = new java.util.ArrayList<>();
++          List<P3ScopeReplay> staged = new java.util.ArrayList<>();
+           int ordinal = 0;
+           for (var axis :
+               List.of(
+@@ -4241,56 +4242,51 @@
+                   Map.entry("CSI-456", "fixture"),
+                   Map.entry("CSI-123", "fixture-other"),
+                   Map.entry("CSI-123", "fixture"))) {
+-            p3Mode = P3Mode.LOGIN;
+-            p3Grant(axis.getKey(), axis.getValue());
+-            UUID test = p3CreateSource(axis.getKey(), axis.getValue(), true);
+-            VaultScope scope = VaultScope.of(axis.getKey(), axis.getValue(), test);
+-            scopes.add(scope);
+-            String value = "P3-ORDINARY-" + UUID.randomUUID();
+-            canaries.add(value);
+-            p3ExpectedPassword = value;
+-            P3_RECEIPTS.clear();
+-            P3_NATIVE_SESSIONS.clear();
+-            p3Seed(scope, value);
+-            String id = p3Start(test, axis.getValue());
+-            awaitFinalizing(id);
+-            P3Publication published = p3Publish(id);
+-            int models = MODEL_WIRE.size();
+-            P3_NATIVE_SESSIONS.clear();
+-            P3_RECEIPTS.clear();
+-            List<Integer> beforeReads =
+-                scopes.stream()
+-                    .map(
+-                        other ->
+-                            COUNTED_VAULT.readCount(
+-                                StudioVaultProvider.ReferenceKind.SECRET, other, "PASS"))
+-                    .toList();
+-            UUID execution = p3Execute(test);
+-            p3AssertBinding(execution, scope, published);
+-            assertThat(
+-                    COUNTED_VAULT.readCount(
++            P3ScopeReplay prepared = p3PrepareScopeReplay(axis);
++            staged.add(prepared);
++            scopes.add(prepared.scope());
++            canaries.add(prepared.value());
++            if (staged.size() == 1) {
++              continue; // Stage the two existing cross-CSI positives before accepting either run.
++            }
++            boolean concurrent = staged.size() == 2;
++            List<P3ScopeReplay> batch = concurrent ? List.copyOf(staged) : List.of(prepared);
++            if (concurrent) {
++              p3ConcurrentScopeReplays(batch);
++            }
++            for (P3ScopeReplay current : batch) {
++              UUID test = current.test();
++              VaultScope scope = current.scope();
++              String value = current.value();
++              P3Publication published = current.published();
++              p3ExpectedPassword = value;
++              int models = MODEL_WIRE.size();
++              List<Integer> beforeReads =
++                  scopes.stream()
++                      .map(other -> COUNTED_VAULT.readCount(
++                          StudioVaultProvider.ReferenceKind.SECRET, other, "PASS"))
++                      .toList();
++              if (!concurrent) {
++                P3_NATIVE_SESSIONS.clear();
++                P3_RECEIPTS.clear();
++                UUID execution = p3Execute(test);
++                p3AssertBinding(execution, scope, published);
++                assertThat(COUNTED_VAULT.readCount(
+                         StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS"))
+-                .isEqualTo(beforeReads.getLast());
+-            assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+-            JsonNode report = p3AwaitExecution(execution, "PASSED");
+-            assertThat(
+-                    COUNTED_VAULT.readCount(
+-                        StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS"))
+-                .isEqualTo(beforeReads.getLast() + 1);
+-            for (int i = 0; i < scopes.size() - 1; i++) {
+-              assertThat(
+-                      COUNTED_VAULT.readCount(
++                    .isEqualTo(current.ownReads());
++                assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
++                p3AssertScopeReplay(current, execution, p3AwaitExecution(execution, "PASSED"));
++                assertThat(P3_RECEIPTS.size()).isEqualTo(1);
++                assertThat(P3_RECEIPTS.getFirst().accepted()).isTrue();
++                assertThat(P3_RECEIPTS.getFirst().password().equals(value)).isTrue();
++                assertThat(P3_RECEIPTS.getFirst().username().equals("p3-user")).isTrue();
++                for (int i = 0; i < scopes.size() - 1; i++) {
++                  assertThat(COUNTED_VAULT.readCount(
+                           StudioVaultProvider.ReferenceKind.SECRET, scopes.get(i), "PASS"))
+-                  .isEqualTo(beforeReads.get(i));
+-            }
+-            assertThat(P3_RECEIPTS).hasSize(1);
+-            assertThat(P3_RECEIPTS.getFirst().accepted()).isTrue();
+-            assertThat(P3_RECEIPTS.getFirst().password().equals(value)).isTrue();
+-            assertThat(P3_RECEIPTS.getFirst().username().equals("p3-user")).isTrue();
+-            p3AssertUsed(null, execution);
+-            p3AssertAuditScope(null, execution, scope);
+-            p3DecodeVideo(execution, report);
+-            assertThat(MODEL_WIRE.size()).isEqualTo(models);
++                      .isEqualTo(beforeReads.get(i));
++                }
++                assertThat(MODEL_WIRE.size()).isEqualTo(models);
++              }
+             // Genuine accepted scope remains fixed when its own entry vanishes at the actual read.
+             P3_NATIVE_SESSIONS.clear();
+             P3_RECEIPTS.clear();
+@@ -4309,7 +4305,10 @@
+                 .isEqualTo(1);
+             assertThat(P3_FAIL_READ.get()).isNull();
+             assertThat(P3_RECEIPTS).isEmpty();
+-            for (int i = 0; i < scopes.size() - 1; i++) {
++            for (int i = 0; i < scopes.size(); i++) {
++              if (scopes.get(i).equals(scope)) {
++                continue;
++              }
+               assertThat(
+                       COUNTED_VAULT.readCount(
+                           StudioVaultProvider.ReferenceKind.SECRET, scopes.get(i), "PASS"))
+@@ -4354,7 +4353,7 @@
+                 "ordinary-scope-" + (++ordinal),
+                 C.object()
+                     .put("ordinal", ordinal)
+-                    .put("successfulOwnRead", reads - beforeReads.getLast())
++                    .put("successfulOwnRead", reads - current.ownReads())
+                     .put("foreignReads", 0)
+                     .put(
+                         "missingOwnRead",
+@@ -4372,6 +4371,7 @@
+                                 String.class,
+                                 published.revision())
+                             .equals(published.artifactHash())));
++            }
+           }
+         });
+   }
+@@ -5601,7 +5601,7 @@
+   }
+ 
+   private static void p6Signal(String signal, String ownedTarget) throws Exception {
+-    assertThat(List.of("-STOP", "-CONT", "-KILL").contains(signal)).isTrue();
++    assertThat(List.of("-STOP", "-CONT", "-KILL", "-TERM").contains(signal)).isTrue();
+     assertThat(ownedTarget.matches("-?[1-9][0-9]{0,12}")).isTrue();
+     Process command =
+         new ProcessBuilder("/bin/kill", signal, "--", ownedTarget)
+@@ -7092,6 +7092,358 @@
+ 
+   private record P3Publication(UUID revision, String artifactHash, String artifact) {}
+ 
++  private record P3ScopeReplay(
++      UUID test, VaultScope scope, String value, P3Publication published, int ownReads) {
++    @Override
++    public String toString() {
++      return "P3ScopeReplay[<private>]";
++    }
++  }
++
++  private static final class P3ConcurrentHold {
++    final java.util.concurrent.CountDownLatch[] entered = {
++      new java.util.concurrent.CountDownLatch(1), new java.util.concurrent.CountDownLatch(1)
++    };
++    final java.util.concurrent.CountDownLatch[] exited = {
++      new java.util.concurrent.CountDownLatch(1), new java.util.concurrent.CountDownLatch(1)
++    };
++    final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
++    final AtomicInteger calls = new AtomicInteger();
++    volatile boolean failed;
++
++    void hold(boolean accepted, int ordinal) {
++      if (ordinal >= 2) {
++        failed = true;
++        return;
++      }
++      entered[ordinal].countDown();
++      if (!accepted) {
++        failed = true;
++        return;
++      }
++      try {
++        if (!release.await(20, java.util.concurrent.TimeUnit.SECONDS)) {
++          failed = true;
++        }
++      } catch (InterruptedException failure) {
++        failed = true;
++        Thread.currentThread().interrupt();
++      }
++    }
++  }
++
++  private static volatile P3ConcurrentHold p3ConcurrentHold;
++
++  private P3ScopeReplay p3PrepareScopeReplay(Map.Entry<String, String> axis) throws Exception {
++    p3Mode = P3Mode.LOGIN;
++    p3Grant(axis.getKey(), axis.getValue());
++    UUID test = p3CreateSource(axis.getKey(), axis.getValue(), true);
++    VaultScope scope = VaultScope.of(axis.getKey(), axis.getValue(), test);
++    String value = "P3-ORDINARY-" + UUID.randomUUID();
++    p3ExpectedPassword = value;
++    P3_RECEIPTS.clear();
++    P3_NATIVE_SESSIONS.clear();
++    p3Seed(scope, value);
++    String id = p3Start(test, axis.getValue());
++    awaitFinalizing(id);
++    P3Publication published = p3Publish(id);
++    return new P3ScopeReplay(test, scope, value, published,
++        COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS"));
++  }
++
++  private void p3AssertScopeReplay(P3ScopeReplay current, UUID execution, JsonNode report)
++      throws Exception {
++    assertThat(COUNTED_VAULT.readCount(
++            StudioVaultProvider.ReferenceKind.SECRET, current.scope(), "PASS"))
++        .isEqualTo(current.ownReads() + 1);
++    p3AssertBinding(execution, current.scope(), current.published());
++    p3AssertUsed(null, execution);
++    p3AssertAuditScope(null, execution, current.scope());
++    p3DecodeVideo(execution, report);
++  }
++
++  private void p3ConcurrentScopeReplays(List<P3ScopeReplay> pair) throws Exception {
++    assertThat(pair.size()).isEqualTo(2);
++    assertThat(pair.get(0).scope().csiId().equals(pair.get(1).scope().csiId())).isFalse();
++    assertThat(pair.get(0).value().equals(pair.get(1).value())).isFalse();
++    assertThat(p3ConcurrentHold).isNull();
++    long logStart;
++    var hold = new P3ConcurrentHold();
++    List<UUID> executions = new java.util.ArrayList<>();
++    List<Long> terminalDeadlines = new java.util.ArrayList<>();
++    List<JsonNode> receipts = new java.util.ArrayList<>();
++    List<P6OwnedPid> owned = new java.util.ArrayList<>();
++    int models = MODEL_WIRE.size();
++    Throwable primary = null;
++    Process parent = null;
++    try {
++      assertThat(ordinaryWorker.children().count()).isZero();
++      stopOwnedProcessTree(ordinaryWorker);
++      logStart = Files.size(TEMP.resolve("ordinary.log"));
++      long startupDeadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
++      startOrdinaryWorker(true, 2); // Real startup precedes either original authorization window.
++      p3AwaitParentStarted(logStart, 2, startupDeadline);
++      parent = ordinaryWorker;
++      Instant parentStarted = parent.info().startInstant().orElseThrow();
++      assertThat(p3ParentEvents(logStart, receipts, true)[0]).isEqualTo(2);
++      P3_NATIVE_SESSIONS.clear();
++      P3_RECEIPTS.clear();
++      p3ConcurrentHold = hold;
++      List<P6OwnedPid> children = new java.util.ArrayList<>();
++      for (int index = 0; index < pair.size(); index++) {
++        P3ScopeReplay current = pair.get(index);
++        p3ExpectedPassword = current.value();
++        UUID execution = p3Execute(current.test());
++        executions.add(execution);
++        p3AssertBinding(execution, current.scope(), current.published());
++        assertThat(COUNTED_VAULT.readCount(
++                StudioVaultProvider.ReferenceKind.SECRET, current.scope(), "PASS"))
++            .isEqualTo(current.ownReads());
++        assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
++        terminalDeadlines.add(System.nanoTime() + Duration.ofSeconds(60).toNanos());
++        assertThat(hold.entered[index].await(15, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
++        assertThat(hold.failed).isFalse();
++        List<P6OwnedPid> currentChildren = p3OrdinaryChildren(parent);
++        assertThat(currentChildren.size()).isEqualTo(index + 1);
++        for (P6OwnedPid prior : children) {
++          p6SameProcess(prior.handle(), prior.started());
++          assertThat(currentChildren.stream().anyMatch(
++                  next -> next.handle().pid() == prior.handle().pid()
++                      && next.started().equals(prior.started())))
++              .isTrue();
++        }
++        for (P6OwnedPid child : currentChildren) {
++          if (owned.stream().noneMatch(prior -> prior.handle().pid() == child.handle().pid()
++                  && prior.started().equals(child.started()))) {
++            owned.add(child);
++            for (ProcessHandle descendant : child.handle().descendants().limit(257).toList()) {
++              owned.add(p6SnapshotPid(descendant));
++            }
++          }
++        }
++        assertThat(owned.size()).isBetween(1, 256);
++        children = currentChildren;
++        JsonNode receipt = C.parse(jdbc.queryForObject(
++            "SELECT observed_admission_receipt::text FROM ui_test_executions WHERE id=?",
++            String.class, execution));
++        assertThat(receipt.path("kind").asText()).isEqualTo("observed");
++        assertThat(receipt.path("request").path("executionId").asText()
++                .equals(execution.toString())).isTrue();
++        assertThat(receipt.path("admissionId").isTextual()
++                && receipt.path("admissionId").equals(receipt.path("request").path("admissionId")))
++            .isTrue();
++        receipts.add(receipt);
++      }
++      assertThat(owned.size()).isBetween(2, 256);
++      p3ScanOwnedChildArguments(children, pair.stream().map(P3ScopeReplay::value).toList());
++      assertThat(hold.calls.get()).isEqualTo(2);
++      assertThat(hold.release.getCount()).isEqualTo(1);
++      assertThat(hold.failed).isFalse();
++      for (P6OwnedPid child : children) {
++        p6SameProcess(child.handle(), child.started());
++      }
++      p6SameProcess(parent.toHandle(), parentStarted);
++      p6Signal("-TERM", Long.toString(parent.pid()));
++      long drainingDeadline = System.nanoTime() + Duration.ofSeconds(2).toNanos();
++      while (p3ParentEvents(logStart, receipts, true)[1] == 0 && System.nanoTime() < drainingDeadline) {
++        Thread.sleep(10);
++      }
++      assertThat(p3ParentEvents(logStart, receipts, true)[1]).isEqualTo(1);
++      hold.release.countDown();
++      List<JsonNode> reports = new java.util.ArrayList<>();
++      for (int index = 0; index < pair.size(); index++) {
++        reports.add(p3AwaitExecution(executions.get(index), "PASSED", terminalDeadlines.get(index)));
++      }
++      for (int index = 0; index < pair.size(); index++) {
++        p3AssertScopeReplay(pair.get(index), executions.get(index), reports.get(index));
++        assertThat(P3_RECEIPTS.size()).isEqualTo(2);
++        assertThat(P3_RECEIPTS.get(index).accepted()).isTrue();
++        assertThat(P3_RECEIPTS.get(index).password().equals(pair.get(index).value())).isTrue();
++        assertThat(P3_RECEIPTS.get(index).username().equals("p3-user")).isTrue();
++      }
++      assertThat(parent.waitFor(20, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
++      assertThat(parent.exitValue()).isZero();
++      p6AwaitProcesses(owned, true);
++      assertThat(hold.failed).isFalse();
++      assertThat(MODEL_WIRE.size()).isEqualTo(models);
++      int[] events = p3ParentEvents(logStart, receipts, true);
++      assertThat(events).containsExactly(2, 1, 1, 0, 1, 1);
++      p3WriteEvidence("ordinary-concurrent-drain", C.object()
++          .put("distinctCsiScopes", 2).put("simultaneousOwnedChildren", 2)
++          .put("actualOwnReceipts", 2).put("privateEnvArgvScans", 2)
++          .put("canaryVariants", 30).put("canaryHits", 0)
++          .put("actualDrainingInFlight", 2).put("gracefulDrainCompleted", true)
++          .put("parentWipeEvents", 2).put("ownedProcessCount", owned.size())
++          .put("ownedProcessesGone", true));
++    } catch (Exception | AssertionError failure) {
++      primary = failure;
++      throw failure;
++    } finally {
++      var failures = new java.util.ArrayList<Throwable>();
++      hold.release.countDown();
++      for (int index = 0; index < Math.min(2, hold.calls.get()); index++) {
++        var exited = hold.exited[index];
++        p3AttemptTeardown(failures, () -> assertThat(
++            exited.await(5, java.util.concurrent.TimeUnit.SECONDS)).isTrue());
++      }
++      Process actualParent = parent == null ? ordinaryWorker : parent;
++      p3AttemptTeardown(failures, () -> stopOwnedProcessTree(actualParent));
++      if (!owned.isEmpty()) {
++        p3AttemptTeardown(failures, () -> p6AwaitProcesses(owned, true));
++      }
++      if (failures.isEmpty()) {
++        p3ConcurrentHold = null;
++        p3AttemptTeardown(failures, () -> {
++          long restoredLogStart = Files.size(TEMP.resolve("ordinary.log"));
++          long startupDeadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
++          startOrdinaryWorker(true);
++          p3AwaitParentStarted(restoredLogStart, 1, startupDeadline);
++        });
++      }
++      if (!failures.isEmpty()) {
++        cleanupUnconfirmed = true;
++        if (primary != null) {
++          failures.forEach(primary::addSuppressed);
++        } else {
++          throwTeardownFailures(failures);
++        }
++      }
++    }
++  }
++
++  private static List<P6OwnedPid> p3OrdinaryChildren(Process parent) {
++    Instant started = parent.info().startInstant().orElseThrow();
++    p6SameProcess(parent.toHandle(), started);
++    var children = parent.children().limit(3).toList();
++    assertThat(children.size()).isBetween(1, 2);
++    var owned = new java.util.ArrayList<P6OwnedPid>();
++    for (ProcessHandle child : children) {
++      assertThat(child.info().commandLine()
++              .map(command -> command.contains(TEMP.resolve("recorded-child.mjs").toString()))
++              .orElse(false))
++          .as("actual direct compiled ordinary child").isTrue();
++      P6OwnedPid actual = p6SnapshotPid(child);
++      assertThat(actual.parent() == parent.pid() && actual.group() == child.pid()).isTrue();
++      owned.add(actual);
++    }
++    p6SameProcess(parent.toHandle(), started);
++    return List.copyOf(owned);
++  }
++
++  private static void p3ScanOwnedChildArguments(List<P6OwnedPid> children, List<String> values)
++      throws Exception {
++    for (P6OwnedPid child : children) {
++      p6SameProcess(child.handle(), child.started());
++      C5CanaryStream scan = new C5CanaryStream(values);
++      byte[] arguments = null, environment = null;
++      Process probe = null;
++      try {
++        String[] actualArguments = child.handle().info().arguments().orElseThrow();
++        assertThat(actualArguments.length).isBetween(1, 32);
++        arguments = String.join("\0", actualArguments).getBytes(StandardCharsets.UTF_8);
++        assertThat(arguments.length).isBetween(1, 65536);
++        probe = new ProcessBuilder("/bin/ps", "eww", "-p", Long.toString(child.handle().pid()),
++            "-o", "command=").redirectErrorStream(true).start();
++        assertThat(probe.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
++        assertThat(probe.exitValue()).isZero();
++        environment = probe.getInputStream().readNBytes(65537);
++        assertThat(environment.length).isBetween(1, 65536);
++        assertThat(containsBytes(environment,
++                "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1".getBytes(StandardCharsets.UTF_8))).isTrue();
++        assertThat(containsBytes(environment, "TMPDIR=".getBytes(StandardCharsets.UTF_8))).isTrue();
++        p6SameProcess(child.handle(), child.started());
++        scan.write(arguments, 0, arguments.length);
++        scan.write(environment, 0, environment.length);
++        scan.closeInput();
++        scan.assertClean(true);
++      } finally {
++        if (arguments != null) java.util.Arrays.fill(arguments, (byte) 0);
++        if (environment != null) java.util.Arrays.fill(environment, (byte) 0);
++        scan.wipe();
++        if (probe != null) p6CloseCommand(probe);
++      }
++    }
++  }
++
++  private static void p3AwaitParentStarted(long offset, int poolSize, long deadline)
++      throws Exception {
++    int observed;
++    do {
++      observed = p3ParentEvents(offset, List.of(), false)[0];
++      if (observed != 0) break;
++      Thread.sleep(10);
++    } while (System.nanoTime() < deadline);
++    assertThat(System.nanoTime() <= deadline).as("original parent readiness deadline").isTrue();
++    assertThat(observed).as("actual parent startup within original readiness budget").isEqualTo(poolSize);
++  }
++
++  private static int[] p3ParentEvents(
++      long offset, List<JsonNode> receipts, boolean concurrentDrain) throws Exception {
++    assertThat(receipts.size()).isBetween(0, 2);
++    int[] counts = new int[6]; // pool size, drain2, completed, fault, and exact A/B parent wipes.
++    byte[] bytes = null;
++    try (var input = Files.newInputStream(TEMP.resolve("ordinary.log"))) {
++      input.skipNBytes(offset);
++      bytes = input.readNBytes(2097153);
++      assertThat(bytes.length).isLessThanOrEqualTo(2097152);
++      String text = new String(bytes, StandardCharsets.UTF_8);
++      int complete = text.lastIndexOf('\n');
++      if (complete < 0) return counts;
++      for (String line : text.substring(0, complete).split("\n")) {
++        if (!line.startsWith("{") || !(line.contains("runner.started")
++            || line.contains("runner.draining") || line.contains("runner.drained")
++            || line.contains("runner.drain_deadline") || line.contains("runner.drain_killed")
++            || line.contains("run.values_wiped"))) continue;
++        JsonNode event;
++        try {
++          event = JSON.readTree(line);
++        } catch (IOException invalid) {
++          throw new IllegalStateException("C2 parent event shape unavailable");
++        }
++        String name = event.path("event").asText();
++        // Startup has no receipt; C6's nonempty receipt selection grades only its wipe.
++        if (!concurrentDrain
++            && !(receipts.isEmpty() ? name.equals("runner.started") : name.equals("run.values_wiped")))
++          continue;
++        switch (name) {
++          case "runner.started" -> {
++            assertThat(counts[0]).isZero();
++            counts[0] = event.path("poolSize").asInt(-1);
++          }
++          case "runner.draining" -> {
++            assertThat(event.path("inFlight").asInt(-1)).isEqualTo(2);
++            counts[1]++;
++          }
++          case "runner.drained" -> {
++            assertThat(event.path("completed").isBoolean()).isTrue();
++            if (event.path("completed").asBoolean()) counts[2]++; else counts[3]++;
++          }
++          case "runner.drain_deadline", "runner.drain_killed" -> counts[3]++;
++          case "run.values_wiped" -> {
++            int matched = 0;
++            for (int index = 0; index < receipts.size(); index++) {
++              JsonNode receipt = receipts.get(index);
++              JsonNode request = receipt.path("request");
++              assertThat(receipt.path("admissionId").isTextual()
++                      && receipt.path("admissionId").equals(request.path("admissionId"))).isTrue();
++              if (List.of("executionId", "attemptId", "admissionId").stream()
++                  .allMatch(key -> event.path(key).isTextual()
++                      && event.path(key).equals(request.path(key)))) {
++                counts[4 + index]++;
++                matched++;
++              }
++            }
++            assertThat(matched).isEqualTo(1);
++          }
++          default -> { }
++        }
++      }
++      return counts;
++    } finally {
++      if (bytes != null) java.util.Arrays.fill(bytes, (byte) 0);
++    }
++  }
++
+   @FunctionalInterface
+   private interface P3Action {
+     void run() throws Exception;
+@@ -8636,6 +8988,7 @@
+     }
+     int reads = COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
+     int models = MODEL_WIRE.size();
++    long ordinaryLogStart = kind <= 2 ? Files.size(TEMP.resolve("ordinary.log")) : -1;
+     P4RevocationState state =
+         new P4RevocationState(P4_REVOCATION_CASE.incrementAndGet(), kind <= 2 ? 2 : 1, test, jdbc);
+     state.c6Kind = kind;
+@@ -8658,6 +9011,7 @@
+       assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+     }
+     List<P6OwnedPid> browserTree = List.of();
++    List<P6OwnedPid> ordinaryTree = new java.util.ArrayList<>();
+     if (kind < 4) {
+       assertThat(
+               state.c6Timing == null
+@@ -8682,6 +9036,15 @@
+         if (kind == 1) {
+           state.c6CutAt = System.nanoTime();
+         }
++      }
++      if (kind <= 2) {
++        List<P6OwnedPid> children = p3OrdinaryChildren(ordinaryWorker);
++        assertThat(children.size()).isEqualTo(1);
++        P6OwnedPid child = children.getFirst();
++        ordinaryTree.add(child);
++        ordinaryTree.addAll(child.handle().descendants().limit(129)
++            .map(GuidedPublicationReplayIT::p6SnapshotPid).toList());
++        assertThat(ordinaryTree.size()).isBetween(1, 128);
+       }
+       P6OwnedPid primaryBrowser = kind == 3 ? p8OwnedPrimaryBrowser(state) : null;
+       if (kind == 3) {
+@@ -8847,6 +9210,18 @@
+           true; // Observer output closed; its raw SDK sealed field remains false.
+     }
+     p3CleanupOwnedResources();
++    if (!ordinaryTree.isEmpty()) p6AwaitProcesses(ordinaryTree, true);
++    boolean parentValuesWipedObserved = false;
++    if (kind <= 2) {
++      JsonNode receipt = C.parse(jdbc.queryForObject(
++          "SELECT observed_admission_receipt::text FROM ui_test_executions WHERE id=?",
++          String.class, state.execution));
++      assertThat(receipt.path("kind").asText()).isEqualTo("observed");
++      assertThat(receipt.path("request").path("executionId").asText()
++              .equals(state.execution.toString())).isTrue();
++      assertThat(p3ParentEvents(ordinaryLogStart, List.of(receipt), false)[4]).isEqualTo(1);
++      parentValuesWipedObserved = true;
++    }
+     p8AssertUnknownUsageLineage(state);
+     if (!browserTree.isEmpty()) {
+       p6AwaitProcesses(browserTree, true);
+@@ -8909,7 +9284,10 @@
+             .put("rawEncodedHits", state.c6EncodedHits)
+             .put("producedRedactedCallback", state.c6CallbackRedacted)
+             .put("realReleasedReads", 1)
+-            .put("ownedBrowserTreeGone", !browserTree.isEmpty());
++            .put("ownedBrowserTreeGone", !browserTree.isEmpty())
++            .put("parentValuesWipedObserved", parentValuesWipedObserved)
++            .put("ownedOrdinaryChildTreeGone", !ordinaryTree.isEmpty())
++            .put("ownedOrdinaryChildTreeCount", ordinaryTree.size());
+     if (capture.c6Timing != null) {
+       capture.c6Acceptance = acceptance.deepCopy();
+     }
+@@ -9907,7 +10285,11 @@
+   }
+ 
+   private JsonNode p3AwaitExecution(UUID execution, String expected) throws Exception {
+-    long deadline = System.nanoTime() + Duration.ofSeconds(60).toNanos();
++    return p3AwaitExecution(execution, expected, System.nanoTime() + Duration.ofSeconds(60).toNanos());
++  }
++
++  private JsonNode p3AwaitExecution(UUID execution, String expected, long deadline) throws Exception {
++    assertThat(System.nanoTime() < deadline).as("original terminal observation deadline").isTrue();
+     String actual = "";
+     do {
+       actual =
+@@ -10998,6 +11380,8 @@
+   private static void p3Application(com.sun.net.httpserver.HttpExchange exchange)
+       throws IOException {
+     P6ChildCut heldCut = null;
++    P3ConcurrentHold heldConcurrent = null;
++    int concurrentOrdinal = -1;
+     try {
+       if (p3Mode == null) {
+         exchange.sendResponseHeaders(404, -1);
+@@ -11026,6 +11410,12 @@
+         String password = values.getOrDefault("password", "");
+         boolean accepted = password.equals(p3ExpectedPassword);
+         P3_RECEIPTS.add(new P3Receipt(password, values.getOrDefault("username", ""), accepted));
++        P3ConcurrentHold concurrent = p3ConcurrentHold;
++        if (concurrent != null) {
++          heldConcurrent = concurrent;
++          concurrentOrdinal = concurrent.calls.getAndIncrement();
++          concurrent.hold(accepted, concurrentOrdinal);
++        }
+         P6ChildCut selectedCut = p6ChildCut;
+         if (selectedCut != null) {
+           heldCut = selectedCut;
+@@ -11115,6 +11505,9 @@
+       } finally {
+         if (heldCut != null) {
+           heldCut.signInExited.countDown();
++        }
++        if (heldConcurrent != null && concurrentOrdinal >= 0 && concurrentOrdinal < 2) {
++          heldConcurrent.exited[concurrentOrdinal].countDown();
+         }
+       }
+     }
+@@ -14856,9 +15249,9 @@
+             + "t:720},stepTimeoutMs:30000,launchTimeoutMs:30000,maxFailureMessag"
+             + "eLength:400,seekOriginCalibrationMs:0,spawner:cutSpawner,childModulePath:"
+             + JSON.writeValueAsString(child.toString())
+-            + "});const cutConfig=loadConfig("
++            + "});const cutConfig=loadConfig({..."
+             + env
+-            + (");const app=createApplication(cutConfig,{launcher,http:revHttp,"
++            + (",POOL_SIZE:process.env.OBS007_ORDINARY_POOL_SIZE});const app=createApplication(cutConfig,{launcher,http:revHttp,"
+                 + "scratch:cutScratchStore(cutConfig.scratchDir),"
+                 + "runtimeVersions:loadRuntimeVersions(),observed:{build,policies:[")
+             + POLICY
+@@ -14884,6 +15277,11 @@
+   }
+ 
+   private void startOrdinaryWorker(boolean preserveExistingLog) throws Exception {
++    startOrdinaryWorker(preserveExistingLog, 1);
++  }
++
++  private void startOrdinaryWorker(boolean preserveExistingLog, int poolSize) throws Exception {
++    assertThat(poolSize).isBetween(1, 2);
+     String browsers =
+         System.getenv()
+             .getOrDefault(
+@@ -14893,6 +15291,7 @@
+     var ordinary = new ProcessBuilder("node", TEMP.resolve("ordinary.mjs").toString());
+     ordinary.environment().put("NODE_EXTRA_CA_CERTS", TEMP.resolve("tls.crt").toString());
+     ordinary.environment().put("PLAYWRIGHT_BROWSERS_PATH", browsers);
++    ordinary.environment().put("OBS007_ORDINARY_POOL_SIZE", Integer.toString(poolSize));
+     ordinary
+         .redirectErrorStream(true)
+         .redirectOutput(

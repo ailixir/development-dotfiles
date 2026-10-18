@@ -1,0 +1,25 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java
+@@ -197,6 +197,7 @@
+       s.executeUpdate(revisionWithStepMetadata(prior, owner.testId(), first, snapshot, "{}", "1"));
+       s.execute("SET CONSTRAINTS tr_publication_step_metadata_guard IMMEDIATE");
+       // Same test and CSI, identical snapshot: the reuse is accepted by the guard.
++      var beforeReuse = c.setSavepoint();
+       UUID reused = UUID.randomUUID();
+       s.executeUpdate(
+           revisionWithStepMetadata(
+@@ -215,6 +216,14 @@
+                       + reused
+                       + "'"))
+           .isEqualTo(prior.toString());
++      c.rollback(beforeReuse);
++      c.releaseSavepoint(beforeReuse);
++      // Same test, same authored coordinate and same prior revision; only the hash differs.
++      // These are rollback-only deferred metadata probes, not committed publications.
++      reject(c, revisionWithStepMetadata(UUID.randomUUID(), owner.testId(), second,
++          "{\"" + step + "\":\"" + "e".repeat(64) + "\"}",
++          "{\"" + step + "\":{\"revisionId\":\"" + prior + "\",\"stepId\":\"" + step + "\"}}", "3"),
++          "step reuse must preserve same-scope published snapshot hash");
+       c.rollback();
+     }
+     try (Connection c = transaction();

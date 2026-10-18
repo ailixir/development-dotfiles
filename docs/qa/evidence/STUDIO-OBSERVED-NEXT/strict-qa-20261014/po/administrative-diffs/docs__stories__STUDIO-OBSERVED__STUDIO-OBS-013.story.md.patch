@@ -1,0 +1,26 @@
+--- docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md (before Pax administration)
++++ docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md (after Pax administration)
+@@ -305,8 +305,23 @@
+ 
+ | 2026-10-14 | 0.2.8 | Strict independent QA PASS — Status: InReview → Done. Every originally planned applicable local validation is executed green on the final source/dist and reconciled executor revision; prior failures, uncredited skips and original external gates remain explicit. Gate and complete proof: qa013/final-story-review.json. | @qa (Quinn) |
+ 
++| 2026-10-14 | 0.2.9 | Administrative reclosure after independent strict Quinn approval; exact current QA/story/source provenance, protected content and all planned local green evidence verified. Status Done and QA Results unchanged; no lifecycle transition by PO. Historical CONCERNS report archived and twenty carry-forward dispositions reconciled without external approval. [closure-key: STUDIO-OBS-013:digest:strict-review:sha256:76cfd1310ab814e48cbf3b095b45e79ade5a373156c796e6fd800699fd13ec47] | @po (Pax) |
++
+ ## Administrative closure notes — 2026-10-14
+ 
++These paragraphs preserve the superseded CONCERNS administrative closure. The strict administrative reclosure below is current.
++
+ All applicable ACs accepted. Applicability: the retired `recording-coverage.test.ts` references in AC-6/Testing are satisfied by `studio-runner/test/fixtures-tier/guided-recording.test.ts` (four real-browser cases including adapter parity and recorder loss); no guided coverage is waived. AC-4 SSE remains N/A under the existing PO ruling, never an SSE pass. The joined recorder-fault case uses the plain fixture because of the single-use secret observer, while the runner fault still uses the login fixture; QA verified the unchanged assertions. CONTEXT_LOST/scratch cleanup are in OBS-009, range-cost/ratification in OBS-008, logging in OBS-010, normative regex documentation in OBS-011. Manual masking/Sonic remain external or downstream.
+ 
+ The coordinator accepts the documented nonblocking concerns only for this story’s scoped completion. See [`po-closure-placements.json`](../../qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json) for owners and completion conditions. Outstanding follow-ups remain open. No commit, push, deployment, database recreation or external communication occurred.
++
++
++## Strict administrative reclosure — 2026-10-14
++
++Independent Quinn completed the lifecycle at version 0.2.8. Pax verified the current canonical gate, final source-bound review and exact QA-reviewed Done story, then appended this administrative version 0.2.9. Status Done, QA Results, acceptance criteria, tasks and the actual implementation File List remain byte-identical to that review. The reviewed revision remains `strict-review:sha256:76cfd1310ab814e48cbf3b095b45e79ade5a373156c796e6fd800699fd13ec47`; the post-administration story hash is recorded separately in `.ai/STUDIO-OBS-013-close.json`.
++
++All originally planned applicable local checks are complete and green. Final normal backend: 2,077 standard passes / 25 historical uncredited skips, plus two cross-replica passes; Planning57/Replay40/Session44/Bridge37. Final runner: 1,529 unit passes / 29 historical uncredited skips; type/full lint/coverage green; profile10, native232 / nine historical uncredited skips; deployment313 / zero skips. Source `cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467` and dist `af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2` were independently rehashed. Actual global70, four75 and relocated gateway393/424≥80 coverage pass; retired compiler selector literals have no current classes, not matched passes, and their future enforcement limitation remains explicit. The configured independent manual review fallback applies; no automated CodeRabbit result is claimed.
++
++Strict local logging, evidence wiring, every-read authorization/duplicate/expiry ratification and conformance, PostgreSQL ID boundaries, real owned SIGKILL/restart cleanup, native startup discrimination and profile fixture ownership/privacy proofs are complete. The retired recording fixture applicability, guided SSE N/A and separate fault-fixture hosting remain as independently accepted; no SSE pass is invented. Historical CONTEXT_LOST and 503 causes remain unknown.
++
++The old `.ai` CONCERNS report is preserved byte-exact at `docs/qa/evidence/STUDIO-OBS-013/strict-qa/history/close-before-strict-pass.json`. The current `.ai` report and strict closure receipt bind this administrative delta; the twenty carried obligations are reconciled in `docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json`. Local completed obligations are no longer deferred downstream; original playback/UX/load and folded/deployed reliability work remains. Real provider/Sonic/Vault/SIEM/staging/manual C-17, Security/Compliance, D-2b, targetLabelHash privacy and F01–F04 retain their original gates. Artifact HMAC does not fix audit-label hashing. No external approval or deployment occurred. OBS-012B is unchanged; OBS-015 production is unstarted and technical signoff unresolved. Root retains close-phase CLI verification and wave advancement.

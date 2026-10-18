@@ -1,0 +1,85 @@
+{
+  "schema": "fresh-owner-d-stop-owner-review/1",
+  "verdict": "SCOPED_FINDINGS",
+  "reviewType": "INDEPENDENT_READONLY_SOURCE_ONLY",
+  "authority": {
+    "source": "docs/qa/evidence/STUDIO-OBS-007/d-stop-owner-candidate/after.java",
+    "sha256": "ea7fb2b07d040747973d17be78953271933b09089765e73fa322cd5ee0ae0e37",
+    "beforeSha256": "770a33a35c6d449e68bb356404eae131871fae6cee63e6842704ceecb15aa26b",
+    "patchSha256": "d0a824bb64f37eeb19d1941744998de81e7deaabbe2b0c457730116acaac858b",
+    "reportSha256": "a958e4528d979088d0c58ee67129b052236a8f0d84b84e60d4dd95b2d3e16a9e",
+    "hashesVerified": true,
+    "mutableCurrentTestRead": false,
+    "lineAuthority": "Immutable after.java; later formatter/reanchors do not change this review's source identity."
+  },
+  "scope": "New SourceStopOwner, TrackingTransactionTemplate, attached private-route lifetime, four failure controls, and owned-context teardown hunks; original nine/modes and private fault preservation checked through immutable source.patch.",
+  "findings": [
+    {
+      "id": "D-STOP-01",
+      "severity": "P2",
+      "title": "Guard failure signals completion before the original operation executes",
+      "location": { "artifact": "after.java", "line": 1133, "relatedLines": [1053, 1056, 1068, 1119, 1122, 1127] },
+      "detail": "TrackingTransactionTemplate's completion finally covers its source/thread/count assertions as well as super.execute. If a guard fails, super.execute has never started, yet completed is counted down and the route drain treats confirmation as complete. SourceStopOwner similarly counts down when a preregistration/session/invocation assertion fails before sender.stop. These branches violate the requested genuine original-operation return/throw boundary and no never-started completion rule. confirmationCalls is also incremented before the original execute is reached.",
+      "impact": "The exact failure branches that detect an ownership mismatch can release the completion handle without executing the operation it claims to own. Recording the assertion as failure does not make this a genuine sender/confirmation completion.",
+      "requestedChange": "Separate guard/ownership failure from actual operation completion. Only mark sender or confirmation completion after its original call has actually returned/thrown and released resources; retain explicit failed/unstarted ownership for rejected guards rather than satisfying the genuine-completion predicate."
+    },
+    {
+      "id": "D-STOP-02",
+      "severity": "P2",
+      "title": "Outer control cleanup discards interruption restored by the ownership drain",
+      "location": { "artifact": "after.java", "line": 1300, "relatedLines": [1193, 1249, 1288, 1299, 1302] },
+      "detail": "actualStopControl snapshots only the interrupt at method entry. Its outer finally unconditionally clears the current flag and restores only that entry snapshot. An external interruption received during sender/confirmation drain is correctly remembered and restored by drainUninterruptibly, then erased here when priorInterrupt was false. The intentional interrupt-control assertion also clears the flag at line 1249, so its success proves only the intermediate drain behavior, not preservation at method exit.",
+      "impact": "A genuine observation or cleanup interruption can be lost even though the owned operations were drained safely, contrary to the explicit restore-interrupt requirement.",
+      "requestedChange": "Preserve interrupts received during the control and cleanup through method exit. If consuming the deliberate control interrupt is necessary, distinguish that deliberate observation from newly received external interruptions rather than clearing all current interruption in finally."
+    },
+    {
+      "id": "D-STOP-03",
+      "severity": "P2",
+      "title": "Cleanup-time operation errors are omitted from the primary failure",
+      "location": { "artifact": "after.java", "line": 1288, "relatedLines": [1257, 1263, 1279, 1280, 1289, 1293] },
+      "detail": "The four controls inspect owner.failure only on their normal assertion path. If an earlier assertion/observation fails while genuine stop work is pending, finally releases the gates and drains the work but never attaches owner.failure to primary. For example, a failed gate-entered await or peer/count assertion followed by a real HTTP503 sender failure leaves only the earlier primary error visible. Only route.reopen errors are suppressed here. The existing private-fault cleanup does collect stopWork.failure, so the omission is specific to the new control cleanup.",
+      "impact": "Real sender or JDBC confirmation failures that emerge during cleanup are retained in an internal field but lost from the thrown failure evidence; draining successfully cannot substitute for preserving those errors.",
+      "requestedChange": "After the independent drain, preserve any genuine owner failure with the primary error (avoiding duplicate/self suppression). Keep intentionally asserted refusal outcomes distinct from an unexpected cleanup-time operation failure."
+    }
+  ],
+  "verifiedSourceProperties": {
+    "preregistration": "The private-fault normal cancellation and all four controls register one case-local owner/session before cancel. Invocation count rejects a second sender attempt; the recorded task thread and same DataSource gate the confirmation seam. Expected work that never enters send leaves its latch pending. Guard-failure exceptions to the genuine-completion rule are D-STOP-01.",
+    "productionBindings": {
+      "GuidedSessionService.java": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+      "GuidedSessionRepository.java": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d",
+      "GuidedDispatchService.java": "ceeec5a8ef899dced36c556b44ce2e1099fefe65084b7ffc4e3b0f69c4bc68dd",
+      "hashesVerified": true
+    },
+    "originalForwarding": "On guards passing, original dispatch.stop runs once, then the ThreadLocal arms the pinned same-thread immediately following repository transaction. super.execute receives the unchanged callback once with the same DataSourceTransactionManager/source; its return/throw precedes the completion finally and original transaction resource cleanup. Production lines 2204-2238 contain only RuntimeException catch/return after these operations.",
+    "routeLifetime": "Explicit drains in private-fault cleanup, control cleanup and PrivatePgRoute.close precede normal route destruction. Observation deadlines, Future state and bridge idleness do not satisfy an expected operation latch. Confirmation-refusal unavailable() is the deliberate fault injection, while actual close remains after drain. Unbounded pending work remains unreaped; no watchdog success path is implemented.",
+    "fourControls": [
+      "Observation error uses an actual assertion against a genuinely pending sender held in the authenticated relay, then releases/drains and requires real persisted confirmation.",
+      "Observation interrupt uses real CountDownLatch.await interruption while the sender is pending, followed by an independent drain; method-exit preservation gap is D-STOP-02.",
+      "Sender refusal changes the actual authenticated relay response to HTTP503 and asserts the original GuidedSessionException UNKNOWN_OUTCOME/409, zero confirmation calls and persisted CANCELLED/PENDING/live=false facts.",
+      "Confirmation refusal gates after the real sender succeeds, closes only the private JDBC route, checks direct physical PG availability, then calls original super.execute and requires CannotCreateTransactionException plus genuine PSQLException class08. Persisted state remains unconfirmed; same-port route restoration is separate."
+    ],
+    "preservation": "The verified immutable patch leaves the original parameterized method and nine-value Mode block untouched. The private fault retains its original real driver/refusal, read/POST/consume, unresolved pre-rescue state, same-port recovery/no-resend, interrupt/array and separate authorized-cancellation assertions; reviewed deltas replace ownership/completion and strengthen cleanup.",
+    "ownedContext": "The actual injected context is captured per class. A real ThreadPoolTaskScheduler bean supplies an executor handle; scheduler, ThreadPoolTaskExecutor and ExecutorService handles are gathered before context.close, shutdown and checked for actual termination before relay/PEERS/PG teardown. Unsupported scheduler types fail before PG stop. AFTER_CLASS DirtiesContext subsequently evicts the closed context. This is stronger than inactive-flag-only evidence and does not shut down the global common pool."
+  },
+  "execution": {
+    "expectedInvocations": 14,
+    "originalNine": "UNRUN",
+    "privateFault": "UNRUN",
+    "fourControls": "UNRUN",
+    "compilation": "NOT_RUN",
+    "formatting": "NOT_RUN",
+    "runtime": "NOT_RUN",
+    "Gradle": "NOT_RUN",
+    "Docker": "NOT_RUN",
+    "browser": "NOT_RUN",
+    "processActions": [],
+    "sourceEdits": false,
+    "soleWrittenArtifact": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-d-stop-owner-review.json"
+  },
+  "limits": [
+    "No whole outer Future or JVM common-pool termination claim; parent-approved owned sender/confirmation operation boundary only.",
+    "No optional JDBC timeout added or approved; no bounded cleanup certification for permanently blocked work.",
+    "Prior normal private-route PASS is separate historical evidence and does not establish these failure paths.",
+    "No general DB, held-row, pool, primary outage, all19, full Core/browser, QA or lifecycle claim; earlier D03 is not closed by this review."
+  ]
+}

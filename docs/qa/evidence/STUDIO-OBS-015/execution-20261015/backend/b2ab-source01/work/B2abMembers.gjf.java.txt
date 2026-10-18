@@ -1,0 +1,2706 @@
+class W {
+
+  // ---------------------------------------------------------------------------------------------
+  // B2A-01..04 / B2B-01..02 (STUDIO-OBS-015 b2ab-source01, design b2ab-design01). Test-only.
+  // Authority tiers (authority-tier-ruling01 T1/T2), disclosed here once and in assertion texts:
+  // "Vault" is the in-JVM FakeStudioVaultProvider behind CountedLoginVault (only the
+  // StudioVaultProvider leaf is a double); "Core" is the in-JVM Core contract fixture (real Citi
+  // Core/COIN not exercised); secret-use grants come from the controlledLoginEntitlement fixture
+  // entitlement (P3_PERMITTED), never Core policy. Resolver, secret-use check, audit lifecycle,
+  // redaction and Testcontainers PG are production code. Every knob below defaults to the
+  // unchanged P3/ten-step fixture bytes; no production seam, clock, lease or cap is changed.
+  // ---------------------------------------------------------------------------------------------
+
+  private enum B2PasswordPage {
+    SINGLE,
+    NONE,
+    TWO,
+    TYPE_FLIP
+  }
+
+  private static volatile B2PasswordPage b2PasswordPage = B2PasswordPage.SINGLE;
+  private static volatile boolean b2Combined;
+  private static volatile boolean b2aTitleSuffix;
+  // Private fixture values and receipts (like P3_RECEIPTS): never printed or used in messages.
+  private static final List<String> B2_ORDER_VALUES = new CopyOnWriteArrayList<>();
+  private static final List<String> B2_REFERENCE_RECEIPTS = new CopyOnWriteArrayList<>();
+  private static final List<JsonNode> B2_MODEL_CONTEXTS = new CopyOnWriteArrayList<>();
+  private static final java.util.concurrent.ConcurrentMap<String, B2bPlanHold> B2B_PLAN_HOLDS =
+      new java.util.concurrent.ConcurrentHashMap<>();
+  private static volatile java.util.concurrent.CountDownLatch b2bSignInHold;
+  private static volatile java.util.concurrent.CountDownLatch b2bSignInEntered;
+
+  /** Provider-thread hold of the first suffix SOURCE_PLAN of one session (B2B-01 only). */
+  private static final class B2bPlanHold {
+    final java.util.concurrent.CountDownLatch entered = new java.util.concurrent.CountDownLatch(1);
+    final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+    final AtomicInteger hits = new AtomicInteger();
+    volatile Throwable failure;
+  }
+
+  @FunctionalInterface
+  private interface B2aSetup {
+    void run() throws Exception;
+  }
+
+  /** Code/count oracles of one B2A-01 fault; null state/code means "pinned on first run". */
+  private record B2aExpected(
+      String state, String code, int reads, String release, String usage, boolean linked) {}
+
+  /**
+   * B2A-01 (ledger 28 {@code IncrementalRelearnIT.secretPrefixPreservesOBS007Oracles}, tier "REAL
+   * JOINED password fixture + test Vault"; "test Vault" = in-JVM fake provider, ruling T1). One
+   * confirmed P3 LOGIN base on the exact non-default tuple (primaryCsi, fixture-other, PASS); each
+   * fault is a separate real mixed session (explicit firstLearnStepId THREE) on that base, then a
+   * valid control publishes and replays. Assertion IDs A28-1..A28-12 follow the design table.
+   */
+  @Test
+  void incrementalSecretPrefixPreservesEveryVaultFaultOracle() throws Exception {
+    p3Case(
+        () -> {
+          try {
+            p3Mode = P3Mode.LOGIN;
+            String environment = "fixture-other";
+            String csi = primaryCsi;
+            // Fixture entitlement (not Core policy): this tuple exists only through P3_PERMITTED.
+            p3Grant(csi, environment);
+            UUID test = p3CreateSource(csi, environment, true);
+            VaultScope scope = VaultScope.of(csi, environment, test);
+            String first = p3ExpectedPassword;
+            p3Seed(scope, first);
+            String original = p3Start(test, environment);
+            awaitFinalizing(original);
+            P3Publication base = p3Publish(original);
+            String baseAudit = b2AuditSnapshot(original);
+            String badOrigin = "B2A-BADORIGIN-" + UUID.randomUUID();
+            String flip = "B2A-TYPEFLIP-" + UUID.randomUUID();
+            String head = "B2A-OVERSIZE-" + UUID.randomUUID(); // unique scan head of the oversize
+            String oversize = head + "x".repeat(4097 - head.length());
+            assertThat(oversize.length())
+                .as("one char above the 4096 resolver bound")
+                .isEqualTo(4097);
+            String current = "B2A-CURRENT-" + UUID.randomUUID();
+            var canaries = new ArrayList<String>(List.of(first, badOrigin, flip, head, current));
+            AUDIT_CANARIES.addAll(canaries);
+
+            // A28-6: the Vault entry is bound to an approved but different origin.
+            b2aFault(
+                test,
+                scope,
+                base,
+                environment,
+                badOrigin,
+                () ->
+                    VAULT.bindOrigins(
+                        StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS", SECRET_ORIGIN),
+                new B2aExpected("FAILED", "ORIGIN_NOT_ALLOWED", 1, "RESOLVED", "REFUSED", true));
+            // A28-7: a value above the resolver bound is refused after the bounded read.
+            b2aFault(
+                test,
+                scope,
+                base,
+                environment,
+                oversize,
+                () -> {},
+                new B2aExpected("FAILED", "SECRET_TOO_LONG", 1, "UNAVAILABLE", "REFUSED", true));
+            // A28-8/9: zero or two password controls refuse in the password-only adapter, unread.
+            for (B2PasswordPage page : List.of(B2PasswordPage.NONE, B2PasswordPage.TWO)) {
+              b2PasswordPage = page;
+              try {
+                b2aFault(
+                    test,
+                    scope,
+                    base,
+                    environment,
+                    current,
+                    () -> {},
+                    new B2aExpected(null, null, 0, null, "NOT_USED", false));
+              } finally {
+                b2PasswordPage = B2PasswordPage.SINGLE;
+              }
+            }
+            // A28-10: focus type-flip after INVOKING is a truthful UNKNOWN_OUTCOME use.
+            b2PasswordPage = B2PasswordPage.TYPE_FLIP;
+            try {
+              b2aFault(
+                  test,
+                  scope,
+                  base,
+                  environment,
+                  flip,
+                  () -> {},
+                  new B2aExpected("UNKNOWN_OUTCOME", null, 1, "RESOLVED", "UNKNOWN_OUTCOME", true));
+            } finally {
+              b2PasswordPage = B2PasswordPage.SINGLE;
+            }
+            // A28-11: revoking the exact fixture entitlement refuses the start before any write.
+            String before = b1ScopedSnapshot(test);
+            int reads =
+                COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
+            int lists = COUNTED_VAULT.lists.size();
+            JsonNode launch = p3LaunchCounter();
+            var removed = new ArrayList<P3Entitlement>();
+            try {
+              for (String actor : List.of("user-1", "fixture@example.invalid")) {
+                var tuple = new P3Entitlement(actor, csi, environment, "PASS");
+                assertThat(P3_PERMITTED.remove(tuple))
+                    .as("exact previously granted fixture entitlement")
+                    .isTrue();
+                removed.add(tuple);
+              }
+              JsonNode refused =
+                  p3Call(
+                      p3Cookie,
+                      "/api/v1/studio/guided-sessions",
+                      p3StartCommand(test, environment)
+                          .put("baseRevisionId", base.revision().toString())
+                          .put("firstLearnStepId", THREE),
+                      403);
+              assertThat(refused.path("code").asText()).isEqualTo("SECRET_USE_NOT_AUTHORIZED");
+              assertThat(b1ScopedSnapshot(test))
+                  .as("revoked start writes nothing")
+                  .isEqualTo(before);
+              assertThat(
+                      COUNTED_VAULT.readCount(
+                          StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS"))
+                  .isEqualTo(reads);
+              assertThat(COUNTED_VAULT.lists.size())
+                  .as("no name listing after refusal")
+                  .isEqualTo(lists);
+              assertThat(p3LaunchCounter()).as("no guided browser launch").isEqualTo(launch);
+            } finally {
+              P3_PERMITTED.addAll(removed);
+            }
+
+            // Valid control (A28-1..5, A28-12) on the same confirmed base, authority restored.
+            p3ExpectedPassword = current;
+            p3Seed(scope, current);
+            P3_RECEIPTS.clear();
+            P3_NATIVE_SESSIONS.clear();
+            int models = MODEL_WIRE.size();
+            int valueReads =
+                COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
+            int startLists = COUNTED_VAULT.lists.size();
+            int mayUse = P3_MAY_USE.size();
+            String mixed =
+                p3Call(
+                        p3Cookie,
+                        "/api/v1/studio/guided-sessions",
+                        p3StartCommand(test, environment)
+                            .put("baseRevisionId", base.revision().toString())
+                            .put("firstLearnStepId", THREE),
+                        202)
+                    .path("session")
+                    .path("sessionId")
+                    .asText();
+            awaitFinalizing(mixed);
+            String principal =
+                sessions.transaction(
+                    () ->
+                        sessions.lock(mixed).document().path("scope").path("principalId").asText());
+            // A28-2: one names-only preflight of the mixed scope and a fixture-entitlement check.
+            assertThat(b2Tail(COUNTED_VAULT.lists, startLists)).containsExactly(scope);
+            assertThat(b2Tail(P3_MAY_USE, mayUse))
+                .as("fixture entitlement consulted for the session principal and exact tuple")
+                .contains(new P3Entitlement(principal, csi, environment, "PASS"));
+            // A28-4: exactly one value read during the whole mixed run, at the secret dispatch.
+            assertThat(
+                    COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS")
+                        - valueReads)
+                .isEqualTo(1);
+            // A28-1: no model attempt before the relearn switch; password-only adapter target.
+            assertThat(
+                    jdbc.queryForObject(
+                        "SELECT count(*) FROM studio_guided_model_attempts m JOIN"
+                            + " studio_guided_relearn_switches s USING(session_id)"
+                            + " WHERE m.session_id=? AND m.created_at<s.created_at",
+                        Integer.class,
+                        mixed))
+                .isZero();
+            JsonNode secret =
+                C.parse(
+                    jdbc.queryForObject(
+                        "SELECT proposal::text FROM studio_guided_actions"
+                            + " WHERE session_id=? AND step_id=? AND ordinal=1",
+                        String.class,
+                        mixed,
+                        TWO));
+            assertThat(secret.path("target").path("kind").asText()).isEqualTo("passwordControl");
+            assertThat(secret.path("operation").path("value").path("kind").asText())
+                .isEqualTo("secretRef");
+            assertThat(
+                    jdbc.queryForObject(
+                        "SELECT count(*) FROM studio_guided_prefix_requests"
+                            + " WHERE session_id=? AND step_id=? AND ordinal=1",
+                        Integer.class,
+                        mixed,
+                        TWO))
+                .as("TWO/1 was issued from the base prefix program")
+                .isEqualTo(1);
+            assertThat(P3_NATIVE_SESSIONS).as("same guided browser, one sign-in").hasSize(1);
+            assertThat(P3_RECEIPTS).hasSize(1);
+            assertThat(P3_RECEIPTS.getFirst().accepted()).isTrue();
+            assertThat(P3_RECEIPTS.getFirst().password().equals(current))
+                .as("current Vault value used (boolean only)")
+                .isTrue();
+            // A28-3/4: release and use rows are joined to the mixed session, never the base one.
+            String admission =
+                jdbc.queryForObject(
+                    "SELECT admission_id FROM studio_guided_actions"
+                        + " WHERE session_id=? AND step_id=? AND ordinal=1",
+                    String.class,
+                    mixed,
+                    TWO);
+            String readVersion = COUNTED_VAULT.reads.getLast().version;
+            assertThat(
+                    b2AuditCount(
+                        mixed,
+                        "row_kind='RELEASE' AND outcome='RESOLVED' AND admission_id=?"
+                            + " AND vault_version=? AND coordinate_step_id=?"
+                            + " AND coordinate_ordinal=1"
+                            + " AND source_reference_id=?",
+                        admission,
+                        readVersion,
+                        TWO,
+                        b2PassReferenceId(mixed)))
+                .isEqualTo(1);
+            assertThat(
+                    b2AuditCount(
+                        mixed,
+                        "row_kind='USAGE' AND usage_outcome='USED' AND admission_id=?",
+                        admission))
+                .isEqualTo(1);
+            assertThat(b2AuditCount(mixed, "true")).as("exactly RELEASE + USAGE").isEqualTo(2);
+            assertThat(b2AuditSnapshot(original))
+                .as("base session audit is untouched by every fault and the mixed run")
+                .isEqualTo(baseAudit);
+            p3AssertAuditScope(mixed, null, scope);
+            var sinks = new java.util.LinkedHashMap<String, byte[]>();
+            assertGuidedLearnRunRecorded(mixed, sinks);
+            sinks.put(
+                "public-session",
+                p3Call(p3Cookie, "/api/v1/studio/guided-sessions/" + mixed, null, 200)
+                    .toString()
+                    .getBytes(StandardCharsets.UTF_8));
+            sinks.put(
+                "public-result",
+                p3Call(p3Cookie, "/api/v1/studio/guided-sessions/" + mixed + "/result", null, 200)
+                    .toString()
+                    .getBytes(StandardCharsets.UTF_8));
+            P3Publication merged = p3Publish(mixed);
+            b2aAssertNoSpanningLowering(test, mixed, merged); // A28-12
+            UUID execution = p3Execute(test);
+            p3AssertBinding(execution, scope, merged);
+            assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+            JsonNode report = p3AwaitExecution(execution, "PASSED");
+            assertThat(p3DecodeVideo(execution, report)).isPositive();
+            assertThat(MODEL_WIRE.size() - models).as("suffix THREE only was learned").isPositive();
+            p3Scan(canaries); // A28-5: original OBS-007 sink set, unchanged.
+            for (String value : canaries) {
+              assertJoinedSinkAbsent(sinks, value);
+            }
+            p3WriteEvidence(
+                "b2a-fault-matrix",
+                C.object()
+                    .put("faults", 6)
+                    .put("validPrefixValueReads", 1)
+                    .put("revokedStartWrites", 0));
+          } finally {
+            b2ResetKnobs();
+          }
+        });
+  }
+
+  /** One real mixed session on the confirmed base under one fault; code/count oracles only. */
+  private void b2aFault(
+      UUID test,
+      VaultScope scope,
+      P3Publication base,
+      String environment,
+      String value,
+      B2aSetup setup,
+      B2aExpected expected)
+      throws Exception {
+    p3ExpectedPassword = value;
+    p3Seed(scope, value);
+    setup.run();
+    P3_RECEIPTS.clear();
+    P3_NATIVE_SESSIONS.clear();
+    int reads = COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
+    int models = MODEL_WIRE.size();
+    try {
+      String id =
+          p3Call(
+                  p3Cookie,
+                  "/api/v1/studio/guided-sessions",
+                  p3StartCommand(test, environment)
+                      .put("baseRevisionId", base.revision().toString())
+                      .put("firstLearnStepId", THREE),
+                  202)
+              .path("session")
+              .path("sessionId")
+              .asText();
+      String state = b2AwaitSettled(id, 60);
+      if (expected.state() != null) {
+        assertThat(state).as("fault terminal state").isEqualTo(expected.state());
+      } else {
+        // VERIFY-2: the exact ZERO/TWO terminal is pinned on the first run; effects are exact.
+        assertThat(state).as("fault terminal state").isIn("FAILED", "UNKNOWN_OUTCOME");
+      }
+      p3AwaitTeardown(id);
+      if (expected.code() != null) {
+        assertThat(
+                sessions.transaction(() -> sessions.lock(id).progress().path("errorCode").asText()))
+            .isEqualTo(expected.code());
+      }
+      assertThat(
+              COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS")
+                  - reads)
+          .as("in-JVM fake Vault value reads under the fault")
+          .isEqualTo(expected.reads());
+      assertThat(MODEL_WIRE.size())
+          .as("no prefix or relearn model call under a fault")
+          .isEqualTo(models);
+      assertThat(P3_RECEIPTS).as("no sign-in POST under any fault").isEmpty();
+      assertThat(b2AuditCount(id, "row_kind='RELEASE'"))
+          .isEqualTo(expected.release() == null ? 0 : 1);
+      if (expected.release() != null) {
+        assertThat(b2AuditCount(id, "row_kind='RELEASE' AND outcome=?", expected.release()))
+            .isEqualTo(1);
+      }
+      assertThat(b2AuditCount(id, "row_kind='USAGE'")).isEqualTo(1);
+      assertThat(
+              b2AuditCount(
+                  id,
+                  "row_kind='USAGE' AND usage_outcome=? AND admission_id IS "
+                      + (expected.linked() ? "NOT NULL" : "NULL"),
+                  expected.usage()))
+          .isEqualTo(1);
+      if (!expected.usage().equals("REFUSED")) {
+        assertThat(b2AuditCount(id, "row_kind='USAGE' AND usage_outcome='REFUSED'")).isZero();
+      }
+      if (!expected.usage().equals("NOT_USED")) {
+        assertThat(b2AuditCount(id, "row_kind='USAGE' AND usage_outcome='NOT_USED'")).isZero();
+      }
+      var fill =
+          jdbc.queryForList(
+              "SELECT document::text FROM studio_guided_actions"
+                  + " WHERE session_id=? AND step_id=? AND ordinal=1",
+              String.class,
+              id,
+              TWO);
+      if (expected.reads() == 0) {
+        assertThat(fill).as("no TWO/1 admission without a password target").isEmpty();
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_prefix_requests"
+                        + " WHERE session_id=? AND step_id=? AND ordinal=1 AND status='PREPARED'",
+                    Integer.class,
+                    id,
+                    TWO))
+            .isZero();
+      } else {
+        assertThat(fill).hasSize(1);
+        assertThat(C.parse(fill.getFirst()).path("dispatchCount").asInt()).isEqualTo(1);
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?",
+                    Integer.class,
+                    id,
+                    TWO))
+            .as("no replacement admission after a fault")
+            .isEqualTo(2);
+      }
+      assertThat(
+              COUNTED_VAULT.reads.stream()
+                  .filter(read -> read.value != null)
+                  .allMatch(read -> allErased(read.value)))
+          .isTrue();
+    } finally {
+      // Restore the exact page origin binding for the next fault (fake Vault leaf only).
+      VAULT.bindOrigins(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS", ORIGIN);
+    }
+  }
+
+  /** A28-12 typed walk (VERIFY-4): no literal/spanning lowering of the secret token. */
+  private void b2aAssertNoSpanningLowering(UUID test, String mixed, P3Publication merged) {
+    String text =
+        jdbc.queryForObject("SELECT steps->>1 FROM ui_tests WHERE id=?", String.class, test);
+    String token = "<secret PASS>";
+    int start = text.indexOf(token);
+    int end = start + token.length();
+    assertThat(start).as("authored secret token present in step TWO").isNotNegative();
+    int secretInputs = 0;
+    for (String row :
+        jdbc.queryForList(
+            "SELECT document::text FROM studio_guided_materialization_inputs WHERE session_id=?",
+            String.class,
+            mixed)) {
+      JsonNode input = C.parse(row);
+      JsonNode provenance = input.path("provenance");
+      if (input.path("kind").asText().equals("secretRef")) {
+        secretInputs++;
+        assertThat(input.has("value")).as("secretRef input is value-free").isFalse();
+        continue;
+      }
+      assertThat(input.has("secretId"))
+          .as("no nonsecret/destination input carries secretId")
+          .isFalse();
+      if (provenance.path("referenceKind").asText().equals("sourceSpan")
+          && provenance.path("stepId").asText().equals(TWO)) {
+        assertThat(
+                provenance.path("endUtf16").asInt() <= start
+                    || provenance.path("startUtf16").asInt() >= end)
+            .as("no literal input span overlaps the secret token")
+            .isTrue();
+      }
+    }
+    assertThat(secretInputs).as("one secretRef input").isEqualTo(1);
+    JsonNode artifact = C.parse(merged.artifact());
+    for (JsonNode recipe : artifact.path("inputRecipes")) {
+      if (recipe.path("kind").asText().equals("secretRef")) {
+        assertThat(recipe.path("provenance").path("kind").asText()).isEqualTo("configuration");
+      } else if (recipe.path("stepId").asText().equals(TWO)
+          && recipe.path("provenance").path("kind").asText().equals("sourceSpan")) {
+        assertThat(
+                recipe.path("provenance").path("end").asInt() <= start
+                    || recipe.path("provenance").path("start").asInt() >= end)
+            .as("no published literal recipe overlaps the secret token")
+            .isTrue();
+      }
+    }
+    var guards = new java.util.HashMap<String, JsonNode>();
+    for (JsonNode guard : artifact.path("guards")) {
+      guards.put(guard.path("guardId").asText(), guard);
+    }
+    int passwordOperations = 0;
+    for (JsonNode step : artifact.path("steps")) {
+      for (JsonNode operation : step.path("operations")) {
+        JsonNode guard = guards.get(operation.path("guardId").asText());
+        assertThat(guard != null).as("every published operation has its guard").isTrue();
+        boolean password = guard.path("target").path("kind").asText().equals("passwordControl");
+        boolean secretValue =
+            operation.path("operation").path("value").path("kind").asText().equals("secretRef");
+        assertThat(password)
+            .as("secretRef only on a passwordControl target")
+            .isEqualTo(secretValue);
+        if (password) {
+          passwordOperations++;
+          assertThat(operation.path("operation").path("kind").asText()).isEqualTo("fill");
+          assertThat(operation.path("coordinate").path("stepId").asText()).isEqualTo(TWO);
+        }
+      }
+    }
+    assertThat(passwordOperations).as("exactly one password fill is published").isEqualTo(1);
+  }
+
+  /**
+   * B2A-02 (ledger 45 {@code
+   * IncrementalMaterializationIT.secretLineagePinsActualHistoricalVersion}, tier "Postgres+runner
+   * secret fixture"; fake Vault leaf, ruling T1). The TWO/1 secret action keeps context version 1
+   * and its Vault read version after a real suffix v2 append, a real Vault rotation, lost-response
+   * reconciliation, live recheck and terminal settlement (A45-1..3).
+   */
+  @Test
+  void incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck() throws Exception {
+    p3Case(
+        () -> {
+          String mixed = null;
+          try {
+            p3Mode = P3Mode.LOGIN;
+            b2aTitleSuffix = true;
+            p3Grant(primaryCsi, "fixture");
+            UUID test = p3CreateSource(primaryCsi, "fixture", true);
+            VaultScope scope = VaultScope.of(primaryCsi, "fixture", test);
+            String first = p3ExpectedPassword;
+            p3Seed(scope, first);
+            String original = p3Start(test, "fixture");
+            awaitFinalizing(original);
+            P3Publication base = p3Publish(original);
+            JsonNode edited =
+                b2Edit(
+                    test,
+                    2,
+                    "Click Sign in, click the Reports link and check protected Reports heading."
+                        + " Check page title is Reports.");
+            assertThat(edited.path("firstChangedStepId").asText()).isEqualTo(THREE);
+            String used = "B2A-V1-" + UUID.randomUUID();
+            String rotated = "B2A-V2-" + UUID.randomUUID();
+            AUDIT_CANARIES.addAll(List.of(first, used, rotated));
+            p3ExpectedPassword = used;
+            p3Seed(scope, used);
+            P3_RECEIPTS.clear();
+            P3_NATIVE_SESSIONS.clear();
+            Files.writeString(
+                TEMP.resolve("obs015-native-mode.json"),
+                C.object()
+                    .put("mode", "append-input")
+                    .put("stepId", TWO)
+                    .put("ordinal", 1)
+                    .toString());
+            Files.writeString(TEMP.resolve("obs015-native-events.jsonl"), "");
+            int startReads =
+                COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
+            ObjectNode start =
+                p3StartCommand(test, "fixture")
+                    .put("sourceRevision", edited.path("sourceRevision").asText())
+                    .put("configurationRevision", edited.path("configurationRevision").asText())
+                    .put("baseRevisionId", base.revision().toString());
+            mixed =
+                p3Call(p3Cookie, "/api/v1/studio/guided-sessions", start, 202)
+                    .path("session")
+                    .path("sessionId")
+                    .asText();
+            final String id = mixed;
+            long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+            while (!INCREMENTAL_ACK_ENTERED.contains(id) && System.nanoTime() < deadline) {
+              Thread.sleep(10);
+            }
+            assertThat(INCREMENTAL_ACK_ENTERED.contains(id))
+                .as("actual runner applied v2 on the original browser before its ACK returned")
+                .isTrue();
+            // A45-1 at the held v2 ACK.
+            var versions =
+                jdbc.queryForList(
+                    "SELECT context_revision,authored_inputs_hash FROM"
+                        + " studio_guided_materialization_versions WHERE session_id=?"
+                        + " ORDER BY context_revision",
+                    id);
+            assertThat(versions).hasSize(2);
+            String v1Hash = String.valueOf(versions.get(0).get("authored_inputs_hash"));
+            assertThat(
+                    jdbc.queryForObject(
+                        "SELECT status FROM studio_guided_materialization_deliveries"
+                            + " WHERE session_id=?",
+                        String.class,
+                        id))
+                .isEqualTo("PENDING");
+            var row =
+                jdbc.queryForMap(
+                    "SELECT admission_id,document::text AS document FROM studio_guided_actions"
+                        + " WHERE session_id=? AND step_id=? AND ordinal=1",
+                    id,
+                    TWO);
+            String admission = (String) row.get("admission_id");
+            String actionBytes = (String) row.get("document");
+            JsonNode action = C.parse(actionBytes);
+            assertThat(action.path("state").asText()).isEqualTo("SUCCEEDED");
+            assertThat(action.path("contextRevision").asInt()).isEqualTo(1);
+            assertThat(action.path("authoredInputsHash").asText()).isEqualTo(v1Hash);
+            JsonNode proof =
+                C.parse(
+                    jdbc.queryForObject(
+                        "SELECT proof::text FROM studio_guided_preparations"
+                            + " WHERE session_id=? AND admission_id=?",
+                        String.class,
+                        id,
+                        admission));
+            assertThat(proof.path("contextRevision").asInt()).isEqualTo(1);
+            assertThat(proof.path("authoredInputsHash").asText()).isEqualTo(v1Hash);
+            assertThat(
+                    COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS")
+                        - startReads)
+                .as("one in-JVM fake Vault value read, at the prefix dispatch")
+                .isEqualTo(1);
+            String readVersion = COUNTED_VAULT.reads.getLast().version;
+            String auditAtV2 = b2AuditSnapshot(id);
+            assertThat(
+                    b2AuditCount(
+                        id,
+                        "row_kind='RELEASE' AND outcome='RESOLVED' AND vault_version=?",
+                        readVersion))
+                .isEqualTo(1);
+            assertThat(b2AuditCount(id, "row_kind='USAGE' AND usage_outcome='USED'")).isEqualTo(1);
+            // Real (fake-leaf) Vault rotation after the historical use: the release keeps its read.
+            p3ExpectedPassword = rotated;
+            p3Seed(scope, rotated);
+            int reads =
+                COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
+            INCREMENTAL_ACK_RELEASE.get(id).countDown();
+            long acked = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+            while (!"ACKNOWLEDGED"
+                    .equals(
+                        jdbc.queryForObject(
+                            "SELECT status FROM studio_guided_materialization_deliveries"
+                                + " WHERE session_id=?",
+                            String.class,
+                            id))
+                && System.nanoTime() < acked) {
+              Thread.sleep(20);
+            }
+            JsonNode ack =
+                C.parse(
+                    jdbc.queryForObject(
+                        "SELECT ack::text FROM studio_guided_materialization_deliveries"
+                            + " WHERE session_id=?",
+                        String.class,
+                        id));
+            assertThat(ack.path("contextRevision").asInt()).isEqualTo(2);
+            assertThat(
+                    jdbc.queryForObject(
+                        "SELECT document::text FROM studio_guided_actions"
+                            + " WHERE session_id=? AND admission_id=?",
+                        String.class,
+                        id,
+                        admission))
+                .as("v1 action bytes survive the v2 ACK")
+                .isEqualTo(actionBytes);
+            assertThat(b2AuditSnapshot(id)).as("A45-2 at v2 ACK").isEqualTo(auditAtV2);
+            // A45-3: the real lost-response reconciliation and live recheck add nothing.
+            ownedApplicationContext
+                .getBean(com.citi.put.checks.studio.guided.session.GuidedSessionService.class)
+                .lostAcknowledgment(id, admission);
+            boolean revoked =
+                ownedApplicationContext
+                    .getBean(com.citi.put.checks.studio.secrets.SecretRevocationSweep.class)
+                    .guidedRevoked(id);
+            assertThat(revoked)
+                .as("fixture entitlement still present: live recheck keeps it")
+                .isFalse();
+            assertThat(b2AuditSnapshot(id)).as("A45-3 after recheck").isEqualTo(auditAtV2);
+            awaitFinalizing(id);
+            assertThat(
+                    jdbc.queryForObject(
+                        "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND"
+                            + " step_id=? AND (document->>'contextRevision')::integer=2",
+                        Integer.class,
+                        id,
+                        THREE))
+                .as("suffix ran on v2")
+                .isPositive();
+            P3Publication merged = b2Publish(id, edited);
+            assertThat(b2AuditSnapshot(id))
+                .as("A45-2/3 after terminal settlement")
+                .isEqualTo(auditAtV2);
+            assertThat(
+                    b2AuditCount(
+                        id,
+                        "row_kind='USAGE' AND usage_outcome IN"
+                            + " ('NOT_USED','REFUSED','UNKNOWN_OUTCOME')"))
+                .isZero();
+            assertThat(
+                    COUNTED_VAULT.readCount(
+                        StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS"))
+                .as("no suffix or finalize value read")
+                .isEqualTo(reads);
+            p3AssertAuditScope(id, null, scope);
+            assertThat(C.parse(merged.artifact()).path("inputRecipes").size())
+                .isGreaterThanOrEqualTo(2);
+            UUID execution = p3Execute(test);
+            p3AssertBinding(execution, scope, merged);
+            assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+            JsonNode report = p3AwaitExecution(execution, "PASSED");
+            assertThat(P3_RECEIPTS.getLast().password().equals(rotated))
+                .as("ordinary replay resolves the current version (boolean only)")
+                .isTrue();
+            assertThat(p3DecodeVideo(execution, report)).isPositive();
+            p3Scan(List.of(first, used, rotated));
+            p3WriteEvidence(
+                "b2a-version-one",
+                C.object()
+                    .put("versions", 2)
+                    .put("auditRowsStable", true)
+                    .put("falseUsageRows", 0));
+          } finally {
+            try {
+              if (mixed != null) {
+                var latch = INCREMENTAL_ACK_RELEASE.remove(mixed);
+                if (latch != null) {
+                  latch.countDown();
+                }
+                INCREMENTAL_ACK_ENTERED.remove(mixed);
+              }
+              Files.writeString(TEMP.resolve("obs015-native-mode.json"), "{}");
+            } finally {
+              b2ResetKnobs();
+            }
+          }
+        });
+  }
+
+  /**
+   * B2A-03 (access-mapping OPEN: exact worker current-access guard for a separate secret-bearing
+   * parent). A real P3 secret prefix on the exact fixture-entitlement tuple is held, outside SQL,
+   * at the same-version context update before TWO/1 by the separately named SECRET_HOLD cut. The
+   * negative revokes the fixture entitlement there; only the exact post-ACK checkCurrent refusal
+   * (advancePrefix:405) is credited. The positive sibling keeps the grant. checkCurrent proof only.
+   */
+  @Test
+  void incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent() throws Exception {
+    p3Case(
+        () -> {
+          try {
+            p3Mode = P3Mode.LOGIN;
+            String environment = "fixture-other";
+            String csi = primaryCsi;
+            p3Grant(csi, environment); // fixture entitlement, revocable for this tuple only
+            UUID test = p3CreateSource(csi, environment, true);
+            VaultScope scope = VaultScope.of(csi, environment, test);
+            AUDIT_CANARIES.add(p3ExpectedPassword);
+            p3Seed(scope, p3ExpectedPassword);
+            String original = p3Start(test, environment);
+            awaitFinalizing(original);
+            P3Publication base = p3Publish(original);
+            String first = p3ExpectedPassword;
+            String value = "B2A-SC-" + UUID.randomUUID();
+            AUDIT_CANARIES.add(value);
+            p3ExpectedPassword = value;
+            p3Seed(scope, value);
+            b2aSecretCutSibling(test, scope, base, environment, true, TWO, 1);
+            b2aSecretCutSibling(test, scope, base, environment, false, TWO, 1);
+            p3Scan(List.of(first, value));
+          } finally {
+            b2ResetKnobs();
+          }
+        });
+  }
+
+  private void b2aSecretCutSibling(
+      UUID test,
+      VaultScope scope,
+      P3Publication base,
+      String environment,
+      boolean revoke,
+      String stepId,
+      int ordinal)
+      throws Exception {
+    assertThat(PREFIX_SYNC_CUTS).isEmpty();
+    var cut = new PrefixSyncCut("SECRET_HOLD");
+    PREFIX_SYNC_CUTS.put(cut.key, cut);
+    Path control = TEMP.resolve("obs015-secret-context-control.json");
+    var removed = new ArrayList<P3Entitlement>();
+    try {
+      writeOwnedControl(
+          control,
+          C.object()
+              .put("caseId", cut.key)
+              .put("mode", "SECRET_HOLD")
+              .put("stepId", stepId)
+              .put("ordinal", ordinal));
+      P3_RECEIPTS.clear();
+      int reads = COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
+      String session =
+          p3Call(
+                  p3Cookie,
+                  "/api/v1/studio/guided-sessions",
+                  p3StartCommand(test, environment)
+                      .put("baseRevisionId", base.revision().toString())
+                      .put("firstLearnStepId", THREE),
+                  202)
+              .path("session")
+              .path("sessionId")
+              .asText();
+      assertThat(cut.entered.await(30, java.util.concurrent.TimeUnit.SECONDS))
+          .as("actual secret-context update cut")
+          .isTrue();
+      assertThat(cut.failure).isNull();
+      assertThat(cut.sessionId).isEqualTo(session);
+      assertThat(cut.phase).isEqualTo("AFTER");
+      // The original issued TWO/1 request precedes the held context response.
+      var issued =
+          jdbc.queryForList(
+              "SELECT request_digest,document::text FROM studio_guided_prefix_requests"
+                  + " WHERE session_id=? AND step_id=? AND ordinal=? AND status='ISSUED'",
+              session,
+              stepId,
+              ordinal);
+      assertThat(issued).hasSize(1);
+      JsonNode request = C.parse((String) issued.getFirst().get("document"));
+      assertThat(GuidedContracts.hash(request)).isEqualTo(issued.getFirst().get("request_digest"));
+      JsonNode document = sessions.transaction(() -> sessions.lock(session).document().deepCopy());
+      assertThat(document.path("state").asText()).isEqualTo("REPLAYING_PREFIX");
+      String principal = document.path("scope").path("principalId").asText();
+      assertThat(document.path("scope").path("csiId").asText()).isEqualTo(scope.csiId());
+      assertThat(document.path("scope").path("environmentId").asText())
+          .isEqualTo(scope.environment());
+      assertThat(b2PassReferenceId(session)).as("frozen manifest secretRef PASS").isNotBlank();
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?"
+                      + " AND ordinal<? AND document->>'state'='SUCCEEDED'",
+                  Integer.class,
+                  session,
+                  stepId,
+                  ordinal))
+          .as("earlier TWO coordinates already executed")
+          .isEqualTo(ordinal);
+      String earlier =
+          jdbc.queryForObject(
+              "SELECT jsonb_agg(to_jsonb(a) ORDER BY step_id,ordinal)::text"
+                  + " FROM studio_guided_actions a WHERE session_id=?",
+              String.class,
+              session);
+      int preparations =
+          jdbc.queryForObject(
+              "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",
+              Integer.class,
+              session);
+      var authorization =
+          ownedApplicationContext.getBean(
+              com.citi.put.checks.studio.secrets.StudioSecretUseAuthorization.class);
+      assertThat(authorization.mayUse(principal, scope.csiId(), scope.environment(), "PASS"))
+          .as("fixture entitlement present at the cut")
+          .isTrue();
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT revoked_at FROM studio_guided_sessions WHERE session_id=?",
+                  Object.class,
+                  session))
+          .isNull();
+      int diagnostics = FINALIZE_DIAGNOSTICS.get();
+      if (revoke) {
+        for (String actor : List.of("user-1", "fixture@example.invalid")) {
+          var tuple = new P3Entitlement(actor, scope.csiId(), scope.environment(), "PASS");
+          assertThat(P3_PERMITTED.remove(tuple))
+              .as("exact previously present fixture entitlement")
+              .isTrue();
+          removed.add(tuple);
+        }
+        assertThat(authorization.mayUse(principal, scope.csiId(), scope.environment(), "PASS"))
+            .as("fixture entitlement revoked (not Core policy)")
+            .isFalse();
+        // Source, policy, owner, lease, evidence, program and request are untouched. Release at
+        // once so the renewal observer cannot be the only refusal of this boundary.
+        cut.release.countDown();
+        b2AwaitCheckCurrentGate(diagnostics);
+        String state = b2AwaitLeft(session, "REPLAYING_PREFIX", 45);
+        assertThat(state).isIn("CANCELLED", "FAILED");
+        assertThat(
+                sessions.transaction(
+                    () -> sessions.lock(session).progress().path("errorCode").asText()))
+            .isEqualTo("SECRET_USE_REVOKED");
+        p3AwaitTeardown(session);
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_actions"
+                        + " WHERE session_id=? AND step_id=? AND ordinal=?",
+                    Integer.class,
+                    session,
+                    stepId,
+                    ordinal))
+            .isZero();
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",
+                    Integer.class,
+                    session))
+            .isEqualTo(preparations);
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT jsonb_agg(to_jsonb(a) ORDER BY step_id,ordinal)::text"
+                        + " FROM studio_guided_actions a WHERE session_id=?"
+                        + " AND NOT (step_id=? AND ordinal>=?)",
+                    String.class,
+                    session,
+                    stepId,
+                    ordinal))
+            .as("earlier lawful facts retained")
+            .isEqualTo(earlier);
+        assertThat(COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS"))
+            .as("no in-JVM fake Vault value read")
+            .isEqualTo(reads);
+        assertThat(b2AuditCount(session, "row_kind='RELEASE'")).isZero();
+        assertThat(
+                b2AuditCount(
+                    session,
+                    "row_kind='USAGE' AND usage_outcome='NOT_USED' AND admission_id IS NULL"))
+            .isEqualTo(1);
+        assertThat(P3_RECEIPTS).isEmpty();
+        assertThat(
+                b2PrefixSyncEvents(cut, session).stream()
+                    .filter(event -> event.path("phase").asText().startsWith("TARGET_"))
+                    .count())
+            .isZero();
+      } else {
+        cut.release.countDown();
+        awaitFinalizing(session);
+        var events = b2PrefixSyncEvents(cut, session);
+        assertThat(
+                events.stream()
+                    .filter(event -> event.path("phase").asText().equals("TARGET_PREPARE_ENTER"))
+                    .count())
+            .isEqualTo(1);
+        assertThat(
+                events.stream()
+                    .filter(event -> event.path("phase").asText().equals("TARGET_DISPATCH_ENTER"))
+                    .count())
+            .isEqualTo(1);
+        var phases = events.stream().map(event -> event.path("phase").asText()).toList();
+        assertThat(phases.indexOf("ACK_RELEASED"))
+            .isLessThan(phases.indexOf("TARGET_PREPARE_ENTER"));
+        JsonNode fill =
+            C.parse(
+                jdbc.queryForObject(
+                    "SELECT document::text FROM studio_guided_actions"
+                        + " WHERE session_id=? AND step_id=? AND ordinal=?",
+                    String.class,
+                    session,
+                    stepId,
+                    ordinal));
+        assertThat(fill.path("state").asText()).isEqualTo("SUCCEEDED");
+        assertThat(fill.path("dispatchCount").asInt()).isEqualTo(1);
+        assertThat(
+                COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS")
+                    - reads)
+            .isEqualTo(1);
+        assertThat(b2AuditCount(session, "row_kind='RELEASE' AND outcome='RESOLVED'")).isEqualTo(1);
+        assertThat(b2AuditCount(session, "row_kind='USAGE' AND usage_outcome='USED'")).isEqualTo(1);
+        assertThat(P3_RECEIPTS).hasSize(1);
+        assertThat(P3_RECEIPTS.getFirst().accepted()).isTrue();
+        p3AssertAuditScope(session, null, scope);
+        for (int n = diagnostics + 1; n <= FINALIZE_DIAGNOSTICS.get(); n++) {
+          Path file = TEMP.resolve("finalize-exception-" + n + ".json");
+          if (Files.isRegularFile(file)) {
+            assertThat(C.parse(Files.readString(file)).path("exceptionCode").asText())
+                .isNotEqualTo("SECRET_USE_REVOKED");
+          }
+        }
+        p3Call(
+            p3Cookie,
+            "/api/v1/studio/guided-sessions/" + session + "/cancel",
+            C.object().put("schemaVersion", 3).put("reason", "userRequested"),
+            202);
+        p3AwaitTeardown(session);
+      }
+    } finally {
+      P3_PERMITTED.addAll(removed); // restore only the exact removed fixture entitlement
+      cut.release.countDown();
+      cut.cleanupRelease.countDown();
+      try {
+        writeOwnedControl(control, C.object());
+      } finally {
+        PREFIX_SYNC_CUTS.remove(cut.key);
+      }
+      assertThat(cut.failure).as("secret-context instrumentation completed").isNull();
+    }
+  }
+
+  /**
+   * B2A-04 (OPEN: combined secret-use grant revocation at the fresh-producer ACK cut). Combined P3
+   * program: ONE reads a business Order reference, TWO fills it, USER and the PASS secret. The
+   * unmodified PFXSYNC fresh-producer HOLD selector holds the first producer-bearing update before
+   * the TWO/0 consumer; the negative revokes the exact fixture entitlement there.
+   */
+  @Test
+  void incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation()
+      throws Exception {
+    p3Case(
+        () -> {
+          try {
+            p3Mode = P3Mode.LOGIN;
+            b2Combined = true;
+            String environment = "fixture-other";
+            String csi = primaryCsi;
+            p3Grant(csi, environment);
+            UUID test = b2CreateCombinedSource(csi, environment, "p3-user", null);
+            VaultScope scope = VaultScope.of(csi, environment, test);
+            AUDIT_CANARIES.add(p3ExpectedPassword);
+            p3Seed(scope, p3ExpectedPassword);
+            String original = p3Start(test, environment);
+            awaitFinalizing(original);
+            assertThat(
+                    jdbc.queryForObject(
+                        "SELECT count(*) FROM studio_guided_producers WHERE session_id=?",
+                        Integer.class,
+                        original))
+                .isEqualTo(1);
+            P3Publication base = p3Publish(original);
+            assertThat(C.parse(base.artifact()).path("learnedPlan").path("bindings").size())
+                .isEqualTo(1);
+            for (boolean revoke : List.of(true, false)) {
+              b2aProducerCutSibling(test, scope, base, environment, revoke);
+            }
+            p3Scan(List.of(p3ExpectedPassword));
+          } finally {
+            b2ResetKnobs();
+          }
+        });
+  }
+
+  private UUID b2CreateCombinedSource(
+      String csi,
+      String environment,
+      String user,
+      com.citi.put.checks.studio.dto.StepAuthoringContext twoContext)
+      throws Exception {
+    List<String> texts =
+        List.of(
+            "Open " + ORIGIN + "/p3/login and read the Order reference.",
+            "Enter that order reference in Reference, <var USER> in User and <secret PASS> as"
+                + " password.",
+            "Click Sign in, click the Reports link and check protected Reports heading.");
+    var authoring =
+        new AuthoringV2Request(
+            2,
+            null,
+            List.of(
+                new AuthoringStep(UUID.fromString(ONE), texts.get(0), null),
+                new AuthoringStep(UUID.fromString(TWO), texts.get(1), twoContext),
+                new AuthoringStep(UUID.fromString(THREE), texts.get(2), null)));
+    // secretRef carries secretId (r1-diagnosis cause C); the plain value is keyed by its
+    // reference id, exactly the token name (VERIFY-5, AuthoringRevisionIdentity.nonsecret).
+    String variables =
+        JSON.writeValueAsString(
+            List.of(
+                Map.of("name", "USER", "kind", "plain", "value", user),
+                Map.of("name", "PASS", "kind", "secretRef", "secretId", "PASS")));
+    UUID test = UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
+            + "authoring_revision_inputs,created_by,created_at,updated_at) VALUES (?,'B2 combined"
+            + " join',?,?,'chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,'fixture@example.invalid',"
+            + "now(),now())",
+        test,
+        csi,
+        environment,
+        JSON.writeValueAsString(texts),
+        variables,
+        JSON.writeValueAsString(authoring),
+        JSON.writeValueAsString(AuthoringRevisionIdentity.create(authoring, Map.of("USER", user))));
+    AUDIT_CANARIES.addAll(texts);
+    return test;
+  }
+
+  private void b2aProducerCutSibling(
+      UUID test, VaultScope scope, P3Publication base, String environment, boolean revoke)
+      throws Exception {
+    assertThat(PREFIX_SYNC_CUTS).isEmpty();
+    var cut = new PrefixSyncCut("HOLD");
+    PREFIX_SYNC_CUTS.put(cut.key, cut);
+    var removed = new ArrayList<P3Entitlement>();
+    try {
+      // The unchanged PFXSYNC fresh-producer selector: first producer-bearing update before TWO.
+      writePrefixSyncControl(
+          C.object().put("caseId", cut.key).put("mode", "HOLD").put("stepId", TWO));
+      P3_RECEIPTS.clear();
+      B2_REFERENCE_RECEIPTS.clear();
+      int reads = COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
+      int orders = B2_ORDER_VALUES.size();
+      String session =
+          p3Call(
+                  p3Cookie,
+                  "/api/v1/studio/guided-sessions",
+                  p3StartCommand(test, environment)
+                      .put("baseRevisionId", base.revision().toString())
+                      .put("firstLearnStepId", THREE),
+                  202)
+              .path("session")
+              .path("sessionId")
+              .asText();
+      assertThat(cut.entered.await(30, java.util.concurrent.TimeUnit.SECONDS))
+          .as("actual fresh-producer update cut")
+          .isTrue();
+      assertThat(cut.failure).isNull();
+      assertThat(cut.sessionId).isEqualTo(session);
+      assertThat(cut.phase).isEqualTo("AFTER");
+      assertThat(B2_ORDER_VALUES.size())
+          .as("one fresh mixed-session read page")
+          .isEqualTo(orders + 1);
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_producers p JOIN studio_guided_actions a"
+                      + " ON a.session_id=p.session_id AND a.admission_id=p.admission_id"
+                      + " WHERE p.session_id=? AND a.document->>'state'='SUCCEEDED'"
+                      + " AND a.proposal->'operation'->>'kind'='read'",
+                  Integer.class,
+                  session))
+          .as("fresh producer committed before the held ACK")
+          .isEqualTo(1);
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?",
+                  Integer.class,
+                  session,
+                  TWO))
+          .isZero();
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_prefix_requests"
+                      + " WHERE session_id=? AND step_id=? AND ordinal=0 AND status='ISSUED'",
+                  Integer.class,
+                  session,
+                  TWO))
+          .isEqualTo(1);
+      String producers =
+          jdbc.queryForObject(
+              "SELECT jsonb_agg(to_jsonb(p) ORDER BY binding_id)::text"
+                  + " FROM studio_guided_producers p WHERE session_id=?",
+              String.class,
+              session);
+      int preparations =
+          jdbc.queryForObject(
+              "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",
+              Integer.class,
+              session);
+      String principal =
+          sessions.transaction(
+              () -> sessions.lock(session).document().path("scope").path("principalId").asText());
+      var authorization =
+          ownedApplicationContext.getBean(
+              com.citi.put.checks.studio.secrets.StudioSecretUseAuthorization.class);
+      assertThat(authorization.mayUse(principal, scope.csiId(), scope.environment(), "PASS"))
+          .as("fixture entitlement present at the cut")
+          .isTrue();
+      int diagnostics = FINALIZE_DIAGNOSTICS.get();
+      if (revoke) {
+        for (String actor : List.of("user-1", "fixture@example.invalid")) {
+          var tuple = new P3Entitlement(actor, scope.csiId(), scope.environment(), "PASS");
+          assertThat(P3_PERMITTED.remove(tuple))
+              .as("exact previously present fixture entitlement")
+              .isTrue();
+          removed.add(tuple);
+        }
+        assertThat(authorization.mayUse(principal, scope.csiId(), scope.environment(), "PASS"))
+            .as("fixture entitlement revoked (not Core policy)")
+            .isFalse();
+        cut.release.countDown();
+        b2AwaitCheckCurrentGate(diagnostics);
+        b2AwaitLeft(session, "REPLAYING_PREFIX", 45);
+        assertThat(
+                sessions.transaction(
+                    () -> sessions.lock(session).progress().path("errorCode").asText()))
+            .isEqualTo("SECRET_USE_REVOKED");
+        p3AwaitTeardown(session);
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?",
+                    Integer.class,
+                    session,
+                    TWO))
+            .isZero();
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",
+                    Integer.class,
+                    session))
+            .isEqualTo(preparations);
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_consumer_edges WHERE session_id=?",
+                    Integer.class,
+                    session))
+            .isZero();
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT jsonb_agg(to_jsonb(p) ORDER BY binding_id)::text"
+                        + " FROM studio_guided_producers p WHERE session_id=?",
+                    String.class,
+                    session))
+            .isEqualTo(producers);
+        assertThat(COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS"))
+            .isEqualTo(reads);
+        assertThat(b2AuditCount(session, "row_kind='RELEASE'")).isZero();
+        assertThat(P3_RECEIPTS).isEmpty();
+        assertThat(B2_REFERENCE_RECEIPTS.size()).isZero();
+      } else {
+        cut.release.countDown();
+        awaitFinalizing(session);
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_consumer_edges WHERE session_id=?",
+                    Integer.class,
+                    session))
+            .isEqualTo(1);
+        assertThat(B2_REFERENCE_RECEIPTS.size()).isEqualTo(1);
+        assertThat(B2_REFERENCE_RECEIPTS.getFirst().equals(B2_ORDER_VALUES.getLast()))
+            .as("the fresh producer value was consumed (boolean only)")
+            .isTrue();
+        assertThat(
+                COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS")
+                    - reads)
+            .isEqualTo(1);
+        assertThat(b2AuditCount(session, "row_kind='USAGE' AND usage_outcome='USED'")).isEqualTo(1);
+        assertThat(P3_RECEIPTS).hasSize(1);
+        assertThat(P3_RECEIPTS.getFirst().accepted()).isTrue();
+        p3Call(
+            p3Cookie,
+            "/api/v1/studio/guided-sessions/" + session + "/cancel",
+            C.object().put("schemaVersion", 3).put("reason", "userRequested"),
+            202);
+        p3AwaitTeardown(session);
+      }
+    } finally {
+      P3_PERMITTED.addAll(removed);
+      cut.release.countDown();
+      cut.cleanupRelease.countDown();
+      try {
+        writePrefixSyncControl(C.object());
+      } finally {
+        PREFIX_SYNC_CUTS.remove(cut.key);
+      }
+      assertThat(cut.failure).as("fresh-producer instrumentation completed").isNull();
+    }
+  }
+
+  /**
+   * B2B-01 (ledgers 18 {@code appendedSuffixInputPreservesEarlierEvidence}, 46 {@code
+   * stalePreparedCommandCannotCrossAppend}, 77 {@code
+   * cumulativeAllocationAdapterPreservesPendingDeliveryOrder}). Own ten-step parent (the 35-label
+   * append-input variant is untouched), then an owner-loss sibling (A77-4). A18-4 (lost ACK
+   * response, one stable retry) stays OPEN: see b2ab-source01 notes, finding F1.
+   */
+  @Test
+  void incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority() throws Exception {
+    b2bAppendParent(false);
+    b2bAppendParent(true);
+  }
+
+  private void b2bAppendParent(boolean ownerLoss) throws Exception {
+    String id = null;
+    var hold = new B2bPlanHold();
+    var failures = new ArrayList<Throwable>();
+    try {
+      primaryCsi = "CSI-B2B-" + (++p3CsiOrdinal); // per-parent budget isolation
+      forgetCachedCoreIdentity();
+      jdbc.update(
+          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
+              + " VALUES (?,'Orders','Ops','HIGH','fixture@example.invalid','Production')",
+          primaryCsi);
+      startWorkers();
+      seedGovernedPolicies(primaryCsi);
+      incrementalTenScenario = true;
+      var texts = new ArrayList<String>();
+      texts.add("Open " + URL + " and read the Order reference.");
+      texts.add(
+          "Enter that order reference in Destination (an authored alternative is"
+              + " literal-control).");
+      texts.add("Check Destination has that order reference.");
+      texts.add("Check Destination is visible.");
+      texts.add("Click Submit and check Confirmation appears.");
+      for (int i = 5; i < 10; i++) {
+        texts.add("Check Confirmation is visible at checkpoint " + (i + 1) + ".");
+      }
+      AUDIT_CANARIES.addAll(texts);
+      AUDIT_CANARIES.addAll(
+          List.of(
+              "Operations",
+              "Order reference",
+              "Destination",
+              "Submit",
+              "Confirmation",
+              "literal-control",
+              "unused-input"));
+      var steps = new ArrayList<AuthoringStep>();
+      for (int i = 0; i < 10; i++) {
+        steps.add(new AuthoringStep(UUID.fromString(INCREMENTAL_STEPS.get(i)), texts.get(i), null));
+      }
+      var authoring = new AuthoringV2Request(2, null, steps);
+      UUID test = UUID.randomUUID();
+      jdbc.update(
+          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
+              + "authoring_revision_inputs,created_by,created_at,updated_at) VALUES (?,'B2b"
+              + " append',?,'fixture','chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,"
+              + "'fixture@example.invalid',now(),now())",
+          test,
+          primaryCsi,
+          JSON.writeValueAsString(texts),
+          JSON.writeValueAsString(authoring),
+          JSON.writeValueAsString(AuthoringRevisionIdentity.create(authoring, Map.of())));
+      String original = startLearning(test);
+      awaitFinalizing(original);
+      JsonNode base =
+          publicCall(
+              "/api/v1/studio/guided-sessions/" + original + "/finalize",
+              C.object()
+                  .put("schemaVersion", 3)
+                  .put("expectedSourceRevision", "1")
+                  .put("expectedConfigurationRevision", "1"),
+              200,
+              UUID.randomUUID().toString());
+      p3AwaitTeardown(original);
+      // Same append-input edit as the 35-label variant (prefixSyncEdit edits index 3).
+      JsonNode edited =
+          prefixSyncEdit(
+              test,
+              "Check Destination is visible. Check page title is Operations. The note unused-input"
+                  + " is context only.");
+      assertThat(edited.path("firstChangedStepId").asText()).isEqualTo(INCREMENTAL_STEPS.get(3));
+      incrementalDomVariant = "append-input";
+      Files.writeString(
+          TEMP.resolve("obs015-native-mode.json"),
+          C.object()
+              .put("mode", "append-input")
+              .put("stepId", INCREMENTAL_STEPS.get(1))
+              .put("ordinal", 0)
+              .toString());
+      Files.writeString(TEMP.resolve("obs015-native-events.jsonl"), "");
+      ObjectNode start =
+          C.object()
+              .put("schemaVersion", 3)
+              .put("testId", test.toString())
+              .put("sourceRevision", edited.path("sourceRevision").asText())
+              .put("configurationRevision", edited.path("configurationRevision").asText())
+              .put("environmentId", "fixture")
+              .put("applicationId", "orders")
+              .put("baseRevisionId", base.path("revisionId").asText());
+      start.set("versions", versions());
+      // Keyed by session id (known after 202); the suffix SOURCE_PLAN follows ten prefix steps.
+      id =
+          publicCall("/api/v1/studio/guided-sessions", start, 202, UUID.randomUUID().toString())
+              .path("session")
+              .path("sessionId")
+              .asText();
+      B2B_PLAN_HOLDS.put(id, hold);
+      final String session = id;
+      var service =
+          ownedApplicationContext.getBean(
+              com.citi.put.checks.studio.guided.session.GuidedSessionService.class);
+      var controller =
+          com.citi.put.checks.studio.guided.session.GuidedInternalIdentityFixture.controller();
+      if (ownerLoss) {
+        b2bOwnerLoss(session, hold, service, controller);
+      } else {
+        b2bAppendAuthority(test, session, edited, hold, service, controller);
+      }
+    } catch (Exception | AssertionError failure) {
+      failures.add(failure);
+    } finally {
+      hold.release.countDown();
+      if (id != null) {
+        B2B_PLAN_HOLDS.remove(id);
+        var latch = INCREMENTAL_ACK_RELEASE.remove(id);
+        if (latch != null) {
+          latch.countDown();
+        }
+        INCREMENTAL_ACK_ENTERED.remove(id);
+        final String session = id;
+        try {
+          String state =
+              sessions.transaction(() -> sessions.lock(session).document().path("state").asText());
+          if (!List.of(
+                  "SUCCEEDED",
+                  "FAILED",
+                  "UNKNOWN_OUTCOME",
+                  "CANCELLED",
+                  "EXPIRED",
+                  "PUBLICATION_CONFLICT")
+              .contains(state)) {
+            publicCall(
+                "/api/v1/studio/guided-sessions/" + session + "/cancel",
+                C.object().put("schemaVersion", 3).put("reason", "userRequested"),
+                202,
+                UUID.randomUUID().toString());
+          }
+          p3AwaitTeardown(session);
+        } catch (Exception | AssertionError cleanup) {
+          failures.add(cleanup);
+        }
+      }
+      incrementalTenScenario = false;
+      incrementalDomVariant = null;
+      try {
+        Files.writeString(TEMP.resolve("obs015-native-mode.json"), "{}");
+      } catch (Exception cleanup) {
+        failures.add(cleanup);
+      }
+      primaryCsi = "CSI-123";
+      forgetCachedCoreIdentity();
+    }
+    throwTeardownFailures(failures);
+  }
+
+  private void b2bAppendAuthority(
+      UUID test,
+      String session,
+      JsonNode edited,
+      B2bPlanHold hold,
+      com.citi.put.checks.studio.guided.session.GuidedSessionService service,
+      org.springframework.security.core.Authentication controller)
+      throws Exception {
+    var materialization =
+        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(jdbc, C);
+    var preparationStore =
+        new com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore(jdbc, C);
+    var runner =
+        ownedApplicationContext.getBean(
+            com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.class);
+    // ---- Phase A: a real unexpired, unconsumed preparation blocks the append (A46-1) ----
+    assertThat(hold.entered.await(60, java.util.concurrent.TimeUnit.SECONDS))
+        .as("suffix SOURCE_PLAN in flight")
+        .isTrue();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT reason FROM studio_guided_relearn_switches WHERE session_id=?",
+                String.class,
+                session))
+        .isEqualTo("BOUNDARY");
+    assertThat(b2bCount("studio_guided_materialization_versions", session)).isEqualTo(1);
+    long fence =
+        sessions.transaction(
+            () -> sessions.lock(session).document().path("owner").path("fence").asLong());
+    JsonNode progress = sessions.transaction(() -> sessions.lock(session).progress().deepCopy());
+    JsonNode document = sessions.transaction(() -> sessions.lock(session).document().deepCopy());
+    ObjectNode context = service.runnerContext(controller, session, fence);
+    JsonNode target = null;
+    for (JsonNode node : progress.path("observation").path("nodes")) {
+      if (node.path("name").asText().equals("Destination")) {
+        target = node;
+      }
+    }
+    assertThat(target != null).as("Destination observed on the live page").isTrue();
+    ObjectNode proposal =
+        C.object()
+            .put("schemaVersion", 3)
+            .put("sessionId", session)
+            .put("scopeHash", document.path("scopeHash").asText())
+            .put("generation", progress.path("generation").asInt())
+            .put("evidenceHash", progress.path("evidenceHash").asText())
+            .put("contextRevision", context.path("contextRevision").asInt())
+            .put("authoredInputsHash", context.path("authoredInputsHash").asText());
+    proposal.putObject("coordinate").put("stepId", INCREMENTAL_STEPS.get(3)).put("ordinal", 0);
+    proposal.set("executionEvidence", progress.path("executionEvidence"));
+    proposal
+        .putObject("target")
+        .put("nodeId", target.path("nodeId").asText())
+        .put("documentId", progress.path("documentId").asText())
+        .put("generation", progress.path("generation").asInt())
+        .putObject("locator")
+        .put("kind", "role")
+        .put("role", target.path("role").asText())
+        .put("name", "Destination")
+        .put("exact", true);
+    proposal
+        .putObject("operation")
+        .put("kind", "assert")
+        .put("predicate", "visible")
+        .putNull("expected");
+    C.validate("v3/action", proposal);
+    // Exactly GuidedDispatchService.prepareAndAdmit's context push and prepare request, without
+    // its admit: the real concurrent-callback window, through the production runner client.
+    runner.send("context", context);
+    ObjectNode prepare = materialization.identity(context);
+    prepare.set("proposal", proposal);
+    prepare.put("requestDigest", GuidedContracts.hash(proposal));
+    prepare.set("expiresAt", context.path("leaseExpiresAt"));
+    JsonNode proof = runner.send("prepare", prepare);
+    service.storePreparation(controller, session, fence, proposal, proof);
+    String preparationId = proof.path("preparationId").asText();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_preparations WHERE session_id=? AND"
+                    + " preparation_id=? AND admission_id IS NULL AND expires_at>clock_timestamp()",
+                Integer.class,
+                session,
+                preparationId))
+        .isEqualTo(1);
+    String completedV1 =
+        jdbc.queryForObject(
+            "SELECT jsonb_agg(to_jsonb(p) ORDER BY preparation_id)::text"
+                + " FROM studio_guided_preparations p WHERE session_id=?"
+                + " AND admission_id IS NOT NULL",
+            String.class,
+            session);
+    String publicationPreparations =
+        jdbc.queryForObject(
+            "SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY preparation_id),'[]'::jsonb)::text"
+                + " FROM studio_guided_publication_preparations p WHERE session_id=?",
+            String.class,
+            session);
+    hold.release.countDown();
+    assertThat(hold.failure).as("plan hold released within its bound").isNull();
+    long accepted = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+    while (!plans.state(session).path("continuation").asText().equals("MATERIALIZE")
+        && System.nanoTime() < accepted) {
+      Thread.sleep(20);
+    }
+    assertThat(plans.state(session).path("continuation").asText()).isEqualTo("MATERIALIZE");
+    Thread.sleep(2500); // >= two real coordinator polls (poll 1000 ms); observed, never shortened
+    assertThat(b2bCount("studio_guided_materialization_versions", session)).isEqualTo(1);
+    assertThat(b2bCount("studio_guided_materialization_deliveries", session)).isZero();
+    long planRevision = plans.state(session).path("planRevision").asLong();
+    JsonNode references = plans.state(session).path("plan").path("sourceReferences").deepCopy();
+    String productionKey = "suffix-materialize-" + planRevision;
+    String immutable = incrementalImmutableSnapshot(session);
+    assertThatThrownBy(
+            () -> service.materialize(controller, session, fence, productionKey, references))
+        .as("exact production append is refused while the real preparation is live")
+        .isInstanceOf(RuntimeException.class);
+    assertThat(incrementalImmutableSnapshot(session)).isEqualTo(immutable);
+    // ---- natural expiry (A46-2): no clock, timestamp, lease or SQL time change ----
+    Instant expires = Instant.parse(proof.path("expiresAt").asText());
+    long renew = System.nanoTime();
+    while (!Instant.now().isAfter(expires.plusMillis(20))) {
+      if (System.nanoTime() >= renew) {
+        refreshFixtureCredentials();
+        renew = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+      }
+      Thread.sleep(100);
+    }
+    long held = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+    while (!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < held) {
+      Thread.sleep(20);
+    }
+    assertThat(INCREMENTAL_ACK_ENTERED.contains(session))
+        .as("append retried after natural expiry; otherwise a liveness finding, never a relaxation")
+        .isTrue();
+    // ---- Phase B at the held v2 ACK (A18-1..3, A77-1, A77-3) ----
+    long fence2 =
+        sessions.transaction(
+            () -> sessions.lock(session).document().path("owner").path("fence").asLong());
+    String pending = incrementalImmutableSnapshot(session);
+    String deliveries = b2bRows("studio_guided_materialization_deliveries", "delivery_id", session);
+    String allocations = b2bRows("studio_guided_allocations", "binding_id", session);
+    String producers = b2bRows("studio_guided_producers", "binding_id", session);
+    int revision = b2bMaterializationRevision(session);
+    JsonNode stored =
+        C.parse(
+            jdbc.queryForObject(
+                "SELECT response::text FROM studio_guided_commands"
+                    + " WHERE namespace=? AND route='materialization' AND idempotency_key=?",
+                String.class,
+                session,
+                productionKey));
+    assertThat(service.materialize(controller, session, fence2, productionKey, references))
+        .as("A18-1 duplicate key and body return the stored response")
+        .isEqualTo(stored);
+    var mutated = (ArrayNode) references.deepCopy();
+    mutated.remove(mutated.size() - 1);
+    assertThatThrownBy(
+            () -> service.materialize(controller, session, fence2, productionKey, mutated))
+        .as("A18-2 same key, mutated body")
+        .isInstanceOf(GuidedSessionException.class)
+        .hasMessage("IDEMPOTENCY_CONFLICT");
+    service.materialize(controller, session, fence2, "b2b-fresh-" + UUID.randomUUID(), references);
+    JsonNode allocation =
+        C.parse(
+            jdbc.queryForObject(
+                "SELECT document::text FROM studio_guided_allocations WHERE session_id=?",
+                String.class,
+                session));
+    assertThat(allocation.path("consumers").size())
+        .as("prefix consumers established before the append")
+        .isEqualTo(2);
+    ObjectNode narrow =
+        C.object()
+            .put("needId", allocation.path("needId").asText())
+            .put("producerStepId", allocation.path("producerStepId").asText());
+    narrow.putArray("consumers").add(allocation.path("consumers").get(0).deepCopy());
+    ObjectNode union = service.cumulativeAllocationRequest(controller, session, fence2, narrow);
+    assertThat(union.path("consumers"))
+        .as("A77-1 cumulative union, not a shrink")
+        .isEqualTo(allocation.path("consumers"));
+    ObjectNode same =
+        C.object()
+            .put("needId", allocation.path("needId").asText())
+            .put("producerStepId", allocation.path("producerStepId").asText());
+    same.set("consumers", allocation.path("consumers").deepCopy());
+    try {
+      service.allocateBinding(controller, session, fence2, "b2b-alloc-" + UUID.randomUUID(), same);
+    } catch (GuidedSessionException refused) {
+      // A77-3: a refusal or an idempotent no-op is lawful; neither may write (asserted below).
+      assertThat(refused.getMessage()).isIn("REVISION_CONFLICT", "IDEMPOTENCY_CONFLICT");
+    }
+    assertThat(incrementalImmutableSnapshot(session)).as("A18-3/A77-3 no write").isEqualTo(pending);
+    assertThat(b2bRows("studio_guided_materialization_deliveries", "delivery_id", session))
+        .isEqualTo(deliveries);
+    assertThat(b2bRows("studio_guided_allocations", "binding_id", session)).isEqualTo(allocations);
+    assertThat(b2bRows("studio_guided_producers", "binding_id", session)).isEqualTo(producers);
+    assertThat(b2bMaterializationRevision(session)).isEqualTo(revision);
+    // A18-4 is OPEN (finding F1): the delivery is released normally and earns no A18-4 credit.
+    String deliveryId =
+        jdbc.queryForObject(
+            "SELECT delivery_id::text FROM studio_guided_materialization_deliveries"
+                + " WHERE session_id=?",
+            String.class,
+            session);
+    INCREMENTAL_ACK_RELEASE.get(session).countDown();
+    long acked = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+    while (!"ACKNOWLEDGED"
+            .equals(
+                jdbc.queryForObject(
+                    "SELECT status FROM studio_guided_materialization_deliveries"
+                        + " WHERE session_id=?",
+                    String.class,
+                    session))
+        && System.nanoTime() < acked) {
+      Thread.sleep(25);
+    }
+    var delivery =
+        jdbc.queryForMap(
+            "SELECT delivery_id::text AS id,status,context_hash,ack::text AS ack"
+                + " FROM studio_guided_materialization_deliveries WHERE session_id=?",
+            session);
+    assertThat(delivery.get("status")).isEqualTo("ACKNOWLEDGED");
+    assertThat(delivery.get("id")).isEqualTo(deliveryId);
+    assertThat(C.parse((String) delivery.get("ack")).path("contextHash").asText())
+        .isEqualTo(delivery.get("context_hash"));
+    assertThat(b2bCount("studio_guided_materialization_versions", session)).isEqualTo(2);
+    assertThat(b2bMaterializationRevision(session)).isEqualTo(revision);
+    // ---- Phase C: the expired old preparation cannot cross the new ACK (A46-3, A46-4) ----
+    String after = incrementalPendingSnapshot(session);
+    long fence3 =
+        sessions.transaction(
+            () -> sessions.lock(session).document().path("owner").path("fence").asLong());
+    assertThatThrownBy(
+            () ->
+                service.admit(
+                    controller, session, fence3, "b2b-old-" + UUID.randomUUID(), proposal))
+        .isInstanceOf(GuidedSessionException.class)
+        .satisfies(
+            failure ->
+                assertThat(failure.getMessage()).isIn("REVISION_CONFLICT", "STALE_GENERATION"));
+    assertThat(incrementalPendingSnapshot(session)).isEqualTo(after);
+    sessions.transaction(
+        () -> {
+          JsonNode current = sessions.lock(session).document();
+          ObjectNode currentContext = materialization.context(current);
+          assertThatThrownBy(
+                  () ->
+                      preparationStore.authorize(current, proposal, currentContext, Instant.now()))
+              .isInstanceOf(GuidedSessionException.class)
+              .hasMessage("STALE_GENERATION");
+          assertThatThrownBy(() -> materialization.verify(current, proof))
+              .isInstanceOf(GuidedSessionException.class)
+              .hasMessage("STALE_FENCE");
+          return null;
+        });
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT admission_id FROM studio_guided_preparations"
+                    + " WHERE session_id=? AND preparation_id=?",
+                String.class,
+                session,
+                preparationId))
+        .isNull();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT jsonb_agg(to_jsonb(p) ORDER BY preparation_id)::text"
+                    + " FROM studio_guided_preparations p WHERE session_id=?"
+                    + " AND admission_id IS NOT NULL"
+                    + " AND (proof->>'contextRevision')::integer=1",
+                String.class,
+                session))
+        .isEqualTo(completedV1);
+    String v1Hash =
+        jdbc.queryForObject(
+            "SELECT authored_inputs_hash FROM studio_guided_materialization_versions"
+                + " WHERE session_id=? AND context_revision=1",
+            String.class,
+            session);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_preparations p JOIN studio_guided_actions a"
+                    + " USING(session_id,admission_id) WHERE p.session_id=?"
+                    + " AND (p.proof->>'contextRevision')::integer=1"
+                    + " AND p.proof->>'authoredInputsHash'=?"
+                    + " AND (a.document->>'contextRevision')::integer=1"
+                    + " AND a.document->>'state'='SUCCEEDED'",
+                Integer.class,
+                session,
+                v1Hash))
+        .as("every completed v1 preparation still joins v1 and its admitted action")
+        .isEqualTo(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?"
+                    + " AND admission_id IS NOT NULL AND (proof->>'contextRevision')::integer=1",
+                Integer.class,
+                session));
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY preparation_id),'[]'::jsonb)::text"
+                    + " FROM studio_guided_publication_preparations p WHERE session_id=?"
+                    + " AND (proof->>'contextRevision')::integer=1",
+                String.class,
+                session))
+        .isEqualTo(publicationPreparations);
+    // ---- downstream truth: merged publication and ordinary replay still succeed ----
+    awaitFinalizing(session);
+    JsonNode merged =
+        publicCall(
+            "/api/v1/studio/guided-sessions/" + session + "/finalize",
+            C.object()
+                .put("schemaVersion", 3)
+                .put("expectedSourceRevision", edited.path("sourceRevision").asText())
+                .put(
+                    "expectedConfigurationRevision", edited.path("configurationRevision").asText()),
+            200,
+            UUID.randomUUID().toString());
+    assertThat(
+            C.parse(
+                    jdbc.queryForObject(
+                        "SELECT artifact::text FROM ui_test_revisions WHERE id=?::uuid",
+                        String.class,
+                        merged.path("revisionId").asText()))
+                .path("inputRecipes")
+                .size())
+        .isEqualTo(2);
+    UUID execution =
+        UUID.fromString(
+            publicCall(
+                    "/api/v1/studio/tests/" + test + "/execute",
+                    C.object(),
+                    202,
+                    UUID.randomUUID().toString())
+                .path("executionId")
+                .asText());
+    assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+    long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+    JsonNode replay;
+    do {
+      replay = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+      if (replay.path("streamComplete").asBoolean()) {
+        break;
+      }
+      Thread.sleep(30);
+    } while (System.nanoTime() < end);
+    assertThat(replay.path("status").asText()).isEqualTo("PASSED");
+  }
+
+  /** A77-4: authenticated owner/browser loss while the v2 ACK is pending bumps nothing. */
+  private void b2bOwnerLoss(
+      String session,
+      B2bPlanHold hold,
+      com.citi.put.checks.studio.guided.session.GuidedSessionService service,
+      org.springframework.security.core.Authentication controller)
+      throws Exception {
+    hold.release.countDown(); // this sibling never holds its suffix plan
+    long held = System.nanoTime() + Duration.ofSeconds(90).toNanos();
+    while (!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < held) {
+      Thread.sleep(20);
+    }
+    assertThat(INCREMENTAL_ACK_ENTERED.contains(session)).as("v2 ACK pending").isTrue();
+    long fence =
+        sessions.transaction(
+            () -> sessions.lock(session).document().path("owner").path("fence").asLong());
+    String pending = incrementalImmutableSnapshot(session);
+    String allocations = b2bRows("studio_guided_allocations", "binding_id", session);
+    String producers = b2bRows("studio_guided_producers", "binding_id", session);
+    int revision = b2bMaterializationRevision(session);
+    String work = b2bWorkSnapshot(session);
+    ObjectNode context = service.runnerContext(controller, session, fence);
+    ownedApplicationContext
+        .getBean(com.citi.put.checks.studio.guided.bridge.GuidedDispatchService.class)
+        .stop(context, "LEASE_LOST");
+    INCREMENTAL_ACK_RELEASE.get(session).countDown();
+    String state = b2AwaitSettled(session, 30);
+    assertThat(state).isIn("FAILED", "UNKNOWN_OUTCOME");
+    p3AwaitTeardown(session);
+    assertThat(incrementalImmutableSnapshot(session)).isEqualTo(pending);
+    assertThat(b2bCount("studio_guided_materialization_deliveries", session)).isEqualTo(1);
+    assertThat(b2bRows("studio_guided_allocations", "binding_id", session)).isEqualTo(allocations);
+    assertThat(b2bRows("studio_guided_producers", "binding_id", session)).isEqualTo(producers);
+    assertThat(b2bMaterializationRevision(session)).isEqualTo(revision);
+    // Design note 1: counters may legitimately change on stop, so only work tables are compared.
+    assertThat(b2bWorkSnapshot(session))
+        .as("no action/preparation/model attempt/switch after loss")
+        .isEqualTo(work);
+  }
+
+  private String b2bWorkSnapshot(String id) {
+    ObjectNode snapshot = C.object();
+    for (String table :
+        List.of(
+            "studio_guided_actions",
+            "studio_guided_model_attempts",
+            "studio_guided_relearn_switches",
+            "studio_guided_preparations")) {
+      snapshot.set(
+          table,
+          C.parse(
+              jdbc.queryForObject(
+                  "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text),'[]'::jsonb)"
+                      + "::text FROM "
+                      + table
+                      + " t WHERE session_id=?",
+                  String.class,
+                  id)));
+    }
+    return GuidedContracts.canonical(snapshot);
+  }
+
+  private int b2bCount(String table, String session) {
+    return jdbc.queryForObject(
+        "SELECT count(*) FROM " + table + " WHERE session_id=?", Integer.class, session);
+  }
+
+  private String b2bRows(String table, String order, String session) {
+    return jdbc.queryForObject(
+        "SELECT jsonb_agg(to_jsonb(t) ORDER BY "
+            + order
+            + ")::text FROM "
+            + table
+            + " t WHERE session_id=?",
+        String.class,
+        session);
+  }
+
+  private int b2bMaterializationRevision(String session) {
+    return jdbc.queryForObject(
+        "SELECT materialization_revision FROM studio_guided_materializations WHERE session_id=?",
+        Integer.class,
+        session);
+  }
+
+  /**
+   * B2B-02 (ledger 68 {@code SnapshotBasisPrivacyIT.authoringSourceNeverEscapesPrivateValidation}
+   * and IPC P08). Combined P3 program: PLAIN (USER), SECRET (PASS, fake Vault leaf), fresh ORDER
+   * reads, and step TWO context [ContextText, LiteralInput], with a real v2 suffix append and a
+   * merged publication; the live ordinary child is scanned at a held sign-in (A68-1..5, AP08-1..3).
+   */
+  @Test
+  void incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication() throws Exception {
+    p3Case(
+        () -> {
+          try {
+            p3Mode = P3Mode.LOGIN;
+            b2Combined = true;
+            b2aTitleSuffix = true;
+            String plain = "B2B-PLAIN-" + UUID.randomUUID();
+            String ctxText = "B2B-CTXTEXT-" + UUID.randomUUID();
+            String ctxLiteral = "B2B-CTXLIT-" + UUID.randomUUID();
+            String secret = "B2B-SECRET-" + UUID.randomUUID();
+            AUDIT_CANARIES.addAll(List.of(plain, ctxText, ctxLiteral, secret));
+            var context =
+                new com.citi.put.checks.studio.dto.StepAuthoringContext(
+                    List.of(
+                        new com.citi.put.checks.studio.dto.ContextText(ctxText),
+                        new com.citi.put.checks.studio.dto.LiteralInput(ctxLiteral)),
+                    List.of());
+            p3Grant(primaryCsi, "fixture");
+            UUID test = b2CreateCombinedSource(primaryCsi, "fixture", plain, context);
+            VaultScope scope = VaultScope.of(primaryCsi, "fixture", test);
+            p3ExpectedPassword = secret;
+            p3Seed(scope, secret);
+            // Whole-case scan windows (base learn + mixed run): a superset of the design's mixed
+            // window, so every privacy oracle below covers more gateway contexts, never fewer.
+            int caseOrders = B2_ORDER_VALUES.size();
+            int contexts = B2_MODEL_CONTEXTS.size();
+            int wire = MODEL_WIRE.size();
+            String original = p3Start(test, "fixture");
+            awaitFinalizing(original);
+            P3Publication base = p3Publish(original);
+            JsonNode edited =
+                b2Edit(
+                    test,
+                    2,
+                    "Click Sign in, click the Reports link and check protected Reports heading."
+                        + " Check page title is Reports.");
+            int orders = B2_ORDER_VALUES.size();
+            Files.writeString(TEMP.resolve("obs015-native-mode.json"), "{}");
+            String mixed =
+                p3Call(
+                        p3Cookie,
+                        "/api/v1/studio/guided-sessions",
+                        p3StartCommand(test, "fixture")
+                            .put("sourceRevision", edited.path("sourceRevision").asText())
+                            .put(
+                                "configurationRevision",
+                                edited.path("configurationRevision").asText())
+                            .put("baseRevisionId", base.revision().toString()),
+                        202)
+                    .path("session")
+                    .path("sessionId")
+                    .asText();
+            awaitFinalizing(mixed);
+            assertThat(b2bCount("studio_guided_materialization_versions", mixed))
+                .as("real v2 suffix append")
+                .isEqualTo(2);
+            P3Publication merged = b2Publish(mixed, edited);
+            // ---- A68-1, A68-3, A68-4, AP08-2: pure basis declarations and evidence ----
+            JsonNode raw =
+                sessions.transaction(
+                    () ->
+                        ownedApplicationContext
+                            .getBean(GuidedPublicationEvidenceRepository.class)
+                            .read(mixed)
+                            .document());
+            JsonNode current = raw.path("snapshotEvidence").path("current");
+            boolean userHash = false;
+            boolean passId = false;
+            for (JsonNode declaration : current.path("authoredDeclarations")) {
+              assertThat(declaration.has("value")).as("declaration is value-free").isFalse();
+              String reference = declaration.path("referenceId").asText();
+              if (reference.equals("USER") && declaration.path("kind").asText().equals("plain")) {
+                userHash = declaration.path("valueHash").asText().matches("^[a-f0-9]{64}$");
+              }
+              if (reference.equals("PASS")
+                  && declaration.path("kind").asText().equals("secretRef")) {
+                passId = declaration.path("secretId").asText().equals("PASS");
+              }
+            }
+            assertThat(userHash).as("plain declaration carries a 64-hex valueHash").isTrue();
+            assertThat(passId).as("secret declaration carries its secretId").isTrue();
+            byte[] authoringBytes =
+                current.path("authoring").toString().getBytes(StandardCharsets.UTF_8);
+            assertThat(containsBytes(authoringBytes, ctxText.getBytes(StandardCharsets.UTF_8)))
+                .as("positive control: context text reaches internal validation")
+                .isTrue();
+            assertThat(containsBytes(authoringBytes, ctxLiteral.getBytes(StandardCharsets.UTF_8)))
+                .as("positive control: context literal reaches internal validation")
+                .isTrue();
+            // Both private authoring subtrees are internal validation inputs: the current
+            // snapshot and the pinned base revision's own authoring (baseProof, mixed session).
+            ObjectNode outsideAuthoring = raw.deepCopy();
+            ((ObjectNode) outsideAuthoring.path("snapshotEvidence").path("current"))
+                .remove("authoring");
+            JsonNode baseIdentity =
+                outsideAuthoring
+                    .path("snapshotEvidence")
+                    .path("baseProof")
+                    .path("authoringIdentity");
+            if (baseIdentity.isObject()) {
+              ((ObjectNode) baseIdentity).remove("authoring");
+            }
+            var outside =
+                Map.of(
+                    "raw-evidence-outside-authoring",
+                    outsideAuthoring.toString().getBytes(StandardCharsets.UTF_8));
+            var whole =
+                Map.of("raw-evidence-whole", raw.toString().getBytes(StandardCharsets.UTF_8));
+            for (String value : List.of(ctxText, ctxLiteral, plain, secret)) {
+              assertJoinedSinkAbsent(outside, value);
+            }
+            for (String value : List.of(plain, secret)) {
+              assertJoinedSinkAbsent(whole, value);
+            }
+            assertThat(B2_ORDER_VALUES.size() - orders)
+                .as("fresh mixed-session reads")
+                .isPositive();
+            for (String value : b2Tail(B2_ORDER_VALUES, caseOrders)) {
+              assertJoinedSinkAbsent(whole, value);
+            }
+            for (JsonNode entry : raw.path("materializationEvidence").path("entries")) {
+              assertThat(entry.path("metadata").has("value")).as("no proof enrichment").isFalse();
+            }
+            // ---- A68-3 gateway: context text only inside authoringContext ----
+            boolean contextSeen = false;
+            for (JsonNode model : b2Tail(B2_MODEL_CONTEXTS, contexts)) {
+              for (String forbidden :
+                  List.of(
+                      "authoringSnapshot",
+                      "authoredDeclarations",
+                      "snapshotEvidence",
+                      "configurationValues")) {
+                assertThat(model.findValue(forbidden) == null)
+                    .as("no private basis field in a decoded gateway context")
+                    .isTrue();
+              }
+              contextSeen |=
+                  containsBytes(
+                      model.path("authoringContext").toString().getBytes(StandardCharsets.UTF_8),
+                      ctxText.getBytes(StandardCharsets.UTF_8));
+              ObjectNode remainder = model.deepCopy();
+              remainder.remove("authoringContext");
+              assertJoinedSinkAbsent(
+                  Map.of("gateway-context", remainder.toString().getBytes(StandardCharsets.UTF_8)),
+                  ctxText);
+              for (String value : List.of(ctxLiteral, plain, secret)) {
+                assertJoinedSinkAbsent(
+                    Map.of("gateway-context", model.toString().getBytes(StandardCharsets.UTF_8)),
+                    value);
+              }
+            }
+            assertThat(contextSeen)
+                .as("positive control: the approved text projection carried the context")
+                .isTrue();
+            byte[] rawWire =
+                String.join("\n", b2Tail(MODEL_WIRE, wire)).getBytes(StandardCharsets.UTF_8);
+            for (String value : List.of(ctxLiteral, plain, secret)) {
+              assertJoinedSinkAbsent(Map.of("gateway-raw", rawWire), value);
+            }
+            // ---- AP08-1: argv/env of the live ordinary compiled child and the guided worker ----
+            b2bSignInEntered = new java.util.concurrent.CountDownLatch(1);
+            b2bSignInHold = new java.util.concurrent.CountDownLatch(1);
+            UUID execution;
+            try {
+              execution = p3Execute(test);
+              p3AssertBinding(execution, scope, merged);
+              assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+              assertThat(b2bSignInEntered.await(45, java.util.concurrent.TimeUnit.SECONDS))
+                  .as("live ordinary child held at sign-in")
+                  .isTrue();
+              b2bScanLiveProcesses(
+                  List.of(plain, ctxText, ctxLiteral, secret, B2_ORDER_VALUES.getLast()));
+            } finally {
+              var release = b2bSignInHold;
+              b2bSignInHold = null;
+              b2bSignInEntered = null;
+              if (release != null) {
+                release.countDown();
+              }
+            }
+            JsonNode report = p3AwaitExecution(execution, "PASSED");
+            assertThat(p3DecodeVideo(execution, report)).isPositive();
+            assertThat(B2_REFERENCE_RECEIPTS.getLast().equals(B2_ORDER_VALUES.getLast()))
+                .as("ordinary replay recaptured the fresh read (boolean only)")
+                .isTrue();
+            // ---- A68-2/AP08-1/AP08-3: forbidden sinks; lawful private stores excluded by name
+            // ----
+            var sinks = new java.util.LinkedHashMap<String, byte[]>();
+            collectJoinedSinks(sinks);
+            for (String lawfulPrivate :
+                List.of(
+                    "postgres-studio_guided_source_manifests",
+                    "postgres-studio_guided_materializations",
+                    "postgres-studio_guided_translation_state",
+                    "postgres-ui_test_revisions",
+                    "postgres-ui_test_executions",
+                    "postgres-studio_guided_commands")) {
+              sinks.remove(lawfulPrivate); // VERIFY-8 (may only shrink); see notes
+            }
+            sinks.remove("gateway"); // checked above with the explicit authoringContext exception
+            sinks.put(
+                "artifact",
+                jdbc.queryForObject(
+                        "SELECT artifact::text FROM ui_test_revisions WHERE id=?",
+                        String.class,
+                        merged.revision())
+                    .getBytes(StandardCharsets.UTF_8));
+            sinks.put(
+                "public-session",
+                p3Call(p3Cookie, "/api/v1/studio/guided-sessions/" + mixed, null, 200)
+                    .toString()
+                    .getBytes(StandardCharsets.UTF_8));
+            sinks.put(
+                "public-result",
+                p3Call(p3Cookie, "/api/v1/studio/guided-sessions/" + mixed + "/result", null, 200)
+                    .toString()
+                    .getBytes(StandardCharsets.UTF_8));
+            sinks.put(
+                "public-execution",
+                p3Call(p3Cookie, "/api/v1/studio/executions/" + execution, null, 200)
+                    .toString()
+                    .getBytes(StandardCharsets.UTF_8));
+            sinks.put(
+                "final-report",
+                p3RunnerReport(execution).toString().getBytes(StandardCharsets.UTF_8));
+            sinks.put(
+                "recording-row",
+                String.valueOf(guidedRecordingRow(mixed)).getBytes(StandardCharsets.UTF_8));
+            for (String value : List.of(plain, ctxLiteral, ctxText, secret)) {
+              assertJoinedSinkAbsent(sinks, value);
+            }
+            for (String value : b2Tail(B2_ORDER_VALUES, caseOrders)) {
+              assertJoinedSinkAbsent(sinks, value);
+            }
+            for (String table :
+                List.of(
+                    "studio_guided_actions",
+                    "studio_secret_use_audit",
+                    "studio_guided_translation_plans",
+                    "studio_guided_model_attempts")) {
+              assertJoinedSinkAbsent(
+                  Map.of(
+                      table,
+                      String.join(
+                              "\n",
+                              jdbc.queryForList(
+                                  "SELECT row_to_json(t)::text FROM "
+                                      + table
+                                      + " t WHERE session_id=?",
+                                  String.class,
+                                  mixed))
+                          .getBytes(StandardCharsets.UTF_8)),
+                  plain); // AP08-3 withholding
+            }
+            p3Scan(List.of(secret)); // A68-5: original OBS-007 sink set, unchanged
+            p3WriteEvidence(
+                "b2b-canaries",
+                C.object()
+                    .put("canaryKinds", 5)
+                    .put("contextInGatewayOnlyViaAuthoringContext", true)
+                    .put("liveChildArgvEnvScanned", true));
+          } finally {
+            b2ResetKnobs();
+          }
+        });
+  }
+
+  /** REUSED owned ordinary-child argv/env scan, plus the same bounded scan of the guided worker. */
+  private static void b2bScanLiveProcesses(List<String> values) throws Exception {
+    p3ScanOwnedChildArguments(p3OrdinaryChildren(ordinaryWorker), values);
+    ProcessHandle guided = guidedWorker.toHandle();
+    Instant started = guided.info().startInstant().orElseThrow();
+    p6SameProcess(guided, started);
+    C5CanaryStream scan = new C5CanaryStream(values);
+    byte[] arguments = null;
+    byte[] environment = null;
+    Process probe = null;
+    try {
+      String[] actual = guided.info().arguments().orElseThrow();
+      assertThat(actual.length).isBetween(1, 32);
+      arguments = String.join("\0", actual).getBytes(StandardCharsets.UTF_8);
+      probe =
+          new ProcessBuilder("/bin/ps", "eww", "-p", Long.toString(guided.pid()), "-o", "command=")
+              .redirectErrorStream(true)
+              .start();
+      registerOwnedTool(probe, "private-process-scan");
+      assertThat(probe.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+      assertThat(probe.exitValue()).isZero();
+      environment = probe.getInputStream().readNBytes(65537);
+      assertThat(environment.length).isBetween(1, 65536);
+      p6SameProcess(guided, started);
+      scan.write(arguments, 0, arguments.length);
+      scan.write(environment, 0, environment.length);
+      scan.closeInput();
+      scan.assertClean(true);
+    } finally {
+      if (arguments != null) {
+        java.util.Arrays.fill(arguments, (byte) 0);
+      }
+      if (environment != null) {
+        java.util.Arrays.fill(environment, (byte) 0);
+      }
+      scan.wipe();
+      if (probe != null) {
+        p6CloseCommand(probe);
+      }
+    }
+  }
+
+  // ---- B2 shared helpers (test-owned; value-free failure texts) ----
+
+  /** Immutable snapshot of a concurrently appended fixture list from an index. */
+  private static <T> List<T> b2Tail(List<T> list, int from) {
+    List<T> copy = List.copyOf(list);
+    return copy.subList(from, copy.size());
+  }
+
+  private void b2ResetKnobs() {
+    b2PasswordPage = B2PasswordPage.SINGLE;
+    b2Combined = false;
+    b2aTitleSuffix = false;
+    B2_REFERENCE_RECEIPTS.clear();
+    B2_MODEL_CONTEXTS.clear();
+    b2bSignInHold = null;
+    b2bSignInEntered = null;
+  }
+
+  /** Generalizes writePrefixSyncControl to a named owner-only control file (4096-byte bound). */
+  private static void writeOwnedControl(Path file, JsonNode value) throws Exception {
+    byte[] bytes = GuidedContracts.canonical(value).getBytes(StandardCharsets.UTF_8);
+    assertThat(bytes.length).isLessThanOrEqualTo(4096);
+    if (!Files.exists(file)) {
+      Files.createFile(
+          file,
+          java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
+              java.nio.file.attribute.PosixFilePermissions.fromString("rw-------")));
+    }
+    assertThat(Files.isSymbolicLink(file)).isFalse();
+    assertThat(Files.getPosixFilePermissions(file))
+        .isEqualTo(java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
+    Files.write(file, bytes);
+  }
+
+  private String b2AuditSnapshot(String session) {
+    return GuidedContracts.hash(
+        C.parse(
+            jdbc.queryForObject(
+                "SELECT COALESCE(jsonb_agg(to_jsonb(a) ORDER BY to_jsonb(a)::text),'[]'::jsonb)"
+                    + "::text FROM studio_secret_use_audit a WHERE session_id=?",
+                String.class,
+                session)));
+  }
+
+  /** PASS audit rows of one session matching a test-owned predicate with bound parameters. */
+  private long b2AuditCount(String session, String predicate, Object... arguments) {
+    Object[] bound = new Object[arguments.length + 1];
+    bound[0] = session;
+    System.arraycopy(arguments, 0, bound, 1, arguments.length);
+    return jdbc.queryForObject(
+        "SELECT count(*) FROM studio_secret_use_audit WHERE session_id=? AND secret_id='PASS' AND "
+            + predicate,
+        Long.class,
+        bound);
+  }
+
+  private String b2PassReferenceId(String session) {
+    for (JsonNode reference :
+        C.parse(
+                jdbc.queryForObject(
+                    "SELECT manifest::text FROM studio_guided_source_manifests WHERE session_id=?",
+                    String.class,
+                    session))
+            .path("configurationReferences")) {
+      if (reference.path("kind").asText().equals("secretRef")
+          && reference.path("referenceName").asText().equals("PASS")) {
+        return reference.path("referenceId").asText();
+      }
+    }
+    throw new AssertionError("frozen PASS secretRef missing");
+  }
+
+  private String b2AwaitSettled(String id, int seconds) throws Exception {
+    long end = System.nanoTime() + Duration.ofSeconds(seconds).toNanos();
+    String state;
+    do {
+      state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+      if (List.of("FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED", "SUCCEEDED", "FINALIZING")
+          .contains(state)) {
+        break;
+      }
+      Thread.sleep(25);
+    } while (System.nanoTime() < end);
+    return state;
+  }
+
+  private String b2AwaitLeft(String id, String from, int seconds) throws Exception {
+    long end = System.nanoTime() + Duration.ofSeconds(seconds).toNanos();
+    String state;
+    do {
+      state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+      if (!state.equals(from)) {
+        break;
+      }
+      Thread.sleep(25);
+    } while (System.nanoTime() < end);
+    return state;
+  }
+
+  /**
+   * Exact post-ACK gate: checkCurrent inside translationTransaction entered from advancePrefix:405
+   * (GuidedTranslationService d8c494b2). No other revocation observer is credited.
+   */
+  private void b2AwaitCheckCurrentGate(int after) throws Exception {
+    long end = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+    do {
+      var matches = new ArrayList<JsonNode>();
+      for (int n = after + 1; n <= FINALIZE_DIAGNOSTICS.get(); n++) {
+        Path file = TEMP.resolve("finalize-exception-" + n + ".json");
+        if (!Files.isRegularFile(file)) {
+          continue; // the counter increment precedes the completed write
+        }
+        JsonNode row;
+        try {
+          row = C.parse(Files.readString(file));
+        } catch (RuntimeException incomplete) {
+          continue;
+        }
+        if (!row.path("exceptionCode").asText().equals("SECRET_USE_REVOKED")) {
+          continue;
+        }
+        boolean access = false;
+        boolean transaction = false;
+        boolean gate = false;
+        for (JsonNode frame : row.path("stackFrames")) {
+          String type = frame.path("class").asText();
+          String method = frame.path("method").asText();
+          access |=
+              type.equals(
+                      "com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess")
+                  && method.equals("checkCurrent");
+          transaction |=
+              type.equals("com.citi.put.checks.studio.guided.session.GuidedSessionService")
+                  && method.startsWith("lambda$translationTransaction");
+          gate |=
+              type.equals("com.citi.put.checks.studio.guided.translation.GuidedTranslationService")
+                  && method.equals("advancePrefix")
+                  && frame.path("line").asInt() == 405;
+        }
+        if (access && transaction && gate) {
+          matches.add(row);
+        }
+      }
+      if (!matches.isEmpty()) {
+        assertThat(matches.size()).as("one exact post-ACK checkCurrent refusal").isEqualTo(1);
+        return;
+      }
+      Thread.sleep(10);
+    } while (System.nanoTime() < end);
+    throw new AssertionError(
+        "post-ACK worker checkCurrent SECRET_USE_REVOKED not observed; no other observer credited");
+  }
+
+  private List<JsonNode> b2PrefixSyncEvents(PrefixSyncCut cut, String session) throws Exception {
+    Path file = TEMP.resolve("obs015-prefix-sync-" + cut.key + ".jsonl");
+    if (!Files.exists(file)) {
+      return List.of();
+    }
+    assertThat(Files.isSymbolicLink(file)).isFalse();
+    assertThat(Files.getPosixFilePermissions(file))
+        .isEqualTo(java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
+    var events =
+        Files.readAllLines(file, StandardCharsets.UTF_8).stream()
+            .filter(line -> !line.isBlank())
+            .map(C::parse)
+            .toList();
+    for (JsonNode row : events) {
+      assertThat(row.size()).as("closed nine-key event row").isEqualTo(9);
+      assertThat(row.path("mode").asText()).isEqualTo(cut.mode);
+      assertThat(row.path("sessionHash").asText())
+          .isEqualTo(GuidedContracts.hash(JSON.getNodeFactory().textNode(session)));
+    }
+    return events;
+  }
+
+  private JsonNode b2Edit(UUID test, int index, String text) throws Exception {
+    JsonNode draft = publicCall("/api/v1/studio/tests/" + test, null, 200, null);
+    ObjectNode edit = C.object();
+    for (String field :
+        List.of(
+            "authoringSchemaVersion",
+            "globalContext",
+            "steps",
+            "name",
+            "description",
+            "csiId",
+            "environment",
+            "variables",
+            "configuration",
+            "sourceRevision",
+            "configurationRevision")) {
+      edit.set(field, draft.path(field).deepCopy());
+    }
+    ((ObjectNode) edit.path("steps").get(index)).put("text", text);
+    AUDIT_CANARIES.add(text);
+    var put =
+        HttpRequest.newBuilder(
+                URI.create("https://localhost:" + port + "/api/v1/studio/tests/" + test))
+            .header("Cookie", "put_session=" + COOKIE)
+            .header("Content-Type", "application/json")
+            .header("Idempotency-Key", UUID.randomUUID().toString())
+            .PUT(HttpRequest.BodyPublishers.ofString(edit.toString()))
+            .build();
+    var response =
+        HttpClient.newBuilder()
+            .sslContext(TLS)
+            .build()
+            .send(put, HttpResponse.BodyHandlers.ofString());
+    assertThat(response.statusCode()).as("draft edit status").isEqualTo(200);
+    return C.parse(response.body());
+  }
+
+  /** p3Publish for an edited draft: same value-free checks with the edited expected revisions. */
+  private P3Publication b2Publish(String id, JsonNode edited) throws Exception {
+    int models = MODEL_WIRE.size();
+    int reads = COUNTED_VAULT.reads.size();
+    JsonNode published =
+        p3Call(
+            p3Cookie,
+            "/api/v1/studio/guided-sessions/" + id + "/finalize",
+            C.object()
+                .put("schemaVersion", 3)
+                .put("expectedSourceRevision", edited.path("sourceRevision").asText())
+                .put(
+                    "expectedConfigurationRevision", edited.path("configurationRevision").asText()),
+            200);
+    UUID revision = UUID.fromString(published.path("revisionId").asText());
+    String artifact =
+        jdbc.queryForObject(
+            "SELECT artifact::text FROM ui_test_revisions WHERE id=?", String.class, revision);
+    String hash =
+        jdbc.queryForObject(
+            "SELECT artifact_hash FROM ui_test_revisions WHERE id=?", String.class, revision);
+    assertThat(independentArtifactHash(C.parse(artifact))).isEqualTo(hash);
+    assertThat(MODEL_WIRE.size()).isEqualTo(models);
+    assertThat(COUNTED_VAULT.reads.size()).isEqualTo(reads);
+    p3AwaitTeardown(id);
+    return new P3Publication(revision, hash, artifact);
+  }
+
+  // ---- B2 fixture hooks (reached only through the one-line shared hunks; inert by default) ----
+
+  private static boolean b2PageArmed() {
+    return b2Combined || b2PasswordPage != B2PasswordPage.SINGLE;
+  }
+
+  private static String b2LoginDocument() {
+    B2PasswordPage page = b2PasswordPage;
+    String passwords =
+        switch (page) {
+          case NONE -> "";
+          case TWO ->
+              "<input name='password' type='password'><input name='password2' type='password'>";
+          default -> "<input name='password' type='password'>";
+        };
+    // Same semantics as the OBS-007 fixture /trap (studio-runner secret-login/server.ts).
+    String trap =
+        page == B2PasswordPage.TYPE_FLIP
+            ? "<script>document.querySelector(\"input[type=password]\").addEventListener(\"focus\","
+                + "event=>event.target.type=\"text\")</script>"
+            : "";
+    if (b2Combined) {
+      String fresh = "  b2-order-" + UUID.randomUUID() + "-é  ";
+      B2_ORDER_VALUES.add(fresh);
+      VALUES.add(fresh); // private observed value: also covered by the final whole-class scan
+      return "<main aria-label='Operations'><output aria-label='Order reference'>"
+          + fresh
+          + "</output><form method='post' action='/p3/login'><label>Reference<input"
+          + " name='reference'></label><label>User<input name='username'></label>"
+          + passwords
+          + "<button type='submit'>Sign in</button></form><button"
+          + " type='button'>Reports</button></main>"
+          + trap;
+    }
+    return "<form method='post' action='/p3/login'><label>User<input name='username'></label>"
+        + passwords
+        + "<button type='submit'>Sign in</button></form><button type='button'>Reports</button>"
+        + trap;
+  }
+
+  private static void b2SignIn(Map<String, String> values) {
+    if (b2Combined) {
+      B2_REFERENCE_RECEIPTS.add(values.getOrDefault("reference", ""));
+    }
+    java.util.concurrent.CountDownLatch hold = b2bSignInHold;
+    if (hold == null) {
+      return;
+    }
+    java.util.concurrent.CountDownLatch entered = b2bSignInEntered;
+    if (entered != null) {
+      entered.countDown();
+    }
+    try {
+      if (!hold.await(20, java.util.concurrent.TimeUnit.SECONDS)) {
+        b2bSignInHold = null;
+      }
+    } catch (InterruptedException interrupted) {
+      Thread.currentThread().interrupt();
+    }
+  }
+
+  private static String b2TitleHead(String path) {
+    return b2aTitleSuffix && path.equals("/p3/reports")
+        ? "<head><title>Reports</title></head>"
+        : "";
+  }
+
+  private static void b2bHoldSuffixPlan(String kind, JsonNode context) {
+    if (!kind.equals("SOURCE_PLAN") || !context.has("learningWindow")) {
+      return;
+    }
+    B2bPlanHold hold = B2B_PLAN_HOLDS.get(context.path("sessionId").asText());
+    if (hold == null || hold.hits.getAndIncrement() > 0) {
+      return; // only the first suffix SOURCE_PLAN of the selected session
+    }
+    hold.entered.countDown();
+    try {
+      if (!hold.release.await(8, java.util.concurrent.TimeUnit.SECONDS)) {
+        hold.failure = new IllegalStateException("B2b plan hold deadline");
+      }
+    } catch (InterruptedException interrupted) {
+      Thread.currentThread().interrupt();
+      hold.failure = interrupted;
+    }
+  }
+
+  /** Null unless a B2 model knob is armed and the P3 LOGIN obligation is one B2 owns. */
+  private static ObjectNode b2Model(ObjectNode result, JsonNode context, String kind) {
+    if (!b2Combined && !b2aTitleSuffix || p3Mode != P3Mode.LOGIN) {
+      return null;
+    }
+    if (b2Combined) {
+      B2_MODEL_CONTEXTS.add(context.deepCopy()); // decoded gateway context, never printed
+    }
+    if (kind.equals("SOURCE_PLAN")) {
+      return b2SourcePlan(result, context);
+    }
+    JsonNode obligation = context.path("obligations").path(0);
+    String operationKind = obligation.path("operationKind").asText();
+    if (operationKind.equals("assert") && obligation.path("predicate").asText().equals("title")) {
+      JsonNode input = context.path("inputs").path(obligation.path("referenceIndex").asInt());
+      if (!input.path("intendedSlot").asText().equals("assert.expected")) {
+        throw new IllegalStateException("B2 title input missing");
+      }
+      result
+          .put("status", "ACTION")
+          .put("obligationId", obligation.path("obligationId").asText())
+          .putNull("question");
+      var action = result.putObject("action");
+      action
+          .putObject("operation")
+          .put("kind", "assert")
+          .put("predicate", "title")
+          .putObject("expected")
+          .put("kind", "authoredLiteral")
+          .put("sourceInputId", input.path("inputId").asText());
+      action.putObject("target").put("kind", "page");
+      return result;
+    }
+    if (b2Combined
+        && (operationKind.equals("read")
+            || obligation.path("targetIntent").asText().equals("Reference"))) {
+      JsonNode node = null;
+      for (JsonNode candidate : context.path("observation").path("nodes")) {
+        if (candidate.path("name").equals(obligation.path("targetIntent"))) {
+          node = candidate;
+        }
+      }
+      if (node == null) {
+        return result.put("status", "UNSUPPORTED").put("reasonCode", "INSUFFICIENT_EVIDENCE");
+      }
+      result
+          .put("status", "ACTION")
+          .put("obligationId", obligation.path("obligationId").asText())
+          .putNull("question");
+      var action = result.putObject("action");
+      String binding = context.path("needs").path(0).path("bindingId").asText();
+      if (operationKind.equals("read")) {
+        action
+            .putObject("operation")
+            .put("kind", "read")
+            .put("bindingId", binding)
+            .putObject("recipe")
+            .put("kind", "visibleText")
+            .put("classification", "permittedBusinessData")
+            .put("policyRuleId", "business-read");
+      } else {
+        action
+            .putObject("operation")
+            .put("kind", "fill")
+            .putObject("value")
+            .put("kind", "binding")
+            .put("bindingId", binding);
+      }
+      action
+          .putObject("target")
+          .put("nodeId", node.path("nodeId").asText())
+          .putObject("locator")
+          .put("kind", "role")
+          .put("role", node.path("role").asText())
+          .put("name", node.path("name").asText())
+          .put("exact", true);
+      return result;
+    }
+    return null;
+  }
+
+  /** The P3 LOGIN SOURCE_PLAN plus the combined read/consumer and the title-suffix obligation. */
+  private static ObjectNode b2SourcePlan(ObjectNode result, JsonNode context) {
+    String destination = ORIGIN + "/p3/login";
+    var references = result.putArray("sourceReferences");
+    references
+        .addObject()
+        .put("referenceKind", "sourceSpan")
+        .put("sourceRevision", "1")
+        .put("stepId", ONE)
+        .put("startUtf16", 5)
+        .put("endUtf16", 5 + destination.length())
+        .put("kind", "destination")
+        .put("intendedSlot", "navigate.destination");
+    for (String name : List.of("USER", "PASS")) {
+      JsonNode declaring = null;
+      for (JsonNode configured : context.path("configurationReferences")) {
+        if (configured.path("referenceName").asText().equals(name)
+            && configured.path("stepId").asText().equals(TWO)
+            && configured.path("intendedSlot").asText().equals("fill.value")) {
+          declaring = configured;
+        }
+      }
+      if (declaring == null) {
+        throw new IllegalStateException("Authentic B2 declaration missing");
+      }
+      var reference =
+          ((ObjectNode) declaring)
+              .deepCopy()
+              .put("referenceKind", "configuration")
+              .put("configurationRevision", "1");
+      if (name.equals("USER")) {
+        reference.remove("referenceName");
+      }
+      references.add(reference);
+    }
+    var obligations = result.putArray("obligations");
+    obligations.add(obligation(ONE, 0, "navigate", "page", 0, null));
+    if (b2Combined) {
+      obligations.add(obligation(ONE, 1, "read", "Order reference", null, "order"));
+      obligations.add(obligation(TWO, 0, "fill", "Reference", null, "order"));
+      obligations.add(obligation(TWO, 1, "fill", "User", 1, null));
+      obligations.add(obligation(TWO, 2, "fill", "password", 2, null));
+    } else {
+      obligations.add(obligation(TWO, 0, "fill", "User", 1, null));
+      obligations.add(obligation(TWO, 1, "fill", "password", 2, null));
+    }
+    obligations.add(obligation(THREE, 0, "click", "Sign in", null, null));
+    obligations.add(obligation(THREE, 1, "click", "Reports", null, null));
+    obligations.add(
+        obligation(THREE, 2, "assert", "Reports", null, null).put("predicate", "visible"));
+    if (b2aTitleSuffix) {
+      String sentence = "Check page title is Reports.";
+      for (JsonNode step : context.path("sourceSteps")) {
+        String text = step.path("text").asText();
+        int at = text.indexOf(sentence);
+        if (!step.path("stepId").asText().equals(THREE) || at < 0) {
+          continue;
+        }
+        int offset = at + "Check page title is ".length();
+        int reference = references.size();
+        references
+            .addObject()
+            .put("referenceKind", "sourceSpan")
+            .put("sourceRevision", context.path("sourceRevision").asText())
+            .put("stepId", THREE)
+            .put("startUtf16", offset)
+            .put("endUtf16", offset + "Reports".length())
+            .put("kind", "nonsecretText")
+            .put("intendedSlot", "assert.expected");
+        obligations.add(
+            obligation(THREE, 3, "assert", "page", reference, null).put("predicate", "title"));
+      }
+    }
+    boolean windowHasTwo = !context.has("learningWindow");
+    for (JsonNode step : context.path("learningWindow").path("learnableStepIds")) {
+      windowHasTwo |= step.asText().equals(TWO);
+    }
+    var needs = result.putArray("needs");
+    if (b2Combined && windowHasTwo) {
+      var need = needs.addObject().put("needId", "order").put("producerStepId", ONE);
+      need.putArray("consumers").addObject().put("stepId", TWO).put("argumentSlot", "fill.value");
+    }
+    return incrementalSourcePlanWindow(result, context);
+  }
+
+  /**
+   * B2A-03 separately named secret-context ACK cut (SECRET_HOLD). A test-owned layer installed
+   * between the 015 fault observer and the S2 observers (S2 stays outermost). It reuses
+   * pfxEvent/pfxSignal/prefixSyncCallback unchanged and never alters pfxRead/pfxSelect or the
+   * closed PFX modes. Inert unless the owner-only control file is armed. No runner source or dist
+   * change; the runtime fields used (ordinals, prefixExited, hasSecretInputs) are real dist fields.
+   */
+  private static String b2SecretContextObserver() throws Exception {
+    return """
+// B2A-03: separately named secret-context ACK cut; values and contexts are never exported.
+const scControl=%s,scCases=new Map();
+function scRead(){
+ if(!fs.existsSync(scControl))return null;
+ const b=fs.readFileSync(scControl);if(b.length>4096)throw new Error('SC_CONTROL_BOUND');
+ const c=JSON.parse(b.toString('utf8'));if(Object.keys(c).length===0)return null;
+ if(Object.keys(c).sort().join(',')!=='caseId,mode,ordinal,stepId'
+  ||!/^[0-9a-f-]{36}$/u.test(c.caseId)||typeof c.stepId!=='string'
+  ||!Number.isInteger(c.ordinal)||c.ordinal<0||c.ordinal>31||c.mode!=='SECRET_HOLD')
+  throw new Error('SC_CONTROL_SHAPE');
+ return c;
+}
+function scSelect(runtime,next){
+ const control=scRead();if(!control||scCases.has(control.caseId))return null;
+ const program=next?.prefixProgram;
+ if(!program?.actions?.length||next.contextRevision!==1||runtime.prefixExited
+  ||!runtime.hasSecretInputs)return null;
+ const at=program.actions.findIndex(a=>a.coordinate.stepId===control.stepId
+  &&a.coordinate.ordinal===control.ordinal);
+ if(at<0)return null;
+ const target=program.actions[at];
+ if(target.operation.kind!=='fill'||target.operation.value?.kind!=='secretRef'
+  ||target.guard?.target?.kind!=='passwordControl')return null;
+ for(let i=0;i<program.actions.length;i++){
+  const a=program.actions[i];
+  const done=(runtime.ordinals.get(a.coordinate.stepId)??0)>a.coordinate.ordinal;
+  if((i<at)!==done)return null;}
+ const c={...control,sessionId:next.sessionId,browser:runtime.browser,
+  observations:runtime.browser?.observations,count:1};
+ scCases.set(control.caseId,c);return c;
+}
+const scFind=(id,coordinate)=>[...scCases.values()].find(c=>c.sessionId===id
+ &&c.stepId===coordinate?.stepId&&c.ordinal===coordinate?.ordinal);
+const scUpdate=RevRuntime.prototype.update;
+RevRuntime.prototype.update=async function(...args){
+  const sc=scSelect(this,args[0]);
+  const result=await Reflect.apply(scUpdate,this,args);
+  if(sc){await pfxEvent(sc,'UPDATED_BEFORE_ACK',this,args[0]);await pfxSignal(sc,args[0],'AFTER');
+    await pfxEvent(sc,'ACK_RELEASED',this,args[0]);}
+  return result;};
+const scPrepare=RevRuntime.prototype.preparePrefix;
+RevRuntime.prototype.preparePrefix=async function(...args){
+  const sc=scFind(args[0]?.request?.sessionId,args[0]?.request?.coordinate);
+  if(sc)await pfxEvent(sc,'TARGET_PREPARE_ENTER',this,this.context);
+  return Reflect.apply(scPrepare,this,args);};
+const scDispatch=RevRuntime.prototype.dispatch;
+RevRuntime.prototype.dispatch=async function(...args){
+  const sc=scFind(args[0]?.sessionId,args[0]?.proposal?.coordinate);
+  if(sc)await pfxEvent(sc,'TARGET_DISPATCH_ENTER',this,this.context);
+  return Reflect.apply(scDispatch,this,args);};
+"""
+        .formatted(
+            JSON.writeValueAsString(TEMP.resolve("obs015-secret-context-control.json").toString()));
+  }
+}

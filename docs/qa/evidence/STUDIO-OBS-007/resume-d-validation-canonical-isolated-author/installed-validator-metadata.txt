@@ -1,0 +1,3243 @@
+Compiled from "SchemaValidatorsConfig.java"
+public class com.networknt.schema.SchemaValidatorsConfig {
+  private com.networknt.schema.JsonSchemaIdValidator schemaIdValidator;
+
+  private boolean typeLoose;
+
+  private boolean failFast;
+
+  private com.networknt.schema.ApplyDefaultsStrategy applyDefaultsStrategy;
+
+  private boolean ecma262Validator;
+
+  private boolean javaSemantics;
+
+  private boolean losslessNarrowing;
+
+  private boolean isCustomMessageSupported;
+
+  private boolean openAPI3StyleDiscriminators;
+
+  private final java.util.Map<java.lang.String, java.lang.Boolean> strictness;
+
+  private boolean handleNullableField;
+
+  private java.lang.Boolean readOnly;
+
+  private java.lang.Boolean writeOnly;
+
+  private com.networknt.schema.PathType pathType;
+
+  private boolean preloadJsonSchema;
+
+  public static final java.lang.String ALL_KEYWORD_WALK_LISTENER_KEY;
+
+  private final java.util.Map<java.lang.String, java.util.List<com.networknt.schema.walk.JsonSchemaWalkListener>> keywordWalkListenersMap;
+
+  private final java.util.List<com.networknt.schema.walk.JsonSchemaWalkListener> propertyWalkListeners;
+
+  private final java.util.List<com.networknt.schema.walk.JsonSchemaWalkListener> itemWalkListeners;
+
+  private com.networknt.schema.ExecutionContextCustomizer executionContextCustomizer;
+
+  private boolean loadCollectors;
+
+  private java.util.Locale locale;
+
+  private com.networknt.schema.i18n.MessageSource messageSource;
+
+  private java.lang.Boolean formatAssertionsEnabled;
+
+  private boolean disableUnevaluatedItems;
+
+  private boolean disableUnevaluatedProperties;
+
+  private final com.networknt.schema.walk.WalkListenerRunner itemWalkListenerRunner;
+
+  private com.networknt.schema.walk.WalkListenerRunner keywordWalkListenerRunner;
+
+  private com.networknt.schema.walk.WalkListenerRunner propertyWalkListenerRunner;
+
+  public com.networknt.schema.SchemaValidatorsConfig disableUnevaluatedAnalysis();
+    Code:
+       0: aload_0
+       1: invokevirtual #1                  // Method disableUnevaluatedItems:()Lcom/networknt/schema/SchemaValidatorsConfig;
+       4: pop
+       5: aload_0
+       6: invokevirtual #2                  // Method disableUnevaluatedProperties:()Lcom/networknt/schema/SchemaValidatorsConfig;
+       9: pop
+      10: aload_0
+      11: areturn
+
+  public com.networknt.schema.SchemaValidatorsConfig disableUnevaluatedItems();
+    Code:
+       0: aload_0
+       1: iconst_1
+       2: putfield      #3                  // Field disableUnevaluatedItems:Z
+       5: aload_0
+       6: areturn
+
+  public com.networknt.schema.SchemaValidatorsConfig disableUnevaluatedProperties();
+    Code:
+       0: aload_0
+       1: iconst_1
+       2: putfield      #4                  // Field disableUnevaluatedProperties:Z
+       5: aload_0
+       6: areturn
+
+  public com.networknt.schema.SchemaValidatorsConfig enableUnevaluatedAnalysis();
+    Code:
+       0: aload_0
+       1: invokevirtual #5                  // Method enableUnevaluatedItems:()Lcom/networknt/schema/SchemaValidatorsConfig;
+       4: pop
+       5: aload_0
+       6: invokevirtual #6                  // Method enableUnevaluatedProperties:()Lcom/networknt/schema/SchemaValidatorsConfig;
+       9: pop
+      10: aload_0
+      11: areturn
+
+  public com.networknt.schema.SchemaValidatorsConfig enableUnevaluatedItems();
+    Code:
+       0: aload_0
+       1: iconst_0
+       2: putfield      #3                  // Field disableUnevaluatedItems:Z
+       5: aload_0
+       6: areturn
+
+  public com.networknt.schema.SchemaValidatorsConfig enableUnevaluatedProperties();
+    Code:
+       0: aload_0
+       1: iconst_0
+       2: putfield      #4                  // Field disableUnevaluatedProperties:Z
+       5: aload_0
+       6: areturn
+
+  public boolean isUnevaluatedItemsAnalysisDisabled();
+    Code:
+       0: aload_0
+       1: getfield      #3                  // Field disableUnevaluatedItems:Z
+       4: ireturn
+
+  public boolean isUnevaluatedItemsAnalysisEnabled();
+    Code:
+       0: aload_0
+       1: invokevirtual #7                  // Method isUnevaluatedItemsAnalysisDisabled:()Z
+       4: ifne          11
+       7: iconst_1
+       8: goto          12
+      11: iconst_0
+      12: ireturn
+
+  public boolean isUnevaluatedPropertiesAnalysisDisabled();
+    Code:
+       0: aload_0
+       1: getfield      #4                  // Field disableUnevaluatedProperties:Z
+       4: ireturn
+
+  public boolean isUnevaluatedPropertiesAnalysisEnabled();
+    Code:
+       0: aload_0
+       1: invokevirtual #8                  // Method isUnevaluatedPropertiesAnalysisDisabled:()Z
+       4: ifne          11
+       7: iconst_1
+       8: goto          12
+      11: iconst_0
+      12: ireturn
+
+  public boolean isTypeLoose();
+    Code:
+       0: aload_0
+       1: getfield      #9                  // Field typeLoose:Z
+       4: ireturn
+
+  public void setTypeLoose(boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: putfield      #9                  // Field typeLoose:Z
+       5: return
+
+  public void setFailFast(boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: putfield      #10                 // Field failFast:Z
+       5: return
+
+  public boolean isFailFast();
+    Code:
+       0: aload_0
+       1: getfield      #10                 // Field failFast:Z
+       4: ireturn
+
+  public void setApplyDefaultsStrategy(com.networknt.schema.ApplyDefaultsStrategy);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: ifnull        9
+       5: aload_1
+       6: goto          12
+       9: getstatic     #11                 // Field com/networknt/schema/ApplyDefaultsStrategy.EMPTY_APPLY_DEFAULTS_STRATEGY:Lcom/networknt/schema/ApplyDefaultsStrategy;
+      12: putfield      #12                 // Field applyDefaultsStrategy:Lcom/networknt/schema/ApplyDefaultsStrategy;
+      15: return
+
+  public com.networknt.schema.ApplyDefaultsStrategy getApplyDefaultsStrategy();
+    Code:
+       0: aload_0
+       1: getfield      #12                 // Field applyDefaultsStrategy:Lcom/networknt/schema/ApplyDefaultsStrategy;
+       4: areturn
+
+  public boolean isHandleNullableField();
+    Code:
+       0: aload_0
+       1: getfield      #13                 // Field handleNullableField:Z
+       4: ireturn
+
+  public void setHandleNullableField(boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: putfield      #13                 // Field handleNullableField:Z
+       5: return
+
+  public boolean isEcma262Validator();
+    Code:
+       0: aload_0
+       1: getfield      #14                 // Field ecma262Validator:Z
+       4: ireturn
+
+  public void setEcma262Validator(boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: putfield      #14                 // Field ecma262Validator:Z
+       5: return
+
+  public boolean isJavaSemantics();
+    Code:
+       0: aload_0
+       1: getfield      #15                 // Field javaSemantics:Z
+       4: ireturn
+
+  public void setJavaSemantics(boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: putfield      #15                 // Field javaSemantics:Z
+       5: return
+
+  public boolean isCustomMessageSupported();
+    Code:
+       0: aload_0
+       1: getfield      #16                 // Field isCustomMessageSupported:Z
+       4: ireturn
+
+  public void setCustomMessageSupported(boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: putfield      #16                 // Field isCustomMessageSupported:Z
+       5: return
+
+  public void addKeywordWalkListener(com.networknt.schema.walk.JsonSchemaWalkListener);
+    Code:
+       0: aload_0
+       1: getfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+       4: ldc           #19                 // String com.networknt.AllKeywordWalkListener
+       6: invokeinterface #20,  2           // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      11: ifnonnull     35
+      14: new           #21                 // class java/util/ArrayList
+      17: dup
+      18: invokespecial #22                 // Method java/util/ArrayList."<init>":()V
+      21: astore_2
+      22: aload_0
+      23: getfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+      26: ldc           #19                 // String com.networknt.AllKeywordWalkListener
+      28: aload_2
+      29: invokeinterface #23,  3           // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      34: pop
+      35: aload_0
+      36: getfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+      39: ldc           #19                 // String com.networknt.AllKeywordWalkListener
+      41: invokeinterface #20,  2           // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      46: checkcast     #24                 // class java/util/List
+      49: aload_1
+      50: invokeinterface #25,  2           // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+      55: pop
+      56: return
+
+  public void addKeywordWalkListener(java.lang.String, com.networknt.schema.walk.JsonSchemaWalkListener);
+    Code:
+       0: aload_0
+       1: getfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+       4: aload_1
+       5: invokeinterface #20,  2           // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      10: ifnonnull     33
+      13: new           #21                 // class java/util/ArrayList
+      16: dup
+      17: invokespecial #22                 // Method java/util/ArrayList."<init>":()V
+      20: astore_3
+      21: aload_0
+      22: getfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+      25: aload_1
+      26: aload_3
+      27: invokeinterface #23,  3           // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      32: pop
+      33: aload_0
+      34: getfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+      37: aload_1
+      38: invokeinterface #20,  2           // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      43: checkcast     #24                 // class java/util/List
+      46: aload_2
+      47: invokeinterface #25,  2           // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+      52: pop
+      53: return
+
+  public void addKeywordWalkListeners(java.util.List<com.networknt.schema.walk.JsonSchemaWalkListener>);
+    Code:
+       0: aload_0
+       1: getfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+       4: ldc           #19                 // String com.networknt.AllKeywordWalkListener
+       6: invokeinterface #20,  2           // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      11: ifnonnull     35
+      14: new           #21                 // class java/util/ArrayList
+      17: dup
+      18: invokespecial #22                 // Method java/util/ArrayList."<init>":()V
+      21: astore_2
+      22: aload_0
+      23: getfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+      26: ldc           #19                 // String com.networknt.AllKeywordWalkListener
+      28: aload_2
+      29: invokeinterface #23,  3           // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      34: pop
+      35: aload_0
+      36: getfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+      39: ldc           #19                 // String com.networknt.AllKeywordWalkListener
+      41: invokeinterface #20,  2           // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      46: checkcast     #24                 // class java/util/List
+      49: aload_1
+      50: invokeinterface #26,  2           // InterfaceMethod java/util/List.addAll:(Ljava/util/Collection;)Z
+      55: pop
+      56: return
+
+  public void addKeywordWalkListeners(java.lang.String, java.util.List<com.networknt.schema.walk.JsonSchemaWalkListener>);
+    Code:
+       0: aload_0
+       1: getfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+       4: aload_1
+       5: invokeinterface #20,  2           // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      10: ifnonnull     33
+      13: new           #21                 // class java/util/ArrayList
+      16: dup
+      17: invokespecial #22                 // Method java/util/ArrayList."<init>":()V
+      20: astore_3
+      21: aload_0
+      22: getfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+      25: aload_1
+      26: aload_3
+      27: invokeinterface #23,  3           // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      32: pop
+      33: aload_0
+      34: getfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+      37: aload_1
+      38: invokeinterface #20,  2           // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      43: checkcast     #24                 // class java/util/List
+      46: aload_2
+      47: invokeinterface #26,  2           // InterfaceMethod java/util/List.addAll:(Ljava/util/Collection;)Z
+      52: pop
+      53: return
+
+  public void addPropertyWalkListeners(java.util.List<com.networknt.schema.walk.JsonSchemaWalkListener>);
+    Code:
+       0: aload_0
+       1: getfield      #27                 // Field propertyWalkListeners:Ljava/util/List;
+       4: aload_1
+       5: invokeinterface #26,  2           // InterfaceMethod java/util/List.addAll:(Ljava/util/Collection;)Z
+      10: pop
+      11: return
+
+  public void addPropertyWalkListener(com.networknt.schema.walk.JsonSchemaWalkListener);
+    Code:
+       0: aload_0
+       1: getfield      #27                 // Field propertyWalkListeners:Ljava/util/List;
+       4: aload_1
+       5: invokeinterface #25,  2           // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+      10: pop
+      11: return
+
+  public void addItemWalkListener(com.networknt.schema.walk.JsonSchemaWalkListener);
+    Code:
+       0: aload_0
+       1: getfield      #28                 // Field itemWalkListeners:Ljava/util/List;
+       4: aload_1
+       5: invokeinterface #25,  2           // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+      10: pop
+      11: return
+
+  public void addItemWalkListeners(java.util.List<com.networknt.schema.walk.JsonSchemaWalkListener>);
+    Code:
+       0: aload_0
+       1: getfield      #28                 // Field itemWalkListeners:Ljava/util/List;
+       4: aload_1
+       5: invokeinterface #26,  2           // InterfaceMethod java/util/List.addAll:(Ljava/util/Collection;)Z
+      10: pop
+      11: return
+
+  public java.util.List<com.networknt.schema.walk.JsonSchemaWalkListener> getPropertyWalkListeners();
+    Code:
+       0: aload_0
+       1: getfield      #27                 // Field propertyWalkListeners:Ljava/util/List;
+       4: areturn
+
+  public java.util.Map<java.lang.String, java.util.List<com.networknt.schema.walk.JsonSchemaWalkListener>> getKeywordWalkListenersMap();
+    Code:
+       0: aload_0
+       1: getfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+       4: areturn
+
+  public java.util.List<com.networknt.schema.walk.JsonSchemaWalkListener> getArrayItemWalkListeners();
+    Code:
+       0: aload_0
+       1: getfield      #28                 // Field itemWalkListeners:Ljava/util/List;
+       4: areturn
+
+  com.networknt.schema.walk.WalkListenerRunner getItemWalkListenerRunner();
+    Code:
+       0: aload_0
+       1: getfield      #29                 // Field itemWalkListenerRunner:Lcom/networknt/schema/walk/WalkListenerRunner;
+       4: areturn
+
+  com.networknt.schema.walk.WalkListenerRunner getKeywordWalkListenerRunner();
+    Code:
+       0: aload_0
+       1: getfield      #30                 // Field keywordWalkListenerRunner:Lcom/networknt/schema/walk/WalkListenerRunner;
+       4: areturn
+
+  com.networknt.schema.walk.WalkListenerRunner getPropertyWalkListenerRunner();
+    Code:
+       0: aload_0
+       1: getfield      #31                 // Field propertyWalkListenerRunner:Lcom/networknt/schema/walk/WalkListenerRunner;
+       4: areturn
+
+  public com.networknt.schema.SchemaValidatorsConfig();
+    Code:
+       0: aload_0
+       1: invokespecial #32                 // Method java/lang/Object."<init>":()V
+       4: aload_0
+       5: getstatic     #33                 // Field com/networknt/schema/JsonSchemaIdValidator.DEFAULT:Lcom/networknt/schema/JsonSchemaIdValidator;
+       8: putfield      #34                 // Field schemaIdValidator:Lcom/networknt/schema/JsonSchemaIdValidator;
+      11: aload_0
+      12: getstatic     #11                 // Field com/networknt/schema/ApplyDefaultsStrategy.EMPTY_APPLY_DEFAULTS_STRATEGY:Lcom/networknt/schema/ApplyDefaultsStrategy;
+      15: putfield      #12                 // Field applyDefaultsStrategy:Lcom/networknt/schema/ApplyDefaultsStrategy;
+      18: aload_0
+      19: iconst_1
+      20: putfield      #16                 // Field isCustomMessageSupported:Z
+      23: aload_0
+      24: iconst_0
+      25: putfield      #35                 // Field openAPI3StyleDiscriminators:Z
+      28: aload_0
+      29: new           #36                 // class java/util/HashMap
+      32: dup
+      33: iconst_0
+      34: invokespecial #37                 // Method java/util/HashMap."<init>":(I)V
+      37: putfield      #38                 // Field strictness:Ljava/util/Map;
+      40: aload_0
+      41: iconst_1
+      42: putfield      #13                 // Field handleNullableField:Z
+      45: aload_0
+      46: aconst_null
+      47: putfield      #39                 // Field readOnly:Ljava/lang/Boolean;
+      50: aload_0
+      51: aconst_null
+      52: putfield      #40                 // Field writeOnly:Ljava/lang/Boolean;
+      55: aload_0
+      56: getstatic     #41                 // Field com/networknt/schema/PathType.DEFAULT:Lcom/networknt/schema/PathType;
+      59: putfield      #42                 // Field pathType:Lcom/networknt/schema/PathType;
+      62: aload_0
+      63: iconst_1
+      64: putfield      #43                 // Field preloadJsonSchema:Z
+      67: aload_0
+      68: new           #36                 // class java/util/HashMap
+      71: dup
+      72: invokespecial #44                 // Method java/util/HashMap."<init>":()V
+      75: putfield      #17                 // Field keywordWalkListenersMap:Ljava/util/Map;
+      78: aload_0
+      79: new           #21                 // class java/util/ArrayList
+      82: dup
+      83: invokespecial #22                 // Method java/util/ArrayList."<init>":()V
+      86: putfield      #27                 // Field propertyWalkListeners:Ljava/util/List;
+      89: aload_0
+      90: new           #21                 // class java/util/ArrayList
+      93: dup
+      94: invokespecial #22                 // Method java/util/ArrayList."<init>":()V
+      97: putfield      #28                 // Field itemWalkListeners:Ljava/util/List;
+     100: aload_0
+     101: iconst_1
+     102: putfield      #45                 // Field loadCollectors:Z
+     105: aload_0
+     106: aconst_null
+     107: putfield      #46                 // Field formatAssertionsEnabled:Ljava/lang/Boolean;
+     110: aload_0
+     111: iconst_0
+     112: putfield      #3                  // Field disableUnevaluatedItems:Z
+     115: aload_0
+     116: iconst_0
+     117: putfield      #4                  // Field disableUnevaluatedProperties:Z
+     120: aload_0
+     121: new           #47                 // class com/networknt/schema/walk/DefaultItemWalkListenerRunner
+     124: dup
+     125: aload_0
+     126: invokevirtual #48                 // Method getArrayItemWalkListeners:()Ljava/util/List;
+     129: invokespecial #49                 // Method com/networknt/schema/walk/DefaultItemWalkListenerRunner."<init>":(Ljava/util/List;)V
+     132: putfield      #29                 // Field itemWalkListenerRunner:Lcom/networknt/schema/walk/WalkListenerRunner;
+     135: aload_0
+     136: new           #50                 // class com/networknt/schema/walk/DefaultKeywordWalkListenerRunner
+     139: dup
+     140: aload_0
+     141: invokevirtual #51                 // Method getKeywordWalkListenersMap:()Ljava/util/Map;
+     144: invokespecial #52                 // Method com/networknt/schema/walk/DefaultKeywordWalkListenerRunner."<init>":(Ljava/util/Map;)V
+     147: putfield      #30                 // Field keywordWalkListenerRunner:Lcom/networknt/schema/walk/WalkListenerRunner;
+     150: aload_0
+     151: new           #53                 // class com/networknt/schema/walk/DefaultPropertyWalkListenerRunner
+     154: dup
+     155: aload_0
+     156: invokevirtual #54                 // Method getPropertyWalkListeners:()Ljava/util/List;
+     159: invokespecial #55                 // Method com/networknt/schema/walk/DefaultPropertyWalkListenerRunner."<init>":(Ljava/util/List;)V
+     162: putfield      #31                 // Field propertyWalkListenerRunner:Lcom/networknt/schema/walk/WalkListenerRunner;
+     165: return
+
+  public com.networknt.schema.ExecutionContextCustomizer getExecutionContextCustomizer();
+    Code:
+       0: aload_0
+       1: getfield      #56                 // Field executionContextCustomizer:Lcom/networknt/schema/ExecutionContextCustomizer;
+       4: areturn
+
+  public void setExecutionContextCustomizer(com.networknt.schema.ExecutionContextCustomizer);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: putfield      #56                 // Field executionContextCustomizer:Lcom/networknt/schema/ExecutionContextCustomizer;
+       5: return
+
+  public boolean isLosslessNarrowing();
+    Code:
+       0: aload_0
+       1: getfield      #57                 // Field losslessNarrowing:Z
+       4: ireturn
+
+  public void setLosslessNarrowing(boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: putfield      #57                 // Field losslessNarrowing:Z
+       5: return
+
+  public boolean isOpenAPI3StyleDiscriminators();
+    Code:
+       0: aload_0
+       1: getfield      #35                 // Field openAPI3StyleDiscriminators:Z
+       4: ireturn
+
+  public void setOpenAPI3StyleDiscriminators(boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: putfield      #35                 // Field openAPI3StyleDiscriminators:Z
+       5: return
+
+  public void setLoadCollectors(boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: putfield      #45                 // Field loadCollectors:Z
+       5: return
+
+  public boolean doLoadCollectors();
+    Code:
+       0: aload_0
+       1: getfield      #45                 // Field loadCollectors:Z
+       4: ireturn
+
+  public boolean isReadOnly();
+    Code:
+       0: aconst_null
+       1: aload_0
+       2: getfield      #39                 // Field readOnly:Ljava/lang/Boolean;
+       5: if_acmpeq     22
+       8: aload_0
+       9: getfield      #39                 // Field readOnly:Ljava/lang/Boolean;
+      12: invokevirtual #58                 // Method java/lang/Boolean.booleanValue:()Z
+      15: ifeq          22
+      18: iconst_1
+      19: goto          23
+      22: iconst_0
+      23: ireturn
+
+  public void setReadOnly(boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: invokestatic  #59                 // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+       5: putfield      #39                 // Field readOnly:Ljava/lang/Boolean;
+       8: return
+
+  public boolean isWriteOnly();
+    Code:
+       0: aconst_null
+       1: aload_0
+       2: getfield      #40                 // Field writeOnly:Ljava/lang/Boolean;
+       5: if_acmpeq     22
+       8: aload_0
+       9: getfield      #40                 // Field writeOnly:Ljava/lang/Boolean;
+      12: invokevirtual #58                 // Method java/lang/Boolean.booleanValue:()Z
+      15: ifeq          22
+      18: iconst_1
+      19: goto          23
+      22: iconst_0
+      23: ireturn
+
+  public void setWriteOnly(boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: invokestatic  #59                 // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+       5: putfield      #40                 // Field writeOnly:Ljava/lang/Boolean;
+       8: return
+
+  public boolean isWriteMode();
+    Code:
+       0: aconst_null
+       1: aload_0
+       2: getfield      #40                 // Field writeOnly:Ljava/lang/Boolean;
+       5: if_acmpeq     18
+       8: aload_0
+       9: getfield      #40                 // Field writeOnly:Ljava/lang/Boolean;
+      12: invokevirtual #58                 // Method java/lang/Boolean.booleanValue:()Z
+      15: ifeq          22
+      18: iconst_1
+      19: goto          23
+      22: iconst_0
+      23: ireturn
+
+  public void setPathType(com.networknt.schema.PathType);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: putfield      #42                 // Field pathType:Lcom/networknt/schema/PathType;
+       5: return
+
+  public com.networknt.schema.PathType getPathType();
+    Code:
+       0: aload_0
+       1: getfield      #42                 // Field pathType:Lcom/networknt/schema/PathType;
+       4: areturn
+
+  public boolean isStrict(java.lang.String);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: getstatic     #60                 // Field java/lang/Boolean.TRUE:Ljava/lang/Boolean;
+       5: invokevirtual #61                 // Method isStrict:(Ljava/lang/String;Ljava/lang/Boolean;)Z
+       8: ireturn
+
+  public boolean isStrict(java.lang.String, java.lang.Boolean);
+    Code:
+       0: aload_0
+       1: getfield      #38                 // Field strictness:Ljava/util/Map;
+       4: aload_1
+       5: ldc           #62                 // String keyword cannot be null
+       7: invokestatic  #63                 // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
+      10: aload_2
+      11: invokeinterface #64,  3           // InterfaceMethod java/util/Map.getOrDefault:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      16: checkcast     #65                 // class java/lang/Boolean
+      19: invokevirtual #58                 // Method java/lang/Boolean.booleanValue:()Z
+      22: ireturn
+
+  public void setStrict(java.lang.String, boolean);
+    Code:
+       0: aload_0
+       1: getfield      #38                 // Field strictness:Ljava/util/Map;
+       4: aload_1
+       5: ldc           #62                 // String keyword cannot be null
+       7: invokestatic  #63                 // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
+      10: checkcast     #66                 // class java/lang/String
+      13: iload_2
+      14: invokestatic  #59                 // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+      17: invokeinterface #23,  3           // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      22: pop
+      23: return
+
+  public java.util.Locale getLocale();
+    Code:
+       0: aload_0
+       1: getfield      #67                 // Field locale:Ljava/util/Locale;
+       4: ifnonnull     11
+       7: invokestatic  #68                 // Method java/util/Locale.getDefault:()Ljava/util/Locale;
+      10: areturn
+      11: aload_0
+      12: getfield      #67                 // Field locale:Ljava/util/Locale;
+      15: areturn
+
+  public void setLocale(java.util.Locale);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: putfield      #67                 // Field locale:Ljava/util/Locale;
+       5: return
+
+  public com.networknt.schema.i18n.MessageSource getMessageSource();
+    Code:
+       0: aload_0
+       1: getfield      #69                 // Field messageSource:Lcom/networknt/schema/i18n/MessageSource;
+       4: ifnonnull     11
+       7: invokestatic  #70                 // Method com/networknt/schema/i18n/DefaultMessageSource.getInstance:()Lcom/networknt/schema/i18n/MessageSource;
+      10: areturn
+      11: aload_0
+      12: getfield      #69                 // Field messageSource:Lcom/networknt/schema/i18n/MessageSource;
+      15: areturn
+
+  public void setMessageSource(com.networknt.schema.i18n.MessageSource);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: putfield      #69                 // Field messageSource:Lcom/networknt/schema/i18n/MessageSource;
+       5: return
+
+  public java.lang.Boolean getFormatAssertionsEnabled();
+    Code:
+       0: aload_0
+       1: getfield      #46                 // Field formatAssertionsEnabled:Ljava/lang/Boolean;
+       4: areturn
+
+  public void setFormatAssertionsEnabled(java.lang.Boolean);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: putfield      #46                 // Field formatAssertionsEnabled:Ljava/lang/Boolean;
+       5: return
+
+  public com.networknt.schema.JsonSchemaIdValidator getSchemaIdValidator();
+    Code:
+       0: aload_0
+       1: getfield      #34                 // Field schemaIdValidator:Lcom/networknt/schema/JsonSchemaIdValidator;
+       4: areturn
+
+  public void setSchemaIdValidator(com.networknt.schema.JsonSchemaIdValidator);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: putfield      #34                 // Field schemaIdValidator:Lcom/networknt/schema/JsonSchemaIdValidator;
+       5: return
+
+  public boolean isPreloadJsonSchema();
+    Code:
+       0: aload_0
+       1: getfield      #43                 // Field preloadJsonSchema:Z
+       4: ireturn
+
+  public void setPreloadJsonSchema(boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: putfield      #43                 // Field preloadJsonSchema:Z
+       5: return
+}
+Compiled from "PropertiesValidator.java"
+public class com.networknt.schema.PropertiesValidator extends com.networknt.schema.BaseJsonValidator {
+  public static final java.lang.String PROPERTY;
+
+  private static final org.slf4j.Logger logger;
+
+  private final java.util.Map<java.lang.String, com.networknt.schema.JsonSchema> schemas;
+
+  private java.lang.Boolean hasUnevaluatedPropertiesValidator;
+
+  public com.networknt.schema.PropertiesValidator(com.networknt.schema.SchemaLocation, com.networknt.schema.JsonNodePath, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonSchema, com.networknt.schema.ValidationContext);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: aload_3
+       4: aload         4
+       6: getstatic     #1                  // Field com/networknt/schema/ValidatorTypeCode.PROPERTIES:Lcom/networknt/schema/ValidatorTypeCode;
+       9: aload         5
+      11: invokespecial #2                  // Method com/networknt/schema/BaseJsonValidator."<init>":(Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/JsonNodePath;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonSchema;Lcom/networknt/schema/ValidatorTypeCode;Lcom/networknt/schema/ValidationContext;)V
+      14: aload_0
+      15: new           #3                  // class java/util/LinkedHashMap
+      18: dup
+      19: invokespecial #4                  // Method java/util/LinkedHashMap."<init>":()V
+      22: putfield      #5                  // Field schemas:Ljava/util/Map;
+      25: aload_3
+      26: invokevirtual #6                  // Method com/fasterxml/jackson/databind/JsonNode.fields:()Ljava/util/Iterator;
+      29: astore        6
+      31: aload         6
+      33: invokeinterface #7,  1            // InterfaceMethod java/util/Iterator.hasNext:()Z
+      38: ifeq          109
+      41: aload         6
+      43: invokeinterface #8,  1            // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      48: checkcast     #9                  // class java/util/Map$Entry
+      51: astore        7
+      53: aload         7
+      55: invokeinterface #10,  1           // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      60: checkcast     #11                 // class java/lang/String
+      63: astore        8
+      65: aload_0
+      66: getfield      #5                  // Field schemas:Ljava/util/Map;
+      69: aload         8
+      71: aload         5
+      73: aload_1
+      74: aload         8
+      76: invokevirtual #12                 // Method com/networknt/schema/SchemaLocation.append:(Ljava/lang/String;)Lcom/networknt/schema/SchemaLocation;
+      79: aload_2
+      80: aload         8
+      82: invokevirtual #13                 // Method com/networknt/schema/JsonNodePath.append:(Ljava/lang/String;)Lcom/networknt/schema/JsonNodePath;
+      85: aload         7
+      87: invokeinterface #14,  1           // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      92: checkcast     #15                 // class com/fasterxml/jackson/databind/JsonNode
+      95: aload         4
+      97: invokevirtual #16                 // Method com/networknt/schema/ValidationContext.newSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/JsonNodePath;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonSchema;)Lcom/networknt/schema/JsonSchema;
+     100: invokeinterface #17,  3           // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     105: pop
+     106: goto          31
+     109: return
+
+  public java.util.Set<com.networknt.schema.ValidationMessage> validate(com.networknt.schema.ExecutionContext, com.fasterxml.jackson.databind.JsonNode, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonNodePath);
+    Code:
+       0: getstatic     #18                 // Field logger:Lorg/slf4j/Logger;
+       3: aload_2
+       4: aload_3
+       5: aload         4
+       7: invokestatic  #19                 // Method debug:(Lorg/slf4j/Logger;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;)V
+      10: aconst_null
+      11: astore        5
+      13: aload_1
+      14: invokevirtual #20                 // Method com/networknt/schema/ExecutionContext.getValidatorState:()Lcom/networknt/schema/ValidatorState;
+      17: astore        6
+      19: aconst_null
+      20: astore        7
+      22: aconst_null
+      23: astore        8
+      25: aload_0
+      26: invokespecial #21                 // Method collectAnnotations:()Z
+      29: ifne          40
+      32: aload_0
+      33: aload_1
+      34: invokevirtual #22                 // Method collectAnnotations:(Lcom/networknt/schema/ExecutionContext;)Z
+      37: ifeq          44
+      40: iconst_1
+      41: goto          45
+      44: iconst_0
+      45: istore        9
+      47: aload_0
+      48: getfield      #5                  // Field schemas:Ljava/util/Map;
+      51: invokeinterface #23,  1           // InterfaceMethod java/util/Map.entrySet:()Ljava/util/Set;
+      56: invokeinterface #24,  1           // InterfaceMethod java/util/Set.iterator:()Ljava/util/Iterator;
+      61: astore        10
+      63: aload         10
+      65: invokeinterface #7,  1            // InterfaceMethod java/util/Iterator.hasNext:()Z
+      70: ifeq          428
+      73: aload         10
+      75: invokeinterface #8,  1            // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      80: checkcast     #9                  // class java/util/Map$Entry
+      83: astore        11
+      85: aload_2
+      86: aload         11
+      88: invokeinterface #10,  1           // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      93: checkcast     #11                 // class java/lang/String
+      96: invokevirtual #25                 // Method com/fasterxml/jackson/databind/JsonNode.get:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      99: astore        12
+     101: aload         12
+     103: ifnull        312
+     106: aload         4
+     108: aload         11
+     110: invokeinterface #10,  1           // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     115: checkcast     #11                 // class java/lang/String
+     118: invokevirtual #13                 // Method com/networknt/schema/JsonNodePath.append:(Ljava/lang/String;)Lcom/networknt/schema/JsonNodePath;
+     121: astore        13
+     123: iload         9
+     125: ifeq          160
+     128: aload         8
+     130: ifnonnull     142
+     133: new           #26                 // class java/util/LinkedHashSet
+     136: dup
+     137: invokespecial #27                 // Method java/util/LinkedHashSet."<init>":()V
+     140: astore        8
+     142: aload         8
+     144: aload         11
+     146: invokeinterface #10,  1           // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     151: checkcast     #11                 // class java/lang/String
+     154: invokeinterface #28,  2           // InterfaceMethod java/util/Set.add:(Ljava/lang/Object;)Z
+     159: pop
+     160: aload         6
+     162: invokevirtual #29                 // Method com/networknt/schema/ValidatorState.isComplexValidator:()Z
+     165: istore        14
+     167: iload         14
+     169: ifeq          184
+     172: aload         6
+     174: iconst_1
+     175: invokevirtual #30                 // Method com/networknt/schema/ValidatorState.setMatchedNode:(Z)V
+     178: aload         6
+     180: iconst_0
+     181: invokevirtual #31                 // Method com/networknt/schema/ValidatorState.setComplexValidator:(Z)V
+     184: aload         6
+     186: invokevirtual #32                 // Method com/networknt/schema/ValidatorState.isWalkEnabled:()Z
+     189: ifne          248
+     192: aload         11
+     194: invokeinterface #14,  1           // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+     199: checkcast     #33                 // class com/networknt/schema/JsonSchema
+     202: aload_1
+     203: aload         12
+     205: aload_3
+     206: aload         13
+     208: invokevirtual #34                 // Method com/networknt/schema/JsonSchema.validate:(Lcom/networknt/schema/ExecutionContext;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;)Ljava/util/Set;
+     211: astore        15
+     213: aload         15
+     215: invokeinterface #35,  1           // InterfaceMethod java/util/Set.isEmpty:()Z
+     220: ifne          245
+     223: aload         5
+     225: ifnonnull     237
+     228: new           #36                 // class com/networknt/schema/utils/SetView
+     231: dup
+     232: invokespecial #37                 // Method com/networknt/schema/utils/SetView."<init>":()V
+     235: astore        5
+     237: aload         5
+     239: aload         15
+     241: invokevirtual #38                 // Method com/networknt/schema/utils/SetView.union:(Ljava/util/Set;)Lcom/networknt/schema/utils/SetView;
+     244: pop
+     245: goto          291
+     248: aload         5
+     250: ifnonnull     262
+     253: new           #36                 // class com/networknt/schema/utils/SetView
+     256: dup
+     257: invokespecial #37                 // Method com/networknt/schema/utils/SetView."<init>":()V
+     260: astore        5
+     262: aload_0
+     263: aload_1
+     264: aload         11
+     266: aload_2
+     267: aload_3
+     268: aload         4
+     270: aload         6
+     272: invokevirtual #39                 // Method com/networknt/schema/ValidatorState.isValidationEnabled:()Z
+     275: aload         5
+     277: aload_0
+     278: getfield      #40                 // Field validationContext:Lcom/networknt/schema/ValidationContext;
+     281: invokevirtual #41                 // Method com/networknt/schema/ValidationContext.getConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+     284: invokevirtual #42                 // Method com/networknt/schema/SchemaValidatorsConfig.getPropertyWalkListenerRunner:()Lcom/networknt/schema/walk/WalkListenerRunner;
+     287: iconst_0
+     288: invokespecial #43                 // Method walkSchema:(Lcom/networknt/schema/ExecutionContext;Ljava/util/Map$Entry;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;ZLcom/networknt/schema/utils/SetView;Lcom/networknt/schema/walk/WalkListenerRunner;Z)V
+     291: iload         14
+     293: ifeq          309
+     296: aload         6
+     298: iload         14
+     300: invokevirtual #31                 // Method com/networknt/schema/ValidatorState.setComplexValidator:(Z)V
+     303: aload         6
+     305: iconst_1
+     306: invokevirtual #30                 // Method com/networknt/schema/ValidatorState.setMatchedNode:(Z)V
+     309: goto          425
+     312: aload         6
+     314: invokevirtual #32                 // Method com/networknt/schema/ValidatorState.isWalkEnabled:()Z
+     317: ifeq          363
+     320: aload         5
+     322: ifnonnull     334
+     325: new           #36                 // class com/networknt/schema/utils/SetView
+     328: dup
+     329: invokespecial #37                 // Method com/networknt/schema/utils/SetView."<init>":()V
+     332: astore        5
+     334: aload_0
+     335: aload_1
+     336: aload         11
+     338: aload_2
+     339: aload_3
+     340: aload         4
+     342: aload         6
+     344: invokevirtual #39                 // Method com/networknt/schema/ValidatorState.isValidationEnabled:()Z
+     347: aload         5
+     349: aload_0
+     350: getfield      #40                 // Field validationContext:Lcom/networknt/schema/ValidationContext;
+     353: invokevirtual #41                 // Method com/networknt/schema/ValidationContext.getConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+     356: invokevirtual #42                 // Method com/networknt/schema/SchemaValidatorsConfig.getPropertyWalkListenerRunner:()Lcom/networknt/schema/walk/WalkListenerRunner;
+     359: iconst_1
+     360: invokespecial #43                 // Method walkSchema:(Lcom/networknt/schema/ExecutionContext;Ljava/util/Map$Entry;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;ZLcom/networknt/schema/utils/SetView;Lcom/networknt/schema/walk/WalkListenerRunner;Z)V
+     363: aload         6
+     365: invokevirtual #29                 // Method com/networknt/schema/ValidatorState.isComplexValidator:()Z
+     368: ifeq          425
+     371: aload_0
+     372: invokevirtual #44                 // Method getParentSchema:()Lcom/networknt/schema/JsonSchema;
+     375: invokevirtual #45                 // Method com/networknt/schema/JsonSchema.hasRequiredValidator:()Z
+     378: ifeq          425
+     381: aload         7
+     383: ifnonnull     405
+     386: aload_0
+     387: invokevirtual #44                 // Method getParentSchema:()Lcom/networknt/schema/JsonSchema;
+     390: invokevirtual #46                 // Method com/networknt/schema/JsonSchema.getRequiredValidator:()Lcom/networknt/schema/JsonValidator;
+     393: aload_1
+     394: aload_2
+     395: aload_3
+     396: aload         4
+     398: invokeinterface #47,  5           // InterfaceMethod com/networknt/schema/JsonValidator.validate:(Lcom/networknt/schema/ExecutionContext;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;)Ljava/util/Set;
+     403: astore        7
+     405: aload         7
+     407: invokeinterface #35,  1           // InterfaceMethod java/util/Set.isEmpty:()Z
+     412: ifne          425
+     415: aload         6
+     417: iconst_0
+     418: invokevirtual #30                 // Method com/networknt/schema/ValidatorState.setMatchedNode:(Z)V
+     421: invokestatic  #48                 // Method java/util/Collections.emptySet:()Ljava/util/Set;
+     424: areturn
+     425: goto          63
+     428: iload         9
+     430: ifeq          488
+     433: aload_1
+     434: invokevirtual #49                 // Method com/networknt/schema/ExecutionContext.getAnnotations:()Lcom/networknt/schema/annotation/JsonNodeAnnotations;
+     437: invokestatic  #50                 // Method com/networknt/schema/annotation/JsonNodeAnnotation.builder:()Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     440: aload         4
+     442: invokevirtual #51                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.instanceLocation:(Lcom/networknt/schema/JsonNodePath;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     445: aload_0
+     446: getfield      #52                 // Field evaluationPath:Lcom/networknt/schema/JsonNodePath;
+     449: invokevirtual #53                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.evaluationPath:(Lcom/networknt/schema/JsonNodePath;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     452: aload_0
+     453: getfield      #54                 // Field schemaLocation:Lcom/networknt/schema/SchemaLocation;
+     456: invokevirtual #55                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.schemaLocation:(Lcom/networknt/schema/SchemaLocation;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     459: aload_0
+     460: invokevirtual #56                 // Method getKeyword:()Ljava/lang/String;
+     463: invokevirtual #57                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.keyword:(Ljava/lang/String;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     466: aload         8
+     468: ifnonnull     477
+     471: invokestatic  #48                 // Method java/util/Collections.emptySet:()Ljava/util/Set;
+     474: goto          479
+     477: aload         8
+     479: invokevirtual #58                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.value:(Ljava/lang/Object;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     482: invokevirtual #59                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.build:()Lcom/networknt/schema/annotation/JsonNodeAnnotation;
+     485: invokevirtual #60                 // Method com/networknt/schema/annotation/JsonNodeAnnotations.put:(Lcom/networknt/schema/annotation/JsonNodeAnnotation;)V
+     488: aload         5
+     490: ifnull        501
+     493: aload         5
+     495: invokevirtual #61                 // Method com/networknt/schema/utils/SetView.isEmpty:()Z
+     498: ifeq          507
+     501: invokestatic  #48                 // Method java/util/Collections.emptySet:()Ljava/util/Set;
+     504: goto          509
+     507: aload         5
+     509: areturn
+
+  public java.util.Set<com.networknt.schema.ValidationMessage> walk(com.networknt.schema.ExecutionContext, com.fasterxml.jackson.databind.JsonNode, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonNodePath, boolean);
+    Code:
+       0: new           #36                 // class com/networknt/schema/utils/SetView
+       3: dup
+       4: invokespecial #37                 // Method com/networknt/schema/utils/SetView."<init>":()V
+       7: astore        6
+       9: aload_0
+      10: getfield      #40                 // Field validationContext:Lcom/networknt/schema/ValidationContext;
+      13: invokevirtual #41                 // Method com/networknt/schema/ValidationContext.getConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+      16: invokevirtual #62                 // Method com/networknt/schema/SchemaValidatorsConfig.getApplyDefaultsStrategy:()Lcom/networknt/schema/ApplyDefaultsStrategy;
+      19: invokevirtual #63                 // Method com/networknt/schema/ApplyDefaultsStrategy.shouldApplyPropertyDefaults:()Z
+      22: ifeq          48
+      25: aconst_null
+      26: aload_2
+      27: if_acmpeq     48
+      30: aload_2
+      31: invokevirtual #64                 // Method com/fasterxml/jackson/databind/JsonNode.getNodeType:()Lcom/fasterxml/jackson/databind/node/JsonNodeType;
+      34: getstatic     #65                 // Field com/fasterxml/jackson/databind/node/JsonNodeType.OBJECT:Lcom/fasterxml/jackson/databind/node/JsonNodeType;
+      37: if_acmpne     48
+      40: aload_0
+      41: aload_2
+      42: checkcast     #66                 // class com/fasterxml/jackson/databind/node/ObjectNode
+      45: invokespecial #67                 // Method applyPropertyDefaults:(Lcom/fasterxml/jackson/databind/node/ObjectNode;)V
+      48: iload         5
+      50: ifeq          71
+      53: aload         6
+      55: aload_0
+      56: aload_1
+      57: aload_2
+      58: aload_3
+      59: aload         4
+      61: invokevirtual #68                 // Method validate:(Lcom/networknt/schema/ExecutionContext;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;)Ljava/util/Set;
+      64: invokevirtual #38                 // Method com/networknt/schema/utils/SetView.union:(Ljava/util/Set;)Lcom/networknt/schema/utils/SetView;
+      67: pop
+      68: goto          142
+      71: aload_0
+      72: getfield      #40                 // Field validationContext:Lcom/networknt/schema/ValidationContext;
+      75: invokevirtual #41                 // Method com/networknt/schema/ValidationContext.getConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+      78: invokevirtual #42                 // Method com/networknt/schema/SchemaValidatorsConfig.getPropertyWalkListenerRunner:()Lcom/networknt/schema/walk/WalkListenerRunner;
+      81: astore        7
+      83: aload_0
+      84: getfield      #5                  // Field schemas:Ljava/util/Map;
+      87: invokeinterface #23,  1           // InterfaceMethod java/util/Map.entrySet:()Ljava/util/Set;
+      92: invokeinterface #24,  1           // InterfaceMethod java/util/Set.iterator:()Ljava/util/Iterator;
+      97: astore        8
+      99: aload         8
+     101: invokeinterface #7,  1            // InterfaceMethod java/util/Iterator.hasNext:()Z
+     106: ifeq          142
+     109: aload         8
+     111: invokeinterface #8,  1            // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     116: checkcast     #9                  // class java/util/Map$Entry
+     119: astore        9
+     121: aload_0
+     122: aload_1
+     123: aload         9
+     125: aload_2
+     126: aload_3
+     127: aload         4
+     129: iload         5
+     131: aload         6
+     133: aload         7
+     135: iconst_0
+     136: invokespecial #43                 // Method walkSchema:(Lcom/networknt/schema/ExecutionContext;Ljava/util/Map$Entry;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;ZLcom/networknt/schema/utils/SetView;Lcom/networknt/schema/walk/WalkListenerRunner;Z)V
+     139: goto          99
+     142: aload         6
+     144: areturn
+
+  private boolean collectAnnotations();
+    Code:
+       0: aload_0
+       1: invokespecial #69                 // Method hasUnevaluatedPropertiesValidator:()Z
+       4: ireturn
+
+  private boolean hasUnevaluatedPropertiesValidator();
+    Code:
+       0: aload_0
+       1: getfield      #70                 // Field hasUnevaluatedPropertiesValidator:Ljava/lang/Boolean;
+       4: ifnonnull     20
+       7: aload_0
+       8: aload_0
+       9: ldc           #71                 // String unevaluatedProperties
+      11: invokevirtual #72                 // Method hasAdjacentKeywordInEvaluationPath:(Ljava/lang/String;)Z
+      14: invokestatic  #73                 // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+      17: putfield      #70                 // Field hasUnevaluatedPropertiesValidator:Ljava/lang/Boolean;
+      20: aload_0
+      21: getfield      #70                 // Field hasUnevaluatedPropertiesValidator:Ljava/lang/Boolean;
+      24: invokevirtual #74                 // Method java/lang/Boolean.booleanValue:()Z
+      27: ireturn
+
+  private void applyPropertyDefaults(com.fasterxml.jackson.databind.node.ObjectNode);
+    Code:
+       0: aload_0
+       1: getfield      #5                  // Field schemas:Ljava/util/Map;
+       4: invokeinterface #23,  1           // InterfaceMethod java/util/Map.entrySet:()Ljava/util/Set;
+       9: invokeinterface #24,  1           // InterfaceMethod java/util/Set.iterator:()Ljava/util/Iterator;
+      14: astore_2
+      15: aload_2
+      16: invokeinterface #7,  1            // InterfaceMethod java/util/Iterator.hasNext:()Z
+      21: ifeq          131
+      24: aload_2
+      25: invokeinterface #8,  1            // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      30: checkcast     #9                  // class java/util/Map$Entry
+      33: astore_3
+      34: aload_1
+      35: aload_3
+      36: invokeinterface #10,  1           // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      41: checkcast     #11                 // class java/lang/String
+      44: invokevirtual #75                 // Method com/fasterxml/jackson/databind/node/ObjectNode.get:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      47: astore        4
+      49: aload_3
+      50: invokeinterface #14,  1           // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      55: checkcast     #33                 // class com/networknt/schema/JsonSchema
+      58: invokestatic  #76                 // Method getDefaultNode:(Lcom/networknt/schema/JsonSchema;)Lcom/fasterxml/jackson/databind/JsonNode;
+      61: astore        5
+      63: aload         5
+      65: ifnonnull     71
+      68: goto          15
+      71: aload         4
+      73: ifnull        100
+      76: aload         4
+      78: invokevirtual #77                 // Method com/fasterxml/jackson/databind/JsonNode.isNull:()Z
+      81: ifeq          104
+      84: aload_0
+      85: getfield      #40                 // Field validationContext:Lcom/networknt/schema/ValidationContext;
+      88: invokevirtual #41                 // Method com/networknt/schema/ValidationContext.getConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+      91: invokevirtual #62                 // Method com/networknt/schema/SchemaValidatorsConfig.getApplyDefaultsStrategy:()Lcom/networknt/schema/ApplyDefaultsStrategy;
+      94: invokevirtual #78                 // Method com/networknt/schema/ApplyDefaultsStrategy.shouldApplyPropertyDefaultsIfNull:()Z
+      97: ifeq          104
+     100: iconst_1
+     101: goto          105
+     104: iconst_0
+     105: istore        6
+     107: iload         6
+     109: ifeq          128
+     112: aload_1
+     113: aload_3
+     114: invokeinterface #10,  1           // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     119: checkcast     #11                 // class java/lang/String
+     122: aload         5
+     124: invokevirtual #79                 // Method com/fasterxml/jackson/databind/node/ObjectNode.set:(Ljava/lang/String;Lcom/fasterxml/jackson/databind/JsonNode;)Lcom/fasterxml/jackson/databind/JsonNode;
+     127: pop
+     128: goto          15
+     131: return
+
+  private static com.fasterxml.jackson.databind.JsonNode getDefaultNode(com.networknt.schema.JsonSchema);
+    Code:
+       0: aload_0
+       1: invokevirtual #80                 // Method com/networknt/schema/JsonSchema.getSchemaNode:()Lcom/fasterxml/jackson/databind/JsonNode;
+       4: ldc           #81                 // String default
+       6: invokevirtual #25                 // Method com/fasterxml/jackson/databind/JsonNode.get:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+       9: astore_1
+      10: aload_1
+      11: ifnonnull     31
+      14: aload_0
+      15: invokestatic  #82                 // Method com/networknt/schema/utils/JsonSchemaRefs.from:(Lcom/networknt/schema/JsonSchema;)Lcom/networknt/schema/JsonSchemaRef;
+      18: astore_2
+      19: aload_2
+      20: ifnull        31
+      23: aload_2
+      24: invokevirtual #83                 // Method com/networknt/schema/JsonSchemaRef.getSchema:()Lcom/networknt/schema/JsonSchema;
+      27: invokestatic  #76                 // Method getDefaultNode:(Lcom/networknt/schema/JsonSchema;)Lcom/fasterxml/jackson/databind/JsonNode;
+      30: astore_1
+      31: aload_1
+      32: areturn
+
+  private void walkSchema(com.networknt.schema.ExecutionContext, java.util.Map$Entry<java.lang.String, com.networknt.schema.JsonSchema>, com.fasterxml.jackson.databind.JsonNode, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonNodePath, boolean, com.networknt.schema.utils.SetView<com.networknt.schema.ValidationMessage>, com.networknt.schema.walk.WalkListenerRunner, boolean);
+    Code:
+       0: aload_2
+       1: invokeinterface #14,  1           // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+       6: checkcast     #33                 // class com/networknt/schema/JsonSchema
+       9: astore        10
+      11: aload_3
+      12: ifnonnull     19
+      15: aconst_null
+      16: goto          32
+      19: aload_3
+      20: aload_2
+      21: invokeinterface #10,  1           // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      26: checkcast     #11                 // class java/lang/String
+      29: invokevirtual #25                 // Method com/fasterxml/jackson/databind/JsonNode.get:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      32: astore        11
+      34: aload         5
+      36: aload_2
+      37: invokeinterface #10,  1           // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      42: checkcast     #11                 // class java/lang/String
+      45: invokevirtual #13                 // Method com/networknt/schema/JsonNodePath.append:(Ljava/lang/String;)Lcom/networknt/schema/JsonNodePath;
+      48: astore        12
+      50: aload         8
+      52: aload_1
+      53: getstatic     #1                  // Field com/networknt/schema/ValidatorTypeCode.PROPERTIES:Lcom/networknt/schema/ValidatorTypeCode;
+      56: invokevirtual #84                 // Method com/networknt/schema/ValidatorTypeCode.getValue:()Ljava/lang/String;
+      59: aload         11
+      61: aload         4
+      63: aload         12
+      65: aload         10
+      67: aload_0
+      68: invokeinterface #85,  8           // InterfaceMethod com/networknt/schema/walk/WalkListenerRunner.runPreWalkListeners:(Lcom/networknt/schema/ExecutionContext;Ljava/lang/String;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;Lcom/networknt/schema/JsonSchema;Lcom/networknt/schema/JsonValidator;)Z
+      73: istore        13
+      75: aload         11
+      77: ifnonnull     99
+      80: aload_3
+      81: ifnull        99
+      84: aload_3
+      85: aload_2
+      86: invokeinterface #10,  1           // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      91: checkcast     #11                 // class java/lang/String
+      94: invokevirtual #25                 // Method com/fasterxml/jackson/databind/JsonNode.get:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      97: astore        11
+      99: iload         13
+     101: ifeq          134
+     104: iload         9
+     106: ifeq          114
+     109: aload         11
+     111: ifnull        134
+     114: aload         7
+     116: aload         10
+     118: aload_1
+     119: aload         11
+     121: aload         4
+     123: aload         12
+     125: iload         6
+     127: invokevirtual #86                 // Method com/networknt/schema/JsonSchema.walk:(Lcom/networknt/schema/ExecutionContext;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;Z)Ljava/util/Set;
+     130: invokevirtual #38                 // Method com/networknt/schema/utils/SetView.union:(Ljava/util/Set;)Lcom/networknt/schema/utils/SetView;
+     133: pop
+     134: aload         8
+     136: aload_1
+     137: getstatic     #1                  // Field com/networknt/schema/ValidatorTypeCode.PROPERTIES:Lcom/networknt/schema/ValidatorTypeCode;
+     140: invokevirtual #84                 // Method com/networknt/schema/ValidatorTypeCode.getValue:()Ljava/lang/String;
+     143: aload         11
+     145: aload         4
+     147: aload         12
+     149: aload         10
+     151: aload_0
+     152: aload         7
+     154: invokeinterface #87,  9           // InterfaceMethod com/networknt/schema/walk/WalkListenerRunner.runPostWalkListeners:(Lcom/networknt/schema/ExecutionContext;Ljava/lang/String;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;Lcom/networknt/schema/JsonSchema;Lcom/networknt/schema/JsonValidator;Ljava/util/Set;)V
+     159: return
+
+  public java.util.Map<java.lang.String, com.networknt.schema.JsonSchema> getSchemas();
+    Code:
+       0: aload_0
+       1: getfield      #5                  // Field schemas:Ljava/util/Map;
+       4: areturn
+
+  public void preloadJsonSchema();
+    Code:
+       0: aload_0
+       1: aload_0
+       2: getfield      #5                  // Field schemas:Ljava/util/Map;
+       5: invokeinterface #88,  1           // InterfaceMethod java/util/Map.values:()Ljava/util/Collection;
+      10: invokevirtual #89                 // Method preloadJsonSchemas:(Ljava/util/Collection;)V
+      13: aload_0
+      14: invokespecial #21                 // Method collectAnnotations:()Z
+      17: pop
+      18: return
+
+  static {};
+    Code:
+       0: ldc           #90                 // class com/networknt/schema/PropertiesValidator
+       2: invokestatic  #91                 // Method org/slf4j/LoggerFactory.getLogger:(Ljava/lang/Class;)Lorg/slf4j/Logger;
+       5: putstatic     #18                 // Field logger:Lorg/slf4j/Logger;
+       8: return
+}
+Compiled from "ItemsValidator.java"
+public class com.networknt.schema.ItemsValidator extends com.networknt.schema.BaseJsonValidator {
+  private static final org.slf4j.Logger logger;
+
+  private static final java.lang.String PROPERTY_ADDITIONAL_ITEMS;
+
+  private final com.networknt.schema.JsonSchema schema;
+
+  private final java.util.List<com.networknt.schema.JsonSchema> tupleSchema;
+
+  private final java.lang.Boolean additionalItems;
+
+  private final com.networknt.schema.JsonSchema additionalSchema;
+
+  private java.lang.Boolean hasUnevaluatedItemsValidator;
+
+  private final com.networknt.schema.JsonNodePath additionalItemsEvaluationPath;
+
+  private final com.networknt.schema.SchemaLocation additionalItemsSchemaLocation;
+
+  private final com.fasterxml.jackson.databind.JsonNode additionalItemsSchemaNode;
+
+  public com.networknt.schema.ItemsValidator(com.networknt.schema.SchemaLocation, com.networknt.schema.JsonNodePath, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonSchema, com.networknt.schema.ValidationContext);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: aload_3
+       4: aload         4
+       6: getstatic     #1                  // Field com/networknt/schema/ValidatorTypeCode.ITEMS:Lcom/networknt/schema/ValidatorTypeCode;
+       9: aload         5
+      11: invokespecial #2                  // Method com/networknt/schema/BaseJsonValidator."<init>":(Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/JsonNodePath;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonSchema;Lcom/networknt/schema/ValidatorTypeCode;Lcom/networknt/schema/ValidationContext;)V
+      14: aload_0
+      15: aconst_null
+      16: putfield      #3                  // Field hasUnevaluatedItemsValidator:Ljava/lang/Boolean;
+      19: aconst_null
+      20: astore        6
+      22: aload_0
+      23: new           #4                  // class java/util/ArrayList
+      26: dup
+      27: invokespecial #5                  // Method java/util/ArrayList."<init>":()V
+      30: putfield      #6                  // Field tupleSchema:Ljava/util/List;
+      33: aconst_null
+      34: astore        7
+      36: aconst_null
+      37: astore        8
+      39: aconst_null
+      40: astore        9
+      42: aload_3
+      43: invokevirtual #7                  // Method com/fasterxml/jackson/databind/JsonNode.isObject:()Z
+      46: ifne          56
+      49: aload_3
+      50: invokevirtual #8                  // Method com/fasterxml/jackson/databind/JsonNode.isBoolean:()Z
+      53: ifeq          71
+      56: aload         5
+      58: aload_1
+      59: aload_2
+      60: aload_3
+      61: aload         4
+      63: invokevirtual #9                  // Method com/networknt/schema/ValidationContext.newSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/JsonNodePath;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonSchema;)Lcom/networknt/schema/JsonSchema;
+      66: astore        7
+      68: goto          222
+      71: iconst_0
+      72: istore        10
+      74: aload_3
+      75: invokevirtual #10                 // Method com/fasterxml/jackson/databind/JsonNode.iterator:()Ljava/util/Iterator;
+      78: astore        11
+      80: aload         11
+      82: invokeinterface #11,  1           // InterfaceMethod java/util/Iterator.hasNext:()Z
+      87: ifeq          139
+      90: aload         11
+      92: invokeinterface #12,  1           // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      97: checkcast     #13                 // class com/fasterxml/jackson/databind/JsonNode
+     100: astore        12
+     102: aload_0
+     103: getfield      #6                  // Field tupleSchema:Ljava/util/List;
+     106: aload         5
+     108: aload_1
+     109: iload         10
+     111: invokevirtual #14                 // Method com/networknt/schema/SchemaLocation.append:(I)Lcom/networknt/schema/SchemaLocation;
+     114: aload_2
+     115: iload         10
+     117: invokevirtual #15                 // Method com/networknt/schema/JsonNodePath.append:(I)Lcom/networknt/schema/JsonNodePath;
+     120: aload         12
+     122: aload         4
+     124: invokevirtual #9                  // Method com/networknt/schema/ValidationContext.newSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/JsonNodePath;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonSchema;)Lcom/networknt/schema/JsonSchema;
+     127: invokeinterface #16,  2           // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+     132: pop
+     133: iinc          10, 1
+     136: goto          80
+     139: aload_0
+     140: invokevirtual #17                 // Method getParentSchema:()Lcom/networknt/schema/JsonSchema;
+     143: invokevirtual #18                 // Method com/networknt/schema/JsonSchema.getSchemaNode:()Lcom/fasterxml/jackson/databind/JsonNode;
+     146: ldc           #20                 // String additionalItems
+     148: invokevirtual #21                 // Method com/fasterxml/jackson/databind/JsonNode.get:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+     151: astore        11
+     153: aload         11
+     155: ifnull        222
+     158: aload         11
+     160: astore        9
+     162: aload         11
+     164: invokevirtual #8                  // Method com/fasterxml/jackson/databind/JsonNode.isBoolean:()Z
+     167: ifeq          183
+     170: aload         11
+     172: invokevirtual #22                 // Method com/fasterxml/jackson/databind/JsonNode.asBoolean:()Z
+     175: invokestatic  #23                 // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+     178: astore        6
+     180: goto          222
+     183: aload         11
+     185: invokevirtual #7                  // Method com/fasterxml/jackson/databind/JsonNode.isObject:()Z
+     188: ifeq          222
+     191: aload         5
+     193: aload         4
+     195: getfield      #24                 // Field com/networknt/schema/JsonSchema.schemaLocation:Lcom/networknt/schema/SchemaLocation;
+     198: ldc           #20                 // String additionalItems
+     200: invokevirtual #25                 // Method com/networknt/schema/SchemaLocation.append:(Ljava/lang/String;)Lcom/networknt/schema/SchemaLocation;
+     203: aload         4
+     205: getfield      #26                 // Field com/networknt/schema/JsonSchema.evaluationPath:Lcom/networknt/schema/JsonNodePath;
+     208: ldc           #20                 // String additionalItems
+     210: invokevirtual #27                 // Method com/networknt/schema/JsonNodePath.append:(Ljava/lang/String;)Lcom/networknt/schema/JsonNodePath;
+     213: aload         11
+     215: aload         4
+     217: invokevirtual #9                  // Method com/networknt/schema/ValidationContext.newSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/JsonNodePath;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonSchema;)Lcom/networknt/schema/JsonSchema;
+     220: astore        8
+     222: aload_0
+     223: aload         6
+     225: putfield      #28                 // Field additionalItems:Ljava/lang/Boolean;
+     228: aload_0
+     229: aload         7
+     231: putfield      #29                 // Field schema:Lcom/networknt/schema/JsonSchema;
+     234: aload_0
+     235: aload         8
+     237: putfield      #30                 // Field additionalSchema:Lcom/networknt/schema/JsonSchema;
+     240: aload_0
+     241: aload         4
+     243: getfield      #26                 // Field com/networknt/schema/JsonSchema.evaluationPath:Lcom/networknt/schema/JsonNodePath;
+     246: ldc           #20                 // String additionalItems
+     248: invokevirtual #27                 // Method com/networknt/schema/JsonNodePath.append:(Ljava/lang/String;)Lcom/networknt/schema/JsonNodePath;
+     251: putfield      #31                 // Field additionalItemsEvaluationPath:Lcom/networknt/schema/JsonNodePath;
+     254: aload_0
+     255: aload         4
+     257: getfield      #24                 // Field com/networknt/schema/JsonSchema.schemaLocation:Lcom/networknt/schema/SchemaLocation;
+     260: ldc           #20                 // String additionalItems
+     262: invokevirtual #25                 // Method com/networknt/schema/SchemaLocation.append:(Ljava/lang/String;)Lcom/networknt/schema/SchemaLocation;
+     265: putfield      #32                 // Field additionalItemsSchemaLocation:Lcom/networknt/schema/SchemaLocation;
+     268: aload_0
+     269: aload         9
+     271: putfield      #33                 // Field additionalItemsSchemaNode:Lcom/fasterxml/jackson/databind/JsonNode;
+     274: return
+
+  public java.util.Set<com.networknt.schema.ValidationMessage> validate(com.networknt.schema.ExecutionContext, com.fasterxml.jackson.databind.JsonNode, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonNodePath);
+    Code:
+       0: getstatic     #34                 // Field logger:Lorg/slf4j/Logger;
+       3: aload_2
+       4: aload_3
+       5: aload         4
+       7: invokestatic  #35                 // Method debug:(Lorg/slf4j/Logger;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;)V
+      10: aload_2
+      11: invokevirtual #36                 // Method com/fasterxml/jackson/databind/JsonNode.isArray:()Z
+      14: ifne          34
+      17: aload_0
+      18: getfield      #37                 // Field validationContext:Lcom/networknt/schema/ValidationContext;
+      21: invokevirtual #38                 // Method com/networknt/schema/ValidationContext.getConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+      24: invokevirtual #39                 // Method com/networknt/schema/SchemaValidatorsConfig.isTypeLoose:()Z
+      27: ifne          34
+      30: invokestatic  #40                 // Method java/util/Collections.emptySet:()Ljava/util/Set;
+      33: areturn
+      34: aload_0
+      35: invokespecial #41                 // Method collectAnnotations:()Z
+      38: istore        5
+      40: iload         5
+      42: ifne          53
+      45: aload_0
+      46: aload_1
+      47: invokevirtual #42                 // Method collectAnnotations:(Lcom/networknt/schema/ExecutionContext;)Z
+      50: ifeq          247
+      53: aload_0
+      54: getfield      #29                 // Field schema:Lcom/networknt/schema/JsonSchema;
+      57: ifnull        109
+      60: aload_1
+      61: invokevirtual #43                 // Method com/networknt/schema/ExecutionContext.getAnnotations:()Lcom/networknt/schema/annotation/JsonNodeAnnotations;
+      64: invokestatic  #44                 // Method com/networknt/schema/annotation/JsonNodeAnnotation.builder:()Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+      67: aload         4
+      69: invokevirtual #45                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.instanceLocation:(Lcom/networknt/schema/JsonNodePath;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+      72: aload_0
+      73: getfield      #46                 // Field evaluationPath:Lcom/networknt/schema/JsonNodePath;
+      76: invokevirtual #47                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.evaluationPath:(Lcom/networknt/schema/JsonNodePath;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+      79: aload_0
+      80: getfield      #48                 // Field schemaLocation:Lcom/networknt/schema/SchemaLocation;
+      83: invokevirtual #49                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.schemaLocation:(Lcom/networknt/schema/SchemaLocation;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+      86: aload_0
+      87: invokevirtual #50                 // Method getKeyword:()Ljava/lang/String;
+      90: invokevirtual #51                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.keyword:(Ljava/lang/String;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+      93: iconst_1
+      94: invokestatic  #23                 // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+      97: invokevirtual #52                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.value:(Ljava/lang/Object;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     100: invokevirtual #53                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.build:()Lcom/networknt/schema/annotation/JsonNodeAnnotation;
+     103: invokevirtual #54                 // Method com/networknt/schema/annotation/JsonNodeAnnotations.put:(Lcom/networknt/schema/annotation/JsonNodeAnnotation;)V
+     106: goto          247
+     109: aload_0
+     110: getfield      #6                  // Field tupleSchema:Ljava/util/List;
+     113: ifnull        247
+     116: aload_2
+     117: invokevirtual #36                 // Method com/fasterxml/jackson/databind/JsonNode.isArray:()Z
+     120: ifeq          130
+     123: aload_2
+     124: invokevirtual #55                 // Method com/fasterxml/jackson/databind/JsonNode.size:()I
+     127: goto          131
+     130: iconst_1
+     131: istore        6
+     133: aload_0
+     134: getfield      #6                  // Field tupleSchema:Ljava/util/List;
+     137: invokeinterface #56,  1           // InterfaceMethod java/util/List.size:()I
+     142: istore        7
+     144: iload         6
+     146: iload         7
+     148: if_icmple     201
+     151: aload_1
+     152: invokevirtual #43                 // Method com/networknt/schema/ExecutionContext.getAnnotations:()Lcom/networknt/schema/annotation/JsonNodeAnnotations;
+     155: invokestatic  #44                 // Method com/networknt/schema/annotation/JsonNodeAnnotation.builder:()Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     158: aload         4
+     160: invokevirtual #45                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.instanceLocation:(Lcom/networknt/schema/JsonNodePath;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     163: aload_0
+     164: getfield      #46                 // Field evaluationPath:Lcom/networknt/schema/JsonNodePath;
+     167: invokevirtual #47                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.evaluationPath:(Lcom/networknt/schema/JsonNodePath;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     170: aload_0
+     171: getfield      #48                 // Field schemaLocation:Lcom/networknt/schema/SchemaLocation;
+     174: invokevirtual #49                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.schemaLocation:(Lcom/networknt/schema/SchemaLocation;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     177: aload_0
+     178: invokevirtual #50                 // Method getKeyword:()Ljava/lang/String;
+     181: invokevirtual #51                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.keyword:(Ljava/lang/String;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     184: iload         7
+     186: invokestatic  #57                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     189: invokevirtual #52                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.value:(Ljava/lang/Object;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     192: invokevirtual #53                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.build:()Lcom/networknt/schema/annotation/JsonNodeAnnotation;
+     195: invokevirtual #54                 // Method com/networknt/schema/annotation/JsonNodeAnnotations.put:(Lcom/networknt/schema/annotation/JsonNodeAnnotation;)V
+     198: goto          247
+     201: aload_1
+     202: invokevirtual #43                 // Method com/networknt/schema/ExecutionContext.getAnnotations:()Lcom/networknt/schema/annotation/JsonNodeAnnotations;
+     205: invokestatic  #44                 // Method com/networknt/schema/annotation/JsonNodeAnnotation.builder:()Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     208: aload         4
+     210: invokevirtual #45                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.instanceLocation:(Lcom/networknt/schema/JsonNodePath;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     213: aload_0
+     214: getfield      #46                 // Field evaluationPath:Lcom/networknt/schema/JsonNodePath;
+     217: invokevirtual #47                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.evaluationPath:(Lcom/networknt/schema/JsonNodePath;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     220: aload_0
+     221: getfield      #48                 // Field schemaLocation:Lcom/networknt/schema/SchemaLocation;
+     224: invokevirtual #49                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.schemaLocation:(Lcom/networknt/schema/SchemaLocation;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     227: aload_0
+     228: invokevirtual #50                 // Method getKeyword:()Ljava/lang/String;
+     231: invokevirtual #51                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.keyword:(Ljava/lang/String;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     234: iconst_1
+     235: invokestatic  #23                 // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+     238: invokevirtual #52                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.value:(Ljava/lang/Object;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     241: invokevirtual #53                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.build:()Lcom/networknt/schema/annotation/JsonNodeAnnotation;
+     244: invokevirtual #54                 // Method com/networknt/schema/annotation/JsonNodeAnnotations.put:(Lcom/networknt/schema/annotation/JsonNodeAnnotation;)V
+     247: iconst_0
+     248: istore        6
+     250: new           #58                 // class com/networknt/schema/utils/SetView
+     253: dup
+     254: invokespecial #59                 // Method com/networknt/schema/utils/SetView."<init>":()V
+     257: astore        7
+     259: aload_2
+     260: invokevirtual #36                 // Method com/fasterxml/jackson/databind/JsonNode.isArray:()Z
+     263: ifeq          326
+     266: iconst_0
+     267: istore        8
+     269: aload_2
+     270: invokevirtual #10                 // Method com/fasterxml/jackson/databind/JsonNode.iterator:()Ljava/util/Iterator;
+     273: astore        9
+     275: aload         9
+     277: invokeinterface #11,  1           // InterfaceMethod java/util/Iterator.hasNext:()Z
+     282: ifeq          323
+     285: aload         9
+     287: invokeinterface #12,  1           // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     292: checkcast     #13                 // class com/fasterxml/jackson/databind/JsonNode
+     295: astore        10
+     297: aload_0
+     298: aload_1
+     299: aload         7
+     301: iload         8
+     303: aload         10
+     305: aload_3
+     306: aload         4
+     308: invokespecial #60                 // Method doValidate:(Lcom/networknt/schema/ExecutionContext;Lcom/networknt/schema/utils/SetView;ILcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;)Z
+     311: ifeq          317
+     314: iconst_1
+     315: istore        6
+     317: iinc          8, 1
+     320: goto          275
+     323: goto          344
+     326: aload_0
+     327: aload_1
+     328: aload         7
+     330: iconst_0
+     331: aload_2
+     332: aload_3
+     333: aload         4
+     335: invokespecial #60                 // Method doValidate:(Lcom/networknt/schema/ExecutionContext;Lcom/networknt/schema/utils/SetView;ILcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;)Z
+     338: ifeq          344
+     341: iconst_1
+     342: istore        6
+     344: iload         6
+     346: ifeq          408
+     349: iload         5
+     351: ifne          364
+     354: aload_0
+     355: aload_1
+     356: ldc           #20                 // String additionalItems
+     358: invokevirtual #61                 // Method collectAnnotations:(Lcom/networknt/schema/ExecutionContext;Ljava/lang/String;)Z
+     361: ifeq          408
+     364: aload_1
+     365: invokevirtual #43                 // Method com/networknt/schema/ExecutionContext.getAnnotations:()Lcom/networknt/schema/annotation/JsonNodeAnnotations;
+     368: invokestatic  #44                 // Method com/networknt/schema/annotation/JsonNodeAnnotation.builder:()Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     371: aload         4
+     373: invokevirtual #45                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.instanceLocation:(Lcom/networknt/schema/JsonNodePath;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     376: aload_0
+     377: getfield      #31                 // Field additionalItemsEvaluationPath:Lcom/networknt/schema/JsonNodePath;
+     380: invokevirtual #47                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.evaluationPath:(Lcom/networknt/schema/JsonNodePath;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     383: aload_0
+     384: getfield      #32                 // Field additionalItemsSchemaLocation:Lcom/networknt/schema/SchemaLocation;
+     387: invokevirtual #49                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.schemaLocation:(Lcom/networknt/schema/SchemaLocation;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     390: ldc           #20                 // String additionalItems
+     392: invokevirtual #51                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.keyword:(Ljava/lang/String;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     395: iconst_1
+     396: invokestatic  #23                 // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+     399: invokevirtual #52                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.value:(Ljava/lang/Object;)Lcom/networknt/schema/annotation/JsonNodeAnnotation$Builder;
+     402: invokevirtual #53                 // Method com/networknt/schema/annotation/JsonNodeAnnotation$Builder.build:()Lcom/networknt/schema/annotation/JsonNodeAnnotation;
+     405: invokevirtual #54                 // Method com/networknt/schema/annotation/JsonNodeAnnotations.put:(Lcom/networknt/schema/annotation/JsonNodeAnnotation;)V
+     408: aload         7
+     410: invokevirtual #62                 // Method com/networknt/schema/utils/SetView.isEmpty:()Z
+     413: ifeq          422
+     416: invokestatic  #40                 // Method java/util/Collections.emptySet:()Ljava/util/Set;
+     419: goto          424
+     422: aload         7
+     424: areturn
+
+  private boolean doValidate(com.networknt.schema.ExecutionContext, com.networknt.schema.utils.SetView<com.networknt.schema.ValidationMessage>, int, com.fasterxml.jackson.databind.JsonNode, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonNodePath);
+    Code:
+       0: iconst_0
+       1: istore        7
+       3: aload         6
+       5: iload_3
+       6: invokevirtual #15                 // Method com/networknt/schema/JsonNodePath.append:(I)Lcom/networknt/schema/JsonNodePath;
+       9: astore        8
+      11: aload_0
+      12: getfield      #29                 // Field schema:Lcom/networknt/schema/JsonSchema;
+      15: ifnull        54
+      18: aload_0
+      19: getfield      #29                 // Field schema:Lcom/networknt/schema/JsonSchema;
+      22: aload_1
+      23: aload         4
+      25: aload         5
+      27: aload         8
+      29: invokevirtual #63                 // Method com/networknt/schema/JsonSchema.validate:(Lcom/networknt/schema/ExecutionContext;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;)Ljava/util/Set;
+      32: astore        9
+      34: aload         9
+      36: invokeinterface #64,  1           // InterfaceMethod java/util/Set.isEmpty:()Z
+      41: ifne          51
+      44: aload_2
+      45: aload         9
+      47: invokevirtual #65                 // Method com/networknt/schema/utils/SetView.union:(Ljava/util/Set;)Lcom/networknt/schema/utils/SetView;
+      50: pop
+      51: goto          326
+      54: aload_0
+      55: getfield      #6                  // Field tupleSchema:Ljava/util/List;
+      58: ifnull        326
+      61: iload_3
+      62: aload_0
+      63: getfield      #6                  // Field tupleSchema:Ljava/util/List;
+      66: invokeinterface #56,  1           // InterfaceMethod java/util/List.size:()I
+      71: if_icmpge     119
+      74: aload_0
+      75: getfield      #6                  // Field tupleSchema:Ljava/util/List;
+      78: iload_3
+      79: invokeinterface #66,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+      84: checkcast     #67                 // class com/networknt/schema/JsonSchema
+      87: aload_1
+      88: aload         4
+      90: aload         5
+      92: aload         8
+      94: invokevirtual #63                 // Method com/networknt/schema/JsonSchema.validate:(Lcom/networknt/schema/ExecutionContext;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;)Ljava/util/Set;
+      97: astore        9
+      99: aload         9
+     101: invokeinterface #64,  1           // InterfaceMethod java/util/Set.isEmpty:()Z
+     106: ifne          116
+     109: aload_2
+     110: aload         9
+     112: invokevirtual #65                 // Method com/networknt/schema/utils/SetView.union:(Ljava/util/Set;)Lcom/networknt/schema/utils/SetView;
+     115: pop
+     116: goto          326
+     119: aload_0
+     120: getfield      #28                 // Field additionalItems:Ljava/lang/Boolean;
+     123: ifnull        136
+     126: aload_0
+     127: getfield      #28                 // Field additionalItems:Ljava/lang/Boolean;
+     130: invokevirtual #68                 // Method java/lang/Boolean.booleanValue:()Z
+     133: ifne          143
+     136: aload_0
+     137: getfield      #30                 // Field additionalSchema:Lcom/networknt/schema/JsonSchema;
+     140: ifnull        146
+     143: iconst_1
+     144: istore        7
+     146: aload_0
+     147: getfield      #30                 // Field additionalSchema:Lcom/networknt/schema/JsonSchema;
+     150: ifnull        189
+     153: aload_0
+     154: getfield      #30                 // Field additionalSchema:Lcom/networknt/schema/JsonSchema;
+     157: aload_1
+     158: aload         4
+     160: aload         5
+     162: aload         8
+     164: invokevirtual #63                 // Method com/networknt/schema/JsonSchema.validate:(Lcom/networknt/schema/ExecutionContext;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;)Ljava/util/Set;
+     167: astore        9
+     169: aload         9
+     171: invokeinterface #64,  1           // InterfaceMethod java/util/Set.isEmpty:()Z
+     176: ifne          186
+     179: aload_2
+     180: aload         9
+     182: invokevirtual #65                 // Method com/networknt/schema/utils/SetView.union:(Ljava/util/Set;)Lcom/networknt/schema/utils/SetView;
+     185: pop
+     186: goto          326
+     189: aload_0
+     190: getfield      #28                 // Field additionalItems:Ljava/lang/Boolean;
+     193: ifnull        326
+     196: aload_0
+     197: getfield      #28                 // Field additionalItems:Ljava/lang/Boolean;
+     200: invokevirtual #68                 // Method java/lang/Boolean.booleanValue:()Z
+     203: ifeq          209
+     206: goto          326
+     209: aload_2
+     210: aload_0
+     211: invokevirtual #69                 // Method message:()Lcom/networknt/schema/MessageSourceValidationMessage$Builder;
+     214: aload         5
+     216: invokevirtual #70                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.instanceNode:(Lcom/fasterxml/jackson/databind/JsonNode;)Ljava/lang/Object;
+     219: checkcast     #71                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+     222: aload         6
+     224: invokevirtual #72                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.instanceLocation:(Lcom/networknt/schema/JsonNodePath;)Ljava/lang/Object;
+     227: checkcast     #71                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+     230: ldc           #20                 // String additionalItems
+     232: invokevirtual #73                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.type:(Ljava/lang/String;)Ljava/lang/Object;
+     235: checkcast     #71                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+     238: ldc           #20                 // String additionalItems
+     240: invokevirtual #74                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.messageKey:(Ljava/lang/String;)Ljava/lang/Object;
+     243: checkcast     #71                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+     246: aload_0
+     247: getfield      #31                 // Field additionalItemsEvaluationPath:Lcom/networknt/schema/JsonNodePath;
+     250: invokevirtual #75                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.evaluationPath:(Lcom/networknt/schema/JsonNodePath;)Ljava/lang/Object;
+     253: checkcast     #71                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+     256: aload_0
+     257: getfield      #32                 // Field additionalItemsSchemaLocation:Lcom/networknt/schema/SchemaLocation;
+     260: invokevirtual #76                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.schemaLocation:(Lcom/networknt/schema/SchemaLocation;)Ljava/lang/Object;
+     263: checkcast     #71                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+     266: aload_0
+     267: getfield      #33                 // Field additionalItemsSchemaNode:Lcom/fasterxml/jackson/databind/JsonNode;
+     270: invokevirtual #77                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.schemaNode:(Lcom/fasterxml/jackson/databind/JsonNode;)Ljava/lang/Object;
+     273: checkcast     #71                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+     276: aload_1
+     277: invokevirtual #78                 // Method com/networknt/schema/ExecutionContext.getExecutionConfig:()Lcom/networknt/schema/ExecutionConfig;
+     280: invokevirtual #79                 // Method com/networknt/schema/ExecutionConfig.getLocale:()Ljava/util/Locale;
+     283: invokevirtual #80                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.locale:(Ljava/util/Locale;)Ljava/lang/Object;
+     286: checkcast     #71                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+     289: aload_1
+     290: invokevirtual #81                 // Method com/networknt/schema/ExecutionContext.isFailFast:()Z
+     293: invokevirtual #82                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.failFast:(Z)Ljava/lang/Object;
+     296: checkcast     #71                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+     299: iconst_1
+     300: anewarray     #83                 // class java/lang/Object
+     303: dup
+     304: iconst_0
+     305: iload_3
+     306: invokestatic  #57                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     309: aastore
+     310: invokevirtual #84                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.arguments:([Ljava/lang/Object;)Ljava/lang/Object;
+     313: checkcast     #71                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+     316: invokevirtual #85                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.build:()Lcom/networknt/schema/ValidationMessage;
+     319: invokestatic  #86                 // Method java/util/Collections.singleton:(Ljava/lang/Object;)Ljava/util/Set;
+     322: invokevirtual #65                 // Method com/networknt/schema/utils/SetView.union:(Ljava/util/Set;)Lcom/networknt/schema/utils/SetView;
+     325: pop
+     326: iload         7
+     328: ireturn
+
+  public java.util.Set<com.networknt.schema.ValidationMessage> walk(com.networknt.schema.ExecutionContext, com.fasterxml.jackson.databind.JsonNode, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonNodePath, boolean);
+    Code:
+       0: new           #87                 // class java/util/LinkedHashSet
+       3: dup
+       4: invokespecial #88                 // Method java/util/LinkedHashSet."<init>":()V
+       7: astore        6
+       9: aload_2
+      10: instanceof    #89                 // class com/fasterxml/jackson/databind/node/ArrayNode
+      13: ifeq          141
+      16: aload_2
+      17: checkcast     #89                 // class com/fasterxml/jackson/databind/node/ArrayNode
+      20: astore        7
+      22: aconst_null
+      23: astore        8
+      25: aload_0
+      26: getfield      #37                 // Field validationContext:Lcom/networknt/schema/ValidationContext;
+      29: invokevirtual #38                 // Method com/networknt/schema/ValidationContext.getConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+      32: invokevirtual #90                 // Method com/networknt/schema/SchemaValidatorsConfig.getApplyDefaultsStrategy:()Lcom/networknt/schema/ApplyDefaultsStrategy;
+      35: invokevirtual #91                 // Method com/networknt/schema/ApplyDefaultsStrategy.shouldApplyArrayDefaults:()Z
+      38: ifeq          57
+      41: aload_0
+      42: getfield      #29                 // Field schema:Lcom/networknt/schema/JsonSchema;
+      45: ifnull        57
+      48: aload_0
+      49: getfield      #29                 // Field schema:Lcom/networknt/schema/JsonSchema;
+      52: invokestatic  #92                 // Method getDefaultNode:(Lcom/networknt/schema/JsonSchema;)Lcom/fasterxml/jackson/databind/JsonNode;
+      55: astore        8
+      57: iconst_0
+      58: istore        9
+      60: aload         7
+      62: invokevirtual #93                 // Method com/fasterxml/jackson/databind/node/ArrayNode.iterator:()Ljava/util/Iterator;
+      65: astore        10
+      67: aload         10
+      69: invokeinterface #11,  1           // InterfaceMethod java/util/Iterator.hasNext:()Z
+      74: ifeq          138
+      77: aload         10
+      79: invokeinterface #12,  1           // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      84: checkcast     #13                 // class com/fasterxml/jackson/databind/JsonNode
+      87: astore        11
+      89: aload         11
+      91: invokevirtual #94                 // Method com/fasterxml/jackson/databind/JsonNode.isNull:()Z
+      94: ifeq          116
+      97: aload         8
+      99: ifnull        116
+     102: aload         7
+     104: iload         9
+     106: aload         8
+     108: invokevirtual #95                 // Method com/fasterxml/jackson/databind/node/ArrayNode.set:(ILcom/fasterxml/jackson/databind/JsonNode;)Lcom/fasterxml/jackson/databind/JsonNode;
+     111: pop
+     112: aload         8
+     114: astore        11
+     116: aload_0
+     117: aload_1
+     118: aload         6
+     120: iload         9
+     122: aload         11
+     124: aload_3
+     125: aload         4
+     127: iload         5
+     129: invokespecial #96                 // Method doWalk:(Lcom/networknt/schema/ExecutionContext;Ljava/util/HashSet;ILcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;Z)V
+     132: iinc          9, 1
+     135: goto          67
+     138: goto          155
+     141: aload_0
+     142: aload_1
+     143: aload         6
+     145: iconst_0
+     146: aload_2
+     147: aload_3
+     148: aload         4
+     150: iload         5
+     152: invokespecial #96                 // Method doWalk:(Lcom/networknt/schema/ExecutionContext;Ljava/util/HashSet;ILcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;Z)V
+     155: aload         6
+     157: areturn
+
+  private static com.fasterxml.jackson.databind.JsonNode getDefaultNode(com.networknt.schema.JsonSchema);
+    Code:
+       0: aload_0
+       1: invokevirtual #18                 // Method com/networknt/schema/JsonSchema.getSchemaNode:()Lcom/fasterxml/jackson/databind/JsonNode;
+       4: ldc           #97                 // String default
+       6: invokevirtual #21                 // Method com/fasterxml/jackson/databind/JsonNode.get:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+       9: astore_1
+      10: aload_1
+      11: ifnonnull     31
+      14: aload_0
+      15: invokestatic  #98                 // Method com/networknt/schema/utils/JsonSchemaRefs.from:(Lcom/networknt/schema/JsonSchema;)Lcom/networknt/schema/JsonSchemaRef;
+      18: astore_2
+      19: aload_2
+      20: ifnull        31
+      23: aload_2
+      24: invokevirtual #99                 // Method com/networknt/schema/JsonSchemaRef.getSchema:()Lcom/networknt/schema/JsonSchema;
+      27: invokestatic  #92                 // Method getDefaultNode:(Lcom/networknt/schema/JsonSchema;)Lcom/fasterxml/jackson/databind/JsonNode;
+      30: astore_1
+      31: aload_1
+      32: areturn
+
+  private void doWalk(com.networknt.schema.ExecutionContext, java.util.HashSet<com.networknt.schema.ValidationMessage>, int, com.fasterxml.jackson.databind.JsonNode, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonNodePath, boolean);
+    Code:
+       0: aload_0
+       1: getfield      #29                 // Field schema:Lcom/networknt/schema/JsonSchema;
+       4: ifnull        29
+       7: aload_0
+       8: aload_1
+       9: aload_0
+      10: getfield      #29                 // Field schema:Lcom/networknt/schema/JsonSchema;
+      13: aload         4
+      15: aload         5
+      17: aload         6
+      19: iload_3
+      20: invokevirtual #15                 // Method com/networknt/schema/JsonNodePath.append:(I)Lcom/networknt/schema/JsonNodePath;
+      23: iload         7
+      25: aload_2
+      26: invokespecial #100                // Method walkSchema:(Lcom/networknt/schema/ExecutionContext;Lcom/networknt/schema/JsonSchema;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;ZLjava/util/Set;)V
+      29: aload_0
+      30: getfield      #6                  // Field tupleSchema:Ljava/util/List;
+      33: ifnull        112
+      36: iload_3
+      37: aload_0
+      38: getfield      #6                  // Field tupleSchema:Ljava/util/List;
+      41: invokeinterface #56,  1           // InterfaceMethod java/util/List.size:()I
+      46: if_icmpge     83
+      49: aload_0
+      50: aload_1
+      51: aload_0
+      52: getfield      #6                  // Field tupleSchema:Ljava/util/List;
+      55: iload_3
+      56: invokeinterface #66,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+      61: checkcast     #67                 // class com/networknt/schema/JsonSchema
+      64: aload         4
+      66: aload         5
+      68: aload         6
+      70: iload_3
+      71: invokevirtual #15                 // Method com/networknt/schema/JsonNodePath.append:(I)Lcom/networknt/schema/JsonNodePath;
+      74: iload         7
+      76: aload_2
+      77: invokespecial #100                // Method walkSchema:(Lcom/networknt/schema/ExecutionContext;Lcom/networknt/schema/JsonSchema;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;ZLjava/util/Set;)V
+      80: goto          112
+      83: aload_0
+      84: getfield      #30                 // Field additionalSchema:Lcom/networknt/schema/JsonSchema;
+      87: ifnull        112
+      90: aload_0
+      91: aload_1
+      92: aload_0
+      93: getfield      #30                 // Field additionalSchema:Lcom/networknt/schema/JsonSchema;
+      96: aload         4
+      98: aload         5
+     100: aload         6
+     102: iload_3
+     103: invokevirtual #15                 // Method com/networknt/schema/JsonNodePath.append:(I)Lcom/networknt/schema/JsonNodePath;
+     106: iload         7
+     108: aload_2
+     109: invokespecial #100                // Method walkSchema:(Lcom/networknt/schema/ExecutionContext;Lcom/networknt/schema/JsonSchema;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;ZLjava/util/Set;)V
+     112: return
+
+  private void walkSchema(com.networknt.schema.ExecutionContext, com.networknt.schema.JsonSchema, com.fasterxml.jackson.databind.JsonNode, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonNodePath, boolean, java.util.Set<com.networknt.schema.ValidationMessage>);
+    Code:
+       0: aload_0
+       1: getfield      #37                 // Field validationContext:Lcom/networknt/schema/ValidationContext;
+       4: invokevirtual #38                 // Method com/networknt/schema/ValidationContext.getConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+       7: invokevirtual #101                // Method com/networknt/schema/SchemaValidatorsConfig.getItemWalkListenerRunner:()Lcom/networknt/schema/walk/WalkListenerRunner;
+      10: aload_1
+      11: getstatic     #1                  // Field com/networknt/schema/ValidatorTypeCode.ITEMS:Lcom/networknt/schema/ValidatorTypeCode;
+      14: invokevirtual #102                // Method com/networknt/schema/ValidatorTypeCode.getValue:()Ljava/lang/String;
+      17: aload_3
+      18: aload         4
+      20: aload         5
+      22: aload_2
+      23: aload_0
+      24: invokeinterface #103,  8          // InterfaceMethod com/networknt/schema/walk/WalkListenerRunner.runPreWalkListeners:(Lcom/networknt/schema/ExecutionContext;Ljava/lang/String;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;Lcom/networknt/schema/JsonSchema;Lcom/networknt/schema/JsonValidator;)Z
+      29: istore        8
+      31: iload         8
+      33: ifeq          56
+      36: aload         7
+      38: aload_2
+      39: aload_1
+      40: aload_3
+      41: aload         4
+      43: aload         5
+      45: iload         6
+      47: invokevirtual #104                // Method com/networknt/schema/JsonSchema.walk:(Lcom/networknt/schema/ExecutionContext;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;Z)Ljava/util/Set;
+      50: invokeinterface #105,  2          // InterfaceMethod java/util/Set.addAll:(Ljava/util/Collection;)Z
+      55: pop
+      56: aload_0
+      57: getfield      #37                 // Field validationContext:Lcom/networknt/schema/ValidationContext;
+      60: invokevirtual #38                 // Method com/networknt/schema/ValidationContext.getConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+      63: invokevirtual #101                // Method com/networknt/schema/SchemaValidatorsConfig.getItemWalkListenerRunner:()Lcom/networknt/schema/walk/WalkListenerRunner;
+      66: aload_1
+      67: getstatic     #1                  // Field com/networknt/schema/ValidatorTypeCode.ITEMS:Lcom/networknt/schema/ValidatorTypeCode;
+      70: invokevirtual #102                // Method com/networknt/schema/ValidatorTypeCode.getValue:()Ljava/lang/String;
+      73: aload_3
+      74: aload         4
+      76: aload         5
+      78: aload_2
+      79: aload_0
+      80: aload         7
+      82: invokeinterface #106,  9          // InterfaceMethod com/networknt/schema/walk/WalkListenerRunner.runPostWalkListeners:(Lcom/networknt/schema/ExecutionContext;Ljava/lang/String;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;Lcom/networknt/schema/JsonSchema;Lcom/networknt/schema/JsonValidator;Ljava/util/Set;)V
+      87: return
+
+  public java.util.List<com.networknt.schema.JsonSchema> getTupleSchema();
+    Code:
+       0: aload_0
+       1: getfield      #6                  // Field tupleSchema:Ljava/util/List;
+       4: areturn
+
+  public com.networknt.schema.JsonSchema getSchema();
+    Code:
+       0: aload_0
+       1: getfield      #29                 // Field schema:Lcom/networknt/schema/JsonSchema;
+       4: areturn
+
+  private boolean collectAnnotations();
+    Code:
+       0: aload_0
+       1: invokespecial #107                // Method hasUnevaluatedItemsValidator:()Z
+       4: ireturn
+
+  private boolean hasUnevaluatedItemsValidator();
+    Code:
+       0: aload_0
+       1: getfield      #3                  // Field hasUnevaluatedItemsValidator:Ljava/lang/Boolean;
+       4: ifnonnull     20
+       7: aload_0
+       8: aload_0
+       9: ldc           #108                // String unevaluatedItems
+      11: invokevirtual #109                // Method hasAdjacentKeywordInEvaluationPath:(Ljava/lang/String;)Z
+      14: invokestatic  #23                 // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+      17: putfield      #3                  // Field hasUnevaluatedItemsValidator:Ljava/lang/Boolean;
+      20: aload_0
+      21: getfield      #3                  // Field hasUnevaluatedItemsValidator:Ljava/lang/Boolean;
+      24: invokevirtual #68                 // Method java/lang/Boolean.booleanValue:()Z
+      27: ireturn
+
+  public void preloadJsonSchema();
+    Code:
+       0: aconst_null
+       1: aload_0
+       2: getfield      #29                 // Field schema:Lcom/networknt/schema/JsonSchema;
+       5: if_acmpeq     15
+       8: aload_0
+       9: getfield      #29                 // Field schema:Lcom/networknt/schema/JsonSchema;
+      12: invokevirtual #110                // Method com/networknt/schema/JsonSchema.initializeValidators:()V
+      15: aload_0
+      16: aload_0
+      17: getfield      #6                  // Field tupleSchema:Ljava/util/List;
+      20: invokevirtual #111                // Method preloadJsonSchemas:(Ljava/util/Collection;)V
+      23: aconst_null
+      24: aload_0
+      25: getfield      #30                 // Field additionalSchema:Lcom/networknt/schema/JsonSchema;
+      28: if_acmpeq     38
+      31: aload_0
+      32: getfield      #30                 // Field additionalSchema:Lcom/networknt/schema/JsonSchema;
+      35: invokevirtual #110                // Method com/networknt/schema/JsonSchema.initializeValidators:()V
+      38: aload_0
+      39: invokespecial #41                 // Method collectAnnotations:()Z
+      42: pop
+      43: return
+
+  static {};
+    Code:
+       0: ldc           #19                 // class com/networknt/schema/ItemsValidator
+       2: invokestatic  #112                // Method org/slf4j/LoggerFactory.getLogger:(Ljava/lang/Class;)Lorg/slf4j/Logger;
+       5: putstatic     #34                 // Field logger:Lorg/slf4j/Logger;
+       8: return
+}
+Compiled from "ApplyDefaultsStrategy.java"
+public class com.networknt.schema.ApplyDefaultsStrategy {
+  static final com.networknt.schema.ApplyDefaultsStrategy EMPTY_APPLY_DEFAULTS_STRATEGY;
+
+  private final boolean applyPropertyDefaults;
+
+  private final boolean applyPropertyDefaultsIfNull;
+
+  private final boolean applyArrayDefaults;
+
+  public com.networknt.schema.ApplyDefaultsStrategy(boolean, boolean, boolean);
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+       4: iload_1
+       5: ifne          20
+       8: iload_2
+       9: ifeq          20
+      12: new           #2                  // class java/lang/IllegalArgumentException
+      15: dup
+      16: invokespecial #3                  // Method java/lang/IllegalArgumentException."<init>":()V
+      19: athrow
+      20: aload_0
+      21: iload_1
+      22: putfield      #4                  // Field applyPropertyDefaults:Z
+      25: aload_0
+      26: iload_2
+      27: putfield      #5                  // Field applyPropertyDefaultsIfNull:Z
+      30: aload_0
+      31: iload_3
+      32: putfield      #6                  // Field applyArrayDefaults:Z
+      35: return
+
+  public boolean shouldApplyPropertyDefaults();
+    Code:
+       0: aload_0
+       1: getfield      #4                  // Field applyPropertyDefaults:Z
+       4: ireturn
+
+  public boolean shouldApplyPropertyDefaultsIfNull();
+    Code:
+       0: aload_0
+       1: getfield      #5                  // Field applyPropertyDefaultsIfNull:Z
+       4: ireturn
+
+  public boolean shouldApplyArrayDefaults();
+    Code:
+       0: aload_0
+       1: getfield      #6                  // Field applyArrayDefaults:Z
+       4: ireturn
+
+  static {};
+    Code:
+       0: new           #7                  // class com/networknt/schema/ApplyDefaultsStrategy
+       3: dup
+       4: iconst_0
+       5: iconst_0
+       6: iconst_0
+       7: invokespecial #8                  // Method "<init>":(ZZZ)V
+      10: putstatic     #9                  // Field EMPTY_APPLY_DEFAULTS_STRATEGY:Lcom/networknt/schema/ApplyDefaultsStrategy;
+      13: return
+}
+Compiled from "JsonSchemaFactory.java"
+public class com.networknt.schema.JsonSchemaFactory {
+  private static final org.slf4j.Logger logger;
+
+  private final com.fasterxml.jackson.databind.ObjectMapper jsonMapper;
+
+  private final com.fasterxml.jackson.databind.ObjectMapper yamlMapper;
+
+  private final java.lang.String defaultMetaSchemaIri;
+
+  private final com.networknt.schema.resource.SchemaLoaders$Builder schemaLoadersBuilder;
+
+  private final com.networknt.schema.resource.SchemaMappers$Builder schemaMappersBuilder;
+
+  private final com.networknt.schema.resource.SchemaLoader schemaLoader;
+
+  private final java.util.concurrent.ConcurrentMap<java.lang.String, com.networknt.schema.JsonMetaSchema> metaSchemas;
+
+  private final java.util.concurrent.ConcurrentMap<com.networknt.schema.SchemaLocation, com.networknt.schema.JsonSchema> schemaCache;
+
+  private final boolean enableSchemaCache;
+
+  private final com.networknt.schema.JsonMetaSchemaFactory metaSchemaFactory;
+
+  private static final java.util.List<com.networknt.schema.resource.SchemaLoader> DEFAULT_SCHEMA_LOADERS;
+
+  private static final java.util.List<com.networknt.schema.resource.SchemaMapper> DEFAULT_SCHEMA_MAPPERS;
+
+  private com.networknt.schema.JsonSchemaFactory(com.fasterxml.jackson.databind.ObjectMapper, com.fasterxml.jackson.databind.ObjectMapper, java.lang.String, com.networknt.schema.resource.SchemaLoaders$Builder, com.networknt.schema.resource.SchemaMappers$Builder, java.util.concurrent.ConcurrentMap<java.lang.String, com.networknt.schema.JsonMetaSchema>, boolean, com.networknt.schema.JsonMetaSchemaFactory);
+    Code:
+       0: aload_0
+       1: invokespecial #2                  // Method java/lang/Object."<init>":()V
+       4: aload_0
+       5: new           #3                  // class java/util/concurrent/ConcurrentHashMap
+       8: dup
+       9: invokespecial #4                  // Method java/util/concurrent/ConcurrentHashMap."<init>":()V
+      12: putfield      #5                  // Field schemaCache:Ljava/util/concurrent/ConcurrentMap;
+      15: aload_0
+      16: aload         6
+      18: putfield      #6                  // Field metaSchemas:Ljava/util/concurrent/ConcurrentMap;
+      21: aload_3
+      22: ifnull        35
+      25: aload_3
+      26: invokevirtual #7                  // Method java/lang/String.trim:()Ljava/lang/String;
+      29: invokevirtual #8                  // Method java/lang/String.isEmpty:()Z
+      32: ifeq          45
+      35: new           #9                  // class java/lang/IllegalArgumentException
+      38: dup
+      39: ldc           #10                 // String defaultMetaSchemaIri must not be null or empty
+      41: invokespecial #11                 // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      44: athrow
+      45: aload         6
+      47: ifnull        60
+      50: aload         6
+      52: invokeinterface #12,  1           // InterfaceMethod java/util/concurrent/ConcurrentMap.isEmpty:()Z
+      57: ifeq          70
+      60: new           #9                  // class java/lang/IllegalArgumentException
+      63: dup
+      64: ldc           #13                 // String Json Meta Schemas must not be null or empty
+      66: invokespecial #11                 // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      69: athrow
+      70: aload_0
+      71: getfield      #6                  // Field metaSchemas:Ljava/util/concurrent/ConcurrentMap;
+      74: aload_3
+      75: invokestatic  #14                 // Method normalizeMetaSchemaUri:(Ljava/lang/String;)Ljava/lang/String;
+      78: invokeinterface #15,  2           // InterfaceMethod java/util/concurrent/ConcurrentMap.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      83: ifnonnull     96
+      86: new           #9                  // class java/lang/IllegalArgumentException
+      89: dup
+      90: ldc           #16                 // String Meta Schema for default Meta Schema URI must be provided
+      92: invokespecial #11                 // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      95: athrow
+      96: aload_0
+      97: aload_1
+      98: putfield      #17                 // Field jsonMapper:Lcom/fasterxml/jackson/databind/ObjectMapper;
+     101: aload_0
+     102: aload_2
+     103: putfield      #18                 // Field yamlMapper:Lcom/fasterxml/jackson/databind/ObjectMapper;
+     106: aload_0
+     107: aload_3
+     108: putfield      #19                 // Field defaultMetaSchemaIri:Ljava/lang/String;
+     111: aload_0
+     112: aload         4
+     114: putfield      #20                 // Field schemaLoadersBuilder:Lcom/networknt/schema/resource/SchemaLoaders$Builder;
+     117: aload_0
+     118: aload         5
+     120: putfield      #21                 // Field schemaMappersBuilder:Lcom/networknt/schema/resource/SchemaMappers$Builder;
+     123: aload_0
+     124: new           #22                 // class com/networknt/schema/resource/DefaultSchemaLoader
+     127: dup
+     128: aload         4
+     130: ifnull        141
+     133: aload         4
+     135: invokevirtual #23                 // Method com/networknt/schema/resource/SchemaLoaders$Builder.build:()Lcom/networknt/schema/resource/SchemaLoaders;
+     138: goto          144
+     141: getstatic     #24                 // Field DEFAULT_SCHEMA_LOADERS:Ljava/util/List;
+     144: aload         5
+     146: ifnull        157
+     149: aload         5
+     151: invokevirtual #25                 // Method com/networknt/schema/resource/SchemaMappers$Builder.build:()Lcom/networknt/schema/resource/SchemaMappers;
+     154: goto          160
+     157: getstatic     #26                 // Field DEFAULT_SCHEMA_MAPPERS:Ljava/util/List;
+     160: invokespecial #27                 // Method com/networknt/schema/resource/DefaultSchemaLoader."<init>":(Ljava/util/List;Ljava/util/List;)V
+     163: putfield      #28                 // Field schemaLoader:Lcom/networknt/schema/resource/SchemaLoader;
+     166: aload_0
+     167: iload         7
+     169: putfield      #29                 // Field enableSchemaCache:Z
+     172: aload_0
+     173: aload         8
+     175: putfield      #30                 // Field metaSchemaFactory:Lcom/networknt/schema/JsonMetaSchemaFactory;
+     178: return
+
+  public com.networknt.schema.resource.SchemaLoader getSchemaLoader();
+    Code:
+       0: aload_0
+       1: getfield      #28                 // Field schemaLoader:Lcom/networknt/schema/resource/SchemaLoader;
+       4: areturn
+
+  public static com.networknt.schema.JsonSchemaFactory$Builder builder();
+    Code:
+       0: new           #31                 // class com/networknt/schema/JsonSchemaFactory$Builder
+       3: dup
+       4: invokespecial #32                 // Method com/networknt/schema/JsonSchemaFactory$Builder."<init>":()V
+       7: areturn
+
+  public static com.networknt.schema.JsonSchemaFactory getInstance(com.networknt.schema.SpecVersion$VersionFlag);
+    Code:
+       0: aload_0
+       1: aconst_null
+       2: invokestatic  #33                 // Method getInstance:(Lcom/networknt/schema/SpecVersion$VersionFlag;Ljava/util/function/Consumer;)Lcom/networknt/schema/JsonSchemaFactory;
+       5: areturn
+
+  public static com.networknt.schema.JsonSchemaFactory getInstance(com.networknt.schema.SpecVersion$VersionFlag, java.util.function.Consumer<com.networknt.schema.JsonSchemaFactory$Builder>);
+    Code:
+       0: aload_0
+       1: invokestatic  #34                 // Method checkVersion:(Lcom/networknt/schema/SpecVersion$VersionFlag;)Lcom/networknt/schema/JsonSchemaVersion;
+       4: astore_2
+       5: aload_2
+       6: invokeinterface #35,  1           // InterfaceMethod com/networknt/schema/JsonSchemaVersion.getInstance:()Lcom/networknt/schema/JsonMetaSchema;
+      11: astore_3
+      12: invokestatic  #36                 // Method builder:()Lcom/networknt/schema/JsonSchemaFactory$Builder;
+      15: aload_3
+      16: invokevirtual #37                 // Method com/networknt/schema/JsonMetaSchema.getIri:()Ljava/lang/String;
+      19: invokevirtual #38                 // Method com/networknt/schema/JsonSchemaFactory$Builder.defaultMetaSchemaIri:(Ljava/lang/String;)Lcom/networknt/schema/JsonSchemaFactory$Builder;
+      22: aload_3
+      23: invokevirtual #39                 // Method com/networknt/schema/JsonSchemaFactory$Builder.metaSchema:(Lcom/networknt/schema/JsonMetaSchema;)Lcom/networknt/schema/JsonSchemaFactory$Builder;
+      26: astore        4
+      28: aload_1
+      29: ifnull        40
+      32: aload_1
+      33: aload         4
+      35: invokeinterface #40,  2           // InterfaceMethod java/util/function/Consumer.accept:(Ljava/lang/Object;)V
+      40: aload         4
+      42: invokevirtual #41                 // Method com/networknt/schema/JsonSchemaFactory$Builder.build:()Lcom/networknt/schema/JsonSchemaFactory;
+      45: areturn
+
+  public static com.networknt.schema.JsonSchemaVersion checkVersion(com.networknt.schema.SpecVersion$VersionFlag);
+    Code:
+       0: aconst_null
+       1: aload_0
+       2: if_acmpne     7
+       5: aconst_null
+       6: areturn
+       7: getstatic     #42                 // Field com/networknt/schema/JsonSchemaFactory$1.$SwitchMap$com$networknt$schema$SpecVersion$VersionFlag:[I
+      10: aload_0
+      11: invokevirtual #43                 // Method com/networknt/schema/SpecVersion$VersionFlag.ordinal:()I
+      14: iaload
+      15: tableswitch   { // 1 to 5
+                     1: 48
+                     2: 56
+                     3: 64
+                     4: 72
+                     5: 80
+               default: 88
+          }
+      48: new           #44                 // class com/networknt/schema/Version202012
+      51: dup
+      52: invokespecial #45                 // Method com/networknt/schema/Version202012."<init>":()V
+      55: areturn
+      56: new           #46                 // class com/networknt/schema/Version201909
+      59: dup
+      60: invokespecial #47                 // Method com/networknt/schema/Version201909."<init>":()V
+      63: areturn
+      64: new           #48                 // class com/networknt/schema/Version7
+      67: dup
+      68: invokespecial #49                 // Method com/networknt/schema/Version7."<init>":()V
+      71: areturn
+      72: new           #50                 // class com/networknt/schema/Version6
+      75: dup
+      76: invokespecial #51                 // Method com/networknt/schema/Version6."<init>":()V
+      79: areturn
+      80: new           #52                 // class com/networknt/schema/Version4
+      83: dup
+      84: invokespecial #53                 // Method com/networknt/schema/Version4."<init>":()V
+      87: areturn
+      88: new           #9                  // class java/lang/IllegalArgumentException
+      91: dup
+      92: new           #54                 // class java/lang/StringBuilder
+      95: dup
+      96: invokespecial #55                 // Method java/lang/StringBuilder."<init>":()V
+      99: ldc           #56                 // String Unsupported value
+     101: invokevirtual #57                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     104: aload_0
+     105: invokevirtual #58                 // Method java/lang/StringBuilder.append:(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+     108: invokevirtual #59                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+     111: invokespecial #11                 // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     114: athrow
+
+  public static com.networknt.schema.JsonSchemaFactory$Builder builder(com.networknt.schema.JsonSchemaFactory);
+    Code:
+       0: invokestatic  #36                 // Method builder:()Lcom/networknt/schema/JsonSchemaFactory$Builder;
+       3: aload_0
+       4: getfield      #6                  // Field metaSchemas:Ljava/util/concurrent/ConcurrentMap;
+       7: invokeinterface #60,  1           // InterfaceMethod java/util/concurrent/ConcurrentMap.values:()Ljava/util/Collection;
+      12: invokevirtual #61                 // Method com/networknt/schema/JsonSchemaFactory$Builder.metaSchemas:(Ljava/util/Collection;)Lcom/networknt/schema/JsonSchemaFactory$Builder;
+      15: aload_0
+      16: getfield      #19                 // Field defaultMetaSchemaIri:Ljava/lang/String;
+      19: invokevirtual #38                 // Method com/networknt/schema/JsonSchemaFactory$Builder.defaultMetaSchemaIri:(Ljava/lang/String;)Lcom/networknt/schema/JsonSchemaFactory$Builder;
+      22: aload_0
+      23: getfield      #17                 // Field jsonMapper:Lcom/fasterxml/jackson/databind/ObjectMapper;
+      26: invokevirtual #62                 // Method com/networknt/schema/JsonSchemaFactory$Builder.jsonMapper:(Lcom/fasterxml/jackson/databind/ObjectMapper;)Lcom/networknt/schema/JsonSchemaFactory$Builder;
+      29: aload_0
+      30: getfield      #18                 // Field yamlMapper:Lcom/fasterxml/jackson/databind/ObjectMapper;
+      33: invokevirtual #63                 // Method com/networknt/schema/JsonSchemaFactory$Builder.yamlMapper:(Lcom/fasterxml/jackson/databind/ObjectMapper;)Lcom/networknt/schema/JsonSchemaFactory$Builder;
+      36: astore_1
+      37: aload_0
+      38: getfield      #20                 // Field schemaLoadersBuilder:Lcom/networknt/schema/resource/SchemaLoaders$Builder;
+      41: ifnull        59
+      44: aload_1
+      45: invokestatic  #64                 // Method com/networknt/schema/resource/SchemaLoaders.builder:()Lcom/networknt/schema/resource/SchemaLoaders$Builder;
+      48: aload_0
+      49: getfield      #20                 // Field schemaLoadersBuilder:Lcom/networknt/schema/resource/SchemaLoaders$Builder;
+      52: invokevirtual #65                 // Method com/networknt/schema/resource/SchemaLoaders$Builder.with:(Lcom/networknt/schema/resource/SchemaLoaders$Builder;)Lcom/networknt/schema/resource/SchemaLoaders$Builder;
+      55: invokestatic  #66                 // Method com/networknt/schema/JsonSchemaFactory$Builder.access$102:(Lcom/networknt/schema/JsonSchemaFactory$Builder;Lcom/networknt/schema/resource/SchemaLoaders$Builder;)Lcom/networknt/schema/resource/SchemaLoaders$Builder;
+      58: pop
+      59: aload_0
+      60: getfield      #21                 // Field schemaMappersBuilder:Lcom/networknt/schema/resource/SchemaMappers$Builder;
+      63: ifnull        81
+      66: aload_1
+      67: invokestatic  #67                 // Method com/networknt/schema/resource/SchemaMappers.builder:()Lcom/networknt/schema/resource/SchemaMappers$Builder;
+      70: aload_0
+      71: getfield      #21                 // Field schemaMappersBuilder:Lcom/networknt/schema/resource/SchemaMappers$Builder;
+      74: invokevirtual #68                 // Method com/networknt/schema/resource/SchemaMappers$Builder.with:(Lcom/networknt/schema/resource/SchemaMappers$Builder;)Lcom/networknt/schema/resource/SchemaMappers$Builder;
+      77: invokestatic  #69                 // Method com/networknt/schema/JsonSchemaFactory$Builder.access$202:(Lcom/networknt/schema/JsonSchemaFactory$Builder;Lcom/networknt/schema/resource/SchemaMappers$Builder;)Lcom/networknt/schema/resource/SchemaMappers$Builder;
+      80: pop
+      81: aload_1
+      82: areturn
+
+  protected com.networknt.schema.JsonSchema newJsonSchema(com.networknt.schema.SchemaLocation, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.SchemaValidatorsConfig);
+    Code:
+       0: aload_0
+       1: aload_2
+       2: aload_3
+       3: invokevirtual #70                 // Method createValidationContext:(Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/ValidationContext;
+       6: astore        4
+       8: aload_0
+       9: aload         4
+      11: aload_0
+      12: aload_1
+      13: invokevirtual #71                 // Method getSchemaLocation:(Lcom/networknt/schema/SchemaLocation;)Lcom/networknt/schema/SchemaLocation;
+      16: new           #72                 // class com/networknt/schema/JsonNodePath
+      19: dup
+      20: aload         4
+      22: invokevirtual #73                 // Method com/networknt/schema/ValidationContext.getConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+      25: invokevirtual #74                 // Method com/networknt/schema/SchemaValidatorsConfig.getPathType:()Lcom/networknt/schema/PathType;
+      28: invokespecial #75                 // Method com/networknt/schema/JsonNodePath."<init>":(Lcom/networknt/schema/PathType;)V
+      31: aload_2
+      32: aconst_null
+      33: iconst_0
+      34: invokespecial #76                 // Method doCreate:(Lcom/networknt/schema/ValidationContext;Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/JsonNodePath;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonSchema;Z)Lcom/networknt/schema/JsonSchema;
+      37: astore        5
+      39: aload_3
+      40: invokevirtual #77                 // Method com/networknt/schema/SchemaValidatorsConfig.isPreloadJsonSchema:()Z
+      43: ifeq          56
+      46: aload         5
+      48: invokevirtual #78                 // Method com/networknt/schema/JsonSchema.initializeValidators:()V
+      51: goto          56
+      54: astore        6
+      56: aload         5
+      58: areturn
+    Exception table:
+       from    to  target type
+          46    51    54   Class java/lang/Exception
+
+  public com.networknt.schema.JsonSchema create(com.networknt.schema.ValidationContext, com.networknt.schema.SchemaLocation, com.networknt.schema.JsonNodePath, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonSchema);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: aload_3
+       4: aload         4
+       6: aload         5
+       8: iconst_0
+       9: invokespecial #76                 // Method doCreate:(Lcom/networknt/schema/ValidationContext;Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/JsonNodePath;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonSchema;Z)Lcom/networknt/schema/JsonSchema;
+      12: areturn
+
+  private com.networknt.schema.JsonSchema doCreate(com.networknt.schema.ValidationContext, com.networknt.schema.SchemaLocation, com.networknt.schema.JsonNodePath, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonSchema, boolean);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload         4
+       4: invokespecial #80                 // Method withMetaSchema:(Lcom/networknt/schema/ValidationContext;Lcom/fasterxml/jackson/databind/JsonNode;)Lcom/networknt/schema/ValidationContext;
+       7: aload_2
+       8: aload_3
+       9: aload         4
+      11: aload         5
+      13: iload         6
+      15: invokestatic  #81                 // Method com/networknt/schema/JsonSchema.from:(Lcom/networknt/schema/ValidationContext;Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/JsonNodePath;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonSchema;Z)Lcom/networknt/schema/JsonSchema;
+      18: areturn
+
+  private com.networknt.schema.ValidationContext withMetaSchema(com.networknt.schema.ValidationContext, com.fasterxml.jackson.databind.JsonNode);
+    Code:
+       0: aload_0
+       1: aload_2
+       2: aload_1
+       3: invokevirtual #73                 // Method com/networknt/schema/ValidationContext.getConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+       6: invokespecial #82                 // Method getMetaSchema:(Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonMetaSchema;
+       9: astore_3
+      10: aload_3
+      11: ifnull        60
+      14: aload_3
+      15: invokevirtual #37                 // Method com/networknt/schema/JsonMetaSchema.getIri:()Ljava/lang/String;
+      18: aload_1
+      19: invokevirtual #83                 // Method com/networknt/schema/ValidationContext.getMetaSchema:()Lcom/networknt/schema/JsonMetaSchema;
+      22: invokevirtual #37                 // Method com/networknt/schema/JsonMetaSchema.getIri:()Ljava/lang/String;
+      25: invokevirtual #84                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      28: ifne          60
+      31: new           #85                 // class com/networknt/schema/ValidationContext
+      34: dup
+      35: aload_3
+      36: aload_1
+      37: invokevirtual #86                 // Method com/networknt/schema/ValidationContext.getJsonSchemaFactory:()Lcom/networknt/schema/JsonSchemaFactory;
+      40: aload_1
+      41: invokevirtual #73                 // Method com/networknt/schema/ValidationContext.getConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+      44: aload_1
+      45: invokevirtual #87                 // Method com/networknt/schema/ValidationContext.getSchemaReferences:()Ljava/util/concurrent/ConcurrentMap;
+      48: aload_1
+      49: invokevirtual #88                 // Method com/networknt/schema/ValidationContext.getSchemaResources:()Ljava/util/concurrent/ConcurrentMap;
+      52: aload_1
+      53: invokevirtual #89                 // Method com/networknt/schema/ValidationContext.getDynamicAnchors:()Ljava/util/concurrent/ConcurrentMap;
+      56: invokespecial #90                 // Method com/networknt/schema/ValidationContext."<init>":(Lcom/networknt/schema/JsonMetaSchema;Lcom/networknt/schema/JsonSchemaFactory;Lcom/networknt/schema/SchemaValidatorsConfig;Ljava/util/concurrent/ConcurrentMap;Ljava/util/concurrent/ConcurrentMap;Ljava/util/concurrent/ConcurrentMap;)V
+      59: areturn
+      60: aload_1
+      61: areturn
+
+  protected com.networknt.schema.SchemaLocation getSchemaLocation(com.networknt.schema.SchemaLocation);
+    Code:
+       0: aload_1
+       1: ifnull        8
+       4: aload_1
+       5: goto          11
+       8: getstatic     #91                 // Field com/networknt/schema/SchemaLocation.DOCUMENT:Lcom/networknt/schema/SchemaLocation;
+      11: areturn
+
+  protected com.networknt.schema.ValidationContext createValidationContext(com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.SchemaValidatorsConfig);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: invokespecial #92                 // Method getMetaSchemaOrDefault:(Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonMetaSchema;
+       6: astore_3
+       7: new           #85                 // class com/networknt/schema/ValidationContext
+      10: dup
+      11: aload_3
+      12: aload_0
+      13: aload_2
+      14: invokespecial #93                 // Method com/networknt/schema/ValidationContext."<init>":(Lcom/networknt/schema/JsonMetaSchema;Lcom/networknt/schema/JsonSchemaFactory;Lcom/networknt/schema/SchemaValidatorsConfig;)V
+      17: areturn
+
+  private com.networknt.schema.JsonMetaSchema getMetaSchema(com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.SchemaValidatorsConfig);
+    Code:
+       0: aload_1
+       1: ldc           #94                 // String $schema
+       3: invokevirtual #95                 // Method com/fasterxml/jackson/databind/JsonNode.get:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+       6: astore_3
+       7: aload_3
+       8: ifnull        45
+      11: aload_3
+      12: invokevirtual #96                 // Method com/fasterxml/jackson/databind/JsonNode.isTextual:()Z
+      15: ifeq          45
+      18: aload_0
+      19: getfield      #6                  // Field metaSchemas:Ljava/util/concurrent/ConcurrentMap;
+      22: aload_3
+      23: invokevirtual #97                 // Method com/fasterxml/jackson/databind/JsonNode.textValue:()Ljava/lang/String;
+      26: invokestatic  #14                 // Method normalizeMetaSchemaUri:(Ljava/lang/String;)Ljava/lang/String;
+      29: aload_0
+      30: aload_2
+      31: invokedynamic #98,  0             // InvokeDynamic #0:apply:(Lcom/networknt/schema/JsonSchemaFactory;Lcom/networknt/schema/SchemaValidatorsConfig;)Ljava/util/function/Function;
+      36: invokeinterface #99,  3           // InterfaceMethod java/util/concurrent/ConcurrentMap.computeIfAbsent:(Ljava/lang/Object;Ljava/util/function/Function;)Ljava/lang/Object;
+      41: checkcast     #100                // class com/networknt/schema/JsonMetaSchema
+      44: areturn
+      45: aconst_null
+      46: areturn
+
+  private com.networknt.schema.JsonMetaSchema getMetaSchemaOrDefault(com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.SchemaValidatorsConfig);
+    Code:
+       0: aload_1
+       1: ldc           #94                 // String $schema
+       3: invokevirtual #95                 // Method com/fasterxml/jackson/databind/JsonNode.get:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+       6: astore_3
+       7: aload_3
+       8: ifnull        55
+      11: aload_3
+      12: invokevirtual #101                // Method com/fasterxml/jackson/databind/JsonNode.isNull:()Z
+      15: ifne          55
+      18: aload_3
+      19: invokevirtual #96                 // Method com/fasterxml/jackson/databind/JsonNode.isTextual:()Z
+      22: ifne          55
+      25: new           #102                // class com/networknt/schema/JsonSchemaException
+      28: dup
+      29: new           #54                 // class java/lang/StringBuilder
+      32: dup
+      33: invokespecial #55                 // Method java/lang/StringBuilder."<init>":()V
+      36: ldc           #103                // String Unknown MetaSchema:
+      38: invokevirtual #57                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      41: aload_3
+      42: invokevirtual #104                // Method com/fasterxml/jackson/databind/JsonNode.toString:()Ljava/lang/String;
+      45: invokevirtual #57                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      48: invokevirtual #59                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+      51: invokespecial #105                // Method com/networknt/schema/JsonSchemaException."<init>":(Ljava/lang/String;)V
+      54: athrow
+      55: aload_3
+      56: ifnull        66
+      59: aload_3
+      60: invokevirtual #101                // Method com/fasterxml/jackson/databind/JsonNode.isNull:()Z
+      63: ifeq          73
+      66: aload_0
+      67: getfield      #19                 // Field defaultMetaSchemaIri:Ljava/lang/String;
+      70: goto          77
+      73: aload_3
+      74: invokevirtual #97                 // Method com/fasterxml/jackson/databind/JsonNode.textValue:()Ljava/lang/String;
+      77: astore        4
+      79: aload_0
+      80: aload         4
+      82: aload_2
+      83: invokevirtual #106                // Method getMetaSchema:(Ljava/lang/String;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonMetaSchema;
+      86: areturn
+
+  public com.networknt.schema.JsonMetaSchema getMetaSchema(java.lang.String, com.networknt.schema.SchemaValidatorsConfig);
+    Code:
+       0: aload_1
+       1: invokestatic  #14                 // Method normalizeMetaSchemaUri:(Ljava/lang/String;)Ljava/lang/String;
+       4: astore_3
+       5: aload_0
+       6: getfield      #6                  // Field metaSchemas:Ljava/util/concurrent/ConcurrentMap;
+       9: aload_3
+      10: aload_0
+      11: aload_2
+      12: invokedynamic #107,  0            // InvokeDynamic #1:apply:(Lcom/networknt/schema/JsonSchemaFactory;Lcom/networknt/schema/SchemaValidatorsConfig;)Ljava/util/function/Function;
+      17: invokeinterface #99,  3           // InterfaceMethod java/util/concurrent/ConcurrentMap.computeIfAbsent:(Ljava/lang/Object;Ljava/util/function/Function;)Ljava/lang/Object;
+      22: checkcast     #100                // class com/networknt/schema/JsonMetaSchema
+      25: areturn
+
+  protected com.networknt.schema.JsonMetaSchema loadMetaSchema(java.lang.String, com.networknt.schema.SchemaValidatorsConfig);
+    Code:
+       0: aload_0
+       1: getfield      #30                 // Field metaSchemaFactory:Lcom/networknt/schema/JsonMetaSchemaFactory;
+       4: ifnull        22
+       7: aload_0
+       8: getfield      #30                 // Field metaSchemaFactory:Lcom/networknt/schema/JsonMetaSchemaFactory;
+      11: aload_1
+      12: aload_0
+      13: aload_2
+      14: invokeinterface #108,  4          // InterfaceMethod com/networknt/schema/JsonMetaSchemaFactory.getMetaSchema:(Ljava/lang/String;Lcom/networknt/schema/JsonSchemaFactory;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonMetaSchema;
+      19: goto          31
+      22: invokestatic  #109                // Method com/networknt/schema/DefaultJsonMetaSchemaFactory.getInstance:()Lcom/networknt/schema/DefaultJsonMetaSchemaFactory;
+      25: aload_1
+      26: aload_0
+      27: aload_2
+      28: invokevirtual #110                // Method com/networknt/schema/DefaultJsonMetaSchemaFactory.getMetaSchema:(Ljava/lang/String;Lcom/networknt/schema/JsonSchemaFactory;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonMetaSchema;
+      31: areturn
+
+  public com.networknt.schema.JsonSchema getSchema(java.lang.String, com.networknt.schema.SchemaValidatorsConfig);
+    Code:
+       0: aload_0
+       1: invokevirtual #111                // Method getJsonMapper:()Lcom/fasterxml/jackson/databind/ObjectMapper;
+       4: aload_1
+       5: invokevirtual #112                // Method com/fasterxml/jackson/databind/ObjectMapper.readTree:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+       8: astore_3
+       9: aload_0
+      10: aconst_null
+      11: aload_3
+      12: aload_2
+      13: invokevirtual #113                // Method newJsonSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+      16: areturn
+      17: astore_3
+      18: getstatic     #115                // Field logger:Lorg/slf4j/Logger;
+      21: ldc           #116                // String Failed to load json schema!
+      23: aload_3
+      24: invokeinterface #117,  3          // InterfaceMethod org/slf4j/Logger.error:(Ljava/lang/String;Ljava/lang/Throwable;)V
+      29: new           #102                // class com/networknt/schema/JsonSchemaException
+      32: dup
+      33: aload_3
+      34: invokespecial #118                // Method com/networknt/schema/JsonSchemaException."<init>":(Ljava/lang/Throwable;)V
+      37: athrow
+    Exception table:
+       from    to  target type
+           0    16    17   Class java/io/IOException
+
+  public com.networknt.schema.JsonSchema getSchema(java.lang.String);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_0
+       3: invokevirtual #119                // Method createSchemaValidatorsConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+       6: invokevirtual #120                // Method getSchema:(Ljava/lang/String;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+       9: areturn
+
+  public com.networknt.schema.JsonSchema getSchema(java.io.InputStream, com.networknt.schema.SchemaValidatorsConfig);
+    Code:
+       0: aload_0
+       1: invokevirtual #111                // Method getJsonMapper:()Lcom/fasterxml/jackson/databind/ObjectMapper;
+       4: aload_1
+       5: invokevirtual #121                // Method com/fasterxml/jackson/databind/ObjectMapper.readTree:(Ljava/io/InputStream;)Lcom/fasterxml/jackson/databind/JsonNode;
+       8: astore_3
+       9: aload_0
+      10: aconst_null
+      11: aload_3
+      12: aload_2
+      13: invokevirtual #113                // Method newJsonSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+      16: areturn
+      17: astore_3
+      18: getstatic     #115                // Field logger:Lorg/slf4j/Logger;
+      21: ldc           #116                // String Failed to load json schema!
+      23: aload_3
+      24: invokeinterface #117,  3          // InterfaceMethod org/slf4j/Logger.error:(Ljava/lang/String;Ljava/lang/Throwable;)V
+      29: new           #102                // class com/networknt/schema/JsonSchemaException
+      32: dup
+      33: aload_3
+      34: invokespecial #118                // Method com/networknt/schema/JsonSchemaException."<init>":(Ljava/lang/Throwable;)V
+      37: athrow
+    Exception table:
+       from    to  target type
+           0    16    17   Class java/io/IOException
+
+  public com.networknt.schema.JsonSchema getSchema(java.io.InputStream);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_0
+       3: invokevirtual #119                // Method createSchemaValidatorsConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+       6: invokevirtual #122                // Method getSchema:(Ljava/io/InputStream;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+       9: areturn
+
+  public com.networknt.schema.JsonSchema getSchema(com.networknt.schema.SchemaLocation, com.networknt.schema.SchemaValidatorsConfig);
+    Code:
+       0: aload_0
+       1: getfield      #29                 // Field enableSchemaCache:Z
+       4: ifeq          91
+       7: aload_0
+       8: getfield      #5                  // Field schemaCache:Ljava/util/concurrent/ConcurrentMap;
+      11: aload_1
+      12: invokeinterface #15,  2           // InterfaceMethod java/util/concurrent/ConcurrentMap.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      17: checkcast     #123                // class com/networknt/schema/JsonSchema
+      20: astore_3
+      21: aload_3
+      22: ifnonnull     85
+      25: aload_0
+      26: dup
+      27: astore        4
+      29: monitorenter
+      30: aload_0
+      31: getfield      #5                  // Field schemaCache:Ljava/util/concurrent/ConcurrentMap;
+      34: aload_1
+      35: invokeinterface #15,  2           // InterfaceMethod java/util/concurrent/ConcurrentMap.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      40: checkcast     #123                // class com/networknt/schema/JsonSchema
+      43: astore_3
+      44: aload_3
+      45: ifnonnull     71
+      48: aload_0
+      49: aload_1
+      50: aload_2
+      51: invokevirtual #124                // Method getMappedSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+      54: astore_3
+      55: aload_3
+      56: ifnull        71
+      59: aload_0
+      60: getfield      #5                  // Field schemaCache:Ljava/util/concurrent/ConcurrentMap;
+      63: aload_1
+      64: aload_3
+      65: invokeinterface #125,  3          // InterfaceMethod java/util/concurrent/ConcurrentMap.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      70: pop
+      71: aload         4
+      73: monitorexit
+      74: goto          85
+      77: astore        5
+      79: aload         4
+      81: monitorexit
+      82: aload         5
+      84: athrow
+      85: aload_3
+      86: aload_2
+      87: invokevirtual #126                // Method com/networknt/schema/JsonSchema.withConfig:(Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+      90: areturn
+      91: aload_0
+      92: aload_1
+      93: aload_2
+      94: invokevirtual #124                // Method getMappedSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+      97: areturn
+    Exception table:
+       from    to  target type
+          30    74    77   any
+          77    82    77   any
+
+  protected com.fasterxml.jackson.databind.ObjectMapper getYamlMapper();
+    Code:
+       0: aload_0
+       1: getfield      #18                 // Field yamlMapper:Lcom/fasterxml/jackson/databind/ObjectMapper;
+       4: ifnull        14
+       7: aload_0
+       8: getfield      #18                 // Field yamlMapper:Lcom/fasterxml/jackson/databind/ObjectMapper;
+      11: goto          17
+      14: invokestatic  #127                // Method com/networknt/schema/serialization/YamlMapperFactory.getInstance:()Lcom/fasterxml/jackson/databind/ObjectMapper;
+      17: areturn
+
+  protected com.fasterxml.jackson.databind.ObjectMapper getJsonMapper();
+    Code:
+       0: aload_0
+       1: getfield      #17                 // Field jsonMapper:Lcom/fasterxml/jackson/databind/ObjectMapper;
+       4: ifnull        14
+       7: aload_0
+       8: getfield      #17                 // Field jsonMapper:Lcom/fasterxml/jackson/databind/ObjectMapper;
+      11: goto          17
+      14: invokestatic  #128                // Method com/networknt/schema/serialization/JsonMapperFactory.getInstance:()Lcom/fasterxml/jackson/databind/ObjectMapper;
+      17: areturn
+
+  protected com.networknt.schema.SchemaValidatorsConfig createSchemaValidatorsConfig();
+    Code:
+       0: new           #129                // class com/networknt/schema/SchemaValidatorsConfig
+       3: dup
+       4: invokespecial #130                // Method com/networknt/schema/SchemaValidatorsConfig."<init>":()V
+       7: areturn
+
+  protected com.networknt.schema.JsonSchema getMappedSchema(com.networknt.schema.SchemaLocation, com.networknt.schema.SchemaValidatorsConfig);
+    Code:
+       0: aload_0
+       1: getfield      #28                 // Field schemaLoader:Lcom/networknt/schema/resource/SchemaLoader;
+       4: aload_1
+       5: invokevirtual #131                // Method com/networknt/schema/SchemaLocation.getAbsoluteIri:()Lcom/networknt/schema/AbsoluteIri;
+       8: invokeinterface #132,  2          // InterfaceMethod com/networknt/schema/resource/SchemaLoader.getSchema:(Lcom/networknt/schema/AbsoluteIri;)Lcom/networknt/schema/resource/InputStreamSource;
+      13: invokeinterface #133,  1          // InterfaceMethod com/networknt/schema/resource/InputStreamSource.getInputStream:()Ljava/io/InputStream;
+      18: astore_3
+      19: aload_3
+      20: ifnonnull     53
+      23: new           #114                // class java/io/IOException
+      26: dup
+      27: new           #54                 // class java/lang/StringBuilder
+      30: dup
+      31: invokespecial #55                 // Method java/lang/StringBuilder."<init>":()V
+      34: ldc           #134                // String Cannot load schema at
+      36: invokevirtual #57                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      39: aload_1
+      40: invokevirtual #135                // Method com/networknt/schema/SchemaLocation.toString:()Ljava/lang/String;
+      43: invokevirtual #57                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      46: invokevirtual #59                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+      49: invokespecial #136                // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+      52: athrow
+      53: aload_0
+      54: aload_1
+      55: invokespecial #137                // Method isYaml:(Lcom/networknt/schema/SchemaLocation;)Z
+      58: ifeq          74
+      61: aload_0
+      62: invokevirtual #138                // Method getYamlMapper:()Lcom/fasterxml/jackson/databind/ObjectMapper;
+      65: aload_3
+      66: invokevirtual #121                // Method com/fasterxml/jackson/databind/ObjectMapper.readTree:(Ljava/io/InputStream;)Lcom/fasterxml/jackson/databind/JsonNode;
+      69: astore        4
+      71: goto          84
+      74: aload_0
+      75: invokevirtual #111                // Method getJsonMapper:()Lcom/fasterxml/jackson/databind/ObjectMapper;
+      78: aload_3
+      79: invokevirtual #121                // Method com/fasterxml/jackson/databind/ObjectMapper.readTree:(Ljava/io/InputStream;)Lcom/fasterxml/jackson/databind/JsonNode;
+      82: astore        4
+      84: aload_0
+      85: aload         4
+      87: aload_2
+      88: invokespecial #92                 // Method getMetaSchemaOrDefault:(Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonMetaSchema;
+      91: astore        5
+      93: new           #72                 // class com/networknt/schema/JsonNodePath
+      96: dup
+      97: aload_2
+      98: invokevirtual #74                 // Method com/networknt/schema/SchemaValidatorsConfig.getPathType:()Lcom/networknt/schema/PathType;
+     101: invokespecial #75                 // Method com/networknt/schema/JsonNodePath."<init>":(Lcom/networknt/schema/PathType;)V
+     104: astore        6
+     106: aload_1
+     107: invokevirtual #139                // Method com/networknt/schema/SchemaLocation.getFragment:()Lcom/networknt/schema/JsonNodePath;
+     110: ifnull        123
+     113: aload_1
+     114: invokevirtual #139                // Method com/networknt/schema/SchemaLocation.getFragment:()Lcom/networknt/schema/JsonNodePath;
+     117: invokevirtual #140                // Method com/networknt/schema/JsonNodePath.getNameCount:()I
+     120: ifne          162
+     123: new           #85                 // class com/networknt/schema/ValidationContext
+     126: dup
+     127: aload         5
+     129: aload_0
+     130: aload_2
+     131: invokespecial #93                 // Method com/networknt/schema/ValidationContext."<init>":(Lcom/networknt/schema/JsonMetaSchema;Lcom/networknt/schema/JsonSchemaFactory;Lcom/networknt/schema/SchemaValidatorsConfig;)V
+     134: astore        7
+     136: aload_0
+     137: aload         7
+     139: aload_1
+     140: aload         6
+     142: aload         4
+     144: aconst_null
+     145: iconst_1
+     146: invokespecial #76                 // Method doCreate:(Lcom/networknt/schema/ValidationContext;Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/JsonNodePath;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonSchema;Z)Lcom/networknt/schema/JsonSchema;
+     149: astore        8
+     151: aload_3
+     152: ifnull        159
+     155: aload_3
+     156: invokevirtual #141                // Method java/io/InputStream.close:()V
+     159: aload         8
+     161: areturn
+     162: aload_0
+     163: aload         4
+     165: aload_2
+     166: invokevirtual #70                 // Method createValidationContext:(Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/ValidationContext;
+     169: astore        7
+     171: new           #142                // class com/networknt/schema/SchemaLocation
+     174: dup
+     175: aload_1
+     176: invokevirtual #131                // Method com/networknt/schema/SchemaLocation.getAbsoluteIri:()Lcom/networknt/schema/AbsoluteIri;
+     179: invokespecial #143                // Method com/networknt/schema/SchemaLocation."<init>":(Lcom/networknt/schema/AbsoluteIri;)V
+     182: astore        8
+     184: aload_0
+     185: aload         7
+     187: aload         8
+     189: aload         6
+     191: aload         4
+     193: aconst_null
+     194: iconst_0
+     195: invokespecial #76                 // Method doCreate:(Lcom/networknt/schema/ValidationContext;Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/JsonNodePath;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonSchema;Z)Lcom/networknt/schema/JsonSchema;
+     198: astore        9
+     200: aload         9
+     202: aload_1
+     203: invokevirtual #139                // Method com/networknt/schema/SchemaLocation.getFragment:()Lcom/networknt/schema/JsonNodePath;
+     206: invokevirtual #144                // Method com/networknt/schema/JsonSchema.getRefSchema:(Lcom/networknt/schema/JsonNodePath;)Lcom/networknt/schema/JsonSchema;
+     209: astore        10
+     211: aload_3
+     212: ifnull        219
+     215: aload_3
+     216: invokevirtual #141                // Method java/io/InputStream.close:()V
+     219: aload         10
+     221: areturn
+     222: astore        4
+     224: aload_3
+     225: ifnull        244
+     228: aload_3
+     229: invokevirtual #141                // Method java/io/InputStream.close:()V
+     232: goto          244
+     235: astore        5
+     237: aload         4
+     239: aload         5
+     241: invokevirtual #146                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     244: aload         4
+     246: athrow
+     247: astore_3
+     248: getstatic     #115                // Field logger:Lorg/slf4j/Logger;
+     251: ldc           #147                // String Failed to load json schema from {}
+     253: aload_1
+     254: invokevirtual #131                // Method com/networknt/schema/SchemaLocation.getAbsoluteIri:()Lcom/networknt/schema/AbsoluteIri;
+     257: aload_3
+     258: invokeinterface #148,  4          // InterfaceMethod org/slf4j/Logger.error:(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+     263: new           #102                // class com/networknt/schema/JsonSchemaException
+     266: dup
+     267: new           #54                 // class java/lang/StringBuilder
+     270: dup
+     271: invokespecial #55                 // Method java/lang/StringBuilder."<init>":()V
+     274: ldc           #149                // String Failed to load json schema from
+     276: invokevirtual #57                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     279: aload_1
+     280: invokevirtual #131                // Method com/networknt/schema/SchemaLocation.getAbsoluteIri:()Lcom/networknt/schema/AbsoluteIri;
+     283: invokevirtual #58                 // Method java/lang/StringBuilder.append:(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+     286: invokevirtual #59                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+     289: invokespecial #105                // Method com/networknt/schema/JsonSchemaException."<init>":(Ljava/lang/String;)V
+     292: astore        4
+     294: aload         4
+     296: aload_3
+     297: invokevirtual #150                // Method com/networknt/schema/JsonSchemaException.initCause:(Ljava/lang/Throwable;)Ljava/lang/Throwable;
+     300: pop
+     301: aload         4
+     303: athrow
+    Exception table:
+       from    to  target type
+          19   151   222   Class java/lang/Throwable
+         162   211   222   Class java/lang/Throwable
+         228   232   235   Class java/lang/Throwable
+           0   159   247   Class java/io/IOException
+         162   219   247   Class java/io/IOException
+         222   247   247   Class java/io/IOException
+
+  public com.networknt.schema.JsonSchema getSchema(java.net.URI);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokevirtual #151                // Method java/net/URI.toString:()Ljava/lang/String;
+       5: invokestatic  #152                // Method com/networknt/schema/SchemaLocation.of:(Ljava/lang/String;)Lcom/networknt/schema/SchemaLocation;
+       8: aload_0
+       9: invokevirtual #119                // Method createSchemaValidatorsConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+      12: invokevirtual #153                // Method getSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+      15: areturn
+
+  public com.networknt.schema.JsonSchema getSchema(java.net.URI, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.SchemaValidatorsConfig);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokevirtual #151                // Method java/net/URI.toString:()Ljava/lang/String;
+       5: invokestatic  #152                // Method com/networknt/schema/SchemaLocation.of:(Ljava/lang/String;)Lcom/networknt/schema/SchemaLocation;
+       8: aload_2
+       9: aload_3
+      10: invokevirtual #113                // Method newJsonSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+      13: areturn
+
+  public com.networknt.schema.JsonSchema getSchema(java.net.URI, com.fasterxml.jackson.databind.JsonNode);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokevirtual #151                // Method java/net/URI.toString:()Ljava/lang/String;
+       5: invokestatic  #152                // Method com/networknt/schema/SchemaLocation.of:(Ljava/lang/String;)Lcom/networknt/schema/SchemaLocation;
+       8: aload_2
+       9: aload_0
+      10: invokevirtual #119                // Method createSchemaValidatorsConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+      13: invokevirtual #113                // Method newJsonSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+      16: areturn
+
+  public com.networknt.schema.JsonSchema getSchema(com.networknt.schema.SchemaLocation);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_0
+       3: invokevirtual #119                // Method createSchemaValidatorsConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+       6: invokevirtual #153                // Method getSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+       9: areturn
+
+  public com.networknt.schema.JsonSchema getSchema(com.networknt.schema.SchemaLocation, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.SchemaValidatorsConfig);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: aload_3
+       4: invokevirtual #113                // Method newJsonSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+       7: areturn
+
+  public com.networknt.schema.JsonSchema getSchema(com.networknt.schema.SchemaLocation, com.fasterxml.jackson.databind.JsonNode);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: aload_0
+       4: invokevirtual #119                // Method createSchemaValidatorsConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+       7: invokevirtual #113                // Method newJsonSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+      10: areturn
+
+  public com.networknt.schema.JsonSchema getSchema(com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.SchemaValidatorsConfig);
+    Code:
+       0: aload_0
+       1: aconst_null
+       2: aload_1
+       3: aload_2
+       4: invokevirtual #113                // Method newJsonSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+       7: areturn
+
+  public com.networknt.schema.JsonSchema getSchema(com.fasterxml.jackson.databind.JsonNode);
+    Code:
+       0: aload_0
+       1: aconst_null
+       2: aload_1
+       3: aload_0
+       4: invokevirtual #119                // Method createSchemaValidatorsConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+       7: invokevirtual #113                // Method newJsonSchema:(Lcom/networknt/schema/SchemaLocation;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonSchema;
+      10: areturn
+
+  private boolean isYaml(com.networknt.schema.SchemaLocation);
+    Code:
+       0: aload_1
+       1: invokevirtual #131                // Method com/networknt/schema/SchemaLocation.getAbsoluteIri:()Lcom/networknt/schema/AbsoluteIri;
+       4: invokevirtual #154                // Method com/networknt/schema/AbsoluteIri.toString:()Ljava/lang/String;
+       7: astore_2
+       8: aload_2
+       9: bipush        46
+      11: invokevirtual #155                // Method java/lang/String.lastIndexOf:(I)I
+      14: istore_3
+      15: iload_3
+      16: iconst_m1
+      17: if_icmpne     22
+      20: iconst_0
+      21: ireturn
+      22: aload_2
+      23: iload_3
+      24: invokevirtual #156                // Method java/lang/String.substring:(I)Ljava/lang/String;
+      27: astore        4
+      29: ldc           #157                // String .yml
+      31: aload         4
+      33: invokevirtual #84                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      36: ifne          49
+      39: ldc           #158                // String .yaml
+      41: aload         4
+      43: invokevirtual #84                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      46: ifeq          53
+      49: iconst_1
+      50: goto          54
+      53: iconst_0
+      54: ireturn
+
+  protected static java.lang.String normalizeMetaSchemaUri(java.lang.String);
+    Code:
+       0: iconst_0
+       1: istore_1
+       2: invokestatic  #159                // Method com/networknt/schema/SpecVersion$VersionFlag.values:()[Lcom/networknt/schema/SpecVersion$VersionFlag;
+       5: astore_2
+       6: aload_2
+       7: arraylength
+       8: istore_3
+       9: iconst_0
+      10: istore        4
+      12: iload         4
+      14: iload_3
+      15: if_icmpge     47
+      18: aload_2
+      19: iload         4
+      21: aaload
+      22: astore        5
+      24: aload         5
+      26: invokevirtual #160                // Method com/networknt/schema/SpecVersion$VersionFlag.getId:()Ljava/lang/String;
+      29: aload_0
+      30: invokevirtual #84                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      33: ifeq          41
+      36: iconst_1
+      37: istore_1
+      38: goto          47
+      41: iinc          4, 1
+      44: goto          12
+      47: iload_1
+      48: ifne          132
+      51: aload_0
+      52: ldc           #161                // String ://json-schema.org/draft
+      54: invokevirtual #162                // Method java/lang/String.contains:(Ljava/lang/CharSequence;)Z
+      57: ifeq          132
+      60: aload_0
+      61: ldc           #163                // String /draft-07/
+      63: invokevirtual #162                // Method java/lang/String.contains:(Ljava/lang/CharSequence;)Z
+      66: ifeq          75
+      69: ldc           #165                // String http://json-schema.org/draft-07/schema#
+      71: astore_0
+      72: goto          132
+      75: aload_0
+      76: ldc           #166                // String /draft/2019-09/
+      78: invokevirtual #162                // Method java/lang/String.contains:(Ljava/lang/CharSequence;)Z
+      81: ifeq          90
+      84: ldc           #167                // String https://json-schema.org/draft/2019-09/schema
+      86: astore_0
+      87: goto          132
+      90: aload_0
+      91: ldc           #168                // String /draft/2020-12/
+      93: invokevirtual #162                // Method java/lang/String.contains:(Ljava/lang/CharSequence;)Z
+      96: ifeq          105
+      99: ldc           #169                // String https://json-schema.org/draft/2020-12/schema
+     101: astore_0
+     102: goto          132
+     105: aload_0
+     106: ldc           #170                // String /draft-04/
+     108: invokevirtual #162                // Method java/lang/String.contains:(Ljava/lang/CharSequence;)Z
+     111: ifeq          120
+     114: ldc           #171                // String http://json-schema.org/draft-04/schema#
+     116: astore_0
+     117: goto          132
+     120: aload_0
+     121: ldc           #172                // String /draft-06/
+     123: invokevirtual #162                // Method java/lang/String.contains:(Ljava/lang/CharSequence;)Z
+     126: ifeq          132
+     129: ldc           #173                // String http://json-schema.org/draft-06/schema#
+     131: astore_0
+     132: aload_0
+     133: areturn
+
+  private com.networknt.schema.JsonMetaSchema lambda$getMetaSchema$1(com.networknt.schema.SchemaValidatorsConfig, java.lang.String);
+    Code:
+       0: aload_0
+       1: aload_2
+       2: aload_1
+       3: invokevirtual #174                // Method loadMetaSchema:(Ljava/lang/String;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonMetaSchema;
+       6: areturn
+
+  private com.networknt.schema.JsonMetaSchema lambda$getMetaSchema$0(com.networknt.schema.SchemaValidatorsConfig, java.lang.String);
+    Code:
+       0: aload_0
+       1: aload_2
+       2: aload_1
+       3: invokevirtual #174                // Method loadMetaSchema:(Ljava/lang/String;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonMetaSchema;
+       6: areturn
+
+  com.networknt.schema.JsonSchemaFactory(com.fasterxml.jackson.databind.ObjectMapper, com.fasterxml.jackson.databind.ObjectMapper, java.lang.String, com.networknt.schema.resource.SchemaLoaders$Builder, com.networknt.schema.resource.SchemaMappers$Builder, java.util.concurrent.ConcurrentMap, boolean, com.networknt.schema.JsonMetaSchemaFactory, com.networknt.schema.JsonSchemaFactory$1);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: aload_3
+       4: aload         4
+       6: aload         5
+       8: aload         6
+      10: iload         7
+      12: aload         8
+      14: invokespecial #1                  // Method "<init>":(Lcom/fasterxml/jackson/databind/ObjectMapper;Lcom/fasterxml/jackson/databind/ObjectMapper;Ljava/lang/String;Lcom/networknt/schema/resource/SchemaLoaders$Builder;Lcom/networknt/schema/resource/SchemaMappers$Builder;Ljava/util/concurrent/ConcurrentMap;ZLcom/networknt/schema/JsonMetaSchemaFactory;)V
+      17: return
+
+  static {};
+    Code:
+       0: ldc           #175                // class com/networknt/schema/JsonSchemaFactory
+       2: invokestatic  #176                // Method org/slf4j/LoggerFactory.getLogger:(Ljava/lang/Class;)Lorg/slf4j/Logger;
+       5: putstatic     #115                // Field logger:Lorg/slf4j/Logger;
+       8: invokestatic  #64                 // Method com/networknt/schema/resource/SchemaLoaders.builder:()Lcom/networknt/schema/resource/SchemaLoaders$Builder;
+      11: invokevirtual #23                 // Method com/networknt/schema/resource/SchemaLoaders$Builder.build:()Lcom/networknt/schema/resource/SchemaLoaders;
+      14: putstatic     #24                 // Field DEFAULT_SCHEMA_LOADERS:Ljava/util/List;
+      17: invokestatic  #67                 // Method com/networknt/schema/resource/SchemaMappers.builder:()Lcom/networknt/schema/resource/SchemaMappers$Builder;
+      20: invokevirtual #25                 // Method com/networknt/schema/resource/SchemaMappers$Builder.build:()Lcom/networknt/schema/resource/SchemaMappers;
+      23: putstatic     #26                 // Field DEFAULT_SCHEMA_MAPPERS:Ljava/util/List;
+      26: return
+}
+Compiled from "TypeValidator.java"
+public class com.networknt.schema.TypeValidator extends com.networknt.schema.BaseJsonValidator {
+  private static final org.slf4j.Logger logger;
+
+  private final com.networknt.schema.JsonType schemaType;
+
+  private final com.networknt.schema.UnionTypeValidator unionTypeValidator;
+
+  public com.networknt.schema.TypeValidator(com.networknt.schema.SchemaLocation, com.networknt.schema.JsonNodePath, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonSchema, com.networknt.schema.ValidationContext);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: aload_3
+       4: aload         4
+       6: getstatic     #1                  // Field com/networknt/schema/ValidatorTypeCode.TYPE:Lcom/networknt/schema/ValidatorTypeCode;
+       9: aload         5
+      11: invokespecial #2                  // Method com/networknt/schema/BaseJsonValidator."<init>":(Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/JsonNodePath;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonSchema;Lcom/networknt/schema/ValidatorTypeCode;Lcom/networknt/schema/ValidationContext;)V
+      14: aload_0
+      15: aload_3
+      16: invokestatic  #3                  // Method com/networknt/schema/TypeFactory.getSchemaNodeType:(Lcom/fasterxml/jackson/databind/JsonNode;)Lcom/networknt/schema/JsonType;
+      19: putfield      #4                  // Field schemaType:Lcom/networknt/schema/JsonType;
+      22: aload_0
+      23: getfield      #4                  // Field schemaType:Lcom/networknt/schema/JsonType;
+      26: getstatic     #5                  // Field com/networknt/schema/JsonType.UNION:Lcom/networknt/schema/JsonType;
+      29: if_acmpne     53
+      32: aload_0
+      33: new           #6                  // class com/networknt/schema/UnionTypeValidator
+      36: dup
+      37: aload_1
+      38: aload_2
+      39: aload_3
+      40: aload         4
+      42: aload         5
+      44: invokespecial #7                  // Method com/networknt/schema/UnionTypeValidator."<init>":(Lcom/networknt/schema/SchemaLocation;Lcom/networknt/schema/JsonNodePath;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonSchema;Lcom/networknt/schema/ValidationContext;)V
+      47: putfield      #8                  // Field unionTypeValidator:Lcom/networknt/schema/UnionTypeValidator;
+      50: goto          58
+      53: aload_0
+      54: aconst_null
+      55: putfield      #8                  // Field unionTypeValidator:Lcom/networknt/schema/UnionTypeValidator;
+      58: return
+
+  public com.networknt.schema.JsonType getSchemaType();
+    Code:
+       0: aload_0
+       1: getfield      #4                  // Field schemaType:Lcom/networknt/schema/JsonType;
+       4: areturn
+
+  public boolean equalsToSchemaType(com.fasterxml.jackson.databind.JsonNode);
+    Code:
+       0: aload_1
+       1: aload_0
+       2: getfield      #4                  // Field schemaType:Lcom/networknt/schema/JsonType;
+       5: aload_0
+       6: getfield      #9                  // Field parentSchema:Lcom/networknt/schema/JsonSchema;
+       9: aload_0
+      10: getfield      #10                 // Field validationContext:Lcom/networknt/schema/ValidationContext;
+      13: invokestatic  #11                 // Method com/networknt/schema/utils/JsonNodeUtil.equalsToSchemaType:(Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonType;Lcom/networknt/schema/JsonSchema;Lcom/networknt/schema/ValidationContext;)Z
+      16: ireturn
+
+  public java.util.Set<com.networknt.schema.ValidationMessage> validate(com.networknt.schema.ExecutionContext, com.fasterxml.jackson.databind.JsonNode, com.fasterxml.jackson.databind.JsonNode, com.networknt.schema.JsonNodePath);
+    Code:
+       0: getstatic     #12                 // Field logger:Lorg/slf4j/Logger;
+       3: aload_2
+       4: aload_3
+       5: aload         4
+       7: invokestatic  #13                 // Method debug:(Lorg/slf4j/Logger;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;)V
+      10: aload_0
+      11: getfield      #4                  // Field schemaType:Lcom/networknt/schema/JsonType;
+      14: getstatic     #5                  // Field com/networknt/schema/JsonType.UNION:Lcom/networknt/schema/JsonType;
+      17: if_acmpne     33
+      20: aload_0
+      21: getfield      #8                  // Field unionTypeValidator:Lcom/networknt/schema/UnionTypeValidator;
+      24: aload_1
+      25: aload_2
+      26: aload_3
+      27: aload         4
+      29: invokevirtual #14                 // Method com/networknt/schema/UnionTypeValidator.validate:(Lcom/networknt/schema/ExecutionContext;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/JsonNodePath;)Ljava/util/Set;
+      32: areturn
+      33: aload_0
+      34: aload_2
+      35: invokevirtual #15                 // Method equalsToSchemaType:(Lcom/fasterxml/jackson/databind/JsonNode;)Z
+      38: ifne          131
+      41: aload_2
+      42: aload_0
+      43: getfield      #10                 // Field validationContext:Lcom/networknt/schema/ValidationContext;
+      46: invokevirtual #16                 // Method com/networknt/schema/ValidationContext.getConfig:()Lcom/networknt/schema/SchemaValidatorsConfig;
+      49: invokestatic  #17                 // Method com/networknt/schema/TypeFactory.getValueNodeType:(Lcom/fasterxml/jackson/databind/JsonNode;Lcom/networknt/schema/SchemaValidatorsConfig;)Lcom/networknt/schema/JsonType;
+      52: astore        5
+      54: aload_0
+      55: invokevirtual #18                 // Method message:()Lcom/networknt/schema/MessageSourceValidationMessage$Builder;
+      58: aload_2
+      59: invokevirtual #19                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.instanceNode:(Lcom/fasterxml/jackson/databind/JsonNode;)Ljava/lang/Object;
+      62: checkcast     #20                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+      65: aload         4
+      67: invokevirtual #21                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.instanceLocation:(Lcom/networknt/schema/JsonNodePath;)Ljava/lang/Object;
+      70: checkcast     #20                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+      73: aload_1
+      74: invokevirtual #22                 // Method com/networknt/schema/ExecutionContext.getExecutionConfig:()Lcom/networknt/schema/ExecutionConfig;
+      77: invokevirtual #23                 // Method com/networknt/schema/ExecutionConfig.getLocale:()Ljava/util/Locale;
+      80: invokevirtual #24                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.locale:(Ljava/util/Locale;)Ljava/lang/Object;
+      83: checkcast     #20                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+      86: aload_1
+      87: invokevirtual #25                 // Method com/networknt/schema/ExecutionContext.isFailFast:()Z
+      90: invokevirtual #26                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.failFast:(Z)Ljava/lang/Object;
+      93: checkcast     #20                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+      96: iconst_2
+      97: anewarray     #27                 // class java/lang/Object
+     100: dup
+     101: iconst_0
+     102: aload         5
+     104: invokevirtual #28                 // Method com/networknt/schema/JsonType.toString:()Ljava/lang/String;
+     107: aastore
+     108: dup
+     109: iconst_1
+     110: aload_0
+     111: getfield      #4                  // Field schemaType:Lcom/networknt/schema/JsonType;
+     114: invokevirtual #28                 // Method com/networknt/schema/JsonType.toString:()Ljava/lang/String;
+     117: aastore
+     118: invokevirtual #29                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.arguments:([Ljava/lang/Object;)Ljava/lang/Object;
+     121: checkcast     #20                 // class com/networknt/schema/MessageSourceValidationMessage$Builder
+     124: invokevirtual #30                 // Method com/networknt/schema/MessageSourceValidationMessage$Builder.build:()Lcom/networknt/schema/ValidationMessage;
+     127: invokestatic  #31                 // Method java/util/Collections.singleton:(Ljava/lang/Object;)Ljava/util/Set;
+     130: areturn
+     131: invokestatic  #32                 // Method java/util/Collections.emptySet:()Ljava/util/Set;
+     134: areturn
+
+  static {};
+    Code:
+       0: ldc           #33                 // class com/networknt/schema/TypeValidator
+       2: invokestatic  #34                 // Method org/slf4j/LoggerFactory.getLogger:(Ljava/lang/Class;)Lorg/slf4j/Logger;
+       5: putstatic     #12                 // Field logger:Lorg/slf4j/Logger;
+       8: return
+}

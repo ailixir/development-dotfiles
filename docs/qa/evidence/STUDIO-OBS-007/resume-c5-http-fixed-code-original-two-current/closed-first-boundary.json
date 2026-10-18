@@ -1,0 +1,155 @@
+{
+  "scope": "ONE_ORIGINAL_UNPROFILED_CAUSE_RUN",
+  "boundaries": [
+    {
+      "selector": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+      "firstProjectFrames": [
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.awaitFinalizing(GuidedPublicationReplayIT.java:13931)",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel(GuidedPublicationReplayIT.java:3677)"
+      ],
+      "fixedC5HttpCodeLabel": [],
+      "expectedStatus": [],
+      "actualStatus": []
+    }
+  ],
+  "failedState": {
+    "state": "FAILED",
+    "errorCode": "OTHER",
+    "bootstrapPhase": "READY",
+    "materializationPresent": true,
+    "fixtureModelHttpCalls": 5,
+    "fixturePhysicalProviderReads": 1,
+    "fixtureProviderFailures": 0,
+    "fixtureModelKinds": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 4,
+      "VERIFY_STEP": 0
+    }
+  },
+  "claimServerFixed": [
+    {
+      "status": 202,
+      "handlerNanos": 14691542,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 10317375,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 786947125,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 944444542,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 128121542,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 629669333,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 878735917,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 134839792,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 195963709,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 580351500,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 436668167,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 675257417,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 435958375,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 235065208,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 1074076250,
+      "consumed": true
+    }
+  ],
+  "lifecycleFixed": [
+    {
+      "status": 202,
+      "kind": "RUNTIME",
+      "reason": "LEASE_LOST",
+      "consumed": true
+    }
+  ],
+  "numericEvidence": {
+    "mappedAppenders": 1,
+    "rootEvents": null,
+    "appEvents": null,
+    "eventCountsStatus": "SUPPORT_UNOBSERVED",
+    "logCoverage": "STREAMED_ORIGINAL_ENCODED_OUTPUT",
+    "encodedBytes": 72334311,
+    "encodedWriteCalls": 34927,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsCollected": true,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 30,
+    "patternBytes": 3308,
+    "rootTraceObserved": true,
+    "appTraceObserved": true,
+    "httpBodies": 1,
+    "httpErrors": 0,
+    "jsonBodies": 1,
+    "problemBodies": 0,
+    "sseStreams": 0,
+    "metricBytes": 82341,
+    "cacheEntries": 2,
+    "cacheNonemptyRequired": true,
+    "cacheProduced": true,
+    "cacheUnproducedOutsideFilterRoutes": false,
+    "profileFiles": 171,
+    "knownRootLinks": 4,
+    "externalLinkTargetBytesScanned": false,
+    "c4WindowsExecuted": false,
+    "traceFromStart": false,
+    "traceArmed": true
+  },
+  "finalizeHttpStatus": "UNREACHED",
+  "finalizeFixedCode": "UNREACHED",
+  "samplerEnabled": false,
+  "historicalMappingInvalid": true,
+  "wholeC5Accepted": false,
+  "unchangedRetryPlanned": false
+}

@@ -1,0 +1,428 @@
+{
+ "story": "STUDIO-OBS-012A",
+ "lane": "M (AC-6) — migrations + Flyway-pinned tests",
+ "agent": "Dara (@data-engineer), AGENT_NAME=dara-lanem",
+ "date": "2026-10-13",
+ "status": "MIGRATIONS_LANDED_PINNED_TESTS_PORTED",
+ "binding": [
+  "ADR-SC-005 D-A/D-B (V1–V11 byte-identical; Studio re-authored as V12–V18; no backward compat, no legacy fallback)",
+  "root/architect-rulings-wave1b.json R1 (V16 LEARN_REQUIRED in, COMPILE_REQUIRED out, OBSERVED_SCHEDULE_AUTH_REQUIRED REFUSED-only) and R2 (unbound execution rows keep NULL/changed CSI)",
+  "lane-c-java/ledger.json sqlOwedToLaneM",
+  "data-draft/{handoff.json,migration-design.md,pinned-test-mapping.json}"
+ ],
+ "gitOperations": "none (no add/commit/stash/reset)",
+ "externalDbConfirmation": {
+  "state": "UNCONFIRMED",
+  "owner": "user / Platform-SRE",
+  "askedByThisAgent": false
+ },
+ "migrations": {
+  "deleted": {
+   "count": 23,
+   "files": [
+    "backend/db/cutover/V19__studio_inference_candidate_identity.sql (and the now-empty backend/db/ tree)",
+    "backend/src/main/resources/db/migration/V12__ui_test_revisions_and_compile_state.sql",
+    "backend/src/main/resources/db/migration/V13__studio_dispatch_ledger.sql",
+    "backend/src/main/resources/db/migration/V14__studio_execution_history_v2.sql",
+    "backend/src/main/resources/db/migration/V15__studio_dispatch_ledger_state_machine.sql",
+    "backend/src/main/resources/db/migration/V16__studio_compile_started_at.sql",
+    "backend/src/main/resources/db/migration/V17__studio_execution_error_code_check.sql",
+    "backend/src/main/resources/db/migration/V18__studio_inference_capture.sql",
+    "backend/src/main/resources/db/migration/V20__studio_execution_cancel.sql",
+    "backend/src/main/resources/db/migration/V21__studio_authoring_context.sql",
+    "backend/src/main/resources/db/migration/V22__studio_expected_intent.sql",
+    "backend/src/main/resources/db/migration/V23__studio_intent_derivation_version.sql",
+    "backend/src/main/resources/db/migration/V24__studio_reference_policy.sql",
+    "backend/src/main/resources/db/migration/V25__drop_plaintext_secrets.sql",
+    "backend/src/main/resources/db/migration/V26__studio_scheduling.sql",
+    "backend/src/main/resources/db/migration/V27__studio_revision_immutability_restore.sql",
+    "backend/src/main/resources/db/migration/V28__studio_execution_scope_immutable.sql",
+    "backend/src/main/resources/db/migration/V29__studio_run_confirmation.sql",
+    "backend/src/main/resources/db/migration/V30__studio_guided_sessions.sql",
+    "backend/src/main/resources/db/migration/V31__studio_guided_bridge.sql",
+    "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql",
+    "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql",
+    "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql"
+   ],
+   "v34Note": "V34 was UNTRACKED (OBS-007 work, absent from HEAD and d954a21c5); its only byte-exact copy was backend/build/resources/main (sha256 f644a055a2942939f4cd6a1f295757ebf769e706134ec12fa8b29f3e9f8ce380 = data-draft/input-bindings.json). Preserved at docs/qa/evidence/STUDIO-OBS-012A/lane-m/preserved/V34__studio_guided_secret_login.sql before any build could sync it away. All other deleted files are recoverable from HEAD."
+  },
+  "placed": {
+   "V12__tests_revisions.sql": "274c26c4d41fbd991e157ec6372d08ca5c53ebe0a9e2d7a7252838228057d0d7",
+   "V13__executions_ledger.sql": "f258e01be9963e58b47d6dfef7171e4cd36043e82e4c0f2ea78ec439f47abeb7",
+   "V14__guided_sessions.sql": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357",
+   "V15__publication.sql": "ef092dfff93a24c4a05dc9afee6ba4a3b9a054f6cf39ca4059c186ff10777b40",
+   "V16__scheduling.sql": "6d7f4888aabf4a7206bfff9bd242ee15037121e74ed2c3fa32156a4ed862ab72",
+   "V17__secret_use_audit.sql": "a5b6a89525f3b53769678361c204ba3a78564f9f108aeb0979c184a702bc3ba7",
+   "V18__drop_plaintext_secrets.sql": "febfd5eb1624240e58d87bd92bdb2d4b82c762a7cf6fd94de8077eb6f2fc7c9f"
+  },
+  "draftToFinalDelta": [
+   "Line 1 of all seven: 'ISOLATED DRAFT rev 2' header -> final area header; line 2 of V13–V18: 'integrate in the single compile-green Lane M batch' -> 'forward-only again from here (ARCH.md:123)'",
+   "V12 '-- Rev 2: retained V24 rule' -> '-- Retained V24 rule'; V14 '-- Rev 2 decision:' -> '-- Decision:'; V15 'frozen in lane-c/tuple-spec.json' -> 'Collapsed v3 tuple (STUDIO-OBS-012A AC-4)'",
+   "V13: added a comment-only block before the error_code constraint (vocabulary provenance + operator remedy with the final 10-code NOT IN query and the verbatim VALIDATE), required for ErrorCodeVocabularyTest's comment-trap controls on the area file",
+   "Verified: 0 non-comment lines differ between each data-draft file and the landed file (diff filtered to non '--' lines)"
+  ],
+  "recheckedAgainstCurrentCode": {
+   "laneCTuple": "V15 studio_publication_profile(p) := p='{\"contract\":3}'::jsonb; studio_publication_hash('{\"contract\":3}') = 9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8 on PG15 (= lane-c tuple-spec profileHash); studio_publication_build unchanged 5-field.",
+   "learnRequired": "V16 ck_studio_schedule_occurrences_code: LEARN_REQUIRED in, COMPILE_REQUIRED absent, OBSERVED_SCHEDULE_AUTH_REQUIRED only with decision REFUSED. All codes the scheduler/readiness main code writes (ReadinessVerdict LEARN_REQUIRED/RUNTIME_INCOMPATIBLE/TEST_DELETED/TEST_QUARANTINED + processor literals) are in the list.",
+   "errorVocabulary": "One set: dto/ExecutionErrorCode.values() (10) == OpenAPI components.schemas.ExecutionErrorCode (10 + null) == V13 CHECK (10, incl. CANCELLED and SECRET_TOO_LONG), installed once NOT VALID then VALIDATE. Resolves the baseline ErrorCodeVocabularyTest x2 / ErrorCodeConstraintMigrationIT initializationError for real (tests now read V13 and the full enum).",
+   "R2": "Catalog of ui_test_executions and studio_dispatch_ledger (columns, constraints, triggers) is identical between old V1–V34 and new V1–V18; csi_id stays nullable; studio_observed_execution_guard md5 unchanged — unbound rows still accept NULL/changed CSI. NOTE for the R2 re-seat: the new schema admits NO non-GUIDED_RUN revision (ck_observed_revision_origin + NOT NULL publication columns), so an 'ordinaryRevision' seat is impossible; only revision_id NULL is.",
+   "mainCodeAlignment": "lane-m-dev ledger status MAIN_CODE_DONE_SMOKE_GREEN; its column truth matches landed files; no Lane M request to dev outstanding."
+  }
+ },
+ "proofs": {
+  "v1v11Sha256": {
+   "method": "shasum -a 256 <file> vs git show d954a21c5:<path> | shasum -a 256",
+   "result": "11/11 EQUAL",
+   "sha256": {
+    "V1__init.sql": "2e010e6e1e6f01706acb0f644ad37a3ba0340363979a994de34a4b33ba750e29",
+    "V2__schedule_next_execution.sql": "7a36462fcceb86d2ccb533c0743c20bcfedadb819f9674c0d1e8eb847830ca7f",
+    "V3__check_templates_seed.sql": "8c356f1081df490cbc213f31330883f8be477de722fc737d588f52e2ef8b48ee",
+    "V4__secrets_encrypted_value.sql": "91662e9f2c8f07e24d85d15d5ce7e5508d4f20ddfc78fdfd1dbfa083f30b24a7",
+    "V5__story_3_schema_additions.sql": "b930941c1b7ba06b8e34b67021425cffedd3264b225607ff3f170ba4545f0477",
+    "V6__report_next_delivery.sql": "d4669fed42d82824f278364845540ee4318ee9ab243bc0780a68c5092695d913",
+    "V7__partition_remaining_tables_and_defaults.sql": "ee6f50fe699f70af713a7c739acb4eb358a562837e8c43ffb130a6604fb62174",
+    "V8__failed_dispatches_and_report_failures.sql": "78ad49e718124c78f6e7a3a5a64b203f175c73642f2754a01647166c89ec89be",
+    "V9__schedules_check_type_column.sql": "9c91a6b11df2f9b012a638cbf1e0ae921d4dd09c0710a22db9d3c5a18c412f0d",
+    "V10__uppercase_status_standardization.sql": "714ea331197e4b30000b5f5706262172ee1b17ba0f7b13f6c7c33cb44abdba26",
+    "V11__check_acknowledge_assign.sql": "13a95eb5154cc4f3bc037bbfcd1c498faf5b0ecd62473857fab0a2a181179732"
+   }
+  },
+  "freshInstallScratch": {
+   "db": "scratch docker postgres:15-alpine (reused dara-obs012a-89061-1791863485, now removed)",
+   "runs": [
+    "drafts V1–V18 -> 18 OK",
+    "current V1–V34 (33 files) -> 33 OK (comparison baseline)",
+    "landed V1–V18 before V13 comment -> 18 OK, catalog identical to draft install",
+    "landed V1–V18 after V13 comment (final) -> 18 OK, catalog identical; ck_ui_test_executions_error_code validated on 5 relations",
+    "populated core V11 (chrome + NULL-CSI drafts, 3 executions) -> V12..V18 OK: browser->chromium, NULL-CSI draft quarantined, CSI backfilled, logs->JSONB, 2 DONE locators"
+   ],
+   "catalogDiff": "before(V1–V34) vs after(V1–V18), parent tables: removed exactly ui_test_compile_outcomes/ui_test_compile_requests/ui_test_step_identities, 10 ui_tests compile/snapshot columns, 9 ui_test_revisions compile columns (+expected_intent), compile identity indexes and inference triggers/functions; added ui_test_revisions.step_snapshot_hashes/step_reuse_provenance + ck_observed_revision_step_metadata + deferred tr_publication_step_metadata_guard; confirmation NOT NULL GUIDED_RUN-only; base closed keys drop compileRequestId/candidateRevisionId; occurrence code LEARN_REQUIRED; only changed function bodies: studio_publication_base_guard, studio_publication_epoch, studio_publication_profile, ui_test_revisions_write_once (+ new step guard). Partition-level triggers/constraints: 354 rows each, identical. Tables 51->48, functions 67->65.",
+   "catalogFiles": [
+    "docs/qa/evidence/STUDIO-OBS-012A/lane-m/catalog.sql",
+    "catalog-before-V1-V34.txt",
+    "catalog-after-V1-V18.txt"
+   ]
+  },
+  "testcontainersFreshInstall": "GuidedSessionIT.migrationPreservesExistingDataAndFreshInstallWorks (fresh V18, migrationsExecuted=18, validate OK), InferenceMigrationIT/LatestIT fresh vs populated-core head equality — green in final run",
+  "rdsParityLint": [
+   {
+    "cmd": "gradle-locked.sh rdsParityLint",
+    "exit": 0,
+    "out": "18 migration file(s) checked — clean.",
+    "when": "after placement, before V13 comment"
+   },
+   {
+    "cmd": "gradle-locked.sh rdsParityLint --rerun-tasks",
+    "exit": 0,
+    "out": "18 migration file(s) checked — clean.",
+    "when": "final files"
+   }
+  ],
+  "greps": {
+   "scope": "backend/src/main/resources/db/migration/V*.sql (final)",
+   "zeroHits": [
+    "observed-1",
+    "observed-replay-3",
+    "COMPILE_REQUIRED",
+    "compile_status",
+    "compile_request",
+    "current_candidate",
+    "intent_derivation",
+    "ui_test_compile",
+    "ui_test_step_identities",
+    "AWAITING_AUTH",
+    "accountRef",
+    "17-key profile keys (browserEngine, guidedPolicy, replayAuthorization, validationBasis, playwright, lowering, \"executor\", \"validator\", \"protocol\", \"language\")"
+   ],
+   "migrationFileCount": 18,
+   "backend/db exists": false
+  }
+ },
+ "pinnedTests": {
+  "scope": "20 Flyway-target-pinned files / 224 methods (data-draft/pinned-test-mapping.json) + non-target ErrorCodeVocabularyTest (6)",
+  "deletedFiles": [
+   "compile/CompileStartedAtMigrationIT.java (6)",
+   "compile/IntentDerivationMigrationIT.java (2)",
+   "compile/ReferencePolicyMigrationIT.java (2)"
+  ],
+  "deletedFilesNote": "These three were already removed from the working tree (Lane K deletion of studio/compile tests) when Lane M started; they are counted here as the named compile deletions they are in the mapping.",
+  "namedMethodDeletions": {
+   "InferenceMigrationIT": [
+    "oldPublisherConflictTargetStillWorksAfterExpansion",
+    "stepRegistryAndRequestAndOutcomeAreAppendOnly",
+    "cutoverRequiresAttestationAndSeparatesContentFromRequestIdentity"
+   ],
+   "InferenceMigrationLatestIT": [
+    "appendOnlyCaptureAndAuthoringGuardsSurviveLaterMigrations",
+    "baselineSelectionIsScopedDeterministicAndFallsBackWhenEvidenceExpires",
+    "baselineQueryAvoidsExecutionSequentialScansAtLocalHistoryVolume",
+    "mixedWriterCutoverOnHeadSchema",
+    "capturedPublisherAcceptsContextAwareDraftAfterCutover",
+    "compileRequestTriggerIsClosedToTheC0SetAndImmutable",
+    "v29BackfillsNoConfirmationSourceOrTrigger"
+   ],
+   "CompileStartedAtMigrationIT": 6,
+   "IntentDerivationMigrationIT": 2,
+   "ReferencePolicyMigrationIT": 2
+  },
+  "renamedPorts": [
+   [
+    "LegacyDataMigrationIT",
+    "v14AppliesSuccessfullyToADatabaseThatAlreadyHoldsRows",
+    "studioBaselineAppliesSuccessfullyToADatabaseThatAlreadyHoldsRows"
+   ],
+   [
+    "LedgerStateMachineMigrationIT",
+    "v15AppliesToADatabaseHoldingLedgerAndHistoryRows",
+    "v13AppliesToADatabaseHoldingExecutionHistoryRows"
+   ],
+   [
+    "RevisionMigrationIT",
+    "leavesEveryLegacyDraftStaleWithNoRevisions",
+    "leavesEveryLegacyDraftUnlearnedWithNoRevisions"
+   ],
+   [
+    "RevisionMigrationIT",
+    "constrainsCompileStatusToTheFiveStates",
+    "carriesNoStoredCompileState (assertion re-pointed: compile_status no longer exists; asserts no compile column/table and the UPDATE fails)"
+   ],
+   [
+    "RevisionMigrationIT",
+    "acceptsTheFirstConfirmationAndRejectsASecond",
+    "arrivesConfirmedAndRejectsAnyReconfirmation"
+   ],
+   [
+    "StudioAuthoringMigrationIT",
+    "candidateInsertCapturesTheExactV2InputsAndTheyAreWriteOnce",
+    "publicationCapturesTheExactV2InputsAndTheyAreWriteOnce"
+   ],
+   [
+    "InferenceMigrationIT",
+    "baselineCannotBelongToAnotherTestAndScopeEditsNeedRevisionAdvance",
+    "reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot (first half re-pointed to the D-D reuse guard; the 'scope edits need revision advance' half is RETIRED: its only DB enforcement was the compile authoring_snapshot trigger, removed with the column — named here, not silently dropped)"
+   ],
+   [
+    "InferenceMigrationLatestIT",
+    "everyV18RevisionColumnRemainsImmutableOnTheHeadSchema",
+    "everyObservedRevisionColumnRemainsImmutableOnTheHeadSchema"
+   ],
+   [
+    "InferenceMigrationLatestIT",
+    "everyRevisionColumnExceptFirstConfirmationIsImmutableOnTheHeadSchema",
+    "everyRevisionColumnIsImmutableOnTheHeadSchema"
+   ],
+   [
+    "InferenceMigrationLatestIT",
+    "confirmationSourceIsWriteOnceAndOnlyWithTheFirstConfirmation",
+    "confirmationSourceIsGuidedRunOnlyAndImmutable"
+   ],
+   [
+    "GuidedPublicationMigrationTest",
+    "installedScheduleCodeConstraintKeepsLegacyVocabularyAndAddsOnlyObservedRefusal",
+    "installedScheduleCodeConstraintKeepsSchedulerVocabularyAndAddsOnlyObservedRefusal (COMPILE_REQUIRED -> LEARN_REQUIRED; COMPILE_REQUIRED now asserted refused)"
+   ],
+   [
+    "GuidedPublicationMigrationTest",
+    "bothCutoverOrdersPreserveLegacyRows",
+    "freshCoreToHeadHasNoCutoverAndNoLegacyRevisionFamily"
+   ],
+   [
+    "GuidedSecretLoginMigrationTest",
+    "freshAndBothStagedCutoverOrdersReachV34WithoutChangingOrdinaryCapability",
+    "freshInstallReachesHeadWithoutCutoverAndKeepsOrdinaryCapability"
+   ],
+   [
+    "GuidedSecretLoginMigrationTest",
+    "guardsFailLoudlyOnAwaitingAuthOrObservedBindingRows",
+    "awaitingAuthAndForgedObservedBindingRowsAreRefusedAtHead (no trigger is disabled any more)"
+   ]
+  ],
+  "targetOnlyPorts": {
+   "GuidedBridgeIntegrationTest": "target 30 + full -> single target 18",
+   "GuidedPlanningIntegrationTest": "target 30 + full -> single target 18",
+   "GuidedServiceTransportFaultIT": "34 -> 18",
+   "GuidedDefaultModelReservationIT": "34 -> 18",
+   "GuidedSessionIT": "29/34 sentinel staging -> 13/18; fresh-install case 31/30 executed -> 18/18 executed",
+   "GuidedTranslationMigrationTest": "31 -> 14 (populated guided area, then V15–V18)",
+   "PlaintextSecretsDropMigrationIT": "24->25 becomes 17->18",
+   "LegacyDataMigrationIT": "12->14 becomes 11->18 (orphan draft now quarantined by V12 itself; asserted)",
+   "LedgerStateMachineMigrationIT": "14->15 becomes core 11 -> 18; DONE locator is V13's own backfill; QUEUED/ADMITTED written at head",
+   "StudioSchedulingSchemaIT": "25->26 becomes 15->16->18; fixtures use genuine publications; accepted history rows carry their revision's observed binding",
+   "ErrorCodeConstraintMigrationIT": "16->17 becomes 18 + drop only this CHECK on the disposable DB, seed, re-apply V13's own two statements (read, not transcribed) in one transaction",
+   "RevisionMigrationIT": "11->12 kept; then ->18 for revision cases",
+   "StudioAuthoringMigrationIT": "17->21 becomes 11->18",
+   "InferenceMigrationIT/LatestIT": "17->18 / 17->head become core 11 -> 18"
+  },
+  "parameterizedNote": "StudioSchedulingSchemaIT.acceptedLinkMustMatchActualImmutableExecutionProvenance: variants test/csi/environment/revision now hit the V15 observed execution guard at INSERT ('observed execution binding invalid', asserted) because those rows contradict their own revision; the commit-time 'exactly one matching ledger/history snapshot' refusal is still asserted for all 8 variants.",
+  "sharedFixtureChanges": [
+   "GuidedPublicationMigrationTest made public; added public Prepared/Published records and publishObserved/prepareObserved/observedBuild/observedBinding helpers (production writers, every SQL guard; synthetic verdict, no browser) — used by Revision/StudioAuthoring/Inference(Latest)/StudioSchedulingSchema ITs",
+   "GuidedPublicationMigrationTest.Database: no target-32 legacy revision, no cutover flag; signature Database(boolean...) -> Database(List<String>) (only caller outside the class: GuidedSecretLoginMigrationTest.publishedRetry, updated)",
+   "Dependents re-run green in the final run: GuidedPublicationRaceTest 13, GuidedPublicationEvidenceTest 5, SecretAuditLifecycleIT 7, ObservedReadEntryProtocolIT 11, ObservedResolverProcessCrashIT 3, SecretUseAuditIT 36"
+  ],
+  "reconciliation": {
+   "rule": "after = baseline - named drops - named deletions + named ports",
+   "baselineMethods": 224,
+   "namedDrops": 0,
+   "namedDeletions": 20,
+   "portsKeptName": 190,
+   "portsRenamed": 14,
+   "afterMappedMethods": 204,
+   "check": "224 - 0 - 20 = 204 = 190 + 14 (verified by name: scratchpad recon.py over current sources vs mapping)",
+   "outOfMappingMethod": "GuidedServiceTransportFaultIT.actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery exists in the current (untracked) file but not in the T0 mapping (12 -> 13 methods); not authored by Lane M (only line 150 target changed). Source method total 205.",
+   "newTestsAdded": 0,
+   "lowerCoverage": "none: no method dropped without a name; StudioSchedulingSchemaIT, RevisionMigrationIT, GuidedPublicationMigrationTest gained assertions (constraint names, receipt FK, refusal of COMPILE_REQUIRED/legacy revision family)"
+  },
+  "finalRun": {
+   "cmd": "gradle-locked.sh test --continue --tests <18 pinned classes + ErrorCodeVocabularyTest + 6 Database dependents>",
+   "exit": 1,
+   "when": "2026-10-13T07:17–07:29Z, final sources (after spotless)",
+   "pinnedRuntimeTests": 253,
+   "pinnedFailures": 4,
+   "pinnedSkipped": 0,
+   "perClass": {
+    "ErrorCodeVocabularyTest": "6/6",
+    "ErrorCodeConstraintMigrationIT": "5/5",
+    "LegacyDataMigrationIT": "7/7",
+    "LedgerStateMachineMigrationIT": "5/5",
+    "PlaintextSecretsDropMigrationIT": "2/2",
+    "RevisionMigrationIT": "8/8",
+    "StudioAuthoringMigrationIT": "3/3",
+    "InferenceMigrationIT": "4/4",
+    "InferenceMigrationLatestIT": "9/9",
+    "StudioSchedulingSchemaIT": "20/20 (12 methods incl. 8 parameter invocations)",
+    "GuidedTranslationMigrationTest": "5/5",
+    "GuidedPublicationMigrationTest": "11/11",
+    "GuidedSecretLoginMigrationTest": "23/23",
+    "GuidedSessionIT": "43/43",
+    "GuidedBridgeIntegrationTest": "37/37",
+    "GuidedPlanningIntegrationTest": "36/40",
+    "GuidedServiceTransportFaultIT": "21/21",
+    "GuidedDefaultModelReservationIT": "4/4"
+   },
+   "failures": {
+    "GuidedPlanningIntegrationTest": [
+     "contextMetadataRetryLimitStopsWithoutAnotherBrowserOrModelCall",
+     "[1] chosenIndex=0",
+     "[2] chosenIndex=1",
+     "[4] mutation=assertion"
+    ],
+    "classification": "PRE-EXISTING, identical names in baseline-backend and baseline-postKC (BUDGET_EXCEEDED 429 / model budget). Not caused or fixed by Lane M; no schema involvement inferred from the messages (inference, not root-caused). Owner: root/@dev; AC-7 cannot be green while red."
+   },
+   "dependentsRuntimeTests": 75,
+   "dependentsFailures": 0,
+   "resultFiles": "docs/qa/evidence/STUDIO-OBS-012A/lane-m/final-results/*.xml (18 pinned classes)"
+  },
+  "baselineDelta": {
+   "fixedForReal": [
+    "ErrorCodeConstraintMigrationIT.initializationError",
+    "ErrorCodeVocabularyTest.theMigrationConstrainsExactlyTheVocabularyTheApiCanAssign",
+    "ErrorCodeVocabularyTest.theMigrationConstrainsExactlyTheVocabularyTheFrozenContractDeclares"
+   ],
+   "greenedByV15Predicate": "post-K+C M-blocked GuidedSecretLoginMigrationTest (11) and GuidedPublicationMigrationTest.validatedRelationalCycle... now pass; Database dependents (Race 13, SecretUseAuditIT 36, ObservedReadEntryProtocolIT 11, SecretAuditLifecycleIT 7, ObservedResolverProcessCrashIT 3) green"
+  },
+  "flake": "GuidedServiceTransportFaultIT.actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost failed once (run4: expected READ_BEFORE_DECISION but was \"\"), passed in the isolated rerun (21/21) and in the final run (21/21). Same crash-cut stage-file read Lane C recorded. Not fixed; flagged."
+ },
+ "staticChecks": [
+  {
+   "cmd": "gradle-locked.sh compileTestJava",
+   "exit": 0
+  },
+  {
+   "cmd": "gradle-locked.sh spotlessApply -PspotlessIdeHook=<file> x18 (my files)",
+   "exit": 0,
+   "note": "7 reformatted, 11 already clean"
+  },
+  {
+   "cmd": "gradle-locked.sh spotlessCheck",
+   "exit": 1,
+   "note": "remaining violations ONLY in other lanes' in-flight files: scheduling/SharedSchedulingIT, studio/StudioAuthorizationIT, studio/StudioExecutionFixtures, studio/evidence/ExecutionVideoAuthorizationIT, studio/scheduling/StudioScheduleApiIT (R1/R2 exec-fixtures work; not touched by Lane M)"
+  },
+  {
+   "cmd": "gradle-locked.sh checkstyleTest",
+   "exit": 0
+  }
+ ],
+ "commands": [
+  {
+   "cmd": "shasum -a 256 V1..V11 vs git show d954a21c5:<path> | shasum -a 256",
+   "exit": 0,
+   "result": "11 EQUAL"
+  },
+  {
+   "cmd": "scratch PG15 apply.sh (V1–V11 + drafts; current V1–V34; landed V1–V18 x2; populated V11 -> V12..V18)",
+   "exit": 0,
+   "result": "all OK; catalogs as recorded"
+  },
+  {
+   "cmd": "gradle-locked.sh rdsParityLint",
+   "exit": 0,
+   "result": "18 clean"
+  },
+  {
+   "cmd": "gradle-locked.sh compileTestJava",
+   "exit": 0
+  },
+  {
+   "cmd": "run1: 11 Flyway-only pinned classes",
+   "exit": 0,
+   "result": "74 tests, 0 failures"
+  },
+  {
+   "cmd": "run2: GuidedPublicationMigrationTest, GuidedSecretLoginMigrationTest + 6 Database dependents",
+   "exit": 1,
+   "result": "109 tests, 1 failure (my wrong assertion: NOT NULL publication_kind fires before ck_observed_revision_origin) -> fixed"
+  },
+  {
+   "cmd": "run3: GuidedPublicationMigrationTest",
+   "exit": 0,
+   "result": "11/11"
+  },
+  {
+   "cmd": "run4: GuidedSessionIT, Bridge, Planning, FaultIT, Reservation",
+   "exit": 1,
+   "result": "145 tests, 5 failures = 4 baseline Planning + 1 FaultIT flake"
+  },
+  {
+   "cmd": "run5: GuidedServiceTransportFaultIT",
+   "exit": 0,
+   "result": "21/21"
+  },
+  {
+   "cmd": "spotlessApply ide-hook x18; spotlessCheck; checkstyleTest",
+   "exit": "0/1/0",
+   "result": "see staticChecks"
+  },
+  {
+   "cmd": "final: 24 classes",
+   "exit": 1,
+   "result": "328 tests, 4 failures (baseline Planning only)"
+  },
+  {
+   "cmd": "gradle-locked.sh rdsParityLint --rerun-tasks",
+   "exit": 0,
+   "result": "18 clean"
+  },
+  {
+   "cmd": "docker rm -f dara-obs012a-89061-1791863485",
+   "exit": 0,
+   "result": "scratch container removed; no other container touched"
+  }
+ ],
+ "notRun": [
+  "full backend ./gradlew check and full backend test suite (root-owned gate; AC-7)",
+  "dev database recreation — DESTRUCTIVE, owed to root/user: after identifying the disposable dev DB and retaining wanted data: ': \"${CHECKS_DEV_DB_NAME:?}\"; dropdb --if-exists -- \"$CHECKS_DEV_DB_NAME\"; createdb -- \"$CHECKS_DEV_DB_NAME\"' then application start lets Flyway install V1–V18. Never apply this reset over a V34 Flyway history and never use flyway repair to mask checksums. Runbook row: OBS-010.",
+  "external D-B confirmation (nothing deployed from an internal remote): UNCONFIRMED, owner user/Platform-SRE; not asked by this agent",
+  "StudioScheduleApiIT/SharedSchedulingIT R1 deferral work and the 5 R2 re-seats (exec-fixtures/@dev lanes)",
+  "GuidedPublicationReplayIT and other non-pinned Studio classes",
+  "runner tiers, frontend, contract tool",
+  "CodeRabbit (WSL wrapper unavailable on darwin) — no review claimed",
+  "SYNAPSE diagnostics and checklist-runner skill texts attached to the spawn were not executed (outside Lane M scope)"
+ ],
+ "openItems": [
+  "GuidedPlanningIntegrationTest 4 baseline failures (BUDGET_EXCEEDED) block a green AC-7; owner root/@dev",
+  "GuidedServiceTransportFaultIT crash-cut flake (1 of 3 runs)",
+  "R2 re-seat must use revision_id NULL — the re-baselined schema has no ordinary (non-GUIDED_RUN) revision",
+  "OBS-014's future V19 and any OBS-013 DDL re-pin the literal '18' targets/assertions (GuidedSessionIT fresh count, InferenceMigrationLatestIT head, LegacyDataMigrationIT, GuidedSecretLoginMigrationTest max version)",
+  "Spotless violations in other lanes' files (listed above)"
+ ]
+}

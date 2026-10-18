@@ -1,0 +1,209 @@
+{
+  "artifact": "Dara source hold checkpoint10 \u2014 replay executable capability projection only",
+  "createdUtc": "2026-10-15T09:55:29.922878+00:00",
+  "sourceHold": true,
+  "priorData09": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/source-hold-checkpoint-09.json",
+    "sha256": "bd6cf746a4aafddd0bda31a256ee384426fdd296e0e08d464ac2fb2745ba657a"
+  },
+  "file": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+    "beforeSha256": "ede60569a84cd7ef5f9e007dd9cbf2948e822d2bd47aad382c6217425828e9a6",
+    "afterSha256": "417e605d25ca8b68039b9aa4dafc07ec4390994bb58630766e9dd92bd5f7b359",
+    "bytes": 58099
+  },
+  "beforeArchive": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/archive/before-data10-replay-capabilities",
+  "actualFailurePreserved": {
+    "receipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/joined-edit4-attempt01-receipt.json",
+    "sha256": "b8ee324f54c962491c342762e3f2992b43b211bc995926bc8f883c242a0fff5a",
+    "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-attempt01-results.json",
+    "resultsSha256": "921ace54bb814d2a8940640dff5bd4b9d186c08bdbf3a155f74fce8edde0eb47",
+    "actualCounts": {
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "stage": "InitializationError before Spring/native; actual PG15.19 reached schema20. No main edit4 case executed.",
+    "logSha256": "cd795d1fd7322cbb01eb67a6055e342a1df69ed6612af38d597292f02bb43a90",
+    "xmlFiles": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+        "sha256": "eec37fea02d012497928a73fd74b73bf25b23b73e1085167c39c8d77c9526c6c"
+      }
+    ]
+  },
+  "capabilityScopeProof": {
+    "tier": "Static source/definition comparison only, not runtime validation",
+    "guidedScopeStillExact": [
+      "observe",
+      "navigate",
+      "read",
+      "fill",
+      "click",
+      "assert"
+    ],
+    "replayExecutableProjection": [
+      "navigate",
+      "read",
+      "fill",
+      "click",
+      "assert"
+    ],
+    "removedFromReplayOnly": [
+      "observe"
+    ],
+    "allOtherActualGuidedCapabilitiesRetainedInOrder": true,
+    "newIndependentArray": "Projection deep-copies each retained capability, never mutates guided scope array or permission/hash.",
+    "productionReference": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayPins.java",
+      "sha256": "da4dcec91b65cc4d44e0212c06632b6c90c7199b5297c93fcaaac0aa022212fa",
+      "method": "ObservedReplayPins.requirements(session), exact observe-only exclusion"
+    },
+    "frozenDefinition": {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-profile.schema.json",
+      "sha256": "adf91ed11e9d878ef31d4ee87902e76e27e8ec53b14cf61e79acb8717102fbe4",
+      "definition": "ReplayRequirements.capabilities.items.enum",
+      "executableEnum": [
+        "navigate",
+        "click",
+        "fill",
+        "press",
+        "check",
+        "uncheck",
+        "hover",
+        "selectOption",
+        "read",
+        "assert"
+      ]
+    },
+    "shapeValidation": "Existing GuidedContracts validates v3/replay-profile#/definitions/ReplayRequirements before Base.capture. Unknown executable fields/capabilities are refused rather than silently dropped."
+  },
+  "protectedSources": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "sha256": "3f8d75c258a1a0e827524a54ee1c822ac0374eebcdef148a21b4f21a7be5d2d0"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+      "sha256": "80357798b080ab6f8cb1ba38c7828915fa37663e203b0280997c7937ebc432d0"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java",
+      "sha256": "e1e4acd9410a1764b186cc4f9e54be0bfc62bddfcff6246d812e73ddda00b7aa"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+      "sha256": "cecad9faf49c0353c37a1b74ecade3f43127fbc554dcaaa675341373905bf45e"
+    }
+  ],
+  "all25OriginalMethodsAndAssertionsUnchanged": true,
+  "migrationManifest": [
+    {
+      "path": "backend/src/main/resources/db/migration/V10__uppercase_status_standardization.sql",
+      "sha256": "714ea331197e4b30000b5f5706262172ee1b17ba0f7b13f6c7c33cb44abdba26"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V11__check_acknowledge_assign.sql",
+      "sha256": "13a95eb5154cc4f3bc037bbfcd1c498faf5b0ecd62473857fab0a2a181179732"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V12__tests_revisions.sql",
+      "sha256": "274c26c4d41fbd991e157ec6372d08ca5c53ebe0a9e2d7a7252838228057d0d7"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V13__executions_ledger.sql",
+      "sha256": "f258e01be9963e58b47d6dfef7171e4cd36043e82e4c0f2ea78ec439f47abeb7"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V14__guided_sessions.sql",
+      "sha256": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V15__publication.sql",
+      "sha256": "ef092dfff93a24c4a05dc9afee6ba4a3b9a054f6cf39ca4059c186ff10777b40"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V16__scheduling.sql",
+      "sha256": "6d7f4888aabf4a7206bfff9bd242ee15037121e74ed2c3fa32156a4ed862ab72"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V17__secret_use_audit.sql",
+      "sha256": "a5b6a89525f3b53769678361c204ba3a78564f9f108aeb0979c184a702bc3ba7"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V18__drop_plaintext_secrets.sql",
+      "sha256": "febfd5eb1624240e58d87bd92bdb2d4b82c762a7cf6fd94de8077eb6f2fc7c9f"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V19__guided_governance.sql",
+      "sha256": "628b47efbb656aef8a3260f03e7dc77d988555a306652b4d433b8796e3424855"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V1__init.sql",
+      "sha256": "2e010e6e1e6f01706acb0f644ad37a3ba0340363979a994de34a4b33ba750e29"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V20__guided_session_recording.sql",
+      "sha256": "e26da3077ca90fc0f3c6d7f4fc7156d416c39b66482330acb24d62d61514acc2"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V2__schedule_next_execution.sql",
+      "sha256": "7a36462fcceb86d2ccb533c0743c20bcfedadb819f9674c0d1e8eb847830ca7f"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V3__check_templates_seed.sql",
+      "sha256": "8c356f1081df490cbc213f31330883f8be477de722fc737d588f52e2ef8b48ee"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V4__secrets_encrypted_value.sql",
+      "sha256": "91662e9f2c8f07e24d85d15d5ce7e5508d4f20ddfc78fdfd1dbfa083f30b24a7"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V5__story_3_schema_additions.sql",
+      "sha256": "b930941c1b7ba06b8e34b67021425cffedd3264b225607ff3f170ba4545f0477"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V6__report_next_delivery.sql",
+      "sha256": "d4669fed42d82824f278364845540ee4318ee9ab243bc0780a68c5092695d913"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V7__partition_remaining_tables_and_defaults.sql",
+      "sha256": "ee6f50fe699f70af713a7c739acb4eb358a562837e8c43ffb130a6604fb62174"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V8__failed_dispatches_and_report_failures.sql",
+      "sha256": "78ad49e718124c78f6e7a3a5a64b203f175c73642f2754a01647166c89ec89be"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V9__schedules_check_type_column.sql",
+      "sha256": "9c91a6b11df2f9b012a638cbf1e0ae921d4dd09c0710a22db9d3c5a18c412f0d"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql",
+      "sha256": "b012ddddb44b599c4f8699be39281dd6f407b2cb93b41386a79eb22c06c4d179"
+    }
+  ],
+  "allV1ThroughV21ByteExact": true,
+  "preservedFixtureSemantics": [
+    "Both PreparedCases seeds still construct valid ordinary schema20 baseline before original insufficient immutable metadata/stale current cache variation.",
+    "No source/config/declaration/counter/bootstrap/preparation/action/private input/receipt identity construction changed outside legitimate replay capability projection.",
+    "Original guided observe permission remains; this is not removal of product observation capability.",
+    "Normal20to21 upgrade remains; no protected historical/head row backfill, target change, compatibility fallback, bypass, disabled guard or schema/oracle edit."
+  ],
+  "bothLegacyHttpConditionsStillUnproven": [
+    "IncrementalPublicationIT.explicitFirstStepFullLearnDoesNotRequireOldIdentity / historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
+    "IncrementalIdentityIT.explicitFullLearnWorksWithStaleDraftIdentityCache / actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache"
+  ],
+  "futureRequiredValidation": [
+    "Fresh root-authorized actual joined edit4 retry through preboot20 baseline, Spring21, model/browser prefix/suffix/publication/replay.",
+    "Actual both Legacy HTTP cases with all refusal/full-learning/cache/counter/immutable history oracles.",
+    "Full86/24/55current/check/coverage/crossReplica/native/joined and independent015closure then008 remain mandatory."
+  ],
+  "executionAfterSourceChange": {
+    "compileTestsGradleDBNativeBrowserBuildDistGenerationFormatInvocations": 0
+  },
+  "qaVerdict": null,
+  "next": "Atomic HOLD; root serializes all writers and separately authorizes joined retry. No source-only PASS or completion claim."
+}

@@ -1,0 +1,657 @@
+{
+  "story": "STUDIO-OBS-015",
+  "window": "w2-window01",
+  "ruling": "aria-bridge-ruling01",
+  "agent": "Aria (@architect)",
+  "date": "2026-10-16",
+  "nonCredit": true,
+  "sourceChanged": false,
+  "gradleRun": false,
+  "committed": false,
+  "subject": {
+    "class": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+    "sha256": "d48d4f0d9e61ba0c000b7013683858244873980d5fd9a1bb40c66e297d4ffc3f",
+    "run": "w2-w01-bridge-exp02",
+    "total": 38,
+    "passed": 9,
+    "failed": 29
+  },
+  "counts": {
+    "MIGRATE": 16,
+    "RETIRE": 12,
+    "RETIRE_OBSOLETE": 1,
+    "total": 29,
+    "after": {
+      "GuidedBridgeIntegrationTest": 9,
+      "GuidedBridgePlannedIT": 16,
+      "retiredByName": 13,
+      "reconciles": "9+16+13=38"
+    }
+  },
+  "dexWiring": {
+    "installTranslation": {
+      "verdict": "CORRECT",
+      "evidence": [
+        "GuidedSessionConfiguration.java:59 unconditional installTranslation [V]",
+        "stores are stateless (jdbc,contracts) wrappers [V]",
+        "required by contextDeliveryId->translationTransaction GuidedSessionService:2361-2362,:174 [V]"
+      ]
+    },
+    "createSessionTranslationInit": {
+      "verdict": "ACCEPTED_AS_FIXTURE_NOT_PRODUCTION_EQUIVALENT",
+      "differences": [
+        "separate transaction vs in-start (GuidedSessionService:691-696)",
+        "hand 5-field manifest vs classifier output (no schemaPins/configurationReferences)",
+        "2-arg initialize: no progress.translationAcquisition marker"
+      ],
+      "fakesPlannerAuthority": false,
+      "requiredEdit": {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+        "line": 2759,
+        "old": "// Single path: every production start initializes translation state (GuidedProductionSessionAccess).",
+        "new": "// Fixture stand-in for GuidedProductionSessionAccess.initialize: same rows, hand manifest, no acquisition marker; no case here plans or admits."
+      }
+    },
+    "noNarrowFixAnalysis": "AGREED"
+  },
+  "rules": {
+    "R-1": "never insert plan/obligation/manifest/translation-state rows or call store.acceptPlan/reserveObligation/attachAdmission for a driven session",
+    "R-2": "controlled provider over real HTTP is the untrusted-model boundary (lawful)",
+    "R-3": "process-stop AssertionError from a Mockito spy on GuidedDispatchService.prepareAndAdmit after the committed reservation (precedent GuidedPlanningIntegrationTest:1884-1895)",
+    "R-4": "hand-crafted proposals only as negative probes",
+    "R-5": "test state writes only narrow or restore the exact prior state",
+    "R-6": "RETIRE needs a same-behaviour covering test at a real tier; composition stated per case"
+  },
+  "cases": [
+    {
+      "n": 1,
+      "name": "uncapturedPasswordAndInputEchoesStayPrivateAcrossActualDocumentNavigation",
+      "line": 2633,
+      "behavior": "uncaptured password/input echoes never reach observation, command responses or worker log",
+      "acAnchors": [
+        "OBS-004 AC-3",
+        "OBS-004 AC-6"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "RETIRE",
+      "coveredBy": [
+        "studio-runner/test/fixtures-tier/guided-targets.test.ts:153 (password+text, removal+navigation, real Chromium) [V]",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java:884-885 @AfterEach worker-log canary (kept in both classes) [V]",
+        "compensating commands-response canary scan appended to migrated #27"
+      ]
+    },
+    {
+      "n": 2,
+      "name": "realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue",
+      "line": 1722,
+      "behavior": "paused real worker renews past first lease and keeps captured value for later fill",
+      "acAnchors": [
+        "OBS-004 AC-3",
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_DATAFLOW",
+      "caseEdits": [
+        "forced pause round trip kept (R-5)",
+        ":1774 \"assignment\" -> \"translation-assignment\""
+      ]
+    },
+    {
+      "n": 3,
+      "name": "actualApplicationReplacementAfterPrepareNeverActsOnReplacement",
+      "line": 1375,
+      "behavior": "DOM replacement after prepare -> FAILED TARGET_CHANGED, no fill",
+      "acAnchors": [
+        "OBS-004 AC-2",
+        "OBS-004 AC-7"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_NAV_LIT"
+    },
+    {
+      "n": 4,
+      "name": "cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation",
+      "line": 2277,
+      "behavior": "cancel during held refresh callback: no generation commit, no mutation",
+      "acAnchors": [
+        "OBS-004 AC-5",
+        "OBS-004 AC-7"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_NAV"
+    },
+    {
+      "n": 5,
+      "name": "currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased",
+      "line": 1166,
+      "behavior": "source edit lock wins over consume; config revision refuses; allocations cumulative and unerasable",
+      "acAnchors": [
+        "OBS-004 AC-4",
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_DATAFLOW",
+      "caseEdits": [
+        "source lock/revision on ui_tests row (FOR UPDATE; source_revision+1 then =1; configuration_revision+1 then =1)",
+        "allocation calls kept with planner need shape; assert bindingId equals bindingId(id,\"order\")"
+      ]
+    },
+    {
+      "n": 6,
+      "name": "freshObservationConnectsTwoAuthoredStepsWithoutReplayingProducer",
+      "line": 2040,
+      "behavior": "cross-step producer->consumer after refresh, producer not replayed, refresh idempotent",
+      "acAnchors": [
+        "OBS-004 AC-2",
+        "OBS-004 AC-4"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "RETIRE",
+      "coveredBy": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java:748-904 configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules[0,1] [V]",
+        "migrated #13/#18 (refresh idempotency)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java:409-418 (stale observe STALE_GENERATION) [V]"
+      ],
+      "reason": "FixtureAccess.complete two-step verifier (:638-667) is non-production (obsolete element)"
+    },
+    {
+      "n": 7,
+      "name": "belowFoldClickUsesNativeRevealAndOneReceipt",
+      "line": 2009,
+      "behavior": "native scroll-reveal click; duplicate advance one receipt",
+      "acAnchors": [
+        "OBS-004 AC-2",
+        "OBS-004 AC-7"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "RETIRE",
+      "coveredBy": [
+        "studio-runner/test/fixtures-tier/guided-targets.test.ts:140,143,146 [V]",
+        "migrated #27 :915-917 duplicate/new-key advance dispatchCount 1"
+      ]
+    },
+    {
+      "n": 8,
+      "name": "producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay",
+      "line": 1413,
+      "behavior": "producer insert failure rolls back outcome; UNKNOWN_OUTCOME; no replay",
+      "acAnchors": [
+        "OBS-004 AC-3",
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_DATAFLOW"
+    },
+    {
+      "n": 9,
+      "name": "httpSuccessWithoutCommittedCompletionCallbackIsUnknownAndNeverRetried",
+      "line": 1665,
+      "behavior": "HTTP 200 without committed callback -> UNKNOWN_OUTCOME, never retried",
+      "acAnchors": [
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "RETIRE",
+      "coveredBy": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery[COMPLETE_200_NO_CALLBACK] :616-620, :651-663 [V]"
+      ]
+    },
+    {
+      "n": 10,
+      "name": "concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission",
+      "line": 1048,
+      "behavior": "concurrent prepareAndAdmit same key -> one immutable admission",
+      "acAnchors": [
+        "OBS-004 AC-1",
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_NAV",
+      "caseEdits": [
+        "association = reserve(id, navigation(id)); race prepareAndAdmit(controller,id,1,association.admissionKey,association.proposal) x2"
+      ]
+    },
+    {
+      "n": 11,
+      "name": "supportedV2AnswerResumesTrustedQuestionFixtureThenRefreshPreservesHistoricalSelection",
+      "line": 2364,
+      "behavior": "forged progress question answered/resumed/refreshed; historical proposal refused",
+      "acAnchors": [
+        "pre-OBS-005 stand-in (case comment :2414)"
+      ],
+      "stillRequired": false,
+      "reachableOnSinglePath": false,
+      "ruling": "RETIRE-OBSOLETE",
+      "coveredBy": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java:748-904 (genuine AMBIGUOUS_TARGET answer -> new coordinator -> fill chosen field) [V]",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java:468-489, :610-644 [V]"
+      ],
+      "reason": "Single path: questions only via planner (translationQuestion -> questions.create); with translation installed clarify -> questions.accept requires studio_guided_clarification_contexts row else MISSING_SOURCE (GuidedSessionService:832-834; GuidedClarificationContextStore:200-223) [V]; ADR-SC-005 D-A"
+    },
+    {
+      "n": 12,
+      "name": "configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules",
+      "line": 1582,
+      "behavior": "governed region read grant without testIds/per-control rules; mounted config has no rules",
+      "acAnchors": [
+        "OBS-014 AC-1 qaOracle 3",
+        "OBS-004 AC-3"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "RETIRE",
+      "coveredBy": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java:748-904 (same name, joined planner) [V]",
+        "studio-runner/test/guided/runtime.test.ts:320 [V]",
+        "studio-runner/test/guided/transport.test.ts:101 [V]",
+        "mounted-file assertions :1641-1643 appended to migrated #27"
+      ]
+    },
+    {
+      "n": 13,
+      "name": "committedObservationRecoversLostHttpResponseWithoutAnotherCollection",
+      "line": 2132,
+      "behavior": "lost refresh RPC response recovered from committed result, no second collection",
+      "acAnchors": [
+        "OBS-004 AC-2",
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_NAV"
+    },
+    {
+      "n": 14,
+      "name": "lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction",
+      "line": 1680,
+      "behavior": "per-admission lost ack on older action does not downgrade newer DISPATCHING",
+      "acAnchors": [
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_NAV_LIT"
+    },
+    {
+      "n": 15,
+      "name": "failedRenewalStopsWithoutUsingUnacknowledgedLeaseOrReclaiming",
+      "line": 1855,
+      "behavior": "renewal failure stops; no reclaim/revive",
+      "acAnchors": [
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "RETIRE",
+      "coveredBy": [
+        "studio-runner/test/guided/ownership.test.ts:58 [V]",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java:279-300 [V]",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java:1924-1927 retained invalidAcknowledgedClaim... (joined lifecycle -> FAILED) [V]"
+      ]
+    },
+    {
+      "n": 16,
+      "name": "lateRenewalResponseAfterStopCannotReviveContextOrOwnership",
+      "line": 1873,
+      "behavior": "held renewal response released after stop cannot revive",
+      "acAnchors": [
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_NAV"
+    },
+    {
+      "n": 17,
+      "name": "preventedNativeToggleNeverCommitsSuccessOrRetries",
+      "line": 2674,
+      "behavior": "prevented checkbox -> UNKNOWN_OUTCOME, one attempt, no retry",
+      "acAnchors": [
+        "OBS-004 AC-5",
+        "OBS-004 AC-7"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "RETIRE",
+      "coveredBy": [
+        "studio-runner/test/fixtures-tier/guided-targets.test.ts:175 [V]",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java:651-660 [V]",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java:325-330 [V]"
+      ]
+    },
+    {
+      "n": 18,
+      "name": "concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration",
+      "line": 2259,
+      "behavior": "racing same-key refreshes -> one collection/generation",
+      "acAnchors": [
+        "OBS-004 AC-2",
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_NAV"
+    },
+    {
+      "n": 19,
+      "name": "nativeRadioUncheckIsRefusedBeforeAnyBrowserAttempt",
+      "line": 2709,
+      "behavior": "radio uncheck refused at prepare before input",
+      "acAnchors": [
+        "OBS-004 AC-2"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "RETIRE",
+      "coveredBy": [
+        "studio-runner/test/fixtures-tier/guided-targets.test.ts:180 [V]",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java:146-152 prepare refusal precedes storePreparation/admit [V]"
+      ]
+    },
+    {
+      "n": 20,
+      "name": "concurrentSameAndNewKeysHaveOneRealDispatch",
+      "line": 1063,
+      "behavior": "three racing dispatches -> one real navigation",
+      "acAnchors": [
+        "OBS-004 AC-5",
+        "OBS-004 AC-7",
+        "OBS-015 AC-4(3)"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_NAV"
+    },
+    {
+      "n": 21,
+      "name": "restartedWorkerCannotReclaimExistingAssignmentOrReplayBrowserEffects",
+      "line": 1937,
+      "behavior": "restarted worker cannot reclaim or replay",
+      "acAnchors": [
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "RETIRE",
+      "coveredBy": [
+        "studio-runner/test/guided/ownership.test.ts:68 [V]",
+        "studio-runner/test/guided/runtime.test.ts:115,122 [V titles]",
+        "real-process kill mid-run placed in OBS-009 (ADR-SC-005:92) [V]"
+      ]
+    },
+    {
+      "n": 22,
+      "name": "actualDeferredCommitFailureSendsNothingAndRollsBackConsumption",
+      "line": 1115,
+      "behavior": "deferred commit failure sends nothing, rolls back",
+      "acAnchors": [
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_NAV"
+    },
+    {
+      "n": 23,
+      "name": "authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly",
+      "line": 1554,
+      "behavior": "configuration value transported and filled exactly, never persisted in actions",
+      "acAnchors": [
+        "OBS-004 AC-3",
+        "OBS-004 AC-4"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_CONFIG",
+      "caseEdits": [
+        "JsonNode input = input(id, 1) replaces .get(2)",
+        "@BeforeEach configuredInput authors <var config> and variables [{name config, kind plain, value CONFIG_INPUT}]"
+      ]
+    },
+    {
+      "n": 24,
+      "name": "renewalWhileBrowserDispatchIsBusyDoesNotResetOrRepeatTheAction",
+      "line": 1835,
+      "behavior": "renewal during busy effect: no reset/repeat",
+      "acAnchors": [
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "RETIRE",
+      "coveredBy": [
+        "studio-runner/test/guided/ownership.test.ts:53 [V]",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java:925-937 [V]"
+      ]
+    },
+    {
+      "n": 25,
+      "name": "refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation",
+      "line": 2188,
+      "behavior": "refresh refusals: foreign context, pause, budget, active admission, cancel",
+      "acAnchors": [
+        "OBS-004 AC-2",
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_NAV_LIT",
+      "caseEdits": [
+        "forced pause/counter round trips kept (R-5)",
+        "add before active-admission check: assert progress.generation == request.expectedGeneration"
+      ]
+    },
+    {
+      "n": 26,
+      "name": "cancellationBeforeConsumptionRevokesAndMissingStopAckNeverConfirmsTeardown",
+      "line": 1471,
+      "behavior": "cancel before consume -> REVOKED/CANCELLED; missing stop ACK never confirms",
+      "acAnchors": [
+        "OBS-004 AC-5",
+        "H8 ruling 2026-10-16"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "RETIRE",
+      "coveredBy": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java:341-351 [V]",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java:3833-3885 teardownWithoutAckNeverConfirmsAndStopsAfterWindow [V]",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java:3559-3562 actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation [V]"
+      ]
+    },
+    {
+      "n": 27,
+      "name": "realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch",
+      "line": 894,
+      "behavior": "initialBlank/null origin, first navigation, idempotent advance, premature consumer refused, exact real read, callback duplicate/changed/value-leak, value-free producer, consumer edge, cancel CONFIRMED",
+      "acAnchors": [
+        "OBS-004 AC-1",
+        "OBS-004 AC-2",
+        "OBS-004 AC-3",
+        "OBS-004 AC-4",
+        "OBS-004 AC-7"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_DATAFLOW",
+      "caseEdits": [
+        "navigateAssociation = reserve(id, navigate); first = admit(id, navigateAssociation)",
+        ":1033-1038 operationHash over navigateAssociation.proposal",
+        "premature probe :923-941 unchanged (negative probe; GuidedBindingStore:299 422 MISSING_SOURCE precedes obligation gate) [V]",
+        "append mounted-file assertions from :1639-1643",
+        "append studio_guided_commands.response doesNotContain CAPTURE.strip()"
+      ]
+    },
+    {
+      "n": 28,
+      "name": "cancellationBeforeAndAfterConsumePreventsFutureWorkAndPreservesUncertainty",
+      "line": 1146,
+      "behavior": "consumed-unsent then cancel -> UNKNOWN_OUTCOME; later dispatch CANCELLED",
+      "acAnchors": [
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "RETIRE",
+      "coveredBy": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java:341-359 [V]",
+        "migrated #27 cancel->CONFIRMED; retained stopRetryAfterCloseCompletesConfirmsWithSameKey [V]"
+      ]
+    },
+    {
+      "n": 29,
+      "name": "nestedRollbackAndLostWinnerNeverManufactureSendAuthority",
+      "line": 1083,
+      "behavior": "ambient-tx refusal; WonConsumption-only send; restart without permit sends nothing; lost ack UNKNOWN_OUTCOME",
+      "acAnchors": [
+        "OBS-004 AC-5"
+      ],
+      "stillRequired": true,
+      "reachableOnSinglePath": true,
+      "ruling": "MIGRATE",
+      "migratePlan": "PLAN_NAV"
+    }
+  ],
+  "migrateSpec": {
+    "newFile": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+    "package": "com.citi.put.checks.studio.guided.session",
+    "steps": [
+      "N1 copy bridge IT bytes d48d4f0d, rename, TEMP prefix guided-bridge-planned-, evidence /tmp/studio-obs015-bridge-planned-worker.json",
+      "N2 keep only the 16 MIGRATE methods; delete FixtureAccess, bridge_fixture_* DDL/seed, manual translation init, materializeSession",
+      "N3 add spring.jpa.hibernate.ddl-auto=none",
+      "N4 Application: planning IT annotations (:301-311) with @Import{GuidedInternalController,GuidedInternalSecurity,GuidedWireBodyAdvice}; beans per ruling.md 4.2 N4; no coordinator/reaper",
+      "N5 PROVIDER + PLAN/NEXT/Selection + providerResponse (ruling.md 4.2 N5)",
+      "N6 @BeforeEach: configuredInput flag; users/csi_systems/ui_tests insert (planning IT :617-644) with STEP per test and TEXT()",
+      "N7 createSession/command/plannedSession/plan templates/stepId/bindingId/input/inputId",
+      "N8 reserve(id, handProposal) + admit(id, association) (ruling.md 4.2 N8)",
+      "N9 mechanical substitutions"
+    ],
+    "plans": {
+      "PLAN_NAV": "refs[R0]; nav(0,page,ref0)",
+      "PLAN_NAV_LIT": "refs[R0,R1]; nav(0,page,0), fill(1,destination,ref1)",
+      "PLAN_DATAFLOW": "refs[R0]; nav(0,page,0), read(1,source,need order), fill(2,destination,need order); needs[order: STEP fill.value]",
+      "PLAN_CONFIG": "refs[R0]+classified configuration ref appended by provider; nav(0,page,0), fill(1,destination,ref1)"
+    },
+    "substitutions": [
+      "prepareSession(); dispatch.pushContext(controller,id,1); -> plannedSession(PLAN_X())",
+      "positive admit(id,P) -> admit(id, reserve(id,P)); negative probes unchanged",
+      "allocateBinding(...) used only for bindingId -> bindingId(id,\"order\")",
+      "authoredInputs.inputs.get(k).inputId -> inputId(id, referenceIndex)",
+      "\"step-1\" -> stepId(id) in proposal() and needs/consumers",
+      "navigation(id): .get(0) -> inputId(id,0)"
+    ],
+    "staticGuards": [
+      "0 matches in GuidedBridgePlannedIT for studio_guided_(obligation_admissions|translation_plans|translation_state|source_manifests)|acceptPlan(|reserveObligation(|attachAdmission(|GuidedTranslationStore(...).initialize",
+      "every 202 admissions post in GuidedBridgePlannedIT keyed by association.admissionKey",
+      "no 202 admissions post in GuidedBridgeIntegrationTest",
+      "PROVIDER_KINDS subset {SOURCE_PLAN, NEXT_ACTION} asserted in @AfterEach"
+    ],
+    "acceptance": "./gradlew test --tests '*GuidedBridgeIntegrationTest' --tests '*GuidedBridgePlannedIT' -> 9/9 and 16/16 PASS, 0 skipped; record studio-runner/dist digest",
+    "inferredPoints": [
+      "classifier accepts /start URL and fixture-input spans (fallback: planning-IT sentence shape)",
+      "post-bootstrap state PROPOSING (fallback: assert !FAILED, record state)"
+    ]
+  },
+  "disclosure": {
+    "retired": [
+      "uncapturedPasswordAndInputEchoesStayPrivateAcrossActualDocumentNavigation",
+      "freshObservationConnectsTwoAuthoredStepsWithoutReplayingProducer",
+      "belowFoldClickUsesNativeRevealAndOneReceipt",
+      "httpSuccessWithoutCommittedCompletionCallbackIsUnknownAndNeverRetried",
+      "supportedV2AnswerResumesTrustedQuestionFixtureThenRefreshPreservesHistoricalSelection",
+      "configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules",
+      "failedRenewalStopsWithoutUsingUnacknowledgedLeaseOrReclaiming",
+      "preventedNativeToggleNeverCommitsSuccessOrRetries",
+      "nativeRadioUncheckIsRefusedBeforeAnyBrowserAttempt",
+      "restartedWorkerCannotReclaimExistingAssignmentOrReplayBrowserEffects",
+      "renewalWhileBrowserDispatchIsBusyDoesNotResetOrRepeatTheAction",
+      "cancellationBeforeConsumptionRevokesAndMissingStopAckNeverConfirmsTeardown",
+      "cancellationBeforeAndAfterConsumePreventsFutureWorkAndPreservesUncertainty"
+    ],
+    "moved": [
+      "realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue",
+      "actualApplicationReplacementAfterPrepareNeverActsOnReplacement",
+      "cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation",
+      "currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased",
+      "producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay",
+      "concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission",
+      "committedObservationRecoversLostHttpResponseWithoutAnotherCollection",
+      "lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction",
+      "lateRenewalResponseAfterStopCannotReviveContextOrOwnership",
+      "concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration",
+      "concurrentSameAndNewKeysHaveOneRealDispatch",
+      "actualDeferredCommitFailureSendsNothingAndRollsBackConsumption",
+      "authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly",
+      "refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation",
+      "realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch",
+      "nestedRollbackAndLostWinnerNeverManufactureSendAuthority"
+    ],
+    "retainedUnchanged": [
+      "callbackAcceptsValidUnicodeSessionLargerThan64KiB",
+      "actualServiceTransportRejectsWrongAudienceSubjectFenceAndTuple",
+      "assignmentRenewsBeforeContextAndCancellationReleasesItsOnlyCapacitySlot",
+      "legacyClarificationAnswerCannotResumeObservedV2Session",
+      "invalidAcknowledgedClaimNeverLaunchesAndUnassignedOrWrongWorkersCannotClaim",
+      "actualAuthenticatedRawBytesRejectAmbiguityAndUnknownSignedClaims",
+      "actualRunnerResponseBoundaryRejectsMalformedUtf8DuplicatesTrailingAndTimestampProfiles",
+      "stopRetryAfterCloseCompletesConfirmsWithSameKey",
+      "maximumFenceCanBeRenewedBySameOwnerWithoutAnotherAcquisition"
+    ],
+    "records": [
+      "@po: OBS-015 Dev Agent Record count reconciliation vs OBS-012A port proof 37=37 (+H8 = 38)",
+      "@po: OBS-014 AC-4 named exclusions add GuidedBridgePlannedIT (no click/press/check planned)",
+      "OBS-009 AC-12 i: add GuidedBridgePlannedIT to dist-digest list"
+    ],
+    "residual": "no joined DB canary scan for a password echo after real navigation; substitute = runner guided-targets.test.ts:153 + #27 commands-response scan"
+  },
+  "findings": [
+    {
+      "id": "F-1",
+      "severity": {
+        "security": "LOW",
+        "evidence": "MEDIUM"
+      },
+      "summary": "GuidedSessionService translation-absent branches (:353,:799,:832,:1375,:1923) unreachable in production but used by GuidedSessionIT(43) and TransportFaultIT(28) to admit hand-crafted proposals; recommend unconditional gate after those classes adopt the helper; placement by @po/coordinator"
+    },
+    {
+      "id": "F-2",
+      "summary": "retained bridge cases hand-materialize via FixtureAccess; sanctioned by OBS-004 Dev Notes (story:60); none admits; acceptable"
+    },
+    {
+      "id": "F-3",
+      "summary": "new class duplicates ~800 lines of bridge static fixture; OBS-011 code-health"
+    }
+  ],
+  "alternativesRejected": [
+    "seed rows (R-1)",
+    "optional gate (production change, second path)",
+    "store-level acceptPlan/reserveObligation (skips validator/planner/guard)",
+    "host in GuidedPlanningIntegrationTest (@AfterEach CONFIRMED wait, GuardDecisionTally, static Environment stopped in @AfterAll)",
+    "migrate all 29 (duplication, ~35 s sleep-poll flake)"
+  ]
+}

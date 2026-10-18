@@ -1,0 +1,17 @@
+{
+  "classification": "IMPLEMENTATION_DIAGNOSTICS_NOT_APPLICATION_TESTS",
+  "initialInstallerFailure": {
+    "exit": 1,
+    "message": "TypeError: Cannot set properties of null (setting 'jwtAlgorithm') at install.cjs apply()",
+    "cause": "Draft rebase installer shared positive payload references across mutants; changed apply() to clone before mutation. First failed invocation stopped before canonical fixture writes.",
+    "retainedSource": "install.cjs",
+    "finalStatus": "Resolved before selected gates; valid-parent and exact prior-code fidelity independently audited."
+  },
+  "earlierLogs": [
+    "oracle-attempt01.log",
+    "current-vectors-attempt01.log",
+    "current-vectors-attempt02.log",
+    "choice-attempt01.log"
+  ],
+  "noHistoricalFailureRewritten": true
+}

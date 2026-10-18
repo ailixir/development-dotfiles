@@ -1,0 +1,184 @@
+{
+  "scope": "READ_ONLY_C14_TEXT_LEARNING_MARKER_AND_EXISTING_AUTHORITATIVE_ORACLE",
+  "sourceBinding": {
+    "gate": "resume-c14-published-grounded-control-current",
+    "sourcesZipSha256": "4f12a374e36e73ace4db8790d0487e981510fcd60ae1c556844eea0b449af9be",
+    "sources": {
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "f072bd9c5016665b2acb6721cdf0eabbffc4ff3d80bf9615e889e53c7baf0fed",
+      "studio-runner/src/guided/runtime.ts": "75fc33b1cd1cbc59bcb746811caff879d7217b22de8b08b374eec173dacf271c",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java": "1e56ce648ff0c4720c13a0be5adacf82f6452caeb8819ebb47f51dc0a904ee8d",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "0a26aeec0574fae1256ff15057fdb3c268de7a2f26b8977296b5e31c25d42ddd",
+      "backend/src/main/resources/db/migration/V31__studio_guided_bridge.sql": "909e8d68b1012aa2b88ae2567e93a811c233fa61c8ade6b822d4c3fb585bf85c"
+    },
+    "resultSha256": "87353275135abf12f0a023ca2e1b3c340d56e8d7f52bd06a88103960ff38af14"
+  },
+  "actualFirstBoundary": {
+    "class": "GuidedPublicationReplayIT",
+    "line": 5725,
+    "method": "p14Run",
+    "awaitFinalizingCompleted": true,
+    "supportingP3InvocationsReadContains": false,
+    "publication": "UNREACHED",
+    "passwordMutation": "UNREACHED",
+    "secondaryCacheFailure": "NOT_POSITIVE_LEARNING_CAUSE"
+  },
+  "retainedActualLearning": {
+    "bootstrap": "READY",
+    "materializationPresent": true,
+    "modelKinds": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 5,
+      "VERIFY_STEP": 0
+    },
+    "physicalVaultReads": 0,
+    "providerFailures": 0,
+    "authenticatedActionRecords": [
+      {
+        "operation": "navigate",
+        "ordinal": 0,
+        "state": "SUCCEEDED",
+        "outcome": "OK",
+        "dispatchCount": 1
+      },
+      {
+        "operation": "read",
+        "ordinal": 0,
+        "state": "SUCCEEDED",
+        "outcome": "OK",
+        "dispatchCount": 1
+      },
+      {
+        "operation": "fill",
+        "ordinal": 0,
+        "state": "SUCCEEDED",
+        "outcome": "OK",
+        "dispatchCount": 1
+      },
+      {
+        "operation": "click",
+        "ordinal": 1,
+        "state": "SUCCEEDED",
+        "outcome": "OK",
+        "dispatchCount": 1
+      },
+      {
+        "operation": "assert",
+        "ordinal": 2,
+        "state": "SUCCEEDED",
+        "outcome": "OK",
+        "dispatchCount": 1
+      }
+    ],
+    "postCleanupState": "CANCELLED",
+    "postCleanupNotPositiveStageVerdict": true,
+    "producerConsumerRowsPrivatelyRetainedInReport": false,
+    "actualPageReceiptPrivatelyRetainedInReport": false
+  },
+  "markerProduction": {
+    "receiverClass": "GuidedPublicationReplayIT",
+    "receiverLines": [
+      585,
+      598
+    ],
+    "meaning": "P3_INVOCATIONS is appended only when original /invocation POST is received and the case mode condition permits it.",
+    "ordinaryExportedSessionWrappersLines": [
+      11811,
+      11814,
+      11862,
+      11865
+    ],
+    "meaningOfWrappers": "The generated observed child/ordinary parent wrappers append a post-success callback around exported createObservationSession().invoke. They observe the invoked wrapper, not every possible production native operation path.",
+    "guidedLaunchLines": [
+      9275,
+      9299
+    ],
+    "guidedScript": "Original guidedMain imports launch-count/native-close/revocation support but no /invocation wrapper. Missing marker during guided learn is therefore an inapplicable supporting channel, not proof of missing successful native read.",
+    "receiverModeCondition": "p14Recipe active is necessary for appending a received POST, not a producer installation or a guarantee that guided sends one."
+  },
+  "existingDefiningEvidence": [
+    {
+      "class": "GuidedRuntime",
+      "lines": [
+        241,
+        261
+      ],
+      "fact": "Actual successful native read captures a nonempty permitted runtime value, retains it behind binding identity and creates closed availability with producer admission/context/worker/fence; actual outcome carries that availability. No captured value is persisted by the availability record."
+    },
+    {
+      "class": "GuidedSessionService",
+      "lines": [
+        2030,
+        2053
+      ],
+      "fact": "Authenticated outcome path verifies materialization/ledger identity, completed assert boolean semantics, and invokes successfulRead only for actual SUCCEEDED read; otherwise availability must be null."
+    },
+    {
+      "class": "GuidedBindingStore",
+      "lines": [
+        193,
+        225
+      ],
+      "fact": "successfulRead validates closed availability and exact binding/actual read admission/context/worker/fence, persists immutable producer recipe/coordinate/origin and availability."
+    },
+    {
+      "class": "GuidedBindingStore",
+      "lines": [
+        108,
+        189
+      ],
+      "fact": "Actual consumer uses scoped producer availability and records argument-slot edge with actual producer/consumer admission, binding, origin and coordinate; existing FKs authenticate this lineage."
+    },
+    {
+      "class": "GuidedPublicationReplayIT",
+      "lines": [
+        5864,
+        5868
+      ],
+      "fact": "Intrinsic Submit handler posts actual Destination value to existing /receipt and reveals original Confirmation; these are the authored consumer/effect, not an extra grounding click."
+    }
+  ],
+  "smallestFutureOracleProposal": {
+    "status": "ROOT_REVIEW_REQUIRED; NOT_AUTHORED",
+    "ownedPath": "existing GuidedPublicationReplayIT.java p14 positive-learning helper/branch only",
+    "replacement": "Replace the three P3_INVOCATIONS contains(read/assert/fill/click) prerequisites with one bounded helper over existing same-session authenticated action/proposal/producer/availability/consumer-edge rows and existing passive RECEIPTS list. No new observer/hook/API/framework or additional action.",
+    "sharedPreconditions": [
+      "Preserve awaitFinalizing as a liveness milestone only, never sufficient positive proof.",
+      "Require exact original accepted source plan/obligation/need and materialization/source/config/owner identity, no schema or profile alteration.",
+      "Every expected real action is present once at its authored coordinate, SUCCEEDED/OK/dispatchCount1; no unexpected admission, failed/started-only/unknown action substitutes."
+    ],
+    "controlValueChecks": [
+      "Require actual TWO/ordinal0 read proposal targets genuine Field textbox with controlValue/nonsecretApproved/controlType text/business-read recipe, correct observed document/origin/generation and actual admission.",
+      "Join exact same-session allocation.needId=c14-field to actual read operation.bindingId and immutable producer row keyed by that read admission. Verify producer.coordinate=TWO/0, recipe/origin and closed availability contextId/workerId/ownerFence match real materialization/read ledger.",
+      "Require actual THREE/0 fill proposal targets real Destination textbox/textarea and value.kind=binding with same bindingId. Join its actual consumer admission to exactly one fill.value edge pointing to actual read producer admission and same binding, coordinate and origin.",
+      "Require actual THREE/1 Submit click and THREE/2 Confirmation visible assertion completed successfully with assertionPassed=true.",
+      "Snapshot existing RECEIPTS.size before original p3Start; after actual learning require exactly one new intrinsic Submit receipt and privately compare it to the genuine TEXT fixture field value used for that run. Do not serialize that value or fabricate a receipt; no extra request or timer/telemetry is needed."
+    ],
+    "hasValueChecks": [
+      "Require exact actual TWO/0 Field hasValue assertion SUCCEEDED/OK/count1/assertionPassed=true with expected.authoredLiteral pointing to actual plain EXPECTED declared at TWO/assert.expected.",
+      "Require same actual source/config/materialization/input identity and actual text node/recipe, plus original THREE heading assertion completed; no producer availability is invented for a non-read action."
+    ],
+    "afterPositiveProof": "Only then original p3Publish may run, followed by unchanged password mutation and exact TARGET_DRIFT guards; one existing hasValue publication still reused for exact TEXT ASSERTION_FAILED after owner close."
+  },
+  "tradeoff": "Authenticated action/availability/producer/consumer lineage and the intrinsic fixture receipt directly prove successful TEXT read and correct use. A missing wrapper-only marker is classified supporting/nonapplicable rather than promoted into required telemetry. No positive effect assertion is removed or replaced by generic FINALIZING. The plan does not pretend the currently unqueried producer/edge/receipt assertions have already passed.",
+  "preservation": [
+    "Five logical C14 requests/four selectors",
+    "Actual source/need/binding semantics, operator and intrinsic Submit/Confirmation order",
+    "All production schema/grounding/ownership/fence/recipe/origin guards",
+    "Exact published TARGET_DRIFT and reused text ASSERTION_FAILED expected first guards",
+    "Same active C5 capture and original actual owner/resource drains",
+    "No unrelated action/policy expansion/fabricated nodes/receipts or new mandatory supporting E2E"
+  ],
+  "actions": {
+    "sourceEdits": 0,
+    "runtime": 0,
+    "sql": 0,
+    "newObservers": 0,
+    "newCases": 0,
+    "models": 0,
+    "reports": 1
+  },
+  "privacy": "No raw model/config/availability bodies, values, credentials, identity strings or runtime paths exported.",
+  "whole19AcPass": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE"
+}

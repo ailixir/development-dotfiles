@@ -1,0 +1,26 @@
+{
+  "startedAt": "2026-10-12T01:23:26.604299+00:00",
+  "commands": [
+    [
+      "npm",
+      "run",
+      "test:coverage",
+      "--",
+      "--run",
+      "--maxWorkers=2",
+      "--minWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile.json=../docs/qa/evidence/STUDIO-OBS-007/resume-frontend-original-coverage-bounded-workers/tests.json"
+    ],
+    [
+      "npm",
+      "run",
+      "build"
+    ]
+  ],
+  "maxWorkers": 2,
+  "minWorkers": 1,
+  "originalTimeoutsConfigCoverage": true,
+  "noConcurrentHeavyJobs": true
+}

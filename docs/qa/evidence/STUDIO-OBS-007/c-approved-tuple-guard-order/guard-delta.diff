@@ -1,0 +1,17 @@
+--- V34-before.sql
++++ V34-after.sql
+@@ -427,7 +427,13 @@
+   IF OLD.observed_admission_receipt IS NOT NULL AND receipt IS DISTINCT FROM OLD.observed_admission_receipt
+   THEN RAISE EXCEPTION 'observed execution identity immutable'; END IF;
+   IF b IS DISTINCT FROM OLD.observed_revision_binding THEN
+-   SELECT * INTO STRICT ledger FROM studio_dispatch_ledger WHERE execution_id=NEW.id FOR UPDATE;
++   IF OLD.observed_revision_binding IS NULL OR b IS NULL THEN
++    RAISE EXCEPTION 'observed execution identity immutable without owned retry authority';
++   END IF;
++   SELECT * INTO ledger FROM studio_dispatch_ledger WHERE execution_id=NEW.id FOR UPDATE;
++   IF NOT FOUND THEN
++    RAISE EXCEPTION 'observed execution identity immutable without owned retry authority';
++   END IF;
+    IF (OLD.observed_revision_binding IS NOT NULL AND b IS NOT NULL
+     AND OLD.observed_admission_receipt IS NULL AND receipt IS NULL
+     AND ledger.execution_accepted_at=NEW.started_at AND ledger.state='CLAIMED'

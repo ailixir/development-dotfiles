@@ -1,0 +1,186 @@
+{
+  "story": "STUDIO-OBS-014",
+  "lane": "B14",
+  "date": "2026-10-14",
+  "applyOrder": [
+    "01-sec001-submit-capable-controls.patch",
+    "02-sec002-unobserved-target-fails-closed.patch",
+    "03-test001-session-level-deny-and-clarify-first.patch",
+    "04-test002-mid-session-daily-budget.patch",
+    "05-test004-policy-routes-401.patch",
+    "06-ac1-v2-runner-context-hash.patch",
+    "07-ac1-bootstrap-definite-refusal.patch",
+    "08-ac1-bootstrap-timeout-negative-control.patch",
+    "09-ac4-guard-decision-tally.patch",
+    "10-s4-owned-buffer-boundary-reflection.patch",
+    "11-s4-plan-builder-checkstyle.patch",
+    "12-s4-canonical-test-checkstyle.patch",
+    "13-test001-keep-active-application-policy.patch",
+    "14-ar-sec001-fm-fail-closed-side-effects.patch"
+  ],
+  "patches": [
+    {
+      "file": "01-sec001-submit-capable-controls.patch",
+      "sha256": "b890ce59eb15f7fb130083912e0037726e9cae3bce141ed443733ac9662f6b62",
+      "finding": "SEC-001 (HIGH, product)",
+      "change": "GuidedActionGuard.sideEffecting: in a form, any <button>, any role=button control (incl. <input type=submit|image|reset|button>, exported as element input/role button) and any <input> outside the native non-submitting roles is submit-capable; role=link is navigation anywhere. Unit cases for submit/image/reset inputs under DENY and CLARIFY_FIRST, no-type button, role=button custom control, role=link custom control, and non-submitting inputs.",
+      "tests": [
+        "GuidedActionGuardTest"
+      ]
+    },
+    {
+      "file": "02-sec002-unobserved-target-fails-closed.patch",
+      "sha256": "4bf4ab5f98835ee048735529acf8096349e5c6d5b26a0cc228fb0008a7218e8f",
+      "finding": "SEC-002 (medium)",
+      "change": "Guard overload with targetNodeId: an element target of a click/press/check kind absent from the observation is refused UNGROUNDED_TARGET (ruled AC-4 code, ar-2-3-obs014 AC-4 row: target not traceable). GuidedTranslationService passes the proposal's textual nodeId.",
+      "tests": [
+        "GuidedActionGuardTest"
+      ]
+    },
+    {
+      "file": "03-test001-session-level-deny-and-clarify-first.patch",
+      "sha256": "7e86b1a20e0d573b9949488ef782ce0a0fa7a4dd1c3c1cc49c704f497fce3dce",
+      "finding": "TEST-001 (HIGH)",
+      "change": "GuidedPlanningIntegrationTest: fixture variant placing Submit inside a labelled form as <button> or <input type=submit>; governed DENY (both controls): 422 POLICY_DENIED, session FAILED POLICY_DENIED, zero submits, zero Submit-step admissions, GUIDED_ACTION_REFUSED/SIDE_EFFECT_DENIED audited; governed CLARIFY_FIRST: one SIDE_EFFECT_CONFIRMATION/CONFIRM_ACTION question with one AUTHORED choice before any dispatch, confirm continues to one real submit, FINALIZING, no second question. invoke() split into invokeRaw.",
+      "tests": [
+        "GuidedPlanningIntegrationTest"
+      ]
+    },
+    {
+      "file": "04-test002-mid-session-daily-budget.patch",
+      "sha256": "fce26a82a2bfd08ece0a2b6bae70495217a4ad8826213f46231b3edd48af5455",
+      "finding": "TEST-002 (medium, AC-8 oracle 3)",
+      "change": "GuidedCsiBudgetIT: day exhausted after start; the production reservation hook refuses; session FAILED BUDGET_EXCEEDED; neither the CSI day nor the session counters charged.",
+      "tests": [
+        "GuidedCsiBudgetIT"
+      ]
+    },
+    {
+      "file": "05-test004-policy-routes-401.patch",
+      "sha256": "2063177a4051731a4547608350b4f08ba8c4257aebe209c0c9617c9709ff1145",
+      "finding": "TEST-004 (low)",
+      "change": "ObservationPolicyRouteIT: all five policy routes refuse an unauthenticated request 401 with the platform envelope and write nothing (JDK client).",
+      "tests": [
+        "ObservationPolicyRouteIT"
+      ]
+    },
+    {
+      "file": "06-ac1-v2-runner-context-hash.patch",
+      "sha256": "a1e4f1668b6ed3183db9cbdc3251af9ffec842aea69523d101797bfc1bc0266e",
+      "finding": "po-qa014-rulings b item 1 (AC-1 h1)",
+      "change": "GuidedSessionIT: the materialized runner context of a session started after v2's approval carries v2 and hash(v2) != the v1 session's hash; the v1 session keeps v1.",
+      "tests": [
+        "GuidedSessionIT"
+      ]
+    },
+    {
+      "file": "07-ac1-bootstrap-definite-refusal.patch",
+      "sha256": "289a5c132f8286a475af7fb0eaa0d5650a39dc6b7cd6bcd90cea937686974dbd",
+      "finding": "po-qa014-rulings b item 2 (AC-1 h2; ar-2-r14-stops ruling 2 tests[1])",
+      "change": "Product: GuidedTranslationService.plan() returns the terminal session, with no runner/model/assignment request, when the session ended FAILED after a REFUSED bootstrap delivery (narrowly scoped; other terminal continuations unchanged). IT with a stub HTTPS runner through the real GuidedRunnerClient: one context request, FAILED RUNTIME_INCOMPATIBLE, 409 retryable:false, second continuation zero requests and returns FAILED.",
+      "tests": [
+        "GuidedPlanningIntegrationTest"
+      ]
+    },
+    {
+      "file": "08-ac1-bootstrap-timeout-negative-control.patch",
+      "sha256": "ad6d42f303366ad4c6209e2bba1473f9d2d8375ebb89088c88cd887ee9171def",
+      "finding": "po-qa014-rulings b item 3 (AC-1 h3; tests[3])",
+      "change": "GuidedPlanningIntegrationTest: a never-answering context (real 15 s client deadline, about 45 s) retries three times as UNKNOWN_OUTCOME, then exhausts with RUNTIME_INCOMPATIBLE; no delivery marked REFUSED.",
+      "tests": [
+        "GuidedPlanningIntegrationTest"
+      ]
+    },
+    {
+      "file": "09-ac4-guard-decision-tally.patch",
+      "sha256": "1670e4050a0a5d82593854f98a651b99b8a49289ad2473005c6924bb4563d9c8",
+      "finding": "po-qa014-rulings a1/a2 (AC-4 corpus)",
+      "change": "New test support GuardDecisionTally: per test, passed decisions from studio_guided_obligation_admissions (click/press/check), confirmFirst from progress.sideEffectConfirmation, refusals from GUIDED_ACTION_REFUSED audit events; asserts any refusal is in the class's planted list; writes build/guard-tally/<class>.json. Hooked into GuidedPlanningIntegrationTest (planted: governedDeny..., hostileCurrentPage...) and GuidedPublicationReplayIT (planted: none). Unit corpus completed to 6 entries (adds the P14 CONTROL_VALUE step) with named exclusions: GuidedSessionIT and GuidedBridgeIntegrationTest never construct GuidedTranslationService (guard unreachable), ReplayIT's diagnostic operation-kind enum, the 4 hostile semanticCases.",
+      "tests": [
+        "GuidedActionGuardTest",
+        "GuidedPlanningIntegrationTest",
+        "GuidedPublicationReplayIT"
+      ]
+    },
+    {
+      "file": "10-s4-owned-buffer-boundary-reflection.patch",
+      "sha256": "a3c1172b0cd97858157de3b16a2b111664ba0c2a189830076de9a68a5b2b27d3",
+      "finding": "S4 break: GuidedOwnedBufferBoundaryTest x3 NoSuchMethodException",
+      "change": "Construct BoundedResponse(boolean,int) with LIMIT and REFUSAL_LIMIT read reflectively from the real static fields; new case for the REFUSAL_LIMIT bound (no growth at exactly 4096, one byte beyond cancels unconsumed).",
+      "tests": [
+        "GuidedOwnedBufferBoundaryTest"
+      ]
+    },
+    {
+      "file": "11-s4-plan-builder-checkstyle.patch",
+      "sha256": "a15adf878ca1ff9584e57e1df2f1b0d5a9b7af5664128c432c66c5dbc8be6165",
+      "finding": "S4 break: checkstyleTest GuidedPlanBuilderTest switch indentation",
+      "change": "Switch expression extracted to private static shortEscape(int); behaviour identical; no suppression.",
+      "tests": [
+        "GuidedPlanBuilderTest"
+      ]
+    },
+    {
+      "file": "12-s4-canonical-test-checkstyle.patch",
+      "sha256": "698cc0b46170aa9126ea3dd487ac457422945ca6a11475a4ebfd7a34fec4c9df",
+      "finding": "S4 checkstyleTest (same switch-in-expression conflict found in b14's GuidedContractsCanonicalTest)",
+      "change": "Switch extracted to private static normative(int); behaviour identical; no suppression.",
+      "tests": [
+        "GuidedContractsCanonicalTest"
+      ]
+    },
+    {
+      "file": "13-test001-keep-active-application-policy.patch",
+      "sha256": "04dc324c8f008145f846ebfbf4689b6b75c8e49a6a6f689a6561e37988f0ca71",
+      "finding": "TEST-001 fix found under the lock",
+      "change": "governedStance() now re-approves with the active version's application policy (the per-test business-read grant the worker start seeds) and changes only the stance; patch 03 had replaced it with a structural policy, so the read step failed UNKNOWN_OUTCOME.",
+      "tests": [
+        "GuidedPlanningIntegrationTest"
+      ]
+    },
+    {
+      "file": "14-ar-sec001-fm-fail-closed-side-effects.patch",
+      "sha256": "874c2d3a01b0e8659c7c915d81cefc41e78953f196bfd21237ce81b9a8754c9c",
+      "finding": "SEC-001 residual, architect ruling AR-SEC001-FM option B",
+      "change": "Guard: click side-effecting unless the target is one of three proven non-activating triples (text-entry input, textarea, select); press side-effecting on Enter (any target) or in a form; call site passes operation.key. Unit oracles U1-U7 (incl. closed-world enumeration with a frozen pre-ruling predicate for monotonicity); U2 flip and U4 rework recorded; IT I-1 (unlabelled <button>/<input type=submit> and form= under DENY) and I-2 (unlabelled under CLARIFY_FIRST). guided-data-flow.md defines side-effecting.",
+      "tests": [
+        "GuidedActionGuardTest",
+        "GuidedPlanningIntegrationTest"
+      ]
+    }
+  ],
+  "base": "working tree at the S4 frozen identity; every patch was checked to apply in order with git apply and to reproduce the final tree byte for byte",
+  "preApplyChecks": "google-java-format 1.22.0 (spotless-equivalent flags) dry-run clean for every stage; javac 21 compile of every stage clean. Pre-checks only; the Gradle verification is recorded in the b14 ledger.",
+  "stopEscalation": {
+    "rule": "ar-2-3-obs014 S-6 (binding)",
+    "item": "SEC-001 residual: a submit-capable control inside a form the collector does not export (no aria-label/labelledby on the <form>, so formId is null), and telling submit from non-submit types, need an observation signal the sanitized node does not carry. Not inferred here; escalated to @architect (options: export formId for every form, or treat button-role clicks with unknown form context as side-effecting)."
+  },
+  "plannedVerification": [
+    "AGENT_NAME=b14 .aiox/sdc/STUDIO-OBSERVED-ORCH/gradle-locked.sh spotlessCheck checkstyleTest compileTestJava",
+    "AGENT_NAME=b14 .aiox/sdc/STUDIO-OBSERVED-ORCH/gradle-locked.sh test --tests '*GuidedActionGuardTest' --tests '*GuidedPlanningIntegrationTest' --tests '*GuidedCsiBudgetIT' --tests '*ObservationPolicyRouteIT' --tests '*GuidedSessionIT' --tests '*GuidedOwnedBufferBoundaryTest' --tests '*GuidedPlanBuilderTest' --tests '*GuidedTranslation*'",
+    "AGENT_NAME=b14 .aiox/sdc/STUDIO-OBSERVED-ORCH/gradle-locked.sh test --tests '*GuidedPublicationReplayIT'"
+  ],
+  "handoff": "B13's TEST-001 patch touches GuidedPublicationReplayIT and applies after this set (root).",
+  "applied": "2026-10-14 by B14 with git apply, in applyOrder, on root's instruction (lock handed over); not committed",
+  "verification": {
+    "spotlessCheck checkstyleTest compileTestJava": "spotless and compile pass; checkstyleTest has 6 remaining violations, all in D-lane GuidedGovernanceMigrationIT.java:1093-1098 (same switch pattern), not edited by B14, routed to root",
+    "targetedSet": "308 run: 305 passed, 3 failed (the TEST-001 ITs, fixed by patch 13)",
+    "afterPatch13": {
+      "governed DENY/CLARIFY_FIRST ITs": "3/3",
+      "GuidedPlanningIntegrationTest full class": "45/45",
+      "GuidedPublicationReplayIT full class": "39/39"
+    },
+    "guardTally": {
+      "GuidedPlanningIntegrationTest": "45 tests recorded; click passed 4, confirmFirst 1, refused SIDE_EFFECT_DENIED 2 (both the planted DENY test); no unplanted refusal",
+      "GuidedPublicationReplayIT": "39 tests recorded; click passed 54, refused 0",
+      "excluded": "GuidedSessionIT and GuidedBridgeIntegrationTest never construct GuidedTranslationService (guard unreachable)"
+    }
+  },
+  "verificationAfterRuling": {
+    "static": "spotlessCheck checkstyleMain checkstyleTest compileTestJava green",
+    "GuidedActionGuardTest": "21/21",
+    "GuidedPlanningIntegrationTest": "49/49",
+    "tally": "Planning: 49 recorded, click passed 5, confirmFirst 2 (both planted CLARIFY_FIRST tests), refused SIDE_EFFECT_DENIED 5 (all planted DENY tests); no unplanted refusal",
+    "GuidedPublicationReplayIT": "40 run, 31 failed: Order 9 secret-login teardown (awaitS2Completion: S2 producer never closed within 10 s), then the class's fail-stop cascade. Reproduced on rerun and standalone. A control run of Order 9 with the pre-ruling guard restored fails identically, so not caused by AR-SEC001-FM; the change since the last green run (39/39) is B13's TEST-001 ReplayIT patch (adds assertGuidedLearnRunRecorded in Order 9 and changes the launchPersistentContext instrumentation). Routed to root/B13. Partial ReplayIT tally from the passing tests: click passed 71, refused 0, confirmFirst 0."
+  }
+}

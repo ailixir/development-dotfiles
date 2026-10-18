@@ -1,0 +1,661 @@
+{
+ "lane": "L5b",
+ "story": "STUDIO-OBS-008",
+ "wave": "W3",
+ "executor": "Uma (@ux-design-expert), YOLO",
+ "date": "2026-10-17",
+ "status": "GREEN",
+ "environment": {
+  "node": "v23.10.0",
+  "pnpm": "10.33.0",
+  "vitest": "1.6.1"
+ },
+ "batonCheckAtStart": {
+  "files": 45,
+  "mismatches": 0,
+  "log": "logs/before-sha256-batons.json"
+ },
+ "files": [
+  {
+   "path": "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+   "before": "87f141b5edd473efb814334d30aff880195966c64b6b0cd6e44e548f93ad13a0",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "095d4d7c2f1fb8f66fa338a818c339d9887f445f06b8b60aa256d33f93781dd0",
+   "baton": "L2a->L5b",
+   "batonHash": "87f141b5edd473efb814334d30aff880195966c64b6b0cd6e44e548f93ad13a0",
+   "beforeMatchesBaton": true,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/pages/ChecksStudioPage/pageAuthoringUx.test.tsx",
+   "before": "1911d4b7b30fd9bc98d0e26c58a04f9f3094971ce3474e0fcaa3ab4d63aa10c7",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "16b51603c2e39bf5773d1d2a3dec48a68df3b3ad7beaf54b9edbd4b413933bbe",
+   "baton": "L2a->L5b",
+   "batonHash": "1911d4b7b30fd9bc98d0e26c58a04f9f3094971ce3474e0fcaa3ab4d63aa10c7",
+   "beforeMatchesBaton": true,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+   "before": "410f59c550b6fdf90d31cc8b237e985bdd4a124f92145701cc0f9621eb0968d6",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "7b5bcac2df9c5a66f5e01b49fdb9b6b715d57543bfec5d0e979d55f5fe823cbc",
+   "baton": "L2a->L5b",
+   "batonHash": "410f59c550b6fdf90d31cc8b237e985bdd4a124f92145701cc0f9621eb0968d6",
+   "beforeMatchesBaton": true,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx",
+   "before": "fa4f9328dace36a1c327896238f71f4ef0cdb6fc7552e8c37638bc687c6c74d6",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "6f82ef342a30d6e5c6a38bd3fa30186bf9ab5cfdb13b8e53f7374a352f86f9ea",
+   "baton": "L2a->L5b",
+   "batonHash": "fa4f9328dace36a1c327896238f71f4ef0cdb6fc7552e8c37638bc687c6c74d6",
+   "beforeMatchesBaton": true,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/pages/ChecksStudioPage/pageGuidedRun.test.tsx",
+   "before": null,
+   "beforeSource": null,
+   "new": true,
+   "after": "e91510a8a6a7a98fa264dbd7210032a0ada7f65e069e09a06602a60a67f7789b",
+   "baton": null,
+   "batonHash": null,
+   "beforeMatchesBaton": null,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/pages/ChecksStudioPage/pageReplayAndReferences.test.tsx",
+   "before": null,
+   "beforeSource": null,
+   "new": true,
+   "after": "aa6c00c7d23dbf1538e74157e7d6003e067e5ddb13118de6162ea9112d013803",
+   "baton": null,
+   "batonHash": null,
+   "beforeMatchesBaton": null,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/components/studio/run/useRunGate.ts",
+   "before": "bdde9513f7fe49d569ddf11f19ffc97aefb428495cd439d5bbcc33a84990d72e",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "697d034b1764fc8cbd17258a2940dbcd04519d85d5ce81ac971d7f90e08b01d9",
+   "baton": "L2a->L5b",
+   "batonHash": "bdde9513f7fe49d569ddf11f19ffc97aefb428495cd439d5bbcc33a84990d72e",
+   "beforeMatchesBaton": true,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/components/studio/run/RunControl.tsx",
+   "before": "5d97d9431e22ea0acc790a34f51a46a4c051240e8ca8a6fb755ecae260002e67",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "2b2e91731d82b3f19db399e09ec4807cf63fc07c155d2c811caa7ef126a12cd8",
+   "baton": null,
+   "batonHash": null,
+   "beforeMatchesBaton": null,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/components/studio/run/runEnablement.ts",
+   "before": "1f3d8eb643fe6c47f9a46da7d37710e130634fc844b1fc1c7974edb339526f94",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "6c67598587aa10f0b63e42a38d7113ee2c590fef4ad0d4c4592ede67e6b10476",
+   "baton": null,
+   "batonHash": null,
+   "beforeMatchesBaton": null,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/components/studio/run/executionErrorNarratives.ts",
+   "before": "81d92287185d382f44a3c2ab9ac01d09bca84dd592d9550a13181634ac35fa8f",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "60fa7fbcf81003b665076029249bc174b491e6e41db1e52cda76be1faa2414c2",
+   "baton": null,
+   "batonHash": null,
+   "beforeMatchesBaton": null,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/components/studio/run/ExecutionProgressView.tsx",
+   "before": "1490093812eb6f64496d7abae2e1353e1ac5781527cf034d30c8427257e315db",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "7b671d6bb168165a7f267b4d7308e4e9a01de9ac8c110568e160a2cf8c39f950",
+   "baton": null,
+   "batonHash": null,
+   "beforeMatchesBaton": null,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/components/studio/run/executeRefusals.ts",
+   "before": "6e93b7a259af9d56bfccd7ea6d54a5acc69dd6bd99eb59c829f98f0f815a6a77",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "63cca1269edde3d20b6a60961afa8d778926b0db62bf1dadb7d801d5f64f5563",
+   "baton": null,
+   "batonHash": null,
+   "beforeMatchesBaton": null,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/components/studio/run/index.ts",
+   "before": "6d27660304bf533c0d46bdcdb9771d56c4fb635b34a2d2841e40af2ebffbd56e",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "9b0721c1f759fc253c8ebc9afd979d5506d3a03500924d5c0a1048b880cb4030",
+   "baton": null,
+   "batonHash": null,
+   "beforeMatchesBaton": null,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/components/studio/run/runGate.test.tsx",
+   "before": "ae0a484c359e9dc3edb4e770b3b5c9fbe8c5dd0ab8ba2a39551b06329ba34dee",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "e123386ef708156e35fdd74d16eb8cac15017b4b2959c03c265aa0c032246b09",
+   "baton": null,
+   "batonHash": null,
+   "beforeMatchesBaton": null,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/components/studio/run/replayFailure.test.tsx",
+   "before": null,
+   "beforeSource": null,
+   "new": true,
+   "after": "1121dd2f1006410964ac8171ff3daf91bdd209317302584303e04b8b4e3399d0",
+   "baton": null,
+   "batonHash": null,
+   "beforeMatchesBaton": null,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/utils/config/studioCapabilities.ts",
+   "before": "0200c089e7081767f365c5387c3c24208ba74460eeab96a21811158220cbdaf0",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "69779679a733f7ecfb8b4cb8796742bbfecf36caf8327cf87c1492d1f3a0d727",
+   "baton": "L4->L5b",
+   "batonHash": "0200c089e7081767f365c5387c3c24208ba74460eeab96a21811158220cbdaf0",
+   "beforeMatchesBaton": true,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/components/studio/templates/index.ts",
+   "before": "2adf0980da8cfc563aa8888e35ba73770db038d7f2673a5de2e59814e48b4172",
+   "beforeSource": "measured at lane start",
+   "new": false,
+   "after": "bfeffc4332a118904e7f49892bf53a42e50183d372e4b712da05cd79f30e6ae0",
+   "baton": null,
+   "batonHash": null,
+   "beforeMatchesBaton": null,
+   "inWriteSet": true
+  },
+  {
+   "path": "frontend/src/components/studio/templates/quickStartTemplates.ts",
+   "before": "a1699b957ae98a442c8fadac9a82174eff92584f76e1f7410009cd71ad44507f",
+   "beforeSource": "reconstructed (re-inserted the deleted lines); equals L4 receipt after-hash",
+   "new": false,
+   "after": "ed4b3a91cb895e3be9bfabf981718d17d2de63b0f14257162df2854c8ad0fc8b",
+   "baton": null,
+   "batonHash": null,
+   "beforeMatchesBaton": null,
+   "inWriteSet": false
+  },
+  {
+   "path": "frontend/src/components/studio/templates/quickStartTemplates.test.ts",
+   "before": "295d78cb6f12a7491e2904cf4a7639fdcce5a612ee23d4a23f06e632c2967be0",
+   "beforeSource": "reconstructed (re-inserted the deleted lines); equals L4 receipt after-hash",
+   "new": false,
+   "after": "54c67742c4b622b6e47263232d4f29b1a03138ee7aedb14f963faf6e358af431",
+   "baton": null,
+   "batonHash": null,
+   "beforeMatchesBaton": null,
+   "inWriteSet": false
+  }
+ ],
+ "unchangedOnPurpose": [
+  "frontend/src/components/studio/guided/** (all L5a files, useGuidedSession.ts and test; guided/index.ts not re-exporting useGuidedSession)",
+  "frontend/src/components/studio/evidence/**",
+  "frontend/src/components/studio/runs/**",
+  "frontend/src/components/studio/tests/testListPresentation.ts",
+  "frontend/src/components/studio/scheduling/schedulePresentation.ts",
+  "frontend/src/pages/ChecksStudioPage/{pageEvidence.test.tsx,pageStepTimeout.test.tsx,studioRunTransport.node.test.tsx,saveErrorMessage.*,index.ts}"
+ ],
+ "frozenInterfacesEdited": false,
+ "verify": [
+  {
+   "id": "baseline",
+   "cmd": "cd frontend && pnpm exec vitest run src/pages/ChecksStudioPage src/components/studio/run src/components/studio/runs src/components/studio/guided src/components/studio/evidence src/components/studio/templates --minWorkers=1 --maxWorkers=3",
+   "when": "before any edit",
+   "exit": 0,
+   "files": 24,
+   "passed": 512,
+   "failed": 0,
+   "log": "logs/baseline-vitest-l5b.log"
+  },
+  {
+   "id": "V1",
+   "cmd": "cd frontend && pnpm exec vitest run src/pages/ChecksStudioPage src/components/studio/run src/components/studio/runs src/components/studio/guided src/components/studio/evidence src/components/studio/templates --minWorkers=1 --maxWorkers=3",
+   "exit": 0,
+   "files": 27,
+   "passed": 565,
+   "failed": 0,
+   "skipped": 0,
+   "log": "logs/v1-vitest-l5b.log"
+  },
+  {
+   "id": "V2a",
+   "cmd": "cd frontend && pnpm run type-check",
+   "exit": 0,
+   "log": "logs/v2-type-check.log"
+  },
+  {
+   "id": "V2b",
+   "cmd": "cd frontend && pnpm run lint",
+   "exit": 0,
+   "errors": 0,
+   "warnings": 308,
+   "baselineWarnings": 308,
+   "log": "logs/v2-lint.log"
+  },
+  {
+   "id": "V3",
+   "cmd": "grep -rn \"STUDIO_CAPABILITIES\" frontend/src",
+   "hits": 0,
+   "log": "logs/v3-grep-studio-capabilities.log"
+  },
+  {
+   "id": "V4",
+   "cmd": "grep -rn \"PRODUCTION_ALPHA_TEMPLATES\" frontend/src",
+   "hits": 0,
+   "log": "logs/v4-grep-production-alpha-templates.log"
+  },
+  {
+   "id": "V5",
+   "cmd": "cd frontend && pnpm exec vitest run --minWorkers=1 --maxWorkers=4 --exclude 'src/test/a11y/**'",
+   "log": "logs/v5-vitest-full.log",
+   "exit": 0,
+   "files": 67,
+   "passed": 1253,
+   "failed": 0,
+   "durationS": 202,
+   "a11yAuditCollected": false,
+   "axeResultsMtimeUnchanged": "2026-10-17T16:16:58"
+  }
+ ],
+ "notRun": [
+  "src/test/a11y/studioWcagAudit.test.tsx (L6 is the single writer of axe-results.json)",
+  "Playwright",
+  "pnpm run build",
+  "any backend/Gradle process",
+  "SYNAPSE diagnostics and checklist-runner skills appended to the prompt (not part of the mission verify rows)"
+ ],
+ "ac9TraceTable": "receipt.md section 4",
+ "deviations": [
+  {
+   "id": "DV-1",
+   "needsRatification": true,
+   "what": "Deleted PRODUCTION_ALPHA_TEMPLATES (export + doc comment) from templates/quickStartTemplates.ts and its one interim test + import from quickStartTemplates.test.ts; both files are outside the refold write set. Required by brief items 1-2 (delete the stand-in; grep = 0). Pure deletion: reconstructed before-hashes equal L4 after-hashes."
+  }
+ ],
+ "autoDecisions": [
+  "single Run gate path for run/learnFrom (tokens from the page)",
+  "Stop during a guided session cancels it once (userRequested)",
+  "capability-context mismatch shows L5a revisionNotReady copy, no start",
+  "capability read failure: 403 -> execute-forbidden narrative, else \"The run could not be started\"",
+  "replay cause without an editor worded with stepIndex+1, no actions",
+  "generic replay per-step seek label unchanged (\"Show in recording\"); replay cause carries \"Seek to step N\"",
+  "chip test id readiness-chip -> guided-readiness-chip",
+  "data-run-mode attribute on the Run button",
+  "guided vs replay view derived, not effect-set",
+  "optional ChecksStudioPage prop guidedOptions for test poll timing",
+  "guided/index.ts does not re-export useGuidedSession"
+ ],
+ "openQuestions": [
+  "Q1 DV-1 ratification",
+  "Q2 KL-015-Q4 authoredLiteralHint trigger not wired (copy unreachable on the page)",
+  "Q3 rename generic replay per-step seek to \"Seek to step N\"?",
+  "Q4 LEARNING with no local session: Run disabled, no sourced reason text",
+  "Q5 a11y regression guard not run; new UI on surfaces 3-7 and a new capabilities GET",
+  "Q6 F-L5a-4 unchanged",
+  "Q7 runtime of new page test files (~130 s and ~80 s at maxWorkers=2)",
+  "Q8 commit-set note F-L5a-2 still applies"
+ ],
+ "dv1Ratified": {
+  "by": "root",
+  "date": "2026-10-17",
+  "source": "L5b-F1 message: the pure deletions in quickStartTemplates.ts and its test are fine, because L4 has exited"
+ },
+ "f1Addendum": {
+  "status": "GREEN",
+  "items": {
+   "KL-015-Q4": {
+    "trigger": {
+     "autoredEcho01Landed": false,
+     "citations": [
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md 0.3.20 \"PO T0 outcomes — 2026-10-17\" row A10 (:774) \"Code is written only after the U13 acknowledgement\"; R6 (:730) U13 request not sent",
+      "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json U13 state \"not requested\""
+     ],
+     "obs009StorySha256": "af5a3c7e4d1508c196b947b8b2632e0d999a53a9d07b7e3093b13b4d36aabc78",
+     "consequence": "items b-d apply"
+    },
+    "copyKey": "authoredLiteralTargetNotFound",
+    "rule": "fallback (landed data cannot tell the case apart): FAILED + (failure.code ?? errorCode) === TARGET_MISMATCH + failing step (explanation step with a FAILED action, else first not-completed) whose current draft text starts with an assertion/selection/typed verb and has more after it",
+    "observation": "TARGET_MISMATCH is not emitted by backend/src/main (grep 0); an ungroundable step ends RUNTIME_INCOMPATIBLE (GuidedTranslationService.java:1713-1733, read not run); see Q9",
+    "tests": [
+     "GR KL-015-Q4 positive",
+     "GR control no literal",
+     "GR control AMBIGUOUS_TARGET",
+     "GR control ASSERTION_FAILED",
+     "authoredLiteralHint.test.ts (18)"
+    ]
+   },
+   "AC-7 seek label": {
+    "before": {
+     "text": "Show in recording",
+     "name": "Jump to step N in the recording",
+     "nameDisabled": "Jump to step N: not attempted",
+     "export": "SEEK_LABEL"
+    },
+    "after": {
+     "text": "Seek to step N",
+     "name": "Seek to step N",
+     "nameDisabled": "Seek to step N: not attempted",
+     "export": "removed; seekControlLabel kept"
+    },
+    "test": "evidence/stepSeek.test.tsx AC-7 label test"
+   },
+   "LEARNING elsewhere": {
+    "key": "learningElsewhere",
+    "text": "Another Run is learning this test, so Run is off until that Run ends.",
+    "basis": "delegated",
+    "source": "ADR-SC-006 \"State and consequence stated in visible text\" + AC-3 conventions",
+    "fact": "ExecutionReadinessService.java LEARNING_QUERY",
+    "testId": "run-learning-elsewhere",
+    "tests": [
+     "runGate (f2)",
+     "GR LEARNING elsewhere"
+    ]
+   }
+  },
+  "verify": [
+   {
+    "id": "F1-V1",
+    "exit": 0,
+    "files": 28,
+    "passed": 593,
+    "failed": 0,
+    "log": "logs/f1-v1-vitest-l5b.log"
+   },
+   {
+    "id": "F1-V2a",
+    "cmd": "pnpm run type-check",
+    "exit": 0,
+    "log": "logs/f1-v2-type-check.log"
+   },
+   {
+    "id": "F1-V2b",
+    "cmd": "pnpm run lint",
+    "exit": 0,
+    "errors": 0,
+    "warnings": 308,
+    "note": "first run 309; seek-label helper made module-private; re-run 308",
+    "log": "logs/f1-v2-lint.log"
+   },
+   {
+    "id": "F1-V3",
+    "hits": 0,
+    "log": "logs/f1-v3-grep-studio-capabilities.log"
+   },
+   {
+    "id": "F1-V4",
+    "hits": 0,
+    "log": "logs/f1-v4-grep-production-alpha-templates.log"
+   },
+   {
+    "id": "F1-V5",
+    "exit": 0,
+    "files": 68,
+    "passed": 1281,
+    "failed": 0,
+    "a11yAuditCollected": false,
+    "axeResultsMtimeUnchanged": "2026-10-17T16:16:58",
+    "log": "logs/f1-v5-vitest-full.log"
+   }
+  ],
+  "files": [
+   {
+    "path": "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+    "before": "095d4d7c2f1fb8f66fa338a818c339d9887f445f06b8b60aa256d33f93781dd0",
+    "new": false,
+    "after": "8f398ef6d019e9e1b7df836db9d86333b4a67d97918e5704efbe4566ec6dca78"
+   },
+   {
+    "path": "frontend/src/pages/ChecksStudioPage/authoredLiteralHint.ts",
+    "before": null,
+    "new": true,
+    "after": "8a0f6f4f357ff7fb96cb91831a8f3d0f02e209ec3992e5cd5f0ee38187db4343"
+   },
+   {
+    "path": "frontend/src/pages/ChecksStudioPage/authoredLiteralHint.test.ts",
+    "before": null,
+    "new": true,
+    "after": "47e95e9eecf446b074461b0210bdaee9b7a4c356f17a0a60606880376534824f"
+   },
+   {
+    "path": "frontend/src/pages/ChecksStudioPage/pageGuidedRun.test.tsx",
+    "before": "e91510a8a6a7a98fa264dbd7210032a0ada7f65e069e09a06602a60a67f7789b",
+    "new": false,
+    "after": "29b46ee4cde01021c50ea81f2d3ac951fbc6cd87ef7f833c931e96cc42b431e5"
+   },
+   {
+    "path": "frontend/src/components/studio/run/ExecutionProgressView.tsx",
+    "before": "7b671d6bb168165a7f267b4d7308e4e9a01de9ac8c110568e160a2cf8c39f950",
+    "new": false,
+    "after": "2c8166953db8f949cde7e0bf0d9ef592b2a8bbc273d12a189e8cbfb10fe92d46"
+   },
+   {
+    "path": "frontend/src/components/studio/run/RunControl.tsx",
+    "before": "2b2e91731d82b3f19db399e09ec4807cf63fc07c155d2c811caa7ef126a12cd8",
+    "new": false,
+    "after": "293505b5a9ef40ae3b5c2463dad961aa85a72628f3bb73b9579e49786e120729"
+   },
+   {
+    "path": "frontend/src/components/studio/run/index.ts",
+    "before": "9b0721c1f759fc253c8ebc9afd979d5506d3a03500924d5c0a1048b880cb4030",
+    "new": false,
+    "after": "867e313297fc15a49d3f02514f6ae80da77765eb5a89777a76bf78a5fc53775d"
+   },
+   {
+    "path": "frontend/src/components/studio/run/runGate.test.tsx",
+    "before": "e123386ef708156e35fdd74d16eb8cac15017b4b2959c03c265aa0c032246b09",
+    "new": false,
+    "after": "fe62b79137b29e6cd244fdc488818caf22c5dfc3e0a45cdcb21ea1866b39dfd1"
+   },
+   {
+    "path": "frontend/src/components/studio/guided/guidedNarratives.ts",
+    "before": "b1b767b3ee8c0396b7ea386f5eb9c9071ed6036f3a5fe874b0535098eaa75ebc",
+    "new": false,
+    "after": "f86e5f785b9d0c55169ae7db5d419e87f673dda2b8e95e23d5677aa653640c4d"
+   },
+   {
+    "path": "frontend/src/components/studio/evidence/stepSeek.test.tsx",
+    "before": "a5e2fb746e8cf796207dd203458cdafb037eae2a174ae401abf71bb249e91ca2",
+    "new": false,
+    "after": "3d54d715ef560b1b15c29946777c6efdc97855dfa1e5882c404323f95cc93e2f"
+   }
+  ],
+  "changedForL6": [
+   {
+    "what": "replay per-step seek (step-seek-{i})",
+    "before": "text \"Show in recording\"; name \"Jump to step N in the recording\" / \"Jump to step N: not attempted\"",
+    "after": "text and name \"Seek to step N\" / name \"Seek to step N: not attempted\""
+   },
+   {
+    "what": "new caption",
+    "testId": "run-learning-elsewhere",
+    "text": "Another Run is learning this test, so Run is off until that Run ends."
+   },
+   {
+    "what": "new hint",
+    "testId": "guided-authored-literal-hint",
+    "text": "Studio cannot see page text that matches a value written in this step. Try rewording the step, for example by checking for a longer or different piece of visible text."
+   }
+  ],
+  "knownItemsUnchanged": [
+   "F-L5a-4",
+   "slow page test files (pageGuidedRun 166 s, pageReplayAndReferences 76 s at maxWorkers=4)"
+  ],
+  "commitSetNote": [
+   "docs/architecture/ADR-SC-006-accessibility-scope-functional-only.md is untracked and now read by the copy-table tests",
+   "backend/.../ExecutionReadinessService.java quoted line exists only in the uncommitted working tree"
+  ],
+  "openQuestionsAdded": [
+   "Q9 KL-015-Q4 trigger vs the real backend (TARGET_MISMATCH not emitted; RUNTIME_INCOMPATIBLE names no cause)"
+  ]
+ },
+ "f2Addendum": {
+  "status": "GREEN",
+  "gate": "lanes/tech-gate-L5b/review.md PASS-WITH-FIXES",
+  "F-L5b-3": {
+   "reproducedRedFirst": true,
+   "redLog": "logs/f2-red-F-L5b-3.log",
+   "rule": "root ruling: keep the pointer, start nothing, state it beside Run",
+   "fix": [
+    "useGuidedSession: new result field unreadable (read refused 400/409/401 before any view loaded; reset on a successful read, clear(), session change)",
+    "RunControl: prop sessionUnreadable disables Run (button, runRequest, learnRequest) and shows the sentence",
+    "page passes guided.unreadable"
+   ],
+   "copyKey": "sessionUnreadable",
+   "text": "Studio could not read the Run already started for this test, so Run is off until a page reload reads it.",
+   "basis": "delegated",
+   "source": "ADR-SC-006 \"State and consequence stated in visible text\"",
+   "fact": "useGuidedSession.ts \"once a `sessionId` is known nothing ever re-POSTs start: reload and reconnect only GET\"",
+   "tests": [
+    "GR read refused with 400",
+    "GR read refused with 409"
+   ]
+  },
+  "F-L5b-4": {
+   "real": true,
+   "reproducedRedFirst": true,
+   "redLog": "logs/f2-red-F-L5b-4.log",
+   "fix": "secretDeclaration.ts declareInsertedSecret: declared by secretId; complete own incomplete row; else add under ID or first free alias ID_2, ID_3 (<=64 chars); never touch an existing different declaration; D-8 kept",
+   "tests": [
+    "RR F-L5b-4 plain same-name row",
+    "secretDeclaration.test.ts (7)"
+   ]
+  },
+  "verify": [
+   {
+    "id": "F2-V1",
+    "exit": 0,
+    "files": 29,
+    "passed": 625,
+    "failed": 0,
+    "log": "logs/f2-v1-vitest-l5b.log"
+   },
+   {
+    "id": "F2-V2a",
+    "exit": 0,
+    "log": "logs/f2-v2-type-check.log"
+   },
+   {
+    "id": "F2-V2b",
+    "exit": 0,
+    "errors": 0,
+    "warnings": 308,
+    "log": "logs/f2-v2-lint.log"
+   },
+   {
+    "id": "F2-V3",
+    "hits": 0,
+    "log": "logs/f2-v3-grep-studio-capabilities.log"
+   },
+   {
+    "id": "F2-V4",
+    "hits": 0,
+    "log": "logs/f2-v4-grep-production-alpha-templates.log"
+   },
+   {
+    "id": "F2-V5",
+    "exit": 0,
+    "files": 69,
+    "passed": 1313,
+    "failed": 0,
+    "a11yAuditCollected": false,
+    "axeResultsMtimeUnchanged": "2026-10-17T16:16:58",
+    "log": "logs/f2-v5-vitest-full.log"
+   }
+  ],
+  "files": [
+   {
+    "path": "frontend/src/components/studio/guided/useGuidedSession.ts",
+    "before": "175e5741fd73b8f3ee990ce29df01e80379a0c8e9b8c3c4493379460d631d2f4",
+    "after": "21bee4dbf4ef28cb74c4a119f2c1cb25c9d3a50da9f869b498e1912b6c9320f2"
+   },
+   {
+    "path": "frontend/src/components/studio/guided/guidedNarratives.ts",
+    "before": "f86e5f785b9d0c55169ae7db5d419e87f673dda2b8e95e23d5677aa653640c4d",
+    "after": "166a2bbbdd8863883d6b5974405c2f4cc9910812762f6aeae57a32f29ec61b26"
+   },
+   {
+    "path": "frontend/src/components/studio/run/RunControl.tsx",
+    "before": "293505b5a9ef40ae3b5c2463dad961aa85a72628f3bb73b9579e49786e120729",
+    "after": "2385d817168b0fb9effb1100ed824fc4b82ace4acc924fa99a2b56c9a7b2498a"
+   },
+   {
+    "path": "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+    "before": "8f398ef6d019e9e1b7df836db9d86333b4a67d97918e5704efbe4566ec6dca78",
+    "after": "3ebc644f069a82502ae6659a44e484873d380b710a7d825c9f5f718aa32fdf9c"
+   },
+   {
+    "path": "frontend/src/pages/ChecksStudioPage/secretDeclaration.ts",
+    "before": null,
+    "after": "28d24d00e42a993f2866c8dc2cf7b5e4e6383b0ac74f095c1dad2c50e3fd8f25"
+   },
+   {
+    "path": "frontend/src/pages/ChecksStudioPage/secretDeclaration.test.ts",
+    "before": null,
+    "after": "7160c6213b75dff360c1f319a37adb4dede1785f16c9aa4c7adb8c9ed8ea23b8"
+   },
+   {
+    "path": "frontend/src/pages/ChecksStudioPage/pageGuidedRun.test.tsx",
+    "before": "2b41024aed3a2023a47a1b60617705d10dda528cf25184d2cf82c084891ee275",
+    "after": "4db2f6a55a186ecce083bc33dbb01afa722638a5dae8c0c326d522be9560bf88"
+   },
+   {
+    "path": "frontend/src/pages/ChecksStudioPage/pageReplayAndReferences.test.tsx",
+    "before": "aa6c00c7d23dbf1538e74157e7d6003e067e5ddb13118de6162ea9112d013803",
+    "after": "5c393bb62303d5e5568a9107c5b040b7e860c3d31b70dcd6b2de21f4ef7ace16"
+   }
+  ],
+  "changedForL6": [
+   {
+    "testId": "run-session-unreadable",
+    "text": "Studio could not read the Run already started for this test, so Run is off until a page reload reads it."
+   },
+   {
+    "what": "Variables dialog row added under alias ID_2 (ID_3, ...) when an inserted secret ID is already another row name"
+   }
+  ],
+  "stillOpen": [
+   "F-L5b-5 copy note (no change requested)",
+   "F-L5b-6 / F-L5a-4",
+   "commit-set note F-L5a-2 (+ ADR-SC-006, uncommitted ExecutionReadinessService.java; useGuidedSession.ts now also a copy source)"
+  ]
+ }
+}

@@ -1,0 +1,98 @@
+{
+  "lane": "L2b",
+  "step": "body (after W2.0 integration)",
+  "date": "2026-10-17",
+  "agent": "aiox-dev (Dex)",
+  "status": "READY_FOR_ROOT_REVIEW",
+  "files": [
+    {"path": "frontend/src/types/studio/studioGuidedTypes.ts", "sha256": "d364496975b92943bb93bc3da3bd848c32f559e96dc81b88f2dddd01a7046ed6", "change": "comments only (GuidedPendingReason and GuidedStartRefusal traced to contract elements); no exported signature changed"},
+    {"path": "frontend/src/services/api/studioGuidedApi.ts", "sha256": "e3d06009558ee9b912aed6df715c6f4faa9c456cfbfdb3485e1a5607fdc7d849", "change": "body: key guard, closed bodies, refusal mapping, new helper exports"},
+    {"path": "frontend/src/services/api/studioGuidedApi.test.ts", "sha256": "b7b8b381ddb1eb445c20d5f2ff421cfa7eeece28c1b4ca4f6d6883437536db26", "change": "new, 21 tests"},
+    {"path": "frontend/src/services/api/studioApi.ts", "sha256": "582e04ca7091f7d30c5eec25e6729a4c0da37b8b7592b621d843ce7f2160d1eb", "change": "unchanged since W2.0"},
+    {"path": "frontend/src/store/slices/studioSlice.ts", "sha256": "5c5faab50262f404a52369a98d027d983cf6fe758555d8fbcf136a80eaaf1936", "change": "unchanged since W2.0"},
+    {"path": "frontend/src/services/mocks/studio/guidedHandlers.ts", "sha256": "a32125ba750ffb59657b91097872634c6af9d4ae8d9375ccbaa394fa10bb7290", "change": "new"},
+    {"path": "frontend/src/services/mocks/studio/guidedFixtures.ts", "sha256": "8d123f7895b613213d4564c118c47afd2831a8c30920de2b8f82176dc32f53a2", "change": "new"},
+    {"path": "frontend/src/services/mocks/studio/capabilityHandlers.ts", "sha256": "52e36e57fcc0a6ada02fe1074d557c3f7e525cc7c03b91d4b183a719a3d03846", "change": "new"},
+    {"path": "frontend/src/services/mocks/studio/guidedHandlers.test.ts", "sha256": "f16ea682d7f2ad90be469cff9c3f13b38505bfb266d067f250971a2f0a1afd26", "change": "new, 56 tests"},
+    {"path": "frontend/src/components/studio/guided/useGuidedSession.ts", "sha256": "c1377a481fae9fe6d356e9b228c6b7b89dcc926e1cfa6d695e31e49353e24806", "change": "stub replaced by the body"},
+    {"path": "frontend/src/components/studio/guided/useGuidedSession.test.ts", "sha256": "d47dd62da3a886d4aa9d8b6e3086aee9a0cbf278aed85d65fbde8b3cb831d844", "change": "new, 39 tests"}
+  ],
+  "signatureChanges": {
+    "breaking": [],
+    "compatible": [
+      "useGuidedSession(testId: string | null): UseGuidedSessionResult  ->  useGuidedSession(testId: string | null, options?: UseGuidedSessionOptions): UseGuidedSessionResult  (optional second parameter {pollIntervalMs?, retryDelayMs?}; the return shape is unchanged)",
+      "studioGuidedApi.startSession / clarify / cancel / finalize are now async functions: same parameters and Promise return types. An Idempotency-Key outside 1..256 characters now rejects before any request (it used to be sent).",
+      "studioGuidedApi request bodies are rebuilt as the contract's closed objects before sending, so extra fields on the argument no longer reach the wire."
+    ],
+    "newExports": [
+      "studioGuidedApi.ts: startBodyFrom, finalizeBodyFrom, clarifyBodyFor, USER_CANCEL_BODY, httpStatusOf, guidedErrorOf, toGuidedStartRefusal",
+      "useGuidedSession.ts: UseGuidedSessionOptions, readGuidedPointer, resetGuidedSessionRuntime (test hook)",
+      "guidedHandlers.ts: guidedHandlers, createGuidedHandlers, setGuidedScenario, failGuidedRequests, setGuidedLatency, guidedRequestLog, guidedRequestCount, guidedSessionsForTest, resetGuidedMocks, UNAUTHENTICATED_REFUSAL, types",
+      "capabilityHandlers.ts: capabilityHandlers, createCapabilityHandlers, setVaultSecrets, setGuidedStartCapability, failCapabilityReads, capabilityRequestCount, resetCapabilityMocks",
+      "guidedFixtures.ts: scenarios (LEARN_SCENARIO, learnWithQuestion, learnWithSettlingVideo, endsIn, loginRequired, refusesStart, PUBLICATION_CONFLICT_SCENARIO), GUIDED_START_REFUSALS, builders"
+    ]
+  },
+  "inventedShapesTraced": {
+    "GuidedPendingReason": {
+      "REAUTHENTICATION_REQUIRED": "HTTP 401 (components/responses/SessionUnauthorized, on every guided route)",
+      "NOT_READY": "HTTP 503 on any guided route (openapi: 'Current authority or Vault unavailable'); or HTTP 400/409 refusing finalizeObservedPublication, after which the session stays FINALIZING (openapi 400 'closed v3 contract refused', 409 'Revision, authorization, state or idempotency conflict')",
+      "PUBLICATION_PENDING": "HTTP 202 on readGuidedResult (openapi: 'Pending publication, not a success claim'; result.publication.status PENDING)"
+    },
+    "GuidedStartRefusal": {
+      "httpStatus": "the HTTP status of the response",
+      "error": "error.schema.json body when the response carries one (checked field by field: schemaVersion, code, requestId, retryable, messageCode)",
+      "platformCode": "components/schemas/PlatformErrorResponse.error.code (RATE_LIMITED 429, authentication 503) or the flat ErrorResponse.error string",
+      "retryAfterSeconds": "the Retry-After header (openapi 429: whole seconds, at least 1, present only on retryable budget refusals and RATE_LIMITED)"
+    },
+    "citedIn": ["frontend/src/types/studio/studioGuidedTypes.ts (doc comments)", "frontend/src/services/api/studioGuidedApi.ts (toGuidedStartRefusal)", "frontend/src/components/studio/guided/useGuidedSession.ts (header comment)"]
+  },
+  "verification": {
+    "rows": [
+      {"command": "cd frontend && pnpm exec vitest run src/services/api/studioGuidedApi.test.ts src/services/mocks/studio/guidedHandlers.test.ts src/components/studio/guided/useGuidedSession.test.ts --minWorkers=1 --maxWorkers=2", "result": "3 files, 116 tests passed (21 + 56 + 39); run twice with identical counts"},
+      {"command": "cd frontend && pnpm run type-check", "result": "exit 0, no errors"},
+      {"command": "cd frontend && pnpm exec eslint <the 11 files>", "result": "exit 0, no warnings (one react/no-children-prop error in the hook test was found and fixed)"}
+    ],
+    "mutationChecks": [
+      "Hook: removing the finalize latch -> 2 tests fail (two instances finalize once; refused finalize not re-sent). Needed a mock latency control to make the race real; before that only 1 test failed.",
+      "Hook: removing the pointer write before the start POST -> 4 tests fail.",
+      "Hook: removing the start-flight dedupe -> 2 tests fail (strict-mode resume; double click).",
+      "Api: dropping the Idempotency-Key header -> 2 tests fail. Dropping __doNotRetry on getCapabilities -> 1 fails (3 calls instead of 1). Sending the finalize body unclosed -> 1 fails.",
+      "All mutations were reverted; the files were compared byte-for-byte with backups afterwards."
+    ],
+    "contractValidation": "guidedHandlers.test.ts loads every contracts/v3/*.schema.json into a draft-07 Ajv (as studioContract.test.ts does for replay-artifact) and validates every body the mirror returns: session-view, PublicSession, result (200 and 202, every scenario), clarification (3 kinds), error (every start refusal), PublicationReceipt, StudioCapabilities. The 12 start refusals are asserted as complete responses with no session created.",
+    "notRun": ["the full frontend suite", "studioContract.test.ts (L2a owns and is extending it)", "any browser or Playwright run", "composition into handlers.ts (root F1)"]
+  },
+  "exitCriteria": {
+    "keysOnAllFourGuidedMutations": "api rejects a missing/oversized key before sending; mock refuses a mutation without a key (400) for all four; hook tests show start, clarify, cancel and finalize each carried a non-empty key and the keys are distinct per logical operation",
+    "reload": "pointer resumes by sessionId without re-POSTing start (3 tests); a reload at FINALIZING finalizes under the persisted finalizeKey; a reload after a fully lost start retries the same key",
+    "lostResponse": "start lost after processing: retried under the same key, one session created; start lost on every attempt: pointer kept, new page retries the same key; finalize lost before processing: repeated under the same key; finalize processed but unanswered: not sent again",
+    "strictMode": "strict-mode mount: one start, one finalize; strict-mode resume of a pointer without sessionId: one start POST (with a slow server so the first is still in flight)"
+  },
+  "observations": [
+    "Backend vs OpenAPI: GuidedSessionController.result answers 202 with the SESSION VIEW body (no outcome) for a non-terminal session, while openapi documents the 202 body as a result with publication PENDING. The client calls readResult only after a terminal state, so it never meets the session-view body. The mirror follows the document (a 202 result with publication PENDING and outcome = current state). Worth an architect look, not changed here.",
+    "Backend: a pending publication also answers 202 on a TERMINAL session (publication.status PENDING -> 202). The hook therefore sets pending=PUBLICATION_PENDING and re-reads the result up to 60 times before giving up.",
+    "ORIGIN_NOT_ALLOWED, MISSING_SOURCE and BUDGET_EXCEEDED also occur as a session's errorCode (GuidedSessionService), not only as start refusals. The mirror offers them as terminal FAILED results (endsIn with failureCode) and the other start refusals as 409/429 responses."
+  ],
+  "mockChoicesNotInContract": [
+    "capability guidedStart.context: environmentId = the draft's environment label, applicationId = its CSI; a draft with no steps is RUNTIME_INCOMPATIBLE (D-11); a CSI in MOCK_EXECUTE_DENIED_CSIS is FORBIDDEN_SCOPE",
+    "A cancel of a running session ends CANCELLED with publication REFUSED; UNKNOWN_OUTCOME defaults to REFUSED unless a test asks for PENDING; revision mismatch on start/finalize answers REVISION_CONFLICT with messageCode = code; a clarify with a stale generation answers STALE_GENERATION 409 and an unoffered choice 400 INVALID_CONTRACT",
+    "Step IDs come from fixtureStepId(i) in authoringState.ts (read-only import). A test created through the authoring mock keeps its own step IDs there, so root F1 should pass stepsOf to createGuidedHandlers if guided progress must match those IDs"
+  ],
+  "autoDecisions": [
+    "[AUTO-DECISION] Hook uses Redux for view/result/clarification (the four slice keys) and local state for pending and startRefusal. Mount it once per page; components take its return value as props.",
+    "[AUTO-DECISION] startLearn rejects only when no response ever arrived (pointer kept); every HTTP outcome resolves and is visible in startRefusal or pending. Callers should catch the rejection.",
+    "[AUTO-DECISION] 401 stops polling (pointer kept, resume on reload); the login redirect reloads the app anyway. 403 forgets everything. No-response reads are retried silently by the next tick.",
+    "[AUTO-DECISION] Session reads keep apiClient's default GET retry (2 retries, 200 ms then 400 ms), so a 503 shows as NOT_READY about 600 ms after it starts. Only getCapabilities opts out.",
+    "[AUTO-DECISION] Clarify and cancel keys are memoized in memory per logical operation (session + clarification + generation + choice; session). A reload starts a new operation, which the server treats as a no-op on a session that has moved on; only start and finalize keys are persisted, as P6 specifies.",
+    "[AUTO-DECISION] Result re-read while the recording is PROCESSING is bounded at 60 reads (about a minute at the default interval) so a recording that never settles does not poll forever.",
+    "[AUTO-DECISION] Mock scenarios advance by read count, not time; gates hold at AWAITING_CLARIFICATION and FINALIZING."
+  ],
+  "ids": {
+    "reused": ["fixtureStepId (authoringState.ts)", "readinessFixtures drafts, mockTests, demoTests", "STUDIO_FORBIDDEN_BODY and MOCK_READABLE_CSIS (fixtures.ts)", "contracts/v3/fixtures.json documents (labelledQuestion, policyNotApprovedError, publicSessionPreparing)", "studioVideoUrl (videoPath)", "the draft-07 Ajv harness pattern of studioContract.test.ts"],
+    "created": ["guidedHandlers.ts, guidedFixtures.ts, capabilityHandlers.ts (no existing guided mirror; handlers.ts is L2a's seam and was not touched)", "newGuidedIdempotencyKey duplicates the private helper in run/useRunGate.ts, which belongs to L5b"]
+  },
+  "blockers": [],
+  "notes": [
+    "Did not edit handlers.ts, studioTypes.ts, the story, or any file outside the L2b writes list. No git operation, no pnpm install/add."
+  ]
+}

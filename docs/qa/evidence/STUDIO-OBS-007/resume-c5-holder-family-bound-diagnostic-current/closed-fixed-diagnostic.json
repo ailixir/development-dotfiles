@@ -1,0 +1,392 @@
+{
+  "scope": "ONE_BOUNDED_DIAGNOSTIC_NOT_ACCEPTANCE",
+  "firstProjectFrames": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.awaitFinalizing(GuidedPublicationReplayIT.java:13904)",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel(GuidedPublicationReplayIT.java:3677)"
+  ],
+  "failedState": {
+    "state": "FAILED",
+    "errorCode": "OTHER",
+    "bootstrapPhase": "READY",
+    "materializationPresent": true,
+    "fixtureModelHttpCalls": 6,
+    "fixturePhysicalProviderReads": 1,
+    "fixtureProviderFailures": 0,
+    "fixtureModelKinds": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 5,
+      "VERIFY_STEP": 0
+    }
+  },
+  "claimServerFixed": [
+    {
+      "status": 202,
+      "handlerNanos": 17346292,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 23397250,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 20675583,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 238417542,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 456070458,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 137139208,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 266196959,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 575728250,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 297247125,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 942106792,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 133645250,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 430160084,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 202324416,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 498591292,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 409487333,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 575437834,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 1174090666,
+      "consumed": true
+    }
+  ],
+  "lifecycleFixed": [
+    {
+      "status": 202,
+      "kind": "RUNTIME",
+      "reason": "LEASE_LOST",
+      "consumed": true
+    }
+  ],
+  "numericEvidence": {
+    "mappedAppenders": 1,
+    "rootEvents": null,
+    "appEvents": null,
+    "eventCountsStatus": "SUPPORT_UNOBSERVED",
+    "logCoverage": "STREAMED_ORIGINAL_ENCODED_OUTPUT",
+    "encodedBytes": 77418848,
+    "encodedWriteCalls": 38148,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsCollected": true,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 30,
+    "patternBytes": 3308,
+    "rootTraceObserved": true,
+    "appTraceObserved": true,
+    "httpBodies": 1,
+    "httpErrors": 0,
+    "jsonBodies": 1,
+    "problemBodies": 0,
+    "sseStreams": 0,
+    "metricBytes": 82326,
+    "cacheEntries": 2,
+    "cacheNonemptyRequired": true,
+    "cacheProduced": true,
+    "cacheUnproducedOutsideFilterRoutes": false,
+    "profileFiles": 171,
+    "knownRootLinks": 4,
+    "externalLinkTargetBytesScanned": false,
+    "c4WindowsExecuted": false,
+    "traceFromStart": false,
+    "traceArmed": true,
+    "claimSamplerStatus": 2,
+    "claimSamplerJoined": true,
+    "claimSamplerCleanupConfirmed": true,
+    "claimSamplerDiagnosticOnly": true,
+    "claimSamplerCycles": 710,
+    "claimSamplerEmpty": 0,
+    "claimSamplerUnattributed": 2,
+    "claimSamplerCounts": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        5,
+        0,
+        175,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        46,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        8,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "pgSnapshotStatus": 2,
+    "pgSnapshotJoined": true,
+    "pgSnapshotExactClaimAttribution": true,
+    "pgSnapshotRows": 2,
+    "pgSnapshotCandidates": 1,
+    "pgSnapshotBlockers": 1,
+    "pgSnapshotStageWaitCounts": [
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "pgSnapshotBlockerStageCounts": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "pgSnapshotRelationCounts": [
+      2,
+      1,
+      0
+    ],
+    "pgSnapshotWaitEventCounts": [
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ]
+  },
+  "sqlBlockerPartition0to6": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1
+  ],
+  "sourceBlockerPartition7to12": [
+    0,
+    1,
+    0,
+    0,
+    0,
+    0
+  ],
+  "sourceMapping": {
+    "7": "CLAIM",
+    "8": "TRANSLATION",
+    "9": "OBSERVATION_MATERIALIZATION",
+    "10": "CONSUME_OUTCOME",
+    "11": "READ_START_COMMAND",
+    "12": "STOP_RECONCILE"
+  },
+  "actualHolderFamily": "TRANSLATION",
+  "actualInnerMethod": "UNOBSERVED",
+  "exclusiveCostAttribution": false,
+  "acceptanceCredit": false,
+  "repeatDiagnosticPlanned": false
+}

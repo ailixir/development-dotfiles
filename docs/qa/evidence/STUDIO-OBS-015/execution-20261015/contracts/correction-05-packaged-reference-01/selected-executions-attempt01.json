@@ -1,0 +1,51 @@
+[
+  {
+    "name": "oracle",
+    "command": [
+      "node",
+      "tools/check-studio-observed-contracts.cjs"
+    ],
+    "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+    "exit": 0,
+    "elapsedSeconds": 1.925,
+    "stdoutSha256": "9b1ea4bf5af9b47e0a921c486e391781ba6ddc4ff949baf7ba052b43d71334f6",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "parity",
+    "command": [
+      "node",
+      "tools/build-studio-observed-schemas.cjs",
+      "--check"
+    ],
+    "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+    "exit": 0,
+    "elapsedSeconds": 0.034,
+    "stdoutSha256": "785745b252f39a1a2f24ec7875449b8ba3b4c9c77edf14aa0cd21db7a714eead",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "catalog",
+    "command": [
+      "node",
+      "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-05-packaged-reference-01/catalog-audit.cjs"
+    ],
+    "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+    "exit": 1,
+    "elapsedSeconds": 0.539,
+    "stdoutSha256": "b3bbd08bd8e150d3d41c4c23c709d3c1b02ee550edc182b008886600350407b9",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "source-pins",
+    "command": [
+      "node",
+      "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/check-pins.cjs"
+    ],
+    "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+    "exit": 1,
+    "elapsedSeconds": 0.565,
+    "stdoutSha256": "276fced208da896c58b8efbe3d51ff57696b909d270076c476edb5fa5bdb326d",
+    "stderrSha256": "afef2cbbdf817237ed7e588ee936d56bc76cfd659574a309a4741013c3eefd2d"
+  }
+]

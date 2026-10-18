@@ -145,8 +145,8 @@ ${BOLD}Environment:${NC}
   STUDIO_RUNNER_SERVICE_TOKEN   bearer the backend presents to the runner
   STUDIO_CALLBACK_SERVICE_TOKEN bearer the runner presents to the backend
                                 (both generated per session when unset)
-  STUDIO_GATEWAY_PROVIDER       translation provider: recorded-fixture (local default),
-                                vertex (needs endpoint, project, location) or disabled
+  STUDIO_GATEWAY_PROVIDER       guided translation provider: disabled (local default)
+                                or vertex (needs endpoint, project, location)
 EOF
   exit 0
 }
@@ -192,9 +192,12 @@ check_prereqs() {
       err "Node.js not found. Install: brew install node"
       failed=true
     fi
-    if [ ! -d "$ROOT_DIR/frontend/node_modules" ]; then
-      warn "frontend/node_modules missing — running npm install…"
-      (cd "$ROOT_DIR/frontend" && npm install)
+    if ! command -v pnpm &>/dev/null; then
+      err "pnpm not found. Install: brew install pnpm"
+      failed=true
+    elif [ ! -d "$ROOT_DIR/frontend/node_modules" ]; then
+      warn "frontend/node_modules missing — running pnpm install…"
+      (cd "$ROOT_DIR/frontend" && pnpm install --frozen-lockfile)
     fi
     local core_comp="$ROOT_DIR/../put-core-components/dist/index.js"
     if [ ! -f "$core_comp" ]; then
@@ -343,11 +346,10 @@ if [ "$BACKEND" = true ] && [ "$STUDIO_RUNNER" = true ]; then
   export CHECKS_SOURCE_UI_TEST="${CHECKS_SOURCE_UI_TEST:-true}"
   # Local Studio uses the real Vertex path. Missing project, endpoint, location, or credentials
   # must stop startup instead of producing fixture-backed output that looks successful.
-  # Local default is the recorded corpus: it needs no credential, and it answers only the
-  # sources recorded verbatim, so a local run can never be mistaken for proof that
-  # free-form English translates. Set STUDIO_GATEWAY_PROVIDER=vertex (with endpoint,
-  # project and location) to exercise the real provider locally.
-  export STUDIO_GATEWAY_PROVIDER="${STUDIO_GATEWAY_PROVIDER:-recorded-fixture}"
+  # Local default is disabled (STUDIO-OBS-012A removed the recorded-fixture provider; the
+  # backend accepts only disabled or vertex). Set STUDIO_GATEWAY_PROVIDER=vertex (with
+  # endpoint, project and location) to exercise the real provider locally.
+  export STUDIO_GATEWAY_PROVIDER="${STUDIO_GATEWAY_PROVIDER:-disabled}"
   export STUDIO_GATEWAY_MODEL="${STUDIO_GATEWAY_MODEL:-gemini-3.8-flash}"
 
   kill_port "$RUNNER_PORT"
@@ -444,12 +446,12 @@ fi
 if [ "$FRONTEND" = true ]; then
   if [ "$FEDERATED" = true ]; then
     log "Starting frontend — Webpack/Module Federation :3002…"
-    (cd "$ROOT_DIR/frontend" && npm run dev) &
+    (cd "$ROOT_DIR/frontend" && pnpm run dev) &
     FRONTEND_PORT=3002
   else
     log "Starting frontend — Vite standalone :${VITE_PORT}…"
     # vite.config.ts reads VITE_API_URL for the /api proxy target.
-    (cd "$ROOT_DIR/frontend" && VITE_API_URL="http://localhost:${BACKEND_PORT}" npx vite --port "$VITE_PORT") &
+    (cd "$ROOT_DIR/frontend" && VITE_API_URL="http://localhost:${BACKEND_PORT}" pnpm exec vite --port "$VITE_PORT") &
     FRONTEND_PORT="$VITE_PORT"
   fi
   FRONTEND_PID=$!
@@ -469,8 +471,8 @@ if [ "$BACKEND" = true ]; then
   fi
   if [ -n "$RUNNER_PID" ]; then
     ok "Runner:     http://127.0.0.1:${RUNNER_PORT} (Studio runs dispatch here)"
-    if [ "${STUDIO_GATEWAY_PROVIDER}" = "recorded-fixture" ]; then
-      ok "Translate:  recorded-fixture corpus (no model call; recorded sources only)"
+    if [ "${STUDIO_GATEWAY_PROVIDER}" = "disabled" ]; then
+      ok "Translate:  disabled (no model provider; set STUDIO_GATEWAY_PROVIDER=vertex)"
     else
       ok "Translate:  ${STUDIO_GATEWAY_PROVIDER} (${STUDIO_GATEWAY_MODEL})"
     fi

@@ -1,0 +1,273 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
+@@ -116,12 +116,16 @@
+   private static final String OBSERVATION_SCHEMA_EPOCH =
+       "9be57abe1679bafcf7dbbcf3452a515dab7032c999ad630a241c7cbb856ac2d2";
+ 
+-  private record ObservationNodes(JsonSchema shape, JsonSchema item) {
++  private record ArraySchema(JsonSchema shape, JsonSchema item, CompiledSchema itemObject) {
++    ArraySchema(JsonSchema shape, JsonSchema item) {
++      this(shape, item, null);
++    }
++
+     boolean valid(JsonNode value) {
+       boolean valid = shape.validate(value).isEmpty();
+       if (value.isArray()) {
+         for (JsonNode node : value) {
+-          valid &= item.validate(node).isEmpty();
++          valid &= itemObject == null ? item.validate(node).isEmpty() : itemObject.valid(node);
+         }
+       }
+       return valid;
+@@ -132,9 +136,9 @@
+       JsonSchema shape,
+       Map<String, JsonSchema> properties,
+       Map<String, CompiledSchema> objects,
+-      ObservationNodes nodes) {
++      Map<String, ArraySchema> arrays) {
+     CompiledSchema(JsonSchema shape, Map<String, JsonSchema> properties) {
+-      this(shape, properties, Map.of(), null);
++      this(shape, properties, Map.of(), Map.of());
+     }
+ 
+     boolean valid(JsonNode value) {
+@@ -146,8 +150,8 @@
+           CompiledSchema nested = objects.get(property.getKey());
+           if (nested != null) {
+             valid &= nested.valid(child);
+-          } else if (nodes != null && property.getKey().equals("nodes")) {
+-            valid &= nodes.valid(child);
++          } else if (arrays.containsKey(property.getKey())) {
++            valid &= arrays.get(property.getKey()).valid(child);
+           } else {
+             valid &= property.getValue().validate(child).isEmpty();
+           }
+@@ -185,7 +189,7 @@
+       if (name.equals("v3/replay-validation")) {
+         // Only these two original child roots are independent objects in this frozen epoch.
+         CompiledSchema artifact = compileProperties(root.properties().get("artifact"));
+-        CompiledSchema basis = compileProperties(root.properties().get("validationBasis"));
++        CompiledSchema basis = compileBasis(root.properties().get("validationBasis"));
+         if (artifact == null || basis == null) {
+           return baseline;
+         }
+@@ -193,14 +197,11 @@
+             root.shape(),
+             root.properties(),
+             Map.of("artifact", artifact, "validationBasis", basis),
+-            null);
++            Map.of());
+       }
+       if (name.equals("v3/observation")) {
+-        ObservationNodes nodes = compileObservationNodes(root.properties().get("nodes"));
+-        if (nodes == null) {
+-          return baseline;
+-        }
+-        return new CompiledSchema(root.shape(), root.properties(), Map.of(), nodes);
++        CompiledSchema observation = withObservationNodes(root);
++        return observation == null ? baseline : observation;
+       }
+       return root;
+     } catch (RuntimeException unavailable) {
+@@ -208,7 +209,55 @@
+     }
+   }
+ 
+-  /** Shallow only: callers select the four named roots and two literal replay children above. */
++  private CompiledSchema withObservationNodes(CompiledSchema observation) {
++    ArraySchema nodes = compileArray(observation.properties().get("nodes"));
++    return nodes == null ? null : new CompiledSchema(observation.shape(), observation.properties(),
++        Map.of(), Map.of("nodes", nodes));
++  }
++
++  /** Only the three original exercised-fact collections in the frozen replay request. */
++  private CompiledSchema compileBasis(JsonSchema original) {
++    CompiledSchema basis = compileProperties(original);
++    if (basis == null) {
++      return null;
++    }
++    ArraySchema observations = compileArray(basis.properties().get("observations"));
++    ArraySchema actions = compileArray(basis.properties().get("actions"));
++    ArraySchema preparations = compileArray(basis.properties().get("preparations"));
++    if (observations == null || actions == null || preparations == null) {
++      return null;
++    }
++    CompiledSchema observationFact = compileProperties(observations.item());
++    CompiledSchema actionFact = compileProperties(actions.item());
++    if (observationFact == null || actionFact == null) {
++      return null;
++    }
++    JsonSchema observed = observationFact.properties().get("observation");
++    JsonSchema ledger = actionFact.properties().get("ledger");
++    if (!OBSERVATION_SCHEMA_EPOCH.equals(hash(observed.getSchemaNode()))
++        || !LEDGER_SCHEMA_EPOCH.equals(hash(ledger.getSchemaNode()))) {
++      return null;
++    }
++    CompiledSchema observation = compileProperties(observed);
++    CompiledSchema ledgerPlan = compileProperties(ledger);
++    if (observation == null || ledgerPlan == null) {
++      return null;
++    }
++    observation = withObservationNodes(observation);
++    if (observation == null) {
++      return null;
++    }
++    observationFact = new CompiledSchema(observationFact.shape(), observationFact.properties(),
++        Map.of("observation", observation), Map.of());
++    actionFact = new CompiledSchema(actionFact.shape(), actionFact.properties(),
++        Map.of("ledger", ledgerPlan), Map.of());
++    return new CompiledSchema(basis.shape(), basis.properties(), Map.of(), Map.of(
++        "observations", new ArraySchema(observations.shape(), observations.item(), observationFact),
++        "actions", new ArraySchema(actions.shape(), actions.item(), actionFact),
++        "preparations", preparations));
++  }
++
++  /** Shallow only: callers above name every supported property/item path explicitly. */
+   private CompiledSchema compileProperties(JsonSchema original) {
+     var config = original.getValidationContext().getConfig();
+     var defaults = config.getApplyDefaultsStrategy();
+@@ -250,8 +299,8 @@
+         java.util.Collections.unmodifiableMap(new java.util.LinkedHashMap<>(properties)));
+   }
+ 
+-  /** The single frozen observation.nodes array; complete native item schemas remain intact. */
+-  private ObservationNodes compileObservationNodes(JsonSchema original) {
++  /** Original native item plus all collection constraints; callers select only literal paths. */
++  private ArraySchema compileArray(JsonSchema original) {
+     var config = original.getValidationContext().getConfig();
+     if (config.isTypeLoose() || !original.getSchemaNode().path("items").isObject()) {
+       return null;
+@@ -272,7 +321,7 @@
+     }
+     ObjectNode shape = original.getSchemaNode().deepCopy();
+     shape.set("items", object());
+-    return new ObservationNodes(
++    return new ArraySchema(
+         JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7).getSchema(shape, config), item);
+   }
+ 
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java
+@@ -100,6 +100,7 @@
+       cases.add(contracts.parse("[]"));
+       cases.add(contracts.parse("1"));
+       if (replay) {
++        requestArrayCases(document, original, cases);
+         ObjectNode conditional = document.deepCopy();
+         conditional
+             .withObject("/validationBasis/inputs/0")
+@@ -279,6 +280,7 @@
+   private void assertNativePlan(Object plan) throws Exception {
+     org.assertj.core.api.Assertions.assertThat(compiledPropertyCount(plan)).isZero();
+     org.assertj.core.api.Assertions.assertThat(compiledObjects(plan)).isEmpty();
++    org.assertj.core.api.Assertions.assertThat(compiledArrays(plan)).isEmpty();
+     org.assertj.core.api.Assertions.assertThat(compiledNodes(plan)).isNull();
+   }
+ 
+@@ -299,12 +301,31 @@
+         org.assertj.core.api.Assertions.assertThat(compiledObjects(child)).isEmpty();
+         org.assertj.core.api.Assertions.assertThat(compiledNodes(child)).isNull();
+       }
++      org.assertj.core.api.Assertions.assertThat(compiledArrays(objects.get("artifact"))).isEmpty();
++      var arrays = compiledArrays(objects.get("validationBasis"));
++      org.assertj.core.api.Assertions.assertThat(arrays.keySet()
++          .equals(java.util.Set.of("observations", "actions", "preparations"))).isTrue();
++      Object observationFact = compiledItemObject(arrays.get("observations"));
++      Object actionFact = compiledItemObject(arrays.get("actions"));
++      org.assertj.core.api.Assertions.assertThat(compiledPropertyCount(observationFact)).isEqualTo(2);
++      org.assertj.core.api.Assertions.assertThat(compiledPropertyCount(actionFact)).isEqualTo(3);
++      org.assertj.core.api.Assertions.assertThat(compiledObjects(observationFact).keySet()
++          .equals(java.util.Set.of("observation"))).isTrue();
++      org.assertj.core.api.Assertions.assertThat(compiledObjects(actionFact).keySet()
++          .equals(java.util.Set.of("ledger"))).isTrue();
++      assertFinitePlan("v3/observation", compiledObjects(observationFact).get("observation"));
++      assertFinitePlan("v3/ledger", compiledObjects(actionFact).get("ledger"));
++      org.assertj.core.api.Assertions.assertThat(compiledItemObject(arrays.get("preparations"))).isNull();
+     } else {
+       org.assertj.core.api.Assertions.assertThat(objects).isEmpty();
+     }
+     if (name.equals("v3/observation")) {
++      org.assertj.core.api.Assertions.assertThat(compiledArrays(plan).keySet()
++          .equals(java.util.Set.of("nodes"))).isTrue();
+       org.assertj.core.api.Assertions.assertThat(compiledNodes(plan)).isNotNull();
++      org.assertj.core.api.Assertions.assertThat(compiledItemObject(compiledNodes(plan))).isNull();
+     } else {
++      org.assertj.core.api.Assertions.assertThat(compiledArrays(plan)).isEmpty();
+       org.assertj.core.api.Assertions.assertThat(compiledNodes(plan)).isNull();
+     }
+   }
+@@ -315,10 +336,20 @@
+     return (java.util.Map<?, ?>) objects.invoke(compiled);
+   }
+ 
++  private java.util.Map<?, ?> compiledArrays(Object compiled) throws Exception {
++    var arrays = compiled.getClass().getDeclaredMethod("arrays");
++    arrays.setAccessible(true);
++    return (java.util.Map<?, ?>) arrays.invoke(compiled);
++  }
++
+   private Object compiledNodes(Object compiled) throws Exception {
+-    var nodes = compiled.getClass().getDeclaredMethod("nodes");
+-    nodes.setAccessible(true);
+-    return nodes.invoke(compiled);
++    return compiledArrays(compiled).get("nodes");
++  }
++
++  private Object compiledItemObject(Object array) throws Exception {
++    var item = array.getClass().getDeclaredMethod("itemObject");
++    item.setAccessible(true);
++    return item.invoke(array);
+   }
+ 
+   private ObjectNode fixtureRoot(String name) throws Exception {
+@@ -342,6 +373,50 @@
+     org.assertj.core.api.Assertions.assertThat(originalAccepts(original, value))
+         .isEqualTo(accepted);
+     cases.add(value);
++  }
++
++  private void requestArrayCases(ObjectNode document, JsonSchema original, List<JsonNode> cases) {
++    for (String field : List.of("observations", "actions", "preparations")) {
++      String pointer = "/validationBasis/" + field;
++      int maximum = field.equals("observations") ? 400 : 200;
++      for (int size : new int[] {0, maximum, maximum + 1}) {
++        ObjectNode changed = document.deepCopy();
++        var array = changed.withObject("/validationBasis").putArray(field);
++        for (int index = 0; index < size; index++) {
++          array.add(document.at(pointer + "/0").deepCopy());
++        }
++        addNativeCase(original, cases, changed,
++            size <= maximum && (size > 0 || field.equals("observations")));
++      }
++      ObjectNode absentArray = document.deepCopy();
++      absentArray.withObject("/validationBasis").putNull(field);
++      addNativeCase(original, cases, absentArray, false);
++      ObjectNode nonArray = document.deepCopy();
++      nonArray.withObject("/validationBasis").put(field, "invalid-array");
++      addNativeCase(original, cases, nonArray, false);
++      ObjectNode nullItem = document.deepCopy();
++      nullItem.withArray(pointer).set(0, com.fasterxml.jackson.databind.node.NullNode.instance);
++      addNativeCase(original, cases, nullItem, false);
++      ObjectNode missing = document.deepCopy();
++      missing.withObject(pointer + "/0").remove(field.equals("observations")
++          ? "observationHash" : field.equals("actions") ? "ledger" : "proposal");
++      addNativeCase(original, cases, missing, false);
++    }
++    ObjectNode badObservation = document.deepCopy();
++    badObservation.withObject("/validationBasis/observations/0/observation").put("observedAt", "not-a-date");
++    addNativeCase(original, cases, badObservation, false);
++    ObjectNode badNode = document.deepCopy();
++    badNode.withObject("/validationBasis/observations/0/observation/nodes/0").remove("nodeId");
++    addNativeCase(original, cases, badNode, false);
++    ObjectNode badLedger = document.deepCopy();
++    badLedger.withObject("/validationBasis/actions/0/ledger").put("dispatchCount", -1);
++    addNativeCase(original, cases, badLedger, false);
++    ObjectNode badPreparation = document.deepCopy();
++    badPreparation.withObject("/validationBasis/preparations/0/proof").remove("workerId");
++    addNativeCase(original, cases, badPreparation, false);
++    ObjectNode badProposal = document.deepCopy();
++    badProposal.withObject("/validationBasis/preparations/0/proposal/operation").put("kind", "unsupported-operation");
++    addNativeCase(original, cases, badProposal, false);
+   }
+ 
+   private void observationCases(ObjectNode document, JsonSchema original, List<JsonNode> cases) {

@@ -1,0 +1,77 @@
+{
+  "status": "SOURCE_FROZEN_CORRECTED_CANDIDATE_AWAITING_ROOT_RERUN",
+  "at": "2026-10-10T10:56:34.579422+00:00",
+  "scope": "D owned terminal settlement data only; no QA/lifecycle verdict",
+  "api": "boolean recordObservedTerminalSettlement(UUID executionId,String plannedErrorCode,Instant plannedEndedAt)",
+  "sources": [
+    {
+      "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+      "sha256": "e2c5e26c16bb6c161b5216335a308666fa91391606cc7ee03a11aac0517cf897"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+      "sha256": "a8e9cf16c3f194713c95f4518fc35d88de7e6e888ecb87e2e67127c4780222f1"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+      "sha256": "ade2a916783b4cdff6bedfab275b19e1129295e21c400e2cad1a7d572f4de0cc"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "sha256": "9e9a081e4a067162682eadcca20c70943e5e80e2e78715343731965f0cdfbdbd"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java",
+      "sha256": "b490790700c1c4f618f3c90fbcc052fddbf56665dfcff75f84b7b1a910b4e0ea"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionBootstrap.java",
+      "sha256": "31518e41580281ce9d1123c15b8ada54e4e5b8f4640996e61595ae6e89c632b0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionHealthIndicator.java",
+      "sha256": "a9e824e48781e6dacb225f5591edb6b56409b337e87aa2a482c1806348bf3232"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/RetentionPruner.java",
+      "sha256": "01d2387d355d44e5c81051fe4306bd807b17d093947102483d328cef0270ed5d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionScheduler.java",
+      "sha256": "19b21872f027e28ee52becdbc1621725713752fc4b3d2e5b24d482d50ff83ba1"
+    }
+  ],
+  "priorGate": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/root-terminal-gate-2/result.json",
+    "tests": 186,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0,
+    "sourceDrift": [],
+    "D": {
+      "tests": 53,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "correction": "Only SELECT studio_guided_publications added to synthetic runtime writer role; no production/SQL/API changes after gate2; exactlytwo direct currentleaf UPDATE/DELETE probes against existing execution row, causal PSQLException P0001 append-only and full row unchanged; narrow synthetic leaf SELECT only",
+  "evidence": [
+    "t2-terminal-settlement-design.md",
+    "t2-terminal-settlement-candidate.json",
+    "t2-terminal-staged-migration-preservation.json",
+    "root-terminal-gate-1",
+    "root-terminal-gate-2"
+  ],
+  "pending": [
+    "Same source-bound expanded11-selector root gate after exact14-file formatter",
+    "Independent peer re-review before T4",
+    "Full physical resolver/crash/send/Core/browser/channel joins and unchanged whole QA gates"
+  ],
+  "sourceFrozen": true,
+  "noDGradleProcess": true,
+  "previousHandoff": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/t2-terminal-data-frozen-handoff.json",
+    "sha256": "356206a93f31c53c2ae849f0d11c8376f382b93ab2aff08e58fe073ab66aea25"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "command": [
+    "./gradlew",
+    "test",
+    "--rerun-tasks",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue"
+  ],
+  "classes": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue"
+  ],
+  "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "startedAt": "2026-10-11T15:29:12.835621+00:00",
+  "fixturePrerequisites": {
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+  },
+  "prerequisiteSelected": false
+}

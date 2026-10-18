@@ -1,0 +1,320 @@
+{
+  "artifact": "Independent Quinn selected read-only source and evidence fingerprints",
+  "capturedAtUTC": "2026-10-15T06:31:09.460450+00:00",
+  "qualification": "Exact selected source/design/evidence bytes at bounded seam review. Generated bundles and broad supporting files are fingerprinted; this is not a complete codebase audit or source/dist execution release freeze.",
+  "files": {
+    ".codex/skills/aiox-architect/SKILL.md": {
+      "sha256": "376153f250f0d4142f19fe0835e43cc2157072ee881db6daf33ca033efab3962",
+      "bytes": 1552,
+      "ariaSourceObservation": "376153f250f0d4142f19fe0835e43cc2157072ee881db6daf33ca033efab3962",
+      "matchesAriaObservation": true
+    },
+    ".aiox-core/development/agents/architect.md": {
+      "sha256": "c45b1e71af39b5da34a832dcc3d1c9b41b6270de61f79d4bada3c27b46be19df",
+      "bytes": 21210,
+      "ariaSourceObservation": "c45b1e71af39b5da34a832dcc3d1c9b41b6270de61f79d4bada3c27b46be19df",
+      "matchesAriaObservation": true
+    },
+    ".aiox-core/constitution.md": {
+      "sha256": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+      "bytes": 9089,
+      "ariaSourceObservation": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+      "matchesAriaObservation": true
+    },
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": {
+      "sha256": "1b8df23c11becdb3991ae1a00206d76651e9ff383a5e8a27495807cb357a658d",
+      "bytes": 60308,
+      "ariaSourceObservation": "9afc02bb238d76f941fff47a54ebaedb9f72aec59a56d88e4759a6b76868ba1d",
+      "matchesAriaObservation": false
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/implementation-ruling.md": {
+      "sha256": "23d87def447f08bbf6f8d305abbdf1d55b9ba53a11221d2201695f265e6a8feb",
+      "bytes": 28554,
+      "ariaSourceObservation": "23d87def447f08bbf6f8d305abbdf1d55b9ba53a11221d2201695f265e6a8feb",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/manifest.json": {
+      "sha256": "54c5551d6d3316b3cc384fc4ebbf6d78476840130625476f2af50e193efc3818",
+      "bytes": 10048,
+      "ariaSourceObservation": "54c5551d6d3316b3cc384fc4ebbf6d78476840130625476f2af50e193efc3818",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/zero-consumer-child-mapping-issue.json": {
+      "sha256": "2d2cfbd33f3224561c8bffccd72fcef81e2259721cab47f66013caff3eab1276",
+      "bytes": 3192,
+      "ariaSourceObservation": "2d2cfbd33f3224561c8bffccd72fcef81e2259721cab47f66013caff3eab1276",
+      "matchesAriaObservation": true
+    },
+    "studio-runner/src/validator/observedHistory.ts": {
+      "sha256": "114b3d64dc3966651c3d70df491ab3a9f981278da08a16da6a2a138206bba973",
+      "bytes": 13863,
+      "ariaSourceObservation": "114b3d64dc3966651c3d70df491ab3a9f981278da08a16da6a2a138206bba973",
+      "matchesAriaObservation": true
+    },
+    "studio-runner/src/validator/observedSnapshots.ts": {
+      "sha256": "a8a53dedfa041aa9a671e1e03361fee5572cdfa9bc3abca91b5d53e160332928",
+      "bytes": 11314,
+      "ariaSourceObservation": "a8a53dedfa041aa9a671e1e03361fee5572cdfa9bc3abca91b5d53e160332928",
+      "matchesAriaObservation": true
+    },
+    "studio-runner/src/validator/observedReplay.ts": {
+      "sha256": "829eeac9d27180b78a3b18b445cf315df97730ad36361cc74e3cea7bd7ed5ac5",
+      "bytes": 44462,
+      "ariaSourceObservation": "829eeac9d27180b78a3b18b445cf315df97730ad36361cc74e3cea7bd7ed5ac5",
+      "matchesAriaObservation": true
+    },
+    "studio-runner/src/validator/observedReferencePolicy.ts": {
+      "sha256": "3f57d0acb304df8a5dc626c6fe4f3161f90444f97d2d2a3cc12a8787ada6a948",
+      "bytes": 32008,
+      "ariaSourceObservation": "3f57d0acb304df8a5dc626c6fe4f3161f90444f97d2d2a3cc12a8787ada6a948",
+      "matchesAriaObservation": true
+    },
+    "studio-runner/src/executor/observedReplay.ts": {
+      "sha256": "250fc0a1af5aa510931a9be78baa9e2c2f47557e4b3fdf884fe26d16f7239dac",
+      "bytes": 22958,
+      "ariaSourceObservation": "250fc0a1af5aa510931a9be78baa9e2c2f47557e4b3fdf884fe26d16f7239dac",
+      "matchesAriaObservation": true
+    },
+    "studio-runner/src/executor/observedOperations.ts": {
+      "sha256": "46d8b23d5cc0e6cbe785c9b6e7a03a143d41b4efe2acae3cf2f613886a374fd4",
+      "bytes": 69264,
+      "ariaSourceObservation": "46d8b23d5cc0e6cbe785c9b6e7a03a143d41b4efe2acae3cf2f613886a374fd4",
+      "matchesAriaObservation": true
+    },
+    "studio-runner/src/validator/observedSchemas.json": {
+      "sha256": "f84cf6ca767a13af7fa1df7e892b72f975f2652a51c7b2347a26f08c7d17b4f0",
+      "bytes": 313862,
+      "ariaSourceObservation": "f84cf6ca767a13af7fa1df7e892b72f975f2652a51c7b2347a26f08c7d17b4f0",
+      "matchesAriaObservation": true
+    },
+    "studio-runner/src/run/launcher.ts": {
+      "sha256": "196a53ebff84522aaee8cc24df0ea943aa215f83267170212e1fe44674ea8adf",
+      "bytes": 33459,
+      "ariaSourceObservation": "196a53ebff84522aaee8cc24df0ea943aa215f83267170212e1fe44674ea8adf",
+      "matchesAriaObservation": true
+    },
+    "studio-runner/src/run/childRuntime.ts": {
+      "sha256": "1e3223c4622d15c8e14c41a976c3482c8063cc4ecfc9fb8571a41c7570665716",
+      "bytes": 16201,
+      "ariaSourceObservation": "1e3223c4622d15c8e14c41a976c3482c8063cc4ecfc9fb8571a41c7570665716",
+      "matchesAriaObservation": true
+    },
+    "studio-runner/src/run/protocol.ts": {
+      "sha256": "b4dd186e38403a017a70d2925bf6d6e77842c61c2fe7c4c01ebba26119eea00a",
+      "bytes": 1664,
+      "ariaSourceObservation": "b4dd186e38403a017a70d2925bf6d6e77842c61c2fe7c4c01ebba26119eea00a",
+      "matchesAriaObservation": true
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/replay-ipc.schema.json": {
+      "sha256": "f3df0dcace0a9f6e2c575d86d7008e64b0351b7f488957050c488315141a9c6d",
+      "bytes": 30181,
+      "ariaSourceObservation": "f3df0dcace0a9f6e2c575d86d7008e64b0351b7f488957050c488315141a9c6d",
+      "matchesAriaObservation": true
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/replay-artifact.schema.json": {
+      "sha256": "590e3d79a0d4b6ef5705083950324bc962b536958d6878b97b13859e1c2ff989",
+      "bytes": 2008,
+      "ariaSourceObservation": "590e3d79a0d4b6ef5705083950324bc962b536958d6878b97b13859e1c2ff989",
+      "matchesAriaObservation": true
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/replay-job.schema.json": {
+      "sha256": "f1c850dedcc62e7e1cc9cce1b88942d8975d28ae6cadcc39a96075b94ecf501f",
+      "bytes": 13088,
+      "ariaSourceObservation": "f1c850dedcc62e7e1cc9cce1b88942d8975d28ae6cadcc39a96075b94ecf501f",
+      "matchesAriaObservation": true
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/learned-plan.schema.json": {
+      "sha256": "404ec2ea1ee733371d7d36f379f9203721a3aba60f00f7fb256bed8a0280cdff",
+      "bytes": 10783,
+      "ariaSourceObservation": "404ec2ea1ee733371d7d36f379f9203721a3aba60f00f7fb256bed8a0280cdff",
+      "matchesAriaObservation": true
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/binding.schema.json": {
+      "sha256": "78ba6b131343ec5b41c9e8f38a70907264875e8702a3a5cb80b7dfefbf892657",
+      "bytes": 2219,
+      "ariaSourceObservation": "78ba6b131343ec5b41c9e8f38a70907264875e8702a3a5cb80b7dfefbf892657",
+      "matchesAriaObservation": true
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json": {
+      "sha256": "40d547d9891561541947b591ffa6ba1d07ae2caff7349fd780db4acc8d5313d7",
+      "bytes": 47271,
+      "ariaSourceObservation": "40d547d9891561541947b591ffa6ba1d07ae2caff7349fd780db4acc8d5313d7",
+      "matchesAriaObservation": true
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/guided-model-response.schema.json": {
+      "sha256": "2d986c098548b604d6fe75a3597397eabe325705550a78286e76ae5ae2a176ca",
+      "bytes": 66554,
+      "ariaSourceObservation": "2d986c098548b604d6fe75a3597397eabe325705550a78286e76ae5ae2a176ca",
+      "matchesAriaObservation": true
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedEffectiveGraph.java": {
+      "sha256": "ec72094efdec593c6d73d378e4b0f5445ba80ffd1c44927d49c80d5ac462dc39",
+      "bytes": 15952,
+      "ariaSourceObservation": "ec72094efdec593c6d73d378e4b0f5445ba80ffd1c44927d49c80d5ac462dc39",
+      "matchesAriaObservation": true
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java": {
+      "sha256": "414ad82d6467406693fd868a036b4d0ee5590880b3d42dcbd0c71a7b6b688c09",
+      "bytes": 13913,
+      "ariaSourceObservation": "414ad82d6467406693fd868a036b4d0ee5590880b3d42dcbd0c71a7b6b688c09",
+      "matchesAriaObservation": true
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java": {
+      "sha256": "ec6448d6baef417ffb69366be9f01bd5da13fa87859a2d8c73a1e83956ce6792",
+      "bytes": 5646,
+      "ariaSourceObservation": "ec6448d6baef417ffb69366be9f01bd5da13fa87859a2d8c73a1e83956ce6792",
+      "matchesAriaObservation": true
+    },
+    "tools/build-studio-observed-schemas.cjs": {
+      "sha256": "9b72380011ff4784750f663369b737c37e2610bc1d00b3dd5a403a0574f5a710",
+      "bytes": 7420,
+      "ariaSourceObservation": "9b72380011ff4784750f663369b737c37e2610bc1d00b3dd5a403a0574f5a710",
+      "matchesAriaObservation": true
+    },
+    "studio-runner/test/run/observedReplayProtocol.test.ts": {
+      "sha256": "a258d8b41882d0b6c66abdbf983c8479d66bda7dc9985cadfc35c68059a133c9",
+      "bytes": 17271,
+      "ariaSourceObservation": "a258d8b41882d0b6c66abdbf983c8479d66bda7dc9985cadfc35c68059a133c9",
+      "matchesAriaObservation": true
+    },
+    "studio-runner/test/observedReplayExecutor.test.ts": {
+      "sha256": "d58c6d5c78516e1eb3442ae3ad59a46bec808b194ec70e73ba7791eef77805e7",
+      "bytes": 23334,
+      "ariaSourceObservation": "d58c6d5c78516e1eb3442ae3ad59a46bec808b194ec70e73ba7791eef77805e7",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/ruling.md": {
+      "sha256": "4cfd50b1a9d3bae194584791455512914b1feb780670d33e9ade822c6d051688",
+      "bytes": 12128,
+      "ariaSourceObservation": "4cfd50b1a9d3bae194584791455512914b1feb780670d33e9ade822c6d051688",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/manifest.json": {
+      "sha256": "6f74157cf539d89714a40bce147442ffae7f45d22c2d4c059d2183d522577f22",
+      "bytes": 4901,
+      "ariaSourceObservation": "6f74157cf539d89714a40bce147442ffae7f45d22c2d4c059d2183d522577f22",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/qa-review.json": {
+      "sha256": "8dffa911c145d44c9d53d3723491a33b974a0354d1361ec89956436c7bdc999a",
+      "bytes": 19726,
+      "ariaSourceObservation": "8dffa911c145d44c9d53d3723491a33b974a0354d1361ec89956436c7bdc999a",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/ruling.md": {
+      "sha256": "96b15fbe740a4d89ce4db418db4880e4c374b08d91fce9fa9ce84ae4aa3a87da",
+      "bytes": 12504,
+      "ariaSourceObservation": "96b15fbe740a4d89ce4db418db4880e4c374b08d91fce9fa9ce84ae4aa3a87da",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/manifest.json": {
+      "sha256": "879aaa09344878f846b34dc4d1c98c8d117c2fd51e27ffe445d505e16dbb838a",
+      "bytes": 1954,
+      "ariaSourceObservation": "879aaa09344878f846b34dc4d1c98c8d117c2fd51e27ffe445d505e16dbb838a",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/qa-review.json": {
+      "sha256": "003fce36c88cfe4e19d88180f08d8bbc8a24b54e2a6691fd7e6007dcd01a6817",
+      "bytes": 15228,
+      "ariaSourceObservation": "003fce36c88cfe4e19d88180f08d8bbc8a24b54e2a6691fd7e6007dcd01a6817",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/ruling.md": {
+      "sha256": "a095c6221ed200f6802f8fc09f97a5fc26ef60ffe8ae6ef46093af3b24928d20",
+      "bytes": 13706,
+      "ariaSourceObservation": "a095c6221ed200f6802f8fc09f97a5fc26ef60ffe8ae6ef46093af3b24928d20",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/manifest.json": {
+      "sha256": "0bf2a5a9ea32f79b27563809b68ba6e2de9f0ccbf2633f54302e2f3bd031e311",
+      "bytes": 2512,
+      "ariaSourceObservation": "0bf2a5a9ea32f79b27563809b68ba6e2de9f0ccbf2633f54302e2f3bd031e311",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/qa-review.json": {
+      "sha256": "0c97a71d73c192d61708b6798e311aeeae5c31fc27c98264c5c8a94e38d14e8e",
+      "bytes": 19674,
+      "ariaSourceObservation": "0c97a71d73c192d61708b6798e311aeeae5c31fc27c98264c5c8a94e38d14e8e",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-04/ruling.md": {
+      "sha256": "64a0368cb1c9834b95930629d43d7ec5745132a31ad22cfe7c850213c11cf77e",
+      "bytes": 3389,
+      "ariaSourceObservation": "64a0368cb1c9834b95930629d43d7ec5745132a31ad22cfe7c850213c11cf77e",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-04/manifest.json": {
+      "sha256": "1cc89ac2cb5947c36701147546ec9cb15c8f6ee890490b255626093a34e71697",
+      "bytes": 2447,
+      "ariaSourceObservation": "1cc89ac2cb5947c36701147546ec9cb15c8f6ee890490b255626093a34e71697",
+      "matchesAriaObservation": true
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-04/qa-review.json": {
+      "sha256": "0999abd94e23280c2740fbb11f237b7309b5d5f14491a6cf777f69baa15fffdf",
+      "bytes": 10826,
+      "ariaSourceObservation": "0999abd94e23280c2740fbb11f237b7309b5d5f14491a6cf777f69baa15fffdf",
+      "matchesAriaObservation": true
+    },
+    "studio-runner/src/run/observedReplayAdapter.ts": {
+      "sha256": "743d1564f192e865dd9377083037272031223607e33c31a5bcc57129567babb6",
+      "bytes": 9933,
+      "ariaSourceObservation": null,
+      "matchesAriaObservation": null
+    },
+    "studio-runner/src/server/runCoordinator.ts": {
+      "sha256": "004e52deb3e0b1965a8dec43db08e17170515cbcd5fc5f2980269a46433ed52f",
+      "bytes": 50579,
+      "ariaSourceObservation": null,
+      "matchesAriaObservation": null
+    },
+    "studio-runner/src/reporting/admissionClient.ts": {
+      "sha256": "672a3077efc99f8ede43e97ce3f4836f036798aa8ff3dbd531260a84dcffba88",
+      "bytes": 4202,
+      "ariaSourceObservation": null,
+      "matchesAriaObservation": null
+    },
+    "studio-runner/src/guided/contracts.ts": {
+      "sha256": "e38f5e1c2f53776f98602cfacc9e3e2c9737372a004cbf55b69a3077b56b8950",
+      "bytes": 11916,
+      "ariaSourceObservation": null,
+      "matchesAriaObservation": null
+    },
+    "studio-runner/test/run/observedChildRuntime.test.ts": {
+      "sha256": "22db2e781d93561ada3473260e95fa58775fd7c02386b0c86ac8c9fb4e15d3b5",
+      "bytes": 12012,
+      "ariaSourceObservation": null,
+      "matchesAriaObservation": null
+    },
+    "studio-runner/test/observedIncrementalValidation.test.ts": {
+      "sha256": "be4dcb0e6f39c99e4ce4ec4691cc5b972b6c8469c1e8f7f0c229c416731437b8",
+      "bytes": 3547,
+      "ariaSourceObservation": null,
+      "matchesAriaObservation": null
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java": {
+      "sha256": "dea383304b28264ca06069e765c459e17e2469819005df4cdb879429b6169d18",
+      "bytes": 6656,
+      "ariaSourceObservation": null,
+      "matchesAriaObservation": null
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/acceptance-inventory.json": {
+      "sha256": "7bc0c055272b11a7aa3d8715b67931f14313d26c56c04b1a9e26bfbcf995e501",
+      "bytes": 30359,
+      "ariaSourceObservation": null,
+      "matchesAriaObservation": null
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/acceptance-delta.json": {
+      "sha256": "02b2fdb232a141de8ad3c2358aa37020a1ff8fabb3458abe192eab80b411fc46",
+      "bytes": 10765,
+      "ariaSourceObservation": null,
+      "matchesAriaObservation": null
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/unit-feedback-attempt01-receipt.json": {
+      "sha256": "4a461b1d1310ccf8a830722adc04949e87aea2c9b310cc8aceed84b3242f4ac4",
+      "bytes": 31378,
+      "ariaSourceObservation": null,
+      "matchesAriaObservation": null
+    }
+  },
+  "sourceDriftInterpretation": "Only story bookkeeping differs from Aria diagnostic snapshot; no reviewed runtime/schema/generated source differs. Story is not edited or lifecycle-reviewed here."
+}

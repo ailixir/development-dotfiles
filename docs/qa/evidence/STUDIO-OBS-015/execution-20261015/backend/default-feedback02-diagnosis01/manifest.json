@@ -1,0 +1,46 @@
+{
+  "classification": "BOUNDED_ACTUAL_FAILURE_DIAGNOSIS_SOURCE_REPAIR_PLAN_NOT_FORMAL_QA",
+  "payloads": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/default-feedback02-diagnosis01/review.md",
+      "sha256": "95bfaaef6803208746bda338917c06da22a1f4f106b3d0cd53bcc0ca8bf64393",
+      "bytes": 10359
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/default-feedback02-diagnosis01/checks.json",
+      "sha256": "e483959431f922f3a02b35beb8b5ee836e961f5430297105665ff1fd24664d76",
+      "bytes": 17593
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/default-feedback02-diagnosis01/source-inventory.json",
+      "sha256": "df367aba3e423c1bf5ea844cf54d278a496b1de75dbb5cdee046be2847ccc11a",
+      "bytes": 5940
+    }
+  ],
+  "inputCount": 22,
+  "namedInputsStableAtWrite": true,
+  "globalStabilityClaim": false,
+  "actualLowererFailures": 23,
+  "failureSubgroups": {
+    "18 reconstructed parents: worker identity guard289": 18,
+    "2 control parents: history session identity guard39": 2,
+    "1 nonexistent configurationReferences[0]": 1,
+    "2 missing hashes.artifactHash lookup": 2
+  },
+  "planningActualFailedVariants": 4,
+  "productionChangesRecommended": false,
+  "goldenSchemaCapChangesRecommended": false,
+  "candidateWholesaleMoveRejected": true,
+  "minimalSourcePaths": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java"
+  ],
+  "sourceWrites": false,
+  "reviewerRuntimeExecution": false,
+  "sourceRelease": false,
+  "formalStoryQaVerdict": null,
+  "lifecycleChange": false,
+  "full015then008ScopeUnchanged": true,
+  "row85": "originalOPENpendingunamended"
+}

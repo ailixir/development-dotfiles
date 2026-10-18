@@ -1,0 +1,63 @@
+// Independent bounded schema checks. No app, browser, database, build or service imports.
+const fs = require('node:fs');
+const path = require('node:path');
+const Ajv = require('ajv');
+const crypto = require('node:crypto');
+const root = path.resolve(__dirname, '../../../../../..');
+const base = path.dirname(__dirname);
+const read = p => JSON.parse(fs.readFileSync(p, 'utf8'));
+const digest = p => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const schema = read(path.join(base, 'architect-public-projections.schema.json'));
+const rulings = read(path.join(base, 'architect-rulings.json'));
+const receipt = read(path.join(base, 'architect-completion-receipt.json'));
+const ajv = new Ajv({strict: false, allErrors: true});
+require('ajv-formats')(ajv);
+const versions = read(path.join(root, 'docs/specs/studio-observed-authoring/contracts/v3/versions.schema.json'));
+ajv.addSchema(versions);ajv.addSchema(schema);
+const cases = [];
+const test = (name, definition, value, expected) => {
+  const validate = ajv.compile({$ref: schema.$id + '#/definitions/' + definition});
+  const actual = validate(value);
+  cases.push({name,definition,expected,actual,ok:actual===expected});
+};
+const clone = x => JSON.parse(JSON.stringify(x));
+const uuid = n => '00000000-0000-4000-8000-' + String(n).padStart(12,'0');
+const context = {schemaVersion:3,testId:uuid(1),sourceRevision:'1',configurationRevision:'2',environmentId:'test',applicationId:'orders',versions:{contract:3}};
+test('capability-available-exact-context','StudioCapabilities',{vaultSecrets:true,guidedStart:{available:true,context}},true);
+test('capability-off-context-unavailable','StudioCapabilities',{vaultSecrets:false,guidedStart:{available:false,code:'RUNTIME_INCOMPATIBLE'}},true);
+test('capability-readable-without-execute','StudioCapabilities',{vaultSecrets:true,guidedStart:{available:false,code:'FORBIDDEN_SCOPE'}},true);
+for(const field of ['value','provider','token','policy','csiId'])test('capability-rejects-private-extra-'+field,'StudioCapabilities',{vaultSecrets:true,guidedStart:{available:true,context},[field]:'canary'},false);
+for(const field of Object.keys(context)) {const x=clone(context);delete x[field];test('context-required-'+field,'StudioCapabilities',{vaultSecrets:true,guidedStart:{available:true,context:x}},false);}
+test('context-rejects-unsafe-number-revision','StudioCapabilities',{vaultSecrets:true,guidedStart:{available:true,context:{...context,sourceRevision:1}}},false);
+test('context-rejects-secret-value','StudioCapabilities',{vaultSecrets:true,guidedStart:{available:true,context:{...context,value:'canary'}}},false);
+test('context-unavailable-cannot-carry-context','StudioCapabilities',{vaultSecrets:true,guidedStart:{available:false,code:'RUNTIME_INCOMPATIBLE',context}},false);
+const progress = {stepCount:10,activeStep:{stepId:uuid(4),number:4,text:'Fill password with <secret LOGIN_PASSWORD>'}};
+test('active-progress-exact-public-shape','PublicProgress',progress,true);
+test('terminal-progress-no-active-step','PublicProgress',{stepCount:10,activeStep:null},true);
+test('progress-rejects-zero-based-display-number','PublicProgress',{stepCount:10,activeStep:{...progress.activeStep,number:0}},false);
+for(const field of ['value','locator','observation','modelResponse'])test('progress-rejects-private-extra-'+field,'PublicProgress',{...progress,activeStep:{...progress.activeStep,[field]:'canary'}},false);
+const step = {stepId:uuid(1),number:1,completed:false,learnedFromThisRun:false,reusedFrom:null,relearnedAfterDrift:false,actions:[]};
+const explanation = {sessionId:'session-1',sourceRevision:'1',configurationRevision:'2',steps:[step],referenceFlows:[]};
+test('failed-unattempted-explanation-shape','PublicExplanation',explanation,true);
+for(const [kind,label]of Object.entries(rulings.labelVocabulary)) {
+  const action={admissionId:'admission-1',ordinal:0,attemptOrdinal:0,operationKind:kind,safeLabel:label,outcome:'SUCCEEDED',referenceIds:['LOGIN_PASSWORD']};
+  const withAction={...explanation,steps:[{...step,actions:[action]}]};
+  test('actual-kind-vocabulary-'+kind,'PublicExplanation',withAction,true);
+  test('kind-rejects-fabricated-label-'+kind,'PublicExplanation',{...withAction,steps:[{...step,actions:[{...action,safeLabel:'canary arbitrary page label'}]}]},false);
+}
+const action = {admissionId:'admission-spent',ordinal:1,attemptOrdinal:0,operationKind:'fill',safeLabel:'Fill field',outcome:'FAILED',referenceIds:['LOGIN_PASSWORD']};
+test('spent-and-fresh-attempts-distinct','PublicExplanation',{...explanation,steps:[{...step,actions:[action,{...action,admissionId:'admission-fresh',attemptOrdinal:1,outcome:'SUCCEEDED'}]}]},true);
+test('third-attempt-refused','PublicExplanation',{...explanation,steps:[{...step,actions:[{...action,attemptOrdinal:2}]}]},false);
+for(const field of ['value','operation','proposal','locator','url','node','policyReason'])test('explanation-rejects-private-extra-'+field,'PublicExplanation',{...explanation,steps:[{...step,actions:[{...action,[field]:'canary'}]}]},false);
+test('reference-flow-exact-identities','PublicExplanation',{...explanation,referenceFlows:[{bindingId:'binding-1',producerStepId:uuid(2),consumerStepId:uuid(4),argumentSlot:'fill.value'}]},true);
+test('reference-flow-rejects-value','PublicExplanation',{...explanation,referenceFlows:[{bindingId:'binding-1',producerStepId:uuid(2),consumerStepId:uuid(4),argumentSlot:'fill.value',value:'canary'}]},false);
+const files = Object.entries(receipt.files).map(([file,expected])=>({file,expected,actual:digest(path.join(base,file)),ok:expected===digest(path.join(base,file))}));
+const sources = Object.entries(rulings.sourceSnapshots).map(([file,expected])=>({file,expected,actual:digest(path.join(root,file)),unchanged:expected===digest(path.join(root,file))}));
+const delta=read(path.join(base,'architect-test-delta.json'));
+const ux=read(path.join(base,'ux-implementation-plan.json'));
+const errors=[...cases.filter(x=>!x.ok),...files.filter(x=>!x.ok)];
+if(delta.cases.length!==16||delta.cases.some(x=>x.status!=='PLANNED_NOT_RUN'))errors.push({name:'planned-delta-inventory'});
+if(ux.coverage.length!==9||ux.inheritedObligations.length!==17||[...ux.coverage,...ux.inheritedObligations].some(x=>x.status!=='PLANNED_NOT_RUN'))errors.push({name:'original-ac-inherited-inventory'});
+const result={classification:'INDEPENDENT_DESIGN_SCHEMA_AND_HASH_CHECKS_ONLY',createdAt:new Date().toISOString(),rulingsSha256:digest(path.join(base,'architect-rulings.json')),receiptSha256:digest(path.join(base,'architect-completion-receipt.json')),frozenBoundFileChecks:files,sourceSnapshots:sources,sourceSnapshotDriftMeaning:'Active015C-int production inputs are provisional for008; post015 rebaseline remains mandatory, never credit historical hashes as current.',schemaCases:cases,counts:{schemaCases:cases.length,originalAcRows:ux.coverage.length,inheritedRows:ux.inheritedObligations.length,deltaCases:delta.cases.length},errors,status:errors.length?'FAIL':'PASS',applicationTestsExecuted:0,databaseCommandsExecuted:0,browserCommandsExecuted:0,buildsExecuted:0};
+fs.writeFileSync(path.join(__dirname,'independent-projection-checks.json'),JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify({status:result.status,counts:result.counts,frozenBoundFiles:files.length,sourceSnapshots:sources.length,sourceDrift:sources.filter(x=>!x.unchanged),errors},null,2));process.exitCode=errors.length?1:0;

@@ -1,0 +1,267 @@
+{
+  "createdUtc": "2026-10-15T00:54:55.859918+00:00",
+  "status": "TWO_ORIGINAL_LIVE_ORACLES_EXECUTED_GREEN_FINAL_AGGREGATE_STILL_REQUIRED",
+  "doneAllowed": false,
+  "story": "STUDIO-OBS-014",
+  "sourceChanged": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+  "beforeSha256": "c1194e0ab31cf6253b9d974fb78de8e98f6daa15ca0309c58fe7defe5d27714b",
+  "afterSha256": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b",
+  "sourceBeforeByteCopy": "GuidedPlanningIntegrationTest.before.java.txt",
+  "sourceAfterByteCopy": "GuidedPlanningIntegrationTest.after.java.txt",
+  "patch": "implementation.patch",
+  "allOtherBackendSourcesUnchanged": true,
+  "backendSourceFilesChecked": 812,
+  "runnerDistUnchanged": true,
+  "runnerDistFilesChecked": 238,
+  "noProductionContractMigrationOrSDKChange": true,
+  "testCount": "All prior56Planning invocations preserved;1new namedlivecase adds57expectedfullclassinvocations. Runtimefocusedonlynewcase1PASS; fullnormalbackendcheckpending.",
+  "configuredFormatterIdempotent": true,
+  "commands": {
+    "format01-command.json": {
+      "command": [
+        "./gradlew",
+        "spotlessApply",
+        "-PspotlessFiles=src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+        "--console=plain"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 1.4935718750348315,
+      "sourceBefore": "b1280c202139db31822f149a9ad0c3f4501adaa2f2ce883448430fa1fb923ed1",
+      "sourceAfter": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b",
+      "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
+    },
+    "format02-command.json": {
+      "command": [
+        "./gradlew",
+        "spotlessApply",
+        "-PspotlessFiles=src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+        "--console=plain"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 0.6073787909699604,
+      "sourceBefore": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b",
+      "sourceAfter": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b",
+      "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
+    },
+    "compile-static-command.json": {
+      "command": [
+        "./gradlew",
+        "compileTestJava",
+        "spotlessCheck",
+        "checkstyleMain",
+        "checkstyleTest",
+        "--console=plain"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 9.142589333001524,
+      "sourceBefore": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b",
+      "sourceAfter": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b",
+      "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
+    },
+    "live-policy-targeted-attempt01-results.json": {
+      "command": [
+        "./gradlew",
+        "test",
+        "--tests",
+        "*GuidedPlanningIntegrationTest.aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch",
+        "--console=plain"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 27.068819999927655,
+      "tests": [
+        {
+          "name": "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch()",
+          "pass": true
+        }
+      ],
+      "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
+    },
+    "mounted-process-attempt01-command.json": {
+      "command": [
+        "node",
+        "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-process-harness.cjs"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 5.482230500085279
+    }
+  },
+  "liveActualProof": {
+    "evidence": "actual-live-policy-proof.json",
+    "wrapperIdentityAndOwnedCleanup": "live-wrapper-process-cleanup.json",
+    "guardTally": "live-policy-guard-tally.json",
+    "importantLimit": "Realbackend/client/workerexecuted; testonlywirecopyforgespolicyHash,actualPlaywrightboundaryinstrumentationcallsoriginal. NodeownedworkerconfirmeddeadpostJUnitAfterEach. NoStubRunner/browserreplacement/syntheticreply/refusal."
+  },
+  "mountedProcessProof": {
+    "evidence": "mounted-process-results.json",
+    "harness": "mounted-process-harness.cjs",
+    "variants": 3,
+    "validBaselineReallyListenedAndExited0": true,
+    "badVariantsExited1AndFixedStderr": true,
+    "portSamplingPlusSourceOrdering": true,
+    "zeroSessionCallbacksAndOwnedChildren": true,
+    "ownedScratchRemovedAndOutsideCanaryPreserved": true,
+    "sameActualCommandEnvBaselineOnlyRulesDelta": true,
+    "noMountedConfigCredentialRawContentRetained": true
+  },
+  "denominator": "../denominator-reconciliation/014-unit-denominator-reconciliation.json correcteda2attribution and newlivecase noguardexclusion",
+  "remaining": "IndependentQAconsumption + finalnormal ./gradlew check --continue --console=plain after runnerfailurecorrection/finalgates. No storyPASS/Done/lifecycle authority here.",
+  "resourceWindowReleasedToRoot": true,
+  "finalSourceFreeze": true,
+  "artifacts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/GuidedPlanningIntegrationTest.after.java.txt",
+      "sha256": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b",
+      "bytes": 168031
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/GuidedPlanningIntegrationTest.before.java.txt",
+      "sha256": "c1194e0ab31cf6253b9d974fb78de8e98f6daa15ca0309c58fe7defe5d27714b",
+      "bytes": 154676
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/actual-live-policy-proof.json",
+      "sha256": "0d30a5a7ab638c3f7d09399cb6afe1019d14228bf9185bd019137436fcbbf543",
+      "bytes": 723
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/after-manifest.json",
+      "sha256": "50d51556db7df9b8a6c6bb05db4b20edbba5e8e58190a5917dcc69f982cd5f8a",
+      "bytes": 195437
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/before-manifest.json",
+      "sha256": "fe73ae8a909f689cb4a574d278aaabcc997e62cdd414badc7a5bb0cd39554129",
+      "bytes": 195437
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/compile-static-command.json",
+      "sha256": "69aa2d851dbac1ab208ba3e712275bd058ff023285e2c8101b2bd3438c1e0e37",
+      "bytes": 454
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/compile-static.log",
+      "sha256": "191ffea11d3a9ec43ea83b70fad3b862fc7bf77a8dfe3e4e259ea0fbf30f25d3",
+      "bytes": 804
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/format01-command.json",
+      "sha256": "155d496c65f683eda7a0b0d13a291b8620acf64f464321ceb25447233d00bc8d",
+      "bytes": 506
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/format01.log",
+      "sha256": "7f2d50536152bcdd482712da1a80cc5bf3b846bb3804be1730bfe5c9ed6d49c0",
+      "bytes": 534
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/format02-command.json",
+      "sha256": "0f4c71163189df48f6578116053067af06c735aba85768872cf0a9bff0a70ef0",
+      "bytes": 506
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/format02.log",
+      "sha256": "21cc49b53464fc9bd23faafac41c9c63bedde64882e0a9c25c6cf1cfa463cf8b",
+      "bytes": 537
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/implementation.patch",
+      "sha256": "0fe16540d9211ded8cc425a3d4897b658b47bc9fdf297775173714332b395efe",
+      "bytes": 15039
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-counter-54fd6276-48c9-4e94-a68d-bca9cdf5f270.json",
+      "sha256": "36328cf9be0f352b0265700183477164ccb788a9ed3640a76755b8189bb8654c",
+      "bytes": 73
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-guard-tally.json",
+      "sha256": "f098bc3ddbcbea2820fc3fd2d1e29b2f337414c883dd8b3c1926f802d18e9d36",
+      "bytes": 525
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-targeted-attempt01-results.json",
+      "sha256": "7c37e0958220743f0d6bc9ea902356da4a5a829fdebf36de629f7ae8dbb1c7a7",
+      "bytes": 501
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-targeted-attempt01.log",
+      "sha256": "f47ce5ecb1332087317bd2c4031112e359ecebc6d223c4d4043f056d787f0db2",
+      "bytes": 1273
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-targeted-attempt01.xml",
+      "sha256": "be623108c63b341c691a49ad6f924a96119b98c14881255939c7f7baa7c66dda",
+      "bytes": 2850
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-policy-wrapper-73013f98-ceef-46b6-bddf-19ac4767ad13.mjs",
+      "sha256": "a00ab5a9a6910109e57ec3367e155379779116ac53a9c1db2d37943e950985c7",
+      "bytes": 1163
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/live-wrapper-process-cleanup.json",
+      "sha256": "b5317fa77b47359303c6f4bf1dd1da688b6bd4e7a5bee946fd77dd3ebdf7bf3e",
+      "bytes": 1206
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-baseline.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-baseline.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-nonsecretApproved.stderr.log",
+      "sha256": "67cdbcc9560fe2ac5c8515b13e222f49778f5052bcdd8fc9fa7428e595f85d3c",
+      "bytes": 26
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-nonsecretApproved.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-permittedBusinessData.stderr.log",
+      "sha256": "67cdbcc9560fe2ac5c8515b13e222f49778f5052bcdd8fc9fa7428e595f85d3c",
+      "bytes": 26
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-permittedBusinessData.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-process-attempt01-command.json",
+      "sha256": "f237533c851f3a456f85c19cc5f7a005603256cdae5a03b305c8b47fee3b2513",
+      "bytes": 219
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-process-attempt01.log",
+      "sha256": "0c1f1d222ccc8a81f7c0739aed4cedc2a88ce36bee5ed87d7f99bbcf5056c053",
+      "bytes": 80
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-process-harness.cjs",
+      "sha256": "cb87e0da858c5c501cae5d56e569edfe348f820302bc9b1a4b9c837d6fa3e0ee",
+      "bytes": 13325
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-process-results.json",
+      "sha256": "2ba3da6c6121dde68c3ea59f2f68fe97431e934789ea221dafe86c2bcaea3ccc",
+      "bytes": 12538
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-structuralOnly.stderr.log",
+      "sha256": "67cdbcc9560fe2ac5c8515b13e222f49778f5052bcdd8fc9fa7428e595f85d3c",
+      "bytes": 26
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/live-original-proofs/mounted-structuralOnly.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ]
+}

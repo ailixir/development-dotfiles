@@ -1,0 +1,108 @@
+{
+  "capturedAtUtc": "2026-10-10T15:40:14.169381+00:00",
+  "story": "STUDIO-OBS-007",
+  "reviewer": "Independent Aria architect; not R author",
+  "scope": "Read-only AC18 acquisition/error/annotation impact and new three actual-browser testcase constructions",
+  "disposition": "CORRECT_TEST_CONSTRUCTION_BEFORE_ASSERTING_AC18_PROOF",
+  "runtimeStatus": "NOT_EXECUTED_BY_REVIEWER; dispatched context says new three runtime cases not yet executed",
+  "reproducedRed": false,
+  "sourceConcernOnly": true,
+  "canonicalAc18": {
+    "source": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md:74",
+    "rule": "Annotation of existing failure only; replay existing TARGET_DRIFT/POLICY_REFUSED on non-secretRef-fill action plus current trusted structural signature. No passing-step change. Detail retains actual failing stepId and earlier successful secretRef fill boolean.",
+    "signatureSource": "studio-runner/src/run/loginRequired.ts:3",
+    "singleFunctionRetained": true
+  },
+  "branchAnalysis": [
+    {
+      "source": "studio-runner/src/run/observationCollector.ts:581",
+      "fact": "Unique complete candidate universe with no exact Reports role-link candidate and no same-name Reports role candidate returns ABSENT. A same-name wrong-role candidate instead refuses TARGET_DRIFT. Duplicate/mismatched/changed candidate is structural drift, not elapsed time."
+    },
+    {
+      "source": "studio-runner/src/run/observedReplayAdapter.ts:107",
+      "fact": "ABSENT and VISIBILITY_PENDING request additional bounded observation and continue; REFUSED is propagated. Signature is refreshed from every current observation. Missing target does not itself become TARGET_DRIFT in current source."
+    },
+    {
+      "source": "studio-runner/src/executor/observedReplay.ts:135",
+      "fact": "Total observation/byte and extra observation counters currently exhaust as TIMEOUT. This is resource exhaustion, distinct cause from real elapsed deadline, but same existing wire classification. Do not claim current finite-budget exhaustion is structural drift."
+    },
+    {
+      "source": "studio-runner/src/executor/observedReplay.ts:172",
+      "fact": "Actual PREPARING elapsed deadline -> TIMEOUT; actual INVOKING elapsed deadline -> OUTCOME_UNKNOWN; cancellation -> CANCELLED. Poisoned authority wins over late work and cannot be reclassified by login signature."
+    },
+    {
+      "source": "studio-runner/src/executor/observedReplay.ts:300",
+      "fact": "Only adapter failure TARGET_DRIFT/POLICY_REFUSED and nonsecret action plus signature annotates LOGIN_REQUIRED; no TIMEOUT/OUTCOME_UNKNOWN/CANCELLED/ASSERTION_FAILED annotation. Earlier actual successful secret fill sets loginStepsPresent after completion."
+    }
+  ],
+  "newCases": [
+    {
+      "mode": "no-login",
+      "source": "studio-runner/test/fixtures-tier/secret-login.test.ts:161",
+      "assessment": "TEST_EXPECTATION_NOT_SUPPORTED_BY_STABLE_SOURCE_PATH",
+      "facts": "Navigates unauthenticated /reports, reaches actual /login, then seeks role=link/name=Reports absent from login form. Stable collector acquisition returns ABSENT and performs bounded retries. Five-second step deadline arrives before per-step32 extra-observation budget (minimum100+31*250=7850ms plus collection time). Source predicts TIMEOUT, not annotated LOGIN_REQUIRED. Unexpected real drift or policy refusal could change actual result, so runtime outcome is not asserted."
+    },
+    {
+      "mode": "wrong-password",
+      "assessment": "TEST_EXPECTATION_NOT_SUPPORTED_BY_STABLE_SOURCE_PATH",
+      "facts": "Prior password fill can legitimately PASS and mark PASS USED despite authentication failure. Actual Sign in submit yields rejected fixture receipt and reached login document. Next role=link/name=Reports is stably ABSENT; same five-second PREPARING deadline predicts TIMEOUT. Prior fill true is truthful but does not permit widening eligible annotation codes."
+    },
+    {
+      "mode": "registration",
+      "assessment": "SOURCE_CONSISTENT_PASSING_CONTROL",
+      "facts": "Navigates registration, signature is true, actual page URL assert passes, executor retains PASS and no detail. Runtime still unexecuted."
+    }
+  ],
+  "publishedPlanCoverageLimit": "New three cases directly assemble Execute3 from publication fixture fields. They do not themselves execute learn/finalize/publication or establish an authenticated learned session that is explicitly expired between learn and replay. Do not label these as full published-plan expired-session AC18 proof; current joined backend path remains separately required.",
+  "recommendedBoundedCorrection": {
+    "choice": "Correct test/controlled fixture construction; no production error-taxonomy delta requested by this disposition",
+    "steps": [
+      "Retain current two missing-Reports cases as honest actual-browser TIMEOUT/no-login-annotation controls with failed step, later SKIPPED steps, prior wrong-password secret USED and receipt checks. Do not relabel these observed runtime results before execution.",
+      "For positive annotation oracles, learn/freeze an actual protected role=link/name=Reports control and provide a controlled fixture-only expired-session/login submit role=button/name=Reports collision. Same-name wrong-role is a genuine existing collector TARGET_DRIFT. Use the same deterministic fixture login submit label during login learning/submission for wrong-password case, so no injected refusal or invalid manually fabricated learned guard is needed.",
+      "Acquire the real learned protected control in an authenticated fixture session, publish its actual guard, explicitly expire the session before replay. No-login replay reaches login; wrong-password replay completes real secret fill and submit and reaches login; both fail the protected guard as TARGET_DRIFT on the reached current document. Keep actual receipt, prior fill, failed-step and subsequent SKIPPED evidence.",
+      "Keep registration passing actual URL assertion as the signature-true/no-annotation control. Keep current single trusted signature function and earlier-secret-fill boolean. Fixture labels are locator collision construction, never login detection text heuristics.",
+      "If a production missing-target classification change is desired instead, obtain separate bounded architecture/acceptance reconciliation for a private exhaustion cause before implementation; this report authorizes no such change. Do not catch all TIMEOUT, shorten allowed acquisition, reclassify real deadlines/cancellation, or modify passing operations."
+    ],
+    "productionSourceDelta": "NONE_RECOMMENDED_FOR_THIS_TEST_CONSTRUCTION_CORRECTION",
+    "wireConstSchemaPinDelta": "NONE",
+    "limits": "Fixture-only positive collision demonstrates genuine structural drift annotation, not classification of stable absence. Natural stable absence remains TIMEOUT under current canonical acquisition implementation; full publish/current Core/backend joins still required.",
+    "prerequisite": "Root first executes the current three cases unchanged in the isolated runner lane after current serialized backend gate completes; archive exact actual results before any test/fixture/source edits. This source analysis is not reproduced red.",
+    "ownership": "Root owns sequencing/authorization and joined backend gate; R author owns any subsequently authorized test-only fixture/case edits and bound runner verification. Independent architect reviews any proposed production taxonomy change separately. No edit authority granted by this report.",
+    "fixtureOnlyConstructionOptions": [
+      {
+        "option": "Controlled submit-label collision",
+        "construction": "Use a test-only fixture setting making expired and failed-login form submit button name Reports; protected page contains an actual Reports link. Learn the actual login submit guard and actual protected link guard from their respective reached documents, then freeze/publish. Expire session after publication. Adapter receives real observations and collector emits same-name wrong-role TARGET_DRIFT on protected link acquisition. No scripted adapter REFUSED, mocked failure or forged locator proof.",
+        "ownership": "R controlled fixture/test construction; root actual learn/publish/expire join"
+      },
+      {
+        "option": "Retain unmodified fixture and test genuine structural-refusal condition separately",
+        "construction": "Keep the current missing Reports-link scenarios as TIMEOUT controls after authentic execution; add a separately named actual structural guard mismatch case with authentic learned candidate and controlled DOM role/type change. This proves only TARGET_DRIFT annotation, not expired-session three-case oracle by itself.",
+        "ownership": "R scoped fixture/test oracle; root full published expired-session oracle remains required"
+      }
+    ],
+    "publishedProofRequirement": "Direct Execute3 adapter variants remain supplemental runner tests even when collision is authentic. Only actual current Core-guided learn, publish, explicit fixture session expiration and ordinary compiled replay can satisfy the canonical published expired-session obligation."
+  },
+  "bindings": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "7ec961b567234eee0d089bf28d51406b32b5da3737917c9e22e276b54f4aa8ea",
+    "studio-runner/src/executor/observedReplay.ts": "2e55d5fde016475bc7c7ad8dd7cf5a0561b371a4d827b0abd5264a0955876353",
+    "studio-runner/src/run/observedReplayAdapter.ts": "bf7401fa6a39c1751b5fedd093fd4da7433cc5a7ec5194976234a47c66a722f2",
+    "studio-runner/src/run/loginRequired.ts": "ff3ae364e27532ca35437cbcbbdf07c23c50888d09c3c81c571d6bef66e830bd",
+    "studio-runner/src/run/observationCollector.ts": "ba31be90d04885e6329ae02f6559205325740cbd46960a438150a890557c27a2",
+    "studio-runner/test/fixtures-tier/secret-login.test.ts": "b867e6ba251c63e71561fc215b17a246155f28229f25cbd410eb17b887fe1e9d",
+    "studio-runner/test/fixtures/secret-login/server.ts": "2cea73be1af48d4bcd3eaa1768f6c09899fbd8a380812d281641f85b67c3664a",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/login-required-impact-intent.txt": "128a5a616551913060eacfcbb92f0a2c38fb985b6aaf35d48f4bfa4254c72dfb",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/login-required-impact-context.txt": "fdb11b2ae1a4255f65f72aa55d954396f17b677244297c0395a3e62f5038fa0b"
+  },
+  "historicalPixelConcern": "Historical7290-byte all-white native predicate failure remains UNCLASSIFIED_OLD_PIXELS; unrelated and unchanged.",
+  "authorityLimits": {
+    "sourceEdits": false,
+    "testEdits": false,
+    "testRuns": false,
+    "builds": false,
+    "lifecycleChanged": false,
+    "wholeStoryQa": false,
+    "onlyWrite": "docs/qa/evidence/STUDIO-OBS-007/login-required-impact-disposition.json",
+    "wholeWaveBudgetUsd": 500,
+    "actualBillingAvailable": false
+  }
+}

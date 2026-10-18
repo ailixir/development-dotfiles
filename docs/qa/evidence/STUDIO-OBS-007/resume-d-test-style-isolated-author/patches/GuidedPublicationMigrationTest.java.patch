@@ -1,0 +1,39 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java
+@@ -243,11 +243,14 @@
+           "owner@example.test");
+       jdbc.update(
+           "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) "
+-              + "VALUES (?,'Report fixture','unit','LOW','owner@example.test','Development') ON CONFLICT(id) DO NOTHING",
++              + ("VALUES (?,'Report fixture','unit','LOW','owner@example.test',"
++                  + "'Development') ON CONFLICT(id) DO NOTHING"),
+           csi);
+       try {
+         jdbc.update(
+-            "INSERT INTO ui_tests(id,name,csi_id,environment,browser,viewport_width,viewport_height,timeout_seconds,wait_strategy,steps,created_by,authoring,authoring_revision_inputs) "
++            ("INSERT INTO ui_tests(id,name,csi_id,environment,browser,"
++                + "viewport_width,viewport_height,timeout_seconds,wait_strategy,"
++                + "steps,created_by,authoring,authoring_revision_inputs) ")
+                 + "VALUES (?,'Observed report fixture',?,?,?, ?,?,?,?,?::jsonb,'owner@example.test',?::jsonb,?::jsonb)",
+             testId,
+             csi,
+@@ -374,12 +377,17 @@
+                       .put("fence", 1)
+                       .put("leaseExpiresAt", Instant.now().plusSeconds(120).toString());
+               jdbc.update(
+-                  "UPDATE studio_guided_sessions SET state='FINALIZING',document=jsonb_set(jsonb_set(document,'{state}','\"FINALIZING\"'),'{owner}',?::jsonb) WHERE session_id=?",
++                  ("UPDATE studio_guided_sessions SET "
++                      + "state='FINALIZING',document=jsonb_set(jsonb_set(document,"
++                      + "'{state}','\"FINALIZING\"'),'{owner}',?::jsonb) WHERE "
++                      + "session_id=?"),
+                   owner.toString(),
+                   fixtureSession);
+               JsonNode plan = sharedBasis.path("translationPlan");
+               jdbc.update(
+-                  "INSERT INTO studio_guided_translation_plans(session_id,plan_revision,parent_revision,plan,plan_hash) VALUES (?,1,0,?::jsonb,?)",
++                  ("INSERT INTO studio_guided_translation_plans(session_id,"
++                      + "plan_revision,parent_revision,plan,plan_hash) VALUES "
++                      + "(?,1,0,?::jsonb,?)"),
+                   fixtureSession,
+                   plan.toString(),
+                   GuidedContracts.hash(plan));

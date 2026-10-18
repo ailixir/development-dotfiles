@@ -1,0 +1,82 @@
+{
+  "story": "STUDIO-OBS-015",
+  "subject": "Step-text cap contradiction: studio.authoring.max-line-chars 1024 / SOURCE_LINE_TOO_LONG vs AuthoringStep.text maxLength 500 (fullsuite-triage-E item 5)",
+  "owner": "Aria (@architect)",
+  "capturedAtUtc": "2026-10-16T16:23:30Z",
+  "hashAlgorithm": "SHA-256",
+  "readOnly": true,
+  "commandsRun": [
+    "read/grep/git show HEAD/git diff HEAD/git log -S/shasum/python3 -I JSON scan only; no Gradle, no DB, no network, no source edit, no commit"
+  ],
+  "ruling": {
+    "productTruth": 500,
+    "productTruthSource": "docs/specs/studio/openapi.yaml AuthoringStep.text maxLength 500 (frozen Story 10.34, commit e4ab6c6ec); enforced by AuthoringStep @Size, StudioService.validateAuthoring, frontend legacyStudioAuthoringAdapter",
+    "maxLineChars1024": "compile-path leftover (HEAD studio.compile.authoring.max-line-chars + artifact.schema.json representability); reachable at save only via the v1 body deleted by 015 ruling1",
+    "chosenOption": "A: single bound 500; keep SOURCE_LINE_TOO_LONG enforcing it from AuthoringStep.MAX_TEXT_CHARS; delete the max-line-chars property and env var",
+    "rejected": {
+      "B_widen_to_1024": "public contract widening with no product driver; justification (compiled artifact) is gone",
+      "C_delete_code": "capability loss of the step-numbered refusal ratified by ADR-002 section 34 / VAL-024"
+    },
+    "owningStory": "STUDIO-OBS-015",
+    "owningReason": "015 ruling1 deleted the v1 generation, the only path where 1024 was reachable; 015's test port surfaced it; 012A AC-1 correctly preserved the guard as-is",
+    "testCountDelta": 0,
+    "supersedes": [
+      "fullsuite-triage-E/fix.patch StudioWriteValidationControllerTest comment 'The 1024 authoring bound is the refusal case above'"
+    ],
+    "behaviourChangeOnSinglePath": [
+      {"stepChars": "<=500", "before": "accepted", "after": "accepted"},
+      {"stepChars": "501-1024", "before": "400 INVALID_AUTHORING 'Invalid authoring source' (toast: Failed to save)", "after": "400 SOURCE_LINE_TOO_LONG step-numbered, maximum 500"},
+      {"stepChars": ">=1025", "before": "400 SOURCE_LINE_TOO_LONG 'maximum is 1024' (false)", "after": "400 SOURCE_LINE_TOO_LONG 'maximum is 500'"}
+    ]
+  },
+  "requiredChanges": [
+    {"id": "B1", "file": "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringStep.java", "what": "add public static final int MAX_TEXT_CHARS = 500; @Size(max = MAX_TEXT_CHARS)"},
+    {"id": "B2", "file": "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringLimits.java", "what": "line check and message use AuthoringStep.MAX_TEXT_CHARS instead of limits.maxLineChars(); javadoc: contract bound, UTF-16 units, not configurable; order unchanged"},
+    {"id": "B3", "file": "backend/src/main/java/com/citi/put/checks/studio/authoring/StudioAuthoringProperties.java", "what": "remove maxLineChars component, @param and check; message 'studio.authoring.max-steps must be > 0 but was N'"},
+    {"id": "B4", "file": "backend/src/main/resources/application.yml", "what": "delete line 257 max-line-chars: ${STUDIO_AUTHORING_MAX_LINE_CHARS:1024}"},
+    {"id": "B5", "file": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java", "what": "lines 549-551 use AuthoringStep.MAX_TEXT_CHARS; code/message unchanged"},
+    {"id": "O1", "file": "docs/specs/studio/openapi.yaml", "what": "lines 363-364: SOURCE_LINE_TOO_LONG = step text longer than 500 characters, the AuthoringStep.text bound"},
+    {"id": "O2", "file": "docs/specs/studio/openapi.yaml", "what": "AuthoringStep.text (3338-3339): keep maxLength 500; description adds 'At most 500 UTF-16 code units; a longer step is refused 400 SOURCE_LINE_TOO_LONG naming the step number, never its text.'"},
+    {"id": "O3", "file": "studio-runner/test/run/confinement.test.ts", "what": "re-anchor BASE_SHA256 (currently 54fd12cd...cd0d, matches file) with old/new comment"},
+    {"id": "O4", "file": "(none)", "what": "no generator regen: no openapi codegen in frontend/studio-runner package.json; observedSchemas.json derives from unchanged v3 schemas"},
+    {"id": "O5", "file": "docs/architecture/ADR-002-internal-contract-surface.md", "what": "changelog row: section 34.2 1024 bound was the compile bound; single save bound now 500; status unchanged; 501-1024 code INVALID_AUTHORING -> SOURCE_LINE_TOO_LONG; Class C authorized by this ruling"},
+    {"id": "T1", "file": "backend/src/test/java/com/citi/put/checks/studio/StudioWriteValidationControllerTest.java", "what": "line 67: new StudioAuthoringProperties(100)"},
+    {"id": "T2", "file": "backend/src/test/java/com/citi/put/checks/studio/StudioWriteValidationControllerTest.java", "what": "line 171: repeat(501); expected message 'Step 2 is 501 characters long; the maximum is 500. Shorten it or split it into two steps.'"},
+    {"id": "T3", "file": "backend/src/test/java/com/citi/put/checks/studio/StudioWriteValidationControllerTest.java", "what": "line 208: repeat(500); comment '100 steps at the single AuthoringStep.text bound (500).'"},
+    {"id": "T4", "file": "backend/src/test/java/com/citi/put/checks/studio/StudioWriteValidationControllerTest.java", "what": "inside T2 method: a 600-char step answers SOURCE_LINE_TOO_LONG (pins 501-1024 band); no new @Test"},
+    {"id": "F1", "file": "frontend/src/pages/ChecksStudioPage/saveErrorMessage.test.ts", "what": "line 13 fixture message -> real 501-char server message"}
+  ],
+  "verification": [
+    "backend --tests StudioWriteValidationControllerTest",
+    "frontend vitest saveErrorMessage.test.ts",
+    "studio-runner confinement.test.ts",
+    "grep 'max-line-chars|maxLineChars|STUDIO_AUTHORING_MAX_LINE_CHARS|1024 char' in backend/src frontend/src docs/specs/studio -> 0 hits"
+  ],
+  "notRuled": [
+    "studio.authoring.max-steps (same class; AuthoringV2Request @Size(max=100) caps it anyway)",
+    "optional editor character counter",
+    "legacyStudioAuthoringAdapter.ts v1 string-steps branch (ruling1 inventory question)"
+  ],
+  "inputs": {
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/fullsuite-triage-E/review.md": "482ffaba14dd594b41976ec497cbe536482c50c69b87a1fe7f6b8e543f4a08bb",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/fullsuite-triage-E/fix.patch": "b4b628e151a0b0dd293eb7cb8887fc1734dc09474146ff193388748a6a3b9fdc",
+    "docs/specs/studio/openapi.yaml": "54fd12cd9951cad6caa32e78693598eb0a23d4333a11749e2083b340d503cd0d",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringStep.java": "bc446c98e0bd8a28fc133f7bdce8479e4070654d1fe35526e58f5cc3fc17fb67",
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringLimits.java": "e7c03548a47a35e40d036c9392bd6513fe8aa030af19c7c0083b09c8ad05122b",
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/StudioAuthoringProperties.java": "e88da48c6b7c2c3049d0e250c4fee54900c91fa9b8d6d0548b75eae31ed9f38d",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/StudioAuthoringMapper.java": "d57c72ca3a4de4d208c575dc19f3b2ee244c7c67d362c265bddb8ad9b60930b2",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioService.java": "7bb9a5b00d041c4d1cc5e9fedb19b58365b6ada11a8d2acc380570f5015e9797",
+    "backend/src/main/resources/application.yml": "2c7819284988e6e63bb8153588ab04ecba7dbc69b44a7d3e37e2bfa9493791e7",
+    "backend/src/test/java/com/citi/put/checks/studio/StudioWriteValidationControllerTest.java": "2c9c7a400748329b708201d15a3248f28c986ce5e74ee4263ed7be2fec334b58",
+    "frontend/src/pages/ChecksStudioPage/saveErrorMessage.ts": "d72242218fc82abb1f69c660383352db21a20ece10eed67fd90fe16087096772",
+    "frontend/src/pages/ChecksStudioPage/saveErrorMessage.test.ts": "dac8edb176ba8d72019e91a073cf198810dad03b987061e9d9d297d899ef1b8b",
+    "frontend/src/types/studio/legacyStudioAuthoringAdapter.ts": "cdc65b5558411b36d2155f2fa8815e471ea367e556b42c5477e3e60efc9a4103",
+    "studio-runner/test/run/confinement.test.ts": "68917b2bbcbeb9ea769420c9df1dbc544616b4b32020702c6088cd00e4fb779c",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "d4fbf055d99f1aebe49c37cb588207bf5e9e7efe59fda70deb7925452c54fd2d",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012A.story.md": "026e8f62bf0ef23834cf3784c0d7e6a19b6fd9561b390995fcfac521cc49f71e",
+    "docs/architecture/ADR-002-internal-contract-surface.md": "19e6273b94599c0dee4e0ac44343a52eeec43d98b22a132b35bf343f2b12d984"
+  },
+  "outputs": {
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/aria-cap-ruling01/ruling.md": "095edf86fd60e46b5f9a21e9762ca28c12d08f4b98fbd86a5e5d642a001d0793"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "classification": "CONFIRMED_ALIGNED_SOURCE_DEFECT in publicly callable production service pending-prefix branch; not a claim of an observed runtime failure",
+  "source": {
+    "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+    "line": 1381,
+    "anchor": "public JsonNode completeStep"
+  },
+  "existingBehavior": "Allowed states explicitly include REPLAYING_PREFIX; after all real ledger/StepVerifier checks the state expression ignores incremental.pending and writes OBSERVING/FINALIZING. Pending-prefix SQL state invariant refuses generic escape; valid pending completion therefore cannot preserve required state.",
+  "callgraph": [
+    "GuidedPlanningController proposals -> GuidedTranslationService.advance -> fulfilled -> complete -> completeCurrent -> GuidedSessionService.completeStep; normal suffix/no-base path",
+    "GuidedTranslationCoordinator REPLAYING_PREFIX routes plans -> GuidedTranslationService.plan/bootstrap -> advancePrefix; advancePrefix walks actual nextAction/actions and commits switch directly, never calls completeCurrent/completeStep",
+    "No /step-complete HTTP mapping exists in GuidedInternalController or GuidedPlanningController. Do not invent one. Existing GuidedSessionIT and GuidedBridgeIntegrationTest invoke service directly."
+  ],
+  "lawfulPendingRequest": {
+    "api": "service.completeStep(GuidedInternalIdentityFixture.controller(), actualSessionId, actualLiveOwnerFence, newUniqueKey, C.object().put(\"stepId\",INCREMENTAL_STEPS.get(0)))",
+    "preconditions": [
+      "actual current PG-backed pending-prefix session, stateREPLAYING_PREFIX and continuationREPLAYING_PREFIX",
+      "after real step1 navigate/read outcomes committed SUCCEEDED/dispatch1 with exact obligation associations, current stepIndex0",
+      "production GuidedProductionSessionAccess/GuidedStepVerifier complete=true; actual current owner/source/permissions/lease",
+      "hold continuation before coordinator moves current step; never mutate source/clock/fake verifier"
+    ],
+    "expected": "one successful completion increments stepIndex to1, stateREPLAYING_PREFIX, continuationREPLAYING_PREFIX. Repeat exact key returns historical response, no second increment. No model reservation/gateway. Next normal prefix action chosen once."
+  },
+  "minimalFix": "In completeStep state setter, outer conditional incremental.pending(id) ? \"REPLAYING_PREFIX\" : existing finalizing/observing expression. No model call/continuation/switch change; ordinary completion behavior preserved.",
+  "reachabilityCaveat": "Normal real prefix loop does not exercise method, so add exact service+PG proof; do not misrepresent it as actual HTTP step-complete callback. Source fix can be authorized by this explicit accepted-state/invariant contradiction without executing a known invalid pre-fix path."
+}

@@ -1,0 +1,54 @@
+{
+  "schema": "studio-observed-publisher-transaction-candidate/1",
+  "recordedAt": "2026-10-10T16:38:56.862167+00:00",
+  "scope": "Released single-file active-publication transaction call location repair; execution pending root gate",
+  "authority": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/publisher-transaction-disposition.json",
+    "sha256": "562c753a32dbed0f2b5b549ab911438cc12c51d73dc57b1c0e6722228547bbbc"
+  },
+  "source": {
+    "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+    "beforeSha256": "9859044ca8d4fcacf6c6849eebda05656ed50d748f685643e90f67e628f9f36a",
+    "candidateSha256": "87e9a1da8028ecf341aa3c7102069acb223ce44eb81d00e665c9650088a2a650"
+  },
+  "changes": [
+    "Removed only outside-transaction initial checkCurrent(original); original session snapshot and checkUser remain before prepare.",
+    "Existing locked prepare acquires actual session then source, bases.requireCurrent, then checkCurrent(document) before evidence lowering/reserve.",
+    "Replaced outside-transaction post-validator checkCurrent(prepared.session) with short actual session then source locked transaction, current base/source check and checkCurrent(actual current document), ending before unchanged fresh Core authorization."
+  ],
+  "preserved": [
+    "Historical receipt-first branch and authorization/digest checks",
+    "No outer transaction annotation and no network or Core call introduced under locks",
+    "Existing validator outside claim transaction, claim/finish/deadline/attempt ordering",
+    "Final commit source/basis/claim/snapshot/grant fences and lifecycle",
+    "Existing denial and conflict codes; no current-state guard removed"
+  ],
+  "validation": {
+    "gradleExecuted": false,
+    "runtimeExecuted": false,
+    "scope": "source placement inspected only; root owns actual compilation/regression27 gate"
+  },
+  "secretNinthReadOnly": {
+    "archive": "docs/qa/evidence/STUDIO-OBS-007/root-nineflow-diagnostic-gate",
+    "sessionId": "0750d893-788f-4766-a725-4b43bf05005a",
+    "actualState": "FAILED before finalize",
+    "cleanup": "CONFIRMED real worker teardown",
+    "journalFileExpected": "626757000c0edffc8b58f929c13b44ec73fcfa14eb0b532a138b5616c951401d.journal",
+    "journalPresent": false,
+    "interpretation": "No actual runtime context journal retained for this session; earlier source-plan/bootstrap failure is possible. Exact failed stage/errorCode/model response not retained in current evidence. This does not prove zero provider read or a model root cause.",
+    "sourceInspection": "USER selected from exact nonsecretText/sourceStep TWO/fill.value metadata and PASS from authentic secretRef. Model response source references copied from actual manifest. Existing fixture failure projection omits terminal errorCode/providerFailures/modelKinds for ninth.",
+    "proposedNextScope": "Only after root release add safe failure state/progress errorCode/model-kind/provider counter metadata to existing awaitFinalizing diagnostic or failed-test cleanup, no raw gateway/values/canary/oracle changes. Do not alter model or expectations without concrete failure fact."
+  },
+  "limitations": [
+    "Unexecuted compiler/transaction/network boundary oracle on candidate",
+    "Remaining alternative-choice and secret-ninth failures not closed by this repair",
+    "No all19AC/service/Core/browser/fault/allSink completion claim"
+  ],
+  "actions": {
+    "onlyProductionPathEdited": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+    "testRunnerSchemaEdits": false,
+    "gradle": false,
+    "liveProcesses": false,
+    "modelsOrLifecycleChanges": false
+  }
+}

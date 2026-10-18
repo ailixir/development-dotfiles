@@ -1,0 +1,65 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java
+@@ -902,6 +902,62 @@
+     assertThat(assembler.schemaProvenance().path("sourceSelectionSchemaHash").asText()).hasSize(64);
+   }
+ 
++  @Test
++  void startupSchemaEpochReturnsDefensiveCopiesWithoutRebuildingMetadata() {
++    GuidedContracts parsing = org.mockito.Mockito.spy(new GuidedContracts());
++    var assembler = new GuidedPromptAssembler(parsing);
++    ObjectNode baselinePins = assembler.schemaProvenance();
++    String pinsCanonical = GuidedContracts.canonical(baselinePins);
++    var canonicalSchemas = new java.util.EnumMap<GuidedModelRequest.Kind, String>(
++        GuidedModelRequest.Kind.class);
++    for (GuidedModelRequest.Kind kind : GuidedModelRequest.Kind.values()) {
++      canonicalSchemas.put(kind, GuidedContracts.canonical(assembler.providerSchema(kind)));
++    }
++    org.mockito.Mockito.clearInvocations(parsing);
++
++    ObjectNode returnedPins = assembler.schemaProvenance();
++    returnedPins.withObject("/providerSchemaHashes").put("SOURCE_PLAN", "f".repeat(64));
++    returnedPins.removeAll();
++    for (GuidedModelRequest.Kind kind : GuidedModelRequest.Kind.values()) {
++      ObjectNode returnedSchema = (ObjectNode) assembler.providerSchema(kind);
++      for (JsonNode typed : returnedSchema.findParents("type")) {
++        ((ObjectNode) typed).put("type", "changed-returned-copy");
++      }
++      returnedSchema.removeAll();
++      JsonNode freshSchema = assembler.providerSchema(kind);
++      assertThat(freshSchema).isNotSameAs(returnedSchema);
++      assertThat(GuidedContracts.canonical(freshSchema)).isEqualTo(canonicalSchemas.get(kind));
++      assertThat(assembler.schemaProvenance().path("providerSchemaHashes").path(kind.name()).asText())
++          .isEqualTo(GuidedContracts.hash(freshSchema));
++    }
++    ObjectNode freshPins = assembler.schemaProvenance();
++    assertThat(freshPins).isNotSameAs(returnedPins);
++    assertThat(GuidedContracts.canonical(freshPins)).isEqualTo(pinsCanonical);
++    org.mockito.Mockito.verifyNoInteractions(parsing);
++  }
++
++  @Test
++  void failedStaticSchemaConstructionPublishesNoEpoch() {
++    GuidedContracts parsing = org.mockito.Mockito.spy(new GuidedContracts());
++    var parsed = new AtomicInteger();
++    org.mockito.Mockito.doAnswer(
++            invocation -> {
++              if (parsed.incrementAndGet() == 2) {
++                throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
++                    "INVALID_CONTRACT", 422);
++              }
++              return invocation.callRealMethod();
++            })
++        .when(parsing)
++        .parse(org.mockito.ArgumentMatchers.anyString());
++    var published = new java.util.concurrent.atomic.AtomicReference<GuidedPromptAssembler>();
++    assertThatThrownBy(() -> published.set(new GuidedPromptAssembler(parsing)))
++        .isInstanceOf(com.citi.put.checks.studio.guided.session.GuidedSessionException.class)
++        .hasMessage("INVALID_CONTRACT");
++    assertThat(parsed.get()).isEqualTo(2);
++    assertThat(published.get()).isNull();
++  }
++
+   private static void verifyLocalReferences(JsonNode node, JsonNode root) {
+     if (node.has("$ref")) {
+       String reference = node.path("$ref").asText();

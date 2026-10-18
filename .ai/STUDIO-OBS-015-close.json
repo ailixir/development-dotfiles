@@ -1,0 +1,754 @@
+{
+  "schema": 2,
+  "story": "STUDIO-OBS-015",
+  "author": "Pax (@po), independent administrative closure",
+  "closedAt": "2026-10-17T19:12:39.840756+00:00",
+  "verdict": "CONCERNS",
+  "reviewer": "Quinn (Test Architect, independent SDC QA)",
+  "reviewed_revision": "source-digest:9d18f5550ac830bd2164bf4b4261f6d10ec8fd43b837e4bf9e9c990dc7cb5884 dist-digest:897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c",
+  "closureKey": "STUDIO-OBS-015:digest:source-digest:9d18f5550ac830bd2164bf4b4261f6d10ec8fd43b837e4bf9e9c990dc7cb5884 dist-digest:897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c",
+  "closureKeyMethod": "<story-id>:digest:<gate reviewed_revision verbatim> (po-close-story.md step 2; OBS-007/012A/014 precedent). The verbatim value contains one space between the source and dist parts; it is kept as written by QA.",
+  "statusBefore": "Done",
+  "statusAfter": "Done",
+  "lifecycleTransitionByPo": false,
+  "qaLifecycleTransition": "Change Log 0.1.21, Quinn: InReview -> Done, gate CONCERNS; the gate file still reads story_status_observed InProgress / lifecycle_change pending because it was issued at story 0.1.18; the transition is recorded in the story QA Results \"Status transition\" subsection",
+  "storyVersionReviewedByQa": "0.1.18",
+  "storyVersionBefore": "0.1.21",
+  "administrativeVersion": "0.1.22",
+  "storySha256Before": "7d3a08c81cdd549b5b3dbb2705965e5b109d808e81be3ad7cc046c46d80938e3",
+  "storySha256After": "b6e2befdd32d3e882bdac1152ef7e6d0f9d0a9bec26245de2cb5c96f6bcb1b00",
+  "normalizedStorySha256": "7d3a08c81cdd549b5b3dbb2705965e5b109d808e81be3ad7cc046c46d80938e3",
+  "normalizedEqualsBefore": true,
+  "restoresExactQaReviewedStory": false,
+  "restoresExactQaReviewedStoryNote": "Removing the 0.1.22 row restores the pre-close story exactly (7d3a08c8...). That is not the QA Done-time story: root reports Done at story sha \"b1b6c171...\" and then edited the T0 stale-text parentheticals (CLAUDE-RESUME-STATE.md \"UPDATE ~18:00\"). No copy of the b1b6c171 story exists in the repo, so @po could not diff that root edit; it is reported, not verified.",
+  "QAResultsSha256Before": "fdb8d030ca1cbb41d374fcb0ac77a20f3a87733f40770ba117345212e3a2bcba",
+  "QAResultsSha256After": "fdb8d030ca1cbb41d374fcb0ac77a20f3a87733f40770ba117345212e3a2bcba",
+  "qaResultsUnchanged": true,
+  "sectionHashMethod": "bytes from the '## <name>' heading line to (excluding) the next '## ' heading; this method reproduces the 014 close QAResultsSha256Before 581045f5...",
+  "protectedSectionSha256": {
+    "Story": {
+      "before": "23b2a378485f3cd25fa5723f15c4c59931f70f1eda996a6c438fb45ce1a4ba90",
+      "after": "23b2a378485f3cd25fa5723f15c4c59931f70f1eda996a6c438fb45ce1a4ba90",
+      "unchanged": true
+    },
+    "Acceptance Criteria": {
+      "before": "243d4fc92aeb3ec696d160732acec3aea188e6a6ce47debc87037c01559ff93d",
+      "after": "243d4fc92aeb3ec696d160732acec3aea188e6a6ce47debc87037c01559ff93d",
+      "unchanged": true
+    },
+    "Tasks / Subtasks": {
+      "before": "695294bf57bdeeef2f335302b018c7f8dc0327a34d1dcb5aad361c34784f9ecf",
+      "after": "695294bf57bdeeef2f335302b018c7f8dc0327a34d1dcb5aad361c34784f9ecf",
+      "unchanged": true
+    },
+    "Dev Notes": {
+      "before": "e6c781cf2dc0eb56e7b66b46f8e160ba9ffd758a89c57af9471817ce38ab1367",
+      "after": "e6c781cf2dc0eb56e7b66b46f8e160ba9ffd758a89c57af9471817ce38ab1367",
+      "unchanged": true
+    },
+    "File List": {
+      "before": "e84fed0898573476a20f319797629e7d1c6753426b76ebde58e307682daee68a",
+      "after": "e84fed0898573476a20f319797629e7d1c6753426b76ebde58e307682daee68a",
+      "unchanged": true
+    },
+    "Known limitations": {
+      "before": "7637e9b25355b61543957466c7d6eb0c323f707e3244fd3a2ea0750057da96d6",
+      "after": "7637e9b25355b61543957466c7d6eb0c323f707e3244fd3a2ea0750057da96d6",
+      "unchanged": true
+    },
+    "Dev Agent Record": {
+      "before": "a5eebd5825bf4abbbaf742dee9e7a820058a4b12759bce7df556fd1f1b64e2b3",
+      "after": "a5eebd5825bf4abbbaf742dee9e7a820058a4b12759bce7df556fd1f1b64e2b3",
+      "unchanged": true
+    },
+    "QA Results": {
+      "before": "fdb8d030ca1cbb41d374fcb0ac77a20f3a87733f40770ba117345212e3a2bcba",
+      "after": "fdb8d030ca1cbb41d374fcb0ac77a20f3a87733f40770ba117345212e3a2bcba",
+      "unchanged": true
+    }
+  },
+  "preQaGroupsByteExact": true,
+  "preQaGroupsScope": "across this administrative close only (pre-close vs post-close); not against the unavailable QA Done-time copy",
+  "acTextUnchanged": true,
+  "taskTextUnchanged": true,
+  "fileListPreserved": true,
+  "administrativeFileListPolicy": "No File List edit: reconciled by Dex in 0.1.19 against final-gates07/capture-before.json (298 entries) and spot-checked by QA. dispatch-governance.js is recorded there as outside 015 scope.",
+  "storyDiff": "one inserted line (Change Log row 0.1.22) after line 807; no deletion or modification (difflib opcodes: insert only)",
+  "sourceManifest": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/capture-after.json",
+  "sourceManifestSha256": "70333d0eebb5fd6dc51c959daacc1533e41a1a9299ed0e64a349cbafa02c9446",
+  "sourceManifestBefore": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/capture-before.json",
+    "sha256": "4aac37e37aaaf5c7f12b8fd12a3c67c1833c9c00029bbfaf292937fa6cfae3d3"
+  },
+  "recaptureTool": ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py (output to the session scratchpad, not committed)",
+  "sourceDigest": "9d18f5550ac830bd2164bf4b4261f6d10ec8fd43b837e4bf9e9c990dc7cb5884",
+  "distDigest": "897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c",
+  "sourceFilesCompared": 1651,
+  "distFilesCompared": 247,
+  "sourceMismatches": [],
+  "distMismatches": [],
+  "sourceMismatchesVsCaptureBefore": [],
+  "distMismatchesVsCaptureBefore": [],
+  "recapturedAfterWrites": {
+    "sourceDigest": "9d18f5550ac830bd2164bf4b4261f6d10ec8fd43b837e4bf9e9c990dc7cb5884",
+    "distDigest": "897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c",
+    "files": 1651,
+    "sourceMismatches": [],
+    "distMismatches": [],
+    "note": "story, README and .ai files are outside the capture scope; re-run confirms no in-scope file moved"
+  },
+  "gatePath": "docs/qa/gates/STUDIO-OBS-015-incremental-re-learn-from-the-first-changed-step.yml",
+  "gateSha256": "8ad9c27aa1e22d852e36ee6e3839a26a3830065760795396f961ad3c251809c9",
+  "gateEqualsQaFormalGateYaml": true,
+  "reviewReport": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-formal-gate01/gate.md",
+  "reviewReportSha256": "8eb8784733bf71807cc86d9f3252aa46620f3cf896ebe1c38177797b81b76c1c",
+  "requirementMap": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-formal-gate01/map.json",
+    "sha256": "4bb0a7749e4e0056af0d399386b43254c67ace6baebf7b19a0fe781281022080"
+  },
+  "supersededGateDraft": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-formal-gate-draft01/gate.yaml",
+    "sha256": "062852bd7dcaf1744d09da3c97c62fc70d297e9c0945a0b36f77188290c2855f"
+  },
+  "bindingReceipt": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/receipt.json",
+    "sha256": "95d2516a23a582ed55d04b7e04395307a4e7bf99efcaad3bf1c137b06d0b4b3f"
+  },
+  "bindingReceiptReview": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/review.md",
+    "sha256": "b3c4eee017e04ad89967af98e1a43498935f656403770cbd3cf5727476bd4398"
+  },
+  "quality": {
+    "allPlannedApplicableLocalValidationGreen": true,
+    "firstRunGreenOnBindingTree": true,
+    "backend": {
+      "label": "final-gate-attempt06-20261017T1307",
+      "exit": 0,
+      "test": {
+        "total": 2412,
+        "passed": 2387,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 25,
+        "skipsEqualApproved": true
+      },
+      "guidedIncrementalTest": {
+        "total": 62,
+        "passed": 62
+      },
+      "crossReplicaTest": {
+        "total": 2,
+        "passed": 2
+      },
+      "all": {
+        "total": 2476,
+        "passed": 2451,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 25
+      },
+      "recountedByPo": "collector testcases: test PASS 2387, test SKIP 25, guidedIncrementalTest PASS 62, crossReplicaTest PASS 2; exit 0; sourceStable and distStable true",
+      "collectorResults": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/final-gate-attempt06-20261017T1307-results.json",
+        "sha256": "f3468921f1e451b7afabeb86958f1ae7af60581d1b7ade5082d5405976551a82"
+      },
+      "GuidedReplayingPrefixMigrationIT": "55/55",
+      "requireFreshGuidedPartitions": "executed and passed",
+      "jacoco": {
+        "bundleLine": 0.9086,
+        "bundleMin": 0.7,
+        "dispatch": 0.862,
+        "internal": 0.9093,
+        "recovery": 0.8889,
+        "sse": 0.918,
+        "packageMin": 0.75,
+        "compileRules": "vacuous (packages removed)",
+        "summary": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/jacoco-line-summary.json",
+          "sha256": "7d730bfb3fada274f10c0e370661de2afc593f4e89e86ecc35a9161b2d4fbbcb"
+        }
+      }
+    },
+    "runner": {
+      "typeCheckExit": 0,
+      "lintExit": 0,
+      "unit": "2306 passed / 0 failed / 29 historical skips, coverage thresholds pass",
+      "fixtures": "260 / 0 / 9",
+      "deployment": "322 / 0 / 0",
+      "distBuildChangedDist": false,
+      "inImageCheckPins": {
+        "verdict": "PASS",
+        "node": "v24.20.0",
+        "nodeMajorPin": "24",
+        "image": "put-checks-studio-runner:obs015-final07-local (local gate build, not the deployed internal image)",
+        "file": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/image-final07-check-pins.json",
+          "sha256": "83bb5b19971137e415a97e98dfcd1ce113a33c08c5f82283982f9e9af2aae004"
+        }
+      }
+    },
+    "contracts": "contracts + build-studio-observed-schemas --check re-run, exit 0/0, no write",
+    "carriedByDigest": {
+      "frontend": "701/701, type-check 0, lint 0 errors (274-file subset digest 5988e697...)",
+      "standaloneBackendStatic": "spotless/checkstyle/spotbugs PASS (872-file subset digest b6fbde38...), also re-executed inside attempt06"
+    },
+    "acceptanceMap": {
+      "ledger86": "84 PROVEN, 1 PROVEN-BY-RULING (56), 1 user waiver of one clause (85)",
+      "ipc24": "PROVEN",
+      "sql55": "PROVEN",
+      "routes15": "PROVEN",
+      "supplementary7": "PROVEN",
+      "storyItems": "AC-1..AC-6, O-1, R-2, PO-REQ PROVEN",
+      "naByRuling": 13
+    },
+    "guidedStartFailed": {
+      "file": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/guided-start-failed-lines.json",
+        "sha256": "ea55164de07be87a1e53a7273987072295b20193dd080faa08a1a481dd436fc5"
+      },
+      "summary": "no real GUIDED_START_FAILED line; fixtures lines all injected, max elapsedMs 19, no TIMEOUT"
+    },
+    "codeRabbit": "Not run (WSL-only); independent W6-W11 source reviews are the configured fallback; no automated pass claimed",
+    "noSkippedCaseCreditedAsPassed": true
+  },
+  "rawArtifactReferencesIndependentlyRehashed": 0,
+  "rawArtifactReferencesNote": "Unlike the 014 report, qa-formal-gate01/map.json carries no path+sha256 artifact references to rehash (checked: 0 pairs). @po instead hashed every evidence and placement file cited in this report (see evidenceHashes) and re-derived the tree digests.",
+  "acceptanceTrace": {
+    "allApplicableAcMet": true,
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-formal-gate01/map.json",
+    "pointer": "/storyAcs",
+    "waiverDisclosure": "row 85 positive equal full-key tie clause only: user waiver, never PASS or N/A"
+  },
+  "carriedItems": [
+    {
+      "id": "REL-001",
+      "severity": "medium",
+      "finding": "attempt03 CONTEXT_LOST at the guided context push has no proven root cause; not reproduced in 2303 stress starts. Patch A, patch B and D4 shipped; no recurrence in final-gates05/06/07 (absence of evidence, not an explanation).",
+      "evidence": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/rel001-rootcause01/repro/results/verdict.md",
+        "sha256": "71b68559825955222ca40db78df1b68027446d991b28d4733cc05c48086fcee2"
+      },
+      "placedAt": "STUDIO-OBS-009 AC-11 REL-001 pointer (:380) + AC-12 15 s-edge classification rule (:427), 0.3.17",
+      "openQuestion": "whether an innermost code CANCELLED (stop during start) is exempt from the recurrence rule: @architect at 009 T0, not decided by @po",
+      "blocksDone": false
+    },
+    {
+      "id": "REQ-001",
+      "severity": "low",
+      "finding": "validation-ledger row 85: the positive equal full-key timing tie observed end to end in an actual run is waived by the user (Option C, 2026-10-15); retained conjuncts passed",
+      "record": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-recording85-decision-user-c/decision.json",
+        "sha256": "80d2c75ed7bb8129cdf4060535c1d3030daf83eaef43561774c11c96ad2d2601"
+      },
+      "reportedAs": "user waiver, never PASS or N/A",
+      "blocksDone": false
+    },
+    {
+      "id": "REQ-002",
+      "severity": "low",
+      "finding": "ED-05 remainder: internal Playwright image, non-root user, seccomp, CA bundle. The Node-pin sub-item is fixed and green in the local gate image.",
+      "owner": "Platform/SRE",
+      "trackedAt": [
+        "docs/epics/UI-STUDIO-GA-PLAN.md:83 (ED-05 + SPK-04 row: \"ED-05 stays open\")",
+        "docs/qa/spikes/SPK-04/README.md:60, :84-:88 (questions 1-5)",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json U4 (deployed stack, internal Playwright image; blocks 009 Done)"
+      ],
+      "gap": "The gate says \"OBS-010 release readiness owns closure\", but STUDIO-OBS-010 AC-4 clarification d row e (:77) struck the whole ED-05 row on 2026-10-16 (\"fixed inside STUDIO-OBS-015\"). No OBS-010 row names the remainder, and U4 in the 009 register names the internal image but not non-root user, seccomp or CA bundle. Reached from 010 only through 009 Done (U4). Not re-placed here: outside this close's requested scope; flagged to the lead.",
+      "blocksDone": false
+    }
+  ],
+  "otherGateItems": [
+    {
+      "id": "TEST-001",
+      "severity": "low",
+      "state": "rule carried: 009 AC-12 clarification (D-14, :388) never credits a single-test GuidedPublicationReplayIT rerun; the class-scoped order-dependence hygiene debt itself is not placed as an obligation in 009 or 011 (gate suggests either; not routed to @po)"
+    },
+    {
+      "id": "TEST-002",
+      "severity": "low",
+      "state": "no action for Done (archive mutation outputs next time)"
+    },
+    {
+      "id": "MNT-001",
+      "severity": "low",
+      "state": "optional @dev hardening (zero usable kill markers = unreadable table; delete dead VariableReferenceValidator.isBlank); moves the digest; unplaced, owner @dev next source window (gate §8 item 4)"
+    },
+    {
+      "id": "MNT-002",
+      "severity": "low",
+      "state": "push-time constraint below"
+    },
+    {
+      "id": "DOC-001",
+      "severity": "low",
+      "state": "Status/ticks closed by 0.1.19-0.1.21; F4 note placed in STUDIO-OBS-008 0.3.12; the six Node doc rows were already marked \"in-image verified (final-gates07)\" by @po on 2026-10-17 (UI-STUDIO-GA-PLAN.md:83, SPK-04 README, staging-acceptance-register.md:190, EPIC-10-RUN-LOG.md:170). QA Results \"Status transition\" still lists the six rows as open: stale on that point, not edited by @po"
+    }
+  ],
+  "placements": [
+    {
+      "item": "REL-001 recurrence pointer (gate REL-001, medium)",
+      "target": "STUDIO-OBS-009",
+      "anchor": "AC-11 pointer REL-001 (story :380); T5 sub-item; section \"PO follow-ups — STUDIO-OBS-015 formal gate and root decisions (2026-10-17)\" (:642)",
+      "storyVersion": "0.3.17",
+      "record": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md (section and Change Log 0.3.17; no separate JSON record was written)",
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-formal-gate01/gate.md §6, §8 item 2"
+      ],
+      "state": "placed; open in 009"
+    },
+    {
+      "item": "D4 15 s-edge classification rule (root decision c)",
+      "target": "STUDIO-OBS-009",
+      "anchor": "AC-12 classification rule (:427); T5 sub-item (:465)",
+      "storyVersion": "0.3.17",
+      "record": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md (Change Log 0.3.17)",
+        "docs/qa/evidence/STUDIO-OBSERVED-NEXT/execute-015-008/CLAUDE-RESUME-STATE.md \"UPDATE ~14:35\" item 3"
+      ],
+      "state": "placed; open in 009"
+    },
+    {
+      "item": "KL-015-D5 with Quinn F3 and the stop-before-spawn residual",
+      "target": "STUDIO-OBS-009",
+      "anchor": "AC-11 obligation D5 a-f (:303)",
+      "storyVersion": "0.3.16",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/po-delta-validation.json amendments[2026-10-17]"
+      ],
+      "state": "placed; ruling-first (@architect)"
+    },
+    {
+      "item": "LIFECYCLE-REASON-01 (Aria W11 backend F-1)",
+      "target": "STUDIO-OBS-009",
+      "anchor": "AC-11 obligation LR a-c (:351)",
+      "storyVersion": "0.3.16",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/po-delta-validation.json amendments[2026-10-17]"
+      ],
+      "state": "placed; open"
+    },
+    {
+      "item": "EDGE-15S-3 optional backend test",
+      "target": "STUDIO-OBS-009",
+      "anchor": "AC-11 EDGE a (:376)",
+      "storyVersion": "0.3.16",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/po-delta-validation.json amendments[2026-10-17]"
+      ],
+      "state": "placed; @qa decides at 009 T0"
+    },
+    {
+      "item": "PID-1 deployment constraint",
+      "target": "STUDIO-OBS-009",
+      "anchor": "AC-1 obligation PID-1 a-d (:40)",
+      "storyVersion": "0.3.16",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/po-delta-validation.json amendments[2026-10-17]"
+      ],
+      "state": "placed; owner @devops"
+    },
+    {
+      "item": "KL-015-Q4 fix (AUTHORED-ECHO-01)",
+      "target": "STUDIO-OBS-009",
+      "anchor": "AC-7 obligation AUTHORED-ECHO-01 a-f (:131)",
+      "storyVersion": "0.3.11",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-kl015-q4-placement/decision.json"
+      ],
+      "state": "placed; before the first real-model call"
+    },
+    {
+      "item": "FOCUS-MUTATION-01 guard redesign",
+      "target": "STUDIO-OBS-009",
+      "anchor": "AC-7 obligation FOCUS-MUTATION-01 a-f (:139)",
+      "storyVersion": "0.3.13",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-focus-r1-placement/decision.json"
+      ],
+      "state": "placed; open"
+    },
+    {
+      "item": "KL-015-R1 fix",
+      "target": "STUDIO-OBS-009",
+      "anchor": "AC-11 obligation R1 a-e (:264)",
+      "storyVersion": "0.3.13",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-focus-r1-placement/decision.json"
+      ],
+      "state": "placed; open"
+    },
+    {
+      "item": "KL-015-GRANT (TF-5 runtime DB role SELECT)",
+      "target": "STUDIO-OBS-009",
+      "anchor": "AC-4 obligation TF-5 a-e (:63)",
+      "storyVersion": "0.3.14",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-triage-followups/decision.json"
+      ],
+      "state": "placed; \"unrun, owner Platform DBA / @devops\" until confirmed"
+    },
+    {
+      "item": "S1 / TF-3 GET lock before requireRead (pre-existing at HEAD)",
+      "target": "STUDIO-OBS-009",
+      "anchor": "AC-9 obligation TF-3 a-e (:194)",
+      "storyVersion": "0.3.14",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-triage-followups/decision.json"
+      ],
+      "state": "placed; ruling-first"
+    },
+    {
+      "item": "GuidedBridgePlannedIT runner-dist digest (bridge disclosure)",
+      "target": "STUDIO-OBS-009",
+      "anchor": "AC-12 i addendum (:420)",
+      "storyVersion": "0.3.12",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-bridge-disclosure/decision.json"
+      ],
+      "state": "placed; open"
+    },
+    {
+      "item": "KL-015-D5 release-record row (root decision b)",
+      "target": "STUDIO-OBS-010",
+      "anchor": "AC-4 clarification d row g (:79)",
+      "storyVersion": "0.3.9",
+      "record": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md (Change Log 0.3.9; no separate JSON record)",
+        "docs/qa/evidence/STUDIO-OBSERVED-NEXT/execute-015-008/CLAUDE-RESUME-STATE.md \"UPDATE ~14:35\" item 2"
+      ],
+      "state": "placed; pending row"
+    },
+    {
+      "item": "FOCUS-MUTATION-01 pre-pilot focus check and release row",
+      "target": "STUDIO-OBS-010",
+      "anchor": "AC-1 obligation FOCUS-MUTATION-01 a-d (:26); AC-4 clarification d row f (:78)",
+      "storyVersion": "0.3.7",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-focus-r1-placement/decision.json"
+      ],
+      "state": "placed; open"
+    },
+    {
+      "item": "KL-015-R1, AUTHORED-ECHO-01/U13, KL-015-GRANT/TF-5/U14 release rows",
+      "target": "STUDIO-OBS-010",
+      "anchor": "AC-4 clarification d rows a, b, d (:73, :74, :76)",
+      "storyVersion": "0.3.8",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-010/prep-20261016/po-delta-validation.json (D-4)"
+      ],
+      "state": "placed; pending rows"
+    },
+    {
+      "item": "OBS-011 start list: D5 and LIFECYCLE-REASON-01 count; EDGE, PID-1, the REL-001 pointer and the 15 s-edge rule do not (root decision a)",
+      "target": "STUDIO-OBS-011",
+      "anchor": "Start-condition clarification, 2026-10-17 addition (:237)",
+      "storyVersion": "0.2.8",
+      "record": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md (Change Log 0.2.8; no separate JSON record)",
+        "docs/qa/evidence/STUDIO-OBSERVED-NEXT/execute-015-008/CLAUDE-RESUME-STATE.md \"UPDATE ~14:35\" item 1"
+      ],
+      "state": "placed; [AUTO-DECISION] on the pointer/rule, coordinator may override"
+    },
+    {
+      "item": "F-1 / CLN-F1 translation-absent admission branch (bridge ruling §6)",
+      "target": "STUDIO-OBS-011",
+      "anchor": "AC-2 obligation F-1 a-g (:57)",
+      "storyVersion": "0.2.5",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-bridge-disclosure/decision.json"
+      ],
+      "state": "placed; open"
+    },
+    {
+      "item": "CLN-F2 historical V18 fixture adapter (TF-4)",
+      "target": "STUDIO-OBS-011",
+      "anchor": "AC-1 candidate CLN-F2 a-d (:28)",
+      "storyVersion": "0.2.6",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-triage-followups/decision.json"
+      ],
+      "state": "placed; ruling-first"
+    },
+    {
+      "item": "F4 exception note for 015 decision R4 (DOC-001)",
+      "target": "STUDIO-OBS-008",
+      "anchor": "Inherited documentation item (:160); T1 L0 C-int sub-item (:201)",
+      "storyVersion": "0.3.12",
+      "record": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md (Change Log 0.3.12; no separate JSON record)",
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-r4-whitespace-decision/decision.md §2 (note text source)"
+      ],
+      "state": "placed; @architect confirms the note in the W1 unit"
+    },
+    {
+      "item": "O-1 frontend consumer: v2 authoring writes with stable step IDs (ruling1 consumerItemForOBS008)",
+      "target": "STUDIO-OBS-008",
+      "anchor": "Inherited obligation a-f (:51); T1 sub-item (:195)",
+      "storyVersion": "0.3.3",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json ruling1",
+        "docs/qa/evidence/STUDIO-OBS-015/po-t0-followups.json"
+      ],
+      "state": "placed; deploy constraint applies until it lands"
+    },
+    {
+      "item": "Base MSW v1 routes and handler-response schema test (items g1, g2)",
+      "target": "STUDIO-OBS-008",
+      "anchor": "Inherited obligation item g (:59)",
+      "storyVersion": "0.3.8",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-inventory-changes/decision.json obs008"
+      ],
+      "state": "placed; open"
+    },
+    {
+      "item": "44 M12 frontend LEFTOVER-OBS-008 rows (41 by items b/d, 3 studioTypes.ts rows by g3)",
+      "target": "STUDIO-OBS-008",
+      "anchor": "Inherited obligation item g3 (:61)",
+      "storyVersion": "0.3.10",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-inventory-changes/decision.json addenda A1",
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/dev-bookkeeping01/m12-grep.txt"
+      ],
+      "state": "placed; item f re-run must show 0 rows"
+    },
+    {
+      "item": "KL-015-Q4 conditional copy while AUTHORED-ECHO-01 is open",
+      "target": "STUDIO-OBS-008",
+      "anchor": "Conditional inherited obligation a-d (:79); T2 sub-item (:207)",
+      "storyVersion": "0.3.7",
+      "record": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-kl015-q4-placement/decision.json"
+      ],
+      "state": "placed; conditional"
+    }
+  ],
+  "placementRecordHashes": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/po-delta-validation.json",
+      "sha256": "2539969fad13cb48cf14d8d99fe6e8ad7671f8f304563eb43267af688a736b0d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-010/prep-20261016/po-delta-validation.json",
+      "sha256": "38f96f7e44d08848fff4d0944566ce02439130a8cc9481fe8d45e75e9d4d7b2c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-bridge-disclosure/decision.json",
+      "sha256": "99b58e57446266a44db1498aff793024d5f5a98215bcd024c8469712cd614f6d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-focus-r1-placement/decision.json",
+      "sha256": "93b0a1531982c728fdff675a69e99df6b336e1705529785d3503d2c4a95ec180"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-inventory-changes/decision.json",
+      "sha256": "02f65e88670e44ee8c605b70be953c06fb3db25daba1539086aa57936e230838"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-kl015-q4-placement/decision.json",
+      "sha256": "fb98d1308ff96f930a88e0edacb38710085d4d341eea20384c4e40a75c7714f9"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-r4-whitespace-decision/decision.md",
+      "sha256": "18808d267526c3cc3d4c2526e320a3360d8ce57b5709c1819601cd321592ccc9"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-triage-followups/decision.json",
+      "sha256": "a74010be6bc7d8c1c90fb81832405ce5e13272cbe263a77ed6d5d182d203822d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-formal-gate01/gate.md",
+      "sha256": "8eb8784733bf71807cc86d9f3252aa46620f3cf896ebe1c38177797b81b76c1c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/po-t0-followups.json",
+      "sha256": "985407bcb11a72c1aa1186e0b93d825566def90d0c0869858851b84c83fcf7d9"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json",
+      "sha256": "58a75633d2dcf1aa94f80e17172612fae6b31cab08f8fc498eda1ccac00cbf24"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/execute-015-008/CLAUDE-RESUME-STATE.md",
+      "sha256": "cb8d560c3c256288bdd9d1ff67ea76c73f256d6b14626ff130c400f907652af6"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "sha256": "293cd445c08a83b1db8ca784ba2d861ddf42370ca1c6a0736c701d1bb1759503"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "sha256": "6bf1014eac92a8a529bd3075fb79972f9bf50e2ba3800a2235ca3d163a1f2641"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+      "sha256": "236ca9813618e5e60ea1f815f8c5e2933db43bd14f3f4cc6afc2264f80e65569"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+      "sha256": "914e2fb524f92869960cfc2f7a540c78032a72c5583600a8dd47726e4d0ee80d"
+    }
+  ],
+  "targetStoryHashesAtClose": [
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "sha256": "293cd445c08a83b1db8ca784ba2d861ddf42370ca1c6a0736c701d1bb1759503"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "sha256": "6bf1014eac92a8a529bd3075fb79972f9bf50e2ba3800a2235ca3d163a1f2641"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+      "sha256": "236ca9813618e5e60ea1f815f8c5e2933db43bd14f3f4cc6afc2264f80e65569"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+      "sha256": "914e2fb524f92869960cfc2f7a540c78032a72c5583600a8dd47726e4d0ee80d"
+    }
+  ],
+  "targetStoriesEditedByThisClose": false,
+  "pushTimeConstraints": [
+    {
+      "id": "MNT-002",
+      "constraint": "Keep .aiox-core/core/permissions/dispatch-governance.js out of the STUDIO-OBS-015 commit.",
+      "facts": "L1 framework file, working-tree diff +20/-4 against HEAD, outside the 015 File List and the capture-manifest scope, not reviewed by QA, origin unknown",
+      "sha256AtClose": "093ac0f4e939e22142097769d866ecf9798f3b0cdbb77b7cff4c2700265b8440",
+      "owner": "@devops"
+    },
+    {
+      "id": "DEPLOY-008",
+      "constraint": "Do not run or demo the post-015 backend against a pre-OBS-008 frontend on a real backend: every frontend create/save is then 400 INVALID_AUTHORING.",
+      "source": "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json ruling1 deploy constraint; gate dispositions.deploy_constraint",
+      "liftsWhen": "STUDIO-OBS-008 Done",
+      "owner": "@devops"
+    }
+  ],
+  "closureArtifacts": [
+    "docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md"
+  ],
+  "writeOrder": "README marker first, then story Change Log row, then this report",
+  "artifactHashes": {
+    "storyBefore": "7d3a08c81cdd549b5b3dbb2705965e5b109d808e81be3ad7cc046c46d80938e3",
+    "storyAfter": "b6e2befdd32d3e882bdac1152ef7e6d0f9d0a9bec26245de2cb5c96f6bcb1b00",
+    "indexBefore": "e6d6dfcf56e489fb0f38e2a974497ddae67e56c681754ab71eaf67ea8c5b6324",
+    "indexAfter": "3e58bf704af19894439d4891947a9256f8d33da502276f5414cb70a210db855e"
+  },
+  "idempotency": {
+    "markerCountPerStory": 1,
+    "markerCountPerIndex": 1,
+    "keyAbsentBeforeWrite": true,
+    "secondPass": "NO_OP: a re-run finds the key in both artifacts and writes nothing",
+    "note": "The simulated-failure retry fixture of po-close-story.md was not executed; convergence is by per-artifact marker check."
+  },
+  "driftAnnotations": [
+    {
+      "path": ".ai/STUDIO-OBS-014-close.drift-annotation.json",
+      "sha256": "d59f7eb77f41a08b19592895b503c60968d11037267929cd1de16f1a1cfaed63",
+      "annotates": ".ai/STUDIO-OBS-014-close.json"
+    },
+    {
+      "path": ".ai/STUDIO-OBS-012A-close.drift-annotation.json",
+      "sha256": "97269efc93dea04960bd2e9266f7ca9186aedca96fd24859e4fbda2e27d8f973",
+      "annotates": ".ai/STUDIO-OBS-012A-close.json"
+    }
+  ],
+  "phaseVerification": {
+    "closeOwner": "root Orion",
+    "performedByPo": false,
+    "pendingRootCloseVerification": true,
+    "rootFollowUps": "wave advance STUDIO-OBS-SINGLE-PATH, README top checkpoint, execution-state.json (per CLAUDE-RESUME-STATE.md)"
+  },
+  "scopeBoundaries": [
+    "REL-001 root cause unproven; patches A/B and D4 shipped; recurrence rule in 009.",
+    "Row 85 clause is a user waiver, never PASS or N/A.",
+    "ED-05 remainder (internal image, non-root user, seccomp, CA bundle) is external with Platform/SRE; in-image Node pin verified on the local gate image only, not the deployed internal image.",
+    "Real Citi Core/COIN and real Vault are not exercised and are not 015 obligations (authority-tier ruling T1/T2).",
+    "Carried greens (frontend, standalone backend static) rely on identical-input subset digests, not re-runs.",
+    "One first-run green on this tree; the suite is order-dependent (TEST-001).",
+    "008 Ready (W0 next); 009/010/011 Ready; epic not complete."
+  ],
+  "next": {
+    "story": "STUDIO-OBS-008",
+    "status": "Ready",
+    "condition": "W0 after this admin close and the root close (wave advance, README checkpoint, execution state). pnpm migration lane first in the frontend lanes.",
+    "automaticDispatch": false
+  },
+  "budget": {
+    "wholeWaveCeilingUsd": 500,
+    "actualBilling": "unavailable"
+  },
+  "noTestsBuildsNativeProcessesCliGitGateRuntimeSourceConfigDistInstallCommitPushDeployOrDevDbChanges": true,
+  "commandsRunByPo": [
+    "python3 capture-manifest.py (twice: before and after writes; scratchpad output)",
+    "shasum -a 256 on cited files",
+    "read-only python recounts/section hashing"
+  ],
+  "evidenceHashes": [
+    {
+      "path": "docs/qa/gates/STUDIO-OBS-015-incremental-re-learn-from-the-first-changed-step.yml",
+      "sha256": "8ad9c27aa1e22d852e36ee6e3839a26a3830065760795396f961ad3c251809c9"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-formal-gate01/gate.md",
+      "sha256": "8eb8784733bf71807cc86d9f3252aa46620f3cf896ebe1c38177797b81b76c1c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-formal-gate01/gate.yaml",
+      "sha256": "8ad9c27aa1e22d852e36ee6e3839a26a3830065760795396f961ad3c251809c9"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-formal-gate01/map.json",
+      "sha256": "4bb0a7749e4e0056af0d399386b43254c67ace6baebf7b19a0fe781281022080"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/receipt.json",
+      "sha256": "95d2516a23a582ed55d04b7e04395307a4e7bf99efcaad3bf1c137b06d0b4b3f"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/review.md",
+      "sha256": "b3c4eee017e04ad89967af98e1a43498935f656403770cbd3cf5727476bd4398"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/capture-before.json",
+      "sha256": "4aac37e37aaaf5c7f12b8fd12a3c67c1833c9c00029bbfaf292937fa6cfae3d3"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/capture-after.json",
+      "sha256": "70333d0eebb5fd6dc51c959daacc1533e41a1a9299ed0e64a349cbafa02c9446"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/jacoco-line-summary.json",
+      "sha256": "7d730bfb3fada274f10c0e370661de2afc593f4e89e86ecc35a9161b2d4fbbcb"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/image-final07-check-pins.json",
+      "sha256": "83bb5b19971137e415a97e98dfcd1ce113a33c08c5f82283982f9e9af2aae004"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/guided-start-failed-lines.json",
+      "sha256": "ea55164de07be87a1e53a7273987072295b20193dd080faa08a1a481dd436fc5"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/final-gate-attempt06-20261017T1307-results.json",
+      "sha256": "f3468921f1e451b7afabeb86958f1ae7af60581d1b7ade5082d5405976551a82"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/rel001-rootcause01/repro/results/verdict.md",
+      "sha256": "71b68559825955222ca40db78df1b68027446d991b28d4733cc05c48086fcee2"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+      "sha256": "ce1752f0ff45c314f967eba5848d8a445826829313344a8e86ea18a3f90cfd6e"
+    },
+    {
+      "path": "docs/epics/UI-STUDIO-GA-PLAN.md",
+      "sha256": "43ccee1798b2f9d59b10ca93d49448f28f15711420c1d3cc85a9f4b537a7df51"
+    },
+    {
+      "path": "docs/qa/spikes/SPK-04/README.md",
+      "sha256": "3824fae1a26926d285baa4d79805e97e9f52f4c9bfa03f39ec29d1b0dd298a60"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+[
+ {
+  "task": "test",
+  "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+  "name": "AC-18b \u2014 ranged reads against real Sonic (ED-03 / SPK-03 / 10.18 / 10.19)"
+ },
+ {
+  "task": "test",
+  "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+  "name": "AC-19b \u2014 the media route through the real ingress (ED-06 / SPK-02 / 10.18 / 10.19)"
+ },
+ {
+  "task": "test",
+  "class": "com.citi.put.checks.studio.guided.translation.GuidedProviderEvaluationTest",
+  "name": "approvedProviderEvaluationIsReportedUnavailableWithoutExplicitConfiguration(TestReporter)"
+ },
+ {
+  "task": "test",
+  "class": "com.citi.put.checks.studio.readiness.ExecutionReadinessTest",
+  "name": "targetPolicySelectionAdvancesTheConfigurationRevision()"
+ },
+ {
+  "task": "test",
+  "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+  "name": "AC-13b \u2014 canaries through the integrated path with real material (ED-02 / 10.19)"
+ },
+ {
+  "task": "test",
+  "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+  "name": "AC-7b \u2014 real revocation through a non-bypassed session (ED-02 / 10.18 / 10.19)"
+ },
+ {
+  "task": "test",
+  "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+  "name": "AC-5b \u2014 resolution confined by the real vault's own policy (ED-02 / 10.18 / 10.19)"
+ },
+ {
+  "task": "test",
+  "class": "com.citi.put.checks.studio.secrets.VaultPolicyIT",
+  "name": "AC-4 Vault policy test (U5, ED-02): UNRUN, owner PUT Core/BFF; a local container is REHEARSAL_ONLY_NON_CREDITING and the image pull is not authorized (U19)"
+ },
+ {
+  "task": "test",
+  "class": "com.citi.put.checks.studio.guided.translation.GuidedSchemaProbeIT",
+  "name": "approvedGatewayProbeAcceptsEveryGuidedProjectionSchema(TestReporter)"
+ }
+]

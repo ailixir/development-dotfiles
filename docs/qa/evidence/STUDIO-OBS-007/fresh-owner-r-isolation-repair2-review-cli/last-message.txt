@@ -1,0 +1,5 @@
+Wrote [the review JSON](/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-007/fresh-owner-r-isolation-repair2-review.json).
+
+RISO03 is resolved. RISO04 remains unresolved: a `false` result from `Reflect.deleteProperty()` can silently confirm restoration, discard the retry capability, and allow `unresolved=false`.
+
+RISO01/02, all three case bodies, and extraction bytes are unchanged. No source edits or checks were run. Scoped verdict: **changes required; source review only**.

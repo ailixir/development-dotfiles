@@ -1,0 +1,1128 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "reviewer": "Fresh independent Dara database peer; did not author reviewed implementation",
+  "reviewType": "Development support, manual/static PostgreSQL SQL and Java guard review",
+  "verdict": "FAIL",
+  "verdictScope": "Current bounded persistence/caller semantics contain concrete static AC-14 guard and transaction gaps. This is not lifecycle QA, canonical acceptance, a runtime suite failure, or a whole-story verdict.",
+  "summary": "The source-bound archive genuinely contains 29 passing PostgreSQL cases and verifies substantial nullable-uncertainty, linkage, append-only, idempotency and partition behavior. It does not exercise the declaration/attempt authenticity holes in ordinary RELEASE, unreached ordinal evasion, split replay failure transactions, or mixed raw/recorder lock ordering. Current B/helper changes are explicitly outside the archived tested identities.",
+  "guidance": {
+    "skill": ".codex/skills/aiox-data-engineer/SKILL.md",
+    "sot": ".aiox-core/development/agents/data-engineer.md",
+    "constitution": ".aiox-core/constitution.md",
+    "task": ".aiox-core/development/tasks/security-audit.md",
+    "parameters": {
+      "scope": "schema",
+      "mode": "yolo",
+      "scan_depth": 5,
+      "target": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+      "rules": [
+        "Literal canonical AC-14 and related AC-13/19 persistence obligations",
+        "RULING-1 through RULING-6, with applied T2 PO uncertainty amendment",
+        "ADR-SC-005 current-baseline/core-SQL preservation; existing Q3 retention"
+      ]
+    },
+    "taskAdaptation": "User explicitly supplied parameters, authorized continuation after persona activation, permitted manual/static scanning, forbade runtime/dependency/network audit and restricted writes to this report. No new elicitation or generic Supabase/RLS architecture was introduced. No lifecycle QA authority assumed.",
+    "scanner": {
+      "method": "Manual source inspection using read-only shell, rg, numbered source, SHA-256, XML parsing, targeted diff and git object reads",
+      "declaredScannerScript": ".aiox-core/scripts/security-scan.js",
+      "declaredScannerScriptAvailable": false,
+      "configuredCodeRabbitBinary": "~/.local/bin/coderabbit",
+      "configuredCodeRabbitBinaryAvailable": false,
+      "automatedScanExecuted": false,
+      "codeRabbitExecuted": false,
+      "dependencyAuditExecuted": false,
+      "runtimeTestsExecuted": false,
+      "riskScore": null,
+      "status": "Automated scanner/CodeRabbit/runtime gates unfulfilled; no fabricated PASS"
+    }
+  },
+  "boundaries": {
+    "authorizedWriteSet": [
+      "docs/qa/evidence/STUDIO-OBS-007/t2-data-independent-peer.json"
+    ],
+    "productOrTestMutations": false,
+    "canonicalOrLifecycleEdits": false,
+    "gradleExecuted": false,
+    "npmExecuted": false,
+    "dependencyInstallation": false,
+    "networkAudit": false,
+    "databaseConnectionOrProbe": false,
+    "sharedDatabaseAccess": false,
+    "subagentsOrModelsSpawned": false,
+    "externalContact": false,
+    "envSecretDump": false,
+    "approvalOrSdcVerify": false,
+    "commitPushDeploy": false,
+    "goalStatusChanged": false,
+    "sharedWaveBudgetUSD": 500,
+    "actualSpend": "UNKNOWN",
+    "retainedFullWave": [
+      "STUDIO-OBS-007",
+      "STUDIO-OBS-012A",
+      "STUDIO-OBS-012B",
+      "STUDIO-OBS-013",
+      "STUDIO-OBS-014",
+      "STUDIO-OBS-015",
+      "STUDIO-OBS-008",
+      "STUDIO-OBS-009",
+      "STUDIO-OBS-010",
+      "STUDIO-OBS-011"
+    ],
+    "preservedExternalGates": [
+      "G-1 mTLS provisioning",
+      "G-2 runner TLS/client certificate",
+      "G-3 schedules",
+      "C-2 production authorization source",
+      "C-3 production Vault availability",
+      "D-B confirmation/rebaseline obligations",
+      "D-C actual-model benchmark",
+      "OBS-014 compliance approvals",
+      "OBS-009/010 release gates"
+    ],
+    "nativeC6": "OPEN per supplied root context; production CDP failure code-only proof lacks required canary. Unrelated to this database peer scope; not closed here."
+  },
+  "canonicalInterpretation": {
+    "sourceAC14": {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "line": 62
+    },
+    "exactResolutionOutcomes": [
+      "RESOLVED",
+      "NOT_AUTHORIZED",
+      "REVOKED",
+      "UNAVAILABLE",
+      "VAULT_UNAVAILABLE",
+      "REVOKED_MID_RUN"
+    ],
+    "wireUsageOutcomes": [
+      "USED",
+      "NOT_USED",
+      "REFUSED"
+    ],
+    "auditUncertainty": "UNKNOWN_OUTCOME is a safe audit summary, not a wire status, resolution decision or replay authority. Replay ACK_LOST is currently refused because no authentic durable replay acknowledgement-loss marker exists.",
+    "precedence": "The applied T2 PO delta and current AC-14/design supersede the original T0 RULING-6 sentence restricting unlinked usage to unreached NOT_USED. Both permitted no-decision variants are reviewed without treating the stale T0 sentence as a current failure.",
+    "nullableCases": [
+      {
+        "case": "True guided declared/unreached",
+        "usage": "NOT_USED",
+        "nullFields": [
+          "release_id",
+          "admission_id",
+          "outcome",
+          "vault_version"
+        ],
+        "facts": "Exact declaration, session/principal/CSI/environment/test/secret/attempt and declaring coordinate; no consumed secret admission or dispatch decision. Own event time is retention locator, not release time; runtime counters must separately prove zero reads/sends."
+      },
+      {
+        "case": "Guided committed consume without committed resolution/release",
+        "usage": "UNKNOWN_OUTCOME or genuinely evidenced guided ACK_LOST",
+        "nullFields": [
+          "release_id",
+          "outcome",
+          "vault_version"
+        ],
+        "nonNullFields": [
+          "admission_id"
+        ],
+        "facts": "Retained actual proposal/materialization/source declaration, dispatchCount=1, real admission, action ownerFence-derived attempt and exact coordinate. Possible ephemeral Vault read; no zero-read/no-use inference."
+      },
+      {
+        "case": "All linked usage",
+        "facts": "Non-null exact resolution outcome and actual scoped RELEASE locator, original release timestamp/version/attempt/sequence/scope/coordinate. Preserve committed positives; no extra terminal USAGE from LIVE_RECHECK."
+      }
+    ],
+    "diagnostics": "No diagnostic text, runner-supplied error cause, HTTP status or arbitrary string establishes resolution, completed use, no-invocation, acknowledgement loss, admission or replay authority."
+  },
+  "findings": [
+    {
+      "id": "DB-PEER-01",
+      "severity": "HIGH",
+      "status": "STATIC_DEFECT",
+      "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+      "line": 158,
+      "relatedLocations": [
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 112
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 199
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+          "line": 109
+        }
+      ],
+      "title": "Unreached NOT_USED does not authenticate the declaring ordinal; changing it can evade terminal summary uniqueness",
+      "evidence": "studio_secret_guided_declaration validates step ID and secret reference but has no ordinal input. The unreached branch validates attempt=session:ownerFence and absence of consumed fill, while no admission exists to enforce action.ordinal. coordinate_ordinal is only constrained >=0. Both duplicate searches include coordinate_ordinal.",
+      "counterexample": "Using the existing FAILED/unconsumed declared PASS fixture, insert no-decision NOT_USED with attempt session:1 and ordinal 0, then a new id with ordinal 1 and the same session/attempt/secret/step. Static control flow admits both: declaration is unchanged, no consumed admission/release exists, and duplicate identity differs only by unchecked ordinal. No PostgreSQL probe was executed.",
+      "impact": "A spurious declaring coordinate can manufacture a second terminal summary for one actual declaration; this breaks AC-14 exact coordinate and duplicate-summary rejection.",
+      "remediation": "In the data-owned V34 insert guard, derive the unreached declaration's real occurrence from retained immutable source/plan facts and compare coordinate_ordinal; also reject repeat summaries for the same actual declaration independently of caller-supplied ordinal. Do not fabricate an admission or force a Vault read. Update only unreleased V34/test fixtures under existing ownership, or use a forward corrective migration if baseline policy changes; V1-V33 stay untouched.",
+      "requiredProof": "Root/data exclusive PostgreSQL lane: two NOT_USED inserts differing only in fabricated ordinal/sequence/time, using exact authentic declaration, must yield one accepted summary and explicit refusal. Retain legitimate distinct declaring-coordinate scenarios."
+    },
+    {
+      "id": "DB-PEER-02",
+      "severity": "HIGH",
+      "status": "STATIC_DEFECT",
+      "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+      "line": 134,
+      "relatedLocations": [
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 150
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 190
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 231
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+          "line": 142
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+          "line": 323
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+          "line": 86
+        }
+      ],
+      "title": "Ordinary RELEASE authenticates owner scope and optional coordinates, but not actual declaration/attempt/consumption",
+      "evidence": "The stronger declaration/materialization/dispatchCount/ownerFence checks are nested only under USAGE with release_id IS NULL. Ordinary GUIDED RELEASE checks session scope, step membership and admission coordinates only if admission_id is supplied. Replay checks ledger and accepted execution scope, but never compares attempt_id with accepted observed binding/current attempt or secret_id with immutable declarations. Foreign keys do not establish those missing facts.",
+      "counterexample": "The archived positive tests themselves admit RESOLVED guided releases on an ADMITTED/count0 fixture with arbitrary attempts 'attempt-one'/'attempt-two' and no retained materialization, and replay RESOLVED on an ordinary QUEUED execution lacking an observed binding. A syntactically valid undeclared secret or fabricated attempt follows the same ordinary-release guard path. No new negative SQL test was executed.",
+      "impact": "A structurally real RELEASE locator can anchor false secret/attempt facts, so linked usage and outage retry joins only prove consistency with that row, not authenticity of the base decision. The append guard also has no explicit ban on a later DISPATCH RELEASE contradicting an already committed unlinked no-decision summary for the same actual declaration/attempt.",
+      "qualification": "PostgreSQL cannot prove that Vault physically returned a value. The missing checks here are available durable declaration/admission/attempt/owner facts, not a demand to add wire fields or make the database a Vault authority. Actual B guided dispatch does validate consumed action/current fence and secretInput before calling the recorder; this mitigates normal callers but does not supply the omitted persistence guards.",
+      "remediation": "Add path-specific ordinary DISPATCH RELEASE joins: guided actual source declaration, immutable proposal/materialization sourceInput identity, admission/count1 and action fence/attempt for this post-consume release path; replay immutable observed binding/declarations and the authentic pending/current dispatch attempt, preserving the legitimate CLAIMED/no-attempt zero-send decision path. Reject contradictory late release facts after terminal no-decision summary. Keep exact six resolution outcomes and no value-bearing columns. Replace the underconstrained positive fixtures with authentic existing lineage; preserve original assertions.",
+      "requiredProof": "Scoped negative PostgreSQL/recorder cases for undeclared secret, fabricated/stale attempt/fence, GUIDED missing or unconsumed admission/materialization, OBSERVED_REPLAY missing binding/wrong accepted attempt, and late release after no-decision terminal summary, alongside genuine zero-send outage/refusal and current successful dispatch."
+    },
+    {
+      "id": "DB-PEER-03",
+      "severity": "HIGH",
+      "status": "STATIC_DEFECT",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+      "line": 438,
+      "relatedLocations": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+          "line": 477
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+          "line": 529
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+          "line": 431
+        }
+      ],
+      "title": "Replay terminal pre-send failure audit and terminal state are committed in separate transactions",
+      "evidence": "Current revoked/too-long/unavailable and other pre-send exception paths call auditObservedFailure, whose TransactionTemplate commits RELEASE and REFUSED usage, then call close, whose separate TransactionTemplate commits closeWithError. dispatchObserved has no encompassing caller transaction. Outage is enclosed in one outer transaction, but its zero-row releaseObservedOutageClaim result is returned without requiring success or rollback of already appended decisions.",
+      "impact": "A crash between the two commits leaves audit decisions without the paired terminal state transition required by AC-14. A reaper/cancel winner or stale claim can cause a loser to append failure facts without winning the owner state transition. Recorder MANDATORY alone cannot make two separate caller transactions atomic.",
+      "remediation": "Use one outer transaction after taking the real ledger owner lock/CAS preconditions, append only genuine per-secret decisionFacts and proven no-send usage, and perform the close or outage-claim release in that same transaction. Require the state-change winner or roll back appended facts; preserve cancellation precedence and exact attempt. No runner-text-derived cause or new release decision is needed.",
+      "requiredProof": "B/root exclusive integration lane: inject rollback immediately after audit append and before close/requeue, assert both state and audit roll back; race cancelled/reaped/stale-owner closure against this failure path, assert loser emits no extra decisions. Preserve genuine zero-send and definite-refusal fresh-attempt tests."
+    },
+    {
+      "id": "DB-PEER-04",
+      "severity": "MEDIUM",
+      "status": "STATIC_LOCK_ORDER_HAZARD",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+      "line": 261,
+      "relatedLocations": [
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 128
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 129
+        }
+      ],
+      "title": "Mixed raw SQL and recorder writers acquire audit locks in opposite order",
+      "evidence": "Recorder append acquires owner advisory lock before INSERT. The INSERT trigger acquires event-id lock before owner lock. With the same event id, a raw insert can hold id and wait for owner while a recorder writer holds owner and waits for id. Archived races exercise raw/raw or recorder/recorder, not this mixed interleaving.",
+      "impact": "PostgreSQL must abort one deadlocked transaction. Integrity constraints remain, but the claimed matching-duplicate idempotency can fail and roll back a caller dispatch/outcome transaction. No runtime deadlock was manufactured or observed here.",
+      "remediation": "Adopt the same documented owner-then-event-id advisory lock ordering in both Java and SQL, preserving caller ledger/session lock order. Reversible data-owned guard adjustment; no shared scheduler/role rewrite.",
+      "requiredProof": "Two controlled connections in an isolated root-owned database: synchronize one raw insert and one recorder call for the identical event and owner, with bounded lock_timeout/statement_timeout; verify completion/idempotency or explicit duplicate refusal without SQLSTATE 40P01 and one stored event."
+    }
+  ],
+  "staticChecks": [
+    {
+      "id": "S-01",
+      "result": "PASS",
+      "scope": "Static exact enum and row shape only",
+      "locations": [
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 73
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 84
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+          "line": 31
+        }
+      ],
+      "detail": "Six non-null resolution codes remain exact and separate from usage. RELEASE forbids usage_outcome; USAGE requires it. Explicit IS TRUE blocks malformed nullable shape. Replay ACK_LOST is rejected by SQL/Java; no fabricated replay marker exists."
+    },
+    {
+      "id": "S-02",
+      "result": "PASS",
+      "scope": "Consumed-no-decision guard structure",
+      "locations": [
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 150
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 168
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+          "line": 222
+        }
+      ],
+      "detail": "Terminal/finalizing session, authentic immutable declaration hash, actual admission/coordinate, dispatchCount1, qualifying action state, action ownerFence-derived attempt and retained sourceInput/secret/step/intendedSlot materialization join are required. Null decision/release/version is honest absence; not zero reads. No manufactured release/read is introduced."
+    },
+    {
+      "id": "S-03",
+      "result": "CONCERNS",
+      "scope": "Unreached guard structure",
+      "locations": [
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 158
+        }
+      ],
+      "detail": "No consumed secret fill and no actual dispatch decision are checked; null admission/release/version/outcome and terminal/finalizing state are required. Exact ordinal and resulting duplicate evasion remain DB-PEER-01. SQL evidence of no consume is not actual zero-read/send runtime proof."
+    },
+    {
+      "id": "S-04",
+      "result": "PASS",
+      "scope": "Existence/full identity of linked RELEASE and LIVE_RECHECK",
+      "locations": [
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 207
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 106
+        }
+      ],
+      "detail": "Immutable trigger joins actual DISPATCH RELEASE id and original release timestamp, then compares path/execution/session/admission/principal/CSI/environment/test/secret/version/attempt/sequence/step/ordinal. Wrong/missing links refuse. LIVE_RECHECK requires prior RESOLVED, unique affected release/retention key, exact original scope, and no new terminal usage. No self-FK is falsely claimed; RULING-5 deliberately uses trigger+lock."
+    },
+    {
+      "id": "S-05",
+      "result": "PASS",
+      "scope": "Committed positive audit monotonicity",
+      "locations": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+          "line": 266
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 199
+        }
+      ],
+      "detail": "Repeated matching recorder calls are idempotent; late UNKNOWN_OUTCOME/ACK_LOST keeps stored positive usage while all other safe identity fields must match. Contradictory positives refuse. Raw duplicates refuse. This does not certify positive wire facts are persisted before FINAL, nor permit UNKNOWN to be overwritten by a later positive."
+    },
+    {
+      "id": "S-06",
+      "result": "PASS",
+      "scope": "Parent UPDATE/DELETE/TRUNCATE guards",
+      "locations": [
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 248
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 252
+        }
+      ],
+      "detail": "Row UPDATE/DELETE and parent statement TRUNCATE triggers raise; PUBLIC UPDATE/DELETE/TRUNCATE revoked. Archived tests exercise the parent and nonowner detach/drop denial. Direct-leaf TRUNCATE accidental-grant resilience and real deployed actor grants remain open proof below."
+    },
+    {
+      "id": "S-07",
+      "result": "PASS",
+      "scope": "Recorder transaction and SQL construction",
+      "locations": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+          "line": 141
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+          "line": 254
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+          "line": 359
+        }
+      ],
+      "detail": "All mutating recorder methods use MANDATORY and explicit active-transaction checks; no REQUIRES_NEW, resolver/value argument or outbox. Named inserts and values are bound; only constant column names concatenate. UUID identity metadata is safe and does not contain a secret value. Caller atomicity gap remains DB-PEER-03."
+    },
+    {
+      "id": "S-08",
+      "result": "CONCERNS",
+      "scope": "Cross-partition uniqueness and races",
+      "locations": [
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 127
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 199
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 232
+        }
+      ],
+      "detail": "Owner advisory lock and global history lookup reject duplicate attempts/sequences/summaries even if timestamp moves partitions. Archived raw/raw and recorder/recorder races have one winner/idempotent result. Identity authenticator gaps and mixed lock order remain findings; no all-races PASS."
+    },
+    {
+      "id": "S-09",
+      "result": "PASS",
+      "scope": "Retention design and enrollment",
+      "locations": [
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 103
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 256
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java",
+          "line": 29
+        }
+      ],
+      "detail": "Partition key release_occurred_at keeps linked RELEASE/USAGE/recheck in release month; unlinked usage owns its event month. No DEFAULT created. Current + 2 UTC months created, all five enrolled manager files preserved. Existing 12-month default pruner detaches/drops; no trigger DELETE/move required for audit. New diffs in managers are family/key enrollment only; scheduler is byte-identical to HEAD."
+    },
+    {
+      "id": "S-10",
+      "result": "PASS",
+      "scope": "Write-once revocation persistence",
+      "locations": [
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 24
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretRevocationSweep.java",
+          "line": 97
+        }
+      ],
+      "detail": "revoked_at cannot be cleared/replaced; sweep locks owner, updates write-once, appends unique actual release recheck using original metadata. Unreleased guided declaration denial sets owner revocation without fictional release/recheck. Timing and real no-next-fill/cancel oracles are not certified."
+    },
+    {
+      "id": "S-11",
+      "result": "PASS",
+      "scope": "Replay retry SQL authority structure",
+      "locations": [
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 277
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 361
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+          "line": 142
+        }
+      ],
+      "detail": "Definite-refusal and real zero-send VAULT_UNAVAILABLE tokens are distinct. No admission/receipt, pending/not cancelled/not revoked, live owned claim, fresh attempt/grant nonce, immutable accepted identities, closed v3 grant with <=30s lifetime, and transaction-local owner proof/CAS are checked. BeginObservedDispatch clears both tokens. SQL cannot classify actual runner transport results; real C-4 fresh resolution/read counters remain open."
+    },
+    {
+      "id": "S-12",
+      "result": "PASS",
+      "scope": "Current B conservative uncertainty and no-send call sites, static only",
+      "locations": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+          "line": 52
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+          "line": 154
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+          "line": 162
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+          "line": 508
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+          "line": 1037
+        }
+      ],
+      "detail": "Released guided nonsuccess becomes linked UNKNOWN_OUTCOME; only OK is USED. Backend pre-send decisions/owned definite refusal use REFUSED. Terminal reaper writes missing released replay summaries UNKNOWN and leaves existing positives. Missing sparse replay entries become UNKNOWN; unknown wire secret ids refuse. No diagnostic/runner error text assigns ACK_LOST audit or resolution authority."
+    },
+    {
+      "id": "S-13",
+      "result": "CONCERNS",
+      "scope": "Least-writer proof and production role boundary",
+      "locations": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+          "line": 310
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+          "line": 543
+        }
+      ],
+      "detail": "Archived synthetic NOLOGIN nonowner role can insert linked usage and cannot rewrite/detach/drop, including accidental parent UPDATE/DELETE grants. This is not proof of deployed role ownership or grants. These fixtures do not grant/read source manifests or materializations and do not execute both unlinked variants as least writer. No new RLS architecture is required/invented."
+    },
+    {
+      "id": "S-14",
+      "result": "PASS",
+      "scope": "Core/baseline preservation by hash only",
+      "detail": "Read-only current file SHA-256 and git show HEAD verification matches every entry of preserved-baseline.json: 33 files covering V1-V33 including staged V19, with Checks core V1-V11 byte-identical. No historical SQL changed. This is not live core regression or OBS-012A rebaseline acceptance."
+    }
+  ],
+  "integrationCompleteness": [
+    {
+      "id": "I-01",
+      "severity": "MEDIUM",
+      "state": "OPEN",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+      "line": 52,
+      "detail": "Current guidedOutcome/guidedTerminal map every released nonsuccess to UNKNOWN. This is conservative and avoids claiming REFUSED/NOT_USED after an interrupted effect, but also leaves actual authenticated positive pre-effect target/policy refusal as unknown. Preserve existing ledger authenticity; classify only code/operation evidence that genuinely proves no invocation. Do not assign runner diagnostic text authority or introduce new wire fields.",
+      "proof": "Real released guided backend refusal plus genuine runner pre-effect refusal, successful fill and interrupted/post-effect failure; verify USED/REFUSED/linked NOT_USED where actual facts support them and UNKNOWN otherwise."
+    },
+    {
+      "id": "I-02",
+      "severity": "MEDIUM",
+      "state": "OPEN",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java",
+      "line": 198,
+      "detail": "secretUse is consumed only for an applied FINAL. Positive entries on an authenticated acknowledged PROGRESS are not persisted by this seam; a missing final/reaper can therefore produce UNKNOWN although an earlier report carried a known usage fact. The recorder protects committed audit positives, but cannot preserve facts never recorded. No runtime claim is made about whether current runner emits that progress data.",
+      "proof": "Root/B join actual sparse positive progress report and subsequent child kill/missing FINAL/reaper. Establish which positive facts commit and preserve them under exact attempt/admission identity without adding another terminal summary or widening the wire contract."
+    },
+    {
+      "id": "I-03",
+      "severity": "HIGH",
+      "state": "OPEN_COMPLETENESS_OR_DESIGN_RECONCILIATION",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+      "line": 117,
+      "relatedLocations": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+          "line": 477
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+          "line": 172
+        }
+      ],
+      "detail": "Current per-secret decisionFacts correctly record only actual completed decisions and the actually attempted failing secret. If resolution aborts before later declared secrets are visited, there is no RELEASE for those declarations; replayNoSend/replayOwnerTerminal only traverse actual release rows. One terminal summary per declared secret is consequently not established for partial/early resolution failure. Current approved replay shapes forbid unlinked no-decision usage. Do not restore fabricated UNAVAILABLE decisions for all ids, perform read-and-discard, or invent a replay null variant.",
+      "proof": "Multi-secret ordinary replay with failure on first/middle secret and exact real read/send counts, actual safe decisions and terminal summary inventory. Root/B/architect/PO must reconcile an authentic complete decision path or report the exact unmet completeness oracle without weakening original acceptance."
+    },
+    {
+      "id": "I-04",
+      "severity": "MEDIUM",
+      "state": "OPEN",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+      "line": 122,
+      "detail": "guidedTerminal locates consumed admissions through materialization and emits honest UNKNOWN. Its lookup does not itself filter owner_fence/scope_hash; the SQL no-decision guard supplies those checks. Missing retained materialization cannot become NOT_USED: the unreached guard detects consumed fills and refuses, potentially rolling back terminal closure. Archived negative SQL case verifies refusal; operational recovery completeness through actual stop/reaper needs current B proof.",
+      "proof": "Actual consume-committed controller crash, retained/missing materialization and owner/fence races; verify truthful summary plus terminal state behavior or explicit fail-closed recovery limitation, with no reconstructed browser/read."
+    },
+    {
+      "id": "I-05",
+      "severity": "MEDIUM",
+      "state": "OPEN",
+      "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+      "line": 252,
+      "detail": "DDL declares a TRUNCATE statement trigger only on the parent. Neither V34 nor future-partition creation explicitly installs a per-leaf TRUNCATE guard. The archive truncates the parent, and least-writer cases grant only parent UPDATE/DELETE. Direct child TRUNCATE under an accidental child grant is not tested. No runtime bypass PASS/FAIL is asserted.",
+      "remediationIfProbeConfirms": "Keep ordinary roles nonowner and deny TRUNCATE on every leaf; install identical statement guard for current and future audit partitions if accidental-grant resilience is required. Preserve owner detach/drop retention and no DEFAULT; do not use DELETE as pruning."
+    },
+    {
+      "id": "I-06",
+      "severity": "MEDIUM",
+      "state": "OPEN",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "line": 319,
+      "detail": "Least-writer test proves linked usage only, under a synthetic role. Ordinary RELEASE and both unlinked branches require additional SELECT privilege on actual declaration/materialization sources because the trigger is invoker-security. Actual deployment owner/migration/runtime/retention separation and new/future partition grants have not been inspected through a database.",
+      "proof": "In isolated lane use nonowner runtime role with exact SELECT/INSERT and necessary names-only source SELECT, no owner membership/DDL/TRUNCATE; execute all legitimate branches plus denied mutations/direct-leaf/partition DDL; verify configured production actor mapping without revealing credentials."
+    }
+  ],
+  "proposedIsolatedProbes": {
+    "executionStatus": "NOT_EXECUTED; precise proposals to root only, no shared lane/active B DB access",
+    "isolation": "After root schedules a separate lane, create a fresh uniquely named PostgreSQL 15 scratch database/container and synthetic roles, with exact hashed migration baseline and no shared application connection. Use bounded statement_timeout/lock_timeout; discard only that scratch database after results are archived. No reviewer Gradle is proposed.",
+    "probes": [
+      {
+        "name": "unreached-ordinal-and-base-release-authenticity",
+        "steps": [
+          "Seed exact immutable guided declaration, session FAILED with owner fence 1 and no consumed action.",
+          "Insert actual ordinal-0 no-decision NOT_USED; try same declaration ordinal 1 with new id, sequence and retention timestamp.",
+          "On separate fresh fixtures attempt ordinary RELEASE with undeclared secret/stale or arbitrary attempt/unconsumed admission, then replay release without observed binding or with wrong accepted attempt.",
+          "Assert intended refusals and inventory exact stored rows; never manufacture Vault read/send counts from SQL."
+        ],
+        "purpose": "Confirm DB-PEER-01/02 static holes and validate proposed guard repairs."
+      },
+      {
+        "name": "direct-leaf-truncate",
+        "steps": [
+          "Create V34 current and future partitions in scratch DB; seed one legitimate release/usage.",
+          "Inspect pg_trigger on parent and selected leaves.",
+          "Grant a nonowner synthetic writer accidental TRUNCATE on exactly one leaf and attempt TRUNCATE leaf in a transaction; roll it back whether refused or admitted.",
+          "Compare parent TRUNCATE refusal and owner detach/drop success. No production role/grants touched."
+        ],
+        "purpose": "Settle I-05 without assuming statement-trigger cloning or colliding with active runtime tests."
+      },
+      {
+        "name": "mixed-writer-lock-order",
+        "steps": [
+          "Use two scratch connections for the same safe event identity/owner.",
+          "Hold id advisory lock in raw-insert connection; begin recorder-equivalent owner lock in the other; synchronize INSERT attempts.",
+          "Bound waits and capture SQLSTATE/one-row inventory. Repeat after unified lock ordering."
+        ],
+        "purpose": "Settle mixed-writer deadlock hazard; pure SQL interleaving models the actual recorder lock calls, not full Java runtime proof."
+      }
+    ]
+  },
+  "archiveVerification": {
+    "method": "Read and hash archived files/snapshots; parse XML and compare exact names/counters/sha256 with result.json. Reading XML is evidence verification, not new test execution.",
+    "archive": "docs/qa/evidence/STUDIO-OBS-007/data-uncertainty-green",
+    "manifestSHA256": "5785fc8f2ec1fce35ad9e7bc5f92c8479b89b32474048d93aa90800afa3d1033",
+    "resultSHA256": "9e4dc170364fd1cdc321c993c30c0387096bab270d15ca4de1dc56a1756d4926",
+    "recordedRun": {
+      "session": 31466,
+      "exitCode": 0,
+      "totalTests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "database": "Testcontainers postgres:15-alpine",
+      "log": "BUILD SUCCESSFUL in 57s"
+    },
+    "xml": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/data-uncertainty-green/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+        "sha256": "90fdb982f7480c7cb5cbe2eaa073987aae2c1196e75c96e544758cf462cfac67",
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+        "tests": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T06:36:59",
+        "testNames": [
+          "concurrentRetryRefreshersHaveExactlyOneWinner()",
+          "definiteRefusalAllowsOnlyOneOwnedFreshAttemptAndKeepsAcceptedIdentities()",
+          "freshAndBothStagedCutoverOrdersReachV34WithoutChangingOrdinaryCapability()",
+          "scopedReleaseUsageRetryAndAppendOnlyRowsNeverContainTheCanary()",
+          "exactV3ProfileAccountFreeScopeAndObservationCountsAreClosed()",
+          "crossMonthUsageAndLiveRecheckExpireWithReleaseWhileUnlinkedUsageKeepsOwnMonth()",
+          "consumedAckLossIsEvidenceBoundAndMissingMaterializationCannotBecomeUnused()",
+          "unreachedNotUsedHasNoFabricatedResolutionAndRejectsOtherNullableVariants()",
+          "realNoSendOutageDecisionGrantsDifferentAuthorityAndCannotBeFabricated()",
+          "guardsFailLoudlyOnAwaitingAuthOrObservedBindingRows()",
+          "additiveStoredSecretLengthCodeKeepsEveryPriorTerminalValueAndRefusesUnknown()",
+          "liveRecheckIsUniqueAndPreservesOneTerminalUsageAndWriteOnceRevocation()",
+          "ordinaryWriterCannotAlterOrDropRetentionPartitions()",
+          "consumedNoDecisionRequiresAuthenticAdmissionAndKeepsNullResolutionHonest()",
+          "rawConcurrentConsumedUncertaintyHasOneWinnerAcrossRetentionClock()",
+          "concurrentUsageSummariesHaveExactlyOneWinner()",
+          "replayUsageUsesClosedCodesAndTheActualExecutionScope()",
+          "releasedReplayUncertaintyRequiresRealScopedReleaseAndNeverFakeAckStatus()"
+        ],
+        "failureNodes": 0,
+        "errorNodes": 0
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/data-uncertainty-green/TEST-com.citi.put.checks.studio.guided.secret.SecretUseAuditIT.xml",
+        "sha256": "baff46571536eb5e47607a564d2654067b5be36713f40f21ddd1328de6027034",
+        "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T06:37:37",
+        "testNames": [
+          "concurrentConsumedUnknownWritersAreIdempotentAndCannotInventTwoSummaries()",
+          "leastWriterCanRecordUsageButCannotRewriteOrPrunePartitions()",
+          "concurrentDuplicateWritersProduceOneRelease()",
+          "consumedWithoutDecisionIsHonestUnlinkedUncertaintyNeverUnreached()",
+          "committedResolutionCannotBeRelabelledNoDecisionAndLateUnknownPreservesPositive()",
+          "actualJavaBootstrapHealthSchedulerAndPrunerManageAuditLifecycle()",
+          "mixedKnownAndUnknownReplayUsageKeepsSparseWireSeparateAndRejectsAckWithoutEvidence()",
+          "releaseUsageAndRevocationAreIdempotentImmutableScopedMetadata()",
+          "unreachedDeclarationHasOnlyOneTerminalNotUsedWithoutRelease()",
+          "auditAndDispatchStateCommitOrRollbackTogetherAndRequireTransaction()",
+          "consumedScopeRequiresActualAdmissionDeclarationFenceAndAckLossEvidence()"
+        ],
+        "failureNodes": 0,
+        "errorNodes": 0
+      }
+    ],
+    "archiveFiles": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/data-uncertainty-green/source-hashes.json",
+        "sha256": "5785fc8f2ec1fce35ad9e7bc5f92c8479b89b32474048d93aa90800afa3d1033"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/data-uncertainty-green/result.json",
+        "sha256": "9e4dc170364fd1cdc321c993c30c0387096bab270d15ca4de1dc56a1756d4926"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/data-uncertainty-green/run.log",
+        "sha256": "ccf93b2074472a2015afc0b2cad768bebbdcad725ca59997c8c24c795929d6a5"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/data-uncertainty-green/preserved-baseline.json",
+        "sha256": "60b37911646af45cd43fe5a5c5856f65161330b1fd8bfab015f0556c587a72f0"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/data-uncertainty-green/post-release-source-delta.json",
+        "sha256": "df00049817996ad9f2906ac891e66e6f68de2e23ff511dc940405f07ac0fc699"
+      }
+    ],
+    "meaning": "Actual archived migration/Java-recorder/partition assertions passed at recorded identities. Some fixtures are deliberately underconstrained for ordinary release authenticity; synthetic publication lineage and manually set ACK_LOST are database fixtures, not actual Vault/browser/model/crash evidence.",
+    "historical": {
+      "uncertaintyRed": {
+        "tests": 29,
+        "failures": 2,
+        "failedMigrationCases": [
+          "crossMonthUsageAndLiveRecheckExpireWithReleaseWhileUnlinkedUsageKeepsOwnMonth()",
+          "unreachedNotUsedHasNoFabricatedResolutionAndRejectsOtherNullableVariants()"
+        ]
+      },
+      "persistenceGreen": {
+        "tests": 20,
+        "migration": 14,
+        "recorder": 6,
+        "failures": 0,
+        "designation": "Historical identities; never called current"
+      }
+    },
+    "sourceLimits": [
+      "V34, recorder, SecretUseAuditIT, five partition files and GuidedPublicationMigrationTest still match archived source snapshots at reviewed hashes.",
+      "GuidedSecretLoginMigrationTest changed during this review from the archived SHA to package-visible helper SHA; the 29 tests were run against the earlier private helper source.",
+      "StudioDispatchLedgerStatements tested SHA is known but archived source snapshot is unavailable. Existing post-release-source-delta records a first B revision; current SHA is a later revision. Exact old-to-current semantic diff cannot be independently reconstructed from missing snapshot.",
+      "Current SecretAuditLifecycle/Dispatcher/GuidedSessionService/GuidedDispatchService/ObservedReplayAuthorization/ProgressReportService/decisionFacts resolver changes are not certified by the 29-case archive.",
+      "User-reported B8 regression LIVE95262, bridge37 running, root20 HTTP-security/root30 lifecycle and R local gates are contextual only; not rerun or promoted to this review's current-source PASS."
+    ]
+  },
+  "sourceBoundaries": {
+    "capturedAtUTC": "2026-10-10T06:59:21.175922+00:00",
+    "sha256Algorithm": "SHA-256",
+    "manifest": [
+      {
+        "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+        "currentSha256": "98a4d078d72c15ae47be3f75030af0af164613744d511aab4f6ccb01d6f8be6e",
+        "firstObservedSha256": "98a4d078d72c15ae47be3f75030af0af164613744d511aab4f6ccb01d6f8be6e",
+        "archivedTestedSha256": "98a4d078d72c15ae47be3f75030af0af164613744d511aab4f6ccb01d6f8be6e",
+        "archiveSnapshotSha256": "98a4d078d72c15ae47be3f75030af0af164613744d511aab4f6ccb01d6f8be6e",
+        "matchesArchive": true,
+        "runtimeCertification": "Covered only to the extent of the archived named assertions"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+        "currentSha256": "72499fe274e6dddd6dce1c406a97bf02dbb2dea7de09caa992878e8d6fcc083a",
+        "firstObservedSha256": "72499fe274e6dddd6dce1c406a97bf02dbb2dea7de09caa992878e8d6fcc083a",
+        "archivedTestedSha256": "72499fe274e6dddd6dce1c406a97bf02dbb2dea7de09caa992878e8d6fcc083a",
+        "archiveSnapshotSha256": "72499fe274e6dddd6dce1c406a97bf02dbb2dea7de09caa992878e8d6fcc083a",
+        "matchesArchive": true,
+        "runtimeCertification": "Covered only to the extent of the archived named assertions"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+        "currentSha256": "008166747878dbf4ac32adece8e224947d26f7fa04c1653c5291e6dcb5a9967f",
+        "firstObservedSha256": "008166747878dbf4ac32adece8e224947d26f7fa04c1653c5291e6dcb5a9967f",
+        "archivedTestedSha256": "008166747878dbf4ac32adece8e224947d26f7fa04c1653c5291e6dcb5a9967f",
+        "archiveSnapshotSha256": "008166747878dbf4ac32adece8e224947d26f7fa04c1653c5291e6dcb5a9967f",
+        "matchesArchive": true,
+        "runtimeCertification": "Covered only to the extent of the archived named assertions"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+        "currentSha256": "7729f7c5f087090ff4a8d363d902d770b50f8c043cee543a9cba01d46b7d6d3a",
+        "firstObservedSha256": "3fbc6b5aaad3a70af810d93cd2f59acb79432c09f03cf03daa943d553f4ac52b",
+        "archivedTestedSha256": "3fbc6b5aaad3a70af810d93cd2f59acb79432c09f03cf03daa943d553f4ac52b",
+        "archiveSnapshotSha256": "3fbc6b5aaad3a70af810d93cd2f59acb79432c09f03cf03daa943d553f4ac52b",
+        "matchesArchive": false,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java",
+        "currentSha256": "f4d0b3cf3c5460ecbc05585e11f2536219c0aac2caa6c012d67b40321e90544a",
+        "firstObservedSha256": "f4d0b3cf3c5460ecbc05585e11f2536219c0aac2caa6c012d67b40321e90544a",
+        "archivedTestedSha256": "f4d0b3cf3c5460ecbc05585e11f2536219c0aac2caa6c012d67b40321e90544a",
+        "archiveSnapshotSha256": "f4d0b3cf3c5460ecbc05585e11f2536219c0aac2caa6c012d67b40321e90544a",
+        "matchesArchive": true,
+        "runtimeCertification": "Covered only to the extent of the archived named assertions"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionBootstrap.java",
+        "currentSha256": "1be896da353007d241f368e3ad9b77c6f7d9adf9878dd9057ac2f15a62475dfb",
+        "firstObservedSha256": "1be896da353007d241f368e3ad9b77c6f7d9adf9878dd9057ac2f15a62475dfb",
+        "archivedTestedSha256": "1be896da353007d241f368e3ad9b77c6f7d9adf9878dd9057ac2f15a62475dfb",
+        "archiveSnapshotSha256": "1be896da353007d241f368e3ad9b77c6f7d9adf9878dd9057ac2f15a62475dfb",
+        "matchesArchive": true,
+        "runtimeCertification": "Covered only to the extent of the archived named assertions"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionHealthIndicator.java",
+        "currentSha256": "ae851e1050269c19f2d54036ea522d1bfe163630cbbf0789a80b42b70e2b5f4e",
+        "firstObservedSha256": "ae851e1050269c19f2d54036ea522d1bfe163630cbbf0789a80b42b70e2b5f4e",
+        "archivedTestedSha256": "ae851e1050269c19f2d54036ea522d1bfe163630cbbf0789a80b42b70e2b5f4e",
+        "archiveSnapshotSha256": "ae851e1050269c19f2d54036ea522d1bfe163630cbbf0789a80b42b70e2b5f4e",
+        "matchesArchive": true,
+        "runtimeCertification": "Covered only to the extent of the archived named assertions"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/RetentionPruner.java",
+        "currentSha256": "85fa653cedbae9af25d7631c29db5afe99c0a002f4ec3926ae2a28a5f1b6fc8b",
+        "firstObservedSha256": "85fa653cedbae9af25d7631c29db5afe99c0a002f4ec3926ae2a28a5f1b6fc8b",
+        "archivedTestedSha256": "85fa653cedbae9af25d7631c29db5afe99c0a002f4ec3926ae2a28a5f1b6fc8b",
+        "archiveSnapshotSha256": "85fa653cedbae9af25d7631c29db5afe99c0a002f4ec3926ae2a28a5f1b6fc8b",
+        "matchesArchive": true,
+        "runtimeCertification": "Covered only to the extent of the archived named assertions"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionScheduler.java",
+        "currentSha256": "19b21872f027e28ee52becdbc1621725713752fc4b3d2e5b24d482d50ff83ba1",
+        "firstObservedSha256": "19b21872f027e28ee52becdbc1621725713752fc4b3d2e5b24d482d50ff83ba1",
+        "archivedTestedSha256": "19b21872f027e28ee52becdbc1621725713752fc4b3d2e5b24d482d50ff83ba1",
+        "archiveSnapshotSha256": "19b21872f027e28ee52becdbc1621725713752fc4b3d2e5b24d482d50ff83ba1",
+        "matchesArchive": true,
+        "runtimeCertification": "Covered only to the extent of the archived named assertions"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+        "currentSha256": "445b9f46757424b4368c760805ae89efb561025955212a778585991cd7433e68",
+        "firstObservedSha256": "445b9f46757424b4368c760805ae89efb561025955212a778585991cd7433e68",
+        "archivedTestedSha256": "445b9f46757424b4368c760805ae89efb561025955212a778585991cd7433e68",
+        "archiveSnapshotSha256": "445b9f46757424b4368c760805ae89efb561025955212a778585991cd7433e68",
+        "matchesArchive": true,
+        "runtimeCertification": "Covered only to the extent of the archived named assertions"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+        "currentSha256": "ede8863502f58ce5828866af9ecd7d441d7cb58cefe8b702da74e6facc19a633",
+        "firstObservedSha256": "ede8863502f58ce5828866af9ecd7d441d7cb58cefe8b702da74e6facc19a633",
+        "archivedTestedSha256": "d921257332416e38563277d31a85c2803b1b3ef4e235a6d7c796b43ece9ad727",
+        "archiveSnapshotSha256": null,
+        "matchesArchive": false,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/t2-observed-retry-design.md",
+        "currentSha256": "db4ea0b7e2d1489dc81969f1ef2632a8e8f6e3936c911f2574685cd1d85f186a",
+        "firstObservedSha256": "db4ea0b7e2d1489dc81969f1ef2632a8e8f6e3936c911f2574685cd1d85f186a",
+        "archivedTestedSha256": "db4ea0b7e2d1489dc81969f1ef2632a8e8f6e3936c911f2574685cd1d85f186a",
+        "archiveSnapshotSha256": "db4ea0b7e2d1489dc81969f1ef2632a8e8f6e3936c911f2574685cd1d85f186a",
+        "matchesArchive": true,
+        "runtimeCertification": "Covered only to the extent of the archived named assertions"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/t2-po-consistency-delta.json",
+        "currentSha256": "3ad3336670648b4ba64ff02ea206c292307241cbe4c0e86b361ed2a1a813aa5c",
+        "firstObservedSha256": "3ad3336670648b4ba64ff02ea206c292307241cbe4c0e86b361ed2a1a813aa5c",
+        "archivedTestedSha256": "3ad3336670648b4ba64ff02ea206c292307241cbe4c0e86b361ed2a1a813aa5c",
+        "archiveSnapshotSha256": "3ad3336670648b4ba64ff02ea206c292307241cbe4c0e86b361ed2a1a813aa5c",
+        "matchesArchive": true,
+        "runtimeCertification": "Covered only to the extent of the archived named assertions"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/t2-po-delta-application.json",
+        "currentSha256": "11b311125fe812c4ddf8ee20837901ced44244914545b33e55073f843bfcf702",
+        "firstObservedSha256": "11b311125fe812c4ddf8ee20837901ced44244914545b33e55073f843bfcf702",
+        "archivedTestedSha256": "11b311125fe812c4ddf8ee20837901ced44244914545b33e55073f843bfcf702",
+        "archiveSnapshotSha256": "11b311125fe812c4ddf8ee20837901ced44244914545b33e55073f843bfcf702",
+        "matchesArchive": true,
+        "runtimeCertification": "Covered only to the extent of the archived named assertions"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/t2-design-consistency.json",
+        "currentSha256": "de5dff6265e1d4f5230818858684b6afa3443acc4fdef83338b06e1e81cdc185",
+        "firstObservedSha256": "de5dff6265e1d4f5230818858684b6afa3443acc4fdef83338b06e1e81cdc185",
+        "archivedTestedSha256": "de5dff6265e1d4f5230818858684b6afa3443acc4fdef83338b06e1e81cdc185",
+        "archiveSnapshotSha256": "de5dff6265e1d4f5230818858684b6afa3443acc4fdef83338b06e1e81cdc185",
+        "matchesArchive": true,
+        "runtimeCertification": "Covered only to the extent of the archived named assertions"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+        "currentSha256": "71547da9de2de97cd9138c86960cfa564a60b4da6489ea397584556b1722f7b2",
+        "firstObservedSha256": "71547da9de2de97cd9138c86960cfa564a60b4da6489ea397584556b1722f7b2",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretRevocationSweep.java",
+        "currentSha256": "54ae3cc71395aa3e42e4dc89660c4677f0c5050103dcfeb60355fda75aa5f922",
+        "firstObservedSha256": "54ae3cc71395aa3e42e4dc89660c4677f0c5050103dcfeb60355fda75aa5f922",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+        "currentSha256": "90cc8051614500affb4215f1ebcff225f47371fdfc0b1935e5465f9564b3e42b",
+        "firstObservedSha256": "04560d6e0b691baeb5f44fe9f5a9eb3ac38f9a1ccad3dece623834a55d08fdd8",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+        "currentSha256": "f49bce1e30b786292b58fa932b53f071724a977fd7d8c866b8dd31980f4b3808",
+        "firstObservedSha256": "f49bce1e30b786292b58fa932b53f071724a977fd7d8c866b8dd31980f4b3808",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+        "currentSha256": "883d6470d9ef5170c928549367f4130517e8ddc8cb3dd38b2b5e5a00ada89218",
+        "firstObservedSha256": "883d6470d9ef5170c928549367f4130517e8ddc8cb3dd38b2b5e5a00ada89218",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+        "currentSha256": "bc2d280762ae8d9c82d4af6e75c047dd129123d9828015afe8fc017373a86436",
+        "firstObservedSha256": "f25e7c2f86672d58a6d92447e38404c319b563d29c004130bfa769b8410d34d4",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java",
+        "currentSha256": "e5670621ab53ccbf351562901651059b3fe5114befdc853eb3990cf9082071a7",
+        "firstObservedSha256": "e5670621ab53ccbf351562901651059b3fe5114befdc853eb3990cf9082071a7",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/internal/dto/RunnerReport.java",
+        "currentSha256": "afe1e812bc887155d42f947547fb3b2a1b097248be8b878a26a85f2f27a8a554",
+        "firstObservedSha256": "afe1e812bc887155d42f947547fb3b2a1b097248be8b878a26a85f2f27a8a554",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "currentSha256": "81c09f2583555cc2bc286032d3fc4ef5c68e9a5cb5feae8e6603c46616436feb",
+        "firstObservedSha256": "81c09f2583555cc2bc286032d3fc4ef5c68e9a5cb5feae8e6603c46616436feb",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/README.md",
+        "currentSha256": "c5541f9f72dd8daac16457fa4c101bd39bb04a6a60a071b2d602edb934bec32c",
+        "firstObservedSha256": "c5541f9f72dd8daac16457fa4c101bd39bb04a6a60a071b2d602edb934bec32c",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "currentSha256": "4d38a0c9e78d30ee269502edb5c5ac254b8de30a2f98fdb8b56245eb5d642e2e",
+        "firstObservedSha256": "4d38a0c9e78d30ee269502edb5c5ac254b8de30a2f98fdb8b56245eb5d642e2e",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "docs/specs/studio-observed-authoring/secret-login-security-review.md",
+        "currentSha256": "c5ce3be4543ae51618455b14909caabaf9cc46b9dd7fce0a2ff57516394cde49",
+        "firstObservedSha256": "c5ce3be4543ae51618455b14909caabaf9cc46b9dd7fce0a2ff57516394cde49",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "docs/architecture/ADR-SC-005-single-path-observed-authoring.md",
+        "currentSha256": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4",
+        "firstObservedSha256": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": ".ai/STUDIO-OBS-007-architect-t0-rulings.json",
+        "currentSha256": "df94f7d40de5f026856aa959427cbdb09ce71ba7f99a144c081f7f59e3d01cd2",
+        "firstObservedSha256": "df94f7d40de5f026856aa959427cbdb09ce71ba7f99a144c081f7f59e3d01cd2",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": ".codex/skills/aiox-data-engineer/SKILL.md",
+        "currentSha256": "c97b81fc2599852b32cf391957ed084df24241814050f962724c35f78448bba4",
+        "firstObservedSha256": "c97b81fc2599852b32cf391957ed084df24241814050f962724c35f78448bba4",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": ".aiox-core/development/agents/data-engineer.md",
+        "currentSha256": "4b921018c23721c6f71a5d23b6495d254f260cd85406db5915f034a90d17c845",
+        "firstObservedSha256": "4b921018c23721c6f71a5d23b6495d254f260cd85406db5915f034a90d17c845",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": ".aiox-core/constitution.md",
+        "currentSha256": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+        "firstObservedSha256": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": ".aiox-core/development/tasks/security-audit.md",
+        "currentSha256": "8ae6068628080d67c4c981d0c6e87d6347ddcc2e363d985ef578de22e94d6ae1",
+        "firstObservedSha256": "8ae6068628080d67c4c981d0c6e87d6347ddcc2e363d985ef578de22e94d6ae1",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "AGENTS.md",
+        "currentSha256": "a3e2fe4c0bebc01d91b0fa0b062c49d031e203ab2a522ee9b04d9f06df797198",
+        "firstObservedSha256": "a3e2fe4c0bebc01d91b0fa0b062c49d031e203ab2a522ee9b04d9f06df797198",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioReferenceResolver.java",
+        "currentSha256": "8f7ed2b55569069b02a543cabad554b4b6baccd9a006879b139d8bc917af6ddb",
+        "firstObservedSha256": "8f7ed2b55569069b02a543cabad554b4b6baccd9a006879b139d8bc917af6ddb",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+        "currentSha256": "70dd660a75a92e247dd46df8203d37a29acf1509b2ea1b025f63293f6dc796a0",
+        "firstObservedSha256": "a5c25d5ac8e0471943ed1c20d503d62bd9e4f9d392b743e0e5349c77eab7a676",
+        "archivedTestedSha256": null,
+        "archiveSnapshotSha256": null,
+        "matchesArchive": null,
+        "runtimeCertification": "No current-source runtime certification from the 29-case archive"
+      }
+    ],
+    "concurrentDeltas": [
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+        "testedSha256": "3fbc6b5aaad3a70af810d93cd2f59acb79432c09f03cf03daa943d553f4ac52b",
+        "currentSha256": "7729f7c5f087090ff4a8d363d902d770b50f8c043cee543a9cba01d46b7d6d3a",
+        "exactDiff": [
+          {
+            "line": 759,
+            "before": "private record RetryFixture(",
+            "after": "record RetryFixture("
+          },
+          {
+            "line": 772,
+            "before": "private static RetryFixture publishedRetry() throws Exception {",
+            "after": "static RetryFixture publishedRetry() throws Exception {"
+          }
+        ],
+        "effect": "Package helper visibility only; tests/assertions unchanged in inspected diff. No new runtime certification."
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+        "testedSha256": "d921257332416e38563277d31a85c2803b1b3ef4e235a6d7c796b43ece9ad727",
+        "archivedPostReleaseSha256": "e7493e80d9bc1f5e66ee39f108f358ed2877f4f3145fc367c819627a2afccc99",
+        "currentSha256": "ede8863502f58ce5828866af9ecd7d441d7cb58cefe8b702da74e6facc19a633",
+        "snapshotAvailable": false,
+        "effect": "Current no-send/terminal-reaper caller behavior reviewed statically only; missing archived source prevents exact semantic delta certification."
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+        "firstObservedSha256": "04560d6e0b691baeb5f44fe9f5a9eb3ac38f9a1ccad3dece623834a55d08fdd8",
+        "currentSha256": "90cc8051614500affb4215f1ebcff225f47371fdfc0b1935e5465f9564b3e42b",
+        "effect": "B changed failure audit from every declared id sharing one outcome to only actual per-secret decisionFacts; reread current lines 386-531. Split terminal transaction and outage-zero-row concern persists. Earlier whole-declaration fabricated outcome behavior is not assigned to this current hash."
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+        "firstObservedSha256": "f25e7c2f86672d58a6d92447e38404c319b563d29c004130bfa769b8410d34d4",
+        "currentSha256": "bc2d280762ae8d9c82d4af6e75c047dd129123d9828015afe8fc017373a86436",
+        "effect": "B now attaches safe actually resolved version/decision metadata after transient literal refusal, closes ephemeral Resolved and rethrows; reread current job/refreshRetry. No new wire fields or value retention in metadata."
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+        "firstObservedSha256": "a5c25d5ac8e0471943ed1c20d503d62bd9e4f9d392b743e0e5349c77eab7a676",
+        "currentSha256": "70dd660a75a92e247dd46df8203d37a29acf1509b2ea1b025f63293f6dc796a0",
+        "effect": "Resolver drift detected at final source recheck. Full current file reread, including actual safe per-secret decisionFacts at resolve lines 107-156 and names-only mayUse helper at 173. No saved earlier whole-file snapshot; exact whole-file semantic delta unavailable. Current reviewed resolve still stops on first failure and cannot certify later declared-secret summaries."
+      }
+    ],
+    "canonicalDelta": "Current design hash matches PO application. Story whole-file hash differs from application-after hash; AC-14 read directly at current line 62 and is the applied uncertainty text. No byte-identical whole-story application claim; lifecycle/other concurrent bookkeeping not changed by reviewer.",
+    "missingNamedBasename": "User target resolved by rg to V34__studio_guided_secret_login.sql. GuidedDispatchService is under guided/bridge, not guided/session.",
+    "baseline": {
+      "manifest": "docs/qa/evidence/STUDIO-OBS-007/data-uncertainty-green/preserved-baseline.json",
+      "currentMatchesArchiveAndHEAD": true,
+      "files": 33,
+      "coreV1ThroughV11Preserved": true,
+      "stagedV19Preserved": true,
+      "method": "Read-only SHA-256 and git show HEAD comparison"
+    },
+    "finalSourceRecheck": "36 manifest files rehashed before report; one resolver delta detected, fully reread and explicitly bounded. Findings reference those reviewed identities. Any later source change requires re-review; no mutable working tree called frozen."
+  },
+  "requiredOpenProof": [
+    "Data owner address DB-PEER-01/02/04 under exact source hashes, preserve all existing case assertions/names, then archive focused authentic negative/race cases plus original 29 under root-exclusive lane.",
+    "B address DB-PEER-03 and resolve I-01 through I-04 completeness; freeze exact caller/resolver/helper hashes and archive real integrated tests. Package visibility change is not proof execution.",
+    "Prove actual C-11 controller crash before resolve and after real read/pre-decision, sparse replay child kill/mid-fill/missing FINAL, exact real resolver/send counters and fixture keystrokes, actual PostgreSQL terminal summaries, final-callback/reaper/cancel/revocation races and positive usage persistence.",
+    "Retain C-4 forced retry/two attempts/fresh resolution, real outage second read, zero-resend after ambiguity/AlreadyConsumed/context loss, unique live-recheck and immutable positives; no database fixtures substitute for real joined flow.",
+    "Retain audit value-canary/table scan, C-5 TRACE sinks and all retained/additional C-6 native runtime canary oracles. SQL safe shape is not sink-canary/runtime proof.",
+    "Least-write actual role and direct-leaf TRUNCATE proof, partition enrollment/health/no DEFAULT/12-month retention under exact current migrations and both genuine linked/unlinked branches.",
+    "Independent whole-story QA/full 19AC, joined Core-PostgreSQL/runner/Chromium and external release gates remain open. Preserve all ten pending stories and original oracles."
+  ],
+  "handoff": {
+    "to": "Root, existing data/B owners only through this bounded report",
+    "disposition": "Review complete; no implementation changed. Scoped static FAIL requires the concrete reversible guard/transaction fixes or source-bound rebuttal. Archived 29 green remains genuine and source-limited.",
+    "authority": "Root owns coordination, test lanes, SDC verify, lifecycle and independent QA. This report neither grants approval nor marks acceptance/Done.",
+    "next": "Read findings against recorded current hashes, schedule isolated/focused proofs after existing frozen shared run, then request independent re-review of changed identities.",
+    "unavailableGates": "Automated security scanner and configured CodeRabbit unavailable; runtime not run by this peer. No scanner, runtime, whole-story or native-canary PASS fabricated."
+  }
+}

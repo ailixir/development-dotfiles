@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "id": "w3-d4-diagnosis01",
+  "author": "Dex-D4 (@dev, diagnosis, security-first)",
+  "date": "2026-10-16",
+  "status": "Diagnosis + apply-ready test-only patch; not executed under Gradle; no QA credit; no commit",
+  "run": {
+    "label": "w3-w01-full-incr01",
+    "task": "guidedIncrementalTest",
+    "counts": {"total": 63, "passed": 56, "failed": 7},
+    "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w3-w01-full-incr01-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+    "xmlSha256": "e14466a2b302f4be1df7e30baa904e5cdfa28dbfad5ef18350ebcdf4b5873130",
+    "fixtureTempRead": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-8307260946423140654 (read-only; not copied)",
+    "ownedWorkerCleanupSha256": "791c3f5557e9dca9a77b36b772c70858d11766998af234cebda69614a5c88ac6",
+    "ownedWorkerGenerationsSha256": "f19f08e85a9bcaab0ac50f7f27c1f3fda6a093137d750ce3b2d487e79470b023"
+  },
+  "findings": [
+    {
+      "case": "B2B-02 incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication",
+      "verdict": "TEST_ORACLE_ERROR",
+      "productLeak": false,
+      "secretInvolved": false,
+      "severity": "none",
+      "canary": "context text (ContextText)",
+      "sink": "in-memory raw publication evidence minus current/base authoring (test construct raw-evidence-outside-authoring)",
+      "location": ["sourceManifest.authoringSnapshot", "sourceManifest.authoringContext"],
+      "codePath": [
+        "GuidedSourceClassifier.classify:89,98-99,139,182-194",
+        "GuidedProductionSessionAccess:168 -> GuidedTranslationStore.initialize:71-76",
+        "GuidedPublicationEvidenceRepository.read:502-515",
+        "GuidedPlanBuilder.derive:102-106 (hash-bound; cannot be stripped)"
+      ],
+      "policy": ["guided-data-flow.md:202-204,211-213", "b2ab-design01 §6.2 lawful private store studio_guided_source_manifests", "A68-3 wording incomplete"],
+      "notYetObserved": ["ctxLiteral/plain/secret/ORDER assertions after line 8287 never executed"],
+      "fix": "fix.patch hunk 2 (test only)"
+    },
+    {
+      "case": "B3B-1 incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution (exact-alias)",
+      "verdict": "TEST_ORACLE_RACE",
+      "relatedToH8OrP3": false,
+      "rootCause": "cancel won the race against the first prepareAssignment; stop() had no context and no assignment, so no teardownStatus is ever written",
+      "evidence": "session 162 CANCELLED, teardownStatus absent, materializationPresent=false, planRevision 0",
+      "fix": "fix.patch hunks 1 and 3 (b3AwaitCancelSettled); spec: the same exception in the failed-test cleanup ReplayIT:2878-2890 (needs @qa ruling)"
+    },
+    {
+      "case": "executionError (@AfterAll)",
+      "verdict": "FIXTURE_TEARDOWN_BUDGET_AND_METADATA_BOUND",
+      "unsettledSessionOrWorker": "none (207 roots dead, 0 live descendants)",
+      "causes": [
+        "90 s drain deadline reused for the context close after unbounded process stops plus final scans (~385 s; overshoot 295.22 s)",
+        "owned-process metadata bound 4096 events/2,096,000 B exceeded at 07:26 (2,913 events, 2,347 DESCENDANT_RECORDED); 1,388 OWNED_FIXTURE_FAILURES",
+        "1 observer race: ownedCommandHash:499 NoSuchElementException on an exiting root"
+      ],
+      "fix": "fix.patch hunk 4 (own close bound); spec (needs ruling): raise metadata bound to >=16,384 events / 8 MiB; tolerate empty commandLine on an exiting root"
+    }
+  ],
+  "replayit": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "base": "702d1be901ab72b00cbad66bda9578d6e17376883b242c1359fff34eb0971a4d",
+    "patched": "1690eaa71da1f4b21ad4732c6765c0e2dd6935c3881faaa7321a069c667acbe5"
+  },
+  "patch": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w3-d4-diagnosis01/fix.patch",
+    "sha256": "1f38da52c41e8590f081c46e0b16ce18eded163b862474f42a5409b189025e4f",
+    "hunks": 4,
+    "applyCommand": "git apply -p0 docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w3-d4-diagnosis01/fix.patch",
+    "checkResult": "git apply --check -p0 OK on live tree; scratch apply reproduces patched sha256",
+    "compileCheck": "javac --release 21 -proc:none (JDK 23.0.2, build/classes + gradle-cache jars, scratch out): exit 0 base and patched",
+    "notRun": ["gradle", "spotless", "checkstyle", "any test"]
+  },
+  "productionSourcesRead": {
+    "GuidedPublicationEvidenceRepository.java": "8f5c0e0cb880539710355167bde125eaf67eb9f6949c0345baa23cad07a87acc",
+    "GuidedSourceClassifier.java": "b3769877088421d7d4690d663efecc35cf016044cc9ee4849fbed74ef722b23f",
+    "GuidedSessionService.java": "bda270051c3a1a71b89970fafa90464750f121d695ce8ffae97e2db235fbb588 (live; run had d10ec5cb; modified 07:52 after the run, inferred to be the aria-lifecycle-ruling01 L1 change at lifecycle:2385; stop() reported unchanged by that ruling)"
+  },
+  "writes": ["review.md", "fix.patch", "manifest.json"]
+}

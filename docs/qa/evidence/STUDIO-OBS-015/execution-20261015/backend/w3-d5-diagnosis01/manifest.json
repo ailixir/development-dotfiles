@@ -1,0 +1,74 @@
+{
+  "window": "w3-d5-diagnosis01",
+  "agent": "Dex-D5 (@dev, diagnosis)",
+  "date": "2026-10-16",
+  "nonCredit": "Diagnosis and apply-ready test-side patch only. No QA credit, no lifecycle change, no commit, no Gradle/JUnit run.",
+  "run": "w3-w01-full-incr01",
+  "runnerDistDigest": "060d9a53239cf1bd8f3f98fc74e6f9440899c834423d0bb7f8e466ea19cea457",
+  "base": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "702d1be901ab72b00cbad66bda9578d6e17376883b242c1359fff34eb0971a4d",
+    "equalsRunCopy": "w3-window01/sha-after.txt",
+    "verifiedLiveBeforeAndAfter": true
+  },
+  "files": {
+    "review.md": "5af6b6ac2437b7c37661607e6837dfc770cec85ab2b3d5d52c9a9b0794d18871",
+    "fix.patch": "1240de24b71b51b88d8e3cf8699d532f877c323e8b4b3b0b564217fb2758acdf",
+    "probe/probe.mjs": "530bac17a2dae336baccc3f3d299357dbedb4d06b8414d734b83ae82fc2edd2b",
+    "probe/result.json": "31e2c6f9ab8c9d8632c9969fb98c7b02eb72e0996f52fe16f3a3cf4559375487"
+  },
+  "patch": {
+    "file": "fix.patch",
+    "apply": "git apply -p0 fix.patch (repo root)",
+    "gitApplyCheck": "OK against live tree",
+    "hunks": {"GuidedPublicationReplayIT.java": 4},
+    "resultSha256": {"GuidedPublicationReplayIT.java": "b691c832bf7e53afda915c654d3b8c36eb058b675d3948ef0c59d17b07d1861b"},
+    "assertionsChanged": ["unused-declaration :13239 and :13255 literal DISABLED -> PAUSED (unreachable vocabulary corrected; requested_enabled=false retained)"],
+    "fixtureCorrectionDisclosure": {
+      "sites": ["ReplayIT:1721-1723 (assert-fail)", "ReplayIT:11532-11539 (b1c-assert2)"],
+      "old": "destination.addEventListener('focus', ...textContent='changed-after-read')",
+      "new": "destination.addEventListener('change', ...textContent='changed-after-read')",
+      "reason": "a focus-time DOM mutation is refused by the runner's committed POST_FOCUS_CHANGED guard as an unknown-effect fill, so the step-2 assertion is never admitted"
+    },
+    "notRun": ["gradle", "javac", "spotless", "checkstyle", "spotbugs", "junit", "postgres", "runner test tiers", "coderabbit (WSL-only)"],
+    "lineLength": "new comment lines <=107; one pre-existing 124-col line becomes 125 (focus->change)"
+  },
+  "diagnoses": [
+    {
+      "id": "D5-1",
+      "cases": ["incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned (B1C-01, ledger row 26)", "incremental joined assert-fail"],
+      "symptom": "session UNKNOWN_OUTCOME, expected FAILED",
+      "classification": "test fixture defect; no production defect",
+      "whereUnknownArises": "the preceding prefix fill, not the assertion: observationCollector.ts:734-738 POST_FOCUS_CHANGED -> browser.ts:509 UNKNOWN_OUTCOME -> observedReplayAdapter.ts:82 OUTCOME_UNKNOWN -> runtime.ts:438-454 ledger UNKNOWN_OUTCOME/ACK_LOST + stop -> GuidedSessionService.outcomeV2:2294-2297 stop(session, report.state)",
+      "notTheCause": ["runner assertion mapping (runtime.ts:428 correct)", "backend outcome classification (applies reported state)", "ACK loss"],
+      "evidence": [
+        "XML system-out 89979-89983: B1C-01 mixed 4ea9ebc0 navigate/read/fill admitted, no assert admission, lifecycle refused UNKNOWN_OUTCOME at active:2467 204 ms after fill",
+        "XML system-out 90627-90628: assert-fail mixed f0ea5a0e same signature",
+        "XML system-out 90605-90606: unknown2 (passing, deliberate post-native UNKNOWN) identical signature",
+        "probe/result.json: real Chromium + dist collector; focus -> POST_FOCUS_CHANGED, field not written; change/input -> fill ok, containsText false; no trigger -> containsText true (H6 effective)"
+      ],
+      "designObservation": "focus guard counts any non-class/style mutation document-wide; focus-time helper text/autocomplete makes fills UNKNOWN_OUTCOME. Capability boundary, not 015 scope; for @architect/@po placement [I]."
+    },
+    {
+      "id": "D5-2",
+      "cases": ["incremental joined unused-declaration"],
+      "symptom": "studio_schedules.state PAUSED, expected DISABLED",
+      "classification": "test expectation defect (vocabulary); no production defect",
+      "evidence": [
+        "V16__scheduling.sql:17-18 defaults PAUSED/false; :35-40 CHECK allows only ENABLED|PAUSED|BLOCKED",
+        "openapi.yaml schedule state enum PAUSED|ENABLED|BLOCKED",
+        "StudioScheduleInvalidation.invalidate:22-31 touches only requested_enabled=true rows",
+        "T0 implementation-ruling: READY does not reactivate schedules; ledger row 36: preserves disabled schedule, never autoenabled"
+      ]
+    }
+  ],
+  "inputsRelied": [
+    "execution/w3-w01-full-incr01-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+    "backend/w3-window01/review.md",
+    "backend/r2-diagnosis01/review.md (H6)",
+    "backend/r2-diagnosis01/aria-h8-h6-ruling01/ruling.md (H6)",
+    "backend/h8h6-window01/capture-post-build.json (dist file hashes)",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md AC-4, AC-6",
+    "execution-20261015/validation-ledger.json acceptanceCases",
+    "final-design/architect/implementation-ruling.md"
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "artifact": "STUDIO-OBS-015 qa-source-review-final02: independent source review of final-window01 + triage E + triage BC",
+  "reviewer": "Quinn (@qa)",
+  "date": "2026-10-16",
+  "readOnly": true,
+  "testsOrBuildsRunByQa": "none (no Gradle/JUnit/vitest/Chromium); read-only checks only: sha256 of 17 live files, python JSON parse of the timing vectors, git apply --check, scratch-copy apply of both patches, awk line-length scan of added patch lines",
+  "scratchCopy": "/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/49497aae-dbea-402b-a9a6-2d80f4cd2e4e/scratchpad/qaf02",
+  "review": "review.md",
+  "lifecycleChange": "none",
+  "hashChecks": {
+    "finalWindow01": {"files": 17, "mismatchesAgainstSha256After": 0},
+    "distObservationCollectorJs": "6e00578de675e62274026e3f1e25e3a8fb0e1b6ccfad8341fee573f844387ae6 (matches reported)",
+    "triageEPatchSha256": "b4b628e151a0b0dd293eb7cb8887fc1734dc09474146ff193388748a6a3b9fdc",
+    "triageBCPatchSha256": "fe2b005da93ce64cacc5ba64874f369105d21c868669c7d54da553ec1a55288b",
+    "patchBaseStudioServiceSha256": "7bb9a5b00d041c4d1cc5e9fedb19b58365b6ada11a8d2acc380570f5015e9797",
+    "patchesApplyInOrder": "E then BC apply cleanly on a scratch copy"
+  },
+  "verdicts": [
+    {"id": "1a", "change": "ledger 83/84 runner code-point comparator + shared timing-order-vectors.json", "verdict": "PASS"},
+    {"id": "1b", "change": "WARN count-query rate limit (aria-warn-ruling01)", "verdict": "PASS"},
+    {"id": "1c", "change": "PO R4 empty expected never passes", "verdict": "PASS"},
+    {"id": "1d", "change": "conflict-stop hook, conflict() boolean, both publisher sites, leftovers (a) and (b), RaceTest fixture fix", "verdict": "PASS_WITH_REQUIRED_CHANGES", "required": ["R1"]},
+    {"id": "2", "change": "cluster E patch", "verdict": "PASS_WITH_REQUIRED_CHANGES", "required": ["R2", "R3"],
+      "parts": {"2a createAuthoringDraft early requireWrite removal": "PASS", "2b revision-token message": "PASS", "2c three obsolete-test removals": "PASS", "2d other hunks": "PASS except StudioWriteValidationControllerTest caps hunk (hold, R3)"}},
+    {"id": "3", "change": "cluster B/C patch", "verdict": "PASS"}
+  ],
+  "requiredChanges": [
+    {"id": "R1", "where": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java race(), loser branch after the assertThat(moved) block", "change": "when moved is true, assert SELECT progress->>'errorCode' FROM studio_guided_sessions WHERE session_id=? equals PUBLICATION_CONFLICT", "why": "leftover (b) (post-claim conflict() writes progress.errorCode) is asserted by no test; removing the jsonb_set fails nothing", "rerun": "GuidedPublicationRaceTest"},
+    {"id": "R2", "where": "StudioVisibilityIT hunk of backend/fullsuite-triage-E/fix.patch", "change": "wrap the 101-column comment to <= 100 columns", "why": "line length gate"},
+    {"id": "R3", "where": "StudioWriteValidationControllerTest hunk of backend/fullsuite-triage-E/fix.patch", "change": "do not apply 1024 -> 500 until @architect rules on step-text bound (AuthoringStep @Size(max=500) vs max-line-chars 1024 / SOURCE_LINE_TOO_LONG)", "why": "lowering the accepting boundary hides a contract inconsistency"}
+  ],
+  "advisories": [
+    {"id": "A1", "text": "no test pins the if(conflict()) gate and hook call in the post-claim publisher catch; add a publisher-level test with a mock lifecycle before GA"},
+    {"id": "S1", "text": "pre-existing: readAuthoringDraft (GET) takes the row write lock before requireRead; ADR-002 s27.2 orders authorization first; @architect to rule"},
+    {"id": "S2", "text": "dead auth != null guards in lockForAuthoringWrite; a null auth would lock before denying; no caller passes null; remove in the 015 sweep"},
+    {"id": "S3", "text": "optional: assert no users mirror row is created for a denied create"},
+    {"id": "A2", "text": "findAuthoringV2ById has no src/main caller; consider deleting under the single-path rule instead of annotating"},
+    {"id": "A3", "text": "full test lane still red (127 failures, taskCollectionComplete=false); triage E and BC explain 34 by reading; the rest is outside this review"}
+  ],
+  "notDone": [
+    "Gradle/JUnit/vitest/Chromium runs",
+    "spotless/checkstyle/spotbugs/CodeRabbit",
+    "review of triage clusters A and D and of the failing classes outside E and BC",
+    "re-derivation of sha256Before values"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "scope": "EXACT_CURRENT_NATIVE_TIMEOUT_CASE_ONLY",
+  "sourceSha256": "75eb9d480580ca44dc9d60639ae1e9d2750d96bff15874196debee6c3c040a90",
+  "allSelectorTailAssertionsPassed": true,
+  "native": {
+    "originalPendingAck": true,
+    "sameJavaClockPrimitiveToAckNanos": 12565750,
+    "actualStepOverallMarginMs": 88448,
+    "originalNativeFillEntries": 1,
+    "originalCloseConfirmed": true,
+    "pageEffectFenceAvailable": true,
+    "effectKnowledgeUnknown": false,
+    "pendingSamples": 1
+  },
+  "sinks": {
+    "encodedBytes": 19785842,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "rootTraceObserved": true,
+    "appTraceObserved": true,
+    "sseStreams": 1,
+    "cacheEntries": 1,
+    "profileFiles": 341,
+    "knownRootLinks": 8
+  },
+  "manifestTotalDurationIsNotCutClock": true,
+  "actualReportedStepTiming": "NOT_PERSISTED_BY_EXISTING_CALLBACK_CAPTURE",
+  "outerOutcome": "RUN_ERROR",
+  "innerOutcome": "OUTCOME_UNKNOWN",
+  "failedStep": "OUTCOME_UNKNOWN",
+  "followingStep": "SKIPPED_STARTED_AT_NULL",
+  "secretUse": "SPARSE_NO_PASS",
+  "actualStepSeconds": 30,
+  "overallSeconds": 120,
+  "focusStallSeconds": 40,
+  "actualManifest": {
+    "errorCode": "RUN_ERROR",
+    "errorMessage": "OUTCOME_UNKNOWN",
+    "browserStarted": true,
+    "totalDurationMs": 42910,
+    "totalDurationNotCutClock": true
+  },
+  "manifestStepFieldsPresent": false,
+  "effectsInterpretation": "Actual healthy page fence available; no zero-effect or no-write inference from timeout/sparse secretUse."
+}

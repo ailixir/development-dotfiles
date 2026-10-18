@@ -1,0 +1,123 @@
+{
+  "sourceOnly": true,
+  "before": {
+    "path": "backend/b3a-private-authority-source01/source-before/GuidedPublicationAuthorityIT.java",
+    "sha256": "d552398ccb6cc8c9d851acb81f0af35c5a5672e685e2f2543f83784a36a037b5",
+    "bytes": 21596
+  },
+  "after": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+    "sha256": "e6228117d0e9844075603c3b011166ddffb74ddb4533d4524111bd5a665bb9fd",
+    "bytes": 40677
+  },
+  "archiveAfter": {
+    "path": "backend/b3a-private-authority-source01/source-after/GuidedPublicationAuthorityIT.java",
+    "sha256": "e6228117d0e9844075603c3b011166ddffb74ddb4533d4524111bd5a665bb9fd",
+    "bytes": 40677
+  },
+  "originalClassTextRecoveredExactlyAfterRemovingOnlyFiveNewImportsAndAppendedMembers": true,
+  "originalMethodsAndHelpersPreservedByteExact": true,
+  "originalMethodCount": 3,
+  "originalInvocationCount": 11,
+  "newMethodCount": 2,
+  "newInvocationCount": 13,
+  "totalInvocationCount": 24,
+  "methodIdentityMap": [
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.rawEdgeCannotNamePendingActionAgainstActualStoredAuthority",
+      "signatureParameters": "",
+      "oldBodySHA256": "62e08b2675d64cf81913557e617448fb8afe667906012b8ccc2f6623b1de5917",
+      "newBodySHA256": "62e08b2675d64cf81913557e617448fb8afe667906012b8ccc2f6623b1de5917",
+      "oldBodyPreservedByteExact": true,
+      "newSourceLine": 82,
+      "parameters": [],
+      "invocations": 1,
+      "classification": "PRESERVED_ORIGINAL",
+      "originalAssertionInventory": {
+        "assertThat": 51,
+        "assertThatThrownBy": 2
+      }
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.ordinaryCurrentCommitRechecksCompleteStoredEvidenceAndRollbackRemovesEveryWrite",
+      "signatureParameters": "",
+      "oldBodySHA256": "3cc5e706cb64aab6353754f2582137ca895d01ed10cedda169106babfd29411c",
+      "newBodySHA256": "3cc5e706cb64aab6353754f2582137ca895d01ed10cedda169106babfd29411c",
+      "oldBodyPreservedByteExact": true,
+      "newSourceLine": 215,
+      "parameters": [],
+      "invocations": 1,
+      "classification": "PRESERVED_ORIGINAL",
+      "originalAssertionInventory": {
+        "assertThat": 13,
+        "assertThatThrownBy": 0
+      }
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.directCurrentCommitKeepsExactClaimAndGrantAuthorityWithoutAnyWrite",
+      "signatureParameters": "String mutation",
+      "oldBodySHA256": "23eb37007ff8b4011e941a62185f101b4d2ba2ba6ed48e3357ccd8068c743e6b",
+      "newBodySHA256": "23eb37007ff8b4011e941a62185f101b4d2ba2ba6ed48e3357ccd8068c743e6b",
+      "oldBodyPreservedByteExact": true,
+      "newSourceLine": 251,
+      "parameters": [
+        "claim",
+        "snapshot",
+        "finalize-digest",
+        "grant-principal",
+        "grant-csi",
+        "grant-session",
+        "grant-snapshot",
+        "grant-expired",
+        "grant-after-validation"
+      ],
+      "invocations": 9,
+      "classification": "PRESERVED_ORIGINAL",
+      "originalAssertionInventory": {
+        "assertThat": 1,
+        "assertThatThrownBy": 1
+      }
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+      "signatureParameters": "String mutation",
+      "oldBodySHA256": null,
+      "newBodySHA256": "fd30ebf269ed532c39f2239d19c0dcb2ee37d1ed6825082c8ef867ca05ab3553",
+      "oldBodyPreservedByteExact": null,
+      "newSourceLine": 493,
+      "parameters": [
+        "private-value",
+        "private-provenance",
+        "input-order",
+        "missing-input",
+        "introduced-version",
+        "header-hash",
+        "header-count",
+        "header-provenance",
+        "current-private-value"
+      ],
+      "invocations": 9,
+      "classification": "NEW_SOURCE_UNEXECUTED",
+      "originalAssertionInventory": null
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.storedSourceManifestRequiresOriginalImmutableSourcePreimage",
+      "signatureParameters": "String mutation",
+      "oldBodySHA256": null,
+      "newBodySHA256": "4a7e66babb406e39c888213a5843ace56d817d08a8e61401434e1334b50c4348",
+      "oldBodyPreservedByteExact": null,
+      "newSourceLine": 526,
+      "parameters": [
+        "manifest-checksum",
+        "manifest-private-plain",
+        "manifest-missing-plain",
+        "manifest-authored-context"
+      ],
+      "invocations": 4,
+      "classification": "NEW_SOURCE_UNEXECUTED",
+      "originalAssertionInventory": null
+    }
+  ],
+  "originalPositiveParentsAndPendingCurrentCommitControls": "UNCHANGED",
+  "sourceOtherThanExclusiveClassMutated": false
+}

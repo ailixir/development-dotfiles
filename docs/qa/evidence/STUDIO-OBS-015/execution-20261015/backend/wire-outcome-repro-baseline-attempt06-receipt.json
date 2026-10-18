@@ -1,0 +1,358 @@
+{
+  "artifact": "STUDIO-OBS-015 actual full wire-contract original baseline + native outcome reproduction attempt06 receipt",
+  "createdAt": "2026-10-15T11:49:36.057509+00:00",
+  "owner": "backend015_resume / Dex execution-only",
+  "sourceHold": true,
+  "commandsLive": false,
+  "formalQAVerdict": null,
+  "lifecycleTransition": null,
+  "productionCompilerAndEpochAlignmentHold": true,
+  "invocation": {
+    "exactlyOnce": true,
+    "wrapper": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend.py backend-wire-outcome-repro-baseline-attempt06",
+    "command": [
+      "caffeinate",
+      "-i",
+      "./gradlew",
+      "test",
+      "--tests",
+      "com.citi.put.checks.studio.guided.session.GuidedWireContractTest",
+      "--rerun-tasks"
+    ],
+    "cwd": "backend",
+    "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+    "handle": 98322,
+    "terminal": true,
+    "active": false,
+    "exit": 1,
+    "elapsedSeconds": 10.27,
+    "counts": {
+      "total": 8,
+      "passed": 7,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "methods": [
+      {
+        "method": "textualPersistenceParserAlsoRejectsDuplicatesAndTrailingObjects()",
+        "status": "PASS",
+        "timeSeconds": "0.055",
+        "reached": "Complete original method returned normally; no skip."
+      },
+      {
+        "method": "bareSessionNameResolvesToTheOneV3ContractWithNativeValidation()",
+        "status": "PASS",
+        "timeSeconds": "0.672",
+        "reached": "Complete original method returned normally; no skip."
+      },
+      {
+        "method": "rawByteVectorsRejectAmbiguityBeforeParsingCanDiscardIt()",
+        "status": "PASS",
+        "timeSeconds": "0.003",
+        "reached": "Complete original method returned normally; no skip."
+      },
+      {
+        "method": "unknownRootEpochPreservesNativeCrossPropertyRefusal()",
+        "status": "PASS",
+        "timeSeconds": "0.343",
+        "reached": "Complete original method returned normally; no skip."
+      },
+      {
+        "method": "originalNativeOutcomeUnionRejectsLegalOrdinaryWhileFreshFullBranchAccepts(TestReporter)",
+        "status": "PASS",
+        "timeSeconds": "0.015",
+        "reached": "Complete original method returned normally; no skip."
+      },
+      {
+        "method": "rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults()",
+        "status": "FAIL",
+        "timeSeconds": "0.009",
+        "type": "org.opentest4j.AssertionFailedError",
+        "assertion": "Expected14 compiled session properties but actual0",
+        "sourceFrames": [
+          "at app//com.citi.put.checks.studio.guided.session.GuidedWireContractTest.assertFinitePlan(GuidedWireContractTest.java:394)",
+          "at app//com.citi.put.checks.studio.guided.session.GuidedWireContractTest.rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults(GuidedWireContractTest.java:195)"
+        ],
+        "reached": "First v3/session fixture native original acceptance passed; finite plan propertycount gate fails at394/caller195, before mutation case construction/differential loop. Later replay-validation/ledger/observation finite plan gates and mutation loops in this method are UNREACHED."
+      },
+      {
+        "method": "absentSchemaDefinitionNeverBecomesAnEmptyPermissiveSchema()",
+        "status": "PASS",
+        "timeSeconds": "0.003",
+        "reached": "Complete original method returned normally; no skip."
+      },
+      {
+        "method": "frozenDateTimeOracleMatchesOnEnforcedAssignmentSchema()",
+        "status": "PASS",
+        "timeSeconds": "0.005",
+        "reached": "Complete original method returned normally; no skip."
+      }
+    ],
+    "mainCompile": "PASS",
+    "allTestCompile": "PASS",
+    "rerunOrExtraSelector": false
+  },
+  "stability": {
+    "sourceStable": true,
+    "testInputStable": true,
+    "distStable": true,
+    "testInputDigestBefore": "37d3d2c8be752cf4d2d4384b9f37b10ebdea898fe9c2531078ce95d24b119710",
+    "testInputDigestAfter": "37d3d2c8be752cf4d2d4384b9f37b10ebdea898fe9c2531078ce95d24b119710",
+    "sourceDigestBefore": "37d3d2c8be752cf4d2d4384b9f37b10ebdea898fe9c2531078ce95d24b119710",
+    "sourceDigestAfter": "37d3d2c8be752cf4d2d4384b9f37b10ebdea898fe9c2531078ce95d24b119710",
+    "distDigestBefore": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "distDigestAfter": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "testProductionHashes": {
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java": {
+        "before": "dd3af19d0a35461e5844786e9b1433bcdabafab8815720b70367a9e6cbb01b0c",
+        "after": "dd3af19d0a35461e5844786e9b1433bcdabafab8815720b70367a9e6cbb01b0c"
+      },
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": {
+        "before": "c83be072b5b1ef2044be4eb5f81d34ba404d62de3781836d144ec058296943f3",
+        "after": "c83be072b5b1ef2044be4eb5f81d34ba404d62de3781836d144ec058296943f3"
+      }
+    }
+  },
+  "specificNativeControl": {
+    "method": "originalNativeOutcomeUnionRejectsLegalOrdinaryWhileFreshFullBranchAccepts(TestReporter)",
+    "status": "PASS_ACTUAL_EXECUTED",
+    "loadedDependencyAssertionsCompleted": {
+      "version": "1.4.0",
+      "groupId": "com.networknt",
+      "artifactId": "json-schema-validator",
+      "jarSha256": "5d7b6ce4c7b2a3ed189511cbaa913808c7cd2b570d70b923426352785bffbdd0",
+      "provenance": "Actual loaded JsonSchema CodeSource JAR bytes and own pom.properties read; actual JsonSchemaFactory same CodeSource location asserted. Not merely build declaration."
+    },
+    "unchangedFixtureAssertionsCompleted": {
+      "pointer": "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json#/documents/flow/outcomes/0",
+      "canonicalSha256": "6dd0ed43b9b77aba88c075c8a5b84064510baa3d330601f62c03b537d0c71d5b",
+      "initialBlank": true,
+      "nullAvailability": true,
+      "SUCCEEDED_OK": true,
+      "errorMessageAbsent": true,
+      "canonicalBytesUnchanged": true
+    },
+    "frozenSchemaAssertionsCompleted": {
+      "rootSha256": "95f7878408ce7d089646898aef3d528bc2e3c62d7f2bf8f228134556dfe451e8",
+      "onlyRootOneOfExactlyTwoFullBranches": true,
+      "ordinaryBranchSha256": "be738fd98792fed35821849ce6e9e50abbad334a03de282df3261494192497f1",
+      "prefixBranchSha256": "3547f2fbe5f29e0197f7fa326eaa5a2e3da92bbe164a2deb9a74043751a872c0",
+      "V7OriginalConfigSameIdentity": true,
+      "contextCalls": "Separate public native validate(JsonNode) calls for unchanged whole and full freshly compiled ordinary/prefix branches"
+    },
+    "actualPredicatesProvedByCompletedAssertions": {
+      "nativeWholeAccepted": false,
+      "fullOrdinaryAccepted": true,
+      "fullPrefixAccepted": false,
+      "wholeErrors": ">0",
+      "ordinaryErrors": 0,
+      "prefixErrors": ">0",
+      "inputCanonicalUnchanged": true
+    },
+    "reporterCapture": {
+      "publishEntryCalled": true,
+      "boundedEntryKey": "obs015OriginalNativeOutcomeControl",
+      "actualEntryRetainedInGradleArtifacts": false,
+      "searchScope": [
+        "exact wrapper log",
+        "fresh JUnit XML/system-out/system-err/properties",
+        "fresh Gradle test binary results",
+        "fresh HTML test report"
+      ],
+      "observedSystemOutBytes": 0,
+      "observedSystemErrBytes": 0,
+      "exactWholeAndPrefixErrorCounts": "UNAVAILABLE; not inferred from predicates",
+      "provenanceLimit": "Hash/version/booleans above are actual completed assertions in retained exact test source and passing JUnit control, not recovered report payload. No JVM rerun or production call made to obtain missing counts. If machine-readable raw report entry is required, bounded reporting transport requires separate source release."
+    },
+    "notActual04PrivateBody": true,
+    "nativeReproductionDisposition": "Original-engine false/true/false control REPRODUCED on actual loaded pinned dependency; independent final design and root production source release still required."
+  },
+  "actualExistingGateFailure": {
+    "method": "rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults",
+    "status": "FAIL_UNCHANGED_ORIGINAL_GATE",
+    "expectedCompiledSessionProperties": 14,
+    "actualCompiledSessionProperties": 0,
+    "failureLine": 394,
+    "callerLine": 195,
+    "diagnosis": "Current first session compiler plan is native fallback with zero decomposed properties and fails unchanged finite-plan gate. Source audit predicts stale session epoch; actual run proves this zero-property differential only. No original assertion/count/epoch changed or failure waived. Ledger21vs20/session16vs14/replaybasis36vs33 design facts are not newly executed counts here.",
+    "unreached": "Mutation construction/native-versus-compiled loop for v3/session and all later root iterations in this method; no claim of passing current four-root finite/decomposition parity."
+  },
+  "actualScope": {
+    "classMethodsSelected": 8,
+    "originalMethodsRetained": 7,
+    "newControlMethods": 1,
+    "databaseOrCoreStarted": false,
+    "nativeBrowserOrNodeExecuted": false,
+    "actual04AdmissionRetried": false,
+    "noOldTempMediaOrProcessCleanupOperations": true,
+    "prelaunchProcessInventory": [
+      {
+        "pid": 13577,
+        "ppid": 1,
+        "started": "Tue Oct 13 15:35:54 2026",
+        "kind": "InheritedChromium",
+        "commandSha256": "f6475ae8348d3b13a2124f26e47793bba2ee0fb0c1616698d9cc75e4d2706f4a",
+        "inheritedUntouched": true
+      },
+      {
+        "pid": 13581,
+        "ppid": 13577,
+        "started": "Tue Oct 13 15:35:54 2026",
+        "kind": "InheritedChromium",
+        "commandSha256": "f6475ae8348d3b13a2124f26e47793bba2ee0fb0c1616698d9cc75e4d2706f4a",
+        "inheritedUntouched": true
+      },
+      {
+        "pid": 22246,
+        "ppid": 1,
+        "started": "Wed Oct 14 19:09:12 2026",
+        "kind": "GradleDaemon",
+        "commandSha256": "76b51467dd45ca073c5717216588277759004a793004125508f4b902e4a7dbc2",
+        "inheritedUntouched": true
+      },
+      {
+        "pid": 44737,
+        "ppid": 1,
+        "started": "Sat Oct 10 11:36:14 2026",
+        "kind": "guidedMain",
+        "commandSha256": "254e1891a516de5b01c439b7bbfcbcc821d273a77d53af075f11720581bd990c",
+        "inheritedUntouched": true
+      },
+      {
+        "pid": 67717,
+        "ppid": 22246,
+        "started": "Thu Oct 15 04:29:53 2026",
+        "kind": "KotlinCompileDaemon",
+        "commandSha256": "5194b07d059df70f994827259eb149363e885d5c0d24288abce38599e27fc775",
+        "inheritedUntouched": true
+      }
+    ],
+    "noInheritedProcessConnectionsOrKills": true
+  },
+  "artifacts": {
+    "results": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-repro-baseline-attempt06-results.json",
+      "sha256": "0410d5e9df15a9bd9d07c95c16defe6c835fb28090f7f7052a9c7e6775d37656",
+      "mode": "0o644",
+      "bytes": 2786
+    },
+    "log": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-repro-baseline-attempt06.log",
+      "sha256": "fb309c997d701634cbce657ad57606841e48a51e4ced4b84236367be4697036e",
+      "mode": "0o644",
+      "bytes": 2611
+    },
+    "xml": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-repro-baseline-attempt06-xml/TEST-com.citi.put.checks.studio.guided.session.GuidedWireContractTest.xml",
+      "sha256": "6ed89778497af616fe1d298f7cce4118aa7648fb1c7e8e9dcd2185029f32a766",
+      "mode": "0o644",
+      "bytes": 11506
+    },
+    "beforeInputs": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-repro-baseline-attempt06-before.json",
+      "sha256": "a3929c08a8c08274597f183e0dd34ae37a680854fd10cbeca233de87d6476943",
+      "mode": "0o644",
+      "bytes": 327786
+    },
+    "afterInputs": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-repro-baseline-attempt06-after.json",
+      "sha256": "308a8b2523fe21d3268cff751d49bcf15ceb58c9fb01fcee194b50b8f6185fe6",
+      "mode": "0o644",
+      "bytes": 327786
+    },
+    "prelaunch": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-repro-baseline-attempt06-artifacts/prelaunch.json",
+      "sha256": "6f889c96bb01d4ec2e5a66fab13fd4117a46d29bf33c873f38280b2e6a5bd857",
+      "mode": "0o644",
+      "bytes": 13654
+    },
+    "restoration": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-wire-outcome-repro-baseline-attempt06-artifacts/fixed-output-restoration.json",
+      "sha256": "96f947316f338ed98f07c9324d16fcc99137572cdd34fc5ce4af704216ecf340",
+      "mode": "0o644",
+      "bytes": 2587
+    },
+    "guardTallies": [],
+    "fixedOutputRestoration": {
+      "priorFileCount": 56,
+      "freshArchivedFileCount": 12,
+      "restoredFileCount": 56,
+      "byteExact": true,
+      "mismatches": [],
+      "freshArchivedBeforeRestore": true,
+      "freshFiles": [
+        {
+          "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.session.GuidedWireContractTest.xml",
+          "sha256": "6ed89778497af616fe1d298f7cce4118aa7648fb1c7e8e9dcd2185029f32a766",
+          "mode": "0o644"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/output.bin",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "mode": "0o644"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/output.bin.idx",
+          "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+          "mode": "0o644"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/results.bin",
+          "sha256": "86c8f40bbbda517924b77b8efcace460616bdc6913e08487a7595ccd1fe90e9f",
+          "mode": "0o644"
+        },
+        {
+          "path": "backend/build/reports/tests/test/classes/com.citi.put.checks.studio.guided.session.GuidedWireContractTest.html",
+          "sha256": "30e5e980c8432c082e87b5939a22c042ab2ae830ab6966eebadde37cf5b176ed",
+          "mode": "0o644"
+        },
+        {
+          "path": "backend/build/reports/tests/test/css/base-style.css",
+          "sha256": "a10a4ef75ca2601b44bfdaf3112a5854f6376f68d7cbaf6958286f04488d293b",
+          "mode": "0o644"
+        },
+        {
+          "path": "backend/build/reports/tests/test/css/style.css",
+          "sha256": "61866908fd7eb09c79e96239f69db2e8cc5c6526cdb308eba0535ed2a0f6a263",
+          "mode": "0o644"
+        },
+        {
+          "path": "backend/build/reports/tests/test/index.html",
+          "sha256": "c9014f7cb95068b4412aabfa4cf5fabe6d25b68c4f5f1d275f60e76d5ae5bc94",
+          "mode": "0o644"
+        },
+        {
+          "path": "backend/build/reports/tests/test/js/report.js",
+          "sha256": "fc89c6d002d18f4662065c9887b2cda8f8486f2737d4ad0f2fdeac0ad58a44dc",
+          "mode": "0o644"
+        },
+        {
+          "path": "backend/build/reports/tests/test/packages/com.citi.put.checks.studio.guided.session.html",
+          "sha256": "41f4ee79ff110100d2178942e0d5a434d6248c1891bec024fc2c1a1bd797bce4",
+          "mode": "0o644"
+        },
+        {
+          "path": "backend/build/guard-tally/GuidedPlanningIntegrationTest.json",
+          "sha256": "49877687fdc0fe0b3f5640e61f647d165fc6ba88836c6a4fe162dc073cdfc3b2",
+          "mode": "0o644"
+        },
+        {
+          "path": "backend/build/guard-tally/GuidedPublicationReplayIT.json",
+          "sha256": "e783782a1e0729c02240ec2912139d3adf8ea3ffe196ca4c068e66f4723dd1a7",
+          "mode": "0o644"
+        }
+      ]
+    },
+    "previousFailedOutputsReceiptsMediaPreserved": true
+  },
+  "remaining": [
+    "Actual fullclass baseline is FAILED1; existing finite plan gate requires independent reviewed current epoch alignment, not waiver",
+    "Missing persisted TestReporter bounded payload/exact positive whole/prefix error counts explicitly open if required",
+    "Production outcome compiler remains HELD pending independent final reviewed plan and exact root release",
+    "No actual04 retroactive acceptance or UNKNOWN admission replay; main04 browser downstream remains failed/unreached",
+    "Full015 then008; original86/24/55/35/B1/R1/B2/B3/B4-R2/private/native/fullstaticcoverage/deployment/crossReplica/independentQA/PO closure",
+    "Row85 original pending user decision remains unamended"
+  ],
+  "noSourceEditsRetriesOrOracleChangesByExecutor": true
+}

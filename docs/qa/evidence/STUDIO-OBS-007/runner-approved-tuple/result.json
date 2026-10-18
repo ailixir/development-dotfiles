@@ -1,0 +1,54 @@
+{
+  "scope": "Approved tuple mechanics and parent-private Execute attempt correction; behavior compile gate only",
+  "terminalHandle": 74136,
+  "gates": {
+    "typecheck": 0,
+    "lint": 0,
+    "build": 0,
+    "focused": {
+      "exitCode": 0,
+      "files": 5,
+      "passed": 199,
+      "skipped": 0,
+      "coverage": "Focused disabled; not whole coverage gate"
+    },
+    "localPins": {
+      "exitCode": 0,
+      "imageProvenance": "NOT_ASSERTED"
+    }
+  },
+  "tuple": {
+    "executor": "observed-4",
+    "catalog": "observed-replay-3",
+    "language": "observed-3",
+    "otherMembers": "unchanged"
+  },
+  "sourceDrift": [],
+  "sourceManifest": "source-hashes.json",
+  "distManifest": "dist-hashes.json",
+  "absenceCorrection": {
+    "proof": "child.ts35-36 process.send returns without drain/ack; childRuntime.ts889-890 proceeds after step-started emission; parent cannot infer non-invocation from missing receipt",
+    "parentPrivateFact": "executed flips before any child.send(execute) attempt, not an external field",
+    "positiveFacts": "authenticated frozen secret consumer PASS -> USED; no consuming recipe or no Execute attempt -> NOT_USED",
+    "uncertainty": "after any Execute attempt, missing started/final receipts omit possibly consumed secret; genuine sparse final/positive receipts still merged",
+    "testScope": "Controlled spawn-port possible effect + all receipt loss/backpressured stop and tree kill, not real Chromium/Core/PG proof"
+  },
+  "heldBehaviors": [
+    "full Chromium channel/effective four preferences behavior",
+    "existing-wire USED-only PROGRESS producer/consumer"
+  ],
+  "broadGates": "Not run; wait root mechanical release and final behavior stability",
+  "sourceCurrentBackendJoins": "Pending B actual compiled Node gate with this exact dist",
+  "logsSha256": {
+    "build.log": "50d8b286b802e2ce024ca6690dd1f1000b4bcd043b5615565d354c439374330a",
+    "fixture-aggregate-red.log": "d7b01e4b407658d77ce7d544f447d33829d86e30ff2d4fe4828d66ca70b3e973",
+    "focused.log": "261bde7bd3dc6c13221487f1c0441aed8cf72e192a87f434cd7adae0b3dbb2ff",
+    "lint.log": "2ad7d0e1b633ba6235332e7530595b11d60ef34da9c8f4316955d31dd21579e4",
+    "pins.log": "d4f91c9d30d1a96fac427e639cdab457eb2f377f9b8012636225f6a6a4601c5e",
+    "typecheck.log": "bf2aa029bb2deb5530591dca1207249f7f0da44a20b8feef1b5decba7e510c7b"
+  },
+  "budget": {
+    "wholeWaveCeilingUSD": 500,
+    "actualSpend": "UNAVAILABLE"
+  }
+}

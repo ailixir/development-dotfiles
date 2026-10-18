@@ -1,0 +1,38 @@
+{
+  "command": [
+    "./gradlew",
+    "test",
+    "--rerun-tasks",
+    "--tests",
+    "com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest",
+    "--tests",
+    "com.citi.put.checks.studio.secrets.VaultResolutionDecisionTest",
+    "--tests",
+    "com.citi.put.checks.studio.secrets.VaultStreamingReadTest",
+    "--tests",
+    "com.citi.put.checks.studio.dispatch.StudioDispatcherFailureIT",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.SecretAuditLifecycleIT",
+    "--tests",
+    "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+    "--tests",
+    "com.citi.put.checks.studio.dispatch.DispatcherIT",
+    "--tests",
+    "com.citi.put.checks.studio.recovery.RecoveryIT"
+  ],
+  "classes": [
+    "com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest",
+    "com.citi.put.checks.studio.secrets.VaultResolutionDecisionTest",
+    "com.citi.put.checks.studio.secrets.VaultStreamingReadTest",
+    "com.citi.put.checks.studio.dispatch.StudioDispatcherFailureIT",
+    "com.citi.put.checks.studio.guided.publication.SecretAuditLifecycleIT",
+    "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+    "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+    "com.citi.put.checks.studio.dispatch.DispatcherIT",
+    "com.citi.put.checks.studio.recovery.RecoveryIT"
+  ],
+  "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "startedAt": "2026-10-10T09:52:06.239446+00:00"
+}

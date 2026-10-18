@@ -1,0 +1,15 @@
+  // aria-bridge-ruling01 N5: the controlled model provider (R-2). It only selects.
+  static final HttpServer PROVIDER;
+  static final List<String> PROVIDER_KINDS = new CopyOnWriteArrayList<>();
+
+  /** The per-session SOURCE_PLAN template the provider answers with. */
+  static volatile ObjectNode sourcePlan;
+
+  /** The per-reservation NEXT_ACTION selection: an occurrence and a {target, operation}. */
+  static volatile Selection nextSelection;
+
+  /** Set in {@code @BeforeEach} for the configuration-reference case only. */
+  static volatile boolean configuredInput;
+
+  record Selection(int occurrence, ObjectNode action) {}
+

@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v3/error.schema.json",
+  "title": "Studio observed v3 error",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 3
+    },
+    "code": {
+      "enum": [
+        "INVALID_CONTRACT",
+        "UNAUTHENTICATED",
+        "FORBIDDEN_SCOPE",
+        "REVISION_CONFLICT",
+        "STALE_GENERATION",
+        "TARGET_MISMATCH",
+        "AMBIGUOUS_TARGET",
+        "MISSING_SOURCE",
+        "BINDING_ORDER",
+        "SENSITIVE_SOURCE",
+        "ORIGIN_NOT_ALLOWED",
+        "UNSUPPORTED_SURFACE",
+        "BUDGET_EXCEEDED",
+        "STALE_FENCE",
+        "IDEMPOTENCY_CONFLICT",
+        "UNKNOWN_OUTCOME",
+        "PUBLICATION_CONFLICT",
+        "RUNTIME_INCOMPATIBLE",
+        "ASSERTION_FAILED",
+        "CANCELLED",
+        "EXPIRED",
+        "SECRET_UNAVAILABLE",
+        "SECRET_USE_NOT_AUTHORIZED",
+        "SECRET_USE_REVOKED",
+        "VAULT_UNAVAILABLE",
+        "LOGIN_REQUIRED",
+        "SECRET_TOO_LONG"
+      ]
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "retryable": {
+      "type": "boolean"
+    },
+    "messageCode": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "detail": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stepId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "loginStepsPresent": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "stepId",
+        "loginStepsPresent"
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "code",
+    "requestId",
+    "retryable",
+    "messageCode"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "const": "LOGIN_REQUIRED"
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "stepId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "loginStepsPresent": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "stepId",
+              "loginStepsPresent"
+            ]
+          }
+        },
+        "required": [
+          "detail"
+        ]
+      },
+      "else": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "not": {}
+          }
+        }
+      }
+    }
+  ]
+}

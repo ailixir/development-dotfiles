@@ -1,0 +1,11 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java (coordinator formatted)
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java (checked exception repair)
+@@ -4268,7 +4268,7 @@
+     }
+   }
+ 
+-  private ObjectNode p3StartCommand(UUID test, String environment) {
++  private ObjectNode p3StartCommand(UUID test, String environment) throws Exception {
+     var command =
+         C.object()
+             .put("schemaVersion", 3)

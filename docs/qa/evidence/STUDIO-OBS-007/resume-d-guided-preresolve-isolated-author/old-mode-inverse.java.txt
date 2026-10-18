@@ -1,0 +1,350 @@
+{
+    var owner = new SourceStopOwner(actualJdbc.getDataSource());
+    Scenario[] created = new Scenario[1];
+    GuidedSessionService[] controllerService = new GuidedSessionService[1];
+    Path scratch =
+        Files.createTempDirectory(
+            "guided-controller-cut-",
+            java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
+                java.nio.file.attribute.PosixFilePermissions.fromString("rwx------")));
+    var provider =
+        com.sun.net.httpserver.HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    var providerPeers = Executors.newVirtualThreadPerTaskExecutor();
+    provider.setExecutor(providerPeers);
+    Process child = null;
+    Throwable primary = null;
+    boolean reconciled = false;
+    try {
+      GuidedControllerCutFixture fixture =
+          prepareGuidedControllerCut(owner, created, controllerService);
+      Scenario scenario = fixture.scenario();
+      String id = scenario.sessionId;
+      String admissionId = fixture.admission().path("admission").path("admissionId").asText();
+      String path = "/guided-value/" + UUID.randomUUID();
+      var providerFailure = new AtomicReference<Throwable>();
+      var committedCountAtRead = new AtomicInteger(-1);
+      provider.createContext(
+          path,
+          exchange -> {
+            byte[] bytes = null;
+            try (exchange) {
+              require(exchange.getRequestMethod().equals("GET"), "INVALID_CONTRACT", 422);
+              JsonNode actual = action(id);
+              require(
+                  actual.path("state").asText().equals("DISPATCHING")
+                      && actual.path("dispatchCount").asInt() == 1
+                      && actual.path("admission").path("admissionId").asText().equals(admissionId),
+                  "STALE_FENCE",
+                  409);
+              require(
+                  actualJdbc.queryForObject(
+                          "SELECT count(*) FROM studio_secret_use_audit WHERE session_id=?",
+                          Integer.class,
+                          id)
+                      == 0,
+                  "INVALID_CONTRACT",
+                  422);
+              committedCountAtRead.set(actual.path("dispatchCount").asInt());
+              scenario.reads.incrementAndGet();
+              bytes =
+                  C.object()
+                      .put("value", scenario.canary)
+                      .put("version", "fixture-version-1")
+                      .toString()
+                      .getBytes(StandardCharsets.UTF_8);
+              exchange.sendResponseHeaders(200, bytes.length);
+              exchange.getResponseBody().write(bytes);
+            } catch (Throwable failure) {
+              providerFailure.compareAndSet(null, failure);
+            } finally {
+              if (bytes != null) {
+                Arrays.fill(bytes, (byte) 0);
+              }
+            }
+          });
+      provider.start();
+      var source = (DriverManagerDataSource) actualJdbc.getDataSource();
+      ObjectNode configuration =
+          C.object()
+              .put("url", source.getUrl())
+              .put("username", source.getUsername())
+              .put("password", source.getPassword())
+              .put("provider", "http://127.0.0.1:" + provider.getAddress().getPort() + path)
+              .put("stage", scratch.resolve("stage").toString())
+              .put("sessionId", id)
+              .put("testId", scenario.testId.toString())
+              .put("consumeKey", "controller-crash-consume")
+              .put("tlsKeyStore", TEMP.resolve("fixture.p12").toString())
+              .put("tlsTrustStore", TEMP.resolve("trust.p12").toString())
+              .put("runner", "https://localhost:" + RELAY.getAddress().getPort())
+              .put(
+                  "runnerToken",
+                  token("backend-controller", "controller-1", "studio-guided-runner"));
+      configuration.set("source", scenario.source);
+      configuration.set("configuration", scenario.configuration);
+      configuration.set("advance", fixture.advance());
+      Path config =
+          Files.createFile(
+              scratch.resolve("configuration.json"),
+              java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
+                  java.nio.file.attribute.PosixFilePermissions.fromString("rw-------")));
+      Files.writeString(config, configuration.toString(), StandardCharsets.UTF_8);
+      child =
+          new ProcessBuilder(
+                  Path.of(System.getProperty("java.home"), "bin", "java").toString(),
+                  "-cp",
+                  com.citi.put.checks.studio.guided.publication.ObservedResolverProcessCrashIT
+                      .childClasspath(),
+                  GuidedControllerChild.class.getName(),
+                  config.toString())
+              .redirectErrorStream(true)
+              .redirectOutput(scratch.resolve("child.log").toFile())
+              .start();
+      long stageDeadline = System.nanoTime() + Duration.ofSeconds(25).toNanos();
+      while (System.nanoTime() < stageDeadline
+          && child.isAlive()
+          && !Files.exists(scratch.resolve("stage"))) {
+        Thread.sleep(10);
+      }
+      assertThat(Files.exists(scratch.resolve("stage"))).isTrue();
+      assertThat(Files.readString(scratch.resolve("stage"))).isEqualTo("READ_BEFORE_DECISION");
+      assertThat(providerFailure.get() == null).isTrue();
+      assertThat(committedCountAtRead.get()).isEqualTo(1);
+      assertThat(scenario.reads.get()).isEqualTo(1);
+      assertThat(scenario.posts.get()).isZero();
+      assertThat(action(id).path("dispatchCount").asInt()).isEqualTo(1);
+      assertThat(action(id).has("lastSecretReleaseId")).isFalse();
+      long killedPid = child.pid();
+      child.destroyForcibly();
+      assertThat(child.waitFor(10, TimeUnit.SECONDS)).isTrue();
+      assertThat(child.exitValue()).isNotZero();
+      assertThat(ProcessHandle.of(killedPid).map(ProcessHandle::isAlive).orElse(false)).isFalse();
+      assertThat(
+              actualJdbc.queryForObject(
+                  "SELECT count(*) FROM studio_secret_use_audit WHERE session_id=?",
+                  Integer.class,
+                  id))
+          .isZero();
+      var restarted = service(repository, materialization, access, 600);
+      var recovery = new GuidedDispatchService(restarted, materialization, client());
+      recovery.installReferences(
+          new VaultStudioReferenceResolver(
+              new CountedProvider(),
+              (principal, csi, environment, name) ->
+                  principal.equals("user-1")
+                      && csi.equals("CSI-123")
+                      && environment.equals("fixture")
+                      && name.equals("PASS")));
+      for (String key : List.of("controller-crash-consume", "controller-crash-new-key")) {
+        assertThat(
+                recovery.dispatch(controller, id, 1, key, fixture.advance()).path("state").asText())
+            .isEqualTo("DISPATCHING");
+      }
+      assertThat(scenario.reads.get()).isEqualTo(1);
+      assertThat(scenario.posts.get()).isZero();
+      assertThat(action(id).path("dispatchCount").asInt()).isEqualTo(1);
+      JsonNode pending = action(id);
+      assertThat(pending.path("state").asText()).isEqualTo("DISPATCHING");
+      assertThat(pending.path("admission").path("admissionId").asText()).isEqualTo(admissionId);
+      owner.expect(id);
+      restarted.installStopSender(
+          (contextToStop, reason) -> owner.send(recovery, contextToStop, reason));
+      // Trusted local recovery after actual owned-JVM exit; not expired-worker or ACK-loss
+      // authority.
+      restarted.lostAcknowledgment(id, admissionId);
+      owner.drainUninterruptibly();
+      assertThat(owner.failure.get() == null && owner.guardFailure.get() == null).isTrue();
+      assertThat(owner.initiated.get()).isEqualTo(1);
+      assertThat(owner.finished.get()).isEqualTo(1);
+      assertThat(owner.confirmationCalls.get()).isEqualTo(1);
+      assertThat(scenario.stops.get()).isEqualTo(1);
+      assertThat(
+              C.parse(
+                      actualJdbc.queryForObject(
+                          "SELECT document::text FROM studio_guided_sessions WHERE session_id=?",
+                          String.class,
+                          id))
+                  .path("state")
+                  .asText())
+          .isEqualTo("UNKNOWN_OUTCOME");
+      assertThat(
+              actualJdbc.queryForObject(
+                  "SELECT progress->>'teardownStatus' FROM studio_guided_sessions WHERE session_id=?",
+                  String.class,
+                  id))
+          .isEqualTo("CONFIRMED");
+      assertThat(
+              actualJdbc.queryForObject(
+                  "SELECT live FROM studio_guided_materializations WHERE session_id=?",
+                  Boolean.class,
+                  id))
+          .isFalse();
+      assertThat(action(id).path("dispatchCount").asInt()).isEqualTo(1);
+      var rows =
+          actualJdbc.queryForList("SELECT * FROM studio_secret_use_audit WHERE session_id=?", id);
+      assertThat(rows.size()).isEqualTo(1);
+      var summary = rows.getFirst();
+      assertThat(
+              "USAGE".equals(summary.get("row_kind"))
+                  && "UNKNOWN_OUTCOME".equals(summary.get("usage_outcome")))
+          .isTrue();
+      assertThat(admissionId.equals(summary.get("admission_id"))).isTrue();
+      assertThat(
+              "GUIDED".equals(summary.get("path"))
+                  && id.equals(summary.get("session_id"))
+                  && scenario.testId.equals(summary.get("test_id"))
+                  && "user-1".equals(summary.get("principal_id"))
+                  && "CSI-123".equals(summary.get("csi_id"))
+                  && "fixture".equals(summary.get("environment"))
+                  && "PASS".equals(summary.get("secret_id"))
+                  && summary.get("execution_id") == null)
+          .isTrue();
+      assertThat(
+              summary.get("coordinate_step_id").equals("step-1")
+                  && ((Number) summary.get("coordinate_ordinal")).intValue() == 0
+                  && summary.get("source_reference_id").equals("ref-PASS")
+                  && summary.get("attempt_id").equals(id + ":1"))
+          .isTrue();
+      for (String field :
+          List.of("outcome", "release_id", "affected_release_id", "release_seq", "vault_version")) {
+        assertThat(summary.get(field) == null).as("honest consumed uncertainty").isTrue();
+      }
+      for (String key : List.of("controller-crash-consume", "controller-crash-terminal-key")) {
+        Instant actualLease =
+            Instant.parse(
+                C.parse(
+                        actualJdbc.queryForObject(
+                            "SELECT document->'owner' FROM studio_guided_sessions WHERE session_id=?",
+                            String.class,
+                            id))
+                    .path("leaseExpiresAt")
+                    .asText());
+        String originalRefusal =
+            actualLease.isAfter(Instant.now()) ? "UNKNOWN_OUTCOME" : "STALE_FENCE";
+        assertThatThrownBy(() -> recovery.dispatch(controller, id, 1, key, fixture.advance()))
+            .isInstanceOf(GuidedSessionException.class)
+            .hasMessage(originalRefusal);
+      }
+      assertThat(
+              rows.equals(
+                  actualJdbc.queryForList(
+                      "SELECT * FROM studio_secret_use_audit WHERE session_id=?", id)))
+          .isTrue();
+      assertThat(scenario.reads.get()).isEqualTo(1);
+      assertThat(scenario.posts.get()).isZero();
+      assertThat(Files.readString(scratch.resolve("child.log")).contains(scenario.canary))
+          .isFalse();
+      reconciled = true;
+    } catch (Exception | Error failure) {
+      primary = failure;
+      throw failure;
+    } finally {
+      var failures = new java.util.ArrayList<Throwable>();
+      if (child != null) {
+        Process owned = child;
+        attemptGuidedCutCleanup(
+            failures,
+            () -> {
+              boolean interrupted = Thread.interrupted();
+              try {
+                if (owned.isAlive()) {
+                  owned.destroyForcibly();
+                }
+                while (owned.isAlive()) {
+                  try {
+                    owned.waitFor();
+                  } catch (InterruptedException interruption) {
+                    interrupted = true;
+                  }
+                }
+                assertThat(owned.isAlive()).isFalse();
+              } finally {
+                if (interrupted) {
+                  Thread.currentThread().interrupt();
+                }
+              }
+            });
+      }
+      Scenario scenario = created[0];
+      if (scenario != null && !reconciled) {
+        attemptGuidedCutCleanup(
+            failures,
+            () -> {
+              var doc =
+                  repository.transaction(
+                      () -> repository.lock(scenario.sessionId).document().deepCopy());
+              if (!Set.of(
+                      "CANCELLED",
+                      "UNKNOWN_OUTCOME",
+                      "FAILED",
+                      "EXPIRED",
+                      "SUCCEEDED",
+                      "PUBLICATION_CONFLICT")
+                  .contains(doc.path("state").asText())) {
+                boolean notify =
+                    actualJdbc.queryForObject(
+                        "SELECT EXISTS(SELECT 1 FROM studio_guided_materializations WHERE session_id=?)"
+                            + " OR EXISTS(SELECT 1 FROM studio_guided_assignments WHERE session_id=?)",
+                        Boolean.class,
+                        scenario.sessionId,
+                        scenario.sessionId);
+                if (notify) {
+                  owner.expect(scenario.sessionId);
+                }
+                if (repository.actions(scenario.sessionId).stream()
+                    .anyMatch(action -> action.path("state").asText().equals("DISPATCHING"))) {
+                  controllerService[0].lostAcknowledgment(
+                      scenario.sessionId,
+                      action(scenario.sessionId).path("admission").path("admissionId").asText());
+                } else {
+                  controllerService[0].cancel(
+                      user,
+                      scenario.sessionId,
+                      UUID.randomUUID().toString(),
+                      C.object()
+                          .put("schemaVersion", 3)
+                          .put("sessionId", scenario.sessionId)
+                          .put("reason", "userRequested"));
+                }
+              }
+            });
+      }
+      attemptGuidedCutCleanup(failures, owner::drainUninterruptibly);
+      attemptGuidedCutCleanup(
+          failures,
+          () -> {
+            assertThat(owner.failure.get() == null && owner.guardFailure.get() == null).isTrue();
+          });
+      attemptGuidedCutCleanup(failures, () -> provider.stop(0));
+      attemptGuidedCutCleanup(failures, providerPeers::shutdownNow);
+      attemptGuidedCutCleanup(
+          failures,
+          () -> assertThat(providerPeers.awaitTermination(10, TimeUnit.SECONDS)).isTrue());
+      if (failures.isEmpty()) {
+        attemptGuidedCutCleanup(
+            failures,
+            () -> {
+              try (var paths = Files.walk(scratch)) {
+                for (Path path : paths.sorted(java.util.Comparator.reverseOrder()).toList()) {
+                  Files.deleteIfExists(path);
+                }
+              }
+            });
+      }
+      if (!failures.isEmpty()) {
+        GUIDED_CUT_CLEANUP_UNCONFIRMED.set(true);
+        if (primary != null) {
+          failures.forEach(primary::addSuppressed);
+        } else {
+          Throwable first = failures.getFirst();
+          for (int i = 1; i < failures.size(); i++) {
+            first.addSuppressed(failures.get(i));
+          }
+          if (first instanceof Exception failure) {
+            throw failure;
+          }
+          throw (Error) first;
+        }
+      }
+    }
+  }

@@ -1,0 +1,305 @@
+{
+  "capturedAtUtc": "2026-10-10T17:15:07.042412+00:00",
+  "story": "STUDIO-OBS-007",
+  "reviewer": "Independent Aria architect, not implementation author",
+  "scope": "Two frozen backend production corrections; actual service9/buffer9 and first publication evidence",
+  "verdict": "PASS_SCOPED_IMPLEMENTED_DISPATCH_AND_PUBLISHER_DELTA",
+  "findings": [],
+  "wholeStoryQaApproved": false,
+  "lifecycleChanged": false,
+  "productionBindings": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": {
+      "currentSha256": "ceeec5a8ef899dced36c556b44ce2e1099fefe65084b7ffc4e3b0f69c4bc68dd",
+      "testedZipSha256": "ceeec5a8ef899dced36c556b44ce2e1099fefe65084b7ffc4e3b0f69c4bc68dd",
+      "matchesTestedZip": true,
+      "strictGateSha256": "ceeec5a8ef899dced36c556b44ce2e1099fefe65084b7ffc4e3b0f69c4bc68dd"
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": {
+      "currentSha256": "87e9a1da8028ecf341aa3c7102069acb223ce44eb81d00e665c9650088a2a650",
+      "testedZipSha256": "87e9a1da8028ecf341aa3c7102069acb223ce44eb81d00e665c9650088a2a650",
+      "matchesTestedZip": true,
+      "strictGateSha256": "87e9a1da8028ecf341aa3c7102069acb223ce44eb81d00e665c9650088a2a650"
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": {
+      "currentSha256": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+      "testedZipSha256": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+      "matchesTestedZip": true,
+      "strictGateSha256": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c"
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java": {
+      "currentSha256": "66f3665f63de906f5b1a4285aaf904b8527a3231066c28be7ee5c3f713a4bd02",
+      "testedZipSha256": "66f3665f63de906f5b1a4285aaf904b8527a3231066c28be7ee5c3f713a4bd02",
+      "matchesTestedZip": true,
+      "strictGateSha256": "66f3665f63de906f5b1a4285aaf904b8527a3231066c28be7ee5c3f713a4bd02"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": {
+      "currentSha256": "88be098d8b8cf0c5b790eb1f5f0bd8e837b9cd790ec11de43b84c26fcc7b3dbe",
+      "testedZipSha256": "88be098d8b8cf0c5b790eb1f5f0bd8e837b9cd790ec11de43b84c26fcc7b3dbe",
+      "matchesTestedZip": true,
+      "strictGateSha256": "88be098d8b8cf0c5b790eb1f5f0bd8e837b9cd790ec11de43b84c26fcc7b3dbe"
+    }
+  },
+  "requiredProductionIdentities": {
+    "dispatch": "ceeec5a8ef899dced36c556b44ce2e1099fefe65084b7ffc4e3b0f69c4bc68dd",
+    "publisher": "87e9a1da8028ecf341aa3c7102069acb223ce44eb81d00e665c9650088a2a650"
+  },
+  "dispatchReview": {
+    "assessment": "PASS_SCOPED",
+    "helper": "Private reconcileLostAcknowledgment identity-only helper consumes prior interrupt exactly once immediately before existing exact-admission lostAck and restores in finally. New interrupt during DB work remains asserted, because exit does not clear again. Only catch and normal transport acknowledgement invoke it, after sendSecret finally and resolved try-with-resource unwinding erased owned buffers. No consume/read/send/retry/new lease/admission/control/capacity authority is introduced.",
+    "failureSemantics": "Actual reconciliation failure is propagated; only a fresh closed UNKNOWN_OUTCOME GuidedSessionException is suppressed when original failure has that code. Raw provider exception/value is not attached. No DB failure silently changes into transport success or false persisted terminal outcome.",
+    "positivePreservation": "Unchanged session.lostAcknowledgment locks actual session, checks !terminal and exact target admission still DISPATCHING. Unchanged stop only alters ADMITTED/DISPATCHING actions, leaving actual SUCCEEDED/USED and owner FAILED facts intact; stop notification after committed TX only.",
+    "actualProof": "All9 actual service modes pass in source-bound archive: complete200/503 with or without authentic owner callback, partial body nonEOF, caller expiry after consume, interruption after headers. Assertions cover one consumed command/read/post, request/provider erasure, caller join/interrupt flag, terminal action/audit rows, restart/dedup no reread/resend. Owner callback503 success preserves positive SUCCEEDED/USED.",
+    "remaining": "Real reconciliation JDBC begin/commit/rollback failure, blocked pool/row lock, callback race and late-admission adversarial cases not newly executed by this gate. Source honesty inspected; new negative design is staged only. No general blockedDB cleanup bound claim."
+  },
+  "publisherReview": {
+    "assessment": "PASS_SCOPED",
+    "firstCheck": "Original session read and caller checkUser outside locks remain before preparation. checkCurrent(document) executes within existing prepare transaction after session->source locks and bases.requireCurrent, before lowering/reserve/claim.",
+    "secondCheck": "Postvalidator checkCurrent now in short session->source transaction on actual currentSession.document, bases.requireCurrent, ends before fresh authorizePublication. Exact local-denial/Core authority ordering retained.",
+    "externalWork": "No outer transaction annotation. validator.validate follows completed claim TX; authorization fresh Core call remains outside TX with existing actualTXfalse guard. TranslationStore actualTX guard unchanged.",
+    "commit": "Existing final transaction recaptures current session/source/evidence basis and compares snapshot hash, preserves supported pins and exact grant/attempt/claim/source/CAS/lifecycle fences. No authority renewal or relaxed role/current/hash check.",
+    "receipt": "Historical receipt branch before active publication flags/checks remains fresh authorized read plus finalizeDigest equality; live source changes do not erase receipt or create fresh replay authority.",
+    "actualProof": "First current actualLearning flow reaches publication SUCCEEDED before ordinary replay assertion ERROR, confirmed safe stored session state and tested source ordering; transaction guard no longer blocks that publication. This is partial path proof, not current full nineflow pass.",
+    "unexecutedBoundaries": "Source proves ordering; this review does not independently execute validator/Core transaction hook negatives, unauthorized-before-reserve counters, postvalidation policy/source mutation, historical receipt edit followup or grant/race/rollback negatives. Required existing/new focused regressions remain root-owned."
+  },
+  "actualBoundGate": {
+    "scope": "Exact selected current backend gate only; no whole-story QA verdict",
+    "gradleExitCode": 1,
+    "sourceDrift": [],
+    "results": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "tests": 9,
+        "failures": 6,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "finishedAt": "2026-10-10T16:52:32.877198+00:00",
+    "tests": 27,
+    "failures": 6,
+    "errors": 0,
+    "skipped": 0,
+    "pass": false
+  },
+  "actualXmlRows": {
+    "TEST-com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest.xml": [
+      {
+        "name": "closeBeforeSubscriptionRefusesLateChunksWithoutConsumingThem()",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "requestCloseWaitsForOwnedReadMonitorAndRefusesSubsequentReads()",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "oneByteBeyondLimitCancelsAndOwnerCloseErasesAccumulation()",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "exactResponseLimitCompletesAndAllOwnedArraysAreErased()",
+        "passed": true,
+        "failureSummary": null
+      }
+    ],
+    "TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml": [
+      {
+        "name": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()",
+        "passed": false,
+        "failureSummary": "org.opentest4j.AssertionFailedError: [execution f8987db7-a614-4107-a9df-d5374e46f817; runner log /var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-6606175983143914146/ordinary.log] \nexpected: \"PASSED\"\n but was: \"ERROR\""
+      },
+      {
+        "name": "queuedAndPreReadyRefusals()",
+        "passed": false,
+        "failureSummary": "java.lang.AssertionError: [Requires the genuinely published revision from the preceding integration flow] \nExpecting actual not to be null"
+      },
+      {
+        "name": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness()",
+        "passed": false,
+        "failureSummary": "java.lang.AssertionError: \nExpecting actual not to be null"
+      },
+      {
+        "name": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays()",
+        "passed": false,
+        "failureSummary": "org.opentest4j.AssertionFailedError: [async replay logs /var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-6606175983143914146] \nexpected: \"PASSED\"\n but was: \"ERROR\""
+      },
+      {
+        "name": "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance()",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork()",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays()",
+        "passed": false,
+        "failureSummary": "org.opentest4j.AssertionFailedError: [second explicit learning; logs /var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-6606175983143914146] \nexpected: \"FINALIZING\"\n but was: \"FAILED\""
+      },
+      {
+        "name": "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall()",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+        "passed": false,
+        "failureSummary": "org.opentest4j.AssertionFailedError: [second explicit learning; logs /var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-6606175983143914146] \nexpected: \"FINALIZING\"\n but was: \"FAILED\""
+      }
+    ],
+    "TEST-com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.xml": [
+      {
+        "name": "[1] mode=COMPLETE_200_NO_CALLBACK",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "[2] mode=COMPLETE_200_OWNER_OK",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "[3] mode=COMPLETE_200_OWNER_FAILED",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "[4] mode=COMPLETE_503_NO_CALLBACK",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "[5] mode=COMPLETE_503_OWNER_OK",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "[6] mode=PARTIAL_200_NO_EOF",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "[7] mode=PARTIAL_503_NO_EOF",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "[8] mode=CALLER_EXPIRY_AFTER_CONSUME",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "[9] mode=INTERRUPT_AFTER_HEADERS",
+        "passed": true,
+        "failureSummary": null
+      }
+    ],
+    "TEST-com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest.xml": [
+      {
+        "name": "actualProductionHttpsDefaultFifteenSecondBoundIncludesTheResponseBody()",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "[1] status=200",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "[2] status=503",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "guidedPublisherUsesOwnedBytesAndErasesBothBuffersAfterAckAndLostAck()",
+        "passed": true,
+        "failureSummary": null
+      },
+      {
+        "name": "actualProductionHttpsInterruptionClosesPartialResponseAndErasesOwnedBuffers()",
+        "passed": true,
+        "failureSummary": null
+      }
+    ]
+  },
+  "firstPublication": {
+    "safeStateEvidencePath": "docs/qa/evidence/STUDIO-OBS-007/root-combined-remediation-gate/fixture-runtime/failed-test-state-actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues-7d167d47-d679-4cd0-a926-88df1a6fe353.json",
+    "sha256": "79bebf39edb63d546ed5593beeb32fd245fcc806b949e20832db9d958e592ac4",
+    "state": "SUCCEEDED",
+    "actions": 5,
+    "allStoredActionsSucceeded": true,
+    "ordinaryReplay": "ERROR per saved XML; no PASSED replay/rotations/counts claim",
+    "testArchivePath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "testedFixtureSha256": "2854e26dfb370b29945265fca2c13468ee74d49ddb7a6d1d41eb59f4eed70bba",
+    "fixtureAuthoringNote": "Current B fixture may evolve outside frozen production scope; archive is authoritative for this tested result. New model/diagnostic fixture does not retroactively change old test proof."
+  },
+  "strictJavaGate": {
+    "scope": "strictJava support only, not fullbackendcheck/19AC/QA",
+    "command": [
+      "./gradlew",
+      "spotlessCheck",
+      "checkstyleMain",
+      "checkstyleTest",
+      "spotbugsMain",
+      "--continue"
+    ],
+    "exitCode": 0,
+    "sourceDrift": [],
+    "finishedAt": "2026-10-10T17:02:58.230437+00:00"
+  },
+  "evidenceBindings": {
+    "docs/qa/evidence/STUDIO-OBS-007/root-combined-remediation-gate/result.json": "8bc65c6024edfdeef881780d54f6cb07d4d9223f779f5934873b385a35920fef",
+    "docs/qa/evidence/STUDIO-OBS-007/root-combined-remediation-gate/sources.zip": "1429fc40d86006e2518f655c119797c308812e0255f7dbe69e7690901bd65669",
+    "docs/qa/evidence/STUDIO-OBS-007/root-combined-remediation-gate/source-hashes.json": "43db5562efef0f107a3530f7521b6fe7c6cd9cda267feb7f9d916a8cd7de7688",
+    "docs/qa/evidence/STUDIO-OBS-007/root-combined-static-check/result.json": "c4068768adcfe7414f1576ae433b9d2e99869d2c5647a2b7b8218f4159d8034d",
+    "docs/qa/evidence/STUDIO-OBS-007/root-combined-static-check/source-hashes.json": "af44f2fac6632c86aad18dc2a393b515d2c1e97682557257740bac11c803fbe0",
+    "docs/qa/evidence/STUDIO-OBS-007/interrupted-settlement-disposition.json": "d9639576ca0fba6ff3c32e5fa4c5ce496e1d73e4bc2c8492cd0772773e7d2bb7",
+    "docs/qa/evidence/STUDIO-OBS-007/publisher-transaction-disposition.json": "562c753a32dbed0f2b5b549ab911438cc12c51d73dc57b1c0e6722228547bbbc",
+    "docs/qa/evidence/STUDIO-OBS-007/root-combined-remediation-gate/TEST-com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest.xml": "198b0240984bb779f945059e0a516193180568e57adf6a0947d71435125c0ead",
+    "docs/qa/evidence/STUDIO-OBS-007/root-combined-remediation-gate/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml": "6755f951691d0088294ceef72c271327d64b68a54f3d770f3790fc9525a0ee9d",
+    "docs/qa/evidence/STUDIO-OBS-007/root-combined-remediation-gate/TEST-com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.xml": "818a734cb65a05b6a278f1ebdf36f97b6d6f829ee771eb225e24d12ad5e3e880",
+    "docs/qa/evidence/STUDIO-OBS-007/root-combined-remediation-gate/TEST-com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest.xml": "8633d67bcc75b70633887fbe561c747fcbb4923b4a321d643847e41c1c2eebec"
+  },
+  "remainingLimits": [
+    "Current27 gate21pass6fail, no lifecycle/full19AC QA closure",
+    "Ordinary replay ERROR and secret/alternate model failures separate from corrected transaction call location",
+    "Real DB failure/blocked-lock cleanup negative actual evidence still pending; no global pool/transaction settings authority granted",
+    "Actual Core/Vault/PG/two-path allSink/physical process crash/positive lostFINAL/revocation/publication joins remain required",
+    "No fresh current image or Node22/internalED05 proof",
+    "Historical7290byte native allwhite failure remains unclassified"
+  ],
+  "reviewerActions": {
+    "sourceEdits": false,
+    "testEdits": false,
+    "runtimeOrBuild": false,
+    "lifecycleChanges": false,
+    "onlyWrite": "docs/qa/evidence/STUDIO-OBS-007/backend-terminal-publisher-independent-review.json",
+    "wholeWaveCeilingUsd": 500,
+    "actualBillingAvailable": false
+  }
+}

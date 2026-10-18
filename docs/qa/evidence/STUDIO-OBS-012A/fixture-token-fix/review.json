@@ -1,0 +1,189 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "lane": "fixture-token-fix",
+  "agent": "@dev (Dex)",
+  "scope": "Test-fixture credential staleness only; single file changed",
+  "changed_files": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java"
+  ],
+  "source_binding": {
+    "before_sha256": "f51ba83f7d67234aa360219b12d92ceaf5f46161d967db675f6f026642dcaee7",
+    "before_matches_baseline_rootcause_binding": true,
+    "after_sha256": "d2515311942413a024ae89d9763fc7bdf71853c005e1a8c02097c28ee32e5e4c",
+    "note": "after hash is pre-Lane-K; Lane K substitutions will change it"
+  },
+  "production_code_changed": false,
+  "gradle_or_runtime_executed": false,
+  "static_checks_executed": [
+    "google-java-format 1.22.0 (spotless-configured version) run standalone on a scratch copy with --skip-reflowing-long-strings: zero diff after one signature reflow fix",
+    "@Test count grep: 37 (unchanged)"
+  ],
+  "static_checks_not_executed": [
+    "compile",
+    "spotless/checkstyle via Gradle",
+    "test execution (root-owned; Lane K may transiently break compile)"
+  ],
+  "changes": [
+    {
+      "method": "beginOwnedSessionTracking (@BeforeEach)",
+      "lines_after": [
+        1265,
+        1281
+      ],
+      "edit": "signature now 'throws Exception'; refreshFixtureCredentials() at line 1270, AFTER the unchanged cleanupUnconfirmed guard (1267-1269)"
+    },
+    {
+      "method": "cancelFailedTestOwnedSessions (@AfterEach)",
+      "lines_after": [
+        1300,
+        1300
+      ],
+      "edit": "refreshFixtureCredentials() as first statement inside the existing per-session try; any refresh failure is caught by the existing catch and latches cleanupUnconfirmed (no guard relaxation)"
+    },
+    {
+      "method": "p3CleanupOwnedResources",
+      "lines_after": [
+        7772,
+        7773
+      ],
+      "edit": "refreshFixtureCredentials() as first statement; a refresh failure propagates as a cleanup failure (existing semantics)"
+    },
+    {
+      "method": "p3Call",
+      "lines_after": [
+        10313,
+        10313
+      ],
+      "edit": "refreshFixtureCredentialsBeforeDispatch(path) at start of POST branch only (GET branch untouched)"
+    },
+    {
+      "method": "publicCall",
+      "lines_after": [
+        15718,
+        15718
+      ],
+      "edit": "refreshFixtureCredentialsBeforeDispatch(path) at start of POST branch only (GET branch untouched)"
+    },
+    {
+      "method": "refreshFixtureCredentials (new private static helper)",
+      "lines_after": [
+        16178,
+        16192
+      ],
+      "edit": "re-mints controller.jwt and coordinator.jwt with the identical token(role,subject,audience) arguments used at fixture init (lines 435-440); re-mints worker.jwt with the identical startWorkers() arguments only if that file already exists"
+    },
+    {
+      "method": "refreshFixtureCredentialsBeforeDispatch (new private static helper)",
+      "lines_after": [
+        16194,
+        16200
+      ],
+      "edit": "refresh only when path starts with /api/v3/studio/guided-sessions (new session + session control POSTs) or is /api/v1/studio/tests/{id}/execute (ordinary dispatch)"
+    },
+    {
+      "method": "replaceFixtureCredential (new private static helper)",
+      "lines_after": [
+        16202,
+        16216
+      ],
+      "edit": "write sibling temp file then Files.move(ATOMIC_MOVE, REPLACE_EXISTING); finally deleteIfExists(temp). Mirrors the existing in-file pattern (c5-private-values.tmp)"
+    }
+  ],
+  "atomicity_rationale": "All three readers re-read the file per request: GuidedSessionConfiguration line 74 (Files.readString per call), GuidedTranslationCoordinator line 124 (Files.readString per POST), studio-runner guidedMain lines 29-30 (readFile per claim/callback). The scheduler (100 ms poll) and node worker read concurrently with the test thread, so in-place writeString could expose a truncated file; rename within the same TEMP directory is atomic.",
+  "ttl_unchanged": {
+    "token_method_line_after": 16157,
+    "quoted_constants": [
+      ".put(\"exp\", Instant.now().plusSeconds(299).getEpochSecond())",
+      ".put(\"iat\", Instant.now().minusSeconds(1).getEpochSecond());"
+    ],
+    "declared_iat_to_exp_seconds": 300,
+    "token_method_body_modified": false,
+    "verifier_limit_quoted_from_GuidedInternalSecurity": "expires - issued <= 300",
+    "issuer_subject_audience_role_key_unchanged": true,
+    "signing_key": "existing static ISSUER key pair; no new key, no new issuer"
+  },
+  "fresh_token_call_sites": {
+    "per_case_boundary": [
+      "@BeforeEach beginOwnedSessionTracking (every one of the 37 cases, after the guard)"
+    ],
+    "cleanup_boundaries": [
+      "@AfterEach cancelFailedTestOwnedSessions per owned session (failure path only)",
+      "p3CleanupOwnedResources (callers at lines 5770, 6030, 7584 [p3Case finally], 8614, 8705, 9314, 9735, 9983 after edit)"
+    ],
+    "new_session_POSTs": [
+      "publicCall lines 2186, 2903; publicCall helper line 14963",
+      "p3Call lines 4098, 4199; p3Start line 10298"
+    ],
+    "guided_session_control_POSTs": [
+      "finalize: 2257, 2351, 2861, 2912, 2963, 3058, 3215, 3428, 3778, 10352",
+      "clarify: 3184, 3373",
+      "cancel: 3268, 7803"
+    ],
+    "ordinary_dispatch_POSTs": [
+      "execute: 2280, 2389, 2406, 2437, 2838, 3079, 3448, 3824, 4351, 10377"
+    ],
+    "not_refreshed_by_design": [
+      "GET calls through the same helpers (result, clarification, executions)",
+      "raw non-helper POSTs at 2132-2138 and 15640 already mint a fresh controller token inline per call",
+      "startWorkers() already mints worker.jwt at worker start"
+    ]
+  },
+  "preserved": {
+    "case_count": 37,
+    "assertions_modified": 0,
+    "new_tests": 0,
+    "trace_privacy_scan_30_patterns": "untouched; refresh performs no HTTP so C5Capture.recordHttp counts are unchanged and no token is logged",
+    "worker_C2_C6_proofs": "untouched",
+    "eight_scripts": "untouched",
+    "deadlines": "90 s learning wait, 20 s teardown confirmation, 60 s ordinary cleanup, 2 s stop and all other deadline constants unchanged",
+    "cleanupUnconfirmed_guard": "unchanged; still latched on any unconfirmed actual teardown",
+    "background_refresher_or_scheduler": false,
+    "production_auth_relaxation_or_ttl_extension": false,
+    "added_cost_inferred": "three RSA-2048 signatures plus three same-directory renames per refresh point; not measured"
+  },
+  "syntheticSinkScanner_verdict": {
+    "case": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls (Order 19)",
+    "verdict": "CASCADE, not an independent defect",
+    "evidence_verified": [
+      "Baseline XML failure is the @BeforeEach guard at beginOwnedSessionTracking line 1269: 'prior failed-test actual worker teardown was not confirmed'",
+      "Body (lines 4427+) is a pure in-memory test of assertJoinedSinkAbsent/C5CanaryStream: no p3Case, no HTTP, no worker, no token file read; it never executed in the baseline"
+    ],
+    "inferred": "Its 20.057 s duration is the @AfterEach re-attempting the previous case's teardown: the guard throws before testOwnedSessions.clear()/failedTest=null, and JUnit skips AfterTestExecution callbacks when @BeforeEach fails, so stale prior-case state is re-processed with the 20 s teardown deadline. This is cascade bookkeeping from the sticky guard, not a credential-staleness defect, and is out of scope.",
+    "fixed": false
+  },
+  "lane_k_references_for_substitution_not_edited": [
+    {
+      "line": 8,
+      "text": "import com.citi.put.checks.studio.compile.gateway.StudioGatewayProperties;"
+    },
+    {
+      "lines": [
+        782,
+        789
+      ],
+      "text": "DynamicPropertySource keys studio.compile.gateway.{provider,endpoint,project,location,model,credentials.mode}"
+    },
+    {
+      "line": 1249,
+      "text": "@Autowired StudioGatewayProperties gatewayProperties; (used at 1423-1424)"
+    },
+    {
+      "lines": [
+        15051,
+        15186,
+        15187
+      ],
+      "text": "settings.put(\"studio.compile.gateway.provider\"/\"studio.compile.gateway.model\", ...)"
+    }
+  ],
+  "verification_to_run_later": {
+    "owner": "root",
+    "selector": "--tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT'",
+    "expectations": [
+      "37 cases executed",
+      "no learning timeout from expired fixture credentials",
+      "no BeforeEach line-1269 cascade unless a real teardown is unconfirmed"
+    ]
+  },
+  "raw_logs_tokens_keys_or_private_paths_included": false
+}

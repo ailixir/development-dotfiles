@@ -1,0 +1,100 @@
+{
+  "status": "CANDIDATE_AUTHORED_AWAITING_PEER_REVIEW",
+  "scope": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java"
+  ],
+  "authorization": "Root and independent runtime reviewer approve minimum isolated implementation; root alone integrates and executes shared gates/runtime.",
+  "demonstratedEvidence": {
+    "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-finalize-routing-supporting-current/closed-supporting-diagnostic.json",
+    "receiptSha256": "b4a0065b5712381c857fbea3b13e2fbd1735f3f515698ab4151ffaf79677023a",
+    "fact": "Existing bounded sampler joined one authentic selected renewal PG session-lock wait to active Publisher.prepareLowering capture transaction via fixed caller40.",
+    "limits": "Presence at sampled instant only; not exclusive1592ms attribution, finalclaim identity or acceptancePASS."
+  },
+  "options": [
+    {
+      "option": "Revert optional lowering",
+      "selected": false,
+      "tradeoff": "Simpler code but returns entirelowerer to authoritative locked transaction; restores known expensive work underlock."
+    },
+    {
+      "option": "Replace authoritative preparation with proof reuse",
+      "selected": false,
+      "tradeoff": "Could remove repeatedbasisvalidation but requires new freshness/equalityproof and broader authority reasoning not justified for this confirmed preliminary criticalsection."
+    },
+    {
+      "option": "Release optional capture locks before pure preparation",
+      "selected": true,
+      "tradeoff": "One private tuple/localhelper; existing authoritative work remains fullyfresh and locked, so runtime acceptance stillunproved."
+    }
+  ],
+  "flow": "Existing callercheck -> guarded raw capture TX (sessionlock,state,base,expectedrevisions,sourcelock,requireCurrent,access.checkCurrent,evidence.read,ownedsessioncopy) -> commit/unlock -> pureprovenance+basis+pins+owncomparisons+lower -> unchanged actualprepareTX/freshinputs/equality-or-baseline -> unchangedreserve/deadline/claim/validator/commit",
+  "ownershipProof": {
+    "Base": "PublicationContracts51\u201359 constructor bounds/canonical/deepcopy anddocument getter freshcopy",
+    "CurrentSource": "PublicationContracts63\u201371 identical defensiveconstructor/getter",
+    "Evidence": "PublicationContracts75\u201383 identical defensiveconstructor/getter",
+    "Session": "SessionRepository.lock parses private ObjectNode perread; capture makes one explicitdeepCopy before returning. Private capturetuple never escapes publisher call; no live rowalias or globalcache.",
+    "scope": "Existing value-free evidence projection and sensitive-value exclusions unchanged; no new logging or persistence."
+  },
+  "purityInventory": [
+    {
+      "method": "GuidedPlanBuilder.learningProvenance",
+      "dependencies": "Only inputJSON,GuidedContracts.object/hash,regex andpureguards",
+      "sql": false,
+      "network": false,
+      "authorityMutation": false
+    },
+    {
+      "method": "GuidedPlanBuilder.basis",
+      "dependencies": "Only defensive recorddocument copies,JSON/maps/sets,GuidedContractscanonical/hash/validate,local GuidedProposalValidator and ownpurehelpers",
+      "sql": false,
+      "network": false,
+      "authorityMutation": false
+    },
+    {
+      "method": "GuidedProposalValidator",
+      "dependencies": "OnlyGuidedContracts andpureJSON/rulechecks; onlyfield contracts",
+      "sql": false,
+      "network": false,
+      "authorityMutation": false
+    },
+    {
+      "method": "ObservedReplayPins.selected/configured/checked",
+      "dependencies": "ImmutableObservedReplayPropertiesrecord catalogstring,parseWire/schema/canonical/hash/copy",
+      "sql": false,
+      "network": false,
+      "authorityMutation": false
+    },
+    {
+      "method": "ownLoweringInput/representations",
+      "dependencies": "PrivateclosedJSONtree checks/deepcopy/equals/toString",
+      "sql": false,
+      "network": false,
+      "authorityMutation": false
+    }
+  ],
+  "purityCaveat": "Schema compilation can read frozenclasspath resources andvalidation emits existingTRACElogs; pure here means noSQL/network/provider/authorityeffect, not zeroobservationalI/O. Neither effect is disabled.",
+  "preservedByteIdentical": [
+    "preparedOrOriginal complete equality/fallback",
+    "authoritative prepare wholemethod",
+    "finalize reserve/claim/validator/commit orchestration",
+    "publicationbudget andSQL",
+    "allruntime1s/2s boundaries/fullROOT+APPTRACE/all30canaryvariants"
+  ],
+  "errorBehavior": "All moved computation remains in existingoptional RuntimeExceptioncatch; unavailablepreparation fallsback atoriginalauthoritativepoint. FatalError stillpropagates; ambientTX skipsoptionalcapture unchanged.",
+  "testPlan": "Extend existing sevenmode publicPublisherUsesOnlyMatchingDetachedSuccessWithFreshInputs only. Track nativev3/ledger basisvalidation callbackdepth optional0 vsfreshactual1; pinselection same; rawsource/evidence/currentguards remain1. Require positive samples. Preserve existing stale/invalid/build/representation/runtime/fatal/ambient cases andpublicrefusal/reserve/noHTTP/nosave/deadline checks. Mutate a detached mocked source-session read afteroptional capture returns toverify snapshotownership without newcase. Logicalcallbackdepth is explicitly notphysicalJDBCtiming.",
+  "minimumRootVerification": [
+    "Strict gates forchangedproduction/test",
+    "ExistingLowerer36 defining scenarios",
+    "Additional existing relevantcomponent/integrationchecks only iftheir sourcecoverage changed",
+    "OriginalUNPROFILEDC5 once afterpeerGO/gates; no supportingcase promotion or newmandatoryE2E"
+  ],
+  "knownResidual": "Original authoritative prepare repeatsfullbasis andpinauthority whilelocked. Evidence confirmed preliminarycapture; this change doesnot claim allcriticalsections meet1s. Newpublisherline layout invalidates old diagnostic sourcepoint bindings until explicitlyrebound.",
+  "baseHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": "e6c132a979cdf7546abf0b2056dec351a38ea8c58c7da5b34ae429f85e6acaab",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java": "bd78e11ede42c6b4fd77f86640f21b2acc1947c95dce3e0f662b9d4b1d5926a6"
+  },
+  "sharedEdits": false,
+  "buildsExecuted": false,
+  "runtimeStarted": false
+}

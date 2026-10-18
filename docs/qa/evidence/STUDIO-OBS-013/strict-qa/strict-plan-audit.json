@@ -1,0 +1,2593 @@
+{
+  "story": "STUDIO-OBS-013",
+  "reviewer": "Quinn independent strict plan auditor",
+  "createdUtc": "2026-10-14T23:02:45.986193+00:00",
+  "verdict": "FAIL_PENDING_LOCAL_REMEDIATION_AND_VALIDATION",
+  "doneAllowed": false,
+  "policy": "Latest user requires every planned applicable QA validation green. CONCERNS and downstream deferral of local planned checks do not complete this story. No lifecycle/gate write performed by this audit.",
+  "scope": "Read-only product/tests. Only strict-qa evidence written.015 production unstarted. Root owns all Gradle,dist,real browser test windows.",
+  "inputs": [
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+      "sha256": "8471a51d5adfc8d3d22f629b6a83bdcc60c07257bb8cd874a7e2203c4555f8c0"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/t0-plan-012B-013-014.json",
+      "sha256": "f71f0073201e825d3f5b7590d648f60e71c25bd80a2c760d6e0097d403cc6a85"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-1-obs013.json",
+      "sha256": "bf84927a3873a359abb34ed45eea44fc33dc84e9be9d5d9c49d5d25dfaaebb09"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-1-c1-deviations.json",
+      "sha256": "e4f933a2736cc27df0e249cd12655aaf6a3a99a845a5f10c46081b215fa06572"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-013/ar-qa-sec001-test001.json",
+      "sha256": "42ce6474c7c3a05461cc7576b2596741e2fb27d85955d85377e874823b32ed2e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-013/ar-qa-sec001-oracle-revision.json",
+      "sha256": "b224bf6dfb52208fc520e4551522610539e043bda0492b135145a1db8ab47205"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-013/b13/ledger.json",
+      "sha256": "7c6cf39b948ef8cd40fc63935021e6a4c1cd8c6979ead3b763ec5c66b7a6ea07"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-013/r13/ledger.json",
+      "sha256": "adb73e29b31785a450931e260447bb6e2b7f7d541b05c163c73cc4879ac37e05"
+    },
+    {
+      "path": "docs/qa/gates/STUDIO-OBS-013-record-the-learning-run-video-step-offsets-and-seek.yml",
+      "sha256": "9dd1a4669928f22ea0fe86e96da0891984f2ae10f0ee4c25ea76ab59d96d262a"
+    }
+  ],
+  "sourceVerification": {
+    "filesCompared": 1556,
+    "mismatches": [],
+    "rawFilesCompared": 295,
+    "rawMismatches": [],
+    "priorSourceSetDigest": "19f17477060edc4a724d5c5a641aeb91f9fa691c884a272ae644c80df3387497",
+    "fullManifest": "../resume-qa/review-manifest.json"
+  },
+  "currentExecutions": {
+    "runnerCommand": "pnpm --config.package-manager-strict=false exec vitest run --coverage.enabled=false test/guided/runtime.test.ts test/guided/evidence.test.ts test/run/manifest.test.ts test/server/timeline.test.ts test/run/confinement.test.ts test/guided/transport.test.ts test/run/guidedMain.test.ts --reporter=json --outputFile=../docs/qa/evidence/STUDIO-OBS-013/strict-qa/focused-unit-results.json",
+    "runnerPassed": 121,
+    "runnerFailed": 0,
+    "runnerSkipped": 0,
+    "runnerExit": 0,
+    "runnerFileSha256": "e398ce4395917a2d419cbcf33baf36c41c2344c0b34c0d4ede5bbf0fe180896e",
+    "initialPnpmAttempt": {
+      "exit": 1,
+      "reason": "project configured npm; retried with package-manager-strict=false; no install/lock changes"
+    },
+    "readOnlyChecks": [
+      {
+        "command": "node tools/check-studio-observed-contracts.cjs",
+        "exit": 0,
+        "stdout": "PASS v3: 42 schemas with every definition compiled and one actionTiming definition; 443 fixture/semantic/canonical checks; 42 planning fixtures; 80 replay/publication checks.\nPASS public OpenAPI: 43 operations, eight guided-session routes, five guided-policy routes, 25 validated examples; no retired generation or compile route.\nPASS codegen: 22 guided schemas, 29 replay schemas; four byte-identical outputs. No browser, database or publication proof claimed.\n",
+        "stderr": ""
+      },
+      {
+        "command": "node tools/build-studio-observed-schemas.cjs --check",
+        "exit": 0,
+        "stdout": "Verified v3: 22 guided schemas, 29 replay schemas; four byte-identical outputs. Backend processResources packages the same source schemas.\n",
+        "stderr": ""
+      }
+    ],
+    "unitTestInventory": {
+      "studio-runner/test/run/confinement.test.ts": [
+        {
+          "title": "AC-1 \u2014 no Playwright import escapes the one module that starts a browser SEC-10 removes the cookie-import capability and every trusted-browser call to it",
+          "status": "passed"
+        },
+        {
+          "title": "AC-1 \u2014 no Playwright import escapes the one module that starts a browser finds none in the validator, executor, server, reporting or compat trees",
+          "status": "passed"
+        },
+        {
+          "title": "AC-1 \u2014 no Playwright import escapes the one module that starts a browser finds exactly one importer in the whole package: src/run/browser.ts",
+          "status": "passed"
+        },
+        {
+          "title": "AC-1 \u2014 no Playwright import escapes the one module that starts a browser exports no Playwright type from the run surface",
+          "status": "passed"
+        },
+        {
+          "title": "AC-25 \u2014 the unit tier is browser-free no test outside the fixtures tier imports the browser module or Playwright",
+          "status": "passed"
+        },
+        {
+          "title": "AC-25 \u2014 the unit tier is browser-free keeps the fixtures tier out of the default run, with passWithNoTests unset",
+          "status": "passed"
+        },
+        {
+          "title": "AC-25 \u2014 the unit tier is browser-free gates src/run/** at the thresholds already enforced, with none lowered",
+          "status": "passed"
+        },
+        {
+          "title": "AC-13 \u2014 this story makes no contract edit, and that is the criterion finds the contract",
+          "status": "passed"
+        },
+        {
+          "title": "AC-13 \u2014 this story makes no contract edit, and that is the criterion pins the entire reviewed OpenAPI document including observed routes",
+          "status": "passed"
+        },
+        {
+          "title": "AC-13 \u2014 this story makes no contract edit, and that is the criterion carries no artifact-1 ReferencePolicy schema and no expectedIntent",
+          "status": "passed"
+        },
+        {
+          "title": "AC-13 \u2014 this story makes no contract edit, and that is the criterion emits the RunnerEvidence.partial that ADR-002 \u00a720 promoted to required",
+          "status": "passed"
+        },
+        {
+          "title": "AC-13 \u2014 this story makes no contract edit, and that is the criterion keeps every runner-produced body closed, and widens no enum",
+          "status": "passed"
+        },
+        {
+          "title": "AC-24 \u2014 production dependencies remain explicit and exact-pinned includes only Playwright, TypeScript and the intentional Sonic S3 client",
+          "status": "passed"
+        },
+        {
+          "title": "AC-24 \u2014 production dependencies remain explicit and exact-pinned does not touch the fail-closed allowlist to accommodate this story",
+          "status": "passed"
+        },
+        {
+          "title": "AC-24 \u2014 production dependencies remain explicit and exact-pinned keeps story 10.13\u2019s three new modules inside the node: builtins ADR-001 \u00a76 already permits",
+          "status": "passed"
+        },
+        {
+          "title": "AC-24 \u2014 production dependencies remain explicit and exact-pinned serves the fixture pages from node:http, as the internal server does",
+          "status": "passed"
+        },
+        {
+          "title": "AC-23 \u2014 the pins hold and .nvmrc is not touched still reads 22",
+          "status": "passed"
+        },
+        {
+          "title": "AC-23 \u2014 the pins hold and .nvmrc is not touched keeps the engines range as it was, so the mismatch cannot be widened away either",
+          "status": "passed"
+        },
+        {
+          "title": "AC-23 \u2014 the pins hold and .nvmrc is not touched keeps the Playwright pin at 1.63.0 in all four declared copies",
+          "status": "passed"
+        }
+      ],
+      "studio-runner/test/run/guidedMain.test.ts": [
+        {
+          "title": "guided worker mounted configuration accepts the closed trusted key set",
+          "status": "passed"
+        },
+        {
+          "title": "guided worker mounted configuration refuses unknown keys, non-object documents, a missing worker identity and invalid ports",
+          "status": "passed"
+        },
+        {
+          "title": "guided worker mounted configuration STUDIO-OBS-014 AC-1: refuses a mounted applicationPolicy in any form",
+          "status": "passed"
+        },
+        {
+          "title": "guided worker mounted configuration STUDIO-OBS-014 AC-1: refuses a mounted rules key in any form (ar-mounted-rules oracle 1)",
+          "status": "passed"
+        },
+        {
+          "title": "guided worker mounted configuration refuses a document that is not JSON",
+          "status": "passed"
+        },
+        {
+          "title": "guided worker mounted configuration is the only mounted-config gate the worker entry point uses",
+          "status": "passed"
+        }
+      ],
+      "studio-runner/test/run/manifest.test.ts": [
+        {
+          "title": "AC-7a \u2014 the manifest carries what \u00a75.3 names carries attempt/revision identity, result, timings, runtime versions and evidence state",
+          "status": "passed"
+        },
+        {
+          "title": "AC-7a \u2014 the manifest carries what \u00a75.3 names still produces the committed fixture byte for byte",
+          "status": "passed"
+        },
+        {
+          "title": "AC-7a \u2014 the manifest carries what \u00a75.3 names has no browser duration before the browser started",
+          "status": "passed"
+        },
+        {
+          "title": "AC-7a \u2014 the manifest carries what \u00a75.3 names never derives an evidence field from the outcome or an outcome from an evidence field",
+          "status": "passed"
+        },
+        {
+          "title": "AC-6 \u2014 no resolved value reaches the manifest, proven on the stored bytes the three canaries really are in the run before redaction",
+          "status": "passed"
+        },
+        {
+          "title": "AC-6 \u2014 no resolved value reaches the manifest, proven on the stored bytes shape 1 \u2014 a value reaching the manifest through an innocently named local",
+          "status": "passed"
+        },
+        {
+          "title": "AC-6 \u2014 no resolved value reaches the manifest, proven on the stored bytes shape 2 \u2014 a value carried on a throwable message that lands in errorMessage",
+          "status": "passed"
+        },
+        {
+          "title": "AC-6 \u2014 no resolved value reaches the manifest, proven on the stored bytes shape 3 \u2014 a value inside a runtime-version string",
+          "status": "passed"
+        },
+        {
+          "title": "AC-6 \u2014 no resolved value reaches the manifest, proven on the stored bytes scrubs all three at once, and the document is still valid JSON",
+          "status": "passed"
+        },
+        {
+          "title": "AC-6 \u2014 no resolved value reaches the manifest, proven on the stored bytes scrubs a value that JSON would otherwise escape out of a plain text search",
+          "status": "passed"
+        },
+        {
+          "title": "guided recording manifest (STUDIO-OBS-013 AC-5, AR-1 R3 guidedManifest) serializes the guided body in wire order through the same redact-twice serializer, with the constant disclosure",
+          "status": "passed"
+        }
+      ],
+      "studio-runner/test/guided/evidence.test.ts": [
+        {
+          "title": "guided recording keys (AR-1 R5 golden vector shared with the backend) derives every vector entry and refuses every refused entry",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording lifecycle stores the video, writes the manifest, reports STORED with rounded ordered IDs-only timings and removes the directory",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording lifecycle carries partial=true for a playable recording whose recorder did not close in order",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording lifecycle reports recorder never attached to the page as UNAVAILABLE with no video upload and no timings",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording lifecycle reports recorder produced no file as UNAVAILABLE with no video upload and no timings",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording lifecycle keeps a recorder-side fault (UNAVAILABLE) apart from a store-side fault (FAILED)",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording lifecycle fails closed for csiId null: no recorded context, no upload, UNAVAILABLE callback",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording lifecycle fails closed for csiId CSI/123: no recorded context, no upload, UNAVAILABLE callback",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording lifecycle reports UNAVAILABLE when the evidence directory cannot be created",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording lifecycle resends the byte-identical body under one key at most three times, then gives up honestly",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording lifecycle drops the timings, not the video, when a process-origin clock breaks the scale assertion",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording lifecycle reports UNAVAILABLE (and no canary) when the inspection port throws, and still cleans up",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording lifecycle stops stamping at the maxActions bound",
+          "status": "passed"
+        },
+        {
+          "title": "timing serialization and scale guard rounds once and orders by startMs, then ordinal, then stepId code point",
+          "status": "passed"
+        },
+        {
+          "title": "timing serialization and scale guard timingScaleHolds 0",
+          "status": "passed"
+        },
+        {
+          "title": "timing serialization and scale guard timingScaleHolds 1",
+          "status": "passed"
+        },
+        {
+          "title": "timing serialization and scale guard timingScaleHolds 2",
+          "status": "passed"
+        },
+        {
+          "title": "timing serialization and scale guard timingScaleHolds 3",
+          "status": "passed"
+        },
+        {
+          "title": "timing serialization and scale guard timingScaleHolds 4",
+          "status": "passed"
+        },
+        {
+          "title": "timing serialization and scale guard timingScaleHolds 5",
+          "status": "passed"
+        }
+      ],
+      "studio-runner/test/guided/runtime.test.ts": [
+        {
+          "title": "durable worker consumption and recovery completes managed secret loss only after original close and consumes late fulfill without output reentry",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery completes managed secret loss only after original close and consumes late reject without output reentry",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery adds a newly captured runtime value to the dispatch-local redactor before shutdown can clear it",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery keeps prior-value redaction and immutable success when stderr diagnostic delivery fails",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery keeps prior-value redaction and immutable success when callback diagnostic delivery fails",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery keeps prior-value redaction and immutable success when file diagnostic delivery fails",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery redacts all earlier/current values through 'CANCELLED'/'immediate'/'nonsecret' after inventory erasure",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery redacts all earlier/current values through 'CANCELLED'/'immediate'/'secret' after inventory erasure",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery redacts all earlier/current values through 'CANCELLED'/'delayed'/'nonsecret' after inventory erasure",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery redacts all earlier/current values through 'CANCELLED'/'delayed'/'secret' after inventory erasure",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery redacts all earlier/current values through 'EXPIRED'/'immediate'/'nonsecret' after inventory erasure",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery redacts all earlier/current values through 'EXPIRED'/'immediate'/'secret' after inventory erasure",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery redacts all earlier/current values through 'EXPIRED'/'delayed'/'nonsecret' after inventory erasure",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery redacts all earlier/current values through 'EXPIRED'/'delayed'/'secret' after inventory erasure",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery redacts all earlier/current values through 'CONTEXT_LOST'/'immediate'/'nonsecret' after inventory erasure",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery redacts all earlier/current values through 'CONTEXT_LOST'/'immediate'/'secret' after inventory erasure",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery redacts all earlier/current values through 'CONTEXT_LOST'/'delayed'/'nonsecret' after inventory erasure",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery redacts all earlier/current values through 'CONTEXT_LOST'/'delayed'/'secret' after inventory erasure",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery preserves trusted-pre-write secret target-change evidence without inventing refusal",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery preserves uncertain-after-call secret target-change evidence without inventing refusal",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery excludes independent writers and refuses missing/corrupt expected journal state",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery fsyncs before an effect and admits only one concurrent delivery",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery never retries an effect after an uncertain exception and delivers bounded non-authoritative diagnostics",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery preserves a definite success when its callback acknowledgement is lost",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery redacts the in-flight local value when stop has already wiped its inventory",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery cancellation before consume prevents invocation and lease expiry autonomously closes",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery reports a definite failed target refusal after consume and before any browser invocation",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery cancellation after durable consume but before invocation prevents the browser call",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery cancellation after an application effect cannot commit a success or retry",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery retains cumulative allocations while admitting appended prospective consumers",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery enforces aggregate/count bounds without exporting a read value: {\"maxRuntimeValues\":1}",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery enforces aggregate/count bounds without exporting a read value: {\"maxRuntimeValuesBytesTotal\":3}",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery retains capacity until actual browser close and releases private runtime references even when close fails",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery cleans a partial launch failure and cancels an in-flight launch without creating a live context",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery refreshes a new generation, correlates its committed callback and invalidates old preparation without another action",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery does not expose unacknowledged refresh evidence and rejects late acknowledgement after cancellation",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery reserves refresh count and remaining byte capacity without resetting budgets or running extra effects",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery stops on a lost refresh callback acknowledgement without changing already successful action outcomes",
+          "status": "passed"
+        },
+        {
+          "title": "durable worker consumption and recovery rejects mismatched owner/tuple, raised caps, fabricated origin and context rewrites",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) launches one recorded context, stamps the dispatched action on the session clock and reports after the lifecycle",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) does not make the stop wait for the upload",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) stamps endMs per outcome for unknown effects",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) stamps endMs per outcome for targetChanged effects",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) reports a recorder that never attached as UNAVAILABLE with no timings and no video object",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) records nothing and launches unrecorded without a recorder",
+          "status": "passed"
+        },
+        {
+          "title": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) settles a recording opened by a start that a stop overtook, without launching",
+          "status": "passed"
+        },
+        {
+          "title": "STUDIO-OBS-014 AC-1 guided learning takes no field rules (ar-mounted-rules oracle 2) builds the collector config with rules: [] even when a rules option is smuggled past the type",
+          "status": "passed"
+        }
+      ],
+      "studio-runner/test/guided/transport.test.ts": [
+        {
+          "title": "guided strict identity and wire schemas accepts only the designated RS256 service audience, role, issuer, subject and bounded time",
+          "status": "passed"
+        },
+        {
+          "title": "guided strict identity and wire schemas rejects duplicate/extra JWT keys, trailing bytes, optional type, fractional/future times and weak RSA",
+          "status": "passed"
+        },
+        {
+          "title": "guided strict identity and wire schemas keeps the packaged schemas byte-equivalent in meaning to the approved contract bundle",
+          "status": "passed"
+        },
+        {
+          "title": "guided strict identity and wire schemas enforces lowered limits, exact closed shapes and invalid Unicode",
+          "status": "passed"
+        },
+        {
+          "title": "guided strict identity and wire schemas matches the independently frozen refresh callback correlation vector",
+          "status": "passed"
+        },
+        {
+          "title": "audits the enforced schema subset and refuses unresolved or unsupported semantics",
+          "status": "passed"
+        },
+        {
+          "title": "rejects duplicate/trailing/invalidUTF8 and noncanonical numeric wire bytes without echoing input",
+          "status": "passed"
+        },
+        {
+          "title": "matches the shared UTC timestamp profile on actual assignment schemas",
+          "status": "passed"
+        },
+        {
+          "title": "agrees with the shared raw-byte JSON parity corpus",
+          "status": "passed"
+        },
+        {
+          "title": "STUDIO-OBS-013 recording-evidence callback route (applied by R14 from R13 queue) validates the route against recordingEvidence locally, before any credential lookup or send",
+          "status": "passed"
+        },
+        {
+          "title": "STUDIO-OBS-013 recording-evidence callback route (applied by R14 from R13 queue) posts a valid recordingEvidence body with the owner fence and the caller idempotency key",
+          "status": "passed"
+        },
+        {
+          "title": "STUDIO-OBS-014 AC-1 guided server configuration refuses an observation application policy supplied as server configuration",
+          "status": "passed"
+        },
+        {
+          "title": "STUDIO-OBS-014 AC-1 definite context refusal on the wire (AR-2 r14-stops ruling 2) keeps bridge#/definitions/refusal equal to the transport refusal vocabulary",
+          "status": "passed"
+        },
+        {
+          "title": "STUDIO-OBS-014 AC-1 definite context refusal on the wire (AR-2 r14-stops ruling 2) answers a policy mismatch and a context without the policy fields with schema-valid 409 refusals and changes nothing on the worker",
+          "status": "passed"
+        }
+      ],
+      "studio-runner/test/server/timeline.test.ts": [
+        {
+          "title": "AC-11.3 \u2014 every reading in the report is on the run timeline puts the first step reading and the STARTED log entry within a small bound of 0",
+          "status": "passed"
+        },
+        {
+          "title": "AC-11.3 \u2014 every reading in the report is on the run timeline keeps SKIPPED timings null rather than filing them at the browser start",
+          "status": "passed"
+        },
+        {
+          "title": "AC-11.4 \u2014 a report with browserStartedAt: null carries no reading nulls every reading on the serialized FINAL body of a failed launch",
+          "status": "passed"
+        },
+        {
+          "title": "AC-11.4 \u2014 a report with browserStartedAt: null carries no reading is enforced by the producer, not by the call sites that happen to have nothing to say",
+          "status": "passed"
+        }
+      ]
+    }
+  },
+  "priorExecutionProof": {
+    "backendSelected": {
+      "InferenceMigrationLatestIT": {
+        "name": "InferenceMigrationLatestIT",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 9,
+        "timestamp": "2026-10-14T10:11:09",
+        "testcases": [
+          {
+            "name": "upgradeToHeadRewritesNoHistoryAndInventsNoEligibility()",
+            "status": "passed"
+          },
+          {
+            "name": "scopeGuardAllowsNormalLifecycleUpdatesWithUnchangedScope()",
+            "status": "passed"
+          },
+          {
+            "name": "fullExecutionCannotBeRelabelledToNull()",
+            "status": "passed"
+          },
+          {
+            "name": "everyObservedRevisionColumnRemainsImmutableOnTheHeadSchema()",
+            "status": "passed"
+          },
+          {
+            "name": "confirmationSourceIsGuidedRunOnlyAndImmutable()",
+            "status": "passed"
+          },
+          {
+            "name": "historicalExecutionCannotBeRelabelledAsFullEvidence()",
+            "status": "passed"
+          },
+          {
+            "name": "everyRevisionColumnIsImmutableOnTheHeadSchema()",
+            "status": "passed"
+          },
+          {
+            "name": "scopeGuardCoversExistingAndFuturePartitions()",
+            "status": "passed"
+          },
+          {
+            "name": "freshAndUpgradedDatabasesReachTheSameHeadWithoutStagedV19()",
+            "status": "passed"
+          }
+        ]
+      },
+      "StudioContractTest": {
+        "name": "StudioContractTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 13,
+        "timestamp": "2026-10-14T10:11:54",
+        "testcases": [
+          {
+            "name": "declaredOperationStatusSetsAndMarkersMatchTheReviewedContract()",
+            "status": "passed"
+          },
+          {
+            "name": "everySnapshotExampleDeserializesIntoTheSnapshotDto()",
+            "status": "passed"
+          },
+          {
+            "name": "theVideoRouteIsShippedAndTheMarkerCameOffForThatOperationOnly()",
+            "status": "passed"
+          },
+          {
+            "name": "theFrozenInternalSchemasAndTheJavaRecordsShareTheSameFieldNames()",
+            "status": "passed"
+          },
+          {
+            "name": "internalRoutesStayOffThePublicSurfaceAndNameWhatServesThem()",
+            "status": "passed"
+          },
+          {
+            "name": "everyImplementedStudioRouteIsDeclaredInTheContract()",
+            "status": "passed"
+          },
+          {
+            "name": "theInternalDriftCheckWouldHaveCaughtTheRecordThatCausedDef02()",
+            "status": "passed"
+          },
+          {
+            "name": "everyRouteTheContractPresentsAsShippedIsActuallyReachable()",
+            "status": "passed"
+          },
+          {
+            "name": "theGuidedVideoEvidenceIsThePublicVideoEvidenceShape()",
+            "status": "passed"
+          },
+          {
+            "name": "skippedAndUnstartedStepsCarryNullTimingsInTheExamples()",
+            "status": "passed"
+          },
+          {
+            "name": "theFrozenSchemasAndTheJavaTypesShareTheSameFieldNames()",
+            "status": "passed"
+          },
+          {
+            "name": "theLegacyAdapterExamplesAreAcceptedByTheTypedRequestType()",
+            "status": "passed"
+          },
+          {
+            "name": "theSseEventPayloadIsTheSameDtoAsTheGetSnapshot()",
+            "status": "passed"
+          }
+        ]
+      },
+      "ExecutionVideoAuthorizationIT": {
+        "name": "ExecutionVideoAuthorizationIT",
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 14,
+        "timestamp": "2026-10-14T10:16:01",
+        "testcases": [
+          {
+            "name": "softDeletingTheParentTestChangesNoAnswerAndNoByte()",
+            "status": "passed"
+          },
+          {
+            "name": "theIdentityMatrixIsPinnedBothWaysAndCarriesItsTotal()",
+            "status": "passed"
+          },
+          {
+            "name": "aQuarantinedRowIsDeniedToEveryoneIncludingAdministrators()",
+            "status": "passed"
+          },
+          {
+            "name": "noQueryParameterIsEverACredential()",
+            "status": "passed"
+          },
+          {
+            "name": "AC-1/AC-3 \u2014 reader of the execution's CSI",
+            "status": "passed"
+          },
+          {
+            "name": "AC-1/AC-3 \u2014 owner of the execution's CSI",
+            "status": "passed"
+          },
+          {
+            "name": "AC-1/AC-3 \u2014 a principal on a different CSI",
+            "status": "passed"
+          },
+          {
+            "name": "AC-1/AC-3 \u2014 a principal with no ownership at all",
+            "status": "passed"
+          },
+          {
+            "name": "AC-1/AC-3 \u2014 no identity headers at all",
+            "status": "passed"
+          },
+          {
+            "name": "AC-1/AC-3 \u2014 an administrator",
+            "status": "passed"
+          },
+          {
+            "name": "theMatrixContainsBothAnswers()",
+            "status": "passed"
+          },
+          {
+            "name": "movingTheParentTestsCsiDoesNotChangeTheAnswer()",
+            "status": "passed"
+          },
+          {
+            "name": "movingTheExecutionRowsOwnCsiFlipsTheAnswer()",
+            "status": "passed"
+          },
+          {
+            "name": "aDenialUnderAVideoAcceptHeaderIsStillTheSnapshotRoutesJsonRefusal()",
+            "status": "passed"
+          }
+        ]
+      },
+      "ExecutionVideoContractTest": {
+        "name": "ExecutionVideoContractTest",
+        "tests": 21,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 21,
+        "timestamp": "2026-10-14T10:16:03",
+        "testcases": [
+          {
+            "name": "theRangeResponseDeclaresItsContentAndItsTwoHeaders()",
+            "status": "passed"
+          },
+          {
+            "name": "theVideoRoutesRefusalRefsAreItsSiblingsOwn()",
+            "status": "passed"
+          },
+          {
+            "name": "theAttributionReaderCanActuallyFindABadValue()",
+            "status": "passed"
+          },
+          {
+            "name": "theMarkerScanCanStillFindAMarker()",
+            "status": "passed"
+          },
+          {
+            "name": "theVideoOperationsStatusSetMatchesTheApprovedEscalationRuling()",
+            "status": "passed"
+          },
+          {
+            "name": "theGuidedVideoRefusalsAreSharedComponentsWithTheExecutionRoutesShapes()",
+            "status": "passed"
+          },
+          {
+            "name": "theNotFoundResponseDeclaresAnErrorResponseBody()",
+            "status": "passed"
+          },
+          {
+            "name": "theUnsatisfiableRangeResponseDeclaresABodyAndItsContentRangeHeader()",
+            "status": "passed"
+          },
+          {
+            "name": "theGuidedVideoRouteNamesTheStoryThatShipsIt()",
+            "status": "passed"
+          },
+          {
+            "name": "theGuidedVideoRouteHasTheExecutionVideoStatusSet()",
+            "status": "passed"
+          },
+          {
+            "name": "theOperationDeclaresExactlyThePathIdAndTheDownloadFlag()",
+            "status": "passed"
+          },
+          {
+            "name": "everyOperationsUnauthenticatedResponsePointsAtItsOwnProducersEnvelope()",
+            "status": "passed"
+          },
+          {
+            "name": "noOperationCarriesAPendingMarkerInEitherView()",
+            "status": "passed"
+          },
+          {
+            "name": "theMarkerIsGoneAndTheAttributionNamesTheStoryThatShipsTheRoute()",
+            "status": "passed"
+          },
+          {
+            "name": "theSetOfOperationsCarryingAnAttributionIsPinnedBothWays()",
+            "status": "passed"
+          },
+          {
+            "name": "theEmptyPendingSetIsProducedByAReaderThatCanStillFindAMarker()",
+            "status": "passed"
+          },
+          {
+            "name": "theGuidedVideoRouteDeclaresTheSessionIdAndOnlyTheDownloadFlag()",
+            "status": "passed"
+          },
+          {
+            "name": "everyAttributionNamesAStoryTheManifestDeclares()",
+            "status": "passed"
+          },
+          {
+            "name": "videoEvidenceStillRequiresExactlyItsNonNullableProperties()",
+            "status": "passed"
+          },
+          {
+            "name": "thisIsTheLastOperationTheDocumentDeclaredAsUnshipped()",
+            "status": "passed"
+          },
+          {
+            "name": "everyRunnerEvidenceRequiredEntryNamesSomethingBothArtefactsDeclare()",
+            "status": "passed"
+          }
+        ]
+      },
+      "ExecutionVideoEvidenceIT": {
+        "name": "ExecutionVideoEvidenceIT",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 15,
+        "timestamp": "2026-10-14T10:16:05",
+        "testcases": [
+          {
+            "name": "anUnreachableStoreAndAnAbsentObjectAreDifferentAnswers()",
+            "status": "passed"
+          },
+          {
+            "name": "theFiveStateCaseTableCoversEveryStateTheDtoDeclaresAndNoOther()",
+            "status": "passed"
+          },
+          {
+            "name": "aMalformedContainerIsServedExactlyAsAWellFormedOneOfTheSameLength()",
+            "status": "passed"
+          },
+          {
+            "name": "AC-7 \u2014 PROCESSING answers 404",
+            "status": "passed"
+          },
+          {
+            "name": "AC-7 \u2014 AVAILABLE answers 200",
+            "status": "passed"
+          },
+          {
+            "name": "AC-7 \u2014 FAILED answers 404",
+            "status": "passed"
+          },
+          {
+            "name": "AC-7 \u2014 UNAVAILABLE answers 404",
+            "status": "passed"
+          },
+          {
+            "name": "AC-7 \u2014 EXPIRED answers 410",
+            "status": "passed"
+          },
+          {
+            "name": "noResponseCarriesAKeyAPrefixABucketAnEndpointOrAUrl()",
+            "status": "passed"
+          },
+          {
+            "name": "theHygieneAssertionCanActuallyFail()",
+            "status": "passed"
+          },
+          {
+            "name": "everyStatedLengthComesFromTheObjectAndNotFromARowColumn()",
+            "status": "passed"
+          },
+          {
+            "name": "aPersistedRunnerSuppliedKeyCannotRedirectTheRead()",
+            "status": "passed"
+          },
+          {
+            "name": "aLogicallyExpiredRecordingIsRefusedWhileItsBytesAreStillThere()",
+            "status": "passed"
+          },
+          {
+            "name": "onlyTheClockMovesTheExpiryAnswer()",
+            "status": "passed"
+          },
+          {
+            "name": "aPartialRecordingIsServedExactlyAsACompleteOne()",
+            "status": "passed"
+          }
+        ]
+      },
+      "GuidedRecordingMigrationIT": {
+        "name": "GuidedRecordingMigrationIT",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 8,
+        "timestamp": "2026-10-14T10:16:29",
+        "testcases": [
+          {
+            "name": "timingsAreABoundedArrayAndEmptyUnlessAvailable()",
+            "status": "passed"
+          },
+          {
+            "name": "oneFactPerSessionUniqueRecordingIdAndSafeRecordingId()",
+            "status": "passed"
+          },
+          {
+            "name": "derivedStatesAreNeverStored()",
+            "status": "passed"
+          },
+          {
+            "name": "eachStorableStateIsAcceptedWithItsRuledShape()",
+            "status": "passed"
+          },
+          {
+            "name": "headIsV20AndTheTableHasExactlyTheRuledShape()",
+            "status": "passed"
+          },
+          {
+            "name": "theSessionAndScopeHashMustMatchAsAPair()",
+            "status": "passed"
+          },
+          {
+            "name": "updateOfAnyColumnAndDeleteAreRefused()",
+            "status": "passed"
+          },
+          {
+            "name": "partialIsOnlyForAvailableAndExpiryOnlyForAvailable()",
+            "status": "passed"
+          }
+        ]
+      },
+      "GuidedRecordingKeysTest": {
+        "name": "GuidedRecordingKeysTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 4,
+        "timestamp": "2026-10-14T10:16:50",
+        "testcases": [
+          {
+            "name": "failsClosedOnTraversalSeparatorsNullAndOverlongSegments()",
+            "status": "passed"
+          },
+          {
+            "name": "refusesEveryGoldenVectorRefusal()",
+            "status": "passed"
+          },
+          {
+            "name": "theSegmentRuleMatchesTheVectorsStatedPattern()",
+            "status": "passed"
+          },
+          {
+            "name": "derivesEveryGoldenVectorPairExactly()",
+            "status": "passed"
+          }
+        ]
+      },
+      "GuidedRecordingTimingsTest": {
+        "name": "GuidedRecordingTimingsTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 7,
+        "timestamp": "2026-10-14T10:16:50",
+        "testcases": [
+          {
+            "name": "stepIdTiesBreakInCodePointOrder()",
+            "status": "passed"
+          },
+          {
+            "name": "theScaleGuardUsesTheSessionsOwnLimits()",
+            "status": "passed"
+          },
+          {
+            "name": "anEmptyListAndASubsetOfTheDispatchedActionsAreAccepted()",
+            "status": "passed"
+          },
+          {
+            "name": "derivesOneStepItemPerStepAndMergesInRuledOrder()",
+            "status": "passed"
+          },
+          {
+            "name": "endMsIsTakenFromTheActionWithTheGreatestStartNotTheLargestEnd()",
+            "status": "passed"
+          },
+          {
+            "name": "refusesEveryRuledSemanticViolation()",
+            "status": "passed"
+          },
+          {
+            "name": "perKindCapsFollowTheSessionLimits()",
+            "status": "passed"
+          }
+        ]
+      },
+      "GuidedSessionEvidenceTest": {
+        "name": "GuidedSessionEvidenceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 13,
+        "timestamp": "2026-10-14T10:16:52",
+        "testcases": [
+          {
+            "name": "semanticTimingRefusalsWriteNoRow()",
+            "status": "passed"
+          },
+          {
+            "name": "aCsiOutsideTheKeyAlphabetFailsClosed()",
+            "status": "passed"
+          },
+          {
+            "name": "aTerminalSessionWithinTheWindowIsAcceptedAndNotRevived()",
+            "status": "passed"
+          },
+          {
+            "name": "everySessionStateIsAcceptedIncludingNonTerminal()",
+            "status": "passed"
+          },
+          {
+            "name": "theWindowIsJudgedOnTheDatabaseClockAgainstExpiresAtPlusGrace()",
+            "status": "passed"
+          },
+          {
+            "name": "projectionExpiredIsJudgedOnTheDatabaseClock()",
+            "status": "passed"
+          },
+          {
+            "name": "projectionAbsentRowFlipsFromProcessingToUnavailableAtTheDeadline()",
+            "status": "passed"
+          },
+          {
+            "name": "contractRefusalsBeforeAnyRead()",
+            "status": "passed"
+          },
+          {
+            "name": "noPublicProjectionCarriesAKeyBucketOrEndpoint()",
+            "status": "passed"
+          },
+          {
+            "name": "writeOnceAndSameKeyIdempotency()",
+            "status": "passed"
+          },
+          {
+            "name": "identityRefusals()",
+            "status": "passed"
+          },
+          {
+            "name": "requireRoleIsTheSharedCheck()",
+            "status": "passed"
+          },
+          {
+            "name": "projectionStoredRows()",
+            "status": "passed"
+          }
+        ]
+      },
+      "GuidedSessionVideoIT": {
+        "name": "GuidedSessionVideoIT",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 7,
+        "timestamp": "2026-10-14T10:17:12",
+        "testcases": [
+          {
+            "name": "theStrictWireReaderRefusesAFractionalReading()",
+            "status": "passed"
+          },
+          {
+            "name": "theCallbackIsAuthenticatedByTheGuidedChainAndIdempotentUnderOneKey()",
+            "status": "passed"
+          },
+          {
+            "name": "nothingToServeIs404AndExpiryIs410()",
+            "status": "passed"
+          },
+          {
+            "name": "authorizationIsReadGuidedSessionsOwnDecision()",
+            "status": "passed"
+          },
+          {
+            "name": "anAvailableRecordingIsServedWholeAndByRangeFromTheMeasuredSize()",
+            "status": "passed"
+          },
+          {
+            "name": "anUnreachableStoreIs503AndNoSurfaceNamesAKeyBucketOrEndpoint()",
+            "status": "passed"
+          },
+          {
+            "name": "theSessionServicesResultCarriesTheRecordingEvidenceAndValidates()",
+            "status": "passed"
+          }
+        ]
+      },
+      "RecordedGuidedEvidenceProjectionTest": {
+        "name": "RecordedGuidedEvidenceProjectionTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 8,
+        "timestamp": "2026-10-14T10:17:13",
+        "testcases": [
+          {
+            "name": "failedCarriesTheFixedApiTextAndUnavailableCarriesNone()",
+            "status": "passed"
+          },
+          {
+            "name": "availableWithNoReadableStoreIsUnavailableWithTheSharedText()",
+            "status": "passed"
+          },
+          {
+            "name": "noneKeepsTodaysLiteralsAndWritesTheEvidenceShape()",
+            "status": "passed"
+          },
+          {
+            "name": "absentRowIsProcessingWhileTheSessionRunsOrTheWindowIsOpen()",
+            "status": "passed"
+          },
+          {
+            "name": "availableServesTheStoredTimingsVerbatim()",
+            "status": "passed"
+          },
+          {
+            "name": "availableExpiredOnTheDatabaseClockIsExpiredWithoutTimings()",
+            "status": "passed"
+          },
+          {
+            "name": "absentRowAfterTheDeadlineOfATerminalSessionIsUnavailable()",
+            "status": "passed"
+          },
+          {
+            "name": "theCallersLockedStateWinsAndANullStateReadsTheRow()",
+            "status": "passed"
+          }
+        ]
+      },
+      "GuidedPublicationReplayIT": {
+        "name": "GuidedPublicationReplayIT",
+        "tests": 40,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 40,
+        "timestamp": "2026-10-14T10:18:34",
+        "testcases": [
+          {
+            "name": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()",
+            "status": "passed"
+          },
+          {
+            "name": "queuedAndPreReadyRefusals()",
+            "status": "passed"
+          },
+          {
+            "name": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness()",
+            "status": "passed"
+          },
+          {
+            "name": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays()",
+            "status": "passed"
+          },
+          {
+            "name": "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance()",
+            "status": "passed"
+          },
+          {
+            "name": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork()",
+            "status": "passed"
+          },
+          {
+            "name": "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays()",
+            "status": "passed"
+          },
+          {
+            "name": "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall()",
+            "status": "passed"
+          },
+          {
+            "name": "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes()",
+            "status": "passed"
+          },
+          {
+            "name": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+            "status": "passed"
+          },
+          {
+            "name": "actualCoreMayUseDenialStartsNoSessionAndNoBrowser()",
+            "status": "passed"
+          },
+          {
+            "name": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope()",
+            "status": "passed"
+          },
+          {
+            "name": "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope()",
+            "status": "passed"
+          },
+          {
+            "name": "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure()",
+            "status": "passed"
+          },
+          {
+            "name": "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch()",
+            "status": "passed"
+          },
+          {
+            "name": "actualGuidedRegistrationPassingAssertRemainsPassed()",
+            "status": "passed"
+          },
+          {
+            "name": "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection()",
+            "status": "passed"
+          },
+          {
+            "name": "actualPublishedWrongPasswordAnnotatesEarlierSecretFill()",
+            "status": "passed"
+          },
+          {
+            "name": "actualPublishedRegistrationPassingAssertRemainsPassed()",
+            "status": "passed"
+          },
+          {
+            "name": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls()",
+            "status": "passed"
+          },
+          {
+            "name": "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead()",
+            "status": "passed"
+          },
+          {
+            "name": "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead()",
+            "status": "passed"
+          },
+          {
+            "name": "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution()",
+            "status": "passed"
+          },
+          {
+            "name": "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution()",
+            "status": "passed"
+          },
+          {
+            "name": "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds()",
+            "status": "passed"
+          },
+          {
+            "name": "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds()",
+            "status": "passed"
+          },
+          {
+            "name": "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper()",
+            "status": "passed"
+          },
+          {
+            "name": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue()",
+            "status": "passed"
+          },
+          {
+            "name": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue()",
+            "status": "passed"
+          },
+          {
+            "name": "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect()",
+            "status": "passed"
+          },
+          {
+            "name": "actualPublishedPublicCancelWhileNativePasswordWorldPending()",
+            "status": "passed"
+          },
+          {
+            "name": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending()",
+            "status": "passed"
+          },
+          {
+            "name": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks()",
+            "status": "passed"
+          },
+          {
+            "name": "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead()",
+            "status": "passed"
+          },
+          {
+            "name": "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead()",
+            "status": "passed"
+          },
+          {
+            "name": "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead()",
+            "status": "passed"
+          },
+          {
+            "name": "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion()",
+            "status": "passed"
+          },
+          {
+            "name": "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending()",
+            "status": "passed"
+          },
+          {
+            "name": "actualSecretControlWindowLossBeforeReadyReachesTerminalError()",
+            "status": "passed"
+          },
+          {
+            "name": "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass()",
+            "status": "passed"
+          }
+        ]
+      },
+      "GuidedBridgeIntegrationTest": {
+        "name": "GuidedBridgeIntegrationTest",
+        "tests": 37,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 37,
+        "timestamp": "2026-10-14T10:40:41",
+        "testcases": [
+          {
+            "name": "uncapturedPasswordAndInputEchoesStayPrivateAcrossActualDocumentNavigation()",
+            "status": "passed"
+          },
+          {
+            "name": "realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue()",
+            "status": "passed"
+          },
+          {
+            "name": "actualApplicationReplacementAfterPrepareNeverActsOnReplacement()",
+            "status": "passed"
+          },
+          {
+            "name": "cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation()",
+            "status": "passed"
+          },
+          {
+            "name": "callbackAcceptsValidUnicodeSessionLargerThan64KiB()",
+            "status": "passed"
+          },
+          {
+            "name": "currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased()",
+            "status": "passed"
+          },
+          {
+            "name": "actualServiceTransportRejectsWrongAudienceSubjectFenceAndTuple()",
+            "status": "passed"
+          },
+          {
+            "name": "freshObservationConnectsTwoAuthoredStepsWithoutReplayingProducer()",
+            "status": "passed"
+          },
+          {
+            "name": "belowFoldClickUsesNativeRevealAndOneReceipt()",
+            "status": "passed"
+          },
+          {
+            "name": "producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay()",
+            "status": "passed"
+          },
+          {
+            "name": "httpSuccessWithoutCommittedCompletionCallbackIsUnknownAndNeverRetried()",
+            "status": "passed"
+          },
+          {
+            "name": "assignmentRenewsBeforeContextAndCancellationReleasesItsOnlyCapacitySlot()",
+            "status": "passed"
+          },
+          {
+            "name": "concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission()",
+            "status": "passed"
+          },
+          {
+            "name": "supportedV2AnswerResumesTrustedQuestionFixtureThenRefreshPreservesHistoricalSelection()",
+            "status": "passed"
+          },
+          {
+            "name": "legacyClarificationAnswerCannotResumeObservedV2Session()",
+            "status": "passed"
+          },
+          {
+            "name": "configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules()",
+            "status": "passed"
+          },
+          {
+            "name": "invalidAcknowledgedClaimNeverLaunchesAndUnassignedOrWrongWorkersCannotClaim()",
+            "status": "passed"
+          },
+          {
+            "name": "committedObservationRecoversLostHttpResponseWithoutAnotherCollection()",
+            "status": "passed"
+          },
+          {
+            "name": "lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction()",
+            "status": "passed"
+          },
+          {
+            "name": "failedRenewalStopsWithoutUsingUnacknowledgedLeaseOrReclaiming()",
+            "status": "passed"
+          },
+          {
+            "name": "lateRenewalResponseAfterStopCannotReviveContextOrOwnership()",
+            "status": "passed"
+          },
+          {
+            "name": "actualAuthenticatedRawBytesRejectAmbiguityAndUnknownSignedClaims()",
+            "status": "passed"
+          },
+          {
+            "name": "preventedNativeToggleNeverCommitsSuccessOrRetries()",
+            "status": "passed"
+          },
+          {
+            "name": "concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration()",
+            "status": "passed"
+          },
+          {
+            "name": "nativeRadioUncheckIsRefusedBeforeAnyBrowserAttempt()",
+            "status": "passed"
+          },
+          {
+            "name": "concurrentSameAndNewKeysHaveOneRealDispatch()",
+            "status": "passed"
+          },
+          {
+            "name": "restartedWorkerCannotReclaimExistingAssignmentOrReplayBrowserEffects()",
+            "status": "passed"
+          },
+          {
+            "name": "actualDeferredCommitFailureSendsNothingAndRollsBackConsumption()",
+            "status": "passed"
+          },
+          {
+            "name": "actualRunnerResponseBoundaryRejectsMalformedUtf8DuplicatesTrailingAndTimestampProfiles()",
+            "status": "passed"
+          },
+          {
+            "name": "authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly()",
+            "status": "passed"
+          },
+          {
+            "name": "renewalWhileBrowserDispatchIsBusyDoesNotResetOrRepeatTheAction()",
+            "status": "passed"
+          },
+          {
+            "name": "refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation()",
+            "status": "passed"
+          },
+          {
+            "name": "cancellationBeforeConsumptionRevokesAndMissingStopAckNeverConfirmsTeardown()",
+            "status": "passed"
+          },
+          {
+            "name": "realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch()",
+            "status": "passed"
+          },
+          {
+            "name": "maximumFenceCanBeRenewedBySameOwnerWithoutAnotherAcquisition()",
+            "status": "passed"
+          },
+          {
+            "name": "cancellationBeforeAndAfterConsumePreventsFutureWorkAndPreservesUncertainty()",
+            "status": "passed"
+          },
+          {
+            "name": "nestedRollbackAndLostWinnerNeverManufactureSendAuthority()",
+            "status": "passed"
+          }
+        ]
+      },
+      "GuidedPlanningIntegrationTest": {
+        "name": "GuidedPlanningIntegrationTest",
+        "tests": 49,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 49,
+        "timestamp": "2026-10-14T10:45:25",
+        "testcases": [
+          {
+            "name": "optionalChargedVerificationCannotOverrideMissingExecution()",
+            "status": "passed"
+          },
+          {
+            "name": "thoughtAndToolUsageOnStaleReplyRemainInImmutableLateAudit()",
+            "status": "passed"
+          },
+          {
+            "name": "aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried()",
+            "status": "passed"
+          },
+          {
+            "name": "reportedThoughtOutputOverageStopsBeforeMaterializationDespiteSmallVisibleOutput()",
+            "status": "passed"
+          },
+          {
+            "name": "[1] timing=before, loseResponse=false",
+            "status": "passed"
+          },
+          {
+            "name": "[2] timing=after, loseResponse=false",
+            "status": "passed"
+          },
+          {
+            "name": "[3] timing=before, loseResponse=true",
+            "status": "passed"
+          },
+          {
+            "name": "[4] timing=after, loseResponse=true",
+            "status": "passed"
+          },
+          {
+            "name": "contextMetadataRetryLimitStopsWithoutAnotherBrowserOrModelCall()",
+            "status": "passed"
+          },
+          {
+            "name": "[1] control=unlabelled-button",
+            "status": "passed"
+          },
+          {
+            "name": "[2] control=unlabelled-input",
+            "status": "passed"
+          },
+          {
+            "name": "[3] control=form-attribute",
+            "status": "passed"
+          },
+          {
+            "name": "sourceChangeDuringProviderCallCannotRestampAndLateUsageRetainsReservation()",
+            "status": "passed"
+          },
+          {
+            "name": "[1] chosenIndex=0",
+            "status": "passed"
+          },
+          {
+            "name": "[2] chosenIndex=1",
+            "status": "passed"
+          },
+          {
+            "name": "typedUnsupportedOutcomeStopsWithoutInventingAnAction()",
+            "status": "passed"
+          },
+          {
+            "name": "bootstrapOnlyResumeChecksPinsAndDirectProposalsRecoverBeforeInference()",
+            "status": "passed"
+          },
+          {
+            "name": "[1] control=button",
+            "status": "passed"
+          },
+          {
+            "name": "[2] control=input",
+            "status": "passed"
+          },
+          {
+            "name": "malformedProviderReplyRepairsThroughDurableChargedAttemptsWithoutEcho()",
+            "status": "passed"
+          },
+          {
+            "name": "governedClarifyFirstAsksOnceBeforeAnUnlabelledFormSubmit()",
+            "status": "passed"
+          },
+          {
+            "name": "aTimedOutBootstrapContextStillRetriesAndExhaustsAfterThreeDeliveries()",
+            "status": "passed"
+          },
+          {
+            "name": "acknowledgedOlderSnapshotCannotMarkChangedAllocationsReady()",
+            "status": "passed"
+          },
+          {
+            "name": "[1] choice=0",
+            "status": "passed"
+          },
+          {
+            "name": "[2] choice=1",
+            "status": "passed"
+          },
+          {
+            "name": "[1] mutation=operation",
+            "status": "passed"
+          },
+          {
+            "name": "[2] mutation=target",
+            "status": "passed"
+          },
+          {
+            "name": "[3] mutation=value",
+            "status": "passed"
+          },
+          {
+            "name": "[4] mutation=assertion",
+            "status": "passed"
+          },
+          {
+            "name": "chosenSourceCannotBeAppendedUnusedWhileTheRejectedDestinationIsUsed()",
+            "status": "passed"
+          },
+          {
+            "name": "governedClarifyFirstAsksOnceBeforeTheFormSubmitAndConfirmingContinues()",
+            "status": "passed"
+          },
+          {
+            "name": "[1] boundary=entry",
+            "status": "passed"
+          },
+          {
+            "name": "[2] boundary=reservation",
+            "status": "passed"
+          },
+          {
+            "name": "[3] boundary=repair",
+            "status": "passed"
+          },
+          {
+            "name": "terminalCancellationAcceptsLateAccountingWithoutRevivingAuthority()",
+            "status": "passed"
+          },
+          {
+            "name": "pinRefusalAfterLockedLateAccountingPreservesTheDeltaAndStop()",
+            "status": "passed"
+          },
+          {
+            "name": "[1] afterEffect=false",
+            "status": "passed"
+          },
+          {
+            "name": "[2] afterEffect=true",
+            "status": "passed"
+          },
+          {
+            "name": "[1] capacity=input",
+            "status": "passed"
+          },
+          {
+            "name": "[2] capacity=output",
+            "status": "passed"
+          },
+          {
+            "name": "[3] capacity=proposals",
+            "status": "passed"
+          },
+          {
+            "name": "futureNonzeroSourceQuestionCannotBeRedefinedByChangingItsOperation()",
+            "status": "passed"
+          },
+          {
+            "name": "[1] point=plan",
+            "status": "passed"
+          },
+          {
+            "name": "[2] point=materialized",
+            "status": "passed"
+          },
+          {
+            "name": "[3] point=allocation",
+            "status": "passed"
+          },
+          {
+            "name": "[4] point=next",
+            "status": "passed"
+          },
+          {
+            "name": "[5] point=lost-context-response",
+            "status": "passed"
+          },
+          {
+            "name": "[6] point=prior-bootstrap",
+            "status": "passed"
+          },
+          {
+            "name": "lateKnownOverageStopsActiveSessionBeforeAnotherProviderSend()",
+            "status": "passed"
+          }
+        ]
+      },
+      "GuidedSessionIT": {
+        "name": "GuidedSessionIT",
+        "tests": 44,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 44,
+        "timestamp": "2026-10-14T10:50:54",
+        "testcases": [
+          {
+            "name": "accessIsolationRechecksPrincipalCsiAccountAndScope()",
+            "status": "passed"
+          },
+          {
+            "name": "canonicalUnicodeParityAndClosedSchema()",
+            "status": "passed"
+          },
+          {
+            "name": "atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot()",
+            "status": "passed"
+          },
+          {
+            "name": "completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack()",
+            "status": "passed"
+          },
+          {
+            "name": "clarificationSelectionAndPauseChangeRollBackTogether()",
+            "status": "passed"
+          },
+          {
+            "name": "atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit()",
+            "status": "passed"
+          },
+          {
+            "name": "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown()",
+            "status": "passed"
+          },
+          {
+            "name": "theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash()",
+            "status": "passed"
+          },
+          {
+            "name": "gatewayOverrunIsDurablyChargedAndStopsFurtherWork()",
+            "status": "passed"
+          },
+          {
+            "name": "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer()",
+            "status": "passed"
+          },
+          {
+            "name": "expiryCannotBeExtendedAndTrustedReaperRevokes()",
+            "status": "passed"
+          },
+          {
+            "name": "clarificationIsBoundToGenerationChoiceAndOriginalDeadline()",
+            "status": "passed"
+          },
+          {
+            "name": "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch()",
+            "status": "passed"
+          },
+          {
+            "name": "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent()",
+            "status": "passed"
+          },
+          {
+            "name": "unsupportedObservationEnvelopeUsesOriginalLockedValidation()",
+            "status": "passed"
+          },
+          {
+            "name": "conflictingAdmissionAndUniqueCoordinatesFail()",
+            "status": "passed"
+          },
+          {
+            "name": "observationBudgetAndGenerationAreSharedAcrossActions()",
+            "status": "passed"
+          },
+          {
+            "name": "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery()",
+            "status": "passed"
+          },
+          {
+            "name": "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed()",
+            "status": "passed"
+          },
+          {
+            "name": "outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite()",
+            "status": "passed"
+          },
+          {
+            "name": "sameCallbackContextSuccessStillReadsAllRowsAndDefaultsStayStrict()",
+            "status": "passed"
+          },
+          {
+            "name": "unavailableObservationPreparationFallsBackAndFatalRemainsEarly()",
+            "status": "passed"
+          },
+          {
+            "name": "migrationPreservesExistingDataAndFreshInstallWorks()",
+            "status": "passed"
+          },
+          {
+            "name": "workerSubjectFenceAndLeaseAreIndependent()",
+            "status": "passed"
+          },
+          {
+            "name": "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge()",
+            "status": "passed"
+          },
+          {
+            "name": "entireSessionBudgetsAreReservedAndMissingUsageIsConservative()",
+            "status": "passed"
+          },
+          {
+            "name": "atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand()",
+            "status": "passed"
+          },
+          {
+            "name": "concurrentConflictingStartsHaveOneWinner()",
+            "status": "passed"
+          },
+          {
+            "name": "contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal()",
+            "status": "passed"
+          },
+          {
+            "name": "noStateCanPublishWithoutExactVerifier()",
+            "status": "passed"
+          },
+          {
+            "name": "successfulLedgerStillCannotPublishWithoutExactPlanVerifier()",
+            "status": "passed"
+          },
+          {
+            "name": "observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults()",
+            "status": "passed"
+          },
+          {
+            "name": "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence()",
+            "status": "passed"
+          },
+          {
+            "name": "lostAckNeverRetriesAndDelayedCallbackCannotRevive()",
+            "status": "passed"
+          },
+          {
+            "name": "evidenceReferencesAreScopedAndDoNotClaimReplay()",
+            "status": "passed"
+          },
+          {
+            "name": "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping()",
+            "status": "passed"
+          },
+          {
+            "name": "atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate()",
+            "status": "passed"
+          },
+          {
+            "name": "liveOwnerRenewalPreservesAdmittedAndDispatchedActions()",
+            "status": "passed"
+          },
+          {
+            "name": "actionBudgetAndFalseAssertionReportsFailClosed()",
+            "status": "passed"
+          },
+          {
+            "name": "concurrentIdenticalStartsAndChangedDigestAreDurable()",
+            "status": "passed"
+          },
+          {
+            "name": "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState()",
+            "status": "passed"
+          },
+          {
+            "name": "preparedObservationFailureKeepsOwnerMaterializationRefreshAndDuplicatePriority()",
+            "status": "passed"
+          },
+          {
+            "name": "preparedObservationOwnsTheWholeEnvelopeBeforeCallerMutation()",
+            "status": "passed"
+          },
+          {
+            "name": "takeoverCannotReopenFinalizingAfterExecutedEffects()",
+            "status": "passed"
+          }
+        ]
+      }
+    },
+    "backendTotal": {
+      "tests": 2084,
+      "passed": 2059,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 25
+    },
+    "runner": {
+      "unit": {
+        "passed": 1351,
+        "skipped": 29
+      },
+      "fixtures": {
+        "passed": 225,
+        "skipped": 9
+      },
+      "deployment": {
+        "passed": 313,
+        "skipped": 0
+      },
+      "note": "Counts independently checked against raw log summaries; no skips credited as passes."
+    },
+    "skippedBackendTests": [
+      {
+        "class": "SharedSchedulingIT",
+        "name": "sameCoordinatorRunsHttpTcpSplunkAndStudioThroughTheirExistingPipelines()"
+      },
+      {
+        "class": "SharedSchedulingIT",
+        "name": "studioOnlyReplicaRunsWhenCatalogFlagIsOffAndDeduplicatesAgainstAnotherCoordinator()"
+      },
+      {
+        "class": "ExecutionVideoExternallyGatedCriteriaTest",
+        "name": "AC-18b \u2014 ranged reads against real Sonic (ED-03 / SPK-03 / 10.18 / 10.19)"
+      },
+      {
+        "class": "ExecutionVideoExternallyGatedCriteriaTest",
+        "name": "AC-19b \u2014 the media route through the real ingress (ED-06 / SPK-02 / 10.18 / 10.19)"
+      },
+      {
+        "class": "GuidedProviderEvaluationTest",
+        "name": "approvedProviderEvaluationIsReportedUnavailableWithoutExplicitConfiguration(TestReporter)"
+      },
+      {
+        "class": "ExecutionReadinessTest",
+        "name": "targetPolicySelectionAdvancesTheConfigurationRevision()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "rawReadinessChangesRefuseExplicitlyAndAnotherActivatorDoesNotRewriteAcceptedProvenance()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "capabilityOffDeferralExpiresBeforeAnyCatchupAndLifecycleSettlesPendingAudit()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "activeManualWorkSkipsOverlapWithoutChangingManualPermission()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "graceAndGrantAreRecheckedAfterPreflightBeforeAnyAcceptedWrite()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "writeFailuresAtHistoryLedgerAndCursorBoundariesRollbackTheWholeOccurrenceUnit()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "updateRemovalAndInputInvalidationSettleDeferredWithoutOrphans()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "replicasRacingAndRollbackCannotCreateDuplicateOrPartialAcceptedWork()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "authorizationWithdrawalBeforeAdmissionAndBeforeSendFailsClosed()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "deadlineOverrunAdvancesCursorOnlyPastAttemptedCsi()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "quotaWaitCrossingGraceOrGrantWithdrawalNeverWritesAcceptedWork()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "acceptedOccurrenceHasOneImmutableRunAndActivationAcrossResumeAndRecreation()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "callbackLedgerLockDoesNotBlockOverlapAndUncertaintyAfterResumeBlocksNextTick()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "editedWriterRaceSerializesWithAcceptanceAndKeepsTheAcceptedRevision()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "aScheduledOccurrenceIsAcceptedWithNoRequestAuthentication()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "deletionStopsFutureWorkButKeepsAuthorizedOccurrenceAudit()"
+      },
+      {
+        "class": "StudioScheduleApiIT",
+        "name": "failedCsiRotatesAwayRatherThanStarvingOtherEligibleWork()"
+      },
+      {
+        "class": "ExternallyGatedCriteriaTest",
+        "name": "AC-13b \u2014 canaries through the integrated path with real material (ED-02 / 10.19)"
+      },
+      {
+        "class": "ExternallyGatedCriteriaTest",
+        "name": "AC-7b \u2014 real revocation through a non-bypassed session (ED-02 / 10.18 / 10.19)"
+      },
+      {
+        "class": "ExternallyGatedCriteriaTest",
+        "name": "AC-5b \u2014 resolution confined by the real vault's own policy (ED-02 / 10.18 / 10.19)"
+      }
+    ],
+    "runnerSkippedFixtures": [
+      "deadline-cleanup.test.ts:3",
+      "seek-measurement.test.ts:2",
+      "upload-evidence.test.ts:4"
+    ],
+    "skipsRule": "No skip credited. Externally gated replay/deployment cases are not substituted for local013 planned tests. Full gate rerun required after remediation affects shared sources."
+  },
+  "plannedNegativeMatrix": [
+    {
+      "id": "contract_C1[1]",
+      "requirement": "result: video {status:'PROCESSING', expiresAt:'\u2026Z'} is rejected (expiresAt must be null).",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "video PROCESSING with an expiresAt is refused"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "contract_C1[2]",
+      "requirement": "result: video {status:'AVAILABLE', expiresAt:null} is rejected.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "video AVAILABLE with a null expiresAt is refused"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "contract_C1[3]",
+      "requirement": "result: video {status:'FAILED', partial:true} is rejected.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "video FAILED with partial true is refused"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "contract_C1[4]",
+      "requirement": "result: video with an extra key (manifestRef, videoKey, path) is rejected (additionalProperties false).",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "video with a manifestRef key is refused",
+        "video with a videoKey key is refused",
+        "video with a path key is refused"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "contract_C1[5]",
+      "requirement": "result: video.status 'STORED' or 'PENDING' (runner vocabulary) is rejected.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "video status in runner vocabulary STORED is refused",
+        "video status in runner vocabulary PENDING is refused"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "contract_C1[6]",
+      "requirement": "result: actionTimings non-empty with video.status UNAVAILABLE, or with video null, is rejected.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "timings with video UNAVAILABLE are refused",
+        "timings with video null are refused"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "contract_C1[7]",
+      "requirement": "result: 401 actionTimings items are rejected.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "tools/check-studio-observed-contracts.cjs: result.actionTimings 400/401 array-bound assertion"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "contract_C1[8]",
+      "requirement": "actionTiming: kind 'action' with admissionId null is rejected; kind 'step' with an ordinal is rejected; a fractional startMs (12.5) is rejected; negative startMs is rejected; an extra 'label' key is rejected; kind 'clarification' (not in enum) is rejected.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "action item with a null admissionId is refused",
+        "step item with an ordinal is refused",
+        "fractional startMs is refused",
+        "negative startMs is refused",
+        "actionTiming with a label key is refused",
+        "kind outside the closed enum is refused"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "contract_C1[9]",
+      "requirement": "recordingEvidence: state 'PENDING' is rejected; state FAILED with partial true is rejected; state UNAVAILABLE with a non-empty timings array is rejected; any extra key (videoKey, error, url, recordedAt) is rejected; recordingId containing '/' or '..' is rejected; a missing identity field is rejected.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "recordingEvidence state PENDING is refused",
+        "recordingEvidence FAILED with partial true is refused",
+        "recordingEvidence UNAVAILABLE with timings is refused",
+        "recordingEvidence with a videoKey key is refused",
+        "recordingEvidence with an error key is refused",
+        "recordingEvidence with a url key is refused",
+        "recordingEvidence with a recordedAt key is refused",
+        "recordingId with a slash is refused",
+        "recordingId with dot-dot is refused",
+        "recordingEvidence missing an identity field is refused"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "contract_C1[10]",
+      "requirement": "Golden key vector: csiId or sessionId with '/' produces no key on either side.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "GuidedRecordingKeysTest.derivesEveryGoldenVectorPairExactly",
+        "GuidedRecordingKeysTest.refusesEveryGoldenVectorRefusal",
+        "guided/evidence.test.ts: derives every vector entry and refuses every refused entry"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "contract_C1[11]",
+      "requirement": "openapi: getGuidedSessionVideo's 404/410/416 are the SAME $ref as getExecutionVideo's (compare the references, not literals); getExecutionVideo's status set is unchanged.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "ExecutionVideoContractTest.theGuidedVideoRefusalsAreSharedComponentsWithTheExecutionRoutesShapes",
+        "tools/check-studio-observed-contracts.cjs: sharedVideoRefusals"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "data_GuidedRecordingMigrationIT[1]",
+      "requirement": "UPDATE of any column is refused; DELETE is refused.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "updateOfAnyColumnAndDeleteAreRefused"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "data_GuidedRecordingMigrationIT[2]",
+      "requirement": "state 'PROCESSING' and 'EXPIRED' are refused by the CHECK.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "derivedStatesAreNeverStored"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "data_GuidedRecordingMigrationIT[3]",
+      "requirement": "partial=true with state FAILED or UNAVAILABLE is refused.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "partialIsOnlyForAvailableAndExpiryOnlyForAvailable"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "data_GuidedRecordingMigrationIT[4]",
+      "requirement": "AVAILABLE with expires_at NULL is refused; FAILED with expires_at set is refused; expires_at <= recorded_at is refused.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "partialIsOnlyForAvailableAndExpiryOnlyForAvailable"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "data_GuidedRecordingMigrationIT[5]",
+      "requirement": "Non-array timings is refused; 401 elements are refused; timings > 262144 octets is refused; FAILED with non-empty timings is refused.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "timingsAreABoundedArrayAndEmptyUnlessAvailable"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "data_GuidedRecordingMigrationIT[6]",
+      "requirement": "A second row for the same session_id is refused; a duplicate recording_id is refused; recording_id 'a/b' is refused.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "oneFactPerSessionUniqueRecordingIdAndSafeRecordingId"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "data_GuidedRecordingMigrationIT[7]",
+      "requirement": "(session_id, scope_hash) not matching studio_guided_sessions is refused (FK pair).",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "theSessionAndScopeHashMustMatchAsAPair"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "data_GuidedRecordingMigrationIT[8]",
+      "requirement": "V12\u2013V19 checksums are unchanged; head = 20.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "headIsV20AndTheTableHasExactlyTheRuledShape",
+        "InferenceMigrationLatestIT.upgradeToHeadRewritesNoHistoryAndInventsNoEligibility",
+        "InferenceMigrationLatestIT.freshAndUpgradedDatabasesReachTheSameHeadWithoutStagedV19"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "backend_GuidedSessionEvidenceTest_and_GuidedSessionVideoIT[1]",
+      "requirement": "The callback on a TERMINAL session within the window is accepted (202) and the session document/progress are byte-unchanged (no revival; state, owner and lease untouched).",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "GuidedSessionEvidenceTest.aTerminalSessionWithinTheWindowIsAcceptedAndNotRevived",
+        "GuidedSessionVideoIT.theCallbackIsAuthenticatedByTheGuidedChainAndIdempotentUnderOneKey"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "backend_GuidedSessionEvidenceTest_and_GuidedSessionVideoIT[2]",
+      "requirement": "The callback after expires_at + settleGrace on the DB clock is 409 EXPIRED. The test moves time with DB-side expires_at, not an application clock fake.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "GuidedSessionEvidenceTest.theWindowIsJudgedOnTheDatabaseClockAgainstExpiresAtPlusGrace"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "backend_GuidedSessionEvidenceTest_and_GuidedSessionVideoIT[3]",
+      "requirement": "Wrong worker subject \u2192 403 FORBIDDEN_SCOPE. Wrong fence \u2192 409 STALE_FENCE. Wrong scopeHash \u2192 403. Wrong contextId \u2192 409 STALE_FENCE. Unknown session \u2192 403 FORBIDDEN_SCOPE. Role backend-controller \u2192 refused.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "GuidedSessionEvidenceTest.identityRefusals",
+        "GuidedSessionEvidenceTest.requireRoleIsTheSharedCheck"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "backend_GuidedSessionEvidenceTest_and_GuidedSessionVideoIT[4]",
+      "requirement": "Same key + same body \u2192 202 with the identical stored echo and exactly one V20 row. Same key + different body \u2192 409 IDEMPOTENCY_CONFLICT. New key after a row exists \u2192 409 IDEMPOTENCY_CONFLICT.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "GuidedSessionEvidenceTest.writeOnceAndSameKeyIdempotency",
+        "GuidedSessionVideoIT.theCallbackIsAuthenticatedByTheGuidedChainAndIdempotentUnderOneKey"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "backend_GuidedSessionEvidenceTest_and_GuidedSessionVideoIT[5]",
+      "requirement": "An admissionId not in this session's ledger, an ADMITTED/REVOKED (dispatchCount 0) action, a mismatched stepId/ordinal, a duplicate admissionId, unsorted items, endMs < startMs, startMs > maxSessionSeconds\u00d71000, or kind step/clarificationWait/prefixReplay in the body \u2192 each 422 INVALID_CONTRACT with no row written.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "GuidedSessionEvidenceTest.semanticTimingRefusalsWriteNoRow",
+        "GuidedRecordingTimingsTest.refusesEveryRuledSemanticViolation",
+        "GuidedRecordingTimingsTest.theScaleGuardUsesTheSessionsOwnLimits",
+        "GuidedRecordingTimingsTest.perKindCapsFollowTheSessionLimits"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "backend_GuidedSessionEvidenceTest_and_GuidedSessionVideoIT[6]",
+      "requirement": "Projection: each R1 table row is produced, including the PROCESSING\u2192UNAVAILABLE flip after the deadline with no row, AVAILABLE\u2192EXPIRED on the DB clock, and servesRecordings=false \u2192 UNAVAILABLE + NO_RECORDING_STORE.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "RecordedGuidedEvidenceProjectionTest (8 methods)",
+        "GuidedSessionEvidenceTest.projectionAbsentRowFlipsFromProcessingToUnavailableAtTheDeadline",
+        "GuidedSessionEvidenceTest.projectionStoredRows",
+        "GuidedSessionEvidenceTest.projectionExpiredIsJudgedOnTheDatabaseClock"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "backend_GuidedSessionEvidenceTest_and_GuidedSessionVideoIT[7]",
+      "requirement": "No public body, header or log line at INFO or above contains video_key, manifest_key, a bucket or an endpoint (the existing AC-6 style sweep extended to the guided route and the result).",
+      "status": "MISSING_PLANNED_ASSERTION_AND_IMPLEMENTATION_VIOLATION",
+      "testNamesOrCheckerAssertions": [
+        "GuidedSessionVideoIT.anUnreachableStoreIs503AndNoSurfaceNamesAKeyBucketOrEndpoint (HTTP only)",
+        "GuidedSessionEvidenceTest.noPublicProjectionCarriesAKeyBucketOrEndpoint (projection only)"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": "STRICT-013-LOG"
+    },
+    {
+      "id": "backend_GuidedSessionEvidenceTest_and_GuidedSessionVideoIT[8]",
+      "requirement": "Video route: a caller who cannot read the session gets a 403 byte-identical to readGuidedSession. Unknown id \u2192 the same 403. PROCESSING/FAILED/UNAVAILABLE \u2192 404 VIDEO_UNAVAILABLE. EXPIRED \u2192 410. Bad range \u2192 416 with the measured size. Store down \u2192 503 VIDEO_STORE_UNAVAILABLE.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "GuidedSessionVideoIT.authorizationIsReadGuidedSessionsOwnDecision",
+        "GuidedSessionVideoIT.nothingToServeIs404AndExpiryIs410",
+        "GuidedSessionVideoIT.anAvailableRecordingIsServedWholeAndByRangeFromTheMeasuredSize",
+        "GuidedSessionVideoIT.anUnreachableStoreIs503AndNoSurfaceNamesAKeyBucketOrEndpoint"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "backend_GuidedSessionEvidenceTest_and_GuidedSessionVideoIT[9]",
+      "requirement": "ExecutionVideoContractTest, ExecutionVideoEvidenceIT and ExecutionVideoAuthorizationIT stay green with NO assertion weakened (additions only).",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "ExecutionVideoContractTest (21)",
+        "ExecutionVideoEvidenceIT (15)",
+        "ExecutionVideoAuthorizationIT (14)"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "backend_GuidedSessionEvidenceTest_and_GuidedSessionVideoIT[10]",
+      "requirement": "After S3: a result built while no projection is installed fails validation, which proves the projection must be wired.",
+      "status": "COMPOSITIONAL_ONLY_NOT_EXACT_PLANNED_ASSERTION",
+      "testNamesOrCheckerAssertions": [
+        "RecordedGuidedEvidenceProjectionTest.noneKeepsTodaysLiteralsAndWritesTheEvidenceShape (null emission only)",
+        "fixture: S3 tightening (OBS-014 C2b, AR-1): a result with evidence.video null is refused"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": "STRICT-013-WIRING"
+    },
+    {
+      "id": "runner_R13_R14[1]",
+      "requirement": "A process-origin clock injected into the guided runtime makes the first action's startMs fail the scale assertion (it must be near 0 relative to readiness, not near process uptime).",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "guided/evidence.test.ts: drops the timings, not the video, when a process-origin clock breaks the scale assertion",
+        "server/timeline.test.ts: run-scoped origin tests"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "runner_R13_R14[2]",
+      "requirement": "transport: route 'recording-evidence' validates against recordingEvidence, NOT lifecycle (a lifecycle body sent on that route is rejected locally).",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "guided/transport.test.ts: recording-evidence validation cases"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "runner_R13_R14[3]",
+      "requirement": "The evidence dir survives closeBrowser until upload, then is removed on success, failure and kill paths alike.",
+      "status": "PARTIAL_SUCCESS_FAILURE_PROVED_KILL_NOT_PROVED",
+      "testNamesOrCheckerAssertions": [
+        "guided/evidence.test.ts: stores the video, writes the manifest, reports STORED with rounded ordered IDs-only timings and removes the directory",
+        "guided/evidence.test.ts: reports UNAVAILABLE (and no canary) when the inspection port throws, and still cleans up"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": "STRICT-013-KILL"
+    },
+    {
+      "id": "runner_R13_R14[4]",
+      "requirement": "A recorder failure mid-session gives state UNAVAILABLE (unplayable/no file) and an upload failure gives state FAILED. The two are asserted separately; AC-6's 'recording failure \u2192 UNAVAILABLE' case must inject a recorder-side fault, not a store fault.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "guided/evidence.test.ts: keeps a recorder-side fault (UNAVAILABLE) apart from a store-side fault (FAILED)",
+        "guided-recording.test.ts: settles a recorder-side fault as UNAVAILABLE without a fake video, and the session still terminates"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "runner_R13_R14[5]",
+      "requirement": "The serialized callback body and guided manifest contain zero canary hits and no string outside the ID patterns. noRunnerSinks static test unchanged. confinement.test.ts unchanged except BASE_SHA256.",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "guided/runtime.test.ts: launches one recorded context, stamps the dispatched action on the session clock and reports after the lifecycle",
+        "guided-recording.test.ts: records the persistent context, uploads after browser scratch disposal, and reports one timing per dispatched action",
+        "static/noRunnerSinks.test.ts (S4c 2/2)",
+        "run/confinement.test.ts (current focused 19/19)"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    },
+    {
+      "id": "runner_R13_R14[6]",
+      "requirement": "Adapter parity: observedReplayAdapter runs against a guided-mode recorded handle (AC-1).",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "testNamesOrCheckerAssertions": [
+        "guided-recording.test.ts: runs the observed replay adapter on the guided-mode recorded handle (AC-1 parity)"
+      ],
+      "evidence": "S4c source-bound XML/logs below; current runner focused proof where matching filename; current contract checker for structural fixtures",
+      "gap": null
+    }
+  ],
+  "acMatrix": [
+    {
+      "id": "AC-1",
+      "status": "PARTIAL_PENDING_KILL",
+      "tests": [
+        "guided-recording.test.ts: four real Chromium tests listed in prior log",
+        "GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+        "secret-login.test.ts and guided-secret-* real fixture canaries"
+      ],
+      "gap": "STRICT-013-KILL"
+    },
+    {
+      "id": "AC-2",
+      "status": "VERIFIED_PRIOR_UNSKIPPED_PLUS_CURRENT_UNIT",
+      "tests": [
+        "GuidedRecordingTimingsTest:7",
+        "guided/evidence.test.ts:20",
+        "guided/runtime.test.ts recording block",
+        "GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel"
+      ]
+    },
+    {
+      "id": "AC-3",
+      "status": "FUNCTIONAL_PASS_PLAN_LOG_GAP",
+      "tests": [
+        "GuidedSessionVideoIT:7",
+        "ExecutionVideoContractTest:21",
+        "ExecutionVideoEvidenceIT:15",
+        "ExecutionVideoAuthorizationIT:14"
+      ],
+      "gap": "STRICT-013-LOG"
+    },
+    {
+      "id": "AC-4",
+      "status": "FUNCTIONAL_PASS_EXACT_WIRING_NEGATIVE_MISSING",
+      "tests": [
+        "GuidedSessionVideoIT.theSessionServicesResultCarriesTheRecordingEvidenceAndValidates",
+        "StudioContractTest.theGuidedVideoEvidenceIsThePublicVideoEvidenceShape",
+        "current contract/codegen check"
+      ],
+      "sse": "N/A by original PO applicability ruling; no guided SSE stream; not PASS or waived",
+      "gap": "STRICT-013-WIRING"
+    },
+    {
+      "id": "AC-5",
+      "status": "VERIFIED_PRIOR_UNSKIPPED",
+      "tests": [
+        "guided-recording.test.ts disclosure assertion",
+        "GuidedPublicationReplayIT success+fault manifest disclosures",
+        "run/manifest.test.ts current green"
+      ],
+      "external": "Manual C17 explicitly original009 scope, not claimed green here"
+    },
+    {
+      "id": "AC-6",
+      "status": "VERIFIED_PRIOR_UNSKIPPED_RERUN_AFTER_FIXES",
+      "tests": [
+        "GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+        "GuidedPublicationReplayIT.guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes",
+        "guided-recording.test.ts:4",
+        "static/noRunnerSinks.test.ts:2",
+        "run/confinement.test.ts:19"
+      ],
+      "fixtureVariation": "Happy recorded login preserved; joined fault hosted plain fixture due single-use secret S2 observer. Same fault/terminal/UNAVAILABLE/no-fake-video assertions; runner fault remains login fixture. Architect final explicit plan ratification requested."
+    }
+  ],
+  "sec001Oracle": {
+    "status": "VERIFIED_PRIOR_UNSKIPPED",
+    "A": "Content-based full-resolution0..a0+1000, each app/reference region<=10%, per-run chrome-page control>=10000 outside pixels; final current source hash verified. Prior reverted3/3 RED preserved.",
+    "B": "seek alignment only; no security credit",
+    "priorUnexplainedLaunchFailure": "CONTEXT_LOST before oracle under reported load20; subsequent diagnostic80, second10/10, load12/12, full fixture passes. Do not erase failed receipt. Architect must disposition reliability under current strict completion; no arbitrary new production-load gate invented."
+  },
+  "issues": [
+    {
+      "id": "STRICT-013-LOG",
+      "severity": "high",
+      "plannedSource": "AR-1 negativeTestExpectations.backend_GuidedSessionEvidenceTest_and_GuidedSessionVideoIT[7]",
+      "finding": "INFO+ object-location secrecy was planned. VideoObjectServer.unreachable emits WARN with the store exception; its comment explicitly says cause names bucket and endpoint. Existing negative test scans HTTP only. Prior TEST-003 deferral to010 cannot satisfy current strict rule.",
+      "fixOwner": "backend evidence developer",
+      "files": [
+        "backend/src/main/java/com/citi/put/checks/studio/evidence/VideoObjectServer.java",
+        "backend/src/test/java/com/citi/put/checks/studio/evidence/VideoObjectServerTest.java (new recommended)"
+      ],
+      "requiredProof": "Capture INFO/WARN/ERROR formatted messages and throwable rendering with canary key/bucket/endpoint causes on both metadata and read failures. No sensitive cause at INFO+. Prove existing503 bodies and execution authorization/range behavior unchanged."
+    },
+    {
+      "id": "STRICT-013-KILL",
+      "severity": "high",
+      "plannedSource": "AR-1 negativeTestExpectations.runner_R13_R14[3]",
+      "finding": "Settlement removes evidence scratch on normal success/failure. SIGKILL residue lacks a startup sweep, and recording-specific graceful signal/abrupt kill recovery proof is absent. Previous REL-001 deferred a planned local cleanup requirement to009.",
+      "fixOwner": "runner developer with architect scope ruling",
+      "files": [
+        "studio-runner/src/run/guidedMain.ts",
+        "studio-runner/src/guided/evidence.ts",
+        "studio-runner/test/fixtures-tier/guided-recording.test.ts or dedicated guided recording process cleanup fixture",
+        "new owned cleanup helper/test if required"
+      ],
+      "requiredProof": "Architect specify kill semantics preserving live workers and unrelated scratch. Real process signal/kill then restart must remove only eligible owned stale recording dirs within bounds; no symlink traversal/live-dir deletion. Unit success/failure unchanged. Do not claim SIGKILL executes finally."
+    },
+    {
+      "id": "STRICT-013-WIRING",
+      "severity": "medium",
+      "plannedSource": "AR-1 negativeTestExpectations.backend_GuidedSessionEvidenceTest_and_GuidedSessionVideoIT[10]",
+      "finding": "NONE test proves null emission and a separate JSON fixture proves null invalid, but the expressly planned unwired-result validation refusal is not asserted in Java.",
+      "fixOwner": "backend evidence developer",
+      "files": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/RecordedGuidedEvidenceProjectionTest.java"
+      ],
+      "requiredProof": "Construct actual otherwise valid result with default NONE/uninstalled projection, assert backend GuidedContracts v3/result validation refuses, and assert installed projection result validates. Keep null-emission test."
+    },
+    {
+      "id": "STRICT-013-RATIFY",
+      "severity": "medium",
+      "plannedSource": "B13 decisions + prior ARCH-001/ARCH-002; original AR-1",
+      "finding": "Architect signoff still owed for controller-read authorization vs service call, identity before idempotent echo, no-store before expired projection, and PostgreSQL-valid equivalent recording-id constraint. Exact plan-vs-implementation decisions cannot stay deferred under strict completion.",
+      "fixOwner": "independent architect",
+      "files": [
+        "docs/qa/evidence/STUDIO-OBS-013/strict-qa/architect-ratification.json (suggested)"
+      ],
+      "requiredProof": "Read code and tests, ratify or require correction. Record original PostgreSQL {1,256} invalid, equivalent varchar256 plus ASCII+ constraint. Preserve original ruling history. Explicitly disposition documented recorder-fault plain-fixture host vs original login-host plan; login/canary and exact fault clauses remain separately executed."
+    }
+  ],
+  "externalOrDownstreamFromOriginalPlan": [
+    {
+      "requirement": "Real Sonic ED03 lifecycle/ranges",
+      "owner": "OBS009/GA",
+      "credit": "not run/not passed"
+    },
+    {
+      "requirement": "Manual masked dots C17",
+      "owner": "OBS009",
+      "credit": "not run/not passed"
+    },
+    {
+      "requirement": "Video retention acceptance F2",
+      "owner": "GA plan",
+      "credit": "unconfirmed"
+    },
+    {
+      "requirement": "Staging seek measurement",
+      "owner": "ADR002 staging gate/OBS009",
+      "credit": "not run/not passed"
+    },
+    {
+      "requirement": "Frontend playback/seek UX",
+      "owner": "OBS008",
+      "credit": "not013"
+    },
+    {
+      "requirement": "PrefixReplay offset population",
+      "owner": "OBS015",
+      "credit": "not013"
+    }
+  ],
+  "requiredFinalWindows": [
+    "Root serialized clean runner build/pins then backend selected evidence/contract/migration tests, exact joined GuidedPublicationReplayIT success+fault+full40 regression",
+    "Runner full fixtures with new actual signal/kill cleanup proof; fixed SEC001 oracle and secret-login/profile canaries",
+    "Runner full unit with coverage,tsc,eslint,deployment; backend full clean check+JaCoCo; frontend final contract regression because shared OpenAPI unchanged yet final global gate desired",
+    "Independent Quinn re-review final exact hashes; gate PASS only with all local issues resolved and all applicable planned rows green. Existing failures/skips retained."
+  ]
+}

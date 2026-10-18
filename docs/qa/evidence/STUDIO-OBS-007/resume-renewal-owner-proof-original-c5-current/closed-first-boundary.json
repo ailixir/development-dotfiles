@@ -1,0 +1,110 @@
+{
+  "scope": "ONE original UNPROFILED C5 fixed closed facts noQAperformancecredit",
+  "result": {
+    "scope": "Exact selected current backend gate only; no whole-story QA verdict",
+    "gradleExitCode": 1,
+    "sourceDrift": [],
+    "results": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "tests": 2,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "finishedAt": "2026-10-12T18:19:11.711868+00:00",
+    "tests": 2,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "pass": false
+  },
+  "seedPass": true,
+  "mandatoryC5Pass": false,
+  "samplerEnabled": false,
+  "publicationSnapshotPresent": true,
+  "publicationRevisionPresent": false,
+  "captureFailure": "UNOBSERVED",
+  "capture": {
+    "mappedAppenders": 1,
+    "rootEvents": null,
+    "appEvents": null,
+    "eventCountsStatus": "SUPPORT_UNOBSERVED",
+    "logCoverage": "STREAMED_ORIGINAL_ENCODED_OUTPUT",
+    "encodedBytes": 776472511,
+    "encodedWriteCalls": 178235,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsCollected": true,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 30,
+    "patternBytes": 3308,
+    "rootTraceObserved": true,
+    "appTraceObserved": true,
+    "httpBodies": 3,
+    "httpErrors": 1,
+    "jsonBodies": 3,
+    "problemBodies": 0,
+    "sseStreams": 0,
+    "metricBytes": 83487,
+    "cacheEntries": 2,
+    "cacheNonemptyRequired": true,
+    "cacheProduced": true,
+    "cacheUnproducedOutsideFilterRoutes": false,
+    "profileFiles": 172,
+    "knownRootLinks": 4,
+    "externalLinkTargetBytesScanned": false,
+    "c4WindowsExecuted": false,
+    "traceFromStart": false,
+    "traceArmed": true
+  },
+  "claimCount": 172,
+  "lastClaim": {
+    "status": 409,
+    "handlerNanos": 416611750,
+    "consumed": true
+  },
+  "state": {
+    "state": "CANCELLED",
+    "errorCode": "OTHER",
+    "bootstrapPhase": "READY",
+    "materializationPresent": true,
+    "fixtureModelHttpCalls": 8,
+    "fixturePhysicalProviderReads": 1,
+    "fixtureProviderFailures": 0,
+    "fixtureModelKinds": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 7,
+      "VERIFY_STEP": 0
+    }
+  },
+  "finalizeFixedCode": "EXPIRED",
+  "fixedFinalizeGuard": [
+    {
+      "source": "PUBLISHER",
+      "line": 135
+    }
+  ],
+  "fixedLifecycle": [
+    {
+      "ordinal": 1,
+      "status": 409,
+      "kind": "RUNTIME",
+      "reason": "LEASE_LOST",
+      "consumed": true
+    }
+  ],
+  "limits": "Durable marker presence only; server captured response notSDKACK; timing/firstwriter/exclusivecost unproved. No retry.",
+  "currentValidationReached": true,
+  "currentCommitObserved": "UNOBSERVED",
+  "lastSuccessfulClaim": {
+    "status": 202,
+    "handlerNanos": 128808084,
+    "consumed": true
+  },
+  "maximumSuccessfulClaimHandlerNanos": 913609333,
+  "successfulClaimHandler1000msBudgetPassed": true
+}

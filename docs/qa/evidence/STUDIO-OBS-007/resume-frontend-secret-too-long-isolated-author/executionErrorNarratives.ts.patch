@@ -1,0 +1,17 @@
+--- docs/qa/evidence/STUDIO-OBS-007/resume-frontend-secret-too-long-isolated-author/before/frontend/src/components/studio/run/executionErrorNarratives.ts	2026-10-11 20:59:12
++++ docs/qa/evidence/STUDIO-OBS-007/resume-frontend-secret-too-long-isolated-author/candidate/frontend/src/components/studio/run/executionErrorNarratives.ts	2026-10-11 20:59:12
+@@ -100,6 +100,14 @@
+       'Whoever administers entitlements clears this by restoring that access, out of band. Retrying cannot.',
+     offersRerun: false,
+   },
++  SECRET_TOO_LONG: {
++    title: 'A secret exceeds the supported size',
++    browserClaim:
++      'No browser started. The dispatcher refused a secret longer than 4096 characters without truncating it.',
++    remedyOwner:
++      'Whoever owns the secret clears this by rotating it to a supported value of at most 4096 characters before starting a new run.',
++    offersRerun: false,
++  },
+   CANCELLED: {
+     title: 'The run was stopped on request',
+     browserClaim:

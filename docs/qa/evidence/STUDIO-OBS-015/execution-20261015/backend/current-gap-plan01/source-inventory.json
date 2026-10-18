@@ -1,0 +1,932 @@
+{
+  "artifact": "Named input SHA256 inventory and inspection limits",
+  "capturedAt": "2026-10-15T19:48:51.813842+00:00",
+  "evidenceBindings": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/validation-ledger.json",
+      "sha256": "9e58edc0e566b118aa83c184d66907136347844ce1f2bce2ae074c9a97404024",
+      "bytes": 88781,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/remaining-facet-review05/manifest.json",
+      "sha256": "958d4bc12a54db1bb4285f2ee1622c06a292ceb9fb4dc08124fc0da64562d5ea",
+      "bytes": 1353,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/remaining-facet-review05/prioritized-disjoint-source-batches.json",
+      "sha256": "b0ccae534d6490d03842db302e016411b54bd608baa141c071b0f0d5b8613be5",
+      "bytes": 14954,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/remaining-facet-review05/all-86-obligations-retained.json",
+      "sha256": "3a00a2140d380179229edb3d2d4ef7a0eccb4c45c8cc8595b9458f2d85f71b74",
+      "bytes": 39902,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/remaining-facet-review05/remaining-49-dispositions.json",
+      "sha256": "1e22dbffdd7a8f613817e4ab80becb5d53a8659a6c1b760e4adf907cace532b3",
+      "bytes": 116306,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/remaining-facet-review05/architecture05-24-facets-retained.json",
+      "sha256": "bbf0ef18072f3ac81cb69ac2ae55419d7ca7081e4e85ea326dd0e8bbb3eef593",
+      "bytes": 44743,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/source-coverage-map-05.json",
+      "sha256": "558cc386632a22ba4dd7e5015228245a64adb6d0ac287adcf29826651dc8caf9",
+      "bytes": 125418,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b1-execution-handoff01/handoff.md",
+      "sha256": "3e5b364fb2d97431dab18cef8d0bed01e101e3694c9852250b8f652e4133003c",
+      "bytes": 3730,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b1-execution-handoff01/b1-row-handoff.json",
+      "sha256": "2b1bc8037376074f6cb8dce1bc53c17677bfa0115add6e755cb65f7cdc6001c0",
+      "bytes": 96055,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b1-execution-handoff01/runtime-and-ownership.json",
+      "sha256": "f9d8f8db184a0a3d526820034e329ca5373d3e94db72c437276f7ec493aaab9b",
+      "bytes": 5359,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b1-execution-handoff01/completeStep-callgraph.json",
+      "sha256": "b1550a00da51a0671ff6b1f8925810d5dd0b6cf7691724f8b1c3dd63296f6e25",
+      "bytes": 2864,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b1-execution-handoff01/manifest.json",
+      "sha256": "e58c25ec9db8ca43a55ff04b5af99aa192d72b75da33da890a130aefea7850e4",
+      "bytes": 1234,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4-r2-execution-handoff01/handoff.md",
+      "sha256": "1943c6f28e0a6919789b7b6dce69174640ebe3ef69fbfe3a557d9e3b01d23d02",
+      "bytes": 3746,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4-r2-execution-handoff01/original-rows.json",
+      "sha256": "0dfffb2edebcab679e2e8da84338633ea4d2f20950f7e22080199520622663d8",
+      "bytes": 29706,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4-r2-execution-handoff01/ordered-source-batches.json",
+      "sha256": "3a3eb50db32c931225a6ed380a6d4b7867e7cf09e74c4b5c766fd706503d2714",
+      "bytes": 5041,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4-r2-execution-handoff01/manifest.json",
+      "sha256": "a6aba1e032b7ebdd106ea606cba8cad1955473145374b3741e2911c788a34495",
+      "bytes": 1524,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-head-core-feedback-attempt04-receipt.json",
+      "sha256": "4deb29314d211f0dc710d25935521e6d0ca1d4132c969b96d70c500efe8e164c",
+      "bytes": 123011,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-b1-feedback-hold01.json",
+      "sha256": "d9fc9c59274644f5b3ffdbe2a6545076e40eda9f3c132a9120a5b6f26b0dbe8c",
+      "bytes": 27029,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-b4a-source04.json",
+      "sha256": "3b69b9298e513dd65c1ff0d3c2976bfc06be943a5f19e462d37ad021555f0e29",
+      "bytes": 10398,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source04/qa-review/review.md",
+      "sha256": "b8b90cb602419bc29152e79ebd5c3f27c41eaf2876be36fe90e23bcd17c9bf86",
+      "bytes": 4896,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source04/qa-review/manifest.json",
+      "sha256": "dfa1d625c429dd8fe9236a4f6d3dedb6d38c46fe19080feca6117ae6c622a84b",
+      "bytes": 2268,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-raw-input-consistency-source01.json",
+      "sha256": "d6c43963343124d9cd052596633266f074e2f5ab545c9d1204aeb04444129d85",
+      "bytes": 9473,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/qa-review/review.md",
+      "sha256": "97ccdff5e8012b86cc1e4ac4aef8a60c72564e5d6d772dc04af8c21607c556cd",
+      "bytes": 5246,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/qa-review/manifest.json",
+      "sha256": "6ec22023ae5f12d015b32aac16c5c45e07a96ece910579486826f74a0bafca43",
+      "bytes": 2001,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-pending-accounting-proof-transfer-source01.json",
+      "sha256": "d71f838f25b5961063bac5b924681d3076d64ea2b3367196c959248e17a759a4",
+      "bytes": 8444,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b0-authority-companions01.json",
+      "sha256": "bd1fca50ffcaf4eef78beac37093f780b4c5c4fa876f028ba1d91a3fec6c71d7",
+      "bytes": 17858,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b0-aria21-source-map01.json",
+      "sha256": "eb61179a129046497b0cbda4e70d8a3d2bf55837c32e4e156d2278933fe52a39",
+      "bytes": 31808,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/snapshot57-65-feedback-attempt05-receipt.json",
+      "sha256": "f92b70af495c0d9fa055825a991ba0a44867b112886cb3b98a3a5203cbf71163",
+      "bytes": 28621,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/head-foundation-feedback-attempt04-receipt.json",
+      "sha256": "fed197c0b80c379fce9713f792dee6fdedf50e8eac1f7a2b0110b28efa64f60e",
+      "bytes": 123793,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/source-hold-checkpoint-10.json",
+      "sha256": "97894dbb074c1c77cb61e701feb1577da05cf581c8eab8c4cbdb40bc353bfe67",
+      "bytes": 10047,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt05-results.json",
+      "sha256": "148939b29626d1e074d568b1d143f6b639b81d581a88ed68485255fd72000305",
+      "bytes": 12068,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/unit-feedback-attempt15-receipt.json",
+      "sha256": "0ada08041c16b407768f487a64046911d26d705bac0904518c22c069067cdd32",
+      "bytes": 80213,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/native-feedback-attempt03-receipt.json",
+      "sha256": "b452f42cc12ff30420a75b3f2e5837176509cc85d28ed3098c0d3124cab8b838",
+      "bytes": 75699,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-unit-feedback-attempt15-vitest.json",
+      "sha256": "66e501bec3b62acdc4c968177cf9d79dcdcf0dda8d64f180c21665827f7f8739",
+      "bytes": 2613798,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-r1-native-feedback-attempt03-vitest.json",
+      "sha256": "5e6e17b799414d6ab938d598d6d955d15096f8d39417f5d7e2a8c2a05699b580",
+      "bytes": 16607,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/checkpoint-r2-source01.json",
+      "sha256": "69aae9ea4c1fbf9d496db80ff4f2299d41865d73a47151bbfb9d5f155c646d6b",
+      "bytes": 6314,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/r2-source01/qa-review/review.md",
+      "sha256": "17c45c18d35ee45f5068e61bb31756ffd74eb40e8734d268f22f45d8514ab568",
+      "bytes": 9694,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/r2-source01/qa-review/manifest.json",
+      "sha256": "351e5db530ceaa8524e9e50648b38dc5ca7579340ccdce28d6d8f72a90c2e4e6",
+      "bytes": 2805,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/checkpoint-r1-source02.json",
+      "sha256": "b25d111daf830659bfc3e55afe4a5a50ff7aef6863d9cedb68c5d37f26ebb83f",
+      "bytes": 31612,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/checkpoint-r1-native-evidence-retention01.json",
+      "sha256": "a3c6a2486a463f3d56825473b55ed596506a90661be5be63218b3b7fdf1a054b",
+      "bytes": 20341,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/checkpoint-repaired-arch05-source-01.json",
+      "sha256": "bab06bc4ccbdcdf7399c7ef92a4c95387fe3b543be55673e945ab22ef46186fe",
+      "bytes": 31995,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-05/qa-design/test-requirements.json",
+      "sha256": "ba68e1383864aa89a8b32d1accc3d9e461163195cf9d6654c571502d589d431a",
+      "bytes": 23546,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-05/implementation-receipt.json",
+      "sha256": "1c29ab889d5f7c053281f197a420940af44897295cde09eb691c447e13a3c8bb",
+      "bytes": 13650,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/test-delta.json",
+      "sha256": "e5b642c3170f4a44005715cbb6a8f674eab9e962b07650ca0a6b0a8ee253194a",
+      "bytes": 6066,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-remaining-uncertainties05/qa-design/recording85-open-disposition.json",
+      "sha256": "34f0020e23e19cf59f0c6fe3d16ecdc2afbf942c6c45e7a909e178df85a489b8",
+      "bytes": 13966,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-recording85-clarification01/source-lineage.json",
+      "sha256": "2d3f178cbed91c81f09327a56d057157a30049ec3bd2d29b6a1c450eeefc9e80",
+      "bytes": 2676,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-recording85-clarification01/scope-decision.json",
+      "sha256": "90b168eac25e8911d7457aee371ff156f7b14e6d9c5cca6280861c9176a755d5",
+      "bytes": 3751,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-recording85-clarification01/clarification.md",
+      "sha256": "0afd5835d22e3c260af27128329278c1932f4d2a78bb313268b6ec35763c8ef5",
+      "bytes": 15636,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-recording85-clarification01/aria-review/review.md",
+      "sha256": "12f1d88e35521a7fc5b30119f6268592281cc74d51fbc0b8c438ebb4d7404019",
+      "bytes": 9482,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-recording85-clarification01/aria-review/manifest.json",
+      "sha256": "f2f9e2b99a25d80f2c495fe2ca0172779046ab3ecf27f26d0ccfe7b9e78061d4",
+      "bytes": 944,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-recording85-clarification01/qa-review/review.md",
+      "sha256": "f2111eee569864f20f1b56a278830b479a1e3b70a04cd8f668a697b5cb25adf0",
+      "bytes": 9135,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-recording85-clarification01/qa-review/manifest.json",
+      "sha256": "e8b6e809e1816d757d71c2d27e8af72e468129569fc14d35ff2a187b72a00aba",
+      "bytes": 618,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/m12-classification-03.json",
+      "sha256": "2fd945b103b2833c1e9abe54c98cd469a89e3649dbaea9019c670d484ad6d0bc",
+      "bytes": 9127,
+      "inspectionExtent": "Read/parsed for relevant current-plan fields; referenced source reviews are prior bounded reviews, not repeated here"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md",
+      "sha256": "89502764574eef82836257a163ba327040984f630e22d653639d7a22dc436830",
+      "bytes": 67110,
+      "inspectionExtent": "Read for current planning; no execution by this reviewer"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "sha256": "9b7386d5e4230a1a2bff02bd474edb7796ace98e14ec0d047fa618038a3e4500",
+      "bytes": 46706,
+      "inspectionExtent": "Read for current planning; no execution by this reviewer"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/final-design/qa-final/planned-test-inventory.json",
+      "sha256": "5bedc6df8961cfc2accf16541eb83e5b466fa4f6fa43e9b49c2c76a34bd13904",
+      "bytes": 27960,
+      "inspectionExtent": "Read for current planning; no execution by this reviewer"
+    },
+    {
+      "path": ".codex/skills/aiox-qa/SKILL.md",
+      "sha256": "17afd341497b8e535b80c05b7aafe61305f56cdabb2742f8396eb98eec655d99",
+      "bytes": 1501,
+      "inspectionExtent": "Read for current planning; no execution by this reviewer"
+    },
+    {
+      "path": ".aiox-core/development/agents/qa.md",
+      "sha256": "42e0f57a5d2eaca345d074ec53100faabebd42047081325cde2123911aa88b00",
+      "bytes": 20220,
+      "inspectionExtent": "Read for current planning; no execution by this reviewer"
+    },
+    {
+      "path": ".aiox-core/constitution.md",
+      "sha256": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+      "bytes": 9089,
+      "inspectionExtent": "Read for current planning; no execution by this reviewer"
+    },
+    {
+      "path": "/Users/brunobuger/.agents/skills/review-story/SKILL.md",
+      "sha256": "b3637d2553dd6b722f7e785cee85160e13df388280769bec2b1d8bdc75d3566e",
+      "bytes": 1702,
+      "inspectionExtent": "Read for current planning; no execution by this reviewer"
+    },
+    {
+      "path": "/Users/brunobuger/.agents/skills/close-story/SKILL.md",
+      "sha256": "2417d67401eff64cdf77d9f12a7b175851b7696afc2661a758427fdb0662440b",
+      "bytes": 1586,
+      "inspectionExtent": "Read for current planning; no execution by this reviewer"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/test/xml/TEST-com.citi.put.checks.studio.authoring.ChangeDetectionTest.xml",
+      "sha256": "13260b2a38e5680a3a6ae4d67a79ab48e0b9ac6485f44952d13d14d5f5d77199",
+      "bytes": 2546,
+      "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.xml",
+      "sha256": "62ae266d3a40196a1afaa13ebfe048a8e2760e150d9b637c8f63f672402b7481",
+      "bytes": 17528,
+      "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalMaterializationEvidenceTest.xml",
+      "sha256": "f5c439d48f5b1b861927c3180a187ddc00cf1faba4fa644b1b7b10575a72f1b3",
+      "bytes": 1686,
+      "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.xml",
+      "sha256": "d1e8159d651c059d13ea334a1e8304850d7d45fb716ee18c832d33e2ab71e845",
+      "bytes": 24204,
+      "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest.xml",
+      "sha256": "f6d3cda5a98bf7b513c485e7bf7bf48929dd43064408f2c01397867594c2a882",
+      "bytes": 7762,
+      "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest.xml",
+      "sha256": "24c8d71417313be6f281d9aee0908a5ab1a978750e7f9a7ce6d8fe79746d1a20",
+      "bytes": 5590,
+      "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+      "sha256": "d4a6f2f3ebca00408063185e3cdff7affd391c38c67daeb59f128c764a0f4367",
+      "bytes": 423554,
+      "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt05-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "sha256": "1334970aa038204aef92f8f0a229ad206af5715273978da7dbfd1c5b75a58276",
+      "bytes": 25761,
+      "inspectionExtent": "Read-only binding to captured SQL55 XML; names independently compared against results/ledger"
+    }
+  ],
+  "currentNamedSourceBindings": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "246e355b2cdc237957a519d17fdfab81f6fc230102f94176b6df99799fb56bf4",
+      "bytes": 1006367,
+      "inspectionExtent": "Focused current bodies/start/variant/failure/callback/ACK/history/consent/secret methods and complete method/label inventory; not a full20400line QA review"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "e3b1f3c06f7f6ac6dcc2eb3ef609a0047ad1b34c536eed1363ac68e405c78b82",
+      "bytes": 113023,
+      "inspectionExtent": "Focused completeStep/reserveModel/prefix state anchors; existing pending correction observed"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+      "sha256": "d552398ccb6cc8c9d851acb81f0af35c5a5672e685e2f2543f83784a36a037b5",
+      "bytes": 21596,
+      "inspectionExtent": "Focused actual PG fixture/setup/commit/pending guard and method inventory"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalMaterializationEvidenceTest.java",
+      "sha256": "5c5485adb197d7104a7868b2cd95a55702aaf6cea9aeeea50f1c65765ec76b40",
+      "bytes": 7067,
+      "inspectionExtent": "Focused four method bodies and supplied/mock JDBC evidence limits"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceTest.java",
+      "sha256": "2a2aa3770bee4c886816bce74541888b2ab801d91a3a986d865a09228ef04daa",
+      "bytes": 20946,
+      "inspectionExtent": "Method inventory only; assertion completeness not re-reviewed"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+      "sha256": "eccc57318faafd672e04060995b91ce783d72bd2bd7c66f09899ad335146880c",
+      "bytes": 110496,
+      "inspectionExtent": "Exact all55 name presence inventory only; historical run evidence separate"
+    },
+    {
+      "path": "backend/build.gradle.kts",
+      "sha256": "f77c28b83c96b8a0e59c8cfd2419e4faaecacc9b1438e0237ee7bc3d61d61490",
+      "bytes": 25423,
+      "inspectionExtent": "Read normal partition/expected identity/retention/freshness/check/crossReplica/coverage task declarations"
+    },
+    {
+      "path": "studio-runner/package.json",
+      "sha256": "af28d6eee9a7c1ac5d18efe9788659624f14c21cdcc86e695d8c2bf74948e031",
+      "bytes": 1532,
+      "inspectionExtent": "Read exact scripts/pins only"
+    },
+    {
+      "path": "frontend/package.json",
+      "sha256": "c8485306473e0b494c3f73f0f8817592410d4a5f5912b4ade6b0b3dc7eddd07d",
+      "bytes": 2800,
+      "inspectionExtent": "Read exact scripts only; no008implementation review"
+    },
+    {
+      "path": "studio-runner/vitest.config.ts",
+      "sha256": "c833caed66dc39aed1677db7cab921e97a5eb5b36291429c5f5e90f1a28c08f8",
+      "bytes": 4010,
+      "inspectionExtent": "Read complete normal tier/coverage/exclusion configuration"
+    },
+    {
+      "path": "studio-runner/vitest.fixtures.config.ts",
+      "sha256": "2d51915fec9757e34ed1c0c2311fd1362abab917bfa1c5bf8b70ab47cb2c3f87",
+      "bytes": 1761,
+      "inspectionExtent": "Read complete native tier/globalSetup configuration"
+    },
+    {
+      "path": "studio-runner/vitest.deployment.config.ts",
+      "sha256": "8e629004020797f3058aa376960125d99bd35ea1f576fb449ffd57bd8e41870b",
+      "bytes": 3063,
+      "inspectionExtent": "Read complete failclosed deployment tier configuration"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/globalSetup.ts",
+      "sha256": "48ed6f54da59ea71fdecbd6273bb08a3ae0644710a02501d1d9fe48aa95abbcd",
+      "bytes": 1793,
+      "inspectionExtent": "Read emitsdist behavior"
+    },
+    {
+      "path": "studio-runner/ci/stages.md",
+      "sha256": "3b93df1242f0840297b7584ef1604fc9ace2c3c149528da82b70f6f6379decd9",
+      "bytes": 17537,
+      "inspectionExtent": "Read configured gate/prerequisite/pin/image applicability requirements"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+      "sha256": "adf11ab62de6cade54be1427daf60519ae270dceb5ee08b382c828b75b6622a2",
+      "bytes": 42665,
+      "inspectionExtent": "Focused actual partial-drift and prefix/ACK assertion anchors; native03 execution retained at own tier"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "sha256": "c65db8941e89822efba639e9ea36d65405bef5d4732317750734d27f86c9a57d",
+      "bytes": 57127,
+      "inspectionExtent": "Focused seven native-prefix guards/lineage and existing secret test names; not actual external Vault authority"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "sha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+      "bytes": 22720135,
+      "inspectionExtent": "Parsed all24 retainedExecute requirements and50 witness names; complete JSON semantics not re-reviewed"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedBasisValidator.java",
+      "sha256": "2d6016aa0ac8bc1057273676baa1a3583aea39521fd1bddd806c171ba5d8c63e",
+      "bytes": 16867,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "sha256": "9289948874fdce24bf319782fbc69a380d7936388b40bb6a4923ab6add0b01c6",
+      "bytes": 55794,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java",
+      "sha256": "32e99e0c3793221e048abffe3c0280fa522d2e546c42cd868887c1827d214f1d",
+      "bytes": 57342,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+      "sha256": "a9c76b547a77901bb122b2d1835b5d545bc0dddf6f62c0c6daab80a3472e750f",
+      "bytes": 42814,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "sha256": "37a160856fac0a0c25c05d98d4e6fb532c7f7ae615c3c0e1fe49b7cc83016d59",
+      "bytes": 69787,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java",
+      "sha256": "8c110961bc1c6897e0c8e75e0733f61925579f9fa970854fa5c377add3aa0b9d",
+      "bytes": 8744,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+      "sha256": "c26da8acc7a253139fc3bece3cc7e5df156d50ea3e7704bc36861805e06bd0a5",
+      "bytes": 35985,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+      "sha256": "008f61117ce90c31d9a0abddaa4a91d2d142ba7ef8fabf734265a3940d45ee85",
+      "bytes": 19663,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "sha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+      "bytes": 168031,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "studio-runner/src/validator/observedReplay.ts",
+      "sha256": "7c8a3b8d65160357e22878e8b0705cc704b135d42a561fb983950f6fb1e00c19",
+      "bytes": 44673,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "sha256": "6c2812c97dfdbb89089e87e3fbadcef1c99d50d6cde4f1f3a4d2a2d8b79d3296",
+      "bytes": 25939,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "studio-runner/test/observedReplayValidation.test.ts",
+      "sha256": "2551870bc02de7918a0d2389bdea6d243c83131bfb7121b430a7845ac34633a3",
+      "bytes": 34154,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "studio-runner/test/server/observedReplayRoutes.test.ts",
+      "sha256": "bf1d723f6ba4b53f6578646b0db8214e619f3c747ae06a1f60623560398b4a91",
+      "bytes": 11331,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "studio-runner/test/retainedExecute.test.ts",
+      "sha256": "2aa49b583cd8c05a611d76d69537ca0abdba7657d962135a27ff935b4e5e7e0e",
+      "bytes": 25007,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "studio-runner/test/run/observedReplayProtocol.test.ts",
+      "sha256": "a258d8b41882d0b6c66abdbf983c8479d66bda7dc9985cadfc35c68059a133c9",
+      "bytes": 17271,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "studio-runner/test/run/observedChildRuntime.test.ts",
+      "sha256": "d9fa80ce843238f949fee1509dc339515e70b3b17887d378aacda47bf7a43916",
+      "bytes": 18129,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+      "sha256": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa",
+      "bytes": 41590,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/cases/incremental-edit-step-4.json",
+      "sha256": "f04e70016563076decb46292ce0f18d6a819d488f94212bb2bdb11d4f6546b4a",
+      "bytes": 7636,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/cases/incremental-insert-step.json",
+      "sha256": "9a1831f52911dbddc8d7dc1575c7b6e22480b00098b11bea51b6f94f0bfabbc1",
+      "bytes": 7883,
+      "inspectionExtent": "Current hash/name inventory + prior bounded source-review/actual case receipt reconciliation only; no full independent content review"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/authoring/IncrementalIdentityTest.java",
+      "sha256": "24b2f6cb82e20349e9c6cce16c8b3598e6bbe829b97f568b4d3f69fa464afd51",
+      "bytes": 3053,
+      "inspectionExtent": "Read full pure identity test source to distinguish actual exact alias/missing/duplicate inputs from missing HTTP companion"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/StudioAuthoringApiIT.java",
+      "sha256": "2d6c7462c2cdb7e98773e6085b5c53a5d7f73736081827fd3315073dcc6d02c6",
+      "bytes": 10625,
+      "inspectionExtent": "Focused method inventory and fixture-driven authoring source/refusal assertions; not all HTTP runtime identity coverage"
+    },
+    {
+      "path": "tools/check-studio-observed-contracts.cjs",
+      "sha256": "685d92275f7057df877d95f644aab0f7f04b1d7446881eecb6e2f42e0fe0acc9",
+      "bytes": 133790,
+      "inspectionExtent": "Read default command/generator.check final-entry anchors only; no invocation or full tool review"
+    }
+  ],
+  "capturedSourceComparisons": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "capturedEvidence": "raw04 testedHashes",
+      "expectedSha256": "9289948874fdce24bf319782fbc69a380d7936388b40bb6a4923ab6add0b01c6",
+      "currentSha256": "9289948874fdce24bf319782fbc69a380d7936388b40bb6a4923ab6add0b01c6",
+      "equal": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java",
+      "capturedEvidence": "raw04 testedHashes",
+      "expectedSha256": "32e99e0c3793221e048abffe3c0280fa522d2e546c42cd868887c1827d214f1d",
+      "currentSha256": "32e99e0c3793221e048abffe3c0280fa522d2e546c42cd868887c1827d214f1d",
+      "equal": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "capturedEvidence": "raw04 testedHashes",
+      "expectedSha256": "246e355b2cdc237957a519d17fdfab81f6fc230102f94176b6df99799fb56bf4",
+      "currentSha256": "246e355b2cdc237957a519d17fdfab81f6fc230102f94176b6df99799fb56bf4",
+      "equal": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "capturedEvidence": "raw04 testedHashes",
+      "expectedSha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+      "currentSha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+      "equal": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "capturedEvidence": "raw04 testedHashes",
+      "expectedSha256": "e3b1f3c06f7f6ac6dcc2eb3ef609a0047ad1b34c536eed1363ac68e405c78b82",
+      "currentSha256": "e3b1f3c06f7f6ac6dcc2eb3ef609a0047ad1b34c536eed1363ac68e405c78b82",
+      "equal": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedBasisValidator.java",
+      "capturedEvidence": "raw04 testedHashes",
+      "expectedSha256": "2d6016aa0ac8bc1057273676baa1a3583aea39521fd1bddd806c171ba5d8c63e",
+      "currentSha256": "2d6016aa0ac8bc1057273676baa1a3583aea39521fd1bddd806c171ba5d8c63e",
+      "equal": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+      "capturedEvidence": "snapshot57/65feedback05",
+      "expectedSha256": "c26da8acc7a253139fc3bece3cc7e5df156d50ea3e7704bc36861805e06bd0a5",
+      "currentSha256": "c26da8acc7a253139fc3bece3cc7e5df156d50ea3e7704bc36861805e06bd0a5",
+      "equal": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+      "capturedEvidence": "snapshot57/65feedback05",
+      "expectedSha256": "008f61117ce90c31d9a0abddaa4a91d2d142ba7ef8fabf734265a3940d45ee85",
+      "currentSha256": "008f61117ce90c31d9a0abddaa4a91d2d142ba7ef8fabf734265a3940d45ee85",
+      "equal": true
+    },
+    {
+      "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+      "capturedEvidence": "snapshot57/65feedback05",
+      "expectedSha256": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa",
+      "currentSha256": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa",
+      "equal": true
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/cases/incremental-edit-step-4.json",
+      "capturedEvidence": "selectednative03",
+      "expectedSha256": "f04e70016563076decb46292ce0f18d6a819d488f94212bb2bdb11d4f6546b4a",
+      "currentSha256": "f04e70016563076decb46292ce0f18d6a819d488f94212bb2bdb11d4f6546b4a",
+      "equal": true,
+      "scope": "Differences after native03 are not relabelled fresh native proof"
+    },
+    {
+      "path": "studio-runner/evaluation/observed-authoring/cases/incremental-insert-step.json",
+      "capturedEvidence": "selectednative03",
+      "expectedSha256": "9a1831f52911dbddc8d7dc1575c7b6e22480b00098b11bea51b6f94f0bfabbc1",
+      "currentSha256": "9a1831f52911dbddc8d7dc1575c7b6e22480b00098b11bea51b6f94f0bfabbc1",
+      "equal": true,
+      "scope": "Differences after native03 are not relabelled fresh native proof"
+    },
+    {
+      "path": "studio-runner/src/validator/observedReplay.ts",
+      "capturedEvidence": "selectednative03",
+      "expectedSha256": "875da7952c8fb1ece09fdad48ffca822861dfe6cb742694f924995c98e5675df",
+      "currentSha256": "7c8a3b8d65160357e22878e8b0705cc704b135d42a561fb983950f6fb1e00c19",
+      "equal": false,
+      "scope": "Differences after native03 are not relabelled fresh native proof"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+      "capturedEvidence": "selectednative03",
+      "expectedSha256": "adf11ab62de6cade54be1427daf60519ae270dceb5ee08b382c828b75b6622a2",
+      "currentSha256": "adf11ab62de6cade54be1427daf60519ae270dceb5ee08b382c828b75b6622a2",
+      "equal": true,
+      "scope": "Differences after native03 are not relabelled fresh native proof"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "capturedEvidence": "selectednative03",
+      "expectedSha256": "c65db8941e89822efba639e9ea36d65405bef5d4732317750734d27f86c9a57d",
+      "currentSha256": "c65db8941e89822efba639e9ea36d65405bef5d4732317750734d27f86c9a57d",
+      "equal": true,
+      "scope": "Differences after native03 are not relabelled fresh native proof"
+    },
+    {
+      "path": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "capturedEvidence": "selectednative03",
+      "expectedSha256": "c140d89e3bcc397211b4283d8f9a9c83c60286b6ef0efb85c060461b25e92de4",
+      "currentSha256": "6c2812c97dfdbb89089e87e3fbadcef1c99d50d6cde4f1f3a4d2a2d8b79d3296",
+      "equal": false,
+      "scope": "Differences after native03 are not relabelled fresh native proof"
+    },
+    {
+      "path": "studio-runner/test/retainedExecute.test.ts",
+      "capturedEvidence": "selectednative03",
+      "expectedSha256": "2aa49b583cd8c05a611d76d69537ca0abdba7657d962135a27ff935b4e5e7e0e",
+      "currentSha256": "2aa49b583cd8c05a611d76d69537ca0abdba7657d962135a27ff935b4e5e7e0e",
+      "equal": true,
+      "scope": "Differences after native03 are not relabelled fresh native proof"
+    },
+    {
+      "path": "studio-runner/test/run/observedChildRuntime.test.ts",
+      "capturedEvidence": "selectednative03",
+      "expectedSha256": "d9fa80ce843238f949fee1509dc339515e70b3b17887d378aacda47bf7a43916",
+      "currentSha256": "d9fa80ce843238f949fee1509dc339515e70b3b17887d378aacda47bf7a43916",
+      "equal": true,
+      "scope": "Differences after native03 are not relabelled fresh native proof"
+    },
+    {
+      "path": "studio-runner/test/server/observedReplayRoutes.test.ts",
+      "capturedEvidence": "selectednative03",
+      "expectedSha256": "4ddc7d9bf32b2312e0c99bd778cbff17ee4b0d610cf696a4369e3bbab706d288",
+      "currentSha256": "bf1d723f6ba4b53f6578646b0db8214e619f3c747ae06a1f60623560398b4a91",
+      "equal": false,
+      "scope": "Differences after native03 are not relabelled fresh native proof"
+    }
+  ],
+  "actualMetadataVerification": {
+    "raw04XML": [
+      {
+        "task": "test",
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "binding": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/test/xml/TEST-com.citi.put.checks.studio.authoring.ChangeDetectionTest.xml",
+          "sha256": "13260b2a38e5680a3a6ae4d67a79ab48e0b9ac6485f44952d13d14d5f5d77199",
+          "bytes": 2546,
+          "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+        }
+      },
+      {
+        "task": "test",
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest",
+        "tests": 107,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "binding": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.xml",
+          "sha256": "62ae266d3a40196a1afaa13ebfe048a8e2760e150d9b637c8f63f672402b7481",
+          "bytes": 17528,
+          "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+        }
+      },
+      {
+        "task": "test",
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalMaterializationEvidenceTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "binding": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalMaterializationEvidenceTest.xml",
+          "sha256": "f5c439d48f5b1b861927c3180a187ddc00cf1faba4fa644b1b7b10575a72f1b3",
+          "bytes": 1686,
+          "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+        }
+      },
+      {
+        "task": "test",
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "tests": 124,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "binding": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.xml",
+          "sha256": "d1e8159d651c059d13ea334a1e8304850d7d45fb716ee18c832d33e2ab71e845",
+          "bytes": 24204,
+          "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+        }
+      },
+      {
+        "task": "test",
+        "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+        "tests": 41,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "binding": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest.xml",
+          "sha256": "f6d3cda5a98bf7b513c485e7bf7bf48929dd43064408f2c01397867594c2a882",
+          "bytes": 7762,
+          "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+        }
+      },
+      {
+        "task": "test",
+        "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "binding": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest.xml",
+          "sha256": "24c8d71417313be6f281d9aee0908a5ab1a978750e7f9a7ce6d8fe79746d1a20",
+          "bytes": 5590,
+          "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+        }
+      },
+      {
+        "task": "guidedIncrementalTest",
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "tests": 3,
+        "failures": 3,
+        "errors": 0,
+        "skipped": 0,
+        "binding": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-raw-head-core-feedback-attempt04-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+          "sha256": "d4a6f2f3ebca00408063185e3cdff7affd391c38c67daeb59f128c764a0f4367",
+          "bytes": 423554,
+          "inspectionExtent": "Read-only XML count and receipt SHA256 comparison"
+        }
+      }
+    ],
+    "Node15RawCaseCounter": {
+      "passed": 2206,
+      "skipped": 29
+    },
+    "Native03RawCaseCounter": {
+      "passed": 48
+    },
+    "SQL55ExactLedgerNameSet": true,
+    "all86ExactNameTierAssertionMatchToRetainedIndex": true,
+    "JOIN43default37low35labelsFromCurrentDeclarations": true,
+    "manifestPayloadsCompared": "B4source04/rawinput/R2 source QA each3 outputs; remainingreview05all8; no mismatches in checked payloads",
+    "initialMetadataHelperError": "Read-only manifest inspection initially assumed files is a dict; R2 files is a list. Corrected metadata inspection and completed comparisons. No application command or evidence mutation occurred.",
+    "SQL55XMLHashAndCountsCompared": {
+      "sha256MatchesReceipt": true,
+      "tests": 55,
+      "failures": 0,
+      "skipped": 0
+    }
+  },
+  "explicitlyNotReviewedOrBoundAsFrozen": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "reason": "Dex active producer-sync repair; Aria active seam review, deliberately not inspected/bound as frozen by this plan"
+    },
+    "Full source semantics outside named focused anchors; inventory is not a source QA pass",
+    "All prior012B/013/014 closure artifacts; no redundant rereview or reopening",
+    "Raw runtime logs/media decode/DB/Core/Vault/services/process state; no connections or runtime execution",
+    "Current dist entire tree/global stability; retain owner captured distdigest only",
+    "Full frontend008 implementation and all original facets not explicitly examined; full008 remains required",
+    "Original86 private/app/native assertion adequacy is not inferred from source names or all-passing pure components",
+    "No alternate item85 subject accepted or user answer inferred"
+  ],
+  "hold": "SOURCE/DIST HOLD; no source release/runtime permission/formal QA verdict/lifecycle change; only these5newartifactfiles written",
+  "namedSourcesStillEqualAtFinalMetadataCheck": {
+    "checkedAt": "2026-10-15T19:50:19.268304+00:00",
+    "allNamedHashesEqual": true,
+    "globalTreeFrozenClaim": false
+  }
+}

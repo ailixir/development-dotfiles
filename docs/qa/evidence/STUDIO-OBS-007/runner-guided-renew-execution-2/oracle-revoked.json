@@ -1,0 +1,380 @@
+{
+  "mode": "revoked",
+  "sourceGuidedWorker": true,
+  "compiledWorker": false,
+  "realMtlsJwt": true,
+  "backendRevocationAuditProved": false,
+  "scopeHash": "78c09f8dbca9d5364f8edfbbdbf512ff8a93dbb5bbbf755fe8db487a4e8873b8",
+  "sessionId": "be6a44ea-e624-47b0-bead-d7f6ec3218b5",
+  "absoluteExpiresAt": "2026-10-14T11:00:06.970Z",
+  "cutoffMs": 1001.446083,
+  "commandResponses": [
+    {
+      "stage": "navigation-prepare",
+      "status": 200,
+      "code": "OTHER"
+    },
+    {
+      "stage": "navigation-dispatch",
+      "status": 200,
+      "code": "OTHER"
+    },
+    {
+      "stage": "password-prepare",
+      "status": 200,
+      "code": "OTHER"
+    }
+  ],
+  "claimFacts": [
+    {
+      "started": 353.660209,
+      "timeoutMs": 10000,
+      "key": "e60f4807-e3a9-43d0-8aaa-831bbf84c338",
+      "completed": 360.298584
+    },
+    {
+      "started": 1364.527584,
+      "timeoutMs": 1000,
+      "key": "80227bd1-3bda-4167-963c-15a6a38eb645",
+      "completed": 1369.6485
+    },
+    {
+      "started": 2365.946375,
+      "timeoutMs": 1000,
+      "key": "5c3eaa10-83aa-46eb-80b4-dfd55b807b2b",
+      "failed": 2370.952709
+    }
+  ],
+  "requestFacts": [
+    {
+      "started": 358.920042,
+      "key": "e60f4807-e3a9-43d0-8aaa-831bbf84c338",
+      "completed": 358.949334,
+      "leaseExpiresAt": "2026-10-14T10:58:37.007Z"
+    },
+    {
+      "started": 1369.059084,
+      "key": "80227bd1-3bda-4167-963c-15a6a38eb645",
+      "completed": 1369.079042,
+      "leaseExpiresAt": "2026-10-14T10:58:38.017Z"
+    },
+    {
+      "started": 2370.6525,
+      "key": "5c3eaa10-83aa-46eb-80b4-dfd55b807b2b"
+    }
+  ],
+  "focusAt": 968.492292,
+  "nativePendingAtFocus": 1,
+  "t0": 1369.649709,
+  "authorityStoppedAt": 2371.095792,
+  "stopReason": "REVOKED",
+  "closeRequestedAt": 2371.360042,
+  "closeFinishedAt": 2423.170792,
+  "launches": 1,
+  "nativeEntries": [
+    966.783667
+  ],
+  "nativeEnds": [
+    2377.076
+  ],
+  "inputEvents": 0,
+  "pids": [
+    22510,
+    22532,
+    22516,
+    22517,
+    22518,
+    22520,
+    22521,
+    22522,
+    22567,
+    22538,
+    22557
+  ],
+  "allObservedPidsGone": true,
+  "scratchPath": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/checks-guided-2Yrojw",
+  "scratchAbsent": true,
+  "messages": [
+    {
+      "route": "bootstrap-evidence",
+      "body": {
+        "schemaVersion": 3,
+        "sessionId": "be6a44ea-e624-47b0-bead-d7f6ec3218b5",
+        "workerId": "worker-one",
+        "ownerFence": 1,
+        "scopeHash": "78c09f8dbca9d5364f8edfbbdbf512ff8a93dbb5bbbf755fe8db487a4e8873b8",
+        "contextId": "4ffc5758-e66b-4a0f-a7d3-8fe6ca44b6e9",
+        "contextRevision": 1,
+        "sourceRevision": "source-1",
+        "configurationRevision": "config-1",
+        "versions": {
+          "contract": 3
+        },
+        "executionEvidence": {
+          "kind": "initialBlank",
+          "sessionId": "be6a44ea-e624-47b0-bead-d7f6ec3218b5",
+          "contextId": "4ffc5758-e66b-4a0f-a7d3-8fe6ca44b6e9",
+          "creationId": "627ab59a-0147-4814-87df-880b28755d29",
+          "documentId": "f412aec3-c271-4399-8984-8218e563dfdc",
+          "bootstrapId": "b94c854e-5159-4071-bdc9-ec10557d097b",
+          "url": "about:blank",
+          "origin": null,
+          "generation": 0
+        },
+        "evidenceHash": "f0f35b7ce5f16440fefce8e5a5cf2d73416ee6a9a8b969059e364f139a2aa3c7"
+      }
+    },
+    {
+      "route": "outcomes",
+      "body": {
+        "schemaVersion": 3,
+        "sessionId": "be6a44ea-e624-47b0-bead-d7f6ec3218b5",
+        "workerId": "worker-one",
+        "ownerFence": 1,
+        "scopeHash": "78c09f8dbca9d5364f8edfbbdbf512ff8a93dbb5bbbf755fe8db487a4e8873b8",
+        "contextId": "4ffc5758-e66b-4a0f-a7d3-8fe6ca44b6e9",
+        "contextRevision": 1,
+        "sourceRevision": "source-1",
+        "configurationRevision": "config-1",
+        "versions": {
+          "contract": 3
+        },
+        "ledger": {
+          "schemaVersion": 3,
+          "sessionId": "be6a44ea-e624-47b0-bead-d7f6ec3218b5",
+          "coordinate": {
+            "stepId": "nav",
+            "ordinal": 0
+          },
+          "idempotencyKey": "ad560f6f-ef32-4ad3-b856-85270f113d8a",
+          "requestDigest": "ec4b553b1b5e1fc3a57ba8edec03d46e88e14f67772377a2e058d67a2b4ab40d",
+          "scopeHash": "78c09f8dbca9d5364f8edfbbdbf512ff8a93dbb5bbbf755fe8db487a4e8873b8",
+          "operationHash": "07002e4352c83906b7efd679f2ca2e2cd3932ea15b140beac4bb10c94f4c7145",
+          "generation": 0,
+          "documentId": "f412aec3-c271-4399-8984-8218e563dfdc",
+          "ownerFence": 1,
+          "admission": {
+            "admissionId": "d7eb657a-61cf-4c5c-9fa3-893279416b28",
+            "authorizationId": "authorization",
+            "admittedAt": "2026-10-14T10:58:07.556Z",
+            "policyDecisionHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "state": "SUCCEEDED",
+          "dispatchCount": 1,
+          "outcomeCode": "OK",
+          "assertionPassed": null,
+          "executionEvidence": {
+            "kind": "initialBlank",
+            "sessionId": "be6a44ea-e624-47b0-bead-d7f6ec3218b5",
+            "contextId": "4ffc5758-e66b-4a0f-a7d3-8fe6ca44b6e9",
+            "creationId": "627ab59a-0147-4814-87df-880b28755d29",
+            "documentId": "f412aec3-c271-4399-8984-8218e563dfdc",
+            "bootstrapId": "b94c854e-5159-4071-bdc9-ec10557d097b",
+            "url": "about:blank",
+            "origin": null,
+            "generation": 0
+          },
+          "evidenceHash": "f0f35b7ce5f16440fefce8e5a5cf2d73416ee6a9a8b969059e364f139a2aa3c7",
+          "authoredInputsHash": "b066f750b5987f51902968b3747c61e65c1127f2acdcd124166e700a2992af3d",
+          "contextRevision": 1,
+          "preparationId": "573299bd-bfc0-450f-aacc-f8f38be49386"
+        },
+        "availability": null
+      }
+    },
+    {
+      "route": "observations",
+      "body": {
+        "schemaVersion": 3,
+        "sessionId": "be6a44ea-e624-47b0-bead-d7f6ec3218b5",
+        "workerId": "worker-one",
+        "ownerFence": 1,
+        "scopeHash": "78c09f8dbca9d5364f8edfbbdbf512ff8a93dbb5bbbf755fe8db487a4e8873b8",
+        "contextId": "4ffc5758-e66b-4a0f-a7d3-8fe6ca44b6e9",
+        "contextRevision": 1,
+        "sourceRevision": "source-1",
+        "configurationRevision": "config-1",
+        "versions": {
+          "contract": 3
+        },
+        "observation": {
+          "coverage": {
+            "complete": false,
+            "mode": "semantic",
+            "passwordControls": 1,
+            "reason": "sensitivity",
+            "truncated": false,
+            "withheldRegions": 2
+          },
+          "documentId": "10f51582-7f39-4c19-a798-1181779fefba",
+          "generation": 1,
+          "nodes": [
+            {
+              "actionable": false,
+              "classification": "structuralOnly",
+              "controlType": "none",
+              "depth": 0,
+              "documentId": "10f51582-7f39-4c19-a798-1181779fefba",
+              "elementType": "other",
+              "formId": null,
+              "generation": 1,
+              "labelNodeIds": [],
+              "locatorHints": [],
+              "name": "User",
+              "nodeId": "node-1-5",
+              "parentNodeId": null,
+              "policyRuleId": "structural",
+              "regionId": null,
+              "role": "generic",
+              "visible": true
+            },
+            {
+              "actionable": true,
+              "classification": "structuralOnly",
+              "controlType": "text",
+              "depth": 1,
+              "documentId": "10f51582-7f39-4c19-a798-1181779fefba",
+              "elementType": "input",
+              "formId": null,
+              "generation": 1,
+              "labelNodeIds": [
+                "node-1-5"
+              ],
+              "locatorHints": [
+                {
+                  "exact": true,
+                  "kind": "testId",
+                  "value": "username"
+                },
+                {
+                  "exact": true,
+                  "kind": "role",
+                  "name": "User",
+                  "role": "textbox"
+                },
+                {
+                  "exact": true,
+                  "kind": "label",
+                  "value": "User"
+                }
+              ],
+              "name": "User",
+              "nodeId": "node-1-6",
+              "parentNodeId": "node-1-5",
+              "policyRuleId": "structural",
+              "regionId": null,
+              "role": "textbox",
+              "visible": true
+            },
+            {
+              "actionable": true,
+              "classification": "structuralOnly",
+              "controlType": "none",
+              "depth": 0,
+              "documentId": "10f51582-7f39-4c19-a798-1181779fefba",
+              "elementType": "button",
+              "formId": null,
+              "generation": 1,
+              "labelNodeIds": [],
+              "locatorHints": [
+                {
+                  "exact": true,
+                  "kind": "role",
+                  "name": "Sign in",
+                  "role": "button"
+                }
+              ],
+              "name": "Sign in",
+              "nodeId": "node-1-8",
+              "parentNodeId": null,
+              "policyRuleId": "structural",
+              "regionId": null,
+              "role": "button",
+              "visible": true
+            }
+          ],
+          "observedAt": "2026-10-14T10:58:07.593Z",
+          "origin": "http://127.0.0.1:52027",
+          "schemaVersion": 3,
+          "scopeHash": "78c09f8dbca9d5364f8edfbbdbf512ff8a93dbb5bbbf755fe8db487a4e8873b8",
+          "sessionId": "be6a44ea-e624-47b0-bead-d7f6ec3218b5"
+        }
+      }
+    },
+    {
+      "route": "outcomes",
+      "body": {
+        "schemaVersion": 3,
+        "sessionId": "be6a44ea-e624-47b0-bead-d7f6ec3218b5",
+        "workerId": "worker-one",
+        "ownerFence": 1,
+        "scopeHash": "78c09f8dbca9d5364f8edfbbdbf512ff8a93dbb5bbbf755fe8db487a4e8873b8",
+        "contextId": "4ffc5758-e66b-4a0f-a7d3-8fe6ca44b6e9",
+        "contextRevision": 1,
+        "sourceRevision": "source-1",
+        "configurationRevision": "config-1",
+        "versions": {
+          "contract": 3
+        },
+        "ledger": {
+          "schemaVersion": 3,
+          "sessionId": "be6a44ea-e624-47b0-bead-d7f6ec3218b5",
+          "coordinate": {
+            "stepId": "fill",
+            "ordinal": 0
+          },
+          "idempotencyKey": "992171d1-8e8b-4feb-9dc0-ea179b783610",
+          "requestDigest": "5890f33d21b5d4ecc2b17da51863acc8d0358a1b1b949ad6c3be51025673e620",
+          "scopeHash": "78c09f8dbca9d5364f8edfbbdbf512ff8a93dbb5bbbf755fe8db487a4e8873b8",
+          "operationHash": "daa1b4f161d8348e6ba5f007b6806bbe5528a881c4240d985962e6ed7f522217",
+          "generation": 1,
+          "documentId": "10f51582-7f39-4c19-a798-1181779fefba",
+          "ownerFence": 1,
+          "admission": {
+            "admissionId": "cf2a0d58-b904-43a5-a4a6-e41d84881767",
+            "authorizationId": "authorization",
+            "admittedAt": "2026-10-14T10:58:07.609Z",
+            "policyDecisionHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "state": "UNKNOWN_OUTCOME",
+          "dispatchCount": 1,
+          "outcomeCode": "ACK_LOST",
+          "assertionPassed": null,
+          "executionEvidence": {
+            "kind": "observedDocument",
+            "sessionId": "be6a44ea-e624-47b0-bead-d7f6ec3218b5",
+            "contextId": "4ffc5758-e66b-4a0f-a7d3-8fe6ca44b6e9",
+            "documentId": "10f51582-7f39-4c19-a798-1181779fefba",
+            "generation": 1,
+            "origin": "http://127.0.0.1:52027",
+            "observationHash": "12a1a9e5c5ed90c4db4063a1feb915d334109bad0f463eee2844acfd30ec764e"
+          },
+          "evidenceHash": "5615b6d3071ef5c3cf8f13dd349bbfc0b3beae69acd134e0b85f5181c0c95b56",
+          "authoredInputsHash": "b066f750b5987f51902968b3747c61e65c1127f2acdcd124166e700a2992af3d",
+          "contextRevision": 1,
+          "preparationId": "3810c0f3-92ba-4076-a541-31d7c696d1f0"
+        },
+        "availability": null,
+        "errorMessage": "Error: cdpSession.send: Target page, context or browser has been closed"
+      }
+    },
+    {
+      "route": "lifecycle",
+      "body": {
+        "schemaVersion": 3,
+        "sessionId": "be6a44ea-e624-47b0-bead-d7f6ec3218b5",
+        "workerId": "worker-one",
+        "ownerFence": 1,
+        "scopeHash": "78c09f8dbca9d5364f8edfbbdbf512ff8a93dbb5bbbf755fe8db487a4e8873b8",
+        "contextId": "4ffc5758-e66b-4a0f-a7d3-8fe6ca44b6e9",
+        "contextRevision": 1,
+        "sourceRevision": "source-1",
+        "configurationRevision": "config-1",
+        "versions": {
+          "contract": 3
+        },
+        "reason": "REVOKED"
+      }
+    }
+  ]
+}

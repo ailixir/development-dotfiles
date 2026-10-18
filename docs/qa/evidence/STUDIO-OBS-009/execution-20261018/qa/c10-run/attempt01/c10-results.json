@@ -1,0 +1,26 @@
+{
+ "startedAt": "2026-10-18T20:48:16Z",
+ "tier": "core",
+ "frozenSourceDigest": "6fcc12eef193338ca3bc79adaa50660d93c245a4462a5f850a7256588d9fc91b",
+ "frozenDistDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+ "runs": [
+  {
+   "kind": "baseline",
+   "label": "c10-baseline",
+   "exit": 1,
+   "elapsedS": 92,
+   "counts": {
+    "total": 27,
+    "failed": 2,
+    "errors": 0,
+    "skipped": 0
+   },
+   "verdict": "NOT_GREEN",
+   "failed": [
+    "GuidedPublicationReplayIT.editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+    "GuidedPublicationReplayIT.executionError"
+   ]
+  }
+ ],
+ "aborted": "baseline not green: the scratch copy is not faithful, no mutation was applied"
+}

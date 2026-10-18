@@ -1,0 +1,141 @@
+{
+  "status": "READONLY_AUTHOR_READY_MINIMUM_PROPOSAL",
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-minimum-c4-design-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-minimum-c4-design-context.txt"
+  ],
+  "sourceManifest": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "a967a0f254e251e6290bbb7aae2e20ceeaa943fcdda37ba1be62c17f59607d07"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java",
+      "sha256": "92b20b5a3cf02a317340e8316cb8396a002fc78f5d264484dd4878990c7512ad"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+      "sha256": "848b4c80050a7eb03e713093d707b9c32ee99a079c2767a4f05397063435edd6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "sha256": "7530c317e8553b537e8d63a14a3f5c3c98644e897150e758404d7946e38b0feb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+      "sha256": "7313046e049f40ff860119f1927de1bd326dcb9897ce0a5835eb77b450c30833"
+    },
+    {
+      "path": "studio-runner/src/server/runCoordinator.ts",
+      "sha256": "f2fb612e7312cf26768d6bc3ccc687a7735b5182a4b4a1be1578b8b2548ac77b"
+    },
+    {
+      "path": "studio-runner/src/server/config.ts",
+      "sha256": "a15802a842c636f2ed470c2ebe4206265e0c1fe2aefc98b46b0e7cd2cf11c284"
+    }
+  ],
+  "currentEvidence": {
+    "compiledChildPositiveUsedThenPhysicalCrashReaper": "resume-required-child-cut-one-current/result.json actual1PASS/zero drift",
+    "definingReportCasRollback": "Current ProgressCallbackIT20 PASS",
+    "profileAndIsolatedHelper": "resume-profile-helper-five-current/result.json fivePASS",
+    "C4NewJoinedCases": "UNRUN",
+    "C5RequiredTraceTiming": "Unresolved; no C4 or whole privacy credit from this proposal"
+  },
+  "futureOwnedPaths": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java"
+  ],
+  "caseCountDelta": 2,
+  "frameworkContextProxyPoolWatcherQueueLedgerDelta": 0,
+  "minimumTestHelperApi": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java",
+    "signature": "public void makeAvailable()",
+    "body": "available = true;",
+    "purpose": "Recover actual test provider availability without touching entries, creates, reads, lists, versions or value arrays. Existing makeUnavailable() and actual read() remain unchanged; read increments attempted counter before requireAvailable. Never use clear() as recovery."
+  },
+  "caseA": {
+    "selector": "GuidedPublicationReplayIT.actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+    "construction": [
+      "Prepare one genuine nonsecret Registration publication and one genuine scoped secret Login publication with existing p3CreateSource/start/finalize, then actual guided owner cleanup. No second Core fixture or copied matrix. Baseline model/value counters after publication.",
+      "Set existing initial-context-state.json to pause:true,fail:false; delete only existing entered marker before this controlled launch. Execute/dispatch ONLY the nonsecret owner, wait the original checkInitial entered barrier; this is an actual admitted launched browser holding default configured pool1. Do not fill pool with a fake request or secret-bearing blocker.",
+      "Only after the holder is demonstrably paused, accept the secret execution and snapshot original binding/attempt/grant. Dispatch once through actual HTTP client. Original runner validates and then pool.tryAcquire returns authentic429/CAPACITY_SATURATED before admission. Save original ACTUAL_DISPATCH_DIAGNOSTICS immediately before a later pass overwrites the same execution-key capture.",
+      "Assert selected original HTTP outcome is DEFINITE_REFUSAL+retryable+classified429, real no admission/receipt/browser/native secret effects, exactly one scoped PASS successful provider read and real release+REFUSED usage; ledger QUEUED/current attemptNULL with definite_refusal_attempt_id equal first accepted attempt. No zero-send outage token or receipt is inferred from capacity refusal.",
+      "Release original pause with fail:false, wait genuine nonsecret owner terminal success/captured FINAL and existing owner cleanup. Respect original reported Retry-After before retry; current runner fallback is5s. This wait is pacing only, never proof that a slot became free. The subsequent actual202/admission proves availability; a further429 fails the planned two-attempt construction honestly rather than resetting counters or laundering attempts.",
+      "Rotate existing PASS entry and update only fixture expected password, retaining original scope/origins. Retry same secret execution by original dispatcher. Actual refreshRetry under newly owned CLAIMED uses authentic definite token to change only attempt/grant nonce/time; beginObservedDispatch consumes authority tokens.",
+      "Require fresh attempt/grant IDs, bounded new grant, unchanged accepted execution/revision/scope/profile/hash identities, no reuse of prior admission, exact second original provider read/version, genuine202/admission/compiled browser fill+login, actual accepted PROGRESS/FINAL USED. Old first RELEASE/REFUSED row remains byte-for-byte unchanged; successful second release/usage is scoped to fresh attempt. Model delta0 during both ordinary passes; actual native receipt contains only rotated expected value."
+    ],
+    "poolFacts": {
+      "configAnchor": "server/config.ts POOL_SIZE fallback1",
+      "firstStatusAnchor": "runCoordinator.submitObserved:1178 pool.tryAcquire before newAdmissionIdentity/admitObserved",
+      "classifier": "HttpRunnerDispatchClient.classify:214 genuine429 only",
+      "backEdge": "StudioDispatchLedgerStatements.returnAfterDefiniteRefusal:350",
+      "timing": "Keep acceptance/grant/pending deadline naturally valid; accept secret only after holder barrier. Never modify stored deadlines or widen grant ceiling."
+    },
+    "cleanup": "Always release own original pause independently before existing p3Case owner cleanup. Preserve original primary and all owned failure cleanup; clear only this case gate after genuine closure. No pool reset, synthetic release or new completion framework."
+  },
+  "caseB": {
+    "selector": "GuidedPublicationReplayIT.actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+    "construction": [
+      "Prepare one genuine scoped secret Login publication and complete its guided owner. Accept one ordinary observed execution with original p3Execute/binding; provider is available for preflight/name operations. Baseline actual FakeVault attempted counter and CountedLoginVault successful per-scope PASS calls after acceptance.",
+      "Add one case-owned AtomicReference<VaultScope> gate in existing Publication CountedLoginVault. At exact kindSECRET/namePASS/scope boundary, CAS consumes the gate once. Call VAULT.makeUnavailable(), invoke the SAME ORIGINAL VAULT.read once inside try, then VAULT.makeAvailable() in finally. Let actual FakeVault.requireAvailable throw its real VaultProviderUnavailableException. No manual exception, missing-entry delete, extra value read, clear/reset, or declaration/list outage.",
+      "Assert actual attempted read delta1 because original FakeVault.read increments before requireAvailable; successful scoped PASS read delta0 because existing CountedLoginVault adds read entries only after returned Optional. Consumed exact scoped gate proves which original call failed. ObservedReplayAuthorization uses typedDeclarations.variables empty, so this ordinary pass has only the one declared PASS provider call. Do not relabel this as successful resolution.",
+      "Actual dispatcher returns zero sends for selected owner; ACTUAL_DISPATCH_DIAGNOSTICS lacks it. Genuine committed read-entry remains, audit RELEASE decision outcomeVAULT_UNAVAILABLE/versionNULL and truthful REFUSED summary are scoped to old accepted attempt. Current ledgerQUEUED/attemptNULL/admissionNULL/receiptNULL/browserNULL/errorNULL; zero_send_decision_attempt_id matches old attempt, definite tokenNULL. Actual studio_observed_no_send_decisions row dispositionREQUEUED joins original old binding/owner/transaction and empty positive-not-entered set; possible read is never NOT_USED.",
+      "Rotate PASS while availability restored and retain same source scope/origins. Same original dispatcher now uses authentic zero-send token to refresh attempt/grant and commits fresh read marker. Require one fresh successful read with new version, real only runnerPOST202/admission/browser/login, actual USED, unchanged accepted publication/scope/hashes, no model call, old outage decision and REFUSED immutable. Total actual original read attempts2 versus successful PASS values1 across outage+retry; no erased or cleared counters."
+    ],
+    "sourceAnchors": [
+      "FakeStudioVaultProvider.read:54 attempted counter before requireAvailable",
+      "CountedLoginVault.read in current frozen Publication records successful entries only after VAULT.read returns",
+      "ObservedReplayAuthorization.job typedDeclarations(List.of(), acceptedSecrets) and tracked committed entry",
+      "StudioDispatcher.dispatchObserved VaultProviderUnavailableException->settleObservedFailure(nullCode)",
+      "settleObservedFailure append genuine facts+NoSendREQUEUED+releaseObservedOutageClaim atomically",
+      "ObservedReplayAuthorization.refreshRetry genuine zero-send token; actual beginObservedDispatch consumes token"
+    ],
+    "cleanup": "Availability recovery is in finally around original read, independent of scenario success. Clear only consumed one-shot gate in existing case cleanup. All genuine execution owners use existing lifecycle cleanup; never global vault clear or fake terminal rows."
+  },
+  "sharedCapture": {
+    "source": "Existing C5Capture and p3Case/p3Scan/p3WriteEvidence only",
+    "window": "Canary pair old+rotated chosen before first actual secret producer; existing trace/appender quarantine/capture surrounds original publication, first ordinary pass, real retry and final owner/profile cleanup. Existing original handler/client captures remain passive, numeric metadata only; no extra service/SQL/model/value calls to feed capture.",
+    "support": "Reuse exact current source privacy scanner/original callback+log+manifest/DB/profile sinks at their actual tier, record produced/unproduced honestly",
+    "dependency": "If current required TRACE/C5 source timing prevents genuine initial learning/owner renewal, affected C4 construction is UNREACHED/FAIL. Do not disable TRACE, widen one-second deadline, claim red capture PASS, or bypass setup. C4 uses required existing warmup topology once per case, not a copied Core Cartesian matrix.",
+    "mandatoryForBothSubruns": true,
+    "counterOnlyFallbackPermitted": false,
+    "exactExistingApi": "Each of the two cases opens the existing new C5Capture(canaries), assigns c5Capture, calls capture.writeProfileValues(), and retains the SAME active capture through original warmup, its actual429 or provider-outage subrun, rotation/fresh successful retry, real owner/profile closure and all original sink scans. No separate later workflow supplies this credit.",
+    "guidedSelection": "After original p3Start returns its actual guided ID, assign the existing capture.selectedGuidedSession field in this same class; do not introduce a new capture implementation or extra service call.",
+    "canaryAuthority": "Fixture chooses original and planned rotated values without provider reads. Record each actual returned value/version from existing original CountedLoginVault entries; the outage returns no value and contributes no successful-release canary credit. A planned-but-never-returned rotated value cannot make its failed/unreached retry PASS. Scan all known canaries conservatively while reporting actual successful-return counts separately.",
+    "failureAndClose": "Preserve existing C5 primary-failure/independent late-scan/owned-closure/quarantine restoration ordering; do not set c5Capture null or restore outputs before actual producers and owners are drained. Current required TRACE failure remains FAIL/UNREACHED."
+  },
+  "requirementsAndConditionalVariants": {
+    "requiredNow": [
+      "Genuine runner definite429 with fresh attempt/grant/fresh resolution",
+      "Genuine provider outage with no runner send and authentic zero-send retry",
+      "Per-attempt immutable audit lineage and actual rotated native value on successful retry"
+    ],
+    "alreadyReusable": [
+      "Defining migration/PG retry-token guards",
+      "DispatcherIT classification/no-reclaim-same-pass support",
+      "Current Progress20 CAS/audit rollback",
+      "Actual compiled-child lost-FINAL/reaper preserves positiveUSED"
+    ],
+    "notNewRequiredMatrices": [
+      "Every supporting PG negative repeated through Core/browser",
+      "Synthetic503 retry case",
+      "Additional pool/context/proxy lifecycle framework"
+    ],
+    "explicit503Rule": "Actual503 is AMBIGUOUS under HttpRunnerDispatchClient.classify. It is never a definite refusal/re-resolution authorization.",
+    "guidedConsumedRule": "Committed guided consume remains AlreadyConsumed/no resend/no second read; only genuine pre-consume recovery has new ordinary resolution. No read-and-discard counter oracle."
+  },
+  "exactNextReleaseNeeded": {
+    "paths": [
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java"
+    ],
+    "delta": "Two named Publication cases, necessary default-inactive exact-scope availability hook and original pause/capture usage, one test-only FakeVault.makeAvailable setter. Preserve current26 bodies and all existing FakeVault counters/method semantics.",
+    "gates": "Coordinator/source review then actual scoped formatter/compiler and exact2 selectors; runtime/budgets alone coordinator-owned."
+  },
+  "sourceEdits": [],
+  "runtimeActions": [],
+  "privacy": {
+    "rawRuntimeIdsBodiesCanaryValuesThrowableDumpExported": false
+  },
+  "wholeStoryOrC4PassClaim": false
+}

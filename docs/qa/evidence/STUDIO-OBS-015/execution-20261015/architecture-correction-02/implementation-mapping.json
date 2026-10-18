@@ -1,0 +1,65 @@
+{
+  "artifact": "ARCH015-02 exact source adapter mapping",
+  "status": "NO_NEW_CONTRACT_FIELDS_OR_DDL_PENDING_INDEPENDENT_QA_SOURCE_INTEGRATION",
+  "fieldMapping": {
+    "basis.allocations": "Raw current cumulative studio_guided_allocations documents, original order; never effective projection",
+    "basis.producers": "All raw actual successful read producer facts, all must join effective actions",
+    "basis.consumerEdges": "All raw admitted edges; partition only exact effective success or sole proven no-native excluded attempt",
+    "basis.bootstrap.allocationHash": "Existing actual captured metadata hash of raw allocations, unchanged preimage",
+    "localEffectiveAllocations": "In-memory adapter only: existing raw need identity with final accepted effective consumers; never serialized over raw basis field",
+    "localEffectiveEdges": "Exactly raw edges matching effective successful admissions; sole excluded failed edge remains raw evidence",
+    "candidate.bindings/transfers": "Derived exclusively from effective successful producers/edges with exact final need and reference joins",
+    "backendPlanHistory": "Existing immutable DB translation plans selected by firstSuffixAcceptance revision pointers and parent chain; not a new basis field"
+  },
+  "files": [
+    {
+      "owner": "backend015",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "change": "graph(): validate raw facts and exact exception authority, derive effective producer/edge/need graph; remove unconditional raw allocation count/consumer equality only in authorized narrow case; keep all raw arrays and bootstrap hash unmodified."
+    },
+    {
+      "owner": "backend015",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java",
+      "change": "Keep raw monotonic allocation identity. Any projection helper is read-only/local; raw consumer edges remain stored even for sole failed no-native attempt. Never delete or rewrite raw intent."
+    },
+    {
+      "owner": "backend015",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java",
+      "change": "For accepted first suffix, pass cumulative union to allocation port while preserving effective plan consumer set; keep stable binding identity and actual logical idempotency semantics; allocate before append/pending ACK."
+    },
+    {
+      "owner": "backend015",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "change": "One explicitly guarded first-suffix acceptance permits only unperformed imported meanings/consumer intent and exact excluded attempt; retained successful needs/meanings preserved. Every later plan uses original strict monotonicity."
+    },
+    {
+      "owner": "backend015",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+      "change": "Return all raw arrays unchanged; audit stored old/first/later immutable plan history at freeze using suffix acceptance/obligation associations. Full raw-edge partition must match action inventory, not prefilter unknown rows."
+    },
+    {
+      "owner": "runner015",
+      "path": "studio-runner/src/validator/observedReplay.ts",
+      "change": "Independently derive the same local effective graph and exact provenance guards from existing basis after core validation. Compare derived candidate bindings/transfers; retain raw bootstrap allocationHash and full basisHash commitment."
+    },
+    {
+      "owner": "runner015",
+      "path": "studio-runner/src/executor/observedReplay.ts",
+      "change": "Preserve existing retained-prefix zero-consumer proof rule; ordinary/model orphan read still refused. No raw history access or retry weakening."
+    },
+    {
+      "owner": "cint015 if root later assigns fixture-only port",
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json and tools/check-studio-observed-contracts.cjs",
+      "change": "Optional separate reviewed fixture/oracle semantic port for new cases, no schema change/pin operation/generator write required by ARCH015-02. Keep correction01 freeze separate and exact."
+    }
+  ],
+  "unchanged": [
+    "V14 studio_guided_allocation_identity and append-only SQL guards",
+    "V21 first-suffix/no-native/version/immutability guards",
+    "All existing production schemas, required fields and generated type shapes",
+    "Hash preimages and allocation/context/ACK historical metadata authority",
+    "No-repeat possibly effected action rule; sole exact no-native exception",
+    "Original57+48 and correction01 acceptance obligations"
+  ],
+  "authorityLimits": "Pure basis independently proves graph/exclusion/import provenance. It does not contain every intermediate accepted plan; Java must validate the retained immutable plan-row chain before freezing authenticated basis. Synthetic DB-row sidecars here do not become wire facts or live authentication proof."
+}

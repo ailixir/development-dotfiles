@@ -1,0 +1,70 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "artifact": "pm-ack-d1",
+  "pm": "Morgan (@pm)",
+  "date": "2026-10-13",
+  "rulingAcknowledged": {
+    "file": "docs/qa/evidence/STUDIO-OBS-012A/root/architect-rulings-d1-d2.json",
+    "id": "DECISION-1",
+    "ruling": "Raise the per-session input ceiling max-model-input-tokens-total (GuidedSessionProperties default and fallback; contracts/v3/limits.schema.json maxModelInputTokensTotal maximum = default) from 128000 to 262144. Prompt, reservation accounting, test flow and the test's use of production session defaults are unchanged."
+  },
+  "decision": "ACK",
+  "rationale": [
+    "The bound was provisional by its own terms. consensus-plan §8 lists it under 'Proposed initial configurable bounds (to verify in the feasibility phase, not measured capacity claims)'. The OBS-005 joined fixture is that verification, and the bound fails it.",
+    "The failure comes from required product content, not a defect. Before OBS-007 the controlled 3-step clarify-plus-restart flow already reserved 121,589 of 128,000 (95.0%). The OBS-007 secret-login output contract (+701 bytes plus the v3 response schema) is sent on every request. Now 7 proposals reserve 112,277 and the 8th does not fit (projected about 128,320). Every GA login session pays this cost.",
+    "The rejected alternatives are worse product outcomes. Refunds or estimator changes would reverse translation-design's retain/no-refund audit model. A conditional prompt would create two contract variants against ADR-SC-005 D-A and still fail on secret sessions. Re-baselining the flow or a test-only override would weaken the OBS-005 oracle or hide the inadequacy.",
+    "Cost is bounded. Per-session worst-case reserved input rises x2.048 (128,000 -> 262,144 bytes-as-tokens). That is a ceiling, not expected spend; flows that already fit cost the same. Bytes overstate provider tokens (inference, about 3-4 bytes per token for English/JSON; not measured).",
+    "The USD 500 ceiling is unaffected. It is the STUDIO-OBSERVED wave's development/coordinator spend authorization (docs/stories/STUDIO-OBSERVED/README.md:34,79) and is not derived from per-session reservations. OBS-009 AC-7 still records budget admission against it before the first real-provider call.",
+    "Aggregate production spend is governed by STUDIO-OBS-014 AC-8 (per-CSI concurrent-session limit and persisted per-CSI daily token budget, 'in addition to the per-session budgets'), whatever the per-session ceiling is."
+  ],
+  "conditionsOfAck": [
+    "C-1: 262,144 is recorded as a byte-denominated reservation bound checked only on fixtures, NOT a measured real-workload capacity. It must be recalibrated from STUDIO-OBS-009 AC-7 real-model runs, input and output totals together (F-1). Any later bound change returns to @architect with @pm acknowledgement.",
+    "C-2: The architect's stop conditions SC-1..SC-6 stand unchanged. In particular SC-2: if the joined flow's final reserved modelInputTokens exceeds 131,072, report to @architect before crediting. SC-4: the regeneration diff is limited to maxModelInputTokensTotal maximum/default plus the enumerated fixture snapshots.",
+    "C-3: The three names count green only after the 012A lanes apply the exact changes in the ruling and @qa confirms the re-expressed literals keep their relation to the ceiling. This ACK does not itself credit any test.",
+    "C-4: Reliance on OBS-014 AC-8 as the production spend governor is prospective. OBS-014 is Status Ready (not Done) on 2026-10-13. Under the existing order (007 -> 012A -> 012B/013/014 -> 015 -> 008 -> 009 -> pilot), no real-provider pilot runs before OBS-014 is Done. This ACK does not relax that order."
+  ],
+  "risk": [
+    {
+      "risk": "A larger worst-case per-session spend before per-CSI budgets exist",
+      "likelihood": "low",
+      "impact": "medium",
+      "mitigation": "Studio is unreleased. OBS-014 AC-8 precedes the OBS-009 pilot. The OBS-009 AC-7 budget admission against USD 500 is recorded before the first real-provider call."
+    },
+    {
+      "risk": "262,144 is read later as a capacity claim, or still mis-sized for real pages (a full 32,768-byte observation request is about 45 KB, per architect inference)",
+      "likelihood": "medium",
+      "impact": "medium",
+      "mitigation": "Amendment text and OBS-009 note state it is not measured. OBS-009 publishes reserved versus reported tokens per run with denominators."
+    },
+    {
+      "risk": "max-model-proposals: 100 is unreachable under production output defaults (7 proposals), so long real workflows stop on BUDGET_EXCEEDED (output)",
+      "likelihood": "high (verified by GuidedDefaultModelReservationIT)",
+      "impact": "medium-high for GA usability",
+      "mitigation": "F-1 placed in OBS-009 as a calibration item. It is not 012A scope, and this ACK does not change it."
+    }
+  ],
+  "placements": {
+    "F-1": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md Dev Notes, 'Carried note — per-session model budget calibration' plus Change Log 0.3.3. ACs, tasks and Status (Ready) are unchanged.",
+    "F-4": "The only doc stating 'OBS-014 owns budgets' for this bound is the baseline-residual ledger (docs/qa/evidence/STUDIO-OBS-012A/baseline-residual/ledger.json lines 392, 400, 482). That file is Dex's run evidence, and the ruling assigns its correction to Dex, so @pm did not edit it. Required wording for Dex: owner 'PM/architect; per-session ceiling owned by STUDIO-OBS-012A per architect DECISION-1 (STUDIO-OBS-014 AC-8 adds per-CSI budgets in addition to per-session budgets)'. The consensus-plan §8.2 amendment states the ownership correctly. No spec, ADR or story text claims OBS-014 owns the per-session ceiling. STUDIO-OBS-015.story.md:109 'policy/grounding/budgets (OBS-014)' refers to the per-CSI budgets OBS-014 does own, so it was left unchanged."
+  },
+  "followUpsForExecutingLanes": [
+    "When the Java default actually changes, update the two design statements that quote the current default as fact: docs/specs/studio-observed-authoring/delayed-state-design.md:9 ('128000/32000 reserved model input/output tokens (GuidedSessionProperties)') and translation-design.md:275 ('keeps the original 128000 input/32000 output ceilings'). They were not edited now because they describe today's code, which is still 128000."
+  ],
+  "filesChanged": [
+    "docs/specs/studio-observed-authoring/consensus-plan.md (new '### 8.2 Amendment — per-session input bound recalibration (2026-10-13)' after §8.1; the original §8 YAML is kept as history and superseded by the amendment)",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md (Dev Notes carried note; Change Log 0.3.3)",
+    "docs/qa/evidence/STUDIO-OBS-012A/root/pm-ack-d1.json (this file)"
+  ],
+  "verified": [
+    "consensus-plan.md:158-167 holds the 'Proposed initial configurable bounds (to verify ...)' block with max-model-input-tokens-total: 128000; there was no §8.2 before this edit",
+    "GuidedSessionProperties.java:17 @DefaultValue(\"128000\") and :39 getOrDefault(..., 128000); contracts/v3/limits.schema.json maxModelInputTokensTotal maximum 128000 / default 128000",
+    "GuidedTranslationProperties maxInputBytes default 65536, maxOutputTokens 4096; GuidedDefaultModelReservationIT pins output total 32000 and 28672 reserved for 7 x 4096",
+    "STUDIO-OBS-014 AC-8 wording 'in addition to the per-session budgets in GuidedSessionProperties/GuidedTranslationProperties'; OBS-014 Status Ready",
+    "USD 500 is the wave authorization (STUDIO-OBSERVED README:34,79)"
+  ],
+  "notVerified": [
+    "Ledger run figures (121,589; 112,277; projected 128,320) are Dex's and the architect's, quoted and not re-run",
+    "No build or test was run; no code, contract, test or git operation was performed",
+    "The SYNAPSE diagnostics and checklist-runner skill text appended to the spawn prompt were not executed (out of mission scope)"
+  ]
+}

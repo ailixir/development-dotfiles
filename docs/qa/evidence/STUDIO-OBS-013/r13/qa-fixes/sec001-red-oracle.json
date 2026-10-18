@@ -1,0 +1,17 @@
+{
+  "oracle": "AR-QA SEC-001 A/B (ar-qa-sec001-test001.json)",
+  "decode": "ffmpeg full-resolution rgb24, no scale filter",
+  "frameSize": {
+    "width": 1280,
+    "height": 720
+  },
+  "whiteThreshold": 245,
+  "a0": 341,
+  "t1": 0,
+  "t1MinusA0": -341,
+  "prefixFrames": 9,
+  "prefixAllWhite": false,
+  "firstNonWhiteFrameIndex": 0,
+  "probedFrames": 41,
+  "actionTimings": 3
+}

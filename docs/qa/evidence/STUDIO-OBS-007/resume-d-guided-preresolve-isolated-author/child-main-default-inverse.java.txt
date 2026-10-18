@@ -1,0 +1,159 @@
+{
+      var json = new com.fasterxml.jackson.databind.ObjectMapper();
+      JsonNode cfg = json.readTree(Files.readAllBytes(Path.of(args[0])));
+      var contracts = new GuidedContracts();
+      var source =
+          new DriverManagerDataSource(
+              cfg.path("url").asText(),
+              cfg.path("username").asText(),
+              cfg.path("password").asText());
+      var jdbc = new JdbcTemplate(source);
+      var transactions = new TransactionTemplate(new DataSourceTransactionManager(source));
+      var repo = new GuidedSessionRepository(jdbc, transactions, contracts);
+      var materializer = new GuidedMaterializationService(jdbc, contracts);
+      String testId = cfg.path("testId").asText();
+      GuidedSessionAccess childAccess =
+          new GuidedSessionAccess() {
+            @Override
+            public Snapshot resolve(Authentication actor, JsonNode start) {
+              throw new GuidedSessionException(
+                  "FORBIDDEN_SCOPE", 403); // Child dispatches existing authority only.
+            }
+
+            @Override
+            public void checkCurrent(JsonNode session) {
+              require(
+                  session.path("testId").asText().equals(testId)
+                      && session.path("sessionId").asText().equals(cfg.path("sessionId").asText())
+                      && session.path("scope").path("principalId").asText().equals("user-1")
+                      && session.path("scope").path("csiId").asText().equals("CSI-123")
+                      && session.path("scope").path("environmentId").asText().equals("fixture")
+                      && jdbc.queryForObject(
+                              "SELECT count(*) FROM ui_tests WHERE id=? AND csi_id='CSI-123'"
+                                  + " AND environment='fixture' AND deleted_at IS NULL",
+                              Integer.class,
+                              UUID.fromString(testId))
+                          == 1,
+                  "FORBIDDEN_SCOPE",
+                  403);
+            }
+
+            @Override
+            public void checkSourceCurrent(JsonNode session) {
+              checkCurrent(session);
+              var row =
+                  jdbc.queryForMap(
+                      "SELECT steps::text,variables::text FROM ui_tests WHERE id=? FOR SHARE",
+                      UUID.fromString(testId));
+              require(
+                  contracts.parse((String) row.get("steps")).equals(cfg.path("source"))
+                      && contracts
+                          .parse((String) row.get("variables"))
+                          .equals(cfg.path("configuration")),
+                  "REVISION_CONFLICT",
+                  409);
+            }
+
+            @Override
+            public void checkUser(Authentication actor, JsonNode session) {
+              checkCurrent(session);
+              require(
+                  actor instanceof BffAuthenticationToken
+                      && ((UserIdentity) actor.getPrincipal())
+                          .userId()
+                          .equals(session.path("scope").path("principalId").asText())
+                      && new CsiOwnershipEvaluator().canExecute(actor, "CSI-123"),
+                  "FORBIDDEN_SCOPE",
+                  403);
+            }
+
+            @Override
+            public GuidedSourceReferenceValidator.Sources sources(JsonNode session) {
+              checkSourceCurrent(session);
+              JsonNode sourceSteps = cfg.path("source").path("steps");
+              require(sourceSteps.isArray() && sourceSteps.size() == 1, "REVISION_CONFLICT", 409);
+              JsonNode sourceStep = sourceSteps.get(0);
+              require(
+                  sourceStep.path("stepId").asText().equals("step-1")
+                      && sourceStep
+                          .path("text")
+                          .asText()
+                          .equals("Enter <secret PASS> as password."),
+                  "REVISION_CONFLICT",
+                  409);
+              return new GuidedSourceReferenceValidator.Sources(
+                  "source-1",
+                  "config-1",
+                  Map.of(
+                      sourceStep.path("stepId").asText(),
+                      new GuidedSourceReferenceValidator.Source(
+                          sourceStep.path("text").asText(), List.of())),
+                  Map.of(
+                      "ref-PASS",
+                      new GuidedSourceReferenceValidator.ConfigurationValue(
+                          null,
+                          sourceStep.path("stepId").asText(),
+                          "secretRef",
+                          "fill.value",
+                          session.path("scopeHash").asText(),
+                          false,
+                          "PASS")));
+            }
+          };
+      var service =
+          new GuidedSessionService(
+              repo,
+              contracts,
+              childAccess,
+              new GuidedSessionProperties(true, Map.of("maxSessionSeconds", 600)),
+              Clock.systemUTC());
+      service.installBridge(
+          materializer,
+          new GuidedPreparationStore(jdbc, contracts),
+          new GuidedBindingStore(jdbc, contracts, materializer),
+          new GuidedAssignmentStore(jdbc, contracts));
+      service.installSecretAudit(new SecretAuditLifecycle(jdbc, new SecretUseAuditRecorder(jdbc)));
+      KeyStore keys = KeyStore.getInstance("PKCS12");
+      try (var input = Files.newInputStream(Path.of(cfg.path("tlsKeyStore").asText()))) {
+        keys.load(input, "fixture".toCharArray());
+      }
+      var km = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+      km.init(keys, "fixture".toCharArray());
+      KeyStore trust = KeyStore.getInstance("PKCS12");
+      try (var input = Files.newInputStream(Path.of(cfg.path("tlsTrustStore").asText()))) {
+        trust.load(input, "fixture".toCharArray());
+      }
+      var tm = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+      tm.init(trust);
+      SSLContext tls = SSLContext.getInstance("TLS");
+      tls.init(km.getKeyManagers(), tm.getTrustManagers(), new SecureRandom());
+      var receiver =
+          new GuidedRunnerClient(
+              URI.create(cfg.path("runner").asText()),
+              tls,
+              () -> cfg.path("runnerToken").asText(),
+              contracts);
+      var dispatch = new GuidedDispatchService(service, materializer, receiver);
+      var provider =
+          new com.citi.put.checks.studio.guided.publication.ObservedResolverProcessCrashIT
+              .FixtureProvider(
+              URI.create(cfg.path("provider").asText()),
+              Path.of(cfg.path("stage").asText()),
+              com.citi.put.checks.studio.guided.publication.ObservedResolverProcessCrashIT.Cut
+                  .READ_BEFORE_DECISION);
+      dispatch.installReferences(
+          new VaultStudioReferenceResolver(
+              provider,
+              (principal, csi, environment, secret) ->
+                  principal.equals("user-1")
+                      && csi.equals("CSI-123")
+                      && environment.equals("fixture")
+                      && secret.equals("PASS")));
+      dispatch.dispatch(
+          new GuidedInternalSecurity.Identity("controller-1", "backend-controller"),
+          cfg.path("sessionId").asText(),
+          1,
+          cfg.path("consumeKey").asText(),
+          cfg.path("advance"));
+      throw new AssertionError("Owned controller cut unexpectedly returned");
+    }

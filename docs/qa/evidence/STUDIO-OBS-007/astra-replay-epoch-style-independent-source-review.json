@@ -1,0 +1,20 @@
+{
+  "verdict": "GO_EXACT_EQUIVALENT_EPOCH_SELECTION_STYLE_CORRECTION",
+  "candidatePatchSha256": "456e860a56e8c68badd363e2a4164a57fad54620cebf75811422421efaf7ee00",
+  "candidateSourceSha256": "1b971992a670c20225667a1c2f9bf1a09f10aaaa6ddcf37fa45c7394072e3a01",
+  "checks": {
+    "baseHashMatches": true,
+    "candidateHashMatches": true,
+    "patchHashMatches": true,
+    "exactSingleReplacement": true,
+    "inverseExact": true
+  },
+  "semantics": [
+    "Both expressions select the same session epoch for exact session name and the same replay request epoch for exact replay root name.",
+    "Every other nonnull name produces null and follows the unchanged native fallback. Null retains refusal by dereference; private production caller names are nonnull.",
+    "No epoch values, schema strategy, configuration guard, validation order, native child behavior, test, client, budget or publisher code changes."
+  ],
+  "scope": "Source equivalence only. Root strict and actual affected gates remain required; prior strict failure remains preserved.",
+  "sharedSourceChangedByReviewer": false,
+  "buildOrRuntimeExecutedByReviewer": false
+}

@@ -1,0 +1,21 @@
+--- a/src/guided/ownership.ts	2026-10-13 19:35:53
++++ b/src/guided/ownership.ts	2026-10-13 19:36:15
+@@ -125,7 +125,7 @@
+     // Context delivery races renewal: its timestamp is informational, never local authority.
+     const authorized={...structuredClone(context),leaseExpiresAt:grant.owner.leaseExpiresAt};
+     if(entry.runtime){await entry.contextStart;this.live(entry);return entry.runtime.update({...authorized,leaseExpiresAt:entry.grant.owner.leaseExpiresAt});}
+-    entry.runtime=new GuidedRuntime(authorized,{...this.options,capabilities:grant.scope.capabilities,onStopping:()=>{this.invalidate(entry);}});
++    entry.runtime=new GuidedRuntime(authorized,{...this.options,capabilities:grant.scope.capabilities,csiId:grant.scope.csiId,onStopping:()=>{this.invalidate(entry);}});
+     entry.contextStart=entry.runtime.start();this.schedule(entry);
+     try{await entry.contextStart;this.live(entry);return identity(context);}catch{await this.stopEntry(entry,'CONTEXT_LOST');throw new Error('CONTEXT_LOST');}
+   }
+@@ -152,5 +152,8 @@
+     }
+     const entry=this.entries.get(message.sessionId);insist(entry?.runtime&&sameIdentity(entry.runtime.currentIdentity,message),'IDENTITY_MISMATCH');await this.stopEntry(entry,message.reason);return identity(message);
+   }
+-  async close():Promise<void>{const results=await Promise.allSettled([...this.entries.values()].map(entry=>this.stopEntry(entry,'CONTEXT_LOST')));if(results.some(result=>result.status==='rejected'))throw new Error('CONTEXT_LOST');}
++  async close():Promise<void>{const results=await Promise.allSettled([...this.entries.values()].map(entry=>this.stopEntry(entry,'CONTEXT_LOST')));
++    // STUDIO-OBS-013: a drain waits for each session recording to settle (bounded; never rejects).
++    await Promise.all([...this.entries.values()].map(entry=>entry.runtime?.recordingSettled ?? Promise.resolve()));
++    if(results.some(result=>result.status==='rejected'))throw new Error('CONTEXT_LOST');}
+ }

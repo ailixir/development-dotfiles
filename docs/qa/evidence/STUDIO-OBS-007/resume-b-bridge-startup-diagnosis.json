@@ -1,0 +1,96 @@
+{
+  "status": "READ_ONLY_DIAGNOSIS_FROZEN_NO_SOURCE_OR_RUNTIME_CHANGE",
+  "authority": "resume-b-bridge-startup-diagnosis-intent.txt + context",
+  "gate": "docs/qa/evidence/STUDIO-OBS-007/resume-observe-session-bridge-thirtynine-current/result.json",
+  "actualFailures": {
+    "commonPhase": "startWorker readiness before every selected test body",
+    "workerLogCount": 5,
+    "logs": [
+      {
+        "localOrdinal": 1,
+        "logBytes": 1088,
+        "fixedErrorCode": "ERR_MODULE_NOT_FOUND",
+        "missingHelperExactCanonicalMatch": true
+      },
+      {
+        "localOrdinal": 2,
+        "logBytes": 1088,
+        "fixedErrorCode": "ERR_MODULE_NOT_FOUND",
+        "missingHelperExactCanonicalMatch": true
+      },
+      {
+        "localOrdinal": 3,
+        "logBytes": 1088,
+        "fixedErrorCode": "ERR_MODULE_NOT_FOUND",
+        "missingHelperExactCanonicalMatch": true
+      },
+      {
+        "localOrdinal": 4,
+        "logBytes": 1088,
+        "fixedErrorCode": "ERR_MODULE_NOT_FOUND",
+        "missingHelperExactCanonicalMatch": true
+      },
+      {
+        "localOrdinal": 5,
+        "logBytes": 1088,
+        "fixedErrorCode": "ERR_MODULE_NOT_FOUND",
+        "missingHelperExactCanonicalMatch": true
+      }
+    ]
+  },
+  "cause": {
+    "fixedError": "ERR_MODULE_NOT_FOUND",
+    "missingSourceModule": "scripts/browser-provenance.mjs",
+    "importingCompiledModule": "compat/runtime-versions.js",
+    "originalImport": "../../scripts/browser-provenance.mjs",
+    "originalLaunch": "node WORKER_SNAPSHOT/run/guidedMain.js with STUDIO_GUIDED_CONFIG_FILE",
+    "originalFixtureCopy": "Files.walk(sourceBuild) copies only studio-runner/dist to worker-dist, package.json and node_modules link created outside snapshot; no sibling scripts helper is copied",
+    "missingExpectedHelper": true,
+    "canonicalComparison": "Private realpath-normalized comparison avoids macOS /var versus /private/var spelling difference; no raw paths or IDs exported",
+    "guardTiming": "ESM static dependency resolution fails before guidedMain main parses mounted config, performs startup browser provenance validation or listens. It cannot reach changed observeV2 path."
+  },
+  "compatibilityFacts": {
+    "archivedBridgeSourceMatchesLive": true,
+    "bridgeSourceSha256": "1d45909a1fbd9764a4086c109a796ddeb79a9deeddf65f6c0680cfdaaf0a1f7f",
+    "capturedFilesMatchLive": {
+      "run/guidedMain.js": true,
+      "guided/runtime.js": true,
+      "guided/transport.js": true,
+      "guided/schemas.json": true,
+      "runtime-versions.json": true
+    },
+    "capturedNodeMetadata": "v22.23.2",
+    "helperSourceSha256": "ea0dcc15b943a935766ba5cb953a0c6b6b1cdfc94c0520e20f99d04e9171dc42",
+    "helperImports": "Node builtins only: node:crypto, node:fs, node:path, node:os; no additional local transitive dependency",
+    "mountedConfigKeyAllowlistAndPortValid": true,
+    "completeConfigRuntimeValidation": "NOT_REACHED; allowlist/port review alone is not complete startup PASS"
+  },
+  "smallestCorrectionProposal": {
+    "onlyPath": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+    "location": "Static fixture snapshot setup immediately after copying dist, before launching any worker",
+    "steps": [
+      "Create TEMP/scripts in the owned fixture tree.",
+      "Copy the exact original studio-runner/scripts/browser-provenance.mjs bytes to TEMP/scripts/browser-provenance.mjs.",
+      "Add its actual SHA256 to existing worker snapshot metadata using a fixed relative helper identity."
+    ],
+    "retained": [
+      "All selected method names/bodies and readiness bound",
+      "Original worker configuration, Node invocation and callback/TLS authority",
+      "Original provenance/checksum/executable/runtime startup checks",
+      "Original shutdown/log-scan behavior"
+    ],
+    "notAuthorizedOrProposed": [
+      "No production or dist changes",
+      "No skipped browser provenance check",
+      "No change to observation/refresh guards or 1s/2s bounds"
+    ]
+  },
+  "verificationRequest": "Coordinator-focused existing five Bridge observation/refresh selectors after exact fixture correction, with original Service3286 candidate retained; preserve current39 red receipt. No test result claimed by this diagnosis.",
+  "checks": {
+    "sourceEdit": false,
+    "runtimeOrProbe": false,
+    "compilerOrTests": false,
+    "sql": false,
+    "models": false
+  }
+}

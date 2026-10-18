@@ -1,0 +1,1812 @@
+{
+  "artifact": "STUDIO-OBS-015 build07/pins07/full default Node13 feedback",
+  "at": "2026-10-15T15:49:30.794578+00:00",
+  "status": "RED_FULL_DEFAULT_NODE13_11NEW_FIXTURE_FAILURES_3UNHANDLED_COVERAGE_NOT_EVALUATED",
+  "authorization": "Exactly one sequential captured build, asserted-pin check and full unfiltered default suite. No source exclusions; every next command followed previous exit0. All source lanes held; no retries/fixes/extra tests/native/Gradle/DB.",
+  "commands": [
+    {
+      "stage": "build07",
+      "outerCommand": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-runner-build.py runner-build-feedback-attempt07",
+      "handle": 77170,
+      "result": {
+        "command": [
+          "npm",
+          "run",
+          "build"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-15T15:45:14.647877+00:00",
+        "elapsedSeconds": 2.12,
+        "exit": 0,
+        "sourceStable": true,
+        "sourceDigestBefore": "d423fbe530504f6e0e7b779570817715abf1dcdddc525d55ebbed233e55fa93b",
+        "sourceDigestAfter": "d423fbe530504f6e0e7b779570817715abf1dcdddc525d55ebbed233e55fa93b",
+        "distMutationAuthorized": true,
+        "distDigestBefore": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+        "distDigestAfter": "9f2a53fdd175232db3104dc826c556bf85664e782026105085415141ff7de26d",
+        "changedDistFiles": [
+          "run/observedReplayAdapter.js",
+          "run/observedReplayAdapter.js.map"
+        ],
+        "logSha256": "50d8b286b802e2ce024ca6690dd1f1000b4bcd043b5615565d354c439374330a",
+        "testsExecuted": 0,
+        "nativeExecuted": false,
+        "scope": "Real configured runner build; dist mutation is expected, source mutation is not",
+        "buildInputStable": true,
+        "buildInputDigestBefore": "d423fbe530504f6e0e7b779570817715abf1dcdddc525d55ebbed233e55fa93b",
+        "buildInputDigestAfter": "d423fbe530504f6e0e7b779570817715abf1dcdddc525d55ebbed233e55fa93b"
+      }
+    },
+    {
+      "stage": "pins07",
+      "outerCommand": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-runner.py runner-pins-feedback-attempt07 node scripts/check-pins.mjs --json",
+      "result": {
+        "command": [
+          "node",
+          "scripts/check-pins.mjs",
+          "--json"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-15T15:45:26.406017+00:00",
+        "elapsedSeconds": 0.25,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "1f6461a60833e3eae92fa0706462c0092fe19606c2cd3491833e5b6b6264c63d",
+        "testInputStable": true,
+        "testInputDigestBefore": "d423fbe530504f6e0e7b779570817715abf1dcdddc525d55ebbed233e55fa93b",
+        "testInputDigestAfter": "d423fbe530504f6e0e7b779570817715abf1dcdddc525d55ebbed233e55fa93b"
+      }
+    },
+    {
+      "stage": "unit13",
+      "outerCommand": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-runner.py runner-unit-feedback-attempt13 ./node_modules/.bin/vitest run",
+      "handle": 46504,
+      "result": {
+        "command": [
+          "./node_modules/.bin/vitest",
+          "run",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-unit-feedback-attempt13-vitest.json"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-15T15:45:34.549641+00:00",
+        "elapsedSeconds": 25.0,
+        "exit": 1,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "d1109010cacaf5d94d43e77b05eb65d5aae4656bcb2402fb2ea22a7cc69c9f0b",
+        "testInputStable": true,
+        "testInputDigestBefore": "d423fbe530504f6e0e7b779570817715abf1dcdddc525d55ebbed233e55fa93b",
+        "testInputDigestAfter": "d423fbe530504f6e0e7b779570817715abf1dcdddc525d55ebbed233e55fa93b",
+        "vitest": {
+          "success": false,
+          "numPassedTests": 2163,
+          "numFailedTests": 11,
+          "numPendingTests": 29,
+          "numTotalTests": 2203,
+          "numPassedTestSuites": 336,
+          "numFailedTestSuites": 2
+        },
+        "vitestReportSha256": "9c04cee3730f8530324c35800e15b870971fed536f410fc907aa57ef5f5bc305"
+      }
+    }
+  ],
+  "wrapperHashes": {
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-runner-build.py": "ab86ba4bbfdb1e7ad10049f537229056c1c60f273fb94b28c6b1e3acc2478095",
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-runner.py": "51e38cd9b098e519618378acac28f03e867f53c9e4a25c4b4f2727bc463df3d0"
+  },
+  "build": {
+    "actualVerdict": "PASS_CONFIGURED_BUILD_SOURCE_STABLE",
+    "oldDistDigest": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "newDistDigest": "9f2a53fdd175232db3104dc826c556bf85664e782026105085415141ff7de26d",
+    "exactChangedFiles": [
+      {
+        "path": "run/observedReplayAdapter.js",
+        "beforeSha256": "1fadccfc04f79e211b9beeb2e708c41345318cd77d358dfcce658d03e79f2929",
+        "afterSha256": "ba83ecf9ff73f753b57b1555044a7f871a3ed3e612a19b7b846888f40fbc42e3"
+      },
+      {
+        "path": "run/observedReplayAdapter.js.map",
+        "beforeSha256": "11150a95e2195ca6e3d8aa51b22557e25e335d4bcb803a1855a5b3a1e47e7834",
+        "afterSha256": "91bc194dd936b0adeac454d6fef473b8a37d26f5a19bdba5ee29ff09b030c0ae"
+      }
+    ],
+    "mutationAuthorized": true,
+    "productionAdapterCaptured": "473653e3ded3312d433cbe23c1304ef722a164bed3b15cd883d7b836773515f4",
+    "nativeTestsExecuted": false,
+    "sourceBundle": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a"
+  },
+  "assertedPins": {
+    "actualVerdict": "PASS_ASSERTED_PINS_ONLY",
+    "actualJson": {
+      "ok": true,
+      "failures": [],
+      "notAsserted": [
+        "dist/runtime-versions.json chromiumBuild is not asserted (it is null): this build did not run inside the pinned Playwright image, or ran there without being told which image it was, so the browser build was not asserted (ED-05).",
+        "dist/runtime-versions.json image is not asserted (it is null): this build did not run inside the pinned Playwright image, or ran there without being told which image it was, so the browser build was not asserted (ED-05)."
+      ],
+      "pins": {
+        "declared": "1.63.0",
+        "locked": "1.63.0",
+        "image": "1.63.0",
+        "recorded": "1.63.0",
+        "declaredTypescript": "5.9.3",
+        "engines": ">=22.11.0 <25.0.0",
+        "nvmrc": "22",
+        "runtime": {
+          "playwright": "1.63.0",
+          "playwrightLocked": "1.63.0",
+          "playwrightImageTag": "1.63.0",
+          "chromiumBuild": null,
+          "node": "v23.10.0",
+          "nodeEngineRange": ">=22.11.0 <25.0.0",
+          "nodeMajorPin": "22",
+          "validatorSchema": "2.0.0",
+          "validatorParser": "typescript@5.9.3",
+          "syntaxReference": "2.1.0",
+          "executor": "2.1.0",
+          "artifact": 1,
+          "image": null,
+          "observedSchemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
+          "observedReferenceBundleHash": "7f308aaf9e899da23951479b5ecd6796524af8b3bd971e0ea8e1b1b5ae52ae85",
+          "observedChromiumBuild": "1243",
+          "observedBrowserProvenance": {
+            "channel": "chromium",
+            "headless": true,
+            "chromiumSandbox": true,
+            "args": [],
+            "platform": "darwin",
+            "arch": "arm64",
+            "revision": "1243",
+            "executableRelativePath": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+            "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+          },
+          "observedBrowserLauncherSha256": "f1409ce23bc45c7cb6016053dd58f9d0fd371fd2d0773cc042fadaeee2d3356a"
+        },
+        "runtimePresent": true
+      }
+    },
+    "notAssertedStatus": "chromiumBuild=null and image=null remain NOT_ASSERTED/ED05. DeclaredPlaywright image pin/local observed1243 provenance do not prove execution inside pinned internal image.",
+    "log": {
+      "path": "execution/runner-pins-feedback-attempt07.log",
+      "sha256": "1f6461a60833e3eae92fa0706462c0092fe19606c2cd3491833e5b6b6264c63d"
+    }
+  },
+  "unitCounts": {
+    "collected": 2203,
+    "passed": 2163,
+    "failed": 11,
+    "skipped": 29,
+    "files": {
+      "total": 104,
+      "passed": 102,
+      "failed": 1,
+      "skipped": 1,
+      "failedToLoad": 0,
+      "beforeAllAborted": 0
+    },
+    "logicalSuites": {
+      "total": 338,
+      "passed": 336,
+      "failed": 2
+    },
+    "unhandledRejections": 3,
+    "unhandledSuppressed": false
+  },
+  "prior2187Multiplicity": {
+    "preserved": 2187,
+    "removed": 0,
+    "changedMultiplicity": 0,
+    "allPriorStatusesRetained": true,
+    "priorPassedRetained": 2158,
+    "priorSkippedRetained": 29,
+    "new16": {
+      "passed": 5,
+      "failed": 11
+    },
+    "newTotal": 2203,
+    "duplicatesRetained": [
+      {
+        "file": "studio-runner/test/observedReplayEquivalence.test.ts",
+        "name": "packaged canonical and faithful current policy contracts matches independent canonical-v1 'correction01/empty-prefix-incomplete-\u2026'",
+        "count": 3
+      },
+      {
+        "file": "studio-runner/test/observedReplayEquivalence.test.ts",
+        "name": "packaged canonical and faithful current policy contracts matches independent canonical-v1 'correction01/base-historical-ordinary\u2026'",
+        "count": 3
+      }
+    ]
+  },
+  "skipClassification": {
+    "sameHistorical29": true,
+    "newSkips": 0,
+    "loadOrHookAbortedSkips": 0,
+    "byFile": {
+      "studio-runner/test/deferred.test.ts": 19,
+      "studio-runner/test/run/canary.test.ts": 8,
+      "studio-runner/test/run/sandbox.test.ts": 1,
+      "studio-runner/test/server/drain.test.ts": 1
+    },
+    "priorExactNameReference": {
+      "path": "runner/unit-feedback-attempt12-receipt.json",
+      "sha256": "442814f7035ac44802c5ae5c7633589806008257f8a203bb8fee76734364e923"
+    },
+    "noPassCredit": true
+  },
+  "new16PreparationSafetyCases": [
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary classifies trusted PASSWORD_TARGET_ABSENT without filling, invoking, reacquiring or leaking",
+      "status": "failed",
+      "durationMs": 5.918999999999983,
+      "failureMessageSha256": "41416b0847962bea98ed5b2a39f59c2e2ca2854c8042aaa00098f99a6a7e44f9"
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary classifies trusted PASSWORD_TARGET_AMBIGUOUS without filling, invoking, reacquiring or leaking",
+      "status": "failed",
+      "durationMs": 0.6908750000000055,
+      "failureMessageSha256": "41416b0847962bea98ed5b2a39f59c2e2ca2854c8042aaa00098f99a6a7e44f9"
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary classifies trusted TARGET_CHANGED without filling, invoking, reacquiring or leaking",
+      "status": "failed",
+      "durationMs": 0.339917000000014,
+      "failureMessageSha256": "41416b0847962bea98ed5b2a39f59c2e2ca2854c8042aaa00098f99a6a7e44f9"
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary keeps same-text-absent unrecognized and private at the executor boundary",
+      "status": "failed",
+      "durationMs": 0.6578750000001037,
+      "failureMessageSha256": "c8f0985fa3d086fb847c3662672983602d948ec81c6bf95dcbd0e0d8d4ded3ce"
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary keeps same-text-target unrecognized and private at the executor boundary",
+      "status": "failed",
+      "durationMs": 0.329166999999984,
+      "failureMessageSha256": "c8f0985fa3d086fb847c3662672983602d948ec81c6bf95dcbd0e0d8d4ded3ce"
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary keeps unknown-trusted unrecognized and private at the executor boundary",
+      "status": "failed",
+      "durationMs": 0.30950000000007094,
+      "failureMessageSha256": "c8f0985fa3d086fb847c3662672983602d948ec81c6bf95dcbd0e0d8d4ded3ce"
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary keeps canary-unknown unrecognized and private at the executor boundary",
+      "status": "failed",
+      "durationMs": 0.3311660000000529,
+      "failureMessageSha256": "c8f0985fa3d086fb847c3662672983602d948ec81c6bf95dcbd0e0d8d4ded3ce"
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary preserves exact observed-refusal rejection identity and never invents no-effect authority",
+      "status": "passed",
+      "durationMs": 1.1282079999999723,
+      "failureMessageSha256": null
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary preserves exact same-text rejection identity and never invents no-effect authority",
+      "status": "passed",
+      "durationMs": 0.2539170000000013,
+      "failureMessageSha256": null
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary preserves exact unknown-trusted rejection identity and never invents no-effect authority",
+      "status": "passed",
+      "durationMs": 0.21404199999994944,
+      "failureMessageSha256": null
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary preserves exact late-phase rejection identity and never invents no-effect authority",
+      "status": "passed",
+      "durationMs": 4.221374999999966,
+      "failureMessageSha256": null
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary preserves exact non-password-target rejection identity and never invents no-effect authority",
+      "status": "passed",
+      "durationMs": 1.4682080000000042,
+      "failureMessageSha256": null
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary preserves cancel precedence while password preparation is held",
+      "status": "failed",
+      "durationMs": 5004.388584,
+      "failureMessageSha256": "acb43a3801e25b80b57b6b22aed1a9a27b7db638a54dec9232e9833a6aca5387"
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary preserves deadline precedence while password preparation is held",
+      "status": "failed",
+      "durationMs": 5004.620041,
+      "failureMessageSha256": "acb43a3801e25b80b57b6b22aed1a9a27b7db638a54dec9232e9833a6aca5387"
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary preserves authority precedence while password preparation is held",
+      "status": "failed",
+      "durationMs": 5001.726417,
+      "failureMessageSha256": "acb43a3801e25b80b57b6b22aed1a9a27b7db638a54dec9232e9833a6aca5387"
+    },
+    {
+      "file": "studio-runner/test/observedReplayExecutor.test.ts",
+      "name": "ordinary password preparation trust and lifetime boundary keeps a legal prepared password fill as exactly one invocation and positive USED evidence",
+      "status": "failed",
+      "durationMs": 2.1505829999987327,
+      "failureMessageSha256": "604b5ae9643a5ed24c96c127986c42eaeb1ecabf0c14a5d4308fe65a9eac959f"
+    }
+  ],
+  "failureGroups": [
+    {
+      "id": "NEW_EXECUTOR_PARENT_GUARD_ID",
+      "count": 8,
+      "owner": "Runner owned test/observedReplayExecutor.test.ts factory",
+      "cases": [
+        "ordinary password preparation trust and lifetime boundary classifies trusted PASSWORD_TARGET_ABSENT without filling, invoking, reacquiring or leaking",
+        "ordinary password preparation trust and lifetime boundary classifies trusted PASSWORD_TARGET_AMBIGUOUS without filling, invoking, reacquiring or leaking",
+        "ordinary password preparation trust and lifetime boundary classifies trusted TARGET_CHANGED without filling, invoking, reacquiring or leaking",
+        "ordinary password preparation trust and lifetime boundary keeps same-text-absent unrecognized and private at the executor boundary",
+        "ordinary password preparation trust and lifetime boundary keeps same-text-target unrecognized and private at the executor boundary",
+        "ordinary password preparation trust and lifetime boundary keeps unknown-trusted unrecognized and private at the executor boundary",
+        "ordinary password preparation trust and lifetime boundary keeps canary-unknown unrecognized and private at the executor boundary",
+        "ordinary password preparation trust and lifetime boundary keeps a legal prepared password fill as exactly one invocation and positive USED evidence"
+      ],
+      "rootCause": "Factory guard and action both use guardId=password. Frozen executable graph requires ordered g0 at operation index0. validateObservedExecute->validateGraph129 rejects INVALID_CONTRACT before adapter. These cases never exercise trusted mapping/noEffect/secretUse/positivefill or intended unknown error behavior.",
+      "source": [
+        "studio-runner/test/observedReplayExecutor.test.ts:323",
+        "studio-runner/test/observedReplayExecutor.test.ts:324",
+        "studio-runner/test/observedReplayExecutor.test.ts:330",
+        "studio-runner/src/executor/observedReplay.ts:129"
+      ],
+      "disposition": "Correct coherent fixture parent ID under separate root source release, preserve all malicious port errors and assertions. Do not weaken production gN requirement."
+    },
+    {
+      "id": "NEW_HELD_PREPARATION_NEVER_ENTERED_UNOBSERVED_REJECTION",
+      "count": 3,
+      "owner": "Runner owned test/observedReplayExecutor.test.ts held-case orchestration",
+      "cases": [
+        "ordinary password preparation trust and lifetime boundary preserves cancel precedence while password preparation is held",
+        "ordinary password preparation trust and lifetime boundary preserves deadline precedence while password preparation is held",
+        "ordinary password preparation trust and lifetime boundary preserves authority precedence while password preparation is held"
+      ],
+      "rootCause": "Same malformed guard rejects work before prepare enters. Tests await entered.promise before observing work rejection, causing three actual unhandled INVALID_CONTRACT rejections and three5000ms test timeouts. No cancellation/deadline/withdrawn-authority precedence reached.",
+      "source": [
+        "studio-runner/test/observedReplayExecutor.test.ts:363",
+        "studio-runner/test/observedReplayExecutor.test.ts:365",
+        "studio-runner/test/observedReplayExecutor.test.ts:367"
+      ],
+      "disposition": "Separate source release must validate a coherent parent before held async work and observe early rejection while waiting for entered. Preserve original timeouts/authority checks; no suppression or error swallowing."
+    }
+  ],
+  "productionCounterexampleStatus": "None demonstrated by these11 fixture failures. Five direct adapter identity/unknown-trust/latephase/nonpassword negatives executed PASS at controlled unit scope; trusted translated outcomes/noEffect/USED and held cancellation/deadline/authority remain unproven. Native ordinary zero/two password classification remains actual native01 open until rerun on new build.",
+  "newCaseScope": "Synthetic coherent intent/controlled ObservationSession ports only; passing direct negatives are not actual Chromium/Core/Vault/PG authority. No native/browser fixture selected by default config.",
+  "baselineSelectedSuites": {
+    "studio-runner/test/guided/incrementalRuntime.test.ts": {
+      "path": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "counts": {
+        "passed": 15
+      },
+      "collected": 15,
+      "status": "passed",
+      "fileError": false
+    },
+    "studio-runner/test/observedSnapshotPreimages.test.ts": {
+      "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+      "counts": {
+        "passed": 255
+      },
+      "collected": 255,
+      "status": "passed",
+      "fileError": false
+    },
+    "studio-runner/test/observedIncrementalValidation.test.ts": {
+      "path": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "counts": {
+        "passed": 121
+      },
+      "collected": 121,
+      "status": "passed",
+      "fileError": false
+    },
+    "studio-runner/test/retainedExecute.test.ts": {
+      "path": "studio-runner/test/retainedExecute.test.ts",
+      "counts": {
+        "passed": 110
+      },
+      "collected": 110,
+      "status": "passed",
+      "fileError": false
+    },
+    "studio-runner/test/controlReferencePreservation.test.ts": {
+      "path": "studio-runner/test/controlReferencePreservation.test.ts",
+      "counts": {
+        "passed": 13
+      },
+      "collected": 13,
+      "status": "passed",
+      "fileError": false
+    },
+    "studio-runner/test/observedReplayExecutor.test.ts": {
+      "path": "studio-runner/test/observedReplayExecutor.test.ts",
+      "counts": {
+        "passed": 37,
+        "failed": 11
+      },
+      "collected": 48,
+      "status": "failed",
+      "fileError": false
+    },
+    "studio-runner/test/schemaSemantics.test.ts": {
+      "path": "studio-runner/test/schemaSemantics.test.ts",
+      "counts": {
+        "passed": 15
+      },
+      "collected": 15,
+      "status": "passed",
+      "fileError": false
+    }
+  },
+  "actual29BoundaryRoutes": [
+    {
+      "name": "immutable-original-source-cannot-be-replaced",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "private-plain-hash-must-match-before-freeze",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "immutable-source-manifest-hash-is-exact",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "candidate-snapshot-map-cannot-be-copied-even-if-resealed",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "candidate-gap-in-reused-prefix",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "candidate-older-same-test-revision-id",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "candidate-suffix-reuse-is-forbidden",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "raw-edge-cannot-name-pending-action",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "raw-allocation-cannot-be-replaced-with-effective-empty-copy",
+      "route": "PUBLIC_MINIMUM_ADMITTED_GRAPH_JOIN_PLUS_EXTERNAL_EXACT_HISTORY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "raw-failed-edge-history-cannot-be-erased",
+      "route": "PUBLIC_MINIMUM_ADMITTED_GRAPH_JOIN_PLUS_EXTERNAL_EXACT_HISTORY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "receipt-transport-authority-cannot-be-inferred-from-hash",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "candidate-policy-cannot-omit-successful-transfer",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "candidate-policy-binding-cannot-drop-successful-consumer",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "publication-preimage-must-commit-raw-failed-edge",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "publication-preimage-envelope-cannot-change",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "admission-preimage-must-exclude-spent-attempt",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "admission-preimage-is-array-not-wrapper",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "candidate-authorization-preimage-is-exact",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "candidate-source-identity-cannot-be-substituted",
+      "route": "OFFERED_CANDIDATE_REQUEST_VALIDATION",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "REQUIRED_ACTUAL_TIER_NOT_CLOSED_BY_DEFAULT_UNIT"
+    },
+    {
+      "name": "wrong-private-input-hash",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "preparation-substitutes-birth-for-actual",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "unrelated-failed-ledger-cannot-be-omitted",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "hash-is-not-transport-authentication",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "forged-jwt-algorithm",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "missing-mtls",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "wrong-worker-subject",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "stale-callback-owner",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "wrong-assignment",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    },
+    {
+      "name": "wrong-owner-fence",
+      "route": "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY",
+      "status": "passed",
+      "actualPrivateCompanionStatus": "UNFULFILLED_BY_SYNTHETIC_UNIT_ROUTE"
+    }
+  ],
+  "private15ActualBackendStatus": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE. Original15 private immutable/authenticated companions and all24 full required facets remain separate actual-tier obligations.",
+  "coverage": {
+    "enabled": true,
+    "provider": "v8",
+    "actualVerdict": "NOT_EVALUATED_NO_FRESH_TABLE_OR_SUMMARY",
+    "configuredGate": "RED_due11testfailures+3unhandled; no coverage PASS",
+    "freshTextTableEmitted": false,
+    "freshJsonSummaryEmitted": false,
+    "rawCoverageMapEntries": 78,
+    "rawCoverageMap": "Preserved in immutable Vitest JSON; raw map alone is not evaluated normal coverage proof.",
+    "globalThresholds": {
+      "lines": 85,
+      "statements": 85,
+      "functions": 80,
+      "branches": 80,
+      "status": "NOT_EVALUATED"
+    },
+    "sixScopedThresholds": [
+      {
+        "glob": "src/compat/**",
+        "lines": 80,
+        "statements": 80,
+        "functions": 80,
+        "branches": 80,
+        "status": "NOT_EVALUATED"
+      },
+      {
+        "glob": "scripts/**",
+        "lines": 80,
+        "statements": 80,
+        "functions": 80,
+        "branches": 80,
+        "status": "NOT_EVALUATED"
+      },
+      {
+        "glob": "src/server/**",
+        "lines": 85,
+        "statements": 85,
+        "functions": 80,
+        "branches": 80,
+        "status": "NOT_EVALUATED"
+      },
+      {
+        "glob": "src/reporting/**",
+        "lines": 85,
+        "statements": 85,
+        "functions": 80,
+        "branches": 80,
+        "status": "NOT_EVALUATED"
+      },
+      {
+        "glob": "src/main.ts",
+        "lines": 85,
+        "statements": 85,
+        "functions": 80,
+        "branches": 80,
+        "status": "NOT_EVALUATED"
+      },
+      {
+        "glob": "src/run/**",
+        "lines": 85,
+        "statements": 85,
+        "functions": 80,
+        "branches": 80,
+        "status": "NOT_EVALUATED"
+      }
+    ],
+    "config": {
+      "path": "studio-runner/vitest.config.ts",
+      "sha256": "c833caed66dc39aed1677db7cab921e97a5eb5b36291429c5f5e90f1a28c08f8",
+      "unchanged": true
+    },
+    "priorNode12": "Old table/summary/VitestJSON archived and unchanged, scoped only to prior tested source; not credited as Node13 coverage."
+  },
+  "stability": {
+    "allThreeCommandsGlobalSourceStable": true,
+    "sourceDigestBeforeAfter": "d423fbe530504f6e0e7b779570817715abf1dcdddc525d55ebbed233e55fa93b",
+    "noExclusions": true,
+    "unitTestInputStable": true,
+    "unitDistStable": true,
+    "newDistDigest": "9f2a53fdd175232db3104dc826c556bf85664e782026105085415141ff7de26d",
+    "sameSourceDigestAcrossBuildPinsUnits": true,
+    "current52OwnedAndProtectedHashesMatchRemediationCheckpoint": true
+  },
+  "priorEvidencePreservation": {
+    "path": "runner/unit-feedback-attempt13-prior-artifact-preservation.json",
+    "sha256": "fab22e03534331688267c185e1e32104e42af7d1f8ce42aa34865655c7bc3c2d"
+  },
+  "nativeEvidenceStatus": "No8R1manifest/1nonsecretcopy or3238fixed007/013files changed in this CPU gate. Seven secret clips remain private; no new native evidence created, existing failed native01 history immutable.",
+  "allSelectedFileOutcomes": [
+    {
+      "path": "studio-runner/test/browser-provenance.test.ts",
+      "counts": {
+        "passed": 17
+      },
+      "collected": 17,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/compat.test.ts",
+      "counts": {
+        "passed": 6
+      },
+      "collected": 6,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/contract-integrity.test.ts",
+      "counts": {
+        "passed": 3
+      },
+      "collected": 3,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/contract.test.ts",
+      "counts": {
+        "passed": 16
+      },
+      "collected": 16,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/controlReferencePreservation.test.ts",
+      "counts": {
+        "passed": 13
+      },
+      "collected": 13,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/currentWorldFactories.test.ts",
+      "counts": {
+        "passed": 7
+      },
+      "collected": 7,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/deferred.test.ts",
+      "counts": {
+        "skipped": 19
+      },
+      "collected": 19,
+      "status": "skipped",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/deployment-tier-wiring.test.ts",
+      "counts": {
+        "passed": 6
+      },
+      "collected": 6,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/disclosure.test.ts",
+      "counts": {
+        "passed": 14
+      },
+      "collected": 14,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/documentJson.test.ts",
+      "counts": {
+        "passed": 15
+      },
+      "collected": 15,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/generated-contracts.test.ts",
+      "counts": {
+        "passed": 2
+      },
+      "collected": 2,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/isolation.test.ts",
+      "counts": {
+        "passed": 29
+      },
+      "collected": 29,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/lint-boundary.test.ts",
+      "counts": {
+        "passed": 89
+      },
+      "collected": 89,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/nativeBlankSurface.test.ts",
+      "counts": {
+        "passed": 27
+      },
+      "collected": 27,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/nativeControlReadiness.test.ts",
+      "counts": {
+        "passed": 51
+      },
+      "collected": 51,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/no-dynamic-evaluation.test.ts",
+      "counts": {
+        "passed": 8
+      },
+      "collected": 8,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "counts": {
+        "passed": 121
+      },
+      "collected": 121,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/observedReplayEquivalence.test.ts",
+      "counts": {
+        "passed": 76
+      },
+      "collected": 76,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/observedReplayExecutor.test.ts",
+      "counts": {
+        "passed": 37,
+        "failed": 11
+      },
+      "collected": 48,
+      "status": "failed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/observedReplayValidation.test.ts",
+      "counts": {
+        "passed": 119
+      },
+      "collected": 119,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+      "counts": {
+        "passed": 255
+      },
+      "collected": 255,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/observedV3TupleValidation.test.ts",
+      "counts": {
+        "passed": 16
+      },
+      "collected": 16,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/pins.test.ts",
+      "counts": {
+        "passed": 44
+      },
+      "collected": 44,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/profileSafetyFixture.test.ts",
+      "counts": {
+        "passed": 67
+      },
+      "collected": 67,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/redaction.test.ts",
+      "counts": {
+        "passed": 8
+      },
+      "collected": 8,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/retainedExecute.test.ts",
+      "counts": {
+        "passed": 110
+      },
+      "collected": 110,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/runtime-versions.test.ts",
+      "counts": {
+        "passed": 13
+      },
+      "collected": 13,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/schemaSemantics.test.ts",
+      "counts": {
+        "passed": 15
+      },
+      "collected": 15,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/evaluation/fixture-run.test.ts",
+      "counts": {
+        "passed": 3
+      },
+      "collected": 3,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/evaluation/report.test.ts",
+      "counts": {
+        "passed": 10
+      },
+      "collected": 10,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/guided/browser.test.ts",
+      "counts": {
+        "passed": 11
+      },
+      "collected": 11,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/guided/diagnostics.test.ts",
+      "counts": {
+        "passed": 3
+      },
+      "collected": 3,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/guided/evidence.test.ts",
+      "counts": {
+        "passed": 20
+      },
+      "collected": 20,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "counts": {
+        "passed": 15
+      },
+      "collected": 15,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/guided/ownership.test.ts",
+      "counts": {
+        "passed": 13
+      },
+      "collected": 13,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/guided/policyHash.test.ts",
+      "counts": {
+        "passed": 6
+      },
+      "collected": 6,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/guided/runtime.test.ts",
+      "counts": {
+        "passed": 48
+      },
+      "collected": 48,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/guided/schemaAudit.test.ts",
+      "counts": {
+        "passed": 8
+      },
+      "collected": 8,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/guided/transport.test.ts",
+      "counts": {
+        "passed": 14
+      },
+      "collected": 14,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/reporting/httpClient.test.ts",
+      "counts": {
+        "passed": 11
+      },
+      "collected": 11,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/reporting/observedProgressUse.test.ts",
+      "counts": {
+        "passed": 10
+      },
+      "collected": 10,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/reporting/reporting.test.ts",
+      "counts": {
+        "passed": 37
+      },
+      "collected": 37,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/appVideoOwnership.test.ts",
+      "counts": {
+        "passed": 57
+      },
+      "collected": 57,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/browserProfilePreferences.test.ts",
+      "counts": {
+        "passed": 15
+      },
+      "collected": 15,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/canary.test.ts",
+      "counts": {
+        "skipped": 8,
+        "passed": 1
+      },
+      "collected": 9,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/childRuntimeTeardown.test.ts",
+      "counts": {
+        "passed": 8
+      },
+      "collected": 8,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/confinement.test.ts",
+      "counts": {
+        "passed": 19
+      },
+      "collected": 19,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/deadline.test.ts",
+      "counts": {
+        "passed": 14
+      },
+      "collected": 14,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/errors.test.ts",
+      "counts": {
+        "passed": 12
+      },
+      "collected": 12,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/evidenceStoreFaults.test.ts",
+      "counts": {
+        "passed": 14
+      },
+      "collected": 14,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/forkKillTree.test.ts",
+      "counts": {
+        "passed": 2
+      },
+      "collected": 2,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/guidedMain.test.ts",
+      "counts": {
+        "passed": 6
+      },
+      "collected": 6,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/launcher.test.ts",
+      "counts": {
+        "passed": 28
+      },
+      "collected": 28,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/manifest.test.ts",
+      "counts": {
+        "passed": 11
+      },
+      "collected": 11,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/objectStore.test.ts",
+      "counts": {
+        "passed": 10
+      },
+      "collected": 10,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/objectStoreFactory.test.ts",
+      "counts": {
+        "passed": 3
+      },
+      "collected": 3,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/observation.test.ts",
+      "counts": {
+        "passed": 21
+      },
+      "collected": 21,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/observationCollectorInvoke.test.ts",
+      "counts": {
+        "passed": 15
+      },
+      "collected": 15,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/observationCollectorNaming.test.ts",
+      "counts": {
+        "passed": 10
+      },
+      "collected": 10,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/observationInventory.test.ts",
+      "counts": {
+        "passed": 5
+      },
+      "collected": 5,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/observedBootstrap.test.ts",
+      "counts": {
+        "passed": 12
+      },
+      "collected": 12,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/observedChildRuntime.test.ts",
+      "counts": {
+        "passed": 25
+      },
+      "collected": 25,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/observedPreparedAdapter.test.ts",
+      "counts": {
+        "passed": 2
+      },
+      "collected": 2,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/observedReplayProtocol.test.ts",
+      "counts": {
+        "passed": 40
+      },
+      "collected": 40,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/observedWriterQuiescence.test.ts",
+      "counts": {
+        "passed": 1
+      },
+      "collected": 1,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/outputRelay.test.ts",
+      "counts": {
+        "passed": 23
+      },
+      "collected": 23,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/outputRelayContainment.test.ts",
+      "counts": {
+        "passed": 1
+      },
+      "collected": 1,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/passwordControlResolution.test.ts",
+      "counts": {
+        "passed": 15
+      },
+      "collected": 15,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/passwordControlTransport.test.ts",
+      "counts": {
+        "passed": 26
+      },
+      "collected": 26,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/processTableUnavailable.test.ts",
+      "counts": {
+        "passed": 4
+      },
+      "collected": 4,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/production-seams.test.ts",
+      "counts": {
+        "passed": 5
+      },
+      "collected": 5,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/recording.test.ts",
+      "counts": {
+        "passed": 10
+      },
+      "collected": 10,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/recordingScratch.test.ts",
+      "counts": {
+        "passed": 33
+      },
+      "collected": 33,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/s3ObjectStore.test.ts",
+      "counts": {
+        "passed": 6
+      },
+      "collected": 6,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/s3Sonic.test.ts",
+      "counts": {
+        "passed": 2
+      },
+      "collected": 2,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/s3Wire.test.ts",
+      "counts": {
+        "passed": 1
+      },
+      "collected": 1,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/sandbox.test.ts",
+      "counts": {
+        "passed": 14,
+        "skipped": 1
+      },
+      "collected": 15,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/secretReplay.test.ts",
+      "counts": {
+        "passed": 43
+      },
+      "collected": 43,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/timeline.test.ts",
+      "counts": {
+        "passed": 9
+      },
+      "collected": 9,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/trackTreeSampling.test.ts",
+      "counts": {
+        "passed": 4
+      },
+      "collected": 4,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/tree.test.ts",
+      "counts": {
+        "passed": 12
+      },
+      "collected": 12,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/treeAsyncReader.test.ts",
+      "counts": {
+        "passed": 2
+      },
+      "collected": 2,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/run/treeAsyncReaderFaults.test.ts",
+      "counts": {
+        "passed": 4
+      },
+      "collected": 4,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/admission.test.ts",
+      "counts": {
+        "passed": 25
+      },
+      "collected": 25,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/cancel.test.ts",
+      "counts": {
+        "passed": 16
+      },
+      "collected": 16,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/concurrency.test.ts",
+      "counts": {
+        "passed": 13
+      },
+      "collected": 13,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/deadline-outcome.test.ts",
+      "counts": {
+        "passed": 19
+      },
+      "collected": 19,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/drain.test.ts",
+      "counts": {
+        "passed": 10,
+        "skipped": 1
+      },
+      "collected": 11,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/evidence.test.ts",
+      "counts": {
+        "passed": 6
+      },
+      "collected": 6,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/evidenceConfig.test.ts",
+      "counts": {
+        "passed": 8
+      },
+      "collected": 8,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/hung-child.test.ts",
+      "counts": {
+        "passed": 8
+      },
+      "collected": 8,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/observedReplayAdmission.test.ts",
+      "counts": {
+        "passed": 16
+      },
+      "collected": 16,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/observedReplayAuthorization.test.ts",
+      "counts": {
+        "passed": 15
+      },
+      "collected": 15,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/observedReplayRoutes.test.ts",
+      "counts": {
+        "passed": 15
+      },
+      "collected": 15,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/prelaunch.test.ts",
+      "counts": {
+        "passed": 3
+      },
+      "collected": 3,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/probe.test.ts",
+      "counts": {
+        "passed": 1
+      },
+      "collected": 1,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/resolved-value-guards.test.ts",
+      "counts": {
+        "passed": 5
+      },
+      "collected": 5,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/routes.test.ts",
+      "counts": {
+        "passed": 28
+      },
+      "collected": 28,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/scratch.test.ts",
+      "counts": {
+        "passed": 8
+      },
+      "collected": 8,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/storage-lifecycle.test.ts",
+      "counts": {
+        "passed": 1
+      },
+      "collected": 1,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/surface.test.ts",
+      "counts": {
+        "passed": 12
+      },
+      "collected": 12,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/terminal-order.test.ts",
+      "counts": {
+        "passed": 10
+      },
+      "collected": 10,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/server/timeline.test.ts",
+      "counts": {
+        "passed": 4
+      },
+      "collected": 4,
+      "status": "passed",
+      "fileError": false
+    },
+    {
+      "path": "studio-runner/test/static/noRunnerSinks.test.ts",
+      "counts": {
+        "passed": 2
+      },
+      "collected": 2,
+      "status": "passed",
+      "fileError": false
+    }
+  ],
+  "sourceCheckpoint": {
+    "path": "runner/checkpoint-native01-remediation-source01.json",
+    "sha256": "0ce958c8a2633d1ac21199d716f44b5490c706b880f99bc19b1ae7e5cd35236a"
+  },
+  "sourceHashes": {
+    "studio-runner/evaluation/observed-authoring/cases/incremental-edit-step-4.json": "f04e70016563076decb46292ce0f18d6a819d488f94212bb2bdb11d4f6546b4a",
+    "studio-runner/evaluation/observed-authoring/cases/incremental-insert-step.json": "9a1831f52911dbddc8d7dc1575c7b6e22480b00098b11bea51b6f94f0bfabbc1",
+    "studio-runner/src/executor/observedReplay.ts": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+    "studio-runner/src/guided/contracts.ts": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+    "studio-runner/src/guided/evidence.ts": "03afea081e543fc920d2e8012b85951bde9ffd737eb5ba858af959c006340279",
+    "studio-runner/src/guided/journal.ts": "15da758e2e287926a7d404926323791ab3e1f72931bc3c4cb1741de8de9d86dd",
+    "studio-runner/src/guided/ownership.ts": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf",
+    "studio-runner/src/guided/runtime.ts": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+    "studio-runner/src/guided/transport.ts": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+    "studio-runner/src/run/childRuntime.ts": "0eb0c88a0d4a98b716fcc4dc0a070f5c2f0df028e4f6e668ca9ee0cd8526dd02",
+    "studio-runner/src/run/launcher.ts": "0dfeb39a76c046dd1df4b1b9df0cec238aa57c0c7b067b8824368ffc075e9fd7",
+    "studio-runner/src/run/loginRequired.ts": "f46ef274506a4e9ec51df04e081c2e321f1b1088e22a2732751845fe2b001b27",
+    "studio-runner/src/run/observedReplayAdapter.ts": "473653e3ded3312d433cbe23c1304ef722a164bed3b15cd883d7b836773515f4",
+    "studio-runner/src/run/protocol.ts": "46e23a90e8c6e64a7fa94e68bcff02c9b9f51254f2fb3180ae4065deef682fb8",
+    "studio-runner/src/validator/observedHistory.ts": "3fac42d11a71c88387effb74ad9c8ade01dc1ae8dfd75121aea4c3556829e007",
+    "studio-runner/src/validator/observedReferencePolicy.ts": "e6a2565b31ebb7339cc0ed15f9e9d8532d3c473f65709491129f6059108aebdb",
+    "studio-runner/src/validator/observedReplay.ts": "875da7952c8fb1ece09fdad48ffca822861dfe6cb742694f924995c98e5675df",
+    "studio-runner/src/validator/observedSnapshots.ts": "a8a53dedfa041aa9a671e1e03361fee5572cdfa9bc3abca91b5d53e160332928",
+    "studio-runner/test/controlReferencePreservation.test.ts": "86a2d54b5dd4d6603d643812391ea2b9d59211c312b176e0e3da4e4bc7cca0bd",
+    "studio-runner/test/currentWorldFactories.test.ts": "c1e5ead9c29157187857d17ab4c435fc6a95ecdcfb1203d817bbe75f3bc45d14",
+    "studio-runner/test/documentJson.test.ts": "0ec384914250541f410c9e0a63ddacd3ce12257aa6fe7ab06019a25db27de393",
+    "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "f5b613f5486b43a70c043b01a801f4ec8590bd8db2cd3ace8bf5510ca8fed685",
+    "studio-runner/test/fixtures-tier/guided-recording.test.ts": "3522915df575e7a0e98e71e74728545bdcb96fcf9b48b3178762c2ab5cc23574",
+    "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "10d97ab585a5af13a69b128a231eab0c6fd5e18780aec17cb3abcb803f752fd6",
+    "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts": "d1d524272fba634063ec6cf9491b6e14179f8d66dbc53898cffb47c2a84a6186",
+    "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts": "d6af50904a1a3187ae5b9b49478dd4232b28cf0b44e97807db765609876194d8",
+    "studio-runner/test/fixtures-tier/guided-wire.test.ts": "082e00e6de1af226c2d20a907cf28da0d9a70c49844c483ed06f1e75641b3a8f",
+    "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts": "adf11ab62de6cade54be1427daf60519ae270dceb5ee08b382c828b75b6622a2",
+    "studio-runner/test/fixtures-tier/secret-login.test.ts": "6f35aba0f69a21f2869c0451b290ea9adc9bbe4133fa91da4a7b886cb8302597",
+    "studio-runner/test/fixtures/guided-dataflow/server.ts": "db44223ecd775115e3f8cd1ee1a87f4877be1d74d6646f24979426638deb3932",
+    "studio-runner/test/guided/incrementalRuntime.test.ts": "112def39b6fff4b2b6d4a45d180f5bb15d100f7b5e5d1494e1b84eca057cc519",
+    "studio-runner/test/guided/runtime.test.ts": "dfd1bad817e5eb33aaa9e7e6357723544f182342b8203753712f212744a4e814",
+    "studio-runner/test/guided/schemaAudit.test.ts": "c37d834a4956e379d289951e50365ac654c2f004c9df8b40bdef7e22de2e2f39",
+    "studio-runner/test/helpers/currentWorlds.ts": "1487feec0fa9f5e5ef3965e31648b8ab7671dbe7090750e9555677943a34d97c",
+    "studio-runner/test/helpers/documentJson.ts": "64f14fe565fdc562467781b85930025f61c0ee4a9a3ace3614dd769e1535a225",
+    "studio-runner/test/helpers/guided.ts": "af3c5687dcf62682253a58a2564177b507cfc0f61e57ee600cd81fda5255dc4d",
+    "studio-runner/test/helpers/incrementalNegativeBoundaries.ts": "94090a4d7e4a4f957cf8921007f57477c13c670786fe7fd318dcdf4de45fda16",
+    "studio-runner/test/helpers/openapi.ts": "e15c3b8295d0b30c5b2f0422121e8cd197af7ac6c9ca9fc882ac1f8fa533917d",
+    "studio-runner/test/helpers/publicationFixture.ts": "f9bf4c3afe0424275aecf1c256cb2528b99603e8655a68a89b4018f1d53e9773",
+    "studio-runner/test/helpers/retainedReplay.ts": "0ef0ebb4619283dc189361586f32f5c345857c2f28bb3112a16195bc2cd9d0ac",
+    "studio-runner/test/helpers/runner.ts": "4458ed1a65bca9016d2b1f9e396b09eb1a09bf5167a06ac74e8f383ffd65055e",
+    "studio-runner/test/observedIncrementalValidation.test.ts": "c140d89e3bcc397211b4283d8f9a9c83c60286b6ef0efb85c060461b25e92de4",
+    "studio-runner/test/retainedExecute.test.ts": "2aa49b583cd8c05a611d76d69537ca0abdba7657d962135a27ff935b4e5e7e0e",
+    "studio-runner/test/run/observedChildRuntime.test.ts": "d9fa80ce843238f949fee1509dc339515e70b3b17887d378aacda47bf7a43916",
+    "studio-runner/test/run/observedPreparedAdapter.test.ts": "3d5076e153008c06bc63418c4e2ddfdbf6cb6ff664863cd937b020a8861c5d88",
+    "studio-runner/test/run/secretReplay.test.ts": "dc43402d1c3c2f2e5fe4d520e16c2f8b6a188a58c363dcb0e2a6b19470041226",
+    "studio-runner/test/schemaSemantics.test.ts": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb",
+    "studio-runner/test/server/observedReplayAdmission.test.ts": "3a355a5216d7afcbf07b4afa5de494526bc92739763ddb5a7d2de827ab1c275d",
+    "studio-runner/test/server/observedReplayAuthorization.test.ts": "af79cffc7d66e57be89729e140ad9bed9960535529ec3fe8fd4e6d35853413fd",
+    "studio-runner/test/server/observedReplayRoutes.test.ts": "4ddc7d9bf32b2312e0c99bd778cbff17ee4b0d610cf696a4369e3bbab706d288",
+    "studio-runner/test/helpers/observedNativeEvidence.ts": "b3d0669bbbac9e9af56e9ae688b16e191750d279617a17ff8e7d5d7a69a2ee61",
+    "studio-runner/test/observedReplayExecutor.test.ts": "a571cacc12d108c936f7c42304de38c8e0b144c0cef6f1eac63272b4a2f8671a"
+  },
+  "protectedInputs": {
+    "studio-runner/src/guided/runtime.ts": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+    "studio-runner/src/guided/transport.ts": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+    "studio-runner/src/run/observedReplayAdapter.ts": "473653e3ded3312d433cbe23c1304ef722a164bed3b15cd883d7b836773515f4",
+    "studio-runner/src/guided/contracts.ts": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+    "studio-runner/src/executor/observedReplay.ts": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+    "studio-runner/src/validator/observedHistory.ts": "3fac42d11a71c88387effb74ad9c8ade01dc1ae8dfd75121aea4c3556829e007",
+    "studio-runner/test/helpers/incrementalNegativeBoundaries.ts": "94090a4d7e4a4f957cf8921007f57477c13c670786fe7fd318dcdf4de45fda16",
+    "studio-runner/test/schemaSemantics.test.ts": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb",
+    "studio-runner/test/observedSnapshotPreimages.test.ts": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa",
+    "studio-runner/vitest.config.ts": "c833caed66dc39aed1677db7cab921e97a5eb5b36291429c5f5e90f1a28c08f8",
+    "studio-runner/vitest.fixtures.config.ts": "2d51915fec9757e34ed1c0c2311fd1362abab917bfa1c5bf8b70ab47cb2c3f87"
+  },
+  "artifacts": [
+    {
+      "path": "execution/runner-build-feedback-attempt07-before.json",
+      "sha256": "57a4f5f5c94677abc0d402d69ef5b9832b15b73305cdc0db62aee9ce0e9ee2d5"
+    },
+    {
+      "path": "execution/runner-build-feedback-attempt07-after.json",
+      "sha256": "0d1306eb0214e4511a79f3050b34bdd33a3baf3dd0fd2f03e6c7bb04ed13ac98"
+    },
+    {
+      "path": "execution/runner-build-feedback-attempt07-results.json",
+      "sha256": "d0d9778c61b8b696b8b250d4d16741e01a4b57ab08137da13d6fb9336b1b6c97"
+    },
+    {
+      "path": "execution/runner-build-feedback-attempt07.log",
+      "sha256": "50d8b286b802e2ce024ca6690dd1f1000b4bcd043b5615565d354c439374330a"
+    },
+    {
+      "path": "execution/runner-pins-feedback-attempt07-before.json",
+      "sha256": "c19dddc45c435a7bc24f2d38b36de175974c576c1e6e54aa44f38ab5016f8105"
+    },
+    {
+      "path": "execution/runner-pins-feedback-attempt07-after.json",
+      "sha256": "9172c0e33cb0e244742185e0f09f7b42c47603599cda8d2d60dfb087ae0c6699"
+    },
+    {
+      "path": "execution/runner-pins-feedback-attempt07-results.json",
+      "sha256": "f5a35274df6509044792ff7c0fe5bb74ef7a57cef54a4e61df610d6215dca934"
+    },
+    {
+      "path": "execution/runner-pins-feedback-attempt07.log",
+      "sha256": "1f6461a60833e3eae92fa0706462c0092fe19606c2cd3491833e5b6b6264c63d"
+    },
+    {
+      "path": "execution/runner-unit-feedback-attempt13-before.json",
+      "sha256": "4d4f07b461a7eb01c56948320a55a9fd682aa24ec602cd6b9116a26103b0f84f"
+    },
+    {
+      "path": "execution/runner-unit-feedback-attempt13-after.json",
+      "sha256": "b7db7c7c94c5fafaad3e2a7a204354af7e28a7520fe142129cceeb14348168fe"
+    },
+    {
+      "path": "execution/runner-unit-feedback-attempt13-results.json",
+      "sha256": "44b024dc1089f805dd6e2907977db30b262fd50ad6d7b7d84e9fe5bdbac02b18"
+    },
+    {
+      "path": "execution/runner-unit-feedback-attempt13.log",
+      "sha256": "d1109010cacaf5d94d43e77b05eb65d5aae4656bcb2402fb2ea22a7cc69c9f0b"
+    },
+    {
+      "path": "execution/runner-unit-feedback-attempt13-vitest.json",
+      "sha256": "9c04cee3730f8530324c35800e15b870971fed536f410fc907aa57ef5f5bc305"
+    },
+    {
+      "path": "runner/unit-feedback-attempt13-prior-artifact-preservation.json",
+      "sha256": "fab22e03534331688267c185e1e32104e42af7d1f8ce42aa34865655c7bc3c2d"
+    }
+  ],
+  "priorHistoryImmutable": {
+    "node12": {
+      "path": "runner/unit-feedback-attempt12-receipt.json",
+      "sha256": "442814f7035ac44802c5ae5c7633589806008257f8a203bb8fee76734364e923"
+    },
+    "native01": {
+      "path": "runner/native-feedback-attempt01-receipt.json",
+      "sha256": "19984c6818abd06ac9a0120eb035f67824d0a07adb7ad907e9a446170e75c09a"
+    }
+  },
+  "executionLimits": "One build07/one pins07/one Node13 only; no fixes/retries/extra tests/native/browser/Gradle/JVM/DB/install/download/format/commit/push/deploy/subagents/source/schema/gate/lifecycle changes. Analysis/receipt/hash archive only after terminal.",
+  "remaining": "All16cases require full actual validation after separately authorized fixture repair, native two-file42+sharedfixtureconsumers remain unrun after source remediation, Core/Vault/privateDB/15actualcompanions/538JavaB4/full6increments/86acceptance/24IPC/55SQL/35variants/fullqualitycoverage/crossReplica/deployment/independent015QA/PO/rootclosure then008 mandatory. Original85OPEN/unamended. No QA/Done claim.",
+  "hold": "All runner source/tests/helpers/generated/specs/dist HOLD until root explicit release; slot returned."
+}

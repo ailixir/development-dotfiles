@@ -1,0 +1,30 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+@@ -909,6 +909,7 @@
+     askSavedSource = true;
+     String id = startSession();
+     invoke(id, "plans");
++    assertThat(PROVIDER_KINDS).containsExactly("SOURCE_PLAN");
+     assertThat(sessionState(id)).isEqualTo("AWAITING_CLARIFICATION");
+     JsonNode question = publicGet("/" + id + "/clarification");
+     assertThat(question.path("phase").asText()).isEqualTo("source");
+@@ -2959,6 +2960,11 @@
+               && reference.path("intendedSlot").asText().equals("fill.value")) {
+             savedReference = reference.deepCopy();
+             savedReference.put("referenceKind", "configuration").put("configurationRevision", "1");
++            // The classifier's manifest names plain inputs for bookkeeping. The closed public
++            // configuration-reference shape permits referenceName only for secretRef choices.
++            if (!savedReference.path("kind").asText().equals("secretRef")) {
++              savedReference.remove("referenceName");
++            }
+           }
+         }
+         if (savedReference == null) {
+@@ -2992,6 +2998,7 @@
+                                   .put("operationKind", "fill")
+                                   .put("argumentSlot", "fill.value"))));
+         }
++        C.validate("v3/guided-model-response", response);
+         return response;
+       }
+       if (askSource) {

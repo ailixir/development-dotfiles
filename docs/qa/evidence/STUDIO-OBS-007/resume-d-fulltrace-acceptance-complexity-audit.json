@@ -1,0 +1,200 @@
+{
+  "scope": "QA_READ_ONLY_FULLTRACE_ACCEPTANCE_COMPLEXITY_AUDIT_NOT_STORY_GATE",
+  "status": "RECOMMENDATIONS_ONLY; NO_IMPLEMENTATION_OR_WAIVER",
+  "authorityHashes": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "d634b3579e5bf0fd177bf474108b4513fea52b9635bb6932fcaf63d9cdab23e0",
+    "docs/specs/studio-observed-authoring/secret-login-design.md": "0fdd8f75df61761ece1bfab44c32bf507fa6593e72a21333a51141b2e9ea5bfb"
+  },
+  "canonicalQuotes": [
+    {
+      "source": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "line": 50,
+      "requirement": "AC9 C5",
+      "quote": "with root and `com.citi.put.checks` at TRACE and every appender captured during a two-path controlled run (guided learn, observed replay)"
+    },
+    {
+      "source": "docs/specs/studio-observed-authoring/secret-login-design.md",
+      "requirement": "C5",
+      "quote": "TRACE-level capture of every appender during a two-path (guided learn, observed replay) controlled run \u2192 zero canary hits"
+    },
+    {
+      "source": "docs/specs/studio-observed-authoring/secret-login-design.md",
+      "requirement": "C5 sinks",
+      "quote": "same scan over problem+json bodies, SSE frames, `/actuator/prometheus` scrape and `IdempotencyFilter` cache contents"
+    },
+    {
+      "source": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "line": 60,
+      "requirement": "AC13/C4",
+      "quote": "C-5 TRACE every appender and API/SSE/metrics/idempotency scan still spans those C-4 sub-runs."
+    },
+    {
+      "source": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "line": 60,
+      "requirement": "AC13 timing",
+      "quote": "Keep write-once `revoked_at`, unique `REVOKED_MID_RUN`, worst-phase/slow/lost-response proof and the \u22642 s including request/queue time plus one already-in-flight step residual, with no next-step typing."
+    },
+    {
+      "source": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "requirement": "AC19 tiers",
+      "quote": "Schema, static, unit and PostgreSQL transactional negatives run at their defining production boundary."
+    }
+  ],
+  "directConclusion": "APPTRACE alone is NOT canonical C5: AC9 explicitly requires ROOT and APP levels at TRACE. Canonical privacy and genuine functional/timing obligations remain. It does not explicitly require every unrelated warmup/nonsecret regression/framework component to succeed under full inherited third-party TRACE in the same first+ninth combined test invocation. Removing that coupling is a possible test-organization simplification, not permission to reduce logger exposure or rewrite a red result.",
+  "sourceAssumptions": [
+    {
+      "source": "GuidedPublicationReplayIT C5Capture",
+      "frozenSource": "resume-fulltrace-existing-sampler-current/sources.zip",
+      "publicationSha256": "f072bd9c5016665b2acb6721cdf0eabbffc4ff3d80bf9615e889e53c7baf0fed",
+      "lines": [
+        10663,
+        10672,
+        10676,
+        10929
+      ],
+      "fact": "traceFromStart optionally arms ROOT+APP before broader setup; armTrace sets both, final trace check requires both effective levels. These level conditions match AC9. The extra whole-setup/from-start and combined first+ninth healthy success are fixture-plan organization beyond the literal privacy clause."
+    },
+    {
+      "source": "studio-runner/src/guided/ownership.ts",
+      "sha256": "030443d7478791e2f980763a4e30a4b2daba922836d0c5ac9650e141995b31c4",
+      "lines": [
+        52,
+        53,
+        75,
+        79,
+        115,
+        116
+      ],
+      "fact": "Original secret-owner renewal epoch is1s; request cap is<=1000ms and timeout maps LEASE_LOST, aborts/stops. This is a real production fail-closed mechanism implementing the end-to-end revocation bound, not a new canonical rootTRACE performance SLA. It cannot be weakened merely because diagnostic logging adds load."
+    }
+  ],
+  "observedFacts": {
+    "fullTRACEKmpPair": "1PASS1FAIL/0errors/0skips/zeroSourceDrift; secret positive incomplete",
+    "lastKnownFailingHandlerMs": 1066,
+    "requestCapMs": 1000,
+    "latestExistingSamplerServerHandlersBelowCap": 8,
+    "clientCompletionLatency": "UNOBSERVED",
+    "cause": "UNPROVEN; server-only samples cannot attribute client timeout to logging or show complete request latency",
+    "poolWorkflow": "Actual1PASS real429/fresh attempt+grant/resolution/USED and TRACE/sinks under unchanged30s; demonstrates ROOTTRACE is not universally impossible, does not prove fullguidedninth",
+    "guidedInjection": "Actual1PASS on591e at real released-value phase, UNKNOWN with all produced diagnostic/sink assertions; not normal successful learn/publish/two replay substitute",
+    "process22": "Actual22PASS component/JVM tier, not another mandatory Core/browser suite",
+    "pureKmp": "Root-reported1PASS0.857s support; no privacy/end-to-end credit from microbenchmark"
+  },
+  "concreteSimplifications": [
+    {
+      "id": "S1",
+      "recommendation": "Separate the existing nonsecret first OBS006 regression from the secret C5 privacy acceptance invocation. Preserve that regression unchanged at its declared functional tier; keep actual secret guided+replay/fullROOT+APP/every-appender and every C4 TRACE window mandatory.",
+      "authority": "Within canonical evidence-tier organization, subject to root review of the earlier paired fixture-plan requirement; no AC weakening if all original case assertions execute and actual secret two-path TRACE succeeds.",
+      "tradeoff": "Lower redundant logging/sample work on a value0 supporting case. The nonsecret case cannot be claimed as positive secret exposure and its normal-level PASS cannot replace C5."
+    },
+    {
+      "id": "S2",
+      "recommendation": "Arm existing ROOT+APP capture at the already identified actual value-bearing phase and keep it through final sinks/owner drains, rather than require unrelated source/bootstrap/model warmup to run at inherited third-party TRACE. All actual secret serialization/resolution/model-masking/output paths must remain covered; capture setup and route prereqs must be established before any canary release.",
+      "authority": "Candidate test-boundary simplification ONLY if root/architect verify canonical guided-learn/replay privacy scope is fully retained, including early paths with access to planted values. An excluded value-bearing path would require PO acceptance amendment, not an implementation shortcut.",
+      "tradeoff": "Reduces high-volume warmup logs but gives no coverage of quiet/unproduced third-party TRACE paths. APP-only success and value0 warmup never satisfy ROOTTRACE requirement."
+    },
+    {
+      "id": "S3",
+      "recommendation": "Inventory already-executed real guided injection and ordinary pool TRACE captures by identical final source/logger/appender identities and actual released canaries, without running new supporting E2E cases. Use those receipts as scoped privacy/exposure evidence and direct remaining effort to genuine missing positive functional/current two-path coverage.",
+      "authority": "Supporting reuse is already allowed; closing canonical single two-path C5 from separate fault controls requires explicit independent architect/PO disposition of that composition. Current fullTRACE red stays red; no silent replacement of successful secret ninth or missing replay tails.",
+      "tradeoff": "Real failure-path canary exposure is useful privacy evidence. It does not demonstrate successful typing/publication/two fresh replays or zero missed surfaces; each emitted/discarded/nonapplicable sink must remain separately mapped."
+    },
+    {
+      "id": "S4",
+      "recommendation": "Do not require synthetic APPTRACE marker emission or new per-library/profiler/framework infrastructure solely to make every logger produce events. Preserve capture of all original appenders and actual root/app effective TRACE. Report quiet routes as unproduced, verify routing/quarantine/drain, and require genuine released-value production paths for positive exposure.",
+      "authority": "No new acceptance obligation; no synthetic event may count as real product privacy. Existing sampler retention correction can be assessed as diagnostic metadata only; client completion remains unknown until original evidence exists.",
+      "tradeoff": "Avoids invented producer credit and observer overhead; event absence still cannot prove a redactor acted."
+    }
+  ],
+  "changesRequiringSeparateDisposition": [
+    {
+      "change": "ROOT INFO/WARN with APP TRACE",
+      "reason": "Directly contradicts explicit AC9 rootTRACE; architecture/security and independent PO amendment required. No current C5 PASS."
+    },
+    {
+      "change": "Add explicit INFO/WARN overrides to third-party logger namespaces while ROOT remains TRACE",
+      "reason": "Literal root level may stay TRACE, but actual inherited library TRACE exposure/trust boundary is reduced. Requires explicit source/logger inventory and architecture/security scope disposition; any promise of all-library TRACE needs independent PO update. No hidden exclusions or claim that suppressed output was scrubbed."
+    },
+    {
+      "change": "Raise renewal/request timeout, slow polling, extend lease/session/30s guards or retry a consumed effect",
+      "reason": "Changes production revocation/liveness/ownership guarantees. Cannot be a fixture-only complexity fix; separately proven <=2s including queue/request and no-next-step residuals would be required. None authorized."
+    },
+    {
+      "change": "Claim partial/cancelled fullTRACE run or APP-only functional success closes healthy end-to-end",
+      "reason": "Loses real source/read/receipt/audit/model0/rotation/two replay/timing tails; not permitted. Any source-level relaxation must be separately canonical and preserve explicitly required joins."
+    }
+  ],
+  "minimumNextDecision": "Root decides organization S1 first; evaluate any S2 phase against actual source exposure using existing capture seams. Keep existing fullROOT red and original1000ms fail-closed production behavior. Do not build new infrastructure or add mandatory supporting E2E before that bounded scope decision. Complete missing actual joined functionality/privacy/timing proofs under their genuine authority.",
+  "evidence": {
+    "resume-fulltrace-kmp-first-ninth-current": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-fulltrace-kmp-first-ninth-current/result.json",
+      "sha256": "4e41dca4d6e0ab5d3a06d8f5f80ee8d560e8369555fb6d83967e5db6597fa55f",
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "pass": false,
+      "sourceDrift": [],
+      "publicationSha256": "f072bd9c5016665b2acb6721cdf0eabbffc4ff3d80bf9615e889e53c7baf0fed"
+    },
+    "resume-fulltrace-existing-sampler-current": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-fulltrace-existing-sampler-current/result.json",
+      "sha256": "25a8fd8913404c40b44ec7f2c0cb2dd6a326e1b20067c22c1ed70f956d911e08",
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "pass": false,
+      "sourceDrift": [],
+      "publicationSha256": "f072bd9c5016665b2acb6721cdf0eabbffc4ff3d80bf9615e889e53c7baf0fed"
+    },
+    "resume-pool-kmp-one-current": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-pool-kmp-one-current/result.json",
+      "sha256": "d39719b2a6766c107424ee117f77b3852eb923854652295a26780de040681d24",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "pass": true,
+      "sourceDrift": [],
+      "publicationSha256": "f072bd9c5016665b2acb6721cdf0eabbffc4ff3d80bf9615e889e53c7baf0fed"
+    },
+    "resume-c6-injection-cache-current": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-c6-injection-cache-current/result.json",
+      "sha256": "5c5687d038a53819edde53f503778148cb32418dcfcc770071b17c0d8eb1c1b5",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "pass": true,
+      "sourceDrift": [],
+      "publicationSha256": "591e372f6d06fff8255d20500a681e7c8385dbbe3c8a0e0dc4c05ef84dc92c29"
+    },
+    "resume-guided-preresolve-twentytwo-current": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-guided-preresolve-twentytwo-current/result.json",
+      "sha256": "28b877e90d4ee34e914e71eb1e4d5922146777b5367dfa3042165e71389cc2b5",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "pass": true,
+      "sourceDrift": [],
+      "publicationSha256": "f072bd9c5016665b2acb6721cdf0eabbffc4ff3d80bf9615e889e53c7baf0fed"
+    }
+  },
+  "privacy": "Only fixed codes, metadata/source paths/hashes/numeric durations; no raw payloads, values, identifiers or runtime paths.",
+  "actions": {
+    "sourceEdits": 0,
+    "runtime": 0,
+    "sql": 0,
+    "newCases": 0,
+    "newInfrastructure": 0,
+    "clockOrGuardChanges": 0,
+    "models": 0,
+    "reports": 1
+  },
+  "lifecycleVerdict": null,
+  "whole19AcPass": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE"
+}

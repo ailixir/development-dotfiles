@@ -1,0 +1,101 @@
+{
+  "schema": "resume-d-report-four-failure-diagnosis/1",
+  "mode": "READONLY_ARCHIVED_SOURCE_AND_XML",
+  "gate": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/resume-d-current-report-helper-gate",
+    "sourceZipSha256": "de8ffc40194d795cfe388ddd6596b99a914943ff3248cb31af02ca7dd61369b5",
+    "progressXmlSha256": "24ca3112263cb9a50eff478c9a68c62100c0e64aa49448e5bb33bd20c0b6e931",
+    "total": 78,
+    "passed": 74,
+    "failed": 4,
+    "errors": 0,
+    "skips": 0,
+    "sourceDrift": 0,
+    "oldProgressPass": 16,
+    "unitPass": 24,
+    "secretMigrationPass": 23,
+    "publicationMigrationPass": 11
+  },
+  "sourceManifest": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java",
+      "sha256": "56a3ab5cd46df22b4972d2ecc6673709031cd95263fa7a73d9dd8c8bfc19e724"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+      "sha256": "0d6bf1f40b7ff894cb36a542d3527da3af132d49d98aefff9f3daa80e0acce1e"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "sha256": "635d39fae05bf61be8dca6c930f89e1a32c1a9021f4e219e6bd8c7f21e798133"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/ObservedProgressSecretEvidence.java",
+      "sha256": "fe88bd79cc13b184a00ee762b0d7774b5b4a4c6dca1d554a456c5856e419a72c"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java",
+      "sha256": "4b6e7092e85d33d314bf10a3af0187247c186548ba4d4492b5a45fbf96e9ddd7"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/secrets/ObservedProgressSecretEvidenceTest.java",
+      "sha256": "6ca64f60c8f26a2ad462bec1b72b90a939496ba65209aafaa995a1ffc96524e0"
+    }
+  ],
+  "canonicalAssetSha256": "d6757969ec0a9f7b5b013bb68df4f694ceb3cdc88d8739186e811f7ec1bef764",
+  "firstCommonFailure": {
+    "exceptionClass": "InternalCallbackException",
+    "closedCode": "INVALID_REPORT",
+    "origin": "ObservedProgressSecretEvidence.require:90",
+    "calledBy": "ProgressReportService.apply:220",
+    "guard": "REQUESTED_POSITIVE_ID_NOT_PROVEN_BY_COMPLETED_FROZEN_SECRET_FILL",
+    "beforeReportCas": true,
+    "beforeUsageInsert": true,
+    "beforeCommitHook": true
+  },
+  "failedSelectors": [
+    "observedLosingProgressAndRealTerminalOwnerKeepTheEarlierUsedRowImmutable()",
+    "observedProgressMissingScopedResolutionRefusesAndRollsBackItsWinningSnapshotCas()",
+    "observedProgressCommitHookFailureRollsBackSnapshotSequenceAndActualUsageTogether()",
+    "observedWinningProgressAndDuplicateCommitOneUsedSummaryWithTheSnapshotCas()"
+  ],
+  "provenSourceFacts": {
+    "declaredConfigurationInputMatchesExercisedProposalCount": 0,
+    "newFixtureConvertsDeclaredRecipeToSecret": true,
+    "newFixtureSearchesOnlyAlreadyMatchingConfigurationInputProposal": true,
+    "canonicalExercisedFillInsteadUsesDifferentSourceLiteralInput": true,
+    "thereforeNewFixtureMutationChangesProposalCount": 0,
+    "receiptStepIndexInRange": true,
+    "receiptHasCompletedPassAndValidFiniteTiming": true,
+    "fourExpectedSemanticsReached": false
+  },
+  "cause": "FIXTURE_RECIPE_OPERATION_DISCONNECT_BEFORE_IMMUTABLE_PUBLICATION",
+  "minimumFixtureOnlyProposal": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java",
+    "helper": "secretReportBasis",
+    "change": "Select the existing same-step exercised source-literal fill, bind its value to the declared configuration secret input and passwordControl before production lowering/publication. Keep its actual existing coordinate/order and update its existing hash correlations.",
+    "newOperations": 0,
+    "newCases": 0,
+    "sourceOrSchemaGuardChanges": 0,
+    "manualUsageOrFinalOrReleaseRows": false,
+    "expectedAssertionsChanged": false,
+    "scope": "CONTROLLED_PROTOCOL_REPORT_PG_FIXTURE_ONLY_NOT_NATIVE_EFFECT"
+  },
+  "proofVsInference": {
+    "verified": "All four archived stacks terminate at the same proven-ID check; canonical source has no exercised operation consuming the transformed configuration input.",
+    "inferredAfterRepair": "The intended winner/hook/audit/loser assertions can proceed only after the fixture supplies its declared secret-fill witness; their passing status is not inferred."
+  },
+  "execution": {
+    "sourceEdits": false,
+    "runtime": "UNRUN",
+    "SQL": "UNRUN",
+    "PG": "UNRUN",
+    "compiler": "UNRUN",
+    "tests": "UNRUN",
+    "Gradle": "UNRUN",
+    "Node": "UNRUN",
+    "modelsSpawned": false
+  },
+  "privacy": "Only fixed code/class/locations, booleans/counts and source/artifact hashes saved. No raw failure dump, runtime IDs, secret values or value-derived hashes.",
+  "credit": "No new PASS or QA/lifecycle verdict. Original78 red retained; root must release any fixture edit and run current source."
+}

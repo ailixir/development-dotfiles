@@ -1,0 +1,28 @@
+--- docs/qa/evidence/STUDIO-OBS-007/resume-c5-fixed-scan-isolated-author/before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java	2026-10-11 20:37:48
++++ docs/qa/evidence/STUDIO-OBS-007/resume-c5-fixed-scan-isolated-author/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java	2026-10-11 20:37:48
+@@ -11634,7 +11634,8 @@
+       JSON_RENDER,
+       LOG_ENCODER,
+       COMMIT,
+-      OTHER
++      OTHER,
++      FIXTURE_SCAN
+     }
+ 
+     private enum Status {
+@@ -11922,6 +11923,15 @@
+                           && (frame.getMethodName().equals("claim")
+                               || frame.getMethodName().startsWith("lambda$claim$")));
+       if (!claim) return Segment.OTHER;
++      String streamType = C5CanaryStream.class.getName();
++      String captureNestedType = C5Capture.class.getName() + "$";
++      for (StackTraceElement frame : stack) {
++        String type = frame.getClassName(), method = frame.getMethodName();
++        if ((type.equals(streamType) && (method.equals("write") || method.equals("consume")))
++            || (type.startsWith(captureNestedType) && method.equals("write"))) {
++          return Segment.FIXTURE_SCAN;
++        }
++      }
+       // Fixed source categories only; no arbitrary class/method/file/line/name/ID export.
+       for (StackTraceElement frame : stack) {
+         String type = frame.getClassName(), method = frame.getMethodName();

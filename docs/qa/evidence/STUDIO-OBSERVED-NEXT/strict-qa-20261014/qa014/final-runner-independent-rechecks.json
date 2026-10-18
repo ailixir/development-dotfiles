@@ -1,0 +1,2570 @@
+{
+  "gates": [
+    {
+      "label": "runner-unit-final-attempt05",
+      "resultPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-unit-final-attempt05-results.json",
+      "resultSha256": "eebcdd3f4a865ba6090547733056303f9bd1d374ad5d1adbc53113c840ff698d",
+      "command": [
+        "./node_modules/.bin/vitest",
+        "run",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-unit-final-attempt05-vitest.json"
+      ],
+      "exit": 0,
+      "started": "2026-10-15T01:48:51.439125+00:00",
+      "logHashMatches": true,
+      "sourceManifestBefore": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceManifestAfter": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceFilesEqual": true,
+      "distBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distFilesEqual": true,
+      "independentCounts": {
+        "passed": 1529,
+        "skipped": 29
+      },
+      "rawReportHashMatches": true,
+      "rawReportSha256": "aa75af56d210efeac7dcbfe7f34b6cb8e315199691873f7ba3281a5a34ad2772",
+      "failedSuites": 0,
+      "runtimeErrors": 0
+    },
+    {
+      "label": "runner-tsc-final-attempt04",
+      "resultPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-tsc-final-attempt04-results.json",
+      "resultSha256": "5c3541c1bdca37946c99cd9bdc6990a184258f147141856b764b0c02a893732b",
+      "command": [
+        "./node_modules/.bin/tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ],
+      "exit": 0,
+      "started": "2026-10-15T01:49:15.219306+00:00",
+      "logHashMatches": true,
+      "sourceManifestBefore": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceManifestAfter": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceFilesEqual": true,
+      "distBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distFilesEqual": true,
+      "independentCounts": null
+    },
+    {
+      "label": "runner-eslint-final-attempt04",
+      "resultPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-eslint-final-attempt04-results.json",
+      "resultSha256": "0fcc21317b59d24793117109ca00c02b4e9ebdb3895bf55bf995b668f15dd8b1",
+      "command": [
+        "./node_modules/.bin/eslint",
+        "."
+      ],
+      "exit": 0,
+      "started": "2026-10-15T01:49:23.262460+00:00",
+      "logHashMatches": true,
+      "sourceManifestBefore": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceManifestAfter": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceFilesEqual": true,
+      "distBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distFilesEqual": true,
+      "independentCounts": null
+    },
+    {
+      "label": "runner-profile-safety-focused-attempt01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-profile-safety-focused-attempt01-results.json",
+      "resultSha256": "716e01368c8d887c951b67766ca0f9fed9d6493142b302e9a45efcefcf1ce7f9",
+      "command": [
+        "./node_modules/.bin/vitest",
+        "run",
+        "--config",
+        "vitest.fixtures.config.ts",
+        "test/fixtures-tier/browser-profile-safety.test.ts",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-profile-safety-focused-attempt01-vitest.json"
+      ],
+      "exit": 0,
+      "started": "2026-10-15T01:49:47.784936+00:00",
+      "logHashMatches": true,
+      "sourceManifestBefore": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceManifestAfter": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceFilesEqual": true,
+      "distBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distFilesEqual": true,
+      "independentCounts": {
+        "passed": 10
+      },
+      "rawReportHashMatches": true,
+      "rawReportSha256": "b0536742c37ec240ce23d0057a64a31dbd37c94352b125e52505691bfe34c93a",
+      "failedSuites": 0,
+      "runtimeErrors": 0
+    },
+    {
+      "label": "runner-fixtures-final-attempt04",
+      "resultPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-fixtures-final-attempt04-results.json",
+      "resultSha256": "4434df2156f2ad7137bbd1303c0be726e731f54a4237c28238ba643200249401",
+      "command": [
+        "./node_modules/.bin/vitest",
+        "run",
+        "--config",
+        "vitest.fixtures.config.ts",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-fixtures-final-attempt04-vitest.json"
+      ],
+      "exit": 0,
+      "started": "2026-10-15T01:50:30.351069+00:00",
+      "logHashMatches": true,
+      "sourceManifestBefore": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceManifestAfter": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceFilesEqual": true,
+      "distBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distFilesEqual": true,
+      "independentCounts": {
+        "passed": 232,
+        "skipped": 9
+      },
+      "rawReportHashMatches": true,
+      "rawReportSha256": "98ac54ebf1c6e2432cec9cc2851814481949e455f795aa6a176d7d0ff3834235",
+      "failedSuites": 0,
+      "runtimeErrors": 0
+    },
+    {
+      "label": "runner-deployment-final-attempt02",
+      "resultPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-deployment-final-attempt02-results.json",
+      "resultSha256": "1981a6a1a4b95994274c41c1a7ea1b4bc86baca951aeea78882577bb9aef7e02",
+      "command": [
+        "./node_modules/.bin/vitest",
+        "run",
+        "--config",
+        "vitest.deployment.config.ts",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-deployment-final-attempt02-vitest.json"
+      ],
+      "exit": 0,
+      "started": "2026-10-15T01:55:38.061062+00:00",
+      "logHashMatches": true,
+      "sourceManifestBefore": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceManifestAfter": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceFilesEqual": true,
+      "distBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distFilesEqual": true,
+      "independentCounts": {
+        "passed": 313
+      },
+      "rawReportHashMatches": true,
+      "rawReportSha256": "24e1a13f8bf0c2cd04d93d2eb7bccef104d86859431f46c015989705ce7ac7b6",
+      "failedSuites": 0,
+      "runtimeErrors": 0
+    }
+  ],
+  "skipAttribution": {
+    "runner-unit-final-attempt05": {
+      "uncreditedCases": [
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-05 / SPK-04 \u2014 the internal image and the sandbox, in-cluster AC-2b [ED-05, SPK-04, Platform/SRE] \u2014 the same pod spec APPLIED, with Chromium\u2019s sandbox observed active in-cluster: non-root under the cluster PodSecurity level, unprivileged user namespaces on the nodes, launch logs showing the sandbox active with no disabling flag, /dev/shm sized sufficiently, and a controlled-fixture run producing a readable webm from that pod. CARRIES story 10.12 AC-6b. There is NO fallback that disables the sandbox: if neither RuntimeDefault nor a Platform-approved Localhost profile works, this escalates to Platform/SRE and Security. Closes when docs/qa/spikes/SPK-04/ carries the evidence and ED-05 is updated.",
+          "title": "AC-2b [ED-05, SPK-04, Platform/SRE] \u2014 the same pod spec APPLIED, with Chromium\u2019s sandbox observed active in-cluster: non-root under the cluster PodSecurity level, unprivileged user namespaces on the nodes, launch logs showing the sandbox active with no disabling flag, /dev/shm sized sufficiently, and a controlled-fixture run producing a readable webm from that pod. CARRIES story 10.12 AC-6b. There is NO fallback that disables the sandbox: if neither RuntimeDefault nor a Platform-approved Localhost profile works, this escalates to Platform/SRE and Security. Closes when docs/qa/spikes/SPK-04/ carries the evidence and ED-05 is updated.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-05 / SPK-04 \u2014 the internal image and the sandbox, in-cluster AC-3b [SPK-04 question 3, Platform/SRE + @architect] \u2014 the seccomp profile the spike selects, with its approval reference: whether RuntimeDefault permits the namespace-creating clone/unshare calls the sandbox needs without CAP_SYS_ADMIN, and if not, the Platform-approved Localhost profile file, its owner and its approval reference, committed under docs/qa/spikes/SPK-04/. ADR-001 open item O-4. The chart renders RuntimeDefault as a deliberate starting value, never inherited from the backend and never Unconfined.",
+          "title": "AC-3b [SPK-04 question 3, Platform/SRE + @architect] \u2014 the seccomp profile the spike selects, with its approval reference: whether RuntimeDefault permits the namespace-creating clone/unshare calls the sandbox needs without CAP_SYS_ADMIN, and if not, the Platform-approved Localhost profile file, its owner and its approval reference, committed under docs/qa/spikes/SPK-04/. ADR-001 open item O-4. The chart renders RuntimeDefault as a deliberate starting value, never inherited from the backend and never Unconfined.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-05 / SPK-04 \u2014 the internal image and the sandbox, in-cluster AC-4b [ED-05, SPK-04, Platform/SRE] \u2014 SEC-2 browser-path immutability on the INTERNAL image in-cluster, rather than on the public Playwright base ADR-001 \u00a78 permits for local development only. The attack itself is run and recorded against the local image in test/deployment/sec2.test.ts; what is deferred is running it against the image ED-05 delivers, inside a pod. CARRIES story 10.12 AC-6b with AC-2b.",
+          "title": "AC-4b [ED-05, SPK-04, Platform/SRE] \u2014 SEC-2 browser-path immutability on the INTERNAL image in-cluster, rather than on the public Playwright base ADR-001 \u00a78 permits for local development only. The attack itself is run and recorded against the local image in test/deployment/sec2.test.ts; what is deferred is running it against the image ED-05 delivers, inside a pod. CARRIES story 10.12 AC-6b with AC-2b.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-05 / SPK-04 \u2014 the internal image and the sandbox, in-cluster AC-5b [SPK-04 question 6, Platform/SRE] \u2014 in-cluster PID-1 reaping and slot recovery: under shareProcessNamespace, an orphaned grandchild is reaped by the pause container and a hung child is killed by the parent with the pod recovering its slot. CARRIES story 10.13 AC-11b. The mechanism is chosen and rendered (shareProcessNamespace: true) and the SIGNAL half is proven against the built image in 10.18a; the REAPING half cannot be proven outside a pod, because a pause container exists only in one. Stated rather than blurred, as AC-5a requires.",
+          "title": "AC-5b [SPK-04 question 6, Platform/SRE] \u2014 in-cluster PID-1 reaping and slot recovery: under shareProcessNamespace, an orphaned grandchild is reaped by the pause container and a hung child is killed by the parent with the pod recovering its slot. CARRIES story 10.13 AC-11b. The mechanism is chosen and rendered (shareProcessNamespace: true) and the SIGNAL half is proven against the built image in 10.18a; the REAPING half cannot be proven outside a pod, because a pause container exists only in one. Stated rather than blurred, as AC-5a requires.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-04 / SPK-05 \u2014 egress enforcement and destination policy AC-8b [ED-04, SPK-05, Platform/SRE + an unnamed application owner] \u2014 enforcement proven FROM a runner pod with the policy applied: approved host reachable; unapproved host blocked; REDIRECT to an unapproved host blocked; subresources and authentication-provider hops to approved hosts allowed; cloud/cluster metadata and control endpoints, link-local ranges and local files unreachable; DNS behaviour for an unapproved name recorded; callback and object store reachable. If the spike finds only static L3/L4 policy exists, \u00a79.3 requires that per-run destination checks in the runner become the PRIMARY control and that Security accept that limitation EXPLICITLY \u2014 that acceptance, or its absence, is part of this criterion\u2019s evidence.",
+          "title": "AC-8b [ED-04, SPK-05, Platform/SRE + an unnamed application owner] \u2014 enforcement proven FROM a runner pod with the policy applied: approved host reachable; unapproved host blocked; REDIRECT to an unapproved host blocked; subresources and authentication-provider hops to approved hosts allowed; cloud/cluster metadata and control endpoints, link-local ranges and local files unreachable; DNS behaviour for an unapproved name recorded; callback and object store reachable. If the spike finds only static L3/L4 policy exists, \u00a79.3 requires that per-run destination checks in the runner become the PRIMARY control and that Security accept that limitation EXPLICITLY \u2014 that acceptance, or its absence, is part of this criterion\u2019s evidence.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-04 / SPK-05 \u2014 egress enforcement and destination policy AC-9b [ED-04, ADR-002 O-6, @architect then the implementing story] \u2014 story 10.17\u2019s destination-misuse negative tests, un-skipped against the enforced mechanism. They are 10.17\u2019s tests, in 10.17\u2019s files, and this story does not rewrite them. CARRIES story 10.17 AC-16b with its gate note unchanged. The gate-shut tripwire over the production ACCEPTED_JOB_KEYS is re-run UNCHANGED and green in test/run/canary.test.ts; adding a policy field to the closed RunJob is ADR-002 Class B and no story may land it before an architect rules.",
+          "title": "AC-9b [ED-04, ADR-002 O-6, @architect then the implementing story] \u2014 story 10.17\u2019s destination-misuse negative tests, un-skipped against the enforced mechanism. They are 10.17\u2019s tests, in 10.17\u2019s files, and this story does not rewrite them. CARRIES story 10.17 AC-16b with its gate note unchanged. The gate-shut tripwire over the production ACCEPTED_JOB_KEYS is re-run UNCHANGED and green in test/run/canary.test.ts; adding a policy field to the closed RunJob is ADR-002 Class B and no story may land it before an architect rules.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-03 / SPK-03 \u2014 the private object store AC-10b [ED-03, SPK-03, Platform/SRE] \u2014 the scopes DENIED IN FACT on the real store: the runner principal\u2019s GET and LIST denied, the API principal\u2019s PUT denied; plus path-style addressing, multipart upload, HEAD/GET with Range, server-side encryption defaults, and read-after-write consistency on a key the recovery path reads immediately after writing. CARRIES story 10.14 AC-18b. The DEPLOYMENT half \u2014 two distinct Secrets, no Get/List key name on the runner\u2019s side, the fixed \u00a76.2 prefix \u2014 is asserted over the rendered manifest in test/deployment/chart.test.ts. What is deferred is a denial observed on a real store.",
+          "title": "AC-10b [ED-03, SPK-03, Platform/SRE] \u2014 the scopes DENIED IN FACT on the real store: the runner principal\u2019s GET and LIST denied, the API principal\u2019s PUT denied; plus path-style addressing, multipart upload, HEAD/GET with Range, server-side encryption defaults, and read-after-write consistency on a key the recovery path reads immediately after writing. CARRIES story 10.14 AC-18b. The DEPLOYMENT half \u2014 two distinct Secrets, no Get/List key name on the runner\u2019s side, the fixed \u00a76.2 prefix \u2014 is asserted over the rendered manifest in test/deployment/chart.test.ts. What is deferred is a denial observed on a real store.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-03 / SPK-03 \u2014 the private object store AC-11 [ED-03, SPK-03, Platform/SRE] \u2014 lifecycle, versioning and incomplete-upload behaviour with caveats recorded: whether bucket versioning is on and whether lifecycle rules expire noncurrent versions and delete markers; whether incomplete multipart uploads are aborted and after how long; the observed lag between lifecycle expiry and physical deletion; and whether a GET on an expired object fails or still serves. CARRIES story 10.14 AC-19b. A NEGATIVE result is a valid closure and is recorded as a caveat for Security, not worked around. Until then no artefact may claim exact-time physical deletion \u2014 asserted over this story\u2019s own rendered output in chart.test.ts.",
+          "title": "AC-11 [ED-03, SPK-03, Platform/SRE] \u2014 lifecycle, versioning and incomplete-upload behaviour with caveats recorded: whether bucket versioning is on and whether lifecycle rules expire noncurrent versions and delete markers; whether incomplete multipart uploads are aborted and after how long; the observed lag between lifecycle expiry and physical deletion; and whether a GET on an expired object fails or still serves. CARRIES story 10.14 AC-19b. A NEGATIVE result is a valid closure and is recorded as a caveat for Security, not worked around. Until then no artefact may claim exact-time physical deletion \u2014 asserted over this story\u2019s own rendered output in chart.test.ts.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-02 \u2014 identity, and the halves inherited from stories 10.7 and 10.17 AC-19b [ED-02, owner UNASSIGNED IN SOURCES] \u2014 credentialed acceptance through the real ingress: a real trusted-gateway identity resolving to a real user; a FORGED identity header denied at the gateway rather than at the application; a wrong-CSI request denied; access revocation terminating an open SSE stream within the configured refresh interval; and the real vault replacing the SecretsService REDACTED/plaintext stub. CARRIES story 10.17 AC-5b and AC-7b, and story 10.7 AC-4b, AC-6b and AC-37b. The CODE half (three bypass paths made configuration-driven and default-closed) is story 10.18b\u2019s. @po could not name an owner and said so; @pm raises ED-02 to Checks-squad engineering management via BRD \u00a78, with Security & Compliance accepting. Story 10.19 MAY NOT BE DRAFTED while ED-02\u2019s owner reads TBD.",
+          "title": "AC-19b [ED-02, owner UNASSIGNED IN SOURCES] \u2014 credentialed acceptance through the real ingress: a real trusted-gateway identity resolving to a real user; a FORGED identity header denied at the gateway rather than at the application; a wrong-CSI request denied; access revocation terminating an open SSE stream within the configured refresh interval; and the real vault replacing the SecretsService REDACTED/plaintext stub. CARRIES story 10.17 AC-5b and AC-7b, and story 10.7 AC-4b, AC-6b and AC-37b. The CODE half (three bypass paths made configuration-driven and default-closed) is story 10.18b\u2019s. @po could not name an owner and said so; @pm raises ED-02 to Checks-squad engineering management via BRD \u00a78, with Security & Compliance accepting. Story 10.19 MAY NOT BE DRAFTED while ED-02\u2019s owner reads TBD.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18a \u2014 blocked criteria, recorded as skipped and never passed Not skips \u2014 pointers, so nothing is counted twice AC-17 IS NOT THIS STORY\u2019S and is not a skip here. @po moved it to story 10.19 at wave-6 validation: it depends on sibling story 10.15, it is blocked on ED-06/SPK-02 either way, 10.19\u2019s depends_on already lists both 10.15 and 10.18, and it duplicated story 10.15\u2019s AC-19b (\"deployment owner 10.18, integrated proof 10.19\"). Recorded in the manifest under 10.19\u2019s inherited_deferrals. This entry exists so a reader looking for AC-17 finds the pointer rather than concluding it was dropped. Dependency assumption D-3 is CLOSED.",
+          "title": "AC-17 IS NOT THIS STORY\u2019S and is not a skip here. @po moved it to story 10.19 at wave-6 validation: it depends on sibling story 10.15, it is blocked on ED-06/SPK-02 either way, 10.19\u2019s depends_on already lists both 10.15 and 10.18, and it duplicated story 10.15\u2019s AC-19b (\"deployment owner 10.18, integrated proof 10.19\"). Recorded in the manifest under 10.19\u2019s inherited_deferrals. This entry exists so a reader looking for AC-17 finds the pointer rather than concluding it was dropped. Dependency assumption D-3 is CLOSED.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18a \u2014 blocked criteria, recorded as skipped and never passed Not skips \u2014 pointers, so nothing is counted twice Story 10.14\u2019s AC-26 is DISCHARGED, not re-opened. It was recorded \"skipped, never passed\" in a merged story for want of an architect\u2019s ruling on promoting RunnerEvidence.partial to required. ADR-002 \u00a720 is that ruling and story 10.18a landed the edit; 10.14\u2019s own checkbox is left exactly as it merged, on the standing rule that a merged, gated story is not re-opened to close a deferral a later ruling unblocked.",
+          "title": "Story 10.14\u2019s AC-26 is DISCHARGED, not re-opened. It was recorded \"skipped, never passed\" in a merged story for want of an architect\u2019s ruling on promoting RunnerEvidence.partial to required. ADR-002 \u00a720 is that ruling and story 10.18a landed the edit; 10.14\u2019s own checkbox is left exactly as it merged, on the standing rule that a merged, gated story is not re-opened to close a deferral a later ruling unblocked.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18a \u2014 blocked criteria, recorded as skipped and never passed Not skips \u2014 pointers, so nothing is counted twice AC-13a, AC-16a, AC-18, AC-19a, AC-20, AC-21a, AC-22 and AC-23a are STORY 10.18b\u2019s and are IMPLEMENTED, not deferred: the streaming Ingress, CORS coherence, the envFrom key-validity check, the three bypass closures with their permit companions, the runbook disclosures, the CSRF finding, the measured backend baseline and the kill switch. This entry was a forward pointer when 10.18a shipped; it is kept, corrected, so that a reader comparing the two halves\u2019 skip counts is not left thinking the edge half deferred its own scope.",
+          "title": "AC-13a, AC-16a, AC-18, AC-19a, AC-20, AC-21a, AC-22 and AC-23a are STORY 10.18b\u2019s and are IMPLEMENTED, not deferred: the streaming Ingress, CORS coherence, the envFrom key-validity check, the three bypass closures with their permit companions, the runbook disclosures, the CSRF finding, the measured backend baseline and the kill switch. This entry was a forward pointer when 10.18a shipped; it is kept, corrected, so that a reader comparing the two halves\u2019 skip counts is not left thinking the edge half deferred its own scope.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-13b [ED-06, SPK-02 question 3, Platform/SRE (ingress)] \u2014 TWO TIMED execution.snapshot EVENTS REACH A REAL BROWSER SEPARATELY, before response closure, through every proxy layer, captured as a HAR from a real browser on the staging hosts. The DEPLOYMENT half is done and asserted over the rendered manifest: a separate Ingress carrying only the two streaming paths, proxy-buffering off, and an idle timeout derived from the stream lifetime and compared against the rendered heartbeat in the same manifest. What is deferred is whether any of that survives the wire. A PASSING BACKEND TEST IS NOT EVIDENCE FOR THIS CRITERION and must not be offered as one \u2014 the SSE assessment says so directly: \"a buffered mock-controller response does not prove SSE delivery\". Closes when docs/qa/spikes/SPK-02/ carries the HAR and ED-06 is updated.",
+          "title": "AC-13b [ED-06, SPK-02 question 3, Platform/SRE (ingress)] \u2014 TWO TIMED execution.snapshot EVENTS REACH A REAL BROWSER SEPARATELY, before response closure, through every proxy layer, captured as a HAR from a real browser on the staging hosts. The DEPLOYMENT half is done and asserted over the rendered manifest: a separate Ingress carrying only the two streaming paths, proxy-buffering off, and an idle timeout derived from the stream lifetime and compared against the rendered heartbeat in the same manifest. What is deferred is whether any of that survives the wire. A PASSING BACKEND TEST IS NOT EVIDENCE FOR THIS CRITERION and must not be offered as one \u2014 the SSE assessment says so directly: \"a buffered mock-controller response does not prove SSE delivery\". Closes when docs/qa/spikes/SPK-02/ carries the HAR and ED-06 is updated.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-14 [ED-06, SPK-02 question 4, Platform/SRE (ingress)] \u2014 a 15 s HEARTBEAT KEEPS AN IDLE STREAM OPEN across the ingress and any platform proxy, and the EFFECTIVE MAXIMUM STREAM LIFETIME is measured against the intended 60 s. If the effective maximum is BELOW the configured lifetime, the configured value moves to match the measurement and the change is recorded \u2014 studioSse.lifetimeSeconds is a \u00a78.5 starting value, not a commitment, and the ingress timeout is derived from it so it moves too. That is the mechanism working, not a criterion failing. Nothing in this repository can measure a proxy it has never crossed.",
+          "title": "AC-14 [ED-06, SPK-02 question 4, Platform/SRE (ingress)] \u2014 a 15 s HEARTBEAT KEEPS AN IDLE STREAM OPEN across the ingress and any platform proxy, and the EFFECTIVE MAXIMUM STREAM LIFETIME is measured against the intended 60 s. If the effective maximum is BELOW the configured lifetime, the configured value moves to match the measurement and the change is recorded \u2014 studioSse.lifetimeSeconds is a \u00a78.5 starting value, not a commitment, and the ingress timeout is derived from it so it moves too. That is the mechanism working, not a criterion failing. Nothing in this repository can measure a proxy it has never crossed.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-15 [ED-06, SPK-02 question 5, Platform/SRE (ingress) + backend dev] \u2014 RECONNECT WITH Last-Event-ID TO A DIFFERENT API REPLICA restores the current snapshot. The evidence must show the two connections were served by DIFFERENT PODS: a reconnect that happens to land on the same replica proves nothing and is the way this criterion gets reported passed without being tested. Production runs three replicas scaling to six. The design answers this by reading committed state rather than by affinity, and **NO STICKY-SESSION OR SESSION-AFFINITY SETTING MAY BE INTRODUCED TO MAKE IT PASS** \u2014 story 10.18b introduced none, and the streaming Ingress it added carries no affinity annotation of any kind. Trading a design property for a deployment workaround would close this criterion by defeating the thing it exists to check.",
+          "title": "AC-15 [ED-06, SPK-02 question 5, Platform/SRE (ingress) + backend dev] \u2014 RECONNECT WITH Last-Event-ID TO A DIFFERENT API REPLICA restores the current snapshot. The evidence must show the two connections were served by DIFFERENT PODS: a reconnect that happens to land on the same replica proves nothing and is the way this criterion gets reported passed without being tested. Production runs three replicas scaling to six. The design answers this by reading committed state rather than by affinity, and **NO STICKY-SESSION OR SESSION-AFFINITY SETTING MAY BE INTRODUCED TO MAKE IT PASS** \u2014 story 10.18b introduced none, and the streaming Ingress it added carries no affinity annotation of any kind. Trading a design property for a deployment workaround would close this criterion by defeating the thing it exists to check.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-16b [ED-06, SPK-02 questions 1-2, Platform/SRE (ingress) + frontend dev] \u2014 THE PLATFORM\u2019S ACTUAL BROWSER-AUTH ROUTE, IN WRITING, COVERING FEDERATED MODE: which route carries the session cookie to the events and video paths \u2014 same-origin gateway path, or cross-origin with withCredentials plus exact-origin credentialed CORS \u2014 and whether it holds in BOTH standalone and federated (shell-hosted) modes, where the browser\u2019s origin is the PUT platform shell\u2019s and no values file in this chart can know it; and whether a bearer-only requirement exists anywhere on the path, in which case SSE needs the header-capable client inside the centralized API service (STORY 10.11\u2019s, not this one\u2019s) and <video> needs an ambient session regardless. The DEPLOYMENT half is done: exact-origin credentialed CORS compared against the rendered frontend host in the same manifest, never a wildcard, and no credential in any URL. A DEMONSTRATED GATEWAY INCOMPATIBILITY IS A VALID OUTCOME \u2014 it selects the documented GET fallback and changes no execution contract.",
+          "title": "AC-16b [ED-06, SPK-02 questions 1-2, Platform/SRE (ingress) + frontend dev] \u2014 THE PLATFORM\u2019S ACTUAL BROWSER-AUTH ROUTE, IN WRITING, COVERING FEDERATED MODE: which route carries the session cookie to the events and video paths \u2014 same-origin gateway path, or cross-origin with withCredentials plus exact-origin credentialed CORS \u2014 and whether it holds in BOTH standalone and federated (shell-hosted) modes, where the browser\u2019s origin is the PUT platform shell\u2019s and no values file in this chart can know it; and whether a bearer-only requirement exists anywhere on the path, in which case SSE needs the header-capable client inside the centralized API service (STORY 10.11\u2019s, not this one\u2019s) and <video> needs an ambient session regardless. The DEPLOYMENT half is done: exact-origin credentialed CORS compared against the rendered frontend host in the same manifest, never a wildcard, and no credential in any URL. A DEMONSTRATED GATEWAY INCOMPATIBILITY IS A VALID OUTCOME \u2014 it selects the documented GET fallback and changes no execution contract.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-21b [ED-06 / SPK-02 question 7, and ED-02; Platform/SRE + Security] \u2014 THE CSRF CONTROL THE PLATFORM ROUTE ACTUALLY PROVIDES, stated in writing by its owner, and whether the application must add one. The DECIDABLE half is done (AC-21a): the gap is recorded with the two facts that bound it \u2014 the put_session cookie and SecurityConfig.setAllowCredentials(true) with the MFE and API on different hosts \u2014 in SecurityConfig itself and in the runbook \u00a710 as an open launch prerequisite. This story deliberately did NOT enable Spring\u2019s CSRF filter or drop CORS credentials: either changes the public request contract of every existing Checks route, which is not a Studio story\u2019s to land.",
+          "title": "AC-21b [ED-06 / SPK-02 question 7, and ED-02; Platform/SRE + Security] \u2014 THE CSRF CONTROL THE PLATFORM ROUTE ACTUALLY PROVIDES, stated in writing by its owner, and whether the application must add one. The DECIDABLE half is done (AC-21a): the gap is recorded with the two facts that bound it \u2014 the put_session cookie and SecurityConfig.setAllowCredentials(true) with the MFE and API on different hosts \u2014 in SecurityConfig itself and in the runbook \u00a710 as an open launch prerequisite. This story deliberately did NOT enable Spring\u2019s CSRF filter or drop CORS credentials: either changes the public request contract of every existing Checks route, which is not a Studio story\u2019s to land.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18b \u2014 blocked criteria, recorded as skipped and never passed Staging \u2014 the deployed stack under load AC-23b [staging; ED-06/ED-05 and the spikes; Platform/SRE] \u2014 KILL SWITCH, DRAIN, RECOVERY AND BOUNDED OVERLOAD OBSERVED AGAINST THE DEPLOYED STACK, with ordinary REST/check service preserved. Bounded Studio load must not degrade the ordinary check path \u2014 a BRD success metric, not a nicety \u2014 and pod sizing is validated under that load before production templating (BRD \u00a78: \"Prove one runner pod in staging before templating production\"). The kill switch\u2019s behaviour is driven on the production path in both directions in backend StudioKillSwitchWiringTest, and its deployed wiring is asserted over the rendered manifest; what is deferred is the stack.",
+          "title": "AC-23b [staging; ED-06/ED-05 and the spikes; Platform/SRE] \u2014 KILL SWITCH, DRAIN, RECOVERY AND BOUNDED OVERLOAD OBSERVED AGAINST THE DEPLOYED STACK, with ordinary REST/check service preserved. Bounded Studio load must not degrade the ordinary check path \u2014 a BRD success metric, not a nicety \u2014 and pod sizing is validated under that load before production templating (BRD \u00a78: \"Prove one runner pod in staging before templating production\"). The kill switch\u2019s behaviour is driven on the production path in both directions in backend StudioKillSwitchWiringTest, and its deployed wiring is asserted over the rendered manifest; what is deferred is the stack.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/deferred.test.ts",
+          "name": "10.18b \u2014 blocked criteria, recorded as skipped and never passed Not a skip \u2014 resolved configuration-delivery pointer AC-18 is resolved: test/deployment/envfrom-keys.test.ts is green across all value sets. The chart converts dotted configOverrides keys to Spring-compatible environment names and fails rendering on invalid or colliding names. This historical pointer remains to show that the earlier red escalation was closed rather than allowlisted.",
+          "title": "AC-18 is resolved: test/deployment/envfrom-keys.test.ts is green across all value sets. The chart converts dotted configOverrides keys to Spring-compatible environment names and fails rendering on invalid or colliding names. This historical pointer remains to show that the earlier red escalation was closed rather than allowlisted.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/run/canary.test.ts",
+          "name": "Blocked halves \u2014 recorded as live skips, never as passes AC-13b (ED-02, owner 10.19, the other half of 10.13 AC-7b) \u2014 the same canaries through the integrated path with real vault material: nothing the API persists carries them, across progress rows, the persisted snapshot, structured log storage and 10.14\u2019s terminal result manifest. The runner can only assert on what leaves it; the API half needs real material, which needs a real vault. ED-02 is status: open.",
+          "title": "AC-13b (ED-02, owner 10.19, the other half of 10.13 AC-7b) \u2014 the same canaries through the integrated path with real vault material: nothing the API persists carries them, across progress rows, the persisted snapshot, structured log storage and 10.14\u2019s terminal result manifest. The runner can only assert on what leaves it; the API half needs real material, which needs a real vault. ED-02 is status: open.",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/run/canary.test.ts",
+          "name": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a variable URL resolving to an unapproved origin is refused at dispatch",
+          "title": "AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a variable URL resolving to an unapproved origin is refused at dispatch",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/run/canary.test.ts",
+          "name": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 the same resolved URL is refused again during execution",
+          "title": "AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 the same resolved URL is refused again during execution",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/run/canary.test.ts",
+          "name": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a redirect from an approved origin to an unapproved one is refused",
+          "title": "AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a redirect from an approved origin to an unapproved one is refused",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/run/canary.test.ts",
+          "name": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a subresource request to an unapproved origin is refused",
+          "title": "AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a subresource request to an unapproved origin is refused",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/run/canary.test.ts",
+          "name": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a secret submitted to an approved origin over an unapproved scheme is refused",
+          "title": "AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a secret submitted to an approved origin over an unapproved scheme is refused",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/run/canary.test.ts",
+          "name": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a local file URL is refused",
+          "title": "AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a local file URL is refused",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/run/canary.test.ts",
+          "name": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a cloud metadata endpoint is refused",
+          "title": "AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a cloud metadata endpoint is refused",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/run/sandbox.test.ts",
+          "name": "AC-6b \u2014 the sandbox proven in-cluster starts sandboxed under the cluster PodSecurity level \u2014 deferred to ED-05/SPK-04/10.18",
+          "title": "starts sandboxed under the cluster PodSecurity level \u2014 deferred to ED-05/SPK-04/10.18",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/server/drain.test.ts",
+          "name": "AC-12 \u2014 SIGTERM drains without abandoning an admitted attempt an admitted attempt survives SIGKILL \u2014 rests on story 10.7 reapers, not on this suite",
+          "title": "an admitted attempt survives SIGKILL \u2014 rests on story 10.7 reapers, not on this suite",
+          "status": "skipped"
+        }
+      ],
+      "exactHistoricalNameSetUnchanged": true,
+      "newSkippedNames": [],
+      "removedSkippedNames": []
+    },
+    "runner-fixtures-final-attempt04": {
+      "uncreditedCases": [
+        {
+          "suite": "test/fixtures-tier/deadline-cleanup.test.ts",
+          "name": "deferred criteria \u2014 skipped, not passed AC-5b \u2014 the runner total sits inside the API recovery deadline (story 10.19, gated with 10.18)",
+          "title": "AC-5b \u2014 the runner total sits inside the API recovery deadline (story 10.19, gated with 10.18)",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/fixtures-tier/deadline-cleanup.test.ts",
+          "name": "deferred criteria \u2014 skipped, not passed AC-7b \u2014 nothing the API persists carries the canary (story 10.19, with 10.17)",
+          "title": "AC-7b \u2014 nothing the API persists carries the canary (story 10.19, with 10.17)",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/fixtures-tier/deadline-cleanup.test.ts",
+          "name": "deferred criteria \u2014 skipped, not passed AC-11b \u2014 the six paths inside the pinned image under PID-1 reaping (ED-05 / story 10.18)",
+          "title": "AC-11b \u2014 the six paths inside the pinned image under PID-1 reaping (ED-05 / story 10.18)",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/fixtures-tier/seek-measurement.test.ts",
+          "name": "AC-12b \u2014 seek accuracy through the pipeline, against the 500 ms target measures dispatch \u2192 runner \u2192 Sonic \u2192 API \u2192 MFE seek in staging \u2014 SPK-06 phase B",
+          "title": "measures dispatch \u2192 runner \u2192 Sonic \u2192 API \u2192 MFE seek in staging \u2014 SPK-06 phase B",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/fixtures-tier/seek-measurement.test.ts",
+          "name": "AC-12c \u2014 the readiness-to-first-frame gap measures the gap on the controlled fixture in staging \u2014 evidenced by SPK-06 phase B",
+          "title": "measures the gap on the controlled fixture in staging \u2014 evidenced by SPK-06 phase B",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/fixtures-tier/upload-evidence.test.ts",
+          "name": "deferred criteria \u2014 skipped, not passed AC-7b \u2014 the terminal manifest is declared as a closed schema in the frozen contract (@architect, ADR-002 \u00a712 Class B)",
+          "title": "AC-7b \u2014 the terminal manifest is declared as a closed schema in the frozen contract (@architect, ADR-002 \u00a712 Class B)",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/fixtures-tier/upload-evidence.test.ts",
+          "name": "deferred criteria \u2014 skipped, not passed AC-18b \u2014 real Sonic endpoint, write-only runner credentials scoped to studio/, read-only API credentials (ED-03, story 10.18; integrated 10.19)",
+          "title": "AC-18b \u2014 real Sonic endpoint, write-only runner credentials scoped to studio/, read-only API credentials (ED-03, story 10.18; integrated 10.19)",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/fixtures-tier/upload-evidence.test.ts",
+          "name": "deferred criteria \u2014 skipped, not passed AC-19b \u2014 verified lifecycle configuration on real Sonic: physical deletion, versioning/noncurrent objects, incomplete-upload cleanup (ED-03, story 10.18)",
+          "title": "AC-19b \u2014 verified lifecycle configuration on real Sonic: physical deletion, versioning/noncurrent objects, incomplete-upload cleanup (ED-03, story 10.18)",
+          "status": "skipped"
+        },
+        {
+          "suite": "test/fixtures-tier/upload-evidence.test.ts",
+          "name": "deferred criteria \u2014 skipped, not passed AC-26 (O-14) \u2014 promote RunnerEvidence.partial from optional to required in the frozen contract",
+          "title": "AC-26 (O-14) \u2014 promote RunnerEvidence.partial from optional to required in the frozen contract",
+          "status": "skipped"
+        }
+      ],
+      "exactHistoricalNameSetUnchanged": true,
+      "newSkippedNames": [],
+      "removedSkippedNames": []
+    }
+  },
+  "namedCases": {
+    "unit014": [
+      {
+        "suite": "test/contract-integrity.test.ts",
+        "name": "REF-DANGLE-1 \u2014 the contract document is internally consistent finds every $ref the file text contains, so a walk that stops early is visible",
+        "title": "finds every $ref the file text contains, so a walk that stops early is visible",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract-integrity.test.ts",
+        "name": "REF-DANGLE-1 \u2014 the contract document is internally consistent resolves every $ref through the resolver the conformance checker itself uses",
+        "title": "resolves every $ref through the resolver the conformance checker itself uses",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract-integrity.test.ts",
+        "name": "REF-DANGLE-1 \u2014 the contract document is internally consistent every $ref names an object, because a pointer into a scalar is a malformed reference",
+        "title": "every $ref names an object, because a pointer into a scalar is a malformed reference",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 internal contract the frozen contract from story 10.1 is present",
+        "title": "the frozen contract from story 10.1 is present",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 internal contract the request bodies the runner sends conform to the internal-tagged request schemas",
+        "title": "the request bodies the runner sends conform to the internal-tagged request schemas",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 internal contract a progress body carrying a step log line with stepIndex conforms to the amended schema (ADR-002 \u00a733)",
+        "title": "a progress body carrying a step log line with stepIndex conforms to the amended schema (ADR-002 \u00a733)",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 internal contract the response bodies the runner serves conform to the internal-tagged response schemas",
+        "title": "the response bodies the runner serves conform to the internal-tagged response schemas",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 internal contract serves exactly the four routes architecture \u00a78.4 names, and no others",
+        "title": "serves exactly the four routes architecture \u00a78.4 names, and no others",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 internal contract calls exactly the two API routes architecture \u00a78.4 names",
+        "title": "calls exactly the two API routes architecture \u00a78.4 names",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 the conformance check itself accepts bounded secret usage codes and refuses private values and unknown IDs",
+        "title": "accepts bounded secret usage codes and refuses private values and unknown IDs",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 the conformance check itself reads the document shapes an OpenAPI file uses",
+        "title": "reads the document shapes an OpenAPI file uses",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 the conformance check itself accepts the exact admission bytes the runner sends",
+        "title": "accepts the exact admission bytes the runner sends",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 the conformance check itself accepts the exact 202 bytes the runner serves on POST /v2/runs",
+        "title": "accepts the exact 202 bytes the runner serves on POST /v2/runs",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 the conformance check itself rejects a body where a required property is missing",
+        "title": "rejects a body where a required property is missing",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 the conformance check itself rejects a body where a property has the wrong type",
+        "title": "rejects a body where a property has the wrong type",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 the conformance check itself rejects a body where an object property arrives as an array",
+        "title": "rejects a body where an object property arrives as an array",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 the conformance check itself rejects a body where a property the contract does not declare is sent",
+        "title": "rejects a body where a property the contract does not declare is sent",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 the conformance check itself rejects a body where a nullable-looking property arrives as null",
+        "title": "rejects a body where a nullable-looking property arrives as null",
+        "status": "passed"
+      },
+      {
+        "suite": "test/contract.test.ts",
+        "name": "AC-1 \u2014 the conformance check itself fails loudly on a document it cannot read, rather than passing vacuously",
+        "title": "fails loudly on a document it cannot read, rather than passing vacuously",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/policyHash.test.ts",
+        "name": "STUDIO-OBS-014 AC-1 observation policy hash (AR-2 h) is sha256 over sorted-key canonical JSON, independent of insertion order",
+        "title": "is sha256 over sorted-key canonical JSON, independent of insertion order",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/policyHash.test.ts",
+        "name": "STUDIO-OBS-014 AC-1 observation policy hash (AR-2 h) changes when any governed field changes",
+        "title": "changes when any governed field changes",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/policyHash.test.ts",
+        "name": "STUDIO-OBS-014 AC-1 runner-context policy binding accepts a policy whose hash matches and returns a detached copy",
+        "title": "accepts a policy whose hash matches and returns a detached copy",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/policyHash.test.ts",
+        "name": "STUDIO-OBS-014 AC-1 runner-context policy binding refuses a mismatched, malformed or absent binding with IDENTITY_MISMATCH",
+        "title": "refuses a mismatched, malformed or absent binding with IDENTITY_MISMATCH",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/policyHash.test.ts",
+        "name": "STUDIO-OBS-014 AC-1 runner-context policy binding holds a later context of the same session to the binding already in force",
+        "title": "holds a later context of the same session to the binding already in force",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/policyHash.test.ts",
+        "name": "STUDIO-OBS-014 AC-1 shared backend/runner policy hash vectors (AR-2 h, stop S-5) reproduces every contract vector the backend also reads, byte for byte",
+        "title": "reproduces every contract vector the backend also reads, byte for byte",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery completes managed secret loss only after original close and consumes late fulfill without output reentry",
+        "title": "completes managed secret loss only after original close and consumes late fulfill without output reentry",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery completes managed secret loss only after original close and consumes late reject without output reentry",
+        "title": "completes managed secret loss only after original close and consumes late reject without output reentry",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery adds a newly captured runtime value to the dispatch-local redactor before shutdown can clear it",
+        "title": "adds a newly captured runtime value to the dispatch-local redactor before shutdown can clear it",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery keeps prior-value redaction and immutable success when stderr diagnostic delivery fails",
+        "title": "keeps prior-value redaction and immutable success when stderr diagnostic delivery fails",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery keeps prior-value redaction and immutable success when callback diagnostic delivery fails",
+        "title": "keeps prior-value redaction and immutable success when callback diagnostic delivery fails",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery keeps prior-value redaction and immutable success when file diagnostic delivery fails",
+        "title": "keeps prior-value redaction and immutable success when file diagnostic delivery fails",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery redacts all earlier/current values through 'CANCELLED'/'immediate'/'nonsecret' after inventory erasure",
+        "title": "redacts all earlier/current values through 'CANCELLED'/'immediate'/'nonsecret' after inventory erasure",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery redacts all earlier/current values through 'CANCELLED'/'immediate'/'secret' after inventory erasure",
+        "title": "redacts all earlier/current values through 'CANCELLED'/'immediate'/'secret' after inventory erasure",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery redacts all earlier/current values through 'CANCELLED'/'delayed'/'nonsecret' after inventory erasure",
+        "title": "redacts all earlier/current values through 'CANCELLED'/'delayed'/'nonsecret' after inventory erasure",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery redacts all earlier/current values through 'CANCELLED'/'delayed'/'secret' after inventory erasure",
+        "title": "redacts all earlier/current values through 'CANCELLED'/'delayed'/'secret' after inventory erasure",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery redacts all earlier/current values through 'EXPIRED'/'immediate'/'nonsecret' after inventory erasure",
+        "title": "redacts all earlier/current values through 'EXPIRED'/'immediate'/'nonsecret' after inventory erasure",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery redacts all earlier/current values through 'EXPIRED'/'immediate'/'secret' after inventory erasure",
+        "title": "redacts all earlier/current values through 'EXPIRED'/'immediate'/'secret' after inventory erasure",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery redacts all earlier/current values through 'EXPIRED'/'delayed'/'nonsecret' after inventory erasure",
+        "title": "redacts all earlier/current values through 'EXPIRED'/'delayed'/'nonsecret' after inventory erasure",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery redacts all earlier/current values through 'EXPIRED'/'delayed'/'secret' after inventory erasure",
+        "title": "redacts all earlier/current values through 'EXPIRED'/'delayed'/'secret' after inventory erasure",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery redacts all earlier/current values through 'CONTEXT_LOST'/'immediate'/'nonsecret' after inventory erasure",
+        "title": "redacts all earlier/current values through 'CONTEXT_LOST'/'immediate'/'nonsecret' after inventory erasure",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery redacts all earlier/current values through 'CONTEXT_LOST'/'immediate'/'secret' after inventory erasure",
+        "title": "redacts all earlier/current values through 'CONTEXT_LOST'/'immediate'/'secret' after inventory erasure",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery redacts all earlier/current values through 'CONTEXT_LOST'/'delayed'/'nonsecret' after inventory erasure",
+        "title": "redacts all earlier/current values through 'CONTEXT_LOST'/'delayed'/'nonsecret' after inventory erasure",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery redacts all earlier/current values through 'CONTEXT_LOST'/'delayed'/'secret' after inventory erasure",
+        "title": "redacts all earlier/current values through 'CONTEXT_LOST'/'delayed'/'secret' after inventory erasure",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery preserves trusted-pre-write secret target-change evidence without inventing refusal",
+        "title": "preserves trusted-pre-write secret target-change evidence without inventing refusal",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery preserves uncertain-after-call secret target-change evidence without inventing refusal",
+        "title": "preserves uncertain-after-call secret target-change evidence without inventing refusal",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery excludes independent writers and refuses missing/corrupt expected journal state",
+        "title": "excludes independent writers and refuses missing/corrupt expected journal state",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery fsyncs before an effect and admits only one concurrent delivery",
+        "title": "fsyncs before an effect and admits only one concurrent delivery",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery never retries an effect after an uncertain exception and delivers bounded non-authoritative diagnostics",
+        "title": "never retries an effect after an uncertain exception and delivers bounded non-authoritative diagnostics",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery preserves a definite success when its callback acknowledgement is lost",
+        "title": "preserves a definite success when its callback acknowledgement is lost",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery redacts the in-flight local value when stop has already wiped its inventory",
+        "title": "redacts the in-flight local value when stop has already wiped its inventory",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery cancellation before consume prevents invocation and lease expiry autonomously closes",
+        "title": "cancellation before consume prevents invocation and lease expiry autonomously closes",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery reports a definite failed target refusal after consume and before any browser invocation",
+        "title": "reports a definite failed target refusal after consume and before any browser invocation",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery cancellation after durable consume but before invocation prevents the browser call",
+        "title": "cancellation after durable consume but before invocation prevents the browser call",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery cancellation after an application effect cannot commit a success or retry",
+        "title": "cancellation after an application effect cannot commit a success or retry",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery retains cumulative allocations while admitting appended prospective consumers",
+        "title": "retains cumulative allocations while admitting appended prospective consumers",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery enforces aggregate/count bounds without exporting a read value: {\"maxRuntimeValues\":1}",
+        "title": "enforces aggregate/count bounds without exporting a read value: {\"maxRuntimeValues\":1}",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery enforces aggregate/count bounds without exporting a read value: {\"maxRuntimeValuesBytesTotal\":3}",
+        "title": "enforces aggregate/count bounds without exporting a read value: {\"maxRuntimeValuesBytesTotal\":3}",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery retains capacity until actual browser close and releases private runtime references even when close fails",
+        "title": "retains capacity until actual browser close and releases private runtime references even when close fails",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery cleans a partial launch failure and cancels an in-flight launch without creating a live context",
+        "title": "cleans a partial launch failure and cancels an in-flight launch without creating a live context",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery refreshes a new generation, correlates its committed callback and invalidates old preparation without another action",
+        "title": "refreshes a new generation, correlates its committed callback and invalidates old preparation without another action",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery does not expose unacknowledged refresh evidence and rejects late acknowledgement after cancellation",
+        "title": "does not expose unacknowledged refresh evidence and rejects late acknowledgement after cancellation",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery reserves refresh count and remaining byte capacity without resetting budgets or running extra effects",
+        "title": "reserves refresh count and remaining byte capacity without resetting budgets or running extra effects",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery stops on a lost refresh callback acknowledgement without changing already successful action outcomes",
+        "title": "stops on a lost refresh callback acknowledgement without changing already successful action outcomes",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "durable worker consumption and recovery rejects mismatched owner/tuple, raised caps, fabricated origin and context rewrites",
+        "title": "rejects mismatched owner/tuple, raised caps, fabricated origin and context rewrites",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) launches one recorded context, stamps the dispatched action on the session clock and reports after the lifecycle",
+        "title": "launches one recorded context, stamps the dispatched action on the session clock and reports after the lifecycle",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) does not make the stop wait for the upload",
+        "title": "does not make the stop wait for the upload",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) stamps endMs per outcome for unknown effects",
+        "title": "stamps endMs per outcome for unknown effects",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) stamps endMs per outcome for targetChanged effects",
+        "title": "stamps endMs per outcome for targetChanged effects",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) reports a recorder that never attached as UNAVAILABLE with no timings and no video object",
+        "title": "reports a recorder that never attached as UNAVAILABLE with no timings and no video object",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) records nothing and launches unrecorded without a recorder",
+        "title": "records nothing and launches unrecorded without a recorder",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2) settles a recording opened by a start that a stop overtook, without launching",
+        "title": "settles a recording opened by a start that a stop overtook, without launching",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/runtime.test.ts",
+        "name": "STUDIO-OBS-014 AC-1 guided learning takes no field rules (ar-mounted-rules oracle 2) builds the collector config with rules: [] even when a rules option is smuggled past the type",
+        "title": "builds the collector config with rules: [] even when a rules option is smuggled past the type",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "guided strict identity and wire schemas accepts only the designated RS256 service audience, role, issuer, subject and bounded time",
+        "title": "accepts only the designated RS256 service audience, role, issuer, subject and bounded time",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "guided strict identity and wire schemas rejects duplicate/extra JWT keys, trailing bytes, optional type, fractional/future times and weak RSA",
+        "title": "rejects duplicate/extra JWT keys, trailing bytes, optional type, fractional/future times and weak RSA",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "guided strict identity and wire schemas keeps the packaged schemas byte-equivalent in meaning to the approved contract bundle",
+        "title": "keeps the packaged schemas byte-equivalent in meaning to the approved contract bundle",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "guided strict identity and wire schemas enforces lowered limits, exact closed shapes and invalid Unicode",
+        "title": "enforces lowered limits, exact closed shapes and invalid Unicode",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "guided strict identity and wire schemas matches the independently frozen refresh callback correlation vector",
+        "title": "matches the independently frozen refresh callback correlation vector",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "audits the enforced schema subset and refuses unresolved or unsupported semantics",
+        "title": "audits the enforced schema subset and refuses unresolved or unsupported semantics",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "rejects duplicate/trailing/invalidUTF8 and noncanonical numeric wire bytes without echoing input",
+        "title": "rejects duplicate/trailing/invalidUTF8 and noncanonical numeric wire bytes without echoing input",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "matches the shared UTC timestamp profile on actual assignment schemas",
+        "title": "matches the shared UTC timestamp profile on actual assignment schemas",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "agrees with the shared raw-byte JSON parity corpus",
+        "title": "agrees with the shared raw-byte JSON parity corpus",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "STUDIO-OBS-013 recording-evidence callback route (applied by R14 from R13 queue) validates the route against recordingEvidence locally, before any credential lookup or send",
+        "title": "validates the route against recordingEvidence locally, before any credential lookup or send",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "STUDIO-OBS-013 recording-evidence callback route (applied by R14 from R13 queue) posts a valid recordingEvidence body with the owner fence and the caller idempotency key",
+        "title": "posts a valid recordingEvidence body with the owner fence and the caller idempotency key",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "STUDIO-OBS-014 AC-1 guided server configuration refuses an observation application policy supplied as server configuration",
+        "title": "refuses an observation application policy supplied as server configuration",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "STUDIO-OBS-014 AC-1 definite context refusal on the wire (AR-2 r14-stops ruling 2) keeps bridge#/definitions/refusal equal to the transport refusal vocabulary",
+        "title": "keeps bridge#/definitions/refusal equal to the transport refusal vocabulary",
+        "status": "passed"
+      },
+      {
+        "suite": "test/guided/transport.test.ts",
+        "name": "STUDIO-OBS-014 AC-1 definite context refusal on the wire (AR-2 r14-stops ruling 2) answers a policy mismatch and a context without the policy fields with schema-valid 409 refusals and changes nothing on the worker",
+        "title": "answers a policy mismatch and a context without the policy fields with schema-valid 409 refusals and changes nothing on the worker",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-1 \u2014 no Playwright import escapes the one module that starts a browser SEC-10 removes the cookie-import capability and every trusted-browser call to it",
+        "title": "SEC-10 removes the cookie-import capability and every trusted-browser call to it",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-1 \u2014 no Playwright import escapes the one module that starts a browser finds none in the validator, executor, server, reporting or compat trees",
+        "title": "finds none in the validator, executor, server, reporting or compat trees",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-1 \u2014 no Playwright import escapes the one module that starts a browser finds exactly one importer in the whole package: src/run/browser.ts",
+        "title": "finds exactly one importer in the whole package: src/run/browser.ts",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-1 \u2014 no Playwright import escapes the one module that starts a browser exports no Playwright type from the run surface",
+        "title": "exports no Playwright type from the run surface",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-25 \u2014 the unit tier is browser-free no test outside the fixtures tier imports the browser module or Playwright",
+        "title": "no test outside the fixtures tier imports the browser module or Playwright",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-25 \u2014 the unit tier is browser-free keeps the fixtures tier out of the default run, with passWithNoTests unset",
+        "title": "keeps the fixtures tier out of the default run, with passWithNoTests unset",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-25 \u2014 the unit tier is browser-free gates src/run/** at the thresholds already enforced, with none lowered",
+        "title": "gates src/run/** at the thresholds already enforced, with none lowered",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-13 \u2014 this story makes no contract edit, and that is the criterion finds the contract",
+        "title": "finds the contract",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-13 \u2014 this story makes no contract edit, and that is the criterion pins the entire reviewed OpenAPI document including observed routes",
+        "title": "pins the entire reviewed OpenAPI document including observed routes",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-13 \u2014 this story makes no contract edit, and that is the criterion carries no artifact-1 ReferencePolicy schema and no expectedIntent",
+        "title": "carries no artifact-1 ReferencePolicy schema and no expectedIntent",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-13 \u2014 this story makes no contract edit, and that is the criterion emits the RunnerEvidence.partial that ADR-002 \u00a720 promoted to required",
+        "title": "emits the RunnerEvidence.partial that ADR-002 \u00a720 promoted to required",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-13 \u2014 this story makes no contract edit, and that is the criterion keeps every runner-produced body closed, and widens no enum",
+        "title": "keeps every runner-produced body closed, and widens no enum",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-24 \u2014 production dependencies remain explicit and exact-pinned includes only Playwright, TypeScript and the intentional Sonic S3 client",
+        "title": "includes only Playwright, TypeScript and the intentional Sonic S3 client",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-24 \u2014 production dependencies remain explicit and exact-pinned does not touch the fail-closed allowlist to accommodate this story",
+        "title": "does not touch the fail-closed allowlist to accommodate this story",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-24 \u2014 production dependencies remain explicit and exact-pinned keeps story 10.13\u2019s three new modules inside the node: builtins ADR-001 \u00a76 already permits",
+        "title": "keeps story 10.13\u2019s three new modules inside the node: builtins ADR-001 \u00a76 already permits",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-24 \u2014 production dependencies remain explicit and exact-pinned serves the fixture pages from node:http, as the internal server does",
+        "title": "serves the fixture pages from node:http, as the internal server does",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-23 \u2014 the pins hold and .nvmrc is not touched still reads 22",
+        "title": "still reads 22",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-23 \u2014 the pins hold and .nvmrc is not touched keeps the engines range as it was, so the mismatch cannot be widened away either",
+        "title": "keeps the engines range as it was, so the mismatch cannot be widened away either",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/confinement.test.ts",
+        "name": "AC-23 \u2014 the pins hold and .nvmrc is not touched keeps the Playwright pin at 1.63.0 in all four declared copies",
+        "title": "keeps the Playwright pin at 1.63.0 in all four declared copies",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/guidedMain.test.ts",
+        "name": "guided worker mounted configuration accepts the closed trusted key set",
+        "title": "accepts the closed trusted key set",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/guidedMain.test.ts",
+        "name": "guided worker mounted configuration refuses unknown keys, non-object documents, a missing worker identity and invalid ports",
+        "title": "refuses unknown keys, non-object documents, a missing worker identity and invalid ports",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/guidedMain.test.ts",
+        "name": "guided worker mounted configuration STUDIO-OBS-014 AC-1: refuses a mounted applicationPolicy in any form",
+        "title": "STUDIO-OBS-014 AC-1: refuses a mounted applicationPolicy in any form",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/guidedMain.test.ts",
+        "name": "guided worker mounted configuration STUDIO-OBS-014 AC-1: refuses a mounted rules key in any form (ar-mounted-rules oracle 1)",
+        "title": "STUDIO-OBS-014 AC-1: refuses a mounted rules key in any form (ar-mounted-rules oracle 1)",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/guidedMain.test.ts",
+        "name": "guided worker mounted configuration refuses a document that is not JSON",
+        "title": "refuses a document that is not JSON",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/guidedMain.test.ts",
+        "name": "guided worker mounted configuration is the only mounted-config gate the worker entry point uses",
+        "title": "is the only mounted-config gate the worker entry point uses",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "trusted observation policy and canonical export accepts only lowering bounded limits and rejects malformed strings/origins/rules",
+        "title": "accepts only lowering bounded limits and rejects malformed strings/origins/rules",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "trusted observation policy and canonical export exports immutable canonical bytes and hashes compatible with the frozen corpus",
+        "title": "exports immutable canonical bytes and hashes compatible with the frozen corpus",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "enforces policy and visited-element ceilings with a structural DOM, without starting a browser",
+        "title": "enforces policy and visited-element ceilings with a structural DOM, without starting a browser",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "resolves positive region control grants independently of per-control IDs and keeps inventory private",
+        "title": "resolves positive region control grants independently of per-control IDs and keeps inventory private",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "resolves positive region text grants independently of per-control IDs and keeps inventory private",
+        "title": "resolves positive region text grants independently of per-control IDs and keeps inventory private",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "rejects malformed or excessively broad trusted read grants before installing a collector",
+        "title": "rejects malformed or excessively broad trusted read grants before installing a collector",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "private exact acquisition classification proves absence, then visibility-only pending, then an exported READY without changing public bytes",
+        "title": "proves absence, then visibility-only pending, then an exported READY without changing public bytes",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "private exact acquisition classification refuses hidden-duplicate instead of silently waiting",
+        "title": "refuses hidden-duplicate instead of silently waiting",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "private exact acquisition classification refuses sensitive-ancestor instead of silently waiting",
+        "title": "refuses sensitive-ancestor instead of silently waiting",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "private exact acquisition classification refuses sensitive-descendant instead of silently waiting",
+        "title": "refuses sensitive-descendant instead of silently waiting",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "private exact acquisition classification refuses unresolved-name instead of silently waiting",
+        "title": "refuses unresolved-name instead of silently waiting",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "private exact acquisition classification refuses disabled instead of silently waiting",
+        "title": "refuses disabled instead of silently waiting",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "private exact acquisition classification refuses wrong-type instead of silently waiting",
+        "title": "refuses wrong-type instead of silently waiting",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "private exact acquisition classification refuses wrong-origin instead of silently waiting",
+        "title": "refuses wrong-origin instead of silently waiting",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "private exact acquisition classification refuses mutation instead of silently waiting",
+        "title": "refuses mutation instead of silently waiting",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "private exact acquisition classification refuses private-property instead of silently waiting",
+        "title": "refuses private-property instead of silently waiting",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "private exact acquisition classification refuses truncated instead of silently waiting",
+        "title": "refuses truncated instead of silently waiting",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "private exact acquisition classification will not certify a hidden read grant or permit a capture through the probe",
+        "title": "will not certify a hidden read grant or permit a capture through the probe",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "certifies a label relation only from existing eligible cached metadata: visible",
+        "title": "certifies a label relation only from existing eligible cached metadata: visible",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "certifies a label relation only from existing eligible cached metadata: hidden",
+        "title": "certifies a label relation only from existing eligible cached metadata: hidden",
+        "status": "passed"
+      },
+      {
+        "suite": "test/run/observation.test.ts",
+        "name": "certifies a label relation only from existing eligible cached metadata: missing",
+        "title": "certifies a label relation only from existing eligible cached metadata: missing",
+        "status": "passed"
+      }
+    ],
+    "fixture014": [
+      {
+        "suite": "test/fixtures-tier/guided-dataflow.test.ts",
+        "name": "real guided Chromium dataflow proves regionVisible policy source\u2192consumer without value disclosure or duplicate invocation",
+        "title": "proves regionVisible policy source\u2192consumer without value disclosure or duplicate invocation",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-dataflow.test.ts",
+        "name": "real guided Chromium dataflow proves regionControl policy source\u2192consumer without value disclosure or duplicate invocation",
+        "title": "proves regionControl policy source\u2192consumer without value disclosure or duplicate invocation",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-dataflow.test.ts",
+        "name": "real guided Chromium dataflow STUDIO-OBS-014 ar-mounted-rules oracle 2: the former exact-rule page exports only structural nodes under the governed policy and never the former rule target",
+        "title": "STUDIO-OBS-014 ar-mounted-rules oracle 2: the former exact-rule page exports only structural nodes under the governed policy and never the former rule target",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation reads a positively classified field exactly without accepting runtime policy substitutions",
+        "title": "reads a positively classified field exactly without accepting runtime policy substitutions",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation refuses a post-prepare type change to password",
+        "title": "refuses a post-prepare type change to password",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation refuses a post-prepare type change to hidden",
+        "title": "refuses a post-prepare type change to hidden",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation refuses a post-prepare type change to email",
+        "title": "refuses a post-prepare type change to email",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation refuses replacement by an indistinguishable node and never fills the replacement",
+        "title": "refuses replacement by an indistinguishable node and never fills the replacement",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation rejects a hidden locator twin inserted after preparation",
+        "title": "rejects a hidden locator twin inserted after preparation",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation refuses a cross-origin/document race and disposed capture context",
+        "title": "refuses a cross-origin/document race and disposed capture context",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation refuses empty reads",
+        "title": "refuses empty reads",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation refuses whitespace reads",
+        "title": "refuses whitespace reads",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation refuses oversize reads",
+        "title": "refuses oversize reads",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation refuses invalid Unicode reads",
+        "title": "refuses invalid Unicode reads",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation checks lowered UTF-8 byte limit on the exact read",
+        "title": "checks lowered UTF-8 byte limit on the exact read",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation produces native CSS hover and trusted mouse click sequencing",
+        "title": "produces native CSS hover and trusted mouse click sequencing",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation implements native Tab and prevented Enter default behavior",
+        "title": "implements native Tab and prevented Enter default behavior",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation implements native Arrow selection and trusted check/uncheck without duplicate no-op effects",
+        "title": "implements native Arrow selection and trusted check/uncheck without duplicate no-op effects",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation allows native Escape to dismiss a modal dialog and respects prevented keyboard defaults",
+        "title": "allows native Escape to dismiss a modal dialog and respects prevented keyboard defaults",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation stops uncertain after focus theft or a mouseover overlay and does not click a replacement",
+        "title": "stops uncertain after focus theft or a mouseover overlay and does not click a replacement",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation requires a positive region grant without treating generic discovery or application consent as a field override",
+        "title": "requires a positive region grant without treating generic discovery or application consent as a field override",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation rejects the entire region text source with hidden/sensitive/field descendants and private text echoes",
+        "title": "rejects the entire region text source with hidden/sensitive/field descendants and private text echoes",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation prefers a unique region over application grants and denies equal-priority overlaps",
+        "title": "prefers a unique region over application grants and denies equal-priority overlaps",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation erases the private masking inventory and refuses late repopulation after disposal",
+        "title": "erases the private masking inventory and refuses late repopulation after disposal",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation permits benign focus styling but never writes after focus retypes, detaches or steals the pinned field",
+        "title": "permits benign focus styling but never writes after focus retypes, detaches or steals the pinned field",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation asserts readonly/disabled nonsecret values without granting password/hidden access",
+        "title": "asserts readonly/disabled nonsecret values without granting password/hidden access",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation reveals the retained below-fold target before native click",
+        "title": "reveals the retained below-fold target before native click",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation reveals the retained below-fold target before native hover",
+        "title": "reveals the retained below-fold target before native hover",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation reveals the retained below-fold target before native check",
+        "title": "reveals the retained below-fold target before native check",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation reveals the retained below-fold target before native press",
+        "title": "reveals the retained below-fold target before native press",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation reveals an unchanged target inside nested scrolling containers without reacquiring it",
+        "title": "reveals an unchanged target inside nested scrolling containers without reacquiring it",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation does not scroll an already satisfied offscreen check",
+        "title": "does not scroll an already satisfied offscreen check",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation does not scroll an already satisfied offscreen uncheck",
+        "title": "does not scroll an already satisfied offscreen uncheck",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "retained isolated target at invocation stops uncertain after a scroll handler replaces the retained target, without clicking the replacement",
+        "title": "stops uncertain after a scroll handler replaces the retained target, without clicking the replacement",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "QA session privacy and native toggle postconditions withholds uncaptured password bytes and aliases after removal and navigation",
+        "title": "withholds uncaptured password bytes and aliases after removal and navigation",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "QA session privacy and native toggle postconditions withholds uncaptured text bytes and aliases after removal and navigation",
+        "title": "withholds uncaptured text bytes and aliases after removal and navigation",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "QA session privacy and native toggle postconditions retains authorized business source text after removal without requiring a capture",
+        "title": "retains authorized business source text after removal without requiring a capture",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "QA session privacy and native toggle postconditions fails closed persistently on private inventory count/byte overflow instead of evicting earlier bytes",
+        "title": "fails closed persistently on private inventory count/byte overflow instead of evicting earlier bytes",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "QA session privacy and native toggle postconditions does not report a prevented/reverted/replaced checkbox as success: event.preventDefault()",
+        "title": "does not report a prevented/reverted/replaced checkbox as success: event.preventDefault()",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "QA session privacy and native toggle postconditions does not report a prevented/reverted/replaced checkbox as success: this.checked=false",
+        "title": "does not report a prevented/reverted/replaced checkbox as success: this.checked=false",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "QA session privacy and native toggle postconditions does not report a prevented/reverted/replaced checkbox as success: this.replaceWith(this.cloneNode())",
+        "title": "does not report a prevented/reverted/replaced checkbox as success: this.replaceWith(this.cloneNode())",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "QA session privacy and native toggle postconditions does not report a prevented/reverted/replaced checkbox as success: this.type='radio'",
+        "title": "does not report a prevented/reverted/replaced checkbox as success: this.type='radio'",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "QA session privacy and native toggle postconditions refuses radio uncheck during preparation and before any native input while allowing radio check",
+        "title": "refuses radio uncheck during preparation and before any native input while allowing radio check",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "poisons later observation after an unexpected collector error instead of forgetting prior inventory",
+        "title": "poisons later observation after an unexpected collector error instead of forgetting prior inventory",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-targets.test.ts",
+        "name": "keeps explicit sensitive-region text private after the region is gone",
+        "title": "keeps explicit sensitive-region text private after the region is gone",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-wire.test.ts",
+        "name": "uses real mTLS + service JWT for blank-to-Chromium control and data-free callbacks",
+        "title": "uses real mTLS + service JWT for blank-to-Chromium control and data-free callbacks",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts /login without exporting any password node",
+        "title": "counts /login without exporting any password node",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts /two-passwords without exporting any password node",
+        "title": "counts /two-passwords without exporting any password node",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts /no-password without exporting any password node",
+        "title": "counts /no-password without exporting any password node",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts /shadow-login without exporting any password node",
+        "title": "counts /shadow-login without exporting any password node",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses a pinned swap mutation without typing",
+        "title": "refuses a pinned swap mutation without typing",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses a pinned reattach mutation without typing",
+        "title": "refuses a pinned reattach mutation without typing",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses a pinned type mutation without typing",
+        "title": "refuses a pinned type mutation without typing",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses /trap before a value is typed",
+        "title": "refuses /trap before a value is typed",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses /cross-origin-form before a value is typed",
+        "title": "refuses /cross-origin-form before a value is typed",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary permits inert focus styling while retaining the same unique password input",
+        "title": "permits inert focus styling while retaining the same unique password input",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary requires both allowed and approved origin and scrubs later echoes",
+        "title": "requires both allowed and approved origin and scrubs later echoes",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses the native origin boundary at its first guard: nonempty-allowed-exclusion",
+        "title": "refuses the native origin boundary at its first guard: nonempty-allowed-exclusion",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses the native origin boundary at its first guard: approved-exclusion",
+        "title": "refuses the native origin boundary at its first guard: approved-exclusion",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses the native origin boundary at its first guard: formless-declared-navigation",
+        "title": "refuses the native origin boundary at its first guard: formless-declared-navigation",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts adversarial shadow-plus-light candidates identically at prepare",
+        "title": "counts adversarial shadow-plus-light candidates identically at prepare",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts adversarial offscreen candidates identically at prepare",
+        "title": "counts adversarial offscreen candidates identically at prepare",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts adversarial iframe candidates identically at prepare",
+        "title": "counts adversarial iframe candidates identically at prepare",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts adversarial closed-shadow candidates identically at prepare",
+        "title": "counts adversarial closed-shadow candidates identically at prepare",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "scans recorded and guided persistent profiles before close and cleanup",
+        "title": "scans recorded and guided persistent profiles before close and cleanup",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "refuses an actual browser launch without the prewritten Preferences file",
+        "title": "refuses an actual browser launch without the prewritten Preferences file",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "measures raw Playwright fill error text before the production redactor",
+        "title": "measures raw Playwright fill error text before the production redactor",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "measures actual GuidedRuntime native-guard failure and its diagnostic sinks in Chromium",
+        "title": "measures actual GuidedRuntime native-guard failure and its diagnostic sinks in Chromium",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "measures actual GuidedRuntime injected-released-value failure and its diagnostic sinks in Chromium",
+        "title": "measures actual GuidedRuntime injected-released-value failure and its diagnostic sinks in Chromium",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "uses structural login signature only; a passing registration assertion remains passing",
+        "title": "uses structural login signature only; a passing registration assertion remains passing",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "settles a protected redirect on the reached login document instead of timing out",
+        "title": "settles a protected redirect on the reached login document instead of timing out",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "executes the actual replay LOGIN_REQUIRED oracle: no-login",
+        "title": "executes the actual replay LOGIN_REQUIRED oracle: no-login",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "executes the actual replay LOGIN_REQUIRED oracle: wrong-password",
+        "title": "executes the actual replay LOGIN_REQUIRED oracle: wrong-password",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "executes the actual replay LOGIN_REQUIRED oracle: registration",
+        "title": "executes the actual replay LOGIN_REQUIRED oracle: registration",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: no-login",
+        "title": "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: no-login",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: wrong-password",
+        "title": "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: wrong-password",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "replays the published password-only guard against /two-passwords and refuses before typing",
+        "title": "replays the published password-only guard against /two-passwords and refuses before typing",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "replays the published password-only guard against /no-password and refuses before typing",
+        "title": "replays the published password-only guard against /no-password and refuses before typing",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/secret-login.test.ts",
+        "name": "replays login twice without a model, records distinct receipts/video and uses rotated values",
+        "title": "replays login twice without a model, records distinct receipts/video and uses rotated values",
+        "status": "passed"
+      }
+    ],
+    "sharedProfile67Pure": [
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at capture failure, hands off and never credits partial attack",
+        "title": "actual attack sequencing stops at capture failure, hands off and never credits partial attack",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at rename failure, hands off and never credits partial attack",
+        "title": "actual attack sequencing stops at rename failure, hands off and never credits partial attack",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at canary failure, hands off and never credits partial attack",
+        "title": "actual attack sequencing stops at canary failure, hands off and never credits partial attack",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at symlink failure, hands off and never credits partial attack",
+        "title": "actual attack sequencing stops at symlink failure, hands off and never credits partial attack",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at verify failure, hands off and never credits partial attack",
+        "title": "actual attack sequencing stops at verify failure, hands off and never credits partial attack",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup complete attack hands the identical context to production and requires its own close before removal",
+        "title": "complete attack hands the identical context to production and requires its own close before removal",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup rename failure still hands back same context and cannot credit expected refusal",
+        "title": "rename failure still hands back same context and cannot credit expected refusal",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup canary-after-rename failure still hands back same context and cannot credit expected refusal",
+        "title": "canary-after-rename failure still hands back same context and cannot credit expected refusal",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup symlink failure still hands back same context and cannot credit expected refusal",
+        "title": "symlink failure still hands back same context and cannot credit expected refusal",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup identity failure still hands back same context and cannot credit expected refusal",
+        "title": "identity failure still hands back same context and cannot credit expected refusal",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup canary-write-undefined failure still hands back same context and cannot credit expected refusal",
+        "title": "canary-write-undefined failure still hands back same context and cannot credit expected refusal",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup partial rename plus returned success stays red and closes actual success handle",
+        "title": "partial rename plus returned success stays red and closes actual success handle",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup partial canary plus returned success stays red and closes actual success handle",
+        "title": "partial canary plus returned success stays red and closes actual success handle",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup partial symlink plus returned success stays red and closes actual success handle",
+        "title": "partial symlink plus returned success stays red and closes actual success handle",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup unexpected success is retained and closed while original refusal assertion stays primary",
+        "title": "unexpected success is retained and closed while original refusal assertion stays primary",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup unrelated error is never accepted as expected refusal or used as a foreign cleanup capability",
+        "title": "unrelated error is never accepted as expected refusal or used as a foreign cleanup capability",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup missing-browser after acquisition is recorded and same-context handoff survives",
+        "title": "missing-browser after acquisition is recorded and same-context handoff survives",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup missing-page after acquisition is recorded and same-context handoff survives",
+        "title": "missing-page after acquisition is recorded and same-context handoff survives",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup closing after acquisition is recorded and same-context handoff survives",
+        "title": "closing after acquisition is recorded and same-context handoff survives",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup foreign adapter cannot be closed/released/removed as owned",
+        "title": "foreign adapter cannot be closed/released/removed as owned",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup pending raw SDK close cannot permit profile/root removal",
+        "title": "pending raw SDK close cannot permit profile/root removal",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup disconnected event alone and context-closing boolean do not replace actual SDK fulfillment",
+        "title": "disconnected event alone and context-closing boolean do not replace actual SDK fulfillment",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup missing-context-event stays red after raw close fulfillment",
+        "title": "missing-context-event stays red after raw close fulfillment",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup missing-disconnected-event stays red after raw close fulfillment",
+        "title": "missing-disconnected-event stays red after raw close fulfillment",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup first LIVE permanently fails even when later probe confirms disappearance",
+        "title": "first LIVE permanently fails even when later probe confirms disappearance",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup first UNKNOWN permanently fails even when later probe confirms disappearance",
+        "title": "first UNKNOWN permanently fails even when later probe confirms disappearance",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup unknown probe exception cannot be credited dead; later cleanup success stays red",
+        "title": "unknown probe exception cannot be credited dead; later cleanup success stays red",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup live/reused PID persisting through absolute5s cleanup deadline preserves root",
+        "title": "live/reused PID persisting through absolute5s cleanup deadline preserves root",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup cleanup condition polling returns early with one <=50ms timer but keeps first-red result",
+        "title": "cleanup condition polling returns early with one <=50ms timer but keeps first-red result",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup initial/preclose union retains all observed owned IDs",
+        "title": "initial/preclose union retains all observed owned IDs",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup saved close is memoized through repeated cleanup invocation; no extra snapshot or deadline",
+        "title": "saved close is memoized through repeated cleanup invocation; no extra snapshot or deadline",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup fixture fallback cannot supply missing production-close proof",
+        "title": "fixture fallback cannot supply missing production-close proof",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup close rejection retains original error, attempts only owned browser fallback, and remains red",
+        "title": "close rejection retains original error, attempts only owned browser fallback, and remains red",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup fallback rejection retains root and ordered cleanup errors",
+        "title": "fallback rejection retains root and ordered cleanup errors",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup body error and rm failure preserve primary and secondary without replacement",
+        "title": "body error and rm failure preserve primary and secondary without replacement",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup successful body plus cleanup failure is still red and diagnostics do not mask it",
+        "title": "successful body plus cleanup failure is still red and diagnostics do not mask it",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup retains original errors in memory but serializes only fixed facts for the installed reporter",
+        "title": "retains original errors in memory but serializes only fixed facts for the installed reporter",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup diagnostics preserve whitelisted primary/secondary codes while omitting private messages/properties",
+        "title": "diagnostics preserve whitelisted primary/secondary codes while omitting private messages/properties",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup unknown diagnostic codes/messages and throwing accessors become fixed UNEXPECTED",
+        "title": "unknown diagnostic codes/messages and throwing accessors become fixed UNEXPECTED",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup rejects changing generic-code accessor without reading it and never persists its private value",
+        "title": "rejects changing generic-code accessor without reading it and never persists its private value",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup rejects changing message accessor without reading it and never persists its private value",
+        "title": "rejects changing message accessor without reading it and never persists its private value",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup rejects changing internal-code accessor without reading it and never persists its private value",
+        "title": "rejects changing internal-code accessor without reading it and never persists its private value",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup rejects changing internal-message accessor without reading it and never persists its private value",
+        "title": "rejects changing internal-message accessor without reading it and never persists its private value",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup rejects changing name accessor without reading it and never persists its private value",
+        "title": "rejects changing name accessor without reading it and never persists its private value",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup accepts stable own data primitives and ignores inherited accessors without invoking them",
+        "title": "accepts stable own data primitives and ignores inherited accessors without invoking them",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup release/listener cleanup errors stay ordered and remaining safe remove/persist stages run",
+        "title": "release/listener cleanup errors stay ordered and remaining safe remove/persist stages run",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup CANARY_CHANGED stays primary after safe cleanup",
+        "title": "CANARY_CHANGED stays primary after safe cleanup",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup CANARY_MISSING stays primary after safe cleanup",
+        "title": "CANARY_MISSING stays primary after safe cleanup",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup OUTSIDE_IDENTITY stays primary after safe cleanup",
+        "title": "OUTSIDE_IDENTITY stays primary after safe cleanup",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "postlaunch fixture ownership and error-preserving cleanup thrown undefined body is preserved with explicit presence",
+        "title": "thrown undefined body is preserved with explicit presence",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources rejects invalid capture 0",
+        "title": "rejects invalid capture 0",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources rejects invalid capture 1",
+        "title": "rejects invalid capture 1",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources rejects invalid capture 2",
+        "title": "rejects invalid capture 2",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources rejects invalid capture 3",
+        "title": "rejects invalid capture 3",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources rejects invalid capture 4",
+        "title": "rejects invalid capture 4",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources rejects invalid capture 5",
+        "title": "rejects invalid capture 5",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources rejects invalid capture 6",
+        "title": "rejects invalid capture 6",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources rejects invalid capture 7",
+        "title": "rejects invalid capture 7",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources rejects invalid capture 8",
+        "title": "rejects invalid capture 8",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources retains only numeric IDs/fixed process enums and discards unexpected fields",
+        "title": "retains only numeric IDs/fixed process enums and discards unexpected fields",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources signal0 distinguishes ESRCH only; EPERM and other errors are unknown, live/reused is live",
+        "title": "signal0 distinguishes ESRCH only; EPERM and other errors are unknown, live/reused is live",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources invalid initial capture hands context back, closes it, but never grants root deletion",
+        "title": "invalid initial capture hands context back, closes it, but never grants root deletion",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources preclose capture failure still invokes rawclose and invalidates first observation/removal",
+        "title": "preclose capture failure still invokes rawclose and invalidates first observation/removal",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources union over1024 never loses earlier IDs to make a close pass",
+        "title": "union over1024 never loses earlier IDs to make a close pass",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources capture deadline consumes late session creation and detaches it without sending",
+        "title": "capture deadline consumes late session creation and detaches it without sending",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources late rejected capture is consumed; session and listeners dispose and root remains",
+        "title": "late rejected capture is consumed; session and listeners dispose and root remains",
+        "status": "passed"
+      },
+      {
+        "suite": "test/profileSafetyFixture.test.ts",
+        "name": "bounded public-browser process capture and late resources session detach failure is red and rawclose still executes",
+        "title": "session detach failure is red and rawclose still executes",
+        "status": "passed"
+      }
+    ],
+    "sharedNativeAllRequired": [
+      {
+        "suite": "test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "refuses unsafe preferences-symlink before invoking any browser launch",
+        "title": "refuses unsafe preferences-symlink before invoking any browser launch",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "refuses unsafe default-symlink before invoking any browser launch",
+        "title": "refuses unsafe default-symlink before invoking any browser launch",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "refuses unsafe preferences-replacement before invoking any browser launch",
+        "title": "refuses unsafe preferences-replacement before invoking any browser launch",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "refuses unsafe preferences-hardlink before invoking any browser launch",
+        "title": "refuses unsafe preferences-hardlink before invoking any browser launch",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "refuses unsafe default-replacement before invoking any browser launch",
+        "title": "refuses unsafe default-replacement before invoking any browser launch",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "awaits actual scratch removal after guided preparation rejection without an acquired context",
+        "title": "awaits actual scratch removal after guided preparation rejection without an acquired context",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "awaits actual scratch removal after guided initial-launch rejection without an acquired context",
+        "title": "awaits actual scratch removal after guided initial-launch rejection without an acquired context",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "retains cleanup capability after actual context acquisition and never deletes scratch before confirmed context closure",
+        "title": "retains cleanup capability after actual context acquisition and never deletes scratch before confirmed context closure",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "refuses a Default directory redirected after actual launch rather than accepting its newly canonical outside path",
+        "title": "refuses a Default directory redirected after actual launch rather than accepting its newly canonical outside path",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "launches the actual owned confined guided profile and removes it only after successful close",
+        "title": "launches the actual owned confined guided profile and removes it only after successful close",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-recording-kill.test.ts",
+        "name": "parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=false)",
+        "title": "parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=false)",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-recording-kill.test.ts",
+        "name": "parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=true)",
+        "title": "parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=true)",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-recording-kill.test.ts",
+        "name": "actual SIGINT gracefully settles real guided recorder and removes its owned recording bytes",
+        "title": "actual SIGINT gracefully settles real guided recorder and removes its owned recording bytes",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-recording.test.ts",
+        "name": "guided learn run recording on real Chromium (STUDIO-OBS-013) records the persistent context, uploads after browser scratch disposal, and reports one timing per dispatched action",
+        "title": "records the persistent context, uploads after browser scratch disposal, and reports one timing per dispatched action",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-recording.test.ts",
+        "name": "guided learn run recording on real Chromium (STUDIO-OBS-013) settles a recorder-side fault as UNAVAILABLE without a fake video, and the session still terminates",
+        "title": "settles a recorder-side fault as UNAVAILABLE without a fake video, and the session still terminates",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-recording.test.ts",
+        "name": "guided learn run recording on real Chromium (STUDIO-OBS-013) produces no video for an unrecorded guided launch (the webm comes from recordVideo, not from a directory pick)",
+        "title": "produces no video for an unrecorded guided launch (the webm comes from recordVideo, not from a directory pick)",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/guided-recording.test.ts",
+        "name": "guided learn run recording on real Chromium (STUDIO-OBS-013) runs the observed replay adapter on the guided-mode recorded handle (AC-1 parity)",
+        "title": "runs the observed replay adapter on the guided-mode recorded handle (AC-1 parity)",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/native-blank-surface-controls.test.ts",
+        "name": "exact native blank classifier rejects actual 'chrome://version/' at 640 x 360 separately",
+        "title": "exact native blank classifier rejects actual 'chrome://version/' at 640 x 360 separately",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/native-blank-surface-controls.test.ts",
+        "name": "exact native blank classifier rejects actual 'chrome://prefs-internals/' at 640 x 360 separately",
+        "title": "exact native blank classifier rejects actual 'chrome://prefs-internals/' at 640 x 360 separately",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/native-blank-surface-controls.test.ts",
+        "name": "exact native blank classifier rejects actual 'chrome://version/' at 800 x 600 separately",
+        "title": "exact native blank classifier rejects actual 'chrome://version/' at 800 x 600 separately",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/native-blank-surface-controls.test.ts",
+        "name": "exact native blank classifier rejects actual 'chrome://prefs-internals/' at 800 x 600 separately",
+        "title": "exact native blank classifier rejects actual 'chrome://prefs-internals/' at 800 x 600 separately",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+        "name": "settles actual compiled no-app Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "title": "settles actual compiled no-app Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+        "name": "settles actual compiled captured-unpublished Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "title": "settles actual compiled captured-unpublished Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+        "name": "settles actual compiled committed-before-ready Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "title": "settles actual compiled committed-before-ready Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+        "name": "settles actual compiled committed-before-ready-orderly Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "title": "settles actual compiled committed-before-ready-orderly Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+        "name": "settles actual compiled ready-sent-dropped Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "title": "settles actual compiled ready-sent-dropped Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+        "name": "settles actual compiled ready-received-stop Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "title": "settles actual compiled ready-received-stop Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/observed-bootstrap-video.test.ts",
+        "name": "decodes actual compiled normal-failure full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+        "title": "decodes actual compiled normal-failure full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/observed-bootstrap-video.test.ts",
+        "name": "decodes actual compiled forced-step-loss full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+        "title": "decodes actual compiled forced-step-loss full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+        "status": "passed"
+      },
+      {
+        "suite": "test/fixtures-tier/observed-bootstrap-video.test.ts",
+        "name": "decodes actual compiled completed-pass-lost-final full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+        "title": "decodes actual compiled completed-pass-lost-final full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+        "status": "passed"
+      }
+    ]
+  },
+  "nativeArtifactHashChecks": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/native-timing-completed-pass-lost-final-UJktRI/native-classification.json",
+      "sha256": "ac12e4173cbac4a2cfdcd7cba8a350c84b9542716aa3d065c8a2d92bca0e6fd4",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/native-timing-completed-pass-lost-final-UJktRI/runner-bootstrap-native-video.json",
+      "sha256": "dce379795cb3f97103908c442f815dd2c8d822dda1fc75ad2044e09a1b04b848",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/native-timing-completed-pass-lost-final-UJktRI/runner-native-file-facts.json",
+      "sha256": "7df020a6eac8e3b9cf52e84b5d4db7e1ca3de61d267cf916769239bd1e30ba99",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/native-timing-completed-pass-lost-final-UJktRI/selected-app.webm",
+      "sha256": "cbb559f9bb0b4b58f8e9071777806cf5da1fbda35fe2cd4cd10f13d0c341b1ff",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/native-timing-forced-step-loss-WtOHX9/native-classification.json",
+      "sha256": "1588ca3a48ef7338ef56e9f9e7670ea730f2ae835812f5ebae70957a6b79cf10",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/native-timing-forced-step-loss-WtOHX9/runner-bootstrap-native-video.json",
+      "sha256": "c17750485f7a7ad3854f8a1f3c377c08ed075a8e5f40f6c4c9ac38309f8a04b3",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/native-timing-forced-step-loss-WtOHX9/runner-native-file-facts.json",
+      "sha256": "788dd288c033e13143c66673ea7d0b31e8cce61ae26438ca2e9f8e51e815e39f",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/native-timing-forced-step-loss-WtOHX9/selected-app.webm",
+      "sha256": "b26c053c4e6bc48df8c53dec422a8a0f2cce5cf18be8c1625f1c1ceb2b665e16",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/native-timing-normal-failure-cFVxI0/native-classification.json",
+      "sha256": "ac12e4173cbac4a2cfdcd7cba8a350c84b9542716aa3d065c8a2d92bca0e6fd4",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/native-timing-normal-failure-cFVxI0/runner-bootstrap-native-video.json",
+      "sha256": "81de289e3217e94651a1b44b122e9dcba548323c19c4441ca8f1dad315ac92c0",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/native-timing-normal-failure-cFVxI0/runner-native-file-facts.json",
+      "sha256": "c5a26d9c0277dfee061e02c8d511f6201ce49b8854b1df557f4b4fd83f45c0f1",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/native-timing-normal-failure-cFVxI0/selected-app.webm",
+      "sha256": "05c0e7a24c16f97b36b82d62c94ac92abf43436ff5c9573586252ba850ea775b",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/prefs-control-7g2ljf/control-counts.json",
+      "sha256": "b7f888355c73d6cbd7af8dcbe706779451715fe84986e067a3affb2b932ae55f",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/prefs-control-7g2ljf/control-readiness.json",
+      "sha256": "ab5da9e7a48109083f8b8e40cd2c3487f5b103a501ee3f07c6e5f3f563d7a3a2",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/prefs-control-ISZhtL/control-counts.json",
+      "sha256": "12452c548859940d36d86302099579714cb80a26c7700c4da993b792b38a1777",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/prefs-control-ISZhtL/control-readiness.json",
+      "sha256": "5ea9bcf1fde98a19197a61eb28c6148d965053fbca01ec53b0291a4f7101420f",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-captured-unpublished-tsshYG/preclear-0.webm",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-captured-unpublished-tsshYG/runner-bootstrap-process-tree.json",
+      "sha256": "04b2b197fcddead870dbb3aa2e462be9b9abcecdb5635cb9f2182fbfface5c87",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-captured-unpublished-tsshYG/runner-owner-preclear.json",
+      "sha256": "a1118f29083d3594d3a7c7dad8a55d681109178e923d070453a646f9caedd13f",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-committed-before-ready-orderly-WrsVQP/native-classification.json",
+      "sha256": "f6f8625e2af409aaf7a40b93ea43986ac3f86be052bed6c34eedb9920fb248cc",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-committed-before-ready-orderly-WrsVQP/preclear-0.webm",
+      "sha256": "b88f9163d8b1f6e5ccc75d2f2636a28415c8bcc75d94e4f2f93965a96504ae96",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-committed-before-ready-orderly-WrsVQP/runner-bootstrap-process-tree.json",
+      "sha256": "94b7c03a4e5b31f392c01dc9c6cfbd018511ff50e6ce84f186d2aeab5e17c579",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-committed-before-ready-orderly-WrsVQP/runner-owner-preclear.json",
+      "sha256": "ac8a3ee7fc6822b53ea5b5831fabc3836f1fbdeca6b662bfd35c7f64167a58a5",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-committed-before-ready-orderly-WrsVQP/selected-app.webm",
+      "sha256": "b88f9163d8b1f6e5ccc75d2f2636a28415c8bcc75d94e4f2f93965a96504ae96",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-committed-before-ready-orderly-WrsVQP/selected-video.json",
+      "sha256": "ca5ecbaf829e2197231d6ee40f45300e2144ab14f64441aa078274c5343065a0",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-committed-before-ready-uzqBpX/preclear-0.webm",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-committed-before-ready-uzqBpX/runner-bootstrap-process-tree.json",
+      "sha256": "4e578afc0f95e51266a9e22e63f8878b086b00036c8289bd62bcd1677daa4031",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-committed-before-ready-uzqBpX/runner-owner-preclear.json",
+      "sha256": "fee218c99015c5b1ad4a7b57c48cec92bb84c32a8cdf05575d7b1fbd01cf648f",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-no-app-D9TNAv/runner-bootstrap-process-tree.json",
+      "sha256": "a4e707dac6d32dc2a9102682196e39fd2445b913171e906392991974b4e60285",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-no-app-D9TNAv/runner-owner-preclear.json",
+      "sha256": "8a3cf0060b76cb4e4b556db982b21b5e1bffabaa661fdb70d445060b78858dfd",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-ready-received-stop-Hg5Ob8/native-classification.json",
+      "sha256": "0f446ea90fa02a995caa21784e392c420a9944b7cc2bdedb6e28dafe7176e9ff",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-ready-received-stop-Hg5Ob8/preclear-0.webm",
+      "sha256": "7adf77b61ee4c8b32e456f08ee9ffb842b9c63d67b461324b11dd7915ef362c7",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-ready-received-stop-Hg5Ob8/runner-bootstrap-process-tree.json",
+      "sha256": "980d204ba740f56ebe11b30eb992417c5d931b55c334c55e68ff575d84063ccb",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-ready-received-stop-Hg5Ob8/runner-owner-preclear.json",
+      "sha256": "91959d142c9a1bb58ac7ad082a1384a985af08c0cc5b7f286ed61fef37d3fd16",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-ready-received-stop-Hg5Ob8/selected-app.webm",
+      "sha256": "7adf77b61ee4c8b32e456f08ee9ffb842b9c63d67b461324b11dd7915ef362c7",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-ready-received-stop-Hg5Ob8/selected-video.json",
+      "sha256": "0aa0e93233ab56fd80659b3fdf586c38590c64302014fcfddeb6c2ebc0999c36",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-ready-sent-dropped-FkvYDn/preclear-0.webm",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-ready-sent-dropped-FkvYDn/runner-bootstrap-process-tree.json",
+      "sha256": "0d2e218f441135a198fe305de6ac2ffd85960ad9eaa8c07144cd581e37b7f70b",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-ready-sent-dropped-FkvYDn/runner-owner-preclear.json",
+      "sha256": "126655cffe8b100c5cac853a9ed20a53e80bace35442b24adafee657890c8aa0",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/version-control-7CuQca/control-counts.json",
+      "sha256": "c5d69e02f3eded05517f9dab8a45e9eeb49472241813aa4d77da1993ff797433",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/version-control-7CuQca/control-readiness.json",
+      "sha256": "a3f7d37e7884e6a4899334f5580dab76de8bd8fadbb1ebfafba33468e2844c7b",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/version-control-TqEvy2/control-counts.json",
+      "sha256": "a5136b7e6af48e2e3428eb692931db63fe5b8ac6deefc2809cb3c1adc55afe04",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/version-control-TqEvy2/control-readiness.json",
+      "sha256": "5ea9bcf1fde98a19197a61eb28c6148d965053fbca01ec53b0291a4f7101420f",
+      "matches": true
+    }
+  ],
+  "profileFactsHashChecks": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/native-runs/redirect-IKPUfX/profile-safety.json",
+      "sha256": "265a493d27980b39f55d5bf5f8ff059e5d169156e96b45efce0741cb9ba10aef",
+      "matches": true,
+      "facts": {
+        "fixtureSchedulingObservationOnly": true,
+        "acquired": true,
+        "handedOff": true,
+        "attackComplete": true,
+        "setupFailed": false,
+        "primaryPresent": false,
+        "launchReturned": false,
+        "launchThrew": true,
+        "productionRealCloseRequests": 1,
+        "rawCloseRequests": 1,
+        "rawCloseRequestedMs": 1792028992172,
+        "rawCloseFulfilled": true,
+        "rawCloseFulfilledMs": 1792028992207,
+        "contextCloseEvent": true,
+        "browserDisconnectedEvent": true,
+        "firstPidProbeMs": 1792028992207,
+        "firstPidState": "DEAD",
+        "initialSnapshotValid": true,
+        "precloseSnapshotValid": true,
+        "ownedPidCount": 7,
+        "safeToRemove": true,
+        "fallbackRequested": false,
+        "fallbackFulfilled": false,
+        "rootRemoved": true,
+        "primaryCode": "NONE",
+        "secondaryPhases": [],
+        "secondaryCodes": [],
+        "renamed": true,
+        "canaryCreated": true,
+        "symlinkInstalled": true,
+        "liveBefore": true,
+        "liveAfter": true,
+        "expectedRefusal": true,
+        "canaryUnchanged": true,
+        "outsideIdentityUnchanged": true
+      }
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/native-runs/redirect-QwnKm0/profile-safety.json",
+      "sha256": "4380e9f2f7b0bfe64b440b1323381f5e6931e56acc0e1b2e55b2f6e8d23ba82e",
+      "matches": true,
+      "facts": {
+        "fixtureSchedulingObservationOnly": true,
+        "acquired": true,
+        "handedOff": true,
+        "attackComplete": true,
+        "setupFailed": false,
+        "primaryPresent": false,
+        "launchReturned": false,
+        "launchThrew": true,
+        "productionRealCloseRequests": 1,
+        "rawCloseRequests": 1,
+        "rawCloseRequestedMs": 1792029244760,
+        "rawCloseFulfilled": true,
+        "rawCloseFulfilledMs": 1792029244801,
+        "contextCloseEvent": true,
+        "browserDisconnectedEvent": true,
+        "firstPidProbeMs": 1792029244801,
+        "firstPidState": "DEAD",
+        "initialSnapshotValid": true,
+        "precloseSnapshotValid": true,
+        "ownedPidCount": 7,
+        "safeToRemove": true,
+        "fallbackRequested": false,
+        "fallbackFulfilled": false,
+        "rootRemoved": true,
+        "primaryCode": "NONE",
+        "secondaryPhases": [],
+        "secondaryCodes": [],
+        "renamed": true,
+        "canaryCreated": true,
+        "symlinkInstalled": true,
+        "liveBefore": true,
+        "liveAfter": true,
+        "expectedRefusal": true,
+        "canaryUnchanged": true,
+        "outsideIdentityUnchanged": true
+      }
+    }
+  ]
+}

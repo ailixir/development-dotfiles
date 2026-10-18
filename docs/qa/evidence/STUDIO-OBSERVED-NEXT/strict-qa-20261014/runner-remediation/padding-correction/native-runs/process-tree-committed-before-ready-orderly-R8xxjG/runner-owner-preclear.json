@@ -1,0 +1,38 @@
+{
+  "phase": "committed-before-ready-orderly",
+  "quiescenceFacts": {
+    "ok": true,
+    "budget": 500,
+    "elapsedMs": 33
+  },
+  "nativeFacts": {
+    "receipt": {
+      "schemaVersion": 1,
+      "kind": "observed-app-video",
+      "runId": "00000000-0000-4000-8000-000000000020",
+      "attemptId": "00000000-0000-4000-8000-000000000021",
+      "admissionId": "d50bc4fa-1d2f-4cf0-9db3-1b053a6cf154",
+      "runnerInstanceId": "bootstrap-tree-fixture",
+      "parentPid": 35892,
+      "childPid": 42556,
+      "scratchDev": "16777229",
+      "scratchIno": "205438129",
+      "videoBasename": "page@de1aac5cb2daccde01fc91d4216988ba.webm"
+    },
+    "files": [
+      {
+        "basename": "page@de1aac5cb2daccde01fc91d4216988ba.webm",
+        "bytes": 4867,
+        "headHex": "1a45dfa3",
+        "nlink": 1
+      }
+    ]
+  },
+  "archivedVideos": [
+    {
+      "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs/process-tree-committed-before-ready-orderly-R8xxjG/preclear-0.webm",
+      "bytes": 4867,
+      "sha256": "93479c39cebef2a1a44e2b731e0fe924e7a10927fe8ba81c6281f496d6065572"
+    }
+  ]
+}

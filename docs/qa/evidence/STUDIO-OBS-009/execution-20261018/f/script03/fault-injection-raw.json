@@ -1,0 +1,1987 @@
+{
+  "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+  "runnerEntry" : "dist/main.js (folded, TLS listener)",
+  "target" : "loopback http page (no external host)",
+  "startedAt" : "2026-10-18T18:31:25.333Z",
+  "legs" : {
+    "base" : {
+      "runs" : [ {
+        "executionId" : "662fb73e-c73b-46a8-9b77-33980b3c005d",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 1,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.67431640625,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ]
+      }, {
+        "executionId" : "e334325a-80b6-4e7e-b648-66a98fc8a246",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 2,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.9404296875,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ]
+      }, {
+        "executionId" : "40b78d20-2fb6-42c2-a579-7ced9f146b4b",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 3,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.9404296875,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ]
+      } ]
+    },
+    "duplicate" : {
+      "runs" : [ {
+        "executionId" : "1de547df-36c3-4217-8887-f53b5591347f",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 1,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 4,
+        "runnerPosts" : 2,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.86474609375,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "runnerPoolSize" : 1,
+          "repeatedPublicRun" : 1,
+          "racingDispatchers" : 2,
+          "injectedWireDuplicate" : 1,
+          "injectedWireDuplicateAnswer" : "[send:ACCEPTED, injected-duplicate:DEFINITE_REFUSAL:runner refused with 429]",
+          "callbackReplayStatuses" : {
+            "observed-admission#0.0" : 200,
+            "observed-admission#0.1" : 200,
+            "progress#1.0" : 409,
+            "progress#1.1" : 409
+          }
+        }
+      }, {
+        "executionId" : "96737027-4d2d-44e9-9a12-9915c2f2a080",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 1,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 5,
+        "runnerPosts" : 2,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.95556640625,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "runnerPoolSize" : 1,
+          "repeatedPublicRun" : 1,
+          "racingDispatchers" : 2,
+          "injectedWireDuplicate" : 1,
+          "injectedWireDuplicateAnswer" : "[send:ACCEPTED, injected-duplicate:DEFINITE_REFUSAL:runner refused with 429]",
+          "callbackReplayStatuses" : {
+            "observed-admission#0.0" : 200,
+            "observed-admission#0.1" : 200,
+            "progress#1.0" : 409,
+            "progress#1.1" : 409
+          }
+        }
+      }, {
+        "executionId" : "ddd8d569-8780-4bf4-a4b0-e75e0defeb25",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 1,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 6,
+        "runnerPosts" : 2,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.95556640625,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "runnerPoolSize" : 1,
+          "repeatedPublicRun" : 1,
+          "racingDispatchers" : 2,
+          "injectedWireDuplicate" : 1,
+          "injectedWireDuplicateAnswer" : "[send:ACCEPTED, injected-duplicate:DEFINITE_REFUSAL:runner refused with 429]",
+          "callbackReplayStatuses" : {
+            "observed-admission#0.0" : 200,
+            "observed-admission#0.1" : 200,
+            "progress#1.0" : 409,
+            "progress#1.1" : 409,
+            "progress#2.0" : 200,
+            "progress#2.1" : 200
+          }
+        }
+      }, {
+        "executionId" : "10f391d8-f8ce-4eac-a39c-5cd0fe1120ad",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 1,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 7,
+        "runnerPosts" : 2,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.798828125,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "observed-admission",
+          "status" : 409
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "runnerPoolSize" : 2,
+          "repeatedPublicRun" : 1,
+          "racingDispatchers" : 2,
+          "injectedWireDuplicate" : 1,
+          "injectedWireDuplicateAnswer" : "[send:ACCEPTED, injected-duplicate:AMBIGUOUS:runner 503]",
+          "callbackReplayStatuses" : {
+            "observed-admission#0.0" : 200,
+            "observed-admission#0.1" : 200,
+            "observed-admission#1.0" : 409,
+            "observed-admission#1.1" : 409,
+            "progress#2.0" : 409,
+            "progress#2.1" : 409,
+            "progress#3.0" : 200,
+            "progress#3.1" : 200
+          }
+        }
+      }, {
+        "executionId" : "61cc57c9-28b3-4335-ad66-8da756d914f7",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 1,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 8,
+        "runnerPosts" : 2,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.798828125,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "observed-admission",
+          "status" : 409
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "runnerPoolSize" : 2,
+          "repeatedPublicRun" : 1,
+          "racingDispatchers" : 2,
+          "injectedWireDuplicate" : 1,
+          "injectedWireDuplicateAnswer" : "[send:ACCEPTED, injected-duplicate:AMBIGUOUS:runner 503]",
+          "callbackReplayStatuses" : {
+            "observed-admission#0.0" : 200,
+            "observed-admission#0.1" : 200,
+            "observed-admission#1.0" : 409,
+            "observed-admission#1.1" : 409,
+            "progress#2.0" : 409,
+            "progress#2.1" : 409
+          }
+        }
+      }, {
+        "executionId" : "85f8ffd7-1747-4bd9-a5be-8e6499a97da1",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 1,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 9,
+        "runnerPosts" : 2,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 4.0546875,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "observed-admission",
+          "status" : 409
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "runnerPoolSize" : 2,
+          "repeatedPublicRun" : 1,
+          "racingDispatchers" : 2,
+          "injectedWireDuplicate" : 1,
+          "injectedWireDuplicateAnswer" : "[send:ACCEPTED, injected-duplicate:AMBIGUOUS:runner 503]",
+          "callbackReplayStatuses" : {
+            "observed-admission#0.0" : 200,
+            "observed-admission#0.1" : 200,
+            "observed-admission#1.0" : 409,
+            "observed-admission#1.1" : 409,
+            "progress#2.0" : 409,
+            "progress#2.1" : 409,
+            "progress#3.0" : 200,
+            "progress#3.1" : 200
+          }
+        }
+      } ]
+    },
+    "ackLoss" : {
+      "runs" : [ {
+        "executionId" : "af115f54-5c9e-4f87-ac1c-376d355d9c65",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 10,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 4.0546875,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "ledgerStateRightAfterTheLostAcknowledgment" : "ADMITTED"
+        }
+      }, {
+        "executionId" : "2cdcfd39-d208-46cc-8e61-4ba3a6ec2a0b",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 11,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.89013671875,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "ledgerStateRightAfterTheLostAcknowledgment" : "ADMITTED"
+        }
+      }, {
+        "executionId" : "708d9440-c1b2-49e3-a8fc-4d0bf2a30a88",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 12,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.89013671875,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "ledgerStateRightAfterTheLostAcknowledgment" : "ADMITTED"
+        }
+      } ]
+    },
+    "publicCancel" : {
+      "runs" : [ {
+        "executionId" : "8d625504-e3e6-469d-a5c6-557af20bab3c",
+        "status" : "ERROR",
+        "errorCode" : "CANCELLED",
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 1,
+        "runnerGeneration" : 13,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 1,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.73876953125,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "cancelToTerminalMs" : 364,
+          "browserTreeProcesses" : 10,
+          "browserTreeSurvivorsAfterSettle" : 0
+        }
+      }, {
+        "executionId" : "5f61039a-262c-4a5c-b8aa-618f3ba7c80e",
+        "status" : "ERROR",
+        "errorCode" : "CANCELLED",
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 1,
+        "runnerGeneration" : 14,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 1,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.73876953125,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "cancelToTerminalMs" : 361,
+          "browserTreeProcesses" : 10,
+          "browserTreeSurvivorsAfterSettle" : 0
+        }
+      }, {
+        "executionId" : "4c35a85d-bb75-4c6e-a4ae-63fb5d923655",
+        "status" : "ERROR",
+        "errorCode" : "CANCELLED",
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 1,
+        "runnerGeneration" : 15,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 1,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 4.39990234375,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "cancelToTerminalMs" : 369,
+          "browserTreeProcesses" : 10,
+          "browserTreeSurvivorsAfterSettle" : 0
+        }
+      } ]
+    },
+    "runnerKill" : {
+      "runs" : [ {
+        "executionId" : "afa6a264-0c65-46ee-b2d2-b9e299fdc447",
+        "status" : "ERROR",
+        "errorCode" : "STALE",
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 16,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.74609375,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "killedProcessesCaptured" : 10,
+          "browserTreeReaped" : true,
+          "browserTreeReapedMillis" : 30325,
+          "stepTimeoutSeconds" : 30,
+          "orphanWindowMs" : 90000,
+          "orphansAfterWindow" : 0,
+          "childrenVanished" : [ {
+            "process" : "?",
+            "afterKillMs" : 0
+          }, {
+            "process" : "node",
+            "afterKillMs" : 30075
+          }, {
+            "process" : "Google Chrome for Testing",
+            "afterKillMs" : 30075
+          }, {
+            "process" : "ffmpeg-mac",
+            "afterKillMs" : 30075
+          }, {
+            "process" : "Google Chrome for Testing Helper (Renderer)",
+            "afterKillMs" : 30075
+          }, {
+            "process" : "Google Chrome for Testing Helper",
+            "afterKillMs" : 30075
+          }, {
+            "process" : "Google Chrome for Testing Helper",
+            "afterKillMs" : 30075
+          }, {
+            "process" : "Google Chrome for Testing Helper (GPU)",
+            "afterKillMs" : 30075
+          }, {
+            "process" : "Google Chrome for Testing Helper (Renderer)",
+            "afterKillMs" : 30075
+          }, {
+            "process" : "Google Chrome for Testing Helper (Renderer)",
+            "afterKillMs" : 30075
+          } ]
+        }
+      }, {
+        "executionId" : "bbaa28d0-141e-498e-9aa4-b761f660f018",
+        "status" : "ERROR",
+        "errorCode" : "STALE",
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 17,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.5927734375,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "killedProcessesCaptured" : 9,
+          "browserTreeReaped" : true,
+          "browserTreeReapedMillis" : 10301,
+          "stepTimeoutSeconds" : 10,
+          "orphanWindowMs" : 90000,
+          "orphansAfterWindow" : 0,
+          "childrenVanished" : [ {
+            "process" : "node",
+            "afterKillMs" : 10047
+          }, {
+            "process" : "Google Chrome for Testing",
+            "afterKillMs" : 10047
+          }, {
+            "process" : "ffmpeg-mac",
+            "afterKillMs" : 10047
+          }, {
+            "process" : "Google Chrome for Testing Helper (Renderer)",
+            "afterKillMs" : 10047
+          }, {
+            "process" : "Google Chrome for Testing Helper",
+            "afterKillMs" : 10047
+          }, {
+            "process" : "Google Chrome for Testing Helper",
+            "afterKillMs" : 10047
+          }, {
+            "process" : "Google Chrome for Testing Helper (GPU)",
+            "afterKillMs" : 10047
+          }, {
+            "process" : "Google Chrome for Testing Helper (Renderer)",
+            "afterKillMs" : 10047
+          }, {
+            "process" : "Google Chrome for Testing Helper (Renderer)",
+            "afterKillMs" : 10047
+          } ]
+        }
+      }, {
+        "executionId" : "3966c849-1fe6-4418-9027-05f4654b70b5",
+        "status" : "ERROR",
+        "errorCode" : "STALE",
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 18,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.26708984375,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "killedProcessesCaptured" : 9,
+          "browserTreeReaped" : true,
+          "browserTreeReapedMillis" : 10321,
+          "stepTimeoutSeconds" : 10,
+          "orphanWindowMs" : 90000,
+          "orphansAfterWindow" : 0,
+          "childrenVanished" : [ {
+            "process" : "node",
+            "afterKillMs" : 10068
+          }, {
+            "process" : "Google Chrome for Testing",
+            "afterKillMs" : 10068
+          }, {
+            "process" : "ffmpeg-mac",
+            "afterKillMs" : 10068
+          }, {
+            "process" : "Google Chrome for Testing Helper (Renderer)",
+            "afterKillMs" : 10068
+          }, {
+            "process" : "Google Chrome for Testing Helper",
+            "afterKillMs" : 10068
+          }, {
+            "process" : "Google Chrome for Testing Helper",
+            "afterKillMs" : 10068
+          }, {
+            "process" : "Google Chrome for Testing Helper (GPU)",
+            "afterKillMs" : 10068
+          }, {
+            "process" : "Google Chrome for Testing Helper (Renderer)",
+            "afterKillMs" : 10068
+          }, {
+            "process" : "Google Chrome for Testing Helper (Renderer)",
+            "afterKillMs" : 10068
+          } ]
+        }
+      } ]
+    },
+    "restart" : {
+      "runs" : [ {
+        "executionId" : "99a5b907-358d-4ab4-865b-97508da5c18a",
+        "status" : "ERROR",
+        "errorCode" : "STALE",
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 19,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.23681640625,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "stepTimeoutSeconds" : 30,
+          "firstGeneration" : 19,
+          "secondGeneration" : 20,
+          "secondGenerationPostsBeforeNewRun" : 0,
+          "staleCallbackStatuses" : {
+            "ownRun.observed-admission#0" : 409,
+            "otherRun.observed-admission#0" : 403,
+            "ownRun.progress#1" : 409,
+            "otherRun.progress#1" : 400,
+            "ownRun.progress#2" : 200,
+            "otherRun.progress#2" : 400
+          }
+        }
+      }, {
+        "executionId" : "44ac27fb-75cd-4378-9dbe-2886a9562814",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 20,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.23681640625,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ]
+      }, {
+        "executionId" : "3d7fcebc-f1f6-486d-a332-d1460406f3f9",
+        "status" : "ERROR",
+        "errorCode" : "STALE",
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 21,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.45556640625,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "stepTimeoutSeconds" : 10,
+          "firstGeneration" : 21,
+          "secondGeneration" : 22,
+          "secondGenerationPostsBeforeNewRun" : 0,
+          "staleCallbackStatuses" : {
+            "ownRun.observed-admission#0" : 409,
+            "otherRun.observed-admission#0" : 403,
+            "ownRun.progress#1" : 409,
+            "otherRun.progress#1" : 400,
+            "ownRun.progress#2" : 200,
+            "otherRun.progress#2" : 400
+          }
+        }
+      }, {
+        "executionId" : "4921077f-bd3a-4f7d-a38a-3f1e88a824f9",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 22,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.45556640625,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ]
+      }, {
+        "executionId" : "1ee37305-9cbe-46b8-ab89-01973065c33c",
+        "status" : "ERROR",
+        "errorCode" : "STALE",
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 23,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.6748046875,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "stepTimeoutSeconds" : 10,
+          "firstGeneration" : 23,
+          "secondGeneration" : 24,
+          "secondGenerationPostsBeforeNewRun" : 0,
+          "staleCallbackStatuses" : {
+            "ownRun.observed-admission#0" : 409,
+            "otherRun.observed-admission#0" : 403,
+            "ownRun.progress#1" : 409,
+            "otherRun.progress#1" : 400,
+            "ownRun.progress#2" : 200,
+            "otherRun.progress#2" : 400
+          }
+        }
+      }, {
+        "executionId" : "564f8b0a-d8bd-4105-9df2-a615562fccc5",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 24,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.6748046875,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ]
+      } ]
+    },
+    "lateCallback" : {
+      "runs" : [ {
+        "executionId" : "6402cba3-1add-4a2d-9e78-9af499f6ff49",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 25,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.70068359375,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "callbacksReplayed" : 5,
+          "replayStatuses" : {
+            "observed-admission#0" : 409,
+            "progress#1" : 409,
+            "progress#2" : 409,
+            "progress#3" : 409,
+            "progress#4" : 200
+          }
+        }
+      }, {
+        "executionId" : "ca736d2b-3f0c-4d48-8b11-2a13b6825c6c",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 26,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.70068359375,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "callbacksReplayed" : 5,
+          "replayStatuses" : {
+            "observed-admission#0" : 409,
+            "progress#1" : 409,
+            "progress#2" : 409,
+            "progress#3" : 409,
+            "progress#4" : 200
+          }
+        }
+      }, {
+        "executionId" : "01362776-794f-4f96-889f-078e107681f4",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 27,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.64453125,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "callbacksReplayed" : 5,
+          "replayStatuses" : {
+            "observed-admission#0" : 409,
+            "progress#1" : 409,
+            "progress#2" : 409,
+            "progress#3" : 409,
+            "progress#4" : 200
+          }
+        }
+      } ]
+    },
+    "afterFaults" : {
+      "runs" : [ {
+        "executionId" : "dcd39ea5-e02e-4474-90e9-374f2a49b18a",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 28,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.64453125,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ]
+      }, {
+        "executionId" : "1a37a427-44ac-40ba-a0a1-0468bb09ce34",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 29,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.6728515625,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ]
+      }, {
+        "executionId" : "98161e6a-8550-4d58-9076-1eb73ff76657",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 30,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 3.53857421875,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ]
+      } ]
+    },
+    "guidedPublicCancel" : {
+      "runs" : [ {
+        "sessionDocumentUnchangedByReplays" : true,
+        "staleOwnerReplays" : 4,
+        "staleOwnerReplaysAnswered2xx" : 1,
+        "staleOwnerReplayStatuses" : {
+          "claim#0" : 409,
+          "bootstrap-evidence#1" : 202,
+          "outcomes#2" : 409,
+          "lifecycle#3" : 409
+        },
+        "sessionState" : "CANCELLED",
+        "stateBeforeCancel" : "ACTING",
+        "cancelToBrowserTreeGoneMs" : 310,
+        "guidedBrowsersBeforeCancel" : 8,
+        "guidedBrowsersAfter" : 0,
+        "runnerDispatchRoutes" : 1,
+        "runnerStopRoutes" : 1,
+        "runnerContextRoutes" : 2,
+        "runnerAssignRoutes" : 1,
+        "actionRows" : 1,
+        "sourcePlanModelCalls" : 1,
+        "nextActionModelCalls" : 1,
+        "runnerGeneration" : 31,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "hostLoadAtRecord" : 3.53857421875
+      }, {
+        "sessionDocumentUnchangedByReplays" : true,
+        "staleOwnerReplays" : 4,
+        "staleOwnerReplaysAnswered2xx" : 1,
+        "staleOwnerReplayStatuses" : {
+          "claim#0" : 409,
+          "bootstrap-evidence#1" : 202,
+          "outcomes#2" : 409,
+          "lifecycle#3" : 409
+        },
+        "sessionState" : "CANCELLED",
+        "stateBeforeCancel" : "ACTING",
+        "cancelToBrowserTreeGoneMs" : 319,
+        "guidedBrowsersBeforeCancel" : 8,
+        "guidedBrowsersAfter" : 0,
+        "runnerDispatchRoutes" : 1,
+        "runnerStopRoutes" : 1,
+        "runnerContextRoutes" : 2,
+        "runnerAssignRoutes" : 1,
+        "actionRows" : 1,
+        "sourcePlanModelCalls" : 1,
+        "nextActionModelCalls" : 1,
+        "runnerGeneration" : 32,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "hostLoadAtRecord" : 3.9755859375
+      }, {
+        "sessionDocumentUnchangedByReplays" : true,
+        "staleOwnerReplays" : 4,
+        "staleOwnerReplaysAnswered2xx" : 1,
+        "staleOwnerReplayStatuses" : {
+          "claim#0" : 409,
+          "bootstrap-evidence#1" : 202,
+          "outcomes#2" : 409,
+          "lifecycle#3" : 409
+        },
+        "sessionState" : "CANCELLED",
+        "stateBeforeCancel" : "ACTING",
+        "cancelToBrowserTreeGoneMs" : 301,
+        "guidedBrowsersBeforeCancel" : 8,
+        "guidedBrowsersAfter" : 0,
+        "runnerDispatchRoutes" : 1,
+        "runnerStopRoutes" : 1,
+        "runnerContextRoutes" : 2,
+        "runnerAssignRoutes" : 1,
+        "actionRows" : 1,
+        "sourcePlanModelCalls" : 1,
+        "nextActionModelCalls" : 1,
+        "runnerGeneration" : 33,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "hostLoadAtRecord" : 3.7373046875
+      } ]
+    },
+    "guidedWorkerKill" : {
+      "runs" : [ {
+        "processesBeforeKill" : 8,
+        "guidedBrowsersBeforeKill" : 8,
+        "orphanWindowMs" : 90000,
+        "allListedProcessesGoneAfterMs" : 328,
+        "survivorsAfterWindow" : 0,
+        "guidedBrowsersAfterWindow" : 0,
+        "processesVanished" : [ {
+          "process" : "ffmpeg-mac",
+          "afterKillMs" : 328
+        }, {
+          "process" : "Google Chrome for Testing",
+          "afterKillMs" : 328
+        }, {
+          "process" : "Google Chrome for Testing Helper (Renderer)",
+          "afterKillMs" : 328
+        }, {
+          "process" : "Google Chrome for Testing Helper (Renderer)",
+          "afterKillMs" : 328
+        }, {
+          "process" : "Google Chrome for Testing Helper",
+          "afterKillMs" : 328
+        }, {
+          "process" : "Google Chrome for Testing Helper",
+          "afterKillMs" : 328
+        }, {
+          "process" : "Google Chrome for Testing Helper (GPU)",
+          "afterKillMs" : 328
+        }, {
+          "process" : "Google Chrome for Testing Helper (Renderer)",
+          "afterKillMs" : 328
+        } ],
+        "sessionStateAfterKill" : "UNKNOWN_OUTCOME",
+        "sessionSettledAfterMs" : 354,
+        "sessionTerminalWithin60s" : true,
+        "runnerDispatchRoutes" : 1,
+        "newRunnerDispatchRoutes" : 0,
+        "newRunnerAssignRoutes" : 0,
+        "actionRows" : 1,
+        "runnerGeneration" : 34,
+        "newRunnerGeneration" : 35,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "hostLoadAtRecord" : 3.51806640625
+      }, {
+        "processesBeforeKill" : 8,
+        "guidedBrowsersBeforeKill" : 8,
+        "orphanWindowMs" : 90000,
+        "allListedProcessesGoneAfterMs" : 318,
+        "survivorsAfterWindow" : 0,
+        "guidedBrowsersAfterWindow" : 0,
+        "processesVanished" : [ {
+          "process" : "ffmpeg-mac",
+          "afterKillMs" : 318
+        }, {
+          "process" : "Google Chrome for Testing",
+          "afterKillMs" : 318
+        }, {
+          "process" : "Google Chrome for Testing Helper (Renderer)",
+          "afterKillMs" : 318
+        }, {
+          "process" : "Google Chrome for Testing Helper (Renderer)",
+          "afterKillMs" : 318
+        }, {
+          "process" : "Google Chrome for Testing Helper",
+          "afterKillMs" : 318
+        }, {
+          "process" : "Google Chrome for Testing Helper",
+          "afterKillMs" : 318
+        }, {
+          "process" : "Google Chrome for Testing Helper (GPU)",
+          "afterKillMs" : 318
+        }, {
+          "process" : "Google Chrome for Testing Helper (Renderer)",
+          "afterKillMs" : 318
+        } ],
+        "sessionStateAfterKill" : "UNKNOWN_OUTCOME",
+        "sessionSettledAfterMs" : 347,
+        "sessionTerminalWithin60s" : true,
+        "runnerDispatchRoutes" : 1,
+        "newRunnerDispatchRoutes" : 0,
+        "newRunnerAssignRoutes" : 0,
+        "actionRows" : 1,
+        "runnerGeneration" : 36,
+        "newRunnerGeneration" : 37,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "hostLoadAtRecord" : 3.4990234375
+      }, {
+        "processesBeforeKill" : 8,
+        "guidedBrowsersBeforeKill" : 8,
+        "orphanWindowMs" : 90000,
+        "allListedProcessesGoneAfterMs" : 326,
+        "survivorsAfterWindow" : 0,
+        "guidedBrowsersAfterWindow" : 0,
+        "processesVanished" : [ {
+          "process" : "ffmpeg-mac",
+          "afterKillMs" : 326
+        }, {
+          "process" : "Google Chrome for Testing",
+          "afterKillMs" : 326
+        }, {
+          "process" : "Google Chrome for Testing Helper (Renderer)",
+          "afterKillMs" : 326
+        }, {
+          "process" : "Google Chrome for Testing Helper (Renderer)",
+          "afterKillMs" : 326
+        }, {
+          "process" : "Google Chrome for Testing Helper",
+          "afterKillMs" : 326
+        }, {
+          "process" : "Google Chrome for Testing Helper",
+          "afterKillMs" : 326
+        }, {
+          "process" : "Google Chrome for Testing Helper (GPU)",
+          "afterKillMs" : 326
+        }, {
+          "process" : "Google Chrome for Testing Helper (Renderer)",
+          "afterKillMs" : 326
+        } ],
+        "sessionStateAfterKill" : "UNKNOWN_OUTCOME",
+        "sessionSettledAfterMs" : 351,
+        "sessionTerminalWithin60s" : true,
+        "runnerDispatchRoutes" : 1,
+        "newRunnerDispatchRoutes" : 0,
+        "newRunnerAssignRoutes" : 0,
+        "actionRows" : 1,
+        "runnerGeneration" : 38,
+        "newRunnerGeneration" : 39,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "hostLoadAtRecord" : 3.298828125
+      } ]
+    },
+    "secretCanary" : {
+      "runs" : [ {
+        "executionId" : "a67067e0-2ed2-47f0-8d35-c4861d68663a",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 40,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 4.13623046875,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "runStatus" : "PASSED",
+          "canaryTypedByTheRealBrowser" : true,
+          "databaseTables" : 97,
+          "databaseColumns" : 1364,
+          "canaryForms" : 11,
+          "databaseHits" : 0,
+          "surfacesScanned" : 63,
+          "storedFilesScanned" : 56,
+          "storedBytesScanned" : 183508,
+          "surfaceHits" : 0
+        }
+      }, {
+        "executionId" : "898fc174-a8fc-4feb-8b8d-389409b88912",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 41,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 4.4453125,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "runStatus" : "PASSED",
+          "canaryTypedByTheRealBrowser" : true,
+          "databaseTables" : 97,
+          "databaseColumns" : 1364,
+          "canaryForms" : 11,
+          "databaseHits" : 0,
+          "surfacesScanned" : 65,
+          "storedFilesScanned" : 58,
+          "storedBytesScanned" : 199266,
+          "surfaceHits" : 0
+        }
+      }, {
+        "executionId" : "6bb954a5-847c-48d4-98bf-40862936e044",
+        "status" : "PASSED",
+        "errorCode" : null,
+        "dispatcherSends" : 1,
+        "injectedDuplicates" : 0,
+        "cancelRelays" : 0,
+        "runnerGeneration" : 42,
+        "runnerPosts" : 1,
+        "runnerForks" : 1,
+        "runnerDeleteRelays" : 0,
+        "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+        "ledgerState" : "DONE",
+        "attemptIssued" : true,
+        "admitted" : true,
+        "hostLoadAtRecord" : 4.958984375,
+        "runnerCallbacks" : [ {
+          "route" : "observed-admission",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        }, {
+          "route" : "progress",
+          "status" : 200
+        } ],
+        "leg" : {
+          "runStatus" : "PASSED",
+          "canaryTypedByTheRealBrowser" : true,
+          "databaseTables" : 97,
+          "databaseColumns" : 1364,
+          "canaryForms" : 11,
+          "databaseHits" : 0,
+          "surfacesScanned" : 67,
+          "storedFilesScanned" : 60,
+          "storedBytesScanned" : 210199,
+          "surfaceHits" : 0
+        }
+      } ]
+    }
+  },
+  "launchAttribution" : [ {
+    "runnerGeneration" : 1,
+    "loadAtStart" : 3.7333984375,
+    "loadAtEnd" : 3.67431640625,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 2,
+    "loadAtStart" : 3.67431640625,
+    "loadAtEnd" : 3.9404296875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 3,
+    "loadAtStart" : 3.9404296875,
+    "loadAtEnd" : 3.9404296875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 4,
+    "loadAtStart" : 3.9404296875,
+    "loadAtEnd" : 3.86474609375,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 5,
+    "loadAtStart" : 3.86474609375,
+    "loadAtEnd" : 3.95556640625,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 6,
+    "loadAtStart" : 3.95556640625,
+    "loadAtEnd" : 3.95556640625,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 7,
+    "loadAtStart" : 3.95556640625,
+    "loadAtEnd" : 3.798828125,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 8,
+    "loadAtStart" : 3.798828125,
+    "loadAtEnd" : 3.798828125,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 9,
+    "loadAtStart" : 3.798828125,
+    "loadAtEnd" : 4.0546875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 10,
+    "loadAtStart" : 4.0546875,
+    "loadAtEnd" : 4.0546875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 11,
+    "loadAtStart" : 4.0546875,
+    "loadAtEnd" : 3.89013671875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 12,
+    "loadAtStart" : 3.89013671875,
+    "loadAtEnd" : 3.89013671875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 13,
+    "loadAtStart" : 3.89013671875,
+    "loadAtEnd" : 3.73876953125,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 14,
+    "loadAtStart" : 3.73876953125,
+    "loadAtEnd" : 3.73876953125,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 15,
+    "loadAtStart" : 3.73876953125,
+    "loadAtEnd" : 4.39990234375,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 16,
+    "loadAtStart" : 4.39990234375,
+    "loadAtEnd" : 3.74609375,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 17,
+    "loadAtStart" : 3.74609375,
+    "loadAtEnd" : 3.5927734375,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 18,
+    "loadAtStart" : 3.5927734375,
+    "loadAtEnd" : 3.26708984375,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 19,
+    "loadAtStart" : 3.26708984375,
+    "loadAtEnd" : 3.3447265625,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 20,
+    "loadAtStart" : 3.3447265625,
+    "loadAtEnd" : 3.23681640625,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 21,
+    "loadAtStart" : 3.23681640625,
+    "loadAtEnd" : 3.45556640625,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 22,
+    "loadAtStart" : 3.45556640625,
+    "loadAtEnd" : 3.45556640625,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 23,
+    "loadAtStart" : 3.45556640625,
+    "loadAtEnd" : 3.6748046875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 24,
+    "loadAtStart" : 3.6748046875,
+    "loadAtEnd" : 3.6748046875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 25,
+    "loadAtStart" : 3.6748046875,
+    "loadAtEnd" : 3.70068359375,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 26,
+    "loadAtStart" : 3.70068359375,
+    "loadAtEnd" : 3.70068359375,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 27,
+    "loadAtStart" : 3.70068359375,
+    "loadAtEnd" : 3.64453125,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 28,
+    "loadAtStart" : 3.64453125,
+    "loadAtEnd" : 3.64453125,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 29,
+    "loadAtStart" : 3.6728515625,
+    "loadAtEnd" : 3.6728515625,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 30,
+    "loadAtStart" : 3.6728515625,
+    "loadAtEnd" : 3.53857421875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 31,
+    "loadAtStart" : 3.53857421875,
+    "loadAtEnd" : 3.53857421875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 1,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 32,
+    "loadAtStart" : 3.53857421875,
+    "loadAtEnd" : 3.9755859375,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 1,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 33,
+    "loadAtStart" : 3.9755859375,
+    "loadAtEnd" : 3.7373046875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 1,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 34,
+    "loadAtStart" : 3.7373046875,
+    "loadAtEnd" : 3.7373046875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 35,
+    "loadAtStart" : 3.7373046875,
+    "loadAtEnd" : 3.51806640625,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 36,
+    "loadAtStart" : 3.51806640625,
+    "loadAtEnd" : 3.716796875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 3,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 37,
+    "loadAtStart" : 3.716796875,
+    "loadAtEnd" : 3.4990234375,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 38,
+    "loadAtStart" : 3.4990234375,
+    "loadAtEnd" : 3.4990234375,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 39,
+    "loadAtStart" : 3.4990234375,
+    "loadAtEnd" : 3.298828125,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 9,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 40,
+    "loadAtStart" : 3.298828125,
+    "loadAtEnd" : 4.13623046875,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 9,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 41,
+    "loadAtStart" : 4.13623046875,
+    "loadAtEnd" : 4.4453125,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 0,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  }, {
+    "runnerGeneration" : 42,
+    "loadAtStart" : 4.4453125,
+    "loadAtEnd" : 4.958984375,
+    "distDigest" : "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "guidedEnabled" : true,
+    "stopRoutesReceived" : 9,
+    "guidedStartFailedLines" : [ ],
+    "startFailedCount" : 0
+  } ],
+  "finishedAt" : "2026-10-18T18:35:32.387522Z"
+}

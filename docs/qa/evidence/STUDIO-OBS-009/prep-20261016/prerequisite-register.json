@@ -1,0 +1,680 @@
+{
+ "story": "STUDIO-OBS-009",
+ "record": "external prerequisite register (T0 preparation; read-only)",
+ "actor": "Pax (@po)",
+ "date": "2026-10-16",
+ "storySha256Prefix": "7b9ef036b6bd1c55",
+ "basis": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/execute-015-008/claude-feasibility-008-011.md (U1-U12, 2026-10-15) plus the 2026-10-16 placements from STUDIO-OBS-015 and the STUDIO-OBS-008 T0 close-out",
+ "rules": [
+  "An absent prerequisite makes the dependent AC 'unrun, owner X'. It is never a pass and never a silent skip (story :24).",
+  "GO condition 2: budget admission is recorded before the first real-provider call.",
+  "GO condition 3: Done is unreachable while AC-7's staging half, AC-8 or AC-4's Vault policy test is unrun.",
+  "No state below was obtained. Every 'state' value is what the repository shows on 2026-10-16. Asking the owner is outside this read-only pass."
+ ],
+ "internalHolds": [
+  {
+   "id": "H-1",
+   "item": "STUDIO-OBS-015 independent QA Done and root release",
+   "owner": "@qa (Quinn) / root",
+   "state": "gate draft01 PENDING; attempt04 outstanding (source digest f071984a)",
+   "blocks": "008, hence every 009 AC; also 011 AC-11 R1 (L1 lands in 015)"
+  },
+  {
+   "id": "H-2",
+   "item": "STUDIO-OBS-008 Done",
+   "owner": "@dev / @qa",
+   "state": "Ready, held on H-1",
+   "blocks": "every 009 AC (Depends on 008)"
+  }
+ ],
+ "prerequisites": [
+  {
+   "id": "U2",
+   "item": "ED-01 (R2D2) gateway owner named, plus gateway access/credentials and the gateway-side retention answer",
+   "owner": "user -> GA plan D-3 (owner TBD)",
+   "state": "owner TBD; STUDIO_GATEWAY_* / STUDIO_GUIDED_EVAL_* unset (feasibility 2026-10-15; not re-checked today)",
+   "blocks009": [
+    {
+     "ac": "AC-7",
+     "part": "every real-model run"
+    },
+    {
+     "ac": "AC-8",
+     "part": "the whole probe"
+    },
+    {
+     "ac": "AC-9",
+     "part": "guard refusals exercised with the real model"
+    },
+    {
+     "ac": "AC-10",
+     "part": "live gateway bytes"
+    },
+    {
+     "ac": "AC-12",
+     "part": "a real-model learn inside the deployed E2E"
+    }
+   ],
+   "blocks010": [
+    "AC-4 row 'ED-01 owner named' and the gateway retention approval"
+   ]
+  },
+  {
+   "id": "U3",
+   "item": "Approved staging application with real login, approved origins and a provisioned test secret",
+   "owner": "user / application owner / Platform-SRE (ED-04)",
+   "state": "not identified",
+   "blocks009": [
+    {
+     "ac": "AC-7",
+     "part": "(b) staging login workflow"
+    },
+    {
+     "ac": "AC-10",
+     "part": "C-17 login recording on the live stack"
+    }
+   ],
+   "blocks010": [
+    "AC-1 pilot preparation, incl. the FOCUS-MUTATION-01 per-application probe"
+   ]
+  },
+  {
+   "id": "U4",
+   "item": "Deployed stack (shared K8s namespace), internal Playwright image ~~and Node pin (ED-05: in-image Node v24.20.0 vs .nvmrc 22, per the 015 QA draft REQ-001)~~, prod studioRunner.enabled",
+   "owner": "Platform/SRE ~~(ED-05)~~ + @devops",
+   "state": "no kube context on this Mac (feasibility); ~~ED-05 EXTERNAL-OPEN in the 015 draft gate~~",
+   "struck20261016": {
+    "what": "the ED-05 Node-pin sub-item (item, owner and state text, and the blocks010 entry below)",
+    "reason": "user decision 2026-10-16 (relayed by root): the runner image Node 24 vs .nvmrc 22 mismatch is fixed inside STUDIO-OBS-015 and is no longer an external item",
+    "by": "Pax (@po)"
+   },
+   "blocks009": [
+    {
+     "ac": "AC-1",
+     "part": "internal image + real deployment"
+    },
+    {
+     "ac": "AC-2",
+     "part": "G-1 verified in a shared environment"
+    },
+    {
+     "ac": "AC-4",
+     "part": "TF-5 c live audit row under the runtime role"
+    },
+    {
+     "ac": "AC-7",
+     "part": "deployed stack"
+    },
+    {
+     "ac": "AC-9",
+     "part": "real-model guard refusals on the stack"
+    },
+    {
+     "ac": "AC-10",
+     "part": "live traffic"
+    },
+    {
+     "ac": "AC-11",
+     "part": "live revocation, worker-profile dispatch on real pods, R8.2 e live reaper bound"
+    },
+    {
+     "ac": "AC-12",
+     "part": "E2E against the deployed stack"
+    }
+   ],
+   "blocks010": [
+    "~~AC-4 ED-05 row (closure owned by OBS-010 per the 015 QA draft)~~ (struck 2026-10-16: ED-05 fixed inside STUDIO-OBS-015, user decision)"
+   ]
+  },
+  {
+   "id": "U5",
+   "item": "ED-02: dev Vault for the policy test; production StudioSecretUseAuthorization/StudioBackgroundAuthorization sources; Vault provider enablement",
+   "owner": "PUT Core / BFF (ED-02)",
+   "state": "not available; tests use FakeStudioVaultProvider",
+   "blocks009": [
+    {
+     "ac": "AC-4",
+     "part": "Vault policy test (GO condition 3)"
+    }
+   ],
+   "blocks010": [
+    "AC-4 C-2/C-3, G-2"
+   ]
+  },
+  {
+   "id": "U6",
+   "item": "SIEM sink and Q3 audit retention",
+   "owner": "Platform/SRE",
+   "state": "not available",
+   "blocks009": [
+    {
+     "ac": "AC-5",
+     "part": "SIEM routing live (may be recorded 'unrun, owner Platform/SRE')"
+    }
+   ],
+   "blocks010": [
+    "AC-4 SIEM/Q3 row"
+   ]
+  },
+  {
+   "id": "U7",
+   "item": "Real-model budget admission within the USD 500 wave ceiling (spend not measurable); optionally a non-gating Vertex rehearsal with local GCP credentials",
+   "owner": "user",
+   "state": "not recorded",
+   "blocks009": [
+    {
+     "ac": "AC-7",
+     "part": "first real-provider call"
+    },
+    {
+     "ac": "AC-8",
+     "part": "first real-provider call (GO condition 2; the feasibility table listed AC-7 only)"
+    },
+    {
+     "ac": "AC-9",
+     "part": "real-model guard refusals"
+    }
+   ],
+   "blocks010": []
+  },
+  {
+   "id": "U8",
+   "item": "Human C-17 masked-video inspection reviewer",
+   "owner": "user or a named reviewer",
+   "state": "not named",
+   "blocks009": [
+    {
+     "ac": "AC-10",
+     "part": "manual video gate"
+    }
+   ],
+   "blocks010": []
+  },
+  {
+   "id": "U9",
+   "item": "At least 5 nontechnical pilot participants, plus explicit authorization to contact them",
+   "owner": "user",
+   "state": "not authorized",
+   "blocks009": [],
+   "blocks010": [
+    "AC-1",
+    "AC-2",
+    "AC-3"
+   ]
+  },
+  {
+   "id": "U10",
+   "item": "Compliance approvals (OBS-014 export/retention, AUDIT-LABEL-PRIVACY), CACHE-REAUTH disposition, F04 / E1-E8 or named-residual acceptance",
+   "owner": "Security & Compliance, Platform/SRE, @pm",
+   "state": "E1-E8 UNCONFIRMED; no approval recorded",
+   "blocks009": [],
+   "blocks010": [
+    "AC-4"
+   ]
+  },
+  {
+   "id": "U11",
+   "item": "D-B confirmation (nothing deployed from an internal remote); dev-DB recreation (012A REQ-003); NTP skew bound",
+   "owner": "user / Platform-SRE",
+   "state": "owed",
+   "blocks009": [],
+   "blocks010": [
+    "AC-4",
+    "AC-5 NTP row ('bound owed' allowed)"
+   ]
+  },
+  {
+   "id": "U12",
+   "item": "Any push, PR, deploy or schedule activation",
+   "owner": "user -> @devops",
+   "state": "not authorized",
+   "blocks009": [
+    {
+     "ac": "AC-1",
+     "part": "shared-environment rollout (pre-deployment review by @devops)"
+    },
+    {
+     "ac": "AC-2",
+     "part": "shared-environment rollout"
+    }
+   ],
+   "blocks010": [
+    "AC-6 (handoff only; nothing deployed by the story)"
+   ]
+  },
+  {
+   "id": "U13",
+   "new": true,
+   "item": "Security & Compliance acknowledgement of the AUTHORED-ECHO-01 rule before runner code merges; conditional S&C acknowledgement for FOCUS-MUTATION-01 only if @architect classifies it as a privacy/security boundary",
+   "owner": "Security & Compliance (rule text by @architect)",
+   "state": "not requested",
+   "blocks009": [
+    {
+     "ac": "AC-7",
+     "part": "AE-01 a merge gate; T4 cannot start before AE-01 lands or @pm+@architect record the wait/disclose decision (AE-01 e)"
+    }
+   ],
+   "blocks010": [
+    "AC-4 benchmark row disclosure if the count is nonzero"
+   ]
+  },
+  {
+   "id": "U14",
+   "new": true,
+   "item": "DB role model per shared environment: which role runs migrations and owns the Studio objects, which role the API/worker pods use (TF-5 a)",
+   "owner": "Platform DBA / @devops",
+   "state": "unconfirmed; repo config makes the runtime user the owner [I]",
+   "blocks009": [
+    {
+     "ac": "AC-4",
+     "part": "TF-5 a, c, e (b only if a non-owner role is confirmed)"
+    }
+   ],
+   "blocks010": [
+    "AC-4 row 'unrun, owner Platform DBA / @devops' until confirmed (010 D-4)"
+   ]
+  },
+  {
+   "id": "U15",
+   "new": true,
+   "decisionOnly": true,
+   "item": "User scope decision on REL-001 (value-free diagnostic at guided/ownership.ts:139 and guided/runtime.ts:157-159)",
+   "owner": "user",
+   "state": "raised by the 015 QA draft; unplaced",
+   "blocks009": [],
+   "note": "Not a 009 prerequisite until placed. If placed in 009 AC-11, it is LOCAL work.",
+   "decision20261016": {
+    "by": "user (relayed by root)",
+    "decision": "REL-001 is root-caused and fixed INSIDE STUDIO-OBS-015; it is not placed in 009",
+    "effect": "U15 is decided; it is not a 009 or 010 prerequisite"
+   }
+  }
+ ],
+ "internalRulingsNotExternal": [
+  {
+   "item": "@qa corpus composition (T0)",
+   "ac": "AC-7"
+  },
+  {
+   "item": "Q2 default stands unless the user overrides before T3",
+   "ac": "AC-6"
+  },
+  {
+   "item": "ADJ-1 b ruling with security review",
+   "ac": "AC-11"
+  },
+  {
+   "item": "R10c f shape ruling with security review (include the D-11 replayFailure clause)",
+   "ac": "AC-11"
+  },
+  {
+   "item": "R10-OBS-1 j review; P3 k deadline value review",
+   "ac": "AC-11"
+  },
+  {
+   "item": "R1 b non-consuming confirmation",
+   "ac": "AC-11"
+  },
+  {
+   "item": "TF-3 b read-order ruling",
+   "ac": "AC-9"
+  },
+  {
+   "item": "AE-01 a rule text; FM-01 a rule text and allowlist",
+   "ac": "AC-7"
+  },
+  {
+   "item": "TF-5 b grant mechanism (@data-engineer)",
+   "ac": "AC-4"
+  },
+  {
+   "note": "Who performs 'security review' for ADJ-1/R10c is not named in the story (internal reviewer vs Security & Compliance). Ask at T0; recorded here as internal."
+  }
+ ],
+ "perAcLocalVsExternal": [
+  {
+   "ac": "AC-1",
+   "class": "LOCAL-PARTIAL",
+   "localOnStartList": true,
+   "external": [
+    "U4",
+    "U12"
+   ]
+  },
+  {
+   "ac": "AC-2",
+   "class": "LOCAL-PARTIAL",
+   "localOnStartList": true,
+   "external": [
+    "U4",
+    "U12"
+   ]
+  },
+  {
+   "ac": "AC-3",
+   "class": "LOCAL",
+   "localOnStartList": true,
+   "external": []
+  },
+  {
+   "ac": "AC-4",
+   "class": "LOCAL-PARTIAL",
+   "localOnStartList": true,
+   "external": [
+    "U5",
+    "U14",
+    "U4"
+   ]
+  },
+  {
+   "ac": "AC-5",
+   "class": "LOCAL-PARTIAL",
+   "localOnStartList": true,
+   "external": [
+    "U6"
+   ]
+  },
+  {
+   "ac": "AC-6",
+   "class": "LOCAL",
+   "localOnStartList": true,
+   "external": []
+  },
+  {
+   "ac": "AC-7",
+   "class": "EXTERNAL",
+   "localOnStartList": false,
+   "external": [
+    "U2",
+    "U3",
+    "U4",
+    "U7",
+    "U13"
+   ]
+  },
+  {
+   "ac": "AC-8",
+   "class": "EXTERNAL",
+   "localOnStartList": false,
+   "external": [
+    "U2",
+    "U7"
+   ]
+  },
+  {
+   "ac": "AC-9",
+   "class": "LOCAL-PARTIAL",
+   "localOnStartList": false,
+   "external": [
+    "U2",
+    "U4",
+    "U7"
+   ]
+  },
+  {
+   "ac": "AC-10",
+   "class": "EXTERNAL",
+   "localOnStartList": false,
+   "external": [
+    "U2",
+    "U3",
+    "U4",
+    "U8"
+   ]
+  },
+  {
+   "ac": "AC-11",
+   "class": "LOCAL-PARTIAL",
+   "localOnStartList": true,
+   "external": [
+    "U4"
+   ],
+   "note": "R1 a-d needs H-1"
+  },
+  {
+   "ac": "AC-12",
+   "class": "LOCAL-PARTIAL",
+   "localOnStartList": "f-j only",
+   "external": [
+    "U4",
+    "U2"
+   ]
+  }
+ ],
+ "doneReachableLocally": false,
+ "doneBlockedBy": [
+  "U2",
+  "U3",
+  "U4",
+  "U5",
+  "U7",
+  "U8"
+ ],
+ "amendments": [
+  {
+   "date": "2026-10-16",
+   "actor": "Pax (@po)",
+   "instruction": "root (orchestrator) dispatch 2026-10-16",
+   "changes": [
+    "U4: the ED-05 Node-pin sub-item is struck (user decision 2026-10-16: fixed inside STUDIO-OBS-015; no longer external). U4 stays open for the deployed stack, internal Playwright image and prod studioRunner.enabled.",
+    "U15: decided (REL-001 fixed inside STUDIO-OBS-015; not placed in 009).",
+    "U13 and U14 are now named in the stories: 009 Dependency notes and T0; 010 Dependency notes, Dev Notes and AC-4 clarification d. 011 lists no external prerequisites, so neither is added there."
+   ],
+   "storySha256After": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md": "a7d1ef1ad3ff184d4e54b11b7a96980e1588df69ad0769eb85f06b82785779bd",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md": "c56aac98d0a83f4b76c37da39dd448fd90527402b05734e791bbaae1df4a4934",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md": "2a8b4f76e791e4160fbdb16a3f9d4624b293790265cabb1d5cc87a6aaf86f114"
+   }
+  },
+  {
+   "date": "2026-10-17",
+   "actor": "Pax (@po)",
+   "instruction": "root dispatch 2026-10-17 (yolo), lane T0-PO",
+   "changes": [
+    "Appended the key t0Batch20261017 after this array: U16 (A17), U17 and U18 (B8, split by owner: headroom R from the user, price from the ED-01 owner), U19 (Vault image pull or a named skip), U20 (R1 one-pod override), U21 (ED-02 policy note) and U22 (Docker for the D2 image smoke). U3 (ED-04 staging application), U8 (C-17 reviewer) and U13 (AE-01 Security & Compliance acknowledgement) are restated there with today's state.",
+    "None of these items is satisfied.",
+    "Nothing above this entry was edited; the prerequisites array, perAcLocalVsExternal, doneBlockedBy and the 2026-10-16 amendment are byte-unchanged."
+   ],
+   "registerSha256Before": "ce1752f0ff45c314f967eba5848d8a445826829313344a8e86ea18a3f90cfd6e",
+   "storySha256After": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md": "af5a3c7e4d1508c196b947b8b2632e0d999a53a9d07b7e3093b13b4d36aabc78"
+   }
+  },
+  {
+   "date": "2026-10-18",
+   "actor": "Pax (@po)",
+   "instruction": "lead placement 2026-10-18 (yolo), STUDIO-OBS-009 W2 and Aria's pre-F-merge rulings; docs only; no source, spec, test, build or git write",
+   "changes": [
+    "Appended the key w2Batch20261018 after t0Batch20261017 with one new item, U23 (guided callback / controller token issuer, W1.5 ruling Q6). Q6 suggested U21; U21 was already used by t0Batch20261017 (ED-02 policy note), so the next free id U23 is used.",
+    "U23 is not satisfied.",
+    "Nothing above this entry was edited; the prerequisites array, t0Batch20261017 and the earlier amendments are byte-unchanged apart from the comma added after the previous last amendment."
+   ],
+   "registerSha256Before": "dcc24d127affe6fa66c4fe8144fbd66906fb0b8fcef0bba3484252fde1b34bc4",
+   "storySha256After": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md": "e6a15be136bde22cac354992a37b16d0e8372c5108df8eacc4a969ec8f7d127d"
+   }
+  }
+ ],
+ "t0Batch20261017": {
+  "date": "2026-10-17",
+  "actor": "Pax (@po)",
+  "instruction": "root dispatch 2026-10-17 (yolo), lane T0-PO",
+  "sources": {
+   "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-rulings/ruling.md": "e7beb6ce36bba8f71950cd73df833d53a75f78316ea9c9ad98e1e54d095de66b",
+   "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/qa/t0-qa-20261017.md": "0f1e2f6f7e77740856931469e8dc651a2bd458c09cc9cd62fcb6fbf5f4fae4f9",
+   "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/qa/t0-qa-20261017.json": "0195c583e84a729515065db3bf72c7f91a56907402789d01d85642e9af062b52"
+  },
+  "rules": [
+   "Append-only. The prerequisites array above is unchanged. U3, U8 and U13 are restated here with today's state, and their entries above stay as written.",
+   "None of these items is satisfied. Asking an owner, sending a request or pulling an image is outside this pass.",
+   "An absent item makes the dependent AC or lane 'unrun, owner X'. It is never a pass and never a silent skip."
+  ],
+  "items": [
+   {
+    "id": "U16",
+    "alias": "A17 (ruling.md section 5)",
+    "item": "Confirm the Q2 default: observed schedules use parity with ConfiguredBackgroundAuthorization, and G-3 refuses outside local/test (story GO condition 4)",
+    "owner": "user",
+    "recommendedDefault": "confirm (ruling.md section 5)",
+    "neededBefore": "lane S (009 W2); AC-6",
+    "ifOverridden": "the 18 deferrals cannot be re-enabled as written; AC-6 goes back to @po and the disposition of the 18 goes to @architect (story AC-6, 'If Q2 is decided otherwise')",
+    "state": "NOT_SATISFIED",
+    "satisfied": false
+   },
+   {
+    "id": "U17",
+    "alias": "B8, headroom half",
+    "item": "Remaining USD headroom R under the USD 500 whole-wave ceiling, with its source, and whether benchmark spend shares that pool with agent spend",
+    "owner": "user",
+    "recommendedDefault": "none; without it there is no admission (budget-admission.json status ADMISSION_REFUSED_*, qa/t0-qa-20261017.md section 3.5)",
+    "neededBefore": "009 T4, the first real-provider call (AC-7, AC-8; GO condition 2)",
+    "relatesTo": [
+     "U7"
+    ],
+    "state": "NOT_SATISFIED",
+    "satisfied": false
+   },
+   {
+    "id": "U18",
+    "alias": "B8, price half",
+    "item": "Gateway price list (p_in, p_out) for the pinned model, and whether thoughts tokens bill as output",
+    "owner": "ED-01 owner (TBD, GA plan D-3; see U2)",
+    "recommendedDefault": "none; without it the admission record reads ADMISSION_REFUSED_PRICE_UNKNOWN",
+    "neededBefore": "009 T4, the first real-provider call",
+    "relatesTo": [
+     "U2",
+     "U7"
+    ],
+    "state": "NOT_SATISFIED",
+    "satisfied": false
+   },
+   {
+    "id": "U19",
+    "alias": "R5, Vault half; A18",
+    "item": "Authorization to pull the hashicorp/vault image for the AC-4 Vault rehearsal (A18), or a named skip",
+    "owner": "user",
+    "recommendedDefault": "allow, or record 'unrun, no authorization' (ruling.md section 5, R5); a skip is by name and is listed in the QA approved-skips file",
+    "neededBefore": "the VaultPolicyIT rehearsal run (informational only; never AC-4 credit)",
+    "relatesTo": [
+     "U5"
+    ],
+    "state": "NOT_SATISFIED",
+    "satisfied": false
+   },
+   {
+    "id": "U20",
+    "alias": "R1 override (A2.6)",
+    "item": "Whether the user overrides root decision R1 (provisional): guided mode only where the studio-runner Deployment runs exactly 1 pod, enforced by a chart check; guided mode on more than one pod is a later GA capacity item (GA plan section 4.G G-4). For guided-enabled environments this sets aside Studio v1 decision D3 ('a static two pods for the pilot', helm-chart/put-checks/values.yaml:380)",
+    "owner": "user (raised by root)",
+    "recommendedDefault": "R1 stands (ruling.md section 6, R1)",
+    "neededBefore": "lane D2 (009 W2), which starts on 'root decision R1 (A2.6)'",
+    "ifOverridden": "009 AC-1 note A2.6 is struck; AC-1 scope goes to @architect + @pm (owner-addressed routing is new design) and back to @po for revalidation",
+    "state": "NOT_SATISFIED (root decision recorded as provisional; the user has not been asked yet)",
+    "satisfied": false
+   },
+   {
+    "id": "U21",
+    "alias": "ED-02 policy note (qa/t0-qa-20261017.md section 5 item 18)",
+    "item": "Tell the ED-02 owner that the backend's Vault policy needs create plus metadata list in scope, not read only, and the KV v2 data/ and metadata/ path forms",
+    "owner": "@dev -> PUT Core / BFF (ED-02)",
+    "basis": "adapter Javadoc HashicorpStudioVaultProvider.java:31 'a bounded read, a create-only write and a metadata list' [V]; design I-C9 says the policy 'grants read' [V]; the path forms are Quinn's inference (P4)",
+    "neededBefore": "the AC-4 dev-Vault policy test (U5, GO condition 3)",
+    "relatesTo": [
+     "U5"
+    ],
+    "state": "NOT_SATISFIED (not sent)",
+    "satisfied": false
+   },
+   {
+    "id": "U22",
+    "alias": "R5, image-smoke half",
+    "item": "Authorization to use Docker for the D2 image smoke: docker build; docker run --init with guided mode enabled (pid != 1 recorded); docker run without --init (CONFIGURATION_DENIED recorded); docker stop (runner.draining and runner.drained with the new CMD)",
+    "owner": "user",
+    "recommendedDefault": "allow, or record 'unrun, no authorization' (ruling.md section 5, R5)",
+    "neededBefore": "the lane D2 image smoke (009 W2): AC-1 PID-1 c and the A6 drain re-record",
+    "state": "AUTHORIZED 2026-10-18 (user: local build + C4 re-run + D2 image smoke; run pending after G9 C8; see execution-20261018/w0/decisions.md)",
+    "satisfied": false
+   },
+   {
+    "id": "U3",
+    "restated": true,
+    "alias": "ED-04 staging application",
+    "item": "Approved staging application with real login, approved origins, a provisioned test secret, and an application-side oracle for the D2/E1 benchmark cases",
+    "owner": "user / application owner / Platform-SRE (ED-04); the test secret via PUT Core / BFF (ED-02)",
+    "neededBefore": "009 AC-7 (b), AC-10 C-17; 010 pilot",
+    "state": "NOT_SATISFIED (not identified)",
+    "satisfied": false
+   },
+   {
+    "id": "U8",
+    "restated": true,
+    "alias": "C-17 reviewer",
+    "item": "A named human reviewer for the C-17 masked-video inspection",
+    "owner": "user",
+    "neededBefore": "009 AC-10 manual video gate",
+    "state": "NOT_SATISFIED (not named)",
+    "satisfied": false
+   },
+   {
+    "id": "U13",
+    "restated": true,
+    "alias": "AE-01 Security & Compliance acknowledgement",
+    "item": "Security & Compliance acknowledgement of rule AE (ruling.md section 1 A10, AE-1 to AE-7)",
+    "owner": "Security & Compliance",
+    "recommendedDefault": "request now with ruling.md section 1 A10 as the text (ruling.md section 5 and section 6 R6)",
+    "neededBefore": "AE-01 runner code (lanes O-AE, C9-AE, FE9); T4 per story AE-01 e",
+    "draftRequest": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-rulings/ae01-ack-request-draft.md (draft for the user to forward; not sent)",
+    "fm01Half": "ruling.md section 1 A9 FM-7 classifies FOCUS-MUTATION-01 as an effect-safety guard, so no Security & Compliance acknowledgement is required for it. That conditional half is 'not required'; it is not satisfied.",
+    "state": "NOT_SATISFIED (not requested; draft prepared)",
+    "satisfied": false
+   },
+   {
+    "id": "U24",
+    "alias": "DEPLOY-OBSERVED-01 policy owner",
+    "item": "Name the owner of the per-environment trusted observed policy content (backend catalog/policies; runner OBSERVED_* via chart studioObserved block)",
+    "owner": "user",
+    "recommendedDefault": "pilot application owner writes, Security & Compliance approves, @devops applies at deploy (pm-ack.md §3, STUDIO-OBS-010 live-surface-pre-g9-20261018/rulings/pm-ack.md)",
+    "neededBefore": "UAT render, 009 AC-7/AC-12 deployed, G-1, pilot",
+    "state": "NOT_SATISFIED (added 2026-10-18 by root)",
+    "satisfied": false
+   }
+  ]
+ },
+ "w2Batch20261018": {
+  "date": "2026-10-18",
+  "actor": "Pax (@po)",
+  "instruction": "lead placement 2026-10-18 (yolo), from docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w1.5/ruling-part1.md Q6 (Aria), which asks root to register the item",
+  "sources": {
+   "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w1.5/ruling-part1.md": "27a6e2476fe39348f6e4322a97839ea5bf3e2398766a2a03cb885eca0045bccc",
+   "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f-merge/prep-devops/receipt.md": "2992a1136355fae455f4d8ec5314a4386d2223508ed00ced773a4dd15e822cc3"
+  },
+  "rules": [
+   "Append-only. Every key above is unchanged.",
+   "U23 is not satisfied. Asking an owner or sending a request is outside this pass.",
+   "An absent item makes the dependent AC or lane 'unrun, owner X'. It is never a pass and never a silent skip."
+  ],
+  "items": [
+   {
+    "id": "U23",
+    "new": true,
+    "alias": "Q6, guided token issuer (suggested U21 in the ruling; U21 was already used)",
+    "item": "An external issuer for the guided internal tokens: one deliverable, three audience-scoped files. It writes the runner's STUDIO_RUNNER_GUIDED_CALLBACK_TOKEN_FILE and the backend's two controller token files (application.yml:200, :202 per the ruling). Tokens are RS256 and live at most 300 s (GuidedInternalSecurity.java:205-210). One issuer key verifies both roles, owning-worker and backend-controller (GuidedInternalSecurity.java:49-51, :196-201). The issuer refreshes Secrets mounted as directories (no subPath).",
+    "constraints": [
+     "No in-pod minting: a signing key in the pod that renders untrusted pages could also mint backend-controller tokens (Gage's refusal, co-signed by Aria in Q6)",
+     "No sidecar: it breaks the one-container bound",
+     "No static Secret: a token expires within 300 s"
+    ],
+    "owner": "external, not named (Platform/SRE identity per the ruling; not ED-02 until someone confirms ED-02)",
+    "neededBefore": "G-1 and any guided-enabled shared environment; not needed for the local 009 ACs",
+    "relatesTo": [
+     "U4"
+    ],
+    "guard": "lane D2 makes the guided render fail on an empty token Secret name (ruling Q6)",
+    "observation": "helm-chart/put-checks/values-uat.yaml:184 and :186 name checks-studio-guided-callback-token-uat and checks-studio-guided-controller-tokens-uat [V, read by @po 2026-10-18]; these are the Secrets the issuer must keep filled",
+    "storyNote": "STUDIO-OBS-009 'PO notes — W2 findings and pre-F-merge rulings (2026-10-18)' item b",
+    "state": "NOT_SATISFIED (owner not named)",
+    "satisfied": false
+   }
+  ]
+ }
+}

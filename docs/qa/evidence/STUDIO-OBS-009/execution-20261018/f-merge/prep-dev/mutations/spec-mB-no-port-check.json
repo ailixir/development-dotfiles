@@ -1,0 +1,23 @@
+{
+ "label": "obs009-prep-dev-mB-no-port-check",
+ "evid": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f-merge/prep-dev/mutations",
+ "edits": [
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+   "old": "        if (connector > 0 && request.getLocalPort() != connector) {\n          chain.doFilter(request, response);\n          return;\n        }\n",
+   "new": ""
+  }
+ ],
+ "gradle": [
+  "test",
+  "--tests",
+  "com.citi.put.checks.studio.guided.session.GuidedConnectorScopeTest",
+  "--tests",
+  "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT",
+  "--tests",
+  "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT$OneIdentityInARealContext",
+  "--tests",
+  "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT$GuidedConnectorInARealContext",
+  "--no-daemon"
+ ]
+}

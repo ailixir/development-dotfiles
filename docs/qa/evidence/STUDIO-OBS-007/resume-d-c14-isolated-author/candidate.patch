@@ -1,0 +1,349 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -178,6 +178,13 @@
+     REPORTS,
+     REGISTRATION
+   }
++
++  // Case-only C14 phases; NONE leaves every original page/model/source flow unchanged.
++  private enum P14Recipe { NONE, CONTROL_VALUE, HAS_VALUE }
++  private enum P14Page { TEXT_MATCH, PASSWORD, TEXT_CANARY }
++  private static volatile P14Recipe p14Recipe = P14Recipe.NONE;
++  private static volatile P14Page p14Page = P14Page.TEXT_MATCH;
++  private static volatile String p14Expected, p14Canary;
+ 
+   private record P3Entitlement(String principal, String csi, String environment, String name) {}
+ 
+@@ -511,6 +518,9 @@
+                       + "body:JSON.stringify({chosen:document.getElementById('alternate').value,"
+                       + "unchosen:document.getElementById('destination').value})});};</script></body></html>";
+             }
++            if (p14Recipe != P14Recipe.NONE) {
++              html = p14Markup();
++            }
+             byte[] bytes = html.getBytes(StandardCharsets.UTF_8);
+             exchange.getResponseHeaders().set("Content-Type", "text/html; charset=utf-8");
+             exchange.sendResponseHeaders(200, bytes.length);
+@@ -571,6 +581,9 @@
+               REPLAY_INVOCATIONS.add(operation);
+             }
+             if (p3Mode != null) {
++              P3_INVOCATIONS.add(operation);
++            }
++            if (p14Recipe != P14Recipe.NONE) {
+               P3_INVOCATIONS.add(operation);
+             }
+             exchange.sendResponseHeaders(204, -1);
+@@ -5408,6 +5421,302 @@
+             + " AND secret_id='PASS' ORDER BY row_kind,id",
+         execution,
+         attempt);
++  }
++
++  @Test
++  @org.junit.jupiter.api.Order(33)
++  void actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead() throws Exception {
++    p14Captured(P14Recipe.CONTROL_VALUE, false);
++  }
++
++  @Test
++  @org.junit.jupiter.api.Order(34)
++  void actualCorePublishedControlValuePasswordRequestRefusesBeforeRead() throws Exception {
++    p14Captured(P14Recipe.CONTROL_VALUE, true);
++  }
++
++  @Test
++  @org.junit.jupiter.api.Order(35)
++  void actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead() throws Exception {
++    p14Captured(P14Recipe.HAS_VALUE, false);
++  }
++
++  @Test
++  @org.junit.jupiter.api.Order(36)
++  void actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion()
++      throws Exception {
++    // Two separately labeled ordinary runs share ONE genuine hasValue publication.
++    p14Captured(P14Recipe.HAS_VALUE, true);
++  }
++
++  private void p14Captured(P14Recipe recipe, boolean published) throws Exception {
++    String canary = "C14-PAGE-" + UUID.randomUUID();
++    C5Capture capture = new C5Capture(List.of(canary), false);
++    c5Capture = capture;
++    Throwable primary = null;
++    try {
++      capture.writeProfileValues();
++      p3Case(() -> {
++        p14Recipe = recipe;
++        p14Page = published ? P14Page.TEXT_MATCH : P14Page.PASSWORD;
++        p14Expected = "C14-EXPECTED-" + UUID.randomUUID();
++        p14Canary = canary;
++        p14Run(recipe, published, capture);
++      });
++    } catch (Exception | Error failure) {
++      primary = failure;
++      throw failure;
++    } finally {
++      var failures = new java.util.ArrayList<Throwable>();
++      if (!cleanupUnconfirmed) {
++        // Original owner drainage has returned before resetting the actual served document.
++        p3AttemptTeardown(failures, () -> p3Scan(List.of(canary)));
++        p3AttemptTeardown(failures, capture::writeNumericEvidence);
++        p3AttemptTeardown(failures, capture::close);
++        p14Recipe = P14Recipe.NONE;
++        p14Page = P14Page.TEXT_MATCH;
++        p14Expected = null;
++        p14Canary = null;
++        c5Capture = null;
++      } else {
++        failures.add(new IllegalStateException("C14 original owner closure remains unconfirmed"));
++      }
++      if (!failures.isEmpty()) {
++        if (primary != null) failures.forEach(primary::addSuppressed);
++        else throwTeardownFailures(failures);
++      }
++    }
++  }
++
++  private void p14Run(P14Recipe recipe, boolean published, C5Capture capture) throws Exception {
++    UUID test = p14CreateSource(recipe);
++    VaultScope scope = VaultScope.of("CSI-123", "fixture", test);
++    int reads = COUNTED_VAULT.reads.size();
++    capture.armTrace();
++    String session = p3Start(test, "fixture");
++    capture.selectedGuidedSession = session;
++    if (!published) {
++      awaitState(session, "FAILED");
++      JsonNode result = p3Call(p3Cookie,
++          "/api/v3/studio/guided-sessions/" + session + "/result", null, 200);
++      assertThat(result.path("failure").path("code").asText())
++          .isEqualTo("RUNTIME_INCOMPATIBLE");
++      JsonNode observation = sessions.transaction(
++          () -> sessions.lock(session).progress().path("observation").deepCopy());
++      p14PasswordObservation(observation);
++      assertThat(P3_INVOCATIONS.stream().anyMatch(kind -> kind.equals("read") || kind.equals("assert")))
++          .as("no successful requested password operation; pre-admission guard is distinct")
++          .isFalse();
++      assertThat(jdbc.queryForObject(
++          "SELECT count(*) FROM studio_guided_actions WHERE session_id=?"
++              + " AND step_id IN (?,?) AND admission_id IS NOT NULL",
++          Long.class, session, TWO, THREE)).isZero();
++      p3AwaitTeardown(session);
++      p3WriteEvidence("c14-guided-" + recipe.ordinal(), C.object()
++          .put("operator", recipe.ordinal()).put("path", 1)
++          .put("signatureFalse", true).put("passwordControls", 1)
++          .put("groundingGuardRuntimeIncompatible", true)
++          .put("requestedPasswordOperations", 0).put("vaultValueReads", 0));
++    } else {
++      awaitFinalizing(session);
++      // A successful actual TEXT read/consumer or assertion is mandatory BEFORE mutation.
++      assertThat(P3_INVOCATIONS.contains(recipe == P14Recipe.CONTROL_VALUE ? "read" : "assert"))
++          .isTrue();
++      if (recipe == P14Recipe.CONTROL_VALUE) {
++        assertThat(P3_INVOCATIONS.contains("fill") && P3_INVOCATIONS.contains("click")).isTrue();
++      }
++      P3Publication publication = p3Publish(session);
++      int models = MODEL_WIRE.size();
++      p14Page = P14Page.PASSWORD;
++      UUID passwordRun = p14Ordinary(test, scope, publication, capture, "TARGET_DRIFT", "ERROR");
++      assertThat(MODEL_WIRE.size()).isEqualTo(models);
++      p3WriteEvidence("c14-published-" + recipe.ordinal(), C.object()
++          .put("operator", recipe.ordinal()).put("path", 2)
++          .put("authenticTextPublication", true).put("actualSameHintPasswordMutation", true)
++          .put("firstGuardTargetDrift", true).put("requestedPasswordOperations", 0)
++          .put("vaultValueReads", 0).put("ordinaryModelCalls", 0));
++      // Close the genuine password-refusal owner BEFORE reusing the same immutable publication.
++      p3CleanupOrdinary(passwordRun, p3Cookie, System.nanoTime() + Duration.ofSeconds(60).toNanos());
++      if (recipe == P14Recipe.HAS_VALUE) {
++        p14Page = P14Page.TEXT_CANARY;
++        UUID textRun = p14Ordinary(test, scope, publication, capture, "ASSERTION_FAILED", "FAILED");
++        assertThat(MODEL_WIRE.size()).isEqualTo(models);
++        p3CleanupOrdinary(textRun, p3Cookie, System.nanoTime() + Duration.ofSeconds(60).toNanos());
++        p3WriteEvidence("c14-text-canary", C.object()
++            .put("operator", recipe.ordinal()).put("path", 2)
++            .put("sameAuthenticHasValuePublication", true).put("actualTextAssertionFalse", true)
++            .put("firstGuardAssertionFailed", true).put("vaultValueReads", 0)
++            .put("ordinaryModelCalls", 0).put("separateVaultSecretCredit", false));
++      }
++    }
++    assertThat(COUNTED_VAULT.reads.size()).isEqualTo(reads);
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_secret_use_audit WHERE test_id=?",
++        Long.class, test)).isZero();
++    p3Scan(List.of(p14Canary));
++  }
++
++  private UUID p14Ordinary(UUID test, VaultScope scope, P3Publication publication,
++      C5Capture capture, String firstGuard, String status) throws Exception {
++    int invocations = P3_INVOCATIONS.size();
++    UUID execution = p3Execute(test);
++    p3AssertBinding(execution, scope, publication);
++    capture.watchExecution(execution);
++    assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
++    JsonNode current = p3AwaitExecution(execution, status);
++    JsonNode report = p3RunnerReport(execution);
++    // TARGET_DRIFT is an actual inner reason under RUN_ERROR; do not relabel the wire enum.
++    assertThat(report.path("outcome").path("errorMessage").asText().equals(firstGuard))
++        .as("exact first inner production guard").isTrue();
++    assertThat(report.path("steps").size()).isEqualTo(3);
++    assertThat(report.path("steps").get(0).path("status").asText()).isEqualTo("PASS");
++    assertThat(report.path("steps").get(1).path("status").asText()).isEqualTo("FAIL");
++    assertThat(report.path("steps").get(1).path("failure").asText().equals(firstGuard))
++        .as("exact Field failure guard").isTrue();
++    assertThat(report.path("steps").get(2).path("status").asText()).isEqualTo("SKIPPED");
++    if (firstGuard.equals("TARGET_DRIFT")) {
++      assertThat(P3_INVOCATIONS.subList(invocations, P3_INVOCATIONS.size()).stream()
++          .anyMatch(kind -> kind.equals("read") || kind.equals("assert") || kind.equals("fill") || kind.equals("click")))
++          .isFalse();
++    }
++    assertThat(p3DecodeVideo(execution, current)).isPositive();
++    return execution;
++  }
++
++  private UUID p14CreateSource(P14Recipe recipe) throws Exception {
++    List<String> texts = recipe == P14Recipe.CONTROL_VALUE
++        ? List.of("Open " + URL + ".", "Read Field value.",
++            "Enter captured Field value in Destination, click Submit and check Confirmation.")
++        : List.of("Open " + URL + ".", "Check Field value equals <var EXPECTED>.",
++            "Check Complete heading remains visible.");
++    var authoring = new AuthoringV2Request(2, null, List.of(
++        new AuthoringStep(UUID.fromString(ONE), texts.get(0), null),
++        new AuthoringStep(UUID.fromString(TWO), texts.get(1), null),
++        new AuthoringStep(UUID.fromString(THREE), texts.get(2), null)));
++    UUID test = UUID.randomUUID();
++    String variables = recipe == P14Recipe.HAS_VALUE
++        ? JSON.createArrayNode().add(C.object().put("name", "EXPECTED").put("kind", "plain")
++            .put("value", p14Expected)).toString() : "[]";
++    jdbc.update("INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
++        + "authoring_revision_inputs,created_by,created_at,updated_at)"
++        + " VALUES (?,'C14 controlled Field','CSI-123','fixture','chromium',?::jsonb,?::jsonb,"
++        + "?::jsonb,?::jsonb,'fixture@example.invalid',now(),now())", test,
++        JSON.writeValueAsString(texts), variables, JSON.writeValueAsString(authoring),
++        JSON.writeValueAsString(AuthoringRevisionIdentity.create(authoring, Map.of())));
++    return test;
++  }
++
++  private static String p14Markup() {
++    boolean password = p14Page == P14Page.PASSWORD;
++    String actual = p14Page == P14Page.TEXT_MATCH ? p14Expected : p14Canary;
++    String consumer = p14Recipe == P14Recipe.CONTROL_VALUE && !password
++        ? "<label for='destination'>Destination</label><textarea id='destination'></textarea>"
++            + "<output id='done' aria-label='Confirmation' hidden>Submitted</output>"
++            + "<button id='submit'>Submit</button><script>document.getElementById('submit').onclick=()=>{"
++            + "document.getElementById('done').hidden=false;fetch('/receipt',{method:'POST',"
++            + "body:document.getElementById('destination').value});};</script>" : "";
++    return "<!doctype html><html><head><title>Operations</title></head><body>"
++        + "<main aria-label='Operations'><input aria-label='Field' type='"
++        + (password ? "password" : "text") + "' value='" + actual
++        + "'><h1>Complete</h1>" + consumer + "</main></body></html>";
++  }
++
++  private static void p14PasswordObservation(JsonNode observation) {
++    assertThat(observation.path("coverage").path("passwordControls").asInt(-1)).isEqualTo(1);
++    assertThat(observation.path("coverage").path("complete").asBoolean()).isTrue();
++    assertThat(java.util.stream.StreamSupport.stream(observation.path("nodes").spliterator(), false)
++        .anyMatch(node -> node.path("name").asText().equals("Field"))).isFalse();
++    assertThat(com.citi.put.checks.studio.guided.translation.LoginRequiredSignature.matches(observation))
++        .isFalse();
++  }
++
++  private static ObjectNode p14Model(ObjectNode result, JsonNode context, String kind) {
++    if (kind.equals("SOURCE_PLAN")) {
++      var references = result.putArray("sourceReferences");
++      references.addObject().put("referenceKind", "sourceSpan").put("sourceRevision", "1")
++          .put("stepId", ONE).put("startUtf16", 5).put("endUtf16", 5 + URL.length())
++          .put("kind", "destination").put("intendedSlot", "navigate.destination");
++      var obligations = result.putArray("obligations");
++      obligations.add(obligation(ONE, 0, "navigate", "page", 0, null));
++      var needs = result.putArray("needs");
++      if (p14Recipe == P14Recipe.CONTROL_VALUE) {
++        obligations.add(obligation(TWO, 0, "read", "Field", null, "c14-field"));
++        obligations.add(obligation(THREE, 0, "fill", "Destination", null, "c14-field"));
++        obligations.add(obligation(THREE, 1, "click", "Submit", null, null));
++        obligations.add(obligation(THREE, 2, "assert", "Confirmation", null, null).put("predicate", "visible"));
++        needs.addObject().put("needId", "c14-field").put("producerStepId", TWO)
++            .putArray("consumers").addObject().put("stepId", THREE).put("argumentSlot", "fill.value");
++      } else {
++        JsonNode declaring = null;
++        for (JsonNode configured : context.path("configurationReferences")) {
++          if (configured.path("referenceName").asText().equals("EXPECTED")
++              && configured.path("stepId").asText().equals(TWO)
++              && configured.path("intendedSlot").asText().equals("assert.expected")) {
++            assertThat(declaring == null).isTrue();
++            declaring = configured;
++          }
++        }
++        assertThat(declaring != null).as("authentic plain EXPECTED declaring step/slot").isTrue();
++        var reference = ((ObjectNode) declaring).deepCopy()
++            .put("referenceKind", "configuration").put("configurationRevision", "1");
++        reference.remove("referenceName");
++        references.add(reference);
++        obligations.add(obligation(TWO, 0, "assert", "Field", 1, null).put("predicate", "hasValue"));
++        obligations.add(obligation(THREE, 0, "assert", "Complete", null, null).put("predicate", "visible"));
++      }
++      return result;
++    }
++    JsonNode obligation = context.path("obligations").get(0);
++    String op = obligation.path("operationKind").asText();
++    String name = obligation.path("targetIntent").asText();
++    if (op.equals("navigate")) {
++      result.put("status", "ACTION").put("obligationId", obligation.path("obligationId").asText())
++          .putNull("question");
++      result.putObject("action").putObject("operation").put("kind", "navigate")
++          .put("destinationInputId", context.path("inputs").get(0).path("inputId").asText());
++      result.withObject("/action").putObject("target").put("kind", "page");
++      return result;
++    }
++    JsonNode node = null;
++    for (JsonNode candidate : context.path("observation").path("nodes")) {
++      if (candidate.path("name").asText().equals(name)) {
++        assertThat(node == null).as("unique real C14 exported target").isTrue();
++        node = candidate;
++      }
++    }
++    if (node == null) {
++      assertThat(name.equals("Field") && p14Page == P14Page.PASSWORD).isTrue();
++      p14PasswordObservation(context.path("observation"));
++      result.put("status", "UNSUPPORTED").put("reasonCode", "INSUFFICIENT_EVIDENCE");
++      return result;
++    }
++    if (name.equals("Field")) {
++      assertThat(p14Page == P14Page.TEXT_MATCH).isTrue();
++      assertThat(node.path("role").asText()).isEqualTo("textbox");
++    }
++    result.put("status", "ACTION").put("obligationId", obligation.path("obligationId").asText())
++        .putNull("question");
++    var action = result.putObject("action");
++    var operation = action.putObject("operation").put("kind", op);
++    action.putObject("target").put("nodeId", node.path("nodeId").asText())
++        .putObject("locator").put("kind", "role").put("role", node.path("role").asText())
++        .put("name", name).put("exact", true);
++    if (op.equals("read")) {
++      operation.put("bindingId", context.path("needs").get(0).path("bindingId").asText())
++          .putObject("recipe").put("kind", "controlValue").put("classification", "nonsecretApproved")
++          .put("controlType", "text").put("policyRuleId", "business-read");
++    } else if (op.equals("fill")) {
++      operation.putObject("value").put("kind", "binding")
++          .put("bindingId", context.path("needs").get(0).path("bindingId").asText());
++    } else if (op.equals("assert")) {
++      if (name.equals("Field")) {
++        operation.put("predicate", "hasValue").putObject("expected").put("kind", "authoredLiteral")
++            .put("sourceInputId", context.path("inputs").get(obligation.path("referenceIndex").asInt())
++                .path("inputId").asText());
++      } else {
++        operation.put("predicate", "visible").putNull("expected");
++      }
++    }
++    return result;
+   }
+ 
+   private String p3Cookie;
+@@ -11283,6 +11592,9 @@
+             .put("schemaVersion", 3)
+             .put("kind", kind)
+             .put("requestId", request.path("requestId").asText());
++    if (p14Recipe != P14Recipe.NONE) {
++      return p14Model(result, context, kind);
++    }
+     if (p3Mode != null) {
+       return p3Model(result, context, kind);
+     }

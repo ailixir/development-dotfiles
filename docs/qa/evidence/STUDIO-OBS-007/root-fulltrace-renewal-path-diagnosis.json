@@ -1,0 +1,50 @@
+{
+  "scope": "READONLY_FULLTRACE_RENEWAL_PATH_DIAGNOSIS",
+  "sourceBindings": {
+    "studio-runner/src/guided/ownership.ts": "030443d7478791e2f980763a4e30a4b2daba922836d0c5ac9650e141995b31c4",
+    "studio-runner/src/guided/transport.ts": "fc447a2efdf666c9b4ed319685e1d59875787fa11ec3a3e070171ae5da5ae3bf",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "0a26aeec0574fae1256ff15057fdb3c268de7a2f26b8977296b5e31c25d42ddd",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "a8fec6d16dea5567caab96e7bd565fac9ada9ed501951a58eda52f77e615e377",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java": "c058bfc2a9b43ddc933db1296be8a9af0211cf82b2fbe0aefb0fc0efa8bbf0f7"
+  },
+  "archivedActualFacts": {
+    "gate": "resume-current-fulltrace-first-ninth-current",
+    "testCounts": {
+      "pass": 1,
+      "fail": 1,
+      "errors": 0,
+      "skips": 0
+    },
+    "initialClaimHandlerMs": 146.577917,
+    "renewalClaimHandlerMs": 1154.279125,
+    "lifecycleStatus": 202,
+    "lifecycleReason": "LEASE_LOST",
+    "initialGrantRemainingMs": 29880,
+    "renewalClientCompletion": "UNOBSERVED"
+  },
+  "sourcePath": [
+    "Ownership.requestClaim72-85 retains 1000ms secret request timeout, AbortController race and post-reply live/grant validation; initial nonsecret acquire can use10000ms",
+    "Transport.controllerRequest119-150 timeout spans token read/new TLS connection/full response parse, agentfalse and original controller certificate checks",
+    "Backend.claim742-797 validates role/identity/revocation, holds session FOR UPDATE, current policy/manifest entitlement and source snapshot lock, assignment/duplicate/version/fence/live lease guards, full schema and atomic renewal/command commit",
+    "Server test filter records chain duration before recordClaim; includes downstream filter/controller/serialization/transaction contention rather than exclusive claim body cost",
+    "Any renewal error except authenticated REVOKED follows original stopEntry LEASE_LOST; this lifecycle reason alone is not a timed network causality trace"
+  ],
+  "conclusion": "Observed renewal handler duration exceeds original secret1000ms request budget. Source is consistent with honest stop after request timeout; actual client abort/completion and exclusive cost are unretained, so no individual schema/JDBC/source-lock/logger/TLS/CPU component is proved responsible.",
+  "nonConclusions": [
+    "Server202 alone does not prove client received/validated renewed authority",
+    "Handler1154ms alone does not prove response tail or client request start alignment",
+    "Initial30s live lease does not justify extending original1s request deadline",
+    "No evidence justifies another speculative product optimization or guard removal"
+  ],
+  "nextMinimum": "Use already-existing optional bounded C5ClaimSampler/fixed stage counts and any retained claim-server/client numeric receipts to discriminate cost before product edits; no new profiler/logger/probes. If those artifacts are absent, explicitly record unavailable attribution and request exact bounded proposal before adding instrumentation.",
+  "actions": {
+    "sourceEdits": 0,
+    "runtime": 0,
+    "builds": 0,
+    "tests": 0,
+    "newInfrastructure": 0
+  },
+  "wholeAcceptanceClaim": false,
+  "budgetUsdCeiling": 500,
+  "billing": "UNMEASURED"
+}

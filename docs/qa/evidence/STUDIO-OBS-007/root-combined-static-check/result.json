@@ -1,0 +1,14 @@
+{
+  "scope": "strictJava support only, not fullbackendcheck/19AC/QA",
+  "command": [
+    "./gradlew",
+    "spotlessCheck",
+    "checkstyleMain",
+    "checkstyleTest",
+    "spotbugsMain",
+    "--continue"
+  ],
+  "exitCode": 0,
+  "sourceDrift": [],
+  "finishedAt": "2026-10-10T17:02:58.230437+00:00"
+}

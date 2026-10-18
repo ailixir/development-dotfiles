@@ -1,0 +1,39 @@
+{
+  "classification": "BOUNDED_INDEPENDENT_READ_ONLY_DESIGN_READY_WITH_REQUIRED_CORRECTIONS",
+  "reviewer": "Quinn / aiox-qa",
+  "planManifestSha256": "1513ffb50fd708b4963c7189044446aa6d73bf43d5c4bbc9cf4f4fd72396426c",
+  "payloads": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/core05-budget-design01/qa-design/review.md",
+      "sha256": "482a8f7e7ef781fbe53f812b0c78e50daf73fec24200a581856aa9e87bc44723",
+      "bytes": 14830
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/core05-budget-design01/qa-design/checks.json",
+      "sha256": "99145a0f20c31377e97c880b7e0668f622f48d41cb29e7986918e94e9894cd54",
+      "bytes": 19594
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/core05-budget-design01/qa-design/source-inventory.json",
+      "sha256": "af84fc2482684461c33528f491d99dddc43ddd84fe1a354fb64f8604c06b2c5d",
+      "bytes": 6485
+    }
+  ],
+  "inputCount": 24,
+  "namedInputsStableAtWrite": true,
+  "globalStabilityClaim": false,
+  "checkCount": 16,
+  "requiredDesignCorrections": [
+    "D06 guard tally overwritten between JVMs/failure-safe export",
+    "D07 low audit lacks real canary registration; full nonvacuous lifecycle scan",
+    "D09 parameterized budget export basename collision",
+    "D16 original Order39 audit precedes unordered default subjects; complete final scan in both lanes"
+  ],
+  "sourceWrites": false,
+  "runtimeCommandsExecuted": false,
+  "sourceRelease": false,
+  "formalStoryQaVerdict": null,
+  "lifecycleChange": false,
+  "row85": "original OPEN/pending/unamended",
+  "goal": "all original015 obligations and independent closure before008 unchanged"
+}

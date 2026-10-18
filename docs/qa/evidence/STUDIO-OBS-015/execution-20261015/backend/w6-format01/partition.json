@@ -1,0 +1,110 @@
+{
+ "method": "ReplayIT alone; remaining files LPT-greedy bin-packed by effortUnits (NeedBraces 1, LineLength 1.5, Indentation/WhitespaceAround 3, other 2) into 4 groups; groups are file-disjoint",
+ "notes": [
+  "Indentation and WhitespaceAround sites are gjf/checkstyle conflicts: restructure (helper method / named no-op), bytecode may change; owners must list them.",
+  "Run spotlessApply then spotlessCheck after the last fixer finishes; fixers should use the same CLI (scratchpad script is not in the repo) or fmt_fast_check on scratch copies for iteration."
+ ],
+ "groups": [
+  {
+   "group": "G1-replayit",
+   "effortUnits": 338.0,
+   "violations": 276,
+   "byRule": {
+    "Indentation": 10,
+    "LineLength": 60,
+    "NeedBraces": 200,
+    "WhitespaceAround": 6
+   },
+   "files": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java"
+   ]
+  },
+  {
+   "group": "G2",
+   "effortUnits": 201.0,
+   "violations": 118,
+   "byRule": {
+    "Indentation": 36,
+    "NeedBraces": 72,
+    "WhitespaceAround": 4,
+    "LineLength": 6
+   },
+   "files": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/IncrementalIdentityTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalBoundaryFixture.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedBootstrapPlanHistoryIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java"
+   ]
+  },
+  {
+   "group": "G3",
+   "effortUnits": 201.0,
+   "violations": 160,
+   "byRule": {
+    "LineLength": 74,
+    "NeedBraces": 84,
+    "WhitespaceAround": 2
+   },
+   "files": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/IncrementalHashTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedAcceptedPlanTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/support/ObservedPublicationFixture.java"
+   ]
+  },
+  {
+   "group": "G4",
+   "effortUnits": 200.0,
+   "violations": 172,
+   "byRule": {
+    "LineLength": 56,
+    "NeedBraces": 116
+   },
+   "files": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+    "backend/src/test/java/com/citi/put/checks/studio/StudioAuthorizationIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalMaterializationEvidenceTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationMigrationTest.java"
+   ]
+  },
+  {
+   "group": "G5",
+   "effortUnits": 200.0,
+   "violations": 148,
+   "byRule": {
+    "LineLength": 52,
+    "NeedBraces": 83,
+    "Indentation": 11,
+    "WhitespaceAround": 2
+   },
+   "files": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedBasisValidator.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedEffectiveGraph.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceSnapshotRepository.java",
+    "backend/src/test/java/com/citi/put/checks/studio/StudioApiIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+    "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java"
+   ]
+  }
+ ]
+}

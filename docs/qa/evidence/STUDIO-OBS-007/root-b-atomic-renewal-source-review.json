@@ -1,0 +1,30 @@
+{
+  "verdict": "APPROVED_SOURCE_FOR_SCOPED_VERIFICATION",
+  "candidateSha256": "8cbc64346b012b28d6e1436f1f7ce23d08c2c6fb96f69bff54799db3cae2d508",
+  "sourceBindings": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+      "beforeSha256": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d",
+      "afterSha256": "5827f9678e111a834fca762bb1338d2f0bcdca58674d8da2c080755b65c63430"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "beforeSha256": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+      "afterSha256": "48ce3c73f12b76f89075b04a10abb8febab8ac540d1f3073f1ce8a6a21d4dc6e"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "beforeSha256": "7c18cd04d8ff5765fd05a00bb274b3702a6ff04175c34c3ab34d1d2664590408",
+      "afterSha256": "dbe5c60ec5abf7d4e7260e2eb814a9b9471e8c108ecbca716b7e6af1154cc0e5"
+    }
+  ],
+  "findings": [
+    "Only same-live branch calls narrow writer; original service guards and deepCopy retained",
+    "Full contracts.validate precedes single serialization/CTE; actual transaction guard and count1 fail closed",
+    "Progress not rewritten; updated document feeds original command snapshot; natural conflict atomic rollback retained",
+    "Four defining tests use actual existing PostgreSQL fixture and verify snapshot/copy/progress, unique conflict rollback, outer rollback and schema/missing-row refusal"
+  ],
+  "checks": "UNRUN coordinator-owned",
+  "performance": "UNVERIFIED; retain original TRACE and 1000ms budgets",
+  "storyCompletion": false
+}

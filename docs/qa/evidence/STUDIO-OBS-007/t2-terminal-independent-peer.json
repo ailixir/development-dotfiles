@@ -1,0 +1,678 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "reportKind": "Fresh independent Dara manual persistence/caller technical peer review for develop support",
+  "reviewer": {
+    "role": "Independent SQL/caller reviewer",
+    "authoredReviewedImplementation": false,
+    "subagentsSpawned": false
+  },
+  "capturedAt": "2026-10-10T11:26:48.401398+00:00",
+  "verdict": "FAIL",
+  "verdictScope": "Two concrete current persistence commit-invariant counterexamples in frozen source. PostgreSQL runtime reproduction remains UNEXECUTED; this is a manual scoped source review, not a failed 186-case root gate, lifecycle QA, whole-19AC verdict or implementation approval.",
+  "summary": "The postformatter root gate is independently source-bound and genuinely green at 186/0/0/0 with every 143 baseline instance and original 41 D case names retained. Original DB01-04 are addressed. The deferred receipt invariant can be evaluated early and bypassed by later history writes, and future leaf publication precedes its leaf-only guards. Both need bounded root PostgreSQL probes/remediation; real Core/crash/browser/image/physical Vault oracles remain separate.",
+  "guidance": {
+    "skill": ".codex/skills/aiox-data-engineer/SKILL.md",
+    "sot": ".aiox-core/development/agents/data-engineer.md",
+    "task": ".aiox-core/development/tasks/security-audit.md",
+    "parameters": {
+      "scope": "schema",
+      "mode": "yolo"
+    },
+    "activationCompletedAndContinued": true,
+    "adaptation": "User supplied exact bounded schema/caller scope and continuation. Manual security-audit source inspection only; no generic checklist failure, no RLS/updated_at architecture substitution, no scanner/CodeRabbit/dependency/broad runner gates. Root sole Gradle. No permission/lifecycle operation inferred."
+  },
+  "authority": {
+    "t0Rulings": "RULING-1 through RULING-6 reread; current baseline and preservation remain mandatory",
+    "canonical": [
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "docs/specs/studio-observed-authoring/secret-login-design.md",
+      "docs/architecture/studio-execution.md",
+      "docs/architecture/ADR-SC-005-single-path-observed-authoring.md"
+    ],
+    "firstPax": {
+      "report": "docs/qa/evidence/STUDIO-OBS-007/t2-t3-po-architecture-revalidation.json",
+      "sha256": "9c6ff6de3e2f6ff9f0925a2efc9b84b91880ef4c144b013e634c7bc2f71ea2b5",
+      "exactOperationsReconstructed": 18,
+      "receiptFilesReproduced": true
+    },
+    "laterPax": {
+      "report": "docs/qa/evidence/STUDIO-OBS-007/t2-t3-po-bootstrap-closure-revalidation.json",
+      "sha256": "9b0229944a487677f04a6ac0c135ad78ea9289c3829add3dcce27640f845b68f",
+      "exactOperationsReconstructed": 12,
+      "currentExactScopedLinesVerified": 9,
+      "wireAndConstsUnchangedByLaterAmendments": true
+    },
+    "all19AC": [
+      {
+        "ac": 1,
+        "canonicalLineSha256": "9e6b87f0e71e6549b923687902e1e79b819e0238a5b3371475bd8d38a0fbeaa4",
+        "reread": true,
+        "peerDisposition": "Reread for authority; implementation/whole-AC verdict outside this review"
+      },
+      {
+        "ac": 2,
+        "canonicalLineSha256": "212ae40871e68711d591e4e460bbd4b367f14fb2b47c848fb227f527dbe77fcd",
+        "reread": true,
+        "peerDisposition": "Scoped persistence/caller findings and coverage only"
+      },
+      {
+        "ac": 3,
+        "canonicalLineSha256": "d99b9043f7f8cb5ede9064ca34fa0c7d669cfdc182b3c57b09523376075b429c",
+        "reread": true,
+        "peerDisposition": "Reread for authority; implementation/whole-AC verdict outside this review"
+      },
+      {
+        "ac": 4,
+        "canonicalLineSha256": "48f0aa64057079800fccac13208db0ade0946a98c4a1ecd1fa893017bac1a438",
+        "reread": true,
+        "peerDisposition": "Reread for authority; implementation/whole-AC verdict outside this review"
+      },
+      {
+        "ac": 5,
+        "canonicalLineSha256": "b9503972dfd2f31edd0ee2d1e103058c797d0c9df85f02ce23ee50c893a833d8",
+        "reread": true,
+        "peerDisposition": "Reread for authority; implementation/whole-AC verdict outside this review"
+      },
+      {
+        "ac": 6,
+        "canonicalLineSha256": "2564a16f32d536095396afa8e8b1747ab3df23755711c49c015b14cb575f0ee4",
+        "reread": true,
+        "peerDisposition": "Scoped persistence/caller findings and coverage only"
+      },
+      {
+        "ac": 7,
+        "canonicalLineSha256": "524b19eed3d208022c84205fbc833245cc3daa18ae4a7447363b8913a1295023",
+        "reread": true,
+        "peerDisposition": "Scoped persistence/caller findings and coverage only"
+      },
+      {
+        "ac": 8,
+        "canonicalLineSha256": "150707666ac4a12b94db63db693db408949b891d99ced328295b1392c1dc48c8",
+        "reread": true,
+        "peerDisposition": "Reread for authority; implementation/whole-AC verdict outside this review"
+      },
+      {
+        "ac": 9,
+        "canonicalLineSha256": "fb34dd4c2c89ac64e1cfec7168728452bb25ac57db529f076ce6aba40fe6b074",
+        "reread": true,
+        "peerDisposition": "Reread for authority; implementation/whole-AC verdict outside this review"
+      },
+      {
+        "ac": 10,
+        "canonicalLineSha256": "84c0e256baa83e135d79051dc16c0b62c85e9fa7d89f6b4bd4431beaec642e4c",
+        "reread": true,
+        "peerDisposition": "Reread for authority; implementation/whole-AC verdict outside this review"
+      },
+      {
+        "ac": 11,
+        "canonicalLineSha256": "d5820632582ab15d959508c310b0a61be2f8a90ce72e4ef10f49cacf56b3bd59",
+        "reread": true,
+        "peerDisposition": "Reread for authority; implementation/whole-AC verdict outside this review"
+      },
+      {
+        "ac": 12,
+        "canonicalLineSha256": "f2ac9d45388b96dbae6dc28871128730967cd00db2ab4616c5096203ad4c68c2",
+        "reread": true,
+        "peerDisposition": "Reread for authority; implementation/whole-AC verdict outside this review"
+      },
+      {
+        "ac": 13,
+        "canonicalLineSha256": "acaf3690a070c0b07706fdc2bedd19890e9cc88491006ee34e758831deba3c74",
+        "reread": true,
+        "peerDisposition": "Scoped persistence/caller findings and coverage only"
+      },
+      {
+        "ac": 14,
+        "canonicalLineSha256": "1834d86c88faa2a4b454da39d82011d09c50a09e3bc66fbff4e5ae1033088440",
+        "reread": true,
+        "peerDisposition": "Scoped persistence/caller findings and coverage only"
+      },
+      {
+        "ac": 15,
+        "canonicalLineSha256": "9c38827940511ec9184ba744e3bd0fe005c82305a98be9df106cecc12052d170",
+        "reread": true,
+        "peerDisposition": "Scoped persistence/caller findings and coverage only"
+      },
+      {
+        "ac": 16,
+        "canonicalLineSha256": "c5972424c1070ac2690faa9765399d031e9ec06a6c57e77de3d933e34fff75ba",
+        "reread": true,
+        "peerDisposition": "Reread for authority; implementation/whole-AC verdict outside this review"
+      },
+      {
+        "ac": 17,
+        "canonicalLineSha256": "c9eb0d1972a21840cc54db73d3eb586c2a9b9546b2ce084db7ccccb6257aa223",
+        "reread": true,
+        "peerDisposition": "Reread for authority; implementation/whole-AC verdict outside this review"
+      },
+      {
+        "ac": 18,
+        "canonicalLineSha256": "2092ca104239c9599254402acecdd02a9248729fabebc49ad1b113cd3eb5fe36",
+        "reread": true,
+        "peerDisposition": "Reread for authority; implementation/whole-AC verdict outside this review"
+      },
+      {
+        "ac": 19,
+        "canonicalLineSha256": "a6a36f2e08b0e5602c215fabeb20cb3afed60c601d547e46d9e7758695abe729",
+        "reread": true,
+        "peerDisposition": "Scoped persistence/caller findings and coverage only"
+      }
+    ],
+    "securityConditions": [
+      {
+        "condition": 1,
+        "sourceLineSha256": "9e7193c9f7008ef91c5f399df8087510d5efd0978a964fd635a6685882eb25be",
+        "reread": true,
+        "status": "NEEDS_EVIDENCE",
+        "scope": "Scoped audit rows/usage linkage reviewed where relevant; complete security-condition oracle not awarded. Conditions 10/11 are retained deployment/external gates."
+      },
+      {
+        "condition": 2,
+        "sourceLineSha256": "566fcd5e68d43282a251064333588c54db41727e9bb358cb1283f3cbb00e7abd",
+        "reread": true,
+        "status": "NEEDS_EVIDENCE",
+        "scope": "Scoped audit rows/usage linkage reviewed where relevant; complete security-condition oracle not awarded. Conditions 10/11 are retained deployment/external gates."
+      },
+      {
+        "condition": 3,
+        "sourceLineSha256": "8e6c6abaeb5b31acf7f7678871ed61b4cbc2415f9c6416fec302a12101370ded",
+        "reread": true,
+        "status": "NEEDS_EVIDENCE",
+        "scope": "Scoped audit rows/usage linkage reviewed where relevant; complete security-condition oracle not awarded. Conditions 10/11 are retained deployment/external gates."
+      },
+      {
+        "condition": 4,
+        "sourceLineSha256": "c4411b9aed36ec3eada09792db4c408f1cd25f5460150451f083765a9dc4ff7d",
+        "reread": true,
+        "status": "NEEDS_EVIDENCE",
+        "scope": "Scoped audit rows/usage linkage reviewed where relevant; complete security-condition oracle not awarded. Conditions 10/11 are retained deployment/external gates."
+      },
+      {
+        "condition": 5,
+        "sourceLineSha256": "23328b45d7afeb48965a527d27a878e075e48e8b3f8307d2e1c7cf6a75bd35e8",
+        "reread": true,
+        "status": "NEEDS_EVIDENCE",
+        "scope": "Scoped audit rows/usage linkage reviewed where relevant; complete security-condition oracle not awarded. Conditions 10/11 are retained deployment/external gates."
+      },
+      {
+        "condition": 6,
+        "sourceLineSha256": "8c193809e383c7ac4de861f5133f62474142ab9339de4573e8b11be009ad4013",
+        "reread": true,
+        "status": "NEEDS_EVIDENCE",
+        "scope": "Scoped audit rows/usage linkage reviewed where relevant; complete security-condition oracle not awarded. Conditions 10/11 are retained deployment/external gates."
+      },
+      {
+        "condition": 7,
+        "sourceLineSha256": "5461d3651cc723a00cb26f34b5d7690f2e336bd3321b6745c7ba8c7e826ce386",
+        "reread": true,
+        "status": "NEEDS_EVIDENCE",
+        "scope": "Scoped audit rows/usage linkage reviewed where relevant; complete security-condition oracle not awarded. Conditions 10/11 are retained deployment/external gates."
+      },
+      {
+        "condition": 8,
+        "sourceLineSha256": "8652bc7ec586749933fb627ed36cf0ed84e97c30586844a8bfd148072b520d87",
+        "reread": true,
+        "status": "NEEDS_EVIDENCE",
+        "scope": "Scoped audit rows/usage linkage reviewed where relevant; complete security-condition oracle not awarded. Conditions 10/11 are retained deployment/external gates."
+      },
+      {
+        "condition": 9,
+        "sourceLineSha256": "7cdfd1c8c0bbfbda9d8b534029bef3d2241df361dc0178bdebf10a5470a8a47e",
+        "reread": true,
+        "status": "NEEDS_EVIDENCE",
+        "scope": "Scoped audit rows/usage linkage reviewed where relevant; complete security-condition oracle not awarded. Conditions 10/11 are retained deployment/external gates."
+      },
+      {
+        "condition": 10,
+        "sourceLineSha256": "df9aaa17a1175efcd8c4371d4cb4f65739020ef00c2f49837c12ff7389ad12ec",
+        "reread": true,
+        "status": "NEEDS_EVIDENCE",
+        "scope": "Scoped audit rows/usage linkage reviewed where relevant; complete security-condition oracle not awarded. Conditions 10/11 are retained deployment/external gates."
+      },
+      {
+        "condition": 11,
+        "sourceLineSha256": "0bb75a725c202d4c9e4392ed85c14161860532b4f8e936d5952d4330a6e1e53d",
+        "reread": true,
+        "status": "NEEDS_EVIDENCE",
+        "scope": "Scoped audit rows/usage linkage reviewed where relevant; complete security-condition oracle not awarded. Conditions 10/11 are retained deployment/external gates."
+      }
+    ],
+    "R1Tightenings": [
+      "R1-1 element identity continuity",
+      "R1-2 form-action/whole-origin trust",
+      "R1-3 single visibility/candidate function"
+    ],
+    "canonicalWeakening": false
+  },
+  "sourceBinding": {
+    "manifest": "docs/qa/evidence/STUDIO-OBS-007/t2-terminal-independent-peer-source-hashes.json",
+    "manifestSha256": "81747ddcbf81c4ffced172914d518774792032e5d6d97272908f425b4c2f400c",
+    "gate": "docs/qa/evidence/STUDIO-OBS-007/root-terminal-gate-4",
+    "postformatterAuthority": true,
+    "sourceCount": 933,
+    "allCurrentAndArchiveHashesMatch": true,
+    "manuallyReviewedSources": [
+      "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionBootstrap.java",
+      "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionHealthIndicator.java",
+      "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java",
+      "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionScheduler.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioReferenceResolver.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/recovery/PendingReaper.java",
+      "backend/src/main/java/com/citi/put/checks/studio/secrets/ObservedProgressSecretEvidence.java",
+      "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+      "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+      "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+      "backend/src/main/resources/db/migration/V26__studio_scheduling.sql",
+      "backend/src/main/resources/db/migration/V28__studio_execution_scope_immutable.sql",
+      "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql",
+      "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatcherIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/ObservedTerminalSettlementIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedReadEntryProtocolIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SecretAuditLifecycleIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/recovery/RecoveryIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/secrets/ObservedProgressSecretEvidenceTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/secrets/VaultResolutionDecisionTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/secrets/VaultStreamingReadTest.java"
+    ],
+    "runnerSourceAndDistExcluded": true
+  },
+  "rootGateReaudit": {
+    "invocationPath": "docs/qa/evidence/STUDIO-OBS-007/root-terminal-gate-4/invocation.json",
+    "invocationClassSelectors": [
+      "com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest",
+      "com.citi.put.checks.studio.secrets.VaultResolutionDecisionTest",
+      "com.citi.put.checks.studio.dispatch.StudioDispatcherFailureIT",
+      "com.citi.put.checks.studio.guided.publication.SecretAuditLifecycleIT",
+      "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "com.citi.put.checks.studio.dispatch.DispatcherIT",
+      "com.citi.put.checks.studio.secrets.VaultStreamingReadTest",
+      "com.citi.put.checks.studio.recovery.RecoveryIT",
+      "com.citi.put.checks.studio.guided.publication.ObservedReadEntryProtocolIT",
+      "com.citi.put.checks.studio.dispatch.ObservedTerminalSettlementIT"
+    ],
+    "rootExitCode": 0,
+    "totalsIndependentlyParsedFromFreshXml": {
+      "tests": 186,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "peerRanGradle": false,
+    "casePreservation": {
+      "baselineInstances": 143,
+      "currentInstances": 186,
+      "lostInstances": [],
+      "addedInstances": 43,
+      "DOriginalInstances": 41,
+      "DCurrentInstances": 53
+    },
+    "composition": "143 baseline +31 B (20 terminal,11 read-entry) +12 D (9 audit,3 migration) =186",
+    "priorRedGateHistoryRetained": [
+      "root-terminal-gate-2:186/2 diagnostic/role failures",
+      "root-terminal-gate-3:186/1 exact DETACH role-message assertion"
+    ],
+    "correctionAssessment": "Exact causal PostgreSQL refusal assertions preserved: nested top-XID/savepoint refusal, synthetic actor lineage SELECT only, real direct-leaf UPDATE/DELETE P0001 and unchanged safeRow, DETACH 42501 exact owner message. Candidate/preformatter reports do not replace gate4 ZIP/current authority."
+  },
+  "preservation": {
+    "priorPeer": "docs/qa/evidence/STUDIO-OBS-007/t2-data-independent-peer.json",
+    "priorPeerVerdict": "FAIL",
+    "priorPeerSha256": "49621636e986bbf47c3201bb6ba7ea1fe96fb9d0de5a2d71679181f7d1dba826",
+    "all33HistoricalMigrationHashesRecomputedIdentical": true,
+    "baseline143InstancesAllPreserved": true,
+    "originalD41NamesPreservedCurrentD53": true,
+    "all19ACRetained": true,
+    "storyStatus": "InProgress",
+    "phase": "develop",
+    "qaLifecycleTasksCanonicalSourcePinsUnchangedByPeer": true
+  },
+  "findings": [
+    {
+      "id": "TERM-PEER-01",
+      "status": "FAIL",
+      "severity": "HIGH",
+      "title": "Caller can flush the terminal constraint trigger, then change the authoritative history before commit",
+      "evidenceLevel": "Concrete source/SQL-semantics counterexample; independent disposable PostgreSQL probe UNEXECUTED. Not a claimed failing root test.",
+      "paths": [
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 243,
+          "role": "One-shot terminal receipt commit guard reads actual history here"
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 684,
+          "role": "Constraint event is receipt INSERT only and is caller-deferrable"
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V28__studio_execution_scope_immutable.sql",
+          "line": 19,
+          "role": "History guard protects scope, not error_code/ended_at/snapshot_revision"
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql",
+          "line": 412,
+          "role": "Observed history guard protects binding/receipt; same binding with changed terminal history is allowed"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+          "line": 85,
+          "role": "REQUIRED deliberately joins external caller transaction"
+        }
+      ],
+      "canonicalRequirement": "Current AC-14/design 4.1 and approved terminal-family Pax mapping require the exact actual winning terminal code/time/history snapshot at physical commit, independently of planned proposals and caller labels.",
+      "preconditions": [
+        "Authentic publishedRetry fixture with remaining declared secret, QUEUED/PENDING accepted history and no admission",
+        "Outer caller transaction invokes the real public closeWithError; no savepoint, no trigger disable, no receipt rewrite or owner impersonation"
+      ],
+      "reproduction": [
+        "BEGIN outer transaction through fixture TransactionTemplate; call real closeWithError(id, DISPATCH_FAILED, now), require applied=1",
+        "SET CONSTRAINTS ALL IMMEDIATE: existing deferred receipt event validates the consistent terminal ledger/history/summary and is consumed",
+        "UPDATE ui_test_executions SET error_code=DISPATCH_UNKNOWN, ended_at=ended_at + interval 1 second, snapshot_revision=snapshot_revision+1 WHERE id=<fixture id>",
+        "COMMIT; compare immutable receipt/ledger code and time and receipt.before_snapshot_revision+1 to history"
+      ],
+      "reason": "The subsequent history UPDATE fires no terminal receipt INSERT event. Existing history triggers permit these three columns with unchanged binding/locator/scope. The DONE ledger code/time remains immutable, so the later history diverges from both ledger and receipt. PostgreSQL SET CONSTRAINTS explicitly forces pending constraint triggers early; their check is not automatically repeated at COMMIT without a new triggering event.",
+      "expectedOracle": "Reject the history mutation or roll back commit; require no committed receipt/audit/history/ledger inconsistency. Current source predicts a committed mismatch.",
+      "rootTargetedProbe": "Use the bounded standalone TerminalConstraintProbe source reproduced below with an own disposable publishedRetry fixture; no Gradle/shared results needed. Run only via root authorized database access. Record exact SQLSTATE/cause or committed mismatch count.",
+      "recommendation": "Make the authoritative invariant survive early constraint evaluation and all subsequent history mutations, or explicitly prohibit that caller path with database enforcement. Preserve exact terminal/top-XID/savepoint requirements; do not relax them."
+    },
+    {
+      "id": "TERM-PEER-02",
+      "status": "FAIL",
+      "severity": "HIGH",
+      "title": "Future evidence partition is committed before its leaf constraint/TRUNCATE guards are installed",
+      "evidenceLevel": "Concrete two-statement visibility counterexample in current source; two-connection disposable PostgreSQL race UNEXECUTED. Existing green test inspects only completed installation.",
+      "paths": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java",
+          "line": 177,
+          "role": "DO creation statement completes separately from guard installation"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java",
+          "line": 196,
+          "role": "Second JdbcTemplate statement installs leaf-only guards"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionBootstrap.java",
+          "line": 59,
+          "role": "No surrounding transaction on production ensureAll"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionScheduler.java",
+          "line": 43,
+          "role": "Daily creator invokes the same unwrapped path"
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 680,
+          "role": "No-send deferred guard is created only by installer"
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+          "line": 684,
+          "role": "Terminal deferred guard is created only by installer"
+        }
+      ],
+      "canonicalRequirement": "Current/future receipt leaves must enforce receipt+actual terminal winner+complete summaries, and direct-leaf append-only/TRUNCATE guarantees; parent-only checks or later completed setup are insufficient.",
+      "preconditions": [
+        "Production bootstrap/scheduler uses JdbcTemplate autocommit with no surrounding transaction",
+        "Own new month outside initial current+2 leaves; actor has the ordinary SELECT/INSERT parent permissions, no DDL or trigger-disable authority",
+        "Authentic pre-transition owner/binding/declaration remains available; occurred_at is finite but no guard restricts it to wall-clock month"
+      ],
+      "reproduction": [
+        "Connection A executes exactly ensurePartition creation DO for a new terminal-receipt month and commits, then pauses before installSecretEvidenceGuards",
+        "Connection B observes the attached leaf and missing tr_observed_terminal_commit in pg_trigger",
+        "B inserts an otherwise authentic raw terminal settlement through the parent, with occurred_at in that month, captured before-image/full exact classification, then COMMIT without changing owner/history or appending summaries",
+        "A resumes installer; inspect the earlier committed receipt against still QUEUED/PENDING owner/history and absent summaries"
+      ],
+      "reason": "Parent row INSERT guards are cloned, so they validate/capture pre-transition identity. The complete-winner constraint is a leaf trigger added only in the later statement; no event exists for B commit and a later CREATE TRIGGER does not validate prior rows. The advisory creation lock ends with the DO transaction and ordinary INSERT guards do not acquire that creation lock. A new receipt can therefore fence dispatch despite no terminal winner/usage settlement. A crash/failure between statements prolongs the same exposed state. Direct-leaf TRUNCATE guard is also absent until installation; ordinary append role still lacks TRUNCATE privilege.",
+      "expectedOracle": "At every visible attached-leaf state both constraint and direct-leaf guards exist; receipt-only commit must fail. Current source predicts visible unguarded interval and committed receipt-only cut.",
+      "rootTargetedProbe": "On an own disposable DB pause the production Java manager immediately after its first JDBC execute returns, without putting an outer test transaction around ensurePartition. Use second connection under actual least-writer role and an authentic receipt from the fixture. Capture pg_trigger before insertion and commit facts. This is not tested by checking after ensurePartition returns.",
+      "recommendation": "Publish attachment and all applicable leaf guards in one physical transaction, including already-existing leaf repair/failure semantics, while preserving no DEFAULT, append-only and prune behavior."
+    }
+  ],
+  "priorDefectReassessment": [
+    {
+      "id": "DB-PEER-01",
+      "originalVerdict": "FAIL",
+      "currentOriginalDefectAssessment": "PASS",
+      "scope": "Original concrete defect addressed in current frozen persistence/caller source and preserved root scoped tests; original report/history remains FAIL and unchanged; new findings are independent."
+    },
+    {
+      "id": "DB-PEER-02",
+      "originalVerdict": "FAIL",
+      "currentOriginalDefectAssessment": "PASS",
+      "scope": "Original concrete defect addressed in current frozen persistence/caller source and preserved root scoped tests; original report/history remains FAIL and unchanged; new findings are independent."
+    },
+    {
+      "id": "DB-PEER-03",
+      "originalVerdict": "FAIL",
+      "currentOriginalDefectAssessment": "PASS",
+      "scope": "Original concrete defect addressed in current frozen persistence/caller source and preserved root scoped tests; original report/history remains FAIL and unchanged; new findings are independent."
+    },
+    {
+      "id": "DB-PEER-04",
+      "originalVerdict": "FAIL",
+      "currentOriginalDefectAssessment": "PASS",
+      "scope": "Original concrete defect addressed in current frozen persistence/caller source and preserved root scoped tests; original report/history remains FAIL and unchanged; new findings are independent."
+    }
+  ],
+  "factualCoverage": [
+    {
+      "area": "Original DB01 declaring-reference identity/dedup",
+      "status": "PASS",
+      "basis": "Scoped source plus root real-PG tests",
+      "facts": "Authentic reference id, source step/name/manifest and owner scope replace caller ordinal for unreached identity; no invented ordinal/sequence/admission. Absence excludes consumed/decision/summary across retained fences. Cross-month clock cannot evade stable owner/reference identity. Same-step/same-name classifier is deduplicated; distinct actual references stay distinct.",
+      "cases": [
+        "authenticUnreachedReferenceHasNoInventedOrdinalSequenceOrPlan",
+        "unreachedDeclaringSummaryCannotRepeatWithCallerOrdinalSequenceOrClock",
+        "unreachedNotUsedHasNoFabricatedResolutionAndRejectsOtherNullableVariants"
+      ]
+    },
+    {
+      "area": "Original DB02 declaration/attempt/release and null shapes",
+      "status": "PASS",
+      "basis": "Scoped source plus root real-PG tests",
+      "facts": "Ordinary guided releases join actual consumed admission/manifest/authored materialization/fence; replay releases join accepted history/declaration/binding attempt. Nullable no-decision variants require no actual decision/summary contradiction; release_seq null, true accepted replay attempt nonnull, no synthetic version/outcome/admission/action identity. Linked RELEASE/USAGE retain actual locator/time/version/scope/sequence and closed six outcomes.",
+      "cases": [
+        "ordinaryGuidedReleaseRequiresConsumedDeclarationMaterializationAndFence",
+        "ordinaryReplayReleaseRequiresAcceptedDeclarationAndAuthenticAttempt",
+        "consumedNoDecisionRequiresAuthenticAdmissionAndKeepsNullResolutionHonest",
+        "terminalNoDecisionCannotAcquireContradictoryLateRelease"
+      ]
+    },
+    {
+      "area": "Original DB03 actual caller transaction",
+      "status": "PASS",
+      "basis": "Direct caller source plus root real-PG controlled-position tests; not blanket terminal guard approval",
+      "facts": "Ledger public terminal entrypoints use programmatic REQUIRED and participate in outer rollback. Dispatcher failures atomically append release/no-send facts with applied=1 close/requeue and loser facts zero. Direct/self-invoked paths do not depend on proxy annotations. Receipt/audit injected failures roll back all writes. Actual nested/savepoint row versions are refused with exact top-transaction SQL cause. New TERM-PEER-01 is separate.",
+      "cases": [
+        "terminalReceiptOwnerHistoryAndSummariesRollbackTogether",
+        "actualNestedSavepointCannotEstablishACommittableTerminalWinnerVersion",
+        "terminalReceiptRequiresExactActualWinnerCodeTimeAndPhysicalTransaction",
+        "noSendReceiptAuditAndClosureRollbackTogetherWithoutGrantingRetry"
+      ]
+    },
+    {
+      "area": "Original DB04 owner/advisory/event lock order",
+      "status": "PASS",
+      "basis": "Raw/recorder source and root real-PG races",
+      "facts": "Shared owner row precedes owner advisory and event id locks. Fresh VOLATILE separate SPI classification after waited owner lock sees committed writer; tests establish actual pg_stat_activity Lock wait.",
+      "cases": [
+        "rawAndRecorderWritersShareOwnerThenEventOrderWithoutDeadlock",
+        "waitedTerminalCutUsesFreshCommittedReadEntryInsteadOfStaleNoReadView",
+        "waitedForCommittedEntryWriterGetsFreshPossibleReadClassificationAtRealCancelCut"
+      ]
+    },
+    {
+      "area": "Read-entry before value and creator identity",
+      "status": "PASS",
+      "basis": "Frozen Java source and root real-PG counted local provider tests; provider is a controlled fake, not physical Vault/Core",
+      "facts": "Observed job checks no ambient/bound transaction before and after observer, independently reads committed exact history/binding/scope/attempt entry and entry creator==current lease owner before provider. Observer no-op/rollback/wrong scope/external uncommitted marker fail before value read. Tracked default resolver fails closed; missing observed runtime cannot fall through to legacy. Reclaimed same-attempt owner cannot borrow old creator marker for new value. Terminal classification may count authentic old marker only as possible history, never new read permission.",
+      "cases": [
+        "actualProviderObservesCommittedScopedEntryBeforeItsOnlyValueRead",
+        "externalCallerTransactionCannotReadThroughItsUncommittedMarker",
+        "noopObserverCannotSupplyAnUncommittedOrMissingEntry",
+        "unsupportedCustomResolverFailsClosedBeforeLegacyValueMethodOrMarker",
+        "missingObservedRuntimeCannotFallThroughToUntrackedLegacyValueResolver"
+      ]
+    },
+    {
+      "area": "Terminal winner/before-image/actual history proof",
+      "status": "FAIL",
+      "basis": "TERM-PEER-01/02; substantial normal-path root coverage retained",
+      "facts": "INSERT captures actual locked QUEUED/CLAIMED beforeimage; strict accepted locator/binding/declaration/classification; CLOSED-only family distinct from unchanged live-owned CLOSED/REQUEUED guard. Normal deferred check validates exact winner code/time/snapshot/top XID and all new summaries. Early trigger forcing and future installation interval leave the commit invariant open.",
+      "cases": [
+        "terminalRawBeforeImageScopeAndCompleteClassificationCannotBeForged",
+        "rawTerminalReceiptCannotCommitWithoutCompleteExactSummaries",
+        "terminalCrossMonthClockCannotEvadeActualAttemptReceiptIdentity"
+      ]
+    },
+    {
+      "area": "No transport/retry authority or bookkeeping side effect",
+      "status": "PASS",
+      "basis": "Scoped current callers and root controlled-position tests",
+      "facts": "Receipt fences later entry/release/admission; no additional provider read/send is added for settlement. Request-only DISPATCHING cancel and kill-switch wrong states append zero. Expired terminal claimant is not impersonated as current lease owner. No new requeue/refresh/deadline/grant/CAS authority: live no-send retry only actual Vault outage, definite refusal retains existing authority. Marker-before-call and read-before-decision both classify UNKNOWN possible history with separately counted 0/1 local reads.",
+      "cases": [
+        "terminalSettlementPreservesActualLinkedPositiveAndHasNoRetryAuthority",
+        "realNoSendOutageDecisionGrantsDifferentAuthorityAndCannotBeFabricated",
+        "realDispatchingCancelIsRequestOnlyAndKillSwitchCannotCloseIt"
+      ]
+    },
+    {
+      "area": "Early USED and later guided admissions",
+      "status": "PASS",
+      "basis": "Frozen backend recipe/PASS validation and root scoped tests; authenticated parent/browser join remains pending",
+      "facts": "PROGRESS positives join completed PASS frozen fill recipe and raw receipt order/timing/profile/build/current attempt/admission/sequence; append only in winning report CAS. Sparse/missing/unsupported positives cannot invent use. Existing USED is immutable during negative/unknown/final loss. Same-reference prior USED excludes false unreached declaration but later actual consumed admission receives its own honest actual-identity settlement. Guided runtime non-success stays UNKNOWN, never generic label ACK_LOST.",
+      "cases": [
+        "ObservedProgressSecretEvidenceTest",
+        "SecretAuditLifecycleIT",
+        "committedResolutionCannotBeRelabelledNoDecisionAndLateUnknownPreservesPositive"
+      ]
+    },
+    {
+      "area": "Least writer, partitions, expiry",
+      "status": "FAIL",
+      "basis": "TERM-PEER-02; completed-state denials and expiry coverage retained",
+      "facts": "Current installed parents/leaves deny UPDATE/DELETE/TRUNCATE; actual ordinary-role leaf row UPDATE/DELETE produces P0001 and unchanged safe row; DETACH refuses 42501 must be owner. Actor only received lineage SELECT for guard evaluation. No DEFAULT; initial current+2 leaves installed atomically in V34; Java bootstrap/scheduler/health/pruner families complete after return. Existing 12-month Q3 retention; summaries expire with linked release or terminal receipt; no self-FK prevents detach/drop, no orphans in tested prune. Future creation/install is not atomic.",
+      "cases": [
+        "ordinaryRuntimeWriterCanSettleButCannotAlterOrTruncateTerminalEvidence",
+        "leastWriterCanRecordUsageButCannotRewriteOrPrunePartitions",
+        "terminalReceiptAndUnlinkedSummaryExpireInTheSameRetentionMonth",
+        "actualJavaBootstrapHealthSchedulerAndPrunerManageAuditLifecycle",
+        "futureEvidencePartitionsKeepDeferredAndDirectTruncateGuards"
+      ]
+    },
+    {
+      "area": "ACK_LOST authenticity boundary",
+      "status": "NEEDS_EVIDENCE",
+      "basis": "Exact approved Pax F disposition retained; no inferred real acknowledgement loss",
+      "facts": "V34 accepts ACK_LOST from generic guided action outcomeCode label and recorder permits it. Current production SecretAuditLifecycle consistently maps every consumed non-success to UNKNOWN_OUTCOME, satisfying the approved alternative of restricting reachable runtime usage. The manually labelled positive DB fixture validates relation checks only. No physical acknowledgement-loss claim or SQL proof is awarded; any future ACK-emitting caller requires separately authentic backend/transport evidence.",
+      "paths": [
+        "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+        "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java"
+      ]
+    }
+  ],
+  "independentExecution": {
+    "sharedDbAccess": false,
+    "sharedGradleResultsTouched": false,
+    "sqlProbesExecuted": 0,
+    "attempts": [
+      {
+        "attempt": "Compile standalone Java probe in /tmp using read-only existing build/cache; invoke own PostgreSQLContainer fixture",
+        "status": "BLOCKED_BEFORE_SQL",
+        "reason": "Initial classpath conflict corrected; disposable Docker fixture unavailable from this sandbox. No container/database created; no SQL executed."
+      },
+      {
+        "attempt": "Bounded native initdb into own /tmp directory",
+        "status": "BLOCKED_BEFORE_SERVER_START",
+        "reason": "Operating-system shared-memory creation denied; no PostgreSQL server/database started. Own initdb data removed by initdb."
+      }
+    ],
+    "rawToolLogsRetainedInDeliverable": false,
+    "note": "Raw runtime logger environment/path output omitted. No environment/credential dump or shared database mutation performed. Root targeted probe request sent; no response/probe result available at report time.",
+    "terminalProbeSource": "package com.citi.put.checks.studio.guided.publication;\nimport com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;\nimport com.citi.put.checks.studio.secrets.SecretUseAuditRecorder;\nimport com.citi.put.checks.studio.secrets.SecretAuditLifecycle;\nimport java.time.Instant;\npublic final class TerminalConstraintProbe {\n public static void main(String[] args) throws Exception {\n  try (var f=GuidedSecretLoginMigrationTest.publishedRetry()) {\n   System.out.println(\"OWN_DISPOSABLE_FIXTURE_CREATED\");\n   var ledger=new StudioDispatchLedgerStatements(f.jdbc());\n   ledger.installSecretAudit(new SecretAuditLifecycle(f.jdbc(),new SecretUseAuditRecorder(f.jdbc())));\n   f.transaction().executeWithoutResult(t -> {\n    if(ledger.closeWithError(f.id(),\"DISPATCH_FAILED\",Instant.now())!=1)throw new AssertionError(\"No winner\");\n    f.jdbc().execute(\"SET CONSTRAINTS ALL IMMEDIATE\");\n    System.out.println(\"GUARD_VALIDATED_BEFORE_MUTATION\");\n    int changed=f.jdbc().update(\"UPDATE ui_test_executions SET error_code='DISPATCH_UNKNOWN',ended_at=ended_at+interval '1 second',snapshot_revision=snapshot_revision+1 WHERE id=?\",f.id());\n    System.out.println(\"POST_VALIDATION_HISTORY_MUTATION_ROWS=\"+changed);\n   });\n   System.out.println(\"COMMITTED_INCONSISTENCY=\"+f.jdbc().queryForObject(\"SELECT count(*) FROM studio_observed_terminal_secret_settlements s JOIN ui_test_executions e ON e.id=s.execution_id AND e.started_at=s.execution_accepted_at JOIN studio_dispatch_ledger l ON l.execution_id=e.id WHERE s.terminal_error_code<>e.error_code AND s.terminal_ended_at<>e.ended_at AND e.snapshot_revision<>s.before_snapshot_revision+1 AND l.terminal_error_code<>e.error_code\",Integer.class));\n  }\n  System.out.println(\"OWN_DISPOSABLE_FIXTURE_CLOSED\");\n }\n}\n"
+  },
+  "remainingOracles": [
+    {
+      "id": "ROOT-PROBE-EARLY-CONSTRAINT",
+      "status": "NEEDS_EVIDENCE",
+      "owner": "Root",
+      "requirement": "Execute TERM-PEER-01 exact real-caller outer-transaction PostgreSQL probe; capture rejection or committed mismatch."
+    },
+    {
+      "id": "ROOT-PROBE-ATOMIC-FUTURE-LEAF",
+      "status": "NEEDS_EVIDENCE",
+      "owner": "Root",
+      "requirement": "Execute TERM-PEER-02 two-connection autocommit production-manager interval probe; capture leaf trigger catalog and receipt-only commit outcome."
+    },
+    {
+      "id": "PHYSICAL-CORE-CRASH",
+      "status": "NEEDS_EVIDENCE",
+      "requirement": "Actual Core HTTP/PostgreSQL/compiled child/browser joins; controller process crashes before resolve and after physical read/pre-decision; child mid-fill kill/missing FINAL, races, counters and keystrokes. Controlled local fake providers and metadata are not physical Vault facts."
+    },
+    {
+      "id": "PARENT-MODEL-NONSECRET-PRIVACY-SINKS",
+      "status": "NEEDS_EVIDENCE",
+      "requirement": "Authenticated parent/child ready profile/build/admission facts, model/nonsecret behavior, complete privacy/allSink scans across normal/retry/error flows. This peer did not review evolving R source."
+    },
+    {
+      "id": "BROWSER-IMAGE-STARTUP-VIDEO",
+      "status": "NEEDS_EVIDENCE",
+      "requirement": "Actual fixed browser executable/image and effective preferences, scratch canary scans, startup native video removal and page guards, pinned decoded recorder <=500ms calibration. No virtual or metadata waiver."
+    },
+    {
+      "id": "REVOCATION-DEFAULT-WORKER",
+      "status": "NEEDS_EVIDENCE",
+      "requirement": "Worst-phase <=2s including queue/request plus one in-flight step; defaults, worker/!worker bean proof and public cancellation/revocation joins remain separate."
+    },
+    {
+      "id": "ACK-ACTUAL-LOSS",
+      "status": "NEEDS_EVIDENCE",
+      "requirement": "If an ACK-emitting production caller is introduced, actual independent backend/transport acknowledgement-loss evidence; current conservative UNKNOWN mapping retained."
+    }
+  ],
+  "primarySources": [
+    {
+      "title": "PostgreSQL 15 SET CONSTRAINTS",
+      "url": "https://www.postgresql.org/docs/15/sql-set-constraints.html",
+      "use": "Caller switch to IMMEDIATE retroactively executes outstanding constraint triggers, which then obey statement-end timing."
+    },
+    {
+      "title": "PostgreSQL 15 CREATE TRIGGER",
+      "url": "https://www.postgresql.org/docs/15/sql-createtrigger.html",
+      "use": "Constraint trigger event/time semantics; triggers act on their specified events and pending deferred firing can be forced by SET CONSTRAINTS."
+    }
+  ],
+  "handoff": {
+    "boundedReviewEnded": true,
+    "action": "Root receives scoped FAIL and two exact unexecuted disposable-PG probes; retain green gate/history and physical-oracle limits. No implementation or canonical change made by reviewer.",
+    "notLifecycleQA": true,
+    "notDone": true,
+    "notWhole19AcApproval": true,
+    "notImplementationApproval": true,
+    "wholeWaveBudgetUsd": 500,
+    "billingAvailable": false
+  },
+  "constraints": {
+    "noGoalsPhaseVerifyCommitPushDeployScheduleContact": true,
+    "noModelSpawn": true,
+    "noProductionSchemaOrTaskPinEdits": true,
+    "onlyWorkspaceDeliverables": [
+      "docs/qa/evidence/STUDIO-OBS-007/t2-terminal-independent-peer.json",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-terminal-independent-peer-source-hashes.json"
+    ]
+  }
+}

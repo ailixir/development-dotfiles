@@ -1,0 +1,2602 @@
+{
+  "artifact": "STUDIO-OBS-009 (local ACs) / 010 (Live surface) / 011 lane and wave plan, machine-readable companion of implementation-plan.md",
+  "author": "Aria (@architect)",
+  "createdAt": "2026-10-16",
+  "status": "PREP_ONLY_HELD_UNTIL_015_DONE_AND_008_DONE",
+  "repoRoot": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "companions": {
+    "plan": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/implementation-plan.md",
+    "questions": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-questions.md"
+  },
+  "commandConventions": {
+    "BK": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py <label> --test-tasks <tasks> --require-exec-tasks <tasks> -- --no-daemon <gradle args>",
+    "PN": "pnpm --config.package-manager-strict=false run",
+    "notes": [
+      "Collector output is hard-coded to docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution and refuses an existing label; use obs009-/obs011- labels or a root-made copy",
+      "Collector default permits zero skips; G9/011-G pass --allowed-skips-file authored by QA",
+      "Runner subset vitest runs need --coverage.enabled=false",
+      "GuidedPublicationReplayIT is class-scoped and order-dependent: full-class runs only, no single-test credit",
+      "Record lsof -nP -iTCP -sTCP:LISTEN before every backend run (AC-12 g)",
+      "Every command is PLANNED_NOT_RUN"
+    ]
+  },
+  "baselineObserved20261016": {
+    "story015": "InProgress (gate draft, attempt04 pending)",
+    "stories008to011": "Ready",
+    "openapiSha256Prefix": "c053a7f75656",
+    "flywayHead": "V21 (008 adds V22)",
+    "guidedSessionServiceSha256Prefix": "cfb55a54e206",
+    "disabledTotal": 24,
+    "deferredObs009": 18,
+    "runnerSpawningBackendITs": [
+      "GuidedBridgeIntegrationTest",
+      "GuidedBridgePlannedIT",
+      "GuidedPlanningIntegrationTest",
+      "GuidedPublicationReplayIT"
+    ],
+    "corunHarness": "StudioCoRunIT + 6 support classes deleted in working tree; tools/corun.sh:60 still references it",
+    "benchmarkHarness": "evaluation/lifecycle.mjs drives /compile and /confirm-compile, absent from OpenAPI (via Quinn)",
+    "runnerPackageManager": "npm@11.3.0 (hence --config.package-manager-strict=false)"
+  },
+  "gates": [
+    { "id": "G-015", "meaning": "015 attempt04 green, QA verdict, PO + root close" },
+    { "id": "G-008", "meaning": "008 QA Done (its own W0-W5)" },
+    { "id": "G-008-W1", "meaning": "008 L0 contract unit landed (pin lines released); relevant only under t0-questions A1 optional decision" },
+    { "id": "F-merge", "meaning": "root-serialized slot: single dist rebuild; D1+I+D3 land together; P2+B projectRuntime land together; ReplayIT baton I->S" },
+    { "id": "G9", "meaning": "009 local gate: serialized suites + independent QA local-validation record (t0-questions D2). With 010 T2 Live surface list, this is the 011 start condition" }
+  ],
+  "lanes": [
+    {
+      "id": "W0",
+      "story": "009",
+      "name": "Root re-baseline and run setup",
+      "agent": "root (@aiox-master)",
+      "waves": ["W0"],
+      "dependsOn": ["G-015", "G-008"],
+      "files": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/** (receipts, hash manifests)",
+        "QA-authored 7-entry approved-skips file for 009 final runs (written by @qa, not root)"
+      ],
+      "duties": [
+        "sha256 of every lane file; OpenAPI digest; Flyway head; grep ProcessBuilder users in backend tests to name runner-spawning classes for lane I",
+        "Docker, JDK 21, free memory check (host memory is short)",
+        "collector label prefix or 009 collector copy (output path only)",
+        "record t0-questions A1-A19 decisions"
+      ],
+      "collisions008": [],
+      "acs": { "local": [], "external": [] },
+      "verify": ["shasum -a 256 <lane files>", "ls backend/src/main/resources/db/migration | sort -V | tail -1"]
+    },
+    {
+      "id": "T0",
+      "story": "009",
+      "name": "Rulings, prerequisite register, corpus and budget drafts",
+      "agent": "@architect (rulings), @qa (corpus, budget), @po (register, PO notes), @devops (owners)",
+      "waves": ["W0"],
+      "dependsOn": [],
+      "canRunBeside008": true,
+      "files": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/** (existing drafts)",
+        "docs/qa/evidence/STUDIO-OBS-009/t0-rulings/** (new, @architect)",
+        "docs/qa/evidence/studio-observed-authoring/prerequisites.md (new)",
+        "docs/qa/evidence/studio-observed-authoring/budget-admission.json (new; draft until user + ED-01 owner fill R and prices)"
+      ],
+      "collisions008": [],
+      "acs": { "local": ["T0 records"], "external": ["U2-U11 owners named"] },
+      "verify": ["node -e \"JSON.parse(require('fs').readFileSync('docs/qa/evidence/studio-observed-authoring/budget-admission.json','utf8'))\""]
+    },
+    {
+      "id": "C9",
+      "story": "009",
+      "name": "009 contract unit (single contract writer)",
+      "agent": "@dev contract integrator",
+      "waves": ["W1", "W3 (AE-01 notes, only after S&C acknowledgement)"],
+      "dependsOn": ["G-008", "t0 A7", "t0 A10 (W3 slot)"],
+      "files": [
+        "docs/specs/studio/openapi.yaml (RuntimeVersions description + examples only)",
+        "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java (pin lines only)",
+        "studio-runner/test/run/confinement.test.ts (pin line only)",
+        "docs/architecture/ADR-002-internal-contract-surface.md (section 13 row)",
+        "docs/specs/studio-observed-authoring/consensus-plan.md (AE-01 dated note)",
+        "docs/specs/studio-observed-authoring/bridge-design.md (AE-01 dated note)",
+        "docs/specs/studio-observed-authoring/account-provider-readiness-design.md (AE-01 dated note)"
+      ],
+      "collisions008": ["openapi.yaml, StudioContractTest pin, confinement pin are 008 L0 files: start only after 008 Done"],
+      "acs": { "local": ["AC-1 c", "AC-7 AE-01 a (notes)"], "external": ["AE-01 S&C acknowledgement"] },
+      "verify": [
+        "node tools/check-studio-observed-contracts.cjs",
+        "node tools/build-studio-observed-schemas.cjs --check",
+        "cd studio-runner && PN test test/run/confinement.test.ts --coverage.enabled=false",
+        "BK obs009-c9-pins01 test -- test --tests 'com.citi.put.checks.studio.StudioContractTest'"
+      ],
+      "exit": "old/new OpenAPI digests quoted; 0 operations added; both pins re-anchored in one unit"
+    },
+    {
+      "id": "D1",
+      "story": "009",
+      "name": "One runner process, one TLS listener (runner)",
+      "agent": "@dev runner, @devops co-executes",
+      "waves": ["W1:D1.0 launch contract", "W2"],
+      "dependsOn": ["G-008 (or t0 A1 optional: G-015 + G-008-W1)", "t0 A2", "t0 A3", "P2.0 key names"],
+      "canRunBeside008": "only under t0 A1 optional decision; Vitest only, no dist rebuild",
+      "files": [
+        "studio-runner/src/main.ts",
+        "studio-runner/src/server/application.ts",
+        "studio-runner/src/server/server.ts",
+        "studio-runner/src/server/config.ts",
+        "studio-runner/src/server/identity.ts",
+        "studio-runner/src/server/routes.ts",
+        "studio-runner/src/probe.ts",
+        "studio-runner/src/guided/transport.ts",
+        "studio-runner/src/run/guidedMain.ts (delete)",
+        "studio-runner/package.json (start:guided script only; no dependency or lockfile change)",
+        "studio-runner/test/run/guidedMain.test.ts (port by name, then delete)",
+        "studio-runner/test/server/guidedMode.test.ts (new)",
+        "studio-runner/test/server/tlsListener.test.ts (new)",
+        "studio-runner/test/server/routes.test.ts",
+        "studio-runner/test/server/surface.test.ts",
+        "studio-runner/test/server/probe.test.ts",
+        "studio-runner/test/server/drain.test.ts",
+        "studio-runner/test/server/storage-lifecycle.test.ts (P2 key rename only)",
+        "studio-runner/test/server/observedReplayRoutes.test.ts (P2 key rename only)",
+        "studio-runner/test/server/resolved-value-guards.test.ts (P2 key rename only)",
+        "studio-runner/test/server/timeline.test.ts (P2 key rename only)",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/d1-launch-contract.md (D1.0)"
+      ],
+      "collisions008": ["none by file; studio-runner/dist is shared at runtime with 008 backend ITs: no rebuild in lane"],
+      "acs": { "local": ["AC-1 (fold, keys)", "AC-3 (runner TLS + client cert)", "AC-4 (STUDIO_RUNNER_VAULT_ADDRESS refusal)", "RUNNER-SCRATCH fold"], "external": ["AC-1 internal image/ED-05", "real Deployment"] },
+      "verify": [
+        "cd studio-runner && PN test test/server/guidedMode.test.ts test/server/tlsListener.test.ts test/server/routes.test.ts test/server/surface.test.ts test/server/probe.test.ts test/server/drain.test.ts --coverage.enabled=false",
+        "cd studio-runner && PN type-check",
+        "cd studio-runner && PN lint"
+      ],
+      "prohibited": ["plaintext listener mode", "second entrypoint or mode-selected process", "dist rebuild outside F-merge", "dependency/lockfile change"]
+    },
+    {
+      "id": "D2",
+      "story": "009",
+      "name": "Image, chart values, deployment tier",
+      "agent": "@devops with @dev",
+      "waves": ["W2"],
+      "dependsOn": ["D1.0", "t0 A6", "t0 A15"],
+      "canRunBeside008": "only under t0 A1 optional decision",
+      "files": [
+        "studio-runner/Dockerfile",
+        "helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+        "helm-chart/put-checks/templates/studio-runner-service.yaml",
+        "helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+        "helm-chart/put-checks/templates/deployment.yaml",
+        "helm-chart/put-checks/templates/configmap.yaml",
+        "helm-chart/put-checks/values.yaml",
+        "helm-chart/put-checks/values-dev.yaml",
+        "helm-chart/put-checks/values-uat.yaml",
+        "helm-chart/put-checks/values-prod.yaml",
+        "studio-runner/test/deployment/chart.test.ts",
+        "studio-runner/test/deployment/backend-env.test.ts",
+        "studio-runner/test/deployment/envfrom-keys.test.ts",
+        "studio-runner/test/deployment/helm.ts",
+        "studio-runner/test/deployment/image.ts",
+        "studio-runner/test/deployment/dump-settings.test.ts (new)",
+        "studio-runner/test/deployment/tls-client-cert.test.ts (new)"
+      ],
+      "collisions008": [],
+      "acs": { "local": ["AC-1 (chart, no guided template)", "AC-2 (values, rotation inputs)", "AC-4 (dump lint)", "AC-5 (SIEM values)", "AC-11 d (alert specification)"], "external": ["G-1 shared env", "SIEM sink", "alert firing"] },
+      "verify": [
+        "cd studio-runner && PN test:deployment test/deployment/chart.test.ts test/deployment/dump-settings.test.ts test/deployment/tls-client-cert.test.ts test/deployment/envfrom-keys.test.ts test/deployment/backend-env.test.ts"
+      ]
+    },
+    {
+      "id": "D3",
+      "story": "009",
+      "name": "Backend runner TLS, validate(), profile gates, canary",
+      "agent": "@dev backend",
+      "waves": ["W1:D3.0 StudioRunnerTls + RunnerTestTls API", "W2"],
+      "dependsOn": ["G-008", "t0 A3", "t0 A4", "t0 A5", "t0 A18", "D1.0"],
+      "files": [
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java (new)",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerProperties.java",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java (TLS context only)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java (TLS wiring only)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java (TLS wiring only)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java (@Profile)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java (@Profile)",
+        "backend/src/main/resources/application.yml",
+        "backend/src/main/resources/application-api.yml",
+        "backend/src/main/resources/application-worker.yml",
+        "backend/src/main/resources/application-prod.yml",
+        "backend/src/main/resources/application-staging.yml",
+        "backend/src/main/resources/application-dev.yml",
+        "backend/src/main/resources/application-local.yml",
+        "backend/src/main/resources/application-test.yml",
+        "backend/src/test/java/com/citi/put/checks/studio/support/RunnerTestTls.java (new; read-only for I)",
+        "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java (new)",
+        "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java (new)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedScheduledBeansProfileTest.java (new)",
+        "backend/src/test/java/com/citi/put/checks/studio/secrets/DatabaseCanaryScanIT.java (new)",
+        "backend/src/test/java/com/citi/put/checks/studio/secrets/VaultPolicyIT.java (new; rehearsal or unrun-by-name)"
+      ],
+      "collisions008": ["GuidedSessionConfiguration and GuidedPublicationConfiguration are 008 L1 files: start after 008 Done"],
+      "acs": { "local": ["AC-2 (backend fail-closed)", "AC-3", "AC-4 (canary; Vault rehearsal only)", "AC-5"], "external": ["AC-4 dev-Vault policy test (GO-3)", "SIEM sink"] },
+      "verify": [
+        "BK obs009-d3-01 test -- test --tests 'com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest' --tests 'com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT' --tests 'com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest' --tests 'com.citi.put.checks.studio.secrets.DatabaseCanaryScanIT'"
+      ],
+      "prohibited": ["javax.net.ssl JVM-wide client keystore", "widening any @Profile(\"!worker\") bean"]
+    },
+    {
+      "id": "P2",
+      "story": "009",
+      "name": "Artifact-1 runtime-version stamps removed (runner half)",
+      "agent": "@dev runner",
+      "waves": ["W1:P2.0 report key names", "W2"],
+      "dependsOn": ["t0 A7"],
+      "canRunBeside008": "only under t0 A1 optional decision",
+      "files": [
+        "studio-runner/src/versions.ts",
+        "studio-runner/scripts/write-runtime-versions.mjs",
+        "studio-runner/scripts/write-runtime-versions.d.mts",
+        "studio-runner/src/compat/runtime-versions.ts (assertObservedBrowserStartup signature stable)",
+        "studio-runner/scripts/check-pins.mjs",
+        "studio-runner/scripts/check-pins.d.mts",
+        "studio-runner/test/runtime-versions.test.ts",
+        "studio-runner/test/compat.test.ts",
+        "studio-runner/test/pins.test.ts",
+        "studio-runner/test/contract.test.ts",
+        "studio-runner/test/reporting/*.test.ts (those naming runtime versions)",
+        "studio-runner/test/fixtures-tier/helpers/harness.ts",
+        "studio-runner/test/fixtures-tier/{observed-bootstrap-process-tree,observed-bootstrap-video,observed-secret-control,observed-replay}.test.ts (runtime-version fields only)"
+      ],
+      "collisions008": [],
+      "landsWith": "B RunnerReportProjection.projectRuntime in F-merge",
+      "acs": { "local": ["AC-1 P2 a, b, d"], "external": [] },
+      "verify": [
+        "cd studio-runner && PN test test/runtime-versions.test.ts test/compat.test.ts test/pins.test.ts test/contract.test.ts --coverage.enabled=false",
+        "cd studio-runner && PN check:pins",
+        "grep -rn \"ARTIFACT_VERSION\\|VALIDATOR_SCHEMA_VERSION\\|SYNTAX_REFERENCE_VERSION\\|VALIDATOR_PARSER\\|EXECUTOR_VERSION\" studio-runner/src studio-runner/scripts (expect 0; baseline 19)"
+      ]
+    },
+    {
+      "id": "R1",
+      "story": "009",
+      "name": "Kill path, post-Ready self-stop shape, control-window log (runner)",
+      "agent": "@dev runner",
+      "waves": ["W2"],
+      "dependsOn": ["t0 A12 (R10c shape)"],
+      "canRunBeside008": "only under t0 A1 optional decision",
+      "files": [
+        "studio-runner/src/run/launcher.ts (kill() only)",
+        "studio-runner/src/run/tree.ts",
+        "studio-runner/src/server/runCoordinator.ts",
+        "studio-runner/test/run/launcher.test.ts",
+        "studio-runner/test/run/tree.test.ts",
+        "studio-runner/test/run/forkKillTree.test.ts",
+        "studio-runner/test/server/cancel.test.ts",
+        "studio-runner/test/server/terminal-order.test.ts",
+        "studio-runner/test/server/deadline-outcome.test.ts",
+        "studio-runner/test/server/controlWindowLog.test.ts (new)"
+      ],
+      "collisions008": [],
+      "landsWith": "B RunnerOutcomeCodes/RunnerReportProjection R10c acceptance",
+      "acs": { "local": ["AC-11 f-h (runner)", "AC-11 i", "AC-11 j"], "external": [] },
+      "verify": [
+        "cd studio-runner && PN test test/run/launcher.test.ts test/run/tree.test.ts test/run/forkKillTree.test.ts test/server/cancel.test.ts test/server/terminal-order.test.ts test/server/deadline-outcome.test.ts test/server/controlWindowLog.test.ts --coverage.enabled=false"
+      ],
+      "prohibited": ["signal changes", "any window/deadline/TTL/margin change", "new error vocabulary"]
+    },
+    {
+      "id": "R2",
+      "story": "009",
+      "name": "Guided launch bound and browser-tree reaping (runner)",
+      "agent": "@dev runner",
+      "waves": ["W2"],
+      "dependsOn": ["t0 A13"],
+      "canRunBeside008": "only under t0 A1 optional decision",
+      "files": [
+        "studio-runner/src/run/browser.ts (launchGuidedBrowser only)",
+        "studio-runner/vitest.config.ts (comment only)",
+        "studio-runner/test/fixtures-tier/guidedLaunchBound.test.ts (new)",
+        "studio-runner/test/fixtures-tier/helpers/guidedLaunch.ts (new; does not edit harness.ts)",
+        "studio-runner/test/run/guidedBrowserReap.test.ts (new)"
+      ],
+      "collisions008": [],
+      "acs": { "local": ["AC-11 k (runner)", "RUNNER-LAUNCH (bound)"], "external": [] },
+      "verify": [
+        "cd studio-runner && PN test:fixtures test/fixtures-tier/guidedLaunchBound.test.ts",
+        "cd studio-runner && PN test test/run/guidedBrowserReap.test.ts --coverage.enabled=false",
+        "ps -axo pid,ppid,command | grep checks-guided (read-only, before/after)"
+      ],
+      "prohibited": ["killing host processes", "signal changes"]
+    },
+    {
+      "id": "O",
+      "story": "009",
+      "name": "Observation collector obligations (AC-7 local halves) + REL-001",
+      "agent": "@dev runner",
+      "waves": ["W2 (FM-01, REL-001)", "W3 (joined ITs after F-merge)", "after S&C ack (AE-01 merge)"],
+      "dependsOn": ["t0 A9", "t0 A10", "t0 A19", "I.0 (joined ITs)"],
+      "canRunBeside008": "FM-01 code only, under t0 A1 optional decision",
+      "files": [
+        "studio-runner/src/run/observationCollector.ts",
+        "studio-runner/src/guided/runtime.ts",
+        "studio-runner/src/guided/ownership.ts (REL-001 only, if placed)",
+        "studio-runner/test/run/observationCollectorInvoke.test.ts (scripted-record stub extension)",
+        "studio-runner/test/guided/runtime.test.ts",
+        "studio-runner/test/fixtures-tier/focusMutation.test.ts (new)",
+        "studio-runner/test/fixtures-tier/authoredEcho.test.ts (new)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java (new)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedAuthoredEchoJoinedIT.java (new)"
+      ],
+      "collisions008": ["008 conditional KL-015-Q4 copy is removed by FE9, not here"],
+      "acs": {
+        "local": ["AC-7 FM-01 a-d", "AC-7 AE-01 b-d (code + proof)", "REL-001 diagnostic (if placed)"],
+        "external": ["AE-01 a Security & Compliance acknowledgement before merge", "AE-01 e / FM-01 e benchmark accounting (T4)", "FM-01 f pilot probe (010)"]
+      },
+      "notOn011StartList": true,
+      "verify": [
+        "cd studio-runner && PN test test/run/observationCollectorInvoke.test.ts test/guided/runtime.test.ts --coverage.enabled=false",
+        "cd studio-runner && PN test:fixtures test/fixtures-tier/focusMutation.test.ts test/fixtures-tier/authoredEcho.test.ts",
+        "BK obs009-o-joined01 test -- test --tests 'com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT' --tests 'com.citi.put.checks.studio.guided.translation.GuidedAuthoredEchoJoinedIT'"
+      ],
+      "prohibited": ["AE-01 merge before S&C acknowledgement", "wire/schema change", "unit-tier positive FM case against the [] stub"]
+    },
+    {
+      "id": "S",
+      "story": "009",
+      "name": "Observed schedules, G-3, 18 re-enables",
+      "agent": "@dev backend",
+      "waves": ["W2 code", "W3 full-class runs"],
+      "dependsOn": ["G-008", "t0 A17 (Q2)", "I.0 harness", "baton GuidedPublicationReplayIT from I"],
+      "files": [
+        "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java",
+        "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledDispatchAuthorization.java",
+        "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayRuntimeConfiguration.java",
+        "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+        "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleApiIT.java",
+        "backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java",
+        "backend/src/test/java/com/citi/put/checks/studio/scheduling/ObservedScheduleAuthorityIT.java (new)"
+      ],
+      "batonFiles": {
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "I (spawn/TLS/teardown) -> S (tripwire :18508 only) at F-merge"
+      },
+      "readOnly": ["backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java (R9-OBS-1 record)"],
+      "collisions008": [],
+      "acs": { "local": ["AC-6 a-f"], "external": [] },
+      "verify": [
+        "BK obs009-s-sched01 test -- test --tests 'com.citi.put.checks.studio.scheduling.StudioScheduleApiIT' --tests 'com.citi.put.checks.scheduling.SharedSchedulingIT' --tests 'com.citi.put.checks.studio.scheduling.ObservedScheduleAuthorityIT'",
+        "BK obs009-s-replay01 test -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' (alone, full class)",
+        "grep -rn '@Disabled' backend/src/test | wc -l (expect 6)",
+        "grep -rn 'DEFERRED STUDIO-OBS-009' backend/src/test (expect 0)",
+        "grep -n 'studio.updateTest(' <the two schedule ITs> (expect 0)"
+      ],
+      "prohibited": ["changing any assertion of the 18", "clock-source change without an @architect ruling", "editing V16"]
+    },
+    {
+      "id": "B",
+      "story": "009",
+      "name": "Backend read order, R1 evidence binding, R10c/P2 projection, ADJ-1",
+      "agent": "@dev backend",
+      "waves": ["W2 code", "W3 joined + ADJ-1 after probe"],
+      "dependsOn": ["G-008", "t0 A8", "t0 A11", "t0 A12", "t0 A7", "C1 ruling after probe (ADJ-1)"],
+      "files": [
+        "backend/src/main/java/com/citi/put/checks/studio/StudioService.java (readAuthoringDraft only)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java (extracted acceptedContextRevisions only)",
+        "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+        "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java (projectRuntime; R10c post-Ready acceptance)",
+        "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java (only if ADJ-1 = a)",
+        "backend/src/test/java/com/citi/put/checks/studio/StudioServiceWriteAuthorizationTest.java",
+        "backend/src/test/java/com/citi/put/checks/studio/StudioReadLockOrderIT.java (new)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendIT.java (new)",
+        "backend/src/test/java/com/citi/put/checks/studio/internal/RunnerReportProjectionTest.java",
+        "backend/src/test/java/com/citi/put/checks/studio/dispatch/PreReadyRevocationProbeIT.java (new)"
+      ],
+      "collisions008": ["RunnerReportProjection and ProgressReportService are 008 A1 (L1) files: start after 008 Done; A1 replayFailure derivation must stay unchanged (Pax D-11)"],
+      "acs": { "local": ["AC-9 TF-3", "AC-11 R1 a-d", "AC-11 f-h (backend)", "AC-11 a-c (ADJ-1)", "AC-1 P2 b (projection)"], "external": [] },
+      "verify": [
+        "BK obs009-b-01 test -- test --tests 'com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest' --tests 'com.citi.put.checks.studio.StudioReadLockOrderIT' --tests '*StudioVisibilityIT' --tests '*StudioAuthorizationIT' --tests '*RunnerReportProjectionTest' --tests 'com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT' --tests '*GuidedSessionEvidenceTest'",
+        "BK obs009-b-adj1-probe01 test -- test --tests 'com.citi.put.checks.studio.dispatch.PreReadyRevocationProbeIT' (expected red before ruling)",
+        "grep -rn 'sameIdentity' backend/src/main (exactly one body)"
+      ],
+      "prohibited": ["ADJ-1 implementation before ruling", "reaper/deadline changes", "new error vocabulary", "second identity derivation"]
+    },
+    {
+      "id": "I",
+      "story": "009",
+      "name": "Guided IT harness and test infrastructure (AC-12 f-j, AC-11 k teardown, TLS spawn switch)",
+      "agent": "@dev backend test-infra",
+      "waves": ["W1:I.0 RunnerProcessHarness API", "W2", "F-merge"],
+      "dependsOn": ["G-008", "D1.0", "D3.0", "t0 A14"],
+      "files": [
+        "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java (new)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+        "backend/build.gradle.kts (verifyRunnerDist task + guided IT dependsOn)",
+        "other runner-spawning tests named by the W0 grep (candidates: ObservedResolverProcessCrashIT, GuidedRunnerContextRefusalTest, GuidedDispatchContextRefusalTest, GuidedSecretByteBodyTest, ObservedArtifactLowererTest), only if they spawn the runner"
+      ],
+      "batonFiles": {
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "I owns spawn, base URL, TLS, teardown, kept IPC diagnostic -> baton to S at F-merge"
+      },
+      "collisions008": ["no 008 file; runs need Gradle windows after 008 final gate"],
+      "acs": { "local": ["AC-12 f, g (records), h, i, j", "AC-11 k (IT teardown)", "AC-12 a-d (observation on every full-class run)"], "external": [] },
+      "verify": [
+        "BK obs009-i-bridge01 test -- verifyRunnerDist test --tests 'com.citi.put.checks.studio.guided.bridge.GuidedBridgeIntegrationTest' --tests 'com.citi.put.checks.studio.guided.bridge.GuidedBridgePlannedIT' --tests 'com.citi.put.checks.studio.guided.translation.GuidedPlanningIntegrationTest'",
+        "lsof -nP -iTCP -sTCP:LISTEN (recorded before each run)"
+      ],
+      "prohibited": ["building the runner from Gradle", "removing or weakening the ReplayIT IPC diagnostic", "assertion changes"]
+    },
+    {
+      "id": "F",
+      "story": "009",
+      "name": "Co-run fault injection (new harness) and launch attribution",
+      "agent": "@dev, @qa reproduces",
+      "waves": ["W3"],
+      "dependsOn": ["F-merge", "t0 A16", "I.0"],
+      "files": [
+        "backend/src/test/java/com/citi/put/checks/corun/ObservedCoRunIT.java (new)",
+        "tools/corun.sh",
+        "tools/corun-report.mjs",
+        "docs/qa/evidence/studio-observed-authoring/fault-injection.json (new)"
+      ],
+      "collisions008": [],
+      "acs": { "local": ["AC-11 base legs (duplicate, ack loss, restart, stale owner, late callback, public mid-step cancel, runner kill)", "RUNNER-LAUNCH attribution"], "external": ["live revocation", "worker-profile dispatch on real pods", "R8.2 e"] },
+      "verify": [
+        "BK obs009-f-corun01 test -- test --tests 'com.citi.put.checks.corun.ObservedCoRunIT'",
+        "bash tools/corun.sh --skip-build (after re-point)"
+      ]
+    },
+    {
+      "id": "EP",
+      "story": "009",
+      "name": "Benchmark preparation (optional, does not gate 011)",
+      "agent": "@dev + @qa",
+      "waves": ["W4"],
+      "dependsOn": ["G9 recommended", "t0 B1-B7"],
+      "files": [
+        "studio-runner/evaluation/lifecycle.mjs (delete) + its test",
+        "studio-runner/evaluation/observed-authoring/evaluate.mjs (new)",
+        "studio-runner/evaluation/observed-authoring/manifest.json (new)",
+        "studio-runner/evaluation/observed-authoring/pages/** (new; re-authored ports, enterprise pages, oracles)",
+        "studio-runner/evaluation/observed-authoring/cases/*.json (consumed unchanged)",
+        "studio-runner/evaluation/README.md",
+        "studio-runner/test/evaluation/*.test.ts (new)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSchemaProbeIT.java (new; AC-8 code)"
+      ],
+      "collisions008": [],
+      "acs": { "local": ["AC-7 preparation", "AC-8 test code", "B7 budget measurement with fixture provider"], "external": ["AC-7", "AC-8", "AC-9 real-model", "AC-10"] },
+      "notOn011StartList": true,
+      "verify": [
+        "cd studio-runner && PN test test/evaluation --coverage.enabled=false",
+        "BK obs009-ep-budget01 guidedIncrementalTest -- guidedIncrementalTest --tests '<10-step cases at production ceilings, named when written>'"
+      ]
+    },
+    {
+      "id": "FE9",
+      "story": "009",
+      "name": "Frontend: remove the 008 KL-015-Q4 copy after AE-01 lands",
+      "agent": "@dev frontend",
+      "waves": ["after AE-01 merge"],
+      "dependsOn": ["G-008", "O AE-01 merged"],
+      "files": [
+        "frontend/src/components/studio/guided/guidedNarratives.ts (copy key only)",
+        "frontend/src/components/studio/guided/*.test.tsx (the copy's tests)",
+        "frontend/src/services/mocks/studio/guidedHandlers.ts or guidedFixtures.ts (the copy's MSW case only)"
+      ],
+      "collisions008": ["008 L5a/L2b files: after 008 Done"],
+      "acs": { "local": ["AC-7 AE-01 f"], "external": [] },
+      "notOn011StartList": true,
+      "verify": [
+        "cd frontend && PN test run src/components/studio/guided --maxWorkers=2",
+        "cd frontend && PN type-check",
+        "grep -rn \"<copy key named by 008 T2>\" frontend/src (expect 0)"
+      ]
+    },
+    {
+      "id": "E",
+      "story": "009",
+      "name": "External and live proof",
+      "agent": "@dev, @devops, @qa",
+      "waves": ["when U2-U8 arrive"],
+      "dependsOn": ["U2 ED-01", "U3 staging app", "U4 deployed stack", "U5 dev Vault", "U6 SIEM", "U7 budget admission", "U8 C-17 reviewer", "S&C acknowledgement (AE-01)"],
+      "files": [
+        "frontend/e2e/studio-observed-authoring.spec.ts (new; extends 008 playwright.config.ts)",
+        "docs/qa/evidence/studio-observed-authoring/{benchmark.json, benchmark-report.md, replay-stability.json, isolation-mutation.json, wire-canaries.json, video-masking-inspection.md, vault-policy.json, schema-probe.json}"
+      ],
+      "collisions008": ["frontend/playwright.config.ts and frontend/e2e are 008 L3/L6 files"],
+      "acs": { "local": [], "external": ["AC-1/2 deploy halves", "AC-4 Vault + TF-5 a/c/e", "AC-5 SIEM", "AC-7", "AC-8", "AC-9 real model", "AC-10", "AC-11 live", "AC-12 deployed E2E"] },
+      "verify": ["per story; never credited without the external system"]
+    },
+    {
+      "id": "G9",
+      "story": "009",
+      "name": "009 local gate",
+      "agent": "root, then independent @qa",
+      "waves": ["W5"],
+      "dependsOn": ["C9", "D1", "D2", "D3", "P2", "R1", "R2", "S", "B", "I", "F", "O (FM-01 at least)"],
+      "files": ["docs/qa/evidence/STUDIO-OBS-009/local-gate-<date>/** (receipts, QA local-validation record)"],
+      "acs": { "local": ["validation of AC-1-6, AC-11, AC-12 f-j local halves"], "external": [] },
+      "verify": [
+        "cd studio-runner && PN type-check && PN lint && PN test && PN test:fixtures && PN test:deployment && PN check:pins",
+        "node tools/check-studio-observed-contracts.cjs",
+        "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py obs009-local-check01 --test-tasks test,guidedIncrementalTest,crossReplicaTest --require-exec-tasks test,guidedIncrementalTest --allowed-skips-file <QA 7-entry file> -- --no-daemon --continue check --rerun-tasks",
+        "cd frontend && PN type-check && PN lint && PN test run"
+      ],
+      "exit": "single green run at one source digest; JaCoCo and requireFreshGuidedPartitions executed; skips = the 7 historical; QA local-validation record issued (not Done)"
+    },
+    {
+      "id": "T2",
+      "story": "010",
+      "name": "Single-path runbook and dated Live surface list",
+      "agent": "@analyst; @architect cross-checks every Live-surface entry against the tree; @pm accepts",
+      "waves": ["draft beside 009 W2 (evidence folder only)", "final after G9"],
+      "dependsOn": ["G-008 (008 L0 edits the runbook)", "G9 (keys/values final)", "t0 D1 (PO note letting T2 start before 009 Done)"],
+      "files": [
+        "docs/qa/evidence/STUDIO-OBS-010/live-surface-draft/** (draft only)",
+        "docs/runbooks/studio-guided-authoring.md",
+        "docs/runbooks/studio-secrets-provisioning.md (optional)"
+      ],
+      "collisions008": ["docs/runbooks/studio-guided-authoring.md is an 008 L0 file (finalize paragraph)"],
+      "acs": { "local": ["AC-5 (runbook rows, NTP row, Live surface)"], "external": ["NTP skew bound owed by Platform/SRE"] },
+      "verify": ["per-entry grep in the tree recorded for every Live-surface item", "row -> evidence table (PO should-fix 1)"],
+      "exit": "dated list accepted by @pm; with G9 this releases 011 T0"
+    },
+    {
+      "id": "T3",
+      "story": "010",
+      "name": "Release-readiness record (local rows)",
+      "agent": "@analyst",
+      "waves": ["after G9"],
+      "dependsOn": ["G9"],
+      "files": [
+        "docs/qa/evidence/studio-observed-authoring/release-readiness.md (new)",
+        "docs/stories/10.34.story.md (dated re-registration note only)"
+      ],
+      "acs": { "local": ["AC-4 record with honest rows incl. KL-015-R1, FOCUS-MUTATION-01, TF-5"], "external": ["every external gate state"] },
+      "notOn011Path": true,
+      "verify": ["@qa traceability review against gate files"]
+    },
+    {
+      "id": "PILOT",
+      "story": "010",
+      "name": "Pilot preparation, focus probe, execution, remediation, handoff",
+      "agent": "@analyst + user; @devops for handoff",
+      "waves": ["external"],
+      "dependsOn": ["009 AC-7 D-C passed", "U9 participants", "user authorization"],
+      "files": [
+        "docs/qa/evidence/studio-observed-authoring/usability-pilot.md (new)",
+        "docs/qa/evidence/studio-observed-authoring/pilot-focus-compatibility/** (new)"
+      ],
+      "acs": { "local": [], "external": ["AC-1", "AC-2", "AC-3", "AC-6 handoff"] },
+      "verify": ["human; never simulated"]
+    },
+    {
+      "id": "11-T0",
+      "story": "011",
+      "name": "Baselines, inventory re-run, rulings",
+      "agent": "root + @dev (read-only) + @architect + @qa + @po",
+      "waves": ["011 W0"],
+      "dependsOn": ["G9", "T2"],
+      "files": ["docs/qa/evidence/STUDIO-OBS-011/t0-<date>/** (inventory re-run commands/results, baselines, rulings)"],
+      "duties": ["read Live surface list first", "re-verify F-1 facts at GuidedSessionService cfb55a54+", "D4 rulings: F-1 shape, CLN-F2, wait library, fold targets, CLN-10, CLN-40, TEST-002, JaCoCo vacuous rules", "three baselines", "timing run naming sleep-polled ITs"],
+      "acs": { "local": ["AC-1 re-run"], "external": [] },
+      "verify": ["BK obs011-baseline01 test -- test --tests 'com.citi.put.checks.studio.*'", "cd studio-runner && PN test", "cd frontend && PN test run"]
+    },
+    {
+      "id": "11-GS",
+      "story": "011",
+      "name": "GuidedSessionService: F-1 then claim() split",
+      "agent": "@dev backend",
+      "waves": ["011 W1 (F-1)", "011 W3 (claim split)"],
+      "dependsOn": ["11-T0"],
+      "files": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java (+ new collaborators under guided/session/)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java (orphaned helpers)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java (fixture fold)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java (new)"
+      ],
+      "batonFiles": { "GuidedSessionIT, GuidedServiceTransportFaultIT, GuidedBridgeIntegrationTest, GuidedBridgePlannedIT": "11-GS (F-1, W1) -> 11-FOLD (type swaps, W2) -> 11-GS (split proofs, W3) unchanged" },
+      "acs": { "local": ["AC-2 F-1 a-g (CLN-F1)", "AC-4 c (claim)", "CLN-21 recordEvidence"], "external": [] },
+      "verify": ["BK obs011-gs-f1 test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedSessionIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT' --tests 'com.citi.put.checks.studio.guided.bridge.*'", "SQL statement count per command before/after split"]
+    },
+    {
+      "id": "11-LEFT",
+      "story": "011",
+      "name": "Backend class A leftovers, emitters, CLN-F2",
+      "agent": "@dev backend (+ @data-engineer for CLN-F2)",
+      "waves": ["011 W1"],
+      "dependsOn": ["11-T0", "009 AC-6 outcome (emitters)"],
+      "files": [
+        "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+        "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java (isApiAssigned)",
+        "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+        "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAlreadyExistsException.java",
+        "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+        "backend/src/main/resources/application.yml (sse.read-interval)",
+        "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java (emitter, conditional)",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java (emitter, conditional)",
+        "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java (CLN-F2 if retired)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java (CLN-F2 if retired)",
+        "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java (CLN-F2 if retired)",
+        "backend/build.gradle.kts (JaCoCo vacuous rules, if ruled) - sequential after 009 I"
+      ],
+      "acs": { "local": ["AC-1 CLN-F2", "AC-2 class A", "AC-3"], "external": [] },
+      "verify": ["BK obs011-left01 test -- test --tests 'com.citi.put.checks.studio.scheduling.*' --tests 'com.citi.put.checks.studio.InferenceMigrationIT' --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest'", "grep -rn 'HistoricalV18\\|requireV18' backend/src (expect 0 if retired)"]
+    },
+    {
+      "id": "11-FOLD",
+      "story": "011",
+      "name": "Dispatch-client and authorization folds + R9-OBS-3",
+      "agent": "@dev backend",
+      "waves": ["011 W2"],
+      "dependsOn": ["11-GS F-1 landed", "11-T0 fold rulings"],
+      "files": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java (delete)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java (delete)",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java (client type swap only; baton -> 11-GT)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java (delete)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationController.java",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+        "the 18 test files referencing GuidedRunnerClient/ObservedValidationClient/GuidedPublicationAuthorization (type swaps; batons from 11-GS)",
+        "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java (ported tests)",
+        "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchAuthorizationIT.java (ported)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java (new)"
+      ],
+      "acs": { "local": ["AC-4 a", "AC-4 b + R9-OBS-3"], "external": [] },
+      "verify": ["BK obs011-fold01 test -- test --tests 'com.citi.put.checks.studio.dispatch.*' --tests 'com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT' --tests 'com.citi.put.checks.studio.guided.publication.ObservedGrantClockIT'", "then full ReplayIT class alone"]
+    },
+    {
+      "id": "11-GT",
+      "story": "011",
+      "name": "GuidedTranslationService checkCommand split",
+      "agent": "@dev backend",
+      "waves": ["011 W3"],
+      "dependsOn": ["11-FOLD baton on GuidedTranslationService"],
+      "files": ["backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java (+ new collaborators under guided/translation/)"],
+      "acs": { "local": ["AC-4 c (checkCommand)"], "external": [] },
+      "verify": ["BK obs011-gt01 test,guidedIncrementalTest -- test guidedIncrementalTest --tests 'com.citi.put.checks.studio.guided.*'", "SQL statement count per command before/after"]
+    },
+    {
+      "id": "11-RT",
+      "story": "011",
+      "name": "Runner leftovers and guided TS reformat",
+      "agent": "@dev runner",
+      "waves": ["011 W1"],
+      "dependsOn": ["11-T0", "009 P2, R1, D1, O landed"],
+      "files": [
+        "studio-runner/src/versions.ts (CLN-41 residue)",
+        "studio-runner/src/run/launcher.ts (TOTAL_TIMEOUT_MESSAGE)",
+        "studio-runner/scripts/write-runtime-versions.mjs",
+        "studio-runner/test/deferred.test.ts (CLN-40 ruling)",
+        "studio-runner/src/guided/** (reformat only; excludes runtime.ts and ownership.ts while AE-01/REL-001 open)",
+        "studio-runner/src/run/guidedBrowser.ts (reformat only)"
+      ],
+      "acs": { "local": ["AC-2 CLN-41, CLN-40", "AC-4 d", "class B runner sweep"], "external": [] },
+      "verify": ["cd studio-runner && PN type-check && PN lint && PN test", "AST-equality or test-suite equality evidence for the reformat"]
+    },
+    {
+      "id": "11-FE",
+      "story": "011",
+      "name": "Frontend leftovers",
+      "agent": "@dev frontend",
+      "waves": ["011 W1"],
+      "dependsOn": ["11-T0", "CLN-10 ruling"],
+      "files": [
+        "frontend/src/components/studio/evidence/pinnedVideoEvidenceFacts.ts (CLN-07)",
+        "frontend/src/utils/retireLegacyStudioWorker.ts (CLN-10, per ruling)",
+        "frontend/src/index.tsx (CLN-10, per ruling)",
+        "frontend/src/main.tsx (CLN-10, per ruling)",
+        "frontend RunDetailsDrawer wording file (CLEANUP-OBSERVATIONS; path named at T0)"
+      ],
+      "acs": { "local": ["AC-2 CLN-07, CLN-10", "class B frontend sweep"], "external": [] },
+      "verify": ["cd frontend && PN test run src/components/studio/evidence --maxWorkers=2", "cd frontend && PN type-check && PN lint"]
+    },
+    {
+      "id": "11-IT",
+      "story": "011",
+      "name": "Sleep-polled IT conversion (AC-5) + TEST-002",
+      "agent": "@dev backend test",
+      "waves": ["011 W4"],
+      "dependsOn": ["11-GS split proof", "11-GT split proof", "wait-library ruling"],
+      "files": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/**/*IT.java named at 11-T0 (e.g. GuidedPublicationReplayIT, SecretLoginFixtureIT, IncrementalRelearnIT, GuidedPublicationRaceTest, GuidedPlanningIntegrationTest)",
+        "backend/build.gradle.kts (only if Awaitility is ruled)",
+        "backend/src/test/java/com/citi/put/checks/studio/support/Await.java (new, only if in-repo helper is ruled)"
+      ],
+      "acs": { "local": ["AC-5"], "external": [] },
+      "verify": ["before/after wall time with exact test list via BK obs011-it-before01 / obs011-it-after01"]
+    },
+    {
+      "id": "11-DOC",
+      "story": "011",
+      "name": "Docs, pins, artefacts",
+      "agent": "@dev + @po (.ai/ decision)",
+      "waves": ["011 W1-W4"],
+      "dependsOn": ["11-T0", "009 C9 AE-01 notes landed (shared doc)"],
+      "files": [
+        "docs/specs/studio-observed-authoring/account-provider-readiness-design.md (historical header)",
+        "docs/specs/studio-context/current-state.md (dated note)",
+        ".ai/ (archive-vs-keep, archive-first)",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md (dated addendum)",
+        "openapi.yaml + pins only if a route changes (none expected)"
+      ],
+      "acs": { "local": ["AC-6"], "external": [] },
+      "verify": ["node tools/check-studio-observed-contracts.cjs"]
+    },
+    {
+      "id": "11-G",
+      "story": "011",
+      "name": "Verification and record",
+      "agent": "root + independent @qa",
+      "waves": ["011 W5"],
+      "dependsOn": ["all 011 lanes"],
+      "files": ["docs/qa/evidence/STUDIO-OBS-011/final-<date>/**"],
+      "acs": { "local": ["AC-7"], "external": [] },
+      "verify": ["as G9 with obs011- labels", "independent QA symbol grep", "after = baseline - named drops + named additions for all three suites"]
+    }
+  ],
+  "sharedFilesSingleOwner": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "I -> S (F-merge baton); later 11-GS/11-FOLD/11-IT sequentially",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java": "B (after 008 L1)",
+    "backend/src/main/resources/application*.yml": "D3 (009); 11-LEFT (011)",
+    "helm-chart/put-checks/**": "D2",
+    "docs/specs/studio/openapi.yaml + StudioContractTest pin + confinement pin": "C9 (after 008 L0)",
+    "studio-runner/test/fixtures-tier/helpers/harness.ts": "P2 (R2/O add new helper files)",
+    "studio-runner/test/server/{drain,surface,storage-lifecycle,observedReplayRoutes,resolved-value-guards,timeline}.test.ts": "D1 (applies P2 key rename)",
+    "studio-runner/src/run/observationCollector.ts + src/guided/runtime.ts": "O; 11-RT excluded while AE-01 open",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioService.java": "B (009 TF-3); 011 excluded while TF-3 open",
+    "backend/build.gradle.kts": "I (009) -> 11-LEFT / 11-IT (011) sequentially",
+    "studio-runner/dist": "runtime artifact: rebuilt only in root F-merge slots, never during 008"
+  },
+  "waves": [
+    { "id": "G-015", "items": ["015 attempt04", "QA verdict", "PO + root close"] },
+    { "id": "008", "items": ["008 W0-W5 to QA Done"] },
+    { "id": "W0", "lanes": ["W0", "T0"] },
+    { "id": "W1", "lanes": ["C9", "D1:D1.0", "D3:D3.0", "I:I.0", "P2:P2.0"] },
+    { "id": "W2", "lanes": ["D1", "D2", "D3", "P2", "R1", "R2", "O", "S", "B", "I"], "parallel": true, "gradle": "serialized by root" },
+    { "id": "F-merge", "owner": "root", "items": ["single dist rebuild", "D1+I+D3 atomic", "P2+B projectRuntime atomic", "ReplayIT baton I->S", "R1+B R10c atomic"] },
+    { "id": "W3", "lanes": ["S (full-class runs)", "B (joined, ADJ-1)", "F", "O (joined; AE-01 if acknowledged)", "C9 (AE-01 notes)", "FE9"] },
+    { "id": "W4", "lanes": ["EP (optional)"] },
+    { "id": "W5", "lanes": ["G9"] },
+    { "id": "010-T2", "lanes": ["T2"], "note": "draft beside W2; final after G9" },
+    { "id": "011-W0", "lanes": ["11-T0"] },
+    { "id": "011-W1", "lanes": ["11-GS (F-1)", "11-LEFT", "11-RT", "11-FE", "11-DOC"], "parallel": true },
+    { "id": "011-W2", "lanes": ["11-FOLD"] },
+    { "id": "011-W3", "lanes": ["11-GS (claim split)", "11-GT"], "parallel": "coding parallel, proofs serialized" },
+    { "id": "011-W4", "lanes": ["11-IT"] },
+    { "id": "011-W5", "lanes": ["11-G"] }
+  ],
+  "criticalPath": [
+    "G-015", "G-008", "W0 rulings (t0 A2-A5, A7, A8, A11, A12)", "D1.0 + D3.0 + I.0 drops", "D1 fold + D3 TLS + I spawn/TLS switch", "F-merge dist rebuild", "S full ReplayIT/schedule runs + F co-run", "G9 serialized check + QA local record", "010 T2 Live surface final", "011 T0"
+  ],
+  "parallelWith008": {
+    "withoutNewDecision": ["T0 (docs/qa/evidence only)", "EP design notes", "010 Live-surface skeleton under docs/qa/evidence/STUDIO-OBS-010/"],
+    "withT0A1UserDecision": {
+      "lanes": ["D1 (code only)", "D2", "P2", "R1", "R2", "O (FM-01 code)"],
+      "conditions": ["after G-015 and 008 W1", "Vitest only", "no studio-runner/dist rebuild", "no Gradle"]
+    },
+    "never": ["C9", "D3", "B", "I", "S", "F", "FE9", "T2 final", "E"]
+  },
+  "collisions008": [
+    { "file": "docs/specs/studio/openapi.yaml, StudioContractTest pin, confinement.test.ts pin", "owner008": "L0", "lane009": "C9", "rule": "after 008 Done; one re-anchor unit" },
+    { "file": "internal/RunnerReportProjection.java, internal/ProgressReportService.java", "owner008": "L1 (A1)", "lane009": "B", "rule": "after 008 Done; A1 replayFailure derivation unchanged" },
+    { "file": "guided/session/GuidedSessionConfiguration.java, guided/publication/GuidedPublicationConfiguration.java", "owner008": "L1", "lane009": "D3", "rule": "after 008 Done; TLS wiring only" },
+    { "file": "docs/runbooks/studio-guided-authoring.md", "owner008": "L0", "lane010": "T2", "rule": "after 008 Done" },
+    { "file": "frontend/src/components/studio/guided/guidedNarratives.ts (+ tests, MSW case)", "owner008": "L5a/L5b/L2b", "lane009": "FE9", "rule": "after 008 Done and AE-01 merged" },
+    { "file": "frontend/playwright.config.ts, frontend/e2e/**", "owner008": "L3/L6", "lane009": "E", "rule": "after 008 Done" },
+    { "file": "backend/src/main/resources/db/migration", "owner008": "@data-engineer V22", "lane009": "any (TF-5 b / ADJ-1 a)", "rule": "009 migrations are V23+" },
+    { "file": "studio-runner/dist (runtime artifact)", "owner008": "spawned by 008 L1 guided ITs", "lane009": "F-merge", "rule": "no 009 rebuild until 008 final gate receipt" }
+  ],
+  "expectedRedLedger": [
+    "the 4 runner-spawning ITs between D1 fold and I switch -> land atomically in F-merge",
+    "runtime-reading projection tests between P2 and B projectRuntime -> atomic",
+    "18 schedule tests, 4 ports and ReplayIT tripwire -> atomic inside S",
+    "ADJ-1 probe IT is red by design until C1 ruling + implementation"
+  ],
+  "openQuestionsRef": "t0-questions.md A1-A19 (before 009), B1-B8 (before T4), C1-C2 (after probes), D1-D4 (010/011)",
+  "testsExecuted": 0,
+  "sourceChanges": false,
+  "w0Refold20261017": {
+   "title": "W0 refold 2026-10-17 (append-only; governs over the 2026-10-16 lanes, waves and baseline above where they disagree)",
+   "author": "Aria (@architect)",
+   "date": "2026-10-17",
+   "status": "READY_FOR_W0_AFTER_008_DONE; docs-only lanes (group NOW) may run beside 008 W3-W5",
+   "rulings": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-rulings/ruling.md (inputs and sha256 in t0-rulings/manifest.json)",
+   "assumptions": [
+    "All 009 source lanes start after STUDIO-OBS-008 Done (root has not taken t0 A1)",
+    "Root decisions R1-R7 and user batch items in ruling.md sections 5-6 are open until recorded"
+   ],
+   "rebaseline": {
+    "story015": "Done (QA CONCERNS); close drift annotation .ai/STUDIO-OBS-015-close.drift-annotation.json",
+    "story008": "InProgress; F1 GREEN 2026-10-17 19:45 EDT (backend union 656/656; frontend vitest 1200/1200); W3 running (L5b, L6-author); W4 (L6 MSW E2E + D5 bootRun smoke) and W5 (gates, reviews) to come",
+    "flywayHead": "V22__execution_replay_failure.sql; 009 migrations are V23+",
+    "openapi": {
+     "sha256": "b5ecdcad4c5e152d0edde5ad14af1a04438f3d9153b04037ef9ce5bc0ae29244",
+     "paths": 36,
+     "operations": 44,
+     "digestPins": [
+      "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java:89-91",
+      "studio-runner/test/run/confinement.test.ts:293-294"
+     ],
+     "opCountPins": [
+      "StudioContractTest.java:340-341"
+     ],
+     "capabilityRoute": "GET /tests/{id}/capabilities",
+     "note": "root's '~82-83' and ':287' anchors are stale; measured 2026-10-17"
+    },
+    "frontend": "pnpm (pnpm-lock.yaml, no package-lock.json, .npmrc node-linker=hoisted, @playwright/test 1.63.0, frontend/e2e harness, playwright.config.ts)",
+    "runner": "npm-managed (package-lock.json, packageManager npm@11.3.0): pnpm commands need --config.package-manager-strict=false; no installs",
+    "node": "studio-runner/.nvmrc 24; engines >=24.11.0 <25.0.0; N24 = export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH for runner and backend",
+    "dist": "897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c (015 close = 008 F1 after-manifest); no 009 rebuild before 008's final-gate receipt",
+    "guidedSessionServiceSha256": "a8ddea755687e10bcfe7a23a5240614954a300356a65348e8b77a8bad15541cf (lifecycle :2501, assignmentLifecycle :1815/:1840)",
+    "landedIn015": [
+     "REL-001 diagnostics (GuidedStartFailure, GUIDED_START_FAILED line)",
+     "D4 12 s guided start budget + argv-marker hard teardown",
+     "N24 runner pin"
+    ],
+    "landedIn008": [
+     "ExecutionSnapshot.replayFailure + ReplayFailure",
+     "capability route",
+     "GuidedPublicPresentationProjector",
+     "frontend pnpm + Playwright 1.63.0 harness",
+     "conditional KL-015-Q4 copy key authoredLiteralTargetNotFound"
+    ],
+    "unchanged": "@Disabled 24 = 6 + 18 DEFERRED STUDIO-OBS-009; ports StudioScheduleApiIT:447,:972 and SharedSchedulingIT:359,:511; tripwire GuidedPublicationReplayIT:18508"
+   },
+   "droppedFromPlan20261016": [
+    "lane O: REL-001 (done in 015; only the AC-11 pointer classification remains, owner @qa)",
+    "lane R2: guided launch bound and launch-phase tree reaping (done by 015 D4); R2 now carries KL-015-D5 and the k residue",
+    "drop P2.0 new private key names (observed keys already exist; P2 only removes the five artifact-1 keys)",
+    "lane I: per-IT dist-digest metadata (collectors already record dist.digest and distStable)",
+    "ED-05 Node pin (done in 015); frontend npm->pnpm (done by 008 U2)",
+    "wave G-015 (015 Done)",
+    "008 collisions on openapi/pins, RunnerReportProjection, ProgressReportService, GuidedSession/PublicationConfiguration and the runbook (008 L0/L1 finished in W1/W2); they are sequential after 008 Done"
+   ],
+   "addedSince20261016": [
+    "A2.6 owner routing: guided-enabled => one runner replica (chart render guard), two-browser pod sizing (D2); root decision R1",
+    "AC-1 PID-1 a (D1 guard) and b/c (D2)",
+    "KL-015-D5: W1 probe PR-RT, W1.5 ruling, R2 implementation, BL backend read (D5 e)",
+    "LIFECYCLE-REASON-01 (lane BL; no tolerance)",
+    "lane DE: TF-5 b privilege-delta check V19-V22 (no V23 grant unless U14 confirms a non-owner role)",
+    "W1 probes PR-BE (R1 a, ADJ-1 a) so C1 and the R1 binding are ruled before W2 code",
+    "FE9 key known: authoredLiteralTargetNotFound",
+    "D3 gates the coordinator on its @Bean method in GuidedTranslationConfiguration (not the class)",
+    "C9 also edits ReportedRuntimeVersions and four example blocks",
+    "AE-01 (O-AE) starts only after the U13 acknowledgement; R2 -> O-AE baton on runtime.ts"
+   ],
+   "collisionsWith008": {
+    "liveNow": "only 008 W3-W5 write sets (see live008WriteSets); group NOW overlaps them 0 times",
+    "laterLanesOnLive008Paths": [
+     {
+      "lane009": "FE9",
+      "group": "W3",
+      "path": "frontend/src/components/studio/guided/guidedNarratives.ts",
+      "live008": "L5b (W3)"
+     },
+     {
+      "lane009": "FE9",
+      "group": "W3",
+      "path": "frontend/src/components/studio/guided/GuidedCompletion.tsx",
+      "live008": "L5b (W3)"
+     },
+     {
+      "lane009": "FE9",
+      "group": "W3",
+      "path": "frontend/src/components/studio/guided/guided.test.tsx",
+      "live008": "L5b (W3)"
+     },
+     {
+      "lane009": "FE9",
+      "group": "W3",
+      "path": "frontend/src/pages/ChecksStudioPage/*",
+      "live008": "L5b (W3)"
+     }
+    ],
+    "rules": [
+     "FE9 edits files L5b owns in 008 W3: after 008 Done and after O-AE merges",
+     "lane E (frontend/e2e/studio-observed-authoring.spec.ts, frontend/playwright.config.ts): after 008 Done",
+     "studio-runner/dist: F-merge rebuild only after 008's final backend-gate receipt",
+     "Gradle: one lock (execute-008/with-gradle-lock.py) shared by 008 W4/W5 and 009"
+    ]
+   },
+   "commandConventions": {
+    "N24": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH",
+    "LOCK": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+    "BK": "(repo root) <N24>; <LOCK> python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-<label> --test-tasks <tasks> -- <gradle args> --no-daemon",
+    "RR": "(repo root) <N24>; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-runner.py obs009-<label> pnpm --config.package-manager-strict=false exec vitest run <args>   # evidence run; needs root edit R2 to capture the JSON report",
+    "RB": "(repo root) <N24>; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-runner-build.py obs009-<label>   # copy builds with pnpm --config.package-manager-strict=false run build (root edit R2)",
+    "RF": "cd studio-runner && <N24>; pnpm --config.package-manager-strict=false exec vitest run <files> --coverage.enabled=false --minWorkers=1 --maxWorkers=2",
+    "RFX": "cd studio-runner && <N24>; pnpm --config.package-manager-strict=false exec vitest run --config vitest.fixtures.config.ts <files> --minWorkers=1 --maxWorkers=1",
+    "RDP": "cd studio-runner && <N24>; pnpm --config.package-manager-strict=false exec vitest run --config vitest.deployment.config.ts <files> --minWorkers=1 --maxWorkers=1",
+    "FE": "cd frontend && pnpm exec vitest run <paths> --minWorkers=1 --maxWorkers=3   # host Node; record node --version",
+    "rules": [
+     "pnpm only; no npm, no installs; the runner keeps its npm lockfile untouched",
+     "one Gradle process at a time through LOCK, always --no-daemon",
+     "record lsof -nP -iTCP -sTCP:LISTEN before every backend run (AC-12 g)",
+     "GuidedPublicationReplayIT: full class only, alone; no single-test credit",
+     "guided IT runs credit only when the collector's dist digest equals the F-merge build receipt's distDigestAfter",
+     "every command here is PLANNED_NOT_RUN"
+    ]
+   },
+   "lanes": [
+    {
+     "id": "T0-AR",
+     "group": "NOW",
+     "agent": "aiox-architect (Aria)",
+     "story": "009",
+     "startsWhen": [
+      "now (this record)"
+     ],
+     "writes": [
+      "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-rulings/**",
+      "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/lanes.json (append w0Refold20261017 only)",
+      "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/implementation-plan.md (append section only)"
+     ],
+     "acs": {
+      "local": [
+       "T0 rulings A2-A16, C1-C2 criteria, A19 status"
+      ],
+      "external": []
+     },
+     "verify": [
+      "node -e \"JSON.parse(require('fs').readFileSync('docs/qa/evidence/STUDIO-OBS-009/prep-20261016/lanes.json','utf8'))\""
+     ],
+     "exit": "ruling.md + manifest.json written; lanes.json parses"
+    },
+    {
+     "id": "T0-QA",
+     "group": "NOW",
+     "agent": "aiox-qa (Quinn)",
+     "story": "009",
+     "startsWhen": [
+      "now (docs only)"
+     ],
+     "writes": [
+      "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/qa/t0-qa-decisions.md (new)"
+     ],
+     "acs": {
+      "local": [
+       "EDGE-15S-3 requested or 'not requested'",
+       "corpus composition final (B1-B6 inputs)",
+       "approved-skips draft for G9",
+       "A18 Vault-rehearsal classification"
+      ],
+      "external": []
+     },
+     "verify": [
+      "@qa self-check; no command"
+     ],
+     "exit": "decisions dated; approved-skips draft names every expected skip by task/class/name"
+    },
+    {
+     "id": "T0-PO",
+     "group": "NOW",
+     "agent": "aiox-po (Pax)",
+     "story": "009",
+     "startsWhen": [
+      "after this ruling is issued"
+     ],
+     "writes": [
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md (append-only PO notes: A16 co-run rebuilt, B1/B5 interpretations, A2.6 disclosure if root accepts it)"
+     ],
+     "acs": {
+      "local": [
+       "PO notes"
+      ],
+      "external": []
+     },
+     "verify": [
+      "@po change-log row with before/after sha256"
+     ],
+     "exit": "notes recorded; Status stays Ready"
+    },
+    {
+     "id": "T2-SK",
+     "group": "NOW",
+     "agent": "aiox-analyst (Alex), optional",
+     "story": "010",
+     "startsWhen": [
+      "optional now; NOT T2; no status effect"
+     ],
+     "writes": [
+      "docs/qa/evidence/STUDIO-OBS-010/live-surface-skeleton/**"
+     ],
+     "acs": {
+      "local": [
+       "skeleton of the measured Live surface (non-binding)"
+      ],
+      "external": []
+     },
+     "verify": [
+      "every entry carries the grep/ls command that measured it"
+     ],
+     "exit": "skeleton dated; re-measured at T2"
+    },
+    {
+     "id": "W0",
+     "group": "W0",
+     "agent": "root (@aiox-master)",
+     "story": "009",
+     "startsWhen": [
+      "008 Done (QA)"
+     ],
+     "writes": [
+      ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/** (collector copies; output path only + the two root edits R2)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/w0/**"
+     ],
+     "duties": [
+      "re-baseline: sha256 of every lane file, openapi digest + op count, Flyway head, dist digest, GuidedSessionService sha",
+      "Docker daemon, JDK 21, free memory",
+      "record root decisions R1-R7 and the user batch answers (A17 at least)",
+      "recommended: checkpoint the 008-Done tree (R4)"
+     ],
+     "acs": {
+      "local": [],
+      "external": []
+     },
+     "verify": [
+      "ls backend/src/main/resources/db/migration | sort -V | tail -1   # expect V22__execution_replay_failure.sql",
+      "shasum -a 256 docs/specs/studio/openapi.yaml   # expect b5ecdcad... unless 008 W5 changed it",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py docs/qa/evidence/STUDIO-OBS-009/execution-<date>/w0/baseline-manifest.json   # dist digest expect 897182d5..."
+     ],
+     "exit": "baseline manifest + decisions recorded"
+    },
+    {
+     "id": "QA-W0",
+     "group": "W0",
+     "agent": "aiox-qa (Quinn)",
+     "story": "009",
+     "startsWhen": [
+      "W0"
+     ],
+     "writes": [
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/qa/approved-skips.json"
+     ],
+     "acs": {
+      "local": [
+       "G9 expected-skip multiset"
+      ],
+      "external": []
+     },
+     "verify": [
+      "python3 -c 'import json,sys;json.load(open(sys.argv[1]))' <file>"
+     ],
+     "exit": "file final; root records its sha256"
+    },
+    {
+     "id": "C9",
+     "group": "W1",
+     "agent": "aiox-dev (Dex, contract integrator)",
+     "story": "009",
+     "startsWhen": [
+      "W0 closed",
+      "ruling A7"
+     ],
+     "writes": [
+      "docs/specs/studio/openapi.yaml (RuntimeVersions + ReportedRuntimeVersions descriptions and their examples only)",
+      "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java (BASE_SHA256 comment+constant :89-91 only)",
+      "studio-runner/test/run/confinement.test.ts (BASE_SHA256 comment+constant :293-294 only)",
+      "docs/architecture/ADR-002-internal-contract-surface.md (section 13 row only)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/c9/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-1 P2 c"
+      ],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; node -e \"require('./tools/build-studio-observed-schemas.cjs').check()\"",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; node tools/check-studio-observed-contracts.cjs",
+      "shasum -a 256 docs/specs/studio/openapi.yaml   # old b5ecdcad4c5e152d0edde5ad14af1a04438f3d9153b04037ef9ce5bc0ae29244 -> new, quoted in both pin comments",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-runner.py obs009-c9-confinement01 pnpm --config.package-manager-strict=false exec vitest run test/run/confinement.test.ts --coverage.enabled=false --minWorkers=1 --maxWorkers=1",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-c9-pins01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.StudioContractTest' --no-daemon"
+     ],
+     "exit": "op count 44 unchanged (StudioContractTest :340-341); both pins re-anchored in one unit; ADR-002 section 13 row"
+    },
+    {
+     "id": "D1.0",
+     "group": "W1",
+     "agent": "aiox-dev (Dex, runner) + aiox-devops (Gage) co-sign",
+     "story": "009",
+     "startsWhen": [
+      "W0 closed",
+      "rulings A2, A3"
+     ],
+     "writes": [
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/d1/launch-contract.md"
+     ],
+     "acs": {
+      "local": [
+       "interface drop for D2, D3, I, F"
+      ],
+      "external": []
+     },
+     "verify": [
+      "@architect review against ruling A2/A3; @devops co-sign"
+     ],
+     "exit": "keys, file-path keys, guided enable switch, probe over TLS, readiness signal, exit codes named"
+    },
+    {
+     "id": "D3.0",
+     "group": "W1",
+     "agent": "aiox-dev (Dex, backend)",
+     "story": "009",
+     "startsWhen": [
+      "W0 closed",
+      "ruling A4"
+     ],
+     "writes": [
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java (new)",
+      "backend/src/test/java/com/citi/put/checks/studio/support/RunnerTestTls.java (new)",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerTlsTest.java (new)"
+     ],
+     "acs": {
+      "local": [
+       "AC-3 interface"
+      ],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-d3-api01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest' --no-daemon"
+     ],
+     "exit": "API compiles; one test CA available to I and D3"
+    },
+    {
+     "id": "I.0",
+     "group": "W1",
+     "agent": "aiox-dev (Dex, backend test infra)",
+     "story": "009",
+     "startsWhen": [
+      "W0 closed",
+      "D1.0 draft",
+      "ruling A14"
+     ],
+     "writes": [
+      "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java (new; API + javadoc)",
+      "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarnessTest.java (new; fake-process unit test)"
+     ],
+     "acs": {
+      "local": [
+       "AC-12 h/i harness API",
+       "AC-11 k teardown API"
+      ],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-i-api01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.support.RunnerProcessHarnessTest' --no-daemon"
+     ],
+     "exit": "spawn(dist/main.js, TLS), readiness wait, descendants() captured before kill, reaped on teardown"
+    },
+    {
+     "id": "PR-RT",
+     "group": "W1",
+     "agent": "aiox-dev (Dex, runner)",
+     "story": "009",
+     "startsWhen": [
+      "W0 closed"
+     ],
+     "writes": [
+      "studio-runner/test/fixtures-tier/guidedCloseProbe.test.ts (new; KL-015-D5 c probe, records today's behaviour)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/pr-rt/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-11 D5 c"
+      ],
+      "external": []
+     },
+     "verify": [
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false exec vitest run --config vitest.fixtures.config.ts test/fixtures-tier/guidedCloseProbe.test.ts --minWorkers=1 --maxWorkers=1",
+      "ps -axo pid,ppid,command | grep checks-guided   # read-only, before and after"
+     ],
+     "exit": "per path (i)-(iv): settles?, reply sent?, slot held?, reply instant for (iv); handed to @architect"
+    },
+    {
+     "id": "PR-BE",
+     "group": "W1",
+     "agent": "aiox-dev (Dex, backend)",
+     "story": "009",
+     "startsWhen": [
+      "W0 closed"
+     ],
+     "writes": [
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendIT.java (new; R1 a probe case only)",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/PreReadyRevocationProbeIT.java (new; ADJ-1 a probe)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/pr-be/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-11 R1 a",
+       "AC-11 ADJ-1 a"
+      ],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-prbe-r1-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT' --no-daemon   # red = STALE_FENCE reproduced; green = 'not reproduced', R1 closes",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-prbe-adj1-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.dispatch.PreReadyRevocationProbeIT' --no-daemon   # red by design (409 FINAL, reaper settlement)"
+     ],
+     "exit": "both probe outcomes recorded with receipts; batons to B"
+    },
+    {
+     "id": "AR-W1",
+     "group": "W1.5",
+     "agent": "aiox-architect (Aria)",
+     "story": "009",
+     "startsWhen": [
+      "PR-RT and PR-BE exit"
+     ],
+     "writes": [
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/aria/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-11 D5 a ruling",
+       "AC-11 ADJ-1 b ruling (criteria C1)",
+       "AC-11 R1 binding go/no-go"
+      ],
+      "external": []
+     },
+     "verify": [
+      "ruling cites probe receipts"
+     ],
+     "exit": "rulings dated before any D5/ADJ-1 code merges"
+    },
+    {
+     "id": "D1",
+     "group": "W2",
+     "agent": "aiox-dev (Dex, runner); aiox-devops co-executes",
+     "story": "009",
+     "startsWhen": [
+      "D1.0 accepted"
+     ],
+     "writes": [
+      "studio-runner/src/main.ts",
+      "studio-runner/src/server/application.ts",
+      "studio-runner/src/server/server.ts",
+      "studio-runner/src/server/config.ts",
+      "studio-runner/src/server/identity.ts",
+      "studio-runner/src/server/routes.ts",
+      "studio-runner/src/probe.ts",
+      "studio-runner/src/guided/transport.ts",
+      "studio-runner/src/run/guidedMain.ts (delete)",
+      "studio-runner/src/run/guidedConfig.ts (delete or fold into config.ts)",
+      "studio-runner/src/run/guidedShutdown.ts (fold into the one drain)",
+      "studio-runner/src/run/index.ts (exports only, if needed)",
+      "studio-runner/package.json (start:guided script removal only; no dependency, no lockfile)",
+      "studio-runner/test/run/guidedMain.test.ts (port by name, then delete)",
+      "studio-runner/test/server/guidedMode.test.ts (new)",
+      "studio-runner/test/server/tlsListener.test.ts (new)",
+      "studio-runner/test/server/routes.test.ts",
+      "studio-runner/test/server/surface.test.ts",
+      "studio-runner/test/server/probe.test.ts",
+      "studio-runner/test/server/drain.test.ts",
+      "studio-runner/test/server/storage-lifecycle.test.ts",
+      "studio-runner/test/server/observedReplayRoutes.test.ts",
+      "studio-runner/test/server/observedReplayAdmission.test.ts",
+      "studio-runner/test/server/resolved-value-guards.test.ts",
+      "studio-runner/test/server/timeline.test.ts",
+      "studio-runner/test/guided/transport.test.ts",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/d1/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-1 fold",
+       "AC-1 PID-1 a",
+       "AC-2 runner fail-closed",
+       "AC-3 runner TLS + client cert",
+       "AC-4 STUDIO_RUNNER_VAULT_ADDRESS refusal",
+       "RUNNER-SCRATCH fold"
+      ],
+      "external": []
+     },
+     "verify": [
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false exec vitest run test/server/guidedMode.test.ts test/server/tlsListener.test.ts test/server/routes.test.ts test/server/surface.test.ts test/server/probe.test.ts test/server/drain.test.ts test/server/storage-lifecycle.test.ts test/server/observedReplayRoutes.test.ts test/server/observedReplayAdmission.test.ts test/server/resolved-value-guards.test.ts test/server/timeline.test.ts test/guided/transport.test.ts --coverage.enabled=false --minWorkers=1 --maxWorkers=2",
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false run type-check && pnpm --config.package-manager-strict=false run lint",
+      "grep -rn 'guidedMain\\|start:guided\\|STUDIO_GUIDED_CONFIG_FILE' studio-runner/src studio-runner/package.json   # expect 0 (test/run/tree.test.ts argv strings are fixture data, listed)"
+     ],
+     "prohibited": [
+      "plaintext listener in any configuration",
+      "a second entrypoint or a mode that selects a different process",
+      "dist rebuild outside F-merge",
+      "dependency or lockfile change",
+      "a capacity or policy-hash key (ruling A2.3/A2.4)"
+     ],
+     "exit": "focused suites green on src; no dist rebuild"
+    },
+    {
+     "id": "D2",
+     "group": "W2",
+     "agent": "aiox-devops (Gage) with aiox-dev",
+     "story": "009",
+     "startsWhen": [
+      "D1.0 accepted",
+      "root decision R1 (A2.6)"
+     ],
+     "writes": [
+      "studio-runner/Dockerfile",
+      "helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+      "helm-chart/put-checks/templates/studio-runner-service.yaml",
+      "helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+      "helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+      "helm-chart/put-checks/templates/deployment.yaml",
+      "helm-chart/put-checks/templates/configmap.yaml",
+      "helm-chart/put-checks/values.yaml",
+      "helm-chart/put-checks/values-dev.yaml",
+      "helm-chart/put-checks/values-uat.yaml",
+      "helm-chart/put-checks/values-prod.yaml",
+      "studio-runner/test/deployment/chart.test.ts",
+      "studio-runner/test/deployment/backend-env.test.ts",
+      "studio-runner/test/deployment/envfrom-keys.test.ts",
+      "studio-runner/test/deployment/scaling.test.ts",
+      "studio-runner/test/deployment/helm.ts",
+      "studio-runner/test/deployment/image.ts",
+      "studio-runner/test/deployment/dump-settings.test.ts (new)",
+      "studio-runner/test/deployment/tls-client-cert.test.ts (new)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/d2/** (incl. r82-alert-spec.md, PID-1 c launch-path table, resource basis)"
+     ],
+     "acs": {
+      "local": [
+       "AC-1 chart (one Deployment, no guided template, guided-enabled single replica A2.6, init PID-1 b, launch paths PID-1 c)",
+       "AC-2 values + rotation inputs",
+       "AC-4 dump flags + lint (A6)",
+       "AC-5 SIEM values",
+       "AC-11 d alert specification (A15)"
+      ],
+      "external": [
+       "G-1 in a shared environment (U4)",
+       "PID-1 d deployed pid (U4)",
+       "SIEM sink (U6)",
+       "alert firing (monitoring stack, @devops/Platform)"
+      ]
+     },
+     "verify": [
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false exec vitest run --config vitest.deployment.config.ts test/deployment/chart.test.ts test/deployment/dump-settings.test.ts test/deployment/tls-client-cert.test.ts test/deployment/envfrom-keys.test.ts test/deployment/backend-env.test.ts test/deployment/scaling.test.ts --minWorkers=1 --maxWorkers=1",
+      "image smoke only if root/user authorizes Docker (R5): docker build; docker run --init (guided enabled) -> pid != 1 recorded; docker run without --init -> CONFIGURATION_DENIED recorded; docker stop -> runner.draining + runner.drained (the chart.test.ts:557-565 property) with the new CMD. Otherwise 'unrun, no authorization'"
+     ],
+     "exit": "deployment tier green; render fails for guided enabled with replicaCount != 1 or autoscaling.enabled"
+    },
+    {
+     "id": "D3",
+     "group": "W2",
+     "agent": "aiox-dev (Dex, backend)",
+     "story": "009",
+     "startsWhen": [
+      "D3.0 exit",
+      "D1.0 accepted",
+      "rulings A3, A4, A5"
+     ],
+     "writes": [
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java (from D3.0, same lane)",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerProperties.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java (add an @Autowired TLS constructor; keep the 3-arg one so the 4 dispatch tests compile unchanged)",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java (TLS wiring only)",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java (TLS wiring only)",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java (@Profile)",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java (@Profile on the coordinator @Bean method)",
+      "backend/src/main/resources/application.yml",
+      "backend/src/main/resources/application-api.yml",
+      "backend/src/main/resources/application-worker.yml",
+      "backend/src/main/resources/application-prod.yml",
+      "backend/src/main/resources/application-staging.yml",
+      "backend/src/main/resources/application-dev.yml",
+      "backend/src/main/resources/application-local.yml",
+      "backend/src/main/resources/application-test.yml",
+      "backend/src/test/java/com/citi/put/checks/studio/support/RunnerTestTls.java (from D3.0, same lane)",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java (new)",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java (new)",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedScheduledBeansProfileTest.java (new)",
+      "backend/src/test/java/com/citi/put/checks/studio/secrets/DatabaseCanaryScanIT.java (new)",
+      "backend/src/test/java/com/citi/put/checks/studio/secrets/VaultPolicyIT.java (new; rehearsal or 'unrun' by name, never credited)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/d3/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-2 backend fail-closed",
+       "AC-3 validate() + client cert",
+       "AC-4 DB canary",
+       "AC-5 profile gates"
+      ],
+      "external": [
+       "AC-4 dev-Vault policy test (U5)"
+      ]
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-d3-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest' --tests 'com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT' --tests 'com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest' --tests 'com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest' --tests 'com.citi.put.checks.studio.secrets.DatabaseCanaryScanIT' --tests 'com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest' --no-daemon",
+      "grep -rn 'SSLContext.getDefault' backend/src/main/java/com/citi/put/checks/studio   # expect 0"
+     ],
+     "prohibited": [
+      "javax.net.ssl JVM-wide client keystore",
+      "widening any @Profile(\"!worker\") bean",
+      "merging runner-origin and studio.runner.base-url (011 FOLD owns client folds)"
+     ],
+     "exit": "worker context builds the reaper + coordinator graph; else stop and escalate (A5 risk)"
+    },
+    {
+     "id": "P2",
+     "group": "W2",
+     "agent": "aiox-dev (Dex, runner)",
+     "story": "009",
+     "startsWhen": [
+      "ruling A7"
+     ],
+     "writes": [
+      "studio-runner/src/versions.ts",
+      "studio-runner/scripts/write-runtime-versions.mjs",
+      "studio-runner/scripts/write-runtime-versions.d.mts",
+      "studio-runner/src/compat/runtime-versions.ts (assertObservedBrowserStartup signature stable)",
+      "studio-runner/scripts/check-pins.mjs",
+      "studio-runner/scripts/check-pins.d.mts",
+      "studio-runner/test/runtime-versions.test.ts",
+      "studio-runner/test/compat.test.ts",
+      "studio-runner/test/pins.test.ts",
+      "studio-runner/test/contract.test.ts",
+      "studio-runner/test/reporting/observedProgressUse.test.ts",
+      "studio-runner/test/reporting/reporting.test.ts",
+      "studio-runner/test/run/manifest.test.ts",
+      "studio-runner/test/helpers/harness.ts",
+      "studio-runner/test/fixtures/result-manifest.json",
+      "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts",
+      "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "studio-runner/test/fixtures-tier/observed-secret-control.test.ts",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/p2/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-1 P2 a, b (runner), d"
+      ],
+      "external": []
+     },
+     "verify": [
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false exec vitest run test/runtime-versions.test.ts test/compat.test.ts test/pins.test.ts test/contract.test.ts test/reporting/observedProgressUse.test.ts test/reporting/reporting.test.ts test/run/manifest.test.ts --coverage.enabled=false --minWorkers=1 --maxWorkers=2",
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false exec vitest run --config vitest.fixtures.config.ts test/fixtures-tier/observed-bootstrap-process-tree.test.ts test/fixtures-tier/observed-bootstrap-video.test.ts test/fixtures-tier/observed-replay.test.ts test/fixtures-tier/observed-secret-control.test.ts --minWorkers=1 --maxWorkers=1",
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false run check:pins",
+      "grep -rn \"ARTIFACT_VERSION\\|VALIDATOR_SCHEMA_VERSION\\|SYNTAX_REFERENCE_VERSION\\|VALIDATOR_PARSER\\|EXECUTOR_VERSION\" studio-runner/src studio-runner/scripts   # expect 0 (19 on 2026-10-17)"
+     ],
+     "landsWith": "B projectRuntime in F-merge",
+     "exit": "grep 0; observed keys unchanged (ReplayIT reads them)"
+    },
+    {
+     "id": "R1",
+     "group": "W2",
+     "agent": "aiox-dev (Dex, runner)",
+     "story": "009",
+     "startsWhen": [
+      "ruling A12"
+     ],
+     "writes": [
+      "studio-runner/src/run/launcher.ts (kill() only)",
+      "studio-runner/src/run/tree.ts",
+      "studio-runner/src/server/runCoordinator.ts",
+      "studio-runner/test/run/launcher.test.ts",
+      "studio-runner/test/run/tree.test.ts",
+      "studio-runner/test/run/forkKillTree.test.ts",
+      "studio-runner/test/server/cancel.test.ts",
+      "studio-runner/test/server/terminal-order.test.ts",
+      "studio-runner/test/server/deadline-outcome.test.ts",
+      "studio-runner/test/server/controlWindowLog.test.ts (new)",
+      "studio-runner/test/reporting/terminalAbandoned.test.ts (new; R8.2 d counter)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/r1/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-11 f-h (runner)",
+       "AC-11 i",
+       "AC-11 j",
+       "AC-11 d counter test"
+      ],
+      "external": []
+     },
+     "verify": [
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false exec vitest run test/run/launcher.test.ts test/run/tree.test.ts test/run/forkKillTree.test.ts test/server/cancel.test.ts test/server/terminal-order.test.ts test/server/deadline-outcome.test.ts test/server/controlWindowLog.test.ts test/reporting/terminalAbandoned.test.ts --coverage.enabled=false --minWorkers=1 --maxWorkers=2"
+     ],
+     "landsWith": "B RunnerOutcomeCodes/RunnerReportProjection R10c acceptance in F-merge",
+     "prohibited": [
+      "signal changes",
+      "any window/deadline/TTL/margin change",
+      "new error vocabulary"
+     ],
+     "exit": "kill path never reaches spawnSync('ps'); forked tree still killed"
+    },
+    {
+     "id": "R2",
+     "group": "W2",
+     "agent": "aiox-dev (Dex, runner)",
+     "story": "009",
+     "startsWhen": [
+      "AR-W1 D5 ruling"
+     ],
+     "writes": [
+      "studio-runner/src/run/browser.ts",
+      "studio-runner/src/guided/runtime.ts (closeResources and start-timeout close paths only)",
+      "studio-runner/src/run/guidedBrowser.ts (only if the D5 ruling needs it)",
+      "studio-runner/src/guided/ownership.ts (only if the D5 ruling needs it)",
+      "studio-runner/vitest.config.ts (coverage comment only)",
+      "studio-runner/test/guided/runtime.test.ts",
+      "studio-runner/test/guided/ownership.test.ts",
+      "studio-runner/test/guided/browser.test.ts",
+      "studio-runner/test/fixtures-tier/guidedCloseProbe.test.ts (baton from PR-RT)",
+      "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts (new)",
+      "studio-runner/test/fixtures-tier/helpers/guidedLaunch.ts (new)",
+      "studio-runner/test/run/guidedBrowserReap.test.ts (new)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/r2/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-11 D5 a-f (runner)",
+       "AC-11 k residue (comment, reap proof)"
+      ],
+      "external": []
+     },
+     "verify": [
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false exec vitest run test/guided/runtime.test.ts test/guided/ownership.test.ts test/guided/browser.test.ts test/run/guidedBrowserReap.test.ts --coverage.enabled=false --minWorkers=1 --maxWorkers=2",
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false exec vitest run --config vitest.fixtures.config.ts test/fixtures-tier/guidedCloseProbe.test.ts test/fixtures-tier/guidedCloseBound.test.ts --minWorkers=1 --maxWorkers=1",
+      "ps -axo pid,ppid,command | grep checks-guided   # read-only, before and after; agents never kill host processes"
+     ],
+     "batonOut": {
+      "studio-runner/src/guided/runtime.ts": "R2 -> O-AE after R2 exit (only if U13 acknowledged)",
+      "studio-runner/test/guided/runtime.test.ts": "R2 -> O-AE"
+     },
+     "prohibited": [
+      "D4 budget/reserve/backstop changes",
+      "releasing the slot over an unconfirmed browser",
+      "wire/schema/vocabulary change",
+      "tree.ts edits (R1 owns; baton if needed)"
+     ],
+     "exit": "one case per path (i)-(iv) green; mutation check red as required"
+    },
+    {
+     "id": "O-FM",
+     "group": "W2",
+     "agent": "aiox-dev (Dex, runner)",
+     "story": "009",
+     "startsWhen": [
+      "ruling A9"
+     ],
+     "writes": [
+      "studio-runner/src/run/observationCollector.ts",
+      "studio-runner/test/run/observationCollectorInvoke.test.ts (scripted-record stub extension + its own control)",
+      "studio-runner/test/fixtures-tier/focusMutation.test.ts (new)",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java (new; runs after F-merge)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/o-fm/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-7 FM-01 b-d"
+      ],
+      "external": [
+       "FM-01 e (T4)",
+       "FM-01 f (010 pilot probe)"
+      ]
+     },
+     "verify": [
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false exec vitest run test/run/observationCollectorInvoke.test.ts --coverage.enabled=false --minWorkers=1 --maxWorkers=2",
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false exec vitest run --config vitest.fixtures.config.ts test/fixtures-tier/focusMutation.test.ts --minWorkers=1 --maxWorkers=1",
+      "after F-merge: export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-ofm-joined01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT' --no-daemon"
+     ],
+     "notOn011StartList": true,
+     "exit": "positive cases write and return {}; every listed control still refuses POST_FOCUS_CHANGED"
+    },
+    {
+     "id": "S",
+     "group": "W2",
+     "agent": "aiox-dev (Dex, backend)",
+     "story": "009",
+     "startsWhen": [
+      "A17 recorded (Q2 default unless the user overrides)"
+     ],
+     "writes": [
+      "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java",
+      "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledDispatchAuthorization.java",
+      "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayRuntimeConfiguration.java",
+      "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+      "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleApiIT.java",
+      "backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/scheduling/ObservedScheduleAuthorityIT.java (new)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/s/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-6 a-f"
+      ],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-s-sched01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.scheduling.StudioScheduleApiIT' --tests 'com.citi.put.checks.scheduling.SharedSchedulingIT' --tests 'com.citi.put.checks.studio.scheduling.ObservedScheduleAuthorityIT' --no-daemon",
+      "grep -rn '@Disabled' backend/src/test | wc -l   # expect 6",
+      "grep -rn 'DEFERRED STUDIO-OBS-009' backend/src/test   # expect 0",
+      "grep -n 'studio.updateTest(' backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleApiIT.java backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java   # expect 0"
+     ],
+     "readOnly": [
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java (R9-OBS-1 record)"
+     ],
+     "prohibited": [
+      "changing any assertion of the 18",
+      "clock-source change without an @architect ruling",
+      "editing V16"
+     ],
+     "exit": "18 green unchanged; R7 conditioned + acceptance-first; 4 ports retired or re-pointed by name"
+    },
+    {
+     "id": "B",
+     "group": "W2",
+     "agent": "aiox-dev (Dex, backend)",
+     "story": "009",
+     "startsWhen": [
+      "rulings A7, A8, A11, A12",
+      "AR-W1 (C1, R1 go/no-go)"
+     ],
+     "writes": [
+      "backend/src/main/java/com/citi/put/checks/studio/StudioService.java (readAuthoringDraft only)",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java (extracted acceptedContextRevisions only)",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java (projectRuntime; R10c post-Ready acceptance)",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java (only if C1 = (a))",
+      "backend/src/test/java/com/citi/put/checks/studio/StudioServiceWriteAuthorizationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/StudioReadLockOrderIT.java (new)",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendIT.java (baton from PR-BE)",
+      "backend/src/test/java/com/citi/put/checks/studio/internal/RunnerReportProjectionTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/PreReadyRevocationProbeIT.java (baton from PR-BE)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/b/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-9 TF-3",
+       "AC-11 R1 a-d",
+       "AC-11 f-h (backend) incl. D-11 replayFailure null",
+       "AC-11 ADJ-1 a-c",
+       "AC-1 P2 b (projection)"
+      ],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-b-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest' --tests 'com.citi.put.checks.studio.StudioReadLockOrderIT' --tests '*StudioVisibilityIT' --tests '*StudioAuthorizationIT' --tests 'com.citi.put.checks.studio.internal.RunnerReportProjectionTest' --tests '*GuidedSessionEvidenceTest' --tests 'com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT' --no-daemon",
+      "grep -rn 'boolean sameIdentity' backend/src/main   # exactly 1 body",
+      "W3: export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-b-adj1-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.dispatch.PreReadyRevocationProbeIT' --no-daemon"
+     ],
+     "prohibited": [
+      "ADJ-1 implementation before AR-W1",
+      "reaper/deadline changes",
+      "new error vocabulary",
+      "a second identity derivation",
+      "touching the 008 A1 replayFailure derivation"
+     ],
+     "exit": "named cases + mutation checks recorded"
+    },
+    {
+     "id": "BL",
+     "group": "W2",
+     "agent": "aiox-dev (Dex, backend)",
+     "story": "009",
+     "startsWhen": [
+      "ruling LR (this record, section X1)",
+      "T0-QA EDGE decision"
+     ],
+     "writes": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java (lifecycle only)",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java (new)",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerContextRefusalTest.java (EDGE only if @qa requests it)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/bl/** (incl. the D5 e read-only record of GuidedDispatchService.stop)"
+     ],
+     "acs": {
+      "local": [
+       "AC-11 LR a-c",
+       "AC-11 D5 e (backend read)",
+       "AC-11 EDGE (only if requested)"
+      ],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-bl-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedSessionIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT' --no-daemon   # add guidedIncrementalTest to --test-tasks if I's partition list places a class there"
+     ],
+     "prohibited": [
+      "changing the hand-built LEASE_LOST ITs",
+      "an expiry tolerance (ruled out)",
+      "new vocabulary"
+     ],
+     "exit": "EXPIRED -> EXPIRED; DISPATCHING still UNKNOWN_OUTCOME; mutation check red"
+    },
+    {
+     "id": "DE",
+     "group": "W2",
+     "agent": "aiox-data-engineer (Dara)",
+     "story": "009",
+     "startsWhen": [
+      "W0 closed"
+     ],
+     "writes": [
+      "backend/src/test/java/com/citi/put/checks/studio/guided/secret/GuidedRuntimeRolePrivilegeIT.java (new; V19-V22 privilege delta + view-only variant)",
+      "backend/src/main/resources/db/migration/V23__studio_runtime_role_grants.sql (only if @data-engineer rules a migration AND U14 confirms a non-owner runtime role; default: none in 009 local)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/de/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-4 TF-5 b (delta check; grant statement prepared)"
+      ],
+      "external": [
+       "TF-5 a, c, e (U14, U4)"
+      ]
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-de-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.secret.GuidedRuntimeRolePrivilegeIT' --tests 'com.citi.put.checks.studio.guided.secret.SecretUseAuditIT' --no-daemon"
+     ],
+     "exit": "delta table per object V19-V22; if V23 lands, the head-pin tests move atomically in the same unit (008 DE precedent)"
+    },
+    {
+     "id": "I",
+     "group": "W2",
+     "agent": "aiox-dev (Dex, backend test infra)",
+     "story": "009",
+     "startsWhen": [
+      "I.0 exit",
+      "D1.0 accepted",
+      "D3.0 exit"
+     ],
+     "writes": [
+      "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java (body; same lane as I.0)",
+      "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarnessTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java (also RUNNER_PORT :3652-3653, probe :3856)",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java (spawn, base URL :2901, inline createApplication :32686-32798, teardown; IPC diagnostic kept)",
+      "backend/build.gradle.kts (verifyRunnerDist + guided IT dependsOn only)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/i/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-12 f, g records, h, i, j",
+       "AC-11 k IT teardown",
+       "AC-12 a-d observation duty"
+      ],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-i-api02 --test-tasks test -- test --tests 'com.citi.put.checks.studio.support.RunnerProcessHarnessTest' --no-daemon   # W2: compile + unit only; the switched ITs are expected red against dist 897182d5 until F-merge",
+      "lsof -nP -iTCP -sTCP:LISTEN   # recorded before every backend run (AC-12 g)"
+     ],
+     "batonOut": {
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "I -> S at F-merge (tripwire :18508 only)"
+     },
+     "prohibited": [
+      "building the runner from Gradle",
+      "removing or weakening the ReplayIT IPC diagnostic",
+      "assertion changes"
+     ],
+     "exit": "switch compiled; full runs after F-merge"
+    },
+    {
+     "id": "FMERGE",
+     "group": "F-merge",
+     "agent": "root (serialized)",
+     "story": "009",
+     "startsWhen": [
+      "D1, D3, I, P2, B, R1 exit",
+      "008 final-gate receipt exists"
+     ],
+     "writes": [
+      "studio-runner/dist/** (runtime artifact; one rebuild)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/f-merge/**"
+     ],
+     "items": [
+      "one dist rebuild via the 009 run-runner-build copy (pnpm form)",
+      "atomic sets: D1+I+D3; P2+B projectRuntime; R1+B R10c",
+      "baton ReplayIT I->S with hashes",
+      "post-rebuild runs below"
+     ],
+     "acs": {
+      "local": [],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-runner-build.py obs009-fmerge-build01",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-fmerge-bridge01 --test-tasks test -- verifyRunnerDist test --tests 'com.citi.put.checks.studio.guided.bridge.GuidedBridgeIntegrationTest' --tests 'com.citi.put.checks.studio.guided.bridge.GuidedBridgePlannedIT' --tests 'com.citi.put.checks.studio.guided.translation.GuidedPlanningIntegrationTest' --tests 'com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT' --no-daemon"
+     ],
+     "exit": "expected-red ledger empty; dist digest recorded; every later guided IT run credits only this digest"
+    },
+    {
+     "id": "S-W3",
+     "group": "W3",
+     "agent": "aiox-dev (Dex, backend)",
+     "story": "009",
+     "startsWhen": [
+      "F-merge exit",
+      "baton ReplayIT"
+     ],
+     "writes": [
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java (tripwire :18508 only)",
+      "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleApiIT.java",
+      "backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/scheduling/ObservedScheduleAuthorityIT.java",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/s/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-6 a-e full-class",
+       "AC-12 a-d observation on the ReplayIT run"
+      ],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-s-replay01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' --no-daemon   # alone, full class; never a single-test credit",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-s-sched02 --test-tasks test -- test --tests 'com.citi.put.checks.studio.scheduling.StudioScheduleApiIT' --tests 'com.citi.put.checks.scheduling.SharedSchedulingIT' --tests 'com.citi.put.checks.studio.scheduling.ObservedScheduleAuthorityIT' --no-daemon"
+     ],
+     "exit": "full-class greens with the F-merge dist digest and lsof preflight"
+    },
+    {
+     "id": "B-W3",
+     "group": "W3",
+     "agent": "aiox-dev (Dex, backend)",
+     "story": "009",
+     "startsWhen": [
+      "F-merge exit"
+     ],
+     "writes": [
+      "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java (only if C1 = (a))",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendIT.java (R1 d joined)",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/PreReadyRevocationProbeIT.java",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/b/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-11 R1 d",
+       "AC-11 ADJ-1 c"
+      ],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-b-joined01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT' --tests 'com.citi.put.checks.studio.dispatch.PreReadyRevocationProbeIT' --no-daemon"
+     ],
+     "exit": "joined owner loss at v(n-1): recording settles, plays, seeks"
+    },
+    {
+     "id": "F",
+     "group": "W3",
+     "agent": "aiox-dev (Dex) + aiox-qa (Quinn) reproduces",
+     "story": "009",
+     "startsWhen": [
+      "F-merge exit",
+      "ruling A16"
+     ],
+     "writes": [
+      "backend/src/test/java/com/citi/put/checks/corun/ObservedCoRunIT.java (new)",
+      "tools/corun.sh",
+      "tools/corun-report.mjs",
+      "docs/qa/evidence/studio-observed-authoring/fault-injection.json (new)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/f/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-11 base legs (duplicate, ACK loss, restart, stale owner, late callback, public mid-step cancel, runner kill)",
+       "RUNNER-LAUNCH attribution",
+       "REL-001 pointer + 15 s-edge classification on every run"
+      ],
+      "external": [
+       "live revocation, worker-profile dispatch on pods, R8.2 e (U4)"
+      ]
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-f-corun01 --test-tasks test -- test --tests 'com.citi.put.checks.corun.ObservedCoRunIT' --no-daemon",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; bash tools/corun.sh --skip-build   # after the re-point; no install branch"
+     ],
+     "exit": "fault-injection.json with denominators; zero repeated dispatches"
+    },
+    {
+     "id": "O-FM-W3",
+     "group": "W3",
+     "agent": "aiox-dev (Dex, runner)",
+     "story": "009",
+     "startsWhen": [
+      "F-merge exit"
+     ],
+     "writes": [
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/o-fm/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-7 FM-01 c"
+      ],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-ofm-joined01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT' --no-daemon"
+     ],
+     "exit": "fill succeeds; session continues"
+    },
+    {
+     "id": "EP",
+     "group": "W3",
+     "agent": "aiox-dev (Dex) + aiox-qa (Quinn); optional, may spill to W4",
+     "story": "009",
+     "startsWhen": [
+      "F-merge exit",
+      "T0-QA corpus final",
+      "B1-B7 recorded"
+     ],
+     "writes": [
+      "studio-runner/evaluation/lifecycle.mjs (delete)",
+      "studio-runner/evaluation/lifecycle.d.mts (delete)",
+      "studio-runner/evaluation/lifecycle.test.mjs (delete)",
+      "studio-runner/evaluation/cli.mjs",
+      "studio-runner/evaluation/README.md",
+      "studio-runner/evaluation/observed-authoring/evaluate.mjs (new)",
+      "studio-runner/evaluation/observed-authoring/manifest.json (new)",
+      "studio-runner/evaluation/observed-authoring/pages/** (new)",
+      "studio-runner/test/evaluation/** (new)",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSchemaProbeIT.java (new; AC-8 code)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/ep/**"
+     ],
+     "readOnly": [
+      "studio-runner/evaluation/observed-authoring/cases/*.json (015-owned; consumed unchanged)"
+     ],
+     "acs": {
+      "local": [
+       "AC-7 preparation (manifest, RS-1 marks, harness self-test)",
+       "AC-8 code",
+       "AC-9/AC-10 local halves (fixture provider)",
+       "B7 measurement"
+      ],
+      "external": [
+       "AC-7, AC-8, AC-9 real model, AC-10 live"
+      ]
+     },
+     "notOn011StartList": true,
+     "verify": [
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false exec vitest run test/evaluation --coverage.enabled=false --minWorkers=1 --maxWorkers=2",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-ep-probe01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.translation.GuidedSchemaProbeIT' --no-daemon   # without ED-01 it records UNAVAILABLE_NOT_RUN, never a pass"
+     ],
+     "exit": "harness self-tests labelled 'not D-C evidence'"
+    },
+    {
+     "id": "O-AE",
+     "group": "W3",
+     "agent": "aiox-dev (Dex, runner); conditional on U13",
+     "story": "009",
+     "startsWhen": [
+      "U13 Security & Compliance acknowledgement recorded",
+      "R2 exit (baton runtime.ts)"
+     ],
+     "writes": [
+      "studio-runner/src/guided/runtime.ts (baton from R2; withhold input filter :239/:281 only)",
+      "studio-runner/test/guided/runtime.test.ts (baton from R2)",
+      "studio-runner/test/fixtures-tier/authoredEcho.test.ts (new)",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedAuthoredEchoJoinedIT.java (new)",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/o-ae/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-7 AE-01 b-d"
+      ],
+      "external": [
+       "AE-01 a acknowledgement (U13)",
+       "AE-01 e (T4)"
+      ]
+     },
+     "notOn011StartList": true,
+     "verify": [
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false exec vitest run test/guided/runtime.test.ts test/run/canary.test.ts --coverage.enabled=false --minWorkers=1 --maxWorkers=2",
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false exec vitest run --config vitest.fixtures.config.ts test/fixtures-tier/authoredEcho.test.ts --minWorkers=1 --maxWorkers=1",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-oae-joined01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.translation.GuidedAuthoredEchoJoinedIT' --tests '*GuidedGatewayPrivacyTest' --tests '*GuidedSecretByteBodyTest' --no-daemon   # needs its own serialized dist rebuild (RB obs009-ae-build01) if it lands after F-merge"
+     ],
+     "exit": "positive + negative cases; canaries 0; dist digest recorded"
+    },
+    {
+     "id": "C9-AE",
+     "group": "W3",
+     "agent": "aiox-dev (Dex, contract integrator); conditional on U13",
+     "story": "009",
+     "startsWhen": [
+      "U13 recorded"
+     ],
+     "writes": [
+      "docs/specs/studio-observed-authoring/consensus-plan.md (dated note only)",
+      "docs/specs/studio-observed-authoring/bridge-design.md (dated note only)",
+      "docs/specs/studio-observed-authoring/account-provider-readiness-design.md (dated note only)"
+     ],
+     "acs": {
+      "local": [
+       "AC-7 AE-01 a (notes)"
+      ],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; node tools/check-studio-observed-contracts.cjs"
+     ],
+     "exit": "three dated notes; before/after sha256"
+    },
+    {
+     "id": "FE9",
+     "group": "W3",
+     "agent": "aiox-dev (Dex, frontend); after O-AE merges",
+     "story": "009",
+     "startsWhen": [
+      "O-AE merged",
+      "008 Done"
+     ],
+     "writes": [
+      "frontend/src/components/studio/guided/guidedNarratives.ts (authoredLiteralTargetNotFound key only)",
+      "frontend/src/components/studio/guided/GuidedCompletion.tsx (authored-literal hint only)",
+      "frontend/src/components/studio/guided/guided.test.tsx (KL-015-Q4 case only)",
+      "frontend/src/pages/ChecksStudioPage/<the page trigger file, named at start>",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-<date>/fe9/**"
+     ],
+     "acs": {
+      "local": [
+       "AC-7 AE-01 f"
+      ],
+      "external": []
+     },
+     "notOn011StartList": true,
+     "verify": [
+      "cd frontend && pnpm exec vitest run src/components/studio/guided src/pages/ChecksStudioPage --minWorkers=1 --maxWorkers=3",
+      "cd frontend && pnpm run type-check && pnpm run lint",
+      "grep -rn 'authoredLiteralTargetNotFound' frontend/src   # expect 0"
+     ],
+     "exit": "copy, trigger, tests and any MSW case removed"
+    },
+    {
+     "id": "G9",
+     "group": "W5",
+     "agent": "root, then aiox-qa (Quinn) local-validation record",
+     "story": "009",
+     "startsWhen": [
+      "all W2/W3 start-list lanes exit (D1, D2, D3, P2, R1, R2, S, B, BL, DE, I, F)"
+     ],
+     "writes": [
+      "docs/qa/evidence/STUDIO-OBS-009/local-gate-<date>/**"
+     ],
+     "acs": {
+      "local": [
+       "validation of AC-1-6, AC-11 (incl. R1 a-d, D5, LR) and AC-12 f-j local halves",
+       "plus TF-3, FM-01 (and AE-01 if landed), not gating 011"
+      ],
+      "external": []
+     },
+     "verify": [
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-runner.py obs009-g9-runner-unit01 pnpm --config.package-manager-strict=false exec vitest run --minWorkers=1 --maxWorkers=2",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-runner.py obs009-g9-runner-fixtures01 pnpm --config.package-manager-strict=false exec vitest run --config vitest.fixtures.config.ts --minWorkers=1 --maxWorkers=1",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-runner.py obs009-g9-runner-deploy01 pnpm --config.package-manager-strict=false exec vitest run --config vitest.deployment.config.ts --minWorkers=1 --maxWorkers=1",
+      "cd studio-runner && export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; pnpm --config.package-manager-strict=false run type-check && pnpm --config.package-manager-strict=false run lint && pnpm --config.package-manager-strict=false run check:pins",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; node tools/check-studio-observed-contracts.cjs",
+      "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/run-backend-tasked.py obs009-g9-check01 --test-tasks test,guidedIncrementalTest,crossReplicaTest --require-exec-tasks test,guidedIncrementalTest,crossReplicaTest --allowed-skips-file docs/qa/evidence/STUDIO-OBS-009/execution-<date>/qa/approved-skips.json -- --continue check --rerun-tasks --no-daemon   # jacocoTestCoverageVerification and requireFreshGuidedPartitions must show as executed",
+      "cd frontend && pnpm run type-check && pnpm run lint && pnpm exec vitest run --minWorkers=1 --maxWorkers=3 && pnpm run build"
+     ],
+     "exit": "one green run at one source digest; QA local-validation record (not Done) issued = 010 T2 trigger and first half of the 011 start condition"
+    }
+   ],
+   "live008WriteSets": {
+    "L5b (W3)": [
+     "frontend/src/pages/**",
+     "frontend/src/components/studio/run/**",
+     "frontend/src/components/studio/runs/**",
+     "frontend/src/components/studio/guided/**",
+     "frontend/src/components/studio/evidence/**",
+     "frontend/src/components/studio/templates/**",
+     "frontend/src/components/studio/tests/testListPresentation.ts",
+     "frontend/src/components/studio/scheduling/schedulePresentation.ts",
+     "frontend/src/utils/config/studioCapabilities.ts"
+    ],
+    "L6-author (W3)": [
+     "frontend/e2e/studio-guided.spec.ts",
+     "frontend/e2e/studio-authoring-real-backend.spec.ts"
+    ],
+    "L6 (W4)": [
+     "frontend/e2e/studio-guided.spec.ts",
+     "frontend/e2e/studio-authoring-real-backend.spec.ts",
+     "frontend/playwright.config.ts",
+     "frontend/e2e/start-servers.mjs",
+     "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+     "docs/qa/accessibility/axe-results.json"
+    ],
+    "W5 (root gates + reviews)": [
+     "docs/qa/evidence/STUDIO-OBS-008/**",
+     "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md"
+    ]
+   },
+   "waves": [
+    {
+     "id": "NOW",
+     "when": "beside 008 W3-W5",
+     "lanes": [
+      "T0-AR (this record)",
+      "T0-QA",
+      "T0-PO",
+      "T2-SK (optional)"
+     ],
+     "plus": "root raises the section 5 batch (U13 request now)"
+    },
+    {
+     "id": "W0",
+     "when": "after 008 Done",
+     "lanes": [
+      "W0",
+      "QA-W0"
+     ],
+     "exit": "baseline manifest; R1-R7 and A17 recorded"
+    },
+    {
+     "id": "W1",
+     "parallel": true,
+     "lanes": [
+      "C9",
+      "D1.0",
+      "D3.0",
+      "I.0",
+      "PR-RT",
+      "PR-BE"
+     ],
+     "gradle": "serialized by LOCK",
+     "exit": "contract re-anchored; drops accepted; probe outcomes recorded"
+    },
+    {
+     "id": "W1.5",
+     "lanes": [
+      "AR-W1"
+     ],
+     "exit": "D5 ruling, C1 ruling, R1 go/no-go dated"
+    },
+    {
+     "id": "W2",
+     "parallel": true,
+     "lanes": [
+      "D1",
+      "D2",
+      "D3",
+      "P2",
+      "R1",
+      "R2",
+      "O-FM",
+      "S",
+      "B",
+      "BL",
+      "DE",
+      "I"
+     ],
+     "gradle": "serialized by LOCK",
+     "memory": "root caps active agents (R7)",
+     "exit": "each lane's focused checks green on src; no dist rebuild"
+    },
+    {
+     "id": "F-merge",
+     "owner": "root",
+     "lanes": [
+      "FMERGE"
+     ],
+     "exit": "one dist rebuild; atomic sets landed; expected-red ledger empty"
+    },
+    {
+     "id": "W3",
+     "parallel": true,
+     "lanes": [
+      "S-W3",
+      "B-W3",
+      "F",
+      "O-FM-W3",
+      "EP (optional)",
+      "O-AE (if U13)",
+      "C9-AE (if U13)",
+      "FE9 (after O-AE)"
+     ],
+     "gradle": "serialized by LOCK"
+    },
+    {
+     "id": "W5",
+     "lanes": [
+      "G9"
+     ],
+     "exit": "QA local-validation record (not Done)"
+    },
+    {
+     "id": "010-T2",
+     "lanes": [
+      "T2 (aiox-analyst; @architect cross-check; @pm accepts)"
+     ],
+     "startsWhen": "G9 exit"
+    },
+    {
+     "id": "011-T0",
+     "startsWhen": "G9 exit AND the dated 010 Live surface list exists"
+    }
+   ],
+   "expectedRedLedger": [
+    "I's switched guided ITs (Bridge, BridgePlanned, Planning, ReplayIT) are red against dist 897182d5 until F-merge; W2 runs them compile-only",
+    "P2 key removal and B projectRuntime re-point land together in F-merge (after the rebuild the dist no longer emits validatorSchema/executor)",
+    "R1 R10c runner shape and B post-Ready acceptance land together in F-merge",
+    "S: 18 re-enables, 4 ports and the ReplayIT tripwire are one atomic unit (tripwire after the I->S baton)",
+    "PreReadyRevocationProbeIT red by design until the C1-ruled implementation; GuidedEvidencePendingAppendIT red until the R1 binding (or green = 'not reproduced', R1 closes)"
+   ],
+   "localVsExternal": [
+    {
+     "ac": "AC-1",
+     "local": "fold, keys, enable switch, PID-1 a-c, chart (one Deployment, no guided template, guided-enabled single replica), P2 a-d",
+     "lanes": "D1, D2, P2, B, C9",
+     "blocked": "PID-1 d deployed pid; internal image; real Deployment",
+     "blocker": "U4, U12",
+     "owner": "Platform/SRE + @devops"
+    },
+    {
+     "ac": "AC-2",
+     "local": "values for key/issuer/truststore, fail-closed negatives, separate audiences, rotation inputs",
+     "lanes": "D1, D2, D3",
+     "blocked": "G-1 verified in a shared environment",
+     "blocker": "U4",
+     "owner": "Platform/SRE + @devops"
+    },
+    {
+     "ac": "AC-3",
+     "local": "all (runner TLS + client cert, validate(), self-signed-CA IT, client presents cert)",
+     "lanes": "D1, D3, I",
+     "blocked": "none (G-2 recorded in 010)",
+     "blocker": "-",
+     "owner": "-"
+    },
+    {
+     "ac": "AC-4",
+     "local": "dump flags + lint, runner Vault-address refusal, DB canary IT, TF-5 b privilege-delta check, Vault rehearsal (never credited)",
+     "lanes": "D1, D2, D3, DE",
+     "blocked": "dev-Vault policy test (GO-3); TF-5 a role model, c live audit row, e; TF-5 b grant if non-owner; backend core rlimit",
+     "blocker": "U5 (ED-02); U14; U4; R5 for the rehearsal image",
+     "owner": "PUT Core/BFF; Platform DBA/@devops; Platform/SRE; user"
+    },
+    {
+     "ac": "AC-5",
+     "local": "profile gates + context test, SIEM chart values",
+     "lanes": "D3, D2",
+     "blocked": "SIEM sink live",
+     "blocker": "U6",
+     "owner": "Platform/SRE"
+    },
+    {
+     "ac": "AC-6",
+     "local": "all (lift, G-3, 18 re-enabled, R7, 4 ports, tripwire, R9-OBS-1 record)",
+     "lanes": "S, S-W3",
+     "blocked": "none (activation is GA E-1/E-2)",
+     "blocker": "A17 user confirmation of the Q2 default",
+     "owner": "user"
+    },
+    {
+     "ac": "AC-7 FM-01",
+     "local": "a (ruled), b-d",
+     "lanes": "O-FM, O-FM-W3",
+     "blocked": "e accounting (T4); f pilot probe",
+     "blocker": "T4 externals; 010 pilot",
+     "owner": "@dev/@qa; @analyst + user"
+    },
+    {
+     "ac": "AC-7 AE-01",
+     "local": "a rule text (ruled); b-d after acknowledgement; f FE copy removal",
+     "lanes": "O-AE, C9-AE, FE9",
+     "blocked": "a acknowledgement; e accounting",
+     "blocker": "U13; T4",
+     "owner": "Security & Compliance; @dev/@qa"
+    },
+    {
+     "ac": "AC-7 benchmark (+RS-1)",
+     "local": "manifest, RS-1 marks, harness self-test, B7 measurement",
+     "lanes": "EP",
+     "blocked": "every real-model run; staging half",
+     "blocker": "U2, U7 (+B8 R and price), U4, U3, MODEL-SIZING ruling",
+     "owner": "user / ED-01 owner / Platform-SRE / @architect+@pm"
+    },
+    {
+     "ac": "AC-8",
+     "local": "GuidedSchemaProbeIT code",
+     "lanes": "EP",
+     "blocked": "probe run",
+     "blocker": "U2, U7",
+     "owner": "ED-01 owner / user"
+    },
+    {
+     "ac": "AC-9",
+     "local": "TF-3; isolation/mutation with the fixture provider",
+     "lanes": "B, EP",
+     "blocked": "guard refusals with the real model",
+     "blocker": "U2, U4, U7",
+     "owner": "ED-01 owner / Platform-SRE / user"
+    },
+    {
+     "ac": "AC-10",
+     "local": "canary scanner over local traffic and outputs",
+     "lanes": "EP, O-AE",
+     "blocked": "live gateway bytes; C-17 manual video gate",
+     "blocker": "U2, U4; U8, U3",
+     "owner": "ED-01 owner, Platform/SRE; user"
+    },
+    {
+     "ac": "AC-11",
+     "local": "co-run legs; ADJ-1 a-c; R8.2 d spec + counter; R10c f-h; i; j; k residue; R1 a-d; D5 a-f; LR a-c; EDGE if requested; REL-001 pointer classification",
+     "lanes": "F, B, B-W3, D2, R1, R2, I, BL, PR-RT, PR-BE",
+     "blocked": "live revocation within one real control poll; worker-profile dispatch on pods; R8.2 e live reaper bound; alert firing",
+     "blocker": "U4; monitoring stack",
+     "owner": "Platform/SRE + @devops"
+    },
+    {
+     "ac": "AC-12",
+     "local": "f-j; a-d observation; 15 s-edge rule; five backend lanes + three runner tiers + frontend suites on the local tree; local E2E with the fixture provider labelled local",
+     "lanes": "I, S-W3, F, G9",
+     "blocked": "real-browser E2E on the deployed stack with a real model",
+     "blocker": "U4, U2",
+     "owner": "Platform/SRE + @devops; ED-01 owner"
+    }
+   ],
+   "targetThisSession": "009 local ACs: AC-1-6, AC-11 (incl. R1 a-d, D5, LR) and AC-12 f-j local halves validated at G9; TF-3 and FM-01 also local but not on the 011 start list; AE-01 only if U13 arrives. External proofs are owed, never fabricated",
+   "triggers": {
+    "010T2": "G9 exit: the independent @qa local-validation record over the 011 start-list local halves at one source digest (STUDIO-OBS-010 dependency note D-1; STUDIO-OBS-011 clarification S-2/S-3 and 2026-10-17 addition). T2-SK work before that is not T2",
+    "011Start": "G9 exit AND the dated 010 Live surface list (measured at G9, accepted by @pm) exists. Counts: AC-1-6, AC-11 incl. R1 a-d, D5 a-f, LR a-c; AC-12 f-j. Does not count: TF-3, FM-01, AE-01, EDGE, PID-1, REL-001 pointer, 15 s-edge rule",
+    "singleOwnerAfter011Starts": "if O-AE has not landed: studio-runner/src/guided/runtime.ts stays excluded from 011's reformat; StudioService.java is free once TF-3 lands in B; GuidedSessionService.java is free once BL lands (C-OBS008-1 and CLN-F1 come after)"
+   },
+   "agents": {
+    "aiox-dev": "C9, D1, D3.0, D3, I.0, I, P2, R1, R2, O-FM, S, B, BL, PR-RT, PR-BE, F, EP, O-AE, C9-AE, FE9 (Sonnet 5.5, effort high, user rule)",
+    "aiox-devops": "D2; co-signs D1.0/D1; PID-1 (Sonnet 5.5, effort high)",
+    "aiox-data-engineer": "DE (model per root)",
+    "aiox-qa": "T0-QA, QA-W0, F reproduction, G9 local-validation record (Sonnet 5.5, effort high)",
+    "aiox-analyst": "T2-SK (optional), 010 T2 (model per root)",
+    "aiox-architect": "T0-AR, AR-W1, T2 cross-check"
+   },
+   "writeOverlapCheck": {
+    "script": "refold009.py (scratchpad; method reproduced in implementation-plan.md 'W0 refold 2026-10-17' section R9.6)",
+    "method": "pairwise across lanes of one concurrency group, segment by segment: equal literals, fnmatch of a literal segment against a wildcard segment, '**' matching any remainder, two wildcard segments compared by literal head and tail. '<date>' is a wildcard. Collector receipts under execution-<date>/execution/ are a shared append-only sink with unique labels and are excluded. A self-test (below) proves the checker flags a real overlap",
+    "perGroup": {
+     "NOW": {
+      "lanes": [
+       "T0-AR",
+       "T0-QA",
+       "T0-PO",
+       "T2-SK"
+      ],
+      "overlaps": 0,
+      "pairs": []
+     },
+     "W0": {
+      "lanes": [
+       "W0",
+       "QA-W0"
+      ],
+      "overlaps": 0,
+      "pairs": []
+     },
+     "W1": {
+      "lanes": [
+       "C9",
+       "D1.0",
+       "D3.0",
+       "I.0",
+       "PR-RT",
+       "PR-BE"
+      ],
+      "overlaps": 0,
+      "pairs": []
+     },
+     "W1.5": {
+      "lanes": [
+       "AR-W1"
+      ],
+      "overlaps": 0,
+      "pairs": []
+     },
+     "W2": {
+      "lanes": [
+       "D1",
+       "D2",
+       "D3",
+       "P2",
+       "R1",
+       "R2",
+       "O-FM",
+       "S",
+       "B",
+       "BL",
+       "DE",
+       "I"
+      ],
+      "overlaps": 0,
+      "pairs": []
+     },
+     "F-merge": {
+      "lanes": [
+       "FMERGE"
+      ],
+      "overlaps": 0,
+      "pairs": []
+     },
+     "W3": {
+      "lanes": [
+       "S-W3",
+       "B-W3",
+       "F",
+       "O-FM-W3",
+       "EP",
+       "O-AE",
+       "C9-AE",
+       "FE9"
+      ],
+      "overlaps": 0,
+      "pairs": []
+     },
+     "W5": {
+      "lanes": [
+       "G9"
+      ],
+      "overlaps": 0,
+      "pairs": []
+     }
+    },
+    "overlapTotal": 0,
+    "nowVsLive008": {
+     "overlaps": 0,
+     "pairs": []
+    },
+    "sequentialHandovers": [
+     {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+      "ownersInOrder": [
+       "D3.0",
+       "D3"
+      ]
+     },
+     {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java",
+      "ownersInOrder": [
+       "B",
+       "B-W3"
+      ]
+     },
+     {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+      "ownersInOrder": [
+       "B",
+       "B-W3"
+      ]
+     },
+     {
+      "path": "backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java",
+      "ownersInOrder": [
+       "S",
+       "S-W3"
+      ]
+     },
+     {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/PreReadyRevocationProbeIT.java",
+      "ownersInOrder": [
+       "PR-BE",
+       "B",
+       "B-W3"
+      ]
+     },
+     {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "ownersInOrder": [
+       "I",
+       "S-W3"
+      ]
+     },
+     {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendIT.java",
+      "ownersInOrder": [
+       "PR-BE",
+       "B",
+       "B-W3"
+      ]
+     },
+     {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+      "ownersInOrder": [
+       "O-FM",
+       "O-FM-W3"
+      ]
+     },
+     {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/scheduling/ObservedScheduleAuthorityIT.java",
+      "ownersInOrder": [
+       "S",
+       "S-W3"
+      ]
+     },
+     {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleApiIT.java",
+      "ownersInOrder": [
+       "S",
+       "S-W3"
+      ]
+     },
+     {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java",
+      "ownersInOrder": [
+       "I.0",
+       "I"
+      ]
+     },
+     {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarnessTest.java",
+      "ownersInOrder": [
+       "I.0",
+       "I"
+      ]
+     },
+     {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerTestTls.java",
+      "ownersInOrder": [
+       "D3.0",
+       "D3"
+      ]
+     },
+     {
+      "path": "studio-runner/src/guided/runtime.ts",
+      "ownersInOrder": [
+       "R2",
+       "O-AE"
+      ]
+     },
+     {
+      "path": "studio-runner/test/fixtures-tier/guidedCloseProbe.test.ts",
+      "ownersInOrder": [
+       "PR-RT",
+       "R2"
+      ]
+     },
+     {
+      "path": "studio-runner/test/guided/runtime.test.ts",
+      "ownersInOrder": [
+       "R2",
+       "O-AE"
+      ]
+     }
+    ],
+    "laterLanesOnLive008Paths": [
+     {
+      "lane009": "FE9",
+      "group": "W3",
+      "path": "frontend/src/components/studio/guided/guidedNarratives.ts",
+      "live008": "L5b (W3)"
+     },
+     {
+      "lane009": "FE9",
+      "group": "W3",
+      "path": "frontend/src/components/studio/guided/GuidedCompletion.tsx",
+      "live008": "L5b (W3)"
+     },
+     {
+      "lane009": "FE9",
+      "group": "W3",
+      "path": "frontend/src/components/studio/guided/guided.test.tsx",
+      "live008": "L5b (W3)"
+     },
+     {
+      "lane009": "FE9",
+      "group": "W3",
+      "path": "frontend/src/pages/ChecksStudioPage/*",
+      "live008": "L5b (W3)"
+     }
+    ],
+    "selfTest": {
+     "literalVsGlob": true,
+     "distinctEvidenceFolders": false,
+     "mutationMoveOAEIntoW2_overlapsWithR2": 2,
+     "expected": {
+      "literalVsGlob": true,
+      "distinctEvidenceFolders": false,
+      "mutationMoveOAEIntoW2_overlapsWithR2": ">0 (runtime.ts, runtime.test.ts)"
+     }
+    }
+   },
+   "testsExecuted": 0,
+   "sourceChanges": false
+  }
+}

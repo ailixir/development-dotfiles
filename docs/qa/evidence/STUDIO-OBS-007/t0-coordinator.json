@@ -1,0 +1,34 @@
+{
+  "story": "STUDIO-OBS-007",
+  "recordedAt": "2026-10-10T04:33:36.088224+00:00",
+  "phase": "develop",
+  "task": "T0",
+  "released": [
+    "Lane C contract construction",
+    "root mechanical backend T1 DTOs",
+    "V34 DDL and migration-only tests after independent PO audit absence delta GO"
+  ],
+  "held": [
+    "T2/T3 full behavior before compile-green T1"
+  ],
+  "sourceHashes": {
+    "docs/qa/evidence/STUDIO-OBS-007/t0-security-r3-delta.md": "627a3c3d0701b0881e1a285811b9ebbb5a2158a663fcdc6d2c42335a09dcbcc4",
+    "docs/qa/evidence/STUDIO-OBS-007/t0-data-design.md": "55fe0895dd4af69cd7a6951f247ab1daf826a03b95c1b639e22f7cf4787af517",
+    ".ai/STUDIO-OBS-007-architect-t0-rulings.json": "a6a71c7186f8f26c09f3a3e9f53ca222f1025a699b12c85723d879103958fc70"
+  },
+  "dependencyClosureReverification": {
+    "story": "STUDIO-OBS-006",
+    "reviewedRevision": "f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab",
+    "mismatches": []
+  },
+  "modelBudgetCeilingUsd": 500,
+  "actualSpendAvailable": false,
+  "noRuntimeProofClaimed": true,
+  "poDelta": {
+    "path": ".ai/STUDIO-OBS-007-po-audit-delta.json",
+    "sha256": "cf9c3436887f00bd4075daddb7381c3c9aafa5dc79c048e410084514776fff54",
+    "verdict": "GO",
+    "scope": "Only AC-14 absence semantics for guided declared-but-unreached NOT_USED; prior full 19-AC scope and conditions retained"
+  },
+  "finalArchitectRulingSha256": "df94f7d40de5f026856aa959427cbdb09ce71ba7f99a144c081f7f59e3d01cd2"
+}

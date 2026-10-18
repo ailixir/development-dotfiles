@@ -1,0 +1,38 @@
+{
+  "classification": "BOUNDED_ACTUAL_APPEND_DIAGNOSIS_LEGAL_EXISTING_FLOW_PROOF_TRANSFER_NOT_FORMAL_QA",
+  "payloads": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/feedback03-append-diagnosis/review.md",
+      "sha256": "17ef03b5103208247d6b9809c54471cc8a2e347686670ab3dc48bca09c78bc93",
+      "bytes": 9832
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/feedback03-append-diagnosis/checks.json",
+      "sha256": "6b21822b831e60c332593d57cd56e13b093db4770b2b97cdaae978a40a533b3e",
+      "bytes": 9308
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/feedback03-append-diagnosis/source-inventory.json",
+      "sha256": "cc70f80684c5e6cd050ed103b3d7b329b29823cd4bc4d6fa75a266ac11222fbf",
+      "bytes": 6394
+    }
+  ],
+  "inputCount": 23,
+  "namedInputsStableAtWrite": true,
+  "globalStabilityClaim": false,
+  "actualRootCause": "IllegaltestsetupmissingrealMATERIALIZEcontinuation",
+  "productionChangeRecommended": false,
+  "minimumTestPaths": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java"
+  ],
+  "proofTransferExplicitlyAcceptedByRoot": true,
+  "transferredProofRuntime": "UNRUNuntiloriginalappend-inputlabelinall35or37taskexecutes",
+  "reviewerRuntimeExecution": false,
+  "sourceEdits": false,
+  "sourceRelease": false,
+  "formalStoryQaVerdict": null,
+  "lifecycleChange": false,
+  "full015then008ScopeUnchanged": true,
+  "item85": "originalOPENpendingunamended"
+}

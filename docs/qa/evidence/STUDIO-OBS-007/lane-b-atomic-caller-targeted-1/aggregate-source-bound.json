@@ -1,0 +1,20 @@
+{
+  "sourceComparison": "all Java, historical/current migrations and v3 schemas match gate3",
+  "mismatches": [],
+  "receipts": [
+    {
+      "path": "../lane-b-atomic-caller-gate-3/result.json",
+      "credited": "26 DispatcherIT +39 data/lifecycle cases; original atomic class has one setup failure, uncredited as full class"
+    },
+    {
+      "path": "result.json",
+      "credited": "9 StudioDispatcherFailureIT actual tests"
+    }
+  ],
+  "aggregateTests": 74,
+  "aggregateFailures": 0,
+  "aggregateErrors": 0,
+  "aggregateSkipped": 0,
+  "combinedSingleRunPass": false,
+  "notClaimed": "Full final-source backend regression, joined19AC, full native sink or lifecycle QA PASS"
+}

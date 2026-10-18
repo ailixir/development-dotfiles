@@ -1,0 +1,836 @@
+{
+  "artifact": "Independent B3a named source/evidence bindings",
+  "capturedAt": "2026-10-15T20:17:34.720638+00:00",
+  "inputs": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-b3a-private-authority-source01.json",
+      "sha256": "472a73223f922ac47206a9e02119ee6bcb29959fd613b7e9be34fef3f3cd5cb7",
+      "bytes": 6547,
+      "inspectionExtent": "Read canonical checkpoint and verified all listed payload hashes/lengths"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+      "sha256": "e6228117d0e9844075603c3b011166ddffb74ddb4533d4524111bd5a665bb9fd",
+      "bytes": 40677,
+      "inspectionExtent": "Read full owned source; exact before/after/patch/preservation review"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/source-before/GuidedPublicationAuthorityIT.java",
+      "sha256": "d552398ccb6cc8c9d851acb81f0af35c5a5672e685e2f2543f83784a36a037b5",
+      "bytes": 21596,
+      "inspectionExtent": "Read original source; independent inverse whole-file equality"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/source-after/GuidedPublicationAuthorityIT.java",
+      "sha256": "e6228117d0e9844075603c3b011166ddffb74ddb4533d4524111bd5a665bb9fd",
+      "bytes": 40677,
+      "inspectionExtent": "Read archived final source; equals current owned source"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/source.patch",
+      "sha256": "9dcd3b4a671282b494c77699285e39c0226a2aefea8a97e09b1b18a469082080",
+      "bytes": 20494,
+      "inspectionExtent": "Read complete source delta; independently reconstructed exact unified diff"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/bindings.json",
+      "sha256": "05aa732d7565a3c376e9883416c3d948141d86e6c6577250ad1929173321d823",
+      "bytes": 7331,
+      "inspectionExtent": "Read canonical dependency hashes and normalization metadata"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/location-normalization.json",
+      "sha256": "25a0c419ebc5638aefba96691b13e0dd64f84bbc2d611290a277f27e925169aa",
+      "bytes": 13908,
+      "inspectionExtent": "Read historical-to-canonical path overlay; old paths not treated as live outputs"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/preservation.json",
+      "sha256": "c909cee1f706df440b9fe3cd65c964727df054a76bc5629c6f33e90d0845b676",
+      "bytes": 4839,
+      "inspectionExtent": "Read original11 identities/body bindings and archive overlay"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/subjects.json",
+      "sha256": "ccbc84859539bb43c07b257c443c3721a7e4a4ce9736fb70370380297e688106",
+      "bytes": 6371,
+      "inspectionExtent": "Read all4 original subjects; exact comparison to ledger"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/selectors.json",
+      "sha256": "f87b30cc309a8b4217104f91b9ff79b9a12e56df8e0871b1083bf397f830fec3",
+      "bytes": 3410,
+      "inspectionExtent": "Read all5methods/24invocations; parameter declaration matching"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/remaining.json",
+      "sha256": "c107b8db545db2c253b65d872465ad1f73288b50dd1a4a1a184e70fe13a2022a",
+      "bytes": 4266,
+      "inspectionExtent": "Read original scope and next-owner boundaries"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/private-routes.json",
+      "sha256": "f32934447c9a55116374eaa382475397093986952881999691b8ad406406cd2f",
+      "bytes": 26426,
+      "inspectionExtent": "Read all15 named routes/tiers/limits; no closure; do not export original descriptor scalar hashes"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/historical/bindings.original.json",
+      "sha256": "97e9ba99c5c7f3dc827aa0061a3b2ec7b49df9818949f3057da9632cd30d2285",
+      "bytes": 5796,
+      "inspectionExtent": "Hash and normalization lineage only; historical paths not live"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/historical/checkpoint-b3a-private-authority-source01.original.json",
+      "sha256": "c3f134f09e5691d26fbb73d184b1b7f047067366b14f2b998706d3ad352d1823",
+      "bytes": 3890,
+      "inspectionExtent": "Hash and normalized lineage metadata only"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedMaterializationEvidence.java",
+      "sha256": "7fbefe9db5f02682c6468d3495617a2468748d5a6405affe6bc205197061ef6e",
+      "bytes": 6809,
+      "inspectionExtent": "Read full private input/version/current reconstruction and exact queries"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+      "sha256": "8aa40c60582007a59ba406d47832bf30d06627cf227fc0c3ce942ab7d58b07df",
+      "bytes": 37477,
+      "inspectionExtent": "Read current read/snapshotEvidence/materialization queries and relevant composition; no full unrelated capture review"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "sha256": "28aafe98ebdbbd3dcd59d061b671131713c5b5c2db4330a3e5252bd106011b48",
+      "bytes": 28293,
+      "inspectionExtent": "Read constructor/current commit/reader/verification/write ordering relevant to parent and attacks"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "sha256": "9289948874fdce24bf319782fbc69a380d7936388b40bb6a4923ab6add0b01c6",
+      "bytes": 55794,
+      "inspectionExtent": "Read basis initial original-manifest hash and materialization/graph composition anchors"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/authoring/IncrementalAuthoringIdentity.java",
+      "sha256": "f2212c7200dd2d3dff4e31611bb01c8b9e20a1715b1aeab623ba22fc9b175973",
+      "bytes": 15215,
+      "inspectionExtent": "Read snapshot/resolve/frozen/collect exact private declaration and input identity call path"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringRevisionIdentity.java",
+      "sha256": "bc081c9a6113bed285c9764a574747e2195a38478c9c670b11ceffaaa67587ae",
+      "bytes": 10682,
+      "inspectionExtent": "Read context/reference input identity and data type construction anchors"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringRevisionInputs.java",
+      "sha256": "c5c164bbfc55f8136db5c467522d0f5498e77bbb477f672ec5f74341116e85dd",
+      "bytes": 1818,
+      "inspectionExtent": "Read full mapper-relevant record types; no temporals"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java",
+      "sha256": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc",
+      "bytes": 6560,
+      "inspectionExtent": "Read copy/bounded/record defensive API types and source hash binding"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanHistoryAudit.java",
+      "sha256": "b69b48bee651b8b7c83d02a96836af986d23a888b38b4fad2460e8b77bbd02ee",
+      "bytes": 11494,
+      "inspectionExtent": "Read actual audit preceding materialization/source read and unchanged query order"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java",
+      "sha256": "b3769877088421d7d4690d663efecc35cf016044cc9ee4849fbed74ef722b23f",
+      "bytes": 9073,
+      "inspectionExtent": "Read private configurationSlots and snapshot/manifest classification anchors"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "sha256": "2f74c1fcb596f09ed630e674185f7f3ba7cfac78f5540f8aa61d8ce2efe8df84",
+      "bytes": 22975,
+      "inspectionExtent": "Read safe parse/validate exception behavior and API declarations"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "sha256": "3f8d75c258a1a0e827524a54ee1c822ac0374eebcdef148a21b4f21a7be5d2d0",
+      "bytes": 152043,
+      "inspectionExtent": "Read existing Database constructors/capture/finalize/rebind/persist ordinary shared fixture; no full152KB migration-suite rereview"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+      "sha256": "80357798b080ab6f8cb1ba38c7828915fa37663e203b0280997c7937ebc432d0",
+      "bytes": 40492,
+      "inspectionExtent": "Read real classifier source freeze and synthetic upstream bootstrap fixture lineage"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "sha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+      "bytes": 22720135,
+      "inspectionExtent": "Parsed only ordinary basis parent shape/types/cutoff count and chosen mutation node types; no subject code/oracle execution"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/validation-ledger.json",
+      "sha256": "9e58edc0e566b118aa83c184d66907136347844ce1f2bce2ae074c9a97404024",
+      "bytes": 88781,
+      "inspectionExtent": "Read exact original4subjects/no status mutation"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/requirement-map.json",
+      "sha256": "cf63626da52b1a7d3c48aeaf913f6088876a87873ba5ac540f7be6cc5bdce003",
+      "bytes": 317243,
+      "inspectionExtent": "Read retained original15 names and4subject scope; not a full review repetition"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/review.md",
+      "sha256": "f362d2205354875bdba926cd0356fc8a6be7aeb34c858532218654837c74eedc",
+      "bytes": 9973,
+      "inspectionExtent": "SHA256/length binding only; content not independently re-reviewed in this bounded source delta"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/next-batches.json",
+      "sha256": "6e1d20f17c9802a6f747ded7bc521db4b047a2a248a84c7fabd9baf32adadb54",
+      "bytes": 48944,
+      "inspectionExtent": "SHA256/length binding only; content not independently re-reviewed in this bounded source delta"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/manifest.json",
+      "sha256": "ed7e2bc4918044c0af66bce8f483a362d9ac93f0c220418b9e8348f338b864b7",
+      "bytes": 2271,
+      "inspectionExtent": "SHA256/length binding only; content not independently re-reviewed in this bounded source delta"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/source-inventory.json",
+      "sha256": "dcc55bacffc13baf9e69e45ac19d38ffea7fca3a5c7a9c2f7ece73c16dfd0496",
+      "bytes": 53373,
+      "inspectionExtent": "SHA256/length binding only; content not independently re-reviewed in this bounded source delta"
+    },
+    {
+      "path": ".codex/skills/aiox-dev/SKILL.md",
+      "sha256": "5a9a1dddb456cf05429f995cd4d192a00a47b0b23e46331d02eb7048c2b6a9e8",
+      "bytes": 1477,
+      "inspectionExtent": "SHA256/length binding only; content not independently re-reviewed in this bounded source delta"
+    },
+    {
+      "path": ".aiox-core/development/agents/dev.md",
+      "sha256": "91a63332b1cc19af47b3cd2811b5e00635b72a747b5858efc09ce3aa7826d1b7",
+      "bytes": 25645,
+      "inspectionExtent": "SHA256/length binding only; content not independently re-reviewed in this bounded source delta"
+    },
+    {
+      "path": ".aiox-core/constitution.md",
+      "sha256": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+      "bytes": 9089,
+      "inspectionExtent": "SHA256/length binding only; content not independently re-reviewed in this bounded source delta"
+    },
+    {
+      "path": "studio-runner/test/helpers/incrementalNegativeBoundaries.ts",
+      "sha256": "94090a4d7e4a4f957cf8921007f57477c13c670786fe7fd318dcdf4de45fda16",
+      "bytes": 36393,
+      "inspectionExtent": "SHA256/length binding only; content not independently re-reviewed in this bounded source delta"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java",
+      "sha256": "c61619225cd95f4e2dbfb37e03bec71e53ed2460af46f8cb0e41497e98eac658",
+      "bytes": 10005,
+      "inspectionExtent": "SHA256/length binding only; content not independently re-reviewed in this bounded source delta"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+      "sha256": "e9615582cefa38ca192b2a2dee8d47f846410680496c617ac7ad3a7557ff9d43",
+      "bytes": 22153,
+      "inspectionExtent": "SHA256/length binding only; content not independently re-reviewed in this bounded source delta"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalMaterializationEvidenceTest.java",
+      "sha256": "5c5485adb197d7104a7868b2cd95a55702aaf6cea9aeeea50f1c65765ec76b40",
+      "bytes": 7067,
+      "inspectionExtent": "SHA256/length binding only; content not independently re-reviewed in this bounded source delta"
+    },
+    {
+      "path": ".codex/skills/aiox-qa/SKILL.md",
+      "sha256": "17afd341497b8e535b80c05b7aafe61305f56cdabb2742f8396eb98eec655d99",
+      "bytes": 1501,
+      "inspectionExtent": "Loaded QA role/instructions retained; no formal task workflow invoked"
+    },
+    {
+      "path": ".aiox-core/development/agents/qa.md",
+      "sha256": "42e0f57a5d2eaca345d074ec53100faabebd42047081325cde2123911aa88b00",
+      "bytes": 20220,
+      "inspectionExtent": "Loaded QA role/instructions retained; no formal task workflow invoked"
+    }
+  ],
+  "canonical35BindingChecks": [
+    {
+      "category": "canonicalCheckpointPayload",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/bindings.json",
+      "sha256": "05aa732d7565a3c376e9883416c3d948141d86e6c6577250ad1929173321d823",
+      "bytes": 7331,
+      "matches": true
+    },
+    {
+      "category": "canonicalCheckpointPayload",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/historical/bindings.original.json",
+      "sha256": "97e9ba99c5c7f3dc827aa0061a3b2ec7b49df9818949f3057da9632cd30d2285",
+      "bytes": 5796,
+      "matches": true
+    },
+    {
+      "category": "canonicalCheckpointPayload",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/historical/checkpoint-b3a-private-authority-source01.original.json",
+      "sha256": "c3f134f09e5691d26fbb73d184b1b7f047067366b14f2b998706d3ad352d1823",
+      "bytes": 3890,
+      "matches": true
+    },
+    {
+      "category": "canonicalCheckpointPayload",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/location-normalization.json",
+      "sha256": "25a0c419ebc5638aefba96691b13e0dd64f84bbc2d611290a277f27e925169aa",
+      "bytes": 13908,
+      "matches": true
+    },
+    {
+      "category": "canonicalCheckpointPayload",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/preservation.json",
+      "sha256": "c909cee1f706df440b9fe3cd65c964727df054a76bc5629c6f33e90d0845b676",
+      "bytes": 4839,
+      "matches": true
+    },
+    {
+      "category": "canonicalCheckpointPayload",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/private-routes.json",
+      "sha256": "f32934447c9a55116374eaa382475397093986952881999691b8ad406406cd2f",
+      "bytes": 26426,
+      "matches": true
+    },
+    {
+      "category": "canonicalCheckpointPayload",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/remaining.json",
+      "sha256": "c107b8db545db2c253b65d872465ad1f73288b50dd1a4a1a184e70fe13a2022a",
+      "bytes": 4266,
+      "matches": true
+    },
+    {
+      "category": "canonicalCheckpointPayload",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/selectors.json",
+      "sha256": "f87b30cc309a8b4217104f91b9ff79b9a12e56df8e0871b1083bf397f830fec3",
+      "bytes": 3410,
+      "matches": true
+    },
+    {
+      "category": "canonicalCheckpointPayload",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/source-after/GuidedPublicationAuthorityIT.java",
+      "sha256": "e6228117d0e9844075603c3b011166ddffb74ddb4533d4524111bd5a665bb9fd",
+      "bytes": 40677,
+      "matches": true
+    },
+    {
+      "category": "canonicalCheckpointPayload",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/source-before/GuidedPublicationAuthorityIT.java",
+      "sha256": "d552398ccb6cc8c9d851acb81f0af35c5a5672e685e2f2543f83784a36a037b5",
+      "bytes": 21596,
+      "matches": true
+    },
+    {
+      "category": "canonicalCheckpointPayload",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/source.patch",
+      "sha256": "9dcd3b4a671282b494c77699285e39c0226a2aefea8a97e09b1b18a469082080",
+      "bytes": 20494,
+      "matches": true
+    },
+    {
+      "category": "canonicalCheckpointPayload",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/subjects.json",
+      "sha256": "ccbc84859539bb43c07b257c443c3721a7e4a4ce9736fb70370380297e688106",
+      "bytes": 6371,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/review.md",
+      "sha256": "f362d2205354875bdba926cd0356fc8a6be7aeb34c858532218654837c74eedc",
+      "bytes": 9973,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/next-batches.json",
+      "sha256": "6e1d20f17c9802a6f747ded7bc521db4b047a2a248a84c7fabd9baf32adadb54",
+      "bytes": 48944,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/requirement-map.json",
+      "sha256": "cf63626da52b1a7d3c48aeaf913f6088876a87873ba5ac540f7be6cc5bdce003",
+      "bytes": 317243,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/manifest.json",
+      "sha256": "ed7e2bc4918044c0af66bce8f483a362d9ac93f0c220418b9e8348f338b864b7",
+      "bytes": 2271,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/source-inventory.json",
+      "sha256": "dcc55bacffc13baf9e69e45ac19d38ffea7fca3a5c7a9c2f7ece73c16dfd0496",
+      "bytes": 53373,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": ".codex/skills/aiox-dev/SKILL.md",
+      "sha256": "5a9a1dddb456cf05429f995cd4d192a00a47b0b23e46331d02eb7048c2b6a9e8",
+      "bytes": 1477,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": ".aiox-core/development/agents/dev.md",
+      "sha256": "91a63332b1cc19af47b3cd2811b5e00635b72a747b5858efc09ce3aa7826d1b7",
+      "bytes": 25645,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": ".aiox-core/constitution.md",
+      "sha256": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+      "bytes": 9089,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "studio-runner/test/helpers/incrementalNegativeBoundaries.ts",
+      "sha256": "94090a4d7e4a4f957cf8921007f57477c13c670786fe7fd318dcdf4de45fda16",
+      "bytes": 36393,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "sha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+      "bytes": 22720135,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+      "sha256": "8aa40c60582007a59ba406d47832bf30d06627cf227fc0c3ce942ab7d58b07df",
+      "bytes": 37477,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedMaterializationEvidence.java",
+      "sha256": "7fbefe9db5f02682c6468d3495617a2468748d5a6405affe6bc205197061ef6e",
+      "bytes": 6809,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "sha256": "9289948874fdce24bf319782fbc69a380d7936388b40bb6a4923ab6add0b01c6",
+      "bytes": 55794,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "sha256": "28aafe98ebdbbd3dcd59d061b671131713c5b5c2db4330a3e5252bd106011b48",
+      "bytes": 28293,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java",
+      "sha256": "c61619225cd95f4e2dbfb37e03bec71e53ed2460af46f8cb0e41497e98eac658",
+      "bytes": 10005,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java",
+      "sha256": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc",
+      "bytes": 6560,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/authoring/IncrementalAuthoringIdentity.java",
+      "sha256": "f2212c7200dd2d3dff4e31611bb01c8b9e20a1715b1aeab623ba22fc9b175973",
+      "bytes": 15215,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java",
+      "sha256": "b3769877088421d7d4690d663efecc35cf016044cc9ee4849fbed74ef722b23f",
+      "bytes": 9073,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "sha256": "3f8d75c258a1a0e827524a54ee1c822ac0374eebcdef148a21b4f21a7be5d2d0",
+      "bytes": 152043,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+      "sha256": "e9615582cefa38ca192b2a2dee8d47f846410680496c617ac7ad3a7557ff9d43",
+      "bytes": 22153,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalMaterializationEvidenceTest.java",
+      "sha256": "5c5485adb197d7104a7868b2cd95a55702aaf6cea9aeeea50f1c65765ec76b40",
+      "bytes": 7067,
+      "matches": true
+    },
+    {
+      "category": "supportingDependency",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+      "sha256": "80357798b080ab6f8cb1ba38c7828915fa37663e203b0280997c7937ebc432d0",
+      "bytes": 40492,
+      "matches": true
+    },
+    {
+      "category": "currentOwnedSource",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+      "sha256": "e6228117d0e9844075603c3b011166ddffb74ddb4533d4524111bd5a665bb9fd",
+      "bytes": 40677,
+      "matches": true
+    }
+  ],
+  "all35Match": true,
+  "historicalPathPolicy": "Use canonical checkpoint/bindings and location-normalization overlay. Original checkpoint/bindings/preservation bytes stay historical; their old backend/b3a... archive paths are not live output targets. No old artifact edited.",
+  "originalSubjectsVerbatim": [
+    {
+      "ledgerIndex0": 31,
+      "stableOriginalSubjectId": "IncrementalPublicationIT.mergedProofCannotReuseOldAdmissionsOrForeignSnapshots",
+      "canonicalPointer": "/acceptanceCases/31",
+      "originalVerbatim": {
+        "plannedName": "IncrementalPublicationIT.mergedProofCannotReuseOldAdmissionsOrForeignSnapshots",
+        "requirement": [
+          "AC-5"
+        ],
+        "tier": "Java + Postgres + pure runner validator",
+        "assertions": "New-session prefix+suffix evidence; base admission substitution, cross-CSI/test reuse, omitted/extra hash key, wrong snapshot value and forged no-invocation receipt all refused; finalization idempotent and model/browser free",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null
+      },
+      "companionSourceStatus": "OPEN_REQUIRED_TIER_UNAVAILABLE_IN_SINGLE_CLASS_LEASE",
+      "originalSubjectRemainsOpen": true,
+      "finalClosureCredit": false,
+      "implementedCompanions": [],
+      "remaining": [
+        "All original new-session prefix+suffix/old base admission/cross-CSI/test reuse, omitted or extra snapshot keys and forged no-invocation receipt attacks remain at their original required tiers. Existing original current-commit and raw-pending controls are preserved only."
+      ]
+    },
+    {
+      "ledgerIndex0": 42,
+      "stableOriginalSubjectId": "IncrementalIdentityTest.opaqueAliasRequiresExactDeclaredName",
+      "canonicalPointer": "/acceptanceCases/42",
+      "originalVerbatim": {
+        "plannedName": "IncrementalIdentityTest.opaqueAliasRequiresExactDeclaredName",
+        "requirement": [
+          "AC-1"
+        ],
+        "tier": "unit+HTTP refusal",
+        "assertions": "URI-looking alias exact name->secretId succeeds; suffix-only declaration misses; duplicate/conflict/missing plain value closed; null never hashed",
+        "executionStatus": "EXECUTED_PASS_AT_RECORDED_SNAPSHOT_SCOPE_REVIEW_PENDING",
+        "actualTestNames": [
+          "com.citi.put.checks.studio.authoring.IncrementalIdentityTest.opaqueAliasRequiresExactDeclaredName()"
+        ],
+        "evidence": [
+          "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-foundation-unit-attempt01-results.json"
+        ],
+        "independentReview": null
+      },
+      "companionSourceStatus": "OPEN_REQUIRED_TIER_UNAVAILABLE_IN_SINGLE_CLASS_LEASE",
+      "originalSubjectRemainsOpen": true,
+      "finalClosureCredit": false,
+      "implementedCompanions": [],
+      "remaining": [
+        "Actual HTTP URI-looking exact alias name positive and suffix-only/duplicate/conflicting/missing plain or null refusal matrix. New missing plain returned-manifest case is narrower than HTTP."
+      ]
+    },
+    {
+      "ledgerIndex0": 52,
+      "stableOriginalSubjectId": "IncrementalValidationBasisTest.reconstructsPrivateInputsBeforePublicEvidence",
+      "canonicalPointer": "/acceptanceCases/52",
+      "originalVerbatim": {
+        "plannedName": "IncrementalValidationBasisTest.reconstructsPrivateInputsBeforePublicEvidence",
+        "requirement": [
+          "AC-3",
+          "AC-4",
+          "AC-5",
+          "AC-6"
+        ],
+        "tier": "Java+runner canonical+Postgres",
+        "assertions": "Reconstruct every full immutable version by ordinal cutoff; hash values before removal; metadata exact minus value; header/current/proposal/proof/ledger hash joins; mutate private value, entry hash, provenance, count/order/introduced version and reject; no raw values in basis/provider/public output",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null
+      },
+      "companionSourceStatus": "IMPLEMENTED_UNEXECUTED_NARROWER_READ_BOUNDARY",
+      "originalSubjectRemainsOpen": true,
+      "finalClosureCredit": false,
+      "implementedCompanions": [
+        "storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+        "storedSourceManifestRequiresOriginalImmutableSourcePreimage[manifest-private-plain,manifest-missing-plain]"
+      ],
+      "remaining": [
+        "Every full immutable multi-version envelope reconstructed by each ordinal cutoff; exact offered-basis entry-hash mutation; full introduced-version/append chain and original preparation issued metadata revision versus birth; proposal/proof/ledger hash substitutions; provider/public canary sinks and runner canonical execution remain OPEN. These 13 new invocations have not executed."
+      ]
+    },
+    {
+      "ledgerIndex0": 60,
+      "stableOriginalSubjectId": "IncrementalPublicationIT.snapshotFactsMatchImmutableOriginalSourceManifest",
+      "canonicalPointer": "/acceptanceCases/60",
+      "originalVerbatim": {
+        "plannedName": "IncrementalPublicationIT.snapshotFactsMatchImmutableOriginalSourceManifest",
+        "requirement": [
+          "ARCH015-01: original snapshot/provenance/privacy obligations; see approved ruling"
+        ],
+        "tier": "HTTP+Postgres",
+        "assertions": "Freeze private authoringSnapshot at start, then attempted context/declaration/default/evidence tamper or changed source/config fails original CAS; unknown/unreferenced declaration extras and raw value in proof reject. SourceManifestHash preimage retains authoringSnapshot, removes configurationValues only.",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null,
+        "sourceCorrection": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/test-delta.json"
+      },
+      "companionSourceStatus": "IMPLEMENTED_UNEXECUTED_NARROWER_READ_BOUNDARY",
+      "originalSubjectRemainsOpen": true,
+      "finalClosureCredit": false,
+      "implementedCompanions": [
+        "storedSourceManifestRequiresOriginalImmutableSourcePreimage"
+      ],
+      "remaining": [
+        "Actual authenticated start/freeze/current application source/config CAS; exact original boundary/pinned snapshot mutation and offered sourceManifestHash substitution; declaration/default/evidence/unknown-extra/raw-proof matrix; actual HTTP+PG joined execution remain OPEN. These read-boundary companions have not executed."
+      ]
+    }
+  ],
+  "15OriginalRoutesPreservedWithoutPrivateScalarHashes": [
+    {
+      "originalName": "immutable-original-source-cannot-be-replaced",
+      "section": "snapshot",
+      "parent": "boundary",
+      "requiredBackendCompanion": "Backend real source manifest/read/builder plus original source/config CAS; obligation60.",
+      "originalObligationLedgerIndices0": [
+        60
+      ],
+      "newNarrowerCompanion": "storedSourceManifestRequiresOriginalImmutableSourcePreimage[manifest-authored-context]",
+      "limit": "Ordinary returned private manifest adaptation preserves stored source and original base; not the exact original boundary/pinned-base offered snapshot mutation or real source/config CAS.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "private-plain-hash-must-match-before-freeze",
+      "section": "snapshot",
+      "parent": "boundary",
+      "requiredBackendCompanion": "Backend GuidedPublicationEvidenceRepository.snapshotEvidence must hash actual private immutable value before removal;52/60/68.",
+      "originalObligationLedgerIndices0": [
+        52,
+        60,
+        68
+      ],
+      "newNarrowerCompanion": "storedSourceManifestRequiresOriginalImmutableSourcePreimage[manifest-private-plain]",
+      "limit": "Actual SQL full manifest read is substituted after retrieval and only its returned checksum is resealed. Stored private value remains original; no actual HTTP start/freeze corruption or native claim.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "immutable-source-manifest-hash-is-exact",
+      "section": "snapshot",
+      "parent": "boundary",
+      "requiredBackendCompanion": "Backend start base/sourceManifest join exact hash including authoringSnapshot minus configurationValues;60.",
+      "originalObligationLedgerIndices0": [
+        60
+      ],
+      "newNarrowerCompanion": "storedSourceManifestRequiresOriginalImmutableSourcePreimage[manifest-checksum] and positive original public preimage assertions",
+      "limit": "Checksum refusal and exact original public preimage controls are distinct companions; exact original offered basis/sourceManifestHash wrong-hash mutation remains OPEN.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "raw-edge-cannot-name-pending-action",
+      "section": "graph",
+      "parent": "admitted-binding-replacement",
+      "requiredBackendCompanion": "Backend actual repository action/admission snapshot must reject inconsistent/omitted pending facts;31/54/75. Pure offered artifact comparison is not this authority check.",
+      "originalObligationLedgerIndices0": [
+        31,
+        54,
+        75
+      ],
+      "newNarrowerCompanion": "rawEdgeCannotNamePendingActionAgainstActualStoredAuthority (PRESERVED_ONLY)",
+      "limit": "No duplicate implementation or new execution; broader authenticated state/phase inventory remains OPEN.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "receipt-transport-authority-cannot-be-inferred-from-hash",
+      "section": "graph",
+      "parent": "admitted-binding-replacement",
+      "requiredBackendCompanion": "Actual signed owning-worker HTTP callback plus assignment/current owner checks;48/54.",
+      "originalObligationLedgerIndices0": [
+        48,
+        54
+      ],
+      "newNarrowerCompanion": null,
+      "limit": "Actual authenticated owning-worker/session/assignment/owner/fence or complete stored action state authority requires joined harness; no new B3a coverage.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "wrong-private-input-hash",
+      "section": "incrementalBasis",
+      "parent": "ordinary",
+      "requiredBackendCompanion": "Backend GuidedMaterializationEvidence actual value-bearing rows/hash reconstruction, no raw value leaked;52.",
+      "originalObligationLedgerIndices0": [
+        52
+      ],
+      "newNarrowerCompanion": "storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+      "limit": "Actual stored private preimages are separately verified and returned value/history attacks reject; original exact supplied basis entry inputHash mutation remains OPEN.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "preparation-substitutes-birth-for-actual",
+      "section": "incrementalBasis",
+      "parent": "appendedHistorical",
+      "requiredBackendCompanion": "Backend actual preparation copied evidence/current historical version query compares exact issued materializationRevision;18/52/54/74.",
+      "originalObligationLedgerIndices0": [
+        18,
+        52,
+        54,
+        74
+      ],
+      "newNarrowerCompanion": null,
+      "limit": "Existing shared Database rejects multi-version or incremental parents. No lawful appendedHistorical parent/current preparation metadata bump is available in this lease.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "unrelated-failed-ledger-cannot-be-omitted",
+      "section": "incrementalBasis",
+      "parent": "ordinary",
+      "requiredBackendCompanion": "Actual repository complete action inventory rejects other failed/unknown/dispatching omission;31/54.",
+      "originalObligationLedgerIndices0": [
+        31,
+        54
+      ],
+      "newNarrowerCompanion": null,
+      "limit": "Actual authenticated owning-worker/session/assignment/owner/fence or complete stored action state authority requires joined harness; no new B3a coverage.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "hash-is-not-transport-authentication",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "requiredBackendCompanion": "Actual owning-worker callback refuses absent authentication despite correct receiptHash;48/54.",
+      "originalObligationLedgerIndices0": [
+        48,
+        54
+      ],
+      "newNarrowerCompanion": null,
+      "limit": "Actual authenticated owning-worker/session/assignment/owner/fence or complete stored action state authority requires joined harness; no new B3a coverage.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "forged-jwt-algorithm",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "requiredBackendCompanion": "Real HTTP token verifier refuses forged algorithm; no model/caller trust;48/54.",
+      "originalObligationLedgerIndices0": [
+        48,
+        54
+      ],
+      "newNarrowerCompanion": null,
+      "limit": "Actual authenticated owning-worker/session/assignment/owner/fence or complete stored action state authority requires joined harness; no new B3a coverage.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "missing-mtls",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "requiredBackendCompanion": "Actual HTTP connection without client certificate refuses;48/54.",
+      "originalObligationLedgerIndices0": [
+        48,
+        54
+      ],
+      "newNarrowerCompanion": null,
+      "limit": "Actual authenticated owning-worker/session/assignment/owner/fence or complete stored action state authority requires joined harness; no new B3a coverage.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "wrong-worker-subject",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "requiredBackendCompanion": "Actual authenticated wrong worker subject/assignment refuses;48/54.",
+      "originalObligationLedgerIndices0": [
+        48,
+        54
+      ],
+      "newNarrowerCompanion": null,
+      "limit": "Actual authenticated owning-worker/session/assignment/owner/fence or complete stored action state authority requires joined harness; no new B3a coverage.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "stale-callback-owner",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "requiredBackendCompanion": "Actual owner transfer/loss or stale callback after terminal, with real HTTP current ownership check;48/54/81.",
+      "originalObligationLedgerIndices0": [
+        48,
+        54,
+        81
+      ],
+      "newNarrowerCompanion": null,
+      "limit": "Actual authenticated owning-worker/session/assignment/owner/fence or complete stored action state authority requires joined harness; no new B3a coverage.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "wrong-assignment",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "requiredBackendCompanion": "Actual callback worker/assignmentSessionId mismatch against persisted assignment, no writes;48/54.",
+      "originalObligationLedgerIndices0": [
+        48,
+        54
+      ],
+      "newNarrowerCompanion": null,
+      "limit": "Actual authenticated owning-worker/session/assignment/owner/fence or complete stored action state authority requires joined harness; no new B3a coverage.",
+      "exactOriginalRouteClosed": false
+    },
+    {
+      "originalName": "wrong-owner-fence",
+      "section": "incrementalBasis",
+      "parent": "admittedDrift",
+      "requiredBackendCompanion": "Actual wrong authenticated X-Owner-Fence/current owner fence against stored assignment;48/54.",
+      "originalObligationLedgerIndices0": [
+        48,
+        54
+      ],
+      "newNarrowerCompanion": null,
+      "limit": "Actual authenticated owning-worker/session/assignment/owner/fence or complete stored action state authority requires joined harness; no new B3a coverage.",
+      "exactOriginalRouteClosed": false
+    }
+  ],
+  "notReviewedOrUnbound": [
+    "Moving GuidedPublicationReplayIT.java and backend/build.gradle.kts for five new prefix tests; no continuing global sourceStable claim",
+    "Actual JVM/compiler/Gradle/PostgreSQL/HTTP/Core/Vault/native/browser/decoder/process/sink behavior; no execution or connections",
+    "Full unrelated dependencies/source outside the explicitly named reviewed call paths",
+    "Runtime independently expected candidate/artifact; existing parent lowerer is the subject-derived candidate control",
+    "Multi-version, preparation birth versus issued revision, pinnedBase, HTTP/CAS/alias/current Core/Vault/native complete original subjects",
+    "Any new formal015 QA/admin/root closure or008implementation"
+  ],
+  "sourceDistHold": true,
+  "testsExecuted": 0,
+  "globalSourceStableClaim": false,
+  "formalQAVerdict": null,
+  "lifecycleTransition": null
+}

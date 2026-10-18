@@ -1,0 +1,27 @@
+{
+ "label": "obs009-i-mut-b",
+ "evid": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/execution-20261018/i/w2/mutations",
+ "edits": [
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java",
+   "old": "        signaller.signal(\"STOP\", target.fact().pid());",
+   "new": "        signaller.signal(\"CONT\", target.fact().pid());"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java",
+   "old": "    Files.writeString(entry, preload + \"\\n\" + mainInvocation(main) + \"\\n\", StandardCharsets.UTF_8);",
+   "new": "    Files.writeString(entry, mainInvocation(main) + \"\\n\" + preload + \"\\n\", StandardCharsets.UTF_8);"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java",
+   "old": "        .removeIf(name -> name.startsWith(KEY_PREFIX) || DEBUG_VARIABLES.contains(name));",
+   "new": "        .removeIf(name -> DEBUG_VARIABLES.contains(name));"
+  }
+ ],
+ "gradle": [
+  "test",
+  "--tests",
+  "com.citi.put.checks.studio.support.RunnerProcessHarnessTest",
+  "--no-daemon"
+ ]
+}

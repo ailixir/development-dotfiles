@@ -1,0 +1,14 @@
+[
+  {
+    "before": "          int bytes =\n              GuidedContracts.canonical(observation).getBytes(StandardCharsets.UTF_8).length;\n",
+    "after": "          byte[] canonicalObservation =\n              GuidedContracts.canonical(observation).getBytes(StandardCharsets.UTF_8);\n          int bytes = canonicalObservation.length;\n"
+  },
+  {
+    "before": "          String observationHash = GuidedContracts.hash(observation);\n",
+    "after": "          String observationHash = hashObservationBytes(canonicalObservation);\n"
+  },
+  {
+    "before": "  public JsonNode observe(\n",
+    "after": "  private static String hashObservationBytes(byte[] canonicalObservation) {\n    try {\n      return java.util.HexFormat.of()\n          .formatHex(\n              java.security.MessageDigest.getInstance(\"SHA-256\").digest(canonicalObservation));\n    } catch (java.security.NoSuchAlgorithmException e) {\n      throw new IllegalStateException(e);\n    }\n  }\n\n  public JsonNode observe(\n"
+  }
+]

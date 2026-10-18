@@ -1,0 +1,252 @@
+{
+  "scope": "READ_ONLY_TARGETED_ORIGINAL_JDBC_WAIT_SOURCE_DIAGNOSIS",
+  "sourceBindings": {
+    "archive": "docs/qa/evidence/STUDIO-OBS-007/resume-c5-small-sampler-two-diagnostic",
+    "archivedPublicationSha256": "4a61d60f9a4ab65b78198b17afd676cd76c665ec864b6bf84a0a18a01397c289",
+    "closedDiagnosticSha256": "fa855d9b0e9b5ab5aff669c72dada699f95484a3c34827ab0e7e2bc54ed03fe8",
+    "paths": [
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+        "sha256": "48ce3c73f12b76f89075b04a10abb8febab8ac540d1f3073f1ce8a6a21d4dc6e"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+        "sha256": "a8fec6d16dea5567caab96e7bd565fac9ada9ed501951a58eda52f77e615e377"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretRevocationSweep.java",
+        "sha256": "884ddb3c7bc119998b91eb6b7649b148bc3054222c56f1c880c92aa5da9b66a8"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+        "sha256": "c058bfc2a9b43ddc933db1296be8a9af0211cf82b2fbe0aefb0fc0efa8bbf0f7"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+        "sha256": "168d894dfca9bf33f780a07414f5a4cc3b17be01db3579b6f041f3da9434a2ad"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+        "sha256": "5f52bf68e733829044afca036cd7c9f2b281f6eff8eef525f91ae0d2bfb2e0cf"
+      },
+      {
+        "path": "backend/src/main/resources/application-test.yml",
+        "sha256": "be3b1d458bc67efa5b9d53e513a273992237ed74c53ecb228074524cfc8e8f28"
+      }
+    ]
+  },
+  "actual": {
+    "failures": [
+      {
+        "case": "first-learning",
+        "line": 2065,
+        "actualState": "FAILED",
+        "errorCode": "OTHER",
+        "actions": 0
+      },
+      {
+        "case": "secret-ninth",
+        "line": 8993,
+        "actualState": "UNKNOWN_OUTCOME",
+        "errorCode": "OTHER",
+        "actions": 1
+      }
+    ],
+    "sampler": {
+      "claimSamplerStatus": 2,
+      "claimSamplerJoined": true,
+      "claimSamplerCleanupConfirmed": true,
+      "claimSamplerDiagnosticOnly": true,
+      "claimSamplerCycles": 406,
+      "claimSamplerEmpty": 0,
+      "claimSamplerUnattributed": 0,
+      "claimSamplerCounts": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          68,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          23,
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "claims": [
+      {
+        "ordinal": 1,
+        "status": 202,
+        "handlerNanos": 127417209,
+        "consumed": true
+      },
+      {
+        "ordinal": 2,
+        "status": 202,
+        "handlerNanos": 820400458,
+        "consumed": true
+      },
+      {
+        "ordinal": 3,
+        "status": 202,
+        "handlerNanos": 131331167,
+        "consumed": true
+      },
+      {
+        "ordinal": 4,
+        "status": 202,
+        "handlerNanos": 120953792,
+        "consumed": true
+      },
+      {
+        "ordinal": 5,
+        "status": 202,
+        "handlerNanos": 247564875,
+        "consumed": true
+      },
+      {
+        "ordinal": 6,
+        "status": 202,
+        "handlerNanos": 1019754000,
+        "consumed": true
+      }
+    ],
+    "lifecycle": [
+      {
+        "ordinal": 1,
+        "status": 202,
+        "consumed": true,
+        "kind": "RUNTIME",
+        "reason": "LEASE_LOST"
+      }
+    ],
+    "grantCount": 5,
+    "classification": "Valid joined diagnostic matrix69JDBC_PATH samples (68WAITING/1RUNNABLE),24LOG_ENCODER (23RUNNABLE/1WAITING), SOURCE_CHECK1/JSON_RENDER1RUNNABLE. Counts approximate; no exclusive rowlock attribution."
+  },
+  "lockAndTransactionMap": [
+    {
+      "entry": "claim synchronous current revocation",
+      "order": "Standalone required transaction: studio_guided_sessions owner FORUPDATE; then actual RELEASE/audit or manifest/session reads/current names authorization. Completes before main claim transaction.",
+      "source": "SecretRevocationSweep.guidedRevoked/recheck; GuidedSessionService.claim742-752"
+    },
+    {
+      "entry": "claim main/current authorization/source",
+      "order": "TransactionTemplate owner studio_guided_sessions FORUPDATE -> immutable manifest/state reads -> ui_tests PESSIMISTIC_WRITE via StudioRepository.findByIdForUpdate; assignment/current command lookup -> schema validated sessionUPDATE and original claimcommand insert. Locks held through commit.",
+      "source": "GuidedSessionService.claim752-800; ProductionSessionAccess.checkSourceCurrent; SourceSnapshotRepository.lockCurrent"
+    },
+    {
+      "entry": "model work",
+      "order": "sessions.translationTransaction locks owner then current source; preflight builds projection/schema/canonical/reservation under owner, commits before actual gateway.propose. Separate settlement owner transaction writes attempt/usage/proposal. These can contend on same session while doing validation/TRACE CPU.",
+      "source": "GuidedTranslationService.call708-878; session translationTransaction; gateway.propose870 outside reservation transaction"
+    },
+    {
+      "entry": "observation/admission/outcome",
+      "order": "Own session lock first; source/current evidence/action/materialization/command updates after it. Observe schemas checked; processing/save/progress validation inside appropriate owner transaction.",
+      "source": "GuidedSessionService.observe836/outcomeV2/internal/verifyRefreshOwner; repository action/command methods"
+    },
+    {
+      "entry": "coordinator",
+      "order": "Own command-building transaction locks session then reads state/hashes current progress; commits BEFORE original authenticated65s HTTP controller request. Poll fixture100ms source property; no source change proposed.",
+      "source": "GuidedTranslationCoordinator.continueRuns60-137"
+    },
+    {
+      "entry": "runner/publication network",
+      "order": "GuidedDispatchService noTransaction guard around assignment/context/observe/prepare/dispatch HTTP; short session methods commit before send. Publisher session->source lock order in prepare/finalchecks, Coreauthorization/validator outside short transactions.",
+      "source": "GuidedDispatchService.assign/pushContext/observe/prepareAndAdmit; GuidedPlanPublisher.prepare/transaction boundaries"
+    }
+  ],
+  "orderVerdict": "Reviewed active claim/model/observation/publisher paths acquire session before source; no concrete inversion/deadlock proven here. This is not an exhaustive all-repository lock-order proof. Current ordinary/outage/revocation invariants remain.",
+  "connectionOwnership": {
+    "graph": "Existing fixture production JdbcTemplate, GuidedSessionRepository TransactionTemplate and JpaTransactionManager share same datasource; preserved exact public graph checks in archive. No copied pool or dispatcher wrapper.",
+    "configuration": "Active test profile Hikari maximum5/minimumIdle0, original fixture supplies actual Postgres URL and has no override. Config bound, not a new measured pool-utilization result. Application async semaphore uses2*hikariMax; actualvirtual request/scheduled work can compete for same pool.",
+    "waitingPossibilities": [
+      "PG owner/source row or transaction wait while another model/observation transaction holds locks",
+      "JDBC connection borrow/resource contention",
+      "Driver native socket/network/storage/commit delay"
+    ],
+    "caveat": "Fixed JDBC_PATH classification includes PostgreSQL driver/Spring JDBC frames. WAITING state sampled after stack is not atomic; it does not reveal SQLstatement/backendpid/pool wait cause."
+  },
+  "sourceBackedCandidate": "Other same-session model preflight/settlement/observation holds owner row while full validation/canonical/TRACE rendering runs; renewal waits rather than executing that CPU itself. Source establishes possibility, not measured blocker. No structural optimization authorized from these samples.",
+  "smallestDiscriminatorProposal": {
+    "status": "EXACT_SOURCE_PREFLIGHT_AND_ROOT_REVIEW_REQUIRED_NO_PROBE_EXECUTED",
+    "oneShotTrigger": "Within original selected C5 claim filter/sampler only, actual executing claim still registered, JDBC_PATH WAITING and original handler elapsed>=500ms. AtomicBoolean permits one snapshot for that diagnostic window; no periodic PG query/poll or new recorder. Original requests/deadlines unaffected.",
+    "connection": "Separate owned unpooled JDBC connection built from existing actual Publication DB fixture URL/user/password, outside saturated Hikari pool. Credentials/private connection/PIDs never exported. Read-only transaction; existing original connection graph unchanged.",
+    "bounds": "Connection/socket timeouts1s, one observer statement query timeout1s plus transaction-local PostgreSQL statement_timeout250ms; maxrows64/maxprivatequeryclassificationlength4096. Independent ResultSet/Statement/Connection close and rollback on every path; failures mark UNOBSERVED, no observer reconnect/retry. Extra catalog load/creation overhead remains diagnostic not acceptance.",
+    "sqlShape": "One SELECT over pg_stat_activity and pg_blocking_pids with private blocker query join and pg_locks known-relation metadata, restricted current_database/client backends/excluding observer PID. No authority data row change or raw application table read; no EXPLAIN/wait queue framework.",
+    "privateInputs": "Actual PID/query/wait fields/blocker IDs/relation names may be inspected transiently to match exact original fixed SQL-stage signatures. Never store/querytext/PID/bindvalue/UUID/host/date/credentials/hash/Throwable in evidence.",
+    "fixedExport": [
+      "snapshotStatus enum ordinal",
+      "known query stage REVOCATION_OWNER_LOCK/OWNER_LOCK/SOURCE_LOCK/CURRENT_MANIFEST/RENEWAL_WRITE/SESSION_WRITE/OTHER",
+      "fixed wait type Lock/LWLock/IO/Client/IPC/Timeout/Activity/BufferPin/NO_WAIT/UNCLASSIFIED",
+      "blocked/backend/blocker counts and known OWNER_SESSION/SOURCE_DRAFT/OTHER relation counts",
+      "truncated/overflow/failed flags invalidate attribution, no zero-as-absence"
+    ],
+    "classification": "Original revocation owner SELECTstate/revoked_at FORUPDATE; repository SELECTdocument/progress FORUPDATE; ui_tests pessimistic lookup; currentManifestjoin; atomicrenewWITHupdated statement; otherqueries OTHER. No querypayload output or incoming SQL normalization as authority.",
+    "attributionLimit": "Current fixture exposes no recorded direct original claim backend PID. One same-database snapshot plus known slow claim establishes potential actual blocker/work, not exclusive exactclaim identification. Multiple matching owners/blockers/relations remain UNCLASSIFIED; do not guess from timestamps or borrowconnection. Root may decide whether supporting snapshot suffices before any source change.",
+    "currentSourceVerdict": "No demonstrated lock inversion. Shared owner-row contention versus pool/socket/otherDB waits remains unmeasured; no pool-size/schema/cache/lock-order/TRACE/deadline optimization proposed."
+  },
+  "preserved": "Actual productionownership1000ms/cadence1s and2s revocation bound, schema/currentauth/scope/audit/source/transaction/TRACE/provider semantics unchanged. First nonsecretfailure0actions separatelyretained; sampler onlyactiveC5ninth, so do not blame sampler for unprofiledfirstfailure without proof.",
+  "actions": "Report only; no source edits/probes/SQL/HTTP/Node/Gradle/runtime/models. All19/C4/C5/C6/fullwave open."
+}

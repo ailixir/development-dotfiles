@@ -1,0 +1,159 @@
+{
+  "artifact": "R13 runner-lane patches for AR-QA SEC-001 (STUDIO-OBS-013 guided learning-run video recording)",
+  "author": "@dev (Dex), R13 runner lane",
+  "date": "2026-10-13",
+  "ruling": "docs/qa/evidence/STUDIO-OBS-013/ar-qa-sec001-test001.json (SEC001, verdict FIX)",
+  "mode": "Prepared statically on 2026-10-13. On 2026-10-14 Root gave GO, and the patches were applied to the working tree and run under the lock (owner r13-sec001). Not committed.",
+  "base": {
+    "head": "734ad704f (working tree, not HEAD: browser.ts and guidedBrowser.ts carry uncommitted changes, guided-recording.test.ts is untracked)",
+    "sha256": {
+      "studio-runner/src/run/browser.ts": "f0e33dcebdb590922f6f6690dc34e28c5d18e305b7f919a2a1af80721b5b748c",
+      "studio-runner/src/run/guidedBrowser.ts": "90f291e185e399cdec0849a8488305b200be9f829ae76ec4331baffcf184a377",
+      "studio-runner/test/fixtures-tier/guided-recording.test.ts": "bfa367dfd6c1235de9d0f4c711ccbd97d4c767058f07c98d0fa129845c72b017"
+    }
+  },
+  "patches": [
+    {
+      "file": "sec001-browser.patch",
+      "sha256": "25173d1263d2e869d2435a3f8e3188f6965993432b478aa0a3a8832d2549e0c0",
+      "target": "studio-runner/src/run/browser.ts:541-546 (launchGuidedBrowser)",
+      "summary": "With a recording request and a recorded startup page, this reuses replay's sequence from browser.ts:153-160: probe the chrome:// pages on the startup page, close it, run the realpath/lstat checks on its video (no symlink, regular file, dirname equal to realpath(recording.dir)), delete it, require readdir(recording.dir) to be empty, open a fresh page that must be about:blank (otherwise TARGET_DRIFT), then video = newPage.video() and recording.ready(video !== null). `page` and `video` rebind to the new page, so the CDP session, crash, route, blank proof, handle.page and recordedVideo() all see it. Any check or delete failure throws inside the existing try, and the existing GuidedLaunchFailure cleanup ends the launch closed. When there is no recording, or the startup page has no video, the code calls recording?.ready(false) and probes the single page as it does today. No new mechanism, no deadline, and no contract, schema or wire change."
+    },
+    {
+      "file": "sec001-guidedBrowser-doc.patch",
+      "sha256": "b53b0505167f0ad09df46ea4b02d728794062f6afc82d863395a613054840235",
+      "target": "studio-runner/src/run/guidedBrowser.ts:12-15 (GuidedRecordingRequest Javadoc)",
+      "summary": "Docs only, as the ruling's change.files[1] requires. It restates readiness as 'after the startup probe recording is deleted and the fresh app page exists (replay semantics, AR-QA SEC-001)'. It is optional for the fix, but without it the Javadoc says the opposite of the code."
+    },
+    {
+      "file": "sec001-guided-recording-test.patch",
+      "sha256": "8c2ee0f73e197d94655062d5277bd4981cc19f82c25b42baad623ce0b07a1a93",
+      "target": "studio-runner/test/fixtures-tier/guided-recording.test.ts",
+      "summary": "Oracle A: decode the uploaded objects/studio/fixture-csi/guided/{sessionId}.webm at full resolution with `ffmpeg -t a0/1000 -vsync 0 -pix_fmt rgb24 -f rawvideo` (no scale filter), where a0 = timings[0].startMs. Assert the output is not empty and every byte is >= 245. Oracle B: decode up to a0+1000 ms, map the first byte below 245 to its frame index and that frame's ffprobe best_effort_timestamp_time (t1), then assert -250 <= t1-a0 <= 500. A missing paint in that window fails. Oracle C, in the AC-1 parity case: handle.page.url() is 'about:blank' before the first navigation, and before close, recording dir holds exactly one file whose name is basename(recordedVideo()). Facts {a0, t1, t1-a0, prefix frame count, first non-white frame index, probed frames} are written to docs/qa/evidence/STUDIO-OBS-013/r13/sec001-guided-video-oracle.json before the asserts, so a red run is also recorded. Paths are redacted. The decoding is the same ffmpeg/ffprobe execFileSync as observed-bootstrap-video.test.ts, with the same eslint-disable justification. No new dependency. A missing ffmpeg/ffprobe throws, so the test fails and never skips.",
+      "status": "SUPERSEDED by sec001-guided-recording-test.v2.patch (oracle A revised 2026-10-14). Do not apply v1 on top of v2."
+    },
+    {
+      "file": "sec001-guided-recording-test.v2.patch",
+      "sha256": "7086309b1b00740bd66cf81dc4541ff39794820c8d9afd1a05c35da92e92a14e",
+      "target": "studio-runner/test/fixtures-tier/guided-recording.test.ts (from base bfa367dfd6c1…)",
+      "check": "patch --dry-run -p1 against a copy of the base: clean. git apply -R --check against the working tree: clean (the tree already carries v2, sha256 f964969488ca8baa45a70c945734fb95f5e83034beecee25973aaa98112ba5e0)",
+      "summary": "Oracle A is now stated on content instead of the a0 boundary. B is unchanged except that t1 is now the first content frame. Oracle C is unchanged. See oracleRevision.",
+      "status": "SUPERSEDED by v3 (T1/T2, 2026-10-14)."
+    },
+    {
+      "file": "sec001-guided-recording-test.v3.patch",
+      "sha256": "d14fb53bdb71a0e3f9d06da26868ca8af018068594ee4147c9615df300a2aafe",
+      "target": "studio-runner/test/fixtures-tier/guided-recording.test.ts (from base bfa367dfd6c1…); tree sha256 e4cf54b2fbe3d2393fb466c2e2f1b2b00195c38bbf9d1a1bb0445885e60eae2f",
+      "ruling": "docs/qa/evidence/STUDIO-OBS-013/ar-qa-sec001-oracle-revision.json (APPROVE WITH TIGHTENING)",
+      "summary": "T1: the app region, the login box and the final box are each asserted to be at most 10% of the frame. The area and ratios are written to the facts first. T2: a per-run positive control records chrome://version and then chrome://prefs-internals in a plain recorded persistent Chromium context at the same size (an off-the-record context gives ERR_INVALID_URL for prefs-internals). It requires at least one non-content-free frame with outsideApp >= 10,000 against the same region. Only the counts {frames, flaggedFrames, maxOutsideApp} are persisted, and the directory is removed in finally. Comments now say B is a seek-alignment oracle only and not SEC-001 evidence, and that the 2026-10-13 half-fix claim is retracted. B is kept."
+    }
+  ],
+  "applyCheck": {
+    "command": "git apply --check -v docs/qa/evidence/STUDIO-OBS-013/r13/qa-fixes/<patch> (from the repository root)",
+    "result": "All three patches report 'Checking patch …' with no error against the working tree at the base sha256 values above."
+  },
+  "unitCoverage": "No unit-tier test is added. The only executable change is in src/run/browser.ts, which vitest.config.ts coverage.exclude removes from unit coverage (unit tests are forbidden from loading it, AC-25). guidedBrowser.ts changes only a comment. The src/run/** thresholds (85/85/80/80) cannot move because of these patches, and none is lowered. This is an inference from the coverage config. The unit tier was not run.",
+  "verification": {
+    "lock": "Hold .aiox/sdc/STUDIO-OBSERVED-ORCH/gradle.lock.d for the fixtures tier (the joined backend IT also reads studio-runner/dist).",
+    "redFirst": [
+      "cd <repo> && git apply docs/qa/evidence/STUDIO-OBS-013/r13/qa-fixes/sec001-guided-recording-test.patch",
+      "cd studio-runner && rm -rf dist && node_modules/.bin/tsc -p tsconfig.build.json && node scripts/write-runtime-versions.mjs",
+      "node_modules/.bin/vitest run --config vitest.fixtures.config.ts test/fixtures-tier/guided-recording.test.ts   # expect the happy-path case RED on oracle A (and B lower bound), with sec001-guided-video-oracle.json showing prefixAllWhite=false"
+    ],
+    "green": [
+      "cd <repo> && git apply docs/qa/evidence/STUDIO-OBS-013/r13/qa-fixes/sec001-browser.patch && git apply docs/qa/evidence/STUDIO-OBS-013/r13/qa-fixes/sec001-guidedBrowser-doc.patch",
+      "cd studio-runner && rm -rf dist && node_modules/.bin/tsc -p tsconfig.build.json && node scripts/write-runtime-versions.mjs",
+      "node_modules/.bin/vitest run --config vitest.fixtures.config.ts   # under the Gradle lock; full fixtures tier",
+      "node_modules/.bin/vitest run   # unit tier with coverage thresholds",
+      "node_modules/.bin/tsc -p tsconfig.json --noEmit",
+      "node_modules/.bin/eslint ."
+    ],
+    "afterGreen": "Append a0, t1 and the frame counts from r13/sec001-guided-video-oracle.json to r13/ledger.json. Back up the untracked ledger first. Then re-freeze the S4 identity: browser.ts is in QA's 32-file digest.",
+    "status": "RUN. Red on test-only patches, green after the fix. See results."
+  },
+  "risks": [
+    "Measured, not inferred: on the fixed tree a0 was 14-24 ms, so oracle A covers a single frame (pts 0). It is valid while a0 > 0, but thin.",
+    "B assumes the secret-login /login page paints dark text on a white default background, so its first paint has bytes below 245. That holds for test/fixtures/secret-login/server.ts as read, but it was not decoded.",
+    "Full-resolution decode memory: the a0+1000 ms window at 1280x720 rgb24 is about 2.76 MB per frame. maxBuffer is 1 GiB."
+  ],
+  "results": {
+    "red": {
+      "applied": [
+        "sec001-guided-recording-test.patch",
+        "sec001-guidedBrowser-doc.patch"
+      ],
+      "command": "rm -rf dist && tsc -p tsconfig.build.json && node scripts/write-runtime-versions.mjs && vitest run --config vitest.fixtures.config.ts test/fixtures-tier/guided-recording.test.ts",
+      "outcome": "1 failed | 3 passed. The happy path failed oracle A with \"expected 2268 to be -1\": frame 0 is non-white (chrome:// probe). B would also fail (t1-a0 = -341 < -250).",
+      "oracle": "sec001-red-oracle.json",
+      "a0": 341,
+      "t1": 0,
+      "prefixFrames": 9
+    },
+    "green": {
+      "applied": "all three patches",
+      "run1": "Full fixtures tier: 1 failed | 224 passed | 9 skipped. guided-recording passed 4/4. The failure was observed-bootstrap-video forced-step-loss (replay path, untouched by the patch, load average about 8). It passed 3/3 when rerun in isolation.",
+      "run2": "Full fixtures tier: 17 files passed | 3 skipped (deadline-cleanup, seek-measurement, upload-evidence); 225 passed | 9 skipped; exit 0.",
+      "oracle": "sec001-green-oracle.json",
+      "a0": 14,
+      "t1": 40,
+      "t1MinusA0": 26,
+      "prefixFrames": 1
+    },
+    "unit": "Default config with coverage: 1351 passed | 29 skipped, exit 0. src/run coverage is 99.91 lines, 85.88 branches, 99.6 functions, 99.91 statements. Thresholds unchanged.",
+    "tsc": "--noEmit exit 0",
+    "eslint": "exit 0",
+    "rawLogs": "Session scratchpad r13-sec001/{red,green,obv-rerun,green2,unit}.log (not evidence)",
+    "ledger": "r13/ledger.json qaFixSec001 (appended; earlier sections byte-unchanged)",
+    "hashesAfter": {
+      "studio-runner/src/run/browser.ts": "dadcbb9f13c4e98de041478583bad6ae19a5e12e8c85fdca71c2a48be3d986b5",
+      "studio-runner/src/run/guidedBrowser.ts": "8c4d36a38f1901b93f3d6185955b2cb2b5a1bd7e06bbd93a6479e0c2a3158ce1",
+      "studio-runner/test/fixtures-tier/guided-recording.test.ts": "f800807e9b370757c6a8b6745e26049b40549434e63f4434c0950328ee6fcd02"
+    },
+    "final": {
+      "date": "2026-10-14",
+      "lockHold": "09:28:50Z-09:37:58Z, owner \"r13 sec001-triage\". dist was rebuilt first, because the red re-proof had re-emitted dist from the reverted source.",
+      "repeatGuidedRecording": "10/10 green. In 5/10, k=0: the app's paint was frame 0, which v1 oracle A would have failed.",
+      "underLoadRepeat": "repro/v3: 12/12 green at load 7-13 (4 burners)",
+      "fixturesTier": [
+        "run 1: 17 files passed | 3 skipped; 225 passed | 9 skipped",
+        "run 2 (consecutive): 17 files passed | 3 skipped; 225 passed | 9 skipped"
+      ],
+      "skippedFiles": "deadline-cleanup, seek-measurement, upload-evidence (skips, not passes)",
+      "unit": "89 files passed | 1 skipped; 1351 passed | 29 skipped. src/run 99.91 lines, 85.87 branches, 99.6 functions, 99.91 statements. Thresholds unchanged.",
+      "tsc": "exit 0",
+      "eslint": "exit 0",
+      "hashes": {
+        "studio-runner/src/run/browser.ts": "dadcbb9f13c4e98de041478583bad6ae19a5e12e8c85fdca71c2a48be3d986b5 (unchanged by triage)",
+        "studio-runner/test/fixtures-tier/guided-recording.test.ts": "f964969488ca8baa45a70c945734fb95f5e83034beecee25973aaa98112ba5e0"
+      },
+      "oracle": "r13/sec001-guided-video-oracle.json (from tier run 2)"
+    }
+  },
+  "oracleRevision": {
+    "date": "2026-10-14",
+    "trigger": "S4b failed oracle A once (guided-recording.test.ts:144, \"expected 30834 to be -1\"): load average about 9.",
+    "classification": "ORACLE, not product. Verified by decoding.",
+    "measured": [
+      "Under load (repro/fixed, 10 CPU burners, load 40-48), v1 failed 10/12. 2 of those were oracle A, and in both the first non-white frame was frame 0 at pts 0 with box [8,8,400,29] and 2036 px. Decoded to PNG, it is the login page (\"User\" input, password input, \"Sign in\"), not chrome:// content. Evidence: sec001-triage-v1-oracle-frame0-login.json.",
+      "Under load 9-12 (repro/v2, 4 burners), a first content-matching revision failed 4/12. In 2 runs frame 0 was Chromium's initial solid surface: 921600 non-white px, colours (17,17,17) and (128,128,128), about 1036x514 dark over Playwright's gray pad, with no glyphs. Evidence: sec001-triage-v1b-oracle-frame0-initial-surface.json. In the other 2 runs the first app frame already showed the filled password, because the unfilled paint was never captured.",
+      "The other v1 failures under load 40+ were NO_FIRST_PAINT (navigate took 6-12 s, beyond a0+1 s) and one TARGET_CHANGED. That is an extreme-load environment and not this oracle. B would also fail there, by design (the seek budget)."
+    ],
+    "rootCause": "Playwright 1.63 videoRecorder writes each screencast frame at frameSwapWallTime minus recorder creation, and ffmpeg starts the output at the first frame it receives. The webm therefore starts at the first composited frame, not at ready(). When about:blank composites no frame before navigation, the app's own first paint, or the initial solid surface, is frame 0 at pts 0, which is before a0. v1 oracle A (\"every frame before a0 is white\") assumed video zero equals the origin, so it contradicted B, which allows t1 down to a0-250.",
+    "change": "Oracle A, v2: decode [0, a0+1 s] at full resolution. Every frame must be either CONTENT-FREE (every row has at most 6 solid-colour runs at per-channel tolerance 12; white has 1 and the initial surface 2, while text rows have 55-437) or must show NO non-white pixel outside the APP REGION. The app region is the union of two boxes, padded by 8 px. The first is the login page's box, measured independently by a separate recorded guided launch of the same Chromium at the same size, navigated to /login (last decoded frame). The second is this run's own settled final frame (the home page, decoded with -sseof -1). B keeps -250 <= t1-a0 <= 500, with t1 = the pts of the first non-content-free frame. Facts are written before the asserts: per-frame ms, box, maxRowRuns, contentFree, outsideApp, the region, a0 and t1.",
+    "whyNotVacuous": "Startup-probe footage is text over most of the viewport. Red re-proof with only sec001-browser.patch reverted (3/3 RED): frames 2-4 at pts 80-160 ms have maxRowRuns 437, box [240,6,1039,719] and about 91k px outside the app region [0,0,408,~100]. Decoded, they are chrome://version (Chrome for Testing build, command line and profile path). Evidence: sec001-red2-oracle.json. The PNG stays in scratch only because it shows a local path. Frame 0 in red is the initial surface and is correctly content-free.",
+    "proposedRulingText": "AR-QA SEC-001 proofOracles.A_startupFramesAbsent (amended): decode the uploaded webm at full resolution over [0, a0+1000 ms]. Every frame is either content-free (no row with more than 6 solid-colour runs at per-channel tolerance 12) or has no non-white pixel (any channel < 245) outside the app region. The app region is the union of the login page's non-white box, measured by a separate recorded guided launch of the same Chromium, and the run's settled final frame's box, padded by 8 px. Reason: Playwright's webm starts at the first composited frame, not at ready(), so frames before a0 can legitimately show the app's first paint or Chromium's initial solid surface. B_trimBeforeOffsets is unchanged, with t1 = the first non-content-free frame."
+  },
+  "tightening": {
+    "date": "2026-10-14",
+    "red": "Only sec001-browser.patch reverted (browser.ts f0e33dce…), restored afterwards (dadcbb9f…): 3/3 RED on A. Offending frames: [2..6], [2..4] and [1..3]; max outsideApp about 91.3k. T1 passed on all three (ratio 0.043-0.045) and T2 passed (flagged frames 36-41). B passed on the reverted tree (t1-a0 = -214, -163, -201), which matches the architect retraction. Evidence: sec001-red3-oracle.json.",
+    "abortedAttempt": "The first T2 attempt used an off-the-record context, and chrome://prefs-internals gave ERR_INVALID_URL. Those red runs failed for that reason, so they are invalid and are not counted. The run was aborted, I killed my own CPU burners, and I cleared my own stale lock (holder pid 33877 was dead).",
+    "repeat10": "First 10x run: 9/10. Iteration 2 at load about 20 failed in GuidedRuntime.start with CONTEXT_LOST: the guided launch threw a GuidedLaunchFailure before any oracle ran, and the oracle JSON in that directory is stale. Cause unknown, because GuidedLaunchFailure hides the underlying error. A follow-up diagnostic ran 40 recorded guided launches on each tree (fixed and pre-fix) under 6 CPU burners, logging the swallowed error from a temporary instrumented dist copy that was removed afterwards: 80/80 OK, not reproduced. Second 10x run: 10/10 green.",
+    "underLoad12": "12/12 green with 4 burners at load 11-14. appRegionAreaRatio 0.044-0.046; positive control flagged 39-42 frames, max outsideApp 91.3-91.4k.",
+    "fixturesTier": "Two consecutive runs: 17 files passed | 3 skipped; 225 passed | 9 skipped each. Skipped files: deadline-cleanup, seek-measurement, upload-evidence.",
+    "unit": "89 files passed | 1 skipped; 1351 passed | 29 skipped. src/run 99.91 lines, 85.88 branches, 99.6 functions, 99.91 statements. Thresholds unchanged.",
+    "tsc": "exit 0",
+    "eslint": "exit 0",
+    "dist": "Rebuilt at the end from the final tree (rm -rf dist && tsc -p tsconfig.build.json && write-runtime-versions). No diagnostic files remain.",
+    "notDone": "Did not apply the architect's non-blocking recommendation to gate the evidence write behind an env flag (out of scope)."
+  }
+}

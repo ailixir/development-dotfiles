@@ -1,0 +1,557 @@
+{
+  "story": "STUDIO-OBS-007",
+  "scope": "CURRENT_TEST_ONLY_REAL_ADAPTER_PROOF",
+  "capturedAtUtc": "2026-10-10T15:50:39.420269+00:00",
+  "changedSourcePaths": [
+    "studio-runner/test/fixtures-tier/secret-login.test.ts",
+    "studio-runner/test/fixtures/secret-login/server.ts"
+  ],
+  "productionSourceChanges": [],
+  "distChanges": [],
+  "original25SourceTextUnchanged": true,
+  "fixtureDefaultBehavior": "Optional second argument reportsRoleCollision defaults false. Only GET/rejectedPOST /login conditionally appends actual type=button Reports. Existing default markup and routes unchanged; each new oracle owns independent fixture.",
+  "gates": [
+    {
+      "command": "npm run type-check",
+      "session": 6588,
+      "exitCode": 0,
+      "log": "type.log"
+    },
+    {
+      "command": "npm exec -- eslint test/fixtures-tier/secret-login.test.ts test/fixtures/secret-login/server.ts",
+      "session": 86950,
+      "exitCode": 0,
+      "log": "lint.log"
+    },
+    {
+      "command": "npm run test:fixtures -- test/fixtures-tier/secret-login.test.ts --reporter=default --reporter=json --outputFile.json=../docs/qa/evidence/STUDIO-OBS-007/runner-login-collision-candidate/tests.json",
+      "session": 66873,
+      "exitCode": 0,
+      "log": "fixtures.log",
+      "total": 30,
+      "passed": 30,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "originalCases": [
+    {
+      "name": "isolated-world password control production boundary counts /login without exporting any password node",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary counts /two-passwords without exporting any password node",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary counts /no-password without exporting any password node",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary counts /shadow-login without exporting any password node",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary refuses a pinned swap mutation without typing",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary refuses a pinned reattach mutation without typing",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary refuses a pinned type mutation without typing",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary refuses /trap before a value is typed",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary refuses /cross-origin-form before a value is typed",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary permits inert focus styling while retaining the same unique password input",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary requires both allowed and approved origin and scrubs later echoes",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary counts adversarial shadow-plus-light candidates identically at prepare",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary counts adversarial offscreen candidates identically at prepare",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary counts adversarial iframe candidates identically at prepare",
+      "status": "passed"
+    },
+    {
+      "name": "isolated-world password control production boundary counts adversarial closed-shadow candidates identically at prepare",
+      "status": "passed"
+    },
+    {
+      "name": "scans recorded and guided persistent profiles before close and cleanup",
+      "status": "passed"
+    },
+    {
+      "name": "refuses an actual browser launch without the prewritten Preferences file",
+      "status": "passed"
+    },
+    {
+      "name": "measures raw Playwright fill error text before the production redactor",
+      "status": "passed"
+    },
+    {
+      "name": "measures actual GuidedRuntime native-guard failure and its diagnostic sinks in Chromium",
+      "status": "passed"
+    },
+    {
+      "name": "measures actual GuidedRuntime injected-released-value failure and its diagnostic sinks in Chromium",
+      "status": "passed"
+    },
+    {
+      "name": "uses structural login signature only; a passing registration assertion remains passing",
+      "status": "passed"
+    },
+    {
+      "name": "settles a protected redirect on the reached login document instead of timing out",
+      "status": "passed"
+    },
+    {
+      "name": "replays the published password-only guard against /two-passwords and refuses before typing",
+      "status": "passed"
+    },
+    {
+      "name": "replays the published password-only guard against /no-password and refuses before typing",
+      "status": "passed"
+    },
+    {
+      "name": "replays login twice without a model, records distinct receipts/video and uses rotated values",
+      "status": "passed"
+    }
+  ],
+  "newCases": [
+    {
+      "name": "executes the actual replay LOGIN_REQUIRED oracle: no-login",
+      "status": "passed"
+    },
+    {
+      "name": "executes the actual replay LOGIN_REQUIRED oracle: wrong-password",
+      "status": "passed"
+    },
+    {
+      "name": "executes the actual replay LOGIN_REQUIRED oracle: registration",
+      "status": "passed"
+    },
+    {
+      "name": "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: no-login",
+      "status": "passed"
+    },
+    {
+      "name": "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: wrong-password",
+      "status": "passed"
+    }
+  ],
+  "actualOracleFacts": {
+    "oracle-no-login-collision.json": {
+      "mode": "no-login",
+      "reportsRoleCollision": true,
+      "actualAdapter": true,
+      "actualChromium": true,
+      "reachedUrl": "http://127.0.0.1:53587/login",
+      "result": {
+        "ok": false,
+        "errorCode": "LOGIN_REQUIRED",
+        "secretUse": {},
+        "detail": {
+          "stepId": "00000000-0000-4000-8000-000000000202",
+          "loginStepsPresent": false
+        }
+      },
+      "started": [
+        {
+          "stepIndex": 0,
+          "startedAtMs": 5578.3335
+        },
+        {
+          "stepIndex": 1,
+          "startedAtMs": 5595.959417
+        }
+      ],
+      "finished": [
+        {
+          "stepIndex": 0,
+          "status": "PASS",
+          "startedAtMs": 5578.3335,
+          "finishedAtMs": 5595.936834,
+          "durationMs": 17.60333400000036,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "status": "FAIL",
+          "startedAtMs": 5595.959417,
+          "finishedAtMs": 5611.9195,
+          "durationMs": 15.96008299999994,
+          "failure": "LOGIN_REQUIRED",
+          "detail": {
+            "stepId": "00000000-0000-4000-8000-000000000202",
+            "loginStepsPresent": false
+          }
+        },
+        {
+          "stepIndex": 2,
+          "status": "SKIPPED",
+          "startedAtMs": null,
+          "finishedAtMs": null,
+          "durationMs": null,
+          "failure": null
+        }
+      ],
+      "receiptCount": 0,
+      "rejectedReceiptCount": 0,
+      "profileCanaryHits": [],
+      "nativeVideo": {
+        "path": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/secret-login-required-tD712c/video/page@a8278e9ea779c16a703f58ff118f8342.webm",
+        "bytes": 5477,
+        "sha256": "4f90afe362e6000754dda59c22239a61cd8daeda87c6262e2a7d5ba900dee48a"
+      },
+      "learnedPublishedCoreProof": false
+    },
+    "oracle-wrong-password-collision.json": {
+      "mode": "wrong-password",
+      "reportsRoleCollision": true,
+      "actualAdapter": true,
+      "actualChromium": true,
+      "reachedUrl": "http://127.0.0.1:53605/login",
+      "result": {
+        "ok": false,
+        "errorCode": "LOGIN_REQUIRED",
+        "secretUse": {
+          "PASS": "USED"
+        },
+        "detail": {
+          "stepId": "00000000-0000-4000-8000-000000000204",
+          "loginStepsPresent": true
+        }
+      },
+      "started": [
+        {
+          "stepIndex": 0,
+          "startedAtMs": 6368.805
+        },
+        {
+          "stepIndex": 1,
+          "startedAtMs": 6382.739917
+        },
+        {
+          "stepIndex": 2,
+          "startedAtMs": 6403.861084
+        },
+        {
+          "stepIndex": 3,
+          "startedAtMs": 6448.97225
+        }
+      ],
+      "finished": [
+        {
+          "stepIndex": 0,
+          "status": "PASS",
+          "startedAtMs": 6368.805,
+          "finishedAtMs": 6382.733667,
+          "durationMs": 13.928667000000132,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "status": "PASS",
+          "startedAtMs": 6382.739917,
+          "finishedAtMs": 6403.852917,
+          "durationMs": 21.113000000000284,
+          "failure": null
+        },
+        {
+          "stepIndex": 2,
+          "status": "PASS",
+          "startedAtMs": 6403.861084,
+          "finishedAtMs": 6448.966834,
+          "durationMs": 45.105749999999716,
+          "failure": null
+        },
+        {
+          "stepIndex": 3,
+          "status": "FAIL",
+          "startedAtMs": 6448.97225,
+          "finishedAtMs": 6454.353167,
+          "durationMs": 5.380917000000409,
+          "failure": "LOGIN_REQUIRED",
+          "detail": {
+            "stepId": "00000000-0000-4000-8000-000000000204",
+            "loginStepsPresent": true
+          }
+        },
+        {
+          "stepIndex": 4,
+          "status": "SKIPPED",
+          "startedAtMs": null,
+          "finishedAtMs": null,
+          "durationMs": null,
+          "failure": null
+        }
+      ],
+      "receiptCount": 1,
+      "rejectedReceiptCount": 1,
+      "profileCanaryHits": [],
+      "nativeVideo": {
+        "path": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/secret-login-required-CnHlWr/video/page@e88dd5c67c7f6d7dcb85d8e844039714.webm",
+        "bytes": 6489,
+        "sha256": "5824d28ae21c7b125f0ed581c21b513ce1df3cbc36c88a5837857dd896aed393"
+      },
+      "learnedPublishedCoreProof": false
+    },
+    "oracle-wrong-password-default.json": {
+      "mode": "wrong-password",
+      "reportsRoleCollision": false,
+      "actualAdapter": true,
+      "actualChromium": true,
+      "reachedUrl": "http://127.0.0.1:53676/login",
+      "result": {
+        "ok": false,
+        "errorCode": "TIMEOUT",
+        "secretUse": {
+          "PASS": "USED"
+        }
+      },
+      "started": [
+        {
+          "stepIndex": 0,
+          "startedAtMs": 13805.202625
+        },
+        {
+          "stepIndex": 1,
+          "startedAtMs": 13817.585709
+        },
+        {
+          "stepIndex": 2,
+          "startedAtMs": 13840.208667
+        },
+        {
+          "stepIndex": 3,
+          "startedAtMs": 13876.830417
+        }
+      ],
+      "finished": [
+        {
+          "stepIndex": 0,
+          "status": "PASS",
+          "startedAtMs": 13805.202625,
+          "finishedAtMs": 13817.579917,
+          "durationMs": 12.377291999999215,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "status": "PASS",
+          "startedAtMs": 13817.585709,
+          "finishedAtMs": 13840.205709,
+          "durationMs": 22.61999999999898,
+          "failure": null
+        },
+        {
+          "stepIndex": 2,
+          "status": "PASS",
+          "startedAtMs": 13840.208667,
+          "finishedAtMs": 13876.827959,
+          "durationMs": 36.619291999999405,
+          "failure": null
+        },
+        {
+          "stepIndex": 3,
+          "status": "FAIL",
+          "startedAtMs": 13876.830417,
+          "finishedAtMs": 18876.575292,
+          "durationMs": 4999.744875000002,
+          "failure": "TIMEOUT"
+        },
+        {
+          "stepIndex": 4,
+          "status": "SKIPPED",
+          "startedAtMs": null,
+          "finishedAtMs": null,
+          "durationMs": null,
+          "failure": null
+        }
+      ],
+      "receiptCount": 1,
+      "rejectedReceiptCount": 1,
+      "profileCanaryHits": [],
+      "nativeVideo": {
+        "path": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/secret-login-required-ZzsOhN/video/page@dad4c41796009c8d2d391b75a8af0586.webm",
+        "bytes": 15986,
+        "sha256": "82213e0486c2c8b5d1b0cc9c9a0536f976b52dee3b8b2af9540d86ef35f39f67"
+      },
+      "learnedPublishedCoreProof": false
+    },
+    "oracle-registration-default.json": {
+      "mode": "registration",
+      "reportsRoleCollision": false,
+      "actualAdapter": true,
+      "actualChromium": true,
+      "reachedUrl": "http://127.0.0.1:53625/registration",
+      "result": {
+        "ok": true,
+        "errorCode": null,
+        "secretUse": {}
+      },
+      "started": [
+        {
+          "stepIndex": 0,
+          "startedAtMs": 7196.458542
+        },
+        {
+          "stepIndex": 1,
+          "startedAtMs": 7210.381334
+        }
+      ],
+      "finished": [
+        {
+          "stepIndex": 0,
+          "status": "PASS",
+          "startedAtMs": 7196.458542,
+          "finishedAtMs": 7210.374709,
+          "durationMs": 13.916166999999405,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "status": "PASS",
+          "startedAtMs": 7210.381334,
+          "finishedAtMs": 7222.219334,
+          "durationMs": 11.838000000000648,
+          "failure": null
+        }
+      ],
+      "receiptCount": 0,
+      "rejectedReceiptCount": 0,
+      "profileCanaryHits": [],
+      "nativeVideo": {
+        "path": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/secret-login-required-RPx7ff/video/page@a079aedbc01a327190d6ce98cd84813b.webm",
+        "bytes": 5643,
+        "sha256": "36b94ceec6a382b3918153fec04edb58325beb939517a491472304fe9e84b728"
+      },
+      "learnedPublishedCoreProof": false
+    },
+    "oracle-no-login-default.json": {
+      "mode": "no-login",
+      "reportsRoleCollision": false,
+      "actualAdapter": true,
+      "actualChromium": true,
+      "reachedUrl": "http://127.0.0.1:53637/login",
+      "result": {
+        "ok": false,
+        "errorCode": "TIMEOUT",
+        "secretUse": {}
+      },
+      "started": [
+        {
+          "stepIndex": 0,
+          "startedAtMs": 7968.621542
+        },
+        {
+          "stepIndex": 1,
+          "startedAtMs": 7984.079334
+        }
+      ],
+      "finished": [
+        {
+          "stepIndex": 0,
+          "status": "PASS",
+          "startedAtMs": 7968.621542,
+          "finishedAtMs": 7983.815375,
+          "durationMs": 15.193833000000268,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "status": "FAIL",
+          "startedAtMs": 7984.079334,
+          "finishedAtMs": 12984.946125,
+          "durationMs": 5000.866791,
+          "failure": "TIMEOUT"
+        },
+        {
+          "stepIndex": 2,
+          "status": "SKIPPED",
+          "startedAtMs": null,
+          "finishedAtMs": null,
+          "durationMs": null,
+          "failure": null
+        }
+      ],
+      "receiptCount": 0,
+      "rejectedReceiptCount": 0,
+      "profileCanaryHits": [],
+      "nativeVideo": {
+        "path": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/secret-login-required-99sYVu/video/page@c9df92225c09e579fd9e7a461948ccb7.webm",
+        "bytes": 15529,
+        "sha256": "375052e59c78206acc9550c12da91581d44c707aff4aefa9df48c8293bbf298f"
+      },
+      "learnedPublishedCoreProof": false
+    }
+  },
+  "cleanup": {
+    "newRelevantProcessesStillAlive": [],
+    "recentMatchingScratchRemaining": [],
+    "tmpRoot": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T",
+    "basis": "Actual pre/post process snapshots, post-run filesystem, real afterEach/afterAll/finally cleanup; no broad fast-orphan guarantee"
+  },
+  "sourceManifest": "source-manifest.json",
+  "distManifest": "dist-manifest.json",
+  "runtimeIdentity": "runtime-versions.json",
+  "actualExecutableIdentity": "browser-provenance.json",
+  "parentBindingNeeds": [
+    "Future backend9-flow join must snapshot new default-preserving fixture server hash; no historical backend gate relabeled",
+    "Root current dist/build identity remains byte-identical across274 files; source/test corpus now exactly2 paths changed"
+  ],
+  "historicalRedPreserved": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/runner-login-oracle-execution-2/result.json",
+    "sha256": "95e8fc1c814c99293654bc468f09a0b80ed4b2604dad0fac5bb4d04f56404001",
+    "fact": "28 tests /26pass2TIMEOUTred original LOGIN expectation; corrected bounded fixture tests do not erase actual red"
+  },
+  "limits": [
+    "Direct controlled Execute3 actual adapter/executor only; no actual learned protected guard/publication/session-expired/Core/PostgreSQL/guided credit",
+    "Default absence remains TIMEOUT unannotated; no production taxonomy or generic timeout broadening",
+    "Native video bytes/hash reflect original recorder files; not manual masking inspection/staging calibration",
+    "Current targeted30 proof, not current full default/coverage/fixture/deployment gates; prior1760/355/313 remain exact old source-bound",
+    "Scoped independent repairPASS remains prior source-bound; no selfQA/lifecycle claim",
+    "Node24vs22 strict internalimage/ED05 red, historical7290byte missing pixels and other joined/control/revocation/isolation oracles remain open"
+  ],
+  "artifactsSha256": {
+    "before.json": "d1c12560e140cd7e98e66fd13f0f9f3d34d86335ebf0ce5615bdbf2bfa292c15",
+    "browser-provenance.json": "d5c19b48a4d37659821441b462c3f131c6101d2e2145de464d130c55412b2a91",
+    "source-manifest.json": "a90efc50a3dedf1ec1f8d736bc658f7df656bac34b53f42539194d3006d2460f",
+    "oracle-no-login-collision.json": "73594ab121cd2564c1c3ac179f5377d167e1b30c868a744d9e721c3d698ebc18",
+    "secret-login.test.ts.before": "0348c70985b09c0373fcdcedc5eafbc5cafada9c31f361ebd619415318ac919a",
+    "before-bindings.json": "cc94482ac1dac6604a3c2e4fb957945ff5f7c616986a2a72e4ebd53df3aeae39",
+    "tests.json": "08886f096d949ae374ba54e7229d15e8bd64db3708dd4a50770a088d4f1780c9",
+    "server.ts.before": "2cea73be1af48d4bcd3eaa1768f6c09899fbd8a380812d281641f85b67c3664a",
+    "lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "oracle-wrong-password-collision.json": "c5c000179928cccee99984513c9c1721937820e17695721d1a15003c1547cb7d",
+    "runtime-versions.json": "ff9d2b4c8867c6cd1fa27c2019838b0ce25d2ee39c219fa0b6c24e2fa0928b8c",
+    "cleanup.json": "094ab2db97aecf8ab9b4d0d838f6cc724b0ae30763bf55d141670c9c13747bf0",
+    "processes-before.txt": "4588f1498c6453e21c117c8659886f65fd7d4da1bde4515ae4fb4baa3126156d",
+    "processes-after.txt": "dbd40cc1fd59ad228a376feaeb747997a3e675af554c0edf2d5386190e84ce48",
+    "fixtures.log": "ea78c88b0b2fe9438209826461ba69e17046e5a4790609db0f0cd564fe776398",
+    "oracle-wrong-password-default.json": "68c089f2c5796590185d7a8d55faac2de06cdcde293f49c1c06180bcfca47a58",
+    "dist-manifest.json": "095b36fca69699e61121b54a2539b67d0b1f077140e5e5ed5670809d0c899607",
+    "type.log": "66cb0d88cd3e949228a13daec3e65de0ce0c25b1b7278f1ffdb96dcd2886dfc9",
+    "oracle-registration-default.json": "788d58485687aa3e61a574dc6f04d915481357dedf8e6b2cbc5453d80f72d107",
+    "oracle-no-login-default.json": "476cb290ebf5c6e44aeab44c8dcedae72c6028d3d764436f93b90e976815feb6"
+  }
+}

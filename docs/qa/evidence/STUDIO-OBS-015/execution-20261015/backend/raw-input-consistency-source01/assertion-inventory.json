@@ -1,0 +1,89 @@
+{
+  "classification": "SOURCE_ONLY_UNCOMPILED_UNEXECUTED_NO_QA_VERDICT",
+  "productionDelta": {
+    "method": "GuidedPlanBuilder.basis",
+    "position": "Immediately after reading raw.materialization; before effective used-input scan/filtering",
+    "algorithm": "Existing versionContext(raw.materializationEvidence,versions.size()) reconstructs complete latest safe ordered metadata; require structural array equality with raw.materialization.inputs",
+    "refusal": "EVIDENCE_MISMATCH422",
+    "excludedChanges": [
+      "No sorting/intersection/repair/overwrite",
+      "No raw-ID-only trust",
+      "No public metadata hash used as private-document hash",
+      "No oldaction hash/array compared tolatesthead",
+      "No current materializationRevision=immutablebirth equality",
+      "No production changes outside Builder/newflags/schema/cap/authority changes"
+    ]
+  },
+  "newSubjects": [
+    {
+      "selector": "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.detachedCurrentInputsMatchCompleteHistoryBeforeEffectiveFiltering",
+      "labels": [
+        "missing-unused-input",
+        "raw-row-order",
+        "same-id-metadata-substitution"
+      ],
+      "controls": [
+        "Full independent ordinary basis parent passes before eachattack",
+        "raw/current and normalized history3 actualinput rows; usedbasis/replayrecipe2 actualinputs",
+        "unusedinput-config retainedraw/history, absentfuture recipe",
+        "Only raw currentinput array changes; normalizedhistory/unrelatedfacts unchanged",
+        "EVIDENCE_MISMATCH422, no source repair/mutation",
+        "Restore exactwhole original array/order thenfullparent recovers"
+      ],
+      "proofLimit": "Detached record conformance, not SQL-committed corruption/private authority/native proof"
+    },
+    {
+      "selector": "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.appendedHistoricalHeadPreservesOriginalVersionsAndIndependentWholeBasis",
+      "controls": [
+        "Frozen appendedHistorical authority.privateInputs validates and reconstructs exactprivateversion1prefix count1 and finalcount3 hashes; safe metadata never substitutesprivatehashes",
+        "Originalbootstrap1/ACK/actions/proposals/preparations untouched",
+        "Local synthetic currenthead context2/materialization4 with version2birth3 and prepmetadata revisions2/4",
+        "Original navigation/read staycontext1/originalhashdifferentlatest; suffixactions context2/finalhash",
+        "Entire basis equals independentfrozenfixture+only independently constructedmanifest hash adjustment",
+        "Recipes matchoriginalfrozen expectedartifact, rawmetadata3 vs effective2, allinputs/frozen facts immutable"
+      ],
+      "expectedOracle": "Literal unchanged frozen independent basis/private inputs; no actual Java returned output used as expected",
+      "proofLimit": "Synthetic conformance only; original frozen lowerer artifact/hash remains separate opaque-manifest proof"
+    }
+  ],
+  "preservedSubjects": [
+    "brokenJoins/refusesAlteredOriginalEvidence byte-exact including missing source input",
+    "All previous Builder bodies andhelper behavior/source04 identities+oraclebindings",
+    "Source02 commitments/firstsuffixnegative/source03snapshot fixes and exact6MiB helper7958 unchanged",
+    "All fixture/schema/oracle/golden/migration/repository/validator/graph sources held"
+  ],
+  "futureFirstSelectors": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.refusesAlteredOriginalEvidence",
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.detachedCurrentInputsMatchCompleteHistoryBeforeEffectiveFiltering",
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.appendedHistoricalHeadPreservesOriginalVersionsAndIndependentWholeBasis"
+  ],
+  "futureFullClassSelectors": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest",
+    "com.citi.put.checks.studio.guided.publication.IncrementalMaterializationEvidenceTest",
+    "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+    "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+    "com.citi.put.checks.studio.authoring.ChangeDetectionTest"
+  ],
+  "futureCommands": {
+    "firstFocused": "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.refusesAlteredOriginalEvidence --tests com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.detachedCurrentInputsMatchCompleteHistoryBeforeEffectiveFiltering --tests com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.appendedHistoricalHeadPreservesOriginalVersionsAndIndependentWholeBasis",
+    "fullDefaultClasses": "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest --tests com.citi.put.checks.studio.guided.publication.IncrementalMaterializationEvidenceTest --tests com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest --tests com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest --tests com.citi.put.checks.studio.authoring.ChangeDetectionTest"
+  },
+  "runtimeScheduling": "Root schedules after sourceHOLD+independentdeltaQA; every parameterlabel runs. Core guidedIncrementalTest and separateappendACKfix need actual evidence; no runtime invoked here.",
+  "historicalFeedback03Only": {
+    "total": 293,
+    "passed": 291,
+    "failed": 2,
+    "skipped": 0,
+    "lowCore": "NOT_RUN_AFTER_DEFAULT_FAILURE",
+    "sourceAcceptance": "NOT_INFERRED_FROM_SOURCE"
+  },
+  "retained": {
+    "goal": "full015 then full008",
+    "acceptance": 86,
+    "IPC": 24,
+    "SQL": 55,
+    "joinedVariants": 35,
+    "privateCoreVaultNativeFullConfiguredGates": "REMAIN_REQUIRED",
+    "item85": "ORIGINAL_OPEN_PENDING_USER_UNAMENDED"
+  }
+}

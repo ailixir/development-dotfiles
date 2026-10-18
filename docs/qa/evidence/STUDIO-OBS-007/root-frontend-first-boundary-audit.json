@@ -1,0 +1,36 @@
+{
+  "scope": "READ_ONLY_FRONTEND_FIRST_BOUNDARY_QA_AUDIT_NOT_GATE",
+  "disposition": "FOUR_CONTRACT_DRIFT_FIXES_REQUIRED_SIX_TIMEOUT_CAUSES_UNOBSERVED",
+  "sourceHashes": {
+    "frontend/src/types/studio/studioTypes.ts": "22882c6d23c2fd5ae755d88570971ee35de7ea2ed2668cd244df96ca9cb2ff50",
+    "frontend/src/components/studio/run/executionErrorNarratives.ts": "7407cafca152ee479fcfb1e217f6889c588d77b02b7b721f109229d2521b9227",
+    "frontend/src/services/mocks/studio/executionFixtures.ts": "3438efb6e9714d5a12b4915add3f02031c32a867661baf298071fd3913f56816",
+    "docs/specs/studio/openapi.yaml": "08f091eca8a25ffe6df38ce8100d081b8a22f8fe7cd700cd7db03e84df510d49"
+  },
+  "actualFullGate": {
+    "total": 956,
+    "passed": 946,
+    "failed": 10,
+    "pending": 0,
+    "type": "PASS",
+    "lint": "PASS",
+    "build": "NOT_RUN"
+  },
+  "deterministicContractDefect": "Canonical ExecutionErrorCode enum/description/assigned-by includes SECRET_TOO_LONG (OpenAPI3187/3209/3243), frontend runtime carrier and exhaustive narrative omit it. Matrix derives from runtime carrier and therefore misses FX-ERRCODE-SECRET_TOO_LONG; four contract failures share this one drift.",
+  "minimalFixDesign": [
+    "Add only SECRET_TOO_LONG to existing EXECUTION_ERROR_CODES in canonical relative order.",
+    "Add exhaustive narrative with unique title: saved secret exceeds supported size. Browser never started, dispatcher refused without truncation; owner rotates reference to supported <=4096-character value. offersRerun=false; do not expose secret content.",
+    "Existing execution fixture matrix derives from carrier, so no handpinned matrix list/new flow/extra case infrastructure. Existing contract+matrix component tests verify declared set and narrative behavior."
+  ],
+  "timeouts": {
+    "transport1": "Run control failed to become available in existinguntil; cause unobserved without rendered state/failed network binding.",
+    "Splunk3": "Existing20s timeouts, first awaited interaction unretained.",
+    "StudioRuns2": "Existing5s timeouts, first awaited interaction unretained."
+  },
+  "next": "Coordinator may dispatch isolated two-file carrier/narrative candidate under exact preflight after D style freeze; root exact review before apply. Then unchanged existing three UI files scoped behavioral run plus affected contract/matrix/narrative checks, original timeout/config unchanged; retain original full10 failures. Full frontend original coverage and production build follow genuine repairs.",
+  "newMandatoryE2eCases": 0,
+  "sourceEdits": 0,
+  "runtime": 0,
+  "formalQA": false,
+  "whole19AcPass": false
+}

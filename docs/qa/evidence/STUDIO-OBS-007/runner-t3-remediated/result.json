@@ -1,0 +1,110 @@
+{
+  "story": "STUDIO-OBS-007",
+  "capturedAt": "2026-10-10T07:33:27.583878+00:00",
+  "candidateRevision": 4,
+  "scope": "Independent technical peer remediation candidate only; no T3/story/QA acceptance verdict",
+  "gates": {
+    "typecheck": {
+      "exitCode": 0
+    },
+    "lint": {
+      "exitCode": 0
+    },
+    "build": {
+      "exitCode": 0
+    },
+    "localPins": {
+      "exitCode": 0,
+      "imageProvenance": "NOT_ASSERTED"
+    },
+    "defaultCoverage": {
+      "exitCode": 0,
+      "filesPassed": 81,
+      "filesSkipped": 1,
+      "testsPassed": 1645,
+      "testsSkipped": 29,
+      "coverageTotals": {
+        "lines": {
+          "total": 11616,
+          "covered": 10551,
+          "skipped": 0,
+          "pct": 90.83
+        },
+        "statements": {
+          "total": 11616,
+          "covered": 10551,
+          "skipped": 0,
+          "pct": 90.83
+        },
+        "functions": {
+          "total": 755,
+          "covered": 717,
+          "skipped": 0,
+          "pct": 94.96
+        },
+        "branches": {
+          "total": 5508,
+          "covered": 4815,
+          "skipped": 0,
+          "pct": 87.41
+        },
+        "branchesTrue": {
+          "total": 0,
+          "covered": 0,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "thresholdsUnchanged": true
+    },
+    "chromiumFixtures": {
+      "exitCode": 0,
+      "filesPassed": 22,
+      "testsPassed": 326,
+      "testsSkipped": 10,
+      "compiledDependencyOrder": "Build terminal before gate; fixture mandatory globalSetup emitted same frozen source before children; final dist hashes match"
+    },
+    "deployment": {
+      "exitCode": 0,
+      "filesPassed": 8,
+      "testsPassed": 313,
+      "testsSkipped": 0,
+      "scope": "Deployment declarations/sandbox shim existing container, no revision4 deployed runner claim"
+    }
+  },
+  "sourceManifest": "source-hashes.json",
+  "distManifest": "dist-hashes.json",
+  "sourceDrift": [],
+  "distDrift": [],
+  "liveHandles": [],
+  "open": [
+    "ARIA05 active Default path corrected; effective legacy profile.password_manager_enabled absent, production full channel ruling pending. C3/effective-all-keys not claimed.",
+    "ARIA02 original literal native C6 remains OPEN pending PO revalidation; native/injected/supplementary and every joined all-sink oracle preserved.",
+    "ARIA06 approved conservative guided usage completeness retained; no new wire authority.",
+    "Source-current backend/PostgreSQL/CoreHTTP/compiled-worker joins, crash/audit/revocation/counting and independent technical re-review/lifecycle QA remain required."
+  ],
+  "noStatusStoryGeneratedBackendDdlPushDeployScheduleChanges": true,
+  "budget": {
+    "sharedWholeWaveCeilingUSD": 500,
+    "actualBilling": "UNAVAILABLE"
+  },
+  "logsSha256": {
+    "build.log": "50d8b286b802e2ce024ca6690dd1f1000b4bcd043b5615565d354c439374330a",
+    "default.log": "38bc89560d2960f3d94991a953e705b604bc0807123c1f32e0c922a232f6bee7",
+    "deployment.log": "97797a0ebea5b7992b06c66a192b5f7bbd6f337a0a311203b3070c2f34b98a20",
+    "fixtures.log": "1dfe0ca1e5ae720b9c645df89d2a71114dbcab5b1f17bd6a6aff0ce4d12f8466",
+    "focused-guards-diagnostics.log": "16ece08291c1e7ba5be8fe9740981912545ff037bd000328562f962b81266059",
+    "launcher-receipts.log": "d14110f1296e4ff79881b0cb49afc6f29a9048b3c34fb1812a555d1013cb9191",
+    "lint.log": "2ad7d0e1b633ba6235332e7530595b11d60ef34da9c8f4316955d31dd21579e4",
+    "new-runtime-green.log": "ae22401900f51bf0b159d8b5de7350aa876108e494696820f4896d8c4f72f7d6",
+    "pins.log": "d4f91c9d30d1a96fac427e639cdab457eb2f377f9b8012636225f6a6a4601c5e",
+    "typecheck.log": "bf2aa029bb2deb5530591dca1207249f7f0da44a20b8feef1b5decba7e510c7b"
+  },
+  "artifactsSha256": {
+    "coverage-summary.json": "23df062185e538a7a73ee222d41a73a6570339735a4f2a3212baf1303055c0b1",
+    "dist-hashes.json": "d198fb07583c7f01c761f71369d354a4999fd8b6824d0602837462f123787959",
+    "remediation.json": "c9ad3417471350509c67f018df4f2ad75696ea87c93a25b18d11e07884fad738",
+    "source-hashes.json": "2ff0879775191856d3dd4223290bb2a5bf182e2816077e3523220803e302a3a0",
+    "source-hashes.revision3.json": "3cbfaf3c496ab0c1ef02318e05e901d5b8f86459e9a75e7e11bb1aa7dcc968d5"
+  }
+}

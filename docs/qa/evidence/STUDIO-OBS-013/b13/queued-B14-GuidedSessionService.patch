@@ -1,0 +1,44 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -86,6 +86,23 @@
+     publication = java.util.Objects.requireNonNull(lifecycle);
+   }
+ 
++  private com.citi.put.checks.studio.guided.evidence.GuidedEvidenceProjection evidence =
++      com.citi.put.checks.studio.guided.evidence.GuidedEvidenceProjection.NONE;
++
++  /**
++   * STUDIO-OBS-013 (AR-1 B14_S3_hunk): the recording evidence projection result() publishes. One
++   * install, mirroring installPublication; until installed, today's literals (NONE).
++   */
++  public void installEvidence(
++      com.citi.put.checks.studio.guided.evidence.GuidedEvidenceProjection projection) {
++    require(
++        evidence == com.citi.put.checks.studio.guided.evidence.GuidedEvidenceProjection.NONE
++            && projection != null,
++        "RUNTIME_INCOMPATIBLE",
++        409);
++    evidence = projection;
++  }
++
+   private com.citi.put.checks.studio.guided.translation.GuidedTranslationStore translation;
+   private com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore questions;
+ 
+@@ -2289,7 +2306,6 @@
+             .put("learnedFromThisRun", false)
+             .put("replayVerified", false)
+             .put("scheduleActivated", false);
+-    out.putArray("actionTimings");
+     out.putObject("publication")
+         .put(
+             "status",
+@@ -2303,7 +2319,8 @@
+         .putNull("revisionId")
+         .put("ready", false)
+         .put("code", "NOT_PUBLISHED");
+-    out.putObject("evidence").put("kind", "guidedLedger").put("ref", id).putNull("video");
++    // Learned-from-execution evidence (STUDIO-OBS-013): actionTimings + evidence.video.
++    evidence.project(id, state).writeTo(out, id);
+     if (session.progress().has("errorCode")) {
+       out.set("errorCode", session.progress().path("errorCode"));
+     } else {

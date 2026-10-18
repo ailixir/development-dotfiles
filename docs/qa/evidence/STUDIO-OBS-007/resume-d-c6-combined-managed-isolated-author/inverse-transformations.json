@@ -1,0 +1,168 @@
+{
+  "studio-runner/src/guided/runtime.ts": [
+    {
+      "before": "  private closing: Promise<void> | null = null;",
+      "after": "  private closing: Promise<void> | null = null;\n  private confirmBrowserLoss: (() => void) | null = null;\n  // Fulfilled only by original launch-loss stop completion, never generic stop or early stopped state.\n  private readonly browserLossConfirmation = new Promise<void>(resolve => { this.confirmBrowserLoss = resolve; });"
+    },
+    {
+      "before": "        await this.browser.observations.fillPassword(p.target, p.executionEvidence.origin, allowedOrigins, resolvedValue);",
+      "after": "        const nativeOperation = this.browser.observations.fillPassword(p.target, p.executionEvidence.origin, allowedOrigins, resolvedValue);\n        // Both rejection handlers are installed immediately. A late losing SDK rejection cannot\n        // re-enter this dispatch catch or publish another application outcome/diagnostic.\n        await Promise.race([nativeOperation, this.browserLossConfirmation.then(() => { throw new Error('CONTEXT_LOST'); })]);"
+    },
+    {
+      "before": "    this.launching = this.options.launch(config, this.context.contextId, () => { void this.stop('CONTEXT_LOST').catch(() => undefined); });",
+      "after": "    this.launching = this.options.launch(config, this.context.contextId, () => {\n      const originalStop = this.stop('CONTEXT_LOST');\n      // Same original launch loss/stop promise; rejection is never confirmation.\n      void originalStop.then(() => { this.confirmBrowserLoss?.(); this.confirmBrowserLoss = null; }, () => undefined);\n    });"
+    }
+  ],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": [
+    {
+      "before": "        const revActive=new Map(),revGroups=new Set();",
+      "after": "        let revActive=new Map();const revGroups=new Set();\n        let revLossLifetime=null;\n        const revManagedLoss=()=>revLossSelected()&&revLossLifetime?.retired===true;"
+    },
+    {
+      "before": "          if(revLocalMode&&!revSealed){revFail();return;}",
+      "after": "          if(revLocalMode&&!revSealed&&!revManagedLoss()){revFail();return;}\n          // The old map remains captured by its original pending callbacks; it is not erased.\n          if(revManagedLoss())revActive=new Map();"
+    },
+    {
+      "before": "          if(mode.c6===3&&revProducer===1){revLossRuntime=null;revLossBusy=2;revLossRestoreAttempt=0;revLossRestoreRefusal=0;}",
+      "after": "          if(mode.c6===3&&revProducer===1){revLossRuntime=null;revLossBusy=2;revLossRestoreAttempt=0;revLossRestoreRefusal=0;\n            revLossLifetime={mode,active:revActive,high:0,operations:0,callbacks:0,cleanupAuthorized:false,retired:false};}\n          else revLossLifetime=null;"
+    },
+    {
+      "before": "                if(mode.c6&&revC6RetryRestore){",
+      "after": "                if(mode.c6===3&&revProducer===1&&revLossLifetime)revLossLifetime.cleanupAuthorized=true;\n                if(mode.c6&&revC6RetryRestore){"
+    },
+    {
+      "before": "                    revSealing=true;revFs.unwatchFile(command);revWatching=false;revMaybeSeal();",
+      "after": "                    revSealing=true;revFs.unwatchFile(command);revWatching=false;\n                    // Managed output closure is not normal raw-SDK settlement/sealing.\n                    if(revManagedLoss())revPublish(mode,false);else revMaybeSeal();"
+    },
+    {
+      "before": "                revC6HighPending++;let result;\n                const settled=()=>{revC6HighPending--;revPublish(mode,revSealed);revMaybeSeal();};",
+      "after": "                revC6HighPending++;let result;const lifetime=revLossSelected()?revLossLifetime:null;\n                if(lifetime)lifetime.high++;\n                const settled=()=>{\n                  if(lifetime)lifetime.high--;\n                  if(lifetime&&lifetime!==revLossLifetime)return;\n                  revC6HighPending--;\n                  if(lifetime?.retired)return; // Value-free observer retired, actual promise unchanged.\n                  revPublish(mode,revSealed);revMaybeSeal();};"
+    },
+    {
+      "before": "        const revCheck=RevOwnership.prototype.checkGrant;",
+      "after": "        // Selected kind3 observes actual managed promises without changing original results/errors.\n        for(const name of ['dispatch','refreshObservation']){\n          const original=RevRuntime.prototype[name];\n          RevRuntime.prototype[name]=function(...args){\n            const mode=revRuntimes.get(this),lifetime=mode?.c6===3?revLossLifetime:null;\n            if(!lifetime)return Reflect.apply(original,this,args);\n            lifetime.operations++;revOriginalPending++;let result;\n            const done=()=>{lifetime.operations--;revOriginalPending--;revPublish(mode,revSealed);};\n            try{result=Reflect.apply(original,this,args);}catch(error){done();throw error;}\n            result.then(done,()=>{revFail();done();}).catch(()=>{revFail();});return result;\n          };\n        }\n        const revCheck=RevOwnership.prototype.checkGrant;"
+    },
+    {
+      "before": "                const hooks={onRawFailure(error){try{const text=error instanceof Error?error.message:'';",
+      "after": "                if(mode.c6===3){\n                  const descriptor=Object.getOwnPropertyDescriptor(options,'callback'),original=options.callback;\n                  const lifetime=revLossLifetime;\n                  if(typeof original!=='function'||!descriptor||!lifetime)throw new Error('C6_CALLBACK');\n                  const wrapped=function(...args){\n                    lifetime.callbacks++;revOriginalPending++;let result;\n                    const done=()=>{lifetime.callbacks--;revOriginalPending--;revPublish(mode,revSealed);};\n                    try{result=Reflect.apply(original,this,args);}catch(error){done();throw error;}\n                    result.then(done,()=>{revFail();done();}).catch(()=>{revFail();});return result;\n                  };\n                  if(!Reflect.defineProperty(options,'callback',{...descriptor,value:wrapped}))throw new Error('C6_CALLBACK');\n                  group.methods.push(['callback',descriptor,wrapped]);\n                }\n                const hooks={onRawFailure(error){try{const text=error instanceof Error?error.message:'';"
+    },
+    {
+      "before": "                    while((runtime.busy||revActive.size||revC6HighPending||revC6CdpPending)&&performance.now()<deadline)\n                      await new Promise(resolve=>setTimeout(resolve,10));\n                    if(runtime.busy||revActive.size||revC6HighPending||revC6CdpPending){revLossRefuse(1);revFail();return false;}",
+      "after": "                    const lifetime=mode.c6===3?revLossLifetime:null;\n                    if(lifetime&&(!lifetime.cleanupAuthorized||!closeSucceeded))return false;\n                    const pending=()=>runtime.busy||revC6CdpPending||(lifetime?\n                      lifetime.operations||lifetime.callbacks||revOriginalPending:revActive.size||revC6HighPending);\n                    while(pending()&&performance.now()<deadline)\n                      await new Promise(resolve=>setTimeout(resolve,10));\n                    if(pending()||(lifetime&&runtime.active)){revLossRefuse(1);revFail();return false;}"
+    },
+    {
+      "before": "                    revC6Restored=true;\n                    if(closeSucceeded&&!closedRecorded){closedRecorded=true;revEmit(mode,9,1);}",
+      "after": "                    revC6Restored=true;\n                    if(closeSucceeded&&!closedRecorded){closedRecorded=true;revEmit(mode,9,1);}\n                    if(lifetime)lifetime.retired=true;"
+    },
+    {
+      "before": "                result.then(()=>{closeSucceeded=true;return retry();},()=>{",
+      "after": "                result.then(()=>{closeSucceeded=true;return mode.c6===3?true:retry();},()=>{"
+    },
+    {
+      "before": "                result.then(()=>revC6RetryRestore?.(),()=>{revLossRefuse(5);revFail();return revC6RetryRestore?.();})",
+      "after": "                result.then(()=>mode.c6===3?true:revC6RetryRestore?.(),()=>{revLossRefuse(5);revFail();return revC6RetryRestore?.();})"
+    },
+    {
+      "before": "              const ordinal=++revNativeOrdinal;revActive.set(ordinal,1);revEmit(holder.mode,2,ordinal,1);\n              const settled=fulfilled=>{if(!revActive.delete(ordinal))revFail();revEmit(holder.mode,3,ordinal,1,0,fulfilled);};",
+      "after": "              const ordinal=++revNativeOrdinal,active=revActive,lifetime=revLossSelected()?revLossLifetime:null;\n              active.set(ordinal,1);revEmit(holder.mode,2,ordinal,1);\n              const settled=fulfilled=>{\n                const removed=active.delete(ordinal);\n                if(lifetime?.retired)return; // Exact actual settlement remains private; no late observer output.\n                if(!removed)revFail();revEmit(holder.mode,3,ordinal,1,0,fulfilled);};"
+    },
+    {
+      "before": "                  try{await Promise.race([fence(),new Promise((_,reject)=>{\n                    timer=setTimeout(()=>reject(new Error('TIME')),Math.max(1,deadline-performance.now()));})]);}\n                  finally{clearTimeout(timer);}\n                  fenceSucceeded=true;",
+      "after": "                  const holder=selected?.c6===3&&selected.path===1?c6CdpHolders.get(context):null;\n                  const current=holder?revMode():null,browser=holder?context.browser():null;\n                  const unavailable=holder?.context===context&&holder.closed===false&&selected.active===true\n                    &&current?.active===true&&current.c6===3&&current.path===1\n                    &&current.case===selected.case&&current.epoch===selected.epoch\n                    &&holder.mode.case===selected.case&&holder.mode.epoch===selected.epoch\n                    &&holder.mode.c6===3&&holder.mode.path===1&&revLocalMode?.case===selected.case\n                    &&revLocalMode?.epoch===selected.epoch&&revC6ContextBound&&revStarted&&revC6Probed===2\n                    &&holder.dev===revC6ProfileDev&&holder.ino===revC6ProfileIno\n                    &&browser!==null&&typeof browser?.isConnected==='function'&&browser.isConnected()===false;\n                  if(!unavailable){\n                    try{await Promise.race([fence(),new Promise((_,reject)=>{\n                      timer=setTimeout(()=>reject(new Error('TIME')),Math.max(1,deadline-performance.now()));})]);}\n                    finally{clearTimeout(timer);}\n                    fenceSucceeded=true;\n                  } // Genuine bound disconnection supplies UNKNOWN, never a healthy page fence."
+    },
+    {
+      "before": "          if (sample.path(\"sealed\").booleanValue()) {\n            finalSample = sample;\n            break;\n          }",
+      "after": "          boolean managedLoss = state.c6Kind == 3 && producer == 1;\n          if (managedLoss\n              ? state.c6NativeClose && state.restored && state.closed\n                  && !sample.path(\"sealed\").booleanValue()\n                  && p4Number(sample, \"busy\") == 0\n                  && p4Number(sample, \"restoreAttempt\") > 0\n                  && p4Number(sample, \"restoreRefusal\") == 0\n                  && p4Number(sample, \"cdpCreationPending\") == 0\n                  && p4Number(sample, \"originalPending\") == 0\n                  && p4Number(sample, \"pending\") == p4Number(sample, \"highPending\")\n                  && p4Number(sample, \"sent\") == p4Number(sample, \"acked\")\n              : sample.path(\"sealed\").booleanValue()) {\n            finalSample = sample;\n            break;\n          }"
+    },
+    {
+      "before": "      assertThat(p4Number(finalSample, \"pending\")).isZero();",
+      "after": "      if (state.c6Kind == 3 && producer == 1) {\n        assertThat(finalSample.path(\"sealed\").booleanValue()).isFalse();\n        assertThat(p4Number(finalSample, \"pending\")).isEqualTo(p4Number(finalSample, \"highPending\"));\n        assertThat(p4Number(finalSample, \"nativeActive\")).isEqualTo(state.active.size());\n      } else {\n        assertThat(p4Number(finalSample, \"pending\")).isZero();\n      }"
+    },
+    {
+      "before": "    p3CleanupOwnedResources();\n    p8AssertUnknownUsageLineage(state);\n    if (!browserTree.isEmpty()) p6AwaitProcesses(browserTree, true);\n    p8AwaitC6Closed(state);",
+      "after": "    if (kind == 3) {\n      // Existing seal command is authorized only after actual original stop and captured tree exit.\n      p6AwaitProcesses(browserTree, true);\n      p4SealPrivateProducersAfterOwnerCleanup(state);\n      state.c6ProducerSealed = true; // Observer output closed; its raw SDK sealed field remains false.\n    }\n    p3CleanupOwnedResources();\n    p8AssertUnknownUsageLineage(state);\n    if (!browserTree.isEmpty()) p6AwaitProcesses(browserTree, true);\n    p8AwaitC6Closed(state);"
+    },
+    {
+      "before": "    p4SealPrivateProducersAfterOwnerCleanup(state);\n    state.c6ProducerSealed = true;\n    assertThat(state.active).isEmpty();",
+      "after": "    if (!state.c6ProducerSealed) {\n      p4SealPrivateProducersAfterOwnerCleanup(state);\n      state.c6ProducerSealed = true;\n    }\n    p8AssertManagedNativeState(state);"
+    },
+    {
+      "before": "            && state.active.isEmpty()\n            && (state.path == 2 || state.closed)) break;",
+      "after": "            && (state.c6Kind == 3 || state.active.isEmpty())\n            && (state.path == 2 || state.closed)) break;"
+    },
+    {
+      "before": "    assertThat(state.active).isEmpty();\n    if (state.path == 1) assertThat(state.closed).isTrue();",
+      "after": "    p8AssertManagedNativeState(state);\n    if (state.path == 1) assertThat(state.closed).isTrue();"
+    },
+    {
+      "before": "        if (owned != null && owned.c6Kind != 0 && (!owned.restored || !owned.active.isEmpty())) {",
+      "after": "        if (owned != null && owned.c6Kind != 0\n            && (!owned.restored || (owned.c6Kind != 3 && !owned.active.isEmpty()))) {"
+    },
+    {
+      "before": "  private P6OwnedPid p8OwnedPrimaryBrowser(P4RevocationState state) throws Exception {",
+      "after": "  private static void p8AssertManagedNativeState(P4RevocationState state) {\n    if (state.c6Kind == 3) {\n      // The retained actual native map is raw-settlement evidence, never reset by managed close.\n      assertThat(state.active.size()).isLessThanOrEqualTo(1);\n      if (!state.active.isEmpty()) {\n        assertThat(state.active).containsOnlyKeys(state.inFlightOrdinal);\n        assertThat(state.active.get(state.inFlightOrdinal)).isEqualTo(1);\n      }\n      assertThat(state.closed && state.restored && state.c6NativeClose).isTrue();\n    } else {\n      assertThat(state.active).isEmpty();\n    }\n  }\n\n  private P6OwnedPid p8OwnedPrimaryBrowser(P4RevocationState state) throws Exception {"
+    },
+    {
+      "before": "    volatile boolean c6NativeClose, c6FenceAvailable, c6InterruptedNotification, c6ProducerSealed;",
+      "after": "    volatile boolean c6NativeClose, c6FenceAvailable, c6InterruptedNotification, c6ProducerSealed;\n    volatile boolean c6BrowserTreeGone;"
+    },
+    {
+      "before": "        p3AttemptTeardown(failures, () -> p6AwaitProcesses(owned.c6BrowserTree, true));",
+      "after": "        p3AttemptTeardown(failures, () -> {\n          assertThat(owned.c6BrowserTree.isEmpty()).isFalse();\n          p6AwaitProcesses(owned.c6BrowserTree, true);\n          owned.c6BrowserTreeGone = true;\n        });"
+    },
+    {
+      "before": "      p6AwaitProcesses(browserTree, true);\n      p4SealPrivateProducersAfterOwnerCleanup(state);",
+      "after": "      p6AwaitProcesses(browserTree, true);\n      state.c6BrowserTreeGone = true;\n      p4SealPrivateProducersAfterOwnerCleanup(state);"
+    },
+    {
+      "before": "  private void p4SealPrivateProducersAfterOwnerCleanup(P4RevocationState state) throws Exception {\n",
+      "after": "  private void p4SealPrivateProducersAfterOwnerCleanup(P4RevocationState state) throws Exception {\n    if (state.c6Kind == 3) {\n      assertThat(state.c6BrowserTreeGone && state.c6NativeClose).isTrue();\n      if (state.c6ProducerSealed) {\n        p8AssertManagedNativeState(state);\n        return; // Existing command already proved managed output closure, not raw SDK sealing.\n      }\n    }\n"
+    },
+    {
+      "before": "cleanupAuthorized:false,retired:false};",
+      "after": "cleanupAuthorized:false,retired:false,snapshot:null};"
+    },
+    {
+      "before": "            const body=JSON.stringify({case:mode.case,producer:revProducer,epoch:mode.epoch,role:revProducer,\n              sent:revSeq,acked:revAcked,pending:revPending+revOriginalPending+revC6HighPending+revC6CdpPending,originalPending:revOriginalPending,",
+      "after": "            // Retired raw status is the last actual observation, never fake settlement/zero.\n            const raw=revManagedLoss()?revLossLifetime.snapshot:null;\n            const body=JSON.stringify({case:mode.case,producer:revProducer,epoch:mode.epoch,role:revProducer,\n              sent:revSeq,acked:revAcked,pending:revPending+revOriginalPending+(raw?.high??revC6HighPending)+revC6CdpPending,originalPending:revOriginalPending,"
+    },
+    {
+      "before": "              ...(mode.c6===3&&revProducer===1?{highPending:revC6HighPending,cdpCreationPending:revC6CdpPending,\n                nativeActive:revActive.size,busy:revLossBusy,restoreAttempt:revLossRestoreAttempt,",
+      "after": "              ...(mode.c6===3&&revProducer===1?{highPending:raw?.high??revC6HighPending,cdpCreationPending:revC6CdpPending,\n                nativeActive:raw?.active??revActive.size,busy:revLossBusy,restoreAttempt:revLossRestoreAttempt,"
+    },
+    {
+      "before": "        const revMaybeSeal=()=>{",
+      "after": "        const revMaybeSeal=()=>{\n          if(revManagedLoss())return; // This epoch explicitly has no normal raw SDK seal."
+    },
+    {
+      "before": "                    if(lifetime)lifetime.retired=true;",
+      "after": "                    if(lifetime){lifetime.snapshot={high:revC6HighPending,active:revActive.size};lifetime.retired=true;}"
+    },
+    {
+      "before": "                    &&current?.active===true&&current.c6===3&&current.path===1",
+      "after": "                    &&Number.isInteger(selected.case)&&selected.case>0&&selected.epoch===selected.case\n                    &&current?.active===true&&current.c6===3&&current.path===1"
+    },
+    {
+      "before": "      assertThat(state.closed && state.restored && state.c6NativeClose).isTrue();",
+      "after": "      assertThat(state.closed && state.restored && state.c6NativeClose && state.c6BrowserTreeGone).isTrue();"
+    },
+    {
+      "before": "      if (kind == 3) {\n        assertThat(state.c6RawCalls).isEqualTo(1);",
+      "after": "      if (kind == 3) {\n        // This hook may observe managed CONTEXT_LOST; it supplies no genuine native-error credit.\n        assertThat(state.c6RawCalls).isEqualTo(1);"
+    }
+  ],
+  "studio-runner/test/guided/runtime.test.ts": [
+    {
+      "before": "  it('adds a newly captured runtime value to the dispatch-local redactor before shutdown can clear it',async()=>{",
+      "after": "  it.each(['fulfill','reject'] as const)('completes managed secret loss only after original close and consumes late %s without output reentry',async late=>{\n    let originalLoss:(()=>void)|undefined;\n    const h=await setup({secret:true,onLostObserver:callback=>{originalLoss=callback;}});await h.runtime.dispatch(h.request);\n    const o=(h.messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation;\n    const evidence={kind:'observedDocument' as const,sessionId:h.context.sessionId,contextId:h.context.contextId,documentId:o.documentId,generation:o.generation,origin:o.origin,observationHash:hash(o)};\n    let nativeFulfill:()=>void=()=>undefined,nativeReject:(error:Error)=>void=()=>undefined,closeFinish:()=>void=()=>undefined;\n    const native=new Promise<void>((resolve,reject)=>{nativeFulfill=resolve;nativeReject=reject;});\n    h.browser.observations.preparePassword=()=>Promise.resolve();\n    const fill=vi.fn(()=>native);h.browser.observations.fillPassword=fill;\n    vi.mocked(h.browser.close).mockImplementationOnce(()=>new Promise<void>(resolve=>{closeFinish=resolve;}));\n    const p=proposal(h.context,evidence,'fill',{kind:'fill',value:{kind:'secretRef',sourceInputId:'pass'}},{kind:'passwordControl',documentId:o.documentId,generation:o.generation});\n    const prepared=await h.runtime.prepare({...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Date.now()+10000).toISOString()});\n    const request={...dispatch(h.context,p,prepared),secret:{secretId:'PASS',value:'managed-unit-canary',versionId:'unit',allowedOrigins:[o.origin]}};\n    const stderr=vi.spyOn(process.stderr,'write').mockImplementation(()=>true);\n    try{\n      let completed=false;const pending=h.runtime.dispatch(request).then(result=>{completed=true;return result;});\n      await vi.waitFor(()=>{expect(fill).toHaveBeenCalledOnce();});\n      if(!originalLoss)throw new Error('LOSS_CALLBACK');originalLoss();\n      const stopping=(h.runtime as unknown as {closing:Promise<void>}).closing;\n      await Promise.resolve();expect(completed).toBe(false);\n      expect((h.runtime as unknown as {busy:boolean}).busy).toBe(true);expect(h.runtime.active).toBe(true);\n      closeFinish();await stopping;\n      const result=await pending;expect(result.ledger.state).toBe('UNKNOWN_OUTCOME');expect(result.ledger.outcomeCode).toBe('ACK_LOST');\n      expect((h.runtime as unknown as {busy:boolean}).busy).toBe(false);expect(h.runtime.active).toBe(false);expect(request).not.toHaveProperty('secret');\n      const before=JSON.stringify(h.messages),errCount=stderr.mock.calls.length;\n      const name=(await readdir(h.path)).find(f=>f.endsWith('.diagnostic.jsonl'));if(!name)throw new Error('DIAGNOSTIC');\n      const diagnostic=await readFile(join(h.path,name),'utf8');\n      if(late==='fulfill')nativeFulfill();else nativeReject(new Error('managed-unit-canary'));\n      await native.catch(()=>undefined);await Promise.resolve();await Promise.resolve();\n      expect(JSON.stringify(h.messages)).toBe(before);expect(stderr.mock.calls).toHaveLength(errCount);\n      expect(await readFile(join(h.path,name),'utf8')).toBe(diagnostic);expect(fill).toHaveBeenCalledOnce();\n      await expect(h.runtime.dispatch(request)).rejects.toThrow('CONTEXT_LOST');\n    }finally{nativeFulfill();closeFinish();stderr.mockRestore();}\n  });\n  it('adds a newly captured runtime value to the dispatch-local redactor before shutdown can clear it',async()=>{"
+    },
+    {
+      "before": "observationCallback?:(body:unknown,key?:string)=>Promise<void>}={}){",
+      "after": "observationCallback?:(body:unknown,key?:string)=>Promise<void>;onLostObserver?:(callback:()=>void)=>void}={}){"
+    },
+    {
+      "before": "launch:()=>Promise.resolve(browser),callback:",
+      "after": "launch:(_config,_contextId,onLost)=>{options.onLostObserver?.(onLost);return Promise.resolve(browser);},callback:"
+    }
+  ]
+}

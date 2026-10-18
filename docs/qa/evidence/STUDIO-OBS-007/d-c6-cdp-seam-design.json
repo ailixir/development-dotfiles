@@ -1,0 +1,101 @@
+{
+  "scope": "READ_ONLY_ARCHITECT_DEV_C6_ACTUAL_SOLE_CDP_PRIMITIVE_PENDING_DESIGN",
+  "disposition": "MINIMUM_EXISTING_FIXTURE_CDP_OBSERVER_FOR_ROOT_REVIEW_NOT_AUTHOR_RELEASE",
+  "authority": "docs/qa/evidence/STUDIO-OBS-007/root-c6-native-pending-acceptance-audit.json",
+  "sourceBindings": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "24d425ad759d67c8f0d55a3c757e61ad1ef4fd485c0532cf2838c2f7ab64c960",
+    "studio-runner/src/run/browser.ts": "a397ece7c7dec06e643bc82b6a4862c5accf154c1c6b28d314ad3c7fab4ac02d",
+    "studio-runner/src/run/passwordControl.ts": "5312b614a53ae14eedb574161831168ec404ff5f700875b0883eec083a045882",
+    "studio-runner/src/run/observationCollector.ts": "ba31be90d04885e6329ae02f6559205325740cbd46960a438150a890557c27a2",
+    "studio-runner/src/guided/runtime.ts": "75fc33b1cd1cbc59bcb746811caff879d7217b22de8b08b374eec173dacf271c",
+    "studio-runner/src/run/observedReplayAdapter.ts": "07af47170a6050e7973c17355809a65b3d9219eaea6bc4b115b84b57e311c5c7"
+  },
+  "firstBoundary": {
+    "highLevel": "passwordControl.ts:36-40 awaits withhold and guards before actual port.call; cap.fillPassword entry/its pending promise does not alone prove CDP invocation.",
+    "solePrimitive": "browser.ts:350-353 original CDPSession.send Runtime.callFunctionOn with exact fixed fillPasswordResult function declaration, bound to the isolated collector objectId.",
+    "nativeEffect": "observationCollector.ts:542,550-566 performs password pin/document/origin/single-candidate guards, focus, recheck, then native value assignment/input/change. Observer does not replace or repeat these operations."
+  },
+  "existingReusableSeams": [
+    {
+      "anchor": "Publication p4NativeCloseObserverSdk:9862-9949",
+      "fact": "Existing actual chromium.launchPersistentContext wrapper receives the exact context before production resumes and already validates canonical owned0700 profile/dev/ino for selected C6. Attach observation only to this context and its original factory-owned Page; do not patch global CDP classes/another page/context."
+    },
+    {
+      "anchor": "browser.ts:299-315,547-566",
+      "fact": "Original code creates CDP sessions through that context. Blank-world CDP and observation-collector CDP are distinct. Capture original creation results; never call newCDPSession yourself or infer collector from blank-session existence."
+    },
+    {
+      "anchor": "Publication scalar support:9370,9414-9426,9476-9491",
+      "fact": "Existing revActive map and event2 entry/event3 settle/event10 sampled pending protocol can represent the actual CDP promise; closed numeric9field payload, sequence/epoch/producer validation and Node process probes stay unchanged."
+    }
+  ],
+  "concreteMinimumDesign": [
+    {
+      "step": 1,
+      "site": "Existing context launch wrapper, before returning actual context",
+      "delta": "Record exact context/Page references and current selected mode/profile identities. Preserve context.newCDPSession own descriptor and wrap its original function. Call it once with original receiver/arguments, attach an observation to its original returned promise to wrap the actual CDPSession.send before the production await resumes; return original creation promise unchanged. No session or native call added."
+    },
+    {
+      "step": 2,
+      "site": "The actual observation CDPSession.send wrapper",
+      "delta": "Recognize only fixed trusted command metadata: method Runtime.callFunctionOn, exact production fillPasswordResult declaration, and opaque collector objectId learned from the original successful collector-install response on this same session/world. Distinguish collector installation using the existing exported installObservationCollector source identity, not an application string match/blank world. Keep IDs private; never inspect/copy/hash/serialize params.arguments, secret value, return result.value or exception description. Other CDP methods simply call original once and return it."
+    },
+    {
+      "step": 3,
+      "site": "Exact selected Runtime.callFunctionOn invocation",
+      "delta": "Invoke original send once unchanged. Only after it has returned the actual promise register one operation1 ordinal in revActive and emit existing event2. Attach fulfillment/rejection observers that remove exactly that ordinal and emit existing event3, preserving original response/error object and original promise return. Synchronous throw preserves original throw and cannot create a pending entry. Closure capture must not retain original arguments; retain promise/ordinal/fixedmetadata only."
+    },
+    {
+      "step": 4,
+      "site": "Existing revObserveNative for selected C6 kinds1-3",
+      "delta": "Stop counting high-level fillPassword as the native operation1 entry so it cannot duplicate or precede sole primitive evidence. Keep its original call unchanged and preserve high-level completion/resource drain separately using existing pending counter/wrapper closure pattern. Legacy revocation/default modes and kind4 injected-before-native0 retain their original semantics; invoke tracking remains unchanged where needed."
+    },
+    {
+      "step": 5,
+      "site": "Existing Java scalar event2/event10 + p8C6Run first pending wait",
+      "delta": "On actual CDP event2 entry request original Node pending probe using the existing command receipt. Permit first pending when exact matchingCDP ordinal remains alone/unsettled; require matching live mode/profile/context/producer and same sequence guards. Remove only DOMfocus dependence from that prerequisite. Keep original15s await, second probe2s and <=250ms cut relation, admitted overall-vs-step margin,30sstep/120stotal and8s/40s fixture behavior. No new event/endpoint/test/watcher."
+    },
+    {
+      "step": 6,
+      "site": "Existing close/descriptor and owner completion paths",
+      "delta": "Require original real close plus both actualCDP promise and original high-level callback/dispatch lifetimes settled before restoring send/newCDPSession descriptors. Register them in the existing restoration group with exact descriptor identity checks. Retain existing finite close/drain bounds, sticky observer failures and quarantine; timeout or browserstop never fabricates a settled promise."
+    }
+  ],
+  "scopeAndSourceBinding": {
+    "scope": "Keep existing Java actual accepted binding, admission/dispatchCount1/source secretRef/password target/document/generation/ownerfence/audit linkage validation. New observer does not borrow another mode/session or manufacture admission.",
+    "profile": "Original selected actual context + canonical profile/inode/uid0700 evidence remains mandatory. CDP result belongs only to a session created by this exact context and original Page; ambiguity/unmatched session/collector fails observation.",
+    "document": "Actual collector objectId originates from exact original trusted isolated-world installation, which production replaces/reinstalls on document transition. Refresh metadata binding on genuine subsequent installation and never reuse a stale collector ID after navigation/dispose/detach. No new Page/DOM lookup/guard call.",
+    "owner": "Guided original runtime/context and ordinary original child Ready/factory identity remain existing sources of authority. An opaqueCDP/session ID is a receiver pin, not new authorization.",
+    "privacy": "Allowlisted fixed source discriminator and opaque receiver/world metadata only. Actual JS arguments array and response value/exception strings remain wholly unobserved; no rawpayload/token/value/event export."
+  },
+  "oracleChanges": {
+    "pending": "Actual original CDP call returned promise and that same promise has not fulfilled/rejected at original Node probe and contemporaneous cut. Not merely high-level promise pending or a renderer focus receipt.",
+    "focus": "Retain original focus/input/change/submit witnesses and counters truthfully as effect-support. Absent focus stays unobserved, never no-effect. No first-wait gate should require focus network progress once true CDP pending is established.",
+    "effectAndAudit": "Preserve authentic UNKNOWN/sparsewire/linked UNKNOWNusage and exact scope/owner/coordinate facts. CDP pending does not prove fill began writing or succeeded; any effects require actual original witnesses. Kind4 still proves actual injectedreleasedvalue failure before native with nativeentries0.",
+    "mandatory": "Same existing ordinary2/guided3 logical cases; no new mandatory control/test/framework."
+  },
+  "tradeoffsAndLimits": [
+    "Stronger SDK boundary observation removes blocked-renderer DOMnetwork coupling while preserving actual in-flight call. It observes API invocation/promise pending, not CPU entry into collector or value assignment.",
+    "Known fixed function declaration/source identity must be pinned to current production source; no broad substring classification. Future collector/port source changes require re-review.",
+    "Creation-promise handler ordering and descriptor restoration need independent source review before authoring; original promise remains unchanged. Unknown session/collector/closure fails rather than guesses.",
+    "Removing focus as a mandatory cut prerequisite must not remove real effect/privacy evidence or change native/write guards, cut budget,auth/fence validation.",
+    "Observer event delivery still has original1s bound and pending15s/cut timing; design offers no latency guarantee and no longer wait.",
+    "No Core/browser full acceptance claim or assumption that this design will pass current C6. Runtime and independent source validation remain required."
+  ],
+  "futureOwnedPath": "Existing Publication test fixture only, isolated candidate after exact root release; no production/SDK/publicAPI/schema change.",
+  "actions": {
+    "reports": 1,
+    "sourceEdits": 0,
+    "runtime": 0,
+    "builds": 0,
+    "sql": 0,
+    "newTests": 0,
+    "models": 0
+  },
+  "runtime": "UNRUN",
+  "lifecycleVerdict": null,
+  "acceptanceWaiver": false,
+  "whole19AcPass": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE"
+}

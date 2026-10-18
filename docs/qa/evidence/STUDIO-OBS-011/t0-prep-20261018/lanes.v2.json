@@ -1,0 +1,631 @@
+{
+ "artifact": "STUDIO-OBS-011 lane and wave plan v2 (co-sign fold), machine-readable companion of t0-proposal.md as amended by t0-record-draft.md",
+ "author": "Aria (@architect)",
+ "createdAt": "2026-10-18",
+ "version": 2,
+ "status": "FOLDED_FOR_ROOT_SIGNATURE at the 11-T0 start digest; every command PLANNED_NOT_RUN",
+ "repoRoot": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+ "supersedes": "lanes.json v1 (sha256 a800e2e9033c64098f3452addf098a727fa0404f799e9900413f0beb95fba144); v1 is not edited",
+ "folds": {
+  "qa": "qa-cosign.md C1-C8",
+  "dev": "dev-cosign.md RC-1..RC-10, N-1..N-7, section 3 collisions",
+  "devops": "devops-cosign.md D-1..D-6, X-1..X-10, landing order, commit grouping",
+  "po": "po-ratification.md RD-1..RD-4, P-1..P-12",
+  "user": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w0/decisions.md: R4 local checkpoint commits (no push); 011 Docker on U22 terms",
+  "rulingsIndex": "t0-record-draft.md section 5 (conflict rulings K-1..K-16)"
+ },
+ "companions": {
+  "proposal": "docs/qa/evidence/STUDIO-OBS-011/t0-prep-20261018/t0-proposal.md (rulings; amended by t0-record-draft.md)",
+  "brief": "docs/qa/evidence/STUDIO-OBS-011/t0-prep-20261018/w-brief.v2.md",
+  "t0Record": "docs/qa/evidence/STUDIO-OBS-011/t0-prep-20261018/t0-record-draft.md"
+ },
+ "preStartOrder": {
+  "source": "root ordering decision 2026-10-18 (follows Gage landing order and Dex RC-7)",
+  "steps": [
+   "1. G9 is ruled (009; outside 011)",
+   "2. g9-image.sh (C4b + D2 smoke) against the UNCHANGED G9 tree, before any residue patch (Gage X-1: the script aborts on a digest mismatch). The script sits in a session scratchpad under /private/tmp; root copies it into docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/image/ before running it",
+   "3. 009 residue lands: model-sizing, catalog-entry, chart (+ untracked templates/api-guided-tls-networkpolicy.yaml), tests, consensus-plan 8.3; then ONE runner dist rebuild (D_009r) and the deployment tier first-green (Gage X-3). Image question: see openItems OI-1",
+   "4. 010 Live surface list re-dated over the post-residue tree (Gage X-4)",
+   "5. R4 local checkpoint commits by category, no push (@devops; user decision R4). 7 categories: agent memory, backend, runner, contracts/tools, chart, frontend, docs/evidence. dispatch-governance.js never staged",
+   "6. 011 start digest + FRESH baselines (11-T0). G9 is not reused",
+   "7. 011 waves W1..W6"
+  ],
+  "consequence": "Every 009 residue collision listed in dev-cosign.md section 3 (ReplayIT, PlanningIT, cli.mjs, evaluation/README.md, application.yml, schemas.json) is resolved by order: the residue is in the start digest, so 011 lanes edit committed bytes and no patch needs a re-base"
+ },
+ "measuredAt": {
+  "head": "734ad704f (pre-R4); the 011 start HEAD is the last R4 commit: <R4_HEAD>",
+  "tree": "pre-G9-exit working tree; every anchor re-taken at the start digest (R-T0-1)",
+  "guidedSessionServiceSha256Prefix": "cad1efa342710c08 [V 2026-10-18, pre-residue]",
+  "replayItSleepCensus": "grep -c '\\.sleep(' = 95; grep -c 'Thread.sleep' = 94 [V pre-residue; model-sizing.patch edits this file, re-count at T0]",
+  "p7Tests": [
+   "GuidedPublicationReplayIT.actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue (@Order 27)",
+   "GuidedPublicationReplayIT.actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue (@Order 28)"
+  ],
+  "awaitility": "spring-boot-starter-test-3.3.5.pom declares org.awaitility:awaitility:4.2.2 scope compile; jar + pom in ~/.gradle cache [V]; resolution on testCompileClasspath NOT verified -> T0 check T0-AW"
+ },
+ "commandConventions": {
+  "N24": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH",
+  "LOCK": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+  "BK": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+  "RR": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+  "RB": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner-build.py",
+  "RFE": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-frontend.py (C5; if root does not make it, the fixed manual record in w-brief.v2.md applies)",
+  "BACKEND_FORM": "(repo root) <N24>; <LOCK> <BK> obs011-<lane>-<n> --test-tasks <tasks> -- <task> --tests '<FQCN>' ... --no-daemon",
+  "RED_FORM": "same as BACKEND_FORM with label obs011-<lane>-red<k>; taken after the new test exists and BEFORE the main edit; must be an assertion failure of the new test (not a compile error, not 'no tests found')",
+  "MUTANT_FORM": "(repo root) <LOCK> sh -c 'cp <f> <f>.pre && <apply mutant> && (<N24>; <BK> obs011-<lane>-mut<k> --test-tasks test -- test --tests <FQCN> --no-daemon); rc=$?; cp <f>.pre <f> && rm <f>.pre; shasum -a 256 <f>; exit $rc'   # one lock hold; restored sha must equal the pre-mutation sha",
+  "RF": "cd $SANDBOX/repo/studio-runner && <N24>; pnpm --config.package-manager-strict=false exec vitest run <files> --coverage.enabled=false --minWorkers=1 --maxWorkers=2",
+  "RFX": "cd $SANDBOX/repo/studio-runner && <N24>; pnpm --config.package-manager-strict=false exec vitest run --config vitest.fixtures.config.ts <files> --minWorkers=1 --maxWorkers=1",
+  "FE": "cd $SANDBOX/repo/frontend && pnpm exec vitest run <paths> --minWorkers=1 --maxWorkers=2   # host Node; record node --version",
+  "rules": [
+   "pnpm only; never npm or yarn; install nothing; runner pnpm needs --config.package-manager-strict=false; no pnpm lockfile enters a copy-back set (Gage 2.1)",
+   "Gradle only through LOCK, always --no-daemon, a NEW obs011- label every time; one Gradle process at a time; the execute-011 collectors keep calling the execute-008 lock (C5)",
+   "Collector output: docs/qa/evidence/STUDIO-OBS-011/execution-<date>/execution (RD-4, C5). Root announces the path; the execute-011 copies repoint run-backend-tasked.py:92 AND :112, run-backend.py:6, run-runner.py:5, run-runner-build.py",
+   "Test FQCNs are keyed on the DECLARED package (JUnit XML classname), never the folder: GuidedBridgeIntegrationTest, GuidedBridgePlannedIT, GuidedPlanningIntegrationTest, GuidedPublicPresentationIT declare com.citi.put.checks.studio.guided.session",
+   "verifyRunnerDist (build.gradle.kts:295-341) triggers on any '*' pattern or a runner-spawning class name; it passes only while no studio-runner/src file is newer than dist/main.js; hence the runner sandboxes",
+   "Record lsof -nP -iTCP -sTCP:LISTEN before every backend run",
+   "GuidedPublicationReplayIT: full class only, alone, --tests on both test and guidedIncrementalTest; no single-test credit (D-14)",
+   "Lane collector runs are non-evidentiary (R-T0-4) except the F-1 freeze window (C4); credited evidence = T0 baseline + 11-G (+ the F-1 freeze runs)",
+   "Lane commands carry no --allowed-skips-file (non-evidentiary); an EXACT_SKIP_POLICY_MISMATCH exit 2 in a lane run is expected noise, report counts",
+   "Multi-file backend changes land as one staged unit under the lock (Dex N-1): prepare the patch in the receipt folder, apply it inside a LOCK hold, compile, release"
+  ]
+ },
+ "t0": {
+  "reverifyCommands": "lanes.json v1 t0.reverifyCommands, unchanged, plus T0-AW, T0-JC, T0-SL, T0-P7, T0-FQ, T0-RB, T0-IMG, T0-SB below; all re-run at the start digest",
+  "checks": [
+   {"id": "T0-AW", "what": "Awaitility resolves on the test classpath offline (RC-5 claim, unverified)", "cmd": "(repo root) <N24>; <LOCK> sh -c 'cd backend && ./gradlew dependencies --configuration testCompileClasspath --offline --no-daemon' | grep -n 'org.awaitility:awaitility'", "pass": "a line resolving org.awaitility:awaitility:4.2.2 (no FAILED, no '(n)')", "onPass": "R-5w v2 branch A (Awaitility, no Await.java)", "onFail": "R-5w v2 branch B (in-repo Await.java, owned by 11-LEFT in W1)"},
+   {"id": "T0-JC", "what": "JaCoCo headroom for com.citi.put.checks.studio.dispatch (RC-10)", "cmd": "read the LINE ratio for package com/citi/put/checks/studio/dispatch from the T0 baseline jacoco XML (collector-archived), and the bundle ratio", "pass": "dispatch LINE >= 0.80 and bundle >= 0.75", "onFail": "11-FOLD-final adds the non-credited coverage run obs011-foldf-cov01 before 11-MERGE"},
+   {"id": "T0-SL", "what": "sleep census for the nine R-5 classes (C8)", "cmd": "grep -c '\\.sleep(' <each of the nine files>", "record": "per-file count; ReplayIT expected 95 pre-residue, re-count post-residue"},
+   {"id": "T0-P7", "what": "P7 test names for TEST-001 (C8)", "cmd": "grep -n 'p7CapturedFaultAndRetry(true)\\|p7CapturedFaultAndRetry(false)' -B3 GuidedPublicationReplayIT.java", "record": "the two method names in measuredAt.p7Tests, re-confirmed"},
+   {"id": "T0-FQ", "what": "declared packages of every class named in this file (C-3.1)", "cmd": "grep -m1 '^package' <file> for each FQCN", "pass": "all equal"},
+   {"id": "T0-RB", "what": "R-B AWAITING_AUTH row", "cmd": "sed -n '10760,10790p' docs/specs/studio-observed-authoring/contracts/v3/fixtures.json (re-anchor first)", "record": "negative row -> guard text (Dex already read it: negative, keep)"},
+   {"id": "T0-IMG", "what": "deployment-tier image for the T0 baseline", "cmd": "docker image inspect <residue image tag> + the studio-runner subtree digest recorded at its build vs the start capture", "pass": "image exists and was built from a studio-runner tree equal to the start digest", "onFail": "deployment tier baseline = NOT_MET: image prerequisite, by name (C1/3.5(3)); see openItems OI-1"},
+   {"id": "T0-SB", "what": "sandbox input lists (RC-6)", "cmd": "grep -rn 'REPO_ROOT\\|docs/qa/evidence\\|helm-chart' studio-runner/test frontend/src --include=*.ts --include=*.tsx -l", "record": "exact runner and frontend sandbox copy lists"},
+   {"id": "T0-EP", "what": "P-10 guard: written confirmation by the 009 T4 harness owner that T4 uses neither browser-oracle.test.mjs nor example-manifest.json", "record": "one dated line in the T0 record; without it both stay (carried)"}
+  ],
+  "timingSource": "the FRESH T0 baseline XML (obs011-t0-baseline-check01), quiet machine; uptime + vm_stat at start and end"
+ },
+ "lanes": [
+  {
+   "id": "11-T0",
+   "wave": "W0",
+   "size": "S (0.5 d) + baseline wall time (~3.5-4 h, sequential, quiet machine) [I]",
+   "agent": "root + aiox-qa (T0-QA) + aiox-dev read-only (T0-DEV) + aiox-data-engineer (T0-DE); @po and @ux one-line items",
+   "startsWhen": ["preStartOrder steps 1-5 done", "dated (re-dated) 010 Live surface list exists", "execute-011 collectors made (C5)"],
+   "writes": ["docs/qa/evidence/STUDIO-OBS-011/t0-<date>/** (start capture, baselines, intersection, qa/approved-skips.json, the signed T0 record)"],
+   "readOnly": ["everything else"],
+   "duties": [
+    "root: start capture once (capture-manifest.py) PLUS helm sha (same command as G9 helm-before) PLUS the sha256 of every quoted doc the tests read (Quinn 3.2(3): docs/stories files read by tests, COPY_SOURCE_FILES, docs/qa/accessibility/*, CLAUDE.md, ARCH.md, docs/runbooks/*) -> start digest set S_011",
+    "root: run the FRESH baseline set below in order, nothing else running (AC-5 before timing); a red is recorded by name and must be green at 11-G (never waived there)",
+    "@qa: derive t0-<date>/qa/approved-skips.json from the T0 baseline skip multiset, reviewed against 009's ruled approved-skips; reconcile against cases 011 retires or ports",
+    "@dev read-only: T0 checks T0-AW (needs the lock), T0-SL, T0-P7, T0-FQ, T0-RB, T0-SB; re-run reverifyCommands; re-anchor every line number this file and the rulings quote",
+    "@dev read-only: R-T0-3 intersect every write set with the re-dated Live surface list",
+    "root: read T0-JC from the baseline jacoco XML; record T0-IMG; obtain T0-EP or record carry",
+    "@data-engineer: R-F2 co-sign; @ux-design-expert: R-CO yes/no",
+    "root: sandbox seed copies for 11-RT and 11-FE taken from the start tree AFTER the capture (lists from T0-SB), with before hashes"
+   ],
+   "verify": [
+    "B1 (repo root) <N24>; <LOCK> <BK> obs011-t0-baseline-check01 --test-tasks test,guidedIncrementalTest,crossReplicaTest --require-exec-tasks test,guidedIncrementalTest,crossReplicaTest --allowed-skips-file docs/qa/evidence/STUDIO-OBS-009/<G9-ruled approved-skips path> -- --continue check --rerun-tasks --no-daemon",
+    "B2 (repo root) <N24>; <RR> obs011-t0-runner-unit01 pnpm --config.package-manager-strict=false exec vitest run --minWorkers=1 --maxWorkers=2",
+    "B3 (repo root) <N24>; <RR> obs011-t0-runner-fixtures01 pnpm --config.package-manager-strict=false exec vitest run --config vitest.fixtures.config.ts --minWorkers=1 --maxWorkers=1",
+    "B4 (repo root) <N24>; STUDIO_RUNNER_IMAGE=<residue image tag> <RR> obs011-t0-runner-deploy01 pnpm --config.package-manager-strict=false exec vitest run --config vitest.deployment.config.ts --minWorkers=1 --maxWorkers=1   # only if T0-IMG passes; else NOT_MET by name",
+    "B5 cd studio-runner && <N24>; pnpm --config.package-manager-strict=false run type-check && pnpm --config.package-manager-strict=false run lint && pnpm --config.package-manager-strict=false run check:pins",
+    "B6 (repo root) <N24>; node tools/check-studio-observed-contracts.cjs && node -e \"require('./tools/build-studio-observed-schemas.cjs').check()\"",
+    "B7 (repo root) <RFE> obs011-t0-frontend01 -- pnpm exec vitest run --minWorkers=1 --maxWorkers=3 --reporter=json --outputFile=<out>   # then type-check, lint, build, and the ad hoc tsc --noUnusedLocals --noUnusedParameters, each exit recorded",
+    "uptime; vm_stat   # at start and end of B1 and of the whole set"
+   ],
+   "exit": "S_011 recorded; B1-B7 named with digests and counts (or NOT_MET by name); T0 checks recorded; Live-surface intersection = 0 or items stopped by name; t0-record signed by root"
+  },
+  {
+   "id": "11-GS-T",
+   "wave": "W1",
+   "size": "L (3 d est.; range 3-5) [I] - critical path",
+   "agent": "aiox-dev (Dex, backend tests)",
+   "startsWhen": ["11-T0 exit"],
+   "writes": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java (RC-3; 5 @Test)",
+    "docs/qa/evidence/STUDIO-OBS-011/execution-<date>/gs-t/**"
+   ],
+   "readOnly": ["backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java (11-GS-M)"],
+   "acs": ["AC-2 F-1 b: move positive admissions to planner-issued obligations through GuidedProductionSessionAccess-based compositions (as GuidedBridgeIntegrationTest did in 015), R-1..R-5; names and counts kept"],
+   "verify": [
+    "<BACKEND_FORM> obs011-gst-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedSessionIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedCommittedRefreshStateTest' --no-daemon   # last two: still green, not edited",
+    "per-name @Test/@ParameterizedTest table before/after for the three edited files (no drops without an @architect R-6 ruling)"
+   ],
+   "prohibited": ["any src/main edit", "seeding plan/obligation/admission/manifest/translation-state rows", "store-level acceptPlan/reserveObligation/attachAdmission calls", "dropping or renaming a case"],
+   "batonOut": {
+    "GuidedSessionIT.java": "-> 11-GS-M(b) (recordEvidence case only) -> 11-FOLD-final",
+    "GuidedServiceTransportFaultIT.java": "-> 11-IT-S -> 11-FOLD-final",
+    "GuidedLifecycleReasonIT.java": "released (no later owner)"
+   },
+   "exit": "all three green against the UNCHANGED main; per-name table"
+  },
+  {
+   "id": "11-GS-M",
+   "wave": "W1 (part a) + W2 (part b)",
+   "size": "a: M (2 d); b: M (1 d incl. the F-1 freeze window ~40 min) [I] - part b on the critical path",
+   "agent": "aiox-dev (Dex, backend main)",
+   "startsWhen": ["11-T0 exit (part a)", "11-GS-T exit (part b)"],
+   "writes": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java (new; C-OBS009-1 c.3)",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java (new; C-OBS008-1 d)",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedAdmissionWithoutTranslationIT.java (new; F-1 negative IT covering all four operations / five former sites, part b)",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java (part b only, baton from 11-GS-T: recordEvidence case drop/port)",
+    "docs/qa/evidence/STUDIO-OBS-011/execution-<date>/gs-m/**"
+   ],
+   "acs": [
+    "part a: C-OBS009-1 a-e (narrow AC-7 exception); seam per Dex N-3: package-private executor installer in GuidedSessionService, queued-not-started tracking beside TEARDOWNS_IN_FLIGHT, unique session ids in the test",
+    "part a: C-OBS008-1 a-g with R-08-1e (REFUSED); re-grep for a test pinning the SUCCEEDED/PENDING fallback (Dex N-5)",
+    "part b: AC-2 F-1 c-e per R-F1 v2 (t0-record-draft.md K-4)",
+    "part b: CLN-21 recordEvidence (R-21)"
+   ],
+   "red": [
+    "part a: obs011-gsm-red01 GuidedTeardownShedTest (C-OBS009-1) and obs011-gsm-red02 GuidedResultPublicationDisabledIT (C-OBS008-1), each before its main edit",
+    "part b: obs011-gsm-red03 GuidedAdmissionWithoutTranslationIT before the F-1 main edit: red = 200/accepted where 409 RUNTIME_INCOMPATIBLE is expected, per case"
+   ],
+   "mutants": [
+    "C-OBS009-1: WARN fires every call / never (expect red for once-per-interval)",
+    "C-OBS008-1: REFUSED -> PENDING (expect red)",
+    "F-1: delete each of the 4 new requireTranslation calls in turn (4 mutants, each red); move the admit require after access.authorizeAction (expect red on the 'authorizeAction never invoked' assertion)"
+   ],
+   "verify": [
+    "part a: <BACKEND_FORM> obs011-gsm-a01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedTeardownShedTest' --tests 'com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT' --tests 'com.citi.put.checks.studio.guided.retention.GuidedObservationPrunerIT' --no-daemon   # GuidedSessionIT removed from a01 (Dex N-2)",
+    "part b FREEZE WINDOW (C4; root announces start and end; no real-tree write under the manifest roots or helm-chart by any lane): record sha256 of GuidedBridgeIntegrationTest, GuidedBridgePlannedIT, GuidedPlanningIntegrationTest, GuidedPublicationReplayIT immediately before the F-1 main edit; then b01, b02, b03 below; credit requires exit 0, sourceStable:true, distStable:true; the before/after manifests prove the four files byte-identical (R-T0-7)",
+    "part b: <BACKEND_FORM> obs011-gsm-b01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedSessionIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedAdmissionWithoutTranslationIT' --no-daemon",
+    "part b: <BACKEND_FORM> obs011-gsm-b02 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest' --tests 'com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest' --no-daemon",
+    "part b: <BACKEND_FORM> obs011-gsm-b03 --test-tasks test,guidedIncrementalTest -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' guidedIncrementalTest --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' --no-daemon   # alone, full class",
+    "grep -c 'requireTranslation(' GuidedSessionService.java   # expect 3 existing + 4 new = 7 call sites (+1 declaration); positive control: the same grep at the start digest returns 0",
+    "grep -n 'translation != null' GuidedSessionService.java   # expect exactly 1 (inside the helper)",
+    "grep -rnw recordEvidence backend/src/main   # expect 0",
+    "grep -n 'DiscardPolicy' GuidedSessionService.java   # expect 0"
+   ],
+   "prohibited": ["changing pool size, queue size or the 15-minute window (C-OBS009-1 c.4)", "openapi.yaml or pin edits", "removing the instanceof GuidedProductionSessionAccess conditionals (R-F1.3)", "editing GuidedPublicationReplayIT"],
+   "batonOut": {"GuidedPublicationResultProjector.java": "-> 11-FOLD-final", "GuidedSessionIT.java": "-> 11-FOLD-final"},
+   "exit": "red then green logs for the three new tests; mutant table; F-1 freeze runs credited; grep results"
+  },
+  {
+   "id": "11-LEFT",
+   "wave": "W1",
+   "size": "M (2 d; +0.25 d if Await.java fallback) [I]",
+   "agent": "aiox-dev (Dex, backend) + aiox-data-engineer (CLN-F2 ports)",
+   "startsWhen": ["11-T0 exit", "R-F2 co-signed (CLN-F2 part only)"],
+   "writes": [
+    "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAlreadyExistsException.java",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsService.java (Javadoc only; C-OBS008-2)",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java (Dispatcher.pollInterval and Sse.readInterval components + accessors removed)",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioKillSwitchWiringTest.java (arity edit only: 5 -> 4 args; C6/RC-3)",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioService.java (updateAuthoring only)",
+    "backend/src/main/resources/application.yml (studio.execution.sse.read-interval leaf only)",
+    "backend/build.gradle.kts (the two JaCoCo rules for studio.compile.gateway and studio.compile only)",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/account/ (empty directory: delete; CLN-57; the tracked ReplayAccountAccess.java deletion is already in R4 commit C-2)",
+    "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java (only to receive ported V18 cases)",
+    "backend/src/test/java/com/citi/put/checks/studio/support/Await.java (ONLY on T0-AW fail, branch B; ADAPT of the existing private await loop, e.g. GuidedBridgeIntegrationTest:1664; landed in the first day of W1)",
+    "docs/qa/evidence/STUDIO-OBS-011/execution-<date>/left/**"
+   ],
+   "acs": ["AC-1 CLN-F2 (R-F2)", "AC-2 CLN-19, CLN-20, CLN-21 (except recordEvidence)", "AC-3 record only (R-3)", "C-OBS008-2", "R-J", "CLN-57", "R-5w v2 branch B only"],
+   "verify": [
+    "<BACKEND_FORM> obs011-left-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.InferenceMigrationIT' --tests 'com.citi.put.checks.studio.InferenceMigrationLatestIT' --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest' --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest' --tests 'com.citi.put.checks.studio.guided.session.GuidedPublicPresentationIT' --no-daemon   # last two: fixture importers (RC-3)",
+    "<BACKEND_FORM> obs011-left-02 --test-tasks test -- test --tests 'com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest' --tests 'com.citi.put.checks.studio.secrets.StudioSecretsServiceTest' --tests 'com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest' --tests 'com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest' --no-daemon",
+    "grep -rn 'new StudioExecutionProperties\\.\\|\\.Sse(' backend/src   # every positional construction listed and updated (C6)",
+    "grep -rn 'HistoricalV18\\|requireV18' backend/src   # expect 0 if retired; positive control at start digest = 25",
+    "grep -rnw 'isCanonical\\|updateAuthoring\\|allocationIds\\|isApiAssigned\\|providerName\\|getSecretName\\|pollIntervalOrDefault\\|readIntervalOrDefault' backend/src   # expect 0",
+    "grep -n 'read-interval:' backend/src/main/resources/application.yml   # expect 0 (read-interval-ms stays); the studio.observed-replay block byte-unchanged (Gage X-5)",
+    "grep -rn OBSERVED_SCHEDULE_AUTH_REQUIRED backend/src/main/java   # expect 0 (AC-3 record)",
+    "grep -n 'studio.compile' backend/build.gradle.kts   # expect 0"
+   ],
+   "prohibited": ["migrations (immutable)", "any other StudioService.java method", "any other application.yml key", "any other build.gradle.kts line (no Awaitility declaration in either R-5w branch)"],
+   "batonOut": {"Await.java (branch B only)": "readOnly for 11-IT-R, 11-IT-S, 11-GS-T2 once landed"},
+   "exit": "named drops/ports table for CLN-F2; greps; green classes"
+  },
+  {
+   "id": "11-FOLD-prep",
+   "wave": "W1-W3",
+   "size": "L-XL (4.5 d est.; float about 2 d) [I] - near-critical",
+   "agent": "aiox-dev (Dex, backend fold)",
+   "startsWhen": ["11-T0 exit"],
+   "writes": [
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java (new; R-4b v2 collaborator, implemented and registered under !worker)",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayBindingBuilder.java (new; C-OBS009-4; package-private)",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java (runner-client type swap only)",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md (stale AccountAccess prose; client names)",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java (new folded-client cases)",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchAuthorizationIT.java (new; port of GuidedPublicationAuthorizationIT by name: fresh, authorizePublication, authorizeReceiptRead)",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java (new; R9-OBS-3 proof)",
+    "docs/qa/evidence/STUDIO-OBS-011/execution-<date>/fold/**"
+   ],
+   "removedFromV1Writes": ["GuidedPublicationController.java (references none of the three classes [Dex V])"],
+   "readOnly": ["DatabaseClock.java", "GuidedPublicationResultProjector.java (11-GS-M)", "all FOLD_TESTS until 11-FOLD-final", "JobBodyLeakTest.java, StudioRunnerPropertiesProfileTest.java (constructors preserved, R-4a v2.4)"],
+   "acs": ["AC-4 a (R-4a v2)", "AC-4 b + R9-OBS-3 (R-4b v2, R-9)", "C-OBS009-2 (R-09-2)", "C-OBS009-4 (R-09-4)", "class B text residue README (R-B)"],
+   "rule": "Old classes GuidedRunnerClient, ObservedValidationClient, GuidedPublicationAuthorization and their beans stay compiling and wired until 11-FOLD-final; no FOLD_TESTS file is edited in prep; compile-clean at every lock release; multi-file changes land as staged units",
+   "red": ["obs011-foldp-red01 PublicationGrantClockIT skew-both-ways against the JVM-clock main (R9-OBS-3)"],
+   "mutants": ["R-9: each of the four clock sites (mint, judge, publisher claim, PublicationBudget) back to Clock.systemUTC() in turn (4 mutants, each red)", "R-4b worker: remove the !worker absence refusal (expect red in GuidedScheduledBeansProfileTest or DispatchAuthorizationIT worker case)"],
+   "verify": [
+    "<BACKEND_FORM> obs011-foldp-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest' --tests 'com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT' --tests 'com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT' --tests 'com.citi.put.checks.studio.guided.publication.ObservedGrantClockIT' --tests 'com.citi.put.checks.studio.dispatch.JobBodyLeakTest' --no-daemon",
+    "<BACKEND_FORM> obs011-foldp-02 --test-tasks test -- test --tests 'com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest' --tests 'com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest' --tests 'com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest' --tests 'com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT' --no-daemon   # GuidedScheduledBeansProfileTest = the worker-context gate (RC-1)",
+    "<BACKEND_FORM> obs011-foldp-03 --test-tasks test -- test --tests 'com.citi.put.checks.studio.scheduling.StudioScheduleApiIT' --tests 'com.citi.put.checks.studio.scheduling.ObservedScheduleAuthorityIT' --tests 'com.citi.put.checks.scheduling.SharedSchedulingIT' --no-daemon",
+    "per-operation transport table before/after: endpoint, credential, connect timeout, HTTP version for dispatch, validation, guided (R-4a v2.1); must be equal",
+    "grep -rn 'runner.validate()' backend/src/main   # expect 0",
+    "grep -rn 'Clock.systemUTC()' backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java   # expect 0",
+    "SecretValue writer count: grep -rn 'SecretValue' backend/src/main before/after; exactly one serializer writes secret bytes (K-5)"
+   ],
+   "prohibited": ["new configuration keys or merging runner-origin with base-url (R-T0-3 b)", "a tolerance on any window", "editing V15 or any migration", "editing GuidedSessionService.java", "changing a per-operation timeout or HTTP version (R-4a v2.1)", "removing the 3-arg/4-arg HttpRunnerDispatchClient constructors"],
+   "batonOut": {"all FOLD_PREP_MAIN files": "-> 11-FOLD-final (same agent)"},
+   "exit": "folded client + seam + DatabaseClock wiring green beside the old classes; transport table equal; worker gate green"
+  },
+  {
+   "id": "11-RT",
+   "wave": "W1",
+   "size": "S-M (1 d) [I] - scope reduced by RC-8",
+   "agent": "aiox-dev (Dex, runner) in a SANDBOX",
+   "sandbox": "$SANDBOX/repo/ with the same relative layout: cp -a studio-runner, docs/specs, tools, helm-chart (post-residue), plus ONLY the evidence subpaths the unit and fixtures tiers read (list from T0-SB: e.g. docs/qa/evidence/STUDIO-OBS-007/<referenced files>, STUDIO-OBS-013/r13/..., STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/...); copies, never symlinks; record copy commands and before hashes (RC-6)",
+   "startsWhen": ["11-T0 exit (seed copy taken by root after the start capture)"],
+   "writes": [
+    "studio-runner/test/deferred.test.ts (via sandbox; R-40)",
+    "studio-runner/src/guided/contracts.ts (via sandbox; reformat only)",
+    "studio-runner/src/guided/diagnostics.ts (via sandbox; reformat only)",
+    "studio-runner/src/guided/evidence.ts (via sandbox; reformat only)",
+    "studio-runner/src/guided/json.ts (via sandbox; reformat only)",
+    "studio-runner/src/guided/transport.ts (via sandbox; reformat only)",
+    "studio-runner/src/run/guidedBrowser.ts (via sandbox; reformat + the one GuidedRunnerClient comment at :26 rewritten to name HttpRunnerDispatchClient, RC-9 / K-8)",
+    "studio-runner/evaluation/browser-oracle.test.mjs (delete; only with T0-EP confirmation)",
+    "studio-runner/evaluation/example-manifest.json (delete; only with T0-EP confirmation)",
+    "studio-runner/evaluation/README.md (the :45 sentence only: drop the two deleted files, dated note; via sandbox)",
+    "docs/qa/evidence/STUDIO-OBS-011/execution-<date>/rt/** (AST checker, its self-test, emit compare, copy-back manifest)"
+   ],
+   "carriedForwardByRC8": ["evaluation/cli.mjs command removal (validate-manifest, oracle-self-test, summarize)", "evaluation/oracle.mjs, oracle.test.mjs", "evaluation/report.mjs, report.d.mts, test/evaluation/report.test.ts", "evaluation/fixture-server.mjs (+ .d.mts) stays", "owner @dev, with @qa for the corpus; reason: 009 harness live (model-sizing edits cli.mjs and README) and P-10 guard"],
+   "readOnly": ["studio-runner/src/guided/runtime.ts (AE-01 open)", "studio-runner/src/guided/ownership.ts (REL-001 per 009 plan)", "studio-runner/src/guided/types.ts + schemas.json (generated)", "studio-runner/src/run/observationCollector.ts (AE-01 open)", "studio-runner/evaluation/cli.mjs (cli.mjs:29 comment = AC-7 known exception)", "studio-runner/package.json, package-lock.json"],
+   "acs": ["AC-2 CLN-40 (R-40)", "AC-4 d (R-4d)", "AC-4 e record (R-4e)", "CLN-52..56 partial (R-EP v2)"],
+   "verify": [
+    "cd $SANDBOX/repo/studio-runner && <N24>; pnpm --config.package-manager-strict=false run type-check && pnpm --config.package-manager-strict=false run lint",
+    "cd $SANDBOX/repo/studio-runner && <N24>; pnpm --config.package-manager-strict=false exec vitest run --coverage.enabled=false --minWorkers=1 --maxWorkers=2   # full unit; names and skipped count reconciled by name (R-40: 4 named conversions)",
+    "cd $SANDBOX/repo/studio-runner && <N24>; pnpm --config.package-manager-strict=false exec vitest run --config vitest.fixtures.config.ts --minWorkers=1 --maxWorkers=1   # sandbox dist only",
+    "AST checker self-test (C3): a pure wrap -> 0 differences; renamed identifier, changed string, changed template-literal text, edited comment, swapped statement -> each >= 1 difference",
+    "node $EV/rt/ast-equal.mjs <before-dir> <after-dir>   # 0 differences for five files; exactly 1 expected comment difference in guidedBrowser.ts (:26), listed",
+    "tsc emit byte-compare of dist/**/*.js for the six files before/after in the sandbox (RC-6); not identical -> AC-4 d carried unless root accepts the dist digest move in writing",
+    "awk 'length($0)>140' <six files> | wc -l   # expect 0",
+    "cd $SANDBOX/repo/studio-runner && grep -rn 'example-manifest\\|browser-oracle' evaluation test scripts src package.json   # expect 0 except the cli.mjs:29 comment (known exception)"
+   ],
+   "prohibited": ["any write in the real studio-runner/ (K-1)", "npm/yarn or installs", "editing generated files by hand", "a real-tree dist rebuild", "editing cli.mjs, oracle.mjs, report.mjs, fixture-server.mjs, observed-authoring/**"],
+   "batonOut": {"sandbox file set": "-> 11-MERGE (exact path list)"},
+   "exit": "sandbox green; AST + emit proofs; copy-back manifest (path, before sha, after sha)"
+  },
+  {
+   "id": "11-IT-R",
+   "wave": "prep: W1 tail-W2 (read-only); apply: W3",
+   "size": "XL, TIMEBOXED: prep <= 1.5 d (read-only, off the critical path), apply <= 2 d and <= 6 full-class ReplayIT collector runs (on the critical path) [I]",
+   "agent": "aiox-dev (Dex, backend tests)",
+   "startsWhen": ["prep: 11-RT exit frees a slot (no file is written in prep)", "apply: 11-GS-M part b exit (F-1 freeze proof recorded with ReplayIT unchanged)", "apply: wait library decided at T0 (branch A) or Await.java landed (branch B)"],
+   "writes": [
+    "prep: docs/qa/evidence/STUDIO-OBS-011/execution-<date>/it-r/prep/** only (POLL/DELIBERATE table for all 95 .sleep( calls, TEST-001 design, the draft patch cut against the start-digest ReplayIT, which stays byte-identical through 11-GS-M b)",
+    "apply: backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "docs/qa/evidence/STUDIO-OBS-011/execution-<date>/it-r/**"
+   ],
+   "acs": ["AC-5 TEST-001 a-d (R-TEST-001) FIRST", "AC-5 for ReplayIT (R-5, all 95 sleeps classified)", "if the T0 baseline records a ReplayIT red by name: its stabilisation, if the cause is in the test (a main-code cause is reported to root, not fixed here)"],
+   "timebox": {
+    "order": "1) apply TEST-001 (order independence for the two P7 tests and any test reading state another wrote) 2) convert POLL sleeps in batches, each batch kept only if the class goes green",
+    "stopAt": "apply day 2 end OR the 6th full-class run, whichever first",
+    "atStop": [
+     "TEST-001 not closed -> stop and escalate to root the same day; @po/@qa rule carry vs extend; FOLD-final waits for that ruling, not for more conversion",
+     "unconverted POLL sleeps -> carried forward by name (owner @dev, reason timebox), never dropped silently",
+     "the last state that was green twice in a row is the baton; anything after it is reverted to that state's sha256"
+    ]
+   },
+   "verify": [
+    "<BACKEND_FORM> obs011-itr-<n> --test-tasks test,guidedIncrementalTest -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' guidedIncrementalTest --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' --no-daemon   # full class alone; counts toward the 6-run budget",
+    "TEST-001: one single-test run of each P7 test (actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue, actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue; re-confirmed by T0-P7) with the command recorded; one run with reversed @Order for the two if the harness allows; none credited (D-14)",
+    "grep -c '\\.sleep(' GuidedPublicationReplayIT.java   # = DELIBERATE count + carried POLL count in the table (C8)"
+   ],
+   "prohibited": ["renaming methods (build.gradle.kts guidedIncrementalTest selects them by name)", "weakening any assertion", "breaking the R10-rev2-2 wrapper-only diagnostic", "new dependencies or a build.gradle.kts edit", "any write to the real file during prep"],
+   "batonOut": {"GuidedPublicationReplayIT.java": "-> 11-FOLD-final"},
+   "exit": "ReplayIT green twice in a row (full class); sleep table; TEST-001 evidence; carried list if the timebox fired"
+  },
+  {
+   "id": "11-IT-S",
+   "wave": "W3",
+   "size": "M (2 d) [I] - zero float (near-critical)",
+   "agent": "aiox-dev (Dex, backend tests)",
+   "startsWhen": ["11-GS-M part b exit", "wait library decided at T0 (branch A) or Await.java landed by 11-LEFT (branch B); no dependency on 11-IT-R any more"],
+   "writes": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java (baton from 11-GS-T)",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+    "docs/qa/evidence/STUDIO-OBS-011/execution-<date>/it-s/**"
+   ],
+   "acs": ["AC-5 siblings (R-5; census by '\\.sleep(')", "if the T0 baseline records the TransportFaultIT red by name: same rule as 11-IT-R"],
+   "verify": [
+    "<BACKEND_FORM> obs011-its-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT' --tests 'com.citi.put.checks.studio.guided.secret.SecretUseAuditIT' --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest' --no-daemon",
+    "<BACKEND_FORM> obs011-its-02 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest' --tests 'com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT' --no-daemon"
+   ],
+   "prohibited": ["converting a DELIBERATE sleep", "weakening assertions", "renaming methods", "replacing private await copies in files outside this write set (no bonus refactors)"],
+   "batonOut": {"all six files": "-> 11-FOLD-final"},
+   "exit": "sleep table per file; classes green"
+  },
+  {
+   "id": "11-GS-T2",
+   "wave": "W3",
+   "size": "M (1.5 d) [I]",
+   "agent": "aiox-dev (Dex, backend tests)",
+   "startsWhen": ["11-GS-M part b exit", "wait library decided (branch A) or Await.java landed (branch B)"],
+   "writes": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java (new; package choice by @dev; the ITs declare package guided.session)",
+    "docs/qa/evidence/STUDIO-OBS-011/execution-<date>/gs-t2/**"
+   ],
+   "acs": ["AC-2 F-1 f (orphaned helpers after reference check; F-3 fixture fold)", "AC-5 for the two bridge files"],
+   "verify": [
+    "<BACKEND_FORM> obs011-gst2-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest' --tests 'com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT' --no-daemon",
+    "per-name counts unchanged (re-counted at T0)",
+    "orphan check: removed only if grep finds no reference AND it is not an @Override"
+   ],
+   "batonOut": {"both bridge ITs": "-> 11-FOLD-final"},
+   "exit": "fixture folded; names/counts equal; green"
+  },
+  {
+   "id": "11-FE",
+   "wave": "W1 tail-W2",
+   "size": "M (2 d) [I]",
+   "agent": "aiox-dev (Dex, frontend) in a SANDBOX",
+   "sandbox": "REPO-SHAPED (RC-6): $SANDBOX/repo/frontend (cp -a, node_modules included) plus every path in COPY_SOURCE_FILES and every other REPO_ROOT read found by T0-SB (at least docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008/014/015 stories, the six docs/qa/evidence/STUDIO-OBS-008 files, docs/specs/studio-observed-authoring/consensus-plan.md and contracts/v3, docs/specs/studio/openapi.yaml, docs/architecture/ADR-SC-006-..., backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java); 008 U1 layout precedent",
+   "startsWhen": ["11-T0 exit", "a free agent slot (cap 5)", "R-08-3 ratified (C-OBS008-3 part only)"],
+   "writes": [
+    "frontend/src/components/studio/evidence/pinnedVideoEvidenceFacts.ts (via sandbox)",
+    "frontend/src/services/mocks/studio/handlers.ts (via sandbox; C-OBS008-5 anchors only)",
+    "frontend/src/services/mocks/studio/studioHandlers.test.ts (via sandbox)",
+    "frontend/src/services/mocks/studio/authoringHandlers.ts (optional C-OBS008-5 e; via sandbox)",
+    "frontend/src/components/studio/guided/guidedNarratives.ts (via sandbox)",
+    "frontend/src/components/studio/guided/<test-only copy-source registry> (new; name by @dev; via sandbox)",
+    "frontend/src/components/studio/guided/guided.test.tsx (via sandbox)",
+    "frontend/src/test/a11y/studioWcagAudit.test.tsx (via sandbox; R-11 deletion only, reason text per C8/Quinn 4.4)",
+    "docs/qa/accessibility/axe-results.json (regenerated by the full run; written at 11-MERGE)",
+    "frontend/README.md (via sandbox; CLN-50 bullet)",
+    "frontend/src/components/studio/runs/RunDetailsDrawer.tsx (via sandbox; only if R-CO approved)",
+    "docs/qa/evidence/STUDIO-OBS-011/execution-<date>/fe/**"
+   ],
+   "movedToMerge": ["frontend/src/.claude/agent-memory/{aiox-pm,aiox-ux}/ deletion (CLN-58, P-8: root at 11-MERGE)"],
+   "readOnly": ["frontend/src/components/studio/guided/useGuidedSession.ts", "frontend/package.json, pnpm-lock.yaml", "frontend/src/index.tsx, frontend/src/main.tsx (CLN-10 carried, R-10)"],
+   "acs": ["AC-2 CLN-07", "C-OBS008-5 a-f", "C-OBS008-3 a-f (R-08-3)", "CLN-11 (R-11, reason: duplicate pair, unlearned state no longer scanned, accepted under ADR-SC-006)", "CLN-50", "R-CO (conditional)"],
+   "verify": [
+    "cd $SANDBOX/repo/frontend && pnpm run type-check && pnpm run lint",
+    "cd $SANDBOX/repo/frontend && pnpm exec vitest run src/services/mocks/studio src/components/studio/guided src/components/studio/evidence src/test/a11y --minWorkers=1 --maxWorkers=2",
+    "cd $SANDBOX/repo/frontend && pnpm exec vitest run --minWorkers=1 --maxWorkers=2   # full suite once; copy-table rows by name vs the T0 count",
+    "cd $SANDBOX/repo/frontend && pnpm run build && grep -rl 'docs/qa/evidence/' dist | wc -l   # expect 0 (C-OBS008-3 d)",
+    "key-by-key template dump before/after equal byte for byte (C-OBS008-3 d)"
+   ],
+   "prohibited": ["new copy keys or guided states", "a11y work beyond R-11 (ADR-SC-006)", "contract or pin edits", "writes in the real frontend/ before 11-MERGE"],
+   "exit": "sandbox green; copy-back manifest"
+  },
+  {
+   "id": "11-DOC",
+   "wave": "W1 tail-W2",
+   "size": "S-M (1.5 d) [I]",
+   "agent": "aiox-dev (Dex, docs) or root",
+   "startsWhen": ["11-T0 exit", "a free agent slot (cap 5)", "Gage's UAT deploy note already in runbook section 14 (preStartOrder step 3; Gage X-6)"],
+   "writes": [
+    "docs/runbooks/studio-inference-rollout.md (CLN-49 flag sentence; and the evaluation sentence: drop 'complete API lifecycle' (lifecycle.mjs is gone), keep the oracle wording because R-EP v2 carries the oracles; RC-8)",
+    "docs/runbooks/studio-runner.md (C-OBS009-3 re-audit of sections 1-3 and 5-13 only; section 14 is not touched)",
+    "CLAUDE.md (CLN-51)",
+    "ARCH.md (CLN-51; dated note)",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md (dated addendum only; CLN-44 quoted at the post-residue count, Gage X-9)",
+    "docs/qa/evidence/STUDIO-OBS-011/execution-<date>/doc/** (AGENTS.md.patch, studio-runner-README.md.patch; and AGENTS.md.patched / README.md.patched preview files for the verify)"
+   ],
+   "readOnly": ["AGENTS.md (patch only)", "studio-runner/README.md (patch only)", "docs/specs/**", "studio-runner/evaluation/observed-authoring/evaluate.d.mts (its :2 'report.d.mts precedent' stays true under the R-EP carry; no edit)"],
+   "acs": ["AC-6 (CLN-49, CLN-51, C-OBS009-3, inventory addendum)", "R-AI record"],
+   "verify": [
+    "diff <(sed -n '<re-anchored CLN-51 ranges>p' CLAUDE.md) <(sed -n '<same>p' $EV/doc/AGENTS.md.patched)   # identical ranges",
+    "grep -n 'studioAuthoringV2\\|STUDIO_AUTHORING_V2_ENABLED\\|STUDIO_INCREMENTAL_ENABLED\\|complete API lifecycle' docs/runbooks/studio-inference-rollout.md   # expect 0 or a dated historical note",
+    "grep -n 'validateArtifact\\|^## Bounds\\|^## Accepted language\\|^## Fixture corpora' $EV/doc/README.md.patched   # expect 0"
+   ],
+   "prohibited": ["rewriting dated records (dated notes only, G11)", "editing stories other than the inventory addendum", "runbook section 14", "any git operation (lanes never stage; Gage D-4 is @devops's)"],
+   "exit": "docs edited; two patches ready; root confirms the CLAUDE.md/AGENTS.md wording"
+  },
+  {
+   "id": "11-FOLD-final",
+   "wave": "W4",
+   "size": "L (2.5 d) [I] - critical path",
+   "agent": "aiox-dev (Dex, backend fold; same agent as prep)",
+   "startsWhen": ["11-FOLD-prep exit", "batons in: 11-GS-M (Projector, GuidedSessionIT), 11-IT-R (ReplayIT), 11-IT-S (six files), 11-GS-T2 (bridge ITs)"],
+   "writes": [
+    "every FOLD_PREP_MAIN file of 11-FOLD-prep",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java (delete)",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java (delete)",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java (delete)",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java (type swap; baton from 11-GS-M)",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchTestAccess.java (new; test-side accessor for the package-private observeRequestBytes on the folded client, used by the guided.bridge tests; R-4a v2.5)",
+    "the 21 FOLD_TESTS listed in lanes.json v1 11-FOLD-final, unchanged list [Dex V: exactly 21]",
+    "docs/qa/evidence/STUDIO-OBS-011/execution-<date>/fold/**"
+   ],
+   "acs": ["AC-4 a, b complete. 'Ported by name' means the 8 guided.bridge unit tests and the 4 publication tests among the 21; GuidedRunnerClientTest and ObservedValidationClientTest do not exist (AC-1 delta for @po)", "R-C5 (class-name strings in the ReplayIT diagnostic)"],
+   "verify": [
+    "<BACKEND_FORM> obs011-foldf-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest' --tests 'com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT' --tests 'com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT' --tests 'com.citi.put.checks.studio.guided.publication.ObservedGrantClockIT' --tests 'com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT' --tests 'com.citi.put.checks.studio.dispatch.JobBodyLeakTest' --tests 'com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest' --no-daemon",
+    "<BACKEND_FORM> obs011-foldf-02 (lanes.json v1 foldf-02 class list, unchanged)",
+    "<BACKEND_FORM> obs011-foldf-03 (lanes.json v1 foldf-03 class list, unchanged)",
+    "<BACKEND_FORM> obs011-foldf-04 --test-tasks test,guidedIncrementalTest -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' guidedIncrementalTest --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' --no-daemon   # full class alone; includes the worker assertion near ReplayIT :32463 (re-anchored)",
+    "ONLY if T0-JC failed: <BACKEND_FORM> obs011-foldf-cov01 --test-tasks test,guidedIncrementalTest,crossReplicaTest -- test guidedIncrementalTest crossReplicaTest jacocoTestReport jacocoTestCoverageVerification --no-daemon   # non-credited headroom check (RC-10)",
+    "grep -rnw 'GuidedRunnerClient\\|ObservedValidationClient\\|GuidedPublicationAuthorization' backend/src studio-runner/src studio-runner/test   # expect 0 except the listed AC-7 known exceptions"
+   ],
+   "prohibited": ["changing assertions while swapping types", "renaming test methods"],
+   "exit": "three classes deleted; 21 files swapped; names/counts reconciled; all green"
+  },
+  {
+   "id": "11-MERGE",
+   "wave": "W5 (frontend half may start in W4)",
+   "size": "S (0.5 d) [I]",
+   "agent": "root (+ @devops helper for D-1)",
+   "startsWhen": ["frontend half: 11-FE and 11-DOC exit (may overlap 11-FOLD-final; its lane runs are non-evidentiary anyway)", "runner half: 11-FOLD-final exit and 11-RT exit"],
+   "writes": [
+    "copy-back of the 11-RT and 11-FE sandbox sets by EXACT path list from their receipts (never rsync a directory; Gage 2.4)",
+    "AGENTS.md (apply 11-DOC patch)",
+    "studio-runner/README.md (apply 11-DOC patch)",
+    "frontend/src/.claude/agent-memory/{aiox-pm,aiox-ux}/ (delete; CLN-58)",
+    "studio-runner/dist (one clean build -> D_011)",
+    "docs/qa/accessibility/axe-results.json (from the frontend full run)",
+    "local docker image put-checks-studio-runner:obs011-<n>-local (user decision: 011 Docker on U22 terms; --pull=false; syntax frontend fetch allowed)",
+    "docs/qa/evidence/STUDIO-OBS-011/execution-<date>/merge/**"
+   ],
+   "verify": [
+    "capture-manifest before; copy-back; every copied file's after-sha equals the lane receipt",
+    "(repo root) <N24>; <RB> obs011-merge-build01   # clean build; distDigestAfter = D_011",
+    "dist rule (RC-6): every later emit (fixtures tier here and at 11-G) must leave the dist digest = D_011",
+    "(repo root) <N24>; <RR> obs011-merge-runner-unit01 pnpm --config.package-manager-strict=false exec vitest run --minWorkers=1 --maxWorkers=2",
+    "(repo root) <N24>; <RR> obs011-merge-runner-fixtures01 pnpm --config.package-manager-strict=false exec vitest run --config vitest.fixtures.config.ts --minWorkers=1 --maxWorkers=1",
+    "D-1: docker build of studio-runner/ to put-checks-studio-runner:obs011-<n>-local with --pull=false; record image inspect, Config.Cmd check, and the source+dist digest it was built from; then cd studio-runner && <N24>; pnpm --config.package-manager-strict=false run check:pins -- --require-image",
+    "post-MERGE smoke (C8, Quinn 3.4(6)): <BACKEND_FORM> obs011-merge-smoke01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest' --tests 'com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest' --tests 'com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT' --no-daemon",
+    "(repo root) <RFE> obs011-merge-frontend01 -- pnpm run type-check && pnpm run lint && pnpm exec vitest run --minWorkers=1 --maxWorkers=3"
+   ],
+   "exit": "real tree = lane outputs; D_011 and the obs011 image recorded; runner, frontend and smoke green"
+  },
+  {
+   "id": "11-G",
+   "wave": "W6",
+   "size": "S (1 d incl. ~4 h of credited runs) [I] - critical path",
+   "agent": "root, then independent aiox-qa (Quinn)",
+   "startsWhen": ["11-MERGE exit"],
+   "writes": ["docs/qa/evidence/STUDIO-OBS-011/final-<date>/**"],
+   "acs": ["AC-7 (after = baseline - named drops + named additions, per suite, by (classname, name) multiset with status; independent symbol grep; known exceptions list)", "AC-5 after wall time (same test list as the T0 baseline)", "AC-1 final table"],
+   "verify": [
+    "uptime; vm_stat   # at start and end (C2 load record)",
+    "G1 (repo root) <N24>; <LOCK> <BK> obs011-g-check01 --test-tasks test,guidedIncrementalTest,crossReplicaTest --require-exec-tasks test,guidedIncrementalTest,crossReplicaTest --allowed-skips-file docs/qa/evidence/STUDIO-OBS-011/t0-<date>/qa/approved-skips.json -- --continue check --rerun-tasks --no-daemon",
+    "G1a grep the G1 collector log: jacocoTestCoverageVerification and requireFreshGuidedPartitions EXECUTED (not UP-TO-DATE, SKIPPED or NO-SOURCE) (C2; R-J proof)",
+    "G2 <RR> obs011-g-runner-unit01 ...; G3 <RR> obs011-g-runner-fixtures01 ...; G4 STUDIO_RUNNER_IMAGE=put-checks-studio-runner:obs011-<n>-local <RR> obs011-g-runner-deploy01 pnpm --config.package-manager-strict=false exec vitest run --config vitest.deployment.config.ts --minWorkers=1 --maxWorkers=1",
+    "G5 cd studio-runner && <N24>; pnpm --config.package-manager-strict=false run type-check && pnpm --config.package-manager-strict=false run lint && pnpm --config.package-manager-strict=false run check:pins -- --require-image",
+    "G6 (repo root) <N24>; node tools/check-studio-observed-contracts.cjs && node -e \"require('./tools/build-studio-observed-schemas.cjs').check()\"",
+    "G7 (repo root) <RFE> obs011-g-frontend01 -- type-check, lint, vitest (json report), build, ad hoc tsc --noUnusedLocals --noUnusedParameters",
+    "G8 DIGEST CHAIN (C2): every credited *-before.json and *-after.json of G1-G7 has the same source digest and the same dist digest; dist digest = D_011; helm sha and quoted-docs shas equal across the set; the obs011 image was built from that same source+dist digest. Any mismatch voids the runs with the other digest",
+    "G9 reconciliation from the collector-ARCHIVED XML (<label>-task-outputs/<task>/xml), never live backend/build/test-results; skips equal the 011 approved-skips multiset exactly",
+    "G10 independent @qa grep of every deleted symbol/file in frontend/src, studio-runner/src, studio-runner/test, backend/src, tools/, with a positive control per grep"
+   ],
+   "exit": "one green run set at one digest chain; QA verdict; only @qa sets Done"
+  }
+ ],
+ "droppedLanes": {
+  "11-RO, 11-RO-BE": "RD-3 (root): RUN-ORPHAN-01 and SEC-AUDIT-PREREADY-01 stay in 009",
+  "11-GT, 11-GS W3 split": "RD-1 (root): claim/checkCommand split closed"
+ },
+ "concurrencyGroups": {
+  "W1": ["11-GS-T", "11-GS-M (a)", "11-LEFT", "11-FOLD-prep", "11-RT", "then as slots free: 11-IT-R (prep), 11-FE, 11-DOC"],
+  "W2": ["11-GS-M (b) incl. F-1 freeze window", "11-FOLD-prep", "11-FE", "11-DOC", "11-IT-R (prep tail if any)"],
+  "W3": ["11-IT-R (apply)", "11-IT-S", "11-GS-T2", "11-FOLD-prep (tail)", "(free slot)"],
+  "W4": ["11-FOLD-final", "11-MERGE frontend half"],
+  "W5": ["11-MERGE runner half"],
+  "W6": ["11-G"]
+ },
+ "sharedFilesSingleOwner": {
+  "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": ["11-GS-T", "11-GS-M (b)", "11-FOLD-final"],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": ["11-GS-T", "11-IT-S", "11-FOLD-final"],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java": ["11-GS-T only"],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": ["(read-only: 11-GS-M b freeze proof; 11-IT-R prep reads)", "11-IT-R (apply)", "11-FOLD-final"],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java": ["(read-only: 11-GS-M b proof)", "11-GS-T2", "11-FOLD-final"],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java": ["(read-only: 11-GS-M b proof)", "11-GS-T2", "11-FOLD-final"],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java": ["(read-only: 11-GS-M b proof)", "11-IT-S", "11-FOLD-final"],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java": ["11-IT-S", "11-FOLD-final"],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java": ["11-IT-S", "11-FOLD-final"],
+  "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioKillSwitchWiringTest.java": ["11-LEFT only"],
+  "backend/src/test/java/com/citi/put/checks/studio/support/Await.java": ["11-LEFT only, branch B only; otherwise not created"],
+  "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java": ["11-GS-M (a)", "11-FOLD-final"],
+  "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": ["11-GS-M only"],
+  "backend/src/main/java/com/citi/put/checks/studio/StudioService.java": ["11-LEFT (updateAuthoring only)"],
+  "backend/build.gradle.kts": ["11-LEFT only (two JaCoCo rules; no Awaitility declaration in either branch)"],
+  "backend/src/main/resources/application.yml": ["11-LEFT only"],
+  "studio-runner/src/**": ["11-RT sandbox -> 11-MERGE"],
+  "studio-runner/dist": ["11-MERGE only"],
+  "studio-runner/evaluation/cli.mjs, oracle.mjs, report.mjs, fixture-server.mjs, observed-authoring/**": ["no 011 owner (R-EP v2 carry)"],
+  "frontend/**": ["11-FE sandbox -> 11-MERGE"],
+  "AGENTS.md, studio-runner/README.md": ["11-DOC patch -> 11-MERGE"],
+  "docs/runbooks/studio-runner.md": ["11-DOC (sections 1-3, 5-13); section 14 = @devops pre-start (Gage X-6)"],
+  "helm-chart/**, studio-runner/test/deployment/**": ["no 011 owner (009 residue, pre-start)"],
+  "studio-runner/src/guided/runtime.ts, studio-runner/src/run/observationCollector.ts": ["excluded while 009 AE-01 is open"],
+  "studio-runner/src/guided/ownership.ts": ["excluded (REL-001 per 009 plan)"]
+ },
+ "schedule": {
+  "unit": "working days from the 011 start (T0 begin); estimates are [I], from Dex's sizes and 008/G9 run times; Gradle lock contention not modelled beyond W3 note",
+  "lanes": {
+   "11-T0": [0.0, 0.5],
+   "11-GS-T": [0.5, 3.5],
+   "11-GS-M (a)": [0.5, 2.5],
+   "11-LEFT": [0.5, 2.5],
+   "11-FOLD-prep": [0.5, 5.0],
+   "11-RT": [0.5, 1.5],
+   "11-IT-R (prep)": [1.5, 3.0],
+   "11-FE": [2.5, 4.5],
+   "11-DOC": [2.5, 4.0],
+   "11-GS-M (b)": [3.5, 4.5],
+   "11-IT-R (apply, timeboxed)": [4.5, 6.5],
+   "11-IT-S": [4.5, 6.5],
+   "11-GS-T2": [4.5, 6.0],
+   "11-FOLD-final": [6.5, 9.0],
+   "11-MERGE frontend half": [4.5, 5.0],
+   "11-MERGE runner half": [9.0, 9.5],
+   "11-G": [9.5, 10.5]
+  },
+  "agentCountByInterval": {
+   "0.5-1.5": 5,
+   "1.5-2.5": 5,
+   "2.5-3.0": 5,
+   "3.0-3.5": 4,
+   "3.5-4.0": 4,
+   "4.0-4.5": 3,
+   "4.5-5.0": 4,
+   "5.0-6.0": 3,
+   "6.0-6.5": 2,
+   "6.5-9.0": 1,
+   "9.0-10.5": "root + QA"
+  },
+  "maxParallelism": 5,
+  "gradleLockNote": "W1 has 4 backend users (GS-T, GS-M a, LEFT, FOLD-prep); W3 has 4 (IT-R apply with up to 6 x ~18-25 min ReplayIT runs, IT-S, GS-T2, FOLD-prep tail). Lock wait is the main schedule risk in W3 [I]"
+ },
+ "waves": [
+  {"id": "W0", "lanes": ["11-T0"], "agents": "root + up to 4 reviewers", "gradle": "1 (fresh baseline) + T0-AW", "startsWhen": "preStartOrder 1-5 + re-dated Live surface + execute-011 collectors"},
+  {"id": "W1", "lanes": ["11-GS-T", "11-GS-M (a)", "11-LEFT", "11-FOLD-prep", "11-RT", "11-IT-R (prep, after RT)", "11-FE, 11-DOC (after GS-M a / LEFT)"], "agents": 5, "gradle": "4 users, serialized"},
+  {"id": "W2", "lanes": ["11-GS-M (b)", "11-FOLD-prep", "11-FE", "11-DOC"], "agents": "4", "gradle": "F-1 freeze window: GS-M b only"},
+  {"id": "W3", "lanes": ["11-IT-R (apply)", "11-IT-S", "11-GS-T2", "11-FOLD-prep (tail)", "11-MERGE frontend half (root)"], "agents": "4 + root", "gradle": "ReplayIT runs dominate"},
+  {"id": "W4", "lanes": ["11-FOLD-final"], "agents": 1, "gradle": "FOLD proof incl. ReplayIT alone (+ cov01 if T0-JC failed)"},
+  {"id": "W5", "lanes": ["11-MERGE runner half"], "agents": "root + @devops helper", "gradle": "1 smoke run"},
+  {"id": "W6", "lanes": ["11-G"], "agents": "root + QA", "gradle": "1 credited check"}
+ ],
+ "waveCount": 7,
+ "criticalPath": {
+  "external": ["G9 ruled", "g9-image.sh", "009 residue + dist rebuild + deployment tier", "010 list re-dated", "R4 commits"],
+  "within011": ["11-T0 (0.5)", "11-GS-T (3.0)", "11-GS-M part b incl. F-1 freeze proof (1.0)", "11-IT-R apply, timeboxed (2.0)", "11-FOLD-final (2.5)", "11-MERGE runner half incl. D-1 image (0.5)", "11-G (1.0)"],
+  "lengthDays": "10.5 [I]",
+  "nearCritical": {"11-IT-S": "0 d float", "11-GS-T2": "0.5 d float", "11-FOLD-prep": "about 2 d float, but L-XL risk from RC-1/RC-2"},
+  "changeVsV1": "v1 path ran 11-IT-R (incl. Await.java baton) fully after GS-M b; v2 moves the wait library to T0/W1 and the IT-R analysis to W1-W2 (read-only), so IT-S and GS-T2 start with IT-R apply and the critical-path IT-R segment is capped at 2 d"
+ },
+ "openItems": [
+  {"id": "OI-1", "item": "The 009 residue changes the runner image content (catalog-entry edits the Dockerfile; model-sizing edits src/guided/schemas.json, so dist changes). Gage's step 3 runs the post-residue deployment tier 'against the G9 image tag', which no longer matches the tree. U22 authorizes one 009 build for G9; the 011 authorization covers 11-MERGE/11-G only. Needs root (or the user): does U22 cover one more fresh-tag 009 build after the residue?", "recommendation": "Yes, same terms (local, --pull=false, fresh obs009-residue tag). That image is then also the T0 deployment baseline image (T0-IMG). If refused: the post-residue deployment run is recorded as 'image predates residue' for image-dependent cases, and B4 is NOT_MET by name", "owner": "root / user"}
+ ],
+ "writeOverlapCheck": {
+  "method": "manual pairwise reading of each concurrency group (no script run: python and node are barred during G9)",
+  "result": {"W1": 1, "W2": 0, "W3": 0, "W4": 0, "W5": 0},
+  "explained": ["W1: GuidedSessionIT.java in 11-GS-T and 11-GS-M; GS-M writes it only in part b (W2), after the baton. Sequential by rule"],
+  "newPathsChecked": ["GuidedLifecycleReasonIT (GS-T only)", "StudioKillSwitchWiringTest (LEFT only)", "Await.java (LEFT only, branch B)", "PublicationGrantAuthority.java (FOLD only)", "DispatchTestAccess.java (FOLD-final only)", "evaluation/README.md (RT only; DOC patches studio-runner/README.md, a different file)"],
+  "tag": "[I] manual; @dev re-checks mechanically at T0"
+ }
+}

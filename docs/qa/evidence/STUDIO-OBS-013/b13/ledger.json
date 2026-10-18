@@ -1,0 +1,295 @@
+{
+  "artifact": "STUDIO-OBS-013 lane B13 (backend) ledger",
+  "agent": "Dex (@dev), lane B13",
+  "date": "2026-10-13",
+  "authority": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-1-obs013.json (AR-1, binding) over s0-plan-refresh.json lanes.B13",
+  "storyStatus": "Ready -> InProgress (Change Log 0.2.0). Not submitted for review: S1/S3 integration and the joined proof are open.",
+  "hardRules": "No git add/commit/stash/reset. No TTL/deadline relaxation. No second recording implementation. GuidedSessionService.java not edited (hunk queued). Contracts, migrations and runner not edited.",
+  "filesCreated": [
+    "backend/src/main/java/com/citi/put/checks/studio/evidence/VideoObjectServer.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedEvidenceProjection.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/RecordedGuidedEvidenceProjection.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingProperties.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingKeys.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimings.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceRepository.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceInternalController.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionVideoController.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedEvidenceConfiguration.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingSeed.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimingsTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingKeysTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/RecordedGuidedEvidenceProjectionTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionVideoIT.java",
+    "docs/qa/evidence/STUDIO-OBS-013/b13/queued-B14-GuidedSessionService.patch",
+    "docs/qa/evidence/STUDIO-OBS-013/b13/xml-run1/ (5 JUnit XML files, copied while the lock was held)"
+  ],
+  "filesModified": [
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/evidence/ExecutionVideoService.java",
+      "change": "Steps 4-5 (measured size, range, respond, store-unreachable) moved verbatim into VideoObjectServer; steps 1-3 unchanged. Constructor takes VideoObjectServer instead of VideoObjectStore (no test constructs it directly; grep verified). Log text identical ('... for execution <id>'); logger category is now VideoObjectServer. One ordering nuance: with ?download=true the ledger attempt lookup for the filename now runs before the store metadata call; no response byte changes."
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java",
+      "change": "NO_RECORDING_STORE package-private -> public (one word), so the guided projection shares the constant (AR-1 R1 table)."
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java",
+      "change": "requireRole package-private -> public (one word, AR-1 R3 step 1). SC-6 check: the file is in no other lane's S1 file list (B14 lists session/{GuidedSessionService,GuidedSessionController,GuidedSessionProperties,GuidedContracts})."
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "change": "installEvidence(GuidedEvidenceProjection) (single install, default NONE); the two literals replaced by evidence.project(id, state).writeTo(result, id)."
+    },
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/evidence/ExecutionVideoContractTest.java",
+      "change": "Additions plus two pin re-anchors forced by C1's new operation: OPERATIONS_CARRYING_ATTRIBUTION + getGuidedSessionVideo; PUBLIC_OPERATIONS_DECLARING_UNAUTHENTICATED + getGuidedSessionVideo and its count 29 -> 30. Both pins stay exact and both-ways. Four new guided-route tests. No existing getExecutionVideo assertion was changed. Made before the coordinator's E-1 note; nothing further touched while ar-1-c1-deviations.json is pending. E-1 (after ar-1-c1-deviations.json): responseOf() now reads through deref, which re-points the 404 (~223), 416 (~233) and guided-comparison (~878) reads; asserted values unchanged. New check in theGuidedVideoRefusalsAreSharedComponentsWithTheExecutionRoutesShapes: getExecutionVideo's 404/410/416 $ref isIn(null, guided $ref) and both routes' example error codes match through deref. TIGHTEN to isEqualTo(guidedRef) at S2 when C2a switches the openapi side (B13 owns this). S2 (after C2a, docs/qa/evidence/STUDIO-OBS-014/c2a-contract/ledger.json): claimAdmission removed from OPERATIONS_CARRYING_ATTRIBUTION and CALLBACK_OPERATIONS_DECLARING_UNAUTHENTICATED; the callback count it forces moves 4 -> 3 (exact, both-ways set kept). Same-$ref check tightened: guided $ref non-null AND getExecutionVideo 404/410/416 $ref isEqualTo the guided one. S3 (after C2b): lookupGuidedPolicy, createGuidedPolicy, readGuidedPolicy, createGuidedPolicyVersion and approveGuidedPolicyVersion added to OPERATIONS_CARRYING_ATTRIBUTION and PUBLIC_OPERATIONS_DECLARING_UNAUTHENTICATED; the public-401 count moves 30 -> 35. Both pins stay exact and both-ways."
+    },
+    {
+      "file": "docs/runbooks/studio-guided-authoring.md",
+      "change": "Line 3 only: 'first guided recording (OBS-008)' -> recorded first guided Run is OBS-013 (video route), playback OBS-008."
+    },
+    {
+      "file": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+      "change": "Status Ready -> InProgress, Change Log row, Dev Agent Record (B13)."
+    },
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/evidence/ContractDocument.java",
+      "change": "E-1 (ar-1-c1-deviations.json): deref(node) follows local #/ $refs (max 16 hops; dangling/non-local -> null so assertions fail rather than pass on the ref string)."
+    },
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/evidence/ExecutionVideoEvidenceIT.java",
+      "change": "E-1: expiredCodeFromContract reads the 410 response through ContractDocument.deref. Asserted value unchanged."
+    }
+  ],
+  "stopConditions": {
+    "SC-1": "NOT triggered. Verified in code: GuidedSessionService.stop() (:2134-2217 region) writes document.state and action states and never writes document.owner. GuidedMaterializationService.stop(id) is `UPDATE studio_guided_materializations SET live=false` and GuidedAssignmentStore.stop(id) is `UPDATE studio_guided_assignments SET live=false`; neither touches the session document. document.owner is written only at start() (unclaimed/0) and claim() (which goes through active() and so never runs on a terminal session). Nuance found: materialization.context()/verify() require live=true and therefore fail after stop; the evidence service reads the materialization row WITHOUT the live filter and compares worker_id, owner_fence, context_id, context_revision, source_revision, configuration_revision exactly.",
+    "SC-5": "Not triggered by the extraction (no ExecutionVideo* assertion changed; ExecutionVideoContractTest 21/21 green including the additions). ExecutionVideoEvidenceIT/RangeIT/AuthorizationIT/RefusalEnvelopeIT were NOT run in this lane (Spring ITs, root S1 window).",
+    "SC-6": "Not triggered (see GuidedInternalSecurity above).",
+    "SC-8": "Op count is StudioContractTest's (C lane). Not pinned here.",
+    "SC-9": "Not tested in this lane against the runner; GuidedSessionVideoIT.theStrictWireReaderRefusesAFractionalReading asserts the backend reader refuses 12.5 (not yet run).",
+    "SC-10": "Not triggered: the callback carries IDs, integers and enums only; no key/manifest reference on any public surface.",
+    "SC-2, SC-3, SC-4, SC-7": "Runner / S3 conditions; not observable from B13."
+  },
+  "decisions": [
+    "[AUTO-DECISION] Video route authorization calls GuidedSessionController.read(user, id, request) rather than GuidedSessionService.read(user, id, 'session') as AR-1 names. Reason: the public readGuidedSession goes through the publication projector first (receipt-backed authorization when a publication base exists). Calling the controller's read is 'the readGuidedSession path itself' in both branches, so 403/503 stay identical for published sessions too. The body is discarded. Flag for @architect review.",
+    "[AUTO-DECISION] Acceptance order: role, key, fence header present, schemaVersion, schema, path==body sessionId, lock, then identity (scopeHash, caller==owner.workerId==body.workerId, X-Owner-Fence==body.ownerFence==owner.fence, versions, materialized context) BEFORE the idempotent duplicate lookup, then the DB-clock window, the write-once check, semantics, keys, insert. AR-1 lists duplicate (step 5) before identity (step 6); identity-first follows GuidedSessionService.internal() and keeps a different caller from being echoed someone else's stored response. Every AR-1 negative expectation still holds.",
+    "[AUTO-DECISION] Projection precedence when a row is AVAILABLE and no store can serve AND it is expired: UNAVAILABLE+NO_RECORDING_STORE (AR-1 table order). ExecutionSnapshotMapper checks EXPIRED first; the guided order follows the ruling's table. Recorded for @architect.",
+    "[AUTO-DECISION] Internal controller reads the raw body itself (bounded 1 MiB, UTF-8 charset check) and parses with GuidedContracts.parseWire, because GuidedWireBodyAdvice is assignableTypes-limited and is not B13's file.",
+    "[AUTO-DECISION] Both controllers carry @Profile(\"!worker\") like ExecutionVideoController and GuidedInternalSecurity.",
+    "Step items are derived by the backend; the bridge accepts kind=action only (AR-1 R2). Per-kind caps use the session's own limits; a subset of dispatched actions is accepted.",
+    "Video route refusals reuse ExecutionVideoException (shared ChecksExceptionHandler envelope): messages read '... for this execution'. C1's VideoNoEvidence/VideoExpired examples read '... for this recording'; examples only, codes and statuses match. Observation for the E-1 ruling, not changed here.",
+    "Guided download filename: guided-session-{sessionId}.webm, emitted only after the id matched the key alphabet."
+  ],
+  "queuedHunks": {
+    "toB14_S3": {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "patch": "docs/qa/evidence/STUDIO-OBS-013/b13/queued-B14-GuidedSessionService.patch",
+      "baseSha256": "b19449b90c0769d8f3cd1c7ab53c18194dddde32a518be19ae19bbf4ae0b590a (working tree 2026-10-13; re-base if B14 has moved the file)",
+      "content": "(1) field `evidence = GuidedEvidenceProjection.NONE` + `installEvidence(GuidedEvidenceProjection)` refusing a second install (mirrors installPublication). (2) result(): delete `out.putArray(\"actionTimings\");` and replace `out.putObject(\"evidence\")...putNull(\"video\");` with `evidence.project(id, state).writeTo(out, id);`. No recordEvidence hook (AR-1 withdrew it). Formatted with google-java-format 1.22.0."
+    },
+    "B13_followUp_at_S3": "DONE (s3Wiring)."
+  },
+  "runs": [
+    {
+      "id": "pre-1",
+      "kind": "PRE-CHECK, not proof",
+      "what": "javac of all of src/main/java outside Gradle against the main runtime classpath; javac of the B13 tests + ExecutionVideoContractTest; JUnit launcher outside Gradle.",
+      "result": "main compile exit 0; test compile exit 0; GuidedRecordingTimingsTest 7/7, GuidedRecordingKeysTest 4/4, RecordedGuidedEvidenceProjectionTest 8/8, ExecutionVideoContractTest 21/21."
+    },
+    {
+      "id": "run1",
+      "kind": "Gradle under the lock",
+      "command": "AGENT_NAME=b13 gradle-locked.sh -I <copy-XML init script> -I <AdmissionCasIT-exclusion init script> compileJava test --tests *.GuidedRecordingTimingsTest --tests *.GuidedRecordingKeysTest --tests *.RecordedGuidedEvidenceProjectionTest --tests *.GuidedSessionEvidenceTest --tests *.ExecutionVideoContractTest",
+      "exclusion": "An out-of-tree init script removes **/AdmissionCasIT.java from the test source set (coordinator: red mid-unit in B14). No repo file edited.",
+      "note": "compileJava and compileTestJava reported UP-TO-DATE (outputs from a prior holder with identical inputs); the five classes executed (XML present).",
+      "results": {
+        "GuidedRecordingTimingsTest": "7 tests, 0 failures",
+        "GuidedRecordingKeysTest": "4 tests, 0 failures (golden vector from C1 fixtures.json)",
+        "RecordedGuidedEvidenceProjectionTest": "8 tests, 0 failures",
+        "ExecutionVideoContractTest": "21 tests, 0 failures",
+        "GuidedSessionEvidenceTest": "13 tests, 7 FAILED, 6 passed. All 7 failures are the same PSQLException on INSERT into studio_guided_session_recordings: 'invalid regular expression: invalid repetition count(s)'. The 6 passes are the paths that never insert (identity refusals, contract refusals, key-alphabet refusal, absent-row projection flip, requireRole)."
+      },
+      "xml": "raw JUnit XML kept in the session scratchpad (contains private paths); counts summarized here",
+      "total": "53 tests, 46 passed, 7 failed. BUILD FAILED (exit 1)."
+    },
+    {
+      "id": "probe-1",
+      "kind": "scratch PostgreSQL 15-alpine (docker run --rm), not the repo DB",
+      "result": "`SELECT 'a' ~ '^[A-Za-z0-9_-]{1,255}$'` -> t; the same with {1,256} -> ERROR invalid repetition count(s). The B13 insert shape (one clock_timestamp() sample, CASE expires_at, make_interval(secs => 2592000)) inserted AVAILABLE with exactly 2592000 s and FAILED with NULL expires_at."
+    },
+    {
+      "id": "probe-2",
+      "kind": "PRE-CHECK on a scratch openapi copy (a scratch copy of openapi.yaml) with getExecutionVideo 404/410/416 replaced by the shared $refs",
+      "result": "Through deref, literal and simulated-C2a documents read the same values: 404/410/416 schema #/components/schemas/ErrorResponse on both, 416 Content-Range type string on both, expired example code VIDEO_EXPIRED. Repo openapi not edited."
+    },
+    {
+      "id": "run2",
+      "kind": "Gradle under the lock",
+      "command": "AGENT_NAME=b13 gradle-locked.sh -I <copy-XML init script> -I <AdmissionCasIT-exclusion init script> compileJava compileTestJava test --tests *.ExecutionVideoContractTest --tests *.GuidedRecordingTimingsTest --tests *.GuidedRecordingKeysTest --tests *.RecordedGuidedEvidenceProjectionTest",
+      "note": "compileJava/compileTestJava UP-TO-DATE: classes were recompiled at 19:36 by another holder after the 19:35 edits; verified the compiled ContractDocument.class contains deref.",
+      "results": {
+        "ExecutionVideoContractTest": "21/21",
+        "GuidedRecordingTimingsTest": "7/7",
+        "GuidedRecordingKeysTest": "4/4",
+        "RecordedGuidedEvidenceProjectionTest": "8/8"
+      },
+      "total": "40 tests, 0 failures. BUILD SUCCESSFUL.",
+      "xml": "raw JUnit XML kept in the session scratchpad (contains private paths); counts summarized here",
+      "notRun": "ExecutionVideoEvidenceIT (Spring IT, root window); compiled only."
+    },
+    {
+      "id": "run3",
+      "kind": "Gradle under the lock, no exclusion init script (AdmissionCasIT compiles again)",
+      "command": "AGENT_NAME=b13 gradle-locked.sh -I <copy-XML init script> compileJava compileTestJava test --tests *.ExecutionVideoContractTest --tests *.ExecutionVideoEvidenceIT.everyEvidenceStateIsAnsweredAndBothSurfacesAgree --tests *.ExecutionVideoEvidenceIT.aLogicallyExpiredRecordingIsRefusedWhileItsBytesAreStillThere --tests *.GuidedRecordingTimingsTest --tests *.GuidedRecordingKeysTest --tests *.RecordedGuidedEvidenceProjectionTest --tests *.GuidedSessionEvidenceTest",
+      "inputs": {
+        "V20 sha256": "e26da3077ca90fc0f3c6d7f4fc7156d416c39b66482330acb24d62d61514acc2 (recording_id ~ '^[A-Za-z0-9_-]+$')",
+        "openapi.yaml sha256": "61181c8457bb50cbc111812a57805ce8687618bfa4bb32a0d373d202ee2bd087",
+        "ExecutionVideoContractTest sha256": "667541ca55dae99baf1c35540db2f33dd9db6a9c60cd987caedcc5e70b68d719"
+      },
+      "note": "compileTestJava executed in this hold.",
+      "results": {
+        "ExecutionVideoContractTest": "21/21",
+        "ExecutionVideoEvidenceIT": "6/6 (the two methods calling expiredCodeFromContract: 5 parameterized AC-7 cases + aLogicallyExpiredRecordingIsRefusedWhileItsBytesAreStillThere)",
+        "GuidedSessionEvidenceTest": "13/13 (the 7 inserting cases now green on fixed V20)",
+        "GuidedRecordingTimingsTest": "7/7",
+        "GuidedRecordingKeysTest": "4/4",
+        "RecordedGuidedEvidenceProjectionTest": "8/8"
+      },
+      "total": "59 tests, 0 failures. BUILD SUCCESSFUL.",
+      "xml": "raw JUnit XML kept in the session scratchpad (contains private paths); counts summarized here"
+    },
+    {
+      "id": "run4",
+      "kind": "Gradle under the lock (AGENT_NAME=b13), after F-1",
+      "command": "gradle-locked.sh compileJava compileTestJava test --tests *.GuidedSessionVideoIT --tests *.GuidedSessionEvidenceTest (plus an out-of-tree init script that copies the JUnit XML while the lock is held)",
+      "note": "compileJava and compileTestJava executed in this hold.",
+      "results": {
+        "GuidedSessionVideoIT": "6/6",
+        "GuidedSessionEvidenceTest": "13/13"
+      },
+      "total": "19 tests, 0 failures. BUILD SUCCESSFUL.",
+      "xml": "raw JUnit XML kept in the session scratchpad (contains private paths); counts summarized here"
+    },
+    {
+      "id": "run5",
+      "kind": "Gradle under the lock (AGENT_NAME=b13), after the S3 wiring",
+      "command": "gradle-locked.sh compileJava compileTestJava test --tests *.GuidedSessionEvidenceTest --tests *.RecordedGuidedEvidenceProjectionTest --tests *.GuidedSessionVideoIT (plus an out-of-tree init script that copies the JUnit XML while the lock is held)",
+      "note": "compileJava and compileTestJava executed in this hold. The guided end-to-end ITs were not run (root S3 window).",
+      "results": {
+        "GuidedSessionEvidenceTest": "13/13",
+        "RecordedGuidedEvidenceProjectionTest": "8/8",
+        "GuidedSessionVideoIT": "7/7 (includes the new result() test)"
+      },
+      "total": "28 tests, 0 failures. BUILD SUCCESSFUL.",
+      "xml": "raw JUnit XML kept in the session scratchpad (contains private paths); counts summarized here"
+    },
+    {
+      "id": "run6",
+      "kind": "Gradle under the lock (AGENT_NAME=b13), after the C2b pins",
+      "command": "gradle-locked.sh compileJava compileTestJava test --tests *.ExecutionVideoContractTest (plus the copy-XML init script)",
+      "note": "compileJava and compileTestJava executed in this hold. An outside-Gradle pre-check compile failed against stale scratch main classes (B14 changes) and is disregarded; the locked run is the evidence.",
+      "results": {
+        "ExecutionVideoContractTest": "21/21"
+      },
+      "total": "21 tests, 0 failures. BUILD SUCCESSFUL.",
+      "xml": "raw JUnit XML kept in the session scratchpad (contains private paths); counts summarized here"
+    }
+  ],
+  "blockerForDataLane": {
+    "finding": "V20__guided_session_recording.sql CHECK (recording_id ~ '^[A-Za-z0-9_-]{1,256}$') is invalid in PostgreSQL: ARE bounds allow 0..255 (DUPMAX). The migration applies (CHECK regexes compile lazily) but EVERY insert fails. The DDL is AR-1 R5 ddl_normative verbatim, so the defect is in the ruling text too.",
+    "owner": "D lane (V20) + @architect (AR-1 R5 text). B13 does not edit migrations.",
+    "suggestedFix": "CHECK (recording_id ~ '^[A-Za-z0-9_-]+$') — varchar(256) already bounds the length — or add `AND length(recording_id) BETWEEN 1 AND 256`. Any GuidedRecordingMigrationIT positive insert will hit the same error. The 256 bound in Java (GuidedRecordingKeys) and JSON Schema is fine; only PostgreSQL regex has the limit.",
+    "sha256V20AsRead": "db1124df91f9ef311dbca855ac9c4b9d982ad33015075a5d77e4f9f42cc72e9a",
+    "status": "RESOLVED by D lane: V20 now uses '^[A-Za-z0-9_-]+$' (sha256 e26da307...). GuidedSessionEvidenceTest 13/13 in run3."
+  },
+  "pending": {
+    "onV20": "Resolved (run3). GuidedSessionVideoIT still not run by B13 (root S1/S3 window).",
+    "onC1": "Landed (coordinator note). GuidedRecordingKeysTest consumes guidedRecordingKeyVector (green). actionTiming moved to v3/action-timing.schema.json; result.schema.json still defines videoEvidence (read 2026-10-13), which GuidedSessionEvidenceTest validates against.",
+    "onE1": "Done at S2: re-points live, same-$ref check strict, ExecutionVideoEvidenceIT expiredCode path green (run3).",
+    "onS1Root": "GuidedSessionVideoIT ran in root's S1+S2 window (1 failure, fixed as F-1) and is 6/6 in run4. ExecutionVideo* Spring ITs beyond the two run3 methods remain root's.",
+    "onS3": "B13's S3 wiring is done. Root's S3 window still owns the guided end-to-end ITs (GuidedSessionIT, GuidedBridgeIntegrationTest, GuidedPlanningIntegrationTest, GuidedPublicationReplayIT ...), which now run with the projection installed in both builders.",
+    "notInB13": "AC-1/AC-2/AC-5 runner work (R13/R14); AC-6 joined learn run on the OBS-007 fixture, recording-failure path and replay regression (S3 window). GuidedSessionVideoIT proves the backend half only and says so in its Javadoc.",
+    "naNote": "AC-4 'SSE snapshots carry the reference': no guided SSE stream exists; the reference rides result/session-view reads (AR-1 planCorrections, recorded for @po)."
+  },
+  "rootNote": "Raw JUnit XML dirs xml-run1/xml-run2 moved by root to the session scratchpad (contained private paths); results are summarized in this ledger.",
+  "fixes": [
+    {
+      "id": "F-1",
+      "found": "Root S1+S2 window, first GuidedSessionVideoIT run: theCallbackIsAuthenticatedByTheGuidedChainAndIdempotentUnderOneKey failed at the byte comparison of the second 202 body against the first (6 tests, 1 failure; root XML kept out of evidence by instruction).",
+      "rootCause": "PRODUCT BUG, not test semantics. Same JSON members, different key order: the first acceptance returned request.deepCopy() (request order), while the same-key resend returned the echo read back from studio_guided_commands.response, which is jsonb and reorders keys. GuidedSessionEvidenceTest compared JsonNode equality (order-insensitive) and so missed it.",
+      "semantics": "AR-1 negativeTestExpectations.backend_GuidedSessionEvidenceTest_and_GuidedSessionVideoIT: 'Same key + same body -> 202 with the identical stored echo and exactly one V20 row'; README row (R3.readmeRow): 202 'echo of the accepted request'. The test's byte-identity expectation is the ruled one.",
+      "fix": "GuidedSessionEvidenceService answers both paths in canonical-v1 key order (contracts.parse(GuidedContracts.canonical(node))): the first acceptance stores and returns the canonical echo; the duplicate path re-canonicalizes the stored jsonb echo. Members and values unchanged. GuidedSessionEvidenceTest now also asserts byte identity (resend toString equals first; echo equals canonical(body)).",
+      "sha256": {
+        "GuidedSessionEvidenceService.java": "0f3be7586414f80debcc704d1ef65374bf5f108487a590cbf7018398bf867c12",
+        "GuidedSessionEvidenceTest.java": "bb3361460bb4a9e2af9815bb3c38290fd792f397305c2f128cb319b1d6b55ba3",
+        "GuidedSessionVideoIT.java (unchanged by F-1)": "fb631c9a7c710b4f34efd8d1c03cc2c4af2102682ef434c37b6cddef09d3d25a"
+      },
+      "observation": "The other bridge routes in GuidedSessionService.internal() have the same shape (first response vs jsonb duplicate); not changed here (not B13's file). Reported only."
+    }
+  ],
+  "s3Wiring": {
+    "go": "Root GO after B14's S3 patch (including the queued GuidedSessionService hunk) and C2b landed.",
+    "change": "GuidedEvidenceConfiguration.installGuidedEvidenceProjection now calls guided.installEvidence(projection) and projector.installEvidence(projection): one projection, both result builders.",
+    "verifiedHunk": "GuidedSessionService.java carries installEvidence (single install, default NONE) and result() calls evidence.project(id, state).writeTo(out, id) (read 2026-10-13).",
+    "sha256": {
+      "GuidedEvidenceConfiguration.java": "a44f726528edf8c60956717603299c6a480ceb3fa4b7021b3adced7d3660bdc7",
+      "GuidedSessionVideoIT.java": "e2c6c47ee85f3ea977467d840e58110dbe71f50f053163bdd2da95af5fb6ec9e",
+      "GuidedSessionService.java (as read, B14-owned)": "b8b60e123d6d9db8ed141017f4c782e87d9404d659b59cbc3c66a650fdf20149",
+      "v3/result.schema.json (C2b: evidence.video = $ref videoEvidence, null invalid)": "b30feddf1f0ead9fcb2e39cddaf25b40166a1ef76fe80f251905b1bed7741cf9"
+    },
+    "newTest": "GuidedSessionVideoIT.theSessionServicesResultCarriesTheRecordingEvidenceAndValidates: GET /guided-sessions/{id}/result on sessions with no publication base, so the call reaches GuidedSessionService.result(). result() validates v3/result itself, and the test validates the body again. It asserts evidence.video is an object in four states: AVAILABLE (with expiresAt and 2 timings, step+action), PROCESSING (no row, window open), UNAVAILABLE (no row, deadline passed) and FAILED (fixed API text). It also checks replayVerified false and that no key text appears.",
+    "notSeparatelyTested": "A negative control showing a builder left on NONE fails v3/result after C2b was not added in B13. The schema makes null invalid, and C2b's contract checks own that assertion."
+  },
+  "c2bPins": {
+    "verifiedInDocument": "All five operations carry tags [guided-policies] (not internal), x-implemented-by STUDIO-OBS-014 (a story the standalone-story reader finds), and '401': $ref '#/components/responses/SessionUnauthorized'.",
+    "envelopeNote": "SessionUnauthorized's body is PlatformErrorResponse, written by the platform BFF filter on every /api/** path before Studio code runs. It is not the Studio ErrorResponse. That is the correct producer envelope for a public route, and it is what this test requires of every public operation (ADR-002 §25.4). The test's allMatch(SessionUnauthorized) assertion was not changed. If the C2b spec intended the Studio error body for 401, that disagrees with the document and with ADR-002 §25; reported, not changed.",
+    "sha256": {
+      "ExecutionVideoContractTest.java": "0c85617cbd39475bbbe4be17e3757de58e8ed4fbd9f409d215de0d21c18c25e5",
+      "openapi.yaml (as read)": "afec6c04cdd5bcc19e42b83f83656a342165c5e04407e90a7206de0b40c46183"
+    }
+  },
+  "qaFixTEST001": {
+    "status": "PREPARED, not applied, not run (S4 frozen window)",
+    "readme": "docs/qa/evidence/STUDIO-OBS-013/b13/qa-fixes/README.json",
+    "patch": "docs/qa/evidence/STUDIO-OBS-013/b13/qa-fixes/TEST-001-GuidedPublicationReplayIT.patch",
+    "patchSha256": "f6b58de10c6933ce6cad1941a4d6464e1abdce24ff4e00414280cc6745a53819",
+    "baseSha256": "a10cc9dc7dac4816a6fbf999a847f899a065ef01f61ec707a1f67f0ebfc532e3",
+    "ruling": "docs/qa/evidence/STUDIO-OBS-013/ar-qa-sec001-test001.json",
+    "regression": {
+      "symptom": "Full-class GuidedPublicationReplayIT 31/40 failed after root applied the TEST-001 patch together with R13's SEC-001 dist. The first failure was actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel, in TEARDOWN: C5Capture.awaitS2Completion 'actual selected guided operation/callback completion' found no closed s2-<epoch>-1 receipt within 10 s. The cleanupUnconfirmed fail-stop then failed the 30 tests after it. All of that method's body assertions, including the new AC-6 guided-recording ones, had passed. The new recorder-fault test (equal Order 9) ran first and PASSED.",
+      "culprit": "(a), the B13 TEST-001 patch, NOT (b) the SEC-001 browser.ts change. The patch's recorder-fault test was a second secret-bearing S2 case (C5Capture.beginS2 + secretLoginScenario + S2TraceBinding) in the same guided worker process. The worker-side S2 observer (p4GuidedRevocationObservers) is single-use per worker lifetime. Its drain requires s2States.size()==1 and, through s2Restore, restores the wrapped RevRuntime.prototype start/dispatch/refreshObservation/stop. After the first S2 case drained, the second case's runtime was never observed, so no receipt was written.",
+      "isolationMethod": "Read the harness code. The git apply -R bisect step was not run. The evidence is that, with R13's SEC-001 browser.ts and dist unchanged, only rehosting the fault test turns the class 40/40 twice. That rules (b) out.",
+      "fix": "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes is rehosted on the class's plain learn fixture (createSource(TEXT), the default model, no secret, no C5/S2 capture). The same fault is injected (the live WebM in recordVideo.dir is deleted after the first dispatched action, guarded as mid-session), and every AC-6 fault assertion is kept: UNAVAILABLE result, V20 row UNAVAILABLE/false/no expiry/[], no video object, manifest UNAVAILABLE with the disclosure, GET /video 404 VIDEO_UNAVAILABLE. Dropped with the secret setup: that test's canary sink scan, which has no secret to scan for on a plain fixture. Deviation from the ruling's 'same login fixture' host, with the reason recorded in the test Javadoc. The happy-path login assertions and the :16036 exactness are unchanged. No sleep was added and no assertion was weakened.",
+      "addendumPatch": "docs/qa/evidence/STUDIO-OBS-013/b13/qa-fixes/TEST-001-fix1-recorder-fault-rehost.patch (from the applied tree e3b511cb… to the fixed tree 9b6233bf…)",
+      "runs": {
+        "bis1 (as applied, under the lock)": "40 tests, 31 failed",
+        "fix1 (fixed tree, full class)": "40 tests, 0 failed, 19m33s",
+        "fix2 (fixed tree, full class, test --rerun, consecutive)": "40 tests, 0 failed, 19m36s"
+      },
+      "identity": {
+        "GuidedPublicationReplayIT.java": "9b6233bfe7133255a6d0e720b95d2cf009a416946048a23269644d1d0d04acd9 (unchanged across fix1 and fix2)"
+      },
+      "note": "A first fix2 attempt reported BUILD SUCCESSFUL in 1 s because Gradle treated test as UP-TO-DATE. It is not counted. The counted fix2 used test --rerun."
+    },
+    "s4bFlake": {
+      "symptom": "S4b full clean check: guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes failed with '[the live recording file was removed] Expecting actual: 0 to be greater than: 0' at host load ~9. It had passed 40/40 twice before.",
+      "classification": "(i) A race in the test against an asynchronous product signal, made more likely by load. Not a product defect, and not caused by the SEC-001 startup sequence. Playwright's recorder (playwright-core videoRecorder.ts: FfmpegVideoRecorder._launch) spawns an ffmpeg child that creates the .webm output only after it has probed the first screencast frame. So the file appears asynchronously after page creation, and can appear after the first action is dispatched. The test injected the fault on 'first dispatchCount=1 action' and found the recordVideo.dir empty. With no live file there is nothing to remove, which is not the recorderFileLost fault under test. SEC-001 deletes only the startup-probe video before readiness, which precedes any dispatch.",
+      "fix": "The trigger is now the product signal itself: a regular .webm present in recordVideo.dir, after the first dispatched action, while the session is still before FINALIZING. That state is asserted on every poll iteration, so a session that reaches FINALIZING with no live file fails explicitly rather than retrying. The existing 20 ms poll step was kept and no sleep was added. Every assertion is unchanged: removed > 0, UNAVAILABLE result, V20 row, no object, manifest, 404.",
+      "patch": "docs/qa/evidence/STUDIO-OBS-013/b13/qa-fixes/TEST-001-fix2-live-file-signal.patch",
+      "patchSha256": "b76bbed401310a8517f3ad3b8299fc04491b8ebb64e38b01b620d0853fbc21c1",
+      "baseSha256": "9b6233bfe7133255a6d0e720b95d2cf009a416946048a23269644d1d0d04acd9",
+      "resultSha256": "9e22002ca290bddb0043dfcf1e661885337e45e2e6cfcdd2b9773d56da0b3c4d",
+      "runs": {
+        "overloadAttempt (discarded, reported)": "10-iteration loop with 11 extra busy loops on top of R13's concurrent 12-loop repro (1-min load up to 175 on 11 cores). Iteration 1 passed. Iterations 2-6 failed in the class's existing Order-1 test (ordinary run still RUNNING at its deadline; sessions reaching UNKNOWN_OUTCOME), and in iteration 2 the fault test also reached UNKNOWN_OUTCOME in awaitFinalizing. Those are the existing deadline budgets collapsing under 16x oversubscription, not the file race. The loop was stopped; the orphaned iteration 7 then passed. Not counted.",
+        "rep1-10 (counted)": "10/10 green: each iteration ran Order-1 actualLearningPublishes plus the fault test (2 tests, 0 failures each, fault test 3.9-5.2 s). Load was 7.07-48.76 at iteration start. Where the 1-min load was below 10 (iterations 4, 6, 8, 9), 3 extra busy loops ran during the iteration; the loads are recorded per iteration.",
+        "checkstyleTest spotlessCheck": "BUILD SUCCESSFUL (under the lock)",
+        "full class #1": "40 tests, 0 failed, 19m35s",
+        "full class #2 (consecutive)": "40 tests, 0 failed, 19m38s",
+        "identity": "GuidedPublicationReplayIT sha256 9e22002c… identical before and after both full runs"
+      }
+    }
+  }
+}

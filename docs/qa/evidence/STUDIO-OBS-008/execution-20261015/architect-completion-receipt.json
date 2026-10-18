@@ -1,0 +1,34 @@
+{
+  "artifact": "008 bounded architecture ruling receipt",
+  "createdAt": "2026-10-15T04:04:01.235317+00:00",
+  "status": "P1_P7_TECHNICAL_CHOICES_RESOLVED_IMPLEMENTATION_HELD",
+  "files": {
+    "architect-ownership.json": "71767d0662a31db38294fdc540bc0c8e3e88840000e3cfb95d5079339f41b5d4",
+    "architect-public-projections.schema.json": "3bc546dc5700813c13591c757f0f7b5e71c7ee14af55bb7a9e089094a0305d2e",
+    "architect-rulings.json": "1476ce905c4927a827b2bf05319031fb55c67806cca63b78a3264b67b4e37a7d",
+    "architect-test-delta.json": "ac3357c0f162b0d6b7891fe9c5696468c82bd4dbec83e881d6a24d362f1e49b4"
+  },
+  "conditions": [
+    "015 QA PASS and Done, then root closes shared contract/backend windows",
+    "Root measures post015 production baseline and reconciles backend ownership overlay before008 dispatch",
+    "Independent review and every required actual008 QA gate remain future work"
+  ],
+  "productChoicesRemaining": [],
+  "sourceAuthority": "Pax original9AC scope GO plus implemented public API/backend/frontend source snapshots in architect-rulings.json",
+  "015FrozenFileVerification": {
+    "manifestSha256": "54c5551d6d3316b3cc384fc4ebbf6d78476840130625476f2af50e193efc3818",
+    "boundFiles": 22,
+    "allByteExact": true
+  },
+  "verification": "Static JSON parse/shape and source hash checks only; no schema/application tests",
+  "testCasesPlanned": 16,
+  "testsExecuted": 0,
+  "sourceChanges": false,
+  "sharedContractChanges": false,
+  "storyLifecycleChanges": false,
+  "noBuildDatabaseInstallGitOrExternalCommunication": true,
+  "budget": {
+    "wholeWaveCeilingUSD": 500,
+    "actualSpend": "unavailable"
+  }
+}

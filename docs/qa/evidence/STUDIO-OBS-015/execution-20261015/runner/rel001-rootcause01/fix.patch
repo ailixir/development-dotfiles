@@ -1,0 +1,696 @@
+diff --git a/studio-runner/src/guided/diagnostics.ts b/studio-runner/src/guided/diagnostics.ts
+--- a/studio-runner/src/guided/diagnostics.ts
++++ b/studio-runner/src/guided/diagnostics.ts
+@@ -14,6 +14,64 @@
+   for(const character of redacted){const length=Buffer.byteLength(character);if(bytes+length>2048 || Array.from(bounded).length>=2048)break;bounded+=character;bytes+=length;}
+   return bounded||'Unknown error';
+ }
++/**
++ * The start-up refusal the worker answers on the wire (`CONTEXT_LOST`), with everything that caused it
++ * kept as `cause`. The wire code and message are unchanged; only the worker's own log reads the rest.
++ * `phase` and `loss` come from closed vocabularies owned by the runtime (REL-001).
++ */
++export class GuidedStartFailure extends Error {
++  constructor(readonly phase: string | null, readonly loss: string | null, cause: unknown) {
++    super('CONTEXT_LOST', { cause });
++    this.name = 'GuidedStartFailure';
++  }
++}
++const CLOSED_CODE = /^[A-Z][A-Z0-9_]{2,47}$/u;
++const ERROR_NAME = /^[A-Za-z][A-Za-z0-9]{0,39}$/u;
++const ERRNO_CODE = /^E[A-Z0-9]{2,31}$/u;
++const PROCESS_EXIT = /process did exit: exitCode=(-?\d{1,3}|null), signal=(SIG[A-Z0-9]{2,10}|null)/u;
++const TIMEOUT = /Timeout \d{1,7}ms exceeded/u;
++const MAX_LINKS = 6;
++interface CauseLink { name: string; code?: string; errno?: string; phase?: string; loss?: string; kind?: string; exitCode?: number | null; signal?: string | null }
++/** One link of a cause chain as fixed labels only. Free text is classified here, never echoed. */
++function describeLink(error: unknown): CauseLink {
++  if (!(error instanceof Error)) return { name: 'NonError' };
++  const link: CauseLink = { name: ERROR_NAME.test(error.name) ? error.name : 'Error' };
++  if (CLOSED_CODE.test(error.message)) link.code = error.message;
++  const fields = error as { code?: unknown; phase?: unknown; loss?: unknown };
++  if (typeof fields.code === 'string' && ERRNO_CODE.test(fields.code)) link.errno = fields.code;
++  if (typeof fields.phase === 'string' && CLOSED_CODE.test(fields.phase)) link.phase = fields.phase;
++  if (typeof fields.loss === 'string' && CLOSED_CODE.test(fields.loss)) link.loss = fields.loss;
++  if (error.message.includes('Target page, context or browser has been closed')) link.kind = 'TARGET_CLOSED';
++  else if (TIMEOUT.test(error.message)) link.kind = 'TIMEOUT';
++  const exit = PROCESS_EXIT.exec(error.message);
++  if (exit) {
++    const [, exitCode, signal] = exit;
++    link.exitCode = exitCode === undefined || exitCode === 'null' ? null : Number(exitCode);
++    link.signal = signal === undefined || signal === 'null' ? null : signal;
++  }
++  return link;
++}
++export interface StartRefusalFacts { readonly operation: string; readonly sessionId: string; readonly elapsedMs: number }
++/**
++ * One value-free line for a refused `assign` or `context` (REL-001): the route, a hash prefix of the
++ * session (the sidecar file name uses the full hash), the elapsed milliseconds and the cause chain as
++ * closed codes, error class names, errno codes, the failed step and, for a browser process that
++ * exited, its exit code and signal. No message text, path, URL or session id is ever written.
++ */
++export function describeStartFailure(error: unknown, facts: StartRefusalFacts): string {
++  const links: CauseLink[] = [];
++  const seen = new Set<unknown>();
++  let current: unknown = error;
++  while (links.length < MAX_LINKS && !seen.has(current)) {
++    seen.add(current);
++    links.push(describeLink(current));
++    current = current instanceof Error ? current.cause : undefined;
++    if (current === undefined) break;
++  }
++  const operation = facts.operation === 'assign' || facts.operation === 'context' ? facts.operation : 'other';
++  return 'GUIDED_START_FAILED ' + JSON.stringify({ operation, session: hash(facts.sessionId).slice(0, 16), elapsedMs: Math.max(0, Math.round(facts.elapsedMs)), links }) + '\n';
++}
++
+ /** Bounded, non-authoritative sidecar. Consumption/recovery never reads this file. */
+ export class GuidedDiagnostics {
+   private records=0;private bytes=0;
+diff --git a/studio-runner/src/guided/ownership.ts b/studio-runner/src/guided/ownership.ts
+--- a/studio-runner/src/guided/ownership.ts
++++ b/studio-runner/src/guided/ownership.ts
+@@ -1,6 +1,7 @@
+ import { randomUUID } from 'node:crypto';
+ import { join } from 'node:path';
+ import { canonical, hash, identity, insist, sameIdentity, validate } from './contracts.js';
++import { GuidedStartFailure } from './diagnostics.js';
+ import { GuidedJournal } from './journal.js';
+ import { GuidedRuntime } from './runtime.js';
+ import { bindContextPolicy } from './policyHash.js';
+@@ -91,10 +92,10 @@
+   private async acquire(entry: OwnedAssignment): Promise<void> {
+     try {
+       let marker: GuidedJournal;
+-      try { marker = await GuidedJournal.open(join(this.options.journalDirectory,'assignments'),entry.assignment.sessionId); } catch { entry.unconfirmed=true;throw new Error('CONTEXT_LOST'); }
++      try { marker = await GuidedJournal.open(join(this.options.journalDirectory,'assignments'),entry.assignment.sessionId); } catch (cause) { entry.unconfirmed=true;throw new Error('CONTEXT_LOST',{cause}); }
+       await marker.consume(entry.assignment); this.live(entry);
+       const grant = await this.requestClaim(entry,true); this.live(entry); entry.grant = grant; this.schedule(entry);
+-    } catch { if(entry.unconfirmed)this.invalidate(entry);else await this.stopEntry(entry,'CONTEXT_LOST');throw new Error('CONTEXT_LOST'); }
++    } catch (cause) { if(entry.unconfirmed)this.invalidate(entry);else await this.stopEntry(entry,'CONTEXT_LOST');throw new Error('CONTEXT_LOST',{cause}); }
+   }
+   async assign(value: unknown): Promise<AssignmentReceipt> {
+     const assignment = validate<Assignment>('assignment',value); insist(assignment.workerId === this.options.workerId, 'IDENTITY_MISMATCH');
+@@ -136,7 +137,7 @@
+     entry.runtime=new GuidedRuntime(authorized,{...this.options,applicationPolicy:policy.applicationPolicy,capabilities:grant.scope.capabilities,csiId:grant.scope.csiId,onStopping:()=>{this.invalidate(entry);}});
+     entry.runtime.setLiveLease(grant.owner.leaseExpiresAt);
+     entry.contextStart=entry.runtime.start();this.schedule(entry);
+-    try{await entry.contextStart;this.live(entry);return identity(context);}catch{await this.stopEntry(entry,'CONTEXT_LOST');throw new Error('CONTEXT_LOST');}
++    try{await entry.contextStart;this.live(entry);return identity(context);}catch(cause){const {phase,loss}=entry.runtime.startFailure;await this.stopEntry(entry,'CONTEXT_LOST');throw new GuidedStartFailure(phase,loss,cause);}
+   }
+   private async stopEntry(entry: OwnedAssignment, reason: BridgeStop['reason']): Promise<void> {
+     insist(!entry.unconfirmed,'CONTEXT_LOST');
+diff --git a/studio-runner/src/guided/runtime.ts b/studio-runner/src/guided/runtime.ts
+--- a/studio-runner/src/guided/runtime.ts
++++ b/studio-runner/src/guided/runtime.ts
+@@ -11,7 +11,7 @@
+ import { GuidedJournal } from './journal.js';
+ import type { Action, BridgeDispatch, BridgeIdentity, BridgeObservation, BridgeOrdinaryOutcome as BridgeOutcome, BridgePreparation, BridgeStop, ConsumerEdge, ExecutionEvidence, Producer, RunnerContext, ObservationRefresh } from './types.js';
+ import { GuidedLaunchFailure } from '../run/guidedBrowser.js';
+-import type { GuidedBrowser, GuidedRecordingRequest } from '../run/guidedBrowser.js';
++import type { GuidedBrowser, GuidedLossReason, GuidedRecordingRequest } from '../run/guidedBrowser.js';
+ import type { ActionStamp, GuidedRecorder, GuidedSessionRecording } from './evidence.js';
+ import type { ObservationConfig } from '../run/observationTypes.js';
+ 
+@@ -29,7 +29,7 @@
+    * GuidedOwnership after its policyHash is verified; never a mounted or server configuration. Guided
+    * learning takes no field rules (ar-mounted-rules): the collector always gets `rules: []`. */
+   applicationPolicy?: ObservationConfig['applicationPolicy'];
+-  launch: (config: ObservationConfig, contextId: string, onLost: () => void, recording?: GuidedRecordingRequest) => Promise<GuidedBrowser>;
++  launch: (config: ObservationConfig, contextId: string, onLost: (reason?: GuidedLossReason) => void, recording?: GuidedRecordingRequest) => Promise<GuidedBrowser>;
+   callback: (route: 'bootstrap-evidence' | 'observations' | 'outcomes' | 'lifecycle' | 'recording-evidence', message: unknown, idempotencyKey?: string) => Promise<void>;
+   /**
+    * Session recording composition (STUDIO-OBS-013 AC-1). Absent: the session records nothing and
+@@ -40,6 +40,8 @@
+   csiId?: string;
+ }
+ type Availability = Producer['availability'];
++/** Last `start()` step entered. Closed vocabulary: it is logged on a failed start, never derived from input. */
++export type GuidedStartPhase = 'VALIDATE' | 'JOURNAL' | 'RECORDER' | 'LAUNCH' | 'WITHHOLD' | 'BLANK_MATCH' | 'BOOTSTRAP_CALLBACK' | 'STARTED';
+ function argumentSlot(operation: Action['operation']): string {
+   return operation.kind === 'navigate' ? 'navigate.destination' : operation.kind === 'fill' ? 'fill.value' : operation.kind === 'selectOption' ? 'selectOption.value' : 'assert.expected';
+ }
+@@ -53,6 +55,8 @@
+   private diagnostics: GuidedDiagnostics | null = null;
+   private evidence: ExecutionEvidence | null = null;
+   private stopped = false;
++  private startPhase: GuidedStartPhase | null = null;
++  private lossReason: GuidedLossReason | null = null;
+   private busy = false;
+   private preparing = false;
+   private readonly prefixWaits = new Map<string,number>();
+@@ -86,6 +90,8 @@
+   get active(): boolean { return !this.stopped || !this.browserClosed; }
+   get accepting(): boolean { return !this.stopped && Date.now() < this.deadline(); }
+   get currentIdentity(): BridgeIdentity { return identity(this.context); }
++  /** Where a failed start stopped and, if the browser reported itself lost, why (REL-001). */
++  get startFailure(): { readonly phase: GuidedStartPhase | null; readonly loss: GuidedLossReason | null } { return { phase: this.startPhase, loss: this.lossReason }; }
+   /** Resolves when the session recording has settled (upload, manifest, callback, cleanup). Never rejects. */
+   get recordingSettled(): Promise<void> { return this.recordingSettlement ?? Promise.resolve(); }
+   private live(): void { insist(!this.stopped && Date.now() < this.deadline(), 'CONTEXT_LOST'); }
+@@ -103,6 +109,7 @@
+   private checkIdentity(message: BridgeIdentity): void { this.live(); insist(sameIdentity(message, this.context), 'IDENTITY_MISMATCH'); }
+   setLiveLease(leaseExpiresAt: string): void { this.liveLease = leaseExpiresAt; }
+   async start(): Promise<void> {
++    this.startPhase = 'VALIDATE';
+     validate<RunnerContext>('runner-context', this.context);
+     insist(this.context.workerId === this.options.workerId, 'IDENTITY_MISMATCH');
+     const program = this.context.prefixProgram;
+@@ -133,6 +140,7 @@
+     insist(Date.parse(this.context.leaseExpiresAt) <= Date.parse(this.context.expiresAt), 'LEASE_DENIED');
+     for (const origin of this.context.approvedOrigins) { const url = new URL(origin); insist(['http:','https:'].includes(url.protocol) && url.origin === origin && !url.username && !url.password, 'POLICY_DENIED'); }
+     this.live(); this.schedule();
++    this.startPhase = 'JOURNAL';
+     this.journal = await GuidedJournal.open(this.options.journalDirectory, this.context.sessionId);
+     this.diagnostics = new GuidedDiagnostics(this.options.journalDirectory,this.context.sessionId,this.context.limits.maxActions);
+     insist(!this.journal.recovered, 'CONTEXT_LOST');
+@@ -142,6 +150,7 @@
+     const config: ObservationConfig = { sessionId: this.context.sessionId, scopeHash: this.context.scopeHash, approvedOrigins: this.context.approvedOrigins, rules: [],
+       knownSecrets: [], limits: { nodes: limits.maxObservationNodes, bytes: limits.maxObservationBytes, depth: limits.maxObservationDepth },
+       ...(this.options.applicationPolicy ? { applicationPolicy: this.options.applicationPolicy } : {}) };
++    this.startPhase = 'RECORDER';
+     if (this.options.recorder) {
+       const opened = await this.options.recorder.open({ sessionId: this.context.sessionId, csiId: this.options.csiId ?? null, maxSessionSeconds: limits.maxSessionSeconds });
+       // A stop that raced the open already closed resources: settle (UNAVAILABLE) and clean up here.
+@@ -149,21 +158,27 @@
+       this.recording = opened;
+     }
+     const recordingRequest = this.recording?.launchRequest() ?? null;
+-    this.launching = this.options.launch(config, this.context.contextId, () => {
++    this.startPhase = 'LAUNCH';
++    this.launching = this.options.launch(config, this.context.contextId, reason => {
++      this.lossReason ??= reason ?? null;
+       const originalStop = this.stop('CONTEXT_LOST');
+       // Same original launch loss/stop promise; rejection is never confirmation.
+       void originalStop.then(() => { this.confirmBrowserLoss?.(); this.confirmBrowserLoss = null; }, () => undefined);
+     }, ...(recordingRequest ? [recordingRequest] : []));
+     try { this.browser = await this.launching; } catch (error) {
+       if (error instanceof GuidedLaunchFailure) this.failedLaunchClose = error.close;
+-      throw new Error('CONTEXT_LOST');
++      throw new Error('CONTEXT_LOST', { cause: error });
+     }
+     if (this.stopped) { await this.closing; throw new Error('CONTEXT_LOST'); }
++    this.startPhase = 'WITHHOLD';
+     insist(typeof this.browser.observations.withhold === 'function', 'CONTEXT_LOST');
+     await this.browser.observations.withhold(input.inputs.flatMap(i => i.kind === 'secretRef' ? [] : [i.value]));
+     this.live(); this.evidence = this.browser.evidence;
++    this.startPhase = 'BLANK_MATCH';
+     insist(this.evidence.kind === 'initialBlank' && await this.browser.blankMatches(), 'CONTEXT_LOST');
++    this.startPhase = 'BOOTSTRAP_CALLBACK';
+     await this.options.callback('bootstrap-evidence', { ...identity(this.context), executionEvidence: this.evidence, evidenceHash: hash(this.evidence) });
++    this.startPhase = 'STARTED';
+   }
+   async update(value: unknown, deliveryId?: string): Promise<BridgeIdentity | BridgeContextAcknowledgement> {
+     const next = validate<RunnerContext>('runner-context', value); this.live();
+diff --git a/studio-runner/src/guided/transport.ts b/studio-runner/src/guided/transport.ts
+--- a/studio-runner/src/guided/transport.ts
++++ b/studio-runner/src/guided/transport.ts
+@@ -7,6 +7,7 @@
+ import { canonical, hash, identity, insist, validate } from './contracts.js';
+ import type { BridgeIdentity, BridgeDispatch, BridgePrefixPrepare, BridgePrefixDriftCallback, Assignment, AssignmentStop, AssignmentLifecycle, Session } from './types.js';
+ import { GuidedOwnership } from './ownership.js';
++import { describeStartFailure } from './diagnostics.js';
+ import type { ClaimPort } from './ownership.js';
+ import type { GuidedRuntimeOptions } from './runtime.js';
+ 
+@@ -74,11 +75,12 @@
+   const ownership = new GuidedOwnership(options);
+   const replay = new Map<string, {digest:string;secretIdentity:string;promise:Promise<unknown>}>();
+   const server = createServer({...options.tls,minVersion:'TLSv1.2',requestCert:true,rejectUnauthorized:true},(req,res)=>{
++    const began=Date.now();let routed:{operation:string;sessionId:string}|null=null;
+     const handle=async():Promise<void>=>{
+       insist(req.socket instanceof TLSSocket&&req.socket.authorized&&req.socket.getPeerCertificate().fingerprint256===options.controllerCertificateFingerprint256,'AUTH_DENIED');
+       verifyGuidedJwt(req.headers.authorization,options.controllerJwt,'studio-guided-runner','backend-controller');
+       insist(req.method==='POST'&&req.headers['content-type']?.split(';')[0]==='application/json','SCHEMA');
+-      const route=/^\/internal\/v2\/studio\/guided-sessions\/([^/]+)\/(assign|context|prepare|dispatch|observe|stop)$/u.exec(req.url??'');insist(route,'SCHEMA');const sessionId=decodeURIComponent(route[1]??'');const operation=route[2];
++      const route=/^\/internal\/v2\/studio\/guided-sessions\/([^/]+)\/(assign|context|prepare|dispatch|observe|stop)$/u.exec(req.url??'');insist(route,'SCHEMA');const sessionId=decodeURIComponent(route[1]??'');const operation=route[2];routed={operation:operation??'',sessionId};
+       const key=req.headers['idempotency-key'];insist(typeof key==='string'&&key.length>0&&key.length<=256,'SCHEMA');
+       const body=await readBody(req);insist(body&&typeof body==='object'&&!Array.isArray(body),'SCHEMA');
+       let envelope:BridgeIdentity|null=null;
+@@ -115,6 +117,10 @@
+     void handle().catch((error:unknown)=>{
+       const code=error instanceof Error&&(GUIDED_REFUSAL_CODES as readonly string[]).includes(error.message)?error.message:'POLICY_DENIED';
+       const reason = error instanceof Error && (GUIDED_REFUSAL_REASONS as readonly string[]).includes(error.message) ? error.message : null;
++      // REL-001: a refused assign/context ends the session, so the worker says why on stderr. The wire answer below is unchanged.
++      if(code==='CONTEXT_LOST'&&routed&&(routed.operation==='assign'||routed.operation==='context')){
++        try{(options.diagnosticStderr??((text:string)=>{process.stderr.write(text);}))(describeStartFailure(error,{operation:routed.operation,sessionId:routed.sessionId,elapsedMs:Date.now()-began}));}catch{/* A diagnostic never changes the verdict. */}
++      }
+       if(!res.headersSent)res.writeHead(code==='AUTH_DENIED'?401:409,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({code,...(reason ? {reason} : {})}));
+     });
+   });
+diff --git a/studio-runner/src/run/browser.ts b/studio-runner/src/run/browser.ts
+--- a/studio-runner/src/run/browser.ts
++++ b/studio-runner/src/run/browser.ts
+@@ -35,7 +35,7 @@
+ import { dispatchNativeInput } from './nativeInput.js';
+ import type { NativePoint } from './nativeInput.js';
+ import { GuidedLaunchFailure } from './guidedBrowser.js';
+-import type { GuidedBrowser, GuidedRecordingRequest } from './guidedBrowser.js';
++import type { GuidedBrowser, GuidedLaunchPhase, GuidedLossReason, GuidedRecordingRequest } from './guidedBrowser.js';
+ import { chromium } from 'playwright';
+ import { randomUUID } from 'node:crypto';
+ import type { BrowserContext, Page, Frame, CDPSession } from 'playwright';
+@@ -46,6 +46,7 @@
+ import type { BrowserFactory, BrowserHandle, BrowserLaunchRequest } from './browserFactory.js';
+ import {BrowserStartupCleanupFailure} from './browserFactory.js';
+ import {BootstrapPageGuard,boundedStartup} from './observedBootstrap.js';
++import {readVersionPaths} from './versionProbe.js';
+ import {validateAppVideoPath} from './appVideoOwnership.js';
+ import { installObservationCollector } from './observationCollector.js';
+ import { observationOptions, exportObservation } from './observationSanitizer.js';
+@@ -57,9 +58,8 @@
+  * additional page or arbitrary preference export; restore the required initial blank document. */
+ async function verifyBrowserPreferences(page:Page,profile:string):Promise<BrowserPreferenceEvidence>{
+   const expected=browserProfileConfinement(profile).defaultProfile.path;
+-  await page.goto('chrome://version/');const path=(await page.locator('#profile_path').textContent())?.trim();
++  await page.goto('chrome://version/');const {profilePath:path,executablePath:executable}=await readVersionPaths(page);
+   if(!path||await realpath(path)!==expected)throw new Error('PROFILE_PREFERENCES_REQUIRED');
+-  const executable=(await page.locator('#executable_path').textContent())?.trim();
+   if(!executable||await realpath(executable)!==await realpath(chromium.executablePath()))throw new Error('PROFILE_MISMATCH');
+   await page.goto('chrome://prefs-internals/');
+   const effective=await page.evaluate(()=>{
+@@ -529,14 +529,16 @@
+  * The evidence directory is the caller's, outside this scratch directory, so `close()` (which
+  * disposes scratch) never deletes the finalized webm before the caller's upload attempt.
+  */
+-export async function launchGuidedBrowser(config: ObservationConfig, contextId: string, onLost: () => void, recording?: GuidedRecordingRequest): Promise<GuidedBrowser> {
++export async function launchGuidedBrowser(config: ObservationConfig, contextId: string, onLost: (reason?: GuidedLossReason) => void, recording?: GuidedRecordingRequest): Promise<GuidedBrowser> {
+   if (process.env.DEBUG || process.env.PWDEBUG || process.env.NODE_DEBUG || process.env.NODE_OPTIONS) throw new Error('DIAGNOSTICS_DENIED');
+   const scratchDirectory = await mkdtemp(join(process.env.TMPDIR ?? tmpdir(), 'checks-guided-'));
+   let context:BrowserContext|undefined;
++  let phase:GuidedLaunchPhase='PROFILE';
+   let preparedProfile=join(scratchDirectory,SCRATCH_SUBDIRECTORIES.profile);
+   const disposeScratch=async():Promise<void>=>{releaseBrowserProfile(preparedProfile);await rm(scratchDirectory,{recursive:true,force:true});};
+   try {
+   const profile = prepareBrowserProfile(scratchDirectory);preparedProfile=profile;requireBrowserPreferences(profile);
++  phase = 'PROCESS';
+   context = await chromium.launchPersistentContext(profile, { channel:'chromium',headless: true, handleSIGINT: false, handleSIGTERM: false, chromiumSandbox: true, args: [], acceptDownloads: false, serviceWorkers: 'block', ...(recording ? { recordVideo: { dir: recording.dir, size: { width: recording.size.width, height: recording.size.height } } } : {}), env: { PATH: process.env.PATH ?? '', HOME: process.env.HOME ?? '', TMPDIR: scratchDirectory } });
+   const browser = context.browser();
+   let page = context.pages()[0] ?? await context.newPage();
+@@ -547,12 +549,15 @@
+     // recorded only on the startup page; that page is closed and its video deleted before the app
+     // page exists, so no probe frame reaches the evidence. Any anomaly fails the launch closed.
+     const startupPage = page, startupVideo = video;
++    phase = 'PROBE';
+     preferenceEvidence = await verifyBrowserPreferences(startupPage, profile);
++    phase = 'STARTUP_PAGE';
+     await startupPage.close();
+     const path = await startupVideo.path(), directory = await realpath(recording.dir), actual = await realpath(path), file = await lstat(path);
+     if ((await lstat(recording.dir)).isSymbolicLink() || file.isSymbolicLink() || !file.isFile() || dirname(actual) !== directory) throw new Error('RECORDING_FAILED');
+     await startupVideo.delete();
+     if ((await readdir(recording.dir)).length !== 0) throw new Error('RECORDING_FAILED');
++    phase = 'APP_PAGE';
+     page = await context.newPage();
+     if (page.url() !== 'about:blank') throw new Error('TARGET_DRIFT');
+     // Recording-context readiness: the one ADR-002 §11.6 origin instant, after the startup probe
+@@ -562,20 +567,23 @@
+   } else {
+     // Unrecorded launch, or a recorder fault (no video on the page): the probe stays on the single page.
+     recording?.ready(false);
++    phase = 'PROBE';
+     preferenceEvidence = await verifyBrowserPreferences(page, profile);
+   }
+   let closed = false;
+   let extraPageListener: (() => void) | null = null;
+-  context.on('page', extra => { if (extra !== page) { void extra.close().catch(() => undefined); extraPageListener?.(); onLost(); } });
+-  page.on('crash', onLost);
+-  browser?.on('disconnected', () => { if (!closed) onLost(); });
++  context.on('page', extra => { if (extra !== page) { void extra.close().catch(() => undefined); extraPageListener?.(); onLost('EXTRA_PAGE'); } });
++  page.on('crash', () => { onLost('PAGE_CRASH'); });
++  browser?.on('disconnected', () => { if (!closed) onLost('BROWSER_DISCONNECTED'); });
++  phase = 'ROUTING';
+   await context.route('**/*', async route => {
+     let allowed = false;
+     try { allowed = config.approvedOrigins.includes(new URL(route.request().url()).origin); } catch { /* deny */ }
+-    try { if (allowed) await route.continue(); else await route.abort(); } catch { if (!closed) onLost(); }
++    try { if (allowed) await route.continue(); else await route.abort(); } catch { if (!closed) onLost('ROUTE_FAILURE'); }
+   });
+   const hosts = new Set<string>();
+   context.on('request', request_ => { if (hosts.size >= MAX_OBSERVED_HOSTS) return; const host = hostOf(request_.url()); if (host !== null) hosts.add(host); });
++  phase = 'BLANK_DOCUMENT';
+   const cdp = await context.newCDPSession(page);
+   const tree = await cdp.send('Page.getFrameTree');
+   const world = await cdp.send('Page.createIsolatedWorld', { frameId: tree.frameTree.frame.id, worldName: `checks-blank-${randomUUID()}`, grantUniveralAccess: false });
+@@ -631,7 +639,8 @@
+   } catch(error) {
+     const acquired=context;
+     const cleanup = async (): Promise<void> => { if(acquired)await acquired.close().catch(() => { throw new Error('CONTEXT_LOST'); }); await disposeScratch(); };
+-    if(!acquired){try{await cleanup();}catch{throw new GuidedLaunchFailure(cleanup);}throw error;}
+-    throw new GuidedLaunchFailure(cleanup);
++    // The original error stays the cause and the step stays the phase (REL-001); the wire code is unchanged.
++    if(!acquired){try{await cleanup();}catch{throw new GuidedLaunchFailure(cleanup,error,phase);}throw new GuidedLaunchFailure(()=>Promise.resolve(),error,phase);}
++    throw new GuidedLaunchFailure(cleanup,error,phase);
+   }
+ }
+diff --git a/studio-runner/src/run/guidedBrowser.ts b/studio-runner/src/run/guidedBrowser.ts
+--- a/studio-runner/src/run/guidedBrowser.ts
++++ b/studio-runner/src/run/guidedBrowser.ts
+@@ -42,7 +42,20 @@
+   readonly handle?: BrowserHandle;
+ }
+ 
+-/** A partially created browser still needs confirmed cleanup before capacity can be released. */
++/** Why an already running guided browser reported itself lost. Closed vocabulary, no free text. */
++export type GuidedLossReason = 'PAGE_CRASH' | 'EXTRA_PAGE' | 'BROWSER_DISCONNECTED' | 'ROUTE_FAILURE';
++
++/** Last launch step entered before a launch failure. Closed vocabulary, no free text. */
++export type GuidedLaunchPhase = 'PROFILE' | 'PROCESS' | 'PROBE' | 'STARTUP_PAGE' | 'APP_PAGE' | 'ROUTING' | 'BLANK_DOCUMENT';
++
++/**
++ * A launch that failed. The wire code stays `CONTEXT_LOST`, but the original error is kept as `cause`
++ * and the step that failed as `phase`, so the worker can say why it refused (REL-001).
++ * A partially created browser still needs confirmed cleanup before capacity can be released.
++ */
+ export class GuidedLaunchFailure extends Error {
+-  constructor(readonly close: () => Promise<void>) { super('CONTEXT_LOST'); }
++  constructor(readonly close: () => Promise<void>, cause?: unknown, readonly phase: GuidedLaunchPhase | null = null) {
++    super('CONTEXT_LOST', cause === undefined ? undefined : { cause });
++    this.name = 'GuidedLaunchFailure';
++  }
+ }
+diff --git a/studio-runner/src/run/versionProbe.ts b/studio-runner/src/run/versionProbe.ts
+new file mode 100644
+--- /dev/null
++++ b/studio-runner/src/run/versionProbe.ts
+@@ -0,0 +1,42 @@
++/**
++ * The trusted `chrome://version/` read behind the profile-confinement probe (STUDIO-OBS-015 REL-001).
++ *
++ * The page fills `#profile_path` and `#executable_path` asynchronously, so both elements exist and are
++ * empty when `load` fires until the browser's reply lands. Reading them straight after `goto` raced that
++ * reply and failed the launch (`PROFILE_PREFERENCES_REQUIRED`) whenever the browser was slow. This waits,
++ * for at most {@link VERSION_FIELDS_TIMEOUT_MS}, until both fields hold text, and only then reads them. It
++ * relaxes no check: the caller still compares the values exactly, and a page that never fills them fails
++ * the launch when the wait times out.
++ *
++ * Playwright-free on purpose: only the slice of `Page` and `Locator` used here is named, so the unit tier
++ * can drive it with a fake page (AC-25 keeps `browser.ts` itself out of that tier).
++ */
++export interface VersionProbeLocator {
++  filter(options: { hasText: RegExp }): VersionProbeLocator;
++  waitFor(options: { state: 'attached'; timeout: number }): Promise<void>;
++  textContent(): Promise<string | null>;
++}
++export interface VersionProbePage {
++  locator(selector: string): VersionProbeLocator;
++}
++export interface VersionPaths {
++  readonly profilePath: string | undefined;
++  readonly executablePath: string | undefined;
++}
++
++/**
++ * Per field. A cold launch took 0.9 s to draw its UI where the others took 0.2 s, so this is several
++ * times the worst lag seen, and it stays well inside the backend's 15 s context-push deadline: a wait
++ * that outlived that deadline would keep the single worker slot busy after the backend gave up.
++ */
++export const VERSION_FIELDS_TIMEOUT_MS = 5_000;
++
++const PROFILE_PATH = '#profile_path';
++const EXECUTABLE_PATH = '#executable_path';
++
++export async function readVersionPaths(page: VersionProbePage): Promise<VersionPaths> {
++  for (const selector of [PROFILE_PATH, EXECUTABLE_PATH]) await page.locator(selector).filter({ hasText: /\S/u }).waitFor({ state: 'attached', timeout: VERSION_FIELDS_TIMEOUT_MS });
++  const profile = await page.locator(PROFILE_PATH).textContent();
++  const executable = await page.locator(EXECUTABLE_PATH).textContent();
++  return { profilePath: profile?.trim(), executablePath: executable?.trim() };
++}
+diff --git a/studio-runner/test/fixtures-tier/guided-recording.test.ts b/studio-runner/test/fixtures-tier/guided-recording.test.ts
+--- a/studio-runner/test/fixtures-tier/guided-recording.test.ts
++++ b/studio-runner/test/fixtures-tier/guided-recording.test.ts
+@@ -24,10 +24,11 @@
+ // eslint-disable-next-line no-restricted-imports -- AR-QA SEC-001 T2 positive control only: a plain recorded context showing the real chrome:// probe pages.
+ import { chromium } from 'playwright';
+ import { existsSync } from 'node:fs';
+-import { mkdir, realpath, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'node:fs/promises';
++import { mkdir, realpath, mkdtemp, readFile, readdir, rm, symlink, unlink, writeFile } from 'node:fs/promises';
+ import { basename, join, resolve } from 'node:path';
+ import { tmpdir } from 'node:os';
+ import { launchGuidedBrowser } from '../../src/run/browser.js';
++import { GuidedLaunchFailure } from '../../src/run/guidedBrowser.js';
+ import { GuidedRuntime } from '../../src/guided/runtime.js';
+ import { createGuidedRecorder } from '../../src/guided/evidence.js';
+ import type { RecordingEvidenceBody } from '../../src/guided/evidence.js';
+@@ -266,6 +267,19 @@
+     } finally { await rm(run.root, { recursive: true, force: true }); }
+   });
+ 
++  it('REL-001: a launch that fails mid-startup keeps the original error and names the step it failed in', async () => {
++    const root = await mkdtemp(join(tmpdir(), 'guided-launch-phase-'));
++    try {
++      // A symlinked recording directory is refused only after the startup probe page has closed, so the real browser fails inside STARTUP_PAGE.
++      const real = join(root, 'real'), link = join(root, 'link'); await mkdir(real); await symlink(real, link);
++      const config: ObservationConfig = { sessionId: 'phase', scopeHash: 'a'.repeat(64), approvedOrigins: [fixture.origin], rules: [], knownSecrets: [] };
++      const failure = await launchGuidedBrowser(config, 'phase-context', () => undefined, { dir: link, size: { width: 640, height: 360 }, ready: () => undefined }).then(() => null, (error: unknown) => error);
++      expect(failure).toBeInstanceOf(GuidedLaunchFailure);
++      expect(failure).toMatchObject({ message: 'CONTEXT_LOST', phase: 'STARTUP_PAGE', cause: { message: 'RECORDING_FAILED' } });
++      await (failure as GuidedLaunchFailure).close();
++    } finally { await rm(root, { recursive: true, force: true }); }
++  });
++
+   it('produces no video for an unrecorded guided launch (the webm comes from recordVideo, not from a directory pick)', async () => {
+     const guided = await launchGuidedBrowser({ sessionId: 'unrecorded', scopeHash: 'f'.repeat(64), approvedOrigins: [fixture.origin], rules: [], knownSecrets: [] }, 'unrecorded-context', () => undefined);
+     await guided.close(); expect(await guided.recordedVideo?.()).toBeNull();
+diff --git a/studio-runner/test/guided/diagnostics.test.ts b/studio-runner/test/guided/diagnostics.test.ts
+--- a/studio-runner/test/guided/diagnostics.test.ts
++++ b/studio-runner/test/guided/diagnostics.test.ts
+@@ -2,7 +2,9 @@
+ import {mkdtemp,readFile,rm,stat,writeFile} from 'node:fs/promises';
+ import {join} from 'node:path';
+ import {tmpdir} from 'node:os';
+-import {GuidedDiagnostics,redactFailure} from '../../src/guided/diagnostics.js';
++import {GuidedDiagnostics,GuidedStartFailure,describeStartFailure,redactFailure} from '../../src/guided/diagnostics.js';
++import {hash} from '../../src/guided/contracts.js';
++import {GuidedLaunchFailure} from '../../src/run/guidedBrowser.js';
+ const paths:string[]=[];
+ afterEach(async()=>{for(const path of paths.splice(0))await rm(path,{recursive:true,force:true});});
+ async function directory(){const path=await mkdtemp(join(tmpdir(),'guided-diagnostics-'));paths.push(path);return path;}
+@@ -32,3 +34,36 @@
+     await expect(broken.record(identity,new Error('secret'),['secret'],()=>{throw new Error('stderr closed');})).resolves.toBe('Error: [REDACTED]');
+   });
+ });
++describe('REL-001 value-free start-failure line',()=>{
++  const prefix='GUIDED_START_FAILED ';
++  const parse=(line:string)=>JSON.parse(line.slice(prefix.length)) as {operation:string;session:string;elapsedMs:number;links:Record<string,unknown>[]};
++  it('names the failed step, the browser exit signal and the whole cause chain without any message text',()=>{
++    const canaries=['/Users/private-canary/profile','https://private-canary.example/path','private-canary-token'];
++    const launch=new Error(`browserType.launchPersistentContext: Target page, context or browser has been closed\nBrowser logs:\n<launched> pid=54867\n[pid=54867][err] ${canaries[0]??''} ${canaries[1]??''}\n<process did exit: exitCode=null, signal=SIGABRT> ${canaries[2]??''}`);
++    const failure=new GuidedStartFailure('LAUNCH',null,new Error('CONTEXT_LOST',{cause:new GuidedLaunchFailure(()=>Promise.resolve(),launch,'PROCESS')}));
++    const line=describeStartFailure(failure,{operation:'context',sessionId:'session-private-canary',elapsedMs:1873.6});
++    expect(line.startsWith(prefix)).toBe(true);expect(line.endsWith('\n')).toBe(true);
++    for(const canary of [...canaries,'session-private-canary'])expect(line).not.toContain(canary);
++    expect(parse(line)).toEqual({operation:'context',session:hash('session-private-canary').slice(0,16),elapsedMs:1874,links:[
++      {name:'GuidedStartFailure',code:'CONTEXT_LOST',phase:'LAUNCH'},{name:'Error',code:'CONTEXT_LOST'},
++      {name:'GuidedLaunchFailure',code:'CONTEXT_LOST',phase:'PROCESS'},{name:'Error',kind:'TARGET_CLOSED',exitCode:null,signal:'SIGABRT'}]});
++  });
++  it('reports a browser loss reason, a Playwright timeout and an errno code as fixed labels',()=>{
++    const timeout=Object.assign(new Error('page.goto: Timeout 30000ms exceeded.\nCall log: /Users/private-canary'),{name:'TimeoutError'});
++    const errno=Object.assign(new Error('EACCES: permission denied, open /Users/private-canary/x'),{code:'EACCES'});
++    const line=describeStartFailure(new GuidedStartFailure('LAUNCH','PAGE_CRASH',timeout),{operation:'assign',sessionId:'s',elapsedMs:0});
++    expect(line).not.toContain('private-canary');expect(parse(line).links).toEqual([{name:'GuidedStartFailure',code:'CONTEXT_LOST',phase:'LAUNCH',loss:'PAGE_CRASH'},{name:'TimeoutError',kind:'TIMEOUT'}]);
++    expect(parse(describeStartFailure(errno,{operation:'assign',sessionId:'s',elapsedMs:0})).links).toEqual([{name:'Error',errno:'EACCES'}]);
++    const killed=new Error('browserType.launchPersistentContext: Target page, context or browser has been closed\n<process did exit: exitCode=137, signal=null>');
++    expect(parse(describeStartFailure(killed,{operation:'assign',sessionId:'s',elapsedMs:0})).links).toEqual([{name:'Error',kind:'TARGET_CLOSED',exitCode:137,signal:null}]);
++  });
++  it('bounds the chain, survives a cycle and a non-error cause, and never echoes a free-form name or route',()=>{
++    let long:Error=new Error('CONTEXT_LOST');for(let depth=0;depth<10;depth++)long=new Error('CONTEXT_LOST',{cause:long});
++    expect(parse(describeStartFailure(long,{operation:'context',sessionId:'s',elapsedMs:1})).links).toHaveLength(6);
++    const first=new Error('CONTEXT_LOST'),second=new Error('CONTEXT_LOST',{cause:first});first.cause=second;
++    expect(parse(describeStartFailure(second,{operation:'context',sessionId:'s',elapsedMs:1})).links).toHaveLength(2);
++    const stranger=Object.assign(new Error('lower case message',{cause:'a private string'}),{name:'has spaces /Users/private-canary'});
++    const line=describeStartFailure(stranger,{operation:'/Users/private-canary',sessionId:'s',elapsedMs:-5});
++    expect(line).not.toContain('private');expect(parse(line)).toMatchObject({operation:'other',elapsedMs:0,links:[{name:'Error'},{name:'NonError'}]});
++  });
++});
+diff --git a/studio-runner/test/guided/ownership.test.ts b/studio-runner/test/guided/ownership.test.ts
+--- a/studio-runner/test/guided/ownership.test.ts
++++ b/studio-runner/test/guided/ownership.test.ts
+@@ -1,12 +1,14 @@
+ import type { Session } from '../../src/guided/types.js';
+ import { afterEach, describe, expect, it, vi } from 'vitest';
+-import { mkdtemp,rm } from 'node:fs/promises';
++import { mkdtemp,rm,writeFile } from 'node:fs/promises';
+ import { tmpdir } from 'node:os';
+ import { join } from 'node:path';
+ import { randomUUID } from 'node:crypto';
+ import { GuidedOwnership } from '../../src/guided/ownership.js';
+ import type { ClaimPort, OwnershipOptions } from '../../src/guided/ownership.js';
++import { GuidedLaunchFailure } from '../../src/run/guidedBrowser.js';
+ import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
++import { GuidedStartFailure } from '../../src/guided/diagnostics.js';
+ import { hash,identity } from '../../src/guided/contracts.js';
+ import { guidedContext,ownershipSession,assignmentFor,proposal,dispatch,STRUCTURAL_POLICY,withContextPolicy } from '../helpers/guided.js';
+ import type { ObservationApplicationPolicy, ObservationConfig } from '../../src/run/observationTypes.js';
+@@ -106,3 +108,27 @@
+     await expect(h.manager.context(structuredClone(h.context))).resolves.toBeDefined();
+   });
+ });
++describe('REL-001 start-up refusals keep their cause',()=>{
++  const causes=(failure:unknown):Error[]=>{const chain:Error[]=[];for(let link:unknown=failure;link instanceof Error;link=link.cause)chain.push(link);return chain;};
++  it('keeps the launch error, the failed launch step and the failed start step under the unchanged CONTEXT_LOST message',async()=>{
++    const h=await setup();await h.manager.assign(h.assignment);
++    const original=new Error('browserType.launchPersistentContext: Target page, context or browser has been closed');
++    h.launch.mockRejectedValueOnce(new GuidedLaunchFailure(()=>Promise.resolve(),original,'PROBE'));
++    const refused=await h.manager.context(h.context).then(()=>null,(error:unknown)=>error);
++    expect(refused).toBeInstanceOf(GuidedStartFailure);expect(refused).toMatchObject({message:'CONTEXT_LOST',phase:'LAUNCH',loss:null});
++    const chain=causes(refused);expect(chain.map(link=>link.message)).toEqual(['CONTEXT_LOST','CONTEXT_LOST','CONTEXT_LOST',original.message]);
++    expect(chain.at(-1)).toBe(original);expect(chain[2]).toMatchObject({phase:'PROBE'});
++  });
++  it('names why a running browser reported itself lost while the start was still in flight',async()=>{
++    const h=await setup();await h.manager.assign(h.assignment);
++    h.options.launch=(_config,_contextId,onLost)=>{onLost('PAGE_CRASH');return Promise.resolve(h.browser);};
++    const refused=await h.manager.context(h.context).then(()=>null,(error:unknown)=>error);
++    expect(refused).toMatchObject({message:'CONTEXT_LOST',phase:'LAUNCH',loss:'PAGE_CRASH'});
++  });
++  it('keeps the journal error as the cause when the assignment cannot be acquired',async()=>{
++    const h=await setup();const blocked=join(h.directory,'assignments');await writeFile(blocked,'not a directory');
++    const refused=await h.manager.assign(h.assignment).then(()=>null,(error:unknown)=>error);
++    expect(refused).toMatchObject({message:'CONTEXT_LOST'});expect(causes(refused).length).toBeGreaterThan(1);
++    expect((causes(refused).at(-1) as NodeJS.ErrnoException).code).toMatch(/^E[A-Z]+$/u);
++  });
++});
+diff --git a/studio-runner/test/guided/runtime.test.ts b/studio-runner/test/guided/runtime.test.ts
+--- a/studio-runner/test/guided/runtime.test.ts
++++ b/studio-runner/test/guided/runtime.test.ts
+@@ -326,3 +326,22 @@
+     expect(await readFile(new URL('../../src/guided/runtime.ts',import.meta.url),'utf8')).not.toContain('options.rules');
+   });
+ });
++describe('REL-001 the failed start step and the launch error stay visible',()=>{
++  const blankBrowser=(context:ReturnType<typeof guidedContext>,blank:boolean):GuidedBrowser=>({evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(blank),navigateBlank:()=>Promise.resolve(),close:()=>Promise.resolve(),observations:{withhold:()=>Promise.resolve(),dispose:()=>Promise.resolve(),matches:()=>Promise.resolve(false),observe:()=>Promise.reject(new Error('unused'))}});
++  it('keeps a plain launch rejection as the cause and records LAUNCH',async()=>{
++    const context=guidedContext('https://example.test');const original=new Error('launch exploded');
++    const runtime=new GuidedRuntime(context,{workerId:context.workerId,journalDirectory:await directory(),launch:()=>Promise.reject(original),callback:()=>Promise.resolve()});
++    await expect(runtime.start()).rejects.toMatchObject({message:'CONTEXT_LOST',cause:original});
++    expect(runtime.startFailure).toEqual({phase:'LAUNCH',loss:null});await runtime.stop('CONTEXT_LOST');
++  });
++  it.each([{phase:'BLANK_MATCH',blank:false,callbackFails:false,message:'CONTEXT_LOST'},{phase:'BOOTSTRAP_CALLBACK',blank:true,callbackFails:true,message:'CALLBACK_DENIED'}] as const)('records $phase when the start fails there',async({phase,blank,callbackFails,message})=>{
++    const context=guidedContext('https://example.test');
++    const runtime=new GuidedRuntime(context,{workerId:context.workerId,journalDirectory:await directory(),launch:()=>Promise.resolve(blankBrowser(context,blank)),callback:route=>callbackFails&&route==='bootstrap-evidence'?Promise.reject(new Error('CALLBACK_DENIED')):Promise.resolve()});
++    await expect(runtime.start()).rejects.toThrow(message);expect(runtime.startFailure.phase).toBe(phase);await runtime.stop('CONTEXT_LOST');
++  });
++  it('records STARTED after a completed start',async()=>{
++    const context=guidedContext('https://example.test');
++    const runtime=new GuidedRuntime(context,{workerId:context.workerId,journalDirectory:await directory(),launch:()=>Promise.resolve(blankBrowser(context,true)),callback:()=>Promise.resolve()});
++    await runtime.start();expect(runtime.startFailure).toEqual({phase:'STARTED',loss:null});await runtime.stop('CANCELLED');
++  });
++});
+diff --git a/studio-runner/test/guided/transport.test.ts b/studio-runner/test/guided/transport.test.ts
+--- a/studio-runner/test/guided/transport.test.ts
++++ b/studio-runner/test/guided/transport.test.ts
+@@ -5,6 +5,7 @@
+ import { join } from 'node:path';
+ import { randomUUID } from 'node:crypto';
+ import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
++import { GuidedLaunchFailure } from '../../src/run/guidedBrowser.js';
+ import { createServer } from 'node:https';
+ import type { AddressInfo } from 'node:net';
+ import { sign, generateKeyPairSync } from 'node:crypto';
+@@ -143,3 +144,26 @@
+     }finally{await app.close().catch(()=>undefined);await rm(directory,{recursive:true,force:true});}
+   });
+ });
++describe('REL-001 a refused start-up says why on stderr and nowhere else',()=>{
++  it('answers the unchanged CONTEXT_LOST refusal and writes one value-free line naming the failed step and the browser exit',async()=>{
++    const directory=await mkdtemp(join(tmpdir(),'guided-rel001-'));
++    const context=guidedContext('https://example.test');const grant=ownershipSession(context);const assignment=assignmentFor(context);
++    const privatePath='/Users/private-canary/checks-guided-profile';const lines:string[]=[];
++    const exited=new Error(`browserType.launchPersistentContext: Target page, context or browser has been closed\n<process did exit: exitCode=null, signal=SIGABRT> ${privatePath}`);
++    const app=createGuidedServer({workerId:context.workerId,journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,
++      launch:()=>Promise.reject(new GuidedLaunchFailure(()=>Promise.resolve(),exited,'PROCESS')),
++      claim:()=>Promise.resolve({...structuredClone(grant),owner:{...grant.owner,leaseExpiresAt:new Date(Math.min(Date.now()+30_000,Date.parse(grant.expiresAt))).toISOString()}}),
++      callback:()=>Promise.resolve(),diagnosticStderr:text=>{lines.push(text);}});
++    await new Promise<void>(resolve=>{app.server.listen(0,'127.0.0.1',resolve);});
++    try{
++      const port=(app.server.address() as AddressInfo).port;const path=`/internal/v2/studio/guided-sessions/${context.sessionId}`;
++      expect((await post(port,`${path}/assign`,assignment,{fence:null,key:'assign-1'})).status).toBe(200);expect(lines).toEqual([]);
++      const refused=await post(port,`${path}/context`,context,{key:'context-1'});
++      expect(refused.status).toBe(409);expect(refused.body).toEqual({code:'CONTEXT_LOST'});expect(()=>validate('bridge',refused.body,'refusal')).not.toThrow();
++      expect(lines).toHaveLength(1);const line=lines[0]??'';expect(line).not.toContain(privatePath);expect(line).not.toContain(context.sessionId);
++      const facts=JSON.parse(line.slice('GUIDED_START_FAILED '.length)) as {operation:string;session:string;elapsedMs:number;links:unknown[]};
++      expect(facts).toMatchObject({operation:'context',session:hash(context.sessionId).slice(0,16)});expect(Number.isInteger(facts.elapsedMs)&&facts.elapsedMs>=0).toBe(true);
++      expect(facts.links).toEqual([{name:'GuidedStartFailure',code:'CONTEXT_LOST',phase:'LAUNCH'},{name:'Error',code:'CONTEXT_LOST'},{name:'GuidedLaunchFailure',code:'CONTEXT_LOST',phase:'PROCESS'},{name:'Error',kind:'TARGET_CLOSED',exitCode:null,signal:'SIGABRT'}]);
++    }finally{await app.close().catch(()=>undefined);await rm(directory,{recursive:true,force:true});}
++  });
++});
+diff --git a/studio-runner/test/run/versionProbe.test.ts b/studio-runner/test/run/versionProbe.test.ts
+new file mode 100644
+--- /dev/null
++++ b/studio-runner/test/run/versionProbe.test.ts
+@@ -0,0 +1,77 @@
++import { describe, expect, it } from 'vitest';
++import { VERSION_FIELDS_TIMEOUT_MS, readVersionPaths } from '../../src/run/versionProbe.js';
++import type { VersionProbeLocator, VersionProbePage } from '../../src/run/versionProbe.js';
++
++/**
++ * A fake chrome://version whose two fields stay empty until `fill`, like the real page between `load`
++ * and the browser's reply. `waitFor` settles only for a field that holds non-whitespace text, as
++ * Playwright's `filter({ hasText })` does, and every `textContent` read is recorded.
++ */
++function lateVersionPage() {
++  const text = new Map<string, string>([['#profile_path', ''], ['#executable_path', '']]);
++  const waiting: { selector: string; resolve: () => void }[] = [];
++  const reads: { selector: string; text: string | null }[] = [];
++  const waits: { selector: string; state: string; timeout: number }[] = [];
++  const populated = (selector: string): boolean => /\S/u.test(text.get(selector) ?? '');
++  const locator = (selector: string): VersionProbeLocator => ({
++    filter: () => locator(selector),
++    waitFor: options => { waits.push({ selector, ...options }); return populated(selector) ? Promise.resolve() : new Promise<void>(resolve => { waiting.push({ selector, resolve }); }); },
++    textContent: () => { const value = text.get(selector) ?? null; reads.push({ selector, text: value }); return Promise.resolve(value); },
++  });
++  const page: VersionProbePage = { locator };
++  const fill = (values: Record<string, string>): void => {
++    for (const [selector, value] of Object.entries(values)) text.set(selector, value);
++    for (const waiter of waiting.splice(0)) { if (populated(waiter.selector)) waiter.resolve(); else waiting.push(waiter); }
++  };
++  return { page, fill, reads, waits };
++}
++const settled = async (promise: Promise<unknown>): Promise<boolean> => {
++  let done = false;
++  void promise.then(() => { done = true; }, () => { done = true; });
++  await new Promise<void>(resolve => { setTimeout(resolve, 0); });
++  return done;
++};
++
++describe('REL-001 chrome://version is read only after the browser has filled it', () => {
++  it('waits through the empty window after load instead of reading empty paths', async () => {
++    const fake = lateVersionPage();
++    const pending = readVersionPaths(fake.page);
++    expect(await settled(pending)).toBe(false);
++    expect(fake.reads).toEqual([]);
++    fake.fill({ '#profile_path': ' /tmp/profile ', '#executable_path': ' /tmp/chrome ' });
++    await expect(pending).resolves.toEqual({ profilePath: '/tmp/profile', executablePath: '/tmp/chrome' });
++    expect(fake.reads.every(read => read.text !== '')).toBe(true);
++    expect(fake.reads.map(read => read.selector)).toEqual(['#profile_path', '#executable_path']);
++    expect(fake.waits).toEqual([
++      { selector: '#profile_path', state: 'attached', timeout: VERSION_FIELDS_TIMEOUT_MS },
++      { selector: '#executable_path', state: 'attached', timeout: VERSION_FIELDS_TIMEOUT_MS },
++    ]);
++    expect(VERSION_FIELDS_TIMEOUT_MS).toBeLessThan(15_000);
++  });
++
++  it('keeps waiting while one field is still empty or only whitespace', async () => {
++    const fake = lateVersionPage();
++    const pending = readVersionPaths(fake.page);
++    fake.fill({ '#profile_path': '/tmp/profile', '#executable_path': '  ' });
++    expect(await settled(pending)).toBe(false);
++    expect(fake.reads).toEqual([]);
++    fake.fill({ '#executable_path': '/tmp/chrome' });
++    await expect(pending).resolves.toEqual({ profilePath: '/tmp/profile', executablePath: '/tmp/chrome' });
++  });
++
++  it('fails on the wait, without reading, when the page never fills the fields', async () => {
++    const reads: string[] = [];
++    const locator = (): VersionProbeLocator => ({
++      filter: () => locator(),
++      waitFor: () => Promise.reject(new Error('Timeout 30000ms exceeded.')),
++      textContent: () => { reads.push('read'); return Promise.resolve(''); },
++    });
++    await expect(readVersionPaths({ locator })).rejects.toThrow('Timeout 30000ms exceeded.');
++    expect(reads).toEqual([]);
++  });
++
++  it('passes a missing text node through as undefined so the caller refuses it', async () => {
++    const locator = (): VersionProbeLocator => ({ filter: () => locator(), waitFor: () => Promise.resolve(), textContent: () => Promise.resolve(null) });
++    await expect(readVersionPaths({ locator })).resolves.toEqual({ profilePath: undefined, executablePath: undefined });
++  });
++});

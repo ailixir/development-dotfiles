@@ -1,0 +1,506 @@
+{
+  "story": "STUDIO-OBS-009",
+  "task": "validate-next-story (delta re-validation after STUDIO-OBS-007..015 and the STUDIO-OBS-008 T0 close-out)",
+  "actor": "Pax (@po)",
+  "date": "2026-10-16",
+  "mode": "yolo",
+  "verdict": "GO_WITH_CORRECTIONS",
+  "readinessScore": 8,
+  "scoreScale": 10,
+  "statusBefore": "Ready",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": false,
+  "storyEdited": false,
+  "implementationReleased": false,
+  "implementationHold": "Depends on STUDIO-OBS-008 Done; 008 is held until STUDIO-OBS-015 independent QA Done and root release. The 015 gate is a draft (gate PENDING, attempt04 outstanding).",
+  "binding": {
+    "head": "734ad704f",
+    "tree": "uncommitted working tree on brunobuger/ui-studio",
+    "sha256": {
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md": "7b9ef036b6bd1c55",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md": "bf8b1bf6961a5280",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md": "7cfb11f5a94b958a",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "1942f9452112021d",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md": "78e2b14c79ffa501",
+      "docs/stories/STUDIO-OBSERVED/README.md": "e6d6dfcf56e489fb",
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT/execute-015-008/claude-feasibility-008-011.md": "4c58e07ab06e1e20",
+      "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-formal-gate-draft01/gate.yaml": "062852bd7dcaf174",
+      "docs/qa/evidence/STUDIO-OBS-008/prep-20261016/t0-rulings/ruling.md": "1127e9950d822834",
+      "docs/specs/studio/openapi.yaml": "c053a7f75656628a"
+    },
+    "note": "sha256 prefixes (16 hex)."
+  },
+  "readOnlyCommandsRun": ["grep", "sed -n", "wc -l", "ls", "find", "shasum -a 256", "git ls-files", "git rev-parse", "node one-liner listing distinct case ids in benchmark/results.jsonl"],
+  "notRun": ["tests", "builds", "installs", "gradle", "docker", "git writes", "any edit under backend/ frontend/ studio-runner/ tools/ docs/specs/ .github/", "any story edit"],
+  "placementCheck": [
+    {"item": "KL-015-Q4 / AUTHORED-ECHO-01", "target": "009 AC-7 a-f, T4", "lines": ":114-120, :338", "present": true},
+    {"item": "FOCUS-MUTATION-01", "target": "009 AC-7 a-f, T4; 010 AC-1 a-d, T0", "lines": "009 :122-171, :339; 010 :26-55, :86", "present": true},
+    {"item": "KL-015-R1", "target": "009 AC-11 R1 a-e, T5", "lines": ":245-282, :348", "present": true, "gap": "010 has no reciprocal AC-4 known-limit row (010 D-4)"},
+    {"item": "KL-015-GRANT (TF-5)", "target": "009 AC-4 a-e, T2", "lines": ":46-63, :329", "present": true, "gap": "010 release record row not stated (010 D-4)"},
+    {"item": "S1 (TF-3)", "target": "009 AC-9 a-e, T5", "lines": ":177-194, :350", "present": true},
+    {"item": "V18 adapter (CLN-F2)", "target": "011 AC-1 a-d, T1", "lines": "011 :28-53, :119-122", "present": true},
+    {"item": "F-1 dead branch (CLN-F1)", "target": "011 AC-2 a-g, T1", "lines": "011 :57-94, :118", "present": true, "gap": "anchors drifted; GuidedSessionService now cfb55a54 (was d10ec5cb); T0 re-verify already required"}
+  ],
+  "corrections": [
+    {"id": "D-1", "line": ":398", "kind": "correction", "severity": "should-fix", "finding": "Sequencing note says OBS-011 starts only after this story is Done; contradicts the 2026-10-15 user decision recorded at :9 and 011 0.2.4.", "source": "user decision 2026-10-15; 011 :211-221; README :5", "proposed": "OBS-011 starts once AC-1-6, AC-11, AC-12 f-j are implemented and validated and the 010 Live surface list exists; launcher.ts (AC-11 j) and versions.ts (AC-1 P2) are in that list, so one owner at a time still holds."},
+    {"id": "D-2", "line": ":75", "kind": "correction", "severity": "low", "finding": "Reason 'learned v2 draft refuses updateTest with AUTHORING_V2_REQUIRED' is stale: StudioService has no updateTest and AUTHORING_V2_REQUIRED has 0 hits in backend/src/main. Tripwire grep still 0. Test comments StudioScheduleApiIT:444,:615,:929 still name the code.", "source": "015 story :437 (RC-2, ruling1); grep", "proposed": "Reason: v1 updateTest no longer exists (015 ruling1); comment-only update allowed and recorded by name."},
+    {"id": "D-3", "line": ":94", "kind": "anchor", "finding": "ReplayIT interim tripwire :2943 is now :18508.", "source": "grep"},
+    {"id": "D-4", "line": ":28, :357", "kind": "anchor", "finding": "guidedMain.ts 33 -> 37 lines; Dockerfile CMD :59 -> :61.", "source": "wc -l; grep"},
+    {"id": "D-5", "line": ":226", "kind": "anchor", "finding": "control-window sites :389/:398/:402/:403 -> :390/:400/:404/:405.", "source": "grep runCoordinator.ts"},
+    {"id": "D-6", "line": ":234, :387", "kind": "anchor", "finding": "launchGuidedBrowser :533 -> :532; replay boundedStartup :140-158 -> :141-181; no Studio-owned guided launch bound still true.", "source": "grep browser.ts"},
+    {"id": "D-7", "line": ":264", "kind": "anchor", "finding": "verifyLifecycle/sameIdentity :301/:313 -> :376/:388.", "source": "grep GuidedMaterializationService"},
+    {"id": "D-8", "line": ":310", "kind": "anchor", "finding": "RUNNER_PORT ServerSocket(0) :2708-2709 -> :3652-3653; probe :3856.", "source": "grep GuidedPlanningIntegrationTest"},
+    {"id": "D-9", "line": ":180", "kind": "anchor", "finding": "readAuthoringDraft :294-295 -> method :294, findByIdForUpdate :296, requireRead :297.", "source": "grep StudioService"},
+    {"id": "D-10", "line": ":57, :329", "kind": "correction", "severity": "low", "finding": "TF-5 b privilege delta 'V19-V21' predates 008 T0 A1 V22__execution_replay_failure.sql (4 nullable columns + CHECK on ui_test_executions).", "source": "008 story :126, :173; t0 ruling A1.3", "proposed": "V19 through the migration head at T2 (V22 if kept)."},
+    {"id": "D-11", "line": ":218-224", "kind": "addition", "severity": "should-fix", "finding": "R10c edits RunnerReportProjection/RunnerOutcomeCodes and reclassifies post-Ready self-stops toward RUN_ERROR; 008 A1 derives replayFailure TARGET_DRIFT from RUN_ERROR + errorMessage TARGET_DRIFT + one FAIL step in the same projector. Interaction unstated (risk inferred).", "source": "008 t0 ruling A1.2 :97-107", "proposed": "h: A1 derivation unchanged; any post-Ready self-stop projects replayFailure null; stated in the R10c ruling and proven by one RunnerReportProjectionTest case."},
+    {"id": "D-12", "line": ":240, :449", "kind": "addition", "severity": "low", "finding": "GuidedBridgePlannedIT spawns the same dist but is absent from the AC-11 k 'IT teardown reaps descendants' list.", "source": "grep (4 dist-spawning classes); po-bridge-disclosure note", "proposed": "Add it to k and the File List."},
+    {"id": "D-13", "line": ":445, :106", "kind": "correction", "severity": "low", "finding": "015-owned corpus files already exist: studio-runner/evaluation/observed-authoring/cases/incremental-edit-step-4.json and incremental-insert-step.json (untracked; QA ledger row 35 static validation).", "source": "ls; 015 gate.yaml ledger_35", "proposed": "Name them as inputs consumed unchanged."},
+    {"id": "D-14", "line": ":284, :410", "kind": "addition", "severity": "should-fix", "finding": "AC-12 backend suites do not name the 015 lanes: test, guidedIncrementalTest, crossReplicaTest, jacocoTestCoverageVerification, requireFreshGuidedPartitions (build.gradle.kts :278, :326). The last two never executed in 015; the JOIN suite is order-dependent.", "source": "015 gate.yaml tests findings, TEST-002", "proposed": "Name the five tasks; credit only full-class/full-lane runs, never a single-test ReplayIT rerun."},
+    {"id": "D-15", "line": ":410, :450", "kind": "correction", "severity": "low", "finding": "Frontend commands become pnpm after 008 U2 (exact @playwright/test 1.63.0); runner stays npm (package-lock.json, Dockerfile npm ci, tools/corun.sh:92). Migration not done yet.", "source": "008 story :139-151, :245; ls", "proposed": "Testing names pnpm frontend commands; runner unchanged."},
+    {"id": "D-16", "line": ":9", "kind": "correction", "severity": "low", "finding": "Superseded clause 'OBS-011 may start once this story is Done (ADR-SC-005)' sits unstruck beside the 2026-10-15 amendment.", "source": "008 0.3.11 strike convention", "proposed": "Strike with reason (append-only)."}
+  ],
+  "unplaced": [
+    {"id": "REL-001", "fact": "guided/ownership.ts:139 and guided/runtime.ts:157-159 drop the inner error and throw CONTEXT_LOST; attempt03 cause unknown", "verified": true, "decisionOwner": "user (scope decision per 015 QA draft)", "candidateHome": "~~009 AC-11 next to RUNNER-LAUNCH, or AC-12 e~~",
+     "decision20261016": {"date": "2026-10-16", "by": "user (relayed by root)", "decision": "root-caused and fixed INSIDE STUDIO-OBS-015; not placed in 009", "storyEffect": "009 AC-11 does not refer to REL-001 (grep 2026-10-16), so no AC text is struck; recorded in the 009 section 'PO delta corrections and decisions — 2026-10-16' (story 0.3.15). The RUNNER-LAUNCH carry (013:REL-002, 014:REL-001) is a separate item and is unchanged.", "candidateHomeStruckReason": "superseded by this decision"}},
+    {"id": "TEST-002", "fact": "order-dependent JOIN suite", "candidateHome": "011 AC-5", "pending": "issued 015 gate"},
+    {"id": "TEST-003", "fact": "pendingTeardowns LIMIT 32 starvation (GuidedSessionService:1620 -> GuidedSessionRepository:215); RaceTest vacuity; ledger-47 prune assertion", "candidateHome": "009 AC-11 (runtime) / 011 AC-5 (tests)", "pending": "issued 015 gate"},
+    {"id": "DOC-001", "fact": "stale VariableReferenceValidator Javadoc; dead private isBlank", "candidateHome": "011 AC-2", "pending": "issued 015 gate"},
+    {"id": "JACOCO-VACUOUS", "fact": "build.gradle.kts :436 compile.gateway, :491 compile rules match no package", "candidateHome": "011 AC-1 new candidate"},
+    {"id": "M12-STALE-COMMENTS", "fact": "4 stale comments classed for OBS-011 by Dex M12", "candidateHome": "011 AC-1 new candidates"},
+    {"id": "A2-FOLLOWUP", "fact": "public SECRET_TARGET_NOT_PASSWORD only if OBS-009 live runs show authors hit the refusal", "candidateHome": "optional AC-7 report count; recommendation only"}
+  ],
+  "acClassification": [
+    {"ac": "AC-1", "class": "LOCAL-PARTIAL", "local": "fold guidedMain into runner app; one listener; config keys; chart render tests; P2 a-d; local docker build from public base image", "external": ["U4", "U12"]},
+    {"ac": "AC-2", "class": "LOCAL-PARTIAL", "local": "profile/chart values; fail-closed negative test; audiences; rotation inputs recorded", "external": ["U4"]},
+    {"ac": "AC-3", "class": "LOCAL", "local": "runner TLS + client cert; validate() profile rule; self-signed-CA IT; client cert in HttpRunnerDispatchClient", "external": []},
+    {"ac": "AC-4", "class": "LOCAL-PARTIAL", "local": "dump settings + lint; VAULT_ADDRESS refusal; DB canary after local full run; non-credited Vault policy-text rehearsal; TF-5 b only if ruled", "external": ["U5", "U14", "U4"]},
+    {"ac": "AC-5", "class": "LOCAL-PARTIAL", "local": "@Profile gates + context test per profile; SIEM routing chart values", "external": ["U6"]},
+    {"ac": "AC-6", "class": "LOCAL", "local": "lift via background authorization (Q2 default); G-3 refusal; 18 re-enabled; R7; 4 ports + tripwire; @Disabled 6+0; f record", "external": []},
+    {"ac": "AC-7", "class": "EXTERNAL", "local": "corpus manifest, harness, RS-1 marking, AE-01 and FM-01 runner changes with fixture-tier and joined proofs, replay-stability harness", "external": ["U2", "U3", "U4", "U7", "U13"]},
+    {"ac": "AC-8", "class": "EXTERNAL", "local": "GuidedSchemaProbeIT code", "external": ["U2", "U7"]},
+    {"ac": "AC-9", "class": "LOCAL-PARTIAL", "local": "isolation + mutation oracles with fixture provider; TF-3 ruling, implementation, no-lock test", "external": ["U2", "U4", "U7"]},
+    {"ac": "AC-10", "class": "EXTERNAL", "local": "canary scanner over local traffic", "external": ["U2", "U3", "U4", "U8"]},
+    {"ac": "AC-11", "class": "LOCAL-PARTIAL", "local": "co-run faults, mid-step cancel, runner kill, ADJ-1 a-c, R8.2 d, R10c f-h, i, j, k, R1 a-d (after 015 Done)", "external": ["U4"]},
+    {"ac": "AC-12", "class": "LOCAL-PARTIAL", "local": "backend lanes (D-14), runner tiers, frontend suites, f-j, a-d observation, i addendum, E2E against local servers with fixture provider", "external": ["U4", "U2"]}
+  ],
+  "acTotals": {"LOCAL": 2, "LOCAL-PARTIAL": 7, "EXTERNAL": 3, "changeVsFeasibility20261015": "none"},
+  "autoDecisions": [
+    {"q": "Does a local Vault dev-mode container satisfy AC-4's dev-Vault policy test?", "decision": "No for Done and GO condition 3; allowed as non-credited rehearsal of the policy text", "reason": "the AC proves deployed least privilege (mount, auth role, binding) owned by ED-02; a self-provisioned container proves only our policy document; @qa may overrule at T0"}
+  ],
+  "obs011StartCondition": {
+    "reflectsUserDecision20261015": true,
+    "evidence": ["011 :9 (0.2.4)", "011 :211-221 Start-condition amendment", "README :5 item 2", "009 :9", "010 :9"],
+    "corrections": [
+      {"id": "S-1", "where": "011 :209", "kind": "correction", "severity": "low", "finding": "superseded clause 'starts only after OBS-009 is Done' left unstruck", "proposed": "strike inline with pointer"},
+      {"id": "S-2", "where": "011 :212", "kind": "clarification", "severity": "should-fix", "finding": "'validated' has no named validator", "proposed": "default: independent @qa review record of the listed local halves (not Done); coordinator confirms"},
+      {"id": "S-3", "where": "011 :212", "kind": "clarification", "severity": "should-fix", "finding": "list predates 2026-10-16 placements: AC-11 now includes R1 a-d (needs 015 Done; 'not reproduced' or non-confirmation counts as resolved); AC-4 TF-5 a/c/e external (only b counts); AC-9 TF-3, AC-7 AE-01, AC-7 FM-01 not on the list", "proposed": "one sentence naming these per sub-item"},
+      {"id": "S-4", "where": "011 AC-4 (d) :98, File List", "kind": "addition", "severity": "low", "finding": "reformat of src/guided/** includes guided/runtime.ts (AE-01); observationCollector.ts shared by AE-01/FM-01; StudioService.java shared with TF-3; reciprocal single-owner note only on 009 side", "proposed": "reciprocal note in 011"},
+      {"id": "S-5", "where": "010", "kind": "blocking-for-condition", "finding": "condition needs 010 Live surface list, but 010 has no text allowing T2 before 009 Done", "proposed": "see 010 D-1"}
+    ],
+    "observation": "F-1 facts bound to GuidedSessionService d10ec5cb; now cfb55a54; arms at :370/:828/:862/:1424/:1995; three require(translation != null && ...) gates at :177/:191/:405 will hit F-1 d's grep. checkCommand in GuidedTranslationService :166/:197/:889; .ai/ 118 tracked files.",
+    "earliestStartInferred": "015 Done -> 008 Done -> 009 local lanes validated + 010 T2 Live surface list (needs 010 D-1)"
+  },
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "status": "PASS"},
+    {"n": 2, "item": "Complete description", "status": "PASS"},
+    {"n": 3, "item": "Testable acceptance criteria", "status": "PASS", "note": "anchor drift only; D-14 makes AC-12 suite set explicit"},
+    {"n": 4, "item": "Scope IN/OUT", "status": "PASS"},
+    {"n": 5, "item": "Dependencies mapped", "status": "PASS_AFTER_CORRECTION", "before": "PARTIAL", "items": ["D-1", "D-16"]},
+    {"n": 6, "item": "Complexity estimate", "status": "PASS", "note": "L; ~17 inherited blocks; size risk noted"},
+    {"n": 7, "item": "Business value", "status": "PASS"},
+    {"n": 8, "item": "Risks documented", "status": "PASS_AFTER_CORRECTION", "before": "PARTIAL", "items": ["D-11"], "open": ["REL-001 unplaced"]},
+    {"n": 9, "item": "Criteria of Done", "status": "PASS"},
+    {"n": 10, "item": "Alignment with landed contracts", "status": "PASS_AFTER_CORRECTION", "before": "PARTIAL", "items": ["D-2", "D-10", "D-13", "D-14", "D-15"]}
+  ],
+  "executorCheck": {"executor": "dev", "quality_gate": "architect", "valid": true, "note": "@devops co-executes T1/T2 (GO condition 5)"},
+  "codeIntel": "not used",
+  "epicFile": "none under docs/prd; ADR-SC-005 is the source of truth",
+  "notClaimed": ["implementation", "tests", "QA verdict", "Done", "architect rulings", "placement of REL-001 or draft-gate advisories", "015 completion"],
+  "amendments": [
+    {"date": "2026-10-16", "actor": "Pax (@po)", "kind": "corrections applied to stories (append-only; this record's original fields are unchanged)",
+     "instruction": "root (orchestrator) dispatch 2026-10-16",
+     "anchorsReverified": "all D-3..D-9, D-13, D-14, D-15 anchors re-checked by grep/ls on the current tree before applying; all held",
+     "sha256BeforeMethod": "re-derived by reversing the exact edits on a scratch copy; reproduces the 16-hex prefixes in binding.sha256 above",
+     "stories": [
+       {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md", "versionAfter": "0.3.15", "sha256Before": "7b9ef036b6bd1c55d2eb49e9076fb716278eed45624c282f1c35ee0bee632cc1", "sha256After": "a7d1ef1ad3ff184d4e54b11b7a96980e1588df69ad0769eb85f06b82785779bd", "applied": ["D-1", "D-2", "D-3", "D-4", "D-5", "D-6", "D-7", "D-8", "D-9", "D-10", "D-11", "D-12", "D-13", "D-14", "D-15", "D-16"], "status": "Ready (unchanged)"},
+       {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md", "versionAfter": "0.2.7", "sha256Before": "7cfb11f5a94b958a1608fa3b3b533173440f8bb1d7c436cdfd280ee3d49ba394", "sha256After": "2a8b4f76e791e4160fbdb16a3f9d4624b293790265cabb1d5cc87a6aaf86f114", "applied": ["S-1", "S-2 (recommended default: independent @qa review record of the listed local halves, not Done; coordinator confirms)", "S-3", "S-4"], "status": "Ready (unchanged)"}
+     ],
+     "userDecisions20261016": [
+       {"id": "REL-001", "decision": "fixed inside STUDIO-OBS-015; not placed in 009"},
+       {"id": "ED-05", "decision": "runner image Node 24 vs .nvmrc 22 fixed inside STUDIO-OBS-015; no longer external; struck from 010 AC-4 clarification d (e) and from prerequisite-register.json U4"}
+     ],
+     "externalPrerequisitesAdded": ["U13 and U14 named in 009 Dependency notes and T0"],
+     "notApplied": ["Quinn benchmark gaps under prep-20261016/qa/ (pending @architect ruling)", "TEST-002, TEST-003, DOC-001, JACOCO-VACUOUS, M12-STALE-COMMENTS, A2-FOLLOWUP (pending the issued 015 gate; not in this dispatch)"]},
+    {"date": "2026-10-17", "actor": "Pax (@po)", "kind": "placement of STUDIO-OBS-015 W10/W11 deferrals into STUDIO-OBS-009 (append-only; this record's original fields and the 2026-10-16 amendment are unchanged)",
+     "instruction": "lead dispatch 2026-10-17 (yolo); a gate run is live, so nothing under backend/ frontend/ studio-runner/ tools/ docs/specs/ .github/ was edited and no test, build or install ran",
+     "sourcesSha256": {
+       "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/aria-d4-launch-deadline-ruling01/ruling.md": "4a4359db8deda0e99490fed9e446e19e823056b853d5589abf11d016a70b830d",
+       "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/aria-d4-launch-deadline-ruling01/ratification.md": "577ed8089a61e3fd072c152686f66a37984b7fa94e84115108099bb413615ff9",
+       "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/aria-d4-launch-deadline-ruling01/ruling-15s-edge.md": "0cc0756a0952647cbf1b398adf9202903fb26210cc008ddb3169b0bd60c2af96",
+       "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/aria-w11-stop-reason-ruling01/ruling.md": "4a4338d1eef56124e01c621a8cdc597fb6ea12c1b5b84e85ca2b9657a07010e7",
+       "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-source-review-w6-w9/findings.json": "d58cf7b1e511058079e5f95f12bfbce3fc8e06e0c741c77c4a14f131a1c6466c",
+       "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-source-review-w6-w9/review.md": "70fd45d17d2c36be4793756db6310ae00cb9a52adb3a7f45efefc876adf53883"
+     },
+     "placements": [
+       {"id": "KL-015-D5", "includes": ["Quinn F3 (WITHHOLD/BLANK_MATCH/BOOTSTRAP_CALLBACK and non-deadline launch failures close gracefully with no bound)", "W10 F2 residual: a runner stop before Chrome spawns waits until backstopAt, so the backend stop RPC can hit its 15 s limit (ruling-15s-edge §4 item 4)"], "sources": ["015 story KL-015-D5", "aria-d4-launch-deadline-ruling01/ruling.md §1 Not in scope, §5, AUTO-DECISION 3", "ratification.md deviation 1", "ruling-15s-edge.md §4 item 4", "qa-source-review-w6-w9/findings.json F3, F2"], "target": "009 AC-11 D5 a-f; T5 sub-item", "anchorsReverified": "runtime.ts closeResources :568, browser.close :589; browser.ts backstopAt :543/:556, cleanup() :675, hardTeardown :678/:687; GuidedDispatchService.stop :319-331 (grep 2026-10-17)", "order": "architect ruling -> fixtures-tier probe -> per-path tests + mutation check", "notDecidedByPo": ["bound value", "reply-before-teardown", "backstop change"]},
+       {"id": "LIFECYCLE-REASON-01", "sourceId": "Aria W11 follow-up F-1 (renamed in 009 to avoid clash with 011 CLN-F1 'F-1 dead branch' and 012A budget finding F-1)", "sources": ["aria-w11-stop-reason-ruling01/ruling.md §2 F-1", "015 story W11 deviation table row 'Wire, backend'"], "target": "009 AC-11 LR a-c; T5 sub-item", "anchorsReverified": "GuidedSessionService.lifecycle :2483-2503 (reason never read; DISPATCHING -> UNKNOWN_OUTCOME else FAILED); assignmentLifecycle :1797, EXPIRED mapping :1822 (sed 2026-10-17)", "recommendedFix": "map reason EXPIRED -> EXPIRED as assignmentLifecycle does; DISPATCHING still UNKNOWN_OUTCOME", "notDecidedByPo": ["optional expiresAt-now tolerance and its value (@architect)"]},
+       {"id": "EDGE-15S-3", "sources": ["ruling-15s-edge.md §4 item 3"], "target": "009 AC-11 EDGE a; T5 sub-item", "classification": "optional; @qa decides at T0; if not requested, recorded 'not requested', never a pass", "test": "bootstrap continuation: transport timeout, then runner CONTEXT_LOST, then exhaustion -> RUNTIME_INCOMPATIBLE after exactly 3 deliveries", "openCheck": "the ruling did not check whether GuidedRunnerContextRefusalTest already has a timeout case"},
+       {"id": "PID-1", "sources": ["015 story W10 Dev Agent Record Quinn F1 row ('New deployment constraint')", "015 Change Log 0.1.16", "ratification.md R2"], "target": "009 AC-1 PID-1 a-d; T1 sub-item", "owner": "@devops with @dev", "anchorsReverified": "guidedMain.ts:25 insist(canEnumerateLaunchTree()); tree.ts:300-301 pid <= 1 -> false; Dockerfile:61 exec-form CMD, no init (:58-60); studio-runner-deployment.yaml:52 shareProcessNamespace, values.yaml:442 true", "inference": "in a real pod with today's default the pause container is PID 1; a plain docker run without --init makes the runner PID 1"}
+     ],
+     "stories": [
+       {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md", "versionAfter": "0.3.16", "sha256Before": "a7d1ef1ad3ff184d4e54b11b7a96980e1588df69ad0769eb85f06b82785779bd", "sha256After": "645b1fc2211696174bf69546aa93251f495cbf8df510dcbec724897a97ed4fba", "edits": ["AC-1 PID-1 block after P2 d", "AC-11 D5, LR and EDGE blocks after R1 e", "T1 and T5 sub-items", "File List line", "section 'PO placements — STUDIO-OBS-015 deferrals (2026-10-17)'", "Change Log 0.3.16"], "status": "Ready (unchanged)"},
+       {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md", "versionAfter": "0.1.18", "sha256Before": "ed32178049d2553523d4ab88cf38f086de4541e985de9e9dbe232009e837e690", "sha256After": "fc4b0756e825d0bdc17b580bb6df41b0964c2e68e41c58ac9d0d03dc1a9a69de", "edits": ["PO placement record after KL-015-D5", "Change Log 0.1.18"], "status": "InProgress (unchanged)"}
+     ],
+     "appendOnlyCheck": "both sha256Before values copied from shasum output before editing; re-derived by removing exactly the inserted blocks on a scratch copy, which reproduced both hashes (pure insertions)",
+     "autoDecisions": [
+       {"q": "Which ID for Aria's backend F-1 in 009?", "decision": "LIFECYCLE-REASON-01, with sourceId F-1 recorded", "reason": "009/011 already use F-1 for other items (011 CLN-F1 dead branch; 012A budget finding F-1)"},
+       {"q": "Is KL-015-D5 a pilot gate or a T4 precondition?", "decision": "neither; an AC-11 item reported open until landed", "reason": "no source classifies it as a gate; @architect or @pm may classify it"},
+       {"q": "Is the PID-1 constraint in AC-1 or AC-2?", "decision": "AC-1", "reason": "AC-1 owns the one image and Deployment into which guided mode folds; AC-2 is the mTLS chain"},
+       {"q": "When do D5 and LR land?", "decision": "on the 015 trees after 015 Done (same rule as R1)", "reason": "both build on 015 W9-W11 code; 009 already depends on 008 which follows 015 Done"}
+     ],
+     "observationsNotActed": [
+       "011 start-condition amendment lists AC-1 and AC-11 but its per-sub-item clarification does not name D5/LR/EDGE/PID-1; 011 not edited; coordinator confirms",
+       "no reciprocal OBS-010 AC-4 known-limit row for KL-015-D5 was created (not in this dispatch); candidate if the lead wants parity with KL-015-R1",
+       "ruling-15s-edge §4 item 2 triage rule (bootstrap UNKNOWN_OUTCOME with GUIDED_START_FAILED elapsedMs >= 15000 is D4 case a/b) may also apply to 009 AC-12 classification; not placed (not in this dispatch)"
+     ]},
+  {
+   "date": "2026-10-17",
+   "actor": "Pax (@po)",
+   "kind": "T0 outcomes recorded in STUDIO-OBS-009 (append-only; this record's original fields and the earlier amendments are unchanged)",
+   "instruction": "root dispatch 2026-10-17 (yolo), lane T0-PO; docs only, beside STUDIO-OBS-008 W3; nothing under backend/ frontend/ studio-runner/ tools/ docs/specs/ was edited; no test, build, install, Docker or git write",
+   "sourcesSha256": {
+    "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-rulings/ruling.md": "e7beb6ce36bba8f71950cd73df833d53a75f78316ea9c9ad98e1e54d095de66b",
+    "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-rulings/manifest.json": "39672b1b11c6ddde897d0fce84853d0faf3cc70d19bac6bca0464c1da881fa45",
+    "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-rulings/w0-refold.md": "8bca5fdaf7ad004fecaa5db8c74bd8e5c496e788703ebede1a1cb07500e3dacb",
+    "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/lanes.json": "97b6de8fe5a72dccb5390b9b3e0de1323a778e3ab98be0c28e258da58c929e24",
+    "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/implementation-plan.md": "5d642f0a16be6b5a553f3e9c419481d84da8f3275373560f9931be8a448f1855",
+    "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/qa/t0-qa-20261017.md": "0f1e2f6f7e77740856931469e8dc651a2bd458c09cc9cd62fcb6fbf5f4fae4f9",
+    "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/qa/t0-qa-20261017.json": "0195c583e84a729515065db3bf72c7f91a56907402789d01d85642e9af062b52",
+    "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-questions.md": "2654c380e38caf3ee261a6c3f78f443ae13b16c9c9d1691a38f3ff3b2c69e627"
+   },
+   "rootDecisions20261017": [
+    {
+     "id": "R1",
+     "decision": "guided mode only where the studio-runner Deployment runs exactly 1 pod, enforced by a chart check; more than one pod is a later GA capacity item",
+     "provisional": true,
+     "userOverrideItem": "prerequisite-register.json U20"
+    },
+    {
+     "id": "R3",
+     "decision": "collector runs taken during active editing are non-evidentiary; gate runs happen in hold windows"
+    },
+    {
+     "id": "R4",
+     "decision": "no checkpoint commit without the user's request"
+    },
+    {
+     "id": "R7",
+     "decision": "at most 5 concurrent agents in 009 W2"
+    },
+    {
+     "id": "order",
+     "decision": "009 source lanes start after 008 Done; the optional T0 A1 runner subset beside 008 was not taken"
+    }
+   ],
+   "stories": [
+    {
+     "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+     "versionAfter": "0.3.20",
+     "sha256Before": "5d69ee0daffbab9a3dada54aa85a6470ceb6a2e160d9b5be8ee4fcc8a87b6b58",
+     "sha256After": "af5a3c7e4d1508c196b947b8b2632e0d999a53a9d07b7e3093b13b4d36aabc78",
+     "edits": [
+      "AC-1 note A2.6 a-e after PID-1 d (placed as a note, not an amendment)",
+      "AC-4 note A18 after TF-5 e",
+      "AC-7 interpretation note B1 ('ported' = re-authored ports) after the AC-7 paragraph",
+      "dated note appended to AC-11 EDGE a (not requested, @qa T0 decision)",
+      "dated note appended to the AC-11 REL-001 pointer 'Not decided by @po' bullet (code CANCELLED ruled in ruling.md section 4)",
+      "section 'PO T0 outcomes — 2026-10-17' before Dev Agent Record",
+      "Change Log 0.3.20"
+     ],
+     "status": "Ready (unchanged)"
+    },
+    {
+     "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+     "edited": false,
+     "sha256": "f2b1dd0c754120d9eca6cae341b24587fd92338c24f52937eb98461de373bb76",
+     "reason": "nothing in 010 assumes two runner pods (grep for pod|replica|concurren|scale|KEDA|capacity: only the NTP row's 'API replicas'), and its T2 trigger (D-1: same trigger and validator as 011 S-2, an independent @qa review record) is the D2 record, not a different trigger"
+    },
+    {
+     "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+     "edited": false,
+     "sha256": "afe5e7487db4b9f2541b16cc3cdaf745bff4ecbc028f0279ca552bb241d3b25c",
+     "reason": "consistency read only (story rule for this dispatch)"
+    }
+   ],
+   "otherFilesWritten": [
+    {
+     "path": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+     "sha256Before": "ce1752f0ff45c314f967eba5848d8a445826829313344a8e86ea18a3f90cfd6e",
+     "sha256After": "dcc24d127affe6fa66c4fe8144fbd66906fb0b8fcef0bba3484252fde1b34bc4",
+     "change": "appended an amendments entry and the key t0Batch20261017 (U16-U22 new; U3, U8, U13 restated); none satisfied"
+    },
+    {
+     "path": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-rulings/ae01-ack-request-draft.md",
+     "new": true,
+     "sha256": "c5be91ad96d9c6677b44d43dbbd5da918d20f65fdedddcb66e32609c3811cf15",
+     "change": "draft Security & Compliance acknowledgement request for rule AE (ruling.md section 1 A10, AE-1 to AE-7 verbatim); for the user to forward; not sent"
+    }
+   ],
+   "a26Judgement": {
+    "question": "Does the one-pod restriction (A2.6, root R1) change AC-1's meaning?",
+    "answer": "no; recorded as an AC-1 note, not a proposed amendment",
+    "reasons": [
+     "AC-1 requires one process, one image and one Deployment on one TLS listener with no studio-guided-worker-* template; it says nothing about the replica count",
+     "the restriction is additive: a deploy constraint plus a chart render check; it removes nothing AC-1 requires",
+     "the alternative that would contradict AC-1 (a second Deployment) is the rejected one",
+     "runner capacity/KEDA is already out of scope here (GA section 4.G G-1..G-5), where guided scale-out goes",
+     "the lost two-pod replay redundancy is Studio v1 decision D3, a chart default no 009 AC requires"
+    ],
+    "ifUserOverrides": "note A2.6 e: the note is struck and AC-1 scope goes to @architect + @pm, then @po revalidates"
+   },
+   "autoDecisions": [
+    {
+     "q": "Does A2.6 change AC-1's meaning?",
+     "decision": "no (see a26Judgement)",
+     "reason": "deploy constraint and chart check only"
+    },
+    {
+     "q": "B8 has two owners; one register item or two?",
+     "decision": "two: U17 (headroom R, user) and U18 (price, ED-01 owner)",
+     "reason": "ruling.md section 5 lists them as two rows with different owners"
+    },
+    {
+     "q": "U3, U8 and U13 already exist in the register; add new IDs?",
+     "decision": "no; restated in t0Batch20261017 under their own IDs, originals untouched",
+     "reason": "append-only without duplicate identities"
+    },
+    {
+     "q": "Record @qa's EDGE-15S-3 decision and @architect's code CANCELLED rule inline?",
+     "decision": "yes, as dated notes appended to the two bullets",
+     "reason": "both bullets say the T0 decision or ruling is recorded there"
+    }
+   ],
+   "observationsNotActed": [
+    "Aria's R1 recommendation says 'disclose in 010'; root's condition for a 010 note (an assumption of two pods or a different T2 trigger) is not met, so no 010 note was added. The 'two pods for the pilot' assumption lives in the chart comment (values.yaml:380, Studio v1 D3), not in 010; it is covered by U20",
+    "Aria's lanes.json trigger for 011 says the dated 010 Live surface list is 'measured at G9, accepted by @pm'; the 011 start-condition amendment only requires that the list 'exists'. Not edited (011 is read-only in this dispatch)",
+    "Aria A4 assigns merging studio.guided-authoring.runner-origin with studio.runner.base-url to 011's client fold; 011 AC-4 (a) names the client fold and one TLS configuration but not the property merge. Not edited",
+    "Quinn's D2 AC-1 row says 'capacity and policy hash as config'; ruling A2 items 3-4 rule no capacity key and no policy-hash key. Pointed out in the 009 T0 section for @qa; Quinn's file not edited",
+    "Quinn's D2 digest tool omits helm-chart/ (21 tracked files); owner root before G9",
+    "Not done in this dispatch: B2 (class-P denominator), B3 (iframe outcome), the optional B5 N-RS1 case, and an inline A16 'rebuilt, not extended' note at AC-11 and Testing (only an index row in the T0 section)"
+   ],
+   "appendOnlyCheck": "story: difflib over the scratch copy taken before editing shows 126 inserted lines and 2 existing lines extended at their end (EDGE a, REL-001 bullet), with no deleted or rewritten text; JSON files: original bytes up to the final closing of the amendments array are unchanged, and json.loads of every original key compares equal"
+  },
+  {
+    "date": "2026-10-17",
+    "actor": "Pax (@po)",
+    "kind": "AUTHORED-ECHO-01 residuals from STUDIO-OBS-008 ruling Q9 recorded in STUDIO-OBS-009 AC-7 (append-only; this record's original fields and the earlier amendments are unchanged)",
+    "instruction": "lead dispatch 2026-10-17 (yolo); docs only; no source, spec, test, build, Gradle or git write; STUDIO-OBS-010 and STUDIO-OBS-011 not touched",
+    "sourcesSha256": {
+      "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/rulings/q9-authored-literal-trigger.md": "d2d14aec22f251c865c5ee4f5331ed041a0f89ac2b73a3746f7f1b71f1a7dab8"
+    },
+    "residualsCited": {
+      "R1": "cross-step: a literal in another step hides this step's target; no hint shows, because the copy says 'this step'; AE-01 removes the cause",
+      "R2": "shared code: the hint can appear on a model, CSI, cap or window BUDGET_EXCEEDED at a step that carries a literal; true but may be irrelevant; AE-01 f removes it",
+      "R3": "secondary paths (ruling section 1 row 6, inferred, not run) get no hint",
+      "R4": "AE-01 e: authoredEchoUnobservableTargets cannot be counted from a target code; today these runs end FAILED BUDGET_EXCEEDED"
+    },
+    "copyKey": "authoredLiteralTargetNotFound",
+    "triggerFile": "frontend/src/pages/ChecksStudioPage/authoredLiteralHint.ts",
+    "readOnlyCheck": "grep -rn authoredLiteralTargetNotFound frontend/src on 2026-10-17: hits in guidedNarratives.ts, GuidedCompletion.tsx, authoredLiteralHint.ts, guided.test.tsx and pageGuidedRun.test.tsx (in-progress STUDIO-OBS-008 work; a snapshot, not a closure)",
+    "stories": [
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+        "versionAfter": "0.3.21",
+        "sha256Before": "af5a3c7e4d1508c196b947b8b2632e0d999a53a9d07b7e3093b13b4d36aabc78",
+        "sha256After": "a2cd39d353b3cf7e140eee935aa3e53144aef53c09e5a30fde63b5bbab7c7a6f",
+        "edits": [
+          "dated pointer appended at the end of AC-7 AUTHORED-ECHO-01 e (see R4)",
+          "dated pointer appended at the end of AC-7 AUTHORED-ECHO-01 f (copy key and trigger file)",
+          "PO note 2026-10-17 after item f: Q9 ruling cited, R1-R4 quoted verbatim, copy key and trigger file named, one AUTO-DECISION",
+          "Change Log 0.3.21"
+        ],
+        "status": "Ready (unchanged)"
+      }
+    ],
+    "autoDecisions": [
+      {
+        "q": "Is R4's last sentence ('The AE-01 b/c cases should pin that outcome as the \"before\" state') an added obligation on b or c?",
+        "decision": "no; recorded as @architect's recommendation",
+        "reason": "append-only; AC-7 meaning unchanged"
+      }
+    ],
+    "notDecided": [
+      "how AE-01 e classifies a hidden-target run without a target code"
+    ],
+    "appendOnlyCheck": "story: difflib over the scratch copy taken before editing shows 2 existing lines extended at their end (AC-7 AUTHORED-ECHO-01 e and f) and 9 inserted lines (8 in AC-7, 1 change-log row), with no deleted or rewritten text; this JSON: original bytes up to the final closing of the amendments array are unchanged"
+  },
+  {
+    "date": "2026-10-17",
+    "actor": "Pax (@po)",
+    "kind": "STUDIO-OBS-008 outbound carried item C-OBS008-4 placed in STUDIO-OBS-009 for lane C9 (append-only; this record's original fields and the earlier amendments are unchanged)",
+    "instruction": "lead dispatch 2026-10-17 (yolo), root placement of the STUDIO-OBS-008 outbound carried items; docs only; no source, spec, test, build, Gradle or git write; STUDIO-OBS-008 not edited (Dex consolidates it in parallel)",
+    "sourcesSha256": {
+      "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/rulings/w5-unreadable-and-alias.md": "3fbf9dcb4a4d714b89b4825059594e5e891b6f66ea4eb9ef17e388c9d671e53a",
+      "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/w5-reviews/dex-technical-review.md": "06b2c52d4349f29ed11db8fc0f2c66ea663169c50b019d1dd45fb99d33c5340e",
+      "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/w5-reviews/U1-spec.md": "939719c17d5c2df7ab497c76585567049ccd3d9a19b9898fb8434292fa6dd6d7",
+      "docs/qa/evidence/STUDIO-OBS-008/qa-gate-20261017/gate-draft.md": "e89fbd466449bfba7e5770f6ab6473e0311cde1a0df5570209d0e4f0b34d6c52"
+    },
+    "placement": {
+      "id": "C-OBS008-4",
+      "item": "startGuidedSession can answer 422 INVALID_CONTRACT / AUTHORING_REFERENCE_AMBIGUOUS, but docs/specs/studio/openapi.yaml declares no 422 for it",
+      "target": "009 section 'Carried items (inbound from 008)' a-g; T1 sub-item; File List entry; narrow exception appended to the 'Not owned here' line",
+      "owner": "lane C9 (@dev contract integrator) with @architect",
+      "anchorsReverified": "IncrementalAuthoringIdentity.java (80b943dc...) refusals :63-70, :71-73, :77-80, :83-90, ambiguous() :379-382; start path GuidedSessionService.java:643 -> GuidedProductionSessionAccess.java:85 -> GuidedSourceClassifier.java:69-78; GuidedSessionController.java:103-105 failure.status(); openapi.yaml (b5ecdcad...) startGuidedSession :1298, responses '400' :1345 to '429' :1409, grep -c \"'422'\" = 0, other 422 at :281 is admitObservedExecution; pins StudioContractTest.java:90-91 and confinement.test.ts:294 = b5ecdcad...; guidedHandlers.ts (a32125ba...) start handler :562, no AMBIGUOUS in guidedHandlers.ts or guidedFixtures.ts (grep 2026-10-17)",
+      "options": [
+        "(1) declare the 422 on startGuidedSession; re-anchor StudioContractTest and confinement.test.ts pins with old/new digests quoted; contract checker and generator --check pass; 0 operations added",
+        "(2) change the backend status to one the operation already declares; [I] document and pins may not move; @architect confirms and names the owner (outside C9's write list)"
+      ],
+      "then": "add exactly the four backend refusals to the start mirror in frontend/src/services/mocks/studio/guidedHandlers.ts with the declared status and code, a test per case, bodies validated against v3 schemas; handlers.ts not changed for this",
+      "alsoCovered": "Variables dialog can still save an ambiguous set by hand (Aria section 4; Quinn REQ-002); no dialog fix is ruled",
+      "notDecidedByPo": [
+        "option (1) or (2)",
+        "the Variables dialog fix"
+      ]
+    },
+    "stories": [
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+        "versionAfter": "0.3.22",
+        "sha256Before": "a2cd39d353b3cf7e140eee935aa3e53144aef53c09e5a30fde63b5bbab7c7a6f",
+        "sha256After": "759005adbd133b21be23db733034781dacd46547f143d92a355a2108a1fc8627",
+        "edits": [
+          "new section 'Carried items (inbound from 008): append-only' before Dev Agent Record: dated PO note, one-row table, details a-g",
+          "T1 sub-item C-OBS008-4 after PID-1",
+          "File List entry after the 2026-10-17 (@po) entry",
+          "narrow exception for C-OBS008-4 appended at the end of the 'Not owned here' line",
+          "Change Log 0.3.22"
+        ],
+        "status": "Ready (unchanged)"
+      }
+    ],
+    "autoDecisions": [
+      {
+        "q": "If option (1) is chosen, does the 422 land in the same C9 unit as the AC-1 P2 RuntimeVersions edit?",
+        "decision": "recommended yes; the coordinator widens C9's write list (RuntimeVersions only today) and may override",
+        "reason": "the digest and both pins then move once, matching the C9 exit 'both pins re-anchored in one unit' (lanes.json)"
+      }
+    ],
+    "notEdited": [
+      "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/lanes.json",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md"
+    ],
+    "appendOnlyCheck": "story: difflib against the copy taken before editing shows 4 inserted blocks (1 + 1 + 44 + 1 lines) and 1 existing line extended at its end (the 'Not owned here' line), with no deleted or rewritten text; this JSON: original bytes up to the final closing of the amendments array are unchanged apart from the comma after the fourth entry"
+  },
+  {
+    "date": "2026-10-18",
+    "actor": "Pax (@po)",
+    "kind": "STUDIO-OBS-009 W2 findings and Aria's pre-F-merge rulings placed in STUDIO-OBS-009, STUDIO-OBS-011, the wave README backlog and the prerequisite register (append-only; this record's original fields and the earlier amendments are unchanged)",
+    "instruction": "lead placement 2026-10-18 (yolo); docs only; no source, spec, test, build, Gradle or git write; STUDIO-OBS-008 and STUDIO-OBS-010 not edited; .aiox-core/core/permissions/dispatch-governance.js not opened",
+    "sourcesSha256": {
+      "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f-merge/pre-rulings.md": "1c2b9869d7f1db3d9a016787fd46f3f5277f9e1b6debf56f47240b75b3447bbf",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w1.5/ruling-part1.md": "27a6e2476fe39348f6e4322a97839ea5bf3e2398766a2a03cb885eca0045bccc",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/receipt.md": "129182a686799362caa9bd4f5f9de5bf63c01ab579bc90fa7a966a34ee15a9a7",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/runtime-role-grants-v19-v22.sql": "02c13ee62d39710cee760dfcced16aa41604233ae65517e5a6ebe1d13f448e86",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/d2/receipt.md": "e0b10d3a2e745eefa1c26accc6ca51ac45053fb5f7170102a7210f0940c90a30",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/s/receipt.md": "1726b7b36d61eac4b7d418948cc233fd403bb50cb5db08cae54fdc59fea49115",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f-merge/prep-devops/receipt.md": "2992a1136355fae455f4d8ec5314a4386d2223508ed00ced773a4dd15e822cc3",
+      "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/bl/d5-e-backend-stop-record.md": "11a85f3c90a88e7e56ed3654c71dbe0c2b285d411720ae10b4f4c5cb96532ce6"
+    },
+    "placements": [
+      {
+        "id": "KL-009-REVOKE-UNLEARNED",
+        "source": "pre-rulings.md ruling 2 section 2.3",
+        "target": "009 'PO notes — W2 findings and pre-F-merge rulings (2026-10-18)' a",
+        "kind": "disclosure; not fixed; fails closed"
+      },
+      {
+        "id": "U23",
+        "source": "ruling-part1.md Q6",
+        "target": "009 same section b; prerequisite-register.json w2Batch20261018",
+        "kind": "new external prerequisite, owner external not named, not satisfied",
+        "idNote": "Q6 suggested U21, already used by t0Batch20261017"
+      },
+      {
+        "id": "DE-F1",
+        "source": "de/receipt.md finding F1 (with F2, F4)",
+        "target": "009 same section c, linked de/runtime-role-grants-v19-v22.sql for U14",
+        "kind": "note; TF-5 text unchanged"
+      },
+      {
+        "id": "D2-F4",
+        "source": "d2/receipt.md finding F4",
+        "target": "009 same section d",
+        "kind": "note for STUDIO-OBS-010 release readiness; 010 not edited"
+      },
+      {
+        "id": "C-OBS009-1",
+        "source": "pre-rulings.md ruling 5",
+        "target": "011 'Carried items (inbound)'",
+        "owner": "@dev"
+      },
+      {
+        "id": "C-OBS009-2",
+        "source": "pre-rulings.md ruling 4(iii)",
+        "target": "011 'Carried items (inbound)'",
+        "owner": "@dev"
+      },
+      {
+        "id": "C-OBS009-3",
+        "source": "f-merge/prep-devops/receipt.md F1, F2",
+        "target": "011 'Carried items (inbound)'",
+        "owner": "@dev with @devops"
+      },
+      {
+        "id": "C-OBS009-4",
+        "source": "s/receipt.md findings item 2",
+        "target": "011 'Carried items (inbound)'",
+        "owner": "@dev"
+      },
+      {
+        "id": "STUDIO-OBS-F09",
+        "source": "pre-rulings.md ruling 5 'After the window'",
+        "target": "README 'Follow-up backlog' table",
+        "kind": "GA backlog, owner Platform/SRE, not release-blocking"
+      }
+    ],
+    "autoDecisions": [
+      "Ruling 5 names STUDIO-OBS-011-cleanup-inventory.md for its row; the row goes in 011's inbound table per the lead's placement, and the inventory is not edited",
+      "C-OBS009-1 carries a narrow AC-7 exception (a new WARN line and a queueing rule are observable behaviour); the coordinator may override",
+      "KL-009-REVOKE-UNLEARNED is a dated note, not an AC-11 edit, because the behaviour already matches T0 ruling A12",
+      "TF-5 'grant SELECT on the view' is read as 'apply the prepared grant' once U14 confirms a non-owner role; not an AC meaning change"
+    ],
+    "files": [
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+        "versionAfter": "0.3.23",
+        "sha256Before": "759005adbd133b21be23db733034781dacd46547f143d92a355a2108a1fc8627",
+        "sha256After": "e6a15be136bde22cac354992a37b16d0e8372c5108df8eacc4a969ec8f7d127d",
+        "status": "Ready (unchanged)"
+      },
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+        "versionAfter": "0.2.13",
+        "sha256Before": "d1be797c163123507b547f051d6bf6d94e0cd8b893da62f39c95a52ab2fb8db7",
+        "sha256After": "18014f338597c4ddfab0e0ec39582228b1813017775d82cafbf7f1b76917f50f",
+        "status": "Ready (unchanged)"
+      },
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/README.md",
+        "sha256Before": "6f058aad2238ebe0b59278e3de1c6193e83aba277621ae1a76c57171456f1581",
+        "sha256After": "3810c7134dcba8afb6d04f46521cc511ee1b9e7a9686ece6badd0142f72a79a2"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "sha256Before": "dcc24d127affe6fa66c4fe8144fbd66906fb0b8fcef0bba3484252fde1b34bc4",
+        "sha256After": "25fe56fe52bacae6619bf8f53ba7a12960e581d6c7d09a04ecf701597e8e9125"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/po-delta-validation.json",
+        "sha256Before": "4a91b9fa470d80cd0be529a13ad01aa2b5fc2626da38d138d5de7149e39e0dca",
+        "sha256After": "not recordable inside this file; reported by @po in the placement reply"
+      }
+    ],
+    "appendOnlyCheck": "for both stories, the README and the register, removing the inserted text reproduces the sha256Before above (checked by @po with python3 on 2026-10-18); this JSON: original bytes up to the closing of the amendments array are unchanged apart from the comma after the fifth entry"
+  }
+  ]
+}

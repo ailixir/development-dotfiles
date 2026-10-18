@@ -1,0 +1,16 @@
+{
+  "sourceBound": true,
+  "xmlOwningClass": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+  "methodSelectors": 2,
+  "tests": 2,
+  "failed": 2,
+  "zeroSkipDrift": true,
+  "realPgEmptyQueryPreflight": "passed before both bodies",
+  "nonemptyMapper": "succeeded, first DISPATCH_FAILED captured without executionProbeFailure",
+  "whole9NotRetried": true,
+  "actualFirst": "publication SUCCEEDED then ordinary ERROR DISPATCH_FAILED; observed begin committed; no recorded admission/browser/receipt; elapsed41ms",
+  "actualNinth": "SOURCE_PLAN APPLIED then INVALID_CONTRACT zeroactions/observations/providerreads",
+  "safeFixtureFiles": 6,
+  "wholeAcCompletion": false,
+  "boundaryCorrection": "Actual ledger attempt_id==accepted_attempt_id shows beginObservedDispatch committed. admission/browser absent does not establish before-send; sender outcome currently unretained. SOURCE_PLAN APPLIED/planRevision1 does not establish admitPlan refusal; authentic bootstrap guarded failure required."
+}

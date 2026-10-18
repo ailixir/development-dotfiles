@@ -1,0 +1,611 @@
+{
+ "story": "STUDIO-OBS-012A",
+ "acceptance": "AC-7: 35 frozen baseline named failures reconciled by name",
+ "lane": "baseline-residual",
+ "agent": "Dex (@dev), AGENT_NAME=dex-baseline",
+ "date": "2026-10-13",
+ "gitOperations": "none (no add/commit/stash/reset/checkout/restore)",
+ "baselineSource": "docs/qa/evidence/STUDIO-OBS-012A/baseline-backend/named-failures.json (35)",
+ "summary": {
+  "totalNames": 35,
+  "greenNow": 25,
+  "greenBreakdown": "3 AdmissionCasIT ported, 1 SecretUseAuthorizationTest ported, 3 ErrorCode* (Lane M, re-verified), 1 Planning contextMetadata (main-code fix), 3 ObservedAdmissionSecurityIT (2 dropped by name with a ported replacement, 1 ported and renamed), 14 ReplayIT passing in both full-class runs",
+  "blockedOnProductDecision": 3,
+  "openNotFixed": 7,
+  "openBreakdown": "ReplayIT Pool (timing vs 30 s replay TTL under TRACE capture), ReplayIT C6 (fails only in class order), 5 ReplayIT cases that fail only as cascade behind C6 and pass when C6 is not run before them",
+  "ac7GreenClaim": false,
+  "statusCounts": {
+   "PASS": 22,
+   "OPEN_FAILING": 1,
+   "OPEN_FAILING_IN_CLASS_ORDER": 1,
+   "PASS_WHEN_NOT_CASCADED;": 5,
+   "OPEN_BLOCKED_DECISION": 3,
+   "DROPPED_BY_NAME": 2,
+   "PORTED_RENAMED": 1
+  }
+ },
+ "changedFiles": [
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+   "kind": "main",
+   "sha256Before": "44d4bfb4233357ba0a01df83db97fbd7655f201404280eb3c088803374093c10",
+   "sha256After": "b19449b90c0769d8f3cd1c7ab53c18194dddde32a518be19ae19bbf4ae0b590a",
+   "change": "stop(): address the monotone stop to the assignment when the translation bootstrap context is unacknowledged (CONTEXT_PENDING without metadataAcknowledgement); new private static unacknowledgedBootstrap(session). +13 lines."
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/secrets/SecretUseAuthorizationTest.java",
+   "kind": "test",
+   "sha256After": "01ae9b02c96fb580e385ef9924103774194dd74c2d613cf40f51ff6d08ba58fb",
+   "change": "one method ported (names-only preflight)"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/internal/AdmissionCasIT.java",
+   "kind": "test",
+   "sha256After": "9e6fae90e837fb1221c9ba831f4f16d6f8b0aab164258ea10160d1b0ac6a2b3d",
+   "change": "three rawObservedFailure* methods ported to the current pre-Ready reason set; legacyAdmissionCannotUseObservedPreReadyFailure left unchanged (it still feeds ACCOUNT_UNAVAILABLE to a legacy row; its assertion does not depend on the reason)"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+   "kind": "test",
+   "sha256After": "7eecee0f30da95276eda2bf3e4d9c73ea273d462cb265648c6a8b50f7b56720e",
+   "change": "accountGrantId removed from REQUEST_FIELDS and the tuple list, added to the smuggle list; account-boundary case renamed and ported; class javadoc updated"
+  }
+ ],
+ "unchangedButTemporarilyInstrumented": [
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+   "sha256": "f8e93bc95ba40bd20637917ac41e83db5fa2db5b32dff5e76041cef75781195a",
+   "note": "DIAG prints added for r1/r2 and removed by restoring the byte-exact backup; hash equals the pre-diagnostic hash"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+   "sha256": "22712b521297d6c55ac8f7361f4c2e17f6c6f53fe0b7b7080ca5e92d8269f325",
+   "note": "DIAG for r5-r8, restored byte-exact"
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+   "sha256": "d3f12d26649d28032e55ac5e317731c62445ae808e9c3047138a884951eecfb4",
+   "note": "timing DIAG for r8 only, restored byte-exact"
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+   "sha256": "ec6448d6baef417ffb69366be9f01bd5da13fa87859a2d8c73a1e83956ce6792",
+   "note": "timing DIAG for r8 only, restored byte-exact"
+  }
+ ],
+ "names": [
+  {
+   "suite": "com.citi.put.checks.studio.internal.AdmissionCasIT",
+   "case": "rawObservedFailureAcceptsOnlyCompleteUntimedSkippedCoordinates()",
+   "statusNow": "PASS",
+   "howResolved": "PORTED_SAME_NAME (test was wrong): the valid baseline reason ACCOUNT_UNAVAILABLE was replaced with REFERENCE_MISMATCH; the accepted-reason list now mirrors the current closed set; ACCOUNT_UNAVAILABLE and ACCOUNT_UNKNOWN were added to the refused list (stronger); the 'account_unavailable' / 'ACCOUNT_UNAVAILABLE detail' near-miss mutations became 'reference_mismatch' / 'REFERENCE_MISMATCH detail'. No assertion removed.",
+   "evidence": "r0-small FAIL (InternalCallbackException at RunnerReportProjection:130, reproduces baseline); r1-ports-diag PASS 15/15; r10-regression PASS 15/15",
+   "governing": "STUDIO-OBS-007 story 'Codes' table (line 135): ACCOUNT_UNAVAILABLE, ACCOUNT_UNKNOWN removed from v3 and emitters; EXT-001 dropped (OBS-007 decision, consensus-plan §8.1 amendment 2026-10-09). Main RunnerReportProjection.requireObservedPreReadyFailure set already replaced them with REFERENCE_MISMATCH, PASSWORD_CONTROL_READ_REFUSED."
+  },
+  {
+   "suite": "com.citi.put.checks.studio.internal.AdmissionCasIT",
+   "case": "rawObservedFailureRejectsOriginLogsAndNonfinalKindsEvenWhenReduced()",
+   "statusNow": "PASS",
+   "howResolved": "PORTED_SAME_NAME (test was wrong): the valid baseline reason ACCOUNT_UNAVAILABLE was replaced with REFERENCE_MISMATCH; the accepted-reason list now mirrors the current closed set; ACCOUNT_UNAVAILABLE and ACCOUNT_UNKNOWN were added to the refused list (stronger); the 'account_unavailable' / 'ACCOUNT_UNAVAILABLE detail' near-miss mutations became 'reference_mismatch' / 'REFERENCE_MISMATCH detail'. No assertion removed.",
+   "evidence": "r0-small FAIL (InternalCallbackException at RunnerReportProjection:130, reproduces baseline); r1-ports-diag PASS 15/15; r10-regression PASS 15/15",
+   "governing": "STUDIO-OBS-007 story 'Codes' table (line 135): ACCOUNT_UNAVAILABLE, ACCOUNT_UNKNOWN removed from v3 and emitters; EXT-001 dropped (OBS-007 decision, consensus-plan §8.1 amendment 2026-10-09). Main RunnerReportProjection.requireObservedPreReadyFailure set already replaced them with REFERENCE_MISMATCH, PASSWORD_CONTROL_READ_REFUSED."
+  },
+  {
+   "suite": "com.citi.put.checks.studio.internal.AdmissionCasIT",
+   "case": "rawObservedFailureDoesNotTreatGenericErrorsAsAuthority()",
+   "statusNow": "PASS",
+   "howResolved": "PORTED_SAME_NAME (test was wrong): the valid baseline reason ACCOUNT_UNAVAILABLE was replaced with REFERENCE_MISMATCH; the accepted-reason list now mirrors the current closed set; ACCOUNT_UNAVAILABLE and ACCOUNT_UNKNOWN were added to the refused list (stronger); the 'account_unavailable' / 'ACCOUNT_UNAVAILABLE detail' near-miss mutations became 'reference_mismatch' / 'REFERENCE_MISMATCH detail'. No assertion removed.",
+   "evidence": "r0-small FAIL (InternalCallbackException at RunnerReportProjection:130, reproduces baseline); r1-ports-diag PASS 15/15; r10-regression PASS 15/15",
+   "governing": "STUDIO-OBS-007 story 'Codes' table (line 135): ACCOUNT_UNAVAILABLE, ACCOUNT_UNKNOWN removed from v3 and emitters; EXT-001 dropped (OBS-007 decision, consensus-plan §8.1 amendment 2026-10-09). Main RunnerReportProjection.requireObservedPreReadyFailure set already replaced them with REFERENCE_MISMATCH, PASSWORD_CONTROL_READ_REFUSED."
+  },
+  {
+   "suite": "com.citi.put.checks.studio.ErrorCodeVocabularyTest",
+   "case": "theMigrationConstrainsExactlyTheVocabularyTheApiCanAssign()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED_BY_LANE_M (lane-m/ledger.json); verified here, not edited",
+   "evidence": "r0-small PASS 6/6, r10-regression PASS 6/6"
+  },
+  {
+   "suite": "com.citi.put.checks.studio.ErrorCodeVocabularyTest",
+   "case": "theMigrationConstrainsExactlyTheVocabularyTheFrozenContractDeclares()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED_BY_LANE_M; verified here, not edited",
+   "evidence": "r0-small PASS 6/6, r10-regression PASS 6/6"
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualPublishedWrongPasswordAnnotatesEarlierSecretFill()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 7.705s",
+    "r11": "PASS 6.108s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualPublishedRegistrationPassingAssertRemainsPassed()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 6.174s",
+    "r11": "PASS 4.973s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 0.689s",
+    "r11": "PASS 0.655s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 7.186s",
+    "r11": "PASS 5.405s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 5.635s",
+    "r11": "PASS 5.293s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 7.077s",
+    "r11": "PASS 6.182s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 6.477s",
+    "r11": "PASS 5.942s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 4.704s",
+    "r11": "PASS 4.611s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 8.524s",
+    "r11": "PASS 7.113s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 604.841s",
+    "r11": "PASS 604.451s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue()",
+   "statusNow": "OPEN_FAILING (1/7 runs pass)",
+   "howResolved": "NOT FIXED. Root cause measured with temporary diagnostics, since reverted (r6-r8): the login execution's dispatch refuses with GuidedSessionException AUTHORIZATION_EXPIRED (mapped to AUTHORIZATION_REVOKED) in beginResolvedObservedDispatch -> ObservedReplayAuthorization.check, before any send, so dispatchOnce() returns 0 where the test expects 1. Measured r8 timeline: replay grant issued 08:20:57.701, expires +30.000 s (production studio.observed-replay.authorization-ttl-ms default). verifier.verify took 5971 ms and acceptance 6284 ms; the 9.6 s blocker pause wait came next; dispatchOnce started at +16.2 s and the refusal was observed at +32.5 s. The blocker's own execute took 30 ms + 88 ms, before C5Capture.armTrace(). After armTrace, ROOT logs at TRACE through the synchronized canary scanner (c5-numeric-evidence encodedBytes 138,523,600), so the secret-bearing path is 100-300x slower and exceeds the 30 s TTL under concurrent machine load (load average ~6). Product code is consistent with OBS-007; the TTL was not relaxed. OBS-007 evidence shows this case only ever passed in single-case runs (resume-pool-kmp-one-current, resume-final-c4-pool-one-current); no full-class pass exists. In the frozen baseline it never ran (cascade).",
+   "evidence": "r3,r4,r5,r6,r8,r11 FAIL at GuidedPublicationReplayIT:5845 (dispatchOnce 0 vs 1); r7 PASS (diagnostic build). r5-r8 carried test-only DIAG prints, r8 also temporary main-code timing prints; all reverted (sha256 restored). Not credited as gate results.",
+   "governing": "OBS-007 AC-18/C-4 pool refusal oracle; ADR-SC-005 D-A; lead constraint: no TTL/deadline relaxation",
+   "runs": {
+    "r3": "FAIL 49.553s",
+    "r4": "FAIL 51.158s",
+    "r5": "FAIL 49.192s",
+    "r6": "FAIL 50.117s",
+    "r7": "PASS 73.41s",
+    "r8": "FAIL 52.762s",
+    "r11": "FAIL 49.463s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 54.098s",
+    "r11": "PASS 54.735s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 50.078s",
+    "r11": "PASS 50.12s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualPublishedPublicCancelWhileNativePasswordWorldPending()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 11.017s",
+    "r11": "PASS 11.312s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending()",
+   "statusNow": "PASS",
+   "howResolved": "RESOLVED: the baseline token-expiry cascade no longer occurs. The fixture-token-fix lane's per-boundary credential refresh is in place; no change from this lane. TTL unchanged (exp-iat=300 s).",
+   "evidence": "full class r3 PASS and r11 PASS",
+   "governing": "fixture-token-fix/review.json; baseline-native-rootcause.json",
+   "runs": {
+    "r3": "PASS 3.976s",
+    "r11": "PASS 3.953s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks()",
+   "statusNow": "OPEN_FAILING_IN_CLASS_ORDER (passes isolated)",
+   "howResolved": "NOT FIXED, root cause not established. Full class 0/2 (r3, r11; 43.5 s each): IllegalStateException 'Actual owned P3 cleanup remains unconfirmed' (p3CleanupOwnedResources:7829 via p8C6Run:9306), suppressing assertions 'exact descriptors restored after original dispatch lifetime' (:9492), 'actual producer final ACK/failure processing sample' (:8568) and 'C6 original owner cleanup remains unconfirmed' (:9037). Session ended UNKNOWN_OUTCOME (the second fill is ACK_LOST); session teardownStatus is CONFIRMED but allActualTeardownsConfirmed=false. Isolated with only the Order(1) predecessor (r9): PASS in 4.0 s. The case depends on state or timing left by earlier cases. OBS-007 evidence shows it only passed single-case (resume-c6-injection-cache-current, 2026-10-11); in the frozen baseline it never ran (cascade). Its unconfirmed cleanup latches cleanupUnconfirmed, which blocks the 5 later cases.",
+   "evidence": "r3/r11 FAIL; r9 PASS (isolated, with Order(1) case)",
+   "governing": "OBS-007 AC-10/C-6 injected released-value oracle",
+   "runs": {
+    "r3": "FAIL 43.53s",
+    "r9": "PASS 3.998s",
+    "r11": "FAIL 43.434s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead()",
+   "statusNow": "PASS_WHEN_NOT_CASCADED; FAILS IN FULL CLASS ONLY AS CASCADE",
+   "howResolved": "Token-expiry cascade resolved (fixture-token-fix + the current tree). In both full-class runs (r3, r11) this case fails in about 0.2 s at BeforeEach beginOwnedSessionTracking:1265 ('prior failed-test actual worker teardown was not confirmed'), because the C6 case before it latched cleanupUnconfirmed. Run without C6 (r4), its own body passes. Its full-class result depends on the C6 item.",
+   "evidence": "r3/r11 FAIL (0.2 s, BeforeEach guard); r4 PASS (body executed, ~8-37 s)",
+   "governing": "OBS-007 oracle; no change made",
+   "runs": {
+    "r3": "FAIL 0.381s",
+    "r4": "PASS 31.159s",
+    "r11": "FAIL 0.221s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead()",
+   "statusNow": "PASS_WHEN_NOT_CASCADED; FAILS IN FULL CLASS ONLY AS CASCADE",
+   "howResolved": "Token-expiry cascade resolved (fixture-token-fix + the current tree). In both full-class runs (r3, r11) this case fails in about 0.2 s at BeforeEach beginOwnedSessionTracking:1265 ('prior failed-test actual worker teardown was not confirmed'), because the C6 case before it latched cleanupUnconfirmed. Run without C6 (r4), its own body passes. Its full-class result depends on the C6 item.",
+   "evidence": "r3/r11 FAIL (0.2 s, BeforeEach guard); r4 PASS (body executed, ~8-37 s)",
+   "governing": "OBS-007 oracle; no change made",
+   "runs": {
+    "r3": "FAIL 0.212s",
+    "r4": "PASS 33.724s",
+    "r11": "FAIL 0.219s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead()",
+   "statusNow": "PASS_WHEN_NOT_CASCADED; FAILS IN FULL CLASS ONLY AS CASCADE",
+   "howResolved": "Token-expiry cascade resolved (fixture-token-fix + the current tree). In both full-class runs (r3, r11) this case fails in about 0.2 s at BeforeEach beginOwnedSessionTracking:1265 ('prior failed-test actual worker teardown was not confirmed'), because the C6 case before it latched cleanupUnconfirmed. Run without C6 (r4), its own body passes. Its full-class result depends on the C6 item.",
+   "evidence": "r3/r11 FAIL (0.2 s, BeforeEach guard); r4 PASS (body executed, ~8-37 s)",
+   "governing": "OBS-007 oracle; no change made",
+   "runs": {
+    "r3": "FAIL 0.208s",
+    "r4": "PASS 30.8s",
+    "r11": "FAIL 0.226s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion()",
+   "statusNow": "PASS_WHEN_NOT_CASCADED; FAILS IN FULL CLASS ONLY AS CASCADE",
+   "howResolved": "Token-expiry cascade resolved (fixture-token-fix + the current tree). In both full-class runs (r3, r11) this case fails in about 0.2 s at BeforeEach beginOwnedSessionTracking:1265 ('prior failed-test actual worker teardown was not confirmed'), because the C6 case before it latched cleanupUnconfirmed. Run without C6 (r4), its own body passes. Its full-class result depends on the C6 item.",
+   "evidence": "r3/r11 FAIL (0.2 s, BeforeEach guard); r4 PASS (body executed, ~8-37 s)",
+   "governing": "OBS-007 oracle; no change made",
+   "runs": {
+    "r3": "FAIL 0.259s",
+    "r4": "PASS 36.769s",
+    "r11": "FAIL 0.196s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "case": "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending()",
+   "statusNow": "PASS_WHEN_NOT_CASCADED; FAILS IN FULL CLASS ONLY AS CASCADE",
+   "howResolved": "Token-expiry cascade resolved (fixture-token-fix + the current tree). In both full-class runs (r3, r11) this case fails in about 0.2 s at BeforeEach beginOwnedSessionTracking:1265 ('prior failed-test actual worker teardown was not confirmed'), because the C6 case before it latched cleanupUnconfirmed. Run without C6 (r4), its own body passes. Its full-class result depends on the C6 item.",
+   "evidence": "r3/r11 FAIL (0.2 s, BeforeEach guard); r4 PASS (body executed, ~8-37 s)",
+   "governing": "OBS-007 oracle; no change made",
+   "runs": {
+    "r3": "FAIL 0.192s",
+    "r4": "PASS 8.3s",
+    "r11": "FAIL 0.274s"
+   }
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+   "case": "contextMetadataRetryLimitStopsWithoutAnotherBrowserOrModelCall()",
+   "statusNow": "PASS",
+   "howResolved": "FIXED_MAIN_CODE (main code was wrong). Teardown after context-metadata delivery exhaustion was never confirmed. GuidedSessionService.stop addressed the one monotone stop to the unacknowledged bootstrap context, which the runner never received. The runner refused it: backend saw 409 UNKNOWN_OUTCOME; the runner-side IDENTITY_MISMATCH at ownership.ts:153 is inferred from source. teardownStatus therefore stayed PENDING, and the @AfterEach teardown oracle timed out after 10 s. Fix: when the translation bootstrap is CONTEXT_PENDING without metadataAcknowledgement and an assignment exists, the stop goes to the assignment. The runner always holds the assignment once claimed, and the assignment stop stops any runtime under it. Still one stop, no retry, and a lost ack still never confirms.",
+   "evidence": "DIAG run r1: context stop FAILED 409 UNKNOWN_OUTCOME, teardownStatus PENDING, materialization/assignment live=false. After the fix (r2, DIAG): assignment stop OK, CONFIRMED, PASS. Without DIAG, r10 full class: this case PASS. Regression in r10: GuidedBridgeIntegrationTest 37/37, GuidedSessionIT 43/43 and GuidedServiceTransportFaultIT 21/21 PASS, including the 'missing stop ack never confirms teardown' cases.",
+   "governing": "OBS-004 AC-5 (lifecycle/cancel teardown); OBS-007 Planning fixture repair (resume-d-planning-fixture-isolated-repair): cleanup must observe genuine CONFIRMED teardown"
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+   "case": "[1] chosenIndex=0",
+   "statusNow": "OPEN_BLOCKED_DECISION",
+   "howResolved": "BLOCKED_PRODUCT_DECISION (see DECISION-1 (Planning model-input budget)). Verified cause: STUDIO-OBS-007's required prompt additions (secret-login output-contract paragraph, +701 bytes; v3 response schema with secretRef/passwordControl) raised the reserved input per model request. Reservation = wire bytes + 2048, and settlement never refunds. The same 3-step clarify-plus-restart fixture flow was measured on 2026-10-09 with the pre-OBS-007 contract (outputContractHash 60d57376..., equal to the HEAD contract hash): 8 proposals, 121,589 reserved, avg 15,199. It now needs 7 proposals = 112,277/112,291 (avg 16,040, +5.5%), and the 8th proposal cannot fit the 128000 default ceiling (15,723 left), so the session stops with BUDGET_EXCEEDED. Not changed: raising the ceiling, changing accounting, trimming the OBS-007 contract, or lowering the test's ceiling would each be a product decision or an assertion weakening.",
+   "evidence": "r0, r10: 429 BUDGET_EXCEEDED at configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules invoke(); counters actions=4 proposals=7 modelInputTokens=112277/112291",
+   "governing": "consensus-plan §8 bounds max-model-input-tokens-total: 128000 ('proposed initial ... to verify'); GuidedSessionProperties default; translation-design §5 (retain reservation, no refunds); OBS-014 owns budgets",
+   "governingCorrection": "Correction 2026-10-13 (Dex, d1-ceiling lane; per pm-ack-d1.json placements.F-4 and architect-rulings-d1-d2.json DECISION-1 finding): 'OBS-014 owns budgets' is inaccurate for this bound. Owner: PM/architect; per-session ceiling owned by STUDIO-OBS-012A per architect DECISION-1 (STUDIO-OBS-014 AC-8 adds per-CSI budgets in addition to per-session budgets). The original 'governing' text is kept as history."
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+   "case": "[2] chosenIndex=1",
+   "statusNow": "OPEN_BLOCKED_DECISION",
+   "howResolved": "BLOCKED_PRODUCT_DECISION (see DECISION-1 (Planning model-input budget)). Verified cause: STUDIO-OBS-007's required prompt additions (secret-login output-contract paragraph, +701 bytes; v3 response schema with secretRef/passwordControl) raised the reserved input per model request. Reservation = wire bytes + 2048, and settlement never refunds. The same 3-step clarify-plus-restart fixture flow was measured on 2026-10-09 with the pre-OBS-007 contract (outputContractHash 60d57376..., equal to the HEAD contract hash): 8 proposals, 121,589 reserved, avg 15,199. It now needs 7 proposals = 112,277/112,291 (avg 16,040, +5.5%), and the 8th proposal cannot fit the 128000 default ceiling (15,723 left), so the session stops with BUDGET_EXCEEDED. Not changed: raising the ceiling, changing accounting, trimming the OBS-007 contract, or lowering the test's ceiling would each be a product decision or an assertion weakening.",
+   "evidence": "r0, r10: 429 BUDGET_EXCEEDED at configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules invoke(); counters actions=4 proposals=7 modelInputTokens=112277/112291",
+   "governing": "consensus-plan §8 bounds max-model-input-tokens-total: 128000 ('proposed initial ... to verify'); GuidedSessionProperties default; translation-design §5 (retain reservation, no refunds); OBS-014 owns budgets",
+   "governingCorrection": "Correction 2026-10-13 (Dex, d1-ceiling lane; per pm-ack-d1.json placements.F-4 and architect-rulings-d1-d2.json DECISION-1 finding): 'OBS-014 owns budgets' is inaccurate for this bound. Owner: PM/architect; per-session ceiling owned by STUDIO-OBS-012A per architect DECISION-1 (STUDIO-OBS-014 AC-8 adds per-CSI budgets in addition to per-session budgets). The original 'governing' text is kept as history."
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+   "case": "[4] mutation=assertion",
+   "statusNow": "OPEN_BLOCKED_DECISION",
+   "howResolved": "BLOCKED_PRODUCT_DECISION (see DECISION-1 (Planning model-input budget)). Verified cause: STUDIO-OBS-007's required prompt additions (secret-login output-contract paragraph, +701 bytes; v3 response schema with secretRef/passwordControl) raised the reserved input per model request. Reservation = wire bytes + 2048, and settlement never refunds. The same 3-step clarify-plus-restart fixture flow was measured on 2026-10-09 with the pre-OBS-007 contract (outputContractHash 60d57376..., equal to the HEAD contract hash): 8 proposals, 121,589 reserved, avg 15,199. It now needs 7 proposals = 112,277/112,291 (avg 16,040, +5.5%), and the 8th proposal cannot fit the 128000 default ceiling (15,723 left), so the session stops with BUDGET_EXCEEDED. Not changed: raising the ceiling, changing accounting, trimming the OBS-007 contract, or lowering the test's ceiling would each be a product decision or an assertion weakening. In this case the budget stop (BUDGET_EXCEEDED) is reached before the hostile assertion mutation, so the expected INVALID_CONTRACT is never observed.",
+   "evidence": "r0, r10: expected INVALID_CONTRACT but was BUDGET_EXCEEDED (hostileCurrentPageCannotSubstituteAnotherPermittedEffect)"
+  },
+  {
+   "suite": "com.citi.put.checks.studio.secrets.SecretUseAuthorizationTest",
+   "case": "aDeclaredIdThatIsNotASecretNameIsRefusedBeforeTheProviderIsCalled()",
+   "statusNow": "PASS",
+   "howResolved": "PORTED_SAME_NAME (test was wrong). Its permit companion asserted that preflight performs a value read (reads==1), and its counting provider threw on listSecretNames. OBS-007 made preflight names-only. The counting provider now counts listSecretNames (delegating to the fake) as well as read. Invalid id: reads==0 AND listings==0 (new, stronger). Valid id: listings==1 and reads==0 (new: proves zero value reads at preflight).",
+   "evidence": "r0 FAIL (AssertionError 'not used' from listSecretNames, reproduces baseline); r1/r10 PASS 14/14",
+   "governing": "STUDIO-OBS-007 AC-6 ('mayUse is checked at session start (names only, ... zero Vault reads)'); secret-login-design §4.4; VaultStudioReferenceResolver javadoc 'Secret preflight reads names only'"
+  },
+  {
+   "suite": "com.citi.put.checks.studio.ErrorCodeConstraintMigrationIT",
+   "case": "initializationError",
+   "statusNow": "PASS (class initializes; 5/5 cases pass)",
+   "howResolved": "RESOLVED_BY_LANE_M; verified here, not edited. The pseudo-case 'initializationError' no longer exists because the class now initializes.",
+   "evidence": "r0 5/5, r10 5/5"
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+   "case": "[12] field=accountGrantId",
+   "statusNow": "DROPPED_BY_NAME + PORTED",
+   "howResolved": "Removed 'accountGrantId' from authenticatedCallerCannotChangeStoredExecutionTuple's ValueSource. No stored account grant exists, and adding the field is a closed-schema 422, not a 403 tuple mismatch. Ported equivalent: extraIdentityOrPrivateMetadataCannotBeSmuggledIntoObservedBody gains 'accountGrantId' (new name '[6] field=accountGrantId') and asserts 422 INVALID_CONTRACT with no JDBC, statement, reference or admission interaction. The parameter index shift renames '[13] field=startedAt' to '[12] field=startedAt' (same body).",
+   "evidence": "r0 FAIL (403 vs 422); r1/r10 '[6] field=accountGrantId' PASS; class 100/100",
+   "governing": "STUDIO-OBS-007 decision: login is author-written <secret ID> steps; EXT-001 account provider dropped; v3 AdmissionRequest has no accountGrantId (contracts/v3/replay-job.schema.json AdmissionRequest is closed; the fixture admissionRequest has 19 keys and none is accountGrantId); AUTH_CONNECTION_REQUIRED removed (OBS-007 'Codes' table and AC-2); secrets resolve at dispatch, never at admission (secret-login-design §4.4)."
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+   "case": "[52] field=accountGrantId, mutation=missing",
+   "statusNow": "DROPPED_BY_NAME + PORTED",
+   "howResolved": "Removed 'accountGrantId' from REQUEST_FIELDS: it is not a closed v3 identity field, so 'missing' tested nothing and returned 409. This also drops the passing siblings '[53] ... mutation=null' and '[54] ... mutation=wrong-type', which passed only as unknown-field refusals. Equivalent coverage is the ported '[6] field=accountGrantId' smuggle case. Index shift renames profile/build [55..60] to [52..57] with unchanged bodies.",
+   "evidence": "r0 FAIL (422 vs 409); r1/r10 PASS",
+   "governing": "STUDIO-OBS-007 decision: login is author-written <secret ID> steps; EXT-001 account provider dropped; v3 AdmissionRequest has no accountGrantId (contracts/v3/replay-job.schema.json AdmissionRequest is closed; the fixture admissionRequest has 19 keys and none is accountGrantId); AUTH_CONNECTION_REQUIRED removed (OBS-007 'Codes' table and AC-2); secrets resolve at dispatch, never at admission (secret-login-design §4.4)."
+  },
+  {
+   "suite": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+   "case": "otherwiseValidTupleReachesRealUnavailableAccountBoundaryButNeverCas()",
+   "statusNow": "PORTED_RENAMED -> otherwiseValidTupleReachesTheLockedAdmissionTransactionButNeverCasOrSecretResolution()",
+   "howResolved": "With the account boundary gone, the otherwise-valid tuple passes every pre-transaction guard and enters AdmissionCasService.claimObserved. The JDBC double has no ledger row, so the row lock returns nothing and the endpoint answers 409 {error:EXECUTION_UNKNOWN, message:'Execution unavailable'}. This is the same body the baseline returned. Asserted: that exact body; privateFree (no canaries, forged headers grant nothing); prepareAdmission and claimObserved each invoked once; the lock query 'FOR UPDATE OF l,e' issued with the execution id; zero interactions with statements (CAS), references (secret resolution), verifier, authority, progress and control. Dropped: the AUTH_CONNECTION_REQUIRED expectation (code removed).",
+   "evidence": "r0 FAIL (expected AUTH_CONNECTION_REQUIRED, got EXECUTION_UNKNOWN); r1/r10 renamed case PASS",
+   "governing": "STUDIO-OBS-007 decision: login is author-written <secret ID> steps; EXT-001 account provider dropped; v3 AdmissionRequest has no accountGrantId (contracts/v3/replay-job.schema.json AdmissionRequest is closed; the fixture admissionRequest has 19 keys and none is accountGrantId); AUTH_CONNECTION_REQUIRED removed (OBS-007 'Codes' table and AC-2); secrets resolve at dispatch, never at admission (secret-login-design §4.4)."
+  }
+ ],
+ "replayItFullClass": {
+  "selector": "--tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+  "r3": {
+   "startedUtc": "2026-10-13T07:47:52",
+   "tests": 37,
+   "passed": 29,
+   "failed": [
+    "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel (NOT a baseline name; learning ended UNKNOWN_OUTCOME after the login 'Click Sign in' action was ACK_LOST; passed in r5 and r11 and in the frozen baseline: intermittent)",
+    "actualPoolDefinite... (timing)",
+    "actualGuidedReleasedValueInjected... (C6)",
+    "5 cascade at BeforeEach:1265"
+   ],
+   "duration": "18m32s",
+   "gradleExit": 1
+  },
+  "r11": {
+   "startedUtc": "2026-10-13T08:33:13",
+   "tests": 37,
+   "passed": 30,
+   "failed": [
+    "actualPoolDefinite... (timing, same line 5845)",
+    "actualGuidedReleasedValueInjected... (C6, same assertions)",
+    "5 cascade at BeforeEach:1265"
+   ],
+   "duration": "19m27s",
+   "gradleExit": 1
+  },
+  "perCaseAllRuns": "see names[].runs; r4..r9 are subset reruns",
+  "observation": "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper passes but takes ~604 s in both full runs, about a third of the class wall time."
+ },
+ "decisionsRequested": [
+  {
+   "id": "DECISION-1",
+   "owner": "PM/architect (budgets are OBS-014 scope; bound from consensus-plan §8)",
+   "question": "OBS-007's required secret-login prompt growth makes the controlled 3-step clarify-plus-restart planning flow reserve ~128.3k input against the 128000 default studio.guided-authoring.max-model-input-tokens-total (pre-OBS-007: 121,589). Which change is approved? (a) raise the default ceiling (config only; the bound was 'proposed initial ... to verify'); (b) change the reservation estimator or refund unused reservations to reported usage (reverses translation-design §5 'retain reservation'); (c) shrink the prompt, e.g. send the secret-login contract paragraph only when a secretRef exists (changes the pinned outputContractHash per session); (d) QA/architect approve re-baselining the OBS-005 joined fixture flow. Dex has not chosen; each option either changes a product bound or contract or weakens the test's own 128000 assertion.",
+   "blocks": [
+    "GuidedPlanningIntegrationTest [1] chosenIndex=0",
+    "[2] chosenIndex=1",
+    "[4] mutation=assertion"
+   ],
+   "ownerCorrection": "Correction 2026-10-13 (Dex, d1-ceiling lane; per pm-ack-d1.json placements.F-4 and architect-rulings-d1-d2.json DECISION-1 finding): 'budgets are OBS-014 scope' is inaccurate for this bound. Owner: PM/architect; per-session ceiling owned by STUDIO-OBS-012A per architect DECISION-1 (STUDIO-OBS-014 AC-8 adds per-CSI budgets in addition to per-session budgets). The original 'owner' text is kept as history."
+  },
+  {
+   "id": "DECISION-2",
+   "owner": "QA (Quinn) + architect; OBS-007 C-4/C-6 oracle owners",
+   "question": "Pool (C-4) fails 6 of 7 runs: the 30 s production replay-grant TTL expires because whole-app TRACE canary capture slows execute and dispatch to 6-16 s each. C6 fails 2 of 2 in class order and passes isolated. OBS-007 only ever proved both in single-case runs. Approve one: (a) move these two oracles into their own test class or fork so no prior case shares state and fewer cases share the machine; (b) reorder the Pool scenario so the blocker is dispatched and paused before the login execution is accepted (test-only; every assertion kept; reclaims ~9.6 s of grant age; margin still load-dependent); (c) accept them as a separately scheduled quiet-machine tier. TTL relaxation is excluded by the lead's constraint.",
+   "blocks": [
+    "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+    "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks",
+    "and in full-class order the 5 cascade names"
+   ]
+  }
+ ],
+ "otherFindings": [
+  "docs/specs/studio/openapi.yaml:214 observed-admission 409 x-conflict-codes still lists ACCOUNT_UNAVAILABLE, but the OBS-007 'Codes' table says it is removed from x-conflict-codes. This is a Lane C/contract item, not edited here (it would move the BASE_SHA256/StudioContractTest pins).",
+  "GuidedSecretLoginMigrationTest (item 6): 23/23 PASS in r0 and r10. The post-K+C 'unclassified' failure no longer reproduces. It was not one of the 35 names.",
+  "ReplayIT cases depend on order: Order(1) registers CSI-123. A single later case run alone fails with ui_tests_csi_id_fkey (seen in r4 for actualSecretLogin...). This is pre-existing, not changed."
+ ],
+ "commands": [
+  {
+   "id": "r0-small",
+   "cmd": "gradle-locked.sh -I copy.init.gradle.kts test --tests AdmissionCasIT, ObservedAdmissionSecurityIT, SecretUseAuthorizationTest, GuidedSecretLoginMigrationTest, ErrorCodeVocabularyTest, ErrorCodeConstraintMigrationIT, GuidedPlanningIntegrationTest",
+   "exit": 1,
+   "result": "208 tests, 11 failed = exactly the 11 baseline names of these classes, 0 other; ErrorCode* 11/11 and GuidedSecretLoginMigrationTest 23/23 pass (before any edit)"
+  },
+  {
+   "id": "r1-ports-diag",
+   "cmd": "test --tests AdmissionCasIT ObservedAdmissionSecurityIT SecretUseAuthorizationTest GuidedPlanningIntegrationTest.contextMetadataRetryLimit... (Planning had test-only DIAG)",
+   "exit": 1,
+   "result": "AdmissionCasIT 15/15, ObservedAdmissionSecurityIT 100/100, SecretUseAuthorizationTest 14/14; Planning case 1 FAIL (diagnosis run)"
+  },
+  {
+   "id": "r2-teardown-diag",
+   "cmd": "test --tests Planning.contextMetadataRetryLimit... Planning.acknowledgedOlderSnapshot... (after main fix, DIAG still in test)",
+   "exit": 0,
+   "result": "2/2 PASS"
+  },
+  {
+   "id": "r3-replayit",
+   "cmd": "test --tests GuidedPublicationReplayIT",
+   "exit": 1,
+   "result": "37 tests, 29 pass, 8 fail (18m32s)"
+  },
+  {
+   "id": "r4-replay-subset",
+   "cmd": "test --tests ReplayIT.{actualSecretLogin..., actualPool..., 5 cascade names}",
+   "exit": 1,
+   "result": "7 tests: 5 cascade names PASS; actualSecretLogin FAIL (CSI FK, no Order(1) predecessor); Pool FAIL"
+  },
+  {
+   "id": "r5-replay-diag",
+   "cmd": "ReplayIT {Order(1), actualSecretLogin..., Pool} with DIAG",
+   "exit": 1,
+   "result": "Order(1) PASS, actualSecretLogin PASS 125.9 s, Pool FAIL; recheck DIAG never fired, so the refusal is not the dispatch-authz recheck"
+  },
+  {
+   "id": "r6-pool-diag",
+   "cmd": "ReplayIT Pool with DIAG",
+   "exit": 1,
+   "result": "settle code=AUTHORIZATION_REVOKED from GuidedSessionException AUTHORIZATION_EXPIRED"
+  },
+  {
+   "id": "r7-pool-diag",
+   "cmd": "ReplayIT Pool with DIAG timeline prints",
+   "exit": 0,
+   "result": "PASS 73.4 s (diagnostic build; not credited)"
+  },
+  {
+   "id": "r8-pool-timing",
+   "cmd": "ReplayIT Pool with DIAG plus temporary main timing prints",
+   "exit": 1,
+   "result": "FAIL; timeline in names[] Pool entry"
+  },
+  {
+   "id": "r9-c6",
+   "cmd": "ReplayIT {Order(1), actualGuidedReleasedValueInjected...}",
+   "exit": 0,
+   "result": "2/2 PASS (C6 4.0 s)"
+  },
+  {
+   "id": "spotless",
+   "cmd": "gradle-locked.sh spotlessApply -PspotlessIdeHook=<file> x4 (my 4 files)",
+   "exit": 0,
+   "result": "one javadoc reflow in SecretUseAuthorizationTest"
+  },
+  {
+   "id": "checkstyle",
+   "cmd": "gradle-locked.sh checkstyleMain checkstyleTest --continue",
+   "exit": 0,
+   "result": "BUILD SUCCESSFUL (whole tree)"
+  },
+  {
+   "id": "r10-regression",
+   "cmd": "test --tests GuidedPlanningIntegrationTest GuidedBridgeIntegrationTest GuidedSessionIT GuidedServiceTransportFaultIT AdmissionCasIT ObservedAdmissionSecurityIT SecretUseAuthorizationTest GuidedSecretLoginMigrationTest ErrorCodeVocabularyTest ErrorCodeConstraintMigrationIT (final tree, no DIAG)",
+   "exit": 1,
+   "result": "304 tests in these 10 classes, 3 fail = Planning [1],[2],[4] (DECISION-1); Bridge 37/37, Session 43/43, TransportFault 21/21, Planning 37/40 (contextMetadata PASS)"
+  },
+  {
+   "id": "r11-replayit-final",
+   "cmd": "test --tests GuidedPublicationReplayIT (final tree, no DIAG)",
+   "exit": 1,
+   "result": "37 tests, 30 pass, 7 fail (19m27s)"
+  },
+  {
+   "id": "spotbugs+spotless",
+   "cmd": "gradle-locked.sh spotbugsMain spotlessCheck --continue",
+   "exit": 0,
+   "result": "BUILD SUCCESSFUL (whole tree)"
+  }
+ ],
+ "notRun": [
+  "full backend ./gradlew check (jacoco/coverage gate not run; other lanes mid-edit)",
+  "studio-runner tiers, frontend, contract tool (nothing in those trees was touched)",
+  "npm run lint / typecheck (backend-only lane; no JS/TS edited)",
+  "CodeRabbit (the WSL wrapper is not available on this darwin host; no review claimed)",
+  "SYNAPSE diagnostics skill text appended to the spawn prompt (out of mission scope; not executed)",
+  "R1/R2-owned classes (StudioScheduleApiIT, SharedSchedulingIT, StudioAuthorizationIT, ExecutionVideoAuthorizationIT, SseStreamingIT): not edited and not run. SseCrossReplicaIT XML in my copy dirs is a stale build artifact and is not counted.",
+  "db/migration/**: not touched; no migration change requested"
+ ],
+ "harnessNote": "Result XML was copied inside the Gradle lock by an out-of-tree init script (scratchpad copy.init.gradle.kts). The copy includes stale XML still present in build/test-results; only the selected classes are counted."
+}

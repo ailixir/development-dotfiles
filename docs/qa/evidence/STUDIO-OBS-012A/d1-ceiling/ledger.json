@@ -1,0 +1,246 @@
+{
+ "story": "STUDIO-OBS-012A",
+ "lane": "d1-ceiling (architect DECISION-1, PM ack pm-ack-d1.json)",
+ "agent": "Dex (@dev), AGENT_NAME=dex-d1, 2026-10-13",
+ "gitOperations": "none (no add/commit/stash/reset/checkout/restore)",
+ "ruling": "docs/qa/evidence/STUDIO-OBS-012A/root/architect-rulings-d1-d2.json rulings[DECISION-1]; ack docs/qa/evidence/STUDIO-OBS-012A/root/pm-ack-d1.json (decision ACK, conditions C-1..C-4)",
+ "changes": {
+  "product": [
+   "GuidedSessionProperties.java:17 @DefaultValue(\"128000\") -> \"262144\"; :39 limits.getOrDefault(\"maxModelInputTokensTotal\", 128000) -> 262144",
+   "contracts/v3/limits.schema.json maxModelInputTokensTotal maximum 128000 -> 262144, default 128000 -> 262144 (only lines 35-36 differ)"
+  ],
+  "generated": {
+   "command": "node tools/build-studio-observed-schemas.cjs; node tools/build-studio-observed-schemas.cjs --check",
+   "result": "exit 0 / exit 0: 'Verified v3: 21 guided schemas, 28 replay schemas; four byte-identical outputs'",
+   "diff": {
+    "studio-runner/src/guided/schemas.json": "lines 2805-2806 maximum/default 128000 -> 262144 only; sha256 fa52c55b... -> f4cecd6c...",
+    "studio-runner/src/validator/observedSchemas.json": "lines 2823-2824 maximum/default 128000 -> 262144 only; sha256 bee0e605... -> 95b8751d...",
+    "studio-runner/src/guided/types.ts": "byte-identical (d5cdf40f...)",
+    "studio-runner/src/executor/observedOperations.ts": "byte-identical (35743af2...)"
+   },
+   "backendClasspathCopy": "none to regenerate: build.gradle.kts processResources packages docs/specs/.../contracts/v3/*.schema.json directly into studio/observed-contracts (verified build.gradle.kts:338-344)",
+   "SC-4": "HELD: generator diff is limited to maxModelInputTokensTotal maximum/default"
+  },
+  "fixtureSnapshots": {
+   "file": "docs/specs/studio-observed-authoring/contracts/v3/planning-fixtures.json",
+   "sitesChanged": {
+    "2100": "semanticCases[0].runtime.session.limits",
+    "2385": "semanticCases[0].runtime.context.limits",
+    "2669": "semanticCases[1].runtime.session.limits",
+    "2954": "semanticCases[1].runtime.context.limits",
+    "3238": "semanticCases[2].runtime.session.limits",
+    "3523": "semanticCases[2].runtime.context.limits",
+    "3809": "semanticCases[3].runtime.session.limits",
+    "4094": "semanticCases[3].runtime.context.limits"
+   },
+   "criterion": "ruling: 'update only where the snapshot mirrors every other default verbatim'. Verified by script before the edit: all 8 limits objects had 15 keys and zero differences from limits.schema.json defaults.",
+   "autoDecision": "[AUTO-DECISION] The ruling's parenthetical names ~2100, ~2385, ~2667 (3 sites); the same criterion holds at 8 sites (4 hostile semantic cases x session+context). Changing only 3 would leave case 1's session at 262144 and its context at 128000. Applied the stated criterion to all 8. @architect/@qa: please confirm; reverting the 5 extra sites is a one-line sed.",
+   "notChanged": "contracts/v3/fixtures.json (30 x 128000), backend session-it-documents.json:53, studio-runner/test/helpers/guided.ts:9 LIMITS: 128000 is still schema-valid and no run test asserts equality with the default (ruling explicitlyUnchanged / SC-3: no ad-hoc literal edits)",
+   "hashes": "no digest in planning-fixtures covers runtime.session/context.limits (checker PASS and GuidedProviderEvaluationTest green after the edit)"
+  },
+  "schemaEpochs": {
+   "finding": "v3/session reaches limits by $ref, so the expanded session root hash moved. replay-validation, ledger and observation did not move.",
+   "method": "Lane C's scratch Epochs.java (reflective GuidedContracts.schema(name) -> GuidedContracts.hash(getSchemaNode())), JDK 21, classpath = <overlay dir with studio/observed-contracts/v3/*.schema.json> + main runtime classpath. Old overlay = current sources with the pre-edit limits.schema.json; new overlay = current sources.",
+   "oldOverlayReproducesCurrentConstants": true,
+   "v3/session": {
+    "old": "479fd6360acafec28dbd72e9568ef266b500f45134ccb33e4509de60b5ea07e2",
+    "new": "e9f57e1e8ce11fdf76901a21047106655cd3342a435be61c9e1e26d1ce7e5b17"
+   },
+   "v3/replay-validation": "2a55e780afc6cfdc7c010d15c5000c6b5ed737dc28ebb7270343be4c11fac519 (unchanged)",
+   "v3/ledger": "2f365ba04a6254df0fb6c3930b01bdcecea5a494415f25cae4653e1aa870d6cb (unchanged)",
+   "v3/observation": "9be57abe1679bafcf7dbbcf3452a515dab7032c999ad630a241c7cbb856ac2d2 (unchanged)",
+   "edit": "GuidedContracts.SESSION_SCHEMA_EPOCH re-anchored to e9f57e1e... with a comment naming DECISION-1",
+   "reProof": "GuidedWireContractTest 7/7 green. Its rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults asserts the compiled session plan has 14 properties; a stale epoch makes compileSchema return the native baseline plan (0 properties), so a wrong constant fails that test. This sensitivity was read from the code, not shown with a mutation run."
+  },
+  "otherPins": "confinement.test.ts BASE_SHA256 pins docs/specs/studio/openapi.yaml, which is not touched (confinement 19/19 green). No literal digest of schemas.json/observedSchemas.json/limits.schema.json/planning-fixtures.json exists outside evidence (grep). OBSERVED_SCHEMA_BUNDLE_HASH is computed at runtime from schemas.json.",
+  "runnerDist": "studio-runner/dist rebuilt (./node_modules/.bin/tsc -p tsconfig.build.json exit 0; node scripts/write-runtime-versions.mjs exit 0) so the guidedMain child that the backend ITs spawn validates the 262144 limits. This is untracked output shared with other sessions. check-pins.mjs --json: ok:true, failures []. Before the rebuild ps showed one stale guidedMain.js (pid 44737, started Saturday), not started by this lane and left alone.",
+  "testPins": {
+   "defaultPins": [
+    "GuidedDefaultModelReservationIT:159 isEqualTo(128000) -> isEqualTo(262144)",
+    "GuidedDefaultModelReservationIT:301 isLessThanOrEqualTo(128000) -> isLessThanOrEqualTo(262144)",
+    "GuidedPublicationReplayIT:1429 isEqualTo(128000) -> 262144; :1455 isEqualTo(128000) -> 262144; :1457 isLessThanOrEqualTo(128000) -> 262144 (edited only, NOT run)",
+    "GuidedPlanningIntegrationTest:742 isLessThanOrEqualTo(128000) -> isLessThanOrEqualTo(262144)"
+   ],
+   "ceilingRelative": {
+    "helper": "new private GuidedPlanningIntegrationTest.inputCeiling(id): reads the session's immutable limits.maxModelInputTokensTotal and asserts it is an integral number (a missing field fails the test instead of becoming 0)",
+    "lateKnownOverageStopsActiveSessionBeforeAnotherProviderSend": "recordLateUsage 200000 -> overage = inputCeiling(id) + 72_000; counter isEqualTo(200000) -> isEqualTo(overage)",
+    "lateUsageCommitsBeforeEveryReservationAndSendClaim": "recordLateUsage 200000 -> overage = inputCeiling(id) + 72_000; isGreaterThan(200000) -> isGreaterThan(overage)",
+    "underCeilingLateDeltaSurvivesRefusedNextReservation[input]": "127000 - before -> inputCeiling(id) - 1_000 - before",
+    "unchanged": "terminalCancellationAcceptsLateAccountingWithoutRevivingAuthority keeps 200000 / before + 199900 (CANCELLED, not ceiling-coupled); [output] 31000 unchanged"
+   }
+  },
+  "docs": [
+   "docs/specs/studio-observed-authoring/delayed-state-design.md:9 '128000/32000' -> '262144/32000' plus a dated note linking consensus-plan §8.2",
+   "docs/specs/studio-observed-authoring/translation-design.md:275 'keeps the original 128000 input/32000 output ceilings' -> 'keeps the session input/output ceilings unchanged (then 128000/32000; on 2026-10-13 the input ceiling was raised to 262144 by consensus-plan §8.2, output stays 32000)'",
+   "docs/qa/evidence/STUDIO-OBS-012A/baseline-residual/ledger.json: F-4 corrected by appending fields; original text kept. governingCorrection added to the [1] chosenIndex=0 and [2] chosenIndex=1 entries (the lines that said 'OBS-014 owns budgets'; the [4] entry has no governing field). ownerCorrection added to decisionsRequested DECISION-1 ('budgets are OBS-014 scope'). Wording from pm-ack-d1.json placements.F-4. The file was re-serialized with json.dumps(indent=1, ensure_ascii=False); a round-trip test before the edit was byte-identical, so the only diff is the 3 added fields (+ one comma)."
+  ]
+ },
+ "measuredReservation": {
+  "source": "/tmp/studio-obs005-joined-metrics.json, written by configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules on success; a 1 s watcher copied each write (copies in d1-ceiling/joined-metrics/)",
+  "chosenIndex=0": {
+   "providerRequests": 8,
+   "SOURCE_PLAN": 1,
+   "NEXT_ACTION": 7,
+   "modelProposals": 8,
+   "modelInputTokens": 130133,
+   "modelOutputTokens": 16384,
+   "sanitizedEvidenceBytes": 30392,
+   "limit": 262144,
+   "utilization": "49.6%"
+  },
+  "chosenIndex=1": {
+   "providerRequests": 8,
+   "SOURCE_PLAN": 1,
+   "NEXT_ACTION": 7,
+   "modelProposals": 8,
+   "modelInputTokens": 130147,
+   "modelOutputTokens": 16384,
+   "sanitizedEvidenceBytes": 30392,
+   "limit": 262144,
+   "utilization": "49.6%"
+  },
+  "preObs007Reference": "2026-10-09 file (outputContractHash 60d57376...): chosenIndex=1, 8 requests, 121,589 of 128,000",
+  "SC-2": "NOT TRIGGERED, BUT CLOSE. The maximum is 130,147, which is <= 131,072 by 925 bytes (99.3% of the SC-2 threshold). It is about 1,800 above the architect's projected ~128,320. The per-request average is 130,147/8 = 16,268, above the 16,040 average from 7 proposals in the ledger r0/r10. The SC-2 rationale ('per-request growth then exceeds the measured 16,040 average') therefore already holds slightly, while the numeric stop threshold is not crossed. Flagged for @architect before crediting; this lane does not credit."
+ },
+ "commands": [
+  {
+   "cmd": "node tools/build-studio-observed-schemas.cjs && --check",
+   "exit": 0
+  },
+  {
+   "cmd": "node tools/check-studio-observed-contracts.cjs",
+   "exit": 0,
+   "result": "PASS v3 (40 schemas, 303 checks, 42 planning fixtures, 79 publication); PASS public OpenAPI 38 operations; PASS codegen"
+  },
+  {
+   "cmd": "gradle-locked.sh compileJava processResources compileTestJava -q",
+   "exit": 0,
+   "note": "run before the epoch re-anchor; main recompiled again by the test run below"
+  },
+  {
+   "cmd": "java -cp <overlay-old|overlay-new>:<main runtime cp> Epochs.java",
+   "exit": 0,
+   "result": "see schemaEpochs"
+  },
+  {
+   "cmd": "studio-runner: ./node_modules/.bin/tsc -p tsconfig.build.json; node scripts/write-runtime-versions.mjs; node scripts/check-pins.mjs --json",
+   "exit": "0 / 0 / 0 (ok:true)"
+  },
+  {
+   "cmd": "studio-runner: ./node_modules/.bin/vitest run --coverage.enabled=false test/generated-contracts.test.ts test/contract*.test.ts test/run/confinement.test.ts",
+   "exit": 0,
+   "files": "4 passed (generated-contracts 2, confinement 19, contract-integrity 3, contract 16)",
+   "tests": "40 passed, 0 failed"
+  },
+  {
+   "cmd": "gradle-locked.sh test --continue -I <scratch>/copyxml.init.gradle.kts --tests *.GuidedPlanningIntegrationTest *.GuidedDefaultModelReservationIT *.GuidedWireContractTest *.StudioContractTest *.GuidedSessionIT *.GuidedBridgeIntegrationTest *.GuidedProviderEvaluationTest",
+   "exit": 0,
+   "wall": "7m10s (BUILD SUCCESSFUL)",
+   "perClass": {
+    "GuidedPlanningIntegrationTest": "40/40 passed (baseline-backend: 40, 4 failed)",
+    "GuidedDefaultModelReservationIT": "4/4",
+    "GuidedWireContractTest": "7/7",
+    "StudioContractTest": "12/12",
+    "GuidedSessionIT": "43/43",
+    "GuidedBridgeIntegrationTest": "37/37",
+    "GuidedProviderEvaluationTest": "3 run, 2 passed, 1 skipped (approvedProviderEvaluationIsReportedUnavailableWithoutExplicitConfiguration: assumeTrue on real-provider configuration; the same case is skipped in baseline-backend)"
+   },
+   "total": "146 tests, 0 failures, 0 errors, 1 skipped (pre-existing assumption skip)",
+   "decisionNames": {
+    "[1] chosenIndex=0": "PASS 5.509 s",
+    "[2] chosenIndex=1": "PASS 5.69 s",
+    "[4] mutation=assertion": "PASS 4.431 s",
+    "SC-1": "held: no failure for any other reason"
+   },
+   "reExpressed": {
+    "lateKnownOverageStopsActiveSessionBeforeAnotherProviderSend": "PASS",
+    "lateUsageCommitsBeforeEveryReservationAndSendClaim [1] entry/[2] reservation/[3] repair": "PASS",
+    "underCeilingLateDeltaSurvivesRefusedNextReservation [1] input/[2] output/[3] proposals": "PASS",
+    "terminalCancellationAcceptsLateAccountingWithoutRevivingAuthority (unchanged)": "PASS"
+   },
+   "SC-3": "held: no test outside the listed sites failed in the classes run",
+   "SC-5": "held: GuidedDefaultModelReservationIT 4/4 with its output-refusal assertions unedited (only :159/:301 changed)",
+   "junit": "docs/qa/evidence/STUDIO-OBS-012A/d1-ceiling/junit/"
+  },
+  {
+   "cmd": "gradle-locked.sh spotlessCheck checkstyleMain checkstyleTest spotbugsMain --continue",
+   "exit": 0,
+   "result": "BUILD SUCCESSFUL in 19s; spotlessJava, spotlessJavaCheck, checkstyleMain, checkstyleTest and spotbugsMain executed (none UP-TO-DATE)"
+  }
+ ],
+ "notRun": [
+  "GuidedPublicationReplayIT: pin lines edited only, per instruction (another agent profiles it next). It compiles: compileTestJava exit 0, and the test run compiled it.",
+  "studio-runner fixtures tier and default unit tier (fixtures tier excluded by instruction; default tier not requested). test/helpers/guided.ts LIMITS keeps 128000, which stays schema-valid.",
+  "GuidedTranslationTest and other GuidedTranslation* classes: they read planning-fixtures cases[], not the edited semanticCases[]. Only GuidedProviderEvaluationTest (reads semanticCases) was added.",
+  "Full backend ./gradlew check (012A full gate) and frontend lint/typecheck (frontend untouched)",
+  "No mutation run reverting SESSION_SCHEMA_EPOCH to prove GuidedWireContractTest sensitivity (inferred from code, see schemaEpochs.reProof)",
+  "SYNAPSE diagnostics, coderabbit-review (WSL-only, platform is darwin) and checklist-runner skill text appended to the spawn prompt: not executed, out of mission scope",
+  "SecretMasker and its test: not touched (concurrent agent)"
+ ],
+ "filesChanged": {
+  "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": {
+   "sha256Before": "4313b861438cdfdca2247748220a157a47db7ce48828a14510bd471f007ebf3b",
+   "sha256After": "bd1c11bdbdf26db96eaee7e73f89e7f78854350351e9770e907a31cd3473515c"
+  },
+  "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java": {
+   "sha256Before": "319caa2bf2a2ba3b32965e7280088a78e6e4d2b620066d707b07ce3a3fcc9b03",
+   "sha256After": "3732d860c1388108b435004182e3d260b2c1a1cf30507b8e5f21d5b78e8010c0"
+  },
+  "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": {
+   "sha256Before": "adc5987dff36866ac1756bb2efa7638e3fd9ce0725f283f8940bc8b76eaa895a",
+   "sha256After": "a8708b61ef3d550c6f5d2fda9aa1a4c3115607a3ab20674dbb6ddc9bc210ec88"
+  },
+  "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java": {
+   "sha256Before": "caead7f6716b47c70c2cc72ae630a17ec0e57f16fcd6cdf2d5c2c4ab5763c028",
+   "sha256After": "96a37d1144b7e542b7bc8bb1766e14f0dce57a614c51fb634070f4bb5916d188"
+  },
+  "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java": {
+   "sha256Before": "f8e93bc95ba40bd20637917ac41e83db5fa2db5b32dff5e76041cef75781195a",
+   "sha256After": "46a9177ee7f890b7245de5fb56f10d4c9486b0272fcc106ea21fce3dca098749"
+  },
+  "docs/qa/evidence/STUDIO-OBS-012A/baseline-residual/ledger.json": {
+   "sha256Before": "1bb3292afbaa170f3b4efbae4960684161372e48569dd7dced89a14c330b0c60",
+   "sha256After": "82520c083a28224a7efff499448141364d3e9dd010142f02b6bf7edef5b756f6"
+  },
+  "docs/specs/studio-observed-authoring/contracts/v3/limits.schema.json": {
+   "sha256Before": "da2f2e21e2aca5db1bc64bd95fe0b46caa505c4f9877f8b06ebbcd41eafdd1b7",
+   "sha256After": "f6e4bba01ee38ee2aa56b759120ec2e86c97f47cec15609e4ce0c60ccef97995"
+  },
+  "docs/specs/studio-observed-authoring/contracts/v3/planning-fixtures.json": {
+   "sha256Before": "ebb6fc14a36342b149767243212b3be1def5058ed30961998e047da9ef31beac",
+   "sha256After": "61ca2b3c7a682934fb7af5f11b839b281228305fb1845383ea1203f357cacb45"
+  },
+  "docs/specs/studio-observed-authoring/delayed-state-design.md": {
+   "sha256Before": "5f0844f49f98b6ac9da99abcc11b650e0ac218c2097fad9950deaee859f629e6",
+   "sha256After": "a17c0d12e3e2ddf34689bde34cde93a9283e649796f8304ea5b8cfe830ed4a05"
+  },
+  "docs/specs/studio-observed-authoring/translation-design.md": {
+   "sha256Before": "7f1891e104098d25b7dad4d0e9d663ac6c9d93a95288d886cbacbb6d5cbcef21",
+   "sha256After": "ec709603da068b3c100c560fd67852172537a170cabce46fd2ea1b7088d3cbce"
+  },
+  "studio-runner/src/executor/observedOperations.ts": {
+   "sha256Before": "35743af285e092a29c6e822c9c98c2027ba39e43b5f6f74f13bcae8abb9ac52a",
+   "sha256After": "35743af285e092a29c6e822c9c98c2027ba39e43b5f6f74f13bcae8abb9ac52a"
+  },
+  "studio-runner/src/guided/schemas.json": {
+   "sha256Before": "fa52c55baac5b039374ff57f4efd500c4d9341450218ef901e13c3b9efb6cd5c",
+   "sha256After": "f4cecd6c7e52406c809ec14e871af1463e2e45520ccedd7a369fdcbc2f3c1f78"
+  },
+  "studio-runner/src/guided/types.ts": {
+   "sha256Before": "d5cdf40fda57d12af15308a49ea33cafc92fc76201b55358fe43660f23ad1825",
+   "sha256After": "d5cdf40fda57d12af15308a49ea33cafc92fc76201b55358fe43660f23ad1825"
+  },
+  "studio-runner/src/validator/observedSchemas.json": {
+   "sha256Before": "bee0e60574eee390b970bb08415c3a63252ed372038aec325e9b04d63a3b80c1",
+   "sha256After": "95b8751d223a596df4fe09eb569065d4736c5171e7b4f37fe0133e02006f6c06"
+  }
+ },
+ "untrackedOutputs": [
+  "studio-runner/dist/** (rebuilt)",
+  "docs/qa/evidence/STUDIO-OBS-012A/d1-ceiling/** (this ledger, junit/, joined-metrics/)"
+ ],
+ "verifiedVsInferred": {
+  "verified": "the diffs above, generator/checker output, epoch values (old overlay reproduces the current constants), JUnit XML counts, measured reservation from the test's own metrics file, gate exit codes",
+  "inferred": "that GuidedWireContractTest would fail on a stale epoch (code reading); that the 5 extra fixture sites are within the ruling's intent (criterion applied literally)"
+ }
+}

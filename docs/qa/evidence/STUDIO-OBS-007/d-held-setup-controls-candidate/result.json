@@ -1,0 +1,94 @@
+{
+  "schema": "d-held-setup-controls-candidate/1",
+  "state": "FROZEN_SOURCE_ONLY_AWAITING_COORDINATOR_FORMAT_COMPILE_PG_RUNTIME_AND_REVIEW",
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-setup-failure-controls-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-setup-failure-controls-context.txt",
+    "docs/qa/evidence/STUDIO-OBS-007/d-held-setup-failure-control-design.json"
+  ],
+  "sourceHashesAnd15BodyProof": {
+    "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "beforeSha256": "80b3cd18d98f2a31fc0a4c16142170435cee18eabbccfc45e8323049f2769ffa",
+    "afterSha256": "e236159bcb55cd049d8809dc13a2660dadde2227678d7d9e8b1e92ce7505b98b",
+    "patchSha256": "d18b82eb5ed12b26c6fb01b71f92a92f86e8217f318ccab0fcb266b280b92227",
+    "old15MethodBodiesByteIdentical": true,
+    "oldNineModesByteIdentical": true,
+    "ownersManagersCleanupReceiverLifecycleByteIdentical": true,
+    "removeOnlyTwoDefaultOffHookBlocksReconstructsOldFixtureMethod": true,
+    "hookDefault": "NONE",
+    "expectedDomainInvocations": 17,
+    "newTests": [
+      "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+      "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent"
+    ],
+    "unchangedMethodHashes": {
+      "void actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(": "add4e01f373303bba3534675aad4a09f97fc0d380101a979b5f745e1d3590906",
+      "void genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit(": "14025055195695784fc1ef08e44d5e6040508e3fdd54759a0ad4955734944a5f",
+      "void actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased(": "90fcc283e083e3bed44ac7e8cb4c5681d2a65ba1211fbf496695510edb276a6a",
+      "void actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose(": "793fe53e5aff517f5202d1f4220072f16d8aa048ae79845d93e54e681e208b4a",
+      "void actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose(": "16223d2c60dda8ee883c1821987526c26ac43e8bfe551bb7a8d776cd107bd1c2",
+      "void actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation(": "419b5258dd2da0cb9b400407dbbadb8452d1f564aed9327859709659761c838e",
+      "void actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose(": "90ffa836d878a30f8640e8f3f036d97ea085d064ad1e2ea83c7c09d7de2805a0",
+      "enum Mode {": "f2c3cdbf4d0a7df3037a3996ffcc82e74afa9926bacdb304c59d216b272c03b2",
+      "class SourceStopOwner {": "4d4fbf69faf9ff152de5d75051a24537b19a703e53e99b5f0836d1a9d06521e9",
+      "class TrackingTransactionTemplate extends TransactionTemplate {": "c76e991eb1b0f0ab3c69b4872fe203778948cbf5b4c29592d70fafdfe259a982",
+      "class HeldRowTransactionManager extends DataSourceTransactionManager {": "c1a2828a424bfd4cbfed18e2d69bdfbe24ecba2af3baa83e38a87ab53f90aeed",
+      "class HeldRowTransactionTemplate extends TransactionTemplate {": "754fcf4a68e2ed55292a3bff32d1eef4cc61ba5543d20e7bb37d7dd8d9c76482",
+      "class OwnedCacheListener implements TestExecutionListener, Ordered {": "f897a9b9cd7190c065114b2770b5e8511f904527ff96fbf6dccbd82e3a3b2646",
+      "void closeHeldRowSetup(HeldRowSetup setup, PrivatePgRoute route)": "40af1c75efc1a92c6be34c03eb0d43518f5067f449edbc59edb0a0c26b78edcf",
+      "void closeHeldRowSetupWithClearInterrupt(HeldRowSetup setup, PrivatePgRoute route)": "7f200e620928963fc85981aadc60c23abf760d44fc36d28e7d67a835882a9e3a",
+      "void acceptHeldRowAssignmentStop(": "16984e0d175f91a4823f002a3003ace4dd5431b0c5fc4989af31f688f55eafa2",
+      "void relay(": "3af02c5c82f9c63dd0ba596e795cd50e5294a7bdf9117aeb814d4ad74d7127c7",
+      "static void close() throws Exception {": "8a70ac36706ab56bc884921cc3506926d9506b2015a297c3271de735039c7280",
+      "static void terminateOwnedContextBeforePostgres() {": "fdebb1141e5fd8f5443959c6645abdfd039e8fceaf578ccbe9d99ae91c24a446"
+    }
+  },
+  "stageMatrix": [
+    {
+      "test": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+      "genuineStage": "Original start physically returns and real ID registered before translation/context creation; exact committed owned namespace/key/digest/response-session/test/principal join verified. Supplied exact test observation AssertionError thrown afterward.",
+      "realCleanupAssertions": "Authenticated public cancel actually CANCELLED; actual assignments/materializations/actions/consumed commands/value reads/dispatch POST/stop0; expectedfalse/initiated0/confirmation0/completed latch still1/teardownnull. No declaration audit fabricated. Same original Throwable and no unexpected suppressed errors.",
+      "runtime": "UNRUN"
+    },
+    {
+      "test": "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent",
+      "genuineStage": "Exact original public prepareAssignment first assign suboperation physically returns/persists canonical intent, while real owner unclaimed/base fence and receipt null. No assign RPC/claim/materialization. Exact supplied observation AssertionError thrown afterward.",
+      "realCleanupAssertions": "Authenticated public cancel commits expected-stop registration; real JWT/mTLS exact-intent/path/reason assignment stop receives canonical HTTP200 STOPPED via unchanged controlled receiver. True unclaimed owner/null-pair branch; real original sender+confirmation completion/CONFIRMED/livefalse/stops1; read/dispatch/consume/action/materialization0. Exact supplied primary, any unexpected cleanup causes suppressed+FAIL.",
+      "runtime": "UNRUN"
+    }
+  ],
+  "selectors": [
+    "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+    "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent"
+  ],
+  "sourceScope": "Exactly two named observation controls plus case-local defaultNONE hook fields, two post-success opt-in blocks and small positive-boundary/control assertion helpers. Old15 bodies/modes/owners/managers/cleanup/receiver/lifecycle unchanged. Removing only opt-in blocks restores original fixture method exactly.",
+  "primarySemantics": "Tests compare exact supplied AssertionError identity. Any different actual failure is rethrown; missing observation is FAIL. Actual cleanup failure is attached distinctly and the SAME original observation is thrown to fail the control. Successful cleanup requires zero suppressed errors. No broad exception acceptance/production fake fault.",
+  "receiptScope": "The existing unchanged case receiver derives null fence/lease exclusively from actual unclaimed stored owner/base fence and validates canonical STOPPED. Source controls verify unclaimed owner/no claim receipt before and after, actual stop/controlled termination/original backend confirmation. Historical-grant branch remains source-only/uncovered by these two; no physical worker/Chromium effect claim.",
+  "preservation": [
+    "No manual SQL row/state/audit/grant/clock/reset/renew writes; real public service creation/preparation/cancel only.",
+    "Exact actual owned start receipt authority and genuine committed notify-context expectation semantics retained.",
+    "No optional timeout/profile/permission/schema/wire/pin/production/B/R/sourceoutsidefile or lifecycle change."
+  ],
+  "execution": {
+    "authorFormat": "NOT_RUN",
+    "authorCompile": "NOT_RUN",
+    "authorRuntime": "NOT_RUN",
+    "authorSQL": "NOT_RUN",
+    "authorTests": "NOT_RUN",
+    "authorGradle": "NOT_RUN",
+    "authorDocker": "NOT_RUN",
+    "authorProcessActions": []
+  },
+  "limits": [
+    "Current17 cases all UNRUN by author; exact phase reachability, real closure and original/suppressed error assertions need coordinator execution.",
+    "No product/provider/network fake fault, new generic DB deadline, full Core/Vault/native/browser/historical-grant/all19/QA/lifecycle claim."
+  ],
+  "archives": {
+    "before.java": "docs/qa/evidence/STUDIO-OBS-007/d-held-setup-controls-candidate/before.java",
+    "after.java": "docs/qa/evidence/STUDIO-OBS-007/d-held-setup-controls-candidate/after.java",
+    "source.patch": "docs/qa/evidence/STUDIO-OBS-007/d-held-setup-controls-candidate/source.patch",
+    "hashes.json": "docs/qa/evidence/STUDIO-OBS-007/d-held-setup-controls-candidate/hashes.json",
+    "matrix.json": "docs/qa/evidence/STUDIO-OBS-007/d-held-setup-controls-candidate/matrix.json"
+  },
+  "nextOwner": "Coordinator formats/compiles/runs actual17 with fresh source binding and controls independent review; author parked."
+}

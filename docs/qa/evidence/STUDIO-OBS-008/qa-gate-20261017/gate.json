@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "story": "STUDIO-OBS-008",
+  "gate": "CONCERNS",
+  "reviewer": "Quinn",
+  "status_reason": "All AC-1..AC-9 and inherited obligations met on S_F2; backend 2531/2506/0/0/25 (skips equal the approved 25, 0 names lost vs 015), JaCoCo above minimums, frontend 1367/1367, e2e 13/13. CONCERNS for tracked non-blocking items (D-8 mirror residue, deferred copy/security lows, commit-set coupling, pending user decision).",
+  "reviewed_revision": "source-digest:50692d55e40807f67bf959f0d9672d9305d69b72ad693860506a3f7055e12dd3 dist-digest:897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c",
+  "updated": "2026-10-18T04:10:00Z",
+  "story_version_reviewed": "0.3.17",
+  "story_sha256_before_qa_edit": "81950a05515c1575f2133297e7634a97eafb7acf71658a7a59d14e852e032a15",
+  "status_before": "InReview",
+  "status_after": "Done",
+  "openapi_sha256": "b5ecdcad4c5e152d0edde5ad14af1a04438f3d9153b04037ef9ce5bc0ae29244",
+  "evidence": {
+    "backend": {
+      "label": "obs008-final-check01",
+      "exit": 0,
+      "elapsedSeconds": 6105.41,
+      "total": 2531,
+      "passed": 2506,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 25,
+      "skipsEqualApproved": true,
+      "namesRemovedVs015": 0,
+      "namesAddedVs015": 55,
+      "jacoco": {
+        "bundle": 0.9096,
+        "dispatch": 0.862,
+        "internal": 0.9084,
+        "recovery": 0.8889,
+        "sse": 0.918
+      },
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true
+    },
+    "frontend": {
+      "typeCheck": 0,
+      "lintErrors": 0,
+      "lintWarnings": 308,
+      "vitestFiles": 70,
+      "vitestTests": 1367,
+      "vitestPassed": 1367,
+      "build": 0,
+      "e2e": "13/13",
+      "axeSha": "9d3853da76e71a4b0c69a90ac3a5863345bdbb78076da9df09c6044a99a45934"
+    },
+    "runnerPart1": {
+      "unitPassed": 2306,
+      "unitFailed": 0,
+      "unitPending": 29,
+      "pins": 0
+    },
+    "copyBack": {
+      "changed": 24,
+      "unexpected": 0,
+      "missing": 0,
+      "subsetDigestsEqual": [
+        "backend/",
+        "studio-runner/",
+        "tools/",
+        "docs/specs/",
+        ".github/"
+      ],
+      "distEqual": true
+    },
+    "captureFinal": "50692d55e40807f67bf959f0d9672d9305d69b72ad693860506a3f7055e12dd3"
+  },
+  "top_issues": [
+    {
+      "id": "REQ-001",
+      "severity": "low",
+      "finding": "D-8 mirror residue: handlers.ts:177 secretId ?? name remains; authoring mirror does not require secretId on a secretRef; unreachable from the page",
+      "owner": "@dev",
+      "tracked_in": "C-OBS008-5 in STUDIO-OBS-011"
+    },
+    {
+      "id": "REQ-002",
+      "severity": "low",
+      "finding": "Variables dialog can save a plain variable plus a secret row that the backend refuses at start with an undeclared 422 AUTHORING_REFERENCE_AMBIGUOUS; UI shows the code",
+      "owner": "@architect / 009 C9 lane",
+      "tracked_in": "C-OBS008-4 in STUDIO-OBS-009"
+    },
+    {
+      "id": "MNT-001",
+      "severity": "low",
+      "finding": "guidedNarratives.ts ships basis/source/note/facts (internal doc paths, quotes) in the production bundle",
+      "owner": "@dev",
+      "tracked_in": "C-OBS008-3 in STUDIO-OBS-011"
+    },
+    {
+      "id": "UX-F08",
+      "severity": "low",
+      "finding": "Nine whole copy Lows (UX-08,10,11,14,17,18,19,20,21), UX-09 prefix form, UX-13 'that step' wording, UX-02 question cue",
+      "owner": "@ux-design-expert",
+      "tracked_in": "STUDIO-OBS-F08 in README backlog"
+    },
+    {
+      "id": "SEC-001",
+      "severity": "low",
+      "finding": "UX-21: page-derived role and region render as plain captions outside the untrusted box",
+      "owner": "@dev + @ux-design-expert",
+      "tracked_in": "inside STUDIO-OBS-F08"
+    },
+    {
+      "id": "REQ-003",
+      "severity": "low",
+      "finding": "User decision pending: 'Someone pressed Stop' is untrue after None of these / declined confirmation",
+      "owner": "user",
+      "tracked_in": "README pending user decision"
+    },
+    {
+      "id": "TEST-001",
+      "severity": "medium",
+      "finding": "Copy-table tests read untracked/uncommitted files and pinned story text; tree is uncommitted 015 plus 008; partial commit turns 240+ tests red",
+      "owner": "@devops",
+      "tracked_in": "Dev Agent Record commit-set notes"
+    },
+    {
+      "id": "MNT-003",
+      "severity": "low",
+      "finding": "Leftovers without placed destination: W5-8 executeTest key optional, W5-9, W5-10, F-L5a-4, F-L5b-7/M6",
+      "owner": "@dev",
+      "tracked_in": "Dev Agent Record outbound list"
+    },
+    {
+      "id": "MNT-002",
+      "severity": "low",
+      "finding": "Lint warnings 302 to 308",
+      "owner": "none",
+      "tracked_in": "none"
+    },
+    {
+      "id": "TEST-002",
+      "severity": "low",
+      "finding": "pageGuidedRun.test.tsx 311 s under load in sandbox; passed in final run",
+      "owner": "@dev",
+      "tracked_in": "watch"
+    },
+    {
+      "id": "TEST-003",
+      "severity": "info",
+      "finding": "E2E MSW only, D5 local; no live integration claimed",
+      "owner": "STUDIO-OBS-009",
+      "tracked_in": "009"
+    },
+    {
+      "id": "REL-001",
+      "severity": "info",
+      "finding": "V22 VALIDATE lock window unmeasured at production size",
+      "owner": "STUDIO-OBS-010",
+      "tracked_in": "release readiness"
+    }
+  ],
+  "waiver": {
+    "active": false
+  },
+  "narrative": "docs/qa/evidence/STUDIO-OBS-008/qa-gate-20261017/gate.md",
+  "public_gate": "docs/qa/gates/STUDIO-OBS-008-single-path-studio-ui.yml",
+  "descoped_by_user_not_credited": [
+    "X1-X11 accessibility",
+    "A15-A18",
+    "FE-A11Y",
+    "PLAYBACK-COST",
+    "PLAYBACK-COPY",
+    "R5 wording variant",
+    "R8"
+  ],
+  "handoff": "@devops *push, TEST-001 commit set as precondition"
+}

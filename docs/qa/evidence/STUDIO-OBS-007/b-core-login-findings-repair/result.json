@@ -1,0 +1,94 @@
+{
+  "schema": "studio-observed-core-login-findings-repair/1",
+  "recordedAt": "2026-10-10T21:28:36.869055+00:00",
+  "mode": "SOURCE_ONLY_RUNTIME_UNRUN",
+  "source": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "beforeSHA256": "7f1a3be93f7262ea75e9ee533eecf9bd134144bb4c529b02654093ae3539563c",
+    "candidateSHA256": "882591fa6784e18e961d50c686b0b6cc695aeaf8fd9d8f85375f239772df78be",
+    "patchPath": "docs/qa/evidence/STUDIO-OBS-007/b-core-login-findings-repair/one-file.patch",
+    "patchSHA256": "f3504cfbfc64db9d999ebe0940e35db905e7ab435ef3e368e038fb583b9958fe",
+    "all18NamesPreserved": [
+      "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+      "queuedAndPreReadyRefusals",
+      "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+      "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays",
+      "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance",
+      "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork",
+      "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays",
+      "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall",
+      "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+      "actualCoreMayUseDenialStartsNoSessionAndNoBrowser",
+      "actualCoreGuidedSameSecretIdStaysWithinPersistedScope",
+      "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope",
+      "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure",
+      "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch",
+      "actualGuidedRegistrationPassingAssertRemainsPassed",
+      "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection",
+      "actualPublishedWrongPasswordAnnotatesEarlierSecretFill",
+      "actualPublishedRegistrationPassingAssertRemainsPassed"
+    ],
+    "originalNineBodiesByteIdentical": {
+      "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues": true,
+      "queuedAndPreReadyRefusals": true,
+      "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness": true,
+      "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays": true,
+      "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance": true,
+      "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork": true,
+      "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays": true,
+      "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall": true,
+      "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel": true
+    },
+    "checkedExceptionDeclarationPreserved": true,
+    "otherSourceEdits": false
+  },
+  "peer": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-b-core-login-review.json",
+  "findingMatrix": {
+    "B-CORE-LOGIN-001": {
+      "sourceDisposition": "Dedicated P3_INVOCATIONS at actual existing /invocation forwarding receipt seam; original old list/asynchronous/choice condition untouched. P3 published helper uses real P3 per-execution delta. Original generated invoke called once unchanged.",
+      "runtime": "UNRUN"
+    },
+    "B-CORE-LOGIN-002": {
+      "sourceDisposition": "Published registration calls p3RunnerReport with current ledger full execution/attempt/admission/instance/sequence checks; actual FINAL resultPASSED, errorCode null/detail absent, three original ordered steps PASS and failure null. Public FAILED/null mapping unchanged.",
+      "runtime": "UNRUN"
+    },
+    "B-CORE-LOGIN-003": {
+      "sourceDisposition": "Per-case ordinary execution\u2192actual caller-cookie map tracks every genuine202 including unexpected negative accept. Finally authenticates real public cancellation if nonterminal, validates bounded terminal streamComplete/DONE. A genuine no-transport terminal requires absent real attempt/admission/receipt/sender entry; an attempted transport requires original identity-bound FINAL (actual parent closes/wipes before delivery). No DB/runner final row manufactured. All ordinary+guided owners attempted; cleanup errors aggregated/suppressed onto primary. Fixture authority cleared only after all owners confirmed. Sticky cleanupUnconfirmed blocks following cases and retains fixture authority on uncertainty.",
+      "limits": "Public cancel15s plus terminal/resource60s per execution; actual no-start terminal is protocol-only proof, not invented callback or browser receipt. No reaper-only terminal with attempted transport is treated as cleanup confirmation without original FINAL.",
+      "runtime": "UNRUN"
+    },
+    "B-CORE-LOGIN-004": {
+      "sourceDisposition": "p3Call parses actual202 and tracks guided ID with actual cookie and ordinary acceptance with actual cookie/callback-capture ID before expected status assertion. Unexpected denied caller stays out of legacy user-1-only map but is owned by new cleanup map and authentic cookie. Expected negative assertion still primary. Real guided cancellation then boundedCONFIRMED required; unsupported/failed acknowledgement remains sticky rather than fake success.",
+      "runtime": "UNRUN"
+    }
+  },
+  "preserved": {
+    "original9Bodies": true,
+    "all18Names": true,
+    "originalSECRETFixture": true,
+    "sourceAndGuardAuthority": true,
+    "fixtureOutput4000": true,
+    "sessionTotals32000and128000": true,
+    "productionDefaultsSchemaDistPinsDSource": true,
+    "primaryErrorsRetained": true,
+    "noSecretCounterOrOwnershipBypass": true
+  },
+  "validation": {
+    "formatter": "UNRUN",
+    "compiler": "UNRUN",
+    "testsBuildRuntimeBrowserGradleProcesses": false,
+    "priorCompileRed": "one checked-exception error/zero tests preserved; fixed declaration retained",
+    "QAOrLifecycleClaim": false,
+    "full19Complete": false
+  },
+  "nextSelectors": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualCoreMayUseDenialStartsNoSessionAndNoBrowser",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPublishedWrongPasswordAnnotatesEarlierSecretFill",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPublishedRegistrationPassingAssertRemainsPassed",
+    "all18 after focused genuine root causes resolved"
+  ],
+  "budget": {
+    "wholeWaveUSD": 500,
+    "billingAvailable": false
+  }
+}

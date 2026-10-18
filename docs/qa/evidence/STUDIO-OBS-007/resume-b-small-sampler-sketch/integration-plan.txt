@@ -1,0 +1,18 @@
+ISOLATED INTEGRATION PLAN — NOT APPLIED
+Base: archived Publication a967a0f254e251e6290bbb7aae2e20ceeaa943fcdda37ba1be62c17f59607d07
+1. Add only one default-OFF C5ClaimSampler field to existing C5Capture.
+2. At end of active C5 constructor, create it with separately approved diagnostic selection flag.
+3. Existing selected /claim filter immediately BEFORE the SAME original chain call:
+   if (claim && activeC5.claimSampler != null) activeC5.claimSampler.enterCurrent();
+   try { chain.doFilter(wrapped, response); }
+   finally {
+     if (claim && activeC5.claimSampler != null) activeC5.claimSampler.leaveCurrent();
+     [existing original claim/lifecycle closed diagnostics unchanged]
+   }
+4. Existing C5 close independently stops/joins sampler through existing cleanup path.
+5. Export fixed Status/Segment/Thread.State ordinal counts ONLY after joined. No files,
+   raw frames, names, threadIDs, arguments, body, dates, hashes or Throwable export.
+6. NON_QUIESCENT invalidates diagnostic: registry cleared but sampler-local refs not claimed
+   discarded until thread actually terminates. No Thread.stop/target interrupt/forced sampling.
+7. Original actual flow runs with unchanged TRACE/schema/provider/clock/deadlines/calls.
+   Diagnostic overhead can perturb it; unprofiled original acceptance must follow.

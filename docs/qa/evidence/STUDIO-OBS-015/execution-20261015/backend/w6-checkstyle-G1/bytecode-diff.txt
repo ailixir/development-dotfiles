@@ -1,0 +1,304 @@
+36693c36693
+<       24: ifeq          849
+---
+>       24: ifeq          742
+36948,37023c36948,36990
+<      653: astore        7
+<      655: iconst_m1
+<      656: istore        8
+<      658: aload         7
+<      660: invokevirtual                // Method java/lang/String.hashCode:()I
+<      663: lookupswitch  { // 2
+<            -1367724422: 688
+<             -896505829: 705
+<                default: 719
+<           }
+<      688: aload         7
+<      690: ldc_w                        // String cancel
+<      693: invokevirtual                  // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+<      696: ifeq          719
+<      699: iconst_0
+<      700: istore        8
+<      702: goto          719
+<      705: aload         7
+<      707: ldc_w                        // String source
+<      710: invokevirtual                  // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+<      713: ifeq          719
+<      716: iconst_1
+<      717: istore        8
+<      719: iload         8
+<      721: lookupswitch  { // 2
+<                      0: 748
+<                      1: 754
+<                default: 760
+<           }
+<      748: ldc_w                        // String CANCELLED
+<      751: goto          763
+<      754: ldc_w                        // String REVISION_CONFLICT
+<      757: goto          763
+<      760: ldc_w                        // String STALE_GENERATION
+<      763: astore        6
+<      765: aload_0
+<      766: aload_3
+<      767: iload         5
+<      769: aload         6
+<      771: iconst_1
+<      772: invokevirtual                // Method prefixSyncAwaitDiagnostic:(Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$PrefixSyncParent;ILjava/lang/String;Z)V
+<      775: aload_0
+<      776: aload_3
+<      777: aload         4
+<      779: invokevirtual                // Method prefixSyncNoTarget:(Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$PrefixSyncParent;Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$PrefixSyncFacts;)V
+<      782: aload_3
+<      783: ifnull        818
+<      786: aload_3
+<      787: invokevirtual                // Method com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$PrefixSyncParent.close:()V
+<      790: goto          818
+<      793: astore        4
+<      795: aload_3
+<      796: ifnull        815
+<      799: aload_3
+<      800: invokevirtual                // Method com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$PrefixSyncParent.close:()V
+<      803: goto          815
+<      806: astore        5
+<      808: aload         4
+<      810: aload         5
+<      812: invokevirtual                 // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+<      815: aload         4
+<      817: athrow
+<      818: ldc_w                        // String owner
+<      821: putstatic                    // Field coreRole:Ljava/lang/String;
+<      824: aload_0
+<      825: invokevirtual                // Method forgetCachedCoreIdentity:()V
+<      828: goto          846
+<      831: astore        17
+<      833: ldc_w                        // String owner
+<      836: putstatic                    // Field coreRole:Ljava/lang/String;
+<      839: aload_0
+<      840: invokevirtual                // Method forgetCachedCoreIdentity:()V
+<      843: aload         17
+<      845: athrow
+<      846: goto          18
+<      849: return
+---
+>      653: invokestatic                 // Method prefixSyncRaceCode:(Ljava/lang/String;)Ljava/lang/String;
+>      656: astore        6
+>      658: aload_0
+>      659: aload_3
+>      660: iload         5
+>      662: aload         6
+>      664: iconst_1
+>      665: invokevirtual                // Method prefixSyncAwaitDiagnostic:(Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$PrefixSyncParent;ILjava/lang/String;Z)V
+>      668: aload_0
+>      669: aload_3
+>      670: aload         4
+>      672: invokevirtual                // Method prefixSyncNoTarget:(Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$PrefixSyncParent;Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$PrefixSyncFacts;)V
+>      675: aload_3
+>      676: ifnull        711
+>      679: aload_3
+>      680: invokevirtual                // Method com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$PrefixSyncParent.close:()V
+>      683: goto          711
+>      686: astore        4
+>      688: aload_3
+>      689: ifnull        708
+>      692: aload_3
+>      693: invokevirtual                // Method com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$PrefixSyncParent.close:()V
+>      696: goto          708
+>      699: astore        5
+>      701: aload         4
+>      703: aload         5
+>      705: invokevirtual                 // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+>      708: aload         4
+>      710: athrow
+>      711: ldc_w                        // String owner
+>      714: putstatic                    // Field coreRole:Ljava/lang/String;
+>      717: aload_0
+>      718: invokevirtual                // Method forgetCachedCoreIdentity:()V
+>      721: goto          739
+>      724: astore        17
+>      726: ldc_w                        // String owner
+>      729: putstatic                    // Field coreRole:Ljava/lang/String;
+>      732: aload_0
+>      733: invokevirtual                // Method forgetCachedCoreIdentity:()V
+>      736: aload         17
+>      738: athrow
+>      739: goto          18
+>      742: return
+37026,37029c36993,37001
+<           45   782   793   Class java/lang/Throwable
+<          799   803   806   Class java/lang/Throwable
+<           37   818   831   any
+<          831   833   831   any
+---
+>           45   675   686   Class java/lang/Throwable
+>          692   696   699   Class java/lang/Throwable
+>           37   711   724   any
+>          724   726   724   any
+> 
+>   private static void b2aNoSetup();
+>     descriptor: ()V
+>     Code:
+>        0: return
+42267a42240,42256
+> 
+>   private static java.lang.String b2PasswordControls(com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT$B2PasswordPage);
+>     descriptor: (Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$B2PasswordPage;)Ljava/lang/String;
+>     Code:
+>        0: aload_0
+>        1: invokevirtual                // Method com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$B2PasswordPage.ordinal:()I
+>        4: lookupswitch  { // 2
+>                      1: 32
+>                      2: 38
+>                default: 44
+>           }
+>       32: ldc_w                        // String
+>       35: goto          47
+>       38: ldc_w                        // String <input name=\'password\' type=\'password\'><input name=\'password2\' type=\'password\'>
+>       41: goto          47
+>       44: ldc_w                        // String <input name=\'password\' type=\'password\'>
+>       47: areturn
+42275,42316c42264,42295
+<        5: invokevirtual                // Method com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$B2PasswordPage.ordinal:()I
+<        8: lookupswitch  { // 2
+<                      1: 36
+<                      2: 42
+<                default: 48
+<           }
+<       36: ldc_w                        // String
+<       39: goto          51
+<       42: ldc_w                        // String <input name=\'password\' type=\'password\'><input name=\'password2\' type=\'password\'>
+<       45: goto          51
+<       48: ldc_w                        // String <input name=\'password\' type=\'password\'>
+<       51: astore_1
+<       52: aload_0
+<       53: getstatic                    // Field com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$B2PasswordPage.TYPE_FLIP:Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$B2PasswordPage;
+<       56: if_acmpne     65
+<       59: ldc_w                        // String <script>document.querySelector(\"input[type=password]\").addEventListener(\"focus\",event=>event.target.type=\"text\")</script>
+<       62: goto          68
+<       65: ldc_w                        // String
+<       68: astore_2
+<       69: getstatic                    // Field b2Combined:Z
+<       72: ifeq          116
+<       75: invokestatic                 // Method java/util/UUID.randomUUID:()Ljava/util/UUID;
+<       78: invokestatic                 // Method java/lang/String.valueOf:(Ljava/lang/Object;)Ljava/lang/String;
+<       81: invokedynamic ,  0           // InvokeDynamic :makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+<       86: astore_3
+<       87: getstatic                    // Field B2_ORDER_VALUES:Ljava/util/List;
+<       90: aload_3
+<       91: invokeinterface ,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+<       96: pop
+<       97: getstatic                    // Field VALUES:Ljava/util/List;
+<      100: aload_3
+<      101: invokeinterface ,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+<      106: pop
+<      107: aload_3
+<      108: aload_1
+<      109: aload_2
+<      110: invokedynamic ,  0           // InvokeDynamic :makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+<      115: areturn
+<      116: aload_1
+<      117: aload_2
+<      118: invokedynamic ,  0           // InvokeDynamic :makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+<      123: areturn
+---
+>        5: invokestatic                 // Method b2PasswordControls:(Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$B2PasswordPage;)Ljava/lang/String;
+>        8: astore_1
+>        9: aload_0
+>       10: getstatic                    // Field com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$B2PasswordPage.TYPE_FLIP:Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$B2PasswordPage;
+>       13: if_acmpne     22
+>       16: ldc_w                        // String <script>document.querySelector(\"input[type=password]\").addEventListener(\"focus\",event=>event.target.type=\"text\")</script>
+>       19: goto          25
+>       22: ldc_w                        // String
+>       25: astore_2
+>       26: getstatic                    // Field b2Combined:Z
+>       29: ifeq          73
+>       32: invokestatic                 // Method java/util/UUID.randomUUID:()Ljava/util/UUID;
+>       35: invokestatic                 // Method java/lang/String.valueOf:(Ljava/lang/Object;)Ljava/lang/String;
+>       38: invokedynamic ,  0           // InvokeDynamic :makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+>       43: astore_3
+>       44: getstatic                    // Field B2_ORDER_VALUES:Ljava/util/List;
+>       47: aload_3
+>       48: invokeinterface ,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+>       53: pop
+>       54: getstatic                    // Field VALUES:Ljava/util/List;
+>       57: aload_3
+>       58: invokeinterface ,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+>       63: pop
+>       64: aload_3
+>       65: aload_1
+>       66: aload_2
+>       67: invokedynamic ,  0           // InvokeDynamic :makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+>       72: areturn
+>       73: aload_1
+>       74: aload_2
+>       75: invokedynamic ,  0           // InvokeDynamic :makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+>       80: areturn
+44535a44515,44554
+> 
+>   private static java.lang.String prefixSyncRaceCode(java.lang.String);
+>     descriptor: (Ljava/lang/String;)Ljava/lang/String;
+>     Code:
+>        0: aload_0
+>        1: astore_1
+>        2: iconst_m1
+>        3: istore_2
+>        4: aload_1
+>        5: invokevirtual                // Method java/lang/String.hashCode:()I
+>        8: lookupswitch  { // 2
+>            -1367724422: 36
+>             -896505829: 51
+>                default: 63
+>           }
+>       36: aload_1
+>       37: ldc_w                        // String cancel
+>       40: invokevirtual                  // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+>       43: ifeq          63
+>       46: iconst_0
+>       47: istore_2
+>       48: goto          63
+>       51: aload_1
+>       52: ldc_w                        // String source
+>       55: invokevirtual                  // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+>       58: ifeq          63
+>       61: iconst_1
+>       62: istore_2
+>       63: iload_2
+>       64: lookupswitch  { // 2
+>                      0: 92
+>                      1: 98
+>                default: 104
+>           }
+>       92: ldc_w                        // String CANCELLED
+>       95: goto          107
+>       98: ldc_w                        // String REVISION_CONFLICT
+>      101: goto          107
+>      104: ldc_w                        // String STALE_GENERATION
+>      107: areturn
+79907c79926
+<     1697: ldc_w                        // String SELECT count(*) FROM studio_secret_use_audit WHERE test_id=?
+---
+>     1697: ldc_w                       // String SELECT count(*) FROM studio_secret_use_audit WHERE test_id=?
+79934c79953
+<        7: invokedynamic ,  0           // InvokeDynamic :get:(Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT;Ljava/lang/String;Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$P14Recipe;)Ljava/util/function/Supplier;
+---
+>        7: invokedynamic ,  0          // InvokeDynamic :get:(Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT;Ljava/lang/String;Lcom/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT$P14Recipe;)Ljava/util/function/Supplier;
+79955c79974
+<       62: ldc_w                        // String actual TEXT read value reached the intrinsic binding consumer
+---
+>       62: ldc_w                       // String actual TEXT read value reached the intrinsic binding consumer
+118427,118431d118445
+< 
+<   private static void lambda$N() throws java.lang.Exception;
+<     descriptor: ()V
+<     Code:
+<        0: return
+118433,118442d118446
+<   private static void lambda$N() throws java.lang.Exception;
+<     descriptor: ()V
+<     Code:
+<        0: return
+< 
+<   private static void lambda$N() throws java.lang.Exception;
+<     descriptor: ()V
+<     Code:
+<        0: return
+< 

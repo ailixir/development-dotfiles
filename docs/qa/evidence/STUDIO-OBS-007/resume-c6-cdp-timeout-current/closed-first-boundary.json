@@ -1,0 +1,54 @@
+{
+  "firstFailure": [
+    {
+      "type": "org.opentest4j.AssertionFailedError",
+      "frames": [
+        "GuidedPublicationReplayIT.p8C6Run(GuidedPublicationReplayIT.java:8154)",
+        "GuidedPublicationReplayIT.lambda$p8C6Case$174(GuidedPublicationReplayIT.java:7964)",
+        "GuidedPublicationReplayIT.p3Case(GuidedPublicationReplayIT.java:6613)",
+        "GuidedPublicationReplayIT.p8C6Case(GuidedPublicationReplayIT.java:7964)",
+        "GuidedPublicationReplayIT.actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect(GuidedPublicationReplayIT.java:4538)"
+      ]
+    }
+  ],
+  "actualFixedFacts": [
+    {
+      "receipt": null,
+      "producer": [
+        {
+          "producer": 2,
+          "sent": 44,
+          "acked": 44,
+          "pending": 0,
+          "originalPending": 0,
+          "failed": false,
+          "sealed": true,
+          "contextBound": false
+        },
+        {
+          "producer": 3,
+          "sent": 8,
+          "acked": 8,
+          "pending": 0,
+          "originalPending": 0,
+          "failed": false,
+          "sealed": true,
+          "contextBound": false
+        }
+      ],
+      "executions": [
+        {
+          "status": "ERROR",
+          "ledgerState": "DONE",
+          "errorCode": "NONE",
+          "admission_present": true,
+          "observed_receipt_present": true,
+          "browser_started": true,
+          "last_runner_sequence": 7,
+          "elapsed_ms": 45439
+        }
+      ]
+    }
+  ],
+  "sourceDrift": []
+}

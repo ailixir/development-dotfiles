@@ -1,0 +1,30 @@
+{
+  "scope": "REVISED_SOURCE_ONLY_EXISTING_NAMED_HOLDER_DISPATCH",
+  "sourceSha": "4e2e21bec4c017cef3b2ec4fed6221c111afef70f76c0c25a7439e86189f0f9d",
+  "supersedesRejectedProposal": "resume-pool-prepared-secret-phase-proposal.json",
+  "rejectedOriginalReason": "Default batch20 can dispatch both queued rows in first pass",
+  "productionAPI": "StudioDispatcher.dispatch(UUID)251-264",
+  "proposedOrder": [
+    "Write original pause true; create nonsecret holder execution first without dispatch",
+    "Arm same capture TRACE; create secret execution, retain binding/SSE/observedBinding snapshot before holder dispatch",
+    "Invoke existing dispatcher.dispatch(blocker), require true original send; wait same genuine pause marker",
+    "Retain holder ADMITTED/browsernotstarted/zero-provider guards",
+    "Invoke unchanged dispatchOnce for secret, require genuine429DEFINITE_REFUSAL then release same pause",
+    "Retain all original audit/scope/read/outcome/token/holderPASSED/rotation/retry/sinks/cleanup assertions"
+  ],
+  "preserved": [
+    "Same production claim(instance,lease,now) and dispatchClaimed path for holder",
+    "No new API/selective dispatcher/config/batch/deadline or clock changes",
+    "Secret initial/refreshed dispatchOnce unchanged",
+    "TRACE before secret acceptance/possible provider entry, same whole capture lifetime",
+    "Original32 case bodies unchanged; common helper reorder only"
+  ],
+  "tradeoff": "Capacity holder setup uses existing named claim boundary rather than batch-selection loop; shared original claim guards/lease and runner admission remain real. Batch scheduler selection is not newly tested by holder setup.",
+  "sourceEvidence": [
+    "StudioDispatcher251-264 existing public dispatch",
+    "StudioDispatcher153-181 batch dispatch loop",
+    "Current p7FaultAndRetry5148-5202 starts pause before costly secret acceptance/SSE"
+  ],
+  "performanceClaim": "UNPROVED; measured31.135s holder interval motivates removing setup work from paused lifetime",
+  "authorStatus": "NOT_AUTHORED"
+}

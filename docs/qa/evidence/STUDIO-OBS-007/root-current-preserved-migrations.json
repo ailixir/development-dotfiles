@@ -1,0 +1,205 @@
+{
+  "scope": "OBS007 immutable V1-V33 and stagedV19 current bytes only, no new SQL behavior verdict",
+  "capturedAt": "2026-10-10T09:02:00.509301+00:00",
+  "files": [
+    {
+      "path": "backend/src/main/resources/db/migration/V10__uppercase_status_standardization.sql",
+      "expectedSha256": "714ea331197e4b30000b5f5706262172ee1b17ba0f7b13f6c7c33cb44abdba26",
+      "actualSha256": "714ea331197e4b30000b5f5706262172ee1b17ba0f7b13f6c7c33cb44abdba26",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V11__check_acknowledge_assign.sql",
+      "expectedSha256": "13a95eb5154cc4f3bc037bbfcd1c498faf5b0ecd62473857fab0a2a181179732",
+      "actualSha256": "13a95eb5154cc4f3bc037bbfcd1c498faf5b0ecd62473857fab0a2a181179732",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V12__ui_test_revisions_and_compile_state.sql",
+      "expectedSha256": "a7ed9ab8955a5d9bd9ad7914c4484f1f264210e7bfe45606ff39910e3b3c1b40",
+      "actualSha256": "a7ed9ab8955a5d9bd9ad7914c4484f1f264210e7bfe45606ff39910e3b3c1b40",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V13__studio_dispatch_ledger.sql",
+      "expectedSha256": "4852cddb26c838216969572fb8501895662a9b8ef6a73633b632a10d4e6aa95a",
+      "actualSha256": "4852cddb26c838216969572fb8501895662a9b8ef6a73633b632a10d4e6aa95a",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V14__studio_execution_history_v2.sql",
+      "expectedSha256": "06acca3bbcba2891523dfa7546dc6713424ed0b1ce63bc8da5620d543a9328d5",
+      "actualSha256": "06acca3bbcba2891523dfa7546dc6713424ed0b1ce63bc8da5620d543a9328d5",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V15__studio_dispatch_ledger_state_machine.sql",
+      "expectedSha256": "737813e8f4a69ff25bd4b1b1c4c30a824647d6bc65239d815016f033d747b439",
+      "actualSha256": "737813e8f4a69ff25bd4b1b1c4c30a824647d6bc65239d815016f033d747b439",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V16__studio_compile_started_at.sql",
+      "expectedSha256": "486d076de3e0971281c7a33c25f8b154f7d02c272f25bd6c98ffba6d18ae7100",
+      "actualSha256": "486d076de3e0971281c7a33c25f8b154f7d02c272f25bd6c98ffba6d18ae7100",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V17__studio_execution_error_code_check.sql",
+      "expectedSha256": "286c827aa10220ceea9d55aa5820ea25fe1931f2a81393e280ff213f2f451cab",
+      "actualSha256": "286c827aa10220ceea9d55aa5820ea25fe1931f2a81393e280ff213f2f451cab",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V18__studio_inference_capture.sql",
+      "expectedSha256": "1d69e0051c9cd357ad8a80e17758a8822e504c13f88b3ca0b0967c7c6076f665",
+      "actualSha256": "1d69e0051c9cd357ad8a80e17758a8822e504c13f88b3ca0b0967c7c6076f665",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V1__init.sql",
+      "expectedSha256": "2e010e6e1e6f01706acb0f644ad37a3ba0340363979a994de34a4b33ba750e29",
+      "actualSha256": "2e010e6e1e6f01706acb0f644ad37a3ba0340363979a994de34a4b33ba750e29",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V20__studio_execution_cancel.sql",
+      "expectedSha256": "7a1ed09c0e55e189cdb3047ceed977aa63b50ec4fa48aefb2ef04eacd8a82978",
+      "actualSha256": "7a1ed09c0e55e189cdb3047ceed977aa63b50ec4fa48aefb2ef04eacd8a82978",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V21__studio_authoring_context.sql",
+      "expectedSha256": "3e5138c7a429821012f2b0e8c509ff253c0cb355a0affe335bb15fbf9a2a2fa3",
+      "actualSha256": "3e5138c7a429821012f2b0e8c509ff253c0cb355a0affe335bb15fbf9a2a2fa3",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V22__studio_expected_intent.sql",
+      "expectedSha256": "9b04e2816a34c64f50ba18ccb7b0e33d59aa2389275173625e99675c49426a5d",
+      "actualSha256": "9b04e2816a34c64f50ba18ccb7b0e33d59aa2389275173625e99675c49426a5d",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V23__studio_intent_derivation_version.sql",
+      "expectedSha256": "6d2068c3c5eb003cf2803210c6f521b8d2847e818955c9a674a1bee801028bb7",
+      "actualSha256": "6d2068c3c5eb003cf2803210c6f521b8d2847e818955c9a674a1bee801028bb7",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V24__studio_reference_policy.sql",
+      "expectedSha256": "53b6559e914c5e031a3ededacd83d9e46cdcfe0fd84fb3f708d10d78ea782859",
+      "actualSha256": "53b6559e914c5e031a3ededacd83d9e46cdcfe0fd84fb3f708d10d78ea782859",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V25__drop_plaintext_secrets.sql",
+      "expectedSha256": "ba9c7f3d602b91648d8601644c1b9a84f4e88a3184bfe04bfa5fdc5cd95cc124",
+      "actualSha256": "ba9c7f3d602b91648d8601644c1b9a84f4e88a3184bfe04bfa5fdc5cd95cc124",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V26__studio_scheduling.sql",
+      "expectedSha256": "42593d19e7d2b5febe8bca4b2cbf6bc6088bd24e2b4355e9c426eb52a0a5fb4f",
+      "actualSha256": "42593d19e7d2b5febe8bca4b2cbf6bc6088bd24e2b4355e9c426eb52a0a5fb4f",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V27__studio_revision_immutability_restore.sql",
+      "expectedSha256": "37a29f6e46de7bff8e4426b4b4613b9d17c34e95a86c9fad7f97297065f89ed6",
+      "actualSha256": "37a29f6e46de7bff8e4426b4b4613b9d17c34e95a86c9fad7f97297065f89ed6",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V28__studio_execution_scope_immutable.sql",
+      "expectedSha256": "b896ac72292dd1e1fdc30ddbfe6df70cf811a7a22c2c48c0d6de25f2a64ea93d",
+      "actualSha256": "b896ac72292dd1e1fdc30ddbfe6df70cf811a7a22c2c48c0d6de25f2a64ea93d",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V29__studio_run_confirmation.sql",
+      "expectedSha256": "269bb9b42c606c867d48020c91c067fe2c7957fd2f8746343b9f9783401bc977",
+      "actualSha256": "269bb9b42c606c867d48020c91c067fe2c7957fd2f8746343b9f9783401bc977",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V2__schedule_next_execution.sql",
+      "expectedSha256": "7a36462fcceb86d2ccb533c0743c20bcfedadb819f9674c0d1e8eb847830ca7f",
+      "actualSha256": "7a36462fcceb86d2ccb533c0743c20bcfedadb819f9674c0d1e8eb847830ca7f",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V30__studio_guided_sessions.sql",
+      "expectedSha256": "859c27578e24ad4eeaad0c5a16cb42ee11ac82b94d04ab0fa11644ba4c36502a",
+      "actualSha256": "859c27578e24ad4eeaad0c5a16cb42ee11ac82b94d04ab0fa11644ba4c36502a",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V31__studio_guided_bridge.sql",
+      "expectedSha256": "909e8d68b1012aa2b88ae2567e93a811c233fa61c8ade6b822d4c3fb585bf85c",
+      "actualSha256": "909e8d68b1012aa2b88ae2567e93a811c233fa61c8ade6b822d4c3fb585bf85c",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql",
+      "expectedSha256": "898990b29a4705e0de662a756ba86fad7cfc57cfa1c8775a9a922628781688b7",
+      "actualSha256": "898990b29a4705e0de662a756ba86fad7cfc57cfa1c8775a9a922628781688b7",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql",
+      "expectedSha256": "1119fe64db48d1eeb90fb3798cdd51eea1cd9da63bc0fd13d162af5309d6e50d",
+      "actualSha256": "1119fe64db48d1eeb90fb3798cdd51eea1cd9da63bc0fd13d162af5309d6e50d",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V3__check_templates_seed.sql",
+      "expectedSha256": "8c356f1081df490cbc213f31330883f8be477de722fc737d588f52e2ef8b48ee",
+      "actualSha256": "8c356f1081df490cbc213f31330883f8be477de722fc737d588f52e2ef8b48ee",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V4__secrets_encrypted_value.sql",
+      "expectedSha256": "91662e9f2c8f07e24d85d15d5ce7e5508d4f20ddfc78fdfd1dbfa083f30b24a7",
+      "actualSha256": "91662e9f2c8f07e24d85d15d5ce7e5508d4f20ddfc78fdfd1dbfa083f30b24a7",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V5__story_3_schema_additions.sql",
+      "expectedSha256": "b930941c1b7ba06b8e34b67021425cffedd3264b225607ff3f170ba4545f0477",
+      "actualSha256": "b930941c1b7ba06b8e34b67021425cffedd3264b225607ff3f170ba4545f0477",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V6__report_next_delivery.sql",
+      "expectedSha256": "d4669fed42d82824f278364845540ee4318ee9ab243bc0780a68c5092695d913",
+      "actualSha256": "d4669fed42d82824f278364845540ee4318ee9ab243bc0780a68c5092695d913",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V7__partition_remaining_tables_and_defaults.sql",
+      "expectedSha256": "ee6f50fe699f70af713a7c739acb4eb358a562837e8c43ffb130a6604fb62174",
+      "actualSha256": "ee6f50fe699f70af713a7c739acb4eb358a562837e8c43ffb130a6604fb62174",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V8__failed_dispatches_and_report_failures.sql",
+      "expectedSha256": "78ad49e718124c78f6e7a3a5a64b203f175c73642f2754a01647166c89ec89be",
+      "actualSha256": "78ad49e718124c78f6e7a3a5a64b203f175c73642f2754a01647166c89ec89be",
+      "identical": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V9__schedules_check_type_column.sql",
+      "expectedSha256": "9c91a6b11df2f9b012a638cbf1e0ae921d4dd09c0710a22db9d3c5a18c412f0d",
+      "actualSha256": "9c91a6b11df2f9b012a638cbf1e0ae921d4dd09c0710a22db9d3c5a18c412f0d",
+      "identical": true
+    },
+    {
+      "path": "backend/db/cutover/V19__studio_inference_candidate_identity.sql",
+      "expectedSha256": "8ae0c62865a356461d02a7e3623f730ee607b475b0364768f32fe99402178204",
+      "actualSha256": "8ae0c62865a356461d02a7e3623f730ee607b475b0364768f32fe99402178204",
+      "identical": true
+    }
+  ],
+  "allIdentical": true
+}

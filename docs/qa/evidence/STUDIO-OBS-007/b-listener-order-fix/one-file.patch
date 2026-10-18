@@ -1,0 +1,54 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java candidate
+@@ -58,7 +58,6 @@
+ import javax.net.ssl.KeyManagerFactory;
+ import javax.net.ssl.SSLContext;
+ import javax.net.ssl.TrustManagerFactory;
+-import org.junit.jupiter.api.AfterAll;
+ import org.junit.jupiter.api.AfterEach;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+@@ -874,9 +873,11 @@
+ 
+   public static final class OwnedContextCapture
+       extends org.springframework.test.context.support.AbstractTestExecutionListener {
++    private GuidedPublicationReplayIT ownedInstance;
++
+     @Override
+     public int getOrder() {
+-      return 3000;
++      return 3500;
+     }
+ 
+     @Override
+@@ -885,6 +886,22 @@
+       var instance = (GuidedPublicationReplayIT) testContext.getTestInstance();
+       assertThat(testContext.getApplicationContext()).isSameAs(instance.ownedApplicationContext);
+       instance.ownedFrameworkContext = testContext;
++      ownedInstance = instance;
++    }
++
++    @Override
++    public void afterTestClass(org.springframework.test.context.TestContext testContext)
++        throws Exception {
++      try {
++        assertThat(testContext.getTestClass()).isEqualTo(GuidedPublicationReplayIT.class);
++        assertThat(ownedInstance).isNotNull();
++        assertThat(ownedInstance.ownedFrameworkContext).isSameAs(testContext);
++        assertThat(testContext.getApplicationContext())
++            .isSameAs(ownedInstance.ownedApplicationContext);
++        ownedInstance.stop();
++      } finally {
++        ownedInstance = null;
++      }
+     }
+   }
+ 
+@@ -6501,7 +6518,6 @@
+         .isFalse();
+   }
+ 
+-  @AfterAll
+   void stop() throws Exception {
+     retryRelease.countDown();
+     var failures = new java.util.ArrayList<Throwable>();

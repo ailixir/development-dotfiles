@@ -1,0 +1,21 @@
+{
+  "scope": "INDEPENDENT_MECHANICAL_TEST_STYLE_SOURCE_REVIEW_NOT_RUNTIME_QA",
+  "candidateResultSha256": "43f0da4dd2fa30b94223c9a348194780ef2498132dd8071905fe1d7c5620b2b2",
+  "disposition": "APPROVE_SEVEN_FILE_SCOPED_APPLY_CANONICAL_FORMAT_COOKED_PROOF_STRICT_GATES",
+  "independentProof": [
+    "All7 before/candidate source hash pairs independently verified.",
+    "All7 ENTIRE original files independently reconstructed by reversing every recorded brace/literal transformation at exact positions.",
+    "Before/after ast.tsv bytes independently equal SHAaa0a4363, ordered9156constants.tsv bytes equal SHA23cd7d2b, actual compiled harmless StringConstants.class bytes equal SHAe968f5bd.",
+    "Proof tool source independently inspected: complete ordered tree kinds/names/modifiers/nonstring values retained, only singleton block/parentheses normalized and string-only constant concatenations folded. Harmless constants actually compiled/constant values verified without loading fixture classes.",
+    "124 controls wrapped as complete statements, no extraction or declaration scope change; textblock escaped continuation and literal concatenation preserve cooked generated JS/SQL bytes."
+  ],
+  "conditions": [
+    "Exact current base checks7files, preserve any intervening source changes with zero-fuzz mechanical merge.",
+    "Canonical formatter may alter textblock indentation: rerun existing harmless AST/cooked proof on formatted result and compare original proof BEFORE behavioral credit. No fixture execution by proof.",
+    "Original spotless/checkstyleMain/Test and SpotbugsMain strict checks must run; no suppressions/config/threshold changes.",
+    "Mechanical formatting source disposition can reuse unchanged logical/browser receipts; do not promote each supporting constant check to E2E or rerun every unchanged case. Required final affected gates remain."
+  ],
+  "sourceOnly": true,
+  "formalQA": false,
+  "whole19AcPass": false
+}

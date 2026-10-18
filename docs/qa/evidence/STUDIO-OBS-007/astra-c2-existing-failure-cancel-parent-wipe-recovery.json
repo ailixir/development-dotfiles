@@ -1,0 +1,70 @@
+{
+  "status": "OBSERVED_HISTORICAL_EVENTS_WITH_CURRENT_PRODUCER_SEMANTIC_REUSE",
+  "exits": [
+    {
+      "exit": "STEP_FAILURE",
+      "originalGateReceipt": "resume-c6-timeout-wire-current/result.json",
+      "originalGatePass": true,
+      "sourceSnapshot": "resume-c6-timeout-wire-current/sources.zip",
+      "sourceSnapshotExists": true,
+      "invocationRootCandidates": 1,
+      "nativeWitnessCandidates": 1,
+      "parentRunIdentities": 1,
+      "actualParentWipeEvents": 1,
+      "actualParentCancelRequests": 0,
+      "originalPendingAck": true,
+      "originalNativeCloseConfirmed": true,
+      "realFocusIngress": false,
+      "runnerSourceDistEntries": 364,
+      "currentProducerBinding": "PASS_SOURCE_AND_COMPILED_EXECUTE_SUFFIX_IDENTICAL",
+      "currentRunnerSourceDistMismatches": [
+        "studio-runner/dist/guided/runtime.d.ts",
+        "studio-runner/dist/guided/runtime.js",
+        "studio-runner/dist/guided/runtime.js.map",
+        "studio-runner/dist/server/runCoordinator.js",
+        "studio-runner/dist/server/runCoordinator.js.map",
+        "studio-runner/src/guided/runtime.ts",
+        "studio-runner/src/server/runCoordinator.ts"
+      ],
+      "directCompiledChildPidExport": "NOT_IN_OLD_WITNESS",
+      "newRuntimeExecuted": false,
+      "heapZeroizationClaim": false,
+      "unchangedRunnerSourceDistEntries": 357
+    },
+    {
+      "exit": "CANCEL",
+      "originalGateReceipt": "resume-c6-cdp-cancel-current/result.json",
+      "originalGatePass": true,
+      "sourceSnapshot": "resume-c6-cdp-cancel-current/sources.zip",
+      "sourceSnapshotExists": true,
+      "invocationRootCandidates": 1,
+      "nativeWitnessCandidates": 1,
+      "parentRunIdentities": 1,
+      "actualParentWipeEvents": 1,
+      "actualParentCancelRequests": 1,
+      "originalPendingAck": true,
+      "originalNativeCloseConfirmed": true,
+      "realFocusIngress": false,
+      "runnerSourceDistEntries": 364,
+      "currentProducerBinding": "PASS_SOURCE_AND_COMPILED_EXECUTE_SUFFIX_IDENTICAL",
+      "currentRunnerSourceDistMismatches": [
+        "studio-runner/dist/guided/runtime.d.ts",
+        "studio-runner/dist/guided/runtime.js",
+        "studio-runner/dist/guided/runtime.js.map",
+        "studio-runner/dist/server/runCoordinator.js",
+        "studio-runner/dist/server/runCoordinator.js.map",
+        "studio-runner/src/guided/runtime.ts",
+        "studio-runner/src/server/runCoordinator.ts"
+      ],
+      "directCompiledChildPidExport": "NOT_IN_OLD_WITNESS",
+      "newRuntimeExecuted": false,
+      "heapZeroizationClaim": false,
+      "unchangedRunnerSourceDistEntries": 357
+    }
+  ],
+  "scope": "Original parent event/run lineage observed on recorded source; current parent producer semantics independently identical. Direct compiled-child PID closure still not exported by those old witnesses; no heap or concurrency inference.",
+  "concurrencyCredit": false,
+  "previousStatus": "HISTORICAL_OBSERVED_PARENT_WIPE_EVENTS_PENDING_CURRENT_PRODUCER_BINDING",
+  "independentSourceReview": "astra-c2-failure-cancel-parent-wipe-independent-review.json",
+  "independentSourceReviewSha256": "5d89afbb5817e1723623a0623bc69b9617d74a6ffb3292b76558512e922f33fb"
+}

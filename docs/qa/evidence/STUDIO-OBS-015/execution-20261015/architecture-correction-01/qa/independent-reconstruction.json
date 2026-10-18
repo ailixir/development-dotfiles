@@ -1,0 +1,393 @@
+{
+  "classification": "INDEPENDENT_SYNTHETIC_DESIGN_RECONSTRUCTION_ONLY",
+  "createdAt": "2026-10-15T04:36:53.675371+00:00",
+  "manifestSha256": "6f74157cf539d89714a40bce147442ffae7f45d22c2d4c059d2183d522577f22",
+  "boundFiles": [
+    {
+      "file": "check-design.cjs",
+      "expected": "cc41d86169be2ba5481cfd565d9d42177ee58c0f0a2a355411854311009c71d6",
+      "actual": "cc41d86169be2ba5481cfd565d9d42177ee58c0f0a2a355411854311009c71d6",
+      "ok": true
+    },
+    {
+      "file": "completion-receipt.json",
+      "expected": "179d1e7aee28c1c5878fd29a57a0b5a898e4aec2635a8e7dd22bfa668a4d6b6a",
+      "actual": "179d1e7aee28c1c5878fd29a57a0b5a898e4aec2635a8e7dd22bfa668a4d6b6a",
+      "ok": true
+    },
+    {
+      "file": "design-check-result.json",
+      "expected": "f4565aa2d72c43621ee3cc21196aa6e3fef68115278a0a0ac2c40a0055d52a9c",
+      "actual": "f4565aa2d72c43621ee3cc21196aa6e3fef68115278a0a0ac2c40a0055d52a9c",
+      "ok": true
+    },
+    {
+      "file": "fixtures.json",
+      "expected": "cfe0a1bae262ad988a93f7400011fafb0812c575a2698037202d31733807fc6b",
+      "actual": "cfe0a1bae262ad988a93f7400011fafb0812c575a2698037202d31733807fc6b",
+      "ok": true
+    },
+    {
+      "file": "generate-design.py",
+      "expected": "6f6109fceb77caea124f60b8ebf723c843fa85332736d73f4116dc1ce2559d1f",
+      "actual": "6f6109fceb77caea124f60b8ebf723c843fa85332736d73f4116dc1ce2559d1f",
+      "ok": true
+    },
+    {
+      "file": "implementation-mapping.json",
+      "expected": "4d6832026b9b283b4778cdb9067a4a750226b40e16f178a125139b0e34094fb8",
+      "actual": "4d6832026b9b283b4778cdb9067a4a750226b40e16f178a125139b0e34094fb8",
+      "ok": true
+    },
+    {
+      "file": "interfaces.schema.json",
+      "expected": "31460bc84408df57dd5127dcedced9f8f631b5c80e78f183c73b69d6e5bce5bb",
+      "actual": "31460bc84408df57dd5127dcedced9f8f631b5c80e78f183c73b69d6e5bce5bb",
+      "ok": true
+    },
+    {
+      "file": "ruling.md",
+      "expected": "4cfd50b1a9d3bae194584791455512914b1feb780670d33e9ade822c6d051688",
+      "actual": "4cfd50b1a9d3bae194584791455512914b1feb780670d33e9ade822c6d051688",
+      "ok": true
+    },
+    {
+      "file": "test-delta.json",
+      "expected": "b2a74704d224c9481a8ad01b3f1037fd9f8786a86711350a0b515e54f2b54342",
+      "actual": "b2a74704d224c9481a8ad01b3f1037fd9f8786a86711350a0b515e54f2b54342",
+      "ok": true
+    }
+  ],
+  "diagnosticSourceSnapshots": [
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/manifest.json",
+      "captured": "54c5551d6d3316b3cc384fc4ebbf6d78476840130625476f2af50e193efc3818",
+      "currentObserved": "54c5551d6d3316b3cc384fc4ebbf6d78476840130625476f2af50e193efc3818",
+      "unchanged": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/manifest.json",
+      "captured": "63b9ec46a4c800f1a08c267f929049fab55d458e9910128eae2b6ce7aa3640d0",
+      "currentObserved": "63b9ec46a4c800f1a08c267f929049fab55d458e9910128eae2b6ce7aa3640d0",
+      "unchanged": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/qa-readiness-final.json",
+      "captured": "7e440341dc116d31c01704beae0d3158eefe3d09876619d45cd89953a1423370",
+      "currentObserved": "7e440341dc116d31c01704beae0d3158eefe3d09876619d45cd89953a1423370",
+      "unchanged": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/implementation-receipt.json",
+      "captured": "38f442ba0ff87c191a2c795ad56eda05c4c2a5b5d0e7d04a86f00d28b3d996f1",
+      "currentObserved": "38f442ba0ff87c191a2c795ad56eda05c4c2a5b5d0e7d04a86f00d28b3d996f1",
+      "unchanged": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/touched-files.json",
+      "captured": "edc84ffb59d0ce85322ef2953d5f1d66ba4859e514c7aa3a3b07d143a355f5b5",
+      "currentObserved": "edc84ffb59d0ce85322ef2953d5f1d66ba4859e514c7aa3a3b07d143a355f5b5",
+      "unchanged": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/checkpoint-architecture-dependency.json",
+      "captured": "d677e9643da8a5b5d67d0bb2aae86cf9eb9b2f027e874938b2ebc919cce4c40d",
+      "currentObserved": "d677e9643da8a5b5d67d0bb2aae86cf9eb9b2f027e874938b2ebc919cce4c40d",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json",
+      "captured": "078edacd45c880b3acbc0f4d82a709f8496d72aad685da8fa37aaf7746a487de",
+      "currentObserved": "078edacd45c880b3acbc0f4d82a709f8496d72aad685da8fa37aaf7746a487de",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/revision.schema.json",
+      "captured": "e37b2bd9869d42af323b2ad321e731a2556a8c44ebdc86f52c2e505fc1ea3531",
+      "currentObserved": "e37b2bd9869d42af323b2ad321e731a2556a8c44ebdc86f52c2e505fc1ea3531",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "captured": "757fdb6197367bffb7f5d2242db5d1d6f76565156b1314673377182319629324",
+      "currentObserved": "757fdb6197367bffb7f5d2242db5d1d6f76565156b1314673377182319629324",
+      "unchanged": true
+    },
+    {
+      "file": "studio-runner/src/validator/observedReplay.ts",
+      "captured": "5b10290ccf0a9d3ffe247ff32bd245faba338126acab0c885bbe3e1777f87fb9",
+      "currentObserved": "5b10290ccf0a9d3ffe247ff32bd245faba338126acab0c885bbe3e1777f87fb9",
+      "unchanged": true
+    },
+    {
+      "file": "studio-runner/src/validator/observedReferencePolicy.ts",
+      "captured": "3f57d0acb304df8a5dc626c6fe4f3161f90444f97d2d2a3cc12a8787ada6a948",
+      "currentObserved": "3f57d0acb304df8a5dc626c6fe4f3161f90444f97d2d2a3cc12a8787ada6a948",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/authoring/IncrementalAuthoringIdentity.java",
+      "captured": "bcf9271b378557c6a7cfd80b90296eb98dfea7f4a0df8d47c3f649ccbacddc7c",
+      "currentObserved": "bcf9271b378557c6a7cfd80b90296eb98dfea7f4a0df8d47c3f649ccbacddc7c",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringRevisionIdentity.java",
+      "captured": "80f41e2f0e4dc8d923932afb5b7ee29bc24b07aecdebbcab2340f1daf1e4f504",
+      "currentObserved": "80f41e2f0e4dc8d923932afb5b7ee29bc24b07aecdebbcab2340f1daf1e4f504",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java",
+      "captured": "b3769877088421d7d4690d663efecc35cf016044cc9ee4849fbed74ef722b23f",
+      "currentObserved": "b3769877088421d7d4690d663efecc35cf016044cc9ee4849fbed74ef722b23f",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java",
+      "captured": "4e0b4f6bdf7bf4b3b4260eefa3ff4b8537046e21f2b87be198de0bbd803ebb37",
+      "currentObserved": "4e0b4f6bdf7bf4b3b4260eefa3ff4b8537046e21f2b87be198de0bbd803ebb37",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "captured": "c44d5af6b9577b3543a234be33ac6c97e0535d093791ffae936c0f5316d0021c",
+      "currentObserved": "c44d5af6b9577b3543a234be33ac6c97e0535d093791ffae936c0f5316d0021c",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java",
+      "captured": "9c6b155204eb78359243a99d5d46544e788d7c5381abdf2a1f4f2f1443aeaf1c",
+      "currentObserved": "9c6b155204eb78359243a99d5d46544e788d7c5381abdf2a1f4f2f1443aeaf1c",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringV2Request.java",
+      "captured": "455275e8da934aa7092ee81917cd97d472cfbd980fc45e65f048cc407acfa211",
+      "currentObserved": "455275e8da934aa7092ee81917cd97d472cfbd980fc45e65f048cc407acfa211",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/dto/StepAuthoringContext.java",
+      "captured": "012581ffd2d3c682aee3950f351208bf9fa6376d09a5f39f6dad56c05b366ac4",
+      "currentObserved": "012581ffd2d3c682aee3950f351208bf9fa6376d09a5f39f6dad56c05b366ac4",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/dto/GlobalAuthoringContext.java",
+      "captured": "39e97dea4eed7ce551cb2b2a316b143eb5f5cad2e561588547fc5374c59f02c6",
+      "currentObserved": "39e97dea4eed7ce551cb2b2a316b143eb5f5cad2e561588547fc5374c59f02c6",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/dto/TargetHint.java",
+      "captured": "d7542aa8ccf73b475c69431bafe4bad14492822f3fa4bb51a4db7393c0df3f52",
+      "currentObserved": "d7542aa8ccf73b475c69431bafe4bad14492822f3fa4bb51a4db7393c0df3f52",
+      "unchanged": true
+    }
+  ],
+  "sourceScope": "Live backend/data edits may advance diagnostic source anchors; they are not final implementation baseline claims. Frozen design artifacts must remain exact.",
+  "checks": [
+    {
+      "name": "complete-basis-ordinary",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "complete-basis-boundary",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "complete-basis-empty-prefix-incomplete-base",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "complete-basis-base-historical-ordinary",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "owner-negative-missing-snapshot-evidence",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "closed schema refuses malformed input"
+    },
+    {
+      "name": "owner-negative-null-base-for-nonempty-original-prefix",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "original nonempty prefix requires base proof even drift1"
+    },
+    {
+      "name": "owner-negative-foreign-base-id",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "immutable revision digest"
+    },
+    {
+      "name": "owner-negative-foreign-test-base-identity",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "immutable revision digest"
+    },
+    {
+      "name": "owner-negative-forged-base-revision-digest",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "exact original base pin"
+    },
+    {
+      "name": "owner-negative-forged-base-artifact-hash",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "immutable revision digest"
+    },
+    {
+      "name": "owner-negative-claimed-map-not-recomputed",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "base map recomputed from own facts"
+    },
+    {
+      "name": "owner-negative-changed-base-context-retains-old-snapshot",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "base map recomputed from own facts"
+    },
+    {
+      "name": "owner-negative-source-text-does-not-match-basis",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "exact current source"
+    },
+    {
+      "name": "owner-negative-duplicate-reference-declaration",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "duplicate declaration"
+    },
+    {
+      "name": "owner-negative-missing-referenced-plain-identity",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "missing or wrong-kind reference"
+    },
+    {
+      "name": "owner-negative-private-resolved-value-in-declaration",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "closed schema refuses malformed input"
+    },
+    {
+      "name": "owner-negative-noncontiguous-original-prefix-program",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "program commitment"
+    },
+    {
+      "name": "owner-negative-program-action-not-from-base",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "program commitment"
+    },
+    {
+      "name": "owner-negative-current-prefix-context-cannot-be-reused",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "current prefix byte equality"
+    },
+    {
+      "name": "owner-negative-base-authoring-identity-version-absent",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "closed schema refuses malformed input"
+    },
+    {
+      "name": "missing-context-counterexample-A",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "missing-context-counterexample-B",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "missing-context-changes-exact-tail",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "plain-value-hash-affects-reference-step-only",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "global-context-affects-all-input-chains",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "test-config-affects-all-input-chains",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "authored-step-order-affects-causal-tail",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "normalized-nullable-target-hint-is-part-of-source",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "authored-evidence-ISO-string-remains-source",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "nullable-target-exact-is-not-false",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "plain-reference-hash-verified-against-private-fixture-value",
+      "ok": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "nonempty-original-prefix-nullproof-after-drift1",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "original nonempty prefix requires base proof even drift1"
+    },
+    {
+      "name": "claimed-candidate-map",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "candidate map independently derived"
+    },
+    {
+      "name": "gap-in-reused-prefix",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "derived immediate reuse map"
+    },
+    {
+      "name": "older-immediate-revision-map",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "derived immediate reuse map"
+    }
+  ],
+  "errors": [],
+  "applicationTestsExecuted": 0,
+  "databaseCommandsExecuted": 0,
+  "browserCommandsExecuted": 0,
+  "buildsExecuted": 0,
+  "status": "PASS"
+}

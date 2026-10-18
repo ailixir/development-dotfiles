@@ -1,0 +1,326 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -4890,6 +4890,259 @@
+             : "Owned child group not execution-terminated");
+   }
+ 
++
++  @Test
++  @org.junit.jupiter.api.Order(27)
++  void actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue() throws Exception {
++    p7CapturedFaultAndRetry(true);
++  }
++
++  @Test
++  @org.junit.jupiter.api.Order(28)
++  void actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue() throws Exception {
++    p7CapturedFaultAndRetry(false);
++  }
++
++  private static final java.util.concurrent.atomic.AtomicReference<VaultScope> P7_OUTAGE_SCOPE =
++      new java.util.concurrent.atomic.AtomicReference<>();
++
++  private void p7CapturedFaultAndRetry(boolean capacity) throws Exception {
++    var canaries = List.of("C4-OLD-" + UUID.randomUUID(), "C4-FRESH-" + UUID.randomUUID());
++    C5Capture capture = new C5Capture(canaries);
++    c5Capture = capture;
++    Throwable primary = null;
++    try {
++      capture.writeProfileValues();
++      p3Case(() -> p7FaultAndRetry(capacity, canaries, capture));
++      capture.c4WindowsExecuted = true; // Genuine whole workflow and original owner cleanup returned.
++    } catch (Exception | Error failure) {
++      primary = failure;
++      throw failure;
++    } finally {
++      P7_OUTAGE_SCOPE.set(null);
++      var failures = new java.util.ArrayList<Throwable>();
++      if (!cleanupUnconfirmed) {
++        // The same capture remains active until p3Case has genuinely drained its owners.
++        p3AttemptTeardown(failures, () -> p3Scan(canaries));
++        p3AttemptTeardown(failures, capture::writeNumericEvidence);
++        p3AttemptTeardown(failures, capture::close);
++        c5Capture = null;
++      } else {
++        // No timeout-as-drain: retain the original quarantine over unreaped producers.
++        failures.add(new IllegalStateException("C4 actual owner closure remains unconfirmed"));
++      }
++      if (!failures.isEmpty()) {
++        if (primary != null) {
++          failures.forEach(primary::addSuppressed);
++        } else {
++          throwTeardownFailures(failures);
++        }
++      }
++    }
++  }
++
++  private void p7FaultAndRetry(boolean capacity, List<String> canaries, C5Capture capture)
++      throws Exception {
++    UUID blockerTest = null;
++    P3Publication blockerPublication = null;
++    if (capacity) {
++      p3Mode = P3Mode.REGISTRATION;
++      blockerTest = p3CreateSource("CSI-123", "fixture", false);
++      String holderLearning = p3Start(blockerTest, "fixture");
++      capture.selectedGuidedSession = holderLearning;
++      awaitFinalizing(holderLearning);
++      blockerPublication = p3Publish(holderLearning);
++    }
++    p3Mode = P3Mode.LOGIN;
++    p3Grant("CSI-123", "fixture");
++    UUID test = p3CreateSource("CSI-123", "fixture", true);
++    VaultScope scope = VaultScope.of("CSI-123", "fixture", test);
++    p3ExpectedPassword = canaries.getFirst();
++    p3Seed(scope, p3ExpectedPassword);
++    String learning = p3Start(test, "fixture");
++    capture.selectedGuidedSession = learning;
++    awaitFinalizing(learning);
++    P3Publication publication = p3Publish(learning);
++    p3CleanupOwnedResources();
++    P3_RECEIPTS.clear();
++    P3_NATIVE_SESSIONS.clear();
++    P3_REPORT_REQUESTS.set(0);
++    int models = MODEL_WIRE.size(), attempted = VAULT.readCount();
++    int successful = COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
++    boolean paused = false;
++    Throwable workflowPrimary = null;
++    try {
++      UUID blocker = null;
++      if (capacity) {
++        Files.deleteIfExists(TEMP.resolve("initial-context-check-entered"));
++        Files.writeString(TEMP.resolve("initial-context-state.json"), "{\"pause\":true,\"fail\":false}");
++        paused = true;
++        blocker = p3Execute(blockerTest);
++        p3AssertBinding(blocker, VaultScope.of("CSI-123", "fixture", blockerTest), blockerPublication);
++        assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
++        long until = System.nanoTime() + Duration.ofSeconds(15).toNanos();
++        while (!Files.exists(TEMP.resolve("initial-context-check-entered"))
++            && System.nanoTime() < until) {
++          Thread.sleep(20);
++        }
++        assertThat(Files.exists(TEMP.resolve("initial-context-check-entered"))).isTrue();
++        assertThat("ADMITTED".equals(p6Owner(blocker).get("state"))).isTrue();
++        assertThat(jdbc.queryForObject(
++            "SELECT browser_started_at IS NULL FROM ui_test_executions WHERE id=?",
++            Boolean.class, blocker)).isTrue();
++        assertThat(VAULT.readCount()).as("nonsecret actual browser holder").isEqualTo(attempted);
++      }
++      UUID execution = p3Execute(test);
++      p3AssertBinding(execution, scope, publication);
++      JsonNode first = observedBinding(execution).deepCopy();
++      String attempt = first.path("attemptId").asText();
++      if (!capacity) {
++        assertThat(P7_OUTAGE_SCOPE.compareAndSet(null, scope)).isTrue();
++      }
++      assertThat(dispatcher.dispatchOnce()).isEqualTo(capacity ? 1 : 0);
++      assertThat(VAULT.readCount() - attempted).isEqualTo(1);
++      assertThat(COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS")
++          - successful).isEqualTo(capacity ? 1 : 0);
++      var owner = jdbc.queryForMap(
++          "SELECT l.state,l.attempt_id,l.admission_id,l.definite_refusal_attempt_id,"
++              + "l.zero_send_decision_attempt_id,e.observed_admission_receipt,e.browser_started_at,"
++              + "e.error_code FROM studio_dispatch_ledger l JOIN ui_test_executions e"
++              + " ON e.id=l.execution_id AND e.started_at=l.execution_accepted_at"
++              + " WHERE l.execution_id=?", execution);
++      assertThat("QUEUED".equals(owner.get("state"))).isTrue();
++      for (String field : List.of("attempt_id", "admission_id", "observed_admission_receipt",
++          "browser_started_at", "error_code")) {
++        assertThat(owner.get(field) == null).as("actual first fault is not admitted").isTrue();
++      }
++      assertThat(P3_RECEIPTS.isEmpty() && P3_NATIVE_SESSIONS.isEmpty()).isTrue();
++      assertThat(P3_REPORT_REQUESTS.get()).isZero();
++      List<Map<String, Object>> oldAudit = p7AttemptAudit(execution, attempt);
++      assertThat(oldAudit.size()).isEqualTo(2);
++      var oldRelease = oldAudit.stream().filter(row -> "RELEASE".equals(row.get("row_kind")))
++          .findFirst().orElseThrow();
++      var oldUsage = oldAudit.stream().filter(row -> "USAGE".equals(row.get("row_kind")))
++          .findFirst().orElseThrow();
++      assertThat("REFUSED".equals(oldUsage.get("usage_outcome"))).isTrue();
++      assertThat(oldRelease.get("id").equals(oldUsage.get("release_id"))).isTrue();
++      p4CompareAuditScope(oldRelease, oldUsage);
++      p3AssertAuditScope(null, execution, scope);
++      if (capacity) {
++        var actual = ACTUAL_DISPATCH_DIAGNOSTICS.get(execution);
++        assertThat(actual != null).isTrue();
++        JsonNode refusal = actual.deepCopy();
++        assertThat("DEFINITE_REFUSAL".equals(refusal.path("kind").asText())
++            && refusal.path("retryable").asBoolean()
++            && refusal.path("classifiedHttpStatus").asInt() == 429).isTrue();
++        assertThat(attempt.equals(String.valueOf(owner.get("definite_refusal_attempt_id")))).isTrue();
++        assertThat(owner.get("zero_send_decision_attempt_id") == null).isTrue();
++        assertThat("RESOLVED".equals(oldRelease.get("outcome"))
++            && oldRelease.get("vault_version") != null).isTrue();
++        assertThat(jdbc.queryForObject(
++            "SELECT count(*) FROM studio_observed_no_send_decisions WHERE execution_id=? AND attempt_id=?",
++            Integer.class, execution, UUID.fromString(attempt))).isZero();
++        Files.writeString(TEMP.resolve("initial-context-state.json"), "{\"pause\":false,\"fail\":false}");
++        paused = false;
++        p3AwaitExecution(blocker, "PASSED");
++        // Only the genuine holder is cleaned; global cleanup would cancel the queued retry owner.
++        p3CleanupOrdinary(blocker, p3Cookie, System.nanoTime() + Duration.ofSeconds(60).toNanos());
++        Thread.sleep(Duration.ofSeconds(5).toMillis()); // Original configured Retry-After pacing only.
++      } else {
++        assertThat(P7_OUTAGE_SCOPE.get() == null).isTrue();
++        assertThat(ACTUAL_DISPATCH_DIAGNOSTICS.containsKey(execution)).isFalse();
++        assertThat(owner.get("definite_refusal_attempt_id") == null).isTrue();
++        assertThat(attempt.equals(String.valueOf(owner.get("zero_send_decision_attempt_id")))).isTrue();
++        assertThat("VAULT_UNAVAILABLE".equals(oldRelease.get("outcome"))
++            && oldRelease.get("vault_version") == null).isTrue();
++        var receipt = jdbc.queryForMap(
++            "SELECT disposition,not_entered_ids::text AS not_entered FROM"
++                + " studio_observed_no_send_decisions WHERE execution_id=? AND attempt_id=?",
++            execution, UUID.fromString(attempt));
++        assertThat("REQUEUED".equals(receipt.get("disposition"))).isTrue();
++        JsonNode notEntered = C.parse((String) receipt.get("not_entered"));
++        assertThat(notEntered.isArray()).isTrue();
++        assertThat(notEntered.isEmpty()).isTrue();
++        assertThat(jdbc.queryForObject(
++            "SELECT count(*) FROM studio_observed_secret_read_entries WHERE execution_id=?"
++                + " AND attempt_id=? AND secret_id='PASS'", Integer.class, execution,
++            UUID.fromString(attempt))).isEqualTo(1);
++      }
++      p3ExpectedPassword = canaries.getLast();
++      p3Seed(scope, p3ExpectedPassword);
++      capture.writeProfileValues();
++      assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
++      JsonNode snapshot = p3AwaitExecution(execution, "PASSED");
++      JsonNode second = observedBinding(execution);
++      String freshAttempt = second.path("attemptId").asText();
++      assertThat(attempt.equals(freshAttempt)).isFalse();
++      assertThat(first.path("replayGrant").path("grantId")
++          .equals(second.path("replayGrant").path("grantId"))).isFalse();
++      var before = ((ObjectNode) first).deepCopy();
++      var after = ((ObjectNode) second).deepCopy();
++      before.remove(List.of("attemptId", "replayGrant"));
++      after.remove(List.of("attemptId", "replayGrant"));
++      assertThat(before.equals(after)).isTrue();
++      var grant = second.path("replayGrant");
++      assertThat(grant.path("attemptId").asText().equals(freshAttempt)).isTrue();
++      assertThat(Duration.between(Instant.parse(grant.path("issuedAt").asText()),
++          Instant.parse(grant.path("expiresAt").asText())).toMillis()).isBetween(1L, 30000L);
++      assertThat(ACTUAL_DISPATCH_DIAGNOSTICS.get(execution).path("kind").asText()).isEqualTo("ACCEPTED");
++      assertThat(jdbc.queryForObject(
++          "SELECT definite_refusal_attempt_id IS NULL AND zero_send_decision_attempt_id IS NULL"
++              + " FROM studio_dispatch_ledger WHERE execution_id=?", Boolean.class, execution)).isTrue();
++      assertThat(VAULT.readCount() - attempted).isEqualTo(2);
++      assertThat(COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS")
++          - successful).isEqualTo(capacity ? 2 : 1);
++      assertThat(MODEL_WIRE.size()).isEqualTo(models);
++      assertThat(P3_RECEIPTS.size()).isEqualTo(1);
++      assertThat(P3_RECEIPTS.getFirst().accepted()
++          && P3_RECEIPTS.getFirst().password().equals(canaries.getLast())).isTrue();
++      assertThat(P3_REPORT_REQUESTS.get()).isPositive();
++      p3AssertUsed(null, execution);
++      var freshAudit = p7AttemptAudit(execution, freshAttempt);
++      assertThat(freshAudit.size()).isEqualTo(2);
++      var freshRelease = freshAudit.stream().filter(row -> "RELEASE".equals(row.get("row_kind")))
++          .findFirst().orElseThrow();
++      assertThat("RESOLVED".equals(freshRelease.get("outcome"))).isTrue();
++      if (capacity) {
++        assertThat(oldRelease.get("vault_version").equals(freshRelease.get("vault_version"))).isFalse();
++      }
++      assertThat(oldAudit.equals(p7AttemptAudit(execution, attempt))).isTrue();
++      p3AssertAuditScope(null, execution, scope);
++      assertThat(p3DecodeVideo(execution, snapshot)).isPositive();
++      p3CleanupOwnedResources();
++      p3Scan(canaries);
++      p3WriteEvidence(capacity ? "c4-real-429-fresh-retry" : "c4-real-outage-fresh-retry",
++          C.object().put("actualFirstStatus", capacity ? 429 : 0)
++              .put("firstRunnerClientInvoked", capacity).put("firstValueReturned", capacity)
++              .put("providerAttempts", 2).put("successfulValues", capacity ? 2 : 1)
++              .put("freshAttemptGrant", true).put("firstAuditImmutable", true)
++              .put("rotatedNativeValueAccepted", true).put("nativeVideoDecoded", true)
++              .put("modelCallsDuringOrdinaryPasses", 0).put("sameActiveC5Window", true));
++    } catch (Exception | Error failure) {
++      workflowPrimary = failure;
++      throw failure;
++    } finally {
++      P7_OUTAGE_SCOPE.set(null);
++      if (paused) {
++        try {
++          Files.writeString(TEMP.resolve("initial-context-state.json"), "{\"pause\":false,\"fail\":false}");
++        } catch (Exception | Error cleanup) {
++          if (workflowPrimary != null) {
++            workflowPrimary.addSuppressed(cleanup);
++          } else {
++            throw cleanup;
++          }
++        }
++      }
++    }
++  }
++
++  private List<Map<String, Object>> p7AttemptAudit(UUID execution, String attempt) {
++    return jdbc.queryForList(
++        "SELECT * FROM studio_secret_use_audit WHERE execution_id=? AND attempt_id=?"
++            + " AND secret_id='PASS' ORDER BY row_kind,id", execution, attempt);
++  }
++
+   private String p3Cookie;
+   private final Map<String, String> p3OwnedGuidedCookies = new java.util.LinkedHashMap<>();
+   private final Map<UUID, String> p3OwnedOrdinaryCookies = new java.util.LinkedHashMap<>();
+@@ -6639,6 +6892,10 @@
+         p3OwnedOrdinaryCookies.put(execution, cookie);
+         P3_EXECUTIONS.add(execution);
+       }
++    }
++    C5Capture capture = c5Capture;
++    if (capture != null) {
++      capture.recordHttp(response); // Observe the original returned response; no extra HTTP call.
+     }
+     // Track genuine success, including an unexpected negative-test 202, before refusing its status.
+     assertThat(response.statusCode()).as("actual P3 public route status").isEqualTo(status);
+@@ -7897,7 +8154,19 @@
+         // The current entry vanishes only at its real value-read boundary; another scope remains.
+         VAULT.delete(kind, scope, name);
+       }
+-      Optional<VaultEntry> result = VAULT.read(kind, scope, name);
++      Optional<VaultEntry> result;
++      VaultScope unavailableScope = P7_OUTAGE_SCOPE.get();
++      if (kind == ReferenceKind.SECRET && name.equals("PASS") && scope.equals(unavailableScope)
++          && P7_OUTAGE_SCOPE.compareAndSet(unavailableScope, null)) {
++        VAULT.makeUnavailable();
++        try {
++          result = VAULT.read(kind, scope, name); // Original provider increments and throws itself.
++        } finally {
++          VAULT.makeAvailable(); // Preserve every counter, entry, version and returned array.
++        }
++      } else {
++        result = VAULT.read(kind, scope, name);
++      }
+       reads.add(
+           new OwnedVaultRead(
+               com.citi.put.checks.studio.secrets.FakeStudioVaultProvider.key(kind, scope, name),
+@@ -8287,7 +8556,7 @@
+     private final ch.qos.logback.classic.LoggerContext loggerContext;
+     private final long statusSince;
+     private long rootEvents, appEvents;
+-    private boolean failed;
++    private boolean failed, c4WindowsExecuted;
+     private int httpBodies,
+         httpErrors,
+         jsonBodies,
+@@ -8687,7 +8956,7 @@
+               .put("profileFiles", profileFiles)
+               .put("knownRootLinks", profileLinks)
+               .put("externalLinkTargetBytesScanned", false)
+-              .put("c4WindowsExecuted", false)
++              .put("c4WindowsExecuted", c4WindowsExecuted)
+               .put("appEventsObserved", appEvents > 0);
+       Files.writeString(TEMP.resolve("c5-numeric-evidence.json"), evidence.toString());
+     }
+--- a/backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java
+@@ -131,6 +131,11 @@
+     available = false;
+   }
+ 
++  /** Restore availability without resetting existing facts or attempted-read counters. */
++  public void makeAvailable() {
++    available = true;
++  }
++
+   public static String key(ReferenceKind kind, VaultScope scope, String referenceName) {
+     return kind.name()
+         + '|'

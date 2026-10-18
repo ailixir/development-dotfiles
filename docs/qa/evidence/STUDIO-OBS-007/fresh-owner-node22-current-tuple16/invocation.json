@@ -1,0 +1,14 @@
+{
+  "command": [
+    "npm",
+    "run",
+    "test",
+    "--",
+    "test/observedV3TupleValidation.test.ts",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-007/fresh-owner-node22-current-tuple16/tests.json"
+  ],
+  "expected": 16,
+  "startedAt": "2026-10-11T01:28:23.525749+00:00"
+}

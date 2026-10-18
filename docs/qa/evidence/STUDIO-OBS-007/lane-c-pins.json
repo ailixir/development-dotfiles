@@ -1,0 +1,36 @@
+{
+  "ok": true,
+  "failures": [],
+  "notAsserted": [
+    "dist/runtime-versions.json chromiumBuild is not asserted (it is null): this build did not run inside the pinned Playwright image, or ran there without being told which image it was, so the browser build was not asserted (ED-05).",
+    "dist/runtime-versions.json image is not asserted (it is null): this build did not run inside the pinned Playwright image, or ran there without being told which image it was, so the browser build was not asserted (ED-05)."
+  ],
+  "pins": {
+    "declared": "1.63.0",
+    "locked": "1.63.0",
+    "image": "1.63.0",
+    "recorded": "1.63.0",
+    "declaredTypescript": "5.9.3",
+    "engines": ">=22.11.0 <25.0.0",
+    "nvmrc": "22",
+    "runtime": {
+      "playwright": "1.63.0",
+      "playwrightLocked": "1.63.0",
+      "playwrightImageTag": "1.63.0",
+      "chromiumBuild": null,
+      "node": "v23.10.0",
+      "nodeEngineRange": ">=22.11.0 <25.0.0",
+      "nodeMajorPin": "22",
+      "validatorSchema": "2.0.0",
+      "validatorParser": "typescript@5.9.3",
+      "syntaxReference": "2.1.0",
+      "executor": "2.1.0",
+      "artifact": 1,
+      "image": null,
+      "observedSchemaBundleHash": "dab490f97f833b48addc0644b4591830b68d459e411d4ba78a7d94c293dda549",
+      "observedReferenceBundleHash": "6632fe7dac978c091255e3b22575b0b386b07f7b0017ac0408d1ac53995d60f5",
+      "observedChromiumBuild": "1243"
+    },
+    "runtimePresent": true
+  }
+}

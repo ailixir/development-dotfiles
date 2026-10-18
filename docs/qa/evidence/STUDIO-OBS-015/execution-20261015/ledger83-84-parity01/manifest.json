@@ -1,0 +1,88 @@
+{
+  "artifact": "ledger83-84-parity01",
+  "story": "STUDIO-OBS-015",
+  "agent": "Dex-T (@dev)",
+  "createdAt": "2026-10-16",
+  "subjects": {
+    "validationLedgerRows": [83, 84],
+    "testDelta": "architecture-correction-03/test-delta.json additionalApplicationCases[5], [6]",
+    "pregateBlocker": "qa-pregate01/map.json genuineBlockers GB-1"
+  },
+  "verdict": {
+    "divergence": "REAL_FOR_SCHEMA_LEGAL_INPUT_LATENT_IN_CURRENT_MINTING",
+    "contractOrder": "startMs, kindRank(prefixReplay,step,clarificationWait,action), ordinal null-first, stepId code point, admissionId null-first code point (ruling.md T1 l.70)",
+    "deviatingSide": "studio-runner/src/guided/evidence.ts wireTimings (UTF-16 code-unit compare via JS <)",
+    "productionChange": "studio-runner/src/guided/evidence.ts: private compareCodePoints used for stepId and admissionId",
+    "javaProductionChange": false,
+    "schemaAsciiProof": "NOT_AVAILABLE: action-timing/ledger/commands/session schemas constrain stepId/admissionId to string minLength 1 maxLength 256 only; DB varchar(256)",
+    "implementationReachability": "admissionId UUID.randomUUID() (GuidedActionLedger.java:48) [V]; stepId bound to authoring UUID at publication (GuidedSnapshotDeriver.java:28) [V]; session sourceSteps copied from snapshot (GuidedSessionService.java:684) [I]"
+  },
+  "javaLane": {
+    "comparator": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimings.java:148-170",
+    "class": "com.citi.put.checks.studio.guided.evidence.GuidedRecordingTimingsTest",
+    "gradleSelector": "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.guided.evidence.GuidedRecordingTimingsTest'",
+    "inDefaultTestTask": true,
+    "whyNeverExecuted": "Not excluded (include **/*Test.class; only SseCrossReplicaIT excluded). Every recorded 015 run used narrow --tests selectors that never named this class; backend/build/test-results/test holds only GuidedPublicationAuthorityIT and GuidedPublicationReplayIT XML.",
+    "methodsAdded": [
+      "distinctAdmissionsWithIdenticalMeasuredKeysRemainDistinct",
+      "tieEndSelectionAndUnicodeOrderMatchRunner"
+    ],
+    "existingRelatedMethods": [
+      "stepIdTiesBreakInCodePointOrder",
+      "equalMeasuredAttemptCoordinatesUseAdmissionIdentityWithoutChangingReadings",
+      "admissionTieBreakIsScalarAndNeverCreatesAnAbsentPreNativeReading",
+      "endMsIsTakenFromTheActionWithTheGreatestStartNotTheLargestEnd",
+      "refusesEveryRuledSemanticViolation"
+    ]
+  },
+  "tsLane": {
+    "comparator": "studio-runner/src/guided/evidence.ts:139-144 wireTimings",
+    "testFile": "studio-runner/test/guided/evidence.test.ts",
+    "command": "cd studio-runner && npx vitest run test/guided/evidence.test.ts",
+    "testsAdded": [
+      "timing tie parity (shared vector with GuidedRecordingTimingsTest) > distinctAdmissionsWithIdenticalMeasuredKeysRemainDistinct",
+      "timing tie parity (shared vector with GuidedRecordingTimingsTest) > tieEndSelectionAndUnicodeOrderMatchRunner",
+      "timing tie parity (shared vector with GuidedRecordingTimingsTest) > carries an equal-millisecond astral tie through the recording callback and never invents an absent reading"
+    ]
+  },
+  "sharedVector": {
+    "path": "docs/specs/studio-observed-authoring/contracts/v3/timing-order-vectors.json",
+    "new": true,
+    "sha256": "28a2171311f37dc57bb30cbbb4559271b448b91c60487095a6587decfa17dae3",
+    "cases": {
+      "83": ["equalMeasuredKeysDistinctAdmissions"],
+      "84": ["astralAdmissionTieKeepsAbsentPreNativeReadingAbsent", "astralStepIdOrder", "bmpPrefixAndPrivateUseOrder", "endSelectionOverActualReadings"]
+    },
+    "refused": ["duplicateAdmissionAtADifferentTime", "exactDuplicateItem", "unknownAdmission", "undispatchedAdmission", "wrongOrdinal", "wrongStepId", "tieInReverseAdmissionOrder", "astralTieInUtf16CodeUnitOrder"],
+    "oracle": "independent Python generator (str order = code point order); not derived from Java or TS output"
+  },
+  "patch": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/ledger83-84-parity01/parity.patch",
+    "sha256": "5d9f8dd2fcf0d1bbe5bc3a0420e0070a2897300f2a45177afb38c6b89d3dcfd8",
+    "applyCheck": "cd <repo-root> && git apply --check -p0 docs/qa/evidence/STUDIO-OBS-015/execution-20261015/ledger83-84-parity01/parity.patch -> OK (2026-10-16)",
+    "files": [
+      {"path": "studio-runner/src/guided/evidence.ts", "kind": "production", "baseSha256": "03afea081e543fc920d2e8012b85951bde9ffd737eb5ba858af959c006340279"},
+      {"path": "studio-runner/test/guided/evidence.test.ts", "kind": "test", "baseSha256": "69cc689da27b59737cb2a1b4661a4f5d423af76bd886e0947761d9ce19cf12ee"},
+      {"path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimingsTest.java", "kind": "test", "baseSha256": "470dff7420dd2cee1bf200aa102876712d158e28f972baf3b8ace3dc920623c3"},
+      {"path": "docs/specs/studio-observed-authoring/contracts/README.md", "kind": "doc", "baseSha256": "51808d1b16d5ffdb5ea9e65cfba00d522bfa7cd1dc71372514f34c82c5c7d7f1"},
+      {"path": "docs/specs/studio-observed-authoring/contracts/v3/timing-order-vectors.json", "kind": "new-vector", "baseSha256": null}
+    ],
+    "unchangedReference": {"path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimings.java", "sha256": "66b2918e80bd9493b259000e79d37ae95636cc31affa48e2f41c6fe6bad5c0bf"}
+  },
+  "isolatedRuns": {
+    "environment": "scratch copy of studio-runner (no node_modules; read-only symlink to live node_modules), docs/specs, tools; Node v23.10.0; vitest 3.2.7; --coverage.enabled=false",
+    "tsRedBeforeFix": {"file": "test/guided/evidence.test.ts", "passed": 21, "failed": 2, "failing": ["tieEndSelectionAndUnicodeOrderMatchRunner", "carries an equal-millisecond astral tie through the recording callback and never invents an absent reading"]},
+    "tsGreenAfterFix": {"file": "test/guided/evidence.test.ts", "passed": 23, "failed": 0},
+    "tsGuidedDir": {"files": 9, "passed": 141, "failed": 0},
+    "tsFullUnitTier": {"filesPassed": 102, "filesFailed": 2, "testsPassed": 2209, "testsFailed": 3, "failingFiles": ["test/pins.test.ts", "test/disclosure.test.ts"], "baselineWithoutPatch": "same 2 files / 3 tests fail (environmental to isolated copy)"},
+    "eslint": {"files": ["src/guided/evidence.ts", "test/guided/evidence.test.ts"], "exit": 0},
+    "typecheck": {"command": "tsc -p tsconfig.json --noEmit", "exit": 0},
+    "java": {"jdk": "21.0.10 (Gradle-provisioned)", "launcher": "JUnit Platform 1.10.3 / Jupiter 5.10.3 scratch launcher", "workingDir": "iso/backend", "found": 11, "passed": 11, "failed": 0, "compiledAgainst": "live unmodified GuidedRecordingTimings.java"},
+    "javaMutationUtf16": {"mutation": "codePoints -> String::compareTo", "failed": 4, "includes": ["distinctAdmissionsWithIdenticalMeasuredKeysRemainDistinct", "tieEndSelectionAndUnicodeOrderMatchRunner"]}
+  },
+  "notRun": ["Gradle (any task)", "spotlessCheck/checkstyle", "tools/check-studio-observed-contracts.cjs", "repo pnpm/npm build", "runner coverage thresholds"],
+  "openItems": [
+    "Execute the Gradle selector and runner evidence.test.ts on the live tree after applying the patch in the final run",
+    "Pre-existing google-java-format nonconformance in live GuidedRecordingTimingsTest.java (l.158-198) and GuidedRecordingTimings.java (l.145-146, l.154); spotlessCheck will flag them regardless of this patch"
+  ]
+}

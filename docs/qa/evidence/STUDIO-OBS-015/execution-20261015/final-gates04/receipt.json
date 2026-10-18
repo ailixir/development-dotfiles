@@ -1,0 +1,223 @@
+{
+  "story": "STUDIO-OBS-015",
+  "step": "final source-frozen gates (final-gates04, attempt04)",
+  "agent": "Gage (@devops)",
+  "date": "2026-10-16 22:50 EDT to 2026-10-17 00:33 EDT (2026-10-17T02:50Z to 04:33Z)",
+  "head": "734ad704f6ae508dbb10d9b5127a315bb0df5f81",
+  "verdict": "GREEN",
+  "attempt04_slot": {
+    "receiptPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates04/receipt.json",
+    "label": "final-gate-attempt04-20261016T2252",
+    "exit": 0,
+    "counts": {
+      "test": "2412 total / 2387 passed / 0 failed / 0 errors / 25 skipped (= approved 25)",
+      "guidedIncrementalTest": "62 / 62",
+      "crossReplicaTest": "2 / 2",
+      "all": "2476 total / 2451 passed / 0 failed / 0 errors / 25 skipped"
+    },
+    "elapsedSeconds": 6073.27,
+    "jacoco": "jacocoTestReport and jacocoTestCoverageVerification executed and passed (Gradle BUILD SUCCESSFUL). Bundle line 0.9088 (min 0.70); dispatch 0.8620, internal 0.9093, recovery 0.8889, sse 0.9258 (min 0.75 each); studio.compile and studio.compile.gateway rules vacuous (packages no longer exist)",
+    "requireFreshGuidedPartitions": "executed and passed (retainOriginalGuidedCohort, retainIncrementalGuidedCohort, requireFreshGuidedPartitions all ran after the two lanes; no failure; collector found exactly 1 fresh JOIN cohort per lane)",
+    "sourceDigest": "f071984a46af15a039140e11135c0223092b338fd79d3a985757421ab323cabe",
+    "distDigest": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e",
+    "newFailures": []
+  },
+  "binding": {
+    "S_F3": "f071984a46af15a039140e11135c0223092b338fd79d3a985757421ab323cabe",
+    "D_F": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e",
+    "identicalToAttempt03": true,
+    "note": "unchanged rerun: source and dist digests equal attempt03's (final-gates03/capture-before.json) file by file"
+  },
+  "freeze": {
+    "before": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates04/capture-before.json",
+      "capturedAt": "2026-10-17T02:50:31.262764+00:00",
+      "source": "f071984a46af15a039140e11135c0223092b338fd79d3a985757421ab323cabe",
+      "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+    },
+    "after": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates04/capture-after.json",
+      "capturedAt": "2026-10-17T04:32:44.217143+00:00",
+      "source": "f071984a46af15a039140e11135c0223092b338fd79d3a985757421ab323cabe",
+      "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+    },
+    "collectorManifests": {
+      "before": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/final-gate-attempt04-20261016T2252-before.json (2026-10-17T02:50:41Z, source f071984a..., dist 80d1ba1d...)",
+      "after": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/final-gate-attempt04-20261016T2252-after.json (2026-10-17T04:31:55Z, source f071984a..., dist 80d1ba1d...)"
+    },
+    "filesIdentical": true,
+    "distIdentical": true,
+    "scopeFiles": 1647
+  },
+  "precheck": {
+    "capturedWith": ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+    "sourceDigestExpected": "f071984a...",
+    "sourceFilesExpected": 1647,
+    "distDigestExpected": "80d1ba1d...",
+    "result": "match; run authorised"
+  },
+  "host": {
+    "before": {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates04/host-before.txt",
+      "capturedAt": "2026-10-17T02:50Z (22:50 EDT)",
+      "vmSwapusage": "total = 5120.00M  used = 4064.19M  free = 1055.81M  (encrypted)",
+      "memoryPressureQ": "System-wide memory free percentage: 46%"
+    },
+    "after": {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates04/host-after.txt",
+      "capturedAt": "2026-10-17T04:32Z (00:32 EDT)",
+      "vmSwapusage": "total = 7168.00M  used = 5640.38M  free = 1527.62M  (encrypted)",
+      "memoryPressureQ": "System-wide memory free percentage: 71%"
+    },
+    "note": "Swap file grew from 5120M to 7168M total during the run (used 4064M to 5640M). Free memory was 46% at launch, not the 50% quoted in the brief."
+  },
+  "approvedSkipsFile": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/approved-historical-skips.json",
+    "sha256": "5a0755a49408fdc1645f5f47ea2a6f44280f174b25c632c8b93f80225a907a81",
+    "entries": 25,
+    "note": "same file as attempts 01 to 03; unchanged; not independently ratified (same caveat as before)"
+  },
+  "collectorSha256": "b81dbb25086aaebe4a001512cabdb4c8a071f3c3c2c43908adf298a140ab3b3b",
+  "gates": [
+    {
+      "gate": "backend-final-check (collector), includes static tasks, test, guidedIncrementalTest, crossReplicaTest, JaCoCo, requireFreshGuidedPartitions",
+      "verdict": "PASS",
+      "command": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py final-gate-attempt04-20261016T2252 --test-tasks test,guidedIncrementalTest,crossReplicaTest --require-exec-tasks test,guidedIncrementalTest --allowed-skips-file docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/approved-historical-skips.json -- --no-daemon --continue check --rerun-tasks",
+      "launch": "nohup, PID 80588",
+      "launchedAt": "2026-10-17T02:50:41Z",
+      "exit": 0,
+      "gradleExit": 0,
+      "elapsedSeconds": 6073.27,
+      "gradleReported": "BUILD SUCCESSFUL in 1h 41m 12s; 25 actionable tasks: 25 executed",
+      "validationSucceeded": true,
+      "sourceStable": true,
+      "distStable": true,
+      "testInputStable": true,
+      "taskCollectionComplete": true,
+      "taskCollectionErrors": [],
+      "counts": {
+        "total": 2476,
+        "passed": 2451,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 25
+      },
+      "taskResults": {
+        "test": {
+          "counts": {"total": 2412, "passed": 2387, "failed": 0, "errors": 0, "skipped": 25},
+          "freshXmlFiles": 305,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": true,
+          "freshJoinCohorts": 1
+        },
+        "guidedIncrementalTest": {
+          "counts": {"total": 62, "passed": 62, "failed": 0, "errors": 0, "skipped": 0},
+          "freshXmlFiles": 1,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": true,
+          "freshJoinCohorts": 1
+        },
+        "crossReplicaTest": {
+          "counts": {"total": 2, "passed": 2, "failed": 0, "errors": 0, "skipped": 0},
+          "freshXmlFiles": 1,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": false,
+          "joinCasesPresent": false,
+          "freshJoinCohorts": 0
+        }
+      },
+      "expected": {
+        "test": "2412/2387/0/25",
+        "guidedIncrementalTest": "62/62",
+        "crossReplicaTest": "2/2",
+        "jacocoAndRequireFreshGuidedPartitions": "RUN and PASS"
+      },
+      "matchesExpected": true,
+      "skipsEqualApproved25": true,
+      "failedCases": [],
+      "gradleTaskOrderTail": [
+        "retainOriginalGuidedCohort", "guidedIncrementalTest", "retainIncrementalGuidedCohort", "requireFreshGuidedPartitions",
+        "jacocoTestReport", "jacocoTestCoverageVerification", "rdsParityLint", "spotbugsTest (SKIPPED, disabled by design)",
+        "spotlessCheck", "testcontainersAlignmentCheck", "spotbugsMain", "check"
+      ],
+      "jacoco": {
+        "summary": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates04/jacoco-line-summary.json",
+        "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates04/reports/jacoco/test/jacocoTestReport.xml",
+        "lineCoveredRatio": {
+          "bundle": {"min": 0.70, "actual": 0.9088, "covered": 22468, "missed": 2256},
+          "studio.dispatch": {"min": 0.75, "actual": 0.8620, "covered": 962, "missed": 154},
+          "studio.internal": {"min": 0.75, "actual": 0.9093, "covered": 672, "missed": 67},
+          "studio.recovery": {"min": 0.75, "actual": 0.8889, "covered": 232, "missed": 29},
+          "studio.sse": {"min": 0.75, "actual": 0.9258, "covered": 237, "missed": 19},
+          "studio.compile": {"min": 0.80, "actual": null, "vacuous": true},
+          "studio.compile.gateway": {"min": 0.80, "actual": null, "vacuous": true}
+        },
+        "disclosure": "ratios computed by me from the report XML (LINE counters); the Gradle verification task passing is the authoritative result. The two compile rules match no package (compile path removed) and pass vacuously."
+      },
+      "attempt03TriggerTests": {
+        "GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()": "PASSED (first guided context push; CONTEXT_LOST did not recur, 0 occurrences in the log)",
+        "GuidedPublicationAuthorityIT stored private returned history header-count": "PASSED (no Flyway EOF)",
+        "GuidedPublicationReplayIT.queuedAndPreReadyRefusals() and editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness()": "PASSED"
+      },
+      "logObservations": {
+        "contextLostLines": 0,
+        "eofExceptionLines": 0,
+        "note": "76 ERROR-level log lines, none a test failure. The 2 'An I/O error occurred while sending to the backend' lines (23:17:08 EDT) belong to a cached Spring context's scheduler and async user-provisioning hitting an embedded Postgres that had just logged 'received fast shutdown request' (SQLState 57P01 'terminating connection due to administrator command'). That is context-cache teardown noise, same family as attempts 01 to 03. [inference on cause]"
+      },
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/final-gate-attempt04-20261016T2252-results.json",
+      "resultsSha256": "2694787c331b4585468ea97813ee57152b13ef8ea45e902388e7b123809acfe4",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/final-gate-attempt04-20261016T2252.log",
+      "logSha256": "60269e6885395a4893e2123a0df5741badc0d756fa7d8e538c1bc021ca0cbca3",
+      "collectorLog": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates04/backend-final-check-attempt04.collector.log",
+      "taskOutputs": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/final-gate-attempt04-20261016T2252-task-outputs/",
+      "postRunAudit": {
+        "dockerBefore": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates04/backend-final-check-attempt04-docker-before.txt",
+        "dockerAfter": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates04/backend-final-check-attempt04-docker-after.txt",
+        "containerSetUnchanged": true,
+        "remainingProcesses": "only pre-existing PID 44737 (guidedMain.js, started 2026-10-10), not signalled",
+        "supabaseContainers": "the 8 supabase_*_outvo containers were already stopped before launch (by the user's approval) and stayed stopped; I did not start, stop or remove any container"
+      }
+    },
+    {
+      "gate": "carried forward by digest (no re-execution): runner build, host check:pins, test:fixtures, image build, test:deployment, frontend, runner type-check/lint/unit, contracts, standalone static",
+      "verdict": "CARRIED_FORWARD",
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates04/carry-forward-inputs.json",
+      "method": "attempt04 capture-before compared file by file against attempt03 capture-before (same 1647 files, same hashes, same dist). attempt03's carry-forward-inputs.json had already proven each gate's input subset digest equal to the original gate manifest. Equal full trees imply equal subsets. Image IDs re-read with docker image inspect (read-only).",
+      "treeComparison": {"files": [1647, 1647], "changed": [], "added": [], "removed": [], "distFilesIdentical": true},
+      "verdicts": {
+        "runner build (runner-final-build01)": "PASS (dist unchanged); input subset 177 files, de1d5f84...",
+        "runner check:pins host (runner-final-pins01)": "PASS; 177 files, de1d5f84...",
+        "runner test:fixtures (runner-final-fixtures01)": "PASS 252/0/9; 228 files, b088ef53...",
+        "image build (image-final01)": "PASS; 101 files, 3d371c83...",
+        "runner test:deployment (runner-final-deployment01)": "PASS 322/0/0; 188 files, f024bc02...",
+        "frontend (frontend-final01)": "PASS 701/701, type-check 0, lint 0 errors; 274 files, 5988e697...",
+        "runner type-check / lint / unit (attempt02, -03 labels)": "PASS; unit 2229/0/29, coverage lines 97.25 branches 89.11 functions 97.12; 351 files, b01c94bd...",
+        "contracts + build-studio-observed-schemas --check (contracts-final02)": "PASS (7 sections, no write); 248 files, a5f54fef...",
+        "standalone Gradle static (static03: spotlessCheck checkstyleMain checkstyleTest spotbugsMain --rerun-tasks)": "PASS (checkstyleMain 466 files / 0 violations, checkstyleTest 332 / 0). All of these tasks also re-executed and passed inside attempt04's check."
+      },
+      "imageIdsUnchanged": {
+        "put-checks-studio-runner:obs015-final01-local": "sha256:e3a2d8bdcf74cb634cce0197a750cc16535b609f456e980f5d9527339eef4ea9",
+        "put-checks-studio-runner:obs015-final01-buildstage-local": "sha256:3ef3f96877fb5f7b8c6d7ae35c8b0065a7eb4d60f0efc9f88445184720245e2c"
+      },
+      "receipts": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/receipt.json",
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates02/receipt.json",
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates03/receipt.json"
+      ]
+    },
+    {
+      "gate": "in-image check-pins --require-image (ED-05 / O-2a)",
+      "verdict": "NOT_GREEN_EXTERNAL",
+      "classification": "EXTERNAL, not a regression",
+      "note": "carried forward FAIL, not re-executed: the public base image ships Node v24.20.0 against .nvmrc 22. Image inputs and image IDs are unchanged. Expected per the runbook (section 6, step 5c)."
+    }
+  ],
+  "overall": "GREEN. Backend final check via the collector: exit 0, test 2412/2387/0/25 (skips equal the approved 25), guidedIncrementalTest 62/62, crossReplicaTest 2/2, JaCoCo report and verification and requireFreshGuidedPartitions executed and passed, source 1647 files f071984a... and dist 80d1ba1d... identical before and after. All other gates CARRIED_FORWARD by digest equality (PASS). In-image pins NOT_GREEN_EXTERNAL (ED-05/O-2a).",
+  "noCommitsNoPushNoSourceEdits": true,
+  "labelNotes": "Fresh label final-gate-attempt04-20261016T2252 (did not exist before). Single Gradle run, --no-daemon, launched with nohup and polled. No reruns. I wrote only under docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates04/ plus the collector's own output under execution/; scratch script in the session scratchpad."
+}

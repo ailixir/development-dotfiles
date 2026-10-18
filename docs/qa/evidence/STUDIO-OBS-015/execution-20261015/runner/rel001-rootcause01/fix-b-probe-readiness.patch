@@ -1,0 +1,151 @@
+diff --git a/studio-runner/src/run/browser.ts b/studio-runner/src/run/browser.ts
+--- a/studio-runner/src/run/browser.ts
++++ b/studio-runner/src/run/browser.ts
+@@ -46,6 +46,7 @@
+ import type { BrowserFactory, BrowserHandle, BrowserLaunchRequest } from './browserFactory.js';
+ import {BrowserStartupCleanupFailure} from './browserFactory.js';
+ import {BootstrapPageGuard,boundedStartup} from './observedBootstrap.js';
++import {readVersionPaths} from './versionProbe.js';
+ import {validateAppVideoPath} from './appVideoOwnership.js';
+ import { installObservationCollector } from './observationCollector.js';
+ import { observationOptions, exportObservation } from './observationSanitizer.js';
+@@ -57,9 +58,8 @@
+  * additional page or arbitrary preference export; restore the required initial blank document. */
+ async function verifyBrowserPreferences(page:Page,profile:string):Promise<BrowserPreferenceEvidence>{
+   const expected=browserProfileConfinement(profile).defaultProfile.path;
+-  await page.goto('chrome://version/');const path=(await page.locator('#profile_path').textContent())?.trim();
++  await page.goto('chrome://version/');const {profilePath:path,executablePath:executable}=await readVersionPaths(page);
+   if(!path||await realpath(path)!==expected)throw new Error('PROFILE_PREFERENCES_REQUIRED');
+-  const executable=(await page.locator('#executable_path').textContent())?.trim();
+   if(!executable||await realpath(executable)!==await realpath(chromium.executablePath()))throw new Error('PROFILE_MISMATCH');
+   await page.goto('chrome://prefs-internals/');
+   const effective=await page.evaluate(()=>{
+diff --git a/studio-runner/src/run/versionProbe.ts b/studio-runner/src/run/versionProbe.ts
+new file mode 100644
+--- /dev/null
++++ b/studio-runner/src/run/versionProbe.ts
+@@ -0,0 +1,42 @@
++/**
++ * The trusted `chrome://version/` read behind the profile-confinement probe (STUDIO-OBS-015 REL-001).
++ *
++ * The page fills `#profile_path` and `#executable_path` asynchronously, so both elements exist and are
++ * empty when `load` fires until the browser's reply lands. Reading them straight after `goto` raced that
++ * reply and failed the launch (`PROFILE_PREFERENCES_REQUIRED`) whenever the browser was slow. This waits,
++ * for at most {@link VERSION_FIELDS_TIMEOUT_MS}, until both fields hold text, and only then reads them. It
++ * relaxes no check: the caller still compares the values exactly, and a page that never fills them fails
++ * the launch when the wait times out.
++ *
++ * Playwright-free on purpose: only the slice of `Page` and `Locator` used here is named, so the unit tier
++ * can drive it with a fake page (AC-25 keeps `browser.ts` itself out of that tier).
++ */
++export interface VersionProbeLocator {
++  filter(options: { hasText: RegExp }): VersionProbeLocator;
++  waitFor(options: { state: 'attached'; timeout: number }): Promise<void>;
++  textContent(): Promise<string | null>;
++}
++export interface VersionProbePage {
++  locator(selector: string): VersionProbeLocator;
++}
++export interface VersionPaths {
++  readonly profilePath: string | undefined;
++  readonly executablePath: string | undefined;
++}
++
++/**
++ * Per field. A cold launch took 0.9 s to draw its UI where the others took 0.2 s, so this is several
++ * times the worst lag seen, and it stays well inside the backend's 15 s context-push deadline: a wait
++ * that outlived that deadline would keep the single worker slot busy after the backend gave up.
++ */
++export const VERSION_FIELDS_TIMEOUT_MS = 5_000;
++
++const PROFILE_PATH = '#profile_path';
++const EXECUTABLE_PATH = '#executable_path';
++
++export async function readVersionPaths(page: VersionProbePage): Promise<VersionPaths> {
++  for (const selector of [PROFILE_PATH, EXECUTABLE_PATH]) await page.locator(selector).filter({ hasText: /\S/u }).waitFor({ state: 'attached', timeout: VERSION_FIELDS_TIMEOUT_MS });
++  const profile = await page.locator(PROFILE_PATH).textContent();
++  const executable = await page.locator(EXECUTABLE_PATH).textContent();
++  return { profilePath: profile?.trim(), executablePath: executable?.trim() };
++}
+diff --git a/studio-runner/test/run/versionProbe.test.ts b/studio-runner/test/run/versionProbe.test.ts
+new file mode 100644
+--- /dev/null
++++ b/studio-runner/test/run/versionProbe.test.ts
+@@ -0,0 +1,77 @@
++import { describe, expect, it } from 'vitest';
++import { VERSION_FIELDS_TIMEOUT_MS, readVersionPaths } from '../../src/run/versionProbe.js';
++import type { VersionProbeLocator, VersionProbePage } from '../../src/run/versionProbe.js';
++
++/**
++ * A fake chrome://version whose two fields stay empty until `fill`, like the real page between `load`
++ * and the browser's reply. `waitFor` settles only for a field that holds non-whitespace text, as
++ * Playwright's `filter({ hasText })` does, and every `textContent` read is recorded.
++ */
++function lateVersionPage() {
++  const text = new Map<string, string>([['#profile_path', ''], ['#executable_path', '']]);
++  const waiting: { selector: string; resolve: () => void }[] = [];
++  const reads: { selector: string; text: string | null }[] = [];
++  const waits: { selector: string; state: string; timeout: number }[] = [];
++  const populated = (selector: string): boolean => /\S/u.test(text.get(selector) ?? '');
++  const locator = (selector: string): VersionProbeLocator => ({
++    filter: () => locator(selector),
++    waitFor: options => { waits.push({ selector, ...options }); return populated(selector) ? Promise.resolve() : new Promise<void>(resolve => { waiting.push({ selector, resolve }); }); },
++    textContent: () => { const value = text.get(selector) ?? null; reads.push({ selector, text: value }); return Promise.resolve(value); },
++  });
++  const page: VersionProbePage = { locator };
++  const fill = (values: Record<string, string>): void => {
++    for (const [selector, value] of Object.entries(values)) text.set(selector, value);
++    for (const waiter of waiting.splice(0)) { if (populated(waiter.selector)) waiter.resolve(); else waiting.push(waiter); }
++  };
++  return { page, fill, reads, waits };
++}
++const settled = async (promise: Promise<unknown>): Promise<boolean> => {
++  let done = false;
++  void promise.then(() => { done = true; }, () => { done = true; });
++  await new Promise<void>(resolve => { setTimeout(resolve, 0); });
++  return done;
++};
++
++describe('REL-001 chrome://version is read only after the browser has filled it', () => {
++  it('waits through the empty window after load instead of reading empty paths', async () => {
++    const fake = lateVersionPage();
++    const pending = readVersionPaths(fake.page);
++    expect(await settled(pending)).toBe(false);
++    expect(fake.reads).toEqual([]);
++    fake.fill({ '#profile_path': ' /tmp/profile ', '#executable_path': ' /tmp/chrome ' });
++    await expect(pending).resolves.toEqual({ profilePath: '/tmp/profile', executablePath: '/tmp/chrome' });
++    expect(fake.reads.every(read => read.text !== '')).toBe(true);
++    expect(fake.reads.map(read => read.selector)).toEqual(['#profile_path', '#executable_path']);
++    expect(fake.waits).toEqual([
++      { selector: '#profile_path', state: 'attached', timeout: VERSION_FIELDS_TIMEOUT_MS },
++      { selector: '#executable_path', state: 'attached', timeout: VERSION_FIELDS_TIMEOUT_MS },
++    ]);
++    expect(VERSION_FIELDS_TIMEOUT_MS).toBeLessThan(15_000);
++  });
++
++  it('keeps waiting while one field is still empty or only whitespace', async () => {
++    const fake = lateVersionPage();
++    const pending = readVersionPaths(fake.page);
++    fake.fill({ '#profile_path': '/tmp/profile', '#executable_path': '  ' });
++    expect(await settled(pending)).toBe(false);
++    expect(fake.reads).toEqual([]);
++    fake.fill({ '#executable_path': '/tmp/chrome' });
++    await expect(pending).resolves.toEqual({ profilePath: '/tmp/profile', executablePath: '/tmp/chrome' });
++  });
++
++  it('fails on the wait, without reading, when the page never fills the fields', async () => {
++    const reads: string[] = [];
++    const locator = (): VersionProbeLocator => ({
++      filter: () => locator(),
++      waitFor: () => Promise.reject(new Error('Timeout 30000ms exceeded.')),
++      textContent: () => { reads.push('read'); return Promise.resolve(''); },
++    });
++    await expect(readVersionPaths({ locator })).rejects.toThrow('Timeout 30000ms exceeded.');
++    expect(reads).toEqual([]);
++  });
++
++  it('passes a missing text node through as undefined so the caller refuses it', async () => {
++    const locator = (): VersionProbeLocator => ({ filter: () => locator(), waitFor: () => Promise.resolve(), textContent: () => Promise.resolve(null) });
++    await expect(readVersionPaths({ locator })).resolves.toEqual({ profilePath: undefined, executablePath: undefined });
++  });
++});

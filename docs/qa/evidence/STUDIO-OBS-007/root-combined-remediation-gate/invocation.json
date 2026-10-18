@@ -1,0 +1,23 @@
+{
+  "command": [
+    "./gradlew",
+    "test",
+    "--rerun-tasks",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+    "--tests",
+    "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+    "--tests",
+    "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest"
+  ],
+  "classes": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+    "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+    "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+    "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest"
+  ],
+  "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "startedAt": "2026-10-10T16:50:26.857142+00:00"
+}

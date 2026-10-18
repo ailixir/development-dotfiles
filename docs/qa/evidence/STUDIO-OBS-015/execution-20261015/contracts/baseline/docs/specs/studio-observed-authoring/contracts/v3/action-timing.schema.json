@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v3/action-timing.schema.json",
+  "title": "Studio observed v3 recording action timing",
+  "description": "One reading on the guided recording timeline (AR-1 R2, STUDIO-OBS-013). Shared by result.actionTimings (via result#/definitions/actionTiming) and bridge#/definitions/recordingEvidence.timings. clarificationWait and prefixReplay are reserved for OBS-015.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "enum": [
+        "step",
+        "action",
+        "clarificationWait",
+        "prefixReplay"
+      ]
+    },
+    "stepId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "admissionId": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      ]
+    },
+    "ordinal": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      ]
+    },
+    "startMs": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "endMs": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      ]
+    }
+  },
+  "required": [
+    "kind",
+    "stepId",
+    "admissionId",
+    "ordinal",
+    "startMs",
+    "endMs"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "action"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "admissionId": {
+            "type": "string"
+          },
+          "ordinal": {
+            "type": "integer"
+          }
+        }
+      },
+      "else": {
+        "type": "object",
+        "properties": {
+          "admissionId": {
+            "type": "null"
+          },
+          "ordinal": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}

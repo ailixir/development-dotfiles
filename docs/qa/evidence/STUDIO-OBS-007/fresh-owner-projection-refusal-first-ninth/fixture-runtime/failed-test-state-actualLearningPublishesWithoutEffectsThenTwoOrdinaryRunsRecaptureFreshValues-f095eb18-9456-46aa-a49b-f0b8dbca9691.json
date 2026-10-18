@@ -1,0 +1,190 @@
+{
+  "schemaVersion" : 1,
+  "sessionId" : "f095eb18-9456-46aa-a49b-f0b8dbca9691",
+  "testId" : "a238804f-a291-4c88-9d21-a7b844548d05",
+  "state" : "SUCCEEDED",
+  "errorCode" : "OTHER",
+  "bootstrapPhase" : "READY",
+  "materializationPresent" : true,
+  "counters" : {
+    "actions" : 5,
+    "observations" : 7,
+    "modelProposals" : 6,
+    "modelInputTokens" : 90482,
+    "modelOutputTokens" : 24576,
+    "sanitizedEvidenceBytes" : 20255
+  },
+  "coordinate" : {
+    "stepIndex" : 3,
+    "generation" : 7
+  },
+  "observationCounts" : {
+    "passwordControls" : 0,
+    "withheldRegions" : 0
+  },
+  "acquisition" : {
+    "allowanceMs" : 30000,
+    "totalExtraPolls" : 0
+  },
+  "activeAcquisition" : {
+    "extraPolls" : 0
+  },
+  "fixtureModelHttpCalls" : 6,
+  "fixturePhysicalProviderReads" : 0,
+  "fixtureProviderFailures" : 0,
+  "fixtureModelKinds" : {
+    "SOURCE_PLAN" : 1,
+    "NEXT_ACTION" : 5,
+    "VERIFY_STEP" : 0
+  },
+  "continuation" : "FINALIZING",
+  "translationCounters" : {
+    "planRevision" : 2
+  },
+  "declarations" : [ ],
+  "obligations" : [ {
+    "operationKind" : "navigate",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 0,
+    "referenceIndex" : 0
+  }, {
+    "operationKind" : "read",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 1
+  }, {
+    "operationKind" : "fill",
+    "stepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "click",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "assert",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 1
+  } ],
+  "actions" : [ {
+    "operationKind" : "fill",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "admissionId" : "afebbbc7-6f4b-439f-a6f2-ba6b244db1f1",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 3
+  }, {
+    "operationKind" : "click",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "admissionId" : "767de114-4998-4716-9780-dd4e0994ee98",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 5
+  }, {
+    "operationKind" : "assert",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "admissionId" : "502dc1f2-7453-4327-ba9a-8a4b8881c92f",
+    "ordinal" : 1,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 6
+  }, {
+    "operationKind" : "navigate",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "admissionId" : "7c30f8cd-5d19-47d3-b245-7c1244ac81f4",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 0
+  }, {
+    "operationKind" : "read",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "admissionId" : "3528d24f-008a-4d6d-aff2-13941a21d943",
+    "ordinal" : 1,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 1
+  } ],
+  "modelAttempts" : [ {
+    "kind" : "SOURCE_PLAN",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  } ],
+  "testMethod" : "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+  "executions" : [ {
+    "actualDispatchClientInvoked" : true,
+    "actualDispatchClient" : {
+      "sendOutcome" : {
+        "kind" : "DEFINITE_REFUSAL",
+        "retryable" : false,
+        "reason" : "HTTP_STATUS",
+        "classifiedHttpStatus" : 409
+      }
+    },
+    "id" : "0796d659-af9e-439f-a385-0f1978eaa771",
+    "revision_id" : "515c00e7-0052-4d5f-9e87-fe254d8342d8",
+    "attempt_id" : "a21a8fb0-3c26-4072-9a48-f7eb89d273a5",
+    "accepted_attempt_id" : "a21a8fb0-3c26-4072-9a48-f7eb89d273a5",
+    "status" : "ERROR",
+    "ledgerState" : "DONE",
+    "errorCode" : "DISPATCH_FAILED",
+    "ledger_present" : true,
+    "admission_present" : false,
+    "observed_receipt_present" : false,
+    "browser_started" : false,
+    "video_present" : false,
+    "manifest_present" : false,
+    "step_results_present" : true,
+    "snapshot_revision" : 1,
+    "last_runner_sequence" : 0,
+    "elapsed_ms" : 39
+  } ]
+}

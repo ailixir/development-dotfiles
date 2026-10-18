@@ -1,0 +1,29 @@
+{
+  "scope": "Narrow two existing-shape source fixes; compiler/tests not run by B; no scope or QA completion",
+  "context": ".aiox/sdc/STUDIO-OBS-007/dispatch/b-existing-shape-fixes-r2-context.txt",
+  "historicalCandidate": "docs/qa/evidence/STUDIO-OBS-007/lane-b-approved-behavior-candidate.json (preserved unchanged)",
+  "priorGate": "root-approved-behavior-gate-2: compiler PASS137tests/7D failures/0errors/skips; parent reports all96 non-D cases pass, not current new source result",
+  "ownedDelta": {
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java": "d71a2c4be6467ccbf193784eb128fc5d425ef8624407b1457e0f440717153fd2",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java": "07f51facca9bc25636ac71fa08763c3c3a27b308d8556b20aa36c4e904aed12d",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java": "b9aed155e1355336b4ab5bf2709fffdc778681e60105d9c147640b3bfffbc564",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SecretAuditLifecycleIT.java": "c48712f91d379d67ef3d378dd0ef6988e42958d0fe0b7d5d731d3b5dc245501f"
+  },
+  "fixes": [
+    "Dispatch begin-stage transaction refusal captures only actual resolved secret version/outcome facts before caller erasure; zero-row begin remains loser without append; existing winning CLAIMED no-send transaction consumes facts",
+    "Guided declaration-wide existing usage skip only applies matching-empty unreached branch; each authentic consumed admission checks and settles its own summary"
+  ],
+  "newCases": {
+    "StudioDispatcherFailureIT": {
+      "added": 4,
+      "proof": "Actual counted resolver, durable read entry, real closed-binding/catalog/policy authority check, PostgreSQL claimed-owner transition: current revocation/cancel flag winning close versus terminal cancel winner/changed-lease-owner zero begin. Direct safe flag setup and a focused begin-stage seam; no actual CoreHTTP/browser/crash proof."
+    },
+    "SecretAuditLifecycleIT": {
+      "added": 2,
+      "proof": "Actual resolver version + all guarded PostgreSQL session/declaration/materialization/assignment/two consumed ledger coordinates; lifecycle first USED then independent consumed/no-decision UNKNOWN, retry idempotence and caller rollback. Controlled persisted ledger fixture, no live browser/IPC proof."
+    }
+  },
+  "remaining": "All prior candidate obligations retained: no generic terminal/no-decision replay shape, reaper/kill-switch entrypoint probes pending release, nine-flow frozen compiled runner join, all19AC exact privacy/timing/physical crash/model silence oracles, full regression/style/build/coverage and independent lane review.",
+  "backendSourceFrozen": true,
+  "liveProcesses": []
+}

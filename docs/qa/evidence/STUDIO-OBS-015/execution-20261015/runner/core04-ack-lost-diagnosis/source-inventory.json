@@ -1,0 +1,327 @@
+{
+  "at": "2026-10-15T19:21:32.352433+00:00",
+  "classification": "READ_ONLY_SOURCE_BINDING_NO_SOURCE_OR_DIST_WRITES",
+  "actual04SourceDigest": "d598ae77d32f4a2d1712ff04855654e82eb79b1cbd681013934f4ac749295745",
+  "actual04DistDigest": "db6c8022b20113c73862b63a9f019b5026d37e0a4e3db1b15ac182f5c99e4775",
+  "files": [
+    {
+      "path": "studio-runner/src/guided/runtime.ts",
+      "sha256": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+      "bytes": 49558,
+      "anchors": [
+        {
+          "line": 171,
+          "fact": "update validates exact monotone context and matches every fresh local producer to acknowledged metadata"
+        },
+        {
+          "line": 299,
+          "fact": "resolve(binding) requires local value plus context producer/allocation and exact qualified edge"
+        },
+        {
+          "line": 336,
+          "fact": "resolve runs before dispatch try, journal.consume and native fence"
+        },
+        {
+          "line": 373,
+          "fact": "durable consumption precedes target recheck/native invocation"
+        },
+        {
+          "line": 410,
+          "fact": "known effect result precedes completed success/outcome callback"
+        },
+        {
+          "line": 434,
+          "fact": "completed success is retained on later callback/collection failure"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "studio-runner/src/guided/journal.ts",
+      "sha256": "15da758e2e287926a7d404926323791ab3e1f72931bc3c4cb1741de8de9d86dd",
+      "bytes": 4303,
+      "anchors": [
+        {
+          "line": 39,
+          "fact": "fence synchronously persists native INVOKING before API boundary"
+        },
+        {
+          "line": 57,
+          "fact": "consume hashes exact admission identity and appends/fsyncs before continuing"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "studio-runner/src/guided/transport.ts",
+      "sha256": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+      "bytes": 15579,
+      "anchors": [
+        {
+          "line": 117,
+          "fact": "pre-dispatch refusal becomes closed409 code; dispatch promises are never replayed"
+        },
+        {
+          "line": 155,
+          "fact": "owner outcome callback must receive202"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "studio-runner/src/guided/diagnostics.ts",
+      "sha256": "cd355ead668fc54953c8a06acf8da13a317b103ced1357d68eef516c6f2a7637",
+      "bytes": 2252,
+      "anchors": [
+        {
+          "line": 24,
+          "fact": "bounded redacted non-authoritative diagnostic sidecar; dispatch only calls it after consumed=true"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "studio-runner/src/run/observedReplayAdapter.ts",
+      "sha256": "473653e3ded3312d433cbe23c1304ef722a164bed3b15cd883d7b836773515f4",
+      "bytes": 10917,
+      "anchors": [
+        {
+          "line": 49,
+          "fact": "prepared prefix action rechecks original target and invokes existing observation session"
+        },
+        {
+          "line": 75,
+          "fact": "validateInvocation before observations.invoke; no reacquisition"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "studio-runner/src/run/observationCollector.ts",
+      "sha256": "ba31be90d04885e6329ae02f6559205325740cbd46960a438150a890557c27a2",
+      "bytes": 66323,
+      "anchors": [
+        {
+          "line": 633,
+          "fact": "retained target/control eligibility validation"
+        },
+        {
+          "line": 731,
+          "fact": "fill requires original editable field and post-focus retained identity before value write"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "studio-runner/src/run/observationTypes.ts",
+      "sha256": "351d9626ca1042c1fe9bb9a3f92f94a91753061153f63b4c3fe915dbeac59c50",
+      "bytes": 5999,
+      "anchors": [
+        {
+          "line": 80,
+          "fact": "observation session invoke/validateInvocation contract"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "studio-runner/src/run/browser.ts",
+      "sha256": "19893b2aeda17b4d94b4ddb45977fb170cea45035a78cc4e6a1b3f904de21dd9",
+      "bytes": 44368,
+      "anchors": [
+        {
+          "line": 415,
+          "fact": "actual collector validateInvocation boundary uses existing browser handle"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "studio-runner/src/executor/observedReplay.ts",
+      "sha256": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+      "bytes": 30652,
+      "anchors": [
+        {
+          "line": 165,
+          "fact": "ordinary replay requires qualified binding transfers and chronological producer/consumer"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "82b8401722224d5277da5080b9475c32318284cf32abb0a7aa33cc9aca86938b",
+      "bytes": 107105,
+      "anchors": [
+        {
+          "line": 314,
+          "fact": "bootstrap pushes allocation context"
+        },
+        {
+          "line": 340,
+          "fact": "advancePrefix captures PG context/issued request but does not push it before preparePrefix395"
+        },
+        {
+          "line": 395,
+          "fact": "recommended smallest change: acknowledged pushContext before this new-prefix prepare only"
+        },
+        {
+          "line": 447,
+          "fact": "actual safe exception passes through dispatch here"
+        },
+        {
+          "line": 967,
+          "fact": "suffix materialization already pushes context"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java",
+      "sha256": "83ed8fa26c304d5b2b8d8df9be51681598908c36be27cf0791c20a632f07063b",
+      "bytes": 13803,
+      "anchors": [
+        {
+          "line": 98,
+          "fact": "prefix import creates allocation intent, not historical producer value"
+        },
+        {
+          "line": 208,
+          "fact": "consumer edge attaches exact admitted consumer and bumps metadata revision"
+        },
+        {
+          "line": 242,
+          "fact": "successfulRead persists fresh producer/availability, then bumps metadata revision"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+      "sha256": "d61340b753e2da729c4777b850c3420224825553f62d9e6f5c8bf37394a8fe5c",
+      "bytes": 17643,
+      "anchors": [
+        {
+          "line": 221,
+          "fact": "assembleContext queries current session allocations/producers/consumerEdges"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256": "174d99ace9c47eeb85904002156eddc595c352590076917135e153411d5df963",
+      "bytes": 14153,
+      "anchors": [
+        {
+          "line": 130,
+          "fact": "ordinary prepareAndAdmit pushes current context before preparation"
+        },
+        {
+          "line": 160,
+          "fact": "dispatch attaches authoritative current consumer edge, sends once and reconciles owner callback"
+        },
+        {
+          "line": 297,
+          "fact": "lost acknowledgement reconciliation checks only this admission"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+      "sha256": "e4c48761e3b80561165bf7e51ee8b202c03ba9dfaf35a6ef52f9d77143a3de50",
+      "bytes": 18445,
+      "anchors": [
+        {
+          "line": 188,
+          "fact": "non200 dispatch response uses nonaccepted bounded subscriber"
+        },
+        {
+          "line": 267,
+          "fact": "actual safe top frame; groups execution/timeout/cancellation exceptions as UNKNOWN_OUTCOME"
+        },
+        {
+          "line": 421,
+          "fact": "nonaccepted subscriber cancels and completes exceptionally without exposing rawbody"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "e3b1f3c06f7f6ac6dcc2eb3ef609a0047ad1b34c536eed1363ac68e405c78b82",
+      "bytes": 113023,
+      "anchors": [
+        {
+          "line": 1551,
+          "fact": "lostAcknowledgment(id,admission) stops only unresolved DISPATCHING admission"
+        },
+        {
+          "line": 2174,
+          "fact": "outcomeV2 authenticated callback verifies current identity/ledger; successful read commits producer"
+        },
+        {
+          "line": 2510,
+          "fact": "stop changes unresolved DISPATCHING to UNKNOWN_OUTCOME/ACK_LOST"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalController.java",
+      "sha256": "b94aed29b8eea89d5e7cb460655d93581f3cafe649b48b4e413da7a85cb6b106",
+      "bytes": 5441,
+      "anchors": [
+        {
+          "line": 82,
+          "fact": "actual owning-worker outcomes endpoint"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "246e355b2cdc237957a519d17fdfab81f6fc230102f94176b6df99799fb56bf4",
+      "bytes": 1006367,
+      "anchors": [
+        {
+          "line": 15005,
+          "fact": "outcome shape capture binds first base session only; absence for mixed is inconclusive"
+        },
+        {
+          "line": 15048,
+          "fact": "selected mixed dispatch observer wraps real runtime and records native entry/completion, never invents result"
+        }
+      ],
+      "matchesActual04SourceCapture": true
+    }
+  ],
+  "compiledRuntimeFiles": [
+    {
+      "path": "studio-runner/dist/guided/runtime.js",
+      "sha256": "6b75489d78750cc33b59e171cae2e74abda1dbebef503d4af575f4369196be0a",
+      "bytes": 49386,
+      "matchesActual04DistCapture": true
+    },
+    {
+      "path": "studio-runner/dist/guided/journal.js",
+      "sha256": "4c9c80ad38efe8c9ae705715604848266392427377040124ee19bf466f8c32d7",
+      "bytes": 5051,
+      "matchesActual04DistCapture": true
+    },
+    {
+      "path": "studio-runner/dist/guided/transport.js",
+      "sha256": "1ee83f233ef6ac0116d97bdee1a84fd03e75d213e593f4f3cdac90e39b061507",
+      "bytes": 15818,
+      "matchesActual04DistCapture": true
+    },
+    {
+      "path": "studio-runner/dist/run/observedReplayAdapter.js",
+      "sha256": "ba83ecf9ff73f753b57b1555044a7f871a3ed3e612a19b7b846888f40fbc42e3",
+      "bytes": 10201,
+      "matchesActual04DistCapture": true
+    }
+  ],
+  "allInspectedSourceMatchesActual04": true
+}

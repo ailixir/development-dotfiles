@@ -1,0 +1,102 @@
+{
+  "artifact": "Closed-source witness feasibility and byte-layer boundaries; not a generated acceptance fixture",
+  "originalRequirement": {
+    "plannedName": "SnapshotBasisValidationTest.keepsOriginalGlobalByteLimits",
+    "requirement": [
+      "ARCH015-01: original snapshot/provenance/privacy obligations; see approved ruling"
+    ],
+    "tier": "Java+TS+wire",
+    "assertions": "Exactly existing6MiB basis and8MiB fullrequest boundaries, valid smallbaseartifact and maximal currentlysupported closed cases; oversized corrective facts refuse LIMIT_EXCEEDED before hashing/dispatch without raising cap, omission, recursive proof or partial publication.",
+    "executionStatus": "NOT_RUN",
+    "actualTestNames": [],
+    "evidence": [],
+    "independentReview": null,
+    "sourceCorrection": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/test-delta.json"
+  },
+  "architectureWordingPath": "architecture-correction-01/test-delta.json#/cases/10",
+  "caps": {
+    "basis": 6291456,
+    "request": 8388608,
+    "artifact": 1048576,
+    "policy": 524288,
+    "choiceWitness": 262144,
+    "choiceContextAndMeaningsEach": 65536,
+    "choiceReceipt": 16384,
+    "sourceSteps": 100,
+    "actionsAndPreparationsEach": 200,
+    "obligationAssociationsAndPlanObligations": 800,
+    "observations": 400,
+    "observationBytesEachTS": 32768,
+    "observationBytesAggregateTS": 1048576,
+    "sourceUtf8AggregateTS": 1048576,
+    "targetIntentMaxScalars": 500,
+    "witnessMeaningsMinMax": [
+      2,
+      10
+    ]
+  },
+  "canonicalRequestUpperBound": {
+    "componentBasis": 6291456,
+    "componentArtifact": 1048576,
+    "maxClosedRemainderIncludingEscapedChromium256": 2264,
+    "total": 7342296,
+    "gapBelow8MiB": 1046312,
+    "assumptions": "Actual publisher constructed Candidate/Snapshot has independent component caps. Direct schema-only ObservedValidationClient callers do not themselves establish those semantic caps. Max six-byte escaping for each chromiumBuild scalar; all remaining envelope values fixed ASCII formats.",
+    "meaning": "Explanatory actual canonical-client limitation, not original requirement change or owner-decision blocker. Schema-valid oversized child is not legal publication parent. Raw whitespace8MiB exists and is actual wire subject."
+  },
+  "semanticSixMiBControlPlan": {
+    "classification": "CONCRETE_SOURCE_FEASIBILITY_PLAN_UNEXECUTED; semantic acceptance must be established by owner tests",
+    "sourceShape": {
+      "currentSourceSteps": 100,
+      "actions": 100,
+      "distinctPreparations": 100,
+      "distinctAdmissions": 100,
+      "distinctObligationAssociations": 100,
+      "completePlanObligations": 100,
+      "observedChoiceWitnesses": 99,
+      "observations": 198,
+      "materializationVersions": 1,
+      "materializedInputs": 1,
+      "allocationsProducersBindingsTransfers": 0,
+      "base": "valid existing small frozen pinned base; explicit EMPTY_PREFIX; empty original program; nullbaseProof lawful; no recursive proof"
+    },
+    "construction": [
+      "First step actual initialBlank navigate through one original authored sourceSpan input; remaining99 step IDs each click Proceed. Source text includes chosen target safe label. Every obligation/prep/action/ledger ID unique and actual coordinate stepIDordinal0 matches plan; every dispatchCount1/stateSUCCEEDED. This is a test-only semantic conformance fixture unless real DB execution is separately captured; never present it as real callback history.",
+      "Each later preparation owns unique observed question/receipt/accepted attempt and exact original100obligation plan. Two original observed meanings use actual distinct nodes/locators, unique server/provider IDs; selected old locator matches fresh proposal; oldgeneration<freshgeneration, samecurrentcontext/fence/source/config. Different captures use distinctclarification andobligation IDs, no duplicate witness/action.",
+      "198small old/fresh observations each contain only2 observed controls; every observation anchored by current prep or exercised original question. Keep total under1MiB and each below32768, full node-parent/reference validity and exact nanosecond original instants; no clocks run/reset or fake past native stamps.",
+      "Shared complete100obligation historical plan repeated in99 genuine witnesses supplies size while final artifact stayssmall. All historical/current original obligation meanings consistent; no unrelated invented plan-only UUIDs as padding. TargetIntent is bounded500scalars; use legal text with multibyteé, all arbitrary text facts declared at fixture construction before expectedhashes.",
+      "Choose dimensional size near target using one coherent plan; adjust legal per-witness nonsemantic safe label/current model provenance scalar string residues within their original256scalar caps, not unknown fields, extra observations, duplicated actions or recursive proofs. All affected question/receipt/context/model/plan/proposal/evidence/ledger/hash joins must reseal from explicit fixture facts. Byte search must be deterministic construction arithmetic, never repeated runtime until-pass sampling.",
+      "Construct expected artifact/plan/maps/policy/evidence preimages independently from literal test fixture descriptor and original canonical domains. Do not use deriveObservedArtifact/lowerer output to manufacture its own expected candidate or change frozengoldens. Assert full parent independent expected artifact/hash equality and actual requestoktrue before counting6MiB boundary.",
+      "At exactly6291456 canonical UTF8 bytes both fullJava lowerer andTS derive/request must succeed under every unchanged component/aggregate/cardinality cap; then replace one declared ASCII char by é or append one legal ASCII char at a residue field to+1 while retaining closedshape, assert early byte refusal before hash/dispatch. Before computing newartifact from oversize input verify early guard; preserve parentcandidate."
+    ],
+    "capacityArithmetic": {
+      "oneHundredObligationPlanBytesAtTargetIntent1Scalar": 21839,
+      "oneHundredObligationPlanBytesAtTargetIntent500Scalars": 120641,
+      "99FullPlanCopiesAloneMaxBytes": 11943459,
+      "oneWitnessPlanBelow262144": true,
+      "note": "Capacity bound only. Other witness overhead ispositive and separately capped; chosen fixture counts/caps/joins must be asserted by real owner tests. No acceptance or exact6MiB document is claimed from arithmetic."
+    }
+  },
+  "rawEightMiBWireControl": {
+    "entry": "POST existing /v2/validate-observed",
+    "auth": "existing service Bearer identity/header checked beforebody, exact current requiredBuild/schemaBundle pins",
+    "parent": "Existing immutable valid small fixture request; exact same parsed object/artifact/basis. Append legalJSONwhitespace tocanonicalJSON bytes to8388608, countBuffer/UTF8 rawbytes, then oneASCIIspace to8388609.",
+    "expected": [
+      "exact8388608HTTP200/oktrue and actualvalidateObservedRequest once, noadmission/browser/model/native/networkcallback/pooluse",
+      "8388609HTTP413BODY_TOO_LARGE at readBoundedBody beforeparse/validator; coordinator.validateObserved spy delta0, hash/effect0",
+      "parseObservedBytes exact+1 separately throwsLIMIT_EXCEEDED; do not substitute parser foractualHTTP",
+      "wrongBearer403beforebody; no productendpoint or user-controlledtrustsidecar"
+    ],
+    "owningFile": "studio-runner/test/server/observedReplayRoutes.test.ts"
+  },
+  "beforeHashCallgraph": {
+    "java": "ObservedArtifactLowerer.lower→GuidedPlanBuilder.plan first PublicationContracts.bounded(basis,6MiB), then schema/joins/hashes. PublicationContracts.Evidence constructor boundsraw6MiB; builder.basis finaloutput bounds after constructing facts; do not confuse alreadyneeded construction hashes with post-ingress basisHash.",
+    "javaClient": "ObservedValidationClient.validate→validateAndCanonical closed request→UTF8length≤8MiB→token.get→budget→HttpClient.send. Existing exact utilitycap tests and valid tinyconfiguredcap refusal source already present; no need invent canonical8MiBparent.",
+    "tsCurrent": "validateObservedRequest→validateObserved(root,8MiB)→assertProfile/assertBuild (constant profile hash)→H(request.validationBasis)→deriveObservedArtifact→validateObserved(basis,6MiB). Thus oversized6MiBchild can be hashed first under8MiBroot.",
+    "minimalRepair": "Insert boundedObserved(request.validationBasis,OBSERVED_LIMITS.basis) immediately after root validate before assertProfile/assertBuild/H(basis). Preserve closed schemas and all policy/canonical semantics. No generalized newcap or raisedthreshold.",
+    "measurement": "TS spy/mockedwrapper around actual importedhash function resets aftermoduleinitialization and counts onlycall under test; oversize request must reachzero hashcalls afteraddedguard. Java constructlowerer before scoped static hashspy; +1basis must not invokesemantichash/schema/dispatch, actual413BUDGET_EXCEEDED. Actualwire+1 verifies coordinatorvalidator neverentered.",
+    "codeLayers": "Java originalBUDGET_EXCEEDED413; TS component LIMIT_EXCEEDED; actualwire readBoundedBody BODY_TOO_LARGE413. Originalrow wording retained; do not renameerrors or silentlyequate layer-specific responses."
+  },
+  "requiredOwnerDecisions": [],
+  "row85": "UNAMENDED_PENDING_USER_NO_TIMING_ALTERNATIVE"
+}

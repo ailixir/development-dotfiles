@@ -1,0 +1,91 @@
+{
+  "classification": "SOURCE_TEXT_PRESERVATION_NOT_COMPILE_OR_TEST_EXECUTION",
+  "ownedMethods": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": {
+      "priorMethodCount": 18,
+      "allExistingMethodNamesPreserved": true,
+      "authorizedChangedMethods": [
+        "basis"
+      ],
+      "newTestMethods": [],
+      "allOtherMethodsByteExact": true,
+      "unchangedMethodNames": [
+        "GuidedPlanBuilder",
+        "learningProvenance",
+        "verifyExcluded",
+        "effectiveObservedObligation",
+        "locatorCardinality",
+        "bootstrap",
+        "graph",
+        "graphExact",
+        "plan",
+        "proposal",
+        "actionByAdmission",
+        "text",
+        "list",
+        "index",
+        "unique",
+        "position",
+        "compare"
+      ]
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java": {
+      "priorMethodCount": 36,
+      "allExistingMethodNamesPreserved": true,
+      "authorizedChangedMethods": [],
+      "newTestMethods": [
+        "detachedCurrentInputsMatchCompleteHistoryBeforeEffectiveFiltering",
+        "appendedHistoricalHeadPreservesOriginalVersionsAndIndependentWholeBasis"
+      ],
+      "allOtherMethodsByteExact": true,
+      "unchangedMethodNames": [
+        "fixture",
+        "choiceFixture",
+        "copy",
+        "object",
+        "at",
+        "array",
+        "canonical",
+        "shortEscape",
+        "string",
+        "hash",
+        "build",
+        "rewriteProposal",
+        "rewriteObservation",
+        "witness",
+        "resealChoice",
+        "rewriteQuestionObservation",
+        "suppliedBasis",
+        "find",
+        "reconstructsOriginalFiveActionsAndAllocatedGraphWithoutValueMaterialization",
+        "ordersOriginalActionsBySourceRatherThanUuidOrRepositoryOrder",
+        "historicalOutputContractIsNotInventedFullPromptOrProviderVersion",
+        "missingImmutableOutputOrSchemaPinsCannotBecomeInventedProvenance",
+        "controlReadRejectsPasswordReplacementWithCoherentObservationAndAdmissionHashes",
+        "Mutation",
+        "toString",
+        "brokenJoins",
+        "refusesAlteredOriginalEvidence",
+        "reconstructsIndependentObservedChoiceWithOriginalAndFreshNodes",
+        "changedChoice",
+        "choiceText",
+        "brokenChoiceJoins",
+        "refusesCoherentlyAlteredOriginalObservedChoice",
+        "originalNanosecondAnswerBoundaryAndHistoricalLeaseRemainHistorical",
+        "unchangedObligationRetainsOriginalQuestionPlanAcrossLaterRefinement",
+        "selectedBindingMetadataCannotOverrideTheOriginalAuthoredInput",
+        "Original"
+      ]
+    }
+  },
+  "existingTestBodiesAndHelpersAllByteExact": true,
+  "brokenJoinsIncludingMissingSourceInputByteExact": true,
+  "refusesAlteredOriginalEvidenceByteExact": true,
+  "source04FixtureIdentityOracleFixesByteExact": true,
+  "source02ConformanceLowererAndSource03BoundaryFilesProtectedWholeFile": true,
+  "boundaryHelperExpectedSha256": "7958ba808637442c244799061051017c0ff354fb0b31189be81884955d58fe7f",
+  "boundaryHelperActual": {
+    "sha256": "7958ba808637442c244799061051017c0ff354fb0b31189be81884955d58fe7f",
+    "bytes": 27005
+  }
+}

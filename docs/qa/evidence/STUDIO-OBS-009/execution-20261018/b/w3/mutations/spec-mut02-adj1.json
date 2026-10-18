@@ -1,0 +1,17 @@
+{
+ "label": "obs009-b-w3-mut02-adj1",
+ "evid": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/execution-20261018/b/w3/mutations",
+ "edits": [
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+   "old": "AND revoked_at IS NOT NULL AND CAST(? AS boolean)))",
+   "new": "AND revoked_at IS NOT NULL AND CAST(? AS boolean) AND false))"
+  }
+ ],
+ "gradle": [
+  "test",
+  "--tests",
+  "com.citi.put.checks.studio.dispatch.PreReadyRevocationJoinedIT",
+  "--no-daemon"
+ ]
+}

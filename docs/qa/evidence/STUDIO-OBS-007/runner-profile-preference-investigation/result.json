@@ -1,0 +1,23 @@
+{
+  "scope": "No-secret sandboxed full bundled Chromium temporary probe; not production-headless-shell equivalence or full C3 PASS",
+  "version": "153.0.8010.12",
+  "activeProfile": "user-data/Default",
+  "registeredEffective": {
+    "credentials_enable_service": false,
+    "autofill.profile_enabled": false,
+    "autofill.credit_card_enabled": false,
+    "session.restore_on_startup": 5
+  },
+  "legacyEffective": {
+    "profile.password_manager_enabled": "ABSENT"
+  },
+  "sourceChange": "R prewrite/validation now uses Default/Preferences, keeps mandated legacy key in prepared file",
+  "productionChannelChangeApplied": false,
+  "effectiveAllMandatoryKeysVerified": false,
+  "unresolved": "Root coordinated executable choice and explicit obsolete-effective-key architect/PO ruling pending",
+  "primarySources": [
+    "https://chromium.googlesource.com/chromium/src/+/HEAD/docs/user_data_dir.md",
+    "https://github.com/microsoft/playwright/blob/main/docs/src/browsers.md",
+    "https://chromium.googlesource.com/chromium/src/+/refs/heads/main/components/password_manager/core/common/password_manager_pref_names.h"
+  ]
+}

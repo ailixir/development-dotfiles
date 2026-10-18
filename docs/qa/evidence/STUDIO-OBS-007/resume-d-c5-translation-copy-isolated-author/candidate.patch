@@ -1,0 +1,21 @@
+--- before/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java
++++ candidate/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java
+@@ -748,7 +748,8 @@
+                           .put("kind", request.kind().name())
+                           .put("requestId", request.requestId())
+                           .put("attempt", request.attempt());
+-                  payload.set("context", request.projection().document());
++                  ObjectNode projectionDocument = request.projection().document();
++                  payload.set("context", projectionDocument);
+                   ObjectNode wireBound =
+                       contracts
+                           .object()
+@@ -793,7 +794,7 @@
+                                   .setAll(
+                                       java.util.Map.of(
+                                           "context",
+-                                          request.projection().document(),
++                                          projectionDocument,
+                                           "schemaPins",
+                                           prompts.schemaProvenance()))),
+                           revision,

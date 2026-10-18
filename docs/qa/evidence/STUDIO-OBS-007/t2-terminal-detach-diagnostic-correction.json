@@ -1,0 +1,23 @@
+{
+  "at": "2026-10-10T11:04:01.417851+00:00",
+  "scope": "Single existing DETACH diagnostic assertion in ordinaryRuntimeWriterCanSettleButCannotAlterOrTruncateTerminalEvidence",
+  "redGate": "root-terminal-gate-3",
+  "priorResult": "186tests/1failure/0errors/0skips/zeroSourceDrift",
+  "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+  "beforeSha256": "b8f886602f388780f05afaa9ce4db696ab186fa4904bd316674cebcb647feb17",
+  "afterSha256": "7892304aa81aeb57ad59d85183abf5b47fc0da77fdceca0f7855018fbdb29ec8",
+  "refusal": {
+    "type": "org.postgresql.util.PSQLException",
+    "sqlState": "42501",
+    "exactServerMessage": "must be owner of table studio_observed_terminal_secret_settlements"
+  },
+  "preserved": [
+    "DETACH statement/current leaf and role",
+    "all53case names and existing assertions",
+    "direct leaf UPDATE/DELETE P0001 + row preservation probes",
+    "all role grants",
+    "all SQL/API/production/contract bytes"
+  ],
+  "status": "CORRECTION_APPLIED_SOURCE_FROZEN_PENDING_ROOT_RERUN",
+  "noGradleProcess": true
+}

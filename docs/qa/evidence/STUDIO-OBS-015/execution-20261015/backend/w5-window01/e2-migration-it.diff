@@ -1,0 +1,10 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java
+@@ -841,6 +841,7 @@
+     try(Fixture f=new Fixture(true)) {
+       boundary(f);f.insertAction(STEP2,0,0,"SUCCEEDED");ObjectNode artifact=effectiveArtifact(f);UUID id=UUID.randomUUID();exec(f.c,revision(f,id,artifact,f.declarations(),reuse(f)));ObjectNode good=publication(f,id,artifact);
+       ObjectNode wrong=good.deepCopy();((ObjectNode)wrong.path("publicReceipt")).set("relearnedFrom",C.object().put("stepId",STEP1));reject(f.c,publicationSql(f,wrong,artifact),"publication relearned boundary differs");
++      ObjectNode driftOnBoundary=good.deepCopy();((ObjectNode)driftOnBoundary.path("publicReceipt").path("relearnedFrom")).put("driftSwitchStepId",good.path("publicReceipt").path("relearnedFrom").path("stepId").asText());reject(f.c,publicationSql(f,driftOnBoundary,artifact),"publication relearned boundary differs");
+       ObjectNode extra=good.deepCopy();((ObjectNode)extra.path("publicReceipt")).put("unexpected",true);reject(f.c,publicationSql(f,extra,artifact),"publication receipt shape invalid");
+       exec(f.c,publicationSql(f,good,artifact));f.immediate();assertThat(f.count("studio_guided_publications")).isEqualTo("1");
+     }

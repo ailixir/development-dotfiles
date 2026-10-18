@@ -1,0 +1,89 @@
+{
+  "scope": "ORIGINAL_UNPROFILED_SEED_AND_MANDATORY_NINTH_SOURCE_BOUND",
+  "firstProjectFrames": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.awaitFinalizing(GuidedPublicationReplayIT.java:13904)",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel(GuidedPublicationReplayIT.java:3677)"
+  ],
+  "failedState": {
+    "state": "FAILED",
+    "errorCode": "OTHER",
+    "bootstrapPhase": "READY",
+    "materializationPresent": true,
+    "fixtureModelHttpCalls": 4,
+    "fixturePhysicalProviderReads": 1,
+    "fixtureProviderFailures": 0,
+    "fixtureModelKinds": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 3,
+      "VERIFY_STEP": 0
+    }
+  },
+  "claimServerFixed": [
+    {
+      "status": 202,
+      "handlerNanos": 13511625,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 27230000,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 137368042,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 1119547416,
+      "consumed": true
+    }
+  ],
+  "lifecycleFixed": [
+    {
+      "status": 202,
+      "kind": "RUNTIME",
+      "reason": "LEASE_LOST",
+      "consumed": true
+    }
+  ],
+  "numericEvidence": {
+    "mappedAppenders": 1,
+    "rootEvents": null,
+    "appEvents": null,
+    "eventCountsStatus": "SUPPORT_UNOBSERVED",
+    "logCoverage": "STREAMED_ORIGINAL_ENCODED_OUTPUT",
+    "encodedBytes": 17140845,
+    "encodedWriteCalls": 7433,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsCollected": true,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 30,
+    "patternBytes": 3308,
+    "rootTraceObserved": true,
+    "appTraceObserved": true,
+    "httpBodies": 1,
+    "httpErrors": 0,
+    "jsonBodies": 1,
+    "problemBodies": 0,
+    "sseStreams": 0,
+    "metricBytes": 79525,
+    "cacheEntries": 2,
+    "cacheNonemptyRequired": true,
+    "cacheProduced": true,
+    "cacheUnproducedOutsideFilterRoutes": false,
+    "profileFiles": 167,
+    "knownRootLinks": 4,
+    "externalLinkTargetBytesScanned": false,
+    "c4WindowsExecuted": false,
+    "traceFromStart": false,
+    "traceArmed": true
+  },
+  "samplerEnabled": false,
+  "wholeC5Accepted": false,
+  "unchangedRetryPlanned": false
+}

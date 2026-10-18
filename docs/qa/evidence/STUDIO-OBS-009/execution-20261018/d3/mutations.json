@@ -1,0 +1,226 @@
+[
+ {
+  "id": "M1-strict-hop-without-tls-starts",
+  "applied": true,
+  "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+  "gradleExit": 1,
+  "testcases": 44,
+  "skipped": 0,
+  "failedCases": [
+   "StudioRunnerPropertiesProfileTest.aConfiguredRunnerHopOutsideLocalAndTestDoesNotStartWithoutTlsSettings()"
+  ],
+  "failedCount": 1,
+  "killed": true,
+  "tail": [
+   "* Try:",
+   "> Run with --scan to get full insights.",
+   "",
+   "BUILD FAILED in 9s"
+  ],
+  "restoredShaMatches": true
+ },
+ {
+  "id": "M2-plaintext-url-accepted-everywhere",
+  "applied": true,
+  "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerProperties.java",
+  "gradleExit": 1,
+  "testcases": 44,
+  "skipped": 0,
+  "failedCases": [
+   "StudioRunnerPropertiesProfileTest.[1] profiles=[prod]",
+   "StudioRunnerPropertiesProfileTest.[2] profiles=[staging]",
+   "StudioRunnerPropertiesProfileTest.[3] profiles=[dev]",
+   "StudioRunnerPropertiesProfileTest.[4] profiles=[api, prod]",
+   "StudioRunnerPropertiesProfileTest.[5] profiles=[worker, staging]",
+   "StudioRunnerPropertiesProfileTest.[6] profiles=[uat]",
+   "StudioRunnerPropertiesProfileTest.[7] profiles=[]",
+   "StudioRunnerPropertiesProfileTest.theSchemeCheckIsNotFooledByALookAlikeScheme()",
+   "StudioRunnerPropertiesProfileTest.[1] profiles=[prod]",
+   "StudioRunnerPropertiesProfileTest.[2] profiles=[staging]",
+   "StudioRunnerPropertiesProfileTest.[3] profiles=[dev]",
+   "StudioRunnerPropertiesProfileTest.[4] profiles=[api, prod]"
+  ],
+  "failedCount": 15,
+  "killed": true,
+  "tail": [
+   "* Try:",
+   "> Run with --scan to get full insights.",
+   "",
+   "BUILD FAILED in 16s"
+  ],
+  "restoredShaMatches": true
+ },
+ {
+  "id": "M3-reaper-profile-removed",
+  "applied": true,
+  "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java",
+  "gradleExit": 1,
+  "testcases": 15,
+  "skipped": 0,
+  "failedCases": [
+   "GuidedScheduledBeansProfileTest.reaper under api,prod: present=false",
+   "GuidedScheduledBeansProfileTest.reaper under api,staging: present=false",
+   "GuidedScheduledBeansProfileTest.reaper under api: present=false",
+   "GuidedScheduledBeansProfileTest.reaper under api,dev: present=false",
+   "GuidedScheduledBeansProfileTest.reaper under local,api: present=false",
+   "GuidedScheduledBeansProfileTest.reaper under api,test: present=false",
+   "GuidedScheduledBeansProfileTest.bothGatesUseTheExpressionOfTheSchedulingCoordinator()"
+  ],
+  "failedCount": 7,
+  "killed": true,
+  "tail": [
+   "* Try:",
+   "> Run with --scan to get full insights.",
+   "",
+   "BUILD FAILED in 12s"
+  ],
+  "restoredShaMatches": true
+ },
+ {
+  "id": "M4-coordinator-profile-removed",
+  "applied": true,
+  "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java",
+  "gradleExit": 1,
+  "testcases": 15,
+  "skipped": 0,
+  "failedCases": [
+   "GuidedScheduledBeansProfileTest.coordinator under api,prod: present=false",
+   "GuidedScheduledBeansProfileTest.coordinator under api,staging: present=false",
+   "GuidedScheduledBeansProfileTest.coordinator under api: present=false",
+   "GuidedScheduledBeansProfileTest.coordinator under api,dev: present=false",
+   "GuidedScheduledBeansProfileTest.coordinator under local,api: present=false",
+   "GuidedScheduledBeansProfileTest.coordinator under api,test: present=false",
+   "GuidedScheduledBeansProfileTest.bothGatesUseTheExpressionOfTheSchedulingCoordinator()"
+  ],
+  "failedCount": 7,
+  "killed": true,
+  "tail": [
+   "* Try:",
+   "> Run with --scan to get full insights.",
+   "",
+   "BUILD FAILED in 11s"
+  ],
+  "restoredShaMatches": true
+ },
+ {
+  "id": "M5-connector-accepts-no-client-certificate",
+  "applied": true,
+  "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+  "gradleExit": 1,
+  "testcases": 1,
+  "skipped": 0,
+  "failedCases": [
+   "RunnerTlsClientCertIT.theGuidedConnectorDemandsAClientCertificateAndServesTheBackendCertificate()"
+  ],
+  "failedCount": 1,
+  "killed": true,
+  "tail": [
+   "* Try:",
+   "> Run with --scan to get full insights.",
+   "",
+   "BUILD FAILED in 10s"
+  ],
+  "restoredShaMatches": true
+ },
+ {
+  "id": "M6-issuer-not-required",
+  "applied": true,
+  "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+  "gradleExit": 1,
+  "testcases": 44,
+  "skipped": 0,
+  "failedCases": [
+   "StudioRunnerPropertiesProfileTest.[3] part=studio.guided-authoring.service-issuer, named=service-issuer",
+   "StudioRunnerPropertiesProfileTest.aWorkerNeedsTheTokenFilesButNotTheReceivingHalfOfTheChain()"
+  ],
+  "failedCount": 2,
+  "killed": true,
+  "tail": [
+   "* Try:",
+   "> Run with --scan to get full insights.",
+   "",
+   "BUILD FAILED in 9s"
+  ],
+  "restoredShaMatches": true
+ },
+ {
+  "id": "M7-dispatch-client-ignores-tls",
+  "applied": true,
+  "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+  "gradleExit": 1,
+  "testcases": 3,
+  "skipped": 0,
+  "failedCases": [
+   "RunnerTlsClientCertIT.submissionAndCancelSucceedOnlyWithTheBackendCertificateAndTheRunnerIssuer()"
+  ],
+  "failedCount": 1,
+  "killed": true,
+  "tail": [
+   "* Try:",
+   "> Run with --scan to get full insights.",
+   "",
+   "BUILD FAILED in 9s"
+  ],
+  "restoredShaMatches": true
+ },
+ {
+  "id": "M8-coordinator-ignores-tls",
+  "applied": true,
+  "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+  "gradleExit": 1,
+  "testcases": 1,
+  "skipped": 0,
+  "failedCases": [
+   "RunnerTlsClientCertIT.theCoordinatorsControllerHopPresentsTheBackendCertificateAndRefusesAStrayServer()"
+  ],
+  "failedCount": 1,
+  "killed": true,
+  "tail": [
+   "* Try:",
+   "> Run with --scan to get full insights.",
+   "",
+   "BUILD FAILED in 9s"
+  ],
+  "restoredShaMatches": true
+ },
+ {
+  "id": "M10-validation-client-ignores-tls",
+  "applied": true,
+  "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+  "gradleExit": 1,
+  "testcases": 2,
+  "skipped": 0,
+  "failedCases": [
+   "RunnerTlsClientCertIT$OneIdentityInARealContext.allFourRunnerFacingClientsHoldTheOneConfiguredContext()"
+  ],
+  "failedCount": 1,
+  "killed": true,
+  "tail": [
+   "* Try:",
+   "> Run with --scan to get full insights.",
+   "",
+   "BUILD FAILED in 21s"
+  ],
+  "restoredShaMatches": true
+ },
+ {
+  "id": "M9-scanner-blind-to-jsonb",
+  "applied": true,
+  "file": "backend/src/test/java/com/citi/put/checks/studio/secrets/DatabaseCanaryScanIT.java",
+  "gradleExit": 1,
+  "testcases": 1,
+  "skipped": 0,
+  "failedCases": [
+   "DatabaseCanaryScanIT.theScannerReportsAPlantedCopyInEveryColumnTypeAndEveryEncoding()"
+  ],
+  "failedCount": 1,
+  "killed": true,
+  "tail": [
+   "* Try:",
+   "> Run with --scan to get full insights.",
+   "",
+   "BUILD FAILED in 23s"
+  ],
+  "restoredShaMatches": true
+ }
+]

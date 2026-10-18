@@ -1,0 +1,67 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -11914,13 +11914,15 @@
+ 
+     private volatile PgStatus pgStatus = PgStatus.NOT_TRIGGERED;
+     private final long[][] pgStagesAndWaits = new long[7][10];
+-    // Independent nonadditive partitions: SQL 0..6, source family 7..12, phase 13..19.
++    // Independent nonadditive partitions: SQL 0..6, source family 7..12, caller 13..28.
+     // Never sum partitions: the same confirmed blocker can contribute to each.
+     // Source codes: 7 claim, 8 translation, 9 observation/materialization, 10 consume/outcome,
+     // 11 read/start/command, 12 stop/reconcile. Exact Translation.call phases:
+     // 13 reserve, 14 send, 15 apply, 16 duplicate, 17 reject accounting, 18 late accounting,
+-    // 19 preparation capture. Callsite labels do not assert inner guard completion or cost.
+-    private final long[] pgBlockerStages = new long[20],
++    // 19 preparation capture. Family 9 method labels: 20 observe, 21 observeV2, 22 materialize,
++    // 23 allocateBinding, 24 runnerContext, 25 storePreparation, 26 bootstrap, 27 beginRefresh,
++    // 28 committedRefresh. Caller labels do not assert inner guard completion or cost.
++    private final long[] pgBlockerStages = new long[29],
+         pgRelations = new long[3],
+         pgWaitEvents = new long[8];
+     private long pgRows, pgCandidates, pgBlockers;
+@@ -12254,7 +12256,7 @@
+                     "bootstrap",
+                     "beginObservationRefresh",
+                     "committedObservationRefresh" ->
+-                new SourceClassification(9, -1);
++                new SourceClassification(9, sourceFamily9Method(stack[i], method));
+             case "recordSecretDecision",
+                     "refuseResolvedSecret",
+                     "admit",
+@@ -12331,6 +12333,26 @@
+         case 1083 -> 17;
+         case 1113 -> 18;
+         case 774 -> 19;
++        default -> -1;
++      };
++    }
++
++    private static int sourceFamily9Method(StackTraceElement frame, String method) {
++      if (!frame.getClassName().equals("com.citi.put.checks.studio.guided.session.GuidedSessionService")
++          || !"GuidedSessionService.java".equals(frame.getFileName())
++          || frame.getLineNumber() <= 0) {
++        return -1;
++      }
++      return switch (method) {
++        case "observe" -> 20;
++        case "observeV2" -> 21;
++        case "materialize" -> 22;
++        case "allocateBinding" -> 23;
++        case "runnerContext" -> 24;
++        case "storePreparation" -> 25;
++        case "bootstrap" -> 26;
++        case "beginObservationRefresh" -> 27;
++        case "committedObservationRefresh" -> 28;
+         default -> -1;
+       };
+     }
+@@ -12551,6 +12573,9 @@
+                 pgBlockerStages[holder.getValue().family()]++;
+                 int phase = holder.getValue().phase();
+                 if (holder.getValue().family() == 8 && phase >= 13 && phase <= 19) {
++                  pgBlockerStages[phase]++;
++                }
++                if (holder.getValue().family() == 9 && phase >= 20 && phase <= 28) {
+                   pgBlockerStages[phase]++;
+                 }
+               }

@@ -1,0 +1,87 @@
+  private enum ObservationFailure {
+    INVALID_CONTRACT("INVALID_CONTRACT", 422),
+    RUNTIME_INCOMPATIBLE("RUNTIME_INCOMPATIBLE", 409);
+
+    private final String code;
+    private final int status;
+
+    ObservationFailure(String code, int status) {
+      this.code = code;
+      this.status = status;
+    }
+
+    private static ObservationFailure known(GuidedSessionException failure) {
+      for (ObservationFailure candidate : values()) {
+        if (candidate.code.equals(failure.getMessage()) && candidate.status == failure.status()) {
+          return candidate;
+        }
+      }
+      return null;
+    }
+  }
+
+  private static final class ObservationValidation {
+    private final GuidedSessionService owner;
+    private final JsonNode originalObservation;
+    private final ObjectNode snapshot;
+    private final String representation;
+    private final ObservationFailure failure;
+
+    private ObservationValidation(
+        GuidedSessionService owner,
+        JsonNode originalObservation,
+        ObjectNode snapshot,
+        String representation,
+        ObservationFailure failure) {
+      this.owner = owner;
+      this.originalObservation = originalObservation;
+      this.snapshot = snapshot;
+      this.representation = representation;
+      this.failure = failure;
+    }
+  }
+
+  private ObservationValidation prepareObservation(JsonNode observation) {
+    ObjectNode snapshot = ledger.copyOutcomeRequest(observation);
+    if (snapshot == null) {
+      return null;
+    }
+    try {
+      String representation = snapshot.toString();
+      ObservationFailure preparedFailure = null;
+      try {
+        contracts.validate("observation", snapshot);
+      } catch (GuidedSessionException failure) {
+        preparedFailure = ObservationFailure.known(failure);
+        if (preparedFailure == null) {
+          return null;
+        }
+      }
+      return new ObservationValidation(this, observation, snapshot, representation, preparedFailure);
+    } catch (RuntimeException unavailable) {
+      return null;
+    }
+  }
+
+  private void validateObservationAtOriginalPoint(
+      JsonNode observation, ObservationValidation prepared) {
+    boolean matching = false;
+    try {
+      matching =
+          prepared != null
+              && prepared.owner == this
+              && prepared.originalObservation == observation
+              && observation.equals(prepared.snapshot)
+              && observation.toString().equals(prepared.representation);
+    } catch (RuntimeException unavailable) {
+      // Unknown comparison cannot establish original observation schema validity.
+    }
+    if (!matching) {
+      contracts.validate("observation", observation);
+      return;
+    }
+    if (prepared.failure != null) {
+      throw new GuidedSessionException(prepared.failure.code, prepared.failure.status);
+    }
+  }
+

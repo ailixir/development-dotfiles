@@ -1,0 +1,36 @@
+{
+  "status": "SOURCE_HELD_FOR_ROOT_SQL_FEEDBACK_WINDOW_NOT_GREEN",
+  "laneGreen": false,
+  "createdAt": "2026-10-15T05:48:23.472670+00:00",
+  "scope": "ARCH015-02/03 semantic conformance + exact independently approved04scalarpatch",
+  "authorities": {
+    "04Manifest": "1cc89ac2cb5947c36701147546ec9cb15c8f6ee890490b255626093a34e71697",
+    "04Qa": "0999abd94e23280c2740fbb11f237b7309b5d5f14491a6cf777f69baa15fffdf"
+  },
+  "priorFailedCheckpoint": "checkpoint-receipt.json preserved exact f764d35c8c24a298661261efe38a932acdc14996e4b8536b6c3801d2f3694078",
+  "manifest": "post-patch-checkpoint-manifest.json",
+  "manifestSHA256": "5e4c934b25ef58a18f470828af66e4bd2d3747b09ea129fccca680b2e0676b77",
+  "generation": "generation-write.json",
+  "generationSHA256": "135efd501f380078ac302fea68651a1049e7ac3531ec9a61ec7703d72811ad82",
+  "selectedMeasuredScope": {
+    "graphTimingProbeCasesPassed": 67,
+    "completeGraphPositives": 4,
+    "completeGraphNegatives": 32,
+    "timingCases": 15,
+    "publicWaitSchemaCases": 8,
+    "syntheticHistorySidecarCases": 8,
+    "historicalBaseWitnesses": 4,
+    "byteParityAtGenerationCheckpoint": "PASS",
+    "fullOracleFinalGate": "NOT_RUN_AFTER_GENERATION",
+    "applicationAcceptanceCredit": false,
+    "coverageCredit": false
+  },
+  "remaining": [
+    "Run final full bounded oracle, generator parity and pin/status checks and archive exact final source logs.",
+    "Finish explicit effective-transfer bijection and full-basis publication/admission preimage assertions on appended witnesses; keep all raw arrays/hash evidence unmodified.",
+    "Record negative-rejection reason inventory and final raw/model/six-copy audit.",
+    "Freeze complete immutable final receipt and consumer handoff only after all selected checks green."
+  ],
+  "hold": "No further owned source/spec/tool writes or tests until root resumes. No active command.",
+  "prohibitedActionsPerformed": []
+}

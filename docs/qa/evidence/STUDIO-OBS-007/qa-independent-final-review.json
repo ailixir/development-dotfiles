@@ -1,0 +1,676 @@
+{
+  "schema": 1,
+  "story": "STUDIO-OBS-007",
+  "gate": "PASS",
+  "reviewer": "Quinn",
+  "reviewer_model": "GPT-6 Astra xhigh",
+  "updated": "2026-10-13T01:52:17Z",
+  "reviewed_revision": "sha256:167ccfb6fa058edf9ff03ffe2b8f99e6917f55d3cf2158c7344b81742a87b80c",
+  "independence": {
+    "product_or_test_implementer": false,
+    "development_runtime_executor": false,
+    "prior_role": "independent source/runtime and assigned architecture reviewer",
+    "architecture_pass_automatically_adopted": false
+  },
+  "review_depth": "Deep independent review for security-sensitive change with19ACs and broad implementation impact",
+  "top_issues": [],
+  "waiver": {
+    "active": false
+  },
+  "requirements_sha256": "ce2c754f588e8f25957a8c828cd11c03bd333de603a53c0397304ccaed57f317",
+  "current_fixture_sha256": "f51ba83f7d67234aa360219b12d92ceaf5f46161d967db675f6f026642dcaee7",
+  "backend_source_bindings": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "b278df113f0c55d081a35a839fc3a0eb79a8de26b7dbc840288b6f0aca69c1c4",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": "c9a36bac3fe1cbd5d98b4599734013bb3aa64cdac2922406e1df865d8e909b09",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationBudget.java": "ccababf7de7f83f6b516496962dd6c1ee419855782a4606fc2bc284a64be4437",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java": "aeb534126b39be519976059d1d6ceb9a55493403110e642c85d25fc172bfef0e",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java": "188016cbaf302a6bf754727dc33f8fa13c7f2176989cdfd753012b85954fe96d",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java": "848b4c80050a7eb03e713093d707b9c32ee99a079c2767a4f05397063435edd6",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java": "db8eba667bb2858ce66dee903ed4f42cb60e28b26ad44b7fc836f6773380b23a",
+    "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java": "324da4937240cc6fd6937446889ad1c0307ad92031c00d027ee03271207e2146"
+  },
+  "core_data_reuse_bindings": [
+    {
+      "source": "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql",
+      "currentSha256": "f644a055a2942939f4cd6a1f295757ebf769e706134ec12fa8b29f3e9f8ce380",
+      "passed264Sha256": "f644a055a2942939f4cd6a1f295757ebf769e706134ec12fa8b29f3e9f8ce380",
+      "sameBytes": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+      "currentSha256": "cb3329c3f290e7a409c3c2da98f890da2cf070e8c8102c4d1683f38abbc22ab2",
+      "passed264Sha256": "cb3329c3f290e7a409c3c2da98f890da2cf070e8c8102c4d1683f38abbc22ab2",
+      "sameBytes": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+      "currentSha256": "7313046e049f40ff860119f1927de1bd326dcb9897ce0a5835eb77b450c30833",
+      "passed264Sha256": "7313046e049f40ff860119f1927de1bd326dcb9897ce0a5835eb77b450c30833",
+      "sameBytes": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/recovery/PendingReaper.java",
+      "currentSha256": "4f643583b8739682a3482f13396d47b461fc41f2b67fddcfcde583abf3d8caff",
+      "passed264Sha256": "4f643583b8739682a3482f13396d47b461fc41f2b67fddcfcde583abf3d8caff",
+      "sameBytes": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java",
+      "currentSha256": "4b6e7092e85d33d314bf10a3af0187247c186548ba4d4492b5a45fbf96e9ddd7",
+      "passed264Sha256": "4b6e7092e85d33d314bf10a3af0187247c186548ba4d4492b5a45fbf96e9ddd7",
+      "sameBytes": true
+    }
+  ],
+  "architecture_input": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/astra-assigned-architecture-final-readiness.json",
+    "sha256": "d90e4b43a7cf026fa62775106e6c7de594beeaeb541abddec93bb0983ff7b57b",
+    "scope": "technical readiness input; separate formal QA decision"
+  },
+  "evidence_registry": {
+    "current_c5_ac16": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-c2-c6-current-c5pair/closed-first-boundary.json",
+      "sha256": "47c6864fca9d07690347e807fb1f13108a1b86a721b3b15a1cfb20451cc2f304",
+      "use": "scope-qualified evidence"
+    },
+    "current_c2_c6": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-c2-c6-current-native3-twofix/closed-current-native-proof.json",
+      "sha256": "ee1bea8f3b0debd74830fc73dc13bfc54e5482dc105965fd8cf00b2bdc7b6046",
+      "use": "scope-qualified evidence"
+    },
+    "current_native_review": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-c2-c6-current-native3-independent-confirmation.json",
+      "sha256": "2053eef30528890019a335726056843bcb19d84f6ebd8fe0fa0d2ca640d4a62a",
+      "use": "scope-qualified evidence"
+    },
+    "main_strict": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-request-array-validation-current-static/result.json",
+      "sha256": "127ec9445c38868f52b7abfb92d27a74658a81d7152a3ab5e35b698c56705b36",
+      "use": "scope-qualified evidence"
+    },
+    "affected139": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-request-array-validation-defining-current/result.json",
+      "sha256": "9c0c9d889fc41689d66e561046d28e564f6334fe9b6e96f104a254a2a6e198d2",
+      "use": "scope-qualified evidence"
+    },
+    "migration16": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-existing-migration-current/result.json",
+      "sha256": "6116b02e56fb4d826049fd407b79c62213b39dae61ab56129665dcf1a3c6a6e6",
+      "use": "scope-qualified evidence"
+    },
+    "studio13": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-existing-studio-regression-current/result.json",
+      "sha256": "2b8ddeb6bcb942dc483fd338cadc66514cbdda88114bf661f10fc987dfca0b9f",
+      "use": "scope-qualified evidence"
+    },
+    "compile394_skip1": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-existing-compile-regression-current/result.json",
+      "sha256": "3325d19812d43e514afbf4e61b8cbb24662d76a3a3422b71ba3cc9fe071c4937",
+      "use": "scope-qualified evidence"
+    },
+    "sdk1800_skip29": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-existing-sdk-default-current/result.json",
+      "sha256": "734d7f74fb295f284a010576284ebee3a5fdc8b309a26cb7485ffc07268dfd4e",
+      "use": "scope-qualified evidence"
+    },
+    "skip_tiers": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-sdk-default-skip-tier-reconciliation.json",
+      "sha256": "1b3b8d4a3aac188a735dbd7859a392fce972de0feca195e848da636854e5330c",
+      "use": "scope-qualified evidence"
+    },
+    "contracts_codegen": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/root-current-contract-check/result.json",
+      "sha256": "4657fa302847398635d83e26b6314254d2888fc7bd80eabfff0c48350eb87b22",
+      "use": "scope-qualified evidence"
+    },
+    "data264": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-2/result.json",
+      "sha256": "b2160cb4dcd3c11ebd0e5f485508a0581eed1a26cd788f37e6c6092c68caecc0",
+      "use": "scope-qualified evidence"
+    },
+    "report_boundary": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-manifest-report-guard-gate/result.json",
+      "sha256": "d04017ee2639377b002260a8c1ac0a94bdf37772340d6095d010a568f2cfbdd1",
+      "use": "scope-qualified evidence"
+    },
+    "defaults_and_routes": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/lane-b-core-gate-3/result.json",
+      "sha256": "f7d4b45718a8d6bab018da52575c885d8ec1b0650fb2e8fc443c8b32b8661a1d",
+      "use": "scope-qualified evidence"
+    },
+    "active_ports": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/root-guided-security-ports-green/result.json",
+      "sha256": "b93e05a77430f539ec6fc3c39ee287ec41f68e4660856f7ac7559d5016a8a301",
+      "use": "scope-qualified evidence"
+    },
+    "login6": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-login-six-current/result.json",
+      "sha256": "e2724ff17d60d8fc30563aa9c0cacadcd47add63446b8381086f7d26b3c0d982",
+      "use": "scope-qualified evidence"
+    },
+    "native_collector33": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-r-origin-native-thirtythree/result.json",
+      "sha256": "407f5fb0571d92238c438a5300305fbb2e1ac23b509d2cd3fab54bae214ca3e2",
+      "use": "scope-qualified evidence"
+    },
+    "guided_capacity3": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-node22-native-isolation-three/result.json",
+      "sha256": "2154d9cf9380f3990df59c5aa0a326d21056cf08ef8841875b98a78c9094f055",
+      "use": "scope-qualified evidence"
+    },
+    "native_control4": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-native-absolute-window-four-current/result.json",
+      "sha256": "b69218b81a40969b6ee08aba236ccb528caa9c33db30f74bbfa14fe2b6b342c9",
+      "use": "scope-qualified evidence"
+    },
+    "core_revocation2": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-final-core-revocation-two-current/result.json",
+      "sha256": "8197f886ff8cde7d161c19a935c877854ae7ff7b7bf7944b55cdfcfea85302f4",
+      "use": "scope-qualified evidence"
+    },
+    "retry_pool": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-final-c4-pool-one-current/result.json",
+      "sha256": "42308850b6c08e0dfb8093f82762addd0999af50aaf8b4de1593b02dc5ab524f",
+      "use": "scope-qualified evidence"
+    },
+    "retry_outage": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-final-c4-outage-one-current/result.json",
+      "sha256": "b4aba65e4e0f6e53dab0ed24f79e8122619054b39e2163dbce6d5d9ced71c999",
+      "use": "scope-qualified evidence"
+    },
+    "c11_midfill": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-final-c11-midfill-one-current/closed-actual-scope-proof.json",
+      "sha256": "59aed7008a545613fc3f34cbe274dbfd1774e7a4b607dc8be1dfe10cf3d4b5ab",
+      "use": "scope-qualified evidence"
+    },
+    "c11_parent_wipe": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-c2-child-kill-parent-wipe-independent-review.json",
+      "sha256": "cc98ad5ad2c75cb4196250fcaee3d584f7cf5a4939b575b0a0ee5414d30d6252",
+      "use": "scope-qualified evidence"
+    },
+    "guided_preresolve": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-guided-preresolve-twentytwo-current/result.json",
+      "sha256": "28b877e90d4ee34e914e71eb1e4d5922146777b5367dfa3042165e71389cc2b5",
+      "use": "scope-qualified evidence"
+    },
+    "child_progress_cut": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-required-child-cut-one-current/result.json",
+      "sha256": "edcc45c8c7029fe51f9c3f061c2478799cc0f7bcc7d3ae2125fb09b6d0672e22",
+      "use": "scope-qualified evidence"
+    },
+    "c6_injected": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-c6-injection-cache-current/result.json",
+      "sha256": "5c5687d038a53819edde53f503778148cb32418dcfcc770071b17c0d8eb1c1b5",
+      "use": "scope-qualified evidence"
+    },
+    "c6_guided_loss": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-c6-managed-callback-completion-current/result.json",
+      "sha256": "b9fd1fbe0cca5c0c99a3a617b3d1d849120ba1024237e5187214dd78ca95f23a",
+      "use": "scope-qualified evidence"
+    },
+    "c14_guided_control": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-c14-guided-kmp-first-current/result.json",
+      "sha256": "d47ad4281ecb8f1c7f8d19e9fdfef42010d7eb903e503e1e2851e70f35c81890",
+      "use": "scope-qualified evidence"
+    },
+    "c14_guided_value": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-c14-guided-hasvalue-current/result.json",
+      "sha256": "e1a9d3cad5077ffe5d03d657416c0b3d034257938b3ce4faf39a4a601af03d47",
+      "use": "scope-qualified evidence"
+    },
+    "c14_replay_control": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-c14-published-phase-control-current/result.json",
+      "sha256": "1317c462fe35228c24e2404037e2ef1654331287e07bf2f369a1b32468577030",
+      "use": "scope-qualified evidence"
+    },
+    "c14_replay_value_text": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-c14-cache-policy-current/result.json",
+      "sha256": "3e2511a80c971a77eff2ba923c33b6a9c045d0d6b822cb33569bd35931a5d58d",
+      "use": "scope-qualified evidence"
+    },
+    "frontend958": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/resume-frontend-skiphover-full-current/result.json",
+      "sha256": "855b94892ca3b1620480427d8a3faf4ecdd4e7296e7628480b963346efd508c7",
+      "use": "scope-qualified evidence"
+    },
+    "local_chromium": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-local-chromium-version-record.json",
+      "sha256": "88953b0ddb31c3331c2224d85e3dde324c1233785afdfd17f6835629946aec4f",
+      "use": "scope-qualified evidence"
+    },
+    "residuals": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/lane-b-residuals.json",
+      "sha256": "ea7356d8f19abd137bc68b9ce124218bdcd3b5c37638867eaa91224d08e8e0eb",
+      "use": "scope-qualified evidence"
+    },
+    "security_r3": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/t0-security-r3-delta.md",
+      "sha256": "627a3c3d0701b0881e1a285811b9ebbb5a2158a663fcdc6d2c42335a09dcbcc4",
+      "use": "scope-qualified evidence"
+    },
+    "manual_fallback": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-final-manual-review-fallback.json",
+      "sha256": "6ff7b6b95cdd2a78a0db37c135888b218e2345a0499c9cd4fc94f48a6792b69e",
+      "use": "scope-qualified evidence"
+    },
+    "root_checkpoint": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-007/root-acceptance-complexity-execution-checkpoint.json",
+      "sha256": "12545ec83d250558c4eafead426e0b604602aaab284ba65fd6ba44b8d25a2c5c",
+      "use": "current metadata reconciliation; historical architecture digest retained separately"
+    }
+  },
+  "acceptance_traceability": [
+    {
+      "ac": 1,
+      "requirement": "Closed v3 contracts/version tuple/codegen and no-value secret reference shapes",
+      "given": "a secret-reference contract and version tuple",
+      "when": "valid and invalid generated shapes are parsed",
+      "then": "closed schemas preserve reference-only forms and reject unknown/value-bearing forms",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "contracts_codegen",
+        "affected139",
+        "sdk1800_skip29"
+      ],
+      "scope_and_limits": "Generated-contract checks are separate from native schema strategy. Current finite strategy preserves original native constraints, canonical bytes and fallback; no schema/pin/log/deadline weakening."
+    },
+    {
+      "ac": 2,
+      "requirement": "Strict internal secretUse/revoked body shapes, code and digest pins",
+      "given": "an internal secret-use or revoked report",
+      "when": "strict body, code and digest validation runs",
+      "then": "only the scoped allowed report shape reaches the audit boundary",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "report_boundary",
+        "affected139",
+        "sdk1800_skip29"
+      ],
+      "scope_and_limits": "Use the passing ProgressCallbackIT20 slice of the historical110 gate, whose whole gate had3 failures; never promote the entire failed gate. Current DTO/canonical/public contracts remain unchanged by final delta."
+    },
+    {
+      "ac": 3,
+      "requirement": "Classify/mask/materialize secretRef; lowered reference and transient literal/span refusal; rotation hash",
+      "given": "a declared secret reference and transient model inputs",
+      "when": "classification, masking, materialization and lowering run",
+      "then": "the reference remains value-free and literal/span substitution is refused",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "current_c5_ac16",
+        "affected139",
+        "sdk1800_skip29"
+      ],
+      "scope_and_limits": "Actual secret learn/publish/two fresh model-free replays now pass. Defining verifier/classifier/schema negatives remain at their native unit/contract boundary, not fabricated invalid browser artifacts."
+    },
+    {
+      "ac": 4,
+      "requirement": "Declaring step/slot, unique cited password target, current document/generation/origin/form action",
+      "given": "the declaring fill slot and current observation",
+      "when": "target, generation, document, origin and form-action guards run",
+      "then": "only the single cited password target can receive the value",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "affected139",
+        "native_collector33",
+        "current_c5_ac16"
+      ],
+      "scope_and_limits": "Retained native guard variants plus actual guided/published wiring. Exact first reachable refusals remain; no source/current-authority bypass."
+    },
+    {
+      "ac": 5,
+      "requirement": "Sole isolated collector; retained element/mutation/origin guards; shadow/frame/decoy limits",
+      "given": "the isolated native collector and supported document topology",
+      "when": "retained-element and mutation checks execute",
+      "then": "shadow/frame/decoy guards preserve the one supported password target without exporting it",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "native_collector33",
+        "sdk1800_skip29",
+        "current_c5_ac16"
+      ],
+      "scope_and_limits": "Shared native topology variants are not multiplied into a Core Cartesian matrix. Same password-only and no-exported-password-node policy applies to both paths."
+    },
+    {
+      "ac": 6,
+      "requirement": "Names-only admission, post-consume release, scope/frame/digest/wipe and chosen guided capacity1",
+      "given": "names-only admission and separately scoped secret values",
+      "when": "post-consume release and concurrent ordinary runs execute",
+      "then": "scope, owned-frame delivery, digest checks, wipes and guided capacity-one isolation hold",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "current_c5_ac16",
+        "current_c2_c6",
+        "guided_capacity3",
+        "c11_parent_wipe",
+        "affected139",
+        "sdk1800_skip29"
+      ],
+      "scope_and_limits": "C2 now has genuine concurrent distinct-CSI ordinary children with distinct values and30-variant env/argv scans; success/drain/current failure/cancel and live-parent child-kill wipes/PIDs are separately bound. Guided capacity1 is retained; ordinary scoped pool2 does not alter it."
+    },
+    {
+      "ac": 7,
+      "requirement": "Ordinary observed dispatch-time resolution; scope/origins/password-only/model-free replay",
+      "given": "an accepted ordinary observed replay",
+      "when": "dispatch resolves the current reference and executes the compiled child",
+      "then": "fresh scoped values fill only the allowed target without a runtime model",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "current_c5_ac16",
+        "current_c2_c6",
+        "retry_pool",
+        "retry_outage",
+        "native_collector33"
+      ],
+      "scope_and_limits": "Real public executions and actual compiled/native replays are the evidence. No account/legacy adapter credit; original four scope positives and their negative checks remain."
+    },
+    {
+      "ac": 8,
+      "requirement": "Password hasValue/controlValue refusals in both paths and redacted text-control failure",
+      "given": "password-value assertions or a canary-bearing text failure",
+      "when": "guided and replay guard paths execute",
+      "then": "password value access is refused and exported failure content is redacted",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "c14_guided_control",
+        "c14_guided_value",
+        "c14_replay_control",
+        "c14_replay_value_text",
+        "native_collector33"
+      ],
+      "scope_and_limits": "Four existing selected cases cover five logical probes, including reused text-canary failure. Exact native defensive refusal and first reachable workflow guards are distinguished; no fabricated password observation."
+    },
+    {
+      "ac": 9,
+      "requirement": "Owned SecretValue/streaming writers and full backend C5 sinks plus retry fault windows",
+      "given": "owned backend secret buffers and retry/failure windows",
+      "when": "the original secret publication/replay capture runs with full TRACE",
+      "then": "all 30 representations have zero sink hits and final closure is verified",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "current_c5_ac16",
+        "retry_pool",
+        "retry_outage",
+        "data264",
+        "residuals"
+      ],
+      "scope_and_limits": "Current original C5 retains full ROOT+APP TRACE/all30/final closed scans. Last C6 capture15 is never substituted. JVM/Jackson/HttpClient/TLS residuals remain explicit; no heap-zeroization claim."
+    },
+    {
+      "ac": 10,
+      "requirement": "Runner sink/static guard, distinct native/injected/supplementary controls and authentic failure closure",
+      "given": "native, injected and supplementary runner failures",
+      "when": "their defining paths and current timeout/cancel cases execute",
+      "then": "appropriate sink refusals and authentic cleanup outcomes retain their distinct provenance",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "current_c2_c6",
+        "c6_injected",
+        "c6_guided_loss",
+        "sdk1800_skip29",
+        "root_checkpoint"
+      ],
+      "scope_and_limits": "Native current timeout/cancel and guided loss remain separate from injected released-value redaction and supplementary Playwright controls. Preserve reviewed source-bound refusal/code-only limits and historical unmet assertions; no support-tier promotion."
+    },
+    {
+      "ac": 11,
+      "requirement": "Fixed sandboxed full Chromium, effective preferences/profile confinement, cleanup and native video",
+      "given": "the configured sandboxed full Chromium and owned profile",
+      "when": "native flows execute and terminate",
+      "then": "effective preferences, profile confinement, cleanup and video claims stay bound to the recorded local runtime",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "current_c5_ac16",
+        "current_c2_c6",
+        "native_collector33",
+        "sdk1800_skip29",
+        "local_chromium",
+        "root_checkpoint"
+      ],
+      "scope_and_limits": "Current local binary record is Chromium153.0.8010.12, not retrospective or production-image proof. Local profile/video proofs retain their source/runtime scopes; staging seek and human masking stay assigned external gates."
+    },
+    {
+      "ac": 12,
+      "requirement": "4096 value bound, existing oversized refusal and names-only secrets route/response pins",
+      "given": "a names-only request or oversized secret",
+      "when": "service, streaming and route bounds are enforced",
+      "then": "the 4096 bound and existing refusal are preserved without a value-return route or truncation fallback",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "defaults_and_routes",
+        "data264",
+        "sdk1800_skip29",
+        "frontend958"
+      ],
+      "scope_and_limits": "Defining service/streaming/schema/route tests and existing error mapping are retained. Backend half belongs here; UI/MSW secrets-authoring half remains OBS008. No value route or truncation fallback."
+    },
+    {
+      "ac": 13,
+      "requirement": "Fresh-resolution retries/outage/revocation, real1s+1s control bound and immutable completed outcomes",
+      "given": "a retry, outage, or revoked authorization",
+      "when": "fresh resolution and the original bounded control polls run",
+      "then": "stop bounds and completed outcomes remain intact without deadline resets",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "retry_pool",
+        "retry_outage",
+        "core_revocation2",
+        "native_control4",
+        "current_c2_c6"
+      ],
+      "scope_and_limits": "Actual Core pair and separate native worst/slow/lost-response controls retain original2000ms bound and in-flight residual. No timing result borrowed from unrelated manifests; no completed result rewritten."
+    },
+    {
+      "ac": 14,
+      "requirement": "Atomic append-only release/usage, scoped identity, positive/unknown facts, recovery/retention/CAS",
+      "given": "scoped release and usage identities, including uncertainty",
+      "when": "transactional recording, crash recovery and terminal reconciliation run",
+      "then": "append-only facts retain correct positive, unknown and unreached distinctions",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "data264",
+        "report_boundary",
+        "guided_preresolve",
+        "child_progress_cut",
+        "c11_midfill",
+        "current_c2_c6"
+      ],
+      "scope_and_limits": "Five core data components still match passed264 bytes. PG negatives remain at defining transactional tier. Current native uncertainty keeps one linked UNKNOWN; no invented NOT_USED/REFUSED/ACK_LOST or killed-child normal seal."
+    },
+    {
+      "ac": 15,
+      "requirement": "Account removal, immutable old migrations, V34 and staged V19 orders; faithful active ports",
+      "given": "the current migration baseline and active guided security ports",
+      "when": "migration orders and active-v3 contract/refusal tests run",
+      "then": "account removal and V34 behavior preserve old migrations and required live port coverage",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "migration16",
+        "data264",
+        "active_ports",
+        "affected139",
+        "sdk1800_skip29"
+      ],
+      "scope_and_limits": "Fresh migration16 passes. Current Session43/Wire7 and retained security/HTTP ports preserve active-v3 scenarios; historical20-port receipt is scoped, not the final whole port count. OBS012A removes remaining obsolete scaffolding later."
+    },
+    {
+      "ac": 16,
+      "requirement": "Actual worker and non-worker accepted observed dispatch with readiness verifier installed",
+      "given": "API-accepted observed executions in non-worker and worker contexts",
+      "when": "the actual verifier, readiness service and dispatcher route them",
+      "then": "both profiles use the observed route and the owned worker context and three executors close",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "current_c5_ac16"
+      ],
+      "scope_and_limits": "Same two existing nonsecret replays exercise both real profiles; observed receipt/route, real bean wiring, absent BFF controllers, context close and three real executor terminations are source-bound passing assertions."
+    },
+    {
+      "ac": 17,
+      "requirement": "Default-on translation/nonsecret/publication/replay with original execution kill switch",
+      "given": "default application configuration and the existing kill switch",
+      "when": "the defining context and joined flows start",
+      "then": "translation, nonsecret, publication and replay defaults remain on while the execution kill switch remains effective",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "defaults_and_routes",
+        "current_c5_ac16"
+      ],
+      "scope_and_limits": "Two existing default/kill-switch context cases are the defining evidence. Final schema/capture/fixture changes do not change production flag declarations or conditional-bean semantics."
+    },
+    {
+      "ac": 18,
+      "requirement": "Exactly three LOGIN outcomes on each path; failure-only annotation and reached-document evidence",
+      "given": "each of the three login signatures on each execution path",
+      "when": "failure annotation is evaluated against reached-document evidence",
+      "then": "exact LOGIN outcomes are emitted only on appropriate failures without changing a successful result",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "login6",
+        "sdk1800_skip29",
+        "affected139"
+      ],
+      "scope_and_limits": "Six genuine joined cases remain mapped to their recorded source; the final finite-schema/pure-capture delta preserves detector/annotation logic, with current differential/native and joined path proof. No passing result becomes failure."
+    },
+    {
+      "ac": 19,
+      "requirement": "All named logical oracles at their actual tiers, current regression/coverage/build and honest provenance",
+      "given": "the named logical oracles and current implementation delta",
+      "when": "defining-tier and joined evidence are reconciled",
+      "then": "required in-scope proof is complete with honest skips, runtime provenance, regression and coverage records",
+      "qa_disposition": "PASS",
+      "evidence": [
+        "current_c5_ac16",
+        "current_c2_c6",
+        "c11_parent_wipe",
+        "migration16",
+        "studio13",
+        "compile394_skip1",
+        "sdk1800_skip29",
+        "frontend958",
+        "root_checkpoint"
+      ],
+      "scope_and_limits": "Current missing joins are closed. Compile:394 executed passes+1 explicitly deferred10.18 case; SDK:1800 passes+29 declared deferred/external rows on Node23.10 with coverage. No all-cases green, Node22 image, live-provider or human gate claim."
+    }
+  ],
+  "quality_checks": {
+    "code_review": {
+      "status": "PASS",
+      "basis": "Independent source review of fixed native-validator paths, authority/lease ordering, optional capture ownership, runner cleanup, worker topology, and bounded fixture deltas; no high-severity finding."
+    },
+    "unit_and_contract_tests": {
+      "status": "PASS",
+      "basis": "Fresh affected139; native baseline oracle, activation, bounds, nonmutation and fallback checks; existing SDK coverage enforced. Deferred cases receive no pass credit."
+    },
+    "acceptance_criteria": {
+      "status": "PASS",
+      "basis": "All19 rows mapped below; original logical variants retained at their defining tiers. Supporting diagnostics are not extra acceptance cases."
+    },
+    "regression": {
+      "status": "PASS",
+      "basis": "Fresh migration16/named13/compile394 plus assigned1skip; SDK1800 plus assigned29skips; unaffected frontend958 and build. No universal full-repository pass claim."
+    },
+    "performance_and_reliability": {
+      "status": "PASS",
+      "basis": "Original SDK1s renewal,2s stop,immutable15s publication budget and current guards retained. Actual original secret publication/two replays pass; actual concurrency/drain and failure/cancel ownership closure pass. No exclusive CPU attribution or universal latency claim."
+    },
+    "security": {
+      "status": "PASS",
+      "basis": "Reference-only contracts, current CSI/assignment/authorization/origin checks, post-consume release, bounded owned transport, full TRACE30 zero-hit closure, concurrent env/argv30 zero-hit checks, and current wipe/PID joins reviewed. Canonical security-checklist topics reviewed in changed scope; no automated CodeRabbit scan claim."
+    },
+    "documentation_and_traceability": {
+      "status": "PASS",
+      "basis": "Requirements, File List, development history, residuals, runtime/skip provenance and assigned external gates reconciled; prior red evidence retained."
+    }
+  },
+  "validation_counts": {
+    "affected_backend": {
+      "executed_pass": 139
+    },
+    "migration": {
+      "executed_pass": 16
+    },
+    "named_backend_regression": {
+      "executed_pass": 13
+    },
+    "compile_regression": {
+      "suites": 54,
+      "total": 395,
+      "executed_pass": 394,
+      "skipped": 1,
+      "strict_all_cases_pass": false,
+      "skip_owner": "10.18/ED04/ADR002O6/SPK05"
+    },
+    "sdk_default": {
+      "total": 1829,
+      "executed_pass": 1800,
+      "skipped": 29,
+      "failed": 0,
+      "runtime_errors": 0,
+      "strict_all_cases_pass": false,
+      "actual_node": "23.10.0",
+      "coverage_enforced": true
+    },
+    "frontend": {
+      "executed_pass": 958,
+      "build_exit_code": 0,
+      "scope": "unchanged source-bound reuse"
+    },
+    "current_c5_ac16": {
+      "executed_pass": 2,
+      "full_root_app_trace": true,
+      "canary_variants": 30,
+      "hits": 0,
+      "final_closed": true
+    },
+    "current_c2_c6": {
+      "executed_pass": 3,
+      "concurrent_children": 2,
+      "own_receipts": 2,
+      "env_argv_scans": 2,
+      "canary_variants": 30,
+      "hits": 0,
+      "draining_in_flight": 2,
+      "parent_wipes": 2,
+      "owned_processes_gone": 18,
+      "timeout_owned_tree_gone": 9,
+      "cancel_owned_tree_gone": 9
+    },
+    "counts_are_not_additive": true
+  },
+  "source_semantic_reuse": {
+    "c5_pair_after_fixture_twofix": "Default pool1 startup is equivalent; pair does not use corrected ordinary child enumeration. Production9 and SDK364 retain recorded bindings. Current native3 executes the changed pool2 and child-enumeration paths.",
+    "report_boundary": "Only historical ProgressCallbackIT20 passing slice is credited; original110 gate had3failures.",
+    "c11": "Live parent/compiled-child kill only, one genuine parent wipe and owned process closure; no normal killed-child seal or dead-parent telemetry.",
+    "last_c6_capture": "15-pattern capture does not substitute for separate original C5 full30 capture.",
+    "supporting_diagnostic": "14.884s postclaim slack and851positive schema-phase samples qualified wall presence only; not exclusiveCPU, universal timing, or acceptance credit."
+  },
+  "manual_review_fallback": {
+    "automated_coderabbit_or_wsl_executed": false,
+    "configured_graceful_degradation": true,
+    "evidence": "docs/qa/evidence/STUDIO-OBS-007/astra-final-manual-review-fallback.json",
+    "missing_duplicate_checklist": "qa-master-checklist.md was not available; primary canonical QA tasks, lifecycle seven checks, security checklist and all19ACs used; no missing-checklist execution claimed."
+  },
+  "external_and_deferred": [
+    "Production/internal Node22 image provenance and in-cluster sandbox/security/egress controls: not asserted by local Node23/Chromium proof.",
+    "Real Vault/provider/credentialed ingress and destination-policy gates retain assigned owners/tiers; no skipped case relabeled passed.",
+    "TargetPolicyGapTest skipped perturbation belongs10.18/ED04/ADR002O6/SPK05; active sibling guard preserved.",
+    "SDK29 retain their explicit deployment/ingress/store/identity/staging/pointer, real-Vault/egress, cluster-sandbox and old reaper tiers.",
+    "OBS008 UI/MSW secret-authoring half; OBS009 C8/C9/C10/manual masking/live-model/human/staging proof; OBS010 release/runbook/provisioning; OBS013 first guided recording; OBS012A later route/version/compile/account-scaffolding retirement."
+  ],
+  "residual_limits": [
+    "No heap-zeroization claim for immutable JVM/JS strings, opaque Jackson/HTTP/TLS/browser allocations or transient caches.",
+    "Current local Chromium153.0.8010.12 record does not certify a production image or retrospectively establish older executions.",
+    "No universal backend202-to-SDK acknowledgement claim.",
+    "No live-provider, staging, manual-mask, model, pilot or deployment approval is granted by this story gate."
+  ],
+  "write_scope": [
+    "story QA Results",
+    "story Status",
+    "story Change Log",
+    "docs/qa/gates/STUDIO-OBS-007-login-steps-with-secret-references-on-the-single-observed-path.yml",
+    "docs/qa/evidence/STUDIO-OBS-007/qa-independent-final-review.json"
+  ],
+  "new_build_or_runtime": false,
+  "new_product_or_test_source": false,
+  "administrative_close_performed": false
+}

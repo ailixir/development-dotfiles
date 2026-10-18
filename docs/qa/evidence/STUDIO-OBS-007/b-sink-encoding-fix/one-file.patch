@@ -1,0 +1,95 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java candidate
+@@ -3997,6 +3997,33 @@
+     p3Case(() -> p3PublishedLogin(P3Mode.REGISTRATION, false));
+   }
+ 
++  @Test
++  @org.junit.jupiter.api.Order(19)
++  void syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls() {
++    String value = "é😀\"\\A z+";
++    // Independent literal vectors: C3 A9 / F0 9F 98 80 / 22 / 5C / 41 / 20 / 7A / 2B.
++    // Expectations never call the scanner's encoders.
++    List<String> encodedLeaks = List.of(
++        "%C3%A9%F0%9F%98%80%22%5C%41%20%7A%2B",
++        "%c3%a9%f0%9f%98%80%22%5c%41%20%7a%2b",
++        "%C3%A9%F0%9F%98%80%22%5CA+z%2B",
++        "%C3%A9%F0%9F%98%80%22%5CA%20z%2B",
++        "c3a9f09f9880225c41207a2b",
++        "C3A9F09F9880225C41207A2B",
++        "é😀\\\"\\\\A z+",
++        "\"é😀\\\"\\\\A z+\"",
++        "\\u00e9\\ud83d\\ude00\\u0022\\u005c\\u0041\\u0020\\u007a\\u002b",
++        "\\u00E9\\uD83D\\uDE00\\u0022\\u005C\\u0041\\u0020\\u007A\\u002B");
++    for (String leak : encodedLeaks) {
++      assertThatThrownBy(() -> assertJoinedSinkAbsent(
++          Map.of("synthetic-control", leak.getBytes(StandardCharsets.UTF_8)), value))
++          .isInstanceOf(AssertionError.class);
++    }
++    assertJoinedSinkAbsent(
++        Map.of("synthetic-unrelated",
++            "%C3%A8%F0%9F%98%80%22%5CA%20z%2B".getBytes(StandardCharsets.UTF_8)), value);
++  }
++
+   private String p3Cookie;
+   private final Map<String, String> p3OwnedGuidedCookies = new java.util.LinkedHashMap<>();
+   private final Map<UUID, String> p3OwnedOrdinaryCookies = new java.util.LinkedHashMap<>();
+@@ -5391,22 +5418,50 @@
+ 
+   private static void assertJoinedSinkAbsent(Map<String, byte[]> sinks, String value) {
+     var variants = new java.util.ArrayList<byte[]>();
+-    variants.add(value.getBytes(StandardCharsets.UTF_8));
++    byte[] utf8 = value.getBytes(StandardCharsets.UTF_8);
++    variants.add(utf8);
+     variants.add(value.getBytes(StandardCharsets.UTF_16LE));
+     variants.add(value.getBytes(StandardCharsets.UTF_16BE));
+-    variants.add(Base64.getEncoder().encode(value.getBytes(StandardCharsets.UTF_8)));
+-    variants.add(
+-        HexFormat.of()
+-            .formatHex(value.getBytes(StandardCharsets.UTF_8))
+-            .getBytes(StandardCharsets.UTF_8));
++    variants.add(Base64.getEncoder().encode(utf8));
++    variants.add(HexFormat.of().formatHex(utf8).getBytes(StandardCharsets.UTF_8));
++    variants.add(HexFormat.of().withUpperCase().formatHex(utf8).getBytes(StandardCharsets.UTF_8));
+     StringBuilder unicode = new StringBuilder();
+-    StringBuilder percent = new StringBuilder();
+     for (char character : value.toCharArray()) {
+       unicode.append(String.format(java.util.Locale.ROOT, "\\u%04x", (int) character));
+-      percent.append(String.format(java.util.Locale.ROOT, "%%%02X", (int) character));
+     }
+     variants.add(unicode.toString().getBytes(StandardCharsets.UTF_8));
++    variants.add(unicode.toString().toUpperCase(java.util.Locale.ROOT)
++        .replace("\\U", "\\u").getBytes(StandardCharsets.UTF_8));
++    StringBuilder percent = new StringBuilder();
++    StringBuilder component = new StringBuilder();
++    for (byte octet : utf8) {
++      int unsigned = Byte.toUnsignedInt(octet);
++      String escape = String.format(java.util.Locale.ROOT, "%%%02X", unsigned);
++      percent.append(escape);
++      // JavaScript encodeURIComponent leaves these ASCII bytes unescaped.
++      if (unsigned >= 'a' && unsigned <= 'z'
++          || unsigned >= 'A' && unsigned <= 'Z'
++          || unsigned >= '0' && unsigned <= '9'
++          || "-_.!~*'()".indexOf(unsigned) >= 0) {
++        component.append((char) unsigned);
++      } else {
++        component.append(escape);
++      }
++    }
+     variants.add(percent.toString().getBytes(StandardCharsets.UTF_8));
++    variants.add(percent.toString().toLowerCase(java.util.Locale.ROOT)
++        .getBytes(StandardCharsets.UTF_8));
++    variants.add(component.toString().getBytes(StandardCharsets.UTF_8));
++    String form = java.net.URLEncoder.encode(value, StandardCharsets.UTF_8);
++    variants.add(form.getBytes(StandardCharsets.UTF_8));
++    variants.add(form.replace("+", "%20").getBytes(StandardCharsets.UTF_8));
++    try {
++      String json = JSON.writeValueAsString(value);
++      variants.add(json.getBytes(StandardCharsets.UTF_8));
++      variants.add(json.substring(1, json.length() - 1).getBytes(StandardCharsets.UTF_8));
++    } catch (com.fasterxml.jackson.core.JsonProcessingException failure) {
++      throw new IllegalStateException("Synthetic sink JSON encoding unavailable", failure);
++    }
+     for (var sink : sinks.entrySet()) {
+       for (byte[] variant : variants) {
+         assertThat(containsBytes(sink.getValue(), variant))

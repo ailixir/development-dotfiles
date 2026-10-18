@@ -1,0 +1,25 @@
+          require(
+              bytes <= limits.path("maxObservationBytes").asInt()
+                  && observation.path("nodes").size() <= limits.path("maxObservationNodes").asInt(),
+              "BUDGET_EXCEEDED",
+              429);
+          for (JsonNode node : observation.path("nodes")) {
+            require(
+                node.path("depth").asInt() <= limits.path("maxObservationDepth").asInt(),
+                "BUDGET_EXCEEDED",
+                429);
+          }
+          int generation = observation.path("generation").asInt();
+          require(
+              generation > session.progress().path("generation").asInt(-1),
+              "STALE_GENERATION",
+              409);
+          boolean origin = false;
+          for (JsonNode allowed : session.document().path("scope").path("approvedOrigins")) {
+            if (allowed.equals(observation.path("origin"))) {
+              origin = true;
+            }
+          }
+          require(origin, "ORIGIN_NOT_ALLOWED", 403);
+          reserve(session, "observations", 1, "maxObservations");
+          reserve(session, "sanitizedEvidenceBytes", bytes, "maxSanitizedEvidenceBytesTotal");

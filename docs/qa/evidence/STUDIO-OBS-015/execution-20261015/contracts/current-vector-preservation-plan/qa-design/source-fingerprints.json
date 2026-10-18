@@ -1,0 +1,243 @@
+{
+  "artifact": "Independent Quinn vector preservation selected source/evidence fingerprints",
+  "capturedAtUTC": "2026-10-15T07:38:31.807051+00:00",
+  "files": {
+    "studio-runner/fixtures/observed-reference/accepted-observed-choice.json": {
+      "sha256": "7c90084a1f37b75d338cc1739640074567f92392d902a1f3adfa024bf6a8c044",
+      "bytes": 85580
+    },
+    "studio-runner/fixtures/observed-reference/control-value-reference.json": {
+      "sha256": "d6de790ae5d8c25cffcdce375150fbe3d5e9669781c5f2932512fee1baf1090c",
+      "bytes": 63130
+    },
+    "studio-runner/fixtures/observed-reference/fresh-order-reference.json": {
+      "sha256": "3816e6fffceeab29ab7db71cf7c6bf47584b771369debebdf39b307ae874811a",
+      "bytes": 68909
+    },
+    "studio-runner/fixtures/observed-reference/manifest.json": {
+      "sha256": "7c0fb5418184dcb9a4a4d1b21af96263412fe06da1a998b1f31424654fbfb02a",
+      "bytes": 588915
+    },
+    "studio-runner/fixtures/observed-reference/operation-mutations.json": {
+      "sha256": "6df9810b016e10eee3be490da2763c97807243649069e57c99fb167f111778c5",
+      "bytes": 320
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json": {
+      "sha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9",
+      "bytes": 22410793
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/publication-canonical-vectors.json": {
+      "sha256": "264f86e108b6c40642469a5fe1f0e16e1db9ca4b7d205e85df81622b1a6b05f5",
+      "bytes": 577272
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/wire-parity.fixtures.json": {
+      "sha256": "38d30dc9fa01b7148bacf81be786f260457dfa59f283e116d38cef2dcde45629",
+      "bytes": 4644
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json": {
+      "sha256": "b5942f63eaa520fe80ed7cde10018586a29c5e314283c79051009626bc1716f8",
+      "bytes": 461612
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json": {
+      "sha256": "40d547d9891561541947b591ffa6ba1d07ae2caff7349fd780db4acc8d5313d7",
+      "bytes": 47271
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/authoring-snapshot.schema.json": {
+      "sha256": "dc212b318aee6076acef74e17aee488af61a907a16a71e21bf5672fb99a1330b",
+      "bytes": 10910
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/guided-model-response.schema.json": {
+      "sha256": "2d986c098548b604d6fe75a3597397eabe325705550a78286e76ae5ae2a176ca",
+      "bytes": 66554
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/replay-ipc.schema.json": {
+      "sha256": "6bbf2c36dafb970fc1874c0c1ab31538a30d4e5222b1f5244000ccf0bc8b47cf",
+      "bytes": 30320
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/replay-artifact.schema.json": {
+      "sha256": "590e3d79a0d4b6ef5705083950324bc962b536958d6878b97b13859e1c2ff989",
+      "bytes": 2008
+    },
+    "studio-runner/src/validator/observedReplay.ts": {
+      "sha256": "875da7952c8fb1ece09fdad48ffca822861dfe6cb742694f924995c98e5675df",
+      "bytes": 44604
+    },
+    "studio-runner/src/validator/observedHistory.ts": {
+      "sha256": "21f41c3451f3158e458d5965cb50c43a47dd60bfface405f3028a4ffef7eb2d2",
+      "bytes": 14516
+    },
+    "studio-runner/src/validator/observedSnapshots.ts": {
+      "sha256": "a8a53dedfa041aa9a671e1e03361fee5572cdfa9bc3abca91b5d53e160332928",
+      "bytes": 11314
+    },
+    "studio-runner/src/validator/observedReferencePolicy.ts": {
+      "sha256": "e6a2565b31ebb7339cc0ed15f9e9d8532d3c473f65709491129f6059108aebdb",
+      "bytes": 33071
+    },
+    "studio-runner/src/guided/contracts.ts": {
+      "sha256": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+      "bytes": 13652
+    },
+    "studio-runner/src/guided/json.ts": {
+      "sha256": "113713fd50d5eab8a49b0740e68ae6b12d55d150c459f4c135f317e78de7b39d",
+      "bytes": 2608
+    },
+    "studio-runner/src/executor/observedReplay.ts": {
+      "sha256": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+      "bytes": 30652
+    },
+    "studio-runner/src/run/observedReplayAdapter.ts": {
+      "sha256": "aa0036d2d6df0d761f7a6f66f3823fba495a6f91bbe0c410de05a38dd4165dba",
+      "bytes": 9900
+    },
+    "studio-runner/test/helpers/openapi.ts": {
+      "sha256": "e15c3b8295d0b30c5b2f0422121e8cd197af7ac6c9ca9fc882ac1f8fa533917d",
+      "bytes": 15759
+    },
+    "studio-runner/test/observedReplayValidation.test.ts": {
+      "sha256": "906ff76d2d97b0d20b8d7c957e5e267a741e5ac6ce1470e7cd11223ac2c08408",
+      "bytes": 27631
+    },
+    "studio-runner/test/observedReplayExecutor.test.ts": {
+      "sha256": "d58c6d5c78516e1eb3442ae3ad59a46bec808b194ec70e73ba7791eef77805e7",
+      "bytes": 23334
+    },
+    "studio-runner/test/observedIncrementalValidation.test.ts": {
+      "sha256": "be4dcb0e6f39c99e4ce4ec4691cc5b972b6c8469c1e8f7f0c229c416731437b8",
+      "bytes": 3547
+    },
+    "studio-runner/test/retainedExecute.test.ts": {
+      "sha256": "72c55adc93e466a58116e7726fec4e8f5c3b0ba862fdfc895b3f549857585342",
+      "bytes": 15261
+    },
+    "studio-runner/test/schemaSemantics.test.ts": {
+      "sha256": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb",
+      "bytes": 3011
+    },
+    "studio-runner/test/server/observedReplayRoutes.test.ts": {
+      "sha256": "4ddc7d9bf32b2312e0c99bd778cbff17ee4b0d610cf696a4369e3bbab706d288",
+      "bytes": 7904
+    },
+    "studio-runner/test/server/observedReplayAuthorization.test.ts": {
+      "sha256": "d0f5ab245f33ac1d05c11b0dd5fcb06a621c25696842d6ef6216b2e589848a68",
+      "bytes": 3526
+    },
+    "studio-runner/test/fixtures-tier/observed-replay.test.ts": {
+      "sha256": "22789612e66b57d1b9f9608816cae91606f950b36ef9b3e91701e0af71e22cb7",
+      "bytes": 21364
+    },
+    "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts": {
+      "sha256": "91129c744068c21780243b3f86c2e54e318d985fba3b25169dcdc4252b6836f5",
+      "bytes": 25855
+    },
+    "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": {
+      "sha256": "f5b613f5486b43a70c043b01a801f4ec8590bd8db2cd3ace8bf5510ca8fed685",
+      "bytes": 9304
+    },
+    "studio-runner/package.json": {
+      "sha256": "af28d6eee9a7c1ac5d18efe9788659624f14c21cdcc86e695d8c2bf74948e031",
+      "bytes": 1532
+    },
+    "studio-runner/vitest.config.ts": {
+      "sha256": "c833caed66dc39aed1677db7cab921e97a5eb5b36291429c5f5e90f1a28c08f8",
+      "bytes": 4010
+    },
+    "tools/check-studio-observed-contracts.cjs": {
+      "sha256": "5eaa063af5de7536a68fd261b01250fe0541234d9a31c390913da689854c53e3",
+      "bytes": 130871
+    },
+    "tools/studio-snapshot-contract-oracle.cjs": {
+      "sha256": "f994ad1306f17bb8be6d64a6938eed2da944d87784529ef9604dce4a289c776b",
+      "bytes": 15972
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/build-unit-feedback-attempt02-receipt.json": {
+      "sha256": "c9618cf5162f53ebe75b4111f6b9a72017cc2844933f125ff9f89ef98545b825",
+      "bytes": 123739
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-unit-feedback-attempt02-results.json": {
+      "sha256": "64506074764dc07b83107a734d253b40ce051169e864d4f63f6023f6ed8c3833",
+      "bytes": 843
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-unit-feedback-attempt02-vitest.json": {
+      "sha256": "60d0d490f0fa0d4592be09f426bf0ccdbf2811bdb3ec855929fb367313745314",
+      "bytes": 2352161
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-05-packaged-reference-01/control-value-gap.json": {
+      "sha256": "46c0d50e61f2de4a8ed05951b2b05568b79788acb08e6f7140d16795a25dd7ae",
+      "bytes": 3350
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-05-packaged-reference-01/catalog-result.json": {
+      "sha256": "74f76aea0cd3404279ab3efffeecdfb8f47fa1cdd95ab9a1009d3f999a00938c",
+      "bytes": 12250
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-05-packaged-reference-01/catalog-audit.cjs": {
+      "sha256": "01424cc9102cf6987bd711c0b463bfeb1eb3dc09dab1a316cb46a73aa1318b4a",
+      "bytes": 7042
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-05-packaged-reference-01/preservation-result.json": {
+      "sha256": "faa3800290eb00716858e576667fc1680a60b47b8e96b0fdec3d5e5ead7a2fda",
+      "bytes": 547
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-05-packaged-reference-01/pointer-and-source-mapping.json": {
+      "sha256": "747982a2015610f7199e90d44820d506b544d26bbd6f006db55b76248339fe07",
+      "bytes": 20267
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/implementation-ruling.md": {
+      "sha256": "23d87def447f08bbf6f8d305abbdf1d55b9ba53a11221d2201695f265e6a8feb",
+      "bytes": 28554
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/manifest.json": {
+      "sha256": "54c5551d6d3316b3cc384fc4ebbf6d78476840130625476f2af50e193efc3818",
+      "bytes": 10048
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/ruling.md": {
+      "sha256": "4cfd50b1a9d3bae194584791455512914b1feb780670d33e9ade822c6d051688",
+      "bytes": 12128
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/manifest.json": {
+      "sha256": "6f74157cf539d89714a40bce147442ffae7f45d22c2d4c059d2183d522577f22",
+      "bytes": 4901
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/ruling.md": {
+      "sha256": "96b15fbe740a4d89ce4db418db4880e4c374b08d91fce9fa9ce84ae4aa3a87da",
+      "bytes": 12504
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/manifest.json": {
+      "sha256": "879aaa09344878f846b34dc4d1c98c8d117c2fd51e27ffe445d505e16dbb838a",
+      "bytes": 1954
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/ruling.md": {
+      "sha256": "a095c6221ed200f6802f8fc09f97a5fc26ef60ffe8ae6ef46093af3b24928d20",
+      "bytes": 13706
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/manifest.json": {
+      "sha256": "0bf2a5a9ea32f79b27563809b68ba6e2de9f0ccbf2633f54302e2f3bd031e311",
+      "bytes": 2512
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-04/ruling.md": {
+      "sha256": "64a0368cb1c9834b95930629d43d7ec5745132a31ad22cfe7c850213c11cf77e",
+      "bytes": 3389
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-04/manifest.json": {
+      "sha256": "1cc89ac2cb5947c36701147546ec9cb15c8f6ee890490b255626093a34e71697",
+      "bytes": 2447
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-05/ruling.md": {
+      "sha256": "1744c2cd04c387306b621c65b93cf5efe75a0758e5cbf93bf3e358227e7f3cb8",
+      "bytes": 14051
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-05/manifest.json": {
+      "sha256": "fdd27c680631fc74f0e1c61868dddda3f36ccef0eef7e8fa3de3950923d13a31",
+      "bytes": 1613
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-05/addendum-01/ruling.md": {
+      "sha256": "3b17e8ff1681fa26bbdcdfe30021fbe32b56efbe783b7ddae481c0974071877d",
+      "bytes": 4556
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-05/addendum-01/manifest.json": {
+      "sha256": "e8880e8b5673fa574e2b9e2dc0adf51c3e2993e385c787823206ef49b7a21589",
+      "bytes": 605
+    }
+  },
+  "qualification": "Read-only selected source/log/vector/design inspection and byte inventory. No complete product audit or application execution; all current references held."
+}

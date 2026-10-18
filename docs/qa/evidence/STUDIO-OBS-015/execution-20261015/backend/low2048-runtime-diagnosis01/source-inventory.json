@@ -1,0 +1,501 @@
+{
+  "scope": "Only named inspected source/immutable archived runtime artifacts; concurrent disjoint Runner/Java writers are outside this claim. No global source freeze or fresh execution.",
+  "inputCount": 59,
+  "inputs": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "597942a8fdf2e8b366bb7a180073db1542943631ba1478750c0a1fdadb0baa15",
+      "bytes": 113262,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+      "sha256": "a7eccb02ba06e045717178679bd3b3d75725ecba5bf64fa1d20f5565fc712dc9",
+      "bytes": 7981,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java",
+      "sha256": "0e98da660358acd128b468bb28660bcf5a7378dbe7427a85464ae4e3caa9fd1f",
+      "bytes": 32273,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+      "sha256": "07976ffe0cfe7e32203b481bc443542df3ea5a1800c1794506fa207072d8bdd0",
+      "bytes": 6283,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "82b8401722224d5277da5080b9475c32318284cf32abb0a7aa33cc9aca86938b",
+      "bytes": 107105,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "sha256": "745223f046be477593a8f701a2fc4ed24d29dcfab6d19d32acabb011ed181165",
+      "bytes": 57856,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+      "sha256": "d61340b753e2da729c4777b850c3420224825553f62d9e6f5c8bf37394a8fe5c",
+      "bytes": 17643,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256": "174d99ace9c47eeb85904002156eddc595c352590076917135e153411d5df963",
+      "bytes": 14153,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "sha256": "c9a36bac3fe1cbd5d98b4599734013bb3aa64cdac2922406e1df865d8e909b09",
+      "bytes": 20777,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "9f56c92947fe4030fe2f58d79ef6d4f209185a52c5c2efb9840f962df47b61be",
+      "bytes": 1000782,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "sha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+      "bytes": 168031,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+      "sha256": "93c083cb0a74d8b0b331cbe3aadfebbabf1c562b06e6cae7ab35f96e4f71a458",
+      "bytes": 69252,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java",
+      "sha256": "1a402fb857d93ce17c7335eea2af4524a3d73f2d6161c9e65c1bae3e991cc52d",
+      "bytes": 30448,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "sha256": "4c5236fd7056c292e9b9225340321282beed6589c5165ef02e8e97080613fa6a",
+      "bytes": 81211,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+      "sha256": "f18114111346e371bc6fe31021ea9e424d668d866cbd5bed9c40ce1bd2bc838e",
+      "bytes": 32287,
+      "roles": [
+        "targeted source/callgraph or existing regression path inspected; no runtime execution"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/incremental2048-core-feedback-attempt01-receipt.json",
+      "sha256": "60dc2da8623bb8b1260cc5691b100bf637b16b0cdd962f5923b1b09c87baaa37",
+      "bytes": 31351,
+      "roles": [
+        "final actual feedback01 receipt"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-before.json",
+      "sha256": "f1cbf5d6c9d367e91070e01e5be76d3960ca3962e6722f3cace4c4014ef7d552",
+      "bytes": 327952,
+      "roles": [
+        "final receipt artifact hash verified"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-after.json",
+      "sha256": "d2bceecaac8c67e6c1734476c0b7036e47e6560a3331f609cb7bedb255de9e61",
+      "bytes": 327952,
+      "roles": [
+        "final receipt artifact hash verified"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-results.json",
+      "sha256": "42459374ecd4d1224a7b1104bedc3426aa48cfa28cd23dd5e6778b7fae7aad4b",
+      "bytes": 14368,
+      "roles": [
+        "final receipt artifact hash verified",
+        "actual task-qualified result/counts/read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-default-task-base-results.json",
+      "sha256": "5f85d1408429d0d9035f1e7e385a814f73035b73bdee2c4fffc8e3913771a255",
+      "bytes": 1370,
+      "roles": [
+        "final receipt artifact hash verified"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01.log",
+      "sha256": "5a2c3fd56e11123f47fa13dda2b2a04c6de8edf3e4bd9b5396396425c2669c14",
+      "bytes": 2064,
+      "roles": [
+        "final receipt artifact hash verified",
+        "actual immutable log hash bound"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/fixed-before.json",
+      "sha256": "34b924123345a959a0b2423b75fd86b1400e29b8fbc11d5b48e06bd60bdb6455",
+      "bytes": 502897,
+      "roles": [
+        "final receipt artifact hash verified"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/fixed-output-restoration.json",
+      "sha256": "016df300175d80f3ddc82fed90a276beeaceab2b0f41f5adea75a1cd442e91bf",
+      "bytes": 19310,
+      "roles": [
+        "final receipt artifact hash verified"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/capture-manifest.json",
+      "sha256": "6eea23c1145430e36f1f32389fe4208f22c87f01f75ee53ef034fa8d3d9a6a22",
+      "bytes": 436890,
+      "roles": [
+        "final receipt artifact hash verified",
+        "safe bounded actual diagnosis evidence read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/owned-cleanup-verification.json",
+      "sha256": "8062bf38c78fa9693193cef55eb0403e73d53c9e33a49a1a67953f9d83a43875",
+      "bytes": 3720,
+      "roles": [
+        "final receipt artifact hash verified",
+        "safe bounded actual diagnosis evidence read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/safe-refusal-snapshot-differences.json",
+      "sha256": "3432f594405e285801bee995022d041508ea4f29c421462b5222b33e15b816b5",
+      "bytes": 669,
+      "roles": [
+        "final receipt artifact hash verified",
+        "safe bounded actual diagnosis evidence read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/safe-exception-groups.json",
+      "sha256": "8879ac0bfc6c189388be6dd08e4c1cdc8d5de6413c483195e357e5a42bcbc735",
+      "bytes": 917,
+      "roles": [
+        "final receipt artifact hash verified",
+        "safe bounded actual diagnosis evidence read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/safe-actual-budget-response-summary.json",
+      "sha256": "20a4921570ccd79642adc731d44f4939baf1978a215ebf0b32670040d275d54e",
+      "bytes": 9373,
+      "roles": [
+        "final receipt artifact hash verified"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/safe-lifecycle-media-summary.json",
+      "sha256": "17711eca499d5fe6b41c5e9438a01b77b3adb1a976a8203eb8b6cba2a80fdb9d",
+      "bytes": 5165,
+      "roles": [
+        "final receipt artifact hash verified"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+      "sha256": "918b453f6ec80042ce489f5ab2527cbd9400bd237e45ec5228060f0aa5cb61db",
+      "bytes": 12415491,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/html/classes/com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.html",
+      "sha256": "76ae1e299257640bcacde3cc9bb8a6b42a5fe60531cecb6e8749cac96811ac32",
+      "bytes": 12209595,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/html/css/base-style.css",
+      "sha256": "a10a4ef75ca2601b44bfdaf3112a5854f6376f68d7cbaf6958286f04488d293b",
+      "bytes": 2645,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/html/css/style.css",
+      "sha256": "61866908fd7eb09c79e96239f69db2e8cc5c6526cdb308eba0535ed2a0f6a263",
+      "bytes": 1135,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/html/index.html",
+      "sha256": "ad64f76317a8ee5d055e85c8d85124567097c4dfb53c71198e75a8fcff88875f",
+      "bytes": 3634,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/html/js/report.js",
+      "sha256": "fc89c6d002d18f4662065c9887b2cda8f8486f2737d4ad0f2fdeac0ad58a44dc",
+      "bytes": 5252,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/html/packages/com.citi.put.checks.studio.guided.publication.html",
+      "sha256": "035738be9780a0df173cc2ce607fd76bcaf66436357abaf16a5ed03fd6523119",
+      "bytes": 3297,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/jacoco/guidedIncrementalTest.exec",
+      "sha256": "df98db13d7b29cf5e0a17814e10a05e19a3f7f2324242e636f7642d278b98a7f",
+      "bytes": 973757,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/cohort.json",
+      "sha256": "73700f196506c69ff4c9cd7cad265abe7581f73f40df740b356974d64c6837af",
+      "bytes": 6804,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/guard-tally.json",
+      "sha256": "75e1555d061730d3732e31bbb59e286e157eba44b49cc300d13b3c379f5a3af6",
+      "bytes": 728,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/model-budget-evidence-guidedIncrementalTest-1-incrementalStartCannotWidenTrustedOriginCeiling-singleton-after-each.json",
+      "sha256": "52f3f7f4e5fefc3cb7e5d4fb14ce44a744868b69aefebba1d20f9de2751b83c1",
+      "bytes": 7645,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/model-budget-evidence-guidedIncrementalTest-1-incrementalStartCannotWidenTrustedOriginCeiling-singleton-final.json",
+      "sha256": "52f3f7f4e5fefc3cb7e5d4fb14ce44a744868b69aefebba1d20f9de2751b83c1",
+      "bytes": 7645,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/model-budget-evidence-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-after-each.json",
+      "sha256": "47649caf0f50bc26cba9905f8a5d569788428e61c1b35ca1ca689baf850ff391",
+      "bytes": 7894,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/model-budget-evidence-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-final.json",
+      "sha256": "47649caf0f50bc26cba9905f8a5d569788428e61c1b35ca1ca689baf850ff391",
+      "bytes": 7894,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/privacy-guidedIncrementalTest-1-incrementalStartCannotWidenTrustedOriginCeiling-singleton.json",
+      "sha256": "8761c13cdc3db876181dff23b14736a99a0734725618c4517e3a7e2e148a3345",
+      "bytes": 6262,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/privacy-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton.json",
+      "sha256": "dba9d2417a7cf2cb24287d821db77e5699e41e6d183791edf255cc94619d893f",
+      "bytes": 6316,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/responses-guidedIncrementalTest-1-incrementalStartCannotWidenTrustedOriginCeiling-singleton-after-each.json",
+      "sha256": "6f06595a7dc978686e7b7205d1e1c406214d39ab8b69abd60f50cf485a0d78c4",
+      "bytes": 10734,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/responses-guidedIncrementalTest-1-incrementalStartCannotWidenTrustedOriginCeiling-singleton-final.json",
+      "sha256": "a5cbcb1fafb27278ecf6022130bc0199f119b59a2d6ba75ecb465758ae3785b6",
+      "bytes": 11411,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/responses-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-after-each.json",
+      "sha256": "846731a847d844b210056334fb6d1c10432776a3fceefa7bbf5f10d1c90b163b",
+      "bytes": 10786,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/responses-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-final.json",
+      "sha256": "6659452dbc8f8a1cd67c4a4176f1d284a83861daae246ea3061825bacc7a4031",
+      "bytes": 11463,
+      "roles": [
+        "actual archived task output hash verified; XML/cohort/budget/response selected content read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/owned-temp/finalize-exception-1.json",
+      "sha256": "2246e2f8a5f06f053c3167a968a4cdaedb25794df39a527e33ccb3beda66d4eb",
+      "bytes": 20173,
+      "roles": [
+        "safe exemplar actual complete service/controller stack read"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/owned-temp/failed-test-state-guidedIncrementalTest-1-incrementalStartCannotWidenTrustedOriginCeiling-singleton-3-initial.json",
+      "sha256": "fc8385eee5cb0dc5a604f81e3b5cbf07e2c1a9596f5252a1296b2e370e177d22",
+      "bytes": 11234,
+      "roles": [
+        "safe actual initial/cleanup metadata bound; no raw source/browser payload"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/owned-temp/failed-test-state-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-5-enriched.json",
+      "sha256": "f5328e261b2f494dda07f592a401bea76ce6793b01fa155ab84481df29150fec",
+      "bytes": 1195,
+      "roles": [
+        "safe actual initial/cleanup metadata bound; no raw source/browser payload"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/owned-temp/failed-test-state-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-4-enriched.json",
+      "sha256": "83e85b252c664af77db51362c6aab0eafd40e51febde561da11f271d533d22d1",
+      "bytes": 11282,
+      "roles": [
+        "safe actual initial/cleanup metadata bound; no raw source/browser payload"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/owned-temp/failed-test-state-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-5-initial.json",
+      "sha256": "1c173e5fa0bf4e87c3b31f6bc5a33c15fdad0b6fe0ed2e7fc80c3aedaacb6e6a",
+      "bytes": 1173,
+      "roles": [
+        "safe actual initial/cleanup metadata bound; no raw source/browser payload"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/owned-temp/failed-test-state-guidedIncrementalTest-1-incrementalStartCannotWidenTrustedOriginCeiling-singleton-3-enriched.json",
+      "sha256": "899668cf28b6005a8c72c77007e9431d4d5e2004e46eb823e1ecc0e2d703971b",
+      "bytes": 11256,
+      "roles": [
+        "safe actual initial/cleanup metadata bound; no raw source/browser payload"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/owned-temp/failed-test-cleanup-guidedIncrementalTest-1-incrementalStartCannotWidenTrustedOriginCeiling-singleton.json",
+      "sha256": "50755da80609e15018e1d8bef4da1322a6ae1a64eec4e26b64a65bc19c299ed5",
+      "bytes": 262,
+      "roles": [
+        "safe actual initial/cleanup metadata bound; no raw source/browser payload"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/owned-temp/failed-test-state-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-4-initial.json",
+      "sha256": "c2ef6786206f0f52cedaf7c530db0729cc7186f232e50a3523f329a32e0d62b1",
+      "bytes": 11260,
+      "roles": [
+        "safe actual initial/cleanup metadata bound; no raw source/browser payload"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/owned-temp/failed-test-cleanup-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton.json",
+      "sha256": "ddc4ed627c503fd997233b596ab1e369a91d918c5325435013e822b4fa2b962a",
+      "bytes": 451,
+      "roles": [
+        "safe actual initial/cleanup metadata bound; no raw source/browser payload"
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/owned-temp/p3-owned-context-teardown.json",
+      "sha256": "822b1bf8d0aa593062aa9d39373ca8d50ca374e48171323ec2737ac267542fc1",
+      "bytes": 414,
+      "roles": [
+        "safe actual context closure metadata"
+      ]
+    }
+  ],
+  "heldSessionSha256": "597942a8fdf2e8b366bb7a180073db1542943631ba1478750c0a1fdadb0baa15",
+  "heldJoinSha256": "9f56c92947fe4030fe2f58d79ef6d4f209185a52c5c2efb9840f962df47b61be",
+  "actualTaskArtifactHashVerification": {
+    "XML": 1,
+    "HTML": 6,
+    "nonemptyExec": 1,
+    "cohortFiles": 12,
+    "receiptArtifacts": 13
+  },
+  "safeExceptionFileCountByArchivedNames": 664,
+  "counterexampleAuthority": "664group summary + safe exemplar + actual XML/state snapshots + direct source; not664model invocations or fresh process inspection",
+  "reviewerOnlyWrites": [
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/low2048-runtime-diagnosis01/review.md",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/low2048-runtime-diagnosis01/checks.json",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/low2048-runtime-diagnosis01/source-inventory.json",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/low2048-runtime-diagnosis01/manifest.json"
+  ]
+}

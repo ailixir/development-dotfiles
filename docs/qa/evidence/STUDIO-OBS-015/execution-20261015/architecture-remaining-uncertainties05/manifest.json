@@ -1,0 +1,50 @@
+{
+  "artifact": "Aria bounded remaining-three architecture/source mapping05",
+  "scopeLedgerIndices0": [
+    57,
+    65,
+    85
+  ],
+  "inputManifestSha256": "958d4bc12a54db1bb4285f2ee1622c06a292ceb9fb4dc08124fc0da64562d5ea",
+  "files": {
+    "assertion-inventory.json": {
+      "sha256": "a79a59654b8a4f016b9ce8d486eb0fce0cf0f2085b48ee6ebcf41ed5b5a73d03",
+      "bytes": 19529
+    },
+    "closing-source-notes.json": {
+      "sha256": "1ea2f8499cf4ac3271abc5268221017644cf9615741a22e77dc74c5f1fdfdefc",
+      "bytes": 3303
+    },
+    "existing-negative-inventory.json": {
+      "sha256": "84262241815a1dcc216214cc441e84e29621d66300bf1d632a993d60c43d68cd",
+      "bytes": 22932
+    },
+    "metadata-check.json": {
+      "sha256": "ca18f8a4d5b59b09390dc07cc30fd4f3fb77d594a3865ffb2f0f752f604a888e",
+      "bytes": 1415
+    },
+    "obligations.json": {
+      "sha256": "61f5b5c5007d8047c76df7219d99fb50f0027a8927856830b0a0f21f721954a0",
+      "bytes": 8120
+    },
+    "ruling.md": {
+      "sha256": "0529c8881c6f6a7ceecfc3623b23b7a5bc8dd5a75408fecebab6753a4a7e53b0",
+      "bytes": 31873
+    },
+    "source-inventory.json": {
+      "sha256": "6dde0e980d050afb20ed006c6217eab4e5ee0cde1c430310f6784c2795ff0235",
+      "bytes": 45559
+    }
+  },
+  "sourceBinding": "source-inventory.json has exact per-file captured hashes and selectors; metadata-check.json reports movement at closing read. No whole-tree stability claim.",
+  "rulings": {
+    "57": "Production and golden map construction present; targeted per-envelope/normalization construction inventory specified, assertions still required.",
+    "65": "Production base preimages present; exact isolated preimage/wrapper/omission inventory specified; hidden historical receipt authority remains backend-owned.",
+    "85": "Full equal-old-key native attempt pair conflicts with current native-zero retry invariant; honest actual invariant and separately bounded transport characterization evidence plan specified for independent QA; no substitution/waiver."
+  },
+  "sourceReleaseGranted": false,
+  "applicationTestsExecuted": false,
+  "storyGateVerdict": null,
+  "lifecycleTransition": null,
+  "preservedCompletionScope": "goal015then008;86 obligations;24 ARCH05 facets;55 migration methods;full configured gates/coverage;native/actual joined;independent QA/admin closure"
+}

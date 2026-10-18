@@ -1,0 +1,244 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -803,7 +803,25 @@
+             public <T> T execute(
+                 org.springframework.transaction.support.TransactionCallback<T> callback) {
+               try {
+-                return super.execute(callback);
++                C5Capture capture = c5Capture;
++                C5ClaimSampler observer = capture == null ? null : capture.claimSampler;
++                if (observer == null
++                    || org.springframework.transaction.support.TransactionSynchronizationManager
++                        .isActualTransactionActive()
++                    || !observer.registeredCurrent()) {
++                  return super.execute(callback);
++                }
++                return super.execute(
++                    status -> {
++                      C5ClaimSampler.PgClaimBinding binding =
++                          status.isNewTransaction() ? observer.bindPrequery(manager, jdbc) : null;
++                      try {
++                        return callback.doInTransaction(status);
++                      } finally {
++                        // Retire BEFORE original superclass commit/rollback, never just filter exit.
++                        observer.retirePrequery(binding);
++                      }
++                    });
+               } catch (GuidedSessionException original) {
+                 if (p4AdversarialPasswordSelection && P4_FIRST_GUIDED_REQUEST.get() != null) {
+                   try {
+@@ -11867,6 +11885,9 @@
+         java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+     private final long[][] counts = new long[Segment.values().length][Thread.State.values().length];
+     private final java.util.Map<Thread, Long> entered = new java.util.IdentityHashMap<>();
++    private record PgClaimBinding(int pid) {}
++    private final Map<Thread, PgClaimBinding> bindings = new java.util.IdentityHashMap<>();
++    private volatile boolean bindingUnconfirmed, pgExactClaimAttribution;
+     private final java.util.concurrent.atomic.AtomicBoolean pgOnce =
+         new java.util.concurrent.atomic.AtomicBoolean();
+     private volatile Thread pgObserver;
+@@ -11908,6 +11929,126 @@
+         sampler.start();
+       } catch (Throwable unavailable) {
+         status = Status.FAILED;
++      }
++    }
++
++    boolean registeredCurrent() {
++      try {
++        synchronized (gate) {
++          return !stopping && System.nanoTime() < end && executing.contains(Thread.currentThread());
++        }
++      } catch (Throwable unavailable) {
++        return false;
++      }
++    }
++
++    PgClaimBinding bindPrequery(
++        org.springframework.transaction.PlatformTransactionManager manager, JdbcTemplate jdbc) {
++      try {
++        if (!registeredCurrent()
++            || !(manager instanceof org.springframework.orm.jpa.JpaTransactionManager jpa)
++            || jpa.getDataSource() != jdbc.getDataSource()
++            || jpa.getEntityManagerFactory() == null) {
++          return null;
++        }
++        Object resource =
++            org.springframework.transaction.support.TransactionSynchronizationManager.getResource(
++                jpa.getEntityManagerFactory());
++        if (!(resource instanceof org.springframework.orm.jpa.EntityManagerHolder holder)
++            || !(holder.getEntityManager()
++                instanceof org.hibernate.engine.spi.SessionImplementor session)) {
++          return null;
++        }
++        var logical = session.getJdbcCoordinator().getLogicalConnection();
++        if (!(logical
++                instanceof org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl managed)
++            || !managed.isOpen()
++            || !managed.isPhysicallyConnected()
++            || managed.getConnectionHandlingMode().getReleaseMode()
++                == org.hibernate.ConnectionReleaseMode.AFTER_STATEMENT) {
++          return null;
++        }
++        // Never obtain/borrow a connection when the native logical connection is not connected.
++        var existing = managed.getPhysicalConnection();
++        if (existing == null || existing.isClosed()) {
++          return null;
++        }
++        var pg = existing.unwrap(org.postgresql.PGConnection.class);
++        int pid = pg.getBackendPID(); // Already-connected handshake metadata; no statement/SQL.
++        if (pid <= 0) {
++          return null;
++        }
++        synchronized (gate) {
++          Thread current = Thread.currentThread();
++          if (stopping
++              || System.nanoTime() >= end
++              || !executing.contains(current)
++              || bindings.containsKey(current)
++              || bindings.size() >= MAX_THREADS) {
++            return null;
++          }
++          var binding = new PgClaimBinding(pid);
++          bindings.put(current, binding);
++          return binding;
++        }
++      } catch (Throwable unavailable) {
++        return null; // Diagnostic availability cannot replace original callback/status/error.
++      }
++    }
++
++    void retirePrequery(PgClaimBinding binding) {
++      if (binding == null) {
++        return;
++      }
++      try {
++        synchronized (gate) {
++          Thread current = Thread.currentThread();
++          if (bindings.get(current) == binding) {
++            bindings.remove(current);
++          }
++        }
++      } catch (Throwable unavailable) {
++        bindingUnconfirmed = true;
++        pgExactClaimAttribution = false;
++      }
++    }
++
++    private Map<Thread, PgClaimBinding> snapshotBindings() {
++      try {
++        synchronized (gate) {
++          if (stopping || System.nanoTime() >= end || bindingUnconfirmed) {
++            return Map.of();
++          }
++          return new java.util.IdentityHashMap<>(bindings);
++        }
++      } catch (Throwable unavailable) {
++        bindingUnconfirmed = true;
++        return Map.of();
++      }
++    }
++
++    private PgClaimBinding stableBinding(Map<Thread, PgClaimBinding> before, int pid) {
++      try {
++        synchronized (gate) {
++          if (stopping || System.nanoTime() >= end || bindingUnconfirmed) {
++            return null;
++          }
++          PgClaimBinding matched = null;
++          for (var entry : before.entrySet()) {
++            if (entry.getValue().pid() == pid
++                && bindings.get(entry.getKey()) == entry.getValue()
++                && executing.contains(entry.getKey())) {
++              if (matched != null) {
++                return null; // Multiple registered owners of this PID never qualify as exact.
++              }
++              matched = entry.getValue();
++            }
++          }
++          return matched;
++        }
++      } catch (Throwable unavailable) {
++        bindingUnconfirmed = true;
++        return null;
+       }
+     }
+ 
+@@ -11939,6 +12080,7 @@
+           Thread current = Thread.currentThread();
+           executing.remove(current);
+           entered.remove(current);
++          bindings.remove(current);
+         }
+       } catch (Throwable unsupported) {
+         status = Status.FAILED;
+@@ -12070,6 +12212,11 @@
+     }
+ 
+     private void snapshotPg() {
++      // Snapshot identity before original row inspection; never associate a later pooled borrower.
++      Map<Thread, PgClaimBinding> beforeBindings =
++          new java.util.IdentityHashMap<>(snapshotBindings());
++      var stableCandidates = new java.util.HashSet<Integer>();
++      pgExactClaimAttribution = false;
+       var privatePids = new java.util.HashSet<Integer>();
+       var candidates = new java.util.HashSet<Integer>();
+       var blockers = new java.util.HashSet<Integer>();
+@@ -12135,6 +12282,9 @@
+                 if (!rows.wasNull() && blockers.add(blocker)) {
+                   pgBlockerStages[pgStage(blockerQuery)]++;
+                 }
++                if (stage < 6 && stableBinding(beforeBindings, pid) != null) {
++                  stableCandidates.add(pid);
++                }
+               }
+             }
+           }
+@@ -12143,6 +12293,13 @@
+         }
+         pgCandidates = candidates.size();
+         pgBlockers = blockers.size();
++        pgExactClaimAttribution =
++            !bindingUnconfirmed
++                && candidates.size() == 1
++                && stableCandidates.contains(candidates.iterator().next())
++                && stableBinding(beforeBindings, candidates.iterator().next()) != null
++                && pgStatus != PgStatus.TRUNCATED
++                && pgStatus != PgStatus.NON_QUIESCENT;
+         if (pgStatus != PgStatus.TRUNCATED && pgStatus != PgStatus.NON_QUIESCENT) {
+           pgStatus =
+               pgCandidates > 1
+@@ -12155,6 +12312,8 @@
+         }
+         // Never retain/log raw SQL/IDs/credentials/exception.
+       } finally {
++        beforeBindings.clear();
++        stableCandidates.clear();
+         privatePids.clear();
+         candidates.clear();
+         blockers.clear();
+@@ -12227,6 +12386,7 @@
+       stopping = true;
+       synchronized (gate) {
+         executing.clear();
++        bindings.clear();
+       }
+       if (sampler == null) {
+         return;
+@@ -12272,6 +12432,7 @@
+         synchronized (gate) {
+           executing.clear();
+           entered.clear();
++          bindings.clear();
+         }
+         if (restoreInterrupt) {
+           Thread.currentThread().interrupt();
+@@ -13005,7 +13166,7 @@
+       evidence
+           .put("pgSnapshotStatus", claimSampler.pgStatus.ordinal())
+           .put("pgSnapshotJoined", pgJoined)
+-          .put("pgSnapshotExactClaimAttribution", false);
++          .put("pgSnapshotExactClaimAttribution", claimSampler.pgExactClaimAttribution);
+       if (pgJoined) {
+         evidence
+             .put("pgSnapshotRows", claimSampler.pgRows)

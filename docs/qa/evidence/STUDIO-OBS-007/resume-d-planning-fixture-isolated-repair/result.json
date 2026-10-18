@@ -1,0 +1,43 @@
+{
+  "scope": "ISOLATED_NARROW_PLANNING_FIXTURE_SETUP_TEARDOWN_REPAIR",
+  "disposition": "FROZEN_FOR_INDEPENDENT_ROOT_REVIEW",
+  "sourcePath": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+  "beforePath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-planning-fixture-isolated-repair/before/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+  "candidatePath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-planning-fixture-isolated-repair/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+  "baseSha256": "de11acbfd56e7fc4422d490844223b51d9664405d7bef4ecdfb898bb15092ade",
+  "candidateSha256": "9d63ab9fb19abbef9044da246f36582ec13ca1e8d73eb9aa902d45acc85e7d85",
+  "patchSha256": "9085f28931ced702e9d604c66f379f14d8cf12bb4bc7bcfc4c3edc87bcb6aac9",
+  "designPath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-planning-fixture-isolated-repair/design.json",
+  "designSha256": "d215f73d958cf1932c4a22b593b25696992886d2de5122a68137969c7bfc280d",
+  "sourceProofPath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-planning-fixture-isolated-repair/source-preservation-proof.json",
+  "sourceProofSha256": "1d901765e9c26a476e1bd2c0107131033ae29dd6f45363ee5da9194f67542c9f",
+  "concreteIsolationProof": [
+    "Fresh existing test/session namespaces remain original, but alone do not prevent global continuation. Candidate uses current fresh testId only to select actual owned rows, exact string binding for session varchar key.",
+    "Original public cancel body is schemaVersion3/reason userRequested with fixture actual BFF user. Existing principal/CSI/current-policy checks remain; cancel deliberately does not require unchanged source revision. No manual terminal write or guard bypass.",
+    "Original source stop makes materialization/assignment nonlive and confirms teardown only after genuine original stop sender returns. Existing10s await verifies actual terminal state/nonlive rows plus CONFIRMED; genuinely association-free/unassigned sessions need no fabricated ACK.",
+    "Unchanged Store.runnable/global scanner excludes genuine terminal owners. Fixed worker identity/capacity/policies untouched; worker process close remains original5s/forced-destroy flow after owner cleanup."
+  ],
+  "failureAndPrivacyProof": [
+    "Each owner failure is retained while independent remaining owners continue cleanup. Worker close is attempted even if inventory/cancel/await fails. Original primary Exception/Error is rethrown and additional failures suppressed.",
+    "Worker process close and every created worker log scan are independent inside closeWorker. Null workerLog is not read after failed pre-log start; nonnull missing/read-failed/unsafe logs are not skipped. Original privacy assertion retained.",
+    "Held original claim/refresh callback latches released before cleanup, with original closeWorker release backup. No main-body call/guard/deadline/assertion altered."
+  ],
+  "retention": "All V34 append-only triggers/audit rows/FKs remain. No TRUNCATE, audit DELETE, cascade cleanup, forced SQL terminalization, production coordinator query change or new case/framework.",
+  "oldAssertions": "All original test and parameterized bodies preserved byte-exact by unchanged old void-method bodies except the three authorized lifecycle helpers; both selected oracles explicitly hashed.",
+  "coordinatorNext": [
+    "Root exact design/source review before apply.",
+    "Coordinator scoped format/compiler and exact original two guided.session.GuidedPlanningIntegrationTest selectors; not physical translation package selector.",
+    "No full fixture/browser matrix or repeated C5 diagnostic authorized by this receipt."
+  ],
+  "limits": [
+    "Runtime/compiler UNRUN. Real authorization/teardown/privacy failure stays red; no silent cleanup success.",
+    "Original forced worker branch has no new process-reap assertion/credit. No physical forced-exit or full resource-drain claim from source proof.",
+    "Current schema epoch72 definingPASS retained separately; prior planning setup failure remains historical evidence."
+  ],
+  "liveSourceApplied": false,
+  "runtime": false,
+  "build": false,
+  "newTestCases": 0,
+  "lifecycleOrQaChanged": false,
+  "whole19AcPass": false
+}

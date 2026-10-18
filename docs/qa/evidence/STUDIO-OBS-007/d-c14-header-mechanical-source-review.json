@@ -1,0 +1,53 @@
+{
+  "scope": "INDEPENDENT_MECHANICAL_SOURCE_ONLY_C14_HEADER_REVIEW",
+  "verdict": "SOURCE_APPROVED_FOR_SCOPED_STATIC_AND_EXISTING_WORKFLOW",
+  "authorIndependent": true,
+  "reviewerAuthoredHeader": false,
+  "inputs": {
+    "docs/qa/evidence/STUDIO-OBS-007/resume-c14-cache-policy-isolated-candidate/before.java": "02b135c25b11bcc8be6804e68a5461a4007552150039dad85fec8b5460b37be4",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-c14-cache-policy-isolated-candidate/candidate.java": "f020b315b901c460392a6b452603a4d7418b95a5ded629486de54f3d169cf816",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-c14-cache-policy-isolated-candidate/candidate.patch": "98cfdcd147c5021a3feafec55a03b4ef882ba1c4aec7d1c143b933e6d7e72ab8",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-c14-cache-policy-isolated-candidate/result.json": "debcba5185330ffecc44c79c1b4cfd2f5ec10d9095a01f3c3faa30b349527ffb",
+    "docs/qa/evidence/STUDIO-OBS-007/root-c14-cache-policy-design-review.json": "cd480413750cbb7068f9af0a668ca57edf99213478a9e74ff22a0931ea5c25f0",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-c14-http-cache-producer-policy-proposal.json": "98cfede699c713c37a7e71abebb4d7c5891bc2fead92072c8ebc90d9ad09f885"
+  },
+  "mechanicalProof": {
+    "baseSha256": "02b135c25b11bcc8be6804e68a5461a4007552150039dad85fec8b5460b37be4",
+    "candidateSha256": "f020b315b901c460392a6b452603a4d7418b95a5ded629486de54f3d169cf816",
+    "exactDeltaLines": 3,
+    "entireInverseBytesEqual": true,
+    "all36TestBodiesByteIdentical": true,
+    "headerLine": 536,
+    "condition": "p14Recipe != P14Recipe.NONE",
+    "newHeader": "Cache-Control: no-store",
+    "placement": "After original HTML selection/UTF8 byte construction/Content-Type, before unchanged sendResponseHeaders(200,bytes.length), actual original body write and close."
+  },
+  "preservedByWholeByteInverse": [
+    "Mandatory genuine TEXT_CANARY body/native input/same response status and data",
+    "Original source/config/learned plans/publication/recipes/guards/origin/scope/timing",
+    "Full original14 profile-field proof and15 matching variants, same-fd/full tree scans and required hits0",
+    "Original actual ASSERTION_FAILED and positive producer/effect assertions",
+    "All36 tests and existing workflow/capture/owner drains",
+    "No cache flush/deletion/filter/sink exception/canary replacement/SDK policy change"
+  ],
+  "limits": [
+    "Source review only; compiler/static/runtime/workflow UNRUN by reviewer.",
+    "Actual fresh existing workflow must still execute every strict scan; header does not guarantee zero cache/profile hits.",
+    "Controlled generated target-page no-store policy does not prove arbitrary external cacheable-page privacy or product cache cleanup.",
+    "All prior privacy red artifacts remain red; no all19/lifecycle/QA PASS."
+  ],
+  "findings": [],
+  "actions": {
+    "sourceEdits": 0,
+    "builds": 0,
+    "runtime": 0,
+    "probes": 0,
+    "newCases": 0,
+    "models": 0,
+    "reports": 1
+  },
+  "lifecycleVerdict": null,
+  "whole19AcPass": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE"
+}

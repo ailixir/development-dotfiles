@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "qa-source-review",
+  "label": "r1-diagnosis01/qa-source-review02",
+  "story": "STUDIO-OBS-015",
+  "reviewer": "Quinn (@qa)",
+  "createdAt": "2026-10-15",
+  "mode": "read-only static; no Gradle/JVM/Node/test executed; no source edited",
+  "verdict": "PASS_WITH_REQUIRED_CHANGES",
+  "review": {"path": "review.md", "sha256": "cf2b880926a7c0d5b7e078933757a91ba9b50fba543d5031e45aebd003db1ab5"},
+  "subjects": [
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ExecutionReferences.java", "sha256": "75b6ec153d608bcd14e4b4a4b81c3983758673c462ec5b45ff686ecaf25d2912", "ruling": "PASS (F1 closed)"},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java", "sha256": "ad8742a8426d757b198883be5fe089eae558e90e02d7b256340e24ac4dbf8fbe", "ruling": "PASS (D1 per spec; missing-server-value guard accepted, unreachable on validated path)", "beforeReconstructed": {"method": "delete lines 294-317", "sha256": "d61340b753e2da729c4777b850c3420224825553f62d9e6f5c8bf37394a8fe5c", "matchesDexBefore": true}},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java", "sha256": "055081ff6551de8eb640e589ffa8f5dd6d18876f64fd7264c1a1a6d432d1e3f8", "ruling": "PASS (F2 per spec; D1 call site per spec)", "diffBase": {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/low2048-accounting-fix01/source-after/GuidedSessionService.java", "sha256": "e3b1f3c06f7f6ac6dcc2eb3ef609a0047ad1b34c536eed1363ac68e405c78b82", "hunks": 2}},
+    {"path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/TypedReferenceAdapterTest.java", "sha256": "a3fcca289fdba201db0adb5d877f1bf4f3717b153cac2ffbd246644b83e4281c", "ruling": "PASS (F4 closed)"},
+    {"path": "backend/src/test/java/com/citi/put/checks/studio/StudioExecutionFixtures.java", "sha256": "2a71a31845121f639c834b5990ae37a199896cdced42f355fd08cc006eda8c8f", "ruling": "PASS (NO_REFERENCES javadoc line 97 still stale, non-blocking)"},
+    {"path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java", "sha256": "84c3d496244991723520f270a6591b11a820edbbbeda48319fecc1ad5adbea96", "ruling": "fix F PASS; undisclosed config timeoutSeconds 31->29 hunk (R1); stale STALE_GENERATION tolerance 3451-3458 (R2); vacuous drift probe rows 4585 (R3)", "beforeReconstructed": {"method": "revert fix F (drop 15554-15555, swap 15556/15557) AND revert 3971-3972 to timeoutSeconds 31 without comment", "sha256": "9f54372cf4ca4ec4e789be879e3cafbfad272a1b33a38384ef49ac03e4473839", "matchesDexBefore": true, "fixFOnlyRevertSha256": "23722e05ff830f12b6dba649b2636add1f834038c0b9f58d527d864e804e0e28", "fixFOnlyRevertMatchesDexBefore": false}},
+    {"path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedPrefixReceiptVerificationTest.java", "sha256": "44a0759b6b0447c9a4c3a4458b9a35aa8f2f1239a7210bf3ce2c360cbfa5ea9c", "ruling": "PASS"},
+    {"path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedCommittedRefreshStateTest.java", "sha256": "8cd157c4e0d4f6d990570b38d6bb6900361e79b5423a6edd0996a9edde49321a", "ruling": "PASS (reflection, non-blocking)"}
+  ],
+  "inputs": [
+    {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r1-diagnosis01/review.md", "sha256": "ea90eccde24e2ce798a1dc7c92151483dc7e144eaeaba32185adae64a5255a08"},
+    {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r1-diagnosis01/manifest.json", "sha256": "cdb63154318270217ddecd42b1402c5279b3868423225d022faa6a5a467a07f0"},
+    {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r1-diagnosis01/qa-source-review01/review.md", "sha256": "f115fb0f34f85339c0e5bce641637219e5764d69112ea135669e3370700dfa64"},
+    {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b1bcd-design01/qa-d1-review01/review.md", "sha256": "946cdaaa9f9884a284a9d44ec2685a2084ed9cd3723cce9ca3b79c86e03a47f1"},
+    {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/feedback05-fixture-fixes-source01/source-after/GuidedPublicationReplayIT.java", "sha256": "f279684cdc8fa168adcfcb8e45dead590a0257711892a094dbc5412191abea24"},
+    {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-r1-order9-quinn-d1f2-attempt01-before.json", "sha256": "d7c7aba9d392c805cc37f594f26ee99245e99ee90ec25dc9c50fd4857bbce430", "note": "all 8 subject hashes match"},
+    {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-r1-order9-quinn-d1f2-attempt01-after.json", "sha256": "ea4adc9a95746b434eae8e2592d4340b1faecd05b12818cd726258cbd579a7df", "note": "all 8 subject hashes match"},
+    {"path": "docs/specs/studio-observed-authoring/contracts/v3/bridge.schema.json", "sha256": "039ad4017a8256481d4109d37dfcfc919767094fd1610988d16706fef1065817"},
+    {"path": "docs/specs/studio-observed-authoring/contracts/v3/revision.schema.json", "sha256": "e37b2bd9869d42af323b2ad321e731a2556a8c44ebdc86f52c2e505fc1ea3531"},
+    {"path": "studio-runner/src/validator/observedReplay.ts", "sha256": "7c8a3b8d65160357e22878e8b0705cc704b135d42a561fb983950f6fb1e00c19"},
+    {"path": "studio-runner/src/run/deadline.ts", "sha256": "a12f616e294e8de3ee943dd7185e6024065b420c9dd54de2b30e139a4d718ed0"},
+    {"path": "studio-runner/src/server/runCoordinator.ts", "sha256": "004e52deb3e0b1965a8dec43db08e17170515cbcd5fc5f2980269a46433ed52f"}
+  ],
+  "requiredChanges": [
+    {"id": "R1", "file": "GuidedPublicationReplayIT.java:3971-3972", "summary": "Disclose config-variant timeoutSeconds 31->29 edit; revert and treat runner clamp-vs-equality as production finding, or obtain @po/@architect ruling that >30 is out of policy (with authoring refusal)"},
+    {"id": "R2", "file": "GuidedPublicationReplayIT.java:3451-3458", "summary": "Remove STALE_GENERATION tolerance around observe() now that F2 is fixed; amend B1B-05 REFRESH row"},
+    {"id": "R3", "file": "GuidedPublicationReplayIT.java:4585", "summary": "Pin exact drift probe outcomes per D1 spec before any R3 credit"}
+  ],
+  "skipped": ["Gradle/test execution (instruction)", "CodeRabbit (WSL-only; host darwin)", "SYNAPSE diagnostics (out of mission)"]
+}

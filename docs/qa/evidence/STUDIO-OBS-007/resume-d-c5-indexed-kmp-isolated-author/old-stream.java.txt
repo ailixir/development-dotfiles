@@ -1,0 +1,173 @@
+  private static final class C5CanaryStream {
+    private static final int MAX_VALUES = 16, MAX_VALUE_CHARS = 4096, VARIANTS = 15;
+    private static final int MAX_PATTERN_BYTES = MAX_VALUE_CHARS * 12;
+    private static final int MAX_TOTAL_PATTERN_BYTES = MAX_VALUES * VARIANTS * MAX_PATTERN_BYTES;
+    private final List<byte[]> patterns = new java.util.ArrayList<>();
+    private int[][] prefixes = new int[0][];
+    private int[] states = new int[0];
+    private final boolean[] startBytes = new boolean[256];
+    private int activeStates;
+    private long encodedBytes, writeCalls, hits, invalidWrites;
+    private int patternBytes;
+    private boolean failed, inputClosed, wiped;
+
+    C5CanaryStream(List<String> values) {
+      try {
+        if (values == null || values.isEmpty() || values.size() > MAX_VALUES) {
+          throw new IllegalArgumentException("C5 stream value inventory bound");
+        }
+        for (String value : values) {
+          if (value == null || value.isEmpty() || value.length() > MAX_VALUE_CHARS) {
+            throw new IllegalArgumentException("C5 stream value bound");
+          }
+          List<byte[]> variants = canaryByteVariants(value);
+          if (variants.size() != VARIANTS) {
+            throw new IllegalArgumentException("C5 stream variant count");
+          }
+          for (byte[] variant : variants) {
+            if (variant.length == 0
+                || variant.length > MAX_PATTERN_BYTES
+                || patternBytes > MAX_TOTAL_PATTERN_BYTES - variant.length) {
+              throw new IllegalArgumentException("C5 stream pattern bound");
+            }
+            patterns.add(variant);
+            patternBytes += variant.length;
+          }
+        }
+        prefixes = new int[patterns.size()][];
+        states = new int[patterns.size()];
+        for (int index = 0; index < patterns.size(); index++) {
+          byte[] pattern = patterns.get(index);
+          startBytes[Byte.toUnsignedInt(pattern[0])] = true;
+          int[] prefix = new int[pattern.length];
+          for (int offset = 1, matched = 0; offset < pattern.length; offset++) {
+            while (matched > 0 && pattern[offset] != pattern[matched]) {
+              matched = prefix[matched - 1];
+            }
+            if (pattern[offset] == pattern[matched]) {
+              matched++;
+            }
+            prefix[offset] = matched;
+          }
+          prefixes[index] = prefix;
+        }
+      } catch (RuntimeException invalid) {
+        // Failure is sticky and closed; never export a payload-containing cause.
+        failed = true;
+      }
+    }
+
+    private long increment(long counter) {
+      if (counter == Long.MAX_VALUE) {
+        failed = true;
+        return counter;
+      }
+      return counter + 1;
+    }
+
+    private void invalid() {
+      failed = true;
+      invalidWrites = increment(invalidWrites);
+    }
+
+    void write(int octet) {
+      writeCalls = increment(writeCalls);
+      if (inputClosed || wiped) {
+        invalid();
+      }
+      consume((byte) octet); // Original OutputStream.write(int) consumes its low eight bits.
+    }
+
+    void write(byte[] bytes, int offset, int length) {
+      writeCalls = increment(writeCalls);
+      if (inputClosed || wiped) {
+        invalid();
+      }
+      if (bytes == null || offset < 0 || length < 0 || offset > bytes.length - length) {
+        invalid();
+        return;
+      }
+      // No truncation/drop after a hit; every later valid byte is independently consumed.
+      for (int index = offset; index < offset + length; index++) {
+        consume(bytes[index]);
+      }
+    }
+
+    private void consume(byte octet) {
+      encodedBytes = increment(encodedBytes);
+      if (wiped
+          || states.length != patterns.size()
+          || prefixes.length != patterns.size()
+          || activeStates < 0
+          || activeStates > patterns.size()) {
+        failed = true;
+        return;
+      }
+      if (activeStates == 0 && !startBytes[Byte.toUnsignedInt(octet)]) {
+        return;
+      }
+      for (int index = 0; index < patterns.size(); index++) {
+        byte[] pattern = patterns.get(index);
+        int[] prefix = prefixes[index];
+        int previous = states[index];
+        int matched = previous;
+        while (matched > 0 && pattern[matched] != octet) {
+          matched = prefix[matched - 1];
+        }
+        if (pattern[matched] == octet) {
+          matched++;
+        }
+        if (matched == pattern.length) {
+          hits = increment(hits);
+          matched = prefix[matched - 1];
+        }
+        if (previous == 0 && matched > 0) {
+          activeStates++;
+        } else if (previous > 0 && matched == 0) {
+          activeStates--;
+        }
+        states[index] = matched;
+      }
+      if (activeStates < 0 || activeStates > patterns.size()) {
+        failed = true;
+      }
+    }
+
+    void closeInput() {
+      inputClosed = true;
+    }
+
+    void assertClean(boolean requireClosed) {
+      assertThat(activeStates)
+          .as("exact positive KMP state inventory")
+          .isEqualTo((int) java.util.Arrays.stream(states).filter(state -> state > 0).count());
+      assertThat(failed).as("original encoded stream observer/counter integrity").isFalse();
+      assertThat(invalidWrites).as("original encoded stream invalid or late writes").isZero();
+      assertThat(encodedBytes).as("actual original encoded bytes consumed").isPositive();
+      assertThat(writeCalls).as("actual original encoded write calls consumed").isPositive();
+      assertThat(hits)
+          .as("released literal/encoded values absent from original encoded stream")
+          .isZero();
+      if (requireClosed) {
+        assertThat(inputClosed).as("original capture target was actually closed").isTrue();
+      }
+    }
+
+    void wipe() {
+      for (byte[] pattern : patterns) {
+        java.util.Arrays.fill(pattern, (byte) 0);
+      }
+      for (int[] prefix : prefixes) {
+        if (prefix != null) {
+          java.util.Arrays.fill(prefix, 0);
+        }
+      }
+      java.util.Arrays.fill(states, 0);
+      java.util.Arrays.fill(startBytes, false);
+      activeStates = 0;
+      patterns.clear();
+      prefixes = new int[0][];
+      states = new int[0];
+      wiped = true;
+    }
+  }

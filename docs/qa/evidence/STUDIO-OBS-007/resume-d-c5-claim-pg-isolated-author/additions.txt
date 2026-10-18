@@ -1,0 +1,265 @@
+  @Test
+  void composedClaimRevocationCommitsBeforeRefusalAndOriginalStop() throws Exception {
+    var owner = new SourceStopOwner(actualJdbc.getDataSource());
+    Scenario[] created = new Scenario[1];
+    GuidedSessionService[] services = new GuidedSessionService[1];
+    Throwable primary = null;
+    try {
+      var fixture = prepareClaimRelease(owner, created, services, access);
+      String id = fixture.scenario().sessionId;
+      var release = claimReleaseRows(id);
+      var commands = claimCommandRows(id);
+      assertThat(release.size()).isEqualTo(1);
+      var atSender = new AtomicInteger();
+      var senderFailure = new AtomicReference<Throwable>();
+      fixture.sessions().installStopSender(
+          (contextToStop, reason) -> {
+            try {
+              // This is the original sender's entry, before send/ACK or confirmation.
+              assertThat(org.springframework.transaction.support.TransactionSynchronizationManager
+                  .getResource(actualJdbc.getDataSource())).isNull();
+              var committed = claimOwnerRow(id);
+              assertThat(committed.get("revoked_at") != null).isTrue();
+              assertThat(C.parse((String) committed.get("document")).path("state").asText())
+                  .isEqualTo("CANCELLED");
+              assertThat(C.parse((String) committed.get("progress")).path("errorCode").asText())
+                  .isEqualTo("SECRET_USE_REVOKED");
+              assertThat(claimReleaseRows(id).equals(release)).isTrue();
+              assertThat(claimCommandRows(id).equals(commands)).isTrue();
+              assertThat(actualJdbc.queryForObject(
+                  "SELECT count(*) FROM studio_secret_use_audit WHERE session_id=? "
+                      + "AND decision_stage='LIVE_RECHECK' AND outcome='REVOKED_MID_RUN'",
+                  Integer.class, id)).isEqualTo(1);
+              assertThat(fixture.scenario().stops.get()).isZero();
+              atSender.incrementAndGet();
+            } catch (RuntimeException | Error failure) {
+              senderFailure.compareAndSet(null, failure);
+            }
+            // Observation failures never replace or prevent the original stop operation.
+            owner.send(fixture.dispatch(), contextToStop, reason);
+          });
+      var sweep = new com.citi.put.checks.studio.secrets.SecretRevocationSweep(
+          actualJdbc, (principal, csi, environment, secret) -> false,
+          new SecretUseAuditRecorder(actualJdbc),
+          new DataSourceTransactionManager(actualJdbc.getDataSource()), context.getEnvironment());
+      sweep.installGuidedStop(fixture.sessions()::secretRevoked);
+      fixture.sessions().installSecretRevocation(sweep);
+      owner.expect(id);
+      assertThatThrownBy(() -> fixture.sessions().claim(
+          new GuidedInternalSecurity.Identity("worker-1", "owning-worker"),
+          id, "claim-denied", claimRequest(id)))
+          .isInstanceOfSatisfying(GuidedSessionException.class, failure -> {
+            assertThat(failure.getMessage()).isEqualTo("SECRET_USE_REVOKED");
+            assertThat(failure.status()).isEqualTo(409);
+          });
+      var committed = claimOwnerRow(id);
+      assertThat(committed.get("revoked_at") != null).isTrue();
+      assertThat(C.parse((String) committed.get("document")).path("state").asText())
+          .isEqualTo("CANCELLED");
+      assertThat(C.parse((String) committed.get("progress")).path("errorCode").asText())
+          .isEqualTo("SECRET_USE_REVOKED");
+      assertThat(claimCommandRows(id).equals(commands)).isTrue();
+      assertThat(claimReleaseRows(id).equals(release)).isTrue();
+      owner.drainUninterruptibly();
+      assertThat(senderFailure.get() == null).isTrue();
+      assertThat(atSender.get()).isEqualTo(1);
+      assertThat(owner.initiated.get()).isEqualTo(1);
+      assertThat(owner.finished.get()).isEqualTo(1);
+      assertThat(owner.confirmationCalls.get()).isEqualTo(1);
+      assertThat(fixture.scenario().stops.get()).isEqualTo(1);
+      assertThat(actualJdbc.queryForObject(
+          "SELECT progress->>'teardownStatus' FROM studio_guided_sessions WHERE session_id=?",
+          String.class, id)).isEqualTo("CONFIRMED");
+      assertThat(actualJdbc.queryForObject(
+          "SELECT live FROM studio_guided_materializations WHERE session_id=?", Boolean.class, id))
+          .isFalse();
+      assertThat(fixture.scenario().reads.get()).isZero();
+      assertThat(fixture.scenario().posts.get()).isZero();
+    } catch (Exception | Error failure) {
+      primary = failure;
+      throw failure;
+    } finally {
+      closeClaimFixture(owner, created, services, primary);
+    }
+  }
+
+  @Test
+  void permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback() throws Exception {
+    var owner = new SourceStopOwner(actualJdbc.getDataSource());
+    Scenario[] created = new Scenario[1];
+    GuidedSessionService[] services = new GuidedSessionService[1];
+    var authorizationHolders = new java.util.ArrayList<Object>();
+    var currentHolders = new java.util.ArrayList<Object>();
+    var observing = new AtomicBoolean();
+    var observedAccess = new FixtureAccess(actualJdbc, session -> {
+      if (observing.get()) {
+        currentHolders.add(org.springframework.transaction.support.TransactionSynchronizationManager
+            .getResource(actualJdbc.getDataSource()));
+      }
+    });
+    Throwable primary = null;
+    try {
+      var fixture = prepareClaimRelease(owner, created, services, observedAccess);
+      String id = fixture.scenario().sessionId;
+      var release = claimReleaseRows(id);
+      var sweep = new com.citi.put.checks.studio.secrets.SecretRevocationSweep(
+          actualJdbc, (principal, csi, environment, secret) -> {
+            if (observing.get()) {
+              authorizationHolders.add(
+                  org.springframework.transaction.support.TransactionSynchronizationManager
+                      .getResource(actualJdbc.getDataSource()));
+            }
+            return principal.equals("user-1") && csi.equals("CSI-123")
+                && environment.equals("fixture") && secret.equals("PASS");
+          }, new SecretUseAuditRecorder(actualJdbc),
+          new DataSourceTransactionManager(actualJdbc.getDataSource()), context.getEnvironment());
+      sweep.installGuidedStop(fixture.sessions()::secretRevoked);
+      fixture.sessions().installSecretRevocation(sweep);
+      var worker = new GuidedInternalSecurity.Identity("worker-1", "owning-worker");
+      ObjectNode request = claimRequest(id);
+      observing.set(true);
+      JsonNode renewed = fixture.sessions().claim(worker, id, "claim-permitted", request);
+      assertClaimResourceIdentity(authorizationHolders, currentHolders);
+      var stableOwner = claimOwnerRow(id);
+      var stableCommands = claimCommandRows(id);
+      var stableAudit = actualJdbc.queryForList(
+          "SELECT * FROM studio_secret_use_audit WHERE session_id=? ORDER BY id", id);
+      assertThat(C.parse((String) stableOwner.get("document")).equals(renewed)).isTrue();
+      assertThat(actualJdbc.queryForObject(
+          "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND route='claim' "
+              + "AND idempotency_key='claim-permitted'", Integer.class, id)).isEqualTo(1);
+      authorizationHolders.clear();
+      currentHolders.clear();
+      JsonNode duplicate = fixture.sessions().claim(worker, id, "claim-permitted", request);
+      assertClaimResourceIdentity(authorizationHolders, currentHolders);
+      assertThat(duplicate.equals(renewed)).isTrue();
+      assertThat(claimOwnerRow(id).equals(stableOwner)).isTrue();
+      assertThat(claimCommandRows(id).equals(stableCommands)).isTrue();
+      authorizationHolders.clear();
+      currentHolders.clear();
+      assertThatThrownBy(() -> fixture.sessions().claim(worker, id, "claim-permitted",
+          request.deepCopy().put("expectedFence", 2)))
+          .isInstanceOfSatisfying(GuidedSessionException.class, failure -> {
+            assertThat(failure.getMessage()).isEqualTo("IDEMPOTENCY_CONFLICT");
+            assertThat(failure.status()).isEqualTo(409);
+          });
+      assertClaimResourceIdentity(authorizationHolders, currentHolders);
+      assertThat(claimOwnerRow(id).equals(stableOwner)).isTrue();
+      assertThat(claimCommandRows(id).equals(stableCommands)).isTrue();
+      var rollback = new AssertionError("Controlled caller rollback");
+      authorizationHolders.clear();
+      currentHolders.clear();
+      assertThatThrownBy(() -> repository.transaction(() -> {
+        JsonNode inside = fixture.sessions().claim(worker, id, "claim-rollback", request);
+        assertClaimResourceIdentity(authorizationHolders, currentHolders);
+        assertThat(C.parse((String) claimOwnerRow(id).get("document")).equals(inside)).isTrue();
+        assertThat(actualJdbc.queryForObject(
+            "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND route='claim' "
+                + "AND idempotency_key='claim-rollback'", Integer.class, id)).isEqualTo(1);
+        throw rollback;
+      })).isSameAs(rollback);
+      observing.set(false);
+      assertThat(claimOwnerRow(id).equals(stableOwner)).isTrue();
+      assertThat(claimCommandRows(id).equals(stableCommands)).isTrue();
+      assertThat(actualJdbc.queryForList(
+          "SELECT * FROM studio_secret_use_audit WHERE session_id=? ORDER BY id", id)
+          .equals(stableAudit)).isTrue();
+      assertThat(claimReleaseRows(id).equals(release)).isTrue();
+      assertThat(fixture.scenario().reads.get()).isZero();
+      assertThat(fixture.scenario().posts.get()).isZero();
+    } catch (Exception | Error failure) {
+      primary = failure;
+      throw failure;
+    } finally {
+      observing.set(false);
+      closeClaimFixture(owner, created, services, primary);
+    }
+  }
+
+  private GuidedControllerCutFixture prepareClaimRelease(SourceStopOwner owner, Scenario[] created,
+      GuidedSessionService[] services, FixtureAccess fixtureAccess) throws Exception {
+    var fixture = prepareGuidedControllerCut(owner, created, services, fixtureAccess);
+    var consumption = fixture.sessions().consume(controller, fixture.scenario().sessionId, 1,
+        "claim-fixture-consume", fixture.advance());
+    assertThat(consumption instanceof GuidedSessionService.WonConsumption).isTrue();
+    assertThat(action(fixture.scenario().sessionId).path("dispatchCount").asInt()).isEqualTo(1);
+    // Real service/guarded audit decision, controlled metadata; no value provider/native effect.
+    fixture.sessions().recordSecretDecision(fixture.scenario().sessionId, fixture.admission(),
+        "PASS", "fixture-version-1", SecretUseAuditRecorder.ResolutionOutcome.RESOLVED);
+    return fixture;
+  }
+
+  private static ObjectNode claimRequest(String id) {
+    return C.object().put("schemaVersion", 3).put("sessionId", id)
+        .put("workerId", "worker-1").put("expectedFence", 1)
+        .set("versions", DOCUMENTS.path("versions"));
+  }
+
+  private static Map<String, Object> claimOwnerRow(String id) {
+    return actualJdbc.queryForMap(
+        "SELECT document::text,progress::text,revoked_at FROM studio_guided_sessions WHERE session_id=?", id);
+  }
+
+  private static List<Map<String, Object>> claimCommandRows(String id) {
+    return actualJdbc.queryForList(
+        "SELECT * FROM studio_guided_commands WHERE namespace=? AND route='claim' ORDER BY idempotency_key", id);
+  }
+
+  private static List<Map<String, Object>> claimReleaseRows(String id) {
+    return actualJdbc.queryForList(
+        "SELECT * FROM studio_secret_use_audit WHERE session_id=? AND row_kind='RELEASE' "
+            + "AND decision_stage='DISPATCH' ORDER BY id", id);
+  }
+
+  private static void assertClaimResourceIdentity(List<Object> authorization, List<Object> current) {
+    assertThat(authorization.isEmpty()).isFalse();
+    assertThat(current.size()).isEqualTo(1);
+    assertThat(current.getFirst() instanceof org.springframework.jdbc.datasource.ConnectionHolder)
+        .isTrue();
+    var expected = (org.springframework.jdbc.datasource.ConnectionHolder) current.getFirst();
+    assertThat(expected.hasConnection()).isTrue();
+    for (Object holder : authorization) {
+      assertThat(holder).isSameAs(expected);
+      assertThat(((org.springframework.jdbc.datasource.ConnectionHolder) holder).getConnection())
+          .isSameAs(expected.getConnection());
+    }
+  }
+
+  private void closeClaimFixture(SourceStopOwner owner, Scenario[] created,
+      GuidedSessionService[] services, Throwable primary) throws Exception {
+    var failures = new java.util.ArrayList<Throwable>();
+    if (created[0] != null) {
+      var scenario = created[0];
+      attemptGuidedCutCleanup(failures, () -> {
+        var document = repository.transaction(() -> repository.lock(scenario.sessionId).document());
+        if (!Set.of("CANCELLED", "UNKNOWN_OUTCOME", "FAILED", "EXPIRED", "SUCCEEDED",
+            "PUBLICATION_CONFLICT").contains(document.path("state").asText())) {
+          owner.expect(scenario.sessionId);
+          services[0].cancel(user, scenario.sessionId, UUID.randomUUID().toString(),
+              C.object().put("schemaVersion", 3).put("sessionId", scenario.sessionId)
+                  .put("reason", "userRequested"));
+        }
+      });
+      attemptGuidedCutCleanup(failures, owner::drainUninterruptibly);
+      attemptGuidedCutCleanup(failures, () -> {
+        assertThat(owner.failure.get() == null && owner.guardFailure.get() == null).isTrue();
+        assertThat(actualJdbc.queryForObject(
+            "SELECT live FROM studio_guided_materializations WHERE session_id=?",
+            Boolean.class, scenario.sessionId)).isFalse();
+      });
+    }
+    if (!failures.isEmpty()) {
+      GUIDED_CUT_CLEANUP_UNCONFIRMED.set(true);
+      if (primary != null) {
+        failures.forEach(primary::addSuppressed);
+      } else {
+        var first = failures.getFirst();
+        failures.stream().skip(1).forEach(first::addSuppressed);
+        if (first instanceof Exception exception) {
+          throw exception;
+        }
+        throw (Error) first;
+      }
+    }
+  }
+

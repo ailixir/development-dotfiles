@@ -1,0 +1,33 @@
+{
+  "verdict": "BOUNDED_SOURCE_FIXES_REQUIRED",
+  "candidateSha256": "b54eeea294dd6f4dcf41176303e287abb5c0e8a243f61eaa285724029580d088",
+  "peerReview": "c6-peer-source-review.json",
+  "peerFindingsAccepted": [
+    "C6-PEER-01 ordinarytimeout lacks restoration and cancel restores tooearly",
+    "C6-PEER-02 rawdiagnostic/stderr AssertJ actualstrings can leak onfailure",
+    "C6-PEER-03 guidedreject/drain-timeout abandons late restoration"
+  ],
+  "rootFindings": [
+    {
+      "id": "C6-ROOT-01",
+      "priority": "HIGH",
+      "location": "p4HandleObserver catch IOException|RuntimeException after C6cut",
+      "problem": "All RuntimeException validation failures with !accepted after cut are softened into interrupted notification. This includes malformed/unknown/duplicate event or ACK failures and violates sticky validation requirements; kind1 cut clock is set at focus, before realtimeout.",
+      "requiredFix": "Validation/runtime failures always remain sticky. Narrow any allowed destroyed-realm notification unavailability to actual independently proven interruption with explicit unknown effect knowledge; never infer it from cut timestamp alone. Preserve originalclose/cleanup and fourcases."
+    },
+    {
+      "id": "C6-ROOT-02",
+      "priority": "MEDIUM",
+      "location": "p8C6Run terminalaudit assertions",
+      "problem": "Excluding positive/refusal/no-use codes does not prove that the required actual terminal UNKNOWN_OUTCOME usage summary exists; missing allUSAGE can satisfy it.",
+      "requiredFix": "Within each existingcase after authenticterminalsettlement require exactlyone actual linked UNKNOWN_OUTCOME USAGE for the real RESOLVED release, with authenticscope/attempt/version lineage. Keep existing forbiddencodes checks; no seededsummary/newcase."
+    }
+  ],
+  "pageAckDisposition": {
+    "acceptedProof": "Actual server focus-enter ingress from selected page plus contemporaneous original Node pending ACK establishes nativeworld entered and stillpending atcut. Page response-completion is unavailable during synchronousstall and is not a pending-entry prerequisite.",
+    "limits": "This supplies no completed pageACK/fence/zero-write/no-effect claim. Healthy effect proofs stillrequire actual producerregistration and fullfenceACK; interruptedrealm remains UNKNOWN."
+  },
+  "preservation": "Fourminimumcuts and original28 bodies; no comparator/Cartesian/newordinaryinjectionAPI or generalframework",
+  "next": "Preflight exact isolated R repair of fiveconcrete findings, source re-review before merge/execution",
+  "runtime": "UNRUN; no lifecycle/acceptance verdict"
+}

@@ -1,0 +1,104 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "task": "po-close-story",
+  "result": "PASS",
+  "administrativelyClosed": true,
+  "actor": "Pax (@po), autonomous agent",
+  "model": "claude-opus-5-5",
+  "mode": "yolo",
+  "at": "2026-10-13T23:02:56Z",
+  "statusBefore": "Done",
+  "statusAfter": "Done",
+  "statusPreserved": true,
+  "lifecycleTransitionPerformed": false,
+  "closureKey": "STUDIO-OBS-012A:digest:worktree-digest:sha256:a5315b093a84b03d1387a20ecd1ba84018daccb7814574755d62c5e933badf86",
+  "reviewed_revision": "worktree-digest:sha256:a5315b093a84b03d1387a20ecd1ba84018daccb7814574755d62c5e933badf86",
+  "closureKeyMethod": {
+    "precedent": "OBS-007 used the gate's reviewed_revision verbatim as the digest (docs/qa/evidence/STUDIO-OBS-007/astra-root-admin-close.json); OBS-006 used a working-tree sha256. 012A's gate reviewed_revision is a worktree digest, so the key is <story-id>:digest:<reviewed_revision> per po-close-story.md step 2.",
+    "recomputation": "find backend/src backend/build.gradle.kts studio-runner/src studio-runner/test studio-runner/scripts tools docs/specs -type f | LC_ALL=C sort | (NUL-delimited) xargs -0 shasum -a 256 | shasum -a 256",
+    "fileCount": 1108,
+    "recomputedDigest": "a5315b093a84b03d1387a20ecd1ba84018daccb7814574755d62c5e933badf86",
+    "matchesGate": true,
+    "recomputedAfterWrites": "a5315b093a84b03d1387a20ecd1ba84018daccb7814574755d62c5e933badf86",
+    "note": "QA did not record the exact command; the variant above reproduced the gate digest exactly on the first sorted-path/shasum-list attempt. Other tried variants (sorted sums, hash-only list, unsorted find, concatenated content) did not match and were discarded."
+  },
+  "preCloseGates": {
+    "G1_verdict": {"result": "PASS", "detail": "Gate CONCERNS, waiver inactive, no high finding; CONCERNS accepted per root instruction. reviewer Quinn; story id matches."},
+    "G2_acceptanceCriteria": {"result": "PASS", "detail": "QA ac_mapping: AC-1..AC-5 MET; AC-6 MET with REQ-002/REQ-003; AC-7 MET for backend/src/main, studio-runner/src, tools, frontend half assigned to OBS-012B by the AC-7 parenthetical (REQ-001)."},
+    "G3_tasksAndFileList": {"result": "PASS_WITH_NOTE", "detail": "T0-T2 and T4 checked. T3 sub-item 'Dev database recreated' unchecked = user-owned destructive step (REQ-003, accepted by gate). T5 'Submit to independent @qa' unchecked = stale admin metadata, QA Results and gate prove completion (same interpretation as OBS-006 close). @dev-owned checkboxes not edited. File List present (Actual changes 2026-10-13, reconciled)."},
+    "G4_qualityGates": {"result": "PASS", "detail": "backend check run5b 1916 tests / 0 failures / 0 errors / 25 skipped, JaCoCo PASS; runner-gates-final all five gates green; contracts tool and --check exit 0 (QA re-run); architect gate APPROVE-WITH-CONDITIONS G1-G3 met, G4 host cleanup awaits user. CodeRabbit not run (no WSL), QA manual fallback review recorded."},
+    "G5_statusDone": {"result": "PASS", "detail": "Status **Done** set by @qa in Change Log 0.2.5; unchanged on disk after closure."},
+    "provenance": {"result": "PASS", "detail": "reviewed_revision re-derived exactly (above); find -newer 2026-10-13 17:40 EDT over backend/src, build.gradle.kts, backend/config, studio-runner (excl. node_modules/dist/coverage), tools, docs/specs returned 0 files at 2026-10-13 19:01 EDT."}
+  },
+  "evidenceHashes": {
+    "gate": {"path": "docs/qa/gates/STUDIO-OBS-012A-compile-path-retirement-backend-runner-contracts-and-migration-re-baseline.yml", "sha256": "8a2a277294ff9c89a4cb1ccbeb8c179fd2c420582e6945e3cfdc52268b95f805"},
+    "backendRun5b": {"path": "docs/qa/evidence/STUDIO-OBS-012A/final-gates/backend-check-run5b.json", "sha256": "8ff1907bc93ff227b63aa80b3c2d070c20468debf3e826bba2487bca018e01ad", "tests": 1916, "failures": 0, "errors": 0, "skipped": 25},
+    "runnerGatesFinal": {"path": "docs/qa/evidence/STUDIO-OBS-012A/runner-gates-final/ledger.json", "sha256": "931673ba89bb4043ef58b6624d34ed0f894bb5d12ee95ad6abcc1cc960d07350", "verdict": "All five gates GREEN"},
+    "architectGate": {"path": "docs/qa/evidence/STUDIO-OBS-012A/root/architect-gate.json", "sha256": "4eb8bdbc1c3948929cb67718b5d8f27dd82b987a537f3c4ada0a2dedd6f7e595", "verdict": "APPROVE-WITH-CONDITIONS"},
+    "poPlacementsGate": {"path": "docs/qa/evidence/STUDIO-OBS-012A/root/po-placements-gate.json", "sha256": "2081b02c5b13daf18606898802ea8e5a489f5dc5d5a86fb1f62b0fd5ce305cf4"}
+  },
+  "acceptedConcerns": [
+    {"id": "REL-001", "severity": "medium", "owner": "@qa observation / STUDIO-OBS-009 AC-12 a-e", "verifiedPlacement": "OBS-009 AC-12 present"},
+    {"id": "ARCH-001", "severity": "medium", "owner": "STUDIO-OBS-014 (P1), before OBS-010", "verifiedPlacement": "OBS-014 :58-62 obligation P1"},
+    {"id": "ARCH-002", "severity": "medium", "owner": "STUDIO-OBS-009 (P2), before OBS-010", "verifiedPlacement": "OBS-009 :30-34 obligation P2"},
+    {"id": "REQ-001", "severity": "medium", "owner": "STUDIO-OBS-012B AC-3", "verifiedPlacement": "OBS-012B AC-3 names compileTest/confirmCompile clients"},
+    {"id": "ARCH-003", "severity": "medium", "owner": "@architect ruling at STUDIO-OBS-015 T0 (P7)", "verifiedPlacement": "OBS-015 :40-46 obligation O-1/P7"},
+    {"id": "REQ-002", "severity": "medium", "owner": "user / Platform-SRE; carried by STUDIO-OBS-010", "state": "UNCONFIRMED, question never sent"},
+    {"id": "REQ-003", "severity": "low", "owner": "user", "state": "dev DB not recreated; command in lane-m notRun"},
+    {"id": "TEST-001", "severity": "low", "owner": "STUDIO-OBS-009 (P5)"},
+    {"id": "MNT-001", "severity": "low", "owner": "STUDIO-OBS-009 (P5) / any lane rebuilding dist"},
+    {"id": "REL-002", "severity": "low", "owner": "user (architect G4) / STUDIO-OBS-009 AC-12 f-j (P3/P4)"},
+    {"id": "ARCH-004", "severity": "low", "owner": "STUDIO-OBS-011 fold (P6)"},
+    {"id": "MNT-002", "severity": "low", "owner": "STUDIO-OBS-011 reformat"}
+  ],
+  "deploymentWarning": "Do not deploy or demo against a real backend with the current (pre-OBS-012B) frontend: its compile calls now 404. MSW-mocked dev is unaffected.",
+  "bookkeepingFilesChanged": [
+    "docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012A.story.md"
+  ],
+  "filesChanged": [
+    "docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012A.story.md",
+    ".ai/STUDIO-OBS-012A-close.json"
+  ],
+  "readmeChanges": [
+    "Administrative closure: STUDIO-OBS-012A entry with closure key (written first).",
+    "'Next session: start here' heading dated 2026-10-13; new State paragraph (007 and 012A Done, eight Ready, next 012B/013/014, user-owned items, deployment warning); 2026-10-10 state kept as marked history.",
+    "'Current execution' parenthetical updated (007 and 012A Done and closed).",
+    "Commands example re-pointed from OBS-007 to OBS-012B."
+  ],
+  "artifactHashes": {
+    "storyBefore": "25f320a80740e6031a89e3730eb58b2e046fa47562926607d6442ff3abea7153",
+    "storyAfter": "b0b79c1354227da2882241272c3f77ade52507e91a3af3e01dc7336075ada150",
+    "storyPreQa": "a69d1f835b1bd91ca0ff644ad1dfa4a2e668d36ab19e24886420b9019b559ea6",
+    "indexBefore": "b7db9a2f41f4aeb07e0a8466f3145b51ea505d132eea6e2b19dda096e7b4f1b4",
+    "indexAfter": "e1cc81242222d67e5d3c1a6fc515196b9d2fb08e64c40ad045ce6aae9d07a72d"
+  },
+  "storyEdits": "Change Log row 0.2.6 appended only. Status, AC, scope, title, tasks, File List and QA Results untouched.",
+  "idempotency": {
+    "markerCounts": {
+      "docs/stories/STUDIO-OBSERVED/README.md": 1,
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012A.story.md": 1
+    },
+    "secondPass": "NO_OP (both markers present; a re-run finds the key in each artifact and writes nothing)",
+    "writeOrder": "README marker first, then story Change Log row",
+    "note": "The simulated-failure retry from the task's Idempotency Validation section was not executed as a separate fixture run; convergence is by marker check per artifact."
+  },
+  "scope": {
+    "productTestCodeChanged": false,
+    "newQualityVerdictIssued": false,
+    "qaArtifactsChanged": false,
+    "sdcStateChanged": false,
+    "waveStateChanged": false,
+    "commitPushPrDeployment": false,
+    "externalMessages": false
+  },
+  "nextStory": {
+    "ids": ["STUDIO-OBS-012B", "STUDIO-OBS-013", "STUDIO-OBS-014"],
+    "status": "Ready (each)",
+    "parallel": true,
+    "note": "015 follows 014 per coordinator ruling 2; 012B must be Done before any real-backend deploy/demo.",
+    "automaticDispatch": false
+  },
+  "handoff": "Root verifies close and advances the wave. @devops push only after the user acknowledges REQ-001 (no real-backend deploy/demo before OBS-012B) and REQ-002/REQ-003, per gate next_steps."
+}

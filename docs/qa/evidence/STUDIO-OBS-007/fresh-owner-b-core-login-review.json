@@ -1,0 +1,312 @@
+{
+  "schema": "studio-observed-b-core-login-independent-source-review/1",
+  "recordedAt": "2026-10-10T21:15:38.526Z",
+  "verdict": "CHANGES_REQUESTED",
+  "mode": "READ_ONLY_EXACT_SOURCE_REVIEW",
+  "scope": {
+    "sourcePath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "sourceSHA256": "35b10bba98b67f912af3abd24c96ae57979f2b105aa5ee1eead2f3611ccb658b",
+    "reviewed": "Exactly three new Core/scope methods, six new LOGIN methods, changed helpers and narrowly referenced original fixtures/helpers in GuidedPublicationReplayIT.java.",
+    "sourceRuntimeBuildGradleTestsBrowserProcessCommandsModelsSpawnsRun": false,
+    "sourceEdits": false,
+    "onlyWrite": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-b-core-login-review.json",
+    "qaOrLifecycleVerdict": false,
+    "waiver": false
+  },
+  "identity": {
+    "baselineArchive": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-contract-corrected-all9/sources.zip",
+    "baselineSourceSHA256": "fcfc4ee93fb9802b5d28ef04caf98c1f153d8ac3f5083e73ea13fed38b20c90b",
+    "patchPath": "docs/qa/evidence/STUDIO-OBS-007/b-core-scope-login-candidate/one-file.patch",
+    "patchSHA256": "1f1ba76e83201b0a1d58c4b7b576a8a397e59ba1616e7a68f530fabad29833d8",
+    "patchAddedLines": 892,
+    "patchRemovedLines": 16,
+    "reconstructedCandidateSHA256": "9071eaf556e5774a38422aa9ff11c5de43990bd1a5945df7ff559939e45688ea",
+    "candidateReportSHA256": "7201797dfe127c0b872a54f159be0e2cc5161be68610c29165a40f7e06ad63ed",
+    "formatterManifest": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-core-pg-candidates-format/result.json",
+    "formatterPublicationBefore": "9071eaf556e5774a38422aa9ff11c5de43990bd1a5945df7ff559939e45688ea",
+    "formatterPublicationAfter": "35b10bba98b67f912af3abd24c96ae57979f2b105aa5ee1eead2f3611ccb658b",
+    "candidateAndFormattedEquivalentTokens": true,
+    "tokenComparison": "Whitespace/comments ignored; adjacent Java string-literal concatenations normalized. No candidate code was executed.",
+    "originalNineBodiesByteIdentical": {
+      "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues": true,
+      "queuedAndPreReadyRefusals": true,
+      "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness": true,
+      "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays": true,
+      "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance": true,
+      "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork": true,
+      "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays": true,
+      "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall": true,
+      "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel": true
+    },
+    "originalBudgetHelperByteIdentical": true
+  },
+  "findings": [
+    {
+      "id": "B-CORE-LOGIN-001",
+      "severity": "P1",
+      "title": "The published wrong-password case requires an invocation witness that never records P3 calls",
+      "location": {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+        "startLine": 4160,
+        "endLine": 4162
+      },
+      "relatedLocations": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "startLine": 463,
+          "endLine": 471
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "startLine": 3951,
+          "endLine": 3973
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "startLine": 4106,
+          "endLine": 4107
+        }
+      ],
+      "finding": "p3PublishedLogin(LOGIN,true) snapshots REPLAY_INVOCATIONS and requires containsExactly(\"fill\", \"click\"). The unchanged /invocation handler appends only when asynchronousPage || observedChoicePage. Both default to false; the referenced old fixtures restore them to false, and p3Case never enables them or another P3 recording condition. Thus genuine P3 native fills/clicks are forwarded by the existing worker tap but discarded by the HTTP witness. The new published wrong-password test necessarily reaches this assertion with an empty list if its preceding checks pass; the empty-list assertions for the other P3 branches are also vacuous as invocation evidence.",
+      "requestedChange": "Add a P3-scoped invocation witness at the existing forwarding seam and use its per-case delta, preserving the old nine fixture behavior and original invoke call exactly once. Do not enable old asynchronous/choice page behavior to make this assertion pass.",
+      "validationBoundary": "Static contradiction in the reviewed source; no runtime was executed."
+    },
+    {
+      "id": "B-CORE-LOGIN-002",
+      "severity": "P2",
+      "title": "The published registration control does not check its actual FINAL outcome for unwanted annotation",
+      "location": {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+        "startLine": 4117,
+        "endLine": 4119
+      },
+      "relatedLocations": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "startLine": 4121,
+          "endLine": 4129
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "startLine": 4387,
+          "endLine": 4416
+        }
+      ],
+      "finding": "The registration branch tests public report.errorCode and report.detail, then skips p3RunnerReport entirely. The adjacent failure branch explicitly documents that runner causes live in the authenticated FINAL outcome rather than public errorCode. A PASSED FINAL that incorrectly retains outcome.errorCode=LOGIN_REQUIRED or outcome.detail therefore can satisfy the registration assertions while the public API omits those fields. This fails to prove the requested passing/no-annotation control at the actual runner boundary.",
+      "requestedChange": "Inspect the captured successful registration FINAL through p3RunnerReport, retain execution/attempt/admission/instance/sequence identity checks, and assert the actual outcome has no errorCode/detail annotation plus passing original step receipts. Keep the accepted public FAILED/errorCode-null vocabulary unchanged.",
+      "validationBoundary": "Missing assertion on the actual captured outcome; no invented API mapping or runtime claim."
+    },
+    {
+      "id": "B-CORE-LOGIN-003",
+      "severity": "P2",
+      "title": "Owned ordinary executions are not cancelled or settled before fixture state is cleared on failure",
+      "location": {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+        "startLine": 4345,
+        "endLine": 4352
+      },
+      "relatedLocations": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "startLine": 3977,
+          "endLine": 4013
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "startLine": 3795,
+          "endLine": 3802
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "startLine": 4107,
+          "endLine": 4111
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "startLine": 885,
+          "endLine": 1018
+        }
+      ],
+      "finding": "p3Execute creates a genuine accepted ordinary execution and puts it only in the class-wide P3_EXECUTIONS callback-capture set. p3Case finally cleans testOwnedSessions (guided sessions) only; the referenced AfterEach also cancels only guided sessions. If p3AssertBinding or dispatchOnce fails after acceptance, the ordinary execution can remain queued; if p3AwaitExecution times out, it can remain active. Finally then clears APP mode, native sessions, credentials and entitlement fixtures without settling that owned execution. A queued execution can contaminate the next dispatchOnce count, and an active execution can continue against cleared fixture authority.",
+      "requestedChange": "Track each case’s accepted ordinary executions separately and use genuine bounded cancellation/terminal acknowledgement before restoring APP/Core/entitlement state. Preserve the primary error with suppressed cleanup failures and prevent later case execution when owned teardown remains unconfirmed.",
+      "validationBoundary": "Concrete failure paths in new helpers; this is bounded test resource ownership, not a broader process/revocation or lifecycle review."
+    },
+    {
+      "id": "B-CORE-LOGIN-004",
+      "severity": "P2",
+      "title": "Unexpected successful negative starts fail before their session can be tracked for cleanup",
+      "location": {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+        "startLine": 4310,
+        "endLine": 4315
+      },
+      "relatedLocations": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "startLine": 3622,
+          "endLine": 3627
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "startLine": 3723,
+          "endLine": 3728
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "startLine": 3979,
+          "endLine": 3996
+        }
+      ],
+      "finding": "p3Call asserts the expected HTTP status before parsing/tracking an actual successful guided start, and tracking additionally depends on the requested status being 202. If either the mayUse denial or missing-scope refusal regresses to a real 202, the helper throws immediately and leaves the returned session absent from testOwnedSessions. Neither p3Case nor the existing failure cleanup can cancel that session. The denied-principal case also needs the actual owning cookie retained for a legitimate cancellation; the default P3 cookie belongs to user-1.",
+      "requestedChange": "Record any actual successful guided-start response and its actual owning identity/cookie before asserting the expected refusal status. Clean that unexpected owned session through the genuine authenticated route with bounded teardown and retain the original refusal assertion as the primary failure.",
+      "validationBoundary": "Concrete negative-test regression path; no simulated cancellation or ownership bypass is requested."
+    }
+  ],
+  "scopedChecks": [
+    {
+      "check": "Original nine bodies and budgets",
+      "result": "PASS_SOURCE",
+      "evidence": "All nine method bodies match the exact fcfc4ee9 baseline archive byte-for-byte. persistActualBudgetEvidence is byte-identical; 4000 fixture output and 32000/128000 session assertions remain. The bounded patch reconstructs exact 9071eaf5 and formatter tokens match current 35b10bba. Other production/default files were not reviewed or modified."
+    },
+    {
+      "check": "Core cookie, ownership and mayUse",
+      "result": "PASS_SOURCE",
+      "locations": [
+        328,
+        753,
+        3617,
+        4255
+      ],
+      "evidence": "Exact private Cookie-to-Core identity response supplies owned CSI-123/456 through real HTTP. Distinct cookies avoid same-cookie cache reuse. mayUse retains the original aliases and uses exact additional principal/CSI/environment/name tuples; denial explicitly observes the real denied tuple and Core call delta."
+    },
+    {
+      "check": "Legitimate secondary environment",
+      "result": "PASS_SOURCE",
+      "locations": [
+        577,
+        620,
+        635,
+        5381
+      ],
+      "evidence": "fixture-other is a startup deep copy with distinct policyId/environment, original approved origins/profile/build/rules retained. Backend and ordinary policy mounts include it. No incoming job normalization, fake guard or policy bypass appears in the delta."
+    },
+    {
+      "check": "Guided scope positive and names refusal",
+      "result": "PASS_SOURCE_WITH_LIMIT",
+      "locations": [
+        3672,
+        3698,
+        3714,
+        3721,
+        4825
+      ],
+      "evidence": "Four persisted source scopes use the same PASS name with distinct private values, exact own physical read/native receipt and unchanged measured prior-scope reads. Missing new test scopes refuse with SECRET_UNAVAILABLE and zero value/model/session effects. These are cross-scope cases with distinct test IDs; no claim of an isolated one-ID CSI/environment mutation. Names-list tracing exists, but missing-scope list calls are not separately delta-asserted."
+    },
+    {
+      "check": "Accepted ordinary scope and read-boundary disappearance",
+      "result": "PASS_SOURCE_WITH_CLEANUP_FINDING",
+      "locations": [
+        3795,
+        3825,
+        3845,
+        3862,
+        4801
+      ],
+      "evidence": "Public acceptance freezes actual revision/hash/CSI/environment/test binding. Genuine delegate deletion happens once at the selected PASS read boundary; own read increments, foreign reads remain fixed, real error/UNAVAILABLE audit and no dispatch diagnostic/admission/browser-start facts are checked. Positive native receipts, USED/audit scope and native decode are asserted. Ordinary failure cleanup is finding 003."
+    },
+    {
+      "check": "Guided launch noBrowser oracle",
+      "result": "PASS_SOURCE_RUNTIME_UNRUN",
+      "locations": [
+        3605,
+        3610,
+        3645,
+        4532,
+        5268
+      ],
+      "evidence": "Generated shim imports the installed Playwright Chromium export before the original guidedMain entry, registers a lifetime numeric counter and forwards original receiver/args/result via Reflect.apply exactly once. Actual registration learning/publication must produce a positive registered count before denied launch delta zero can pass. Runtime SDK interception/nonvacuity remains unexecuted by this review."
+    },
+    {
+      "check": "Native APP and wrong-password grounding",
+      "result": "PASS_SOURCE_WITH_INVOCATION_FINDING",
+      "locations": [
+        4263,
+        4573,
+        4592,
+        4611,
+        4638,
+        4664,
+        4739,
+        4755
+      ],
+      "evidence": "Actual form POST parses private credentials; only accepted POST issues a native cookie/302. Authenticated Home has Reports role=link; rejected login has inert Reports role=button. PASS is bound to exact APP origin before classify/learn. Model selects actual observed link/heading/button roles and emits existing UNSUPPORTED/INSUFFICIENT_EVIDENCE on a missing eligible target; it never fabricates LOGIN/detail or a learned guard. Ordinary wrong-password uses genuine learned link-versus-button drift, without changing original Home/TIMEOUT controls. Invocation witness is finding 001."
+    },
+    {
+      "check": "Six LOGIN assertions",
+      "result": "PARTIAL_SOURCE_FINDINGS",
+      "locations": [
+        3906,
+        4017,
+        4085
+      ],
+      "evidence": "Distinct guided/replay no-login, wrong-password and passing registration methods exist. Guided failures assert actual LOGIN/detail/current step/password signature, earlier native rejected POST and USED audit. Replay failures inspect actual authenticated FINAL LOGIN/detail and PASS/FAIL/SKIPPED receipts, with accepted public FAILED/errorCode-null preserved. Published registration no-annotation proof is finding 002."
+    },
+    {
+      "check": "Real PG, immutable publication, admission, audit, model zero and video",
+      "result": "PASS_SOURCE_RUNTIME_UNRUN",
+      "locations": [
+        110,
+        4320,
+        4355,
+        4387,
+        4419,
+        4439,
+        4483
+      ],
+      "evidence": "Uses actual PostgreSQL container and production routes/repositories/dispatcher. Publication independently hashes real artifact and asserts publication model/read zero, freezes accepted binding and unchanged stored artifact/hash. Failed replay FINAL identity is matched to durable attempt/admission/runner-instance/sequence. Genuine USED/scoped audit and native video decode through EOF are checked. No fabricated FINAL/admission/runner_report SQL exists in the delta; published registration callback assertions remain deficient per finding 002."
+    },
+    {
+      "check": "Original successful FINAL forwarding and body capture",
+      "result": "PASS_SOURCE_FOR_FAILURE_BRANCHES",
+      "locations": [
+        789,
+        792,
+        797,
+        4387
+      ],
+      "evidence": "Tracked callback body is read through ContentCachingRequestWrapper after the original chain is called once and returns 2xx. Actual parsed FINAL is retained privately and later checked against ledger identity. Production parsing/response authority remains unchanged; there is no direct fabricated callback or SQL final outcome. Registration bypasses the identity/outcome helper (finding 002). No body is exported in new P3 numeric evidence."
+    },
+    {
+      "check": "Product privacy credit and numeric exports",
+      "result": "PASS_SOURCE_SCOPED_ONLY",
+      "locations": [
+        175,
+        4504,
+        4527,
+        4991,
+        5033
+      ],
+      "evidence": "Private P3 password/username receipts are excluded from product sinks and have a nonsecret toString. Actual collected PG/model/log/journal/scratch/object sinks plus captured FINAL objects receive literal/encoded absence checks; returned arrays are checked for erasure. New p3 evidence is recursively restricted to numbers/booleans and local ordinal filenames; no new raw ID/body/canary export. Current scans are supporting coverage only, not full sinks or image/privacy completion."
+    },
+    {
+      "check": "Resource bounds and primary failure preservation",
+      "result": "PARTIAL_SOURCE_FINDINGS",
+      "locations": [
+        3951,
+        4292,
+        4371,
+        4387,
+        4470,
+        4483,
+        4977
+      ],
+      "evidence": "HTTP15s, learning90s/existing failure30s, ordinary60s, FINAL5s, teardown20s, video45s and existing decoder30s bounds are present. p3Case suppresses guided cleanup errors onto its primary failure and restores fixture state in finally. Unexpected accepted starts and ordinary execution cleanup remain findings 003/004."
+    }
+  ],
+  "limitations": [
+    "Source review only; no new method runtime PASS, SDK/browser launch proof, admission consumption runtime proof or native video runtime proof is granted.",
+    "The earlier original-nine runtime PASS is user-supplied context; this review independently verified preservation against its exact source archive, not rerun results.",
+    "Full sinks/Core process/revocation/image/full19, P6, QA and lifecycle obligations remain outside this bounded review; no waiver or closure.",
+    "Only the target Java entry was extracted from source archives; no other source file was reviewed."
+  ]
+}

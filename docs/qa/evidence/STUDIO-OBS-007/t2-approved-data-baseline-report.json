@@ -1,0 +1,68 @@
+{
+  "story": "STUDIO-OBS-007",
+  "scope": "Approved A/B data baseline only; no whole-story QA or new terminal-settlement implementation",
+  "rootGate": "root-approved-behavior-gate-3/result.json",
+  "rootGateSha256": "07866dacd06113904c813de4e0f2167653e7b1f7224f699c298ee6336088ed35",
+  "rootGateTotals": {
+    "tests": 143,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "gradleExitCode": 0,
+    "sourceDrift": []
+  },
+  "ownedDataTests": 41,
+  "dataClasses": [
+    {
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "sourceArchive": "root-approved-behavior-gate-3/sources.zip",
+  "sourceArchiveSha256": "028c05cd33af11435685ed4fcfed111ace950f98bfe5175d57d74a466545df7c",
+  "ownedSourceHashes": {
+    "backend/src/main/resources/db/migration/V34__studio_guided_secret_login.sql": "3e2a57ea3d6975f0ea4e32c6883332a578fe78d601af5bf35bdd5d32845d9e46",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java": "d5dd19dd738ee20d0809d488766cb1ed2b1fc34b2771255c2bf6e7a6e8b1229c",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java": "cc5ec40531d753f3e25c96d48fe68cc66c87389337c0e2e356b02e580049ad7f",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java": "3725277ffbbbc0ee9598833c2650d36aefdb138959ba35419004a062569be8ec",
+    "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java": "55be04bffb1ae42c8b67365ac7031c5907ded540f53869909d312eb3a0808772",
+    "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionBootstrap.java": "0851ebeac5c51a9aefff649962eb317f9fe738c757ed8f9aaec05ec0aa67aa98",
+    "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionHealthIndicator.java": "a57a71555d04e0675a334549f1b2b46971b98333c2a8c1d93d1956251f911414",
+    "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/RetentionPruner.java": "1a31c2639256b8a70e62aadaf4962de4d513376c5c4adafeed3772d6cc537ba6",
+    "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionScheduler.java": "19b21872f027e28ee52becdbc1621725713752fc4b3d2e5b24d482d50ff83ba1"
+  },
+  "design": "t2-approved-data-design.md",
+  "history": "data-approved-history-check.json",
+  "implemented": [
+    "Exact guided immutable reference identity, null actual ordinal/admission/release sequence and authentic terminal fence",
+    "Consumed unknown actual admission/ordinal/provenance/fence with null sequence; distinct real coordinates sharing one declaration remain independent",
+    "Durable possible-read marker before existing reads; exact scoped idempotence across real retry while marker remains conservative",
+    "Live-owned positively unattempted replay receipt+usage+actual winning DONE/ERROR or genuine outage requeue in same physical transaction, enforced deferred per-leaf",
+    "No general receipt retry authority; existing narrow refusal/outage tokens unchanged",
+    "Append-only/evidence partition guards, initial/future leaf TRUNCATE/deferred guard installation and existing twelve-month manager enrollment"
+  ],
+  "boundaryProofs": [
+    "Root143 includes real provider/atomic caller B regressions; D41 itself proves database/recorder/partition behavior, not every joined oracle",
+    "Receipt-only commits, rollback, fake unentered IDs with a durable entry, stale owner, empty-receipt-without-winner, arbitrary requeue and per-leaf TRUNCATE refuse",
+    "Original scenarios retain exact database negatives; Java shape rejection does not substitute for missing-admission SQL lineage proof"
+  ],
+  "remaining": [
+    "New terminal-winner/bootstrap scope freshly PO-reviewed but D implementation held pending explicit next release",
+    "Current root-gate-3 entered/no-decision test explicitly exposes missing audit obligation without fabricating an UNKNOWN/no-use/release row",
+    "Additional exact source peer and broader final coverage/joined/control/privacy/manual/external gates remain mandatory"
+  ],
+  "noAcceptancesOrQaStatusChanged": true,
+  "noDGradleExecuted": true,
+  "waveCeilingUSD": 500,
+  "spendTelemetry": "UNAVAILABLE"
+}

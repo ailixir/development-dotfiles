@@ -1,0 +1,702 @@
+{
+ "lane": "EP",
+ "story": "STUDIO-OBS-009",
+ "wave": "W3",
+ "author": "Dex (@dev)",
+ "date": "2026-10-18",
+ "mode": "YOLO",
+ "verdict": "GREEN_LOCAL_HALVES_EXTERNALS_OWED",
+ "labels": {
+  "allRuns": "HARNESS_SELF_TEST_NOT_D_C_EVIDENCE",
+  "budgetAdmission": "ADMISSION_REFUSED_PRICE_UNKNOWN",
+  "b8": "UNKNOWN"
+ },
+ "noRealProviderOrModelCall": true,
+ "noDistRebuild": true,
+ "distDigestOfEveryGradleRun": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+ "corpus": {
+  "manifestSha256": "e4785112885541c03f7ebed2b08bdc878a183d8e692b62140fa4491560df285b",
+  "manifestFrozenAt": "2026-10-18T16:38:51.221Z",
+  "cases": 25,
+  "classP": 19,
+  "classF": 1,
+  "classN": 5,
+  "externallyBlocked": [
+   "D2-login-staging-real",
+   "E1-sso-approved-origin"
+  ],
+  "gate": {
+   "completionThresholdPct": 90,
+   "classPCases": 19,
+   "repetitions": 3,
+   "plannedRuns": 57,
+   "minCompletions": 52,
+   "maxFailedRuns": 5,
+   "denominatorDefinition": "class P runs only; F and N fall under the zero-false-pass hard gate; partial when D2 or E1 is unrun, never a pass",
+   "thresholdPct": 90
+  },
+  "sessionPlan": {
+   "runs": 75,
+   "sessions": 81,
+   "contingencySessions": 122
+  },
+  "rulings": {
+   "B1": "RECORDED_BY_PO",
+   "B2": "RECOMMENDED_NOT_RULED",
+   "B3": "RECOMMENDED_NOT_RULED",
+   "B5": "MODE_DECLARED",
+   "B6": "IMPLEMENTED_LOCALLY",
+   "B7": "MEASUREMENT_RECORDED_SEPARATELY",
+   "B8": "UNKNOWN"
+  }
+ },
+ "tests": {
+  "runnerEvaluationBaseline": {
+   "files": 2,
+   "passed": 13
+  },
+  "runnerEvaluationFinal": {
+   "files": 7,
+   "passed": 144,
+   "failed": 0
+  },
+  "runnerUnitFull": {
+   "files": "115 passed | 1 skipped",
+   "passed": 2606,
+   "failed": 0,
+   "skipped": 29,
+   "fmergeBaseline": "2475 passed, 29 skipped",
+   "delta": 131
+  },
+  "nodeTestOracleSelfTest": {
+   "passed": 15,
+   "failed": 0,
+   "baseline": "21 tests, 1 red file (browser-oracle, missing dist/validator)"
+  },
+  "typecheck": "exit 0",
+  "eslintMyPaths": "exit 0",
+  "eslintWholeRunner": "exit 1, 3 errors in other lanes files (test/fixtures-tier/guidedCloseBound.test.ts x2, helpers/guidedLaunch.ts)",
+  "javaGuidedSchemaProbeIT": {
+   "red01": {
+    "total": 9,
+    "passed": 5,
+    "failed": 3,
+    "skipped": 1
+   },
+   "probe02": {
+    "total": 9,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 1
+   },
+   "final_probe03": {
+    "total": 10,
+    "passed": 9,
+    "failed": 0,
+    "skipped": 1,
+    "skippedByName": "GuidedSchemaProbeIT.approvedGatewayProbeAcceptsEveryGuidedProjectionSchema (UNAVAILABLE_NOT_RUN)"
+   }
+  },
+  "guidedIncrementalTest_budget01": {
+   "total": 36,
+   "passed": 36,
+   "failed": 0,
+   "skipped": 0,
+   "collectorExit": 2,
+   "reason": "sourceStable:false, other lanes and my own IT edited during the run; non-evidentiary"
+  },
+  "budget02_profile4000": {
+   "total": 2,
+   "passed": 0,
+   "failed": 2,
+   "meaning": "refused by the IT closed-profile guard; no measurement"
+  }
+ },
+ "mutations": {
+  "runner": {
+   "count": 16,
+   "killed": 16,
+   "file": "mutation-results.json"
+  },
+  "java": {
+   "count": 3,
+   "killed": 3,
+   "labels": [
+    "obs009-ep-mutj1",
+    "obs009-ep-mutj2",
+    "obs009-ep-mutj3"
+   ],
+   "restoredByteIdentical": true,
+   "sha256AfterRestore": "7b959547e57fbc02541d8c224a1fb9f75605dd6ff30d598eddb83d48ce216d58"
+  }
+ },
+ "realBrowserPageProbe": {
+  "cases": 19,
+  "positiveAccepted": 19,
+  "endStateAssertionsTrue": 11,
+  "allApplicableMutantsRejected": true,
+  "file": "page-probe-results.json"
+ },
+ "b7": {
+  "verdict": "REFUTES_7_PROPOSALS_PER_SESSION_ASSUMPTION",
+  "tenStepBaseProposals": 13,
+  "editSessionProposals": {
+   "editStep4": 9,
+   "insertStep": 10
+  },
+  "peakAcross70Sessions": 14,
+  "sessionsNeedingMoreThan7": "54 of 70",
+  "reservedOutputAt4096": "53,248 of 32,000 for a 10-step base (derived, not run)",
+  "ranAtProductionPerCallCeiling": false,
+  "reason": "incremental lane is closed to the 2048 profile; 4000 profile refused by the IT guard",
+  "owed": "MODEL-SIZING ruling (@architect + @pm)"
+ },
+ "acs": {
+  "AC-7": "preparation done (manifest, RS-1 marks, harness self-test); runs owed externally",
+  "AC-8": "code done; external half skipped by name UNAVAILABLE_NOT_RUN",
+  "AC-9": "local half done at harness level (oracle + 4 mutants + isolation checker); real isolation proof is existing tests not re-run",
+  "AC-10": "canary scanner local half done; gateway bytes and C-17 owed"
+ },
+ "owedExternally": [
+  "ED-01 gateway owner (TBD)",
+  "remaining headroom R (user)",
+  "gateway price list (ED-01 owner)",
+  "deployed stack and internal image (U4)",
+  "staging login and SSO (U3, ED-04) and dev-Vault secret (ED-02)",
+  "AUTHORED-ECHO-01 acknowledgement U13 and AE-01/FM-01 landings before the first real call",
+  "C-17 human reviewer (user)",
+  "MODEL-SIZING ruling (@architect + @pm)",
+  "deployed per-CSI and session ceilings (@devops)"
+ ],
+ "deviations": [
+  "evaluate.d.mts typing sidecar outside the listed write set",
+  "deleted test/evaluation/fixture-run.test.ts and scripted-backend.ts (only tested the deleted driver)",
+  "ADMISSION_REFUSED_OVER_ALLOCATION added to the ledger enum",
+  "guidedIncrementalTest --tests widened instead of narrowing (36 tests)",
+  "budget02 build-dir side effects on guard-tally / guided-cohorts/test",
+  "superseded first freeze a901a0d9... visible only as ledger entries 1 and 2"
+ ],
+ "findings": [
+  "F1 compile-era leftovers: browser-oracle.test.mjs red at baseline; oracle.mjs, report.mjs, fixture-server.mjs, example-manifest.json, report.test.ts dead under the single path",
+  "F2 B7 refutation blocks T4 until MODEL-SIZING ruling",
+  "F3 eslint . fails on 3 errors in R2 files",
+  "F4 step texts/pages/outcomes are dev drafts for QA review; edit re-freezes and voids admissions",
+  "F5 incremental case partly observable via public API; createPublicApiClient never run against a live backend",
+  "F6 TS fixtures must be reachable from the deployed runner pod at T4",
+  "F7 B2 and B3 unruled"
+ ],
+ "g9ApprovedSkipsNote": "GuidedSchemaProbeIT adds one named skip",
+ "batons": [],
+ "files": [
+  {
+   "path": "studio-runner/evaluation/lifecycle.mjs",
+   "state": "DELETED",
+   "sha256Before": "81a20c05d1958cc7e2557477b6a73cb451d3f5e9948ad8db120ab185a594a48e",
+   "sha256After": null
+  },
+  {
+   "path": "studio-runner/evaluation/lifecycle.d.mts",
+   "state": "DELETED",
+   "sha256Before": "4346181336ed4a6ce27c03ccb9dccdfdaea1fc04a4311294607484c5078e43b5",
+   "sha256After": null
+  },
+  {
+   "path": "studio-runner/evaluation/lifecycle.test.mjs",
+   "state": "DELETED",
+   "sha256Before": "34dfcae9616821845c0ed7bcc99e392f84a0f749737a4cb1dbb925cc571cd6ce",
+   "sha256After": null
+  },
+  {
+   "path": "studio-runner/test/evaluation/fixture-run.test.ts",
+   "state": "DELETED",
+   "sha256Before": "becf2b63862596f2d5b5f7296774479754e4b140584e08d41d82cf404abab358",
+   "sha256After": null
+  },
+  {
+   "path": "studio-runner/test/evaluation/scripted-backend.ts",
+   "state": "DELETED",
+   "sha256Before": "e687069d35ded11c5becdcea189dd65af1cf2ed4cc74cd344966fb965e84677e",
+   "sha256After": null
+  },
+  {
+   "path": "studio-runner/evaluation/cli.mjs",
+   "state": "MODIFIED",
+   "sha256Before": "29d70ccf4a1b0b31d6a7e6e66759227a5a78910fe4ca084c4000969abf090942",
+   "sha256After": "a9fe8a775f90f85aa36c5d6b7eedaed2b4542e56ebc688ae64b50456b36748b1"
+  },
+  {
+   "path": "studio-runner/evaluation/README.md",
+   "state": "MODIFIED",
+   "sha256Before": "f42e5154b568af7b8dceb19bb9f62ebf6aeeab7b3a0c533554333ba046d9973e",
+   "sha256After": "53daf1babe06fd18adf0ff6dc783c3d78eb1e1657263130ab28a31b5553798c7"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/evaluate.d.mts",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "1dfd56c5deff2e7f7c8624609002f25fed3d8f9addb51da84c47b04876007b67"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "29c47788cd1bf6151c0652ddb12d039e32d74f6bab90d390b9b26c17f0914ea9"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/manifest.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "9858fc11b2086a50762c7334b5fa0e88f2a3370ffc166a62075b771d7bc70f16"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c01/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "eeb521527c320f44359455b505062f388e92caa25fd7ae1a278139d8e8776dfc"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c01/home.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "cade98b28ff8104cd3d1450e6b95a3c2abe571785e09e2197c21059126aca030"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c01/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "4281c172cb492d1f51b10f8db9e9c594f3e5605811b20df8a974c5ec3fb9431b"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c02/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "fdc3a30522808663ec326c576b401f0f3c15bd306bed233291336fdc976b0729"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c02/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "29f2477b48e11c680594569ec5d1928a75bef45be88f0d53f0fbdfa8bdd7230f"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c02/wiki.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "7ed99779ab8f6f218e4c830564d224da9a410e9706abd90e850c6d3d91639912"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c03/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "cbe8f2f1a42dc03bf5262dbff00693b5d21681974b6a406282535fe7410bfe70"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c03/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "eabf2c6732ef784e31d31094c51d3db3bcfc790eece666e0f764dc133c48e460"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c03/wiki.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "7f09beaafb921de3e9125d3520f519b29b785f5ee2e04db5478aaba176962aeb"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c04/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "a30165e3bc61bc4a2cad602ac745e6b10a216826760d64176c15c0687879f99f"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c04/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "021032dd312bde62eba6b2e8c05cc2a5159e86dafc201e09cdbcfc271c1cdeec"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c04/trial.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "2728de700553004180de15151cd2f2e4697cd4e5621d6e3767cb6c27288b0165"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c05/dashboard.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "9561226e607ce507c89f8525484412c0a3f10d5731ee242126b905e27619eda2"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c05/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "90565f305b7ca4742f5bb737fec0261edf31964bb396bf483d98c283f3c8924a"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c05/login.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "eb7d4cc719f2b44d8c4c84ac66148ea27ba94b2e4d5092f57f180bcb057fcf10"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c05/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "8cb84680633fbb2bd69ea29da2d325100c2595af5c3a82274d3daff3c72946ac"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c06/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "4c4d529ae8e6adc16d5ef6475aa5a2f1299ef367480ee6fd90c77305209da9e8"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c06/forms.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "a0db1f373aea57aff6ea57d1fa5f1879d9f490e54d86ec6d2e73227fc52565d0"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c06/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "f18220d41a9d0e6c1b2c0d258d2c5fbb16a55ab15d9304cb0588df4d9070f092"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c07/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "cb0f583b6d6acfcbd91f6e9cea3a284240ff605af350ba2a16f8579664e95042"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c07/search.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "771ee303101f3f26f64f02d9a1fa362f948a3f59b8c8b39db0ecf8c308791cf0"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c07/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "2601fba92e513804bf85fb11fcc63b1fec6d997c2988f528b7992d53999bcafc"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c08/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "da9bca93468333254a24ac968f80e21f6327f0cfcffee918d5520d95db9601d4"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c08/orders.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "37a160aa179d431672c7aba3fa3f4c49a032e13500b95313fee18f5a4807563d"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c08/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "659779c273d11dc1426497c8372bfc37463f5420010a950e654ced24ee799977"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c09/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "46212673a0db0c469848e6979401e0964db05c048d3049346cde039656272760"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c09/forms.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "a216c2564c928d3294e73943af836832537880691dbedb93dcaae69101123f11"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c09/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "e8ad553a53309b066c1d0b622045194d5bc148a2c0bbd1eca1974c2788d3f9cb"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c10/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "472b3aedadabbae907567ce93a6ba16305186f9184a7ea0c6d39e67a061af081"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c10/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "16174ccd7714ad42d48a71c32ae7fb3fe1b372b627148968339ab0c491b336b7"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c11/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "ec1777723b7ea2b2ad8eb3b90ee39fd758737403275d9df020961a7ef0c16ff3"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c11/home.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "141d57954d94e4f6a9f07288181f9c58622dde6466aa09e0b20e892227ac083a"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c11/other.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "c6f9ac20db088799f44a5ff576eddb87c1944eba3dc4acb12f00bdf4b86205fc"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c11/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "f12aad3199267c00c01a8c4e9275417e7d0fa6f886bf7f3b4fc300f08838317c"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c12/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "1c9ddd4c04da93756036e6d128ad75701cf076a46d81f295803d595f6fb3feed"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c12/forms.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "12ab5aa38cf5d2a8b08c10d73e0ce1ed535cb4952a4b76ee32dab0b9b40dd962"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c12/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "158cb827e5a21b39b9754a35688a5537d1aaf4cd85ecefe141e7c04778daa459"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c13/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "0889d16ce6f782796c08fe7ef6538216034b6bfac848c81f837d4b48c7f5f6ea"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c13/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "809b58644efc384c9c3c86f9c0d0c2976d8b0e3904c461f851c8c5b22dcd028e"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/c13/wikimain.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "bc4c6a8e7fe17e775be0ad8e6a524c0007d4d849eba39b71852a329fc51e4d30"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/d1/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "d39f5e65a01b81731d3e9625e3851ffe38ff1de4670e7eb65c35e0c3b413aaf3"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/d1/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "973acf38c7f2eb0fd3f77c121fd9a3ecee33f8367a313d613d49163585085239"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/d3/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "dce8bf4544f72b6300cfd0ee6e9eff2e5d30f4d3468b27bb7069cd3012c8bf3b"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/d3/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "d9d71bd4c6b22f1fe10fe1234388f2f2fff3f9f3dfc7e20f4c5469a63f8e7656"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/e2/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "8d99a0701ea07447027e7ed97945889fe3babfc63bdf2bc6489ce03616e84275"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/e2/shadow.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "9b083f8386427fe203ede4368fc19aa6acb116b27a46244af682ac7c55ba29ce"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/e2/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "15c6d222bb7079ad390307a08a85bfce78cbd400822b19ca279a0cf1f80f3b10"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/e3/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "2f46ce77618ba693100541a88b4cc3b7cc4abe0cc73eb246afa4790b3bca7b9a"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/e3/frame.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "eff33b3a58dd24000b2903f164d519e8fe7f60b063aa2fa20e3d625f5bf7f4a8"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/e3/inner.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "32bce8c99dcaece4400dad64a6c88a3c6960428bb13e707d90cf9bbb710761ef"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/e3/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "ee299d65b9b79178e8da269d5e726486f0ea0f74834c55919b993435337248f2"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/e4/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "c0383c76d5da627d828b7af74aef1957902b1ad01e633df3443b04fb75fe357c"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/e4/list.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "b302faa1b6fbe1f6a1e99c9abd77edc7c354facb8994cfc8fcf81891de6764ed"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/e4/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "8a5cdfc004f43c6345f8f180554fd1d8ebca7344e444ba841c1dcf9b3d751305"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/inc-edit4/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "ff0234b02e16c908ca2eba7b85dc917812f8def842e764c11a9116a929a5e54f"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/inc-insert/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "4e4629f3b6fae6e9dcb8b3f7c1c7ed1e43cdf1221bb0c1bde5554f04ca01fd46"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/q1/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "8973306c8dc23918ddffa72b8d8cd5d9763d3c5a6b739373c4a63c65ddacbf2a"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/q1/form.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "851fa5c906cc8d1ff8d66cbed9c013fc784b28750c3882f322145c2bd7b96633"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/q1/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "a2b5367ad8e48f0ed0dbc81a65b73b2ee30b4787299d9f5a251a01136611b0f8"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/q2/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "c3baf0c0dfd7c9ec51cff0c2cb2ede01b5611bfe78842729239cec08a9dafb40"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/q2/home.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "045f80146c8e36daf2527c92b71e50e70050bf09aba705f4b0c4aa75fe3ae6e6"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/q2/reports.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "8444fc78766c9bdd6a2eebf16ddcf6286a750027d9b7f63d3ffa2b87fd61b7f8"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/q2/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "87c4b710505e034e60451dff49e46c897baa04614876194c5a3b557c159beea6"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/q3/city.html",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "2c6096c2ba77c2fc1e61aba3b486e3b2924f59dce1c72a31d9bdf4598a0d9cc6"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/q3/expected-outcome.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "3fdca89053f6955bb34022652527fe59201050c2639f24d1f2df3d084d43acff"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/q3/step-text.json",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "2a6d066953b8734e7895c6dbc28692e180e9188772f9e3417008cd38a86caa88"
+  },
+  {
+   "path": "studio-runner/evaluation/observed-authoring/pages/server.mjs",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "81d1673989f20ba236b5fb6a774ba33da87192983dd87956157227e1b3936d30"
+  },
+  {
+   "path": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "fb26b89354d30274361a45996dccf74df3353cfd8d99f44d8584b92b8479a93b"
+  },
+  {
+   "path": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "737ad64889b762a0c00e3b893545e10b4e3d9b376c840632229bdae4d27d961d"
+  },
+  {
+   "path": "studio-runner/test/evaluation/corpusManifest.test.ts",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "db7189d40e751949ef8714a880a5e9ff8d743f51c0e34637e37e2b44a541da6a"
+  },
+  {
+   "path": "studio-runner/test/evaluation/corpusPages.test.ts",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "f619e79b21653e7b93d9bbddf919327d5d2140569e2c5f519dc6bdb403d721e1"
+  },
+  {
+   "path": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "4e6b86e4bf1a09eee46570eca97a8f2e8504a1756a1c91636459e9d77884e7dd"
+  },
+  {
+   "path": "studio-runner/test/evaluation/observedCorpus.ts",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "be1a3630ac7a466f86542977890c7410197830350e7599ff28e436ae2865a746"
+  },
+  {
+   "path": "studio-runner/test/evaluation/observedOracle.test.ts",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "35b949761de8446629740de19a078aa750150379383c3fc993f6f88bf3e0655d"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSchemaProbeIT.java",
+   "state": "NEW",
+   "sha256Before": null,
+   "sha256After": "7b959547e57fbc02541d8c224a1fb9f75605dd6ff30d598eddb83d48ce216d58"
+  }
+ ]
+}

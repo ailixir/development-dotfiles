@@ -1,0 +1,56 @@
+{
+  "schema": "private-pg-route-candidate/1",
+  "at": "2026-10-10T21:03:58.450007+00:00",
+  "status": "SOURCE_FROZEN_UNBUILT_UNRUN",
+  "ownedOnlySource": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+  "hashes": {
+    "source": {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "before": "88be098d8b8cf0c5b790eb1f5f0bd8e837b9cd790ec11de43b84c26fcc7b3dbe",
+      "after": "9fe3688acf7803c859a609e2e06967c7c3be29c994cfc1526673c30eceb9b800"
+    },
+    "patch": "b3b6f44b505838cba66cee2ed8d6cf0dc98cf6f22d723a3b2f2c6506df0e1a5c",
+    "originalNineBody": "2c793271f602af859aac8c1dac3e0d080548bbb836c80e5d63d8278c74aa2457",
+    "unchangedNineBodyVerified": true
+  },
+  "constructionAudit": {
+    "routedDatasource": "One DriverManagerDataSource object with same realownedPG target through private loopback socket route",
+    "writersSameInstance": [
+      "GuidedSessionRepository/JdbcTemplate + DataSourceTransactionManager(routedSource)",
+      "GuidedMaterializationService(routedJdbc)",
+      "FixtureAccess(routedJdbc)",
+      "GuidedPreparationStore(jdbc) in explicit overload",
+      "GuidedBindingStore(jdbc,materialization)",
+      "GuidedAssignmentStore(jdbc)",
+      "SecretAuditLifecycle(jdbc)/SecretUseAuditRecorder(jdbc)",
+      "GuidedTranslationStore(routedJdbc) within routedRepository.transaction"
+    ],
+    "originalFactory": "Delegates to explicit overload with actualJdbc and original repo/materializer/access, old behavior preserved",
+    "directObserverAndCallbacks": "Original actualJdbc and real authenticated HTTPS backend callback operate on SAME underlyingownedPG, deliberately outside controller transactions"
+  },
+  "networkMechanism": "Transparent raw JDBC copy buffers erased/no logging. Only case listener+tracked bridges closed; direct PostgreSQL/HTTPS relay stay live. Fresh real Pgdriver refusal then exact helperDBerror. Reopen same port without lease/actor/authority change.",
+  "cleanup": "Caseownedsocket/executor release; finally reopens route before reinterrupt/join solely for watchdog cleanup, preserves primaryfailure via suppressed cleanup failure; erase actual buffers. No sharedcontainerstop/productionenv actions.",
+  "matrixFile": "matrix.json",
+  "patchFile": "source.patch",
+  "beforeCopy": "before.java",
+  "preservation": [
+    "All9 mode definitions and originalparameterized method body byteidentical",
+    "Seven healthy/positive callback controls not weakened",
+    "Three-second expiry/mTLS/JWT/hostname/guard/data shapes unchanged",
+    "No production/otherJava/schema/migration/corpus/pin/R/dist edits"
+  ],
+  "limits": [
+    "No source compilation/test/runtime/Gradle/native/Docker was executed",
+    "15sec callerjoin/3sec proxytargetconnect/5sec cleanup are harness safety only, not production JDBC guarantee",
+    "ApplicationPGroute outage does not prove primary/pool/heldrow failure",
+    "Fixture authenticatedcallbacks are service facts, not browser effects",
+    "Sourcecoordinator must format/compile/run fresh10 serviceinstances+existingcontrols on frozen snapshot; independentreview/all19 QA remains open"
+  ],
+  "methodInstancePrediction": {
+    "oldParameterized": 9,
+    "newSingle": 1,
+    "totalService": 10
+  },
+  "nextOwner": "Sourcecoordinator sole sourceformatter/Gradle/runtime/build/browser/execution; no authorprocessactive",
+  "sourceFreeze": true
+}

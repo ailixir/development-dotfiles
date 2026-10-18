@@ -1,0 +1,53 @@
+{
+  "status": "FROZEN_CANDIDATE_AWAITING_PEER_GO",
+  "files": [
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "baseSha256": "398648c589598b15b0e93165302824d91c5e595a4d97454f5ff41e35806f2e04",
+      "candidateSha256": "3470deb4d527005743888a45242754a87563f9a0e3a3c3fbbda50570fbd769ee",
+      "beforeLines": 404,
+      "afterLines": 453
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java",
+      "baseSha256": "d1a815255c4fbbf2f50b04ff044bea077a93a5a3bc82435921e18cf36f2fde12",
+      "candidateSha256": "537a20a5fd09795ad3af6aec459718039d96b354d6efef9baac3bd51ffc8cf90",
+      "beforeLines": 530,
+      "afterLines": 605
+    }
+  ],
+  "candidatePatchSha256": "4864a7354f1eb884a6cd098ecbc4a881f4f1b025680c8a797c3af48e78cb5c9c",
+  "inversePatchSha256": "2246beb3eb58d22ecdcbd6d138f44624aa46696e84da90a0ddde4633667859fd",
+  "forwardPatchCheckExit": 0,
+  "inversePatchCheckExit": 0,
+  "addedLines": 144,
+  "removedLines": 20,
+  "publicValidationPrefixAndAllEpochsByteIdentical": true,
+  "nativeSchemaExpansionCanonicalHashSuffixByteIdentical": true,
+  "fourAuthorityClientBudgetDiagnosticBoundariesUnchanged": true,
+  "publicValidationLinesPreserved": [
+    89,
+    90,
+    94,
+    95,
+    98,
+    99,
+    104
+  ],
+  "newEpochs": 0,
+  "selectedBasisArrays": [
+    "observations",
+    "actions",
+    "preparations"
+  ],
+  "preparationItemNativeUnchanged": true,
+  "wireCasesBefore": 7,
+  "wireCasesAfter": 7,
+  "newCases": 0,
+  "sixOtherWireTestsByteIdentical": true,
+  "newCollectionAndNestedVectors": 26,
+  "sharedEdits": false,
+  "buildsExecuted": false,
+  "runtimeStarted": false,
+  "acceptanceClaim": false
+}

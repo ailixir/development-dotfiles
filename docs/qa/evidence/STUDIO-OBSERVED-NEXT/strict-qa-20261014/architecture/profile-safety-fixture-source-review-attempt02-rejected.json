@@ -1,0 +1,132 @@
+{
+  "artifact": "Aria-independent-profile-safety-fixture-final-byte-review-attempt02",
+  "decision": "BLOCKED_BY_DIAGNOSTIC_WHITELIST_ACCESSOR_BYPASS",
+  "sourceApproved": false,
+  "notStoryGate": true,
+  "doneAllowed": false,
+  "nativeExecutionAuthorizedByThisReview": false,
+  "scope": "Read-only source/API/receipt inspection and independent hashing; only this architecture evidence JSON written. No source/test/build/native/process/CLI/config/dist/story/gate/lifecycle mutation. OBS-015 unstarted; declared shared USD500 ceiling, actual billing unavailable.",
+  "authority": [
+    {
+      "path": "architecture/profile-safety-fixture-ruling.md",
+      "sha256": "9deafbd7bf5a60e2730778043a9954e82450864af91c919b4d8d8bbcc6b2933d"
+    },
+    {
+      "path": "qa013/profile-safety-fixture-plan-review.json",
+      "sha256": "45271d2463bd05ae7cfe19394d83d7d68d4eeb66e0ddbee5147f30fa9651d48a"
+    }
+  ],
+  "reviewedFreeze": [
+    {
+      "path": "runner-remediation/profile-safety-fixture/source-checkpoint-attempt02.json",
+      "sha256": "ac20a40009c42cdb5400f00d6f4124c598a729ba2df2467f4aacc160be7ce8fb"
+    },
+    {
+      "path": "runner-remediation/profile-safety-fixture/implementation-receipt-attempt02.json",
+      "sha256": "6d5e6bbad6972d7e8e6242b4dc600d9427a79a1e811b2e657f3284a71a1a6b3d"
+    },
+    {
+      "path": "runner-remediation/profile-safety-fixture/implementation-attempt02.patch",
+      "sha256": "f8ad688ed37a7193ab56ce169616c1f00fe210959209077d86ab9d30f325c282"
+    },
+    {
+      "path": "runner-remediation/profile-safety-fixture/before.json",
+      "sha256": "185c12e2301698ff7bbc2b8e0e00d5952593f6855b6711f72f9cc16ffe671e23"
+    },
+    {
+      "path": "runner-remediation/profile-safety-fixture/after-attempt02.json",
+      "sha256": "c08e6b1b782ad29433a70535ba71ab9d75667afbc5fe521215555407fd514759"
+    }
+  ],
+  "independentlyHashedSources": [
+    {
+      "path": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "sha256": "941a658043fcc687d30311b8fff34d4ffd1bc02ca2b517cac21dc8fde6d855f7"
+    },
+    {
+      "path": "studio-runner/test/helpers/profileSafetyFixture.ts",
+      "sha256": "7b7b11b94481d012b73b40b2a11d7f79f843d634add3c2e8b6f61316af644e84"
+    },
+    {
+      "path": "studio-runner/test/profileSafetyFixture.test.ts",
+      "sha256": "9b20e60a3dde0a3868a62702bb7d304eba5d998edded7359a8bc6cc252e331a1"
+    }
+  ],
+  "blockingFindings": [
+    {
+      "id": "PROFILE-DIAGNOSTIC-ACCESSOR-001",
+      "path": "studio-runner/test/helpers/profileSafetyFixture.ts",
+      "symbol": "profileDiagnosticCode",
+      "kind": "TEST_PRIVACY_CONTRACT_AND_WHITELIST_BYPASS",
+      "establishedBy": "Static exact-source evaluation; no test execution or actual private-data disclosure asserted.",
+      "finding": "Validation and return read the same property repeatedly. Generic code branch reads value.code for typeof, Set.has and return. ProfileFixtureError branch reads code for Set.has then return. Error message fallback reads message for Set.has then return. A nonthrowing/changing accessor can supply an allowed code during checks and a private arbitrary string during return. That string is assigned to primaryCode/secondaryCodes and serialized into native facts/toJSON, bypassing the strict whitelist.",
+      "concreteTrace": "For an Error with own code getter: reads1 and2 return EEXIST; read3 returns a fixed private-canary string. The current branch accepts EEXIST then returns the unvalidated third value. Likewise a message getter returns CONTEXT_LOST on Set.has and private-canary on return.",
+      "existingTestGap": "Current unknown/accessor test verifies only a throwing code getter. The private-error serialization test uses stable data properties. Neither exercises changing nonthrowing code/message accessors or the ProfileFixtureError branch.",
+      "requiredCorrection": "Obtain own data-descriptor values without invoking accessors, or an equally rigorous mechanism satisfying root's accessor=>UNEXPECTED requirement; hold one primitive candidate, validate that exact candidate and return that same candidate. Apply to every code/message branch, including ProfileFixtureError. Diagnostic name handling must also avoid unsafe accessor evaluation if used. Unknown/accessor/trap failure remains the fixed UNEXPECTED value; no arbitrary getter output, message or property is persisted.",
+      "meaningfulRegression": "Add deterministic nonthrowing/changing code and message accessor cases, including ProfileFixtureError override. Assert getters are not invoked when rejecting accessor descriptors, original error objects remain in memory, and persisted primary/secondary/toJSON facts contain only allowed fixed values and no private canary. Keep existing EEXIST+ENOTEMPTY stable-data proof.",
+      "consequence": "No source approval or native release for this freeze. Root must authorize the narrow correction, retain attempt02 evidence as historical, then require fresh pure/type/lint and immutable checkpoint/receipt/diff for independent final-byte re-review."
+    }
+  ],
+  "independentBridge": {
+    "lastFullNativeAttempt03ToCorrectionBefore": "All1581 captured input hashes identical; no added/removed entries.",
+    "beforeInputs": 1581,
+    "afterInputs": 1583,
+    "changedExisting": [
+      "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts"
+    ],
+    "added": [
+      "studio-runner/test/helpers/profileSafetyFixture.ts",
+      "studio-runner/test/profileSafetyFixture.test.ts"
+    ],
+    "all1583AfterEntriesRehashedAgainstCurrentFiles": true,
+    "currentHashMismatches": [],
+    "distBefore": 238,
+    "distAfter": 238,
+    "distChanged": [],
+    "all238DistFilesRehashed": true,
+    "receiptReferencedArtifactsRehashed": 37,
+    "receiptHashMismatches": [],
+    "otherOriginalCases": [
+      {
+        "block": "Five prelaunch attacks +two no-context stages +acquired-context failure case",
+        "byteIdentical": true,
+        "bytes": 4731,
+        "sha256": "2e5704550e13045a47ef4648803f19d037d0183c666923d0e57daadf058b7779"
+      },
+      {
+        "block": "Positive confined launch suffix",
+        "byteIdentical": true,
+        "bytes": 886,
+        "sha256": "c333061f6f7687be886f60035a288c93f40c626090f3d8cf2c4e0052eec620b0"
+      }
+    ],
+    "preserved": "Production browser/profile guards, backend PlanningIT96a1e2..., config/dist, native readiness helper786bcc.../51cases385638..., blank helper9d70.../27casesd96c... unchanged."
+  },
+  "otherwiseConformingSource": [
+    "Actual context retained before post-acquisition awaits; every setup/mutation failure is recorded and same context returned; assertAttack keeps partial setup permanently red for either returned success or failure capability.",
+    "Original live rename, canary only after rename, symlink and moved-directory identity checks preserved; connected/nonclosing before/after attack; original GFL/CONTEXT_LOST/checks-guided absence plus outside identity/canary checks present.",
+    "Production expected-failure capability explicitly invokes memoized saved actual close; raw request/fulfillment/events recorded before PID observation. Public owned-browser CDP snapshots only, positive bounded IDs and <=1024 union.",
+    "First LIVE/UNKNOWN/invalid/missing event observation rejects permanently; later <=5s/50ms polling is cleanup-only. Fallback cannot earn missing production-close credit. Root removal requires owned confirmation; no nonzero PID signal/private SDK/global scan/close or rm retry.",
+    "Late sessions/capture rejections are consumed and joined; saved close memoized; original primary and ordered cleanup error objects retained in memory including thrown undefined; remaining safe stages run after errors.",
+    "Installed persistent public-browser association chain independently inspected at core55505/63320/62432 and SDK close contracts reviewed; source compatibility is not native availability proof.",
+    "Fixture scheduling and PID gate do not prove unchanged production descendant-quiescence behavior. This distinction remains explicit."
+  ],
+  "validationEvidence": {
+    "finalReport": {
+      "path": "runner-remediation/profile-safety-fixture/pure-attempt05-vitest.json",
+      "sha256": "ece45dfa5a79f216c5e1925375f762bac16a8fdcc69b7c2805f8146cebe0bb71",
+      "passed": 61,
+      "failed": 0,
+      "pending": 0,
+      "success": true
+    },
+    "finalTypeAndScopedLint": "Retained attempt05 receipt records exit0 each; both logs empty SHAe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855. Reviewer ran no validation commands.",
+    "assessment": "Actual deferred/clock/session/mutation/PID/error tests inspected critically. Their ownership/resource assertions are meaningful, but do not cover the concrete changing-accessor privacy bypass.",
+    "historical": "Initial pure52/1, type2 and lint failures remain retained; 59-case checkpoint and earlier counts are historical. Green61 does not cure the untested source defect."
+  },
+  "remainingRequired": [
+    "Narrow diagnostic extraction correction plus meaningful regressions, fresh pure/type/lint, new immutable final freeze, independent Aria+Quinn source review.",
+    "Root then decides serialized native release: all10 original profile cases, fresh complete fixtures, deployment and mandatory normal backend/final gates under exact source/dist receipts.",
+    "Full native attempt03 remains red231PASS/1FAIL/9historicaluncreditedskips. Exact historical ENOTEMPTY branch remains unproved; no story gate or Done issued."
+  ]
+}

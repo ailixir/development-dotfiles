@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "status": "ISOLATED_AUTHOR_CANDIDATE_FROZEN_FOR_INDEPENDENT_SOURCE_REVIEW",
+  "createdAtUtc": "2026-10-11T13:30:02.721602+00:00",
+  "bindings": {
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-r-c6-isolated-author-intent.txt": "efd03a4b5103f067431284f5cecfb9abe87fa4192341fc50b9ae060f22cb5dab",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-r-c6-isolated-author-context.txt": "51d8c1b7166e22d9f8f66ecf2b0b0969a2994b75a5ac781a46cc7b866d403e70",
+    "docs/qa/evidence/STUDIO-OBS-007/root-r-c6-seam-review.json": "91a8ea705f5876c495bd920caa7d8ad89ad899253404bc25fd4b3e776b9e6544",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-r-c6-exact-seam.json": "1c576fc7f8de0837ba4580db92bc92b089f9c66010fbcb5582df7f445b6c4cef",
+    "studio-runner/src/guided/runtime.ts": "75fc33b1cd1cbc59bcb746811caff879d7217b22de8b08b374eec173dacf271c",
+    "studio-runner/src/run/guidedBrowser.ts": "e22ec61544c212696e84d472d6b2f0e93e95cfcb5fc19cdb97d7f99d8fa3e3e4",
+    "studio-runner/src/run/browser.ts": "a397ece7c7dec06e643bc82b6a4862c5accf154c1c6b28d314ad3c7fab4ac02d",
+    "studio-runner/src/run/launcher.ts": "dd6b6c71b97eab7396d7b67b752a5cbfbc6d2df51b2d89c0bf37ebeafa41443d",
+    "studio-runner/src/executor/observedReplay.ts": "da04d4ddaca0c3c0a3b0572fc181c3bd7874d7d03d3b26ccd1cd9eb6123add4a",
+    "studio-runner/src/guided/diagnostics.ts": "cd355ead668fc54953c8a06acf8da13a317b103ced1357d68eef516c6f2a7637",
+    "studio-runner/dist/runtime-versions.json": "0fd1c628462ecd9c64a1d1928167d0701ae251d69085b71044fa65aa660cc75e"
+  },
+  "base": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/resume-projection-c4-four-static/GuidedPublicationReplayIT.java.formatted",
+    "sha256": "f69b4beafe89aece89343c2027c70f4b57c06eb389a656b593c1b63c70f89a79"
+  },
+  "candidate": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/resume-r-c6-isolated-candidate/GuidedPublicationReplayIT.java",
+    "sha256": "b54eeea294dd6f4dcf41176303e287abb5c0e8a243f61eaa285724029580d088",
+    "patch": "docs/qa/evidence/STUDIO-OBS-007/resume-r-c6-isolated-candidate/candidate.patch",
+    "patchSha256": "25d1fd5b591aff672921f4cfab30fdbfdeeb59d0d0a8202567e5f52de62c678c",
+    "manifest": "docs/qa/evidence/STUDIO-OBS-007/resume-r-c6-isolated-candidate/manifest.json",
+    "protectedSourceProof": "docs/qa/evidence/STUDIO-OBS-007/resume-r-c6-isolated-candidate/protected-source-proof.json"
+  },
+  "preservation": {
+    "originalCases": 28,
+    "byteIdenticalBodies": 28,
+    "newCases": 4,
+    "totalProposedCases": 32,
+    "C4SamplerPg": "All original 28 bodies plus selected C4/C5 sampler, PG, capture, fault/retry, revocation pair, ordinary cleanup/scan/http helper blocks byte identical. Protocol additions are explicitly case gated.",
+    "defaultOff": "c6Kind0 retains old sample10/renewal/fence/hook behavior; added closed sample13 and numeric focus/probe/hook paths require selected C6 mode."
+  },
+  "cases": [
+    {
+      "selector": "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect",
+      "path": "REAL_CORE_PUBLISHED_ORDINARY",
+      "expected": "OUTCOME_UNKNOWN",
+      "fault": "Original step timer only. Real timeout_seconds120 configured before learning/pub; incoming actual Launch/Execute scalars must prove positive overall-minus-step margin. Nonpositive margin blocks credit; no interchangeable global TIMEOUT.",
+      "runtime": "UNRUN"
+    },
+    {
+      "selector": "actualPublishedPublicCancelWhileNativePasswordWorldPending",
+      "path": "REAL_CORE_PUBLISHED_ORDINARY",
+      "expected": "CANCELLED",
+      "fault": "Real authenticated public cancel after two finite pending samples. Actual valid original child Stop ingress<=2s including queues/network; third step not started and no later native entry.",
+      "runtime": "UNRUN"
+    },
+    {
+      "selector": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending",
+      "path": "REAL_CORE_GUIDED",
+      "expected": "Consumed UNKNOWN_OUTCOME/ACK_LOST ledger; uncertain usage, no ACK_LOST audit fiction",
+      "fault": "Only original selected-context primary browser. Actual executable revision/path/SHA, owner0700 profile inode, start identity and worker ancestry must match; captures actual browser descendants before second pending ACK and actual primary signal<=250ms thereafter. Missing/ambiguous match prevents signal; owning worker stays alive.",
+      "runtime": "UNRUN"
+    },
+    {
+      "selector": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks",
+      "path": "REAL_CORE_GUIDED",
+      "expected": "Consumed UNKNOWN_OUTCOME/ACK_LOST ledger; sparse uncertain usage",
+      "fault": "Sanctioned beforeSecretFill receives actual resolved value, one real read/release/consume; throws literal/URI/base64 error before native fill. Original onRawFailure must report scalar literal1/encoded2. Actual accepted callback, selected diagnosticJSONL and original stderr must contain bounded REDACTED and zero encoded canary.",
+      "runtime": "UNRUN"
+    }
+  ],
+  "sourcePrivacyDelta": {
+    "witness": "Only extends existing P4 witness. Original native methods return the same original promise/result/error with unchanged receiver/args, once. Real password focus has closed numeric event tags and finite monotonic stall, no value/name/selector read. Existing private command supports probe1/2 only, observes original active Map, never calls stop or grants execution. Missing actual focus/pending is fail-to-reach.",
+    "profile": "Transient original SDK launch args[0] inspection and transient selected runtime scratch/profile comparison; existing private producer sample persists device/inode/contextBound numbers only. Java compares actual primary --user-data-dir inode transiently and never persists raw path/UUID/token/args. Metadata establishes ownership only, no Ready/use/execution authority.",
+    "hooks": "Install existing beforeSecretFill/onRawFailure only after genuine selected start, refusing collisions. Original descriptor capabilities stay in revGroups until original stop settles and busy=false, bounded10s; late failure remains observed, failed restoration retained/sticky. Actual values/errors never exported; bounded private C5 comparator file retains existing lifecycle.",
+    "positiveSinks": "Existing original-forward filter observes selected actual accepted callback transiently, emits only sticky failure/count. Real diagnostic and stderr must contain same bounded redacted message. Existing original C5 encoder/TRACE/CoreHTTP/DB/model/cache/metrics/profile scans remain. Empty or missing sink never supplies redactor-positive evidence.",
+    "interruption": "Only actual TIME/destroyed-realm fence unavailability permitted for native cuts; malformed ACK/fence or original close stays sticky fail. Original SDK close always attempted. Existing producer ACK drain<=1s after original close is observation/cleanup only. Unavailable effect phases never enter healthy closed-phase set or prove zero writes/no effect.",
+    "cleanup": "Original p3Case owner cleanup retained. Captured exact browser tree/start identities retained through finally; after original context cleanup attempt, attempt every residual owned writer release and actual reaping. Preserve primary error and quarantine unresolved original cleanup. No new context, video splice, unsafe flags, wire/API or ordinary injection seam."
+  },
+  "reviewAndExecutionPrerequisites": [
+    "Exact isolated source/privacy review required before any application. Compilation/formatter/static/runtime all UNRUN.",
+    "Real network focus signal under synchronous stall must actually reach; source construction alone gives no entry or native credit.",
+    "Actual admitted step<overall/lease ordering required. Legitimate prepublication timeout_seconds120 is a construction, not proof that global admitted cap exceeds step.",
+    "Process metadata may be unavailable/race. Exact pinned primary+selected profile+start identity required, never whole-worker substitute.",
+    "Unavailable page fence preserves UNKNOWN effects. Observed zero counts are not no-write proof after interruption.",
+    "Actual late callbacks/hook restoration/ACK drains/PIDs/scratch/capacity/sinks/timing must be executed within original absolute bounds. No cleanup grace renews action/run/lease permission.",
+    "Existing native33, defensive raw CANARY transport unit and supplementary direct Playwright controls remain separate support; no additional comparator Core case or 3x2 expansion."
+  ],
+  "actions": {
+    "liveSourceWrites": 0,
+    "distWrites": 0,
+    "isolatedJavaCandidate": 1,
+    "newCasesAuthored": 4,
+    "bytePreservation": "EVIDENCE_ONLY",
+    "typeChecks": 0,
+    "lint": 0,
+    "formatters": 0,
+    "compilers": 0,
+    "NodeCommands": 0,
+    "runtimeStarts": 0,
+    "browserLaunches": 0,
+    "SQL": 0,
+    "Gradle": 0,
+    "testsExecuted": 0,
+    "modelDispatches": 0
+  },
+  "runtime": "UNRUN",
+  "liveApplied": false,
+  "executionRelease": false,
+  "qaApproved": false,
+  "whole19AcPass": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNKNOWN_NOT_MEASURED",
+  "evidenceHashes": {
+    "docs/qa/evidence/STUDIO-OBS-007/resume-r-c6-isolated-candidate/GuidedPublicationReplayIT.java": "b54eeea294dd6f4dcf41176303e287abb5c0e8a243f61eaa285724029580d088",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-r-c6-isolated-candidate/author.py": "c64a5b2d8ddfd08b4f48ebe3403b539f61aaec342bf184447ae3916b25cacf9e",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-r-c6-isolated-candidate/before.java": "f69b4beafe89aece89343c2027c70f4b57c06eb389a656b593c1b63c70f89a79",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-r-c6-isolated-candidate/candidate.patch": "25d1fd5b591aff672921f4cfab30fdbfdeeb59d0d0a8202567e5f52de62c678c",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-r-c6-isolated-candidate/case-helpers.txt": "9772825fd49e8ce768cc8ba5800ab0c1a50fc777ad29c2c62ae00079d35ef389",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-r-c6-isolated-candidate/manifest.json": "a80033d6e30019aca37a5b374eab5e8d8219252829cfe5cae254587524210d1a",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-r-c6-isolated-candidate/protected-source-proof.json": "a3711a9b2865cc32de93273395ca56ef225566eb3ba90ec4f97ebdc0a3a0de86",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-r-c6-isolated-candidate/seal-report.py": "014374941045d21127679628f4693e5a78ca154de594a87c73b8670fac220702"
+  }
+}

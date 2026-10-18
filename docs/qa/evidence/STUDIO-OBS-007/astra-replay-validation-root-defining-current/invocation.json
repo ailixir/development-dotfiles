@@ -1,0 +1,15 @@
+{
+  "command": [
+    "./gradlew",
+    "test",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedWireContractTest",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedActionLedgerTest"
+  ],
+  "bridgeReuseImpact": "astra-replay-validation-bridge-reuse-impact.json; peerindependentlyverifiedno changed-root transitivecaller"
+}

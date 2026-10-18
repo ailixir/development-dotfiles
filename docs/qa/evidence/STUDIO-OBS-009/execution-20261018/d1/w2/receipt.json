@@ -1,0 +1,266 @@
+{
+ "lane": "D1",
+ "story": "STUDIO-OBS-009",
+ "wave": "W2",
+ "agent": "Dex (@dev)",
+ "date": "2026-10-18",
+ "verdict": "GREEN in scratch tree (live + out-of-set patch); RED in live tree until the patch lands",
+ "patch": {
+  "file": "out-of-set-tests.patch",
+  "sha256": "c291c3fd04602e06f80671bcd1756253f17f08c2756cf4e45f1029eb20018cd7",
+  "files": 10,
+  "gitApplyCheck": "ok on live tree"
+ },
+ "tests": {
+  "verifyCommand1": {
+   "live": {
+    "exit": 1,
+    "passed": 141,
+    "failed": 35,
+    "skipped": 1
+   },
+   "scratch": {
+    "exit": 0,
+    "passed": 176,
+    "failed": 0,
+    "skipped": 1,
+    "files": 12
+   }
+  },
+  "fullUnitScratch": {
+   "exit": 0,
+   "filesPassed": 108,
+   "filesSkipped": 1,
+   "passed": 2394,
+   "skipped": 29,
+   "failed": 0,
+   "coverageThresholds": "met"
+  },
+  "fullUnitLiveBeforeLastEdits": {
+   "failed": 165,
+   "passed": 2213,
+   "skipped": 45
+  },
+  "red": {
+   "failed": 98,
+   "passed": 69,
+   "skipped": 1,
+   "files": "8 failed | 2 passed (10)",
+   "source": "pre-change src + new tests + patch"
+  },
+  "new": {
+   "guidedMode": 36,
+   "tlsListener": 14
+  },
+  "portedAndDeleted": "test/run/guidedMain.test.ts (7 cases) -> guidedMode.test.ts by name"
+ },
+ "typecheck": {
+  "live": {
+   "exit": 2,
+   "errorsInD1WriteSet": 0,
+   "errorFiles": [
+    "test/helpers/harness.ts",
+    "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+    "test/fixtures-tier/observed-replay.test.ts",
+    "test/fixtures-tier/observed-secret-control.test.ts",
+    "test/deployment/tls-client-cert.test.ts (D2)"
+   ]
+  },
+  "scratch": {
+   "exit": 2,
+   "errorFiles": [
+    "test/deployment/tls-client-cert.test.ts (D2)"
+   ]
+  }
+ },
+ "lint": {
+  "live": {
+   "exit": 1,
+   "errorFiles": [
+    "test/deployment/tls-client-cert.test.ts (D2)"
+   ]
+  },
+  "d1Files": "clean"
+ },
+ "grep": {
+  "command": "grep -rn 'guidedMain\\|start:guided\\|STUDIO_GUIDED_CONFIG_FILE' studio-runner/src studio-runner/package.json",
+  "hits": 0
+ },
+ "mutations": {
+  "run": 25,
+  "red": 25,
+  "details": "logs/mutation-results.json"
+ },
+ "files": {
+  "src/main.ts": {
+   "before": "e0bac30c0469aead61a07054daf7b76f3570a49eb658a17db1628d121fe68842",
+   "after": "2a3e92f7401c19e1117903a01bac58f9e3bb0c2e37dc817dfd6b309e2490f322",
+   "changed": true
+  },
+  "src/probe.ts": {
+   "before": "ca763aae70acc4369233fb4f7b03d42b7e578413c6474934117a98a7658e989a",
+   "after": "c243ba6e2d5446fabca6790d311ee10ef5acfb14016b0779f272acce1674468f",
+   "changed": true
+  },
+  "src/server/application.ts": {
+   "before": "e4157791ebd2c252ab1c4a62ca906ee9cf38ece8fe6c4feb77867323ebf16c27",
+   "after": "275524a2080225132a8a091d2417fd62f4cae9641305a4eb32286ab3f369d725",
+   "changed": true
+  },
+  "src/server/server.ts": {
+   "before": "996a7d126c95212d56ca7508c02e5442b263960736ccc4e2b5265fe0faf55bdd",
+   "after": "0ba8ebe27c81e2921532c5e20cca81674089c379dd29ef2432126758364540a6",
+   "changed": true
+  },
+  "src/server/config.ts": {
+   "before": "613f9bc237469295cef8d956aa398cd094e5385cba0d0f4b6b22e5e8751f9745",
+   "after": "95299924714c357c63874e75f610bea0250cddb598ff4e22e0596b05137c05ad",
+   "changed": true
+  },
+  "src/server/identity.ts": {
+   "before": "728d91aa271afc65ef3ccbb9546dd55910c3789647045563e5f16875afe6c9f2",
+   "after": "472c00d4a2923d73713a6fe5d6cae241f5488efeba4ec57e4eb0a5046b49b53b",
+   "changed": true
+  },
+  "src/server/routes.ts": {
+   "before": "760e7afa15a10d27497deecb577351df4d1124a982ebe6560a20bf6681d442ba",
+   "after": "c0c432d43f08b4560fbef879b1ffcadc83e78bbbb4b637982493e5257fe1e9fc",
+   "changed": true
+  },
+  "src/guided/transport.ts": {
+   "before": "1c6638387cea86e519be065975e04d4ecdd7b28918709d02c08c0dd4da6a69ad",
+   "after": "527471dfbe446c3fc2396c71158bd339d9bb33f73f5139994d7e58e7d84190ed",
+   "changed": true
+  },
+  "src/run/guidedMain.ts": {
+   "before": "90c3c6c57bf6248714d714887d5cff9b6d2b6527db904669d5e65bf405afac90",
+   "after": null,
+   "changed": true
+  },
+  "src/run/guidedConfig.ts": {
+   "before": "5e3d31c66f5a864c40886342bf24dfffa443b0fc8ae46ccf39642c5daf5bffda",
+   "after": null,
+   "changed": true
+  },
+  "src/run/guidedShutdown.ts": {
+   "before": "31d7e9eb9c006e40a4470d8ba4fc5471349dd24193ebbb1ff12ff5f80e5ac303",
+   "after": null,
+   "changed": true
+  },
+  "src/run/index.ts": {
+   "before": "ebf5cead3b5833c1f1c8c3a155b58b7371ad2e6b465b0f915971f42fa3d5c383",
+   "after": "ebf5cead3b5833c1f1c8c3a155b58b7371ad2e6b465b0f915971f42fa3d5c383",
+   "changed": false
+  },
+  "package.json": {
+   "before": "b8b9bc81b1bacf37005bfc14100cf1b2e9247155e3f0763a2b85355b79b3561d",
+   "after": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e",
+   "changed": true
+  },
+  "test/run/guidedMain.test.ts": {
+   "before": "227b182a883df0b24a97e2570609324f999069ff586b4044241ab5878c71f3fd",
+   "after": null,
+   "changed": true
+  },
+  "test/server/routes.test.ts": {
+   "before": "ad98d3a5c66cda6de20269be561bb3a0a0c3c37eccbda9e4dbee4f60c4aa3cd5",
+   "after": "5123fec482ec2f8add9d222ccbb4e991b11019caa96e5d00704390a49850206d",
+   "changed": true
+  },
+  "test/server/surface.test.ts": {
+   "before": "54ae776b1844b1f792c2cc623f081c344f343e84be325dd8b153a1b08be52e1e",
+   "after": "742d220329ebb1349f1a19450248ffbb8bd87cdcbc29415dab4439981ebab791",
+   "changed": true
+  },
+  "test/server/probe.test.ts": {
+   "before": "1e03e9e26b17a1b153d9468108bc70ab5ba545231b96f3f7d35e1f61f34206ad",
+   "after": "90983fc7ea4019bcd52055cd26aa15e56479d03af793da6ba1a10528723998f1",
+   "changed": true
+  },
+  "test/server/drain.test.ts": {
+   "before": "b8697861067692327d0facbf684f17960e037e3d073a4b1083fe6a00e66ecc8f",
+   "after": "931059ab53fef49652d86bc93f11a82a25f634ffe5b33b3c46607db6775080e9",
+   "changed": true
+  },
+  "test/server/storage-lifecycle.test.ts": {
+   "before": "052b41beee886ab8dea4b3a81c543ad77a9b13b37a75a1f89e0d5af14d21b671",
+   "after": "3a3c608aff991c7ac4756ac43f9234844a0ce26bf2a2c5980b98fdadacb1afb1",
+   "changed": true
+  },
+  "test/server/observedReplayRoutes.test.ts": {
+   "before": "bf1d723f6ba4b53f6578646b0db8214e619f3c747ae06a1f60623560398b4a91",
+   "after": "c3aecdf8af1c5d3c26afab75bc760d3794d02beecc72568c3a785f9d4f87bba4",
+   "changed": true
+  },
+  "test/server/observedReplayAdmission.test.ts": {
+   "before": "e13e70f9d546412c37c83cb82fb2f28c228f59519db9fdf374d59d1c6b0a9a55",
+   "after": "2478379fbc47b54fa89c94f7383de9f4301105d4da8025c4c4e4ef92082dd4eb",
+   "changed": true
+  },
+  "test/server/resolved-value-guards.test.ts": {
+   "before": "d33f4b2a7068674a9989ff59fecc219eb882706565d12f22bd4e31f2f0ee62e5",
+   "after": "d33f4b2a7068674a9989ff59fecc219eb882706565d12f22bd4e31f2f0ee62e5",
+   "changed": false
+  },
+  "test/server/timeline.test.ts": {
+   "before": "27c59dde79eaf953f478e753d9c6e345a818a33ba37d6d0a5cdaf51b3c19ef37",
+   "after": "27c59dde79eaf953f478e753d9c6e345a818a33ba37d6d0a5cdaf51b3c19ef37",
+   "changed": false
+  },
+  "test/guided/transport.test.ts": {
+   "before": "74e235e9abd245eae0f8a8ffa80a8099f040e087e0ff05ab30a03dfaf23e9473",
+   "after": "d2fdc0b980eba9a0d61080a2e97d69bbd529e34e5babd292c395259f5c236966",
+   "changed": true
+  },
+  "test/helpers/harness.ts": {
+   "before": "abfab3e3fb3efd7d5b59ac53e7b56d3360eadf5b8ace560722ff491267e485ae",
+   "after": "abfab3e3fb3efd7d5b59ac53e7b56d3360eadf5b8ace560722ff491267e485ae",
+   "changed": false
+  },
+  "test/helpers/runner.ts": {
+   "before": "4458ed1a65bca9016d2b1f9e396b09eb1a09bf5167a06ac74e8f383ffd65055e",
+   "after": "4458ed1a65bca9016d2b1f9e396b09eb1a09bf5167a06ac74e8f383ffd65055e",
+   "changed": false
+  },
+  "test/helpers/guidedTls.ts": {
+   "before": "bb06b80734a892d526890eb0efaaea61e061c2f8442e7f807ea1d62b4b0e07fb",
+   "after": "bb06b80734a892d526890eb0efaaea61e061c2f8442e7f807ea1d62b4b0e07fb",
+   "changed": false
+  },
+  "test/helpers/recordingScratchWorker.mjs": {
+   "before": "e6ad5a92455a5cf2f23432d86b041b8b18b4ade62692aa6339be34ba271ffa7f",
+   "after": "e6ad5a92455a5cf2f23432d86b041b8b18b4ade62692aa6339be34ba271ffa7f",
+   "changed": false
+  },
+  "test/server/guidedMode.test.ts": {
+   "before": null,
+   "after": "7da57d6389d0593bdd1d6c66ffe5f50d7fbcd3a62af46e87c9e98ab3bfc2dc40",
+   "changed": true
+  },
+  "test/server/tlsListener.test.ts": {
+   "before": null,
+   "after": "ca3a389537e70075eb91babc6458edb4dff8ca0dc5aa3ad618f62c622cbcd74a",
+   "changed": true
+  }
+ },
+ "findings": [
+  "F1 unit-tier TLS migration has no owner; apply the patch",
+  "F2 D2 file tls-client-cert.test.ts breaks type-check and lint",
+  "F3 main.ts statically imports run/browser.ts (Playwright loaded by every runner process)",
+  "F4 process end after drain proven in a real process from scratch-emitted src (not dist); still owed on rebuilt dist, image, Linux, pid 1",
+  "F5 stale dist guided files and four Java ITs still spawn guidedMain.js",
+  "F6 Java test certs pass the EKU check; key names match",
+  "F7 chart must render the four listener keys everywhere"
+ ],
+ "owedExternally": [
+  "dist rebuild and real-process tests",
+  "image smoke incl. PID-1 negative/positive",
+  "in-cluster pid, probe, seccomp",
+  "U21 token issuer"
+ ],
+ "foreignProcessNotTouched": 44737,
+ "realProcessSmoke": {
+  "file": "logs/real-process-smoke.md",
+  "what": "compiled live src emitted to a scratch dir (not dist); replay-only and guided start over TLS, real probe.js exit 0, SIGTERM drain exit 0 in ~0.3 s, 8 refusals with exit 78 or 1 and one value-free line"
+ }
+}

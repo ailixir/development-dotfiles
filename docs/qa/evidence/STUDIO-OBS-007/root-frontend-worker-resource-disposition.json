@@ -1,0 +1,17 @@
+{
+  "scope": "FRONTEND_EXECUTION_RESOURCE_DISPOSITION_NOT_PRODUCT_CAUSE_OR_QA_GATE",
+  "actual": "Original full title-aligned coverage958/955PASS/3timeouts, no other heavyjobs, all canonical code/facts/matrix/title guardsPASS; original scoped130PASS.",
+  "disposition": "ONE_SAME_FULL_SUITE_WITH_SUPPORTED_BOUNDED_WORKER_CLI",
+  "rationale": "Full-suite worker resource pressure is a source-consistent hypothesis, not proved cause or flaky label. Bound host parallelism without changing test bodies/coverage/timeouts/config, as orchestration of existing tests.",
+  "conditions": [
+    "Coordinator verifies supported installed Vitest CLI worker flags, e.g. maxWorkers2/minWorkers1.",
+    "All958existing tests and original coverage thresholds,20sSplunk/5sRuns limits unchanged; no new skip/retry/case/config flag reducing assertion.",
+    "Run alone without native/backend CPUheavyjob. Record actual worker concurrency, preserve prior3FAIL.",
+    "If samefailures persist, exact first awaited-interaction evidence required before another rerun; no repeated unchanged attempts.",
+    "Production build follows genuine full suitePASS."
+  ],
+  "runtimeByRoot": false,
+  "formalQA": false,
+  "actualBoundedTwoResult": "Samefull958:957PASS1FAIL Splunk combine20s; no coverage threshold errors, others2timeouts resolved in samefullscope. Original combine single-case WITHcoverage then actual1PASS6selector-skips; aggregate corrected to actual assertion statuses. Full1timeout staysRED/causeUNKNOWN.",
+  "nextControlledResourceStep": "After existing native4+33 terminal, samefull958coverage maxWorkers1/minWorkers1 with original20s/5s/coverage/config/source unchanged, alone. Concurrency variable changes; no new case or longer limit. Build only afterpass. If failure persists, exact failure-stage evidence in existing harness required before further run."
+}

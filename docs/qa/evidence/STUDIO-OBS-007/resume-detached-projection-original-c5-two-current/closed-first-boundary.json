@@ -1,0 +1,260 @@
+{
+  "scope": "ORIGINAL_UNPROFILED_SEED_AND_MANDATORY_NINTH_SOURCE_BOUND",
+  "firstProjectFrames": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.publicCall(GuidedPublicationReplayIT.java:14522)",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel(GuidedPublicationReplayIT.java:3713)"
+  ],
+  "failedState": {
+    "state": "FAILED",
+    "errorCode": "OTHER",
+    "bootstrapPhase": "READY",
+    "materializationPresent": true,
+    "fixtureModelHttpCalls": 8,
+    "fixturePhysicalProviderReads": 1,
+    "fixtureProviderFailures": 0,
+    "fixtureModelKinds": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 7,
+      "VERIFY_STEP": 0
+    }
+  },
+  "claimServerFixed": [
+    {
+      "status": 202,
+      "handlerNanos": 15005333,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 8564291,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 770528792,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 905006334,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 124600334,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 576977166,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 814738250,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 517023209,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 130054875,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 464033291,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 318709208,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 534098125,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 298909375,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 743320000,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 814961291,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 123179791,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 127342958,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 582326750,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 125861834,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 570854708,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 154752833,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 947437959,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 122978917,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 128587333,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 563332083,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 124333833,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 510702791,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 141405042,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 920234334,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 116867792,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 125572875,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 531211250,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 126979000,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 513317958,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 130280125,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 872766458,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 123141084,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 2229231542,
+      "consumed": true
+    }
+  ],
+  "lifecycleFixed": [
+    {
+      "status": 202,
+      "kind": "RUNTIME",
+      "reason": "LEASE_LOST",
+      "consumed": true
+    }
+  ],
+  "numericEvidence": {
+    "mappedAppenders": 1,
+    "rootEvents": null,
+    "appEvents": null,
+    "eventCountsStatus": "SUPPORT_UNOBSERVED",
+    "logCoverage": "STREAMED_ORIGINAL_ENCODED_OUTPUT",
+    "encodedBytes": 190702163,
+    "encodedWriteCalls": 95394,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsCollected": true,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 30,
+    "patternBytes": 3308,
+    "rootTraceObserved": true,
+    "appTraceObserved": true,
+    "httpBodies": 2,
+    "httpErrors": 1,
+    "jsonBodies": 2,
+    "problemBodies": 0,
+    "sseStreams": 0,
+    "metricBytes": 83501,
+    "cacheEntries": 2,
+    "cacheNonemptyRequired": true,
+    "cacheProduced": true,
+    "cacheUnproducedOutsideFilterRoutes": false,
+    "profileFiles": 171,
+    "knownRootLinks": 4,
+    "externalLinkTargetBytesScanned": false,
+    "c4WindowsExecuted": false,
+    "traceFromStart": false,
+    "traceArmed": true
+  },
+  "samplerEnabled": false,
+  "historicalDiagnosticMappingInvalid": true,
+  "wholeC5Accepted": false,
+  "unchangedRetryPlanned": false
+}

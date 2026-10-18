@@ -1,0 +1,16 @@
+{
+  "verdict": "ONE_NARROW_ASSERTION_FIX_REQUIRED",
+  "candidateSha256": "74db807360c8530b766e5445c125952eddb26c7b5451bacd8d16eb14113a7509",
+  "accepted": [
+    "Two genuine fault/freshretry workflows with originalprovider calls, no reset; actualfreshattempt/native/audit anchors",
+    "Same capture through realowners cleanup, explicit currentleasefailure dependency",
+    "Original26 bodies/sampler/testFake methods retained; isolatedonly"
+  ],
+  "finding": {
+    "location": "p7FaultAndRetry outage not_entered assertion",
+    "problem": "C.parse(not_entered).path(ids).isEmpty() is vacuous for the actual JSON array column: path(ids) is MissingNode and empty even if array has elements.",
+    "requiredFix": "Assert parsed column is an array and the array itself is empty. Preserve original readattempt/no-send/token facts, no newcase/framework."
+  },
+  "application": "Merge only reviewed logical delta into current B frozenlive source later; never overwrite Publication from oldbase",
+  "runtime": "UNRUN; source review repair then coordinator apply/format/compile/exact2"
+}

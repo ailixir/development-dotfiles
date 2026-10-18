@@ -1,0 +1,177 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java
+@@ -56,8 +56,13 @@
+         "RUNTIME_INCOMPATIBLE",
+         409);
+     require(endpoint != null, "RUNTIME_INCOMPATIBLE", 409);
+-    contracts.validate("v3/replay-validation", request);
+-    byte[] payload = GuidedContracts.canonical(request).getBytes(StandardCharsets.UTF_8);
++    String representation = contracts.validateAndCanonical("v3/replay-validation", request);
++    if (representation == null) {
++      // Unsupported dependency stubs retain the original strict validation/encoding path.
++      contracts.validate("v3/replay-validation", request);
++      representation = GuidedContracts.canonical(request);
++    }
++    byte[] payload = representation.getBytes(StandardCharsets.UTF_8);
+     require(payload.length <= properties.maxValidationBytes(), "BUDGET_EXCEEDED", 413);
+     String credential = token.get();
+     require(credential != null && !credential.isBlank(), "UNAUTHENTICATED", 401);
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
+@@ -87,7 +87,16 @@
+   }
+ 
+   public void validate(String name, JsonNode value) {
+-    canonical(value);
++    validatedCanonical(name, value);
++  }
++
++  /** Canonical request bytes are usable only after the same original schema succeeds. */
++  public String validateAndCanonical(String name, JsonNode value) {
++    return validatedCanonical(name, value);
++  }
++
++  private String validatedCanonical(String name, JsonNode value) {
++    String representation = canonical(value);
+     if (!name.startsWith("v3/") && value.path("schemaVersion").asInt() == 3) {
+       name = "v3/" + name;
+     }
+@@ -95,6 +104,7 @@
+         schemas.computeIfAbsent(name, this::schema).validate(value).isEmpty(),
+         "INVALID_CONTRACT",
+         422);
++    return representation;
+   }
+ 
+   // Independent expanded v3/session source oracle; unknown schema epochs use strict baseline.
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java
+@@ -31,6 +31,116 @@
+ 
+ /** Independent RUNNER fixture artifact/hash vectors are the expected results, never Java output. */
+ class ObservedArtifactLowererTest {
++  @Test
++  void validationCanonicalRetainsPublicNameRefusalAndImmutableInputBytes() throws Exception {
++    var checked = new GuidedContracts();
++    ObjectNode publication = checked.object().put("schemaVersion", 3)
++        .put("expectedConfigurationRevision", "2").put("expectedSourceRevision", "1");
++    String before = publication.toString();
++    String expected = GuidedContracts.canonical(publication);
++    checked.validate("publication", publication);
++    assertThat(checked.validateAndCanonical("publication", publication).equals(expected)).isTrue();
++    assertThat(checked.validateAndCanonical("v3/publication", publication)
++        .getBytes(StandardCharsets.UTF_8)).isEqualTo(expected.getBytes(StandardCharsets.UTF_8));
++    assertThat(publication.toString().equals(before)).isTrue();
++    ObjectNode invalid = publication.deepCopy().put("unexpected", true);
++    assertThatThrownBy(() -> checked.validate("publication", invalid)).hasMessage("INVALID_CONTRACT");
++    assertThatThrownBy(() -> checked.validateAndCanonical("publication", invalid))
++        .hasMessage("INVALID_CONTRACT");
++    ObjectNode nonCanonical = publication.deepCopy().put("schemaVersion", 3.5);
++    assertThatThrownBy(() -> checked.validate("publication", nonCanonical))
++        .hasMessage("INVALID_CONTRACT");
++    assertThatThrownBy(() -> checked.validateAndCanonical("publication", nonCanonical))
++        .hasMessage("INVALID_CONTRACT");
++
++    var independent = fixture("fresh-order-reference");
++    ObjectNode request = checked.object().put("schemaVersion", 3)
++        .put("attemptId", "00000000-0000-4000-8000-000000000001")
++        .put("claimId", "00000000-0000-4000-8000-000000000002")
++        .put("snapshotHash", "a".repeat(64)).put("basisHash", hash(independent.path("basis")));
++    request.set("requiredProfile", independent.path("artifact").path("profile").deepCopy());
++    request.set("requiredBuild", checked.object()
++        .put("profileHash", hash(request.path("requiredProfile")))
++        .put("schemaBundleHash", "b".repeat(64)).put("referenceBundleHash", "c".repeat(64))
++        .put("executableImageDigest", "d".repeat(64)).put("chromiumBuild", "synthetic-component"));
++    request.set("artifact", independent.path("artifact").deepCopy());
++    request.set("validationBasis", independent.path("basis").deepCopy());
++    ObjectNode retained = request.deepCopy();
++    String representation = request.toString();
++    byte[] originalBytes = GuidedContracts.canonical(request).getBytes(StandardCharsets.UTF_8);
++    byte[] reusedBytes = checked.validateAndCanonical("v3/replay-validation", request)
++        .getBytes(StandardCharsets.UTF_8);
++    assertThat(reusedBytes).isEqualTo(originalBytes);
++    assertThat(request.equals(retained)).isTrue();
++    assertThat(request.toString().equals(representation)).isTrue();
++    var nodes = new java.util.ArrayDeque<JsonNode[]>();
++    nodes.add(new JsonNode[] {retained, request});
++    while (!nodes.isEmpty()) {
++      JsonNode[] pair = nodes.removeFirst();
++      assertThat(pair[0].getClass() == pair[1].getClass()).isTrue();
++      if (pair[0].isObject()) {
++        pair[0].fields().forEachRemaining(
++            field -> nodes.add(new JsonNode[] {field.getValue(), pair[1].get(field.getKey())}));
++      } else if (pair[0].isArray()) {
++        for (int i = 0; i < pair[0].size(); i++) {
++          nodes.add(new JsonNode[] {pair[0].get(i), pair[1].get(i)});
++        }
++      }
++    }
++
++    var http = org.mockito.Mockito.mock(java.net.http.HttpClient.class);
++    org.mockito.Mockito.when(http.followRedirects()).thenReturn(java.net.http.HttpClient.Redirect.NEVER);
++    var tokenCalls = new java.util.concurrent.atomic.AtomicInteger();
++    var client = new ObservedValidationClient(java.net.URI.create("http://localhost"), http,
++        () -> { tokenCalls.incrementAndGet(); return "controlled-local-token"; }, checked,
++        new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608));
++    org.mockito.Mockito.clearInvocations(http);
++    var now = Instant.parse("2026-10-12T12:00:00Z");
++    var expired = new PublicationBudget(now.minusMillis(1),
++        java.time.Clock.fixed(now, java.time.ZoneOffset.UTC));
++    assertThatThrownBy(() -> client.validate(request, expired)).hasMessage("EXPIRED");
++    assertThat(tokenCalls.get()).isEqualTo(1);
++    assertThatThrownBy(() -> client.validate(request.deepCopy().put("unexpected", true), expired))
++        .hasMessage("INVALID_CONTRACT");
++    assertThat(tokenCalls.get()).isEqualTo(1);
++    var tight = new ObservedValidationClient(java.net.URI.create("http://localhost"), http,
++        () -> { tokenCalls.incrementAndGet(); return "controlled-local-token"; }, checked,
++        new GuidedPublicationProperties(true, 3, 15000, 5000, 1));
++    org.mockito.Mockito.clearInvocations(http);
++    assertThatThrownBy(() -> tight.validate(request, expired)).hasMessage("BUDGET_EXCEEDED");
++    assertThat(tokenCalls.get()).isEqualTo(1);
++    org.mockito.Mockito.verifyNoInteractions(http);
++  }
++
++  @Test
++  void unsupportedNullCanonicalDependencyRetainsOriginalValidationAndBudgetOrder()
++      throws Exception {
++    var checked = org.mockito.Mockito.spy(new GuidedContracts());
++    org.mockito.Mockito.doReturn(null).when(checked).validateAndCanonical(
++        org.mockito.ArgumentMatchers.eq("v3/replay-validation"), org.mockito.ArgumentMatchers.any());
++    var http = org.mockito.Mockito.mock(java.net.http.HttpClient.class);
++    org.mockito.Mockito.when(http.followRedirects()).thenReturn(java.net.http.HttpClient.Redirect.NEVER);
++    var client = new ObservedValidationClient(java.net.URI.create("http://localhost"), http,
++        () -> "controlled-local-token", checked,
++        new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608));
++    var now = Instant.parse("2026-10-12T12:00:00Z");
++    var expired = new PublicationBudget(now.minusMillis(1),
++        java.time.Clock.fixed(now, java.time.ZoneOffset.UTC));
++    org.mockito.Mockito.clearInvocations(http);
++    assertThatThrownBy(() -> client.validate(checked.object(), expired))
++        .hasMessage("INVALID_CONTRACT");
++    // Existing void-path refusal stub must still win over an already-expired budget.
++    org.mockito.Mockito.doThrow(new GuidedSessionException("INVALID_CONTRACT", 422))
++        .when(checked).validate(
++            org.mockito.ArgumentMatchers.eq("v3/replay-validation"), org.mockito.ArgumentMatchers.any());
++    org.mockito.Mockito.clearInvocations(http);
++    assertThatThrownBy(() -> client.validate(checked.object(), expired))
++        .hasMessage("INVALID_CONTRACT");
++    org.mockito.Mockito.verify(checked, org.mockito.Mockito.times(2)).validate(
++        org.mockito.ArgumentMatchers.eq("v3/replay-validation"), org.mockito.ArgumentMatchers.any());
++    org.mockito.Mockito.verifyNoInteractions(http);
++  }
++
+   @Test
+   void separateOwnedLoweringCopiesRetainCutAndIndependentArtifact() throws Exception {
+     for (String name : List.of("fresh-order-reference", "control-value-reference")) {
+--- a/docs/specs/studio-observed-authoring/secret-login-design.md
++++ b/docs/specs/studio-observed-authoring/secret-login-design.md
+@@ -320,3 +320,9 @@
+ Actual claim guards and queries remain fresh and ordered. Only a same-owner live renewal with exact complete node-class, JSON and serialized representation agreement before lease mutation can use the call-local proof. At the original save validation point, the only permitted change is leaseExpiresAt; whole-session canonicalization remains fresh and the same compiled OWNER object validator checks all owner fields. Null, foreign, changed, unsupported or unavailable proof uses original public whole-schema save validation. The child entry has different internal root/path/TRACE context; only the original status-only INVALID_CONTRACT refusal is retained, with no rooted diagnostic equivalence claim. Resource changes require a new Contracts instance and any expanded fingerprint mismatch disables preparation.
+ 
+ Original revocation/auth/source/assignment/fence/lease clipping/idempotency/atomic command writes and rollback stay unchanged. The additional read, full detached validation, representation comparisons and fallback cost may outweigh one removed locked traversal. Secret renewal 1000ms, revocation 2000ms, full ROOT+APP capture and privacy scans remain unchanged; this is not a latency, cause or acceptance claim. Existing sampler debug-line mappings become historical after these source edits.
++
++### Validator canonical result reuse
++
++The validator-only request path may reuse the canonical String already computed by the original Contracts validation instead of traversing the same privately assembled JSON again. Public void validate retains canonicalization, conditional v3 name normalization, the same cached schema and fixed refusal ordering; a successful return-value helper shares that exact body. No result is returned before strict schema success. Client UTF-8 encoding, byte limit, credential supplier, immutable deadline, one HTTP send, bounded response and verdict checks retain their order.
++
++Configured networknt draft-7 validation must not mutate the input; existing schema resources have no application defaults or injected custom validator configuration. This is a supported standard Jackson/private Publisher request contract, not arbitrary concurrent mutable node or mocked successful-null return equivalence. Existing production configuration and real Contracts tests remain the authority. No owned token, cache, schema bypass, timeout reset or logger change is added. One fewer off-lock canonical traversal adds API coupling and does not establish exclusive cost, causality, latency improvement or C5 acceptance. The already-expired immutable budget remains expired; HTTP send and validator response are not credited.

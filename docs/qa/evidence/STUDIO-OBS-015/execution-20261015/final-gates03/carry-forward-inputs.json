@@ -1,0 +1,141 @@
+{
+  "method": "per-gate input subset (rule reproduces attempt02 carry-forward-inputs.json subset digests) of the attempt01 gate before-manifest vs final-gates03/capture-before.json, plus dist digest; attempt02-run gates compared on their full input prefixes vs final-gates02/capture-before.json",
+  "now": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates03/capture-before.json",
+  "nowSource": "f071984a46af15a039140e11135c0223092b338fd79d3a985757421ab323cabe",
+  "nowDist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e",
+  "fromAttempt01": {
+    "runner-build (runner-final-build01)": {
+      "attempt01Manifest": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/runner-final-build01-before.json",
+      "attempt01Verdict": "PASS (dist unchanged)",
+      "inputFiles": [
+        177,
+        177
+      ],
+      "inputSubsetDigest": [
+        "de1d5f8410b0973b6ffc958d102b9a83cb00807c3998f83d544922eaefeff216",
+        "de1d5f8410b0973b6ffc958d102b9a83cb00807c3998f83d544922eaefeff216"
+      ],
+      "distSame": true,
+      "inputsIdentical": true
+    },
+    "runner check:pins host (runner-final-pins01)": {
+      "attempt01Manifest": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-pins01-before.json",
+      "attempt01Verdict": "PASS",
+      "inputFiles": [
+        177,
+        177
+      ],
+      "inputSubsetDigest": [
+        "de1d5f8410b0973b6ffc958d102b9a83cb00807c3998f83d544922eaefeff216",
+        "de1d5f8410b0973b6ffc958d102b9a83cb00807c3998f83d544922eaefeff216"
+      ],
+      "distSame": true,
+      "inputsIdentical": true
+    },
+    "runner test:fixtures (runner-final-fixtures01)": {
+      "attempt01Manifest": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-fixtures01-before.json",
+      "attempt01Verdict": "PASS 252/0/9",
+      "inputFiles": [
+        228,
+        228
+      ],
+      "inputSubsetDigest": [
+        "b088ef534ee61fad4c9f91fd42c39d6f5830e7c1af536db24433ca4c8a6af96c",
+        "b088ef534ee61fad4c9f91fd42c39d6f5830e7c1af536db24433ca4c8a6af96c"
+      ],
+      "distSame": true,
+      "inputsIdentical": true
+    },
+    "image build + in-image pins (image-final01)": {
+      "attempt01Manifest": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/final-dist-frozen.json",
+      "attempt01Verdict": "image PASS; in-image pins FAIL NOT_GREEN_EXTERNAL (Node v24 vs .nvmrc 22, ED-05/O-2a)",
+      "inputFiles": [
+        101,
+        101
+      ],
+      "inputSubsetDigest": [
+        "3d371c83e142d4a852b2fed7ebba62b981906520f9e54def0c5ed30c8cc16150",
+        "3d371c83e142d4a852b2fed7ebba62b981906520f9e54def0c5ed30c8cc16150"
+      ],
+      "distSame": true,
+      "inputsIdentical": true
+    },
+    "runner test:deployment (runner-final-deployment01)": {
+      "attempt01Manifest": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-deployment01-before.json",
+      "attempt01Verdict": "PASS 322/0/0",
+      "inputFiles": [
+        188,
+        188
+      ],
+      "inputSubsetDigest": [
+        "f024bc025f391fad3b0b1960c77948d3dce6d150746eb66e76db16e92cbc94d7",
+        "f024bc025f391fad3b0b1960c77948d3dce6d150746eb66e76db16e92cbc94d7"
+      ],
+      "distSame": true,
+      "inputsIdentical": true
+    },
+    "frontend (frontend-final01)": {
+      "attempt01Manifest": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/frontend-final01-before.json",
+      "attempt01Verdict": "PASS 701/701; type-check 0; lint 0 errors",
+      "inputFiles": [
+        274,
+        274
+      ],
+      "inputSubsetDigest": [
+        "5988e69777c973aa1a64c92bc643d11a0e4b573e1ebd7048f7615db3d17982a2",
+        "5988e69777c973aa1a64c92bc643d11a0e4b573e1ebd7048f7615db3d17982a2"
+      ],
+      "distSame": true,
+      "inputsIdentical": true
+    }
+  },
+  "fromAttempt02": {
+    "runner type-check / lint / unit (runner-final-typecheck03, -lint03, -unit03)": {
+      "attempt02Manifest": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates02/capture-before.json",
+      "attempt02Verdict": "PASS; unit 2229/0/29, coverage lines 97.25 branches 89.11 functions 97.12",
+      "prefixes": [
+        "studio-runner/"
+      ],
+      "inputFiles": [
+        351,
+        351
+      ],
+      "inputSubsetDigest": [
+        "b01c94bdaefd68d62b309c2854613dde9c304bf28682d27e647fdc5e7205e5c4",
+        "b01c94bdaefd68d62b309c2854613dde9c304bf28682d27e647fdc5e7205e5c4"
+      ],
+      "inputsIdentical": true
+    },
+    "contracts + build-studio-observed-schemas --check (contracts-final02)": {
+      "attempt02Manifest": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates02/capture-before.json",
+      "attempt02Verdict": "PASS (7 sections, no write)",
+      "prefixes": [
+        "tools/",
+        "docs/specs/",
+        "studio-runner/src/",
+        "backend/src/main/resources/"
+      ],
+      "inputFiles": [
+        248,
+        248
+      ],
+      "inputSubsetDigest": [
+        "a5f54fefd784317b5ace3fbc28e9087baec698fc58feb9c8c5e8df6f83087575",
+        "a5f54fefd784317b5ace3fbc28e9087baec698fc58feb9c8c5e8df6f83087575"
+      ],
+      "inputsIdentical": true
+    }
+  },
+  "allNonBackendIdenticalToAttempt02": {
+    "files": [
+      775,
+      775
+    ],
+    "digest": [
+      "8735f12b17b92930ad7f780a1b5d8bef2254aaa268c01821eccd45909e3bfb4d",
+      "8735f12b17b92930ad7f780a1b5d8bef2254aaa268c01821eccd45909e3bfb4d"
+    ],
+    "identical": true
+  },
+  "allIdentical": true
+}

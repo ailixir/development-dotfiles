@@ -1,0 +1,44 @@
+{
+  "classification": "BOUNDED_READ_ONLY_ACTUAL_DIAGNOSIS_MINIMAL_REPAIR_RECOMMENDED_NOT_RELEASE_NOT_FORMAL_QA",
+  "reviewer": "Quinn / aiox-qa",
+  "receiptSha256": "60dc2da8623bb8b1260cc5691b100bf637b16b0cdd962f5923b1b09c87baaa37",
+  "payloads": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/low2048-runtime-diagnosis01/review.md",
+      "sha256": "cc7008de87f1c5a7115b6d76b43f7ca09f5bc286e10a5eca1bb150cfee839825",
+      "bytes": 12965
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/low2048-runtime-diagnosis01/checks.json",
+      "sha256": "32c1d14d162e0e1bf08a948887ea6db54df0543d70f20b8bb71a692d8181097b",
+      "bytes": 10747
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/low2048-runtime-diagnosis01/source-inventory.json",
+      "sha256": "db88382abb76c80d06809a9e43ad225c2e8867919ec757e8615f187a83b74bd9",
+      "bytes": 27173
+    }
+  ],
+  "inputCount": 59,
+  "namedInputsStableAtWrite": true,
+  "globalStabilityClaim": false,
+  "findings": [
+    "D1 accounting authoring-phase guard obstruction",
+    "D2 missing genuine base teardown precondition"
+  ],
+  "auditCollectorChangeRecommended": false,
+  "minimalProposedSourcePaths": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java"
+  ],
+  "runtimeExecutedByReviewer": false,
+  "sourceWrittenByReviewer": false,
+  "sourceRelease": false,
+  "formalStoryQaVerdict": null,
+  "lifecycleChange": false,
+  "015": "InProgress",
+  "008": "Ready",
+  "row85": "originalOPENpendingunamended",
+  "fullScopeUnchanged": true
+}

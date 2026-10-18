@@ -1,0 +1,1174 @@
+diff --git backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimingsTest.java backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimingsTest.java
+index 93fbdb7..659cafb 100644
+--- backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimingsTest.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimingsTest.java
+@@ -7,8 +7,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
+ 
+ import com.citi.put.checks.studio.guided.evidence.GuidedRecordingTimings.LedgerAction;
+ import com.citi.put.checks.studio.guided.evidence.GuidedRecordingTimings.Limits;
++import com.fasterxml.jackson.databind.JsonNode;
+ import com.fasterxml.jackson.databind.node.ArrayNode;
+ import com.fasterxml.jackson.databind.node.ObjectNode;
++import java.io.IOException;
++import java.nio.file.Files;
++import java.nio.file.Path;
++import java.util.ArrayList;
+ import java.util.LinkedHashMap;
+ import java.util.List;
+ import java.util.Map;
+@@ -196,4 +201,128 @@ class GuidedRecordingTimingsTest {
+     assertThat(GuidedRecordingTimings.ORDER.compare(first, second)).isNegative();
+   }
+ 
++  // ARCH015-03 T1 parity with the runner (validation ledger rows 83/84). The same vector file
++  // drives studio-runner/test/guided/evidence.test.ts; `wire` is what the runner sends.
++  private static final Path TIMING_ORDER_VECTORS =
++      Path.of("../docs/specs/studio-observed-authoring/contracts/v3/timing-order-vectors.json");
++
++  private static JsonNode timingOrder() throws IOException {
++    return JSON.readTree(Files.readString(TIMING_ORDER_VECTORS));
++  }
++
++  private static Map<String, LedgerAction> vectorLedger(JsonNode entries) {
++    Map<String, LedgerAction> ledger = new LinkedHashMap<>();
++    for (JsonNode e : entries) {
++      String id = e.path("admissionId").asText();
++      ledger.put(
++          id,
++          new LedgerAction(
++              id,
++              e.path("stepId").asText(),
++              e.path("ordinal").asInt(),
++              e.path("dispatchCount").asInt()));
++    }
++    return ledger;
++  }
++
++  private static Limits vectorLimits(JsonNode vector) {
++    JsonNode l = vector.path("limits");
++    return new Limits(
++        l.path("maxSessionSeconds").asLong(),
++        l.path("maxActions").asLong(),
++        l.path("maxSourceSteps").asLong());
++  }
++
++  /** Accepts the runner's wire exactly as the vector states, and refuses it reversed. */
++  private static void acceptsWireAsStated(JsonNode vector, JsonNode c) {
++    String name = c.path("name").asText();
++    Map<String, LedgerAction> ledger = vectorLedger(c.path("ledger"));
++    ArrayNode wire = (ArrayNode) c.path("wire").deepCopy();
++    ArrayNode accepted = GuidedRecordingTimings.acceptAndDerive(wire, ledger, vectorLimits(vector));
++    assertThat(accepted).as(name).isEqualTo(c.path("accepted"));
++    assertThat(wire).as(name + " readings unchanged").isEqualTo(c.path("wire"));
++    for (JsonNode item : accepted) {
++      assertThat(item.fieldNames())
++          .toIterable()
++          .as(name)
++          .containsExactly("kind", "stepId", "admissionId", "ordinal", "startMs", "endMs");
++    }
++    // Every dispatched admission without a measured reading stays absent; nothing is invented.
++    List<String> measured = new ArrayList<>();
++    c.path("wire").forEach(item -> measured.add(item.path("admissionId").asText()));
++    for (JsonNode item : accepted) {
++      if (item.path("kind").asText().equals(GuidedRecordingTimings.ACTION)) {
++        assertThat(measured).as(name).contains(item.path("admissionId").asText());
++      }
++    }
++    assertThat(accepted.size() - measured.size())
++        .as(name + " one derived step per measured step")
++        .isEqualTo((int) measured.stream().map(id -> ledger.get(id).stepId()).distinct().count());
++    // ORDER restores the stated wire from the runner's own reading order.
++    List<JsonNode> fromReadings = new ArrayList<>();
++    for (JsonNode r : c.path("readings")) {
++      for (JsonNode item : c.path("wire")) {
++        if (item.path("admissionId").equals(r.path("admissionId"))) {
++          fromReadings.add(item);
++        }
++      }
++    }
++    fromReadings.sort(GuidedRecordingTimings.ORDER);
++    assertThat(fromReadings).as(name).containsExactlyElementsOf(c.path("wire"));
++    if (wire.size() > 1) {
++      ArrayNode reversed = JSON.createArrayNode();
++      for (int i = wire.size() - 1; i >= 0; i--) {
++        reversed.add(wire.get(i).deepCopy());
++      }
++      assertThatThrownBy(
++              () -> GuidedRecordingTimings.acceptAndDerive(reversed, ledger, vectorLimits(vector)))
++          .as(name + " reversed")
++          .hasMessage("INVALID_CONTRACT");
++    }
++  }
++
++  private static List<JsonNode> casesFor(JsonNode vector, int ledgerRow) {
++    List<JsonNode> out = new ArrayList<>();
++    vector
++        .path("cases")
++        .forEach(
++            c -> {
++              if (c.path("ledgerRow").asInt() == ledgerRow) {
++                out.add(c);
++              }
++            });
++    assertThat(out).as("vector cases for ledger row " + ledgerRow).isNotEmpty();
++    return out;
++  }
++
++  @Test
++  void distinctAdmissionsWithIdenticalMeasuredKeysRemainDistinct() throws IOException {
++    JsonNode vector = timingOrder();
++    for (JsonNode c : casesFor(vector, 83)) {
++      acceptsWireAsStated(vector, c);
++    }
++    Map<String, LedgerAction> ledger = vectorLedger(vector.path("refusedLedger"));
++    assertThat(vector.path("refused").size()).isPositive();
++    for (JsonNode refused : vector.path("refused")) {
++      ArrayNode body = (ArrayNode) refused.path("timings").deepCopy();
++      assertThatThrownBy(
++              () -> GuidedRecordingTimings.acceptAndDerive(body, ledger, vectorLimits(vector)))
++          .as(refused.path("name").asText())
++          .hasMessage("INVALID_CONTRACT");
++    }
++  }
++
++  @Test
++  void tieEndSelectionAndUnicodeOrderMatchRunner() throws IOException {
++    JsonNode vector = timingOrder();
++    assertThat(vector.path("kindOrder"))
++        .containsExactly(
++            JSON.getNodeFactory().textNode(GuidedRecordingTimings.PREFIX_REPLAY),
++            JSON.getNodeFactory().textNode(GuidedRecordingTimings.STEP),
++            JSON.getNodeFactory().textNode(GuidedRecordingTimings.CLARIFICATION_WAIT),
++            JSON.getNodeFactory().textNode(GuidedRecordingTimings.ACTION));
++    for (JsonNode c : casesFor(vector, 84)) {
++      acceptsWireAsStated(vector, c);
++    }
++  }
+ }
+diff --git docs/specs/studio-observed-authoring/contracts/README.md docs/specs/studio-observed-authoring/contracts/README.md
+index 16625ed..754b6b4 100644
+--- docs/specs/studio-observed-authoring/contracts/README.md
++++ docs/specs/studio-observed-authoring/contracts/README.md
+@@ -27,7 +27,7 @@ The checker compiles every draft-07 schema and definition in strict mode, keeps
+ | Bridge (backend ⇄ guided runner) | `bridge`, `runner-context`, `assignment`, `assignment-receipt`, `assignment-stop`, `assignment-lifecycle`, `observation-refresh`, `observation`, `execution-evidence`, `action`, `ledger`, `allocation`, `availability`, `producer`, `consumer-edge`, `binding` |
+ | Exercised plan and publication | `learned-plan`, `publication`, `revision`, `result`, `action-timing` |
+ | Replay family | `replay-profile`, `replay-operation`, `replay-policy`, `replay-artifact`, `replay-validation`, `replay-job`, `replay-ipc` |
+-| Fixtures and vectors | `fixtures.json`, `planning-fixtures.json`, `publication-fixtures.json`, `publication-canonical-vectors.json`, `wire-parity.fixtures.json` |
++| Fixtures and vectors | `fixtures.json`, `planning-fixtures.json`, `publication-fixtures.json`, `publication-canonical-vectors.json`, `wire-parity.fixtures.json`, `timing-order-vectors.json` (recording timing order and tie parity, backend `GuidedRecordingTimingsTest` and runner `test/guided/evidence.test.ts`) |
+ 
+ ## Versions
+ 
+diff --git docs/specs/studio-observed-authoring/contracts/v3/timing-order-vectors.json docs/specs/studio-observed-authoring/contracts/v3/timing-order-vectors.json
+new file mode 100644
+index 0000000..ef8d544
+--- /dev/null
++++ docs/specs/studio-observed-authoring/contracts/v3/timing-order-vectors.json
+@@ -0,0 +1,900 @@
++{
++  "description": "ARCH015-03 T1 recording timing order, shared by backend GuidedRecordingTimingsTest and runner test/guided/evidence.test.ts (validation ledger rows 83/84). Order: startMs, kind (prefixReplay, step, clarificationWait, action), ordinal null first, stepId, then admissionId null first; both identifiers in Unicode code point (scalar) order, never UTF-16 code-unit or locale order. readings are runner readings (rounded once to wire); wire is the runner's recordingEvidence.timings; accepted is the backend's merged list with derived step items. utf16CodeUnitOrder records the admission order a UTF-16 comparator would produce when it differs. refused bodies are checked against refusedLedger by the backend only.",
++  "order": [
++    "startMs",
++    "kind",
++    "ordinal",
++    "stepId",
++    "admissionId"
++  ],
++  "kindOrder": [
++    "prefixReplay",
++    "step",
++    "clarificationWait",
++    "action"
++  ],
++  "limits": {
++    "maxSessionSeconds": 600,
++    "maxActions": 200,
++    "maxSourceSteps": 100
++  },
++  "cases": [
++    {
++      "name": "equalMeasuredKeysDistinctAdmissions",
++      "ledgerRow": 83,
++      "note": "Two admitted attempts at one coordinate whose rounded readings tie on (startMs, ordinal, stepId); both are kept, ordered by admissionId, readings unchanged.",
++      "ledger": [
++        {
++          "admissionId": "a-old",
++          "stepId": "step-1",
++          "ordinal": 0,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "b-new",
++          "stepId": "step-1",
++          "ordinal": 0,
++          "dispatchCount": 1
++        }
++      ],
++      "readings": [
++        {
++          "admissionId": "b-new",
++          "stepId": "step-1",
++          "ordinal": 0,
++          "startMs": 100.4,
++          "endMs": 110.2
++        },
++        {
++          "admissionId": "a-old",
++          "stepId": "step-1",
++          "ordinal": 0,
++          "startMs": 99.6,
++          "endMs": 105
++        }
++      ],
++      "wire": [
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a-old",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 105
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "b-new",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 110
++        }
++      ],
++      "accepted": [
++        {
++          "kind": "step",
++          "stepId": "step-1",
++          "admissionId": null,
++          "ordinal": null,
++          "startMs": 100,
++          "endMs": 110
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a-old",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 105
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "b-new",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 110
++        }
++      ],
++      "utf16CodeUnitOrder": null
++    },
++    {
++      "name": "astralAdmissionTieKeepsAbsentPreNativeReadingAbsent",
++      "ledgerRow": 84,
++      "note": "U+FFFD sorts before U+1F600 in code point order but after it in UTF-16 code-unit order. never-started was dispatched but has no measured reading: it stays absent. Both selected ends are null.",
++      "ledger": [
++        {
++          "admissionId": "\ufffd",
++          "stepId": "step-1",
++          "ordinal": 0,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "\ud83d\ude00",
++          "stepId": "step-1",
++          "ordinal": 0,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "never-started",
++          "stepId": "step-1",
++          "ordinal": 0,
++          "dispatchCount": 1
++        }
++      ],
++      "readings": [
++        {
++          "admissionId": "\ud83d\ude00",
++          "stepId": "step-1",
++          "ordinal": 0,
++          "startMs": 8,
++          "endMs": null
++        },
++        {
++          "admissionId": "\ufffd",
++          "stepId": "step-1",
++          "ordinal": 0,
++          "startMs": 8,
++          "endMs": null
++        }
++      ],
++      "wire": [
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "\ufffd",
++          "ordinal": 0,
++          "startMs": 8,
++          "endMs": null
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "\ud83d\ude00",
++          "ordinal": 0,
++          "startMs": 8,
++          "endMs": null
++        }
++      ],
++      "accepted": [
++        {
++          "kind": "step",
++          "stepId": "step-1",
++          "admissionId": null,
++          "ordinal": null,
++          "startMs": 8,
++          "endMs": null
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "\ufffd",
++          "ordinal": 0,
++          "startMs": 8,
++          "endMs": null
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "\ud83d\ude00",
++          "ordinal": 0,
++          "startMs": 8,
++          "endMs": null
++        }
++      ],
++      "utf16CodeUnitOrder": [
++        "\ud83d\ude00",
++        "\ufffd"
++      ]
++    },
++    {
++      "name": "astralStepIdOrder",
++      "ledgerRow": 84,
++      "note": "stepId breaks the tie before admissionId, in code point order; derived step items follow the same order.",
++      "ledger": [
++        {
++          "admissionId": "x-2",
++          "stepId": "\ud83d\ude00",
++          "ordinal": 0,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "x-1",
++          "stepId": "\ufffd",
++          "ordinal": 0,
++          "dispatchCount": 1
++        }
++      ],
++      "readings": [
++        {
++          "admissionId": "x-2",
++          "stepId": "\ud83d\ude00",
++          "ordinal": 0,
++          "startMs": 50,
++          "endMs": 60
++        },
++        {
++          "admissionId": "x-1",
++          "stepId": "\ufffd",
++          "ordinal": 0,
++          "startMs": 50,
++          "endMs": 55
++        }
++      ],
++      "wire": [
++        {
++          "kind": "action",
++          "stepId": "\ufffd",
++          "admissionId": "x-1",
++          "ordinal": 0,
++          "startMs": 50,
++          "endMs": 55
++        },
++        {
++          "kind": "action",
++          "stepId": "\ud83d\ude00",
++          "admissionId": "x-2",
++          "ordinal": 0,
++          "startMs": 50,
++          "endMs": 60
++        }
++      ],
++      "accepted": [
++        {
++          "kind": "step",
++          "stepId": "\ufffd",
++          "admissionId": null,
++          "ordinal": null,
++          "startMs": 50,
++          "endMs": 55
++        },
++        {
++          "kind": "step",
++          "stepId": "\ud83d\ude00",
++          "admissionId": null,
++          "ordinal": null,
++          "startMs": 50,
++          "endMs": 60
++        },
++        {
++          "kind": "action",
++          "stepId": "\ufffd",
++          "admissionId": "x-1",
++          "ordinal": 0,
++          "startMs": 50,
++          "endMs": 55
++        },
++        {
++          "kind": "action",
++          "stepId": "\ud83d\ude00",
++          "admissionId": "x-2",
++          "ordinal": 0,
++          "startMs": 50,
++          "endMs": 60
++        }
++      ],
++      "utf16CodeUnitOrder": [
++        "x-2",
++        "x-1"
++      ]
++    },
++    {
++      "name": "bmpPrefixAndPrivateUseOrder",
++      "ledgerRow": 84,
++      "note": "Shorter prefix first; BMP below U+D800 agrees in both orders; U+E000..U+FFFF versus astral is where UTF-16 code-unit order diverges.",
++      "ledger": [
++        {
++          "admissionId": "a",
++          "stepId": "s",
++          "ordinal": 0,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "a\ud83d\ude00",
++          "stepId": "s",
++          "ordinal": 0,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "a\ufffd",
++          "stepId": "s",
++          "ordinal": 0,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "\u00e9",
++          "stepId": "s",
++          "ordinal": 0,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "z",
++          "stepId": "s",
++          "ordinal": 0,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "\ue000",
++          "stepId": "s",
++          "ordinal": 0,
++          "dispatchCount": 1
++        }
++      ],
++      "readings": [
++        {
++          "admissionId": "\ue000",
++          "stepId": "s",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "admissionId": "a\ud83d\ude00",
++          "stepId": "s",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "admissionId": "z",
++          "stepId": "s",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "admissionId": "a",
++          "stepId": "s",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "admissionId": "\u00e9",
++          "stepId": "s",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "admissionId": "a\ufffd",
++          "stepId": "s",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        }
++      ],
++      "wire": [
++        {
++          "kind": "action",
++          "stepId": "s",
++          "admissionId": "a",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "kind": "action",
++          "stepId": "s",
++          "admissionId": "a\ufffd",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "kind": "action",
++          "stepId": "s",
++          "admissionId": "a\ud83d\ude00",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "kind": "action",
++          "stepId": "s",
++          "admissionId": "z",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "kind": "action",
++          "stepId": "s",
++          "admissionId": "\u00e9",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "kind": "action",
++          "stepId": "s",
++          "admissionId": "\ue000",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        }
++      ],
++      "accepted": [
++        {
++          "kind": "step",
++          "stepId": "s",
++          "admissionId": null,
++          "ordinal": null,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "kind": "action",
++          "stepId": "s",
++          "admissionId": "a",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "kind": "action",
++          "stepId": "s",
++          "admissionId": "a\ufffd",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "kind": "action",
++          "stepId": "s",
++          "admissionId": "a\ud83d\ude00",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "kind": "action",
++          "stepId": "s",
++          "admissionId": "z",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "kind": "action",
++          "stepId": "s",
++          "admissionId": "\u00e9",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        },
++        {
++          "kind": "action",
++          "stepId": "s",
++          "admissionId": "\ue000",
++          "ordinal": 0,
++          "startMs": 7,
++          "endMs": 9
++        }
++      ],
++      "utf16CodeUnitOrder": [
++        "a",
++        "a\ud83d\ude00",
++        "a\ufffd",
++        "z",
++        "\u00e9",
++        "\ue000"
++      ]
++    },
++    {
++      "name": "endSelectionOverActualReadings",
++      "ledgerRow": 84,
++      "note": "Step start = minimum action start; step end = endMs (or null) of the last action in ORDER, i.e. the greatest start, with admissionId deciding a tie at that start. Never the largest end, never calibrated.",
++      "ledger": [
++        {
++          "admissionId": "a1",
++          "stepId": "step-1",
++          "ordinal": 0,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "a2",
++          "stepId": "step-1",
++          "ordinal": 1,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "m-1",
++          "stepId": "step-2",
++          "ordinal": 0,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "m-2",
++          "stepId": "step-2",
++          "ordinal": 0,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "n-1",
++          "stepId": "step-3",
++          "ordinal": 0,
++          "dispatchCount": 1
++        },
++        {
++          "admissionId": "n-2",
++          "stepId": "step-3",
++          "ordinal": 0,
++          "dispatchCount": 1
++        }
++      ],
++      "readings": [
++        {
++          "admissionId": "a2",
++          "stepId": "step-1",
++          "ordinal": 1,
++          "startMs": 20,
++          "endMs": 30
++        },
++        {
++          "admissionId": "a1",
++          "stepId": "step-1",
++          "ordinal": 0,
++          "startMs": 10,
++          "endMs": 5000
++        },
++        {
++          "admissionId": "m-2",
++          "stepId": "step-2",
++          "ordinal": 0,
++          "startMs": 40,
++          "endMs": null
++        },
++        {
++          "admissionId": "m-1",
++          "stepId": "step-2",
++          "ordinal": 0,
++          "startMs": 40,
++          "endMs": 70
++        },
++        {
++          "admissionId": "n-2",
++          "stepId": "step-3",
++          "ordinal": 0,
++          "startMs": 60,
++          "endMs": 65
++        },
++        {
++          "admissionId": "n-1",
++          "stepId": "step-3",
++          "ordinal": 0,
++          "startMs": 60,
++          "endMs": null
++        }
++      ],
++      "wire": [
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a1",
++          "ordinal": 0,
++          "startMs": 10,
++          "endMs": 5000
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a2",
++          "ordinal": 1,
++          "startMs": 20,
++          "endMs": 30
++        },
++        {
++          "kind": "action",
++          "stepId": "step-2",
++          "admissionId": "m-1",
++          "ordinal": 0,
++          "startMs": 40,
++          "endMs": 70
++        },
++        {
++          "kind": "action",
++          "stepId": "step-2",
++          "admissionId": "m-2",
++          "ordinal": 0,
++          "startMs": 40,
++          "endMs": null
++        },
++        {
++          "kind": "action",
++          "stepId": "step-3",
++          "admissionId": "n-1",
++          "ordinal": 0,
++          "startMs": 60,
++          "endMs": null
++        },
++        {
++          "kind": "action",
++          "stepId": "step-3",
++          "admissionId": "n-2",
++          "ordinal": 0,
++          "startMs": 60,
++          "endMs": 65
++        }
++      ],
++      "accepted": [
++        {
++          "kind": "step",
++          "stepId": "step-1",
++          "admissionId": null,
++          "ordinal": null,
++          "startMs": 10,
++          "endMs": 30
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a1",
++          "ordinal": 0,
++          "startMs": 10,
++          "endMs": 5000
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a2",
++          "ordinal": 1,
++          "startMs": 20,
++          "endMs": 30
++        },
++        {
++          "kind": "step",
++          "stepId": "step-2",
++          "admissionId": null,
++          "ordinal": null,
++          "startMs": 40,
++          "endMs": null
++        },
++        {
++          "kind": "action",
++          "stepId": "step-2",
++          "admissionId": "m-1",
++          "ordinal": 0,
++          "startMs": 40,
++          "endMs": 70
++        },
++        {
++          "kind": "action",
++          "stepId": "step-2",
++          "admissionId": "m-2",
++          "ordinal": 0,
++          "startMs": 40,
++          "endMs": null
++        },
++        {
++          "kind": "step",
++          "stepId": "step-3",
++          "admissionId": null,
++          "ordinal": null,
++          "startMs": 60,
++          "endMs": 65
++        },
++        {
++          "kind": "action",
++          "stepId": "step-3",
++          "admissionId": "n-1",
++          "ordinal": 0,
++          "startMs": 60,
++          "endMs": null
++        },
++        {
++          "kind": "action",
++          "stepId": "step-3",
++          "admissionId": "n-2",
++          "ordinal": 0,
++          "startMs": 60,
++          "endMs": 65
++        }
++      ],
++      "utf16CodeUnitOrder": null
++    }
++  ],
++  "refusedLedger": [
++    {
++      "admissionId": "a-old",
++      "stepId": "step-1",
++      "ordinal": 0,
++      "dispatchCount": 1
++    },
++    {
++      "admissionId": "b-new",
++      "stepId": "step-1",
++      "ordinal": 0,
++      "dispatchCount": 1
++    },
++    {
++      "admissionId": "z-zero",
++      "stepId": "step-1",
++      "ordinal": 0,
++      "dispatchCount": 0
++    },
++    {
++      "admissionId": "\ufffd",
++      "stepId": "step-1",
++      "ordinal": 0,
++      "dispatchCount": 1
++    },
++    {
++      "admissionId": "\ud83d\ude00",
++      "stepId": "step-1",
++      "ordinal": 0,
++      "dispatchCount": 1
++    }
++  ],
++  "refused": [
++    {
++      "name": "duplicateAdmissionAtADifferentTime",
++      "timings": [
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a-old",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 105
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a-old",
++          "ordinal": 0,
++          "startMs": 200,
++          "endMs": 210
++        }
++      ]
++    },
++    {
++      "name": "exactDuplicateItem",
++      "timings": [
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a-old",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 105
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a-old",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 105
++        }
++      ]
++    },
++    {
++      "name": "unknownAdmission",
++      "timings": [
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a-old",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 105
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "ghost",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 110
++        }
++      ]
++    },
++    {
++      "name": "undispatchedAdmission",
++      "timings": [
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a-old",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 105
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "z-zero",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 110
++        }
++      ]
++    },
++    {
++      "name": "wrongOrdinal",
++      "timings": [
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a-old",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 105
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "b-new",
++          "ordinal": 1,
++          "startMs": 100,
++          "endMs": 110
++        }
++      ]
++    },
++    {
++      "name": "wrongStepId",
++      "timings": [
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a-old",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 105
++        },
++        {
++          "kind": "action",
++          "stepId": "step-2",
++          "admissionId": "b-new",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 110
++        }
++      ]
++    },
++    {
++      "name": "tieInReverseAdmissionOrder",
++      "timings": [
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "b-new",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 110
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "a-old",
++          "ordinal": 0,
++          "startMs": 100,
++          "endMs": 105
++        }
++      ]
++    },
++    {
++      "name": "astralTieInUtf16CodeUnitOrder",
++      "timings": [
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "\ud83d\ude00",
++          "ordinal": 0,
++          "startMs": 8,
++          "endMs": null
++        },
++        {
++          "kind": "action",
++          "stepId": "step-1",
++          "admissionId": "\ufffd",
++          "ordinal": 0,
++          "startMs": 8,
++          "endMs": null
++        }
++      ]
++    }
++  ]
++}
+diff --git studio-runner/src/guided/evidence.ts studio-runner/src/guided/evidence.ts
+index 7b58904..cdd2faf 100644
+--- studio-runner/src/guided/evidence.ts
++++ studio-runner/src/guided/evidence.ts
+@@ -131,15 +131,34 @@ export interface ActionStamp {
+   end(known: boolean): void;
+ }
+ 
++/**
++ * Unicode code point (scalar) order, the backend's `GuidedRecordingTimings.codePoints`
++ * (ARCH015-03 T1). JS `<` compares UTF-16 code units, which puts an astral character before
++ * U+E000..U+FFFF; the backend's strict-order check would then refuse the whole timing list.
++ */
++function compareCodePoints(a: string, b: string): number {
++  let i = 0;
++  let j = 0;
++  while (i < a.length && j < b.length) {
++    const x = a.codePointAt(i) ?? 0;
++    const y = b.codePointAt(j) ?? 0;
++    if (x !== y) return x - y;
++    i += x > 0xffff ? 2 : 1;
++    j += y > 0xffff ? 2 : 1;
++  }
++  return (a.length - i) - (b.length - j);
++}
++
+ /**
+  * Integer milliseconds, rounded once here because the guided wire forbids fractional lexemes
+- * (AR-1 R2 "rounding"), sorted by the R2 order. Every item is `kind: action`: step items are
+- * derived by the backend, and the reserved kinds belong to OBS-015.
++ * (AR-1 R2 "rounding"), sorted by the R2 order with ARCH015-03's final admissionId key, both
++ * identifiers in code point order. Every item is `kind: action`: step items are derived by the
++ * backend, and the reserved kinds belong to OBS-015.
+  */
+ export function wireTimings(readings: readonly Reading[]): ActionTiming[] {
+   return [...readings]
+     .map(r => ({ ...r, startMs: Math.round(r.startMs), endMs: r.endMs === null ? null : Math.round(r.endMs) }))
+-    .sort((a, b) => a.startMs - b.startMs || a.ordinal - b.ordinal || (a.stepId < b.stepId ? -1 : a.stepId > b.stepId ? 1 : 0) || (a.admissionId < b.admissionId ? -1 : a.admissionId > b.admissionId ? 1 : 0))
++    .sort((a, b) => a.startMs - b.startMs || a.ordinal - b.ordinal || compareCodePoints(a.stepId, b.stepId) || compareCodePoints(a.admissionId, b.admissionId))
+     .map((r): ActionTiming => ({ kind: 'action', stepId: r.stepId, admissionId: r.admissionId, ordinal: r.ordinal, startMs: r.startMs, endMs: r.endMs }));
+ }
+ 
+diff --git studio-runner/test/guided/evidence.test.ts studio-runner/test/guided/evidence.test.ts
+index ef7ae73..42c8857 100644
+--- studio-runner/test/guided/evidence.test.ts
++++ studio-runner/test/guided/evidence.test.ts
+@@ -4,6 +4,7 @@ import { join } from 'node:path';
+ import { tmpdir } from 'node:os';
+ import { randomUUID } from 'node:crypto';
+ import fixtures from '../../../docs/specs/studio-observed-authoring/contracts/v3/fixtures.json' with { type: 'json' };
++import timingOrder from '../../../docs/specs/studio-observed-authoring/contracts/v3/timing-order-vectors.json' with { type: 'json' };
+ import { createGuidedRecorder, guidedRecordingKeys, timingScaleHolds, wireTimings, MAX_RECORDING_CALLBACK_ATTEMPTS } from '../../src/guided/evidence.js';
+ import type { GuidedRecorderPorts, RecordingEvidenceBody } from '../../src/guided/evidence.js';
+ import { validate } from '../../src/guided/contracts.js';
+@@ -186,3 +187,53 @@ describe('timing serialization and scale guard', () => {
+     [[{ kind: 'action' as const, stepId: 's', admissionId: 'a', ordinal: 0, startMs: 0, endMs: 600_000 }], true],
+   ])('timingScaleHolds %#', (timings, expected) => { expect(timingScaleHolds(timings, 600)).toBe(expected); });
+ });
++
++/**
++ * ARCH015-03 T1 parity with the backend (validation ledger rows 83/84): the same vector file drives
++ * `GuidedRecordingTimingsTest`. The runner sends action items only, so its effective order is
++ * startMs, ordinal, stepId, admissionId, both identifiers in code point order.
++ */
++describe('timing tie parity (shared vector with GuidedRecordingTimingsTest)', () => {
++  const cases = (row: number) => timingOrder.cases.filter(c => c.ledgerRow === row);
++  const utf16 = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
++
++  it('distinctAdmissionsWithIdenticalMeasuredKeysRemainDistinct', () => {
++    expect(cases(83)).not.toHaveLength(0);
++    for (const c of cases(83)) {
++      const readings = c.readings.map(r => ({ ...r }));
++      expect(wireTimings(readings), c.name).toEqual(c.wire);
++      expect(readings, c.name).toEqual(c.readings); // readings are never rewritten
++      expect(new Set(c.wire.map(t => t.admissionId)).size).toBe(c.readings.length); // both attempts kept
++    }
++  });
++
++  it('tieEndSelectionAndUnicodeOrderMatchRunner', () => {
++    expect(cases(84)).not.toHaveLength(0);
++    for (const c of cases(84)) {
++      const wire = wireTimings(c.readings);
++      expect(wire, c.name).toEqual(c.wire);
++      expect(wireTimings([...c.readings].reverse()), c.name).toEqual(c.wire); // input order is irrelevant
++      for (const item of wire) expect(Object.keys(item)).toEqual(['kind', 'stepId', 'admissionId', 'ordinal', 'startMs', 'endMs']);
++      // The vector discriminates: a UTF-16 code-unit comparator orders these cases differently.
++      if (c.utf16CodeUnitOrder !== null) {
++        const legacy = [...c.wire].sort((a, b) => a.startMs - b.startMs || a.ordinal - b.ordinal || utf16(a.stepId, b.stepId) || utf16(a.admissionId, b.admissionId));
++        expect(legacy.map(t => t.admissionId)).toEqual(c.utf16CodeUnitOrder);
++        expect(c.utf16CodeUnitOrder).not.toEqual(wire.map(t => t.admissionId));
++      }
++    }
++  });
++
++  it('carries an equal-millisecond astral tie through the recording callback and never invents an absent reading', async () => {
++    const c = timingOrder.cases.find(x => x.name === 'astralAdmissionTieKeepsAbsentPreNativeReadingAbsent');
++    if (!c) throw new Error('VECTOR');
++    // Origin 1000, both begins read 1008, end(false) reads nothing: no +1 ms, no re-read.
++    const h = await harness({ origin: [1_000, 1_008, 1_008] }); h.recording.launchRequest()?.ready(true);
++    for (const r of c.readings) h.recording.begin(r.admissionId, r.stepId, r.ordinal)?.end(false);
++    // never-started was dispatched by the ledger but refused before its native effect: no begin().
++    expect(await h.recording.settle({ identity: sessionIdentity(), videoPath: await playable(h.recording.directory), orderlyClose: true, callback: h.callback })).toBe('STORED');
++    const body = h.calls[0]?.body; if (!body) throw new Error('CALL');
++    expect(body.timings).toEqual(c.wire);
++    expect(JSON.stringify(body.timings)).not.toContain('never-started');
++    expect(validate<RecordingEvidenceBody>('bridge', body, 'recordingEvidence')).toEqual(body);
++  });
++});

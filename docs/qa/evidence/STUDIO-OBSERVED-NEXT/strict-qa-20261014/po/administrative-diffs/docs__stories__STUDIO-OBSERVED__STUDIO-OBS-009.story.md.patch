@@ -1,0 +1,19 @@
+--- docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md (before Pax administration)
++++ docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md (after Pax administration)
+@@ -330,6 +330,16 @@
+ - **MODEL-SIZING** (014:OPS-001; AC-7 D-C benchmark / existing tuning path; owner @architect + @pm): Size from real D-C measurements. Defaults remain concurrency 3, input 5,242,880 and output 640,000; full-ceiling reservation without refund explains about 20–21 full-budget sessions per CSI/day. Change limits only through the existing architect ruling and PM acknowledgement; preserve UTC-midnight Retry-After. Open follow-up; no pass or waiver supplied by closure.
+ - **LIVE-RECORDING** (013:external-Sonic, 013:C-17, 014:SIEM sink and audit-retention Q3; Live evidence, C-17 and ops inputs; owner @dev runner + Platform/SRE + @qa): Execute real Sonic range/lifecycle/ingress and manual password-masking inspection C-17; obtain actual SIEM sink and retention inputs. Local object-store, controlled Chromium and audit-canary results do not satisfy these external checks. Carry sign-off into OBS-010. Unavailable services and human inspections remain unrun, with named owners; no simulated pass.
+ 
++
++### Strict local-proof reconciliation — 2026-10-14
++
++The dated CONCERNS placement list above is retained as history. Current dispositions below follow independent strict Quinn approval of 013/014 and the existing strict 012B closure. Existing acceptance criteria, tasks, lifecycle and external gates are unchanged. Full source/proof links: [`closure-placements-reconciliation.json`](../../qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json).
++
++- **RUNNER-LAUNCH**: Final local startup, ownership, kill and native content cases passed in 013. Historical pre-oracle CONTEXT_LOST and runner 503 causes remain unknown and distinct; representative folded/deployed reliability and AC-12 recurrence attribution stay in OBS-009. The corrected profile test ownership gap does not attribute those historical production failures. [reconciliation-key: strict-qa-20261014:RUNNER-LAUNCH]
++- **RUNNER-SCRATCH**: 013 implements the bounded private ownership-marked startup sweep and proves real SIGKILL/restart, live-worker preservation, signal settlement and external-canary safety. OBS-009 folds this existing utility into its single-process/image startup and proves deployed behavior. Legacy unmarked scratch is preserved; no SIGKILL finally, victim upload or hostile same-UID isolation claim. [reconciliation-key: strict-qa-20261014:RUNNER-SCRATCH]
++- **MODEL-SIZING**: Real D-C provider measurements and architect/PM sizing remain open. Controlled budget tests and the full-ceiling 20–21 session explanation are not live capacity or measured cost proof; existing limits and tuning authority remain. [reconciliation-key: strict-qa-20261014:MODEL-SIZING]
++- **LIVE-RECORDING**: Actual Sonic range/lifecycle/ingress, human C-17 masking, SIEM sink and retention inputs remain unrun or unconfirmed with their original owners. Local native/store/process tests supply no external pass. [reconciliation-key: strict-qa-20261014:LIVE-RECORDING]
++
+ ## Dev Agent Record
+ 
+ Not started. Draft preparation only; no implementation evidence yet.

@@ -10,6 +10,7 @@ That guide supersedes the earlier Sonic/fake-store setup notes below; cloud prov
 | **Sections from 10.18a** | §1 Chromium and the sandbox · §2 Egress and approved destinations · §3 Evidence storage and expiry · §4 Signals, drain and reaping |
 | **Sections from 10.18b** | §5 Stuck runs (reapers, ledger states, what an operator may and may not do by hand) · §6 The kill switch · §7 SSE · §8 Manifest recovery · §9 Identity (`ED-02`) · §10 CSRF · §11 Configuration delivery |
 | **Sections from 10.19** | **§12 Rollback** |
+| **Sections from STUDIO-OBS-009** | **§14 One entrypoint, TLS everywhere, the one-pod guard and the new Secrets** (written 2026-10-18 by @devops); the `CMD` paragraph of §4 is amended in the same change. §§1-3 and §5-13 were **not** re-audited by this change: §2 in particular still describes the `callback-api` class without the guided connector port (see §14.6) |
 | **Written by** | @dev (Dex), story 10.18a · 2026-09-15; assembled by @dev (Dex), story 10.18b · 2026-09-16; audited and extended by @dev (Dex), story 10.19 · 2026-09-17 |
 | **Last audited against the merged system** | **2026-09-17**, story 10.19 AC-8, at integration head `d3700f23d` (10.30, 10.31 and 10.32 merged). Drift found and corrected in this pass: `ED-02`'s owner (three places), the lifted 10.19 drafting gate (two places), story 10.30's write authorization (§9.1 new), story 10.31's video-route refusal surface (§7 new). Checked and found **not** drifted: §1–§6, §8, §10, §11 — including §11's "no key 10.18b added is affected" claim, which still holds for story 10.32's `STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS` because it matches the `STUDIO_RUNNER_*` shape §11 already names. Every disclosed limitation below is cross-checked against [`docs/qa/staging-acceptance-register.md`](../qa/staging-acceptance-register.md) (AC-8c) |
 
@@ -197,12 +198,19 @@ still SPK-03 and have not been run.
 
 *Implements architecture §9.3 and ADR-001 §1.1. Expanded in 10.18b's stuck-runs section.*
 
-**The image's `CMD` is the bare exec form on purpose.** `SIGTERM` must reach the Node process
-directly so the drain runs: readiness goes false, in-flight work finishes, the scratch is cleared.
-Substituting a shell form makes PID 1 a shell that never forwards the signal — measured against
-this image, `docker stop` then waits out its **entire** grace period and is SIGKILLed, and neither
-`runner.draining` nor `runner.drained` is ever emitted. **Do not add an `ENTRYPOINT` wrapper and do
-not override `command`/`args` in the chart.**
+**The image's `CMD` ends in `exec node dist/main.js` on purpose.** `SIGTERM` must reach the Node
+process directly so the drain runs: readiness goes false, in-flight work finishes, the scratch is
+cleared. Since STUDIO-OBS-009 (ruling A6) the `CMD` is
+`["sh", "-c", "ulimit -c 0 && exec node dist/main.js"]`: the shell exists only so `ulimit -c 0`
+(core dumps off; a core of a process that held a decrypted secret is a plaintext copy on disk) runs
+first, and `exec` **replaces** the shell, so Node keeps the container's PID and receives the signal.
+Dropping `exec` (a shell that stays in front of Node never forwards `SIGTERM`) makes `docker stop`
+wait out its **entire** grace period and be SIGKILLed, and neither `runner.draining` nor
+`runner.drained` is ever emitted. **Do not add an `ENTRYPOINT` wrapper and do not override
+`command`/`args` in the chart**; the deployment tier asserts the chart overrides neither.
+**That the new `CMD` still drains on `docker stop` has not been run** (it needs a Docker build and
+run; owed to @devops, see §14.5). The earlier "bare exec form" measurement was taken against the old
+`CMD` and does not carry over.
 
 **Reaping is `shareProcessNamespace: true`**, not an in-image init, so the infrastructure pause
 container is PID 1 and reaps orphaned grandchildren. Node as PID 1 reaps only its own known
@@ -592,9 +600,11 @@ inferred from HashiCorp's documentation and has not been checked against the pla
 
 **Caveats an operator will meet:**
 
-- **Response size.** A value may be up to 8192 characters. Lowering
-  `STUDIO_VAULT_MAX_RESPONSE_BYTES` below about 57 KiB can make a stored long value unreadable
-  (the read is refused as oversized and surfaces as `VAULT_UNAVAILABLE`).
+- **Response size.** A value may be up to 4096 characters (OBS-007 AC-12); a longer entry already
+  in Vault is refused at dispatch with `SECRET_TOO_LONG`, never truncated. Keep
+  `STUDIO_VAULT_MAX_RESPONSE_BYTES` at its 64 KiB default: below about 34 KiB a maximum-length value
+  can become unreadable, and an older entry of up to 8192 characters needs about 57 KiB to be read
+  and reported as `SECRET_TOO_LONG` rather than `VAULT_UNAVAILABLE`.
 - **Changing a test's environment hides its earlier secrets.** They stay in Vault under the old
   environment, are not listed, and do not resolve. This is the intended scoping.
 - **Deleting a test leaves its Vault subtree behind.** Purge it in Vault by prefix if needed; Studio
@@ -801,6 +811,13 @@ rollback expires on its original schedule.
 
 ### (e) Executor and contract release order — three steps in one window
 
+> **Superseded for the current system (2026-10-18, STUDIO-OBS-009).** This subsection describes the
+> artifact-1 executor version pin (`2.0.0` to `2.1.0`) and its `RUNTIME_INCOMPATIBLE` refusal. The
+> artifact-1 stamps and that check were retired (STUDIO-OBS-012A, STUDIO-OBS-009 AC-1 P2): a grep of
+> `backend/src/main` and `helm-chart` finds no `executor-version` property today. It is kept as the
+> record of how that release was ordered. **Do not follow its steps for a current release**; the
+> current upgrade notes are §14.4 above and the STUDIO-OBS-010 runbook.
+
 *Added 2026-10-04 (VAL-031). Reconciled 2026-10-05 with VAL-012 (ADR-002 §33.3), following the
 re-gate `regate_2026-10-04b.release_sequence` in
 [`docs/qa/gates/ui-studio-validation-20261004.yml`](../qa/gates/ui-studio-validation-20261004.yml).*
@@ -922,3 +939,163 @@ switch a shared environment to recorded fixtures. Check API readiness and logs, 
 workload-identity binding, Vertex quota, and endpoint reachability. Roll back provider/model changes
 with the chart revision only after engaging the Studio execution kill switch and draining admitted
 runs as described in §12. Existing confirmed revisions and evidence remain revision-bound.
+
+---
+
+## 14. One entrypoint, TLS everywhere, the one-pod guard and the new Secrets (STUDIO-OBS-009)
+
+*Written 2026-10-18 by @devops from the rendered chart and the lane receipts under
+`docs/qa/evidence/STUDIO-OBS-009/execution-20261018/`. **Legend:** [V] asserted on `helm template`
+output by `studio-runner/test/deployment/` or read from source today; [U] not run, owner named. No
+certificate was issued, no Secret created, no pod started and no image built by this change. The
+guided-authoring operating procedure (sessions, drain, abandon) is the separate STUDIO-OBS-010
+runbook, `studio-guided-authoring.md`; this section covers only what changed in the pod and the
+chart.*
+
+### 14.1 One entrypoint, one Deployment
+
+- The image starts **`node dist/main.js` and nothing else.** There is one process, one Deployment
+  and one listener. Guided authoring is a **mode** of that process, switched by
+  `STUDIO_RUNNER_GUIDED_ENABLED` (chart: `studioRunner.guided.enabled`, **`false` in every shipped
+  values file**). There is no second Deployment, no second start script and no mounted JSON
+  configuration file. [V] `chart.test.ts` asserts one runner Deployment and no guided template file.
+- Configuration is `STUDIO_RUNNER_*` environment keys only. The runner refuses an unenumerated
+  `STUDIO_RUNNER_*` key at start (exit 78), so a stray key from an old release fails the pod instead
+  of being ignored. `STUDIO_RUNNER_VAULT_ADDRESS` is one such key, refused on purpose. [V]
+- With the switch on, seven guided keys are required (worker id, journal directory, controller
+  issuer, subject, public-key file, callback base URL, callback token file); with it off, **any** of
+  them is refused. The chart renders them as a set. Names: `studio-runner/README.md`, "Guided
+  observed-2 worker".
+- `/ready` and `/health` do not change with the mode, and no guided field appears in them. A guided
+  session is visible to operators through the backend, not through the probes. [V]
+
+### 14.2 TLS everywhere: what the chart now requires
+
+The runner serves **TLS only**, with a client certificate **required**; there is no plaintext
+listener in any configuration. A runner that cannot read its TLS files does not start. [V]
+
+| Item | Where | Provider |
+|---|---|---|
+| Runner key, certificate, CA | Secret `studioRunner.tls.secretName`, mounted read-only at mode 0440, directory mount, no `subPath` | Platform/SRE |
+| Controller pin | `studioRunner.tls.controllerCertificateFingerprint256`: SHA-256 of the backend client certificate, 32 upper-case hex pairs joined by `:`. **No default. The render fails without it** (and in any other form) | Platform/SRE, per environment |
+| Backend key store and trust store (API and worker) | Secret `studioRunner.backendTls.secretName`, PKCS12 plus password **files**, rendered as `studio.runner.tls.*` in the mounted `application.yaml` | Platform/SRE |
+| Runner base URL used by API and worker | `https://<fullname>-studio-runner:<port>` | the chart |
+| Exec probe | `node dist/probe.js`, an HTTPS client of its own pod using the runner's own certificate; reads the files on **every** run | the image |
+
+- **A request that presents a CA-issued certificate that is not the pinned backend certificate is
+  refused 401 before any bearer check** on every route except the probe's `/health` and `/ready`.
+  The pin is therefore as sensitive as a key: a renewed backend certificate with an unchanged pin
+  refuses every inbound call. [V] (`tlsListener.test.ts`, per the D1 receipt)
+- **The runner private key and the backend private key never share a pod.** The two Secrets are
+  different and neither pod references the other's. [V]
+- **Rotation.** The runner reads key, certificate and CA **once**; the probe re-reads them every
+  run. So after a certificate change, bump `studioRunner.tls.rotationRevision` and release: without
+  a restart the probe presents the new certificate while the process serves the old one, the pin
+  fails, and liveness restarts the container at an arbitrary moment, possibly mid-session. A renewed
+  backend certificate needs its Secret, the new pin, `rotationRevision` and a rollout **in one
+  release**. Full procedures and certificate requirements (EKU, SANs): `d2/rotation-and-cert-inputs.md`
+  under `docs/qa/evidence/STUDIO-OBS-009/execution-20261018/`.
+- **The backend trust store must hold only the issuer of the Studio service plane**
+  (`studio.runner.tls.trust-store`), never a shared cluster or mesh CA. The client certificate is
+  the transport gate of the guided connector (below), so a broad trust store widens who can open it.
+  (Architect ruling 4(i) c.)
+- **PKCS12.** The backend contract in this release is PKCS12 stores plus password files; the
+  chart's `storeType` is `PKCS12`. If the certificates come from cert-manager, the preferred route
+  is `Certificate.spec.keystores.pkcs12` with `create: true` and a `passwordSecretRef`: mount the
+  password as a **file** from that Secret's key, mount the Secret as a directory without `subPath`
+  so rotation propagates, and note that the generated `truststore.p12` holds only that
+  Certificate's `ca.crt`, which suffices only if the runner and connector certificates share one
+  issuer (otherwise supply a separate trust bundle, for example a trust-manager PKCS12 target). If
+  Platform issues PEM only, **convert on the issuer side**, not in the pod: a conversion init
+  container would put private-key handling and an `openssl` image into the pod that renders
+  untrusted pages. [U] Which cert-manager version and PKCS12 profile Platform runs, and that the
+  JDK 21 reads that profile, are not checked. Owner: Platform/SRE.
+- **The guided connector.** With guided mode on, the **API** pods open a second, TLS-only port
+  (`studioRunner.guided.tlsConnector.port`, default 8443, container port name `guided-tls`) with
+  client authentication required, exposed through its own Service
+  `<fullname>-api-guided-tls` (the ordinary API Service is byte-identical with guided on or off).
+  The backend property is `studio.guided-authoring.connector.port`; a chart that renders any other
+  name leaves the API at port 0 and it refuses to start. The backend certificate's SANs must cover
+  that Service name. [V] (`tls-client-cert.test.ts`)
+- **API ingress NetworkPolicy** (`<fullname>-api-guided-tls-ingress`, rendered **only** while guided
+  mode is on and `studioRunner.networkPolicy.enabled` is true): the connector port is open to the
+  **runner pods and the worker pods only**, and every other API port keeps today's ingress (all
+  sources). The ordinary-port rule is derived from the API's rendered container ports, so a port
+  added later without a rule fails the deployment test rather than a cluster. The worker is a
+  legitimate caller because the translation coordinator runs there. [V] **Enforcement depends on the
+  cluster's CNI (SPK-05 is open) and has not been shown in a cluster [U], owner @devops, G-4 and the
+  010 runbook.** The connector also serves more than the guided routes at the network level; the
+  backend filters by path as the second half of the same defence.
+
+### 14.3 The one-pod guard (A2.6)
+
+Guided mode runs on **exactly one runner pod**. The worker holds sessions in memory and refuses
+calls it does not own, so a second pod could only produce fail-closed refusals, and capacity is the
+constant 1. The chart enforces it at render; each of these fails `helm template` naming the key:
+
+- guided on with `studioRunner.replicaCount` other than 1 (**every shipped values file sets 2**, so
+  an environment enabling guided mode must also set it to 1);
+- guided on with `studioRunner.autoscaling.enabled` true (a ScaledObject would own the count);
+- guided on with `studioRunner.shareProcessNamespace` not true (PID-1 b, below);
+- guided on with `studioRunner.enabled` false.
+
+[V] each has a positive control and a deleted-guard mutation in `chart.test.ts`. With guided on the
+Deployment strategy is `Recreate`, so **a rollout is a short outage**: the old pod drains, then the
+new one starts. The journal lives on an `emptyDir`, so **a replaced pod loses it**; the backend
+fence is then the only authority, and the session needs a new backend session. Do not raise the
+replica count, and do not delete the journal to "resume" a session.
+
+### 14.4 The new Secrets, and what must exist before the release
+
+| Secret (values key) | Pods | Needed |
+|---|---|---|
+| `studioRunner.tls.secretName` | runner | every deployment with the runner enabled |
+| `studioRunner.backendTls.secretName` | API, worker | every deployment with the runner enabled |
+| `studioRunner.guided.callbackToken.secretName` | runner (directory mount, file `token`, re-read on every callback) | guided |
+| `studioRunner.guided.backendTokens.secretName` | API, worker (files for the runner and translation tokens) | guided |
+
+- **UAT breaks on upgrade unless the first two exist first.** `values-uat.yaml` already enables the
+  runner, TLS is mandatory even with guided off, and a missing Secret leaves the pod in
+  `ContainerCreating`; the `values-*.yaml` Secret names are per-environment placeholders that do not
+  exist yet. In the same release the API and worker runner URL changes from `http` to `https`, and
+  runner and callers are not updated atomically, so dispatches during the rollout fail as ambiguous
+  and are left to the reapers. Plan the upgrade for a quiet window.
+- **The guided token issuer is outside this repository (register U21).** Nothing in the chart or
+  code mints the three guided token files (they live at most 300 s and the kubelet can lag behind a
+  Secret update). **A guided-enabled shared environment is blocked until Platform/SRE delivers an
+  external issuer** that refreshes three audience-scoped files. The chart fails closed: an empty
+  token Secret name, issuer, subject or public key fails the render. The token files must be
+  directory mounts (a `subPath` mount goes stale).
+
+### 14.5 PID 1, core dumps and the image checks that are still owed
+
+- Guided start requires the runner's PID to be greater than 1 (`canEnumerateLaunchTree`). In the pod
+  that holds because `shareProcessNamespace: true` makes the pause container PID 1 (the chart
+  refuses to render guided mode without it). In a plain `docker run` **without `--init`** Node is
+  PID 1 and a guided start is refused, exit 78, one line `CONFIGURATION_DENIED LAUNCH_TREE`; use
+  `docker run --init`. A `NODE_OPTIONS` value is refused with `CONFIGURATION_DENIED DEBUG_ENV`. The
+  guard is not relaxed to fit a PID-1 container.
+- Core dumps are off on all three workloads: the API and worker `JAVA_OPTS` carry
+  `-XX:-HeapDumpOnOutOfMemoryError -XX:-CreateCoredumpOnCrash` in every values file, and the runner
+  image's `CMD` runs `ulimit -c 0`. Asserted on rendered output and on the Dockerfile text, not on a
+  running container. [V] An override of `JAVA_OPTS` that drops the flags is caught by the deployment
+  test, not prevented. Whether the backend image's entrypoint actually consumes `JAVA_OPTS`, and the
+  backend's core-file rlimit, are unknown [U] (Platform/SRE).
+- **Owed, not run (no Docker authorization this wave):** the image build and `docker image inspect`
+  of the `CMD`; the `--init` start and the no-`--init` refusal; `docker stop` showing
+  `runner.draining` then `runner.drained` with the new `CMD`; the journal on a read-only root;
+  recording scratch on Linux; the TLS mount modes inside the container; the deployed PID in a pod.
+  Owner @devops. Procedure: `d2/pid1-launch-paths.md` under the same evidence folder.
+
+### 14.6 Known gaps in this runbook
+
+- §2 (egress) describes the `callback-api` destination class as the API's HTTP port. With guided
+  mode on, the same class also covers the connector port (a second port on the same rule; the
+  replay callback stays on the first). The runner NetworkPolicy and its test already say so; §2's
+  prose was not rewritten.
+- The pod's resource sizing for two browsers, the `/tmp` and journal volume sizes, the liveness
+  threshold and the guided drain bound (about 63 s of the 215 s grace) are starting values with a
+  recorded basis (`d2/resource-basis.md`), **unmeasured** (G-4).
+- SIEM routing of the studio audit stream (`studioAuditSiem`, off by default) and the platform-neutral
+  alert specification (`d2/r82-alert-spec.md`) are specified, not exercised; the sink and the alert
+  rendering are Platform/SRE's.

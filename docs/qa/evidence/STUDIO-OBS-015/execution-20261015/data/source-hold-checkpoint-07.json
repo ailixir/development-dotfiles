@@ -1,0 +1,275 @@
+{
+  "artifact": "Dara source hold checkpoint07 \u2014 implementation05 and stale-cache extension",
+  "createdUtc": "2026-10-15T08:17:28.875975+00:00",
+  "sourceHold": true,
+  "priorCheckpoint": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/source-hold-checkpoint-06.json",
+    "sha256": "f9dd6cdc939f79eab62af9422495b1550d2001c124f2fcc7f361b15dacb9761e"
+  },
+  "authority": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/v18-publication-applicability-ruling/manifest.json",
+      "sha256": "f513d7ff46140ed2e5fec0909ce551264d7a919779a9e2811ec8f4d8e952e38f"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/v18-publication-applicability-ruling/qa-design/manifest.json",
+      "sha256": "771aa0074f3a66ccff458f89b7823b1d4daf84b722af61c5f78dd059f0ca7648"
+    }
+  ],
+  "supersededIntent": "undispatched data015-v18-impl04 remains unexecuted historical intent; revised active implementation05 and bounded stale-cache extension only",
+  "sourceFiles": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "beforeSha256": "c4e32a785857137ce849b4a7b879bc92befad973bc1e6b113822eff3bdf7c9ca",
+      "sha256": "03c7b7cc4e2924795cae54362566856502b0ccc480ad50216c81917a43df4661",
+      "bytes": 142962
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+      "beforeSha256": "71df70ac4addbe07646cabaa81b4b3a5bd44538ab91d5d4a7144111bfe9b472d",
+      "sha256": "d1be7d86bd25bfcbf631eac5137531812b5586244794f758e9ac95d9bd83be74",
+      "bytes": 34130
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java",
+      "beforeSha256": "4f834ecd9d2f3222c5416784390466b64d602ce0cff8e0361dbcd7092a7f0ed1",
+      "sha256": "e1e4acd9410a1764b186cc4f9e54be0bfc62bddfcff6246d812e73ddda00b7aa",
+      "bytes": 15602
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+      "beforeSha256": "86b44d31b12f51e0f624ec2d34ba63a99d692f786c396faa24ecab72dad61625",
+      "sha256": "cecad9faf49c0353c37a1b74ecade3f43127fbc554dcaaa675341373905bf45e",
+      "bytes": 25483
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+      "beforeSha256": null,
+      "sha256": "72b013cb4a6c4966954e77b2c61bfb925c12616f5ce0460312cd232a26de54f0",
+      "bytes": 52416
+    }
+  ],
+  "preservedMethods": [
+    {
+      "class": "GuidedPublicationMigrationTest",
+      "originalMethods": [
+        "installedScheduleCodeConstraintKeepsSchedulerVocabularyAndAddsOnlyObservedRefusal",
+        "upgradeBaseEpochAndImmutableHistory",
+        "freshCoreToHeadHasNoCutoverAndNoLegacyRevisionFamily",
+        "claimIsSingleSendRenewalStableAndSessionBudgetCannotReset",
+        "halfRevisionAndMissingObservationCannotCommit",
+        "validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry",
+        "directSqlClaimsAndNewPartitionsKeepTheirIndependentGuards",
+        "postgresReproducesEveryPositiveCanonicalVector",
+        "realLegacyChromeUpgradeAndMillisecondNormalization",
+        "observedChoiceReceiptIsOptionalImmutableAndRollsBackWithPreparation",
+        "observedChoiceReceiptRejectsMissingExtraNullWrongTypesAndRowIdentity",
+        "observedChoiceCanonicalBytesAndUnicodeIdsUseIndependentBounds"
+      ],
+      "currentMethods": [
+        "installedScheduleCodeConstraintKeepsSchedulerVocabularyAndAddsOnlyObservedRefusal",
+        "upgradeBaseEpochAndImmutableHistory",
+        "freshCoreToHeadHasNoCutoverAndNoLegacyRevisionFamily",
+        "claimIsSingleSendRenewalStableAndSessionBudgetCannotReset",
+        "halfRevisionAndMissingObservationCannotCommit",
+        "validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry",
+        "directSqlClaimsAndNewPartitionsKeepTheirIndependentGuards",
+        "postgresReproducesEveryPositiveCanonicalVector",
+        "realLegacyChromeUpgradeAndMillisecondNormalization",
+        "observedChoiceReceiptIsOptionalImmutableAndRollsBackWithPreparation",
+        "observedChoiceReceiptRejectsMissingExtraNullWrongTypesAndRowIdentity",
+        "observedChoiceCanonicalBytesAndUnicodeIdsUseIndependentBounds"
+      ],
+      "removedOrSkipped": []
+    },
+    {
+      "class": "GuidedPublicationEvidenceFixture",
+      "originalMethods": [],
+      "currentMethods": [],
+      "removedOrSkipped": []
+    },
+    {
+      "class": "InferenceMigrationIT",
+      "originalMethods": [
+        "freshInstallStopsAtAdditiveVersionAndUpgradeInventsNoHistory",
+        "revisionMustMatchCaptureAndProtectsEveryNewColumn",
+        "reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot",
+        "baselineIndexRequiresTruthfulFullMarkerAndSurvivesExecutionRetention"
+      ],
+      "currentMethods": [
+        "freshInstallStopsAtAdditiveVersionAndUpgradeInventsNoHistory",
+        "revisionMustMatchCaptureAndProtectsEveryNewColumn",
+        "reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot",
+        "baselineIndexRequiresTruthfulFullMarkerAndSurvivesExecutionRetention"
+      ],
+      "removedOrSkipped": []
+    },
+    {
+      "class": "InferenceMigrationLatestIT",
+      "originalMethods": [
+        "freshAndUpgradedDatabasesReachTheSameHeadWithoutStagedV19",
+        "upgradeToHeadRewritesNoHistoryAndInventsNoEligibility",
+        "everyObservedRevisionColumnRemainsImmutableOnTheHeadSchema",
+        "everyRevisionColumnIsImmutableOnTheHeadSchema",
+        "historicalExecutionCannotBeRelabelledAsFullEvidence",
+        "fullExecutionCannotBeRelabelledToNull",
+        "scopeGuardAllowsNormalLifecycleUpdatesWithUnchangedScope",
+        "scopeGuardCoversExistingAndFuturePartitions",
+        "confirmationSourceIsGuidedRunOnlyAndImmutable"
+      ],
+      "currentMethods": [
+        "freshAndUpgradedDatabasesReachTheSameHeadWithoutStagedV19",
+        "upgradeToHeadRewritesNoHistoryAndInventsNoEligibility",
+        "everyObservedRevisionColumnRemainsImmutableOnTheHeadSchema",
+        "everyRevisionColumnIsImmutableOnTheHeadSchema",
+        "historicalExecutionCannotBeRelabelledAsFullEvidence",
+        "fullExecutionCannotBeRelabelledToNull",
+        "scopeGuardAllowsNormalLifecycleUpdatesWithUnchangedScope",
+        "scopeGuardCoversExistingAndFuturePartitions",
+        "confirmationSourceIsGuidedRunOnlyAndImmutable"
+      ],
+      "removedOrSkipped": []
+    },
+    {
+      "class": "LegacyV20ConfirmedBaseFixture",
+      "originalMethods": [],
+      "currentMethods": [],
+      "removedOrSkipped": []
+    }
+  ],
+  "originalMethodsPreserved": 25,
+  "previousHeadSecretTranslationRepairsUnchanged": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationMigrationTest.java",
+      "beforeSha256": "db319a8f41146efe85a4f9b6949ad234f2f1a5d367bb013806966a1605f83bd9",
+      "afterSha256": "2eef0d9d68bf7d5d1383cb704821df05a24bbd55f0b5300004a575efdb5c4e60",
+      "bytes": 20856
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+      "beforeSha256": "73b28c433f26d9b9805ff10c35cb403b96ec38c7dea1b2a53cbd90e5dc7e5866",
+      "afterSha256": "e10374dc2b77d53bdea27b5611528894e73ac5112d06e6d40c3311db19673458",
+      "bytes": 89680
+    }
+  ],
+  "migrationFiles": [
+    {
+      "path": "backend/src/main/resources/db/migration/V10__uppercase_status_standardization.sql",
+      "sha256": "714ea331197e4b30000b5f5706262172ee1b17ba0f7b13f6c7c33cb44abdba26"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V11__check_acknowledge_assign.sql",
+      "sha256": "13a95eb5154cc4f3bc037bbfcd1c498faf5b0ecd62473857fab0a2a181179732"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V12__tests_revisions.sql",
+      "sha256": "274c26c4d41fbd991e157ec6372d08ca5c53ebe0a9e2d7a7252838228057d0d7"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V13__executions_ledger.sql",
+      "sha256": "f258e01be9963e58b47d6dfef7171e4cd36043e82e4c0f2ea78ec439f47abeb7"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V14__guided_sessions.sql",
+      "sha256": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V15__publication.sql",
+      "sha256": "ef092dfff93a24c4a05dc9afee6ba4a3b9a054f6cf39ca4059c186ff10777b40"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V16__scheduling.sql",
+      "sha256": "6d7f4888aabf4a7206bfff9bd242ee15037121e74ed2c3fa32156a4ed862ab72"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V17__secret_use_audit.sql",
+      "sha256": "a5b6a89525f3b53769678361c204ba3a78564f9f108aeb0979c184a702bc3ba7"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V18__drop_plaintext_secrets.sql",
+      "sha256": "febfd5eb1624240e58d87bd92bdb2d4b82c762a7cf6fd94de8077eb6f2fc7c9f"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V19__guided_governance.sql",
+      "sha256": "628b47efbb656aef8a3260f03e7dc77d988555a306652b4d433b8796e3424855"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V1__init.sql",
+      "sha256": "2e010e6e1e6f01706acb0f644ad37a3ba0340363979a994de34a4b33ba750e29"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V20__guided_session_recording.sql",
+      "sha256": "e26da3077ca90fc0f3c6d7f4fc7156d416c39b66482330acb24d62d61514acc2"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V2__schedule_next_execution.sql",
+      "sha256": "7a36462fcceb86d2ccb533c0743c20bcfedadb819f9674c0d1e8eb847830ca7f"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V3__check_templates_seed.sql",
+      "sha256": "8c356f1081df490cbc213f31330883f8be477de722fc737d588f52e2ef8b48ee"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V4__secrets_encrypted_value.sql",
+      "sha256": "91662e9f2c8f07e24d85d15d5ce7e5508d4f20ddfc78fdfd1dbfa083f30b24a7"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V5__story_3_schema_additions.sql",
+      "sha256": "b930941c1b7ba06b8e34b67021425cffedd3264b225607ff3f170ba4545f0477"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V6__report_next_delivery.sql",
+      "sha256": "d4669fed42d82824f278364845540ee4318ee9ab243bc0780a68c5092695d913"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V7__partition_remaining_tables_and_defaults.sql",
+      "sha256": "ee6f50fe699f70af713a7c739acb4eb358a562837e8c43ffb130a6604fb62174"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V8__failed_dispatches_and_report_failures.sql",
+      "sha256": "78ad49e718124c78f6e7a3a5a64b203f175c73642f2754a01647166c89ec89be"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V9__schedules_check_type_column.sql",
+      "sha256": "9c91a6b11df2f9b012a638cbf1e0ae921d4dd09c0710a22db9d3c5a18c412f0d"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql",
+      "sha256": "b012ddddb44b599c4f8699be39281dd6f407b2cb93b41386a79eb22c06c4d179"
+    }
+  ],
+  "migrationsChanged": false,
+  "fixtureInterfaces": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/legacy-v20-fixture-interface-01.md",
+      "sha256": "929fb6a30c33443a087f9070570356c1a76cad0a4206bda05de12f1fcf4ea2a0"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/legacy-v20-fixture-interface-02.md",
+      "sha256": "9eb55704ecdd652a6189202cf2eb895a2db4605fd5b8af69427d44175b2593ce"
+    }
+  ],
+  "requirementsMapping": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/implementation05-source-requirements.json",
+    "sha256": "f304e8ea3386f045e7350c5a5c79e1f955866228de5680a1ecbc2f322faee110"
+  },
+  "execution": {
+    "compilation": "NOT_RUN",
+    "testsExecuted": 0,
+    "databaseCommandsExecuted": 0,
+    "nativeCommandsExecuted": 0,
+    "buildDistGenerationFormatCommandsExecuted": 0
+  },
+  "boundaries": [
+    "Explicit historical18 and20 test-only SQL authority; no current Java commit-on-old-schema claim.",
+    "Current head always production repository.commit; no missing-function catch/fallback/interception.",
+    "Two atomic preboot20 variants are separately named, no second fresh factory call or protected head cache mutation.",
+    "Full typed current pure preimages are checked; outcome/validator/policy/bootstrap test facts remain synthetic and confer no browser/model/Vault/live worker/joined acceptance credit.",
+    "Exact V1-V20 and V21b012 remain immutable. Existing55SQLPASS and failed logs remain separate historical evidence.",
+    "No method skips/removals, no production/schema/generated/oracle/runner/frontend/story/gate changes."
+  ],
+  "remainingSourceGaps": [],
+  "remainingValidation": "All new and previous data/head/backend/HTTP/joined/55migration obligations remain open until captured real compile/PG15/test execution and independent QA. Source readiness is not PASS.",
+  "qaVerdict": null,
+  "next": "HOLD all five Dara source/helper paths plus prior secret/translation/migration files; root exclusively schedules captured command and any repair release."
+}

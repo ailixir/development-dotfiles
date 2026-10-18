@@ -1,0 +1,184 @@
+{
+  "story": "STUDIO-OBS-008",
+  "artifact": "Consolidated obligation checklist for the 008 executor",
+  "author": "Pax (@po)",
+  "date": "2026-10-16",
+  "storySha256": "650333492bd69176ebb01bf3581da78c4a2f164470c2d824b1bc5a72cb03a84d",
+  "storySha256Note": "Refreshed 2026-10-17 by Pax (@po) to the story at 0.3.13 (user scope decision). Previous value 4b6c2c481be16e5c09aa40168d3a54e9f4a0a07bbb429302592e69bc3204580c (story 0.3.9 era, stale). Story sha256 immediately before the 0.3.13 edit: 0013f14a75db31859b0627230af2ead0281e75d1a3f0de35f0bf68866d7fc7fb. Re-check at W0 if the story moves again. Refreshed again 2026-10-17 by Pax (@po) to the story at 0.3.14 (PO scope decision 2, accessibility reduced to must-have); the 0.3.13 value was be87eaac686c637ea10d0d0678eccdbc85dd73ddc12a86acce70a3cee79282b5.",
+  "rule": "Every item is OPEN and none is passed by omission. An item that cannot be met is reported OPEN with its owner, never as PASS, N/A or waived. All statuses below are OPEN or PLANNED_NOT_RUN as of this record.",
+  "counts": {"holds": 4, "t0": 7, "acceptanceCriteria": 9, "inheritedV2": 9, "inheritedPolicy014": 4, "inheritedPolicyNotApproved": 3, "conditionalKL015Q4": 4, "allowlist": 1, "carriedFollowUps": 5, "architectRulings": 8, "delta": 12, "constraints": 6, "gates": 7},
+  "holds": [
+    {"id": "H-1", "text": "STUDIO-OBS-015 independent QA PASS and Done (story Status InProgress at 2026-10-16), then Pax administrative closure and Orion root CLI/wave closure", "source": "008 GO conditions; architect P0; QA holds"},
+    {"id": "H-2", "text": "Root records the post-015 production contract, schema, generated-bundle, pin and source baseline. It re-verifies the hashes quoted in the PO delta amendment and reconciles any drift", "source": "QA holds 2; delta amendment header"},
+    {"id": "H-3", "text": "Root reconciles the final 008 ownership and dispatches the 008 C-int unit first. Dependent lanes start only after the interface freeze", "source": "QA holds 3; architect P7"},
+    {"id": "H-4", "text": "No 008 edit in this worktree while the 015 source freeze is live (frontend/src, docs/specs, backend/src, studio-runner, tools)", "source": "feasibility-008-011 '015 source freeze'"}
+  ],
+  "t0": [
+    {"id": "T0-1", "text": "@architect P1 capability route GET /api/v1/studio/tests/{id}/capabilities is already ruled. Record the OpenAPI pins old and new, quoted", "source": "AC-5a; should-fix ROUTE-001; architect P1"},
+    {"id": "T0-2", "text": "Declare AC-3/AC-4 (plus the inherited copy blocks) the canonical state and copy list in the Dev Agent Record. The UX panel is not a repository artifact", "source": "should-fix SRC-001; po-scope-readiness copyAndPrivacyBoundaries"},
+    {"id": "T0-3", "text": "Ruling A1: the public replay surface for LOGIN_REQUIRED{stepId, loginStepsPresent} and drift step identity", "source": "delta D-7"},
+    {"id": "T0-4", "text": "Ruling A2: a public password-refusal discriminator, or the secret-fill copy is recorded as unreachable", "source": "delta D-6"},
+    {"id": "T0-5", "text": "Ruling A3: confirm the D-12 'None of these' mapping (default: cancel with userRequested, then focus step N)", "source": "delta D-12"},
+    {"id": "T0-6", "text": "KL-015-Q4 trigger: record whether STUDIO-OBS-009 AUTHORED-ECHO-01 has landed, citing its evidence path. As of 2026-10-16 it has not; 009 is Ready", "source": "conditional obligation a (checked at T2 start)"},
+    {"id": "T0-7", "text": "Name the Redux slice keys (studioSlice guided state only)", "source": "should-fix SLICE-001; T1"}
+  ],
+  "acceptanceCriteria": [
+    {"id": "AC-1", "text": "Typed studioGuidedApi.ts for the 8 guided operations through the central apiClient. Types derive from v3. The MSW guidedHandlers/guidedFixtures are derived from contracts/v3 fixtures. A contract test asserts that each guided operation has a client method and a handler. Idempotency-Key is sent per D-1", "deltaItems": ["D-1", "D-2"]},
+    {"id": "AC-2", "text": "One Run with three modes read from GET /tests/{id} readiness, never compileStatus. Auto-finalize at FINALIZING is a continuation with a stable key. Reconnect reuses the session. No hidden second execution. Not-ready is never shown as published", "deltaItems": ["D-3", "D-4", "D-11"], "architect": ["P6", "P7"]},
+    {"id": "AC-3", "text": "States and copy verbatim, with REPLAYING_PREFIX, PAGE labels rendered as untrusted, expiry warnings at 60 s and 20 s, and no sign-in, selector or DOM-upload state", "deltaItems": ["D-4", "D-5", "D-6", "D-7", "D-12"], "architect": ["P2", "P4"]},
+    {"id": "AC-4", "text": "LOGIN_REQUIRED, both variants, with the 'Go to step N' and 'Open Variables' actions. Guided half now; replay half after A1", "deltaItems": ["D-7"]},
+    {"id": "AC-5", "text": "Server-provided vaultSecrets capability (P1); ReferencePicker insert menu; SecretInput reuse; never-echo canaries assert the value is absent and the ID present; templates and onboarding follow the capability", "deltaItems": ["D-8"], "architect": ["P1"]},
+    {"id": "AC-6", "text": "Read-only 'Steps as learned' explanation. Learned versus replayed evidence is never conflated. PUBLISHED and currentReadiness are shown separately. Receipt reads go through the public result route only", "architect": ["P3"]},
+    {"id": "AC-7", "text": "Guided (getGuidedSessionVideo) and replay video with named per-step and per-action seek. Unavailable video gets a narrative, never a fake player", "deltaItems": ["D-2", "D-10"], "architect": ["P3"]},
+    {"id": "AC-8", "text": "WCAG 2.1 AA: live regions, focus, keyboard, aria-current from P2 progress, named seek buttons, reduced motion, narrow layout. CLN-11 surfaces 4/5 are rewritten with the contrast and target-size rules enabled", "architect": ["P2"], "amended20261017": "User scope decision change 1 (A11): contrast and target-size are NOT enabled in the jsdom audit (no layout engine; studioWcagAudit.test.tsx:132-136). They are enabled and asserted in the real-browser frontend/e2e/studio-guided-accessibility.spec.ts at 1440x900 and 375x812 with the existing axe-core (no new package). The jsdom audit keeps surfaces 4/5 rewritten to distinct guided states with baseline keys regenerated", "amended20261017b": "PO scope decision 2 (user, 2026-10-17; ADR-SC-006), which supersedes amended20261017. AC-8 is now: (a) responsive narrow layout, verified by the AC-9 narrow-layout case; (b) the existing jsdom studioWcagAudit.test.tsx kept green as a regression guard only: no surface rewrite, no rule change (color-contrast/target-size stay disabled), and the pinned baseline is regenerated only if 008's UI changes break it, with before/after recorded. Removed and never credited: the WCAG 2.1 AA target, live regions, focus-on-entry and keyboard operability as a requirement, aria-current, reduced motion, the CLN-11 surface rewrite, the contrast/target-size rules and e2e/studio-guided-accessibility.spec.ts. Kept elsewhere as functional/security/convention: focus to step N (AC-3/AC-4), expiry warnings in text (AC-3), visible seek labels (AC-7), untrusted PAGE-label styling with role/region (AC-3), MUI sx", "status": "OPEN"},
+    {"id": "AC-9", "text": "The Vitest+MSW flow list from AC-9, plus the tests named in the inherited blocks and in D-4/D-6/D-8/D-11/D-12. playwright.config.ts plus e2e/studio-guided.spec.ts against MSW (P5). MSW proof is never claimed as live", "architect": ["P5"]}
+  ],
+  "inheritedV2": [
+    {"id": "V2-a", "text": "Write v2 with stable step IDs: preserved on edit and reorder, fresh on insert and copy, dropped on delete. Test it. Create sends csiId; update sends sourceRevision/configurationRevision (D-9)"},
+    {"id": "V2-b", "text": "One transport signature each. getTest(id) takes no parameter and returns TestDetailDto. Delete the frontend v1 TestRequest/TestDto detail overloads, legacyStudioAuthoringAdapter(.test).ts and the legacy cases in studioContextContract/studioAuthoringTransport tests. listTests keeps TestDto (D-9)"},
+    {"id": "V2-c", "text": "Move the string-step readers to the v2 detail: useRunGate, StudioScheduleDialog, ChecksStudioPage, CreateCheckPage (anchors in the 015 t0-architect-rulings)"},
+    {"id": "V2-d", "text": "MSW authoringHandlers/authoringState drop AUTHORING_V2_REQUIRED/LEGACY_AUTHORING; a v1 body gets 400 INVALID_AUTHORING and nothing is written"},
+    {"id": "V2-e", "text": "Delete the shared legacy-empty-context and mixed-legacy fixture cases through the 008 C-int lane only, in the same unit as V2-b"},
+    {"id": "V2-f", "text": "Re-run the M12 grep on frontend/src and record it. Close before OBS-010 release readiness"},
+    {"id": "V2-g1", "text": "handlers.ts GET/POST/PUT /tests: no v1 fallthrough. Answer TestDetailDto; refuse v1 with 400 INVALID_AUTHORING"},
+    {"id": "V2-g2", "text": "Extend the studioContract.test.ts document-reading harness: getTest/createTest/updateTest handler responses validate against each operation's declared $ref schema"},
+    {"id": "V2-baseline", "text": "Start from 015's four scoped-exception files (fixtures.ts:72, readinessFixtures.ts:37, pageSaveAndStop.test.tsx:265, studioContract.test.ts with its renamed getTest example test). Record the frontend counts before and after against 015's 701/69 live-tree baseline"}
+  ],
+  "inheritedPolicy014": [
+    {"id": "POL-a", "text": "Governed terminal POLICY_DENIED narrative. It names no cause and is not the secret copy. It may point to check/uncheck wording or the CSI owner's side-effect setting"},
+    {"id": "POL-b", "text": "SIDE_EFFECT_CONFIRMATION/CONFIRM_ACTION (one AUTHORED choice) is rendered as a confirmation, not 'Which one did you mean?'. Declining follows D-12/A3"},
+    {"id": "POL-c", "text": "Copy owner @ux-design-expert, under the AC-3 conventions"},
+    {"id": "POL-d", "text": "AC-9 tests: a governed POLICY_DENIED result shows the a narrative; one confirmation is confirmed through to continuation"}
+  ],
+  "inheritedPolicyNotApproved": [
+    {"id": "PNA-a", "text": "A 409 POLICY_NOT_APPROVED start (retryable false; GUIDED_POLICY_ABSENT/UNAPPROVED/PENDING_VERSION) shows inline approval-needed feedback. Copy by @ux-design-expert"},
+    {"id": "PNA-b", "text": "No session, state, poll, finalize or automatic retry follows"},
+    {"id": "PNA-c", "text": "The transport and MSW consume the closed v3 envelope. AC-9 verifies the feedback and that no follow-on calls happen"}
+  ],
+  "conditionalKL015Q4": [
+    {"id": "Q4-a", "text": "At T2 start, record whether AUTHORED-ECHO-01 has landed"},
+    {"id": "Q4-b", "text": "If not landed: authored-literal target-not-found copy by @ux-design-expert"},
+    {"id": "Q4-c", "text": "No contract change. Use the hint fallback if the landed data cannot tell the case apart, and record that choice"},
+    {"id": "Q4-d", "text": "AC-9 tests with a control case; name the copy key for OBS-009 AUTHORED-ECHO-01 f"}
+  ],
+  "allowlist": [
+    {"id": "ALLOW-A", "text": "Remove all 10 class-A entries in the same changes as their handlers: 8 guided at T1/T2 (getGuidedSessionVideo included), listTestSecrets/createTestSecret at T3. Keep class B (streamExecution) and class C (5 guided-policy operations). The capability operation is never allowlisted. At T5 the Dev Agent Record shows zero class-A entries and quotes the final allowlist"}
+  ],
+  "carriedFollowUps": [
+    {"id": "FE-WORKERS", "text": "Run 008's own final frontend gates. Attribute any default-worker timeout by file. Do not raise timeouts"},
+    {"id": "FE-A11Y", "text": "Distinct guided-state surfaces 4/5. Check browser contrast and target size, keyboard and focus, busy-state label-in-name, tooltip reachability and the Add-a-step aria-describedby. jsdom alone is limited evidence", "status": "DESCOPED_BY_USER_20261017", "amended20261017b": "PO scope decision 2 (user, 2026-10-17; ADR-SC-006). Descoped from OBS-008 in full: busy label-in-name, tooltip keyboard reach, Add-a-step aria-describedby, browser contrast/target size and the distinct surfaces 4/5 (CLN-11's 008 half). Post-GA backlog item (README follow-up table), owner @ux-design-expert + @dev frontend. Not passed and not waived; not moved to another story. 008 keeps the existing jsdom audit green as a regression guard (AC-8 b)"},
+    {"id": "PLAYBACK-COST", "text": "Measure through the real GuidedSessionVideoController, local PostgreSQL and object store, and loopback Core: 20 sequential plus 4-concurrent batches, 100 range requests in total. Record counts, p50/p95/max, lock observations and the revoked/Core503 refusal. Keep every-range authorization; no SLO is invented", "status": "DESCOPED_BY_USER_20261017", "disposition": "Descoped from OBS-008 by the user on 2026-10-17. Open post-GA backlog item, owner @architect + @dev playback. Not passed and not waived; not moved to another story. The stronger per-range authorization stays"},
+    {"id": "PLAYBACK-COPY", "text": "Neutral guided recording unavailable/expired wording that keeps codes and statuses; coordinate with the OBS-010 runbook", "status": "DESCOPED_BY_USER_20261017", "disposition": "Descoped from OBS-008 by the user on 2026-10-17. Open post-GA backlog item, owner @ux-design-expert. Not passed and not waived; not moved to another story"},
+    {"id": "FE-CONSUMERS", "text": "Real guided and secrets clients and mirrors, labelSource rendering, governed refusal and confirmation. No intermediate release"}
+  ],
+  "architectRulings": [
+    {"id": "P1", "text": "Per-test capability route, vaultSecrets = configured provider (not health), fail-closed, apiClient __doNotRetry, useStudioCapabilities hook; route, client, MSW and OpenAPI land atomically"},
+    {"id": "P2", "text": "PublicProgress on PublicSession and result through one GuidedPublicPresentationProjector. activeStep is null when no valid index exists; it is never inferred"},
+    {"id": "P3", "text": "PublicExplanation on the result, including failed and conflict results. Controlled label vocabulary, reference IDs separate, no values, honest provenance"},
+    {"id": "P4", "text": "Start refusals are inline, with no session: POLICY_NOT_APPROVED, REVISION_CONFLICT incl. BASE_IDENTITY_INCOMPLETE, MISSING_SOURCE, ORIGIN_NOT_ALLOWED, RUNTIME_INCOMPATIBLE, BUDGET_EXCEEDED. A start 429 may arrive as either the v3 error or the platform RATE_LIMITED envelope, and either way there is no automatic start"},
+    {"id": "P5", "text": "Test-only Node MSW proxy plus the real Vite app. No service worker. Add @playwright/test 1.63.0 with its lockfile through the package owner. Use a local non-secret WebM fixture with real range behaviour"},
+    {"id": "P6", "text": "Server start context from guidedStart in capabilities. sessionStorage recovery pointer key checks.studio.guided.v1:<testId> holding only safe IDs and keys. Retry the exact body with the same key; never fabricate a session identity"},
+    {"id": "P7", "text": "Finalize POST /studio/guided-sessions/{id}/finalize with body {schemaVersion:3, expectedSourceRevision, expectedConfigurationRevision}. C-int measures the operation count 43 → 44 and re-anchors the pins. Correct the stale runbook finalize paragraph in the same unit"},
+    {"id": "P-COST", "text": "Playback-cost ratification retained; the measurement is PLAYBACK-COST above", "amended20261017": "The measurement (PLAYBACK-COST) is descoped from 008 by the user on 2026-10-17 and is an open post-GA backlog item. The ratification and the stronger per-range authorization are retained"}
+  ],
+  "delta": [
+    {"id": "D-1", "text": "Send Idempotency-Key on executeTest (UUID), startGuidedSession, clarifyGuidedSession, cancelGuidedSession and finalizeObservedPublication. Keep it stable per logical operation"},
+    {"id": "D-2", "text": "Video operationId getGuidedSessionVideo"},
+    {"id": "D-3", "text": "baseRevisionId = confirmedRevisionId; firstLearnStepId = firstChangedStepId as served, never after k. Show the four REVISION_CONFLICT messageCodes as not-ready start feedback. Send the closed start body. Learn again from step N uses step N's stable ID (source per A1)"},
+    {"id": "D-4", "text": "NEEDS_RELEARN + readinessReason BASE_IDENTITY_INCOMPLETE: UX copy that does not claim the author changed steps, an explicit first-step boundary, no automatic full learn, and tests"},
+    {"id": "D-5", "text": "Map FAILED + errorCode/failure.code to the AC-3 narratives. Partial and drift copies from relearnedFrom{stepId, driftSwitchStepId}. R4 whitespace-only expected ends ASSERTION_FAILED, with no client detection"},
+    {"id": "D-6", "text": "The secret-fill copy appears only on the public discriminator from A2. Never infer it from INVALID_CONTRACT or diagnostic text. Test that INVALID_CONTRACT does not show it"},
+    {"id": "D-7", "text": "Replay halves of AC-4 and the AC-3 drift copy wait for A1. Never parse diagnostic or message text"},
+    {"id": "D-8", "text": "Every secretRef carries a pattern-valid secretId (the Vault name from listTestSecrets). No null, empty or alias fallback. Drop the MSW handlers.ts:173 name fallback. Tests"},
+    {"id": "D-9", "text": "getTest(id) takes no parameter. Do not confuse the frontend v1 TestRequest type with the OpenAPI v2 TestRequest schema. Keep the STALE_REVISION/CSI_IMMUTABLE reload path"},
+    {"id": "D-10", "text": "Action seek only from kind:action timings when video is AVAILABLE. No stamp, no button. Partial or absent guided video (KL-015-R1) and a null replay video status (H9) show the unavailable narrative"},
+    {"id": "D-11", "text": "No guided start for a zero-step draft (structural count). A RUNTIME_INCOMPATIBLE refusal names no cause"},
+    {"id": "D-12", "text": "'None of these' and a declined confirmation: cancel with userRequested, then focus step N. Never send a fabricated choiceId (pending A3)"}
+  ],
+  "constraints": [
+    {"id": "C-1", "text": "Deploy constraint: never run or demo a post-015 backend with a pre-008 frontend against a real backend"},
+    {"id": "C-2", "text": "No intermediate shared release between OBS-012B and OBS-008"},
+    {"id": "C-3", "text": "No state beyond AC-3/AC-4 and the inherited blocks. Every guidedNarratives.ts string cites its source"},
+    {"id": "C-4", "text": "Never-echo: no secret value in any rendered, mocked or logged payload. Canaries assert the value is absent and the ID present"},
+    {"id": "C-5", "text": "Centralized transport only (apiClient); no direct fetch. No client-side intent parsing (ADR-SC-003)"},
+    {"id": "C-6", "text": "Only independent @qa sets Done. Hand any push or PR to @devops"}
+  ],
+  "gates": [
+    {"id": "G-1", "text": "npm run type-check (frontend; project CLAUDE.md uses npm)", "amended20261017": "User decision U2 (2026-10-16) migrates frontend/ to pnpm; recorded at W0 refold 2026-10-17 by Aria (@architect). Original text kept above. Run as: cd frontend && pnpm run type-check (after the U2 lane lands; frontend/package.json declares no packageManager, so no strict-mode override is needed)"},
+    {"id": "G-2", "text": "npm run lint", "amended20261017": "User decision U2 (2026-10-16) migrates frontend/ to pnpm; recorded at W0 refold 2026-10-17 by Aria (@architect). Original text kept above. Run as: cd frontend && pnpm run lint"},
+    {"id": "G-3", "text": "npm run build", "amended20261017": "User decision U2 (2026-10-16) migrates frontend/ to pnpm; recorded at W0 refold 2026-10-17 by Aria (@architect). Original text kept above. Run as: cd frontend && pnpm run build"},
+    {"id": "G-4", "text": "npm run test (full suite; record counts against the 015 baseline)", "amended20261017": "User decision U2 (2026-10-16) migrates frontend/ to pnpm; recorded at W0 refold 2026-10-17 by Aria (@architect). Original text kept above. Run as: cd frontend && pnpm exec vitest run (single run, default workers per FE-WORKERS; the test script is bare vitest, which watches on a TTY). Counts recorded against the 015 baseline"},
+    {"id": "G-5", "text": "npm run test:e2e (Playwright against MSW via the P5 proxy; a real browser run, not just a spec file)", "amended20261017": "User decision U2 (2026-10-16) migrates frontend/ to pnpm; recorded at W0 refold 2026-10-17 by Aria (@architect). Original text kept above. Run as: cd frontend && pnpm run test:e2e (@playwright/test 1.63.0 exact, added by U2). The default run covers the MSW projects; the D5 real-backend smoke runs separately against a local bootRun"},
+    {"id": "G-6", "text": "Backend: StudioContractTest plus the capability-route tests, and confinement.test.ts pin re-anchors with old and new quoted. Gradle runs serialized"},
+    {"id": "G-7", "text": "Regenerate studioWcagAudit and docs/qa/accessibility/axe-results.json with the contrast and target-size rules enabled", "amended20261017": "User scope decision change 1 (A11): regenerate the jsdom audit with the two rules still disabled; contrast and target-size are asserted by the real-browser e2e/studio-guided-accessibility.spec.ts at 1440x900 and 375x812", "amended20261017b": "PO scope decision 2 (user, 2026-10-17; ADR-SC-006), which supersedes amended20261017. Run the existing studioWcagAudit.test.tsx inside the full frontend suite (G-4) and require it green, unchanged: no surface rewrite, rules still disabled, no real-browser a11y spec. Its pinned baseline is regenerated only if 008's UI changes break it, with before/after recorded. The axe-results.json rewrite on every full-suite run is a known side effect, not a baseline change"}
+  ],
+  "scopeDecision20261017": {
+    "source": "User decision 2026-10-17, verbatim: \"i agree with your recommendations, remove all the 'Out' and 'Nice to Have'\", given in reply to root's 37-row scope table. Recorded by Pax (@po) in the story block 'PO scope decision — 2026-10-17 (user)' (story 0.3.13)",
+    "statusNote": "DESCOPED_BY_USER_20261017 is a status outside the original rule's OPEN/PLANNED_NOT_RUN set. It means removed from 008 by the user, never PASS, N/A or waived. QA does not credit 008 for any descoped item",
+    "kept": ["AC-1..AC-9", "inherited obligations as amended (D-1..D-12, A1-A3, U1-U2)", "FE-A11Y", "FE-CONSUMERS", "FE-WORKERS"],
+    "changed": [
+      {"id": "A11", "text": "AC-8 reworded: color-contrast and target-size enabled and asserted in real-browser frontend/e2e/studio-guided-accessibility.spec.ts (1440x900, 375x812, existing axe-core, no new package); not enabled in the jsdom studioWcagAudit.test.tsx", "status": "OPEN"}
+    ],
+    "added": [
+      {"id": "D5-SMOKE", "text": "Local real-backend authoring smoke frontend/e2e/studio-authoring-real-backend.spec.ts against local ./gradlew bootRun (local profile): create, edit, reorder and save of v2 drafts with stable step IDs (implementation-plan.md B15/D5). Not live integration (OBS-009); MSW stays the AC-9 basis. T4 sub-item", "status": "OPEN"}
+    ],
+    "descoped": [
+      {"id": "A15", "text": "Manual screen-reader pass", "status": "DESCOPED_BY_USER_20261017"},
+      {"id": "A16", "text": "Reflow at 320 px / 200% zoom", "status": "DESCOPED_BY_USER_20261017"},
+      {"id": "A17", "text": "Forced-colors / high-contrast mode", "status": "DESCOPED_BY_USER_20261017"},
+      {"id": "A18", "text": "Text alternative for the run video", "status": "DESCOPED_BY_USER_20261017"},
+      {"id": "A3-VARIANT", "text": "Optional user-initiated CANCELLED wording variant (A3 'may')", "status": "DESCOPED_BY_USER_20261017"},
+      {"id": "A1-NULL-EXAMPLE", "text": "Optional replayFailure: null example on SnapshotFailed (A1 'optional')", "status": "DESCOPED_BY_USER_20261017"},
+      {"id": "PLAYBACK-COPY", "text": "See carriedFollowUps; open post-GA backlog item, owner @ux-design-expert", "status": "DESCOPED_BY_USER_20261017"},
+      {"id": "PLAYBACK-COST", "text": "See carriedFollowUps; open post-GA backlog item, owner @architect + @dev playback; per-range authorization stays", "status": "DESCOPED_BY_USER_20261017"}
+    ],
+    "alreadyOutUnchanged": ["secret-fill copy (A2)", "< autocomplete (post-GA)", "live/deployed E2E (OBS-009)", "schedule dialog UX", "editor environment list"],
+    "notEditedHere": "implementation-plan.md (W4 PLAYBACK-COST measurement; D5 'optional') and lanes.json (PLAYBACK-COST, PLAYBACK-COPY references) are unchanged; the story block governs and root reconciles at W0",
+    "supersededBy20261017b": "Change A11 and the FE-A11Y entry of 'kept' are superseded by scopeDecision20261017b"
+  },
+  "scopeDecision20261017b": {
+    "source": "User decision 2026-10-17, verbatim: \"Remove the a11y (accessibility) that are not must have, for instance we don't have to have shortcuts and we dont have handicap users for now\". Relayed by the lead. Recorded by Pax (@po) in the story block 'PO scope decision 2 — 2026-10-17 (user): accessibility reduced to must-have' (story 0.3.14). Project rule: docs/architecture/ADR-SC-006-accessibility-scope-functional-only.md (@architect; Status Accepted, sha256 399c7810965f68b03232a5f24b46a0127730451689da0c7a2e6fb5f9a716bc20 when checked 2026-10-17)",
+    "statusNote": "REMOVED_BY_USER_20261017B means removed from 008 by the user's second scope decision; never PASS, N/A or waived, and QA neither credits nor fails 008 for it",
+    "kept": [
+      {"id": "K1", "text": "Focus moves to step N's editor row for 'None of these' and 'Go to step N'", "home": "AC-3 (A3), AC-4"},
+      {"id": "K2", "text": "Expiry warnings at 60 s and 20 s state the consequence in text", "home": "AC-3"},
+      {"id": "K3", "text": "Visible seek labels 'Seek to step N' / 'Seek to action: <safe label>'", "home": "AC-7"},
+      {"id": "K4", "text": "Untrusted styling plus role/region for PAGE-derived labels (security)", "home": "AC-3"},
+      {"id": "K5", "text": "Responsive narrow layout (CLAUDE.md mobile-first)", "home": "AC-8 a, AC-9"},
+      {"id": "K6", "text": "Existing jsdom studioWcagAudit.test.tsx green as a regression guard only; baseline regenerated only if 008's UI breaks it", "home": "AC-8 b, G-7"},
+      {"id": "K7", "text": "MUI with sx (project convention)", "home": "Dev Notes 'Repository conventions'"}
+    ],
+    "removed": [
+      {"id": "X1", "text": "WCAG 2.1 AA conformance target", "status": "REMOVED_BY_USER_20261017B"},
+      {"id": "X2", "text": "Polite/assertive live region", "status": "REMOVED_BY_USER_20261017B"},
+      {"id": "X3", "text": "Clarification focus-on-entry and radiogroup keyboard operability as a requirement (MUI defaults stay; no a11y tests)", "status": "REMOVED_BY_USER_20261017B"},
+      {"id": "X4", "text": "aria-current=\"step\"", "status": "REMOVED_BY_USER_20261017B"},
+      {"id": "X5", "text": "prefers-reduced-motion", "status": "REMOVED_BY_USER_20261017B"},
+      {"id": "X6", "text": "CLN-11 surface 4/5 rewrite and baseline-key regeneration", "status": "REMOVED_BY_USER_20261017B"},
+      {"id": "X7", "text": "color-contrast and target-size axe rules", "status": "REMOVED_BY_USER_20261017B"},
+      {"id": "X8", "text": "frontend/e2e/studio-guided-accessibility.spec.ts (supersedes scopeDecision20261017 change A11)", "status": "REMOVED_BY_USER_20261017B"},
+      {"id": "X9", "text": "FE-A11Y items; see carriedFollowUps FE-A11Y. Post-GA backlog, owner @ux-design-expert + @dev", "status": "DESCOPED_BY_USER_20261017"},
+      {"id": "X10", "text": "The a11y part of the Uma (@ux-design-expert) review; her UX/copy review stays", "status": "REMOVED_BY_USER_20261017B"},
+      {"id": "X11", "text": "quality_gate_tools accessibility-audit", "status": "REMOVED_BY_USER_20261017B"}
+    ],
+    "cln11": "CLN-11's 008 half is descoped; dated note on the CLN-11 row of docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md. The audit comments at studioWcagAudit.test.tsx:320-323 and :334 that name OBS-008 AC-8 are now stale; no edit is placed for them",
+    "notEditedHere": "implementation-plan.md (L6 'Uma reviews', W5 'Uma UX/a11y review', L6 a11y lane) and lanes.json (:412 'Uma independent a11y review') are unchanged; the story block governs and root reconciles at W0"
+  },
+  "amendments": [
+    {"date": "2026-10-17", "by": "Pax (@po)", "change": "User scope decision recorded: AC-8 and G-7 amended, PLAYBACK-COST/PLAYBACK-COPY descoped, P-COST annotated, scopeDecision20261017 added, storySha256 refreshed", "storySha256Before": "0013f14a75db31859b0627230af2ead0281e75d1a3f0de35f0bf68866d7fc7fb", "storySha256After": "be87eaac686c637ea10d0d0678eccdbc85dd73ddc12a86acce70a3cee79282b5", "obligationsSha256Before": "52e207cffed22e74c174e2bfc78d5ca336ab8540ab1b872fb115326060a02e99"},
+    {"date": "2026-10-17", "by": "Aria (@architect), W0 refold", "change": "G-1..G-5: amended20261017 fields appended for the U2 pnpm decision; original npm text kept. storySha256 not touched (Pax refreshed it). Not edited here: the second user scope change of 2026-10-17 (accessibility reduced to must-haves), which makes AC-8, G-7, FE-A11Y and scopeDecision20261017 change 1 (A11) stale; PO records it", "obligationsSha256Before": "d5541f42d831f0148ff4418536fbc1944109de03ca1692fa9329df67de06dace"},
+    {"date": "2026-10-17", "by": "Pax (@po)", "change": "PO scope decision 2 (user): accessibility reduced to must-have (ADR-SC-006). amended20261017b added to AC-8, FE-A11Y (status DESCOPED_BY_USER_20261017) and G-7; scopeDecision20261017 annotated as superseded for A11 and FE-A11Y; scopeDecision20261017b added; storySha256 refreshed. Aria's G-1..G-5 amendments untouched", "storySha256Before": "be87eaac686c637ea10d0d0678eccdbc85dd73ddc12a86acce70a3cee79282b5", "storySha256After": "650333492bd69176ebb01bf3581da78c4a2f164470c2d824b1bc5a72cb03a84d", "obligationsSha256Before": "5fbfc9e4890e8f0ac2f1e3bd7667ec5daa75512aa3fdb23e1b8938a347c2327b"}
+  ],
+  "sources": [
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md (0.3.9)",
+    ".ai/STUDIO-OBS-008-po-validation-sp.json",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/{architect-rulings,po-scope-readiness,qa-design-readiness,ux-implementation-plan,architect-test-delta,architect-ownership}.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/execute-015-008/claude-feasibility-008-011.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/po-ruling-012B-allowlist.json",
+    "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/{po-kl015-q4-placement,po-inventory-changes,po-r4-whitespace-decision,po-recording85-decision-user-c}/",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r2-diagnosis01/qa-review01/review.md (H5, H9)",
+    "docs/qa/evidence/STUDIO-OBS-008/prep-20261016/po-delta-validation.json"
+  ]
+}

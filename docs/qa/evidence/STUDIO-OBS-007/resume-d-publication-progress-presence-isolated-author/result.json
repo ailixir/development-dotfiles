@@ -1,0 +1,28 @@
+{
+  "story": "STUDIO-OBS-007",
+  "status": "FROZEN_ISOLATED_SOURCE_ONLY_TWO_BOOLEAN_DIAGNOSTICS_UNRUN",
+  "sourcePath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "beforePath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-publication-progress-presence-isolated-author/before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "candidatePath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-publication-progress-presence-isolated-author/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "baseSha256": "c4da9c0ee696fd17f43ced25fdc3749906e7bc141c3ad3865695ca8e3da09eb1",
+  "candidateSha256": "c12b979b6467679222cbefd3626820a5320bb85d0ddf103d74fbcc6a3679b9cb",
+  "patchPath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-publication-progress-presence-isolated-author/candidate.patch",
+  "patchSha256": "2909fa9473e0a62ef2de732649093119e87ae6d7e3b745469b7350862d6ba9dc",
+  "inversePatchSha256": "2e75958bdae1b3d5008d21d4e07794f772fd47fe984024e3c35fae7e3fc498c1",
+  "sourceAuditSha256": "dcfe40b798d06a0344a76d8e76c9097a815b15ea7a18f9ef3a59f0f1d9cc5756",
+  "change": "Exactly two typed boolean put statements in safeFailureMetadata after original out construction, using ALREADY READ progress. No new query/helper/file/sampler/hook/case/assertion/control/exporter.",
+  "fields": {
+    "publicationSnapshotPresent": "progress.path(publicationSnapshotIdentity).isObject()",
+    "publicationRevisionPresent": "progress.path(publicationRevisionId).isTextual()"
+  },
+  "wholeInverse": "Remove exactly these two statements and restore entire c4da9c0e base bytes; all37 original Test bodies/scripts/diagnostics/capture order unchanged. All text blocks byte-identical.",
+  "liveSourceUnchanged": true,
+  "oldTests": 37,
+  "newTests": 0,
+  "newRuntimeQueries": 0,
+  "meaning": "Writer-shaped marker presence at this existing failure capture row-read only. Snapshot can be retained from a prior attempt; commit rollback and generic full-progress replacement limit interpretation. No receipt verification, phase-entry, exact conflict, cost or acceptance proof.",
+  "missing": "Missing diagnostic field/export or captureFailure is UNOBSERVED, never default false. Explicit false means no marker of expected type at this read, never proof preparation was unentered.",
+  "privacy": "No hash/id/deadline/marker value copied or exported; existing private capture source tier only. Coordinator existing external whitelist handled separately after review; no new exporter authored.",
+  "actions": "No live source edits/formatter/build/tests/SQL/runtime/lifecycle/QA/commit/push/deploy. Source candidate requires independent root review before coordinator integration.",
+  "budget": "Shared USD500 ceiling; actual billing unavailable."
+}

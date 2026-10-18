@@ -1,0 +1,130 @@
+{
+  "bindings": [
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "sourceSha256": "92793bb530ae379e642c20f1898973b426dfcce172f7066372da25c1dd69b13b",
+      "classRelativePath": "backend/build/classes/java/main/com/citi/put/checks/studio/guided/session/GuidedContracts.class",
+      "classSha256": "4adbe0d615e7cd023296a2a8898ba27c15657223ecd4415732aba1cb0d571e07",
+      "method": "validate",
+      "invocation": "validatedCanonical",
+      "requiredLines": [
+        90
+      ],
+      "compiledInvocationLines": [
+        90
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+      "sourceSha256": "b058dd5d553157ba564dda80de033afa447fda6c0c28b26ccc0e32760cef0503",
+      "classRelativePath": "backend/build/classes/java/main/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.class",
+      "classSha256": "ab461c45a14a4d8276e57cc42bbbea3d126db252a9ad78c102f3e411f212a5c0",
+      "method": "saveRenewalAndCommand",
+      "invocation": "GuidedContracts.validate",
+      "requiredLines": [
+        79
+      ],
+      "compiledInvocationLines": [
+        79
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sourceSha256": "a386ec76d26281771e50b470eddaf54bbe7e509b1e3d9ef0115471d32665eaf3",
+      "classRelativePath": "backend/build/classes/java/main/com/citi/put/checks/studio/guided/session/GuidedSessionService.class",
+      "classSha256": "e7bd1202de1df3f4583635de0ad3f9a814b28f84fc0b607ce0660ebcc3ac7b55",
+      "method": "claim",
+      "invocation": "GuidedSessionRepository.transaction",
+      "requiredLines": [
+        751
+      ],
+      "compiledInvocationLines": [
+        751
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sourceSha256": "e9747ea62a00fc16dae73e29ce3145b6deefc29e399019ab8cfc978d9b389426",
+      "classRelativePath": "backend/build/classes/java/main/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.class",
+      "classSha256": "4b3991d381708b713ca32b000d51e50a3acfcceb281d8be9560f5306dd1ff2d2",
+      "method": "call",
+      "invocation": "GuidedSessionService.translationTransaction",
+      "requiredLines": [
+        774,
+        796,
+        932,
+        949,
+        984,
+        1083
+      ],
+      "compiledInvocationLines": [
+        774,
+        796,
+        932,
+        949,
+        984,
+        1083
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sourceSha256": "e9747ea62a00fc16dae73e29ce3145b6deefc29e399019ab8cfc978d9b389426",
+      "classRelativePath": "backend/build/classes/java/main/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.class",
+      "classSha256": "4b3991d381708b713ca32b000d51e50a3acfcceb281d8be9560f5306dd1ff2d2",
+      "method": "call",
+      "invocation": "GuidedSessionRepository.transaction",
+      "requiredLines": [
+        1113
+      ],
+      "compiledInvocationLines": [
+        1113
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "sourceSha256": "e6c132a979cdf7546abf0b2056dec351a38ea8c58c7da5b34ae429f85e6acaab",
+      "classRelativePath": "backend/build/classes/java/main/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.class",
+      "classSha256": "74c0ba8d73ebdf5862f1506c565b04a3ecc286c515e209edb79c4c32e6e982f2",
+      "method": "prepareLowering",
+      "invocation": "GuidedSessionRepository.transaction",
+      "requiredLines": [
+        378
+      ],
+      "compiledInvocationLines": [
+        378
+      ],
+      "bound": true
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "sourceSha256": "e6c132a979cdf7546abf0b2056dec351a38ea8c58c7da5b34ae429f85e6acaab",
+      "classRelativePath": "backend/build/classes/java/main/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.class",
+      "classSha256": "74c0ba8d73ebdf5862f1506c565b04a3ecc286c515e209edb79c4c32e6e982f2",
+      "method": "finalizeForUser",
+      "invocation": "GuidedSessionRepository.transaction",
+      "requiredLines": [
+        95,
+        100,
+        110
+      ],
+      "compiledInvocationLines": [
+        95,
+        100,
+        110,
+        138,
+        159,
+        182,
+        195,
+        235
+      ],
+      "bound": true
+    }
+  ],
+  "allBound": true,
+  "compiledClassesReadOnly": true
+}

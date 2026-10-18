@@ -1,0 +1,541 @@
+{
+  "artifact": "STUDIO-OBS-014 lane R14 ledger (runner: governed policy from the hash-bound runner context, mounted applicationPolicy refused)",
+  "agent": "Dex (@dev), lane R14",
+  "date": "2026-10-13",
+  "recordedAtUtc": "2026-10-13T23:35Z; updated after the R13 hunks and the r14-stops rulings; updated after C2a; updated for ar-mounted-rules and the C2b spec delta; S3 applied after C2b; S3b oracle-2 triage",
+  "head": "734ad704f + uncommitted shared working tree",
+  "authority": [
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json (AR-2 a/h, stopConditions S-5, S-10; AR-3 b pins note on admissionClient.ts:52)",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/s0-plan-refresh.json lanes.R14, conflictMatrix, contractSequence C2b, syncPoints S1-S3, risks RK-2"
+  ],
+  "gitWrites": "none (no add/commit/stash/reset)",
+  "notRun": [
+    "runner fixtures tier (root-owned, under the Gradle lock)",
+    "dist rebuild (root-owned)",
+    "any Gradle/backend test",
+    "SYNAPSE diagnostics, CodeRabbit and checklist-runner skill payloads attached to the spawn prompt: outside this lane's mission, not run"
+  ],
+  "autoDecisions": [
+    "[AUTO-DECISION] Land the AC-1 cutover in the shared tree now, or stage it for S3? -> STAGED as a patch (s3-cutover.patch), applied at S3 with C2b. Reason: the plan sequences '014 removal at S3' (conflictMatrix guidedMain row), AR-2 S-10 forbids a partial C2b landing, and root rebuilds dist at S1 and runs GuidedPlanningIntegrationTest at S2 against dist/run/guidedMain.js. With the cutover in the tree, those spawn a worker that refuses the mounted applicationPolicy the backend ITs still write (RK-2) and refuses every context that lacks the C2b fields. Only behaviour-neutral parts are in the tree now.",
+    "[AUTO-DECISION] Where does the testable mounted-config gate live? -> new browser-free src/run/guidedConfig.ts (IDS: CREATE). Reason: guidedMain.ts imports the browser module, the vitest config excludes it from coverage, and AC-25 (confinement.test.ts) keeps the unit tier browser-free, so test/run/guidedMain.test.ts cannot import the entry point. REUSE was not possible: no existing parser for the guided mounted config exists (it was inline in guidedMain.ts). Root: add it to the File List.",
+    "[AUTO-DECISION] How does the verified policy reach the runtime? -> GuidedOwnership.context() binds it (policyHash.ts) and passes it as the runtime's applicationPolicy option, overriding anything configured. Reason: this works with the current runtime.ts (R13-owned) without a functional R13 hunk. The R13 hunk is reduced to a doc comment (see queuedHunksForR13).",
+    "[AUTO-DECISION] Refuse an applicationPolicy passed to createGuidedServer as well as one in the mounted file -> yes, runtime CONFIGURATION_DENIED in transport.ts (AR-2 a cites transport.ts:64-65 as the precedent). Not a type-level Omit yet: the four fixtures-tier server tests still pass the option and would turn tsc red before S3. Type-level Omit is optional at S3 after those edits.",
+    "[AUTO-DECISION] Shared hash vectors fixture key -> proposed `observationPolicyHashVectors: [{applicationPolicy, observationPolicyHash}]` in contracts v3 fixtures.json. Reason: AR-2 h names the location but not the key. C lane decides; if it picks another name, change one line in the patched policyHash.test.ts."
+  ],
+  "inTreeNow": {
+    "note": "Behaviour-neutral at runtime: nothing in production imports policyHash.ts yet; guidedMain.ts parses the mounted config exactly as before (same key set incl. applicationPolicy, same checks, same stderr).",
+    "files": [
+      {
+        "path": "studio-runner/src/guided/policyHash.ts",
+        "status": "new",
+        "sha256": "1287588f309f933d8c5a636d2761b4d90c47f879e0e3003f748e47e62454cb3d",
+        "what": "observationPolicyHash(policy) = contracts.hash (sha256 of sorted-key canonical JSON); bindContextPolicy(context, inForce?) -> IDENTITY_MISMATCH on absent/malformed hash, non-object policy, non-canonicalizable policy, hash mismatch, or a different hash than the binding in force; returns a detached copy; parameter typed `object` (post-C2a TS2559 fix)"
+      },
+      {
+        "path": "studio-runner/src/run/guidedConfig.ts",
+        "status": "new",
+        "sha256": "dc6df04e55156b8adf9e84d118b3eb92287224248fc9661eef449795aad623f7",
+        "what": "parseGuidedMountedConfig: verbatim extraction of guidedMain.ts:21-23 (closed key set, workerId, port), plus an explicit object check"
+      },
+      {
+        "path": "studio-runner/src/run/guidedMain.ts",
+        "status": "modified",
+        "sha256": "abb3cb7c3942dbef17f22a293a7f33e609d4b0ba1a59ac9c0950f19371df12a8",
+        "baseSha256": "5148b8915e48af7718ad5986c8053d7ba5e66c40bbe22e4487cb116708a94a2a",
+        "what": "uses parseGuidedMountedConfig; MountedConfig interface and inline checks removed"
+      },
+      {
+        "path": "studio-runner/src/reporting/admissionClient.ts",
+        "status": "modified (comment only)",
+        "sha256": "672a3077efc99f8ede43e97ce3f4836f036798aa8ff3dbd531260a84dcffba88",
+        "baseSha256": "dc5b1e79a17da9986255ffa06cbede12dd2806892b2458b49701a7baa568a65d",
+        "what": "AR-3 b pins: the :52 comment named the openapi AdmissionRequest/AdmissionResponse that C2a deletes; it now names v3 replay-job#/definitions/AdmissionRequest and AdmissionReceipt (verified at admissionClient.ts:65,69)"
+      },
+      {
+        "path": "studio-runner/test/guided/policyHash.test.ts",
+        "status": "new",
+        "sha256": "0c9d785648da983dd7373687a7411670745b79d10caa3029b4880c672a56266f",
+        "tests": 5,
+        "what": "digests checked against hand-written canonical text (not the implementation); order independence; every governed field changes the hash; 14 refusal inputs; binding in force"
+      },
+      {
+        "path": "studio-runner/test/run/guidedMain.test.ts",
+        "status": "new",
+        "sha256": "c3cd605fcdfbc7005e89bebfae80214aa2ab16462c1f31a3380923f7ddad4352",
+        "tests": 4,
+        "what": "closed key set, refusals, non-JSON, and a static check that the entry point uses only this gate"
+      }
+    ]
+  },
+  "s3CutoverPatch": {
+    "path": "docs/qa/evidence/STUDIO-OBS-014/r14/s3-cutover.patch",
+    "sha256": "a4011e585b9534703cb02261c44fde702d521a4190da04f3e40db506be0271d2",
+    "applyAt": "S3, same unit as C2b, B14 T1b (incl. the B14_backend_ITs tasks of ar-mounted-rules) and the c2b-spec b14Obligations (AR-2 S-10, C2b SC-6). Apply with `git apply docs/qa/evidence/STUDIO-OBS-014/r14/s3-cutover.patch`.",
+    "applyCheck": "Regenerated with the ar-mounted-rules tasks, the C2b r14PatchDelta and the runtime.ts doc comment. `git apply --check` on the tree: APPLIES (21 files). Applying it to the pre-patch snapshot reproduces the verified scratch tree byte for byte (diff -r clean apart from the C2b-generated files, which are C-int's).",
+    "baseSha256": {
+      "studio-runner/src/run/guidedConfig.ts": "dc6df04e55156b8adf9e84d118b3eb92287224248fc9661eef449795aad623f7",
+      "studio-runner/src/run/guidedMain.ts": "085bbf9feec4e949fac22626f596d6cbb87229d60afadec33d971c4aa029403d",
+      "studio-runner/src/guided/ownership.ts": "666adcff169a25556c2cb9fc5e2763afe4936bc5f54ee1fc73113810e35c69b5",
+      "studio-runner/src/guided/transport.ts": "2bd7d94eb12ae8c1c86dbb6d3a75af0550a2a9798b2d16b5fb6d6e62c687a95b",
+      "studio-runner/src/guided/runtime.ts": "ef96f04ef24ff3d01c171085565f9af0ad72b2e10a498ca650134a2b7609ba11",
+      "studio-runner/src/run/observationTypes.ts": "e54ff4abefe34b7357084dbbe6b1bcc530293306700cf2d8b554548f50fad7a8",
+      "studio-runner/README.md": "8790031fec1f309360e1ae123e29849ad2a79ebd455999a4a8044fb02b53f7bb",
+      "studio-runner/test/helpers/guided.ts": "5c32c632ce7ad4a5ff5c33aaaea0e0c9c34e32099d4a448ea177ef6e565e26c0",
+      "studio-runner/test/guided/ownership.test.ts": "4bf7e8465c901c545442d893e6c8e921e8bf66d3ce4f48268e18cb28f584639a",
+      "studio-runner/test/guided/transport.test.ts": "7956b9bbc472588c2408fe932b77663ec1e842bef3b2f2f733f7facb4efad7f2",
+      "studio-runner/test/guided/policyHash.test.ts": "0c9d785648da983dd7373687a7411670745b79d10caa3029b4880c672a56266f",
+      "studio-runner/test/guided/runtime.test.ts": "d31aca6163e6de24cb0452dde14476e27abdf45b339ffab3eb931825bdad4294",
+      "studio-runner/test/run/guidedMain.test.ts": "c3cd605fcdfbc7005e89bebfae80214aa2ab16462c1f31a3380923f7ddad4352",
+      "studio-runner/test/run/secretReplay.test.ts": "23fda813b3788b950ebe7fd55e3f7a9dedb8071b08c2410cb50e57ab5bd2c960",
+      "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "417c8ae2f6fb845eb4f7f802b037efc5638ee53ab0fcab41e4a7d8553bf763ad",
+      "studio-runner/test/fixtures-tier/guided-wire.test.ts": "ee3bcc4c8032025311bb24236a51f4d8ea64136be66cdcd0587e38fb0622bfcb",
+      "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "3a52cc9aebec7dc9ea7184d6d3c96bb00e67b571aca41e6c5145a10544af8566",
+      "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts": "c6f789268dc25478d61d83204cf11ec4d97be4f2a8b04743d5c68af6a2e24df4",
+      "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts": "117664104e79d066aafc0c61c2b842ddf1a0154fa5d340b645ec431ffe30ccbe",
+      "studio-runner/test/fixtures-tier/guided-recording.test.ts": "1db4ccae46cf178a06fb834930e10e0cce43301b84f40dd677577497e312fb95",
+      "studio-runner/test/fixtures-tier/secret-login.test.ts": "cfe00db9c60e2150665f49dafe3f2c59074201e7d5cd0dca257c172b684aadc9"
+    },
+    "hunks": [
+      {
+        "file": "src/run/guidedConfig.ts",
+        "change": "mounted key set = TLS/JWT/callback only: `rules` removed from MOUNTED_KEYS and GuidedMountedConfig (ObservationRule import dropped); explicit CONFIGURATION_DENIED for a mounted `applicationPolicy` and for `rules` in any form"
+      },
+      {
+        "file": "src/run/guidedMain.ts",
+        "change": "no `applicationPolicy` pass-through and no `rules: config.rules`; the entry point contains neither token"
+      },
+      {
+        "file": "src/guided/ownership.ts",
+        "change": "bindContextPolicy before runtime creation/update; the binding is frozen per entry; the runtime gets applicationPolicy from the verified context (R13's csiId kept)"
+      },
+      {
+        "file": "src/guided/transport.ts",
+        "change": "createGuidedServer refuses an `applicationPolicy` or `rules` option (CONFIGURATION_DENIED, every form); refusal vocabulary exported as GUIDED_REFUSAL_CODES / GUIDED_REFUSAL_REASONS and used in place"
+      },
+      {
+        "file": "src/guided/runtime.ts",
+        "change": "(assigned to R14 by root) GuidedRuntimeOptions loses `rules`; the applicationPolicy comment becomes 'governed policy from the hash-bound context' (this is the previously queued :23-25 doc hunk, folded in); the collector config at :108 uses the constant `rules: []`; ObservationRule import dropped"
+      },
+      {
+        "file": "src/run/observationTypes.ts",
+        "change": "comment only: governed positive grants (guided: runner context; replay: TrustedPolicy)"
+      },
+      {
+        "file": "README.md",
+        "change": ":629-630 mounted list drops `rules`/`applicationPolicy` and states both are CONFIGURATION_DENIED (mounted and server option), the policy arrives in the hash-bound context; :662-679 readGrants example is the governed policy, readGrants required; exact field rules and the structuralOnly veto scoped to replay's TrustedPolicy"
+      },
+      {
+        "file": "test/helpers/guided.ts",
+        "change": "STRUCTURAL_POLICY (with readGrants: [], hash f68dc4b2…16f5 per c2b-spec) + withContextPolicy(); guidedContext() carries applicationPolicy/policyHash"
+      },
+      {
+        "file": "test/guided/ownership.test.ts",
+        "change": "+4 policy-binding tests; `rules:[]` removed from the options literal"
+      },
+      {
+        "file": "test/guided/transport.test.ts",
+        "change": "+4 tests: server refuses applicationPolicy and rules ([] and a read rule) options (positive control); refusal-schema enums equal the transport vocabulary; wire-level definite refusals (IDENTITY_MISMATCH, SCHEMA) valid against bridge#/definitions/refusal with no worker state change; all policy literals carry readGrants"
+      },
+      {
+        "file": "test/guided/policyHash.test.ts",
+        "change": "+1 test over fixtures.json observationPolicyHashVectors (length > 0)"
+      },
+      {
+        "file": "test/guided/runtime.test.ts",
+        "change": "`rules:[]` removed from 4 option literals; +1 inertness oracle: a smuggled `rules:[readRule]` (cast) still yields collector config rules == []; static check that runtime.ts has no `options.rules`"
+      },
+      {
+        "file": "test/run/guidedMain.test.ts",
+        "change": "fixture without `rules`; +1 test mounted applicationPolicy refused (4 forms); +1 test mounted rules refused in the 7 ruled forms; static check: no applicationPolicy and no \\brules\\b token in guidedMain.ts"
+      },
+      {
+        "file": "test/run/secretReplay.test.ts:110",
+        "change": "`rules:[]` removed from the createGuidedServer literal (mechanical, ruling task list)"
+      },
+      {
+        "file": "test/fixtures-tier/guided-dataflow.test.ts",
+        "change": "QA oracle (2): 'exact' leaves the it.each and the rules option is gone; new case on the former exact page with a governed policy readGrants: [] asserts every exported node is structuralOnly with policyRuleId 'app-structural', no 'reference-read' and no 'Business reference' name, no canary; if the testId 'source' node is exported, a read proposal on it is refused at prepare with TARGET_CHANGED with no producer and no new outcome; if not exported, that is asserted instead. regionVisible/regionControl cases unchanged except their policy carries readGrants as before"
+      },
+      {
+        "file": "test/fixtures-tier/guided-wire.test.ts",
+        "change": "options lose rules/applicationPolicy; the context carries {policyRuleId:'application', allowStructuralDiscovery:true, readGrants:[]} via withContextPolicy (c2b-spec r14PatchDelta)"
+      },
+      {
+        "file": "test/fixtures-tier/guided-secret-isolation.test.ts",
+        "change": "options lose rules/applicationPolicy; each client context carries the same region-read grant policy via withContextPolicy"
+      },
+      {
+        "file": "test/fixtures-tier/guided-secret-ownership.test.ts, guided-secret-stale-grant.test.ts",
+        "change": "options lose rules/applicationPolicy; contexts carry the helper default STRUCTURAL_POLICY"
+      },
+      {
+        "file": "test/fixtures-tier/guided-recording.test.ts (R13's), secret-login.test.ts:157",
+        "change": "direct GuidedRuntime literals lose `rules: []`; their policy option gains readGrants: []"
+      }
+    ],
+    "previousSha256": "c4149f3c8de91c8de30aede4e4c3647efb075cd593aec4983e563e9dc25656e5"
+  },
+  "verification": {
+    "liveTree": [
+      {
+        "cmd": "studio-runner: ./node_modules/.bin/vitest run test/guided/policyHash.test.ts test/run/guidedMain.test.ts test/guided/ownership.test.ts test/guided/transport.test.ts test/run/confinement.test.ts --coverage.reportOnFailure=true --coverage.reportsDirectory=<scratch>",
+        "result": "5 files, 46 tests passed. Exit 1 only from global coverage thresholds of a partial run (expected). policyHash.ts 100/100/100/100, guidedConfig.ts 100/100/100/100"
+      },
+      {
+        "cmd": "studio-runner: ./node_modules/.bin/vitest run --coverage.reportOnFailure=true --coverage.reportsDirectory=<scratch> (full default tier)",
+        "result": "88 files passed, 1 skipped, 1 failed: test/pins.test.ts (3 tests) with 'Observed packaged schema bundle is stale.' (also from `node scripts/check-pins.mjs`). Not attributed to R14 (inferred): R14 touched no schema or bundle; docs/qa/evidence/STUDIO-OBS-013/c1-contract/ shows C1 contract regeneration in flight, and src/guided/types.ts / schemas.json hashes changed during this session (35720e1b…→334b4657…, 4afd19d8…→c5374279…). Coverage table printed: All files 96.21 lines / 88.63 branches; src/guided 91.24/90.79; src/run 99.91/85.9; src/reporting 97.46/91.81; no threshold error for src/guided, src/run or src/reporting. Tests 1334 passed, 3 failed, 29 skipped"
+      },
+      {
+        "cmd": "studio-runner: ./node_modules/.bin/tsc -p tsconfig.json --noEmit",
+        "result": "exit 0"
+      },
+      {
+        "cmd": "studio-runner: ./node_modules/.bin/eslint <6 R14 in-tree files>",
+        "result": "exit 0"
+      }
+    ],
+    "s3Simulation": {
+      "what": "Scratch copy of studio-runner + docs/specs (node_modules symlinked) with the S3 patch applied and C2b SIMULATED: runner-context.schema.json (docs copy and packaged schemas.json) gains properties applicationPolicy {closed object: policyRuleId string 1..256, allowStructuralDiscovery boolean, readGrants array ≤32 of object; required policyRuleId, allowStructuralDiscovery} and policyHash {string ^[a-f0-9]{64}$}, both required; types.ts RunnerContext gains both fields; fixtures.json gains the two Java-computed vectors below. The simulation is not the C2b contract; C lane's real schema replaces it.",
+      "results": [
+        "tsc --noEmit exit 0 (includes fixtures-tier sources); eslint on the 11 patched/new files exit 0",
+        "vitest ownership/transport/policyHash/guidedMain/runtime tests: 5 files, 73 tests passed",
+        "full default tier minus 4 scratch-environment files (disclosure, generated-contracts, runtime-versions, pins: they need docs/runbooks, tools/, dist/ outside the copy): 82 files passed, 1 failed (observationCollectorNaming, a known load flake per agent memory); src/guided 90.56 lines, src/run 99.36 lines, no threshold error for either; compat/scripts thresholds fail only because their tests were excluded",
+        "test/run/observation.test.ts failed under full load twice in scratch and passed isolated 2/2 in scratch and 1/1 in the live tree (load flake; R14 changed only a comment in observationTypes.ts)"
+      ],
+      "negativeControls": [
+        "binding replaced by a pass-through of the configured policy: 3 of 4 new ownership tests fail (the 4th, missing fields, is enforced by the simulated schema, as C2b intends)",
+        "transport.ts refusal line removed: the new transport test fails",
+        "guidedConfig.ts explicit hasOwn line removed: tests still pass because the closed key list also refuses the key (two layers; recorded, not a gap)"
+      ]
+    },
+    "policyHashParity_S5": {
+      "how": "Gradle toolchain JDK 21 (<gradle-toolchain-jdk21>) single-file program calling com.citi.put.checks.studio.guided.session.GuidedContracts.hash/canonical from backend/build/classes/java/main (class built 15:43, source last modified 05:50 the same day) with jackson 2.17.2 from the Gradle cache; runner side via studio-runner/node_modules/.bin/vite-node over src/guided/policyHash.ts. Same three vectors.",
+      "results": [
+        {
+          "vector": "{policyRuleId:'structural',allowStructuralDiscovery:true}",
+          "java": "d70cfec589d77a44ff9f8f9439c00b57cbd879ada08698b810e857bacbd07eb0",
+          "runner": "d70cfec589d77a44ff9f8f9439c00b57cbd879ada08698b810e857bacbd07eb0",
+          "equal": true
+        },
+        {
+          "vector": "app-structural with one role/main read grant, non-ASCII name 'Résumé'",
+          "java": "1999ae8cc714e792340957bedc0ccc85e0cf2d86f295a017deae491e7534a485",
+          "runner": "1999ae8cc714e792340957bedc0ccc85e0cf2d86f295a017deae491e7534a485",
+          "equal": true
+        },
+        {
+          "vector": "policyRuleId containing U+0001 and U+001F (plus \\b \\f \\n \\t \\\" \\\\ / U+2028 and an astral char)",
+          "java": "e1226f6d1097aae0b3cf716c282f75d46418f353c1c95b774d135554c2ca3621",
+          "runner": "ecadc97d7c1bb1c7fbc4b7b95030b60119f04cdcdc9b7b863a9075ecdd328610",
+          "equal": false,
+          "cause": "Jackson escapes U+001F as \\u001F (uppercase hex); JSON.stringify emits \\u001f. Both escape U+0001 the same way (no letters in the hex digits)."
+        }
+      ],
+      "verdict": "S-5 is TRIGGERED pre-emptively for strings that contain C0 control characters whose \\uXXXX escape has a hex letter (U+000B, U+000E, U+000F, U+001A-U+001F). R14 does NOT fix this in one side (AR-2 S-5). The C lane must decide at C2b: either the policy schema forbids C0 controls in every string (for example a pattern), or the shared canonical form fixes the escape case. The same divergence applies to every existing contracts.hash/GuidedContracts.hash pair (scopeHash etc.) wherever such characters could reach it (inferred, not traced). The two equal vectors are the ones staged into the simulated fixtures."
+    },
+    "afterR13Hunks": [
+      {
+        "cmd": "studio-runner: ./node_modules/.bin/tsc -p tsconfig.json --noEmit",
+        "result": "exit 0"
+      },
+      {
+        "cmd": "studio-runner: ./node_modules/.bin/eslint src/guided/transport.ts src/guided/ownership.ts src/run/guidedMain.ts test/guided/transport.test.ts",
+        "result": "exit 0"
+      },
+      {
+        "cmd": "studio-runner: vitest run transport, ownership, policyHash, guidedMain, runtime, confinement tests (coverage on, report on failure)",
+        "result": "93 passed, 1 failed: runtime.test.ts 'rejects mismatched owner/tuple…' timed out at 5539 ms under the 6-file load; isolated 46/46 twice. runtime.test.ts is R13's and was not edited by R14 (load timeout, inferred)"
+      },
+      {
+        "cmd": "studio-runner: ./node_modules/.bin/vitest run --coverage.reportOnFailure=true (full default tier)",
+        "result": "88 files passed, 1 skipped, 1 failed: pins.test.ts (3 tests, 'packaged schema bundle stale'; known, pending root's S1 dist rebuild, ignored per root). Tests 1336 passed, 3 failed, 29 skipped. Coverage: All files 96.67 lines / 88.41 branches; src/guided 94.55/89.49; src/run 99.91/85.88; src/reporting 97.46/91.81; src/server 95.23/87.78; no threshold error for these directories"
+      }
+    ],
+    "s3Simulation_rebased": {
+      "what": "Fresh scratch copy of the tree after the R13 hunks, s3-cutover patch applied (one ownership hunk and the transport.test hunks rebased by hand), C2b SIMULATED as before plus bridge#/definitions/refusal {closed: code enum = transport list + POLICY_DENIED, reason enum = 4 password reasons, required code}",
+      "results": [
+        "tsc exit 0; eslint on the 11 patched/new files exit 0",
+        "vitest transport, ownership, policyHash, guidedMain, runtime: 5 files, 84 tests passed",
+        "negative control: binding replaced by a pass-through -> wire refusal test fails"
+      ]
+    },
+    "s3Simulation_mountedRules": {
+      "what": "Fresh scratch copy of the tree with s3-cutover.patch applied, C2b applied EXACTLY as c2b-spec.json specifies (runner-context properties/required/definitions, bridge#/definitions/refusal verbatim, the four observationPolicyHashVectors), and schemas.json / types.ts / observedSchemas.json / observedOperations.ts regenerated with tools/build-studio-observed-schemas.cjs (copied into the scratch root; it writes only under studio-runner/). Not C-int's landed files.",
+      "results": [
+        "tsc -p tsconfig.json --noEmit: exit 0 (includes every fixtures-tier file)",
+        "eslint on the 20 patched .ts files: exit 0",
+        "vitest test/guided, guidedMain, secretReplay, observedReplayValidation, observedReplayEquivalence: 11 files, 297 tests passed",
+        "full default tier (coverage, report on failure): 87 files passed, 2 failed, 1 skipped = disclosure.test.ts (needs docs/runbooks outside the copy) and runtime-versions.test.ts 2 tests (need dist/) - scratch-environment artifacts as before; pins and generated-contracts passed here. Tests 1334 passed. Coverage src/guided 98.36 lines, src/run 99.91; no threshold error for either"
+      ]
+    }
+  },
+  "stopConditions": [
+    {
+      "id": "AR-2 a, IDENTITY_MISMATCH row stopCondition",
+      "status": "RULED (ar-2-r14-stops.json ruling2): definite refusal -> immediate RUNTIME_INCOMPATIBLE (B14); R14 test added in s3-cutover.patch",
+      "evidence": [
+        "The runner answers a refused context with HTTP 409 {code:'IDENTITY_MISMATCH'} (transport.ts:103-106).",
+        "Backend GuidedRunnerClient.send requires status 200 (GuidedRunnerClient.java:176), else GuidedSessionException UNKNOWN_OUTCOME 409. The runner's code is not read.",
+        "Bootstrap path: GuidedTranslationService pushes the context at :272. A failed push leaves the CONTEXT_PENDING delivery for a 'bounded idempotent metadata retry on the next continuation'. After 3 deliveries (:299) it calls failTranslation(…, 'RUNTIME_INCOMPATIBLE') (:300), which is terminal FAILED.",
+        "prepareAndAdmit re-pushes the context before every prepare (GuidedDispatchService.java:129); a refusal there surfaces as UNKNOWN_OUTCOME 409 to the caller."
+      ],
+      "reading": "The backend RETRIES (bounded at 3 deliveries) and then ends the session terminal with RUNTIME_INCOMPATIBLE, not IDENTITY_MISMATCH. Whether a continuation happens without another caller request was not traced, so a session may wait for its next continuation or for expiry (inferred). The ruling names 'it retries' as a stop trigger, so R14 reports it. The runner-side refusal is fail-closed either way: nothing is observed or exported under an unverified policy. R14 keeps the runner change staged for S3 as ruled and waits for @architect on the backend handling (B14 scope).",
+      "question": "Is 'refused context -> UNKNOWN_OUTCOME, up to 3 deliveries, then FAILED RUNTIME_INCOMPATIBLE' acceptable for a policy-hash mismatch, or does B14 need a fast-fail path? R14 does not decide it."
+    },
+    {
+      "id": "S-5",
+      "status": "RULED (ar-2-r14-stops.json ruling1): Java fixed by B14, vectors by C-int; no runner change",
+      "owner": "C lane at C2b"
+    },
+    {
+      "id": "S-10",
+      "status": "HONOURED: no partial C2b landing from R14; the cutover is staged as one patch for the S3 unit"
+    }
+  ],
+  "r13HunksApplied": {
+    "status": "APPLIED in the tree at root's request (R13 finished)",
+    "source": "docs/qa/evidence/STUDIO-OBS-013/r13/queued-r14/{r14-transport.patch, r14-ownership.patch, r14-guidedMain.patch}; applied with `git apply --directory=studio-runner` after `--check` passed on all three",
+    "resultSha256": {
+      "studio-runner/src/guided/transport.ts": "2bd7d94eb12ae8c1c86dbb6d3a75af0550a2a9798b2d16b5fb6d6e62c687a95b (base fc447a2e…)",
+      "studio-runner/src/guided/ownership.ts": "666adcff169a25556c2cb9fc5e2763afe4936bc5f54ee1fc73113810e35c69b5 (base 030443d7…)",
+      "studio-runner/src/run/guidedMain.ts": "085bbf9feec4e949fac22626f596d6cbb87229d60afadec33d971c4aa029403d (base abb3cb7c…)"
+    },
+    "hunks": [
+      "transport.ts:145: route 'recording-evidence' validates against bridge#/definitions/recordingEvidence (it fell through to 'lifecycle' before)",
+      "ownership.ts:128: csiId from grant.scope.csiId passed to the runtime; close() awaits each runtime.recordingSettled after the stops",
+      "guidedMain.ts: loadEvidenceConfig(process.env) -> createConfiguredObjectStore -> createGuidedRecorder passed as `recorder`; objectStore.close() after app.close() settles"
+    ],
+    "testsAdded": {
+      "file": "studio-runner/test/guided/transport.test.ts (+2 tests, sha256 7956b9bbc472588c2408fe932b77663ec1e842bef3b2f2f733f7facb4efad7f2)",
+      "cases": [
+        "a lifecycle body on 'recording-evidence' and a recordingEvidence body on 'lifecycle' are both refused locally with SCHEMA before any credential lookup; the right shape reaches the credential lookup (positive control)",
+        "a valid recordingEvidence body is POSTed over mutual TLS to …/recording-evidence with X-Owner-Fence = ownerFence and the caller's Idempotency-Key, body byte-equal (local https stub, 202)"
+      ],
+      "negativeControl": "route mapping reverted -> both new tests fail; restored -> 11/11 pass"
+    },
+    "notAddedByR14": "No new ownership test for csiId pass-through or close() awaiting recordingSettled; root asked for the transport test only. R13's runtime tests cover the runtime side (not re-verified by R14)."
+  },
+  "queuedHunksForR13": [
+    {
+      "file": "studio-runner/src/guided/runtime.ts",
+      "status": "SUPERSEDED: root assigned the runtime.ts change to R14; the :23-25 doc comment is folded into s3-cutover.patch with the `rules` removal. Nothing queued for R13 or root."
+    }
+  ],
+  "rk2_fixturesTierClassification": {
+    "note": "Prepared, not edited (fixtures tier not run by R14; edits land at S3 with B14 seeding). Classified by reading each file.",
+    "mustChangeAtS3_serverPath": [
+      {
+        "file": "test/fixtures-tier/guided-wire.test.ts",
+        "anchor": ":25 options.applicationPolicy {policyRuleId:'application',…}",
+        "edit": "remove the option (now CONFIGURATION_DENIED); `withContextPolicy(context, {policyRuleId:'application', allowStructuralDiscovery:true})` on the context built at :22"
+      },
+      {
+        "file": "test/fixtures-tier/guided-secret-isolation.test.ts",
+        "anchor": ":212 options.applicationPolicy {policyRuleId:'app-structural', readGrants:[…]}",
+        "edit": "remove the option; apply the same policy to every client context via withContextPolicy (contexts from guidedContext at :194). The :335 foreign-context IDENTITY_MISMATCH oracle is unchanged"
+      },
+      {
+        "file": "test/fixtures-tier/guided-secret-ownership.test.ts",
+        "anchor": ":97",
+        "edit": "remove the option; guidedContext's default STRUCTURAL_POLICY equals it, so no context edit is needed"
+      },
+      {
+        "file": "test/fixtures-tier/guided-secret-stale-grant.test.ts",
+        "anchor": ":256",
+        "edit": "remove the option; default STRUCTURAL_POLICY equals it"
+      }
+    ],
+    "unchangedUnderR14Design_directRuntime": [
+      {
+        "file": "test/fixtures-tier/guided-dataflow.test.ts",
+        "anchor": ":22",
+        "why": "constructs GuidedRuntime directly with the option; still valid under the pass-through design. Its context gains the required fields from guidedContext"
+      },
+      {
+        "file": "test/fixtures-tier/secret-login.test.ts",
+        "anchor": ":157",
+        "why": "same as guided-dataflow"
+      }
+    ],
+    "unaffected_observationConfigOrReplay": [
+      "guided-targets.test.ts:21 and secret-login.test.ts:40,82,133,186 (ObservationConfig passed to createObservationSession/launchGuidedBrowser directly)",
+      "observed-replay, observed-replay-privacy, observed-secret-control, observed-bootstrap-video, observed-authoring-snapshot (TrustedPolicy / replay path; AR-2 g keeps replay on its published snapshot)"
+    ],
+    "count": "6 of the 12 fixtures files that mention applicationPolicy are on the guided path; 4 need edits. The '~15' in RK-2 counts backend ITs as well (6 backend files per s0 RK-2, B14's).",
+    "status": "Now edited inside s3-cutover.patch (root instruction with ar-mounted-rules); see s3CutoverPatch.hunks."
+  },
+  "pendingOnC2b": [
+    "C-int landing of c2b-spec (runner-context policy fields + definitions, bridge refusal, observationPolicyHashVectors, regenerated bundles). The patch is verified against a simulation of exactly that spec.",
+    "runner-context.schema.json: applicationPolicy (closed ObservationApplicationPolicy shape) + policyHash, both required; regenerated schemas.json and types.ts (C lane). Until then s3-cutover.patch stays unapplied; if it were applied now, every ownership context in the default tier would be refused (schema rejects the extra fields, or the binding rejects their absence).",
+    "bridge#/definitions/refusal (C-int) - the patched transport test validates replies against it and checks its enums against GUIDED_REFUSAL_CODES/REASONS",
+    "B14 T1b: backend freezes the policy into the runner context (studio_guided_session_policies) and stops writing the mounted applicationPolicy file in the guided ITs and ObservedPublicationFixture (RK-2), in the same S3 unit.",
+    "Root: dist rebuilt from both runner lanes after the patch, then the fixtures tier under the lock (S3 gate). R14 cannot run it."
+  ],
+  "fileListForRoot": [
+    "studio-runner/src/guided/policyHash.ts (new)",
+    "studio-runner/src/run/guidedConfig.ts (new; not in the story File List; see autoDecisions)",
+    "studio-runner/src/guided/transport.ts (R13 hunk applied by R14)",
+    "studio-runner/test/observedReplayValidation.test.ts (C2a labelSource follow-up, assigned by root)",
+    "studio-runner/src/guided/ownership.ts (R13 hunk applied by R14)",
+    "studio-runner/test/guided/transport.test.ts (+2 recording-evidence tests)",
+    "studio-runner/src/run/guidedMain.ts",
+    "studio-runner/src/reporting/admissionClient.ts (comment only, AR-3 b)",
+    "studio-runner/test/guided/policyHash.test.ts (new)",
+    "studio-runner/test/run/guidedMain.test.ts (new)",
+    "at S3 via s3-cutover.patch (21 files): studio-runner/src/run/{guidedConfig,guidedMain,observationTypes}.ts, src/guided/{ownership,transport,runtime}.ts, README.md, test/helpers/guided.ts, test/guided/{ownership,transport,policyHash,runtime}.test.ts, test/run/{guidedMain,secretReplay}.test.ts, test/fixtures-tier/{guided-dataflow,guided-wire,guided-secret-isolation,guided-secret-ownership,guided-secret-stale-grant,guided-recording,secret-login}.test.ts",
+    "studio-runner/test/fixtures/guided-dataflow/server.ts (S3b oracle-2 fix: Refresh control on the exact page)"
+  ],
+  "architectRulings_r14Stops": {
+    "source": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-r14-stops.json",
+    "S5": "Lowercase hex is normative; B14 fixes Java GuidedContracts.quote; C-int adds the vectors (accepts R14's observationPolicyHashVectors key). R14: no runner code change; the patched policyHash.test.ts keeps asserting length > 0.",
+    "contextRefusal": "Definite = 409 on 'context' with a body valid against the new bridge#/definitions/refusal (C2b) and code IDENTITY_MISMATCH or SCHEMA; B14 fails the session immediately as RUNTIME_INCOMPATIBLE.",
+    "r14Delivered": [
+      "transport.ts (in s3-cutover.patch): the refusal vocabulary at :104 is exported as GUIDED_REFUSAL_CODES / GUIDED_REFUSAL_REASONS and used in place, behaviour byte-identical, so the code list has one source the schema can be checked against",
+      "transport.test.ts (in s3-cutover.patch) +2 tests: (1) bridge#/definitions/refusal code enum equals [...GUIDED_REFUSAL_CODES,'POLICY_DENIED'] and reason enum equals GUIDED_REFUSAL_REASONS; (2) over real mutual TLS through createGuidedServer: after assign, a forged-policy context -> 409 {code:IDENTITY_MISMATCH}, a context without applicationPolicy/policyHash -> 409 {code:SCHEMA}, both valid against bridge#/definitions/refusal; then no launch, no callback, the assignment receipt is unchanged, and the bound context is accepted (200, identity) with exactly one launch",
+      "negative control: binding replaced by a pass-through -> test (2) fails"
+    ],
+    "observationForArchitect": "A replay (same Idempotency-Key) of a refused context before any runtime exists answers IDENTITY_MISMATCH even when the first answer was SCHEMA: the transport replay branch calls ownership.getRuntime() before reusing the prior result (pre-existing, transport.ts replay path). Both codes are definite under the ruling, so B14's terminal mapping is unaffected; the test asserts that the replay is a schema-valid definite refusal, not that the code is the same. Not changed by R14."
+  },
+  "queuedNotesForB14B13_guidedWorkerEnv": {
+    "context": "After R13's guidedMain hunk the worker calls loadEvidenceConfig(process.env): any STUDIO_RUNNER_* key not in the runner KEY_SPECS refuses startup (stderr GUIDED_WORKER_UNAVAILABLE), and evidence keys must parse. STUDIO_RUNNER_OBJECT_STORE_DIR is NOT required for startup (fallback /tmp/studio-runner-objects, provider fallback 'filesystem'); setting it matters so a recording lands where the backend under test reads (studio.execution.video-store.directory) and so parallel ITs do not share the fallback directory.",
+    "spawnSitesOfTheGuidedWorker": [
+      {
+        "helper": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java:848-850 (worker start) and :1863-1868 (restart)",
+        "env": "inherited + STUDIO_GUIDED_CONFIG_FILE only",
+        "needs": "STUDIO_RUNNER_OBJECT_STORE_DIR (and STUDIO_RUNNER_SCRATCH_DIR, disjoint) under the IT's TEMP; backend video-store is not overridden in this IT (provider default none), so no read-side coupling"
+      },
+      {
+        "helper": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java:2882-2884",
+        "env": "inherited + STUDIO_GUIDED_CONFIG_FILE only",
+        "needs": "same as GuidedBridgeIntegrationTest"
+      },
+      {
+        "helper": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java:15871-15876 (p3-guided-launch-counter.mjs wrapper importing dist/run/guidedMain.js, built by p3GuidedLaunchCounter() at :12080)",
+        "env": "inherited + STUDIO_GUIDED_CONFIG_FILE only",
+        "needs": "STUDIO_RUNNER_OBJECT_STORE_DIR = TEMP.resolve(\"objects\"), the directory this IT gives the backend at :794-795 (studio.execution.video-store.provider=local, directory=TEMP/objects) and the replay runner at :15941. Without it the guided recording goes to the shared fallback and the backend cannot read it"
+      }
+    ],
+    "notASpawnSite": "GuidedSessionVideoIT (guided/evidence) seeds recordings through GuidedRecordingSeed and spawns no worker; R13's R-3 note naming it is a read-side reference only.",
+    "inheritedEnvRisk": "All three inherit the Gradle test JVM environment. This shell had no STUDIO_RUNNER_* variables (verified: count 0) and backend/build.gradle.kts sets none (grep). A developer or CI env exporting an unenumerated STUDIO_RUNNER_* would stop all three workers from starting (inferred).",
+    "owner": "B14 owns GuidedPublicationReplayIT (conflictMatrix); GuidedBridgeIntegrationTest and GuidedPlanningIntegrationTest have no named owner in the matrix -> root to assign (B13 or B14)."
+  },
+  "c2aFollowUp": {
+    "source": "docs/qa/evidence/STUDIO-OBS-014/c2a-contract/ledger.json (clarification choices require labelSource; role/region exactly when PAGE)",
+    "fix": {
+      "file": "studio-runner/test/observedReplayValidation.test.ts:121 (assigned to R14 by root)",
+      "baseSha256": "e825fa421606ab742b077a3a51b4e8dd7b5db7ef6a9970a7adaea61f31554a64",
+      "sha256": "8dd37db49a61a6c9d78fddbf2476f1d969b29bd29b2e49a62fca50a8cc295936",
+      "change": "the added alternative question choice now carries labelSource:'PAGE', role:node.role, region:node.regionId (C-int's suggestion, typechecked). It mirrors the fixture's own PAGE choices (publication-fixtures.json observedChoice … context.question: labelSource PAGE, role textbox, region null)."
+    },
+    "results": [
+      "tsc -p tsconfig.json --noEmit: exit 0 (TS2345 gone)",
+      "eslint test/observedReplayValidation.test.ts: exit 0",
+      "vitest test/observedReplayValidation.test.ts: 100/100 (was 1 failed)",
+      "full default tier (coverage on, report on failure): 88 files passed, 1 skipped, 1 failed = pins.test.ts 3 tests. Now reports 'Observed packaged reference bundle is stale.' as well as the known schema-bundle message; both are packaged bundles awaiting root's dist rebuild after C2a (inferred, not R14 files). Tests 1336 passed, 3 failed, 29 skipped. Coverage: All files 96.67 lines; src/guided 94.55; src/run 99.91; src/validator 96.18; no threshold error for these"
+    ],
+    "s3PatchTypeCheck": {
+      "applyCheck": "`git apply --check docs/qa/evidence/STUDIO-OBS-014/r14/s3-cutover.patch` on the post-C2a tree: APPLIES; patch bytes unchanged (sha256 c4149f3c…56e5)",
+      "againstUnchangedGeneratedTypes": "Fresh scratch copy of the post-C2a tree with the patch applied, generated guided types as they are now: first run found ONE production error, src/guided/ownership.ts:131 TS2559 (RunnerContext has no properties in common with the weak parameter type of bindContextPolicy). Fixed in the tree in policyHash.ts (parameter is `object`, values still checked at run time; sha256 1287588f309f933d8c5a636d2761b4d90c47f879e0e3003f748e47e62454cb3d; tsc/eslint 0, policyHash.test 5/5). After the fix, the remaining errors are only in test files that use the C2b fields (TS2339/TS2353 in test/helpers/guided.ts, test/guided/ownership.test.ts, test/guided/transport.test.ts), which resolve when C2b regenerates RunnerContext. This corrects the earlier ledger statement that the production code compiled with or without the fields.",
+      "againstSimulatedC2b": "Same copy with C2b simulated (runner-context fields, bridge refusal, types, vectors): tsc exit 0; vitest transport, ownership, policyHash, guidedMain, runtime, observedReplayValidation: 6 files, 184 tests passed"
+    }
+  },
+  "mountedRulesRuling": {
+    "source": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-mounted-rules.json (option A: refuse every form)",
+    "r14TasksDone": "1-8 and the optional observationTypes comment, all inside s3-cutover.patch (nothing in the tree before S3)",
+    "notChanged": "ObservationConfig.rules / CollectorOptions.rules, the collector's rule logic, sanitizer, observedReferencePolicy and every replay TrustedPolicy.rules path; collector-level `rules: []` literals (launchGuidedBrowser / createObservationSession, guided-targets) left as ruled",
+    "negativeControls": [
+      "transport.ts rules insist removed -> the server-option refusal test fails",
+      "runtime.ts reading a smuggled rules option -> the inertness oracle fails",
+      "guidedConfig.ts: the explicit `rules` insist and the closed key list both refuse the key (two layers, as for applicationPolicy)"
+    ],
+    "notRunByR14": "fixtures tier (guided-dataflow oracle 2, the four server tests, guided-recording, secret-login): type-checked and linted under the C2b simulation only; root runs them at S3 under the lock. Whether the testId 'source' div is exported structurally was not observed; the test handles both outcomes as ruled."
+  },
+  "c2bSpecDelta": {
+    "source": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/c2b-spec.json r14PatchDelta",
+    "done": [
+      "STRUCTURAL_POLICY gains readGrants: []",
+      "guided-wire context policy with readGrants: []",
+      "every other policy literal in the patch carries readGrants (transport refusal/forged literals, guided-recording, secret-login); 'wide' and the isolation grant policy already did"
+    ],
+    "vectors": "R14's d70cfec5 vector is dropped; the patched policyHash.test.ts reads the spec's four observationPolicyHashVectors (structural-no-grants f68dc4b2…, Résumé 1999ae8c…, application-control-value-two-origins 8a3b7e83…, c0-in-policy-rule-id 221efae4…) and all four pass in the runner under simulation",
+    "optionalNotTaken": "observationTypes.ts ObservationApplicationPolicy.readGrants stays optional: the same type is used for replay's TrustedPolicy projection (observedReferencePolicy.ts), and the generated RunnerContext type already requires it on the guided wire."
+  },
+  "s3Applied": {
+    "authority": "root GO for S3 after C2b landed (docs/qa/evidence/STUDIO-OBS-014/c2b-contract/ledger.json)",
+    "patchSha256": "a4011e585b9534703cb02261c44fde702d521a4190da04f3e40db506be0271d2",
+    "applyCheck": "`git apply --check`: APPLIES with no drift, so no rebase was needed; then `git apply` (21 files). No git add/commit.",
+    "resultSha256": {
+      "studio-runner/src/run/guidedConfig.ts": "5e3d31c66f5a864c40886342bf24dfffa443b0fc8ae46ccf39642c5daf5bffda",
+      "studio-runner/src/run/guidedMain.ts": "11e8f02a988f31d091f1a1705a8071727e4af142fdcfedea79fa52d3ea51d687",
+      "studio-runner/src/guided/ownership.ts": "b20ff97845dd37b3b4fe2247d69dc162f0942fca21e3af85ac0ea789f5c984ad",
+      "studio-runner/src/guided/transport.ts": "e8162981c0ac5e42b557b711dc867b62a2a82881b078a192f7651b425e3c1a77",
+      "studio-runner/src/guided/runtime.ts": "e3d0da037141fb77ebd18d06c3de73f9356e516b5ba59fb44ae0f4826e252817",
+      "studio-runner/src/run/observationTypes.ts": "351d9626ca1042c1fe9bb9a3f92f94a91753061153f63b4c3fe915dbeac59c50",
+      "studio-runner/README.md": "153c6d79731ee18d14e71d8616a74bd51dd50fd7f09393ad486641a82e0a26c5",
+      "studio-runner/test/helpers/guided.ts": "eec50f8a0bff138661d1a2a66563776c03c89e24a9a6465f86ee55bdb3a22f35",
+      "studio-runner/test/guided/ownership.test.ts": "fc4cb4f4c617830c75a32572e8cc381cd933310b33ea0d3ee212e91f1f9865e4",
+      "studio-runner/test/guided/transport.test.ts": "a76e9842f23aed320cc5cf25f8dbd646a9e9c920aea5eee8e1e426e67009b979",
+      "studio-runner/test/guided/policyHash.test.ts": "00a235472b87858f29205c4483e16d2599eb0c986da94caa4ba9fbe115cb1d76",
+      "studio-runner/test/guided/runtime.test.ts": "f02b7386ecf352f3e4e925d0a4336c4a080b0100666f16c37ea1c5df159e4466",
+      "studio-runner/test/run/guidedMain.test.ts": "4c1cdda88fe4a4c703dc106b642a1d9cd13a6fcd38424e343b11fac023638ff9",
+      "studio-runner/test/run/secretReplay.test.ts": "29854e25320a6fc1d0e0dfe02dcfa07d9389c14a97acb6aaec002c2823b6a437",
+      "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "0525292ffb48f2aab3043afcef0de0d57eabae3e60e7b10dd58fd6e8ef34aa0a",
+      "studio-runner/test/fixtures-tier/guided-wire.test.ts": "0cbdaf6f164209402e46a0ab24913e2b513a5e335853cba79d1c1857799ffc85",
+      "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "fff604c8396b3f736a9d5d7e69d7e1a23e35ac584df1cf7b2cedb7fc732b5fd2",
+      "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts": "e35d6d523c6122f529c5d7e6a99b8551c7bb523428e6b32a18c5a53da3f296f2",
+      "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts": "5492b91ade9049e980caa126b18e695d279002857fc282e11345d4c07d9cddc0",
+      "studio-runner/test/fixtures-tier/guided-recording.test.ts": "bfa367dfd6c1235de9d0f4c711ccbd97d4c767058f07c98d0fa129845c72b017",
+      "studio-runner/test/fixtures-tier/secret-login.test.ts": "57ee7dd8099ac71848951e1eb0abfde2815f8066db7cf15e9d6eb2aa73f65844"
+    },
+    "results": [
+      {
+        "cmd": "studio-runner: ./node_modules/.bin/tsc -p tsconfig.json --noEmit",
+        "result": "exit 0 (whole package, including fixtures-tier sources, against the landed C2b generated types)"
+      },
+      {
+        "cmd": "studio-runner: ./node_modules/.bin/eslint .",
+        "result": "exit 0 (whole package)"
+      },
+      {
+        "cmd": "studio-runner: vitest run test/guided test/run/guidedMain.test.ts test/run/secretReplay.test.ts test/observedReplayValidation.test.ts (policyHash.test.ts is under test/guided)",
+        "result": "10 files, 263 tests passed, 0 failed: browser 11, guidedMain 6, policyHash 6 (all four landed observationPolicyHashVectors reproduced), diagnostics 3, secretReplay 43, evidence 20, transport 14, ownership 13, observedReplayValidation 100, runtime 47"
+      },
+      {
+        "cmd": "studio-runner: vitest run --coverage.reportOnFailure=true (full default tier)",
+        "result": "90 files: 88 passed, 1 skipped, 1 failed = pins.test.ts 3 tests ('Observed packaged schema bundle is stale.', the known item root fixes with the dist rebuild under the lock; ignored per root). Tests 1348 passed, 3 failed, 29 skipped (1380). Coverage: All files 97.21 lines / 88.33 branches; src/guided 98.36/88.83; src/run 99.91/85.95; src/validator 96.18/92.2; src/server 95.23/87.81; src/reporting 97.46/91.81; no coverage threshold error printed"
+      }
+    ],
+    "notRun": "fixtures tier and dist rebuild (root, under the lock, in the S3 window), backend Gradle (B14/root)."
+  },
+  "s3bOracle2Triage": {
+    "trigger": "root S3b fixtures run (dist d769a0b3…): guided-dataflow oracle 2 failed at `expect(observation.nodes.length).toBeGreaterThan(0)` (got 0); 1 failed, 224 passed, 9 skipped",
+    "verdict": "ORACLE, not product. The former exact-rule /source page holds only a password input (withheld as a password control), an unlabelled text input (no accessible name: `safe` requires displayName.length > 0) and `<div data-testid=\"source\">` whose only name is the business value itself; a generic div is not `relevant` to structural discovery (observationCollector.ts `relevant = rule !== undefined || fallback || role !== 'generic' || …`). With readGrants [] nothing on that page may be exported, so 0 nodes is the correct fail-closed result: exporting the div structurally would put the canary in the model-visible observation. The `length > 0` precondition was R14's own addition, not in ar-mounted-rules; the ruling's 'if the node is not exported, assert that instead' branch is what the product does.",
+    "fix": {
+      "files": {
+        "studio-runner/test/fixtures/guided-dataflow/server.ts": "exact page gains one named structural control `<button data-testid=\"refresh\">Refresh</button>` next to the unchanged source div (sha256 c8420f7d… -> 88d94a17…). Only guided-dataflow uses mode 'exact' (secret-isolation uses 'regionVisible').",
+        "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "oracle 2 rewritten deterministically (sha256 0525292f… -> f669d24d…): 'Refresh' must be exported (so the structural checks are not vacuous); every exported node structuralOnly with policyRuleId 'app-structural' and never named 'Business reference'; no 'reference-read', no canary in any message; the testId 'source' node is NOT exported (was a conditional branch, now asserted); coverage.withheldRegions > 0; no producer and exactly one outcome (the navigation). The dead prepare/TARGET_CHANGED branch is removed because the ruled outcome on this page is non-export."
+      },
+      "notWeakened": "Every earlier assertion is kept or made unconditional; the only removed line is the vacuity guard, replaced by a stronger one (a named node is exported and checked)."
+    },
+    "verification": [
+      {
+        "cmd": "studio-runner: eslint . / tsc -p tsconfig.json --noEmit",
+        "result": "exit 0 / exit 0"
+      },
+      {
+        "cmd": "fixtures tier, guided-dataflow.test.ts only, under the shared Gradle lock (mkdir protocol, after B14's run released it), dist rebuilt first (rm -rf dist; tsc -p tsconfig.build.json; node scripts/write-runtime-versions.mjs)",
+        "result": "3/3 passed (regionVisible, regionControl, oracle 2)"
+      },
+      {
+        "cmd": "full fixtures tier (vitest.fixtures.config.ts), same lock hold protocol, dist rebuilt again",
+        "result": "20 files: 17 passed, 3 skipped; tests 225 passed, 9 skipped (environment-gated), 0 failed"
+      },
+      {
+        "cmd": "runner default tier (coverage, report on failure)",
+        "result": "first run: 1 failed = test/run/observation.test.ts 'enforces policy and visited-element ceilings…' (known load flake; isolated 21/21 twice); rerun: 89 files passed, 1 skipped, 1351 tests passed, 29 skipped, 0 failed; pins green on the rebuilt dist. Coverage All files 97.21 lines / 88.32 branches; src/guided 98.36; src/run 99.91; src/validator 96.18; no threshold error"
+      }
+    ],
+    "sideEffects": "The fixtures tier rewrote the untracked docs/qa/evidence/STUDIO-OBS-007/ files, as every fixtures run does. dist/ was rebuilt twice under the lock and left built from this tree. Raw logs stay in the session scratchpad, not in docs/qa/evidence.",
+    "lock": "Held only for the two fixtures runs via a scratch wrapper using the same mkdir/pid/owner/trap protocol as gradle-locked.sh (owner text 'R14 runner fixtures tier'); released on exit."
+  }
+}

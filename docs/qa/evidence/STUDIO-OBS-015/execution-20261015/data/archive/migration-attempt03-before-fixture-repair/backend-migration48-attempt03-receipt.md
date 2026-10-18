@@ -1,0 +1,25 @@
+# Migration48 attempt03 execution receipt
+
+The single authorized command completed with exit1 after16.0 seconds. Fresh JUnit XML records **48 actual cases:41 passed,7 failed,0 errors,0 skipped**. All48 source methods match actual XML cases. This is a bounded migration execution result; no story QA verdict or Done transition was issued.
+
+All7 failures encounter `fk_observed_revision_receipt`: `ui_test_revisions(guided_session_id,id)` has no paired `studio_guided_publications(session_id,revision_id)` row. The existing V15 deferred FK is declared at `V15__publication.sql:270`. The fixture's `reject` helper forces all constraints at line72; `Fixture.immediate()` does so at211. Five negative cases receive the FK error rather than intended V21 guard text. Two publication-result cases call `f.immediate()` after revision INSERT and before publication setup. These incomplete fixture transaction boundaries block the intended V21 assertions. Fixture owner:data015. A production guard defect is not established.
+
+| Actual failing method | Source frame(s) | Intended check blocked |
+| --- | --- | --- |
+| `completeMetadataRequiredForNewRevisionWithoutHistoricalBackfill` | GuidedReplayingPrefixMigrationIT.java:62, GuidedReplayingPrefixMigrationIT.java:72, GuidedReplayingPrefixMigrationIT.java:671, GuidedReplayingPrefixMigrationIT.java:73 | requires complete immutable input and snapshot metadata |
+| `reuseMustNameImmediatePinnedBaseAndExactContiguousPrefix` | GuidedReplayingPrefixMigrationIT.java:62, GuidedReplayingPrefixMigrationIT.java:72, GuidedReplayingPrefixMigrationIT.java:681, GuidedReplayingPrefixMigrationIT.java:73 | reuse must equal actual immediate-base prefix |
+| `effectiveActionsAreUniqueCompleteSuccessfulAndMatchLedger` | GuidedReplayingPrefixMigrationIT.java:62, GuidedReplayingPrefixMigrationIT.java:72, GuidedReplayingPrefixMigrationIT.java:702, GuidedReplayingPrefixMigrationIT.java:73 | duplicate effective action |
+| `publicationReceiptRejectsWrongRelearnedBoundaryOrExtraKeys` | GuidedReplayingPrefixMigrationIT.java:62, GuidedReplayingPrefixMigrationIT.java:211, GuidedReplayingPrefixMigrationIT.java:715 | Publication result setup before public-receipt checks |
+| `publicationReceiptRequiresExplicitNullBeforeAnyCommittedSwitch` | GuidedReplayingPrefixMigrationIT.java:62, GuidedReplayingPrefixMigrationIT.java:211, GuidedReplayingPrefixMigrationIT.java:722 | Publication result setup before public-receipt checks |
+| `postDriftSuffixAndWrongSameTestBaseCannotBeMarkedReused` | GuidedReplayingPrefixMigrationIT.java:62, GuidedReplayingPrefixMigrationIT.java:72, GuidedReplayingPrefixMigrationIT.java:688, GuidedReplayingPrefixMigrationIT.java:73 | reuse must equal actual immediate-base prefix |
+| `excludedFailureRequiresExactImmutableNoInvocationReceipt` | GuidedReplayingPrefixMigrationIT.java:62, GuidedReplayingPrefixMigrationIT.java:72, GuidedReplayingPrefixMigrationIT.java:710, GuidedReplayingPrefixMigrationIT.java:73 | publication omitted unproven failed attempt |
+
+Full per-case traces, failure summaries, fresh XML and source snapshots are archived under this attempt. No fixes, retries, new skips or filter/threshold changes were made.
+
+The actual owned Testcontainers1.20.2 container `6c49f42089d063fd601d4f04d0ddd5a3505915aa6383849210c4716342c840d6` used `postgres:15-alpine`, image `sha256:ed8478222652ed5ec9cd22a74417af86b61d7cf03bea9bb4d3193be315c16567`, repository digest `postgres@sha256:fe0737ba566a2c5b2a28f34433c0a423261900ec17b9bf7ad115e1aae7e57f1b`. A read-only `SELECT version(), current_setting('server_version'), current_database()` returned PostgreSQL15.19 on aarch64 and `obs015_migrations`; fresh XML Flyway logs independently report PostgreSQL15.19 and successful V1->V21 plus isolated populated V20->V21 migration. Initial observer probes raced container bootstrap; their readiness errors are archived separately and are not JUnit failures. No user/dev database was accessed or changed.
+
+All1593 captured source inputs and runner dist remained stable. Source digest before/after:`ff9b87c7e2a2dda4fbd6e6aa2cfe9b865003bf619afdf9830e3dddd57b1eb574`. Dist digest before/after:`af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2`. Preflight verified checkpoint04 plus both authorized compiler corrections and found no other active Gradle build. Wrapper session71568 was polled to terminal completion.
+
+The populatedV20 upgrade test **passed its session/materialization and normalized-history assertions**. It still needs existing revision/policy/recording byte-preservation assertions before final completion, even if48 later pass. The separate passing live prefix/suffix policy/recording assertion does not establish upgrade preservation. SQL model-reservation/ACK assertions do not establish actual runtime gateway silence or browser at-most-once behavior.
+
+Both publication/head fixture ports and full HTTP/runner/joined/native/browser/coverage checks remain unverified. Root should release data015 for complete fixture correction and the explicit upgrade-preservation gap, then create a distinct frozen execution window. Independent final story gate remains later.

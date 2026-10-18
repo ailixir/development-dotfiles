@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "scope": "READONLY_INDEPENDENT_FINAL_NARROW_RISO03_RISO04_EXACT_REPAIR2_SOURCE_REVIEW_ONLY",
+  "verdict": "CHANGES_REQUIRED_SOURCE_ONLY_NOT_RUNTIME_OR_QA_APPROVAL",
+  "reason": "RISO03 is resolved at source level. RISO04 preserves thrown descriptor restoration failures but still silently confirms a false-returning inherited-property deletion, loses that retry capability, and can emit unresolved=false. No checks or native cases were executed.",
+  "inputBindings": {
+    "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "6a6781e7d8be2de8fabe79e22479aac476d241e61a32e1c50a9eb89de0603116",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair-2/result.json": "361b31f349f5303ef3aa8e9c0a99bd6aec25e2d7caaa762a5e3a57ee49253b45",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair-2/candidate.patch": "afbc63ce38acc7be574d2eae344da7715b204d54dfa2d2930b3e143988436141",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair-2/before.test.ts": "af961521a414a1c043f6fec79bd28a8d9816295d0983e4757483bad08b0e8114",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair-2/after.test.ts": "6a6781e7d8be2de8fabe79e22479aac476d241e61a32e1c50a9eb89de0603116",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair-2/before-bindings.json": "bb619efc75c4fc0f06cd72e7a4d39088ead923b252dc87452d275840143db527",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair-2/source-manifest.json": "c4390b03063981fd890a88996bf426151989f6419a6c667a1e7d20110aac23de",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair-2/dist-manifest.json": "7c10a486e83ae076f27fc09f9839e6b93fb6657ff39cd4391043b237a9dd9a27",
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-runner-isolation-static-2/source-dist.zip": "69f5e98a07cb7c3738da7fc7e5f17efa48c84eb391ac660f970337f17a7f3a46",
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-r-isolation-repair-review.json": "2d78eb222ecf7604d1d124d6640d610ad8c1cb93516905cb3fe9193443b215e0",
+    "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "417c8ae2f6fb845eb4f7f802b037efc5638ee53ab0fcab41e4a7d8553bf763ad",
+    "studio-runner/test/fixtures/guided-dataflow/server.ts": "c8420f7dc5420a085b0c5b51f92251b8418e6f6c7e4d891d2eb084cd15ee1f61"
+  },
+  "bindingVerification": {
+    "af96ArchiveTestSha256": "af961521a414a1c043f6fec79bd28a8d9816295d0983e4757483bad08b0e8114",
+    "currentTestSha256": "6a6781e7d8be2de8fabe79e22479aac476d241e61a32e1c50a9eb89de0603116",
+    "archiveEqualsBeforeSnapshot": true,
+    "liveEqualsAfterSnapshot": true,
+    "regeneratedUnifiedDiffEqualsPatch": true,
+    "sourceManifestEntriesIndependentlyRehashed": 256,
+    "sourceManifestMismatches": [],
+    "distManifestEntriesIndependentlyRehashed": 274,
+    "distManifestMismatches": [],
+    "sourceDeltaFromBeforeBindings": [
+      "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts"
+    ],
+    "distDeltaFromBeforeBindings": [],
+    "sharedArchiveSourcePathsCompared": 249,
+    "archiveOmitsSevenSourceManifestPaths": true,
+    "sharedArchiveSourceChangedPaths": [
+      "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts"
+    ],
+    "archiveDistPathsCompared": 274,
+    "archiveDistChangedPaths": [],
+    "allThreeCaseNamesBodiesAssertionsByteIdenticalToAf96": true,
+    "caseCount": 3,
+    "RISO01And02AssertionBytesUnchanged": true,
+    "extractionBytesEqualAf96Archive": true,
+    "sourceCompilationEquivalenceProved": false
+  },
+  "findings": [
+    {
+      "id": "R-ISO-SOURCE-01",
+      "status": "RESOLVED_SOURCE_ONLY_UNRUN",
+      "severity": "NONE",
+      "evidence": "Previously resolved exact CONTEXT_LOST foreign-producer and IDENTITY_MISMATCH foreign-envelope assertions, scalar recording and B liveness/no-binding checkpoints remain byte-identical within ISO3 (333-337). No expanded re-review or runtime claim."
+    },
+    {
+      "id": "R-ISO-SOURCE-02",
+      "status": "RESOLVED_SOURCE_ONLY_UNRUN",
+      "severity": "NONE",
+      "evidence": "Previously resolved nonempty A inventory witness, disposed same-tag check, initial fresh B inventory/runtime checks before credentials and same-tag post-fill B witness remain byte-identical within ISO3 (323,328,330-331,338-339)."
+    },
+    {
+      "id": "R-ISO-SOURCE-03",
+      "status": "RESOLVED_SOURCE_ONLY_UNRUN",
+      "severity": "NONE",
+      "path": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+      "lines": [
+        126,
+        127,
+        128,
+        129,
+        161,
+        162,
+        163,
+        164,
+        189,
+        191
+      ],
+      "evidence": "The original SDK profile argument is recognized as browser-profile and its actual parent is stored on the matching client before invoke(). Synchronous original launch failure scans that parent before rethrowing the same error. The rejection reaction is registered on the original SDK promise inside the wrapper before it is returned to production browser.ts:534 await. Its non-async rejection callback synchronously scans extant root files before production browser.ts:574-578 no-context disposal resumes. Missing roots and scan errors emit scanned=false/UNAVAILABLE_UNSCANNED/hits=null; required rejection scan absence becomes an unconfirmed cleanup issue. Results retain only scalar label/phase/status/hits/time; file buffers and generated encoding buffers are transient and not archived. Reflect.apply forwards original receiver/all arguments and the wrapper returns the same original promise unchanged. Existing output, callback, encoding and final evidence scan constraints remain."
+    },
+    {
+      "id": "R-ISO-SOURCE-04",
+      "status": "PARTIALLY_RESOLVED_REPAIR_REQUIRED",
+      "severity": "HIGH",
+      "path": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+      "lines": [
+        87,
+        89,
+        105,
+        109,
+        120,
+        124,
+        166,
+        282,
+        283,
+        284
+      ],
+      "resolved": "Thrown restoration errors are now recorded in cleanupIssues, failed closures remain in their lists, SDK restoration groups remain reachable through the outer retained list, descriptor release rejects on failed restoration, and constructor unwind attempts all releases plus a retry under the same absolute 5000ms await budget. Constructor evidence includes releaseIssues, descriptorAndScanIssues and pendingDescriptorRestorations; thrown failures cannot yield unresolved=false. The primary constructor error is rethrown unchanged.",
+      "unresolved": "patchMethod restoration at line109 uses Reflect.deleteProperty(holder,key) when the original method was inherited and ignores its boolean result. Reflect.deleteProperty returns false rather than throwing when the installed own property cannot be deleted (for example if it has become non-configurable). restoreMethods at line89 sees a normal return, splices out the capability and leaves confirmed=true. With other releases successful, constructor evidence at line283 can report pendingDescriptorRestorations=0 and unresolved=false while that own proxy remains installed. This is the inherited-method branch used by methods such as stream.write; it remains within the exact descriptor restoration boundary, not a new probe. This path was inspected statically and was not executed.",
+      "repair": "Treat a false Reflect.deleteProperty result as a restoration failure before the closure returns. Then the existing restoreMethods catch retains the capability, records the failure, descriptor release rejects, and constructor evidence remains unresolved. Preserve the original constructor error and existing bounded attempts; source was not edited."
+    }
+  ],
+  "resolvedFindingIds": [
+    "R-ISO-SOURCE-01",
+    "R-ISO-SOURCE-02",
+    "R-ISO-SOURCE-03"
+  ],
+  "unresolvedFindingIds": [
+    "R-ISO-SOURCE-04"
+  ],
+  "constraints": {
+    "exactlyThreeIsolationCases": true,
+    "allThreeCaseBodiesByteIdentical": true,
+    "extraction417cAndC842Untouched": true,
+    "noProductionSourceChange": true,
+    "noProductionApiFlagPolicySandboxChange": true,
+    "originalSdkLaunchReceiverArgumentsPromisePreserved": true,
+    "ordinaryPrivateMethodsAndOutputOriginalDelegationPreserved": true,
+    "deliberatePreOriginalCloseGateTimingExceptionPreserved": true,
+    "outputAndEncodingCoverageUnchanged": true,
+    "noRetainedScanBytesRawInventoryOrMockArchives": true,
+    "noSecretDerivedInstrumentationHashes": true,
+    "noPhysicalHeapErasureClaim": true,
+    "noOldAEcho": true,
+    "noFourthProbe": true,
+    "FOperationsReadGrantAndSPASSOriginsPreserved": true,
+    "cleanupAwaitBudgetPreservedMs": 5000,
+    "strictDescriptorFailureHonestyFullySatisfied": false
+  },
+  "gateDisposition": {
+    "historicalAf96Types": "USER_REPORTED_EXIT_0_NOT_RERUN",
+    "historicalAf96TargetLint": "USER_REPORTED_EXIT_0_NOT_RERUN",
+    "currentTypes": "UNRUN_REQUIRES_FRESH_COORDINATOR_EXECUTION",
+    "currentLint": "UNRUN_REQUIRES_FRESH_COORDINATOR_EXECUTION",
+    "nativeIsolation": "UNRUN",
+    "sourceDistManifestDrift": 0,
+    "coordinatorSoleBuildRuntimeOwner": true
+  },
+  "scopeLimits": [
+    "Source-only review; reaction ordering and restoration failure observations remain unexecuted. No native PASS, execution release, QA or lifecycle approval.",
+    "5000ms bounds cleanup awaits, not synchronous filesystem scans or forced settlement of underlying operations. Reference dropping does not prove physical heap erasure.",
+    "Current source/dist hash stability does not prove compilation equivalence.",
+    "User-reported full9 actual8PASS1FAIL (QuestionAttemptEvidence v3 const2 versus producer3) remains separate architecture/contracts disposition; no schema change reviewed or made. B collectorfc8 repair remains frozen/unrun. All19/default-negative/Core/sinks/image/QA remain open."
+  ],
+  "executionRelease": false,
+  "qaApproved": false,
+  "lifecycleVerdict": null,
+  "coordination": {
+    "newAgents": 0,
+    "contacts": 0,
+    "dispatchChanges": 0,
+    "cap": 4,
+    "roles": "root, coordinator and two read-only reviewers",
+    "wholeWaveCeilingUsd": 500,
+    "billing": "UNAVAILABLE_NOT_MEASURED"
+  },
+  "workPerformed": {
+    "sourceEdits": 0,
+    "tests": 0,
+    "typeChecks": 0,
+    "lint": 0,
+    "builds": 0,
+    "runtime": 0,
+    "browserLaunches": 0,
+    "gradle": 0,
+    "models": 0,
+    "processLifecycleActions": 0,
+    "lifecycleChanges": 0,
+    "metadataChanges": 0,
+    "contacts": 0,
+    "goalChanges": 0,
+    "dispatchChanges": 0,
+    "distWrites": 0,
+    "evidenceWrites": 1
+  }
+}

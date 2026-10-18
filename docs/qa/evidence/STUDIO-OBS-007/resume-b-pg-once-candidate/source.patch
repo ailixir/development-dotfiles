@@ -1,0 +1,241 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java.before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -8105,6 +8105,14 @@
+     private final java.util.Set<Thread> executing =
+         java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+     private final long[][] counts = new long[Segment.values().length][Thread.State.values().length];
++    private final java.util.Map<Thread, Long> entered = new java.util.IdentityHashMap<>();
++    private final java.util.concurrent.atomic.AtomicBoolean pgOnce = new java.util.concurrent.atomic.AtomicBoolean();
++    private volatile Thread pgObserver;
++    private enum PgStatus { NOT_TRIGGERED, RUNNING, OBSERVED, UNOBSERVED, FAILED, AMBIGUOUS, TRUNCATED, NON_QUIESCENT }
++    private volatile PgStatus pgStatus = PgStatus.NOT_TRIGGERED;
++    private final long[][] pgStagesAndWaits = new long[7][10];
++    private final long[] pgBlockerStages = new long[7], pgRelations = new long[3], pgWaitEvents = new long[8];
++    private long pgRows, pgCandidates, pgBlockers;
+     private volatile boolean stopping;
+     private volatile Status status = Status.OFF;
+     private long empty, unattributed, cycles;
+@@ -8137,8 +8145,9 @@
+             status = Status.FAILED;
+             return;
+           }
+-          executing.add(
+-              Thread.currentThread()); // Only original selected filter's executing thread.
++          Thread current = Thread.currentThread();
++          executing.add(current); // Only original selected filter's executing thread.
++          entered.putIfAbsent(current, System.nanoTime());
+         }
+       } catch (Throwable unsupported) {
+         status = Status.FAILED;
+@@ -8148,7 +8157,9 @@
+     void leaveCurrent() {
+       try {
+         synchronized (gate) {
+-          executing.remove(Thread.currentThread());
++          Thread current = Thread.currentThread();
++          executing.remove(current);
++          entered.remove(current);
+         }
+       } catch (Throwable unsupported) {
+         status = Status.FAILED;
+@@ -8175,6 +8186,9 @@
+                 Segment segment = classify(stack);
+                 if (segment == Segment.OTHER) unattributed++;
+                 counts[segment.ordinal()][state.ordinal()]++;
++                if (segment == Segment.JDBC_PATH && state == Thread.State.WAITING) {
++                  triggerPgOnce(target);
++                }
+                 if (segment != Segment.OTHER
+                     && status != Status.FAILED
+                     && status != Status.NON_QUIESCENT) status = Status.OBSERVED;
+@@ -8195,8 +8209,116 @@
+       } finally {
+         synchronized (gate) {
+           executing.clear();
+-        }
+-      }
++          entered.clear();
++        }
++      }
++    }
++
++    private void triggerPgOnce(Thread target) {
++      synchronized (gate) {
++        Long start = entered.get(target);
++        if (stopping || start == null || !executing.contains(target)
++            || System.nanoTime() - start < Duration.ofMillis(500).toNanos()
++            || !pgOnce.compareAndSet(false, true)) {
++          return;
++        }
++        pgStatus = PgStatus.RUNNING;
++        pgObserver = Thread.ofPlatform().daemon().name("private-c5-pg-once").unstarted(this::snapshotPg);
++        try { pgObserver.start(); } catch (Throwable failed) { pgStatus = PgStatus.FAILED; }
++      }
++    }
++
++    private static int pgStage(String original) {
++      if (original == null || original.length() > 4096) return 6;
++      String sql = original.toLowerCase(java.util.Locale.ROOT).replaceAll("\\s+", " ").trim();
++      if (sql.startsWith("select state,revoked_at from studio_guided_sessions") && sql.contains("for update")) return 0;
++      if (sql.startsWith("select document::text,progress::text from studio_guided_sessions") && sql.contains("for update")) return 1;
++      if (sql.contains(" from ui_tests ") && (sql.contains("for update") || sql.contains("for no key update"))) return 2;
++      if (sql.startsWith("select m.manifest::text from studio_guided_translation_state")) return 3;
++      if (sql.startsWith("with updated as (update studio_guided_sessions")) return 4;
++      if (sql.startsWith("update studio_guided_sessions")) return 5;
++      return 6;
++    }
++
++    private static int pgWait(String type) {
++      if (type == null) return 0;
++      int index = List.of("Lock", "LWLock", "IO", "Client", "IPC", "Timeout", "Activity", "BufferPin").indexOf(type);
++      return index < 0 ? 9 : index + 1;
++    }
++
++    private static int pgEvent(String event) {
++      if (event == null) return 0;
++      int index = List.of("transactionid", "tuple", "relation", "ClientRead", "ClientWrite", "DataFileRead").indexOf(event);
++      return index < 0 ? 7 : index + 1;
++    }
++
++    private void snapshotPg() {
++      var privatePids = new java.util.HashSet<Integer>();
++      var candidates = new java.util.HashSet<Integer>();
++      var blockers = new java.util.HashSet<Integer>();
++      var settings = new java.util.Properties();
++      settings.setProperty("user", DB.getUsername());
++      settings.setProperty("password", DB.getPassword());
++      settings.setProperty("connectTimeout", "1");
++      settings.setProperty("socketTimeout", "1");
++      settings.setProperty("ApplicationName", "c5-private-pg-observer");
++      try (var connection = java.sql.DriverManager.getConnection(DB.getJdbcUrl(), settings)) {
++        connection.setReadOnly(true);
++        connection.setAutoCommit(false);
++        try {
++          try (var statement = connection.createStatement()) {
++            statement.setQueryTimeout(1);
++            statement.execute("SET LOCAL statement_timeout='250ms'");
++            statement.setMaxRows(64);
++            String catalog = "SELECT a.pid,a.query,a.wait_event_type,a.wait_event,b.pid AS blocker_pid,b.query AS blocker_query,"
++                + " EXISTS(SELECT 1 FROM pg_locks l WHERE l.pid=a.pid AND l.relation='studio_guided_sessions'::regclass) AS owner_relation,"
++                + " EXISTS(SELECT 1 FROM pg_locks l WHERE l.pid=a.pid AND l.relation='ui_tests'::regclass) AS source_relation"
++                + " FROM pg_stat_activity a LEFT JOIN LATERAL unnest(pg_blocking_pids(a.pid)) blocked(pid) ON true"
++                + " LEFT JOIN pg_stat_activity b ON b.pid=blocked.pid"
++                + " WHERE a.datname=current_database() AND a.backend_type='client backend'"
++                + " AND a.pid<>pg_backend_pid() AND a.state<>'idle'";
++            try (var rows = statement.executeQuery(catalog)) {
++              while (rows.next()) {
++                if (++pgRows >= 64) { pgStatus = PgStatus.TRUNCATED; break; }
++                String original = rows.getString("query"), blockerQuery = rows.getString("blocker_query");
++                if (original != null && original.length() > 4096 || blockerQuery != null && blockerQuery.length() > 4096) {
++                  pgStatus = PgStatus.TRUNCATED;
++                  break;
++                }
++                int pid = rows.getInt("pid"), stage = pgStage(original), wait = pgWait(rows.getString("wait_event_type"));
++                if (privatePids.add(pid)) {
++                  pgStagesAndWaits[stage][wait]++;
++                  pgWaitEvents[pgEvent(rows.getString("wait_event"))]++;
++                  if (stage < 6) candidates.add(pid);
++                  boolean owner = rows.getBoolean("owner_relation"), source = rows.getBoolean("source_relation");
++                  if (owner) pgRelations[0]++;
++                  if (source) pgRelations[1]++;
++                  if (!owner && !source) pgRelations[2]++;
++                }
++                int blocker = rows.getInt("blocker_pid");
++                if (!rows.wasNull() && blockers.add(blocker)) pgBlockerStages[pgStage(blockerQuery)]++;
++              }
++            }
++          }
++        } finally {
++          connection.rollback();
++        }
++        pgCandidates = candidates.size();
++        pgBlockers = blockers.size();
++        if (pgStatus != PgStatus.TRUNCATED && pgStatus != PgStatus.NON_QUIESCENT) {
++          pgStatus = pgCandidates > 1 ? PgStatus.AMBIGUOUS : pgCandidates == 1 ? PgStatus.OBSERVED : PgStatus.UNOBSERVED;
++        }
++      } catch (Throwable failed) {
++        if (pgStatus != PgStatus.NON_QUIESCENT) pgStatus = PgStatus.FAILED;
++        // Never retain/log raw SQL/IDs/credentials/exception.
++      } finally {
++        privatePids.clear(); candidates.clear(); blockers.clear(); settings.clear();
++      }
++    }
++
++    private boolean pgJoined() {
++      Thread observer = pgObserver;
++      return observer == null || !observer.isAlive();
+     }
+ 
+     private static Segment classify(StackTraceElement[] stack) {
+@@ -8254,9 +8376,22 @@
+           }
+         }
+         if (sampler.isAlive()) status = Status.NON_QUIESCENT;
++        Thread observer = pgObserver;
++        if (observer != null) {
++          observer.interrupt();
++          long pgDeadline = System.nanoTime() + Duration.ofSeconds(3).toNanos();
++          while (observer.isAlive()) {
++            long remaining = pgDeadline - System.nanoTime();
++            if (remaining <= 0) break;
++            try { observer.join(Duration.ofNanos(remaining)); }
++            catch (InterruptedException interrupted) { restoreInterrupt = true; }
++          }
++          if (observer.isAlive()) pgStatus = PgStatus.NON_QUIESCENT;
++        }
+       } finally {
+         synchronized (gate) {
+           executing.clear();
++          entered.clear();
+         }
+         if (restoreInterrupt) Thread.currentThread().interrupt();
+       }
+@@ -8696,11 +8831,12 @@
+       try {
+         claimSampler.close();
+       } finally {
+-        if (claimSampler.sampler.isAlive()) {
++        if (claimSampler.sampler.isAlive() || !claimSampler.pgJoined()) {
+           cleanupUnconfirmed = true;
+         }
+       }
+       boolean joined = !claimSampler.sampler.isAlive();
++      boolean pgJoined = claimSampler.pgJoined();
+       Path path = TEMP.resolve("c5-numeric-evidence.json");
+       ObjectNode evidence =
+           Files.exists(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)
+@@ -8709,7 +8845,7 @@
+       evidence
+           .put("claimSamplerStatus", claimSampler.status.ordinal())
+           .put("claimSamplerJoined", joined)
+-          .put("claimSamplerCleanupConfirmed", joined)
++          .put("claimSamplerCleanupConfirmed", joined && pgJoined)
+           .put("claimSamplerDiagnosticOnly", true);
+       if (!joined) {
+         evidence.remove(
+@@ -8726,8 +8862,24 @@
+             .put("claimSamplerUnattributed", claimSampler.unattributed);
+         evidence.set("claimSamplerCounts", JSON.valueToTree(claimSampler.counts));
+       }
++      evidence.remove(List.of("pgSnapshotRows", "pgSnapshotCandidates", "pgSnapshotBlockers",
++          "pgSnapshotStageWaitCounts", "pgSnapshotBlockerStageCounts", "pgSnapshotRelationCounts", "pgSnapshotWaitEventCounts"));
++      evidence.put("pgSnapshotStatus", claimSampler.pgStatus.ordinal())
++          .put("pgSnapshotJoined", pgJoined).put("pgSnapshotExactClaimAttribution", false);
++      if (pgJoined) {
++        evidence.put("pgSnapshotRows", claimSampler.pgRows)
++            .put("pgSnapshotCandidates", claimSampler.pgCandidates)
++            .put("pgSnapshotBlockers", claimSampler.pgBlockers);
++        if (claimSampler.pgStatus == C5ClaimSampler.PgStatus.OBSERVED
++            || claimSampler.pgStatus == C5ClaimSampler.PgStatus.AMBIGUOUS) {
++          evidence.set("pgSnapshotStageWaitCounts", JSON.valueToTree(claimSampler.pgStagesAndWaits));
++          evidence.set("pgSnapshotBlockerStageCounts", JSON.valueToTree(claimSampler.pgBlockerStages));
++          evidence.set("pgSnapshotRelationCounts", JSON.valueToTree(claimSampler.pgRelations));
++          evidence.set("pgSnapshotWaitEventCounts", JSON.valueToTree(claimSampler.pgWaitEvents));
++        }
++      }
+       Files.writeString(path, evidence.toString(), StandardCharsets.UTF_8);
+-      if (!joined) {
++      if (!joined || !pgJoined) {
+         throw new IllegalStateException("Private claim sampler cleanup remains unconfirmed");
+       }
+     }

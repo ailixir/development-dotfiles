@@ -1,0 +1,951 @@
+{
+  "id": "QLV-009-20261018",
+  "kind": "qa-local-validation-record",
+  "draft": false,
+  "author": "@qa (Quinn)",
+  "writtenAt": "2026-10-18",
+  "isVerdict": false,
+  "storyStatusChange": "none",
+  "doneClaimed": false,
+  "verdictVocabularyUsed": "none as a QA outcome (no PASS / CONCERNS / FAIL / WAIVED); the one waiver cited is the user's",
+  "specSource": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/qa/t0-qa-20261017.md section 2 (D2)",
+  "skeleton": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/qa/pre-g9-review/local-validation-record.skeleton.json",
+  "gate": {
+    "id": "obs009-g9-check01 (G9), then G9b (obs009-g9b-c8t01 targeted, obs009-g9b-planfix01)",
+    "done": true,
+    "statusFile": "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018b/status.txt (G9B-DONE); G9: local-gate-20261018/status.txt",
+    "g9bC8": "full check aborted by root on user decision; replaced by a targeted run"
+  },
+  "trigger": {
+    "value": "MET",
+    "meaning": "MET under the user's waiver of 2026-10-18 (full backend regression and JaCoCo coverage gate at the G9b digest, owed at the 011 T0 fresh baseline). A start trigger for OBS-011 T0 and OBS-010 T2. Not a quality verdict, not a Done claim.",
+    "forTargets": [
+      "OBS-011 T0 start",
+      "OBS-010 T2 start"
+    ],
+    "decidedAt": "2026-10-18",
+    "boundDigest": {
+      "sourceDigest": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+      "sourceFiles": 1808,
+      "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distFiles": 238,
+      "helmDigest": "4607090747e4fef31713ff90db5545eb243bdcff67c3b9acfd5fff2e8e01ada8",
+      "gitHead": "734ad704f6ae508dbb10d9b5127a315bb0df5f81",
+      "capturedAt": "2026-10-18T23:26:58Z",
+      "capturedBy": ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py (output outside the repo)",
+      "g9bAfterDigest": "fd793c9561bfa86d3046abd9791c6da231546f309e7e920a569792deb5afcb67",
+      "deltaFromG9bAfter": {
+        "added": 0,
+        "removed": 0,
+        "changed": 2,
+        "files": [
+          "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+          "backend/src/test/java/com/citi/put/checks/studio/support/ObservedPublicationFixture.java"
+        ],
+        "distEqual": true,
+        "helmEqual": true
+      }
+    },
+    "waiver": {
+      "source": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w0/decisions.md, section \"G9b C8: targeted backend run instead of the full check (user decision, 2026-10-18 ~18:05)\"",
+      "choice": "Targeted backend run",
+      "waived": "the full backend regression and the JaCoCo coverage gate at the G9b digest",
+      "owed": "a full fresh `check` at the 011 T0 fresh baseline, before any 011 lane claims credit",
+      "c8RecordedAs": "OWED_BY_DECISION",
+      "qaReading": "the waiver does not make C8 pass; it lets C8 be recorded as owed"
+    },
+    "autoDecision": {
+      "question": "bind to the G9b digest or to the digest after the planning fix",
+      "decision": "bind to 061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+      "reason": "the targeted run had 12 red cases, so the G9b digest cannot carry a clean result; the fix moved the digest by exactly two backend test files; the waiver's wording is read as covering that one-step successor",
+      "ifWrong": "if the user means the waiver to stop at fd793c9561bfa86d3046abd9791c6da231546f309e7e920a569792deb5afcb67, the trigger reverts to NOT_MET on the 12 reds"
+    },
+    "cleared": [
+      "12 G9b reds are one class (GuidedPlanningIntegrationTest model-sizing fixture defects: shared-CSI daily budget 429 x11, hard-coded thought tokens x1); planfix01 67/67 at the bound digest (Planning 57, CsiBudgetIT 5, DefaultModelReservationIT 5); the 12 names and the 57-name set verified",
+      "fix is test-only: additive overload with identical delegating defaults; no daily-budget assertion removed (Planning asserts none; CsiBudgetIT 5/5 owns it)",
+      "F1 class GuidedPublicationReplayIT 46/46 (+62/62 guidedIncrementalTest) and F2 class GuidedServiceTransportFaultIT 39/39 in the targeted run",
+      "static checks ran in the targeted run and did not fail",
+      "drift from the targeted run to the bound digest is exactly the two test files; runner, frontend, contracts, tools, helm and dist byte-identical"
+    ],
+    "disclosedResidues": [
+      {
+        "id": "R1",
+        "what": "F1 cause unproven; diagnostic armed in awaitJoinedVideo but prints only on failure and did not fire (the test passed)"
+      },
+      {
+        "id": "R2",
+        "what": "F2 race proof (scratch-copy mutation, RED unfixed / GREEN fixed) not run; fix is code-read against the race-free sibling awaitStage"
+      },
+      {
+        "id": "R3",
+        "what": "D2 smoke step 6 (one real guided assign on Linux) owed, never passed"
+      },
+      {
+        "id": "R4",
+        "what": "coverage owed at 011 T0; jacocoTestCoverageVerification and requireFreshGuidedPartitions never ran at G9 or G9b; G9 offline reading 91.66% is informational"
+      },
+      {
+        "id": "R5",
+        "what": "C10 not re-run at the G9b or bound digest; carried by file identity of the mutated production files"
+      },
+      {
+        "id": "R6",
+        "what": "D2 container smoke not re-run on the residue image obs009-residue-local (image config equal to the G9 image; dist JavaScript byte-identical; smoke itself not run)"
+      },
+      {
+        "id": "R7",
+        "what": "about 2,440 of G9's 2,773 cases last run at G9; shared-CSI-day 429 risk for unrun classes that use installGovernance (Dex's open inference, extended by @qa grep)"
+      },
+      {
+        "id": "R8",
+        "what": "G9b C0 took no listener or orphan listing"
+      },
+      {
+        "id": "R9",
+        "what": "planfix mutation RED and spotless/checkstyle at the bound digest are @dev-reported; not archived under docs/"
+      }
+    ],
+    "notBlocking": "none of R1-R9 is a NOT_VALIDATED row or a failing check; each is owed to a named step in the owed list",
+    "voidedBy": [
+      "any edit to the 1808-file source set, the 238 dist files or helm-chart/ after the bound capture",
+      "a red in the 011 T0 fresh full check at the same bytes reopens the case it names",
+      "a user statement that the waiver stops at the G9b digest"
+    ],
+    "c4": "MET at G9b: residue image sha256:f8bcb56378b9277f5947a915b25bfdd483e3898ea6dd31681c3ad39d3b616cdf, deployment tier 642/642",
+    "c8": "OWED_BY_DECISION: targeted run test 255/267 (12 Planning fixture failures), guidedIncrementalTest 62/62; planfix01 67/67 at the bound digest",
+    "c10": "CARRIED_NOT_RERUN: 9/9 red at G9; mutated production files byte-identical to G9",
+    "metSteps": [
+      "C0 (gap R8)",
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C9"
+    ],
+    "owedOrCarriedSteps": {
+      "C8": "OWED_BY_DECISION",
+      "C10": "CARRIED_NOT_RERUN"
+    },
+    "rowsAtBoundDigest": {
+      "AC-1": "VALIDATED_WITH_DISCLOSURE",
+      "AC-2": "VALIDATED_WITH_DISCLOSURE",
+      "AC-3": "VALIDATED_WITH_DISCLOSURE",
+      "AC-4": "VALIDATED_WITH_DISCLOSURE",
+      "AC-5": "VALIDATED_WITH_DISCLOSURE",
+      "AC-6": "VALIDATED_WITH_DISCLOSURE",
+      "AC-11": "VALIDATED_WITH_DISCLOSURE",
+      "AC-12 f-j": "VALIDATED_WITH_DISCLOSURE"
+    },
+    "rowsRule": "every row rests on class evidence from G9 that the waiver left unrerun, or on a smoke older than the image; the trigger is MET because no row is NOT_VALIDATED"
+  },
+  "freeze": {
+    "g9": {
+      "sourceDigestBefore": "6fcc12eef193338ca3bc79adaa50660d93c245a4462a5f850a7256588d9fc91b",
+      "sourceDigestAfter": "6fcc12eef193338ca3bc79adaa50660d93c245a4462a5f850a7256588d9fc91b",
+      "distDigestBefore": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "distDigestAfter": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "helmDigestBefore": "8dbe073c706c80b8e560ecc60593ceb550cc93fd6c4ca6486016829899dd04a6",
+      "helmDigestAfter": "8dbe073c706c80b8e560ecc60593ceb550cc93fd6c4ca6486016829899dd04a6",
+      "sourceFiles": 1805,
+      "distFiles": 238,
+      "filesIdenticalToBefore": true,
+      "distHasMainJs": true,
+      "distHasGuidedMainJs": false,
+      "gitHead": "734ad704f6ae508dbb10d9b5127a315bb0df5f81",
+      "gitHeadNote": "the tree is dirty; the digest, not HEAD, is the identity",
+      "approvedSkipsFileSha256": "c6f16987430a332b80a065308a2c9b0ef9adccd478b9be64a02e1cb459cd09dc",
+      "imageAddOnCaptures": "imageBefore and imageAfter equal G9 before at source, dist and head (G/image/summary.json)"
+    },
+    "g9b": {
+      "sourceDigestBefore": "fd793c9561bfa86d3046abd9791c6da231546f309e7e920a569792deb5afcb67",
+      "sourceDigestAfter": "fd793c9561bfa86d3046abd9791c6da231546f309e7e920a569792deb5afcb67",
+      "distDigestBefore": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distDigestAfter": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distDigestBeforeRebuild": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "helmDigestBefore": "4607090747e4fef31713ff90db5545eb243bdcff67c3b9acfd5fff2e8e01ada8",
+      "helmDigestAfter": "4607090747e4fef31713ff90db5545eb243bdcff67c3b9acfd5fff2e8e01ada8",
+      "sourceFiles": 1808,
+      "distFiles": 238,
+      "filesIdenticalToBefore": true,
+      "distHasMainJs": true,
+      "distHasGuidedMainJs": false,
+      "r0": "R0-clean exit 0; run-runner-build.py obs009-g9b-build01 exit 0; verifyRunnerDist exit 0; one dist rebuild"
+    },
+    "bound": {
+      "sourceDigest": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+      "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "helmDigest": "4607090747e4fef31713ff90db5545eb243bdcff67c3b9acfd5fff2e8e01ada8",
+      "g9ToBound": {
+        "added": 3,
+        "changed": 23,
+        "removed": 0,
+        "distFilesDifferent": [
+          "guided/schemas.json",
+          "runtime-versions.json",
+          "validator/observedSchemas.json"
+        ],
+        "distJsByteIdentical": true
+      }
+    }
+  },
+  "steps": [
+    {
+      "id": "C0",
+      "state": "MET",
+      "gap": "R8: no listener or orphan listing at G9b",
+      "observed": "capture-before taken; helm digest recorded; Gradle-daemon file empty; vm_stat taken",
+      "evidence": "Gb/capture-before.json, c0-*.txt"
+    },
+    {
+      "id": "C1",
+      "state": "MET",
+      "observed": "runner type-check and lint exit 0",
+      "evidence": "Gb/c1.log"
+    },
+    {
+      "id": "C2",
+      "state": "MET",
+      "observed": "runner unit: 2672 total, 2643 passed, 0 failed, 29 pending, exit 0",
+      "evidence": "X/execution/obs009-g9b-runner-unit01-*"
+    },
+    {
+      "id": "C3",
+      "state": "MET",
+      "observed": "runner fixtures: 305 total, 296 passed, 0 failed, 9 pending, exit 0",
+      "evidence": "X/execution/obs009-g9b-runner-fixtures01-*"
+    },
+    {
+      "id": "C4",
+      "state": "MET",
+      "observed": "image obs009-residue-local built (buildstage and final exit 0); deployment tier 642/642, 61 suites, exit 0",
+      "evidence": "Gb/c4-*, X/execution/obs009-g9b-runner-deploy01-*"
+    },
+    {
+      "id": "C5",
+      "state": "MET",
+      "observed": "pins, contracts, codegen exit 0 x3; NOT ASSERTED: chromiumBuild and image null (ED-05)",
+      "evidence": "Gb/c5-*.log"
+    },
+    {
+      "id": "C6",
+      "state": "MET",
+      "observed": "frontend type-check, lint (0 errors, 308 warnings), vitest 70 files / 1386 tests, build exit 0",
+      "evidence": "Gb/c6-frontend.log"
+    },
+    {
+      "id": "C7",
+      "state": "MET",
+      "observed": "P2 0; DEFERRED 0; guidedMain 0; start:guided 0; studio-guided-worker 0; sameIdentity bodies 1; SSLContext.getDefault 0; @Disabled 6 and studio.updateTest( 0 repeated by @qa at the bound tree",
+      "evidence": "Gb/c7-greps.txt"
+    },
+    {
+      "id": "C8",
+      "state": "OWED_BY_DECISION",
+      "observed": "targeted run c8t01: 329 cases, 317 pass, 12 fail (all GuidedPlanningIntegrationTest), 0 skipped; planfix01 67/67 at the bound digest",
+      "evidence": "Gb/g9b-c8t.sh, X/execution/obs009-g9b-c8t01-*, X/execution/obs009-g9b-planfix01-*"
+    },
+    {
+      "id": "C9",
+      "state": "MET",
+      "observed": "capture-after equals capture-before file by file (1808 source, 238 dist); helm equal",
+      "evidence": "Gb/capture-after.json"
+    },
+    {
+      "id": "C10",
+      "state": "CARRIED_NOT_RERUN",
+      "observed": "9/9 red as named at the G9 digest; baseline and final 33/33; not re-run at a G9b digest",
+      "evidence": "X/qa/c10-run/c10-results.json"
+    }
+  ],
+  "c4Decision": {
+    "supersedes": "the skeleton decision \"C4 NOT_MET until the image tests pass at the frozen digest\"",
+    "flipped": true,
+    "why": "the condition I set was met: image built (U22), C4 re-run at the same digest, 0 failed",
+    "image": {
+      "tag": "put-checks-studio-runner:obs009-g9-local",
+      "id": "sha256:af96bee8ebf2ebcf9c68db6a98e4f7e208e3f07f99c688d47440ad4dfdbebd8f",
+      "base": "mcr.microsoft.com/playwright:v1.63.0-noble",
+      "baseId": "sha256:5536bbbd0ffc106a9fdab13fbff6b3abab01418cceff67ff246552b64cf5623d",
+      "pull": "none (cached base, --pull=false)"
+    },
+    "d2Smoke": {
+      "assertions": 14,
+      "failed": 0,
+      "step6": "not scripted: one real guided assign on Linux is OWED, not passed",
+      "verdict": "GREEN apart from step 6"
+    },
+    "g9b": {
+      "image": {
+        "tag": "put-checks-studio-runner:obs009-residue-local",
+        "id": "sha256:f8bcb56378b9277f5947a915b25bfdd483e3898ea6dd31681c3ad39d3b616cdf",
+        "pull": "none (cached base, --pull=false)"
+      },
+      "deploymentTier": {
+        "passed": 642,
+        "failed": 0,
+        "pending": 0,
+        "suites": 61,
+        "exit": 0,
+        "elapsedSeconds": 79.01
+      },
+      "imageConfigEqualToG9Image": [
+        "Entrypoint",
+        "Cmd",
+        "User",
+        "WorkingDir",
+        "ExposedPorts",
+        "Env",
+        "Labels",
+        "Volumes",
+        "StopSignal",
+        "Healthcheck"
+      ],
+      "layers": {
+        "g9": 12,
+        "g9b": 13,
+        "sharedPrefix": 10
+      },
+      "addedBuildStep": "runtime 7/7 COPY --from=build /app/scripts/print-observed-catalog.mjs",
+      "d2SmokeOnResidueImage": "NOT RUN (R6)"
+    }
+  },
+  "c8Detail": {
+    "collector": {
+      "exit": 1,
+      "counts": {
+        "total": 2773,
+        "passed": 2762,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 9
+      },
+      "lanes": {
+        "test": "2709 / 2698 / 2 failed / 9 skipped",
+        "guidedIncrementalTest": "62 / 62",
+        "crossReplicaTest": "2 / 2"
+      },
+      "elapsed": "1h52m11s"
+    },
+    "failures": [
+      {
+        "id": "F1",
+        "test": "GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+        "class": "transient, environment-suspected, cause branch NOT proven (Dex ~50% on a load-sensitive ps read in quiesce())",
+        "passedElsewhere": "obs009-sw3-replay01 and the 1,268 retained PASSED/STORED manifests; a roughly 1-in-1600 event by Dex's scan",
+        "diagnosis": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/g9-failures/diagnosis.md"
+      },
+      {
+        "id": "F2",
+        "test": "GuidedServiceTransportFaultIT.actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost",
+        "class": "test defect: the parent reads the stage marker after Files.createFile and before the child's writeString (empty file, failed after 1.0 s)",
+        "diagnosis": "same file"
+      }
+    ],
+    "skipMultisetEqualsApproved": true,
+    "jacoco": {
+      "executed": false,
+      "reason": ":test failed, so jacocoTestCoverageVerification and requireFreshGuidedPartitions never ran",
+      "staleCopy": "local-gate-20261018/c8-jacoco/ holds a jacocoTestReport.xml whose sessions date from 2026-10-17 21:43 to 23:24; it is NOT G9 coverage and must not be cited",
+      "g9ExecFilesKept": "X/execution/obs009-g9-check01-task-outputs/{test,guidedIncrementalTest,crossReplicaTest}/jacoco/*.exec",
+      "informationalReading": "classesAnalyzed=576 execSessions=28\nBUNDLE line covered=23341 missed=2125 ratio=0.9166\ncom/citi/put/checks/studio/compile/gateway ABSENT (rule vacuous)\ncom/citi/put/checks/studio/dispatch covered=1151 missed=135 ratio=0.8950\ncom/citi/put/checks/studio/internal covered=747 missed=74 ratio=0.9099\ncom/citi/put/checks/studio/recovery covered=232 missed=29 ratio=0.8889\ncom/citi/put/checks/studio/sse covered=237 missed=19 ratio=0.9258\ncom/citi/put/checks/studio/compile ABSENT (rule vacuous)"
+    },
+    "countReconciliation": {
+      "baseline": "STUDIO-OBS-008 final-check01 at source digest 50692d55 (X008/execution-20261017/execution/obs008-final-check01-task-outputs): 2531 total / 2506 passed / 25 skipped; test 2467, guidedIncrementalTest 62, crossReplicaTest 2",
+      "after": "G9: 2773 total / 2762 passed / 2 failed / 9 skipped",
+      "removedByName": 4,
+      "addedByName": 246,
+      "check": "2531 - 4 + 246 = 2773",
+      "removed": [
+        "StudioScheduleApiIT.rawReadinessChangeRefusesWithLearnRequiredAndNoExecution (deleted, s/receipt.md)",
+        "SharedSchedulingIT.sameCoordinatorRunsHttpTcpSplunkAndReachesTheStudioPipeline (deleted, s/receipt.md)",
+        "SharedSchedulingIT.studioOnlyReplicaRunsWhenCatalogFlagIsOffAndDeduplicatesOccurrences (deleted, s/receipt.md)",
+        "RunnerReportProjectionTest.theRunnersChromiumBuildKeyProjectsOntoRuntimeChromium (removed by lane B, b/receipt.md, because it pinned the artifact-1 key P2 b stops reading)"
+      ],
+      "ported": [
+        "StudioScheduleApiIT.sourceMutationBlocksTheScheduleWithLearnRequired (re-pointed in place, s/receipt.md)"
+      ],
+      "skippedToRun": "18 (StudioScheduleApiIT 16, SharedSchedulingIT 2) by name; skipped 25 to 9 = 25 - 18 + 2 new approved skips (VaultPolicyIT rehearsal, GuidedSchemaProbeIT external half)",
+      "additionsByClass": "StudioRunnerPropertiesProfileTest +44 (88/2), RunnerProcessHarnessTest +34, GuidedScheduledBeansProfileTest +34 incl. nested, GuidedConnectorScopeTest +23, StudioRunnerTlsTest +19, RunnerTlsClientCertIT +16 incl. nested, ObservedCoRunIT +12, GuidedSchemaProbeIT +10, GuidedEvidencePendingAppendIT +8, ObservedScheduleAuthorityIT +8, RunnerReportProjectionTest +7, GuidedRuntimeRolePrivilegeIT +6, GuidedLifecycleReasonIT +5, PreReadyRevocationProbeIT +4, StudioServiceWriteAuthorizationTest +3, StudioReadLockOrderIT +3, DatabaseCanaryScanIT +2, GuidedEvidencePendingAppendJoinedIT +2, GuidedFocusMutationJoinedIT +2, PreReadyRevocationJoinedIT +1, StudioScheduleApiIT +1, GuidedBridgeIntegrationTest +1, VaultPolicyIT +1",
+      "note": "name-level multiset diff of the two result sets by @qa; the additions are not each tied to an AC in this draft"
+    },
+    "g9bTargeted": {
+      "label": "obs009-g9b-c8t01",
+      "script": "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018b/g9b-c8t.sh",
+      "userDecision": "Targeted backend run (w0/decisions.md)",
+      "exit": 1,
+      "counts": {
+        "total": 329,
+        "passed": 317,
+        "failed": 12,
+        "errors": 0,
+        "skipped": 0
+      },
+      "lanes": {
+        "test": "267 / 255 / 12 failed",
+        "guidedIncrementalTest": "62 / 62"
+      },
+      "elapsedSeconds": 4177.29,
+      "byClass": {
+        "test:GuidedPublicationReplayIT": "46/46",
+        "test:GuidedServiceTransportFaultIT": "39/39",
+        "test:GuidedPlanningIntegrationTest": "45/57 (12 failed)",
+        "test:GuidedSessionIT": "44/44",
+        "test:ObservedArtifactLowererTest": "41/41",
+        "test:GuidedWireContractTest": "18/18",
+        "test:GuidedPublicationMigrationTest": "12/12",
+        "test:GuidedCsiBudgetIT": "5/5",
+        "test:GuidedDefaultModelReservationIT": "5/5",
+        "guidedIncrementalTest:GuidedPublicationReplayIT": "62/62"
+      },
+      "staticChecks": "spotlessCheck, checkstyleMain, checkstyleTest, spotbugsMain executed and did not fail; the only 'Execution failed' line is :test",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "sourceDigest": "fd793c9561bfa86d3046abd9791c6da231546f309e7e920a569792deb5afcb67",
+      "notRunByWaiver": [
+        "jacocoTestCoverageVerification",
+        "requireFreshGuidedPartitions",
+        "crossReplicaTest",
+        "every class outside the nine"
+      ]
+    },
+    "planningFix": {
+      "label": "obs009-g9b-planfix01",
+      "receipt": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/post-g9/planfix-receipt.md",
+      "exit": 0,
+      "counts": {
+        "total": 67,
+        "passed": 67,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "classes": {
+        "GuidedPlanningIntegrationTest": "57/57",
+        "GuidedCsiBudgetIT": "5/5",
+        "GuidedDefaultModelReservationIT": "5/5"
+      },
+      "sourceDigestBeforeAndAfter": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+      "distStable": true,
+      "sourceStable": true,
+      "testInputStable": true,
+      "elapsedSeconds": 440.45,
+      "causes": [
+        "11 cases: 429 CSI_DAILY_TOKENS_EXHAUSTED on the shared CSI-123 day (append-only daily table, about 6 reservations at 98,304)",
+        "1 case: stub hard-coded thoughtsTokenCount 40000 under a ceiling now 98304"
+      ],
+      "changedFiles": {
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java": {
+          "before": "e4bb59c270a23cf7a15e30256e591cc485d73f20988c46398bbb0becb61775fe",
+          "after": "9c68ac5bcdc79fba476177cf6bbbab12ee5583e9bfd3fe2c9449fb3a92d41aa9"
+        },
+        "backend/src/test/java/com/citi/put/checks/studio/support/ObservedPublicationFixture.java": {
+          "before": "b11b75c5fd221a3930c77ceb4b5a0f9cad121b64130df74afc6cce0b640a8d4a",
+          "after": "9264ae0ec8f23d2d3544c2e09341d695a8035e77744b28cd116fdee985de1b1a"
+        }
+      },
+      "qaReview": "diffed against the saved pre-edit copies (hashes match); overload additive; delegating signatures keep 1000/5242880/640000; Planning asserts no daily budget; 12 failed names all pass; 57-name set equals c8t01's",
+      "mutationSpotCheck": "reported RED by @dev (outputCeiling+8100 reverted to 40100); trace is a scratchpad console file only; not archived under docs/ (R9)",
+      "spotlessCheckAtBound": "reported exit 0 by @dev; no archived log (R9)"
+    },
+    "g9bC8Full": "aborted by root on user decision a few minutes after start; obs009-g9b-check01 credits nothing"
+  },
+  "c10": {
+    "attempts": [
+      "qa/c10-run/attempt01 (aborted at baseline: v1 S4 selection named an Order(3) ReplayIT method that cannot run alone)",
+      "qa/c10-run (v2, this record)"
+    ],
+    "script": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/qa/c10-run/c10.v2.sh",
+    "tier": "all",
+    "frozenSourceDigest": "6fcc12eef193338ca3bc79adaa50660d93c245a4462a5f850a7256588d9fc91b",
+    "frozenDistDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "scratchReverified": "1721 files (backend/, studio-runner/, tools/, docs/specs/, .github/ plus 238 dist) against capture-after.json: 0 mismatches, before the run, at run start, and after the final run",
+    "baseline": {
+      "verdict": "GREEN",
+      "counts": {
+        "total": 33,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedS": 123
+    },
+    "mutations": [
+      {
+        "id": "S3",
+        "lane": "S-W3 (AC-6 b/c, R7 non-vacuity)",
+        "what": "scheduled acceptance no longer mints the background grant binding",
+        "verdict": "RED_AS_EXPECTED",
+        "red": [
+          "ObservedScheduleAuthorityIT.g3DoesNotRefuseASecretFreeObservedScheduleOnAProductionBackgroundSource",
+          "ObservedScheduleAuthorityIT.g3AcceptsTheSameSecretReferencingRunUnderTheLocalFixturePolicy",
+          "ObservedScheduleAuthorityIT.anObservedScheduleIsAcceptedUnderBackgroundAuthorityForTheSchedulePrincipal",
+          "ObservedScheduleAuthorityIT.g3HoldsAgainAtDispatchRecheckForARunThatWasAcceptedUnderTheFixturePolicy",
+          "StudioScheduleApiIT.editedWriterQueuedBehindAnAcceptanceKeepsExactlyTheAcceptedRevision"
+        ],
+        "collateralRed": [
+          "ObservedScheduleAuthorityIT.g3DoesNotRefuseASecretFreeObservedScheduleOnAProductionBackgroundSource",
+          "ObservedScheduleAuthorityIT.g3AcceptsTheSameSecretReferencingRunUnderTheLocalFixturePolicy",
+          "ObservedScheduleAuthorityIT.g3HoldsAgainAtDispatchRecheckForARunThatWasAcceptedUnderTheFixturePolicy"
+        ],
+        "expectedMissing": [],
+        "restoredShaMatchesFrozen": true,
+        "elapsedS": 32,
+        "counts": {
+          "total": 9,
+          "failed": 5,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "id": "S4",
+        "lane": "S-W3 (AC-6 d tripwire, grant check)",
+        "what": "the background-grant check is removed (the ReplayIT tripwire expects BACKGROUND_AUTHORIZATION_DENIED)",
+        "verdict": "RED_AS_EXPECTED",
+        "red": [
+          "GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+          "GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+          "ObservedScheduleAuthorityIT.theRefusalNoLongerExistsAndAWithdrawnGrantStillFailsClosed"
+        ],
+        "collateralRed": [
+          "GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel"
+        ],
+        "expectedMissing": [],
+        "restoredShaMatchesFrozen": true,
+        "elapsedS": 124,
+        "counts": {
+          "total": 10,
+          "failed": 3,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "id": "B1",
+        "lane": "B-W3 / R1 d (and R1 a-c)",
+        "what": "evidence acceptance back to the head revision only (the pre-R1 behaviour)",
+        "verdict": "RED_AS_EXPECTED",
+        "red": [
+          "GuidedEvidencePendingAppendIT.aSecondRecordingAtTheOtherAcceptedRevisionIsStillAConflict",
+          "GuidedEvidencePendingAppendIT.recordingAtThePreviousRevisionIsAcceptedWhileAnAppendIsPending",
+          "GuidedEvidencePendingAppendJoinedIT.aSessionEndedWhileAnAppendIsPendingKeepsARecordingThatSettlesPlaysAndSeeks",
+          "GuidedEvidencePendingAppendJoinedIT.aSessionLosingItsBrowserWhileAnAppendIsPendingStillRecordsTheRunnersOwnFact"
+        ],
+        "collateralRed": [
+          "GuidedEvidencePendingAppendIT.aSecondRecordingAtTheOtherAcceptedRevisionIsStillAConflict"
+        ],
+        "expectedMissing": [],
+        "restoredShaMatchesFrozen": true,
+        "elapsedS": 213,
+        "counts": {
+          "total": 10,
+          "failed": 4,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "id": "B2",
+        "lane": "ADJ-1 c (joined)",
+        "what": "the revoked-ADMITTED disjunct is unreachable (the pre-ADJ-1 behaviour)",
+        "verdict": "RED_AS_EXPECTED",
+        "red": [
+          "PreReadyRevocationJoinedIT.aPreReadyRevocationOfARealHeldRunIsSettledAsAuthorizationRevoked",
+          "PreReadyRevocationProbeIT.aPreReadyRevocationIsSettledAsAuthorizationRevoked"
+        ],
+        "collateralRed": [],
+        "expectedMissing": [],
+        "restoredShaMatchesFrozen": true,
+        "elapsedS": 89,
+        "counts": {
+          "total": 5,
+          "failed": 2,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "id": "B3",
+        "lane": "ADJ-1 narrowness (security co-sign dependency)",
+        "what": "the outcome binding is dropped: any pre-Ready FINAL on a revoked row is accepted",
+        "verdict": "RED_AS_EXPECTED",
+        "red": [
+          "PreReadyRevocationProbeIT.aRevokedRowsOtherPreReadyFinalIsStillRefusedAndTheReaperSettlesIt"
+        ],
+        "collateralRed": [],
+        "expectedMissing": [],
+        "restoredShaMatchesFrozen": true,
+        "elapsedS": 22,
+        "counts": {
+          "total": 4,
+          "failed": 1,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "id": "F1",
+        "lane": "F (AC-11 ACK-loss leg)",
+        "what": "the dispatcher resends on an AMBIGUOUS answer",
+        "verdict": "RED_AS_EXPECTED",
+        "red": [
+          "ObservedCoRunIT.aLostAcknowledgmentIsNeverAResend"
+        ],
+        "collateralRed": [],
+        "expectedMissing": [],
+        "restoredShaMatchesFrozen": true,
+        "elapsedS": 26,
+        "counts": {
+          "total": 1,
+          "failed": 1,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "id": "S1",
+        "lane": "S-W3 (G-3 at dispatch recheck)",
+        "what": "the G-3 secret refusal at the dispatch recheck is skipped",
+        "verdict": "RED_AS_EXPECTED",
+        "red": [
+          "ObservedScheduleAuthorityIT.g3HoldsAgainAtDispatchRecheckForARunThatWasAcceptedUnderTheFixturePolicy"
+        ],
+        "collateralRed": [],
+        "expectedMissing": [],
+        "restoredShaMatchesFrozen": true,
+        "elapsedS": 24,
+        "counts": {
+          "total": 8,
+          "failed": 1,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "id": "LR",
+        "lane": "BL / LR c (T0 C10 minimum)",
+        "what": "the lifecycle route ignores the reported reason again (EXPIRED ends FAILED)",
+        "verdict": "RED_AS_EXPECTED",
+        "red": [
+          "GuidedLifecycleReasonIT.anExpiredReportAcceptedBeforeTheBackendExpiryEndsExpired"
+        ],
+        "collateralRed": [],
+        "expectedMissing": [],
+        "restoredShaMatchesFrozen": true,
+        "elapsedS": 16,
+        "counts": {
+          "total": 5,
+          "failed": 1,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "id": "F2",
+        "lane": "F (AC-11 public-cancel leg)",
+        "what": "the guided stop sender is swallowed, so the runner is never told to stop",
+        "verdict": "RED_AS_EXPECTED",
+        "red": [
+          "ObservedCoRunIT.aPublicCancelOfALiveGuidedBrowserMidActionTearsItDownAndFreesTheSlot"
+        ],
+        "collateralRed": [],
+        "expectedMissing": [],
+        "restoredShaMatchesFrozen": true,
+        "elapsedS": 34,
+        "counts": {
+          "total": 1,
+          "failed": 1,
+          "errors": 0,
+          "skipped": 0
+        }
+      }
+    ],
+    "final": {
+      "verdict": "GREEN",
+      "counts": {
+        "total": 33,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedS": 125
+    },
+    "allAsExpected": true,
+    "creditNote": "C10 selections include single-method GuidedPublicationReplayIT runs. They are mutation reproductions only. They are never regression credit (AC-12 clarification: a single-test ReplayIT rerun is never credited).",
+    "atBoundDigest": {
+      "state": "CARRIED_NOT_RERUN",
+      "mutatedProductionFilesUnchangedSinceG9": [
+        "dispatch/StudioAcceptanceService.java",
+        "scheduling/ConfiguredBackgroundAuthorization.java",
+        "scheduling/StudioScheduledDispatchAuthorization.java",
+        "guided/evidence/GuidedSessionEvidenceService.java",
+        "dispatch/StudioDispatchLedgerStatements.java",
+        "dispatch/StudioDispatcher.java",
+        "guided/session/GuidedSessionService.java"
+      ],
+      "namedTestClassesChangedSinceG9": [
+        "GuidedPublicationReplayIT (S4 selects two methods)"
+      ],
+      "baselineGreenAtBound": "not shown",
+      "scratchCopy": "qa/c10-run still equals the G9 capture-after"
+    }
+  },
+  "requiredRows": [
+    {
+      "row": "AC-1",
+      "state": "VALIDATED_WITH_DISCLOSURE",
+      "evidence": "G9b, fresh, inputs equal the bound digest outside two backend test files: C1, C2 (2643 passed), C3 (296 passed), C5 exit 0 x3, C7 on target; C4 deployment tier 642/642 against image `obs009-residue-local` (sha256:f8bcb56378b9...), exit 0. G9 history: D2 smoke 14 assertions on `obs009-g9-local` (single process under --init, pid 7; no-`--init` launch refused exit 78; NODE_OPTIONS refused exit 78; stop drained inside the grace).",
+      "disclosure": "The D2 container smoke was NOT re-run on the residue image. Image config (entrypoint, cmd, user, workdir, env, labels, ports) equals the G9 image; the final build gained one `COPY ... print-observed-catalog.mjs` step (runtime 7/7); the dist differs from G9 in 3 files only (`guided/schemas.json`, `validator/observedSchemas.json`, `runtime-versions.json`), all JavaScript is byte-identical [V, @qa compare]. That is an argument, not a smoke result. Smoke step 6 (one real guided assign on Linux) is OWED, not passed. DEPLOY-OBSERVED-01 is a carried residue against AC-1.",
+      "owed": "deployed Deployment; PID-1 a-c on the stack; smoke step 6; smoke re-run on the residue image (recommended, cheap)"
+    },
+    {
+      "row": "AC-2",
+      "state": "VALIDATED_WITH_DISCLOSURE",
+      "evidence": "C4 642/642 fresh (G9: 581; the +61 are chart cases per @dev); C8 StudioRunnerPropertiesProfileTest 44/44 and GuidedScheduledBeansProfileTest 32/32 at the G9 digest",
+      "disclosure": "CARRIED: the two backend classes were last run at G9 (6fcc12ee), not at either G9b digest, by the user's waiver. Backend main files changed since G9: GuidedContracts (epoch constant), GuidedSessionProperties (token-limit defaults), application.yml (comments only). None is the subject of these classes [I].",
+      "owed": "G-1 in a shared environment"
+    },
+    {
+      "row": "AC-3",
+      "state": "VALIDATED_WITH_DISCLOSURE",
+      "evidence": "C7 SSLContext.getDefault = 0 (G9b, fresh); C8 RunnerTlsClientCertIT 12/12 at the G9 digest",
+      "disclosure": "CARRIED: RunnerTlsClientCertIT not re-run at a G9b digest (waiver). No file of its subject changed since G9 [I, from the change groups in section 2.2].",
+      "owed": "G-2 in 010"
+    },
+    {
+      "row": "AC-4",
+      "state": "VALIDATED_WITH_DISCLOSURE",
+      "evidence": "C2 and C4 fresh (Q4 tmp/TMPDIR/NODE_OPTIONS assertions green in the 642); C8 DatabaseCanaryScanIT 2/2 at the G9 digest",
+      "disclosure": "CARRIED: DatabaseCanaryScanIT not re-run at a G9b digest. VaultPolicyIT is skipped by name and is REHEARSAL_ONLY_NON_CREDITING (approved-skips entry 8); it is not a pass. F1 is not an AC-4 case [I].",
+      "owed": "Vault policy test (U5, ED-02); TF-5 a, c, e"
+    },
+    {
+      "row": "AC-5",
+      "state": "VALIDATED_WITH_DISCLOSURE",
+      "evidence": "C8 GuidedScheduledBeansProfileTest 32/32 at the G9 digest",
+      "disclosure": "CARRIED: not re-run at a G9b digest (waiver).",
+      "owed": "SIEM sink"
+    },
+    {
+      "row": "AC-6",
+      "state": "VALIDATED_WITH_DISCLOSURE",
+      "evidence": "C7 at the bound tree (P2 0, DEFERRED 0, @Disabled 6 counted, studio.updateTest( 0); C8 StudioScheduleApiIT 22/22, SharedSchedulingIT 4/4, ObservedScheduleAuthorityIT 8/8 at the G9 digest; C10 S3 and S4 red as named at the G9 digest",
+      "disclosure": "CARRIED: the three classes and C10 were not re-run at a G9b digest. The files S3 and S4 mutate (`StudioAcceptanceService`, `ConfiguredBackgroundAuthorization`) are byte-identical to G9 [V]. Earlier disclosure stands: S M4 (dropping the ui_tests row locks) is caught by no test; S3 turns red through a database check constraint, not through a grant-binding assertion [I: why the constraint rejects it was not traced]. Question for @po and @architect, not a QA fail.",
+      "owed": "none"
+    },
+    {
+      "row": "AC-11",
+      "state": "VALIDATED_WITH_DISCLOSURE",
+      "evidence": "C3 fresh (296 passed, 0 failed, 9 pending; same counts as G9, names not re-checked at G9b); C8 ObservedCoRunIT 12/12, PreReadyRevocationProbeIT 4/4, PreReadyRevocationJoinedIT 1/1, GuidedEvidencePendingAppendIT 8/8, GuidedEvidencePendingAppendJoinedIT 2/2, GuidedLifecycleReasonIT 5/5, GuidedFocusMutationJoinedIT 2/2 at the G9 digest; C10 B1 B2 B3 F1 LR F2 red as named at the G9 digest",
+      "disclosure": "CARRIED: the backend classes and C10 were not re-run at a G9b digest. Wording rules from G9 stand: (1) runner-kill leg credited for 'zero repeats, settled STALE', not 'no survivor'; (2) ADJ-1 c credited on the observed UNKNOWN_OUTCOME with the AUTHORIZATION_REVOKED label, never NOT_USED, and the joined IT's either-value assertion is weak; (3) failed-launch survivor property is proved on doubles plus a source pin; (4) S-W3's replay collector run exited 2 on sourceStable:false only. B2 and B3 rulings and the N-RS1 sentence are owed to @po and @architect.",
+      "owed": "live revocation; worker-profile dispatch on pods; R8.2 e; RUN-ORPHAN-01 in-pod check"
+    },
+    {
+      "row": "AC-12 f-j",
+      "state": "VALIDATED_WITH_DISCLOSURE",
+      "evidence": "G9b: c8t01 and planfix01 `sourceStable`, `distStable`, `testInputStable` all true; `verifyRunnerDist` executed in both Gradle logs; capture-before equals capture-after file by file (1808 source, 238 dist)",
+      "disclosure": "G9b C0 took no listener or orphan listing (`g9b.sh` writes only the Gradle-daemon file, empty, and vm_stat), and there is no per-run lsof file for c8t01. The only listener evidence is G9's `c0-listeners.txt` (14:40) and the C10 run's `lsof-before.txt`.",
+      "owed": "none"
+    }
+  ],
+  "informationalRows": [
+    {
+      "row": "AC-1 PID-1 a-c",
+      "state": "smoke steps 2, 3, 4, 5, 7 passed (14 assertions) in a local container on the G9 image; step 6 and the deployed Deployment are OWED; residue-image smoke not run"
+    },
+    {
+      "row": "AC-4 Vault rehearsal (A18)",
+      "state": "skipped by name, REHEARSAL_ONLY_NON_CREDITING (approved-skips entry 8)"
+    },
+    {
+      "row": "AC-11 REL-001 pointer",
+      "state": "NOT_COMPUTED in this draft. Classification rule: rel001-pointer-ruling.md. Must be stated as recurrences by classification, never as \"0 lines\""
+    },
+    {
+      "row": "AC-12 D4 15 s edge",
+      "state": "NOT_COMPUTED in this draft (no elapsedMs >= 15000 scan of the G9 logs was run)"
+    },
+    {
+      "row": "AC-12 a-d IPC observation",
+      "state": "NOT_COMPUTED in this draft"
+    },
+    {
+      "row": "AC-9 TF-3",
+      "state": "not examined in this draft"
+    },
+    {
+      "row": "AC-7 AUTHORED-ECHO-01",
+      "state": "not landed at G9; not re-checked today beyond: no o-ae, c9-ae or fe9 folder under execution-20261018. Gates the first real call, not this trigger"
+    },
+    {
+      "row": "AC-7 FOCUS-MUTATION-01",
+      "state": "GuidedFocusMutationJoinedIT 2/2 at G9; not re-run at G9b"
+    }
+  ],
+  "neverCovered": [
+    "AC-7 (benchmark)",
+    "AC-8 (live probe)",
+    "AC-10",
+    "live halves of AC-4/5/11/12",
+    "deployed-stack proofs",
+    "TF-5 a/c/e"
+  ],
+  "carriedItems": [
+    {
+      "id": "G9B-C8-WAIVER",
+      "what": "G9b C8 was replaced by a targeted run by user decision; the full regression and the JaCoCo gate are unrun at both G9b digests. About 2,440 of G9's 2,773 cases (2,773 minus the 329 targeted cases; an approximation, new cases since G9 are not netted) were last run at the G9 digest.",
+      "owner": "user decision; owed at 011 T0"
+    },
+    {
+      "id": "G9-F1",
+      "what": "ReplayIT video FAILED on a PASSED run at G9; cause branch unproven (Dex: about 50% load-sensitive `ps` read in `quiesce()`, rest unobserved); the diagnostic is armed but has never fired; ReplayIT 46/46 in the G9b targeted run is consistent with a rare transient and cannot exclude recurrence. Small product-robustness smell (one failed `ps` sample discards a good recording) stays.",
+      "owner": "@dev; runner change would reopen the runner and image gates"
+    },
+    {
+      "id": "G9-F2",
+      "what": "TransportFaultIT stage-marker read raced the child's write. Fixed (consumer polls on content, like `ObservedResolverProcessCrashIT.awaitStage`); 39/39 green. The race itself was never reproduced on unfixed code, so the fix is code-read, not mutation-proved.",
+      "owner": "@dev; mutation proof owed"
+    },
+    {
+      "id": "PLANFIX-ARCHIVE",
+      "what": "The planfix mutation spot-check (RED) and the `spotlessCheck checkstyleTest` run at the bound digest are reported by @dev in `post-g9/planfix-receipt.md`. The only trace I could read is a scratchpad console file (`1 test completed, 1 failed`); neither is archived under `docs/`.",
+      "owner": "@dev: copy the two logs into post-g9/"
+    },
+    {
+      "id": "SHARED-CSI-DAY",
+      "what": "Test classes that share one CSI on the production-default day (about 6 full-ceiling reservations) can hit 429 CSI_DAILY_TOKENS_EXHAUSTED. Dex's open [I] names the bridge ITs; my grep of `installGovernance` callers adds GuidedFocusMutationJoinedIT, GuidedLifecycleReasonIT and GuidedEvidencePendingAppendIT/JoinedIT. None was run after the sizing change. GuidedSessionIT and TransportFaultIT passed under it.",
+      "owner": "watch at the 011 T0 full check"
+    },
+    {
+      "id": "TEST-001",
+      "what": "GuidedPublicationReplayIT is order-dependent (a lone Order(3) method fails on the null publishedTestId). Placed in OBS-011 AC-5 cleanup.",
+      "owner": "@dev/@qa"
+    },
+    {
+      "id": "C8-JACOCO-STALE-COPY",
+      "what": "`local-gate-20261018/c8-jacoco/` is a copy of `build/reports/jacoco` from 2026-10-17, not G9. G9b wrote no jacoco copy (C8 aborted).",
+      "owner": "note only"
+    },
+    {
+      "id": "DEPLOY-OBSERVED-01",
+      "what": "The chart cannot run observed work; blocks every deployed-stack leg. The story states it does not block G9 or the OBS-011 start.",
+      "owner": "per story AC-1 residue"
+    },
+    {
+      "id": "RUN-ORPHAN-01",
+      "what": "replay child outlives a runner SIGKILL up to the step timeout",
+      "owner": "@dev runner; in-pod check @devops"
+    },
+    {
+      "id": "SEC-AUDIT-PREREADY-01",
+      "what": "see prior records",
+      "owner": "-"
+    },
+    {
+      "id": "RUNNER-LOG-REFUSAL-01",
+      "what": "see prior records",
+      "owner": "-"
+    },
+    {
+      "id": "LEDGER-REVOKED-WRITE-ONCE",
+      "what": "optional: no database trigger on studio_dispatch_ledger.revoked_at",
+      "owner": "-"
+    },
+    {
+      "id": "EP-F1",
+      "what": "dead compile-era files in evaluation/",
+      "owner": "-"
+    }
+  ],
+  "owed": [
+    {
+      "item": "Full fresh `check --rerun-tasks` (full regression + JaCoCo gate), at the 011 T0 fresh baseline, before any 011 lane claims credit (USER WAIVER 2026-10-18, w0/decisions.md)",
+      "owner": "root / @devops, then @qa"
+    },
+    {
+      "item": "C10 mutation reproductions at the bound digest (`c10.v2.sh plan` then `run`, fresh scratch copy, `C10_TIER=all`)",
+      "owner": "@qa"
+    },
+    {
+      "item": "D2 container smoke on the residue image `obs009-residue-local`",
+      "owner": "root / @devops"
+    },
+    {
+      "item": "D2 smoke step 6 (real guided assign on Linux)",
+      "owner": "@dev/@devops with a signed token"
+    },
+    {
+      "item": "F2 race proof: scratch-copy mutation (`Thread.sleep(300)` between createFile and writeString in `Child.pause`), RED on unfixed code, GREEN on fixed",
+      "owner": "@qa or @dev, scratch copy only"
+    },
+    {
+      "item": "F1: decide at the next recurrence (diagnostic armed in `awaitJoinedVideo`; it prints only on a failure)",
+      "owner": "@dev"
+    },
+    {
+      "item": "`print-observed-catalog.mjs` run inside the pushed image and the `build.schemaBundleHash` from the rebuilt dist (CI step)",
+      "owner": "@devops"
+    },
+    {
+      "item": "Gateway price list, thoughts-token billing",
+      "owner": "ED-01 gateway owner (TBD)"
+    },
+    {
+      "item": "Headroom R under the USD 500 wave authorization",
+      "owner": "user (U17/U18)"
+    },
+    {
+      "item": "B2, B3 rulings; N-RS1 case or disclosure sentence",
+      "owner": "@po, @architect"
+    },
+    {
+      "item": "Staging application, SSO case, dev Vault secret (D2, E1)",
+      "owner": "user, app owner, Platform/SRE"
+    },
+    {
+      "item": "AE-01 landing, U13 acknowledgement",
+      "owner": "@dev, user"
+    },
+    {
+      "item": "RUN-ORPHAN-01 in-pod check",
+      "owner": "@devops"
+    },
+    {
+      "item": "C-17 masked-video human reviewer",
+      "owner": "user"
+    }
+  ],
+  "g9b": {
+    "planned": "full gate C0..C10 at a new digest after the post-G9 writer batch",
+    "done": [
+      "post-G9 writer batch landed (X/post-g9/receipt.md)",
+      "R0 one dist rebuild + verifyRunnerDist",
+      "C1-C3, C5, C6 rerun, all exit 0",
+      "C4: residue image built; deployment tier 642/642",
+      "C7 greps",
+      "C8 targeted run (user decision), then the planning fix (planfix01)"
+    ],
+    "notDone": [
+      "C8 full check (aborted, user decision)",
+      "C10 rerun",
+      "D2 smoke on the residue image",
+      "G9b C0 listener/orphan listing"
+    ]
+  },
+  "validity": "bound to source digest 061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617, dist 698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210 and helm 4607090747e4fef31713ff90db5545eb243bdcff67c3b9acfd5fff2e8e01ada8. A later edit to any file in that source set, to studio-runner/dist or to helm-chart/ voids the binding; a later edit to a file owned by a row voids that row. OBS-011's own edits, once 011 T0 has started on this digest, do not void a trigger already given. The trigger is MET under the user's waiver of 2026-10-18 and lapses with it: the full fresh check at the 011 T0 baseline is owed before any 011 lane claims credit. Before any 009 Done review this addendum must be current, and C10, the residue-image smoke and the full regression must have been run at the digest being reviewed.",
+  "firstLinesOfTheFinalMd": [
+    "This record is not a verdict and not a gate decision.",
+    "isVerdict: false. storyStatusChange: none. doneClaimed: false."
+  ],
+  "supersedes": {
+    "md": "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.g9-notmet.md",
+    "json": "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.g9-notmet.json",
+    "note": "the G9 draft with trigger NOT_MET pending G9b, preserved unchanged",
+    "md_sha256": "9065f5107a04dba59de0a50e0c9c391c185869181970eab85f17fc0a313d7e52",
+    "json_sha256": "e13bfbbf73aa3822045523da4021fb4e9dd7980f85ffe8be6d65b63ee2551c51"
+  }
+}

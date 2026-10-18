@@ -1,0 +1,167 @@
+{
+  "story": "STUDIO-OBS-015",
+  "reviewer": "Aria",
+  "scope": "Read-only test-seam and exact next-lease recommendation",
+  "hashAlgorithm": "SHA-256",
+  "observationDate": "2026-10-15",
+  "activeProductionTranslationService": "Not read as stable; inspected immutable source-before archive only while Dex implements production41line insertion",
+  "originalPlanningWholeFile": "1b587 unchanged; no extension authorized",
+  "references": [
+    {
+      "role": "design",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-design/manifest.json",
+      "sha256": "5a2a54fca4b06c44e121538b7c0f9c3f0fc673aa5615c92a789abfdfd3d744d0"
+    },
+    {
+      "role": "immutable_production_baseline",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/source-before/GuidedTranslationService.java",
+      "sha256": "82b8401722224d5277da5080b9475c32318284cf32abb0a7aa33cc9aca86938b"
+    },
+    {
+      "role": "test_lawful_parent_and_fixture_hooks",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "246e355b2cdc237957a519d17fdfab81f6fc230102f94176b6df99799fb56bf4"
+    },
+    {
+      "role": "test_ordinary_only_parent",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "sha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46"
+    },
+    {
+      "role": "closed_cohort_metadata",
+      "path": "backend/build.gradle.kts",
+      "sha256": "f77c28b83c96b8a0e59c8cfd2419e4faaecacc9b1438e0237ee7bc3d61d61490"
+    },
+    {
+      "role": "production_protocol",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "e3b1f3c06f7f6ac6dcc2eb3ef609a0047ad1b34c536eed1363ac68e405c78b82"
+    },
+    {
+      "role": "production_protocol",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "sha256": "745223f046be477593a8f701a2fc4ed24d29dcfab6d19d32acabb011ed181165"
+    },
+    {
+      "role": "production_protocol",
+      "path": "studio-runner/src/guided/transport.ts",
+      "sha256": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344"
+    },
+    {
+      "role": "production_protocol_prior_bound_review",
+      "path": "studio-runner/src/guided/runtime.ts",
+      "sha256": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615"
+    },
+    {
+      "role": "production_protocol_prior_bound_review",
+      "path": "studio-runner/src/guided/ownership.ts",
+      "sha256": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf"
+    },
+    {
+      "role": "actual_original_core04_receipt",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-head-core-feedback-attempt04-receipt.json",
+      "sha256": "4deb29314d211f0dc710d25935521e6d0ca1d4132c969b96d70c500efe8e164c"
+    },
+    {
+      "role": "normative_prior_bound_review",
+      "path": "docs/specs/studio-observed-authoring/bridge-design.md",
+      "sha256": "8510bb7426c17bd91e261d0a1960ca86b05a2e630254575086fd36b362445179"
+    },
+    {
+      "role": "normative_prior_bound_review",
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-r14-stops.json",
+      "sha256": "b32ba487714a2929d72e8c2d6c8228c2eff7825f088e55d05813bca51e3b1ff8"
+    },
+    {
+      "role": "normative_prior_bound_review",
+      "path": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/implementation-ruling.md",
+      "sha256": "23d87def447f08bbf6f8d305abbdf1d55b9ba53a11221d2201695f265e6a8feb"
+    }
+  ],
+  "anchors": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "lines": [
+        88,
+        119,
+        136,
+        137,
+        182,
+        211,
+        1305,
+        1315,
+        1567,
+        1577,
+        1580,
+        2026,
+        2203,
+        2224,
+        2416,
+        3274,
+        3288,
+        3342,
+        3368,
+        3501,
+        3516,
+        3694,
+        3891,
+        4239,
+        4284,
+        15035,
+        15043,
+        15050,
+        18989
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "lines": [
+        103,
+        367,
+        392
+      ]
+    },
+    {
+      "path": "backend/build.gradle.kts",
+      "lines": [
+        128,
+        174,
+        245,
+        252,
+        258,
+        317,
+        320
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "lines": [
+        1187,
+        1236,
+        1890,
+        1932,
+        1944
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "lines": [
+        1224,
+        1283
+      ]
+    },
+    {
+      "path": "studio-runner/src/guided/transport.ts",
+      "lines": [
+        99,
+        106,
+        110,
+        116
+      ]
+    }
+  ],
+  "noProductOrTestEdits": true,
+  "newExecution": false,
+  "globalSourceStableClaim": false,
+  "limitations": "Full new parent/control reachability unexecuted; exact ADMITTED cut remains OPEN; no substitution of originalCore or tiers"
+}

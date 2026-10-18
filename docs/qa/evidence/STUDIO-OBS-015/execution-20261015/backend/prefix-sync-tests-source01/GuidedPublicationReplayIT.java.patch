@@ -1,0 +1,710 @@
+--- source-before/GuidedPublicationReplayIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -134,7 +134,12 @@
+   private static final Path COHORT_DIRECTORY = Path.of("build", "guided-cohorts",
+       FIXTURE_PROFILE.lane, COHORT_RUN, COHORT_ID);
+   private static final List<String> INCREMENTAL_VARIANTS = List.of("insert4", "delete4", "reorder4", "config", "tail1", "tail7", "append11", "ready6", "confirm-prefix", "empty", "drift2", "admitted-drift2", "unknown2", "assert-fail", "policy-prefix", "confirm-long-wait", "confirm-cancel", "confirm-expire", "confirm-source-change", "confirm-recover", "confirm-owner-loss", "append-input", "deleted-consumers", "admitted-literal2", "pre-literal2", "same-pair-literal", "unused-declaration", "drift-plan-fail", "drift-first", "confirm-edit4", "confirm-race", "drift-auth", "drift-auth-pre", "before4at2", "equal4");
+-  private static final java.util.Set<String> SINGLETON_METHODS = java.util.Set.of("actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache",
++  private static final java.util.Set<String> SINGLETON_METHODS = java.util.Set.of("prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest",
++      "prefixProducerContextDefiniteRefusalsStopBeforePreparation",
++      "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch",
++      "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence",
++      "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce",
++      "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache",
+       "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
+       "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+       "incrementalStartCannotWidenTrustedOriginCeiling",
+@@ -179,7 +184,12 @@
+       "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead",
+       "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion",
+       "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass");
+-  private static final java.util.Set<String> INCREMENTAL_METHODS = java.util.Set.of(
++  private static final java.util.Set<String> INCREMENTAL_METHODS = java.util.Set.of("prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest",
++      "prefixProducerContextDefiniteRefusalsStopBeforePreparation",
++      "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch",
++      "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence",
++      "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce",
++      
+       "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+       "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+       "incrementalStartCannotWidenTrustedOriginCeiling");
+@@ -663,6 +673,15 @@
+       Path source = ownedFixtureTemp.resolve(name), target = folder.resolve(name);
+       if (Files.exists(source) && !Files.exists(target)) {
+         Files.copy(source, target); Files.setPosixFilePermissions(target, java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
++      }
++    }
++    try (var files = Files.list(ownedFixtureTemp)) {
++      for (Path source : files.filter(path -> path.getFileName().toString().startsWith("obs015-prefix-sync-")).toList()) {
++        Path target = folder.resolve(source.getFileName());
++        if (!Files.exists(target)) {
++          Files.copy(source, target);
++          Files.setPosixFilePermissions(target, java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
++        }
+       }
+     }
+   }
+@@ -869,6 +888,58 @@
+   private static final java.util.concurrent.ConcurrentMap<String, java.util.concurrent.CountDownLatch> INCREMENTAL_ACK_RELEASE = new java.util.concurrent.ConcurrentHashMap<>();
+   private static final java.util.Set<String> INCREMENTAL_ACK_ENTERED = java.util.concurrent.ConcurrentHashMap.newKeySet();
+   private static final java.util.concurrent.ConcurrentMap<String, ObjectNode> INCREMENTAL_DRIFT_CAPTURE = new java.util.concurrent.ConcurrentHashMap<>();
++  // Test-only same-version context response cuts. No runtime authority is synthesized here.
++  private static final java.util.concurrent.ConcurrentMap<String, PrefixSyncCut> PREFIX_SYNC_CUTS =
++      new java.util.concurrent.ConcurrentHashMap<>();
++  private static final class PrefixSyncCut {
++    final String key = UUID.randomUUID().toString(), mode;
++    final java.util.concurrent.CountDownLatch entered = new java.util.concurrent.CountDownLatch(1);
++    final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
++    final java.util.concurrent.CountDownLatch cleanupRelease = new java.util.concurrent.CountDownLatch(1);
++    final AtomicInteger callbacks = new AtomicInteger();
++    volatile String sessionId, phase;
++    volatile int diagnosticBaseline;
++    volatile long enteredAtNanos;
++    volatile Throwable failure;
++    PrefixSyncCut(String mode) { this.mode = mode; }
++  }
++
++  private static void prefixSyncCallback(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
++    PrefixSyncCut cut = null;
++    int status = 500;
++    try {
++      byte[] bytes = exchange.getRequestBody().readNBytes(1025);
++      if (bytes.length > 1024) throw new IllegalStateException("Prefix sync callback ceiling");
++      JsonNode body = C.parse(new String(bytes, StandardCharsets.UTF_8));
++      var keys = new java.util.HashSet<String>(); body.fieldNames().forEachRemaining(keys::add);
++      if (!keys.equals(java.util.Set.of("caseId", "sessionId", "phase"))
++          || !body.path("caseId").isTextual() || !body.path("sessionId").isTextual()
++          || !java.util.Set.of("BEFORE", "AFTER", "ERROR").contains(body.path("phase").asText()))
++        throw new IllegalStateException("Prefix sync closed callback");
++      cut = java.util.Objects.requireNonNull(PREFIX_SYNC_CUTS.get(body.path("caseId").asText()));
++      synchronized (cut) {
++        String id = body.path("sessionId").asText();
++        if (id.isBlank() || id.length() > 256 || cut.sessionId != null && !cut.sessionId.equals(id))
++          throw new IllegalStateException("Prefix sync session crossed");
++        if (cut.callbacks.get() == 0) {
++          cut.diagnosticBaseline = FINALIZE_DIAGNOSTICS.get(); cut.enteredAtNanos = System.nanoTime();
++        }
++        cut.sessionId = id; cut.phase = body.path("phase").asText(); cut.callbacks.incrementAndGet();
++      }
++      cut.entered.countDown();
++      if (cut.phase.equals("ERROR")) {
++        cut.failure = new IllegalStateException("Prefix sync instrumentation bound/append failure");
++        status = 204; return;
++      }
++      boolean held = cut.phase.equals("AFTER") && !cut.mode.equals("BUSY");
++      var gate = cut.mode.equals("RACE") && cut.callbacks.get() > 1 ? cut.cleanupRelease : cut.release;
++      if (!held || gate.await(20, java.util.concurrent.TimeUnit.SECONDS)) status = 204;
++      else throw new IllegalStateException("Prefix sync ACK cut deadline");
++    } catch (Exception | AssertionError failure) {
++      if (cut != null) { cut.failure = failure; cut.entered.countDown(); }
++      if (failure instanceof InterruptedException) Thread.currentThread().interrupt();
++    } finally { exchange.sendResponseHeaders(status, -1); exchange.close(); }
++  }
+   static volatile String coreRole = "owner";
+ 
+   /**
+@@ -1312,6 +1383,7 @@
+         catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); delivered = false; }
+         exchange.sendResponseHeaders(delivered ? 204 : 503, -1); exchange.close();
+       });
++      APP.createContext("/obs015-prefix-sync", GuidedPublicationReplayIT::prefixSyncCallback);
+       APP.createContext("/obs015-ack", exchange -> {
+         String id = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+         var release = INCREMENTAL_ACK_RELEASE.computeIfAbsent(id, ignored -> new java.util.concurrent.CountDownLatch(1));
+@@ -3287,6 +3359,491 @@
+     b1TrustedCeiling = true;
+     try { incrementalJoined("edit4"); }
+     finally { b1TrustedCeiling = false; }
++  }
++
++  /** PFXSYNC-01: a real producer-bearing update is held outside SQL until its original ACK. */
++  @Test
++  void prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest() throws Exception {
++    try (var parent = prefixSyncParent("HOLD")) {
++      PrefixSyncFacts before = prefixSyncFacts(parent);
++      Instant lease = Instant.parse(before.session().path("owner").path("leaseExpiresAt").asText());
++      long end = System.nanoTime() + Duration.ofSeconds(12).toNanos();
++      JsonNode renewed;
++      do {
++        prefixSyncNoTarget(parent, before);
++        renewed = sessions.transaction(() -> sessions.lock(parent.id).document().path("owner").deepCopy());
++        if (Instant.parse(renewed.path("leaseExpiresAt").asText()).isAfter(lease)) break;
++        Thread.sleep(20);
++      } while (System.nanoTime() < end);
++      assertThat(Instant.parse(renewed.path("leaseExpiresAt").asText()))
++          .as("a real same-owner renewal must occur before the unchanged context transport deadline").isAfter(lease);
++      assertThat(renewed.path("workerId")).isEqualTo(before.session().path("owner").path("workerId"));
++      assertThat(renewed.path("fence")).isEqualTo(before.session().path("owner").path("fence"));
++      prefixSyncNoTarget(parent, before);
++      JsonNode still = sessions.transaction(() -> sessions.lock(parent.id).progress().deepCopy());
++      for (String field : List.of("evidenceHash", "generation", "documentId", "executionEvidence"))
++        assertThat(still.path(field)).isEqualTo(before.progress().path(field));
++      JsonNode renewedSession = sessions.transaction(() -> sessions.lock(parent.id).document().deepCopy());
++      assertThat(renewedSession.path("scope")).isEqualTo(before.session().path("scope"));
++      assertThat(renewedSession.path("counters")).isEqualTo(before.session().path("counters"));
++      assertThat(System.nanoTime() - parent.cut.enteredAtNanos).isLessThan(Duration.ofSeconds(15).toNanos());
++      parent.cut.release.countDown();
++      prefixSyncFinishAndReplay(parent, before);
++    }
++  }
++
++  /** PFXSYNC-02: each before-update refusal uses its own independently learned/confirmed base. */
++  @Test
++  void prefixProducerContextDefiniteRefusalsStopBeforePreparation() throws Exception {
++    for (String mode : List.of("SCHEMA", "IDENTITY_MISMATCH")) {
++      try (var parent = prefixSyncParent(mode)) {
++        PrefixSyncFacts before = prefixSyncFacts(parent);
++        awaitState(parent.id, "FAILED");
++        JsonNode failed = sessions.transaction(() -> sessions.lock(parent.id).progress().deepCopy());
++        assertThat(failed.path("errorCode").asText()).isEqualTo("RUNTIME_INCOMPATIBLE");
++        p3AwaitTeardown(parent.id);
++        prefixSyncNoTarget(parent, before);
++        assertThat(parent.cut.callbacks.get()).as("first definite response ends context delivery").isEqualTo(1);
++        assertThat(prefixSyncEvents(parent).stream().map(row -> row.path("phase").asText()).toList())
++            .containsExactly("BEFORE_REFUSAL");
++      }
++    }
++  }
++
++  /** PFXSYNC-03: uncertainty is retained until real cancellation, never used as retry authority. */
++  @Test
++  void prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch() throws Exception {
++    for (String mode : List.of("BUSY", "LOST")) {
++      try (var parent = prefixSyncParent(mode)) {
++        PrefixSyncFacts before = prefixSyncFacts(parent);
++        int diagnosticStart = parent.cut.diagnosticBaseline;
++        // A real BUSY reply / withheld original response must actually reach the Java failure path.
++        // No timestamp, client timeout or lease is changed; LOST naturally exceeds the 15s client.
++        prefixSyncAwaitDiagnostic(parent, diagnosticStart, "UNKNOWN_OUTCOME", false);
++        prefixSyncNoTarget(parent, before);
++        assertThat(sessions.transaction(() -> sessions.lock(parent.id).document().path("state").asText()))
++            .isEqualTo("REPLAYING_PREFIX");
++        parent.cancel(); // Keep fault selected through cancellation; release only in close().
++        prefixSyncNoTarget(parent, before);
++      }
++    }
++  }
++
++  /** PFXSYNC-04: public cancel/source changes and a real idle observation race the ACK.
++   * Core checkUser403 is not a worker checkCurrent witness. Combined access/producer proof stays OPEN.
++   */
++  @Test
++  void prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence() throws Exception {
++    for (String race : List.of("cancel", "source", "evidence")) {
++      try (var parent = prefixSyncParent("RACE")) {
++        PrefixSyncFacts before = prefixSyncFacts(parent);
++        int diagnosticStart = FINALIZE_DIAGNOSTICS.get();
++        switch (race) {
++          case "cancel" -> parent.cancel();
++          case "source" -> prefixSyncEdit(parent.test, "Check Confirmation remains visible after a current source change.");
++          case "evidence" -> {
++            var service = ownedApplicationContext.getBean(com.citi.put.checks.studio.guided.session.GuidedSessionService.class);
++            var controller = com.citi.put.checks.studio.guided.session.GuidedInternalIdentityFixture.controller();
++            ObjectNode context = service.runnerContext(controller, parent.id, parent.fence());
++            ObjectNode refresh = new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(jdbc, C).identity(context);
++            refresh.put("expectedGeneration", before.progress().path("generation").asInt());
++            String refreshKey = "prefix-sync-observe-" + parent.cut.key;
++            try {
++              ownedApplicationContext.getBean(com.citi.put.checks.studio.guided.bridge.GuidedDispatchService.class)
++                  .observe(controller, parent.id, parent.fence(), refreshKey, refresh);
++            } catch (GuidedSessionException setupResult) {
++              // Existing committedRefresh expects PROPOSING although this real callback retains
++              // REPLAYING_PREFIX. Accept no setup exception without the independently joined commit below.
++              assertThat(setupResult.getMessage()).isEqualTo("STALE_GENERATION");
++            }
++            JsonNode observed = sessions.transaction(() -> sessions.lock(parent.id).progress().deepCopy());
++            ObjectNode correlation = C.object().put("idempotencyKey", refreshKey)
++                .put("requestDigest", GuidedContracts.hash(refresh));
++            correlation.set("identity", new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(jdbc, C).identity(refresh));
++            String callbackKey = "oref-" + GuidedContracts.hash(correlation);
++            JsonNode committed = C.parse(jdbc.queryForObject("SELECT response::text FROM studio_guided_commands"
++                + " WHERE namespace=? AND route='observation-refresh-result' AND idempotency_key=?", String.class, parent.id, callbackKey));
++            assertThat(committed.path("observation").path("generation")).isEqualTo(observed.path("generation"));
++            assertThat(GuidedContracts.hash(committed.path("observation"))).isEqualTo(observed.path("observationHash").asText());
++            assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND route='observations'"
++                + " AND idempotency_key=?", Integer.class, parent.id, callbackKey)).isEqualTo(1);
++            assertThat(observed.path("evidenceHash")).isNotEqualTo(before.request().path("evidenceHash"));
++            assertThat(observed.path("generation").asInt()).isGreaterThan(before.progress().path("generation").asInt());
++          }
++          default -> throw new AssertionError("Closed prefix sync race");
++        }
++        prefixSyncNoTarget(parent, before);
++        diagnosticStart = FINALIZE_DIAGNOSTICS.get(); // Exclude the observation setup's independent return/error.
++        parent.cut.release.countDown();
++        // Existing data-free resolver diagnostics distinguish the post-I/O gate from timeout,
++        // pre-capture refusal and other sessions. A missing/ambiguous exact stage fails this case.
++        String code = switch (race) {
++          case "cancel" -> "CANCELLED";
++          case "source" -> "REVISION_CONFLICT";
++          default -> "STALE_GENERATION";
++        };
++        prefixSyncAwaitDiagnostic(parent, diagnosticStart, code, true);
++        prefixSyncNoTarget(parent, before);
++      } finally { coreRole = "owner"; forgetCachedCoreIdentity(); }
++    }
++  }
++
++  /** PFXSYNC-05: the contender must really win the same stored coordinate, not an earlier guard. */
++  @Test
++  void prefixProducerContextConcurrentAdvancePreparesCoordinateOnce() throws Exception {
++    try (var parent = prefixSyncParent("CONCURRENT")) {
++      PrefixSyncFacts before = prefixSyncFacts(parent);
++      int diagnosticStart = FINALIZE_DIAGNOSTICS.get();
++      var command = C.object().put("schemaVersion", 3).put("sessionId", parent.id)
++          .put("expectedSourceRevision", parent.edited.path("sourceRevision").asText())
++          .put("expectedConfigurationRevision", parent.edited.path("configurationRevision").asText())
++          .put("expectedPlanRevision", plans.state(parent.id).path("planRevision").asLong());
++      // Independent authenticated HTTP continuation, exactly the coordinator's /plans route.
++      var response = prefixSyncContinue(parent, command);
++      assertThat(response.statusCode()).as("contender must enter the real prefix path; an earlier refusal is an OPEN cut").isEqualTo(202);
++      assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=? AND ordinal=0"
++          + " AND document->>'state'='SUCCEEDED' AND (document->>'dispatchCount')::integer=1", Integer.class,
++          parent.id, INCREMENTAL_STEPS.get(1))).as("contender actually advances the coordinate before first ACK release").isEqualTo(1);
++      parent.cut.release.countDown();
++      prefixSyncAwaitDiagnostic(parent, diagnosticStart, "STALE_GENERATION", true);
++      prefixSyncFinishAndReplay(parent, before);
++    }
++  }
++
++  private record PrefixSyncFacts(JsonNode session, JsonNode progress, JsonNode request,
++      String requestDigest, String earlierActions, String immutableInputs, int preparations,
++      int effects, int navigations, int materializationRevision, String allocations, String producers) {}
++
++  private final class PrefixSyncParent implements AutoCloseable {
++    final UUID test;
++    final String id, baseRevision;
++    final JsonNode edited;
++    final PrefixSyncCut cut;
++    boolean cancelled;
++    PrefixSyncParent(UUID test, String id, String baseRevision, JsonNode edited, PrefixSyncCut cut) {
++      this.test = test; this.id = id; this.baseRevision = baseRevision; this.edited = edited; this.cut = cut;
++    }
++    long fence() { return sessions.transaction(() -> sessions.lock(id).document().path("owner").path("fence").asLong()); }
++    void cancel() throws Exception {
++      String state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
++      if (!List.of("SUCCEEDED", "FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED", "PUBLICATION_CONFLICT").contains(state)) {
++        publicCall("/api/v1/studio/guided-sessions/" + id + "/cancel",
++            C.object().put("schemaVersion", 3).put("reason", "userRequested"), 202, UUID.randomUUID().toString());
++      }
++      cancelled = true;
++    }
++    @Override public void close() throws Exception {
++      var failures = new ArrayList<Throwable>();
++      // Actual Core revocation is restored only to permit the original authenticated teardown.
++      coreRole = "owner"; forgetCachedCoreIdentity();
++      try { cancel(); } catch (Exception | AssertionError failure) { failures.add(failure); }
++      finally { cut.release.countDown(); cut.cleanupRelease.countDown(); }
++      try { p3AwaitTeardown(id); } catch (Exception | AssertionError failure) { failures.add(failure); }
++      try {
++        prefixSyncEvents(this);
++        assertThat(cut.failure).as("scoped callback/ACK barrier must complete without instrumentation failure").isNull();
++        assertThat(C.parse(Files.readString(TEMP.resolve("obs015-prefix-sync-control.json"))).equals(
++            C.object().put("caseId", cut.key).put("mode", cut.mode).put("stepId", INCREMENTAL_STEPS.get(1))))
++            .as("the closed selected control remains intact through teardown").isTrue();
++      } catch (Exception | AssertionError failure) { failures.add(failure); }
++      try { writePrefixSyncControl(C.object()); }
++      catch (Exception | AssertionError failure) { failures.add(failure); }
++      try { Files.writeString(TEMP.resolve("obs015-native-mode.json"), "{}"); }
++      catch (Exception | AssertionError failure) { failures.add(failure); }
++      finally {
++        PREFIX_SYNC_CUTS.remove(cut.key);
++        incrementalTenScenario = false; incrementalDomVariant = null;
++        primaryCsi = "CSI-123"; forgetCachedCoreIdentity();
++      }
++      throwTeardownFailures(failures);
++    }
++  }
++
++  /** Copies only the existing ten-step lawful base/edit4 setup; original35 flow is untouched. */
++  private PrefixSyncParent prefixSyncParent(String mode) throws Exception {
++    assertThat(PREFIX_SYNC_CUTS).isEmpty();
++    var cut = new PrefixSyncCut(mode);
++    PrefixSyncParent parent = null;
++    String original = null;
++    try {
++      // Same per-case CSI isolation used by existing P3 subjects: never enlarge the real daily cap.
++      primaryCsi = "CSI-PFX-" + (++p3CsiOrdinal);
++      forgetCachedCoreIdentity();
++      jdbc.update("INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
++          + " VALUES (?,'Orders','Ops','HIGH','fixture@example.invalid','Production')", primaryCsi);
++      startWorkers(); seedGovernedPolicies(primaryCsi); incrementalTenScenario = true;
++      var texts = new ArrayList<String>();
++      texts.add("Open " + URL + " and read the Order reference.");
++      texts.add("Enter that order reference in Destination (an authored alternative is literal-control).");
++      texts.add("Check Destination has that order reference."); texts.add("Check Destination is visible.");
++      texts.add("Click Submit and check Confirmation appears.");
++      for (int i = 5; i < 10; i++) texts.add("Check Confirmation is visible at checkpoint " + (i + 1) + ".");
++      AUDIT_CANARIES.addAll(texts);
++      AUDIT_CANARIES.addAll(List.of("Operations", "Order reference", "Destination", "Submit", "Confirmation", "literal-control"));
++      var steps = new ArrayList<AuthoringStep>();
++      for (int i = 0; i < 10; i++) steps.add(new AuthoringStep(UUID.fromString(INCREMENTAL_STEPS.get(i)), texts.get(i), null));
++      var authoring = new AuthoringV2Request(2, null, steps);
++      UUID test = UUID.randomUUID();
++      jdbc.update("INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,authoring_revision_inputs,created_by,created_at,updated_at)"
++          + " VALUES (?,'Prefix synchronization',?,'fixture','chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,'fixture@example.invalid',now(),now())",
++          test, primaryCsi, JSON.writeValueAsString(texts), JSON.writeValueAsString(authoring),
++          JSON.writeValueAsString(AuthoringRevisionIdentity.create(authoring, Map.of())));
++      original = startLearning(test); awaitFinalizing(original);
++      JsonNode base = publicCall("/api/v1/studio/guided-sessions/" + original + "/finalize",
++          C.object().put("schemaVersion", 3).put("expectedSourceRevision", "1").put("expectedConfigurationRevision", "1"),
++          200, UUID.randomUUID().toString());
++      p3AwaitTeardown(original);
++      JsonNode draft = publicCall("/api/v1/studio/tests/" + test, null, 200, null);
++      assertThat(draft.path("readiness").asText()).isEqualTo("READY");
++      JsonNode edited = prefixSyncEdit(test, texts.get(3) + " Verify it remains visible.");
++      assertThat(edited.path("firstChangedStepId").asText()).isEqualTo(INCREMENTAL_STEPS.get(3));
++      PREFIX_SYNC_CUTS.put(cut.key, cut);
++      ObjectNode control = C.object().put("caseId", cut.key).put("mode", mode).put("stepId", INCREMENTAL_STEPS.get(1));
++      privateImmutableJson(TEMP.resolve("obs015-prefix-sync-" + cut.key + "-control.json"), control);
++      writePrefixSyncControl(control);
++      Files.writeString(TEMP.resolve("obs015-native-mode.json"), C.object().put("mode", "prefix-sync")
++          .put("stepId", INCREMENTAL_STEPS.get(1)).put("ordinal", 0).toString());
++      Files.writeString(TEMP.resolve("obs015-native-events.jsonl"), "");
++      ObjectNode start = C.object().put("schemaVersion", 3).put("testId", test.toString())
++          .put("sourceRevision", edited.path("sourceRevision").asText())
++          .put("configurationRevision", edited.path("configurationRevision").asText())
++          .put("environmentId", "fixture").put("applicationId", "orders").put("baseRevisionId", base.path("revisionId").asText());
++      start.set("versions", versions());
++      String id = publicCall("/api/v1/studio/guided-sessions", start, 202, UUID.randomUUID().toString()).path("session").path("sessionId").asText();
++      parent = new PrefixSyncParent(test, id, base.path("revisionId").asText(), edited, cut);
++      assertThat(cut.entered.await(20, java.util.concurrent.TimeUnit.SECONDS)).as("actual producer update response cut is required").isTrue();
++      assertThat(cut.failure).isNull(); assertThat(cut.sessionId).isEqualTo(id);
++      assertThat(cut.phase).isEqualTo(List.of("SCHEMA", "IDENTITY_MISMATCH", "BUSY").contains(mode) ? "BEFORE" : "AFTER");
++      // Validate the actual stored parent independently of the test fixture's own selector.
++      prefixSyncFacts(parent);
++      return parent;
++    } catch (Exception | AssertionError failure) {
++      if (parent != null) {
++        try { parent.close(); } catch (Exception | AssertionError cleanup) { failure.addSuppressed(cleanup); }
++      } else {
++        cut.release.countDown(); cut.cleanupRelease.countDown(); PREFIX_SYNC_CUTS.remove(cut.key);
++        try { writePrefixSyncControl(C.object()); } catch (Exception cleanup) { failure.addSuppressed(cleanup); }
++        try { Files.writeString(TEMP.resolve("obs015-native-mode.json"), "{}"); } catch (Exception cleanup) { failure.addSuppressed(cleanup); }
++        // startLearning tracks original sessions for the existing failure-safe @AfterEach cleanup.
++        incrementalTenScenario = false; primaryCsi = "CSI-123"; forgetCachedCoreIdentity();
++      }
++      throw failure;
++    }
++  }
++
++  private JsonNode prefixSyncEdit(UUID test, String text) throws Exception {
++    JsonNode draft = publicCall("/api/v1/studio/tests/" + test, null, 200, null);
++    ObjectNode edit = C.object();
++    for (String field : List.of("authoringSchemaVersion", "globalContext", "steps", "name", "description", "csiId", "environment", "variables", "configuration", "sourceRevision", "configurationRevision"))
++      edit.set(field, draft.path(field).deepCopy());
++    ((ObjectNode) edit.path("steps").get(text.startsWith("Check Confirmation") ? 9 : 3)).put("text", text);
++    AUDIT_CANARIES.add(text);
++    var request = HttpRequest.newBuilder(URI.create("https://localhost:" + port + "/api/v1/studio/tests/" + test))
++        .header("Cookie", "put_session=" + COOKIE).header("Content-Type", "application/json")
++        .header("Idempotency-Key", UUID.randomUUID().toString()).PUT(HttpRequest.BodyPublishers.ofString(edit.toString())).build();
++    var response = HttpClient.newBuilder().sslContext(TLS).build().send(request, HttpResponse.BodyHandlers.ofString());
++    assertThat(response.statusCode()).isEqualTo(200);
++    return C.parse(response.body());
++  }
++
++  private static void writePrefixSyncControl(JsonNode value) throws Exception {
++    byte[] bytes = GuidedContracts.canonical(value).getBytes(StandardCharsets.UTF_8);
++    assertThat(bytes.length).isLessThanOrEqualTo(4096);
++    Path file = TEMP.resolve("obs015-prefix-sync-control.json");
++    if (!Files.exists(file)) Files.createFile(file, java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
++        java.nio.file.attribute.PosixFilePermissions.fromString("rw-------")));
++    assertThat(Files.isSymbolicLink(file)).isFalse();
++    assertThat(Files.getPosixFilePermissions(file)).isEqualTo(java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
++    Files.write(file, bytes);
++  }
++
++  private PrefixSyncFacts prefixSyncFacts(PrefixSyncParent parent) throws Exception {
++    String id = parent.id;
++    JsonNode session = sessions.transaction(() -> sessions.lock(id).document().deepCopy());
++    JsonNode progress = sessions.transaction(() -> sessions.lock(id).progress().deepCopy());
++    var requests = jdbc.queryForList("SELECT request_digest,document::text FROM studio_guided_prefix_requests"
++        + " WHERE session_id=? AND step_id=? AND ordinal=0 AND status='ISSUED'", id, INCREMENTAL_STEPS.get(1));
++    assertThat(requests).as("a real issued next-fill identity must precede the context response").hasSize(1);
++    JsonNode request = C.parse((String) requests.getFirst().get("document"));
++    String digest = (String) requests.getFirst().get("request_digest");
++    assertThat(GuidedContracts.hash(request)).isEqualTo(digest);
++    assertThat(request.path("evidenceHash")).isEqualTo(progress.path("evidenceHash"));
++    assertThat(request.path("contextRevision").asInt()).isEqualTo(1);
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_producers p JOIN studio_guided_actions a"
++        + " ON a.session_id=p.session_id AND a.admission_id=p.admission_id WHERE p.session_id=?"
++        + " AND a.document->>'state'='SUCCEEDED' AND a.proposal->'operation'->>'kind'='read'"
++        + " AND p.document->>'bindingId'=a.proposal->'operation'->>'bindingId'", Integer.class, id)).isEqualTo(1);
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_actions WHERE session_id=?"
++        + " AND document->>'state'='SUCCEEDED'", Integer.class, id)).isEqualTo(2);
++    String earlier = jdbc.queryForObject("SELECT jsonb_agg(to_jsonb(a) ORDER BY step_id,ordinal)::text"
++        + " FROM studio_guided_actions a WHERE session_id=? AND step_id=?", String.class, id, INCREMENTAL_STEPS.get(0));
++    String inputs = jdbc.queryForObject("SELECT jsonb_agg(to_jsonb(v) ORDER BY context_revision)::text"
++        + " FROM studio_guided_materialization_versions v WHERE session_id=?", String.class, id);
++    return new PrefixSyncFacts(session, progress, request, digest, earlier, inputs,
++        jdbc.queryForObject("SELECT count(*) FROM studio_guided_preparations WHERE session_id=?", Integer.class, id),
++        RECEIPTS.size(), NAVIGATIONS.get(),
++        jdbc.queryForObject("SELECT materialization_revision FROM studio_guided_materializations WHERE session_id=?", Integer.class, id),
++        jdbc.queryForObject("SELECT jsonb_agg(to_jsonb(a) ORDER BY binding_id)::text FROM studio_guided_allocations a WHERE session_id=?", String.class, id),
++        jdbc.queryForObject("SELECT jsonb_agg(to_jsonb(p) ORDER BY binding_id)::text FROM studio_guided_producers p WHERE session_id=?", String.class, id));
++  }
++
++  private void prefixSyncNoTarget(PrefixSyncParent parent, PrefixSyncFacts before) throws Exception {
++    assertThat(parent.cut.failure).isNull();
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?",
++        Integer.class, parent.id, INCREMENTAL_STEPS.get(1))).isZero();
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_preparations WHERE session_id=?", Integer.class, parent.id)).isEqualTo(before.preparations());
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_consumer_edges WHERE session_id=?", Integer.class, parent.id)).isZero();
++    assertThat(jdbc.queryForObject("SELECT jsonb_agg(to_jsonb(a) ORDER BY step_id,ordinal)::text FROM studio_guided_actions a"
++        + " WHERE session_id=? AND step_id=?", String.class, parent.id, INCREMENTAL_STEPS.get(0))).isEqualTo(before.earlierActions());
++    assertThat(prefixSyncEvents(parent).stream().filter(row -> row.path("phase").asText().startsWith("TARGET_")).count()).isZero();
++    assertThat(jdbc.queryForObject("SELECT materialization_revision FROM studio_guided_materializations WHERE session_id=?",
++        Integer.class, parent.id)).as("same-version delivery itself does not mutate backend metadata").isEqualTo(before.materializationRevision());
++    assertThat(jdbc.queryForObject("SELECT jsonb_agg(to_jsonb(a) ORDER BY binding_id)::text FROM studio_guided_allocations a WHERE session_id=?",
++        String.class, parent.id)).isEqualTo(before.allocations());
++    assertThat(jdbc.queryForObject("SELECT jsonb_agg(to_jsonb(p) ORDER BY binding_id)::text FROM studio_guided_producers p WHERE session_id=?",
++        String.class, parent.id)).isEqualTo(before.producers());
++    assertThat(Files.readAllLines(TEMP.resolve("obs015-native-events.jsonl")).stream().filter(line -> !line.isBlank()).map(C::parse)
++        .filter(row -> row.path("sessionId").asText().equals(parent.id) && row.path("phase").asText().startsWith("NATIVE_")).count()).isZero();
++    assertThat(RECEIPTS).hasSize(before.effects()); assertThat(NAVIGATIONS.get()).isEqualTo(before.navigations());
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=?", Integer.class, parent.id)).isZero();
++  }
++
++  private List<JsonNode> prefixSyncEvents(PrefixSyncParent parent) throws Exception {
++    Path file = TEMP.resolve("obs015-prefix-sync-" + parent.cut.key + ".jsonl");
++    assertThat(Files.isRegularFile(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)).isTrue();
++    assertThat(Files.size(file)).isLessThanOrEqualTo(65536);
++    assertThat(Files.getPosixFilePermissions(file)).isEqualTo(java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
++    var events = Files.readAllLines(file, StandardCharsets.UTF_8).stream().filter(line -> !line.isBlank()).map(C::parse).toList();
++    assertThat(events.size()).isBetween(1, 200);
++    for (JsonNode row : events) {
++      var keys = new java.util.HashSet<String>(); row.fieldNames().forEachRemaining(keys::add);
++      assertThat(keys).isEqualTo(java.util.Set.of("phase", "mode", "sessionHash", "contextRevision", "materializationRevision",
++          "authoredInputsHash", "prefixProgramHash", "sameBrowser", "sameObservationSession"));
++      assertThat(row.path("sessionHash").asText()).isEqualTo(GuidedContracts.hash(JSON.getNodeFactory().textNode(parent.id)));
++      assertThat(row.path("mode").asText()).isEqualTo(parent.cut.mode);
++      assertThat(List.of("BEFORE_REFUSAL", "UPDATED_BEFORE_ACK", "ACK_RELEASED", "TARGET_PREPARE_ENTER", "TARGET_DISPATCH_ENTER"))
++          .contains(row.path("phase").asText());
++      if (!row.path("phase").asText().equals("ACK_RELEASED")) {
++        assertThat(row.path("sameBrowser").asBoolean()).isTrue();
++        assertThat(row.path("sameObservationSession").asBoolean()).isTrue();
++      } // A cancelled/closed runtime may truthfully have no browser when its held ACK is released.
++    }
++    return events;
++  }
++
++  private HttpResponse<String> prefixSyncContinue(PrefixSyncParent parent, JsonNode command) throws Exception {
++    var request = HttpRequest.newBuilder(URI.create("https://localhost:" + port + "/internal/v2/studio/guided-sessions/" + parent.id + "/plans"))
++        .header("Authorization", "Bearer " + token("backend-controller", "controller-1", "studio-guided-controller"))
++        .header("X-Owner-Fence", Long.toString(parent.fence())).header("Idempotency-Key", UUID.randomUUID().toString())
++        .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(command.toString())).build();
++    return HttpClient.newBuilder().sslContext(TLS).build().send(request, HttpResponse.BodyHandlers.ofString());
++  }
++
++  private void prefixSyncAwaitDiagnostic(PrefixSyncParent parent, int after, String code, boolean gate) throws Exception {
++    long end = System.nanoTime() + Duration.ofSeconds(20).toNanos();
++    do {
++      int current = FINALIZE_DIAGNOSTICS.get();
++      var matches = new ArrayList<JsonNode>();
++      for (int n = after + 1; n <= current; n++) {
++        Path file = TEMP.resolve("finalize-exception-" + n + ".json");
++        if (!Files.isRegularFile(file)) continue; // Counter increment precedes completed write.
++        JsonNode row;
++        try { row = C.parse(Files.readString(file)); } catch (RuntimeException incomplete) { continue; }
++        if (code != null && !row.path("exceptionCode").asText().equals(code)) continue;
++        boolean stage = false;
++        for (JsonNode frame : row.path("stackFrames")) {
++          if (frame.path("class").asText().equals("com.citi.put.checks.studio.guided.translation.GuidedTranslationService")
++              && frame.path("method").asText().equals("advancePrefix")
++              && frame.path("line").asInt() == (gate ? 405 : 397)) stage = true;
++        }
++        if (gate && "STALE_GENERATION".equals(code)) {
++          int predicateStart = parent.cut.mode.equals("CONCURRENT") ? 417 : 428;
++          int predicateEnd = parent.cut.mode.equals("CONCURRENT") ? 418 : 433;
++          boolean predicate = false;
++          for (JsonNode frame : row.path("stackFrames")) {
++            if (frame.path("class").asText().equals("com.citi.put.checks.studio.guided.translation.GuidedTranslationService")
++                && frame.path("method").asText().startsWith("lambda$advancePrefix$")
++                && frame.path("line").asInt() >= predicateStart
++                && frame.path("line").asInt() <= predicateEnd) predicate = true;
++          }
++          stage &= predicate;
++        }
++        if (stage) matches.add(row);
++      }
++      if (!matches.isEmpty()) {
++        if (gate) assertThat(matches).as("one isolated fresh case must identify its exact post-ACK gate, not an ambiguous interval").hasSize(1);
++        // Uncertain responses may be revisited by the real coordinator; no single-call claim applies.
++        assertThat(PREFIX_SYNC_CUTS.keySet()).containsExactly(parent.cut.key);
++        assertThat(testOwnedSessions.keySet().stream().filter(id -> !id.equals(parent.id))
++            .allMatch(id -> sessions.transaction(() -> List.of("SUCCEEDED", "FAILED", "CANCELLED", "EXPIRED", "PUBLICATION_CONFLICT")
++                .contains(sessions.lock(id).document().path("state").asText())))).isTrue();
++        return;
++      }
++      Thread.sleep(10);
++    } while (System.nanoTime() < end);
++    throw new AssertionError("PFXSYNC intended Java context/gate stage not observed; no earlier refusal or timeout is credited");
++  }
++
++  private void prefixSyncFinishAndReplay(PrefixSyncParent parent, PrefixSyncFacts before) throws Exception {
++    awaitFinalizing(parent.id);
++    var fill = C.parse(jdbc.queryForObject("SELECT document::text FROM studio_guided_actions WHERE session_id=? AND step_id=? AND ordinal=0",
++        String.class, parent.id, INCREMENTAL_STEPS.get(1)));
++    assertThat(fill.path("state").asText()).isEqualTo("SUCCEEDED"); assertThat(fill.path("dispatchCount").asInt()).isEqualTo(1);
++    assertThat(fill.path("evidenceHash")).isEqualTo(before.request().path("evidenceHash"));
++    JsonNode fillProposal = C.parse(jdbc.queryForObject("SELECT proposal::text FROM studio_guided_actions WHERE session_id=? AND step_id=? AND ordinal=0",
++        String.class, parent.id, INCREMENTAL_STEPS.get(1)));
++    assertThat(fillProposal.path("generation")).isEqualTo(before.progress().path("generation"));
++    assertThat(fill.path("contextRevision").asInt()).isEqualTo(1);
++    assertThat(C.parse(jdbc.queryForObject("SELECT document::text FROM studio_guided_prefix_requests WHERE session_id=? AND request_digest=?",
++        String.class, parent.id, before.requestDigest()))).isEqualTo(before.request());
++    assertThat(jdbc.queryForObject("SELECT jsonb_agg(to_jsonb(v) ORDER BY context_revision)::text FROM studio_guided_materialization_versions v WHERE session_id=?",
++        String.class, parent.id)).isEqualTo(before.immutableInputs());
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_model_attempts m JOIN studio_guided_relearn_switches s USING(session_id)"
++        + " WHERE m.session_id=? AND m.created_at<s.created_at", Integer.class, parent.id)).isZero();
++    var events = prefixSyncEvents(parent);
++    assertThat(events.stream().filter(row -> row.path("phase").asText().equals("TARGET_PREPARE_ENTER")).count()).isEqualTo(1);
++    assertThat(events.stream().filter(row -> row.path("phase").asText().equals("TARGET_DISPATCH_ENTER")).count()).isEqualTo(1);
++    var phases = events.stream().map(row -> row.path("phase").asText()).toList();
++    assertThat(phases.stream().filter(phase -> phase.equals("UPDATED_BEFORE_ACK")).count()).isEqualTo(1);
++    assertThat(phases.stream().filter(phase -> phase.equals("ACK_RELEASED")).count()).isEqualTo(1);
++    if (parent.cut.mode.equals("HOLD")) assertThat(phases.indexOf("ACK_RELEASED")).isLessThan(phases.indexOf("TARGET_PREPARE_ENTER"));
++    // Independent PG metadata accounting: this parent has one unchanged allocation/read producer;
++    // only its two real binding consumer edges may bump metadata after the held read cut.
++    assertThat(jdbc.queryForObject("SELECT jsonb_agg(to_jsonb(a) ORDER BY binding_id)::text FROM studio_guided_allocations a WHERE session_id=?",
++        String.class, parent.id)).isEqualTo(before.allocations());
++    assertThat(jdbc.queryForObject("SELECT jsonb_agg(to_jsonb(p) ORDER BY binding_id)::text FROM studio_guided_producers p WHERE session_id=?",
++        String.class, parent.id)).isEqualTo(before.producers());
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_consumer_edges WHERE session_id=?", Integer.class, parent.id)).isEqualTo(2);
++    assertThat(jdbc.queryForObject("SELECT materialization_revision FROM studio_guided_materializations WHERE session_id=?",
++        Integer.class, parent.id)).isEqualTo(before.materializationRevision() + 2);
++    JsonNode updated = events.stream().filter(row -> row.path("phase").asText().equals("UPDATED_BEFORE_ACK")).findFirst().orElseThrow();
++    JsonNode ack = events.stream().filter(row -> row.path("phase").asText().equals("ACK_RELEASED")).findFirst().orElseThrow();
++    for (String field : List.of("contextRevision", "materializationRevision", "authoredInputsHash", "prefixProgramHash"))
++      assertThat(ack.path(field)).isEqualTo(updated.path(field));
++    assertThat(ack.path("sameBrowser").asBoolean()).isTrue();
++    assertThat(ack.path("sameObservationSession").asBoolean()).isTrue();
++    assertThat(Files.readAllLines(TEMP.resolve("obs015-native-events.jsonl")).stream().filter(line -> !line.isBlank()).map(C::parse)
++        .filter(row -> row.path("sessionId").asText().equals(parent.id) && row.path("phase").asText().equals("NATIVE_COMPLETED")).count()).isEqualTo(1);
++    assertThat(RECEIPTS.getLast()).isEqualTo(VALUES.getLast());
++    assertThat(RECEIPTS.getLast()).isNotEqualTo(RECEIPTS.get(before.effects() - 1));
++    int model = MODEL_WIRE.size(), effects = RECEIPTS.size(), navigations = NAVIGATIONS.get();
++    var merged = publicCall("/api/v1/studio/guided-sessions/" + parent.id + "/finalize",
++        C.object().put("schemaVersion", 3).put("expectedSourceRevision", parent.edited.path("sourceRevision").asText())
++            .put("expectedConfigurationRevision", parent.edited.path("configurationRevision").asText()), 200, UUID.randomUUID().toString());
++    assertThat(MODEL_WIRE).hasSize(model); assertThat(RECEIPTS).hasSize(effects); assertThat(NAVIGATIONS.get()).isEqualTo(navigations);
++    assertThat(merged.path("revisionId").asText()).isNotEqualTo(parent.baseRevision);
++    assertIncrementalRecordingSpansBothHalves(parent.id, sessions.transaction(() -> sessions.effectiveActions(parent.id)), 3);
++    UUID execution = UUID.fromString(publicCall("/api/v1/studio/tests/" + parent.test + "/execute", C.object(), 202, UUID.randomUUID().toString()).path("executionId").asText());
++    assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
++    long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
++    JsonNode replay;
++    do { replay = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
++      if (replay.path("streamComplete").asBoolean()) break; Thread.sleep(30);
++    } while (System.nanoTime() < end);
++    assertThat(replay.path("status").asText()).isEqualTo("PASSED");
++    assertThat(replay.path("video").path("status").asText()).isEqualTo("AVAILABLE");
++    assertThat(MODEL_WIRE).hasSize(model); assertThat(RECEIPTS.getLast()).isEqualTo(VALUES.getLast());
++    assertThat(observedBinding(execution).path("revisionId").asText()).isEqualTo(merged.path("revisionId").asText());
+   }
+ 
+   private void b1AssertTrustedCeilingStart(ObjectNode start, UUID test) throws Exception {
+@@ -15032,15 +15589,66 @@
+       if(!response.ok)throw new Error('UNKNOWN_OUTCOME');}
+       return Reflect.apply(callback,this,cb);};}
+   return result;};
++// Inactive unless the owned case arms the closed control. No value/context is exported.
++const pfxControl=%s,pfxRoot=%s,pfxCallback=%s,pfxCases=new Map();
++function pfxRead(){
++ if(!fs.existsSync(pfxControl))return null;
++ const b=fs.readFileSync(pfxControl);if(b.length>4096)throw new Error('PFX_CONTROL_BOUND');
++ const c=JSON.parse(b.toString('utf8'));if(Object.keys(c).length===0)return null;
++ if(Object.keys(c).sort().join(',')!=='caseId,mode,stepId'||
++  !/^[0-9a-f-]{36}$/u.test(c.caseId)||typeof c.stepId!=='string'||
++  !['HOLD','CONCURRENT','RACE','SCHEMA','IDENTITY_MISMATCH','BUSY','LOST'].includes(c.mode))throw new Error('PFX_CONTROL_SHAPE');
++ return c;
++}
++async function pfxEvent(c,phase,runtime,next){
++ try {
++ const path=pfxRoot+'/obs015-prefix-sync-'+c.caseId+'.jsonl';
++ const old=fs.existsSync(path)?fs.readFileSync(path):Buffer.alloc(0);
++ const n=old.toString('utf8').split('\\n').filter(Boolean).length;
++ const row={phase,mode:c.mode,sessionHash:i15Hash(next.sessionId),contextRevision:next.contextRevision,
++ materializationRevision:next.materializationRevision,authoredInputsHash:next.authoredInputsHash,
++ prefixProgramHash:next.prefixProgramHash,sameBrowser:runtime.browser===c.browser,
++ sameObservationSession:runtime.browser?.observations===c.observations};
++ const line=Buffer.from(JSON.stringify(row)+'\\n','utf8');
++ if(n>=200||old.length+line.length>65536)throw new Error('PFX_EVENT_BOUND');
++ fs.appendFileSync(path,line,{mode:0o600});
++ }catch(error){await pfxSignal(c,next,'ERROR');throw error;}
++}
++async function pfxSignal(c,next,phase){
++ const body=JSON.stringify({caseId:c.caseId,sessionId:next.sessionId,phase});
++ if(Buffer.byteLength(body)>1024)throw new Error('PFX_CALLBACK_BOUND');
++ const response=await fetch(pfxCallback,{method:'POST',body});
++ if(!response.ok)throw new Error('PFX_CALLBACK_FAILED');
++}
++function pfxSelect(runtime,next){
++ const control=pfxRead();if(!control)return null;
++ if(!next?.prefixProgram?.actions?.length||next.contextRevision!==1||runtime.prefixExited||
++   !next.producers?.length||!next.prefixProgram.actions.some(a=>a.coordinate.stepId===control.stepId&&a.operation.kind==='fill'))return null;
++ let c=pfxCases.get(control.caseId);
++ if(!c){c={...control,sessionId:next.sessionId,browser:runtime.browser,observations:runtime.browser?.observations,count:0};pfxCases.set(control.caseId,c);}
++ if(c.sessionId!==next.sessionId)throw new Error('PFX_SESSION_CROSSED');
++ if(c.count++>0&&!['BUSY','LOST','RACE','SCHEMA','IDENTITY_MISMATCH'].includes(c.mode))return null;
++ return c;
++}
+ const i15Update=RevRuntime.prototype.update;
+-RevRuntime.prototype.update=async function(...args){const result=await Reflect.apply(i15Update,this,args);
++RevRuntime.prototype.update=async function(...args){
++  const pfx=pfxSelect(this,args[0]);
++  if(pfx&&['SCHEMA','IDENTITY_MISMATCH','BUSY'].includes(pfx.mode)){
++    await pfxEvent(pfx,'BEFORE_REFUSAL',this,args[0]);await pfxSignal(pfx,args[0],'BEFORE');throw new Error(pfx.mode);}
++  const result=await Reflect.apply(i15Update,this,args);
++  if(pfx){await pfxEvent(pfx,'UPDATED_BEFORE_ACK',this,args[0]);await pfxSignal(pfx,args[0],'AFTER');
++    await pfxEvent(pfx,'ACK_RELEASED',this,args[0]);}
++
+   let mode={};try{mode=JSON.parse(fs.readFileSync(i15ModeFile,'utf8'));}catch{}
+   if(mode.mode==='append-input'&&args[0]?.contextRevision===2&&typeof args[1]==='string'){
+     const response=await fetch(%s,{method:'POST',body:args[0].sessionId});
+     if(!response.ok)throw new Error('CONTEXT_LOST');}
+   return result;};
+ const i15Prepare=RevRuntime.prototype.preparePrefix;
+-RevRuntime.prototype.preparePrefix=async function(...args){const result=await Reflect.apply(i15Prepare,this,args);
++RevRuntime.prototype.preparePrefix=async function(...args){
++  const pfx=[...pfxCases.values()].find(c=>c.sessionId===args[0]?.request?.sessionId&&c.stepId===args[0]?.request?.coordinate?.stepId);
++  if(pfx)await pfxEvent(pfx,'TARGET_PREPARE_ENTER',this,this.context);
++  const result=await Reflect.apply(i15Prepare,this,args);
+   let mode={};try{mode=JSON.parse(fs.readFileSync(i15ModeFile,'utf8'));}catch{}
+   if(result.kind==='PREPARED'&&args[0]?.request?.coordinate?.stepId===mode.stepId)
+     fs.appendFileSync(i15Events,JSON.stringify({phase:'PREPARED',sessionId:args[0].request.sessionId,
+@@ -15049,6 +15657,8 @@
+ const i15Dispatch=RevRuntime.prototype.dispatch;
+ RevRuntime.prototype.dispatch=async function(request){
+   let mode={};try{mode=JSON.parse(fs.readFileSync(i15ModeFile,'utf8'));}catch{}
++  const pfx=[...pfxCases.values()].find(c=>c.sessionId===request?.sessionId&&c.stepId===request?.proposal?.coordinate?.stepId);
++  if(pfx)await pfxEvent(pfx,'TARGET_DISPATCH_ENTER',this,this.context);
+   const selected=this.context?.prefixProgram&&request?.proposal?.coordinate?.stepId===mode.stepId;
+   if(!selected){const original=await Reflect.apply(i15Dispatch,this,[request]);i15Capture(original);return original;}
+   const event=phase=>fs.appendFileSync(i15Events,JSON.stringify({sessionId:request.sessionId,
+@@ -15069,7 +15679,10 @@
+         JSON.writeValueAsString(Path.of("../studio-runner/dist/guided/contracts.js").toAbsolutePath().normalize().toUri().toString()),
+         JSON.writeValueAsString(TEMP.resolve("obs015-outcome-boundary-node.jsonl").toString()),
+         JSON.writeValueAsString(TEMP.resolve("obs015-outcome-boundary-node-cohort.sha256").toString()),
+-        JSON.writeValueAsString(ORIGIN + "/obs015-drift"), JSON.writeValueAsString(ORIGIN + "/obs015-ack"));
++        JSON.writeValueAsString(ORIGIN + "/obs015-drift"),
++        JSON.writeValueAsString(TEMP.resolve("obs015-prefix-sync-control.json").toString()),
++        JSON.writeValueAsString(TEMP.toString()), JSON.writeValueAsString(ORIGIN + "/obs015-prefix-sync"),
++        JSON.writeValueAsString(ORIGIN + "/obs015-ack"));
+   }
+ 
+   private static void p3Application(com.sun.net.httpserver.HttpExchange exchange)
+@@ -18246,6 +18859,14 @@
+             sinks.put("owned-" + TEMP.relativize(file), Files.readAllBytes(file));
+           }
+         }
++      }
++    }
++    try (var files = Files.list(TEMP)) {
++      for (Path file : files.filter(path -> path.getFileName().toString().startsWith("obs015-prefix-sync-")).toList()) {
++        assertThat(Files.isSymbolicLink(file)).isFalse();
++        assertThat(Files.getPosixFilePermissions(file)).isEqualTo(
++            java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
++        sinks.put("prefix-sync/" + file.getFileName(), Files.readAllBytes(file));
+       }
+     }
+     C5Capture capture = c5Capture;

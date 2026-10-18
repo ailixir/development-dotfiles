@@ -1,0 +1,58 @@
+{
+  "story": "STUDIO-OBS-015",
+  "reviewer": "Aria",
+  "root": "Orion",
+  "kind": "READ_ONLY_DIAGNOSIS_AND_MINIMAL_REPAIR_RECOMMENDATION",
+  "decision": "GENUINE_DETACHED_RAW_CURRENT_MATERIALIZATION_CONSISTENCY_GAP",
+  "staleMutationDisposition": "REJECTED_PRESERVE_EXISTING_NEGATIVE_BYTE_EXACT",
+  "sourceRelease": false,
+  "formalQaVerdict": null,
+  "lifecycleTransition": null,
+  "checks": [
+    {"id": "INPUT03-01", "result": "CONFIRMED_FROM_ACTUAL_XML", "claim": "Builder missing source input is the single failure among 103 Builder subjects; original missing input-destination mutation was unchanged by source04."},
+    {"id": "INPUT03-02", "result": "CONFIRMED_STATIC_TRACE", "claim": "Original copies normalized evidence separately, then copies all entry metadata into raw.materialization.inputs. Removing raw index0 preserves normalized history and actual navigation identity."},
+    {"id": "INPUT03-03", "result": "CONFIRMED_STATIC_TRACE", "claim": "basis filters raw current inputs but validates proposals using historical normalized versionContext, allowing an incomplete basis.inputs array."},
+    {"id": "INPUT03-04", "result": "CONFIRMED_NORMATIVE", "claim": "Final ruling section4 requires the latest full current payload plus immutable normalized history; only candidate replay inputs are filtered. ARCH015-02 does not waive complete raw materialization consistency."},
+    {"id": "INPUT03-05", "result": "CONFIRMED_STATIC_SQL_NOT_EXECUTED", "claim": "V21 hash/capture/head-FK/history-insert/deferred-version/immutable guards and the Java private reader disallow this committed SQL mismatch. No real database bypass is established."},
+    {"id": "INPUT03-06", "result": "CONFIRMED_STATIC_SEMANTIC_REFUSAL_NOT_EXECUTED", "claim": "Lowerer.recipes requires every used input ID; Node joins effective references/input mappings. Illegal artifact publication is not demonstrated by the basis-only failure."},
+    {"id": "INPUT03-07", "result": "REPAIR_DESIGN_DERIVED_FROM_APPROVED_REQUIREMENTS", "claim": "Compare complete raw current safe input array with latest normalized metadata prefix before usedInputs filtering; mismatch EVIDENCE_MISMATCH422. Preserve each action's historical version joins."},
+    {"id": "INPUT03-08", "result": "CONCRETE_OVERBROAD_GUARD_COUNTEREXAMPLE", "claim": "appendedHistorical has counts1->3, historical action/context1, headcontext2, preparation metadata2/4 and birth1/3. Comparing old actions or bootstrap to head rejects lawful evidence; current-array-to-latest-array equality does not."},
+    {"id": "INPUT03-09", "result": "NO_REQUIREMENT_CONTRADICTION_IDENTIFIED", "claim": "Full raw/history preservation and effective recipe filtering coexist; no architecture/product-policy decision, wire field, schema, cap, hash or migration change needed."}
+  ],
+  "actualFeedback03": {
+    "total": 293, "passed": 291, "failed": 2, "errors": 0, "skipped": 0,
+    "mainAndTestJavaCompiled": true,
+    "builder": {"total": 103, "passed": 102, "failed": 1},
+    "conformance": {"total": 124, "passed": 124, "failed": 0},
+    "lowerer": {"total": 41, "passed": 41, "failed": 0},
+    "guidedIncrementalTest": "NOT_RUN_AFTER_DEFAULT_TASK_FAILURE",
+    "newExecutionByThisReview": 0
+  },
+  "minimalChange": {
+    "productionPath": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+    "location": "basis immediately after JsonNode materialization=raw.path(materialization), before usedInputs extraction/filtering",
+    "condition": "materialization.inputs equals versionContext(contracts,raw.materializationEvidence,raw.materializationEvidence.versions.size()).inputs, preserving array order and complete metadata",
+    "failure": {"code": "EVIDENCE_MISMATCH", "httpStatus": 422},
+    "preserve": ["complete normalized history", "unused raw inputs", "private full inputHash authority", "exact bootstrap ACK", "original historical contextRevision", "captured preparation materializationRevision", "current raw allocationHash", "ARCH015-02 graph exclusions", "all existing negative methods and mutations"]
+  },
+  "proposedExclusiveSourceLease": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java"
+  ],
+  "newControls": [
+    {"selector": "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.rawCurrentMaterializationMustMatchCompleteNormalizedHead", "status": "PROPOSED_NOT_WRITTEN_NOT_RUN", "parent": "unchanged independent fresh-order-reference basis;3complete raw/history inputs,2effective inputs", "negative": "missing used destination preserved; additionally missing unused config/reorderedraw/substitutedmetadata fail at intended EVIDENCE_MISMATCH check", "restoration": "restore exact removed original row and original order; full independent expected basis passes"},
+    {"selector": "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.normalizedCurrentHeadDoesNotReplaceHistoricalActionVersions", "status": "PROPOSED_NOT_WRITTEN_NOT_RUN", "parent": "unchanged independent appendedHistorical fixture plus authority.privateInputs; explicitly declared legal synthetic rawcurrent head2/metadata4, original bootstrap1, historical action versions retained; not an actualSQLread", "constraint": "whole independent fixture-derived expected basis with only existing independent synthetic manifesthash adjustment; no fake header/entry/history padding; no expectation from actual builder; no whole-helper behavior rewrite"}
+  ],
+  "focusedExistingSelectors": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.refusesAlteredOriginalEvidence",
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.reconstructsOriginalFiveActionsAndAllocatedGraphWithoutValueMaterialization",
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.reconstructsIndependentObservedChoiceWithOriginalAndFreshNodes",
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest",
+    "com.citi.put.checks.studio.guided.publication.IncrementalMaterializationEvidenceTest",
+    "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.unusedMaterializedInputNeverBecomesFutureReplayRecipe",
+    "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.rawAllocationCommitmentCannotBeReplacedByItsEffectiveProjection",
+    "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+    "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest"
+  ],
+  "unchangedRequirements": {"sequence": "FULL015_THEN_FULL008", "acceptance": 86, "ipc": 24, "sql": 55, "joinedVariants": 35, "remaining": "all private/Core/Vault/native/fullconfiguredgates and independentclosure", "item85": "ORIGINAL_OPEN_PENDING_UNAMENDED"}
+}

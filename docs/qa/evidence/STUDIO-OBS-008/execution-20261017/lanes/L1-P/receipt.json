@@ -1,0 +1,362 @@
+{
+  "lane": "L1-P",
+  "story": "STUDIO-OBS-008",
+  "agent": "Dex (@dev)",
+  "files": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsCapabilityController.java",
+      "sha256": "40fa32d69319bc093a39ea4e99266ef2c67aebc53cc896b81d0ef7c6ac649f20",
+      "change": "new"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioCapabilitiesService.java",
+      "sha256": "9548beded8d3fcc2961130264fa90ddc323327a7c4a5c60a58e8f90ed9aacdf8",
+      "change": "new"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedPublicPresentationProjector.java",
+      "sha256": "2e2431dcf6d498d8a773a16200b19c26b97790499b506f994bd38c6906fc8005",
+      "change": "new; section 6 (b): explanation refuses (INVALID_CONTRACT 422 / RUNTIME_INCOMPATIBLE 409), placeholder removed"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "a8ddea755687e10bcfe7a23a5240614954a300356a65348e8b77a8bad15541cf",
+      "change": "projection wiring only: installPresentation/presentation(), view(Session) with progress, result() with progress+explanation"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "sha256": "98e15aa0351c9644e4e7196f1b66db5272c78b50e9634ab49691533cf5e8b934",
+      "change": "projector bean + install"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "sha256": "72cdc69c1471eb37f388946619fb5770226ed5512e8a8f5caf5ec8606d560835",
+      "change": "shared projection call only (session progress, result progress+explanation)"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "sha256": "3d0c1ac367dd50f7fdf512f4a60f380e67898b3717d62bc016353f22b286846e",
+      "change": "passes the shared projector"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java",
+      "sha256": "e4d2c994c9e60bd779f6112c872c2853ded236fbf063735d33b11b9f484c40d9",
+      "change": "read-only applicationIds(csi, environment)"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/secrets/StudioCapabilitiesIT.java",
+      "sha256": "c442b9e467764c0556ee5e320a76c5c5b1984ba45c78620546b997610132eb43",
+      "change": "new, 7 tests"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedPublicPresentationIT.java",
+      "sha256": "06dd4b29209887698d897263f2646272134b12e134d7c87d619adf0f075caec5",
+      "change": "new, 13 tests (9 + 4 fail-closed)"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java",
+      "sha256": "fdb4123fb50a008a5f672421f802f2d41c990fdb842652e097bb663ff5b1fed9",
+      "change": "baton: ReplayFailure parity line, capability row + attribution, 43 -> 44; pin lines untouched"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java",
+      "sha256": "bdce2a9c4e4fa3f668349b79b016ebc7879b901dd11b9ed461696b42a0506d16",
+      "change": "L1-A correction (Aria 2c): replay_failure_* insertable=false, updatable=false"
+    },
+    {
+      "path": "backend/src/test/resources/studio/guided/session-it-documents.json",
+      "sha256": "37b71432258ccf942918d02ad9e78ca4f43a3579b75cf977d760076aeabb3e0e",
+      "change": "root-authorized fixture: decimal revisions \"1\"/\"1\", UUID step ids (...a1/...a2); the clarification coordinate moved from step 2 to step 1 so it names the active step (progress.stepIndex 0)"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "sha256": "4d47ad6f8d67bfd3278b0d3f3930085e90f190d0ea500875272082eb97a7754e",
+      "change": "root-authorized: STEP_1/STEP_2 constants, decimal revisions, newService installs GuidedPublicPresentationProjector(jdbc, contracts)"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingSeed.java",
+      "sha256": "0d6019631e83c9ed62c7fe2f1b988a1fde2b67ad8b255135e43102ef187b16d0",
+      "change": "root-authorized: decimal revisions, STEP_ONE UUID, seeded action proposal now carries an operation (press Enter) instead of {}"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionVideoIT.java",
+      "sha256": "ee59cc124f3b3be25ac5122ba23908ecf8c55448239ee542c21ce81f52ba3c6e",
+      "change": "root-authorized: \"step-1\" -> GuidedRecordingSeed.STEP_ONE"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "sha256": "26b33c23bc6e9caa5e6cb01cd6ae0d838cb9c1f049b49c7a6d0d7fbb30087aa0",
+      "change": "root-authorized: installs the real projector next to installEvidence"
+    }
+  ],
+  "exit": {
+    "StudioContractTest": "fully green, 14/14 (close01), incl. ledger R2 rows declaredOperationStatusSetsAndMarkersMatchTheReviewedContract and everyRouteTheContractPresentsAsShippedIsActuallyReachable",
+    "R3": "all listed classes green in close10 (sourceStable true), including ObservedProfileDriftTest, GuidedObservationPrunerIT, GuidedPlanningIntegrationTest, GuidedSessionIT 44, GuidedPublicationReplayIT 46",
+    "neverMeasured": "GuidedSessionVideoIT 9/9, ObservationPolicyIT 11/11, GuidedCsiBudgetIT 5/5 green",
+    "legacyV20Callers": "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof and actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache PASS in close02 (GuidedPublicationReplayIT 46/46, sourceStable true); they reach the line-802 assertion because the class no longer fails in the R3 cascade",
+    "skips": "0 in every run",
+    "sourceStable": "close10 sourceStable and testInputStable true"
+  },
+  "runs": [
+    {
+      "label": "obs008-be-cap01",
+      "selectors": "StudioContractTest, GuidedObservationPrunerIT, ObservedProfileDriftTest (+ a mis-packaged ExecutionVideoContractTest filter that matched nothing)",
+      "counts": {
+        "total": 21,
+        "passed": 21,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": false,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-cap01-results.json",
+      "note": "first projector landing; StudioContractTest green, two R3 classes green"
+    },
+    {
+      "label": "obs008-be-r3-01",
+      "selectors": "GuidedSessionIT, GuidedServiceTransportFaultIT, GuidedBridgeIntegrationTest, GuidedBridgePlannedIT, GuidedDefaultModelReservationIT, GuidedPlanningIntegrationTest, GuidedCsiBudgetIT, GuidedSessionVideoIT, ObservationPolicyIT",
+      "counts": {
+        "total": 194,
+        "passed": 186,
+        "failed": 8,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": false,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-r3-01-results.json",
+      "note": "diagnostic: 7 GuidedSessionIT + 1 GuidedSessionVideoIT red = synthetic sessions with non-UUID step ids and non-decimal scope revisions; fixed in the projector (empty claim-free explanation)"
+    },
+    {
+      "label": "obs008-be-r3-02",
+      "selectors": "GuidedPublicationReplayIT",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": false,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-r3-02-results.json",
+      "note": "includes both LegacyV20ConfirmedBaseFixture callers"
+    },
+    {
+      "label": "obs008-be-cap02",
+      "selectors": "new ITs + GuidedSessionIT + GuidedSessionVideoIT + StudioContractTest",
+      "counts": {
+        "total": 79,
+        "passed": 69,
+        "failed": 10,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": false,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-cap02-results.json",
+      "note": "diagnostic: IT bug (LOGIN_REQUIRED errorCode without detail) and the non-decimal revision gap"
+    },
+    {
+      "label": "obs008-be-cap03",
+      "selectors": "same selectors after the two fixes",
+      "counts": {
+        "total": 79,
+        "passed": 79,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": false,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-cap03-results.json"
+    },
+    {
+      "label": "obs008-be-close01",
+      "selectors": "closing batch (see classes)",
+      "counts": {
+        "total": 334,
+        "passed": 334,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": false,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-close01-results.json",
+      "classes": {
+        "StudioContractTest": 14,
+        "StudioCapabilitiesIT": 7,
+        "GuidedPublicPresentationIT": 5,
+        "ProgressCallbackIT": 27,
+        "SseStreamingIT": 14,
+        "GuidedSessionIT": 44,
+        "GuidedServiceTransportFaultIT": 39,
+        "GuidedBridgeIntegrationTest": 9,
+        "GuidedBridgePlannedIT": 16,
+        "GuidedDefaultModelReservationIT": 4,
+        "GuidedPlanningIntegrationTest": 57,
+        "ObservedProfileDriftTest": 4,
+        "GuidedPublicationEvidenceTest": 6,
+        "GuidedObservationPrunerIT": 3,
+        "GuidedSessionVideoIT": 9,
+        "ObservationPolicyIT": 11,
+        "GuidedCsiBudgetIT": 5,
+        "RunnerReportProjectionTest": 43,
+        "ExecutionSnapshotMapperTest": 14,
+        "EvidenceRetentionTest": 3
+      },
+      "note": "sourceStable false (other lanes editing, root R1); collector gradle exit 0"
+    },
+    {
+      "label": "obs008-be-close02",
+      "selectors": "GuidedPublicationReplayIT",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-close02-results.json",
+      "note": "sourceStable and testInputStable true; wrapper exit 0"
+    },
+    {
+      "label": "obs008-be-close03",
+      "selectors": "com.citi.put.checks.studio.evidence.ExecutionVideoContractTest",
+      "counts": {
+        "total": 21,
+        "passed": 21,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-close03-results.json",
+      "note": "wrapper exit 0"
+    },
+    {
+      "label": "obs008-be-close04",
+      "selectors": "GuidedPublicPresentationIT",
+      "counts": {
+        "total": 9,
+        "passed": 8,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-close04-results.json",
+      "note": "red: my test assumed one action on step 0; the fixture records navigate (ordinal 0) and an assert (ordinal 1). Test fixed, not the code."
+    },
+    {
+      "label": "obs008-be-close05",
+      "selectors": "GuidedPublicPresentationIT",
+      "counts": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-close05-results.json",
+      "note": "the green run for the four new tests (label close04 was consumed by the red run)"
+    },
+    {
+      "label": "obs008-be-mut01",
+      "selectors": "GuidedPublicPresentationIT with three deliberate mutations (restored afterwards, sha256 checked)",
+      "counts": {
+        "total": 9,
+        "passed": 6,
+        "failed": 3,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-mut01-results.json",
+      "note": "M1 projector copies operation.toString() into referenceIds -> aPlantedSecretValueNeverReachesAnyPublicProjection FAILS; M2 projector drops attempt 1 -> actionTimingUsesExactAttemptAdmission FAILS; M3 receipt read skips authorizeReceiptRead -> receiptAfterExpiryRetainsFreshReadAuthority FAILS. The other 6 stay green."
+    },
+    {
+      "label": "obs008-be-close06",
+      "selectors": "GuidedPublicPresentationIT on the restored sources",
+      "counts": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-close06-results.json"
+    },
+    {
+      "label": "obs008-be-close08",
+      "counts": {
+        "total": 435,
+        "passed": 432,
+        "failed": 3,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-close08-results.json",
+      "note": "first run after the fail-closed change: 3 reds, all fixture consequences, not production: GuidedSessionVideoIT result (seed action proposal was {} so the operation kind was missing -> INVALID_CONTRACT); GuidedSessionIT clarificationSelectionAndPauseChangeRollBackTogether and renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer (the fixture clarification named step 2 while progress.stepIndex was 0; the progress/clarification agreement check from P2 refused it). Fixed in the fixtures. A first launch as close07 was killed at 10 s by me (detached by mistake) and its two files removed."
+    },
+    {
+      "label": "obs008-be-close09",
+      "selectors": "GuidedSessionIT, GuidedSessionVideoIT, GuidedSessionEvidenceTest, GuidedRecordingTimingsTest, GuidedPublicPresentationIT",
+      "counts": {
+        "total": 92,
+        "passed": 92,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-close09-results.json",
+      "note": "diagnostic after the two fixture fixes"
+    },
+    {
+      "label": "obs008-be-close10",
+      "selectors": "the closing batch under one label: StudioContractTest, evidence.ExecutionVideoContractTest, StudioCapabilitiesIT, GuidedPublicPresentationIT, ProgressCallbackIT, SseStreamingIT, GuidedSessionIT, GuidedServiceTransportFaultIT, GuidedBridgeIntegrationTest, GuidedBridgePlannedIT, GuidedDefaultModelReservationIT, GuidedPlanningIntegrationTest, GuidedCommittedRefreshStateTest, ObservedProfileDriftTest, GuidedPublicationEvidenceTest, GuidedPublicationReplayIT, GuidedObservationPrunerIT, GuidedSessionVideoIT, GuidedSessionEvidenceTest, GuidedRecordingTimingsTest, ObservationPolicyIT, GuidedCsiBudgetIT, RunnerReportProjectionTest, ExecutionSnapshotMapperTest",
+      "counts": {
+        "total": 435,
+        "passed": 435,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "testInputStable": true,
+      "resultsPath": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-be-close10-results.json",
+      "note": "wrapper exit 0; this replaces close01/close02 as the R3 closing evidence"
+    }
+  ],
+  "outboundValidationSites": {
+    "GuidedSessionService.view (PublicSession.progress)": "GuidedPublicPresentationIT#activeCoordinateUsesFrozenSourceAndDurableProgress (every sessions.read(...,'session') validates v3/session-view#PublicSession); also GuidedSessionIT (44) and GuidedPlanningIntegrationTest start/read paths",
+    "GuidedSessionService.result (result progress + explanation)": "GuidedPublicPresentationIT#anUnpublishedResultCarriesBothProjections; GuidedSessionIT terminal reads (7 tests that were red in r3-01), GuidedSessionVideoIT#theSessionServicesResultCarriesTheRecordingEvidenceAndValidates",
+    "GuidedPublicationResultProjector.view (session-view with nested result)": "GuidedPublicPresentationIT#aPublishedSessionExplainsItselfAndTheSessionViewCarriesTheSameResult (projector.read(..., false)); GuidedObservationPrunerIT; ObservedProfileDriftTest",
+    "GuidedPublicationResultProjector.result (receipt-backed result)": "GuidedPublicPresentationIT#aPublishedSessionExplainsItselfAndTheSessionViewCarriesTheSameResult and #failedExplanationNeverBorrowsCurrentHead (projector.read(..., true)); GuidedPublicationReplayIT (46)"
+  },
+  "plannedTestMap": {
+    "StudioCapabilitiesIT.authorizesBeforeProviderAndScopedPolicyLookup": "authorizesBeforeProviderAndScopedPolicyLookup (+ capabilityTrueNeverGrantsWriteOrSecretUse)",
+    "StudioCapabilitiesIT.configurationIsNotProviderHealth": "configurationIsNotProviderHealth",
+    "StudioCapabilitiesIT.startContextUsesExactPersistedScopeAndUniqueApplication": "startContextUsesExactPersistedScopeAndUniqueApplication, zeroOrSeveralCandidatesAreRuntimeIncompatible, anUnapprovedScopeStillNamesItsCandidateSoTheRealStartCanRefuseIt, aReaderWithoutExecuteGetsForbiddenScopeWhileVaultStillReportsConfiguration",
+    "GuidedPublicPresentationIT.activeCoordinateUsesFrozenSourceAndDurableProgress": "same name",
+    "GuidedPublicPresentationIT.failedAndConflictExplanationNeverBorrowsCurrentHead": "failedExplanationNeverBorrowsCurrentHead + conflictExplanationNeverBorrowsCurrentHead",
+    "GuidedPublicPresentationIT.closedProjectionRejectsPrivateMaterial": "closedProjectionRejectsPrivateMaterial (origin canary) + aPlantedSecretValueNeverReachesAnyPublicProjection (secret-value canary)",
+    "GuidedPublicPresentationIT.actionTimingUsesExactAttemptAdmission": "actionTimingUsesExactAttemptAdmission",
+    "GuidedPublicPresentationIT.receiptAfterExpiryRetainsFreshReadAuthority": "receiptAfterExpiryRetainsFreshReadAuthority",
+    "GuidedPlaybackLoadIT": "REMOVED (descoped by the user 2026-10-17)"
+  },
+  "addedTests": {
+    "actionTimingUsesExactAttemptAdmission": "attempt 0 (FAILED/TARGET_CHANGED) and attempt 1 of one coordinate keep distinct admission ids, exact (ordinal, attemptOrdinal) and own outcome; step not completed by an unexcluded failed attempt; no timing field invented (no recording seeded). The join of actionTimings to these ids is the client's; this is the backend half.",
+    "receiptAfterExpiryRetainsFreshReadAuthority": "session expired 2 days; owner reads result and session-view (PUBLISHED, receipt object, replayVerified false, currentReadiness.ready a boolean); another principal, a Core identity of another principal, and the same principal whose current Core access lost the CSI are each FORBIDDEN_SCOPE. No model/browser call is possible in this read path (pure projection), not separately instrumented.",
+    "conflictExplanationNeverBorrowsCurrentHead": "PUBLICATION_CONFLICT session: publication CONFLICT, receipt null, NOT_PUBLISHED, all steps completed/learned, unchanged after a newer head is published.",
+    "aPlantedSecretValueNeverReachesAnyPublicProjection": "secret value planted in proposal (hostile operation field and locator value), ledger document, progress and manifest; control counts prove the plants; live view, result and session-view scanned; declared reference id present."
+  },
+  "mutationChecks": "M1, M2, M3 above caught by their tests. The conflict test and the live-view half of the canary test were not separately mutated.",
+  "failClosedTests": {
+    "aNonDecimalScopeRevisionIsRefusedNotPlaceholdered": "sourceRevision and configurationRevision each: /result is GuidedSessionException INVALID_CONTRACT status 422; session view progress still reads (stepCount 2)",
+    "aStepIdThatIsNotAUuidIsRefusedNotDropped": "/result 422 INVALID_CONTRACT; progress.activeStep stays null and the view reads",
+    "moreThanOneHundredStepsAreRefusedNotTruncated": "101 frozen steps: /result 422 INVALID_CONTRACT",
+    "aProjectorWithoutFactsRefusesTheExplanationButNotTheProgress": "withoutFacts().explanation -> RUNTIME_INCOMPATIBLE 409; progress -> stepCount 2, activeStep null"
+  }
+}

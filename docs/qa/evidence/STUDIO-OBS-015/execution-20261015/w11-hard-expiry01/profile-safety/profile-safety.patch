@@ -1,0 +1,30 @@
+--- a/studio-runner/test/fixtures-tier/browser-profile-safety.test.ts
++++ b/studio-runner/test/fixtures-tier/browser-profile-safety.test.ts
+@@ -53,7 +53,7 @@
+  const evidenceRoot=resolve('../docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/native-runs');await promises.mkdir(evidenceRoot,{recursive:true});const evidence=await promises.mkdtemp(join(evidenceRoot,'redirect-'));
+  const outside=join(root,'outside-default'),canary=join(outside,'fixture-canary'),canaryBytes=Buffer.from('profile-fixture-owned-canary');
+  let profile:string|undefined,defaultIdentity:{dev:number;ino:number;uid:number}|undefined,canaryIdentity:{dev:number;ino:number}|undefined;
+- const attackFacts={renamed:false,canaryCreated:false,symlinkInstalled:false,liveBefore:false,liveAfter:false,expectedRefusal:false,canaryUnchanged:false,outsideIdentityUnchanged:false};
++ const attackFacts={defaultRecreations:0,renamed:false,canaryCreated:false,symlinkInstalled:false,liveBefore:false,liveAfter:false,expectedRefusal:false,canaryUnchanged:false,outsideIdentityUnchanged:false};
+  const identity=async(path:string)=>{const stat=await promises.lstat(path);if(!stat.isDirectory()||stat.isSymbolicLink())throw Error('ATTACK_DIRECTORY');return{dev:stat.dev,ino:stat.ino,uid:stat.uid};};
+  const harness=new ProfileSafetyFixture<Awaited<ReturnType<typeof real>>,GuidedBrowser>({
+   bind:context=>{const browser=context.browser(),rawClose=context.close.bind(context);return{
+@@ -68,7 +68,17 @@
+    capture:async()=>{if(!profile)throw Error('ATTACK_PROFILE');attackFacts.liveBefore=true;defaultIdentity=await identity(join(profile,'Default'));},
+    rename:async()=>{if(!profile)throw Error('ATTACK_PROFILE');await promises.rename(join(profile,'Default'),outside);attackFacts.renamed=true;},
+    canary:async()=>{await promises.writeFile(canary,canaryBytes,{flag:'wx',mode:0o600});const stat=await promises.lstat(canary);canaryIdentity={dev:stat.dev,ino:stat.ino};attackFacts.canaryCreated=true;},
+-   symlink:async()=>{if(!profile)throw Error('ATTACK_PROFILE');await promises.symlink(outside,join(profile,'Default'));},
++   symlink:async()=>{
++    if(!profile)throw Error('ATTACK_PROFILE');
++    // The live browser re-creates Default (its "Extension State" directory) whenever it finds it missing, so it can win the race between our rename and this link. The attack being modelled is "swap Default for a link": move what the browser re-created aside and link again. Bounded; any other error, or a persistent browser, stays a failure.
++    for(let attempt=0;;attempt++){
++     try{await promises.symlink(outside,join(profile,'Default'));return;}
++     catch(error){
++      if((error as NodeJS.ErrnoException).code!=='EEXIST'||attempt>=20)throw error;
++      await promises.rename(join(profile,'Default'),join(root,'recreated-default-'+String(attempt)));attackFacts.defaultRecreations++;
++     }
++    }
++   },
+    verify:async()=>{if(!profile)throw Error('ATTACK_PROFILE');const link=await promises.lstat(join(profile,'Default'));if(!link.isSymbolicLink()||await promises.readlink(join(profile,'Default'))!==outside)throw Error('ATTACK_SYMLINK');expect(await identity(outside)).toEqual(defaultIdentity);attackFacts.symlinkInstalled=true;},
+   }),
+   closeOutcome:async outcome=>{if(outcome.returned)await outcome.value?.close();else if(outcome.error instanceof GuidedLaunchFailure)await outcome.error.close();},

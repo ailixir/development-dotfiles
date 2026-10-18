@@ -1,0 +1,542 @@
+{
+ "artifact": "STUDIO-OBS-015 B3a/B3b/B3c test designs (design01)",
+ "author": "Aria (@architect), read-only design",
+ "capturedAt": "2026-10-16T02:43:00Z",
+ "classification": "DESIGN_ONLY_UNCOMPILED_UNEXECUTED",
+ "design": {
+  "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3abc-design01/design.md",
+  "sha256": "2c991e96929e4ebce2d77a0697e145a3e873504ec1248be0e9dfc1612325583f",
+  "bytes": 136650
+ },
+ "productionSeam": null,
+ "productionSeamRationale": "Existing writer re-reads complete stored evidence under locks (GuidedPublicationRepository.commit 233-239); package-private writer constructor, bean reader/verifier, bean ObservedValidationClient, GuidedTranslationStore.acceptPlan, GuidedPlanHistoryAudit and authenticated HTTP routes suffice.",
+ "sharedTestHarnessEdits": [
+  "ReplayIT.incrementalJoined: 3 null-guarded b3Hooks calls (after 3925, after 4140, before finally at 4249); behaviour unchanged when b3Hooks==null",
+  "ReplayIT.incrementalTenModel: SOURCE_PLAN first-suffix provider hold (b3FirstSuffixHold) and b3ReadInsideDriftStep branches; inactive by default",
+  "ReplayIT.observedReportCapture filter: first-branch B3 evidence-callback capture (timing action items only); inactive by default",
+  "ReplayIT SINGLETON_METHODS and INCREMENTAL_METHODS: +5 names",
+  "build.gradle.kts: joinedB3Methods set + 3 call-site unions"
+ ],
+ "controlledInputsDisclosed": [
+  "Publication grant in staged ReplayIT/AuthorityIT commits (built from the stored base; writer re-checks principal/CSI against the stored base)",
+  "AuthorityIT staged validator verdict (same shape as existing prepareStored; relational tier)",
+  "Every staged reserve/claim/finish/commit is setRollbackOnly; nothing committed"
+ ],
+ "methods": [
+  {
+   "id": "B3A-1",
+   "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+   "name": "offeredBasisOriginalPointersRequireStoredPrivatePreimageAtCurrentCommit",
+   "kind": "@Test singleton",
+   "lane": "test (default)",
+   "owner": "Dex-AUTH",
+   "parent": "shared relational Database at actual head PG (ordinary single-version)",
+   "labels": {
+    "wrong-private-input-hash": "STORED pin",
+    "immutable-source-manifest-hash-is-exact": "STORED pin",
+    "immutable-original-source-cannot-be-replaced": "STORED pin"
+   },
+   "ledger": [
+    {
+     "ledgerIndex0": 31,
+     "plannedName": "IncrementalPublicationIT.mergedProofCannotReuseOldAdmissionsOrForeignSnapshots",
+     "tier": "Java + Postgres + pure runner validator",
+     "assertions": "New-session prefix+suffix evidence; base admission substitution, cross-CSI/test reuse, omitted/extra hash key, wrong snapshot value and forged no-invocation receipt all refused; finalization idempotent and model/browser free"
+    },
+    {
+     "ledgerIndex0": 52,
+     "plannedName": "IncrementalValidationBasisTest.reconstructsPrivateInputsBeforePublicEvidence",
+     "tier": "Java+runner canonical+Postgres",
+     "assertions": "Reconstruct every full immutable version by ordinal cutoff; hash values before removal; metadata exact minus value; header/current/proposal/proof/ledger hash joins; mutate private value, entry hash, provenance, count/order/introduced version and reject; no raw values in basis/provider/public output"
+    },
+    {
+     "ledgerIndex0": 60,
+     "plannedName": "IncrementalPublicationIT.snapshotFactsMatchImmutableOriginalSourceManifest",
+     "tier": "HTTP+Postgres",
+     "assertions": "Freeze private authoringSnapshot at start, then attempted context/declaration/default/evidence tamper or changed source/config fails original CAS; unknown/unreferenced declaration extras and raw value in proof reject. SourceManifestHash preimage retains authoringSnapshot, removes configurationValues only."
+    }
+   ],
+   "privateRoutes": [
+    "wrong-private-input-hash",
+    "immutable-source-manifest-hash-is-exact",
+    "immutable-original-source-cannot-be-replaced"
+   ]
+  },
+  {
+   "id": "B3A-2",
+   "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+   "name": "offeredBasisFromAnotherStoredSessionCannotBorrowItsAuthority",
+   "kind": "@Test singleton",
+   "lane": "test (default)",
+   "owner": "Dex-AUTH",
+   "parent": "two shared relational sessions in one container (different test; different CSI, risk R-A2)",
+   "labels": {
+    "foreign-session-basis": "EVIDENCE_MISMATCH, reads 0 (predicted pin)",
+    "foreign-session-resealed-authorization": "stage oracle",
+    "foreign-admission-substitution": "stage oracle"
+   },
+   "ledger": [
+    {
+     "ledgerIndex0": 31,
+     "plannedName": "IncrementalPublicationIT.mergedProofCannotReuseOldAdmissionsOrForeignSnapshots",
+     "tier": "Java + Postgres + pure runner validator",
+     "assertions": "New-session prefix+suffix evidence; base admission substitution, cross-CSI/test reuse, omitted/extra hash key, wrong snapshot value and forged no-invocation receipt all refused; finalization idempotent and model/browser free"
+    }
+   ],
+   "privateRoutes": []
+  },
+  {
+   "id": "B3B-1",
+   "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "name": "incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution",
+   "kind": "@Test singleton",
+   "lane": "guidedIncrementalTest / incremental2048",
+   "owner": "Dex-JOIN",
+   "parent": "incrementalJoined(append-input) generation 1 + second actual incremental session (generation 2) on the same test; per-method CSI",
+   "labels": {
+    "42 alias/duplicate/collision/missing/null at actual start": "HTTP codes predicted (R-42)",
+    "gen1-positive": "COMMITTED_ROLLED_BACK",
+    "wrong-private-input-hash-v2": "STORED pin",
+    "preparation-substitutes-birth-for-actual": "STORED pin (precondition: issued>birth exists)",
+    "historical-cutoff-moves-v2-input-into-v1": "backend-pure pin",
+    "immutable-source-manifest-hash-is-exact": "STORED pin",
+    "immutable-original-source-cannot-be-replaced": "stage oracle (joined analogue)",
+    "v1-private-value / v2-private-value / v1-cutoff-includes-v2-input": "stored-reader EVIDENCE_MISMATCH pin (returned-read, disclosed)",
+    "finalize idempotent": "200 same receipt; 409 IDEMPOTENCY_CONFLICT; no model/browser",
+    "older same-test equal-hash base (HTTP start)": "409 REVISION_CONFLICT/BASE_REVISION_MISMATCH",
+    "older-same-test-equal-hash-base (offered)": "stage oracle, never adopted",
+    "expected-revision CAS": "409 REVISION_CONFLICT, still FINALIZING",
+    "changed-source CAS": "409 PUBLICATION_CONFLICT, no revision"
+   },
+   "ledger": [
+    {
+     "ledgerIndex0": 43,
+     "plannedName": "IncrementalPublicationIT.sameTestOlderBaseAndNoncontiguousReuseAreRefused",
+     "tier": "Postgres+pure validator",
+     "assertions": "Wrong same-test revision with equal hash, prefix gaps, suffix reuse and post-drift j reuse all reject"
+    },
+    {
+     "ledgerIndex0": 61,
+     "plannedName": "IncrementalPublicationIT.baseProofUsesPinnedRevisionOwnImmutableRows",
+     "tier": "Postgres+pure Java+TS",
+     "assertions": "No live draft values, no unrelated/older same-test revision even equal claimed hashes; actual original confirmed ID/digest, stored publication identity and baseartifact map/config/hash all agree; altered source/context/declaration/graph/map rejects after recomputation."
+    },
+    {
+     "ledgerIndex0": 60,
+     "plannedName": "IncrementalPublicationIT.snapshotFactsMatchImmutableOriginalSourceManifest",
+     "tier": "HTTP+Postgres",
+     "assertions": "Freeze private authoringSnapshot at start, then attempted context/declaration/default/evidence tamper or changed source/config fails original CAS; unknown/unreferenced declaration extras and raw value in proof reject. SourceManifestHash preimage retains authoringSnapshot, removes configurationValues only."
+    },
+    {
+     "ledgerIndex0": 52,
+     "plannedName": "IncrementalValidationBasisTest.reconstructsPrivateInputsBeforePublicEvidence",
+     "tier": "Java+runner canonical+Postgres",
+     "assertions": "Reconstruct every full immutable version by ordinal cutoff; hash values before removal; metadata exact minus value; header/current/proposal/proof/ledger hash joins; mutate private value, entry hash, provenance, count/order/introduced version and reject; no raw values in basis/provider/public output"
+    },
+    {
+     "ledgerIndex0": 31,
+     "plannedName": "IncrementalPublicationIT.mergedProofCannotReuseOldAdmissionsOrForeignSnapshots",
+     "tier": "Java + Postgres + pure runner validator",
+     "assertions": "New-session prefix+suffix evidence; base admission substitution, cross-CSI/test reuse, omitted/extra hash key, wrong snapshot value and forged no-invocation receipt all refused; finalization idempotent and model/browser free"
+    },
+    {
+     "ledgerIndex0": 42,
+     "plannedName": "IncrementalIdentityTest.opaqueAliasRequiresExactDeclaredName",
+     "tier": "unit+HTTP refusal",
+     "assertions": "URI-looking alias exact name->secretId succeeds; suffix-only declaration misses; duplicate/conflict/missing plain value closed; null never hashed"
+    }
+   ],
+   "privateRoutes": [
+    "immutable-original-source-cannot-be-replaced",
+    "private-plain-hash-must-match-before-freeze",
+    "immutable-source-manifest-hash-is-exact",
+    "wrong-private-input-hash",
+    "preparation-substitutes-birth-for-actual"
+   ]
+  },
+  {
+   "id": "B3B-2",
+   "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "name": "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne",
+   "kind": "@Test singleton",
+   "lane": "guidedIncrementalTest / incremental2048",
+   "owner": "Dex-JOIN",
+   "parent": "incrementalJoined(drift-first): initial index 3, DRIFT at effective 0 / ordinal 1",
+   "labels": {
+    "base-proof-null": "backend-pure pin",
+    "changed-program": "backend-pure pin",
+    "changed-pin": "backend-pure pin",
+    "base-proof-recomputed-source": "stage oracle",
+    "base-proof-recomputed-reuse-map": "stage oracle",
+    "hidden-successful-read": "stage oracle",
+    "model-only-orphan": "stage oracle",
+    "raw-id-recycle": "stage oracle"
+   },
+   "ledger": [
+    {
+     "ledgerIndex0": 63,
+     "plannedName": "IncrementalPublicationIT.nonemptyOriginalPrefixCannotDropBaseProofAfterDriftAtOne",
+     "tier": "HTTP+Postgres+pure validator",
+     "assertions": "Original initialindex>0 then authenticated driftj1 leaves zero reusedsteps yet still requires full immutablebaseproof. Attempt null, changedprogram or changedpin rejects. No repeat of possibly native effect."
+    },
+    {
+     "ledgerIndex0": 61,
+     "plannedName": "IncrementalPublicationIT.baseProofUsesPinnedRevisionOwnImmutableRows",
+     "tier": "Postgres+pure Java+TS",
+     "assertions": "No live draft values, no unrelated/older same-test revision even equal claimed hashes; actual original confirmed ID/digest, stored publication identity and baseartifact map/config/hash all agree; altered source/context/declaration/graph/map rejects after recomputation."
+    },
+    {
+     "ledgerIndex0": 72,
+     "plannedName": "IncrementalPublicationIT.onlyUnperformedImportedProducerCanRemainRawWithoutNeed",
+     "tier": "PG+pureJavaTS",
+     "assertions": "Unperformed future prefix read import stays raw allocation after drift; no executable orphan binding. Add model-only orphan or hidden successful read and reject; quota/raw IDs never recycled."
+    }
+   ],
+   "ipc": [
+    "N01 (orphan side)"
+   ],
+   "privateRoutes": []
+  },
+  {
+   "id": "B3B-3",
+   "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "name": "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear",
+   "kind": "@Test singleton",
+   "lane": "guidedIncrementalTest / incremental2048",
+   "owner": "Dex-JOIN",
+   "parent": "incrementalJoined(admitted-drift2) with the actual first-suffix provider call held <=10s",
+   "labels": {
+    "2 concurrent /dependency-admissions during the in-flight first suffix": "409 IDEMPOTENCY_CONFLICT each (predicted pin); 0 acceptances, 0 attempts, 0 wire during hold",
+    "one immutable acceptance": "1 row; 1 post-switch SOURCE_PLAN attempt; retained==completed",
+    "duplicate re-acceptance x2 concurrent": "REVISION_CONFLICT each; rows unchanged",
+    "later pair deletion / obligation mutation": "GuidedSessionException at audit and acceptPlan; head unchanged",
+    "edge matrix (11 labels)": "stage oracle, recomputed hashes"
+   },
+   "ledger": [
+    {
+     "ledgerIndex0": 73,
+     "plannedName": "IncrementalPublicationIT.backendAuditsFirstSuffixThenStrictPlanChain",
+     "tier": "PG",
+     "assertions": "Use immutable acceptance pointers: exact authorized first removals, all successful meanings/binding uses retained; second/later need consumer deletion or obligation mutation rejects even if point also existed in originalprefix. Concurrent/duplicate acceptance remains one immutable row."
+    },
+    {
+     "ledgerIndex0": 75,
+     "plannedName": "IncrementalGraphProjectionTest.rejectsEveryUnaccountedOrUnprovenEdge",
+     "tier": "Java+TS",
+     "assertions": "Unknown admission, native-started, policy/assertion/unknown failure, wrong receipt/prep/version/worker/binding/slot/producer/origin, second excluded action, edge attached to PRE_ADMISSION each reject; recomputed attack hashes do not bypass joins."
+    },
+    {
+     "ledgerIndex0": 72,
+     "plannedName": "IncrementalPublicationIT.onlyUnperformedImportedProducerCanRemainRawWithoutNeed",
+     "tier": "PG+pureJavaTS",
+     "assertions": "Unperformed future prefix read import stays raw allocation after drift; no executable orphan binding. Add model-only orphan or hidden successful read and reject; quota/raw IDs never recycled."
+    }
+   ],
+   "privateRoutes": [
+    "receipt-transport-authority-cannot-be-inferred-from-hash (excluded-native-started)"
+   ]
+  },
+  {
+   "id": "B3C-1",
+   "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "name": "incrementalPartialDriftStepReadPublishesAndReplaysTwice",
+   "kind": "@Test singleton",
+   "lane": "guidedIncrementalTest / incremental2048",
+   "owner": "Dex-JOIN",
+   "parent": "incrementalJoined(drift2) with test-owned step1 = read(0)+fill(1); drift at (step1,1) pre-admission; read at (step1,0) retained",
+   "labels": {
+    "exact producer identity / no fabricated consumer / no reusedFrom[j]": "asserted",
+    "N01 negatives (9 labels)": "stage oracle",
+    "two fresh ordinary admitted runs": "PASSED, fresh value, read recaptured each run, no model"
+   },
+   "ledger": [
+    {
+     "ledgerIndex0": 76,
+     "plannedName": "IncrementalGraphProjectionTest.zeroConsumerRequiresRetainedActualProducer",
+     "tier": "Java+TS+ordinaryreplay",
+     "assertions": "Retained exact successful prefix producer can have0consumers and same producer snapshot. Suffix-created/model orphan or unproven import cannot. Actual recipe/origin/availability/source identity exact; drift-step reusedFrom remains absent."
+    }
+   ],
+   "ipc": [
+    "P03",
+    "N01"
+   ],
+   "privateRoutes": []
+  },
+  {
+   "id": "B3C-2",
+   "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+   "name": "incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek",
+   "kind": "@Test singleton",
+   "lane": "guidedIncrementalTest / incremental2048",
+   "owner": "Dex-JOIN",
+   "parent": "incrementalJoined(admitted-drift2) with evidence-callback capture",
+   "labels": {
+    "unrelated-failed-ledger-omitted": "stage oracle",
+    "callback==V20==manifest==result action rows": "canonical equality",
+    "native0 no stamp in any sink; native1 genuine timing": "asserted",
+    "one context/origin/video": "asserted",
+    "actual seek per present admission via served bytes": "64x36 gray frame each; keyed by admission; no native0 seek; beyond-end control returns 0 bytes"
+   },
+   "ledger": [],
+   "ledgerNote": "B3c native/seek companion from next-batches B3c_NATIVE_AND_SEEK; does not complete ledger 85 (positive tie)",
+   "privateRoutes": [
+    "unrelated-failed-ledger-cannot-be-omitted"
+   ]
+  }
+ ],
+ "registration": {
+  "replayITSets": {
+   "SINGLETON_METHODS": "+5",
+   "INCREMENTAL_METHODS": "+5"
+  },
+  "buildGradleKts": [
+   "val joinedB3Methods = setOf(\"incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution\", \"incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne\", \"incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear\", \"incrementalPartialDriftStepReadPublishesAndReplaysTwice\", \"incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek\")",
+   "line 259: (joinedIncrementalMethods + joinedPrefixSyncMethods + joinedB3Methods) in guidedIncrementalTest include filter",
+   "line 265: (joinedIncrementalMethods + joinedPrefixSyncMethods + joinedB3Methods) excluded from tasks.test",
+   "line 325: + joinedB3Methods in requireFreshGuidedPartitions guidedIncrementalTest expected identities"
+  ],
+  "authorityITCount": "24 -> 26 invocations (no JOIN registration)",
+  "lowLaneIdentities": "42 -> 47 for this batch; merge with B1/B2 added sets into one joinedAddedLowMethods by the single build writer"
+ },
+ "selectorsUnexecuted": [
+  "test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+  "guidedIncrementalTest --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution",
+  "guidedIncrementalTest --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne",
+  "guidedIncrementalTest --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear",
+  "guidedIncrementalTest --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalPartialDriftStepReadPublishesAndReplaysTwice",
+  "guidedIncrementalTest --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek"
+ ],
+ "privateRoutes15": [
+  {
+   "route": "immutable-original-source-cannot-be-replaced",
+   "mapped": [
+    "B3A-1 exact pointer (STORED)",
+    "B3B-1 joined analogue",
+    "B3B-1 gen2 destructive source CAS",
+    "source01 manifest-authored-context"
+   ],
+   "gap": "exact pointer absent at joined tier"
+  },
+  {
+   "route": "private-plain-hash-must-match-before-freeze",
+   "mapped": [
+    "source01 manifest-private-plain (actual PG returned read)",
+    "B3B-1 expectedConfigurationRevision CAS"
+   ],
+   "gap": "no lawful HTTP corruption of a frozen plain value"
+  },
+  {
+   "route": "immutable-source-manifest-hash-is-exact",
+   "mapped": [
+    "B3A-1 /basis/sourceManifestHash (STORED)",
+    "B3B-1 joined (STORED)",
+    "source01 manifest-checksum"
+   ],
+   "gap": null
+  },
+  {
+   "route": "raw-edge-cannot-name-pending-action",
+   "mapped": [
+    "AuthorityIT rawEdgeCannotNamePendingActionAgainstActualStoredAuthority (captured; regate)"
+   ],
+   "gap": "broader phase matrix with B1"
+  },
+  {
+   "route": "receipt-transport-authority-cannot-be-inferred-from-hash",
+   "mapped": [
+    "ReplayIT drift-auth forged fields + recomputed receiptHash (R1)",
+    "B3B-3 excluded-native-started"
+   ],
+   "gap": null
+  },
+  {
+   "route": "wrong-private-input-hash",
+   "mapped": [
+    "B3A-1 exact pointer (STORED)",
+    "B3B-1 multi-version (STORED)",
+    "B3B-1 v1/v2 stored private history",
+    "source01 private-value"
+   ],
+   "gap": null
+  },
+  {
+   "route": "preparation-substitutes-birth-for-actual",
+   "mapped": [
+    "B3B-1 appendedHistorical (STORED)"
+   ],
+   "gap": "OPEN only if no actual issued>birth preparation exists"
+  },
+  {
+   "route": "unrelated-failed-ledger-cannot-be-omitted",
+   "mapped": [
+    "B3C-2 unrelated-failed-ledger-omitted",
+    "writer authority() stored inventory"
+   ],
+   "gap": "no lawful second FAILED/UNKNOWN ledger"
+  },
+  {
+   "route": "hash-is-not-transport-authentication",
+   "mapped": [
+    "ReplayIT drift-auth invalid bearer 401 (R1)"
+   ],
+   "gap": "missing-Authorization-header variant -> B1"
+  },
+  {
+   "route": "forged-jwt-algorithm",
+   "mapped": [
+    "GuidedSecurityTest.algorithmSubstitutionDuplicateKeysAndTrailingJsonFail (unit)",
+    "drift-auth invalid token"
+   ],
+   "gap": "alg-substituted re-signed token over actual owning-worker route -> B1"
+  },
+  {
+   "route": "missing-mtls",
+   "mapped": [
+    "ReplayIT drift-auth no client certificate 401 (R1)"
+   ],
+   "gap": null
+  },
+  {
+   "route": "wrong-worker-subject",
+   "mapped": [
+    "ReplayIT drift-auth other-worker 403 (R1)"
+   ],
+   "gap": null
+  },
+  {
+   "route": "stale-callback-owner",
+   "mapped": [
+    "confirm-owner-loss (graceful)",
+    "drift-auth fence+1 403"
+   ],
+   "gap": "natural lease expiry/transfer + late exact callback -> B1c (observation seam)"
+  },
+  {
+   "route": "wrong-assignment",
+   "mapped": [],
+   "gap": "assignmentSessionId mismatch on signed callback -> B1"
+  },
+  {
+   "route": "wrong-owner-fence",
+   "mapped": [
+    "ReplayIT drift-auth X-Owner-Fence+1 403 (R1)"
+   ],
+   "gap": null
+  }
+ ],
+ "routesMappedCount": 14,
+ "routesWithNoAssertionAtAll": [
+  "wrong-assignment"
+ ],
+ "notLawfullyProvableInRepo": [
+  "Ledger 85 positive timing tie (user decision A/B/C)",
+  "Truly simultaneous first-suffix acceptance writes (in-flight attempt guard refuses a second reservation first; only fabricated plans or a production seam could race acceptance)",
+  "Real Core / test Vault authority (in-JVM fixtures; Quinn ruling pending)",
+  "Visual identity of a decoded frame at a seek offset",
+  "Exact original route-1 pointer at the joined tier (node absent)",
+  "A second lawful FAILED/UNKNOWN ledger for route 8"
+ ],
+ "risks": [
+  "R-A2 foreign csiId constructor",
+  "R-42 parseVariables earlier guard/shape",
+  "R-P03 backend may refuse read-inside-drift-step parent (candidate product defect)",
+  "R-VAL class cohort counters vs staged validator calls",
+  "R-HOLD provider hold vs gateway callSeconds",
+  "R-STAGE any pinned stage differs -> OPEN, not re-pointed",
+  "R-RUNTIME B3B-1 ~2-3x a variant"
+ ],
+ "inputs": [
+  {
+   "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/execute-015-008/claude-resume-plan-015.md",
+   "sha256": "09fb94a9876ba7dcb355bf3fdeb02b0acb3e64d3e68335a4d39395d31bc97768"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/validation-ledger.json",
+   "sha256": "429b4fc71055d8752265541fc3a9582b1d6341ff67209e52c6d16161f1ad6cde"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/review.md",
+   "sha256": "f362d2205354875bdba926cd0356fc8a6be7aeb34c858532218654837c74eedc"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/next-batches.json",
+   "sha256": "6e1d20f17c9802a6f747ded7bc521db4b047a2a248a84c7fabd9baf32adadb54"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/requirement-map.json",
+   "sha256": "cf63626da52b1a7d3c48aeaf913f6088876a87873ba5ac540f7be6cc5bdce003"
+  },
+  {
+   "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md",
+   "sha256": "18d9396281f856726fdb5612ca69dfa4d40b7e95c31ba2c6f18a398e521da318"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/private-routes.json",
+   "sha256": "f32934447c9a55116374eaa382475397093986952881999691b8ad406406cd2f"
+  },
+  {
+   "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b3a-private-authority-source01/remaining.json",
+   "sha256": "c107b8db545db2c253b65d872465ad1f73288b50dd1a4a1a184e70fe13a2022a"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+   "sha256": "e6228117d0e9844075603c3b011166ddffb74ddb4533d4524111bd5a665bb9fd"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+   "sha256": "f279684cdc8fa168adcfcb8e45dead590a0257711892a094dbc5412191abea24"
+  },
+  {
+   "path": "backend/build.gradle.kts",
+   "sha256": "1cc4cee0f683661eb5373738d00e30cbc53c3f4716ba3b008a33ec270bdbdef8"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+   "sha256": "28aafe98ebdbbd3dcd59d061b671131713c5b5c2db4330a3e5252bd106011b48"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+   "sha256": "8aa40c60582007a59ba406d47832bf30d06627cf227fc0c3ce942ab7d58b07df"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+   "sha256": "c9a36bac3fe1cbd5d98b4599734013bb3aa64cdac2922406e1df865d8e909b09"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedSnapshotDeriver.java",
+   "sha256": "5e382805c47f5e0be45a09675515fa49a838699b15a2a7e601785e9f5b74f134"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+   "sha256": "d8c494b290fdecff883d3e6b38de2b7cb6470cddfd42db84db84d7cf85c45fc3"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+   "sha256": "745223f046be477593a8f701a2fc4ed24d29dcfab6d19d32acabb011ed181165"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanHistoryAudit.java",
+   "sha256": "b69b48bee651b8b7c83d02a96836af986d23a888b38b4fad2460e8b77bbd02ee"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionVideoController.java",
+   "sha256": "d955e98f1c1f6e2a0ab62523e69a84dc4639e0aadf05f2c90bfc16ae69ea921c"
+  }
+ ],
+ "actionsByThisDesigner": {
+  "sourceEdits": 0,
+  "gradleOrPnpmRuns": 0,
+  "testsExecuted": 0,
+  "dbOrProcessOperations": 0,
+  "gitOperations": 0,
+  "filesWritten": [
+   "design.md",
+   "manifest.json"
+  ]
+ },
+ "sourceDistHold": true,
+ "formalQAVerdict": null,
+ "lifecycleTransition": null,
+ "original85": "OPEN_UNAMENDED_NO_USER_ANSWER"
+}

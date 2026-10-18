@@ -1,0 +1,27 @@
+{
+  "scope": "INDEPENDENT_ISOLATED_POOL_WRAPPER_SOURCE_REVIEW",
+  "disposition": "CONCERNS_REPAIR_DIAGNOSTIC_PATHS_BEFORE_RUNTIME",
+  "sourceSha": "b1ee3517a2f6cbe13229c15a0c0b5492db712b2ae103fecb0f5bcdf02c8a8ed1",
+  "helperSha": "842e3649568f89a5ea62abaa0d31804c9d76956189c73fa830789febc6a2bca8",
+  "findings": [
+    {
+      "path": "GuidedPublicationReplayIT.C5Capture.recordPoolRefusal",
+      "problem": "environment/test metadata read from scope while original resolver uses top-level binding.environment/binding.testId; absent booleans fail to recover intended evidence",
+      "repair": "Only top-level diagnostic reads/equalities; no authority or settlement change"
+    }
+  ],
+  "verified": [
+    "Original same-package settlement override forwards original super exactly once even recorderthrows",
+    "Original9dependency superconstructor unchanged, pointergraph asserted and poll-disabled originalcomponent preserved",
+    "Selected only closed code/source categories/numeric epochs/equality facts, no raw export",
+    "Before-settlement refreshRetry explicitly unobserved",
+    "Source has no production or extra entitlement/authority calls"
+  ],
+  "required": [
+    "Repair and re-freeze independent review",
+    "Compile original graph/inherited optional fields before runtime",
+    "Actual graph verification and original settlement exception preserved"
+  ],
+  "runtime": "UNRUN",
+  "wholeAcceptanceClaim": false
+}

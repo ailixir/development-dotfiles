@@ -1,0 +1,130 @@
+{
+  "story": "STUDIO-OBS-007",
+  "stage": "ACTUAL_TARGETED_ADAPTER_EXECUTION",
+  "capturedAtUtc": "2026-10-10T15:45:38.463265+00:00",
+  "sourceCandidateBeforeStyleSha256": "3e495e04e0d29e72ba8ed8483f383ea2a28453874d919edc07b07a954f599491",
+  "styleOnlyThreeChanges": true,
+  "changedSourcePaths": [
+    "studio-runner/test/fixtures-tier/secret-login.test.ts"
+  ],
+  "productionSourceChanged": [],
+  "distChanges": [],
+  "gates": [
+    {
+      "command": "npm run type-check",
+      "session": 19848,
+      "exitCode": 0,
+      "log": "type.log"
+    },
+    {
+      "command": "npm exec -- eslint test/fixtures-tier/secret-login.test.ts",
+      "session": 70610,
+      "exitCode": 0,
+      "log": "lint.log"
+    },
+    {
+      "command": "npm run test:fixtures -- test/fixtures-tier/secret-login.test.ts --reporter=default --reporter=json --outputFile.json=../docs/qa/evidence/STUDIO-OBS-007/runner-login-oracle-execution-2/tests.json",
+      "session": 70634,
+      "exitCode": 1,
+      "log": "fixtures.log",
+      "passed": 26,
+      "failed": 2,
+      "skipped": 0,
+      "total": 28
+    }
+  ],
+  "retainedOriginalCases": {
+    "total": 25,
+    "passed": 25,
+    "names": [
+      "isolated-world password control production boundary counts /login without exporting any password node",
+      "isolated-world password control production boundary counts /two-passwords without exporting any password node",
+      "isolated-world password control production boundary counts /no-password without exporting any password node",
+      "isolated-world password control production boundary counts /shadow-login without exporting any password node",
+      "isolated-world password control production boundary refuses a pinned swap mutation without typing",
+      "isolated-world password control production boundary refuses a pinned reattach mutation without typing",
+      "isolated-world password control production boundary refuses a pinned type mutation without typing",
+      "isolated-world password control production boundary refuses /trap before a value is typed",
+      "isolated-world password control production boundary refuses /cross-origin-form before a value is typed",
+      "isolated-world password control production boundary permits inert focus styling while retaining the same unique password input",
+      "isolated-world password control production boundary requires both allowed and approved origin and scrubs later echoes",
+      "isolated-world password control production boundary counts adversarial shadow-plus-light candidates identically at prepare",
+      "isolated-world password control production boundary counts adversarial offscreen candidates identically at prepare",
+      "isolated-world password control production boundary counts adversarial iframe candidates identically at prepare",
+      "isolated-world password control production boundary counts adversarial closed-shadow candidates identically at prepare",
+      "scans recorded and guided persistent profiles before close and cleanup",
+      "refuses an actual browser launch without the prewritten Preferences file",
+      "measures raw Playwright fill error text before the production redactor",
+      "measures actual GuidedRuntime native-guard failure and its diagnostic sinks in Chromium",
+      "measures actual GuidedRuntime injected-released-value failure and its diagnostic sinks in Chromium",
+      "uses structural login signature only; a passing registration assertion remains passing",
+      "settles a protected redirect on the reached login document instead of timing out",
+      "replays the published password-only guard against /two-passwords and refuses before typing",
+      "replays the published password-only guard against /no-password and refuses before typing",
+      "replays login twice without a model, records distinct receipts/video and uses rotated values"
+    ]
+  },
+  "newCases": [
+    {
+      "name": "executes the actual replay LOGIN_REQUIRED oracle: no-login",
+      "status": "failed",
+      "failureMessages": [
+        "AssertionError: expected { ok: false, \u2026(2) } to match object { ok: false, \u2026(2) }\n(1 matching property omitted from actual)\n    at Proxy.<anonymous> (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/expect/dist/index.js:1155:10)\n    at Proxy.<anonymous> (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/expect/dist/index.js:1029:14)\n    at Proxy.methodWrapper (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/chai/index.js:1686:25)\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/secret-login.test.ts:209:22\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+      ]
+    },
+    {
+      "name": "executes the actual replay LOGIN_REQUIRED oracle: wrong-password",
+      "status": "failed",
+      "failureMessages": [
+        "AssertionError: expected { ok: false, \u2026(2) } to match object { ok: false, \u2026(2) }\n(2 matching properties omitted from actual)\n    at Proxy.<anonymous> (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/expect/dist/index.js:1155:10)\n    at Proxy.<anonymous> (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/expect/dist/index.js:1029:14)\n    at Proxy.methodWrapper (file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/chai/index.js:1686:25)\n    at /Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/secret-login.test.ts:209:22\n    at file:///Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20"
+      ]
+    },
+    {
+      "name": "executes the actual replay LOGIN_REQUIRED oracle: registration",
+      "status": "passed",
+      "failureMessages": []
+    }
+  ],
+  "actualFailureMechanism": "Real /reports redirect/current /login; absent Reports link acquisition ends TIMEOUT. Executor only annotates TARGET_DRIFT/POLICY_REFUSED. Both missing-target LOGIN_REQUIRED assertions fail; no injected drift and no production changes. Registration passes unchanged annotation negative.",
+  "passedPreFailureAssertions": [
+    "no-login reached actual /login and receipt count0",
+    "wrong-password reached actual /login, one rejected actual receipt, previous secret fill PASS, secretUse PASS=USED",
+    "adapter current structural login signature true in both failed cases"
+  ],
+  "unreachedPostMismatchAssertions": "FAIL detail/SKIPPED sequence, result-sink/profile/native close assertions in the two red cases occur after the failed expectation and were not credited. finally disposal still executed; original25 cases passed their independent full oracles.",
+  "cleanup": {
+    "postProcessSnapshot": "docs/qa/evidence/STUDIO-OBS-007/runner-login-oracle-execution-2/processes-after.txt",
+    "newRelevantProcessesStillAlive": [],
+    "tmpRoot": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T",
+    "recentMatchingScratchRemaining": [],
+    "limits": "Process snapshots establish no new matching browser/encoder/Vitest process remains at post-run capture; suite finally disposes/removes contexts. No process instrumentation or broad orphan guarantee claimed; fast-detached-orphan concern remains separate."
+  },
+  "bindings": {
+    "before": "before-bindings.json",
+    "source": "source-manifest.json",
+    "dist": "dist-manifest.json",
+    "runtime": "runtime-versions.json",
+    "actualExecutable": "browser-provenance.json"
+  },
+  "artifactSha256": {
+    "browser-provenance.json": "d5c19b48a4d37659821441b462c3f131c6101d2e2145de464d130c55412b2a91",
+    "source-manifest.json": "857878e954a088d04985c40f9706d6ae07f133e0d2da349ab223a695bfbc5ad1",
+    "before-bindings.json": "095f4adef69778e01b64eb64b90a8b42f3bad31863315fc51d466e2797d55698",
+    "tests.json": "443a24120d52eea2863251fb0a3c9a5e55f7cb300e0959448b66b9883c40b0da",
+    "lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runtime-versions.json": "ff9d2b4c8867c6cd1fa27c2019838b0ce25d2ee39c219fa0b6c24e2fa0928b8c",
+    "secret-login.before-style.test.ts": "b867e6ba251c63e71561fc215b17a246155f28229f25cbd410eb17b887fe1e9d",
+    "processes-before.txt": "763c26c31613374f419ff7106f7bc83ae14d9367e5ebbe299a4fc5e02da37eaa",
+    "processes-after.txt": "15b77042ce11b632298de5374c7a93e3717dc82e7575a2a1c2a8c78965011b38",
+    "fixtures.log": "6b11e36d7786a8a95fcc4a6c94d43ac85c10f9a86b8aa23ba5575e7b1643ab5b",
+    "dist-manifest.json": "095b36fca69699e61121b54a2539b67d0b1f077140e5e5ed5670809d0c899607",
+    "type.log": "66cb0d88cd3e949228a13daec3e65de0ce0c25b1b7278f1ffdb96dcd2886dfc9"
+  },
+  "limits": [
+    "Actual ordinary adapter/Execute3 proof only; no learned publication/session-expired/Core/guided/PG/Vault credit",
+    "Prior full1760/355/313 and focused repair PASS remain historical exact bindings; this current targeted run is RED",
+    "Native runtime record locally Node23; strict Node24vs22 image gate remains separate failure",
+    "Historical7290byte white-pixel red remains unclassified",
+    "No full coverage gate rerun; all expectations/original cases preserved"
+  ]
+}

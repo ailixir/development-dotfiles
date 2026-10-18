@@ -1,0 +1,184 @@
+{
+  "artifact": "Independent Quinn bounded migration55 attempt04 receipt",
+  "at": "2026-10-15T05:53:06.049478+00:00",
+  "status": "ACTUAL55_EXECUTED_54PASS_1FIXTUREFAIL_NO_VERDICT",
+  "label": "backend-migration55-attempt04",
+  "authorizedCommand": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend.py backend-migration55-attempt04 test --tests com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT --console=plain",
+  "commandsExecutedThisWindow": 1,
+  "liveExecSession": 50664,
+  "polledThroughTerminalCompletion": true,
+  "wrapperExit": 1,
+  "gradleExit": 1,
+  "elapsedSeconds": 20.06,
+  "actualCaseCounts": {
+    "total": 55,
+    "passed": 54,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0
+  },
+  "allOriginal48Plus7AccountedFor": true,
+  "new7ActualCounts": {
+    "total": 7,
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0
+  },
+  "old7FixtureRepairCounts": {
+    "total": 7,
+    "passed": 6,
+    "failed": 1,
+    "skipped": 0
+  },
+  "testSourceSha256": "f927ee53627d1656c4e388029d055589e372f338731b65362e9f9f08bec1e6e1",
+  "amendedV21Sha256": "b012ddddb44b599c4f8699be39281dd6f407b2cb93b41386a79eb22c06c4d179",
+  "canonicalObservedBundleSha256": "ce58d620c27bb84f4233151275373aba24467f748c7152a12f1ef3d2d85381aa",
+  "actualFailures": [
+    {
+      "method": "postDriftSuffixAndWrongSameTestBaseCannotBeMarkedReused",
+      "sourcePath": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+      "sourceMethodLine": 760,
+      "sourceFrames": [
+        "GuidedReplayingPrefixMigrationIT.java:66",
+        "GuidedReplayingPrefixMigrationIT.java:198",
+        "GuidedReplayingPrefixMigrationIT.java:768"
+      ],
+      "type": "org.opentest4j.AssertionFailedError",
+      "summary": "scalar expected one row for SELECT studio_publication_hash(manifest-configurationValues) FROM studio_guided_source_manifests WHERE session_id=<alternate>; ResultSet.next() was false",
+      "ownerLane": "data015",
+      "rootCause": {
+        "setupLine": 768,
+        "helperLine": 198,
+        "assertionLine": 66,
+        "evidence": "The second fixture branch inserts its alternate session, then calls insertBase(alternate,null) without insertSource(alternate). insertBase now reads the captured source-manifest hash; no row exists for that alternate session.",
+        "reachedBeforeFailure": [
+          "First fixture branch completed post-drift rejection with expected reuse diagnostic and successful paired revision/publication without reuse",
+          "Second branch completed actual boundary and suffix action before historical alternate setup"
+        ],
+        "notReached": [
+          "Historical alternate revision insert after insertBase",
+          "Wrong same-test non-immediate-base provenance rejection at769",
+          "Hash-equality assertion at770"
+        ],
+        "inferenceBoundary": "Fixture prerequisite failure before the wrong-base subject mutation; no production SQL-guard defect established."
+      },
+      "fullFailureEvidence": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-failures/postDriftSuffixAndWrongSameTestBaseCannotBeMarkedReused.txt",
+      "sha256": "52d410e212fc6c3431a8770f3d8c670d82ee210715ff190449550f26100949ef"
+    }
+  ],
+  "actualSkips": [],
+  "freshXmlFiles": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-xml/TEST-com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.xml",
+      "sha256": "3545000162e16a805d1c1c321f95e3a9997369e10265e8b12087a020b3aae709"
+    }
+  ],
+  "sourceStable": true,
+  "testInputStable": true,
+  "distStable": true,
+  "sourceDigestBefore": "3f93a05fc16d850cf8731c6565546d615effd25ac5e5ff983c88f8b68c5d55b1",
+  "sourceDigestAfter": "3f93a05fc16d850cf8731c6565546d615effd25ac5e5ff983c88f8b68c5d55b1",
+  "distDigestBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+  "distDigestAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+  "sourceChangesDuringRun": [],
+  "engine": {
+    "status": "EXECUTED_OWNED_TESTCONTAINERS_POSTGRESQL",
+    "actualServerVersion": "15.19",
+    "serverVersionQuery": {
+      "command": "docker exec <owned-testcontainer> psql -U test -d obs015_migrations -Atc SELECT version(), current_setting(server_version), current_database();",
+      "exit": 0,
+      "stdout": "PostgreSQL 15.19 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit|15.19|obs015_migrations\n",
+      "stderr": ""
+    },
+    "containerId": "bb58a345f07dc880722471091b120ededdc8ec6bf072b7098a699872f2e64ce5",
+    "containerName": "/nice_cannon",
+    "containerLabels": {
+      "org.testcontainers": "true",
+      "org.testcontainers.lang": "java",
+      "org.testcontainers.sessionId": "4a43f045-6e8c-4e8c-bc02-25a04a49e569",
+      "org.testcontainers.version": "1.20.2"
+    },
+    "actualImageId": "sha256:ed8478222652ed5ec9cd22a74417af86b61d7cf03bea9bb4d3193be315c16567",
+    "configuredImage": "postgres:15-alpine",
+    "repositoryDigests": [
+      "postgres@sha256:fe0737ba566a2c5b2a28f34433c0a423261900ec17b9bf7ad115e1aae7e57f1b"
+    ],
+    "actualArchitecture": "aarch64-unknown-linux-musl",
+    "testcontainersVersion": "1.20.2",
+    "flywayAndTestEngineEvidence": [
+      "01:51:23.653 [Test worker] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 1.20.2",
+      "01:51:26.116 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:62182/obs015_migrations (PostgreSQL 15.19)",
+      "01:51:26.997 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 21 migrations to schema \"public\", now at version v21 (execution time 00:00.598s)",
+      "01:51:32.447 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:62182/obs015_migrations (PostgreSQL 15.19)",
+      "01:51:32.491 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:62182/obs015_migrations (PostgreSQL 15.19)",
+      "01:51:33.428 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:62182/upgrade_d40a58fa847547d1855bd285d3352f52 (PostgreSQL 15.19)",
+      "01:51:33.975 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 20 migrations to schema \"public\", now at version v20 (execution time 00:00.402s)",
+      "01:51:34.040 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:62182/upgrade_d40a58fa847547d1855bd285d3352f52 (PostgreSQL 15.19)",
+      "01:51:34.152 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 1 migration to schema \"public\", now at version v21 (execution time 00:00.061s)",
+      "01:51:34.162 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:62182/upgrade_d40a58fa847547d1855bd285d3352f52 (PostgreSQL 15.19)"
+    ],
+    "observerReadinessErrors": {
+      "count": 5,
+      "explanation": "Read-only probes during owned container bootstrap; successful actual version query and fresh test Flyway engine logs agree. Separate from JUnit cases."
+    },
+    "databaseScope": "obs015_migrations and isolated UUID upgrade database in owned container only; no user/dev database"
+  },
+  "upgradePreservation": {
+    "actualStatus": "PASS",
+    "families": [
+      "studio_guided_sessions",
+      "studio_guided_materializations",
+      "ui_test_revisions",
+      "ui_tests",
+      "studio_guided_publications",
+      "studio_guided_publication_attempts",
+      "studio_guided_policies",
+      "studio_guided_policy_versions",
+      "studio_guided_policy_approvals",
+      "studio_guided_session_policies",
+      "studio_guided_session_recordings"
+    ],
+    "originalActionColumnsPreserved": true,
+    "legacyInsufficientMetadataNotBackfilledAndNotReusable": true,
+    "representation": "to_jsonb(existing_row)::text equality; actions exclude only new attempt_ordinal field"
+  },
+  "cintGreen": false,
+  "cintPending": [
+    "Run final full bounded oracle, generator parity and pin/status checks and archive exact final source logs.",
+    "Finish explicit effective-transfer bijection and full-basis publication/admission preimage assertions on appended witnesses; keep all raw arrays/hash evidence unmodified.",
+    "Record negative-rejection reason inventory and final raw/model/six-copy audit.",
+    "Freeze complete immutable final receipt and consumer handoff only after all selected checks green."
+  ],
+  "remainingUnverified": [
+    "Wrong same-test non-immediate-base branch of remaining failing migration method",
+    "Six separate head regressions",
+    "Two publication/head fixture suites",
+    "Full HTTP/application and original/correction acceptance cases",
+    "Runner source/runtime tests",
+    "Actual joined/native/browser/gateway behavior",
+    "Coverage thresholds and normal full quality gates",
+    "C-int effective-transfer bijection and full-basis publication/admission preimage assertions and final oracle/parity/pin receipt",
+    "Independent final story gate"
+  ],
+  "nextActions": [
+    {
+      "owner": "data015 via root exclusive source window",
+      "action": "Supply the missing source-manifest prerequisite for the alternate historical session before insertBase in the remaining failing migration fixture; preserve intended wrong-base rejection/hash comparison and all55 methods."
+    },
+    {
+      "owner": "root",
+      "action": "Re-freeze sources and issue a distinct execution window after correction; attempt04 remains54PASS/1FAIL. No retry performed."
+    },
+    {
+      "owner": "root and independent final reviewers",
+      "action": "Schedule separate application/head/runner/joined/native/coverage and C-int completion evidence; keep SQL/state/counter proof within scope."
+    }
+  ],
+  "noRetry": true,
+  "noSourceConfigurationThresholdFilterOrTaskExclusionChanges": true,
+  "noCleanupTricks": true,
+  "dbMutationOutsideTestCommand": false,
+  "userDevDatabaseTouched": false,
+  "storyStatusChanged": false,
+  "qaVerdictIssued": false
+}

@@ -1,0 +1,173 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java
++++ after/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java
+@@ -30,30 +30,23 @@
+   static ObjectNode fixture(String name) throws Exception {
+     ObjectNode corrected = copy(C.parse(Files.readString(Path.of(
+         "../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json"))));
+-    if (name.equals("fresh-order-reference")) {
+-      return corrected;
+-    }
+     ObjectNode original = copy(C.parse(Files.readString(Path.of(
+         "../studio-runner/fixtures/observed-reference/" + name + ".json"))));
+-    ObjectNode basis = object(original, "basis");
+-    JsonNode ordinary = corrected.path("basis");
+-    // The historical control-value vector has the same authored source/configuration. Port its
+-    // input-version proof while preserving the control recipe, observations and all assertions.
+-    assertThat(basis.path("sourceSteps")).isEqualTo(ordinary.path("sourceSteps"));
+-    assertThat(basis.path("configuration")).isEqualTo(ordinary.path("configuration"));
+-    for (String field : List.of("snapshotEvidence", "materializationEvidence", "incrementalEvidence",
+-        "authoredInputsHash", "bootstrap", "inputs", "configurationReferences")) {
+-      basis.set(field, ordinary.path(field).deepCopy());
+-    }
+-    for (JsonNode preparation : basis.path("preparations")) {
+-      ObjectNode prep = (ObjectNode) preparation;
+-      prep.put("materializationRevision", 1);
+-      object(prep, "proposal").set("authoredInputsHash", ordinary.path("authoredInputsHash"));
+-    }
+-    for (JsonNode fact : basis.path("actions")) {
+-      ObjectNode ledger = object(fact, "ledger");
+-      ledger.put("attemptOrdinal", 0);
+-      ledger.set("authoredInputsHash", ordinary.path("authoredInputsHash"));
++    JsonNode current = name.equals("fresh-order-reference") ? corrected : corrected.path("controlValueReference");
++    // Import independent declared hashes only after proving both complete frozen parents equal.
++    // Each vector keeps its own session, worker, materialization and observation identities.
++    assertThat(original.path("basis")).isEqualTo(current.path("basis"));
++    assertThat(original.path("artifact")).isEqualTo(current.path("artifact"));
++    var hashNames = new java.util.HashSet<String>();
++    original.path("hashes").fieldNames().forEachRemaining(hashNames::add);
++    assertThat(hashNames).containsExactlyInAnyOrder("sourceHash", "configurationHash", "authoringHash",
++        "learnedPlanHash", "artifactHash", "referencePolicyHash", "operationEquivalenceHash",
++        "admissionProvenanceHash", "publicationEvidenceHash", "runAuthorizationHash", "profileHash");
++    original.path("hashes").forEach(value -> assertThat(value.asText()).matches("[a-f0-9]{64}"));
++    if (name.equals("fresh-order-reference")) {
++      assertThat(original.at("/hashes/artifactHash")).isEqualTo(corrected.at("/admissionRequest/artifactHash"));
++      corrected.set("hashes", original.path("hashes").deepCopy());
++      return corrected;
+     }
+     return original;
+   }
+@@ -198,7 +191,12 @@
+       session.set("scope", expected.path("scope").deepCopy());
+       session.put("scopeHash", hash(expected.path("scope")));
+       session.set("runAuthorization", expected.path("runAuthorization").deepCopy());
+-      session.putObject("owner").put("workerId", "worker-1").put("fence", 1);
++      JsonNode materializationIdentity = expected.at("/materializationEvidence/versions/0");
++      assertThat(materializationIdentity.path("workerId").isTextual()).isTrue();
++      assertThat(materializationIdentity.path("workerId").asText()).isNotBlank();
++      String workerId = materializationIdentity.path("workerId").asText();
++      int ownerFence = materializationIdentity.path("ownerFence").asInt();
++      session.putObject("owner").put("workerId", workerId).put("fence", ownerFence);
+       var sourceSteps = session.putArray("sourceSteps");
+       for (JsonNode step : expected.path("sourceSteps")) {
+         sourceSteps.addObject().put("stepId", step.path("stepId").asText());
+@@ -238,7 +236,7 @@
+           List.of("contextId", "contextRevision", "materializationRevision", "ownerFence")) {
+         material.set(key, expected.path("bootstrap").path(key));
+       }
+-      material.put("workerId", "worker-1");
++      material.put("workerId", workerId);
+       var inputs = material.putArray("inputs");
+       for (JsonNode inputRow : expected.path("materializationEvidence").path("entries")) {
+         inputs.add(inputRow.path("metadata").deepCopy());
+@@ -277,7 +275,7 @@
+       }
+       context.set("authoredInputsHash", expected.path("bootstrap").path("inputsHash"));
+       context.set("allocations", expected.path("allocations").deepCopy());
+-      var bootIdentity = marker.putObject("identity").put("workerId", "worker-1").put("fence", 1);
++      var bootIdentity = marker.putObject("identity").put("workerId", workerId).put("fence", ownerFence);
+       bootIdentity.set("scopeHash", session.path("scopeHash"));
+       bootIdentity.set("sourceRevision", expected.path("sourceRevision"));
+       bootIdentity.set("configurationRevision", expected.path("configurationRevision"));
+@@ -294,8 +292,8 @@
+           C.object()
+               .put("contextId", context.path("contextId").asText())
+               .put("contextRevision", 1)
+-              .put("workerId", "worker-1")
+-              .put("ownerFence", 1);
++              .put("workerId", workerId)
++              .put("ownerFence", ownerFence);
+       for (String field : List.of("sourceRevision", "configurationRevision")) {
+         bootReceipt.set(field, expected.path(field));
+       }
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java
++++ after/backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java
+@@ -564,7 +564,9 @@
+         .isEqualTo(GuidedContracts.hash(malicious.policy()));
+     assertThat(malicious.hashes().path("artifactHash").asText())
+         .isEqualTo(GuidedContracts.hash(malicious.artifact()));
+-    assertThatThrownBy(() -> writer.verifyCandidate(snapshot, malicious, malicious.hashes()))
++    var attackSnapshot = candidateSnapshot(basis, malicious);
++    assertCandidateSnapshotClaims(attackSnapshot, basis, malicious);
++    assertThatThrownBy(() -> writer.verifyCandidate(attackSnapshot, malicious, malicious.hashes()))
+         .isInstanceOf(GuidedSessionException.class).hasMessage("EVIDENCE_MISMATCH");
+     assertThat(basis).isEqualTo(basisBefore);
+     assertThat(offered).isEqualTo(offeredBefore);
+@@ -614,7 +616,9 @@
+         default -> throw new IllegalArgumentException(mutation);
+       }
+       var malicious = fullyResealedCandidate(basis, offered, accepted);
+-      assertThatThrownBy(() -> writer.verifyCandidate(snapshot, malicious, malicious.hashes()))
++      var attackSnapshot = candidateSnapshot(basis, malicious);
++      assertCandidateSnapshotClaims(attackSnapshot, basis, malicious);
++      assertThatThrownBy(() -> writer.verifyCandidate(attackSnapshot, malicious, malicious.hashes()))
+           .as(mutation).isInstanceOf(GuidedSessionException.class).hasMessage("EVIDENCE_MISMATCH");
+     }
+     assertThat(basis).isEqualTo(before);
+@@ -629,6 +633,20 @@
+     for (String field : java.util.List.of("artifactHash", "learnedPlanHash", "referencePolicyHash",
+         "operationEquivalenceHash", "publicationEvidenceHash")) identity.set(field, accepted.hashes().path(field));
+     return new PublicationContracts.Snapshot(identity, basis);
++  }
++
++  /** Attack claims agree with the offer, isolating the writer's independent semantic comparison. */
++  private static void assertCandidateSnapshotClaims(PublicationContracts.Snapshot snapshot,
++      JsonNode basis, PublicationContracts.Candidate candidate) {
++    assertThat(snapshot.basis()).isEqualTo(basis);
++    assertThat(snapshot.identity().path("basisHash").asText()).isEqualTo(GuidedContracts.hash(basis));
++    for (String field : java.util.List.of("sourceHash", "configurationHash", "authoringHash", "runAuthorizationHash"))
++      assertThat(snapshot.identity().path("base").path(field)).as("attack base %s", field)
++          .isEqualTo(candidate.hashes().path(field));
++    for (String field : java.util.List.of("artifactHash", "learnedPlanHash", "referencePolicyHash",
++        "operationEquivalenceHash", "publicationEvidenceHash"))
++      assertThat(snapshot.identity().path(field)).as("attack snapshot %s", field)
++          .isEqualTo(candidate.hashes().path(field));
+   }
+ 
+   /** Reseal every dependent candidate claim, retaining each original malicious semantic fact. */
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java
++++ after/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java
+@@ -600,7 +600,15 @@
+     var wrongSlot = copy(original);
+     object(at(wrongSlot, "inputs", 1), "provenance").put("intendedSlot", "assert.expected");
+     assertThatThrownBy(() -> lowerer.recipes(wrongSlot)).isInstanceOf(GuidedSessionException.class);
+-    var wrongConfig = copy(original);
++    JsonNode configured = C.parse(Files.readString(Path.of(
++        "../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json")))
++        .path("controlValueReferenceUsedConfiguration");
++    assertThat(configured.path("basis").path("configurationReferences")).hasSize(1);
++    assertThat(lowerer.lower(configured.path("basis"), configured.path("artifact").path("profile")).artifact())
++        .isEqualTo(configured.path("artifact"));
++    assertThat(lowerer.recipes(configured.path("basis")))
++        .isEqualTo(configured.path("artifact").path("inputRecipes"));
++    var wrongConfig = copy(configured.path("basis"));
+     at(wrongConfig, "configurationReferences", 0).put("referenceId", "different-saved-reference");
+     assertThatThrownBy(() -> lowerer.recipes(wrongConfig))
+         .isInstanceOf(GuidedSessionException.class);
+@@ -950,13 +958,11 @@
+           .as(entry.getKey())
+           .isEqualTo(entry.getValue());
+     }
+-    // Fixed v3 oracle: independent sorted-key UTF-8 source, matching the packaged fixture.
+-    // STUDIO-OBS-012A re-anchor for the {contract:3} profile/versions collapse:
+-    // 3ff8f7fcc5d5acd53a2f4932497e4ce146c7a3c8eae4dc3afecd42e6297f64e8 -> 0ec194f5....
+-    // STUDIO-OBS-014 C2a re-anchor (observedChoice witness choices gained labelSource/role/region,
+-    // resealed by the C lane): 0ec194f5...34961 -> 8623b2ad...a9242.
++    // Current unchanged independently authored choice vector, not the reconstructed manifest.
++    assertThat(independent.path("hashes").path("artifactHash").asText())
++        .isEqualTo("d846a0ca41fa432dd9ac7e87bf6d7cb36c37d96fc5fd64dee6d0ad1815dbb7b8");
+     assertThat(hash(candidate.artifact()))
+-        .isEqualTo("8623b2ad1f7d95cb7f50a6a4cf48bfbea6ba88d7ac4c4825d038debde0ba9242");
++        .isEqualTo(independent.path("hashes").path("artifactHash").asText());
+     assertThat(
+             candidate
+                 .artifact()

@@ -1,0 +1,9 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "date": "2026-10-13",
+  "decision": "Exclude src/run/{browser,child,guidedMain}.ts from the unit-tier v8 coverage measurement; all thresholds unchanged (src/run/** 85/85/80/80).",
+  "why": "AC-25 confinement.test.ts forbids unit tests from loading these process entry points; they execute only as child processes in the fixtures tier (real Chromium). Unit-tier ceiling with them counted is 81.16% (runner-coverage/ledger.json). The baseline met 85% only because the deleted artifact-1 playwrightAdapter.ts was well covered.",
+  "alternativesRejected": ["lower src/run threshold (forbidden: no lowered coverage)", "mock playwright in unit tests (violates AC-25 confinement)"],
+  "reviewRequired": "architect gate + independent QA must accept or reject this named deviation",
+  "decidedBy": "root orchestrator (YOLO)"
+}

@@ -1,0 +1,890 @@
+{
+  "schemaVersion": 1,
+  "kind": "r1-diagnosis",
+  "label": "r1-diagnosis01",
+  "author": "Dex (@dev, backend JOIN owner)",
+  "createdAt": "2026-10-16T02:45:33.270049+00:00",
+  "subjectRun": "backend-join85-frozen-attempt07",
+  "rootCauses": [
+    {
+      "id": "A",
+      "classification": "environmental",
+      "summary": "Chrome for Testing SIGABRT at launch under inherited Gradle daemon PID 22246 (org.gradle.java.home pins ~/.jdks; daemon started 2026-10-14 by a Codex CLI session, PPID 1, no SECURITYSESSIONID); fresh daemon (--no-daemon) launches fine",
+      "verified": "4/4 abort under 22246, 4/4 launch under fresh daemon",
+      "inferred": "exact macOS mechanism; why actual05 succeeded on the same daemon",
+      "remedy": "pass --no-daemon in collector gradle args or retire 22246 by its owner; 22246 not signalled"
+    },
+    {
+      "id": "B",
+      "classification": "production-defect",
+      "summary": "ExecutionReferences.declared rejected the 015 RevisionReferences shape (authoringIdentityVersion+authoredDeclarations) that GuidedPublicationRepository writes and V21 studio_015_declarations requires -> HTTP 500 on first ordinary /execute (acceptObserved->acceptCore:359)",
+      "fixed": true
+    },
+    {
+      "id": "C",
+      "classification": "test-fixture-defect",
+      "summary": "ReplayIT secretRef variables lacked secretId required by 015 CanonicalStudioCodec -> HTTP 400 INVALID_VARIABLES at Order(9) startLearning -> S2 completion unobservable -> cleanupUnconfirmed latch (designed fail-stop) -> 33-case cascade",
+      "fixed": true
+    }
+  ],
+  "cascadeGuard": {
+    "designed": true,
+    "changed": false,
+    "latchSite": "GuidedPublicationReplayIT:7002 (S2 owner completion unconfirmed)",
+    "guardSite": "GuidedPublicationReplayIT:2301"
+  },
+  "open": [
+    {
+      "id": "D",
+      "summary": "Order(9) actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel: /finalize 409 PUBLICATION_CONFLICT at ReplayIT:6714 after the C fix; teardown still latches at 7003 -> full R1 would still cascade",
+      "status": "undiagnosed",
+      "lead": "inferred: fixture UPDATE of variables after createSource computed authoring_revision_inputs without values"
+    }
+  ],
+  "changedFiles": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ExecutionReferences.java",
+      "role": "production",
+      "sha256Before": "0ffc9d042c76716168040d88141b1551f093ba62bf398c8ea6e3b7b0d7d6b7d9",
+      "sha256After": "fc6401fb4e1decf421bb9eb421f356cbe82aa2db4c2173a3a309425f8d2551ef"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/TypedReferenceAdapterTest.java",
+      "role": "test",
+      "sha256Before": "cdc145a6617e8f41b91b8268187de755c69703b447d74edb8a4f2610fe77aac0",
+      "sha256After": "aad759847c1bb6c953c880ac46d85ded67f3df42bbd345cce2e5a6988e77d668"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "role": "test-fixture",
+      "sha256Before": "f279684cdc8fa168adcfcb8e45dead590a0257711892a094dbc5412191abea24",
+      "sha256After": "9f54372cf4ca4ec4e789be879e3cafbfad272a1b33a38384ef49ac03e4473839"
+    }
+  ],
+  "invariants": {
+    "clockCoarsening": false,
+    "fabricatedStampsOrTies": false,
+    "original04Retried": false,
+    "assertionsOrBudgetsLowered": false,
+    "joinIdentities": 85,
+    "parameterLabels": 35,
+    "buildGradleChanged": false,
+    "daemon22246Signalled": false
+  },
+  "diagnosticMethod": "scratch-only ReplayIT copy + node --import load hook rewriting dist ownership.js/transport.js/browser.js in memory; backend/build test outputs backed up and restored; value-free 400 body probe (field names + error code only)",
+  "runs": [
+    {
+      "label": "backend-join85-frozen-attempt07",
+      "results": "execution/backend-join85-frozen-attempt07-results.json",
+      "resultsSha256": "42ef5d58088e8dc08c5b9e66ed2c2d79b137aff64ce6629b16fcecaef4a64160",
+      "counts": {
+        "total": 87,
+        "passed": 0,
+        "failed": 87,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit": 1,
+      "elapsedSeconds": 170.96,
+      "sourceDigest": "ea553ee0efc0354026d0d6a2e69c29030c5593383e1d72463e45d2acafc248b7",
+      "distDigest": "db6c8022b20113c73862b63a9f019b5026d37e0a4e3db1b15ac182f5c99e4775",
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "--continue",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "guidedIncrementalTest"
+      ],
+      "testcases": "see results (87 FAIL)"
+    },
+    {
+      "label": "backend-r1-first-diagnosis-attempt01",
+      "results": "execution/backend-r1-first-diagnosis-attempt01-results.json",
+      "resultsSha256": "abc4a12b4abc6f64d291bdf5e79b4e6833e507fed71b6d25584aa1d7414f5c83",
+      "counts": {
+        "total": 2,
+        "passed": 0,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit": 1,
+      "elapsedSeconds": 17.35,
+      "sourceDigest": "ea553ee0efc0354026d0d6a2e69c29030c5593383e1d72463e45d2acafc248b7",
+      "distDigest": "db6c8022b20113c73862b63a9f019b5026d37e0a4e3db1b15ac182f5c99e4775",
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "--continue",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+      ],
+      "testcases": [
+        {
+          "class": "GuidedPublicationReplayIT",
+          "name": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()",
+          "status": "FAIL"
+        },
+        {
+          "class": "GuidedPublicationReplayIT",
+          "name": "executionError",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "label": "backend-r1-first-diagnosis-attempt02",
+      "results": "execution/backend-r1-first-diagnosis-attempt02-results.json",
+      "resultsSha256": "a4b85f8adb1b3ee929a70cf05ebd512082cc170b4917807a5d1f841235950d34",
+      "counts": {
+        "total": 10,
+        "passed": 9,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit": 1,
+      "elapsedSeconds": 39.32,
+      "sourceDigest": "b2a25c2a1bf34f16b935b9654feaca66b3abfdfd362d951a7b353ec1a37cb5a2",
+      "distDigest": "db6c8022b20113c73862b63a9f019b5026d37e0a4e3db1b15ac182f5c99e4775",
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "--no-daemon",
+        "--continue",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+        "--tests",
+        "com.citi.put.checks.studio.dispatch.TypedReferenceAdapterTest"
+      ],
+      "testcases": [
+        {
+          "class": "GuidedPublicationReplayIT",
+          "name": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()",
+          "status": "PASS"
+        },
+        {
+          "class": "GuidedPublicationReplayIT",
+          "name": "executionError",
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "label": "backend-r1-first-diagnosis-attempt03",
+      "results": "execution/backend-r1-first-diagnosis-attempt03-results.json",
+      "resultsSha256": "f44d60e416861231a1c2d5298c0deb06e953f59ace7149242a1460dd4f5df35e",
+      "counts": {
+        "total": 11,
+        "passed": 9,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit": 1,
+      "elapsedSeconds": 139.99,
+      "sourceDigest": "b225af3552a0e3607e0648970162358a413db377fc7bb886cdb5d997f085cd01",
+      "distDigest": "db6c8022b20113c73862b63a9f019b5026d37e0a4e3db1b15ac182f5c99e4775",
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "--no-daemon",
+        "--continue",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+        "--tests",
+        "com.citi.put.checks.studio.dispatch.TypedReferenceAdapterTest"
+      ],
+      "testcases": [
+        {
+          "class": "GuidedPublicationReplayIT",
+          "name": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()",
+          "status": "PASS"
+        },
+        {
+          "class": "GuidedPublicationReplayIT",
+          "name": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+          "status": "FAIL"
+        },
+        {
+          "class": "GuidedPublicationReplayIT",
+          "name": "executionError",
+          "status": "FAIL"
+        }
+      ]
+    }
+  ],
+  "review": "backend/r1-diagnosis01/review.md",
+  "reviewSha256": "706cf973c59858542a16dfe9b7329b5164f81cd3d4a9a55fbdb4ed72c858558a",
+  "part2": {
+    "createdAt": "2026-10-16",
+    "rootCauses": [
+      {
+        "id": "E",
+        "classification": "test-instrumentation x 015 production design (not a proven production defect)",
+        "summary": "C5 armTrace ROOT TRACE makes networknt ValidationBasis validation in GuidedPlanBuilder.basis:477 run 80.6 s inside the session-locked finalize transaction; lease-renewal claim blocks 25.97 s on FOR UPDATE -> LEASE_LOST -> FAILED -> authority:527 PUBLICATION_CONFLICT",
+        "counterfactual": "com.networknt at INFO (scratch only): Order 9 12 s, finalize 200",
+        "status": "OPEN - needs Quinn/Aria/root decision",
+        "applied": false
+      },
+      {
+        "id": "F",
+        "classification": "test-fixture defect (015 preload order)",
+        "summary": "incrementalNativeFaultObserver re-wrapped RevRuntime.prototype.start/dispatch after S2 wrappers -> S2_DESCRIPTOR -> failed receipt -> cleanupUnconfirmed cascade",
+        "status": "FIXED (preload install order)"
+      },
+      {
+        "id": "G",
+        "classification": "undiagnosed",
+        "summary": "incremental config variant ordinary replay DEFINITE_REFUSAL HTTP 400 -> ERROR; 31 later labels blocked by worker-generation restart guard",
+        "status": "OPEN"
+      }
+    ],
+    "quinnF1F4": "applied (single four-key shape; javadocs; TypedReferenceAdapterTest ported + two-key refusal + identity no-leak)",
+    "productionChangesD1F2": {
+      "spec": "backend/b1bcd-design01/qa-d1-review01/review.md",
+      "D1": "GuidedMaterializationService.verifyPrefixReceipt (11 fields; missing server value never matches) called from GuidedSessionService.prefixDrift",
+      "F2": "committedRefresh state predicate = pending ? REPLAYING_PREFIX : PROPOSING",
+      "joinedProof": "pending (drift variants did not run; blocked by G)"
+    },
+    "changedFiles": [
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ExecutionReferences.java",
+        "sha256Before": "fc6401fb4e1decf421bb9eb421f356cbe82aa2db4c2173a3a309425f8d2551ef",
+        "sha256After": "75b6ec153d608bcd14e4b4a4b81c3983758673c462ec5b45ff686ecaf25d2912"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+        "sha256Before": "d61340b753e2da729c4777b850c3420224825553f62d9e6f5c8bf37394a8fe5c",
+        "sha256After": "ad8742a8426d757b198883be5fe089eae558e90e02d7b256340e24ac4dbf8fbe"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+        "sha256Before": "e3b1f3c06f7f6ac6dcc2eb3ef609a0047ad1b34c536eed1363ac68e405c78b82",
+        "sha256After": "055081ff6551de8eb640e589ffa8f5dd6d18876f64fd7264c1a1a6d432d1e3f8"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/TypedReferenceAdapterTest.java",
+        "sha256Before": "aad759847c1bb6c953c880ac46d85ded67f3df42bbd345cce2e5a6988e77d668",
+        "sha256After": "a3fcca289fdba201db0adb5d877f1bf4f3717b153cac2ffbd246644b83e4281c"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/StudioExecutionFixtures.java",
+        "sha256Before": "4c9d29e362e0c7c21bdaf5956b0312e1bb73fec4b9b8250b5143e288a8b19890",
+        "sha256After": "2a71a31845121f639c834b5990ae37a199896cdced42f355fd08cc006eda8c8f"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+        "sha256Before": "9f54372cf4ca4ec4e789be879e3cafbfad272a1b33a38384ef49ac03e4473839",
+        "sha256After": "84c3d496244991723520f270a6591b11a820edbbbeda48319fecc1ad5adbea96"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedPrefixReceiptVerificationTest.java",
+        "sha256Before": null,
+        "sha256After": "44a0759b6b0447c9a4c3a4458b9a35aa8f2f1239a7210bf3ce2c360cbfa5ea9c"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedCommittedRefreshStateTest.java",
+        "sha256Before": null,
+        "sha256After": "8cd157c4e0d4f6d990570b38d6bb6900361e79b5423a6edd0996a9edde49321a"
+      }
+    ],
+    "run": {
+      "label": "backend-r1-order9-quinn-d1f2-attempt01",
+      "results": "execution/backend-r1-order9-quinn-d1f2-attempt01-results.json",
+      "resultsSha256": "5a0cd051777b48bde5d806f07a927207cad059d289db8a8bbb94c690c164cbdf",
+      "counts": {
+        "total": 56,
+        "passed": 21,
+        "failed": 35,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exit": 1,
+      "elapsedSeconds": 849.69,
+      "sourceDigest": "330fd59bc57fb912653397f643934f21c491c3277c8b47d0335f1a877cb55039",
+      "distDigest": "db6c8022b20113c73862b63a9f019b5026d37e0a4e3db1b15ac182f5c99e4775",
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "--no-daemon",
+        "--continue",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.dispatch.TypedReferenceAdapterTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.bridge.GuidedPrefixReceiptVerificationTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedCommittedRefreshStateTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualCoreMayUseDenialStartsNoSessionAndNoBrowser",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass",
+        "guidedIncrementalTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+      ],
+      "taskCollectionComplete": false,
+      "testcases": [
+        {
+          "task": "test",
+          "class": "TypedReferenceAdapterTest",
+          "name": "anUnparseableDocumentIsNotChainedEitherBecauseTheParserQuotesWhatItFailedOn()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "TypedReferenceAdapterTest",
+          "name": "aSwapIsVisibleBecauseTheTwoSetsAreComparedSeparately()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "TypedReferenceAdapterTest",
+          "name": "namesACrossedDeclarationSoNeitherSideHasToNoticeItAlone()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "TypedReferenceAdapterTest",
+          "name": "theGuidedPublicationIdentityShapeIsReadableAndItsVariantsAreTerminal()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "TypedReferenceAdapterTest",
+          "name": "anIdentityRefusalNamesTheDeclarationAndNeverTheDocument()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "TypedReferenceAdapterTest",
+          "name": "everyShapeTheProducerDoesNotWriteIsTerminalRatherThanEmpty()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "TypedReferenceAdapterTest",
+          "name": "theRefusalNamesTheDeclarationAndNeverTheDocument()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "TypedReferenceAdapterTest",
+          "name": "readsTheTwoSetsSeparatelyAndInDeclarationOrder()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "TypedReferenceAdapterTest",
+          "name": "anEmptyDeclarationIsReadableAndIsNotTheSameThingAsAnUnreadableOne()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "GuidedPrefixReceiptVerificationTest",
+          "name": "aSessionWithoutAPrefixProgramNeverMatches()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "GuidedPrefixReceiptVerificationTest",
+          "name": "eachOfTheElevenBoundFieldsMismatchedIsStaleFence()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "GuidedPrefixReceiptVerificationTest",
+          "name": "anAuthenticReceiptWithoutVersionsIsAccepted()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "GuidedPublicationReplayIT",
+          "name": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "GuidedPublicationReplayIT",
+          "name": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+          "status": "FAIL"
+        },
+        {
+          "task": "test",
+          "class": "GuidedPublicationReplayIT",
+          "name": "actualCoreMayUseDenialStartsNoSessionAndNoBrowser()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "GuidedPublicationReplayIT",
+          "name": "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "GuidedPublicationReplayIT",
+          "name": "executionError",
+          "status": "FAIL"
+        },
+        {
+          "task": "test",
+          "class": "GuidedCommittedRefreshStateTest",
+          "name": "aPendingPrefixReadsItsCommittedRefreshInReplayingPrefix()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "GuidedCommittedRefreshStateTest",
+          "name": "withoutAPendingPrefixTheRefreshIsReadInProposing()",
+          "status": "PASS"
+        },
+        {
+          "task": "test",
+          "class": "GuidedCommittedRefreshStateTest",
+          "name": "aStateThatDisagreesWithThePrefixIsStaleGeneration()",
+          "status": "PASS"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined insert4",
+          "status": "PASS"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined delete4",
+          "status": "PASS"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined reorder4",
+          "status": "PASS"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined config",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined tail1",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined tail7",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined append11",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined ready6",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-prefix",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined empty",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined drift2",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined admitted-drift2",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined unknown2",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined assert-fail",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined policy-prefix",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-long-wait",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-cancel",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-expire",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-source-change",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-recover",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-owner-loss",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined append-input",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined deleted-consumers",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined admitted-literal2",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined pre-literal2",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined same-pair-literal",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined unused-declaration",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined drift-plan-fail",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined drift-first",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-edit4",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-race",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined drift-auth",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined drift-auth-pre",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined before4at2",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "incremental joined equal4",
+          "status": "FAIL"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "class": "GuidedPublicationReplayIT",
+          "name": "executionError",
+          "status": "FAIL"
+        }
+      ]
+    },
+    "invariants": {
+      "joinIdentities": 85,
+      "parameterLabels": 35,
+      "assertionsOrBudgetsLowered": false,
+      "buildGradleChanged": false,
+      "daemon22246Signalled": false,
+      "clockOrPolicyChanged": false
+    }
+  },
+  "part3": {
+    "createdAt": "2026-10-16",
+    "sections": [
+      7,
+      8
+    ],
+    "G": {
+      "classification": "proven production defect (authoring 1-120 s vs runner LIMIT_EXCEEDED above 30000 ms default; no clamp possible due to configurationHash binding)",
+      "status": "OPEN - design ruling needed (cap authoring at 30 | runner/Helm ceiling 120000 | contract change)",
+      "fixtureDisclosure": "config variant temporarily 31->29 (undisclosed at the time), reverted to frozen 31; 29-run is diagnostic only"
+    },
+    "quinnR2": "applied+verified PASS",
+    "quinnR3": "applied; not executed (blocked by G)",
+    "E1": "applied; Order 9 PASS (11.96 s)",
+    "E2": "applied; AuthorityIT 25/25",
+    "changedFiles": [
+      {
+        "path": "backend/src/main/resources/application.yml",
+        "role": "production E-1a",
+        "sha256Before": "d34f91345cdc6afc0315b67c3f6e25b12549acccf9b3695953f7ffd51aea18fb",
+        "sha256After": "2c7819284988e6e63bb8153588ab04ecba7dbc69b44a7d3e37e2bfa9493791e7"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+        "role": "production E-2",
+        "sha256Before": "9289948874fdce24bf319782fbc69a380d7936388b40bb6a4923ab6add0b01c6",
+        "sha256After": "23f102d7beeeeb8bd483328da00bb3d1e9bc963218c83b37b14dce3938e0da52"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+        "role": "production E-2",
+        "sha256Before": "c9a36bac3fe1cbd5d98b4599734013bb3aa64cdac2922406e1df865d8e909b09",
+        "sha256After": "42031c661fb07bb13f1e4348507e2715bb3a3f8028ab0eb910831ef711a6ca70"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+        "role": "production E-2",
+        "sha256Before": "28aafe98ebdbbd3dcd59d061b671131713c5b5c2db4330a3e5252bd106011b48",
+        "sha256After": "a6895c6280a760716ede2218f83b360f11d7c189e099a0ad90674a8de07c2368"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+        "role": "test G-revert/R2/R3/E-1b",
+        "sha256Before": "84c3d496244991723520f270a6591b11a820edbbbeda48319fecc1ad5adbea96",
+        "sha256After": "77f47e4148f732151cf9e9c05b712cce3643d62e57d1fad43c8ee25624b0203f"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+        "role": "test E-2",
+        "sha256Before": "e6228117d0e9844075603c3b011166ddffb74ddb4533d4524111bd5a665bb9fd",
+        "sha256After": "84ada478327c45a09f6682adea1123fa7bb8b75457c235d76e0d90ce4db53a4a"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/config/logging/SchemaValidatorLogCapTest.java",
+        "role": "new test E-1c",
+        "sha256Before": null,
+        "sha256After": "24271b883833d86b751dc637c07eb65dc8208e5e72b0942bf6516e471bca40ac"
+      }
+    ],
+    "runs": [
+      {
+        "label": "backend-r1-g-config-attempt01",
+        "resultsSha256": "146fde95c3c53b7a404e1adc2f76aa2c02717884962b401ab9f2ccb786c65604",
+        "counts": {
+          "total": 36,
+          "passed": 8,
+          "failed": 28,
+          "errors": 0,
+          "skipped": 0
+        },
+        "exit": 1,
+        "elapsedSeconds": 306.54,
+        "sourceDigest": "b87d33f14c5290ca0473e5a292b56497778d17df9c72466126a35854d1a78e27",
+        "command": [
+          "caffeinate",
+          "-i",
+          "./gradlew",
+          "--no-daemon",
+          "--continue",
+          "guidedIncrementalTest",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "creditable": false
+      },
+      {
+        "label": "backend-r1-g-quinn02-attempt01",
+        "resultsSha256": "7688d9bca1198937ef6fbdd58c3b0f922782a8139e966b25a5b50697c27467da",
+        "counts": {
+          "total": 37,
+          "passed": 4,
+          "failed": 33,
+          "errors": 0,
+          "skipped": 0
+        },
+        "exit": 1,
+        "elapsedSeconds": 747.58,
+        "sourceDigest": "e76531da5b3e99c28608a9d646aa2e8befd4231432440bab8ea0277df96cb6fc",
+        "command": [
+          "caffeinate",
+          "-i",
+          "./gradlew",
+          "--no-daemon",
+          "--continue",
+          "guidedIncrementalTest",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "creditable": true
+      },
+      {
+        "label": "backend-r1-e12-g-window-attempt01",
+        "resultsSha256": "17cffcb0c759996782c473bbbd9f35d018ee61408123cfe445e10f02fbc0ed1a",
+        "counts": {
+          "total": 139,
+          "passed": 104,
+          "failed": 35,
+          "errors": 0,
+          "skipped": 0
+        },
+        "exit": 1,
+        "elapsedSeconds": 904.87,
+        "sourceDigest": "5f70c50d28f6eb7e62df32118f85d908f662ffcfffb85f8ca26d953d25fc41a2",
+        "command": [
+          "caffeinate",
+          "-i",
+          "./gradlew",
+          "--no-daemon",
+          "--continue",
+          "test",
+          "--tests",
+          "com.citi.put.checks.config.logging.SchemaValidatorLogCapTest",
+          "--tests",
+          "com.citi.put.checks.studio.dispatch.TypedReferenceAdapterTest",
+          "--tests",
+          "com.citi.put.checks.studio.guided.bridge.GuidedPrefixReceiptVerificationTest",
+          "--tests",
+          "com.citi.put.checks.studio.guided.session.GuidedCommittedRefreshStateTest",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualCoreMayUseDenialStartsNoSessionAndNoBrowser",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass",
+          "guidedIncrementalTest",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "creditable": true
+      },
+      {
+        "label": "backend-r1-e2-authority-attempt01",
+        "resultsSha256": "b52f016e8c6dbc4a997bd69d7ed5dbd6ef9d13c05515948a2deb56a7f479ef55",
+        "counts": {
+          "total": 25,
+          "passed": 25,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "exit": 0,
+        "elapsedSeconds": 79.75,
+        "sourceDigest": "da2084a35ade402bd74844c8e62d3208095c21b5f43afae550c7dbc07b182061",
+        "command": [
+          "caffeinate",
+          "-i",
+          "./gradlew",
+          "--no-daemon",
+          "--continue",
+          "test",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT"
+        ],
+        "creditable": true
+      }
+    ],
+    "invariants": {
+      "joinIdentities": 85,
+      "parameterLabels": 35,
+      "assertionsOrBudgetsLowered": false,
+      "buildGradleChanged": false,
+      "daemon22246Used": false
+    }
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "script": "g9-image.sh",
+  "verdict": "GREEN",
+  "facts": {
+    "started": "2026-10-18T20:46:16Z",
+    "base": "mcr.microsoft.com/playwright:v1.63.0-noble",
+    "tag": "put-checks-studio-runner:obs009-g9-local",
+    "btag": "put-checks-studio-runner:obs009-g9-buildstage-local",
+    "docker_server": "27.4.0",
+    "base_id": "sha256:5536bbbd0ffc106a9fdab13fbff6b3abab01418cceff67ff246552b64cf5623d",
+    "build_stage_rc": "0",
+    "build_final_rc": "0",
+    "image_id": "sha256:af96bee8ebf2ebcf9c68db6a98e4f7e208e3f07f99c688d47440ad4dfdbebd8f",
+    "btag_id": "sha256:df039063e63c7b0cfd7811743eaefbdd92a52dbb8471addf726a5e5b10cf7545",
+    "cmd_check_rc": "0",
+    "c4b_rc": "0",
+    "pwuser_uid": "1001",
+    "pwuser_gid": "1001",
+    "d2_rc": "0",
+    "d2_failed_assertions": "0",
+    "d2_step6": "not scripted (owed)",
+    "leftover_smoke_containers": "0",
+    "verdict": "GREEN",
+    "ended": "2026-10-18T20:47:51Z"
+  },
+  "capture": {
+    "g9Before": {
+      "source": "6fcc12eef193338ca3bc79adaa50660d93c245a4462a5f850a7256588d9fc91b",
+      "dist": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "head": "734ad704f6ae508dbb10d9b5127a315bb0df5f81"
+    },
+    "imageBefore": {
+      "source": "6fcc12eef193338ca3bc79adaa50660d93c245a4462a5f850a7256588d9fc91b",
+      "dist": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "head": "734ad704f6ae508dbb10d9b5127a315bb0df5f81"
+    },
+    "imageAfter": {
+      "source": "6fcc12eef193338ca3bc79adaa50660d93c245a4462a5f850a7256588d9fc91b",
+      "dist": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "head": "734ad704f6ae508dbb10d9b5127a315bb0df5f81"
+    }
+  },
+  "c4b": {
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "elapsedSeconds": 77.16,
+    "vitest": {
+      "success": true,
+      "numPassedTests": 581,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTests": 581,
+      "numPassedTestSuites": 56,
+      "numFailedTestSuites": 0
+    },
+    "logSha256": "98642bdfab308e3f20f35c93cc902d518c20a19bb23ec8f750ec8d0bb0a2c89e"
+  },
+  "d2Assertions": [
+    {
+      "name": "setup-pwuser-identity",
+      "result": "pass",
+      "detail": "uid=1001 gid=1001 (the TLS mode check below expects gid 1001)"
+    },
+    {
+      "name": "setup-tls-volume",
+      "result": "pass",
+      "detail": "docker cp exit=0, chown/chmod exit=0"
+    },
+    {
+      "name": "step2-listens",
+      "result": "pass",
+      "detail": "runner.started in logs within 90 s: yes"
+    },
+    {
+      "name": "step2-node-pid-gt-1",
+      "result": "pass",
+      "detail": "node pid=7; pid 1 is: /sbin/docker-init -- sh -c ulimit -c 0 && exec node dist/main.js"
+    },
+    {
+      "name": "step2-exec-probe-health",
+      "result": "pass",
+      "detail": "node dist/probe.js /health exit=0"
+    },
+    {
+      "name": "step7-tls-key-0440-gid1001-readable",
+      "result": "pass",
+      "detail": "mode=-r--r----- gid=1001 readable-by-process exit=0"
+    },
+    {
+      "name": "step3-no-init-exit-78",
+      "result": "pass",
+      "detail": "exit=78"
+    },
+    {
+      "name": "step3-no-init-stderr-LAUNCH_TREE",
+      "result": "pass",
+      "detail": "stderr=CONFIGURATION_DENIED LAUNCH_TREE|"
+    },
+    {
+      "name": "step3-no-init-nothing-listened",
+      "result": "pass",
+      "detail": "runner.started absent from stdout: 0"
+    },
+    {
+      "name": "step4-node-options-exit-78",
+      "result": "pass",
+      "detail": "exit=78"
+    },
+    {
+      "name": "step4-node-options-stderr-DEBUG_ENV",
+      "result": "pass",
+      "detail": "stderr=CONFIGURATION_DENIED DEBUG_ENV|"
+    },
+    {
+      "name": "step5-stop-draining-then-drained",
+      "result": "pass",
+      "detail": "runner.draining at stdout line 2, runner.drained at line 3"
+    },
+    {
+      "name": "step5-stop-within-grace",
+      "result": "pass",
+      "detail": "docker stop exit=0 after 0s of a 30 s grace"
+    },
+    {
+      "name": "step5-container-exit-0",
+      "result": "pass",
+      "detail": "container ExitCode=0"
+    }
+  ],
+  "stderrLines": {
+    "noinit.stderr": [
+      "CONFIGURATION_DENIED LAUNCH_TREE"
+    ],
+    "nodeopts.stderr": [
+      "CONFIGURATION_DENIED DEBUG_ENV"
+    ],
+    "init-final.stderr": []
+  },
+  "cmdCheck": [
+    "dockerfile CMD : [\"sh\", \"-c\", \"ulimit -c 0 && exec node dist/main.js\"]",
+    "image Config.Cmd: [\"sh\", \"-c\", \"ulimit -c 0 && exec node dist/main.js\"]",
+    "image Entrypoint: null",
+    "PASS Config.Cmd equals the Dockerfile CMD (and the A6 literal); no ENTRYPOINT"
+  ],
+  "buildNetworkLines": {
+    "build-network-lines.txt": [
+      "#2 resolve image config for docker-image://docker.io/docker/dockerfile:1",
+      "#3 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e",
+      "#4 [internal] load metadata for mcr.microsoft.com/playwright:v1.63.0-noble",
+      "#2 resolve image config for docker-image://docker.io/docker/dockerfile:1",
+      "#3 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e",
+      "#4 [internal] load metadata for mcr.microsoft.com/playwright:v1.63.0-noble"
+    ]
+  }
+}

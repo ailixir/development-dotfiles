@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "role": "Quinn/@aiox-qa",
+  "at": "2026-10-15T15:54:26.418259+00:00",
+  "status": "BOUNDED_SOURCE_IMPLEMENTATION_ACCEPTABLE_NO_OPEN_SOURCE_FINDINGS_RUNTIME_VALIDATION_PENDING",
+  "formalStoryGate": false,
+  "storyLifecycleChanged": false,
+  "sourceExecutionReleaseGranted": false,
+  "sourceEditsByReviewer": false,
+  "testsOrBuildsOrStaticChecksStartedByReviewer": false,
+  "processSignalsByReviewer": false,
+  "reviewedRemediationCheckpointSha256": "0ce958c8a2633d1ac21199d716f44b5490c706b880f99bc19b1ae7e5cd35236a",
+  "reviewedUnitOnlyCorrectionCheckpointSha256": "93fd0b28df1e4961fab8a9687fbfadad6d6ba75a0ee94ca649088b14962789a8",
+  "boundDesignManifestSha256": "b4d868fdc20909adbc93a1a844779a0f46c7cb16d59e9c94aecedcea24fad472",
+  "sourceBindings": 67,
+  "immutableEvidenceBindings": 42,
+  "checks": 18,
+  "openSourceFindings": 0,
+  "sourceRepairedFindingsAwaitingActualValidation": [
+    "NATIVE01-QA-01"
+  ],
+  "actualCurrentValidation": {
+    "defaultNode13": "RED_2163_PASS_11_FAIL_29_HISTORICAL_PENDING_3_UNHANDLED_COVERAGE_NOT_EVALUATED",
+    "correctedUnitExecution": "UNRUN",
+    "native01": "RED_30_PASS_12_FAIL_42_IDENTITIES_0_SKIP_PREDECESSOR",
+    "postRemediationNative": "UNRUN",
+    "sharedFixtureConsumers": "RERUN_REQUIRED",
+    "build07": "PASS_CONFIGURED_BUILD",
+    "pins07": "PASS_ASSERTED_FIELDS_ONLY_IMAGE_CHROMIUMBUILD_NOT_ASSERTED",
+    "full015Then008": "UNPROVEN_REQUIRED_SCOPE_PRESERVED",
+    "item85": "OPEN_UNAMENDED"
+  },
+  "files": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/native01-remediation-implementation-review01/review.md",
+      "byteLength": 9293,
+      "sha256": "40a48bea8914e1a6504605f245b282e152407edb9fb492a49b54739867366e74"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/native01-remediation-implementation-review01/checks.json",
+      "byteLength": 7387,
+      "sha256": "6e139ffa3d705358b93f8656d5d50d880a14efe0cf0dd93e7197913daa11a913"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/native01-remediation-implementation-review01/source-inventory.json",
+      "byteLength": 26933,
+      "sha256": "f9bef129af23e960cc8979709a83ce3318cb39756010c7ef69d4d59bfc8d9313"
+    }
+  ],
+  "sourceRecheck": {
+    "checkedProduct": 67,
+    "checkedImmutableEvidence": 42,
+    "drift": [],
+    "scope": "Bound inputs only; runtime metadata can gain unrelated parent-generated files without invalidating this source review."
+  }
+}

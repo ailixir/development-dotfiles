@@ -1,0 +1,264 @@
+{
+  "artifact": "Dex-read-only-postlaunch-Default-redirection-cleanup-diagnosis",
+  "createdUtc": "2026-10-15T01:18:02.584750+00:00",
+  "decision": "CONFIRMED_FIXTURE_RESOURCE_AND_ERROR_PRESERVATION_GAPS; EXACT_FAILED_STAGE_UNPROVED; NARROW_TEST_ONLY_PLAN_FOR_INDEPENDENT_ARCHITECT_AND_QA_REVIEW",
+  "notStoryGate": true,
+  "doneAllowed": false,
+  "implementationAuthorized": false,
+  "rerunAuthorized": false,
+  "scope": "Read-only exact source/SDK/type/retained log/JSON/hash analysis; only this owned diagnosis JSON written. No source/test/config/dist/runtime/browser/process/test/Gradle/build/CLI/git/story/gate/lifecycle mutation, no agents, installation/commit/push/deploy/database recreation.015UNSTARTED; strictDone requires all originally planned applicable localgreen. Shared500USD declaredceiling; actualbilling unavailable.",
+  "failedRun": {
+    "label": "runner-fixtures-final-attempt03",
+    "result": {
+      "success": false,
+      "numPassedTests": 231,
+      "numFailedTests": 1,
+      "numPendingTests": 9,
+      "numTotalTests": 241
+    },
+    "failure": {
+      "ancestorTitles": [],
+      "fullName": "refuses a Default directory redirected after actual launch rather than accepting its newly canonical outside path",
+      "status": "failed",
+      "title": "refuses a Default directory redirected after actual launch rather than accepting its newly canonical outside path",
+      "duration": 282.6422500000001,
+      "failureMessages": [
+        "Error: ENOTEMPTY: directory not empty, rmdir '/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/guided-default-escape-CXAN5j/checks-guided-4ubUhK'"
+      ],
+      "meta": {}
+    },
+    "sourceBinding": [
+      {
+        "manifest": "runner-fixtures-final-attempt03-before.json",
+        "sourceDigest": "a0d27eac177ae5caa97c0161767aed0fe54d4ec732ee090376a8892dc99c9de6",
+        "distDigest": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+        "profileFixtureSha256": "d5b17284368658941d516c974ea3f418b3f33b120f6611cdf7142441fe453457"
+      },
+      {
+        "manifest": "runner-fixtures-final-attempt03-after.json",
+        "sourceDigest": "a0d27eac177ae5caa97c0161767aed0fe54d4ec732ee090376a8892dc99c9de6",
+        "distDigest": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+        "profileFixtureSha256": "d5b17284368658941d516c974ea3f418b3f33b120f6611cdf7142441fe453457"
+      }
+    ],
+    "currentProfileFixture": {
+      "path": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "bytes": 7444,
+      "sha256": "d5b17284368658941d516c974ea3f418b3f33b120f6611cdf7142441fe453457"
+    },
+    "historicalSkipsUncredited": 9,
+    "sourceDistStable": true,
+    "errorOriginLimit": "Raw error contains only ENOTEMPTY,rmdir,owned checks-guided scratch path. No JS sourceframe, syscallcaller, primarybodyerror, attack-stage receipt or runtimecontext handle survives. Both product scratchrm and outerfixturerm can yield this owned scratch path."
+  },
+  "confirmedSourceFindings": [
+    {
+      "id": "F1",
+      "path": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "lines": "36-40",
+      "finding": "The fault wrapper acquires real context at await real(...args), then asynchronously renames Default outside and installs symlink before returning context. No retained outer context capability or mutation-stage catch/finally closes it if rename/symlink rejects. This is a test harness resourceownership gap irrespective of whether this exact run hit it."
+    },
+    {
+      "id": "F2",
+      "path": "studio-runner/src/run/browser.ts",
+      "lines": "534-540,631-635",
+      "finding": "Product context variable is assigned only when awaited launchPersistentContext promise resolves. If mock rejects after acquiring hidden context, product sees no acquiredcontext and calls disposeScratch without access to that actual browser. That matches the declared API boundary; the test wrapper must own partial acquisition until successful handoff."
+    },
+    {
+      "id": "F3",
+      "path": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "lines": "39",
+      "finding": "Bodyassertion, failure.close, finalroot directory check and outer recursive rm share one compact try/finally. A rejecting finallyrm replaces any prior throw under JS semantics. Retained ENOTEMPTY therefore cannot establish whether GuidedLaunchFailure assertion passed, whether symlink was installed, or which cleanup rm failed."
+    },
+    {
+      "id": "F4",
+      "path": "studio-runner/src/run/browser.ts",
+      "lines": "58-69,587,631-635",
+      "finding": "verifyBrowserPreferences begins by browserProfileConfinement(profile), which revalidates retained directory identities. For a successfully installed redirected Default symlink, originalcheck fails PROFILE_PREFERENCES_REQUIRED before trusting chrome://version canonicalpath; acquiredcontext launchfailure wraps cleanup in GuidedLaunchFailure(CONTEXT_LOST). Cleanup awaits actual context.close before releasing profile metadata and rm scratch. No source proof of accepting externalDefault."
+    },
+    {
+      "id": "F5",
+      "path": "studio-runner/src/run/scratchLayout.ts",
+      "lines": "39-55",
+      "finding": "Directory checks use lstat (rejectsymlink), retained device/inode/UID/mode and expectedanchoredpaths; profile confinement revalidates all three originaldirectorypins. releaseBrowserProfile deletes retained in-memory preparedprofile metadata; it neither closes Chromium nor traverses/deletes a filesystempath."
+    },
+    {
+      "id": "F6",
+      "path": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "lines": "36-40",
+      "finding": "Existingcase checks GuidedLaunchFailure and no checks-guided root entries after failure.close, but has no original explicit outsidecanary assertion, attackcompletion boolean, owned-PID receipt or primaryerror+cleanupstage receipt. Proposed canary/identity observation strengthens the safetyoracle; do not invent an existing historical canarypass."
+    }
+  ],
+  "retainedFilesystemAndProcessFacts": {
+    "treeCapturedUtc": "2026-10-15T01:13:38.983501+00:00",
+    "treeRootExists": true,
+    "treeMetadataCount": 25,
+    "treeTraversal": "Retained executor lstat-only metadata; no symlinktraversal or profilecontentscopied. Diagnosis did not inspect live tempfiles or processes.",
+    "retainedDefaultType": "directory",
+    "outsideDefaultPresentInSnapshot": false,
+    "mtimeMinUtc": "2026-10-15T01:12:38.918252+00:00",
+    "mtimeMaxUtc": "2026-10-15T01:12:39.460826+00:00",
+    "suiteStartMs": 1792026758250,
+    "suiteEndMs": 1792026759430.4365,
+    "latestTreeMtimeMinusSuiteEndMs": 30.3896484375,
+    "mtimeInterpretation": "Some retained profile file mtimes are about30ms later than Vitest suiteEnd timestamp. Together with residualtree and no contextualclose receipt this supports possible continuing profile writes/teardown race. Wall-clockmetadata alone does not identify writerPID, prove it was Chromium, recover attackordering or prove close was returned before writes. Failedcase exactend notrecorded.",
+    "processSnapshotCapturedUtc": "2026-10-15T01:14:12.162958+00:00",
+    "matchingOwnedRootPids": [],
+    "processLimit": "Read-only OS snapshot, exact failed-root command matching then PPID descendants; no kill/close/removal. No runtime context handle available to executor; absence now cannot prove teardown at assertiontime. Rawcommandargs notpersisted."
+  },
+  "causalAssessment": {
+    "safetyAssertionItself": "UNPROVED: failedrun cannot be credited as successful postlaunch confinement rejection; finalrm may mask assertionfailure. It also does not demonstrate externalDefault acceptance or outsidepath traversal.",
+    "finallyMasking": "Source-proved possible and currently unobservable; exact finalerrororigin (productdisposeScratch vs outerfixturerm) and hiddenprimaryerror not recoverable from onlyENOTEMPTY.",
+    "processQuiescence": "Plausible but historicalPIDbranch unproved. Realcontext lost inside injectionwrapper can continuewriting while product/fixture recursivelyremoveownedroot. Another branch is confirmedcontextclose plus descendant/latefilesystemwrite, which lacks evidence and must not be assumed.",
+    "mutationRace": "Source-proved opportunity: rename/symlink are separate async calls while Chromium remainsactive. A writer may recreate Default or anotherfilesystemerror may reject mutation after realcontext acquisition. Exact rename/symlink outcome and errors notretained; no ENOENT/EEXIST branch claim.",
+    "productionDefect": "NOT_ESTABLISHED. Product already awaits acquiredcontextclose before rm, and pinned persistentclose awaits browserprocessclose. The confirmed gap is test-owned pre-handoff resource management. Any measured reproduction after verified realclose+ownedPIDquiescence requires separate SDK/filesystem/production review; no product edit proposed.",
+    "outsideTraversal": "NOT_DEMONSTRATED. Late Default regular directory and absent outside-default do not prove how originalsymlink/canary behaved; entire ownedroot rm can remove outside-default sibling. No actualoutside canary/filecontents were inspected.",
+    "whyNoBlindRetry": "Retrying fulltest or adding rm.maxRetries could hide activewriter/leak or lostassertion without fixing test resourceownership or proving original attack ran. Failed231/1/9 history remainsred."
+  },
+  "installedSemantics": [
+    {
+      "path": "studio-runner/node_modules/playwright-core/lib/coreBundle.js",
+      "lines": "62620-62631",
+      "fact": "Public BrowserContext.close awaits channelclose withkNoTimeout then closedPromise; merely requestingclose is not confirmation."
+    },
+    {
+      "path": "studio-runner/node_modules/playwright-core/lib/coreBundle.js",
+      "lines": "51899-51936,38749-38754",
+      "fact": "Serverpersistent Chromium contextdoClose returns close-browser; servercontextclose awaits browserclose before finalcontextclose completion."
+    },
+    {
+      "path": "studio-runner/node_modules/playwright-core/lib/coreBundle.js",
+      "lines": "52689-52703,39830-39852",
+      "fact": "Browserclose awaits browserProcess.close and disconnection. Owned launcher closeOrKill retains original SDKtimeout, gracefulclose or ownedkill paths. Do not substitute browserdisconnect alone for processquiescence."
+    },
+    {
+      "path": "studio-runner/node_modules/playwright-core/lib/coreBundle.js",
+      "lines": "9352-9389",
+      "fact": "processLauncher gracefulclose awaits waitForCleanup fulfilled by spawnedprocess close plus cleanup. This supports mainprocess exit semantics, but this diagnosis has no actual failure-time close receipts or complete descendant exit observations."
+    },
+    {
+      "path": "studio-runner/node_modules/@types/node/fs.d.ts",
+      "lines": "1636-1662",
+      "fact": "Installed Nodefs typings describe rm.force only ignoring nonexistentpath; defaultmaxRetries0; recursive retries may cover EBUSY/EMFILE/ENFILE/ENOTEMPTY/EPERM with linearbackoff. force:true does not mean ignoreENOTEMPTY. No filesystemretry change authorized by this reference."
+    }
+  ],
+  "proposedNarrowCorrection": {
+    "status": "DESIGN_PROPOSAL_ONLY_ARIA_AND_INDEPENDENT_QA_APPROVAL_REQUIRED_BEFORE_ANY_EDIT",
+    "preferredScope": "Candidate scope from independentAria discussion: only studio-runner/test/fixtures-tier/browser-profile-safety.test.ts, new studio-runner/test/helpers/profileSafetyFixture.ts and new studio-runner/test/profileSafetyFixture.test.ts. Root+Aria+independentQA must approve finalexactpaths/design before edits. Production/readiness/nativeclock/stop/PID/capacity/config/SDK/pins/dist/contract unchanged.",
+    "ownership": "Keep realcontext in outerfixture-owned variable immediately after await real before mutation. Capture immutable ownedscratch/profile root identities and exact browser-owned processidentities at thatpoint. Retain capability across every mutation/body/assertionfailure. Never derive cleanup authority from newly canonical attacker symlink target. Only own mkdtemp root and knownchildpaths are eligible; no scans/kill/rm of unrelatedprofiles.",
+    "plan": [
+      "Install test-owned close wrapper immediately after realcontext acquisition and before faultmutation. It calls saved realcontext.close and confirms actualclose plus exactowned-PIDexit before returning, so both production failure.close and fixture finally share confirmation and scratchremove cannot race a knownliveownedwriter. Use no fakeclosed flag as proof. Discover PIDownership from that browser/public context-bound processsource or exact uniqueprofileargs plus descendants, with retained identities, never broad Chromiummatching. Independentreview decides observation API and bounded waiter.",
+      "Keep same externalDefault attack AFTERactual launch: rename pinned originalDefault into test-owned outside-default sibling, create syntheticcanary there only AFTERsuccessfulrename (never precreate renamedestination), then symlink originalDefault path to it. Assert actuallstat/readlink/targetidentity and fixedphasebooleans. The wrapper MUST catch/store any post-acquisition injectionerror separately and RETURN the realcontext to production even if mutationfailed, so context=awaitlaunch assigns ownership. Never reject after actualacquisition into production no-contextdispose path. Test remainsred on any injectionerror regardless whether production returns GuidedBrowser or GuidedLaunchFailure; incompleteattack never credits refusal. No closebrowserbeforeattack, prelaunchsubstitution, fakeguard, disconnectedcontext, reload/sleep/retry.",
+      "After wrapper returns actualcontext, retain attackcompletion facts and test-owned syntheticoutsidecanary identity/hash. Require completeattack AND originalproduction GuidedLaunchFailure before expected-refusalcredit. If injectionfailed and productreturns GuidedBrowser, retain thatsuccesscapability for cleanup and forcecase red; if productreturns GuidedLaunchFailure, retain its cleanupcapability but still failinjection. Preserve original publicfailureclass/CONTEXT_LOST and no checks-guided assertion. After expectedproductionfailure.close, verify outsidecanary and targetidentity unchanged before fixture-ownedroot removal; no broadercatch/acceptance.",
+      "In every failure path, including mutationfailbeforehandoff, the acquiredcontext must first be handed back to production; cleanup then closes GuidedBrowser/GuidedLaunchFailure capability as applicable plus retainedactualcontext fallback, with exactownedPIDexit confirmation BEFORE filesystemremoval. The test-owned closewrapper must reject if closure/quiescence unconfirmed, so production acquiredcontext branch cannot rm scratch. If close/PIDexit cannot beconfirmed within approved existingbounds, keepred, retain fixedphasefacts and ownedroot; no cleanupsuccess claim. Do not rely on context.isClosed (SDK treatsclosing asclosed); require awaitedrealclose/publicclose/disconnected and actualownedPIDexit. Any forcedkill needs separateowned-PIDreview; no globalpkill/broadprofilecleanup.",
+      "Preserve original bodyerror separately from teardownerrors. Execute each remaining safe cleanupstage and report both body and cleanup failure fixedcodes/booleans; finally must not replace a primarysecurity/assertion/injectionerror with a singleopaque ENOTEMPTY. Keep cleanupfailuresred even if later cleanup succeeds. No swallow-to-green or loose failure instanceof checks.",
+      "Dispose/release only verifiedownedscratch and testroot after close+quiescence; remove temporary outsidefixture sibling only after canaryassertion. Use original rm options initially, no maxRetries/backoff as defaultremedy. Keep root120000msfixturetimeout and every existing stop/launch/native<=500ms timingbound unchanged. Any additional bounded PIDwait must be separatelyspecified/approved inside those existingbounds, not inferredauthorization from this proposal.",
+      "Write unique sanitized numeric/boolean/fixedenum phasefacts: actualcontextacquired, renameDone, symlinkDone, injectionReturned, expectedGuidedLaunchFailure, productionCloseStarted/Confirmed, observedownedPIDcount/allGone, outsidecanaryUnchanged, primaryErrorCode, cleanupErrorCodes, rmStarted/Completed. No profilecontents/probe text/commandline/media/rawerrorobjects. Retain exactrawtestresult under coordinator privacy rules as before."
+    ],
+    "determinismLimit": "Capability retention+close/PID gating deterministically removes the known leak/error-masking behavior. It does not magically make two filesystem mutations atomic relative to Chromium. Attacksetupfailure must remainred with exactphasefacts, not be rerun until it happens to install. If background Default recreation is actually measured, stop for independent design of an attack-preserving synchronization method; do not introduce SIGSTOP, newprocessmode, sleep or mutationretry here.",
+    "filesystemRetryDecision": "No rmretry currently justified: historical writerquiescence and exactfailingstage unproved. Only after verifiedclose+sameownedPIDexit and exact residualmetadata show a genuine postquiescence transient filesystemcondition may Aria/QA explicitly approve error-specific boundedremoval within originalbudget. Must preserve firstfailurefacts, canary/identity checks and cleanup/leakfailure; never use retryto make activewriteror lostprimaryerror green.",
+    "productionReviewTrigger": "If new deterministic evidence shows production returnscleanupsuccess or removesownedroot before acquiredcontextclose/ownedprocessquiescence, stop for explicit productiondesignreview. This diagnosis authorizes no productionchange.",
+    "independentDesignRefinement": "Aria discussion identified explicit handoff requirement: a postacquisition mutationerror must not reject launchwrapper into productno-contextcleanup, including when attemptedearlyclose fails. Preferred recordinjectionerror+returncontext design supersedes any close-first/rethrow alternative in initial reasoning. Primaryerror staysred; properresourceownership is separate from attackrefusalcredit."
+  },
+  "meaningfulRegressionProofRequired": [
+    "Injected deterministic lifecycleports: afteractualcontextacquisition, renamefailure, symlinkfailure and canary/assertionfailure are recorded but wrapperstillreturns sameactualcontext for productionownership. None starts filesystemremoval before realclose+ownedPIDquiescence; incompleteattack staysred even if production legitimatelyreturns GuidedBrowser or GuidedLaunchFailure.",
+    "Deferred realclose/PIDexit: close request or disconnected event alone cannot enable removal; close rejection/livePID leavesred and preservesownedroot. Multiple cleanupstage errors preserveprimaryfailure and run remaining safe cleanupsteps; no unrelated path/PID touched.",
+    "Actual valid afterlaunchredirect scenario must confirm attackinstalled and contextreturned, expectedproductionGuidedLaunchFailure/CONTEXT_LOST, realclose+ownedPIDexit, untouched outsidecanary/identity, and original checks-guided disappearance assertion. Setupfailure is never credited as securityrefusal.",
+    "Capture originalguard internal PROFILE_PREFERENCES_REQUIRED via deterministicunitregression if needed without exporting sensitiveprofiledata or changingpublicfailurecontract. Existing original prelaunchunsafe5cases, acquiredcontextcleanupfailurecase and positiveconfinedlaunchcase remain unchanged and green.",
+    "Run appropriatepure/type/lint under approvedsourcewindow and independentfinal-byte review. Onlythen rootserialized actual browser-profile-safety file (all10 originalcases + any approvedcontrols) and fullfixtures with unchangedhistorical9uncreditedskips. No blindrerun.",
+    "Root subsequently runs all remaining originallyplanned runner/deployment/finalnormalbackendgates with fresh exactsource/dist manifests. Current1462unitPASS/29historicalskips,13focusednativePASS and original014actualliveproofs remaindatedbinding evidence, not replacement for fullgreen."
+  ],
+  "limits": [
+    "No rawfailedcontext handle, attackphase trace, underlyingprimaryerror, runtimeclose receipt or failure-time PIDs retained; cannot reconstruct hiddenassertion or exactsyscallorigin.",
+    "Only executor-retainedlstat metadata/processsnapshot read; no liveprofilecontents/pathtraversal/processenumeration/removal performed bydiagnoser.",
+    "Failedcase has no explicit outsidecanary proof; proposed canarycheck adds sensitivity and cannot be retroactively credited.",
+    "Late emptyPID snapshot cannot establish successful closure during failedcase. Filemtimecomparison supportspossiblelatewriter but doesnot identifyactor or establish branch.",
+    "No native reproduction, sourcechange or additionalgate executed."
+  ],
+  "artifactHashes": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/integration-readiness-full-native-failed-attempt03.json",
+      "bytes": 240572,
+      "sha256": "a274a32031140f9ab34ac254ab63808ae6cf448cdff5b429e09e831f83877384"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-fixtures-final-attempt03.log",
+      "bytes": 21196,
+      "sha256": "861738965e8773582dcb14d05c75ce16b6068b596e729de48763b170ec4997bd"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-fixtures-final-attempt03-vitest.json",
+      "bytes": 91017,
+      "sha256": "164401a29858cc62d58447c67d08a50833bc96c94cc786c49f9f717bedcbd93b"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-fixtures-final-attempt03-results.json",
+      "bytes": 893,
+      "sha256": "fc10335ac05872fad70bc6e9f966de640229c211a09cf48c657a179e0e6f4303"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-fixtures-final-attempt03-before.json",
+      "bytes": 317467,
+      "sha256": "a3f74360adf71692b152b42e6909bdb89cba82fa1f9b033fbec7c644ad11c2c6"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-fixtures-final-attempt03-after.json",
+      "bytes": 317467,
+      "sha256": "4f5a3a6f75efb114def49f6faded2829d3ae5d190493dc1fdde803ff08d1e23d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-fixtures-final-attempt03-profile-failure-tree.json",
+      "bytes": 8453,
+      "sha256": "f12d018cba85725b87525ea043559b0b41f13a455c9136096e9c05427267a3ee"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-fixtures-final-attempt03-profile-failure-processes.json",
+      "bytes": 447,
+      "sha256": "2b7fd54a7311eb43fda12af1b2359a66968b35df6ea0623981a776324ae059c1"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-fixtures-final-attempt03-browser-profile-safety.source.txt",
+      "bytes": 7444,
+      "sha256": "d5b17284368658941d516c974ea3f418b3f33b120f6611cdf7142441fe453457"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "bytes": 7444,
+      "sha256": "d5b17284368658941d516c974ea3f418b3f33b120f6611cdf7142441fe453457"
+    },
+    {
+      "path": "studio-runner/src/run/browser.ts",
+      "bytes": 44368,
+      "sha256": "19893b2aeda17b4d94b4ddb45977fb170cea45035a78cc4e6a1b3f904de21dd9"
+    },
+    {
+      "path": "studio-runner/src/run/scratchLayout.ts",
+      "bytes": 7675,
+      "sha256": "a923b03081bd6ee74d1e12453371b07debbcd6283a31241b17921c3cda334462"
+    },
+    {
+      "path": "studio-runner/src/run/guidedBrowser.ts",
+      "bytes": 2430,
+      "sha256": "8c4d36a38f1901b93f3d6185955b2cb2b5a1bd7e06bbd93a6479e0c2a3158ce1"
+    },
+    {
+      "path": "studio-runner/test/run/browserProfilePreferences.test.ts",
+      "bytes": 6185,
+      "sha256": "f97266db07702485562cdd8d56671a83e97b10d1943ae9e65d9c2f9f1e92f739"
+    },
+    {
+      "path": "studio-runner/node_modules/playwright-core/lib/coreBundle.js",
+      "bytes": 3477183,
+      "sha256": "549070af3acabb3efcc4f55bfe6210f9f7c2fcf633cf7eaa59bfe60719969171"
+    },
+    {
+      "path": "studio-runner/node_modules/@types/node/fs.d.ts",
+      "bytes": 190525,
+      "sha256": "8e1e46d0a9837ee058c100501080c920fa98081ea3956af0374308ba6f22a33e"
+    },
+    {
+      "path": "studio-runner/vitest.fixtures.config.ts",
+      "bytes": 1761,
+      "sha256": "2d51915fec9757e34ed1c0c2311fd1362abab917bfa1c5bf8b70ab47cb2c3f87"
+    }
+  ]
+}

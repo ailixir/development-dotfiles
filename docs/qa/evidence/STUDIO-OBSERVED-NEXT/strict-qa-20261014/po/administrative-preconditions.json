@@ -1,0 +1,77 @@
+{
+  "createdUtc": "2026-10-15T03:18:53.701045+00:00",
+  "prerequisites": {
+    "013": {
+      "storyBeforeSha256": "5d174629adbc0ca30cc3d46d23552e73d377c9a1cd315e4240cde86b353b51b0",
+      "gateSha256": "5ed4e0369808fe8532e604072691518549ada6a12dcce51ea7e88248c39a39e5",
+      "reviewSha256": "84fbb543bc88acdb8ee0ad3ac471eaabd1e0d604dc10ba0cf8a5a54ea8cd996a",
+      "protectedStorySha256": "6481ca34a02c91fb0942b1327ef4a2d7e9feffeacf85724f06d4348e0e80dc3a",
+      "normalization": "Status\u2192InReview before QA Results",
+      "rootReviewState": {
+        "status": "passed",
+        "at": "2026-10-15T03:13:32.447Z",
+        "notes": null
+      },
+      "currentSdcPhase": "close",
+      "QAResultsSha256": "70366eb91448afdd501fece53f9cb34c9d29a7d1bb001607f377a4d582667123",
+      "statusLine": "| Status | **Done** |"
+    },
+    "014": {
+      "storyBeforeSha256": "253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140",
+      "gateSha256": "3af7b7d6e87dd5541987389e2475b26d0e1685e73d41d174309e0a453a5ef005",
+      "reviewSha256": "61efb21d40d9d315d99d77ff5d118a941e8a8849be8547676540309c9f821a82",
+      "protectedStorySha256": "bc222a40a66ab22a4225a9c4b73e7f827950972b15059721fc6b7d4933883043",
+      "normalization": "Status\u2192NORMALIZED before QA Results",
+      "rootReviewState": {
+        "status": "passed",
+        "at": "2026-10-15T03:14:55.973Z",
+        "notes": null
+      },
+      "currentSdcPhase": "close",
+      "QAResultsSha256": "581045f5a93a7b72f6dfbe9a0da6da71519895785158c0588c408f77fb823ce4",
+      "statusLine": "| Status | **Done** |"
+    }
+  },
+  "sourceFilesRehashed": 1583,
+  "distFilesRehashed": 238,
+  "sourceDigest": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+  "distDigest": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+  "finalArtifactReferencesRehashed": 1319,
+  "finalArtifactHashMismatches": [],
+  "ownedBefore": {
+    "docs/stories/STUDIO-OBSERVED/README.md": "61fb59f69eb1611eb80a2fc60028b3e6a8005b06e97ad5317ba2211e413e650a",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md": "b5c100073debfe970abaac8698210b6c6f56693c96945e68cdfeeb76603a62cd",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md": "d060b162fec1378d21b218311db83b05df9500f6c2780dfd5647d99764fe4c49",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md": "08241b6f9fb86622108fd82783c9270d404d2526d326ffc8d74ce513ecd97c8b",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md": "6f7efb4753ba4ff1440bfad0846708bbf0cd9d8dec45f6a1c368404349383cff",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md": "5d174629adbc0ca30cc3d46d23552e73d377c9a1cd315e4240cde86b353b51b0",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md": "253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140",
+    ".ai/STUDIO-OBS-013-close.json": "701731e681beee5c742eb81d732126f5981d784b27a1ec706ea8f952f27658f1",
+    ".ai/STUDIO-OBS-014-close.json": "01f348287bf1d9dd01e497ca61974c70f289117b62817cba0319513dc55ebe91",
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/MASTER-HANDOFF.md": "024399dd7fa110de8e2f609670267586f1af230cd37e2591c7a77cd473f5027a"
+  },
+  "protectedBefore": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012B.story.md": "201b6e2acfda857f8e6c589799ce37f67de3bf083dcd91a9b917fd2d77cf7161",
+    ".ai/STUDIO-OBS-012B-close.json": "071b3f72f2c4b01c37b0c41d6b5a66a9f31d1e407ea30a455080622de49339b0",
+    "docs/qa/gates/STUDIO-OBS-012B-compile-path-retirement-frontend-and-learn-vocabulary.yml": "f69b02210ead4c6b950dc6cac2c7ed889a11a5355d0992e42a38de20a05ed10b",
+    "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/strict-closure-receipt.json": "bc73bff92c0f2c4997741b54fbe93957dd30514598bc4ab9fda90dfb8829df05",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "0e3c81de45dc1b6ba39db082926d103728d16c9c5014db195ffda10ceea759a8",
+    "docs/qa/gates/STUDIO-OBS-013-record-the-learning-run-video-step-offsets-and-seek.yml": "5ed4e0369808fe8532e604072691518549ada6a12dcce51ea7e88248c39a39e5",
+    "docs/qa/gates/STUDIO-OBS-014-action-safety-and-governance-for-the-learning-run.yml": "3af7b7d6e87dd5541987389e2475b26d0e1685e73d41d174309e0a453a5ef005",
+    ".aiox/sdc/STUDIO-OBS-013/state.json": "032759059c715ebf30e563cbb06330a6733e2cad092edbb1017197b123c7dd78",
+    ".aiox/sdc/STUDIO-OBS-014/state.json": "df8eb9736cba648e47d2c1ccc9179e9e26724ac9873ba88f14cb1d2ffe0234ea",
+    ".aiox/sdc/STUDIO-OBS-015/state.json": "24ab91fba2413795c997fd3acf5ac63c424f79d0c951412aa8c781415d1205c7",
+    ".aiox/waves/STUDIO-OBS-SINGLE-PATH/state.json": "ad05dc5055115611857caaf30c266f8ab9aa4b8b44a1f8839097e3e9d2ef8531",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/coordinator-checkpoint.json": "18eac3e1ee7402326f3a6af91687c4717a09e885696895325a7015bf7bf7e5b9",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/execution-plan.json": "6fe8b4475cda4075aa18557588d22c84d70297ea2c2f371253576adda5ad6c9c",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa013/final-story-review.json": "84fbb543bc88acdb8ee0ad3ac471eaabd1e0d604dc10ba0cf8a5a54ea8cd996a",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-story-review.json": "61efb21d40d9d315d99d77ff5d118a941e8a8849be8547676540309c9f821a82"
+  },
+  "gates": {
+    "013": "docs/qa/gates/STUDIO-OBS-013-record-the-learning-run-video-step-offsets-and-seek.yml",
+    "014": "docs/qa/gates/STUDIO-OBS-014-action-safety-and-governance-for-the-learning-run.yml"
+  },
+  "rootExplicitMetadataWindowRelease": true,
+  "rootCliStateWritesByPax": false,
+  "backendQualityXmlArtifactsRehashed": 1246
+}

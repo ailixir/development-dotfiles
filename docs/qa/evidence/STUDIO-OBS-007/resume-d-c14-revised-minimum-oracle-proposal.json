@@ -1,0 +1,134 @@
+{
+  "scope": "REVISED_MINIMUM_FIVE_C14_ORACLE_SOURCE_PROPOSAL_ONLY",
+  "authorityStatus": "PROPOSED_FOR_ROOT_REVIEW_NOT_APPLIED_OR_APPROVED",
+  "sourceBinding": {
+    "currentDefiningGate": "resume-c14-guided-control-first-current",
+    "sources": {
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "168d894dfca9bf33f780a07414f5a4cc3b17be01db3579b6f041f3da9434a2ad",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": "cdf8b6235226e53f6cc167aa1583cab459e5fd365ce5c6b783cfeb0cfdc4ffe9",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "591e372f6d06fff8255d20500a681e7c8385dbbe3c8a0e0dc4c05ef84dc92c29",
+      "studio-runner/src/run/observationCollector.ts": "ba31be90d04885e6329ae02f6559205325740cbd46960a438150a890557c27a2"
+    },
+    "firstBoundaryReportSha256": "0fc1577dc6680337c0f60021f6f818b5b50c3baadc9092dad13747a7e49728d7"
+  },
+  "minimum": {
+    "logicalRequests": 5,
+    "newCases": 0,
+    "existingNewSelectors": 4,
+    "guidedPasswordRequests": 2,
+    "publishedPasswordRequests": 2,
+    "reusedPublishedTextAssertion": 1,
+    "newFrameworksOrComparators": 0
+  },
+  "guidedActualFirstBoundary": {
+    "operationPairs": [
+      "read/controlValue",
+      "assert/hasValue"
+    ],
+    "class": "GuidedTranslationService",
+    "line": 529,
+    "predicate": "acquisitionAvailable=false for actual accepted nonsecret Field obligation",
+    "state": "NONTERMINAL_ORIGINAL_ACQUISITION_WAIT_REFRESH",
+    "firstExceptionCode": "NONE_AT_THIS_BOUNDARY",
+    "modelUnsupportedResponse": "NOT_REQUESTED",
+    "privacyMeaning": "Genuine authored read/assert obligation cannot acquire actual password Field because it is absent from exported nodes; neither proposal/admission nor requested native password read is created. This is availability refusal, not a terminal model rejection."
+  },
+  "guidedConcreteProposal": [
+    {
+      "ordinal": 1,
+      "action": "Preserve original authenticated source acceptance, valid controlValue need/intrinsic consumer or plain EXPECTED TWO/assert.expected configuration reference, and original one navigate action. No added action/node/secret declaration."
+    },
+    {
+      "ordinal": 2,
+      "action": "Using existing sessions.transaction/repository/store metadata only, establish accepted plan/current acquisition identity points to genuine Field obligation at TWO and correct operator; initial navigation SUCCEEDED/count1, plan/source/materialization identities preserved."
+    },
+    {
+      "ordinal": 3,
+      "action": "Inspect actual original observation: passwordControls1; Field absent from nodes and locator hints; truncated=false and actual reason=sensitivity with withheldRegions positive, not fabricated complete coverage. Record signature=false as supporting observation only; do not claim annotateLoginFailure or unsupported-model branch ran."
+    },
+    {
+      "ordinal": 4,
+      "action": "Require actual original active acquisition window and at least one genuine extra poll, exact same accepted obligation/worker/fence/generation association. Observe original unavailable/REFRESH state and no second NEXT_ACTION/Field admission, no read/assert native completion or consumer action, zero physical provider reads/releases. This proves the first nonterminal boundary only."
+    },
+    {
+      "ordinal": 5,
+      "action": "For terminal credit require actual production REFUSED/BUDGET_EXCEEDED followed by FAILED/failure.code=BUDGET_EXCEEDED and retained matching acquisition evidence showing the original window deadline reached (or original exact cap reached). Do not accept arbitrary BUDGET_EXCEEDED from model/action/global budget, EXPIRED/CANCELLED, generic ERROR or unassociated owner. Preserve zero Field/consumer admission and zero provider reads through actual owner cleanup."
+    }
+  ],
+  "originalBoundedTerminal": {
+    "class": "GuidedTranslationStore",
+    "deadlineGuardLines": [
+      452,
+      455,
+      609,
+      612
+    ],
+    "code": "BUDGET_EXCEEDED",
+    "deadlineSource": "Original active.window.deadline from openedAt + min(remaining allowance, session remaining time, live owner remaining time), same genuine source/obligation association.",
+    "configuredAcquisitionAllowanceMs": 30000,
+    "perTargetMaxExtraPolls": 32,
+    "sessionMaxExtraPolls": 200,
+    "otherExactCapGuardLines": [
+      523,
+      530
+    ],
+    "terminalProjection": {
+      "class": "GuidedTranslationService",
+      "lines": [
+        1692,
+        1694,
+        1724,
+        1726
+      ],
+      "sessionState": "FAILED",
+      "failureCode": "BUDGET_EXCEEDED"
+    },
+    "terminalBoundLimit": "This is a bounded product acquisition reservation checked on a subsequent genuine live controller/observation turn. It is not an unconditional wall-clock guarantee across JDBC/controller stalls.",
+    "current30sFixtureHelperLimit": "Current awaitState30s starts after p3Start, before the target acquisition window opens. Therefore it need not reach the target window expiry and cannot supply terminal credit merely by changing its expected code.",
+    "noExtensionRule": "Keep product allowance/poll caps/session/lease and test wait duration unchanged. Anchor any future existing30s terminal assertion to an actually observed original acquisition window rather than bootstrap; cap its observation by that recorded deadline and existing original helper budget. If a genuine REFUSED/FAILED turn is not observed within the unchanged bound, construction FAIL. No sleep padding, reschedule, deadline rewrite, manual failure, cancel-as-refusal or longer waiter.",
+    "phaseAnchoringStatus": "PROPOSAL_ONLY_ROOT_SOURCE_REVIEW_REQUIRED; no waiter or source changed."
+  },
+  "preservedThreeOrdinaryRequests": [
+    {
+      "operation": "controlValue",
+      "source": "Successful real TEXT Field read plus intrinsic binding consumer learning/publication remains mandatory; only app Field.type changes to password, stable same role/name.",
+      "firstGuard": "TARGET_DRIFT",
+      "wireOuter": "RUN_ERROR",
+      "terminal": "ERROR",
+      "vaultReads": 0,
+      "ordinaryModels": 0
+    },
+    {
+      "operation": "hasValue",
+      "source": "Successful real TEXT EXPECTED comparison and immutable publication remains mandatory before exact same password mutation.",
+      "firstGuard": "TARGET_DRIFT",
+      "wireOuter": "RUN_ERROR",
+      "terminal": "ERROR",
+      "vaultReads": 0,
+      "ordinaryModels": 0
+    },
+    {
+      "operation": "reused hasValue TEXT-canary",
+      "source": "After genuine password owner closes, use same immutable publication and original expected input; app Field becomes text with distinct page-only canary. One ordinary assertion, no third publication.",
+      "firstGuard": "ASSERTION_FAILED",
+      "terminal": "FAILED",
+      "vaultReads": 0,
+      "ordinaryModels": 0
+    }
+  ],
+  "sinkAndTierBounds": "Same original C5 capture stays active across setup/learning/request/refusal/reused text/final drainage. All actually produced canary sinks are scanned; missing/unproduced surfaces classified. No supporting native/PG negative repeated as extra Core cases. No REDACTED-positive token invented for unavailable password reads or boolean-only TEXT assertion.",
+  "requiredReviewTradeoff": "Guided first guard is genuinely nonterminal acquisition unavailability; the terminal code is exact acquisition BUDGET_EXCEEDED only after authentic original budget refusal. The prior expected unsupported-model RUNTIME_INCOMPATIBLE is not reachable for missing Field. Root must review this revised oracle before any source expectation/phase change; do not silently relabel a timeout or cleanup cancellation as successful C14 refusal.",
+  "currentEvidence": "One real guided-control gate reached accepted source/navigation and8 acquisition polls/10 observations/read0. Neither guided terminal BUDGET_EXCEEDED nor revised five-case runtime has been established.",
+  "actions": {
+    "sourceWrites": 0,
+    "isolatedCodeWrites": 0,
+    "runtime": 0,
+    "sql": 0,
+    "newObservers": 0,
+    "models": 0,
+    "reports": 1
+  },
+  "whole19AcPass": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE"
+}

@@ -1,0 +1,479 @@
+{
+  "artifact": "Independent heldJOIN worker lifecycle implementation review",
+  "createdAt": "2026-10-15T15:15:11.951712+00:00",
+  "boundedVerdict": "BLOCKED_ONE_SOURCE_ESTABLISHED_F1_BEFORE_RUNTIME",
+  "formalStoryQAVerdict": null,
+  "sourceReleaseGranted": false,
+  "lifecycleTransition": null,
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "P2",
+      "blockingBeforeNextRuntime": true,
+      "title": "New process metadata UTF-8 ceiling checks UTF-16 character length",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "line": 243,
+      "sourceEstablished": true,
+      "observedRuntimeFailure": false,
+      "condition": "ownedProcessEvent compares ownedProcessEventBytes + line.length() to2096000, but writes UTF8 and increments by line.getBytes(UTF8).length. Canonical strings preserve nonASCII, and a legal ownedTEMP path can contain it.",
+      "counterexampleArithmetic": {
+        "metadataExampleClassification": "Value-free source-derived shape, not process observation",
+        "ownedTemp": "/tmp/é/obs007-joined-control",
+        "javaUtf16CodeUnits": 517,
+        "actualUtf8Bytes": 518,
+        "priorActualUtf8Counter": 2095483,
+        "currentCheckTotal": 2096000,
+        "actualPostWriteTotal": 2096001,
+        "unchangedByteCap": 2096000
+      },
+      "impact": "A row can pass the guard and exceed the declared new process-metadata byte ceiling. Original outcome200event/1040000byte ceilings are separate and were not found weakened.",
+      "minimalExactRepair": "In this same helper encode canonical line once into byte[] UTF8; compare its length with ownedProcessEventBytes and unchanged2096000 before write; write exactly that buffer withAPPEND and increment by the same buffer length. Preserve4096eventcap,0600create,metadatafailure propagation and all other lifecycle logic.",
+      "rootDisposition": "Root acknowledged F1 and will not schedule runtime with it open; no source remediation authorized or performed by this review."
+    }
+  ],
+  "checks": [
+    {
+      "id": "REGISTRY",
+      "assessment": "SOURCE_PRESENT",
+      "sourceFinding": "Actual Process/Handle retained immediately after start before identity/readiness can throw. All8ProcessBuilder constructors route through worker helper or immediate tool registration; every generation/root retained, no overwrittenhandle loss. Live unverifiable identity fails without signal authority; exited shorttools explicitlyunavailable.",
+      "anchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 258,
+          "text": "private static Process registerOwnedProcess"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 357,
+          "text": "private static Process startOwnedWorker"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 19893,
+          "text": "private static Process registerOwnedTool"
+        }
+      ],
+      "runtimeProof": "UNEXECUTED"
+    },
+    {
+      "id": "SIGNALS",
+      "assessment": "SOURCE_PRESENT",
+      "sourceFinding": "Root exact PID/start/command/wrapper argument and descendant actual recorded ancestry/start/command checks precede lifecycle/intentional fault signals. No new port/name/group sweep. Unverifiable identity fails, not authority to signal. Existing P6group/precut/start/group checks retained; no foreign process was observed or signalled by reviewer.",
+      "anchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 291,
+          "text": "private static void verifyOwnedRoot"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 330,
+          "text": "private static void verifyOwnedDescendant"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 338,
+          "text": "private static void verifyRecordedOwnedHandle"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 7934,
+          "text": "private static void p6Signal"
+        }
+      ],
+      "runtimeProof": "UNEXECUTED"
+    },
+    {
+      "id": "ANCESTRY",
+      "assessment": "SOURCE_PRESENT_WITH_RUNTIME_REQUIREMENT",
+      "sourceFinding": "Passive100msobserver and existing pre-cut P6inventory record actual ancestry/command while rootalive; reparented descendants may only use those original records. Missing/racy ancestry remains unverified/failure rather than invented ownership. Actual complete descendant capture/gone proof pending.",
+      "anchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 305,
+          "text": "private static void recordOwnedDescendants"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 7803,
+          "text": "private static P6OwnedPid p6SnapshotPid"
+        }
+      ],
+      "runtimeProof": "UNEXECUTED"
+    },
+    {
+      "id": "READINESS",
+      "assessment": "SOURCE_PRESENT",
+      "sourceFinding": "Freshnonce/role/generation/PID/actual boundport marker after own listening event; candidate live identity before/afterwait; wrapper/confighash proof. Foreign listener cannot satisfy marker. Failedcandidate rollback touches only registeredverified candidate. Secret announcement bound to actualcandidate port; no auth/native/model readiness action.",
+      "anchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 387,
+          "text": "private static String ownedReadyObserver"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 357,
+          "text": "private static Process startOwnedWorker"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 378,
+          "text": "candidate exact wrapper bytes"
+        }
+      ],
+      "runtimeProof": "UNEXECUTED"
+    },
+    {
+      "id": "GENERATION",
+      "assessment": "SOURCE_PRESENT",
+      "sourceFinding": "Explicit startWorkers verifies actual prior session/recording/ordinary/native closure readonly, retires/joins all oldpairroots before wrapper/log/reset, archives epoch and freshESMstartup. Refuses active/pending/unconfirmed prior work rather than cancelling/retrying it. Existing p3Case conditional reuse remains original explicit path, not new generalized alive-return.",
+      "anchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 398,
+          "text": "private void verifyPreviousWorkerGenerationClosed"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 18421,
+          "text": "private void startWorkers()"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 10148,
+          "text": "private void p3Case"
+        }
+      ],
+      "runtimeProof": "UNEXECUTED"
+    },
+    {
+      "id": "FAULT_RESTARTS",
+      "assessment": "SOURCE_PRESENT",
+      "sourceFinding": "Ordinary-only deliberate replacement requires prior parentgone and recordeddescendantsgone; samepairgeneration/new actualPID/nonce/poolsize/logappend. Existing crash/reaper/concurrentpool controls and250msfault/600s/human controls retained. Timing overhead must pass unchanged actual bounds.",
+      "anchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 18602,
+          "text": "private void startOrdinaryWorker(boolean preserveExistingLog, int poolSize)"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 9769,
+          "text": "startOrdinaryWorker(true, 2)"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 12029,
+          "text": "actual verified-primary signal stayed contemporaneous"
+        }
+      ],
+      "runtimeProof": "UNEXECUTED"
+    },
+    {
+      "id": "ALL_GENERATION_CLEANUP",
+      "assessment": "SOURCE_PRESENT",
+      "sourceFinding": "Class/context validation failure still attempts all registeredroots; staticinitializer rollback independent of testinstance; metadata/observer shutdown failures surfaced. Primary test/startup failures retain suppressedcleanup failures. Own-root/descendant survival cannot be calledCONFIRMED from sessionDB state.",
+      "anchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 442,
+          "text": "private static void stopEveryRegisteredProcess"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 19886,
+          "text": "private static void rollbackStaticEndpoints"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 1783,
+          "text": "public void afterTestClass"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 19898,
+          "text": "void stop() throws Exception"
+        }
+      ],
+      "runtimeProof": "UNEXECUTED"
+    },
+    {
+      "id": "NO_PROTOCOL_RETRY",
+      "assessment": "SOURCE_PRESENT",
+      "sourceFinding": "Only harness worker/sessionclosure checks changed. No admission/native action retry, pendingACK browserrestart, fabricated DBteardown/status, outcome rewrite, schema/lease/cap weakening or product runtime change. Existing accepted factual outcomes retained.",
+      "anchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 426,
+          "text": "Prior generation actual sessions/browser/recordings remain unconfirmed"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 19857,
+          "text": "private static void stopOwnedProcessTree"
+        }
+      ],
+      "runtimeProof": "UNEXECUTED"
+    },
+    {
+      "id": "ARTIFACTS",
+      "assessment": "SOURCE_PRESENT",
+      "sourceFinding": "Completedgeneration launchcounter/guided+ordinarylogs/initialcontext/outcomeJSONL archived0600 before legitstartup resets; media/manifest/journal untouched. Existing per-session launch/samehandle/native/provenance assertions retain meaning; actual counters/media continuity stillpending.",
+      "anchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 429,
+          "text": "private static void archiveOwnedGeneration"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 433,
+          "text": "p3-guided-launch-count.json"
+        }
+      ],
+      "runtimeProof": "UNEXECUTED"
+    },
+    {
+      "id": "CAPTURE_CEILINGS",
+      "assessment": "SOURCE_PRESENT",
+      "sourceFinding": "JavaB1OutcomeCapture byteexact tobefore. Node sameJSONL andpersistent firstcohort marker survivegeneration changes; synchronousappend derives cumulativeeventcount+actualUTF8bytes, max200/1040000. No classcohort/budget reset from freshprocess; passive shape/capture resultflow retained.",
+      "anchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 14494,
+          "text": "function i15Append(row)"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 14493,
+          "text": "i15CohortPath=%s"
+        }
+      ],
+      "runtimeProof": "UNEXECUTED"
+    },
+    {
+      "id": "NEW_PROCESS_METADATA",
+      "assessment": "BLOCKED_F1",
+      "sourceFinding": "New4096events/2096000bytes/1048576summary limits and0600files are explicit, failurestored/reported. F1 character-vs-UTF8 guard must be fixed before runtime; no limit increase justified.",
+      "anchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 243,
+          "text": "ownedProcessEventBytes + line.length()"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 465,
+          "text": "bounded owned process cleanup receipt"
+        }
+      ],
+      "runtimeProof": "UNEXECUTED"
+    },
+    {
+      "id": "JAVA_AND_GENERATED_JS",
+      "assessment": "STATIC_ONLY_NO_ADDITIONAL_CONCRETE_HAZARD_FOUND",
+      "sourceFinding": "Reviewed checked-exception/catch/staticrollback/constructor/helper call coherence. New observer Java strings decode to balanced JSquotes/delimiters with no raw line terminator inside quotedstrings; new joinServer/joinFs bindings are distinct. Existing textblock newline escapes and formattedarguments inspected. This is not Java compilation or Node parsing.",
+      "anchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 387,
+          "text": "private static String ownedReadyObserver"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 14493,
+          "text": "const i15CapturePath=%s,i15CohortPath=%s"
+        }
+      ],
+      "runtimeProof": "UNEXECUTED"
+    },
+    {
+      "id": "ORIGINAL_SUBJECTS",
+      "assessment": "SOURCE_EXACT",
+      "sourceFinding": "Unifiedpatch reconstructs heldafter exactly. Original45@Testmethod names/order and35incremental labels identical; original faulttiming/assertion subjects retained; no skip/threshold/coverage/expectedgolden changes. B1remainingfacets not supplied by this lifecycle repair.",
+      "anchors": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2847,
+          "text": "void incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        }
+      ],
+      "runtimeProof": "UNEXECUTED"
+    }
+  ],
+  "sourceProofs": {
+    "heldSource": {
+      "sha256": "0b69bd8af75c639ff06aedf26bebfa994dabddd907d973cf8adf036773ac24de",
+      "bytes": 969911
+    },
+    "beforeSource": {
+      "sha256": "71f19112f82117fc1f0f3090ffd476d48f51cdd026b919092c5b673ff748b0b7",
+      "bytes": 945339
+    },
+    "patch": {
+      "sha256": "c9e19b2b5477c94c3a85c3b629cf4ebfc900478be39736c7dfcc5b9b31304a7a",
+      "bytes": 44561
+    },
+    "patchReconstructsAfterExactly": true,
+    "methodList45": [
+      "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache",
+      "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
+      "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+      "incrementalStartCannotWidenTrustedOriginCeiling",
+      "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+      "queuedAndPreReadyRefusals",
+      "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+      "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays",
+      "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance",
+      "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork",
+      "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays",
+      "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall",
+      "actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay",
+      "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+      "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes",
+      "actualCoreMayUseDenialStartsNoSessionAndNoBrowser",
+      "actualCoreGuidedSameSecretIdStaysWithinPersistedScope",
+      "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope",
+      "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure",
+      "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch",
+      "actualGuidedRegistrationPassingAssertRemainsPassed",
+      "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection",
+      "actualPublishedWrongPasswordAnnotatesEarlierSecretFill",
+      "actualPublishedRegistrationPassingAssertRemainsPassed",
+      "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls",
+      "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead",
+      "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead",
+      "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution",
+      "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution",
+      "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+      "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+      "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper",
+      "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect",
+      "actualPublishedPublicCancelWhileNativePasswordWorldPending",
+      "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending",
+      "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks",
+      "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending",
+      "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+      "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+      "actualSecretControlWindowLossBeforeReadyReachesTerminalError",
+      "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead",
+      "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead",
+      "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead",
+      "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion",
+      "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass"
+    ],
+    "methodListExact": true,
+    "labels35": [
+      "insert4",
+      "delete4",
+      "reorder4",
+      "config",
+      "tail1",
+      "tail7",
+      "append11",
+      "ready6",
+      "confirm-prefix",
+      "empty",
+      "drift2",
+      "admitted-drift2",
+      "unknown2",
+      "assert-fail",
+      "policy-prefix",
+      "confirm-long-wait",
+      "confirm-cancel",
+      "confirm-expire",
+      "confirm-source-change",
+      "confirm-recover",
+      "confirm-owner-loss",
+      "append-input",
+      "deleted-consumers",
+      "admitted-literal2",
+      "pre-literal2",
+      "same-pair-literal",
+      "unused-declaration",
+      "drift-plan-fail",
+      "drift-first",
+      "confirm-edit4",
+      "confirm-race",
+      "drift-auth",
+      "drift-auth-pre",
+      "before4at2",
+      "equal4"
+    ],
+    "labelsExact": true,
+    "ProcessBuilderConstructors": 8,
+    "JavaB1OutcomeCaptureByteExact": true,
+    "ownedReadyObserverStaticLexical": {
+      "quotesDelimitersBalanced": true,
+      "rawNewlinesInJSQuotedStrings": [],
+      "sourceDerivedDecodedJsSHA256": "22d79c3147a7b49cef131ca590ff80193966187aa01bf433e8c5ecc2fe67344f",
+      "actualJSParserOrJVM": "NOT_RUN"
+    },
+    "protectedHashes": {
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": {
+        "expected": "2f74c1fcb596f09ed630e674185f7f3ba7cfac78f5540f8aa61d8ce2efe8df84",
+        "actual": {
+          "sha256": "2f74c1fcb596f09ed630e674185f7f3ba7cfac78f5540f8aa61d8ce2efe8df84",
+          "bytes": 22975
+        },
+        "matches": true
+      },
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java": {
+        "expected": "7c87231fd3704035f333c2c779085ef5f7e98d47ea9f042aca907e00e3feec9d",
+        "actual": {
+          "sha256": "7c87231fd3704035f333c2c779085ef5f7e98d47ea9f042aca907e00e3feec9d",
+          "bytes": 98807
+        },
+        "matches": true
+      },
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": {
+        "expected": "597942a8fdf2e8b366bb7a180073db1542943631ba1478750c0a1fdadb0baa15",
+        "actual": {
+          "sha256": "597942a8fdf2e8b366bb7a180073db1542943631ba1478750c0a1fdadb0baa15",
+          "bytes": 113262
+        },
+        "matches": true
+      },
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java": {
+        "expected": "c26da8acc7a253139fc3bece3cc7e5df156d50ea3e7704bc36861805e06bd0a5",
+        "actual": {
+          "sha256": "c26da8acc7a253139fc3bece3cc7e5df156d50ea3e7704bc36861805e06bd0a5",
+          "bytes": 35985
+        },
+        "matches": true
+      },
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java": {
+        "expected": "008f61117ce90c31d9a0abddaa4a91d2d142ba7ef8fabf734265a3940d45ee85",
+        "actual": {
+          "sha256": "008f61117ce90c31d9a0abddaa4a91d2d142ba7ef8fabf734265a3940d45ee85",
+          "bytes": 19663
+        },
+        "matches": true
+      },
+      "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java": {
+        "expected": "417e605d25ca8b68039b9aa4dafc07ec4390994bb58630766e9dd92bd5f7b359",
+        "actual": {
+          "sha256": "417e605d25ca8b68039b9aa4dafc07ec4390994bb58630766e9dd92bd5f7b359",
+          "bytes": 58099
+        },
+        "matches": true
+      }
+    }
+  },
+  "requiredActualProofAfterF1RootRelease": [
+    "Fresh main+testcompile and actual generatedwrapper startup/syntax with finalsourcehash; no sourceonly readiness claim",
+    "Root serialized all-source-held actualmain+trustedceiling/Core/mTLS/PG/guidedNode/Chromium/recording run; every candidate nonce/PID/start/command/port/config/wrapper join",
+    "Actualmulti-generation prior sessions/browser/recording/ordinaryclosure before retirement and all registeredroots/recordeddescendants gone afterclass/JVM; readonlypre/post identityinventory; no inherited signals",
+    "Existing foreignlistener/failedstartup rollback negative if encountered or separately authorized; do not fabricate encounteredfailures",
+    "All35joinedlabels/45originalsubjects and secret/crash/pool faultcontrols with original250msandotherbounds, owncounters/media/journal/provenance/nativeat-most-once intact",
+    "Classwideonecohort/200/1040000 actualcapturebounds plus repaired exactUTF8newmetadata bounds and0600artifactpermissions",
+    "Full86/24/55/35/B1R1B2B3B4R2/privateCoreVault/native/fullconfiguredcheckscoverage/crossReplica/deployment/independent015QA/adminclosurethen008"
+  ],
+  "row85": "Originalpendinguser/unamended/no timingalternative",
+  "reviewerActions": {
+    "testsJvmGradleBuildDbNativeProcessSignalsConnections": 0,
+    "productTestSpecStoryGeneratedDistSchemaWrites": 0,
+    "subagents": 0
+  }
+}

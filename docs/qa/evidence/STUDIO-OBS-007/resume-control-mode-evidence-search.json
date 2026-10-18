@@ -1,0 +1,48 @@
+{
+  "scope": "EXISTING_VITEST_MACHINE_RECEIPTS_ONLY",
+  "matches": [
+    {
+      "evidence": "docs/qa/evidence/STUDIO-OBS-007/runner-control-focus-execution/tests.json",
+      "cases": [
+        {
+          "mode": "worst-phase",
+          "status": "passed"
+        },
+        {
+          "mode": "slow-revoked",
+          "status": "passed"
+        },
+        {
+          "mode": "lost-control-body",
+          "status": "passed"
+        },
+        {
+          "mode": "progress-revoked",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "evidence": "docs/qa/evidence/STUDIO-OBS-007/runner-observed-control-candidate/tests.json",
+      "cases": [
+        {
+          "mode": "worst-phase",
+          "status": "failed"
+        },
+        {
+          "mode": "slow-revoked",
+          "status": "skipped"
+        },
+        {
+          "mode": "lost-control-body",
+          "status": "skipped"
+        },
+        {
+          "mode": "progress-revoked",
+          "status": "skipped"
+        }
+      ]
+    }
+  ],
+  "noRuntimeActions": true
+}

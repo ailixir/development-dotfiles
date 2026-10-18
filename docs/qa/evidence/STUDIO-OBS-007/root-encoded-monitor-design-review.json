@@ -1,0 +1,43 @@
+{
+  "scope": "Root independent dedicated encoded monitor design review",
+  "sourceSha256": "c12b979b6467679222cbefd3626820a5320bb85d0ddf103d74fbcc6a3679b9cb",
+  "result": "GO_ISOLATED_AUTHOR_CONDITIONED_ON_EXACT_INVERSE",
+  "directAccessInventory": [
+    12906,
+    12908,
+    12917,
+    12919,
+    12927,
+    13287,
+    13456,
+    13457,
+    13458,
+    13459,
+    13460,
+    13463,
+    13464,
+    13465,
+    13638,
+    13651,
+    13655
+  ],
+  "design": [
+    "One private final Object encodedMonitor; original three stream synchronized blocks change only monitor target.",
+    "Existing capture-monitor bookkeeping remains; assertion/closecheck/wipe encoded operations nested capture then encoded only.",
+    "Numeric encoded counters get coherent snapshot under encodedMonitor, existing JSON/file IO outside that monitor. No raw history/helper/new framework.",
+    "CanaryStream constructor before stream publication unchanged; all matcher methods and fields identical; methods do not callback capture/fileIO/appender/logger.",
+    "Appenders/levels/restore outside encodedMonitor; no encoded-to-capture acquisition; stream writer holds only encodedMonitor, preserving serialization and byte order.",
+    "Cleanup retains original producer drain and appender stream restoration before assertClosed; wipe only original conditions and successful actual closure; late-write/integrity detection preserved."
+  ],
+  "tradeoff": "Removes source-proven lock coupling with metadata privatefileIO; adds one monitor/access synchronization, no known exclusive cost or performance promise.",
+  "forbidden": [
+    "matcher changes",
+    "logging exclusion",
+    "timeout change",
+    "new case or query",
+    "new exporter/profiler",
+    "phase or lifecycle credit"
+  ],
+  "runtime": "NOT_RUN",
+  "next": "Isolated exact fixture author, root inverse review, independent coordinator source review before integration"
+}

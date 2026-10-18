@@ -1,0 +1,31 @@
+--- before.java
++++ current.java
+@@ -7353,7 +7353,18 @@
+   private static List<P6OwnedPid> p3OrdinaryChildren(Process parent) {
+     Instant started = parent.info().startInstant().orElseThrow();
+     p6SameProcess(parent.toHandle(), started);
+-    var children = parent.children().limit(3).toList();
++    var direct = parent.children().limit(65).toList();
++    assertThat(direct.size()).isLessThanOrEqualTo(64);
++    var children =
++        direct.stream()
++            .filter(
++                child ->
++                    child.info().commandLine()
++                        .map(
++                            command ->
++                                command.contains(TEMP.resolve("recorded-child.mjs").toString()))
++                        .orElse(false))
++            .toList();
+     assertThat(children.size()).isBetween(1, 2);
+     var owned = new java.util.ArrayList<P6OwnedPid>();
+     for (ProcessHandle child : children) {
+@@ -15349,7 +15360,7 @@
+             + JSON.writeValueAsString(child.toString())
+             + "});const cutConfig=loadConfig({..."
+             + env
+-            + (",POOL_SIZE:process.env.OBS007_ORDINARY_POOL_SIZE});"
++            + (",STUDIO_RUNNER_POOL_SIZE:process.env.OBS007_ORDINARY_POOL_SIZE});"
+                 + "const app=createApplication(cutConfig,{launcher,http:revHttp,"
+                 + "scratch:cutScratchStore(cutConfig.scratchDir),"
+                 + "runtimeVersions:loadRuntimeVersions(),observed:{build,policies:[")

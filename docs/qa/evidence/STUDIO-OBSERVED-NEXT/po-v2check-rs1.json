@@ -1,0 +1,80 @@
+{
+ "artifact": "PO record: STUDIO-OBS-014 dead-matcher oracle reword (v2 check) and architect RS-1 placement",
+ "author": "Pax (@po)",
+ "date": "2026-10-13",
+ "mode": "YOLO (autonomous); docs only, no code, no git",
+ "anchoredOn": {
+  "head": "734ad704f plus working tree",
+  "sha256Before": {
+   "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md": "d0d27cef4dcf938572e42e13d4db0e7b9486863f4d8c618604e3c87620e8559c",
+   "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md": "6c497fc47b500f16faa18ee5ba5622ea876b408518ca6876a0d8b9e283a6f4c5",
+   "docs/stories/STUDIO-OBSERVED/README.md": "3a7859aa5d20607be96f2d70a72e48af6340f7ceb517d0d55bc245652132b84e"
+  },
+  "sha256After": {
+   "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md": "27dcbeac3501492b7bdcb67a080a004108081b953cf051020b81ad08f358acb4",
+   "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md": "46a43abcc72221b5d1b76f4d5412f57a3a8bf69c41663c1fe92113d586d9cbad",
+   "docs/stories/STUDIO-OBSERVED/README.md": "f1a068603c9c0ed22df400cb867b6a4cce7693c236c6fde13a7305d8db2c10b7"
+  },
+  "sha256Sources": {
+   "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-mounted-rules.json": "088f14b3e050548fdda22d404ebfdb36c22eff70469f08bb6244f05945c07195",
+   "docs/qa/evidence/STUDIO-OBS-014/b14/ledger.json": "04546fc1ee7d595623c3710898e5460c39fa978a12375da03bba48aa866f0042",
+   "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json": "abcdf0b512d6a776a80b41badaab5f4b3a6b427512570cee98b4b4fc6bd9109a",
+   "backend/src/test/java/com/citi/put/checks/config/StudioExecuteIdempotencyFilterTest.java": "8293c1520dab4d1fd9bbcff63ea4896a35b53e6f77c6ecf96e343bbb2ec73a43"
+  }
+ },
+ "item1_v2Check": {
+  "problem": "OBS-014 inherited obligation (dead /api/v2/studio/** matcher) oracle d required `grep -rn \"api/v2/studio\" backend/src` to return zero hits. Architect AR-3 c (ar-2-3-obs014.json AR-3.c_deadMatcher.test) requires the negative test theRemovedV2PrefixIsNoLongerCovered, which must name the removed prefix. AR-3 c's own oracle line repeats the zero-hit wording, so the architect file is self-contradictory on this point. B14 ledger deadMatcherGrep raised the conflict.",
+  "verifiedByPo": {
+   "grep -rn \"api/v2/studio\" backend/src/main | wc -l": "0",
+   "grep -rln \"api/v2/studio\" backend/src": [
+    "backend/src/test/java/com/citi/put/checks/config/StudioExecuteIdempotencyFilterTest.java"
+   ],
+   "grep -rn \"api/v2/studio\" backend/src": "3 hits: StudioExecuteIdempotencyFilterTest.java:25 and :27 (class Javadoc), :78 (String path in theRemovedV2PrefixIsNoLongerCovered)",
+   "ls StudioV2IdempotencyFilterTest.java": "No such file or directory",
+   "notRun": "The test itself was not executed by @po; passing is a QA check."
+  },
+  "decision": "Keep the AR-3 c negative test (required). Narrow the oracle; do not drop the test, and do not obfuscate the string.",
+  "newOracle": [
+   "1. `grep -rn \"api/v2/studio\" backend/src/main` returns 0 hits (covers IdempotencyFilter COVERED_PATHS and all production code/resources).",
+   "2. `grep -rln \"api/v2/studio\" backend/src` lists exactly one file: backend/src/test/java/com/citi/put/checks/config/StudioExecuteIdempotencyFilterTest.java.",
+   "3. Every hit in that file is in its class Javadoc or inside method theRemovedV2PrefixIsNoLongerCovered (3 hits at the B14 checkpoint: :25, :27, :78); a different count is acceptable only if every hit meets this rule.",
+   "4. StudioV2IdempotencyFilterTest.java is absent and theRemovedV2PrefixIsNoLongerCovered passes (shouldNotFilter true; chain runs twice for the same key)."
+  ],
+  "supersedes": "OBS-014 obligation d wording and the AR-3 c `oracle` line (the architect file is not edited).",
+  "placement": "STUDIO-OBS-014 inherited obligation (dead matcher) item d, reworded in place; Change Log 0.1.7."
+ },
+ "item2_RS1": {
+  "source": "ar-mounted-rules.json capabilityAccounting.residualForPo (RS-1): exact data-testid reads of non-scalar elements (span/div) are lost in guided learning after mounted rules are removed; governed exact-field reads would be a governed-schema change; architect recommends no pre-emptive change and a decision on benchmark evidence.",
+  "correction": "The architect cites 'the OBS-010 20x3 benchmark'. The D-C benchmark (>=20 workflows x 3) is STUDIO-OBS-009 AC-7; OBS-010 only consumes the report (AC-4 release-readiness). The measurement was therefore placed in OBS-009.",
+  "decision": "Not in OBS-014 (not AC-1, not S3); no pre-emptive schema change (architect recommendation accepted). Measure in OBS-009 AC-7; the schema change becomes backlog item STUDIO-OBS-F03, gated on that evidence.",
+  "placements": [
+   {
+    "where": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+    "what": "AC-1 clarification g (decision + pointers); Change Log 0.1.7"
+   },
+   {
+    "where": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+    "what": "AC-7 obligation a-d (corpus marks RS-1 cases without editing pages; rs1NonScalarReadGaps in benchmark.json inside the gate denominators, 0 written explicitly; routing to F03; no mounted-read workaround); T4 sub-item; Change Log 0.3.8. Status stays Ready; AC-7 gate unchanged."
+   },
+   {
+    "where": "docs/stories/STUDIO-OBSERVED/README.md",
+    "what": "Follow-up backlog row STUDIO-OBS-F03 in the F01/F02 style plus one note line"
+   }
+  ],
+  "f03Gating": "Zero RS-1 cases/gaps -> @pm closes F03. Gaps while the D-C gate passes -> P2 post-release, count disclosed in the OBS-010 AC-4 benchmark row. Release-blocking only if the D-C gate fails and @pm attributes the shortfall to RS-1."
+ },
+ "autoDecisions": [
+  "[AUTO-DECISION] Narrow the oracle or drop the negative test? -> narrow the oracle (reason: AR-3 c requires the negative test and the ledger states IdempotencyFilterIT does not cover the prefix; dropping it loses the only proof that the prefix is uncovered).",
+  "[AUTO-DECISION] Place the RS-1 measurement in OBS-009 or OBS-010? -> OBS-009 AC-7 (reason: OBS-009 runs the D-C benchmark; OBS-010 AC-4 only consumes it).",
+  "[AUTO-DECISION] Do RS-1 runs count against the >=90% gate? -> yes, they stay in the denominator (reason: the gate is the ADR's verbatim; excluding them would weaken AC-7).",
+  "[AUTO-DECISION] Add F03 now or only when gaps are found? -> add now, evidence-gated (reason: the lead allowed it; a named item prevents loss by omission)."
+ ],
+ "observedNotActedOn": [],
+ "unchanged": "No AC text or meaning, Status, File List or task text in OBS-014 changed. OBS-009 changed only by an AC-7 obligation block, a T4 sub-item and a Change Log row. No code. No git.",
+ "followUp_oracle2": {
+  "date": "2026-10-13",
+  "trigger": "coordinator instruction",
+  "change": "OBS-014 AC-1 clarification e oracle (2): READ_REFUSED -> TARGET_CHANGED at prepare in guided learning (studio-runner/src/guided/runtime.ts:184, verified by @po); source ar-mounted-rules.json qaOracles (2). Change Log 0.1.8.",
+  "sha256After": "84d2014ef96045f2c3fd315f3e0f09894374a95089c11b1af3f91c0f5919148d"
+ }
+}

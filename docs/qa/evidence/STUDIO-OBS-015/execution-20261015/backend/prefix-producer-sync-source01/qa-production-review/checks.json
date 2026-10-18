@@ -1,0 +1,52 @@
+{
+  "story": "STUDIO-OBS-015",
+  "reviewer": "Quinn",
+  "root": "Orion",
+  "classification": "INDEPENDENT_BOUNDED_PRODUCTION_SOURCE_REVIEW",
+  "decision": "NO_CONCRETE_PRODUCTION_FINDINGS_IN_BOUND_SCOPE_HOLD_FOR_TESTS_AND_EXECUTION",
+  "findings": [],
+  "sourceDistHold": true,
+  "sourceRelease": false,
+  "formalQaVerdict": null,
+  "lifecycleTransition": null,
+  "compiled": false,
+  "executed": false,
+  "newTestsWrittenAtCheckpoint": false,
+  "globalSourceStableClaim": false,
+  "checks": [
+    {"id":"QPS-01","result":"CONFIRMED_STATIC","claim":"Checkpoint/design/diagnosis and archived before/after hashes match; live production matches after snapshot. Direct diff has one 41-line insertion; earlier and later source is preserved."},
+    {"id":"QPS-02","result":"CONFIRMED_STATIC","claim":"Insertion follows all done/refresh/existing returns. Existing DISPATCHING and ADMITTED paths do not acquire context/prepare RPCs."},
+    {"id":"QPS-03","result":"CONFIRMED_STATIC","claim":"Awaited existing pushContext and runner transport execute outside SQL; post-I/O gate commits before prepare. Nested runnerContext uses the same default REQUIRED transaction, not a new connection owning a competing session lock."},
+    {"id":"QPS-04","result":"CONFIRMED_STATIC","claim":"Only existing distinguished context refusal invokes existing failTranslation; original error propagates. Uncertain errors stop before prepare with no new effect retry or retry loop."},
+    {"id":"QPS-05","result":"CONFIRMED_STATIC","claim":"Post-I/O transaction repeats controller role/current access/source/owner fence/real current live lease/active session guards and requires pending prefix, validated READY and REPLAYING_PREFIX."},
+    {"id":"QPS-06","result":"CONFIRMED_STATIC","claim":"Confirmed old-evidence refresh pause, changed complete next action/coordinate and any newly appeared action at the captured coordinate refuse before prepare."},
+    {"id":"QPS-07","result":"CONFIRMED_STATIC","claim":"PrefixRequestIdentity and RunnerContext are schemaVersion 3. Ten fixed copied identity/input fields, all program hash representations, evidence hash, coordinate and captured request digest are checked."},
+    {"id":"QPS-08","result":"CONFIRMED_STATIC","claim":"Exact captured request envelope is passed to prepare; no issue/refresh/recapture/reseal/mutation is inserted. materializationRevision and leaseExpiresAt are absent from the request preimage and are not equated by the gate."},
+    {"id":"QPS-09","result":"CONFIRMED_STATIC","claim":"Normal same-context-revision BridgeIdentity ACK remains unchanged. Exact append delivery ID/contextHash ACK remains unchanged; V21 blocks append while prefix is pending."},
+    {"id":"QPS-10","result":"CONFIRMED_STATIC","claim":"Runner retains separately acknowledged live lease, monotonic metadata and canonical producer/private-local-value checks. Context timestamp is not live authority."},
+    {"id":"QPS-11","result":"CONFIRMED_STATIC","claim":"Post-prepare result/request/operation/evidence checks, guard/confirmation, store, admit and consume are preserved. Later races retain the original refusal and one-winning-consumption guards."},
+    {"id":"QPS-12","result":"CONFIRMED_STATIC","claim":"Qualified consumer edge, durable consumption/native fence, privacy/withholding and successful callback-loss preservation are unchanged."},
+    {"id":"QPS-13","result":"ATTRIBUTED_PRIOR_ACTUAL_ONLY","claim":"Core04 default300PASS; two Core failures plus audit failure remain red. Both mixed fills remain UNKNOWN_OUTCOME/ACK_LOST dispatchCount1. Original mixed HTTP status/body not retained; 409/BINDING_UNAVAILABLE is inference only."},
+    {"id":"QPS-14","result":"PENDING_NOT_CREDITED","claim":"New meaningful tests, controlled compilation, real Core/native prefix/suffix/publication/replay/video/private audit proof and full gates remain pending."}
+  ],
+  "requestIdentityFields": ["schemaVersion","sessionId","workerId","ownerFence","scopeHash","contextId","contextRevision","authoredInputsHash","sourceRevision","configurationRevision"],
+  "originalCore04": {
+    "total":303,"passed":300,"failed":3,"skipped":0,
+    "mixedOutcome":"UNKNOWN_OUTCOME_ACK_LOST_RETAINED",
+    "mixedOriginalHttpStatusBody":"NOT_RETAINED",
+    "bindingUnavailable409":"SOURCE_INFERENCE_ONLY",
+    "authenticatedNoEffectAuthority":false,
+    "retryOriginalUncertainAdmissions":false
+  },
+  "nextAction": "Finalize Aria lawful actual-prefix seam; Orion grants explicit replacement test-only JOIN/build lease; implement and separately disclose meaningful controls with original selectors/expectations preserved; then schedule controlled compile and actual Core/full proof. No production correction requested by this bounded review.",
+  "retained": {
+    "sequence":"FULL015_THEN_FULL008",
+    "acceptance":86,"ipc":24,"sql":55,"originalJoinInvocations":80,"originalJoinedVariants":35,
+    "futureAdditions":"MUST_BE_DISCLOSED_SEPARATELY",
+    "remaining":"B1/B2/B3/B4/private/Core/Vault/native/configured normal gates/coverage/cross-replica/deployment/independentQA/PO/rootclosure",
+    "item85":"ORIGINAL_OPEN_PENDING_UNAMENDED"
+  },
+  "inspectionOnly": ["file reads","metadata inspection","textual diff","SHA-256 hashing"],
+  "notRun": ["application functions","tests","compiler/build/Gradle/JVM/Node","DB/service/native/process/decoder","install/format/git/subagents/external contacts"],
+  "writes": ["review.md","checks.json","source-inventory.json","manifest.json"]
+}

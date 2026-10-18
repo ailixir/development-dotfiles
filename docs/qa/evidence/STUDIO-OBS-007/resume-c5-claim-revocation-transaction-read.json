@@ -1,0 +1,30 @@
+{
+  "scope": "READ_ONLY_EXACT_EXISTING_CLAIM_REVOCATION_TRANSACTION_BOUNDARIES",
+  "sourceBindings": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "6431f46bc00ae7077e0363cda68d8782f4eb3d2307f5df4be9b3da2ca8e35754",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "a8fec6d16dea5567caab96e7bd565fac9ada9ed501951a58eda52f77e615e377",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java": "c6f424bab316112ed9b03cc07176df84afd87142a6804a91d7fa835ef8d97503",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretRevocationSweep.java": "884ddb3c7bc119998b91eb6b7649b148bc3054222c56f1c880c92aa5da9b66a8"
+  },
+  "provedSourceFacts": [
+    "Claim validates/authenticates first, then guidedRevoked completes its own REQUIRED transaction before main claim starts another REQUIRED repository transaction.",
+    "Both acquire the same session owner row; first SELECT state/revoked_at FOR UPDATE, second SELECT document/progress FOR UPDATE. SessionConfiguration and sweep use same unqualified PlatformTransactionManager; no custom propagation.",
+    "Between first commit and second acquisition, another same-owner model/observe/consume transaction can interpose. Existing sampler demonstrates contention at first acquisition but exact holder/dominance unobserved.",
+    "Revocation precheck can mutate revoked_at and LIVE_RECHECK audit and invokes installed guidedStop inside its transaction. Current caller throws SECRET_USE_REVOKED only AFTER that transaction commits."
+  ],
+  "nonEquivalentNaiveChange": "Moving precheck inside main lambda then throwing would roll back real revocation/audit/stop effects; forbidden.",
+  "smallestPotentialCompositionForArchitectReview": "An outer same REQUIRED transaction could contain unchanged existing guidedRevoked plus unchanged existing main transaction lambda, returning a private revoked-or-response decision. Revoked decision must exit normally to commit before identical public exception is thrown outside; nonrevoked original body/guards/return/clock/calls remain unchanged. This removes the owner release/reacquire interposition window without data/auth cache or skipped validation. No author release proposed from this report.",
+  "requiredReview": [
+    "Same actual tx-manager participation and callback side-effect/aftercommit behavior",
+    "Revoked branch commit/error equivalence and positive/duplicate/conflict rollback",
+    "No remote wait under lock, source/auth/order/deadline invariants"
+  ],
+  "costInterpretation": "Source-proven two-phase queue opportunity only; no exclusive holder identification or sufficient one-second guarantee.",
+  "actions": {
+    "sourceEdits": 0,
+    "runtime": 0,
+    "newTelemetry": 0,
+    "newCases": 0
+  },
+  "requestAndRevocationBoundsUnchanged": true
+}

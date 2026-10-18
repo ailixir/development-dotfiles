@@ -1,0 +1,16 @@
+{
+  "command": [
+    "npm",
+    "run",
+    "test:fixtures",
+    "--",
+    "test/fixtures-tier/guided-targets.test.ts",
+    "-t",
+    "^retained isolated target at invocation (refuses a post-prepare type change to password|asserts readonly/disabled nonsecret values without granting password/hidden access)$",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-007/resume-r-existing-read-native-two/tests.json"
+  ],
+  "expected": 2,
+  "startedAt": "2026-10-11T07:25:54.672545+00:00"
+}

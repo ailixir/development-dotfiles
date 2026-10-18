@@ -1,0 +1,40 @@
+--- before/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ candidate/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -856,6 +856,16 @@
+     return decision.response();
+   }
+ 
++  private static String hashObservationBytes(byte[] canonicalObservation) {
++    try {
++      return java.util.HexFormat.of()
++          .formatHex(
++              java.security.MessageDigest.getInstance("SHA-256").digest(canonicalObservation));
++    } catch (java.security.NoSuchAlgorithmException e) {
++      throw new IllegalStateException(e);
++    }
++  }
++
+   public JsonNode observe(
+       Authentication worker, String id, long fence, String key, JsonNode observation) {
+     return observe(worker, id, fence, key, observation, null);
+@@ -891,8 +901,9 @@
+               409);
+           scoped(session, observation);
+           JsonNode limits = session.document().path("limits");
+-          int bytes =
+-              GuidedContracts.canonical(observation).getBytes(StandardCharsets.UTF_8).length;
++          byte[] canonicalObservation =
++              GuidedContracts.canonical(observation).getBytes(StandardCharsets.UTF_8);
++          int bytes = canonicalObservation.length;
+           require(
+               bytes <= limits.path("maxObservationBytes").asInt()
+                   && observation.path("nodes").size() <= limits.path("maxObservationNodes").asInt(),
+@@ -918,7 +929,7 @@
+           require(origin, "ORIGIN_NOT_ALLOWED", 403);
+           reserve(session, "observations", 1, "maxObservations");
+           reserve(session, "sanitizedEvidenceBytes", bytes, "maxSanitizedEvidenceBytesTotal");
+-          String observationHash = GuidedContracts.hash(observation);
++          String observationHash = hashObservationBytes(canonicalObservation);
+           session
+               .progress()
+               .put("generation", generation)

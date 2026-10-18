@@ -1,0 +1,870 @@
+{
+  "artifact": "STUDIO-OBS-015 resumed independent data readiness review",
+  "author": "Dara / data_015",
+  "date": "2026-10-14",
+  "scope": {
+    "reviewOnly": true,
+    "allowedWrites": [
+      "docs/qa/evidence/STUDIO-OBS-015/resume-data-review.json"
+    ],
+    "implementation": false,
+    "migrationsInstalled": false,
+    "gradleInvoked": false,
+    "databaseRecreated": false,
+    "databaseQueriesExecuted": false,
+    "externalOperations": false,
+    "delegation": false,
+    "budget": "Whole-wave ceiling USD 500 inherited; actual spend unavailable. No spend claim is made."
+  },
+  "verdict": {
+    "status": "NOT_READY_FOR_V21_INSTALL_OR_MIXED_MODE_IMPLEMENTATION",
+    "boundedMeaning": "The existing proposal is adequate only to admit the new session state and provide an optional attempt-row fence. It is not a complete mixed-mode data design. This is a readiness review, not a QA lifecycle transition or an assertion that the story is implemented. Independent authoring cleanup may proceed only under root ownership/window release.",
+    "blockingFindingIds": [
+      "D015-01",
+      "D015-02",
+      "D015-03",
+      "D015-04",
+      "D015-05",
+      "D015-06",
+      "D015-07",
+      "D015-08"
+    ],
+    "stopCondition": "T0 ruling2 baseSide STOP applies to unresolved context secret-reference declaration mapping. No column, live-draft fallback or historical hash synthesis is authorized by this review."
+  },
+  "evidenceClassification": {
+    "executedNow": [
+      "Read local source/contract/evidence files",
+      "Computed file SHA-256 values and static test declaration counts",
+      "Confirmed the migration directory contains V1 through V20 and no V21 path",
+      "Parsed and wrote this JSON artifact"
+    ],
+    "priorReportedOnly": {
+      "artifact": "docs/qa/evidence/STUDIO-OBS-015/v21-design.json",
+      "claim": "PostgreSQL 14.17 psql V1-V20 plus proposed V21 and rolled-back smoke cases; recorded as prior design evidence only, not independently rerun here.",
+      "limits": "No Flyway execution or PostgreSQL 15 gate in that artifact; cannot prove installed head, checksum behavior, application continuation, materialization, publication merge, retention result projection, or gateway silence."
+    },
+    "notExecuted": [
+      "SQL dry-run",
+      "PostgreSQL catalog queries",
+      "Flyway",
+      "Gradle or backend tests",
+      "runner tests",
+      "CodeRabbit/external review",
+      "live secret/Vault/model operations"
+    ]
+  },
+  "findings": [
+    {
+      "id": "D015-01",
+      "severity": "BLOCKER",
+      "title": "Context secret declaration cannot be reconstructed from the allowed immutable base fields",
+      "anchors": [
+        "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json:155",
+        "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json:160",
+        "backend/src/main/java/com/citi/put/checks/studio/dto/SecretReference.java:9",
+        "backend/src/main/java/com/citi/put/checks/studio/dto/StudioAuthoringValidation.java:98",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java:146",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java:227",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java:123",
+        "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringRevisionInputs.java:14",
+        "backend/src/test/java/com/citi/put/checks/studio/contract/StudioContextContractTest.java:219"
+      ],
+      "observed": "Step context accepts secretRef carrying referenceId only; valid examples use vault://studio/protected-page-password. Global secretRef and secret defaults are refused, but a step secretRef is accepted. Classifier context collection handles variableRef and text, not secretRef. Revision authoring captures that opaque referenceId; inputs have only nonsecret value hashes; revision configuration has no variables; references.secrets is populated from materialized configuration references and has no alias-to-secretId mapping.",
+      "implication": "For this accepted context shape, a base-only {referenceId, kind:secretRef, secretId} declaration is not recoverable. T0 explicitly requires STOP/report. A missing entry is not evidence that the reference was unused or equivalent to a token.",
+      "requiredCorrection": "Aria must rule one canonical declaration identity and its immutable persistence, or close the unsupported context shape explicitly. Prefer extending an existing JSON snapshot only if contract/semantics are ruled; no new column or current-draft lookup by assumption. Test two identical authoring shapes with changed declaration mapping and verify historical base resolution independently of live variables.",
+      "owner": "Aria ruling; C-int contract; dev persistence; Dara schema only if newly ruled",
+      "evidenceLevel": "STATIC_SOURCE_REVIEW_NOT_EXECUTED"
+    },
+    {
+      "id": "D015-02",
+      "severity": "BLOCKER",
+      "title": "Token-only plain reference hashes are absent from existing base snapshots",
+      "anchors": [
+        "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringRevisionIdentity.java:127",
+        "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringRevisionIdentity.java:137",
+        "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringRevisionIdentity.java:149",
+        "backend/src/main/java/com/citi/put/checks/studio/StudioService.java:722",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java:111",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java:227",
+        "backend/src/main/resources/db/migration/V12__tests_revisions.sql:90"
+      ],
+      "observed": "AuthoringRevisionIdentity collects global and step context VariableReference/default variable references, but never parses step text. A <var name> token is accepted and materialized by the classifier. Publication stores reference names, not plain values or value hashes, in references; the V12 trigger copies the incomplete authoring_revision_inputs unchanged.",
+      "implication": "The ruled stepInputHash reads valueHash from nonsecretReferencedValues for text and context references; that value is missing for token-only references. A value change can be missed or base recomputation cannot run. Revision configuration_revision alone must not force all such edits to k=1 in place of the ruled per-step behavior.",
+      "requiredCorrection": "Extend the one pure reference collector/identity producer to cover canonical text tokens plus allowed context/default/global references before new revisions are published. Persist complete hashes at first publication. Existing immutable rows with missing values need an explicit clean-data/refusal policy; do not synthesize historical hashes from current draft variables.",
+      "owner": "dev authoring + publication; Aria legacy/base policy; C-int if JSON shape changes",
+      "evidenceLevel": "STATIC_SOURCE_REVIEW_NOT_EXECUTED"
+    },
+    {
+      "id": "D015-03",
+      "severity": "BLOCKER",
+      "title": "One immutable materialization cannot currently accommodate prefix-first execution followed by suffix SOURCE_PLAN",
+      "anchors": [
+        "backend/src/main/resources/db/migration/V14__guided_sessions.sql:127",
+        "backend/src/main/resources/db/migration/V14__guided_sessions.sql:205",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java:24",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:163",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:207",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java:118",
+        "backend/src/main/resources/db/migration/V17__secret_use_audit.sql:423"
+      ],
+      "observed": "Materialization is one row per session. Its authored_inputs, authored_inputs_hash, context identity and source/config revision are immutable; only live/materialization_revision can change. freeze refuses any existing action or materialization. Current SOURCE_PLAN chooses source references before bootstrap/freeze. Publication and secret lineage assume the single materialization.",
+      "implication": "After model-free prefix actions, existing bootstrap/freeze cannot install newly selected suffix inputs. Updating the old materialization would violate V14 and invalidate prefix proofs/secret joins. The proposed V21 does not address this.",
+      "requiredCorrection": "Before DDL installation, choose either a bounded complete pre-prefix materialization whose stable inputs suffice for all future source selections, or a separately ruled append/versioned input design with proof/secret/publication joins bound to each version. A complete source-span universe must respect 200-input/size bounds; do not claim it is free. Any required new tables/constraints/functions go in forward V21, never edited V14/V17.",
+      "owner": "Aria data-flow decision; dev GuidedMaterializationService/translation; Dara forward schema",
+      "evidenceLevel": "STATIC_SOURCE_REVIEW_NOT_EXECUTED"
+    },
+    {
+      "id": "D015-04",
+      "severity": "BLOCKER",
+      "title": "State-only model fence and current continuation routing do not maintain a model-free prefix",
+      "anchors": [
+        "docs/qa/evidence/STUDIO-OBS-015/v21-proposed.sql:35",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1279",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1303",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1335",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1353",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:847",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:1291",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java:83",
+        "backend/src/main/resources/db/migration/V14__guided_sessions.sql:262",
+        "studio-runner/src/guided/ownership.ts:30"
+      ],
+      "observed": "admit writes ACTING and completeStep writes OBSERVING/FINALIZING; completeStep does not accept REPLAYING_PREFIX. reserveModel updates counters/progress without requiring a model-attempt INSERT, so the SQL trigger alone cannot prove zero counters. runnable includes the state; coordinator chooses only plans/dependency-admissions/proposals. Runner ACTIVE excludes it.",
+      "implication": "Untouched paths either reject prefix work, leave the fence mid-prefix, attempt model planning, or lose ownership. Merely filtering the state out of runnable leaves no durable continuation driver.",
+      "requiredCorrection": "Specify an atomic durable replay mode/checkpoint, retain state=REPLAYING_PREFIX across ordinary prefix subactions or enforce mode independently, gate both reservation entrypoints, and route restartable prefix work. A new continuation value is not logically mandatory if state plus durable checkpoint is authoritative; however, recommended explicit REPLAY_PREFIX requires V21 replacing the V14 continuation CHECK and coordinator support. Resolve this choice before V21 is installed. Test direct reserveModel, both gateways, restart, heartbeat, cancel, expiry and drift exit.",
+      "owner": "Aria lifecycle; C-int vocabulary; dev state/runner; Dara continuation CHECK if selected",
+      "evidenceLevel": "STATIC_SOURCE_REVIEW_NOT_EXECUTED"
+    },
+    {
+      "id": "D015-05",
+      "severity": "BLOCKER",
+      "title": "Suffix consumer changes contradict byte-identical reused producer snapshots",
+      "anchors": [
+        "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json:165",
+        "docs/specs/studio-observed-authoring/contracts/v3/binding.schema.json:32",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java:685",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java:772",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java:815",
+        "backend/src/main/resources/db/migration/V15__publication.sql:532"
+      ],
+      "observed": "The ruled learnedStepHash includes produced binding definitions minus session-bound fields. Binding consumers include consumer step coordinate, slot and destination origin; publication builds this from all exercised edges. Those semantic consumer fields are not in the ruled deny-list.",
+      "implication": "Editing/deleting/reordering a suffix consumer changes an unchanged prefix producer hash even when its operation/value production is identical. Copying the base hash fails verifier recomputation or the V15 reuse guard; copying stale consumers fails exact-plan validation.",
+      "requiredCorrection": "Aria must revise the canonical ownership of binding content: commit producer-local identity in producer snapshot and consumer edges at their consumer steps, or another explicit composition with vectors. Keep the complete merged dependency graph and admission provenance independently verified; do not disable the V15 same-hash guard.",
+      "owner": "Aria hash ruling; C-int vectors; dev hasher/verifier",
+      "evidenceLevel": "STATIC_SOURCE_REVIEW_NOT_EXECUTED"
+    },
+    {
+      "id": "D015-06",
+      "severity": "BLOCKER",
+      "title": "Prefix input and binding identity import is not implemented",
+      "anchors": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedSourceReferenceValidator.java:128",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedSourceReferenceValidator.java:152",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java:26",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1260",
+        "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json:165",
+        "backend/src/main/resources/db/migration/V14__guided_sessions.sql:164"
+      ],
+      "observed": "Input IDs are freshly randomized during resolve; binding IDs are randomized for a new session allocation. The learned operation and operationHash commit input/binding references. Tables scope IDs by session, so cross-session reuse is structurally possible, but current methods expose no authenticated import path.",
+      "implication": "Preserving only admission-ID exclusion does not guarantee unchanged learnedStepHash; a re-materialized prefix operation with a different sourceInputId changes operation and operationHash. Binding-ID reuse is also an explicit AC-3 obligation.",
+      "requiredCorrection": "Define authenticated base-revision-to-new-session import for stable input/produced binding IDs and current receipts/proofs, plus suffix collision protection. Alternatively rule canonical recipe identity for hash inputs and recompute operation commitments consistently; cannot simply strip operationHash. Test fresh secret/plain prefix input and binding recapture with same IDs but fresh values/owner/evidence.",
+      "owner": "Aria identity rule; dev bridge/publication; Dara verify existing session-scoped keys",
+      "evidenceLevel": "STATIC_SOURCE_REVIEW_NOT_EXECUTED"
+    },
+    {
+      "id": "D015-07",
+      "severity": "HIGH",
+      "title": "Blind full-base plan/consumer import prevents suffix deletion and drift replacement",
+      "anchors": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:729",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java:60",
+        "backend/src/main/resources/db/migration/V14__guided_sessions.sql:222",
+        "backend/src/main/resources/db/migration/V14__guided_sessions.sql:341",
+        "backend/src/main/resources/db/migration/V14__guided_sessions.sql:361",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java:160",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java:821"
+      ],
+      "observed": "acceptPlan requires every prior obligation and need consumer remain; allocations cannot shed consumers. Plans and obligation meanings/admission associations are immutable. Publication requires exact equality of actions, plan obligations and association counts, and all declared consumers exercised.",
+      "implication": "Importing the full old plan or its suffix graph before replay carries deleted or changed suffix obligations into the new publication and may make a drift switch impossible without replaying old actions.",
+      "requiredCorrection": "Specify a deterministic prefix obligation seed that preserves actual dispatched identities only, reconstruct current-draft consumers, and append learned suffix under a new plan head. Preserve immutable historical plans and single-assignment associations. Decide how a partially dispatched step j retains completed actions while replanning remaining ordinals. No blanket trigger relaxation.",
+      "owner": "Aria merge semantics; dev translation/publisher; Dara schema impact review",
+      "evidenceLevel": "STATIC_SOURCE_REVIEW_NOT_EXECUTED"
+    },
+    {
+      "id": "D015-08",
+      "severity": "HIGH",
+      "title": "Required replay/switch provenance has no assigned durable home under retention",
+      "anchors": [
+        "backend/src/main/resources/db/migration/V19__guided_governance.sql:274",
+        "backend/src/main/resources/db/migration/V19__guided_governance.sql:339",
+        "backend/src/main/resources/db/migration/V14__guided_sessions.sql:58",
+        "backend/src/main/resources/db/migration/V15__publication.sql:78",
+        "backend/src/main/resources/db/migration/V15__publication.sql:260",
+        "backend/src/main/resources/db/migration/V15__publication.sql:278",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java:308",
+        "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json:143",
+        "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json:225"
+      ],
+      "observed": "The pruner retains only stepIndex,errorCode,detail,teardownStatus,publicationRevisionId,publicationRevisionDigest,evidenceRef. baseRevisionId, firstLearnStepId, switch j and prefix checkpoints do not currently exist. New session document fields would not be protected by the V14 explicit immutable-field list. Publication base and publicReceipt have closed SQL key sets.",
+      "implication": "Storing relearnedFrom only in progress loses the required receipt information after pruning. Adding it to publicReceipt without forward SQL changes fails its deferred shape guard. A mutable session copy of the base pointer is not the immutable publication-base guarantee.",
+      "requiredCorrection": "Choose an immutable server-resolved session identity for initial base/k and a write-once effective switch/final receipt. Bind base to publication_bases.confirmedRevisionId. Explicitly decide what survives pruning for succeeded and failed runs. If publicReceipt gains keys, update V15 guard via V21; if outer publication/base keys gain keys, replace their CHECKs too. If progress carries retained scalar provenance, extend V19 retained-key function via V21 and regression-test sensitive payload exclusion.",
+      "owner": "Aria retention/receipt design; C-int shape; Dara forward CHECK/function changes; dev projection",
+      "evidenceLevel": "STATIC_SOURCE_REVIEW_NOT_EXECUTED"
+    },
+    {
+      "id": "D015-09",
+      "severity": "HIGH",
+      "title": "Per-step metadata exists only as nullable storage, with no current producer or verifier",
+      "anchors": [
+        "backend/src/main/resources/db/migration/V15__publication.sql:494",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java:245",
+        "backend/src/main/java/com/citi/put/checks/studio/entity/UITestRevision.java:71",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java:81",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java:133",
+        "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java:182"
+      ],
+      "observed": "Production revision INSERT omits step_snapshot_hashes and step_reuse_provenance. The entity maps neither. Verifier reads artifact/configuration/policy/authoring but neither metadata map nor authoring_revision_inputs/references. Existing metadata test writes synthetic map values explicitly to test DB scope/equality, not production hash composition.",
+      "implication": "V15 proves capacity and relational constraints, not populated base hashes, readiness computation or prefix provenance. Current published rows have NULL maps through the production path. Existing SQL tests do not satisfy AC-1/AC-5/AC-6.",
+      "requiredCorrection": "Implement metadata at publication atomically and read/verify it from the immutable revision; define no-metadata base policy before mixed replay. Retain the nullable schema for frozen V15, never retrofit synthesized hashes into immutable rows. Assert full publish and reuse produce real stored maps and verify all values; reject missing/extra/forged maps.",
+      "owner": "dev publication/readiness/verifier; Dara constraint regression; QA joined oracle",
+      "evidenceLevel": "STATIC_SOURCE_REVIEW_NOT_EXECUTED"
+    },
+    {
+      "id": "D015-10",
+      "severity": "MEDIUM",
+      "title": "Tail deletion is ruled to a real last step; empty suffix is not the adopted representation",
+      "anchors": [
+        "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json:159",
+        "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json:143",
+        "backend/src/main/resources/db/migration/V14__guided_sessions.sql:242",
+        "backend/src/main/resources/db/migration/V15__publication.sql:513",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java:63"
+      ],
+      "observed": "T0 maps pure tail deletion to k=draft last step. Empty draft cannot be learned. Optional firstLearnStepId means server chooses, not an end-of-draft sentinel. Installed contracts/code contain no baseRevisionId/firstLearnStepId/REPLAYING_PREFIX implementation.",
+      "implication": "A draft 1..9 replacing base 1..10 must replay 1..8 and learn 9; it does not have empty learned suffix. New zero-suffix/publish-only semantics would be a change to T0. Deleting all steps can remain a draft but learning is refused.",
+      "requiredCorrection": "Keep this rule unless Aria explicitly changes it. Add tail-delete to one-step, multi-tail-delete, delete-all refusal, append-after-last and ordinary READY replay tests. If empty suffix is newly required, C3b must define nullable/end sentinel and receipt semantics, and publisher must support it; do not overload an omitted field.",
+      "owner": "Aria/PO if semantics change; C-int and dev tests",
+      "evidenceLevel": "STATIC_SOURCE_REVIEW_NOT_EXECUTED"
+    },
+    {
+      "id": "D015-11",
+      "severity": "MEDIUM",
+      "title": "Some proposal statements overclaim invariants or misidentify existing guards",
+      "anchors": [
+        "docs/qa/evidence/STUDIO-OBS-015/v21-design.json:70",
+        "docs/qa/evidence/STUDIO-OBS-015/v21-design.json:97",
+        "docs/qa/evidence/STUDIO-OBS-015/v21-proposed.sql:15",
+        "backend/src/main/resources/db/migration/V14__guided_sessions.sql:20",
+        "backend/src/main/resources/db/migration/V17__secret_use_audit.sql:514",
+        "studio-runner/src/guided/ownership.ts:30"
+      ],
+      "observed": "The proposal says all Java/terminal lists make the state live everywhere, but runner uses ACTIVE. Its suggested test says only one CHECK names state, but the document.state=state CHECK also names it. V17:515 guards terminal unlinked USAGE, not ordinary secret RELEASE. Excluding replay from runnable without a separate driver stalls it.",
+      "implication": "These do not invalidate the narrow state CHECK expansion, but would create incorrect test expectations and misleading readiness evidence.",
+      "requiredCorrection": "Assert exactly one state-vocabulary CHECK plus the unchanged document equality CHECK; preserve unlinked no-decision refusal during prefix and authenticate ordinary RELEASE by existing lineage; enumerate explicit positive ACTIVE lists and document the replay driver.",
+      "owner": "Dara design update; dev/QA liveness tests",
+      "evidenceLevel": "STATIC_SOURCE_REVIEW_NOT_EXECUTED"
+    },
+    {
+      "id": "D015-12",
+      "severity": "MEDIUM",
+      "title": "Existing reuse guard checks a prior same-scope hash, not immediate pinned-base provenance",
+      "anchors": [
+        "backend/src/main/resources/db/migration/V15__publication.sql:526",
+        "backend/src/main/resources/db/migration/V15__publication.sql:532",
+        "backend/src/main/resources/db/migration/V15__publication.sql:103",
+        "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json:172"
+      ],
+      "observed": "The V15 trigger permits a hash-equal GUIDED_RUN revision of the same test/CSI and same step ID. It does not require reusedFrom.revisionId equal this session publication base confirmedRevisionId or require a contiguous actual reused prefix.",
+      "implication": "Same-scope storage integrity is necessary but does not itself establish AC-5 provenance to the selected base or the drift-switch boundary.",
+      "requiredCorrection": "Server and verifier must enforce immediate pinned base, exact reused prefix and absence of reusedFrom for j onward. Optionally add a forward DB guard after Aria chooses immutable base/k/switch representation; test same-test wrong-base, suffix mislabeled reused and post-drift reused entries.",
+      "owner": "dev verifier/publisher; Aria optional DB defense; Dara if ruled",
+      "evidenceLevel": "STATIC_SOURCE_REVIEW_NOT_EXECUTED"
+    }
+  ],
+  "schemaImpactInventory": [
+    {
+      "object": "ck_guided_session_state_v3",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:16",
+      "effect": "Currently rejects REPLAYING_PREFIX",
+      "v21Action": "Required: replace named CHECK in V21; keep old 12 states and add new one"
+    },
+    {
+      "object": "studio_guided_sessions document/sessionId/scopeHash/principalId equality CHECKs",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:18",
+      "effect": "Document state must match the column; update both. No DB catalog validation executed.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_guided_immutable_identity / tr_guided_identity",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:58",
+      "effect": "New state is nonterminal; old terminal cannot reopen. New base/k keys are not immutable today.",
+      "v21Action": "Preserve terminal rules; add immutable mixed-mode identity protection if stored in document"
+    },
+    {
+      "object": "translation_state continuation CHECK",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:262",
+      "effect": "Closed enum lacks REPLAY_PREFIX/REPLAYING_PREFIX.",
+      "v21Action": "Decision required: add one ruled value in V21 if explicit continuation is chosen; identify actual catalog constraint before replacement"
+    },
+    {
+      "object": "studio_guided_translation_head_guard / tr_guided_head_guard",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:372",
+      "effect": "Plan head cannot regress; replay/suffix transition must advance or retain head atomically.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_guided_translation_immutable / tr_guided_manifest_immutable,tr_guided_plan_immutable,tr_guided_usage_immutable",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:341",
+      "effect": "Cannot mutate frozen manifest or plan to replace a suffix; append versioned plans.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_guided_translation_single_assignment / tr_guided_obligation_assignment,tr_guided_question_assignment",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:361",
+      "effect": "Cannot reassign old admissions or clarification choice on drift.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_guided_translation_association_check / tr_guided_obligation_check,tr_guided_question_check",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:380",
+      "effect": "Prefix synthetic obligations still require exact new-session action digest/coordinate.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_guided_model_attempts status/kind CHECKs and uq_guided_translation_live_attempt",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:268",
+      "effect": "Replay is not a new model kind. No live model attempt may coexist with prefix replay.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_guided_translation_attempt_guard / tr_guided_attempt_guard",
+      "anchor": "backend/src/main/resources/db/migration/V19__guided_governance.sql:303",
+      "effect": "Settled attempts cannot resurrect, CALLING cannot return RESERVED, pruned safe_result change is narrowly defined.",
+      "v21Action": "Keep current V19 body; new state fence is separate"
+    },
+    {
+      "object": "proposed studio_guided_replaying_prefix_guard / tr_guided_replaying_prefix_attempt,tr_guided_replaying_prefix_entry",
+      "anchor": "docs/qa/evidence/STUDIO-OBS-015/v21-proposed.sql:35",
+      "effect": "Locks session on attempt insert; rejects inserts during replay and entering replay with RESERVED/CALLING. Does not cover direct model counter reservations or phase loss.",
+      "v21Action": "Retain if selected, test concurrent entry vs insert, explain all-attempt INSERT prohibition and application fence separately"
+    },
+    {
+      "object": "studio_guided_materialization_identity / tr_guided_materialization_identity and materialization PK/FKs",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:127",
+      "effect": "One immutable materialization per session binds preparations and current evidence.",
+      "v21Action": "Blocking design choice D015-03; forward additions only if ruled"
+    },
+    {
+      "object": "studio_guided_allocation_identity / tr_guided_allocation_identity",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:222",
+      "effect": "Consumers only grow. Cannot copy deleted suffix consumers then remove them.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_guided_bridge_immutable / tr_guided_producer_immutable,tr_guided_edge_immutable",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:201",
+      "effect": "Keep new-session recaptured producer/consumer evidence immutable; never copy historic receipts as current.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_guided_immutable_admission / tr_guided_admission and action dispatchCount CHECKs",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:24",
+      "effect": "Action transitions preserve proposals and dispatchCount at most one; drift must never repeat a dispatched ordinal.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_guided_preparation_identity / tr_guided_preparation_identity",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:213",
+      "effect": "Prefix needs fresh preparations and single-assignment admission links; base proof cannot be relabeled.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_guided_assignment_identity / tr_guided_assignment_identity",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:118",
+      "effect": "Keep same guided owner/browser; immutable intent and single assignment receipt.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_secret_revocation_write_once / tr_guided_secret_revocation",
+      "anchor": "backend/src/main/resources/db/migration/V14__guided_sessions.sql:410",
+      "effect": "Prefix replay does not reset revocation.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "publication_bases.document closed CHECK / studio_publication_base_guard / tr_publication_base_guard",
+      "anchor": "backend/src/main/resources/db/migration/V15__publication.sql:74",
+      "effect": "Must insert base while PREPARING, owner unclaimed and fence 0, before all actions/assignments/materializations/attempts. Pins confirmed revision.",
+      "v21Action": "Do not enter replay at session INSERT; if adding base-document keys, forward replace CHECK and any validation"
+    },
+    {
+      "object": "studio_publication_evidence_guard / tr_publication_observation_guard,tr_publication_preparation_guard,tr_publication_admission_guard",
+      "anchor": "backend/src/main/resources/db/migration/V15__publication.sql:154",
+      "effect": "Replay state is allowed; terminal/FINALIZING and expired capture denied. Same-session observations/preparations/obligations/actions must join exactly.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_publication_attempt_guard / tr_publication_attempt_guard and attempt identity CHECK",
+      "anchor": "backend/src/main/resources/db/migration/V15__publication.sql:186",
+      "effect": "Publication reservation/validation requires FINALIZING, live lease and bounded snapshot.",
+      "v21Action": "No state relaxation; if attempt identity gains replay fields, replace closed identity CHECK"
+    },
+    {
+      "object": "studio_guided_publications.document CHECK / studio_publication_receipt_guard / tr_publication_receipt_guard",
+      "anchor": "backend/src/main/resources/db/migration/V15__publication.sql:257",
+      "effect": "Both outer receipt and nested publicReceipt have closed keys; hashes and current session proof remain enforced.",
+      "v21Action": "Conditional V21 replacement when new replay receipt fields are placed here"
+    },
+    {
+      "object": "ck_observed_revision_step_metadata / studio_publication_step_metadata_guard / tr_publication_step_metadata_guard",
+      "anchor": "backend/src/main/resources/db/migration/V15__publication.sql:496",
+      "effect": "Maps nullable together; complete one-per-authored-step coverage; UUID/hash shape; same-test/CSI/hash reuse. No hash computation or pinned-base/prefix validation.",
+      "v21Action": "Existing storage may suffice after hash/identity design resolved; preserve same-hash guard"
+    },
+    {
+      "object": "capture_ui_test_revision_authoring / trg_ui_test_revisions_capture_authoring and ui_test_revisions_write_once / trg_ui_test_revisions_write_once",
+      "anchor": "backend/src/main/resources/db/migration/V12__tests_revisions.sql:38",
+      "effect": "New revision captures current authoring+inputs under publication locks; all columns including new metadata immutable.",
+      "v21Action": "No rewrite/backfill of old revisions"
+    },
+    {
+      "object": "studio_guided_session_policy_guard / tr_guided_session_policy_guard and policy document/hash CHECKs",
+      "anchor": "backend/src/main/resources/db/migration/V19__guided_governance.sql:218",
+      "effect": "No state-specific restriction; freeze current approved policy once and retain same policy for prefix and suffix.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "ix_guided_session_live_csi",
+      "anchor": "backend/src/main/resources/db/migration/V19__guided_governance.sql:266",
+      "effect": "Explicit terminal exclusion includes replay in live index. CSI budget additionally excludes expired rows.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_guided_prune_guard / tr_guided_prune_guard",
+      "anchor": "backend/src/main/resources/db/migration/V19__guided_governance.sql:281",
+      "effect": "Replay cannot be pruned even after expires_at until terminal. Pruned progress cannot regain deleted fields.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_guided_progress_retained_keys",
+      "anchor": "backend/src/main/resources/db/migration/V19__guided_governance.sql:274",
+      "effect": "No mixed-mode result/provenance key is retained.",
+      "v21Action": "Extend only if ruled retained scalar state is housed in progress; otherwise store immutable durable record elsewhere"
+    },
+    {
+      "object": "studio_guided_prune_session",
+      "anchor": "backend/src/main/resources/db/migration/V19__guided_governance.sql:339",
+      "effect": "Requires terminal plus retention window and locks session; clears safe_result and unpublished copies, keeps base/attempt/publication/recording.",
+      "v21Action": "Preserve algorithm; prove new durable provenance survives the chosen representation"
+    },
+    {
+      "object": "studio_publication_immutable / tr_publication_immutable,tr_publication_attempt_delete",
+      "anchor": "backend/src/main/resources/db/migration/V19__guided_governance.sql:324",
+      "effect": "Only unpublished, pruned terminal copied evidence can delete. Published merge evidence retained.",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_secret_audit_insert_guard / tr_secret_audit_insert",
+      "anchor": "backend/src/main/resources/db/migration/V17__secret_use_audit.sql:463",
+      "effect": "Ordinary guided RELEASE uses current action/materialized declaration lineage; terminal unlinked USAGE is forbidden during replay (:515).",
+      "v21Action": "No change required solely for the state"
+    },
+    {
+      "object": "studio_secret_guided_declaration, studio_secret_guided_exact_reference, studio_secret_guided_input_reference, studio_secret_guided_consumed",
+      "anchor": "backend/src/main/resources/db/migration/V17__secret_use_audit.sql:401",
+      "effect": "Same manifest/materialization/step/owner/fill input lineage must hold for prefix secret replay.",
+      "v21Action": "No weakening. Any versioned materialization choice needs an explicit compatible forward design"
+    },
+    {
+      "object": "recording state/partial/expiry/timings CHECKs and studio_guided_session_recording_immutable / tr_guided_session_recording_immutable",
+      "anchor": "backend/src/main/resources/db/migration/V20__guided_session_recording.sql:18",
+      "effect": "Recording state vocabulary is separate; one final immutable video fact spans prefix and suffix, max 400 timings, never pruned.",
+      "v21Action": "No REPLAYING_PREFIX added to recording.state"
+    }
+  ],
+  "baseRevisionPersistenceAudit": {
+    "stepsAndContext": {
+      "status": "PRESENT",
+      "source": "backend/src/main/resources/db/migration/V12__tests_revisions.sql:90",
+      "detail": "Captured authoring has stable UUID/text/context; old nullable authoring rows require explicit handling, not ID minting."
+    },
+    "configuration": {
+      "status": "PRESENT",
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java:63",
+      "detail": "browser, viewport, timeoutSeconds, waitStrategy, environment; no governed policy hashes in change detection."
+    },
+    "plainReferenceHashes": {
+      "status": "PARTIAL",
+      "finding": "D015-02"
+    },
+    "secretTokens": {
+      "status": "RECOVERABLE_FOR_EXISTING_TOKEN_FORM",
+      "sources": [
+        "backend/src/main/java/com/citi/put/checks/studio/validation/VariableReferenceValidator.java:17",
+        "backend/src/main/java/com/citi/put/checks/studio/validation/VariableReferenceValidator.java:83",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java:159",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java:232"
+      ],
+      "detail": "<secret ID> uses the vault ID, not the variable display alias. Token itself carries ID; materialized recipe referenceName and references.secrets also retain it. Do not classify all token secrets as missing."
+    },
+    "contextSecretDeclarations": {
+      "status": "STOP_UNRESOLVED",
+      "finding": "D015-01"
+    },
+    "storedStepSnapshotHashes": {
+      "status": "SCHEMA_ONLY_NULL_FROM_CURRENT_PRODUCER",
+      "finding": "D015-09"
+    },
+    "storedStepReuseProvenance": {
+      "status": "SCHEMA_ONLY_NULL_FROM_CURRENT_PRODUCER",
+      "finding": "D015-09"
+    },
+    "basePublicationPointer": {
+      "status": "PRESENT_IMMUTABLE",
+      "sources": [
+        "backend/src/main/resources/db/migration/V15__publication.sql:103",
+        "backend/src/main/resources/db/migration/V19__guided_governance.sql:324"
+      ],
+      "detail": "confirmedRevisionId pinned in publication base; session aliases do not independently gain this protection."
+    },
+    "replaySwitchAndInitialBoundary": {
+      "status": "ABSENT",
+      "finding": "D015-08"
+    },
+    "sameSessionAdmissionLineage": {
+      "status": "EXISTING_STORAGE_CAN_REPRESENT_AFTER_MERGE_DESIGN",
+      "detail": "Same guided actions/obligations/preparations/producers/edges must record current prefix replay evidence; no second execution ledger. Current producer does not implement prefix importing."
+    }
+  },
+  "continuationDecision": {
+    "requiresNewValueUnconditionally": false,
+    "currentlyUsableWithoutCodeChanges": false,
+    "recommended": "One explicit persisted REPLAY_PREFIX continuation, with separate durable cursor and prefix-mode fence, plus atomic switch to SOURCE_PLAN at k/j. Name must be ruled before contract/DDL; do not add replay to model-attempt kind.",
+    "alternative": "Use session.state=REPLAYING_PREFIX plus durable checkpoint and a state-aware coordinator without new continuation enum. Must guarantee action substeps do not lose mode and model reservations never race.",
+    "v21Impact": "If explicit value chosen, replace V14 continuation CHECK in V21 and add insert-positive/unknown-value tests. Freeze other functions unless another finding requires an explicitly ruled forward replacement."
+  },
+  "livenessAndRetention": {
+    "databaseNonterminal": true,
+    "runnerActiveWithoutChange": false,
+    "startOrder": [
+      "Validate base/k/refusals and policy origins without writes",
+      "Create PREPARING session/manifest/translation state/publication base and freeze policy in existing transaction",
+      "Reserve/claim worker and freeze ruled inputs",
+      "Enter durable prefix mode after base/assignment preconditions, with no live model attempt",
+      "Replay under same owner/browser, progress and action budget",
+      "Atomically exit at k or drift j; no repeated dispatched actions",
+      "FINALIZING only after merged step completeness; publish/terminal then retention"
+    ],
+    "expiry": "Repository.expired uses explicit terminal exclusions (GuidedSessionRepository.java:187); replay is swept. CSI admitStart counts replay while expires_at is future (GuidedCsiBudget.java:48).",
+    "terminalProtection": "Terminal->REPLAYING_PREFIX forbidden by V14. A terminal state does not become re-openable via a new continuation.",
+    "retention": "Live replay remains unprunable. After terminal + window, progress is reduced to seven keys, model safe results erased; unpublished copy evidence deleted, published evidence retained. Recording table is untouched. New result fields must survive by explicit design."
+  },
+  "beforeAfterSchemaHeadTests": {
+    "countBasis": "Static source @Test/@ParameterizedTest annotation counts; not executed cases, reports, or assertions of passing. Counted 2026-10-14; concurrent owners can change source counts.",
+    "headAssertionFiles": [
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+        "anchors": [
+          "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java:100",
+          "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java:108"
+        ],
+        "before": "head \"20\"; later versions 19 and 20",
+        "after": "head \"21\"; append 21:guided session replaying prefix",
+        "staticTestDeclarationsBefore": 9,
+        "staticParameterizedDeclarationsBefore": 0,
+        "afterDeclarationCount": "same for head-pin edits alone; implementation additions reported separately"
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/ErrorCodeConstraintMigrationIT.java",
+        "anchors": [
+          "backend/src/test/java/com/citi/put/checks/studio/ErrorCodeConstraintMigrationIT.java:73",
+          "backend/src/test/java/com/citi/put/checks/studio/ErrorCodeConstraintMigrationIT.java:136"
+        ],
+        "before": "HEAD=\"20\"",
+        "after": "HEAD=\"21\"; retain V13 sole error-code definition proof",
+        "staticTestDeclarationsBefore": 5,
+        "staticParameterizedDeclarationsBefore": 0,
+        "afterDeclarationCount": "same for head-pin edits alone; implementation additions reported separately"
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedRecordingMigrationIT.java",
+        "anchors": [
+          "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedRecordingMigrationIT.java:53",
+          "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedRecordingMigrationIT.java:54"
+        ],
+        "before": "max version \"20\"",
+        "after": "max version \"21\"; keep version 20 description assertion",
+        "staticTestDeclarationsBefore": 8,
+        "staticParameterizedDeclarationsBefore": 0,
+        "afterDeclarationCount": "same for head-pin edits alone; implementation additions reported separately"
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedGovernanceMigrationIT.java",
+        "anchors": [
+          "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedGovernanceMigrationIT.java:974"
+        ],
+        "before": "V18->head max version \"20\"",
+        "after": "max version \"21\"; retain before/after row equality",
+        "staticTestDeclarationsBefore": 26,
+        "staticParameterizedDeclarationsBefore": 0,
+        "afterDeclarationCount": "same for head-pin edits alone; implementation additions reported separately"
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+        "anchors": [
+          "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java:250",
+          "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java:253"
+        ],
+        "before": "max 20 and zero versions >20",
+        "after": "max 21 and zero versions >21",
+        "staticTestDeclarationsBefore": 23,
+        "staticParameterizedDeclarationsBefore": 0,
+        "afterDeclarationCount": "same for head-pin edits alone; implementation additions reported separately"
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+        "anchors": [
+          "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java:624"
+        ],
+        "before": "installed ordered versions 1..20",
+        "after": "installed ordered versions 1..21",
+        "staticTestDeclarationsBefore": 12,
+        "staticParameterizedDeclarationsBefore": 0,
+        "afterDeclarationCount": "same for head-pin edits alone; implementation additions reported separately"
+      }
+    ],
+    "fixtureTargetFiles": [
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java:125",
+        "before": "target(\"20\")",
+        "after": "target(\"21\") or deliberate no-target head fixture before state-writing code lands",
+        "staticTestDeclarationsBefore": 44,
+        "staticParameterizedDeclarationsBefore": 0
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java:151",
+        "before": "target(\"20\")",
+        "after": "target(\"21\") or deliberate no-target head fixture before state-writing code lands",
+        "staticTestDeclarationsBefore": 12,
+        "staticParameterizedDeclarationsBefore": 1
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java:379",
+        "before": "target(\"20\")",
+        "after": "target(\"21\") or deliberate no-target head fixture before state-writing code lands",
+        "staticTestDeclarationsBefore": 37,
+        "staticParameterizedDeclarationsBefore": 0
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java:130",
+        "before": "target(\"20\")",
+        "after": "target(\"21\") or deliberate no-target head fixture before state-writing code lands",
+        "staticTestDeclarationsBefore": 4,
+        "staticParameterizedDeclarationsBefore": 0
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java:3177",
+        "before": "target(\"20\")",
+        "after": "target(\"21\") or deliberate no-target head fixture before state-writing code lands",
+        "staticTestDeclarationsBefore": 18,
+        "staticParameterizedDeclarationsBefore": 0
+      }
+    ],
+    "preserveHistoricalTargets": [
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java:88",
+        "reason": "V18 historical baseline tests, including V15 same-scope snapshot constraint, remain historical; do not globally replace every target."
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationMigrationTest.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationMigrationTest.java:47",
+        "reason": "Explicit V14 baseline remains; new head suite supplies new state/continuation coverage."
+      }
+    ],
+    "existingRegressionsToExtend": [
+      "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedGovernanceMigrationIT.java:174 (nonterminal prune list includes replay after V21)",
+      "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java:182 (same-scope/hash reuse constraints retained)",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java:275 (AWAITING_AUTH remains refused by same named state CHECK)"
+    ],
+    "newClass": {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+      "before": "absent",
+      "after": "new isolated PostgreSQL 15 Flyway suite, only after corrected V21 is released",
+      "exactCaseInventory": [
+        "fresh V1-V21 reaches head/description with no pending migration",
+        "populated V20->V21 leaves existing session/revision/policy/recording rows unchanged",
+        "V1-V20 resource checksums unchanged; Flyway validation succeeds",
+        "insert-positive REPLAYING_PREFIX document+column accepted, unknown state and mismatched document state rejected",
+        "old state vocabulary retained; terminal cannot reopen; replay -> observing/finalizing/failed/cancelled/expired as ruled",
+        "attempt INSERT while replay refused; enter replay with RESERVED/CALLING refused; settled-only entry allowed",
+        "two-connection races: attempt reservation vs replay entry both orderings, rollback, no inconsistent surviving pair",
+        "direct counter reserve and both gateways prevented in prefix (application integration companion)",
+        "prune false/refused while replay; expired replay becomes terminal before pruning; CSI concurrency counts unexpired replay",
+        "chosen continuation value accepted and unknown continuation refused; persisted checkpoint restart routes replay",
+        "chosen immutable base/k/switch fields reject mutation/wrong base; result provenance survives prune",
+        "chosen receipt shape accepts real relearnedFrom and rejects forged/incomplete switch lineage",
+        "new publication stores all step hashes and exact contiguous reusedFrom; wrong scope/hash/base/suffix reuse refused",
+        "empty/tail deletion behavior follows ruling; delete-all learn refused without writes",
+        "materialization design preserves old prefix proof/secret lineage at suffix planning transition"
+      ]
+    }
+  },
+  "ownershipAndSequence": [
+    {
+      "unit": "R-data rulings before implementation release",
+      "owner": "Aria with root",
+      "writes": "resume-plan artifacts only in parallel review",
+      "deliverables": [
+        "Resolve D015-01 declaration STOP and D015-02 missing input hashes",
+        "Resolve materialization and stable input/binding IDs",
+        "Resolve hash ownership of suffix consumer graph",
+        "Choose continuation/cursor and immutable/prunable provenance locations",
+        "Confirm tail deletion remains last-step relearn; no implicit empty suffix"
+      ],
+      "releaseCondition": "No unresolved base-row input identity or V21 shape questions"
+    },
+    {
+      "unit": "C3a/C3b single contract owner",
+      "owner": "C-int assigned by root",
+      "writes": "OpenAPI, contracts/v3, generated bundles, exact quoted pin changes",
+      "deliverables": [
+        "Canonical declaration/hash vectors including text/context/global refs",
+        "Resolved replay state/session/result fields and nullable/omitted boundary semantics",
+        "No duplicate generation; no hand-edited generated bundles"
+      ],
+      "releaseCondition": "Root confirms predecessor integration windows closed and contract base hash remeasured"
+    },
+    {
+      "unit": "D21 migration + all schema-head pins",
+      "owner": "Dara exclusive",
+      "writes": [
+        "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+        "six head-pin files and five explicitly reassigned fixture-target files listed above"
+      ],
+      "deliverables": [
+        "Corrected state CHECK and selected optional gateway attempt guard",
+        "Any ruled continuation/identity/receipt/retained-key/materialization forward additions",
+        "V1-V20 checksum inventory and before/after source test inventory"
+      ],
+      "releaseCondition": "Corrected design signed by Aria/root; only one schema-head test writer; no installation in this review"
+    },
+    {
+      "unit": "T1/T2 identity and readiness",
+      "owner": "dev authoring/publication lane assigned by root",
+      "writes": "authoring, StudioService/readiness, revision read/write/verifier, meaningful identity tests",
+      "deliverables": [
+        "Complete immutable base identity",
+        "Hash maps populated on first publication",
+        "Draft/base pure change detector and narrow start refusal with zero writes"
+      ],
+      "releaseCondition": "Canonical contract + D015-01/02 resolution"
+    },
+    {
+      "unit": "T3/T4 mixed runtime and merge",
+      "owner": "single dev owner of shared guided files",
+      "writes": "GuidedSessionService, GuidedTranslationService/Store/Coordinator, bridge, publisher, runner ownership/runtime",
+      "deliverables": [
+        "Durable model-free replay under frozen governed policy",
+        "Fresh same-session ledger/proofs/secret lineage/values with stable IDs",
+        "Atomic drift/suffix merge and retained result proof"
+      ],
+      "releaseCondition": "D21 installed only in the released disposable test environment after approved migration unit; no concurrent shared-file edits"
+    },
+    {
+      "unit": "Q-data/real stack gate",
+      "owner": "QA with Dara migration review; root schedules execution",
+      "writes": "new executed evidence only",
+      "deliverables": [
+        "PostgreSQL 15 Flyway fresh+upgrade targeted suites",
+        "rdsParityLint and appropriate required backend checks",
+        "joined real 10-step edit/insert/delete/reorder/variable/secret/drift/policy/video oracle with counter and SQL provenance evidence"
+      ],
+      "releaseCondition": "No green claim from old psql dry-run; actual run results attached"
+    }
+  ],
+  "correctionsForRoot": [
+    "Keep the existing V21 draft uninstalled until the mixed-mode persistence choices are explicit; no arbitrary V22 for a design that can still be corrected before first installation.",
+    "Do not modify frozen V1-V20. This review confirms their four key proposal anchors still match; all 20 current resource hashes are recorded below.",
+    "Treat base context-secret STOP as a design escalation, not an excuse to silently use live draft variables. Token secrets remain recoverable in their existing direct-ID form.",
+    "Assign schema-head test edits to one owner; the proposal has six head-assertion files and five V20 fixture-target files, not eight independent migration tests.",
+    "Do not call prior design psql smoke evidence an implemented migration or real-stack mixed-mode test.",
+    "Budget ceiling remains USD 500 for the whole wave; actual spend remains unavailable."
+  ],
+  "anchoredOn": {
+    "sha256": {
+      "backend/src/main/resources/db/migration/V1__init.sql": "2e010e6e1e6f01706acb0f644ad37a3ba0340363979a994de34a4b33ba750e29",
+      "backend/src/main/resources/db/migration/V2__schedule_next_execution.sql": "7a36462fcceb86d2ccb533c0743c20bcfedadb819f9674c0d1e8eb847830ca7f",
+      "backend/src/main/resources/db/migration/V3__check_templates_seed.sql": "8c356f1081df490cbc213f31330883f8be477de722fc737d588f52e2ef8b48ee",
+      "backend/src/main/resources/db/migration/V4__secrets_encrypted_value.sql": "91662e9f2c8f07e24d85d15d5ce7e5508d4f20ddfc78fdfd1dbfa083f30b24a7",
+      "backend/src/main/resources/db/migration/V5__story_3_schema_additions.sql": "b930941c1b7ba06b8e34b67021425cffedd3264b225607ff3f170ba4545f0477",
+      "backend/src/main/resources/db/migration/V6__report_next_delivery.sql": "d4669fed42d82824f278364845540ee4318ee9ab243bc0780a68c5092695d913",
+      "backend/src/main/resources/db/migration/V7__partition_remaining_tables_and_defaults.sql": "ee6f50fe699f70af713a7c739acb4eb358a562837e8c43ffb130a6604fb62174",
+      "backend/src/main/resources/db/migration/V8__failed_dispatches_and_report_failures.sql": "78ad49e718124c78f6e7a3a5a64b203f175c73642f2754a01647166c89ec89be",
+      "backend/src/main/resources/db/migration/V9__schedules_check_type_column.sql": "9c91a6b11df2f9b012a638cbf1e0ae921d4dd09c0710a22db9d3c5a18c412f0d",
+      "backend/src/main/resources/db/migration/V10__uppercase_status_standardization.sql": "714ea331197e4b30000b5f5706262172ee1b17ba0f7b13f6c7c33cb44abdba26",
+      "backend/src/main/resources/db/migration/V11__check_acknowledge_assign.sql": "13a95eb5154cc4f3bc037bbfcd1c498faf5b0ecd62473857fab0a2a181179732",
+      "backend/src/main/resources/db/migration/V12__tests_revisions.sql": "274c26c4d41fbd991e157ec6372d08ca5c53ebe0a9e2d7a7252838228057d0d7",
+      "backend/src/main/resources/db/migration/V13__executions_ledger.sql": "f258e01be9963e58b47d6dfef7171e4cd36043e82e4c0f2ea78ec439f47abeb7",
+      "backend/src/main/resources/db/migration/V14__guided_sessions.sql": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357",
+      "backend/src/main/resources/db/migration/V15__publication.sql": "ef092dfff93a24c4a05dc9afee6ba4a3b9a054f6cf39ca4059c186ff10777b40",
+      "backend/src/main/resources/db/migration/V16__scheduling.sql": "6d7f4888aabf4a7206bfff9bd242ee15037121e74ed2c3fa32156a4ed862ab72",
+      "backend/src/main/resources/db/migration/V17__secret_use_audit.sql": "a5b6a89525f3b53769678361c204ba3a78564f9f108aeb0979c184a702bc3ba7",
+      "backend/src/main/resources/db/migration/V18__drop_plaintext_secrets.sql": "febfd5eb1624240e58d87bd92bdb2d4b82c762a7cf6fd94de8077eb6f2fc7c9f",
+      "backend/src/main/resources/db/migration/V19__guided_governance.sql": "628b47efbb656aef8a3260f03e7dc77d988555a306652b4d433b8796e3424855",
+      "backend/src/main/resources/db/migration/V20__guided_session_recording.sql": "e26da3077ca90fc0f3c6d7f4fc7156d416c39b66482330acb24d62d61514acc2",
+      "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json": "58a75633d2dcf1aa94f80e17172612fae6b31cab08f8fc498eda1ccac00cbf24",
+      "docs/qa/evidence/STUDIO-OBS-015/v21-design.json": "ca947e9abf8c406fd3fae9757c051d6bdede085f8fc7179eec35113cb2311cbb",
+      "docs/qa/evidence/STUDIO-OBS-015/v21-proposed.sql": "17de7622b9cc24ee8b96fc4a52af8f70510dc49788c97f24349b8b1a9f5af78c",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "0e3c81de45dc1b6ba39db082926d103728d16c9c5014db195ffda10ceea759a8",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "994964975c26bf31259b7942011f43dc02fe74f031b93fa274965d41ce3a1642",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "3dad33fefc0cc8b8e207d2fbd3a911bfa7256d8a1b8250d9481980036cdb370f",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": "171d5e1919e737e986fad2888280ea2835c743f8be1322eb55272abfbf96e9f0",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java": "c44d5af6b9577b3543a234be33ac6c97e0535d093791ffae936c0f5316d0021c",
+      "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringRevisionIdentity.java": "50047c7b1615f45610d5f84ab53c039b36c554bec8fadfe94a80181d033e895c"
+    },
+    "proposalAnchorComparisons": [
+      {
+        "path": "backend/src/main/resources/db/migration/V14__guided_sessions.sql",
+        "priorSha256": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357",
+        "currentSha256": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357",
+        "matches": true
+      },
+      {
+        "path": "backend/src/main/resources/db/migration/V15__publication.sql",
+        "priorSha256": "ef092dfff93a24c4a05dc9afee6ba4a3b9a054f6cf39ca4059c186ff10777b40",
+        "currentSha256": "ef092dfff93a24c4a05dc9afee6ba4a3b9a054f6cf39ca4059c186ff10777b40",
+        "matches": true
+      },
+      {
+        "path": "backend/src/main/resources/db/migration/V19__guided_governance.sql",
+        "priorSha256": "628b47efbb656aef8a3260f03e7dc77d988555a306652b4d433b8796e3424855",
+        "currentSha256": "628b47efbb656aef8a3260f03e7dc77d988555a306652b4d433b8796e3424855",
+        "matches": true
+      },
+      {
+        "path": "backend/src/main/resources/db/migration/V20__guided_session_recording.sql",
+        "priorSha256": "e26da3077ca90fc0f3c6d7f4fc7156d416c39b66482330acb24d62d61514acc2",
+        "currentSha256": "e26da3077ca90fc0f3c6d7f4fc7156d416c39b66482330acb24d62d61514acc2",
+        "matches": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json",
+        "priorSha256": "58a75633d2dcf1aa94f80e17172612fae6b31cab08f8fc498eda1ccac00cbf24",
+        "currentSha256": "58a75633d2dcf1aa94f80e17172612fae6b31cab08f8fc498eda1ccac00cbf24",
+        "matches": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/v21-proposed.sql",
+        "priorSha256": "17de7622b9cc24ee8b96fc4a52af8f70510dc49788c97f24349b8b1a9f5af78c",
+        "currentSha256": "17de7622b9cc24ee8b96fc4a52af8f70510dc49788c97f24349b8b1a9f5af78c",
+        "matches": true
+      }
+    ]
+  }
+}

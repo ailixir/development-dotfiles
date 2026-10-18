@@ -1,0 +1,686 @@
+{
+  "artifact": "STUDIO-OBS-015 backend coherent source checkpoint05",
+  "at": "2026-10-15T08:27:25.205850+00:00",
+  "owner": "Dex/backend015_resume",
+  "status": "SOURCE_INCOMPLETE_UNCOMPILED_ATOMIC_HOLD_FOR_ROOT_FEEDBACK",
+  "sourceHold": true,
+  "holdReason": "Root requested captured feedback; all owned Java/test/story/disclosure source writing stopped. This is a scheduled slot handoff, not completion or reduced scope.",
+  "generatedBundle": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
+  "cintFreeze": {
+    "receipt": "contracts/current-vector-preservation-implementation/implementation-receipt.json",
+    "sha256": "0ff289ce50b7fb5758ea331fb8eace94677712e750b55cd1f48a83a623eed61e",
+    "scope": "Selected synthetic contract/vector source; no application green."
+  },
+  "dataFreeze": {
+    "receipt": "data/source-hold-checkpoint-07.json",
+    "sha256": "417a53d9502059a24b1b4117dc97e1531135c6df633db5dcce27c89bce7e3665",
+    "fixtureSha256": "72b013cb4a6c4966954e77b2c61bfb925c12616f5ce0460312cd232a26de54f0",
+    "scope": "Data exclusively owns migration/helper; no bytes edited by Dex."
+  },
+  "previous": "runtime-source-checkpoint-04.json",
+  "actualFeedback": "backend-head-foundation-feedback-attempt01-receipt.json",
+  "validationAfterChanges": {
+    "compilation": "NOT_RUN",
+    "testsExecuted": 0,
+    "gradleDatabaseNativeBuildDistGenerationFormatCommands": 0,
+    "commandsLive": false,
+    "priorSelectedResult": "200total/166pass/34fail/0skip at older captured source only"
+  },
+  "sourceMap": {
+    "path": "backend/source-coverage-map-05.json",
+    "sha256": "558cc386632a22ba4dd7e5015228245a64adb6d0ac287adcf29826651dc8caf9",
+    "acceptanceRows": 86,
+    "actualJoinedParameterLabels": 35,
+    "rowsWithExplicitRemainingFacets": 49,
+    "architecture05Facets": 24,
+    "credit": "No acceptance/gate/QA status changes;49rows retain explicit remaining facets including cross-owner tier/mapping obligations, not49independent failed tests."
+  },
+  "runnableSelectors": {
+    "central": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+    "parameterized": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+    "displayName": "incremental joined {0}",
+    "parameterLabels": [
+      "insert4",
+      "delete4",
+      "reorder4",
+      "config",
+      "tail1",
+      "tail7",
+      "append11",
+      "ready6",
+      "confirm-prefix",
+      "empty",
+      "drift2",
+      "admitted-drift2",
+      "unknown2",
+      "assert-fail",
+      "policy-prefix",
+      "confirm-long-wait",
+      "confirm-cancel",
+      "confirm-expire",
+      "confirm-source-change",
+      "confirm-recover",
+      "confirm-owner-loss",
+      "append-input",
+      "deleted-consumers",
+      "admitted-literal2",
+      "pre-literal2",
+      "same-pair-literal",
+      "unused-declaration",
+      "drift-plan-fail",
+      "drift-first",
+      "confirm-edit4",
+      "confirm-race",
+      "drift-auth",
+      "drift-auth-pre",
+      "before4at2",
+      "equal4"
+    ],
+    "selectionRule": "Gradle --tests method executes all parameter invocations; display labels are not claimed as independent CLI selectors. Root allocates exact later invocation window.",
+    "secret": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay",
+    "historicalIncomplete": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
+    "staleDraftCache": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache"
+  },
+  "priorityRepairContract": {
+    "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlan",
+    "methods": {
+      "public static void validate(GuidedContracts contracts, JsonNode plan)": "Fully allocated immutable internal plan; required obligationId and needs.bindingId; exact closed AcceptedTranslationPlan definition plus unique obligation IDs/coordinates/need IDs/binding IDs/consumer pairs and valid reference indexes. Does not mutate plan. Does not itself establish final zero-consumer historical authority; publication graph/history checks remain.",
+      "public static void validateBeforeAllocation(GuidedContracts contracts, JsonNode plan)": "Mixed trusted retained bound needs and new already-validated raw needs awaiting allocation. Does not mint/remove IDs or rewrite bytes; unbound raw needs retain min1consumer."
+    },
+    "helper149": "Dara should replace C.validate(v3/source-selection,plan) in her exclusively owned helper with GuidedAcceptedPlan.validate(C,plan); preserve all internal IDs, raw immutable rows and source subject assertions.",
+    "evidenceTestAPI": "setup(Database)->JsonNode and capture(Database,JsonNode,int) unchanged; exclusively backend-owned file, migration callers Dara-owned."
+  },
+  "historicalFixtureAPI": {
+    "factory": "LegacyV20ConfirmedBaseFixture.seedV20Cases(DataSource,String,String,UUID,String,JsonNode,JsonNode)->PreparedCases",
+    "accessors": [
+      "PreparedCases.incompleteImmutableBase():Seed",
+      "PreparedCases.staleCurrentCache():StaleSeed",
+      "StaleSeed.publication():Seed",
+      "StaleSeed.oldAuthoring()/newAuthoring()/oldCachedInputs()/expectedCurrentInputs()/oldDeclarations()/newDeclarations():JsonNode",
+      "StaleSeed.sourceRevision()/configurationRevision():String"
+    ],
+    "lifecycle": "Factory exactly once on fresh ownedPG before Spring; seeds validV20pairs then normalV21upgrade. assertPreservedAtHead/assertStaleCachePreservedAtHead before caller modifications. Never commit incomplete currenthead row or change frozen migrations.",
+    "plannedNameCallers": {
+      "IncrementalIdentityIT.explicitFullLearnWorksWithStaleDraftIdentityCache": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache",
+      "IncrementalPublicationIT.explicitFirstStepFullLearnDoesNotRequireOldIdentity": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof"
+    }
+  },
+  "eightIncrements": [
+    {
+      "order": 1,
+      "title": "Remove second authoring generation and narrow canonical storage codec",
+      "status": "SOURCE_IN_PROGRESS_NOT_COMPLETE",
+      "plannedNames": [
+        "StudioAuthoringApiIT.aV1ShapedWriteIsRefusedAndWritesNothing"
+      ],
+      "notes": [
+        "O1 canonical-only implementation and named drop/port inventory retained.",
+        "Exact legacy original/ported XML counts and complete API/component regressions pending."
+      ]
+    },
+    {
+      "order": 2,
+      "title": "Complete canonical declaration identity and shared semantic change boundary",
+      "status": "SOURCE_IN_PROGRESS_NOT_COMPLETE",
+      "plannedNames": [
+        "ChangeDetectionTest.editFourthStepChangesOnlyFourthAndTailInputs",
+        "ChangeDetectionTest.insertAtFourSelectsNewStep",
+        "ChangeDetectionTest.deleteFourthSelectsNextSurvivingStep",
+        "ChangeDetectionTest.swapFourAndFiveSelectsCurrentFourth",
+        "ChangeDetectionTest.multipleEditsSelectEarliestPosition",
+        "ChangeDetectionTest.tailDeletionRelearnsLastRemainingStep",
+        "ChangeDetectionTest.configurationChangesSelectFirstStep",
+        "ChangeDetectionTest.policyChangesDoNotMoveBoundary",
+        "ChangeDetectionTest.unchangedDraftIsReadyAndFirstRunUnlearned",
+        "ChangeDetectionTest.textOnlyPlainValueChangeIsDetected",
+        "ChangeDetectionTest.contextSecretDeclarationChangeUsesFrozenBase",
+        "ChangeDetectionTest.missingBaseContextSecretMappingRefusesReuse",
+        "IncrementalHashTest.matchesCanonicalVectors",
+        "IncrementalHashTest.suffixConsumerChangeDoesNotChangePrefixProducerSnapshot",
+        "IncrementalReadinessIT.unusedDeclarationEditStaysReadyThroughAcceptanceAndDispatch",
+        "IncrementalIdentityIT.explicitFullLearnWorksWithStaleDraftIdentityCache",
+        "IncrementalIdentityTest.opaqueAliasRequiresExactDeclaredName",
+        "SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "SnapshotBasisParityTest.oldBasisCannotDistinguishUnexecutedContextChange",
+        "SnapshotBasisParityTest.normalizesTargetHintsDatesAndEmptyContextsExactly",
+        "IncrementalPublicationIT.explicitFirstStepFullLearnDoesNotRequireOldIdentity"
+      ],
+      "notes": [
+        "Complete raw-source identity/current cache/history authority source present.",
+        "Dedicated browser config unit and complete HTTP alias negatives remain."
+      ]
+    },
+    {
+      "order": 3,
+      "title": "Pin incremental start, policy, durable prefix program and state",
+      "status": "SOURCE_IN_PROGRESS_NOT_COMPLETE",
+      "plannedNames": [
+        "IncrementalStartIT.clientCannotNarrowServerBoundary",
+        "IncrementalStartIT.governedPrefixOriginPreflightWritesNothing",
+        "IncrementalSessionIT.prefixCallbacksNeverOpenModelReservation",
+        "GuidedReplayingPrefixMigrationIT.prefixStateContinuationAndAttemptGuards",
+        "IncrementalRelearnIT.readyLearnAgainFromNUsesSameMechanism",
+        "IncrementalStartIT.deleteAllRefusesWithoutAnyWrite",
+        "IncrementalRelearnIT.tailDeletionToOneUsesOneStepFullLearn",
+        "IncrementalRelearnIT.multipleTailDeletionUsesLastRetainedStep",
+        "IncrementalRelearnIT.appendAfterLastReplaysWholeExistingPrefix",
+        "IncrementalMaterializationIT.emptyPrefixContextKeepsExactProgramPair",
+        "IncrementalPolicyIT.defaultCurrentPolicyPromptsPrefixWithoutModelOrNative",
+        "IncrementalPolicyIT.confirmationResumesFreshSameBrowserThenSuffixWithoutSecondPrompt",
+        "IncrementalPolicyIT.prefixGuardDeniesGroundingDestructionAndDenyEvenAfterConsent",
+        "IncrementalPolicyIT.waitingRecoveryCancellationAndAnswerRacesRemainAtMostOnce",
+        "IncrementalPolicyIT.directPrefixAdmissionCannotBypassConfirmation"
+      ],
+      "notes": [
+        "Actual default-current-policy waiting success/lifecycle source; explicit before/equal hints source.",
+        "Fresh hostile postconsent Save/Delete/unobserved/formEnter matrix and some callback intermediate states incomplete."
+      ]
+    },
+    {
+      "order": 4,
+      "title": "Append-only materialization versions, exact ACK and historical proof/secret joins",
+      "status": "SOURCE_IN_PROGRESS_NOT_COMPLETE",
+      "plannedNames": [
+        "IncrementalMaterializationIT.appendedSuffixInputPreservesEarlierEvidence",
+        "IncrementalMaterializationIT.secretLineagePinsActualHistoricalVersion",
+        "IncrementalMaterializationIT.stalePreparedCommandCannotCrossAppend",
+        "IncrementalValidationBasisTest.reconstructsPrivateInputsBeforePublicEvidence",
+        "IncrementalDependencyIT.cumulativeAllocationAdapterPreservesPendingDeliveryOrder"
+      ],
+      "notes": [
+        "Actual pending append/ACK/history plus adapter source present.",
+        "Secret actionversion1 after appendversion2 and prep-expiry/retry concurrency companions incomplete."
+      ]
+    },
+    {
+      "order": 5,
+      "title": "Model-free prefix observed execution and authenticated single drift switch",
+      "status": "SOURCE_IN_PROGRESS_NOT_COMPLETE",
+      "plannedNames": [
+        "IncrementalSessionIT.restartAndConcurrentDriftTransitionAreIdempotent",
+        "IncrementalSessionIT.provenNoInvocationDriftUsesFreshAttemptWithoutResend",
+        "IncrementalSessionIT.unknownNativeOutcomeNeverLearnsOrRetries",
+        "IncrementalRelearnIT.prefixDriftAtTwoRelearnsTwoThroughTen",
+        "IncrementalRelearnIT.prefixAssertionFailureStopsWithoutReinterpretation",
+        "IncrementalRelearnIT.prefixPolicyRefusalStopsWithoutReinterpretation",
+        "IncrementalDriftIT.preAdmissionAndAdmittedReceiptsUseAuthenticatedAuthority",
+        "IncrementalDriftIT.finalCheckRacePreservesOneNativeEffectAndVideo",
+        "IncrementalResultIT.prefixFailureHasNoEnteredLearningBoundary",
+        "IncrementalPublicationIT.excludedAttemptRequiresEveryExactAuthenticatedJoin",
+        "IncrementalResultIT.receiptAndResultDistinguishBoundaryFromSuccess",
+        "IncrementalPublicationIT.nonemptyOriginalPrefixCannotDropBaseProofAfterDriftAtOne"
+      ],
+      "notes": [
+        "Actual no-native vs UNKNOWN seams and authenticated callback holding/probes source.",
+        "Concurrent duplicate drift/restart coordinates, every transport/preparation field and late callbacks partial."
+      ]
+    },
+    {
+      "order": 6,
+      "title": "Learning window and one first-suffix acceptance with retained graph",
+      "status": "SOURCE_IN_PROGRESS_NOT_COMPLETE",
+      "plannedNames": [
+        "IncrementalSessionIT.importsPrefixGraphWithoutObsoleteSuffixConsumers",
+        "IncrementalPublicationIT.sameTestOlderBaseAndNoncontiguousReuseAreRefused",
+        "IncrementalPublicationIT.deletedLastConsumerRetainsProvenPrefixRead",
+        "IncrementalPublicationIT.excludedBindingConsumerRetainsRawIntentAndPublishesLiteralReplacement",
+        "IncrementalPublicationIT.successfulSamePairOrdinalSurvivesLaterExcludedAttempt",
+        "IncrementalPublicationIT.onlyUnperformedImportedProducerCanRemainRawWithoutNeed",
+        "IncrementalPublicationIT.backendAuditsFirstSuffixThenStrictPlanChain",
+        "IncrementalPublicationIT.rawGraphHashAndPreparationMetadataSurviveProjection",
+        "IncrementalGraphProjectionTest.rejectsEveryUnaccountedOrUnprovenEdge",
+        "IncrementalGraphProjectionTest.zeroConsumerRequiresRetainedActualProducer"
+      ],
+      "notes": [
+        "Actual zero-consumer retained successful read plus two ordinary replays and strict history audits source.",
+        "Retained read inside partial driftstepj, concurrent acceptance and exhaustive repository adversaries incomplete."
+      ]
+    },
+    {
+      "order": 7,
+      "title": "Merge immutable snapshots and complete pure publication evidence",
+      "status": "SOURCE_IN_PROGRESS_NOT_COMPLETE",
+      "plannedNames": [
+        "IncrementalPublicationIT.mergedProofCannotReuseOldAdmissionsOrForeignSnapshots",
+        "IncrementalValidationBasisTest.rejectsMissingOrExtraExtendedEnvelope",
+        "IncrementalValidationBasisTest.publicationHashCommitsEntireExtendedBasis",
+        "IncrementalPublicationIT.snapshotFactsMatchImmutableOriginalSourceManifest",
+        "IncrementalPublicationIT.baseProofUsesPinnedRevisionOwnImmutableRows",
+        "SnapshotBasisValidationTest.candidateMapsAreDerivedBeforeArtifactHash",
+        "SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "SnapshotBasisValidationTest.correctedBasisEvidenceHashUsesUnchangedEnvelope",
+        "SnapshotBasisValidationTest.keepsOriginalGlobalByteLimits",
+        "SnapshotBasisPrivacyIT.authoringSourceNeverEscapesPrivateValidation"
+      ],
+      "notes": [
+        "Complete normalized snapshot/basis/internal plan/effective recipes authority repairs source; frozen vectors preserved.",
+        "Exact request limits and exhaustive actual publication authority/private canary facets remain."
+      ]
+    },
+    {
+      "order": 8,
+      "title": "Port live fixtures and execute full Java/real-stack acceptance under root windows",
+      "status": "SOURCE_IN_PROGRESS_NOT_COMPLETE",
+      "plannedNames": [
+        "IncrementalRelearnIT.editStep4OfTenUsesRealPrefixThenSuffixAndPlainReplay",
+        "IncrementalRelearnIT.insertDeleteReorderAndConfigUseRealComputedBoundary",
+        "IncrementalRelearnIT.secretPrefixPreservesOBS007Oracles",
+        "IncrementalRelearnIT.singleVideoSpansPrefixAndSuffix",
+        "StudioContractTest and confinement.test.ts C3 pins",
+        "mixed-mode-prefix.test.ts model-free-adapter-and-joined-receipts",
+        "incremental-edit-step-4.json and incremental-insert-step.json",
+        "IncrementalRetentionIT.prunesOnlyOBS014DataAndPreservesDeclaredF01Residual",
+        "IncrementalRelearnIT.editStep4OfTenUsesCorrectedSnapshotAuthority",
+        "GuidedRecordingTimingsTest.distinctAdmissionsWithIdenticalMeasuredKeysRemainDistinct",
+        "GuidedRecordingTimingsTest.tieEndSelectionAndUnicodeOrderMatchRunner",
+        "IncrementalRecordingIT.tieTolerancePreservesActualRecordedEvidence"
+      ],
+      "notes": [
+        "Original actual central10step harness retained; secret happy path/variants and original fixture subjects ported.",
+        "All real app/native/joined/fullcheck/coverage executions and independent QA remain; incremental secret fault matrix/corpus map/actual timingtie source incomplete."
+      ]
+    }
+  ],
+  "changedSince04OrAddedToExactInventory": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedAcceptedPlanTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConcurrencyTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/support/ObservedPublicationFixture.java",
+    "docs/specs/studio-observed-authoring/guided-data-flow.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md"
+  ],
+  "hashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java": "5f40a0a11f240646d3cdbb006b2d57ded3271b3d130f459abed133a806e299c7",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioController.java": "ad76cb5d6f2b19ce08add8a1ab2c75a7ac1bea958c53c06262ef49c201425d42",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioService.java": "7bb9a5b00d041c4d1cc5e9fedb19b58365b6ada11a8d2acc380570f5015e9797",
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringLimits.java": "e7c03548a47a35e40d036c9392bd6513fe8aa030af19c7c0083b09c8ad05122b",
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringRevisionIdentity.java": "bc081c9a6113bed285c9764a574747e2195a38478c9c670b11ceffaaa67587ae",
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/ConfigurationChangeClassifier.java": "8f0ab9bb6c1a3391a322f346ef131b41ffb5249afe8212fc723ff0c0295eb231",
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/IncrementalAuthoringIdentity.java": "f2212c7200dd2d3dff4e31611bb01c8b9e20a1715b1aeab623ba22fc9b175973",
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/IncrementalChangeService.java": "0bfad64b7743361c1f42c1e3b299d69115c4970c94c7ea2d0ebb1bb99474b9f3",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java": "739eee7d32d5d9eb2f5bb2f1d98f30eca35fab72877b76fc9882e30f129ee47a",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringRevisionInputs.java": "c5c164bbfc55f8136db5c467522d0f5498e77bbb477f672ec5f74341116e85dd",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringV2Request.java": "455275e8da934aa7092ee81917cd97d472cfbd980fc45e65f048cc407acfa211",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/CanonicalStudioCodec.java": "1b06927851ef35b264bce2089330373a62788a85caee7f2dd9d11d0fa454a527",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/StudioAuthoringMapper.java": "d57c72ca3a4de4d208c575dc19f3b2ee244c7c67d362c265bddb8ad9b60930b2",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/StudioAuthoringValidation.java": "38f87474269b7f2f1d435bcd88c8e20c0fdf6df24b4f997497c069f32b75e363",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/StudioVariable.java": "db588856e4138219f453c5f7cc22d99f50b0d76d2e54d9ce481439424981a41c",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/TestConfiguration.java": "5ac4482712d94037fafeeeddf224ff5c1b3ce411dca0742e95802ed725ea63ea",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/UITestDto.java": "9ed4b4498fc1ccb9d0b5302575cbcd3381bcfe6dc79db45a68b5055d1c7fb9cb",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/UITestRequest.java": "cb281a82a4a55b7b8948afa3dfc415385af1fa2f9e17ddb1e86cbf750c9c2a1e",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/Viewport.java": "dcf2bcf8b5a2a4c33dfbb08750814c6b92e56fb04ebd73056df147f32310b7a7",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java": "83ed8fa26c304d5b2b8d8df9be51681598908c36be27cf0791c20a632f07063b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "174d99ace9c47eeb85904002156eddc595c352590076917135e153411d5df963",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java": "d61340b753e2da729c4777b850c3420224825553f62d9e6f5c8bf37394a8fe5c",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java": "7b0cdb5bd34e1c138fde0c26170ff596ee5d1755fa126169cdc122d00afcfcd9",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java": "e4c48761e3b80561165bf7e51ee8b202c03ba9dfaf35a6ef52f9d77143a3de50",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimings.java": "66b2918e80bd9493b259000e79d37ae95636cc31affa48e2f41c6fe6bad5c0bf",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedBasisValidator.java": "db6c10acd57baab12c11d773e653bde9300e5d0e9054b61820ff58ecb589e186",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedEffectiveGraph.java": "e55c44421e0a48d510ca2338727038c66240087c563b8e3e3b0df42f28f02cdf",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedMaterializationEvidence.java": "7fbefe9db5f02682c6468d3495617a2468748d5a6405affe6bc205197061ef6e",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": "ac801042dd7a94468ff68a5ad7e4efe48ab310a9f12a93d290730243d755d128",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java": "c61619225cd95f4e2dbfb37e03bec71e53ed2460af46f8cb0e41497e98eac658",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java": "5b6566e3e24b8cc1179150a833ae7db7a19efbc8ecd2023499bf1b140a272fd6",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java": "8aa40c60582007a59ba406d47832bf30d06627cf227fc0c3ce942ab7d58b07df",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java": "b0dc9420b534352614d932859e4f9b5dab961224cec3e599783d078c52177229",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java": "da8c971da064ee06adb05ffbd0744e96a28399bf4a18e7eb1a847e7f83c64f5b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedSnapshotDeriver.java": "5e382805c47f5e0be45a09675515fa49a838699b15a2a7e601785e9f5b74f134",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java": "2e16253959c1cb97ac3ce895a0d59ed5f185603564d3a59d38b5d107ccb1be2b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java": "414ad82d6467406693fd868a036b4d0ee5590880b3d42dcbd0c71a7b6b688c09",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java": "651a876be01403a7ddaf56e1921667ff22392eb29d5f9c01b281221d56477796",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java": "0e98da660358acd128b468bb28660bcf5a7378dbe7427a85464ae4e3caa9fd1f",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalController.java": "b94aed29b8eea89d5e7cb460655d93581f3cafe649b48b4e413da7a85cb6b106",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java": "84e049075099bf7685e42435d9d3d4888aeab591800a14208524665a5199a763",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "a7eccb02ba06e045717178679bd3b3d75725ecba5bf64fa1d20f5565fc712dc9",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "705ad5f372ba0e455b404233cf6ac27fa4255329eca45b79a9c69594be9e2cf8",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedAcceptedPlan.java": "35cc9e25796090ae9c60b87bc31fa86b030925d3c17c3ec66a8ebe378039e20d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuard.java": "a74b03e4e54401b1f3ddaf21eefab581fadbd5cef6533620cf88378ed461385d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java": "7a2bce45abe0483ba2f77f5a281a03697115983cf5eac8a8695f2bb5b8f271fd",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanHistoryAudit.java": "5a59ac3f849eabecd411e422fb454c2adde8bc48582e9d2669fcaf2e15648dec",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java": "d7b56a9e930f01b00e7c2d24fd9bddad146b601cdc89812235f2c1b2c674deeb",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java": "d3ef363c54561f290c3d9629a7a7f9cdbdafdafd3bd0e1211a08853184ccd3a2",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java": "2411f9ac24c1d21db7b43ee22ae91055b3aaefbce7f7652b276d4fc3d21e8b40",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java": "b3769877088421d7d4690d663efecc35cf016044cc9ee4849fbed74ef722b23f",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceSnapshotRepository.java": "15b6a39215d9c6ea13cd28294efbca0c48c8a6fa342a8701dee9e5ad91f2d304",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java": "07976ffe0cfe7e32203b481bc443542df3ea5a1800c1794506fa207072d8bdd0",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "2ebcedc49b31ae191f0f04e6360c916de7417b2a4f7876ca718178494cc30215",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": "28497dc35089eceecf8786771baff3f991a714a1ba990779d6c96d43fa19c695",
+    "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java": "f2ed4f9a79cbc53801fc7c81d54c69b090b89c9066aae057af59269c0e88c3c2",
+    "backend/src/main/java/com/citi/put/checks/studio/readiness/ReadinessVerdict.java": "299311c35fa90fd0de222593ee8c2ef23bc7f35495a50de9744b3cf8875e0630",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java": "fab10754c98872a720415ae232835d8a9e7450e08558a54ea86f9d4c41a67fa6",
+    "backend/src/main/java/com/citi/put/checks/studio/validation/VariableReferenceValidator.java": "1bdc3eb56153c8b34386677e8f712c78808b9928deee3246501eb957c51ea6df",
+    "backend/src/test/java/com/citi/put/checks/studio/CanonicalStudioCodecTest.java": "bf1429e0a268146effb4f0d0049f7644a8f387029b063c0175400d5b9b799666",
+    "backend/src/test/java/com/citi/put/checks/studio/StudioAuthoringApiIT.java": "2d6c7462c2cdb7e98773e6085b5c53a5d7f73736081827fd3315073dcc6d02c6",
+    "backend/src/test/java/com/citi/put/checks/studio/StudioWriteValidationControllerTest.java": "2c9c7a400748329b708201d15a3248f28c986ce5e74ee4263ed7be2fec334b58",
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java": "d4d5ff63e71e8b664a9be8843de36d72ec56b9192987d16bb1f764948ea26475",
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/IncrementalHashTest.java": "2135c72b4fb2329e16aadf0dbdf8fe5c47eb76e57e170fe5a4eeba0a5997edff",
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/IncrementalIdentityTest.java": "24b2f6cb82e20349e9c6cce16c8b3598e6bbe829b97f568b4d3f69fa464afd51",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimingsTest.java": "470dff7420dd2cee1bf200aa102876712d158e28f972baf3b8ace3dc920623c3",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java": "757b49fe6c626ce235963d3f186ccd65c50a878927d2a4613cfb1ac0dd9dc970",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceTest.java": "2a2aa3770bee4c886816bce74541888b2ab801d91a3a986d865a09228ef04daa",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java": "e9615582cefa38ca192b2a2dee8d47f846410680496c617ac7ad3a7557ff9d43",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "62b230373b655c28681fb89facddf16906b6b8ae5126f78416a8eb1529829932",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalMaterializationEvidenceTest.java": "5c5485adb197d7104a7868b2cd95a55702aaf6cea9aeeea50f1c65765ec76b40",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java": "256e19b2ba7c584373c4f1583422b6ef8c329605a9221a84c856005a7fb026eb",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedAcceptedPlanTest.java": "685594b600f4c6f38fe128d6d3a27e62969c1d07ea163d92d39db71c6924a9a8",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConcurrencyTest.java": "5adb851cb9892315cda1ea33a89d2a793567cfb678b3ab47c378b0bfe5fe8b67",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java": "93c083cb0a74d8b0b331cbe3aadfebbabf1c562b06e6cae7ab35f96e4f71a458",
+    "backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java": "41e657cc5141f16317c60a262abb12eda8b5cbe6c150602bceabdb498456ad5d",
+    "backend/src/test/java/com/citi/put/checks/studio/support/CanonicalAuthoringFixture.java": "6d62c2b3d73e589657bf06782643f8bc2fcf7a4640e22fd40148f38adb0c32c5",
+    "backend/src/test/java/com/citi/put/checks/studio/support/ObservedPublicationFixture.java": "54c729aabf5553a72c3abca07eb3783ef00355e6c1a2eae491ffb24d0f28930f",
+    "docs/specs/studio-observed-authoring/guided-data-flow.md": "1582e152bfb49ecc5dcdccf3415d850ef637c7ebbd0ff6264a597a15f8c69e45",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "134dcb78cdee2613947a1dc0133f0c1b846a459f01150be1ffd1a8137c00e02a"
+  },
+  "deletedOwnedPaths": [],
+  "remainingSourceFacetsByPlannedName": [
+    {
+      "plannedName": "ChangeDetectionTest.configurationChangesSelectFirstStep",
+      "facets": [
+        "Browser configuration selection distinct from environment/viewport/timeout still needs explicit parameter assertion."
+      ]
+    },
+    {
+      "plannedName": "ChangeDetectionTest.policyChangesDoNotMoveBoundary",
+      "facets": [
+        "First-run UNLEARNED and policy enforcement are application facets mapped separately."
+      ]
+    },
+    {
+      "plannedName": "ChangeDetectionTest.unchangedDraftIsReadyAndFirstRunUnlearned",
+      "facets": [
+        "First-run UNLEARNED and policy enforcement are application facets mapped separately."
+      ]
+    },
+    {
+      "plannedName": "IncrementalHashTest.matchesCanonicalVectors",
+      "facets": [
+        "TS and SQL canonical parity remain their separately owned execution obligations."
+      ]
+    },
+    {
+      "plannedName": "IncrementalStartIT.clientCannotNarrowServerBoundary",
+      "facets": [
+        "Dedicated deleted original step hint is not yet probed; unknown UUID is covered."
+      ]
+    },
+    {
+      "plannedName": "IncrementalStartIT.governedPrefixOriginPreflightWritesNothing",
+      "facets": [
+        "Dedicated trusted-ceiling widening refusal is existing governance scope, not mapped to new incremental start here."
+      ]
+    },
+    {
+      "plannedName": "IncrementalSessionIT.prefixCallbacksNeverOpenModelReservation",
+      "facets": [
+        "All observe/consume/success callback intermediate states require explicit per-callback PG assertions beyond final flow."
+      ]
+    },
+    {
+      "plannedName": "GuidedReplayingPrefixMigrationIT.prefixStateContinuationAndAttemptGuards",
+      "facets": [
+        "Resolve exact Dara method/subcase map against her held checkpoint before final execution credit."
+      ]
+    },
+    {
+      "plannedName": "IncrementalMaterializationIT.appendedSuffixInputPreservesEarlierEvidence",
+      "facets": [
+        "Explicit duplicate same append request and independent expired preparation race need dedicated invocation."
+      ]
+    },
+    {
+      "plannedName": "IncrementalSessionIT.restartAndConcurrentDriftTransitionAreIdempotent",
+      "facets": [
+        "Concurrent duplicate actual drift callback and recovery at every unconsumed prefix coordinate remain absent."
+      ]
+    },
+    {
+      "plannedName": "IncrementalRelearnIT.prefixAssertionFailureStopsWithoutReinterpretation",
+      "facets": [
+        "Current assertion failure is step3 rather than ledger literal step2; preserve original subject but add exact requested coordinate companion."
+      ]
+    },
+    {
+      "plannedName": "IncrementalRelearnIT.prefixPolicyRefusalStopsWithoutReinterpretation",
+      "facets": [
+        "Prefix redirect/navigation/password refusal companions are not all in this incremental variant."
+      ]
+    },
+    {
+      "plannedName": "IncrementalRelearnIT.secretPrefixPreservesOBS007Oracles",
+      "facets": [
+        "Incremental bad-origin/0password/2password/typeflip/oversize/revoked fault matrix is not yet source-joined; existing OBS007 tests remain separately mandatory."
+      ]
+    },
+    {
+      "plannedName": "IncrementalPublicationIT.mergedProofCannotReuseOldAdmissionsOrForeignSnapshots",
+      "facets": [
+        "Dedicated real repository attempts substituting every old admission/cross-CSI/hash-key variant need complete mapping/invocation."
+      ]
+    },
+    {
+      "plannedName": "StudioContractTest and confinement.test.ts C3 pins",
+      "facets": [
+        "Final C-int receipts and full configured parity execution remain separate; no backend source credit for names."
+      ]
+    },
+    {
+      "plannedName": "mixed-mode-prefix.test.ts model-free-adapter-and-joined-receipts",
+      "facets": [
+        "Consume runner exact method/label source map; backend does not assert runner source acceptance."
+      ]
+    },
+    {
+      "plannedName": "incremental-edit-step-4.json and incremental-insert-step.json",
+      "facets": [
+        "Exact two corpus artifact paths and validator invocations not verified in this checkpoint."
+      ]
+    },
+    {
+      "plannedName": "IncrementalIdentityTest.opaqueAliasRequiresExactDeclaredName",
+      "facets": [
+        "Dedicated real HTTP runtime identity-refusal matrix not fully mapped."
+      ]
+    },
+    {
+      "plannedName": "IncrementalPublicationIT.sameTestOlderBaseAndNoncontiguousReuseAreRefused",
+      "facets": [
+        "Actual same-test older equalhash base substitution request not yet dedicated."
+      ]
+    },
+    {
+      "plannedName": "IncrementalMaterializationIT.secretLineagePinsActualHistoricalVersion",
+      "facets": [
+        "Incremental secret actionversion1 then appendversion2 actual joined companion remains absent."
+      ]
+    },
+    {
+      "plannedName": "IncrementalMaterializationIT.stalePreparedCommandCannotCrossAppend",
+      "facets": [
+        "Explicit still-live prep blocksappend and real expiry oldprep admit/consume race need source."
+      ]
+    },
+    {
+      "plannedName": "IncrementalRetentionIT.prunesOnlyOBS014DataAndPreservesDeclaredF01Residual",
+      "facets": [
+        "Exact Dara retention method scope and postprune reconstruction companion not mapped here."
+      ]
+    },
+    {
+      "plannedName": "IncrementalDriftIT.preAdmissionAndAdmittedReceiptsUseAuthenticatedAuthority",
+      "facets": [
+        "All exact admitted preparation/admission mutation fields and late terminal callback need full source matrix."
+      ]
+    },
+    {
+      "plannedName": "IncrementalValidationBasisTest.rejectsMissingOrExtraExtendedEnvelope",
+      "facets": [
+        "Second excluded attempt negative relies separate graph vector source; exact fixture name in vector inventory."
+      ]
+    },
+    {
+      "plannedName": "IncrementalValidationBasisTest.reconstructsPrivateInputsBeforePublicEvidence",
+      "facets": [
+        "Exhaustive private history reorder/count/provenance tamper through real repository remains incomplete."
+      ]
+    },
+    {
+      "plannedName": "IncrementalValidationBasisTest.publicationHashCommitsEntireExtendedBasis",
+      "facets": [
+        "Exact arraypreimage positive/wrappernegative and every extended-basis semantic field/hash mutation must be individually mapped; TS separate."
+      ]
+    },
+    {
+      "plannedName": "IncrementalPublicationIT.excludedAttemptRequiresEveryExactAuthenticatedJoin",
+      "facets": [
+        "Complete every field crossed admission/preparation/obligation negative realHTTP matrix remains partial."
+      ]
+    },
+    {
+      "plannedName": "IncrementalMaterializationIT.emptyPrefixContextKeepsExactProgramPair",
+      "facets": [
+        "Every empty-prefix subsequent context delivery tamper/rebootstrap realHTTP source not complete."
+      ]
+    },
+    {
+      "plannedName": "IncrementalResultIT.receiptAndResultDistinguishBoundaryFromSuccess",
+      "facets": [
+        "Dedicated boundary/full-empty SOURCE_PLANfail and missing/contradictory resultHTTP adversary incomplete."
+      ]
+    },
+    {
+      "plannedName": "SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+      "facets": [
+        "Cross-language exact facet inventory/execution remains separate; source mapping does not equate all fields to tested assertions."
+      ]
+    },
+    {
+      "plannedName": "SnapshotBasisParityTest.oldBasisCannotDistinguishUnexecutedContextChange",
+      "facets": [
+        "Cross-language exact facet inventory/execution remains separate; source mapping does not equate all fields to tested assertions."
+      ]
+    },
+    {
+      "plannedName": "SnapshotBasisParityTest.normalizesTargetHintsDatesAndEmptyContextsExactly",
+      "facets": [
+        "Cross-language exact facet inventory/execution remains separate; source mapping does not equate all fields to tested assertions."
+      ]
+    },
+    {
+      "plannedName": "IncrementalPublicationIT.snapshotFactsMatchImmutableOriginalSourceManifest",
+      "facets": [
+        "Resealed context/default/evidence raw-value/unreferenced-extra adversaries through real application still partial."
+      ]
+    },
+    {
+      "plannedName": "IncrementalPublicationIT.baseProofUsesPinnedRevisionOwnImmutableRows",
+      "facets": [
+        "Actual same-test older equalhash alternative proof companion missing."
+      ]
+    },
+    {
+      "plannedName": "IncrementalPublicationIT.nonemptyOriginalPrefixCannotDropBaseProofAfterDriftAtOne",
+      "facets": [
+        "HTTP candidate nullproof/changedprogram/changedpin negative is pure vector only, actual real repository extra requests remain pending."
+      ]
+    },
+    {
+      "plannedName": "SnapshotBasisValidationTest.candidateMapsAreDerivedBeforeArtifactHash",
+      "facets": [
+        "Cross-language exact facet inventory/execution remains separate; source mapping does not equate all fields to tested assertions."
+      ]
+    },
+    {
+      "plannedName": "SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+      "facets": [
+        "Cross-language exact facet inventory/execution remains separate; source mapping does not equate all fields to tested assertions."
+      ]
+    },
+    {
+      "plannedName": "SnapshotBasisValidationTest.correctedBasisEvidenceHashUsesUnchangedEnvelope",
+      "facets": [
+        "Cross-language exact facet inventory/execution remains separate; source mapping does not equate all fields to tested assertions."
+      ]
+    },
+    {
+      "plannedName": "SnapshotBasisValidationTest.keepsOriginalGlobalByteLimits",
+      "facets": [
+        "Dedicated Java exact6MiB/8MiB boundary executable source not mapped; runner resource facets separately owned."
+      ]
+    },
+    {
+      "plannedName": "SnapshotBasisPrivacyIT.authoringSourceNeverEscapesPrivateValidation",
+      "facets": [
+        "Referenced plain+context canaries through all corrected pure/private/provider/public/log/media sinks require dedicated source."
+      ]
+    },
+    {
+      "plannedName": "IncrementalPublicationIT.onlyUnperformedImportedProducerCanRemainRawWithoutNeed",
+      "facets": [
+        "Hidden successful read/modelorphan runtime negative is covered only pure/internal shape source, not dedicated joined injection."
+      ]
+    },
+    {
+      "plannedName": "IncrementalPublicationIT.backendAuditsFirstSuffixThenStrictPlanChain",
+      "facets": [
+        "Actual concurrent duplicate suffixacceptance and later consumerpair deletion mutation require dedicated source."
+      ]
+    },
+    {
+      "plannedName": "IncrementalGraphProjectionTest.rejectsEveryUnaccountedOrUnprovenEdge",
+      "facets": [
+        "All unaccountededge attacks are pure witnesses; complete real application negative transport/DB authority matrix partial."
+      ]
+    },
+    {
+      "plannedName": "IncrementalGraphProjectionTest.zeroConsumerRequiresRetainedActualProducer",
+      "facets": [
+        "Earlier successful read producer inside partial driftstepj not yet source-joined."
+      ]
+    },
+    {
+      "plannedName": "IncrementalDependencyIT.cumulativeAllocationAdapterPreservesPendingDeliveryOrder",
+      "facets": [
+        "Explicit allocation samebody retry/noduplicate append and keybody mutation/restart source remains partial."
+      ]
+    },
+    {
+      "plannedName": "IncrementalPolicyIT.prefixGuardDeniesGroundingDestructionAndDenyEvenAfterConsent",
+      "facets": [
+        "Dedicated actual fresh Save/Delete/unobserved-target/formEnter after current prefix consent is absent; defaultDENY case is not a substitute."
+      ]
+    },
+    {
+      "plannedName": "IncrementalPolicyIT.waitingRecoveryCancellationAndAnswerRacesRemainAtMostOnce",
+      "facets": [
+        "Dedicated changedcontext-generation/leaseexpiry independent from gracefulLEASE_LOST needs executable companion."
+      ]
+    },
+    {
+      "plannedName": "IncrementalPolicyIT.directPrefixAdmissionCannotBypassConfirmation",
+      "facets": [
+        "Fresh hostileproposal afterconsent cases are still missing as obligation80."
+      ]
+    },
+    {
+      "plannedName": "IncrementalRecordingIT.tieTolerancePreservesActualRecordedEvidence",
+      "facets": [
+        "Dedicated actual naturally measured tie through manifest/backend/result/seek is not guaranteed by current scenarios; unit synthetic ties do not complete this actual obligation."
+      ]
+    }
+  ],
+  "nextWorkAfterFeedback": [
+    "Preserve every failure and exact invocation; no fixes until explicit root source release.",
+    "Implement incremental secret fault matrix + historical append lineage, callback intermediate state/concurrent drift, consent hostile-action cases and exhaustive real repository authority negatives under disjoint ownership.",
+    "Complete retained producer within partial driftstepj; exact resource boundaries; dedicated actually measured timingtie source without fabricated readings.",
+    "Reconcile cross-owner corpus/retention/conformance maps; execute real app/fullcheck/coverage/currentdist/native/actualjoined under root windows and independent QA."
+  ],
+  "noCompletion": "All8increments/full86scope preserved. Source-only mappings, synthetic vectors and parameter counts confer no fulfillment. No Done, QA verdict, skips, threshold/oracle weakening, commits or deploy. All owned source/story/disclosure now HOLD."
+}

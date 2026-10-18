@@ -1,0 +1,368 @@
+{
+  "artifact": "Independent Quinn B3a bounded source checks",
+  "capturedAt": "2026-10-15T20:17:34.720638+00:00",
+  "checkpoint": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-b3a-private-authority-source01.json",
+    "sha256": "472a73223f922ac47206a9e02119ee6bcb29959fd613b7e9be34fef3f3cd5cb7"
+  },
+  "findings": [],
+  "boundedConclusion": "NO_FINDINGS_IN_INSPECTED_SOURCE_DELTA_NOT_EXECUTED_TEST_PASS",
+  "checks": [
+    {
+      "id": "binding",
+      "assessment": "No finding",
+      "evidence": "Canonical checkpoint SHA and35 named payload/dependency/current-source length/hash bindings independently match. Canonical archives and patch are used; historical stale paths are resolved only through the recorded location overlay."
+    },
+    {
+      "id": "preservation",
+      "assessment": "No finding",
+      "evidence": "Removing exactly five added imports and appended new members, including their separator blank line, recovers the entire before class byte-for-byte. Independent unified diff matches source.patch exactly; original3methods/11invocations and helpers/assertions unchanged."
+    },
+    {
+      "id": "parent",
+      "assessment": "No finding in inspected source; runtime unproved",
+      "evidence": "Existing one-container/shared actualPG fixture freezes real classifier source and current identity before base capture, then stores controlled ordinary single-version plans/bootstrap/preparations/admissions/actions. It does not insert fake incremental history. Original positive helper is unchanged; fixture shape has3inputs/1version/nullincrementalEvidence."
+    },
+    {
+      "id": "productionEntry",
+      "assessment": "No finding in inspected source",
+      "evidence": "Unchanged prepareStored uses production capture/lower/reserve/claim/finish. Same writer commit validates claim/verdict/grant/candidate and locks current source before supplied reader; read-boundary JdbcTemplate shares actual DataSource but writer retains original db.jdbc. JdbcTemplate transactions bind to same datasource. No mocked JDBC return or SQL mutation is presented as stored corruption."
+    },
+    {
+      "id": "queryInterception",
+      "assessment": "No finding in inspected source",
+      "evidence": "All four exact SQL constants match production query strings/overloads. Query delegates to super first; only selected session returned rows are copied/substituted. Input/version lists and individual maps are detached; original ResultSet/storage remains untouched. Counter reset/reader/writer order agrees with source stages."
+    },
+    {
+      "id": "positiveControls",
+      "assessment": "No finding in inspected source; actual execution required",
+      "evidence": "For each label, same reader/writer first commits actual publication inside rollback; one revision and current confirmed pointer asserted; full durable digest restored. After refusal, actual untouched storage digest equal, mutation disarmed, complete raw evidence equals original; same writer positively commits/rolls back again. Supplier read counts1/2/3 exclude earlier unrelated refusal."
+    },
+    {
+      "id": "completePrivateParent",
+      "assessment": "No finding in inspected source",
+      "evidence": "Parent verifies every normalized original input document equals private envelope member, ordinal/introduction1, complete private hash against history, each entry hash before value removal, exact metadata minus value, no values in raw metadata. Full manifest checksum and public preimage retaining authoringSnapshot/removing configurationValues only are checked. It is a single-version companion, not multi-version closure."
+    },
+    {
+      "id": "13RefusalStages",
+      "assessment": "No finding in inspected source",
+      "evidence": "Explicit per-label stage/counter map retained separately. Private/history changes fail before current read except current-private-value; manifest checksum/private/plain/missing stop before input reconstruction. Coherent authored-context explicitly completes reader then meets original base hash refusal in builder. Same parent command/candidate stays unchanged."
+    },
+    {
+      "id": "mapperAPI",
+      "assessment": "No apparent source API/type issue; not compiler evidence",
+      "evidence": "Java21List.getFirst/removeLast usage, JdbcTemplate constructor/varargs overrides and ObjectNode copy/set types align with inspected existing APIs. New mapper serializes AuthoringRevisionInputs fields containing strings/UUIDs/lists/integer revision, with no date/time requiring extra module. Production snapshotEvidence uses the same plain ObjectMapper valueToTree shape. No compiler was invoked."
+    },
+    {
+      "id": "durableRowsTriggers",
+      "assessment": "No finding in inspected source; runtime equality unproved",
+      "evidence": "New snapshot enumerates all public tables after validating identifier spelling and hashes complete ordered rows plus noninternal trigger name/table/enabled/definition. Positive commits are rolled back; negative transaction refuses before write. It proves future row/trigger equality assertions, not actual SQL mutation acceptance/refusal or sequence state."
+    },
+    {
+      "id": "privacy",
+      "assessment": "No new output-exposure finding in inspected source",
+      "evidence": "New private JSON, manifest/private/full/entry hash and raw evidence equality assertions reduce to booleans; full durable row/trigger inventory reduces to one aggregate hash before AssertJ. No new runtime artifact writer/log/dump appears. Review outputs retain only source/file hashes, IDs/codes/counts and prose; approved historical fixture descriptor hashes are not recopied as current individual private-value evidence. Actual future exception/log/sink behavior still needs captured execution."
+    },
+    {
+      "id": "scope15",
+      "assessment": "No scope closure or tier substitution found",
+      "evidence": "All15 exact original route names and all original31/42/52/60 verbatim ledger subjects retained. Every exactOriginalRouteClosed isfalse; all4 subjects stay open. Remaining multi-version, issued preparation versus birth, pinned-base, HTTP/CAS/alias/Core/Vault/native/provider/public sinks remain explicitly open. Candidate expected comes from existing subject lowerer, not independent expected-artifact oracle."
+    },
+    {
+      "id": "release",
+      "assessment": "HOLD",
+      "evidence": "Only bounded source inspection. All24class invocations uncompiled/unexecuted. Root must schedule compile/full24actualPG at held hashes and later full015 configured86/24/55/original35/all80plus5/native/coverage/crossReplica/deployment/independentQA/admin/root thenfull008. Original85OPEN/unamended; no test PASS or story verdict."
+    }
+  ],
+  "13UnexecutedLabelStageMap": [
+    {
+      "method": "storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+      "label": "private-value",
+      "expectedFailureCode": "EVIDENCE_MISMATCH",
+      "expectedFailureStageBySource": "Reconstructed complete private envelope hash differs from stored immutable header after value change; no source/hash repair.",
+      "readCountersAtRefusal": {
+        "substitutions": 1,
+        "inputReads": 1,
+        "versionReads": 1,
+        "currentReads": 0
+      },
+      "executionStatus": "UNCOMPILED_UNEXECUTED",
+      "sourceFinding": null
+    },
+    {
+      "method": "storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+      "label": "private-provenance",
+      "expectedFailureCode": "EVIDENCE_MISMATCH",
+      "expectedFailureStageBySource": "Reconstructed private document/envelope hash differs after sourceSpan end change.",
+      "readCountersAtRefusal": {
+        "substitutions": 1,
+        "inputReads": 1,
+        "versionReads": 1,
+        "currentReads": 0
+      },
+      "executionStatus": "UNCOMPILED_UNEXECUTED",
+      "sourceFinding": null
+    },
+    {
+      "method": "storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+      "label": "input-order",
+      "expectedFailureCode": "EVIDENCE_MISMATCH",
+      "expectedFailureStageBySource": "First swapped input ordinal differs from expected0, before version query.",
+      "readCountersAtRefusal": {
+        "substitutions": 1,
+        "inputReads": 1,
+        "versionReads": 0,
+        "currentReads": 0
+      },
+      "executionStatus": "UNCOMPILED_UNEXECUTED",
+      "sourceFinding": null
+    },
+    {
+      "method": "storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+      "label": "missing-input",
+      "expectedFailureCode": "EVIDENCE_MISMATCH",
+      "expectedFailureStageBySource": "Header inputCount3 exceeds returned privateInputs2 before reconstructing full envelope.",
+      "readCountersAtRefusal": {
+        "substitutions": 1,
+        "inputReads": 1,
+        "versionReads": 1,
+        "currentReads": 0
+      },
+      "executionStatus": "UNCOMPILED_UNEXECUTED",
+      "sourceFinding": null
+    },
+    {
+      "method": "storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+      "label": "introduced-version",
+      "expectedFailureCode": "EVIDENCE_MISMATCH",
+      "expectedFailureStageBySource": "Entry introduced2 cannot enter original revision1 cutoff.",
+      "readCountersAtRefusal": {
+        "substitutions": 1,
+        "inputReads": 1,
+        "versionReads": 1,
+        "currentReads": 0
+      },
+      "executionStatus": "UNCOMPILED_UNEXECUTED",
+      "sourceFinding": null
+    },
+    {
+      "method": "storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+      "label": "header-hash",
+      "expectedFailureCode": "EVIDENCE_MISMATCH",
+      "expectedFailureStageBySource": "Complete reconstructed original private envelope hash differs from altered returned header hash.",
+      "readCountersAtRefusal": {
+        "substitutions": 1,
+        "inputReads": 1,
+        "versionReads": 1,
+        "currentReads": 0
+      },
+      "executionStatus": "UNCOMPILED_UNEXECUTED",
+      "sourceFinding": null
+    },
+    {
+      "method": "storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+      "label": "header-count",
+      "expectedFailureCode": "EVIDENCE_MISMATCH",
+      "expectedFailureStageBySource": "Changed count2 reconstructs incomplete envelope and cannot retain original header hash.",
+      "readCountersAtRefusal": {
+        "substitutions": 1,
+        "inputReads": 1,
+        "versionReads": 1,
+        "currentReads": 0
+      },
+      "executionStatus": "UNCOMPILED_UNEXECUTED",
+      "sourceFinding": null
+    },
+    {
+      "method": "storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+      "label": "header-provenance",
+      "expectedFailureCode": "EVIDENCE_MISMATCH",
+      "expectedFailureStageBySource": "Changed authored-input identity sourceRevision2 cannot retain the original complete-envelope hash.",
+      "readCountersAtRefusal": {
+        "substitutions": 1,
+        "inputReads": 1,
+        "versionReads": 1,
+        "currentReads": 0
+      },
+      "executionStatus": "UNCOMPILED_UNEXECUTED",
+      "sourceFinding": null
+    },
+    {
+      "method": "storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+      "label": "current-private-value",
+      "expectedFailureCode": "EVIDENCE_MISMATCH",
+      "expectedFailureStageBySource": "Earlier complete normalized history passes; actual current private envelope no longer matches immutable previousHash.",
+      "readCountersAtRefusal": {
+        "substitutions": 1,
+        "inputReads": 1,
+        "versionReads": 1,
+        "currentReads": 1
+      },
+      "executionStatus": "UNCOMPILED_UNEXECUTED",
+      "sourceFinding": null
+    },
+    {
+      "method": "storedSourceManifestRequiresOriginalImmutableSourcePreimage",
+      "label": "manifest-checksum",
+      "expectedFailureCode": "EVIDENCE_MISMATCH",
+      "expectedFailureStageBySource": "Evidence reader full private manifest checksum before snapshotEvidence.",
+      "readCountersAtRefusal": {
+        "substitutions": 1,
+        "inputReads": 0,
+        "currentReads": 0
+      },
+      "executionStatus": "UNCOMPILED_UNEXECUTED",
+      "sourceFinding": null
+    },
+    {
+      "method": "storedSourceManifestRequiresOriginalImmutableSourcePreimage",
+      "label": "manifest-private-plain",
+      "expectedFailureCode": "EVIDENCE_MISMATCH",
+      "expectedFailureStageBySource": "All four same-name private slots change coherently; resolved declaration valueHash differs from original frozen declaration after snapshot/resolve.",
+      "readCountersAtRefusal": {
+        "substitutions": 1,
+        "inputReads": 0,
+        "currentReads": 0
+      },
+      "executionStatus": "UNCOMPILED_UNEXECUTED",
+      "sourceFinding": null
+    },
+    {
+      "method": "storedSourceManifestRequiresOriginalImmutableSourcePreimage",
+      "label": "manifest-missing-plain",
+      "expectedFailureCode": "MISSING_SOURCE",
+      "expectedFailureStageBySource": "All four copies lose value; frozen plain declaration has no exact private value and snapshotEvidence refuses MISSING_SOURCE.",
+      "readCountersAtRefusal": {
+        "substitutions": 1,
+        "inputReads": 0,
+        "currentReads": 0
+      },
+      "executionStatus": "UNCOMPILED_UNEXECUTED",
+      "sourceFinding": null
+    },
+    {
+      "method": "storedSourceManifestRequiresOriginalImmutableSourcePreimage",
+      "label": "manifest-authored-context",
+      "expectedFailureCode": "EVIDENCE_MISMATCH",
+      "expectedFailureStageBySource": "Resealed full manifest plus recomputed authoringRevisionInputs passes actual reader/snapshot/history reconstruction in an explicit precheck; builder then rejects public manifest against unchanged original start-base sourceManifestHash.",
+      "readCountersAtRefusal": {
+        "substitutions": 1,
+        "inputReads": 1,
+        "currentReads": 1
+      },
+      "executionStatus": "UNCOMPILED_UNEXECUTED",
+      "sourceFinding": null
+    }
+  ],
+  "queryStringChecks": [
+    {
+      "constant": "INPUTS",
+      "exactProductionMatch": true,
+      "matchedSourcePaths": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedMaterializationEvidence.java"
+      ],
+      "interceptedOverload": "queryForList(String,Object...)"
+    },
+    {
+      "constant": "VERSIONS",
+      "exactProductionMatch": true,
+      "matchedSourcePaths": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedMaterializationEvidence.java"
+      ],
+      "interceptedOverload": "queryForList(String,Object...)"
+    },
+    {
+      "constant": "CURRENT",
+      "exactProductionMatch": true,
+      "matchedSourcePaths": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedMaterializationEvidence.java"
+      ],
+      "interceptedOverload": "queryForMap(String,Object...)"
+    },
+    {
+      "constant": "MANIFEST",
+      "exactProductionMatch": true,
+      "matchedSourcePaths": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java"
+      ],
+      "interceptedOverload": "queryForMap(String,Object...)"
+    }
+  ],
+  "preservation": {
+    "beforeSHA256": "d552398ccb6cc8c9d851acb81f0af35c5a5672e685e2f2543f83784a36a037b5",
+    "afterSHA256": "e6228117d0e9844075603c3b011166ddffb74ddb4533d4524111bd5a665bb9fd",
+    "currentEqualsArchivedAfter": true,
+    "wholeBeforeRecoveredByteExact": true,
+    "exactUnifiedPatch": true,
+    "addedImports": 5,
+    "originalMethods": 3,
+    "originalInvocations": 11,
+    "newMethods": 2,
+    "newInvocations": 13,
+    "classInvocations": 24,
+    "methodSelectorsVerified": [
+      {
+        "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.rawEdgeCannotNamePendingActionAgainstActualStoredAuthority",
+        "parameters": [],
+        "invocations": 1
+      },
+      {
+        "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.ordinaryCurrentCommitRechecksCompleteStoredEvidenceAndRollbackRemovesEveryWrite",
+        "parameters": [],
+        "invocations": 1
+      },
+      {
+        "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.directCurrentCommitKeepsExactClaimAndGrantAuthorityWithoutAnyWrite",
+        "parameters": [
+          "claim",
+          "snapshot",
+          "finalize-digest",
+          "grant-principal",
+          "grant-csi",
+          "grant-session",
+          "grant-snapshot",
+          "grant-expired",
+          "grant-after-validation"
+        ],
+        "invocations": 9
+      },
+      {
+        "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+        "parameters": [
+          "private-value",
+          "private-provenance",
+          "input-order",
+          "missing-input",
+          "introduced-version",
+          "header-hash",
+          "header-count",
+          "header-provenance",
+          "current-private-value"
+        ],
+        "invocations": 9
+      },
+      {
+        "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.storedSourceManifestRequiresOriginalImmutableSourcePreimage",
+        "parameters": [
+          "manifest-checksum",
+          "manifest-private-plain",
+          "manifest-missing-plain",
+          "manifest-authored-context"
+        ],
+        "invocations": 4
+      }
+    ]
+  },
+  "tierLimits": [
+    "ActualPG is future execution configuration, not executed by source review",
+    "Sql-row returns substituted after real query; no stored corruption",
+    "Controlled upstream plans/ACK/validator facts; no Core/Vault/HTTP/worker/native proof",
+    "Single version only; exact original15 routes and31/42/52/60 remain open",
+    "No independent expected-artifact proof",
+    "Durable snapshot excludes sequence state and does not establish trigger refusal behavior"
+  ],
+  "runtimeActions": 0,
+  "sourceDistHold": true,
+  "formalQAVerdict": null,
+  "lifecycleTransition": null
+}

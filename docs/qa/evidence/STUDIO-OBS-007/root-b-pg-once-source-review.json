@@ -1,0 +1,13 @@
+{
+  "verdict": "APPROVED_SOURCE_FOR_BOUNDED_DIAGNOSTIC",
+  "candidateSha256": "62cce57b6be4b1aac2d4fe9e66ac19caa0532652fe33ab024efbedb6612500ba",
+  "sourceSha256": "a8f6bbc91aa06668c3a9a1cec157eb314f14252d14e95c8f95f2c448808c79ae",
+  "findings": [
+    "Atomicone trigger only stillregistered originalclaim elapsed500ms+JDBCWAITING; noPGpoll/retry",
+    "Separate ownedfixture connection readonly transaction; boundeddriver/query/statement/rows, rollback and resourceclose independently attempted",
+    "Catalogonlyquery/private transient SQL/PIDs, numericfixed aggregates exported only joined; ambiguity/truncation/failure explicit and exactclaimattributionfalse",
+    "Original26 bodies/sourcecalls/TRACE1sbudget2srevocation preserved, no newmandatorycase"
+  ],
+  "limits": "One sameDB snapshot cannot establish exclusive claim backend or absence of earlier/later wait. Diagnosis only; no structural fix/performance acceptance claim.",
+  "next": "Scoped format/compile then diagnostic selected secret ninth; repeat required unprofiled first+ninth after actual justified fix. C4 reviewed isolated delta merges later without overwriting observer."
+}

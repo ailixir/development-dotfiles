@@ -1,0 +1,146 @@
+{
+  "scope": "Existing closed original diagnostics only; no complete privacy/timing proof",
+  "claim": [
+    {
+      "ordinal": 1,
+      "status": 202,
+      "handlerNanos": 120293917,
+      "consumed": true
+    },
+    {
+      "ordinal": 2,
+      "status": 202,
+      "handlerNanos": 818239125,
+      "consumed": true
+    },
+    {
+      "ordinal": 3,
+      "status": 202,
+      "handlerNanos": 124257458,
+      "consumed": true
+    },
+    {
+      "ordinal": 4,
+      "status": 202,
+      "handlerNanos": 114942417,
+      "consumed": true
+    },
+    {
+      "ordinal": 5,
+      "status": 202,
+      "handlerNanos": 291389542,
+      "consumed": true
+    },
+    {
+      "ordinal": 6,
+      "status": 202,
+      "handlerNanos": 1037610458,
+      "consumed": true
+    }
+  ],
+  "grant": [
+    {
+      "ordinal": 1,
+      "initial": true,
+      "success": true,
+      "code": 0,
+      "previousValid": false,
+      "nextValid": true,
+      "expiryValid": true,
+      "previousRemainingMs": 0,
+      "nextRemainingMs": 29900,
+      "assignmentRemainingMs": 599627,
+      "leaseAdvanceMs": 0,
+      "validationMicros": 117
+    },
+    {
+      "ordinal": 2,
+      "initial": false,
+      "success": true,
+      "code": 0,
+      "previousValid": true,
+      "nextValid": true,
+      "expiryValid": true,
+      "previousRemainingMs": 25057,
+      "nextRemainingMs": 29899,
+      "assignmentRemainingMs": 594784,
+      "leaseAdvanceMs": 4842,
+      "validationMicros": 109
+    },
+    {
+      "ordinal": 3,
+      "initial": false,
+      "success": true,
+      "code": 0,
+      "previousValid": true,
+      "nextValid": true,
+      "expiryValid": true,
+      "previousRemainingMs": 29594,
+      "nextRemainingMs": 29900,
+      "assignmentRemainingMs": 594479,
+      "leaseAdvanceMs": 306,
+      "validationMicros": 124
+    },
+    {
+      "ordinal": 4,
+      "initial": false,
+      "success": true,
+      "code": 0,
+      "previousValid": true,
+      "nextValid": true,
+      "expiryValid": true,
+      "previousRemainingMs": 28908,
+      "nextRemainingMs": 29900,
+      "assignmentRemainingMs": 593487,
+      "leaseAdvanceMs": 992,
+      "validationMicros": 108
+    },
+    {
+      "ordinal": 5,
+      "initial": false,
+      "success": true,
+      "code": 0,
+      "previousValid": true,
+      "nextValid": true,
+      "expiryValid": true,
+      "previousRemainingMs": 28724,
+      "nextRemainingMs": 29892,
+      "assignmentRemainingMs": 592311,
+      "leaseAdvanceMs": 1168,
+      "validationMicros": 117
+    }
+  ],
+  "profile": [
+    {
+      "files": 167,
+      "bytes": 8783058,
+      "hits": 0,
+      "links": 4,
+      "failed": false,
+      "stage": 0,
+      "errno": 0,
+      "linkName": 0,
+      "linkRoot": false,
+      "linkType": 0,
+      "linkBytes": 0,
+      "linkTargetRead": false,
+      "linkTargetIsVersion": false
+    }
+  ],
+  "lifecycle": [
+    {
+      "ordinal": 1,
+      "status": 202,
+      "consumed": true,
+      "kind": "RUNTIME",
+      "reason": "LEASE_LOST"
+    }
+  ],
+  "interpretation": {
+    "lastClaimHandlerAloneExceeds1000ms": true,
+    "exclusiveStageCosts": "UNMEASURED",
+    "clientFullCompletion": "UNOBSERVED",
+    "profile": "Complete structural preclose scan in failed flow; no successful secret-login or full C5 credit",
+    "priorFailuresPreserved": true
+  }
+}

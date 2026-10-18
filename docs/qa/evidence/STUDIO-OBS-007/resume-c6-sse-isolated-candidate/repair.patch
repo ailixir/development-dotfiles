@@ -1,0 +1,30 @@
+--- before.java
++++ after.java
+@@ -7167,6 +7167,7 @@
+       state.execution = p3Execute(test);
+       p4WriteRevocationMode(state);
+       p3AssertBinding(state.execution, scope, publication);
++      capture.watchExecution(state.execution, p3Cookie);
+       assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+     }
+     List<P6OwnedPid> browserTree = List.of();
+@@ -10546,6 +10547,10 @@
+     }
+ 
+     void watchExecution(UUID execution) throws Exception {
++      watchExecution(execution, COOKIE);
++    }
++
++    void watchExecution(UUID execution, String cookie) throws Exception {
+       var response =
+           HttpClient.newBuilder()
+               .sslContext(TLS)
+@@ -10559,7 +10564,7 @@
+                                   + execution
+                                   + "/events"))
+                       .timeout(Duration.ofSeconds(15))
+-                      .header("Cookie", "put_session=" + COOKIE)
++                      .header("Cookie", "put_session=" + cookie)
+                       .header("Accept", "text/event-stream")
+                       .GET()
+                       .build(),

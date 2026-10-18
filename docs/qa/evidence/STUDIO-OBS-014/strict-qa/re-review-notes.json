@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "story": "STUDIO-OBS-014",
+  "reviewer": "Quinn independent strict QA",
+  "updated": "2026-10-14T23:11:51.450381+00:00",
+  "verdict": "PENDING_EXECUTION_NOT_PASS",
+  "doneAllowed": false,
+  "scope": "Independent source/document review only; no source/test writes, heavy tests, lifecycle/gate/CLI/git changes. Original strict-plan-audit FAIL retained.",
+  "sourceManifest": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "sha256": "82b484c96a18477c50e2b2e56eb41cf12f30a313c919c84e0067fe946ebd8d23"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "607f57c71108ea54222f4b02f750ed92f7ef1725f68060f924814578854a7250"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "3dad33fefc0cc8b8e207d2fbd3a911bfa7256d8a1b8250d9481980036cdb370f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "sha256": "171d5e1919e737e986fad2888280ea2835c743f8be1322eb55272abfbf96e9f0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java",
+      "sha256": "0c9b1532ee790d7e9f76930705997d1374c7c76ae7f53b3fa35efe40c4f2ca33"
+    },
+    {
+      "path": "studio-runner/test/guided/transport.test.ts",
+      "sha256": "923d54920369929b34b1ef5cca0dd60f935de2f0e9fba471363e3ce31026b3da"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/guided-data-flow.md",
+      "sha256": "8f0e08a0e9ea362d00ae13e9fed3a3de88faf90a71634ae26e90cde68771d7be"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/addendum.md",
+      "sha256": "13905a67327c82f5bc07022be5bde572f0054710c8b93a47329ef09d36dd6134"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/data/v19-constraint-catalog.json",
+      "sha256": "46f026630c059c5a99ca43be9f1ec9b37b1885eacd9bcbcccfc82085b1908898"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/implementation-receipt.json",
+      "sha256": "e05822b6a20c2665a77b8f298c6f838b53557d714cb0cf15a3514895f04c1d23"
+    }
+  ],
+  "implementationReceiptChecks": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/VideoObjectServer.java",
+      "matchesReceipt": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/ExecutionVideoException.java",
+      "matchesReceipt": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/evidence/VideoObjectServerTest.java",
+      "matchesReceipt": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/RecordedGuidedEvidenceProjectionTest.java",
+      "matchesReceipt": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceTest.java",
+      "matchesReceipt": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionVideoIT.java",
+      "matchesReceipt": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedRecordingMigrationIT.java",
+      "matchesReceipt": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "matchesReceipt": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "matchesReceipt": true
+    }
+  ],
+  "oracles": [
+    {
+      "id": "AC4-integrated-ungrounded",
+      "implementationReview": "SUITABLE_PENDING_EXECUTION",
+      "cases": [
+        "aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch",
+        "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence"
+      ],
+      "basis": "SOURCE_PLAN targetIntent and NEXT_ACTION locator are coherent, actual DOM has Archive/Delete account. Missing-target variant changes nodeId only, retains schema-valid locator. Unlike old hostile fixture, guard action path can reach semantic reason. Asserts422/POLICY_DENIED, FAILED+public result, durable REJECTED attempt, exact refusal audit; zero actions and zero studio_guided_obligation_admissions for third step, unchanged preparation count, zero native SUBMITS. reserveObligation writes exactly studio_guided_obligation_admissions, so this zero-row assertion also covers reservation.",
+      "requiredExecution": "Both cases must pass and tally show exact UNGROUNDED_TARGET planted events."
+    },
+    {
+      "id": "AC5-integrated-destructive",
+      "implementationReview": "SUITABLE_PENDING_EXECUTION",
+      "cases": [
+        "aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch",
+        "anAuthoredDeleteStillFailsTheGovernedDenyStance",
+        "anAuthoredSaveOrDestructiveClickUnderAllowRunsExactlyOnce[Save,Delete]"
+      ],
+      "basis": "Dynamic DOM button has actual proposed safe label, plan matches locator, authored text independent. Exact DESTRUCTIVE_VERB denial, authored Delete still SIDE_EFFECT_DENIED under DENY, and Save/Delete ALLOW positive native control each exactly1 POST effect plus click+assert action count2. Existing CLARIFY_FIRST remains intact. No weakened invalid-contract expectations credited.",
+      "requiredExecution": "All four invocations must pass with new exact reasons and no unplanted refusal in final corpus."
+    },
+    {
+      "id": "AC3-native-post-prune-replay",
+      "implementationReview": "SUITABLE_PENDING_EXECUTION",
+      "cases": [
+        "GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+      ],
+      "basis": "Insertion after real production learning/publication and before existing2 native ordinary runs. Positive preconditions nonempty learned sourceSteps+observation+nonnull safe_result; snapshot6 publication tables; only source expiry aged in test seeding transaction; assert SQL role restored origin; production pruner bean; pruned_at set, progress allowlist, safe_result count0, exact immutable publication/learned_plan/artifact/receipt. Existing two PASSED native runs/fresh values/zero new model calls and historical reads remain. Explicit JsonNode resolves prior compilation ambiguity.",
+      "requiredExecution": "Order1 case and entire ordered class green on final source; storage prune tests remain required. Do not claim pass from source shape."
+    },
+    {
+      "id": "AC7-SAVED_INPUT-emitter",
+      "implementationReview": "SUITABLE_PENDING_EXECUTION",
+      "cases": [
+        "aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue"
+      ],
+      "basis": "Authors actual var token, provider uses real manifest configurationReference plus authored sourceSpan alternative; production service emits source clarification, public GET asserts SAVED_INPUT fixed label1 and AUTHORED alternative. Question and gateway request lack random private saved canary; no materialization or native effect. Secret source not used; this case claims no secret resolution and does not replace existing I-C11 secret tests.",
+      "requiredExecution": "Case must execute green; fake provider safeLabel must not escape. Existing PAGE/AUTHORED/secret regressions remain green."
+    },
+    {
+      "id": "TEST003-exact-context-replay",
+      "implementationReview": "SUITABLE_PENDING_EXECUTION",
+      "basis": "transport.test.ts replaces permissive either-code assertion with exact duplicate IDENTITY_MISMATCH; original first-forged IDENTITY_MISMATCH and first-missing SCHEMA assertions and no-launch/no-callback/valid context positive control retained.",
+      "requiredExecution": "Runner transport unit test must execute green at final hash."
+    }
+  ],
+  "localConcernDisposition": [
+    {
+      "id": "ARCH001",
+      "status": "RESOLVED_BY_DATED_ARCHITECT_RULING_PENDING_EXECUTED_CONFORMANCE",
+      "proof": "architecture/addendum.md explicitly ratifies absent->destructive->grounding->stance, preserving fail-closed form ruling. Added joined cases cover simultaneous-rule precedence."
+    },
+    {
+      "id": "TEST006",
+      "status": "RESOLVED_BY_EXPLICIT_SERIALIZATION_AND_REVIEWED_OWNERSHIP_PENDING_FULL_CLASS_EXECUTION",
+      "proof": "PER_CLASS ordered production application/real Core HTTP endpoint and process tree are class-owned, with intentional Order1->Order2 published test dependency. Instance-only conversion would misrepresent endpoint ownership. Explicit SAME_THREAD plus initial coreRole reset, primaryCsi invariant, fresh credentials, unique P3 scopes and finally cleanup before scope restore are sound within that architecture. Sticky cleanupUnconfirmed blocks unsafe continuation. Existing cleanup/assertions not weakened; full-class green still required."
+    },
+    {
+      "id": "DB001",
+      "status": "RESOLVED_BY_ACTUAL_CATALOG_EVIDENCE",
+      "proof": "Isolated PG15.19 catalog records24 V19 constraints incl generated hash equality and regex names, with unchanged20 migration checksums. Catalog action is explicitly not Flyway/runtime proof.",
+      "migrationChecksumMismatches": []
+    },
+    {
+      "id": "MNT001",
+      "status": "RESOLVED",
+      "proof": "Literal empty contracts/v3/*.json directory is now absent; no product reader change."
+    },
+    {
+      "id": "AC2-final-doc-tense",
+      "status": "SMALL_REMAINING_DOC_DEFECT",
+      "proof": "guided-data-flow.md line128 still says refused proposals emit audit once validator lands, after S3/final guard implementation exists. Replace with factual current emission; retain external disclosure. Other future S3 rows have been corrected."
+    }
+  ],
+  "executionStatus": "Backend focused attempt01 COMPILE_FAILURE; no backend test pass on modified source is claimed. Compile fix now matches receipt. Root owns execution.",
+  "externalBoundary": "D2b, ED01, real SIEM, real-model capacity/compliance and F01-F04 original external/out-of-scope clauses unchanged. No external approval asserted."
+}

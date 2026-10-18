@@ -1,0 +1,16 @@
+{
+  "scope": "C6_ORDINARY_EXISTING_SSE_REUSE_SOURCE_ONLY",
+  "sourceSha": "591e372f6d06fff8255d20500a681e7c8385dbbe3c8a0e0dc4c05ef84dc92c29",
+  "insertion": "Existing p8C6Run ordinary branch after p3AssertBinding before first dispatch: capture.watchExecution(state.execution, p3Cookie)",
+  "helperDelta": "Existing watchExecution(UUID) retains COOKIE behavior via delegating overload; overload differs ONLY provided existing owned cookie header, otherwise same reader/GET/status/media/bounds/EOF/close",
+  "authFact": "Existing fixed COOKIE fixture owns CSI123 only; actual C6 execution CSI456 uses existing p3Cookie same authenticated execution owner owning CSI123+CSI456. Do not broaden COOKIE ownership or reuse wrong scope.",
+  "preserved": [
+    "Actual acceptance/binding before subscription",
+    "No extra execution/value read/provider/browser/native calls",
+    "Same actual SSE endpoint and original15s request/finalreader bounds/terminalEOF/streamComplete scans",
+    "Original C5/C4/default watcher caller unchanged",
+    "Guided-only paths have no execution SSE subscription/no invented frames"
+  ],
+  "authorStatus": "NOT_AUTHORED",
+  "runtime": "UNRUN"
+}

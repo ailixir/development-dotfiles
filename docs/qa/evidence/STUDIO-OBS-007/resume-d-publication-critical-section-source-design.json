@@ -1,0 +1,51 @@
+{
+  "story": "STUDIO-OBS-007",
+  "scope": "SOURCE_ONLY publication critical-section design; no source/runtime/lifecycle action",
+  "disposition": "CONDITIONAL_MINIMAL_OPTIONAL_DETACHED_LOWERING; NO_AUTHOR_UNTIL_FINALIZE_CODE_AND_INDEPENDENT_REVIEW",
+  "source_sha256": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": "87e9a1da8028ecf341aa3c7102069acb223ce44eb81d00e665c9650088a2a650",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": "a728166231f8e1508e88a6bcf91b67933a95a7c5587f41613ce2109200878b96",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java": "8e283dafde35ecdd622e7c8bf9eb116676d6d533a16164dbf78cc986ae681952",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReferencePolicyDeriver.java": "d67a888d42350afe432aab31e9082a8a25b705902b53db1f034628f6497cbb46",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java": "13b254432278614fb0e51d7dd17320eac5b57f64aa81754f786c676980a02788",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java": "197e220f66c6453d6fc9479bbc2c19cdb790d950edf08721a805dc58c77bc168",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java": "aeb534126b39be519976059d1d6ceb9a55493403110e642c85d25fc172bfef0e",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayPins.java": "da4dcec91b65cc4d44e0212c06632b6c90c7199b5297c93fcaaac0aa022212fa",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "a5034ee98707552d927f48bc0a30e07896df913f3b706f42f15ee16c7b52144b"
+  },
+  "observed_boundary": {
+    "authority": "root current unprofiled execution checkpoint; not inferred from source",
+    "learning": "awaitFinalizing plus accepted learning receipt and USED audit prefix reached",
+    "finalize": "HTTP409 where200 expected; exact product code UNOBSERVED",
+    "later_claim_ms": 2229.231542,
+    "later_claim": "LEASE_LOST",
+    "exclusive_cost_and_holder": "UNOBSERVED; prior RESERVE13 mapping is historical source/class-bound support only"
+  },
+  "current_order": "Publisher78\u2013106 keeps body/digest/prior receipt/authenticated receipt read/idempotency/enabled/user checks; prepare265\u2013289 locks owner then source, checks FINALIZING/base/revisions/current source/current access, reads independent evidence, validates reconstructed basis, selects checked pins, then lowers.",
+  "pure_work": "Lowerer29\u2013147 builds learned plan, recipes, reference policy, guards/operations/equivalence/revision hashes and bounded defensive Candidate copies. It has no SQL/gateway/runner dependencies (17\u201326). Builder.plan835\u2013870 strictly validates learned-plan; Candidate107\u2013134 canonicalizes/copies/bounds, rather than independently validating every artifact schema.",
+  "fresh_work_retained": "Builder.basis58\u2013383 retains all original manifest/plan/source/reference/proposal/preparation/observation/ledger/admission/scope/run-authorization/choice/graph checks. Evidence.read452 onward keeps original retained database joins and hash checks. Base.requireCurrent171\u2013208 and pins.selected33\u201336/checked51\u201363 remain original fresh refusal points.",
+  "existing_offlock": "Validator RPC Publisher134 and Core publication authorization191 are already outside the owner transaction; no proposal to move or duplicate them.",
+  "recommendation": [
+    "After the unchanged finalize prefix, an optional extra owner\u2192source capture transaction runs the original pre-lowering guard/basis construction and obtains an owned detached basis and checked profile/build. No snapshot/attempt/progress/receipt/reservation/model/Vault write or send occurs during preparation.",
+    "Outside both locks call the SAME publisher-owned final lowerer once on owned copies and retain only a private prepared candidate/input cut. Reuse private Prepared/Snapshot organization; no generalized capability/cache/API/schema/DB-version framework.",
+    "The actual original prepare transaction repeats EVERY original fresh guard/evidence/basis/pin read in its original order. Reuse prepared lowering only if full reconstructed basis JsonNode equality AND original serialized representation equality, selected profile/build equality AND representation equality hold. Session/key/digest selection binds the private call; never digest-only or filtered projection equality.",
+    "Any unavailable result or mismatch executes original lowerer.lower at289 under the lock, with no retry, new attempt, extra charge or send. Preparation cannot replace the fresh checked-pin getter. Keep the private lowerer construction final/known implementation; any future nonstandard lowerer wiring needs original-path eligibility, not assumed override equivalence.",
+    "Identity290\u2013306 is built from FRESH base/worker/fence/basis and matched candidate. Fresh clock/expiry/lease clipping307\u2013315 and original cached snapshot-identity comparison316\u2013324 remain untouched, then Snapshot/reserve/max-attempt/save327\u2013335 execute once in the actual transaction.",
+    "Keep original claim/verdict/authorization/commit flow108\u2013238 and repository reserve49\u2013114/authority498\u2013540/commit183 onward/verifyCandidate406\u2013467 intact. Fresh commit basis hash211, profile/build support202 and independent verdict/grant/hash checks remain authority."
+  ],
+  "lease_liveness": "Builder basis does not copy owner leaseExpiresAt or progress/counters. Never compare whole mutable session/owner, cached deadline or preparation lease. Fresh owner worker/fence identity and live expiry remain repository authority511\u2013515 and fresh snapshot/deadline; legitimate renewal alone must not invalidate candidate reuse.",
+  "failure_order_conditions": "Extra read is explicitly additional observation. Nonfatal speculative capture/lowering failure makes preparation unavailable and actual original path determines refusal after fresh original guards. If fixed typed lowering failure is ever retained, replay only at289 after exact fresh cut/pin match; no raw Throwable persistence/new code. Error propagates immediately with explicitly changed preparation observation semantics. Existing receipt/conflict marking, lowerer failure before attempt creation, BUDGET/refusal and SQL rollback priorities must be source-reviewed before author.",
+  "alternative_current": "Keep single transaction: least complexity and original observations/error order, but pure lowering/plan validation/canonical hashes/copies stay inside owner+source locks. This remains valid if the actual409 is unrelated or no benefit is demonstrated.",
+  "alternative_static_schema": "GuidedContracts26/88\u2013106 has per-instance computeIfAbsent expansion/compilation only on first validation key. Startup compiled-schema preparation would explicitly alter static-resource failure/startup/restart semantics; no source evidence identifies current cold compilation or dominant cost. Not recommended as an incidental publication fix; no dummy validation/eager resource change authorized.",
+  "alternative_broad_detach": "Moving evidence/basis validation or trusting an existing snapshot without fresh reconstruction risks hidden-row/choice/refusal/source/owner freshness. Whole owner/lease equality also creates renewal conflicts. Reject that broader cut; fresh basis/strict validation and commit checks remain locked.",
+  "tradeoffs": "One extra transaction/read/evidence/basis validation plus matching/copy overhead, and unchanged locked fallback under churn. Relocates only pure lowerer work; fresh basis validation, SQL, deadline and independent commit verification still cost lock time. No performance/1000ms/PASS promise, no diagnosis from status409, no TRACE/budget weakening.",
+  "acceptance_mapping": {
+    "AC6": "JIT secret delivery/current scope/digests unchanged; lowerer manipulates original metadata and adds no resolution/model/native/send channel.",
+    "AC9": "Backend sinks/full ROOT+APP TRACE every-appender and all literal/encoded output scans unchanged; detached copies inherit original privacy/residual bounds, with no raw prepared input/error export.",
+    "AC13": "Original fresh authorization/revocation/no-resend/control timing unchanged; no cached lease/deadline authority.",
+    "AC14": "No audit write/status/USED/RELEASE/retry/summary change; publication preparation and failed attempts do not fabricate facts.",
+    "AC19": "Reuse existing publisher/lowerer/repository idempotency/conflict/expiry/source/pin/hash/rollback defining tests and original unprofiled joined workflow. No new mandatory Core/browser case or supporting-tier promotion."
+  },
+  "next_decision": "First obtain exact finalize failure code from coordinator existing guarded helper repair. Root/independent review then chooses original path or this narrowly scoped optional preparation. No implementation/test/runtime is authorized by this receipt."
+}

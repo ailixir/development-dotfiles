@@ -1,0 +1,17 @@
+{
+  "status": "C2_EXISTING_LIVE_PARENT_WIPE_RECOVERY_SOURCE_REVIEW_PASS",
+  "recoveryReceiptSha256": "7d96d801b3035ed458c6c482fc3c9048901f553a7803277b5edee19aa1f4d1f6",
+  "originalGateSha256": "94f112ac43f6b43c3dfba7a8c327aa0e1af27aad57016e92460855a219f99693",
+  "originalClosedWitnessSha256": "59aed7008a545613fc3f34cbe274dbfd1774e7a4b607dc8be1dfe10cf3d4b5ab",
+  "checks": {
+    "originalActualGatePass": true,
+    "originalLiveParentAndRealChildCut": true,
+    "exactRunnerSourceDistEntries": true,
+    "closedUniqueLineage": true,
+    "noInventedKilledChildOrKilledParentTelemetry": true
+  },
+  "scope": "Existing authentic parent-directed compiled-child kill with live parent and one recovered run.values_wiped event. This closes only that event/exit mapping for C2; not concurrent replay, other exit paths, heap erasure, normal killed-child closure or dead-parent telemetry.",
+  "independentReviewLimit": "Private invocation/event identity association is represented by the root-owned sanitized recovery receipt; this reviewer independently reopened only closed receipts and verified all364 current source/dist hashes, not raw logs or private identifiers.",
+  "newRuntimeExecuted": false,
+  "formalQaOrLifecycleAdvance": false
+}

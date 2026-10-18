@@ -1,0 +1,2488 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -2311,6 +2311,20 @@
+               }
+               return;
+             }
++            B3EvidenceCapture b3 = b3EvidenceCapture; // STUDIO-OBS-015 B3C-2: null unless armed
++            if (b3 != null && b3.selected(http)) {
++              var wrapped =
++                  new org.springframework.web.util.ContentCachingRequestWrapper(http, 1048576);
++              try {
++                chain.doFilter(wrapped, response);
++              } finally {
++                b3.record(
++                    http.getRequestURI(),
++                    wrapped.getContentAsByteArray(),
++                    ((jakarta.servlet.http.HttpServletResponse) response).getStatus());
++              }
++              return;
++            }
+             UUID p3Execution =
+                 P3_EXECUTIONS.stream()
+                     .filter(
+@@ -3645,6 +3659,2386 @@
+     incrementalJoined(variant);
+   }
+ 
++  // ---- STUDIO-OBS-015 B3b/B3c source01 (b3abc-design01 s1/s3/s4): inactive unless selected ----
++
++  /** Test-only hooks inside {@code incrementalJoined}; null means the original flow, unchanged. */
++  private interface B3Hooks {
++    default void texts(String variant, List<String> texts) {}
++
++    default void beforeFinalize(B3Parent parent) throws Exception {}
++
++    default void afterFirstOrdinaryReplay(B3Parent parent, JsonNode merged, UUID execution)
++        throws Exception {}
++  }
++
++  private record B3Parent(
++      String id,
++      UUID test,
++      JsonNode base,
++      JsonNode edited,
++      ArrayNode steps,
++      int boundary,
++      String variant) {}
++
++  private record B3Outcome(
++      String label, String stage, String code, int readsDelta, String backendLowering) {}
++
++  private static volatile B3Hooks b3Hooks;
++  private static volatile boolean b3ReadInsideDriftStep;
++  private static volatile B3FirstSuffixHold b3FirstSuffixHold;
++  private static volatile B3EvidenceCapture b3EvidenceCapture;
++
++  /** Value-free per-label stage records: session hash, label, stage, code, reader delta only. */
++  private static final List<ObjectNode> B3_OUTCOMES = new CopyOnWriteArrayList<>();
++
++  /** B3B-1 (43/61/60/52/31/42): stored base/source/history authority at actual joined parents. */
++  @Test
++  void incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution() throws Exception {
++    b3IsolatedCsi();
++    var parent = new java.util.concurrent.atomic.AtomicReference<B3Parent>();
++    var merged = new java.util.concurrent.atomic.AtomicReference<JsonNode>();
++    try {
++      b3AliasDeclarationsRefuseAtActualStartWithoutWrites(); // 42 HTTP leg
++      b3Hooks =
++          new B3Hooks() {
++            @Override
++            public void beforeFinalize(B3Parent p) throws Exception {
++              parent.set(p);
++              b3AssertPinnedBaseProofJoinsActualRows(p); // 61 positive joins
++              var probe = new B3WriterProbe(p.id(), p.test());
++              probe.positive("gen1-positive");
++              JsonNode entries = probe.genuine.path("materializationEvidence").path("entries");
++              int lastV2 = -1;
++              for (int at = 0; at < entries.size(); at++) {
++                if (entries.get(at).path("introducedContextRevision").asInt() == 2) {
++                  lastV2 = at;
++                }
++              }
++              assertThat(lastV2).as("actual appended version-2 input").isNotNegative();
++              final int v2 = lastV2;
++              probe.requireStored( // 52 / route 6, multi-version
++                  "wrong-private-input-hash-v2",
++                  b -> {
++                    ObjectNode e =
++                        (ObjectNode) b.path("materializationEvidence").path("entries").get(v2);
++                    e.put(
++                        "inputHash",
++                        GuidedContracts.hash(C.object().put("b3", e.path("inputHash").asText())));
++                  });
++              int prep = b3IssuedAboveBirth(probe.genuine); // precondition, else OPEN
++              probe.requireStored( // 52 / route 7
++                  "preparation-substitutes-birth-for-actual",
++                  b -> {
++                    ObjectNode fact = (ObjectNode) b.path("preparations").get(prep);
++                    int revision = b3PreparationContextRevision(b, fact);
++                    fact.put(
++                        "materializationRevision",
++                        b.path("materializationEvidence")
++                            .path("versions")
++                            .get(revision - 1)
++                            .path("birthMaterializationRevision")
++                            .asInt());
++                  });
++              probe.requireBackendPure( // 52 full-version cutoff
++                  "historical-cutoff-moves-v2-input-into-v1",
++                  b ->
++                      ((ObjectNode) b.path("materializationEvidence").path("entries").get(v2))
++                          .put("introducedContextRevision", 1));
++              probe.requireStored( // 60 / route 3
++                  "immutable-source-manifest-hash-is-exact",
++                  b ->
++                      b.put(
++                          "sourceManifestHash",
++                          GuidedContracts.hash(
++                              C.object().put("b3", b.path("sourceManifestHash").asText()))));
++              probe.refuse( // 60 / route 1 (joined analogue; stage recorded, not pinned)
++                  "immutable-original-source-cannot-be-replaced",
++                  b -> {
++                    ObjectNode step =
++                        (ObjectNode)
++                            b.path("snapshotEvidence")
++                                .path("current")
++                                .path("authoring")
++                                .path("steps")
++                                .get(3);
++                    ObjectNode context =
++                        step.has("context")
++                            ? (ObjectNode) step.path("context")
++                            : step.putObject("context");
++                    context
++                        .putArray("entries")
++                        .addObject()
++                        .put("kind", "text")
++                        .put("value", "A different complete source");
++                  });
++              b3AssertMultiVersionReturnedHistoryRefuses(p); // 52 returned-read (no T3 credit)
++              probe.positive("gen1-positive-after");
++            }
++
++            @Override
++            public void afterFirstOrdinaryReplay(B3Parent p, JsonNode receipt, UUID execution)
++                throws Exception {
++              merged.set(receipt);
++              b3AssertFinalizeIsIdempotentAndModelBrowserFree(p, receipt); // 31
++            }
++          };
++      incrementalJoined("append-input");
++      b3Hooks = null;
++      assertThat(parent.get()).isNotNull();
++      assertThat(merged.get()).isNotNull();
++      b3OlderEqualHashBaseAndChangedSourceCas(parent.get(), merged.get()); // 43/61/60 gen 2
++    } finally {
++      b3Hooks = null;
++      incrementalTenScenario = false;
++      incrementalDomVariant = null;
++      Files.writeString(TEMP.resolve("obs015-native-mode.json"), "{}");
++      b3RestoreCsi();
++      b3RetainOutcomes();
++    }
++  }
++
++  /** B3B-2 (63/61/72): drift at j1 keeps the full base proof; null/changed/orphans refuse. */
++  @Test
++  void incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne() throws Exception {
++    b3IsolatedCsi();
++    var seen = new java.util.concurrent.atomic.AtomicReference<B3Parent>();
++    var raw = new java.util.concurrent.atomic.AtomicReference<String>();
++    try {
++      b3Hooks =
++          new B3Hooks() {
++            @Override
++            public void beforeFinalize(B3Parent p) throws Exception {
++              seen.set(p);
++              String nav = b3DriftAtOneFacts(p, raw);
++              var probe = new B3WriterProbe(p.id(), p.test());
++              probe.positive("drift-one-positive");
++              probe.requireBackendPure(
++                  "base-proof-null",
++                  b -> ((ObjectNode) b.path("snapshotEvidence")).putNull("baseProof"));
++              probe.requireBackendPure(
++                  "changed-program",
++                  b -> {
++                    ObjectNode incremental = (ObjectNode) b.path("incrementalEvidence");
++                    ObjectNode program = (ObjectNode) incremental.path("program");
++                    ((ObjectNode) program.path("actions").get(0))
++                        .put("operationHash", "0".repeat(64));
++                    ((ObjectNode) incremental.path("plan"))
++                        .put("prefixProgramHash", GuidedContracts.hash(program));
++                  });
++              probe.requireBackendPure(
++                  "changed-pin",
++                  b -> {
++                    String forged =
++                        GuidedContracts.hash(
++                            C.object().put("b3-forged-pin", p.base().path("revisionId").asText()));
++                    ((ObjectNode) b.path("snapshotEvidence").path("pinnedBase"))
++                        .put("revisionDigest", forged);
++                    ObjectNode incremental = (ObjectNode) b.path("incrementalEvidence");
++                    ObjectNode program = (ObjectNode) incremental.path("program");
++                    program.put("baseRevisionDigest", forged);
++                    ((ObjectNode) incremental.path("plan"))
++                        .put("prefixProgramHash", GuidedContracts.hash(program));
++                  });
++              probe.refuse("base-proof-recomputed-source", b -> b3RecomputedBaseSource(b)); // 61
++              probe.refuse( // 61 map
++                  "base-proof-recomputed-reuse-map",
++                  b -> {
++                    ObjectNode proof = (ObjectNode) b.path("snapshotEvidence").path("baseProof");
++                    ((ObjectNode) proof.path("revision").path("reusedFrom"))
++                        .putObject(INCREMENTAL_STEPS.get(0))
++                        .put("revisionId", p.base().path("revisionId").asText())
++                        .put("stepId", INCREMENTAL_STEPS.get(0));
++                  });
++              String bound = probe.genuine.path("producers").get(0).path("bindingId").asText();
++              probe.refuse( // 72
++                  "hidden-successful-read",
++                  b -> {
++                    ObjectNode hidden = ((ObjectNode) b.path("producers").get(0)).deepCopy();
++                    hidden.put("bindingId", raw.get()).put("producerAdmissionId", nav);
++                    ((ArrayNode) b.path("producers")).add(hidden);
++                  });
++              probe.refuse( // 72 / N01
++                  "model-only-orphan",
++                  b -> {
++                    ObjectNode need =
++                        ((ObjectNode) b.path("translationPlan").path("needs").get(0)).deepCopy();
++                    need.put("needId", "b3-orphan")
++                        .put("bindingId", "b3-orphan-binding")
++                        .putArray("consumers");
++                    ((ArrayNode) b.path("translationPlan").path("needs")).add(need);
++                    ObjectNode allocation = ((ObjectNode) b.path("allocations").get(0)).deepCopy();
++                    allocation
++                        .put("bindingId", "b3-orphan-binding")
++                        .put("needId", "b3-orphan")
++                        .putArray("consumers");
++                    ((ArrayNode) b.path("allocations")).add(allocation);
++                  });
++              probe.refuseOffered( // 72
++                  "raw-id-recycle",
++                  (ObjectNode) C.parse(b3Replace(probe.genuine, bound, raw.get())));
++              probe.positive("drift-one-positive-after");
++            }
++
++            @Override
++            public void afterFirstOrdinaryReplay(B3Parent p, JsonNode merged, UUID execution) {
++              JsonNode artifact =
++                  C.parse(
++                      jdbc.queryForObject(
++                          "SELECT artifact::text FROM ui_test_revisions WHERE id=?::uuid",
++                          String.class,
++                          merged.path("revisionId").asText()));
++              assertThat(artifact.path("learnedPlan").path("reusedFrom"))
++                  .as("drift at j1 reuses zero steps")
++                  .isEmpty();
++              assertThat(artifact.toString())
++                  .as("raw unperformed import never becomes an executable binding")
++                  .doesNotContain(raw.get());
++              assertThat(artifact.path("learnedPlan").path("bindings")).hasSize(1);
++            }
++          };
++      incrementalJoined("drift-first");
++      assertThat(seen.get()).isNotNull();
++    } finally {
++      b3Hooks = null;
++      b3RestoreCsi();
++      b3RetainOutcomes();
++    }
++  }
++
++  /** B3B-3 (73/75/72): one immutable first acceptance; later pair/obligation/edge loss refuses. */
++  @Test
++  void incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear() throws Exception {
++    b3IsolatedCsi();
++    var hold = new B3FirstSuffixHold();
++    var seen = new java.util.concurrent.atomic.AtomicReference<B3Parent>();
++    b3FirstSuffixHold = hold;
++    java.util.concurrent.Future<ObjectNode> race = null;
++    try (var watcher = java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor()) {
++      race = watcher.submit(() -> b3ContendFirstSuffix(hold));
++      final java.util.concurrent.Future<ObjectNode> contention = race;
++      try {
++        b3Hooks =
++            new B3Hooks() {
++              @Override
++              public void beforeFinalize(B3Parent p) throws Exception {
++                seen.set(p);
++                ObjectNode contended = contention.get(5, java.util.concurrent.TimeUnit.SECONDS);
++                assertThat(contended.path("sessionId").asText()).isEqualTo(p.id());
++                assertThat(hold.releasedInTime)
++                    .as("the held actual call was released inside its bound")
++                    .isTrue();
++                for (JsonNode contender : contended.path("contenders")) {
++                  assertThat(contender.path("status").asInt()).isEqualTo(409);
++                  assertThat(contender.path("code").asText())
++                      .as("in-flight first suffix refuses a second reservation")
++                      .isEqualTo("IDEMPOTENCY_CONFLICT");
++                }
++                assertThat(contended.path("contenders")).hasSize(2);
++                assertThat(contended.path("acceptancesDuringHold").asInt()).isZero();
++                assertThat(contended.path("attemptsDelta").asInt()).isZero();
++                assertThat(contended.path("wireDelta").asInt()).isZero();
++                b3AssertOneImmutableFirstAcceptance(p); // 73 concurrent/duplicate + removals
++                b3AssertLaterLossRefuses(p); // 73 later pair deletion / obligation mutation
++                b3EdgeMatrix(p); // 75 / 72 edge side
++              }
++            };
++        incrementalJoined("admitted-drift2");
++        assertThat(seen.get()).isNotNull();
++      } finally {
++        b3Hooks = null;
++        b3FirstSuffixHold = null;
++        hold.release.countDown();
++        if (!race.isDone()) {
++          race.cancel(true); // never leave the 120 s watcher waiting after an earlier failure
++        }
++      }
++    } finally {
++      b3RestoreCsi();
++      b3RetainOutcomes();
++    }
++  }
++
++  /** B3C-1 (76; P03, N01): partial drift-step read at j publishes and replays twice. */
++  @Test
++  void incrementalPartialDriftStepReadPublishesAndReplaysTwice() throws Exception {
++    b3IsolatedCsi();
++    var seen = new java.util.concurrent.atomic.AtomicReference<B3Parent>();
++    var producer = new java.util.concurrent.atomic.AtomicReference<String>();
++    b3ReadInsideDriftStep = true;
++    try {
++      b3Hooks =
++          new B3Hooks() {
++            @Override
++            public void texts(String variant, List<String> texts) {
++              texts.set(0, "Open " + URL + " and wait for Operations.");
++              texts.set(
++                  1, "Read the Order reference, then enter that order reference in Destination.");
++            }
++
++            @Override
++            public void beforeFinalize(B3Parent p) throws Exception {
++              seen.set(p);
++              producer.set(b3PartialDriftStepFacts(p));
++              b3ZeroConsumerAndOrphanNegatives(p, producer.get()); // N01 at actual stored tier
++            }
++
++            @Override
++            public void afterFirstOrdinaryReplay(B3Parent p, JsonNode merged, UUID execution)
++                throws Exception {
++              b3PublishedPartialDriftStepAndSecondReplay(p, merged, execution, producer.get());
++            }
++          };
++      incrementalJoined("drift2");
++      assertThat(seen.get()).isNotNull();
++    } finally {
++      b3Hooks = null;
++      b3ReadInsideDriftStep = false;
++      b3RestoreCsi();
++      b3RetainOutcomes();
++    }
++  }
++
++  /**
++   * B3C-2: native0/native1 identities, equal measured rows in 4 sinks, actual per-admission seek.
++   */
++  @Test
++  void incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek() throws Exception {
++    b3IsolatedCsi();
++    var capture = new B3EvidenceCapture();
++    var seen = new java.util.concurrent.atomic.AtomicReference<B3Parent>();
++    b3EvidenceCapture = capture;
++    try {
++      b3Hooks =
++          new B3Hooks() {
++            @Override
++            public void beforeFinalize(B3Parent p) throws Exception {
++              seen.set(p);
++              var probe = new B3WriterProbe(p.id(), p.test());
++              probe.positive("ledger-positive");
++              probe.refuse( // route 8: complete stored action inventory
++                  "unrelated-failed-ledger-omitted",
++                  b ->
++                      ((ArrayNode) b.path("incrementalEvidence").path("excludedAttempts"))
++                          .removeAll());
++              probe.positive("ledger-positive-after");
++            }
++
++            @Override
++            public void afterFirstOrdinaryReplay(B3Parent p, JsonNode merged, UUID execution)
++                throws Exception {
++              b3AssertMeasuredRowsAndActualMediaSeek(p.id(), capture);
++            }
++          };
++      incrementalJoined("admitted-drift2");
++      assertThat(seen.get()).isNotNull();
++      assertThat(capture.failure).isNull();
++    } finally {
++      b3Hooks = null;
++      b3EvidenceCapture = null;
++      b3RestoreCsi();
++      b3RetainOutcomes();
++    }
++  }
++
++  private void b3IsolatedCsi() {
++    // PFXSYNC precedent (prefixSyncParent): never enlarge the shared real daily cap.
++    primaryCsi = "CSI-B3-" + (++p3CsiOrdinal);
++    forgetCachedCoreIdentity();
++    jdbc.update(
++        "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
++            + " VALUES (?,'Orders','Ops','HIGH','fixture@example.invalid','Production')",
++        primaryCsi);
++  }
++
++  private void b3RestoreCsi() {
++    primaryCsi = "CSI-123";
++    forgetCachedCoreIdentity();
++  }
++
++  /** Retains this invocation's value-free stage records beside the cohort exports. */
++  private static void b3RetainOutcomes() throws Exception {
++    FixtureInvocation invocation = activeFixtureInvocation;
++    ObjectNode out = C.object().put("lane", FIXTURE_PROFILE.lane);
++    out.put("invocation", invocation == null ? "unknown" : invocation.key);
++    var rows = out.putArray("outcomes");
++    B3_OUTCOMES.forEach(row -> rows.add(row.deepCopy()));
++    B3_OUTCOMES.clear();
++    if (invocation != null) {
++      privateImmutableJson(
++          COHORT_DIRECTORY.resolve("b3-outcomes-" + invocation.key + ".json"), out);
++    }
++  }
++
++  /** Every row a publication could write for this test/session, excluding the live lease. */
++  private String b3PublicationWrites(UUID test, String id) {
++    ObjectNode out = C.object();
++    out.set(
++        "test",
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT to_jsonb(t)::text FROM ui_tests t WHERE id=?", String.class, test)));
++    out.set(
++        "revisions",
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY id),'[]'::jsonb)::text"
++                    + " FROM ui_test_revisions r WHERE test_id=?",
++                String.class,
++                test)));
++    for (String table :
++        List.of("studio_guided_publications", "studio_guided_publication_attempts")) {
++      out.set(
++          table,
++          C.parse(
++              jdbc.queryForObject(
++                  "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text),'[]'::jsonb)"
++                      + "::text FROM "
++                      + table
++                      + " t WHERE session_id=?",
++                  String.class,
++                  id)));
++    }
++    out.set(
++        "session",
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT jsonb_build_object('state',state,'documentState',document->'state',"
++                    + "'revision',progress->'publicationRevisionId',"
++                    + "'digest',progress->'publicationRevisionDigest')::text"
++                    + " FROM studio_guided_sessions WHERE session_id=?",
++                String.class,
++                id)));
++    out.set("immutable", C.parse(incrementalImmutableSnapshot(id)));
++    out.set(
++        "acceptances",
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT COALESCE(jsonb_agg(to_jsonb(t)),'[]'::jsonb)::text"
++                    + " FROM studio_guided_suffix_acceptances t WHERE session_id=?",
++                String.class,
++                id)));
++    return GuidedContracts.hash(out);
++  }
++
++  private static String b3Replace(ObjectNode basis, String from, String to) {
++    // Exact-token identity substitution across the offered basis (IDs are opaque; never a value).
++    assertThat(from).isNotEqualTo(to);
++    return basis.toString().replace("\"" + from + "\"", "\"" + to + "\"");
++  }
++
++  /** Rolled-back reserve/claim/actual-runner-validate/finish/commit at the actual stored writer. */
++  private final class B3WriterProbe {
++    final String id;
++    final UUID test;
++    final org.springframework.transaction.support.TransactionTemplate tx;
++    final org.springframework.transaction.support.TransactionTemplate outside;
++    final GuidedPublicationEvidenceRepository reader;
++    final GuidedPublicationRepository writer;
++    final ObservedValidationClient validator;
++    final AtomicInteger reads = new AtomicInteger();
++    final PublicationContracts.Base base;
++    final ObjectNode genuine;
++    final ObjectNode identityTemplate;
++    final ObjectNode profile;
++    final ObjectNode build;
++    final PublicationContracts.Candidate genuineCandidate;
++
++    B3WriterProbe(String id, UUID test) {
++      this(id, test, ownedApplicationContext.getBean(GuidedPublicationEvidenceRepository.class));
++    }
++
++    B3WriterProbe(String id, UUID test, GuidedPublicationEvidenceRepository reader) {
++      this.id = id;
++      this.test = test;
++      this.reader = reader;
++      var manager =
++          ownedApplicationContext.getBean(
++              org.springframework.transaction.PlatformTransactionManager.class);
++      tx = new org.springframework.transaction.support.TransactionTemplate(manager);
++      // ObservedValidationClient.validate refuses any active transaction (RUNTIME_INCOMPATIBLE),
++      // exactly as GuidedPlanPublisher calls it between transactions; the staged call suspends.
++      outside = new org.springframework.transaction.support.TransactionTemplate(manager);
++      outside.setPropagationBehavior(
++          org.springframework.transaction.TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
++      validator = ownedApplicationContext.getBean(ObservedValidationClient.class);
++      // Package-private production constructor; the counting supplier is the stored-reader stage.
++      writer =
++          new GuidedPublicationRepository(
++              jdbc,
++              C,
++              () -> {
++                reads.incrementAndGet();
++                return this.reader;
++              });
++      var bases = ownedApplicationContext.getBean(GuidedPublicationBaseRepository.class);
++      var actual = ownedApplicationContext.getBean(GuidedPublicationEvidenceRepository.class);
++      ObjectNode selected = ownedApplicationContext.getBean(ObservedReplayPins.class).selected();
++      profile = (ObjectNode) selected.path("profile").deepCopy();
++      build = (ObjectNode) selected.path("build").deepCopy();
++      // Exactly GuidedPlanPublisher.prepare's basis/identity construction, read-only, rolled back.
++      Object[] captured =
++          tx.execute(
++              status -> {
++                status.setRollbackOnly();
++                var current = sessions.lock(id);
++                assertThat(current.document().path("state").asText()).isEqualTo("FINALIZING");
++                var pinned = bases.find(id).orElseThrow();
++                var source = bases.lockCurrent(test);
++                bases.requireCurrent(pinned, source);
++                var raw = actual.read(id);
++                var builder = new GuidedPlanBuilder(C);
++                ObjectNode basis =
++                    builder.basis(
++                        pinned,
++                        source,
++                        raw,
++                        current.document(),
++                        builder.learningProvenance(raw.document().path("sourceManifest")));
++                ObjectNode identity = C.object();
++                identity.set("base", pinned.document());
++                identity.set("ownerWorkerId", current.document().path("owner").path("workerId"));
++                identity.set("ownerFence", current.document().path("owner").path("fence"));
++                identity.set("translationHash", basis.path("translationHash"));
++                return new Object[] {pinned, basis, identity};
++              });
++      base = (PublicationContracts.Base) captured[0];
++      genuine = (ObjectNode) captured[1];
++      identityTemplate = (ObjectNode) captured[2];
++      genuineCandidate =
++          new ObservedArtifactLowerer(C).lower(genuine.deepCopy(), profile.deepCopy());
++    }
++
++    B3Outcome staged(
++        String label,
++        ObjectNode offered,
++        PublicationContracts.Candidate candidate,
++        String lowering) {
++      String key = "b3-" + label + "-" + UUID.randomUUID();
++      String digest = GuidedContracts.hash(C.object().put("b3", key));
++      int before = reads.get();
++      String[] stage = {"UNREACHED", null};
++      try {
++        tx.executeWithoutResult(
++            status -> {
++              status.setRollbackOnly();
++              JsonNode current = sessions.lock(id).document();
++              Instant deadline = Instant.now().plusSeconds(12);
++              for (Instant ceiling :
++                  List.of(
++                      Instant.parse(current.path("expiresAt").asText()),
++                      Instant.parse(current.path("owner").path("leaseExpiresAt").asText()))) {
++                if (deadline.isAfter(ceiling)) {
++                  deadline = ceiling;
++                }
++              }
++              ObjectNode identity = identityTemplate.deepCopy();
++              identity
++                  .put("basisHash", GuidedContracts.hash(offered))
++                  .put("validationBuildHash", GuidedContracts.hash(build))
++                  .put(
++                      "validationDeadline",
++                      PublicationContracts.time(PublicationContracts.millisecond(deadline)));
++              for (String field :
++                  List.of(
++                      "learnedPlanHash",
++                      "artifactHash",
++                      "referencePolicyHash",
++                      "operationEquivalenceHash",
++                      "publicationEvidenceHash",
++                      "profileHash")) {
++                identity.set(field, candidate.hashes().path(field));
++              }
++              var snapshot = new PublicationContracts.Snapshot(identity, offered);
++              var attempt =
++                  writer.reserve(
++                      new PublicationContracts.Claim(id, key, digest, snapshot), Instant.now());
++              attempt =
++                  writer.claim(
++                      id, attempt.attemptId(), attempt.claimId(), snapshot.hash(), Instant.now());
++              ObjectNode outgoing =
++                  C.object()
++                      .put("schemaVersion", 3)
++                      .put("attemptId", attempt.attemptId().toString())
++                      .put("claimId", attempt.claimId().toString())
++                      .put("snapshotHash", snapshot.hash())
++                      .put("basisHash", identity.path("basisHash").asText());
++              outgoing.set("requiredProfile", candidate.artifact().path("profile"));
++              outgoing.set("requiredBuild", build);
++              outgoing.set("artifact", candidate.artifact());
++              outgoing.set("validationBasis", snapshot.basis());
++              var budget =
++                  new PublicationBudget(attempt.validationDeadline(), java.time.Clock.systemUTC());
++              JsonNode verdict;
++              try {
++                verdict = outside.execute(ignored -> validator.validate(outgoing, budget));
++              } catch (GuidedSessionException failure) {
++                stage[0] = "VALIDATOR_FAILURE";
++                stage[1] = failure.getMessage();
++                return;
++              }
++              if (!verdict.path("ok").asBoolean()) {
++                stage[0] = "VALIDATOR_REJECTED";
++                stage[1] = verdict.path("errorCode").asText();
++                return;
++              }
++              writer.finish(
++                  id,
++                  attempt.attemptId(),
++                  attempt.claimId(),
++                  snapshot.hash(),
++                  PublicationContracts.AttemptStatus.VALIDATED,
++                  verdict,
++                  null,
++                  Instant.now());
++              // Controlled input (disclosed): the grant, built from the stored base and re-checked
++              // by the writer against that same stored base.
++              var grant =
++                  new PublicationContracts.Grant(
++                      id,
++                      base.document().path("originalPrincipalId").asText(),
++                      base.document().path("csiId").asText(),
++                      snapshot.hash(),
++                      attempt.validationDeadline());
++              var receipt =
++                  writer.commit(
++                      new PublicationContracts.Commit(
++                          id,
++                          UUID.randomUUID(),
++                          attempt.attemptId(),
++                          attempt.claimId(),
++                          key,
++                          digest,
++                          snapshot,
++                          candidate,
++                          grant),
++                      Instant.now());
++              assertThat(
++                      jdbc.queryForObject(
++                          "SELECT confirmed_revision_id::text FROM ui_tests WHERE id=?",
++                          String.class,
++                          test))
++                  .isEqualTo(receipt.document().path("revisionId").asText());
++              stage[0] = "COMMITTED_ROLLED_BACK";
++            });
++      } catch (GuidedSessionException refused) {
++        stage[0] = "WRITER_REFUSED";
++        stage[1] = refused.getMessage();
++      } catch (org.springframework.dao.DataAccessException refused) {
++        // A database guard is a genuine stage too; only its type is retained (never a value).
++        stage[0] = "DATABASE_REFUSED";
++        stage[1] = refused.getClass().getSimpleName();
++      }
++      var outcome = new B3Outcome(label, stage[0], stage[1], reads.get() - before, lowering);
++      B3_OUTCOMES.add(
++          C.object()
++              .put("sessionHash", GuidedContracts.hash(JSON.getNodeFactory().textNode(id)))
++              .put("label", label)
++              .put("stage", outcome.stage())
++              .put("code", outcome.code())
++              .put("readsDelta", outcome.readsDelta())
++              .put("backendLowering", lowering));
++      return outcome;
++    }
++
++    private void noWrite(String writes, int model, int legacy, int effects, int navigations) {
++      assertThat(b3PublicationWrites(test, id))
++          .as("rolled-back stage leaves every publication row unchanged")
++          .isEqualTo(writes);
++      assertThat(MODEL_WIRE).hasSize(model);
++      assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(legacy);
++      assertThat(RECEIPTS).hasSize(effects);
++      assertThat(NAVIGATIONS.get()).isEqualTo(navigations);
++    }
++
++    B3Outcome positive(String label) {
++      String writes = b3PublicationWrites(test, id);
++      int model = MODEL_WIRE.size(), legacy = LEGACY_MODEL_CALLS.get();
++      int effects = RECEIPTS.size(), navigations = NAVIGATIONS.get();
++      var outcome = staged(label, genuine.deepCopy(), genuineCandidate, "ACCEPTED");
++      assertThat(outcome.stage())
++          .as("the genuine stored basis is adoptable at the same boundary (%s)", outcome.code())
++          .isEqualTo("COMMITTED_ROLLED_BACK");
++      assertThat(outcome.readsDelta()).isEqualTo(1);
++      noWrite(writes, model, legacy, effects, navigations);
++      return outcome;
++    }
++
++    B3Outcome refuse(String label, java.util.function.Consumer<ObjectNode> mutation) {
++      ObjectNode offered = genuine.deepCopy();
++      mutation.accept(offered);
++      return refuseOffered(label, offered);
++    }
++
++    B3Outcome refuseOffered(String label, ObjectNode offered) {
++      assertThat(offered.equals(genuine)).as("%s changes the offered basis", label).isFalse();
++      PublicationContracts.Candidate candidate = genuineCandidate;
++      String lowering = "ACCEPTED";
++      try {
++        candidate = new ObservedArtifactLowerer(C).lower(offered.deepCopy(), profile.deepCopy());
++      } catch (GuidedSessionException refused) {
++        lowering = "REFUSED:" + refused.getMessage();
++      }
++      String writes = b3PublicationWrites(test, id);
++      int model = MODEL_WIRE.size(), legacy = LEGACY_MODEL_CALLS.get();
++      int effects = RECEIPTS.size(), navigations = NAVIGATIONS.get();
++      var outcome = staged(label, offered, candidate, lowering);
++      assertThat(outcome.stage())
++          .as("%s is never adopted", label)
++          .isNotIn("COMMITTED_ROLLED_BACK", "UNREACHED");
++      if (outcome.stage().equals("VALIDATOR_FAILURE")) {
++        assertThat(outcome.code())
++            .as("%s: uncertainty is not a refusal", label)
++            .isNotIn("UNKNOWN_OUTCOME", "EXPIRED");
++      }
++      if (outcome.readsDelta() == 1) {
++        assertThat(outcome.code()).isEqualTo("PUBLICATION_CONFLICT");
++      }
++      if (!lowering.equals("ACCEPTED")) {
++        assertThat(outcome.readsDelta())
++            .as("%s: a backend-refused basis never reaches the stored reader", label)
++            .isZero();
++      }
++      noWrite(writes, model, legacy, effects, navigations);
++      return outcome;
++    }
++
++    void requireStored(String label, java.util.function.Consumer<ObjectNode> mutation) {
++      var outcome = refuse(label, mutation);
++      assertThat(outcome.backendLowering())
++          .as("%s is invisible to the public lowerer", label)
++          .isEqualTo("ACCEPTED");
++      assertThat(outcome.stage())
++          .as("%s passes the actual runner validator and meets stored authority", label)
++          .isEqualTo("WRITER_REFUSED");
++      assertThat(outcome.code()).isEqualTo("PUBLICATION_CONFLICT");
++      assertThat(outcome.readsDelta()).isEqualTo(1);
++    }
++
++    void requireBackendPure(String label, java.util.function.Consumer<ObjectNode> mutation) {
++      var outcome = refuse(label, mutation);
++      assertThat(outcome.backendLowering())
++          .as("%s is refused by the backend lowerer itself", label)
++          .startsWith("REFUSED:");
++      assertThat(outcome.readsDelta()).isZero();
++    }
++
++    /** Genuine offered basis; the attacked object is the stored-reader return (52 only). */
++    B3Outcome genuineAgainstReader(String label) {
++      String writes = b3PublicationWrites(test, id);
++      int model = MODEL_WIRE.size(), legacy = LEGACY_MODEL_CALLS.get();
++      int effects = RECEIPTS.size(), navigations = NAVIGATIONS.get();
++      var outcome = staged(label, genuine.deepCopy(), genuineCandidate, "ACCEPTED");
++      noWrite(writes, model, legacy, effects, navigations);
++      return outcome;
++    }
++  }
++
++  private static int b3PreparationContextRevision(JsonNode basis, JsonNode preparation) {
++    for (JsonNode action : basis.path("actions")) {
++      if (action.path("ledger").path("preparationId").equals(preparation.path("preparationId"))) {
++        return action.path("ledger").path("contextRevision").asInt();
++      }
++    }
++    throw new AssertionError("preparation without its actual successful action");
++  }
++
++  /** An actual preparation issued strictly above its version birth; none means OPEN, not a row. */
++  private static int b3IssuedAboveBirth(JsonNode basis) {
++    JsonNode preparations = basis.path("preparations");
++    int chosen = -1;
++    for (int at = 0; at < preparations.size(); at++) {
++      int revision = b3PreparationContextRevision(basis, preparations.get(at));
++      int birth =
++          basis
++              .path("materializationEvidence")
++              .path("versions")
++              .get(revision - 1)
++              .path("birthMaterializationRevision")
++              .asInt();
++      if (preparations.get(at).path("materializationRevision").asInt() > birth
++          && (chosen < 0 || revision == 2)) {
++        chosen = at;
++      }
++    }
++    assertThat(chosen)
++        .as("an actual preparation issued above its version birth exists (else route 7 is OPEN)")
++        .isNotNegative();
++    return chosen;
++  }
++
++  private void b3AssertPinnedBaseProofJoinsActualRows(B3Parent parent) {
++    String baseId = parent.base().path("revisionId").asText();
++    JsonNode raw =
++        sessions.transaction(
++            () ->
++                ownedApplicationContext
++                    .getBean(GuidedPublicationEvidenceRepository.class)
++                    .read(parent.id())
++                    .document());
++    JsonNode pin = raw.path("snapshotEvidence").path("pinnedBase");
++    JsonNode proof = raw.path("snapshotEvidence").path("baseProof");
++    var row =
++        jdbc.queryForMap(
++            "SELECT revision_digest,artifact::text AS artifact,authoring::text AS authoring,"
++                + "step_snapshot_hashes::text AS snapshots,step_reuse_provenance::text AS reuse"
++                + " FROM ui_test_revisions WHERE id=?::uuid",
++            baseId);
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT initial_step_index FROM studio_guided_relearn_plans WHERE session_id=?",
++                Integer.class,
++                parent.id()))
++        .as("nonempty original prefix requires a full base proof")
++        .isPositive();
++    assertThat(pin.path("revisionId").asText()).isEqualTo(baseId);
++    assertThat(pin.path("revisionDigest").asText()).isEqualTo(row.get("revision_digest"));
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT base_revision_id::text FROM studio_guided_relearn_plans WHERE session_id=?",
++                String.class,
++                parent.id()))
++        .isEqualTo(baseId);
++    assertThat(
++            C.parse(
++                    jdbc.queryForObject(
++                        "SELECT document::text FROM studio_guided_publication_bases"
++                            + " WHERE session_id=?",
++                        String.class,
++                        parent.id()))
++                .path("confirmedRevisionId")
++                .asText())
++        .isEqualTo(baseId);
++    assertThat(proof.path("revision").path("id").asText()).isEqualTo(baseId);
++    assertThat(GuidedContracts.hash(proof.path("revision").path("identity")))
++        .isEqualTo(row.get("revision_digest"));
++    assertThat(proof.path("artifact")).isEqualTo(C.parse((String) row.get("artifact")));
++    assertThat(proof.path("revision").path("stepSnapshotHashes"))
++        .isEqualTo(C.parse((String) row.get("snapshots")));
++    assertThat(proof.path("revision").path("reusedFrom"))
++        .isEqualTo(C.parse((String) row.get("reuse")));
++    assertThat(proof.path("configuration"))
++        .isEqualTo(
++            ownedApplicationContext
++                .getBean(ObservedRevisionVerifier.class)
++                .verify(UUID.fromString(baseId))
++                .path("configuration"));
++    JsonNode receipt =
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT document::text FROM studio_guided_publications WHERE revision_id=?::uuid",
++                String.class,
++                baseId));
++    assertThat(receipt.path("revisionDigest").asText())
++        .as("stored publication identity agrees")
++        .isEqualTo(row.get("revision_digest"));
++    assertThat(receipt.path("artifactHash").asText())
++        .isEqualTo(GuidedContracts.hash(proof.path("artifact")));
++    JsonNode live =
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT authoring::text FROM ui_tests WHERE id=?", String.class, parent.test()));
++    assertThat(proof.path("authoringIdentity").path("authoring"))
++        .as("base proof uses the base's own row")
++        .isEqualTo(C.parse((String) row.get("authoring")))
++        .isNotEqualTo(live);
++  }
++
++  private void b3AssertFinalizeIsIdempotentAndModelBrowserFree(B3Parent parent, JsonNode merged)
++      throws Exception {
++    ObjectNode body =
++        C.object()
++            .put("schemaVersion", 3)
++            .put("expectedSourceRevision", parent.edited().path("sourceRevision").asText())
++            .put(
++                "expectedConfigurationRevision",
++                parent.edited().path("configurationRevision").asText());
++    String writes = b3PublicationWrites(parent.test(), parent.id());
++    int model = MODEL_WIRE.size(), legacy = LEGACY_MODEL_CALLS.get();
++    int effects = RECEIPTS.size(), navigation = NAVIGATIONS.get();
++    String path = "/api/v1/studio/guided-sessions/" + parent.id() + "/finalize";
++    // GuidedPlanPublisher.finalizeForUser: an existing receipt is returned for the same digest.
++    assertThat(publicCall(path, body, 200, UUID.randomUUID().toString())).isEqualTo(merged);
++    JsonNode conflict =
++        publicCall(
++            path,
++            body.deepCopy().put("expectedSourceRevision", "999"),
++            409,
++            UUID.randomUUID().toString());
++    assertThat(conflict.path("code").asText()).isEqualTo("IDEMPOTENCY_CONFLICT");
++    assertThat(b3PublicationWrites(parent.test(), parent.id())).isEqualTo(writes);
++    assertThat(MODEL_WIRE).hasSize(model);
++    assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(legacy);
++    assertThat(RECEIPTS).hasSize(effects);
++    assertThat(NAVIGATIONS.get()).isEqualTo(navigation);
++  }
++
++  /**
++   * Returned-read substitution over the actual private rows (52). The SQL strings are copied
++   * verbatim from {@code GuidedMaterializationEvidence.read}. Stored rows stay untouched. This is a
++   * JDBC-boundary substitution, so under authority-tier ruling T3 it earns no private-authority
++   * credit; it is retained as disclosed full-version reconstruction evidence only.
++   */
++  private static final class B3PrivateReadBoundary extends JdbcTemplate {
++    static final String INPUTS =
++        "SELECT input_ordinal,input_id,introduced_revision,document::text FROM"
++            + " studio_guided_materialization_inputs WHERE session_id=? ORDER BY input_ordinal";
++    static final String VERSIONS =
++        "SELECT * FROM studio_guided_materialization_versions WHERE session_id=? ORDER BY"
++            + " context_revision";
++    final String sessionId;
++    volatile String mutation;
++    final AtomicInteger substitutions = new AtomicInteger();
++
++    B3PrivateReadBoundary(JdbcTemplate actual, String sessionId) {
++      super(java.util.Objects.requireNonNull(actual.getDataSource()));
++      this.sessionId = sessionId;
++    }
++
++    @Override
++    public List<Map<String, Object>> queryForList(String sql, Object... args) {
++      List<Map<String, Object>> actual = super.queryForList(sql, args);
++      String selected = mutation;
++      if (selected == null
++          || (!sql.equals(INPUTS) && !sql.equals(VERSIONS))
++          || args.length != 1
++          || !sessionId.equals(args[0])) {
++        return actual;
++      }
++      var offered = new ArrayList<Map<String, Object>>();
++      actual.forEach(row -> offered.add(new java.util.HashMap<>(row)));
++      boolean changed = false;
++      if (sql.equals(INPUTS)
++          && (selected.equals("v1-private-value") || selected.equals("v2-private-value"))) {
++        int introduced = selected.startsWith("v1") ? 1 : 2;
++        for (var row : offered) {
++          ObjectNode input = PublicationContracts.copy(C.parse((String) row.get("document")));
++          if (((Number) row.get("introduced_revision")).intValue() == introduced
++              && input.path("value").isTextual()) {
++            input.put("value", "B3-DIFFERENT-PRIVATE-VALUE");
++            row.put("document", input.toString());
++            changed = true;
++            break;
++          }
++        }
++      } else if (sql.equals(VERSIONS) && selected.equals("v1-cutoff-includes-v2-input")) {
++        offered
++            .getFirst()
++            .put("input_count", ((Number) offered.getFirst().get("input_count")).intValue() + 1);
++        changed = true;
++      }
++      if (!changed) {
++        return actual;
++      }
++      assertThat(offered.equals(actual)).isFalse();
++      substitutions.incrementAndGet();
++      return offered;
++    }
++  }
++
++  private void b3AssertMultiVersionReturnedHistoryRefuses(B3Parent parent) {
++    var boundary = new B3PrivateReadBoundary(jdbc, parent.id());
++    var reader = new GuidedPublicationEvidenceRepository(boundary, C);
++    var verifier = ownedApplicationContext.getBean(ObservedRevisionVerifier.class);
++    reader.installRevisionVerifier(verifier::verify); // GuidedPublicationConfiguration composition
++    var probe = new B3WriterProbe(parent.id(), parent.test(), reader);
++    probe.positive("multi-version-unarmed");
++    for (String label :
++        List.of("v1-private-value", "v2-private-value", "v1-cutoff-includes-v2-input")) {
++      boundary.mutation = label;
++      int before = boundary.substitutions.get();
++      B3Outcome outcome;
++      try {
++        outcome = probe.genuineAgainstReader("returned-read-no-t3-credit-" + label);
++      } finally {
++        boundary.mutation = null;
++      }
++      assertThat(boundary.substitutions.get() - before)
++          .as("%s substituted an actual returned private row", label)
++          .isPositive();
++      assertThat(outcome.stage()).isEqualTo("WRITER_REFUSED");
++      assertThat(outcome.code())
++          .as("%s full-version reconstruction refusal", label)
++          .isEqualTo("EVIDENCE_MISMATCH");
++      assertThat(outcome.readsDelta()).isEqualTo(1);
++    }
++    probe.positive("multi-version-restored");
++  }
++
++  private ObjectNode b3ActualBaseProof(String revisionId) {
++    // Same construction as GuidedPublicationEvidenceRepository.snapshotEvidence, from actual rows.
++    var row =
++        jdbc.queryForMap(
++            "SELECT revision_digest,authoring::text AS authoring,\"references\"::text AS refs,"
++                + "step_snapshot_hashes::text AS snapshots,step_reuse_provenance::text AS reuse"
++                + " FROM ui_test_revisions WHERE id=?::uuid",
++            revisionId);
++    ObjectNode verified =
++        ownedApplicationContext
++            .getBean(ObservedRevisionVerifier.class)
++            .verify(UUID.fromString(revisionId));
++    ObjectNode proof = C.object();
++    ObjectNode identity = proof.putObject("authoringIdentity").put("authoringIdentityVersion", 1);
++    identity.set("authoring", C.parse((String) row.get("authoring")));
++    identity.set(
++        "authoredDeclarations", C.parse((String) row.get("refs")).path("authoredDeclarations"));
++    proof.set("configuration", verified.path("configuration"));
++    proof.set("artifact", verified.path("artifact"));
++    ObjectNode revision =
++        proof
++            .putObject("revision")
++            .put("schemaVersion", 3)
++            .put("id", revisionId)
++            .put("revisionDigest", (String) row.get("revision_digest"));
++    revision.set("identity", verified.path("identity"));
++    revision.set("stepSnapshotHashes", C.parse((String) row.get("snapshots")));
++    revision.set("reusedFrom", C.parse((String) row.get("reuse")));
++    return proof;
++  }
++
++  private void b3OlderEqualHashBaseAndChangedSourceCas(B3Parent gen1, JsonNode merged)
++      throws Exception {
++    UUID test = gen1.test();
++    String r1 = gen1.base().path("revisionId").asText();
++    String r2 = merged.path("revisionId").asText();
++    String r1Digest =
++        jdbc.queryForObject(
++            "SELECT revision_digest FROM ui_test_revisions WHERE id=?::uuid", String.class, r1);
++    JsonNode a1 =
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT artifact::text FROM ui_test_revisions WHERE id=?::uuid", String.class, r1));
++    JsonNode a2 =
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT artifact::text FROM ui_test_revisions WHERE id=?::uuid", String.class, r2));
++    for (int index = 0; index < 3; index++) { // precondition: same test, equal claimed hashes
++      String step = INCREMENTAL_STEPS.get(index);
++      assertThat(a2.path("learnedPlan").path("stepSnapshotHashes").path(step))
++          .isEqualTo(a1.path("learnedPlan").path("stepSnapshotHashes").path(step));
++    }
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT confirmed_revision_id::text FROM ui_tests WHERE id=?", String.class, test))
++        .isEqualTo(r2);
++    // The generation-1 owner must be quiescent before any all-tenant no-write comparison.
++    p3AwaitTeardown(gen1.id());
++    startWorkers();
++    seedGovernedPolicies(primaryCsi);
++    incrementalTenScenario = true;
++    JsonNode edited =
++        prefixSyncEdit(test, "Check Destination is visible for the second generation.");
++    assertThat(edited.path("firstChangedStepId").asText()).isEqualTo(INCREMENTAL_STEPS.get(3));
++    ObjectNode start =
++        C.object()
++            .put("schemaVersion", 3)
++            .put("testId", test.toString())
++            .put("sourceRevision", edited.path("sourceRevision").asText())
++            .put("configurationRevision", edited.path("configurationRevision").asText())
++            .put("environmentId", "fixture")
++            .put("applicationId", "orders");
++    start.set("versions", versions());
++    // 43/61 HTTP: an actual older revision of the same test, with equal prefix hashes.
++    String before = incrementalAuthoritySnapshot(test);
++    int model = MODEL_WIRE.size(), legacy = LEGACY_MODEL_CALLS.get();
++    int effects = RECEIPTS.size(), navigation = NAVIGATIONS.get();
++    JsonNode older =
++        publicCall(
++            "/api/v1/studio/guided-sessions",
++            start.deepCopy().put("baseRevisionId", r1),
++            409,
++            UUID.randomUUID().toString());
++    assertThat(older.path("code").asText()).isEqualTo("REVISION_CONFLICT");
++    assertThat(older.path("messageCode").asText()).isEqualTo("BASE_REVISION_MISMATCH");
++    assertThat(incrementalAuthoritySnapshot(test)).isEqualTo(before);
++    assertThat(MODEL_WIRE).hasSize(model);
++    assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(legacy);
++    assertThat(RECEIPTS).hasSize(effects);
++    assertThat(NAVIGATIONS.get()).isEqualTo(navigation);
++    incrementalDomVariant = "edit4";
++    Files.writeString(TEMP.resolve("obs015-native-mode.json"), "{}");
++    Files.writeString(TEMP.resolve("obs015-native-events.jsonl"), "");
++    String id =
++        publicCall(
++                "/api/v1/studio/guided-sessions",
++                start.deepCopy().put("baseRevisionId", r2),
++                202,
++                UUID.randomUUID().toString())
++            .path("session")
++            .path("sessionId")
++            .asText();
++    awaitFinalizing(id);
++    var probe = new B3WriterProbe(id, test);
++    probe.positive("gen2-positive");
++    ObjectNode olderProof = b3ActualBaseProof(r1);
++    probe.refuse(
++        "older-same-test-equal-hash-base",
++        b -> {
++          ObjectNode evidence = (ObjectNode) b.path("snapshotEvidence");
++          evidence.putObject("pinnedBase").put("revisionId", r1).put("revisionDigest", r1Digest);
++          evidence.set("baseProof", olderProof.deepCopy());
++          ObjectNode incremental = (ObjectNode) b.path("incrementalEvidence");
++          ObjectNode program = (ObjectNode) incremental.path("program");
++          program.put("baseRevisionId", r1).put("baseRevisionDigest", r1Digest);
++          String programHash = GuidedContracts.hash(program);
++          ((ObjectNode) incremental.path("plan"))
++              .put("baseRevisionId", r1)
++              .put("prefixProgramHash", programHash);
++          ((ObjectNode) incremental.path("switch")).put("baseRevisionId", r1);
++          for (JsonNode request : incremental.path("prefixRequests")) {
++            ((ObjectNode) request).put("prefixProgramHash", programHash);
++          }
++        });
++    probe.positive("gen2-positive-after");
++    // 60 non-destructive CAS: the original expected revisions are exact.
++    for (String field : List.of("expectedSourceRevision", "expectedConfigurationRevision")) {
++      ObjectNode stale =
++          C.object()
++              .put("schemaVersion", 3)
++              .put("expectedSourceRevision", edited.path("sourceRevision").asText())
++              .put("expectedConfigurationRevision", edited.path("configurationRevision").asText())
++              .put(field, "999");
++      assertThat(
++              publicCall(
++                      "/api/v1/studio/guided-sessions/" + id + "/finalize",
++                      stale,
++                      409,
++                      UUID.randomUUID().toString())
++                  .path("code")
++                  .asText())
++          .isEqualTo("REVISION_CONFLICT");
++      assertThat(sessions.transaction(() -> sessions.lock(id).document().path("state").asText()))
++          .isEqualTo("FINALIZING");
++    }
++    // 60 destructive CAS: an actual source change after the original freeze fails publication.
++    prefixSyncEdit(test, "Check Destination is visible after a post-learning source change.");
++    int modelAt = MODEL_WIRE.size(), effectsAt = RECEIPTS.size(), navigationAt = NAVIGATIONS.get();
++    JsonNode conflict =
++        publicCall(
++            "/api/v1/studio/guided-sessions/" + id + "/finalize",
++            C.object()
++                .put("schemaVersion", 3)
++                .put("expectedSourceRevision", edited.path("sourceRevision").asText())
++                .put(
++                    "expectedConfigurationRevision", edited.path("configurationRevision").asText()),
++            409,
++            UUID.randomUUID().toString());
++    assertThat(conflict.path("code").asText()).isEqualTo("PUBLICATION_CONFLICT");
++    assertThat(sessions.transaction(() -> sessions.lock(id).document().path("state").asText()))
++        .isEqualTo("PUBLICATION_CONFLICT");
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT confirmed_revision_id::text FROM ui_tests WHERE id=?", String.class, test))
++        .isEqualTo(r2);
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM ui_test_revisions WHERE test_id=?", Integer.class, test))
++        .isEqualTo(2);
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_publications WHERE session_id=?",
++                Integer.class,
++                id))
++        .isZero();
++    assertThat(MODEL_WIRE).hasSize(modelAt);
++    assertThat(RECEIPTS).hasSize(effectsAt);
++    assertThat(NAVIGATIONS.get()).isEqualTo(navigationAt);
++    p3AwaitTeardown(id);
++  }
++
++  /** 42: exact alias resolves; suffix-only/collision/missing/null refuse at start, zero writes. */
++  private void b3AliasDeclarationsRefuseAtActualStartWithoutWrites() throws Exception {
++    startWorkers();
++    seedGovernedPolicies(primaryCsi);
++    String secretStep =
++        UUID.nameUUIDFromBytes("obs015-b3-alias-secret".getBytes(StandardCharsets.UTF_8))
++            .toString();
++    String plainStep =
++        UUID.nameUUIDFromBytes("obs015-b3-alias-plain".getBytes(StandardCharsets.UTF_8)).toString();
++    ObjectNode authoring = C.object().put("authoringSchemaVersion", 2);
++    var steps = authoring.putArray("steps");
++    ((ObjectNode)
++            steps
++                .addObject()
++                .put("id", secretStep)
++                .put("text", "Open " + URL + " and fill the password.")
++                .putObject("context"))
++        .putArray("entries")
++        .addObject()
++        .put("kind", "secretRef")
++        .put("referenceId", "vault://studio/password");
++    steps.addObject().put("id", plainStep).put("text", "Type <var ACCOUNT> in Destination.");
++    steps.forEach(step -> AUDIT_CANARIES.add(step.path("text").asText()));
++    var cases = new java.util.LinkedHashMap<String, String>();
++    cases.put(
++        "suffix-only",
++        "[{\"name\":\"password\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"},"
++            + "{\"name\":\"ACCOUNT\",\"kind\":\"plain\",\"value\":\"acct\"}]");
++    cases.put(
++        "duplicate-conflict",
++        "[{\"name\":\"vault://studio/password\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"},"
++            + "{\"name\":\"vault://studio/password\",\"kind\":\"secretRef\","
++            + "\"secretId\":\"OTHER\"},"
++            + "{\"name\":\"ACCOUNT\",\"kind\":\"plain\",\"value\":\"acct\"}]");
++    cases.put(
++        "plain-secret-collision",
++        "[{\"name\":\"PASS\",\"kind\":\"plain\",\"value\":\"x\"},"
++            + "{\"name\":\"vault://studio/password\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"},"
++            + "{\"name\":\"ACCOUNT\",\"kind\":\"plain\",\"value\":\"acct\"}]");
++    cases.put(
++        "plain-missing-value",
++        "[{\"name\":\"vault://studio/password\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"},"
++            + "{\"name\":\"ACCOUNT\",\"kind\":\"plain\"}]");
++    cases.put(
++        "plain-null-value",
++        "[{\"name\":\"vault://studio/password\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"},"
++            + "{\"name\":\"ACCOUNT\",\"kind\":\"plain\",\"value\":null}]");
++    cases.put(
++        "exact-alias",
++        "[{\"name\":\"vault://studio/password\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"},"
++            + "{\"name\":\"ACCOUNT\",\"kind\":\"plain\",\"value\":\"acct\"}]");
++    // duplicate-conflict has no pin (R-42, confirmed by reading): CanonicalStudioCodec
++    // .variablesFromNode refuses a duplicate stored name before the identity resolver runs.
++    var expected =
++        Map.of(
++            "suffix-only", "MISSING_SOURCE/AUTHORING_REFERENCE_MISSING/409",
++            "plain-secret-collision", "INVALID_CONTRACT/AUTHORING_REFERENCE_AMBIGUOUS/422",
++            "plain-missing-value", "MISSING_SOURCE/AUTHORING_REFERENCE_MISSING/409",
++            "plain-null-value", "MISSING_SOURCE/AUTHORING_REFERENCE_MISSING/409");
++    var dto = JSON.treeToValue(authoring, AuthoringV2Request.class);
++    for (var entry : cases.entrySet()) {
++      UUID test = UUID.randomUUID();
++      jdbc.update(
++          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
++              + "authoring_revision_inputs,created_by,created_at,updated_at) VALUES (?,"
++              + "'Alias declarations',?,'fixture','chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,"
++              + "'fixture@example.invalid',now(),now())",
++          test,
++          primaryCsi,
++          JSON.writeValueAsString(
++              List.of(
++                  "Open " + URL + " and fill the password.", "Type <var ACCOUNT> in Destination.")),
++          entry.getValue(),
++          JSON.writeValueAsString(dto),
++          JSON.writeValueAsString(
++              AuthoringRevisionIdentity.create(dto, Map.of("ACCOUNT", "acct"))));
++      ObjectNode start =
++          C.object()
++              .put("schemaVersion", 3)
++              .put("testId", test.toString())
++              .put("sourceRevision", "1")
++              .put("configurationRevision", "1")
++              .put("environmentId", "fixture")
++              .put("applicationId", "orders");
++      start.set("versions", versions());
++      String before = incrementalAuthoritySnapshot(test);
++      int model = MODEL_WIRE.size(), effects = RECEIPTS.size(), navigation = NAVIGATIONS.get();
++      if (entry.getKey().equals("exact-alias")) {
++        String id =
++            publicCall("/api/v1/studio/guided-sessions", start, 202, UUID.randomUUID().toString())
++                .path("session")
++                .path("sessionId")
++                .asText();
++        publicCall(
++            "/api/v1/studio/guided-sessions/" + id + "/cancel",
++            C.object().put("schemaVersion", 3).put("reason", "userRequested"),
++            202,
++            UUID.randomUUID().toString());
++        JsonNode manifest =
++            C.parse(
++                jdbc.queryForObject(
++                    "SELECT manifest::text FROM studio_guided_source_manifests WHERE session_id=?",
++                    String.class,
++                    id));
++        JsonNode declared = null;
++        for (JsonNode declaration : manifest.path("authoredDeclarations")) {
++          if (declaration.path("kind").asText().equals("secretRef")) {
++            declared = declaration;
++          }
++        }
++        assertThat(declared).isNotNull();
++        assertThat(declared.path("referenceId").asText()).isEqualTo("vault://studio/password");
++        assertThat(declared.path("secretId").asText()).isEqualTo("PASS");
++        p3AwaitTeardown(id);
++        continue;
++      }
++      if (entry.getKey().equals("duplicate-conflict")) {
++        // OPEN, not credited: record the earlier guard; assert only refusal and no write.
++        refreshFixtureCredentialsBeforeDispatch("/api/v1/studio/guided-sessions");
++        var response =
++            HttpClient.newBuilder()
++                .sslContext(TLS)
++                .build()
++                .send(
++                    HttpRequest.newBuilder(
++                            URI.create(
++                                "https://localhost:" + port + "/api/v1/studio/guided-sessions"))
++                        .header("Cookie", "put_session=" + COOKIE)
++                        .header("Content-Type", "application/json")
++                        .header("Idempotency-Key", UUID.randomUUID().toString())
++                        .POST(HttpRequest.BodyPublishers.ofString(start.toString()))
++                        .build(),
++                    HttpResponse.BodyHandlers.ofString());
++        JsonNode body = C.parse(response.body());
++        B3_OUTCOMES.add(
++            C.object()
++                .put("label", "alias-duplicate-conflict-open")
++                .put("stage", "START_REFUSED")
++                .put("status", response.statusCode())
++                .put("code", body.path("code").asText(body.path("error").asText()))
++                .put("messageCode", body.path("messageCode").asText()));
++        assertThat(response.statusCode())
++            .as("duplicate declaration never starts")
++            .isBetween(400, 499);
++      } else {
++        String[] want = expected.get(entry.getKey()).split("/");
++        JsonNode refused =
++            publicCall(
++                "/api/v1/studio/guided-sessions",
++                start,
++                Integer.parseInt(want[2]),
++                UUID.randomUUID().toString());
++        assertThat(refused.path("code").asText()).as(entry.getKey()).isEqualTo(want[0]);
++        assertThat(refused.path("messageCode").asText()).as(entry.getKey()).isEqualTo(want[1]);
++      }
++      assertThat(incrementalAuthoritySnapshot(test))
++          .as("%s writes nothing, so no null value is ever hashed or frozen", entry.getKey())
++          .isEqualTo(before);
++      assertThat(MODEL_WIRE).hasSize(model);
++      assertThat(RECEIPTS).hasSize(effects);
++      assertThat(NAVIGATIONS.get()).isEqualTo(navigation);
++    }
++  }
++
++  /** 63/72 positive facts; returns the retained navigation admission. */
++  private String b3DriftAtOneFacts(
++      B3Parent p, java.util.concurrent.atomic.AtomicReference<String> raw) {
++    String id = p.id();
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT initial_step_index FROM studio_guided_relearn_plans WHERE session_id=?",
++                Integer.class,
++                id))
++        .isEqualTo(3);
++    var sw =
++        jdbc.queryForMap(
++            "SELECT reason,effective_step_index,next_ordinal,completed_admissions::text AS done"
++                + " FROM studio_guided_relearn_switches WHERE session_id=?",
++            id);
++    assertThat(sw.get("reason")).isEqualTo("DRIFT");
++    assertThat(((Number) sw.get("effective_step_index")).intValue()).isZero();
++    assertThat(((Number) sw.get("next_ordinal")).intValue()).isEqualTo(1);
++    String nav =
++        jdbc.queryForObject(
++            "SELECT admission_id FROM studio_guided_actions WHERE session_id=? AND step_id=?"
++                + " AND ordinal=0 AND attempt_ordinal=0 AND document->>'state'='SUCCEEDED'"
++                + " AND (document->>'dispatchCount')::int=1",
++            String.class,
++            id,
++            INCREMENTAL_STEPS.get(0));
++    assertThat(C.parse((String) sw.get("done"))).isEqualTo(C.object().arrayNode().add(nav));
++    // No repeat of a possibly native effect: one navigation row, one relearned read row.
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?"
++                    + " AND ordinal=0",
++                Integer.class,
++                id,
++                INCREMENTAL_STEPS.get(0)))
++        .isEqualTo(1);
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?"
++                    + " AND ordinal=1",
++                Integer.class,
++                id,
++                INCREMENTAL_STEPS.get(0)))
++        .isEqualTo(1);
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_no_invocation_receipts WHERE session_id=?"
++                    + " AND admission_id IS NOT NULL",
++                Integer.class,
++                id))
++        .isZero();
++    var allocations =
++        jdbc.queryForList(
++            "SELECT binding_id FROM studio_guided_allocations WHERE session_id=?"
++                + " ORDER BY binding_id",
++            String.class,
++            id);
++    var producers =
++        jdbc.queryForList(
++            "SELECT binding_id FROM studio_guided_producers WHERE session_id=?", String.class, id);
++    assertThat(allocations).hasSize(2);
++    assertThat(producers).hasSize(1);
++    String unperformed =
++        allocations.stream()
++            .filter(binding -> !producers.contains(binding))
++            .findFirst()
++            .orElseThrow();
++    assertThat(unperformed).as("quota/raw ID is never recycled").isNotEqualTo(producers.getFirst());
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_consumer_edges WHERE session_id=?"
++                    + " AND binding_id=?",
++                Integer.class,
++                id,
++                unperformed))
++        .isZero();
++    raw.set(unperformed);
++    return nav;
++  }
++
++  private void b3RecomputedBaseSource(ObjectNode basis) {
++    ObjectNode proof = (ObjectNode) basis.path("snapshotEvidence").path("baseProof");
++    ObjectNode step =
++        (ObjectNode) proof.path("authoringIdentity").path("authoring").path("steps").get(1);
++    step.put("text", step.path("text").asText() + " (substituted base source)");
++    ArrayNode lines = C.object().putArray("items");
++    ArrayNode ordered = C.object().putArray("items");
++    for (JsonNode source : proof.path("authoringIdentity").path("authoring").path("steps")) {
++      lines.add(source.path("text").asText());
++      ordered
++          .addObject()
++          .put("stepId", source.path("id").asText())
++          .put("ordinal", ordered.size() - 1)
++          .put("source", source.path("text").asText());
++    }
++    ObjectNode identity = (ObjectNode) proof.path("revision").path("identity");
++    identity
++        .put("sourceHash", GuidedContracts.hash(lines))
++        .put("authoringHash", GuidedContracts.hash(ordered));
++    String digest = GuidedContracts.hash(identity);
++    ((ObjectNode) proof.path("revision")).put("revisionDigest", digest);
++    ((ObjectNode) basis.path("snapshotEvidence").path("pinnedBase")).put("revisionDigest", digest);
++    ObjectNode incremental = (ObjectNode) basis.path("incrementalEvidence");
++    ObjectNode program = (ObjectNode) incremental.path("program");
++    program.put("baseRevisionDigest", digest);
++    ((ObjectNode) incremental.path("plan")).put("prefixProgramHash", GuidedContracts.hash(program));
++  }
++
++  /** Holds the actual first SOURCE_PLAN with a learning window on the in-JVM provider thread. */
++  private static final class B3FirstSuffixHold {
++    final java.util.concurrent.CountDownLatch entered = new java.util.concurrent.CountDownLatch(1);
++    final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
++    final java.util.concurrent.atomic.AtomicBoolean armed =
++        new java.util.concurrent.atomic.AtomicBoolean(true);
++    volatile String sessionId;
++    volatile boolean releasedInTime;
++
++    /** Bound 10 s, below the 60 s default GuidedTranslationProperties.callSeconds (R-HOLD). */
++    void hold(String session) {
++      if (!armed.compareAndSet(true, false)) {
++        return;
++      }
++      sessionId = session;
++      entered.countDown();
++      try {
++        releasedInTime = release.await(10, java.util.concurrent.TimeUnit.SECONDS);
++      } catch (InterruptedException interrupted) {
++        Thread.currentThread().interrupt();
++      }
++    }
++  }
++
++  private ObjectNode b3ContendFirstSuffix(B3FirstSuffixHold hold) throws Exception {
++    ObjectNode out = C.object();
++    try {
++      assertThat(hold.entered.await(120, java.util.concurrent.TimeUnit.SECONDS))
++          .as("actual first-suffix model call reached")
++          .isTrue();
++      String id = hold.sessionId;
++      JsonNode session = sessions.transaction(() -> sessions.lock(id).document().deepCopy());
++      long fence = session.path("owner").path("fence").asLong();
++      long revision = sessions.transaction(() -> plans.state(id).path("planRevision").asLong());
++      assertThat(
++              jdbc.queryForObject(
++                  "SELECT count(*) FROM studio_guided_suffix_acceptances WHERE session_id=?",
++                  Integer.class,
++                  id))
++          .isZero();
++      assertThat(
++              jdbc.queryForObject(
++                  "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=?"
++                      + " AND status IN ('RESERVED','CALLING')",
++                  Integer.class,
++                  id))
++          .as("exactly the real coordinator's first-suffix attempt is in flight")
++          .isEqualTo(1);
++      int attempts =
++          jdbc.queryForObject(
++              "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=?",
++              Integer.class,
++              id);
++      int wire = MODEL_WIRE.size();
++      ObjectNode command = C.object().put("schemaVersion", 3).put("sessionId", id);
++      // checkCommand compares the session scope nodes by equality: copy them, never re-type them.
++      command.set(
++          "expectedSourceRevision", session.path("scope").path("sourceRevision").deepCopy());
++      command.set(
++          "expectedConfigurationRevision",
++          session.path("scope").path("configurationRevision").deepCopy());
++      command.put("expectedPlanRevision", revision);
++      String controller = token("backend-controller", "controller-1", "studio-guided-controller");
++      var gate = new java.util.concurrent.CountDownLatch(1);
++      try (var pool = java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor()) {
++        var futures = new ArrayList<java.util.concurrent.Future<HttpResponse<String>>>();
++        for (int contender = 0; contender < 2; contender++) {
++          futures.add(
++              pool.submit(
++                  () -> {
++                    gate.await();
++                    var request =
++                        HttpRequest.newBuilder(
++                                URI.create(
++                                    "https://localhost:"
++                                        + port
++                                        + "/internal/v2/studio/guided-sessions/"
++                                        + id
++                                        + "/dependency-admissions"))
++                            .timeout(Duration.ofSeconds(8))
++                            .header("Authorization", "Bearer " + controller)
++                            .header("X-Owner-Fence", Long.toString(fence))
++                            .header("Idempotency-Key", UUID.randomUUID().toString())
++                            .header("Content-Type", "application/json")
++                            .POST(HttpRequest.BodyPublishers.ofString(command.toString()))
++                            .build();
++                    return HttpClient.newBuilder()
++                        .sslContext(TLS)
++                        .build()
++                        .send(request, HttpResponse.BodyHandlers.ofString());
++                  }));
++        }
++        gate.countDown();
++        var codes = out.putArray("contenders");
++        for (var future : futures) {
++          var response = future.get(9, java.util.concurrent.TimeUnit.SECONDS);
++          codes
++              .addObject()
++              .put("status", response.statusCode())
++              .put("code", C.parse(response.body()).path("code").asText());
++        }
++      }
++      out.put(
++          "acceptancesDuringHold",
++          jdbc.queryForObject(
++              "SELECT count(*) FROM studio_guided_suffix_acceptances WHERE session_id=?",
++              Integer.class,
++              id));
++      out.put(
++          "attemptsDelta",
++          jdbc.queryForObject(
++                  "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=?",
++                  Integer.class,
++                  id)
++              - attempts);
++      out.put("wireDelta", MODEL_WIRE.size() - wire);
++      out.put("sessionId", id);
++    } finally {
++      hold.release.countDown();
++    }
++    return out;
++  }
++
++  private void b3AssertOneImmutableFirstAcceptance(B3Parent p) throws Exception {
++    String id = p.id();
++    var acceptance =
++        jdbc.queryForMap(
++            "SELECT previous_plan_revision,plan_revision,retained_admissions::text AS retained"
++                + " FROM studio_guided_suffix_acceptances WHERE session_id=?",
++            id);
++    long prior = ((Number) acceptance.get("previous_plan_revision")).longValue();
++    long first = ((Number) acceptance.get("plan_revision")).longValue();
++    assertThat(C.parse((String) acceptance.get("retained")))
++        .isEqualTo(
++            C.parse(
++                jdbc.queryForObject(
++                    "SELECT completed_admissions::text FROM studio_guided_relearn_switches"
++                        + " WHERE session_id=?",
++                    String.class,
++                    id)));
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_model_attempts m"
++                    + " JOIN studio_guided_relearn_switches s USING(session_id)"
++                    + " WHERE m.session_id=? AND m.kind='SOURCE_PLAN'"
++                    + " AND m.created_at>=s.created_at",
++                Integer.class,
++                id))
++        .as("one actual first-suffix model attempt")
++        .isEqualTo(1);
++    JsonNode prefix =
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT plan::text FROM studio_guided_translation_plans"
++                    + " WHERE session_id=? AND plan_revision=?",
++                String.class,
++                id,
++                prior));
++    JsonNode accepted =
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT plan::text FROM studio_guided_translation_plans"
++                    + " WHERE session_id=? AND plan_revision=?",
++                String.class,
++                id,
++                first));
++    var sw =
++        jdbc.queryForMap(
++            "SELECT effective_step_index,next_ordinal FROM studio_guided_relearn_switches"
++                + " WHERE session_id=?",
++            id);
++    int boundary = ((Number) sw.get("effective_step_index")).intValue();
++    int nextOrdinal = ((Number) sw.get("next_ordinal")).intValue();
++    var retained = new java.util.HashSet<String>();
++    C.parse((String) acceptance.get("retained")).forEach(value -> retained.add(value.asText()));
++    for (JsonNode old : prefix.path("obligations")) { // independent recomputation, not the audit
++      var rows =
++          jdbc.queryForList(
++              "SELECT a.admission_id,a.document->>'state' AS state"
++                  + " FROM studio_guided_obligation_admissions o"
++                  + " JOIN studio_guided_actions a USING(session_id,admission_id)"
++                  + " WHERE o.session_id=? AND o.obligation_id=?",
++              id,
++              old.path("obligationId").asText());
++      boolean successful = rows.stream().anyMatch(row -> "SUCCEEDED".equals(row.get("state")));
++      boolean kept = false;
++      for (JsonNode next : accepted.path("obligations")) {
++        kept |= next.equals(old);
++      }
++      if (successful) {
++        assertThat(kept).as("successful meaning retained").isTrue();
++        assertThat(
++                rows.stream()
++                    .anyMatch(row -> retained.contains(String.valueOf(row.get("admission_id")))))
++            .isTrue();
++      } else if (!kept) {
++        int index = INCREMENTAL_STEPS.indexOf(old.path("stepId").asText());
++        assertThat(
++                index > boundary
++                    || index == boundary && old.path("occurrence").asInt() >= nextOrdinal)
++            .as("only an exactly authorized first removal at/after the transition")
++            .isTrue();
++      }
++    }
++    String plansSql =
++        "SELECT jsonb_agg(to_jsonb(t) ORDER BY plan_revision)::text"
++            + " FROM studio_guided_translation_plans t WHERE session_id=?";
++    String plans0 = jdbc.queryForObject(plansSql, String.class, id);
++    var tx =
++        new org.springframework.transaction.support.TransactionTemplate(
++            ownedApplicationContext.getBean(
++                org.springframework.transaction.PlatformTransactionManager.class));
++    try (var pool = java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor()) {
++      var duplicates = new ArrayList<java.util.concurrent.Future<String>>();
++      for (int at = 0; at < 2; at++) {
++        duplicates.add(
++            pool.submit(
++                () -> {
++                  try {
++                    tx.executeWithoutResult(
++                        status -> {
++                          status.setRollbackOnly();
++                          plans.acceptPlan(id, prior, accepted);
++                        });
++                    return "ACCEPTED";
++                  } catch (GuidedSessionException refused) {
++                    return refused.getMessage();
++                  }
++                }));
++      }
++      for (var duplicate : duplicates) {
++        assertThat(duplicate.get(10, java.util.concurrent.TimeUnit.SECONDS))
++            .isEqualTo("REVISION_CONFLICT");
++      }
++    }
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_suffix_acceptances WHERE session_id=?",
++                Integer.class,
++                id))
++        .isEqualTo(1);
++    assertThat(jdbc.queryForObject(plansSql, String.class, id)).isEqualTo(plans0);
++  }
++
++  private void b3AssertLaterLossRefuses(B3Parent p) throws Exception {
++    String id = p.id();
++    var tx =
++        new org.springframework.transaction.support.TransactionTemplate(
++            ownedApplicationContext.getBean(
++                org.springframework.transaction.PlatformTransactionManager.class));
++    long prior =
++        jdbc.queryForObject(
++            "SELECT previous_plan_revision FROM studio_guided_suffix_acceptances"
++                + " WHERE session_id=?",
++            Long.class,
++            id);
++    JsonNode prefix =
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT plan::text FROM studio_guided_translation_plans"
++                    + " WHERE session_id=? AND plan_revision=?",
++                String.class,
++                id,
++                prior));
++    String immutable = incrementalImmutableSnapshot(id);
++    var head = sessions.transaction(() -> plans.state(id).deepCopy());
++    long headRevision = head.path("planRevision").asLong();
++    JsonNode current = head.path("plan");
++    JsonNode session = sessions.transaction(() -> sessions.lock(id).document().deepCopy());
++    // later consumer-pair deletion where the pair also existed in the original prefix
++    ObjectNode pairLoss = current.deepCopy();
++    boolean removed = false;
++    for (JsonNode need : pairLoss.path("needs")) {
++      var consumers = (ArrayNode) need.path("consumers");
++      for (int at = consumers.size() - 1; at >= 0; at--) {
++        JsonNode pair = consumers.get(at);
++        boolean inPrefix = false;
++        for (JsonNode old : prefix.path("needs")) {
++          for (JsonNode oldPair : old.path("consumers")) {
++            inPrefix |= oldPair.equals(pair);
++          }
++        }
++        if (!removed && inPrefix && pair.path("argumentSlot").asText().equals("assert.expected")) {
++          consumers.remove(at);
++          removed = true;
++        }
++      }
++    }
++    assertThat(removed).as("a consumer pair that also existed in the original prefix").isTrue();
++    ObjectNode obligationMutation = current.deepCopy();
++    ObjectNode mutated = null;
++    for (JsonNode obligation : obligationMutation.path("obligations")) {
++      if (obligation.path("needId").isNull()
++          && obligation.path("targetIntent").asText().equals("Confirmation")) {
++        mutated = (ObjectNode) obligation;
++      }
++    }
++    assertThat(mutated).isNotNull();
++    mutated.put("targetIntent", "Destination");
++    var audit = new com.citi.put.checks.studio.guided.translation.GuidedPlanHistoryAudit(jdbc, C);
++    for (var later : List.of(pairLoss, obligationMutation)) {
++      assertThatThrownBy(
++              () ->
++                  sessions.transaction(
++                      () -> {
++                        audit.transition(session, current, later, false);
++                        return null;
++                      }))
++          .isInstanceOf(GuidedSessionException.class);
++      assertThatThrownBy(
++              () ->
++                  tx.executeWithoutResult(
++                      status -> {
++                        status.setRollbackOnly();
++                        plans.acceptPlan(id, headRevision, later);
++                      }))
++          .isInstanceOf(GuidedSessionException.class);
++      assertThat(sessions.transaction(() -> plans.state(id).path("planRevision").asLong()))
++          .isEqualTo(headRevision);
++      assertThat(incrementalImmutableSnapshot(id)).isEqualTo(immutable);
++    }
++  }
++
++  private void b3EdgeMatrix(B3Parent p) throws Exception {
++    String id = p.id();
++    JsonNode receipt =
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT document::text FROM studio_guided_no_invocation_receipts"
++                    + " WHERE session_id=?",
++                String.class,
++                id));
++    String native0 = receipt.path("admissionId").asText();
++    String nav =
++        jdbc.queryForObject(
++            "SELECT admission_id FROM studio_guided_actions WHERE session_id=? AND step_id=?"
++                + " AND ordinal=0",
++            String.class,
++            id,
++            INCREMENTAL_STEPS.get(0));
++    var probe = new B3WriterProbe(id, p.test());
++    probe.positive("edges-positive");
++    assertThat(probe.genuine.path("consumerEdges")).isNotEmpty();
++    assertThat(probe.genuine.path("incrementalEvidence").path("excludedAttempts")).hasSize(1);
++    var labels = new java.util.LinkedHashMap<String, java.util.function.Consumer<ObjectNode>>();
++    labels.put(
++        "edge-unknown-admission",
++        b -> b3Edge0(b).put("consumerAdmissionId", UUID.randomUUID().toString()));
++    labels.put(
++        "edge-native0-excluded-admission", b -> b3Edge0(b).put("consumerAdmissionId", native0));
++    labels.put(
++        "edge-wrong-slot",
++        b ->
++            b3Edge0(b)
++                .put(
++                    "argumentSlot",
++                    b3Edge0(b).path("argumentSlot").asText().equals("fill.value")
++                        ? "assert.expected"
++                        : "fill.value"));
++    labels.put("edge-wrong-binding", b -> b3Edge0(b).put("bindingId", "b3-unallocated-binding"));
++    labels.put("edge-wrong-producer", b -> b3Edge0(b).put("producerAdmissionId", nav));
++    labels.put(
++        "edge-wrong-origin",
++        b -> b3Edge0(b).put("destinationOrigin", "https://other.example.test"));
++    labels.put(
++        "producer-wrong-worker",
++        b ->
++            ((ObjectNode) b.path("producers").get(0).path("availability"))
++                .put("workerId", "foreign-worker"));
++    labels.put(
++        "second-excluded-action",
++        b ->
++            ((ArrayNode) b.path("incrementalEvidence").path("excludedAttempts"))
++                .add(b.path("incrementalEvidence").path("excludedAttempts").get(0).deepCopy()));
++    labels.put(
++        "excluded-native-started",
++        b -> {
++          ObjectNode incremental = (ObjectNode) b.path("incrementalEvidence");
++          ObjectNode drift = (ObjectNode) incremental.path("driftReceipt");
++          drift.put("nativeInvocationStarted", true);
++          ObjectNode preimage = drift.deepCopy();
++          preimage.remove("receiptHash");
++          drift.put("receiptHash", GuidedContracts.hash(preimage));
++          ((ObjectNode) incremental.path("switch"))
++              .put("driftReceiptHash", drift.path("receiptHash").asText());
++        });
++    labels.put(
++        "excluded-policy-failure",
++        b ->
++            ((ObjectNode)
++                    b.path("incrementalEvidence")
++                        .path("excludedAttempts")
++                        .get(0)
++                        .path("action")
++                        .path("ledger"))
++                .put("outcomeCode", "POLICY_DENIED"));
++    labels.put(
++        "excluded-wrong-preparation",
++        b -> {
++          ObjectNode fact =
++              (ObjectNode) b.path("incrementalEvidence").path("excludedAttempts").get(0);
++          String other =
++              b.path("preparations")
++                  .get(b.path("preparations").size() - 1)
++                  .path("preparationId")
++                  .asText();
++          ((ObjectNode) fact.path("preparation")).put("preparationId", other);
++          ((ObjectNode) fact.path("action")).put("preparationId", other);
++        });
++    for (var label : labels.entrySet()) {
++      probe.refuse(label.getKey(), label.getValue());
++    }
++    probe.positive("edges-positive-after");
++  }
++
++  private static ObjectNode b3Edge0(ObjectNode basis) {
++    return (ObjectNode) basis.path("consumerEdges").get(0);
++  }
++
++  /** Exact producer identity, no fabricated consumer, no reusedFrom[j]; returns the read. */
++  private String b3PartialDriftStepFacts(B3Parent p) throws Exception {
++    String id = p.id();
++    String step0 = INCREMENTAL_STEPS.get(0);
++    String step1 = INCREMENTAL_STEPS.get(1);
++    var sw =
++        jdbc.queryForMap(
++            "SELECT reason,effective_step_id,effective_step_index,next_ordinal,"
++                + "completed_admissions::text AS done"
++                + " FROM studio_guided_relearn_switches WHERE session_id=?",
++            id);
++    assertThat(sw.get("reason")).isEqualTo("DRIFT");
++    assertThat(sw.get("effective_step_id")).isEqualTo(step1);
++    assertThat(((Number) sw.get("effective_step_index")).intValue()).isEqualTo(1);
++    assertThat(((Number) sw.get("next_ordinal")).intValue())
++        .as("partial drift step: ordinal 0 completed inside j")
++        .isEqualTo(1);
++    String nav = b3SoleSucceeded(id, step0, 0, "navigate");
++    String read = b3SoleSucceeded(id, step1, 0, "read");
++    assertThat(C.parse((String) sw.get("done")))
++        .isEqualTo(C.object().arrayNode().add(nav).add(read));
++    String fill = b3SoleSucceeded(id, step1, 1, "fill");
++    JsonNode receipt =
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT document::text FROM studio_guided_no_invocation_receipts"
++                    + " WHERE session_id=?",
++                String.class,
++                id));
++    assertThat(receipt.path("admissionId").isNull())
++        .as("pre-admission drift: no spent native attempt")
++        .isTrue();
++    assertThat(receipt.path("coordinate"))
++        .isEqualTo(C.object().put("stepId", step1).put("ordinal", 1));
++    var producers =
++        jdbc.queryForList(
++            "SELECT document::text FROM studio_guided_producers WHERE session_id=?",
++            String.class,
++            id);
++    assertThat(producers).hasSize(1);
++    JsonNode actual = C.parse(producers.getFirst());
++    assertThat(actual.path("producerAdmissionId").asText())
++        .as("retained actual producer identity")
++        .isEqualTo(read);
++    assertThat(actual.path("coordinate"))
++        .isEqualTo(C.object().put("stepId", step1).put("ordinal", 0));
++    JsonNode fillProposal =
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT proposal::text FROM studio_guided_actions WHERE session_id=?"
++                    + " AND admission_id=?",
++                String.class,
++                id,
++                fill));
++    assertThat(fillProposal.path("operation").path("value").path("bindingId"))
++        .isEqualTo(actual.path("bindingId"));
++    var pairs = new java.util.HashSet<String>();
++    for (String document :
++        jdbc.queryForList(
++            "SELECT document::text FROM studio_guided_consumer_edges WHERE session_id=?",
++            String.class,
++            id)) {
++      JsonNode edge = C.parse(document);
++      assertThat(edge.path("producerAdmissionId").asText()).isEqualTo(read);
++      JsonNode consumer =
++          C.parse(
++              jdbc.queryForObject(
++                  "SELECT document::text FROM studio_guided_actions WHERE session_id=?"
++                      + " AND admission_id=?",
++                  String.class,
++                  id,
++                  edge.path("consumerAdmissionId").asText()));
++      assertThat(consumer.path("state").asText())
++          .as("no fabricated consumer")
++          .isEqualTo("SUCCEEDED");
++      pairs.add(
++          edge.path("coordinate").path("stepId").asText()
++              + "|"
++              + edge.path("argumentSlot").asText());
++    }
++    assertThat(pairs)
++        .isEqualTo(Set.of(step1 + "|fill.value", INCREMENTAL_STEPS.get(2) + "|assert.expected"));
++    var reads = incrementalNativeEvents(id, read);
++    var fills = incrementalNativeEvents(id, fill);
++    assertThat(
++            reads.stream()
++                .filter(event -> event.path("phase").asText().equals("NATIVE_COMPLETED"))
++                .count())
++        .isEqualTo(1);
++    assertThat(
++            fills.stream()
++                .filter(event -> event.path("phase").asText().equals("DISPATCH_ENTER"))
++                .count())
++        .isEqualTo(1);
++    return read;
++  }
++
++  private String b3SoleSucceeded(String id, String step, int ordinal, String kind) {
++    var rows =
++        jdbc.queryForList(
++            "SELECT admission_id,attempt_ordinal,document::text AS d,proposal::text AS p"
++                + " FROM studio_guided_actions WHERE session_id=? AND step_id=? AND ordinal=?",
++            id,
++            step,
++            ordinal);
++    assertThat(rows)
++        .as("one action at %s/%s (no repeated native effect)", step, ordinal)
++        .hasSize(1);
++    JsonNode ledger = C.parse((String) rows.getFirst().get("d"));
++    assertThat(ledger.path("state").asText()).isEqualTo("SUCCEEDED");
++    assertThat(ledger.path("dispatchCount").asInt()).isEqualTo(1);
++    assertThat(C.parse((String) rows.getFirst().get("p")).path("operation").path("kind").asText())
++        .isEqualTo(kind);
++    return String.valueOf(rows.getFirst().get("admission_id"));
++  }
++
++  /** N01 at the actual stored writer: unretained/suffix/changed producer and hidden use refuse. */
++  private void b3ZeroConsumerAndOrphanNegatives(B3Parent p, String read) throws Exception {
++    var probe = new B3WriterProbe(p.id(), p.test());
++    probe.positive("n01-positive");
++    String fill = b3SoleSucceeded(p.id(), INCREMENTAL_STEPS.get(1), 1, "fill");
++    String later = b3SoleSucceeded(p.id(), INCREMENTAL_STEPS.get(3), 0, "assert");
++    probe.refuse(
++        "unretained-producer",
++        b -> {
++          ObjectNode incremental = (ObjectNode) b.path("incrementalEvidence");
++          for (String path : List.of("switch", "firstSuffixAcceptance")) {
++            var ids = (ArrayNode) incremental.path(path).path("retainedPrefixAdmissionIds");
++            for (int at = ids.size() - 1; at >= 0; at--) {
++              if (ids.get(at).asText().equals(read)) {
++                ids.remove(at);
++              }
++            }
++          }
++          ((ObjectNode) incremental.path("switch"))
++              .put(
++                  "retainedPrefixAdmissionsHash",
++                  GuidedContracts.hash(
++                      incremental.path("switch").path("retainedPrefixAdmissionIds")));
++        });
++    probe.refuse(
++        "suffix-created-producer",
++        b -> ((ObjectNode) b.path("producers").get(0)).put("producerAdmissionId", fill));
++    probe.refuse(
++        "changed-recipe",
++        b ->
++            ((ObjectNode) b.path("producers").get(0).path("recipe"))
++                .put("policyRuleId", "b3-other-rule"));
++    probe.refuse(
++        "changed-origin",
++        b -> ((ObjectNode) b.path("producers").get(0)).put("origin", "https://other.example.test"));
++    probe.refuse(
++        "changed-coordinate",
++        b -> ((ObjectNode) b.path("producers").get(0).path("coordinate")).put("ordinal", 1));
++    probe.refuse("missing-producer", b -> ((ArrayNode) b.path("producers")).removeAll());
++    probe.refuse(
++        "unknown-base",
++        b ->
++            ((ObjectNode) b.path("incrementalEvidence").path("plan"))
++                .put("baseRevisionId", UUID.randomUUID().toString()));
++    probe.refuse(
++        "hidden-successful-use",
++        b -> {
++          ObjectNode hidden = b3Edge0(b).deepCopy();
++          hidden.put("consumerAdmissionId", later).put("argumentSlot", "assert.expected");
++          hidden.set(
++              "coordinate", C.object().put("stepId", INCREMENTAL_STEPS.get(3)).put("ordinal", 0));
++          ((ArrayNode) b.path("consumerEdges")).add(hidden);
++        });
++    probe.refuse(
++        "model-empty-consumers",
++        b ->
++            ((ArrayNode) b.path("translationPlan").path("needs").get(0).path("consumers"))
++                .removeAll());
++    probe.positive("n01-positive-after");
++  }
++
++  private void b3PublishedPartialDriftStepAndSecondReplay(
++      B3Parent p, JsonNode merged, UUID first, String read) throws Exception {
++    String step0 = INCREMENTAL_STEPS.get(0);
++    String step1 = INCREMENTAL_STEPS.get(1);
++    JsonNode artifact =
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT artifact::text FROM ui_test_revisions WHERE id=?::uuid",
++                String.class,
++                merged.path("revisionId").asText()));
++    JsonNode reused = artifact.path("learnedPlan").path("reusedFrom");
++    assertThat(reused.has(step0)).isTrue();
++    assertThat(reused.has(step1)).as("drift-step reusedFrom remains absent").isFalse();
++    JsonNode binding = artifact.path("learnedPlan").path("bindings").get(0);
++    assertThat(artifact.path("learnedPlan").path("bindings")).hasSize(1);
++    assertThat(binding.path("producer").path("stepId").asText()).isEqualTo(step1);
++    assertThat(binding.path("provenance").path("producerAdmissionId").asText()).isEqualTo(read);
++    assertThat(artifact.path("learnedPlan").path("incremental").path("retainedPrefixAdmissionIds"))
++        .contains(JSON.getNodeFactory().textNode(read));
++    assertThat(observedBinding(first).path("revisionId").asText())
++        .isEqualTo(merged.path("revisionId").asText());
++    String firstValue = VALUES.getLast();
++    int model = MODEL_WIRE.size(), reads = INCREMENTAL_ORDINARY_READS.get();
++    int legacy = LEGACY_MODEL_CALLS.get();
++    UUID second =
++        UUID.fromString(
++            publicCall(
++                    "/api/v1/studio/tests/" + p.test() + "/execute",
++                    C.object(),
++                    202,
++                    UUID.randomUUID().toString())
++                .path("executionId")
++                .asText());
++    assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
++    JsonNode replay;
++    long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
++    do {
++      replay = publicCall("/api/v1/studio/executions/" + second, null, 200, null);
++      if (replay.path("streamComplete").asBoolean()) {
++        break;
++      }
++      Thread.sleep(30);
++    } while (System.nanoTime() < deadline);
++    assertThat(replay.path("status").asText()).isEqualTo("PASSED");
++    assertThat(replay.path("video").path("status").asText()).isEqualTo("AVAILABLE");
++    assertThat(INCREMENTAL_ORDINARY_READS.get() - reads)
++        .as("second run recaptures the original read")
++        .isEqualTo(1);
++    assertThat(VALUES.getLast()).as("fresh bytes, no cached value").isNotEqualTo(firstValue);
++    assertThat(RECEIPTS.getLast()).isEqualTo(VALUES.getLast());
++    assertThat(MODEL_WIRE).hasSize(model);
++    assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(legacy);
++    assertThat(observedBinding(second).path("revisionId").asText())
++        .isEqualTo(merged.path("revisionId").asText());
++  }
++
++  /** Accepted owning-worker evidence callbacks: retains only kind=action timing items. */
++  private static final class B3EvidenceCapture {
++    static final String PREFIX = "/internal/v2/studio/guided-sessions/";
++    static final String ROUTE =
++        com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceService.ROUTE_PATH;
++    final java.util.concurrent.ConcurrentMap<String, List<JsonNode>> actions =
++        new java.util.concurrent.ConcurrentHashMap<>();
++    volatile Throwable failure;
++
++    boolean selected(jakarta.servlet.http.HttpServletRequest http) {
++      String uri = http.getRequestURI();
++      return http.getMethod().equals("POST") && uri.startsWith(PREFIX) && uri.endsWith(ROUTE);
++    }
++
++    void record(String uri, byte[] body, int status) {
++      try {
++        if (status < 200 || status >= 300 || body.length == 0) {
++          return;
++        }
++        String id = uri.substring(PREFIX.length(), uri.length() - ROUTE.length());
++        JsonNode parsed = C.parseWire(body);
++        if (!parsed.path("timings").isArray()) {
++          throw new AssertionError("accepted evidence callback without timings array");
++        }
++        ArrayNode items = C.object().putArray("items");
++        for (JsonNode item : parsed.path("timings")) {
++          if (item.path("kind").asText().equals("action")) {
++            items.add(item.deepCopy());
++          }
++        }
++        actions.computeIfAbsent(id, ignored -> new CopyOnWriteArrayList<>()).add(items);
++      } catch (RuntimeException | AssertionError invalid) {
++        failure = invalid;
++      }
++    }
++  }
++
++  private static Path b3Tool(String name) throws IOException {
++    for (String directory : System.getenv("PATH").split(java.io.File.pathSeparator)) {
++      Path candidate = Path.of(directory).resolve(name).toAbsolutePath().normalize();
++      if (Files.isRegularFile(candidate) && Files.isExecutable(candidate)) {
++        return candidate.toRealPath();
++      }
++    }
++    throw new AssertionError("installed " + name + " required for the B3 media probe");
++  }
++
++  /** Test-owned probe over the actual served WebM; records which admission each real seek used. */
++  private static final class B3MediaProbe {
++    final Path video;
++    final Path ffmpeg;
++    final Path ffprobe;
++    final List<String> seeked = new ArrayList<>();
++
++    B3MediaProbe(Path video) throws IOException {
++      this.video = video;
++      ffmpeg = b3Tool("ffmpeg");
++      ffprobe = b3Tool("ffprobe");
++    }
++
++    /** Last actual video packet time; Playwright WebM may omit the container duration. */
++    long lastPacketMs() throws Exception {
++      Process process =
++          registerOwnedTool(
++              new ProcessBuilder(
++                      ffprobe.toString(),
++                      "-v",
++                      "error",
++                      "-select_streams",
++                      "v:0",
++                      "-show_entries",
++                      "packet=pts_time",
++                      "-of",
++                      "csv=p=0",
++                      video.toString())
++                  .redirectErrorStream(true)
++                  .start(),
++              "b3-media-packets");
++      byte[] out = process.getInputStream().readNBytes(4 * 1024 * 1024);
++      awaitJoinedProcess(process, 30, "B3 media packet probe");
++      double last = -1;
++      for (String line : new String(out, StandardCharsets.UTF_8).split("\n")) {
++        if (!line.isBlank() && !line.trim().equals("N/A")) {
++          last = Math.max(last, Double.parseDouble(line.trim()));
++        }
++      }
++      assertThat(last).as("actual decodable video packets").isPositive();
++      return Math.round(last * 1000);
++    }
++
++    byte[] frameAt(String admissionId, long offsetMs) throws Exception {
++      if (admissionId != null) {
++        seeked.add(admissionId);
++      }
++      Process process =
++          registerOwnedTool(
++              new ProcessBuilder(
++                      ffmpeg.toString(),
++                      "-nostdin",
++                      "-v",
++                      "error",
++                      "-ss",
++                      java.math.BigDecimal.valueOf(offsetMs, 3).toPlainString(),
++                      "-i",
++                      video.toString(),
++                      "-frames:v",
++                      "1",
++                      "-vf",
++                      "scale=64:36",
++                      "-pix_fmt",
++                      "gray",
++                      "-f",
++                      "rawvideo",
++                      "pipe:1")
++                  .start(),
++              "b3-media-seek");
++      byte[] frame = process.getInputStream().readNBytes(64 * 36 + 1);
++      process.getErrorStream().readNBytes(65536);
++      awaitJoinedProcess(process, 30, "B3 media seek probe");
++      return frame;
++    }
++  }
++
++  private void b3AssertMeasuredRowsAndActualMediaSeek(String id, B3EvidenceCapture capture)
++      throws Exception {
++    JsonNode result = awaitGuidedVideoSettled(id);
++    assertThat(result.path("evidence").path("video").path("status").asText())
++        .isEqualTo("AVAILABLE");
++    var row = guidedRecordingRow(id);
++    ArrayNode served = C.object().putArray("items");
++    ArrayNode stored = C.object().putArray("items");
++    for (JsonNode item : result.path("actionTimings")) {
++      if (item.path("kind").asText().equals("action")) {
++        served.add(item);
++      }
++    }
++    for (JsonNode item : C.parse(String.valueOf(row.get("timings")))) {
++      if (item.path("kind").asText().equals("action")) {
++        stored.add(item);
++      }
++    }
++    Path objects = TEMP.resolve("objects");
++    JsonNode manifest =
++        C.parse(
++            Files.readString(objects.resolve(String.valueOf(row.get("manifest_key"))).normalize()));
++    ArrayNode manifestActions = C.object().putArray("items");
++    for (JsonNode item : manifest.path("timings")) {
++      if (item.path("kind").asText().equals("action")) {
++        manifestActions.add(item);
++      }
++    }
++    var callbacks = capture.actions.get(id);
++    assertThat(callbacks).as("accepted owning-worker evidence callback captured").isNotEmpty();
++    for (JsonNode callback : callbacks) {
++      assertThat(GuidedContracts.canonical(callback))
++          .as("callback rows unchanged")
++          .isEqualTo(GuidedContracts.canonical(served));
++    }
++    assertThat(GuidedContracts.canonical(stored)).isEqualTo(GuidedContracts.canonical(served));
++    assertThat(GuidedContracts.canonical(manifestActions))
++        .isEqualTo(GuidedContracts.canonical(served));
++    // native0 / native1 identities
++    JsonNode receipt =
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT document::text FROM studio_guided_no_invocation_receipts"
++                    + " WHERE session_id=?",
++                String.class,
++                id));
++    String native0 = receipt.path("admissionId").asText();
++    var same =
++        sessions.transaction(() -> sessions.actions(id)).stream()
++            .filter(action -> action.path("coordinate").equals(receipt.path("coordinate")))
++            .toList();
++    JsonNode replacementAction =
++        same.stream()
++            .filter(action -> action.path("attemptOrdinal").asInt() == 1)
++            .findFirst()
++            .orElseThrow();
++    String native1 = replacementAction.path("admission").path("admissionId").asText();
++    JsonNode spent =
++        same.stream()
++            .filter(action -> action.path("attemptOrdinal").asInt() == 0)
++            .findFirst()
++            .orElseThrow();
++    assertThat(native1).isNotEqualTo(native0);
++    assertThat(spent.path("preparationId")).isNotEqualTo(replacementAction.path("preparationId"));
++    for (ArrayNode sink : List.of(served, stored, manifestActions)) {
++      for (JsonNode item : sink) {
++        assertThat(item.path("admissionId").asText())
++            .as("absent native0 stamp is never invented")
++            .isNotEqualTo(native0);
++      }
++    }
++    JsonNode replacement = null;
++    for (JsonNode item : served) {
++      if (item.path("admissionId").asText().equals(native1)) {
++        replacement = item;
++      }
++    }
++    assertThat(replacement).as("genuine replacement timing").isNotNull();
++    assertThat(replacement.path("endMs").isIntegralNumber()).isTrue();
++    assertThat(replacement.path("endMs").asLong())
++        .isGreaterThanOrEqualTo(replacement.path("startMs").asLong());
++    // one browser/context/origin/video
++    var all = sessions.transaction(() -> sessions.actions(id));
++    assertThat(
++            all.stream()
++                .map(action -> action.path("executionEvidence").path("contextId").asText())
++                .distinct()
++                .toList())
++        .hasSize(1);
++    assertThat(
++            all.stream()
++                .filter(
++                    action ->
++                        action
++                            .path("executionEvidence")
++                            .path("kind")
++                            .asText()
++                            .equals("observedDocument"))
++                .map(action -> action.path("executionEvidence").path("origin").asText())
++                .distinct()
++                .toList())
++        .containsExactly(ORIGIN);
++    // actual per-present-admission media seek on the bytes the production route serves
++    HttpResponse<byte[]> whole = guidedVideoRead(id, null, true);
++    assertThat(whole.statusCode()).isEqualTo(200);
++    assertThat(whole.body())
++        .isEqualTo(
++            Files.readAllBytes(objects.resolve(String.valueOf(row.get("video_key"))).normalize()));
++    Path media = TEMP.resolve("b3-media-" + id + ".webm");
++    try (var channel =
++        Files.newByteChannel(
++            media,
++            Set.of(
++                java.nio.file.StandardOpenOption.CREATE_NEW,
++                java.nio.file.StandardOpenOption.WRITE),
++            java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
++                java.nio.file.attribute.PosixFilePermissions.fromString("rw-------")))) {
++      var buffer = java.nio.ByteBuffer.wrap(whole.body());
++      while (buffer.hasRemaining()) {
++        channel.write(buffer);
++      }
++    }
++    try {
++      var probe = new B3MediaProbe(media);
++      long lastMs = probe.lastPacketMs();
++      var order = new ArrayList<String>();
++      for (JsonNode item : served) {
++        long start = item.path("startMs").asLong();
++        assertThat(start)
++            .as("stamped offset lies on the actual recording timeline")
++            .isBetween(0L, lastMs);
++        byte[] frame = probe.frameAt(item.path("admissionId").asText(), start);
++        assertThat(frame.length).as("one decoded frame at the stamped offset").isEqualTo(64 * 36);
++        order.add(item.path("admissionId").asText());
++      }
++      assertThat(probe.seeked)
++          .as("seeks are keyed by the exact served admission identities")
++          .containsExactlyElementsOf(order);
++      assertThat(probe.seeked).doesNotContain(native0).contains(native1);
++      assertThat(probe.frameAt(null, lastMs + 5000).length)
++          .as("probe control: no frame beyond the recording")
++          .isZero();
++    } finally {
++      Files.deleteIfExists(media);
++    }
++  }
++
+   @Test
+   void incrementalStartCannotWidenTrustedOriginCeiling() throws Exception {
+     b1TrustedCeiling = true;
+@@ -4929,6 +7323,7 @@
+         texts.set(3, "Check Confirmation is visible at checkpoint 4.");
+         texts.set(4, "Check Confirmation is visible at checkpoint 5.");
+       }
++      if (b3Hooks != null) b3Hooks.texts(variant, texts); // STUDIO-OBS-015 B3: inert when null
+       AUDIT_CANARIES.addAll(texts); // Audit-only: authored text is lawful gateway content.
+       var authored = new java.util.ArrayList<AuthoringStep>();
+       for (int index = 0; index < 10; index++) authored.add(new AuthoringStep(UUID.fromString(INCREMENTAL_STEPS.get(index)), texts.get(index), null));
+@@ -5144,6 +7539,12 @@
+       assertThat(actions.stream().allMatch(action -> action.path("dispatchCount").asInt() == 1)).isTrue();
+       if (variant.equals("append-input") || List.of("deleted-consumers", "admitted-literal2", "pre-literal2", "same-pair-literal").contains(variant)) assertIncrementalAppendAckHistory(mixed);
+       assertIncrementalImmutableSourceAndPlanHistory(mixed, base.path("revisionId").asText());
++      B3Hooks b3Active = b3Hooks; // STUDIO-OBS-015 B3: null unless a B3 method selected it
++      B3Parent b3Parent =
++          b3Active == null
++              ? null
++              : new B3Parent(mixed, test, base, edited, currentSteps, boundary, variant);
++      if (b3Active != null) b3Active.beforeFinalize(b3Parent);
+       int callsAtFinalize = MODEL_WIRE.size(), effectsAtFinalize = RECEIPTS.size(), navigationsAtFinalize = NAVIGATIONS.get();
+       JsonNode merged = publicCall("/api/v1/studio/guided-sessions/" + mixed + "/finalize",
+           C.object().put("schemaVersion", 3).put("expectedSourceRevision", edited.path("sourceRevision").asText())
+@@ -5252,6 +7653,7 @@
+           assertThat(observedBinding(second).path("revisionId").asText()).isEqualTo(merged.path("revisionId").asText());
+         }
+       }
++      if (b3Active != null) b3Active.afterFirstOrdinaryReplay(b3Parent, merged, execution);
+     } finally {
+       INCREMENTAL_ACK_RELEASE.values().forEach(java.util.concurrent.CountDownLatch::countDown);
+       INCREMENTAL_ACK_RELEASE.clear(); INCREMENTAL_ACK_ENTERED.clear(); INCREMENTAL_DRIFT_CAPTURE.clear();
+@@ -21444,6 +23846,11 @@
+     if (kind.equals("SOURCE_PLAN")) {
+       if ("drift-plan-fail".equals(incrementalDomVariant) && context.has("learningWindow"))
+         return result.put("status", "UNSUPPORTED").put("reasonCode", "INSUFFICIENT_EVIDENCE");
++      B3FirstSuffixHold b3Hold = b3FirstSuffixHold; // STUDIO-OBS-015 B3B-3: null unless armed
++      if (b3Hold != null && context.has("learningWindow")) {
++        b3Hold.hold(context.path("sessionId").asText());
++      }
++      boolean partialRead = b3ReadInsideDriftStep; // STUDIO-OBS-015 B3C-1: false unless armed
+       var source = new java.util.ArrayList<JsonNode>(); context.path("sourceSteps").forEach(source::add);
+       int first = 0;
+       if (context.path("learningWindow").has("firstLearnStepId")) {
+@@ -21461,7 +23868,7 @@
+         if (!literalReplacement && stepId.equals(INCREMENTAL_STEPS.get(2)) && source.get(at).path("text").asText().contains("that order reference")) bindingConsumers.add(C.object().put("stepId", stepId).put("argumentSlot", "assert.expected"));
+       }
+       if (!bindingConsumers.isEmpty()) {
+-        var need = needs.addObject().put("needId", "order").put("producerStepId", INCREMENTAL_STEPS.get(0));
++        var need = needs.addObject().put("needId", "order").put("producerStepId", INCREMENTAL_STEPS.get(partialRead ? 1 : 0));
+         var consumers = need.putArray("consumers"); bindingConsumers.forEach(consumers::add);
+       }
+       for (int at = first; at < source.size(); at++) {
+@@ -21477,7 +23884,7 @@
+                 .put("startUtf16", 5).put("endUtf16", 5 + URL.length()).put("kind", "destination").put("intendedSlot", "navigate.destination");
+             obligations.add(obligation(stepId, 0, "navigate", "page", reference, null));
+           }
+-          if (!bindingConsumers.isEmpty()) obligations.add(obligation(stepId, 1, "read", "Order reference", null, "order"));
++          if (!bindingConsumers.isEmpty() && !partialRead) obligations.add(obligation(stepId, 1, "read", "Order reference", null, "order"));
+         } else if (stepId.equals(INCREMENTAL_STEPS.get(1))) {
+           if (literalReplacement) {
+             int offset = source.get(at).path("text").asText().indexOf("literal-control");
+@@ -21489,6 +23896,18 @@
+             int ordinal = context.path("learningWindow").path("firstLearnStepId").asText().equals(stepId)
+                 ? context.path("learningWindow").path("nextSemanticOrdinal").asInt() : 0;
+             obligations.add(obligation(stepId, ordinal, "fill", "Destination", reference, null));
++          } else if (partialRead) {
++            // STUDIO-OBS-015 B3C-1: read (ordinal 0) then fill (ordinal 1) inside step j=1.
++            boolean readDone = false;
++            for (JsonNode completed : context.path("learningWindow").path("completedCoordinates")) {
++              readDone |=
++                  completed.path("stepId").asText().equals(stepId)
++                      && completed.path("ordinal").asInt() == 0;
++            }
++            if (!readDone) {
++              obligations.add(obligation(stepId, 0, "read", "Order reference", null, "order"));
++            }
++            obligations.add(obligation(stepId, 1, "fill", "Destination", null, "order"));
+           } else {
+             obligations.add(obligation(stepId, 0, "fill", "Destination", null, "order"));
+             if (source.get(at).path("text").asText().contains("twice")) obligations.add(obligation(stepId, 1, "fill", "Destination", null, "order"));

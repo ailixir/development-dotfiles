@@ -1,0 +1,42 @@
+{
+  "artifact": "STUDIO-OBS-015 B4a-source02 independent Quinn review",
+  "capturedAt": "2026-10-15T16:13:09.256441+00:00",
+  "classification": "BOUNDED_SOURCE_REVIEW_NO_FINDINGS_UNCOMPILED_UNEXECUTED",
+  "checkpoint": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-b4a-source02.json",
+    "sha256": "212c915f3536c0f7a0105989beebfc88912fb876ccea1d5f0713859030439772"
+  },
+  "ownedAfter": {
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java": {
+      "sha256": "8c110961bc1c6897e0c8e75e0733f61925579f9fa970854fa5c377add3aa0b9d",
+      "bytes": 8744
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java": {
+      "sha256": "f18114111346e371bc6fe31021ea9e424d668d866cbd5bed9c40ce1bd2bc838e",
+      "bytes": 32287
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java": {
+      "sha256": "2f18f81a51f10d4c3ab92a0d2c24c9d5aa49e2bce3f90213d16f0467d38a15fe",
+      "bytes": 57337
+    }
+  },
+  "findings": [],
+  "payloads": {
+    "review.md": {
+      "sha256": "87026a57cae03af1f3e3aa59a61ba2cf98914f0ae7a75d43c4bbb654b1c78e2d",
+      "bytes": 4235
+    },
+    "checks.json": {
+      "sha256": "dc867b4c4c25f889011a847b3db6b75e88b9f621a571ab3921cd94286088d6bd",
+      "bytes": 7617
+    },
+    "source-inventory.json": {
+      "sha256": "446b35a090ad59432ad4455e57d8f22c617e22b61d307dbedf7134f8e9e4cfe2",
+      "bytes": 10016
+    }
+  },
+  "formalVerdict": null,
+  "lifecycleTransition": null,
+  "sourceReleaseGranted": false,
+  "runtimeExecuted": false
+}

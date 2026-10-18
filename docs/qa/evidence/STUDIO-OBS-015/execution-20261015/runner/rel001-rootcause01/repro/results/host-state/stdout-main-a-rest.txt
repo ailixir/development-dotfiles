@@ -1,0 +1,108 @@
+node                               v24.20.0
+other gates running                none
+load average (1 min)               4.01
+                                   load above 4: wait or accept a noisy baseline
+swap                               total = 4096.00M  used = 2855.31M  free = 1240.69M  (encrypted)
+disk free on /System/Volumes/Data  126 GB
+chrome for testing                 <HOME>/Library/Caches/ms-playwright/chromium-1243 
+NODE_OPTIONS/DEBUG/PWDEBUG         
+scratch build (a)                  <SCRATCH>/repro-run/a/studio-runner
+protected pids (never signalled)   22246 44737 13577 13581
+PREFLIGHT OK
+results: <SCRATCH>/repro-run/results/main-a   variant: a   n: 300   modes: baseline,cpu,mem,evict   scratch: <TMP>//rel001.li2U1f
+--- baseline: start 03:08:47, load { 4.01 11.59 14.56 }, swap total = 4096.00M  used = 2855.31M  free = 1240.69M  (encrypted)
+[baseline/a] 10/300 done, 0 failed
+[baseline/a] 20/300 done, 0 failed
+[baseline/a] 30/300 done, 0 failed
+[baseline/a] 40/300 done, 0 failed
+[baseline/a] 50/300 done, 0 failed
+[baseline/a] 60/300 done, 0 failed
+[baseline/a] 70/300 done, 0 failed
+[baseline/a] 80/300 done, 0 failed
+[baseline/a] 90/300 done, 0 failed
+[baseline/a] 100/300 done, 0 failed
+[baseline/a] 110/300 done, 0 failed
+[baseline/a] 120/300 done, 0 failed
+[baseline/a] 130/300 done, 0 failed
+[baseline/a] 140/300 done, 0 failed
+[baseline/a] 150/300 done, 0 failed
+[baseline/a] 160/300 done, 0 failed
+[baseline/a] 170/300 done, 0 failed
+[baseline/a] 180/300 done, 0 failed
+[baseline/a] 190/300 done, 0 failed
+[baseline/a] 200/300 done, 0 failed
+[baseline/a] 210/300 done, 0 failed
+[baseline/a] 220/300 done, 0 failed
+[baseline/a] 230/300 done, 0 failed
+[baseline/a] 240/300 done, 0 failed
+[baseline/a] 250/300 done, 0 failed
+[baseline/a] 260/300 done, 0 failed
+[baseline/a] 270/300 done, 0 failed
+[baseline/a] 280/300 done, 0 failed
+[baseline/a] 290/300 done, 0 failed
+[baseline/a] 300/300 done, 0 failed
+--- baseline: harness exit 0 at 03:20:18
+[probe baseline] 25/100
+[probe baseline] 50/100
+[probe baseline] 75/100
+[probe baseline] 100/100
+--- cpu: start 03:21:36, load { 5.12 4.50 8.11 }, swap total = 4096.00M  used = 2855.31M  free = 1240.69M  (encrypted)
+[cpu/a] 10/300 done, 0 failed
+[cpu/a] 20/300 done, 0 failed
+[cpu/a] 30/300 done, 0 failed
+[cpu/a] 40/300 done, 0 failed
+[cpu/a] 50/300 done, 0 failed
+[cpu/a] 60/300 done, 0 failed
+[cpu/a] 70/300 done, 0 failed
+[cpu/a] 80/300 done, 0 failed
+[cpu/a] 90/300 done, 0 failed
+[cpu/a] 100/300 done, 0 failed
+[cpu/a] 110/300 done, 0 failed
+[cpu/a] 120/300 done, 0 failed
+[cpu/a] 130/300 done, 0 failed
+[cpu/a] 140/300 done, 0 failed
+[cpu/a] 150/300 done, 0 failed
+[cpu/a] 160/300 done, 0 failed
+[cpu/a] 170/300 done, 0 failed
+[cpu/a] 180/300 done, 0 failed
+[cpu/a] 190/300 done, 0 failed
+[cpu/a] 200/300 done, 0 failed
+[cpu/a] 210/300 done, 0 failed
+[cpu/a] 220/300 done, 0 failed
+[cpu/a] 230/300 done, 0 failed
+[cpu/a] 240/300 done, 0 failed
+[cpu/a] 250/300 done, 0 failed
+[cpu/a] 260/300 done, 0 failed
+[cpu/a] 270/300 done, 0 failed
+[cpu/a] 280/300 done, 0 failed
+[cpu/a] 290/300 done, 0 failed
+[cpu/a] 300/300 done, 0 failed
+--- cpu: harness exit 0 at 03:34:30
+[probe cpu] 25/100
+[probe cpu] 50/100
+[probe cpu] 75/100
+[probe cpu] 100/100
+mem-hold: holding 5.00 GB
+{"heldGb":5,"capped":null,"pid":59361}
+--- mem: start 03:36:24, load { 20.38 20.52 16.29 }, swap total = 4096.00M  used = 2855.31M  free = 1240.69M  (encrypted)
+[mem/a] 10/300 done, 0 failed
+mem-hold: swap nearly exhausted, releasing everything
+[mem/a] 20/300 done, 0 failed
+[mem/a] 30/300 done, 0 failed
+[mem/a] 40/300 done, 0 failed
+[mem/a] 50/300 done, 0 failed
+[mem/a] 60/300 done, 0 failed
+[mem/a] 70/300 done, 0 failed
+[mem/a] 80/300 done, 0 failed
+[mem/a] 90/300 done, 0 failed
+[mem/a] 100/300 done, 0 failed
+[mem/a] 110/300 done, 0 failed
+[mem/a] 120/300 done, 0 failed
+[mem/a] 130/300 done, 0 failed
+[mem/a] 140/300 done, 0 failed
+[mem/a] 150/300 done, 0 failed
+[mem/a] 160/300 done, 0 failed
+[mem/a] 170/300 done, 0 failed
+[mem/a] 180/300 done, 0 failed
+[mem/a] 190/300 done, 0 failed
+[mem/a] 200/300 done, 0 failed

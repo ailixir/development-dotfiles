@@ -1,0 +1,72 @@
+{
+  "artifact": "STUDIO-OBS-015 merge-new22-01 qa-rulings01",
+  "author": "Quinn (@qa)",
+  "createdAt": "2026-10-16T08:25:10Z",
+  "mode": "read-only; no Gradle; no test run; no commit",
+  "grantsQaCredit": false,
+  "changesLifecycle": false,
+  "rulings": {
+    "R1_B1C03_unplantedDestructiveVerb": {
+      "verdict": "INTENDED_REFUSALS_REGISTRATION_GAP",
+      "gate": "NEEDS_WORK",
+      "plantedSetExact": [
+        "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser[incremental joined policy-prefix]",
+        "incrementalFreshPostConsentGuardsDenyDangerousProposals"
+      ],
+      "inBodyAssertion": {
+        "window": "AUDIT_EVENTS.list.subList(tallyAuditStart, size) after the parent loop",
+        "eventType": "GUIDED_ACTION_REFUSED",
+        "count": 3,
+        "reasonCodeEquals": "DESTRUCTIVE_VERB",
+        "sessionIds": "exactly the 3 hostile parent ids, one each",
+        "allowedParentRefusals": 0,
+        "fieldMatching": "exact key=value parse (not substring)",
+        "keepPerParent": "b1AuditRefusals(parent.id, \"DESTRUCTIVE_VERB\") == 1",
+        "optional": "obligationKind click/click/press [inferred; verify in run]"
+      }
+    },
+    "R2_confirmExpireBoundedWait": {
+      "verdict": "ACK_WITH_CONDITIONS",
+      "deadlineSeconds": 120,
+      "scope": "confirm-expire branch only; own session; teardown CONFIRMED (+ own recording terminal only if the guard then refuses on it)",
+      "unchanged": ["p3AwaitTeardown", "verifyPreviousWorkerGenerationClosed"],
+      "forbidden": ["redriveTeardowns", "teardownAttempt", "GuidedDispatchService.stop", "second expire()", "SQL writes", "clock or expires_at changes"],
+      "onTimeout": "AssertionError naming H8 + value-free diagnostic; no bound increase",
+      "assertAtConfirmed": ["state EXPIRED", "teardownRequest absent"],
+      "measure": "T(expiresAt) -> CONFIRMED latency ms in run evidence"
+    },
+    "R3_H8ResendOnNon200Stop": {
+      "verdict": "ACCEPTABLE",
+      "reason": "stop non-200 bodies are never read or validated; only closed-schema deterministic refusals are definite (contextRefusal precedent); same deterministic key and body; CONFIRMED requires a validated 200",
+      "conditions": ["at most 2 immediate re-sends, same key and body", "IT keeps confirmationCalls 0, PENDING, teardownRequest.reason CANCELLED"],
+      "followUp": "closed stop-refusal vocabulary = bridge contract change, @architect, only on operational evidence"
+    },
+    "R4_H7SessionOnlyBinding": {
+      "verdict": "ACCEPTABLE",
+      "reason": "StudioActionAudit.KEYS has no step or coordinate; step tied by terminal refusal + no ledger action at INCREMENTAL_STEPS.get(4) + hasSize(1)",
+      "optional": "bind obligationKind and targetRole from fixture values"
+    }
+  },
+  "laneGate": "NEEDS_WORK",
+  "inputsRelied": {
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/merge-new22-01/review.md": "53c3fd9aebdc8ddb5b4e3264aad7d25bea57085a3c34564fa525a863df2a821c",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/merge-new22-01/manifest.json": "b8c585a0ba5c28b6dbd42d35d936ecd8c5768b5ebe516e8a422aa90cbfc7369e",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/h8-source01/notes.md": "90b32c31fa42a0afcea1c251b10aa009b6ab7ac06c241be4ff71a4821fb9af68",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/h8-source01/h8.patch": "bd3564d339f4bbe907dfeba167c267100b38ec49e5afaff04b597100843dc959",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/h8-source01/work/new/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "675ab662d6a565fa527da551aeb19e923b0173f0478c9655df2e41a621ac34a6",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r2-diagnosis01/aria-h8-h6-ruling01/ruling.md": "86a53bec8dd6e80fa504c4764239c9ff8c54ec6d61dc31f52677ac3e6762730a",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r2-diagnosis01/qa-review01/review.md": "0d6750fd14bf7ae906bb69593eb422ef3fc5fcd08cc9bd24e83153a2fd44b3bf",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b1bcd-design01/design.md": "5d74d55dadf21f9a418aed813c06a3b4c42b4c25119ca87eb4609ba08015b12f",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "217950c7422aadbceaaf2ab34417d5a932f4e616ff76efc6a2a5e3a04a09aec8",
+    "backend/src/test/java/com/citi/put/checks/studio/support/GuardDecisionTally.java": "f357604e753b0b7cbd28943211510df9ac8dc9e8238795bb956a1d6fb916a236",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "6d7361ae0966eff3c68d34e7f759aaf5a4ae74a72dcb7193fca64c7c982964a6",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/audit/StudioActionAudit.java": "b073385dd3e9886e2a30b61cd339252e446594a7e7316bb16a6eb2bc32133192",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java": "e4c48761e3b80561165bf7e51ee8b202c03ba9dfaf35a6ef52f9d77143a3de50",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java": "3cbae0366ae22691e9304a1ca7169b970827b265bd5ab204b8a57fc6583ab4c0",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "8d67a25196e49c66bdf7cf212b3a9b24cc5f3b30f51a7ed9eb60da4f973689bd"
+  },
+  "notes": [
+    "Live GuidedSessionService.java differs from h8-source01 work/new (351e393d...); H8 redrive/teardownAttempt verified present in live by grep, other differences not reviewed.",
+    "Not run: Gradle, tests, Spotless, CodeRabbit (WSL-only), SYNAPSE diagnostics."
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "source": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "baseSourceSha256": "c359d52c1fa10212fe63a77ff64097d7b13f835deb2699230ce5184f697801ff",
+  "currentSourceSha256": "121e46f1c568a7eb245a0257e3f865d4874b623746642d84ab0fcff8b9742cfd",
+  "originalFailureReceipt": "astra-c2-c6-current-native3/result.json",
+  "failures": [
+    {
+      "test": "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope",
+      "boundary": "FIXTURE_STARTUP_POOL",
+      "expected": 2,
+      "actual": 1
+    },
+    {
+      "test": "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect",
+      "boundary": "FIXTURE_OWNED_CHILD_MODULE_GUARD"
+    },
+    {
+      "test": "actualPublishedPublicCancelWhileNativePasswordWorldPending",
+      "boundary": "FIXTURE_OWNED_CHILD_MODULE_GUARD"
+    }
+  ],
+  "correction": "Use actual prefixed STUDIO_RUNNER_POOL_SIZE key; filter exact direct recorded-child modules before bounded cardinality/parent/start/group guards",
+  "productionChanged": false,
+  "exactTwoFixReconstruction": true
+}

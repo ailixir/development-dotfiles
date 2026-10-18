@@ -1,0 +1,332 @@
+{
+  "scope": "Diagnostic only; not exclusive claim or CPU attribution",
+  "numericEvidence": {
+    "claimSamplerStatus": 2,
+    "claimSamplerJoined": true,
+    "claimSamplerCleanupConfirmed": true,
+    "claimSamplerDiagnosticOnly": true,
+    "claimSamplerCycles": 642,
+    "claimSamplerEmpty": 0,
+    "claimSamplerUnattributed": 1,
+    "claimSamplerCounts": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        185,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        42,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "pgSnapshotStatus": 2,
+    "pgSnapshotJoined": true,
+    "pgSnapshotExactClaimAttribution": false,
+    "pgSnapshotRows": 2,
+    "pgSnapshotCandidates": 1,
+    "pgSnapshotBlockers": 1,
+    "pgSnapshotStageWaitCounts": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "pgSnapshotBlockerStageCounts": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "pgSnapshotRelationCounts": [
+      2,
+      1,
+      0
+    ],
+    "pgSnapshotWaitEventCounts": [
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ]
+  },
+  "queryStageOrder": [
+    "REVOCATION_SESSION_LOCK",
+    "SESSION_DOCUMENT_LOCK",
+    "UI_TEST_SOURCE_LOCK",
+    "MANIFEST_READ",
+    "ATOMIC_RENEWAL_WRITE",
+    "SESSION_WRITE",
+    "OTHER"
+  ],
+  "waitTypeOrder": [
+    "NONE",
+    "Lock",
+    "LWLock",
+    "IO",
+    "Client",
+    "IPC",
+    "Timeout",
+    "Activity",
+    "BufferPin",
+    "OTHER"
+  ],
+  "waitEventOrder": [
+    "NONE",
+    "transactionid",
+    "tuple",
+    "relation",
+    "ClientRead",
+    "ClientWrite",
+    "DataFileRead",
+    "OTHER"
+  ],
+  "relationOrder": [
+    "SESSION",
+    "UI_TEST_SOURCE",
+    "OTHER"
+  ],
+  "claims": [
+    {
+      "ordinal": 1,
+      "status": 202,
+      "handlerNanos": 119300125,
+      "consumed": true
+    },
+    {
+      "ordinal": 2,
+      "status": 202,
+      "handlerNanos": 750177416,
+      "consumed": true
+    },
+    {
+      "ordinal": 3,
+      "status": 202,
+      "handlerNanos": 878119375,
+      "consumed": true
+    },
+    {
+      "ordinal": 4,
+      "status": 202,
+      "handlerNanos": 582782750,
+      "consumed": true
+    },
+    {
+      "ordinal": 5,
+      "status": 202,
+      "handlerNanos": 115044458,
+      "consumed": true
+    },
+    {
+      "ordinal": 6,
+      "status": 202,
+      "handlerNanos": 788149500,
+      "consumed": true
+    },
+    {
+      "ordinal": 7,
+      "status": 202,
+      "handlerNanos": 585202458,
+      "consumed": true
+    },
+    {
+      "ordinal": 8,
+      "status": 202,
+      "handlerNanos": 701409083,
+      "consumed": true
+    },
+    {
+      "ordinal": 9,
+      "status": 202,
+      "handlerNanos": 123547334,
+      "consumed": true
+    },
+    {
+      "ordinal": 10,
+      "status": 202,
+      "handlerNanos": 160777833,
+      "consumed": true
+    },
+    {
+      "ordinal": 11,
+      "status": 202,
+      "handlerNanos": 295313125,
+      "consumed": true
+    },
+    {
+      "ordinal": 12,
+      "status": 202,
+      "handlerNanos": 1114245209,
+      "consumed": true
+    }
+  ],
+  "lifecycle": [
+    {
+      "ordinal": 1,
+      "status": 202,
+      "consumed": true,
+      "kind": "RUNTIME",
+      "reason": "LEASE_LOST"
+    }
+  ],
+  "terminal": {
+    "tests": 2,
+    "passed": 1,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sourceDrift": 0,
+    "firstLearning": "PASSED",
+    "secretFailureMethod": "awaitFinalizing",
+    "secretFailureLine": 9204
+  }
+}

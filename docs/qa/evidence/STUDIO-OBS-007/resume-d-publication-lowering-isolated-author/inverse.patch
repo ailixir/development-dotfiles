@@ -1,0 +1,238 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java
+@@ -94,10 +94,9 @@
+     // Caller scope is checked before locked preparation; fresh Core proof follows validation.
+     JsonNode original = sessions.transaction(() -> sessions.lock(id).document().deepCopy());
+     access.checkUser(caller, original);
+-    LoweringPreparation lowering = prepareLowering(id, body);
+     Prepared prepared;
+     try {
+-      prepared = sessions.transaction(() -> prepare(id, key, digest, body, lowering));
++      prepared = sessions.transaction(() -> prepare(id, key, digest, body));
+     } catch (GuidedSessionException failure) {
+       if (failure.getMessage().equals("PUBLICATION_CONFLICT")) {
+         conflictBeforeClaim(id);
+@@ -263,71 +262,7 @@
+         });
+   }
+ 
+-  private record LoweringInput(
+-      ObjectNode basis,
+-      ObjectNode profile,
+-      ObjectNode build,
+-      String basisRepresentation,
+-      String profileRepresentation,
+-      String buildRepresentation) {}
+-
+-  private record LoweringPreparation(
+-      GuidedPlanPublisher owner, LoweringInput input, PublicationContracts.Candidate candidate) {}
+-
+-  private static final java.util.Set<Class<?>> LOWERING_SCALARS =
+-      java.util.Set.of(
+-          com.fasterxml.jackson.databind.node.TextNode.class,
+-          com.fasterxml.jackson.databind.node.NullNode.class,
+-          com.fasterxml.jackson.databind.node.BooleanNode.class,
+-          com.fasterxml.jackson.databind.node.IntNode.class,
+-          com.fasterxml.jackson.databind.node.LongNode.class,
+-          com.fasterxml.jackson.databind.node.BigIntegerNode.class,
+-          com.fasterxml.jackson.databind.node.FloatNode.class,
+-          com.fasterxml.jackson.databind.node.DoubleNode.class,
+-          com.fasterxml.jackson.databind.node.DecimalNode.class);
+-
+-  private static boolean sameClosedStructure(JsonNode left, JsonNode right) {
+-    if (left == null || right == null || left.getClass() != right.getClass()) {
+-      return false;
+-    }
+-    if (left.getClass() == ObjectNode.class) {
+-      if (left.size() != right.size()) {
+-        return false;
+-      }
+-      for (var fields = left.fields(); fields.hasNext(); ) {
+-        var field = fields.next();
+-        if (!sameClosedStructure(field.getValue(), right.get(field.getKey()))) {
+-          return false;
+-        }
+-      }
+-      return true;
+-    }
+-    if (left.getClass() == com.fasterxml.jackson.databind.node.ArrayNode.class) {
+-      if (left.size() != right.size()) {
+-        return false;
+-      }
+-      for (int index = 0; index < left.size(); index++) {
+-        if (!sameClosedStructure(left.get(index), right.get(index))) {
+-          return false;
+-        }
+-      }
+-      return true;
+-    }
+-    return LOWERING_SCALARS.contains(left.getClass());
+-  }
+-
+-  private static ObjectNode ownLoweringInput(JsonNode value) {
+-    if (value == null || value.getClass() != ObjectNode.class
+-        || !sameClosedStructure(value, value)) {
+-      return null;
+-    }
+-    ObjectNode owned = value.deepCopy();
+-    return sameClosedStructure(value, owned) && value.equals(owned)
+-            && value.toString().equals(owned.toString())
+-        ? owned : null;
+-  }
+-
+-  private LoweringInput captureLoweringInput(String id, JsonNode expected) {
++  private Prepared prepare(String id, String key, String digest, JsonNode expected) {
+     var session = sessions.lock(id);
+     JsonNode document = session.document();
+     require(document.path("state").asText().equals("FINALIZING"), "PUBLICATION_CONFLICT", 409);
+@@ -351,80 +286,7 @@
+             document,
+             builder.learningProvenance(raw.document().path("sourceManifest")));
+     ObjectNode supported = pins.selected();
+-    ObjectNode capturedBasis = ownLoweringInput(basis);
+-    ObjectNode profile = ownLoweringInput(supported.path("profile"));
+-    ObjectNode build = ownLoweringInput(supported.path("build"));
+-    if (capturedBasis == null || profile == null || build == null) {
+-      return null;
+-    }
+-    return new LoweringInput(capturedBasis, profile, build,
+-        capturedBasis.toString(), profile.toString(), build.toString());
+-  }
+-
+-  private LoweringPreparation prepareLowering(String id, JsonNode expected) {
+-    try {
+-      LoweringInput input = sessions.transaction(() -> captureLoweringInput(id, expected));
+-      if (input == null) {
+-        return null;
+-      }
+-      PublicationContracts.Candidate candidate =
+-          lowerer.lower(input.basis().deepCopy(), input.profile().deepCopy());
+-      return new LoweringPreparation(this, input, candidate);
+-    } catch (RuntimeException unavailable) {
+-      return null;
+-    }
+-  }
+-
+-  private PublicationContracts.Candidate preparedOrOriginal(
+-      ObjectNode basis, ObjectNode supported, LoweringPreparation lowering) {
+-    try {
+-      if (lowering != null && lowering.owner() == this) {
+-        LoweringInput input = lowering.input();
+-        JsonNode profile = supported.path("profile"), build = supported.path("build");
+-        if (sameClosedStructure(basis, input.basis())
+-            && sameClosedStructure(profile, input.profile())
+-            && sameClosedStructure(build, input.build())
+-            && basis.equals(input.basis())
+-            && profile.equals(input.profile())
+-            && build.equals(input.build())
+-            && basis.toString().equals(input.basisRepresentation())
+-            && profile.toString().equals(input.profileRepresentation())
+-            && build.toString().equals(input.buildRepresentation())) {
+-          return lowering.candidate();
+-        }
+-      }
+-    } catch (RuntimeException unavailable) {
+-      // Only optional comparison is unavailable; original lowering below retains its errors.
+-    }
+-    return lowerer.lower(basis, supported.path("profile"));
+-  }
+-
+-  private Prepared prepare(
+-      String id, String key, String digest, JsonNode expected, LoweringPreparation lowering) {
+-    var session = sessions.lock(id);
+-    JsonNode document = session.document();
+-    require(document.path("state").asText().equals("FINALIZING"), "PUBLICATION_CONFLICT", 409);
+-    var base = bases.find(id).orElseThrow(() -> new GuidedSessionException("MISSING_SOURCE", 409));
+-    require(
+-        expected.path("expectedSourceRevision").equals(base.document().path("sourceRevision"))
+-            && expected
+-                .path("expectedConfigurationRevision")
+-                .equals(base.document().path("configurationRevision")),
+-        "REVISION_CONFLICT",
+-        409);
+-    var source = bases.lockCurrent(UUID.fromString(text(base.document(), "testId")));
+-    bases.requireCurrent(base, source);
+-    access.checkCurrent(document);
+-    var raw = evidence.read(id);
+-    ObjectNode basis =
+-        builder.basis(
+-            base,
+-            source,
+-            raw,
+-            document,
+-            builder.learningProvenance(raw.document().path("sourceManifest")));
+-    ObjectNode supported = pins.selected();
+-    PublicationContracts.Candidate candidate = preparedOrOriginal(basis, supported, lowering);
++    PublicationContracts.Candidate candidate = lowerer.lower(basis, supported.path("profile"));
+     ObjectNode identity = contracts.object();
+     identity.set("base", base.document());
+     identity.set("ownerWorkerId", document.path("owner").path("workerId"));
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java
+@@ -30,30 +30,6 @@
+ 
+ /** Independent RUNNER fixture artifact/hash vectors are the expected results, never Java output. */
+ class ObservedArtifactLowererTest {
+-  @Test
+-  void separateOwnedLoweringCopiesRetainCutAndIndependentArtifact() throws Exception {
+-    for (String name : List.of("fresh-order-reference", "control-value-reference")) {
+-      var independent = fixture(name);
+-      ObjectNode retainedBasis = copy(independent.path("basis"));
+-      ObjectNode retainedProfile = copy(independent.path("artifact").path("profile"));
+-      String basisRepresentation = retainedBasis.toString();
+-      String profileRepresentation = retainedProfile.toString();
+-      ObjectNode loweringBasis = retainedBasis.deepCopy();
+-      ObjectNode loweringProfile = retainedProfile.deepCopy();
+-      var candidate = new ObservedArtifactLowerer(C).lower(loweringBasis, loweringProfile);
+-      assertThat(retainedBasis.toString().equals(basisRepresentation)).isTrue();
+-      assertThat(retainedProfile.toString().equals(profileRepresentation)).isTrue();
+-      assertThat(loweringBasis.equals(retainedBasis)).isTrue();
+-      assertThat(loweringProfile.equals(retainedProfile)).isTrue();
+-      assertThat(candidate.artifact().equals(independent.path("artifact"))).isTrue();
+-      loweringBasis.remove("scope");
+-      loweringProfile.put("testOnlyAfterLowering", true);
+-      assertThat(retainedBasis.toString().equals(basisRepresentation)).isTrue();
+-      assertThat(retainedProfile.toString().equals(profileRepresentation)).isTrue();
+-      assertThat(candidate.artifact().equals(independent.path("artifact"))).isTrue();
+-    }
+-  }
+-
+   @ParameterizedTest
+   @ValueSource(strings = {"fresh-order-reference", "control-value-reference"})
+   void reproducesIndependentNodeArtifactAndEveryCanonicalHash(String name) throws Exception {
+--- a/docs/specs/studio-observed-authoring/secret-login-design.md
++++ b/docs/specs/studio-observed-authoring/secret-login-design.md
+@@ -269,33 +269,3 @@
+ **Order:** OBS-007 → OBS-012A → {OBS-012B ∥ OBS-013 ∥ OBS-014} → OBS-015 → OBS-008 → OBS-009 → OBS-010; OBS-011 may start after OBS-009 is Done, parallel to OBS-010. OBS-007 and OBS-012A edit the same files (`GuidedSessionService`, contracts, pins, migrations) and are strictly sequential. Contract edits in OBS-013/014/015 (result3/session-view3) go through one owner.
+ 
+ Architect erratum (2026-10-10, OBS-007 T0): SEC-9 names the two active paths. R3 security rulings and the audit-event distinctions are recorded in `.ai/STUDIO-OBS-007-architect-t0-rulings.json`; no story AC is weakened by this wording correction.
+-
+-## Optional success-only publication lowering preparation
+-
+-The unchanged finalize prefix retains the existing document-read transaction and the
+-abstract user authorization outside it. After successful authorization, an optional
+-separate owner-to-source capture transaction repeats the original pre-lowering guards,
+-current source/evidence/basis construction and checked pin selection. It writes no attempt,
+-progress, receipt or accounting state. The publisher-owned pure lowerer then runs off-lock
+-on separate owned copies of the captured basis and profile. The retained match cut owns
+-closed standard-Jackson whole basis/profile/build inputs and their representations; it
+-contains no cached session, owner, authorization, deadline, key or digest authority.
+-
+-Actual preparation repeats every original fresh guard/read/strict basis/pin check in order.
+-Only the original lowerer point may reuse the private successful candidate when the same
+-publisher and complete fresh JSON, recursive node-kind/shape and serialized representation
+-match. Otherwise the original locked lowerer runs. Fresh identity, lease/expiry/deadline,
+-reservation, attempt budget and progress persistence remain unchanged, as do validation,
+-Core authorization, commit and lifecycle. Legitimate lease renewal is not compared as a
+-whole mutable owner or cached deadline.
+-
+-All speculative nonfatal capture/copy/lower/match failures mean unavailable; actual original
+-preparation establishes the refusal at its original point. No throwable, failure enum or
+-failure replay is retained. Fatal `Error` can be observed earlier during optional work and
+-propagates without raw error persistence. The extra transaction/reads, strict basis checks,
+-pin/resource observations, copies and matching cannot be undone by fallback; stateful getter
+-or arbitrary override equivalence is not claimed. The same configured contracts instance
+-and its existing no-eviction compiled schemas are used; no new cache/reload/epoch API exists.
+-This may add cost or worsen timing. There is no exclusive-cost, latency or C5 PASS guarantee.
+-No new model, Vault/native call, value read or output sink is added; all existing full TRACE,
+-privacy, authority and real 1000ms secret renewal requirements remain unchanged.

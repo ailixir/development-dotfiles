@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Checks Product Briefing</title>
+<style>
+:root{
+  --paper:#F5F7FA; --surface:#FFFFFF; --surface-2:#EDF1F6; --ink:#0F1E36; --ink-2:#34445E; --muted:#5A6A82; --line:#D8E0EA;
+  --accent:#0E7C6B; --accent-ink:#0A6E5E; --accent-soft:#DDF1EC; --on-accent:#FFFFFF;
+  --amber:#8A5710; --amber-soft:#FBEFD9; --red:#B83A3A; --red-soft:#F9E1E1;
+  --p1:#DDF1EC; --p2:#E3E9F7; --p3:#F6EAD8; --p4:#ECE4F3;
+  --shadow:0 1px 2px rgba(15,30,54,.06),0 10px 28px rgba(15,30,54,.07);
+  --display:'Archivo','Arial Narrow',Arial,sans-serif;
+  --body:'IBM Plex Sans','Segoe UI',Helvetica,Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#0B1424; --surface:#111D33; --surface-2:#172642; --ink:#E8EEF7; --ink-2:#C4D0E2; --muted:#98A9C2; --line:#26385A;
+    --accent:#3BBFA8; --accent-ink:#3BBFA8; --accent-soft:#103430; --on-accent:#06201C;
+    --amber:#E3AA4D; --amber-soft:#34260F; --red:#F07A7A; --red-soft:#3A1A1C;
+    --p1:#123A34; --p2:#1A2A4A; --p3:#3A2C15; --p4:#2C2340;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#0B1424; --surface:#111D33; --surface-2:#172642; --ink:#E8EEF7; --ink-2:#C4D0E2; --muted:#98A9C2; --line:#26385A;
+  --accent:#3BBFA8; --accent-ink:#3BBFA8; --accent-soft:#103430; --on-accent:#06201C;
+  --amber:#E3AA4D; --amber-soft:#34260F; --red:#F07A7A; --red-soft:#3A1A1C;
+  --p1:#123A34; --p2:#1A2A4A; --p3:#3A2C15; --p4:#2C2340;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+
+.deck{height:100%;display:flex;flex-direction:column}
+.stage{flex:1;min-height:0;position:relative}
+.slide{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:clamp(18px,4vh,56px) clamp(16px,4vw,96px) clamp(18px,3vh,40px);display:flex}
+.frame{width:100%;max-width:1240px;margin:auto;display:flex;flex-direction:column;gap:clamp(12px,2.4vh,28px);min-width:0}
+.slide.is-entering .frame{animation:rise .35s ease both}
+@keyframes rise{from{opacity:.001;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.slide.is-entering .frame{animation:none}.nav-scrub .fill{transition:none}}
+
+.eyebrow{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0}
+h1,h2,h3{font-family:var(--display);font-stretch:112%;margin:0;text-wrap:balance;color:var(--ink)}
+h1{font-size:clamp(48px,8vw,104px);font-weight:800;line-height:.98;letter-spacing:-.01em}
+h2{font-size:clamp(26px,3.4vw,46px);font-weight:750;line-height:1.08;letter-spacing:-.005em;max-width:36ch}
+h3{font-size:clamp(17px,1.6vw,22px);font-weight:700;line-height:1.2}
+p{margin:0}
+.lede{font-size:clamp(17px,1.6vw,22px);color:var(--ink-2);max-width:44ch;line-height:1.45}
+.note{font-size:15px;color:var(--muted);max-width:92ch}
+.grid{display:grid;gap:clamp(12px,1.6vw,20px)}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(14px,1.8vw,24px);display:flex;flex-direction:column;gap:8px;min-width:0}
+.panel p{color:var(--ink-2)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:.04em;padding:4px 10px;border-radius:999px;white-space:nowrap;width:fit-content}
+.chip.done{background:var(--accent-soft);color:var(--accent-ink)}
+.chip.open{background:var(--amber-soft);color:var(--amber)}
+.chip.next{background:var(--surface-2);color:var(--ink-2)}
+.chip.fail{background:var(--red-soft);color:var(--red)}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.lab{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+ul.clean{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+ul.clean li{padding-left:18px;position:relative;color:var(--ink-2);font-size:16px}
+ul.clean li::before{content:"";position:absolute;left:2px;top:.62em;width:7px;height:7px;border-radius:2px;background:var(--accent)}
+.scopegrid{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1fr);gap:clamp(12px,1.6vw,20px)}
+@media (max-width:900px){.scopegrid{grid-template-columns:1fr}}
+ol.ms{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.ms li{display:grid;grid-template-columns:104px minmax(0,1fr);gap:4px 14px;padding-top:10px;border-top:1px solid var(--line)}
+.ms li:first-child{border-top:0;padding-top:0}
+.ms .when{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--accent-ink);padding-top:3px}
+.ms h3{font-size:clamp(16px,1.3vw,18px)}
+.ms p{grid-column:2;font-size:15.5px}
+@media (max-width:520px){.ms li{grid-template-columns:1fr}.ms p{grid-column:1}}
+.mark{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600}
+.mark.ok{background:var(--accent-soft);color:var(--accent-ink)}
+.mark.bad{background:var(--red-soft);color:var(--red)}
+
+/* cover */
+.cover{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:clamp(24px,5vw,72px);align-items:center}
+.cover .meta{display:flex;flex-direction:column;gap:4px;font-family:var(--mono);font-size:13.5px;color:var(--muted)}
+.report{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;margin:0}
+.report header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 18px;background:var(--surface-2);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.report ol{list-style:none;margin:0;padding:8px 0}
+.report li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 18px;font-size:15.5px;color:var(--ink)}
+.report li .sub{display:block;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+
+/* before / after */
+.cmp{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px clamp(10px,2vw,28px);align-items:stretch}
+.cmp .hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cmp .cell{border:1px solid var(--line);border-radius:14px;padding:clamp(12px,2vh,20px) clamp(16px,1.8vw,24px);font-size:clamp(16px,1.5vw,21px);font-weight:600;color:var(--ink);display:flex;flex-direction:column;justify-content:center;gap:2px}
+.cmp .cell.was{background:var(--surface-2);color:var(--ink-2);font-weight:500}
+.cmp .cell.now{background:var(--accent-soft);border-color:var(--accent)}
+.cmp .cell small{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cmp .arr{font-family:var(--mono);font-size:26px;color:var(--accent);align-self:center}
+
+/* problem */
+.quote{border-left:3px solid var(--accent);padding:4px 0 4px clamp(14px,2vw,24px);display:flex;flex-direction:column;gap:8px}
+.quote blockquote{margin:0;font-family:var(--display);font-stretch:106%;font-weight:600;font-size:clamp(19px,2.2vw,30px);line-height:1.25;color:var(--ink);max-width:72ch;text-wrap:balance}
+.quote cite{font-style:normal;font-size:15px;color:var(--muted)}
+.sym p{font-size:15.5px}
+.sym .arrow{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+/* product mock */
+.mock{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.35fr) minmax(0,1fr);gap:clamp(10px,1.2vw,16px)}
+.pane{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.pane > header{padding:9px 14px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--surface-2)}
+.pane .body{padding:6px 14px 10px;display:flex;flex-direction:column;flex:1}
+.mrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:15px;color:var(--ink)}
+.mrow:last-child{border-bottom:0}
+.mrow.sel{background:var(--accent-soft);margin:0 -14px;padding:8px 14px;border-radius:0}
+.mrow small{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-left:6px}
+.mrow .tt{display:flex;align-items:baseline;flex-wrap:wrap;min-width:0}
+.mkv{display:flex;flex-direction:column;gap:2px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14.5px;color:var(--ink-2)}
+.mkv b{color:var(--ink);font-size:15.5px}
+.runbtn{align-self:flex-start;margin-top:10px;background:var(--accent);color:var(--on-accent);font-weight:600;font-size:14px;border-radius:10px;padding:7px 14px}
+.strip{font-size:16px;color:var(--ink-2);padding:10px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.strip b{color:var(--ink)}
+
+/* personas */
+.persona{display:grid;grid-template-columns:auto 1fr;gap:12px 16px;align-items:start}
+.avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-stretch:110%;font-weight:750;font-size:22px;color:var(--ink)}
+.persona .who{display:flex;flex-direction:column;gap:2px}
+.persona .role{font-size:14.5px;color:var(--muted)}
+.persona .body{grid-column:1/-1;display:flex;flex-direction:column;gap:8px}
+.tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink)}
+
+/* journey */
+.who-strip{display:flex;align-items:center;gap:14px}
+.who-strip .avatar{width:44px;height:44px;font-size:19px}
+.journey{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(10px,1.2vw,16px);counter-reset:j}
+.journey li{counter-increment:j;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.journey li::before{content:counter(j);font-family:var(--display);font-stretch:112%;font-weight:800;font-size:32px;line-height:1;color:var(--accent-ink)}
+.journey li p{font-size:15px;color:var(--ink-2)}
+
+/* check types */
+.kinds .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:clamp(16px,2.4vw,32px);display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow)}
+.kinds .card.star{border:2px solid var(--accent);background:var(--accent-soft)}
+.kinds .card h3{font-size:clamp(21px,2.1vw,28px)}
+.kinds .card p{font-size:clamp(16px,1.4vw,19px);color:var(--ink-2)}
+.ico{width:clamp(48px,9vh,80px);height:auto;fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* diagrams */
+.diagram{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:clamp(8px,1.2vw,16px)}
+.diagram svg{display:block;width:100%;height:auto;max-height:44vh}
+.diagram-narrow{display:none}
+.d-zone{fill:var(--surface-2);stroke:var(--line);stroke-width:1.5}
+.d-box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.d-core{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.d-ext{fill:var(--paper);stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 4}
+.d-t{font-family:var(--body);font-size:19px;font-weight:600;fill:var(--ink)}
+.d-s{font-family:var(--body);font-size:15px;fill:var(--ink-2)}
+.d-lbl{font-family:var(--body);font-size:14px;fill:var(--muted)}
+.d-line{stroke:var(--ink-2);stroke-width:2;fill:none}
+.d-head{fill:var(--ink-2)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:14.5px;color:var(--muted);align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.legend i{display:inline-block;width:22px;height:14px;border-radius:4px}
+.legend i.core{background:var(--accent-soft);border:1.5px solid var(--accent)}
+.legend i.ext{background:var(--paper);border:1.5px dashed var(--muted)}
+.lanes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.lanes li{border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--surface);display:flex;flex-direction:column;position:relative;margin-bottom:22px}
+.lanes li:last-child{margin-bottom:0}
+.lanes li:not(:last-child)::after{content:"\2193";position:absolute;left:50%;bottom:-22px;transform:translateX(-50%);font-family:var(--mono);color:var(--accent);font-size:18px;line-height:22px}
+.lanes li.core{background:var(--accent-soft);border-color:var(--accent)}
+.lanes li.ext{background:var(--paper);border-style:dashed}
+.lanes b{font-size:16px;color:var(--ink)}
+.lanes span{font-size:14.5px;color:var(--ink-2)}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,1fr));gap:12px;position:relative}
+.tl::before{content:"";position:absolute;left:10px;right:10px;top:9px;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--accent) 0 var(--fill,12%),var(--line) var(--fill,12%) 100%)}
+.tl li{position:relative;padding-top:34px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.tl li::before{content:"";position:absolute;top:0;left:0;width:22px;height:22px;border-radius:50%;background:var(--surface);border:3px solid var(--line)}
+.tl li.done::before{background:var(--accent);border-color:var(--accent)}
+.tl li.open::before{border-color:var(--amber)}
+.tl li.next::before{border-color:var(--ink-2)}
+.tl p{font-size:14.5px;color:var(--ink-2)}
+.asks{counter-reset:a;list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(10px,1.4vw,18px)}
+.asks li{counter-increment:a;display:grid;grid-template-columns:30px 1fr;gap:8px;align-items:start;background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;padding:12px 14px;font-size:15.5px;font-weight:600;color:var(--ink)}
+.asks li::before{content:counter(a);font-family:var(--display);font-stretch:112%;font-weight:800;font-size:24px;line-height:1.1;color:var(--accent-ink)}
+
+/* nav as a video scrubber */
+.nav{flex:none;border-top:1px solid var(--line);background:var(--surface);padding:10px clamp(16px,3vw,32px) calc(10px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:auto 1fr auto auto;gap:clamp(10px,2vw,20px);align-items:center}
+.nav button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;height:38px;min-width:38px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:500}
+.btn:hover{background:var(--surface-2)}
+.btn:disabled{opacity:.4;cursor:default}
+.nav-scrub{position:relative;height:32px;margin:0 8px}
+.nav-scrub .track{position:absolute;left:0;right:0;top:14px;height:4px;border-radius:2px;background:var(--line)}
+.nav-scrub .fill{position:absolute;left:0;top:14px;height:4px;border-radius:2px;background:var(--accent);transition:width .25s ease}
+.nav-scrub button{position:absolute;top:8px;width:16px;height:16px;transform:translateX(-50%);border-radius:50%;border:2px solid var(--line);background:var(--surface);padding:0}
+.nav-scrub button.past{border-color:var(--accent);background:var(--accent)}
+.nav-scrub button.cur{border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 4px var(--accent-soft)}
+.nav-title{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap;display:flex;gap:10px;align-items:center}
+.nav-title b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+@media (max-width:1000px){
+  .cover{grid-template-columns:1fr}
+  .mock{grid-template-columns:1fr}
+  .journey{grid-template-columns:1fr 1fr}
+  .tl{grid-template-columns:1fr;gap:16px}
+  .tl::before{left:9px;right:auto;top:10px;bottom:10px;width:4px;height:auto;background:linear-gradient(180deg,var(--accent) 0 var(--fill,12%),var(--line) var(--fill,12%) 100%)}
+  .tl li{padding-top:0;padding-left:38px}
+  .asks{grid-template-columns:1fr}
+  .cmp{grid-template-columns:1fr}
+  .cmp .arr{transform:rotate(90deg);justify-self:center}
+  .cmp .hd{display:none}
+  .cell.was::before,.cell.now::before{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  .cell.was::before{content:"DailyChecks today"}
+  .cell.now::before{content:"Checks, target state"}
+}
+@media (max-width:900px){
+  .diagram-wide{display:none}
+  .diagram-narrow{display:block}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  .journey{grid-template-columns:1fr}
+  .nav{gap:8px}
+  .nav-title{gap:0}
+  .nav-title .t{display:none}
+  .nav .pt{display:none}
+}
+@media print{
+  html,body{height:auto}
+  .deck{display:block;height:auto}
+  .stage{position:static}
+  .slide,.slide[hidden]{display:flex!important;position:static;overflow:visible;min-height:100vh;break-after:page}
+  .nav{display:none}
+}
+</style>
+<noscript><style>.slide[hidden]{display:flex!important}.deck{height:auto}.stage{position:static}.slide{position:static;min-height:100vh}.nav{display:none}</style></noscript>
+</head>
+<body>
+<div class="deck" id="deck">
+<main class="stage" id="stage" aria-live="polite">
+
+<!-- sources: PRD §2, §6 (example status report); product direction 16 Oct 2026 (replaces DailyChecks); byline and month per coordinator -->
+<section class="slide" id="s1" data-label="Overview">
+  <div class="frame cover">
+    <div style="display:flex;flex-direction:column;gap:22px">
+      <p class="eyebrow">Checks · EAMP Platform · Stakeholder briefing</p>
+      <h1>Checks</h1>
+      <p class="lede">Define a check once. See the health of every system. Keep the proof of every run.</p>
+      <div class="meta"><span>Created by Bruno Buger · October 2026</span><span>From DailyChecks, to the product, to GA</span></div>
+    </div>
+    <figure class="report" aria-label="Example status report: one passing check, one failing check">
+      <header><span>Daily status report · example from the PRD</span><span class="chip open">Warning</span></header>
+      <ol>
+        <li><span class="mark ok" aria-label="passing">✓</span><span>Trade Settled Log<span class="sub">CSI 12345 · passing for 16 hours</span></span><span class="chip done">Passing</span></li>
+        <li><span class="mark bad" aria-label="failing">✗</span><span>Market Data Feed<span class="sub">CSI 99887 · expected 200, got 503</span></span><span class="chip fail">Failing</span></li>
+      </ol>
+    </figure>
+  </div>
+</section>
+
+<!-- sources: PRD §1.1 (challenges: tool fragmentation, no single source of truth, knowledge silos, manual coordination), §4 (David quote, verbatim, PRD.md line 55) -->
+<section class="slide" id="s2" data-label="The problem" hidden>
+  <div class="frame">
+    <p class="eyebrow">The problem</p>
+    <h2>Operational health checks are scattered across tools, wikis and scripts</h2>
+    <div class="quote">
+      <blockquote>“Every team writes their own bash scripts. When I'm on-call for another team's app, I have no idea where their 'health check' script is.”</blockquote>
+      <cite>David, SRE / DevOps Engineer (PRD persona)</cite>
+    </div>
+    <div class="grid g4">
+      <div class="panel sym"><h3>Fragmented tools</h3><p>ITRS, Grafana, Splunk and AppDynamics are used independently, with no unified strategy.</p></div>
+      <div class="panel sym"><h3>No single source of truth</h3><p>Check definitions and statuses are scattered across platforms and team wikis.</p></div>
+      <div class="panel sym"><h3>Knowledge silos</h3><p>Monitoring expertise stays trapped inside one team.</p></div>
+      <div class="panel sym"><h3>Manual incidents</h3><p>During an incident, engineers correlate alerts from different systems by hand.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- sources: PRD §2.1-§2.2 (orchestration not duplication), §5.1 (CSI dashboards, check library), §6 (email example: "Expected status 200, received 503"); mock is an illustration, names and counts are examples -->
+<section class="slide" id="s3" data-label="The product" hidden>
+  <div class="frame">
+    <p class="eyebrow">The product</p>
+    <h2>One place, organised by CSI, for every kind of check</h2>
+    <div class="mock" role="group" aria-label="Illustration of the Checks dashboard: a CSI list, the checks in one CSI, and a failure detail">
+      <div class="pane">
+        <header>1 · CSIs</header>
+        <div class="body">
+          <div class="mrow"><span>CSI 12345</span><span class="chip done">Healthy</span></div>
+          <div class="mrow sel"><span>CSI 99887</span><span class="chip fail">Failing</span></div>
+          <div class="mrow"><span>CSI 174523</span><span class="chip done">Healthy</span></div>
+        </div>
+      </div>
+      <div class="pane">
+        <header>2 · Checks in CSI 99887</header>
+        <div class="body">
+          <div class="mrow"><span class="tt">Market Data Feed<small>HTTP</small></span><span class="chip fail">Failing</span></div>
+          <div class="mrow"><span class="tt">Market Data Port<small>TCP</small></span><span class="chip done">Passing</span></div>
+          <div class="mrow"><span class="tt">Login flow<small>UI test · Studio</small></span><span class="chip done">Passing</span></div>
+        </div>
+      </div>
+      <div class="pane">
+        <header>3 · Why it failed</header>
+        <div class="body">
+          <div class="mkv"><b>Market Data Feed</b>Failing for 23 minutes</div>
+          <div class="mkv">Expected status 200, received 503</div>
+          <span class="runbtn" aria-hidden="true">Investigate</span>
+        </div>
+      </div>
+    </div>
+    <p class="strip"><b>Orchestrates</b> ITRS, Splunk, Grafana and AppDynamics. <b>Never replaces</b> them.</p>
+    <p class="note">Illustration. Names and statuses are examples.</p>
+  </div>
+</section>
+
+<!-- sources: PRD §4 (personas, names, roles), §6 (use cases); BRD §4 (also at the table) -->
+<section class="slide" id="s4" data-label="Personas" hidden>
+  <div class="frame">
+    <p class="eyebrow">Who it’s for</p>
+    <h2>Four people, and one of them runs checks every day</h2>
+    <div class="grid g4">
+      <article class="panel persona">
+        <div class="avatar" style="background:var(--p1)" aria-hidden="true">P</div>
+        <div class="who"><h3>Priya</h3><span class="role">L2 App Support</span></div>
+        <div class="body"><span class="tag">Primary user</span><p>Runs the daily checks and first triage.</p></div>
+      </article>
+      <article class="panel persona">
+        <div class="avatar" style="background:var(--p2)" aria-hidden="true">D</div>
+        <div class="who"><h3>David</h3><span class="role">SRE / DevOps Engineer</span></div>
+        <div class="body"><span class="tag">Power user</span><p>Schedules checks and digs into incidents.</p></div>
+      </article>
+      <article class="panel persona">
+        <div class="avatar" style="background:var(--p3)" aria-hidden="true">M</div>
+        <div class="who"><h3>Maria</h3><span class="role">Operations Analyst</span></div>
+        <div class="body"><span class="tag">Report consumer</span><p>Turns results into status reports for management.</p></div>
+      </article>
+      <article class="panel persona">
+        <div class="avatar" style="background:var(--p4)" aria-hidden="true">R</div>
+        <div class="who"><h3>Robert</h3><span class="role">IT Director</span></div>
+        <div class="body"><span class="tag">Business sponsor</span><p>Needs KPIs and assurance that operations are stable.</p></div>
+      </article>
+    </div>
+    <p class="note">Also at the table: Security &amp; Compliance, Platform/SRE and the Checks squad.</p>
+  </div>
+</section>
+
+<!-- sources: PRD §6 use cases UC-02 (schedule every 5 minutes), UC-03 (dashboard), UC-04 (investigate with link to underlying system), UC-05 (advanced Splunk check), Maria's report story -->
+<section class="slide" id="s5" data-label="User journey" hidden>
+  <div class="frame">
+    <p class="eyebrow">User journey</p>
+    <h2>Five steps from a new check to an investigated failure</h2>
+    <div class="who-strip"><div class="avatar" style="background:var(--p2)" aria-hidden="true">D</div><div><h3>David</h3><span class="lab">SRE / DevOps Engineer</span></div></div>
+    <ol class="journey">
+      <li><h3>Define</h3><p>Builds a Splunk check for the trade pipeline and files it under its CSI.</p></li>
+      <li><h3>Schedule</h3><p>Runs it every 5 minutes.</p></li>
+      <li><h3>Watch</h3><p>Sees the CSI’s health on the dashboard.</p></li>
+      <li><h3>Share</h3><p>Adds it to the daily status email.</p></li>
+      <li><h3>Investigate</h3><p>Opens the error and jumps to the underlying system.</p></li>
+    </ol>
+    <p class="note">Target experience. What is built today is on the timeline slide.</p>
+  </div>
+</section>
+
+<!-- sources: PRD §5.1 (check library), §5.2 (Studio flagship, "from checklist to reality"); ADR-SC-005 (single observed path) -->
+<section class="slide" id="s6" data-label="Check types" hidden>
+  <div class="frame kinds">
+    <p class="eyebrow">Check types</p>
+    <h2>Three kinds of checks, with Studio as the flagship</h2>
+    <div class="grid g3">
+      <div class="card">
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><polyline points="3,25 14,25 19,9 28,39 34,25 45,25"/></svg>
+        <h3>Basic</h3><p>HTTP and TCP checks</p>
+      </div>
+      <div class="card">
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="6"/><circle cx="8" cy="9" r="4"/><circle cx="40" cy="9" r="4"/><circle cx="8" cy="39" r="4"/><circle cx="40" cy="39" r="4"/><path d="M11 12l9 8M37 12l-9 8M11 36l9-8M37 36l-9-8"/></svg>
+        <h3>Integrations</h3><p>Splunk, Grafana, ITRS and AppDynamics</p>
+      </div>
+      <div class="card star">
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="8" width="40" height="32" rx="4"/><path d="M4 16h40"/><path d="M21 22v12l10-6z"/></svg>
+        <h3>UI tests <span class="chip done" style="vertical-align:middle">Flagship</span></h3><p>Checks Studio: write it in English, watch it run, keep the video.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- sources: ARCH §2-§5, §13; backend spec §7.1 (BFF sign-in, now named EAMP sign-in), §7.2 (CSI ownership); ADR-001 (studio-runner); story 9.7 (DailyChecks interim bridge); ARCH line 69 and 217, PRD line 228 (R2D2 authoring-time gateway, private Sonic object storage); StudioGatewayProperties (R2D2); runner runbook (ED-02 Vault, ED-03 Sonic, SPK-01 R2D2 still gated by other teams) -->
+<section class="slide" id="s7" data-label="How it fits" hidden>
+  <div class="frame">
+    <p class="eyebrow">Architecture</p>
+    <h2>Checks plugs into EAMP and the tools around it</h2>
+    <div class="diagram diagram-wide">
+    <svg viewBox="0 0 1200 420" role="img" aria-labelledby="arT arD"><title id="arT">How Checks fits</title><desc id="arD">Checks screens run inside the EAMP shell. EAMP sign-in identifies people. Checks, made of an API, a worker and a database, starts runs in the isolated Studio runner, which records video into Sonic, a private S3 object store. Checks calls R2D2, the Citi AI gateway, only while a test is being written. It also calls Vault for secret values at run time, an email relay for reports, and DailyChecks as an interim bridge to the monitoring tools.</desc>
+      <defs>
+        <marker id="aa" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-head"/></marker>
+      </defs>
+      <rect x="20" y="15" width="260" height="80" rx="12" class="d-ext"/>
+      <text x="36" y="48" class="d-t">EAMP sign-in</text><text x="36" y="72" class="d-s">Handles COIN</text>
+      <rect x="840" y="15" width="330" height="90" rx="12" class="d-ext"/>
+      <text x="856" y="46" class="d-t">R2D2</text><text x="856" y="70" class="d-s">Citi AI gateway, used while</text><text x="856" y="90" class="d-s">writing a test</text>
+      <rect x="20" y="140" width="310" height="90" rx="12" class="d-core"/>
+      <text x="36" y="175" class="d-t">EAMP shell + Checks screens</text><text x="36" y="199" class="d-s">What people see</text>
+      <rect x="380" y="120" width="300" height="130" rx="12" class="d-core"/>
+      <text x="396" y="164" class="d-t">Checks</text><text x="396" y="190" class="d-s">API · worker · database</text>
+      <rect x="760" y="120" width="260" height="130" rx="12" class="d-core"/>
+      <text x="776" y="164" class="d-t">Studio runner</text><text x="776" y="190" class="d-s">Isolated browser, video</text>
+      <line x1="330" y1="185" x2="378" y2="185" class="d-line" marker-end="url(#aa)"/>
+      <path d="M280,55 H430 V118" class="d-line" marker-end="url(#aa)"/>
+      <text x="355" y="46" class="d-lbl" text-anchor="middle">who is this?</text>
+      <path d="M650,118 V60 H838" class="d-line" marker-end="url(#aa)"/>
+      <text x="745" y="50" class="d-lbl" text-anchor="middle">Only while writing a test</text>
+      <line x1="680" y1="185" x2="758" y2="185" class="d-line" marker-end="url(#aa)"/>
+      <line x1="960" y1="250" x2="960" y2="308" class="d-line" marker-end="url(#aa)"/>
+      <text x="972" y="285" class="d-lbl">Video</text>
+      <path d="M530,250 V285 M105,285 H530" class="d-line"/>
+      <line x1="105" y1="285" x2="105" y2="308" class="d-line" marker-end="url(#aa)"/>
+      <line x1="285" y1="285" x2="285" y2="308" class="d-line" marker-end="url(#aa)"/>
+      <line x1="465" y1="285" x2="465" y2="308" class="d-line" marker-end="url(#aa)"/>
+      <rect x="20" y="310" width="170" height="100" rx="12" class="d-ext"/>
+      <text x="36" y="342" class="d-t">Vault</text><text x="36" y="366" class="d-s">Secret values,</text><text x="36" y="386" class="d-s">fetched at run time</text>
+      <rect x="210" y="310" width="150" height="100" rx="12" class="d-ext"/>
+      <text x="226" y="342" class="d-t">Email relay</text><text x="226" y="366" class="d-s">Reports</text>
+      <rect x="380" y="310" width="170" height="100" rx="12" class="d-ext"/>
+      <text x="396" y="342" class="d-t">DailyChecks</text><text x="396" y="366" class="d-s">Interim bridge</text>
+      <line x1="550" y1="360" x2="588" y2="360" class="d-line" marker-end="url(#aa)"/>
+      <rect x="590" y="310" width="250" height="100" rx="12" class="d-ext"/>
+      <text x="606" y="342" class="d-t">Monitoring tools</text><text x="606" y="366" class="d-s">ITRS · Splunk · Grafana</text><text x="606" y="386" class="d-s">AppDynamics</text>
+      <rect x="900" y="310" width="290" height="100" rx="12" class="d-ext"/>
+      <text x="916" y="342" class="d-t">Sonic · S3 object storage</text><text x="916" y="366" class="d-s">Private store for Studio videos</text><text x="916" y="386" class="d-s">and result files</text>
+    </svg>
+    </div>
+    <div class="diagram diagram-narrow">
+      <ol class="lanes" aria-label="Architecture in reading order">
+        <li class="ext"><b>EAMP sign-in</b><span>Handles COIN</span></li>
+        <li class="core"><b>EAMP shell + Checks screens</b><span>What people see</span></li>
+        <li class="core"><b>Checks</b><span>API, worker, database</span></li>
+        <li class="core"><b>Studio runner</b><span>Isolated browser, video</span></li>
+        <li class="ext"><b>Sonic · S3 object storage</b><span>Private store for Studio videos and result files</span></li>
+        <li class="ext"><b>R2D2</b><span>Citi AI gateway, used while writing a test</span></li>
+        <li class="ext"><b>Vault</b><span>Secret values, fetched at run time</span></li>
+        <li class="ext"><b>Email relay</b><span>Reports</span></li>
+        <li class="ext"><b>DailyChecks</b><span>Interim bridge to the monitoring tools</span></li>
+      </ol>
+    </div>
+    <div class="legend">
+      <span><i class="core"></i>Built for Checks</span>
+      <span><i class="ext"></i>Existing enterprise service</span>
+    </div>
+    <p class="note">EAMP sign-in identifies people, access follows CSI ownership, secrets stay in Vault, videos stay private in Sonic, and R2D2 is used only while authoring.</p>
+  </div>
+</section>
+
+<!-- sources: milestone grouping follows the timeline slide (product-owner direction, 16 Oct 2026); PRD §5.1-§5.3 (checks, dashboards, reports, Studio), PRD §7 and ARCH §6 (RBAC by user role and application/CSI ownership; secrets vault mandatory), §5.4 (left out: automated fixes, ML anomaly detection, PDF/CSV exports). Removed per product owner: Studio Chromium-only line, "replacing ITRS/Grafana/Splunk/AppDynamics" line, "scheduled Studio runs TBC" line. RBAC placed in the Oct core capabilities row (already implemented, per product owner 16 Oct 2026). -->
+<section class="slide" id="s8" data-label="GA scope" hidden>
+  <div class="frame">
+    <p class="eyebrow">Scope</p>
+    <h2>What each milestone delivers, and what we leave out</h2>
+    <div class="scopegrid">
+      <div class="panel">
+        <span class="chip done">Scope by milestone</span>
+        <ol class="ms">
+          <li><span class="when">Oct 2026</span><h3>Core capabilities</h3><p>Checks per CSI (HTTP, TCP, Splunk logs and metrics, ITRS, manual), run on demand or scheduled, CSI dashboards, email reports, role-based access (RBAC) by user role and CSI ownership.</p></li>
+          <li><span class="when">Nov 2026</span><h3>UI Studio alpha</h3><p>Write plain-English steps, watch a real browser run them, keep the video as proof.</p></li>
+          <li><span class="when">Dec–Feb</span><h3>Pilot</h3><p>Early adopters use it, feedback shapes it, remaining integrations reach parity via DailyChecks.</p></li>
+          <li><span class="when">Mar 2027</span><h3>GA</h3><p>Pilot feedback applied, integrations at full parity, ready for general release.</p></li>
+        </ol>
+      </div>
+      <div class="panel">
+        <span class="chip open">Left out</span>
+        <ul class="clean">
+          <li>Automated fixes for failures</li>
+          <li>ML anomaly detection</li>
+          <li>PDF or CSV report exports</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- sources: milestones and dates (alpha Oct 2026 with HTTP/TCP/Splunk logs/Splunk metrics/ITRS/manual check; UI Studio alpha Nov; Dec-Feb pilot + DC integration parity; GA Mar 2027) are product-owner direction, 16 Oct 2026, superseding the ROADMAP (Dec 2026) and the Studio deck (Mar 2027 GA only). Repo cross-check on 16 Oct: only the Splunk DC-bridge executor was found built (off by default); ITRS/Grafana/AppDynamics executors not found; GA plan §1, §4.A-B (12 external gates as of 9 Oct); STUDIO-OBS-010 (pilot); story 9.5 (no DC retirement date, chip removed per product owner) -->
+<section class="slide" id="s9" data-label="Timeline" hidden>
+  <div class="frame">
+    <p class="eyebrow">Timeline</p>
+    <h2>Alpha now, Studio in November, GA in March 2027</h2>
+    <ol class="tl" style="--n:4;--fill:14%">
+      <li class="done"><span class="chip done">Done · Oct 2026</span><h3>Alpha: core capabilities</h3><p>HTTP, TCP, Splunk logs, Splunk metrics, ITRS and manual check.</p></li>
+      <li class="next"><span class="chip next">Target · Nov 2026</span><h3>UI Studio alpha</h3><p>Write in English, watch it run.</p></li>
+      <li class="next"><span class="chip next">Target · Dec–Feb</span><h3>Pilot with early adopters</h3><p>Improve on feedback; reach full integration parity via DailyChecks.</p></li>
+      <li class="next"><span class="chip next">Target · Mar 2027</span><h3>GA release</h3></li>
+    </ol>
+    <div class="chips"><span class="chip done">GA: March 2027</span><span class="chip fail">12 outside gates open (9 Oct)</span></div>
+    <div>
+      <p class="lab" style="margin-bottom:8px">Decisions we need</p>
+      <ol class="asks">
+        <li>Choose the Dec–Feb early adopters (CSIs and users)</li>
+        <li>Unblock R2D2, Sonic, staging and DailyChecks access</li>
+        <li>Confirm the March 2027 GA release</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<nav class="nav" aria-label="Slides">
+  <button class="btn" id="prev" type="button" aria-label="Previous slide">‹ <span class="pt">Prev</span></button>
+  <div class="nav-scrub" id="scrub"><div class="track"></div><div class="fill" id="fill"></div></div>
+  <div class="nav-title"><b id="count">1 / 9</b><span class="t" id="label">Overview</span></div>
+  <button class="btn" id="next" type="button" aria-label="Next slide"><span class="pt">Next</span> ›</button>
+</nav>
+</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length, cur = 0;
+  var scrub = document.getElementById('scrub'), fill = document.getElementById('fill');
+  var count = document.getElementById('count'), label = document.getElementById('label');
+  var prev = document.getElementById('prev'), next = document.getElementById('next');
+  var ticks = slides.map(function(s, k){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.style.left = (total > 1 ? (k / (total - 1)) * 100 : 0) + '%';
+    b.setAttribute('aria-label', 'Go to slide ' + (k + 1) + ': ' + s.getAttribute('data-label'));
+    b.addEventListener('click', function(){ go(k); });
+    scrub.appendChild(b);
+    return b;
+  });
+  function go(n){
+    n = Math.max(0, Math.min(total - 1, n));
+    if (n !== cur) {
+      slides[cur].hidden = true;
+      slides[cur].classList.remove('is-entering');
+    }
+    cur = n;
+    var s = slides[cur];
+    s.hidden = false;
+    s.scrollTop = 0;
+    s.classList.remove('is-entering'); void s.offsetWidth; s.classList.add('is-entering');
+    fill.style.width = (total > 1 ? (cur / (total - 1)) * 100 : 0) + '%';
+    ticks.forEach(function(t, k){ t.classList.toggle('past', k < cur); t.classList.toggle('cur', k === cur); if (k === cur) t.setAttribute('aria-current', 'step'); else t.removeAttribute('aria-current'); });
+    count.textContent = (cur + 1) + ' / ' + total;
+    label.textContent = s.getAttribute('data-label');
+    prev.disabled = cur === 0;
+    next.disabled = cur === total - 1;
+    var h = '#s' + (cur + 1);
+    if (location.hash !== h) { try { history.replaceState(null, '', h); } catch (e) {} }
+  }
+  function fromHash(){ var m = /^#s(\d+)$/.exec(location.hash || ''); return m ? parseInt(m[1], 10) - 1 : null; }
+  prev.addEventListener('click', function(){ go(cur - 1); });
+  next.addEventListener('click', function(){ go(cur + 1); });
+  document.addEventListener('keydown', function(e){
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    var t = e.target, tag = t && t.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && !e.shiftKey && tag !== 'BUTTON')) { e.preventDefault(); go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp' || (k === ' ' && e.shiftKey && tag !== 'BUTTON')) { e.preventDefault(); go(cur - 1); }
+    else if (k === 'Home') { e.preventDefault(); go(0); }
+    else if (k === 'End') { e.preventDefault(); go(total - 1); }
+  });
+  window.addEventListener('hashchange', function(){ var n = fromHash(); if (n !== null) go(n); });
+  var sx = null, sy = null;
+  var stage = document.getElementById('stage');
+  stage.addEventListener('touchstart', function(e){ var t = e.touches[0]; sx = t.clientX; sy = t.clientY; }, {passive:true});
+  stage.addEventListener('touchend', function(e){
+    if (sx === null) return;
+    var t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(cur + (dx < 0 ? 1 : -1));
+    sx = sy = null;
+  }, {passive:true});
+  var start = fromHash();
+  cur = 0;
+  go(start === null ? 0 : start);
+})();
+</script>
+</body>
+</html>

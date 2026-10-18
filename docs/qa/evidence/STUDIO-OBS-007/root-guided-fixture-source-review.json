@@ -1,0 +1,40 @@
+{
+  "verdict": "ONE_NARROW_LOCAL_FIXTURE_SHAPE_FIX_REQUIRED",
+  "receiptSha256": "898eec3d678363ad693b09f15129aea3a2a49dd7b38447c87c71d7a330d1a7a6",
+  "sourceManifest": [
+    {
+      "intendedPath": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "beforeSha256": "f3862d94539e8a94f31653f0ffeeda493f6c181310d509954d65bb289648720c",
+      "candidateSha256": "e2ae2e48fe314a11aa1fe28ce17ff4f3aff9f134eac6fd5aa42eb2ec2b8c014c",
+      "beforeCopy": "docs/qa/evidence/STUDIO-OBS-007/resume-d-guided-cut-isolated-author/before/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "candidateCopy": "docs/qa/evidence/STUDIO-OBS-007/resume-d-guided-cut-isolated-author/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "oldNamedMethods": 9,
+      "newNamedMethods": 10,
+      "currentLiveSha256ReadOnly": "f3862d94539e8a94f31653f0ffeeda493f6c181310d509954d65bb289648720c"
+    },
+    {
+      "intendedPath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java",
+      "beforeSha256": "b8d1013ebd2025fd7645e1be558f533acbe7aed36e60d8b25c55ea81c728ebc2",
+      "candidateSha256": "0ded406c1261b722d5b548532b50cfd2e075cfe3f7ade623b4fcabb4d963c513",
+      "beforeCopy": "docs/qa/evidence/STUDIO-OBS-007/resume-d-guided-cut-isolated-author/before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java",
+      "candidateCopy": "docs/qa/evidence/STUDIO-OBS-007/resume-d-guided-cut-isolated-author/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java",
+      "oldNamedMethods": 1,
+      "newNamedMethods": 1,
+      "currentLiveSha256ReadOnly": "b8d1013ebd2025fd7645e1be558f533acbe7aed36e60d8b25c55ea81c728ebc2"
+    }
+  ],
+  "accepted": [
+    "SameownedPG/originalservices and controlledHTTPprovider/localprocess cut, realconsume/read/noadditionaldispatch and actualuncertainty reconciliation tier",
+    "Child config-local bootstrap avoids outerfixture static references in reviewedsource, actualbytecode stillrequired",
+    "Originaltrackingtemplate no-owner branch forwards originalmanager/callback once; controlledconfirmation retains existing source/thread/count guards",
+    "Original17+resolver3 bodies retained, isolatedonly, identityACK200/trustedreconciliation corrections honest"
+  ],
+  "finding": {
+    "id": "GUIDED-CUT-SOURCE-SHAPE",
+    "location": "GuidedControllerChild childAccess.sources",
+    "problem": "Parent stores cfg.source as object containing steps array and compares SQL steps against that object. Child sources() then treats cfg.source itself as array with get(0), which is null; cannot reach originaldispatch recovery cut.",
+    "requiredFix": "Keep originalwhole-object SQL current-source equality; validate cfg.source.steps is expectedone-element array, derive stepId/text and Source from that exact array. Do not weaken source/current/scope guards or addcases."
+  },
+  "next": "Isolatedsinglefindingrepair, mechanicalunchangedbody/bootstrap proof; then sourceapproval beforecoordinatorlogicalapply/compile/actualchildbytecode and onefixturegate",
+  "limits": "Source-only no runtime/wholeCore/browser/automaticexpiredworker recovery/heapwipe/privacy acceptance"
+}

@@ -1,0 +1,102 @@
+{
+  "story": "STUDIO-OBS-015",
+  "owner": "Dex/backend015_resume",
+  "status": "SOURCE_ONLY_ATOMIC_HOLD_UNCOMPILED_UNEXECUTED",
+  "commandsLive": false,
+  "sourceHold": true,
+  "distHold": true,
+  "exclusiveOwned": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "beforeSha256": "246e355b2cdc237957a519d17fdfab81f6fc230102f94176b6df99799fb56bf4",
+      "afterSha256": "a079ed2176879b1f514a0f9427d4cf98d6dbde34d706c056c771f3ce0a650b75"
+    },
+    {
+      "path": "backend/build.gradle.kts",
+      "beforeSha256": "f77c28b83c96b8a0e59c8cfd2419e4faaecacc9b1438e0237ee7bc3d61d61490",
+      "afterSha256": "1cc4cee0f683661eb5373738d00e30cbc53c3f4716ba3b008a33ec270bdbdef8"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/GuidedPublicationReplayIT.java.patch",
+      "sha256": "96f1982311b9b886c5d5607ddcc4b0138e9bc536180a87cb24b1c982389b5882"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/build.gradle.kts.patch",
+      "sha256": "ac065273c117eadd54e45e6e87d62751242a2c44976e7f3b4ffff2d846f4cf89"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/design-bindings.json",
+      "sha256": "f2e00be1a3085d48e55bf64c4ed6c060d186eff8148e0e4314dc87bab93831cd"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/hook-privacy-bounds.json",
+      "sha256": "a143f1474e10b83b0a51f99e6116227ad28d67aa8201043db457da3a13e264cb"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/identity-map.json",
+      "sha256": "d58400370ad87bbdef79d370215c054f3670980af0ab031c91cebb4bb09d6f78"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/owned-hashes.json",
+      "sha256": "1fd98febccbecc6685d63d0709a15d4be629931c7095bab41695f057b53f0802"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/preservation.json",
+      "sha256": "d112b8caa783f88df6333c5dd7ed4f5b3ebbdf2489d9047d4f975dfc39757f0d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/protected-hashes.json",
+      "sha256": "34d7aec84b1dded8eb905c2f92cb49341320c5b8a344da1b676792eeac91a5d5"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/remaining-and-limits.json",
+      "sha256": "5bedd24993fff6d1b101c8b91e3243aef046c1ffb99c2ebf73a89036acf32a35"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/source-after/GuidedPublicationReplayIT.java",
+      "sha256": "a079ed2176879b1f514a0f9427d4cf98d6dbde34d706c056c771f3ce0a650b75"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/source-after/build.gradle.kts",
+      "sha256": "1cc4cee0f683661eb5373738d00e30cbc53c3f4716ba3b008a33ec270bdbdef8"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/source-before/GuidedPublicationReplayIT.java",
+      "sha256": "246e355b2cdc237957a519d17fdfab81f6fc230102f94176b6df99799fb56bf4"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/source-before/build.gradle.kts",
+      "sha256": "f77c28b83c96b8a0e59c8cfd2419e4faaecacc9b1438e0237ee7bc3d61d61490"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-sync-tests-source01/test-selectors-and-subcases.json",
+      "sha256": "e3e1a8b425661c85d211785135da2112933d663921c9fa8bfaa612d430f71bfd"
+    }
+  ],
+  "checks": {
+    "all46OriginalJUnitBodiesByteExact": true,
+    "original35HelperAndLabelsByteExact": true,
+    "originalPendingAccountingHelperByteExact": true,
+    "original80Preserved": true,
+    "newLowSingletons": 5,
+    "fullDefault43Low42Total85": true,
+    "exactWholeFileInverse": true,
+    "protectedHashesMatch": true,
+    "lexicalBalanceOnlyNotCompile": true
+  },
+  "remaining": [
+    "combined current-access grant revocation at fresh-producer ACK OPEN",
+    "separate lawful worker current-access secret-prefix proof OPEN",
+    "exact ADMITTED recovery cut and done/refresh/recovery RPC matrix OPEN",
+    "all new barrier/race/native tests UNEXECUTED; earlier contender refusal never credits coordinate cut",
+    "all original80plus5 additions/full42low+43default fresh execution",
+    "all86acceptance24IPC55SQL35variants and remaining B1/B2/B3/B4",
+    "full configured backend/native/Core/Vault/privatePG/crossReplica/deployment/coverage",
+    "independent015QA/PO/rootclosure before full008"
+  ],
+  "runtimeQaVerdict": null,
+  "lifecycleChange": null,
+  "item85": "ORIGINAL_OPEN_PENDING_UNAMENDED"
+}

@@ -1,0 +1,10 @@
+{
+  "status": "FAILED_AUDIT_HARNESS_PATH_RESOLUTION",
+  "command": [
+    "node",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-02-03/audit-selected.cjs"
+  ],
+  "exitCode": 1,
+  "errorCode": "ENOENT",
+  "reason": "Historical manifests mix repository-relative and owner-relative file keys; initial audit incorrectly prefixed every key with owner directory. No product/schema failure or case removal."
+}

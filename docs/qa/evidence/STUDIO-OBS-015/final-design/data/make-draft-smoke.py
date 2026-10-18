@@ -1,0 +1,67 @@
+import json,pathlib,datetime
+h=pathlib.Path(__file__).resolve().parent
+q=lambda x:"'"+str(x).replace("'","''")+"'"
+j=lambda x:q(json.dumps(x,separators=(',',':')))+'::jsonb'
+step='22222222-2222-4222-8222-222222222222'; sid='data-smoke'; sh='a'*64
+expiry=(datetime.datetime.now(datetime.timezone.utc)+datetime.timedelta(minutes=10)).isoformat()
+doc=dict(sessionId=sid,testId='11111111-1111-4111-8111-111111111111',scopeHash=sh,state='OBSERVING',scope=dict(principalId='reviewer',csiId='CSI',sourceRevision='1',configurationRevision='1'),owner=dict(workerId='worker',fence=1,leaseExpiresAt=expiry),expiresAt=expiry,sourceSteps=[dict(stepId=step)],limits=dict(maxActions=200,maxStatementsPerStep=8,maxObservations=400),counters=dict(modelProposals=0,modelInputTokens=0,modelOutputTokens=0))
+secret=dict(inputId='I-SECRET',sourceStepId=step,kind='secretRef',secretId='LOGIN_PASSWORD',intendedSlot='fill.value',provenance=dict(referenceKind='configuration',referenceId='cfg',referenceName='LOGIN_PASSWORD',stepId=step,kind='secretRef',intendedSlot='fill.value',configurationRevision='1'))
+inputs=dict(schemaVersion=3,sessionId=sid,scopeHash=sh,sourceRevision='1',configurationRevision='1',inputs=[secret])
+manifest=dict(sourceRevision='1',configurationRevision='1',testId=doc['testId'],policy='fixture',sourceSteps=doc['sourceSteps'],configurationReferences=[dict(referenceId='cfg',stepId=step,kind='secretRef',referenceName='LOGIN_PASSWORD',intendedSlot='fill.value')])
+plain=dict(inputId='I-PLAIN',sourceStepId=step,kind='nonsecretText',value='fresh suffix',intendedSlot='fill.value',provenance=dict(referenceKind='sourceSpan',stepId=step,start=0,end=5,sourceRevision='1'))
+next_inputs={**inputs,'inputs':[secret,plain]}
+sql=["-- Storage-only synthetic fixture; no browser/model/Vault/authentication is exercised.","""CREATE FUNCTION pg_temp.ensure(ok boolean,label text) RETURNS void LANGUAGE plpgsql AS $$ BEGIN IF ok IS NOT TRUE THEN RAISE EXCEPTION 'Smoke failed: %',label; END IF; RAISE NOTICE 'PASS %',label; END $$;
+CREATE FUNCTION pg_temp.expect_error(command text,fragment text) RETURNS void LANGUAGE plpgsql AS $$ DECLARE failed boolean:=false; BEGIN BEGIN EXECUTE command; EXCEPTION WHEN OTHERS THEN IF position(fragment in SQLERRM)=0 THEN RAISE; END IF; failed:=true; END; IF NOT failed THEN RAISE EXCEPTION 'Missing refusal: %',fragment; END IF; RAISE NOTICE 'PASS refusal %',fragment; END $$;"""]
+def check(expr,label): sql.append('SELECT pg_temp.ensure('+expr+','+q(label)+');')
+def refuse(command,fragment): sql.append('SELECT pg_temp.expect_error('+q(command)+','+q(fragment)+');')
+complete=dict(variables=[],secrets=[],authoringIdentityVersion=1,authoredDeclarations=[])
+check("studio_015_relearned_from('absent-session') IS NULL",'no committed switch reports null entered learning boundary')
+check('studio_015_declarations('+j(complete)+')','complete declaration identity')
+check('NOT studio_015_declarations('+j({k:v for k,v in complete.items() if k!='authoringIdentityVersion'})+')','missing version refused')
+check('NOT studio_015_declarations('+j({**complete,'authoredDeclarations':[dict(referenceId='vault://x',kind='secretRef',secretId='..')]})+')','unsafe secret ID refused')
+sql.append(f"INSERT INTO studio_guided_sessions(session_id,test_id,principal_id,scope_hash,state,expires_at,document) VALUES({q(sid)},{q(doc['testId'])},'reviewer',{q(sh)},'OBSERVING',{q(expiry)},{j(doc)});")
+intent=dict(sessionId=sid,assignmentId='assignment',scopeHash=sh,workerId='worker',expectedFence=0)
+sql.append(f"INSERT INTO studio_guided_assignments(session_id,assignment_id,scope_hash,worker_id,expected_fence,intent) VALUES({q(sid)},'assignment',{q(sh)},'worker',0,{j(intent)});")
+sql.append(f"INSERT INTO studio_guided_source_manifests(session_id,scope_hash,manifest,manifest_hash) VALUES({q(sid)},{q(sh)},{j(manifest)},studio_publication_hash({j(manifest)}));")
+sql.append(f"INSERT INTO studio_guided_translation_state(session_id,continuation) VALUES({q(sid)},'MATERIALIZE');")
+sql.append(f"INSERT INTO studio_guided_materializations(session_id,scope_hash,context_id,context_revision,materialization_revision,worker_id,owner_fence,source_revision,configuration_revision,authored_inputs_hash,authored_inputs) VALUES({q(sid)},{q(sh)},'context',1,1,'worker',1,'1','1',studio_publication_hash({j(inputs)}),{j(inputs)});")
+sql.append('SET CONSTRAINTS ALL IMMEDIATE;')
+check("(SELECT count(*)=1 FROM studio_guided_materialization_versions)",'initial header captured')
+action=dict(admission=dict(admissionId='secret-action'),sessionId=sid,coordinate=dict(stepId=step,ordinal=0),state='SUCCEEDED',dispatchCount=1,ownerFence=1,attemptOrdinal=0,contextRevision=1,preparationId='prep')
+proposal=dict(contextRevision=1,operation=dict(kind='fill',value=dict(kind='secretRef',sourceInputId='I-SECRET')))
+proof=dict(sessionId=sid,preparationId='prep',contextId='context',ownerFence=1,contextRevision=1)
+prepared_proposal=j(proposal)+f"||jsonb_build_object('authoredInputsHash',studio_publication_hash({j(inputs)}))"
+proof_sql=j(proof)+f"||jsonb_build_object('authoredInputsHash',studio_publication_hash({j(inputs)}),'requestDigest',studio_publication_hash({prepared_proposal}))"
+sql.append(f"INSERT INTO studio_guided_preparations(session_id,preparation_id,context_id,owner_fence,request_digest,proof,expires_at) VALUES({q(sid)},'prep','context',1,studio_publication_hash({prepared_proposal}),{proof_sql},{q(expiry)});")
+sql.append(f"INSERT INTO studio_guided_actions(admission_id,session_id,step_id,ordinal,document,proposal) VALUES('secret-action',{q(sid)},{q(step)},0,{j(action)}||jsonb_build_object('authoredInputsHash',studio_publication_hash({j(inputs)})),{j(proposal)}||jsonb_build_object('authoredInputsHash',studio_publication_hash({j(inputs)})));")
+sql.append("UPDATE studio_guided_preparations SET admission_id='secret-action' WHERE session_id='data-smoke';")
+check(f"studio_secret_guided_input_reference({q(sid)},{q(sh)},'secret-action')='cfg'",'V1 secret proof before append')
+sql.append('SET CONSTRAINTS ALL DEFERRED;')
+sql.append(f"UPDATE studio_guided_materializations SET context_revision=2,materialization_revision=2,authored_inputs={j(next_inputs)},authored_inputs_hash=studio_publication_hash({j(next_inputs)}) WHERE session_id={q(sid)};")
+sql.append('SET CONSTRAINTS ALL IMMEDIATE;')
+check('(SELECT count(*)=2 FROM studio_guided_materialization_versions)','one append one header')
+check('(SELECT count(*)=2 FROM studio_guided_materialization_inputs)','raw inputs stored once')
+check("(SELECT input_count=1 AND jsonb_array_length(authored_inputs->'inputs')=1 FROM studio_guided_materialization_snapshots WHERE context_revision=1)",'historical snapshot reconstructed')
+check(f"studio_secret_guided_input_reference({q(sid)},{q(sh)},'secret-action')='cfg'",'V1 secret reference after V2 head')
+check(f"studio_secret_guided_consumed({q(sid)},{q(sh)},'secret-action',{q(step)},0,'LOGIN_PASSWORD','data-smoke:1')",'V1 consumed secret after V2 head')
+refuse('UPDATE studio_guided_materialization_inputs SET document=document','incremental history is immutable')
+refuse('DELETE FROM studio_guided_materialization_versions','incremental history is immutable')
+refuse('UPDATE studio_guided_materializations SET materialization_revision=3','context delivery pending')
+refuse("INSERT INTO studio_guided_model_attempts(session_id) VALUES('data-smoke')",'model reservation refused')
+refuse("UPDATE studio_guided_materializations SET authored_inputs='{}'",'input change requires append version')
+metadata=dict(schemaVersion=3,sessionId=sid,workerId='worker',ownerFence=1,scopeHash=sh,contextId='context',contextRevision=2,sourceRevision='1',configurationRevision='1',versions=dict(contract=3),expiresAt=expiry,leaseExpiresAt=expiry,approvedOrigins=[],sourceStepIds=[step],materializationRevision=2,allocations=[],producers=[],consumerEdges=[],limits=doc['limits'],applicationPolicy={},policyHash='b'*64)
+meta=j(metadata)+f"||jsonb_build_object('authoredInputsHash',studio_publication_hash({j(next_inputs)}))"
+for extra in [dict(prefixProgram={}),dict(prefixProgramHash='b'*64),dict(prefixProgram={},prefixProgramHash='b'*64)]:
+ forged_meta=meta+'||'+j(extra)
+ refuse(f"UPDATE studio_guided_materialization_deliveries SET context_metadata={forged_meta},context_hash=studio_publication_hash(({forged_meta})||jsonb_build_object('authoredInputs',{j(next_inputs)}))",'issued context prefix program identity invalid')
+sql.append(f"UPDATE studio_guided_materialization_deliveries SET context_metadata={meta},context_hash=studio_publication_hash({meta}||jsonb_build_object('authoredInputs',{j(next_inputs)}));")
+refuse("UPDATE studio_guided_materialization_deliveries SET context_hash=repeat('b',64),status='ACKNOWLEDGED',ack='{}'",'delivery ACK identity invalid')
+ack=dict(schemaVersion=3,sessionId=sid,workerId='worker',ownerFence=1,scopeHash=sh,contextId='context',contextRevision=2,sourceRevision='1',configurationRevision='1',materializationRevision=2)
+sql.append(f"UPDATE studio_guided_materialization_deliveries SET status='ACKNOWLEDGED',ack={j(ack)}||jsonb_build_object('authoredInputsHash',authored_inputs_hash,'contextHash',context_hash,'deliveryId',delivery_id);")
+check("NOT studio_015_delivery_pending('data-smoke')",'exact ACK clears barrier')
+sql.append('UPDATE studio_guided_materializations SET materialization_revision=3;')
+check('(SELECT materialization_revision=2 FROM studio_guided_materialization_versions WHERE context_revision=2)','historical birth metadata independent of later bumps')
+check(f"NOT studio_015_current_version('data-smoke',jsonb_build_object('contextRevision',1,'authoredInputsHash',studio_publication_hash({j(inputs)})))",'stale preparation cannot admit against old version')
+refuse('UPDATE studio_guided_materializations SET context_revision=4,materialization_revision=4','materialization append refused')
+check("NOT studio_guided_prune_session('data-smoke',interval '1 hour')",'live session not pruned')
+(h/'draft-smoke.sql').write_text('\n'.join(sql)+'\n')

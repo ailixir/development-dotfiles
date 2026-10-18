@@ -1,0 +1,48 @@
+--- a/isolated/GuidedPublicationReplayIT.java
++++ b/isolated/GuidedPublicationReplayIT.java
+@@ -6125,6 +6125,11 @@
+   }
+ 
+   private void p4AwaitRevocationObserverCompletion(P4RevocationState state) throws Exception {
++    if (state.c6Kind != 0) {
++      // C6 never manufactures the legacy successful click/authority flip or residual ACK.
++      p8AwaitC6Closed(state);
++      return;
++    }
+     long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+     boolean complete;
+     do {
+@@ -6490,12 +6495,14 @@
+         }
+         p3AttemptTeardown(failures, () -> p6AwaitProcesses(owned.c6BrowserTree, true));
+       }
++      // Independently attempt the EXISTING selected producer restoration/seal command even
++      // when original owner close failed. It cannot clear sticky failures or quarantine.
++      if (owned != null && owned.c6Kind != 0 && !owned.c6ProducerSealed) {
++        p3AttemptTeardown(failures, () -> {
++          p4SealPrivateProducersAfterOwnerCleanup(owned);owned.c6ProducerSealed=true;
++        });
++      }
+       if (!cleanupUnconfirmed) {
+-        if (owned != null && owned.c6Kind != 0 && !owned.c6ProducerSealed) {
+-          p3AttemptTeardown(failures, () -> {
+-            p4SealPrivateProducersAfterOwnerCleanup(owned);owned.c6ProducerSealed=true;
+-          });
+-        }
+         if (owned != null && owned.c6Kind != 0
+             && (!owned.restored || !owned.active.isEmpty())) {
+           cleanupUnconfirmed = true;
+@@ -6740,6 +6747,13 @@
+       Thread.sleep(20);
+     }
+     assertThat(state.c6NativeClose).as("original SDK close receipt").isTrue();
++    if (state.c6FenceAvailable) {
++      assertThat(p4OriginalCloseSettled(state.c6Phase) && P4_CLOSED_PHASES.contains(state.c6Phase))
++          .as("actual original healthy page fence and close receipt").isTrue();
++    } else {
++      assertThat(P8_C6_CLOSED_UNKNOWN.contains(state.c6Phase) && !P4_CLOSED_PHASES.contains(state.c6Phase))
++          .as("actual original close with unavailable realm effects, never healthy by absence").isTrue();
++    }
+     assertThat(state.restored).as("exact descriptors restored after original dispatch lifetime").isTrue();
+     assertThat(state.active).isEmpty();
+     if (state.path == 1) assertThat(state.closed).isTrue();

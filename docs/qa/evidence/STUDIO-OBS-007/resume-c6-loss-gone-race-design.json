@@ -1,0 +1,14 @@
+{
+  "scope": "ONLY_PROVEN_CAPTURED_HANDLE_GONE_X_BRANCH",
+  "baseSha256": "3f0dbb8bb7f2c8e6f116f9019b5045fee51b52e1d9c82e27bd4d0bb40520e613",
+  "actualEvidence": "resume-c6-loss-tree-order-current/closed-residual-probe-cause.json",
+  "proposedExactReplacement": [
+    "assertThat(p6Status(member.handle()).group()).isEqualTo(member.group());",
+    "P6ProcessStatus actual = p6Status(member.handle());\nif (\"X\".equals(actual.state()) && !member.handle().isAlive()) return;\nassertThat(actual.group()).isEqualTo(member.group());"
+  ],
+  "proof": "Original X means ps nonzero AND captured handle gone; repeated actual-gone check avoids interpreting missing PS alone. No signal on proven dead handle.",
+  "allOtherBranches": "Unchanged strict start identity before/after, alive/unknown/changed group/OS parse launch timeout errors fail; original later all-gone and SDK closure unchanged",
+  "noCatchNoWaitNoNewSearch": true,
+  "closureOrCauseCredit": false,
+  "actions": "DESIGN_ONLY_NO_SOURCE_OR_RUNTIME"
+}

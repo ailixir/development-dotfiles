@@ -1,0 +1,18 @@
+{
+ "kind": "MEASURED_PROPOSALS_PER_SESSION",
+ "provider": "local fixture provider, no model",
+ "fixtureCeilingPerCall": 2048,
+ "productionPerCall": 4096,
+ "tenStepBaseSessions": {
+  "editStep4Base": 13,
+  "insertStepBase": 13
+ },
+ "incrementalSessions": {
+  "editStep4": 9,
+  "insertStep": 10
+ },
+ "peakAcrossAll36Evidence": 14,
+ "verdict": "REFUTES_7_PROPOSALS_PER_SESSION_ASSUMPTION",
+ "caveat": "a local run can refute, never confirm",
+ "evidence": "execution-20261018/ep/b7-proposals.json"
+}

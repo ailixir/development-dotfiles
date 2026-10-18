@@ -1,0 +1,116 @@
+{
+  "status": "READONLY_ONE_CASE_AUTHOR_READY_PROPOSAL_REQUIRES_EXACT_RELEASE",
+  "authority": "docs/qa/evidence/STUDIO-OBS-007/root-d-c11-tier-disposition.json",
+  "requirement": "C11/AC14/19 genuine guided consumed/no-committed-decision controller process cut with authentic owner/action/source and truthful one-read/no-resend uncertainty; ordinary JVM3 and service restart objects alone do not satisfy this named join",
+  "sourceManifest": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "2e36ed91ede412076a34780adbe0d9378bba68b120c6f243139cf2bd97eca6bc",
+      "archive": "docs/qa/evidence/STUDIO-OBS-007/resume-observe-reload-unprofiled-first-ninth-current/sources.zip"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256": "ceeec5a8ef899dced36c556b44ce2e1099fefe65084b7ffc4e3b0f69c4bc68dd",
+      "archive": "docs/qa/evidence/STUDIO-OBS-007/resume-observe-reload-unprofiled-first-ninth-current/sources.zip"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "sha256": "f3862d94539e8a94f31653f0ffeeda493f6c181310d509954d65bb289648720c",
+      "archive": "docs/qa/evidence/STUDIO-OBS-007/resume-observe-reload-unprofiled-first-ninth-current/sources.zip"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java",
+      "sha256": "b8d1013ebd2025fd7645e1be558f533acbe7aed36e60d8b25c55ea81c728ebc2",
+      "archive": "docs/qa/evidence/STUDIO-OBS-007/resume-observe-reload-unprofiled-first-ninth-current/sources.zip"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+      "sha256": "7313046e049f40ff860119f1927de1bd326dcb9897ce0a5835eb77b450c30833",
+      "archive": "docs/qa/evidence/STUDIO-OBS-007/resume-observe-reload-unprofiled-first-ninth-current/sources.zip"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "f69b4beafe89aece89343c2027c70f4b57c06eb389a656b593c1b63c70f89a79",
+      "archive": "docs/qa/evidence/STUDIO-OBS-007/resume-observe-reload-unprofiled-first-ninth-current/sources.zip"
+    }
+  ],
+  "ownedPathProposal": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java"
+  ],
+  "selector": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost",
+  "newCases": 1,
+  "sourceReuse": {
+    "Transport": "Existing samePG/Spring fixture, start/assign/authenticated worker claim/materialization/observation/prepareAndAdmit, original relay/JWT/mTLS, service assembly, actual stop/confirmation owner tracking. Keep all original bodies.",
+    "JvmHarness": "Reuse counted provider HTTP source, owned0700/0600 configuration/scratch, childClasspath/ProcessBuilder/stage/kill/join and FixtureProvider response-read pause. Keep original3 cases and their stated tiers.",
+    "visibilityDelta": "Existing ObservedResolverProcessCrashIT class+Cut enum+FixtureProvider record+childClasspath may become public test-only reuse points; no production API. No existing pause/clock/case behavior changes."
+  },
+  "exactBoundary": {
+    "call": "Original GuidedDispatchService.dispatch(controller,id,fence,key,actualAdvance)",
+    "commit": "Original GuidedSessionService.consume commits real actionDISPATCHING/dispatchCount1 and historicalv2-consume command before WonConsumption returns",
+    "read": "Original resolver calls controlled real HTTP FixtureProvider; its parser reads actual response body and pauses before returning VaultEntry",
+    "noDecision": "Original GuidedDispatchService.recordSecretDecision has not executed because resolver has not returned; sendSecret not reached"
+  },
+  "markerDistinction": {
+    "ordinaryDurableReadMarkerInGuidedPath": false,
+    "sourceFact": "GuidedDispatchService calls five-argument resolve, with no ordinary ValueReadEntry callback or studio_observed_secret_read_entries record. Do not invent marker/absence fact.",
+    "honestProof": "At real provider HTTP entry independent samePG view confirms committed consume/admission/coordinate/source. Physical request/body-read count1 is separate evidence. Snapshot zero committed RELEASE/USAGE/lastSecretReleaseId while child pauses.",
+    "requirementCaveat": "If a durable guided read-entry representation is independently required, it is absent and needs an architecture/PO decision; this construction proves committed consume plus actual physical provider read entry."
+  },
+  "timeline": [
+    {
+      "step": 1,
+      "action": "Prepare fresh genuine authoredsecret scenario with existing Transport fixture and original service methods. Actual authenticated worker assignment/claim, retained declaration/materialization, owned observation, actual preparation/admission give count0/read0/post0. No forged admission/consumption/outcome/audit."
+    },
+    {
+      "step": 2,
+      "action": "Start one owned JVM main nested in Transport test class, with private config for SAME actualPG/session/fence/advance, exact source/current/access facts and owned counted fixture provider URI. No secondSpringContext/PG/browser. Controller Identity is same trusted service actor as existing defining fixture; actual worker/prepare security remains original realmTLS/JWT."
+    },
+    {
+      "step": 3,
+      "action": "Child builds original repository/materializer/preparation/binding/assignment/audit/session/dispatcher with Clock.systemUTC against sameDS, installs original scoped resolver and invokes original dispatch once. Parent provider source checks independently committed count1/admission/fence/source and counts real read1. Child pauses AFTER actual response parse BEFORE return/resolution decision."
+    },
+    {
+      "step": 4,
+      "action": "Parent observes existing stage and physical committed cut, kills only owned JVM and joins actualPID exit/nonzero code. Assert genuine consumed actioncount1, zero committed decision/RELEASE/USAGE, real providerread1, actual relay dispatchPOST0. No explicit killed-memory wipe claim."
+    },
+    {
+      "step": 5,
+      "action": "Instantiate fresh original controller service against sameDS/source; while original lease remains live, exact same consume key and one new key return original AlreadyConsumed historicalDISPATCHING. No secondread/POST/count increment; no rebuilt owner/context/admission. Expired lease before this intended branch is FAIL/unreached, not waived."
+    },
+    {
+      "step": 6,
+      "action": "Wait real original ownerlease expiry while original600s session remains live. Route original authenticated owning-worker reclaim through existing callback/IdentityFilter service bean with exact expectedfence/versions. Original claim sees actualDISPATCHING and stopsUNKNOWN, so no clock edits or publiccancel shortcut. Configure original sender/audit on that same parent callback bean before reclaim."
+    },
+    {
+      "step": 7,
+      "action": "Require actual original authenticated STOPPED relay response, actual confirmation commit and materialization livefalse, using existing SourceStopOwner/TrackingTransactionTemplate completion. Actual action/sessionUNKNOWN; one append-only USAGE UNKNOWN_OUTCOME linked to genuine admission/step/ordinal/sourceRef/session:fence, with null resolution/release/version/sequence and noRELEASE. Generic ledgerACK_LOST label cannot certify genuine acknowledgement loss."
+    },
+    {
+      "step": 8,
+      "action": "Repeat recovery/terminal original refusal and compare scoped summary/action/count/read/post unchanged. Independently drain killedJVM, owned provider peers, genuine stop sender+confirmation and resources before fixturePG teardown, retaining primary/suppressed/sticky failures. No native/C5 sink promotion."
+    }
+  ],
+  "bootstrapLimitation": {
+    "concrete": "Transport outer initializer starts PostgreSQL/Flyway/relay; existing private FixtureAccess accesses outerC/DOCUMENTS/BY_TEST. Child must not call those or outer service() or create another fixture.",
+    "minimumAdapter": "Static nested GuidedControllerChild.main uses config-local GuidedContracts and exact existing current-source/scope/reference predicates with actual row locks and frozen source/config, original constructors and sameDS. No permissive access stub. Parent existing setup supplies genuine guarded lineage. Compile review must verify no outerGETSTATIC/factory initialization before runtime.",
+    "api": "GuidedDispatchService.dispatch; GuidedSessionService.consume (through dispatch only); original authenticated claim/stop reconciliation; original source/current checks. Nested child does not replace dispatcher or manufacture WonConsumption.",
+    "rootReleaseNeeded": "Two existing test paths and exact config-local child adapter/test-only visibility; if full Spring/CoreHTTP/compiled-worker process death is required, decide tier explicitly instead of mislabeling this service-controller process cut."
+  },
+  "timing": {
+    "clock": "SystemUTC only; original lease/session deadlines read back and never changed",
+    "control": "Existing stage/owned process join bounds. Natural leaseexpiry (normally30s) for reclaim, original600s session remains active. No fakeClock/reflection/cancel shortcut copied from ordinary historical harness."
+  },
+  "tierLimits": [
+    "Actual controller-service JVM+realPG+counted physical providerHTTP+authenticated controlled-worker prepare/stop join; not whole backendHTTP JVM restart, liveVault or Chromium effect proof",
+    "No explicit killed-process array wipe or broad trace/sink/cache/SSE/C5/C6/P6 credit",
+    "PG59/JVM3/caller31/lifecycle7 and currentProgress20/ordinarychild1 reused unchanged; no new negative Cartesian matrix",
+    "No wholeC11/all19/storyQA verdict"
+  ],
+  "sourceEdits": [],
+  "runtimeActions": [],
+  "sqlExecuted": false,
+  "modelsSpawned": 0,
+  "rawRuntimeIdsValuesCredentialsBodiesThrowableDumpExported": false,
+  "budget": "Whole-waveUSD500; billing unavailable"
+}

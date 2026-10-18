@@ -1,0 +1,279 @@
+--- docs/qa/evidence/STUDIO-OBS-007/resume-d-c11-midfill-isolated-author/before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java	2026-10-11 18:13:42
++++ docs/qa/evidence/STUDIO-OBS-007/resume-c11-midfill-scope-repair/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java	2026-10-11 18:38:11
+@@ -4557,6 +4557,209 @@
+   }
+ 
+   /** Observations only; neither the PID header nor this handle grants execution authority. */
++  @Test
++  @org.junit.jupiter.api.Order(37)
++  void actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending() throws Exception {
++    String value = "C11-MIDFILL-" + UUID.randomUUID() + "-+/界";
++    C5Capture capture = new C5Capture(List.of(value), false);
++    c5Capture = capture;
++    Throwable primary = null;
++    try {
++      capture.writeProfileValues();
++      p3Case(() -> p9MidfillChildCut(value, capture));
++    } catch (Exception | Error failure) {
++      primary = failure;
++      throw failure;
++    } finally {
++      var failures = new java.util.ArrayList<Throwable>();
++      if (!cleanupUnconfirmed) {
++        p3AttemptTeardown(failures, () -> p3Scan(List.of(value)));
++        p3AttemptTeardown(failures, capture::writeNumericEvidence);
++        p3AttemptTeardown(failures, capture::close);
++        if (!cleanupUnconfirmed) c5Capture = null;
++      } else failures.add(new IllegalStateException("Midfill terminated producer drain unconfirmed"));
++      if (!failures.isEmpty()) {
++        if (primary != null) failures.forEach(primary::addSuppressed);
++        else throwTeardownFailures(failures);
++      }
++    }
++  }
++
++  private void p9MidfillChildCut(String value, C5Capture capture) throws Exception {
++    assertThat(p4Revocation).isNull();
++    assertThat(p6ChildCut).isNull();
++    p3Mode = P3Mode.LOGIN;
++    p3Grant("CSI-456", "fixture-other");
++    UUID test = p3CreateSource("CSI-456", "fixture-other", true);
++    VaultScope scope = VaultScope.of("CSI-456", "fixture-other", test);
++    p3ExpectedPassword = value;
++    p3Seed(scope, value);
++    P3Publication publication = p4PositiveNativeControl(test);
++    int reads = COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
++    int models = MODEL_WIRE.size();
++    P4RevocationState state = new P4RevocationState(P4_REVOCATION_CASE.incrementAndGet(), 2, test, jdbc);
++    state.c6Kind = 2; // Reuse the original ordinary8s-stall/pending-probe fixture; no public cancel.
++    state.c6Capture = capture;
++    state.c6Phase = p4StartObserverPhase(1);
++    p4Revocation = state;
++    p4WriteRevocationMode(state);
++    state.execution = p3Execute(test);
++    p4WriteRevocationMode(state);
++    ObjectNode mode = (ObjectNode) C.parse(Files.readString(TEMP.resolve("p4-revocation-state.json")));
++    mode.put("childCut", true); // Existing actual fork/Ready observation; no new transport field.
++    Files.writeString(TEMP.resolve("p4-revocation-state.json"), mode.toString(), StandardCharsets.UTF_8);
++    P6ChildCut cut = new P6ChildCut(state.execution, scope, observedBinding(state.execution), true);
++    p6ChildCut = cut;
++    var retained = new java.util.LinkedHashMap<String, byte[]>();
++    Throwable primary = null;
++    boolean terminated = false;
++    try {
++      p3AssertBinding(state.execution, scope, publication);
++      capture.watchExecution(state.execution, p3Cookie);
++      assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
++      assertThat(cut.positive.await(25, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
++      assertThat(cut.failed).isFalse();
++      assertThat(state.c6Pending.await(15, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
++      synchronized (state) {
++        assertThat(state.failed).isFalse();
++        assertThat(state.c6FillEntries).isEqualTo(1);
++        assertThat(state.c6PrimitiveAt).isPositive();
++        assertThat(state.active).containsOnlyKeys(state.inFlightOrdinal);
++        assertThat(state.active.get(state.inFlightOrdinal)).isEqualTo(1);
++      }
++      var liveOwner = p6Owner(state.execution);
++      assertThat("RUNNING".equals(liveOwner.get("state"))).isTrue();
++      assertThat(String.valueOf(liveOwner.get("attempt_id")).equals(cut.report.path("attemptId").asText())).isTrue();
++      assertThat(String.valueOf(liveOwner.get("admission_id")).equals(cut.report.path("admissionId").asText())).isTrue();
++      JsonNode admitted = C.parse((String) liveOwner.get("receipt"));
++      assertThat(admitted.path("admissionId").equals(cut.report.path("admissionId"))).isTrue();
++      var releases = jdbc.queryForList("SELECT * FROM studio_secret_use_audit WHERE execution_id=?"
++          + " AND row_kind='RELEASE' AND decision_stage='DISPATCH' AND outcome='RESOLVED' AND secret_id='PASS'", state.execution);
++      assertThat(releases.size()).isEqualTo(1);
++      assertThat(p4AuditOwnerIdentity(state, releases.getFirst())).isTrue();
++      p6VerifyChild(cut);
++      cut.childTree = java.util.stream.Stream.concat(java.util.stream.Stream.of(cut.child), cut.child.descendants())
++          .map(GuidedPublicationReplayIT::p6SnapshotPid).toList();
++      assertThat(cut.childTree.size()).isBetween(2, 128);
++      cut.signalOrder = cut.childTree.stream().sorted(
++          java.util.Comparator.comparingInt((P6OwnedPid member) -> p6Depth(member, cut)).reversed()).toList();
++      // Retain actual owned file bytes before parent cleanup can delete them. No SSE wait occurs here.
++      p9RetainOwnedFiles(retained);
++      assertThat(retained.isEmpty()).isFalse();
++      assertJoinedSinkAbsent(retained, value);
++      assertThat(COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS") - reads).isEqualTo(1);
++      assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_secret_use_audit WHERE execution_id=?"
++          + " AND row_kind='USAGE' AND usage_outcome='USED'", Integer.class, state.execution)).isZero();
++      p8WritePendingProbe(state, 2);
++      assertThat(state.c6CutPending.await(2, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
++      synchronized (state) {
++        assertThat(state.failed).isFalse();
++        assertThat(state.active).containsOnlyKeys(state.inFlightOrdinal);
++        assertThat(state.active.get(state.inFlightOrdinal)).isEqualTo(1);
++        assertThat(state.c6NativeClose || state.reasonProved || state.restored || state.closed).isFalse();
++        state.c6CutAt = System.nanoTime();
++        assertThat(state.c6CutAt - state.c6PendingAt).isLessThanOrEqualTo(Duration.ofMillis(250).toNanos());
++      }
++      p6SameProcess(cut.child, cut.childStarted);
++      cut.childCutStarted = true;
++      p6Signal("-KILL", "-" + cut.child.pid()); // First fatal signal is the verified compiled-fork group.
++      assertThat(System.nanoTime() - state.c6PendingAt).isLessThanOrEqualTo(Duration.ofMillis(250).toNanos());
++      assertThat(cut.parent.isAlive()).isTrue();
++      JsonNode outcome = p3AwaitExecution(state.execution, "ERROR");
++      JsonNode finalReport = p3RunnerReport(state.execution);
++      assertThat(outcome.path("errorCode").isNull()).isTrue();
++      assertThat(finalReport.path("outcome").path("errorCode").asText()).isEqualTo("RUN_ERROR");
++      assertThat(finalReport.path("secretUse").has("PASS")).isFalse();
++      // The original parent snapshot contains observed steps only; no child result invents future ones.
++      assertThat(finalReport.path("steps").isArray()).isTrue();
++      for (JsonNode step : finalReport.path("steps")) {
++        assertThat(step.path("stepIndex").asInt(-1)).isBetween(0, 1);
++      }
++      // p3RunnerReport above is the authentic matching FINAL; no unscoped callback flag is authority.
++      p3AssertBinding(state.execution, scope, publication);
++      p3CleanupOrdinary(state.execution, p3Cookie, System.nanoTime() + Duration.ofSeconds(60).toNanos());
++      p9DrainRetainedChild(cut);
++      terminated = true;
++      p8AssertUnknownUsageLineage(state);
++      assertThat(COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS") - reads).isEqualTo(1);
++      assertThat(MODEL_WIRE.size()).isEqualTo(models);
++      assertThat(P3_RECEIPTS).isEmpty();
++      p3Scan(List.of(value));
++      assertJoinedSinkAbsent(retained, value);
++      // Whatever original manifest/evidence disposition exists is scanned, never deleted or fabricated.
++      p3WriteEvidence("c11-midfill-process", C.object().put("actualReadyStarted", true)
++          .put("soleCdpPending", true).put("compiledChildTerminated", true).put("capturedDescendantsGone", true)
++          .put("parentAlive", cut.parent.isAlive()).put("authenticScopedFinalObserved", true)
++          .put("knownUsedBeforeCut", false).put("physicalReadDelta", 1).put("unknownUsageCount", 1)
++          .put("normalSdkCloseObserved", state.c6NativeClose).put("normalDescriptorRestoreObserved", state.restored)
++          .put("normalChildSealObserved", false).put("terminatedProducerDrain", true)
++          .put("retainedFiles", retained.size()).put("retainedFilesPreCutOnly", true)
++          .put("postFaultScratchProfileObserved", false).put("fullFaultSinkClosureClaimed", false));
++    } catch (Exception | Error failure) {
++      primary = failure; throw failure;
++    } finally {
++      var failures = new java.util.ArrayList<Throwable>();
++      if (cut.childCutStarted) {
++        p3AttemptTeardown(failures, () -> p9DrainRetainedChild(cut));
++        // Preserve primary errors; this genuine authority cleanup is not the fault outcome oracle.
++        p3AttemptTeardown(failures, () -> p3CleanupOrdinary(state.execution, p3Cookie,
++            System.nanoTime() + Duration.ofSeconds(60).toNanos()));
++        if (failures.isEmpty()) {
++          terminated = true;
++          p3AttemptTeardown(failures, () -> p3Scan(List.of(value)));
++          p3AttemptTeardown(failures, () -> assertJoinedSinkAbsent(retained, value));
++          // A dead producer cannot consume its fixture controls. Retire only this actual terminated scope.
++          p3AttemptTeardown(failures, () -> Files.deleteIfExists(TEMP.resolve("p4-native-observer.json")));
++          p3AttemptTeardown(failures, () -> Files.writeString(TEMP.resolve("p4-revocation-state.json"),
++              "{\"active\":false}", StandardCharsets.UTF_8));
++          if (failures.isEmpty()) { p4Revocation = null; p6ChildCut = null; }
++        }
++        if (!terminated || !failures.isEmpty()) cleanupUnconfirmed = true;
++      }
++      if (!failures.isEmpty()) {
++        if (primary != null) failures.forEach(primary::addSuppressed);
++        else throwTeardownFailures(failures);
++      }
++    }
++  }
++
++  private static void p9DrainRetainedChild(P6ChildCut cut) throws Exception {
++    var failures = new java.util.ArrayList<Throwable>();
++    for (P6OwnedPid member : cut.signalOrder) {
++      p3AttemptTeardown(failures, () -> {
++        if (!member.handle().isAlive()) return;
++        p6SameProcess(member.handle(), member.started());
++        P6ProcessStatus actual = p6Status(member.handle());
++        if ("X".equals(actual.state()) || actual.state().startsWith("Z")) return;
++        assertThat(actual.group() == member.group()).isTrue();
++        p6SameProcess(member.handle(), member.started());
++        p6Signal("-KILL", Long.toString(member.handle().pid()));
++      });
++    }
++    p3AttemptTeardown(failures, () -> p6AwaitProcesses(cut.childTree, true));
++    throwTeardownFailures(failures);
++  }
++
++  private static void p9RetainOwnedFiles(Map<String, byte[]> retained) throws Exception {
++    long bytes = 0;
++    for (String directory : List.of("journal", "scratch", "objects")) {
++      Path root = TEMP.resolve(directory);
++      if (!Files.isDirectory(root, java.nio.file.LinkOption.NOFOLLOW_LINKS)) continue;
++      assertThat(Files.isSymbolicLink(root)).isFalse();
++      try (var paths = Files.walk(root)) {
++        for (Path file : paths.filter(path -> Files.isRegularFile(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)).toList()) {
++          assertThat(Files.isSymbolicLink(file)).isFalse();
++          assertThat(file.toRealPath().startsWith(root.toRealPath())).isTrue();
++          long size = Files.size(file);
++          assertThat(size).isLessThanOrEqualTo(67108864);
++          bytes += size;
++          assertThat(bytes).isLessThanOrEqualTo(268435456);
++          retained.put("retained-" + TEMP.relativize(file), Files.readAllBytes(file));
++        }
++      }
++    }
++  }
++
+   private static volatile P6ChildCut p6ChildCut;
+ 
+   private static final class P6ChildCut {
+@@ -4580,6 +4783,7 @@
+     Instant childStarted;
+     List<P6OwnedPid> childTree = List.of(), signalOrder = List.of();
+     boolean stopIssued, childCutStarted, parentKilled, recovered, restarted;
++    boolean midfill;
+ 
+     P6ChildCut(UUID execution, VaultScope scope, JsonNode binding) {
+       this.execution = execution;
+@@ -4589,8 +4793,17 @@
+       parentStarted = parent.info().startInstant().orElseThrow();
+     }
+ 
++    P6ChildCut(UUID execution, VaultScope scope, JsonNode binding, boolean midfill) {
++      this(execution, scope, binding);
++      this.midfill = midfill;
++    }
++
+     synchronized void capture(
+         jakarta.servlet.http.HttpServletRequest request, byte[] bytes, int status) {
++      if (midfill) {
++        captureMidfill(request, bytes, status);
++        return;
++      }
+       try {
+         if (bytes.length > 262144) {
+           throw new IllegalArgumentException("Child cut callback bound");
+@@ -4646,6 +4859,40 @@
+         positive.countDown();
+       }
+     }
++
++    private void captureMidfill(
++        jakarta.servlet.http.HttpServletRequest request, byte[] bytes, int status) {
++      try {
++        if (bytes.length > 262144) throw new IllegalArgumentException("Midfill callback bound");
++        JsonNode body = C.parse(new String(bytes, StandardCharsets.UTF_8));
++        if (status < 200 || status >= 300 || !"STARTED".equals(body.path("kind").asText())) return;
++        if (!("Bearer " + CALLBACK).equals(request.getHeader("Authorization"))
++            || !execution.toString().equals(body.path("executionId").asText())
++            || !binding.path("attemptId").equals(body.path("attemptId"))
++            || !"observed-fixture".equals(body.path("runnerInstanceId").asText())
++            || "1".equals(request.getHeader("X-Fixture-Child-Observer-Failed")))
++          throw new IllegalArgumentException("Midfill authenticated callback identity");
++        String pid = request.getHeader("X-Fixture-Child-Pid");
++        String encoded = request.getHeader("X-Fixture-Child-Ready");
++        if (pid == null || !pid.matches("[1-9][0-9]{0,12}") || encoded == null || encoded.length() > 4096)
++          throw new IllegalArgumentException("Midfill actual Ready observation missing");
++        JsonNode observed = C.parse(new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8));
++        if (!"ready".equals(observed.path("kind").asText()) || observed.path("protocolVersion").asInt() != 3
++            || !body.path("executionId").equals(observed.path("runId"))
++            || !body.path("attemptId").equals(observed.path("attemptId"))
++            || !body.path("admissionId").equals(observed.path("admissionId"))
++            || !body.path("browserStartedAt").equals(observed.path("browserStartedAt"))
++            || !GuidedContracts.hash(binding.path("requiredProfile")).equals(observed.path("profileHash").asText())
++            || !binding.path("requiredBuild").equals(observed.path("build")))
++          throw new IllegalArgumentException("Midfill actual Ready binding differs");
++        if (report == null) {
++          childPid = Long.parseLong(pid); ready = observed.deepCopy(); report = body.deepCopy(); positive.countDown();
++        } else if (childPid != Long.parseLong(pid) || !ready.equals(observed))
++          throw new IllegalArgumentException("Midfill Ready identity changed");
++      } catch (RuntimeException invalid) {
++        failed = true; positive.countDown();
++      }
++    }
+   }
+ 
+   private record P6OwnedPid(ProcessHandle handle, Instant started, long parent, long group) {}

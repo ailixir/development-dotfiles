@@ -1,0 +1,31 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "beforeImplementation": true,
+  "externalDeploymentConfirmation": {
+    "status": "UNCONFIRMED",
+    "owner": "user / Platform-SRE",
+    "authorization": "ADR-SC-005 D-B default permits proceeding",
+    "externalMessageSent": false
+  },
+  "simplifications": [
+    {
+      "decision": "Reuse and port existing guided cases by name; preserve counts instead of adding duplicate end-to-end flows.",
+      "tradeoff": "Explicit count/name reconciliation and final source binding are required."
+    },
+    {
+      "decision": "Reuse existing fresh-install and migration suites for seven-area re-baseline.",
+      "tradeoff": "DDL constraints and entity parity need direct review; no production upgrade compatibility is claimed."
+    },
+    {
+      "decision": "Run one root-owned backend baseline and independent runner baseline concurrently; serialize later Gradle gates.",
+      "tradeoff": "Implementation waits until frozen baseline capture finishes."
+    },
+    {
+      "decision": "Keep one existing generator and one byte-identity check rather than a second contract-generation framework.",
+      "tradeoff": "Full public-document pin and generated output identity become the central checks."
+    }
+  ],
+  "newMandatoryE2ECases": 0,
+  "newTestFrameworks": 0,
+  "productionEditsReleased": false
+}

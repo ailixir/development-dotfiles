@@ -1,0 +1,63 @@
+{
+  "status": "FROZEN_SOURCE_ONLY_FOR_INDEPENDENT_REVIEW",
+  "parentDesignSha256": "16ca20ed9cf1ae2239fc4d94057e32b02564b7ca21462e4080a08ca8bca17189",
+  "documentationFirstSha256": "3e0a43dfbea6f9ad0f9a87ba3c3dcf785ebae1676b6eb63ba896696c83ac110d",
+  "patchSha256": "cff982955bdca3ad40abc609b2bc502052fcafa62ab4d353d9b82a6fca1a3e60",
+  "files": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java": {
+      "baseSha256": "e321b8378f81f6d78ad027449bad3e385f0ac6089b0eabd67a865b6817cbdf5b",
+      "candidateSha256": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+      "inverseSha256": "e321b8378f81f6d78ad027449bad3e385f0ac6089b0eabd67a865b6817cbdf5b",
+      "wholeInverseExact": true,
+      "liveUnchanged": true
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": {
+      "baseSha256": "e40095dd25c53e64c8659d55d13ed39c2c0c2fb646bd15fcc0ba14008a61b162",
+      "candidateSha256": "a3f2344499d0936bb7ab43e4a679cc2f9aa8fe5590fbfd58179d4213796c39fa",
+      "inverseSha256": "e40095dd25c53e64c8659d55d13ed39c2c0c2fb646bd15fcc0ba14008a61b162",
+      "wholeInverseExact": true,
+      "liveUnchanged": true
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java": {
+      "baseSha256": "fa9cd1d3bd7e167600daeb9f0b71a0c3c5cbdda73be9a197e60ceff6f8af346d",
+      "candidateSha256": "ff8946cd52548d7d5b8ce8dae8aec24537d14f85ddf40fcd3335a5dfbc1efd5a",
+      "inverseSha256": "fa9cd1d3bd7e167600daeb9f0b71a0c3c5cbdda73be9a197e60ceff6f8af346d",
+      "wholeInverseExact": true,
+      "liveUnchanged": true
+    },
+    "docs/specs/studio-observed-authoring/secret-login-design.md": {
+      "baseSha256": "079b32167b5c75b7e3f01b33e64ad90e108550f55efb090d7e70de7b3e4a22a6",
+      "candidateSha256": "c06c7196af29af60aaae6d2f7ab670cd445c4041e839cb1708d96c7e82c61f65",
+      "inverseSha256": "079b32167b5c75b7e3f01b33e64ad90e108550f55efb090d7e70de7b3e4a22a6",
+      "wholeInverseExact": true,
+      "liveUnchanged": true
+    }
+  },
+  "exactProductionLift": "Public void validate invokes private validatedCanonical. Public validateAndCanonical invokes SAME private body. Old canonical -> conditional v3 name normalization -> same schemas.computeIfAbsent -> fixed INVALID_CONTRACT422 ordering remains exact; only assign old canonical String and return after schema success. Mechanical inverse reproduces entire old Contracts bytes.",
+  "clientLift": "Only old schema+second canonical request lines changed. Returned successful String UTF8 encoded at old payload point. Mocked null result executes direct original public validate and canonical; void path uses PRIVATE shared body so mocked return helper cannot bypass its schema. Everything after byte array and before prelude including TX/endpoint/size/token/immutable remaining/send/read/verdict/failure unchanged.",
+  "defaultAndMockLimit": "Production Contracts final, standard factory/private cache does not return null. Existing public void API/stubbing keeps original call signature. Selected Client uses new successful helper; arbitrary stateful helper mocks/concurrent mutating/custom JsonNode equivalence is not asserted. A deliberately forged nonnull mocked success is not schema authority; no real configuration offers such override.",
+  "installedLibrary": {
+    "version": "networknt json-schema-validator1.4.0",
+    "jarSha256": "5d7b6ce4c7b2a3ed189511cbaa913808c7cd2b570d70b923426352785bffbdd0",
+    "metadataSha256": "82e92120b667995b251821053a930c762f01be33d393cfa83175709651201afc",
+    "metadataOnlyNoFixtureExecution": true
+  },
+  "inputNonmutationSource": "Current getSchema(JsonNode) uses default SchemaValidatorsConfig; constructor uses EMPTY_APPLY_DEFAULTS_STRATEGY whose static constructor passes false/false/false. Current V7 factory has no configured custom mutators/listeners. Properties/Items validate traverse instance and return diagnostics; default application belongs to optional walk/config paths, disabled here. No schema/default/config changes. This binds current installed library and configured standard nodes, not arbitrary future custom validators.",
+  "meaningfulTestSelectors": [
+    "validationCanonicalRetainsPublicNameRefusalAndImmutableInputBytes",
+    "unsupportedNullCanonicalDependencyRetainsOriginalValidationAndBudgetOrder"
+  ],
+  "testProof": {
+    "oldMethodsByteExactByContiguousAdditionInverse": true,
+    "oldVoidMethodCount": 15,
+    "addedMethods": [
+      "validationCanonicalRetainsPublicNameRefusalAndImmutableInputBytes",
+      "unsupportedNullCanonicalDependencyRetainsOriginalValidationAndBudgetOrder"
+    ]
+  },
+  "testBranches": "Real Contracts public name/v3 parity, canonical/schema refusal parity, complete existing independent replay input JSON/class/representation nonmutation, original-vs-returned canonical UTF8 byte parity; real expired PublicationBudget and fake unsent HttpClient ensure token-before-expiry/schema-before-token/size-before-token order. Null helper original real schema refusal and old void stub refusal preserved. No server, browser, model or new framework.",
+  "sourceTests": "UNRUN; installed metadata inspected with javap only. No formatter/compiler/build/tests/runtime/SQL/profiler invoked. Original golden resources/test bodies/assertions untouched.",
+  "costAndAuthority": "One duplicate canonical traversal removed from an already off-lock request path; API coupling/private frame maintenance increases. No benefit/cause/exclusive-cost/PASS promise. Immutable deadline, secret1000ms/revocation2000ms/full ROOT+APP/30patterns/real closure remain unchanged; exact first presend EXPIRED remains current red evidence.",
+  "metadataWarning": "Contracts validation debug points move; previous sampler mappings are historical until independent current-class review. No ReplayIT or sampler edited.",
+  "sharedBudget": "USD500 ceiling, actual billing unavailable; no lifecycle/QA/Done/DAG/commit/push/deploy."
+}

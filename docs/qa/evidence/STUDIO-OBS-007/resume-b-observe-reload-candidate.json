@@ -1,0 +1,26 @@
+{
+  "status": "SOURCE_FROZEN_CHECKS_UNRUN",
+  "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+  "beforeSha256": "3286e59541e93e393272d43886ce7e739e75dff4412cf98f1b9ffdcbf03c82d7",
+  "afterSha256": "2e36ed91ede412076a34780adbe0d9378bba68b120c6f243139cf2bd97eca6bc",
+  "authority": "root-b-observe-reload-review.json + coordinator exact author release",
+  "proposalSha256": "45666c615581c64e93d3ca1fd382df9ce9c0b363d7540b501b1e6a7a0fd9c52e",
+  "exactInsertion": "if (intent.isMissingNode()) { return result; } after unchanged original observe call",
+  "originalMatchCount": 1,
+  "reverseReplacementRestoresAllOtherBytes": true,
+  "preservation": [
+    "Same original result object after successful original observe",
+    "All guards/full first validated save/commands unchanged",
+    "Same default REQUIRED owner lock/outer commit and external rollback",
+    "Explicit null/object present intent retains original second-lock behavior",
+    "TRACE/ownership 1s/cadence/revocation 2s unchanged"
+  ],
+  "checks": {
+    "runtime": "UNRUN",
+    "tests": "UNRUN",
+    "compiler": "UNRUN",
+    "formatter": "UNRUN",
+    "sql": "UNRUN"
+  },
+  "limits": "No performance or runtime acceptance claim. Coordinator owns exact mechanical and semantic verification."
+}

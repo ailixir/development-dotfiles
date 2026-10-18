@@ -1,0 +1,26 @@
+  @Test
+  void consumedAckLossIsEvidenceBoundAndMissingMaterializationCannotBecomeUnused() {
+    try (var db = new Database(null)) {
+      db.session("FAILED");
+      consumed(db, "ACK_LOST");
+      db.jdbc.update(
+          ("UPDATE studio_guided_actions SET "
+              + "document=jsonb_set(document,'{state}','\"UNKNOWN_OUTCOME\"') WHERE "
+              + "admission_id='admission'"));
+      insert(db, noDecision(db, "ACK_LOST", "admission"));
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT usage_outcome FROM studio_secret_use_audit", String.class))
+          .isEqualTo("ACK_LOST");
+    }
+    try (var db = new Database(null)) {
+      db.session("FAILED");
+      consumed(db, "PENDING");
+      db.jdbc.update("DELETE FROM studio_guided_materializations WHERE session_id='session'");
+      assertThatThrownBy(() -> insert(db, noDecision(db, "NOT_USED", null)))
+          .hasMessageContaining("unreached");
+      assertThatThrownBy(() -> insert(db, noDecision(db, "UNKNOWN_OUTCOME", "admission")))
+          .hasMessageContaining("admission source reference declaration lineage invalid");
+    }
+  }
+

@@ -1,0 +1,1540 @@
+{
+  "artifact": "STUDIO-OBS-015 combined actualCore owned-worker-generation + fullpure feedback05 receipt",
+  "createdAt": "2026-10-15T15:36:15.249378+00:00",
+  "owner": "backend015_resume / Dex execution-only",
+  "sourceHold": true,
+  "distHold": true,
+  "commandsLive": false,
+  "formalQAVerdict": null,
+  "lifecycleTransition": null,
+  "invocation": {
+    "oneAuthorizedInvocationOnly": true,
+    "wrapper": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend.py backend-joined-edit4-worker-generation-attempt05",
+    "command": [
+      "caffeinate",
+      "-i",
+      "./gradlew",
+      "test",
+      "--tests",
+      "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStartCannotWidenTrustedOriginCeiling",
+      "--rerun-tasks"
+    ],
+    "cwd": "backend",
+    "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+    "handle": 95039,
+    "terminal": true,
+    "active": false,
+    "exit": 1,
+    "elapsedSeconds": 47.22,
+    "counts": {
+      "total": 118,
+      "passed": 116,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0
+    },
+    "perClass": [
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 15
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "tests": 2,
+        "failures": 2,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "tests": 101,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 101
+      }
+    ],
+    "testcases": [
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "contextSecretDeclarationChangeUsesFrozenBase()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "policyChangesDoNotMoveBoundary()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "textOnlyPlainValueChangeIsDetected()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "unusedDeclarationChangeDoesNotCreateAReferencedIdentityOrBoundary()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "multipleEditsSelectEarliestPosition()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "viewportWaitAndGlobalContextChangesSelectFirstStep()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "configurationChangesSelectFirstStep()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "insertAtFourSelectsNewStep()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "editFourthStepChangesOnlyFourthAndTailInputs()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "missingBaseContextSecretMappingRefusesReuse()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "deleteFourthSelectsNextSurvivingStep()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "swapFourAndFiveSelectsCurrentFourth()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "unchangedDraftIsReadyAndFirstRunUnlearned()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "stepContextChangeSelectsOnlyItsStableStepAndTail()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "tailDeletionRelearnsLastRemainingStep()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "name": "incrementalStartCannotWidenTrustedOriginCeiling()",
+        "status": "FAIL"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "name": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays()",
+        "status": "FAIL"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:missing-snapshot-evidence",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:null-base-for-nonempty-original-prefix",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:foreign-base-id",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:foreign-test-base-identity",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:forged-base-revision-digest",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:forged-base-artifact-hash",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:claimed-map-not-recomputed",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:changed-base-context-retains-old-snapshot",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:source-text-does-not-match-basis",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:duplicate-reference-declaration",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:missing-referenced-plain-identity",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:private-resolved-value-in-declaration",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:noncontiguous-original-prefix-program",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:program-action-not-from-base",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:current-prefix-context-cannot-be-reused",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:base-authoring-identity-version-absent",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:missing-current-global-context",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:missing-step-evidence-reference-array",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:claimed-current-step-input-is-forbidden",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:recursive-past-basis-is-forbidden",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:raw-configuration-values-in-current-evidence",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:extra-snapshot-evidence-field",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:missing-required-base-proof-null",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:base-operation-equivalence-is-recomputed",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:base-claimed-map-resealed-still-not-source-derived",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:empty-prefix-must-not-require-or-supply-old-proof",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:nonempty-original-prefix-cannot-null-proof-after-drift-at-one",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "normalized snapshot source refuses numeric-captured-at",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "normalized snapshot source refuses lone-surrogate-context",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "normalized snapshot source refuses unsafe-evidence-revision",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "issuedPrefixReadObservationRemainsAnchoredWithoutAnEffectiveReadAction()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "excluded binding multiplicity duplicate-edge",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "excluded binding multiplicity duplicate-pair",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:candidate-snapshot-map-cannot-be-copied-even-if-resealed",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:candidate-gap-in-reused-prefix",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:candidate-older-same-test-revision-id",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:candidate-suffix-reuse-is-forbidden",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "rawAllocationCommitmentCannotBeReplacedByItsEffectiveProjection()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "unusedMaterializedInputNeverBecomesFutureReplayRecipe()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:ordinary",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:boundary",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:empty-prefix-incomplete-base",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:base-historical-ordinary",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "snapshotCorrection:drift-at-first-step-retains-original-base-proof",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:admitted-binding-replacement",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:pre-admission",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:same-pair",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:unperformed-read",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "admitted raw history graphTimingConformance:raw-allocation-cannot-be-replaced-with-effective-empty-copy",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "admitted raw history graphTimingConformance:raw-failed-edge-history-cannot-be-erased",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:unknown-raw-edge-admission",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:native-started-edge-is-not-excludable",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:policy-failure-is-not-edge-exclusion",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:assertion-failure-is-not-edge-exclusion",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:unknown-outcome-is-not-edge-exclusion",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:second-excluded-attempt-forbidden",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:pre-admission-cannot-acquire-failed-edge",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:edge-wrong-origin",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:edge-wrong-binding",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:edge-wrong-producer-admission",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:edge-wrong-coordinate",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:edge-wrong-slot",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:duplicate-raw-edge",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:successful-same-pair-edge-cannot-disappear",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:raw-allocation-cannot-be-replaced-with-effective-empty-copy",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:raw-failed-edge-history-cannot-be-erased",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:bootstrap-cannot-hash-effective-projection",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:model-only-orphan-allocation-refused",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:missing-base-proof-cannot-authorize-import",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:foreign-base-pin-cannot-authorize-import",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:prefix-read-must-match-verified-program",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:missing-base-binding-cannot-authorize-zero-consumer",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:producer-historical-availability-context-must-match",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:producer-historical-availability-fence-must-match",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:successful-read-producer-cannot-be-hidden",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:unread-producer-cannot-be-fabricated",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:retained-producer-provenance-required",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:new-model-consumer-intent-cannot-use-import-exception",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:final-need-identity-cannot-change",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:first-suffix-acceptance-cannot-follow-frozen-head",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:effective-transfer-cannot-disappear",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:effective-transfer-producer-cannot-change",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:excluded-failed-edge-is-not-executable-transfer",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:candidate-policy-cannot-omit-successful-transfer",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:candidate-policy-binding-cannot-drop-successful-consumer",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:publication-preimage-must-commit-raw-failed-edge",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:publication-preimage-envelope-cannot-change",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:admission-preimage-must-exclude-spent-attempt",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:admission-preimage-is-array-not-wrapper",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:candidate-authorization-preimage-is-exact",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:candidate-source-identity-cannot-be-substituted",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "graphTimingConformance:unanchored-generation3-observation-refused",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "oldBasisCannotDistinguishUnexecutedContextChange()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "historicalChoiceCaptureAnchorsItsOlderObservationButAnUnusedSnapshotDoesNot()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "extended basis refuses materializationEvidence",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "extended basis refuses incrementalEvidence",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "extended basis refuses snapshotEvidence",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "extended basis refuses extra-root",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "extended basis refuses extra-version",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "extended basis refuses extra-entry",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "extended basis refuses extra-current-source",
+        "status": "PASS"
+      }
+    ],
+    "mainCompile": "PASS",
+    "allTestCompile": "PASS",
+    "sourceExclusions": null,
+    "retryExtraTestsOrManualNativeCommands": false
+  },
+  "stability": {
+    "sourceStable": true,
+    "testInputStable": true,
+    "distStable": true,
+    "testInputDigestBefore": "9e5d17ae870a0934ce18ec7c10f0d98f396339729b63fb9d423020420df8771c",
+    "testInputDigestAfter": "9e5d17ae870a0934ce18ec7c10f0d98f396339729b63fb9d423020420df8771c",
+    "sourceDigestBefore": "9e5d17ae870a0934ce18ec7c10f0d98f396339729b63fb9d423020420df8771c",
+    "sourceDigestAfter": "9e5d17ae870a0934ce18ec7c10f0d98f396339729b63fb9d423020420df8771c",
+    "distDigestBefore": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "distDigestAfter": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "protectedPins": {
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": {
+        "before": "07818f2ec8eff469548a5c6d5720b950ffead21803ac28021ff5c7d0dd9c0c00",
+        "after": "07818f2ec8eff469548a5c6d5720b950ffead21803ac28021ff5c7d0dd9c0c00"
+      },
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": {
+        "before": "2f74c1fcb596f09ed630e674185f7f3ba7cfac78f5540f8aa61d8ce2efe8df84",
+        "after": "2f74c1fcb596f09ed630e674185f7f3ba7cfac78f5540f8aa61d8ce2efe8df84"
+      },
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java": {
+        "before": "7c87231fd3704035f333c2c779085ef5f7e98d47ea9f042aca907e00e3feec9d",
+        "after": "7c87231fd3704035f333c2c779085ef5f7e98d47ea9f042aca907e00e3feec9d"
+      },
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": {
+        "before": "597942a8fdf2e8b366bb7a180073db1542943631ba1478750c0a1fdadb0baa15",
+        "after": "597942a8fdf2e8b366bb7a180073db1542943631ba1478750c0a1fdadb0baa15"
+      },
+      "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java": {
+        "before": "8c110961bc1c6897e0c8e75e0733f61925579f9fa970854fa5c377add3aa0b9d",
+        "after": "8c110961bc1c6897e0c8e75e0733f61925579f9fa970854fa5c377add3aa0b9d"
+      },
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java": {
+        "before": "b6c0f4996f9cfbaface4f0b0f213969fe05f3979727ed8e2984e1678cdb38baf",
+        "after": "b6c0f4996f9cfbaface4f0b0f213969fe05f3979727ed8e2984e1678cdb38baf"
+      },
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java": {
+        "before": "04fa2de664edfc7a3eb414cffde3c8d7a5c275e7136958b375beab4d4243ea02",
+        "after": "04fa2de664edfc7a3eb414cffde3c8d7a5c275e7136958b375beab4d4243ea02"
+      }
+    }
+  },
+  "actualEngine": {
+    "JDK": "21existingwrapper",
+    "database": "Owned disposable PostgreSQL15.19, actualData10V20preboot/normalV21Springupgrade passed",
+    "Core": "Actual controlled Core HTTP/mTLS/BFF + actualguidedNode/Chromium/recording, both original methods attempted",
+    "inheritedProcesses": "22246/67717/13577/13581/44737 unchanged read-only inventory; no manual connection/signal or arbitrary PID/port action. Authorized Gradle wrapper daemon use is not a browser/server probe."
+  },
+  "exactCoreFailure": {
+    "methods": [
+      {
+        "method": "incrementalStartCannotWidenTrustedOriginCeiling()",
+        "type": "org.opentest4j.AssertionFailedError",
+        "assertion": "awaitFinalizing expected FINALIZING but actual FAILED during initial original10step learning",
+        "sourceFrames": [
+          "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.awaitFinalizing(GuidedPublicationReplayIT.java:18141)",
+          "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalJoined(GuidedPublicationReplayIT.java:2938)",
+          "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStartCannotWidenTrustedOriginCeiling(GuidedPublicationReplayIT.java:2854)"
+        ]
+      },
+      {
+        "method": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays()",
+        "type": "org.opentest4j.AssertionFailedError",
+        "assertion": "awaitFinalizing expected FINALIZING but actual FAILED during initial original10step learning",
+        "sourceFrames": [
+          "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.awaitFinalizing(GuidedPublicationReplayIT.java:18141)",
+          "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalJoined(GuidedPublicationReplayIT.java:2938)",
+          "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays(GuidedPublicationReplayIT.java:2840)"
+        ]
+      }
+    ],
+    "firstCause": "BUDGET_EXCEEDED when reserving another NEXT_ACTION before ninth provider send, at initial source stepIndex5/generation12. Original ten-step initial learning incomplete; no basepublication/edit4 reached.",
+    "actualActionsPerSession": "7SUCCEEDED/OK dispatchCount1: step1 navigate+read, step2 fill, step3 assert, step4 assert, step5 click+assert. No failed/UNKNOWN/native retry or reinterpretation.",
+    "actualCallsPerSession": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 7,
+      "VERIFY_STEP": 0,
+      "totalHttpCalls": 8,
+      "APPLIEDAttempts": 8
+    },
+    "declaredReportedUsagePerResponse": {
+      "input": 20,
+      "output": 40,
+      "totalPerSessionReportedInput": 160,
+      "totalPerSessionReportedOutput": 320,
+      "meaning": "Controlled fixture-declared usage fields, not measured realLLM tokens. No invented usage or capacity inference."
+    },
+    "reservationAccounting": {
+      "perCallActualWireAndCommittedCeiling": 4000,
+      "eightChargedCeilingsTotal": 32000,
+      "sessionOutputTotalCap": 32000,
+      "chargedInputTotal": 129846,
+      "sessionInputCap": 262144,
+      "sourcePolicy": "GuidedSessionService.reserveModel reserves configured ceilings; settleModel explicitly NO REFUNDS, charges only positive actual-minus-ceiling overage and removes reservation. Charged32000 is conservative ceiling accounting, not32000 genuinely spent/remaininginflight tokens.",
+      "actualPendingAttempts": "Retained modelAttempts all8APPLIED; no RESERVED/CALLING attempt in retained metadata.",
+      "settlementAndInFlightLimit": "Exact model-settle command and modelReservations map snapshots NOT RETAINED. Source settle-before-APPLIED same-transaction ordering supports labelled inference that these8APPLIED calls settled; no fabricated actual methodcall count or inflight-map snapshot.",
+      "ninthCall": "Reservation refusal occurs before provider send; transactional earlier partial counter changes not committed. Existing8committed witnesses/counters retained."
+    },
+    "separateCeilings": {
+      "productionGuidedTranslationDefault": 4096,
+      "existingJoinGuidedTranslationOverride": 4000,
+      "separateGenericGatewayDefaultAndCapturedTransportCeiling": 32768,
+      "sourceFacts": "GuidedTranslationProperties15 default4096; JOIN dynamicproperty4000; StudioGatewayProperties48 genericdefault32768. Distinct fields, no production/session/fixture cap increase performed."
+    },
+    "capacityLimit": "Source reconstruction of13base/9suffix calls or candidate2048 belongs independent Aria planning; actual per-response encoded lengths/fullplanenvelope not retained. No source/config/usage changes approved or performed here."
+  },
+  "safeActualBudgetEvidence": {
+    "summary": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/safe-model-budget-summary.json",
+      "sha256": "dd1ae972defd514a3239b84d677c087a14f343929320523a96fa26dcf603261e",
+      "bytes": 18535,
+      "mode": "0o644"
+    },
+    "fullNumericPerAttemptAndRequestByteWitnesses": "Exact original model-budget-evidence copies under owned-temp; actual encoded INPUT bytes/input ceilings preserved for all8calls per session. No output-byte/actualresponse-body reconstruction claimed.",
+    "sentToAria": "/root/aria015_budget05 received safe numeric summary/evidence paths only"
+  },
+  "pureSubjects": {
+    "ChangeDetectionTest": "15/15PASS complete oldcases + browser=firefox pure hash-envelope sentinel inside configurationChangesSelectFirstStep; production Chromium codec untouched, no actual alternate browser support.",
+    "IncrementalPublicationConformanceTest": "101/101PASS entire existing positive/negative/pure candidate/history/snapshot/conformance class. No authority-tier/privatePG/native proof inferred from pure results.",
+    "newB4aActualCases": [
+      {
+        "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+        "name": "configurationChangesSelectFirstStep()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "normalized snapshot source refuses numeric-captured-at",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "normalized snapshot source refuses lone-surrogate-context",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "normalized snapshot source refuses unsafe-evidence-revision",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+        "name": "oldBasisCannotDistinguishUnexecutedContextChange()",
+        "status": "PASS"
+      }
+    ],
+    "frozenStep2_3": "oldBasisCannotDistinguishUnexecutedContextChange method completed full exact frozen identityA/B unusedstep2context and independent step1same/step2+3different maps, currentderive/lowerer and rawsource invariance at pure supplied-preimage tier.",
+    "malformedMetadata3": "Complete numeric capturedAt/lone-surrogate-context/unsafe-evidence-revision negative constructions returned with unchanged positive controls; no HTTPDTO acceptance claim.",
+    "ObservedArtifactLowererTestStandalone": "NOT_SELECTED; existing separate source/gates still require execution as allocated.",
+    "B4aMapping": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source01/case-mapping.json",
+      "sha256": "424988f22cf8cc7b38fdd31c93b81ea66ad428acee7900fe9e4037a6e0563553",
+      "bytes": 1825,
+      "mode": "0o644"
+    }
+  },
+  "lifecycleActualProof": {
+    "registry": {
+      "rootCount": 9,
+      "distinctRecordedDescendantPids": 29,
+      "eventCounts": {
+        "SPAWN": 9,
+        "READY": 5,
+        "DESCENDANT_RECORDED": 29,
+        "GRACEFUL_SIGNAL": 5,
+        "EXIT_CONFIRMED": 12
+      },
+      "eventFile": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/owned-temp/owned-worker-generations.jsonl",
+        "sha256": "c6557629ebf260d08420bdec2c4b2c308d66699a5a4abb40323f5dfc847f52f2",
+        "bytes": 38494,
+        "mode": "0o600"
+      },
+      "cleanupSummary": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/owned-temp/owned-worker-cleanup.json",
+        "sha256": "9a7668886b7dd3dbb56208c5f85c0c2cd5fbc7d9f82c8920e963066558fe5aa0",
+        "bytes": 2045,
+        "mode": "0o600"
+      },
+      "allRootsActuallyFalseAndDesc0": true,
+      "cleanupFailures": 0,
+      "forceSignalEvents": 0
+    },
+    "readiness5": [
+      {
+        "marker": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/owned-temp/owned-ready-8ea1c8a2-bade-47c6-bd8d-db57dcb5530d.json",
+          "sha256": "b1fc64441c3451ffca3c0d02614846b203ca4cc1985f893d83fb4392a0b12ae6",
+          "bytes": 104,
+          "mode": "0o600"
+        },
+        "role": "guided",
+        "generation": 2,
+        "pid": 25900,
+        "port": 51172,
+        "matchedReadyEventCount": 1,
+        "nonceHashMatches": true,
+        "portMatches": true,
+        "event": {
+          "alive": true,
+          "commandSha256": "7b4f7c37fdb930605aac751f195c91346c9d5add4c3b257b01f3a919e7c4fb4d",
+          "configSha256": "93245645f37b6789411a3f8feb3ddc57f03bcb8596baeb3b1631a98c9399c706",
+          "event": "READY",
+          "generation": 2,
+          "ownedTemp": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-8325002344948405311",
+          "pid": 25900,
+          "poolSize": 0,
+          "readinessNonceHash": "f90aa9944da37da22f88ca354325ec4c97afc1c51a2813c4823f31aae6b302a3",
+          "readyPort": 51172,
+          "role": "guided",
+          "started": "2026-10-15T15:23:29.989Z",
+          "wrapperSha256": "49cecf40313233c41ac56cc9e01f83da66efd7c7c4fb657a7a2800c5c8c006dd"
+        }
+      },
+      {
+        "marker": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/owned-temp/owned-ready-e30fbe92-d300-41a0-98b6-169bfab6ab2c.json",
+          "sha256": "0f024c9ff82cf13cc6a4e20e1cf0c21156b6467bacb6d3985e9888df030d9961",
+          "bytes": 104,
+          "mode": "0o600"
+        },
+        "role": "secret",
+        "generation": 0,
+        "pid": 25037,
+        "port": 51170,
+        "matchedReadyEventCount": 1,
+        "nonceHashMatches": true,
+        "portMatches": true,
+        "event": {
+          "alive": true,
+          "commandSha256": "a56cb3e9aa8bfe56459b0d714b2b2f06be102bae72e1ccbda6a149fee2961df4",
+          "configSha256": "NOT_A_CONFIG",
+          "event": "READY",
+          "generation": 0,
+          "ownedTemp": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-8325002344948405311",
+          "pid": 25037,
+          "poolSize": 0,
+          "readinessNonceHash": "2b2f93e8900da1e5744ccd535b46beccb67e4665979ad8501bead71d063d2a08",
+          "readyPort": 51170,
+          "role": "secret",
+          "started": "2026-10-15T15:23:07.845Z",
+          "wrapperSha256": "11955559c487b0a0b3967c6ac583853c4946f1f7d382e5653ca0942e1810bee1"
+        }
+      },
+      {
+        "marker": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/owned-temp/owned-ready-5fd6f0a7-29b8-42ba-aa70-b4c991529277.json",
+          "sha256": "1d4d108f5f10f556ae22488e220056b205bffae5e76d0a2a82c6c80658820349",
+          "bytes": 106,
+          "mode": "0o600"
+        },
+        "role": "ordinary",
+        "generation": 2,
+        "pid": 25916,
+        "port": 51173,
+        "matchedReadyEventCount": 1,
+        "nonceHashMatches": true,
+        "portMatches": true,
+        "event": {
+          "alive": true,
+          "commandSha256": "eadca72c8ca9d1fdb8fb2b4c7f7f7b5fb8a0547df8553ef7a876aca20584e98e",
+          "configSha256": "NOT_A_CONFIG",
+          "event": "READY",
+          "generation": 2,
+          "ownedTemp": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-8325002344948405311",
+          "pid": 25916,
+          "poolSize": 1,
+          "readinessNonceHash": "8fa32da8256a1a7c8cf6dc267f9df8d249505a7953ef215f192ca90d0fc45547",
+          "readyPort": 51173,
+          "role": "ordinary",
+          "started": "2026-10-15T15:23:30.276Z",
+          "wrapperSha256": "fc33c4fd7c037f8aac294a0e128c59f336a539a8eb0930e7b80b545f9db6a3af"
+        }
+      },
+      {
+        "marker": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/owned-temp/owned-ready-46921568-738d-4b5e-b606-14459984b55c.json",
+          "sha256": "fa037a7090295a8602561b2291491a19dd8280e4c463efb4986482eb7c2d7ec6",
+          "bytes": 104,
+          "mode": "0o600"
+        },
+        "role": "guided",
+        "generation": 1,
+        "pid": 25587,
+        "port": 51172,
+        "matchedReadyEventCount": 1,
+        "nonceHashMatches": true,
+        "portMatches": true,
+        "event": {
+          "alive": true,
+          "commandSha256": "7b4f7c37fdb930605aac751f195c91346c9d5add4c3b257b01f3a919e7c4fb4d",
+          "configSha256": "93245645f37b6789411a3f8feb3ddc57f03bcb8596baeb3b1631a98c9399c706",
+          "event": "READY",
+          "generation": 1,
+          "ownedTemp": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-8325002344948405311",
+          "pid": 25587,
+          "poolSize": 0,
+          "readinessNonceHash": "a8e37767defa2b18b984cc32948e74c3c47793a4efe1501efbbaf366d9b39dfd",
+          "readyPort": 51172,
+          "role": "guided",
+          "started": "2026-10-15T15:23:21.014Z",
+          "wrapperSha256": "49cecf40313233c41ac56cc9e01f83da66efd7c7c4fb657a7a2800c5c8c006dd"
+        }
+      },
+      {
+        "marker": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/owned-temp/owned-ready-9d37a56c-262c-403b-8ec2-2c6970d0883e.json",
+          "sha256": "c4bf07fc229f30d145a3a564c63ba7070c620f0f7bbfbe89477aa5f0071b6d16",
+          "bytes": 106,
+          "mode": "0o600"
+        },
+        "role": "ordinary",
+        "generation": 1,
+        "pid": 25588,
+        "port": 51173,
+        "matchedReadyEventCount": 1,
+        "nonceHashMatches": true,
+        "portMatches": true,
+        "event": {
+          "alive": true,
+          "commandSha256": "eadca72c8ca9d1fdb8fb2b4c7f7f7b5fb8a0547df8553ef7a876aca20584e98e",
+          "configSha256": "NOT_A_CONFIG",
+          "event": "READY",
+          "generation": 1,
+          "ownedTemp": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-8325002344948405311",
+          "pid": 25588,
+          "poolSize": 1,
+          "readinessNonceHash": "782cd1fe24cfd9017458a4bc1450bfdd027af60ee70e1fa2e6952f229da2b1e0",
+          "readyPort": 51173,
+          "role": "ordinary",
+          "started": "2026-10-15T15:23:21.392Z",
+          "wrapperSha256": "fc33c4fd7c037f8aac294a0e128c59f336a539a8eb0930e7b80b545f9db6a3af"
+        }
+      }
+    ],
+    "twoFreshGenerations": "Actualgen1guided25587+ordinary25588 EXIT_CONFIRMED before firstgen2SPAWN; gen2guided25900+ordinary25916 distinct start/PID/nonce, same designated port correctlyowned. Secret25037 own ephemeral marker. All5successfulcandidate nonce/role/PID/generation/port markers matched actualREADYmetadata.",
+    "priorClosedGuard": "Actual second startWorkers traversed source-exact read-only prior-generation real-session/recording/ordinary/recorded-descendant closure guard before oldpair stop and gen2SPAWN. Firstsession FAILED/BUDGET and actual failed-test cleanup CONFIRMED, stored native recording, olddescendants gone bracket this transition. No individual guard SQL result snapshot was persisted; no invented DBrowbytes/closuretiming. Ordinary source-flow replay was not reached, so ordinary closure guard was idle/no ordinary execution, not active replay coverage.",
+    "actualSessionTeardowns": [
+      {
+        "testMethod": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+        "sessions": [
+          {
+            "sessionId": "7a7ba0ec-ff19-499b-9e2f-68368c34737d",
+            "beforeState": "FAILED",
+            "teardownStatus": "CONFIRMED"
+          }
+        ],
+        "allActualTeardownsConfirmed": true
+      },
+      {
+        "testMethod": "incrementalStartCannotWidenTrustedOriginCeiling",
+        "sessions": [
+          {
+            "sessionId": "771a8a76-d8d7-4521-b154-d91de19fa516",
+            "beforeState": "FAILED",
+            "teardownStatus": "CONFIRMED"
+          }
+        ],
+        "allActualTeardownsConfirmed": true
+      }
+    ],
+    "owningContext": {
+      "owningContextIdentity": 1812053079,
+      "cancelledScheduledTasks": 12,
+      "fixedDelayTasks": 8,
+      "fixedRateTasks": 2,
+      "cronTasks": 2,
+      "terminatedSchedulerServices": 1,
+      "terminatedAsyncDelegates": 4,
+      "trackedSchedulerBodiesEmpty": true,
+      "contextClosed": true,
+      "afterClassCacheEvictionConfigured": true,
+      "actualFrameworkCacheEntryEvicted": true,
+      "commonPoolTerminationClaimed": false
+    },
+    "postrunProcessInventory": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/postrun-process-inventory.json",
+      "sha256": "26ee30bdaad4c11506e9afe5cb601bc044b5d5c7954cc50eba2e5aa4d5bbd0f7",
+      "bytes": 1622,
+      "mode": "0o644"
+    },
+    "actualPostrunOwnMatches": [],
+    "all9RootsAnd29RecordedDescendantPidsAbsent": true,
+    "inheritedUntouched": [
+      {
+        "pid": 13577,
+        "ppid": 1,
+        "started": "Tue Oct 13 15:35:54 2026",
+        "commandSha256": "f6475ae8348d3b13a2124f26e47793bba2ee0fb0c1616698d9cc75e4d2706f4a"
+      },
+      {
+        "pid": 13581,
+        "ppid": 13577,
+        "started": "Tue Oct 13 15:35:54 2026",
+        "commandSha256": "f6475ae8348d3b13a2124f26e47793bba2ee0fb0c1616698d9cc75e4d2706f4a"
+      },
+      {
+        "pid": 22246,
+        "ppid": 1,
+        "started": "Wed Oct 14 19:09:12 2026",
+        "commandSha256": "76b51467dd45ca073c5717216588277759004a793004125508f4b902e4a7dbc2"
+      },
+      {
+        "pid": 44737,
+        "ppid": 1,
+        "started": "Sat Oct 10 11:36:14 2026",
+        "commandSha256": "254e1891a516de5b01c439b7bbfcbcc821d273a77d53af075f11720581bd990c"
+      },
+      {
+        "pid": 67717,
+        "ppid": 22246,
+        "started": "Thu Oct 15 04:29:53 2026",
+        "commandSha256": "5194b07d059df70f994827259eb149363e885d5c0d24288abce38599e27fc775"
+      }
+    ],
+    "intentionalFaultRestartsOrFailedStartupForeignListenerNegatives": "NOT_REACHED_OR_ENCOUNTERED; no inference from successful normal startup/retirement.",
+    "noManualSignalsOrOldUnknownRetry": true
+  },
+  "counterAndRecordingPreservation": {
+    "counterEpochs": [
+      {
+        "generation": 1,
+        "file": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/owned-temp/owned-generations/generation-1/p3-guided-launch-count.json",
+          "sha256": "be1e89dd4883b2a34044cc0235ea93b255e9be45866ec0e84b836c028500e31c",
+          "bytes": 277,
+          "mode": "0o600"
+        },
+        "registered": true,
+        "count": 1,
+        "recordingPathCaptured": true
+      },
+      {
+        "generation": 2,
+        "file": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/owned-temp/p3-guided-launch-count.json",
+          "sha256": "cb678b0ca306ca5a7e6c53fe055c8a120eabb02efbe1b518ab5549b3ce1dcf14",
+          "bytes": 277,
+          "mode": "0o600"
+        },
+        "registered": true,
+        "count": 1,
+        "recordingPathCaptured": true
+      }
+    ],
+    "archives": "Exact generation1 counter/log/context/outcome files captured before actual newgeneration reset; original live files/archives/media/journals preserved. Both actual guided process launchcounts1, not reinterpreted as one shared lifetime epoch.",
+    "media": [
+      {
+        "manifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/owned-temp/objects/studio/CSI-123/guided/771a8a76-d8d7-4521-b154-d91de19fa516.manifest.json",
+          "sha256": "9a721cdf512403bc62d2d763f8f9d728bd4b505e1af016558a62df4b8074f809",
+          "bytes": 1689,
+          "mode": "0o644"
+        },
+        "video": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/owned-temp/objects/studio/CSI-123/guided/771a8a76-d8d7-4521-b154-d91de19fa516.webm",
+          "sha256": "fd18ac5b4e4900025dabcde4cbdc49b6c553a630523ec30a5b11c1de72e0e0c5",
+          "bytes": 54372,
+          "mode": "0o644"
+        },
+        "sessionId": "771a8a76-d8d7-4521-b154-d91de19fa516",
+        "evidenceState": "STORED",
+        "evidencePartial": false,
+        "timings": [
+          {
+            "kind": "action",
+            "stepId": "909c70ba-a416-38c6-87e2-e0b94fe8162f",
+            "admissionId": "803bc36f-6922-453f-b0f3-4bc3b202cbb8",
+            "ordinal": 0,
+            "startMs": 498,
+            "endMs": 511
+          },
+          {
+            "kind": "action",
+            "stepId": "909c70ba-a416-38c6-87e2-e0b94fe8162f",
+            "admissionId": "b424fb0e-c89a-4fb4-a66e-688bb2811b8c",
+            "ordinal": 1,
+            "startMs": 1314,
+            "endMs": 1315
+          },
+          {
+            "kind": "action",
+            "stepId": "8e755323-90f7-33c2-a015-d5cb02475727",
+            "admissionId": "d063e129-7106-4bfc-976e-c63c44659371",
+            "ordinal": 0,
+            "startMs": 2235,
+            "endMs": 2237
+          },
+          {
+            "kind": "action",
+            "stepId": "ea87b0a0-4bd6-336e-8b80-5c8f3b4a181c",
+            "admissionId": "6d8ef507-907a-4171-8a80-62f1ea325da1",
+            "ordinal": 0,
+            "startMs": 2952,
+            "endMs": 2953
+          },
+          {
+            "kind": "action",
+            "stepId": "a0377309-c578-3794-b6de-12215dc2789a",
+            "admissionId": "2e1b4cc9-2db4-4677-9cae-80ceca92603c",
+            "ordinal": 0,
+            "startMs": 3571,
+            "endMs": 3571
+          },
+          {
+            "kind": "action",
+            "stepId": "4c70f1b7-7889-35c2-8cfa-b087cf18860c",
+            "admissionId": "e97c824e-aebf-4e82-bd66-e627851afc66",
+            "ordinal": 0,
+            "startMs": 4108,
+            "endMs": 4113
+          },
+          {
+            "kind": "action",
+            "stepId": "4c70f1b7-7889-35c2-8cfa-b087cf18860c",
+            "admissionId": "5f59b69c-8901-4422-8243-3c568370ce7e",
+            "ordinal": 1,
+            "startMs": 4437,
+            "endMs": 4437
+          }
+        ],
+        "decoderOrContinuousFrameAssertionsReached": false
+      },
+      {
+        "manifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/owned-temp/objects/studio/CSI-123/guided/7a7ba0ec-ff19-499b-9e2f-68368c34737d.manifest.json",
+          "sha256": "a89ef2b212649bf3cc9cede644e2590733bfc2111a1c37ee3d35a5fb5de2771a",
+          "bytes": 1687,
+          "mode": "0o644"
+        },
+        "video": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/owned-temp/objects/studio/CSI-123/guided/7a7ba0ec-ff19-499b-9e2f-68368c34737d.webm",
+          "sha256": "e568175b3df69dbd0d26975a733c49487436cde36be08dfb6bf1c152bdcad37a",
+          "bytes": 39441,
+          "mode": "0o644"
+        },
+        "sessionId": "7a7ba0ec-ff19-499b-9e2f-68368c34737d",
+        "evidenceState": "STORED",
+        "evidencePartial": false,
+        "timings": [
+          {
+            "kind": "action",
+            "stepId": "909c70ba-a416-38c6-87e2-e0b94fe8162f",
+            "admissionId": "8024fb13-71a9-4684-8bcb-b4fad7e7bb98",
+            "ordinal": 0,
+            "startMs": 439,
+            "endMs": 451
+          },
+          {
+            "kind": "action",
+            "stepId": "909c70ba-a416-38c6-87e2-e0b94fe8162f",
+            "admissionId": "0879d50f-026a-4d55-8d1b-31d369f0cd69",
+            "ordinal": 1,
+            "startMs": 791,
+            "endMs": 792
+          },
+          {
+            "kind": "action",
+            "stepId": "8e755323-90f7-33c2-a015-d5cb02475727",
+            "admissionId": "2d5ad1c4-7a09-4f8b-8895-07f9696f3f82",
+            "ordinal": 0,
+            "startMs": 1359,
+            "endMs": 1361
+          },
+          {
+            "kind": "action",
+            "stepId": "ea87b0a0-4bd6-336e-8b80-5c8f3b4a181c",
+            "admissionId": "aac75dd5-c3a5-483a-a6a1-292a389f2281",
+            "ordinal": 0,
+            "startMs": 1898,
+            "endMs": 1899
+          },
+          {
+            "kind": "action",
+            "stepId": "a0377309-c578-3794-b6de-12215dc2789a",
+            "admissionId": "3826812e-6948-4be5-a763-da9c72b39c7f",
+            "ordinal": 0,
+            "startMs": 2489,
+            "endMs": 2489
+          },
+          {
+            "kind": "action",
+            "stepId": "4c70f1b7-7889-35c2-8cfa-b087cf18860c",
+            "admissionId": "6696f9e9-beea-4baa-94ad-ec489ad6af63",
+            "ordinal": 0,
+            "startMs": 3031,
+            "endMs": 3035
+          },
+          {
+            "kind": "action",
+            "stepId": "4c70f1b7-7889-35c2-8cfa-b087cf18860c",
+            "admissionId": "80472324-ad71-44f1-b307-32da8f5d3453",
+            "ordinal": 1,
+            "startMs": 3354,
+            "endMs": 3355
+          }
+        ],
+        "decoderOrContinuousFrameAssertionsReached": false
+      }
+    ],
+    "pngFiles": 0,
+    "decodedContinuousFrameOffsetsPrivacyAssertions": "UNREACHED downstream; stored original WebMs/timings7each are not substitute decoder/continuous-video/seek/privateprovenance acceptance."
+  },
+  "outcomeCaptures": {
+    "nodeRows": 7,
+    "javaRows": 34,
+    "nodeOriginals": 7,
+    "javaOriginals": 7,
+    "pairs": [
+      {
+        "canonicalBodySha256": "290cc271b3b54ab00d0acf9805bf50d761908f31ff8eaacf3b2eb3c82b8b70af",
+        "javaPresent": true,
+        "bodyBytesMatch": true,
+        "sessionAdmissionJoinsMatch": true,
+        "nodeOutcomeValid": true,
+        "javaAccepted": true,
+        "javaThrew": false
+      },
+      {
+        "canonicalBodySha256": "3e91b36c67868f2341670eb3d8c52c03fb8978236f580da71d41b273faf3cff8",
+        "javaPresent": true,
+        "bodyBytesMatch": true,
+        "sessionAdmissionJoinsMatch": true,
+        "nodeOutcomeValid": true,
+        "javaAccepted": true,
+        "javaThrew": false
+      },
+      {
+        "canonicalBodySha256": "7df43128f71b755fee08b395b65d98281037193fc1d5d9d8e6697bd665c60cbb",
+        "javaPresent": true,
+        "bodyBytesMatch": true,
+        "sessionAdmissionJoinsMatch": true,
+        "nodeOutcomeValid": true,
+        "javaAccepted": true,
+        "javaThrew": false
+      },
+      {
+        "canonicalBodySha256": "2017423fe38857b7a74afd3adeb179875197ebb3e5f0c48103ee1557823b634a",
+        "javaPresent": true,
+        "bodyBytesMatch": true,
+        "sessionAdmissionJoinsMatch": true,
+        "nodeOutcomeValid": true,
+        "javaAccepted": true,
+        "javaThrew": false
+      },
+      {
+        "canonicalBodySha256": "33d64a01f501851d6fca5706fe4b32f1aa3b9416dbc8676337b97221e5c116ee",
+        "javaPresent": true,
+        "bodyBytesMatch": true,
+        "sessionAdmissionJoinsMatch": true,
+        "nodeOutcomeValid": true,
+        "javaAccepted": true,
+        "javaThrew": false
+      },
+      {
+        "canonicalBodySha256": "8020603038e6ba9a13c416555e8ee6cee7d572cff9eb5d087af321846ebaa929",
+        "javaPresent": true,
+        "bodyBytesMatch": true,
+        "sessionAdmissionJoinsMatch": true,
+        "nodeOutcomeValid": true,
+        "javaAccepted": true,
+        "javaThrew": false
+      },
+      {
+        "canonicalBodySha256": "1f055f2023279fe25692b179fd0dcdc22457b2cc7b8c517005ccac011f8b5161",
+        "javaPresent": true,
+        "bodyBytesMatch": true,
+        "sessionAdmissionJoinsMatch": true,
+        "nodeOutcomeValid": true,
+        "javaAccepted": true,
+        "javaThrew": false
+      }
+    ],
+    "nodeValidatorsTrue": true,
+    "javaOriginalsAccepted": true,
+    "instrumentationError": false,
+    "nodeTruncated": false,
+    "javaTruncated": true,
+    "javaTruncationLimit": "Expected bounded nested-error cap64 reached; later nested errors unavailable/inconclusive. All7original bodyhash/accepted records remain present; no missing diagnostic is promoted to success.",
+    "oneClassCohort": "Node7originals/sessionhash1, Java7originals/sessionhash1; finalNode/JavaJSONL hashes equal completedgeneration1archive so generation2 did not reset/expand capture budget.",
+    "originalCapsUnchanged": "1cohort/200events/1040000bytes; Javaerrors64; all actual capture files mode0600 and belowbyte/event caps.",
+    "metadataCapsActual": {
+      "events": 60,
+      "byteCounter": 38494,
+      "actualEventFileBytes": 38494,
+      "eventCap": 4096,
+      "byteCap": 2096000,
+      "summaryBytes": 2045,
+      "summaryCap": 1048576,
+      "mode0600": true,
+      "nonAsciiNearCapRuntimeWitness": "NOT_EXECUTED; independent F1source witness/repair review remains distinct."
+    }
+  },
+  "mainReachability": [
+    {
+      "subject": "Initial10step learn",
+      "status": "ATTEMPTED_INCOMPLETE; first5steps7actions succeeded thenbudget refusal at6"
+    },
+    {
+      "subject": "Basepublish/edit4/prefix1..3model0freshbinding/suffix4..10samehandle+ObservationSession",
+      "status": "UNREACHED"
+    },
+    {
+      "subject": "Exactmergedsnapshots/privateprovenance/READY/finalizezeroeffects",
+      "status": "UNREACHED"
+    },
+    {
+      "subject": "Trustedceiling same-current-contextpositive/409RUNTIME_INCOMPATIBLE zero-write refusal",
+      "status": "UNREACHED; helper afterinitialpublication/edit neverentered"
+    },
+    {
+      "subject": "Continuousdecodednativevideo/offset/privateframes/ordinarymodel0replay",
+      "status": "UNREACHED"
+    }
+  ],
+  "artifacts": {
+    "results": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-results.json",
+      "sha256": "777237bd6ebc47da12ef16046fc9ad0ba5eb40f76b15a3c4a115ee9f15d5f537",
+      "bytes": 26923,
+      "mode": "0o644"
+    },
+    "log": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05.log",
+      "sha256": "76bb92c6de6eed601d5871287b3025e48a73d9949f2aeb0f792a2148fcd5d732",
+      "bytes": 20692,
+      "mode": "0o644"
+    },
+    "xml": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-xml/TEST-com.citi.put.checks.studio.authoring.ChangeDetectionTest.xml",
+        "sha256": "4c02484ac8fa73c0d5a408ef12bbb56fea50b0cdc07efdc1a07d9404e96cd2fc"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+        "sha256": "ef0c2bb8f7cd057d946768e2621d258ce303d0df7e5ea6a3a592916326d0a568"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.xml",
+        "sha256": "f3c770cc3509570b7c6545327911140babce4cf0e88e0b0870997c8f31a38b35"
+      }
+    ],
+    "beforeInputs": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-before.json",
+      "sha256": "3cf2aee761e6a0495bd9c91c6d288643a7b9f26cdd86602b6abad18ae670e021",
+      "bytes": 327952,
+      "mode": "0o644"
+    },
+    "afterInputs": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-after.json",
+      "sha256": "56dd6c84bfe1d4a1196249963d88279b5e98eb66e257af6c02aff49a1b1ef38d",
+      "bytes": 327952,
+      "mode": "0o644"
+    },
+    "guards": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-guard-tally/GuidedPublicationReplayIT.json",
+        "sha256": "53594df3519c8a79d5a1453289d5fccc232bdcf90f2852913ab83e7dd12ac6b0"
+      }
+    ],
+    "captureManifest": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/capture-manifest.json",
+      "sha256": "2bdb872e9b5db31936483a5dab8cce2dd5064fdf80fbf3d13226fac7c380cb2e",
+      "bytes": 33744,
+      "mode": "0o644"
+    },
+    "safeCopiedFiles": 38,
+    "excludedPrivateConfigRawFiles": 26,
+    "originalsPreserved": true,
+    "prelaunch": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/prelaunch.json",
+      "sha256": "ebd91492935260b9fcf48ccd6687902818e0021e76fdeee75c5c755cbea6d765",
+      "bytes": 38597,
+      "mode": "0o644"
+    },
+    "postrun": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/postrun-process-inventory.json",
+      "sha256": "26ee30bdaad4c11506e9afe5cb601bc044b5d5c7954cc50eba2e5aa4d5bbd0f7",
+      "bytes": 1622,
+      "mode": "0o644"
+    },
+    "restoration": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-worker-generation-attempt05-artifacts/fixed-output-restoration.json",
+      "sha256": "8dc859390db3cdc3df802b27a766f9e3ef44774dd73b57730d4b2d41e42f55fd",
+      "bytes": 3434,
+      "mode": "0o644"
+    },
+    "fixedOutputRestoration": {
+      "priorFileCount": 56,
+      "freshArchivedFileCount": 17,
+      "restoredFileCount": 56,
+      "byteExact": true,
+      "mismatches": [],
+      "freshArchivedBeforeRestore": true,
+      "freshFiles": [
+        {
+          "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.authoring.ChangeDetectionTest.xml",
+          "sha256": "4c02484ac8fa73c0d5a408ef12bbb56fea50b0cdc07efdc1a07d9404e96cd2fc"
+        },
+        {
+          "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+          "sha256": "ef0c2bb8f7cd057d946768e2621d258ce303d0df7e5ea6a3a592916326d0a568"
+        },
+        {
+          "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.xml",
+          "sha256": "f3c770cc3509570b7c6545327911140babce4cf0e88e0b0870997c8f31a38b35"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/output.bin",
+          "sha256": "fcd3f109a59abd397a909811be2e720ad2aafc819c85f73fa7ef0b39eeebc7dd"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/output.bin.idx",
+          "sha256": "06bc1f25af988873dc4d5aadde38c15502a88108142c7ca1b47a7955e0355303"
+        },
+        {
+          "path": "backend/build/test-results/test/binary/results.bin",
+          "sha256": "cd570bda19b59d7da116ed7d50f99d81420b9c5b8a9d93e49f5d7e8bd86d4e3a"
+        },
+        {
+          "path": "backend/build/reports/tests/test/classes/com.citi.put.checks.studio.authoring.ChangeDetectionTest.html",
+          "sha256": "481546c8302731118c8f748f3cd8daebc978b2a55dc8412d65b4592302184d25"
+        },
+        {
+          "path": "backend/build/reports/tests/test/classes/com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.html",
+          "sha256": "24af47b6cf3c719b0675db129385acc5fd8cb3f06c298d4b7b8f386bfa9a3f95"
+        },
+        {
+          "path": "backend/build/reports/tests/test/classes/com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.html",
+          "sha256": "79e1b2c2635c2cef0d091e4e6bc0f4316d4fc91fa68282d9c19c09e225f5d7d4"
+        },
+        {
+          "path": "backend/build/reports/tests/test/css/base-style.css",
+          "sha256": "a10a4ef75ca2601b44bfdaf3112a5854f6376f68d7cbaf6958286f04488d293b"
+        },
+        {
+          "path": "backend/build/reports/tests/test/css/style.css",
+          "sha256": "61866908fd7eb09c79e96239f69db2e8cc5c6526cdb308eba0535ed2a0f6a263"
+        },
+        {
+          "path": "backend/build/reports/tests/test/index.html",
+          "sha256": "85507c8509f07dde56d31e51239ae8bf4f626f898d96d9bb888e73d6182ccf83"
+        },
+        {
+          "path": "backend/build/reports/tests/test/js/report.js",
+          "sha256": "fc89c6d002d18f4662065c9887b2cda8f8486f2737d4ad0f2fdeac0ad58a44dc"
+        },
+        {
+          "path": "backend/build/reports/tests/test/packages/com.citi.put.checks.studio.authoring.html",
+          "sha256": "88925eab90b5ec73cff77314e432c0b70d8db1848417b740d83e24c166e5e95a"
+        },
+        {
+          "path": "backend/build/reports/tests/test/packages/com.citi.put.checks.studio.guided.publication.html",
+          "sha256": "6394996c9652d8362cd2cbea4ba66f5caf7253f5b276b42e3c868d43692b3afd"
+        },
+        {
+          "path": "backend/build/guard-tally/GuidedPlanningIntegrationTest.json",
+          "sha256": "49877687fdc0fe0b3f5640e61f647d165fc6ba88836c6a4fe162dc073cdfc3b2"
+        },
+        {
+          "path": "backend/build/guard-tally/GuidedPublicationReplayIT.json",
+          "sha256": "53594df3519c8a79d5a1453289d5fccc232bdcf90f2852913ab83e7dd12ac6b0"
+        }
+      ]
+    },
+    "historicalActual04_05_06_07_08ReceiptsUntouched": true
+  },
+  "remaining": [
+    "BothCoremethodsFAIL; fullinitial10/edit4/trustedceiling/nativejoinedacceptance not granted",
+    "Budget fixture per-request capacity/input planning unresolved; no cap/usage increase or source change",
+    "Full35parameterizedvariants NOT_SELECTED; allremainingB1/R1/B2/B3/B4-R2/86/24/55/privateCoreVault/native/fullnormalcheckscoverage/crossReplica/deployment/independentQA015/POrootclosure then008",
+    "NativeR1 separate42cases30PASS12FAIL retained and not resolved here",
+    "Row85originalpendinguser/unamended"
+  ],
+  "noSourceRetrySkipThresholdOracleLifecycleChanges": true,
+  "allSourceDistHoldAndReturnSlot": true
+}

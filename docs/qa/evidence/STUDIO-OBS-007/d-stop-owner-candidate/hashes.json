@@ -1,0 +1,18 @@
+{
+  "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+  "beforeSha256": "770a33a35c6d449e68bb356404eae131871fae6cee63e6842704ceecb15aa26b",
+  "afterSha256": "ea7fb2b07d040747973d17be78953271933b09089765e73fa322cd5ee0ae0e37",
+  "patchSha256": "d0a824bb64f37eeb19d1941744998de81e7deaabbe2b0c457730116acaac858b",
+  "originalNineMethodSha256": "ec8ce679e86bd1c931aa3006e5d79af2fe7387fdfb4557874bd257303d2d724b",
+  "originalNineMethodByteIdentical": true,
+  "originalModeBlockByteIdentical": true,
+  "originalNineModeCount": 9,
+  "existingPrivateFaultMethodPreserved": true,
+  "newExplicitMethods": [
+    "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose",
+    "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose",
+    "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation",
+    "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose"
+  ],
+  "expectedRuntimeInvocations": 14
+}

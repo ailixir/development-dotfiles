@@ -1,0 +1,18 @@
+{
+  "exitCode": 0,
+  "command": [
+    "./gradlew",
+    "spotlessJavaApply",
+    "--rerun-tasks",
+    "-I",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBS-007/fresh-owner-budget-schedule-spotless.init.gradle"
+  ],
+  "changed": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java"
+  ],
+  "unexpected": [],
+  "afterHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java": "86b36ee2e157be9d34161d5c2ff754b40a572f7862ba6e6b03e67fc7fedda4c6",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "6f2dc64c582b49d2dfaa0cf3d4aa5a5a288690a543c19817c12689211ab0b2aa"
+  }
+}

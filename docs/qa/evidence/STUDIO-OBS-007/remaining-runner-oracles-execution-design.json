@@ -1,0 +1,273 @@
+{
+  "story": "STUDIO-OBS-007",
+  "scope": "DESIGN_ONLY; no source/dist changes or tests executed by this task",
+  "createdAtUtc": "2026-10-10T15:34:17.069129+00:00",
+  "wholeWaveCeilingUsd": 500,
+  "billingTelemetry": "UNAVAILABLE",
+  "candidate": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/runner-peer-repair-candidate/result.json",
+    "sha256": "7dc953f8019958ca966ade62ce3352a83fac3fdbc38b48e40074eba0e1324977",
+    "sourceAggregate": "0f67853794593ae90f6deb400b62378aa2a05e6503fa7067fdb6224117bb85e2",
+    "distAggregate": "7d1c2af8d0e7e80f1737933e74175b5d66d8ea5e3a54917bfad2ea7bb8b5e8ea"
+  },
+  "readBindings": {
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/remaining-runner-oracles-design-intent.txt": "9f8182191e1dd0f47d41d9765bf56697a94da0e2b39f871f1303e7ed4902c891",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/remaining-runner-oracles-design-context.txt": "86493da0b92c2f198731691be6efeb45fc106f612e643f9af1028647836192bf",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "7ec961b567234eee0d089bf28d51406b32b5da3737917c9e22e276b54f4aa8ea",
+    "studio-runner/src/guided/ownership.ts": "030443d7478791e2f980763a4e30a4b2daba922836d0c5ac9650e141995b31c4",
+    "studio-runner/src/server/runCoordinator.ts": "f2fb612e7312cf26768d6bc3ccc687a7735b5182a4b4a1be1578b8b2548ac77b",
+    "studio-runner/src/run/observedReplayAdapter.ts": "bf7401fa6a39c1751b5fedd093fd4da7433cc5a7ec5194976234a47c66a722f2",
+    "studio-runner/src/executor/observedReplay.ts": "2e55d5fde016475bc7c7ad8dd7cf5a0561b371a4d827b0abd5264a0955876353",
+    "studio-runner/src/run/loginRequired.ts": "ff3ae364e27532ca35437cbcbbdf07c23c50888d09c3c81c571d6bef66e830bd",
+    "studio-runner/test/fixtures-tier/secret-login.test.ts": "1207a26ac26170bfcbae9683e2c5d8a05a1950a6aafec15e03f4962bd75bf65c",
+    "studio-runner/test/fixtures/secret-login/server.ts": "2cea73be1af48d4bcd3eaa1768f6c09899fbd8a380812d281641f85b67c3664a",
+    "studio-runner/test/fixtures-tier/guided-wire.test.ts": "ee3bcc4c8032025311bb24236a51f4d8ea64136be66cdcd0587e38fb0622bfcb",
+    "studio-runner/test/fixtures-tier/cancel-real-chromium.test.ts": "af651336c4e2194501a16b9c714e984ebecc55a3ea67bd44d3010768eb475be9",
+    "studio-runner/test/guided/ownership.test.ts": "4bf7e8465c901c545442d893e6c8e921e8bf66d3ce4f48268e18cb28f584639a",
+    "studio-runner/test/server/concurrency.test.ts": "b0dd8474266bf3dff7b11c5122573f6875b321e0dba4b60be36ecbcba8d5677d",
+    "studio-runner/test/run/secretReplay.test.ts": "98aca8fb248925de27e6ec24601ea20d526110201f1e864b636d3aee6f23f775",
+    "studio-runner/test/fixtures-tier/globalSetup.ts": "48ed6f54da59ea71fdecbd6273bb08a3ae0644710a02501d1d9fe48aa95abbcd"
+  },
+  "actualEvidence": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/r-final-repair-delta-review.json",
+      "status": "PASS_SCOPED_REPAIR_DELTA",
+      "closes": "Preferences confinement, acquisition cleanup, SDK architecture mapping source delta only",
+      "doesNotClose": "Whole story, actual remaining control/login/isolation/PG joins; reviewer did not independently execute tests",
+      "sha256": "552126868733f73562594f1a50391a326989bb5b0d34fd81f1fcf72c50b1e14d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-peer-repair-candidate/result.json",
+      "status": "EXECUTED_SOURCE_BOUND_OWNER_GATES",
+      "counts": {
+        "defaultPassed": 1760,
+        "defaultSkipped": 29,
+        "chromiumPassed": 355,
+        "chromiumSkipped": 10,
+        "deploymentPassed": 313,
+        "deploymentSkipped": 0
+      },
+      "doesNotClose": "Named missing test cases below are absent; aggregate green cannot prove them",
+      "sha256": "7dc953f8019958ca966ade62ce3352a83fac3fdbc38b48e40074eba0e1324977"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/root-peerrepair-local-image/probe-result.json",
+      "status": "EXECUTED_LOCAL_IMAGE_PRIMITIVES",
+      "results": {
+        "compiledProvenance": 0,
+        "sandboxedPwuserFullChromium": 0,
+        "requireImageStrictPins": 1
+      },
+      "limits": "Node24 versus required Node22/internal ED05 remains red; native launch primitive is not full recorded child/Core run",
+      "sha256": "6b21cf87bd6d50b9d71cc1fd61347c14d78049f64cc94a610739dc6b25f1e85b"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-peer-repair-red/native-red-limit.txt",
+      "status": "UNCLASSIFIED_OLD_PIXELS",
+      "facts": "Historical 7290-byte Ready/noExecute all-white predicate failed; original bytes deleted before forensics. Isolated/current green does not classify old pixels.",
+      "sha256": "17ec499e5a1debdc3b2345013d9a1ce7ae78c2709e5f456ba83c9dda8e5797b0"
+    }
+  ],
+  "firstExecutableBatch": {
+    "id": "R-LOGIN-REAL-3",
+    "priority": 1,
+    "owner": "R, test-only change after root explicitly releases test scope; source/dist remain frozen until then",
+    "acs": [
+      18,
+      19
+    ],
+    "editOnly": [
+      "studio-runner/test/fixtures-tier/secret-login.test.ts"
+    ],
+    "reuse": [
+      "startSecretLoginFixture(), fixture.rotate()/expire()/reset() from test/fixtures/secret-login/server.ts",
+      "Existing replay frame in replays-login-twice case; actual playwrightBrowserFactory + createObservedReplayAdapter + executeObservedReplay",
+      "Existing structural registration and reached /login redirect cases retained unchanged"
+    ],
+    "gap": "Current mocked run/secretReplay two boolean cases and browser signature/redirect tests do not execute real executor failure annotation. Existing adapter login-twice is success only.",
+    "cases": [
+      {
+        "name": "actual replay protected-target drift without prior login annotates false",
+        "setup": "Fresh owned persistent context; initialBlank navigate to /reports; redirect settles /login. Next nonsecret click targets Reports control absent from login document under structural policy. No secret recipe/value.",
+        "assert": "Actual executor returns !ok LOGIN_REQUIRED detail.stepId = failing protected step and loginStepsPresent=false; failing receipt FAIL, subsequent step SKIPPED; fixture receipts zero; reached observation passwordControls>=1 and visible actionable login button. Use real acquire retry until configured bounded drift, no synthetic adapter.loginRequired override."
+      },
+      {
+        "name": "actual wrong-password replay protected-target drift annotates true",
+        "setup": "Fixture expected CANARY; Execute secretRef PASS value CANARY-wrong. Navigate /login, actual sole password primitive fills, click Sign in records accepted=false, next nonsecret Reports click absent in current reached login document.",
+        "assert": "LOGIN_REQUIRED with true on protected step; actual prior secret-fill PASS and secretUse.PASS=USED; one rejected receipt with correct wrong value in controlled fixture only; no protected effect; later steps SKIPPED. Secret-fill failure itself must never be relabeled LOGIN_REQUIRED."
+      },
+      {
+        "name": "actual registration replay passing assertion remains passing",
+        "setup": "Fresh no-secret frame navigate /registration; page url assert expected actual /registration. Signature is present, assertion actually passes.",
+        "assert": "ok=true errorCode=null, no detail, all actual steps PASS, no login receipt; no gateway invoked. Keep current isolated signature assertion as separate evidence."
+      }
+    ],
+    "proposedCommand": [
+      "npm",
+      "exec",
+      "--",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.fixtures.config.ts",
+      "test/fixtures-tier/secret-login.test.ts"
+    ],
+    "commandCwd": "studio-runner",
+    "executionPrecondition": "Root releases test editing/build or executes isolated full candidate snapshot. This config invokes globalSetup.emitDist; never run it against the presently frozen shared dist while B join loads it. Capture new test/source/dist hashes and actual count before attributing current evidence.",
+    "expectedNewCases": 3,
+    "requiredArtifacts": [
+      "actual reached observations (sanitized), ordered stepStarted/stepFinished, Result3 detail, real fixture receipts (canary-bearing fixture-only evidence confined), both gateway invocation counters, native video path/size/hash, pre-cleanup profile scan, child/stdout/stderr/manifest scans where produced"
+    ],
+    "closureLimit": "Closes real executor/adapter behavior only. Frames are controlled test inputs; does not claim actual publication, backend guided annotation, Vault/auth or Core/PostgreSQL join. The six published/learned cases remain separate below."
+  },
+  "nextBatches": [
+    {
+      "id": "R-CONTROL-REAL-4",
+      "priority": 2,
+      "owner": "R test-only; root joins actual backend revocation facts",
+      "acs": [
+        13,
+        19
+      ],
+      "proposedTestPath": "studio-runner/test/fixtures-tier/observed-secret-control.test.ts",
+      "reuse": [
+        "observed-replay.test.ts real createApplication/loadConfig/createChildBrowserLauncher/loadObservedBuild + local HTTP admission/report service",
+        "cancel-real-chromium.test.ts real monotonic wall/PID/scratch/report tracking; preserve all16 legacy cases",
+        "secret-login/server.ts /login and /slow; add fixture-only value-free input event ordinal/length and next-target effect counters if needed"
+      ],
+      "productionSeams": [
+        "runCoordinator.startControlPoll(..., secretBearing=true): absolute1000ms schedule, timeout1000ms, validSecretControl closed response",
+        "Actual RunJob.references.secrets must be nonempty and current observed route/config/catalog admitted; legacy artifact1 references=[] does not exercise this branch"
+      ],
+      "cases": [
+        "valid revoked=true from worst phase immediately after a successful control read",
+        "revoked response held ~900ms at next real scheduled read; include full queue/request time",
+        "next control connection accepts request but never returns complete body; local timeout stops without inventing revocation cause",
+        "PROGRESS acknowledgement revoked=true during actual in-flight browser step; no DELETE sent"
+      ],
+      "timing": "Use real SYSTEM_DEADLINE_TIMERS and performance.now. t0=controlled revocation immediately after completed nonrevoked response (record actual HTTP finish), not next request start. Capture scheduled/read-start/header/body/stop-request/action entry/finish/tree quiescence/FINAL clocks. Assert authority cutoff tStop-t0<=2000ms, request elapsed included, no later action/secret call enters. Independently measure already-in-flight completion/close residual and stop/kill/reap bounds; never subtract elapsed network time or claim teardown itself always<=2s.",
+      "effectProof": "Record actual entry into the sole trusted native password primitive and child step events at existing test wrapper seams; hold an actual native call using controlled /slow page focus event/block or existing CDP transport gate only AFTER native invocation entered. A promise held after an already completed call is not in-flight typing proof. Place a later secretRef consumer and fixture effect target; require zero later entries and zero effects. Page event telemetry is secondary; missing HTTP beacon alone cannot prove no typing. If existing seams cannot observe the exact native entry, stop with an instrumentation need instead of adding a raw-value production channel.",
+      "expectedNewCases": 4,
+      "proposedCommand": [
+        "npm",
+        "exec",
+        "--",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.fixtures.config.ts",
+        "test/fixtures-tier/observed-secret-control.test.ts"
+      ],
+      "status": "NOT_IMPLEMENTED_NOT_EXECUTED",
+      "closureLimit": "Local callback authority proves runner control response/loss behavior, not real service mayUse sweep, write-once revoked_at/audit/API error mapping. Root must join those below."
+    },
+    {
+      "id": "R-GUIDED-RENEW-REAL-4",
+      "priority": 3,
+      "owner": "R test-only",
+      "acs": [
+        6,
+        13,
+        19
+      ],
+      "proposedTestPath": "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts",
+      "reuse": [
+        "guided-wire.test.ts real mTLS/JWT guidedClaimClient/guidedCallback + createGuidedServer + launchGuidedBrowser",
+        "helpers/guided.ts context/proposal/dispatch/assignmentFor/ownershipSession",
+        "secret-login/server.ts controlled sole password input"
+      ],
+      "cases": [
+        "renewal denial REVOKED at worst phase, while actual password call is busy; no subsequent dispatch can enter",
+        "slow ~800-900ms renewed grant: starts remain absolute1s epochs under real network/wallclock",
+        "renewal connection/body lost: request abort<=1000ms, accepting false<=2s from last acknowledged epoch, subsequent command refused, no invented actual revocation",
+        "actual lease/expiresAt expiry with native action in-flight and late successful claim response cannot revive; no additional context/secret effect"
+      ],
+      "timing": "Capture real request/response/mTLS identity and monotonic stop/native-entry clocks; do not reuse vi fake-timer ownership tests as physical latency evidence. API closure mapping depends root actual revoked_at; local denial response only proves worker behavior.",
+      "capacity": "Use capacity1 unchanged; renewal during busy is independently active. Assert onStopping closes accepting immediately, actual context close awaited, no late response resurrects grant/context, owned scratch eventually gone before replacement admission.",
+      "expectedNewCases": 4,
+      "proposedCommand": [
+        "npm",
+        "exec",
+        "--",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.fixtures.config.ts",
+        "test/fixtures-tier/guided-secret-ownership.test.ts"
+      ],
+      "status": "NOT_IMPLEMENTED_NOT_EXECUTED"
+    },
+    {
+      "id": "R-ISOLATION-REAL-3",
+      "priority": 4,
+      "owner": "R test-only with root actual scope join",
+      "acs": [
+        6,
+        11,
+        19
+      ],
+      "proposedTestPath": "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts",
+      "choice": "C17 implemented CONFIGURATION_DENIED when guided capacity>1; do not change product to multi-session capacity2 merely to test isolation.",
+      "cases": [
+        "capacity2 rejected before TLS server/browser creation; retain existing run/secretReplay constructor counter test and add real mounted option startup denial",
+        "capacity1 session A actual secret fill, concurrent B assign returns CAPACITY and launch/read/effect counters zero; hold actual A close and verify B still refused until liveness confirms close",
+        "after A successful stop/dispose, B different context/CSI same secret ID different planted value: fresh distinct scratch/profile identities and no cookie/knownSecret/withheld/digest/canary carryover"
+      ],
+      "assertions": [
+        "Actual browser1 at most while A held; no B page until old context actually closed",
+        "ProfilesA/B canonical paths and dev/ino distinct; A scratch gone only after browser writers stop",
+        "A fill then /echo sanitized in A; B page containing A former canary demonstrates A withhold redactor inventory not reused (controlled fixture only), while B current canary remains sanitized",
+        "Full profile/user-data scans before each close; fixture recorded submissions use respective values; all callback/diagnostic/journal/stdout/stderr canary scans"
+      ],
+      "expectedNewCases": 3,
+      "status": "NOT_IMPLEMENTED_NOT_EXECUTED",
+      "limits": "Runner sequential memory/capacity/scratch proof is separate from SEC2 real Vault CSI scope isolation. A same-name secret inventory in different runner contexts cannot substitute counted actual scoped backend resolver."
+    }
+  ],
+  "rootOwnedJoinedScopes": [
+    {
+      "id": "JOIN-LOGIN-6",
+      "owner": "Root coordinates backend guided translation + publication/controller/PG; B remains exclusive existing9-flow author",
+      "testHome": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java (root/B exclusive, R does not edit)",
+      "cases": "Three AC18 outcomes on actual guided learn plus corresponding ordinary compiled replays of actual published plans. No-login /reports protected missing target=>false; wrong password then protected target=>true; registration passing assert=>no annotation.",
+      "fixtureNeed": "No-login protected plan must be produced by actual accepted learning/publication, not forged JSON or deleting login steps from artifact. Small controlled fixture-only public-during-learning /reports gate can allow no-login plan learning, then /__expire and require-login-on-replay after publication. Alternatively use existing authenticated-learning plan seam only if current admitted context rules support it; no cookie/account-provider reintroduction. Wrong-password path: learn/publish correct, then rotate actual fixture expected password while backend resolves a counted wrong value; retain artifactHash, expire cookie sessions. Registration learn and publish no-secret passing plan normally.",
+      "evidence": "Actual model requests masked/ID only, expected guided failure eligibility validator rejection/evidence/source failure, reached current observation, exact stepId/boolean, reports/DB result FAILED unchanged; publication/model silence/frozen hash; counter0 during finalize, ordinary model0, value reads only actual dispatch; observed failed target remains identified. Existing nine-flow success rotation is not these6 negatives."
+    },
+    {
+      "id": "JOIN-REVOCATION-QUEUE-LIVE",
+      "owner": "Root actual service harness; D owns read-entry/fault/audit design; B only approved9-flow join",
+      "cases": [
+        "queued accepted secret run revoke before claim: zero actual provider reads/send/launch; real atomic terminal/no-read receipt and one NOT_USED per exact accepted declaration",
+        "live released run revoke immediately after real sweep/control acknowledgement; actual slow/lost response and one-inflight cutoff from runner batches with real revoked_at and REVOKED_MID_RUN unique audit",
+        "revoke between real prepare and dispatch: SECRET_USE_REVOKED zero dispatch sends; genuine no-value mayUse",
+        "user cancel concurrent with revocation preserves CANCELLED precedence; completed PASSED/FAILED/LOGIN_REQUIRED never rewritten"
+      ],
+      "evidence": "Real scoped FakeVault mayUse/read-entry/provider counters, actual Core HTTP traffic, PostgreSQL owner transitions/revoked_at/write-once audit, runner native entry/step clocks, no next consumer invoked, scans all produced sinks. Backend sweep cadence + runner cadence + request/queue must fit actual end-to-end<=2s plus in-flight residual; do not assume two separate1s components automatically compose within2s. If measured bound fails archive red and request bounded owner repair."
+    },
+    {
+      "id": "JOIN-USED-KILL-LOSTFINAL",
+      "owner": "Root+B/D recorder coordination; R compiled harness support only after authorization",
+      "reuse": "observed-bootstrap-video completed-pass-lost-final case currently secrets={} proves receipts/native video only",
+      "missing": "Actual completed secret-fill PASS authenticated PROGRESS USED wins real PG CAS, then SIGKILL/drop FINAL, real reaper/cancel settles exactly one immutable USED summary. Retain actual provider/release/accepted-binding/attempt/admission/runner/profile/build/receipt identity and full sink scans. Sparse absent use after mid-effect loss stays unknown, never NOT_USED."
+    }
+  ],
+  "retainedOpenLimits": [
+    "All-source gates are source-bound regression evidence only, not acceptance of unimplemented batches",
+    "Historical unclassified native7290byte red retained; current green cannot retrospectively classify pixels",
+    "Actual sole-primitive timeout/context/transport loss and all native/injected/supplementary C6 joined sinks remain required; readonly refusal and direct Playwright.fill never substitute",
+    "Fast detached orphan before first25ms tree sample remains independent UNEXECUTED concern; existing actual writer test waits75ms",
+    "Node22/internal ED05 strict image gate, staging seek calibration, live providers/pilot/manual OBS009 masking remain unavailable or separate; no PASS inferred"
+  ],
+  "executionProtocol": {
+    "current": "No proposed commands executed. No source/dist/test file changed; only this design artifact written.",
+    "release": "Root grants bounded test-only batch; fixture globalSetup rebuilds dist, so isolate copied current candidate or wait for B joined dist readers terminal. Freeze/rebind every actual changed test/source/dist before independent review.",
+    "order": [
+      "R-LOGIN-REAL-3 first",
+      "R-CONTROL-REAL-4",
+      "R-GUIDED-RENEW-REAL-4 + R-ISOLATION-REAL-3 shared harness",
+      "Root actual joined scopes; sole serialized Gradle lane"
+    ],
+    "preserve": "All original cases/skips/thresholds and red histories; no wire/canonical/profile/pin changes. Failed new oracle retained red, never unit substitution.",
+    "archive": "Command/cwd/start/end/exit/namedcounts/skips/source/dist/executable/build/policy bindings, monotonic phase timestamps, actual HTTP/receipt/PID/scratch/capacity/profile/sink facts; canary-bearing fixture receipts remain controlled private evidence and never production logs."
+  }
+}

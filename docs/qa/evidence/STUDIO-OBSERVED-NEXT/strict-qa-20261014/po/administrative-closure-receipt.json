@@ -1,0 +1,803 @@
+{
+  "schema": 1,
+  "author": "Pax (@po)",
+  "completedUtc": "2026-10-15T03:24:04.524636+00:00",
+  "state": "ADMINISTRATIVE_CLOSURES_COMPLETE_ROOT_CLOSE_CLI_AND_WAVE_PENDING",
+  "closureSkill": {
+    "path": "/Users/brunobuger/.agents/skills/close-story/SKILL.md",
+    "task": ".aiox-core/development/tasks/po-close-story.md",
+    "scope": "Only alreadyDone verified final independent approved stories; no lifecycle change by PO"
+  },
+  "explicitRootMetadataWindowReleased": true,
+  "basis": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-readiness-plan.json",
+    "sha256": "558cec16c3260cb23e645afc47d25df4e6d64b3054b08e02188ba71de3381993"
+  },
+  "preconditions": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-preconditions.json",
+    "sha256": "baf07bb91c293a0ab34dccf934b32cf4c80cf553dc85ceebd3bdae0724852378"
+  },
+  "stories": {
+    "013": {
+      "version": "0.2.9",
+      "reviewedQaVersion": "0.2.8",
+      "qaReviewedDoneStorySha256": "5d174629adbc0ca30cc3d46d23552e73d377c9a1cd315e4240cde86b353b51b0",
+      "postAdministrativeStorySha256": "65c2830b0fe8ac2703a00a11d74ff79d3c187e58d5d8fe1d19b14143150e9755",
+      "reverseAdministrativeAdditionsSha256": "5d174629adbc0ca30cc3d46d23552e73d377c9a1cd315e4240cde86b353b51b0",
+      "byteExactQaStoryRestored": true,
+      "statusLineBeforeAfter": "| Status | **Done** |",
+      "QAResultsSha256": "70366eb91448afdd501fece53f9cb34c9d29a7d1bb001607f377a4d582667123",
+      "QAResultsByteExact": true,
+      "preQaGroupsByteExact": true,
+      "protectedNormalizedSha256": "6481ca34a02c91fb0942b1327ef4a2d7e9feffeacf85724f06d4348e0e80dc3a",
+      "implementationFileListUnchanged": true,
+      "acceptanceCriteriaAndTasksUnchanged": true,
+      "canonicalGateUnchanged": {
+        "path": "docs/qa/gates/STUDIO-OBS-013-record-the-learning-run-video-step-offsets-and-seek.yml",
+        "sha256": "5ed4e0369808fe8532e604072691518549ada6a12dcce51ea7e88248c39a39e5"
+      },
+      "finalIndependentReviewUnchanged": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa013/final-story-review.json",
+        "sha256": "84fbb543bc88acdb8ee0ad3ac471eaabd1e0d604dc10ba0cf8a5a54ea8cd996a"
+      },
+      "pureParser": {
+        "verdict": "PASS",
+        "reviewer": "Quinn",
+        "reviewedRevision": "strict-review:sha256:76cfd1310ab814e48cbf3b095b45e79ade5a373156c796e6fd800699fd13ec47",
+        "waiver": {
+          "active": false,
+          "reason": "",
+          "approver": "",
+          "valid": false
+        },
+        "waiverValid": true,
+        "complete": true,
+        "gateFound": false,
+        "gateFile": null,
+        "error": null
+      },
+      "closureKey": "STUDIO-OBS-013:digest:strict-review:sha256:76cfd1310ab814e48cbf3b095b45e79ade5a373156c796e6fd800699fd13ec47",
+      "storyKeyCount": 1,
+      "readmeKeyCount": 1,
+      "priorClosureKeysPreserved": [
+        "STUDIO-OBS-013:digest:s4c-worktree:sha256:af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137"
+      ],
+      "archivedOldReport": {
+        "path": "docs/qa/evidence/STUDIO-OBS-013/strict-qa/history/close-before-strict-pass.json",
+        "sha256": "701731e681beee5c742eb81d732126f5981d784b27a1ec706ea8f952f27658f1",
+        "byteExact": true
+      }
+    },
+    "014": {
+      "version": "0.1.18",
+      "reviewedQaVersion": "0.1.17",
+      "qaReviewedDoneStorySha256": "253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140",
+      "postAdministrativeStorySha256": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42",
+      "reverseAdministrativeAdditionsSha256": "253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140",
+      "byteExactQaStoryRestored": true,
+      "statusLineBeforeAfter": "| Status | **Done** |",
+      "QAResultsSha256": "581045f5a93a7b72f6dfbe9a0da6da71519895785158c0588c408f77fb823ce4",
+      "QAResultsByteExact": true,
+      "preQaGroupsByteExact": true,
+      "protectedNormalizedSha256": "bc222a40a66ab22a4225a9c4b73e7f827950972b15059721fc6b7d4933883043",
+      "implementationFileListUnchanged": true,
+      "acceptanceCriteriaAndTasksUnchanged": true,
+      "canonicalGateUnchanged": {
+        "path": "docs/qa/gates/STUDIO-OBS-014-action-safety-and-governance-for-the-learning-run.yml",
+        "sha256": "3af7b7d6e87dd5541987389e2475b26d0e1685e73d41d174309e0a453a5ef005"
+      },
+      "finalIndependentReviewUnchanged": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-story-review.json",
+        "sha256": "61efb21d40d9d315d99d77ff5d118a941e8a8849be8547676540309c9f821a82"
+      },
+      "pureParser": {
+        "verdict": "PASS",
+        "reviewer": "Quinn (independent security/SDC QA)",
+        "reviewedRevision": "worktree-strict:sha256:cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+        "waiver": {
+          "active": false,
+          "reason": "",
+          "approver": "",
+          "valid": false
+        },
+        "waiverValid": true,
+        "complete": true,
+        "gateFound": false,
+        "gateFile": null,
+        "error": null
+      },
+      "closureKey": "STUDIO-OBS-014:digest:worktree-strict:sha256:cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "storyKeyCount": 1,
+      "readmeKeyCount": 1,
+      "priorClosureKeysPreserved": [
+        "STUDIO-OBS-014:digest:worktree-s4c:sha256:af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137"
+      ],
+      "archivedOldReport": {
+        "path": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/history/close-before-strict-pass.json",
+        "sha256": "01f348287bf1d9dd01e497ca61974c70f289117b62817cba0319513dc55ebe91",
+        "byteExact": true
+      }
+    }
+  },
+  "currentReports": [
+    {
+      "path": ".ai/STUDIO-OBS-013-close.json",
+      "sha256": "4f10af05f26bb9dcb3b229d2260488f52c99a936157a73c6e36f2a99f051efcd"
+    },
+    {
+      "path": ".ai/STUDIO-OBS-014-close.json",
+      "sha256": "e438b666a2e6fd9aeb36e5c7cd288d0973e902072e53dfb35d351cc1f9462ac7"
+    }
+  ],
+  "strictStoryReceipts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-013/strict-qa/strict-closure-receipt.json",
+      "sha256": "f7c84c7eed4c00ddf0d50e29f64bd8a82862362348f81b5084a69808b343ec7c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/strict-closure-receipt.json",
+      "sha256": "766ba8eec63ebbe12e72cdc6ad06cb661ee8db9fb41fa001a480f0f7327b68c0"
+    }
+  ],
+  "normalization": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-normalization.json",
+    "sha256": "3994acbd9d66d5b360c3cc823dcf4c9b2f883bc939712e7caf492a16af44281e"
+  },
+  "parser": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-parser-after.json",
+    "sha256": "2f892a4c9977aed965d3d7455f7e7395e0b2bbe43ca0d2161ccd8530c7b302bf"
+  },
+  "noGateOrVerdictMarkersIntroducedByPoAfterQaResults": true,
+  "codeBinding": {
+    "manifest": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/integration-final-all-gates-after.json",
+      "sha256": "cd69f52f93f591932276b75eb5185f48e4c9d047890c62bdab64c7ae54c222ec"
+    },
+    "sourceDigest": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+    "sourceInputsRehashedBeforeAndAfter": 1583,
+    "distDigest": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+    "distInputsRehashedBeforeAndAfter": 238,
+    "sourceAndDistHashMismatches": [],
+    "digestMethod": "SHA256 compact JSON serialization of ordered {path,sha256} rows; each actual file independently rehashed",
+    "globalWholeRepositoryEqualityClaimed": false
+  },
+  "actualEvidenceVerification": {
+    "rawFinalArtifactReferencesRehashed": 1319,
+    "backendQualityXmlArtifacts": 1246,
+    "freshBackendXmlRecounted": 287,
+    "standardPassed": 2077,
+    "standardHistoricalUncreditedSkips": 25,
+    "separateCrossReplicaPassed": 2,
+    "failuresOrErrors": 0,
+    "namedLocalSkips": 0,
+    "runnerActualFinal": "1529 unit/29 historical uncredited skips;type/full lint/coverage green;profile10;native232/9 historical uncredited skips;deployment313/0 skips",
+    "manualCodeReviewFallback": "Explicitly configured and authorized independent manual review; no CodeRabbit automated pass"
+  },
+  "downstream": {
+    "008": {
+      "statusLineUnchanged": "| Status | **Ready** |",
+      "onlyDatedReconciliationInsertion": true,
+      "entirePriorStoryBytesRestoredByRemovingInsertion": true,
+      "acceptanceCriteriaTasksQaDarAndPriorChangeLogUnchanged": true,
+      "originalPlacementKeyCount": 1,
+      "newDispositionCount": 5,
+      "newDispositionKeys": [
+        "strict-qa-20261014:FE-WORKERS",
+        "strict-qa-20261014:FE-A11Y",
+        "strict-qa-20261014:PLAYBACK-COST",
+        "strict-qa-20261014:PLAYBACK-COPY",
+        "strict-qa-20261014:FE-CONSUMERS"
+      ]
+    },
+    "009": {
+      "statusLineUnchanged": "| Status | **Ready** |",
+      "onlyDatedReconciliationInsertion": true,
+      "entirePriorStoryBytesRestoredByRemovingInsertion": true,
+      "acceptanceCriteriaTasksQaDarAndPriorChangeLogUnchanged": true,
+      "originalPlacementKeyCount": 1,
+      "newDispositionCount": 4,
+      "newDispositionKeys": [
+        "strict-qa-20261014:RUNNER-LAUNCH",
+        "strict-qa-20261014:RUNNER-SCRATCH",
+        "strict-qa-20261014:MODEL-SIZING",
+        "strict-qa-20261014:LIVE-RECORDING"
+      ]
+    },
+    "010": {
+      "statusLineUnchanged": "| Status | **Ready** |",
+      "onlyDatedReconciliationInsertion": true,
+      "entirePriorStoryBytesRestoredByRemovingInsertion": true,
+      "acceptanceCriteriaTasksQaDarAndPriorChangeLogUnchanged": true,
+      "originalPlacementKeyCount": 1,
+      "newDispositionCount": 5,
+      "newDispositionKeys": [
+        "strict-qa-20261014:VIDEO-LOGGING",
+        "strict-qa-20261014:CACHE-REAUTH",
+        "strict-qa-20261014:AUDIT-LABEL-PRIVACY",
+        "strict-qa-20261014:EXTERNAL-READINESS",
+        "strict-qa-20261014:RECORDING-RUNBOOK-COPY"
+      ]
+    },
+    "011": {
+      "statusLineUnchanged": "| Status | **Ready** |",
+      "onlyDatedReconciliationInsertion": true,
+      "entirePriorStoryBytesRestoredByRemovingInsertion": true,
+      "acceptanceCriteriaTasksQaDarAndPriorChangeLogUnchanged": true,
+      "originalPlacementKeyCount": 1,
+      "newDispositionCount": 6,
+      "newDispositionKeys": [
+        "strict-qa-20261014:GUARD-INTEGRATION",
+        "strict-qa-20261014:HARNESS-EXACTNESS",
+        "strict-qa-20261014:GUARD-PRECEDENCE",
+        "strict-qa-20261014:DDL-DOCUMENTATION",
+        "strict-qa-20261014:CLEANUP-OBSERVATIONS",
+        "strict-qa-20261014:REVIEW-EVIDENCE-HYGIENE"
+      ]
+    }
+  },
+  "placementReconciliation": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json",
+    "sha256": "201c2e617b4a80708da676862994d06bb8843f874e7fb44525fa9940ed25ff2e"
+  },
+  "exactTwentyDispositions": [
+    {
+      "id": "FE-WORKERS",
+      "disposition": "LOCAL_RESOLVED_012B",
+      "key": "strict-qa-20261014:FE-WORKERS"
+    },
+    {
+      "id": "FE-A11Y",
+      "disposition": "ORIGINAL_008_SCOPE_OPEN",
+      "key": "strict-qa-20261014:FE-A11Y"
+    },
+    {
+      "id": "PLAYBACK-COST",
+      "disposition": "PARTIAL_LOCAL_RESOLVED_LOAD_OPEN",
+      "key": "strict-qa-20261014:PLAYBACK-COST"
+    },
+    {
+      "id": "PLAYBACK-COPY",
+      "disposition": "ORIGINAL_008_SCOPE_OPEN",
+      "key": "strict-qa-20261014:PLAYBACK-COPY"
+    },
+    {
+      "id": "FE-CONSUMERS",
+      "disposition": "ORIGINAL_008_SCOPE_OPEN",
+      "key": "strict-qa-20261014:FE-CONSUMERS"
+    },
+    {
+      "id": "RUNNER-LAUNCH",
+      "disposition": "HISTORICAL_CAUSES_UNKNOWN_DEPLOYED_SCOPE_OPEN",
+      "key": "strict-qa-20261014:RUNNER-LAUNCH"
+    },
+    {
+      "id": "RUNNER-SCRATCH",
+      "disposition": "LOCAL_RESOLVED_FOLDED_DEPLOYMENT_OPEN",
+      "key": "strict-qa-20261014:RUNNER-SCRATCH"
+    },
+    {
+      "id": "MODEL-SIZING",
+      "disposition": "ORIGINAL_009_REAL_MODEL_GATE_OPEN",
+      "key": "strict-qa-20261014:MODEL-SIZING"
+    },
+    {
+      "id": "LIVE-RECORDING",
+      "disposition": "EXTERNAL_MANUAL_GATES_OPEN",
+      "key": "strict-qa-20261014:LIVE-RECORDING"
+    },
+    {
+      "id": "VIDEO-LOGGING",
+      "disposition": "LOCAL_RESOLVED_RUNBOOK_SCOPE_OPEN",
+      "key": "strict-qa-20261014:VIDEO-LOGGING"
+    },
+    {
+      "id": "CACHE-REAUTH",
+      "disposition": "ORIGINAL_010_SECURITY_READINESS_OPEN",
+      "key": "strict-qa-20261014:CACHE-REAUTH"
+    },
+    {
+      "id": "AUDIT-LABEL-PRIVACY",
+      "disposition": "EXTERNAL_SECURITY_COMPLIANCE_DECISION_OPEN",
+      "key": "strict-qa-20261014:AUDIT-LABEL-PRIVACY"
+    },
+    {
+      "id": "EXTERNAL-READINESS",
+      "disposition": "EXTERNAL_AND_F01_F04_GATES_OPEN",
+      "key": "strict-qa-20261014:EXTERNAL-READINESS"
+    },
+    {
+      "id": "RECORDING-RUNBOOK-COPY",
+      "disposition": "ORIGINAL_010_SCOPE_OPEN",
+      "key": "strict-qa-20261014:RECORDING-RUNBOOK-COPY"
+    },
+    {
+      "id": "GUARD-INTEGRATION",
+      "disposition": "LOCAL_RESOLVED_014",
+      "key": "strict-qa-20261014:GUARD-INTEGRATION"
+    },
+    {
+      "id": "HARNESS-EXACTNESS",
+      "disposition": "LOCAL_RESOLVED_014_GENERAL_SPLIT_OPEN",
+      "key": "strict-qa-20261014:HARNESS-EXACTNESS"
+    },
+    {
+      "id": "GUARD-PRECEDENCE",
+      "disposition": "LOCAL_RESOLVED_014",
+      "key": "strict-qa-20261014:GUARD-PRECEDENCE"
+    },
+    {
+      "id": "DDL-DOCUMENTATION",
+      "disposition": "LOCAL_RESOLVED_FUTURE_ALTERATION_GUARD_RETAINED",
+      "key": "strict-qa-20261014:DDL-DOCUMENTATION"
+    },
+    {
+      "id": "CLEANUP-OBSERVATIONS",
+      "disposition": "PARTIAL_EMPTY_DIRECTORY_RESOLVED_VOCABULARY_OPEN",
+      "key": "strict-qa-20261014:CLEANUP-OBSERVATIONS"
+    },
+    {
+      "id": "REVIEW-EVIDENCE-HYGIENE",
+      "disposition": "HISTORICAL_OBSERVATIONS_RETAINED",
+      "key": "strict-qa-20261014:REVIEW-EVIDENCE-HYGIENE"
+    }
+  ],
+  "keyChecks": {
+    "currentStoryAndReadmeKeysOneEach": true,
+    "all20ReconciliationKeysUnique": true,
+    "oldPlacementKeysStillOnePerStory": true,
+    "allHistoricalClosureMarkersPreserved": true,
+    "secondProtocolPass": {
+      "013": {
+        "storyMarkerPresent": true,
+        "indexMarkerPresent": true,
+        "missingArtifactWrites": [],
+        "secondProtocolPass": "NO_OP",
+        "doesNotTreatHistoricalKeyAsCurrent": true,
+        "historicalRecoveryFixtureReused": {
+          "path": "docs/qa/evidence/STUDIO-OBS-013/strict-qa/history/close-before-strict-pass.json",
+          "pointer": "/idempotency/isolatedFailureRetry",
+          "result": {
+            "simulatedInterruptionAfterIndex": "PASS",
+            "retryWroteOnlyMissingStory": "PASS",
+            "secondRunNoOp": "PASS",
+            "oneMarkerEach": "PASS",
+            "statusPreserved": "Done"
+          }
+        }
+      },
+      "014": {
+        "storyMarkerPresent": true,
+        "indexMarkerPresent": true,
+        "missingArtifactWrites": [],
+        "secondProtocolPass": "NO_OP",
+        "doesNotTreatHistoricalKeyAsCurrent": true,
+        "historicalRecoveryFixtureReused": {
+          "path": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/history/close-before-strict-pass.json",
+          "pointer": "/idempotency/isolatedFailureRetry",
+          "result": {
+            "simulatedInterruptionAfterIndex": "PASS",
+            "retryWroteOnlyMissingStory": "PASS",
+            "secondRunNoOp": "PASS",
+            "oneMarkerEach": "PASS",
+            "statusPreserved": "Done"
+          }
+        }
+      }
+    }
+  },
+  "protectedMetadata": {
+    "checkedPaths": {
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012B.story.md": "201b6e2acfda857f8e6c589799ce37f67de3bf083dcd91a9b917fd2d77cf7161",
+      ".ai/STUDIO-OBS-012B-close.json": "071b3f72f2c4b01c37b0c41d6b5a66a9f31d1e407ea30a455080622de49339b0",
+      "docs/qa/gates/STUDIO-OBS-012B-compile-path-retirement-frontend-and-learn-vocabulary.yml": "f69b02210ead4c6b950dc6cac2c7ed889a11a5355d0992e42a38de20a05ed10b",
+      "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/strict-closure-receipt.json": "bc73bff92c0f2c4997741b54fbe93957dd30514598bc4ab9fda90dfb8829df05",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "0e3c81de45dc1b6ba39db082926d103728d16c9c5014db195ffda10ceea759a8",
+      "docs/qa/gates/STUDIO-OBS-013-record-the-learning-run-video-step-offsets-and-seek.yml": "5ed4e0369808fe8532e604072691518549ada6a12dcce51ea7e88248c39a39e5",
+      "docs/qa/gates/STUDIO-OBS-014-action-safety-and-governance-for-the-learning-run.yml": "3af7b7d6e87dd5541987389e2475b26d0e1685e73d41d174309e0a453a5ef005",
+      ".aiox/sdc/STUDIO-OBS-013/state.json": "032759059c715ebf30e563cbb06330a6733e2cad092edbb1017197b123c7dd78",
+      ".aiox/sdc/STUDIO-OBS-014/state.json": "df8eb9736cba648e47d2c1ccc9179e9e26724ac9873ba88f14cb1d2ffe0234ea",
+      ".aiox/sdc/STUDIO-OBS-015/state.json": "24ab91fba2413795c997fd3acf5ac63c424f79d0c951412aa8c781415d1205c7",
+      ".aiox/waves/STUDIO-OBS-SINGLE-PATH/state.json": "ad05dc5055115611857caaf30c266f8ab9aa4b8b44a1f8839097e3e9d2ef8531",
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/coordinator-checkpoint.json": "18eac3e1ee7402326f3a6af91687c4717a09e885696895325a7015bf7bf7e5b9",
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/execution-plan.json": "6fe8b4475cda4075aa18557588d22c84d70297ea2c2f371253576adda5ad6c9c",
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa013/final-story-review.json": "84fbb543bc88acdb8ee0ad3ac471eaabd1e0d604dc10ba0cf8a5a54ea8cd996a",
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-story-review.json": "61efb21d40d9d315d99d77ff5d118a941e8a8849be8547676540309c9f821a82"
+    },
+    "allBeforeAfterHashesEqual": true,
+    "QAResultsAndPreQaGroups": "Byte exact for013/014; actual implementation File Lists remain42/44 entries",
+    "012BStrictClosureFilesUnchanged": true,
+    "012BReadmeClosureEntriesByteExact": true,
+    "015StoryAndStateUnchanged": true,
+    "README_F01_F04BacklogSectionByteExact": true,
+    "sourceConfigDistCanonicalGatesAndFinalReviewArtifactsUnchanged": true,
+    "CLIStatesAndWaveUnchanged": true
+  },
+  "historicalReportsArchivedByteExact": {
+    "013": {
+      "path": "docs/qa/evidence/STUDIO-OBS-013/strict-qa/history/close-before-strict-pass.json",
+      "sha256": "701731e681beee5c742eb81d732126f5981d784b27a1ec706ea8f952f27658f1",
+      "byteExact": true
+    },
+    "014": {
+      "path": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/history/close-before-strict-pass.json",
+      "sha256": "01f348287bf1d9dd01e497ca61974c70f289117b62817cba0319513dc55ebe91",
+      "byteExact": true
+    }
+  },
+  "existingModifiedPaths": [
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/README.md",
+      "beforeSha256": "61fb59f69eb1611eb80a2fc60028b3e6a8005b06e97ad5317ba2211e413e650a",
+      "afterSha256": "16dab7c4e79614beb7f09ec591693cb138f2bb15ae8f7dc16466f72c2e2e43b1",
+      "diff": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__README.md.patch"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "beforeSha256": "b5c100073debfe970abaac8698210b6c6f56693c96945e68cdfeeb76603a62cd",
+      "afterSha256": "ca999de607c239a4f0b00e61439e06ca370041cdf5f8c82f35659f15ee578296",
+      "diff": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-008.story.md.patch"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "beforeSha256": "d060b162fec1378d21b218311db83b05df9500f6c2780dfd5647d99764fe4c49",
+      "afterSha256": "ac92c3f6c9244e9e8db6d9cc160583e2e09c8033b3ac29a59630bd211dba6af7",
+      "diff": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-009.story.md.patch"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+      "beforeSha256": "08241b6f9fb86622108fd82783c9270d404d2526d326ffc8d74ce513ecd97c8b",
+      "afterSha256": "f7f4304e69e55969e4206360251c7283dc6a5832bb713382c572f4957eba9ad6",
+      "diff": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-010.story.md.patch"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+      "beforeSha256": "6f7efb4753ba4ff1440bfad0846708bbf0cd9d8dec45f6a1c368404349383cff",
+      "afterSha256": "81c0fece2aa5d11eb753cbf6f43cb95b62d0a45e3330a8eef6c79d4cdba4ec2b",
+      "diff": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-011.story.md.patch"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+      "beforeSha256": "5d174629adbc0ca30cc3d46d23552e73d377c9a1cd315e4240cde86b353b51b0",
+      "afterSha256": "65c2830b0fe8ac2703a00a11d74ff79d3c187e58d5d8fe1d19b14143150e9755",
+      "diff": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-013.story.md.patch"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+      "beforeSha256": "253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140",
+      "afterSha256": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42",
+      "diff": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-014.story.md.patch"
+    },
+    {
+      "path": ".ai/STUDIO-OBS-013-close.json",
+      "beforeSha256": "701731e681beee5c742eb81d732126f5981d784b27a1ec706ea8f952f27658f1",
+      "afterSha256": "4f10af05f26bb9dcb3b229d2260488f52c99a936157a73c6e36f2a99f051efcd",
+      "diff": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/.ai__STUDIO-OBS-013-close.json.patch"
+    },
+    {
+      "path": ".ai/STUDIO-OBS-014-close.json",
+      "beforeSha256": "01f348287bf1d9dd01e497ca61974c70f289117b62817cba0319513dc55ebe91",
+      "afterSha256": "e438b666a2e6fd9aeb36e5c7cd288d0973e902072e53dfb35d351cc1f9462ac7",
+      "diff": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/.ai__STUDIO-OBS-014-close.json.patch"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/MASTER-HANDOFF.md",
+      "beforeSha256": "024399dd7fa110de8e2f609670267586f1af230cd37e2591c7a77cd473f5027a",
+      "afterSha256": "c4a384721d3fa63843980404992f98b42c17da2bc5f16709f5589a13a04e23aa",
+      "diff": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/.aiox__sdc__STUDIO-OBSERVED-ORCH__strict-qa-20261014__MASTER-HANDOFF.md.patch"
+    }
+  ],
+  "diffArtifacts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__README.md.patch",
+      "sha256": "2aa80bd7e380e62cd4a0df5efd5d69ccf5669f76ea30bd0c134c1d53fd2b5f0f"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-008.story.md.patch",
+      "sha256": "64d857b98c86e9cdc6bebe1279092998fbf712885e5a127ea863bc0c43d8586c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-009.story.md.patch",
+      "sha256": "c3d6f2548793ae7863bebafd77138a1ab4d8381cd195b8231790b4d099ed12a7"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-010.story.md.patch",
+      "sha256": "ed2015f439fe77c1f99d51dd71e350738391b12d8425d3d1633fe89596e73131"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-011.story.md.patch",
+      "sha256": "fdde06e4b9c22d669efdfa3039c3ea794623c1a164d6fe74d35aef56db779dab"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-013.story.md.patch",
+      "sha256": "a23b7aff9405a61f14123cbfef231bc6bca2e40ed6e98819b6646f3fb5a64578"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-014.story.md.patch",
+      "sha256": "3ac837378877c57192f1382ea3e2b606c2b0fa2b060b8e253c3bf25cf894b028"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/.ai__STUDIO-OBS-013-close.json.patch",
+      "sha256": "fe1adb954387f96399af0db3f3e96cf1f69a294444de562bba196cdd146f6170"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/.ai__STUDIO-OBS-014-close.json.patch",
+      "sha256": "adae06817dc9aa80c26f3b6d045274685a333b027a0265ce379e76a0ddd4d461"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/.aiox__sdc__STUDIO-OBSERVED-ORCH__strict-qa-20261014__MASTER-HANDOFF.md.patch",
+      "sha256": "31610d82a4cf0eedaa0a25acd5686e419cf631b4254cf9e2f848d12658905a28"
+    }
+  ],
+  "ownedFileList": [
+    ".ai/STUDIO-OBS-013-close.json",
+    ".ai/STUDIO-OBS-014-close.json",
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/MASTER-HANDOFF.md",
+    "docs/qa/evidence/STUDIO-OBS-013/strict-qa/history/close-before-strict-pass.json",
+    "docs/qa/evidence/STUDIO-OBS-013/strict-qa/strict-closure-receipt.json",
+    "docs/qa/evidence/STUDIO-OBS-014/strict-qa/history/close-before-strict-pass.json",
+    "docs/qa/evidence/STUDIO-OBS-014/strict-qa/strict-closure-receipt.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/.ai/STUDIO-OBS-013-close.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/.ai/STUDIO-OBS-014-close.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/MASTER-HANDOFF.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/.ai/STUDIO-OBS-013-close.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/.ai/STUDIO-OBS-014-close.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/MASTER-HANDOFF.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-closure-receipt.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/.ai__STUDIO-OBS-013-close.json.patch",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/.ai__STUDIO-OBS-014-close.json.patch",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/.aiox__sdc__STUDIO-OBSERVED-ORCH__strict-qa-20261014__MASTER-HANDOFF.md.patch",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__README.md.patch",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-008.story.md.patch",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-009.story.md.patch",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-010.story.md.patch",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-011.story.md.patch",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-013.story.md.patch",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-014.story.md.patch",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-normalization.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-parser-after.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-preconditions.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json",
+    "docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md"
+  ],
+  "ownedFileHashes": [
+    {
+      "path": ".ai/STUDIO-OBS-013-close.json",
+      "sha256": "4f10af05f26bb9dcb3b229d2260488f52c99a936157a73c6e36f2a99f051efcd"
+    },
+    {
+      "path": ".ai/STUDIO-OBS-014-close.json",
+      "sha256": "e438b666a2e6fd9aeb36e5c7cd288d0973e902072e53dfb35d351cc1f9462ac7"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/MASTER-HANDOFF.md",
+      "sha256": "c4a384721d3fa63843980404992f98b42c17da2bc5f16709f5589a13a04e23aa"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-013/strict-qa/history/close-before-strict-pass.json",
+      "sha256": "701731e681beee5c742eb81d732126f5981d784b27a1ec706ea8f952f27658f1"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-013/strict-qa/strict-closure-receipt.json",
+      "sha256": "f7c84c7eed4c00ddf0d50e29f64bd8a82862362348f81b5084a69808b343ec7c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/history/close-before-strict-pass.json",
+      "sha256": "01f348287bf1d9dd01e497ca61974c70f289117b62817cba0319513dc55ebe91"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/strict-closure-receipt.json",
+      "sha256": "766ba8eec63ebbe12e72cdc6ad06cb661ee8db9fb41fa001a480f0f7327b68c0"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/.ai/STUDIO-OBS-013-close.json",
+      "sha256": "4f10af05f26bb9dcb3b229d2260488f52c99a936157a73c6e36f2a99f051efcd"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/.ai/STUDIO-OBS-014-close.json",
+      "sha256": "e438b666a2e6fd9aeb36e5c7cd288d0973e902072e53dfb35d351cc1f9462ac7"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/MASTER-HANDOFF.md",
+      "sha256": "c4a384721d3fa63843980404992f98b42c17da2bc5f16709f5589a13a04e23aa"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/README.md",
+      "sha256": "16dab7c4e79614beb7f09ec591693cb138f2bb15ae8f7dc16466f72c2e2e43b1"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "sha256": "ca999de607c239a4f0b00e61439e06ca370041cdf5f8c82f35659f15ee578296"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "sha256": "ac92c3f6c9244e9e8db6d9cc160583e2e09c8033b3ac29a59630bd211dba6af7"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+      "sha256": "f7f4304e69e55969e4206360251c7283dc6a5832bb713382c572f4957eba9ad6"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+      "sha256": "81c0fece2aa5d11eb753cbf6f43cb95b62d0a45e3330a8eef6c79d4cdba4ec2b"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+      "sha256": "65c2830b0fe8ac2703a00a11d74ff79d3c187e58d5d8fe1d19b14143150e9755"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+      "sha256": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/.ai/STUDIO-OBS-013-close.json",
+      "sha256": "701731e681beee5c742eb81d732126f5981d784b27a1ec706ea8f952f27658f1"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/.ai/STUDIO-OBS-014-close.json",
+      "sha256": "01f348287bf1d9dd01e497ca61974c70f289117b62817cba0319513dc55ebe91"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/MASTER-HANDOFF.md",
+      "sha256": "024399dd7fa110de8e2f609670267586f1af230cd37e2591c7a77cd473f5027a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/README.md",
+      "sha256": "61fb59f69eb1611eb80a2fc60028b3e6a8005b06e97ad5317ba2211e413e650a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "sha256": "b5c100073debfe970abaac8698210b6c6f56693c96945e68cdfeeb76603a62cd"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "sha256": "d060b162fec1378d21b218311db83b05df9500f6c2780dfd5647d99764fe4c49"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+      "sha256": "08241b6f9fb86622108fd82783c9270d404d2526d326ffc8d74ce513ecd97c8b"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+      "sha256": "6f7efb4753ba4ff1440bfad0846708bbf0cd9d8dec45f6a1c368404349383cff"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+      "sha256": "5d174629adbc0ca30cc3d46d23552e73d377c9a1cd315e4240cde86b353b51b0"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+      "sha256": "253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/.ai__STUDIO-OBS-013-close.json.patch",
+      "sha256": "fe1adb954387f96399af0db3f3e96cf1f69a294444de562bba196cdd146f6170"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/.ai__STUDIO-OBS-014-close.json.patch",
+      "sha256": "adae06817dc9aa80c26f3b6d045274685a333b027a0265ce379e76a0ddd4d461"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/.aiox__sdc__STUDIO-OBSERVED-ORCH__strict-qa-20261014__MASTER-HANDOFF.md.patch",
+      "sha256": "31610d82a4cf0eedaa0a25acd5686e419cf631b4254cf9e2f848d12658905a28"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__README.md.patch",
+      "sha256": "2aa80bd7e380e62cd4a0df5efd5d69ccf5669f76ea30bd0c134c1d53fd2b5f0f"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-008.story.md.patch",
+      "sha256": "64d857b98c86e9cdc6bebe1279092998fbf712885e5a127ea863bc0c43d8586c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-009.story.md.patch",
+      "sha256": "c3d6f2548793ae7863bebafd77138a1ab4d8381cd195b8231790b4d099ed12a7"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-010.story.md.patch",
+      "sha256": "ed2015f439fe77c1f99d51dd71e350738391b12d8425d3d1633fe89596e73131"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-011.story.md.patch",
+      "sha256": "fdde06e4b9c22d669efdfa3039c3ea794623c1a164d6fe74d35aef56db779dab"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-013.story.md.patch",
+      "sha256": "a23b7aff9405a61f14123cbfef231bc6bca2e40ed6e98819b6646f3fb5a64578"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-diffs/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-014.story.md.patch",
+      "sha256": "3ac837378877c57192f1382ea3e2b606c2b0fa2b060b8e253c3bf25cf894b028"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-normalization.json",
+      "sha256": "3994acbd9d66d5b360c3cc823dcf4c9b2f883bc939712e7caf492a16af44281e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-parser-after.json",
+      "sha256": "2f892a4c9977aed965d3d7455f7e7395e0b2bbe43ca0d2161ccd8530c7b302bf"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-preconditions.json",
+      "sha256": "baf07bb91c293a0ab34dccf934b32cf4c80cf553dc85ceebd3bdae0724852378"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json",
+      "sha256": "201c2e617b4a80708da676862994d06bb8843f874e7fb44525fa9940ed25ff2e"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/README.md",
+      "sha256": "16dab7c4e79614beb7f09ec591693cb138f2bb15ae8f7dc16466f72c2e2e43b1"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "sha256": "ca999de607c239a4f0b00e61439e06ca370041cdf5f8c82f35659f15ee578296"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "sha256": "ac92c3f6c9244e9e8db6d9cc160583e2e09c8033b3ac29a59630bd211dba6af7"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+      "sha256": "f7f4304e69e55969e4206360251c7283dc6a5832bb713382c572f4957eba9ad6"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+      "sha256": "81c0fece2aa5d11eb753cbf6f43cb95b62d0a45e3330a8eef6c79d4cdba4ec2b"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+      "sha256": "65c2830b0fe8ac2703a00a11d74ff79d3c187e58d5d8fe1d19b14143150e9755"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+      "sha256": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42"
+    }
+  ],
+  "selfHashPolicy": "This receipt lists itself without self hash; root may hash the completed receipt. No circular .ai/receipt hash claims.",
+  "allowedScopeAudit": "All writes in this phase are the exact ten existing administrative paths and listed new evidence/report/archive/diff paths. Code/dist/protected metadata rehashed, no git diff or global filesystem monitor used.",
+  "ORCHLogEntry": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/MASTER-HANDOFF.md",
+    "heading": "Pax administrative closure \u2014 strict 013/014, 2026-10-14",
+    "operation": "One append only",
+    "otherORCHStateWrites": false
+  },
+  "scopeTruthfulness": {
+    "SAME_THREAD": "QA accepted class-owned reset/confirmed cleanup; no per-test conversion claimed",
+    "materialization": "One legitimate frozen backend materialization preserved; not zero",
+    "denominator": "Original historical six pairs plus supplemental Save/Delete positive sites =eight; named semantic/policy negative and source/context no-guard reasons remain exact",
+    "coverage": "Real global70/four75/mapped gateway393/424>=80; retired compiler literal selectors NO_CURRENT_CLASSES, never matched passes; future automatic enforcement limitation open; no all-guided/retention80 invention or new waiver",
+    "history": "CONCERNS gates/reports/keys and failed/unattributed runs preserved; no retroactive pass",
+    "external": "No provider/model/Sonic/Vault/SIEM/staging/manualC17/Security/Compliance/deployment approval. D2b,targetLabelHash,F01-F04 and downstream gates remain open. Artifact HMAC does not fix targetLabelHash.",
+    "015": "Production unstarted, technical signoff unresolved; no implementation dispatch or epic completion",
+    "budget": "Shared declaredUSD500 ceiling; actual billing unavailable"
+  },
+  "actionsNotPerformed": [
+    "Lifecycle or QA Results edits",
+    "Gate/source/runtime/config/dist edits",
+    "Tests/build/native/runtime process actions",
+    "CLI state/wave operations",
+    "Git/commit/push/install/deploy/devDB recreation",
+    "New agents or external messages"
+  ],
+  "nextAuthority": "Root Orion independently verifies both close phases and updates current STUDIO-OBS-SINGLE-PATH wave; no close verification or wave completion claimed by Pax."
+}

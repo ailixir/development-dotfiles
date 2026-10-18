@@ -1,0 +1,23 @@
+{
+  "status": "implemented, diagnostic gate requested; no PASS",
+  "sourceSha256": {
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioReferenceResolver.java": "8f7ed2b55569069b02a543cabad554b4b6baccd9a006879b139d8bc917af6ddb",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java": "70dd660a75a92e247dd46df8203d37a29acf1509b2ea1b025f63293f6dc796a0",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java": "bc2d280762ae8d9c82d4af6e75c047dd129123d9828015afe8fc017373a86436",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java": "90cc8051614500affb4215f1ebcff225f47371fdfc0b1935e5465f9564b3e42b",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java": "71547da9de2de97cd9138c86960cfa564a60b4da6489ea397584556b1722f7b2",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java": "ede8863502f58ce5828866af9ecd7d441d7cb58cefe8b702da74e6facc19a633",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SecretAuditLifecycleIT.java": "181a1ced7d76a84c3a3ab1ad92b4cd670617c8a826b2192399447a8946834dd2",
+    "backend/src/test/java/com/citi/put/checks/studio/secrets/VaultResolutionDecisionTest.java": "aa1c00ce96976742cdc41727a3c01934719e8e5600b12ba8ca9a3a84c45f4f1f"
+  },
+  "safeFacts": "Suppressed typed metadata retains only actually attempted per-ID outcomes and bounded opaque versions; no values, value digests, body or additional Vault calls. Existing exception types remain intact. Resolved-literal verifier refusal closes arrays before propagating actual RESOLVED safe facts.",
+  "auditOrdering": "Definite runner refusal locks the exact DISPATCHING/no-admission attempt, appends safe REFUSED and requeues/closes in one transaction. Ledger close/reconcile writes terminal unknown only for unresolved actual RELEASE rows in same transaction. Existing positive usage is preserved. Backend origin/failed resolution refusal is known before byte writer entry. Guided wire non-success alone becomes UNKNOWN_OUTCOME, never fabricated REFUSED or ACK_LOST.",
+  "testProofScope": "New5 actual PostgreSQL relational-lineage/lifecycle Java tests and4 counted provider ownership tests; neither is actual Core/Vault/Chromium joined acceptance proof.",
+  "dataHelperDelta": "Root authorized visibility-only private record RetryFixture -> package-private record and private static publishedRetry -> package-private static; production SQL and fixture semantics unchanged. Prior29 data snapshot remains immutable; fresh combined gate requested.",
+  "openConsistency": [
+    "Ordinary replay unattempted declaration currently has no truthful nullable/no-decision terminal summary shape; existing SQL only permits GUIDED null-release summary. No fake RELEASE or unused extra read added. Root coordinates independent Aria/PO decision.",
+    "Current guided wire lacks trusted per-secret positive effect/no-effect evidence after fill cancellation; conservative uncertainty remains explicit.",
+    "C6 authentic native CDP exception contains no canary; literal native-canary oracle remains open.",
+    "New actual joined secret-login/C4/C5/sweep bound and full regression/coverage still pending."
+  ]
+}

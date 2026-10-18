@@ -1,0 +1,88 @@
+{
+  "schema": "d-held-row-setup-repair/1",
+  "state": "FROZEN_SOURCE_CANDIDATE_AWAITING_COORDINATOR_FORMAT_COMPILE_RUNTIME_AND_REVIEW",
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-held-row-setup-repair-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-held-row-setup-repair-context.txt"
+  ],
+  "sourceHashesAndBodyProof": {
+    "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "beforeSha256": "73e5f6bc1966c804ef1d2cb71aaa858fd6fefd7adf836162388dac24380b5541",
+    "afterSha256": "80b3cd18d98f2a31fc0a4c16142170435cee18eabbccfc45e8323049f2769ffa",
+    "patchSha256": "3241feaa38706415b7069750714afe4d9ea000393c6aeb225f6ad812bf51e15d",
+    "old14MethodBodiesByteIdentical": true,
+    "oldNineModesByteIdentical": true,
+    "ownedStopLogicTimeoutManagersAndLifecycleByteIdentical": true,
+    "expectedDomainInvocations": 15,
+    "onlyNewHeldCaseLifetimePreparationAndCaseGatedReceiverChanged": true,
+    "unchangedMethodHashes": {
+      "void actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(": "add4e01f373303bba3534675aad4a09f97fc0d380101a979b5f745e1d3590906",
+      "void genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit(": "14025055195695784fc1ef08e44d5e6040508e3fdd54759a0ad4955734944a5f",
+      "void actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose(": "793fe53e5aff517f5202d1f4220072f16d8aa048ae79845d93e54e681e208b4a",
+      "void actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose(": "16223d2c60dda8ee883c1821987526c26ac43e8bfe551bb7a8d776cd107bd1c2",
+      "void actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation(": "419b5258dd2da0cb9b400407dbbadb8452d1f564aed9327859709659761c838e",
+      "void actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose(": "90ffa836d878a30f8640e8f3f036d97ea085d064ad1e2ea83c7c09d7de2805a0",
+      "enum Mode {": "f2c3cdbf4d0a7df3037a3996ffcc82e74afa9926bacdb304c59d216b272c03b2",
+      "class SourceStopOwner {": "4d4fbf69faf9ff152de5d75051a24537b19a703e53e99b5f0836d1a9d06521e9",
+      "class TrackingTransactionTemplate extends TransactionTemplate {": "c76e991eb1b0f0ab3c69b4872fe203778948cbf5b4c29592d70fafdfe259a982",
+      "class HeldRowTransactionManager extends DataSourceTransactionManager {": "c1a2828a424bfd4cbfed18e2d69bdfbe24ecba2af3baa83e38a87ab53f90aeed",
+      "class HeldRowTransactionTemplate extends TransactionTemplate {": "754fcf4a68e2ed55292a3bff32d1eef4cc61ba5543d20e7bb37d7dd8d9c76482",
+      "class OwnedCacheListener implements TestExecutionListener, Ordered {": "f897a9b9cd7190c065114b2770b5e8511f904527ff96fbf6dccbd82e3a3b2646",
+      "static void close() throws Exception {": "8a70ac36706ab56bc884921cc3506926d9506b2015a297c3271de735039c7280",
+      "static void terminateOwnedContextBeforePostgres() {": "fdebb1141e5fd8f5443959c6645abdfd039e8fceaf578ccbe9d99ae91c24a446"
+    }
+  },
+  "findingMatrix": [
+    {
+      "finding": "partial setup before finally",
+      "candidate": "HeldRowSetup exists before fixture call; fixture construction now inside protected case lifetime. Actual graph and scenario retained before seed/start, exact start request/key retained before public start, returned session ID captured immediately before later preparation. Cleanup runs even when helper never returns fixture.",
+      "runtime": "UNRUN"
+    },
+    {
+      "stage": "unknown start receipt",
+      "candidate": "Recovery selects only actual committed start receipt joined to actual session, matching exact authenticated principal/test-derived namespace, key, requestDigest and unique owned test/principal. No guessed ID/currentowner erasure. No match is honest failed unresolved creation, not clean/PASS.",
+      "runtime": "UNRUN"
+    },
+    {
+      "stage": "genuine authority cleanup",
+      "candidate": "After independent own holder rollback/close and actual caller join, cleanup locks real owned session, verifies exact test/principal, uses public materializer context/assignment fallback, and invokes authenticated public cancel in same physical transaction. Only COMMITTED high-priority callback with real notify context registers expected stop before production schedules it; missing context/rollback do not.",
+      "runtime": "UNRUN"
+    },
+    {
+      "stage": "assignment-only case relay",
+      "candidate": "Default marker false preserves old14 behavior. Only actual held setup accepts nested assignment-stop; existing real JWT/mTLS/issuer/role checks first, strict typed/closed shape/reason, exact URL/session and persisted canonical intent. Controlled assignment actually terminates, canonical STOPPED HTTP200 receipt: null fence/lease only truly unclaimed, otherwise unchanged actual historical grant. No launch/renew/new grant/OWNED/generic identity/manual CONFIRMED.",
+      "runtime": "UNRUN"
+    },
+    {
+      "stage": "closure/failure lifetime",
+      "candidate": "Real sender plus original confirmation drain required; closed actual assignment/materialization and persisted CONFIRMED checked when a real stop existed, no invented confirmation otherwise. Routed I/O idle checked after genuine drain. Unexpected cleanup failure retained with primary distinctly and honest existing owner lifetime guard prevents proxy/class PG destruction; no fake expected/completed handle or private auth/state erasure.",
+      "runtime": "UNRUN"
+    }
+  ],
+  "receiverScope": "Names-only authenticated controlled fixture protocol termination, not physical worker/Chromium effect. Parent corrected worker HTTP202 wording to canonical HTTP200 required by original GuidedRunnerClient179; backend callback202 is unrelated and unchanged. Backend original real reconciliation alone persists CONFIRMED.",
+  "cleanupFailureSemantics": "All actual release/caller/cleanup attempts preserve original primary and genuine late errors with identity-safe suppression. Inability to recover exact identity, terminate actual context or observe real confirmation is explicit failure; existing test-owner rejection prevents route/PG teardown being reported safe. Watchdog rescue is failure, never PASS.",
+  "unchanged": "All15 test names, old14 bodies/modes, SourceStopOwner guard/interrupt/error logic, metadata-only timeout observer/commit-priority manager, original lifecycle3500/close body remain byte-identical. No new tests/assertion weakening, optional timeout, production/schema/pin/budget/application auth/state/row writes except genuine existing fixture creation and public service calls.",
+  "execution": {
+    "format": "NOT_RUN",
+    "compile": "NOT_RUN",
+    "runtime": "NOT_RUN",
+    "tests": "NOT_RUN",
+    "SQL": "NOT_RUN",
+    "Gradle": "NOT_RUN",
+    "Docker": "NOT_RUN",
+    "processActions": []
+  },
+  "limits": [
+    "All new source remains unrun; partial-phase exceptions/receipt recovery/assignment-only ack/real ownership drainage require coordinator evidence.",
+    "No general DB deadline, outage/pool/Core/Vault/native/browser/all19/QA/lifecycle conclusion.",
+    "Actual unknown creation without an observable exact committed receipt is not force-cleaned or mislabeled resolved."
+  ],
+  "archives": {
+    "before.java": "docs/qa/evidence/STUDIO-OBS-007/d-held-row-setup-repair/before.java",
+    "after.java": "docs/qa/evidence/STUDIO-OBS-007/d-held-row-setup-repair/after.java",
+    "source.patch": "docs/qa/evidence/STUDIO-OBS-007/d-held-row-setup-repair/source.patch",
+    "hashes.json": "docs/qa/evidence/STUDIO-OBS-007/d-held-row-setup-repair/hashes.json",
+    "matrix.json": "docs/qa/evidence/STUDIO-OBS-007/d-held-row-setup-repair/matrix.json"
+  },
+  "nextOwner": "Coordinator owns scoped format/compiler/runtime and independent re-review; author source parked."
+}

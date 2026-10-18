@@ -1,0 +1,78 @@
+{
+  "kind": "B7_PROPOSAL_MEASUREMENT",
+  "label": "HARNESS_SELF_TEST_NOT_D_C_EVIDENCE",
+  "provider": "local fixture provider (scripted gateway), no model call",
+  "production": {
+    "perCallOutputTokens": 4096,
+    "outputTotal": 32000,
+    "inputTotal": 262144,
+    "csiDailyOutput": 640000,
+    "csiDailyInput": 5242880
+  },
+  "maxProposalsAtProductionCeilings": 7,
+  "sessions": [
+    {
+      "label": "model-budget-evidence-guidedIncrementalTest-1-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-final.json",
+      "sessionOrdinal": 3,
+      "fixtureCeilingPerCall": 2048,
+      "proposals": 13,
+      "reservedOutputAtFixtureCeiling": 26624,
+      "reservedInputTokens": 218206,
+      "productionPerCallOutput": 4096,
+      "reservedOutputAtProductionCeiling": 53248,
+      "exceedsProductionOutputTotal": true,
+      "productionOutputShare": 1.664,
+      "inputShareOfTotal": 0.8323898315429688,
+      "fullSessionsPerCsiDayOutput": 12,
+      "fullSessionsPerCsiDayInput": 24
+    },
+    {
+      "label": "model-budget-evidence-guidedIncrementalTest-1-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-final.json",
+      "sessionOrdinal": 4,
+      "fixtureCeilingPerCall": 2048,
+      "proposals": 9,
+      "reservedOutputAtFixtureCeiling": 18432,
+      "reservedInputTokens": 159092,
+      "productionPerCallOutput": 4096,
+      "reservedOutputAtProductionCeiling": 36864,
+      "exceedsProductionOutputTotal": true,
+      "productionOutputShare": 1.152,
+      "inputShareOfTotal": 0.6068878173828125,
+      "fullSessionsPerCsiDayOutput": 17,
+      "fullSessionsPerCsiDayInput": 32
+    },
+    {
+      "label": "model-budget-evidence-guidedIncrementalTest-2-incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser-insert4-final.json",
+      "sessionOrdinal": 5,
+      "fixtureCeilingPerCall": 2048,
+      "proposals": 13,
+      "reservedOutputAtFixtureCeiling": 26624,
+      "reservedInputTokens": 218206,
+      "productionPerCallOutput": 4096,
+      "reservedOutputAtProductionCeiling": 53248,
+      "exceedsProductionOutputTotal": true,
+      "productionOutputShare": 1.664,
+      "inputShareOfTotal": 0.8323898315429688,
+      "fullSessionsPerCsiDayOutput": 12,
+      "fullSessionsPerCsiDayInput": 24
+    },
+    {
+      "label": "model-budget-evidence-guidedIncrementalTest-2-incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser-insert4-final.json",
+      "sessionOrdinal": 6,
+      "fixtureCeilingPerCall": 2048,
+      "proposals": 10,
+      "reservedOutputAtFixtureCeiling": 20480,
+      "reservedInputTokens": 176954,
+      "productionPerCallOutput": 4096,
+      "reservedOutputAtProductionCeiling": 40960,
+      "exceedsProductionOutputTotal": true,
+      "productionOutputShare": 1.28,
+      "inputShareOfTotal": 0.6750259399414062,
+      "fullSessionsPerCsiDayOutput": 15,
+      "fullSessionsPerCsiDayInput": 29
+    }
+  ],
+  "peakProposals": 13,
+  "verdict": "REFUTES_7_PROPOSALS_PER_SESSION_ASSUMPTION",
+  "caveat": "A local run can refute the assumption but never confirm it. The fixture ran at the declared per-call ceiling, so the production-ceiling reservation is derived arithmetic ([I]), not a run at 4096."
+}

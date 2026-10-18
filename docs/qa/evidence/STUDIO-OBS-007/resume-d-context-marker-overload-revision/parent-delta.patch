@@ -1,0 +1,23 @@
+--- parent/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ revised/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -12122,7 +12122,7 @@
+                   if (claimSnapshot.contains(target)) {
+                     empty++;
+                   }
+-                  sampleSource(target, callbackSnapshot.get(target), null);
++                  sampleSource(target, callbackSnapshot.get(target), null, -1);
+                   continue;
+                 }
+                 SourceClassification classification = sourceFamily(stack);
+@@ -12180,11 +12180,6 @@
+         }
+       }
+       return size;
+-    }
+-
+-    private void sampleSource(
+-        Thread target, PgClaimBinding expected, SourceClassification classification) {
+-      sampleSource(target, expected, classification, -1);
+     }
+ 
+     private void sampleSource(

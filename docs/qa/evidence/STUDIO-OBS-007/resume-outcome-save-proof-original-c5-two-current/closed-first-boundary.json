@@ -1,0 +1,87 @@
+{
+  "scope": "ONE original unprofiledC5 fixedclosedfacts only/noQAcredit",
+  "result": {
+    "scope": "Exact selected current backend gate only; no whole-story QA verdict",
+    "gradleExitCode": 1,
+    "sourceDrift": [],
+    "results": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "tests": 2,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "finishedAt": "2026-10-12T14:32:00.469189+00:00",
+    "tests": 2,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "pass": false
+  },
+  "seedPass": true,
+  "mandatoryC5Pass": false,
+  "samplerEnabled": false,
+  "historicalMetadataReuse": false,
+  "firstProjectFrames": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.publicCall(GuidedPublicationReplayIT.java:14802)",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel(GuidedPublicationReplayIT.java:3713)"
+  ],
+  "finalizeFixedCode": "PUBLICATION_CONFLICT",
+  "capture": {
+    "mappedAppenders": 1,
+    "rootEvents": null,
+    "appEvents": null,
+    "eventCountsStatus": "SUPPORT_UNOBSERVED",
+    "logCoverage": "STREAMED_ORIGINAL_ENCODED_OUTPUT",
+    "encodedBytes": 177151979,
+    "encodedWriteCalls": 90457,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsCollected": true,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 30,
+    "patternBytes": 3308,
+    "rootTraceObserved": true,
+    "appTraceObserved": true,
+    "httpBodies": 2,
+    "httpErrors": 1,
+    "jsonBodies": 2,
+    "problemBodies": 0,
+    "sseStreams": 0,
+    "metricBytes": 81993,
+    "cacheEntries": 2,
+    "cacheNonemptyRequired": true,
+    "cacheProduced": true,
+    "cacheUnproducedOutsideFilterRoutes": false,
+    "profileFiles": 171,
+    "knownRootLinks": 4,
+    "externalLinkTargetBytesScanned": false,
+    "c4WindowsExecuted": false,
+    "traceFromStart": false,
+    "traceArmed": true
+  },
+  "claimCount": 36,
+  "lastClaim": {
+    "status": 202,
+    "handlerNanos": 2032060041,
+    "consumed": true
+  },
+  "state": {
+    "state": "FAILED",
+    "errorCode": "OTHER",
+    "bootstrapPhase": "READY",
+    "materializationPresent": true,
+    "fixtureModelHttpCalls": 8,
+    "fixturePhysicalProviderReads": 1,
+    "fixtureProviderFailures": 0,
+    "fixtureModelKinds": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 7,
+      "VERIFY_STEP": 0
+    }
+  }
+}

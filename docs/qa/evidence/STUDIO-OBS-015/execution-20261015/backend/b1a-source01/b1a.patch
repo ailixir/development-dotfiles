@@ -1,0 +1,1089 @@
+--- backend/build.gradle.kts
++++ backend/build.gradle.kts
+@@ -137,6 +137,11 @@
+     "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence",
+     "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce"
+ )
++// Disclosed low-lane singleton additions (B1A-CB-01 first). The indexed joinedIncrementalMethods
++// list stays closed at its three original entries; later low singletons append here only.
++val joinedAddedLowMethods = setOf(
++    "incrementalPrefixCallbacksKeepStateAndFenceBothReservations"
++)
+ val joinedDefaultMethods = setOf(
+     "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache",
+     "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
+@@ -256,13 +261,13 @@
+     classpath = sourceSets["test"].runtimeClasspath
+     setIncludes(listOf("**/GuidedPublicationReplayIT.class"))
+     setExcludes(emptyList<String>())
+-    filter { setIncludePatterns(*(joinedIncrementalMethods + joinedPrefixSyncMethods).map { "$joinedFixtureClass.$it" }.toTypedArray()) }
++    filter { setIncludePatterns(*(joinedIncrementalMethods + joinedPrefixSyncMethods + joinedAddedLowMethods).map { "$joinedFixtureClass.$it" }.toTypedArray()) }
+     forkEvery = 1
+     mustRunAfter(tasks.test, "crossReplicaTest", "retainOriginalGuidedCohort")
+     configureJoinedFixtureLane(this, "incremental2048")
+ }
+ tasks.test {
+-    (joinedIncrementalMethods + joinedPrefixSyncMethods).forEach { method -> filter.excludeTestsMatching("$joinedFixtureClass.$method") }
++    (joinedIncrementalMethods + joinedPrefixSyncMethods + joinedAddedLowMethods).forEach { method -> filter.excludeTestsMatching("$joinedFixtureClass.$method") }
+     configureJoinedFixtureLane(this, "original4000")
+ }
+ 
+@@ -322,7 +327,7 @@
+                 if (label == "singleton") method else "$method:$label"
+             }
+             val expected = if (lane == "test") joinedDefaultMethods else
+-                setOf(joinedIncrementalMethods[0], joinedIncrementalMethods[2]) + joinedPrefixSyncMethods +
++                setOf(joinedIncrementalMethods[0], joinedIncrementalMethods[2]) + joinedPrefixSyncMethods + joinedAddedLowMethods +
+                     joinedIncrementalLabels.map { "${joinedIncrementalMethods[1]}:$it" }
+             check(identities.size == expected.size && identities.toSet() == expected) { "JOIN partition omission/duplicate in $lane" }
+             check(guidedLaneCases[lane]?.get() == expected.size) { "JOIN XML/test event multiplicity mismatch in $lane" }
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -139,6 +139,7 @@
+       "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch",
+       "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence",
+       "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce",
++      "incrementalPrefixCallbacksKeepStateAndFenceBothReservations",
+       "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache",
+       "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
+       "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+@@ -189,6 +190,7 @@
+       "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch",
+       "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence",
+       "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce",
++      "incrementalPrefixCallbacksKeepStateAndFenceBothReservations",
+       
+       "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+       "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+@@ -939,7 +941,275 @@
+       if (cut != null) { cut.failure = failure; cut.entered.countDown(); }
+       if (failure instanceof InterruptedException) Thread.currentThread().interrupt();
+     } finally { exchange.sendResponseHeaders(status, -1); exchange.close(); }
++  }
++
++  // B1A-CB-01: test-only post-commit checkpoints of actual prefix callbacks. Inactive by default.
++  private enum B1aPhase {
++    ADMIT,
++    CONSUME,
++    NAVIGATION_SUCCESS,
++    OBSERVATION,
++    READ_SUCCESS
++  }
++
++  private static volatile B1aCallbackCut b1aCallbackCut;
++  private static final ThreadLocal<Boolean> B1A_OBSERVER_READ = new ThreadLocal<>();
++  private static final String B1A_SESSION_SERVICE =
++      "com.citi.put.checks.studio.guided.session.GuidedSessionService";
++  private static final String B1A_TRANSLATION = "com.citi.put.checks.studio.guided.translation.";
++  private static final java.util.Set<String> B1A_SERVICE_FRAMES =
++      java.util.Set.of("observeV2", "admitChecked", "consume", "outcomeV2");
++
++  /**
++   * Recognizes the actual service frame after its original outermost transaction committed, copies
++   * bounded ID/hash/state facts from an independent autocommit read, then holds the real caller
++   * outside every transaction. It never changes a result, exception, decision, clock or source.
++   */
++  private static final class B1aCallbackCut {
++    final UUID test;
++    final java.util.Set<B1aPhase> holds;
++    final Thread owner = Thread.currentThread();
++    final java.util.Map<B1aPhase, java.util.concurrent.CountDownLatch> entered =
++        new java.util.EnumMap<>(B1aPhase.class);
++    final java.util.Map<B1aPhase, java.util.concurrent.CountDownLatch> release =
++        new java.util.EnumMap<>(B1aPhase.class);
++    final java.util.Map<B1aPhase, ObjectNode> facts =
++        new java.util.concurrent.ConcurrentHashMap<>();
++    final java.util.Map<B1aPhase, Long> enteredAtNanos =
++        new java.util.concurrent.ConcurrentHashMap<>();
++    final List<B1aPhase> order = new CopyOnWriteArrayList<>();
++    volatile String sessionId;
++    volatile boolean closed;
++    volatile Throwable failure;
++
++    B1aCallbackCut(UUID test, java.util.Set<B1aPhase> holds) {
++      this.test = test;
++      this.holds = java.util.Set.copyOf(holds);
++      for (B1aPhase phase : B1aPhase.values()) {
++        entered.put(phase, new java.util.concurrent.CountDownLatch(1));
++        release.put(phase, new java.util.concurrent.CountDownLatch(1));
++      }
++    }
++
++    void afterCommit(JdbcTemplate jdbc, Object result) {
++      if (closed || Thread.currentThread() == owner || B1A_OBSERVER_READ.get() != null) {
++        return;
++      }
++      B1aPhase held = null;
++      B1A_OBSERVER_READ.set(Boolean.TRUE);
++      try {
++        String frame =
++            StackWalker.getInstance()
++                .walk(
++                    frames ->
++                        frames
++                            .filter(
++                                candidate -> candidate.getClassName().equals(B1A_SESSION_SERVICE))
++                            .map(StackWalker.StackFrame::getMethodName)
++                            .filter(B1A_SERVICE_FRAMES::contains)
++                            .findFirst())
++                .orElse(null);
++        if (frame == null) {
++          return;
++        }
++        JsonNode returned = null;
++        if (result
++            instanceof
++            com.citi.put.checks.studio.guided.session.GuidedSessionService.WonConsumption won) {
++          returned = won.ledger();
++        } else if (!frame.equals("consume") && result instanceof JsonNode node) {
++          returned = node;
++        }
++        if (returned == null) {
++          return;
++        }
++        String id = returned.path("sessionId").asText("");
++        if (id.isEmpty() || !bind(jdbc, id)) {
++          return;
++        }
++        ObjectNode stored = b1aStoredFacts(jdbc, id);
++        B1aPhase phase = phase(frame, returned, stored);
++        if (phase == null || !holds.contains(phase)) {
++          return;
++        }
++        // Copies only IDs, states and counters; the consumed capability itself is never retained.
++        ObjectNode checkpoint =
++            C.object().put("frame", frame).put("resultType", result.getClass().getSimpleName());
++        ObjectNode copied = checkpoint.putObject("result");
++        copied.set("sessionId", b1aFact(returned.path("sessionId")));
++        copied.set("state", b1aFact(returned.path("state")));
++        copied.set("admissionId", b1aFact(returned.path("admission").path("admissionId")));
++        copied.set("dispatchCount", b1aFact(returned.path("dispatchCount")));
++        copied.set("coordinate", b1aFact(returned.path("coordinate")));
++        checkpoint.set("stored", stored);
++        synchronized (this) {
++          if (closed || facts.containsKey(phase)) {
++            return;
++          }
++          facts.put(phase, checkpoint);
++          enteredAtNanos.put(phase, System.nanoTime());
++          order.add(phase);
++        }
++        held = phase;
++        entered.get(phase).countDown();
++      } catch (RuntimeException | AssertionError instrumentation) {
++        if (failure == null) {
++          failure = instrumentation;
++        }
++      } finally {
++        B1A_OBSERVER_READ.remove();
++      }
++      if (held == null) {
++        return;
++      }
++      try {
++        if (!release.get(held).await(13, java.util.concurrent.TimeUnit.SECONDS)
++            && failure == null) {
++          failure = new IllegalStateException("B1a " + held + " hold was not released in time");
++        }
++      } catch (InterruptedException interrupted) {
++        Thread.currentThread().interrupt();
++        if (failure == null) {
++          failure = interrupted;
++        }
++      }
++    }
++
++    private synchronized boolean bind(JdbcTemplate jdbc, String id) {
++      if (sessionId != null) {
++        return sessionId.equals(id);
++      }
++      Map<String, Object> row =
++          jdbc.queryForMap(
++              "SELECT test_id::text AS test,studio_015_prefix_pending(session_id) AS pending"
++                  + " FROM studio_guided_sessions WHERE session_id=?",
++              id);
++      if (!test.toString().equals(row.get("test")) || !Boolean.TRUE.equals(row.get("pending"))) {
++        return false;
++      }
++      sessionId = id;
++      return true;
++    }
++
++    private static B1aPhase phase(String frame, JsonNode returned, JsonNode stored) {
++      JsonNode actions = stored.path("step0Actions");
++      JsonNode navigation = actions.path(0);
++      JsonNode read = actions.path(1);
++      boolean navigationOnly =
++          actions.size() == 1
++              && navigation.path("ordinal").asInt(-1) == 0
++              && navigation.path("kind").asText().equals("navigate");
++      boolean navigationReturned =
++          returned.path("coordinate").path("stepId").asText().equals(INCREMENTAL_STEPS.get(0))
++              && returned.path("coordinate").path("ordinal").asInt(-1) == 0;
++      return switch (frame) {
++        case "admitChecked" ->
++            navigationOnly
++                    && navigationReturned
++                    && navigation.path("state").asText().equals("ADMITTED")
++                ? B1aPhase.ADMIT
++                : null;
++        case "consume" ->
++            navigationOnly
++                    && navigationReturned
++                    && navigation.path("state").asText().equals("DISPATCHING")
++                ? B1aPhase.CONSUME
++                : null;
++        case "outcomeV2" ->
++            actions.size() == 2
++                    && b1aSucceeded(navigation)
++                    && read.path("ordinal").asInt(-1) == 1
++                    && read.path("kind").asText().equals("read")
++                    && b1aSucceeded(read)
++                ? B1aPhase.READ_SUCCESS
++                : navigationOnly && b1aSucceeded(navigation) ? B1aPhase.NAVIGATION_SUCCESS : null;
++        case "observeV2" ->
++            navigationOnly && b1aSucceeded(navigation) ? B1aPhase.OBSERVATION : null;
++        default -> null;
++      };
++    }
++
++    void close() {
++      closed = true;
++      release.values().forEach(java.util.concurrent.CountDownLatch::countDown);
++    }
+   }
++
++  private static boolean b1aSucceeded(JsonNode action) {
++    return action.path("state").asText().equals("SUCCEEDED")
++        && action.path("dispatchCount").asInt(-1) == 1;
++  }
++
++  private static JsonNode b1aFact(JsonNode value) {
++    return value.isMissingNode()
++        ? com.fasterxml.jackson.databind.node.NullNode.instance
++        : value.deepCopy();
++  }
++
++  /** Value-free committed facts: IDs, hashes, states and counts only; no SQL lock is taken. */
++  private static ObjectNode b1aStoredFacts(JdbcTemplate jdbc, String id) {
++    String step = INCREMENTAL_STEPS.get(0);
++    return (ObjectNode)
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT jsonb_build_object('state',s.state,"
++                    + "'stepIndex',COALESCE(s.progress->'stepIndex','0'::jsonb),"
++                    + "'generation',COALESCE(s.progress->'generation','null'::jsonb),"
++                    + "'evidenceHash',COALESCE(s.progress->'evidenceHash','null'::jsonb),"
++                    + "'bootstrapPhase',"
++                    + "COALESCE(s.progress->'translationBootstrap'->'phase','null'::jsonb),"
++                    + "'continuation',t.continuation,"
++                    + "'prefixPending',studio_015_prefix_pending(s.session_id),"
++                    + "'deliveryPending',studio_015_delivery_pending(s.session_id),"
++                    + "'materializationRevision',m.materialization_revision,"
++                    + "'contextRevision',m.context_revision,"
++                    + "'authoredInputsHash',m.authored_inputs_hash,"
++                    + "'switches',(SELECT count(*) FROM studio_guided_relearn_switches x"
++                    + " WHERE x.session_id=s.session_id),"
++                    + "'modelAttempts',(SELECT count(*) FROM studio_guided_model_attempts x"
++                    + " WHERE x.session_id=s.session_id),"
++                    + "'observationCommands',(SELECT count(*) FROM studio_guided_commands x"
++                    + " WHERE x.namespace=s.session_id AND x.route='observations'),"
++                    + "'consumeCommands',(SELECT count(*) FROM studio_guided_commands x"
++                    + " WHERE x.namespace=s.session_id AND x.route='v2-consume'),"
++                    + "'stepCompleteCommands',(SELECT count(*) FROM studio_guided_commands x"
++                    + " WHERE x.namespace=s.session_id AND x.route='step-complete'),"
++                    + "'step0Actions',(SELECT COALESCE(jsonb_agg(jsonb_build_object("
++                    + "'ordinal',a.ordinal,'admissionId',a.admission_id,"
++                    + "'kind',a.proposal->'operation'->>'kind','state',a.document->>'state',"
++                    + "'dispatchCount',a.document->'dispatchCount',"
++                    + "'preparationId',a.document->>'preparationId',"
++                    + "'operationHash',a.document->>'operationHash',"
++                    + "'requestDigest',a.document->>'requestDigest',"
++                    + "'contextRevision',a.document->'contextRevision',"
++                    + "'authoredInputsHash',a.document->>'authoredInputsHash')"
++                    + " ORDER BY a.ordinal,a.attempt_ordinal),'[]'::jsonb)"
++                    + " FROM studio_guided_actions a WHERE a.session_id=s.session_id"
++                    + " AND a.step_id=?),"
++                    + "'step0Obligations',(SELECT COALESCE(jsonb_agg(jsonb_build_object("
++                    + "'ordinal',o.proposal->'coordinate'->'ordinal',"
++                    + "'admissionId',o.admission_id,'proposalDigest',o.proposal_digest)"
++                    + " ORDER BY (o.proposal->'coordinate'->>'ordinal')::integer),'[]'::jsonb)"
++                    + " FROM studio_guided_obligation_admissions o"
++                    + " WHERE o.session_id=s.session_id AND o.proposal->'coordinate'->>'stepId'=?),"
++                    + "'preparations',(SELECT COALESCE(jsonb_agg(jsonb_build_object("
++                    + "'preparationId',p.preparation_id,'admissionId',p.admission_id)"
++                    + " ORDER BY p.preparation_id),'[]'::jsonb)"
++                    + " FROM studio_guided_preparations p WHERE p.session_id=s.session_id),"
++                    + "'producers',(SELECT COALESCE(jsonb_agg(jsonb_build_object("
++                    + "'bindingId',r.binding_id,'admissionId',r.admission_id)"
++                    + " ORDER BY r.binding_id),'[]'::jsonb)"
++                    + " FROM studio_guided_producers r WHERE r.session_id=s.session_id))::text"
++                    + " FROM studio_guided_sessions s"
++                    + " LEFT JOIN studio_guided_translation_state t ON t.session_id=s.session_id"
++                    + " LEFT JOIN studio_guided_materializations m ON m.session_id=s.session_id"
++                    + " WHERE s.session_id=?",
++                String.class,
++                step,
++                step,
++                id));
++  }
++
+   static volatile String coreRole = "owner";
+ 
+   /**
+@@ -1686,6 +1956,27 @@
+               try {
+                 C5Capture capture = c5Capture;
+                 C5ClaimSampler observer = capture == null ? null : capture.claimSampler;
++                B1aCallbackCut b1a = b1aCallbackCut;
++                if (capture == null
++                    && b1a != null
++                    && !org.springframework.transaction.support.TransactionSynchronizationManager
++                        .isActualTransactionActive()) {
++                  // B1A-CB-01: identical outermost execution; only an actual commit is observed.
++                  boolean[] committed = {false};
++                  T result =
++                      super.execute(
++                          status -> {
++                            T value = callback.doInTransaction(status);
++                            committed[0] = status.isNewTransaction() && !status.isRollbackOnly();
++                            return value;
++                          });
++                  if (committed[0]
++                      && !org.springframework.transaction.support.TransactionSynchronizationManager
++                          .isActualTransactionActive()) {
++                    b1a.afterCommit(jdbc, result);
++                  }
++                  return result;
++                }
+                 if (observer == null
+                     || org.springframework.transaction.support.TransactionSynchronizationManager
+                         .isActualTransactionActive()
+@@ -3846,7 +4137,727 @@
+     assertThat(MODEL_WIRE).hasSize(model); assertThat(RECEIPTS.getLast()).isEqualTo(VALUES.getLast());
+     assertThat(observedBinding(execution).path("revisionId").asText()).isEqualTo(merged.path("revisionId").asText());
+   }
++
++  /**
++   * B1A-CB-01 (ledger16 {@code IncrementalSessionIT.prefixCallbacksNeverOpenModelReservation}):
++   * actual prefix admit/consume/success/observation callbacks and a direct service completeStep
++   * keep REPLAYING_PREFIX, and the SOURCE_PLAN, proposal and direct reservation paths refuse before
++   * any committed model reservation or gateway call. The first parent is drained by cancellation
++   * after its injected completeStep and earns no other credit; the destructive proposal probe runs
++   * last in its own second parent (C4 option a).
++   */
++  @Test
++  void incrementalPrefixCallbacksKeepStateAndFenceBothReservations() throws Exception {
++    var service =
++        ownedApplicationContext.getBean(
++            com.citi.put.checks.studio.guided.session.GuidedSessionService.class);
++    var controller =
++        com.citi.put.checks.studio.guided.session.GuidedInternalIdentityFixture.controller();
++    String step = INCREMENTAL_STEPS.get(0);
++    var probes = new ArrayList<B1aProbe>();
++    String first;
++    int models;
++    try (var parent = b1aParent(java.util.EnumSet.allOf(B1aPhase.class))) {
++      first = parent.id;
++      models = MODEL_WIRE.size();
++      ObjectNode admit = b1aAwait(parent, B1aPhase.ADMIT);
++      JsonNode admitted = admit.path("stored").path("step0Actions").get(0);
++      String navigation = admitted.path("admissionId").asText();
++      assertThat(admitted.path("state").asText()).isEqualTo("ADMITTED");
++      assertThat(admitted.path("dispatchCount").asInt(-1)).isZero();
++      assertThat(admit.path("result").path("admissionId").asText()).isEqualTo(navigation);
++      assertThat(admit.path("stored").path("step0Obligations")).hasSize(1);
++      JsonNode obligation = admit.path("stored").path("step0Obligations").get(0);
++      assertThat(obligation.path("ordinal").asInt(-1)).isZero();
++      assertThat(obligation.path("admissionId").asText()).isEqualTo(navigation);
++      assertThat(obligation.path("proposalDigest").asText())
++          .isEqualTo(admitted.path("requestDigest").asText());
++      int proofs = 0;
++      for (JsonNode preparation : admit.path("stored").path("preparations")) {
++        assertThat(preparation.path("admissionId").asText()).isEqualTo(navigation);
++        if (preparation
++            .path("preparationId")
++            .asText()
++            .equals(admitted.path("preparationId").asText())) {
++          proofs++;
++        }
++      }
++      assertThat(proofs).as("the sole admission joins its actual preparation proof").isEqualTo(1);
++      assertThat(admitted.path("operationHash").asText()).matches("[a-f0-9]{64}");
++      assertThat(admitted.path("contextRevision"))
++          .isEqualTo(admit.path("stored").path("contextRevision"));
++      assertThat(admitted.path("authoredInputsHash").asText())
++          .isEqualTo(admit.path("stored").path("authoredInputsHash").asText());
++      probes.add(b1aFenceProbes(parent, B1aPhase.ADMIT));
++      b1aRelease(parent, B1aPhase.ADMIT);
++
++      ObjectNode consume = b1aAwait(parent, B1aPhase.CONSUME);
++      assertThat(consume.path("resultType").asText()).isEqualTo("WonConsumption");
++      assertThat(consume.path("result").path("admissionId").asText()).isEqualTo(navigation);
++      assertThat(consume.path("result").path("state").asText()).isEqualTo("DISPATCHING");
++      JsonNode dispatching = consume.path("stored").path("step0Actions").get(0);
++      assertThat(dispatching.path("admissionId").asText()).isEqualTo(navigation);
++      assertThat(dispatching.path("state").asText()).isEqualTo("DISPATCHING");
++      assertThat(dispatching.path("dispatchCount").asInt(-1)).isEqualTo(1);
++      assertThat(consume.path("stored").path("consumeCommands").asInt(-1)).isEqualTo(1);
++      probes.add(b1aFenceProbes(parent, B1aPhase.CONSUME));
++      b1aRelease(parent, B1aPhase.CONSUME);
++
++      ObjectNode navigated = b1aAwait(parent, B1aPhase.NAVIGATION_SUCCESS);
++      JsonNode succeeded = navigated.path("stored").path("step0Actions").get(0);
++      assertThat(succeeded.path("admissionId").asText()).isEqualTo(navigation);
++      assertThat(b1aSucceeded(succeeded)).isTrue();
++      probes.add(b1aFenceProbes(parent, B1aPhase.NAVIGATION_SUCCESS));
++      b1aRelease(parent, B1aPhase.NAVIGATION_SUCCESS);
++
++      ObjectNode observed = b1aAwait(parent, B1aPhase.OBSERVATION);
++      assertThat(observed.path("stored").path("generation").asLong())
++          .isGreaterThan(navigated.path("stored").path("generation").asLong());
++      assertThat(observed.path("stored").path("evidenceHash"))
++          .isNotEqualTo(navigated.path("stored").path("evidenceHash"));
++      assertThat(observed.path("stored").path("observationCommands").asInt())
++          .isEqualTo(navigated.path("stored").path("observationCommands").asInt() + 1);
++      b1aAssertReadUnperformed(observed.path("stored"), navigation);
++      probes.add(b1aFenceProbes(parent, B1aPhase.OBSERVATION));
++      // C6: navigation alone passes the UNKNOWN_OUTCOME gate; the installed verifier refuses.
++      assertThatThrownBy(
++              () ->
++                  service.completeStep(
++                      controller,
++                      parent.id,
++                      parent.fence(),
++                      "b1a-complete-early-" + UUID.randomUUID(),
++                      C.object().put("stepId", step)))
++          .isInstanceOf(GuidedSessionException.class)
++          .hasMessage("RUNTIME_INCOMPATIBLE");
++      assertThat(b1aStoredFacts(jdbc, parent.id)).isEqualTo(observed.path("stored"));
++      b1aRelease(parent, B1aPhase.OBSERVATION);
+ 
++      ObjectNode read = b1aAwait(parent, B1aPhase.READ_SUCCESS);
++      JsonNode actions = read.path("stored").path("step0Actions");
++      assertThat(actions).hasSize(2);
++      assertThat(actions.get(0).path("admissionId").asText()).isEqualTo(navigation);
++      assertThat(b1aSucceeded(actions.get(0))).isTrue();
++      String readAdmission = actions.get(1).path("admissionId").asText();
++      assertThat(actions.get(1).path("kind").asText()).isEqualTo("read");
++      assertThat(b1aSucceeded(actions.get(1))).isTrue();
++      assertThat(read.path("stored").path("producers")).hasSize(1);
++      assertThat(read.path("stored").path("producers").get(0).path("admissionId").asText())
++          .isEqualTo(readAdmission);
++      assertThat(read.path("stored").path("materializationRevision").asLong())
++          .as("the actual producer insertion bumps materialization metadata")
++          .isGreaterThan(observed.path("stored").path("materializationRevision").asLong());
++      JsonNode obligations = read.path("stored").path("step0Obligations");
++      assertThat(obligations).hasSize(2);
++      for (int ordinal = 0; ordinal < 2; ordinal++) {
++        assertThat(obligations.get(ordinal).path("admissionId").asText())
++            .isEqualTo(actions.get(ordinal).path("admissionId").asText());
++        assertThat(obligations.get(ordinal).path("proposalDigest").asText())
++            .isEqualTo(actions.get(ordinal).path("requestDigest").asText());
++      }
++      probes.add(b1aFenceProbes(parent, B1aPhase.READ_SUCCESS));
++      // Production never calls completeStep during a prefix; this direct service call is the
++      // ledger16 "complete" proof only and is distinguished from the actual worker callbacks.
++      JsonNode completed =
++          service.completeStep(
++              controller,
++              parent.id,
++              parent.fence(),
++              "b1a-complete-" + UUID.randomUUID(),
++              C.object().put("stepId", step));
++      assertThat(completed.path("state").asText()).isEqualTo("REPLAYING_PREFIX");
++      ObjectNode after = b1aStoredFacts(jdbc, parent.id);
++      assertThat(after.path("stepIndex").asInt(-1)).isEqualTo(1);
++      assertThat(after.path("state").asText()).isEqualTo("REPLAYING_PREFIX");
++      assertThat(after.path("continuation").asText()).isEqualTo("REPLAYING_PREFIX");
++      assertThat(after.path("prefixPending").asBoolean()).isTrue();
++      assertThat(after.path("stepCompleteCommands").asInt(-1)).isEqualTo(1);
++      assertThat(after.path("switches").asInt(-1)).isZero();
++      assertThat(after.path("modelAttempts").asInt(-1)).isZero();
++      assertThat(after.path("step0Actions")).isEqualTo(actions);
++      // C7: the injected progression is drained by cancellation before the held ACK returns.
++      parent.cancel();
++      b1aRelease(parent, B1aPhase.READ_SUCCESS);
++    }
++    assertThat(sessions.transaction(() -> sessions.lock(first).document().path("state").asText()))
++        .isEqualTo("CANCELLED");
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_relearn_switches WHERE session_id=?",
++                Integer.class,
++                first))
++        .isZero();
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_publications WHERE session_id=?",
++                Integer.class,
++                first))
++        .isZero();
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=?",
++                Integer.class,
++                first))
++        .isZero();
++    assertThat(MODEL_WIRE).hasSize(models);
++
++    String second;
++    int effects;
++    int navigations;
++    int values;
++    long nativeEvents;
++    try (var parent = b1aParent(java.util.EnumSet.of(B1aPhase.OBSERVATION))) {
++      second = parent.id;
++      ObjectNode observed = b1aAwait(parent, B1aPhase.OBSERVATION);
++      String navigation =
++          observed.path("stored").path("step0Actions").get(0).path("admissionId").asText();
++      boolean verified =
++          sessions.transaction(
++              () -> {
++                var locked = sessions.lock(parent.id);
++                List<ObjectNode> current =
++                    sessions.effectiveActions(parent.id).stream()
++                        .filter(
++                            action ->
++                                action.path("coordinate").path("stepId").asText().equals(step))
++                        .toList();
++                return new com.citi.put.checks.studio.guided.translation.GuidedStepVerifier(plans)
++                    .complete(locked.document(), C.object().put("stepId", step), current);
++              });
++      assertThat(verified).as("the proposal probe needs an unfinished step").isFalse();
++      Map<String, Object> predicates = b1aPredicates(parent.id);
++      String accounting = b1aAccounting(parent.id);
++      effects = RECEIPTS.size();
++      navigations = NAVIGATIONS.get();
++      values = VALUES.size();
++      nativeEvents = b1aNativeEvents(parent.id);
++      int diagnostics = FINALIZE_DIAGNOSTICS.get();
++      ObjectNode command = b1aPlanningCommand(parent);
++      // C5: re-read immediately before /proposals; an ADMITTED read would enter recover instead.
++      b1aAssertReadUnperformed(b1aStoredFacts(jdbc, parent.id), navigation);
++      JsonNode refused =
++          incrementalControllerProbe(parent.id, parent.fence(), command, 409, "proposals");
++      assertThat(refused.path("code").asText()).isEqualTo("REVISION_CONFLICT");
++      b1aRouteDiagnostic(
++          diagnostics,
++          "REVISION_CONFLICT",
++          List.of(
++              B1A_TRANSLATION + "GuidedTranslationStore#reserveAttempt",
++              B1A_TRANSLATION + "GuidedTranslationService#lambda$call$"));
++      JsonNode failed = sessions.transaction(() -> sessions.lock(parent.id).progress().deepCopy());
++      assertThat(failed.path("errorCode").asText()).isEqualTo("REVISION_CONFLICT");
++      assertThat(b1aStoredFacts(jdbc, parent.id).path("state").asText()).isEqualTo("FAILED");
++      assertThat(b1aAccounting(parent.id))
++          .as("the CSI charge and attempt reservation rolled back; no gateway/provider call")
++          .isEqualTo(accounting);
++      assertThat(RECEIPTS).hasSize(effects);
++      assertThat(NAVIGATIONS.get()).isEqualTo(navigations);
++      assertThat(VALUES).hasSize(values);
++      assertThat(b1aNativeEvents(parent.id)).isEqualTo(nativeEvents);
++      probes.add(
++          new B1aProbe(
++              B1aPhase.OBSERVATION,
++              "proposals",
++              Boolean.TRUE.equals(predicates.get("prefix")),
++              Boolean.TRUE.equals(predicates.get("delivery"))));
++      b1aRelease(parent, B1aPhase.OBSERVATION);
++    }
++    assertThat(sessions.transaction(() -> sessions.lock(second).document().path("state").asText()))
++        .isEqualTo("FAILED");
++    assertThat(RECEIPTS).hasSize(effects);
++    assertThat(NAVIGATIONS.get()).isEqualTo(navigations);
++    assertThat(VALUES).hasSize(values);
++    assertThat(b1aNativeEvents(second)).isEqualTo(nativeEvents);
++    // C2: reserveAttempt also refuses on delivery-pending; only prefix=true/delivery=false credits.
++    assertThat(probes).allMatch(B1aProbe::prefixPending);
++    assertThat(probes).anyMatch(B1aProbe::credited);
++  }
++
++  private record B1aControl(String projectionHash, int inputCeiling, int outputCeiling) {}
++
++  private record B1aProbe(
++      B1aPhase phase, String route, boolean prefixPending, boolean deliveryPending) {
++    boolean credited() {
++      return prefixPending && !deliveryPending;
++    }
++  }
++
++  private final class B1aParent implements AutoCloseable {
++    final String id;
++    final JsonNode edited;
++    final B1aCallbackCut cut;
++    final Map<String, B1aControl> controls;
++
++    B1aParent(String id, JsonNode edited, B1aCallbackCut cut, Map<String, B1aControl> controls) {
++      this.id = id;
++      this.edited = edited;
++      this.cut = cut;
++      this.controls = controls;
++    }
++
++    long fence() {
++      return sessions.transaction(
++          () -> sessions.lock(id).document().path("owner").path("fence").asLong());
++    }
++
++    void cancel() throws Exception {
++      String state =
++          sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
++      if (!List.of(
++              "SUCCEEDED",
++              "FAILED",
++              "UNKNOWN_OUTCOME",
++              "CANCELLED",
++              "EXPIRED",
++              "PUBLICATION_CONFLICT")
++          .contains(state)) {
++        publicCall(
++            "/api/v1/studio/guided-sessions/" + id + "/cancel",
++            C.object().put("schemaVersion", 3).put("reason", "userRequested"),
++            202,
++            UUID.randomUUID().toString());
++      }
++    }
++
++    @Override
++    public void close() throws Exception {
++      var failures = new ArrayList<Throwable>();
++      coreRole = "owner";
++      forgetCachedCoreIdentity();
++      try {
++        cancel();
++      } catch (Exception | AssertionError failure) {
++        failures.add(failure);
++      } finally {
++        cut.close();
++      }
++      try {
++        p3AwaitTeardown(id);
++      } catch (Exception | AssertionError failure) {
++        failures.add(failure);
++      }
++      try {
++        assertThat(cut.failure)
++            .as("scoped post-commit cut must complete without instrumentation failure")
++            .isNull();
++        Files.writeString(TEMP.resolve("obs015-native-mode.json"), "{}");
++      } catch (Exception | AssertionError failure) {
++        failures.add(failure);
++      } finally {
++        b1aCallbackCut = null;
++        incrementalTenScenario = false;
++        incrementalDomVariant = null;
++        primaryCsi = "CSI-123";
++        forgetCachedCoreIdentity();
++      }
++      throwTeardownFailures(failures);
++    }
++  }
++
++  /** Same lawful ten-step base, public finalize, edit4 and mixed start as PFXSYNC, cut at step0. */
++  private B1aParent b1aParent(java.util.Set<B1aPhase> holds) throws Exception {
++    assertThat(b1aCallbackCut).isNull();
++    assertThat(PREFIX_SYNC_CUTS).isEmpty();
++    B1aCallbackCut cut = null;
++    B1aParent parent = null;
++    try {
++      // Same per-case CSI isolation used by existing P3/PFXSYNC subjects.
++      primaryCsi = "CSI-B1A-" + (++p3CsiOrdinal);
++      forgetCachedCoreIdentity();
++      jdbc.update(
++          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
++              + " VALUES (?,'Orders','Ops','HIGH','fixture@example.invalid','Production')",
++          primaryCsi);
++      startWorkers();
++      seedGovernedPolicies(primaryCsi);
++      incrementalTenScenario = true;
++      var texts = new ArrayList<String>();
++      texts.add("Open " + URL + " and read the Order reference.");
++      texts.add(
++          "Enter that order reference in Destination (an authored alternative is"
++              + " literal-control).");
++      texts.add("Check Destination has that order reference.");
++      texts.add("Check Destination is visible.");
++      texts.add("Click Submit and check Confirmation appears.");
++      for (int i = 5; i < 10; i++) {
++        texts.add("Check Confirmation is visible at checkpoint " + (i + 1) + ".");
++      }
++      AUDIT_CANARIES.addAll(texts);
++      AUDIT_CANARIES.addAll(
++          List.of(
++              "Operations",
++              "Order reference",
++              "Destination",
++              "Submit",
++              "Confirmation",
++              "literal-control"));
++      var steps = new ArrayList<AuthoringStep>();
++      for (int i = 0; i < 10; i++) {
++        steps.add(new AuthoringStep(UUID.fromString(INCREMENTAL_STEPS.get(i)), texts.get(i), null));
++      }
++      var authoring = new AuthoringV2Request(2, null, steps);
++      UUID test = UUID.randomUUID();
++      jdbc.update(
++          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
++              + "authoring_revision_inputs,created_by,created_at,updated_at) VALUES"
++              + " (?,'Prefix callbacks',?,'fixture','chromium',?::jsonb,'[]'::jsonb,?::jsonb,"
++              + "?::jsonb,'fixture@example.invalid',now(),now())",
++          test,
++          primaryCsi,
++          JSON.writeValueAsString(texts),
++          JSON.writeValueAsString(authoring),
++          JSON.writeValueAsString(AuthoringRevisionIdentity.create(authoring, Map.of())));
++      String original = startLearning(test);
++      awaitFinalizing(original);
++      JsonNode base =
++          publicCall(
++              "/api/v1/studio/guided-sessions/" + original + "/finalize",
++              C.object()
++                  .put("schemaVersion", 3)
++                  .put("expectedSourceRevision", "1")
++                  .put("expectedConfigurationRevision", "1"),
++              200,
++              UUID.randomUUID().toString());
++      p3AwaitTeardown(original);
++      Map<String, B1aControl> controls = b1aControls(original);
++      JsonNode draft = publicCall("/api/v1/studio/tests/" + test, null, 200, null);
++      assertThat(draft.path("readiness").asText()).isEqualTo("READY");
++      JsonNode edited = prefixSyncEdit(test, texts.get(3) + " Verify it remains visible.");
++      assertThat(edited.path("firstChangedStepId").asText()).isEqualTo(INCREMENTAL_STEPS.get(3));
++      Files.writeString(
++          TEMP.resolve("obs015-native-mode.json"),
++          C.object()
++              .put("mode", "b1a-callback")
++              .put("stepId", INCREMENTAL_STEPS.get(0))
++              .put("ordinal", 0)
++              .toString());
++      Files.writeString(TEMP.resolve("obs015-native-events.jsonl"), "");
++      ObjectNode start =
++          C.object()
++              .put("schemaVersion", 3)
++              .put("testId", test.toString())
++              .put("sourceRevision", edited.path("sourceRevision").asText())
++              .put("configurationRevision", edited.path("configurationRevision").asText())
++              .put("environmentId", "fixture")
++              .put("applicationId", "orders")
++              .put("baseRevisionId", base.path("revisionId").asText());
++      start.set("versions", versions());
++      incrementalDomVariant = "edit4";
++      cut = new B1aCallbackCut(test, holds);
++      b1aCallbackCut = cut;
++      String id =
++          publicCall("/api/v1/studio/guided-sessions", start, 202, UUID.randomUUID().toString())
++              .path("session")
++              .path("sessionId")
++              .asText();
++      parent = new B1aParent(id, edited, cut, controls);
++      return parent;
++    } catch (Exception | AssertionError failure) {
++      if (parent != null) {
++        try {
++          parent.close();
++        } catch (Exception | AssertionError cleanup) {
++          failure.addSuppressed(cleanup);
++        }
++      } else {
++        if (cut != null) {
++          cut.close();
++        }
++        b1aCallbackCut = null;
++        try {
++          Files.writeString(TEMP.resolve("obs015-native-mode.json"), "{}");
++        } catch (Exception cleanup) {
++          failure.addSuppressed(cleanup);
++        }
++        // startLearning tracks original sessions for the existing failure-safe @AfterEach cleanup.
++        incrementalTenScenario = false;
++        incrementalDomVariant = null;
++        primaryCsi = "CSI-123";
++        forgetCachedCoreIdentity();
++      }
++      throw failure;
++    }
++  }
++
++  /** Valid direct-attempt controls: the exact tuple of a real committed base reservation. */
++  private Map<String, B1aControl> b1aControls(String original) {
++    var controls = new java.util.LinkedHashMap<String, B1aControl>();
++    for (String kind : List.of("SOURCE_PLAN", "NEXT_ACTION")) {
++      JsonNode identity =
++          C.parse(
++              jdbc.queryForObject(
++                  "SELECT identity::text FROM studio_guided_model_attempts"
++                      + " WHERE session_id=? AND kind=? ORDER BY created_at LIMIT 1",
++                  String.class,
++                  original,
++                  kind));
++      var control =
++          new B1aControl(
++              identity.path("projectionHash").asText(),
++              identity.path("inputCeiling").asInt(),
++              identity.path("outputCeiling").asInt());
++      assertThat(control.projectionHash()).matches("[a-f0-9]{64}");
++      assertThat(control.inputCeiling()).isPositive();
++      assertDeclaredFixtureCeiling(control.outputCeiling());
++      controls.put(kind, control);
++    }
++    return Map.copyOf(controls);
++  }
++
++  private ObjectNode b1aAwait(B1aParent parent, B1aPhase phase) throws Exception {
++    assertThat(parent.cut.entered.get(phase).await(30, java.util.concurrent.TimeUnit.SECONDS))
++        .as("actual %s commit cut is required; an earlier guard or refusal stays OPEN", phase)
++        .isTrue();
++    assertThat(parent.cut.failure).isNull();
++    assertThat(parent.cut.sessionId).isEqualTo(parent.id);
++    assertThat(parent.cut.order)
++        .containsExactlyElementsOf(
++            java.util.Arrays.stream(B1aPhase.values())
++                .filter(
++                    candidate ->
++                        parent.cut.holds.contains(candidate)
++                            && candidate.ordinal() <= phase.ordinal())
++                .toList());
++    ObjectNode checkpoint = parent.cut.facts.get(phase);
++    JsonNode stored = checkpoint.path("stored");
++    assertThat(b1aStoredFacts(jdbc, parent.id))
++        .as("the committed %s state cannot move while its caller is held", phase)
++        .isEqualTo(stored);
++    assertThat(stored.path("state").asText()).isEqualTo("REPLAYING_PREFIX");
++    assertThat(stored.path("continuation").asText()).isEqualTo("REPLAYING_PREFIX");
++    assertThat(stored.path("prefixPending").asBoolean()).isTrue();
++    assertThat(stored.path("bootstrapPhase").asText()).isEqualTo("READY");
++    assertThat(stored.path("stepIndex").asInt(-1)).isZero();
++    assertThat(stored.path("switches").asInt(-1)).isZero();
++    assertThat(stored.path("modelAttempts").asInt(-1)).isZero();
++    assertThat(stored.path("stepCompleteCommands").asInt(-1)).isZero();
++    return checkpoint;
++  }
++
++  private void b1aRelease(B1aParent parent, B1aPhase phase) {
++    assertThat(System.nanoTime() - parent.cut.enteredAtNanos.get(phase))
++        .as("hold stays inside the original callback and coordinator transport deadlines")
++        .isLessThan(Duration.ofSeconds(12).toNanos());
++    parent.cut.release.get(phase).countDown();
++  }
++
++  /** C5: the proposal probe is lawful only while step0's read is wholly unperformed. */
++  private static void b1aAssertReadUnperformed(JsonNode stored, String navigation) {
++    JsonNode actions = stored.path("step0Actions");
++    assertThat(actions).hasSize(1);
++    assertThat(actions.get(0).path("admissionId").asText()).isEqualTo(navigation);
++    assertThat(actions.get(0).path("kind").asText()).isEqualTo("navigate");
++    assertThat(b1aSucceeded(actions.get(0))).isTrue();
++    assertThat(stored.path("step0Obligations")).hasSize(1);
++    assertThat(stored.path("step0Obligations").get(0).path("admissionId").asText())
++        .as("no read obligation association exists for step0")
++        .isEqualTo(navigation);
++    for (JsonNode preparation : stored.path("preparations")) {
++      assertThat(preparation.path("admissionId").asText())
++          .as("no read preparation row exists")
++          .isEqualTo(navigation);
++    }
++  }
++
++  private Map<String, Object> b1aPredicates(String id) {
++    return jdbc.queryForMap(
++        "SELECT studio_015_prefix_pending(?) AS prefix,studio_015_delivery_pending(?) AS delivery",
++        id,
++        id);
++  }
++
++  /**
++   * C3 accounting witness. {@code progress.translationAcquisition} is excluded by name: {@code
++   * store.acquire} legitimately commits it on the proposal path and it is not a model reservation.
++   */
++  private String b1aAccounting(String id) {
++    ObjectNode out = C.object();
++    out.set(
++        "session",
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT jsonb_build_object('counters',document->'counters','modelReservations',"
++                    + "COALESCE(progress->'modelReservations','{}'::jsonb))::text"
++                    + " FROM studio_guided_sessions WHERE session_id=?",
++                String.class,
++                id)));
++    out.set(
++        "csiTokenDays",
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY t.budget_day),'[]'::jsonb)::text"
++                    + " FROM studio_guided_csi_token_days t WHERE t.csi_id=(SELECT"
++                    + " document->'scope'->>'csiId' FROM studio_guided_sessions WHERE"
++                    + " session_id=?)",
++                String.class,
++                id)));
++    out.set(
++        "attempts",
++        C.parse(
++            jdbc.queryForObject(
++                "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY t.attempt_id),'[]'::jsonb)::text"
++                    + " FROM studio_guided_model_attempts t WHERE t.session_id=?",
++                String.class,
++                id)));
++    out.put(
++        "modelReserveCommands",
++        jdbc.queryForObject(
++            "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND"
++                + " route='model-reserve'",
++            Integer.class,
++            id));
++    out.put("committedModelReservations", COMMITTED_MODEL_BUDGET_WITNESSES.size())
++        .put("modelCallJoins", MODEL_CALL_JOINS.size())
++        .put("providerBodies", MODEL_WIRE.size())
++        .put("providerKinds", MODEL_KINDS.size())
++        .put("providerFailures", PROVIDER_FAILURES.get())
++        .put("modelResponses", MODEL_RESPONSE_FACTS.size())
++        .put("legacyCalls", LEGACY_MODEL_CALLS.get());
++    return GuidedContracts.canonical(out);
++  }
++
++  private long b1aNativeEvents(String id) throws Exception {
++    return Files.readAllLines(TEMP.resolve("obs015-native-events.jsonl")).stream()
++        .filter(line -> !line.isBlank())
++        .map(C::parse)
++        .filter(
++            row ->
++                row.path("sessionId").asText().equals(id)
++                    && row.path("phase").asText().startsWith("NATIVE_"))
++        .count();
++  }
++
++  private ObjectNode b1aPlanningCommand(B1aParent parent) {
++    long revision =
++        sessions.transaction(
++            () -> {
++              sessions.lock(parent.id);
++              return plans.state(parent.id).path("planRevision").asLong();
++            });
++    return C.object()
++        .put("schemaVersion", 3)
++        .put("sessionId", parent.id)
++        .put("expectedSourceRevision", parent.edited.path("sourceRevision").asText())
++        .put("expectedConfigurationRevision", parent.edited.path("configurationRevision").asText())
++        .put("expectedPlanRevision", revision);
++  }
++
++  /**
++   * Direct reserveModel, direct typed reserveAttempt (SOURCE_PLAN and NEXT_ACTION) and the actual
++   * SOURCE_PLAN route at one held cut. Both pending predicates are recorded (C2); state, counters,
++   * attempts, CSI day rows and provider witnesses stay unchanged (C3).
++   */
++  private B1aProbe b1aFenceProbes(B1aParent parent, B1aPhase phase) throws Exception {
++    var service =
++        ownedApplicationContext.getBean(
++            com.citi.put.checks.studio.guided.session.GuidedSessionService.class);
++    var controller =
++        com.citi.put.checks.studio.guided.session.GuidedInternalIdentityFixture.controller();
++    String id = parent.id;
++    long fence = parent.fence();
++    Map<String, Object> predicates = b1aPredicates(id);
++    String pending = incrementalPendingSnapshot(id);
++    String accounting = b1aAccounting(id);
++    ObjectNode stored = b1aStoredFacts(jdbc, id);
++    B1aControl next = parent.controls.get("NEXT_ACTION");
++    assertThatThrownBy(
++            () ->
++                service.reserveModel(
++                    controller,
++                    id,
++                    fence,
++                    "b1a-reserve-" + phase + "-" + UUID.randomUUID(),
++                    next.inputCeiling(),
++                    next.outputCeiling()))
++        .isInstanceOf(GuidedSessionException.class)
++        .hasMessage("REVISION_CONFLICT");
++    for (String kind : List.of("SOURCE_PLAN", "NEXT_ACTION")) {
++      B1aControl control = parent.controls.get(kind);
++      String request = "b1a-" + kind + "-" + UUID.randomUUID();
++      assertThatThrownBy(
++              () ->
++                  sessions.transaction(
++                      () -> {
++                        var locked = sessions.lock(id);
++                        long revision = plans.state(id).path("planRevision").asLong();
++                        Instant expires =
++                            Instant.parse(locked.document().path("expiresAt").asText());
++                        Instant until = Instant.now().plusSeconds(10);
++                        return plans.reserveAttempt(
++                            locked.document(),
++                            request,
++                            1,
++                            kind,
++                            control.projectionHash(),
++                            revision,
++                            control.inputCeiling(),
++                            control.outputCeiling(),
++                            UUID.randomUUID().toString(),
++                            until.isAfter(expires) ? expires : until);
++                      }))
++          .isInstanceOf(GuidedSessionException.class)
++          .hasMessage("REVISION_CONFLICT");
++      assertThat(
++              jdbc.queryForObject(
++                  "SELECT count(*) FROM studio_guided_model_attempts WHERE request_id=?",
++                  Integer.class,
++                  request))
++          .isZero();
++    }
++    int diagnostics = FINALIZE_DIAGNOSTICS.get();
++    JsonNode refused =
++        incrementalControllerProbe(
++            id, fence, b1aPlanningCommand(parent), 409, "dependency-admissions");
++    assertThat(refused.path("code").asText()).isEqualTo("REVISION_CONFLICT");
++    b1aRouteDiagnostic(
++        diagnostics,
++        "REVISION_CONFLICT",
++        List.of(B1A_TRANSLATION + "GuidedTranslationService#lambda$learnSuffix$"));
++    assertThat(b1aPredicates(id)).isEqualTo(predicates);
++    assertThat(incrementalPendingSnapshot(id)).isEqualTo(pending);
++    assertThat(b1aAccounting(id)).isEqualTo(accounting);
++    assertThat(b1aStoredFacts(jdbc, id)).isEqualTo(stored);
++    return new B1aProbe(
++        phase,
++        "direct+dependency-admissions",
++        Boolean.TRUE.equals(predicates.get("prefix")),
++        Boolean.TRUE.equals(predicates.get("delivery")));
++  }
++
++  /** Attributes a planning-route refusal to its exact guard frame; checkCommand never credits. */
++  private JsonNode b1aRouteDiagnostic(int after, String code, List<String> required)
++      throws Exception {
++    var matches = new ArrayList<JsonNode>();
++    for (int n = after + 1; n <= FINALIZE_DIAGNOSTICS.get(); n++) {
++      Path file = TEMP.resolve("finalize-exception-" + n + ".json");
++      if (!Files.isRegularFile(file)) {
++        continue;
++      }
++      JsonNode row;
++      try {
++        row = C.parse(Files.readString(file));
++      } catch (RuntimeException incomplete) {
++        continue;
++      }
++      if (!row.path("exceptionCode").asText().equals(code)) {
++        continue;
++      }
++      var frames = new ArrayList<String>();
++      for (JsonNode frame : row.path("stackFrames")) {
++        frames.add(frame.path("class").asText() + "#" + frame.path("method").asText());
++      }
++      if (frames.stream().noneMatch(frame -> frame.endsWith("#checkCommand"))
++          && required.stream()
++              .allMatch(prefix -> frames.stream().anyMatch(frame -> frame.startsWith(prefix)))) {
++        matches.add(row);
++      }
++    }
++    assertThat(matches)
++        .as("one exact %s guard frame; an earlier refusal is not credited", code)
++        .hasSize(1);
++    return matches.getFirst();
++  }
++
+   private void b1AssertTrustedCeilingStart(ObjectNode start, UUID test) throws Exception {
+     ObjectNode narrowed = POLICY.deepCopy(); narrowed.putArray("allowedOrigins").add(SECRET_ORIGIN);
+     ((ObjectNode) narrowed.path("applicationPolicy")).putArray("readGrants");

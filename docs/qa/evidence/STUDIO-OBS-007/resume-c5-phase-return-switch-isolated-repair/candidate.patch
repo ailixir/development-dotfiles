@@ -1,0 +1,193 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -12236,106 +12236,96 @@
+           continue;
+         }
+         if (type.equals("com.citi.put.checks.studio.guided.session.GuidedSessionService")) {
+-          int family =
+-              switch (method) {
+-                case "claim" -> 7;
+-                case "translationQuestion",
+-                        "reserveModel",
+-                        "settleModel",
+-                        "annotateLoginFailure",
+-                        "translationActions" ->
+-                    8;
+-                case "observe",
+-                        "observeV2",
+-                        "materialize",
+-                        "allocateBinding",
+-                        "runnerContext",
+-                        "storePreparation",
+-                        "bootstrap",
+-                        "beginObservationRefresh",
+-                        "committedObservationRefresh" ->
+-                    9;
+-                case "recordSecretDecision",
+-                        "refuseResolvedSecret",
+-                        "admit",
+-                        "advance",
+-                        "outcome",
+-                        "outcomeV2",
+-                        "completeStep",
+-                        "recordEvidence",
+-                        "consume",
+-                        "lifecycle",
+-                        "existingAdmission" ->
+-                    10;
+-                case "secretSession",
+-                        "start",
+-                        "read",
+-                        "clarify",
+-                        "clarificationSelection",
+-                        "publicCommand",
+-                        "prepareAssignment",
+-                        "acknowledgeAssignment",
+-                        "assignmentLifecycle" ->
+-                    11;
+-                case "secretRevoked",
+-                        "cancel",
+-                        "failTranslation",
+-                        "expire",
+-                        "lostAcknowledgment",
+-                        "stop",
+-                        "finalizeSession",
+-                        "publicationCommitted",
+-                        "reconcileLateModelUsage" ->
+-                    12;
+-                default -> -1;
+-              };
+-          return new SourceClassification(family, -1);
++          return switch (method) {
++            case "claim" -> new SourceClassification(7, -1);
++            case "translationQuestion",
++                    "reserveModel",
++                    "settleModel",
++                    "annotateLoginFailure",
++                    "translationActions" -> new SourceClassification(8, -1);
++            case "observe",
++                    "observeV2",
++                    "materialize",
++                    "allocateBinding",
++                    "runnerContext",
++                    "storePreparation",
++                    "bootstrap",
++                    "beginObservationRefresh",
++                    "committedObservationRefresh" -> new SourceClassification(9, -1);
++            case "recordSecretDecision",
++                    "refuseResolvedSecret",
++                    "admit",
++                    "advance",
++                    "outcome",
++                    "outcomeV2",
++                    "completeStep",
++                    "recordEvidence",
++                    "consume",
++                    "lifecycle",
++                    "existingAdmission" -> new SourceClassification(10, -1);
++            case "secretSession",
++                    "start",
++                    "read",
++                    "clarify",
++                    "clarificationSelection",
++                    "publicCommand",
++                    "prepareAssignment",
++                    "acknowledgeAssignment",
++                    "assignmentLifecycle" -> new SourceClassification(11, -1);
++            case "secretRevoked",
++                    "cancel",
++                    "failTranslation",
++                    "expire",
++                    "lostAcknowledgment",
++                    "stop",
++                    "finalizeSession",
++                    "publicationCommitted",
++                    "reconcileLateModelUsage" -> new SourceClassification(12, -1);
++            default -> new SourceClassification(-1, -1);
++          };
+         }
+         if (type.equals("com.citi.put.checks.studio.guided.translation.GuidedTranslationService")) {
+-          int family =
+-              switch (method) {
+-                case "plan",
+-                        "bootstrap",
+-                        "beginBootstrapDelivery",
+-                        "finishBootstrap",
+-                        "advance",
+-                        "context",
+-                        "replan",
+-                        "call",
+-                        "question",
+-                        "recover",
+-                        "admitAndDispatch",
+-                        "complete",
+-                        "completeCurrent",
+-                        "acquireBeforeProposal",
+-                        "observeAcquisition",
+-                        "refresh" ->
+-                    8;
+-                case "reconcile", "stopRejected" -> 12;
+-                default -> -1;
+-              };
+-          int phase = -1;
+-          if (family == 8
+-              && method.equals("call")
+-              && "GuidedTranslationService.java".equals(stack[i].getFileName())) {
+-            // Exact postcompile LineNumberTable/source points, externally bound to runtime receipt.
+-            // Missing/debug/source mismatch is UNKNOWN; no ranges or distant caller fallback.
+-            phase =
+-                switch (stack[i].getLineNumber()) {
+-                  case 708 -> 13;
+-                  case 844 -> 14;
+-                  case 879 -> 15;
+-                  case 827 -> 16;
+-                  case 978 -> 17;
+-                  case 1008 -> 18;
+-                  default -> -1;
+-                };
+-          }
+-          return new SourceClassification(family, phase);
++          return switch (method) {
++            case "plan",
++                    "bootstrap",
++                    "beginBootstrapDelivery",
++                    "finishBootstrap",
++                    "advance",
++                    "context",
++                    "replan",
++                    "call",
++                    "question",
++                    "recover",
++                    "admitAndDispatch",
++                    "complete",
++                    "completeCurrent",
++                    "acquireBeforeProposal",
++                    "observeAcquisition",
++                    "refresh" -> new SourceClassification(8, sourcePhase(stack[i], method));
++            case "reconcile", "stopRejected" -> new SourceClassification(12, -1);
++            default -> new SourceClassification(-1, -1);
++          };
+         }
+         return null; // Unsupported immediate caller: never borrow a more distant broad class.
+       }
+       return null;
++    }
++
++    private static int sourcePhase(StackTraceElement frame, String method) {
++      if (!method.equals("call")
++          || !"GuidedTranslationService.java".equals(frame.getFileName())) {
++        return -1;
++      }
++      // Same selected immediate caller only; exact postcompile mapping is bound externally.
++      return switch (frame.getLineNumber()) {
++        case 708 -> 13;
++        case 844 -> 14;
++        case 879 -> 15;
++        case 827 -> 16;
++        case 978 -> 17;
++        case 1008 -> 18;
++        default -> -1;
++      };
+     }
+ 
+     private void triggerPgOnce(Thread target) {

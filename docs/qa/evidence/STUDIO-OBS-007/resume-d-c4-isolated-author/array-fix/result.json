@@ -1,0 +1,20 @@
+{
+  "status": "ISOLATED_SOURCE_FROZEN_UNRUN",
+  "intent": ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-c4-isolated-array-fix-intent.txt",
+  "context": ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-c4-isolated-array-fix-context.txt",
+  "candidate": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-author/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "beforeSha256": "b354d1bc0a3fc09efd22bda2edd564f44e48495b54bb82cc87ee8ea0d0d58ee6",
+  "afterSha256": "5162ee16fa9c096f231d2e64b46ca4f7654a8bb6567d32534d5ded4dc3e6bdc4",
+  "tinyPatch": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-author/array-fix/source.patch",
+  "tinyPatchSha256": "55ddca5da452afc9b0f94950ca17f6970436b2bfb61ced5da91107a1729b00d6",
+  "byteReconstruction": true,
+  "requireActualArray": true,
+  "requireEmptyArray": true,
+  "original26NewTwoSamplerCaptureProviderPauseAuditOtherAssertionsUnchanged": true,
+  "candidateReport": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-author/result.json",
+  "candidateReportSha256": "ba24089650aed9bd59ae7057507b8772b060bc4da0bb05577f2081e0f076cc48",
+  "completePatchSha256": "dfd8d4af10cd9f567b0e1d2c9dc445b4549a7ee6bebec03a72bb8898426980f3",
+  "liveSourceWrites": 0,
+  "runtimeActions": [],
+  "application": "Coordinator logical merge onto current B source only after review; no old-base overwrite"
+}

@@ -1,0 +1,33 @@
+diff --git a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+@@ -1175,10 +1175,27 @@
+         THREE);
+   }
+ 
+-  /** Approves the class's governed policy with {@code stance}; sessions freeze it at start. */
++  /**
++   * Approves the class's governed policy with {@code stance}, keeping the active version's
++   * application policy (the per-test read grant the worker start seeded); sessions freeze it at
++   * start.
++   */
+   private void governedStance(String stance) {
++    var policyJdbc = Environment.policyJdbc();
++    JsonNode active =
++        new com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository(policyJdbc, C)
++            .active("CSI-123", "orders", "fixture")
++            .orElseThrow()
++            .document()
++            .path("applicationPolicy");
+     com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
+-        jdbc, "CSI-123", "orders", "fixture", List.of(Environment.ORIGIN), null, stance);
++        policyJdbc,
++        "CSI-123",
++        "orders",
++        "fixture",
++        List.of(Environment.ORIGIN),
++        active.deepCopy(),
++        stance);
+   }
+ 
+   private static ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>

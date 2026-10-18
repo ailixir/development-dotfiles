@@ -1,0 +1,152 @@
+{
+  "artifact": "STUDIO-OBS-015 prefixproducer synchronization production-only source01 milestone",
+  "at": "2026-10-15T19:44:27.858529+00:00",
+  "owner": "Dex/backend015_resume",
+  "status": "PRODUCTION_SOURCE_ONLY_ATOMIC_HOLD_TEST_IMPLEMENTATION_HELD_PENDING_LAWFUL_SEAM_REPLACEMENT",
+  "sourceDistHold": true,
+  "commandsLive": false,
+  "compileStatus": "UNCOMPILED",
+  "executionStatus": "UNEXECUTED",
+  "testStatus": "NOT_WRITTEN_PER_ROOT_HOLD_PENDING_REPLACEMENT_LEASE",
+  "qaVerdict": null,
+  "lifecycleTransition": null,
+  "ownedSources": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "beforeSha256": "82b8401722224d5277da5080b9475c32318284cf32abb0a7aa33cc9aca86938b",
+      "afterSha256": "d8c494b290fdecff883d3e6b38de2b7cb6470cddfd42db84db84d7cf85c45fc3",
+      "changed": true,
+      "beforeArchive": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/source-before/GuidedTranslationService.java",
+      "afterArchive": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/source-after/GuidedTranslationService.java"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "beforeSha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+      "afterSha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+      "changed": false,
+      "beforeArchive": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/source-before/GuidedPlanningIntegrationTest.java",
+      "afterArchive": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/source-after/GuidedPlanningIntegrationTest.java"
+    }
+  ],
+  "authority": {
+    "AriaDesign": "backend/prefix-producer-sync-design/manifest.json",
+    "AriaDesignSha256": "5a2a54fca4b06c44e121538b7c0f9c3f0fc673aa5615c92a789abfdfd3d744d0",
+    "RunnerDiagnosis": "runner/core04-ack-lost-diagnosis/manifest.json",
+    "RunnerDiagnosisSha256": "9809067e27fd68c91be16d21f1d6e178cea187d9f7daa1a519800d170e0e7156",
+    "actualFailedReceipt": "backend/raw-head-core-feedback-attempt04-receipt.json",
+    "actualFailedReceiptSha256": "4deb29314d211f0dc710d25935521e6d0ca1d4132c969b96d70c500efe8e164c"
+  },
+  "preservation": {
+    "productionBeforeSha256": "82b8401722224d5277da5080b9475c32318284cf32abb0a7aa33cc9aca86938b",
+    "productionAfterSha256": "d8c494b290fdecff883d3e6b38de2b7cb6470cddfd42db84db84d7cf85c45fc3",
+    "inverseSha256": "82b8401722224d5277da5080b9475c32318284cf32abb0a7aa33cc9aca86938b",
+    "removeOnly41InsertedLinesRestoresWholeBeforeByteExact": true,
+    "allEarlierDoneRefreshExistingActionBranchesByteExact": true,
+    "allPostPrepareVerifyGuardAdmissionConsumeCodeByteExact": true,
+    "newPrepareUsesExactPreviouslyCapturedRequestEnvelope": true,
+    "noIssueRecaptureResealOrObservationRefreshAdded": true,
+    "noMaterializationRevisionOrLeaseTimestampEqualityAdded": true,
+    "normalBridgeIdentityAckUnchanged": true,
+    "planningBeforeSha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+    "planningCurrentSha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+    "planningWholeOriginalUnchanged": true,
+    "testEditsHeldByRoot": true,
+    "testImplementationNotCompleted": true,
+    "newJUnitSubjects": 0,
+    "runtimeExecution": false
+  },
+  "productionSequence": [
+    "Earlierdone/confirmationrefresh/existingDISPATCHINGlostACK/existingADMITTEDdirectdispatch/otherexistingreturns unchanged",
+    "Awaitexistingdispatch.pushContextoutsideSQL",
+    "OnlyexactGuidedRunnerClient.definiteContextRefusal invokesexistingfailTranslationRUNTIME_INCOMPATIBLE;thenpropagate. Otherfailurespropagate; no newprepare/retryloop",
+    "Successfulresponse\u2192translationTransaction currentauth/access/source/owner/fence/livelease/active checks pluspendingprefixREADY/runnablestate",
+    "Refusecurrentconfirmedneedsrefreshpause; unchangednextcompleteaction/coordinate;noactionappeared",
+    "Compare10fixedPrefixRequestIdentityfields/inputhash, exactprogramhash/currentcontextprogram/evidencehash and capturedrequestdigest",
+    "Useexactcapturedrequestforprepare; no materializationRevision/leaseExpiresAtequality,noIssue/recapture/reseal",
+    "Originalpostprepare/admission/consume guardsandappendACKsemantics unchanged"
+  ],
+  "reviewBindingsPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/reviewed-input-bindings.json",
+  "reviewBindingMismatches": [],
+  "protectedGuardsPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/protected-guards.json",
+  "testSeamPendingPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/test-seam-pending.json",
+  "testSourceState": "Planningunchangedperexplicitrootdirective. JOIN/buildnotleasedyetandnotedited. No newtests orselectorsclaimedpresent. Proposednew testgroups remainpending; original2Coreselectors andfull35/37append-input/nativecontextproof stillrequired.",
+  "futureActualExistingSelectors": [
+    {
+      "task": "guidedIncrementalTest",
+      "selector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays"
+    },
+    {
+      "task": "guidedIncrementalTest",
+      "selector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStartCannotWidenTrustedOriginCeiling"
+    }
+  ],
+  "sourceOnlyLimits": "No compiled/static/runtimeproof. Actualoldmixedstatus/bodynotretained; no oldUNKNOWNreclassification,no-effectgrantoruncertainretry. SameversionBridgeIdentityACKandappenddeliveryACKexactoriginalprotocols.",
+  "remaining": "Allnewmeaningfulsynchronization/refusal/race/recoverytests source+actual execution pendinglawfullease;2realCoremethods/all35/37low43default80original/86acceptance24IPC55SQL/B1B2B3B4/privateCoreVaultnative/fullconfigurednormalcheckscoverage/crossReplica/deployment/independent015QA/PO/rootclosure thenfull008.85originalOPENpendingunamended.",
+  "artifacts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/before-hashes.json",
+      "sha256": "d815a7c29e8a83464d0abab593af9a5e284d3a6a6d4eecb8aaa48ee06232a740",
+      "bytes": 350
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/changes.patch",
+      "sha256": "a6dbb3b6efc6d9b53a16f7794c3c6fb29ff10802801e8908ef7b819aad792db8",
+      "bytes": 3275
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/preservation.json",
+      "sha256": "98cb17e2786a2132a2be0f9931236d368249a398dbe4a9346c696f37dbad9d11",
+      "bytes": 1067
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/production-insertion.java.txt",
+      "sha256": "c9138803be6e0ef3074f0af4c7632086e4c0b2c553f9113e604352770f01e2db",
+      "bytes": 2673
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/protected-guards.json",
+      "sha256": "128c92827eba4bcaf8c88395a447fe8a9a5807226c1f840519867f8825139b90",
+      "bytes": 2339
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/reviewed-input-bindings.json",
+      "sha256": "ab1398ffe4b516de2f2383485ca84101f73646fbef50422ab23b5bb8849c61e0",
+      "bytes": 16464
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/source-after/GuidedPlanningIntegrationTest.java",
+      "sha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+      "bytes": 168031
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/source-after/GuidedTranslationService.java",
+      "sha256": "d8c494b290fdecff883d3e6b38de2b7cb6470cddfd42db84db84d7cf85c45fc3",
+      "bytes": 109778
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/source-before/GuidedPlanningIntegrationTest.java",
+      "sha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+      "bytes": 168031
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/source-before/GuidedTranslationService.java",
+      "sha256": "82b8401722224d5277da5080b9475c32318284cf32abb0a7aa33cc9aca86938b",
+      "bytes": 107105
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/source-checks.json",
+      "sha256": "0c258e986835ab9662750d4f1a982b57dec285316013c522a92e89e4dd2b5e48",
+      "bytes": 1438
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/source-notes.txt",
+      "sha256": "7de871391a655d525e4c5f6fa3c7b3b114fb49f11794da7b9d18f6902ea4bedc",
+      "bytes": 1913
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/prefix-producer-sync-source01/test-seam-pending.json",
+      "sha256": "9efe50136526ea0104b454bb727be5ae69147cd9e1dd54b05b2b756f41574de7",
+      "bytes": 2108
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java
+@@ -1334,8 +1334,13 @@
+             + "studio_guided_commands DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN "
+             + "(NEW.route='v2-consume') EXECUTE FUNCTION bridge_fail_commit()");
+     try {
++      // The repository shares the JPA transaction manager (ruling N4, as in production), which
++      // reports a failed commit as JpaSystemException; the base class used a JDBC manager.
+       assertThatThrownBy(() -> dispatch.dispatch(controller, id, 1, "failed-commit", request))
+-          .isInstanceOf(org.springframework.transaction.TransactionException.class);
++          .isInstanceOf(org.springframework.orm.jpa.JpaSystemException.class)
++          .hasMessageContaining("Unable to commit")
++          .rootCause()
++          .hasMessageContaining("injected commit failure");
+       assertThat(NAVIGATIONS.get()).isZero();
+       assertThat(action(id).path("dispatchCount").asInt()).isZero();
+       assertThat(

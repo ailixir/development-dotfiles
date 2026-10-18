@@ -1,0 +1,22 @@
+[
+  {
+    "method": "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose",
+    "genuineWork": "Authenticated actual stop HTTP is held at the fixture relay. Actual premature-completion assertion fails; gate is then released, actual sender/confirmation drained independently, original transaction persists CONFIRMED/live=false before route destruction.",
+    "status": "SOURCE_AUTHORED_RUNTIME_UNRUN"
+  },
+  {
+    "method": "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose",
+    "genuineWork": "Authenticated actual stop held at relay; actual observation thread interruption causes real InterruptedException. Releasing the gate and draining clears/restores cleanup interrupt without cancelling ownership proof, then requires real confirmation before destruction.",
+    "status": "SOURCE_AUTHORED_RUNTIME_UNRUN"
+  },
+  {
+    "method": "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation",
+    "genuineWork": "Authenticated fixture relay actually returns HTTP503. Original transport produces UNKNOWN_OUTCOME409; sender completion records real failure, confirmation calls zero; committed cancellation/materialization closure retained with PENDING, never fake CONFIRMED.",
+    "status": "SOURCE_AUTHORED_RUNTIME_UNRUN"
+  },
+  {
+    "method": "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose",
+    "genuineWork": "Actual sender succeeds. Case gate pauses before original confirmation execute; only private PG route is cut, direct physical PG SELECT1 remains available, and original transaction begins through closed route and must really fail CannotCreateTransactionException/PSQL class08. Handle completes after original execute throw/resource cleanup, retained PENDING/live=false facts checked; same-port route restored separately.",
+    "status": "SOURCE_AUTHORED_RUNTIME_UNRUN"
+  }
+]

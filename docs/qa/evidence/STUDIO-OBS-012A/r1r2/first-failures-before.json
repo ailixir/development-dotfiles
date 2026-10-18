@@ -1,0 +1,118 @@
+{
+ "sameCoordinatorRunsHttpTcpSplunkAndStudioThroughTheirExistingPipelines()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"ACCEPTED\"  but was: \"REFUSED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.scheduling.SharedSchedulingIT.sameCoordinatorRunsHttpTcpSplunkAndStudioThroughTheirExistingPipelines(SharedSchedulingIT.java:319)",
+  "causes": []
+ },
+ "studioOnlyReplicaRunsWhenCatalogFlagIsOffAndDeduplicatesAgainstAnotherCoordinator()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: 1  but was: 0",
+  "firstTestFrame": "at app//com.citi.put.checks.scheduling.SharedSchedulingIT.studioOnlyReplicaRunsWhenCatalogFlagIsOffAndDeduplicatesAgainstAnotherCoordinator(SharedSchedulingIT.java:420)",
+  "causes": []
+ },
+ "rawReadinessChangesRefuseExplicitlyAndAnotherActivatorDoesNotRewriteAcceptedProvenance()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"ACCEPTED\"  but was: \"OBSERVED_SCHEDULE_AUTH_REQUIRED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.rawReadinessChangesRefuseExplicitlyAndAnotherActivatorDoesNotRewriteAcceptedProvenance(StudioScheduleApiIT.java:905)",
+  "causes": []
+ },
+ "capabilityOffDeferralExpiresBeforeAnyCatchupAndLifecycleSettlesPendingAudit()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"PENDING_QUOTA_EXCEEDED\"  but was: \"OBSERVED_SCHEDULE_AUTH_REQUIRED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.capabilityOffDeferralExpiresBeforeAnyCatchupAndLifecycleSettlesPendingAudit(StudioScheduleApiIT.java:487)",
+  "causes": []
+ },
+ "activeManualWorkSkipsOverlapWithoutChangingManualPermission()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"OVERLAP\"  but was: \"OBSERVED_SCHEDULE_AUTH_REQUIRED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.activeManualWorkSkipsOverlapWithoutChangingManualPermission(StudioScheduleApiIT.java:381)",
+  "causes": []
+ },
+ "graceAndGrantAreRecheckedAfterPreflightBeforeAnyAcceptedWrite()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"GRACE_EXPIRED\"  but was: \"OBSERVED_SCHEDULE_AUTH_REQUIRED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.graceAndGrantAreRecheckedAfterPreflightBeforeAnyAcceptedWrite(StudioScheduleApiIT.java:524)",
+  "causes": []
+ },
+ "sourceMutationBlocksAndOptionalUnchangedCompileFailureDoesNot()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"ACCEPTED\"  but was: \"OBSERVED_SCHEDULE_AUTH_REQUIRED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.sourceMutationBlocksAndOptionalUnchangedCompileFailureDoesNot(StudioScheduleApiIT.java:425)",
+  "causes": []
+ },
+ "writeFailuresAtHistoryLedgerAndCursorBoundariesRollbackTheWholeOccurrenceUnit()": {
+  "type": "java.lang.AssertionError",
+  "message": "java.lang.AssertionError:  Expecting code to raise a throwable.",
+  "firstTestFrame": "at com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.writeFailuresAtHistoryLedgerAndCursorBoundariesRollbackTheWholeOccurrenceUnit(StudioScheduleApiIT.java:824)",
+  "causes": []
+ },
+ "updateRemovalAndInputInvalidationSettleDeferredWithoutOrphans()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"PENDING_QUOTA_EXCEEDED\"  but was: \"OBSERVED_SCHEDULE_AUTH_REQUIRED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.updateRemovalAndInputInvalidationSettleDeferredWithoutOrphans(StudioScheduleApiIT.java:560)",
+  "causes": []
+ },
+ "replicasRacingAndRollbackCannotCreateDuplicateOrPartialAcceptedWork()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: 1  but was: 0",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.replicasRacingAndRollbackCannotCreateDuplicateOrPartialAcceptedWork(StudioScheduleApiIT.java:287)",
+  "causes": []
+ },
+ "authorizationWithdrawalBeforeAdmissionAndBeforeSendFailsClosed()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"BACKGROUND_AUTHORIZATION_DENIED\"  but was: \"OBSERVED_SCHEDULE_AUTH_REQUIRED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.authorizationWithdrawalBeforeAdmissionAndBeforeSendFailsClosed(StudioScheduleApiIT.java:449)",
+  "causes": []
+ },
+ "deadlineOverrunAdvancesCursorOnlyPastAttemptedCsi()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"ACCEPTED\"  but was: \"REFUSED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.deadlineOverrunAdvancesCursorOnlyPastAttemptedCsi(StudioScheduleApiIT.java:733)",
+  "causes": []
+ },
+ "quotaWaitCrossingGraceOrGrantWithdrawalNeverWritesAcceptedWork()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  Expecting value to be true but was false",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.quotaWaitCrossingGraceOrGrantWithdrawalNeverWritesAcceptedWork(StudioScheduleApiIT.java:774)",
+  "causes": []
+ },
+ "acceptedOccurrenceHasOneImmutableRunAndActivationAcrossResumeAndRecreation()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"ACCEPTED\"  but was: \"OBSERVED_SCHEDULE_AUTH_REQUIRED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.acceptedOccurrenceHasOneImmutableRunAndActivationAcrossResumeAndRecreation(StudioScheduleApiIT.java:243)",
+  "causes": []
+ },
+ "callbackLedgerLockDoesNotBlockOverlapAndUncertaintyAfterResumeBlocksNextTick()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"OVERLAP\"  but was: \"OBSERVED_SCHEDULE_AUTH_REQUIRED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.callbackLedgerLockDoesNotBlockOverlapAndUncertaintyAfterResumeBlocksNextTick(StudioScheduleApiIT.java:626)",
+  "causes": []
+ },
+ "editedWriterRaceSerializesWithAcceptanceAndKeepsTheAcceptedRevision()": {
+  "type": "java.util.concurrent.ExecutionException",
+  "message": "java.util.concurrent.ExecutionException: com.citi.put.checks.studio.StudioValidationException: This draft uses stable v2 step identities; edit steps through the v2 authoring save operation and reload both revision tokens before retrying",
+  "firstTestFrame": "at com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.editedWriterRaceSerializesWithAcceptanceAndKeepsTheAcceptedRevision(StudioScheduleApiIT.java:886)",
+  "causes": [
+   "Caused by: com.citi.put.checks.studio.StudioValidationException: This draft uses stable v2 step identities; edit steps through the v2 authoring save operation and reload both revision tokens before retrying"
+  ]
+ },
+ "aScheduledOccurrenceIsAcceptedWithNoRequestAuthentication()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"ACCEPTED\"  but was: \"OBSERVED_SCHEDULE_AUTH_REQUIRED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.aScheduledOccurrenceIsAcceptedWithNoRequestAuthentication(StudioScheduleApiIT.java:367)",
+  "causes": []
+ },
+ "deletionStopsFutureWorkButKeepsAuthorizedOccurrenceAudit()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"ACCEPTED\"  but was: \"OBSERVED_SCHEDULE_AUTH_REQUIRED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.deletionStopsFutureWorkButKeepsAuthorizedOccurrenceAudit(StudioScheduleApiIT.java:471)",
+  "causes": []
+ },
+ "failedCsiRotatesAwayRatherThanStarvingOtherEligibleWork()": {
+  "type": "org.opentest4j.AssertionFailedError",
+  "message": "org.opentest4j.AssertionFailedError:  expected: \"ACCEPTED\"  but was: \"REFUSED\"",
+  "firstTestFrame": "at app//com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.failedCsiRotatesAwayRatherThanStarvingOtherEligibleWork(StudioScheduleApiIT.java:666)",
+  "causes": []
+ }
+}

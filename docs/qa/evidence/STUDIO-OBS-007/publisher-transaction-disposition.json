@@ -1,0 +1,212 @@
+{
+  "capturedAtUtc": "2026-10-10T16:30:46.078387+00:00",
+  "story": "STUDIO-OBS-007",
+  "reviewer": "Independent Aria architect, read-only publisher transaction impact",
+  "disposition": "ONE_PATH_CALL_LOCATION_REPAIR_RECOMMENDED",
+  "actualGate": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/root-nineflow-diagnostic-gate",
+    "tests": 9,
+    "passed": 2,
+    "failed": 7,
+    "errors": 0,
+    "skipped": 0,
+    "sourceDrift": [],
+    "cleanup": "Root diagnostic fixture cleanup confirmed as supplied; no independent process runtime performed.",
+    "proof": "Safe exception1/2/3 flags enabled and no actual transaction; exact stack Publisher.finalizeForUser98 -> Access.checkCurrent118 -> Store.exists44 -> Store.transaction30. Only this located finalize cause is established; seven failures are not presumed to share all causes."
+  },
+  "safeExceptionEvidence": [
+    {
+      "path": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-4376298647476388244/finalize-exception-1.json",
+      "sha256": "274f00d35f37e3ac0ffa4e93c6e19c857183ccb62d8daa148975a44e0ffcca74",
+      "exceptionCode": "RUNTIME_INCOMPATIBLE",
+      "publicationEnabled": true,
+      "replayEnabled": true,
+      "resolverTransactionActive": false,
+      "guardStackFrames": [
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+          "method": "require",
+          "line": 35
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationStore",
+          "method": "transaction",
+          "line": 30
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationStore",
+          "method": "exists",
+          "line": 44
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess",
+          "method": "checkCurrent",
+          "line": 118
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPlanPublisher",
+          "method": "finalizeForUser",
+          "line": 98
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationController",
+          "method": "finalizeForUser",
+          "line": 36
+        }
+      ]
+    },
+    {
+      "path": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-4376298647476388244/finalize-exception-2.json",
+      "sha256": "274f00d35f37e3ac0ffa4e93c6e19c857183ccb62d8daa148975a44e0ffcca74",
+      "exceptionCode": "RUNTIME_INCOMPATIBLE",
+      "publicationEnabled": true,
+      "replayEnabled": true,
+      "resolverTransactionActive": false,
+      "guardStackFrames": [
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+          "method": "require",
+          "line": 35
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationStore",
+          "method": "transaction",
+          "line": 30
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationStore",
+          "method": "exists",
+          "line": 44
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess",
+          "method": "checkCurrent",
+          "line": 118
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPlanPublisher",
+          "method": "finalizeForUser",
+          "line": 98
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationController",
+          "method": "finalizeForUser",
+          "line": 36
+        }
+      ]
+    },
+    {
+      "path": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-4376298647476388244/finalize-exception-3.json",
+      "sha256": "274f00d35f37e3ac0ffa4e93c6e19c857183ccb62d8daa148975a44e0ffcca74",
+      "exceptionCode": "RUNTIME_INCOMPATIBLE",
+      "publicationEnabled": true,
+      "replayEnabled": true,
+      "resolverTransactionActive": false,
+      "guardStackFrames": [
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+          "method": "require",
+          "line": 35
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationStore",
+          "method": "transaction",
+          "line": 30
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationStore",
+          "method": "exists",
+          "line": 44
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess",
+          "method": "checkCurrent",
+          "line": 118
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPlanPublisher",
+          "method": "finalizeForUser",
+          "line": 98
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationController",
+          "method": "finalizeForUser",
+          "line": 36
+        }
+      ]
+    }
+  ],
+  "rootCause": "Publisher invokes access.checkCurrent after the transaction returning initial session copy has ended. Production checkCurrent reads translation state via store.exists/state, whose valid transaction contract demands active actualTX. Second post-validator access.checkCurrent(prepared.session()) is also outsideTX in current source; first guard masks it. Transaction guard is correct; publisher call location violates it.",
+  "productionOwnership": {
+    "release": "Root releases B publisher author only after current freeze/serialized gate; this disposition grants no edit authority",
+    "paths": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java"
+    ],
+    "edits": [
+      {
+        "region": "finalizeForUser original-session/checkUser/checkCurrent then prepare",
+        "exactChange": "Keep original session snapshot read and access.checkUser(caller, original) before any active publication preparation. Remove only subsequent outsideTX access.checkCurrent(original). Call access.checkCurrent(document) in existing prepare transaction after session lock, source lock and bases.requireCurrent, before evidence lowering/snapshot reserve/save. This uses the actual locked session document and checks translated current policy/secret mayUse before attempts reserve/claim or external validation."
+      },
+      {
+        "region": "post-verdict checkCurrent then authorizePublication",
+        "exactChange": "Replace outsideTX access.checkCurrent(prepared.session()) with a short sessions.transaction block: lock actual current session, find publication base, acquire current source using existing session->source lock order, bases.requireCurrent(base, source), access.checkCurrent(currentSession.document()), return null. Exit transaction before existing authorizePublication(caller, request, prepared.snapshot(), prepared.session()). This retains current-state denial before fresh Core call without holding locks over Core network."
+      }
+    ],
+    "keep": "Existing claim/finish transactions, snapshot basis/hash, grant ceilings, final adoption transaction source/basis comparison, publications.commit claim/snapshot fencing, lifecycle.publicationCommitted and conflict handling remain unchanged. Add no outer @Transactional. Final commit already recaptures current session/source/evidence basis and validates fresh grant; retained exact current checks do not become commit authority by themselves."
+  },
+  "authorizationOrder": [
+    "Historical receipt branch first: fresh authorizeReceiptRead and digest equality, return immutable receipt without new current live-state checks or validation.",
+    "For active publication: flags and original scope-bound authenticated checkUser remain before locked prepare/current check, before attempt reserve/claim.",
+    "External validator remains after claimed attempt transaction ends, with same validation deadline and attempt budget.",
+    "Post-verdict locked current check ends before fresh Core authorizePublication. No Core request occurs for local current-state denial; no current/role check dropped.",
+    "Fresh Core proof remains outsideTX, then existing atomic adoption source/basis/claim/grant/fencing transaction. No authority renewal or receipt reinterpretation."
+  ],
+  "rejectedAlternatives": [
+    "Removing/weaking GuidedTranslationStore.transaction guard",
+    "Moving checkUser or fresh Core call into locked transaction",
+    "Wrapping finalizeForUser in @Transactional",
+    "Deleting post-validator current check as redundant",
+    "Moving only post-validator current check after Core into adoption TX would change local-denial/Core call ordering; not preferred for this exact callerAuthorder scope",
+    "Creating new schema/config/flags/wire or fresh lease/attempt retry"
+  ],
+  "regressionObligations": [
+    "Actual nonsecret CoreHTTP/PG guided learn/finalize path no longer fails transaction guard; checkCurrent executes with active TX and actual current translation state. Save actual safe stack/HTTP result, no speculative successful publication.",
+    "Unauthorized/wrong-principal/CSI caller refuses before preparation reservation/claim/external validator; before/after counters verify no new current read effects/validation or unauthorized publication. Historical receipt authorized read and matching digest stays independent of later source edits/current readiness.",
+    "Current policy/secret mayUse denial in prepare refuses before reserve/claim/validator; source/config revision mismatch retains existing refusal; no actual Vault values read during current checks.",
+    "Actual validator hook asserts no transaction active, and actual Core authorizePublication hook asserts no transaction active. Both database checks assert actualTX with session->source lock order.",
+    "Policy/revocation or translation/source/config change while validator runs must refuse in post-verdict locked check and/or existing final basis/source fencing; no stale snapshot becomes publication. Lost claim/late verdict, grant expiry, snapshot conflict and rollback append/adopt nothing.",
+    "Attempt deadline, max attempts, RESERVED/VALIDATED/UNKNOWN/REJECTED transitions and passive effect allowance unchanged. No second validation on immutable receipt or unknown claim; source edit keeps receipt but no restored replay readiness.",
+    "Retain current two passing/nine total diagnostic rows and source-bound reports; execute focused publisher checks after root release and then actual nine-flow gate. Remaining secret-model failures, runner control/native oracles and full story QA remain separate until genuinely executed."
+  ],
+  "remainingCauses": "Secret-model question/translation failures are separately diagnosed and not closed by this call-location correction. Static runner artifact guard already repaired independently; service interrupted JDBC settlement/expiry fixture failure separate. No global cause equivalence.",
+  "bindings": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": "9859044ca8d4fcacf6c6849eebda05656ed50d748f685643e90f67e628f9f36a",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java": "1ee94b40a68a4d55f58a237e0da2275ea1bf8963acaf32c7fd22a2dee34d9171",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": "ff63d6ba003075b58c1d8196de69b6ef65fed3aa059c8090df3a09084c15ebbe",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java": "00cb3006ee0b505390ed23b0fb3ccc09b9169bd67ff1697523dd408edd51a42e",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java": "aeb534126b39be519976059d1d6ceb9a55493403110e642c85d25fc172bfef0e"
+  },
+  "archiveSourceMatches": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": true,
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java": true,
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": true,
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java": true,
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java": true
+  },
+  "evidenceHashes": {
+    "docs/qa/evidence/STUDIO-OBS-007/root-nineflow-diagnostic-gate/result.json": "cb4817c95e255cc333c2fbb60263a7541e90afcb0afec6b38b55e46dc779c47b",
+    "docs/qa/evidence/STUDIO-OBS-007/root-nineflow-diagnostic-gate/source-hashes.json": "aef04b4b03d48c10e4eebaaf1296ddd74e9d32f974b37263a9e0c9fad5e6749d",
+    "docs/qa/evidence/STUDIO-OBS-007/root-nineflow-diagnostic-gate/sources.zip": "139cf84d5ea4777733dea85809b15e39898ee8a301bbadad71cd5c66d0fcace6",
+    "docs/qa/evidence/STUDIO-OBS-007/root-nineflow-diagnostic-gate/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml": "3a1c014e0991fe6f2704efd9f79c2caab833ed17443ea04734bc42c49190e4d6"
+  },
+  "limits": {
+    "sourceEdits": false,
+    "testEdits": false,
+    "runtimeBuildExecution": false,
+    "lifecycleQa": false,
+    "onlyWrite": "docs/qa/evidence/STUDIO-OBS-007/publisher-transaction-disposition.json",
+    "wholeWaveBudgetUsd": 500,
+    "actualBillingAvailable": false
+  },
+  "historicalNativeConcern": "7290byte old-pixel white predicate failure remains unclassified; unrelated."
+}

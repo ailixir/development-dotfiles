@@ -1,0 +1,172 @@
+{
+  "capturedAt": "2026-10-15T16:13:09.256441+00:00",
+  "classification": "ONLY_ACTUALLY_READ_OR_BYTE_INSPECTED_INPUTS_NO_TRANSITIVE_AUTHORITY",
+  "globalTreeStabilityClaim": false,
+  "inputs": {
+    "AGENTS.md": {
+      "sha256": "a3e2fe4c0bebc01d91b0fa0b062c49d031e203ab2a522ee9b04d9f06df797198",
+      "bytes": 7346,
+      "inspection": "Repository instructions read"
+    },
+    ".codex/skills/aiox-qa/SKILL.md": {
+      "sha256": "17afd341497b8e535b80c05b7aafe61305f56cdabb2742f8396eb98eec655d99",
+      "bytes": 1501,
+      "inspection": "QA skill read; task-specific no-runtime restriction supersedes Node greeting"
+    },
+    ".aiox-core/development/agents/qa.md": {
+      "sha256": "42e0f57a5d2eaca345d074ec53100faabebd42047081325cde2123911aa88b00",
+      "bytes": 20220,
+      "inspection": "Canonical QA role read"
+    },
+    ".aiox-core/constitution.md": {
+      "sha256": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1",
+      "bytes": 9089,
+      "inspection": "Constitution read"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-b4a-source02.json": {
+      "sha256": "212c915f3536c0f7a0105989beebfc88912fb876ccea1d5f0713859030439772",
+      "bytes": 5963,
+      "inspection": "Assigned frozen checkpoint read and hash verified"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source02/source-inventory.json": {
+      "sha256": "4c4c2a55377193a4bb681524674b5bb1cab59c36ff92e44808cc06a2720dfb7a",
+      "bytes": 16363,
+      "inspection": "Supplied frozen named-input inventory read"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source02/preservation.json": {
+      "sha256": "619f743c61a89f59a759eda6a0cf2a0c822a9a7b8e0017709da92b6ab76d28f3",
+      "bytes": 964,
+      "inspection": "Supplied preservation record read and independently byte-compared"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source02/case-mapping.json": {
+      "sha256": "db49ab580974453531c1cf60aea094e79829367b1f23fa88bf46fc6dd9aaf638",
+      "bytes": 108932,
+      "inspection": "Mapping metadata and pointer tuples inspected; exact pointer-set parity"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source02/changes.patch": {
+      "sha256": "a66ac840189a5203a8eb9dedbdfb26040247aa96b5b02c77322cd3ad8a05ef75",
+      "bytes": 16972,
+      "inspection": "Entire insertion-only patch reviewed"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4-r2-execution-handoff01/handoff.md": {
+      "sha256": "1943c6f28e0a6919789b7b6dce69174640ebe3ef69fbfe3a557d9e3b01d23d02",
+      "bytes": 3746,
+      "inspection": "Reviewed planning handoff read"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4-r2-execution-handoff01/manifest.json": {
+      "sha256": "a6aba1e032b7ebdd106ea606cba8cad1955473145374b3741e2911c788a34495",
+      "bytes": 1524,
+      "inspection": "Planning manifest read and assigned hash verified"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4-r2-execution-handoff01/original-rows.json": {
+      "sha256": "0dfffb2edebcab679e2e8da84338633ea4d2f20950f7e22080199520622663d8",
+      "bytes": 29706,
+      "inspection": "Original rows53/66 inspected"
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReferencePolicyDeriver.java": {
+      "sha256": "d67a888d42350afe432aab31e9082a8a25b705902b53db1f034628f6497cbb46",
+      "bytes": 2223,
+      "inspection": "Entire pure production policy projector read"
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java": {
+      "sha256": "2e16253959c1cb97ac3ce895a0d59ed5f185603564d3a59d38b5d107ccb1be2b",
+      "bytes": 13036,
+      "inspection": "Relevant lower/artifact hash/recipe excerpts read"
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": {
+      "sha256": "ac801042dd7a94468ff68a5ad7e4efe48ab310a9f12a93d290730243d755d128",
+      "bytes": 55431,
+      "inspection": "Relevant basis/plan/verification excerpts read"
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedBasisValidator.java": {
+      "sha256": "a05efebc4fb7ea1698103773e1877fa9aafafd9d2d1b23c0fdacceab268cfc4c",
+      "bytes": 16304,
+      "inspection": "Entire supplied-basis semantic validator read"
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedSnapshotDeriver.java": {
+      "sha256": "5e382805c47f5e0be45a09675515fa49a838699b15a2a7e601785e9f5b74f134",
+      "bytes": 13482,
+      "inspection": "Relevant snapshot/program/retained-admission excerpts read"
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedEffectiveGraph.java": {
+      "sha256": "259807221afbb9ac4fa7b1c68974c42205b4b15d3eab9a8f344be6285ea9197b",
+      "bytes": 17953,
+      "inspection": "Relevant drift-authority/excluded-ledger excerpts read"
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": {
+      "sha256": "2f74c1fcb596f09ed630e674185f7f3ba7cfac78f5540f8aa61d8ce2efe8df84",
+      "bytes": 22975,
+      "inspection": "Byte hash verification only against protected held source; not semantic re-review"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java": {
+      "sha256": "757b49fe6c626ce235963d3f186ccd65c50a878927d2a4613cfb1ac0dd9dc970",
+      "bytes": 47516,
+      "inspection": "Independent canonical/string/hash helpers read"
+    },
+    "docs/specs/studio-observed-authoring/publication-contracts.md": {
+      "sha256": "b42fadc164748245c23c55318486fb2afc03dbd52e309c35d20df1bf8a2f6cb2",
+      "bytes": 63484,
+      "inspection": "Normative identity/preimage section inspected"
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json": {
+      "sha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+      "bytes": 22720135,
+      "inspection": "Normal fixture parsed; exact leaf set, parent structures and vector24-28 inputs inspected; byte hash verified"
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json": {
+      "sha256": "40d547d9891561541947b591ffa6ba1d07ae2caff7349fd780db4acc8d5313d7",
+      "bytes": 47271,
+      "inspection": "PublicationEvidencePreimage and relevant definition references inspected; byte hash verified"
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/bridge.schema.json": {
+      "sha256": "039ad4017a8256481d4109d37dfcfc919767094fd1610988d16706fef1065817",
+      "bytes": 52505,
+      "inspection": "FirstSuffixAcceptance shape inspected"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source02/source-before/ChangeDetectionTest.java": {
+      "sha256": "8c110961bc1c6897e0c8e75e0733f61925579f9fa970854fa5c377add3aa0b9d",
+      "bytes": 8744,
+      "inspection": "Full bytes read for preservation comparison; source-after inserted methods reviewed where changed"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source02/source-after/ChangeDetectionTest.java": {
+      "sha256": "8c110961bc1c6897e0c8e75e0733f61925579f9fa970854fa5c377add3aa0b9d",
+      "bytes": 8744,
+      "inspection": "Full bytes read for preservation comparison; source-after inserted methods reviewed where changed"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source02/source-before/IncrementalPublicationConformanceTest.java": {
+      "sha256": "b6c0f4996f9cfbaface4f0b0f213969fe05f3979727ed8e2984e1678cdb38baf",
+      "bytes": 23656,
+      "inspection": "Full bytes read for preservation comparison; source-after inserted methods reviewed where changed"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source02/source-after/IncrementalPublicationConformanceTest.java": {
+      "sha256": "f18114111346e371bc6fe31021ea9e424d668d866cbd5bed9c40ce1bd2bc838e",
+      "bytes": 32287,
+      "inspection": "Full bytes read for preservation comparison; source-after inserted methods reviewed where changed"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source02/source-before/ObservedArtifactLowererTest.java": {
+      "sha256": "04fa2de664edfc7a3eb414cffde3c8d7a5c275e7136958b375beab4d4243ea02",
+      "bytes": 50193,
+      "inspection": "Full bytes read for preservation comparison; source-after inserted methods reviewed where changed"
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source02/source-after/ObservedArtifactLowererTest.java": {
+      "sha256": "2f18f81a51f10d4c3ab92a0d2c24c9d5aa49e2bce3f90213d16f0467d38a15fe",
+      "bytes": 57337,
+      "inspection": "Full bytes read for preservation comparison; source-after inserted methods reviewed where changed"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java": {
+      "sha256": "8c110961bc1c6897e0c8e75e0733f61925579f9fa970854fa5c377add3aa0b9d",
+      "bytes": 8744,
+      "inspection": "Full bytes read/hash compared with held checkpoint and archive; new method review uses identical frozen archive"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java": {
+      "sha256": "f18114111346e371bc6fe31021ea9e424d668d866cbd5bed9c40ce1bd2bc838e",
+      "bytes": 32287,
+      "inspection": "Full bytes read/hash compared with held checkpoint and archive; new method review uses identical frozen archive"
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java": {
+      "sha256": "2f18f81a51f10d4c3ab92a0d2c24c9d5aa49e2bce3f90213d16f0467d38a15fe",
+      "bytes": 57337,
+      "inspection": "Full bytes read/hash compared with held checkpoint and archive; new method review uses identical frozen archive"
+    }
+  }
+}

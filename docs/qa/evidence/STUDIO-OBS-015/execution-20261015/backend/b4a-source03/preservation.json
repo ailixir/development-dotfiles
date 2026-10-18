@@ -1,0 +1,138 @@
+{
+  "classification": "SOURCE_ONLY_UNCOMPILED_UNEXECUTED_NO_QA_VERDICT",
+  "source02CheckpointSha256": "212c915f3536c0f7a0105989beebfc88912fb876ccea1d5f0713859030439772",
+  "source02OwnedBeforeExactMatch": true,
+  "preservation": {
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java": {
+      "wholeFileByteExact": true,
+      "noInheritedLinesDeletedOrReplaced": true,
+      "allRecognizedInheritedMethodsByteExact": true,
+      "recognizedInheritedMethodCount": 20,
+      "inheritedMethodNames": [
+        "editFourthStepChangesOnlyFourthAndTailInputs",
+        "insertAtFourSelectsNewStep",
+        "deleteFourthSelectsNextSurvivingStep",
+        "swapFourAndFiveSelectsCurrentFourth",
+        "multipleEditsSelectEarliestPosition",
+        "tailDeletionRelearnsLastRemainingStep",
+        "configurationChangesSelectFirstStep",
+        "viewportWaitAndGlobalContextChangesSelectFirstStep",
+        "stepContextChangeSelectsOnlyItsStableStepAndTail",
+        "unusedDeclarationChangeDoesNotCreateAReferencedIdentityOrBoundary",
+        "policyChangesDoNotMoveBoundary",
+        "unchangedDraftIsReadyAndFirstRunUnlearned",
+        "textOnlyPlainValueChangeIsDetected",
+        "contextSecretDeclarationChangeUsesFrozenBase",
+        "missingBaseContextSecretMappingRefusesReuse",
+        "boundary",
+        "identity",
+        "source",
+        "draft",
+        "config"
+      ],
+      "newMethodNames": []
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java": {
+      "wholeFileByteExact": false,
+      "noInheritedLinesDeletedOrReplaced": true,
+      "allRecognizedInheritedMethodsByteExact": true,
+      "recognizedInheritedMethodCount": 27,
+      "inheritedMethodNames": [
+        "document",
+        "Vector",
+        "vectors",
+        "positives",
+        "derivesCompleteIndependentArtifactWithoutMutatingRawEvidence",
+        "snapshotNegatives",
+        "rejectsSuppliedSourceBaseAndSnapshotAttacks",
+        "graphNegatives",
+        "candidateSnapshotNegatives",
+        "actualWriterComparisonRefusesOfferedSnapshotCandidateAfterItsValidParent",
+        "offeredCandidate",
+        "admittedHistoryNegatives",
+        "admittedExcludedBindingStillRequiresItsExactRawIntentAndEdge",
+        "excludedBindingHistoryCannotDuplicateItsAdmissionEdgeOrAllocationPair",
+        "rejectsForgedGraphOrDerivesAnArtifactDifferentFromTheForgedCandidate",
+        "extendedEvidenceEnvelopeIsRequiredAndClosed",
+        "issuedPrefixReadObservationRemainsAnchoredWithoutAnEffectiveReadAction",
+        "historicalChoiceCaptureAnchorsItsOlderObservationButAnUnusedSnapshotDoesNot",
+        "unusedMaterializedInputNeverBecomesFutureReplayRecipe",
+        "oldBasisCannotDistinguishUnexecutedContextChange",
+        "normalizedSnapshotSourceRejectsNumericTimeSurrogatesAndUnsafeRevision",
+        "completeExtendedBasisFactsCommitTheOriginalSixFieldEvidenceEnvelope",
+        "recomputedBasisAndEvidenceHashesCannotReplaceOriginalSemanticJoins",
+        "expectedPublicationEvidencePreimage",
+        "commitmentLeaves",
+        "replaceCommitmentLeaf",
+        "rawAllocationCommitmentCannotBeReplacedByItsEffectiveProjection"
+      ],
+      "newMethodNames": [
+        "fullyResealedCandidateAttacks",
+        "actualWriterRefusesFullyResealedSemanticCandidateAfterCompleteParent",
+        "driftJReconstructsCurrentPrefixButNeverGrantsReuseAtTheDriftStep",
+        "candidateSnapshot",
+        "fullyResealedCandidate"
+      ]
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java": {
+      "wholeFileByteExact": false,
+      "noInheritedLinesDeletedOrReplaced": true,
+      "allRecognizedInheritedMethodsByteExact": true,
+      "recognizedInheritedMethodCount": 21,
+      "inheritedMethodNames": [
+        "validationCanonicalRetainsPublicNameRefusalAndImmutableInputBytes",
+        "unsupportedNullCanonicalDependencyRetainsOriginalValidationAndBudgetOrder",
+        "separateOwnedLoweringCopiesRetainCutAndIndependentArtifact",
+        "publicPublisherUsesOnlyMatchingDetachedSuccessWithFreshInputs",
+        "reproducesIndependentNodeArtifactAndEveryCanonicalHash",
+        "reproducesIndependentCanonicalUnicodeAndNumericVectors",
+        "recipeBoundariesAndAuthoritativePlacementAreNotSilentlyNormalized",
+        "policyUsesOriginalAdmissionTupleHashAndSeparateEvidenceBundle",
+        "correctedCompleteBasisPreimagesKeepExactlyTheOriginalEvidenceEnvelope",
+        "effectiveAdmissionArrayAndFinalPlanHaveTheirExactIndependentPreimages",
+        "defensiveCandidateCannotBeChangedThroughCallerJson",
+        "reproducesIndependentPythonObservedChoiceArtifactAndAllHashes",
+        "compiledNodeIndependentlyValidatesChoiceAgainstCurrentPackagedBuild",
+        "compiledNode",
+        "choiceCanonicalHashesPreserveUnicodeAndOriginalInstantWithoutNormalization",
+        "originalZeroAndSourceOnlyProofsOmitChoiceAndKeepReferenceBytes",
+        "independentUtf8LimitsDoNotBorrowTheLargerTransportAllowance",
+        "pairedChoiceMutations",
+        "bothIndependentValidatorsRejectTheSameCoherentProofMutation",
+        "providerAuditLabelsAndIdsNeverBecomeExecutableSelectors",
+        "assertExecutableSemanticsEqual"
+      ],
+      "newMethodNames": [
+        "lawfulJoinedSemanticBasisAcceptsExactlySixMiBBeforeOneLegalByteIsRefused",
+        "assertBoundaryComponentsAndCompleteJoins"
+      ]
+    }
+  },
+  "helperWasAbsentAtLeaseStart": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalBoundaryFixture.java",
+  "protectedPathCount": 575,
+  "protectedPathsChangedConcurrently": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": {
+      "before": {
+        "sha256": "597942a8fdf2e8b366bb7a180073db1542943631ba1478750c0a1fdadb0baa15",
+        "bytes": 113262
+      },
+      "after": {
+        "sha256": "e3b1f3c06f7f6ac6dcc2eb3ef609a0047ad1b34c536eed1363ac68e405c78b82",
+        "bytes": 113023
+      },
+      "editedByThisWorker": false
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": {
+      "before": {
+        "sha256": "9f56c92947fe4030fe2f58d79ef6d4f209185a52c5c2efb9840f962df47b61be",
+        "bytes": 1000782
+      },
+      "after": {
+        "sha256": "2217294616464c29da1ece11f57970d948166058519f9563b35d035ed6436ce2",
+        "bytes": 1000815
+      },
+      "editedByThisWorker": false
+    }
+  },
+  "remainingProtectedPathsUnchanged": 573
+}

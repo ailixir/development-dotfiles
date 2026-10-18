@@ -1,0 +1,18 @@
+{
+  "verdict": "APPROVED_BOUNDED_AUTHORING",
+  "proposalSha256": "5dda80fb7700ec2f00979c3fb5110ce503a17246349129e7d061a5814f20a077",
+  "scope": "Same-owner live renewal only; repository/service and focused existing GuidedSessionIT regressions",
+  "findings": [
+    "V30 identity and V34 write-once revocation are unconditional row UPDATE triggers, retained; no relevant progress-column or statement trigger found",
+    "Dependent UPDATE RETURNING to command INSERT preserves updated document and natural unique-conflict atomic rollback",
+    "No Java callback between original save and command; unchanged progress must remain untouched",
+    "Keep full canonical/schema validation, all service guards, original transaction and deepCopy; require insert count exactly one and fail closed otherwise"
+  ],
+  "requiredVerification": [
+    "Existing real PostgreSQL renewal/idempotency controls",
+    "Focused unchanged-progress and command-snapshot assertions",
+    "Actual command-conflict and outer-transaction rollback preservation",
+    "Original C5 runtime under TRACE and 1000ms budget"
+  ],
+  "limits": "Source proposal approval only; no performance, test pass or story completion claim"
+}

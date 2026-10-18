@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "reviewKind": "INDEPENDENT_EXACT_READONLY_SOURCE_REVIEW",
+  "status": "FINDINGS",
+  "scope": "Only the one new stale-grant fixture, its frozen candidate report/patch, and narrow helper/guard call paths needed to assess its assertions; no isolation-design or whole-story re-review.",
+  "bindings": {
+    "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts": "dff3b1f98bc041ed2f90c7a470494a731a2ac6ec09bab2c5122eba2092e313c1",
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-candidate/result.json": "155f5c2a7928b0d0843fa0361f2ae69e28d145dbd87be7e37433e653f8d8436e",
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-candidate/candidate.patch": "df96163c45112b7470a691d35b3927b2b2095a0c06ceb7cd863522a099896d34",
+    "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-candidate/candidate.test.ts": "dff3b1f98bc041ed2f90c7a470494a731a2ac6ec09bab2c5122eba2092e313c1"
+  },
+  "exactSource": {
+    "lineCount": 323,
+    "matchesRequestedSha256": true,
+    "matchesFrozenCandidateCopyByteForByte": true,
+    "patchHeader": "One added file from /dev/null, 323 lines",
+    "frozenReportMatchesRequested155f5c2a": true
+  },
+  "findings": [
+    {
+      "id": "R-STALE-PUBLIC-CALLBACK-VERDICT",
+      "severity": "P2",
+      "title": "Public callback canary assertion failures can be swallowed without failing the test",
+      "location": {
+        "path": "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts",
+        "line": 227,
+        "relatedLines": [250, 302, 310, 317, 321]
+      },
+      "detail": "The handler records callback-scan hits and throws expect(requestHits).toBe(0), but its encompassing catch converts that exception into HTTP 500. No persistent failure flag or failed cleanup fact is set. The final assertions check output.total() and journal bytes, and the cleanup verdict examines cleanup/restorers only; neither rejects nonzero callback-scan facts. Runtime lifecycle callback failures are deliberately ignored (runtime.ts:320), as are assignment-only lifecycle failures (ownership.ts:138). Therefore, if an actual lifecycle request carries a matched canary variant during A stop, PROBE rejection, B stop, or finally, the request is recorded as leaking but the callback failure can be swallowed and the case can still pass. This is a verdict gap, not a claim that the present production implementation emits such a request.",
+      "impact": "The authored public-sink no-secret assertion is not a reliable test verdict for lifecycle callbacks, including callbacks during failure cleanup.",
+      "recommendation": "Persist a scalar callback failure/canary flag or an unconfirmed cleanup fact before returning HTTP 500, then include it in the final verdict after worker/callback shutdown. Preserve the original primary error and retain only scalar failure evidence."
+    }
+  ],
+  "sourceAssessment": [
+    {
+      "claim": "Genuine authenticated accepted A acknowledgement retained unchanged and unexpired",
+      "assessment": "SOURCE_CONSTRUCTION_SUPPORTED_UNRUN",
+      "locations": [173, 176, 223, 231, 254, 259, 287, 288, 292, 293, 294],
+      "detail": "Retention begins only after the original checkGrant returns an accepted Session. PROBE receives that clone through the real original guidedClaimClient with mTLS/JWT, HTTP 202 finish and parsed canonical equality checks. PROBE does not rewrite the retained lease/expiry; both remain positive at request, delivery and original guard rejection. A renewals can replace acceptedA only with another original accepted return. This is local fixture/controller authority, not Core/Vault authorization."
+    },
+    {
+      "claim": "Actual positive A effects precede fresh distinct CSI-B PROBE and exact private/public rejection",
+      "assessment": "SOURCE_CONSTRUCTION_SUPPORTED_UNRUN",
+      "locations": [147, 278, 279, 281, 282, 283, 284, 286, 289, 291, 293],
+      "detail": "A requires actual SDK launch, observed native password invocation and accepted login receipt. Its stop awaits original browser close, tracked PID disappearance, scratch disappearance and inventory disposal before creating PROBE. PROBE has distinct session/context/scope and CSI-B intent. The original guard is called once; its original IDENTITY_MISMATCH error is rethrown and the actual assign response must be normalized 409 CONTEXT_LOST. Ownership checkGrant:59 and acquire:93 substantiate the cause/normalization distinction."
+    },
+    {
+      "claim": "Nonvacuous zero PROBE native, launch, runtime and submission effects; separate legitimate B recovery",
+      "assessment": "SOURCE_CONSTRUCTION_SUPPORTED_UNRUN",
+      "locations": [290, 295, 296, 297, 298, 299, 300, 301],
+      "detail": "Measured total launch/native/receipt deltas follow positive A counters. PROBE starts/dispatches/launches remain zero and no context or secret frame is sent to it. B uses a separate fresh session, not a retry of the tombstoned PROBE, and must assign/context successfully, launch a new browser, expose empty cookies and a distinct no-A inventory, then stop. No A echo navigation or public inventory export is authored. Retired test-owned grant references are dropped before B."
+    },
+    {
+      "claim": "Original delegation, private scalar instrumentation and resource cleanup",
+      "assessment": "SOURCE_CONSTRUCTION_SUPPORTED_WITH_PUBLIC_CALLBACK_FINDING_UNRUN",
+      "locations": [69, 92, 103, 129, 182, 187, 193, 200, 207, 215, 261, 272, 304],
+      "detail": "Proxy invocation preserves original receivers/arguments and calls each original once; claim/SDK/CDP/close wrappers return original promises, and the ordinary launch adapter awaits its setup separately. No RuntimeNode export, secret digest, retained raw private inventory, output chunk archive, alternate native password primitive, test extraction or registration change is authored. Actual descendant PID sampling, effective preferences, canonical Default profile paths and scans are required; missing roots are explicitly unscanned. Cleanup registers acquired resources, attempts worker/context/fixture/server/journal/descriptors under a shared five-second await deadline, retains failed restorers for retry, and preserves primary failures. The bound does not force underlying settlement or bound synchronous scans, and tracked PIDs do not prove complete future descendant discovery. Public callback failure propagation is incomplete as described in the finding."
+    }
+  ],
+  "narrowSupportingCitations": [
+    "studio-runner/test/helpers/guided.ts:10-30 (fresh identities, scope/grant/assignment and authored action construction)",
+    "studio-runner/test/helpers/guidedTls.ts:9-19 (signed JWT and actual HTTPS requests)",
+    "studio-runner/test/fixtures/secret-login/server.ts:7-32,52 (private login receipt/cookie oracle and server release)",
+    "studio-runner/test/fixtures-tier/realRunner.ts:62-71 (finite polling helper)",
+    "studio-runner/src/guided/ownership.ts:56-93,122-155 (original grant identity guard, acquisition normalization, stop/close)",
+    "studio-runner/src/guided/transport.ts:67-110,117-160 (authenticated transport, bounded original claim, status normalization)",
+    "studio-runner/src/guided/runtime.ts:309-331 (lifecycle callback failure ignored during resource close)",
+    "studio-runner/src/run/browser.ts:526-578 (cited original persistent browser acquisition/owned cleanup path)",
+    "studio-runner/src/run/observationInventory.ts:3-31 (private inventory scalar fields and disposal)"
+  ],
+  "limitations": [
+    "This is an exact source review. The new case remains UNRUN; no runtime, native, compilation or QA pass is asserted.",
+    "Previously reviewed isolation/dataflow/helper design and prior publication passes were not re-evaluated or relabeled.",
+    "No Core/Vault, database, scoped authorization, physical heap erasure or complete process-tree proof is inferred.",
+    "Existing-source/dist manifest drift claims are frozen author assertions, not a repository-wide review performed here."
+  ],
+  "actions": {
+    "sourceEdits": 0,
+    "runtimeCommands": 0,
+    "typeChecks": 0,
+    "lintRuns": 0,
+    "builds": 0,
+    "testRuns": 0,
+    "browserLaunches": 0,
+    "gradleRuns": 0,
+    "processManagementCommands": 0,
+    "modelOverrides": 0,
+    "agentSpawns": 0,
+    "reportFilesWritten": 1
+  },
+  "executionRelease": false,
+  "qaApproved": false,
+  "wholeStoryPass": false
+}

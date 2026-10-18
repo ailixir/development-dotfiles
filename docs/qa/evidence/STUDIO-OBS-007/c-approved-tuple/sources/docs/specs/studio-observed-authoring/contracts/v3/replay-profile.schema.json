@@ -1,0 +1,406 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v3/replay-profile.schema.json",
+  "title": "Observed replay replay-profile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "catalog": {
+      "const": "observed-replay-3"
+    },
+    "playwright": {
+      "const": "1.63.0"
+    },
+    "browserEngine": {
+      "const": "chromium"
+    },
+    "contract": {
+      "const": 3
+    },
+    "learnedPlan": {
+      "const": 3
+    },
+    "observation": {
+      "const": 3
+    },
+    "guidedPolicy": {
+      "const": 3
+    },
+    "referencePolicy": {
+      "const": 4
+    },
+    "lowering": {
+      "const": 2
+    },
+    "artifact": {
+      "const": 3
+    },
+    "language": {
+      "const": "observed-3"
+    },
+    "executor": {
+      "const": "observed-4"
+    },
+    "publicationEvidence": {
+      "const": 1
+    },
+    "validationBasis": {
+      "const": 1
+    },
+    "validator": {
+      "const": "observed-2"
+    },
+    "protocol": {
+      "const": 3
+    },
+    "replayAuthorization": {
+      "const": 2
+    }
+  },
+  "required": [
+    "catalog",
+    "playwright",
+    "browserEngine",
+    "contract",
+    "learnedPlan",
+    "observation",
+    "guidedPolicy",
+    "referencePolicy",
+    "lowering",
+    "artifact",
+    "language",
+    "executor",
+    "publicationEvidence",
+    "validationBasis",
+    "validator",
+    "protocol",
+    "replayAuthorization"
+  ],
+  "definitions": {
+    "BuildIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "profileHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "schemaBundleHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "referenceBundleHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "executableImageDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "chromiumBuild": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "profileHash",
+        "schemaBundleHash",
+        "referenceBundleHash",
+        "executableImageDigest",
+        "chromiumBuild"
+      ]
+    },
+    "Configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "browser": {
+          "const": "chromium"
+        },
+        "viewport": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8192
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8192
+            }
+          },
+          "required": [
+            "width",
+            "height"
+          ]
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 120
+        },
+        "waitStrategy": {
+          "type": "string",
+          "enum": [
+            "load",
+            "domcontentloaded",
+            "networkidle"
+          ]
+        },
+        "environment": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "browser",
+        "viewport",
+        "timeoutSeconds",
+        "waitStrategy",
+        "environment"
+      ]
+    },
+    "ReplayRequirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "csiId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "environment": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "applicationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "allowedOrigins": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 256,
+            "pattern": "^https?://[^/?#]+$"
+          },
+          "uniqueItems": true
+        },
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "enum": [
+              "navigate",
+              "click",
+              "fill",
+              "press",
+              "check",
+              "uncheck",
+              "hover",
+              "selectOption",
+              "read",
+              "assert"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "policyId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "policyVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "entryPolicyId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "initialContext": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/learned-plan.schema.json#/properties/initialContext"
+        }
+      },
+      "required": [
+        "csiId",
+        "environment",
+        "applicationId",
+        "allowedOrigins",
+        "capabilities",
+        "policyId",
+        "policyVersion",
+        "entryPolicyId",
+        "initialContext"
+      ]
+    },
+    "Scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "principalId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "csiId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "environment": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "applicationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "allowedOrigins": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 256,
+            "pattern": "^https?://[^/?#]+$"
+          },
+          "uniqueItems": true
+        },
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "enum": [
+              "navigate",
+              "click",
+              "fill",
+              "press",
+              "check",
+              "uncheck",
+              "hover",
+              "selectOption",
+              "read",
+              "assert"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "policyId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "policyVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "entryPolicyId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "initialContext": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/learned-plan.schema.json#/properties/initialContext"
+        }
+      },
+      "required": [
+        "principalId",
+        "csiId",
+        "environment",
+        "applicationId",
+        "allowedOrigins",
+        "capabilities",
+        "policyId",
+        "policyVersion",
+        "entryPolicyId",
+        "initialContext"
+      ]
+    },
+    "LearningProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "guidedModelContractHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "guidedProviderSchemaHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "guidedPromptHash": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outputContractHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "publicationResultVersion": {
+          "const": 3
+        },
+        "configuredModel": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "providerReturnedModelVersion": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "guidedModelContractHash",
+        "guidedProviderSchemaHash",
+        "guidedPromptHash",
+        "outputContractHash",
+        "publicationResultVersion",
+        "configuredModel",
+        "providerReturnedModelVersion"
+      ]
+    }
+  }
+}

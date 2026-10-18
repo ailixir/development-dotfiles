@@ -1,0 +1,206 @@
+{
+  "artifact": "T0 plan — batch {STUDIO-OBS-012B ∥ STUDIO-OBS-013 ∥ STUDIO-OBS-014}, wave STUDIO-OBS-SINGLE-PATH",
+  "author": "Aria (@architect)",
+  "date": "2026-10-12",
+  "mode": "READ-ONLY planning. No product/test/story edits, no builds/tests run, no git writes.",
+  "anchoredOn": {
+    "stories": ["STUDIO-OBS-012B.story.md 0.1.1", "STUDIO-OBS-013.story.md 0.1.1", "STUDIO-OBS-014.story.md 0.1.1"],
+    "adr": "ADR-SC-005 (D-A, D-B, placement map, Order and parallelism)",
+    "readmeRulings": ["R1 V19=OBS-014, V20=OBS-013 if DDL", "R2 014->015 one owner for shared set", "R3 architect owns result/session-view/command contracts, batch order", "R4 OBS-008 AC-3/4 canonical UX states"],
+    "assumed012ATargetState": "compile removed; guided routes /api/v1/studio/guided-sessions in docs/specs/studio/openapi.yaml; contracts/v3 only; tuple {contract:3,build}; db/migration exactly V1-V18; one internal mount",
+    "observedTreeCaveat": "HEAD 734ad704f; OBS-007 + in-flight 012A are UNCOMMITTED working-tree changes (140 backend, 90 runner, 52 docs/specs, 5 frontend files). Current-tree facts below are orientation only."
+  },
+
+  "entryGate_S0": [
+    "OBS-012A independent QA PASS + Done, and its tree committed by lead (baselines must be source-bound to a commit, not a dirty tree).",
+    "Quote 012A-final pins: BASE_SHA256 (shasum -a 256 docs/specs/studio/openapi.yaml) and StudioContractTest op-count/hasSize values.",
+    "Confirm migration head = V18 and whether 012A implemented N-1 (latest-applied == highest-file) or a literal V18 pin; name the pinned test file(s).",
+    "Confirm whether GuidedSessionService.result()/view() duplicate projection (current :2480-2510) survived 012A.",
+    "Fresh baselines: frontend vitest (012B), runner default+fixtures (013/014), backend studio.* (root)."
+  ],
+
+  "lanes": {
+    "C-contract": {
+      "owner": "Aria (@architect) — single editor per ruling 3; dev agents never edit these files",
+      "files": [
+        "docs/specs/studio/openapi.yaml",
+        "docs/specs/studio-observed-authoring/contracts/v3/{result,session-view,clarification,runner-context,execution-evidence,bridge,commands}.schema.json (only those actually touched)",
+        "docs/specs/studio-observed-authoring/contracts/v3/{fixtures,publication-fixtures}.json",
+        "generated: studio-runner/src/{guided/schemas.json,guided/types.ts,validator/observedSchemas.json,executor/observedOperations.ts}",
+        "studio-runner/test/run/confinement.test.ts (BASE_SHA256 only)",
+        "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java (op-count, status map, assertSchemaMatchesRecord rows)",
+        "docs/architecture/ADR-002-internal-contract-surface.md §13 amendment rows (Class C per §19; 400-behaviour change on execute is Class C per §34.1)"
+      ],
+      "sequence": [
+        "C1 (OBS-013): result3/session-view3 evidence reference as OPTIONAL property (absent = not recorded), reserved offset kinds {step, action, clarificationWait, prefixReplay}, internal recording-evidence callback body, openapi GET /guided-sessions/{id}/video (206/416/503 envelopes reused) -> regen -> both pins re-anchored old/new quoted",
+        "C2a (OBS-014): clarification.labelSource{AUTHORED,SAVED_INPUT,PAGE}+role/region; runner-context gains governed applicationPolicy + policyHash; openapi execute Idempotency-Key required (400 problem+json code fixed at 014 T0) -> regen -> pins",
+        "C2b (OBS-014, after B-014 policy DTO records compile): openapi policy routes + StudioContractTest parity rows -> pins",
+        "OBS-015 edits (relearnedFrom etc.) come after C2b, next batch"
+      ],
+      "rule": "One commit-sized unit per step; regen + both pins in the same unit; shasum measured, never transcribed."
+    },
+    "D-data": {
+      "owner": "Dara (@data-engineer)",
+      "files": [
+        "backend/src/main/resources/db/migration/V19__guided_governance.sql (OBS-014)",
+        "backend/src/main/resources/db/migration/V20__guided_session_recording.sql (OBS-013)",
+        "backend/config/rds-parity/allowlist.yml (only if lint demands)",
+        "migration head/count test file(s) named at S0"
+      ],
+      "rule": "Author V19 and V20 together and land them in one unit, numeric order, before either backend lane runs ITs (avoids Flyway out-of-order validate failure on any persistent DB; outOfOrder is not configured).",
+      "V19_scope": "policy, policy_version, approval, append-only policy audit (immutable trigger), per-CSI daily token counter + concurrent-session guard (row lock), CREATE OR REPLACE of studio_guided_translation_attempt_guard() permitting ONLY safe_result -> NULL on terminal attempts, session prune marker (progress is NOT NULL: prune to '{}' + pruned_at, or ALTER) — architect-reviewed relaxation",
+      "V20_scope": "[AUTO-DECISION] dedicated studio_guided_session_recordings (session_id PK/FK, video_key, video_status CHECK same set as ui_test_executions, video_error, video_expires_at, video_partial, manifest_ref, offsets jsonb size-bounded, IDs/ms only) -> reason: V14 studio_guided_evidence is insert-only/immutable and progress is pruned by OBS-014; folding into V14 would reopen 012A Lane M"
+    },
+    "F-012B": {
+      "owner": "@dev (frontend)",
+      "files": "exactly the 012B File List under frontend/src/** plus SF-4 additions (pages/StudioTestsPage*.test.tsx, scheduling/StudioScheduleDialog.tsx/.test.tsx, run/refusals.test.tsx) and docs/qa/accessibility/axe-results.json",
+      "notOwned": ["frontend/src/components/studio/guided/**", "references/**", "studioGuidedApi.ts", "studioCapabilities.ts", "SecretInput.tsx", "playwright.config.ts (OBS-008)"]
+    },
+    "R-013": {
+      "owner": "@dev runner A",
+      "files": [
+        "studio-runner/src/run/{guidedBrowser,browser,browserFactory,recording,evidenceUpload,manifest,timeline,observedReplayAdapter}.ts",
+        "studio-runner/src/guided/runtime.ts (SOLE OWNER this batch)",
+        "studio-runner/src/guided/evidence.ts (new)",
+        "studio-runner/test/fixtures-tier/{recording-coverage,guided-recording(new)}.test.ts",
+        "studio-runner/test/guided/{runtime,evidence(new)}.test.ts, test/run/manifest.test.ts"
+      ],
+      "receivesHunkFrom": "R-014: runtime.ts:~96-98 ObservationConfig.applicationPolicy sourced from verified context instead of options (applied by R-013 owner after C2a)"
+    },
+    "R-014": {
+      "owner": "@dev runner B",
+      "files": [
+        "studio-runner/src/run/guidedMain.ts (SOLE OWNER this batch)",
+        "studio-runner/src/run/observationTypes.ts",
+        "studio-runner/src/guided/transport.ts",
+        "studio-runner/src/guided/policyHash.ts (new, pure)",
+        "studio-runner/test/guided/{policyHash(new),transport}.test.ts, test/run/guidedMain.test.ts (NEW — does not exist today despite story wording)",
+        "fixtures-tier tests that pass applicationPolicy via runtime options (guided-wire, guided-targets, guided-dataflow, secret-login, guided-secret-*, observed-authoring-snapshot)"
+      ],
+      "receivesHunkFrom": "R-013: guidedMain.ts composition (recorder/object-store config keys, launchGuidedBrowser factory) — additive, applied by R-014 owner"
+    },
+    "B-013": {
+      "owner": "@dev backend A",
+      "files": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/{GuidedSessionEvidenceService,GuidedSessionEvidenceRepository,GuidedSessionVideoController,GuidedSessionEvidenceInternalController}.java (new; internal route as a NEW class so GuidedInternalController/GuidedSessionService stay untouched)",
+        "backend/src/main/java/com/citi/put/checks/studio/ExecutionVideoController.java (actual path; not under evidence/) + studio/evidence/** (key-based read extraction, no fork)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+        "backend/src/test/java/com/citi/put/checks/studio/evidence/ExecutionVideoContractTest.java, guided/evidence/GuidedSessionVideoIT.java (new)",
+        "docs/runbooks/studio-guided-authoring.md (one sentence)"
+      ],
+      "runOnly": ["GuidedPublicationReplayIT (regression; do not edit — 15k+ line hotspot owned by B-014 this batch)"],
+      "dropFromStoryList": "internal/ProgressReportService.java — replay-execution callback, not the guided path; guided callbacks go to the internal guided mount"
+    },
+    "B-014": {
+      "owner": "@dev backend B — also the ruling-2 owner of the 014/015 shared set",
+      "files": [
+        "guided/policy/** (new)",
+        "guided/session/{GuidedSessionService,GuidedSessionController,GuidedSessionProperties,GuidedContracts}.java",
+        "guided/translation/{GuidedProposalValidator,GuidedTranslationService,GuidedTranslationProperties,GuidedTranslationStore}.java + new pure grounding/destructive/side-effect classes",
+        "guided/bridge/GuidedDispatchService.java, dispatch/StudioDispatcher.java, studio/StudioController.java",
+        "config/RateLimitClassifier.java",
+        "guided/retention/GuidedObservationPruner.java (new; [AUTO-DECISION] new pruner, not core partition RetentionPruner — column/marker pruning does not fit partition drops)",
+        "guided/audit/** (new emitter), backend/src/main/resources/application.yml (SOLE OWNER this batch), logback-spring.xml (audit logger category)",
+        "IT fixture/policy-seeding edits in GuidedPublicationReplayIT, GuidedSessionIT, GuidedBridgeIntegrationTest, GuidedPlanningIntegrationTest, StudioDispatcherFailureIT, ObservedProfileDriftTest, StudioApiIT",
+        "story-listed new tests + docs/specs/studio-observed-authoring/{guided-data-flow,artifact-hmac-design-note}.md"
+      ],
+      "internalSequence": "T1 policy+V19 consumers+seeding helper FIRST (unblocks B-013 IT) -> T2 validator -> T3 metering/audit/idempotency -> T4 docs"
+    }
+  },
+
+  "conflictMatrix": [
+    {"file": "docs/specs/studio/openapi.yaml + confinement BASE_SHA256 + StudioContractTest", "stories": ["013", "014", "015", "008"], "owner": "C-contract", "sequence": "C1(013) -> C2a(014) -> C2b(014) -> 015"},
+    {"file": "v3 schemas/fixtures + generated bundles", "stories": ["013", "014", "015"], "owner": "C-contract", "sequence": "C1 -> C2a; every regen invalidates runner compile for R-013/R-014 -> sync point"},
+    {"file": "studio-runner/src/guided/runtime.ts", "stories": ["013 (offsets, recording lifecycle, evidence callback route literal)", "014 (policy from context, lines ~96-98 — NOT in 014 File List)"], "owner": "R-013", "sequence": "013 hunks, then 014 hunk after C2a"},
+    {"file": "studio-runner/src/run/guidedMain.ts", "stories": ["014 (drop applicationPolicy key, refuse mount)", "013 (compose recorder/object store — NOT in 013 File List)"], "owner": "R-014", "sequence": "013 additive hunk anytime; 014 removal; one test file guidedMain.test.ts owned by R-014"},
+    {"file": "GuidedSessionService.java", "stories": ["014", "015", "013 only if result field required or duplicate result() survives 012A"], "owner": "B-014", "sequence": "013 avoids it via optional evidence field + new internal controller class; any residual 013 hunk queued to B-014"},
+    {"file": "GuidedPublicationReplayIT.java", "stories": ["013 (regression)", "014 (policy seeding)", "015"], "owner": "B-014 this batch", "sequence": "013 run-only; new 013 proof lives in GuidedSessionVideoIT"},
+    {"file": "application.yml", "stories": ["014 (windows, budgets)", "013 (none needed if studio.execution.evidence-retention reused)"], "owner": "B-014"},
+    {"file": "db/migration V19/V20 + migration-count test", "stories": ["014", "013"], "owner": "D-data", "sequence": "single unit V19+V20"},
+    {"file": "frontend/src/services/mocks/studio/studioContract.test.ts (reads docs/specs/studio/openapi.yaml + artifact.schema.json)", "stories": ["012B", "indirectly 013/014 via openapi"], "owner": "F-012B", "sequence": "012B final FE gates re-run after C2b"}
+  ],
+
+  "concurrency": {
+    "recommendedConcurrentSet": ["F-012B", "R-013", "R-014", "B-013", "B-014", "C-contract (serial steps)", "D-data (authoring only until applied)"],
+    "constraints": [
+      "Gradle: root-only, serialized; requested only when BOTH backend lanes declare compile-green (single Java source set -> one lane's broken file fails the other's build).",
+      "Runner: per-file vitest is concurrent-safe; tsc/eslint only at sync points.",
+      "Frontend: no compile coupling to backend/runner; only coupling is the openapi document read by tests.",
+      "B-013 joined IT waits for D-data applied + B-014 T1 policy-seeding helper."
+    ],
+    "syncPoints": ["S0 012A committed", "S1 C1 + D(V19,V20) landed", "S2 C2a landed (runtime/guidedMain cross hunks applied)", "S3 C2b landed", "S4 per-story final gates + independent QA"]
+  },
+
+  "gates": {
+    "STUDIO-OBS-012B": {
+      "poConditions": ["C1 SF-1 (name artifactSummary.test.ts 9 + compilePollBounds.test.ts 4 drops), SF-4, SF-5 at T0", "C2 SF-2 AC-4 RTL oracles named before T4", "C3 QA reproduces /compil/i grep + after=baseline-drops+adds", "C4 no release between 012B and OBS-008"],
+      "external": [],
+      "openRulingsForT0": [
+        "AC-3 'every surviving public route has a handler' would demand MSW handlers for 012A's guided routes, 013 video and 014 policy routes (OBS-008 scope) -> recommend explicit allowlist naming OBS-008 as owner; PO amends Dev Notes",
+        "docs/specs/studio/{artifact.schema.json,inference.openapi.yaml,inference-proposal.schema.json}: no owner after 012A; FE studioContract.test.ts and compileFixtures.ts read artifact.schema.json -> confirm 012A disposition at S0"
+      ]
+    },
+    "STUDIO-OBS-013": {
+      "poConditions": ["contract-edit order agreed with C-contract before any schema edit", "migration number assigned before T2 (V20)", "SF-2 reserved offset kinds named at T1", "SF-3 risk line", "only QA sets Done"],
+      "external_UNCONFIRMED": ["Sonic object store (ED-03) — local store only", "manual masked-dots inspection C-17 (OBS-009)", "video retention acceptance F-2 (GA plan)", "staging seek measurement (ADR-002 §11.6.3)"],
+      "openRulingsForT0": ["no guided SSE exists today -> 'SSE snapshots carry the reference' is N/A unless a guided stream exists post-012A; record, do not invent", "clock origin = run-scoped clock zero at recording-context readiness (ADR-002 §11/§11.6, timeline.test.ts negative control)"]
+    },
+    "STUDIO-OBS-014": {
+      "poConditions": ["T0 records 014/015 ownership (B-014 holds full set: GuidedSessionService, GuidedTranslationService, GuidedDispatchService, GuidedContracts, GuidedSessionController, StudioController) and closed codes before T1", "SF-2 pruner named", "SF-3 BUDGET_EXCEEDED problem+json + Retry-After fixed", "SF-4 V19 confirmed", "approval/SIEM/real-model never marked passed", "only QA sets Done"],
+      "external_UNCONFIRMED": ["Security & Compliance approval of page-metadata export/retention (OBS-010 gate)", "SIEM sink (OBS-009)", "gateway-side retention question to ED-01 owner (TBD)", "real Security approver for policy objects (tests use synthetic approval records)", "real-model guard behaviour (D-C, OBS-009)", "Q3 audit retention window (default applies)", "D-2b IdempotencyFilter re-authorization (named open for @qa)"],
+      "openRulingsForT0": ["no existing structured audit path (only compile GatewayAuditLogger, deleted by 012A) -> new audit logger category + logback-spring.xml", "replay keeps the published policy snapshot (ObservedReplayPins/observedReferencePolicy unchanged); governed policy applies to learning sessions", "default side-effect stance CLARIFY_FIRST; pruning = null safe_result / '{}' progress"]
+    }
+  },
+
+  "verification": {
+    "packageManager": "frontend/ and studio-runner/ have package-lock.json only (no pnpm-lock, no workspace; runner packageManager npm@11.3.0). Per user rule use pnpm without install: `pnpm exec …` against existing node_modules; never write a lockfile.",
+    "F-012B": [
+      "cd frontend && pnpm exec vitest run --reporter=json --outputFile=<evidence>/fe-baseline.json   # S0 and final",
+      "pnpm exec vitest run src/components/studio/run src/pages/ChecksStudioPage src/services/mocks/studio src/test/a11y/studioWcagAudit.test.tsx",
+      "pnpm exec tsc --noEmit && pnpm exec eslint src --ext .ts,.tsx && pnpm run build",
+      "grep -rniE 'compil' frontend/src   # expect 0 outside listed guard literals",
+      "mutation proof: one-line change in relocated RETIRED guard host (run/runGate.test.tsx) -> red, restore -> green"
+    ],
+    "R-013": [
+      "cd studio-runner && pnpm exec vitest run test/guided/runtime.test.ts test/guided/evidence.test.ts test/run/manifest.test.ts test/server/timeline.test.ts test/run/confinement.test.ts",
+      "pnpm exec vitest run --config vitest.fixtures.config.ts test/fixtures-tier/recording-coverage.test.ts test/fixtures-tier/guided-recording.test.ts test/fixtures-tier/observed-bootstrap-video.test.ts test/fixtures-tier/secret-login.test.ts"
+    ],
+    "R-014": [
+      "cd studio-runner && pnpm exec vitest run test/guided/policyHash.test.ts test/guided/transport.test.ts test/run/guidedMain.test.ts test/run/observation.test.ts",
+      "pnpm exec vitest run --config vitest.fixtures.config.ts test/fixtures-tier/guided-wire.test.ts test/fixtures-tier/guided-targets.test.ts test/fixtures-tier/guided-dataflow.test.ts test/fixtures-tier/secret-login.test.ts"
+    ],
+    "runnerSyncPoint": ["pnpm exec tsc -p tsconfig.json --noEmit", "pnpm exec eslint .", "pnpm exec vitest run   # default tier, skipped count recorded"],
+    "C-contract": [
+      "node tools/build-studio-observed-schemas.cjs && <012A's named byte-identity check>",
+      "node tools/check-studio-observed-contracts.cjs",
+      "shasum -a 256 docs/specs/studio/openapi.yaml   # quote old/new into confinement.test.ts",
+      "cd studio-runner && pnpm exec vitest run test/run/confinement.test.ts test/contract.test.ts test/contract-integrity.test.ts",
+      "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.StudioContractTest'   # SKIPPED without Docker -> record as skipped, never pass"
+    ],
+    "D-data": ["cd backend && ./gradlew rdsParityLint", "./gradlew test --tests '<migration head/count test named at S0>'"],
+    "B-013": [
+      "cd backend && ./gradlew test --tests 'com.citi.put.checks.studio.evidence.ExecutionVideoContractTest' --tests 'com.citi.put.checks.studio.guided.evidence.*'",
+      "./gradlew test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT'   # regression"
+    ],
+    "B-014": [
+      "cd backend && ./gradlew test --tests 'com.citi.put.checks.config.RateLimitClassifierTest' --tests 'com.citi.put.checks.studio.guided.policy.*' --tests 'com.citi.put.checks.studio.guided.translation.GuidedProposalGroundingTest' --tests 'com.citi.put.checks.studio.guided.translation.GuidedDestructiveGuardTest' --tests 'com.citi.put.checks.studio.guided.translation.GuidedSideEffectPolicyTest'",
+      "./gradlew test --tests 'com.citi.put.checks.studio.guided.session.GuidedCsiBudgetIT' --tests 'com.citi.put.checks.studio.guided.retention.GuidedObservationPrunerIT' --tests 'com.citi.put.checks.studio.guided.audit.GuidedActionAuditCanaryIT' --tests 'com.citi.put.checks.studio.StudioApiIT'",
+      "regression: ./gradlew test --tests 'com.citi.put.checks.studio.guided.session.GuidedSessionIT' --tests 'com.citi.put.checks.studio.guided.bridge.GuidedBridgeIntegrationTest' --tests 'com.citi.put.checks.studio.guided.translation.GuidedPlanningIntegrationTest' --tests 'com.citi.put.checks.studio.guided.secret.*' --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT'"
+    ],
+    "backendStatic": "./gradlew spotlessCheck checkstyleMain checkstyleTest spotbugsMain (task names inferred from plugins, verify at S0); full ./gradlew check at S4 with completion recorded"
+  },
+
+  "risks": [
+    {"id": "RK-1", "sev": "HIGH", "risk": "V14 attempt guard raises on ANY update of a terminal studio_guided_model_attempts row, so AC-3 safe_result nulling is impossible without V19 replacing the guard function; progress is NOT NULL.", "mitigation": "V19 narrow relaxation (safe_result->NULL only, terminal only) + architect/security review + negative test that other columns stay immutable."},
+    {"id": "RK-2", "sev": "HIGH", "risk": "014 fail-closed governed policy breaks every guided joined IT and ~15 runner fixtures-tier tests that supply applicationPolicy via mounted file/options.", "mitigation": "B-014/R-014 land a seeding helper + context-sourced policy FIRST (S1/S2); 013 builds on it."},
+    {"id": "RK-3", "sev": "MED", "risk": "Story File Lists claim 013/014 disjointness, but policy plumbing is in runtime.ts:96-98 (013-owned) and recorder composition is in guidedMain.ts (014-owned).", "mitigation": "Single owner per file + queued cross hunks (matrix)."},
+    {"id": "RK-4", "sev": "MED", "risk": "Required result3 evidence field would force an edit in GuidedSessionService's duplicate result()/view() path (014/015 shared set).", "mitigation": "Optional field; verify duplicate path at S0; residual hunk to B-014."},
+    {"id": "RK-5", "sev": "MED", "risk": "Flyway out-of-order: V20 applied before V19 on any persistent DB fails validate.", "mitigation": "D-data lands V19+V20 in one unit."},
+    {"id": "RK-6", "sev": "MED", "risk": "012B AC-3 handler-coverage assertion collides with guided/video/policy routes owned by OBS-008; orphaned docs/specs/studio artifact-1/inference documents still read by FE tests.", "mitigation": "PO allowlist ruling at 012B T0; S0 disposition check."},
+    {"id": "RK-7", "sev": "MED", "risk": "Single Java source set + serialized Gradle: two concurrent backend lanes stall each other on compile breaks; GuidedPublicationReplayIT (15k+ lines) is a merge hotspot.", "mitigation": "Compile-green handoff rule; 013 proof in a new IT class."},
+    {"id": "RK-8", "sev": "MED", "risk": "Pin churn: four re-anchors this batch (C1, C2a, C2b) plus 015/008 later; transcription errors.", "mitigation": "Contract lane only, shasum-measured, ADR-002 §13 row per edit."},
+    {"id": "RK-9", "sev": "MED", "risk": "Per-CSI concurrency/token counters must be correct across replicas (no in-memory maps); daily reset boundary unspecified.", "mitigation": "Row-locked counters in V19; reset in UTC fixed at T0; two-replica IT."},
+    {"id": "RK-10", "sev": "LOW", "risk": "Guards proven only with a controlled provider; no real LLM has run guided.", "mitigation": "Named in evidence; D-C benchmark (OBS-009) carries false-pass hard gate."},
+    {"id": "RK-11", "sev": "LOW", "risk": "Dirty working tree (007+012A uncommitted) makes 'fresh HEAD baseline' ambiguous.", "mitigation": "S0 requires lead commit before baselines."}
+  ]
+}

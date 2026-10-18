@@ -1,0 +1,345 @@
+{
+  "scope": "ONE unchanged supporting diagnostic only; no acceptance/performance or exclusive-cost credit",
+  "result": {
+    "scope": "Exact selected current backend gate only; no whole-story QA verdict",
+    "gradleExitCode": 1,
+    "sourceDrift": [],
+    "results": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "tests": 2,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "finishedAt": "2026-10-12T10:21:43.666318+00:00",
+    "tests": 2,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "pass": false
+  },
+  "seedPass": true,
+  "mandatoryC5Pass": false,
+  "firstBoundary": {
+    "method": "awaitFinalizing",
+    "line": 14077,
+    "callerLine": 3677,
+    "finalizeCode": "UNREACHED"
+  },
+  "postrunIdentityVerified": true,
+  "postrunIdentitySha": "6a53f8092ad3ce937dcea6f1a32fe316ed9db13af43e2270cf831ec0ba7ddaf8",
+  "numericCapture": {
+    "mappedAppenders": 1,
+    "rootEvents": null,
+    "appEvents": null,
+    "eventCountsStatus": "SUPPORT_UNOBSERVED",
+    "logCoverage": "STREAMED_ORIGINAL_ENCODED_OUTPUT",
+    "encodedBytes": 17139757,
+    "encodedWriteCalls": 7429,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsCollected": true,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 30,
+    "patternBytes": 3308,
+    "rootTraceObserved": true,
+    "appTraceObserved": true,
+    "httpBodies": 1,
+    "httpErrors": 0,
+    "jsonBodies": 1,
+    "problemBodies": 0,
+    "sseStreams": 0,
+    "metricBytes": 79540,
+    "cacheEntries": 2,
+    "cacheNonemptyRequired": true,
+    "cacheProduced": true,
+    "cacheUnproducedOutsideFilterRoutes": false,
+    "profileFiles": 167,
+    "knownRootLinks": 4,
+    "externalLinkTargetBytesScanned": false,
+    "c4WindowsExecuted": false,
+    "traceFromStart": false,
+    "traceArmed": true,
+    "claimSamplerStatus": 2,
+    "claimSamplerJoined": true,
+    "claimSamplerCleanupConfirmed": true,
+    "claimSamplerDiagnosticOnly": true,
+    "claimSamplerCycles": 214,
+    "claimSamplerEmpty": 0,
+    "claimSamplerUnattributed": 0,
+    "claimSamplerCounts": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        37,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "pgSnapshotStatus": 2,
+    "pgSnapshotJoined": true,
+    "pgSnapshotExactClaimAttribution": true,
+    "pgSnapshotRows": 2,
+    "pgSnapshotCandidates": 1,
+    "pgSnapshotBlockers": 1,
+    "pgSnapshotStageWaitCounts": [
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "pgSnapshotBlockerStageCounts": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "pgSnapshotRelationCounts": [
+      2,
+      1,
+      0
+    ],
+    "pgSnapshotWaitEventCounts": [
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ]
+  },
+  "claimCount": 4,
+  "lastClaim": {
+    "status": 202,
+    "handlerNanos": 1071288042,
+    "consumed": true
+  },
+  "state": {
+    "state": "FAILED",
+    "errorCode": "OTHER",
+    "bootstrapPhase": "READY",
+    "materializationPresent": true,
+    "fixtureModelHttpCalls": 4,
+    "fixturePhysicalProviderReads": 1,
+    "fixtureProviderFailures": 0,
+    "fixtureModelKinds": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 3,
+      "VERIFY_STEP": 0
+    }
+  },
+  "confirmedNonadditivePartitions": {
+    "sql": {
+      "OTHER6": 1
+    },
+    "sourceFamily": {
+      "OBSERVATION_MATERIALIZATION9": 1
+    },
+    "family9Method": {
+      "observeV2_21": 1
+    },
+    "translationPhases": "all zero, not absence proof",
+    "family10Methods": "all zero, not absence proof"
+  },
+  "limits": [
+    "Publisher remains unsupported UNKNOWN/unclassified",
+    "First qualifying one-shot snapshot may differ from last slow claim; no last-claim target match beyond authentic snapshot identity inferred",
+    "observeV2 caller does not prove which inner work consumed time or exclusive cause",
+    "Diagnostic FAIL preserves original unprofiled mandatory C5 RED; no retry performed"
+  ]
+}

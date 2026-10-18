@@ -1,0 +1,66 @@
+{
+  "name": "ISO1-cleanup",
+  "primaryFailure": false,
+  "events": [
+    {
+      "kind": "cleanup-callback-scan",
+      "hits": 0,
+      "at": 368.664584
+    },
+    {
+      "kind": "owned-root-scan",
+      "label": "JOURNAL",
+      "phase": "cleanup",
+      "scanned": true,
+      "status": "SCANNED",
+      "hits": 0,
+      "at": 368.759959
+    },
+    {
+      "kind": "cleanup-callback-scan",
+      "hits": 0,
+      "at": 368.832417
+    },
+    {
+      "kind": "owned-root-scan",
+      "label": "JOURNAL",
+      "phase": "cleanup",
+      "scanned": true,
+      "status": "SCANNED",
+      "hits": 0,
+      "at": 368.856084
+    }
+  ],
+  "claims": [],
+  "pids": [],
+  "outputHits": {},
+  "outputObserved": {},
+  "cleanupIssues": [
+    {
+      "label": "callback-server",
+      "confirmed": true
+    },
+    {
+      "label": "descriptors",
+      "confirmed": true
+    },
+    {
+      "label": "journal-directory",
+      "confirmed": true
+    },
+    {
+      "label": "S",
+      "confirmed": true
+    },
+    {
+      "label": "F",
+      "confirmed": true
+    }
+  ],
+  "pendingDescriptorRestorations": 0,
+  "launches": 0,
+  "maxLive": 0,
+  "allObservedPidsGone": true,
+  "backendVaultScopeProved": false,
+  "physicalHeapErasureProved": false
+}

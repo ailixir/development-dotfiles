@@ -1,0 +1,110 @@
+schema: 1
+story: STUDIO-OBS-012A
+gate: CONCERNS
+status_reason: 'Independent re-derivation confirms AC-1..AC-6 and the backend/runner/tools half of AC-7 on the final tree (run5b green, 35/35 baseline names disposed, 1563 = projected studio.* count, V1-V11 byte-identical, 24 @Disabled = 18 + 6). Done with tracked concerns, none high: the run-3 INTERNAL_ERROR is still under observation, D-A residues outside the AC-7 grep scope are placed in OBS-009/014/015, the frontend/src backend-facing strings go to OBS-012B, and user-owned D-B confirmation and dev-DB recreation are still open.'
+reviewer: Quinn
+reviewed_revision: 'worktree-digest:sha256:a5315b093a84b03d1387a20ecd1ba84018daccb7814574755d62c5e933badf86 (1108 files under backend/src, backend/build.gradle.kts, studio-runner/{src,test,scripts}, tools, docs/specs; uncommitted on HEAD 734ad704f; story pre-QA sha256 a69d1f835b1bd91ca0ff644ad1dfa4a2e668d36ab19e24886420b9019b559ea6)'
+updated: '2026-10-13T22:58:10Z'
+top_issues:
+  - id: REL-001
+    severity: medium
+    owner: '@qa (observation) / STUDIO-OBS-009 AC-12 a-e'
+    finding: 'Run-3 GuidedPublicationReplayIT pre-Ready RUN_ERROR/INTERNAL_ERROR (R10-rev2-2) is still unattributed. It has not recurred in 2 diagnostic full-class runs or in run5b (38/38). The outcome was fail-closed.'
+    suggested_action: 'Keep the IPC diagnostic. Any unattributed recurrence voids that run''s credit and escalates to @architect per OBS-009 AC-12 c.'
+  - id: ARCH-001
+    severity: medium
+    owner: STUDIO-OBS-014 (placement P1, verified at OBS-014 :58-62)
+    finding: 'D-A residue with an integrity weakness: legacy POST /internal/studio/executions/{id}/admission (StudioInternalController claimAdmission -> AdmissionCasService.claim) survives with no observed-binding check. Its only caller was the deleted /v1/runs path. Exposure is limited to the runner''s internal identity, the effect is fail-closed, and no secret is released.'
+    suggested_action: 'Delete the route, the OpenAPI operation (incl. the "/v1/runs" prose at openapi.yaml:1650) and its legacy tests by name before STUDIO-OBS-010.'
+  - id: ARCH-002
+    severity: medium
+    owner: STUDIO-OBS-009 (placement P2, verified at OBS-009 :30-34)
+    finding: 'studio-runner/src/versions.ts still declares ARTIFACT_VERSION = 1, VALIDATOR_SCHEMA_VERSION, VALIDATOR_PARSER and EXECUTOR_VERSION. They are written into dist/runtime-versions.json and projected into every observed run''s RuntimeVersions, so observed runs carry the deleted engine''s identity.'
+    suggested_action: 'Report observed identities only, end to end, before STUDIO-OBS-010.'
+  - id: REQ-001
+    severity: medium
+    owner: STUDIO-OBS-012B AC-3
+    finding: 'The AC-7 frontend/src sweep is not 0: confirm-compile 25, COMPILE_REQUIRED 21, compile/ 3, compileStatus 153. These include backend-facing client calls to the removed route (studioApi.ts:141, studioInferenceApi.ts:15). [AUTO-DECISION] Is this an AC-7 miss? No. The AC-7 parenthetical, Out of scope and File List "Not owned" assign the frontend sweep to OBS-012B, whose AC-3 names these exact clients.'
+    suggested_action: 'Do not deploy or demo the 012A backend with the pre-012B frontend against a real backend; those calls now 404. MSW-mocked dev is unaffected.'
+  - id: ARCH-003
+    severity: medium
+    owner: '@architect ruling at STUDIO-OBS-015 T0 (placement P7, verified at OBS-015 :40-46)'
+    finding: 'A legacy v1 authoring read/promotion path (LegacyAuthoringRequest, LEGACY_AUTHORING 409, LegacyStudioAdapter/LegacyDeserializer) remains. It may be a second authoring generation under D-A. The ADR removal list does not name it, so it is not a 012A AC miss.'
+    suggested_action: 'Rule on it at OBS-015 T0. If it is a second generation, remove it.'
+  - id: REQ-002
+    severity: medium
+    owner: user / Platform-SRE (carried by STUDIO-OBS-010 release record)
+    finding: 'PO GO condition G4 was not met as written. The D-B question was never sent (externalMessageSent=false), so the status is UNCONFIRMED. ADR-SC-005 D-B permits proceeding while the confirmation is owed.'
+    suggested_action: 'The user asks Platform/SRE whether anything was ever deployed from an internal remote and records the answer before OBS-010.'
+  - id: REQ-003
+    severity: low
+    owner: user
+    finding: 'AC-6 / T3: the dev database has not been recreated (destructive, not run by agents). The command is recorded in lane-m/ledger.json notRun.'
+    suggested_action: 'Run the recorded dropdb/createdb, then start the app so Flyway installs V1-V18. Never apply this over a V34 history and never use flyway repair.'
+  - id: TEST-001
+    severity: low
+    owner: STUDIO-OBS-009 (P5)
+    finding: 'R4: unit-tier coverage excludes src/run/{browser,child,guidedMain}.ts. Without the exclusion, src/run/** lines are 81.21% < 85%. guidedMain.ts v8 coverage is unmeasured. Its execution proof is the backend guided ITs (run5b 37/40/38 green), which spawn an untracked studio-runner/dist.'
+    suggested_action: 'Make the backend IT dependency on dist explicit (build or digest check), as already placed.'
+  - id: MNT-001
+    severity: low
+    owner: STUDIO-OBS-009 (P5) / any lane rebuilding dist
+    finding: 'The local studio-runner/dist still holds stale compiled artifact-1 modules (dist/validator/ast.js, dist/executor/executor.js, dist/run/playwrightAdapter.js, ...) because the build never ran "clean". No current source or test imports them, and the Docker image builds dist from src in a clean stage, so the image is unaffected. Backend guided ITs snapshot this directory.'
+    suggested_action: 'Run the package "clean" script before rebuilding dist for gate runs.'
+  - id: REL-002
+    severity: low
+    owner: user (host cleanup, architect G4) / STUDIO-OBS-009 AC-12 f-j (P3/P4)
+    finding: 'Host hazards are still present at review time. Stale Gradle daemons 33891/33892 listen on 127.0.0.1:52100/52101. The guided Chromium launch has no Studio-owned startup bound (run4 xpc_atfork_child deadlock), and orphaned Chrome processes remain.'
+    suggested_action: 'Clean up the host with user authorization. Classify connect EOF, `role "test" does not exist` or a hang after container start as infra after an lsof check.'
+  - id: ARCH-004
+    severity: low
+    owner: STUDIO-OBS-011 fold / OBS-010 AC-5 clock row (P6)
+    finding: 'R9-OBS-3 (inferred, untested): publication authorization and GuidedPlanPublisher still mint and judge on Clock.systemUTC(), while V15 judges against clock_timestamp().'
+    suggested_action: 'Move them to DatabaseClock in the OBS-011 fold.'
+  - id: MNT-002
+    severity: low
+    owner: STUDIO-OBS-011 (runner TypeScript reformat)
+    finding: 'launcher.ts and runCoordinator.ts keep dense multi-statement one-liners, a pre-existing style. They are harder to review: the R8-ADJ-2 reason mapping sits in one nested ternary.'
+    suggested_action: 'Reformat as already scoped to OBS-011.'
+waiver:
+  active: false
+independent_verification:
+  method: 10.51 AC-12 (re-derived from the tree, build outputs and evidence; ledgers used only as claims to test)
+  tree_freshness: 'find -newer 2026-10-13 17:40 EDT over backend/src, build.gradle.kts, backend/config, studio-runner (excl. node_modules/dist/coverage), tools, docs/specs -> 0 files. Run5b (21:45-22:34Z) and runner-gates-final (22:35-22:50Z) therefore ran on the reviewed tree.'
+  v1_v11_identity: 'shasum -a 256 of each V1..V11 vs git show d954a21c5 -> 11/11 EQUAL. db/migration lists exactly V1..V18; backend/db absent; studio/compile main+test absent.'
+  migrations_spot_check: 'V12-V18 have no compile table or column; the only "compile" match is a V12:4 comment. confirmation_source CHECK = GUIDED_RUN only (V12:28). V14/V15 have 0 AWAITING_AUTH/accountRef. V15:497-500 has the step_snapshot_hashes/step_reuse_provenance D-D columns. V16 has LEARN_REQUIRED and OBSERVED_SCHEDULE_AUTH_REQUIRED (REFUSED only).'
+  ac7_greps: 'grep -rnF over 24 patterns (11 AC-7 + 13 extra). backend/src/main = 0 and studio-runner/src = 0 for every pattern. tools/ hits are only the guard literals in check-studio-observed-contracts.cjs:793-799 and :863, all asserting absence. frontend/src is not 0; see REQ-001.'
+  disabled: 'Multi-line @Disabled parse over backend/src/test gives 24: 18 with the exact reason "DEFERRED STUDIO-OBS-009 AC-6/T3: observed scheduled runs are refused OBSERVED_SCHEDULE_AUTH_REQUIRED until background authority and G-3 land; re-enable unchanged" (SharedSchedulingIT 2, StudioScheduleApiIT 16) and 6 pre-existing at HEAD (ExecutionVideoExternallyGatedCriteriaTest 2, ExternallyGatedCriteriaTest 3, ExecutionReadinessTest 1). The 18 names are present in STUDIO-OBS-009. Run5b skipped 25 = 24 + 1 assumption skip.'
+  baseline_35: 'Against run5b XML on the reviewed tree: 31 pass under the same name. ErrorCodeConstraintMigrationIT initializationError is now 5 real cases, all pass. ObservedAdmissionSecurityIT [12]/[52] field=accountGrantId are absent and replaced by "[6] field=accountGrantId" (pass). otherwiseValidTupleReachesRealUnavailableAccountBoundaryButNeverCas is renamed to otherwiseValidTupleReachesTheLockedAdmissionTransactionButNeverCasOrSecretResolution (pass). 35/35 are disposed; none is skipped or failing. Architect gate ruling 1 ratifies the drops and ports.'
+  count_reconciliation: 'Baseline XML (2000 studio.*) vs run5b test-task XML: 520 removed, 83 added, giving 1563. That equals the reconciliation projection 2000 - 440 + 41 - 38 = 1563 (SseCrossReplicaIT 2 runs in crossReplicaTest and is excluded from both). Every removed name and all 59 gone classes appear in a 012A ledger. The 7 new classes are named. The only unnamed additions are the ruled index shifts ObservedAdmissionSecurityIT [55..60] -> [52..57]. Runner +7 after R8 = 5 observedReplayAdmission + 2 launcher (r8-selfstop R8.3tests / R8-ADJ-2), which closes reconciliation G-5.'
+  backend_gate: 'backend/build/test-results/test/*.xml (269 files, 21:45:50-22:34:38Z) total 1916 tests / 0 failures / 0 errors / 25 skipped, matching final-gates/backend-check-run5b.json. Per class: StudioDispatcherAuthorizationRecheckTest 4/0, DispatcherIT 26/0, ObservedGrantClockIT 5/0, SecretMaskerEquivalenceTest 10/0, LocalEmbeddedPostgresPortTest 3/0, GuidedSessionIT 43/0, GuidedHttpSecurityIT 6/0, GuidedBridgeIntegrationTest 37/0, GuidedPublicationReplayIT 38/0, StudioContractTest 12/0, ObservedAdmissionSecurityIT 100/0.'
+  contracts: 'Re-run by QA: node tools/check-studio-observed-contracts.cjs exits 0 (v3 40 schemas; public OpenAPI 38 operations, 7 guided routes; codegen 4 byte-identical outputs). node tools/build-studio-observed-schemas.cjs --check exits 0. contracts/ = README.md + v3 only. sha256(docs/specs/studio/openapi.yaml) = f502160e..., equal to confinement.test.ts BASE_SHA256, so the whole document is pinned. GuidedInternalController has one mount, /internal/v2. Guided controllers map /api/v1/studio/guided-sessions. The config prefix is studio.gateway with no compile alias.'
+  runner_rerun: 'Re-run by QA: vitest run test/run/launcher.test.ts test/server/observedReplayAdmission.test.ts test/server/deadline-outcome.test.ts test/run/confinement.test.ts --coverage.enabled=false gives 4 files, 82/82 passed. tsc --noEmit -p tsconfig.json exits 0. Default/fixtures/deployment tiers credited from runner-gates-final/ledger.json (1288+29skip, 221+9skip, 313/313, secret-control 10/10) on the unchanged tree.'
+  not_rerun: '[AUTO-DECISION] Re-run backend Gradle? No. The test task replaces backend/build/test-results/test, the run5b XML this gate and the architect gate depend on, and the tree is proven unchanged since run5b. CodeRabbit was not run (no WSL on darwin). The fallback manual review is below. SYNAPSE diagnostics and the checklist-runner skill text in the spawn prompt are outside the review mission and were not run.'
+code_review:
+  R3_StudioDispatcher: 'PASS. DispatchAuthorization is a required constructor dependency. recheck runs after the pending-deadline close and before observed.binding, refreshRetry (grant minting), job/Vault read and send. AuthorizationRevokedException closes AUTHORIZATION_REVOKED with a value-free WARN. Other exceptions propagate. A NULL csi_id reaches ProvisionalDispatchAuthorization as null and is refused (csiId == null). Rows with no observed binding close DISPATCH_FAILED (no fallback family).'
+  GuidedSessionService_stop: 'PASS. The stop targets the assignment only when the bootstrap is CONTEXT_PENDING without metadataAcknowledgement (or no context exists), and keeps the context if no assignment is found. It is monotone, and teardownStatus PENDING is set only when a target exists.'
+  SecretMasker: 'PASS. Equivalence reasoned independently: "@" is outside the local-part class, so every start inside a run ends at the same run end, and the original can only match at the first scanned position of a run. The new (?:\G|(?<!cls))cls++@... tries exactly run starts plus the previous match end. The oracle test has 100k seeded cases plus a negative control, and it ran green in run5b.'
+  DatabaseClock_R9: 'PASS. SELECT clock_timestamp() per call, uncached, fail-closed on DB error. It is constructed only in ObservedReplayConfiguration:21 and ObservedReplayRuntimeConfiguration:53 and is not a Spring Clock bean. The V15 trigger zero-tolerance clause is unchanged. ARCH-004 is the residual.'
+  runCoordinator_launcher_R8_ADJ2: 'PASS. settled is captured before stop(), which kills the child. A child-sent errorCode wins, then CANCELLED (abort), then TIMEOUT (wait expired), then INTERNAL_ERROR (exit/violation). The LAUNCH_UNKNOWN literal has 0 hits. The recorded-vs-control-window stop source keeps a self-stop RUN_ERROR and lets a recorded cancel upgrade it to CANCELLED. QA re-run is green.'
+  LocalEmbeddedPostgresConfig: 'PASS. A random port in 20000-32767 (below the Linux and macOS ephemeral ranges) with an exclusive probe on 127.0.0.1 and ::1 without SO_REUSEADDR, max 200 attempts, then IOException. The probe-then-bind TOCTOU window is inherent and the config is local-profile only (low, not raised).'
+  IdempotencyFilter: 'PASS. The guided routes moved from /api/v3 (never covered by the filter) to /api/v1/studio/guided-sessions[/**], which is now explicitly excluded, so behaviour is preserved. GuidedHttpSecurityIT posts a 256-char non-UUID Idempotency-Key and expects 202, which pins the exclusion over HTTP (architect O-4 confirmed).'
+quality_checks:
+  code_review: {status: CONCERNS, basis: 'Risky diffs reviewed and sound. D-A residues ARCH-001/002/003 placed. MNT-002 style.'}
+  unit_and_integration_tests: {status: PASS, basis: 'run5b 1916/0/0/25 with jacoco PASS; runner tiers green; targeted QA re-runs green.'}
+  acceptance_criteria: {status: CONCERNS, basis: 'AC-1..AC-6 met; AC-6 dev-DB recreation owed to user (REQ-003); AC-7 frontend half deferred to OBS-012B (REQ-001).'}
+  regression: {status: PASS, basis: '35/35 baseline failures disposed by name; count 1563 reconciled; 24 @Disabled = 18 + 6, none relabelled passed.'}
+  performance_and_reliability: {status: CONCERNS, basis: 'SecretMasker ReDoS closed (linear). REL-001 under observation; REL-002 host hazards.'}
+  security: {status: CONCERNS, basis: 'R3 dispatch-time recheck restored. Legacy admission route ARCH-001 (internal identity only, fail-closed). No secret value in new logs (R3/R8.2 log codes only).'}
+  documentation_and_traceability: {status: PASS, basis: 'Dated superseded notes present (docs-ac7); one public OpenAPI; contracts README v3-only; File List reconciled against T0 hashes.'}
+ac_mapping:
+  AC-1: 'MET. compile/** main+test absent; studio/gateway holds the 9 named classes + CredentialBudget; CredentialPatternScreen in guided/translation; authoring guards in studio/authoring; StudioRunnerProperties in studio/dispatch; RunnerValidationClient 0 hits; prefix studio.gateway; NoRuntimeLlmTest 5/0, DeReadyCarryForwardTest 3/0 in run5b.'
+  AC-2: 'MET. Compile routes, DTOs and config keys at 0 hits in backend main; LEARN_REQUIRED and readiness vocabulary in openapi.yaml; confirmation_source GUIDED_RUN only; validate-variables documented (openapi.yaml:695).'
+  AC-3: 'MET. Artifact-1 validator/executor/adapters/playwrightAdapter absent from src; routes.ts serves only /v2/validate-observed and /v2/runs; attachLegacyChildRuntime 0 hits. Residue ARCH-002.'
+  AC-4: 'MET. contracts = README + v3; one internal mount; observed-1 0 hits; port-first counts 43/6/37 (+ReplayIT 38) pass in run5b.'
+  AC-5: 'MET. Guided routes at /api/v1; BASE_SHA256 = whole-document sha (verified); 38 ops; regeneration --check exits 0; build.gradle.kts copies v3 only.'
+  AC-6: 'MET with REQ-002/REQ-003. V1-V18 exact; V1-V11 11/11 equal; compile state absent; D-D columns present; cutover absent; pinned tests reconciled (lane-m 224-20 = 204; QA name-level diff shows no unnamed removal).'
+  AC-7: 'MET for backend/src/main, studio-runner/src, tools; full backend check and runner tiers green; counts reconciled. frontend/src deferred to OBS-012B (REQ-001).'
+next_steps:
+  - '@devops: push only after the user acknowledges REQ-001 (no real-backend deploy/demo before OBS-012B) and REQ-002/REQ-003.'
+  - '@po: confirm the P1/P2/P7 deadlines (before STUDIO-OBS-010) remain on the OBS-014/009/015 boards.'

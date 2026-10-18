@@ -1,0 +1,784 @@
+Compiled from "GuidedSessionRepository.java"
+public final class com.citi.put.checks.studio.guided.session.GuidedSessionRepository {
+  private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+
+  private final org.springframework.transaction.support.TransactionTemplate transactions;
+
+  private final com.citi.put.checks.studio.guided.session.GuidedContracts contracts;
+
+  public com.citi.put.checks.studio.guided.session.GuidedSessionRepository(org.springframework.jdbc.core.JdbcTemplate, org.springframework.transaction.support.TransactionTemplate, com.citi.put.checks.studio.guided.session.GuidedContracts);
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+       4: aload_0
+       5: aload_1
+       6: putfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+       9: aload_0
+      10: aload_2
+      11: putfield      #13                 // Field transactions:Lorg/springframework/transaction/support/TransactionTemplate;
+      14: aload_0
+      15: aload_3
+      16: putfield      #17                 // Field contracts:Lcom/citi/put/checks/studio/guided/session/GuidedContracts;
+      19: return
+    LineNumberTable:
+      line 19: 0
+      line 20: 4
+      line 21: 9
+      line 22: 14
+      line 23: 19
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      20     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      20     1  jdbc   Lorg/springframework/jdbc/core/JdbcTemplate;
+          0      20     2 transactions   Lorg/springframework/transaction/support/TransactionTemplate;
+          0      20     3 contracts   Lcom/citi/put/checks/studio/guided/session/GuidedContracts;
+
+  public <T> T transaction(java.util.function.Supplier<T>);
+    Code:
+       0: aload_0
+       1: getfield      #13                 // Field transactions:Lorg/springframework/transaction/support/TransactionTemplate;
+       4: aload_1
+       5: invokedynamic #21,  0             // InvokeDynamic #0:doInTransaction:(Ljava/util/function/Supplier;)Lorg/springframework/transaction/support/TransactionCallback;
+      10: invokevirtual #25                 // Method org/springframework/transaction/support/TransactionTemplate.execute:(Lorg/springframework/transaction/support/TransactionCallback;)Ljava/lang/Object;
+      13: areturn
+    LineNumberTable:
+      line 26: 0
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      14     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      14     1 operation   Ljava/util/function/Supplier;
+
+  public com.citi.put.checks.studio.guided.session.GuidedSessionRepository$Session lock(java.lang.String);
+    Code:
+       0: aload_0
+       1: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+       4: ldc           #31                 // String SELECT document::text,progress::text FROM studio_guided_sessions WHERE session_id=? FOR UPDATE
+       6: aload_0
+       7: invokedynamic #33,  0             // InvokeDynamic #1:mapRow:(Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;)Lorg/springframework/jdbc/core/RowMapper;
+      12: iconst_1
+      13: anewarray     #2                  // class java/lang/Object
+      16: dup
+      17: iconst_0
+      18: aload_1
+      19: aastore
+      20: invokevirtual #37                 // Method org/springframework/jdbc/core/JdbcTemplate.query:(Ljava/lang/String;Lorg/springframework/jdbc/core/RowMapper;[Ljava/lang/Object;)Ljava/util/List;
+      23: astore_2
+      24: aload_2
+      25: invokeinterface #43,  1           // InterfaceMethod java/util/List.isEmpty:()Z
+      30: ifeq          46
+      33: new           #49                 // class com/citi/put/checks/studio/guided/session/GuidedSessionException
+      36: dup
+      37: ldc           #51                 // String FORBIDDEN_SCOPE
+      39: sipush        403
+      42: invokespecial #53                 // Method com/citi/put/checks/studio/guided/session/GuidedSessionException."<init>":(Ljava/lang/String;I)V
+      45: athrow
+      46: aload_2
+      47: invokeinterface #56,  1           // InterfaceMethod java/util/List.getFirst:()Ljava/lang/Object;
+      52: checkcast     #60                 // class com/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session
+      55: areturn
+    LineNumberTable:
+      line 32: 0
+      line 33: 20
+      line 41: 24
+      line 42: 33
+      line 44: 46
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      56     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      56     1    id   Ljava/lang/String;
+         24      32     2  rows   Ljava/util/List;
+
+  public void insert(com.fasterxml.jackson.databind.node.ObjectNode);
+    Code:
+       0: aload_0
+       1: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+       4: ldc           #62                 // String INSERT INTO studio_guided_sessions(session_id,test_id,principal_id,scope_hash,state,expires_at,document) VALUES (?,?,?,?,?,?,?::jsonb)
+       6: bipush        7
+       8: anewarray     #2                  // class java/lang/Object
+      11: dup
+      12: iconst_0
+      13: aload_1
+      14: ldc           #64                 // String sessionId
+      16: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      19: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      22: aastore
+      23: dup
+      24: iconst_1
+      25: aload_1
+      26: ldc           #78                 // String testId
+      28: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      31: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      34: aastore
+      35: dup
+      36: iconst_2
+      37: aload_1
+      38: ldc           #80                 // String scope
+      40: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      43: ldc           #82                 // String principalId
+      45: invokevirtual #84                 // Method com/fasterxml/jackson/databind/JsonNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      48: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      51: aastore
+      52: dup
+      53: iconst_3
+      54: aload_1
+      55: ldc           #85                 // String scopeHash
+      57: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      60: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      63: aastore
+      64: dup
+      65: iconst_4
+      66: aload_1
+      67: ldc           #87                 // String state
+      69: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      72: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      75: aastore
+      76: dup
+      77: iconst_5
+      78: aload_1
+      79: ldc           #89                 // String expiresAt
+      81: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      84: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      87: invokestatic  #91                 // Method java/time/Instant.parse:(Ljava/lang/CharSequence;)Ljava/time/Instant;
+      90: invokestatic  #97                 // Method java/sql/Timestamp.from:(Ljava/time/Instant;)Ljava/sql/Timestamp;
+      93: aastore
+      94: dup
+      95: bipush        6
+      97: aload_1
+      98: invokevirtual #103                // Method com/fasterxml/jackson/databind/node/ObjectNode.toString:()Ljava/lang/String;
+     101: aastore
+     102: invokevirtual #106                // Method org/springframework/jdbc/core/JdbcTemplate.update:(Ljava/lang/String;[Ljava/lang/Object;)I
+     105: pop
+     106: return
+    LineNumberTable:
+      line 48: 0
+      line 52: 16
+      line 53: 28
+      line 54: 40
+      line 55: 57
+      line 56: 69
+      line 57: 81
+      line 58: 98
+      line 48: 102
+      line 59: 106
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0     107     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0     107     1   doc   Lcom/fasterxml/jackson/databind/node/ObjectNode;
+
+  public void save(com.citi.put.checks.studio.guided.session.GuidedSessionRepository$Session);
+    Code:
+       0: aload_0
+       1: getfield      #17                 // Field contracts:Lcom/citi/put/checks/studio/guided/session/GuidedContracts;
+       4: ldc           #110                // String session
+       6: aload_1
+       7: invokevirtual #112                // Method com/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session.document:()Lcom/fasterxml/jackson/databind/node/ObjectNode;
+      10: invokevirtual #116                // Method com/citi/put/checks/studio/guided/session/GuidedContracts.validate:(Ljava/lang/String;Lcom/fasterxml/jackson/databind/JsonNode;)V
+      13: aload_0
+      14: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+      17: ldc           #122                // String UPDATE studio_guided_sessions SET state=?,document=?::jsonb,progress=?::jsonb WHERE session_id=?
+      19: iconst_4
+      20: anewarray     #2                  // class java/lang/Object
+      23: dup
+      24: iconst_0
+      25: aload_1
+      26: invokevirtual #112                // Method com/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session.document:()Lcom/fasterxml/jackson/databind/node/ObjectNode;
+      29: ldc           #87                 // String state
+      31: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      34: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      37: aastore
+      38: dup
+      39: iconst_1
+      40: aload_1
+      41: invokevirtual #112                // Method com/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session.document:()Lcom/fasterxml/jackson/databind/node/ObjectNode;
+      44: invokevirtual #103                // Method com/fasterxml/jackson/databind/node/ObjectNode.toString:()Ljava/lang/String;
+      47: aastore
+      48: dup
+      49: iconst_2
+      50: aload_1
+      51: invokevirtual #124                // Method com/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session.progress:()Lcom/fasterxml/jackson/databind/node/ObjectNode;
+      54: invokevirtual #103                // Method com/fasterxml/jackson/databind/node/ObjectNode.toString:()Ljava/lang/String;
+      57: aastore
+      58: dup
+      59: iconst_3
+      60: aload_1
+      61: invokevirtual #112                // Method com/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session.document:()Lcom/fasterxml/jackson/databind/node/ObjectNode;
+      64: ldc           #64                 // String sessionId
+      66: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      69: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      72: aastore
+      73: invokevirtual #106                // Method org/springframework/jdbc/core/JdbcTemplate.update:(Ljava/lang/String;[Ljava/lang/Object;)I
+      76: pop
+      77: return
+    LineNumberTable:
+      line 62: 0
+      line 63: 13
+      line 66: 26
+      line 67: 41
+      line 68: 51
+      line 69: 61
+      line 63: 73
+      line 70: 77
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      78     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      78     1 session   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session;
+
+  public void saveRenewalAndCommand(com.citi.put.checks.studio.guided.session.GuidedSessionRepository$Session, java.lang.String, java.lang.String);
+    Code:
+       0: invokestatic  #127                // Method org/springframework/transaction/support/TransactionSynchronizationManager.isActualTransactionActive:()Z
+       3: ldc           #132                // String RUNTIME_INCOMPATIBLE
+       5: sipush        409
+       8: invokestatic  #134                // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.require:(ZLjava/lang/String;I)V
+      11: aload_0
+      12: getfield      #17                 // Field contracts:Lcom/citi/put/checks/studio/guided/session/GuidedContracts;
+      15: ldc           #110                // String session
+      17: aload_1
+      18: invokevirtual #112                // Method com/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session.document:()Lcom/fasterxml/jackson/databind/node/ObjectNode;
+      21: invokevirtual #116                // Method com/citi/put/checks/studio/guided/session/GuidedContracts.validate:(Ljava/lang/String;Lcom/fasterxml/jackson/databind/JsonNode;)V
+      24: aload_1
+      25: invokevirtual #112                // Method com/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session.document:()Lcom/fasterxml/jackson/databind/node/ObjectNode;
+      28: invokevirtual #103                // Method com/fasterxml/jackson/databind/node/ObjectNode.toString:()Ljava/lang/String;
+      31: astore        4
+      33: aload_0
+      34: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+      37: ldc           #138                // String WITH updated AS (UPDATE studio_guided_sessions SET state=?,document=?::jsonb WHERE session_id=? RETURNING session_id,document) INSERT INTO studio_guided_commands(namespace,route,idempotency_key,request_digest,response) SELECT session_id,\'claim\',?,?,document FROM updated
+      39: iconst_5
+      40: anewarray     #2                  // class java/lang/Object
+      43: dup
+      44: iconst_0
+      45: aload_1
+      46: invokevirtual #112                // Method com/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session.document:()Lcom/fasterxml/jackson/databind/node/ObjectNode;
+      49: ldc           #87                 // String state
+      51: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      54: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      57: aastore
+      58: dup
+      59: iconst_1
+      60: aload         4
+      62: aastore
+      63: dup
+      64: iconst_2
+      65: aload_1
+      66: invokevirtual #112                // Method com/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session.document:()Lcom/fasterxml/jackson/databind/node/ObjectNode;
+      69: ldc           #64                 // String sessionId
+      71: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      74: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      77: aastore
+      78: dup
+      79: iconst_3
+      80: aload_2
+      81: aastore
+      82: dup
+      83: iconst_4
+      84: aload_3
+      85: aastore
+      86: invokevirtual #106                // Method org/springframework/jdbc/core/JdbcTemplate.update:(Ljava/lang/String;[Ljava/lang/Object;)I
+      89: istore        5
+      91: iload         5
+      93: iconst_1
+      94: if_icmpne     101
+      97: iconst_1
+      98: goto          102
+     101: iconst_0
+     102: ldc           #51                 // String FORBIDDEN_SCOPE
+     104: sipush        403
+     107: invokestatic  #134                // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.require:(ZLjava/lang/String;I)V
+     110: return
+    LineNumberTable:
+      line 76: 0
+      line 74: 8
+      line 79: 11
+      line 80: 24
+      line 81: 33
+      line 87: 46
+      line 89: 66
+      line 82: 86
+      line 92: 91
+      line 93: 110
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0     111     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0     111     1 session   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session;
+          0     111     2   key   Ljava/lang/String;
+          0     111     3 digest   Ljava/lang/String;
+         33      78     4 document   Ljava/lang/String;
+         91      20     5 inserted   I
+
+  public void namespaceLock(java.lang.String);
+    Code:
+       0: aload_0
+       1: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+       4: ldc           #140                // String SELECT pg_advisory_xact_lock(hashtextextended(?,0))
+       6: ldc           #2                  // class java/lang/Object
+       8: iconst_1
+       9: anewarray     #2                  // class java/lang/Object
+      12: dup
+      13: iconst_0
+      14: aload_1
+      15: aastore
+      16: invokevirtual #142                // Method org/springframework/jdbc/core/JdbcTemplate.queryForObject:(Ljava/lang/String;Ljava/lang/Class;[Ljava/lang/Object;)Ljava/lang/Object;
+      19: pop
+      20: return
+    LineNumberTable:
+      line 96: 0
+      line 98: 20
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      21     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      21     1 namespace   Ljava/lang/String;
+
+  public com.fasterxml.jackson.databind.JsonNode duplicate(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+    Code:
+       0: aload_0
+       1: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+       4: ldc           #146                // String SELECT request_digest,response::text FROM studio_guided_commands WHERE namespace=? AND route=? AND idempotency_key=?
+       6: aload_0
+       7: aload         4
+       9: invokedynamic #148,  0            // InvokeDynamic #2:mapRow:(Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;Ljava/lang/String;)Lorg/springframework/jdbc/core/RowMapper;
+      14: iconst_3
+      15: anewarray     #2                  // class java/lang/Object
+      18: dup
+      19: iconst_0
+      20: aload_1
+      21: aastore
+      22: dup
+      23: iconst_1
+      24: aload_2
+      25: aastore
+      26: dup
+      27: iconst_2
+      28: aload_3
+      29: aastore
+      30: invokevirtual #37                 // Method org/springframework/jdbc/core/JdbcTemplate.query:(Ljava/lang/String;Lorg/springframework/jdbc/core/RowMapper;[Ljava/lang/Object;)Ljava/util/List;
+      33: astore        5
+      35: aload         5
+      37: invokeinterface #43,  1           // InterfaceMethod java/util/List.isEmpty:()Z
+      42: ifeq          49
+      45: aconst_null
+      46: goto          59
+      49: aload         5
+      51: invokeinterface #56,  1           // InterfaceMethod java/util/List.getFirst:()Ljava/lang/Object;
+      56: checkcast     #73                 // class com/fasterxml/jackson/databind/JsonNode
+      59: areturn
+    LineNumberTable:
+      line 101: 0
+      line 102: 30
+      line 113: 35
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      60     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      60     1 namespace   Ljava/lang/String;
+          0      60     2 route   Ljava/lang/String;
+          0      60     3   key   Ljava/lang/String;
+          0      60     4 digest   Ljava/lang/String;
+         35      25     5 found   Ljava/util/List;
+
+  public void command(java.lang.String, java.lang.String, java.lang.String, java.lang.String, com.fasterxml.jackson.databind.JsonNode);
+    Code:
+       0: aload_0
+       1: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+       4: ldc           #151                // String INSERT INTO studio_guided_commands VALUES (?,?,?,?,?::jsonb)
+       6: iconst_5
+       7: anewarray     #2                  // class java/lang/Object
+      10: dup
+      11: iconst_0
+      12: aload_1
+      13: aastore
+      14: dup
+      15: iconst_1
+      16: aload_2
+      17: aastore
+      18: dup
+      19: iconst_2
+      20: aload_3
+      21: aastore
+      22: dup
+      23: iconst_3
+      24: aload         4
+      26: aastore
+      27: dup
+      28: iconst_4
+      29: aload         5
+      31: invokevirtual #153                // Method com/fasterxml/jackson/databind/JsonNode.toString:()Ljava/lang/String;
+      34: aastore
+      35: invokevirtual #106                // Method org/springframework/jdbc/core/JdbcTemplate.update:(Ljava/lang/String;[Ljava/lang/Object;)I
+      38: pop
+      39: return
+    LineNumberTable:
+      line 118: 0
+      line 124: 31
+      line 118: 35
+      line 125: 39
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      40     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      40     1 namespace   Ljava/lang/String;
+          0      40     2 route   Ljava/lang/String;
+          0      40     3   key   Ljava/lang/String;
+          0      40     4 digest   Ljava/lang/String;
+          0      40     5 response   Lcom/fasterxml/jackson/databind/JsonNode;
+
+  public void insertAction(com.fasterxml.jackson.databind.node.ObjectNode, com.fasterxml.jackson.databind.JsonNode);
+    Code:
+       0: aload_0
+       1: getfield      #17                 // Field contracts:Lcom/citi/put/checks/studio/guided/session/GuidedContracts;
+       4: ldc           #154                // String action
+       6: aload_2
+       7: invokevirtual #116                // Method com/citi/put/checks/studio/guided/session/GuidedContracts.validate:(Ljava/lang/String;Lcom/fasterxml/jackson/databind/JsonNode;)V
+      10: aload_2
+      11: invokestatic  #156                // Method com/citi/put/checks/studio/guided/session/GuidedContracts.hash:(Lcom/fasterxml/jackson/databind/JsonNode;)Ljava/lang/String;
+      14: aload_1
+      15: ldc           #160                // String requestDigest
+      17: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      20: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      23: invokevirtual #162                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      26: ldc           #168                // String INVALID_CONTRACT
+      28: sipush        422
+      31: invokestatic  #134                // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.require:(ZLjava/lang/String;I)V
+      34: aload_0
+      35: getfield      #17                 // Field contracts:Lcom/citi/put/checks/studio/guided/session/GuidedContracts;
+      38: ldc           #170                // String ledger
+      40: aload_1
+      41: invokevirtual #116                // Method com/citi/put/checks/studio/guided/session/GuidedContracts.validate:(Ljava/lang/String;Lcom/fasterxml/jackson/databind/JsonNode;)V
+      44: aload_0
+      45: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+      48: ldc           #172                // String INSERT INTO studio_guided_actions (admission_id,session_id,step_id,ordinal,document,proposal) VALUES (?,?,?,?,?::jsonb,?::jsonb)
+      50: bipush        6
+      52: anewarray     #2                  // class java/lang/Object
+      55: dup
+      56: iconst_0
+      57: aload_1
+      58: ldc           #174                // String admission
+      60: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      63: ldc           #176                // String admissionId
+      65: invokevirtual #84                 // Method com/fasterxml/jackson/databind/JsonNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      68: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      71: aastore
+      72: dup
+      73: iconst_1
+      74: aload_1
+      75: ldc           #64                 // String sessionId
+      77: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      80: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      83: aastore
+      84: dup
+      85: iconst_2
+      86: aload_1
+      87: ldc           #178                // String coordinate
+      89: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      92: ldc           #180                // String stepId
+      94: invokevirtual #84                 // Method com/fasterxml/jackson/databind/JsonNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      97: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+     100: aastore
+     101: dup
+     102: iconst_3
+     103: aload_1
+     104: ldc           #178                // String coordinate
+     106: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+     109: ldc           #182                // String ordinal
+     111: invokevirtual #84                 // Method com/fasterxml/jackson/databind/JsonNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+     114: invokevirtual #184                // Method com/fasterxml/jackson/databind/JsonNode.asInt:()I
+     117: invokestatic  #188                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     120: aastore
+     121: dup
+     122: iconst_4
+     123: aload_1
+     124: invokevirtual #103                // Method com/fasterxml/jackson/databind/node/ObjectNode.toString:()Ljava/lang/String;
+     127: aastore
+     128: dup
+     129: iconst_5
+     130: aload_2
+     131: invokevirtual #153                // Method com/fasterxml/jackson/databind/JsonNode.toString:()Ljava/lang/String;
+     134: aastore
+     135: invokevirtual #106                // Method org/springframework/jdbc/core/JdbcTemplate.update:(Ljava/lang/String;[Ljava/lang/Object;)I
+     138: pop
+     139: return
+    LineNumberTable:
+      line 128: 0
+      line 129: 10
+      line 130: 11
+      line 129: 31
+      line 133: 34
+      line 134: 44
+      line 138: 60
+      line 139: 77
+      line 140: 89
+      line 141: 106
+      line 142: 124
+      line 143: 131
+      line 134: 135
+      line 144: 139
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0     140     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0     140     1 action   Lcom/fasterxml/jackson/databind/node/ObjectNode;
+          0     140     2 proposal   Lcom/fasterxml/jackson/databind/JsonNode;
+
+  public java.util.List<com.fasterxml.jackson.databind.node.ObjectNode> actions(java.lang.String);
+    Code:
+       0: aload_0
+       1: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+       4: ldc           #194                // String SELECT document::text FROM studio_guided_actions WHERE session_id=? ORDER BY step_id,ordinal
+       6: aload_0
+       7: invokedynamic #196,  0            // InvokeDynamic #3:mapRow:(Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;)Lorg/springframework/jdbc/core/RowMapper;
+      12: iconst_1
+      13: anewarray     #2                  // class java/lang/Object
+      16: dup
+      17: iconst_0
+      18: aload_1
+      19: aastore
+      20: invokevirtual #37                 // Method org/springframework/jdbc/core/JdbcTemplate.query:(Ljava/lang/String;Lorg/springframework/jdbc/core/RowMapper;[Ljava/lang/Object;)Ljava/util/List;
+      23: areturn
+    LineNumberTable:
+      line 147: 0
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      24     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      24     1 sessionId   Ljava/lang/String;
+
+  public com.fasterxml.jackson.databind.JsonNode proposal(java.lang.String);
+    Code:
+       0: aload_0
+       1: getfield      #17                 // Field contracts:Lcom/citi/put/checks/studio/guided/session/GuidedContracts;
+       4: aload_0
+       5: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+       8: ldc           #197                // String SELECT proposal::text FROM studio_guided_actions WHERE admission_id=?
+      10: ldc           #163                // class java/lang/String
+      12: iconst_1
+      13: anewarray     #2                  // class java/lang/Object
+      16: dup
+      17: iconst_0
+      18: aload_1
+      19: aastore
+      20: invokevirtual #142                // Method org/springframework/jdbc/core/JdbcTemplate.queryForObject:(Ljava/lang/String;Ljava/lang/Class;[Ljava/lang/Object;)Ljava/lang/Object;
+      23: checkcast     #163                // class java/lang/String
+      26: invokevirtual #199                // Method com/citi/put/checks/studio/guided/session/GuidedContracts.parse:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      29: areturn
+    LineNumberTable:
+      line 155: 0
+      line 156: 20
+      line 155: 26
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      30     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      30     1 admission   Ljava/lang/String;
+
+  public void saveAction(com.fasterxml.jackson.databind.node.ObjectNode);
+    Code:
+       0: aload_0
+       1: getfield      #17                 // Field contracts:Lcom/citi/put/checks/studio/guided/session/GuidedContracts;
+       4: ldc           #170                // String ledger
+       6: aload_1
+       7: invokevirtual #116                // Method com/citi/put/checks/studio/guided/session/GuidedContracts.validate:(Ljava/lang/String;Lcom/fasterxml/jackson/databind/JsonNode;)V
+      10: aload_0
+      11: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+      14: ldc           #201                // String UPDATE studio_guided_actions SET document=?::jsonb WHERE admission_id=?
+      16: iconst_2
+      17: anewarray     #2                  // class java/lang/Object
+      20: dup
+      21: iconst_0
+      22: aload_1
+      23: invokevirtual #103                // Method com/fasterxml/jackson/databind/node/ObjectNode.toString:()Ljava/lang/String;
+      26: aastore
+      27: dup
+      28: iconst_1
+      29: aload_1
+      30: ldc           #174                // String admission
+      32: invokevirtual #66                 // Method com/fasterxml/jackson/databind/node/ObjectNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      35: ldc           #176                // String admissionId
+      37: invokevirtual #84                 // Method com/fasterxml/jackson/databind/JsonNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      40: invokevirtual #72                 // Method com/fasterxml/jackson/databind/JsonNode.asText:()Ljava/lang/String;
+      43: aastore
+      44: invokevirtual #106                // Method org/springframework/jdbc/core/JdbcTemplate.update:(Ljava/lang/String;[Ljava/lang/Object;)I
+      47: pop
+      48: return
+    LineNumberTable:
+      line 163: 0
+      line 164: 10
+      line 166: 23
+      line 167: 32
+      line 164: 44
+      line 168: 48
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      49     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      49     1 action   Lcom/fasterxml/jackson/databind/node/ObjectNode;
+
+  public java.util.List<java.lang.String> expired(java.time.Instant);
+    Code:
+       0: aload_0
+       1: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+       4: ldc           #203                // String SELECT session_id FROM studio_guided_sessions WHERE expires_at<=? AND state NOT IN (\'SUCCEEDED\',\'PUBLICATION_CONFLICT\',\'FAILED\',\'UNKNOWN_OUTCOME\',\'CANCELLED\',\'EXPIRED\')
+       6: ldc           #163                // class java/lang/String
+       8: iconst_1
+       9: anewarray     #2                  // class java/lang/Object
+      12: dup
+      13: iconst_0
+      14: aload_1
+      15: invokestatic  #97                 // Method java/sql/Timestamp.from:(Ljava/time/Instant;)Ljava/sql/Timestamp;
+      18: aastore
+      19: invokevirtual #205                // Method org/springframework/jdbc/core/JdbcTemplate.queryForList:(Ljava/lang/String;Ljava/lang/Class;[Ljava/lang/Object;)Ljava/util/List;
+      22: areturn
+    LineNumberTable:
+      line 171: 0
+      line 175: 15
+      line 171: 19
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      23     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      23     1   now   Ljava/time/Instant;
+
+  public void finalizationIdentity(java.lang.String, java.lang.String);
+    Code:
+       0: aload_0
+       1: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+       4: ldc           #209                // String UPDATE studio_guided_sessions SET finalization_identity=? WHERE session_id=?
+       6: iconst_2
+       7: anewarray     #2                  // class java/lang/Object
+      10: dup
+      11: iconst_0
+      12: aload_2
+      13: aastore
+      14: dup
+      15: iconst_1
+      16: aload_1
+      17: aastore
+      18: invokevirtual #106                // Method org/springframework/jdbc/core/JdbcTemplate.update:(Ljava/lang/String;[Ljava/lang/Object;)I
+      21: pop
+      22: return
+    LineNumberTable:
+      line 179: 0
+      line 181: 22
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      23     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      23     1    id   Ljava/lang/String;
+          0      23     2  hash   Ljava/lang/String;
+
+  public void evidence(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+    Code:
+       0: aload_0
+       1: getfield      #7                  // Field jdbc:Lorg/springframework/jdbc/core/JdbcTemplate;
+       4: ldc           #211                // String INSERT INTO studio_guided_evidence VALUES (?,?,?,\'guided\',?)
+       6: iconst_4
+       7: anewarray     #2                  // class java/lang/Object
+      10: dup
+      11: iconst_0
+      12: aload_1
+      13: aastore
+      14: dup
+      15: iconst_1
+      16: aload_3
+      17: aastore
+      18: dup
+      19: iconst_2
+      20: aload_2
+      21: aastore
+      22: dup
+      23: iconst_3
+      24: aload         4
+      26: aastore
+      27: invokevirtual #106                // Method org/springframework/jdbc/core/JdbcTemplate.update:(Ljava/lang/String;[Ljava/lang/Object;)I
+      30: pop
+      31: return
+    LineNumberTable:
+      line 184: 0
+      line 186: 31
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      32     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      32     1    id   Ljava/lang/String;
+          0      32     2 scope   Ljava/lang/String;
+          0      32     3 evidenceId   Ljava/lang/String;
+          0      32     4   ref   Ljava/lang/String;
+
+  private com.fasterxml.jackson.databind.node.ObjectNode lambda$actions$3(java.sql.ResultSet, int) throws java.sql.SQLException;
+    Code:
+       0: aload_0
+       1: getfield      #17                 // Field contracts:Lcom/citi/put/checks/studio/guided/session/GuidedContracts;
+       4: aload_1
+       5: iconst_1
+       6: invokeinterface #213,  2          // InterfaceMethod java/sql/ResultSet.getString:(I)Ljava/lang/String;
+      11: invokevirtual #199                // Method com/citi/put/checks/studio/guided/session/GuidedContracts.parse:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      14: checkcast     #67                 // class com/fasterxml/jackson/databind/node/ObjectNode
+      17: areturn
+    LineNumberTable:
+      line 150: 0
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      18     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      18     1    rs   Ljava/sql/ResultSet;
+          0      18     2     n   I
+
+  private com.fasterxml.jackson.databind.JsonNode lambda$duplicate$2(java.lang.String, java.sql.ResultSet, int) throws java.sql.SQLException;
+    Code:
+       0: aload_2
+       1: iconst_1
+       2: invokeinterface #213,  2          // InterfaceMethod java/sql/ResultSet.getString:(I)Ljava/lang/String;
+       7: aload_1
+       8: invokevirtual #162                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      11: ldc           #219                // String IDEMPOTENCY_CONFLICT
+      13: sipush        409
+      16: invokestatic  #134                // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.require:(ZLjava/lang/String;I)V
+      19: aload_0
+      20: getfield      #17                 // Field contracts:Lcom/citi/put/checks/studio/guided/session/GuidedContracts;
+      23: aload_2
+      24: iconst_2
+      25: invokeinterface #213,  2          // InterfaceMethod java/sql/ResultSet.getString:(I)Ljava/lang/String;
+      30: invokevirtual #199                // Method com/citi/put/checks/studio/guided/session/GuidedContracts.parse:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      33: areturn
+    LineNumberTable:
+      line 106: 0
+      line 107: 2
+      line 106: 16
+      line 108: 19
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      34     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      34     1 digest   Ljava/lang/String;
+          0      34     2    rs   Ljava/sql/ResultSet;
+          0      34     3     n   I
+
+  private com.citi.put.checks.studio.guided.session.GuidedSessionRepository$Session lambda$lock$1(java.sql.ResultSet, int) throws java.sql.SQLException;
+    Code:
+       0: new           #60                 // class com/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session
+       3: dup
+       4: aload_0
+       5: getfield      #17                 // Field contracts:Lcom/citi/put/checks/studio/guided/session/GuidedContracts;
+       8: aload_1
+       9: iconst_1
+      10: invokeinterface #213,  2          // InterfaceMethod java/sql/ResultSet.getString:(I)Ljava/lang/String;
+      15: invokevirtual #199                // Method com/citi/put/checks/studio/guided/session/GuidedContracts.parse:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      18: checkcast     #67                 // class com/fasterxml/jackson/databind/node/ObjectNode
+      21: aload_0
+      22: getfield      #17                 // Field contracts:Lcom/citi/put/checks/studio/guided/session/GuidedContracts;
+      25: aload_1
+      26: iconst_2
+      27: invokeinterface #213,  2          // InterfaceMethod java/sql/ResultSet.getString:(I)Ljava/lang/String;
+      32: invokevirtual #199                // Method com/citi/put/checks/studio/guided/session/GuidedContracts.parse:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+      35: checkcast     #67                 // class com/fasterxml/jackson/databind/node/ObjectNode
+      38: invokespecial #221                // Method com/citi/put/checks/studio/guided/session/GuidedSessionRepository$Session."<init>":(Lcom/fasterxml/jackson/databind/node/ObjectNode;Lcom/fasterxml/jackson/databind/node/ObjectNode;)V
+      41: areturn
+    LineNumberTable:
+      line 37: 0
+      line 38: 10
+      line 39: 27
+      line 37: 41
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      42     0  this   Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+          0      42     1    rs   Ljava/sql/ResultSet;
+          0      42     2     n   I
+
+  private static java.lang.Object lambda$transaction$0(java.util.function.Supplier, org.springframework.transaction.TransactionStatus);
+    Code:
+       0: aload_0
+       1: invokeinterface #224,  1          // InterfaceMethod java/util/function/Supplier.get:()Ljava/lang/Object;
+       6: areturn
+    LineNumberTable:
+      line 26: 0
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0       7     0 operation   Ljava/util/function/Supplier;
+          0       7     1     s   Lorg/springframework/transaction/TransactionStatus;
+}

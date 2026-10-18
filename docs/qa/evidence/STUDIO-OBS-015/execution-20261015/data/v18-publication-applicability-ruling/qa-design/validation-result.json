@@ -1,0 +1,20 @@
+{
+  "status": "PASS_READ_ONLY_MANIFEST_INVENTORY_AND_APPLICABILITY_CHECKS",
+  "boundAriaManifestSHA256": "f513d7ff46140ed2e5fec0909ce551264d7a919779a9e2811ec8f4d8e952e38f",
+  "all5DesignFilesMatch": true,
+  "all20V1V20MigrationsMatchCheckpoint": true,
+  "all4HistoricalMethodNamesRetained": true,
+  "currentHistoricalHelperStillCallsCurrentCommit": true,
+  "sameCoordinateUnequalHashCurrentlyPresent": false,
+  "sameCoordinateUnequalHashExplicitlyRequiredByFrozenPlan": true,
+  "sourceDiagnosticDrift": {
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/root-c6-release.json": {
+      "aria": "dfb0c1a5e4453766191901cf151139c8b5b22bd6e1406f97f396b48514febd2c",
+      "current": "efe409c90c7edc28b131fe821cdcf4a95f7dbea7f3f8562b4986b3fba79dc3d1"
+    }
+  },
+  "applicationTestsExecuted": 0,
+  "databaseCommandsExecuted": 0,
+  "nativeBuildGradleGeneratorCommandsExecuted": 0,
+  "qualification": "Standard-library hash/string/inventory validation and selected source inspection only; no application/SQL/Java/runner/native execution or source-release credit."
+}

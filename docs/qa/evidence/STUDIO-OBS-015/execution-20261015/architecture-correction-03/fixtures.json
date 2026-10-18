@@ -1,0 +1,4729 @@
+{
+  "classification": "ABSTRACT STATE/TIMING DESIGN PROOFS ONLY; no real guard invocation, callback auth, SQL, clock or recording execution",
+  "stateCases": [
+    {
+      "name": "default-prefix-asks-current-question-and-model0",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "REPLAYING_PREFIX",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "ask",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "explicit-allow-prefix-skips-question",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "REPLAYING_PREFIX",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "ALLOW",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "ALLOW",
+      "operation": "guard",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "deny-prefix-stops-with-policy-refusal",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "REPLAYING_PREFIX",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "DENY",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "DENY",
+      "operation": "guard",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "TERMINAL_POLICY_DENIED"
+    },
+    {
+      "name": "ungrounded-current-target-stops-even-old-base-was-authorized",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "REPLAYING_PREFIX",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "UNGROUNDED",
+      "operation": "guard",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "TERMINAL_POLICY_DENIED"
+    },
+    {
+      "name": "destructive-current-target-stops-even-session-confirmed",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "REPLAYING_PREFIX",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "sideEffectConfirmation": {
+            "clarificationId": "earlier-current-session-question",
+            "status": "CONFIRMED",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "DESTRUCTIVE",
+      "operation": "guard",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "TERMINAL_POLICY_DENIED"
+    },
+    {
+      "name": "accept-current-answer-resumes-prefix-with-refresh-required",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "pending-prefix-never-reserves-model-while-awaiting",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "model",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "pending-prefix-never-admits-action-while-awaiting",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "admit",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "pending-prefix-coordinator-returns-no-work",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "poll",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "wrong-question",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "old-question",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "wrong-choice",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "old-choice",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "stale-generation",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 7
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "wrong-user-cannot-confirm",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "different-author",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "changed-document",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "other-doc",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "changed-owner-fence",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 8,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "lost-live-lease",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:00Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "changed-source",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "5",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "wrong-policy-hash",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "changed-context",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "other-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "wrong-prefix-request",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "hidden-inflight-action",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": true,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "generic-model-question-cannot-escape-prefix",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "AMBIGUOUS_TARGET",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "forged-marker-extra-field",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd",
+            "confirmedByModel": true
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "terminal-cancelled-cannot-resume",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "CANCELLED",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "terminal-expired-cannot-resume",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "EXPIRED",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "terminal-unknown_outcome-cannot-resume",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "UNKNOWN_OUTCOME",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "answer",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "cancel-during-wait-closes-without-native-or-model",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "cancel",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "same-owner-renewal-retains-question-context-and-clock",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "AWAITING_CLARIFICATION",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "clarification": {
+            "schemaVersion": 3,
+            "phase": "observed",
+            "clarificationId": "question-current",
+            "sessionId": "session-current",
+            "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "documentId": "doc-current",
+            "generation": 8,
+            "reason": "SIDE_EFFECT_CONFIRMATION",
+            "promptCode": "CONFIRM_ACTION",
+            "expiresAt": "2026-10-15T06:10:00Z",
+            "choices": [
+              {
+                "choiceId": "choice-current",
+                "safeLabel": "Click Save",
+                "labelSource": "AUTHORED",
+                "nodeId": "save-current",
+                "bindingId": null
+              }
+            ]
+          },
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "PENDING",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "renew",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "old-preconfirmation-preparation-cannot-admit",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "REPLAYING_PREFIX",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "CONFIRMED",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "admit",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "REJECT"
+    },
+    {
+      "name": "postconfirmation-refresh-invalidates-old-proof-same-browser",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "REPLAYING_PREFIX",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1,
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "CONFIRMED",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "refresh",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "fresh-postconfirmation-proposal-can-pass-guard",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "REPLAYING_PREFIX",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 9,
+          "evidenceHash": "9999999999999999999999999999999999999999999999999999999999999999",
+          "stepIndex": 1,
+          "sideEffectConfirmation": {
+            "clarificationId": "question-current",
+            "status": "CONFIRMED",
+            "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+          }
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false
+      },
+      "decision": "CONFIRM",
+      "operation": "admit",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "base-confirmation-is-not-current-session-consent",
+      "initial": {
+        "sessionId": "session-current",
+        "state": "REPLAYING_PREFIX",
+        "continuation": "REPLAYING_PREFIX",
+        "originalPrincipal": "author-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "sourceRevision": "3",
+        "configurationRevision": "4",
+        "frozenPolicyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "sideEffectStance": "CLARIFY_FIRST",
+        "plan": {
+          "initialIndex": 3,
+          "switch": null,
+          "programHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "nextCoordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          }
+        },
+        "owner": {
+          "workerId": "worker-current",
+          "fence": 7,
+          "leaseExpiresAt": "2026-10-15T06:00:30Z"
+        },
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "context": {
+          "contextId": "same-recorded-context",
+          "contextRevision": 1,
+          "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "browserIdentity": "browser-once",
+          "recordingIdentity": "recording-once",
+          "clockOrigin": "one-origin",
+          "policyHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "progress": {
+          "documentId": "doc-current",
+          "generation": 8,
+          "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "stepIndex": 1
+        },
+        "prefixRequests": {
+          "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd": {
+            "document": {
+              "schemaVersion": 3,
+              "sessionId": "session-current",
+              "workerId": "worker-current",
+              "ownerFence": 7,
+              "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contextId": "same-recorded-context",
+              "contextRevision": 1,
+              "authoredInputsHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "sourceRevision": "3",
+              "configurationRevision": "4",
+              "prefixProgramHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "ordinal": 0
+              },
+              "evidenceHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            },
+            "status": "PREPARED"
+          }
+        },
+        "counters": {
+          "actions": 0,
+          "modelProposals": 0,
+          "modelInputTokens": 0,
+          "modelOutputTokens": 0
+        },
+        "nativeInvocations": 0,
+        "hasInflightAction": false,
+        "pendingDelivery": false,
+        "baseHistoricalConfirmation": "CONFIRMED"
+      },
+      "decision": "CONFIRM",
+      "operation": "ask",
+      "question": {
+        "schemaVersion": 3,
+        "phase": "observed",
+        "clarificationId": "question-current",
+        "sessionId": "session-current",
+        "scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "documentId": "doc-current",
+        "generation": 8,
+        "reason": "SIDE_EFFECT_CONFIRMATION",
+        "promptCode": "CONFIRM_ACTION",
+        "expiresAt": "2026-10-15T06:10:00Z",
+        "choices": [
+          {
+            "choiceId": "choice-current",
+            "safeLabel": "Click Save",
+            "labelSource": "AUTHORED",
+            "nodeId": "save-current",
+            "bindingId": null
+          }
+        ]
+      },
+      "marker": {
+        "clarificationId": "question-current",
+        "status": "PENDING",
+        "prefixRequestDigest": "b45d2d6d4f10ac8046c9cdc402693624cde7a919b76a6eb108e4c9348ab530bd"
+      },
+      "answer": {
+        "schemaVersion": 3,
+        "clarificationId": "question-current",
+        "choiceId": "choice-current",
+        "generation": 8
+      },
+      "caller": "author-current",
+      "now": "2026-10-15T06:00:01Z",
+      "expected": "ACCEPT"
+    }
+  ],
+  "timingCases": [
+    {
+      "name": "legal-distinct-admission-tie",
+      "items": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "attempt-A",
+          "startMs": 100,
+          "endMs": 100
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "attempt-B",
+          "startMs": 100,
+          "endMs": 101
+        }
+      ],
+      "ledger": {
+        "attempt-A": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        "attempt-B": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "dispatchCount": 1
+        }
+      },
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "duplicate-admission-still-rejected",
+      "items": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "attempt-A",
+          "startMs": 100,
+          "endMs": 100
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "attempt-A",
+          "startMs": 100,
+          "endMs": 100
+        }
+      ],
+      "ledger": {
+        "attempt-A": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        "attempt-B": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "dispatchCount": 1
+        }
+      },
+      "expected": "REJECT"
+    },
+    {
+      "name": "reversed-total-order-still-rejected",
+      "items": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "attempt-B",
+          "startMs": 100,
+          "endMs": 101
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "attempt-A",
+          "startMs": 100,
+          "endMs": 100
+        }
+      ],
+      "ledger": {
+        "attempt-A": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        "attempt-B": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "dispatchCount": 1
+        }
+      },
+      "expected": "REJECT"
+    },
+    {
+      "name": "wrong-ledger-coordinate",
+      "items": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "attempt-A",
+          "startMs": 100,
+          "endMs": 100
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "attempt-B",
+          "startMs": 100,
+          "endMs": 101
+        }
+      ],
+      "ledger": {
+        "attempt-A": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        "attempt-B": {
+          "stepId": "foreign-step",
+          "ordinal": 0,
+          "dispatchCount": 1
+        }
+      },
+      "expected": "REJECT"
+    },
+    {
+      "name": "undispatched-admission",
+      "items": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "attempt-A",
+          "startMs": 100,
+          "endMs": 100
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "attempt-B",
+          "startMs": 100,
+          "endMs": 101
+        }
+      ],
+      "ledger": {
+        "attempt-A": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        "attempt-B": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "dispatchCount": 0
+        }
+      },
+      "expected": "REJECT"
+    },
+    {
+      "name": "null-end-preserved-on-legal-tie",
+      "items": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "attempt-A",
+          "startMs": 100,
+          "endMs": 100
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "attempt-B",
+          "startMs": 100,
+          "endMs": null
+        }
+      ],
+      "ledger": {
+        "attempt-A": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        "attempt-B": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "dispatchCount": 1
+        }
+      },
+      "expected": "ACCEPT"
+    },
+    {
+      "name": "admission-tie-break-is-codepoint-not-utf16-locale",
+      "items": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "",
+          "startMs": 100,
+          "endMs": 100
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "admissionId": "𐀀",
+          "startMs": 100,
+          "endMs": 101
+        }
+      ],
+      "ledger": {
+        "": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        "𐀀": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0,
+          "dispatchCount": 1
+        }
+      },
+      "expected": "ACCEPT"
+    }
+  ],
+  "oldTimingCounterexample": {
+    "items": [
+      {
+        "kind": "action",
+        "stepId": "00000000-0000-4000-8000-000000000002",
+        "ordinal": 0,
+        "admissionId": "attempt-A",
+        "startMs": 100,
+        "endMs": 100
+      },
+      {
+        "kind": "action",
+        "stepId": "00000000-0000-4000-8000-000000000002",
+        "ordinal": 0,
+        "admissionId": "attempt-B",
+        "startMs": 100,
+        "endMs": 101
+      }
+    ],
+    "equalOldKeys": true,
+    "distinctAdmissions": true,
+    "ledgerDispatchCounts": [
+      1,
+      1
+    ]
+  },
+  "guardCompositionBoundary": "Actual shared GuidedActionGuard must produce these abstract decisions from the fresh observation/proposal/frozen policy. Synthetic cases do not replace its real grounding/destructive/form-membership integration tests.",
+  "timingObservationLimit": "These are legal synthetic ledger/readings, not observed current runner output. Current runtime stamps only when native dispatch begins, so an unmeasured pre-native refusal MUST NOT be assigned a fabricated timestamp just to exercise this case."
+}

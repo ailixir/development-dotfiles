@@ -1,0 +1,285 @@
+{
+  "story": "STUDIO-OBS-015",
+  "window": "h8h6-window01",
+  "agent": "Dex-W (@dev)",
+  "date": "2026-10-16",
+  "nonCredit": true,
+  "committed": false,
+  "suppliedPatches": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/h8-source01/h8.patch",
+      "sha256": "bd3564d339f4bbe907dfeba167c267100b38ec49e5afaff04b597100843dc959",
+      "postImagesMatchManifest": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/h6-source01/h6.patch",
+      "sha256": "5d98e6a05ee5a0c9112b652223dc66a0a7c5a86f5ef6927127b164615f274e42",
+      "postImagesMatchManifest": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/new22-b2-diagnosis01/fix.patch",
+      "sha256": "1d8a501c97e2a77404e039ba5e59a8e016f302db0f3369616f50e3cd2cf49aa0",
+      "base": {
+        "ReplayIT": "217950c7422aadbceaaf2ab34417d5a932f4e616ff76efc6a2a5e3a04a09aec8",
+        "build.gradle.kts": "2d43ae4d6660b2f440a903ba15c1eb1a51a6a2cb665a8ec215ed364812174a1b"
+      }
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/new22-b1b3-diagnosis01/fix.patch",
+      "sha256": "cc75767627f2dc662009c8f190b2a674c830ef192b05fcb62d61ebc3ab7fb4c9",
+      "appliedAfterB2": true,
+      "overlapWithB2": "none"
+    }
+  ],
+  "handEdits": [
+    "H8 WARN once per row per process (h8-warn-once-adjustment.diff)",
+    "B1D-01 per qa-ack01 \u00a72.2",
+    "B1C-03 planted set + in-body exactness per qa-rulings01 R1",
+    "confirm-expire 120 s read-only wait per qa-rulings01 R2"
+  ],
+  "fixtureCorrectionDisclosure": {
+    "label": "incremental joined drift-first (and B3B-2)",
+    "old": "html.replace(\"<output aria-label='Order reference'>\", \"<span role='status' aria-label='Order reference'>\").replace(\"</output><label for='destination'>\", \"</span><label for='destination'>\")",
+    "new": "html.replace(\"<output aria-label='Order reference'>\", \"<output role='region' aria-label='Order reference'>\")",
+    "replayItSha256Final": "03ec45efc0af75eb9cb38ebcc77995065fd4de17e236871b60c27508dd7936e3",
+    "executedOutcome": "not reached (low lane blocked by cleanupUnconfirmed guard)"
+  },
+  "files": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256Before": "174d99ace9c47eeb85904002156eddc595c352590076917135e153411d5df963",
+      "sha256AfterSuppliedPatch": "89b6301a743ee5f2a809aa821b9c4153c78f6892e2eeaa265e28f1b8dd0ccb89",
+      "sha256Final": "89b6301a743ee5f2a809aa821b9c4153c78f6892e2eeaa265e28f1b8dd0ccb89"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java",
+      "sha256Before": "67c62defc8411c77c62dabc4f66ff83997fe8daeb81d307e78d8011bebb3f48e",
+      "sha256AfterSuppliedPatch": "3cbae0366ae22691e9304a1ca7169b970827b265bd5ab204b8a57fc6583ab4c0",
+      "sha256Final": "3cbae0366ae22691e9304a1ca7169b970827b265bd5ab204b8a57fc6583ab4c0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+      "sha256Before": "a7eccb02ba06e045717178679bd3b3d75725ecba5bf64fa1d20f5565fc712dc9",
+      "sha256AfterSuppliedPatch": "043250e063e8bbe5c9a4c025a2263fed4c3963dfe5bb29847cf98b756e938419",
+      "sha256Final": "7fd81750882fa5c8fc122232d83cf887f570d1922b8b81dcd38a0fb7c0e3a0cd"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256Before": "055081ff6551de8eb640e589ffa8f5dd6d18876f64fd7264c1a1a6d432d1e3f8",
+      "sha256AfterSuppliedPatch": "351e393dc47a8ab6941a75669cb6f50ed1afc1f91a382ba42bf19ba0eb69d8de",
+      "sha256Final": "8d67a25196e49c66bdf7cf212b3a9b24cc5f3b30f51a7ed9eb60da4f973689bd"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "sha256Before": "17e2fb0550843763041529119840c31840ec18278f66ae6d77a2a89af4fd278b",
+      "sha256AfterSuppliedPatch": "68b65fad044035bf8c3ec3dc57bf4ff2ac17527d9841b7955a16140403c17101",
+      "sha256Final": "68b65fad044035bf8c3ec3dc57bf4ff2ac17527d9841b7955a16140403c17101"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java",
+      "sha256Before": null,
+      "sha256AfterSuppliedPatch": "56de3065224b2891c353a1126a6ad3298e1e0b936016c060fdf9a2da5164dab5",
+      "sha256Final": "56de3065224b2891c353a1126a6ad3298e1e0b936016c060fdf9a2da5164dab5"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "sha256Before": "b6945176b29d20cc28734028a5bfe72aaa873cfd4af0f1eca23b32ef0727906e",
+      "sha256AfterSuppliedPatch": "675ab662d6a565fa527da551aeb19e923b0173f0478c9655df2e41a621ac34a6",
+      "sha256Final": "6d7361ae0966eff3c68d34e7f759aaf5a4ae74a72dcb7193fca64c7c982964a6"
+    },
+    {
+      "path": "studio-runner/src/run/observationCollector.ts",
+      "sha256Before": "ba31be90d04885e6329ae02f6559205325740cbd46960a438150a890557c27a2",
+      "sha256AfterSuppliedPatch": "e073909b9b13cf8103abea4032bd78e4af3ba357b229718e9d4cf20392a72315",
+      "sha256Final": "e073909b9b13cf8103abea4032bd78e4af3ba357b229718e9d4cf20392a72315"
+    },
+    {
+      "path": "studio-runner/test/run/observationCollectorInvoke.test.ts",
+      "sha256Before": "3c4ec9bc36287f1b4bee823ac20fe3413c83226a82002406d81e402bab9a60d7",
+      "sha256AfterSuppliedPatch": "912767a1c2a4ac756ba15aabd08cf348c54d2ca4e92cdc7a31b62bd6bac0f0d9",
+      "sha256Final": "912767a1c2a4ac756ba15aabd08cf348c54d2ca4e92cdc7a31b62bd6bac0f0d9"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts",
+      "sha256Before": null,
+      "sha256AfterSuppliedPatch": "46099d1c1bbdbec9cdec3331620c57810cee1c682c927392daa811b3d39714b4",
+      "sha256Final": "46099d1c1bbdbec9cdec3331620c57810cee1c682c927392daa811b3d39714b4"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256Before": "217950c7422aadbceaaf2ab34417d5a932f4e616ff76efc6a2a5e3a04a09aec8",
+      "sha256AfterSuppliedPatch": null,
+      "sha256Final": "03ec45efc0af75eb9cb38ebcc77995065fd4de17e236871b60c27508dd7936e3"
+    },
+    {
+      "path": "backend/build.gradle.kts",
+      "sha256Before": "2d43ae4d6660b2f440a903ba15c1eb1a51a6a2cb665a8ec215ed364812174a1b",
+      "sha256AfterSuppliedPatch": null,
+      "sha256Final": "b296cb7578e627e6d7a790f36b473508910bfc6ac1e48f1f9f9271eb60d0bcdf"
+    }
+  ],
+  "lockfiles": {
+    "unchanged": true,
+    "before": [
+      "a2bc5fa6047298ef17d5137006d05da6c19bd667d7229a1d6b0af243f92a72b0",
+      "package-lock.json",
+      "ae1c6030fcf933dfd3b92fdf2c683641c306595cc2194b2a97db76c3c65154ba",
+      "studio-runner/package-lock.json"
+    ]
+  },
+  "runnerDist": {
+    "digestBeforeBuild": "972ccf7b6a8d880b1f31cd156e54f69bb54b8bac52250eefee77e99f79cae1cc",
+    "digestAfterBuild": "2f688e62d3c1e9cd2cec105186c209d24cbaa50eb29fbb2d0ac5bccd112fcef0",
+    "sourceDigestAtBuild": "36f057d5a276edc64928ad0080243fe03e8ada6a0eb265dcb53fbbbcaaa53656",
+    "captureManifests": [
+      "capture-pre-build.json",
+      "capture-post-build.json"
+    ]
+  },
+  "runner": {
+    "typeCheck": 0,
+    "observationCollectorInvoke": {
+      "passed": 24,
+      "failed": 0
+    },
+    "parityFixturesTier": {
+      "passed": 11,
+      "failed": 0
+    },
+    "fullUnit": {
+      "files": "104 passed | 1 skipped",
+      "passed": 2223,
+      "failed": 0,
+      "skipped": 29,
+      "baseline": {
+        "passed": 2214,
+        "failed": 0,
+        "skipped": 29
+      }
+    },
+    "build": 0,
+    "checkPins": 0,
+    "eslintChangedFiles": 0
+  },
+  "backend": {
+    "compileTestJava": [
+      "compileTestJava.log exit 0",
+      "compileTestJava-02.log exit 0 (after ReplayIT edits)"
+    ],
+    "runs": [
+      {
+        "label": "h8h6-w01-h8tests",
+        "note": "worker hung ~30 min in SourceStopOwner.drainUninterruptibly (actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost cleanup); own worker PID 43051 SIGTERMed; no XML",
+        "logEvents": {
+          "GuidedDispatchStopKeyTest": "2/2 PASS",
+          "GuidedServiceTransportFaultIT": "4 PASS (legacyPending, concurrent, immediateResend, setupObservationFailure) / 14 FAIL / 1 SKIP"
+        }
+      },
+      {
+        "label": "h8h6-w01-h8tests02",
+        "resultsSha256": "8d421734ef332e9a7b58c9d7ebda4ffd90c3098221d9325e2183a9d05574ba19",
+        "exit": 1,
+        "counts": {
+          "total": 14,
+          "passed": 2,
+          "failed": 12,
+          "errors": 0,
+          "skipped": 0
+        },
+        "taskResults": {
+          "test": {
+            "total": 14,
+            "passed": 2,
+            "failed": 12,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "validationSucceeded": false,
+        "taskCollectionErrors": [],
+        "sourceStable": true,
+        "distStable": true,
+        "elapsedSeconds": 15.29
+      },
+      {
+        "label": "h8h6-w01-bridge01",
+        "resultsSha256": "3df3f32bdf736c80b2bc7cc57d4ce5ecaccd6c6df21ea57b9467d784bf28d6ca",
+        "exit": 1,
+        "counts": {
+          "total": 38,
+          "passed": 7,
+          "failed": 31,
+          "errors": 0,
+          "skipped": 0
+        },
+        "taskResults": {
+          "test": {
+            "total": 38,
+            "passed": 7,
+            "failed": 31,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "validationSucceeded": false,
+        "taskCollectionErrors": [],
+        "sourceStable": true,
+        "distStable": true,
+        "elapsedSeconds": 74.81
+      },
+      {
+        "label": "h8h6-w01-full01",
+        "resultsSha256": "52964a7abe786a340a5f667279a41875e6494787fc6cf075c552738655890404",
+        "exit": 1,
+        "counts": {
+          "total": 137,
+          "passed": 79,
+          "failed": 58,
+          "errors": 0,
+          "skipped": 0
+        },
+        "taskResults": {
+          "test": {
+            "total": 74,
+            "passed": 72,
+            "failed": 2,
+            "errors": 0,
+            "skipped": 0
+          },
+          "guidedIncrementalTest": {
+            "total": 63,
+            "passed": 7,
+            "failed": 56,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "validationSucceeded": false,
+        "taskCollectionErrors": [
+          {
+            "reason": "DUPLICATE_ORIGINAL_CASE_ACROSS_TASKS",
+            "identities": [
+              {
+                "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+                "name": "executionError",
+                "tasks": [
+                  "guidedIncrementalTest",
+                  "test"
+                ]
+              }
+            ]
+          }
+        ],
+        "sourceStable": true,
+        "distStable": true,
+        "elapsedSeconds": 2721.32
+      }
+    ],
+    "partitions": {
+      "default": 46,
+      "low": 62,
+      "source": "h8h6-w01-full01 XML (47 and 63 incl. executionError)"
+    },
+    "confirmExpireExpiryToConfirmedMs": null
+  }
+}

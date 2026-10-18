@@ -1,0 +1,187 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java.before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -931,15 +931,21 @@
+           (request, response, chain) -> {
+             var http = (jakarta.servlet.http.HttpServletRequest) request;
+             C5Capture activeC5 = c5Capture;
+-            if (activeC5 != null && activeC5.selectedLifecycle(http)) {
++            if (activeC5 != null && (activeC5.selectedLifecycle(http) || activeC5.selectedClaim(http))) {
+               var wrapped =
+                   new org.springframework.web.util.ContentCachingRequestWrapper(http, 262144);
++              boolean claim = activeC5.selectedClaim(http);
++              long ingress = System.nanoTime();
+               try {
+                 chain.doFilter(wrapped, response);
+               } finally {
+-                activeC5.recordLifecycle(
+-                    wrapped.getContentAsByteArray(),
+-                    ((jakarta.servlet.http.HttpServletResponse) response).getStatus());
++                int status = ((jakarta.servlet.http.HttpServletResponse) response).getStatus();
++                if (claim) {
++                  activeC5.recordClaim(wrapped.getContentAsByteArray(), status,
++                      System.nanoTime() - ingress);
++                } else {
++                  activeC5.recordLifecycle(wrapped.getContentAsByteArray(), status);
++                }
+               }
+               return;
+             }
+@@ -6318,6 +6324,28 @@
+         import {GuidedRuntime as RevRuntime} from %s;
+         import {GuidedOwnership as RevOwnership} from %s;
+         const revOwners=new WeakMap(),revRuntimes=new WeakMap();
++        const c5GrantFile=%s;let c5GrantOrdinal=0;
++        const c5GrantFail=()=>{void revFs.promises.open(c5GrantFile+'-failed',revFs.constants.O_WRONLY|
++          revFs.constants.O_CREAT|revFs.constants.O_APPEND|revFs.constants.O_NOFOLLOW,0o600).then(async fd=>{
++            try{await fd.writeFile('1');}finally{await fd.close();}}).catch(()=>undefined);};
++        const c5GrantRecord=(args,success,error,elapsedMs)=>{
++          try{
++            const entry=args[0],grant=args[1],now=Date.now();
++            const previous=Date.parse(entry?.grant?.owner?.leaseExpiresAt),next=Date.parse(grant?.owner?.leaseExpiresAt),
++              expiry=Date.parse(entry?.assignment?.expiresAt);
++            const valid=number=>Number.isFinite(number),delta=(left,right)=>valid(left)&&valid(right)?Math.trunc(left-right):0;
++            const code=success?0:['LEASE_LOST','CONTEXT_LOST','IDENTITY_MISMATCH','INVALID_CONTRACT','POLICY_DENIED',
++              'BUDGET_EXCEEDED','REVISION_CONFLICT','REVOKED','CLAIM_DENIED','CALLBACK_DENIED','BUSY'].indexOf(error?.message)+1;
++            const sample={ordinal:++c5GrantOrdinal,initial:args[2]===true,success,code,
++              previousValid:valid(previous),nextValid:valid(next),expiryValid:valid(expiry),
++              previousRemainingMs:delta(previous,now),nextRemainingMs:delta(next,now),
++              assignmentRemainingMs:delta(expiry,now),leaseAdvanceMs:delta(next,previous),
++              validationMicros:valid(elapsedMs)?Math.ceil(elapsedMs*1000):0};
++            void (async()=>{const fd=await revFs.promises.open(c5GrantFile,revFs.constants.O_WRONLY|
++              revFs.constants.O_CREAT|revFs.constants.O_APPEND|revFs.constants.O_NOFOLLOW,0o600);
++              try{await fd.writeFile(JSON.stringify(sample)+'\\n');}finally{await fd.close();}})().catch(c5GrantFail);
++          }catch{c5GrantFail();}
++        };
+         const revStart=RevRuntime.prototype.start;
+         RevRuntime.prototype.start=function(...args){const result=Reflect.apply(revStart,this,args),mode=revMode();
+           if(mode?.active&&mode.path===1){const runtime=this;
+@@ -6326,7 +6354,12 @@
+               revEmit(mode,1,1);}catch{revFail();}},()=>{revFail();}).catch(()=>{revFail();});}
+           return result;};
+         const revCheck=RevOwnership.prototype.checkGrant;
+-        RevOwnership.prototype.checkGrant=function(...args){const result=Reflect.apply(revCheck,this,args),mode=revMode();
++        RevOwnership.prototype.checkGrant=function(...args){
++          const selected=revFs.existsSync(c5ValuesFile),started=selected?performance.now():0;
++          let result;try{result=Reflect.apply(revCheck,this,args);}catch(error){
++            if(selected)c5GrantRecord(args,false,error,performance.now()-started);throw error;}
++          if(selected)c5GrantRecord(args,true,null,performance.now()-started);
++          const mode=revMode();
+           if(mode?.active&&mode.path===1){try{const entry=args[0];
+             if(entry.stopped!==false)throw new Error('OWNER');
+             if(args[2]===true)revOwners.set(entry,mode.case);
+@@ -6347,7 +6380,8 @@
+         """
+             .formatted(
+                 JSON.writeValueAsString(root + "guided/runtime.js"),
+-                JSON.writeValueAsString(root + "guided/ownership.js"));
++                JSON.writeValueAsString(root + "guided/ownership.js"),
++                JSON.writeValueAsString(TEMP.resolve("c5-grant-validation-diagnostic.jsonl").toString()));
+   }
+ 
+   private static String p4OrdinaryRevocationHttp() throws Exception {
+@@ -6427,6 +6461,7 @@
+         };
+         const c5ProfileScan=directory=>{
+           let files=0,bytes=0,hits=0,links=0,failed=false,stage=0,errno=0;
++          let linkName=0,linkRoot=false,linkType=0,linkBytes=0,linkTargetRead=false,linkTargetIsVersion=false;
+           try{
+             const root=p4Fs.realpathSync(directory),stat=p4Fs.lstatSync(directory);
+             const canonical=p4Fs.lstatSync(root);
+@@ -6441,7 +6476,15 @@
+                 const child=path+'/'+entry.name,info=p4Fs.lstatSync(child);
+                 if(info.isSymbolicLink()){
+                   if(path!==root||!['SingletonLock','SingletonCookie','SingletonSocket'].includes(entry.name)
+-                    ||info.size>1024)throw new Error('SYMLINK');
++                    ||info.size>1024){
++                    linkName=['SingletonLock','SingletonCookie','SingletonSocket','RunningChromeVersion'].indexOf(entry.name)+1;
++                    linkRoot=path===root;linkType=1;linkBytes=Number.isFinite(info.size)?info.size:0;
++                    if(linkRoot&&linkName===4&&info.size<=1024){try{const target=p4Fs.readlinkSync(child);
++                      linkTargetRead=true;
++                      linkTargetIsVersion=target.length<=128&&/^[0-9]{1,4}(?:\\.[0-9]{1,6}){3}$/.test(target);
++                    }catch{/* Metadata loss cannot change the original SYMLINK rejection. */}}
++                    throw new Error('SYMLINK');
++                  }
+                   const text=Buffer.from(entry.name+' '+p4Fs.readlinkSync(child),'utf8');
+                   if(text.length>2048)throw new Error('LINKBOUND');
+                   links++;bytes+=text.length;
+@@ -6476,7 +6519,7 @@
+           }
+           try{const fd=p4Fs.openSync(c5CountsFile,p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|
+             p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);
+-            try{p4Fs.writeSync(fd,JSON.stringify({files,bytes,hits,links,failed,stage,errno})+'\\n');}finally{p4Fs.closeSync(fd);}}
++            try{p4Fs.writeSync(fd,JSON.stringify({files,bytes,hits,links,failed,stage,errno,linkName,linkRoot,linkType,linkBytes,linkTargetRead,linkTargetIsVersion})+'\\n');}finally{p4Fs.closeSync(fd);}}
+           catch{try{const fd=p4Fs.openSync(c5CountsFile+'-failed',p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|
+             p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);try{p4Fs.writeSync(fd,'1');}finally{p4Fs.closeSync(fd);}}catch{}}
+         };
+@@ -7353,7 +7396,7 @@
+     private static final int MAX_BYTES = 128 * 1024 * 1024;
+     private final List<String> values;
+     private volatile String selectedGuidedSession;
+-    private int lifecycleOrdinal;
++    private int lifecycleOrdinal, claimOrdinal;
+     private volatile boolean lifecycleDiagnosticFailed;
+     private final Map<String, byte[]> produced = new java.util.LinkedHashMap<>();
+     private final List<C5Stream> streams = new java.util.ArrayList<>();
+@@ -7481,6 +7524,33 @@
+           && request
+               .getRequestURI()
+               .equals("/internal/v2/studio/guided-sessions/" + selected + "/lifecycle");
++    }
++
++    boolean selectedClaim(jakarta.servlet.http.HttpServletRequest request) {
++      String selected = selectedGuidedSession;
++      return selected != null && request.getMethod().equals("POST")
++          && request.getRequestURI().equals("/internal/v2/studio/guided-sessions/" + selected + "/claim");
++    }
++
++    synchronized void recordClaim(byte[] bytes, int status, long handlerNanos) {
++      try {
++        ObjectNode sample = C.object().put("ordinal", ++claimOrdinal).put("status", status)
++            .put("handlerNanos", handlerNanos).put("consumed", bytes.length > 0 && bytes.length < 262144);
++        Path file = TEMP.resolve("c5-claim-server-diagnostic.jsonl");
++        if (!Files.exists(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
++          Files.createFile(file, java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
++              java.nio.file.attribute.PosixFilePermissions.fromString("rw-------")));
++        }
++        if (Files.isSymbolicLink(file) || !Files.isRegularFile(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)
++            || !Files.getPosixFilePermissions(file).equals(
++                java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"))) {
++          throw new IOException("Unsafe private claim diagnostic target");
++        }
++        Files.writeString(file, sample.toString() + "\n", StandardCharsets.UTF_8,
++            java.nio.file.StandardOpenOption.APPEND);
++      } catch (Exception failure) {
++        lifecycleDiagnosticFailed = true;
++      }
+     }
+ 
+     synchronized void recordLifecycle(byte[] bytes, int status) {
+@@ -7676,12 +7746,17 @@
+           .isGreaterThanOrEqualTo(streams.size() + 1);
+       for (String line : profileSamples) {
+         JsonNode sample = C.parse(line);
+-        assertThat(sample.size()).isEqualTo(7);
++        assertThat(sample.size()).isEqualTo(13);
+         assertThat(sample.path("failed").isBoolean()).isTrue();
+-        for (String field : List.of("files", "bytes", "hits", "links", "stage", "errno")) {
++        for (String field : List.of("files", "bytes", "hits", "links", "stage", "errno", "linkName", "linkType", "linkBytes")) {
+           assertThat(sample.path(field).isIntegralNumber()).isTrue();
+           assertThat(sample.path(field).asLong()).isGreaterThanOrEqualTo(0);
+         }
++        assertThat(sample.path("linkRoot").isBoolean()).isTrue();
++        assertThat(sample.path("linkTargetRead").isBoolean()).isTrue();
++        assertThat(sample.path("linkTargetIsVersion").isBoolean()).isTrue();
++        assertThat(sample.path("linkName").asInt()).isBetween(0, 4);
++        assertThat(sample.path("linkType").asInt()).isBetween(0, 1);
+         assertThat(sample.path("stage").asInt()).isBetween(0, 16);
+         assertThat(sample.path("errno").asInt()).isBetween(0, 10);
+         assertThat(sample.path("failed").asBoolean(true)).isFalse();
+@@ -7732,6 +7807,8 @@
+                 assertThat(lifecycleDiagnosticFailed)
+                     .as("private lifecycle diagnostic integrity")
+                     .isFalse();
++                assertThat(Files.exists(TEMP.resolve("c5-grant-validation-diagnostic.jsonl-failed")))
++                    .as("private grant diagnostic integrity").isFalse();
+                 assertThat(failed).as("final private appender capture integrity").isFalse();
+                 var finalBytes = new java.util.LinkedHashMap<>(produced);
+                 finalBytes.put("c5-final-original-JSON_CONSOLE", encoded.toByteArray());

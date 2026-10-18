@@ -1,0 +1,75 @@
+{
+  "schemaVersion" : 1,
+  "publicationSnapshotPresent" : false,
+  "publicationRevisionPresent" : false,
+  "sessionId" : "7a055510-1241-413e-8a8f-adade00ef8cc",
+  "testId" : "b37bb2e6-fa80-4f81-851d-9da026c4a006",
+  "state" : "FAILED",
+  "errorCode" : "OTHER",
+  "bootstrapPhase" : "CONTEXT_PENDING",
+  "materializationPresent" : true,
+  "counters" : {
+    "actions" : 0,
+    "observations" : 0,
+    "modelProposals" : 1,
+    "modelInputTokens" : 11604,
+    "modelOutputTokens" : 4000,
+    "sanitizedEvidenceBytes" : 0
+  },
+  "coordinate" : { },
+  "observationCounts" : { },
+  "acquisition" : {
+    "allowanceMs" : 30000,
+    "totalExtraPolls" : 0
+  },
+  "activeAcquisition" : { },
+  "fixtureModelHttpCalls" : 1,
+  "fixturePhysicalProviderReads" : 0,
+  "fixtureProviderFailures" : 0,
+  "fixtureModelKinds" : {
+    "SOURCE_PLAN" : 1,
+    "NEXT_ACTION" : 0,
+    "VERIFY_STEP" : 0
+  },
+  "continuation" : "MATERIALIZE",
+  "translationCounters" : {
+    "planRevision" : 2
+  },
+  "declarations" : [ ],
+  "obligations" : [ {
+    "operationKind" : "navigate",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 0,
+    "referenceIndex" : 0
+  }, {
+    "operationKind" : "read",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 1
+  }, {
+    "operationKind" : "fill",
+    "stepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "click",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "assert",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 1
+  } ],
+  "actions" : [ ],
+  "obligationAdmissions" : [ ],
+  "modelAttempts" : [ {
+    "kind" : "SOURCE_PLAN",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "responseStatus" : "OTHER",
+    "responseOperationKind" : "OTHER",
+    "responseSchemaVersion" : 3,
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  } ],
+  "testMethod" : "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+}

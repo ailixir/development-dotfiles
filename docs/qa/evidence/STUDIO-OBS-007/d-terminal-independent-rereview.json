@@ -1,0 +1,1038 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "capturedAt": "2026-10-10T12:16:45.735433+00:00",
+  "reportKind": "Fresh independent Dara schema security-audit rereview for develop support",
+  "reviewer": {
+    "role": "Dara data engineer, independent technical reviewer",
+    "implementationAuthor": false,
+    "subagentsSpawned": false,
+    "lifecycleQa": false
+  },
+  "verdict": "CONCERNS",
+  "verdictScope": "Exact repaired observed secret evidence persistence/partition invariants and their retained regression gate. TERM-PEER-01/02 repairs supported by current source and actual selected root runtime, but strict current root gate fails one retained D test assertion. No whole-AC, lifecycle QA or story completion approval.",
+  "summary": "TERM-PEER-01 early-flush invariant now survives regular history/owner updates; TERM-PEER-02 attach+guards are one DO transaction, with existing missing-guard repair atomic. Current root source-bound gate: 264 executed, 263 passed, 1 failed, 0 errors, 0 skipped. Six new D methods and three genuine resolver JVM cuts pass. One old D method expects the obsolete later guard message and aborts before its wrong-time branch/rollback tail assertions; strict gate remains red.",
+  "guidance": {
+    "skill": ".codex/skills/aiox-data-engineer/SKILL.md",
+    "sot": ".aiox-core/development/agents/data-engineer.md",
+    "task": ".aiox-core/development/tasks/security-audit.md",
+    "parameters": {
+      "scope": "schema",
+      "mode": "yolo"
+    },
+    "activation": "Skill, SOT, constitution and declared task read; prescribed greeting generator executed; continued immediately per user command.",
+    "workflow": {
+      "preconditions": "Exact target and canonical rule set accessible. rg/Python inventory, hashes, ZIP and XML scanners available; generic .aiox-core/scripts/security-scan.js absent.",
+      "adaptation": "User supplied mode, scope and authorities; no repeated elicitation. Schema workflow performed as bounded source/DDL/caller inspection and artifact verification. Shared psql catalog queries, generic RLS, dependency scan, CodeRabbit network review and schema modifications omitted under explicit source-only/shared-DB restrictions. Generic missing-updated_at/FK heuristics do not supersede canonical append-only/no-retention-blocking-FK design.",
+      "postconditions": "Scoped review and findings persisted in the two requested artifacts; no SQL scan or independent runtime execution claimed.",
+      "taskAcceptance": "No known new critical vulnerability established in this exact repair; all-checks-passed acceptance NOT MET because current strict gate has one failure."
+    }
+  },
+  "sourceBinding": {
+    "manifest": "docs/qa/evidence/STUDIO-OBS-007/d-terminal-independent-rereview-source-hashes.json",
+    "manifestSha256": "0f6711c5d9ad0ac2d1a2d268fae9616a8d92dd1e655cc2b0d854a3459196104e",
+    "rootGate": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1",
+    "rootGateManifestSha256": "90ad3344f309ea663dbc50722c4eddb0048807dce818ed80ae20b6652ebe42d1",
+    "rootGateZipSha256": "81ed4289b0eb41e925e0ef828d74eda47e9d0b9fdf1e7c57061a1bd56bd392a2",
+    "sourceCount": 934,
+    "currentDrift": [],
+    "archiveDrift": [],
+    "formatterReceipts": "D exact 7 after-hashes and B exact 47 after-hashes match gate source manifest; B receipt exit0,45 changed,no unplanned source changes. Preformat candidates are provenance, not current source authority.",
+    "v34Sha256": "f644a055a2942939f4cd6a1f295757ebf769e706134ec12fa8b29f3e9f8ce380",
+    "protected33HistoricalMigrationsAllMatchCandidatePins": true
+  },
+  "authority": {
+    "sources": [
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "docs/specs/studio-observed-authoring/secret-login-design.md \u00a74.1, I-C10, C-11",
+      "docs/architecture/studio-execution.md",
+      "docs/architecture/ADR-SC-005-single-path-observed-authoring.md",
+      ".ai/STUDIO-OBS-007-architect-t0-rulings.json RULING1\u20136",
+      "t2-t3-po-architecture-revalidation.json exact15+3",
+      "t2-t3-po-bootstrap-closure-revalidation.json exact12"
+    ],
+    "interpretation": "Approved terminal variant permits true no-read NOT_USED and scoped possible-read UNKNOWN_OUTCOME only at authentic serialized CLOSED cut. No fictional RELEASE/version/admission/seq/coordinate/sourceRef; unknown omitted from unchanged three-state wire. No retry/read/send grant. Canonical and story lifecycle left unchanged."
+  },
+  "findings": [
+    {
+      "id": "D-REREVIEW-01",
+      "severity": "MEDIUM",
+      "status": "CONCERNS",
+      "title": "Retained winner-mismatch test asserts former deferred error after repair now refuses earlier",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "line": 1508,
+      "trigger": "terminalReceiptRequiresExactActualWinnerCodeTimeAndPhysicalTransaction(), first wrongCode=true iteration: authentic receipt planned DISPATCH_FAILED, actual close REFERENCE_UNAVAILABLE.",
+      "actualProof": {
+        "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+        "case": "terminalReceiptRequiresExactActualWinnerCodeTimeAndPhysicalTransaction()",
+        "message": "org.assertj.core.error.AssertJMultipleFailuresError: \nMultiple Failures (1 failure)\n-- failure 1 --\nExpecting actual:\n  \"ERROR: terminal secret settlement authoritative history locator immutable\n  Where: PL/pgSQL function studio_observed_terminal_history_update_guard() line 15 at RAISE\"\nto contain:\n  \"exact top-transaction winner and locator\" \nat SecretUseAuditIT.commitRefusal(SecretUseAuditIT.java:1030)",
+        "xml": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.guided.secret.SecretUseAuditIT.xml"
+      },
+      "sourceProof": "V34 lines294\u2013300 regular history AFTER UPDATE guard raises authoritative history locator immutable before owner/deferred exact top-transaction winner and locator. Root XML confirms this refusal. No committed inconsistency demonstrated.",
+      "executionLimit": "JUnit counts the original method as executed/failed, but its wrongCode=false wrong-time iteration and lines1510\u20131526 rollback assertions were not reached in this execution. Do not award all53 original D methods as passed.",
+      "minimalReversibleRepair": "Change only the mismatch-loop cause assertion at line1508 to the exact current authoritative history locator immutable message (prefer also retaining PostgreSQL P0001/function identity), preserving receipt-only assertion line1490, both wrong-code/wrong-time cases and all rollback/physical-XID assertions. Root owner reruns the frozen strict selectors and archives new hashes/XML. Do not weaken V34 to accommodate the old message."
+    }
+  ],
+  "originalTerminalFindingReassessment": [
+    {
+      "id": "TERM-PEER-01",
+      "historicalVerdict": "FAIL",
+      "historicalActualCounterexample": "root-terminal-early-constraint-probe/result.json: GUARD_VALIDATED_BEFORE_MUTATION, POST_VALIDATION_HISTORY_MUTATION_ROWS=1, COMMITTED_INCONSISTENCY=1; source drift0.",
+      "currentScopedAssessment": "PASS for exact repaired early SET CONSTRAINTS then mutable winner defect; strict suite remains separately FAIL.",
+      "sourceProof": [
+        "V34 lines243\u2013277 shared exact check compares receipt/owner/history/summary xmin to top pg_current_xact_id(), exact accepted locator/cause/time/binding and snapshot before+1.",
+        "V34 lines286\u2013314 regular history AFTER UPDATE binds immutable terminal identity and top-XID/current snapshot; after early flush subsequent mismatch still fires.",
+        "V34 lines316\u2013344 regular owner AFTER UPDATE keeps exact current-cut check and committed terminal winner, lines346\u2013355 fence retry/admission.",
+        "Committed-cut path permits later monotone snapshot/evidence metadata with unchanged actual winner. Initial CTE history-before-DONE ordering remains valid; later child-XID mutation refuses."
+      ],
+      "currentRuntimeProof": [
+        "earlyConstraintFlushCannotPermitLaterTerminalCauseTimeOrSnapshotMismatch() PASS",
+        "earlyFlushCannotHideLaterSubtransactionWinnerVersion() PASS",
+        "committedTerminalCutAllowsLaterGenuineEvidenceMetadataWithoutChangingItsWinner() PASS",
+        "terminalSavepointReceiptOrWinnerWritesAreExplicitlyProhibited() PASS"
+      ],
+      "qualification": "Current original mismatch method failed its exact cause assertion, not an accepted write. Its unexecuted inner branches stay uncredited."
+    },
+    {
+      "id": "TERM-PEER-02",
+      "historicalVerdict": "FAIL",
+      "historicalActualCounterexample": "data-terminal-partition-window-probe/result.json: visibleAttachedLeaf1, visibleTerminalConstraint0, visibleDirectTruncateGuard0, ordinaryReceiptOnlyCommit1, pending owner/zero summaries1.",
+      "currentScopedAssessment": "PASS for exact split-publication/missing-guard repair defect.",
+      "sourceProof": [
+        "PartitionManager lines127\u2013192 interpolates only whitelisted family/derived month names into one DO; pg_advisory_xact_lock at153, CREATE at172\u2013173 and installer at174 execute before same statement commit.",
+        "Existing attached leaf takes ACCESS EXCLUSIVE lock at155 and installs missing applicable guards at156 in same DO; duplicate ensure remains idempotent. Failure rolls back creation or missing-guard installation; ensurePartitions adds ensured entry only after successful call.",
+        "V34 lines733\u2013753 validates family/leaf lineage and adds direct TRUNCATE plus deferred leaf constraint; row insert/UPDATE/DELETE triggers clone from parent. Initial current+2 migration leaves attach and install in same DO lines757\u2013767."
+      ],
+      "currentRuntimeProof": [
+        "actualProductionPartitionPublishesAllGuardsAtomicallyWithOrWithoutOuterTransaction() PASS",
+        "productionPartitionFailureRollsBackNewAttachmentAndAllApplicableGuards() PASS",
+        "productionExistingLeafRepairIsAtomicIdempotentAndDoesNotNeedDefaultOrMutation() PASS"
+      ],
+      "qualification": "Repair tests model actual historical bare leaf with missing guards. They do not establish remediation of already committed inconsistent rows or arbitrary privileged tampering with an existing same-name trigger; installer only fills missing named triggers. No such current damaged state or ordinary writer DDL authority was found."
+    }
+  ],
+  "invariantInspection": [
+    {
+      "area": "DB01 declaring reference and genuine history identity",
+      "assessment": "Original concrete defect remains repaired",
+      "proof": "V34 444\u2013505 immutable manifest/hash, exact reference and proposal\u2192materialization/input\u2192reference/fence joins; 557\u2013604 unreached excludes actual consumes/decisions, stable declaration identity independent of caller ordinal/clock. Recorder truthful null sequence/ordinal/admission and source reference; GuidedSourceClassifier deduplicates same-step secret tokens, deterministic reference IDs. Original assertion inventories retained; current matching targeted methods pass."
+    },
+    {
+      "area": "DB02 actual release/usage lineage, uniqueness, null and literal-free shapes",
+      "assessment": "Original concrete defect remains repaired",
+      "proof": "V34 51\u2013115 finite times, real owner/session/test/admission FKs, scoped PK and release-key partial unique index; 546\u2013555 authentic consumed guided release,639\u2013655 authentic accepted replay declarations/attempt/current owner;662\u2013705 same-owner/advisory serialized full summary/release identity across retained months;670\u2013693 actual RELEASE locator/version/scope/outcome join. Terminal audit variants keep fictional metadata NULL, no fabricated decision. No value/diagnostic column or value argument; canary table tests retain actual scoped controls. This is not a full API/browser/sink privacy claim."
+    },
+    {
+      "area": "DB03 actual terminal winner callers and physical transaction",
+      "assessment": "Original split-transaction defect remains repaired; retained cause test needs correction",
+      "proof": "StudioDispatchLedgerStatements 79\u201396 programmatic TransactionTemplate REQUIRED joins caller and refuses savepoint status; requestCancel907\u2013967, closeWithError1067, closeByReaper1082, closeUndispatchedWithError1087 and reconciliation1180\u20131253 go through physical transaction, locked before-image/settlement and applied==1. PendingReaper calls actual closeByReaper; dispatcher kill-switch and pre-resolver close use same entrypoints. Dispatcher settleObservedFailure appends genuine safe decisions and CLOSED/REQUEUED receipt before applied==1 close/requeue in one transaction; B no-send authority remains distinct. Loss/request-only paths append zero. Actual cancellation/reaper/kill-switch tests pass."
+    },
+    {
+      "area": "DB04 owner/event lock order and fresh waited view",
+      "assessment": "Original lock-order defect remains repaired",
+      "proof": "Recorder append653\u2013676: owner row then lifecycle advisory then event advisory; raw guard V34 510\u2013520 same order. Receipt/evidence owner locks precede advisory; classification VOLATILE separate SPI after wait at171\u2013238. Root rawAndRecorderWritersShareOwnerThenEventOrderWithoutDeadlock and waitedTerminalCutUsesFreshCommittedReadEntryInsteadOfStaleNoReadView pass, with actual lock-wait and conservative marker proof."
+    },
+    {
+      "area": "Committed write before read and conservative possible-read classifications",
+      "assessment": "Unchanged enforced production boundary; genuine process cuts now root-executed",
+      "proof": "ObservedReplayAuthorization267\u2013305 checks no ambient/bound transaction before/after observer and independently reads exact committed marker/current creator+lease/binding/scope; job rejects ambient transaction. VaultStudioReferenceResolver140\u2013144 runs observer before sole existing secret provider read. Recorder observedMetadata599\u2013650 checks authentic live owner and refuses terminal cut. No callback default/no-op/rollback can borrow private grant; marker is possible-read evidence only. Terminal classification removes prior real DISPATCH/summary, no marker\u2192NOT_USED, marker\u2192UNKNOWN irrespective of whether provider entered. Original physical local read counters retained; provider fixture is not deployed Vault."
+    },
+    {
+      "area": "Same top transaction at creating cut and stable committed winner",
+      "assessment": "Source and selected root runtime support exact repair",
+      "proof": "V34 check243\u2013277 demands current top-XID receipt/owner/history/summaries and exact snapshot+1. Regular update guards285\u2013344 survive early forcing and prevent child-XID authoritative versions, later committed row permits genuine monotone metadata without modifying cause/time/binding/owner. Linked earlier positive usage remains immutable and excluded from terminal classification; authentic later guided consumed admission remains separately settled. SecretAuditLifecycle57\u2013197,266\u2013287 retains conservative all-non-success UNKNOWN; no new ACK_LOST caller."
+    },
+    {
+      "area": "Partition guards, health, least writer and retention",
+      "assessment": "Exact atomic publication supported; health implementation statically inspected",
+      "proof": "PartitionManager233\u2013269 tests real pg_trigger function OID: immutable TRUNCATE tgtype34 O/A, row BEFORE UPDATE/DELETE mask27 O/A; applicable commit tgtype5, tgconstraint nonzero, deferrable/initdeferred O/A. Every attached evidence leaf checked and DEFAULT rejected; missing partitioned evidence family DOWN. Bootstrap, scheduler, health and RetentionPruner include all four families; current+2 lookahead, missing-guard failure health DOWN, successful actual repair UP. No self-FK/receipt-history retention-blocking FK; RELEASE/linked USAGE share release retention key, unlinked terminal summary uses receipt month; privileged existing12month detach/drop pruner retained. Ordinary role cannot update/delete/TRUNCATE/detach; current installed leaf and cross-month/prune negatives pass. No new privilege/schema/role edits by reviewer.",
+      "limits": "No independent catalog query; exact health OID/event/timing/enablement checks were read in source, not newly tested via disabled/wrong-function trigger mutations."
+    }
+  ],
+  "newDRegressions": [
+    {
+      "method": "actualProductionPartitionPublishesAllGuardsAtomicallyWithOrWithoutOuterTransaction",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "line": 2220,
+      "sourceProof": "Actual production manager via reflection, real super.execute then pause; autocommit actor observes guard-complete leaf, outer transaction actor observes no leaf until commit. Ordinary parent writer receipt-only transaction fails; direct leaf TRUNCATE refused.",
+      "rootCurrentXmlStatus": "PASS",
+      "independentlyExecutedByThisReviewer": false
+    },
+    {
+      "method": "committedTerminalCutAllowsLaterGenuineEvidenceMetadataWithoutChangingItsWinner",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "line": 2072,
+      "sourceProof": "Committed winner followed by separate evidence metadata/snapshot+1 transaction; unchanged status/code/time; later code rewrite and snapshot regression refused. Controlled database metadata update, no real uploader claim.",
+      "rootCurrentXmlStatus": "PASS",
+      "independentlyExecutedByThisReviewer": false
+    },
+    {
+      "method": "earlyConstraintFlushCannotPermitLaterTerminalCauseTimeOrSnapshotMismatch",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "line": 2012,
+      "sourceProof": "Both ALL and named constraint IMMEDIATE, each with code/time/snapshot mutation; exception at matching guard, transaction rollback, zero receipt/summary and QUEUED owner.",
+      "rootCurrentXmlStatus": "PASS",
+      "independentlyExecutedByThisReviewer": false
+    },
+    {
+      "method": "earlyFlushCannotHideLaterSubtransactionWinnerVersion",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "line": 2140,
+      "sourceProof": "Actual SAVEPOINT after valid early flush, metadata write with child XID refused; zero receipt and QUEUED owner after rollback.",
+      "rootCurrentXmlStatus": "PASS",
+      "independentlyExecutedByThisReviewer": false
+    },
+    {
+      "method": "productionExistingLeafRepairIsAtomicIdempotentAndDoesNotNeedDefaultOrMutation",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "line": 2375,
+      "sourceProof": "Authentic bare old-version attached future leaf with missing guards, no disabled triggers; health DOWN then actual production repair under lock; repeated call idempotent, health UP, TRUNCATE refused.",
+      "rootCurrentXmlStatus": "PASS",
+      "independentlyExecutedByThisReviewer": false
+    },
+    {
+      "method": "productionPartitionFailureRollsBackNewAttachmentAndAllApplicableGuards",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "line": 2309,
+      "sourceProof": "Injected PostgreSQL exception within actual DO after installer; new leaf absent, retry succeeds. Existing bare leaf repair exception rolls back guards, health DOWN; genuine later repair succeeds and health UP.",
+      "rootCurrentXmlStatus": "PASS",
+      "independentlyExecutedByThisReviewer": false
+    }
+  ],
+  "preservation": {
+    "methods": [
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+        "priorMethodCount": 23,
+        "currentMethodCount": 23,
+        "originalMethods": [
+          "freshAndBothStagedCutoverOrdersReachV34WithoutChangingOrdinaryCapability",
+          "guardsFailLoudlyOnAwaitingAuthOrObservedBindingRows",
+          "exactV3ProfileAccountFreeScopeAndObservationCountsAreClosed",
+          "scopedReleaseUsageRetryAndAppendOnlyRowsNeverContainTheCanary",
+          "unreachedNotUsedHasNoFabricatedResolutionAndRejectsOtherNullableVariants",
+          "liveRecheckIsUniqueAndPreservesOneTerminalUsageAndWriteOnceRevocation",
+          "concurrentUsageSummariesHaveExactlyOneWinner",
+          "replayUsageUsesClosedCodesAndTheActualExecutionScope",
+          "ordinaryWriterCannotAlterOrDropRetentionPartitions",
+          "crossMonthUsageAndLiveRecheckExpireWithReleaseWhileUnlinkedUsageKeepsOwnMonth",
+          "definiteRefusalAllowsOnlyOneOwnedFreshAttemptAndKeepsAcceptedIdentities",
+          "realNoSendOutageDecisionGrantsDifferentAuthorityAndCannotBeFabricated",
+          "concurrentRetryRefreshersHaveExactlyOneWinner",
+          "additiveStoredSecretLengthCodeKeepsEveryPriorTerminalValueAndRefusesUnknown",
+          "consumedNoDecisionRequiresAuthenticAdmissionAndKeepsNullResolutionHonest",
+          "consumedAckLossIsEvidenceBoundAndMissingMaterializationCannotBecomeUnused",
+          "releasedReplayUncertaintyRequiresRealScopedReleaseAndNeverFakeAckStatus",
+          "rawConcurrentConsumedUncertaintyHasOneWinnerAcrossRetentionClock",
+          "ordinaryReplayReleaseRequiresAcceptedDeclarationAndAuthenticAttempt",
+          "unreachedDeclaringSummaryCannotRepeatWithCallerOrdinalSequenceOrClock",
+          "terminalRawBeforeImageScopeAndCompleteClassificationCannotBeForged",
+          "rawTerminalReceiptCannotCommitWithoutCompleteExactSummaries",
+          "terminalCrossMonthClockCannotEvadeActualAttemptReceiptIdentity"
+        ],
+        "missingOriginalMethods": [],
+        "newMethods": [],
+        "inspection": "All original method names and assertion inventory inspected. Normalized lexical body comparison found zero differences after excluding comments/whitespace/braces/parentheses and joining adjacent Java string fragments; this is a formatter preservation check, not a Java semantic equivalence theorem."
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+        "priorMethodCount": 30,
+        "currentMethodCount": 36,
+        "originalMethods": [
+          "auditAndDispatchStateCommitOrRollbackTogetherAndRequireTransaction",
+          "releaseUsageAndRevocationAreIdempotentImmutableScopedMetadata",
+          "unreachedDeclarationHasOnlyOneTerminalNotUsedWithoutRelease",
+          "concurrentDuplicateWritersProduceOneRelease",
+          "actualJavaBootstrapHealthSchedulerAndPrunerManageAuditLifecycle",
+          "leastWriterCanRecordUsageButCannotRewriteOrPrunePartitions",
+          "consumedWithoutDecisionIsHonestUnlinkedUncertaintyNeverUnreached",
+          "consumedScopeRequiresActualAdmissionDeclarationFenceAndAckLossEvidence",
+          "committedResolutionCannotBeRelabelledNoDecisionAndLateUnknownPreservesPositive",
+          "mixedKnownAndUnknownReplayUsageKeepsSparseWireSeparateAndRejectsAckWithoutEvidence",
+          "concurrentConsumedUnknownWritersAreIdempotentAndCannotInventTwoSummaries",
+          "ordinaryGuidedReleaseRequiresConsumedDeclarationMaterializationAndFence",
+          "terminalNoDecisionCannotAcquireContradictoryLateRelease",
+          "rawAndRecorderWritersShareOwnerThenEventOrderWithoutDeadlock",
+          "authenticUnreachedReferenceHasNoInventedOrdinalSequenceOrPlan",
+          "positiveReplayAbsenceCommitsOnlyWithWinningNoSendTransition",
+          "readEntryAndScopeAreDurableIdempotentAndCannotCertifyMissingDecisionAsUnused",
+          "noSendReceiptAuditAndClosureRollbackTogetherWithoutGrantingRetry",
+          "emptyCompletedNoSendReceiptStillRequiresActualOwnedClosure",
+          "futureEvidencePartitionsKeepDeferredAndDirectTruncateGuards",
+          "sameDeclarationCanHaveSeparateRealConsumedCoordinatesWithoutFalseUnused",
+          "terminalWinnerClassifiesExactUnsettledNoReadAndPossibleReadDeclarations",
+          "terminalReceiptRequiresExactActualWinnerCodeTimeAndPhysicalTransaction",
+          "terminalSettlementPreservesActualLinkedPositiveAndHasNoRetryAuthority",
+          "terminalCutRejectsLaterReadReleaseDispatchAndReceiptOnlyRequest",
+          "terminalReceiptOwnerHistoryAndSummariesRollbackTogether",
+          "terminalSavepointReceiptOrWinnerWritesAreExplicitlyProhibited",
+          "waitedTerminalCutUsesFreshCommittedReadEntryInsteadOfStaleNoReadView",
+          "ordinaryRuntimeWriterCanSettleButCannotAlterOrTruncateTerminalEvidence",
+          "terminalReceiptAndUnlinkedSummaryExpireInTheSameRetentionMonth"
+        ],
+        "missingOriginalMethods": [],
+        "newMethods": [
+          "actualProductionPartitionPublishesAllGuardsAtomicallyWithOrWithoutOuterTransaction",
+          "committedTerminalCutAllowsLaterGenuineEvidenceMetadataWithoutChangingItsWinner",
+          "earlyConstraintFlushCannotPermitLaterTerminalCauseTimeOrSnapshotMismatch",
+          "earlyFlushCannotHideLaterSubtransactionWinnerVersion",
+          "productionExistingLeafRepairIsAtomicIdempotentAndDoesNotNeedDefaultOrMutation",
+          "productionPartitionFailureRollsBackNewAttachmentAndAllApplicableGuards"
+        ],
+        "inspection": "All original method names and assertion inventory inspected. Normalized lexical body comparison found zero differences after excluding comments/whitespace/braces/parentheses and joining adjacent Java string fragments; this is a formatter preservation check, not a Java semantic equivalence theorem."
+      }
+    ],
+    "originalDMethods": 53,
+    "currentDMethods": 59,
+    "currentDMigrationMethods": 23,
+    "currentDRecorderMethods": 36,
+    "currentDExecutedXmlCases": 59,
+    "currentDFailures": 1,
+    "all53MethodsRetained": true,
+    "all53MethodsPassed": false,
+    "allSixNewMethodsRootPassed": true,
+    "baselineAndPriorCaseMultiplicity": [
+      {
+        "archive": "docs/qa/evidence/STUDIO-OBS-007/root-approved-behavior-gate-3",
+        "priorExecuted": 143,
+        "priorDistinctLabels": 139,
+        "allExecutedLabelMultiplicitiesRetained": true,
+        "meansAllCurrentCasesPassed": false,
+        "classes": [
+          {
+            "class": "com.citi.put.checks.studio.dispatch.DispatcherIT",
+            "priorExecuted": 26,
+            "priorDistinctLabels": 26,
+            "currentExecuted": 26,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "afde71ef60126f2402e9eb1f47d62d9bbe13c9cc2d06d896221779a069d44ab1",
+            "currentXmlSha256": "4e6739727d2d7ee808b2c97dee7da1fbca9a817691ababd7d8f0921109cbf8db"
+          },
+          {
+            "class": "com.citi.put.checks.studio.dispatch.StudioDispatcherFailureIT",
+            "priorExecuted": 15,
+            "priorDistinctLabels": 11,
+            "currentExecuted": 15,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "67cd49b8b6e09291396a1f11e97e3537ed838f0be94e97d64b3e149992c081b0",
+            "currentXmlSha256": "a17b22cae35959d0e590069bc77b0b6decd14eeeb540837723d2421fbd660671"
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+            "priorExecuted": 20,
+            "priorDistinctLabels": 20,
+            "currentExecuted": 23,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "715d7c563c64a068c2b2fb7f1ad3cad8d8bb65d891fef67b916209986e90ab53",
+            "currentXmlSha256": "7fc62812bb885f1f98321f1075991288bcda30faa77cae46e0944557766c2551"
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.publication.SecretAuditLifecycleIT",
+            "priorExecuted": 7,
+            "priorDistinctLabels": 7,
+            "currentExecuted": 7,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "40899f83cc98fc1fa9beb91bd8da0cc14d1a81ccb3f77b141da120aa4abda981",
+            "currentXmlSha256": "74b42e1ea605ba3343dfbcf80a75feb174fd550f009e9397e4546950b0837e58"
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+            "priorExecuted": 21,
+            "priorDistinctLabels": 21,
+            "currentExecuted": 36,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "a6ca8e760744854454c2b09633f230efb82a2260d01daf5aa79e3cd6a2fbdb62",
+            "currentXmlSha256": "362ab5eed163e1466b1a7eadb1aef38288a123ff0da6fb2e04d2c9724a0aa10e"
+          },
+          {
+            "class": "com.citi.put.checks.studio.recovery.RecoveryIT",
+            "priorExecuted": 25,
+            "priorDistinctLabels": 25,
+            "currentExecuted": 25,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "6f37a580c39708ee4ee1151969ebe53063f20293c0068170b075f041b6c355a9",
+            "currentXmlSha256": "ffbe0ae1d5197bffcaba0b0e95f1980ae2b82995f5af03b49f2259370a44885b"
+          },
+          {
+            "class": "com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest",
+            "priorExecuted": 22,
+            "priorDistinctLabels": 22,
+            "currentExecuted": 22,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "4239eed8cdc8e6485122fc118aae92bb7fb670b2381a127d2091a624a11d1bb4",
+            "currentXmlSha256": "6425609673c0f524eb0788d9a6b0e386d0267671c5089e7d312b44a107ce44a6"
+          },
+          {
+            "class": "com.citi.put.checks.studio.secrets.VaultResolutionDecisionTest",
+            "priorExecuted": 5,
+            "priorDistinctLabels": 5,
+            "currentExecuted": 5,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "75caa8ad0f36bfd2abbee1874169bfe78b2e4a282fc1ac4d9377be090094b5fb",
+            "currentXmlSha256": "57b657d2afb538f01dc3747c26fe7eaef3ca851779804fff38e8e808938af483"
+          },
+          {
+            "class": "com.citi.put.checks.studio.secrets.VaultStreamingReadTest",
+            "priorExecuted": 2,
+            "priorDistinctLabels": 2,
+            "currentExecuted": 3,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "78dec5164beab103c2ae2907125c41ec11882d4bfde93d3558e8581af1ce18a5",
+            "currentXmlSha256": "d66019675c2ee6ffd1e5e8f099c3885df874ee9a71de85b393b30ed6bb5868cb"
+          }
+        ]
+      },
+      {
+        "archive": "docs/qa/evidence/STUDIO-OBS-007/root-terminal-gate-4",
+        "priorExecuted": 186,
+        "priorDistinctLabels": 181,
+        "allExecutedLabelMultiplicitiesRetained": true,
+        "meansAllCurrentCasesPassed": false,
+        "classes": [
+          {
+            "class": "com.citi.put.checks.studio.dispatch.DispatcherIT",
+            "priorExecuted": 26,
+            "priorDistinctLabels": 26,
+            "currentExecuted": 26,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "cad4dc472ee9731f74223f3b7df3a3a9ba31f84bc5331c60a4d7ac6d47999ed9",
+            "currentXmlSha256": "4e6739727d2d7ee808b2c97dee7da1fbca9a817691ababd7d8f0921109cbf8db"
+          },
+          {
+            "class": "com.citi.put.checks.studio.dispatch.ObservedTerminalSettlementIT",
+            "priorExecuted": 20,
+            "priorDistinctLabels": 19,
+            "currentExecuted": 20,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "17d4c3ffc56ee6bcdef94e96b5c5b3916c9f99d3b66c4ec975c013a6033a1d7a",
+            "currentXmlSha256": "56eb74ff6ccae15ab69f5b1012712f6a062e54bcdb40a03908b72ea9c759cc0b"
+          },
+          {
+            "class": "com.citi.put.checks.studio.dispatch.StudioDispatcherFailureIT",
+            "priorExecuted": 15,
+            "priorDistinctLabels": 11,
+            "currentExecuted": 15,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "b3b8a5a4dc7be858d89aaf143cb1ded098673b1cf1d61482d97495539ead06c5",
+            "currentXmlSha256": "a17b22cae35959d0e590069bc77b0b6decd14eeeb540837723d2421fbd660671"
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+            "priorExecuted": 23,
+            "priorDistinctLabels": 23,
+            "currentExecuted": 23,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "e934c1b8cac8869a71cfc1d88835d3aca8055ae030d207c13f9d249f982739d7",
+            "currentXmlSha256": "7fc62812bb885f1f98321f1075991288bcda30faa77cae46e0944557766c2551"
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.publication.ObservedReadEntryProtocolIT",
+            "priorExecuted": 11,
+            "priorDistinctLabels": 11,
+            "currentExecuted": 11,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "27957c6a723472e4e7b7f9ce3f73fa3c2b4f087e0e4fde91ef5add1df55cce97",
+            "currentXmlSha256": "b92b08f978201a6c2afb2d5ad5635e76a19114b159673f834abc1a90535f1655"
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.publication.SecretAuditLifecycleIT",
+            "priorExecuted": 7,
+            "priorDistinctLabels": 7,
+            "currentExecuted": 7,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "67be82759735d5edfb5b5ca49d1a85cdbb5311e847cd198efcb441c46fd61a3f",
+            "currentXmlSha256": "74b42e1ea605ba3343dfbcf80a75feb174fd550f009e9397e4546950b0837e58"
+          },
+          {
+            "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+            "priorExecuted": 30,
+            "priorDistinctLabels": 30,
+            "currentExecuted": 36,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "8de00b98768b7a6be6e2a140939744ded320b638b0d0a84a76012568a33ffd31",
+            "currentXmlSha256": "362ab5eed163e1466b1a7eadb1aef38288a123ff0da6fb2e04d2c9724a0aa10e"
+          },
+          {
+            "class": "com.citi.put.checks.studio.recovery.RecoveryIT",
+            "priorExecuted": 25,
+            "priorDistinctLabels": 25,
+            "currentExecuted": 25,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "d8ba42f7430dd9ef07aaa8db0433d73c9e968671295bc3397c371c438611dc35",
+            "currentXmlSha256": "ffbe0ae1d5197bffcaba0b0e95f1980ae2b82995f5af03b49f2259370a44885b"
+          },
+          {
+            "class": "com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest",
+            "priorExecuted": 22,
+            "priorDistinctLabels": 22,
+            "currentExecuted": 22,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "e629787eec20a8e37e9910c7b098e6cbd7735463e14b738606508892c78bc818",
+            "currentXmlSha256": "6425609673c0f524eb0788d9a6b0e386d0267671c5089e7d312b44a107ce44a6"
+          },
+          {
+            "class": "com.citi.put.checks.studio.secrets.VaultResolutionDecisionTest",
+            "priorExecuted": 5,
+            "priorDistinctLabels": 5,
+            "currentExecuted": 5,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "e11b7f01c3b0e81a4b032c237e1c95389ffcfcd13b02130621aa8246327fe12c",
+            "currentXmlSha256": "57b657d2afb538f01dc3747c26fe7eaef3ca851779804fff38e8e808938af483"
+          },
+          {
+            "class": "com.citi.put.checks.studio.secrets.VaultStreamingReadTest",
+            "priorExecuted": 2,
+            "priorDistinctLabels": 2,
+            "currentExecuted": 3,
+            "missingMultiplicities": {},
+            "priorXmlSha256": "75f36334a4bfb1346f60eb3eeea5193f0ec9cac29736cccf0356d450fd9c750f",
+            "currentXmlSha256": "d66019675c2ee6ffd1e5e8f099c3885df874ee9a71de85b393b30ed6bb5868cb"
+          }
+        ]
+      }
+    ],
+    "all33HistoricalMigrationsUnchanged": true,
+    "storyStatus": "InProgress",
+    "phase": "develop",
+    "all19Completion": false
+  },
+  "rootGateReaudit": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1",
+    "gradleOwner": "Root only; reviewer never invoked Gradle",
+    "sessionReportedByUser": 52200,
+    "status": "TERMINAL_FAIL",
+    "resultSha256": "086c052466d081b00b58aa55888e0d7e6213e33c594b8ca3085852eb9c9bfa0f",
+    "logSha256": "43c33165905b80a362f81f137763726fd61c4c4dbe73cfa32abb3066b2d5f1f3",
+    "gradleExitCode": 1,
+    "tests": 264,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "passedCases": 263,
+    "strictPass": false,
+    "finishedAt": "2026-10-10T12:11:48.719532+00:00",
+    "selectorsMatchInvocation": true,
+    "all17ArchivedXmlMaterialized": true,
+    "xmlSummaries": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.dispatch.DispatcherIT.xml",
+        "sha256": "4e6739727d2d7ee808b2c97dee7da1fbca9a817691ababd7d8f0921109cbf8db",
+        "class": "com.citi.put.checks.studio.dispatch.DispatcherIT",
+        "tests": 26,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:06:57",
+        "caseMultiplicities": {
+          "plainDraftVariablesAreSnapshottedAtAcceptanceWithoutUsingVault()": 1,
+          "anAttemptIsNeverReusedAcrossAttempts()": 1,
+          "anApiProfileContextNeverClaimsAQueuedRow()": 1,
+          "theDispatchSchedulerExistsOnlyOnTheWorkerProfile()": 1,
+          "aRevokedAuthorizationAtDispatchIsTerminalWithAnExplicitCodeAndNoSend()": 1,
+          "aPassClaimIsBoundedByItsLimitAndTakesTheOldestClaimableRowsFirst()": 1,
+          "theClaimIsOneConditionalStatementAndASecondClaimOfAClaimedRowUpdatesNothing()": 1,
+          "dispatchingAndAFreshAttemptAreCommittedBeforeTheSend()": 1,
+          "theTwoDispatcherAssignedCodesAreDisjointFromTheReaperOwnedOnes()": 1,
+          "asecondDispatchPassDoesNotPickUpADispatchingRow()": 1,
+          "aVaultOutageRequeuesTheClaimWithoutIssuingAnAttemptOrMislabelingTheReference()": 1,
+          "anAmbiguousOutcomeIsNeverPermissionToResendAndLeavesTheRowDispatching()": 1,
+          "twoDispatchersRacingOneQueuedRowYieldExactlyOneClaim()": 1,
+          "aRowA429ReturnedToTheQueueIsNotReclaimedWithinTheSamePass()": 1,
+          "twoDispatchersDrainingOneBacklogClaimAndDispatchEachRowExactlyOnce()": 1,
+          "a429PastThePendingDeadlineIsTerminalDispatchFailed()": 1,
+          "theDispatchedPolicyIdentityIsRecordedOnTheExecution()": 1,
+          "aPassNeverClaimsALiveLeaseOrARowItWasToldToExclude()": 1,
+          "aDefinite429ReturnsTheRowToTheQueueWithinThePendingDeadline()": 1,
+          "aPassClaimSkipsARowAnotherTransactionHoldsInsteadOfWaitingForIt()": 1,
+          "anExpiredLeaseOnAQueuedRowIsReclaimableAndALiveOneIsNot()": 1,
+          "theTotalRuntimeBudgetIsTheServersAndNotTheRevisionsStepTimeout()": 1,
+          "aVanishedReferenceAtDispatchIsTerminalWithItsOwnCode()": 1,
+          "dispatchSendsTheExactRevisionArtifactAndHashSnapshottedAtAcceptance()": 1,
+          "noResolvedReferenceValueIsEverPersistedOrLogged()": 1,
+          "theKillSwitchClosesQueuedWorkIdempotentlyAndDoesNotResurrectIt()": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.dispatch.ObservedTerminalSettlementIT.xml",
+        "sha256": "56eb74ff6ccae15ab69f5b1012712f6a062e54bcdb40a03908b72ea9c759cc0b",
+        "class": "com.citi.put.checks.studio.dispatch.ObservedTerminalSettlementIT",
+        "tests": 20,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:07:04",
+        "caseMultiplicities": {
+          "realDispatchingCancelIsRequestOnlyAndKillSwitchCannotCloseIt()": 1,
+          "[1] position=queued": 2,
+          "[2] position=live-claimed": 1,
+          "[3] position=expired-claimed": 1,
+          "[4] position=marker-before-call": 1,
+          "[5] position=read-before-decision": 1,
+          "[1] entrypoint=cancel": 1,
+          "[2] entrypoint=close": 1,
+          "[3] entrypoint=reaper": 1,
+          "[4] entrypoint=kill-switch": 1,
+          "[1] possible=false": 1,
+          "[2] possible=true": 1,
+          "missingObservedRuntimeCannotFallThroughToUntrackedLegacyValueResolver()": 1,
+          "[2] position=marker-before-call": 1,
+          "[3] position=read-before-decision": 1,
+          "waitedForCommittedEntryWriterGetsFreshPossibleReadClassificationAtRealCancelCut()": 1,
+          "[1] sink=receipt": 1,
+          "[2] sink=audit": 1,
+          "actualNestedSavepointCannotEstablishACommittableTerminalWinnerVersion()": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.dispatch.StudioDispatcherFailureIT.xml",
+        "sha256": "a17b22cae35959d0e590069bc77b0b6decd14eeeb540837723d2421fbd660671",
+        "class": "com.citi.put.checks.studio.dispatch.StudioDispatcherFailureIT",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:07:45",
+        "caseMultiplicities": {
+          "[1] outage=false": 2,
+          "[2] outage=true": 2,
+          "[1] change=revoked": 1,
+          "[2] change=cancel-flag": 1,
+          "[3] change=cancel-winner": 1,
+          "[4] change=different-owner": 1,
+          "[1] change=expired": 1,
+          "[2] change=different-owner": 1,
+          "[3] change=different-attempt": 1,
+          "[1] winner=cancel": 2,
+          "[2] winner=reaper": 2
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest.xml",
+        "sha256": "a84feffa4b99fd8eca9f4649055d5bfd54f95f55e4733932756eb67db3ebd831",
+        "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:08:15",
+        "caseMultiplicities": {
+          "actualProductionHttpsDefaultFifteenSecondBoundIncludesTheResponseBody()": 1,
+          "[1] status=200": 1,
+          "[2] status=503": 1,
+          "guidedPublisherUsesOwnedBytesAndErasesBothBuffersAfterAckAndLostAck()": 1,
+          "actualProductionHttpsInterruptionClosesPartialResponseAndErasesOwnedBuffers()": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+        "sha256": "7fc62812bb885f1f98321f1075991288bcda30faa77cae46e0944557766c2551",
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+        "tests": 23,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:08:32",
+        "caseMultiplicities": {
+          "concurrentRetryRefreshersHaveExactlyOneWinner()": 1,
+          "definiteRefusalAllowsOnlyOneOwnedFreshAttemptAndKeepsAcceptedIdentities()": 1,
+          "freshAndBothStagedCutoverOrdersReachV34WithoutChangingOrdinaryCapability()": 1,
+          "scopedReleaseUsageRetryAndAppendOnlyRowsNeverContainTheCanary()": 1,
+          "terminalRawBeforeImageScopeAndCompleteClassificationCannotBeForged()": 1,
+          "exactV3ProfileAccountFreeScopeAndObservationCountsAreClosed()": 1,
+          "crossMonthUsageAndLiveRecheckExpireWithReleaseWhileUnlinkedUsageKeepsOwnMonth()": 1,
+          "unreachedDeclaringSummaryCannotRepeatWithCallerOrdinalSequenceOrClock()": 1,
+          "consumedAckLossIsEvidenceBoundAndMissingMaterializationCannotBecomeUnused()": 1,
+          "terminalCrossMonthClockCannotEvadeActualAttemptReceiptIdentity()": 1,
+          "unreachedNotUsedHasNoFabricatedResolutionAndRejectsOtherNullableVariants()": 1,
+          "ordinaryReplayReleaseRequiresAcceptedDeclarationAndAuthenticAttempt()": 1,
+          "realNoSendOutageDecisionGrantsDifferentAuthorityAndCannotBeFabricated()": 1,
+          "guardsFailLoudlyOnAwaitingAuthOrObservedBindingRows()": 1,
+          "additiveStoredSecretLengthCodeKeepsEveryPriorTerminalValueAndRefusesUnknown()": 1,
+          "rawTerminalReceiptCannotCommitWithoutCompleteExactSummaries()": 1,
+          "liveRecheckIsUniqueAndPreservesOneTerminalUsageAndWriteOnceRevocation()": 1,
+          "ordinaryWriterCannotAlterOrDropRetentionPartitions()": 1,
+          "consumedNoDecisionRequiresAuthenticAdmissionAndKeepsNullResolutionHonest()": 1,
+          "rawConcurrentConsumedUncertaintyHasOneWinnerAcrossRetentionClock()": 1,
+          "concurrentUsageSummariesHaveExactlyOneWinner()": 1,
+          "replayUsageUsesClosedCodesAndTheActualExecutionScope()": 1,
+          "releasedReplayUncertaintyRequiresRealScopedReleaseAndNeverFakeAckStatus()": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.guided.publication.ObservedReadEntryProtocolIT.xml",
+        "sha256": "b92b08f978201a6c2afb2d5ad5635e76a19114b159673f834abc1a90535f1655",
+        "class": "com.citi.put.checks.studio.guided.publication.ObservedReadEntryProtocolIT",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:09:09",
+        "caseMultiplicities": {
+          "markerRollbackPreventsPhysicalProviderEntry()": 1,
+          "[1] oldReadOccurred=false": 1,
+          "[2] oldReadOccurred=true": 1,
+          "[1] field=attemptId": 1,
+          "[2] field=revisionId": 1,
+          "[3] field=csiId": 1,
+          "[4] field=environment": 1,
+          "unsupportedCustomResolverFailsClosedBeforeLegacyValueMethodOrMarker()": 1,
+          "actualProviderObservesCommittedScopedEntryBeforeItsOnlyValueRead()": 1,
+          "externalCallerTransactionCannotReadThroughItsUncommittedMarker()": 1,
+          "noopObserverCannotSupplyAnUncommittedOrMissingEntry()": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.guided.publication.ObservedResolverProcessCrashIT.xml",
+        "sha256": "dcb3d0a64a12c05829d1554ec602dd55925ac7b856f3293cb1c55023e1a97a15",
+        "class": "com.citi.put.checks.studio.guided.publication.ObservedResolverProcessCrashIT",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:09:27",
+        "caseMultiplicities": {
+          "[1] cut=BEFORE_MARKER": 1,
+          "[2] cut=COMMITTED_BEFORE_READ": 1,
+          "[3] cut=READ_BEFORE_DECISION": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.guided.publication.SecretAuditLifecycleIT.xml",
+        "sha256": "74b42e1ea605ba3343dfbcf80a75feb174fd550f009e9397e4546950b0837e58",
+        "class": "com.citi.put.checks.studio.guided.publication.SecretAuditLifecycleIT",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:09:35",
+        "caseMultiplicities": {
+          "[1] rollback=false": 1,
+          "[2] rollback=true": 1,
+          "actualZeroSendOutageDecisionRetainsDistinctRetryAuthorityAndRefusedUsage()": 1,
+          "existingPositiveUsageSurvivesLaterTerminalOwnerUncertainty()": 1,
+          "actualReaperCloseWritesOneUnknownSummaryWithoutInventingChildEffects()": 1,
+          "authoritativeNoAdmissionRefusalSettlesExactAttemptBeforeRetry()": 1,
+          "terminalHistoryLedgerAndUnknownAuditRollbackTogether()": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.guided.secret.LoginRequiredDetectionTest.xml",
+        "sha256": "90b6d34ae4c97bcce0e8788070f1e64bdf7cc78e0987e19c695ee6fa83aa76df",
+        "class": "com.citi.put.checks.studio.guided.secret.LoginRequiredDetectionTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:09:48",
+        "caseMultiplicities": {
+          "trustedStructuralSignatureUsesNoLocalizedTextAndRequiresVisibleActionableButton()": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.guided.secret.SecretUseAuditIT.xml",
+        "sha256": "362ab5eed163e1466b1a7eadb1aef38288a123ff0da6fb2e04d2c9724a0aa10e",
+        "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+        "tests": 36,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:09:48",
+        "caseMultiplicities": {
+          "concurrentConsumedUnknownWritersAreIdempotentAndCannotInventTwoSummaries()": 1,
+          "productionExistingLeafRepairIsAtomicIdempotentAndDoesNotNeedDefaultOrMutation()": 1,
+          "ordinaryGuidedReleaseRequiresConsumedDeclarationMaterializationAndFence()": 1,
+          "productionPartitionFailureRollsBackNewAttachmentAndAllApplicableGuards()": 1,
+          "terminalReceiptOwnerHistoryAndSummariesRollbackTogether()": 1,
+          "earlyConstraintFlushCannotPermitLaterTerminalCauseTimeOrSnapshotMismatch()": 1,
+          "committedTerminalCutAllowsLaterGenuineEvidenceMetadataWithoutChangingItsWinner()": 1,
+          "leastWriterCanRecordUsageButCannotRewriteOrPrunePartitions()": 1,
+          "concurrentDuplicateWritersProduceOneRelease()": 1,
+          "waitedTerminalCutUsesFreshCommittedReadEntryInsteadOfStaleNoReadView()": 1,
+          "readEntryAndScopeAreDurableIdempotentAndCannotCertifyMissingDecisionAsUnused()": 1,
+          "consumedWithoutDecisionIsHonestUnlinkedUncertaintyNeverUnreached()": 1,
+          "committedResolutionCannotBeRelabelledNoDecisionAndLateUnknownPreservesPositive()": 1,
+          "emptyCompletedNoSendReceiptStillRequiresActualOwnedClosure()": 1,
+          "actualJavaBootstrapHealthSchedulerAndPrunerManageAuditLifecycle()": 1,
+          "earlyFlushCannotHideLaterSubtransactionWinnerVersion()": 1,
+          "mixedKnownAndUnknownReplayUsageKeepsSparseWireSeparateAndRejectsAckWithoutEvidence()": 1,
+          "terminalSettlementPreservesActualLinkedPositiveAndHasNoRetryAuthority()": 1,
+          "terminalCutRejectsLaterReadReleaseDispatchAndReceiptOnlyRequest()": 1,
+          "rawAndRecorderWritersShareOwnerThenEventOrderWithoutDeadlock()": 1,
+          "terminalWinnerClassifiesExactUnsettledNoReadAndPossibleReadDeclarations()": 1,
+          "terminalNoDecisionCannotAcquireContradictoryLateRelease()": 1,
+          "terminalSavepointReceiptOrWinnerWritesAreExplicitlyProhibited()": 1,
+          "positiveReplayAbsenceCommitsOnlyWithWinningNoSendTransition()": 1,
+          "sameDeclarationCanHaveSeparateRealConsumedCoordinatesWithoutFalseUnused()": 1,
+          "authenticUnreachedReferenceHasNoInventedOrdinalSequenceOrPlan()": 1,
+          "actualProductionPartitionPublishesAllGuardsAtomicallyWithOrWithoutOuterTransaction()": 1,
+          "noSendReceiptAuditAndClosureRollbackTogetherWithoutGrantingRetry()": 1,
+          "terminalReceiptRequiresExactActualWinnerCodeTimeAndPhysicalTransaction()": 1,
+          "releaseUsageAndRevocationAreIdempotentImmutableScopedMetadata()": 1,
+          "terminalReceiptAndUnlinkedSummaryExpireInTheSameRetentionMonth()": 1,
+          "unreachedDeclarationHasOnlyOneTerminalNotUsedWithoutRelease()": 1,
+          "futureEvidencePartitionsKeepDeferredAndDirectTruncateGuards()": 1,
+          "auditAndDispatchStateCommitOrRollbackTogetherAndRequireTransaction()": 1,
+          "ordinaryRuntimeWriterCanSettleButCannotAlterOrTruncateTerminalEvidence()": 1,
+          "consumedScopeRequiresActualAdmissionDeclarationFenceAndAckLossEvidence()": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.guided.session.GuidedActionLedgerTest.xml",
+        "sha256": "f0f9f5a5bcc3d0c01875196de0bfe2cf8fc4b324c8f7d66ca2045d96631d6c6e",
+        "class": "com.citi.put.checks.studio.guided.session.GuidedActionLedgerTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:10:59",
+        "caseMultiplicities": {
+          "[1] cause=TARGET_CHANGED": 1,
+          "[2] cause=POLICY_DENIED": 1,
+          "[3] cause=TIMEOUT": 1,
+          "[4] cause=CANCELLED": 1,
+          "[5] cause=ACK_LOST": 1,
+          "uncertainReportStillRequiresConsumedCountNullAssertionAndOriginalOwner()": 1,
+          "[1] cause=OK": 1,
+          "[2] cause=PENDING": 1,
+          "[3] cause=ASSERTION_FAILED": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.guided.session.GuidedSessionIT.xml",
+        "sha256": "d91385643c806e686f209182c0597112cfcdc0966985df6df1e5a5d395c2aa68",
+        "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+        "tests": 30,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:11:00",
+        "caseMultiplicities": {
+          "accessIsolationRechecksPrincipalCsiAccountAndScope()": 1,
+          "canonicalUnicodeParityAndClosedSchema()": 1,
+          "clarificationSelectionAndPauseChangeRollBackTogether()": 1,
+          "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown()": 1,
+          "gatewayOverrunIsDurablyChargedAndStopsFurtherWork()": 1,
+          "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer()": 1,
+          "expiryCannotBeExtendedAndTrustedReaperRevokes()": 1,
+          "clarificationIsBoundToGenerationChoiceAndOriginalDeadline()": 1,
+          "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch()": 1,
+          "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent()": 1,
+          "conflictingAdmissionAndUniqueCoordinatesFail()": 1,
+          "observationBudgetAndGenerationAreSharedAcrossActions()": 1,
+          "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery()": 1,
+          "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed()": 1,
+          "migrationPreservesExistingDataAndFreshInstallWorks()": 1,
+          "workerSubjectFenceAndLeaseAreIndependent()": 1,
+          "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge()": 1,
+          "entireSessionBudgetsAreReservedAndMissingUsageIsConservative()": 1,
+          "concurrentConflictingStartsHaveOneWinner()": 1,
+          "noStateCanPublishWithoutExactVerifier()": 1,
+          "successfulLedgerStillCannotPublishWithoutExactPlanVerifier()": 1,
+          "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence()": 1,
+          "lostAckNeverRetriesAndDelayedCallbackCannotRevive()": 1,
+          "evidenceReferencesAreScopedAndDoNotClaimReplay()": 1,
+          "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping()": 1,
+          "liveOwnerRenewalPreservesAdmittedAndDispatchedActions()": 1,
+          "actionBudgetAndFalseAssertionReportsFailClosed()": 1,
+          "concurrentIdenticalStartsAndChangedDigestAreDurable()": 1,
+          "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState()": 1,
+          "takeoverCannotReopenFinalizingAfterExecutedEffects()": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.internal.RunnerReportProjectionTest.xml",
+        "sha256": "b64c665f33fc5ffc5f61ca0874a1c178ed95b72ce1cd0fe919a7724226496af3",
+        "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+        "tests": 23,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:11:31",
+        "caseMultiplicities": {
+          "untouchedStepsAreFilledPendingFromTheRevisionSoEveryOriginalStepHasAnEntry()": 1,
+          "theRunnersChromiumBuildKeyProjectsOntoRuntimeChromium()": 1,
+          "runnerSequenceIsNeverTheRevision()": 1,
+          "aReportWithNoOriginCarriesNoReadingAndOneThatBreaksThatIsA400()": 1,
+          "stepLinesProjectTheirStepIndexAndRunLevelLinesStayNull()": 1,
+          "theApiRoundsOnceAtPersistence()": 1,
+          "evidenceStateProjectsOntoVideoStatusAndExpiredIsNeverReported()": 1,
+          "theManifestKeyIsRecordedAndNotPublishedOnTheSnapshot()": 1,
+          "theOneMappingASourceFixesIsTheParentEnforcedTotalTimeout()": 1,
+          "aBodyWithoutStepIndexIsAnOlderRunnerAndDeserializesToNull()": 1,
+          "theInstantIsBrowserStartedAtPlusAtMsAndNothingElse()": 1,
+          "levelIsLowerCaseOnTheWireAndUpperCaseOnTheSnapshot()": 1,
+          "withNoOriginAndNoReadingsTheProjectionYieldsNullInstantsRatherThanAPartialDerivation()": 1,
+          "theApiAppliesNoCalibrationAndNeverRebasesAgainstTheFirstReadingItHasSeen()": 1,
+          "anUnknownRunnerLevelIsA400()": 1,
+          "aStepStatusFromTheRunOutcomeVocabularyIsA400AndNeverASilentCoercion()": 1,
+          "runtimeVersionsIsNarrowedToTheSection46Subset()": 1,
+          "revocationUsesIndependentFactWithUserCancelPriorityAndNeverRewritesPassingOrFailingReports()": 1,
+          "zeroIsAPositionAndSurvivesTheProjectionDistinctlyFromNull()": 1,
+          "aLogStepIndexTheRevisionDoesNotHaveIsA400()": 1,
+          "originalTextComesFromTheRevisionAndIsNeverEchoedByTheRunner()": 1,
+          "outcomeResultBecomesStatusAndPendingAndRunningStayApiOwned()": 1,
+          "aReaperOwnedCodeIsNeverObtainableByARunnerThatNamesIt()": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.recovery.RecoveryIT.xml",
+        "sha256": "ffbe0ae1d5197bffcaba0b0e95f1980ae2b82995f5af03b49f2259370a44885b",
+        "class": "com.citi.put.checks.studio.recovery.RecoveryIT",
+        "tests": 25,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:11:41",
+        "caseMultiplicities": {
+          "aCrashBetweenCommittingTheAttemptAndSendingItEndsAsUnknownRatherThanBeingReplayed()": 1,
+          "bothChannelsDownThenRunnerLostResolvesThroughTheReaperWithNothingInvented()": 1,
+          "aManifestContradictingTheReaperWinsBeforeFinalizationAndLosesAfterIt()": 1,
+          "aManifestWhoseEmbeddedIdentityDisagreesWithItsKeyIsRefusedAndAppliesNothing()": 1,
+          "anUnreachableStoreIsNotMistakenForAnAbsentManifest()": 1,
+          "aProgressReportRacingAReaperFinalizationIsInterleavedInBothOrders()": 1,
+          "anUnreachableStoreIsNotMistakenForAnAbsentKey()": 1,
+          "restartAfterTheManifestWriteYieldsTheRealResultRatherThanStale()": 1,
+          "restartBeforeSendReclaimsAndDispatchesExactlyOnce()": 1,
+          "everyReaperCloseOfACancelledRowIsCancelledWhateverCodeThePathWouldName()": 1,
+          "restartAfterAdmissionWithNoStartedIsStartTimeoutAndNeverASecondDispatch()": 1,
+          "bothReapersAreIdempotentAndASecondPassBumpsNoRevision()": 1,
+          "theDispatchCounterCanReachTwoAndTheReconciledLedgerStateIsWhatStopsIt()": 1,
+          "theManifestKeyIsDerivedFromImmutableIdentityAndIsNeverListedForOrSupplied()": 1,
+          "restartDuringExecutionPastTheRunDeadlineIsStaleAndNeverASecondDispatchOrAReplay()": 1,
+          "aCancelledRunningRowPastItsRunDeadlineWaitsForTheCancelMarginAndEndsCancelled()": 1,
+          "aCancelledAdmittedRowPastItsStartDeadlineWaitsForTheCancelMarginAndEndsCancelled()": 1,
+          "heartbeatsNeverExtendTheRunDeadlineSoTheRunningReaperStillFires()": 1,
+          "theTwoPendingClosuresAreDistinguishableFromThePersistedStateNotFromALogLine()": 1,
+          "aStaleCallbackAfterAReaperFinalizationChangesNothingAndDispatchesNoRun()": 1,
+          "aLateReportCannotRegressTheReapersTerminalStateAndViceVersa()": 1,
+          "aReaperWriteIncrementsTheRevisionAndSoDoesAnEvidenceUpdate()": 1,
+          "aDispatchingRowIsNeverReclaimedWhateverItsLeaseSays()": 1,
+          "recoveryAppliesTheRealOutcomeFromTheBytesTheRunnersSerializerProduced()": 1,
+          "anOutcomeKnownWithEvidenceUnsettledIsSettledWithTheCheckOutcomePreserved()": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest.xml",
+        "sha256": "6425609673c0f524eb0788d9a6b0e386d0267671c5089e7d312b44a107ce44a6",
+        "class": "com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest",
+        "tests": 22,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:11:46",
+        "caseMultiplicities": {
+          "[1] mutation=nonsecret": 1,
+          "[2] mutation=wrong-step": 1,
+          "[3] mutation=wrong-slot": 1,
+          "[4] mutation=wrong-input": 1,
+          "[5] mutation=wrong-reference": 1,
+          "[6] mutation=duplicate-recipe": 1,
+          "[7] mutation=wrong-coordinate": 1,
+          "[1] mutation=missing": 1,
+          "[2] mutation=duplicate": 1,
+          "[3] mutation=backwards": 1,
+          "[4] mutation=nonfinite": 1,
+          "[5] mutation=negative": 1,
+          "[6] mutation=mismatched-duration": 1,
+          "[7] mutation=failure": 1,
+          "[8] mutation=started-only": 1,
+          "[9] mutation=failed": 1,
+          "[10] mutation=skipped": 1,
+          "[11] mutation=out-of-range": 1,
+          "[12] mutation=no-origin": 1,
+          "genuineFractionalCompletedPasswordReceiptSupportsOnlyItsFrozenSecret()": 1,
+          "[1] status=NOT_USED": 1,
+          "[2] status=REFUSED": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.secrets.VaultResolutionDecisionTest.xml",
+        "sha256": "57b657d2afb538f01dc3747c26fe7eaef3ca851779804fff38e8e808938af483",
+        "class": "com.citi.put.checks.studio.secrets.VaultResolutionDecisionTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:11:46",
+        "caseMultiplicities": {
+          "durableEntryCallbackRunsBeforeActualReadAndItsFailureDoesNotInventResolution()": 1,
+          "partialOutageRetainsOnlyActualSafeDecisionsAndErasesPreviouslyReadArray()": 1,
+          "deniedSecondReferenceNeverReadsItOrTheRemainingReference()": 1,
+          "oversizedSecondValueErasesBothArraysWithoutAReadForUnreachedReference()": 1,
+          "revocationAfterActualReadKeepsSafeVersionAndErasesAllDeliveredArrays()": 1
+        }
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.secrets.VaultStreamingReadTest.xml",
+        "sha256": "d66019675c2ee6ffd1e5e8f099c3885df874ee9a71de85b393b30ed6bb5868cb",
+        "class": "com.citi.put.checks.studio.secrets.VaultStreamingReadTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "timestamp": "2026-10-10T12:11:46",
+        "caseMultiplicities": {
+          "actualOversizedSuccessfulVaultBodyErasesOwnedLimitPlusOneBeforeAnyParserOrValueRelease()": 1,
+          "namesOnlyAuthorizationAndExistenceDoNotReadSecretAndLongStoredEntriesNeverTruncate()": 1,
+          "productionReadUsesParserCharBufferAndNeverBuildsASecretTree()": 1
+        }
+      }
+    ],
+    "failuresDetail": [
+      {
+        "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+        "case": "terminalReceiptRequiresExactActualWinnerCodeTimeAndPhysicalTransaction()",
+        "message": "org.assertj.core.error.AssertJMultipleFailuresError: \nMultiple Failures (1 failure)\n-- failure 1 --\nExpecting actual:\n  \"ERROR: terminal secret settlement authoritative history locator immutable\n  Where: PL/pgSQL function studio_observed_terminal_history_update_guard() line 15 at RAISE\"\nto contain:\n  \"exact top-transaction winner and locator\" \nat SecretUseAuditIT.commitRefusal(SecretUseAuditIT.java:1030)",
+        "xml": "docs/qa/evidence/STUDIO-OBS-007/root-peer-remediation-gate-1/TEST-com.citi.put.checks.studio.guided.secret.SecretUseAuditIT.xml"
+      }
+    ]
+  },
+  "realJvmCuts": {
+    "source": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java",
+    "rootCurrentXml": "TEST-com.citi.put.checks.studio.guided.publication.ObservedResolverProcessCrashIT.xml",
+    "executed": 3,
+    "failures": 0,
+    "cuts": [
+      {
+        "name": "BEFORE_MARKER",
+        "actualCommittedMarkers": 0,
+        "actualFixtureHttpReads": 0,
+        "summary": "NOT_USED"
+      },
+      {
+        "name": "COMMITTED_BEFORE_READ",
+        "actualCommittedMarkers": 1,
+        "actualFixtureHttpReads": 0,
+        "summary": "UNKNOWN_OUTCOME"
+      },
+      {
+        "name": "READ_BEFORE_DECISION",
+        "actualCommittedMarkers": 1,
+        "actualFixtureHttpReads": 1,
+        "summary": "UNKNOWN_OUTCOME"
+      }
+    ],
+    "proof": "Actual child JVM destroyForcibly, nonzero exit/no live PID, real provider HTTP counter and committed-marker-at-read check; actual PendingReaper closes, second reaper/close no-op/no extra read, no RELEASE/version/admission/seq/coordinates/sourceRef. Scratch fixture and child cleanup in finally.",
+    "limits": "Uses genuine resolver/recorder/read-entry/PendingReaper with disposable publishedRetry PostgreSQL and local HTTP FixtureProvider. Entitlement lambda is permissive; only PASS, not USER+PASS, no actual Core HTTP/controller guided/service crash or compiled browser/revocation/allSink join. No current deployed Vault claim or independent reviewer execution."
+  },
+  "independentExecution": {
+    "sqlProbesExecuted": 0,
+    "gradleRuns": 0,
+    "sharedDbReadOrWrite": false,
+    "sharedBuildOrTestResultWrites": false,
+    "binaryProbes": 0,
+    "compiledSnapshotRequested": false,
+    "reason": "Optional probes declined; bounded source/archive/XML review sufficient to report current actual root failure. No existing binary executed, so no stable-compiled-snapshot permission assumed. Root-executed selected tests are explicitly attributed. Generic scanner absent; manual source and targeted inventories used, no full automated scanner PASS.",
+    "writes": "Only d-terminal-independent-rereview.json and d-terminal-independent-rereview-source-hashes.json. No source/canonical/schema/role/permissions/generator/pin/task/oracle/status/lifecycle edits.",
+    "budget": "Shared whole-wave USD500 ceiling acknowledged; billing unavailable, no model spawn."
+  },
+  "remainingObligations": {
+    "strictCurrentGate": "Root author corrects exact old causal assertion under released ownership and reruns frozen selector gate; no PASS until fresh terminal result/XML and hashes.",
+    "coreHttpGuidedPublicationBrowserProvider": "Full current actual Core HTTP + scoped Vault USER+PASS + genuine guided learning\u2192publication\u2192two rotated compiled-browser replay chain, actual physical provider counters/keystrokes and current pin binding remain uncredited.",
+    "crashCancelRevocation": "Resolver JVM fixture cuts credited only at their real controlled positions. Actual guided/service/controller crash, compiled-child mid-effect kill, cancellation and revocation polling/rotation/races with genuine read/send/effect evidence remain separate.",
+    "privacyAllSink": "TRACE every actual appender and API/SSE/metrics/idempotency channels, literal and encoded allSink scans across applicable C6 controls, native/injected/supplementary provenance and discarded-boundary evidence remain uncredited by persistence cases.",
+    "all19SecurityAndWholeQa": "All19 completion false; all AC/security/C6 controls and full-wave QA still required. No selected-test or scoped Dara verdict awards whole AC/QA or closes story.",
+    "externalReleasePilotBenchmark": "External release/pilot/real-model benchmark, deployed policy/TLS/service authority and packaging/runtime gates remain separate. User-reported Docker privatehelper Linux-arm build failure, Node22/internal ED05 and independent runner Aria review were not executed or reassessed here."
+  },
+  "handoff": "Development-support CONCERNS: exact original TERM repairs supported, current strict264-case gate FAIL due preserved old assertion. Minimal test-only correction plus fresh root-owned gate is required. Original reports/counterexamples remain unchanged. No lifecycle transition authorized or performed."
+}

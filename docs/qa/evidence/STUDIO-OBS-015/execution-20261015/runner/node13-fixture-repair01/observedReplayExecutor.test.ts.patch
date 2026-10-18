@@ -1,0 +1,35 @@
+--- studio-runner/test/observedReplayExecutor.test.ts@Node13
++++ studio-runner/test/observedReplayExecutor.test.ts@repair01
+@@ -320,9 +320,10 @@
+ import type {ObservedAdapter} from '../src/run/observedReplayAdapter.js';
+ function ordinaryPasswordPreparation(prepare:(control:InvocationControl)=>Promise<void>,guardLive:()=>void=()=>undefined){
+   const original=required(fixture.basis.observations[0]).observation,observation={...structuredClone(original),schemaVersion:3,coverage:{...original.coverage,passwordControls:1}} as Observation;
+-  const stepId='00000000-0000-4000-8000-000000000901',guard:Guard={guardId:'password',origin:observation.origin,target:{kind:'passwordControl'}},action:ReplayAction={coordinate:{stepId,ordinal:0},guardId:'password',operation:{kind:'fill',value:{kind:'secretRef',sourceInputId:'password-reference'}}};
++  const stepId='00000000-0000-4000-8000-000000000901',guard:Guard={guardId:'g0',origin:observation.origin,target:{kind:'passwordControl'}},action:ReplayAction={coordinate:{stepId,ordinal:0},guardId:'g0',operation:{kind:'fill',value:{kind:'secretRef',sourceInputId:'password-reference'}}};
+   const message:Execute3={...frame(),steps:[{stepIndex:0,stepId,operations:[action]}],guards:[guard],bindings:[],transfers:[],inputs:[{inputId:'password-reference',stepId,kind:'secretRef',intendedSlot:'fill.value',referenceName:'PASS'}],secrets:{PASS:'preparation-private-canary'},secretOrigins:{PASS:[observation.origin]}};
+   const scoped:Scope={...scope,initialContext:{kind:'observedDocument',origin:observation.origin}},events:StepFinishedEvent[]=[];
++  validateObservedExecute(message,scoped); // Prove the declared parent before any asynchronous port fault.
+   let current:InvocationControl|undefined;const failures:unknown[]=[];const begins:MockInstance<InvocationControl['beginInvocation']>[]=[];
+   const observe=vi.fn(()=>Promise.resolve({observation,json:'',bytes:100,observationHash:'a'.repeat(64)})),preparePassword=vi.fn(()=>prepare(required(current))),fillPassword=vi.fn<NonNullable<ObservationSession['fillPassword']>>((_target,_origin,_allowed,_value,control)=>{control?.beginInvocation();return Promise.resolve();}),dispose=vi.fn(()=>Promise.resolve()),withhold=vi.fn(()=>Promise.resolve());
+   const observations:ObservationSession={observe,preparePassword,fillPassword,withhold,dispose,matches:()=>Promise.resolve(true)},handle={createObservationSession:()=>observations,observedBlankMatches:()=>Promise.resolve(false),observedNavigateBlank:()=>Promise.resolve()} as unknown as BrowserHandle;
+@@ -361,10 +362,17 @@
+     }finally{await h.adapter.dispose();expect(h.dispose).toHaveBeenCalledOnce();}
+   });
+   it.each(['cancel','deadline','authority'] as const)('preserves %s precedence while password preparation is held',async mode=>{
+-    vi.useFakeTimers();const entered=deferred<undefined>(),released=deferred<undefined>();let now=0,withdrawn=false;
+-    const h=ordinaryPasswordPreparation(async()=>{entered.resolve();await released.promise;throw new PasswordNoEffect('PASSWORD_TARGET_ABSENT');},()=>{if(withdrawn)throw new ObservedRefusal('AUTHORIZATION_EXPIRED');}),abort=new AbortController(),work=h.run({now:()=>now},abort.signal);
++    const entered=deferred<undefined>(),released=deferred<undefined>();let now=0,withdrawn=false;
++    const h=ordinaryPasswordPreparation(async()=>{entered.resolve();await released.promise;throw new PasswordNoEffect('PASSWORD_TARGET_ABSENT');},()=>{if(withdrawn)throw new ObservedRefusal('AUTHORIZATION_EXPIRED');}),abort=new AbortController();
++    vi.useFakeTimers();const work=h.run({now:()=>now},abort.signal);
++    // Observe immediately, without changing the original promise/rejection used below. A
++    // tagged rejection is a test failure, never successful preparation or a swallowed error.
++    const completion=work.then(value=>({kind:'completed',value})as const,(error:unknown)=>({kind:'rejected',error})as const);
+     try{
+-      await entered.promise;if(mode==='cancel')abort.abort();else if(mode==='deadline'){now=1001;await vi.advanceTimersByTimeAsync(1001);}else withdrawn=true;
++      const first=await Promise.race([entered.promise.then(()=>({kind:'entered'})as const),completion]);
++      if(first.kind==='rejected')throw first.error;
++      if(first.kind==='completed')throw Error('WORK_COMPLETED_BEFORE_PASSWORD_PREPARATION');
++      if(mode==='cancel')abort.abort();else if(mode==='deadline'){now=1001;await vi.advanceTimersByTimeAsync(1001);}else withdrawn=true;
+       released.resolve();await vi.advanceTimersByTimeAsync(0);const result=await work;expect(result.ok).toBe(false);expect(result.errorCode).toBe(mode==='cancel'?'CANCELLED':mode==='deadline'?'TIMEOUT':'AUTHORIZATION_EXPIRED');
+       expect(h.preparePassword).toHaveBeenCalledOnce();expect(h.observe).toHaveBeenCalledOnce();expect(h.fillPassword).not.toHaveBeenCalled();expect(required(h.begins[0])).not.toHaveBeenCalled();expect(h.dispose).toHaveBeenCalledOnce();expect(JSON.stringify({result,events:h.events})).not.toContain('preparation-private-canary');
+     }finally{released.resolve();await vi.advanceTimersByTimeAsync(0);vi.useRealTimers();}

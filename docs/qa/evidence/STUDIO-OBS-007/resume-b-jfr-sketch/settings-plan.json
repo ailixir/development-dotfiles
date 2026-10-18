@@ -1,0 +1,41 @@
+{
+  "allCurrentlyRegisteredEvents": "#enabled=false through exact FlightRecorder event registry; no Configuration/default profile",
+  "allowedEvents": {
+    "jdk.ExecutionSample": {
+      "enabled": true,
+      "period": "20 ms",
+      "stackTrace": true
+    },
+    "jdk.NativeMethodSample": {
+      "enabled": true,
+      "period": "20 ms",
+      "stackTrace": true
+    },
+    "jdk.JavaMonitorEnter": {
+      "enabled": true,
+      "threshold": "5 ms",
+      "stackTrace": true
+    },
+    "jdk.ThreadPark": {
+      "enabled": true,
+      "threshold": "5 ms",
+      "stackTrace": true
+    },
+    "jdk.ThreadCPULoad": {
+      "enabled": true,
+      "period": "20 ms",
+      "stackTrace": false
+    },
+    "jdk.GarbageCollection": {
+      "enabled": true,
+      "stackTrace": false
+    }
+  },
+  "duration": "30 s",
+  "maxAge": "30 s",
+  "maxSize": 33554432,
+  "toDisk": true,
+  "noOtherRecording": true,
+  "strictDumpSizeBytes": 33554432,
+  "privateMode": "0600"
+}

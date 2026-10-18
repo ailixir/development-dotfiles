@@ -1,0 +1,65 @@
+{
+  "scope": "Original C2 + concurrent cross-CSI positive using existing same-secret scoped case; fixture-only, production frozen.",
+  "case": "GuidedPublicationReplayIT.actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope",
+  "preservation": [
+    "37 cases remain; all other36 case bodies including original C5 and AC16 unchanged",
+    "Four existing positive scoped replays and all original unavailable/wrong-principal/foreign-read/audit/video/artifact/privacy negatives remain; first two successes become genuinely overlapping",
+    "No new browser flow, server, credential map, authority relaxation or concurrency-by-exit matrix",
+    "Original claim1s, stop2s, action/run/drain deadlines and ROOT+APP TRACE/all30 scans unchanged"
+  ],
+  "design": {
+    "staging": "Retain first learned/published scoped case while second distinct CSI/same-name-secret case is genuinely learned/published. Do not start first positive yet. At second iteration, run their two existing positives together; finish both original negative checks after restoring ordinary pool1. Later two scope axes keep their original sequential positives/negatives. An immutable fixture-only tuple carries test/scope/value/publication/own-read baseline, never exported.",
+    "capacity": "Add one explicitly named test-only pool-size startup parameter to existing ordinary parent generated loadConfig and ProcessBuilder; default remains1 for every existing caller. Stop/close idle original ordinary parent using existing process cleanup, start scoped parent2 before accepting either API execution, verify real runner.started poolSize2 from the existing original parent log. In finally restore parent1 with existing preserve-log restart. Existing startOrdinaryWorker(boolean) delegates to one overload default1; overload permits only1 or2 and sets fixture-only parent env setting consumed explicitly by generated loadConfig POOL_SIZE field. Child env allowlist remains production unchanged.",
+    "responseHold": "One case-local two-slot hold object with entered latches/shared release/handler-exited tracking and sticky failure. In existing /p3/login POST handler, after its real password equality and original P3Receipt append, capture hold locally, assign ordinal0/1, require accepted, signal entered, await shared release at most existing20s, and record exit in finally. This changes no response/body. No P6 fault/cut counters are reused. Hold armed only for selected pair; always release on every exit.",
+    "overlap": "Set expectation to A, API accept A and dispatch, wait first authentic successful POST held. Capture the exactly one direct compiled recorded-child descendant of exact ordinary parent (PID+start+parent+group identity via existing P6 helpers). Set expectation B, API accept/dispatch B, wait its held successful POST. Verify same A and exactly one new B child alive plus exact actual descendant trees. Two live accepted children and two held original responses establish overlap; no simultaneous-typing claim.",
+    "privacy": "Read each exact owned child actual ProcessHandle argv plus bounded /bin/ps eww command/environment into private transient bytes only, require allowlisted environment marker present so empty/unavailable env is not a clean result. Reuse C5CanaryStream with both values (30 variants); output only counts/booleans and wipe probe bytes/patterns in finally. No raw env/argv/file or parent/global process scan.",
+    "drain": "After two-child/held-response guards and private scan, send genuine SIGTERM to the exact parent using existing p6Signal. Observe original runner.draining inFlight2 in the scoped log interval, promptly release both holds, retain original PASSED/own receipt/read/audit/video checks. Require runner.drained completedtrue, no drain deadline/kill events, actual parent exit and each captured owned process gone. No deadline extension or forced-kill-as-graceful credit. Extend existing p6Signal fixed allowlist with TERM for this one exact parent signal; other existing signals unchanged.",
+    "events": "Use bounded read of only the existing ordinary parent log interval beginning before scoped pool2 startup. Parse native JSON events in memory; correlate exactly one run.values_wiped per expected execution/attempt/admission from genuine DB observed receipt, and require no ambiguity. Export no identifiers or log lines. No new logger/wire/SDK profiler or extra event producer. One fixed concurrentDrain boolean selects strict C2 drain grading. With false, no-receipt startup grades runner.started only; C6 receipt selection grades run.values_wiped only. Unrelated cleanup/start rows do not become C6 assertions.",
+    "cleanup": "Finally always release held HTTP handlers; wait their bounded exit; perform existing owned execution cleanup if failure; terminate/confirm exact scoped parent/tree as fallback without calling that graceful success; restart original parent1 before original negative cases or next test. Preserve original failure plus cleanup failures and sticky cleanupUnconfirmed if exact ownership cannot close. Clear case selection only after handlers exited. No default pool2 leakage."
+  },
+  "changedEmbeddedCode": "Only ordinary generated parent config startup value selection changes to use explicit fixture pool parameter. Eight existing Java textblock scripts remain unchanged unless exact implementation needs a documented tiny support change; no blanket identity claim until diff audited.",
+  "alternatives": [
+    {
+      "choice": "Scope-first two positives rather than secret C5 pair",
+      "reason": "Same existing two replay executions also prove distinct CSI/same secret ID, satisfying both original rows without additional flows."
+    },
+    {
+      "choice": "Authentic response holds instead of credential map",
+      "reason": "Existing singleton expectation rotates only after A has authenticated; held A and B responses prove overlap with original receipts."
+    },
+    {
+      "choice": "One joined graceful drain using same pair",
+      "reason": "Original parent already has SIGTERM->app.drain; completes original successes while covering active drain without another run."
+    },
+    {
+      "choice": "Existing process/log/stream helpers",
+      "reason": "Exact owned PID helpers and30-pattern matcher avoid new OS profiler or generic recorder."
+    }
+  ],
+  "priorExitCredit": "Recovered existing C11 parent-directed child kill: real parent wipe event and all364 SDK pins bound; no rerun or killed-child healthy-close/seal/heap claim. Root separately maps C6 failure/cancel.",
+  "qualification": "Await independent exact design GO before isolated authoring. Source review is not runtime acceptance. Root alone integrates/builds/runs original first+secret+existing C2 selectors.",
+  "baseSha256": "a3ebaffef9b692d42ab2c648ad9e1048a5ac59eabb49be31326ed5f64bb5c929",
+  "existingC6PidAddendum": {
+    "scope": "Only p8C6Run kind1/2, stored state.path=2 (ordinary); no new case or fault flow.",
+    "beforeCut": "After original first pending evidence, inventory exactly one actual direct compiled child of current ordinary parent plus its descendants using shared owned-PID helper. For cancel this precedes existing second pending probe and actual cut clock; no new work inside original250ms/2s cut interval.",
+    "afterCleanup": "After existing p3CleanupOwnedResources, assert each captured PID genuinely gone via p6AwaitProcesses; emit only ownedOrdinaryChildTreeGone boolean and count. Browser SDK close receipts remain separate; no inference from browser closure.",
+    "sourceMappingCorrection": "Parent initial message used path1 descriptively; actual p8C6Run constructor uses state.path=2 for kind<=2.",
+    "existingWipeProof": "Root recovered failure/cancel parent wipe through source-semantic comparison; direct PID proof is the only new observer in these helpers."
+  },
+  "peerDesignGo": {
+    "approved": true,
+    "requiredDetails": [
+      "Safe redacted toString on tuple retaining a test canary; do not assert tuples or process objects in failure messages",
+      "Log interval begins after old idle parent is confirmed gone and before pool2 startup",
+      "Probe overflow/failure/empty output/missing positive environment marker fail closed; zero hits alone is insufficient",
+      "Twenty-second HTTP hold is a fixture bound only, never extends/resets original30s step or any runtime/authority deadline",
+      "C6 stored path is2 for kind1/2; source correction retained"
+    ]
+  },
+  "currentC6WipeJoin": "Reuse the same bounded original parent-log reducer after existing cleanup, starting interval after positive control and before selected kind1/2 dispatch; match current immutable receipt request.executionId/attemptId/admissionId, with root admissionId equality. Export only parentValuesWipedObserved plus actual owned child/tree closure. No historical wipe joined to new PID.",
+  "complexitySize": {
+    "addedLines": 454,
+    "removedLines": 55,
+    "reason": "One fixture file; existing case staging and original negative reuse, finite held-response state, existing-parent event reduction and exact owned-process env/argv/closure checks. No generic framework or new event producer."
+  }
+}

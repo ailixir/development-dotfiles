@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "needId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "producerStepId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "consumers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "stepId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "argumentSlot": {
+            "enum": [
+              "fill.value",
+              "selectOption.value",
+              "assert.expected"
+            ]
+          }
+        },
+        "required": [
+          "stepId",
+          "argumentSlot"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 200
+    }
+  },
+  "required": [
+    "needId",
+    "producerStepId",
+    "consumers"
+  ]
+}

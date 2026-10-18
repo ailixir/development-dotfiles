@@ -1,0 +1,31 @@
+{
+  "status": "ORIGINAL_C5_FIX_EVIDENCE_CONFIRMED",
+  "closedReceiptSha256": "99822ce1eb18d2898d337cc8c17189a0fd9540da6c02e4083899b6c46806cb33",
+  "sourceReviewSha256": "abb00ab2effa3331cd46b14741c22bb08d762b7c8076c6eb6128a98c158adc73",
+  "compiledBindingSha256": "b3ac8977948a08e5d3187ed7f08f90ba3468c5f9de12608fc79ed60a32721dab",
+  "checks": {
+    "twoOriginalCasesFreshPass": true,
+    "exactRequiredCases": true,
+    "diagnosticOffAndFieldsAbsent": true,
+    "fullTraceAndAll30CleanClosed": true,
+    "privateValuesRemovedAndNoFailureBoundary": true,
+    "sourceAndCompiledPinsRemainCurrent": true,
+    "formattedSourceAndTestsRemainCurrent": true
+  },
+  "achieved": "Original nonsecret publication plus two ordinary fresh-value replays and original secret publication plus two ordinary fresh-value replays both pass, diagnostic off.",
+  "productionFix": "Finite original native validation plans now reach the three explicit replay validationBasis arrays, retaining their collection constraints, complete native preparation item, existing observation/node and ledger semantics, canonical checks and whole-original fallback.",
+  "privacyEncodedBytes": 468583235,
+  "claims": {
+    "backendCount": 41,
+    "maxSuccessfulBackend202Ms": 764.395667,
+    "lastSuccessfulBackend202Ms": 42.721292,
+    "backend202IsSdkAcknowledgement": false
+  },
+  "limits": [
+    "This confirms the original reproduced acceptance flow on current source; it is not a universal latency bound or exclusive CPU attribution.",
+    "All earlier failed original and supporting receipts remain historical evidence.",
+    "AC16 worker/non-worker dispatch proof and final development/independent QA/external gates remain distinct; no story lifecycle advancement."
+  ],
+  "sharedEdits": false,
+  "buildOrRuntimeExecuted": false
+}

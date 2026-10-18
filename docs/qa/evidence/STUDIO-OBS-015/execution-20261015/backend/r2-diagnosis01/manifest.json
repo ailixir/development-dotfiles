@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "author": "Dex-FIX (@dev)",
+  "date": "2026-10-16",
+  "input": "backend-r2-join-b1a-b3a-attempt01 guidedIncrementalTest 44/16/28 (+ default test lane via r2-default-diagnosis01/fix.patch)",
+  "creditReleased": false,
+  "rootCauses": [
+    {"id": "H1", "class": "test-harness", "status": "FIXED", "labels": ["confirm-long-wait", "confirm-cancel", "confirm-expire", "confirm-source-change", "confirm-recover", "confirm-owner-loss", "append-input", "deleted-consumers", "admitted-literal2", "pre-literal2", "same-pair-literal", "unused-declaration", "drift-plan-fail", "drift-first", "confirm-edit4", "confirm-race", "drift-auth", "drift-auth-pre", "before4at2", "equal4"], "summary": "CSI-123 daily model-token budget (OBS-014 AC-8) exhausted; per-case CSI isolation like P3/PFXSYNC/B1A"},
+    {"id": "H2", "class": "test", "status": "FIXED", "labels": ["confirm-prefix"], "summary": "plans.state read outside a transaction -> RUNTIME_INCOMPATIBLE"},
+    {"id": "H3", "class": "production", "status": "FIXED", "labels": ["drift2", "admitted-drift2"], "summary": "evidence read dropped the drifted prefix-request observation -> GuidedPlanBuilder.derive:489 EVIDENCE_MISMATCH"},
+    {"id": "H4", "class": "test-expectation", "status": "FIXED_NEEDS_QA_ACK", "labels": ["tail7"], "summary": "relearned unchanged last step has an equal snapshot hash by T0"},
+    {"id": "H5", "class": "test-expectation", "status": "FIXED_NEEDS_QA_ACK", "labels": ["empty"], "summary": "the existing empty-draft refusal is 409 RUNTIME_INCOMPATIBLE"},
+    {"id": "H6", "class": "production-runner-finding", "status": "OPEN", "labels": ["assert-fail"], "summary": "read captures raw text nodes, containsText uses innerText; verified by a standalone Chromium probe"},
+    {"id": "H7", "class": "ruling", "status": "OPEN", "labels": ["policy-prefix"], "summary": "AC-4 tally: the deliberately planted SIDE_EFFECT_DENIED is not declared (po-qa014 a1)"},
+    {"id": "H8", "class": "production-finding", "status": "OPEN_NEEDS_ARIA", "labels": ["confirm-source-change", "confirm-recover", "confirm-owner-loss", "append-input", "deleted-consumers", "admitted-literal2", "pre-literal2", "same-pair-literal", "unused-declaration", "drift-plan-fail", "drift-first", "confirm-edit4", "confirm-race", "drift-auth", "drift-auth-pre", "before4at2", "equal4"], "summary": "the stop of a naturally EXPIRED session times out at 15 s; teardown stays PENDING; the generation guard refuses every later restart"},
+    {"id": "H9", "class": "test-harness-guard", "status": "FIXED_NEEDS_QA_ACK", "labels": ["historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof", "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache"], "summary": "the generation guard required a video for the P6 reaper ERROR/STALE execution, which never settles"},
+    {"id": "H10", "class": "test-fixture", "status": "FIXED", "labels": ["historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof", "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache"], "summary": "jsonb ? operator in a bound JdbcTemplate statement; escaped as ??"},
+    {"id": "EE", "class": "harness-lifecycle", "status": "OPEN", "labels": ["executionError"], "summary": "Zonky afterTestClass context reload after DB stop, or the owned-observer zombie NoSuchElementException"}
+  ],
+  "files": [
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java", "kind": "production", "fix": "H3", "before": "8aa40c60582007a59ba406d47832bf30d06627cf227fc0c3ce942ab7d58b07df", "after": "ffb8ffd4fd87bf903337fdd32f92a96ac4a534003cbc828b61a5fbc10804e60d", "diff": "evidence-repository-h3.diff"},
+    {"path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java", "kind": "test", "fix": ["fix.patch", "H1", "H2", "H4", "H5", "H8-diagnostic", "H9"], "before": "4242ac27020814fe57355116a06ef1271b4a0c2f247d2847ea3c28888ec55b33", "afterDefaultLanePatch": "25f12ca218ccb50b2a9f282f38192b91d1dc9b61f3abf158b913ac3e8055c33e", "intermediate": ["7ff7af1dc579c5c9d93c8eceb0efe3bf354140e552c82ced7571c3a527fca970", "bb6b8b5cf0afb4b3fadd8f653c6d2eb054459d52c5eba58165dedc2258a5d058"], "after": "9d13eeb762f56dbe095b5540ff97d6e63169ec95c7a7dfa084036e7a1755c656", "diff": "replayit-4242ac27-to-final.diff", "defaultLanePatch": {"path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r2-default-diagnosis01/fix.patch", "sha256": "42d7e8bad06632868e3817f2b8b564988cfbe00ffad90c9a9340ad1fff742b35", "applied": "git apply -p0, unchanged"}},
+    {"path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java", "kind": "test", "fix": "H10", "before": "417e605d25ca8b68039b9aa4dafc07ec4390994bb58630766e9dd92bd5f7b359", "after": "ae407fefa0a428d7f73ce2791ab04ad277f79706255e75a3f68a6c2e5b77aa92", "diff": "legacyv20-fixture-h10.diff"}
+  ],
+  "runs": [
+    {"label": "backend-r2fix-inc-attempt01", "tasks": ["guidedIncrementalTest"], "counts": {"guidedIncrementalTest": [44, 24, 20]}, "sourceStable": true, "distStable": true},
+    {"label": "backend-r2fix-join-attempt02", "tasks": ["test --tests ReplayIT", "guidedIncrementalTest"], "counts": {"test": [44, 41, 3], "guidedIncrementalTest": [44, 24, 20]}, "sourceStable": true, "distStable": true},
+    {"label": "tap01", "credit": false, "scratchOnly": true, "purpose": "stopSender tap + open-generation columns; variants confirm-expire, insert4"},
+    {"label": "backend-r2fix-join-attempt03", "windowVerification": true, "tasks": ["test --tests AuthorityIT --tests ReplayIT", "guidedIncrementalTest"], "counts": {"test": [71, 68, 3], "authorityIT": [27, 27, 0], "replayITDefault": [44, 41, 3], "guidedIncrementalTest": [44, 24, 20]}, "sourceStable": true, "distStable": true, "note": "pre-H10 fixture; H10 bytes were present for about 1 minute mid-run and restored byte-exact before the end (disclosed)"},
+    {"label": "backend-r2fix-legacyv20-attempt01", "tasks": ["test --tests Order(1) + 2 legacy V20"], "counts": {"test": [4, 3, 1]}, "note": "both legacy tests PASS; executionError = singleton AfterAll audit"}
+  ]
+}

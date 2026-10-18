@@ -1,0 +1,108 @@
+{
+  "scope": "SOURCE_ONLY_CURRENT_DETACHED_TRANSLATION_PHASE_MAPPING_DESIGN",
+  "disposition": "GO_ISOLATED_MAPPING_CANDIDATE_AFTER_ROOT_REVIEW_NOT_RUNTIME_RELEASE",
+  "sourcePath": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+  "sourceSha256": "e9747ea62a00fc16dae73e29ce3145b6deefc29e399019ab8cfc978d9b389426",
+  "fixtureSha256": "be87add35fe121d214bd2ca5437b14f52c0434ce8409c252fa28e6239f1a217d",
+  "currentCompiledClassSha256": "4b3991d381708b713ca32b000d51e50a3acfcceb281d8be9560f5306dd1ff2d2",
+  "currentCallMethodDebugSha256": "b0878c415a03c3174d242f29d559261c01c48b9750df4dc2ff91cae39fce02a7",
+  "historicalDa7fMappingInvalid": true,
+  "exactMappings": [
+    {
+      "phase": 13,
+      "meaning": "RESERVE",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+      "method": "call",
+      "sourceFile": "GuidedTranslationService.java",
+      "exactDebugLine": 796,
+      "currentInvokeOffset": 130
+    },
+    {
+      "phase": 14,
+      "meaning": "SEND",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+      "method": "call",
+      "sourceFile": "GuidedTranslationService.java",
+      "exactDebugLine": 949,
+      "currentInvokeOffset": 290
+    },
+    {
+      "phase": 15,
+      "meaning": "APPLY",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+      "method": "call",
+      "sourceFile": "GuidedTranslationService.java",
+      "exactDebugLine": 984,
+      "currentInvokeOffset": 424
+    },
+    {
+      "phase": 16,
+      "meaning": "DUPLICATE",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+      "method": "call",
+      "sourceFile": "GuidedTranslationService.java",
+      "exactDebugLine": 932,
+      "currentInvokeOffset": 263
+    },
+    {
+      "phase": 17,
+      "meaning": "REJECT_ACCOUNTING",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+      "method": "call",
+      "sourceFile": "GuidedTranslationService.java",
+      "exactDebugLine": 1083,
+      "currentInvokeOffset": 504
+    },
+    {
+      "phase": 18,
+      "meaning": "LATE_ACCOUNTING",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+      "method": "call",
+      "sourceFile": "GuidedTranslationService.java",
+      "exactDebugLine": 1113,
+      "currentInvokeOffset": 540
+    },
+    {
+      "phase": 19,
+      "meaning": "PREP_CAPTURE",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+      "method": "call",
+      "sourceFile": "GuidedTranslationService.java",
+      "exactDebugLine": 774,
+      "currentInvokeOffset": 57
+    }
+  ],
+  "minimalCandidateScope": [
+    "Replace only existing six sourcePhase line literals with exact current values; retain corresponding codes/meanings13..18.",
+    "Add exact current .call line774\u219219 PREP_CAPTURE, expand existing blocker array19\u219220 and phase-range guard18\u219219; update fixed mapping comment. No sourceFamily allowlist changes because new capture is SAME already-supported immediate .call caller.",
+    "Same original selected frame/boundary traversal, fixed SourceSample phase int and authentic matchedholder finalization. Original SQL/source increment statements, mask fill7..length and identity/latching/join gates remain unchanged."
+  ],
+  "partitions": {
+    "SQL": "0..6 unchanged",
+    "sourceFamily": "7..12 unchanged",
+    "transactionPhase": "13..18 unchanged meanings,19 new PREP_CAPTURE",
+    "arrayLength": 20,
+    "nonadditive": true
+  },
+  "requiredFutureBinding": "Current existing class read-only proves feasibility, not future identity. Build owner must verify eventual freshly compiled e974 source/class/this exact7-point methodLineNumberTable before SINGLE released optional diagnostic, bind to exact invocation and postrun unchanged hashes. No new JVM/global guard/classresourceIO; missing/source/debug mismatch UNKNOWN and no interpretation/run.",
+  "independentRiskDisposition": [
+    "Exact points avoid broad ranges or distantcaller borrowing. File/class/method checks and oldUNKNOWN fallback stay; absent/debugless/unsupported immediateframe never gains phase.",
+    "PREP_CAPTURE denotes new guarded-read TRANSACTION CALLSITE, not proof that capture helper/current authorization completed or exclusive time spent there. Same qualification applies all other phase labels.",
+    "OldSQL and sourcebins remain original independent histograms. New19 only supplements same actualmatched blockeredge; no summing partitions or interpreting zeromasked counts as no activity.",
+    "Additional phase cannot widen thread8/30s/cadence/PGquery/caps/filter/defaultoff/rawstack retention/erasure/closure/TRACE30/1000ms. No additional observations, logger, fields, cases or framework."
+  ],
+  "existingFacts": {
+    "C5": "RED",
+    "latestUnprofiledClaimMs": 1148.671292,
+    "latestFinalizeCode": "UNREACHED",
+    "previousFinalize409Code": "UNOBSERVED",
+    "exclusiveCost": "UNOBSERVED",
+    "indexedParityAndSmoke": "PASS defines matcher correctness only"
+  },
+  "sourceAuthored": false,
+  "buildOrApplicationRuntimeExecuted": false,
+  "existingCompiledMetadataReadOnly": true,
+  "newDiagnosticAuthorized": false,
+  "performanceOrAcceptanceClaim": false,
+  "qaOrLifecycleChanged": false
+}

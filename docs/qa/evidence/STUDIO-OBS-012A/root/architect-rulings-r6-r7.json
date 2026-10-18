@@ -1,0 +1,296 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "artifact": "architect-rulings-r6-r7",
+  "architect": "Aria (@architect)",
+  "date": "2026-10-13",
+  "authority": {
+    "productEdits": false,
+    "testEdits": false,
+    "storyEdits": false,
+    "migrationEdits": false,
+    "buildsOrSuitesExecuted": false,
+    "gitWrites": "none",
+    "onlyFileWritten": "docs/qa/evidence/STUDIO-OBS-012A/root/architect-rulings-r6-r7.json"
+  },
+  "binding": [
+    "ADR-SC-005 D-A (one observed path; no legacy path, compatibility layer, versioned fallback or test-only bypass)",
+    "ADR-SC-005 D-B (V12-V18 re-baseline)",
+    "ADR-SC-005 'Preserves' row: CSI authorization, readiness, scheduling (ADR-003/ADR-004)",
+    "STUDIO-OBS-012A AC-2 (readiness vocabulary; confirmation_source GUIDED_RUN only), AC-6, AC-7 (after = baseline - named drops - named deletions + named ports; never count a skipped or vacuous check as passed)",
+    "root/architect-rulings-wave1b.json R1 (classification rule, acceptableDeferralForm, tripwire) and R2 (re-seat, keep control half, stop condition)"
+  ],
+  "inputsRead": [
+    "docs/qa/evidence/STUDIO-OBS-012A/r1r2/ledger.json",
+    "docs/qa/evidence/STUDIO-OBS-012A/lane-m/ledger.json",
+    "docs/qa/evidence/STUDIO-OBS-012A/root/architect-rulings-wave1b.json",
+    "docs/qa/evidence/STUDIO-OBS-012A/backend-k/ledger.json (ExecutionReadinessTest / DeReadyCarryForwardTest drop list only)",
+    "docs/qa/evidence/STUDIO-OBS-012A/exec-fixtures/ledger.json (ExecutionReadinessTest entry only)",
+    "docs/qa/evidence/STUDIO-OBS-012A/baseline-backend/TEST-*.xml for the 5 R6 classes (counts only)",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012A.story.md (AC-1, AC-2, AC-6, AC-7)",
+    "backend/src/main/resources/db/migration/V12__tests_revisions.sql, V15__publication.sql (lines 60-110, 236-300, 306-380, 494-545), V14__guided_sessions.sql (unique/index lines)",
+    "backend: ExecutionReadinessService, StudioService (updateTest, updateAuthoringDraft, saveAuthoring, softDeleteTest), GuidedPublicationRepository (session SUCCEEDED transition)",
+    "backend/src/test: ExecutionReadinessTest, ReadinessFixtures, DeReadyCarryForwardTest, RevisionRetentionIT, StudioVisibilityIT, CsiImmutabilityIT, StudioExecutionFixtures, support/ObservedPublicationFixture (lines 1-240), GuidedPublicationMigrationTest (Prepared/Published/publishObserved/prepareObserved/observedBinding), StudioSchedulingSchemaIT (history/binding helpers), StudioScheduleApiIT (sourceMutation port, updateRemoval..., editedWriterRace..., rawReadiness port)"
+  ],
+  "verificationNote": "Everything under 'verified' was read from source, migration or evidence files. No build or test was run by the architect. Statements labelled 'inference' were not executed. Every re-seat below carries a stop condition: if it triggers, the implementing agent reports back and does not weaken an assertion or delete unilaterally.",
+
+  "rulings": [
+    {
+      "id": "R6",
+      "topic": "8 tests in 5 classes seat on StudioExecutionFixtures.ordinaryRevision, which V12+V15 make unrepresentable",
+      "facts": {
+        "verified": [
+          "V12 ck_ui_test_revisions_confirmation_source: confirmation_source='GUIDED_RUN'. V15 adds publication_kind, guided_session_id, learned_plan_hash, revision_digest NOT NULL; ck_observed_revision_origin requires publication_kind='GUIDED_RUN', artifact_schema_version=3, a trusted studio_publication_profile and confirmation_source='GUIDED_RUN'; fk_observed_revision_base -> studio_guided_publication_bases; deferred fk_observed_revision_receipt -> studio_guided_publications. A non-observed revision row cannot be inserted, whatever values are supplied.",
+          "V15 studio_observed_execution_guard: an unbound execution row (observed_revision_binding NULL) that names a GUIDED_RUN revision is refused 'observed revision needs execution binding'. A history row that points at a revision must therefore carry a valid binding.",
+          "ExecutionReadinessService term order: lifecycle (deleted, quarantined) -> confirmed pointer -> this test/CSI -> confirmed_by/at -> publication_kind='GUIDED_RUN' (term 4) -> source/configuration revision (term 5) -> hashes (term 6) -> observed verifier (term 7). Term 4's refusal ('no learned revision') is now unreachable through the schema.",
+          "StudioService.updateTest refuses STALE_REVISION, then CSI_IMMUTABLE (line ~491), and only after that AUTHORING_V2_REQUIRED (line ~499). A CSI move on a learned (v2) draft is therefore still answered CSI_IMMUTABLE.",
+          "ObservedPublicationFixture.publish builds the publication with its own ObservedReplayPins, so publishing needs no Spring property. The app's ObservedRevisionVerifier only accepts it as READY in a context that called ObservedPublicationFixture.register. GuidedPublicationRepository.commit moves the fixture's session to SUCCEEDED, which is terminal, so a published draft is not left LEARNING.",
+          "anOrdinaryConfirmedRevisionIsNeverReady was ADDED in 012A by Lane K (exec-fixtures ledger addedNames). It is not a frozen-baseline method. Lane K also named 14 ExecutionReadinessTest and 5 DeReadyCarryForwardTest deletions, with the reason that observed counter/hash terms are covered by 'the joined publication/replay suites'.",
+          "Current @Test counts on the pre-R6 tree: ExecutionReadinessTest 12 (1 pre-existing @Disabled), DeReadyCarryForwardTest 3, RevisionRetentionIT 2, StudioVisibilityIT 3, CsiImmutabilityIT 3. Total 23.",
+          "RevisionRetentionIT.setUp still has assumeTrue(revisionIdColumnExists()). ui_test_executions.revision_id is a V13 column (the R2 unboundExecution helper writes it), so the assumption is always true. It is a silent-skip path that R1 'notAllowed' forbids as a skip mechanism."
+        ]
+      },
+      "decisionPrinciple": "Choose (a) re-seat when the property the test proves still exists in the single path. Re-seat on a genuine GUIDED_RUN publication from the production writers, and keep or add a control that makes the assertion non-vacuous. Choose (b) only when the premise itself is now unrepresentable and the invariant lives in the schema. Choose (c) only when the property itself is gone. No test here qualifies for (c).",
+      "perTest": [
+        {
+          "test": "ExecutionReadinessTest.anOrdinaryConfirmedRevisionIsNeverReady",
+          "disposition": "(b) CONVERT IN PLACE to a DB-refusal assertion. Same method name; count-neutral; record under 'assertionRepoints'.",
+          "provesBefore": "ADR-SC-005 'one family' (AC-2): a confirmed revision of another family is LEARN_REQUIRED via readiness term 4.",
+          "provesAfter": "The same invariant where it now lives: a revision of another family cannot exist, so it can never be ready. The draft stays UNLEARNED afterwards.",
+          "spec": [
+            "Inline jdbc INSERT into ui_test_revisions with every NOT NULL column supplied. Use the artifact-1 shape the old fixture wrote (artifact '{\"version\":1,\"steps\":[]}', artifact_schema_version 1, confirmation_source 'GUIDED_RUN') plus publication_kind 'ORDINARY', a guided_session_id string, learned_plan_hash 'a'x64 and revision_digest 'b'x64.",
+            "assertThatThrownBy -> DataIntegrityViolationException whose message contains 'ck_observed_revision_origin'. PostgreSQL tests CHECK constraints in name order, and ck_observed_revision_origin sorts before ck_observed_revision_step_metadata and ck_ui_test_revisions_*. That ordering is inference from the PG docs and has not been run.",
+            "Then assert: zero ui_test_revisions rows for the test, confirmed_revision_id NULL, evaluate -> LEARN_REQUIRED with 'not been learned yet', readiness -> UNLEARNED.",
+            "Drop the assertion contains('no learned revision'). That term-4 message is unreachable and must not be faked."
+          ],
+          "stopCondition": "If a different constraint or error fires first, report its exact name/SQLState. Do not loosen the assertion to 'any DataAccessException'.",
+          "whyNotC": "Deleting it would remove the only readiness-level statement of the one-family invariant (the class javadoc rests on it), and with it a 012A port. The pinned migration tests prove the constraint, but not that the readiness class still relies on it."
+        },
+        {
+          "test": "ExecutionReadinessTest.theSeamIgnoresWhatTheEntityItIsHandedClaims",
+          "disposition": "(a) RE-SEAT on new ObservedPublicationFixture(jdbc).publish(testId, List.of(), List.of()) with a READY control.",
+          "provesBefore": "Story 10.7a AC-8a / 10.8 AC-26: the ExecutionReadiness seam re-reads the DB and ignores a detached entity's claim.",
+          "whyStronger": "Under the ordinary seat the DB refused at term 4 regardless of source revision, so the entity's source-revision claim never mattered (inference from the term order). On a genuine publication the DB refusal is exactly term 5, the term the entity lies about, so the seam proof becomes discriminating.",
+          "spec": [
+            "ExecutionReadinessTest gains '@DynamicPropertySource static void observedReplay(DynamicPropertyRegistry r) { ObservedPublicationFixture.register(r); }'. This is required for the READY control. It gives the class its own context; accepted cost.",
+            "publish -> control: readiness.evaluate(testId).ready() is true -> the existing raw UPDATE (source_revision+1, steps changed) -> existing assertions unchanged -> add: evaluate(testId).message() contains 'edited after it was learned'."
+          ],
+          "stopCondition": "If READY is not reached after publish in this context, STOP and report the verdict code/message. Do not replace the control with RUNTIME_INCOMPATIBLE."
+        },
+        {
+          "test": "ExecutionReadinessTest.softDeletedAndQuarantinedAreRefusedByTheirOwnCodes",
+          "disposition": "(a) RE-SEAT on a publication with a READY control (same class context as above).",
+          "provesBefore": "AC-24: lifecycle refusals carry their own codes (TEST_DELETED, TEST_QUARANTINED) and not LEARN_REQUIRED. This is the only test of these two readiness codes (grep: no other test asserts them outside GuidedPublicationMigrationTest's vocabulary list).",
+          "whyNotDropTheLine": "Dropping the ordinaryRevision line would still pass, because lifecycle is term 1. But it would only show precedence over a never-learned draft. The security-relevant property is that a published, otherwise READY test stops being runnable once it is deleted or quarantined. Only the re-seat proves that.",
+          "spec": "publish -> control READY -> existing deleted_at and quarantined_at updates and assertions unchanged.",
+          "stopCondition": "Same as theSeam. If a ui_tests guard refuses the deleted_at/quarantined_at UPDATE on a published draft, report it (inference: only tr_studio_publication_epoch and ck_ui_tests_csi_registered apply, and neither touches these columns)."
+        },
+        {
+          "test": "DeReadyCarryForwardTest.noGatewayCallHappensAcrossReadinessInAnyOfTheDeReadyStates",
+          "disposition": "(a) RE-SEAT the third state from 'ordinary revision' to 'learned, then edited' (publication + source bump). No context change.",
+          "provesBefore": "AC-28(b) / ADR-SC-005 'Tests': zero guided model calls across readiness in every de-ready state.",
+          "whyNotC": "In the single path the canonical de-ready state is a learned revision whose draft was edited. Dropping the step leaves only never-learned states and loses the state that NEEDS_RELEARN/LEARN_REQUIRED is about. The re-seat also takes readiness through terms 1-5 on a genuine GUIDED_RUN revision, where the old seat stopped at term 4.",
+          "spec": [
+            "Keep the order: UNLEARNED -> learningSession PROPOSING -> LEARNING -> new ObservedPublicationFixture(jdbc).publish(testId, List.of(), List.of()) -> jdbc UPDATE ui_tests SET source_revision=source_revision+1 -> evaluate code LEARN_REQUIRED (existing) and message contains 'edited after it was learned' (added) -> readiness LEARNING (existing; the PROPOSING session is still live) -> assertNoProviders().",
+            "Permitted fallback, only if publish refuses because of the live PROPOSING session: publish and bump first, then insert the PROPOSING session, keeping the same assertion set. Record which order ran."
+          ],
+          "stopCondition": "Any other publish refusal, or a verdict that is not term-5 LEARN_REQUIRED: report back."
+        },
+        {
+          "test": "RevisionRetentionIT.anExecutionKeepsItsRevisionAfterTheDraftIsEditedAndRecompiled",
+          "disposition": "(a) RE-SEAT on two real publications and one bound history row. Keep the name (count-neutral). The 'Recompiled' wording is not an AC-7 grep target (that scope is src/main); a rename would be churn.",
+          "provesBefore": "Story 10.4 AC-20 / FOC-01: history keeps the revision it actually executed after the draft is edited and a new revision is published.",
+          "spec": [
+            "r1 = ObservedPublicationFixture.publish(testId, [], []). Capture r1's artifact_hash.",
+            "Bound execution of r1: a studio_dispatch_ledger row, then a ui_test_executions row with csi_id, principal (OWNER), environment ('Production'), revision_id r1 and observed_revision_binding = GuidedPublicationMigrationTest.observedBinding(jdbc, r1, executionId, startedAt, OWNER), following StudioSchedulingSchemaIT.history/ledger. Status is not part of the property. Use PASSED if the guard admits it without an admission receipt, otherwise PENDING, and record which.",
+            "Edit through studio.saveAuthoring (step 0 text changed; tokens from the draft; caller StudioExecutionFixtures.identity(OWNER, CSI_ID, \"owner\")). updateTest would refuse AUTHORING_V2_REQUIRED on a learned draft, as already shown in R1.",
+            "r2 = publish again.",
+            "Assertions: r2 != r1; execution revision_id == r1; r1 artifact_hash equals the CAPTURED value (re-point from the literal 'artifact-hash-1', which publish no longer controls; same property); r1 confirmed_by == OWNER."
+          ],
+          "alsoRequired": "Delete assumeTrue(revisionIdColumnExists()), the helper and the class-javadoc paragraph about 10.1's V14. The column is guaranteed by V13, and an assumption-skip is a forbidden silent skip. Count-neutral.",
+          "stopCondition": "If the observed execution guard refuses the bound insert, STOP and report the exception text. Do not drop revision_id, and do not use unboundExecution with a revision (the guard refuses it, and a NULL revision would void the property)."
+        },
+        {
+          "test": "RevisionRetentionIT.aSoftDeletedTestStillExposesTheRevisionItsHistoryPointsAt",
+          "disposition": "(a) RE-SEAT: same publication + bound-row seat as above; studio.softDeleteTest(testId); existing assertions unchanged (execution still points at r1; exactly 1 revision for the test).",
+          "provesBefore": "AC-20 / BRD §9: soft delete never removes the revision that history references.",
+          "stopCondition": "As above."
+        },
+        {
+          "test": "StudioVisibilityIT.aSoftDeletedDraftDisappearsFromReadsWhileItsRevisionsRemainReadable",
+          "disposition": "(a) RE-SEAT: publishCandidate() -> new ObservedPublicationFixture(jdbc).publish(visibleTestId, List.of(), List.of()). Every assertion unchanged (DELETE 204, GET 403, revision present, hasSize(1)). Renaming the private helper to publishObserved is optional and not counted.",
+          "provesBefore": "Story 10.4 AC-3/AC-14: soft-deleted drafts are invisible but their revisions stay readable.",
+          "stopCondition": "If DELETE of a published draft is refused, report it. It must not be worked around."
+        },
+        {
+          "test": "CsiImmutabilityIT.rejectsAnUpdateThatPointsTheTestAtAnotherCsi",
+          "disposition": "(a) RE-SEAT: publishCandidate() -> new ObservedPublicationFixture(jdbc).publish(testId, List.of(), List.of()). Every assertion unchanged (409 CSI_IMMUTABLE, ui_tests.csi_id unchanged, revision csi unchanged).",
+          "provesBefore": "Story 10.4 AC-19 / Architecture §9.1: a test cannot move CSI, and the CSI of its recorded revisions is kept.",
+          "whyItStillHolds": "updateTest answers CSI_IMMUTABLE before AUTHORING_V2_REQUIRED (verified), so the v2 draft that publish produces does not mask the refusal. The ADR 'Preserves CSI authorization' row requires this proof on the only revision family.",
+          "stopCondition": "If the first failure is STALE_REVISION (publish moved a token; inference: it does not), read the tokens from the row instead of the literals 1/1 and change nothing else. Any other status: report."
+        }
+      ],
+      "fixtureCleanup": {
+        "required": [
+          "Delete StudioExecutionFixtures.ordinaryRevision and the private helpers it alone uses (pinnedProvenance, ARTIFACT_V1, sha256Hex). Remove the class-javadoc sentence about it. Keep public NO_REFERENCES and DEFAULT_CONFIGURATION (other callers).",
+          "Delete ReadinessFixtures.ordinaryRevision. Fix its class javadoc ('an ordinary confirmed revision of it').",
+          "Delete RevisionRetentionIT's private ordinaryRevision."
+        ],
+        "why": "D-A: a fixture that claims to write an unrepresentable family is a dead compatibility seat. Leaving it invites the next lane to 'fix' it with a bypass.",
+        "tripwire": "grep -rn 'ordinaryRevision(' backend/src/test -> 0 hits. The method name anOrdinaryConfirmedRevisionIsNeverReady has no '(' after 'ordinaryRevision' and is not matched."
+      },
+      "reconciliation": {
+        "rule": "after = baseline - named drops - named deletions + named ports",
+        "scope": "5 R6 classes, pre-R6 tree",
+        "baseline": 23,
+        "namedDrops": 0,
+        "namedDeletions": 0,
+        "namedPorts": 0,
+        "after": 23,
+        "formula": "23 = 23 - 0 - 0 + 0",
+        "ledgerBuckets": {
+          "arrangementReseats (7)": [
+            "ExecutionReadinessTest.theSeamIgnoresWhatTheEntityItIsHandedClaims",
+            "ExecutionReadinessTest.softDeletedAndQuarantinedAreRefusedByTheirOwnCodes",
+            "DeReadyCarryForwardTest.noGatewayCallHappensAcrossReadinessInAnyOfTheDeReadyStates",
+            "RevisionRetentionIT.anExecutionKeepsItsRevisionAfterTheDraftIsEditedAndRecompiled",
+            "RevisionRetentionIT.aSoftDeletedTestStillExposesTheRevisionItsHistoryPointsAt",
+            "StudioVisibilityIT.aSoftDeletedDraftDisappearsFromReadsWhileItsRevisionsRemainReadable",
+            "CsiImmutabilityIT.rejectsAnUpdateThatPointsTheTestAtAnotherCsi"
+          ],
+          "assertionRepoints (1)": [
+            "ExecutionReadinessTest.anOrdinaryConfirmedRevisionIsNeverReady (term-4 verdict -> ck_observed_revision_origin refusal + UNLEARNED)"
+          ]
+        },
+        "expectedRun": "The 5 classes run 23 tests: 22 pass, 1 skipped (pre-existing targetPolicySelectionAdvancesTheConfigurationRevision), 0 failed.",
+        "openCountQuestion": "exec-fixtures ledger records ExecutionReadinessTest 'after: 13'. The current source has 12 @Test methods. @qa reconciles which figure is right from the XML. This ruling neither depends on it nor resolves it."
+      },
+      "tradeoffs": {
+        "chosen": "Re-seat 7 on genuine publications with explicit controls; convert 1 to the schema-held invariant; delete the dead fixture",
+        "pros": [
+          "No test proves its property on a fabricated row",
+          "Two readiness tests become discriminating (term 5 on a genuine revision, lifecycle over READY)",
+          "CSI immutability and history retention are proven on the only revision family",
+          "No count churn"
+        ],
+        "cons": [
+          "ExecutionReadinessTest gets its own Spring context (register)",
+          "RevisionRetentionIT depends on the observed binding shape. If the binding contract changes, this class churns with it (it already does for StudioSchedulingSchemaIT)"
+        ],
+        "rejected": [
+          "Add a test-only path or relax V15 so ordinary rows insert: a compatibility seat that D-A forbids",
+          "Delete the 8 as unreachable: the properties (retention, visibility, CSI immutability, lifecycle codes, seam, model-free readiness) all survive in the single path, so deleting them would lose capability",
+          "Drop the seeding line only (softDeleted, DeReady): passes, but leaves weaker proofs than the re-seat at almost the same cost"
+        ]
+      },
+      "owners": [
+        {"owner": "@dev (r1r2 lane)", "action": "Apply perTest + fixtureCleanup exactly. Run the 5 classes. Record per-method results, which DeReady order and which RevisionRetention status ran, and the reconciliation by name."},
+        {"owner": "@qa", "action": "Verify each re-seat has its control (READY or term-5 message), that no assertion was weakened except the named term-4 repoint, the ordinaryRevision( tripwire, and the count of 23."}
+      ]
+    },
+
+    {
+      "id": "R7",
+      "topic": "StudioScheduleApiIT.editedWriterRaceSerializesWithAcceptanceAndKeepsTheAcceptedRevision passes vacuously; OBS-009 re-enable hazard in updateRemovalAndInputInvalidationSettleDeferredWithoutOrphans",
+      "facts": {
+        "verified": [
+          "Final assertion: runs.allMatch(originalRevision::equals).hasSizeLessThanOrEqualTo(1). In 012A no scheduled observed occurrence can be accepted, so runs is always empty and that assertion cannot fail (r1r2 ledger note; R1 fact that the refusal precedes the acceptance steps).",
+          "The method's subject is 'serializes with acceptance' and 'keeps the accepted revision'. Neither can occur in 012A. The remaining assertions (BLOCKED after the edit; processor null afterwards) are already proven live, without the race, by sourceMutationBlocksTheScheduleWithLearnRequired and rawReadinessChangeRefusesWithLearnRequiredAndNoExecution.",
+          "Because the processor refuses at the artifact-family check, before any acceptance lock, the 012A race does not exercise the acceptance/edit lock interplay the test exists for.",
+          "The switch from studio.updateTest to studio.saveAuthoring is forced by D-A: every runnable draft is now a learned v2 draft, and updateTest refuses a step edit on it AUTHORING_V2_REQUIRED (StudioService ~line 499). It changes no assertion.",
+          "updateRemovalAndInputInvalidationSettleDeferredWithoutOrphans (deferred) still calls studio.updateTest with List.of(\"Changed step\") in its 'input' iteration (StudioScheduleApiIT ~line 617). It is the only remaining updateTest call in StudioScheduleApiIT and SharedSchedulingIT."
+        ]
+      },
+      "ruling7a": {
+        "question": "Is the editedWriterRace pass acceptable?",
+        "verdict": "NOT ACCEPTABLE as a pass. Reclassify as category C (defer to OBS-009). Keep the saveAuthoring arrangement fix. No live port.",
+        "reasoning": [
+          "R1's first-failure rule did not anticipate a pass that is vacuous by construction. Its own principle governs: no fabricated pass, and a skipped or vacuous check is never counted as passed (AC-7). A test named for acceptance serialization, passing with zero acceptances, overstates coverage.",
+          "A non-vacuity precondition added in 012A (requiring one accepted run when acceptance wins) would fail in 012A, so the test would need deferring anyway. Writing an assertion that cannot be executed until OBS-009 is unverifiable, so it is not done now.",
+          "No live port: every reachable property is already live in the two R1 ports. A third would duplicate them, and the race adds no lock coverage in 012A."
+        ],
+        "action": [
+          "Add method-level @Disabled with exactly the R1 reason: \"DEFERRED STUDIO-OBS-009 AC-6/T3: observed scheduled runs are refused OBSERVED_SCHEDULE_AUTH_REQUIRED until background authority and G-3 land; re-enable unchanged\" (three concatenated literals are fine).",
+          "Body: keep the saveAuthoring arrangement exactly as now. Under the amended deferral form below it is a permitted forced edit. Do NOT revert to updateTest.",
+          "Ledger: move the method from the R1 classification 'A after 012A defect fix' to category C, with reason 'vacuous in 012A: zero acceptances possible'. List it in namedDeferralsToObs009 (17 -> 18)."
+        ]
+      },
+      "ruling7b": {
+        "question": "updateRemoval... 'input' iteration: fix in 012A or record for OBS-009?",
+        "verdict": "FIX IN 012A (arrangement edit in the deferred body). Do not leave it to OBS-009.",
+        "reasoning": [
+          "The breakage comes from 012A's D-A changes and not from OBS-009 scope. At HEAD, runnable fixtures had no v2 authoring and updateTest worked; under D-A every runnable draft is learned and v2.",
+          "The deferral reason says 're-enable unchanged'. Leaving a known non-OBS-009 failure in the body would make that statement false, and would push a 012A defect onto OBS-009 that it would then have to diagnose.",
+          "The same precedent is already accepted for the SharedSchedulingIT replica-config fix and for editedWriterRace."
+        ],
+        "action": [
+          "Replace only the 'input' branch's studio.updateTest(...) with the pattern already green in sourceMutationBlocksTheScheduleWithLearnRequired: draft = studio.findTestById(testId, owner); authoring = studio.findAuthoringV2ById(testId, owner); studio.saveAuthoring(testId, new AuthoringV2Request(2, authoring.globalContext(), List.of(new AuthoringStep(step0.id(), \"Changed step\", step0.context()))), draft.sourceRevision(), draft.configurationRevision(), owner).",
+          "No assertion, loop or other branch changes. The expected code stays LEARN_REQUIRED.",
+          "Honesty label: 'compiles; unexecuted until OBS-009 (first failure in 012A is the earlier PENDING_QUOTA_EXCEEDED assertion); same edit pattern green in sourceMutationBlocksTheScheduleWithLearnRequired'. Never 'verified'."
+        ]
+      },
+      "deferralFormAmendment": {
+        "amends": "architect-rulings-wave1b.json R1.acceptableDeferralForm.allowed",
+        "text": "A deferred body may also carry arrangement edits forced by D-A, meaning the single observed path refuses the old arrangement (for example a legacy step save on a learned draft, or the trusted observed-replay config a context needs). Conditions: no assertion, expected value or control flow that decides pass/fail changes, and each such edit is named in the ledger under 'forcedArrangementEditsInDeferredBodies'.",
+        "currentList": [
+          "SharedSchedulingIT.studioOnlyReplicaRunsWhenCatalogFlagIsOffAndDeduplicatesAgainstAnotherCoordinator (withObservedReplay replica config)",
+          "StudioScheduleApiIT.editedWriterRaceSerializesWithAcceptanceAndKeepsTheAcceptedRevision (updateTest -> saveAuthoring)",
+          "StudioScheduleApiIT.updateRemovalAndInputInvalidationSettleDeferredWithoutOrphans ('input' branch updateTest -> saveAuthoring)"
+        ],
+        "tripwire": "In StudioScheduleApiIT and SharedSchedulingIT: grep 'studio.updateTest(' -> 0 hits."
+      },
+      "obs009Obligation": {
+        "owner": "@po records it in STUDIO-OBS-009 AC-6/T3. @dev OBS-009 implements it.",
+        "text": "On re-enable of editedWriterRaceSerializesWithAcceptanceAndKeepsTheAcceptedRevision: first re-enable it unchanged and green. Then make it non-vacuous: condition the final assertion on the processor result (ACCEPTED -> runs == [originalRevision], exactly 1; otherwise runs empty), and add a deterministic acceptance-first ordering that must yield exactly one run on originalRevision. hasSizeLessThanOrEqualTo(1) alone is not accepted as proof after the lift."
+      },
+      "reconciliation": {
+        "scope": "r1r2 5-class scope",
+        "formula": "82 = 79 - 0 drops - 1 deletion + 4 ports (unchanged)",
+        "runDelta": "StudioScheduleApiIT 22 tests: 6 pass, 16 skipped (was 7/15). 5-class total: 82 executed, 64 passed, 0 failed, 18 skipped. The 18 skipped are exactly the named OBS-009 deferrals.",
+        "exec-fixtures24ClassScope": "290 total unchanged; named deferrals 18.",
+        "disabledTripwireCorrection": "R1's tripwire said 'pre-existing = 1'. Repo-wide it is 6 (ExternallyGatedCriteriaTest 3, ExecutionVideoExternallyGatedCriteriaTest 2, ExecutionReadinessTest 1), as r1r2 reported; I re-counted by grep and got the same. Expected repo-wide @Disabled after R7 = 24 = 6 + 18, every deferral with the 'DEFERRED STUDIO-OBS-009 AC-6/T3:' prefix."
+      },
+      "tradeoffs": {
+        "chosen": "Defer editedWriterRace (C); fix the 'input' arrangement now; OBS-009 owns the non-vacuity strengthening",
+        "pros": [
+          "No vacuous pass is counted",
+          "'Re-enable unchanged' stays true for all 18",
+          "The fix uses a pattern that is already green"
+        ],
+        "cons": [
+          "One fewer passing test in 012A",
+          "The 'input' fix cannot be executed until OBS-009 lifts the refusal"
+        ],
+        "rejected": [
+          "Keep the vacuous pass: overstates acceptance-serialization coverage",
+          "Strengthen now: the assertion cannot run in 012A and would be deferred anyway",
+          "Live port of the reachable half: duplicates the two R1 ports",
+          "Leave 'input' to OBS-009: misattributes a 012A-caused failure and falsifies the deferral reason"
+        ]
+      },
+      "owners": [
+        {"owner": "@dev (r1r2 lane)", "action": "Apply ruling7a and ruling7b, re-run StudioScheduleApiIT and SharedSchedulingIT, update r1r2 ledger (classification, namedDeferralsToObs009 = 18, forcedArrangementEditsInDeferredBodies, finalRun counts, @Disabled tripwire = 24)."},
+        {"owner": "@po (Pax)", "action": "OBS-009 AC-6/T3 re-enable list = 18 names, plus the editedWriterRace non-vacuity obligation, plus retire or re-point the 4 interim live ports."},
+        {"owner": "@qa", "action": "Verify the 18 reason strings, both grep tripwires, that no assertion changed in deferred bodies, and the 64/18 split."}
+      ]
+    }
+  ],
+
+  "autoDecisions": [
+    "[AUTO-DECISION] anOrdinaryConfirmedRevisionIsNeverReady: delete or convert? -> convert in place (reason: the invariant moved into the schema; this is the only readiness-level statement of 'one family'; it is a 012A port, so deleting would also drop a counted port)",
+    "[AUTO-DECISION] Register observed replay in ExecutionReadinessTest to get a READY control? -> yes (reason: without READY the lifecycle and seam tests cannot show the refusal overrides a valid publication; the cost is one extra Spring context)",
+    "[AUTO-DECISION] Rename anExecutionKeepsItsRevisionAfterTheDraftIsEditedAndRecompiled? -> no (reason: the AC-7 grep scope is src/main; a rename is churn and needs a deletion+port pair)",
+    "[AUTO-DECISION] Remove RevisionRetentionIT's assumeTrue? -> yes (reason: always true under V13, and an assumption-skip is a forbidden silent-skip path)",
+    "[AUTO-DECISION] editedWriterRace: live port of the reachable half? -> no (reason: duplicates sourceMutationBlocksTheScheduleWithLearnRequired and rawReadinessChangeRefusesWithLearnRequiredAndNoExecution; no lock coverage in 012A)",
+    "[AUTO-DECISION] Who owns the 'input' updateTest hazard? -> 012A (reason: caused by D-A in 012A; keeps 're-enable unchanged' truthful)"
+  ],
+
+  "notRuledHere": [
+    "Capability-coverage question for @qa: Lane K deleted ExecutionReadinessTest's term-5/6 tests (sourceEditedSinceConfirmation..., configurationEditedSinceConfirmation..., editedTextUnderAnUnmovedCounter..., aTamperedArtifactIsCaughtByItsOwnHash, aConfirmedUneditedDraftIsReady, theSeamAndTheIdentifiedFormAgreeOnAReadyDraft), saying the joined publication/replay suites cover them. At wave1b, GuidedPublicationReplayIT was excluded from compilation. If it does not compile and run on the final tree, observed-revision coverage of terms 5 (configuration half), 6 and 7 is unbacked. After R6, only term 5 (source half) is proven by theSeam and DeReady. QA should check this before AC-7; if it is unbacked, return it to @architect.",
+    "ExecutionReadinessService term 4 (publication_kind != GUIDED_RUN) is unreachable under V15. Keep it in 012A as defense in depth. It is an OBS-011 class-C candidate, like the NULL-CSI quarantine branch."
+  ],
+
+  "securityFlags": [
+    {"id": "R6", "severity": "INFO", "summary": "The re-seats keep CSI-immutability and lifecycle-refusal proofs on the only revision family; the softDeleted re-seat newly proves that a deleted or quarantined test with a valid publication is not runnable. No product code changes."},
+    {"id": "R7", "severity": "INFO", "summary": "Evidence integrity, not product security: a vacuous pass would have overstated scheduler acceptance/edit serialization coverage. Deferred and owned by OBS-009."}
+  ]
+}

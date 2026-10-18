@@ -1,0 +1,504 @@
+{
+  "artifact": "STUDIO-OBS-015 original native outcome regression-only source checkpoint01",
+  "createdAt": "2026-10-15T11:45:31.064466+00:00",
+  "owner": "backend015_resume / Dex",
+  "classification": "REGRESSION_ONLY_PENDING_ACTUAL_ENGINE_REPRODUCTION",
+  "sourceHold": true,
+  "commandsLive": false,
+  "productionGuidedContractsHold": true,
+  "formalQAVerdict": null,
+  "lifecycleTransition": null,
+  "sourceValidation": "Manual bounded source inspection and byte/hash preservation checks only. No compile/test/JVM/Gradle/DB/native/build/format command run. No source-only pass or native-engine reproduction claimed.",
+  "soleEditedSource": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java",
+    "beforeSha256": "4f14e9fd8bac3f831c81be2e8351551e1ce34e633ec1838bccfad805dc7f3549",
+    "afterSha256": "dd3af19d0a35461e5844786e9b1433bcdabafab8815720b70367a9e6cbb01b0c",
+    "addedMethod": "originalNativeOutcomeUnionRejectsLegalOrdinaryWhileFreshFullBranchAccepts",
+    "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.originalNativeOutcomeUnionRejectsLegalOrdinaryWhileFreshFullBranchAccepts",
+    "methodLine": 20,
+    "addedBlockSha256": "f05f34ddb65e1d13c214133924308d9f8b21bb82be9b27e61a7bc3199b4d1645",
+    "addedLines": 100
+  },
+  "originalSourcePreservation": {
+    "preservedBeforePath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/outcome-regression-only01/source-before/GuidedWireContractTest.java",
+    "preservedBeforeSha256": "4f14e9fd8bac3f831c81be2e8351551e1ce34e633ec1838bccfad805dc7f3549",
+    "removeExactSingleAddedBlockRecoversBeforeBytes": true,
+    "recoveredBeforeSha256": "4f14e9fd8bac3f831c81be2e8351551e1ce34e633ec1838bccfad805dc7f3549",
+    "originalTestCount": 7,
+    "currentTestCount": 8,
+    "allOriginalTestNamesPreservedInOriginalOrder": true,
+    "originalMethods": [
+      "frozenDateTimeOracleMatchesOnEnforcedAssignmentSchema",
+      "rawByteVectorsRejectAmbiguityBeforeParsingCanDiscardIt",
+      "textualPersistenceParserAlsoRejectsDuplicatesAndTrailingObjects",
+      "absentSchemaDefinitionNeverBecomesAnEmptyPermissiveSchema",
+      "rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults",
+      "bareSessionNameResolvesToTheOneV3ContractWithNativeValidation",
+      "unknownRootEpochPreservesNativeCrossPropertyRefusal"
+    ],
+    "allOriginalImportsHelpersEpochCountsAssertionsByteExact": true,
+    "noModificationToFinitePlanFallbackMutationCanonicalWireGates": true
+  },
+  "control": {
+    "fixture": "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json#/documents/flow/outcomes/0",
+    "fixtureCanonicalSha256": "6dd0ed43b9b77aba88c075c8a5b84064510baa3d330601f62c03b537d0c71d5b",
+    "fixtureModified": false,
+    "independentFrozenLegality": "Full original ordinary initialBlank/about:blank/null-origin/generation0 envelope, SUCCEEDED/OK/null availability/no errorMessage; exact full ordinary-branch validation is asserted independently. Not a reconstruction of undisclosed actual04 body.",
+    "rootName": "v3/bridge#/definitions/outcome",
+    "rootSha256Expected": "95f7878408ce7d089646898aef3d528bc2e3c62d7f2bf8f228134556dfe451e8",
+    "rootShape": "Exactly only oneOf with two full original branches",
+    "fullBranchSha256Expected": [
+      "be738fd98792fed35821849ce6e9e50abbad334a03de282df3261494192497f1",
+      "3547f2fbe5f29e0197f7fa326eaa5a2e3da92bbe164a2deb9a74043751a872c0"
+    ],
+    "freshNativeCompilation": "Existing originalSchema helper reflectively calls unchanged private GuidedContracts.schema on a new instance. That uses original frozen resource expansion and JsonSchemaFactory V7. Both exact full branch nodes freshly compile with the actual original root ValidationContext config, asserted same config identity.",
+    "nativeContextCalls": [
+      "whole.validate(fixture)",
+      "ordinary.validate(fixture)",
+      "prefix.validate(fixture)"
+    ],
+    "contextIsolation": "Separate public JsonSchema.validate(JsonNode) calls create native execution contexts; no reused ExecutionContext/ValidatorState, leaf stripping, fake branch-selector or production wrapper path.",
+    "requiredActualPredicates": {
+      "wholeNativeErrorCount": ">0",
+      "fullOrdinaryBranchErrorCount": 0,
+      "fullPrefixBranchErrorCount": ">0",
+      "fixtureCanonicalBytesBeforeAfterEqual": true
+    },
+    "futureRepairIndependence": "Control intentionally exercises unchanged ORIGINAL native root/branches and therefore does not expect future public compiler wrapper to retain rejection."
+  },
+  "actualLoadedDependencyProofDeferredToTest": {
+    "source": "JsonSchema.class ProtectionDomain CodeSource location; assert actual factory and schema share loaded location, open those exact JAR bytes and its own Maven pom.properties",
+    "versionExpected": "1.4.0",
+    "groupArtifactExpected": "com.networknt:json-schema-validator",
+    "jarSha256Expected": "5d7b6ce4c7b2a3ed189511cbaa913808c7cd2b570d70b923426352785bffbdd0",
+    "notMerelyBuildDeclaredVersion": true,
+    "actualLoadedProofCurrently": "NOT_EXECUTED; no JVM/classloading by source owner"
+  },
+  "boundedReport": {
+    "mechanism": "Existing JUnit TestReporter.publishEntry captured in actual test report mechanisms",
+    "key": "obs015OriginalNativeOutcomeControl",
+    "jsonFields": [
+      "control static label",
+      "rootSha256",
+      "fixtureSha256",
+      "loadedJarSha256",
+      "loadedJarVersion",
+      "wholeAccepted",
+      "ordinaryAccepted",
+      "prefixAccepted",
+      "wholeErrorCount",
+      "ordinaryErrorCount",
+      "prefixErrorCount",
+      "inputCanonicalBytesUnchanged"
+    ],
+    "rawBodiesMessagesValuesKeysCredentialsConfigs": "NOT_EMITTED; validation Set retained only as size, canonical input compared via boolean with no body in assertion failure",
+    "inputCanonicalBytesUnchanged": "Asserted boolean; body never published"
+  },
+  "sourceBaseline": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-snapshot57-65-feedback-attempt05-after.json",
+    "sha256": "8179daf3e64233f4ead1b730dafc33300427249f56c740b0acb70d99dc9193a5",
+    "capturedFiles": 1632,
+    "currentSourceDelta": [
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java",
+        "before": "4f14e9fd8bac3f831c81be2e8351551e1ce34e633ec1838bccfad805dc7f3549",
+        "after": "dd3af19d0a35461e5844786e9b1433bcdabafab8815720b70367a9e6cbb01b0c"
+      }
+    ],
+    "allOtherCapturedInputHashesUnchanged": true
+  },
+  "protectedInputs": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+      "beforeSha256": "e4c48761e3b80561165bf7e51ee8b202c03ba9dfaf35a6ef52f9d77143a3de50",
+      "currentSha256": "e4c48761e3b80561165bf7e51ee8b202c03ba9dfaf35a6ef52f9d77143a3de50",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "beforeSha256": "c83be072b5b1ef2044be4eb5f81d34ba404d62de3781836d144ec058296943f3",
+      "currentSha256": "c83be072b5b1ef2044be4eb5f81d34ba404d62de3781836d144ec058296943f3",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "beforeSha256": "597942a8fdf2e8b366bb7a180073db1542943631ba1478750c0a1fdadb0baa15",
+      "currentSha256": "597942a8fdf2e8b366bb7a180073db1542943631ba1478750c0a1fdadb0baa15",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "beforeSha256": "71f19112f82117fc1f0f3090ffd476d48f51cdd026b919092c5b673ff748b0b7",
+      "currentSha256": "71f19112f82117fc1f0f3090ffd476d48f51cdd026b919092c5b673ff748b0b7",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+      "beforeSha256": "c26da8acc7a253139fc3bece3cc7e5df156d50ea3e7704bc36861805e06bd0a5",
+      "currentSha256": "c26da8acc7a253139fc3bece3cc7e5df156d50ea3e7704bc36861805e06bd0a5",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+      "beforeSha256": "008f61117ce90c31d9a0abddaa4a91d2d142ba7ef8fabf734265a3940d45ee85",
+      "currentSha256": "008f61117ce90c31d9a0abddaa4a91d2d142ba7ef8fabf734265a3940d45ee85",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+      "beforeSha256": "80357798b080ab6f8cb1ba38c7828915fa37663e203b0280997c7937ebc432d0",
+      "currentSha256": "80357798b080ab6f8cb1ba38c7828915fa37663e203b0280997c7937ebc432d0",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+      "beforeSha256": "417e605d25ca8b68039b9aa4dafc07ec4390994bb58630766e9dd92bd5f7b359",
+      "currentSha256": "417e605d25ca8b68039b9aa4dafc07ec4390994bb58630766e9dd92bd5f7b359",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/README.md",
+      "beforeSha256": "51808d1b16d5ffdb5ea9e65cfba00d522bfa7cd1dc71372514f34c82c5c7d7f1",
+      "currentSha256": "51808d1b16d5ffdb5ea9e65cfba00d522bfa7cd1dc71372514f34c82c5c7d7f1",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/action-timing.schema.json",
+      "beforeSha256": "d2cb597f799dfac20a020d26142e568524eed7c24986eb4ae1566c569c729e7d",
+      "currentSha256": "d2cb597f799dfac20a020d26142e568524eed7c24986eb4ae1566c569c729e7d",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/action.schema.json",
+      "beforeSha256": "cf6844f8eb31169c343af9c19d34458169b50aa6404af793b3989fb4e66b9608",
+      "currentSha256": "cf6844f8eb31169c343af9c19d34458169b50aa6404af793b3989fb4e66b9608",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/allocation.schema.json",
+      "beforeSha256": "8261aca9be0cfdda5081e0e8d15e29b25f2dc3b1be8b385b2d5524fd2498a3e6",
+      "currentSha256": "8261aca9be0cfdda5081e0e8d15e29b25f2dc3b1be8b385b2d5524fd2498a3e6",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/assignment-lifecycle.schema.json",
+      "beforeSha256": "52a37865db75a8e264e8b2c09fec1ba3298d09991422e18940fd7b31abf57ee6",
+      "currentSha256": "52a37865db75a8e264e8b2c09fec1ba3298d09991422e18940fd7b31abf57ee6",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/assignment-receipt.schema.json",
+      "beforeSha256": "7efac7f0b31dff859715c77d54124e794bc09350b64ea46dc0daaa7b29fe1ca9",
+      "currentSha256": "7efac7f0b31dff859715c77d54124e794bc09350b64ea46dc0daaa7b29fe1ca9",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/assignment-stop.schema.json",
+      "beforeSha256": "358e6d151e4fb7b2edfa7b06bf399168af8c3dbd0bbfb61bd990f4ad9e4ede8a",
+      "currentSha256": "358e6d151e4fb7b2edfa7b06bf399168af8c3dbd0bbfb61bd990f4ad9e4ede8a",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/assignment.schema.json",
+      "beforeSha256": "ced834f01f4f346f622b8e87500b7a5f4644cc34ad8d2e8ea90fc9c24d3bedad",
+      "currentSha256": "ced834f01f4f346f622b8e87500b7a5f4644cc34ad8d2e8ea90fc9c24d3bedad",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/authored-inputs.schema.json",
+      "beforeSha256": "9ff02b3dd33bfb2c27e012adb3c0fd421085e67bbc5371e43bda9accd043b2e5",
+      "currentSha256": "9ff02b3dd33bfb2c27e012adb3c0fd421085e67bbc5371e43bda9accd043b2e5",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/authoring-snapshot.schema.json",
+      "beforeSha256": "dc212b318aee6076acef74e17aee488af61a907a16a71e21bf5672fb99a1330b",
+      "currentSha256": "dc212b318aee6076acef74e17aee488af61a907a16a71e21bf5672fb99a1330b",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/availability.schema.json",
+      "beforeSha256": "e286e88762d4e3018eba697f2b59480218b6b8f5e9f8cf96d00c978b8f02685a",
+      "currentSha256": "e286e88762d4e3018eba697f2b59480218b6b8f5e9f8cf96d00c978b8f02685a",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/binding.schema.json",
+      "beforeSha256": "78ba6b131343ec5b41c9e8f38a70907264875e8702a3a5cb80b7dfefbf892657",
+      "currentSha256": "78ba6b131343ec5b41c9e8f38a70907264875e8702a3a5cb80b7dfefbf892657",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/bridge.schema.json",
+      "beforeSha256": "039ad4017a8256481d4109d37dfcfc919767094fd1610988d16706fef1065817",
+      "currentSha256": "039ad4017a8256481d4109d37dfcfc919767094fd1610988d16706fef1065817",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/clarification.schema.json",
+      "beforeSha256": "8ec215edc4334d4b4410c44ec3d6ca8da8ec69c3fe4e743093f842f7def17cca",
+      "currentSha256": "8ec215edc4334d4b4410c44ec3d6ca8da8ec69c3fe4e743093f842f7def17cca",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/commands.schema.json",
+      "beforeSha256": "7a8dbc6c5af455dce04304b33183187c001e95440978ef6aaf47da4fded9c0df",
+      "currentSha256": "7a8dbc6c5af455dce04304b33183187c001e95440978ef6aaf47da4fded9c0df",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/consumer-edge.schema.json",
+      "beforeSha256": "921982d21c7a8151d66fc947b114ea0c695d718e1d85db352c171bbaff85ffbf",
+      "currentSha256": "921982d21c7a8151d66fc947b114ea0c695d718e1d85db352c171bbaff85ffbf",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/current-synthetic-worlds.json",
+      "beforeSha256": "88abb9cb08689f2e96aa509fb3710f4da1b62cf25e44fd02c94fb66fa2fe4ad8",
+      "currentSha256": "88abb9cb08689f2e96aa509fb3710f4da1b62cf25e44fd02c94fb66fa2fe4ad8",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/error.schema.json",
+      "beforeSha256": "4bf2846a3bafdc9fdee29d3bbd9c1dcbda53bffeae3406666d1857a7af355f3d",
+      "currentSha256": "4bf2846a3bafdc9fdee29d3bbd9c1dcbda53bffeae3406666d1857a7af355f3d",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/execution-evidence.schema.json",
+      "beforeSha256": "5f9eda27221c948decd17ff876cb110dc3f9df9195a521bf5dac97ba8187edd9",
+      "currentSha256": "5f9eda27221c948decd17ff876cb110dc3f9df9195a521bf5dac97ba8187edd9",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json",
+      "beforeSha256": "b5942f63eaa520fe80ed7cde10018586a29c5e314283c79051009626bc1716f8",
+      "currentSha256": "b5942f63eaa520fe80ed7cde10018586a29c5e314283c79051009626bc1716f8",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/guided-model-response.schema.json",
+      "beforeSha256": "2d986c098548b604d6fe75a3597397eabe325705550a78286e76ae5ae2a176ca",
+      "currentSha256": "2d986c098548b604d6fe75a3597397eabe325705550a78286e76ae5ae2a176ca",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/guided-planning-commands.schema.json",
+      "beforeSha256": "7229d5841845c04509dd28e4874e415e349b928d2ce1576912b9e98d9926433b",
+      "currentSha256": "7229d5841845c04509dd28e4874e415e349b928d2ce1576912b9e98d9926433b",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/guided-policy.schema.json",
+      "beforeSha256": "9536507b5a3b6fe68f1afbcffaeb26fee26bd18e1c854a0d51024407ce1bb276",
+      "currentSha256": "9536507b5a3b6fe68f1afbcffaeb26fee26bd18e1c854a0d51024407ce1bb276",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/learned-plan.schema.json",
+      "beforeSha256": "404ec2ea1ee733371d7d36f379f9203721a3aba60f00f7fb256bed8a0280cdff",
+      "currentSha256": "404ec2ea1ee733371d7d36f379f9203721a3aba60f00f7fb256bed8a0280cdff",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/ledger.schema.json",
+      "beforeSha256": "081f1c4f45386a52a4263b98475544c919db7a4a1311bc6dae48772ae861d150",
+      "currentSha256": "081f1c4f45386a52a4263b98475544c919db7a4a1311bc6dae48772ae861d150",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/limits.schema.json",
+      "beforeSha256": "f6e4bba01ee38ee2aa56b759120ec2e86c97f47cec15609e4ce0c60ccef97995",
+      "currentSha256": "f6e4bba01ee38ee2aa56b759120ec2e86c97f47cec15609e4ce0c60ccef97995",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/observation-refresh.schema.json",
+      "beforeSha256": "66d7a4591ac4fae47830e178b5685a02d4ff97216de5f4a1eccd2b1b85414ff2",
+      "currentSha256": "66d7a4591ac4fae47830e178b5685a02d4ff97216de5f4a1eccd2b1b85414ff2",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/observation.schema.json",
+      "beforeSha256": "31afe5aa601b10ea1c81434797ff401ceef16ef5df90d49ffb700dfe7ff58963",
+      "currentSha256": "31afe5aa601b10ea1c81434797ff401ceef16ef5df90d49ffb700dfe7ff58963",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/planning-context.schema.json",
+      "beforeSha256": "aa83c37a4b647daea1087987dac4a03667c149cde5342b8b53d946a5043c0747",
+      "currentSha256": "aa83c37a4b647daea1087987dac4a03667c149cde5342b8b53d946a5043c0747",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/planning-fixtures.json",
+      "beforeSha256": "f642159fd4947430c08514bfe1615585499cf2fc2c286e84de41777af2d8e046",
+      "currentSha256": "f642159fd4947430c08514bfe1615585499cf2fc2c286e84de41777af2d8e046",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/producer.schema.json",
+      "beforeSha256": "9a71f3e82034bc7b7244b2ffc43dc6fb238df831e6ab829d9cae4a41cdc407c2",
+      "currentSha256": "9a71f3e82034bc7b7244b2ffc43dc6fb238df831e6ab829d9cae4a41cdc407c2",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-canonical-vectors.json",
+      "beforeSha256": "995458217fdd08ae0454e8045077d7c14a0dbb3842d9e3c35a2271109d4a6185",
+      "currentSha256": "995458217fdd08ae0454e8045077d7c14a0dbb3842d9e3c35a2271109d4a6185",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "beforeSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+      "currentSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication.schema.json",
+      "beforeSha256": "f5314de5d45dd277945f820b9cb5526f88df0da2d49e36ab3a2b42fb81c75b36",
+      "currentSha256": "f5314de5d45dd277945f820b9cb5526f88df0da2d49e36ab3a2b42fb81c75b36",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-artifact.schema.json",
+      "beforeSha256": "590e3d79a0d4b6ef5705083950324bc962b536958d6878b97b13859e1c2ff989",
+      "currentSha256": "590e3d79a0d4b6ef5705083950324bc962b536958d6878b97b13859e1c2ff989",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-ipc.schema.json",
+      "beforeSha256": "6bbf2c36dafb970fc1874c0c1ab31538a30d4e5222b1f5244000ccf0bc8b47cf",
+      "currentSha256": "6bbf2c36dafb970fc1874c0c1ab31538a30d4e5222b1f5244000ccf0bc8b47cf",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-job.schema.json",
+      "beforeSha256": "f1c850dedcc62e7e1cc9cce1b88942d8975d28ae6cadcc39a96075b94ecf501f",
+      "currentSha256": "f1c850dedcc62e7e1cc9cce1b88942d8975d28ae6cadcc39a96075b94ecf501f",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-operation.schema.json",
+      "beforeSha256": "1e5035d1badbe7c742149425257924a6308bb96ec996b23cd8afdf36fe8f2fd5",
+      "currentSha256": "1e5035d1badbe7c742149425257924a6308bb96ec996b23cd8afdf36fe8f2fd5",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-policy.schema.json",
+      "beforeSha256": "045ee1bd22bd654c3fa462d4a0dd7d6b660d17181d41d4a2b4265dec8fbcb7e0",
+      "currentSha256": "045ee1bd22bd654c3fa462d4a0dd7d6b660d17181d41d4a2b4265dec8fbcb7e0",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-profile.schema.json",
+      "beforeSha256": "adf91ed11e9d878ef31d4ee87902e76e27e8ec53b14cf61e79acb8717102fbe4",
+      "currentSha256": "adf91ed11e9d878ef31d4ee87902e76e27e8ec53b14cf61e79acb8717102fbe4",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json",
+      "beforeSha256": "40d547d9891561541947b591ffa6ba1d07ae2caff7349fd780db4acc8d5313d7",
+      "currentSha256": "40d547d9891561541947b591ffa6ba1d07ae2caff7349fd780db4acc8d5313d7",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json",
+      "beforeSha256": "7accd138c4b8385142e9c2b20f308912e2d0cc7b9afccf2d4aac4155ea0197ca",
+      "currentSha256": "7accd138c4b8385142e9c2b20f308912e2d0cc7b9afccf2d4aac4155ea0197ca",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/revision.schema.json",
+      "beforeSha256": "e37b2bd9869d42af323b2ad321e731a2556a8c44ebdc86f52c2e505fc1ea3531",
+      "currentSha256": "e37b2bd9869d42af323b2ad321e731a2556a8c44ebdc86f52c2e505fc1ea3531",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/runner-context.schema.json",
+      "beforeSha256": "7db2628f53fb646c495c538a2e74bc93634ae89efafe08efdc49c8d8cfe53beb",
+      "currentSha256": "7db2628f53fb646c495c538a2e74bc93634ae89efafe08efdc49c8d8cfe53beb",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json",
+      "beforeSha256": "378ab88d0abedb156990f414c0b44ac8a8bdebfcbb791efb12fe0e6723401b26",
+      "currentSha256": "378ab88d0abedb156990f414c0b44ac8a8bdebfcbb791efb12fe0e6723401b26",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/session.schema.json",
+      "beforeSha256": "3651dc302709f3b140e6543238cf0f04f7326ddab422fb7d4465b03faf42f6e8",
+      "currentSha256": "3651dc302709f3b140e6543238cf0f04f7326ddab422fb7d4465b03faf42f6e8",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/source-reference.schema.json",
+      "beforeSha256": "184a99cc4018f5899eb8dc743dcb0a9283c19f3ff7371da99098eeee432e229c",
+      "currentSha256": "184a99cc4018f5899eb8dc743dcb0a9283c19f3ff7371da99098eeee432e229c",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/source-selection.schema.json",
+      "beforeSha256": "df429534e7b827b556d52b7d39790e62d6d40360884d0e388ab70787ed53558f",
+      "currentSha256": "df429534e7b827b556d52b7d39790e62d6d40360884d0e388ab70787ed53558f",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/versions.schema.json",
+      "beforeSha256": "02bc1bbc453daea97962b4ec330599bc66f7632e69a19b7780a610b96a320eb8",
+      "currentSha256": "02bc1bbc453daea97962b4ec330599bc66f7632e69a19b7780a610b96a320eb8",
+      "unchanged": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/wire-parity.fixtures.json",
+      "beforeSha256": "38d30dc9fa01b7148bacf81be786f260457dfa59f283e116d38cef2dcde45629",
+      "currentSha256": "38d30dc9fa01b7148bacf81be786f260457dfa59f283e116d38cef2dcde45629",
+      "unchanged": true
+    },
+    {
+      "path": "studio-runner/src/guided/contracts.ts",
+      "beforeSha256": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+      "currentSha256": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+      "unchanged": true
+    },
+    {
+      "path": "studio-runner/src/guided/runtime.ts",
+      "beforeSha256": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+      "currentSha256": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+      "unchanged": true
+    },
+    {
+      "path": "studio-runner/src/guided/schemas.json",
+      "beforeSha256": "8d21a51550084780d3a4da7a1a482beb717886de57bae4de72a5274db18cdd95",
+      "currentSha256": "8d21a51550084780d3a4da7a1a482beb717886de57bae4de72a5274db18cdd95",
+      "unchanged": true
+    },
+    {
+      "path": "studio-runner/src/guided/transport.ts",
+      "beforeSha256": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+      "currentSha256": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+      "unchanged": true
+    },
+    {
+      "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+      "beforeSha256": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa",
+      "currentSha256": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa",
+      "unchanged": true
+    }
+  ],
+  "reviewInputs": {
+    "AriaManifestPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/outcome-validation-review01/manifest.json",
+    "AriaManifestSha256": "6371990a0187f5e87f4dc8c9d6f1634e20a7ef755e7143eb39bf898db8e996cc",
+    "reviewSha256": "a167d7f4ba5590a4e99bb7d6f383ac81e6e6c14c3cb81cbc3a3f4be5219ad325",
+    "sourceEvidenceSha256": "9c8c6166535c7cfdab697eef19e81d10fbeab1f5f4b2be09e9ea05d227f6aae7"
+  },
+  "nextActualPrerequisite": "Root scheduled entire unchanged GuidedWireContractTest baseline. New method must reproduce original whole=false/ordinary=true/prefix=false on actual loaded1.4.0 JAR. Existing gates remain intact and may independently fail. If control does not reproduce or loaded provenance cannot be established, disposition NEED_EVIDENCE; no speculative engine patch. Independent final design and explicit source release still required before production GuidedContracts changes.",
+  "remaining": [
+    "Separate ledger21vs20/session16vs14/replaybasis36vs33 concerns need actual fullclass baseline, no silent count or epoch changes",
+    "Full015then008 original86/24/55/35, B1/R1/B2/B3/B4-R2/native/private/fullnormalstaticcoverage and independent QA/lifecycle closure",
+    "Actual04 body dispute unresolved until actual original native control and independent final engine review",
+    "Row85 original pending user decision remains unamended"
+  ],
+  "noOtherSourceFixtureSchemaOraclePinDistOrStoryEdits": true
+}

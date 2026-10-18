@@ -1,0 +1,167 @@
+{
+  "createdAt": "2026-10-14T22:21:39.597792+00:00",
+  "authority": "User request to resume STUDIO-OBSERVED with expert subagents; existing full-wave USD500 ceiling",
+  "budget": {
+    "ceilingUSD": 500,
+    "actualSpend": "unavailable; do not claim measured compliance"
+  },
+  "checkpoint": "012B,013,014 strictly PASS/Done, administratively closed and root review/close CLI verified; every originally applicable local QA green;015productionunstarted",
+  "planner": "wave-plan.json produced by node tools/aiox-local.cjs wave plan; no DAG errors",
+  "guardrails": [
+    "Preserve accumulated uncommitted work",
+    "Independent QA owns Done; root owns SDC verification",
+    "One contract owner; no simultaneous writers to shared files",
+    "Serialize Gradle and runner dist/build/fixtures windows",
+    "No new full-suite rerun without source drift or concrete uncovered risk",
+    "External criteria are not treated as passed"
+  ],
+  "stages": [
+    {
+      "id": "resume-qa",
+      "parallel": [
+        "Quinn frontend QA: 012B",
+        "Quinn recording/integration QA: 013",
+        "Quinn security/data QA: 014"
+      ],
+      "root": "Recount evidence, reconcile executor metadata, verify final provenance"
+    },
+    {
+      "id": "close",
+      "requires": "Final accepted QA verdict and Done for each story",
+      "owner": "Pax administrative close; root verify phase lock",
+      "parallelSafe": "Architect may inspect 015 without changing shared source"
+    },
+    {
+      "id": "015-readiness",
+      "requires": "013 and 014 Done and integration windows closed",
+      "experts": [
+        "Aria architecture/contracts",
+        "Dara V21 and persisted state review",
+        "Pax scope and test-oracle review"
+      ],
+      "deliverable": "Source-anchored exact ownership matrix, remaining design decisions, contract schema shape and named test oracles; saved T0 rulings reused"
+    },
+    {
+      "id": "015-implementation",
+      "sequence": [
+        "C-int C3a/C3b schema and pin edit; V21 only after continuation-state ruling",
+        "Dex backend authoring/change detection/session/publication",
+        "Dex runner mixed-mode prefix/suffix and evidence",
+        "Root joined integration window",
+        "Independent Aria technical review and Quinn SDC QA",
+        "Pax close"
+      ],
+      "parallelSafe": [
+        "V21 migration owner vs disjoint runner code after contracts",
+        "Backend and runner disjoint code only after approved interfaces"
+      ],
+      "requiredProof": [
+        "10 steps edit 4: model-free prefix 1-3, always re-learn 4-10",
+        "Insert/delete/reorder/config invalidation",
+        "Drift at j switches safely; assertion/policy failure stops",
+        "Secret references and fresh bindings preserved",
+        "Merged snapshot hashes/provenance and continuous video",
+        "Unchanged second run plain replay; no finalize model calls"
+      ]
+    },
+    {
+      "id": "008",
+      "requires": "012B/013/014/015 Done",
+      "experts": [
+        "Uma UX implementation",
+        "Dex API/MSW integration",
+        "Quinn WCAG/Playwright QA"
+      ],
+      "output": "Single Run UX and v2-only authoring consumer"
+    },
+    {
+      "id": "009",
+      "requires": "008 Done",
+      "experts": [
+        "Dex integration",
+        "Gage deployment configuration",
+        "Quinn real-model benchmark/fault QA"
+      ],
+      "external": [
+        "Approved gateway",
+        "Vault and test secret",
+        "staging login application",
+        "Sonic/SIEM/platform prerequisites"
+      ],
+      "output": "Local deployable path and honest externally gated proof"
+    },
+    {
+      "id": "010-011",
+      "requires": "009 Done and listed external gates",
+      "experts": [
+        "Atlas pilot",
+        "Morgan release readiness",
+        "Dex final cleanup",
+        "Aria technical gate",
+        "Quinn independent QA"
+      ],
+      "ordering": "CLI currently 010 then 011; any permitted overlap must be explicitly reconciled by PO, never inferred from prose"
+    }
+  ],
+  "completedStories": [
+    "STUDIO-OBS-012B",
+    "STUDIO-OBS-013",
+    "STUDIO-OBS-014"
+  ],
+  "currentStage": "requested-strict-validation-complete",
+  "story015ImplementationStarted": false,
+  "nextDesignEvidence": [
+    "docs/qa/evidence/STUDIO-OBS-015/resume-plan/",
+    "docs/qa/evidence/STUDIO-OBS-015/resume-data-review.json",
+    "docs/qa/evidence/STUDIO-OBS-015/resume-po-review.json"
+  ],
+  "implementationReadiness": "015 production NOT_RELEASED: complete user-scoped012B/013/014 strictQA first; prior015finaldesign remains unstarted implementation.",
+  "activeExperts": {
+    "coordinator": "Orion @aiox-master completed fan-in; specialist work complete"
+  },
+  "poScopeReview": {
+    "artifact": "docs/qa/evidence/STUDIO-OBS-015/resume-po-review.json",
+    "verdict": "scope clarifications approved; technical design conditions remain",
+    "sha256": "96f86c359860b1375bc870740509a420b8738df6ad6e7bff9afbb0ad4e5f5d50"
+  },
+  "nextDispatch": "None for this completed user-scoped validation;015 implementation remains unreleased",
+  "latestUserSteering": {
+    "request": "Validate the implementation plan for 012B, 013, 014. Only call it done, when planned qa validation is done and everything is green. Run using the right experts as subagents for better context management.",
+    "completionPolicy": "PASS only after every planned local validation executed green; CONCERNS/WAIVED/deferred planned local checks cannot complete",
+    "storiesReopened": [
+      "STUDIO-OBS-012B",
+      "STUDIO-OBS-013",
+      "STUDIO-OBS-014"
+    ],
+    "productionDispatchReleased": false
+  },
+  "currentObjective": {
+    "stories": [
+      "STUDIO-OBS-012B",
+      "STUDIO-OBS-013",
+      "STUDIO-OBS-014"
+    ],
+    "completionRule": "Every planned applicable local QA validation must execute green; independent PASS only. No CONCERNS/WAIVED completion.",
+    "015ProductionReleased": false
+  },
+  "currentWaveBatch": 4,
+  "strictRevalidationCheckpoint": "../strict-qa-20261014/coordinator-checkpoint.json",
+  "currentExecution": {
+    "requestedStories": "012B0.3.7/0130.2.9/0140.1.18 strictPASS/Done/closed",
+    "allApplicableLocalQa": "COMPLETE_GREEN",
+    "backend": "actual normal check exit0,2077standardPASS+2crossReplicaPASS,25historicaluncreditedskips",
+    "runner": "1529unit,232native,313deployment,10focusedprofilePASS;type/lint/coveragePASS,historicalskipsuncredited",
+    "workflow": "review+closeverified,requestedstoriesmarkedcompleted onSTUDIO-OBS-SINGLE-PATH",
+    "scopeLimits": "Existingexternal009/010/F01-F04gatesandlegacycoverage-selectorfutureenforcementlimitationrecorded; no unexecutedlocalcriterionwaived",
+    "followingWave": "015 Ready,productionunstarted; no furtherimplementationdispatch"
+  },
+  "updatedAt": "2026-10-15T03:28:13.384Z",
+  "priorResumePlanSnapshot": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/orchestration/execution-plan-before-final-backend-refresh.json",
+    "sha256": "4bf8c2c4b4eb3fa1c6c02aac4df23a71b24fb12ee0a21f8778922e27000c16d5",
+    "meaning": "Exact prior plan including historicalCONCERNSDone checkpoint and obsolete015-stage/currentexecution fields; preserved before refreshing current strict objective."
+  },
+  "waveId": "STUDIO-OBS-SINGLE-PATH",
+  "waveStatePath": ".aiox/waves/STUDIO-OBS-SINGLE-PATH/state.json",
+  "finalValidationEvidence": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/orchestration/final-validation.json"
+}

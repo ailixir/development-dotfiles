@@ -1,0 +1,38 @@
+{
+  "status": "GO_CANDIDATE_REVIEW_CONDITIONAL_EXACT_COMPILED_STRUCTURE_PIN",
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "a5034ee98707552d927f48bc0a30e07896df913f3b706f42f15ee16c7b52144b",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": "2c3bcd0b3fff200ab570f3a9cca21a0caad8e7eac7e05f63b2cfd04d220fce3e",
+    "docs/specs/studio-observed-authoring/contracts/v3/session.schema.json": "848801647832837f76e8d31a3fbbc1fbffac296848d15b63edde69a5e76a58fd",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-d-runner-context-same-epoch-library-audit/networknt-bytecode.txt": "b3b1c8b47da000b8f1153cf6b58413ee3864d7b51f34df96089708106db403ed"
+  },
+  "apiFacts": [
+    "JsonSchema.getSchemaNode returns original private schema node; getValidators returns lazily initialized unmodifiable List<JsonValidator>; PropertiesValidator.getSchemas returns original Map<String,JsonSchema>, not a fresh compiler.",
+    "GuidedContracts expands referenced nodes and strips $id/definitions/$defs from compiled input. Eligibility must bind expanded compiled root, not raw session resource hash or separately loaded owner fragment."
+  ],
+  "minimalPin": "Prefer one reviewed exact canonical expanded-v3/session schema fingerprint (and matching compiled owner subtree) over a handwritten partial keyword validator. Calculate/compare only private actual cached root schema node; require unambiguous original root PropertiesValidator owner child, child schema equals exact root.properties.owner, and supported original parent/context identity. Any missing/changed/custom/ambiguous structure disables optimization. Expected fingerprint must be independently derived from pinned expansion/resources, never learned from current runtime candidate. Do not expose/mutate schemas/list/map/config.",
+  "constraints": [
+    "Full actual successful validation initializes SAME original cached schema epoch first. Actual root exact pin covers referenced versions/limits and excludes future cross-field/custom keywords automatically.",
+    "Original complete fresh prelease snapshot/class/JSON/repr, sole lease delta on owned copies, fresh whole canonical at original save and fullOWNER child emptiness remain required.",
+    "No persistent or cross-callback proof; default/manual/ambient path remains original. Runtime extraction/layout error fallback; actual child invalid stays fixed INVALID_CONTRACT422 at original validation point.",
+    "OWNER child scalar-root validation changes internal diagnostics/state path; explicit accepted tradeoff does not permit claiming exact rooted log bytes. Same config/dialect/cache epoch and original full owner checks still required."
+  ],
+  "candidatePitfalls": [
+    "Imports com.networknt.schema.JsonSchema, JsonValidator, PropertiesValidator must match installed1.4.0 signatures and generic Map<String,JsonSchema>/List<JsonValidator>; no casts to custom internal factories/reflection.",
+    "getValidators lazy initialization/getSchemas returned map are mutable or initialize state internally; inspect only after successful full validation, no mutation/exposure.",
+    "Raw root resource hash cannot prove compiled expanded schema identity. Child retrieval by name alone without actual root pin is insufficient against cross-field extensions.",
+    "Same before/after document snapshot must be detached from actual lease mutation; exact report ownership/representation proof not JsonNode reference identity alone."
+  ],
+  "existingTestFit": [
+    "SessionIT.atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot",
+    "SessionIT.atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate",
+    "SessionIT.atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit",
+    "SessionIT.atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand",
+    "SessionIT.workerSubjectFenceAndLeaseAreIndependent",
+    "SessionIT.protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery"
+  ],
+  "scopePrecision": "These existing actual PG fixtures fit default/optimized renewal atomic guards and rollback; new focused method branches can use same fixture if separately authorized. No new harness or mandatory E2E, no runtime/PASS credit. Schema API/root pin parity must be checked by nearest defining tests; source feasibility not actual equivalence execution.",
+  "tradeoff": "Exact schema fingerprint/whole-copy matching adds work and maintenance, but fail-closed version pin is simpler than general keyword/root dependency analysis. No cost dominance/1000ms gain claim.",
+  "actions": "Read-only source/installed metadata; no codeauthor/build/runtime/query/tools infrastructure/lifecycle.",
+  "budget": "USD500 actual billing unavailable"
+}

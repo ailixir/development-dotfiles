@@ -1,0 +1,413 @@
+--- .ai/STUDIO-OBS-014-close.json (before Pax administration)
++++ .ai/STUDIO-OBS-014-close.json (after Pax administration)
+@@ -1,248 +1,193 @@
+ {
++  "schema": 2,
+   "story": "STUDIO-OBS-014",
+-  "reviewer": "Quinn (independent QA)",
+-  "verdict": "CONCERNS",
+-  "reviewed_revision": "worktree-s4c:sha256:af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137",
+-  "closureKey": "STUDIO-OBS-014:digest:worktree-s4c:sha256:af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137",
+-  "sourceManifest": "docs/qa/evidence/STUDIO-OBS-014/resume-qa/review-source-manifest.json",
+-  "sourceManifestSha256": "8468756ee975df9e9e2c351c6f93934f7cc26d90ff2c5f50cf27082885c750f7",
+-  "sourceFilesCompared": 1556,
+-  "sourceMismatches": [],
+-  "storySha256Before": "2f0130435a5bffb414141a48aa62c7b7e2d44785eb1e1a36d7e76378882e1694",
+-  "tasksCompleted": 11,
+-  "uncheckedImplementationTasks": 0,
+-  "acEvidence": {
+-    "AC-1": {
+-      "status": "MET",
+-      "evidence": [
+-        "ObservationPolicyIT 11/11: unapproved/pending refused, version approval/audit and origin subset",
+-        "GuidedGovernanceMigrationIT 26/26: immutable dense versions, separate approver, trigger-only audit and approved CSI freeze",
+-        "GuidedSessionIT v2 materialized-context case; Planning bootstrap refusal and timeout control",
+-        "Runner policyHash 6/6, transport 14/14, guidedMain/config refusal and guided-dataflow 3/3; rules/applicationPolicy rejected before worker/runtime; no rule can widen frozen policy"
+-      ],
+-      "limits": "No claim that future schema F03 exact-field reads exist. No-read fixture proves source is not exported and Refresh still is; its TARGET_CHANGED branch is conditional and not exercised on a nonexistent node, as architect ruled."
+-    },
+-    "AC-2": {
+-      "status": "MET AS DOCUMENT",
+-      "evidence": [
+-        "guided-data-flow.md discloses metadata export, sanitizer/password/known-secret controls, video, audit, publication copies, indefinite R-1 stores, interim R-2 policies and ED-01"
+-      ],
+-      "limits": "External Security/Compliance approval is not obtained; OBS-010 owns it."
+-    },
+-    "AC-3": {
+-      "status": "MET BY COMPONENT + DATABASE EVIDENCE",
+-      "evidence": [
+-        "GuidedObservationPrunerIT 3/3 through actual bean/function: pruned results unchanged, published rows byte-identical, ObservedRevisionVerifier still verifies, window/FINALIZING negatives",
+-        "GuidedGovernanceMigrationIT nonempty never-published copies deleted, published evidence immutable, terminal safe_result nulled only, seven retained keys; late writes refused EXPIRED"
+-      ],
+-      "limits": "The pruner test itself starts with zero copy rows; non-vacuous deletion proof is the migration IT. It verifies persisted revision eligibility after prune rather than launching a new browser replay specifically after pruning; immutable bytes plus green replay suite provide composed evidence."
+-    },
+-    "AC-4": {
+-      "status": "MET WITH TEST-001 COVERAGE CONCERN",
+-      "evidence": [
+-        "Pure guard executes planted Delete account/Open reports and ungrounded target tests",
+-        "Shared integration refusal path proven under DENY; source proves guard runs before admission",
+-        "S4c joined counts and exact tallies; six-case complete/name-excluded unit denominator"
+-      ],
+-      "limits": "Dedicated structurally valid destructive/ungrounded integrated dispatch case was not executed. No such claim or waiver made."
+-    },
+-    "AC-5": {
+-      "status": "MET WITH TEST-001 COVERAGE CONCERN",
+-      "evidence": [
+-        "Governed vocabulary constrained by V19/policy document",
+-        "Pure tests Save vs Delete, authored Delete allowed and Submit order denied execute green",
+-        "Common guard exception/audit/terminal branch is exercised by DENY ITs"
+-      ],
+-      "limits": "Exact destructive reason has unit evidence plus common-branch integration; direct destructive integration remains tracked."
+-    },
+-    "AC-6": {
+-      "status": "MET",
+-      "evidence": [
+-        "AR-SEC001-FM U1-U7 and 2,520-node monotonic set in Guard 21/21",
+-        "Five DENY real controls, two CLARIFY_FIRST workflows, all in Planning 49/49",
+-        "ALLOW OBS-007 learning/replay and audit canary within Replay 40/40; prior recorder-fault teardown is fixed in final S4c"
+-      ],
+-      "limits": "DENY conservatively refuses buttons/links/toggles and Enter; native semantics cannot constrain arbitrary JS handlers on other keys/hover. Scope and residual are architect-ruled and PO acknowledged. Author copy belongs to OBS-008."
+-    },
+-    "AC-7": {
+-      "status": "MET WITH TEST-005 LOW COVERAGE CONCERN",
+-      "evidence": [
+-        "Backend emits AUTHORED/SAVED_INPUT/PAGE; PAGE adds sanitized role/region",
+-        "Closed clarification schema and generated contracts/fixtures; GuidedWireContractTest 7/7, StudioContractTest 13/13",
+-        "Planning confirmation asserts AUTHORED label before dispatch"
+-      ],
+-      "limits": "Direct SAVED_INPUT emitter assertion remains open; secret references are IDs only."
+-    },
+-    "AC-8": {
+-      "status": "MET",
+-      "evidence": [
+-        "RateLimitClassifierTest 5/5 for EXECUTE",
+-        "GuidedCsiBudgetIT 5/5: two replicas, day/start refusal, real reservation hook mid-session failure, conditional monotone charges, ceiling invariant",
+-        "V19 serialized CSI guard + append-only token days; BUDGET_EXCEEDED and Retry-After on database UTC clock"
+-      ],
+-      "limits": "Sizing is OBS-009/OPS-001, unchanged defaults."
+-    },
+-    "AC-9": {
+-      "status": "MET",
+-      "evidence": [
+-        "StudioApiIT 8/8 includes missing key 400 before writes and same-key replay body",
+-        "StudioExecuteIdempotencyFilterTest 2/2; OpenAPI mandatory key and current SHA pin match"
+-      ],
+-      "limits": "D-2b cached response reauthorization remains open; no implied security closure."
+-    },
+-    "AC-10": {
+-      "status": "MET",
+-      "evidence": [
+-        "StudioActionAuditTest 5/5: closed 16 keys, no raw labels, approved origin, after-commit vs refusal timing",
+-        "Replay auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass passed: nonempty registered OBS-007 canaries, admitted+replay events, exact key set, <=1KiB, no canary text",
+-        "Planning refusal audit proves refused event under policy denial"
+-      ],
+-      "limits": "Actual SIEM provisioning/retention is external. Dictionary recovery residual SEC-003 disclosed."
+-    },
+-    "AC-11": {
+-      "status": "MET AS DESIGN NOTE ONLY",
+-      "evidence": [
+-        "Dated artifact-hmac-design-note.md: Vault Transit choice, ObservedRevisionVerifier verification point, rotation/min-key-version and environment gate",
+-        "Architect ar-ac11-and-refusal-codes ratifies design-only scope; F04 backlog named"
+-      ],
+-      "limits": "No HMAC implementation; E1-E8 UNCONFIRMED. F04 is pilot-blocking by default unless explicitly accepted in OBS-010; this gate gives no deployment approval."
+-    },
+-    "P1_legacy_admission": {
+-      "status": "MET",
+-      "evidence": [
+-        "claimAdmission route/op and claim() absent; claimObserved-only admitted path retained",
+-        "StudioAuthorizationIT legacy-route 404/405 no-write negative passed; class 28/28",
+-        "AdmissionCasIT 14/14; old->new names and refusal-code changes architect-ratified; 43 public OpenAPI operations with matching confinement SHA"
+-      ]
+-    },
+-    "dead_v2_matcher": {
+-      "status": "MET",
+-      "evidence": [
+-        "Independent rg: zero production api/v2/studio hits, exactly three test-only hits in StudioExecuteIdempotencyFilterTest Javadoc/named negative method",
+-        "Old StudioV2IdempotencyFilterTest absent; theRemovedV2PrefixIsNoLongerCovered passed",
+-        "Other matcher scope unchanged from inherited baseline; D-2b not narrowed"
+-      ]
+-    }
+-  },
+-  "gatePath": "docs/qa/gates/STUDIO-OBS-014-action-safety-and-governance-for-the-learning-run.yml",
+-  "gateSha256": "0f5e995c2902662a85c7d8be660462f9d3e47e3e4e23f8481be1a6cfaa6a8fa6",
+-  "reviewReport": "docs/qa/evidence/STUDIO-OBS-014/resume-qa/review-report.json",
+-  "reviewReportSha256": "baf44ac53b3bfcaca24bd283e5d8785d46d743f210bf417f06fd4175e52a3a8d",
+-  "schema": 1,
+-  "author": "Pax (@po)",
+-  "closedAt": "2026-10-14T22:31:16.631327+00:00",
++  "author": "Pax (@po), independent administrative closure",
++  "closedAt": "2026-10-15T03:22:31.415086+00:00",
++  "verdict": "PASS",
++  "reviewer": "Quinn (independent security/SDC QA)",
++  "reviewed_revision": "worktree-strict:sha256:cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
++  "closureKey": "STUDIO-OBS-014:digest:worktree-strict:sha256:cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+   "statusBefore": "Done",
+   "statusAfter": "Done",
+   "lifecycleTransitionByPo": false,
+-  "storySha256After": "5487b52a5b7d6bb810a6bf1d095c759d0154dd64d2ecf0986bc0703f27a527bc",
+-  "normalizedStorySha256": "2f0130435a5bffb414141a48aa62c7b7e2d44785eb1e1a36d7e76378882e1694",
++  "storyVersionBefore": "0.1.17",
++  "administrativeVersion": "0.1.18",
++  "storySha256Before": "253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140",
++  "storySha256After": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42",
++  "normalizedStorySha256": "253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140",
+   "restoresExactQaReviewedStory": true,
++  "QAResultsSha256Before": "581045f5a93a7b72f6dfbe9a0da6da71519895785158c0588c408f77fb823ce4",
++  "QAResultsSha256After": "581045f5a93a7b72f6dfbe9a0da6da71519895785158c0588c408f77fb823ce4",
++  "qaResultsUnchanged": true,
++  "preQaGroupsByteExact": true,
++  "protectedStorySha256": "bc222a40a66ab22a4225a9c4b73e7f827950972b15059721fc6b7d4933883043",
++  "protectedStoryNormalization": "Status\u2192NORMALIZED before QA Results",
+   "acTextUnchanged": true,
+   "taskTextUnchanged": true,
+   "fileListPreserved": true,
++  "administrativeFileListPolicy": "No implementation File List edit needed: already actual/reconciled by Dex and QA. Administrative owned-file inventory resides in the aggregate closure receipt; changing pre-QA File List during close would invalidate protected content.",
++  "sourceManifest": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/integration-final-all-gates-after.json",
++  "sourceManifestSha256": "cd69f52f93f591932276b75eb5185f48e4c9d047890c62bdab64c7ae54c222ec",
++  "sourceDigest": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
++  "distDigest": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
++  "sourceFilesCompared": 1583,
++  "distFilesCompared": 238,
++  "sourceMismatches": [],
++  "distMismatches": [],
++  "gatePath": "docs/qa/gates/STUDIO-OBS-014-action-safety-and-governance-for-the-learning-run.yml",
++  "gateSha256": "3af7b7d6e87dd5541987389e2475b26d0e1685e73d41d174309e0a453a5ef005",
++  "reviewReport": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-story-review.json",
++  "reviewReportSha256": "61efb21d40d9d315d99d77ff5d118a941e8a8849be8547676540309c9f821a82",
+   "quality": {
+-    "rawEvidenceFilesRehashed": 295,
+-    "rawHashMismatches": 0,
+-    "backendXmlFiles": 285,
++    "allPlannedApplicableLocalValidationGreen": true,
++    "localWaiver": false,
+     "backend": {
+-      "tests": 2084,
+-      "failures": 0,
++      "total": 2102,
++      "passed": 2077,
++      "failed": 0,
+       "errors": 0,
+-      "skipped": 25,
+-      "passed": 2059
++      "skipped": 25
++    },
++    "crossReplicaTest": {
++      "total": 2,
++      "passed": 2,
++      "failed": 0,
++      "errors": 0,
++      "skipped": 0
++    },
++    "orderedJoinedClasses": {
++      "Planning": 57,
++      "Replay": 40,
++      "Session": 44,
++      "Bridge": 37,
++      "requiredLocalSkipped": 0
+     },
+     "runner": {
+-      "unitPassed": 1351,
+-      "unitSkipped": 29,
+-      "fixturesPassed": 225,
+-      "fixturesSkipped": 9,
+-      "deploymentPassed": 313
++      "unitPassed": 1529,
++      "unitHistoricalSkippedUncredited": 29,
++      "typeCheckExit": 0,
++      "fullLintExit": 0,
++      "allConfiguredCoverageThresholds": "PASS",
++      "profilePassed": 10,
++      "nativePassed": 232,
++      "nativeHistoricalSkippedUncredited": 9,
++      "deploymentPassed": 313,
++      "deploymentSkipped": 0
+     },
+-    "frontendPassed": 701,
+-    "method": "Independent rehash and XML recount of frozen evidence; no full test/build rerun. All skips excluded.",
+-    "codeRabbit": "Unavailable; documented independent QA fallback, no automated pass claimed."
++    "frontend012B": {
++      "passed": 701,
++      "unchangedPreviouslyClosed": true
++    },
++    "coverage": {
++      "globalLine": {
++        "covered": 18987,
++        "total": 21237,
++        "requiredPercent": 70
++      },
++      "activePackageBarsPercent": [
++        75,
++        75,
++        75,
++        75
++      ],
++      "mappedGatewayLine": {
++        "covered": 393,
++        "total": 424,
++        "requiredPercent": 80
++      },
++      "legacyCompilerLiteralScopes": "NO_CURRENT_CLASSES; not matched passes; compiler pipeline explicitly retired; future automatic-selector enforcement limitation remains disclosed",
++      "noInventedRetentionOrAllGuided80Bar": true,
++      "configurationChanged": false
++    },
++    "codeRabbit": "Unavailable; explicit configured independent manual fallback actually used; no automated CodeRabbit pass claimed",
++    "noSkippedCaseCreditedAsPassed": true,
++    "backendFreshXmlFilesRecounted": 287
+   },
+-  "phaseVerification": {
+-    "ok": true,
+-    "phase": "close",
+-    "checks": [
+-      "PASS: status is Done (got Done)",
+-      "PASS: approved QA verdict exists (got CONCERNS)",
+-      "PASS: QA evidence identifies reviewer",
+-      "PASS: QA evidence binds reviewed_revision",
+-      "PASS: QA evidence provenance matches the current story/verdict"
+-    ],
+-    "failures": [],
+-    "outcome": null,
+-    "meta": {
+-      "storyId": "STUDIO-OBS-014",
+-      "status": "Done",
+-      "fileListCount": 13,
+-      "qaVerdict": "CONCERNS",
+-      "qaReviewer": "Quinn",
+-      "qaReviewedRevision": "worktree-s4c:sha256:af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137",
+-      "qaEvidenceError": null,
+-      "tasks": {
+-        "total": 14,
+-        "done": 13
+-      }
++  "rawArtifactReferencesIndependentlyRehashed": 1319,
++  "rawHashMismatches": [],
++  "acceptanceTrace": {
++    "allApplicableAcMet": true,
++    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-story-review.json",
++    "pointer": "/acceptanceTrace",
++    "originalPlannedNegatives": "All original planned local proof and named guard/corpus/no-guard obligations verified",
++    "scopeOnly": "AC2/AC11 design-document scope only; no compliance/HMAC deployment credit"
++  },
++  "coverageApplicability": [
++    {
++      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa013/coverage-scope-applicability.json",
++      "sha256": "982fb5d69589be7456d8d087dd406e1296798eeb5f28bd806d1a3f8a0fd900c2"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/coverage-scope-applicability.json",
++      "sha256": "f627e1dd5776e8d043b2769a5f30382830cf78ec3aef802706a0f5a443b1f67f"
+     }
++  ],
++  "executorHandoff": {
++    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/final-executor-handoff/final-applied-receipt.json",
++    "sha256": "69edecbf1e80d672507a359ce1351656c2647c4daea8d9d1f5cfe96d7c53396e"
++  },
++  "supersededClosure": {
++    "verdict": "CONCERNS",
++    "archivedReport": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/history/close-before-strict-pass.json",
++    "sha256": "01f348287bf1d9dd01e497ca61974c70f289117b62817cba0319513dc55ebe91",
++    "historicalGate": {
++      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/prior-canonical-gate-before-final.yml",
++      "sha256": "0f5e995c2902662a85c7d8be660462f9d3e47e3e4e23f8481be1a6cfaa6a8fa6"
++    },
++    "historicalKey": "STUDIO-OBS-014:digest:worktree-s4c:sha256:af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137",
++    "historicalMarkersPreserved": true,
++    "supersededBy": "STUDIO-OBS-014:digest:worktree-strict:sha256:cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467"
++  },
++  "administrativeNormalization": {
++    "removeExactChangeLogRowWithInsertedBlank": "| 2026-10-14 | 0.1.18 | Administrative reclosure after independent strict Quinn approval; exact current QA/story/source provenance, protected content and all planned local green evidence verified. Status Done and QA Results unchanged; no lifecycle transition by PO. Historical CONCERNS report archived and twenty carry-forward dispositions reconciled without external approval. [closure-key: STUDIO-OBS-014:digest:worktree-strict:sha256:cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467] | @po (Pax) |\n\n",
++    "removeExactHistoricalDisclaimer": "These paragraphs preserve the superseded CONCERNS administrative closure. The strict administrative reclosure below is current.\n\n",
++    "removeExactAppendedSection": "\n\n## Strict administrative reclosure \u2014 2026-10-14\n\nIndependent Quinn completed the lifecycle at version 0.1.17. Pax verified the current canonical gate, final source-bound review and exact QA-reviewed Done story, then appended this administrative version 0.1.18. Status Done, QA Results, acceptance criteria, tasks and the actual implementation File List remain byte-identical to that review. The reviewed revision remains `worktree-strict:sha256:cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467`; the post-administration story hash is recorded separately in `.ai/STUDIO-OBS-014-close.json`.\n\nAll originally planned applicable local checks are complete and green. Final normal backend: 2,077 standard passes / 25 historical uncredited skips, plus two cross-replica passes; Planning57/Replay40/Session44/Bridge37. Final runner: 1,529 unit passes / 29 historical uncredited skips; type/full lint/coverage green; profile10, native232 / nine historical uncredited skips; deployment313 / zero skips. Source `cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467` and dist `af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2` were independently rehashed. Actual global70, four75 and relocated gateway393/424\u226580 coverage pass; retired compiler selector literals have no current classes, not matched passes, and their future enforcement limitation remains explicit. The configured independent manual review fallback applies; no automated CodeRabbit result is claimed.\n\nStrict guard integrations, exact refused-context replay, SAVED_INPUT, two actual model-zero replays after pruning, real policy-context forgery, mounted-worker baseline/three negative variants, catalog names and empty-directory cleanup are complete. SAME_THREAD and class-owned reset/confirmed cleanup are the accepted fixture design; no per-test conversion is claimed. The original six-pair array remains historical, with two supplemental positive sites giving eight and exact named negative/no-guard reasons. One legitimate frozen materialization remains preserved; no zero-materialization claim is made.\n\nThe old `.ai` CONCERNS report is preserved byte-exact at `docs/qa/evidence/STUDIO-OBS-014/strict-qa/history/close-before-strict-pass.json`. The current `.ai` report and strict closure receipt bind this administrative delta; the twenty carried obligations are reconciled in `docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json`. Local completed obligations are no longer deferred downstream; original playback/UX/load and folded/deployed reliability work remains. Real provider/Sonic/Vault/SIEM/staging/manual C-17, Security/Compliance, D-2b, targetLabelHash privacy and F01\u2013F04 retain their original gates. Artifact HMAC does not fix audit-label hashing. No external approval or deployment occurred. OBS-012B is unchanged; OBS-015 production is unstarted and technical signoff unresolved. Root retains close-phase CLI verification and wave advancement.\n",
++    "restoredSha256": "253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140",
++    "restoresExactQaReviewedDoneStory": true
+   },
+   "closureArtifacts": [
+     "docs/stories/STUDIO-OBSERVED/README.md",
+     "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md"
+   ],
+-  "placementRecord": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+-  "acceptance": "Coordinator accepted nonblocking CONCERNS for scoped story completion only; no external release waiver.",
++  "placementRecord": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json",
++  "placementRecordSha256": "201c2e617b4a80708da676862994d06bb8843f874e7fb44525fa9940ed25ff2e",
++  "twentyCarryForwardDispositions": "Current local proof resolved; original downstream/external gates preserved; no downstream lifecycle/AC/task changes.",
++  "idempotency": {
++    "markerCountPerStory": 1,
++    "markerCountPerIndex": 1,
++    "bothArtifactKeysUnique": true,
++    "exactQaReviewedStoryRestoredByReversingAdministrativeDelta": true,
++    "pureSecondRunNoOp": "See aggregate administrative-closure-receipt; target artifact presence checked independently"
++  },
++  "phaseVerification": {
++    "rootReviewPreviouslyPassed": {
++      "status": "passed",
++      "at": "2026-10-15T03:14:55.973Z",
++      "notes": null
++    },
++    "closeOwner": "root Orion",
++    "performedByPo": false,
++    "pendingRootCloseVerification": true
++  },
++  "strictClosureReceipt": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/strict-closure-receipt.json",
++  "aggregateClosureReceipt": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-closure-receipt.json",
++  "scopeBoundaries": [
++    "External provider/model, real Sonic/Vault/SIEM/ingress/staging, manual masked-dots C17 and Security/Compliance approvals are not obtained.",
++    "008 guided UX/consumers/playback cost and copy,009 real D-C/folded deployed reliability,010 security/operations/pilot readiness remain open.",
++    "D2b cached response reauthorization and reversible targetLabelHash remain open. Artifact HMAC F04 does not fix audit-label hashing.",
++    "F01-F04 retain original entry/exit/external gates; F04 design only, E1-E8 UNCONFIRMED.",
++    "SAME_THREAD/class-owned reset accepted; no per-test conversion. One legitimate frozen materialization preserved, never zero. Historical six pairs plus two positive mapped sites total eight; named negative/no-guard exclusions remain exact.",
++    "012B strict closure and0.3.7 unchanged;015 production unstarted and technical signoff unresolved; epic not complete."
++  ],
+   "next": {
+     "story": "STUDIO-OBS-015",
+-    "dependencyEligible": true,
++    "productionImplementationStarted": false,
+     "implementationReady": false,
+-    "condition": "Await architect/data readiness resolution for base input hashes/context secrets, materialization and reused hash semantics; root owns CLI verification and serialized handoff."
+-  },
+-  "idempotency": {
+-    "realArtifactsSecondRunNoOp": true,
+-    "markerCountPerArtifact": 1,
+-    "isolatedFailureRetry": {
+-      "simulatedInterruptionAfterIndex": "PASS",
+-      "retryWroteOnlyMissingStory": "PASS",
+-      "secondRunNoOp": "PASS",
+-      "oneMarkerEach": "PASS",
+-      "statusPreserved": "Done"
+-    }
++    "condition": "Root close verification and wave reconciliation first; independent technical READY_FOR_IMPLEMENTATION still required."
+   },
+   "budget": {
+     "wholeWaveCeilingUsd": 500,
+     "actualBilling": "unavailable"
+   },
+-  "protectedStoryContentSha256": "8c66f171ce9fd3e709132d9725d908b8900fb4a66fa3155c4f32a2b826b5d28b",
+-  "rederivedSourceSetDigest": {
+-    "sha256": "19f17477060edc4a724d5c5a641aeb91f9fa691c884a272ae644c80df3387497",
+-    "method": "SHA256 of path-sorted sha256 + two spaces + path + LF rows",
+-    "matchesReviewedManifest": true
+-  },
+-  "finalFrozenManifestCheck": {
+-    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/resume-20261014/start-manifest.json",
+-    "sha256": "9043d0e047694904f9893b05cbe8127c9055a5fad54876761c99c4533339811e",
+-    "entries": 4414,
+-    "changedPaths": [
+-      "docs/qa/gates/STUDIO-OBS-012B-compile-path-retirement-frontend-and-learn-vocabulary.yml",
+-      "docs/qa/gates/STUDIO-OBS-013-record-the-learning-run-video-step-offsets-and-seek.yml",
+-      "docs/qa/gates/STUDIO-OBS-014-action-safety-and-governance-for-the-learning-run.yml",
+-      "docs/stories/STUDIO-OBSERVED/README.md",
+-      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+-      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+-      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+-      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+-      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012B.story.md",
+-      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+-      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md"
+-    ],
+-    "onlyQaAndStoryBookkeeping": true,
+-    "sourceDrift": 0
+-  },
+-  "finalFormattingCheck": {
+-    "command": "git diff --check -- scoped story/README paths",
+-    "exit": 0
+-  }
++  "noTestsBuildsNativeProcessesCliGitGateRuntimeSourceConfigDistInstallCommitPushDeployOrDevDbChanges": true
+ }

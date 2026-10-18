@@ -1,0 +1,21 @@
+{
+  "scope": "INDEPENDENT_SOURCE_ONLY_C5_REPAIR_RECHECK",
+  "at": "2026-10-11T07:40:50.296385+00:00",
+  "candidate": "docs/qa/evidence/STUDIO-OBS-007/resume-b-c5-three-local-repairs-candidate.json",
+  "candidateSha256": "a5a335bf76e3663c8c77a3c67a5a0f58cc99263bbe2da75cecd6c44fd67d6d73",
+  "source": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "sourceSha256": "70eca76e0ba3ceaa26d0cea5a4b96d8ac54aecd36a02daa8f8031de73c6c2eb9",
+  "patchSha256": "43e0f769155f1faf765e2f383cb7b746aa7c6719c938a0bc15852bf5fca1ad65",
+  "verdict": "SOURCE_APPROVED_FOR_EXISTING_FOCUSED_GATE",
+  "resolvedFindings": {
+    "C5_REVIEW_01": "Actual active response is privately scanned before parser/status and raw body removed from active assertion.",
+    "C5_REVIEW_02": "Actual opened descriptor uses NOFOLLOW, regular/dev/ino/bounds and bounded read plus post-read fstat; descriptor finally closes.",
+    "C5_REVIEW_03": "Rejected SSE status/media/registration closes original stream; real success behavior unchanged.",
+    "cleanupNote": "Existing teardown helper attempts every close/level/stream restoration; private known-value file cleanup runs in independent finally."
+  },
+  "preservation": "All original25 logical flows and source authority/budgets retained; no new acceptance cases, fake bytes, encoder wrapper or source framework.",
+  "remaining": "Actual current first+ninth C5 gate unrun; C4 required fault windows and broader C6/audit/crash/read joins remain open. No whole-story acceptance.",
+  "formatterReanchor": "Coordinator may mechanically bind formatting-only bytes before gate; no need another semantic review absent changed tokens/behavior.",
+  "runtimeExecuted": false,
+  "lifecycleVerdict": null
+}

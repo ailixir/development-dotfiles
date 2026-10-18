@@ -1,0 +1,42 @@
+{
+ "label": "obs009-i-mut-a",
+ "evid": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-009/execution-20261018/i/w2/mutations",
+ "edits": [
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java",
+   "old": "    captureTree();\n    thaw();\n",
+   "new": "    captureTree();\n"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java",
+   "old": "        builder.guided != null && builder.graceTimeout.compareTo(builder.guidedMinimumGrace) < 0\n            ? builder.guidedMinimumGrace\n            : builder.graceTimeout;",
+   "new": "        builder.graceTimeout;"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java",
+   "old": "        process.waitFor(reapTimeout.toMillis(), TimeUnit.MILLISECONDS);\n      } catch (InterruptedException interrupted) {\n        Thread.currentThread().interrupt();\n      }\n    }\n    Integer exit",
+   "new": "        Thread.onSpinWait();\n      } finally {\n      }\n    }\n    Integer exit"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java",
+   "old": "if (exitCode == null || exitCode != 0 || escalatedToForce) {",
+   "new": "if (exitCode == null || exitCode != 0) {"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java",
+   "old": "    env.put(KEY_SCRATCH_DIR, workDir.resolve(\"scratch\").toAbsolutePath().toString());\n",
+   "new": ""
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java",
+   "old": "      if (!sameAliveProcess(match.handle(), match.fact())) {",
+   "new": "      if (false) {"
+  }
+ ],
+ "gradle": [
+  "test",
+  "--tests",
+  "com.citi.put.checks.studio.support.RunnerProcessHarnessTest",
+  "--no-daemon"
+ ]
+}

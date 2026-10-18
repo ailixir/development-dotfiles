@@ -1,0 +1,397 @@
+{
+  "artifact": "Orion C6 implementation release",
+  "at": "2026-10-15T03:56:55.233631+00:00",
+  "authority": "User goal execute015and008; independent exact frozen design readiness verified",
+  "status": "DISJOINT_DATA_BACKEND_RUNNER_CODE_WINDOWS_RELEASED",
+  "designReadinessSha256": "7e440341dc116d31c01704beae0d3158eefe3d09876619d45cd89953a1423370",
+  "predecessors": {
+    "012B": "Done strictPASS closed",
+    "013": "Done strictPASS closed",
+    "014": "Done strictPASS closed"
+  },
+  "windows": {
+    "old013014Integration": "CLOSED",
+    "C-int": "ACTIVE vectorpreserve02 exactQuinn7abb78 syntheticworldplan;noABIchange",
+    "data": "ACTIVE v18impl05 fourreviewedfiles+LegacyV20ConfirmedBaseFixture;sourceonly",
+    "backend": "ACTIVE finalsource03;HTTP/joined/secret/ACK/owner tests,86map incompletelegacycallerawaitsData",
+    "runner": "ALL_SOURCE_DIST_HOLD checkpointfeedback02repair01;type/lint0,testsUNRUN",
+    "gradle": "CLOSED",
+    "nativeBuildDist": "HELD;f707historicaltestedbuild,codechangesrequirefreshbuild",
+    "008production": "NOT_RELEASED_UNTIL015DONE",
+    "backendRuntime": "SOURCE_WRITING_RELEASED_NO_EXECUTION",
+    "architecture05": "DESIGNREADY verifiedAria+addendum+Quinn;Cintsourcewindowexplicitlyreleased",
+    "historicalV18Adapter": "HELD pendingindependentQuinnmapping"
+  },
+  "ownership": {
+    "C-int": "Dex cint015 sole015 publicOpenAPI/v3schema/fixtures/generator/oracle/generatedresources/StudioContractTest/confinement pins; may set015InProgress and maintain initial DevRecord/FileList",
+    "data": "Dara V21 and all migration/head-pin tests; V1-V20 immutable",
+    "backend": "One Dex all other Java business logic and nonmigration tests; full frozen owner map authoritative",
+    "runner": "One Dex TS runtime/adapter/validator/nonpin unit/native/corpus files; no schema/generated edits",
+    "finalReview": "Independent Aria technical and Quinn SDC; QA alone Done",
+    "adminClosure": "Pax afterQA, Orion CLI review/close/wave"
+  },
+  "constraints": [
+    "No simultaneous shared writers",
+    "All105planned acceptance/migration cases accounted without fake pass",
+    "No user/dev DB recreation, commits/push/deploy",
+    "Existing external release gates uncredited"
+  ],
+  "updatedAt": "2026-10-15T07:58:14.425025+00:00",
+  "contractFreeze": {
+    "receiptSha256": "38f442ba0ff87c191a2c795ad56eda05c4c2a5b5d0e7d04a86f00d28b3d996f1",
+    "touchedManifestSha256": "edc84ffb59d0ce85322ef2953d5f1d66ba4859e514c7aa3a3b07d143a355f5b5",
+    "rootRehashedFiles": 33,
+    "mismatches": []
+  },
+  "migrationResource": {
+    "path": "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql",
+    "sha256": "b012ddddb44b599c4f8699be39281dd6f407b2cb93b41386a79eb22c06c4d179",
+    "rootVerified": true,
+    "status": "ACTUAL55_PASS_POSTGRESQL15_19_SQL_SCOPE_ONLY",
+    "userDevDatabaseApplied": false,
+    "newSourceTestCasesExecuted": 55,
+    "ownerReceipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/arch03-sql-amendment-01.json",
+    "frozenV1V20Rechecked": 20,
+    "mismatches": []
+  },
+  "ownershipTransfers": [
+    {
+      "from": "data015_freeze",
+      "to": "backend015",
+      "scope": "Five fixtureTargetFiles after target20->21 edits; Dara stops writing these files, backend owns later business ports",
+      "receipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/fixture-target-handoff.json",
+      "receiptSha256": "cca19d44a4aa3e820baf09a1b86f3e48db50e0300aae1eaa332e416aaac941d3"
+    }
+  ],
+  "designCorrectionOpen": {
+    "id": "ARCH015-01",
+    "finding": "Pure basis lacks authoritative authoring/config/input-chain/base snapshot facts required for StepSnapshot recomputation and immediate-base equality",
+    "reportedBy": "runner015",
+    "owner": "Aria; C-int correction and independent QA if required",
+    "scopeHold": "Snapshot derivation/basis extension only; other disjoint implementation continues",
+    "originalFreezePreserved": true,
+    "status": "ARCH015_01_CORRECTED_CONTRACT_INSTALLED_APPLICATION_IMPLEMENTATION_PENDING",
+    "qaReceiptSha256": "8dffa911c145d44c9d53d3723491a33b974a0354d1361ec89956436c7bdc999a"
+  },
+  "compileWindow": {
+    "owner": "backend015",
+    "label": "backend-foundation-compile-attempt02",
+    "tasks": [
+      "compileJava",
+      "compileTestJava"
+    ],
+    "testsAllowed": false,
+    "sourceWritesAllowed": false,
+    "otherWriterHoldsAcknowledged": true,
+    "sourceCorrectionReceipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/compile-correction-01.json",
+    "result": {
+      "exit": 0,
+      "testsExecuted": 0,
+      "sourceStable": true,
+      "distStable": true,
+      "receipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-foundation-compile-attempt02-results.json"
+    }
+  },
+  "foundationUnitWindow": {
+    "owner": "backend015",
+    "label": "backend-foundation-unit-attempt01",
+    "classes": 4,
+    "expectedSourceMethods": 25,
+    "dbNativeAllowed": false,
+    "sourceWritesAllowed": false,
+    "result": {
+      "exit": 0,
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0,
+      "sourceStable": true,
+      "distStable": true,
+      "receipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-foundation-unit-attempt01-results.json"
+    }
+  },
+  "designCorrections": [
+    {
+      "id": "ARCH015-01",
+      "finding": "Pure basis lacks authoritative authoring/config/input-chain/base snapshot facts required for StepSnapshot recomputation and immediate-base equality",
+      "reportedBy": "runner015",
+      "owner": "Aria; C-int correction and independent QA if required",
+      "scopeHold": "Snapshot derivation/basis extension only; other disjoint implementation continues",
+      "originalFreezePreserved": true,
+      "status": "DESIGN_INDEPENDENTLY_APPROVED_AWAITING_ATOMIC_CINT_INSTALL",
+      "qaReceiptSha256": "8dffa911c145d44c9d53d3723491a33b974a0354d1361ec89956436c7bdc999a"
+    },
+    {
+      "id": "ARCH015-02",
+      "status": "ARCHITECT_RULING_IN_PROGRESS",
+      "finding": "Append-only allocation consumer intent versus allowed first-suffix omission of proven noninvoked consumer",
+      "scopeHold": "Final allocation/effective graph projection; other implementation continues",
+      "schemaDDLImpact": "Owner currently reports no new fields/DDL; final ruling and QA pending"
+    }
+  ],
+  "correctedContractFreeze": {
+    "receipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-01/implementation-receipt.json",
+    "receiptSha256": "d77ab91bcca191a25370c70c330f141005d526efb2c237615e0156381263ad21",
+    "touchedManifestSha256": "d6c04086a20ce85748326d0049d6340f06fdd333486e58c6f3e7919bf4394a30",
+    "rootVerifiedFiles": 9,
+    "mismatches": []
+  },
+  "architecture02": {
+    "status": "INDEPENDENT_DESIGN_MAPPING_APPROVED_SOURCE_IMPLEMENTATION_PENDING",
+    "manifestSha256": "879aaa09344878f846b34dc4d1c98c8d117c2fd51e27ffe445d505e16dbb838a",
+    "qaReceiptSha256": "003fce36c88cfe4e19d88180f08d8bbc8a24b54e2a6691fd7e6007dcd01a6817",
+    "newSchemaOrDDL": false
+  },
+  "migrationWindow": {
+    "owner": "integration015",
+    "label": "backend-migration55-attempt05",
+    "class": "GuidedReplayingPrefixMigrationIT",
+    "sourceCaseCount": 55,
+    "allWritersHeld": true,
+    "rootVerifiedChecks": {
+      "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql": "b012ddddb44b599c4f8699be39281dd6f407b2cb93b41386a79eb22c06c4d179",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java": "f927ee53627d1656c4e388029d055589e372f338731b65362e9f9f08bec1e6e1",
+      "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/source-hold-checkpoint-05.json": "52e8f890dc124028aa0f30c9f8f32bfd77defd14d8e6bb5148a827341efc8e52",
+      "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-02-03/post-patch-checkpoint-receipt.json": "92452a2d6d3795a3f4babcd40a8c9a1236f19c7bc19a91d7c81dc7f58cf593d9"
+    },
+    "uncreditedScopes": [
+      "Java gateway/native/browser proof",
+      "head regressions",
+      "C-int remaining semantic assertions",
+      "whole story QA"
+    ],
+    "attempt04Result": {
+      "exit": 1,
+      "total": 55,
+      "passed": 54,
+      "failed": 1,
+      "skipped": 0,
+      "engine": "actualPostgreSQL15.19",
+      "sourceStable": true,
+      "distStable": true,
+      "receipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt04-results.json",
+      "new7ConfirmationCases": "PASS_SQL_SCOPE",
+      "upgradePreservation": "PASS_EXPANDED_ASSERTIONS",
+      "remainingFailure": "Alternate historical same-test source manifest missing before intended pinned-base rejection"
+    },
+    "currentTestSourceSha256": "eccc57318faafd672e04060995b91ce783d72bd2bd7c66f09899ad335146880c",
+    "latestCorrection": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/data/alternate-source-correction-01.json",
+    "attempt05Result": {
+      "exit": 0,
+      "passed": 55,
+      "failed": 0,
+      "skipped": 0,
+      "engine": "PostgreSQL15.19",
+      "receipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-migration55-attempt05-results.json"
+    }
+  },
+  "architecture03": {
+    "status": "INDEPENDENT_MAPPING_APPROVED_IMPLEMENTATION_RELEASED",
+    "manifestSha256": "0bf2a5a9ea32f79b27563809b68ba6e2de9f0ccbf2633f54302e2f3bd031e311",
+    "qaReceiptSha256": "0c97a71d73c192d61708b6798e311aeeae5c31fc27c98264c5c8a94e38d14e8e",
+    "newPublicShape": false,
+    "unshippedV21Amendment": true
+  },
+  "sharedTestFixtureOwnership": {
+    "data015_freeze": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+    "backend015": [
+      "backend/src/test/java/com/citi/put/checks/studio/support/ObservedPublicationFixture.java",
+      "ProgressCallbackIT caller ports"
+    ],
+    "interface": "freezeSource before Base.capture; completeExistingSession while OBSERVING returns coherent ordinary basis",
+    "status": "SOURCE_WRITTEN_UNVERIFIED",
+    "constraint": "Keep original production subject calls/assertions; no model/browser evidence claim"
+  },
+  "migrationResourceHistory": [
+    {
+      "sha256": "a4e0c441ebcda29f00cc382fb7ed8eb6ce408a44b53a758e8c20277ee05f4a91",
+      "actualOwnedTestRun": "48cases41PASS7FAIL0skipPG15.19;fixturefailures;historicalSQL"
+    }
+  ],
+  "architecture04": {
+    "status": "INDEPENDENT_ONE_POINTER_PATCH_APPROVED_CINT_RELEASED",
+    "qaReceiptSha256": "0999abd94e23280c2740fbb11f237b7309b5d5f14491a6cf777f69baa15fffdf",
+    "allowedPointer": "replay-validation AcceptedTranslationPlan.needs.items.consumers.minItems",
+    "before": 1,
+    "after": 0,
+    "rawModelMinItems": 1,
+    "newApplicationScope": false
+  },
+  "nextSqlRequiresFreshRunnerHold": false,
+  "latestContractFreeze": {
+    "receipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-02-03/implementation-receipt.json",
+    "receiptSha256": "eade41bcf6369d68848205ace6064ce245ccf6e69c217264cb8fdfd2ebbc1707",
+    "manifestSha256": "fb1c2e03a0a0c67ff7da8bdef074378fc39514baa3601c6c1a6baa19c9c12b8d",
+    "rootVerifiedFiles": 4,
+    "rootVerifiedCommandLogs": 4,
+    "canonicalBundle": "ce58d620c27bb84f4233151275373aba24467f748c7152a12f1ef3d2d85381aa",
+    "applicationAcceptanceCredit": false
+  },
+  "feedbackWindow01": {
+    "sourceHoldsAcknowledged": [
+      "backend015_resume checkpoint03",
+      "runner015_resume checkpoint01",
+      "C-int final freeze",
+      "Data hold"
+    ],
+    "checkpointHashes": {
+      "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/runtime-source-checkpoint-03.json": "7e091d733127f15c7cb3cae45820089d36e7d9ffc833fe7ec5f64a0f2395f1fd",
+      "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/checkpoint-source-resume-01.json": "43274027b2e34d71320059a55acb6bd614b52899c94521f4b6ce40c5fdd42653"
+    },
+    "commands": "One selected backend head/foundation run and one complete default runner Node unit/coverage run; different runtimes, no native/build/dist/source writes",
+    "authority": "User original required validation; exact intents preflight PASS",
+    "status": "CLOSED_BOTH_TERMINAL_SOURCE_STABLE",
+    "backendResult": {
+      "result": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-results.json",
+      "exit": 1,
+      "counts": {
+        "total": 200,
+        "passed": 166,
+        "failed": 34,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "fullCheckCredit": false,
+      "joinedNativeCredit": false,
+      "requiredRepairs": "Data fixture/history/historical-target/evidence/SQL cases and backend Java conformance/history; exact expert receipts pending"
+    },
+    "runnerResult": {
+      "receipt": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-unit-feedback-attempt01-results.json",
+      "exit": 1,
+      "reportedPassed": 809,
+      "reportedFailed": 6,
+      "reportedPending": 28,
+      "reportedTotal": 843,
+      "reportedFailedSuites": 49,
+      "scopeWarning": "Many suites could not load; actual failure classification and missing case scope under analysis. This is not a passing default unit or coverage gate.",
+      "sourceStable": true,
+      "distStable": true
+    }
+  },
+  "architecture05": {
+    "designManifestSha256": "fdd27c680631fc74f0e1c61868dddda3f36ccef0eef7e8fa3de3950923d13a31",
+    "addendumManifestSha256": "e8880e8b5673fa574e2b9e2dc0adf51c3e2993e385c787823206ef49b7a21589",
+    "qaManifestSha256": "a17eb3d9193e05c8a50cde80884d73aa457d9f9cb2376a2a27593c7436c59880",
+    "rootVerifiedBoundFiles": 15,
+    "productionSourceRelease": "C-intonlyuntilmini-freeze",
+    "reportedGeneration": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-05/generation-checkpoint.json",
+      "reportedCanonicalBundle": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
+      "generationCount": 1,
+      "changedOutputs": [
+        "observedSchemas.json",
+        "observedOperations.ts"
+      ],
+      "status": "Ownerreportedmeasuredcheckpoint;finalconsumerfreezeandrootverificationpending"
+    }
+  },
+  "parallelRepairRelease02": {
+    "reason": "GeneratedABIandall4outputhashesverified;remainingCintfixture/oracle/source-pinworkdisjointfromconsumerJava/TS. No test/build/native window or competing shared writer. Earlierall-sourceholdsupersededonlyfornamedsourceowners.",
+    "runnerIntent": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/runner015-repair02-intent.txt",
+    "backendIntent": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/backend015-repair02-intent.txt",
+    "preflights": "BothPASS",
+    "testsAllowed": false,
+    "CintFinalSelectedFreeze": "PENDING_NO_GREEN_APPLICATION_CREDIT"
+  },
+  "backendDataSlotHandoff": {
+    "checkpoint": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/runtime-source-checkpoint-04.json",
+    "sha256": "a4fee762ad8886a8b6fa5dbfcaf42efcf462270c55feb63fe3044d526c131769",
+    "rootVerified": true,
+    "backendRemaining": "Full8/86application/joinednegativeandsecretprefixsourceunfinished;resumeafterfreeslot",
+    "dataDispatchIntent": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/data015-repair03-intent.txt",
+    "preflight": "PASS",
+    "dispatch": "ACTUALLY_DISPATCHED",
+    "executionAllowed": false,
+    "rootVerifiedSourceFiles": 75
+  },
+  "historicalV18Applicability": {
+    "status": "EXACT_DELTA_HELD_FOR_ARIA_QUINN_APPLICABILITY_REVIEW",
+    "finding": "Current Java commit unconditionally calls V21only studio_015_relearned_from; complete truthful fixtures alone cannot run currentJava against actualhistorical18",
+    "prohibited": [
+      "Installlaterfunction",
+      "Productioncompatibilityfallback",
+      "Raisehistoricaltarget",
+      "Toybasis",
+      "Intercept/ignorecurrentrepositorycall"
+    ],
+    "candidate": "Complete test-only historical SQL commit adapter preserving actualreserve/claim/finish/V15receipt/revision transaction; exact original subject and real head companion must be independently mapped",
+    "ariaIntent": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/aria015-v18-applicability-intent.txt",
+    "preflight": "PASS",
+    "dispatch": "NOT_DISPATCHED_WAITING_EXPERT_SLOT"
+  },
+  "runnerBuildUnitWindow02": {
+    "owner": "runner015_resume",
+    "sourceHoldAcknowledgements": [
+      "Backendcheckpoint04",
+      "Datacheckpoint06",
+      "Runnerrepairedarch05checkpoint01",
+      "Cintfullsource/commandHOLDafterallselectedchecks"
+    ],
+    "commands": [
+      "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-runner-build.py runner-build-feedback-attempt01",
+      "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-runner.py runner-unit-feedback-attempt02 ./node_modules/.bin/vitest run"
+    ],
+    "dependency": "UnitsONLYafterbuildexit0andstableSource",
+    "distMutation": "AllowedonlyduringconfiguredBuild",
+    "sourceWrites": false,
+    "native": false,
+    "status": "CLOSED_BUILD01_FAILED_UNITS_NOT_STARTED",
+    "actualBuildResult": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-build-feedback-attempt01-results.json",
+    "partialDistDigest": "56d2abd8f088d7a1e2767a1ba461d6dbfb338803f0acee5609c37563a9357b3d"
+  },
+  "packagedReferenceCorrection01": {
+    "intent": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/cint015-packaged-reference01-intent.txt",
+    "preflight": "PASS",
+    "dispatch": "ACTIVE",
+    "knownSync": "canonical observedChoice vs stale packagedcopy70leaves;freshorderauthoritativecounterpartavailable",
+    "remainingCatalogGap": "control-value distinctscenario lacks current complete canonical snapshot/materialization counterpart;mustremainNOTGREENuntilfaithfulpreservationplanandactualproof",
+    "schemaGeneration": "NONEPERMITTED"
+  },
+  "runnerBuildUnitWindow03": {
+    "owner": "runner015_resume",
+    "intent": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/runner015-build-unit03-intent.txt",
+    "preflight": "PASS",
+    "allSourceOwnersHeld": true,
+    "rootVerifiedPackagedRepairFiles": 5,
+    "status": "CLOSED_BUILD02PASS_FULLUNIT02FAIL_SOURCE_DIST_STABLE",
+    "buildLabel": "runner-build-feedback-attempt02",
+    "unitLabel": "runner-unit-feedback-attempt02",
+    "unitsConditional": "Buildexit0/sourceStableonly",
+    "catalogControlGap": "NOTGREEN,nowaiver"
+  },
+  "currentVectorPlan": {
+    "owner": "quinn015_child05",
+    "status": "ACTIVE_READONLY_TESTARCHITECTURE",
+    "intent": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/quinn015-vector-preservation-intent.txt",
+    "preflight": "PASS",
+    "dispatch": "ACTUAL",
+    "mustPreserve": [
+      "Textarea/value/nonsecretApprovedcontrolscenario",
+      "Effectivejob2inputsversusrawhistory3",
+      "Current/firstsuffixconsistentplanfacts",
+      "OriginalobservedChoicehistoricalhash/versionjoins",
+      "Authorizedraw/excludedobservationsonly",
+      "Alladversarialmutationsandproductionstrictparsing"
+    ]
+  },
+  "currentVectorImplementation": {
+    "owner": "cint015",
+    "planManifestSha256": "7abb78c79cd52658d4c5ba9b06ccf326fb7aca17d7b9ff1c8494ff4683617f8d",
+    "rootVerifiedBoundPlanFiles": 7,
+    "intent": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/cint015-vector-preserve02-intent.txt",
+    "preflight": "PASS",
+    "dispatch": "ACTUAL_ACTIVE"
+  },
+  "dataV18Implementation05": {
+    "owner": "data015_freeze",
+    "intent": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/data015-v18-impl05-intent.txt",
+    "preflight": "PASS",
+    "dispatch": "ACTUAL_ACTIVE",
+    "scope": "Reviewed V18SQLadapter/currentJavaheadcompanions plus existingARCH01legacy20->21test-onlyfixture;noDBexecution",
+    "extraOwnedSource": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+    "backendCallerOwner": "backend015_resume",
+    "constraints": "RealoldV20rowsbeforeactual21upgradeandbeforeSpringboot;noincompletecurrentrow/protectedrowedit/noSQLbytechanges"
+  }
+}

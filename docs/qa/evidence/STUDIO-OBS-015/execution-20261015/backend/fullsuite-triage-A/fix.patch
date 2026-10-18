@@ -1,0 +1,559 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java
+@@ -8,11 +8,14 @@
+ import com.citi.put.checks.scheduling.partitioning.PartitionManager;
+ import com.citi.put.checks.scheduling.partitioning.PartitionScheduler;
+ import com.citi.put.checks.scheduling.partitioning.RetentionPruner;
++import com.citi.put.checks.studio.guided.session.GuidedContracts;
+ import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder;
+ import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.Path;
+ import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome;
+ import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.Scope;
+ import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.UsageOutcome;
++import com.citi.put.checks.studio.support.GuidedLedgerSeed;
++import com.fasterxml.jackson.databind.node.ObjectNode;
+ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+ import java.time.Clock;
+ import java.time.Instant;
+@@ -43,12 +46,14 @@
+   private static final PostgreSQLContainer<?> PG = new PostgreSQLContainer<>("postgres:15-alpine");
+   private static final String PRINCIPAL = "owner@example.test";
+   private static final String HASH = "a".repeat(64);
++  private static final GuidedContracts CONTRACTS = new GuidedContracts();
+   private String database;
+   private JdbcTemplate jdbc;
+   private DriverManagerDataSource source;
+   private TransactionTemplate transaction;
+   private UUID testId;
+   private SecretUseAuditRecorder audit;
++  private GuidedLedgerSeed ledger;
+ 
+   @BeforeAll
+   static void start() {
+@@ -96,12 +101,15 @@
+         PRINCIPAL,
+         HASH,
+         PRINCIPAL);
+-    jdbc.update(
+-        ("INSERT INTO studio_guided_actions(admission_id,session_id,step_id,ordina"
+-            + "l,document,proposal) VALUES ('admission','session','password-step',0,'{\""
+-            + "sessionId\":\"session\",\"coordinate\":{\"stepId\":\"password-step\",\"ordinal\":0}"
+-            + ",\"state\":\"ADMITTED\",\"dispatchCount\":0,\"admission\":{\"admissionId\":\"admiss"
+-            + "ion\"}}','{}')"));
++    materialization();
++    // V21: the unconsumed admission is written against the live materialization it was prepared
++    // for; every guard stays enabled.
++    ledger.action(
++        "admission",
++        "password-step",
++        0,
++        ledgerDocument("admission", 0, "ADMITTED", 0),
++        CONTRACTS.object());
+     String manifest =
+         "{\"testId\":\""
+             + testId
+@@ -390,8 +398,8 @@
+     jdbc.execute("GRANT SELECT,INSERT,UPDATE,DELETE ON studio_secret_use_audit TO " + role);
+     jdbc.execute(
+         ("GRANT SELECT ON studio_guided_sessions,studio_guided_actions,studio_guid"
+-                + "ed_materializations,studio_guided_source_manifests,studio_dispatch_ledge"
+-                + "r,ui_test_executions,ui_tests TO ")
++                + "ed_materializations,studio_guided_materialization_snapshots,studio_guided_"
++                + "source_manifests,studio_dispatch_ledger,ui_test_executions,ui_tests TO ")
+             + role);
+     jdbc.execute("GRANT UPDATE ON studio_guided_sessions,studio_dispatch_ledger TO " + role);
+     YearMonth old = YearMonth.now(ZoneOffset.UTC).minusMonths(13);
+@@ -444,7 +452,11 @@
+     consumedSecret(outcome, true);
+   }
+ 
+-  private void consumedSecret(String outcome, boolean terminal) {
++  /**
++   * The session's assignment and its one materialization (V21 keeps it as a versioned head, so it
++   * is written once, live, before any ledger row). It carries the declared secret input.
++   */
++  private void materialization() {
+     String intent =
+         ("{\"sessionId\":\"session\",\"assignmentId\":\"assignment\",\"workerId\":\"worker\",\""
+                 + "scopeHash\":\"")
+@@ -461,11 +473,9 @@
+             + HASH
+             + ("\",\"inputs\":[{\"inputId\":\"input-PASS\",\"sourceStepId\":\"password-step\",\"kind"
+                 + "\":\"secretRef\",\"secretId\":\"PASS\",\"intendedSlot\":\"fill.value\"}]}");
+-    var safeInputs =
+-        (com.fasterxml.jackson.databind.node.ObjectNode)
+-            new com.citi.put.checks.studio.guided.session.GuidedContracts().parse(inputs);
++    var safeInputs = (ObjectNode) CONTRACTS.parse(inputs);
+     for (var rawInput : safeInputs.path("inputs")) {
+-      var input = (com.fasterxml.jackson.databind.node.ObjectNode) rawInput;
++      var input = (ObjectNode) rawInput;
+       input
+           .putObject("provenance")
+           .put("referenceKind", "configuration")
+@@ -476,27 +486,55 @@
+           .put("stepId", input.path("sourceStepId").asText())
+           .put("intendedSlot", "fill.value");
+     }
+-    inputs = safeInputs.toString();
++    ObjectNode closed = GuidedLedgerSeed.closedInputs(safeInputs, "1", "1");
++    String inputsHash = GuidedContracts.hash(closed);
+     jdbc.update(
+         ("INSERT INTO studio_guided_materializations(session_id,scope_hash,context"
+             + "_id,context_revision,materialization_revision,worker_id,owner_fence,sour"
+             + "ce_revision,configuration_revision,authored_inputs_hash,authored_inputs,"
+-            + "live) VALUES ('session',?,'context',1,1,'worker',1,'1','1',?,?::jsonb,fa"
+-            + "lse)"),
++            + "live) VALUES ('session',?,'context',1,1,'worker',1,'1','1',?,?::jsonb,tr"
++            + "ue)"),
+         HASH,
+-        HASH,
+-        inputs);
++        inputsHash,
++        closed.toString());
++    ledger = new GuidedLedgerSeed(jdbc, "session", "context", 1, inputsHash);
++  }
++
++  private static ObjectNode ledgerDocument(
++      String admission, int ordinal, String state, int dispatchCount) {
++    ObjectNode document =
++        CONTRACTS
++            .object()
++            .put("sessionId", "session")
++            .put("state", state)
++            .put("dispatchCount", dispatchCount);
++    document.putObject("coordinate").put("stepId", "password-step").put("ordinal", ordinal);
++    document.putObject("admission").put("admissionId", admission);
++    return document;
++  }
++
++  private static ObjectNode secretFill() {
++    ObjectNode proposal = CONTRACTS.object();
++    proposal
++        .putObject("operation")
++        .put("kind", "fill")
++        .putObject("value")
++        .put("kind", "secretRef")
++        .put("sourceInputId", "input-PASS");
++    return proposal;
++  }
++
++  private void consumedSecret(String outcome, boolean terminal) {
+     // Replace the not-yet-consumed fixture admission with its immutable authentic source reference.
+-    jdbc.update("DELETE FROM studio_guided_actions WHERE admission_id='admission'");
+-    jdbc.update(
+-        ("INSERT INTO studio_guided_actions(admission_id,session_id,step_id,ordina"
+-            + "l,document,proposal) VALUES ('admission','session','password-step',0,jso"
+-            + "nb_build_object('sessionId','session','coordinate',jsonb_build_object('s"
+-            + "tepId','password-step','ordinal',0),'admission',jsonb_build_object('admi"
+-            + "ssionId','admission'),'ownerFence',1,'state','DISPATCHING','dispatchCoun"
+-            + "t',1,'outcomeCode',?),'{\"operation\":{\"kind\":\"fill\",\"value\":{\"kind\":\"secr"
+-            + "etRef\",\"sourceInputId\":\"input-PASS\"}}}')"),
+-        outcome);
++    ledger.retire("admission");
++    ledger.action(
++        "admission",
++        "password-step",
++        0,
++        ledgerDocument("admission", 0, "DISPATCHING", 1)
++            .put("ownerFence", 1)
++            .put("outcomeCode", outcome),
++        secretFill());
+     if (terminal) {
+       jdbc.update("UPDATE studio_guided_sessions SET state='FAILED' WHERE session_id='session'");
+     }
+@@ -913,7 +951,7 @@
+ 
+   @Test
+   void authenticUnreachedReferenceHasNoInventedOrdinalSequenceOrPlan() {
+-    jdbc.update("DELETE FROM studio_guided_actions WHERE admission_id='admission'");
++    ledger.retire("admission");
+     assertThat(
+             jdbc.queryForObject(
+                 "SELECT count(*) FROM studio_guided_translation_plans", Integer.class))
+@@ -1368,13 +1406,12 @@
+         transaction.execute(
+             t -> audit.recordRelease(first, "version1", ResolutionOutcome.RESOLVED));
+     transaction.executeWithoutResult(t -> audit.recordUsage(released, UsageOutcome.USED));
+-    jdbc.update(
+-        ("INSERT INTO studio_guided_actions(admission_id,session_id,step_id,ordina"
+-            + "l,document,proposal) VALUES ('admission-two','session','password-step',1"
+-            + ",'{\"sessionId\":\"session\",\"coordinate\":{\"stepId\":\"password-step\",\"ordinal"
+-            + "\":1},\"admission\":{\"admissionId\":\"admission-two\"},\"ownerFence\":1,\"state\":"
+-            + "\"DISPATCHING\",\"dispatchCount\":1}','{\"operation\":{\"kind\":\"fill\",\"value\":{"
+-            + "\"kind\":\"secretRef\",\"sourceInputId\":\"input-PASS\"}}}')"));
++    ledger.action(
++        "admission-two",
++        "password-step",
++        1,
++        ledgerDocument("admission-two", 1, "DISPATCHING", 1).put("ownerFence", 1),
++        secretFill());
+     jdbc.update("UPDATE studio_guided_sessions SET state='FAILED' WHERE session_id='session'");
+     var second =
+         new Scope(
+--- backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingSeed.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingSeed.java
+@@ -1,5 +1,7 @@
+ package com.citi.put.checks.studio.guided.evidence;
+ 
++import com.citi.put.checks.studio.guided.session.GuidedContracts;
++import com.citi.put.checks.studio.support.GuidedLedgerSeed;
+ import com.fasterxml.jackson.databind.JsonNode;
+ import com.fasterxml.jackson.databind.ObjectMapper;
+ import com.fasterxml.jackson.databind.node.ArrayNode;
+@@ -13,11 +15,13 @@
+  * Seeds the guided rows the recording callback reads, straight into PostgreSQL (STUDIO-OBS-013).
+  *
+  * <p>A session row (the IT session document with a fresh id, state, owner and DB-side {@code
+- * expires_at}), its assignment and its materialization (written {@code live=false}, which is what
+- * the stop path leaves behind), and dispatched/undispatched ledger actions. Time is moved only by
+- * choosing the DB-side {@code expires_at} at insert ({@code clock_timestamp() + offset}): the
+- * session identity trigger forbids changing it later, and the window under test is judged on the
+- * database clock. No trigger is disabled.
++ * expires_at}), its assignment and its V21 versioned materialization (revision 1, closed identity,
++ * canonical inputs hash; written {@code live=true} because the V21 action guard admits a ledger row
++ * only against the live head, and the recording callback never reads {@code live}), and
++ * dispatched/undispatched ledger actions, each with the preparation V21 requires. Time is moved
++ * only by choosing the DB-side {@code expires_at} at insert ({@code clock_timestamp() + offset}):
++ * the session identity trigger forbids changing it later, and the window under test is judged on
++ * the database clock. No trigger is disabled.
+  */
+ final class GuidedRecordingSeed {
+ 
+@@ -105,12 +109,16 @@
+         WORKER,
+         Math.max(0, fence - 1),
+         intent.toString());
+-    ObjectNode authored = JSON.createObjectNode().put("sessionId", id).put("scopeHash", scopeHash);
++    ObjectNode authored =
++        GuidedLedgerSeed.closedInputs(
++            JSON.createObjectNode().put("sessionId", id).put("scopeHash", scopeHash),
++            SOURCE_REVISION,
++            CONFIGURATION_REVISION);
+     jdbc.update(
+         "INSERT INTO studio_guided_materializations(session_id,scope_hash,context_id,"
+             + "context_revision,materialization_revision,worker_id,owner_fence,source_revision,"
+             + "configuration_revision,authored_inputs_hash,authored_inputs,live)"
+-            + " VALUES (?,?,?,?,1,?,?,?,?,?,?::jsonb,false)",
++            + " VALUES (?,?,?,?,1,?,?,?,?,?,?::jsonb,true)",
+         id,
+         scopeHash,
+         contextId,
+@@ -119,7 +127,7 @@
+         fence,
+         SOURCE_REVISION,
+         CONFIGURATION_REVISION,
+-        sha(authored.toString()),
++        GuidedContracts.hash(authored),
+         authored.toString());
+     return new Seeded(id, scopeHash, fence, contextId);
+   }
+@@ -134,14 +142,18 @@
+             .put("dispatchCount", dispatched ? 1 : 0);
+     document.putObject("admission").put("admissionId", admissionId);
+     document.putObject("coordinate").put("stepId", stepId).put("ordinal", ordinal);
+-    jdbc.update(
+-        "INSERT INTO studio_guided_actions(admission_id,session_id,step_id,ordinal,document,"
+-            + "proposal) VALUES (?,?,?,?,?::jsonb,'{}'::jsonb)",
+-        admissionId,
+-        sessionId,
+-        stepId,
+-        ordinal,
+-        document.toString());
++    var head =
++        jdbc.queryForMap(
++            "SELECT context_id,owner_fence,authored_inputs_hash FROM studio_guided_materializations"
++                + " WHERE session_id=?",
++            sessionId);
++    new GuidedLedgerSeed(
++            jdbc,
++            sessionId,
++            (String) head.get("context_id"),
++            ((Number) head.get("owner_fence")).intValue(),
++            (String) head.get("authored_inputs_hash"))
++        .action(admissionId, stepId, ordinal, document, JSON.createObjectNode());
+   }
+ 
+   /** The 10 bridge identity fields for a seeded session, plus the recording fields. */
+--- backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java
+@@ -4,6 +4,7 @@
+ import static org.assertj.core.api.Assertions.assertThatThrownBy;
+ 
+ import com.citi.put.checks.studio.guided.session.GuidedContracts;
++import com.citi.put.checks.studio.support.GuidedLedgerSeed;
+ import com.fasterxml.jackson.databind.JsonNode;
+ import com.fasterxml.jackson.databind.node.ObjectNode;
+ import java.nio.charset.StandardCharsets;
+@@ -170,6 +171,51 @@
+           });
+     }
+ 
++    /**
++     * V21: the session's live revision-1 materialization, which every ledger action is admitted
++     * against. It authors no plan, obligation or allocation.
++     */
++    GuidedLedgerSeed materialize() {
++      ObjectNode document =
++          delayedDb.tx.execute(tx -> delayedDb.sessions.lock(id).document().deepCopy());
++      String scopeHash = document.path("scopeHash").asText();
++      String worker = document.path("owner").path("workerId").asText();
++      int fence = document.path("owner").path("fence").asInt();
++      String contextId = id + "-context";
++      ObjectNode intent =
++          c.object()
++              .put("sessionId", id)
++              .put("assignmentId", id + "-assignment")
++              .put("workerId", worker)
++              .put("scopeHash", scopeHash)
++              .put("expectedFence", 0);
++      ObjectNode inputs =
++          GuidedLedgerSeed.closedInputs(
++              c.object().put("sessionId", id).put("scopeHash", scopeHash), "1", "1");
++      String inputsHash = GuidedContracts.hash(inputs);
++      delayedDb.jdbc.update(
++          "INSERT INTO studio_guided_assignments(session_id,assignment_id,scope_hash,worker_id,"
++              + "expected_fence,intent) VALUES (?,?,?,?,0,?::jsonb)",
++          id,
++          id + "-assignment",
++          scopeHash,
++          worker,
++          intent.toString());
++      delayedDb.jdbc.update(
++          "INSERT INTO studio_guided_materializations(session_id,scope_hash,context_id,"
++              + "context_revision,materialization_revision,worker_id,owner_fence,source_revision,"
++              + "configuration_revision,authored_inputs_hash,authored_inputs) VALUES "
++              + "(?,?,?,1,1,?,?,'1','1',?,?::jsonb)",
++          id,
++          scopeHash,
++          contextId,
++          worker,
++          fence,
++          inputsHash,
++          inputs.toString());
++      return new GuidedLedgerSeed(delayedDb.jdbc, id, contextId, fence, inputsHash);
++    }
++
+     JsonNode progress() {
+       return delayedDb.tx.execute(tx -> delayedDb.sessions.lock(id).progress().deepCopy());
+     }
+@@ -356,8 +402,16 @@
+               var plan = (ObjectNode) delayedDb.store.state(f.id).path("plan");
+               // A real new immutable head preserves all old meanings and has the accepted
+               // closed shape; the acquisition still pins the previous head and must refuse it.
+-              plan.withArray("obligations").add(f.obligation.deepCopy().put("obligationId", java.util.UUID.randomUUID().toString())
+-                  .put("occurrence", 1).put("targetIntent", "Confirmation"));
++              // V21 sourceCoordinates: obligations stay in source order, so the new occurrence of
++              // the first step sits directly after its predecessor, ahead of the second step.
++              plan.withArray("obligations")
++                  .insert(
++                      1,
++                      f.obligation
++                          .deepCopy()
++                          .put("obligationId", java.util.UUID.randomUUID().toString())
++                          .put("occurrence", 1)
++                          .put("targetIntent", "Confirmation"));
+               delayedDb.store.acceptPlan(f.id, 1, plan);
+             });
+       }
+@@ -502,14 +556,8 @@
+         .putObject("coordinate")
+         .put("stepId", f.obligation.path("stepId").asText())
+         .put("ordinal", 0);
+-    delayedDb.jdbc.update(
+-        "INSERT INTO"
+-            + " studio_guided_actions(admission_id,session_id,step_id,ordinal,document,proposal)"
+-            + " VALUES (?,?,?,0,?::jsonb,'{}'::jsonb)",
+-        f.id + "-action",
+-        f.id,
+-        f.obligation.path("stepId").asText(),
+-        action.toString());
++    f.materialize()
++        .action(f.id + "-action", f.obligation.path("stepId").asText(), 0, action, c.object());
+     assertThatThrownBy(() -> f.acquire(false)).hasMessage("RUNTIME_INCOMPATIBLE");
+     assertThat(f.progress().has("translationAcquisition")).isFalse();
+     assertThat(f.acquire(true).disposition())
+@@ -631,7 +679,8 @@
+         tx -> {
+           delayedDb.sessions.lock(f.id);
+           ObjectNode plan = (ObjectNode) delayedDb.store.state(f.id).path("plan");
+-          plan.withArray("obligations").add(next);
++          // V21 sourceCoordinates: source order, so occurrence 1 of step one precedes step two.
++          plan.withArray("obligations").insert(1, next);
+           delayedDb.store.acceptPlan(f.id, 1, plan);
+         });
+     assertThat(f.acquire(false, next).disposition())
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/SecretAuditLifecycleIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/SecretAuditLifecycleIT.java
+@@ -376,15 +376,24 @@
+           .put("kind", "secretRef")
+           .put("stepId", step)
+           .put("intendedSlot", "fill.value");
++      // V21: closed identity and canonical hash; live because the ledger rows below are admitted
++      // only against the live head.
++      var closedInputs =
++          com.citi.put.checks.studio.support.GuidedLedgerSeed.closedInputs(inputs, "1", "1");
++      String inputsHash =
++          com.citi.put.checks.studio.guided.session.GuidedContracts.hash(closedInputs);
+       jdbc.update(
+           ("INSERT INTO studio_guided_materializations(session_id,scope_hash,context_id,context_r"
+               + "evision,materialization_revision,worker_id,owner_fence,source_revision,configuration_"
+               + "revision,authored_inputs_hash,authored_inputs,live) VALUES (?,?,'multi-context',1,1,'"
+-              + "worker',1,'1','1',?,?::jsonb,false)"),
++              + "worker',1,'1','1',?,?::jsonb,true)"),
+           sessionId,
+           scopeHash,
+-          com.citi.put.checks.studio.guided.session.GuidedContracts.hash(inputs),
+-          inputs.toString());
++          inputsHash,
++          closedInputs.toString());
++      var seed =
++          new com.citi.put.checks.studio.support.GuidedLedgerSeed(
++              jdbc, sessionId, "multi-context", 1, inputsHash);
+       var actions = new java.util.ArrayList<com.fasterxml.jackson.databind.node.ObjectNode>();
+       for (int ordinal = 0; ordinal < 2; ordinal++) {
+         String admission = "multi-admission-" + ordinal;
+@@ -405,15 +414,7 @@
+             .putObject("value")
+             .put("kind", "secretRef")
+             .put("sourceInputId", "input-PASS");
+-        jdbc.update(
+-            ("INSERT INTO studio_guided_actions(admission_id,session_id,step_id,ordinal,document,pr"
+-                + "oposal) VALUES (?,?,?,?,?::jsonb,?::jsonb)"),
+-            admission,
+-            sessionId,
+-            step,
+-            ordinal,
+-            action.toString(),
+-            proposal.toString());
++        seed.action(admission, step, ordinal, action, proposal);
+         actions.add(action);
+       }
+       // Controlled consumed ledger/materialization provenance, all SQL guards enabled; no live
+--- /dev/null
++++ backend/src/test/java/com/citi/put/checks/studio/support/GuidedLedgerSeed.java
+@@ -0,0 +1,125 @@
++package com.citi.put.checks.studio.support;
++
++import com.citi.put.checks.studio.guided.session.GuidedContracts;
++import com.fasterxml.jackson.databind.node.ObjectNode;
++import org.springframework.jdbc.core.JdbcTemplate;
++
++/**
++ * Prerequisites that V21 (STUDIO-OBS-015) requires of a hand-written guided ledger row, for tests
++ * whose subject is a reader of the ledger (audit, recording, acquisition), not the planner.
++ *
++ * <p>A ledger action is only insertable against the session's live, versioned materialization and a
++ * preparation issued for exactly that action's request. This helper writes those two rows in the
++ * order production does (preparation, then action, then the preparation's admission link) and
++ * stamps the version identity into the documents. It creates no plan, obligation, allocation,
++ * manifest or translation-state row, and it disables no trigger: every V21 guard still runs.
++ */
++public final class GuidedLedgerSeed {
++  private static final GuidedContracts C = new GuidedContracts();
++
++  private final JdbcTemplate jdbc;
++  private final String sessionId;
++  private final String contextId;
++  private final int ownerFence;
++  private final String inputsHash;
++
++  /**
++   * Binds the seed to one session's current (revision 1) materialization.
++   *
++   * @param inputsHash the {@code authored_inputs_hash} the materialization row was inserted with
++   */
++  public GuidedLedgerSeed(
++      JdbcTemplate jdbc, String sessionId, String contextId, int ownerFence, String inputsHash) {
++    this.jdbc = jdbc;
++    this.sessionId = sessionId;
++    this.contextId = contextId;
++    this.ownerFence = ownerFence;
++    this.inputsHash = inputsHash;
++  }
++
++  /**
++   * The closed identity V21 demands of {@code authored_inputs}: exactly {@code schemaVersion},
++   * {@code sessionId}, {@code scopeHash}, {@code sourceRevision}, {@code configurationRevision}
++   * plus the {@code inputs} array. The caller supplies {@code sessionId}, {@code scopeHash} and any
++   * inputs; the hash stored with the row must be {@code GuidedContracts.hash(result)}.
++   */
++  public static ObjectNode closedInputs(
++      ObjectNode inputs, String sourceRevision, String configurationRevision) {
++    ObjectNode closed = inputs.deepCopy();
++    closed
++        .put("schemaVersion", 3)
++        .put("sourceRevision", sourceRevision)
++        .put("configurationRevision", configurationRevision);
++    if (!closed.has("inputs")) {
++      closed.putArray("inputs");
++    }
++    return closed;
++  }
++
++  /**
++   * Inserts one preparation and its action. {@code document} and {@code proposal} are copied, then
++   * stamped with the current context revision and inputs hash (and, on the document, the attempt
++   * ordinal, preparation id and request digest); the caller's nodes are not modified.
++   */
++  public void action(
++      String admissionId, String stepId, int ordinal, ObjectNode document, ObjectNode proposal) {
++    ObjectNode request =
++        proposal.deepCopy().put("contextRevision", 1).put("authoredInputsHash", inputsHash);
++    String digest = GuidedContracts.hash(request);
++    String preparationId = "prep-" + admissionId;
++    ObjectNode proof =
++        C.object()
++            .put("sessionId", sessionId)
++            .put("preparationId", preparationId)
++            .put("contextId", contextId)
++            .put("ownerFence", ownerFence)
++            .put("requestDigest", digest)
++            .put("contextRevision", 1)
++            .put("authoredInputsHash", inputsHash);
++    ObjectNode ledger =
++        document
++            .deepCopy()
++            .put("attemptOrdinal", 0)
++            .put("contextRevision", 1)
++            .put("preparationId", preparationId)
++            .put("authoredInputsHash", inputsHash)
++            .put("requestDigest", digest);
++    jdbc.update(
++        "INSERT INTO studio_guided_preparations(session_id,preparation_id,context_id,owner_fence,"
++            + "request_digest,proof,expires_at) VALUES (?,?,?,?,?,?::jsonb,"
++            + "clock_timestamp()+interval '1 hour')",
++        sessionId,
++        preparationId,
++        contextId,
++        ownerFence,
++        digest,
++        proof.toString());
++    jdbc.update(
++        "INSERT INTO studio_guided_actions(admission_id,session_id,step_id,ordinal,document,"
++            + "proposal) VALUES (?,?,?,?,?::jsonb,?::jsonb)",
++        admissionId,
++        sessionId,
++        stepId,
++        ordinal,
++        ledger.toString(),
++        request.toString());
++    jdbc.update(
++        "UPDATE studio_guided_preparations SET admission_id=? WHERE session_id=? AND"
++            + " preparation_id=?",
++        admissionId,
++        sessionId,
++        preparationId);
++  }
++
++  /** Removes a fixture admission this seed wrote: its preparation link first, then the action. */
++  public void retire(String admissionId) {
++    jdbc.update(
++        "DELETE FROM studio_guided_preparations WHERE session_id=? AND admission_id=?",
++        sessionId,
++        admissionId);
++    jdbc.update(
++        "DELETE FROM studio_guided_actions WHERE session_id=? AND admission_id=?",
++        sessionId,
++        admissionId);
++  }
++}

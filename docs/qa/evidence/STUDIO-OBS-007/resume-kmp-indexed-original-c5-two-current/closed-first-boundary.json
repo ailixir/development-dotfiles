@@ -1,0 +1,99 @@
+{
+  "scope": "ONE_ORIGINAL_UNPROFILED_C5_AFTER_INDEXED_MATCHER",
+  "boundaries": [
+    {
+      "selector": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+      "firstProjectFrames": [
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.awaitFinalizing(GuidedPublicationReplayIT.java:14019)",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel(GuidedPublicationReplayIT.java:3677)"
+      ],
+      "fixedHttpCode": [],
+      "expectedStatus": [],
+      "actualStatus": []
+    }
+  ],
+  "failedState": {
+    "state": "FAILED",
+    "errorCode": "OTHER",
+    "bootstrapPhase": "READY",
+    "materializationPresent": true,
+    "fixtureModelHttpCalls": 4,
+    "fixturePhysicalProviderReads": 1,
+    "fixtureProviderFailures": 0,
+    "fixtureModelKinds": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 3,
+      "VERIFY_STEP": 0
+    }
+  },
+  "claimServerFixed": [
+    {
+      "status": 202,
+      "handlerNanos": 14098542,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 9000042,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 132370125,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 1148671292,
+      "consumed": true
+    }
+  ],
+  "lifecycleFixed": [
+    {
+      "status": 202,
+      "kind": "RUNTIME",
+      "reason": "LEASE_LOST",
+      "consumed": true
+    }
+  ],
+  "numericEvidence": {
+    "mappedAppenders": 1,
+    "rootEvents": null,
+    "appEvents": null,
+    "eventCountsStatus": "SUPPORT_UNOBSERVED",
+    "logCoverage": "STREAMED_ORIGINAL_ENCODED_OUTPUT",
+    "encodedBytes": 17085860,
+    "encodedWriteCalls": 7301,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsCollected": true,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 30,
+    "patternBytes": 3308,
+    "rootTraceObserved": true,
+    "appTraceObserved": true,
+    "httpBodies": 1,
+    "httpErrors": 0,
+    "jsonBodies": 1,
+    "problemBodies": 0,
+    "sseStreams": 0,
+    "metricBytes": 78987,
+    "cacheEntries": 2,
+    "cacheNonemptyRequired": true,
+    "cacheProduced": true,
+    "cacheUnproducedOutsideFilterRoutes": false,
+    "profileFiles": 167,
+    "knownRootLinks": 4,
+    "externalLinkTargetBytesScanned": false,
+    "c4WindowsExecuted": false,
+    "traceFromStart": false,
+    "traceArmed": true
+  },
+  "finalizeStatusAndCode": "UNREACHED",
+  "samplerEnabled": false,
+  "wholeC5Accepted": false,
+  "scannerExclusiveCostOrCausalGain": "UNOBSERVED",
+  "unchangedRetryPlanned": false
+}

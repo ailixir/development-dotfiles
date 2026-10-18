@@ -1,0 +1,417 @@
+{
+  "artifact": "Independent source-data diff of all36 existing snapshot negatives",
+  "fixtureSha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+  "initialSourceSelectorsAreHistorical": true,
+  "closingSourceNotesApply": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-remaining-uncertainties05/closing-source-notes.json",
+  "rows": [
+    {
+      "name": "missing-snapshot-evidence",
+      "fixturePointer": "/snapshotCorrection/negatives/0",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "null-base-for-nonempty-original-prefix",
+      "fixturePointer": "/snapshotCorrection/negatives/1",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "foreign-base-id",
+      "fixturePointer": "/snapshotCorrection/negatives/2",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/revision/id"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "foreign-test-base-identity",
+      "fixturePointer": "/snapshotCorrection/negatives/3",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/revision/identity/testId"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "forged-base-revision-digest",
+      "fixturePointer": "/snapshotCorrection/negatives/4",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/pinnedBase/revisionDigest"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "forged-base-artifact-hash",
+      "fixturePointer": "/snapshotCorrection/negatives/5",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/revision/identity/artifactHash"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "claimed-map-not-recomputed",
+      "fixturePointer": "/snapshotCorrection/negatives/6",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/artifact/learnedPlan/stepSnapshotHashes/00000000-0000-4000-8000-000000000001",
+        "/snapshotEvidence/baseProof/revision/stepSnapshotHashes/00000000-0000-4000-8000-000000000001"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "changed-base-context-retains-old-snapshot",
+      "fixturePointer": "/snapshotCorrection/negatives/7",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/authoringIdentity/authoring/steps/0/context/entries/0"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "source-text-does-not-match-basis",
+      "fixturePointer": "/snapshotCorrection/negatives/8",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoring/steps/0/text"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "duplicate-reference-declaration",
+      "fixturePointer": "/snapshotCorrection/negatives/9",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoredDeclarations/1"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "missing-referenced-plain-identity",
+      "fixturePointer": "/snapshotCorrection/negatives/10",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoredDeclarations/0"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "private-resolved-value-in-declaration",
+      "fixturePointer": "/snapshotCorrection/negatives/11",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoredDeclarations/0/value"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "noncontiguous-original-prefix-program",
+      "fixturePointer": "/snapshotCorrection/negatives/12",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/incrementalEvidence/program/sourceStepIds/0",
+        "/incrementalEvidence/program/sourceStepIds/1"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "program-action-not-from-base",
+      "fixturePointer": "/snapshotCorrection/negatives/13",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/incrementalEvidence/program/actions/0/operation/destinationInputId"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "current-prefix-context-cannot-be-reused",
+      "fixturePointer": "/snapshotCorrection/negatives/14",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoring/steps/0/context/entries/0"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "base-authoring-identity-version-absent",
+      "fixturePointer": "/snapshotCorrection/negatives/15",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/authoringIdentity/authoringIdentityVersion"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "missing-current-global-context",
+      "fixturePointer": "/snapshotCorrection/negatives/16",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoring/globalContext"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "missing-step-evidence-reference-array",
+      "fixturePointer": "/snapshotCorrection/negatives/17",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoring/steps/0/context/evidenceReferences"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "claimed-current-step-input-is-forbidden",
+      "fixturePointer": "/snapshotCorrection/negatives/18",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/stepInput"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "recursive-past-basis-is-forbidden",
+      "fixturePointer": "/snapshotCorrection/negatives/19",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof/previousBasis"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "raw-configuration-values-in-current-evidence",
+      "fixturePointer": "/snapshotCorrection/negatives/20",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/configurationValues"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "extra-snapshot-evidence-field",
+      "fixturePointer": "/snapshotCorrection/negatives/21",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/extra"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "missing-required-base-proof-null",
+      "fixturePointer": "/snapshotCorrection/negatives/22",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "immutable-original-source-cannot-be-replaced",
+      "fixturePointer": "/snapshotCorrection/negatives/23",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/snapshotEvidence/current/authoring/steps/2/context/entries/1/value"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "private-plain-hash-must-match-before-freeze",
+      "fixturePointer": "/snapshotCorrection/negatives/24",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [],
+      "candidateOrAuthorityOnly": true,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "immutable-source-manifest-hash-is-exact",
+      "fixturePointer": "/snapshotCorrection/negatives/25",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/sourceManifestHash"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "candidate-snapshot-map-cannot-be-copied-even-if-resealed",
+      "fixturePointer": "/snapshotCorrection/negatives/26",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [],
+      "candidateOrAuthorityOnly": true,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "candidate-gap-in-reused-prefix",
+      "fixturePointer": "/snapshotCorrection/negatives/27",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [],
+      "candidateOrAuthorityOnly": true,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "candidate-older-same-test-revision-id",
+      "fixturePointer": "/snapshotCorrection/negatives/28",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [],
+      "candidateOrAuthorityOnly": true,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "candidate-suffix-reuse-is-forbidden",
+      "fixturePointer": "/snapshotCorrection/negatives/29",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [],
+      "candidateOrAuthorityOnly": true,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "base-operation-equivalence-is-recomputed",
+      "fixturePointer": "/snapshotCorrection/negatives/30",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/incrementalEvidence/plan/prefixProgramHash",
+        "/incrementalEvidence/program/baseRevisionDigest",
+        "/snapshotEvidence/baseProof/revision/identity/operationEquivalenceHash",
+        "/snapshotEvidence/baseProof/revision/revisionDigest",
+        "/snapshotEvidence/pinnedBase/revisionDigest"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "base-claimed-map-resealed-still-not-source-derived",
+      "fixturePointer": "/snapshotCorrection/negatives/31",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/incrementalEvidence/plan/prefixProgramHash",
+        "/incrementalEvidence/program/baseRevisionDigest",
+        "/snapshotEvidence/baseProof/artifact/learnedPlan/stepSnapshotHashes/00000000-0000-4000-8000-000000000001",
+        "/snapshotEvidence/baseProof/artifact/learnedPlanHash",
+        "/snapshotEvidence/baseProof/artifact/replayPolicy/learnedPlanHash",
+        "/snapshotEvidence/baseProof/revision/identity/artifactHash",
+        "/snapshotEvidence/baseProof/revision/identity/learnedPlanHash",
+        "/snapshotEvidence/baseProof/revision/identity/referencePolicyHash",
+        "/snapshotEvidence/baseProof/revision/revisionDigest",
+        "/snapshotEvidence/baseProof/revision/stepSnapshotHashes/00000000-0000-4000-8000-000000000001",
+        "/snapshotEvidence/pinnedBase/revisionDigest"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "original-immediate-base-authority-cannot-be-repinned",
+      "fixturePointer": "/snapshotCorrection/negatives/32",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/incrementalEvidence/plan/baseRevisionId",
+        "/incrementalEvidence/plan/prefixProgramHash",
+        "/incrementalEvidence/program/baseRevisionId",
+        "/incrementalEvidence/switch/baseRevisionId",
+        "/snapshotEvidence/baseProof/revision/id",
+        "/snapshotEvidence/pinnedBase/revisionId"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "empty-prefix-must-not-require-or-supply-old-proof",
+      "fixturePointer": "/snapshotCorrection/negatives/33",
+      "control": "/snapshotCorrection/positives/2",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "nonempty-original-prefix-cannot-null-proof-after-drift-at-one",
+      "fixturePointer": "/snapshotCorrection/negatives/34",
+      "control": "/snapshotCorrection/positives/4",
+      "changedBasisPointers": [
+        "/snapshotEvidence/baseProof"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    },
+    {
+      "name": "immutable-current-configuration-cannot-change",
+      "fixturePointer": "/snapshotCorrection/negatives/35",
+      "control": "/snapshotCorrection/positives/1",
+      "changedBasisPointers": [
+        "/configuration/viewport/width",
+        "/configurationHash"
+      ],
+      "candidateOrAuthorityOnly": false,
+      "pointerInventoryMatchesCurrentFrozenSource": true,
+      "executionCredit": false
+    }
+  ],
+  "status": "METADATA_INVENTORY_ONLY_NOT_APPLICATION_VALIDATION"
+}

@@ -1,0 +1,119 @@
+{
+  "artifact": "STUDIO-OBS-013 contract step C1 (sync point S1): ledger",
+  "author": "Dex (@dev), C-lane integrator 'cint'",
+  "date": "2026-10-13",
+  "authority": [
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-1-obs013.json (AR-1, binding; overrides the plan where they differ)",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/s0-plan-refresh.json contractSequence[C1], lanes.C"
+  ],
+  "mode": "No git add/commit/stash/reset. No full Gradle; one compileTestJava via gradle-locked.sh (AGENT_NAME=cint). No backend controllers written. T0 = sha256 of every C-lane file captured before the first edit (scratchpad cint/t0/hashes.txt); the tree was already dirty from earlier stories, so old/new below are T0 -> now, not HEAD -> now.",
+
+  "unit": {
+    "order": "spec edit -> regen -> --check -> checker -> shasum -> pins -> ADR-002 row (one unit)",
+    "regen": "node tools/build-studio-observed-schemas.cjs -> 'Generated v3: 22 guided schemas, 29 replay schemas; four byte-identical outputs.' (T0 measured: 21 guided, 28 replay)",
+    "check": "node tools/build-studio-observed-schemas.cjs --check -> 'Verified v3: 22 guided schemas, 29 replay schemas' exit 0",
+    "checker": {
+      "now": "node tools/check-studio-observed-contracts.cjs -> 'PASS v3: 41 schemas with every definition compiled; 347 fixture/semantic/canonical checks; 42 planning fixtures; 79 replay/publication checks.' / 'PASS public OpenAPI: 39 operations, eight guided-session routes, 18 validated examples' / 'PASS codegen: 22 guided schemas, 29 replay schemas' exit 0",
+      "t0Measured": "Same checker with the C1 edits reversed, run on a scratch mirror of the T0 files: 40 schemas; 303 fixture checks; 42 planning; 79 replay; 38 operations, seven guided-session routes, 18 examples; 21 guided / 28 replay. The reversed checker is a reconstruction (tools/*.cjs had no T0 snapshot); it passed on the T0 tree.",
+      "delta": "+1 schema (action-timing); +44 fixture checks = 40 new structural cases + 4 array-bound checks; +1 operation"
+    }
+  },
+
+  "changes": {
+    "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json": "definitions.videoEvidence (closed {status, error, expiresAt, partial}, all required; VideoStatus enum verbatim; error null|1..512; expiresAt null|shared UTC profile; allOf: AVAILABLE/EXPIRED <=> expiresAt string, partial => AVAILABLE/EXPIRED, PROCESSING => error null). evidence.video = oneOf[null, $ref videoEvidence] (S1 widening). actionTimings = array maxItems 400 items $ref #/definitions/actionTiming. Top-level allOf: video.status != AVAILABLE (video null included) => actionTimings maxItems 0. definitions.actionTiming = $ref action-timing.schema.json (alias, see deviation D-1).",
+    "docs/specs/studio-observed-authoring/contracts/v3/action-timing.schema.json (NEW)": "Closed {kind, stepId, admissionId, ordinal, startMs, endMs}, all six required; kind enum [step, action, clarificationWait, prefixReplay]; integers 0..2147483647; kind action <=> admissionId string AND ordinal integer, otherwise both null. The single shared item definition.",
+    "docs/specs/studio-observed-authoring/contracts/v3/bridge.schema.json": "definitions.recordingEvidence: the 10 identity fields (cloned from definitions.identity) + recordingId ^[A-Za-z0-9_-]{1,256}$ + state [STORED, FAILED, UNAVAILABLE] + partial + timings (maxItems 200, items $ref action-timing.schema.json); additionalProperties false; allOf: state != STORED => partial const false AND timings maxItems 0.",
+    "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json": "documents actionTiming, recordingEvidence, recordingResult; 40 cases: 8 R1 projection rows (one per AR-1 projectionTable row) + S1 null case, 11 R1 negatives, 8 actionTiming cases, 12 recordingEvidence cases (every AR-1 negativeTestExpectations.contract_C1 item); guidedRecordingKeyVector {rule, segmentPattern, derived[2], refused[7]}. Existing bytes untouched (diff vs T0 removes only the closing bracket of cases).",
+    "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json": "UNCHANGED (sha256 equals T0). Its result literals carry video null and stay valid at S1 (checker passes).",
+    "docs/specs/studio/openapi.yaml": "New GET /guided-sessions/{id}/video (operationId getGuidedSessionVideo, tag guided-sessions, x-implemented-by STUDIO-OBS-013, GuidedSessionId + download, statuses 200,206,401,403,404,410,416,503; 403 as on readGuidedSession; 503 oneOf [ErrorResponse, PlatformErrorResponse, v3 error.schema.json]). components.responses VideoNoEvidence, VideoExpired, VideoRangeNotSatisfiable (guided route $refs all three). readGuidedResult gains the re-poll description sentence. getExecutionVideo byte-unchanged (see escalation E-1).",
+    "docs/specs/studio-observed-authoring/contracts/README.md": "Route row `recording-evidence | backend | owning-worker | required | bridge#/definitions/recordingEvidence | 202 bridge#/definitions/recordingEvidence (echo of the accepted request)`; mount sentence names the retry exception; new 'Guided recording evidence (OBS-013)' section (body, key rule, clock origin, no text on the wire, retry exception, S1 null note); public-routes sentence seven -> eight incl. video; area table lists action-timing.",
+    "tools/check-studio-observed-contracts.cjs": "Not in lanes.C.files and owned by no lane; edited because AR-1 requires it to pass and it hard-asserted exactly seven guided routes with JSON 2xx bodies. Edits: eighth route; video 2xx media must be exactly video/webm; guided 404/410/416 must $ref the shared components; getExecutionVideo status set pinned unchanged and its literals must match the components on schema, example codes and headers (drift guard while E-1 holds); 200/206 media and 206 headers equal between the two routes; array bounds 400/401 (result.actionTimings) and 200/201 (recordingEvidence.timings). sha256 now 485841a58664f45b15819de59c4dab0bae6ca97949f68749118344febb2f4558 (T0 not captured).",
+    "generated (byte-identical to regen)": "studio-runner/src/guided/{schemas.json,types.ts}: + action-timing.schema.json, BridgeRecordingEvidence, ActionTiming, Result.evidence.video VideoEvidence. studio-runner/src/validator/observedSchemas.json + executor/observedOperations.ts: + action-timing (replay-validation reaches bridge), RecordingEvidence, ActionTiming. No duplicate exported names (checked).",
+    "studio-runner/test/run/confinement.test.ts": "BASE_SHA256 only (+ provenance comment).",
+    "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java": "status map row GET /guided-sessions/{id}/video = 200,206,401,403,404,410,416,503; total 38 -> 39 (both hasSize); authorized-movement message names OBS-013; new parity test theGuidedVideoEvidenceIsThePublicVideoEvidenceShape (v3 videoEvidence properties == VideoEvidence record == openapi VideoEvidence; status enum == openapi VideoStatus, no STORED/PENDING). Internal list unchanged at 9 (recording-evidence is a contracts/README bridge route, not an OpenAPI operation). google-java-format 1.22 pre-check clean (T0 file also clean under the same tool).",
+    "docs/architecture/ADR-002-internal-contract-surface.md": "One §13 amendment-log row dated 2026-10-13 (Class C public route + Class B guided bridge/result shape)."
+  },
+
+  "pins": {
+    "BASE_SHA256": {"old": "f502160e0c7475eb5356d11c5644cea1b01e10b8d242ca747872b38b17e823e6", "new": "d40c744d924ceb3d90f1711d53c6d714105e95a37a85c54a0a270687cdf1608e", "source": "shasum -a 256 docs/specs/studio/openapi.yaml after the last openapi edit; old value equalled the measured T0 digest (SC-8 satisfied: op count read 38 before pinning)"},
+    "StudioContractTest.totalOperations": {"old": 38, "new": 39},
+    "StudioContractTest.statusMap": {"added": "GET /guided-sessions/{id}/video -> 200,206,401,403,404,410,416,503", "unchanged": "GET /executions/{id}/video -> 200,206,401,403,404,410,416,503 and every other row"},
+    "StudioContractTest.internalList": {"old": 9, "new": 9},
+    "StudioContractTest.schemaRecordParity": {"added": "theGuidedVideoEvidenceIsThePublicVideoEvidenceShape"},
+    "GuidedContracts epochs": {"result": "UNCHANGED", "method": "Epochs.java overlay (JDK 21 toolchain + scratchpad/maincp.txt): old overlay (T0 result/bridge) reproduced all four constants; new overlay gave the same four: session e9f57e1e…7e5b17, replay-validation 2a55e780…fac519, ledger 2f365ba0…70d6cb, observation 9be57abe…ac2d2"},
+    "OBSERVED_SCHEMA_BUNDLE_HASH (runtime-derived, not a literal pin)": {"old": "ff736681d74fa10d41fd4d7cfd01644bbf25fcf1b1b7559425fd1efdf468b8ee", "new": "829195b335f01328b5d45f40ceed765ece4f775fa60024d996cc268f377e88eb", "note": "canonical-v1 sha256 of observedSchemas.json; moves because bridge is in the replay closure. Every runner test and backend path reads it at runtime (verified by grep); no literal pin exists. An artifact persisted with the old build identity would refuse PROFILE_MISMATCH on replay (inferred; Studio unreleased)."}
+  },
+
+  "fileHashes_t0_to_now": "see changedFiles",
+  "changedFiles": {
+    "docs/specs/studio/openapi.yaml": ["f502160e0c7475eb5356d11c5644cea1b01e10b8d242ca747872b38b17e823e6", "d40c744d924ceb3d90f1711d53c6d714105e95a37a85c54a0a270687cdf1608e"],
+    "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json": ["c79958f9ea4b472d3904beaa9f3b042136529aad091c478041e5f4489c109a00", "018909435454d27e5ee8b78ef6e52ee37bbe4ff37f386bd9c871061f9438c084"],
+    "docs/specs/studio-observed-authoring/contracts/v3/bridge.schema.json": ["4ebbe139c43e0b37b9b85168e0ba33010b6604bc740baa536e61193ce290a2d0", "b98c84dc88991134e414b542fea80a0239c1182daf30a98016441335b4aec4e7"],
+    "docs/specs/studio-observed-authoring/contracts/v3/action-timing.schema.json": [null, "d2cb597f799dfac20a020d26142e568524eed7c24986eb4ae1566c569c729e7d"],
+    "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json": ["dc107dc5d996ea984ab02867ab64517b01939a5ec5fe4fe7492a7ce57af334ba", "a3dbdf7aaa4323c803e448579641962256a6eb4a5a6144822ffe7185133924a2"],
+    "docs/specs/studio-observed-authoring/contracts/README.md": ["196b27ae968775a21d4b2cb51d458b6c090f649c75f7c2f2e0c361480e29ce6c", "8c055f8883a89172574ede022dc4664776d27419319d6da13e59711af2827543"],
+    "studio-runner/src/guided/schemas.json": ["f4cecd6c7e52406c809ec14e871af1463e2e45520ccedd7a369fdcbc2f3c1f78", "c5374279ac5d5f88ad8fb18a3260b9906f94e918960531f15c1f12611521cf61"],
+    "studio-runner/src/guided/types.ts": ["d5cdf40fda57d12af15308a49ea33cafc92fc76201b55358fe43660f23ad1825", "334b4657687abda8621f4c6cab3f748e2dcc704646f043f1adb5b9b09dfd328c"],
+    "studio-runner/src/validator/observedSchemas.json": ["95b8751d223a596df4fe09eb569065d4736c5171e7b4f37fe0133e02006f6c06", "51b07592bcb0b9c9f9eabb78151b471672bc3853f1f5352c0ac079e49153d1a5"],
+    "studio-runner/src/executor/observedOperations.ts": ["35743af285e092a29c6e822c9c98c2027ba39e43b5f6f74f13bcae8abb9ac52a", "a8bb403e629f217a106cd7378c8a9fc950d63491964359555036467429f5196d"],
+    "studio-runner/test/run/confinement.test.ts": ["01b51b974634b4cf4639df4fc3cfff3ac27588995313a3959d4c4fbb3970cf55", "5efe5d7a44e1bdcedfec26663a541b04dfc6d651f7431a849bd72b5e79b021af"],
+    "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java": ["3b494a85a06de195f7b77aae699413ba43f92ac95c29f5774d74b690cf3581e9", "3ee7335a848ae70cd6eaf752022410f182149ffee670d39c3ba8647442cdf3c0"],
+    "docs/architecture/ADR-002-internal-contract-surface.md": ["e75b82a83cb9b2e40fb4c31e6178ab38bab87a883f978cdf7945c72b97d2bca6", "41feff007ba926d921bf51be560e0433126c3aabc0f05c4bd88a60912e4fefd8"],
+    "tools/check-studio-observed-contracts.cjs": ["not captured", "485841a58664f45b15819de59c4dab0bae6ca97949f68749118344febb2f4558"]
+  },
+  "unchangedConfirmed": ["v3/publication-fixtures.json", "v3/clarification.schema.json", "v3/runner-context.schema.json", "v3/session-view.schema.json", "tools/build-studio-observed-schemas.cjs (not edited)"],
+
+  "verification": {
+    "runnerContractTests": "cd studio-runner && ./node_modules/.bin/vitest run test/generated-contracts.test.ts test/contract*.test.ts test/run/confinement.test.ts --coverage.enabled=false -> 4 files, 40/40 passed",
+    "runnerWiderNarrow": "same binary, + test/guided test/observedReplayValidation.test.ts test/observedV3TupleValidation.test.ts test/runtime-versions.test.ts -> 12 files, 240/240 passed (the suites that load the regenerated guided and observed bundles)",
+    "runnerTypecheck": "./node_modules/.bin/tsc --noEmit -p . -> exit 0; ./node_modules/.bin/eslint test/run/confinement.test.ts src/guided/types.ts src/executor/observedOperations.ts -> exit 0",
+    "checkerNegativeControls": "scratch mirror of the new tree, one mutation at a time, each restored: guided 404 as a literal -> 'guided 404 is shared'; getExecutionVideo 410 example code VIDEO_GONE -> '410 example code drift'; recordingEvidence.timings maxItems 201 -> 'recordingEvidence.timings with 201 items'; restored tree exit 0",
+    "backendCompile": {
+      "gradle": "AGENT_NAME=cint gradle-locked.sh compileTestJava -> BUILD FAILED (exit 1). compileJava succeeded; all 17 compileTestJava errors are in backend/src/test/java/com/citi/put/checks/studio/internal/AdmissionCasIT.java ('cannot find symbol method claim(UUID,AdmissionRequest)'): another lane's in-flight claimAdmission removal (AdmissionCasService modified, AdmissionCasIT not yet re-pointed; plan C2a/B14 T1a). Not a C1 file and not caused by C1.",
+      "isolatedPrecheck": "javac -proc:none of StudioContractTest.java alone against the freshly compiled build/classes/java/main + scratchpad maincp.txt + gradle-cache test jars (JDK 21 toolchain) -> OK. A pre-check, not Gradle proof: root's S1 window must compile and run it."
+    },
+    "notRun": "No StudioContractTest execution, no full Gradle, no frontend tests, no runner fixtures tier, no backend guided ITs (they spawn studio-runner/dist/run/guidedMain.js; dist was NOT rebuilt by this lane, so a backend guided IT run needs a dist rebuild first to see the new guided bundle - root S1 window)."
+  },
+
+  "redPendingB13": {
+    "StudioContractTest": [
+      "everyRouteTheContractPresentsAsShippedIsActuallyReachable: RED until B13 lands GuidedSessionVideoController (the document presents GET /api/v1/studio/guided-sessions/{id}/video as shipped; springdoc does not serve it yet). Expected per the coupling rule; not run here (inferred from the assertion and the absent controller).",
+      "everyImplementedStudioRouteIsDeclaredInTheContract: stays green (it only requires implemented ⊆ declared).",
+      "declaredOperationStatusSetsAndMarkersMatchTheReviewedContract, internalRoutesStayOffThePublicSurfaceAndNameWhatServesThem, theGuidedVideoEvidenceIsThePublicVideoEvidenceShape: document-only, expected green (not executed here)."
+    ],
+    "ExecutionVideoContractTest (B13-owned, not edited by C-int)": [
+      "theSetOfOperationsCarryingAnAttributionIsPinnedBothWays: RED - OPERATIONS_CARRYING_ATTRIBUTION needs + 'getGuidedSessionVideo' (an addition).",
+      "the public-401 test: RED - publicRefs hasSize(29) -> 30 and PUBLIC_OPERATIONS_DECLARING_UNAUTHENTICATED + 'getGuidedSessionVideo' (additions).",
+      "theAttributionReaderNamesOnlyRealStories (unknownAttributions): expected green - STUDIO-OBS-013 exists at docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md (not executed)."
+    ],
+    "frontend studioContract.test.ts (F-012B-owned)": "Not red from C1 as applied (getExecutionVideo literals untouched); F-012B adds the class-A video allowlist entry for operationId getGuidedSessionVideo at S1 per plan."
+  },
+
+  "deviations": {
+    "D-1": {
+      "what": "AR-1 R2/R3 place the item at result.schema.json definitions.actionTiming and have bridge timings $ref result.schema.json#/definitions/actionTiming. Applied literally first: the guided runner bundle then included result.schema.json, whose pre-existing currentReadiness.revisionId uses format uuid, and studio-runner/src/guided/contracts.ts auditSchemaBundle allows only date-time|uri -> SCHEMA_CONFIGURATION at module load: 4 guided test files failed to load (measured), and guidedMain would refuse to start (inferred).",
+      "applied": "The item lives in a new self-contained v3/action-timing.schema.json; result definitions.actionTiming is a $ref alias to it (so result#/definitions/actionTiming still resolves), result.actionTimings items -> #/definitions/actionTiming, bridge timings items -> action-timing.schema.json. One definition, still shared; OBS-015 still needs no bridge change. Guided bundle grows by action-timing only.",
+      "why not the alternatives": "Widening the runner validator to accept uuid edits a runner source file outside lanes.C.files; copying the item into bridge creates a second definition AR-1 rejected.",
+      "status": "[AUTO-DECISION] pending @architect ratification"
+    },
+    "D-2": {
+      "what": "tools/check-studio-observed-contracts.cjs edited although not listed in lanes.C.files (no lane lists it). Required for the AR-1 checker step to pass at all (it asserted exactly seven guided routes and JSON-only 2xx bodies).",
+      "status": "[AUTO-DECISION] recorded for the coordinator"
+    }
+  },
+
+  "escalations": {
+    "E-1 (AR-1 SC-5 triggered)": {
+      "ruling": "C1 extracts 404/410/416 into components.responses and BOTH getExecutionVideo and getGuidedSessionVideo $ref them.",
+      "finding": "Moving getExecutionVideo to $ref would change existing assertions that walk the literal response: ExecutionVideoContractTest.theNotFoundResponseDeclaresAnErrorResponseBody (404 content.application/json.schema.$ref), ExecutionVideoContractTest.theUnsatisfiableRangeResponseDeclaresABodyAndItsContentRangeHeader (416), ExecutionVideoEvidenceIT.expiredCodeFromContract (410 examples.expired.value.error via ContractDocument.at, which does not follow $ref), and frontend studioContract.test.ts:877-879 (404/410/416 examples). Verified by reading; not executed. SC-5: 'any change would be needed to ExecutionVideo* assertions (as opposed to additions) -> stop.'",
+      "applied": "Components created; getGuidedSessionVideo $refs them; getExecutionVideo left byte-unchanged. Checker guard pins the execution literals to the components on schema, example error codes and headers until a ruling.",
+      "owner": "@architect: either (a) ratify execution-route literals + drift guard, or (b) authorize $ref-following in ContractDocument/studioContract helpers (B13 / F-012B) and then the C lane moves getExecutionVideo to the references."
+    }
+  },
+
+  "selfCritique": [
+    "Every AR-1 contract_C1 negative is a fixture case that the checker asserts; base documents are proven valid by their own VALID cases, so each SCHEMA refusal is attributable to its single patch.",
+    "No field invented: shapes, enums, bounds, texts (FAILED text, NO_RECORDING_STORE) are AR-1/ExecutionSnapshotMapper verbatim. Example messages on the new shared components are illustrative; error codes are the contract.",
+    "No backend controller added; no B13/F-012B/R14 file edited."
+  ]
+}

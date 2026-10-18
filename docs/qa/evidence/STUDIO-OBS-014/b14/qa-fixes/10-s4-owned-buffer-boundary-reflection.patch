@@ -1,0 +1,89 @@
+diff --git a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java
+@@ -15,8 +15,12 @@
+ 
+ /** Actual owned-buffer boundaries; JDK copies and joined service effects are outside this scope. */
+ class GuidedOwnedBufferBoundaryTest {
+-  private static final int LIMIT = 1048576;
++  /** The real accepted-body bound, read from {@code BoundedResponse.LIMIT} (not hard-coded). */
++  private static final int LIMIT = limit("$BoundedResponse", "LIMIT");
+ 
++  /** The real definite-refusal reply bound, read from {@code GuidedRunnerClient.REFUSAL_LIMIT}. */
++  private static final int REFUSAL_LIMIT = limit("", "REFUSAL_LIMIT");
++
+   @Test
+   void exactResponseLimitCompletesAndAllOwnedArraysAreErased() throws Exception {
+     Object owner = response();
+@@ -67,7 +71,43 @@
+     assertThat(owned).containsOnly((byte) 0);
+   }
+ 
++  /**
++   * The definite-refusal reply bound (ar-2-r14-stops ruling 2: a context 409 body is read up to
++   * REFUSAL_LIMIT). It equals the initial owned buffer, so unlike LIMIT nothing grows: exactly
++   * REFUSAL_LIMIT bytes complete into the original array, and one byte more cancels without
++   * consuming it.
++   */
+   @Test
++  void refusalReplyLimitCompletesExactlyAndCancelsOneByteBeyond() throws Exception {
++    Object exact = response(REFUSAL_LIMIT);
++    var subscriber = subscriber(exact);
++    var subscription = new CountedSubscription();
++    subscriber.onSubscribe(subscription);
++    byte[] initial = array(exact, "bytes");
++    byte[] content = new byte[REFUSAL_LIMIT];
++    Arrays.fill(content, (byte) 61);
++    subscriber.onNext(List.of(ByteBuffer.wrap(content)));
++    assertThat(array(exact, "bytes")).as("no growth at the refusal bound").isSameAs(initial);
++    subscriber.onComplete();
++    assertThat(subscriber.getBody().toCompletableFuture().join()).hasSize(REFUSAL_LIMIT);
++    ((AutoCloseable) exact).close();
++    assertThat(initial).containsOnly((byte) 0);
++
++    Object beyond = response(REFUSAL_LIMIT);
++    var over = subscriber(beyond);
++    var cancelled = new CountedSubscription();
++    over.onSubscribe(cancelled);
++    over.onNext(List.of(ByteBuffer.wrap(new byte[REFUSAL_LIMIT])));
++    ByteBuffer excess = ByteBuffer.wrap(new byte[] {62});
++    over.onNext(List.of(excess));
++    assertThat(excess.position()).isZero();
++    assertThat(cancelled.cancelled.get()).isEqualTo(1);
++    assertThatThrownBy(() -> over.getBody().toCompletableFuture().join())
++        .hasRootCauseMessage("Guided response exceeded size bound");
++    ((AutoCloseable) beyond).close();
++  }
++
++  @Test
+   void closeBeforeSubscriptionRefusesLateChunksWithoutConsumingThem() throws Exception {
+     Object owner = response();
+     var subscriber = subscriber(owner);
+@@ -127,10 +167,25 @@
+   }
+ 
+   private static Object response() throws Exception {
++    return response(LIMIT);
++  }
++
++  private static Object response(int limit) throws Exception {
+     Class<?> type = Class.forName(GuidedRunnerClient.class.getName() + "$BoundedResponse");
+-    var constructor = type.getDeclaredConstructor(boolean.class);
++    var constructor = type.getDeclaredConstructor(boolean.class, int.class);
+     constructor.setAccessible(true);
+-    return constructor.newInstance(true);
++    return constructor.newInstance(true, limit);
++  }
++
++  private static int limit(String nested, String name) {
++    try {
++      Field field =
++          Class.forName(GuidedRunnerClient.class.getName() + nested).getDeclaredField(name);
++      field.setAccessible(true);
++      return field.getInt(null);
++    } catch (ReflectiveOperationException failure) {
++      throw new ExceptionInInitializerError(failure);
++    }
+   }
+ 
+   @SuppressWarnings("unchecked")

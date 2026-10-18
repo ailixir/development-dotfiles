@@ -1,0 +1,108 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "lane": "K (backend) - dispatch-time authorization recheck",
+  "ruling": "docs/qa/evidence/STUDIO-OBS-012A/root/architect-rulings-wave1b.json#R3",
+  "agent": "Dex (@dev), AGENT_NAME=dex-r3",
+  "date": "2026-10-13",
+  "productionChange": {
+    "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+    "summary": [
+      "DispatchAuthorization restored as a REQUIRED constructor dependency (public @Autowired constructor and package-private test constructor), positioned after UITestRevisionRepository as at HEAD. No @Autowired(required=false), no null fallback.",
+      "dispatchClaimed: csi_id now read as (String) row.get(\"csi_id\") so a NULL CSI reaches the recheck as null.",
+      "dispatchClaimed: authorization.recheck(executionId, testId, csiId, principal) runs after the pending-deadline close and before observed.binding(...), dispatchObserved/refreshRetry, observed.job (Vault read) and runnerClient.send.",
+      "AuthorizationRevokedException -> LOGGER.warn(executionId, exception message) -> close(executionId, AUTHORIZATION_REVOKED, now) -> return false. No send, no retry, no requeue, no secret no-send fact.",
+      "The returned policy identity is discarded; configuration_snapshot.dispatchPolicyIdentity is not written.",
+      "Other exceptions from recheck propagate unchanged (lease expiry / re-claim), as at HEAD."
+    ]
+  },
+  "testChanges": {
+    "created": [
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherAuthorizationRecheckTest.java",
+        "tests": [
+          "aRevokedAuthorizationClosesWithAuthorizationRevokedBeforeAnySecretAndSendsNothing: closes AUTHORIZATION_REVOKED; zero interactions with ObservedReplayAuthorization (binding/refreshRetry/job), SecretAuditLifecycle, RunnerDispatchClient, UITestRevisionRepository, JdbcTemplate; no executeWithoutResult; no releaseClaim",
+          "theRecheckPrecedesTheBindingLookupAndRefreshRetry: InOrder recheck -> binding -> refreshRetry; job never called; runner never called",
+          "aNullCsiReachesTheRecheckAsNullAndIsRefused",
+          "anUnexpectedRecheckFailurePropagatesAndIsNotRelabelledAsRevoked"
+        ]
+      }
+    ],
+    "constructorCallSitesOnly": [
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatcherIT.java",
+        "change": "secondInstance(...) helper passes the already-autowired Spring DispatchAuthorization bean. Test method aRevokedAuthorizationAtDispatchIsTerminalWithAnExplicitCodeAndNoSend NOT modified."
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioKillSwitchWiringTest.java",
+        "change": "passes mock(DispatchAuthorization.class); the tests never reach dispatchClaimed (nothing claimed / switch off)."
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java",
+        "change": "direct construction passes a permissive lambda; RecordingDispatcher subclass constructor gains a DispatchAuthorization parameter passed through to super(...). sameGraph(...) graph left unchanged (7 entries)."
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/dispatch/ObservedTerminalSettlementIT.java",
+        "change": "passes a permissive lambda so missingObservedRuntimeCannotFallThroughToUntrackedLegacyValueResolver still reaches the no-binding DISPATCH_FAILED branch it asserts."
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+        "change": "@Primary recordedObservedRefusals bean method takes the Spring DispatchAuthorization bean and passes it to RecordingDispatcher (real authorizer, not a stub)."
+      }
+    ]
+  },
+  "commands": [
+    {
+      "cmd": "gradle-locked.sh spotlessApply -PspotlessIdeHook=<file> (once per touched file, 8 invocations over 7 distinct files)",
+      "exit": 0,
+      "note": "Per-file hook used deliberately; a project-wide spotlessApply was cancelled while it waited on the lock so other lanes' files would not be reformatted."
+    },
+    {
+      "cmd": "gradle-locked.sh test --tests StudioDispatcherAuthorizationRecheckTest --tests StudioKillSwitchWiringTest (first attempt)",
+      "exit": 1,
+      "result": "compileTestJava failed: RecordingDispatcher super(...) call site in StudioDispatcherFailureIT not yet updated. Fixed, see next."
+    },
+    {
+      "cmd": "gradle-locked.sh test --tests StudioDispatcherAuthorizationRecheckTest --tests StudioKillSwitchWiringTest",
+      "exit": 0,
+      "result": "compileTestJava OK (all test sources); 10 tests, 10 passed (4 recheck + 6 kill switch)"
+    },
+    {
+      "cmd": "gradle-locked.sh test --tests DispatcherIT.aRevokedAuthorizationAtDispatchIsTerminalWithAnExplicitCodeAndNoSend (run twice)",
+      "exit": 1,
+      "result": "1 test, 1 failure in setUp (DispatcherIT.java:118, fixture seedRunnableTest): PSQLException 'publication verdict mismatch' raised by studio_publication_attempt_guard() line 34. The test body and dispatcher were never reached. The Spring context did start with the required DispatchAuthorization constructor dependency.",
+      "blocker": "Lane M V15 (V34 studio_publication_profile expects the old tuple). Not worked around."
+    },
+    {
+      "cmd": "gradle-locked.sh test --tests ObservedTerminalSettlementIT",
+      "exit": 1,
+      "result": "20 tests, 20 failures, all 'publication verdict mismatch' at fixture setup (ObservedTerminalSettlementIT.java:135). Same Lane M blocker."
+    },
+    {
+      "cmd": "Falsification: recheck call temporarily replaced by a no-op guard, then gradle-locked.sh test --tests StudioDispatcherAuthorizationRecheckTest",
+      "exit": 1,
+      "result": "4 tests, 4 FAILED with the recheck removed. File restored; sha1 cf33a8976c3ce8e7fdfe0a0c28f09d9aefc76608 before and after."
+    },
+    {
+      "cmd": "gradle-locked.sh checkstyleMain checkstyleTest spotbugsMain test --continue --tests StudioDispatcherAuthorizationRecheckTest --tests StudioKillSwitchWiringTest",
+      "exit": 0,
+      "result": "checkstyleMain, checkstyleTest and spotbugsMain passed; 10 tests, 10 passed on the restored code"
+    }
+  ],
+  "verified": [
+    "Recheck precedes binding lookup and refreshRetry (InOrder unit test) and no secret/Vault/audit/runner collaborator is touched on revocation (verifyNoInteractions).",
+    "Revocation closes with AUTHORIZATION_REVOKED and returns false without sending.",
+    "The new tests are falsifiable: all 4 fail when the recheck is removed.",
+    "All test sources compile against the new constructor signature.",
+    "The Spring context with the required dependency starts (DispatcherIT reached setUp)."
+  ],
+  "notRun": [
+    "DispatcherIT revoked-authorization case GREEN: blocked by 'publication verdict mismatch' (Lane M V15). The test is unchanged and not yet observed passing.",
+    "Full DispatcherIT, RevocationRotationIT, CancelIT, StudioDispatchMetricsIT: not run. The same publication fixture blocker is expected (inferred, not observed).",
+    "StudioDispatcherFailureIT and GuidedPublicationReplayIT: compiled only, not executed.",
+    "Recommended non-blocking assertion of zero studio_secret_use_audit rows in DispatcherIT: not added (DispatcherIT test bodies are not mine to change).",
+    "Full backend ./gradlew check, jacoco coverage verification: not run.",
+    "CodeRabbit: not run (WSL-based CLI, not available on this darwin host).",
+    "npm run lint / npm run typecheck: not applicable (no frontend change)."
+  ],
+  "residualRisk": "Millisecond TOCTOU between recheck and send, identical to HEAD; no row locks added per R3."
+}

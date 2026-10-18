@@ -127,8 +127,8 @@ The broader application/component association and CSI-wide reporting requirement
 * **Autosave:** Draft persistence for check creation and reports
 * **Code Generation:** Confirmed Playwright TypeScript source in Checks Studio; Python export is retired from the Studio plan
 * **Template Library:** Pre-built templates for common UI test scenarios
-* **Keyboard Shortcuts:** Comprehensive keyboard navigation throughout the application
-* **Accessibility:** Full ARIA support and screen reader compatibility
+* ~~**Keyboard Shortcuts:** Comprehensive keyboard navigation throughout the application~~ *(2026-10-17: Superseded by ADR-SC-006 (user decision 2026-10-17): accessibility limited to functional must-haves; no WCAG target. No keyboard shortcuts or custom keyboard navigation.)*
+* ~~**Accessibility:** Full ARIA support and screen reader compatibility~~ *(2026-10-17: Superseded by ADR-SC-006 (user decision 2026-10-17): accessibility limited to functional must-haves; no WCAG target. No screen-reader, live-region or aria-only work.)*
 
 ### 5.4. Out of Scope for V2.2
 

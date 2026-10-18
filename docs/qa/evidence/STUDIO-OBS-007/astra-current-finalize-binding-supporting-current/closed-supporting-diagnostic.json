@@ -1,0 +1,317 @@
+{
+  "scope": "Bounded existing supporting diagnostic",
+  "acceptanceCredit": false,
+  "gate": {
+    "pass": false,
+    "gradleExitCode": 1,
+    "sourceDrift": [],
+    "results": [
+      {
+        "test": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+        "pass": true
+      },
+      {
+        "test": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+        "pass": false
+      }
+    ],
+    "tests": 2,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sevenBindingsUnchanged": true,
+    "finishedAt": 1791841250.548573
+  },
+  "privateArtifactJoined": true,
+  "backendClaimIsSdkAcknowledgement": false,
+  "exclusiveLatencyAttribution": "UNPROVED",
+  "privacy": {
+    "encodedBytes": 472731451,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsCollected": true,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 30,
+    "rootTraceObserved": true,
+    "appTraceObserved": true
+  },
+  "diagnostic": {
+    "claimSamplerStatus": 2,
+    "claimSamplerJoined": true,
+    "claimSamplerCleanupConfirmed": true,
+    "claimSamplerDiagnosticOnly": true,
+    "claimSamplerCycles": 1147,
+    "claimSamplerEmpty": 0,
+    "claimSamplerUnattributed": 3,
+    "claimSamplerCounts": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        4,
+        0,
+        41,
+        3,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        31,
+        0,
+        2,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "claimSessionValidationSamples": 21,
+    "pgSnapshotStatus": 2,
+    "pgSnapshotJoined": true,
+    "pgSnapshotExactClaimAttribution": true,
+    "pgSnapshotRows": 2,
+    "pgSnapshotCandidates": 1,
+    "pgSnapshotBlockers": 1,
+    "pgSnapshotStageWaitCounts": [
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "pgSnapshotBlockerStageCounts": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "pgSnapshotBlockerCallerPoint": 41,
+    "pgSnapshotRelationCounts": [
+      2,
+      1,
+      0
+    ],
+    "pgSnapshotWaitEventCounts": [
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ]
+  },
+  "privateValuesRemoved": true,
+  "claims": {
+    "count": 126,
+    "last202Ms": 43.349333,
+    "max202Ms": 989.949875
+  },
+  "failureState": {
+    "publicationSnapshotPresent": true,
+    "publicationRevisionPresent": false,
+    "state": "CANCELLED"
+  },
+  "finalizeDiagnostics": [
+    {
+      "code": "EXPIRED",
+      "sourceFrames": [
+        {
+          "source": "BUDGET",
+          "line": 19
+        },
+        {
+          "source": "VALIDATOR",
+          "line": 69
+        },
+        {
+          "source": "PUBLISHER",
+          "line": 135
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Prearm claims not retrospectively sampled",
+    "One PGsnapshot not wholewindow or automatically lastclaim",
+    "Zero/unknown doesnotproveabsence orcost"
+  ]
+}

@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "kind": "architect-ruling",
+  "story": "STUDIO-OBS-015",
+  "label": "aria-g-ruling01",
+  "subject": "r1-diagnosis01/review.md section 7.1 failure G: authored timeoutSeconds 31-120 publishes but observed ordinary replay is refused 400 LIMIT_EXCEEDED by the runner's 30 s per-step ceiling",
+  "author": "Aria (@architect)",
+  "capturedAtUtc": "2026-10-16T04:19:49Z",
+  "hashAlgorithm": "SHA-256",
+  "releasesQaCredit": false,
+  "lifecycleChanged": false,
+  "sourceOrBuildTouched": false,
+  "gradleRun": false,
+  "testsExecutedByAuthor": false,
+  "payloads": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r1-diagnosis01/aria-g-ruling01/ruling.md",
+      "sha256": "532b21eb45e2b1d764d3af40e74e8d38ffb058533c55dab971b836fed9438521"
+    }
+  ],
+  "decision": {
+    "adopted": {
+      "id": "G-2",
+      "summary": "Runner per-step ceiling = contract maximum: KEY_SPECS.MAX_STEP_TIMEOUT_MS fallback 30_000 -> 120_000 and min 1 -> 120_000 (fail-closed floor); Helm values.yaml runnerEnv STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS: \"120000\"; authoring/contract 1..120 unchanged; runCoordinator LIMIT_EXCEEDED refusal kept as defense in depth; no clamp of hashed configuration",
+      "productValue": "timeoutSeconds 1..120, default 30 (openapi TestConfiguration, VAL-023, v3 replay-profile/revision schemas, delayed-state allowance 1000..120000, arch §5.2 'default 30 s ... within server limits', 10.13 epic 'within API bounds')",
+      "rootCause": "story 10.13 set the runner maximum equal to the 30 s default; hidden by the legacy silent clamp; exposed when OBS-007 observed admission refused instead of clamping because timeoutSeconds is bound into configurationHash",
+      "configVariant": "stays 31 (frozen); becomes the joined regression proof; why-31 is inferred (base 30, minimal configuration delta for AC-1 k=1), undocumented",
+      "distRebuildRequired": true,
+      "distRebuildReason": "GuidedPublicationReplayIT imports ../studio-runner/dist/server/config.js loadConfig with no MAX_STEP override; current dist fallback 30_000; coordinator must serialize the rebuild"
+    },
+    "rejected": [
+      "G-1 cap authoring at 30: capability loss vs re-affirmed VAL-023 contract; forces openapi + v3 schema/bundle/pin regeneration, guided allowance change, backend MAX + VAL-023 test changes, frozen fixture edit",
+      "G-3 decouple effective step timeout from hashed configuration: contradicts publication-contracts C7 (refuse rather than silently change; no default substitution); weakens configurationHash; needs a v3 contract generation"
+    ]
+  },
+  "changeSpec": {
+    "runnerProduction": [
+      "studio-runner/src/server/config.ts: KEY_SPECS.MAX_STEP_TIMEOUT_MS fallback 120_000, min 120_000, comment; maxStepTimeoutMs field doc updated; stepTimeoutMs (30 s default) unchanged"
+    ],
+    "helm": [
+      "helm-chart/put-checks/values.yaml studioRunner.runnerEnv: STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS: \"120000\" (key already accepted in _helpers.tpl:157; env value files unchanged)"
+    ],
+    "runnerTests": [
+      "new studio-runner/test/server/stepTimeoutCeiling.test.ts: default 120000; equals observedSchemas replay-profile and revision timeoutSeconds.maximum*1000; 119999 refused with ConfigurationError; 120000 accepted",
+      "studio-runner/test/server/observedReplayAdmission.test.ts: controlWindowJob(origin,build,timeoutSeconds=10); it.each([30,31,120]) admitted under default config -> 503 ADMISSION_NOT_ACKNOWLEDGED, sends 1, launches 0 (pre-fix 31/120 -> 400 LIMIT_EXCEEDED, sends 0)",
+      "studio-runner/test/deployment/chart.test.ts: four value sets render 120000; rendered env passes loadConfig; 30000 override renders but loadConfig throws"
+    ],
+    "backend": "no production change; no new test; GuidedPublicationReplayIT config variant stays 31",
+    "docs": [
+      "studio-runner/README.md budgets table: per-step row"
+    ],
+    "unchanged": [
+      "runCoordinator.ts:999",
+      "run/deadline.ts",
+      "validator/observedReplay.ts:465",
+      "all schemas/bundles/OBSERVED_SCHEMA_BUNDLE_HASH",
+      "backend TestConfiguration/CanonicalStudioCodec/ObservedReplayAuthorization/GuidedTranslationStore",
+      "build.gradle.kts"
+    ]
+  },
+  "safetyFindings": {
+    "stepDeadlineBoundedByRunDeadline": "executor/observedReplay.ts:335 min(runDeadlineMs, start+stepTimeoutMs)",
+    "totalRuntimeCapUnchanged": "120000 ms runner + backend; worst-case pod occupancy unchanged",
+    "stopGraceSizedFor115sHang": "ADR-002 §29.3; values.yaml BROWSER_STOP_TIMEOUT_MS 15000",
+    "backendRunDeadline": "600 s > 120 s; RunningReaper has no progress-silence condition",
+    "dispatcherLease": "60 s, pre-admission only",
+    "guidedLearningAndPrefix": "do not read maxStepTimeoutMs; acquisition reservation bounded by owner lease expiry (GuidedTranslationStore 485-509)",
+    "residualUx": "timeoutSeconds near 120 after earlier steps ends ERROR/TIMEOUT via run cap rather than step FAIL (existing semantics; out of scope)"
+  },
+  "verificationRequired": [
+    "runner unit: new ceiling test + admission cases green; deadline/production-seams/routes/concurrency unchanged green; typecheck+lint",
+    "deployment tier: new chart block + ACCEPTED_KEYS equality",
+    "serialized dist rebuild; dist/server/config.js shows fallback 120_000 min 120_000; record dist hashes",
+    "joined --no-daemon guidedIncrementalTest: config (31) learns k=1 and ordinary replay admitted and PASS; previously blocked labels run",
+    "invariants: identities 85, labels 35, config=31, no schema/bundle change, build.gradle.kts unchanged"
+  ],
+  "inputsRelied": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r1-diagnosis01/review.md",
+      "sha256": "706cf973c59858542a16dfe9b7329b5164f81cd3d4a9a55fbdb4ed72c858558a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r1-diagnosis01/qa-source-review02/review.md",
+      "sha256": "cf2b880926a7c0d5b7e078933757a91ba9b50fba543d5031e45aebd003db1ab5"
+    },
+    {
+      "path": "docs/specs/studio/openapi.yaml",
+      "sha256": "54fd12cd9951cad6caa32e78693598eb0a23d4333a11749e2083b340d503cd0d"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/publication-contracts.md",
+      "sha256": "b42fadc164748245c23c55318486fb2afc03dbd52e309c35d20df1bf8a2f6cb2"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/delayed-state-design.md",
+      "sha256": "a17c0d12e3e2ddf34689bde34cde93a9283e649796f8304ea5b8cfe830ed4a05"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-profile.schema.json",
+      "sha256": "adf91ed11e9d878ef31d4ee87902e76e27e8ec53b14cf61e79acb8717102fbe4"
+    },
+    {
+      "path": "docs/architecture/studio-execution.md",
+      "sha256": "14557d3213a9cab8cc820c7099fe4886a59fa396c167da08450b29b7ce766b45"
+    },
+    {
+      "path": "docs/architecture/ADR-002-internal-contract-surface.md",
+      "sha256": "19e6273b94599c0dee4e0ac44343a52eeec43d98b22a132b35bf343f2b12d984"
+    },
+    {
+      "path": "docs/stories/10.13.story.md",
+      "sha256": "8f7a525dd55e8679c1512486a471bb636700b26621fc8dc9067b0478d7d4e0dd"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md",
+      "sha256": "18d9396281f856726fdb5612ca69dfa4d40b7e95c31ba2c6f18a398e521da318"
+    },
+    {
+      "path": "studio-runner/src/server/config.ts",
+      "sha256": "a5ce65a4042cf3646634f3932db8fe55cc7fb27d91bf4b2ef2f262d91c1cfa8a"
+    },
+    {
+      "path": "studio-runner/src/server/runCoordinator.ts",
+      "sha256": "004e52deb3e0b1965a8dec43db08e17170515cbcd5fc5f2980269a46433ed52f"
+    },
+    {
+      "path": "studio-runner/src/server/application.ts",
+      "sha256": "e4157791ebd2c252ab1c4a62ca906ee9cf38ece8fe6c4feb77867323ebf16c27"
+    },
+    {
+      "path": "studio-runner/src/run/deadline.ts",
+      "sha256": "a12f616e294e8de3ee943dd7185e6024065b420c9dd54de2b30e139a4d718ed0"
+    },
+    {
+      "path": "studio-runner/src/run/launcher.ts",
+      "sha256": "0dfeb39a76c046dd1df4b1b9df0cec238aa57c0c7b067b8824368ffc075e9fd7"
+    },
+    {
+      "path": "studio-runner/src/run/childRuntime.ts",
+      "sha256": "0eb0c88a0d4a98b716fcc4dc0a070f5c2f0df028e4f6e668ca9ee0cd8526dd02"
+    },
+    {
+      "path": "studio-runner/src/validator/observedReplay.ts",
+      "sha256": "7c8a3b8d65160357e22878e8b0705cc704b135d42a561fb983950f6fb1e00c19"
+    },
+    {
+      "path": "studio-runner/src/executor/observedReplay.ts",
+      "sha256": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad"
+    },
+    {
+      "path": "studio-runner/src/validator/observedSchemas.json",
+      "sha256": "357f6c428f6b85c4bcc3894d6b4c564b291e9642cded402d2c1d0811750e9d29"
+    },
+    {
+      "path": "studio-runner/src/guided/ownership.ts",
+      "sha256": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf"
+    },
+    {
+      "path": "studio-runner/dist/server/config.js",
+      "sha256": "3084e0e4f6831d0889505cbd54bff0d48625160e7594184e6f4fb090b5a9bedf"
+    },
+    {
+      "path": "studio-runner/test/server/observedReplayAdmission.test.ts",
+      "sha256": "3a355a5216d7afcbf07b4afa5de494526bc92739763ddb5a7d2de827ab1c275d"
+    },
+    {
+      "path": "studio-runner/test/deployment/chart.test.ts",
+      "sha256": "b33ee122b1b3e3de36eb7ddf72be4bb2b0d09d418a0a5b01d133ad737b0f7aaa"
+    },
+    {
+      "path": "helm-chart/put-checks/values.yaml",
+      "sha256": "b1eabf559a8dca11260fab96b546c0a691a1891ae787d7120e161cc7afb5a748"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/_helpers.tpl",
+      "sha256": "567a2486e9464e22ef9f0a8cb29244ff6ef3eb7c2008ed203221ace3fbfda4ed"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+      "sha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/TestConfiguration.java",
+      "sha256": "5ac4482712d94037fafeeeddf224ff5c1b3ce411dca0742e95802ed725ea63ea"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/CanonicalStudioCodec.java",
+      "sha256": "1b06927851ef35b264bce2089330373a62788a85caee7f2dd9d11d0fa454a527"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "sha256": "7530c317e8553b537e8d63a14a3f5c3c98644e897150e758404d7946e38b0feb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "sha256": "745223f046be477593a8f701a2fc4ed24d29dcfab6d19d32acabb011ed181165"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+      "sha256": "526d8792b6c0b7f7b806d4d4577b4934757b230cd18b82515b75f911123f3ea2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/RunningReaper.java",
+      "sha256": "37cec126c9581dff3c16f030b49bdfdf8eee9babc8437a11a407266b8139da68"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+      "sha256": "8861f33186f1219b119535fa1a496d33c3be649d9ec323984ab837333cc5a813"
+    },
+    {
+      "path": "backend/src/main/resources/application.yml",
+      "sha256": "2c7819284988e6e63bb8153588ab04ecba7dbc69b44a7d3e37e2bfa9493791e7"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "77f47e4148f732151cf9e9c05b712cce3643d62e57d1fad43c8ee25624b0203f"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/StudioWriteValidationControllerTest.java",
+      "sha256": "2c9c7a400748329b708201d15a3248f28c986ce5e74ee4263ed7be2fec334b58"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/CanonicalStudioCodecTest.java",
+      "sha256": "bf1429e0a268146effb4f0d0049f7644a8f387029b063c0175400d5b9b799666"
+    },
+    {
+      "path": "frontend/src/types/studio/studioTypes.ts",
+      "sha256": "e634a1b04ec49035987655cd5310add58c63db991298ec61b9e25841a343f760"
+    }
+  ]
+}

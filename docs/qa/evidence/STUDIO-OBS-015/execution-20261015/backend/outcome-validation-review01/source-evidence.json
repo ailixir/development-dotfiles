@@ -1,0 +1,287 @@
+{
+  "artifact": "STUDIO-OBS-015 actual04 independent outcome compiler source evidence",
+  "at": "2026-10-15T11:29:11.977674+00:00",
+  "reviewer": "Aria/aria015_bootstrap_review01",
+  "classification": "SOURCE_ESTABLISHED_MATCHED_NODE_STATE_MECHANISM_WITH_ACTIONABLE_BOUNDED_PLAN",
+  "actualCapture": {
+    "captureManifestSha256": "578fd3175b2874445ad1f80f562a3a15ded54721f55d01159685d7390f3a7e3a",
+    "canonicalBodySha256": "df249e3a41e16d33c4dff8b428007f3268c28f18b303a4cc874a8224162c65b7",
+    "canonicalBodyBytes": 1852,
+    "nodeAccepted": true,
+    "javaAccepted": false,
+    "javaThrew": true,
+    "sessionHashMatches": true,
+    "admissionHashMatches": true,
+    "shapeMatches": true,
+    "canonicalBodyHashMatches": true,
+    "errorMessageAbsentInShape": true,
+    "javaRecordCount": 13,
+    "capturedExpandedOutcomeSchemaHash": "UNAVAILABLE",
+    "observedNativeNodeHashes": [
+      "3547f2fbe5f29e0197f7fa326eaa5a2e3da92bbe164a2deb9a74043751a872c0",
+      "682ddeb19c02278306fa79ed3c0e172aaeb908bfe6aca64869ed08beb81dee52",
+      "7337895988e7bfcab42204b5132c401f078f65f5d8c979e526e00d479b95bab9",
+      "864d90fa2023ac4372e34da7cf0ca991c09f32d9b57cabe06899b1fcb1df3b26",
+      "95f7878408ce7d089646898aef3d528bc2e3c62d7f2bf8f228134556dfe451e8",
+      "bcde375ebd4cbacf651311181173836b169d5a360c6ac158c6a2cdaf49be3f61",
+      "cbf45051732175e27f82074a05226aa502d382d7e2dc078b8c191a141535d963",
+      "e90d25de5a78b4a5b9710aa56b49b62532a400f06565944a2fc5b48a054010de",
+      "ef298bac11d98515bec5746854e07643b3dafaefdd1549137c12fe807bb288f8",
+      "f9757109fae32f55a22a6fe81eec0503fb3976db0fb4c7fc85a3d794d8014521"
+    ],
+    "rawBodyCaptured": false,
+    "reviewRanOrReplayedActualBody": false,
+    "capturedCohort": "First trusted-origin-ceiling method cohort only; second main-edit4 body unavailable"
+  },
+  "sourceDerivedExpansion": {
+    "method": "Read-only JSON expansion mirroring GuidedContracts.expand and canonical hash; no schema validation executed",
+    "rootKeys": [
+      "oneOf"
+    ],
+    "exactlyTwoAlternatives": true,
+    "expandedOutcomeSha256": "95f7878408ce7d089646898aef3d528bc2e3c62d7f2bf8f228134556dfe451e8",
+    "sourceDerivedHashOccursAmongObservedNativeNodeHashes": true,
+    "provenanceLimit": "This is separately derived from inspected frozen/build resources; captured root hash stays UNAVAILABLE and observed nodes are not relabeled as tagged roots.",
+    "branches": [
+      {
+        "index": 0,
+        "keys": [
+          "type",
+          "additionalProperties",
+          "properties",
+          "required",
+          "allOf"
+        ],
+        "sha256": "be738fd98792fed35821849ce6e9e50abbad334a03de282df3261494192497f1"
+      },
+      {
+        "index": 1,
+        "keys": [
+          "type",
+          "additionalProperties",
+          "properties",
+          "required",
+          "allOf"
+        ],
+        "sha256": "3547f2fbe5f29e0197f7fa326eaa5a2e3da92bbe164a2deb9a74043751a872c0"
+      }
+    ],
+    "documents": [
+      {
+        "document": "bridge.schema.json",
+        "docsSha256": "039ad4017a8256481d4109d37dfcfc919767094fd1610988d16706fef1065817",
+        "buildResourceSha256": "039ad4017a8256481d4109d37dfcfc919767094fd1610988d16706fef1065817",
+        "nodeBundledDocumentCanonicalSha256": "ebfd008726e989ccfc89a01bed5371fe2a237a502f0f8d8bf63f6823e2fedb44",
+        "docsCanonicalSha256": "ebfd008726e989ccfc89a01bed5371fe2a237a502f0f8d8bf63f6823e2fedb44",
+        "docsEqualBuildResourceDocument": true,
+        "docsEqualNodeDocument": true
+      },
+      {
+        "document": "ledger.schema.json",
+        "docsSha256": "081f1c4f45386a52a4263b98475544c919db7a4a1311bc6dae48772ae861d150",
+        "buildResourceSha256": "081f1c4f45386a52a4263b98475544c919db7a4a1311bc6dae48772ae861d150",
+        "nodeBundledDocumentCanonicalSha256": "dbbf0a8d78e6ad634e737f8006bf7b03f7b85053a48e207fe80aa97687aeaa12",
+        "docsCanonicalSha256": "dbbf0a8d78e6ad634e737f8006bf7b03f7b85053a48e207fe80aa97687aeaa12",
+        "docsEqualBuildResourceDocument": true,
+        "docsEqualNodeDocument": true
+      },
+      {
+        "document": "execution-evidence.schema.json",
+        "docsSha256": "5f9eda27221c948decd17ff876cb110dc3f9df9195a521bf5dac97ba8187edd9",
+        "buildResourceSha256": "5f9eda27221c948decd17ff876cb110dc3f9df9195a521bf5dac97ba8187edd9",
+        "nodeBundledDocumentCanonicalSha256": "c6f57b79226824b21099cde510ed33969b5cef8655c66e642ed3145cc412d036",
+        "docsCanonicalSha256": "c6f57b79226824b21099cde510ed33969b5cef8655c66e642ed3145cc412d036",
+        "docsEqualBuildResourceDocument": true,
+        "docsEqualNodeDocument": true
+      },
+      {
+        "document": "versions.schema.json",
+        "docsSha256": "02bc1bbc453daea97962b4ec330599bc66f7632e69a19b7780a610b96a320eb8",
+        "buildResourceSha256": "02bc1bbc453daea97962b4ec330599bc66f7632e69a19b7780a610b96a320eb8",
+        "nodeBundledDocumentCanonicalSha256": "56ebda635a345b418d2034e2ccbc8a97c2a47784fde7f3144bb5f982ba82ee59",
+        "docsCanonicalSha256": "56ebda635a345b418d2034e2ccbc8a97c2a47784fde7f3144bb5f982ba82ee59",
+        "docsEqualBuildResourceDocument": true,
+        "docsEqualNodeDocument": true
+      }
+    ]
+  },
+  "independentlyLegalControl": {
+    "path": "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json",
+    "pointer": "/documents/flow/outcomes/0",
+    "canonicalControlSha256": "6dd0ed43b9b77aba88c075c8a5b84064510baa3d330601f62c03b537d0c71d5b",
+    "sourceOnlyLegality": "Complete ordinary SUCCEEDED/OK, initialBlank/about:blank/null-origin/generation0, null availability, absent errorMessage; fields inspected against frozen leaves; closed prefix branch refuses this envelope.",
+    "execution": "NOT_RUN",
+    "notActual04Body": true
+  },
+  "dependency": {
+    "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/com.networknt/json-schema-validator/1.4.0/8e7c5b0b0ed6b3eac2adfa9352ff4ca8187d9160/json-schema-validator-1.4.0.jar",
+    "sha256": "5d7b6ce4c7b2a3ed189511cbaa913808c7cd2b570d70b923426352785bffbdd0",
+    "mavenProperties": [
+      "groupId=com.networknt",
+      "artifactId=json-schema-validator",
+      "version=1.4.0"
+    ],
+    "inspection": "Static ZIP/class constant-pool parsing only; no Java class loading or JVM validation",
+    "classes": [
+      {
+        "class": "IfValidator",
+        "sha256": "d40401f5338fdfe149f7e4cabcf2944f4a5c2dd9bf4ae1e5efca2e416f98d6fb",
+        "relevantConstantPoolMethodReferences": [
+          {
+            "owner": "com/networknt/schema/ExecutionContext",
+            "method": "isFailFast",
+            "descriptor": "()Z"
+          },
+          {
+            "owner": "com/networknt/schema/ExecutionContext",
+            "method": "setFailFast",
+            "descriptor": "(Z)V"
+          }
+        ]
+      },
+      {
+        "class": "OneOfValidator",
+        "sha256": "2fbf700e1388107e9561bbe6137a15fc5429bfb9b05a433299d0ab08d9289cba",
+        "relevantConstantPoolMethodReferences": [
+          {
+            "owner": "com/networknt/schema/ValidatorState",
+            "method": "setComplexValidator",
+            "descriptor": "(Z)V"
+          },
+          {
+            "owner": "com/networknt/schema/ExecutionContext",
+            "method": "isFailFast",
+            "descriptor": "()Z"
+          },
+          {
+            "owner": "com/networknt/schema/ExecutionContext",
+            "method": "setFailFast",
+            "descriptor": "(Z)V"
+          },
+          {
+            "owner": "com/networknt/schema/ValidatorState",
+            "method": "setMatchedNode",
+            "descriptor": "(Z)V"
+          },
+          {
+            "owner": "com/networknt/schema/ValidatorState",
+            "method": "isWalkEnabled",
+            "descriptor": "()Z"
+          },
+          {
+            "owner": "com/networknt/schema/ValidatorState",
+            "method": "isValidationEnabled",
+            "descriptor": "()Z"
+          },
+          {
+            "owner": "com/networknt/schema/ValidatorState",
+            "method": "hasMatchedNode",
+            "descriptor": "()Z"
+          }
+        ]
+      },
+      {
+        "class": "PropertiesValidator",
+        "sha256": "2dd78a17a74461d0fb50a143f38a3ca217adaf1b0bef673681dd6647b726c50e",
+        "relevantConstantPoolMethodReferences": [
+          {
+            "owner": "com/networknt/schema/ValidatorState",
+            "method": "isComplexValidator",
+            "descriptor": "()Z"
+          },
+          {
+            "owner": "com/networknt/schema/ValidatorState",
+            "method": "setMatchedNode",
+            "descriptor": "(Z)V"
+          },
+          {
+            "owner": "com/networknt/schema/ValidatorState",
+            "method": "setComplexValidator",
+            "descriptor": "(Z)V"
+          },
+          {
+            "owner": "com/networknt/schema/ValidatorState",
+            "method": "isWalkEnabled",
+            "descriptor": "()Z"
+          },
+          {
+            "owner": "com/networknt/schema/ValidatorState",
+            "method": "isValidationEnabled",
+            "descriptor": "()Z"
+          }
+        ]
+      },
+      {
+        "class": "AllOfValidator",
+        "sha256": "a4b68b3dc49c53c56e7f8403f30cd6b4c47e643eac1b00bf8422fd5d48370320",
+        "relevantConstantPoolMethodReferences": [
+          {
+            "owner": "com/networknt/schema/ValidatorState",
+            "method": "isWalkEnabled",
+            "descriptor": "()Z"
+          }
+        ]
+      },
+      {
+        "class": "JsonSchema",
+        "sha256": "9779878c6bdd86278d9bccf6b946bd04664bcc83fa0ef8b38b3dcd1c57fa2941",
+        "relevantConstantPoolMethodReferences": [
+          {
+            "owner": "com/networknt/schema/ValidatorState",
+            "method": "<init>",
+            "descriptor": "(ZZ)V"
+          }
+        ]
+      }
+    ]
+  },
+  "upstreamPrimarySourceReferences": [
+    {
+      "url": "https://raw.githubusercontent.com/networknt/json-schema-validator/1.4.0/src/main/java/com/networknt/schema/OneOfValidator.java",
+      "version": "1.4.0",
+      "purpose": "empty errors plus hasMatchedNode gate, lines50-98"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/networknt/json-schema-validator/1.4.0/src/main/java/com/networknt/schema/PropertiesValidator.java",
+      "version": "1.4.0",
+      "purpose": "complex missing required field sets unmatched, lines122-140"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/networknt/json-schema-validator/1.4.0/src/main/java/com/networknt/schema/IfValidator.java",
+      "version": "1.4.0",
+      "purpose": "condition errors discarded, only failFast restored, lines65-86"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/networknt/json-schema-validator/1.4.0/src/main/java/com/networknt/schema/AllOfValidator.java",
+      "version": "1.4.0",
+      "purpose": "returns aggregate errors without matched-state restoration, lines45-97"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/networknt/json-schema-validator/1.4.0/src/main/java/com/networknt/schema/JsonSchema.java",
+      "version": "1.4.0",
+      "purpose": "property ordering, shared execution state, fresh public validate context"
+    }
+  ],
+  "implementationOwnership": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java"
+  ],
+  "repairInvariants": [
+    "Exact outcome name and expanded epoch only; original root is oneOf-only with two full branches.",
+    "Both native full branch validators receive independent public validate calls/fresh contexts; exactly one empty-error branch.",
+    "Keep every original nested condition, leaf, required and closed-object constraint.",
+    "Unsupported epoch, extra root sibling or incompatible config uses original native fallback.",
+    "Existing four optimized roots/epochs, parsing/canonicalization, wire schemas/pins and safety behavior unchanged."
+  ],
+  "executionByReviewer": {
+    "testJvmValidationBuildGradleDbNativeProcessMutationCommands": 0,
+    "productionTestSpecGeneratedDistStoryWrites": false,
+    "externalPrimarySourceBrowsing": true
+  },
+  "statusLimits": [
+    "No implementation or execution verification supplied.",
+    "Exact actual04 undisclosed scalars not reconstructed.",
+    "If native-root/isolated-branch control does not reproduce, obtain tagged root and per-branch/matchedNode metadata before alternate fix.",
+    "No formal QA/lifecycle/Done or whole015then008 narrowing; original86/24/55/35/native/private/full gates and row85 remain open as applicable."
+  ]
+}

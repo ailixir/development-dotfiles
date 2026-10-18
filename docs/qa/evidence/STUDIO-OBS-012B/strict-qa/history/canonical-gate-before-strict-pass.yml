@@ -1,0 +1,153 @@
+schema: 1
+story: STUDIO-OBS-012B
+story_title: Compile-path retirement (frontend) and learn vocabulary
+gate: CONCERNS
+status_reason: All six acceptance criteria are met on the S4c frozen source, with independent
+  production-build and 126-test verification. Remaining concerns are bounded-worker reproducibility
+  and explicitly inherited accessibility coverage assigned to OBS-008; no intermediate release is
+  permitted.
+reviewer: Quinn
+reviewed_revision: source-sha256:341cdc10358de0f03840d1668b2eaaadcfc3a7f710c5b2a0223b6ee4e7882d34;
+  S4c-worktree-sha256:af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137
+updated: 2026-10-14T22:24:04.040295+00:00
+top_issues:
+  - id: TEST-001
+    severity: medium
+    owner: "@dev (frontend) / CI owner"
+    story_placement: STUDIO-OBS-008 T5
+    finding: Full frontend verification is green with --minWorkers=1 --maxWorkers=3. Earlier
+      default-worker runs timed out under shared-host load; default-worker reproducibility on a
+      dedicated host is unproven. No timeout value was increased.
+    suggested_action: Retain the recorded worker bound on this shared host; verify default-worker
+      behavior on the next dedicated FE gate and track any reproducible timeout by file.
+  - id: TEST-003
+    severity: low
+    owner: "@ux-design-expert + @dev (frontend)"
+    story_placement: STUDIO-OBS-008 AC-8 and AC-9
+    finding: WCAG surfaces 4/5 intentionally retain their retired names and both scan UNLEARNED. The
+      jsdom audit disables contrast/target-size and retains moderate baseline issues; this is not
+      full browser WCAG evidence.
+    suggested_action: Replace both surfaces with distinct guided states, regenerate keys, and perform
+      browser contrast, target-size and keyboard/focus verification under OBS-008. Preserve the
+      no-intermediate-release condition.
+waiver:
+  active: false
+evidence:
+  report: docs/qa/evidence/STUDIO-OBS-012B/resume-qa/review-report.json
+  source_manifest: docs/qa/evidence/STUDIO-OBS-012B/resume-qa/source-manifest.json
+  s4c_source_identity: af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137
+  frontend_full:
+    files: 56
+    passed: 701
+    failed: 0
+    skipped: 0
+  frontend_independent_targeted:
+    files: 5
+    passed: 126
+    failed: 0
+    skipped: 0
+  frontend_build:
+    exit: 0
+    warnings: 1
+  backend_xml_cross_check:
+    total: 2084
+    passed: 2059
+    skipped: 25
+    failures: 0
+    errors: 0
+  trace:
+    ac_covered:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+    ac_gaps: []
+nfr_validation:
+  security:
+    status: PASS
+    notes: "PASS: centralized API client retained; validation mock echoes no supplied values; no
+      source-security regression found. This is not a separate penetration test."
+  performance:
+    status: PASS
+    notes: "PASS for retirement scope: polling bound unchanged; production build succeeds with the
+      existing asset-size advisory; no load benchmark claimed."
+  reliability:
+    status: CONCERNS
+    notes: "CONCERNS: bounded-worker execution is green; default-worker shared-host timeouts remain
+      recorded."
+  maintainability:
+    status: PASS
+    notes: "PASS: retired modules/imports removed and contract-handler allowlist shrinks on new
+      consumers."
+  accessibility:
+    status: CONCERNS
+    notes: "CONCERNS: requested UX fix covered; full guided/browser audit remains OBS-008."
+finding_dispositions:
+  GATE-001:
+    status: CLOSED
+    basis: S4c source identity independently matched all 4,414 manifest entries at review start. Full FE
+      log and raw gate exits checked. The missing post-UX production build was independently
+      executed, exit 0.
+  TEST-001:
+    status: OPEN_NON_BLOCKING
+    basis: Worker count and load are recorded; final S4c and targeted tests have no timeout.
+      Default-worker behavior remains an environment-reproducibility concern, not a claimed pass.
+  UX-001:
+    status: CLOSED
+    basis: Uma’s ux-gate.json exists. Its four copy fixes and dynamic accessibility fix are present and
+      independently checked; original UX gate CONCERNS is retained as history, not relabeled.
+  COPY-001:
+    status: CLOSED
+    basis: Proof empty state says Run saves your steps and records proof; page test passes.
+  COPY-002:
+    status: CLOSED
+    basis: Schedule errors and both dialog alerts use the approved conditional copy; all schedule cases
+      pass.
+  DOC-001:
+    status: CLOSED
+    basis: Coordinator added Consolidated risks (PO SF-5, resume reconciliation) in Dev Agent Record
+      during this review; no product drift.
+  TEST-002:
+    status: OBSERVATION_RETAINED
+    basis: The historical mutation used a commented import, appropriately described as a text-scanner
+      proof. The five-form scanner self-test and current guard pass. Future proof can use a live
+      import; no additional requirement is waived.
+  TEST-003:
+    status: OPEN_NON_BLOCKING
+    basis: Disclosed fixture replacement keeps both surfaces running. Uma explicitly accepts temporary
+      duplicated coverage; OBS-008 AC-8 owns distinct guided states.
+  EVD-001:
+    status: OBSERVATION_RETAINED
+    basis: Historical baseline raw logs remain unchanged to preserve provenance. New review evidence is
+      structured and uses relative paths/log basenames and hashes. Existing raw logs are not treated
+      as a product defect or silently deleted.
+  COPY-003:
+    status: CLOSED
+    basis: ACTIVATION_REVISION_MISMATCH uses learned steps; approved text is pinned by passing schedule
+      test.
+  COPY-004:
+    status: CLOSED
+    basis: Busy spinner aria-hidden=true; passing runGate (g) rejects exposed progressbar/retired label.
+  UX-A11Y-001:
+    status: CLOSED
+    basis: Dirty READY chip is hidden and the persistent polite status region survives the
+      save-to-UNLEARNED transition; runGate (f) passes with no execute. Optional anticipatory
+      caption was explicitly optional and is not required.
+recommendations:
+  immediate: []
+  future:
+    - owner: "@dev (frontend) / CI owner"
+      story: STUDIO-OBS-008 T5
+      action: Retain the recorded worker bound on this shared host; verify default-worker behavior on the
+        next dedicated FE gate and track any reproducible timeout by file.
+    - owner: "@ux-design-expert + @dev (frontend)"
+      story: STUDIO-OBS-008 AC-8 and AC-9
+      action: Replace both surfaces with distinct guided states, regenerate keys, and perform browser
+        contrast, target-size and keyboard/focus verification under OBS-008. Preserve the
+        no-intermediate-release condition.
+lifecycle:
+  from: InReview
+  to: Done
+  change_log_version: 0.3.3

@@ -1,0 +1,111 @@
+[
+  {
+    "mutation": "m1-connector-property-name-reverted",
+    "exit": 1,
+    "tests_line": "5 failed | 67 passed (72)",
+    "failed_cases": [
+      "AC-2 \u2014 the guided bridge chain: connector, pins, tokens, each from one key > renders the connector port the backend reads from the one values key, and moves it with that key",
+      "AC-2 \u2014 the guided bridge chain: connector, pins, tokens, each from one key > values-dev.yaml: the API terminates a guided TLS connector with clientAuth=need, exposed only through its own Service",
+      "AC-2 \u2014 the guided bridge chain: connector, pins, tokens, each from one key > values-prod.yaml: the API terminates a guided TLS connector with clientAuth=need, exposed only through its own Service",
+      "AC-2 \u2014 the guided bridge chain: connector, pins, tokens, each from one key > values-uat.yaml: the API terminates a guided TLS connector with clientAuth=need, exposed only through its own Service",
+      "AC-2 \u2014 the guided bridge chain: connector, pins, tokens, each from one key > values.yaml: the API terminates a guided TLS connector with clientAuth=need, exposed only through its own Service"
+    ],
+    "n_failed_cases": 5,
+    "restored_sha_equal": true
+  },
+  {
+    "mutation": "m2-np-rule1-ordinary-port-deleted",
+    "exit": 1,
+    "tests_line": "5 failed | 67 passed (72)",
+    "failed_cases": [
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > moves the connector rule with the one port key, and keeps the ordinary-port rule where it was",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-dev.yaml: rule 1 re-admits exactly the API container ports other than guided-tls, from every source",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-prod.yaml: rule 1 re-admits exactly the API container ports other than guided-tls, from every source",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-uat.yaml: rule 1 re-admits exactly the API container ports other than guided-tls, from every source",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values.yaml: rule 1 re-admits exactly the API container ports other than guided-tls, from every source"
+    ],
+    "n_failed_cases": 5,
+    "restored_sha_equal": true
+  },
+  {
+    "mutation": "m3-np-api-pods-added-as-source",
+    "exit": 1,
+    "tests_line": "4 failed | 68 passed (72)",
+    "failed_cases": [
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-dev.yaml: rule 2 opens the connector port to the runner and worker pods, and to nobody else",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-prod.yaml: rule 2 opens the connector port to the runner and worker pods, and to nobody else",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-uat.yaml: rule 2 opens the connector port to the runner and worker pods, and to nobody else",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values.yaml: rule 2 opens the connector port to the runner and worker pods, and to nobody else"
+    ],
+    "n_failed_cases": 4,
+    "restored_sha_equal": true
+  },
+  {
+    "mutation": "m4-np-worker-source-dropped",
+    "exit": 1,
+    "tests_line": "4 failed | 68 passed (72)",
+    "failed_cases": [
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-dev.yaml: rule 2 opens the connector port to the runner and worker pods, and to nobody else",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-prod.yaml: rule 2 opens the connector port to the runner and worker pods, and to nobody else",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-uat.yaml: rule 2 opens the connector port to the runner and worker pods, and to nobody else",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values.yaml: rule 2 opens the connector port to the runner and worker pods, and to nobody else"
+    ],
+    "n_failed_cases": 4,
+    "restored_sha_equal": true
+  },
+  {
+    "mutation": "m5-np-rendered-while-guided-off",
+    "exit": 1,
+    "tests_line": "5 failed | 67 passed (72)",
+    "failed_cases": [
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > follows the existing networkPolicy.enabled switch off, like the runner policy",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-dev.yaml: not rendered while guided mode is off (the API has no ingress policy, as today)",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-prod.yaml: not rendered while guided mode is off (the API has no ingress policy, as today)",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-uat.yaml: not rendered while guided mode is off (the API has no ingress policy, as today)",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values.yaml: not rendered while guided mode is off (the API has no ingress policy, as today)"
+    ],
+    "n_failed_cases": 5,
+    "restored_sha_equal": true
+  },
+  {
+    "mutation": "m6-np-connector-in-open-rule",
+    "exit": 1,
+    "tests_line": "5 failed | 67 passed (72)",
+    "failed_cases": [
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > moves the connector rule with the one port key, and keeps the ordinary-port rule where it was",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-dev.yaml: rule 1 re-admits exactly the API container ports other than guided-tls, from every source",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-prod.yaml: rule 1 re-admits exactly the API container ports other than guided-tls, from every source",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-uat.yaml: rule 1 re-admits exactly the API container ports other than guided-tls, from every source",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values.yaml: rule 1 re-admits exactly the API container ports other than guided-tls, from every source"
+    ],
+    "n_failed_cases": 5,
+    "restored_sha_equal": true
+  },
+  {
+    "mutation": "m7-np-egress-added",
+    "exit": 1,
+    "tests_line": "4 failed | 68 passed (72)",
+    "failed_cases": [
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-dev.yaml: selects the API pods and governs ingress only",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-prod.yaml: selects the API pods and governs ingress only",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-uat.yaml: selects the API pods and governs ingress only",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values.yaml: selects the API pods and governs ingress only"
+    ],
+    "n_failed_cases": 4,
+    "restored_sha_equal": true
+  },
+  {
+    "mutation": "m8-np-wrong-connector-port",
+    "exit": 1,
+    "tests_line": "5 failed | 67 passed (72)",
+    "failed_cases": [
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > moves the connector rule with the one port key, and keeps the ordinary-port rule where it was",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-dev.yaml: rule 2 opens the connector port to the runner and worker pods, and to nobody else",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-prod.yaml: rule 2 opens the connector port to the runner and worker pods, and to nobody else",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values-uat.yaml: rule 2 opens the connector port to the runner and worker pods, and to nobody else",
+      "AC-2 \u2014 the API ingress NetworkPolicy: the connector port is open to runner and worker pods only > values.yaml: rule 2 opens the connector port to the runner and worker pods, and to nobody else"
+    ],
+    "n_failed_cases": 5,
+    "restored_sha_equal": true
+  }
+]

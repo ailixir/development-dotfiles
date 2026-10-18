@@ -1,0 +1,1069 @@
+{
+  "artifact": "Outcome union exact bounded regression design; no tests implemented/executed",
+  "caseCount": 91,
+  "cases": [
+    {
+      "id": "MECH-01",
+      "kind": "actual-engine-prerequisite",
+      "base": "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json#/documents/flow/outcomes/0",
+      "mutation": "none; unchanged original native root and two full branch documents",
+      "independentExpected": "nativeRootfalse; ordinarytrue; prefixfalse; correct loaded1.4.0 JAR evidence",
+      "detects": "Actual proposed mechanism versus wrong dependency/config/partial test. If not reproduced NEED_EVIDENCE.",
+      "stage": "R1",
+      "bothPublicEntryPointsRequired": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "ORD-BLANK",
+      "kind": "positive",
+      "base": "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json#/documents/flow/outcomes/0",
+      "mutation": "none",
+      "independentExpected": "ordinarytrue/prefixfalse/aggregate true",
+      "detects": "Complete nested evidence/availability/diagnostic branches, no success-only shortcut",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "ORD-OBS-READ",
+      "kind": "positive",
+      "base": "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json#/documents/flow/outcomes/1",
+      "mutation": "none",
+      "independentExpected": "ordinarytrue/prefixfalse/aggregate true; complete availability",
+      "detects": "Complete nested evidence/availability/diagnostic branches, no success-only shortcut",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "ORD-OBS-NULL",
+      "kind": "positive",
+      "base": "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json#/documents/flow/outcomes/2",
+      "mutation": "none",
+      "independentExpected": "ordinarytrue/prefixfalse/aggregate true; nullavailability",
+      "detects": "Complete nested evidence/availability/diagnostic branches, no success-only shortcut",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "ORD-FAIL-DIAG",
+      "kind": "positive",
+      "base": "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json#/documents/redactedFailureDiagnostic",
+      "mutation": "none",
+      "independentExpected": "ordinarytrue/prefixfalse/aggregate true",
+      "detects": "Complete nested evidence/availability/diagnostic branches, no success-only shortcut",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "ORD-UNKNOWN-DIAG",
+      "kind": "positive",
+      "base": "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json#/documents/redactedUnknownDiagnostic",
+      "mutation": "none",
+      "independentExpected": "ordinarytrue/prefixfalse/aggregate true",
+      "detects": "Complete nested evidence/availability/diagnostic branches, no success-only shortcut",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "PRE-NULL",
+      "kind": "positive",
+      "base": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json#/incrementalContracts/basisCases[name=preAdmissionDrift]/basis/incrementalEvidence/driftReceipt",
+      "mutation": "test-owned envelope {kind:prefixDrift,receipt:unchanged original receipt,ledger:null}",
+      "independentExpected": "ordinaryfalse/prefixtrue/aggregate true",
+      "detects": "Full PRE receipt and then:null constraint; no test transport authority claim",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "ADMITTED-LEDGER",
+      "kind": "positive",
+      "base": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json#/incrementalContracts/basisCases[name=admittedDrift]/basis/incrementalEvidence",
+      "mutation": "envelope {kind:prefixDrift,receipt:original driftReceipt,ledger:original excludedAttempts[0].action.ledger}",
+      "independentExpected": "ordinaryfalse/prefixtrue/aggregate true",
+      "detects": "Full admitted receipt/fullledger/else; no fake history or authentication credit",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "DIAG-success",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "add errorMessage=already-redacted message; ledger state=SUCCEEDED,outcomeCode=OK,dispatchCount=1",
+      "independentExpected": "both branches false/publicINVALID_CONTRACT422",
+      "detects": "Original conditional retained, not stripped or reduced to leaf validation",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "DIAG-pending",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "add errorMessage=already-redacted message; ledger state=DISPATCHING,outcomeCode=PENDING,dispatchCount=1",
+      "independentExpected": "both branches false/publicINVALID_CONTRACT422",
+      "detects": "Original conditional retained, not stripped or reduced to leaf validation",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "DIAG-dispatch-zero",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "add errorMessage=already-redacted message; ledger state=FAILED,outcomeCode=TARGET_CHANGED,dispatchCount=0",
+      "independentExpected": "both branches false/publicINVALID_CONTRACT422",
+      "detects": "Original conditional retained, not stripped or reduced to leaf validation",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "DIAG-other-state",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "add errorMessage=already-redacted message; ledger state=REVOKED,outcomeCode=CANCELLED,dispatchCount=1",
+      "independentExpected": "both branches false/publicINVALID_CONTRACT422",
+      "detects": "Original conditional retained, not stripped or reduced to leaf validation",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "DIAG-TYPE-nonstring",
+      "kind": "negative",
+      "base": "ORD-FAIL-DIAG",
+      "mutation": {
+        "/errorMessage": 7
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Property type/min/max remains enforced even if condition false",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "DIAG-TYPE-null",
+      "kind": "negative",
+      "base": "ORD-FAIL-DIAG",
+      "mutation": {
+        "/errorMessage": null
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Property type/min/max remains enforced even if condition false",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "DIAG-TYPE-empty",
+      "kind": "negative",
+      "base": "ORD-FAIL-DIAG",
+      "mutation": {
+        "/errorMessage": ""
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Property type/min/max remains enforced even if condition false",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "DIAG-TYPE-oversize",
+      "kind": "negative",
+      "base": "ORD-FAIL-DIAG",
+      "mutation": {
+        "/errorMessage": "2049 ASCII chars"
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Property type/min/max remains enforced even if condition false",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "DIAG-EXACT2048",
+      "kind": "positive",
+      "base": "ORD-FAIL-DIAG",
+      "mutation": "errorMessage exactly2048 legal redacted ASCII characters",
+      "independentExpected": "ordinarytrue/prefixfalse/aggregate true",
+      "detects": "Boundary retained; no raised/lowered diagnosticcap; schema proof is not redaction proof",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-blank-url",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/ledger/executionEvidence/url": "https://not-blank.test"
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-blank-origin",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/ledger/executionEvidence/origin": "https://orders.example.test"
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-blank-generation",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/ledger/executionEvidence/generation": 1
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-obs-kind",
+      "kind": "negative",
+      "base": "ORD-OBS-NULL",
+      "mutation": {
+        "/ledger/executionEvidence/kind": "unsupported"
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-obs-origin",
+      "kind": "negative",
+      "base": "ORD-OBS-NULL",
+      "mutation": {
+        "/ledger/executionEvidence/origin": null
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-hash-length",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/scopeHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-hash-charset",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/ledger/evidenceHash": "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg"
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-negative-owner",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/ownerFence": -1
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-negative-context",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/contextRevision": -1
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-dispatch-over",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/ledger/dispatchCount": 2
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-attempt-over",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/ledger/attemptOrdinal": 2
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-old-version",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/versions/contract": 2
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-tuple-extra",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/versions/legacy": 1
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-invalid-time",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/ledger/admission/admittedAt": "2026-02-30T03:00:10Z"
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-numeric-time",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/ledger/admission/admittedAt": 1
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "LEAF-offset-time",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": {
+        "/ledger/admission/admittedAt": "2026-10-08T03:00:10+00:00"
+      },
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Complete closed leaf constraints, patterns/bounds/versions/date/time retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "TIME-NANO",
+      "kind": "positive",
+      "base": "ORD-BLANK",
+      "mutation": "admission.admittedAt=2026-10-08T03:00:10.123456789Z",
+      "independentExpected": "ordinarytrue/prefixfalse/aggregate true; exact string unchanged",
+      "detects": "Fractional timestamp preserved without clock mutation",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CLOSED-ORD-BLANK:root",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "add unexpected=true at /",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "closed properties cannot be omitted by newmode",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CLOSED-ORD-BLANK:/ledger",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "add unexpected=true at /ledger",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "closed properties cannot be omitted by newmode",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CLOSED-ORD-BLANK:/ledger/admission",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "add unexpected=true at /ledger/admission",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "closed properties cannot be omitted by newmode",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CLOSED-ORD-BLANK:/ledger/executionEvidence",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "add unexpected=true at /ledger/executionEvidence",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "closed properties cannot be omitted by newmode",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CLOSED-ORD-OBS-READ:/availability",
+      "kind": "negative",
+      "base": "ORD-OBS-READ",
+      "mutation": "add unexpected=true at /availability",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "closed properties cannot be omitted by newmode",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CLOSED-PRE-NULL:/receipt",
+      "kind": "negative",
+      "base": "PRE-NULL",
+      "mutation": "add unexpected=true at /receipt",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "closed properties cannot be omitted by newmode",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CLOSED-PRE-NULL:root",
+      "kind": "negative",
+      "base": "PRE-NULL",
+      "mutation": "add unexpected=true at /",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "closed properties cannot be omitted by newmode",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/versions",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "remove /versions",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "required leaf retained; test distinct missing/null/wrongtype where schema differs",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "remove /ledger",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "required leaf retained; test distinct missing/null/wrongtype where schema differs",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/availability",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "remove /availability",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "required leaf retained; test distinct missing/null/wrongtype where schema differs",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/versions/contract",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "remove /versions/contract",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "required leaf retained; test distinct missing/null/wrongtype where schema differs",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/preparationId",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "remove /ledger/preparationId",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "required leaf retained; test distinct missing/null/wrongtype where schema differs",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/assertionPassed",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "remove /ledger/assertionPassed",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "required leaf retained; test distinct missing/null/wrongtype where schema differs",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/admission/admittedAt",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "remove /ledger/admission/admittedAt",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "required leaf retained; test distinct missing/null/wrongtype where schema differs",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/executionEvidence/creationId",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "remove /ledger/executionEvidence/creationId",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "required leaf retained; test distinct missing/null/wrongtype where schema differs",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/executionEvidence/bootstrapId",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "remove /ledger/executionEvidence/bootstrapId",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "required leaf retained; test distinct missing/null/wrongtype where schema differs",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "REQUIRED-ORD-OBS-NULL:/ledger/executionEvidence/observationHash",
+      "kind": "negative",
+      "base": "ORD-OBS-NULL",
+      "mutation": "remove /ledger/executionEvidence/observationHash",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "required leaf retained; test distinct missing/null/wrongtype where schema differs",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "REQUIRED-ORD-OBS-READ:/availability/producerAdmissionId",
+      "kind": "negative",
+      "base": "ORD-OBS-READ",
+      "mutation": "remove /availability/producerAdmissionId",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "required leaf retained; test distinct missing/null/wrongtype where schema differs",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "REQUIRED-PRE-NULL:/receipt/requestDigest",
+      "kind": "negative",
+      "base": "PRE-NULL",
+      "mutation": "remove /receipt/requestDigest",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "required leaf retained; test distinct missing/null/wrongtype where schema differs",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "REQUIRED-ADMITTED-LEDGER:/receipt/preparationId",
+      "kind": "negative",
+      "base": "ADMITTED-LEDGER",
+      "mutation": "remove /receipt/preparationId",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "required leaf retained; test distinct missing/null/wrongtype where schema differs",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "AVAIL-MALFORMED",
+      "kind": "negative",
+      "base": "ORD-OBS-READ",
+      "mutation": "availability={}; also scalar/array/null-vsobject tests",
+      "independentExpected": "emptyobject/scalar/array refuse; originalnull alternative accepts",
+      "detects": "Complete availability union, no null-only shortcut",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "PHASE-pre-nonnull",
+      "kind": "negative",
+      "base": "PRE-NULL",
+      "mutation": "ledger=complete original admitted ledger",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Every original prefix if/then/else/receipt union condition retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "PHASE-admitted-null",
+      "kind": "negative",
+      "base": "ADMITTED-LEDGER",
+      "mutation": "ledger=null",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Every original prefix if/then/else/receipt union condition retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "PHASE-admitted-malformed",
+      "kind": "negative",
+      "base": "ADMITTED-LEDGER",
+      "mutation": "ledger={}",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Every original prefix if/then/else/receipt union condition retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "PHASE-bad-envelopekind",
+      "kind": "negative",
+      "base": "PRE-NULL",
+      "mutation": "kind=ordinary",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Every original prefix if/then/else/receipt union condition retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "PHASE-bad-phase",
+      "kind": "negative",
+      "base": "PRE-NULL",
+      "mutation": "receipt.phase=UNKNOWN",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Every original prefix if/then/else/receipt union condition retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "PHASE-native-started",
+      "kind": "negative",
+      "base": "ADMITTED-LEDGER",
+      "mutation": "receipt.nativeInvocationStarted=true",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Every original prefix if/then/else/receipt union condition retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "PHASE-receipt-attempt",
+      "kind": "negative",
+      "base": "ADMITTED-LEDGER",
+      "mutation": "receipt.attemptOrdinal=1",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Every original prefix if/then/else/receipt union condition retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "PHASE-receipt-fence",
+      "kind": "negative",
+      "base": "PRE-NULL",
+      "mutation": "receipt.ownerFence=0",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Every original prefix if/then/else/receipt union condition retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "PHASE-receipt-context",
+      "kind": "negative",
+      "base": "PRE-NULL",
+      "mutation": "receipt.contextRevision=202",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Every original prefix if/then/else/receipt union condition retained",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "HYBRID",
+      "kind": "negative",
+      "base": "ORD-BLANK",
+      "mutation": "add kind=prefixDrift and receipt=original PRE receipt",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Neither closed branch accepts union hybrid",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "ROOT-null",
+      "kind": "negative",
+      "base": "none",
+      "mutation": "null",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Root types and neitherbranch outcome",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "ROOT-[]",
+      "kind": "negative",
+      "base": "none",
+      "mutation": "[]",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Root types and neitherbranch outcome",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "ROOT-1",
+      "kind": "negative",
+      "base": "none",
+      "mutation": "1",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Root types and neitherbranch outcome",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "ROOT-{}",
+      "kind": "negative",
+      "base": "none",
+      "mutation": "{}",
+      "independentExpected": "bothfalse/publicINVALID_CONTRACT422",
+      "detects": "Root types and neitherbranch outcome",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "XOR-TT",
+      "kind": "private aggregate unit",
+      "base": "two separately compiled COMPLETE ordinary native branches; original positive ORD-BLANK",
+      "mutation": "construct actual private plan mode via existing reflection-style test seam only; do not register altered root in public compiler/cache",
+      "independentExpected": "both branches independently true but mode false; both public validate calls invoked once",
+      "detects": "Distinguishes XOR from OR/firstmatch/deduplicated validators",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "XOR-TF",
+      "kind": "private aggregate unit",
+      "base": "ORD-BLANK with two COMPLETE real native branches ordinary,prefix",
+      "mutation": "private mode construction only, no new production API/epoch override",
+      "independentExpected": "aggregate true; both native publicvalidate calls invoked",
+      "detects": "Detects AND/branch0-only/firstmatch/count mistakes",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "XOR-FT",
+      "kind": "private aggregate unit",
+      "base": "ORD-BLANK with two COMPLETE real native branches prefix,ordinary",
+      "mutation": "private mode construction only, no new production API/epoch override",
+      "independentExpected": "aggregate true; both native publicvalidate calls invoked",
+      "detects": "Detects AND/branch0-only/firstmatch/count mistakes",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "XOR-FF",
+      "kind": "private aggregate unit",
+      "base": "ORD-BLANK with two COMPLETE real native branches prefix,prefix",
+      "mutation": "private mode construction only, no new production API/epoch override",
+      "independentExpected": "aggregate false; both native publicvalidate calls invoked",
+      "detects": "Detects AND/branch0-only/firstmatch/count mistakes",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "EXCEPTION",
+      "kind": "private aggregate unit",
+      "base": "actual complete native branch validator spy",
+      "mutation": "branch publicvalidate throws; never replace with true/empty result",
+      "independentExpected": "no acceptance; exception propagates or existing controlled refusal; no fallback-to-permissive",
+      "detects": "Exception is not an empty-error match. Bothcalls count required on normally completing evaluations, not after propagated exceptional exit.",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": false,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "FRESH-INTERLEAVING",
+      "kind": "mode+public",
+      "base": "positive and negative matrix instances",
+      "mutation": "fixed repeated sequence and bounded parallel interleaving over one cached GuidedContracts and multiple instances",
+      "independentExpected": "results stay independent; fresh ExecutionContext objects per branch/call; input/schema/canonical bytes unchanged",
+      "detects": "Leaked ValidatorState/context/cache contamination. Observe createExecutionContext with callRealMethod spy, not excluded config customizer. No timing/threshold sampling.",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CONFIG-type-loose",
+      "kind": "native fallback",
+      "base": "original exact epoch schema compiled with independent config clone",
+      "mutation": "setTypeLoose(true)",
+      "independentExpected": "newmode absent; complete originalnative fallback, same accept/refusal/exception behavior on separate input copies; no productionconfig mutation",
+      "detects": "Eligibility gate remains conservative; failFasttrue specifically tests known design correction",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CONFIG-fail-fast",
+      "kind": "native fallback",
+      "base": "original exact epoch schema compiled with independent config clone",
+      "mutation": "setFailFast(true)",
+      "independentExpected": "newmode absent; complete originalnative fallback, same accept/refusal/exception behavior on separate input copies; no productionconfig mutation",
+      "detects": "Eligibility gate remains conservative; failFasttrue specifically tests known design correction",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CONFIG-property-defaults",
+      "kind": "native fallback",
+      "base": "original exact epoch schema compiled with independent config clone",
+      "mutation": "enable property defaults",
+      "independentExpected": "newmode absent; complete originalnative fallback, same accept/refusal/exception behavior on separate input copies; no productionconfig mutation",
+      "detects": "Eligibility gate remains conservative; failFasttrue specifically tests known design correction",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CONFIG-null-defaults",
+      "kind": "native fallback",
+      "base": "original exact epoch schema compiled with independent config clone",
+      "mutation": "enable null property defaults",
+      "independentExpected": "newmode absent; complete originalnative fallback, same accept/refusal/exception behavior on separate input copies; no productionconfig mutation",
+      "detects": "Eligibility gate remains conservative; failFasttrue specifically tests known design correction",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CONFIG-array-defaults",
+      "kind": "native fallback",
+      "base": "original exact epoch schema compiled with independent config clone",
+      "mutation": "enable array defaults",
+      "independentExpected": "newmode absent; complete originalnative fallback, same accept/refusal/exception behavior on separate input copies; no productionconfig mutation",
+      "detects": "Eligibility gate remains conservative; failFasttrue specifically tests known design correction",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CONFIG-context-customizer",
+      "kind": "native fallback",
+      "base": "original exact epoch schema compiled with independent config clone",
+      "mutation": "set nonnull context customizer",
+      "independentExpected": "newmode absent; complete originalnative fallback, same accept/refusal/exception behavior on separate input copies; no productionconfig mutation",
+      "detects": "Eligibility gate remains conservative; failFasttrue specifically tests known design correction",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CONFIG-keyword-listener",
+      "kind": "native fallback",
+      "base": "original exact epoch schema compiled with independent config clone",
+      "mutation": "install keyword walk listener",
+      "independentExpected": "newmode absent; complete originalnative fallback, same accept/refusal/exception behavior on separate input copies; no productionconfig mutation",
+      "detects": "Eligibility gate remains conservative; failFasttrue specifically tests known design correction",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CONFIG-property-listener",
+      "kind": "native fallback",
+      "base": "original exact epoch schema compiled with independent config clone",
+      "mutation": "install property walk listener",
+      "independentExpected": "newmode absent; complete originalnative fallback, same accept/refusal/exception behavior on separate input copies; no productionconfig mutation",
+      "detects": "Eligibility gate remains conservative; failFasttrue specifically tests known design correction",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CONFIG-array-listener",
+      "kind": "native fallback",
+      "base": "original exact epoch schema compiled with independent config clone",
+      "mutation": "install array item walk listener",
+      "independentExpected": "newmode absent; complete originalnative fallback, same accept/refusal/exception behavior on separate input copies; no productionconfig mutation",
+      "detects": "Eligibility gate remains conservative; failFasttrue specifically tests known design correction",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CONFIG-discriminator",
+      "kind": "native fallback",
+      "base": "original exact epoch schema compiled with independent config clone",
+      "mutation": "setOpenAPI3StyleDiscriminators(true)",
+      "independentExpected": "newmode absent; complete originalnative fallback, same accept/refusal/exception behavior on separate input copies; no productionconfig mutation",
+      "detects": "Eligibility gate remains conservative; failFasttrue specifically tests known design correction",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "NAME",
+      "kind": "native fallback",
+      "base": "complete original schema",
+      "mutation": "compile with exact non-outcome name, e.g original ordinary fragment; bare bridge name normalizes through existing public code to exact qualified name",
+      "independentExpected": "only normalized outcome name eligible; defined ordinary fragment nativevalid, missing definitionRUNTIME_INCOMPATIBLE409",
+      "detects": "No broad prefix/fragment/name matching or empty permissive fallback",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "SIBLING",
+      "kind": "native fallback",
+      "base": "test-only altered original expanded root",
+      "mutation": "add sibling constraint and use prefix or simple nonbuggy root positive+negative controls; preserve entire originalroot",
+      "independentExpected": "unknown epoch→nativefallback; sibling refusal and positive checked against original native, not dropped",
+      "detects": "No oneOf-only assumption applied to constrained unknown root",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "OVERLAP-UNKNOWN",
+      "kind": "native fallback",
+      "base": "test-only root with two overlapping complete object alternatives",
+      "mutation": "do not force known epoch or production mode",
+      "independentExpected": "native root rejects overlap and compiledfallback does same; mode marker absent",
+      "detects": "Fallback parity only; NOT sufficient to prove optimizedXOR (private TT does that)",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "CHANGED-BRANCH",
+      "kind": "native fallback",
+      "base": "test-only root changed nested conditional/property/branch count/order",
+      "mutation": "change leaf constraint or add/remove branch while name stays outcome",
+      "independentExpected": "unknown epoch→nativefallback, exact native behavior; no newmode",
+      "detects": "No epoch bypass, ignored new leaf, branch stripping, or stale cached compiler",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "WRONG-DIALECT",
+      "kind": "native fallback",
+      "base": "same node under nonV7 validationcontext",
+      "mutation": "compile only through existing private test seam",
+      "independentExpected": "ineligible for V7-specific newmode; preserve native dialect behavior",
+      "detects": "Factory/config copied correctly, no implicit semantic dialect swap",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    },
+    {
+      "id": "OLD-GATES",
+      "kind": "unchanged gates",
+      "base": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java",
+      "mutation": "no weakening existing four-root decomposition/wire/mutation/conditional/fallback/canonical positives",
+      "independentExpected": "all original requirements retained; evidence any stalebaseline failure separately; do not re-epoch/delete/adjustcounts here",
+      "detects": "Newmode does not break existing behavior or substitute for full gating",
+      "stage": "R3",
+      "bothPublicEntryPointsRequired": true,
+      "execution": "NOT_RUN"
+    }
+  ],
+  "publicPathRules": [
+    "Each known-epoch positive/negative executes both contracts.validate(NAME,value) and contracts.validateAndCanonical(NAME,value); bare normalized alias companion too. Expected booleans from fixed frozen constraints, not original buggy outcome root.",
+    "On success exact returnedcanonical==existingGuidedContracts.canonical(originalcopy); on refusal INVALID_CONTRACT422 and caller bytes unchanged. Canonical raw malformed UTF8/duplicate/trailing/numeric/unicode gates remain original tests.",
+    "Assert complete original native branch schema nodes equal originalexpanded oneOf nodes; branch configs preserve original knownV7 config and no ExecutionContext is shared. Entire outerroot unchanged/stored forfallback, never evaluated as successoracle insideoptimizedmode.",
+    "For exact current root ordinary/prefix disjointness alone cannot prove XOR. Private TT/TF/FT/FF tests invoke the SAME production aggregation implementation using complete native schemas; this does not widen compiler eligibility or public schema.",
+    "Normal branch evaluations must both occur even when first accepts or rejects. A propagated exceptional exit can stop evaluation but can never grant acceptance. No kind/errorMessage/state branch shortcut."
+  ],
+  "schemaVsAuthorityLimits": [
+    "Wellformed-but-wrong64hex hash, cross-field same-shaped identity changes and admitted FAILED/TARGET_CHANGED/authentication joins are NOT schema-level compiler constraints. Do not demand newmode reject values accepted by full frozen branches on unavailable history.",
+    "ReceiptHash recomputation/owningworker/mTLS/assignment/preparation/spent-admission/no-native guards remain actual application B1/B3/etc. Schema-only prefix positive is not authenticated dispatch/retry authority.",
+    "Diagnostic length+conditional validation does not prove actual redaction/privacy sink correctness; inherited OBS007 real sinks/native/no-repeat remain."
+  ],
+  "requiredHelperObservability": [
+    "Extend existing assertNativePlan with optional outcome-native-alternatives collection empty/modeabsent; old properties/objects/arrays assertions remain.",
+    "For each old4 finite plan assert new optional unionmode absent, preserving all existing decomposition counts and nested object/array assertions.",
+    "Known exact outcome plan has2complete native alternatives byteequal to expanded original branch nodes, same original V7config; fallback keeps original full native root and optional alternativesempty.",
+    "Private aggregate TT/TF/FT/FF construction never enters public compilercache or overrides epoch. Verify complete branch publicvalidate calls, not a boolean mock helper.",
+    "Canonical raw-input refusal can occur before any mode evaluation; both-branch invocation check applies when valid canonical input reaches mode."
+  ],
+  "sourceOnly": true,
+  "formalQAVerdict": null,
+  "sourceReleaseGranted": false
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "qa-source-review",
+  "label": "qa-source-review01",
+  "reviewer": "Quinn (@qa), independent",
+  "createdAt": "2026-10-15",
+  "subjectReview": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r1-diagnosis01/review.md#3.1",
+  "mode": "read-only source review; no Gradle, no test execution, no source edits",
+  "verdict": "PASS_WITH_REQUIRED_CHANGES",
+  "subjects": {
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/ExecutionReferences.java": "fc6401fb4e1decf421bb9eb421f356cbe82aa2db4c2173a3a309425f8d2551ef",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/TypedReferenceAdapterTest.java": "aad759847c1bb6c953c880ac46d85ded67f3df42bbd345cce2e5a6988e77d668",
+    "ExecutionReferences.java@HEAD(734ad704f)": "76aad72fa0462536d00c33aed24d39ae4c7a930f90e578a4c2a456fe5bfa831e"
+  },
+  "beforeShaClaim": {"value": "0ffc9d04...", "verified": false, "reason": "uncommitted pre-fix state no longer exists; HEAD differs only by javadoc per Dex and git diff"},
+  "comparedAgainst": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java": "28aafe98ebdbbd3dcd59d061b671131713c5b5c2db4330a3e5252bd106011b48",
+    "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql": "b012ddddb44b599c4f8699be39281dd6f407b2cb93b41386a79eb22c06c4d179",
+    "docs/specs/studio-observed-authoring/contracts/v3/revision.schema.json": "e37b2bd9869d42af323b2ad321e731a2556a8c44ebdc86f52c2e505fc1ea3531",
+    "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java": "f2ed4f9a79cbc53801fc7c81d54c69b090b89c9066aae057af59269c0e88c3c2",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java": "414ad82d6467406693fd868a036b4d0ee5590880b3d42dcbd0c71a7b6b688c09",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java": "739eee7d32d5d9eb2f5bb2f1d98f30eca35fab72877b76fc9882e30f129ee47a",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java": "de7b12c556eb5a4a32862484f34d8de4cf16b1942ad079b33dc2743f9c76e05f",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleService.java": "75ca902e3b29bdce422728a191ebf60749903508dd6cd16498851f0886de59d7",
+    "docs/architecture/ADR-SC-005-single-path-observed-authoring.md": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4"
+  },
+  "findings": [
+    {"id": "F1", "severity": "required", "summary": "two-key {variables,secrets} acceptance is a compat read path: sole writer GuidedPublicationRepository:249-296 writes four keys; former producer CompileInputs deleted; V21 tr_015_revision_guard rejects any new two-key row; contract RevisionReferences requires four keys; V20 rows are gated to LEARN_REQUIRED before every reader call site (Acceptance:305<359, Schedule:201<212, Dispatcher on accepted bindings)", "verified": true, "inferred": "pre-V21 in-flight execution dispatched after V21 could still reach Dispatcher:324; strict reader makes it terminal REFERENCE_UNAVAILABLE (correct)"},
+    {"id": "F2", "severity": "pass", "summary": "identity branch fail-closed: isInt()&&==1, isArray(), closed key loop; null/blank/unparseable/non-object terminal"},
+    {"id": "F3", "severity": "pass", "summary": "no value leakage: constant messages, no chained parser exception, valueHash never surfaced"},
+    {"id": "F4", "severity": "required", "summary": "tests still assert two-key readable (:30,:41,:51,:59); leak test only on two-key doc; no identity-branch no-leak assertion"}
+  ],
+  "requiredChanges": [
+    "ExecutionReferences.declared: accept only exactly {variables,secrets,authoringIdentityVersion,authoredDeclarations}, all required; version isInt()==1; authoredDeclarations isArray(); remove `identity` conditional so two-key is terminal",
+    "Javadoc: single shape = V21 studio_015_declarations / contract RevisionReferences written by GuidedPublicationRepository.commit; drop two-key and 'contract ReferenceDeclarations' claims",
+    "TypedReferenceAdapterTest: port :30,:41,:51,:59 and :139 inputs to four-key; add two-key documents to a terminal list; add identity-branch canary no-leak assertion",
+    "Gradle owner: re-run TypedReferenceAdapterTest and ReplayIT first case under fresh labels (--no-daemon); correct StudioExecutionFixtures.references javadoc (:100)"
+  ],
+  "nonBlocking": ["V21 header line 1 'DESIGN CANDIDATE ONLY; not installed' is stale (file is in src/main/resources/db/migration) - @data-engineer"],
+  "skipped": ["CodeRabbit (WSL-only skill; darwin host)", "SYNAPSE diagnostics (outside mission)", "any Gradle/test execution (instructed)"]
+}

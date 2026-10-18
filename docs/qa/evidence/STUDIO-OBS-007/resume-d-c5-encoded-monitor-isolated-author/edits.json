@@ -1,0 +1,62 @@
+[
+  {
+    "before": "    private final C5CanaryStream encoded;",
+    "after": "    private final C5CanaryStream encoded;\n    private final Object encodedMonitor = new Object();"
+  },
+  {
+    "before": "      appender.setOutputStream(\n          new java.io.OutputStream() {\n            @Override\n            public void write(int value) {\n              synchronized (C5Capture.this) {\n                try {\n                  encoded.write(value);\n                } catch (RuntimeException invalid) {\n                  encoded.invalid();\n                }\n              }\n            }\n\n            @Override\n            public void write(byte[] bytes, int offset, int length) {\n              synchronized (C5Capture.this) {\n                try {\n                  encoded.write(bytes, offset, length);\n                } catch (RuntimeException invalid) {\n                  encoded.invalid();\n                }\n              }\n            }\n\n            @Override\n            public void close() {\n              synchronized (C5Capture.this) {\n                encoded.closeInput();\n              }\n              // Original replacement/encoder footer closes this target; no raw history retained.\n            }\n          });\n",
+    "after": "      appender.setOutputStream(\n          new java.io.OutputStream() {\n            @Override\n            public void write(int value) {\n              synchronized (encodedMonitor) {\n                try {\n                  encoded.write(value);\n                } catch (RuntimeException invalid) {\n                  encoded.invalid();\n                }\n              }\n            }\n\n            @Override\n            public void write(byte[] bytes, int offset, int length) {\n              synchronized (encodedMonitor) {\n                try {\n                  encoded.write(bytes, offset, length);\n                } catch (RuntimeException invalid) {\n                  encoded.invalid();\n                }\n              }\n            }\n\n            @Override\n            public void close() {\n              synchronized (encodedMonitor) {\n                encoded.closeInput();\n              }\n              // Original replacement/encoder footer closes this target; no raw history retained.\n            }\n          });\n"
+  },
+  {
+    "before": "        encoded.assertClean(false);",
+    "after": "        synchronized (encodedMonitor) {\n          encoded.assertClean(false);\n        }"
+  },
+  {
+    "before": "                encoded.assertClean(true);",
+    "after": "                synchronized (encodedMonitor) {\n                  encoded.assertClean(true);\n                }"
+  },
+  {
+    "before": "    void writeNumericEvidence() throws Exception {\n      ObjectNode evidence =",
+    "after": "    void writeNumericEvidence() throws Exception {\n      long encodedBytes, encodedWriteCalls, encodedPatternHits, encodedInvalidWrites;\n      boolean encodedObserverFailed, captureTargetClosed;\n      int patternCount, patternBytes;\n      synchronized (encodedMonitor) {\n        encodedBytes = encoded.encodedBytes;\n        encodedWriteCalls = encoded.writeCalls;\n        encodedPatternHits = encoded.hits;\n        encodedInvalidWrites = encoded.invalidWrites;\n        encodedObserverFailed = encoded.failed;\n        captureTargetClosed = encoded.inputClosed;\n        patternCount = encoded.patterns.size();\n        patternBytes = encoded.patternBytes;\n      }\n      ObjectNode evidence ="
+  },
+  {
+    "before": ".put(\"encodedBytes\", encoded.encodedBytes)",
+    "after": ".put(\"encodedBytes\", encodedBytes)"
+  },
+  {
+    "before": ".put(\"encodedWriteCalls\", encoded.writeCalls)",
+    "after": ".put(\"encodedWriteCalls\", encodedWriteCalls)"
+  },
+  {
+    "before": ".put(\"encodedPatternHits\", encoded.hits)",
+    "after": ".put(\"encodedPatternHits\", encodedPatternHits)"
+  },
+  {
+    "before": ".put(\"encodedInvalidWrites\", encoded.invalidWrites)",
+    "after": ".put(\"encodedInvalidWrites\", encodedInvalidWrites)"
+  },
+  {
+    "before": ".put(\"encodedObserverFailed\", encoded.failed)",
+    "after": ".put(\"encodedObserverFailed\", encodedObserverFailed)"
+  },
+  {
+    "before": ".put(\"captureTargetClosed\", encoded.inputClosed)",
+    "after": ".put(\"captureTargetClosed\", captureTargetClosed)"
+  },
+  {
+    "before": ".put(\"patternCount\", encoded.patterns.size())",
+    "after": ".put(\"patternCount\", patternCount)"
+  },
+  {
+    "before": ".put(\"patternBytes\", encoded.patternBytes)",
+    "after": ".put(\"patternBytes\", patternBytes)"
+  },
+  {
+    "before": "        synchronized (this) {\n          if (producersDrained\n              && encoded.inputClosed\n              && appender.getOutputStream() == originalStream) {",
+    "after": "        synchronized (this) {\n          boolean targetClosed = false;\n          if (producersDrained) {\n            synchronized (encodedMonitor) {\n              targetClosed = encoded.inputClosed;\n            }\n          }\n          if (producersDrained\n              && targetClosed\n              && appender.getOutputStream() == originalStream) {"
+  },
+  {
+    "before": "            encoded.wipe();",
+    "after": "            synchronized (encodedMonitor) {\n              encoded.wipe();\n            }"
+  }
+]

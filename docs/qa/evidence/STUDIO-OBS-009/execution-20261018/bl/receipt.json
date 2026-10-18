@@ -1,0 +1,72 @@
+{
+ "lane": "BL",
+ "story": "STUDIO-OBS-009",
+ "wave": "W2",
+ "date": "2026-10-18",
+ "agent": "aiox-dev (Dex)",
+ "verdict": "GREEN",
+ "files": [
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+   "sha256Before": "a8ddea755687e10bcfe7a23a5240614954a300356a65348e8b77a8bad15541cf",
+   "sha256After": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+   "sha256Before": null,
+   "sha256After": "8e5e4473c54e3884008ca63a3c87888ba6dcca514b5165f9dc40f8f20991613b"
+  },
+  {
+   "file": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/bl/d5-e-backend-stop-record.md",
+   "sha256Before": null,
+   "sha256After": "11a85f3c90a88e7e56ed3654c71dbe0c2b285d411720ae10b4f4c5cb96532ce6"
+  }
+ ],
+ "runs": [
+  {
+   "label": "obs009-b-red01",
+   "class": "GuidedLifecycleReasonIT",
+   "counts": {
+    "total": 5,
+    "passed": 4,
+    "failed": 1
+   }
+  },
+  {
+   "label": "obs009-b-02",
+   "class": "GuidedLifecycleReasonIT",
+   "counts": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0
+   }
+  },
+  {
+   "label": "obs009-b-04",
+   "classes": {
+    "GuidedLifecycleReasonIT": 5,
+    "GuidedSessionIT": 44,
+    "GuidedServiceTransportFaultIT": 39
+   },
+   "allPassed": true
+  }
+ ],
+ "mutation": {
+  "id": "LR-M",
+  "run": "obs009-b-mut01",
+  "seen": "red (case 1)"
+ },
+ "edge": "not requested (optional, ruling-15s-edge s4 item 3); GuidedRunnerContextRefusalTest untouched",
+ "d5e": "bl/d5-e-backend-stop-record.md: fail-closed, nothing unsafe; two availability observations for @architect",
+ "acsCoveredLocal": [
+  "AC-11 LR a-c",
+  "AC-11 D5 e (backend read)"
+ ],
+ "findings": [
+  "EXPIRED context lifecycle now writes stop reason EXPIRED (was UNKNOWN_OUTCOME)",
+  "teardown executor sheds silently when full; nothing after the 15 minute window except a count"
+ ],
+ "batons": [
+  "land GuidedSessionService.java and GuidedLifecycleReasonIT.java together"
+ ]
+}

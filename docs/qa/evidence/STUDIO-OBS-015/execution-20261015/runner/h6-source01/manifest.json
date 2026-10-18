@@ -1,0 +1,52 @@
+{
+  "story": "STUDIO-OBS-015",
+  "item": "H6 containsText whitespace normalization",
+  "author": "Dex-R (@dev)",
+  "date": "2026-10-16",
+  "ruling": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r2-diagnosis01/aria-h8-h6-ruling01/ruling.md",
+    "sha256": "86a53bec8dd6e80fa504c4764239c9ff8c54ec6d61dc31f52677ac3e6762730a",
+    "section": "H6"
+  },
+  "patch": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/h6-source01/h6.patch",
+    "sha256": "5d98e6a05ee5a0c9112b652223dc66a0a7c5a86f5ef6927127b164615f274e42",
+    "applyCommand": "git apply -p0 docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/h6-source01/h6.patch",
+    "applyCheck": "git apply --check -p0 passed against live tree 2026-10-16",
+    "numstat": [
+      { "path": "studio-runner/src/run/observationCollector.ts", "added": 2, "removed": 1 },
+      { "path": "studio-runner/test/run/observationCollectorInvoke.test.ts", "added": 37, "removed": 2 },
+      { "path": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts", "added": 91, "removed": 0 }
+    ]
+  },
+  "preImageSha256": {
+    "studio-runner/src/run/observationCollector.ts": "ba31be90d04885e6329ae02f6559205325740cbd46960a438150a890557c27a2",
+    "studio-runner/test/run/observationCollectorInvoke.test.ts": "3c4ec9bc36287f1b4bee823ac20fe3413c83226a82002406d81e402bab9a60d7",
+    "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts": null
+  },
+  "postImageSha256": {
+    "studio-runner/src/run/observationCollector.ts": "e073909b9b13cf8103abea4032bd78e4af3ba357b229718e9d4cf20392a72315",
+    "studio-runner/test/run/observationCollectorInvoke.test.ts": "912767a1c2a4ac756ba15aabd08cf348c54d2ca4e92cdc7a31b62bd6bac0f0d9",
+    "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts": "46099d1c1bbdbec9cdec3331620c57810cee1c682c927392daa811b3d39714b4"
+  },
+  "executorVersion": { "value": "2.1.0", "bumped": false },
+  "repoWrites": {
+    "protectedPathsModified": false,
+    "distRebuilt": false,
+    "note": "Only this evidence folder was written in the repo; all tests ran in an isolated scratch copy."
+  },
+  "verification": {
+    "environment": "isolated rsync copy of studio-runner (no node_modules/dist/coverage), per-package node_modules symlinks, docs/specs + tools mirrored; Node v23.10.0; Playwright 1.63.0; Chromium 1243",
+    "unitInvokeFile": { "file": "test/run/observationCollectorInvoke.test.ts", "passed": 24, "failed": 0, "redAgainstOriginal": { "newRowsFailing": 4, "newRowsTotal": 8 } },
+    "realChromiumParity": { "file": "test/fixtures-tier/observed-contains-text-parity.test.ts", "passed": 11, "failed": 0, "redAgainstOriginal": { "failed": 7, "passed": 4 } },
+    "typeCheck": { "command": "tsc -p tsconfig.json --noEmit", "exit": 0 },
+    "lint": { "command": "eslint <3 changed files>", "exit": 0 },
+    "fullUnitTier": {
+      "patched": { "testsPassed": 1664, "testsFailed": 3, "testsSkipped": 28, "filesFailed": 24 },
+      "baselineUnpatched": { "testsPassed": 1655, "testsFailed": 3, "testsSkipped": 28, "filesFailed": 24 },
+      "failureSetIdentical": true,
+      "failureCause": "copy environment (missing repo-root ajv, docs/runbooks, pins context); not caused by patch"
+    },
+    "notRun": ["other fixtures-tier files", "joined assert-fail label", "dist rebuild", "CodeRabbit (WSL-only)"]
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "createdUtc": "2026-10-15T01:41:19.111231+00:00",
+  "sources": [
+    {
+      "path": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "sha256": "941a658043fcc687d30311b8fff34d4ffd1bc02ca2b517cac21dc8fde6d855f7"
+    },
+    {
+      "path": "studio-runner/test/helpers/profileSafetyFixture.ts",
+      "sha256": "7b7b11b94481d012b73b40b2a11d7f79f843d634add3c2e8b6f61316af644e84"
+    },
+    {
+      "path": "studio-runner/test/profileSafetyFixture.test.ts",
+      "sha256": "9b20e60a3dde0a3868a62702bb7d304eba5d998edded7359a8bc6cc252e331a1"
+    }
+  ],
+  "existingFrozenInputsCompared": 1581,
+  "changedExistingInputs": [
+    "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts"
+  ],
+  "newApprovedInputs": [
+    "studio-runner/test/helpers/profileSafetyFixture.ts",
+    "studio-runner/test/profileSafetyFixture.test.ts"
+  ],
+  "otherFrozenInputsUnchanged": true,
+  "distFilesCompared": 238,
+  "distUnchanged": true,
+  "otherNineOriginalProfileCasesByteIdentical": true,
+  "backendFinalPlanningIT": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+    "sha256": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b"
+  },
+  "productionInputsUnchanged": true,
+  "readinessAndBlankHelpersUnchanged": true,
+  "nativeExecuted": false,
+  "buildExecuted": false,
+  "sourceFrozenForIndependentReview": true,
+  "supersedesHistoricalAttempt01": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/source-checkpoint.json",
+    "sha256": "e3e6ac4e0853fcaf97d14a8ca20c6fbe6ba1500b8d8699cbf96b5040539344de",
+    "bytes": 1420
+  },
+  "finalPureAttempt": 5,
+  "finalPurePasses": 61,
+  "reviewStatus": "IndependentAriaQuinn finalbyteapprovalrequired; prior59casecheckpointnotcurrent"
+}

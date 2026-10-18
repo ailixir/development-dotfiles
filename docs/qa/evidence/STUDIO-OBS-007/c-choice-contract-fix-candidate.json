@@ -1,0 +1,236 @@
+{
+  "schema": "choice-contract-fix-candidate/1",
+  "story": "STUDIO-OBS-007",
+  "at": "2026-10-10T20:21:50.993675+00:00",
+  "status": "SOURCE_FROZEN_GENERATED_UNBUILT_UNTESTED",
+  "authority": "fresh-owner-choice-contract-disposition existingallv3 correction and exact coordinator release; no POdelta",
+  "sourceFiles": [
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json",
+      "beforeRawSha256": "850504848ee0c3e0a26a2cdb14f59a6530255ceda6ec3d0962753eb5511a4c7a",
+      "afterRawSha256": "ac4ca95d1882e112cf0095cc0d5f6e50f68643601c793e041dbf71278c1f9ab0",
+      "changed": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "beforeRawSha256": "90b9e9a386f26de7aeac52a478dd6f5a7602a1fac9e635e6e37c4211892ad8a1",
+      "afterRawSha256": "d6757969ec0a9f7b5b013bb68df4f694ceb3cdc88d8739186e811f7ec1bef764",
+      "changed": true
+    },
+    {
+      "path": "studio-runner/fixtures/observed-reference/accepted-observed-choice.json",
+      "beforeRawSha256": "5bb10f85850617608e5b9a4edee78af2b19a8baccde18190dc847173fc53dacb",
+      "afterRawSha256": "bae85932582a793b08bb1c193812b635c2b2a0d4bb4e32e066eb36e860409ef7",
+      "changed": true
+    },
+    {
+      "path": "studio-runner/src/guided/schemas.json",
+      "beforeRawSha256": "f12246e85ae65ca4c5fb52df80f188ebbe63ffbe5ec4fb65cc050e39e4439f46",
+      "afterRawSha256": "f12246e85ae65ca4c5fb52df80f188ebbe63ffbe5ec4fb65cc050e39e4439f46",
+      "changed": false
+    },
+    {
+      "path": "studio-runner/src/guided/types.ts",
+      "beforeRawSha256": "b53951630d28168939052c4a337063b23b88f3d248f12a0914d9a40bab5e7f35",
+      "afterRawSha256": "b53951630d28168939052c4a337063b23b88f3d248f12a0914d9a40bab5e7f35",
+      "changed": false
+    },
+    {
+      "path": "studio-runner/src/validator/observedSchemas.json",
+      "beforeRawSha256": "429effffee037eca896a52160fc8e5e2ae2b9b92878170aba83051e9ef91594e",
+      "afterRawSha256": "7a9eff7da7f9eed7fda5461fe73f8b22bcafbe3be6b6fb998fa10590cfcfa7ef",
+      "changed": true
+    },
+    {
+      "path": "studio-runner/src/executor/observedOperations.ts",
+      "beforeRawSha256": "137a7b6257505267f1c578cdd8e2fb80df06ecdb2ed8b3bbc7405880610cfc7d",
+      "afterRawSha256": "7a360f2d551f124bbb02332f729610be341f4e4c91f3c3081e5d91f803ce709c",
+      "changed": true
+    },
+    {
+      "path": "studio-runner/test/observedV3TupleValidation.test.ts",
+      "beforeRawSha256": "7cf0586b1acb789c77cac64865607f4962103618ea8bdaf3c0645eee18f400c9",
+      "afterRawSha256": "81e83669593b7c7c1e55887d015fb081e2e244e78b2abc90db79522171e70fcf",
+      "changed": true
+    }
+  ],
+  "semanticChoiceChanges": [
+    {
+      "pointer": "/artifact/replayPolicy/publicationEvidenceHash",
+      "before": "ea01238223165497e238734499e1eca8a68e341fee8f07b96032b4132cabb928",
+      "after": "15b4b4631712dc7dfe4c9e23866ad4275c1f8082c6a35b6a238e52c020177437"
+    },
+    {
+      "pointer": "/basis/preparations/3/observedChoice/attempt/responseSchemaVersion",
+      "before": 2,
+      "after": 3
+    },
+    {
+      "pointer": "/hashes/artifactHash",
+      "before": "1e434df93968dc668e584063ba6645cc60be3938a9746e8b5a2a0ec2f3604dd0",
+      "after": "3ff8f7fcc5d5acd53a2f4932497e4ce146c7a3c8eae4dc3afecd42e6297f64e8"
+    },
+    {
+      "pointer": "/hashes/publicationEvidenceHash",
+      "before": "ea01238223165497e238734499e1eca8a68e341fee8f07b96032b4132cabb928",
+      "after": "15b4b4631712dc7dfe4c9e23866ad4275c1f8082c6a35b6a238e52c020177437"
+    },
+    {
+      "pointer": "/hashes/referencePolicyHash",
+      "before": "220ba6231235a1e566cc08c24c3a9554a8343f5540cea5e28ba13450a2bc8f98",
+      "after": "f9d9ece3e28a8ec0479a217fa0d41d12c7f0ddbd83b9a3b8b4c3168c5007d9b1"
+    }
+  ],
+  "schemaChange": "Only QuestionAttemptEvidence.responseSchemaVersion const2\u21923; required/additionalProperties and allother members unchanged",
+  "oldAggregatePreimagesVerified": [
+    "publicationEvidenceHash",
+    "referencePolicyHash",
+    "artifactHash",
+    "learnedPlanHash",
+    "profileHash",
+    "runAuthorizationHash",
+    "operationEquivalenceHash",
+    "admissionProvenanceHash"
+  ],
+  "independentCanonicalMethod": "Independent Python sorted ASCII object keys, unchanged Unicode, compact canonical JSON UTF8 SHA256. No production derive/lower/validator execution. Exact old preimages verified before update.",
+  "preimages": {
+    "oldBasisHash": "f7e69457414799e4e2f10bcc11736bff4d2455caf91d0ba80e87a6454b040659",
+    "newBasisHash": "5bbc8132dfefd4f2b5c1301de8c796461ec3c388536ce47adc429c41d3d1139d",
+    "oldPublicationEvidencePreimage": {
+      "version": 1,
+      "basisHash": "f7e69457414799e4e2f10bcc11736bff4d2455caf91d0ba80e87a6454b040659",
+      "runAuthorizationHash": "18714bc2b1a152d048d8999d0da9f259cb3891f82346a91e8d0984b1fa856235",
+      "translationHash": "44a36d0e14a43117c3269ea834510344f1612384af0993a66661d2de70711801",
+      "bootstrapHash": "3d07e6c573dcb0de8a9085a24802ca0486c2d2e802d17ca66e214d10e1a21bd9",
+      "sourceManifestHash": "575bf6285bfe67a1a4ef6737ab07e5e5cec178f7d6449fdade7cc428f79ecccd"
+    },
+    "newPublicationEvidencePreimage": {
+      "version": 1,
+      "basisHash": "5bbc8132dfefd4f2b5c1301de8c796461ec3c388536ce47adc429c41d3d1139d",
+      "runAuthorizationHash": "18714bc2b1a152d048d8999d0da9f259cb3891f82346a91e8d0984b1fa856235",
+      "translationHash": "44a36d0e14a43117c3269ea834510344f1612384af0993a66661d2de70711801",
+      "bootstrapHash": "3d07e6c573dcb0de8a9085a24802ca0486c2d2e802d17ca66e214d10e1a21bd9",
+      "sourceManifestHash": "575bf6285bfe67a1a4ef6737ab07e5e5cec178f7d6449fdade7cc428f79ecccd"
+    }
+  },
+  "semanticHashes": {
+    "choiceBefore": "04bda0060b95bf93e4d4570013e0373c45190c35cb27144a93fe72bd850f6974",
+    "choiceAfter": "69389d1f7dff23342b8b8d3057a9d45583c82eaa30a7f44444a7a4ffdd5d57c4",
+    "before": {
+      "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+      "configurationHash": "dc52a6ec856c6e30b512d428302844a530a3dc1b3dcf83ffa27e2e42401e23ee",
+      "authoringHash": "e5e180ed2cfadcd2beaf593b3fe050e22349ae16658b24b7dd00596dee1ca4fe",
+      "learnedPlanHash": "81cdfff421e2193ec667a076402c41efb0e074379994dbbd47af5ce77f5efeb2",
+      "artifactHash": "1e434df93968dc668e584063ba6645cc60be3938a9746e8b5a2a0ec2f3604dd0",
+      "referencePolicyHash": "220ba6231235a1e566cc08c24c3a9554a8343f5540cea5e28ba13450a2bc8f98",
+      "operationEquivalenceHash": "fe898e1a3c643eb13f44a5e4a770b4da930f3542c3ad29fd73e5ea5c41748dea",
+      "admissionProvenanceHash": "d4041572e1570ec3cd83b48304c53b0937c260de9da3e692867a35a0661ee763",
+      "publicationEvidenceHash": "ea01238223165497e238734499e1eca8a68e341fee8f07b96032b4132cabb928",
+      "runAuthorizationHash": "18714bc2b1a152d048d8999d0da9f259cb3891f82346a91e8d0984b1fa856235",
+      "profileHash": "22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386"
+    },
+    "after": {
+      "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+      "configurationHash": "dc52a6ec856c6e30b512d428302844a530a3dc1b3dcf83ffa27e2e42401e23ee",
+      "authoringHash": "e5e180ed2cfadcd2beaf593b3fe050e22349ae16658b24b7dd00596dee1ca4fe",
+      "learnedPlanHash": "81cdfff421e2193ec667a076402c41efb0e074379994dbbd47af5ce77f5efeb2",
+      "artifactHash": "3ff8f7fcc5d5acd53a2f4932497e4ce146c7a3c8eae4dc3afecd42e6297f64e8",
+      "referencePolicyHash": "f9d9ece3e28a8ec0479a217fa0d41d12c7f0ddbd83b9a3b8b4c3168c5007d9b1",
+      "operationEquivalenceHash": "fe898e1a3c643eb13f44a5e4a770b4da930f3542c3ad29fd73e5ea5c41748dea",
+      "admissionProvenanceHash": "d4041572e1570ec3cd83b48304c53b0937c260de9da3e692867a35a0661ee763",
+      "publicationEvidenceHash": "15b4b4631712dc7dfe4c9e23866ad4275c1f8082c6a35b6a238e52c020177437",
+      "runAuthorizationHash": "18714bc2b1a152d048d8999d0da9f259cb3891f82346a91e8d0984b1fa856235",
+      "profileHash": "22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386"
+    }
+  },
+  "generated": [
+    {
+      "path": "studio-runner/src/guided/schemas.json",
+      "before": "f12246e85ae65ca4c5fb52df80f188ebbe63ffbe5ec4fb65cc050e39e4439f46",
+      "after": "f12246e85ae65ca4c5fb52df80f188ebbe63ffbe5ec4fb65cc050e39e4439f46",
+      "changed": false
+    },
+    {
+      "path": "studio-runner/src/guided/types.ts",
+      "before": "b53951630d28168939052c4a337063b23b88f3d248f12a0914d9a40bab5e7f35",
+      "after": "b53951630d28168939052c4a337063b23b88f3d248f12a0914d9a40bab5e7f35",
+      "changed": false
+    },
+    {
+      "path": "studio-runner/src/validator/observedSchemas.json",
+      "before": "429effffee037eca896a52160fc8e5e2ae2b9b92878170aba83051e9ef91594e",
+      "after": "7a9eff7da7f9eed7fda5461fe73f8b22bcafbe3be6b6fb998fa10590cfcfa7ef",
+      "changed": true
+    },
+    {
+      "path": "studio-runner/src/executor/observedOperations.ts",
+      "before": "137a7b6257505267f1c578cdd8e2fb80df06ecdb2ed8b3bbc7405880610cfc7d",
+      "after": "7a360f2d551f124bbb02332f729610be341f4e4c91f3c3081e5d91f803ce709c",
+      "changed": true
+    }
+  ],
+  "generator": {
+    "path": "tools/build-studio-observed-schemas.cjs",
+    "sourceWriteExit": 0,
+    "canonicalCheckExit": 0,
+    "manualGeneratedEdits": false,
+    "guidedBothByteIdentical": true,
+    "observedSchemasOnlySameLeafDelta": true,
+    "observedTypesOnlyLiteral2to3Delta": true
+  },
+  "sourceAnticipatedIdentities": {
+    "profile": {
+      "before": "22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386",
+      "after": "22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386"
+    },
+    "schemaBundle": {
+      "before": "5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2",
+      "after": "305470ca02abcd9130ea039acf66721f95c0349373e13cc9176a3f2548ab48ca"
+    },
+    "referenceBundle": {
+      "before": "762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2",
+      "after": "3ac8057b76aa69c9616692f740b95a3a3d6efd2d85d9dba9c8fa1a776f4cde0d"
+    }
+  },
+  "corpusExactlyMatchesObservedChoiceValue": true,
+  "preserved": [
+    "All no-choice publication examples exact JSON values outside observedChoice, operations, plans, answers, nodes, times, receipts",
+    "All source/configuration/authoring/learnedplan/equivalence/admission/runauthorization/profile hash values",
+    "All tuple constants and witnessversion1, response/body activev3 no2|3 union",
+    "All prior TupleValidation test bodies and cases preserved; new1positive+3negative cases appended",
+    "V1-V33/stagedV19/V34 migrations unedited; quotas/policy unchanged; no OpenAPI edits"
+  ],
+  "focusedRegressions": {
+    "path": "studio-runner/test/observedV3TupleValidation.test.ts",
+    "newPositive": "Full legitimate const3 attempt/witness + independently sealed golden artifact/hashes",
+    "newNegatives": [
+      "version2",
+      "missing-version",
+      "extra-member"
+    ],
+    "executed": false
+  },
+  "protectedRawHashes": {
+    "docs/specs/studio/openapi.yaml": "08f091eca8a25ffe6df38ce8100d081b8a22f8fe7cd700cd7db03e84df510d49",
+    "studio-runner/scripts/write-runtime-versions.mjs": "44043491492139560b6e5c7ac4f95a04a25ccd3e007d8ef0b04de692e2b23ad9",
+    "studio-runner/scripts/check-pins.mjs": "63a15ec6c29cc8c6f3da1b9d79718802f7de1e49bc71bee9bb57d7fd6cfbd04a",
+    "tools/build-studio-observed-schemas.cjs": "43ac9855187f88ca00cb07655cdb4147ac29eba54b2eb31eb4198710cf59e099"
+  },
+  "executionLimits": {
+    "npmBuildDist": false,
+    "testsRuntimeNative": false,
+    "backendClasspathGradle": false,
+    "pinWriterCatalogMutation": false,
+    "actualImageRebuild": false,
+    "statusStoryQaGoalsModels": false
+  },
+  "nextCoordinatorOnly": [
+    "Typecheck/build/focused tests and codegen exact parity on frozen source",
+    "processResources loadedclasspath sourcebyte parity with URLinventory",
+    "Actualdist schema/reference/runtime metadata and mountedcatalog schema/reference pins refreshed together",
+    "Keep profile22fd unchanged only after actualprofile bytes verified; schema305470/reference3ac805 are sourcecanonical identities, not built/image proof",
+    "Current all9 and remaining19/Core/Vault/wronggrant/defaultnegative/image/QA obligations remain open"
+  ],
+  "beforeCopies": ".aiox/sdc/STUDIO-OBS-007/c-choice-contract-before",
+  "sourceFreeze": true
+}

@@ -1,0 +1,20 @@
+{
+  "scope": "APPROVED_FOUR_FILE_SHARED_DATASOURCE_ADAPTER",
+  "beforeHelperEdits": true,
+  "sources": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "beforeSha256": "14ff3056d00c92fc054e6dc8738effe11bd3b8b0781ac3cf29ca14e646c52af5",
+      "archive": "docs/qa/evidence/STUDIO-OBS-007/resume-d-report-cas-owned-tests/GuidedPublicationMigrationTest.before.java"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+      "beforeSha256": "701657d46d0fbb4f4eb6e8a98149e7ef9f8b98a8c761eb9fec66f52747bf010e",
+      "archive": "docs/qa/evidence/STUDIO-OBS-007/resume-d-report-cas-owned-tests/GuidedSecretLoginMigrationTest.before.java"
+    }
+  ],
+  "api": "publishedRetry(JdbcTemplate, TransactionTemplate, String fixtureNamespace, ObjectNode canonicalObservedBasis, ObjectNode requiredProfile, ObjectNode requiredBuild)",
+  "construction": "Borrow existing Spring JDBC/transaction context, namespace session/commands, source/declaring steps from supplied basis, no container/migration/source close. Derive candidate once with production lowerer from basis before immutable publication; retain old owned-source overloads. Reports enter real service/CAS/audit; controlled PASS metadata is not native proof.",
+  "hook": "Existing ReportCommitHook precommit observation, with default no-op outside exact selected execution.",
+  "runtime": "UNRUN"
+}

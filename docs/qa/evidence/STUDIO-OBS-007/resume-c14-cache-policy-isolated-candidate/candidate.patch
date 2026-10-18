@@ -1,0 +1,12 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -533,6 +533,9 @@
+             }
+             byte[] bytes = html.getBytes(StandardCharsets.UTF_8);
+             exchange.getResponseHeaders().set("Content-Type", "text/html; charset=utf-8");
++            if (p14Recipe != P14Recipe.NONE) {
++              exchange.getResponseHeaders().set("Cache-Control", "no-store");
++            }
+             exchange.sendResponseHeaders(200, bytes.length);
+             exchange.getResponseBody().write(bytes);
+             exchange.close();

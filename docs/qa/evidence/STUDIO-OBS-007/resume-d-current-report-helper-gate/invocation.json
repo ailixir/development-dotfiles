@@ -1,0 +1,27 @@
+{
+  "command": [
+    "./gradlew",
+    "test",
+    "--rerun-tasks",
+    "--tests",
+    "com.citi.put.checks.studio.internal.ProgressCallbackIT",
+    "--tests",
+    "com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest"
+  ],
+  "classes": [
+    "com.citi.put.checks.studio.internal.ProgressCallbackIT",
+    "com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest",
+    "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest"
+  ],
+  "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "startedAt": "2026-10-11T09:10:42.445382+00:00",
+  "fixturePrerequisites": {
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+  },
+  "prerequisiteSelected": false
+}

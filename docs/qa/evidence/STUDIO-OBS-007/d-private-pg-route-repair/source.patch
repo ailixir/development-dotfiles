@@ -1,0 +1,573 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java.before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
+@@ -633,136 +633,137 @@
+       var routedAccess = new FixtureAccess(routedJdbc);
+       assertThat(routedJdbc.getDataSource()).isSameAs(routedSource);
+       var scenario = new Scenario(Mode.INTERRUPT_AFTER_HEADERS);
+-      BY_TEST.put(scenario.testId, scenario);
+-      var steps = C.object().putArray("steps");
+-      steps.addObject().put("stepId", "step-1").put("text", "Enter <secret PASS> as password.");
+-      var variables = C.object().putArray("variables");
+-      variables.addObject().put("name", "PASS").put("kind", "secretRef");
+-      scenario.source = steps;
+-      scenario.configuration = variables;
+-      actualJdbc.update(
+-          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,created_by) "
+-              + "VALUES (?,'fault fixture','CSI-123','fixture','chromium',?::jsonb,?::jsonb,?)",
+-          scenario.testId,
+-          steps.toString(),
+-          variables.toString(),
+-          EMAIL);
+       var sessions =
+           service(routedJdbc, routedRepository, routedMaterialization, routedAccess, 600);
+       var client = client();
+-      var dispatch = new GuidedDispatchService(sessions, materialization, client);
+-      dispatch.installReferences(
+-          new VaultStudioReferenceResolver(
+-              new CountedProvider(),
+-              (principal, csi, environment, secret) ->
+-                  principal.equals("user-1")
+-                      && csi.equals("CSI-123")
+-                      && environment.equals("fixture")
+-                      && secret.equals("PASS")));
+-      sessions.installStopSender(dispatch::stop);
+-      var observer =
+-          GuidedRunnerClient.class.getDeclaredMethod(
+-              "observeRequestBytes", java.util.function.Consumer.class);
+-      observer.setAccessible(true);
+-      observer.invoke(
+-          client,
+-          (java.util.function.Consumer<byte[]>)
+-              bytes -> {
+-                if (scenario.reads.get() == 1 && scenario.posts.get() == 0) {
+-                  scenario.request.set(bytes);
+-                }
+-              });
+-      String id =
+-          sessions
+-              .start(
+-                  user,
+-                  UUID.randomUUID().toString(),
++      var dispatch = new GuidedDispatchService(sessions, routedMaterialization, client);
++      var stopWork = new StopWork();
++      Thread caller = null;
++      Throwable primaryFailure = null;
++      try {
++        BY_TEST.put(scenario.testId, scenario);
++        var steps = C.object().putArray("steps");
++        steps.addObject().put("stepId", "step-1").put("text", "Enter <secret PASS> as password.");
++        var variables = C.object().putArray("variables");
++        variables.addObject().put("name", "PASS").put("kind", "secretRef");
++        scenario.source = steps;
++        scenario.configuration = variables;
++        actualJdbc.update(
++            "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,created_by) "
++                + "VALUES (?,'fault fixture','CSI-123','fixture','chromium',?::jsonb,?::jsonb,?)",
++            scenario.testId,
++            steps.toString(),
++            variables.toString(),
++            EMAIL);
++        dispatch.installReferences(
++            new VaultStudioReferenceResolver(
++                new CountedProvider(),
++                (principal, csi, environment, secret) ->
++                    principal.equals("user-1")
++                        && csi.equals("CSI-123")
++                        && environment.equals("fixture")
++                        && secret.equals("PASS")));
++        sessions.installStopSender((contextToStop, reason) -> stopWork.send(dispatch, contextToStop, reason));
++        var observer =
++            GuidedRunnerClient.class.getDeclaredMethod(
++                "observeRequestBytes", java.util.function.Consumer.class);
++        observer.setAccessible(true);
++        observer.invoke(
++            client,
++            (java.util.function.Consumer<byte[]>)
++                bytes -> {
++                  if (scenario.reads.get() == 1 && scenario.posts.get() == 0) {
++                    scenario.request.set(bytes);
++                  }
++                });
++        String id =
++            sessions
++                .start(
++                    user,
++                    UUID.randomUUID().toString(),
++                    C.object()
++                        .put("schemaVersion", 3)
++                        .put("testId", scenario.testId.toString())
++                        .put("sourceRevision", "source-1")
++                        .put("configurationRevision", "config-1")
++                        .put("environmentId", "fixture")
++                        .put("applicationId", "orders")
++                        .set("versions", DOCUMENTS.path("versions")))
++                .path("sessionId")
++                .asText();
++        scenario.sessionId = id;
++        BY_SESSION.put(id, scenario);
++        routedRepository.transaction(
++            () -> {
++              var session = routedRepository.lock(id).document();
++              var manifest =
+                   C.object()
+-                      .put("schemaVersion", 3)
+                       .put("testId", scenario.testId.toString())
+                       .put("sourceRevision", "source-1")
+                       .put("configurationRevision", "config-1")
+-                      .put("environmentId", "fixture")
+-                      .put("applicationId", "orders")
+-                      .set("versions", DOCUMENTS.path("versions")))
+-              .path("sessionId")
+-              .asText();
+-      scenario.sessionId = id;
+-      BY_SESSION.put(id, scenario);
+-      routedRepository.transaction(
+-          () -> {
+-            var session = routedRepository.lock(id).document();
+-            var manifest =
+-                C.object()
+-                    .put("testId", scenario.testId.toString())
+-                    .put("sourceRevision", "source-1")
+-                    .put("configurationRevision", "config-1")
+-                    .put("policy", "INPUT-POLICY-01-A");
+-            manifest.set("sourceSteps", steps);
+-            manifest
+-                .putArray("configurationReferences")
+-                .addObject()
+-                .put("referenceId", "ref-PASS")
+-                .put("referenceName", "PASS")
+-                .put("kind", "secretRef")
+-                .put("stepId", "step-1")
+-                .put("intendedSlot", "fill.value");
+-            new GuidedTranslationStore(routedJdbc, C).initialize(session, manifest);
+-            return null;
+-          });
+-      dispatch.assign(controller, id, "assign", "worker-1");
+-      var references = C.object().putArray("references");
+-      references.add(DOCUMENTS.path("secretReference"));
+-      sessions.materialize(controller, id, 1, "materialize", references);
+-      ObjectNode context = sessions.runnerContext(controller, id, 1);
+-      ObjectNode observation = DOCUMENTS.path("observation").path("observation").deepCopy();
+-      observation
+-          .put("sessionId", id)
+-          .put("scopeHash", context.path("scopeHash").asText())
+-          .put("observedAt", Instant.now().toString());
+-      observation.withObject("/coverage").put("passwordControls", 1);
+-      var envelope = identity(context);
+-      envelope.set("observation", observation);
+-      callback(id, "observations", envelope);
+-      ObjectNode evidence =
+-          C.object()
+-              .put("kind", "observedDocument")
+-              .put("sessionId", id)
+-              .put("contextId", context.path("contextId").asText())
+-              .put("documentId", "document-1")
+-              .put("generation", 1)
+-              .put("origin", ORIGIN)
+-              .put("observationHash", GuidedContracts.hash(observation));
+-      ObjectNode proposal = DOCUMENTS.path("secretAction").deepCopy();
+-      proposal
+-          .put("sessionId", id)
+-          .put("scopeHash", context.path("scopeHash").asText())
+-          .put("generation", 1)
+-          .put("evidenceHash", GuidedContracts.hash(evidence))
+-          .put("authoredInputsHash", context.path("authoredInputsHash").asText());
+-      proposal.set("executionEvidence", evidence);
+-      proposal.withObject("/target").put("documentId", "document-1").put("generation", 1);
+-      proposal
+-          .withObject("/operation/value")
+-          .put(
+-              "sourceInputId",
+-              context.path("authoredInputs").path("inputs").get(0).path("inputId").asText());
+-      JsonNode admission = dispatch.prepareAndAdmit(controller, id, 1, "admit", proposal);
+-      assertThat(admission.path("dispatchCount").asInt()).isZero();
+-      assertThat(scenario.reads.get()).isZero();
+-      assertThat(scenario.names.get()).isGreaterThan(0);
+-      assertThat(scenario.posts.get()).isZero();
+-      ObjectNode advance =
+-          C.object()
+-              .put("schemaVersion", 3)
+-              .put("sessionId", id)
+-              .put("ownerFence", 1)
+-              .put("admissionId", admission.path("admission").path("admissionId").asText())
+-              .put("operationHash", admission.path("operationHash").asText());
+-
+-      Thread caller = null;
+-      Throwable primaryFailure = null;
+-      try {
++                      .put("policy", "INPUT-POLICY-01-A");
++              manifest.set("sourceSteps", steps);
++              manifest
++                  .putArray("configurationReferences")
++                  .addObject()
++                  .put("referenceId", "ref-PASS")
++                  .put("referenceName", "PASS")
++                  .put("kind", "secretRef")
++                  .put("stepId", "step-1")
++                  .put("intendedSlot", "fill.value");
++              new GuidedTranslationStore(routedJdbc, C).initialize(session, manifest);
++              return null;
++            });
++        dispatch.assign(controller, id, "assign", "worker-1");
++        var references = C.object().putArray("references");
++        references.add(DOCUMENTS.path("secretReference"));
++        sessions.materialize(controller, id, 1, "materialize", references);
++        ObjectNode context = sessions.runnerContext(controller, id, 1);
++        ObjectNode observation = DOCUMENTS.path("observation").path("observation").deepCopy();
++        observation
++            .put("sessionId", id)
++            .put("scopeHash", context.path("scopeHash").asText())
++            .put("observedAt", Instant.now().toString());
++        observation.withObject("/coverage").put("passwordControls", 1);
++        var envelope = identity(context);
++        envelope.set("observation", observation);
++        callback(id, "observations", envelope);
++        ObjectNode evidence =
++            C.object()
++                .put("kind", "observedDocument")
++                .put("sessionId", id)
++                .put("contextId", context.path("contextId").asText())
++                .put("documentId", "document-1")
++                .put("generation", 1)
++                .put("origin", ORIGIN)
++                .put("observationHash", GuidedContracts.hash(observation));
++        ObjectNode proposal = DOCUMENTS.path("secretAction").deepCopy();
++        proposal
++            .put("sessionId", id)
++            .put("scopeHash", context.path("scopeHash").asText())
++            .put("generation", 1)
++            .put("evidenceHash", GuidedContracts.hash(evidence))
++            .put("authoredInputsHash", context.path("authoredInputsHash").asText());
++        proposal.set("executionEvidence", evidence);
++        proposal.withObject("/target").put("documentId", "document-1").put("generation", 1);
++        proposal
++            .withObject("/operation/value")
++            .put(
++                "sourceInputId",
++                context.path("authoredInputs").path("inputs").get(0).path("inputId").asText());
++        JsonNode admission = dispatch.prepareAndAdmit(controller, id, 1, "admit", proposal);
++        assertThat(admission.path("dispatchCount").asInt()).isZero();
++        assertThat(scenario.reads.get()).isZero();
++        assertThat(scenario.names.get()).isGreaterThan(0);
++        assertThat(scenario.posts.get()).isZero();
++        ObjectNode advance =
++            C.object()
++                .put("schemaVersion", 3)
++                .put("sessionId", id)
++                .put("ownerFence", 1)
++                .put("admissionId", admission.path("admission").path("admissionId").asText())
++                .put("operationHash", admission.path("operationHash").asText());
++
+         caller =
+             Thread.ofVirtual()
+                 .start(
+@@ -853,7 +854,7 @@
+                         && csi.equals("CSI-123")
+                         && environment.equals("fixture")
+                         && secret.equals("PASS")));
+-        restarted.installStopSender(recovered::stop);
++        restarted.installStopSender((contextToStop, reason) -> stopWork.send(recovered, contextToStop, reason));
+         for (String key : List.of("consume", "new-consume-key")) {
+           Instant now = Instant.now();
+           String lease =
+@@ -899,33 +900,110 @@
+         assertThat(scenario.reads.get()).isEqualTo(1);
+         assertThat(scenario.posts.get()).isEqualTo(1);
+         assertThat(action(id).path("dispatchCount").asInt()).isEqualTo(1);
++        awaitActualStop(route, scenario, stopWork);
+       } catch (Exception | Error failure) {
+         primaryFailure = failure;
+         throw failure;
+       } finally {
++        var cleanupFailures = new java.util.ArrayList<Throwable>();
++        boolean restored = false;
+         try {
+           route.reopen();
+-          if (caller != null) {
++          restored = true;
++        } catch (Exception | Error failure) {
++          cleanupFailures.add(failure);
++        }
++        boolean callerReaped = caller == null;
++        // Always attempt caller cleanup, even if same-port restoration failed.
++        if (caller != null) {
++          try {
+             caller.interrupt();
+             caller.join(5000);
+-            assertThat(caller.isAlive()).as("cleanup must reap actual probe caller").isFalse();
+-          }
+-        } catch (Exception | Error cleanupFailure) {
+-          if (primaryFailure != null) {
+-            primaryFailure.addSuppressed(cleanupFailure);
+-          } else {
+-            throw cleanupFailure;
+-          }
+-        } finally {
+-          if (scenario.request.get() != null) {
+-            Arrays.fill(scenario.request.get(), (byte) 0);
+-          }
+-          if (scenario.chars.get() != null) {
+-            Arrays.fill(scenario.chars.get(), '\0');
++            callerReaped = !caller.isAlive();
++            if (!callerReaped) {
++              cleanupFailures.add(new AssertionError("Actual probe caller was not reaped"));
++            }
++          } catch (Exception | Error failure) {
++            if (failure instanceof InterruptedException) { Thread.currentThread().interrupt(); }
++            cleanupFailures.add(failure);
+           }
+         }
+-      }
+-    }
++        if (scenario.sessionId != null) {
++          if (restored && callerReaped) {
++            try {
++              sessions.cancel(user, scenario.sessionId, "cleanup-user-cancel",
++                  C.object().put("schemaVersion", 3).put("reason", "userRequested"));
++            } catch (Exception | Error failure) {
++              cleanupFailures.add(failure);
++            }
++          }
++          try {
++            awaitActualStop(route, scenario, stopWork);
++          } catch (Exception | Error failure) {
++            cleanupFailures.add(failure);
++          }
++        }
++        // Preserve live ownership; never clear a buffer before its actual owner is reaped.
++        if (callerReaped) {
++          if (scenario.request.get() != null) { Arrays.fill(scenario.request.get(), (byte) 0); }
++          if (scenario.chars.get() != null) { Arrays.fill(scenario.chars.get(), '\0'); }
++        }
++        if (primaryFailure != null) {
++          for (Throwable failure : cleanupFailures) { primaryFailure.addSuppressed(failure); }
++        } else if (!cleanupFailures.isEmpty()) {
++          Throwable first = cleanupFailures.get(0);
++          for (int i = 1; i < cleanupFailures.size(); i++) { first.addSuppressed(cleanupFailures.get(i)); }
++          if (first instanceof Exception failure) { throw failure; }
++          if (first instanceof Error failure) { throw failure; }
++          throw new AssertionError(first);
++        }
++      }
++    }
++  }
++
++  private static final class StopWork {
++    final AtomicInteger initiated = new AtomicInteger(), finished = new AtomicInteger();
++    final AtomicReference<Throwable> failure = new AtomicReference<>();
++    void send(GuidedDispatchService sender, ObjectNode context, String reason) {
++      initiated.incrementAndGet();
++      try {
++        sender.stop(context, reason);
++      } catch (RuntimeException | Error problem) {
++        failure.compareAndSet(null, problem);
++        throw problem;
++      } finally {
++        finished.incrementAndGet();
++      }
++    }
++  }
++
++  private static void awaitActualStop(PrivatePgRoute route, Scenario scenario, StopWork work)
++      throws Exception {
++    long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(20);
++    while (System.nanoTime() < until) {
++      assertThat(work.failure.get()).as("actual fixture stop delivery must succeed").isNull();
++      var status = actualJdbc.queryForMap("SELECT document->>'state' AS state,"
++          + "progress->>'teardownStatus' AS teardown FROM studio_guided_sessions WHERE session_id=?",
++          scenario.sessionId);
++      int materializations = actualJdbc.queryForObject("SELECT count(*) FROM studio_guided_materializations "
++          + "WHERE session_id=?", Integer.class, scenario.sessionId);
++      int live = actualJdbc.queryForObject("SELECT count(*) FROM studio_guided_materializations "
++          + "WHERE session_id=? AND live", Integer.class, scenario.sessionId);
++      boolean senderFinished = work.initiated.get() == work.finished.get();
++      boolean confirmed = "CONFIRMED".equals(status.get("teardown"));
++      boolean noContext = materializations == 0 && status.get("teardown") == null;
++      if (live == 0 && senderFinished && route.idle() && (confirmed || noContext)
++          && java.util.Set.of("CANCELLED","UNKNOWN_OUTCOME","FAILED","EXPIRED")
++              .contains(status.get("state"))) {
++        if (materializations > 0) {
++          assertThat(work.initiated.get()).isGreaterThan(0);
++          assertThat(status.get("teardown")).isEqualTo("CONFIRMED");
++        }
++        return;
++      }
++      Thread.sleep(20);
++    }
++    throw new AssertionError("Actual stop/confirmation/materialization closure did not complete");
+   }
+ 
+   private static void assertConsumedReleaseWithoutTerminalUsage(String id) {
+@@ -967,13 +1045,20 @@
+     private final InetSocketAddress target;
+     private final ExecutorService bridges = Executors.newVirtualThreadPerTaskExecutor();
+     private final Set<java.net.Socket> sockets = ConcurrentHashMap.newKeySet();
++    private final AtomicInteger activeTransfers = new AtomicInteger();
++    private final java.util.Queue<IOException> closeFailures = new java.util.concurrent.ConcurrentLinkedQueue<>();
+     private volatile java.net.ServerSocket listener;
+     private int privatePort;
+     private boolean closed;
+ 
+     PrivatePgRoute(String host, int port) throws IOException {
+       target = new InetSocketAddress(host, port);
+-      reopen();
++      try {
++        reopen();
++      } catch (IOException | RuntimeException | Error failure) {
++        bridges.shutdownNow();
++        throw failure;
++      }
+     }
+ 
+     synchronized int port() {
+@@ -988,11 +1073,22 @@
+         return;
+       }
+       var server = new java.net.ServerSocket();
+-      server.setReuseAddress(true);
+-      server.bind(new InetSocketAddress("127.0.0.1", privatePort));
+-      privatePort = server.getLocalPort();
+-      listener = server;
+-      bridges.submit(() -> accept(server));
++      try {
++        server.setReuseAddress(true);
++        server.bind(new InetSocketAddress("127.0.0.1", privatePort));
++        privatePort = server.getLocalPort();
++        listener = server;
++        bridges.submit(() -> accept(server));
++      } catch (IOException | RuntimeException | Error failure) {
++        try {
++          server.close();
++        } catch (IOException cleanupFailure) {
++          failure.addSuppressed(cleanupFailure);
++        }
++        // Retain a failed-close listener so final cleanup can account for its ownership.
++        listener = server.isClosed() ? null : server;
++        throw failure;
++      }
+     }
+ 
+     private void accept(java.net.ServerSocket server) {
+@@ -1015,8 +1111,8 @@
+             return;
+           }
+           java.net.Socket app = application, pg = database;
+-          bridges.submit(() -> transfer(app, pg));
+-          bridges.submit(() -> transfer(pg, app));
++          beginTransfer(app, pg);
++          beginTransfer(pg, app);
+         } catch (IOException | java.util.concurrent.RejectedExecutionException failure) {
+           closeSocket(application);
+           closeSocket(database);
+@@ -1024,6 +1120,20 @@
+             return;
+           }
+         }
++      }
++    }
++
++    boolean idle() {
++      return activeTransfers.get() == 0 && sockets.isEmpty();
++    }
++
++    private void beginTransfer(java.net.Socket from, java.net.Socket to) {
++      activeTransfers.incrementAndGet();
++      try {
++        bridges.submit(() -> transfer(from, to));
++      } catch (java.util.concurrent.RejectedExecutionException failure) {
++        activeTransfers.decrementAndGet();
++        throw failure;
+       }
+     }
+ 
+@@ -1039,8 +1149,12 @@
+         // JDBC completion and the explicit private route cut close both opaque sides.
+       } finally {
+         Arrays.fill(bytes, (byte) 0);
+-        closeSocket(from);
+-        closeSocket(to);
++        try {
++          closeSocket(from);
++          closeSocket(to);
++        } finally {
++          activeTransfers.decrementAndGet();
++        }
+       }
+     }
+ 
+@@ -1048,33 +1162,62 @@
+       if (socket == null) {
+         return;
+       }
+-      sockets.remove(socket);
+       try {
+         socket.close();
+-      } catch (IOException ignored) {
+-        /* Already disconnected. */
++      } catch (IOException failure) {
++        closeFailures.add(failure);
++      } finally {
++        if (socket.isClosed()) { sockets.remove(socket); }
+       }
+     }
+ 
+     synchronized void unavailable() throws IOException {
+-      if (listener != null) {
+-        listener.close();
+-        listener = null;
+-      }
+-      for (var socket : sockets.toArray(java.net.Socket[]::new)) {
+-        closeSocket(socket);
+-      }
++      IOException listenerFailure = null;
++      java.net.ServerSocket previous = listener;
++      listener = null;
++      if (previous != null) {
++        try { previous.close(); }
++        catch (IOException failure) {
++          listenerFailure = failure;
++          if (!previous.isClosed()) { listener = previous; }
++        }
++      }
++      // Continue socket cleanup even if closing the listener failed.
++      for (var socket : sockets.toArray(java.net.Socket[]::new)) { closeSocket(socket); }
++      if (listenerFailure != null) { throw listenerFailure; }
+     }
+ 
+     @Override
+     public void close() throws Exception {
++      var failures = new java.util.ArrayList<Throwable>();
+       synchronized (this) {
+         closed = true;
+-        unavailable();
++        try { unavailable(); } catch (Exception | Error failure) { failures.add(failure); }
+       }
+       bridges.shutdownNow();
+-      assertThat(bridges.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+-      assertThat(sockets).isEmpty();
++      try {
++        if (!bridges.awaitTermination(5, TimeUnit.SECONDS)) {
++          failures.add(new AssertionError("Case-owned PG bridge tasks were not reaped"));
++        }
++      } catch (InterruptedException failure) {
++        Thread.currentThread().interrupt();
++        failures.add(failure);
++      }
++      IOException closeFailure;
++      while ((closeFailure = closeFailures.poll()) != null) { failures.add(closeFailure); }
++      if (!idle()) { failures.add(new AssertionError("Case-owned PG sockets still have live owners")); }
++      if (listener != null && !listener.isClosed()) {
++        failures.add(new AssertionError("Case-owned PG listener was not closed"));
++      }
++      if (!failures.isEmpty()) {
++        Throwable first = failures.get(0);
++        for (int i = 1; i < failures.size(); i++) {
++          if (failures.get(i) != first) { first.addSuppressed(failures.get(i)); }
++        }
++        if (first instanceof Exception failure) { throw failure; }
++        if (first instanceof Error failure) { throw failure; }
++        throw new AssertionError(first);
++      }
+     }
+   }
+ 

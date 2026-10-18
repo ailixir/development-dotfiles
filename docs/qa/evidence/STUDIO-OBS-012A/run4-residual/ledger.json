@@ -1,0 +1,147 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "agent": "dex-run4 (@dev)",
+  "date": "2026-10-13",
+  "input": "docs/qa/evidence/STUDIO-OBS-012A/final-gates/backend-check-run4.json (1911 tests, 3 failed, 25 skipped). The 3 run-4 JUnit XMLs were copied to session scratch before any Gradle call. They are not reproduced here.",
+  "changedFiles": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/LocalEmbeddedPostgresConfig.java",
+      "kind": "main (profile 'local' only)",
+      "sha256Before": "0f44c256867d4a6bdb11e47c97e1561bf31734bf7b54237a7feeaf0e46d9c17c",
+      "sha256After": "e62eeed1fc6ff692a50f5f726a3bc7e392567b828f736b788e8a89021753a926",
+      "creditImpact": "Voids run-4 credit for every test that starts a Spring context with profile 'local'. That is the only Zonky entry point in the backend. 86 test files declare the profile, and OptimisticSaveIT and GuidedPlanningIntegrationTest are among them. It also affects bootRun on the local profile. Tests that only use Testcontainers are not affected by this file."
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/config/LocalEmbeddedPostgresPortTest.java",
+      "kind": "new test (regression for the port-selection invariants)",
+      "sha256Before": null,
+      "sha256After": "0c34974e74cebdb7e8fba51f92075af8f6de72e4bb68e6204a1906b0899d2c93"
+    },
+    {
+      "path": ".claude/agent-memory/aiox-dev/project_host_port_and_chromium_flakes.md (+ one index line in .claude/agent-memory/aiox-dev/MEMORY.md)",
+      "kind": "agent memory, not code",
+      "sha256After": "7ee68a9336ae9c5a3cee62eabc1bdbe55e53bb38707e429cf60867b71bb9e0b5 (MEMORY.md af8691cbb652cc8da0dfd26126d13686fdffa5683bc5d0a8ff6cede3703ad224)"
+    }
+  ],
+  "untouched": "GuidedPublicationReplayIT.java (owned by R10 rev2), build.gradle.kts, all product deadlines, TTLs and windows, all assertions and test waits.",
+  "failures": [
+    {
+      "id": "OptimisticSaveIT#initializationError",
+      "classification": "(b) test-infra defect, fixed",
+      "rootCause": "Port collision, not slow startup. Zonky picks its port with java.net.ServerSocket(0), a dual-stack wildcard socket that is closed before the postmaster binds. This host allocates TCP ephemeral ports sequentially (net.inet.tcp.randomize_ports=0). On macOS that allocator returns ports another process holds on only one specific loopback address. It returned 49216, which a host desktop client (Horizon) has held on 127.0.0.1 only since 09:23. The postmaster bound [::1]:49216, logged 'could not bind IPv4 address \"127.0.0.1\": Address already in use' and reported ready 32 ms later. Zonky's readiness probe and every JDBC connection to 'localhost' resolve to 127.0.0.1, so they reached the other process: EOFException, then 'Gave up waiting for server to start after 10000ms'. Raising the 10 s wait would not have helped: the server was never reachable.",
+      "verified": [
+        "Run-4 XML (scratch copy): postmaster started on port 49216, the IPv6 bind succeeded, the IPv4 bind failed with 'Address already in use', 'database system is ready' arrived at +32 ms, and the readiness failure came at +10 s with PSQLException/EOFException.",
+        "Live host: lsof shows a host desktop client (Horizon) process listening on 127.0.0.1:49216, IPv4 only, started 09:23:29 on the same day.",
+        "Scratch probe matrix (C sockets): a dual-stack wildcard bind to port 0 landed on 30/30 ports held IPv4-only on 127.0.0.1, with or without SO_REUSEADDR.",
+        "Scratch natural reproduction with the unmodified Zonky builder call: with IPv4-only accept-and-close listeners on the next 300 ephemeral ports, start() failed after 10696 ms with 'Gave up waiting for server to start after 10000ms' (root cause: connection reset)."
+      ],
+      "fix": "LocalEmbeddedPostgresConfig now chooses the port itself and passes it with setPort. The port is random in 20000-32767, below the Linux (32768+) and macOS/IANA (49152+) ephemeral ranges. It is accepted only if it binds without SO_REUSEADDR on both loopback addresses that PostgreSQL's default listen_addresses=localhost uses: 127.0.0.1 always, and ::1 when the host has IPv6 loopback. Up to 200 attempts are made, then the method fails with an explicit IOException. Zonky's 10 s startup wait is unchanged.",
+      "fixVerified": [
+        "Scratch, fixed class compiled from the working tree, with the same 300 IPv4-only ephemeral holders: 3/3 starts succeeded on ports 30954, 20585 and 27125.",
+        "Scratch, adversarial run with 6384 IPv4-only holders and 3192 dual-stack wildcard holders inside 20000-32767: 5/5 starts landed only on the remaining free class (port mod 4 == 3), inet_server_port() matched, and current_user was postgres.",
+        "Gradle runs 1-3: OptimisticSaveIT 3/3 green each time, with Zonky on ports 29217, 22057 and 28162 (all in range)."
+      ],
+      "residual": "There is still a window between the probe closing and the postmaster binding (initdb takes about 0.5 s). No kernel port-0 allocation can take the port in that window, because it is outside the ephemeral range. Only another explicit chooser of the same port could, for example a concurrent JVM that draws the same random port in 20000-32767 within that window. This is inferred to be negligible and was not measured."
+    },
+    {
+      "id": "ObservedReadEntryProtocolIT#noopObserverCannotSupplyAnUncommittedOrMissingEntry",
+      "classification": "(b) test-infra defect, same class as failure 1. Mechanism verified; the specific holder in run 4 is inferred.",
+      "rootCause": "The Testcontainers container was published on *:64961. The JDBC connection to localhost:64961 was answered by a different PostgreSQL that has no role 'test'. Every Testcontainers postgres:15-alpine container runs initdb with POSTGRES_USER=test as the bootstrap superuser, so the server that answered was not a Testcontainers container. In BSD socket semantics a more specific local address wins. A postmaster bound to 127.0.0.1:P and ::1:P with SO_REUSEADDR (PostgreSQL's own setting) therefore shadows a Docker-published *:P for every loopback client. The Zonky postmaster from LocalEmbeddedPostgresConfig is the only non-Testcontainers PostgreSQL this backend starts.",
+      "verified": [
+        "Run-4 XML (scratch copy): 'Container is started (JDBC URL: jdbc:postgresql://localhost:64961/test)' at 15:28:58.90, then Flyway failed with 'FATAL: role \"test\" does not exist' (SQLSTATE 28000).",
+        "Live host: Docker Desktop publishes container ports as one IPv6 dual-stack '*:P' listener.",
+        "Scratch: while Docker held *:P, an AF_INET 127.0.0.1:P bind and an AF_INET6 ::1:P bind with SO_REUSEADDR both succeeded. Without SO_REUSEADDR, and for a Java wildcard bind, they were refused.",
+        "Scratch end-to-end reproduction: a JDBC connection as user test to localhost:P reached the container ('user=test'). After a Zonky postmaster was started on P, the same connection returned 'FATAL: role \"test\" does not exist'."
+      ],
+      "inferred": [
+        "The 64961 holder was a Zonky postmaster. No run-4 XML that survives records a Zonky on 64961. GuidedPublicationReplayIT's run-4 XML was overwritten by R10 reruns, and another checkout or killed JVM on the same host could also leave a postmaster behind (pg_ctl daemonizes it). I could not identify which process it was.",
+        "How it arrived on the same port is not proven. In scratch probes, Docker Desktop's own port allocation skipped ports held IPv4-only or on both loopback addresses (3/3 each), and a Java wildcard bind could not take a Docker-held port. The ordering that actually happened in run 4 is unknown."
+      ],
+      "fix": "The same change as failure 1. Zonky now holds only ports in 20000-32767, and Docker Desktop's host ports always come from the ephemeral range (49152-65535 on macOS, 32768+ on Linux). So in any ordering, a Zonky postmaster from this code can no longer share a port with a Testcontainers mapping, with Tomcat on server.port=0, or with a test HttpServer. The exclusive probe also refuses any port already held on either loopback address, or held by a wildcard listener.",
+      "fixVerified": [
+        "Gradle runs 1-3: ObservedReadEntryProtocolIT 11/11 green each time."
+      ],
+      "notCovered": "Postmasters started by other checkouts that still run the old code."
+    },
+    {
+      "id": "GuidedPlanningIntegrationTest#genuineDelayedOldCallbackRequiresAcknowledgedFinalMetadata [1] timing=before, loseResponse=false",
+      "classification": "(c) no defect in repository code: an intermittent third-party browser startup deadlock. This is not load-only. Nothing was fixed.",
+      "rootCause": "The guided runner received the context push. Its journal for the test was written at 15:35:54, and the session's browser scratch directory was created at 15:35:54. Chrome for Testing (Playwright chromium-1243) then deadlocked during startup. The browser process forked a child, and that child is blocked in the fork child handler (xpc_atfork_child -> OS_xpc_object dealloc -> Chrome code -> pthread mutex wait), most likely on a mutex that another thread held at fork time. The parent waits for it in wait4. Chromium never initialized its profile, so the bootstrap callback was never sent. The test's 10 s arrival wait failed at line 1384. The Java transport deadline (15 s, product, unchanged) then bounded pushContext, which accounts for the 30.86 s case duration.",
+      "verified": [
+        "Run-4 XML (scratch copy): the failure is at line 1384 (arrived.await false), with a case time of 30.86 s. The other three parameterizations took 2.6-3.3 s.",
+        "Leftover browser scratch directory from 15:35:54: it holds only the Preferences file that is pre-written before launch, 4 filesystem entries in total. The other 28 leftover guided scratch directories from the same day hold 201-203 entries, meaning Chromium did start in those.",
+        "Both browser processes from 15:35:54 are still alive about 55 minutes later and orphaned (PPID 1). The parent has 0.05 s of CPU time and its stack sample shows ChromeMain -> __wait4. The child has 0.00 s of CPU and its stack sample shows ChromeMain -> fork -> libSystem_atfork_child -> xpc_atfork_child -> -[OS_xpc_object dealloc] -> ChromeMain -> _pthread_mutex_firstfit_lock_wait -> __psynch_mutexwait.",
+        "Gradle runs 1-3: the class passed 40/40 each time, including all 4 parameterizations of this test."
+      ],
+      "whyNoTestInfraChange": "Chromium had written nothing by the time the worker was torn down (about 25 s later) and is still hung, so raising the test's 10 s wait could not have rescued the case. Bounding or retrying the browser launch would be a runner product timeout change, and that is out of bounds.",
+      "inferred": [
+        "The Lane C GuidedBridgeIntegrationTest flake (pushContext -> UNKNOWN_OUTCOME at the first step) may be the same deadlock. Its artifacts were not available, so this is unverified.",
+        "Host load (about 7) may make the fork race more likely. Not measured."
+      ],
+      "leftInPlace": "The two hung browser processes from 15:35:54 were left running as evidence; they use no CPU. To clean up, kill the two 'Google Chrome for Testing' processes whose --user-data-dir is the checks-guided-* profile created at 15:35:54."
+    }
+  ],
+  "runs": {
+    "command": "gradle-locked.sh test --rerun --console=plain -I <scratch copyxml init> --tests com.citi.put.checks.config.LocalEmbeddedPostgresPortTest --tests com.citi.put.checks.studio.OptimisticSaveIT --tests com.citi.put.checks.studio.guided.publication.ObservedReadEntryProtocolIT --tests com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+    "consecutive": [
+      {
+        "run": 1,
+        "window": "16:22:58-16:25:36",
+        "load1mStartEnd": [
+          5.84,
+          7.16
+        ],
+        "result": "BUILD SUCCESSFUL; 57 tests, 0 failures, 0 errors, 0 skipped",
+        "perClass": {
+          "LocalEmbeddedPostgresPortTest": "3/3",
+          "OptimisticSaveIT": "3/3 (zonky port 29217)",
+          "ObservedReadEntryProtocolIT": "11/11",
+          "GuidedPlanningIntegrationTest": "40/40 (100.4 s)"
+        }
+      },
+      {
+        "run": 2,
+        "window": "16:25:36-16:27:57",
+        "load1mStartEnd": [
+          7.16,
+          9.39
+        ],
+        "result": "BUILD SUCCESSFUL; 57 tests, 0 failures, 0 errors, 0 skipped",
+        "perClass": {
+          "LocalEmbeddedPostgresPortTest": "3/3",
+          "OptimisticSaveIT": "3/3 (zonky port 22057)",
+          "ObservedReadEntryProtocolIT": "11/11",
+          "GuidedPlanningIntegrationTest": "40/40 (98.1 s)"
+        }
+      },
+      {
+        "run": 3,
+        "window": "16:27:57-16:30:11",
+        "load1mStartEnd": [
+          9.39,
+          7.06
+        ],
+        "result": "BUILD SUCCESSFUL; 57 tests, 0 failures, 0 errors, 0 skipped",
+        "perClass": {
+          "LocalEmbeddedPostgresPortTest": "3/3",
+          "OptimisticSaveIT": "3/3 (zonky port 28162)",
+          "ObservedReadEntryProtocolIT": "11/11",
+          "GuidedPlanningIntegrationTest": "40/40 (92.9 s)"
+        }
+      }
+    ],
+    "loadSampling": "15 samples at 30 s intervals over the three runs; 1-minute load average ranged 5.84-9.84. In 14 samples the lock owner was dex-run4; in 1 sample there was no owner (between acquisitions). The counts above come from the copied JUnit XML.",
+    "note": "Each run was a separate lock acquisition. No other lane's owner appeared in any lock sample."
+  },
+  "gates": {
+    "command": "gradle-locked.sh spotlessJava --rerun spotlessCheck checkstyleMain --rerun checkstyleTest --rerun spotbugsMain --rerun --continue",
+    "window": "16:30:24-16:30:45, load 7.04",
+    "result": "BUILD SUCCESSFUL. spotlessJava, spotlessJavaCheck, spotlessCheck, checkstyleMain, checkstyleTest and spotbugsMain all executed (none up-to-date), whole tree.",
+    "preFormat": "spotlessApply -PspotlessIdeHook was run on each changed file and reported IS CLEAN for both."
+  },
+  "reproductions": "Scratch only, under the session scratchpad dex-run4/repro, and not part of the repo: AllocProbe/alloc_probe.py (allocator matrix), hold.py (Docker allocation versus held ports), ZonkyCollisionRepro.java (natural failure-1 reproduction and the 'role test does not exist' shadow reproduction), FixedRepro.java (the fixed class under the same and adversarial holders).",
+  "latentNotFixed": [
+    "GuidedPlanningIntegrationTest.Environment chooses RUNNER_PORT once per class with new ServerSocket(0) and closes it. That is the same ephemeral-allocation hazard: it can land on a port held IPv4-only on 127.0.0.1, and the readiness probe connects to 127.0.0.1 only. It did not cause this failure (the other 39 cases passed on the same port). Left unchanged because it is out of scope.",
+    "When teardown force-kills the guided node worker, its Chromium process tree is not reaped, which is how the hung pair survived."
+  ]
+}

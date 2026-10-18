@@ -1,0 +1,74 @@
+{
+  "firstFailure": [
+    {
+      "type": "org.opentest4j.AssertionFailedError",
+      "sourceFrames": [
+        "GuidedPublicationReplayIT.p8C6Run(GuidedPublicationReplayIT.java:7871)",
+        "GuidedPublicationReplayIT.lambda$p8C6Case$172(GuidedPublicationReplayIT.java:7764)",
+        "GuidedPublicationReplayIT.p3Case(GuidedPublicationReplayIT.java:6584)",
+        "GuidedPublicationReplayIT.p8C6Case(GuidedPublicationReplayIT.java:7764)",
+        "GuidedPublicationReplayIT.actualPublishedPublicCancelWhileNativePasswordWorldPending(GuidedPublicationReplayIT.java:4515)",
+        "GuidedPublicationReplayIT.p3CleanupOwnedResources(GuidedPublicationReplayIT.java:6843)",
+        "GuidedPublicationReplayIT.p3Case(GuidedPublicationReplayIT.java:6591)",
+        "GuidedPublicationReplayIT.p8AwaitC6Closed(GuidedPublicationReplayIT.java:8156)",
+        "GuidedPublicationReplayIT.p4AwaitRevocationObserverCompletion(GuidedPublicationReplayIT.java:7414)"
+      ]
+    }
+  ],
+  "ownedCurrentWindow": [
+    {
+      "executions": [
+        {
+          "actualDispatchClientInvoked": true,
+          "actualDispatchClient": {
+            "sendOutcome": {
+              "kind": "ACCEPTED",
+              "retryable": false,
+              "reason": "NONE"
+            }
+          },
+          "status": "ERROR",
+          "ledgerState": "DONE",
+          "errorCode": "CANCELLED",
+          "admission_present": true,
+          "observed_receipt_present": true,
+          "browser_started": true,
+          "last_runner_sequence": 8,
+          "elapsed_ms": 20947
+        }
+      ],
+      "producer": [
+        {
+          "producer": 2,
+          "sent": 15,
+          "acked": 15,
+          "pending": 0,
+          "originalPending": 0,
+          "failed": false,
+          "sealed": true,
+          "contextBound": false
+        },
+        {
+          "producer": 3,
+          "sent": 10,
+          "acked": 10,
+          "pending": 0,
+          "originalPending": 0,
+          "failed": false,
+          "sealed": true,
+          "contextBound": false
+        }
+      ],
+      "manifests": [
+        {
+          "outcome": "ERROR",
+          "errorCode": "CANCELLED",
+          "closedMessage": "UNCLASSIFIED",
+          "browserStartedAtObserved": true,
+          "evidenceState": "UNCLASSIFIED"
+        }
+      ]
+    }
+  ],
+  "sourceDrift": []
+}

@@ -1,0 +1,29 @@
+{
+  "scope": "Metadata consistency only, not application/design-oracle/test execution",
+  "checkedAtUtc": "2026-10-15T08:54:49.006891+00:00",
+  "originalThreeRowsPreserved": true,
+  "sourceAnchorLookupsPresent": true,
+  "sourceFilesCaptured": 57,
+  "snapshotNegativeRowsInventoried": 36,
+  "assertionFacetsInventoried": 20,
+  "sourceChangesSinceCapture": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "inspectedSha256": "b0dc9420b534352614d932859e4f9b5dab961224cec3e599783d078c52177229",
+      "currentSha256": "6bf5985e220e30f169e1d9bd58a8e3f738608fa85d872b6fb61a567a2d1e3061",
+      "interpretation": "Concurrent source movement; inspect applicable diff before implementing or validating this mapping."
+    },
+    {
+      "path": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "inspectedSha256": "be4dcb0e6f39c99e4ce4ec4691cc5b972b6c8469c1e8f7f0c229c416731437b8",
+      "currentSha256": "c140d89e3bcc397211b4283d8f9a9c83c60286b6ef0efb85c060461b25e92de4",
+      "interpretation": "Concurrent source movement; inspect applicable diff before implementing or validating this mapping."
+    }
+  ],
+  "testsBuildDbNativeOrBrowserExecuted": false,
+  "sourceReleaseGranted": false,
+  "storyGateVerdict": null,
+  "lifecycleTransition": null,
+  "later008Retained": true,
+  "all86And24And55AndFullGatesRetained": true
+}

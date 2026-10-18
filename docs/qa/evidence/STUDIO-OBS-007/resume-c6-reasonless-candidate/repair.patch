@@ -1,0 +1,11 @@
+--- before.java
++++ after.java
+@@ -8239,7 +8239,7 @@
+         const revInvalidate=RevOwnership.prototype.invalidate;
+         RevOwnership.prototype.invalidate=function(...args){const result=Reflect.apply(revInvalidate,this,args),mode=revMode();
+           if(mode?.active&&mode.path===1&&revOwners.get(args[0])===mode.case){
+-            if(args[0].stopped===true)revEmit(mode,5,1);else revFail();}return result;};
++            if(args[0].stopped===true){if(!mode.c6)revEmit(mode,5,1);}else revFail();}return result;};
+         const revStop=RevRuntime.prototype.stop;
+         RevRuntime.prototype.stop=function(...args){const mode=revRuntimes.get(this);
+           if(mode&&!mode.c6){const restored=revRestore();revEmit(mode,6,1,0,0,restored);}

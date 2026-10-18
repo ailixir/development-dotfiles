@@ -1,0 +1,179 @@
+{
+  "schemaVersion" : 1,
+  "sessionId" : "93b566c3-d435-4038-9fa2-286f8c53cd2f",
+  "testId" : "bbea7854-d975-4162-b337-0b9f8ac807b1",
+  "state" : "SUCCEEDED",
+  "errorCode" : "OTHER",
+  "counters" : {
+    "actions" : 5,
+    "observations" : 7,
+    "modelProposals" : 6,
+    "modelInputTokens" : 90482,
+    "modelOutputTokens" : 24576,
+    "sanitizedEvidenceBytes" : 20255
+  },
+  "coordinate" : {
+    "stepIndex" : 3,
+    "generation" : 7
+  },
+  "observationCounts" : {
+    "passwordControls" : 0,
+    "withheldRegions" : 0
+  },
+  "acquisition" : {
+    "allowanceMs" : 30000,
+    "totalExtraPolls" : 0
+  },
+  "activeAcquisition" : {
+    "extraPolls" : 0
+  },
+  "fixtureModelHttpCalls" : 6,
+  "fixturePhysicalProviderReads" : 0,
+  "fixtureProviderFailures" : 0,
+  "fixtureModelKinds" : {
+    "SOURCE_PLAN" : 1,
+    "NEXT_ACTION" : 5,
+    "VERIFY_STEP" : 0
+  },
+  "continuation" : "FINALIZING",
+  "translationCounters" : {
+    "planRevision" : 2
+  },
+  "declarations" : [ ],
+  "obligations" : [ {
+    "operationKind" : "navigate",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 0,
+    "referenceIndex" : 0
+  }, {
+    "operationKind" : "read",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 1
+  }, {
+    "operationKind" : "fill",
+    "stepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "click",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "assert",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 1
+  } ],
+  "actions" : [ {
+    "operationKind" : "fill",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "admissionId" : "54a652cd-0b57-4b9f-9784-084da94bddac",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 3
+  }, {
+    "operationKind" : "click",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "admissionId" : "17619af8-d11d-414b-9c9f-16033ff83fc5",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 5
+  }, {
+    "operationKind" : "assert",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "admissionId" : "2c135f40-be77-4125-8bf9-8e864ba8fc69",
+    "ordinal" : 1,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 6
+  }, {
+    "operationKind" : "navigate",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "admissionId" : "1ce63156-5762-4362-bcba-d3346979e3f8",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 0
+  }, {
+    "operationKind" : "read",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "admissionId" : "51b098f6-e558-4c7f-bd74-70db24d5c538",
+    "ordinal" : 1,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 1
+  } ],
+  "modelAttempts" : [ {
+    "kind" : "SOURCE_PLAN",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  } ],
+  "testMethod" : "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+  "executions" : [ {
+    "id" : "6c893a10-f5f8-4c8d-a94a-59c498f8f8f7",
+    "revision_id" : "a306e664-4adb-4219-9b5d-e0ce6fe32e08",
+    "attempt_id" : "199e73fa-4f7a-416d-a8ef-efaca96586fb",
+    "accepted_attempt_id" : "199e73fa-4f7a-416d-a8ef-efaca96586fb",
+    "status" : "ERROR",
+    "ledgerState" : "DONE",
+    "errorCode" : "DISPATCH_FAILED",
+    "ledger_present" : true,
+    "admission_present" : false,
+    "observed_receipt_present" : false,
+    "browser_started" : false,
+    "video_present" : false,
+    "manifest_present" : false,
+    "step_results_present" : true,
+    "snapshot_revision" : 1,
+    "last_runner_sequence" : 0,
+    "elapsed_ms" : 41
+  } ]
+}

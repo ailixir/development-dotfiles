@@ -1,0 +1,139 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+@@ -559,7 +559,72 @@
+ 
+   @AfterEach
+   void stop() throws Exception {
+-    fixture.closeWorker();
++    Throwable failure = null;
++    Environment.releaseClaimResponse.countDown();
++    Environment.releaseRefreshCallback.countDown();
++    try {
++      if (testId != null) {
++        for (String id :
++            jdbc.queryForList(
++                "SELECT session_id FROM studio_guided_sessions WHERE test_id=?",
++                String.class,
++                testId.toString())) {
++          try {
++            sessions.cancel(
++                fixture.user,
++                id,
++                "fixture-close-" + UUID.randomUUID(),
++                C.object().put("schemaVersion", 3).put("reason", "userRequested"));
++            Environment.await(
++                () ->
++                    repository.transaction(
++                        () -> {
++                          var owner = repository.lock(id);
++                          boolean terminal =
++                              java.util.Set.of(
++                                      "SUCCEEDED", "PUBLICATION_CONFLICT", "FAILED",
++                                      "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED")
++                                  .contains(owner.document().path("state").asText());
++                          List<Boolean> resources =
++                              jdbc.queryForList(
++                                  "SELECT live FROM studio_guided_materializations WHERE session_id=?"
++                                      + " UNION ALL SELECT live FROM studio_guided_assignments WHERE session_id=?",
++                                  Boolean.class,
++                                  id,
++                                  id);
++                          return terminal
++                              && resources.stream().allMatch(Boolean.FALSE::equals)
++                              && (owner.progress().path("teardownStatus").asText().equals("CONFIRMED")
++                                  || resources.isEmpty()
++                                      && !owner.progress().has("teardownStatus"));
++                        }),
++                10000);
++          } catch (Throwable cleanup) {
++            if (failure == null) {
++              failure = cleanup;
++            } else {
++              failure.addSuppressed(cleanup);
++            }
++          }
++        }
++      }
++    } catch (Throwable cleanup) {
++      if (failure == null) {
++        failure = cleanup;
++      } else {
++        failure.addSuppressed(cleanup);
++      }
++    }
++    try {
++      fixture.closeWorker();
++    } catch (Throwable cleanup) {
++      if (failure == null) {
++        failure = cleanup;
++      } else {
++        failure.addSuppressed(cleanup);
++      }
++    }
++    Environment.rethrowCleanupFailure(failure);
+   }
+ 
+   @AfterAll
+@@ -2689,11 +2754,7 @@
+               .getName()
+               .equals("freshObservationConnectsTwoAuthoredStepsWithoutReplayingProducer");
+       genericRead = genericRead || multiStep;
+-      jdbc.execute(
+-          "TRUNCATE studio_guided_consumer_edges,studio_guided_producers,studio_guided"
+-              + "_allocations,studio_guided_preparations,studio_guided_materializations,stud"
+-              + "io_guided_evidence,studio_guided_commands,studio_guided_actions,studio_guid"
+-              + "ed_sessions CASCADE");
++      // Fresh test/session namespaces retain immutable prior audit and owner history.
+       HOLD_NEXT_REFRESH.set(false);
+       refreshCallbackHeld = new CountDownLatch(1);
+       releaseRefreshCallback = new CountDownLatch(1);
+@@ -2799,14 +2860,42 @@
+     void closeWorker() throws Exception {
+       releaseClaimResponse.countDown();
+       releaseRefreshCallback.countDown();
+-      if (worker != null) {
+-        worker.destroy();
+-        if (!worker.waitFor(5, TimeUnit.SECONDS)) {
+-          worker.destroyForcibly();
++      Throwable failure = null;
++      try {
++        if (worker != null) {
++          worker.destroy();
++          if (!worker.waitFor(5, TimeUnit.SECONDS)) {
++            worker.destroyForcibly();
++          }
+         }
+-      }
+-      assertThat(Files.readString(workerLog))
+-          .doesNotContain(CAPTURE, PASSWORD_ECHO, ORDINARY_ECHO.strip());
++      } catch (Throwable cleanup) {
++        failure = cleanup;
++      }
++      try {
++        if (workerLog != null) {
++          assertThat(Files.readString(workerLog))
++              .doesNotContain(CAPTURE, PASSWORD_ECHO, ORDINARY_ECHO.strip());
++        }
++      } catch (Throwable privacy) {
++        if (failure == null) {
++          failure = privacy;
++        } else {
++          failure.addSuppressed(privacy);
++        }
++      }
++      rethrowCleanupFailure(failure);
++    }
++
++    private static void rethrowCleanupFailure(Throwable failure) throws Exception {
++      if (failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (failure instanceof Error error) {
++        throw error;
++      }
++      if (failure != null) {
++        throw new IllegalStateException("Fixture cleanup failed", failure);
++      }
+     }
+ 
+     static ObjectNode versions() {

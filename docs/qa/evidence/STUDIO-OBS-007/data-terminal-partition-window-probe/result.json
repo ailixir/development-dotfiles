@@ -1,0 +1,34 @@
+{
+  "finding": "TERM-PEER-02",
+  "status": "ACTUAL_DISPOSABLE_PRODUCTION_COUNTEREXAMPLE_REPRODUCED",
+  "at": "2026-10-10T11:38:17.673363+00:00",
+  "java21CompileExitCode": 0,
+  "runExitCode": 0,
+  "actualProductionMethod": "PartitionManager.ensurePartition(new future month)",
+  "execution": "No surrounding caller/test transaction; overridden JdbcTemplate.execute delegates actual SQL first, pauses only after real call returned",
+  "twoActors": "Manager JDBC actor A; ordinary runtimewriter INSERT actor B through actual parent in its physical transaction",
+  "facts": {
+    "visibleAttachedLeaf": 1,
+    "visibleTerminalConstraint": 0,
+    "visibleDirectTruncateGuard": 0,
+    "ordinaryReceiptOnlyCommit": 1,
+    "inconsistentReceiptQueuedPendingZeroSummary": 1,
+    "constraintInstalledAfterManagerResume": 1,
+    "ownFixtureClosed": true
+  },
+  "sourceDrift": [],
+  "compiledClasses": {
+    "backend/build/classes/java/main/com/citi/put/checks/scheduling/partitioning/PartitionManager.class": "9ef6706ebd50ca7335b9190008d6239ff76a372c0c80ff95a27819df89689ce6",
+    "backend/build/classes/java/test/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.class": "74f7a2e5bb603e4f62734fe756dff17ffaf403de133ac56ebe62c29cc718522e",
+    "backend/build/classes/java/test/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest$RetryFixture.class": "a6d5c18e0ca074154921b4af9373779023c752e1685f44ebb72e4a74fbcf6d28",
+    "backend/build/classes/java/test/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest$Database.class": "2f7b10401c30975814c27ec953a0865a94236aa9e309156559f354d4357ec4fe",
+    "backend/build/classes/java/test/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.class": "1c5a9ce378a79ceb2407dcbad2969340c3a850067a4ed57f3a9d1465c779f59d",
+    "backend/build/classes/java/test/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest$Database.class": "347f961f9b69ae83ed3dab689c976dfef93b16270103c3258564640b1c72e146"
+  },
+  "limits": [
+    "No Vault/browser/read/send counters",
+    "Reviewer source failure distinct from this actual runtime reproduction",
+    "No backend/source/DDL alteration except own disposable fixture normal creation/roles",
+    "Initial Java11 compiler and wrong working directory failures retained as tooling-only evidence"
+  ]
+}

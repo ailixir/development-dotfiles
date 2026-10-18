@@ -1,0 +1,245 @@
+{
+  "lane": "runner lint-cleanup01",
+  "story": "STUDIO-OBS-015",
+  "head": "734ad704f6ae508dbb10d9b5127a315bb0df5f81",
+  "files": [
+    {
+      "path": "studio-runner/test/helpers/publicationFixture.ts",
+      "sha256Before": "f9bf4c3afe0424275aecf1c256cb2528b99603e8655a68a89b4018f1d53e9773",
+      "sha256After": "bb7d99147e815d9d51ca439917c64262c1a43ba40c2a3206e18cc343852da205",
+      "changed": true,
+      "note": "export PublicationDocument (type only)"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+      "sha256Before": "f5b613f5486b43a70c043b01a801f4ec8590bd8db2cd3ace8bf5510ca8fed685",
+      "sha256After": "f899183fbc7f886d5a78070cd3ce46788de086ebbb6c6b3c508745a87f45e533",
+      "changed": true,
+      "note": "no-floating-promises: void h.runtime.update(h.context) (update() became async in uncommitted src)"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "sha256Before": "941a658043fcc687d30311b8fff34d4ffd1bc02ca2b517cac21dc8fde6d855f7",
+      "sha256After": "8bded3691336bca1f394663cec93036151d3fd4a51768eae39d6d62a26c60307",
+      "changed": true,
+      "note": "typed view of 22.7 MB publication-fixtures.json import; redundant casts/unused type imports removed"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-recording.test.ts",
+      "sha256Before": "3522915df575e7a0e98e71e74728545bdcb96fcf9b48b3178762c2ab5cc23574",
+      "sha256After": "a3fdac9a5f0bd01b66b676f51ecffbdfdc4498e760c2a8ac5bdaf0af3dbb9b5b",
+      "changed": true,
+      "note": "typed view of 22.7 MB publication-fixtures.json import; redundant casts/unused type imports removed"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "sha256Before": "8674f9b60525175101aae81c8c4f66d74e360b19778890f2ba7de23ff2c5287d",
+      "sha256After": "0140a36d0da940d55ff321b1346c5b00311d6ebb7044cd2b6226ca324ed5ad0a",
+      "changed": true,
+      "note": "typed view of 22.7 MB publication-fixtures.json import; redundant casts/unused type imports removed"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-secret-control.test.ts",
+      "sha256Before": "ad2c3cb8523188abe584aba76bc713a32883f2e143fff20510bf3142967a72f4",
+      "sha256After": "c2da1736a8a136c308682ea2b2c7f643e057c070972fe5e26cf42cdc516173d6",
+      "changed": true,
+      "note": "typed view of 22.7 MB publication-fixtures.json import; redundant casts/unused type imports removed"
+    },
+    {
+      "path": "studio-runner/test/observedV3TupleValidation.test.ts",
+      "sha256Before": "7580018a433c53de277e67e11cc59053421004a0315f68cf4547bce9a3e8e042",
+      "sha256After": "5be2eb9060fa9844b6ce447e9f57f905a7a90024440215f54c62052b98f1eeaa",
+      "changed": true,
+      "note": "typed view of 22.7 MB publication-fixtures.json import; redundant casts/unused type imports removed"
+    },
+    {
+      "path": "studio-runner/test/run/childRuntimeTeardown.test.ts",
+      "sha256Before": "bcb4773e0b8dc69f326d18553d4b8104ffbda8d493559d5658c969f748449823",
+      "sha256After": "5d7aee97c6895450796d2392c21d5134a8c285e81205b872179415ecea4b6307",
+      "changed": true,
+      "note": "typed view of 22.7 MB publication-fixtures.json import; redundant casts/unused type imports removed"
+    },
+    {
+      "path": "studio-runner/test/run/launcher.test.ts",
+      "sha256Before": "77a9176d6203328fec2b1745e056600b35b42a15c0df1956d30bb9072edd1ab5",
+      "sha256After": "4695ff1a7bd74f48a05103533a2546106f5ba534a9be82f5c6b0601696ded119",
+      "changed": true,
+      "note": "typed view of 22.7 MB publication-fixtures.json import; redundant casts/unused type imports removed"
+    },
+    {
+      "path": "studio-runner/test/run/observedReplayProtocol.test.ts",
+      "sha256Before": "a258d8b41882d0b6c66abdbf983c8479d66bda7dc9985cadfc35c68059a133c9",
+      "sha256After": "6f8e1cd75babd867a8cb98bd7a9a6bfbe67507fda5257ed408b53869fda843d9",
+      "changed": true,
+      "note": "typed view of 22.7 MB publication-fixtures.json import; redundant casts/unused type imports removed"
+    },
+    {
+      "path": "studio-runner/test/runtime-versions.test.ts",
+      "sha256Before": "f41fd53beb03e78a0d10356fb3bf24326bb3e789f4c950842977a3b4bff30f22",
+      "sha256After": "4db5d57baad742eb11b832ad40a029458afffa78b8ff83bce0b6ee60cbea065a",
+      "changed": true,
+      "note": "typed view of 22.7 MB publication-fixtures.json import; redundant casts/unused type imports removed"
+    },
+    {
+      "path": "studio-runner/src/executor/observedOperations.ts",
+      "sha256Before": "f0e069494676314ab9898f7399b3ecd895d1740aeab963ab7d4d9eec9ba76856",
+      "sha256After": "f0e069494676314ab9898f7399b3ecd895d1740aeab963ab7d4d9eec9ba76856",
+      "changed": false,
+      "note": "NOT changed: generated (tools/build-studio-observed-schemas.cjs, byte-checked by test/generated-contracts.test.ts); 8 no-empty-object-type errors remain"
+    },
+    {
+      "path": "studio-runner/src/guided/types.ts",
+      "sha256Before": "f72139502ca8c040ffed5546364c76af0a2473b547bac8c0f3c78020332ec3fa",
+      "sha256After": "f72139502ca8c040ffed5546364c76af0a2473b547bac8c0f3c78020332ec3fa",
+      "changed": false,
+      "note": "NOT changed: generated (tools/build-studio-observed-schemas.cjs, byte-checked by test/generated-contracts.test.ts); 8 no-empty-object-type errors remain"
+    }
+  ],
+  "lint": {
+    "before": {
+      "exit": 1,
+      "errors": 112,
+      "files": 12
+    },
+    "after": {
+      "exit": 1,
+      "errors": 8,
+      "files": 2
+    },
+    "head734ad704f": {
+      "exit": 0,
+      "errors": 0,
+      "note": "git archive HEAD studio-runner+docs/specs, dist built, current node_modules"
+    }
+  },
+  "typeCheck": {
+    "exit": 0
+  },
+  "unit": {
+    "exit": 0,
+    "passed": 2223,
+    "failed": 0,
+    "skipped": 29,
+    "files": "104 passed | 1 skipped"
+  },
+  "build": {
+    "exit": 0
+  },
+  "checkPins": {
+    "exit": 0
+  },
+  "capture": {
+    "before": {
+      "sourceDigest": "3416fea3ce1aa040511f139f9c420d50b1d9806df51a85705cf5a7440ee358bd",
+      "distDigest": "2f688e62d3c1e9cd2cec105186c209d24cbaa50eb29fbb2d0ac5bccd112fcef0",
+      "files": 1641
+    },
+    "after": {
+      "sourceDigest": "1b966a2057b14c63546195bee9846889757d60a4e7e9d94b5149cdf2b2e2d22f",
+      "distDigest": "2f688e62d3c1e9cd2cec105186c209d24cbaa50eb29fbb2d0ac5bccd112fcef0",
+      "files": 1641
+    },
+    "distBytesChanged": false
+  },
+  "round2": {
+    "authorizedBy": "coordinator (tools/ edit clearance)",
+    "files": [
+      {
+        "path": "tools/build-studio-observed-schemas.cjs",
+        "sha256Before": "9b72380011ff4784750f663369b737c37e2610bc1d00b3dd5a403a0574f5a710",
+        "sha256After": "6557931cf566b5346c4b3eb88ed27a5fef279749934c853288202ebf615ca68f",
+        "changed": true,
+        "note": "property-less object -> Readonly<Record<string, never|<additionalProperties type>|unknown>>; interface only when body is an object literal"
+      },
+      {
+        "path": "studio-runner/src/executor/observedOperations.ts",
+        "sha256Before": "f0e069494676314ab9898f7399b3ecd895d1740aeab963ab7d4d9eec9ba76856",
+        "sha256After": "f4314697bc8bdfff78da77c76a1c49c72c7de85061c88d80df82c38d9da9f0c1",
+        "changed": true,
+        "note": "regenerated: SnapshotMap/ReuseMap type aliases, StepInput.context and LearnedContent items Record<string, unknown>; ReusedFrom emission order moved"
+      },
+      {
+        "path": "studio-runner/src/guided/types.ts",
+        "sha256Before": "f72139502ca8c040ffed5546364c76af0a2473b547bac8c0f3c78020332ec3fa",
+        "sha256After": "36bf59b7a0ff9b941380a178880caeec73dab63560a2116ca7a079fd4718e155",
+        "changed": true,
+        "note": "regenerated: SnapshotMap/ReuseMap type aliases; ReusedFrom emission order moved"
+      },
+      {
+        "path": "studio-runner/src/guided/schemas.json",
+        "sha256Before": "8d21a51550084780d3a4da7a1a482beb717886de57bae4de72a5274db18cdd95",
+        "sha256After": "8d21a51550084780d3a4da7a1a482beb717886de57bae4de72a5274db18cdd95",
+        "changed": false,
+        "note": "regenerated, byte-identical"
+      },
+      {
+        "path": "studio-runner/src/validator/observedSchemas.json",
+        "sha256Before": "357f6c428f6b85c4bcc3894d6b4c564b291e9642cded402d2c1d0811750e9d29",
+        "sha256After": "357f6c428f6b85c4bcc3894d6b4c564b291e9642cded402d2c1d0811750e9d29",
+        "changed": false,
+        "note": "regenerated, byte-identical"
+      },
+      {
+        "path": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+        "sha256Before": "f899183fbc7f886d5a78070cd3ce46788de086ebbb6c6b3c508745a87f45e533",
+        "sha256After": "bdd6b60ae66a687b19f2e10af760d0cfd2b84d8ee359ff1d301be6d494012def",
+        "changed": true,
+        "note": "void -> await h.runtime.update(h.context) (round-1 after = round-2 before)"
+      }
+    ],
+    "lint": {
+      "exit": 0,
+      "errors": 0
+    },
+    "typeCheck": {
+      "exit": 0
+    },
+    "unit": {
+      "exit": 0,
+      "passed": 2223,
+      "failed": 0,
+      "skipped": 29
+    },
+    "build": {
+      "exit": 0
+    },
+    "checkPins": {
+      "exit": 0
+    },
+    "contractsCheck": {
+      "command": "node tools/check-studio-observed-contracts.cjs",
+      "exit": 0
+    },
+    "generatorCheck": {
+      "command": "node tools/build-studio-observed-schemas.cjs --check",
+      "exit": 0
+    },
+    "fixturesTier": {
+      "files": [
+        "guided-dataflow",
+        "browser-profile-safety",
+        "guided-recording",
+        "observed-bootstrap-refusal",
+        "observed-secret-control"
+      ],
+      "passed": 31,
+      "failed": 0
+    },
+    "capture": {
+      "before": {
+        "sourceDigest": "1b966a2057b14c63546195bee9846889757d60a4e7e9d94b5149cdf2b2e2d22f",
+        "distDigest": "2f688e62d3c1e9cd2cec105186c209d24cbaa50eb29fbb2d0ac5bccd112fcef0"
+      },
+      "after": {
+        "sourceDigest": "31e23872ad20bdf69a9ae1ab2c4bbc07be89950a0363026aff3f1c2972a477da",
+        "distDigest": "060d9a53239cf1bd8f3f98fc74e6f9440899c834423d0bb7f8e466ea19cea457",
+        "files": 1641
+      },
+      "distFilesChanged": [
+        "executor/observedOperations.d.ts",
+        "guided/types.d.ts"
+      ],
+      "distJsChanged": false
+    }
+  }
+}

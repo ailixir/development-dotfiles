@@ -1,0 +1,86 @@
+{
+ "lane": "r2",
+ "agent": "Dex (@dev, runner)",
+ "date": "2026-10-18",
+ "files": [
+  {
+   "path": "studio-runner/src/run/browser.ts",
+   "sha256Before": "c9d74add7549cfbc6c065e663d75d5c844340503413203ddf0d28af785d4b171",
+   "sha256After": "f1adfd338106e3c40de5ac9b60336487c6473781d52aefedb641913329b4b840"
+  },
+  {
+   "path": "studio-runner/src/run/guidedBrowser.ts",
+   "sha256Before": "f5019a6235961dace45714c950e4bb2d5851e61efe6839b1ae3fbbb8c6e6d844",
+   "sha256After": "db618097131b61120bae7acdcbb33962adee835b152b0c17350b3d25f86fa432"
+  },
+  {
+   "path": "studio-runner/src/guided/runtime.ts",
+   "sha256Before": "a95ae57ac285e98118c182bdac3092bfc9fc1be003c9072e8f8488811a754776",
+   "sha256After": "eb0e4bd7ab2fc558c2b351740f21ef41a936c76f09b09bfa24506631c618dcfe"
+  },
+  {
+   "path": "studio-runner/vitest.config.ts",
+   "sha256Before": "c833caed66dc39aed1677db7cab921e97a5eb5b36291429c5f5e90f1a28c08f8",
+   "sha256After": "cb110d944a17da279eefbce363b75cb50c09f753b6705dfd67d40948e1ff3051"
+  },
+  {
+   "path": "studio-runner/test/guided/runtime.test.ts",
+   "sha256Before": "002a7af44e7b77d18a7a0e5425f2fc2118eb5ee78a9b011351fab62b6b0af073",
+   "sha256After": "47fec2b4e9277571f3993d5f53ef13f8f454e26887d34378f8559be0e92b8786"
+  },
+  {
+   "path": "studio-runner/test/guided/ownership.test.ts",
+   "sha256Before": "65f171bd1c51b83436fedd26223d54017e802f3c4a3dad1f1071dd3b95a53b51",
+   "sha256After": "63cdcf42e7da63cb5b94327cfb343152b0a5e0b17ad880f9250572d86707eaa6"
+  },
+  {
+   "path": "studio-runner/test/guided/browser.test.ts",
+   "sha256Before": "2e516344ced18a49855a70b8c7e71dee09386984f5a08c8a4f112884cf83d3c7",
+   "sha256After": "73d359901693ab2fd355932d9344d48c7dfd0b800e5e8f54e23c2cdc73ba86ea"
+  },
+  {
+   "path": "studio-runner/test/run/guidedBrowserReap.test.ts",
+   "sha256Before": null,
+   "sha256After": "8b1f8628ca378919625ed58e35e883c8f54a4d5ed924f457b65c87cc5ffa3d90"
+  },
+  {
+   "path": "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts",
+   "sha256Before": null,
+   "sha256After": "3f376556a1f82d6dd3eb9c466f3890eed606f8909420365835b4f4df48902ce4"
+  },
+  {
+   "path": "studio-runner/test/fixtures-tier/helpers/guidedLaunch.ts",
+   "sha256Before": null,
+   "sha256After": "87caa8168b01ca9781778d1079e372ad0dc1da364e540a6008c1ea1985c6b86d"
+  },
+  {
+   "path": "studio-runner/test/fixtures-tier/guidedCloseProbe.test.ts",
+   "sha256Before": "281510cd319ff20bbf25c0c616bf62e80742ec653853245cbd8a98679a69c32a",
+   "sha256After": null
+  }
+ ],
+ "receiptMarkdown": "r2/receipt.md",
+ "result": "GREEN (lane verify); 2 existing fixtures tests red by ruling consequence (F-R2-1)",
+ "tests": {
+  "unit": "126/126 (4 files)",
+  "fixtures": "5/5 guidedCloseBound",
+  "redFirst": "20/120 unit red; F1-F3 red"
+ },
+ "mutations": [
+  "M1",
+  "M2",
+  "M3",
+  "M4",
+  "M5"
+ ],
+ "batons": [
+  "B-R2-1 make terminate/orderlyClosed required after doubles gain them",
+  "B-R2-2 guidedLaunch helper tracks createGuidedServer options",
+  "B-R2-3 O-AE may take runtime.ts"
+ ],
+ "findings": [
+  "F-R2-1 browser-profile-safety.test.ts two tests conflict with D5-1 item 2 (QA fixture requires a real context.close)"
+ ],
+ "kl015D5": "OPEN until F-merge dist rebuild recorded",
+ "healthyCloseMaxMs": 152
+}

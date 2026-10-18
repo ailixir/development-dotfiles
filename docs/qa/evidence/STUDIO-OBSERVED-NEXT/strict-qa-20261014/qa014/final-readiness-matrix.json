@@ -1,0 +1,1106 @@
+{
+  "schema": 1,
+  "story": "STUDIO-OBS-014",
+  "reviewer": "Quinn independent strict QA014",
+  "updated": "2026-10-15T00:42:04.701999+00:00",
+  "decision": "NOT_READY_FOR_FINAL_GATE;LOCAL_PROOF_GAPS_AND_FINAL_GATES_PENDING",
+  "doneAllowed": false,
+  "scope": "Archivedreadinessauditonly;movingformattedsource not treatedasfinal. No tests/build/source/lifecycle/CLI changes.015unstarted;declared500USDactualspendunavailable.",
+  "collectorReceipt": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks-receipt.json",
+    "sha256": "57d39caf30a86d874dc060014aaf0d88485e45507b3fee2a64dcb4cf25191864",
+    "matchesExpected": true
+  },
+  "originalAttempt": {
+    "aggregateExit": 1,
+    "failures": [
+      {
+        "task": ":checkstyleTest",
+        "lastRawOutcome": "FAILED",
+        "outcome": "FAILED"
+      },
+      {
+        "task": ":spotlessJavaCheck",
+        "lastRawOutcome": "FAILED",
+        "outcome": "FAILED"
+      }
+    ],
+    "crossReplicaTaskIsAdditionalNotIncludedInStandard2101": true,
+    "sourceStabilityQualification": {
+      "wholeSourceStable": false,
+      "testInputStable": true,
+      "distStable": true,
+      "allActualSourceChangesWithinExactSix": true,
+      "actualChanges": [
+        {
+          "path": "studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+          "before": null,
+          "after": "2e3034cbf6901e11b592abb315fca9ec2b54806e0ef70a4995c526ae7dc8a451"
+        },
+        {
+          "path": "studio-runner/test/fixtures-tier/nativeBlankVideo.ts",
+          "before": null,
+          "after": "859e7bb7bf5a7fae6bc1acd828b51cc4523fb31dc90773bbfffc5535e94d6e4f"
+        },
+        {
+          "path": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+          "before": "a390a9b9f441e2b7be57366c91b3cc073c3dd6a7da85fc7705dd45b467d1b42e",
+          "after": "e184e5fa2ab76727b9a4080041e9d496472d9bc5fe8aa88aefbb58212ebbd164"
+        },
+        {
+          "path": "studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts",
+          "before": "4d05a4bbd0c7d626f3ab579e360b335de8334e0bd06af48e2978376e83aaedc8",
+          "after": "d8c90763a8779eb5a7466a2912781396cf48397d5283f5695c1647fb612edf14"
+        },
+        {
+          "path": "studio-runner/test/helpers/nativeBlankSurface.ts",
+          "before": "66db2ee2b1bd9f4adcecfa62f677aea92930af3e0e9e71238991d1ef44a8adbc",
+          "after": "9d70f1025b0dbf0b4b176e6722cab107b94fef3a0fd16dda324975447f996c01"
+        },
+        {
+          "path": "studio-runner/test/nativeBlankSurface.test.ts",
+          "before": "85ea8df862c7cc47fda95e43bde8669d17bfcfee8e464d88d80cb42d40b09b2d",
+          "after": "d96c65ca4b8f9cba29145db9b927554026bf9dc9b4ac8a8e058321471d8142a1"
+        }
+      ],
+      "distBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "requiredDist": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2"
+    },
+    "configuredCoverageVerification": {
+      "task": ":jacocoTestCoverageVerification",
+      "lastRawOutcome": "NO_EXPLICIT_OUTCOME_IN_LOG",
+      "outcome": "EXECUTED_NO_FAILURE_REPORTED_IN_COMPLETED_AGGREGATE"
+    },
+    "lineCoverageRatio": 0.8940528323209492,
+    "guardTallies": [
+      {
+        "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+        "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-guard-tally/GuidedPlanningIntegrationTest.json",
+        "sha256": "49a5d4c5b87f75fe68658d224b488cabbcbc90bd8307182aaa9ab0e880cc5d97",
+        "testsRecorded": 56,
+        "totals": {
+          "passed": {
+            "click": 7,
+            "press": 0,
+            "check": 0
+          },
+          "refused": {
+            "SIDE_EFFECT_DENIED": 6,
+            "UNGROUNDED_TARGET": 2,
+            "DESTRUCTIVE_VERB": 1
+          },
+          "confirmFirst": 2
+        },
+        "refusalCases": [
+          {
+            "test": "anAuthoredDeleteStillFailsTheGovernedDenyStance",
+            "sessions": 1,
+            "passed": {
+              "click": 0,
+              "press": 0,
+              "check": 0
+            },
+            "confirmFirst": 0,
+            "refused": {
+              "SIDE_EFFECT_DENIED": 1
+            }
+          },
+          {
+            "test": "governedDenyRefusesAnUnlabelledOrFormAttributeSubmit",
+            "sessions": 1,
+            "passed": {
+              "click": 0,
+              "press": 0,
+              "check": 0
+            },
+            "confirmFirst": 0,
+            "refused": {
+              "SIDE_EFFECT_DENIED": 1
+            }
+          },
+          {
+            "test": "governedDenyRefusesAnUnlabelledOrFormAttributeSubmit",
+            "sessions": 1,
+            "passed": {
+              "click": 0,
+              "press": 0,
+              "check": 0
+            },
+            "confirmFirst": 0,
+            "refused": {
+              "SIDE_EFFECT_DENIED": 1
+            }
+          },
+          {
+            "test": "governedDenyRefusesAnUnlabelledOrFormAttributeSubmit",
+            "sessions": 1,
+            "passed": {
+              "click": 0,
+              "press": 0,
+              "check": 0
+            },
+            "confirmFirst": 0,
+            "refused": {
+              "SIDE_EFFECT_DENIED": 1
+            }
+          },
+          {
+            "test": "aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch",
+            "sessions": 1,
+            "passed": {
+              "click": 0,
+              "press": 0,
+              "check": 0
+            },
+            "confirmFirst": 0,
+            "refused": {
+              "UNGROUNDED_TARGET": 1
+            }
+          },
+          {
+            "test": "governedDenyRefusesTheFormSubmitBeforeAnyDispatchAndFailsPolicyDenied",
+            "sessions": 1,
+            "passed": {
+              "click": 0,
+              "press": 0,
+              "check": 0
+            },
+            "confirmFirst": 0,
+            "refused": {
+              "SIDE_EFFECT_DENIED": 1
+            }
+          },
+          {
+            "test": "governedDenyRefusesTheFormSubmitBeforeAnyDispatchAndFailsPolicyDenied",
+            "sessions": 1,
+            "passed": {
+              "click": 0,
+              "press": 0,
+              "check": 0
+            },
+            "confirmFirst": 0,
+            "refused": {
+              "SIDE_EFFECT_DENIED": 1
+            }
+          },
+          {
+            "test": "aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch",
+            "sessions": 1,
+            "passed": {
+              "click": 0,
+              "press": 0,
+              "check": 0
+            },
+            "confirmFirst": 0,
+            "refused": {
+              "DESTRUCTIVE_VERB": 1
+            }
+          },
+          {
+            "test": "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence",
+            "sessions": 1,
+            "passed": {
+              "click": 0,
+              "press": 0,
+              "check": 0
+            },
+            "confirmFirst": 0,
+            "refused": {
+              "UNGROUNDED_TARGET": 1
+            }
+          }
+        ]
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-guard-tally/GuidedPublicationReplayIT.json",
+        "sha256": "664d7e4f269ef26e7bc56f05799476d47695ff120b4b4d10c808500dff4af3b2",
+        "testsRecorded": 40,
+        "totals": {
+          "passed": {
+            "click": 55,
+            "check": 0,
+            "press": 0
+          },
+          "refused": {},
+          "confirmFirst": 0
+        },
+        "refusalCases": []
+      }
+    ],
+    "independentXmlProof": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/archived-test-proof-recheck.json",
+      "sha256": "f93d587c37c1834eed95957b086890cebf50a80e413aea95b804a29f512373b2",
+      "groups": {
+        "crossReplicaTest": {
+          "total": 2,
+          "PASS": 2
+        },
+        "test": {
+          "total": 2101,
+          "PASS": 2076,
+          "SKIP": 25
+        }
+      },
+      "scopedClasses": [
+        {
+          "class": "com.citi.put.checks.studio.sse.SseCrossReplicaIT",
+          "counts": {
+            "total": 2,
+            "PASS": 2
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/crossReplicaTest/TEST-com.citi.put.checks.studio.sse.SseCrossReplicaIT.xml",
+          "sha256": "4bdf12d386890335e173b6068c797aecde1b996dd49e8a387f1a3d78222c686b",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.config.RateLimitClassifierTest",
+          "counts": {
+            "total": 5,
+            "PASS": 5
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.config.RateLimitClassifierTest.xml",
+          "sha256": "9bc82bf2bbf3dc631ed5cb838afd04354ea95b873b5d15f66f84a35b306b8f82",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.config.StudioExecuteIdempotencyFilterTest",
+          "counts": {
+            "total": 2,
+            "PASS": 2
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.config.StudioExecuteIdempotencyFilterTest.xml",
+          "sha256": "08bae6e0685717e6c2f92951965ea63256e85c1d8376e93cec59891f88026c5a",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.StudioApiIT",
+          "counts": {
+            "total": 8,
+            "PASS": 8
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.StudioApiIT.xml",
+          "sha256": "e31f4a12d0b20c0dba0056cd8b3ef587f09a0245673230e606c33f6417416b94",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.StudioAuthorizationIT",
+          "counts": {
+            "total": 28,
+            "PASS": 28
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.StudioAuthorizationIT.xml",
+          "sha256": "7792cd20d8cc3e949d6a0ceeba26e2f5b2d35e8f349cbe62cb4f7cf99f93b781",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.StudioContractTest",
+          "counts": {
+            "total": 13,
+            "PASS": 13
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.StudioContractTest.xml",
+          "sha256": "f9d1b0a0373dcd3debc9355e80c0f699c20175c04eced21b360e559e73b3b6bd",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+          "counts": {
+            "total": 26,
+            "PASS": 26
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT.xml",
+          "sha256": "9e64dd1da538e1ed3aa547b3bfe810320d4b4414d6496beec6044bafbee60993",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.audit.StudioActionAuditTest",
+          "counts": {
+            "total": 5,
+            "PASS": 5
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.audit.StudioActionAuditTest.xml",
+          "sha256": "5b29e646f09f46db26b64928584f50e0b60622a27cc7fd705dcea1707081b6e4",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchContextRefusalTest",
+          "counts": {
+            "total": 2,
+            "PASS": 2
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.bridge.GuidedDispatchContextRefusalTest.xml",
+          "sha256": "34e691458d245458199bfd2db7f5fd3cee0703471cf8f1d9cf11f352dc4ce544",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerContextRefusalTest",
+          "counts": {
+            "total": 3,
+            "PASS": 3
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.bridge.GuidedRunnerContextRefusalTest.xml",
+          "sha256": "502595eb8709682a2d1efc51237dee467e08d94209ca378f8c9104bd8a67d358",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.policy.ObservationPolicyDocumentsTest",
+          "counts": {
+            "total": 7,
+            "PASS": 7
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.policy.ObservationPolicyDocumentsTest.xml",
+          "sha256": "2a0d65eb4497de26d274c62d37ef26765177c218a7433c288987b18e49620dfe",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.policy.ObservationPolicyIT",
+          "counts": {
+            "total": 11,
+            "PASS": 11
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.policy.ObservationPolicyIT.xml",
+          "sha256": "b5389bfd4c6fb8699b537eb0dee40d0c3f8490921e166271698c0924c681b91f",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.policy.ObservationPolicyRouteIT",
+          "counts": {
+            "total": 4,
+            "PASS": 4
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.policy.ObservationPolicyRouteIT.xml",
+          "sha256": "5bb0ce4fc16439d4287fdc3c0110a584d494e48a262e4e8726a7b775ff1125da",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "counts": {
+            "total": 40,
+            "PASS": 40
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+          "sha256": "a130915504ea6bb0e48cf23024ea63b018e6dcdd671f6f503bb7c48174ed3d2c",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.retention.GuidedObservationPrunerIT",
+          "counts": {
+            "total": 3,
+            "PASS": 3
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.retention.GuidedObservationPrunerIT.xml",
+          "sha256": "f4b688d673f44043a26d07707c82bc50c6f0218f07c41a87d5471e7a71a13219",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+          "counts": {
+            "total": 37,
+            "PASS": 37
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.xml",
+          "sha256": "c8aac476932541d9be6edab32023b8ce7fd0c5238c1ef3a2d9402dca98da7703",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedContractsCanonicalTest",
+          "counts": {
+            "total": 13,
+            "PASS": 13
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.session.GuidedContractsCanonicalTest.xml",
+          "sha256": "752371872d261c6f837d764561fbf2c7466b86bc4271534a2385eb8ac50d4293",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedCsiBudgetIT",
+          "counts": {
+            "total": 5,
+            "PASS": 5
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.session.GuidedCsiBudgetIT.xml",
+          "sha256": "f763b19656a604b9f0a9149b55412a0f81b62faa4c0803e4b43a28c04639b9b6",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+          "counts": {
+            "total": 56,
+            "PASS": 56
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest.xml",
+          "sha256": "bda81b42ba056f3f6cf92624a7aff99afa8790b863828a554607ca25631caa9e",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+          "counts": {
+            "total": 44,
+            "PASS": 44
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.session.GuidedSessionIT.xml",
+          "sha256": "2a93a701faed1c3c7cf2707b8c11686653aa1674b26fa99acb7e2fc74f1db84a",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest",
+          "counts": {
+            "total": 7,
+            "PASS": 7
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.session.GuidedWireContractTest.xml",
+          "sha256": "fe9343b3f1831e75cda6265767887a9632c88fa9ab92b5860136a9ab7a32e54a",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedActionGuardTest",
+          "counts": {
+            "total": 21,
+            "PASS": 21
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.guided.translation.GuidedActionGuardTest.xml",
+          "sha256": "5a3966c6021a60ce23d587d67d04c4873a99248144b344740fb20fb591cf5118",
+          "priorS4cCasesMissing": []
+        },
+        {
+          "class": "com.citi.put.checks.studio.internal.AdmissionCasIT",
+          "counts": {
+            "total": 14,
+            "PASS": 14
+          },
+          "archive": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks/complete/test-results/test/TEST-com.citi.put.checks.studio.internal.AdmissionCasIT.xml",
+          "sha256": "86e8878dce1903c2b2582b1a3f4c754626de7a53be0cbfdb781c50a289547f24",
+          "priorS4cCasesMissing": []
+        }
+      ]
+    }
+  },
+  "replay40AllNames": [
+    {
+      "name": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()",
+      "status": "PASS"
+    },
+    {
+      "name": "queuedAndPreReadyRefusals()",
+      "status": "PASS"
+    },
+    {
+      "name": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness()",
+      "status": "PASS"
+    },
+    {
+      "name": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays()",
+      "status": "PASS"
+    },
+    {
+      "name": "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance()",
+      "status": "PASS"
+    },
+    {
+      "name": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork()",
+      "status": "PASS"
+    },
+    {
+      "name": "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays()",
+      "status": "PASS"
+    },
+    {
+      "name": "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall()",
+      "status": "PASS"
+    },
+    {
+      "name": "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualCoreMayUseDenialStartsNoSessionAndNoBrowser()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualGuidedRegistrationPassingAssertRemainsPassed()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualPublishedWrongPasswordAnnotatesEarlierSecretFill()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualPublishedRegistrationPassingAssertRemainsPassed()",
+      "status": "PASS"
+    },
+    {
+      "name": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualPublishedPublicCancelWhileNativePasswordWorldPending()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending()",
+      "status": "PASS"
+    },
+    {
+      "name": "actualSecretControlWindowLossBeforeReadyReachesTerminalError()",
+      "status": "PASS"
+    },
+    {
+      "name": "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass()",
+      "status": "PASS"
+    }
+  ],
+  "replayOriginalS4cNameRemoval": [],
+  "skipped25": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.scheduling.SharedSchedulingIT",
+      "name": "sameCoordinatorRunsHttpTcpSplunkAndStudioThroughTheirExistingPipelines()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.scheduling.SharedSchedulingIT",
+      "name": "studioOnlyReplicaRunsWhenCatalogFlagIsOffAndDeduplicatesAgainstAnotherCoordinator()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+      "name": "AC-18b \u2014 ranged reads against real Sonic (ED-03 / SPK-03 / 10.18 / 10.19)",
+      "passCredit": false,
+      "scopeAttribution": "Named external ED02/ED03/ED06 integrated Vault/Sonic/ingress criterion, uncredited"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+      "name": "AC-19b \u2014 the media route through the real ingress (ED-06 / SPK-02 / 10.18 / 10.19)",
+      "passCredit": false,
+      "scopeAttribution": "Named external ED02/ED03/ED06 integrated Vault/Sonic/ingress criterion, uncredited"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedProviderEvaluationTest",
+      "name": "approvedProviderEvaluationIsReportedUnavailableWithoutExplicitConfiguration(TestReporter)",
+      "passCredit": false,
+      "scopeAttribution": "Approved actual provider/corpus unavailable; real-model OBS009, uncredited"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.readiness.ExecutionReadinessTest",
+      "name": "targetPolicySelectionAdvancesTheConfigurationRevision()",
+      "passCredit": false,
+      "scopeAttribution": "Existing target-policy selection field absent (10.4/10.8); outside014 governance policy object and uncredited"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "rawReadinessChangesRefuseExplicitlyAndAnotherActivatorDoesNotRewriteAcceptedProvenance()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "capabilityOffDeferralExpiresBeforeAnyCatchupAndLifecycleSettlesPendingAudit()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "activeManualWorkSkipsOverlapWithoutChangingManualPermission()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "graceAndGrantAreRecheckedAfterPreflightBeforeAnyAcceptedWrite()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "writeFailuresAtHistoryLedgerAndCursorBoundariesRollbackTheWholeOccurrenceUnit()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "updateRemovalAndInputInvalidationSettleDeferredWithoutOrphans()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "replicasRacingAndRollbackCannotCreateDuplicateOrPartialAcceptedWork()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "authorizationWithdrawalBeforeAdmissionAndBeforeSendFailsClosed()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "deadlineOverrunAdvancesCursorOnlyPastAttemptedCsi()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "quotaWaitCrossingGraceOrGrantWithdrawalNeverWritesAcceptedWork()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "acceptedOccurrenceHasOneImmutableRunAndActivationAcrossResumeAndRecreation()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "callbackLedgerLockDoesNotBlockOverlapAndUncertaintyAfterResumeBlocksNextTick()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "editedWriterRaceSerializesWithAcceptanceAndKeepsTheAcceptedRevision()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "aScheduledOccurrenceIsAcceptedWithNoRequestAuthentication()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "deletionStopsFutureWorkButKeepsAuthorizedOccurrenceAudit()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "name": "failedCsiRotatesAwayRatherThanStarvingOtherEligibleWork()",
+      "passCredit": false,
+      "scopeAttribution": "OBS009 AC6/T3 scheduled observed authority;18 preexisting explicitly deferred cases (not014)"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+      "name": "AC-13b \u2014 canaries through the integrated path with real material (ED-02 / 10.19)",
+      "passCredit": false,
+      "scopeAttribution": "Named external ED02/ED03/ED06 integrated Vault/Sonic/ingress criterion, uncredited"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+      "name": "AC-7b \u2014 real revocation through a non-bypassed session (ED-02 / 10.18 / 10.19)",
+      "passCredit": false,
+      "scopeAttribution": "Named external ED02/ED03/ED06 integrated Vault/Sonic/ingress criterion, uncredited"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+      "name": "AC-5b \u2014 resolution confined by the real vault's own policy (ED-02 / 10.18 / 10.19)",
+      "passCredit": false,
+      "scopeAttribution": "Named external ED02/ED03/ED06 integrated Vault/Sonic/ingress criterion, uncredited"
+    }
+  ],
+  "noScoped014CaseSkipped": true,
+  "requirementsMatrix": [
+    {
+      "id": "AC1-governance",
+      "localObligation": "Approved/current CSI owned policy with dense version/audit, trusted subset, v2 document/hash frozen",
+      "completedEvidence": [
+        "ObservationPolicyIT11,ObservationPolicyRouteIT4,GuidedGovernanceMigrationIT26,GuidedSessionIT44 allPASS0skip in archived fullrun; exact testcase index referenced below"
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Reexecute via required normal fullbackendcheck after formatting; retain v2/current policy and401zero-write exact cases."
+      ]
+    },
+    {
+      "id": "AC1-runner",
+      "localObligation": "Hash before export, forbidden mounted/server applicationPolicy/rules, no widened read authority",
+      "completedEvidence": [
+        "Historical policyHash6,transport14,config seven-form parser/refusal tests and guided-dataflow ruled no-export branch; source wiring reviewed previously"
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Final runner unit/type/lint and complete fixture gates on finaltestoracle bytes; exact transport duplicate IDENTITY_MISMATCH retained.",
+        "Missing located receipt for actual rejected mounted worker process; see ORIGINAL-MOUNT-PROCESS."
+      ]
+    },
+    {
+      "id": "AC1-context-refusal",
+      "localObligation": "Definite context refusal terminal firstreceipt; context timeout still exactly3; real forgery refusal before browser",
+      "completedEvidence": [
+        "Planning aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried and aTimedOutBootstrapContextStillRetriesAndExhaustsAfterThreeDeliveries pass fullrun; GuidedDispatchContextRefusalTest2 and GuidedRunnerContextRefusalTest3 pass."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Final fullbackendcheck; original real runner+backend tampered-policy liveproof still requires exact receipt/test, see ORIGINAL-LIVE-CONTEXT."
+      ]
+    },
+    {
+      "id": "AC2",
+      "localObligation": "Accurate current export/retention/PII controls, published provenance and indefinite nonAC3 residual disclosure",
+      "completedEvidence": [
+        "guided-data-flow.md reviewed including current audit tense; explicit ED01 unknown and F01/F02/F03 boundaries."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Independent final exactdocument/source review; never claim external approval."
+      ]
+    },
+    {
+      "id": "AC3",
+      "localObligation": "Actual pruning, published immutable proof, real model0 replay after pruning",
+      "completedEvidence": [
+        "PrunerIT3 and GovernanceMigrationIT26 pass; actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues PASS full ordered40 with real learned revision/pruner and2 native ordinary model0 runs; retained publication/plan/artifact/receipt checked."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Final normal fullbackendcheck must retain actual post-prune run and storage negatives, no skipped oracle."
+      ]
+    },
+    {
+      "id": "AC4-grounding",
+      "localObligation": "Exact guarded invalid intent no reserve/prepare/admission/dispatch, rejection counted",
+      "completedEvidence": [
+        "Planning56PASS0skip including Archive UNGROUNDED_TARGET; absent-destructive UNGROUNDED_TARGET; Delete-account/Open-reports DESTRUCTIVE_VERB, durable rejected attempts+FAILED422+audit+no native effect."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Final fullbackendcheck, exact plantedreason tally; complete/nameexcluded unit denominator must include new7invocations, see denominatorGap."
+      ]
+    },
+    {
+      "id": "AC4-corpus",
+      "localObligation": "Four joined classes old/new cases and guard decisions counted, no unplanted refusal",
+      "completedEvidence": [
+        "Fullrun Planning56,Replay40,Session44,Bridge37 allPASS0skip. No prior S4c testcase missing. Planning7admitted,6SIDE_EFFECT_DENIED,2UNGROUNDED_TARGET,1DESTRUCTIVE_VERB,2confirmations;Replay55admitted0refused0confirmation."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Final fullrun counts/name inventories/tallies rebound to finalhash; no unexplained refusal or denominator omission."
+      ]
+    },
+    {
+      "id": "AC5",
+      "localObligation": "Destructive denial and authored Save/Delete ALLOW native positive controls",
+      "completedEvidence": [
+        "GuardTest21PASS; actual integrated DESTRUCTIVE_VERB case and Save/Delete2nativepositive cases PASS in fullrun."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Retain exactreason precedence and nativepositive effect assertions in final fullcheck."
+      ]
+    },
+    {
+      "id": "AC6",
+      "localObligation": "DENY all5realformshapes;2CLARIFY_FIRST oneauthoredconfirmation;ALLOW OBS007native E2E",
+      "completedEvidence": [
+        "Planning56PASS includes5submitDENY+authoredDeleteDENY and2confirmonce cases; GuardTest21 including2520node set; entireReplayIT40PASS inclsecretlogin."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Final fullbackendcheck and finalrunnerfixtures under actual governedcontext; no old fixture deletion."
+      ]
+    },
+    {
+      "id": "AC7",
+      "localObligation": "Actual AUTHORED/SAVED_INPUT/PAGE safe producer andI-C11 secretIDonly",
+      "completedEvidence": [
+        "aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue PASS fullrun; exact1SOURCE_PLAN,publicSAVED_INPUT,label1,no privatevalue/providerlabel/materialization/effect. PAGE/AUTHORED realcases + frozen wire/schema tests pass."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Finalfullcheck after pureformatting preserves allassertions; finalcontracts codegenbyteidentity must remain proven."
+      ]
+    },
+    {
+      "id": "AC8",
+      "localObligation": "EXECUTE classification and persisted crossreplica CSI limits/dailybudget atstart+eachcall withRetryAfter",
+      "completedEvidence": [
+        "RateLimitClassifierTest5,GuidedCsiBudgetIT5,GovernanceMigrationIT26 pass, including real mid-session exhaustion and exactlyone concurrentstarter."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Finalfullcheck; realmodel capacity isOBS009, not inferred from controlledbudgettests."
+      ]
+    },
+    {
+      "id": "AC9",
+      "localObligation": "Mandatory IdempotencyKey atHTTPexecute, samekey cached, typedclosederror+pinnedOpenAPI",
+      "completedEvidence": [
+        "StudioApiIT8 and ExecuteIdempotencyFilterTest2PASS; exactmissingkey zero-write+samekeyresponse;StudioContractTest13PASS."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Finalfullcheck, exact C2a/C2b oldnew pin ledger and43operation contract/hash remain bound; D2b explicitlyunresolvedoutsideAC."
+      ]
+    },
+    {
+      "id": "AC10",
+      "localObligation": "Every admittedguided/replay/refused structuredaudit codes/IDs and actual OBS007canaryscan",
+      "completedEvidence": [
+        "StudioActionAuditTest5 and auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass PASS fullrun; nonempty registeredcanaries,16closedkeys,1KiB bound,actualguidedadmitted+replaydispatch,refused exactreasons."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "FinalorderedReplayIT+audit suite green; finalsecurityreview must preserve actualscope origin and targetlabel privacydisclosure. ActualSIEMsinkexternal."
+      ]
+    },
+    {
+      "id": "AC11",
+      "localObligation": "DatedVaultTransit artifactHMAC design/verification/rotationonly",
+      "completedEvidence": [
+        "artifact-hmac-design-note.md,ar-ac11-and-refusal-codes.json accepted scopeddesign;no implementationpromotion."
+      ],
+      "finalStatus": "DOCUMENTED_SCOPE_ONLY",
+      "stillPending": []
+    },
+    {
+      "id": "P1-admission",
+      "localObligation": "Legacyroute/opdeleted;repointednamedCAS/auth cases;404/405zerowrites",
+      "completedEvidence": [
+        "AdmissionCasIT14,AuthorizationIT28 incltheLegacyAdmissionRouteIsGoneAndWritesNothing PASS."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Finalfullcheck+contract checker; finalstatics confirms no publiclegacyshim."
+      ]
+    },
+    {
+      "id": "P1-deadmatcher",
+      "localObligation": "Dead/api/v2/studio matcherremoved;exacttest-only3hits+oldclassabsent",
+      "completedEvidence": [
+        "StudioExecuteIdempotencyFilterTest2PASS; earlier exactstatic inventoryverified."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Finalstaticcheck reviewed-source unchanged; no unintendedCOVERED/EXCLUDED matcher changes."
+      ]
+    },
+    {
+      "id": "T5-static-and-aggregate",
+      "localObligation": "Fullbackendcheck,configuredquality/JaCoCo/parity/alignment,independentreview",
+      "completedEvidence": [
+        "Attempt01 fullycomplete butEXIT1;2076standardPASS25skip plus2crossReplicaPASS. CheckstyleTest and spotlessJavaCheck FAILED only;JaCoCo configuredverificationpass."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Mandatory normalfullbackendcheck nofilters/exclusions after formatting correction. Staticallgreen and requiredtests unskipped. Fullnormalcheck cannot be replaced with static-onlyplusfailedaggregate."
+      ]
+    },
+    {
+      "id": "T5-runner-contracts",
+      "localObligation": "Affectedunits/nativefixtures+allrequiredsharedgates, schema/codegen/hash pins",
+      "completedEvidence": [
+        "contracts-final.log says42schemas,443checks,42planningfixtures,80replaychecks,43ops,4byteidentical outputs; runnerpins localpinneddeps pass with image/chromiumBuildNOTASSERTED. Earlier runnerunitretry/type/lint/deployment passed at earlierbytes;fullfixturesattempt01failed."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Finalsix-oraclefilefreeze:unit/type/lint,13nativefocused controls+completefixtures+deployment;contractlogs bound with actualcommand/exit/manifests; finalindependentreview. Do not credit earlierpassedchecks as final if their scopedinputs changed."
+      ]
+    },
+    {
+      "id": "ARCH-review",
+      "localObligation": "No originalQA silently replaced,exactreasonprecedence,realstartupprivacyproof remains",
+      "completedEvidence": [
+        "Datedaddendum/portability/bootstrapruling and startuporacleerratum read. Prior strictfindings and failedattempts preserved."
+      ],
+      "finalStatus": "PENDING_FINAL_SOURCE_EXECUTION_OR_REVIEW",
+      "stillPending": [
+        "Final independent sourceboundsecurity/architecture/QA review after executorfreeze. Startup erratum applies to013 sharedproof:currentperrunT2+verifiedhistoricaltightenedred3, not waived mutation and neverB-as-confidentiality. No new014mutationtestintroduced."
+      ]
+    }
+  ],
+  "denominatorGap": {
+    "authority": "014AC4clarificationc2 requires completeORnameexcludedunitdenominator",
+    "status": "PENDING_EXECUTOR_EVIDENCE_RECONCILIATION",
+    "historicalCalibrationCount": 6,
+    "historicalSixNotFinalExhaustive": true,
+    "newInvocations": [
+      {
+        "invocation": "aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch()",
+        "pureCounterpart": "aTargetTheAuthoredStepDoesNotNameIsUngrounded",
+        "inventoryGap": "ActualArchive/authoredSubmit pair not currently listed in historical six-pair inventory; map actualinput or nameexclude as plantednegative with reason."
+      },
+      {
+        "invocation": "aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch()",
+        "pureCounterpart": "thePlantedDeleteAccountClickForOpenReportsIsRefusedBeforeAnyDispatch",
+        "inventoryGap": "Map actualstep Open reports then check Confirmation appears and observedDeleteaccount; dedicatedpure case is shorter Open reports, do not silently claim literalbyteidentity."
+      },
+      {
+        "invocation": "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence()",
+        "pureCounterpart": "anElementTargetMissingFromTheObservationIsRefusedUngrounded",
+        "inventoryGap": "Pure missingtarget usesSubmit; actualjoined missingnode has destructivelocator. Nameexclude or map as explicitprecedence negative; actualexecutedjoinedcaseisrequiredproof."
+      },
+      {
+        "invocation": "anAuthoredDeleteStillFailsTheGovernedDenyStance()",
+        "pureCounterpart": "anAuthoredDestructiveVerbAllowsTheControl plus aFormSubmitClickUnderDenyIsRefusedAndUnderAllowPasses",
+        "inventoryGap": "No exactpure authoredDelete+DENYcombination located; complete unitinventory must acknowledge composition or namedplantednegative exclusion, never claim original6coversit."
+      },
+      {
+        "invocation": "anAuthoredSaveOrDestructiveClickUnderAllowRunsExactlyOnce [1] label=Save",
+        "rawXmlName": "[1] label=Save",
+        "pureCounterpart": "clickSaveOnAPageWithSaveAndDeleteMakesOnlySaveEligible",
+        "inventoryGap": "Newgroundedpositive site must be explicitly accounted; exactauthoredtextincludes trailingassertion, historical6notexhaustive."
+      },
+      {
+        "invocation": "anAuthoredSaveOrDestructiveClickUnderAllowRunsExactlyOnce [2] label=Delete",
+        "rawXmlName": "[2] label=Delete",
+        "pureCounterpart": "anAuthoredDestructiveVerbAllowsTheControl",
+        "inventoryGap": "Newgroundedpositive site must be explicitly accounted with actualinput or namedreason, not silentlyexcludedasnegative."
+      },
+      {
+        "invocation": "aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue()",
+        "pureCounterpart": "notaguardcase;sourceclarificationproducer",
+        "inventoryGap": "Recordnameexclusion:stopsatSOURCE_PLANsourcequestionbeforematerialization/NEXT_ACTION,no clickpresscheck guarddecision. RuntimeevidenceprovesSAVED_INPUT emitterseparately."
+      }
+    ],
+    "requiredArtifact": "backend-remediation/014-unit-denominator-reconciliation.json (proposed;notyetexists)",
+    "noAutomaticExclusion": "Dex must reconcile actualauthoredsites andpurecoverage/namedexclusions;QA doesnotgrantgenericexclusion."
+  },
+  "additionalOriginallyPlannedProofGaps": [
+    {
+      "id": "ORIGINAL-LIVE-CONTEXT",
+      "authority": "ar-2-r14-stops.json ruling2_contextRefusal.tests[4], S3exitcondition; POqa014 AC1h explicitly says livegate separatefromstubIT",
+      "required": "Realrunner+backend frozenpolicy tamper/forgedpolicyHash => FAILED RUNTIME_INCOMPATIBLE withinonecontinuation,no browserlaunch/noobservation.",
+      "locatedProof": "Notlocated. Planningbootstrapcase explicitlyusesStubRunner. RunnertransportwirecaseusescreateGuidedServerwithfakelaunch,provesrunnerrefusalbutnotjoinedbackendterminal.",
+      "resolution": "Locateexactoriginalrootliveexecutionreceipt OR execute bounded authenticjoinedproof beforePASS; no componentcomposition substitute."
+    },
+    {
+      "id": "ORIGINAL-MOUNT-PROCESS",
+      "authority": "ar-mounted-rules.json qaOracles[0]",
+      "required": "Actualworker.jsonwithpermittedBusinessDataornonsecretApprovedrules => processexit1,stderrGUIDED_WORKER_UNAVAILABLE,portneverlistens.",
+      "locatedProof": "Notlocated. guidedMain.test.ts parsersevenforms+staticentrywiring arecomponenttests;no childprocessnegativecase/receipt found in14lane ledger orORCH.",
+      "resolution": "Locateexactoriginalmanual/processreceipt OR execute boundedmanualcheck (explicitlypermittedbyruling) onfrozendist. Must attribute correctinvalidpolicycause,notmissingTLSorenvfailure."
+    }
+  ],
+  "externalScopeNoPassClaim": [
+    "OBS009realmodelDC/guardcapacity/calibration,actualSIEMdeployment/ops,observedscheduledauthority",
+    "OBS010SecurityComplianceapproval,ED01gatewayretention,realapproverprovisioning,pilot readiness",
+    "AC9D2b cachedresponse reauthorization explicitlynamedopen",
+    "F01nonAC3indefinitestores,F02policyunification,F03governedexactfieldreads,F04artifactHMACimplementation:E1-E8UNCONFIRMED. These areexplicit originalscope boundaries,not localQAdeferrals.",
+    "RealSonic/ingress/Vault/nativeproductionimageexternalproof unclaimed. Localreadinessdoesnotassertexternaldeployment."
+  ],
+  "finalReleaseConditions": [
+    "Resolve2locatedproofgapsanddenominatorinventory honestly.",
+    "Freezeallfinalinputs/dist thenmandatoryfullnormalbackendcheck+allrequiredrunnergatesgreen;preservefailedattempts.",
+    "Independentexactsourceboundfinaltechnical/security/QA reviews afterrootpreflightedrelease;onlythenPASS/Donepossible."
+  ]
+}

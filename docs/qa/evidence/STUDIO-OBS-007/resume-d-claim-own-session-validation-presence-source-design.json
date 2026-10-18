@@ -1,0 +1,36 @@
+{
+  "story": "STUDIO-OBS-007",
+  "disposition": "CONDITIONAL_GO_SOURCE_DESIGN_ONLY_NO_AUTHOR_OR_RUNTIME_RELEASE",
+  "scope": "Replace obsolete optional owner-context marker with one independent claimant-own session-validation presence aggregate; baseline UNKNOWN remains acceptable.",
+  "sources": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "99a391859aaddc8fc6fccd16dc6dbd7e79095415cef934c3e3031132f35be9a4",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "4f9055b63cb09aaafc59c60bf40f4723f460e6696e5fd7a8c0d3dd7953dc8d65",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "a8fec6d16dea5567caab96e7bd565fac9ada9ed501951a58eda52f77e615e377",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "a5034ee98707552d927f48bc0a30e07896df913f3b706f42f15ee16c7b52144b"
+  },
+  "classes": {
+    "GuidedSessionService": "09bd498611e642f3263d162d3a49415dcc25d4d24ce550f98d0054fedd990ace",
+    "GuidedSessionRepository": "12850159e8cdb6759a53ea85155dc973c0435d13da646e785902414674ed5ba3",
+    "GuidedContracts": "385dad3a984657e6f986e2928a8619547e2686fe4bba75ce876ffe8e3c85ecf5"
+  },
+  "metadata": "Read-only javap: GSS.claim invokes repository.transaction at bytecode73/debug751; Repo.saveRenewalAndCommand ldc15=session, validate invoke21/debug79; Contracts.validate canonical invoke1/debug89 and schema compute/validate45..54/debug94. No fixture was loaded or run.",
+  "original_scope": "ReplayIT1073\u20131095 selected claim filter enterCurrent then original chain finally leaveCurrent; sampler12057\u201312088 entered.putIfAbsent(Long) and leave removes that exact invocation.",
+  "removal": "Remove SourceSample.contextPresence, contextValidationPresence, slot40 comment/increment and marker arguments; restore source-sample three-argument body and pgBlockerStages length40. Keep all classifiers/SQL/source partitions0..39 and physical holder bindings unchanged.",
+  "minimal_state": "One private long claimSessionValidationSamples; bounded call-local IdentityHashMap<Thread,Long> copied from entered for original claimSnapshot only under the existing gate, cleared in original sample finally. No new registration, thread or persistent identity state.",
+  "pre_guard": "Before the existing target.getStackTrace, record qualification under gate only if captured nonnull Long is the SAME OBJECT as entered.get(target), executing contains target, selected claimSnapshot contains it, !stopping and existing30s end not reached. Original stack acquisition/histograms still run unchanged.",
+  "predicate": "On that SAME original stack length1..512: exact GuidedSessionService.claim/GuidedSessionService.java/debug751 below exact GuidedSessionRepository.saveRenewalAndCommand/GuidedSessionRepository.java/debug79, with exact GuidedContracts.validate/GuidedContracts.java/debug89 or94 ABOVE the repository frame. Unsupported or ambiguous chain is UNKNOWN. No broad class/method-family or PGedge borrowing.",
+  "post_guard": "Before increment, under SAME gate repeat captured Long object identity, executing membership, stopping/end checks. Failed qualification adds nothing; no sticky original flag is cleared. Long identity rejects a servlet thread reused for a subsequent claim even when Thread is unchanged.",
+  "counter": "Increment only this independent scalar; overflow marks existing Status.FAILED. Never change original counts/empty/unattributed/cycles/Segment/status-OBSERVED classifications or add the scalar to any original histogram partition.",
+  "export": "Append only claimSessionValidationSamples to the existing closeClaimSampler numeric receipt/whitelist. Positive count only after original sampler+PG observer joins and cleanup confirmed, Status.OBSERVED, !bindingUnconfirmed and no original failure/nonquiescence/unconfirmed mask. Otherwise export fixed -1 UNKNOWN. No new getter/file/event/control field.",
+  "zero": "A qualified completed sampling window may count0; that means no qualifying sample observed, NEVER absence of validation. Neither -1 nor0 is privacy, cost or acceptance evidence.",
+  "temporal": "Each positive sample proves same entered invocation active around its original acquired stack. Normal later callback retirement does not invalidate that historical sample. Join proves observer termination, not completion of an application request; genuine original owner/capture cleanup remains mandatory.",
+  "independence": "Own-claim presence requires no observed PGedge/blocker/PGstatus. Existing PG observer join and global unconfirmed masks are conservative closure prerequisites only; no claimant/blocker causal inference.",
+  "bounds": "Original selected/default-off behavior, combined TOTAL8 threads, stack cap512,20ms cadence,30s horizon, original SQL/PG once trigger and all existing1s/2s product budgets unchanged. One local map<=8 entries; original arrays/stacks cleared; no raw names, IDs, frames, arguments or payload retained/exported.",
+  "inverse": "Future candidate must remove only the new map/scalar/predicate/export, restore exact removed historical marker bytes and reconstruct entire current base. Independently show all37 tests/generated scripts and original classifier bodies/partitions0..39/histograms/binding masks unchanged.",
+  "comparison": "Baseline UNKNOWN adds no code. Replacement removes a ~65-line obsolete context predicate and marker plumbing, requiring a small exact claimant predicate and invocation identity guard; maintenance remains three pinned source/class/debug points. Growing custom cost infrastructure, JFR or external attach is rejected.",
+  "limitations": "Approximate sampled presence only, not calls, simultaneous PGedge, completed schema validation, exclusive duration, holder/cause attribution or expected latency improvement. Historical Mat132 marker is retired, not reinterpreted.",
+  "review_gates": "Root+independent source review before any isolated author; exact live source/class/line bindings must still match. Metadata drift or inability to preserve same invocation/closure masks gives NO_GO/UNKNOWN, no broader framework.",
+  "retained_status": "C5 remains RED(lastclaim2369ms/finalize409), strict+79 defining PASS scope retained; no story/AC/lifecycle verdict.",
+  "actions": "Only this source-design JSON written. No source edits, builds/tests/SQL, sampler/runtime/tool attach/recording or new mandatory case.",
+  "budget": "Shared USD500 ceiling; actual billing unavailable."
+}

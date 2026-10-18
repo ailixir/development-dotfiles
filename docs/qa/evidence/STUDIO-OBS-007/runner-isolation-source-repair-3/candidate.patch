@@ -1,0 +1,11 @@
+--- before/studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts
++++ after/studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts
+@@ -106,7 +106,7 @@
+   const own=Object.getOwnPropertyDescriptor(holder,key),original=Reflect.get(holder,key) as (...args:unknown[])=>unknown;
+   if(typeof original!=='function')throw Error('METHOD');
+   Object.defineProperty(holder,key,{configurable:true,writable:true,value:new Proxy(original,{apply(target,receiver,args){return observer(receiver as object,args,()=>Reflect.apply(target,receiver,args));}})});
+-  return ()=>{if(own)Object.defineProperty(holder,key,own);else Reflect.deleteProperty(holder,key);};
++  return ()=>{if(own)Object.defineProperty(holder,key,own);else if(!Reflect.deleteProperty(holder,key))throw Error('DESCRIPTOR_RESTORE_UNCONFIRMED');};
+ }
+ async function harness(){
+   const acquired:{label:string;release:()=>Promise<unknown>}[]=[],constructionIssues:CleanupIssue[]=[],cleanupIssues:CleanupIssue[]=[],restores:(()=>void)[]=[];

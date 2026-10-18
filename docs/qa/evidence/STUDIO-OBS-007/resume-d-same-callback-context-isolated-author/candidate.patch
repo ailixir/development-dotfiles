@@ -1,0 +1,342 @@
+--- a/docs/specs/studio-observed-authoring/translation-design.md
++++ b/docs/specs/studio-observed-authoring/translation-design.md
+@@ -351,3 +351,12 @@
+ For the confirmed observeV2 callback, reuse the integrated closed-standard-Jackson request ownership helper. Select one owned whole envelope before the original bridge/path validation and retain it for all reads, hashes, materialization identity and refresh commands. Unsupported ownership keeps the original path. Only after the original bridge/path checks, prepare the SAME observation schema validation outside the owner transaction, retaining a private service-owned original-reference/snapshot/representation result. Success or a fixed code/status pair is consumed only at the original private observation validation point, after fresh outer owner/current/active/full-materialization/duplicate/refresh checks. Null, changed or unavailable preparation executes original validation; public/manual observe remains default original behavior.
+ 
+ The private callback and all current row/context/source/fence/lease/origin/generation/budget/evidence/accounting/atomic-write guards remain unchanged. Known INVALID_CONTRACT/422 and RUNTIME_INCOMPATIBLE/409 results carry no Throwable/raw data and are reconstructed only at the original guarded point; other RuntimeException selects original computation and Error is an explicit additional early observation. The extra owned envelope/snapshot/representation match and fallback may cost more; no latency or acceptance promise is made. Existing defining service/PostgreSQL tests and reviewed ownership support retain their tiers; no schema/config/protocol/DB/API/framework or mandatory Core/browser case changes. Source review and coordinator-owned checks precede integration.
++
++
++## Same-callback complete-context schema success -- isolated source decision
++
++Only the second runner-context schema traversal in one observeV2 callback may reuse first successful validation. The original first context, identity schema and envelope checks always run before capture. An opaque Materialization-owned private-constructor result has no context/schema getters and carries only a privately owned complete snapshot and representation plus its exact owner/contracts instance. Ownership uses the same private JSON parser with exact node-kind/tree/representation parity; unsupported or failed capture remains unavailable. This adds parsing/copy/matching work and an explicit possible fatal Error observation after the first identity checks, not an earlier success/refusal replacement.
++
++The second context repeats every original query, mapper, parse, live/worker/fence/singleton and complete21-property construction. Whole fresh canonicalization stays at the original validation point. Exact full JSON and representation match, INCLUDING lease and every nested array, may reuse only schema success under the same private no-eviction per-instance v3 runner-context cache epoch. Null/foreign/unavailable or ANY input mismatch runs the original full validation; legitimate lease renewal therefore falls back rather than refuses. Default/manual context and verify always remain strict. Fresh context is returned, never the snapshot. No extra transaction/query, parent-writer exclusion, lease composition, permission/result cache, new schema/epoch API or generalized certificate is introduced.
++
++All original guarded callback/state/source/fence/hash/generation/origin/budget/accounting/audit/command/transaction behavior remains. Existing defining fixtures cover actual fresh queries, default/first identity errors, exact-match-only traversal reuse and fallback/refusal branches; no new mandatory Core/browser case is added. Changes invalidate the historical context132 source/debug presence pin until coordinator review. Genuine SDK secret1000ms and AC13 timing remain unchanged; no latency or acceptance guarantee is claimed.
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -977,6 +977,18 @@
+       JsonNode observation,
+       GuidedSessionRepository.Session alreadyLocked,
+       ObservationValidation prepared) {
++    return observe(worker, id, fence, key, observation, alreadyLocked, prepared, null);
++  }
++
++  private JsonNode observe(
++      Authentication worker,
++      String id,
++      long fence,
++      String key,
++      JsonNode observation,
++      GuidedSessionRepository.Session alreadyLocked,
++      ObservationValidation prepared,
++      GuidedMaterializationService.VerifiedContext verifiedContext) {
+     validateObservationAtOriginalPoint(observation, prepared);
+     path(id, observation);
+     return internal(
+@@ -1043,7 +1055,11 @@
+                     .put("sessionId", id)
+                     .put(
+                         "contextId",
+-                        materialization.context(session.document()).path("contextId").asText())
++                        (verifiedContext == null
++                                ? materialization.context(session.document())
++                                : materialization.context(session.document(), verifiedContext))
++                            .path("contextId")
++                            .asText())
+                     .put("documentId", observation.path("documentId").asText())
+                     .put("generation", generation)
+                     .put("origin", observation.path("origin").asText())
+@@ -2041,7 +2057,8 @@
+           access.checkCurrent(session.document());
+           owner(worker, "owning-worker", session, fence);
+           active(session);
+-          materialization.verify(session.document(), request);
++          GuidedMaterializationService.VerifiedContext verifiedContext =
++              materialization.verifyAndCapture(session.document(), request);
+           JsonNode observation = request.path("observation");
+           if (repository.duplicate(id, "observations", key, GuidedContracts.hash(observation))
+               != null) {
+@@ -2061,7 +2078,7 @@
+                 "STALE_GENERATION",
+                 409);
+           }
+-          JsonNode result = observe(worker, id, fence, key, observation, session, prepared);
++          JsonNode result = observe(worker, id, fence, key, observation, session, prepared, verifiedContext);
+           if (intent.isMissingNode()) {
+             return result;
+           }
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java
+@@ -72,6 +72,31 @@
+   }
+ 
+   public ObjectNode context(JsonNode session) {
++    return context(session, null);
++  }
++
++  public ObjectNode context(JsonNode session, VerifiedContext verified) {
++    ObjectNode result = assembleContext(session);
++    if (verified != null && verified.owner == this && verified.contracts == contracts) {
++      GuidedContracts.canonical(result);
++      boolean matching = false;
++      try {
++        matching =
++            sameSnapshotNodeKinds(result, verified.snapshot)
++                && result.equals(verified.snapshot)
++                && result.toString().equals(verified.representation);
++      } catch (RuntimeException unavailable) {
++        // Unknown comparison cannot replace original full-context validation.
++      }
++      if (matching) {
++        return result;
++      }
++    }
++    contracts.validate("v3/runner-context", result);
++    return result;
++  }
++
++  private ObjectNode assembleContext(JsonNode session) {
+     String id = session.path("sessionId").asText();
+     List<ObjectNode> rows =
+         jdbc.query(
+@@ -129,7 +154,6 @@
+               id)
+           .forEach(value -> values.add(contracts.parse(value)));
+     }
+-    contracts.validate("v3/runner-context", result);
+     return result;
+   }
+ 
+@@ -161,6 +185,78 @@
+     }
+   }
+ 
++  public static final class VerifiedContext {
++    private final GuidedMaterializationService owner;
++    private final GuidedContracts contracts;
++    private final ObjectNode snapshot;
++    private final String representation;
++
++    private VerifiedContext(
++        GuidedMaterializationService owner,
++        GuidedContracts contracts,
++        ObjectNode snapshot,
++        String representation) {
++      this.owner = owner;
++      this.contracts = contracts;
++      this.snapshot = snapshot;
++      this.representation = representation;
++    }
++  }
++
++  private static boolean sameSnapshotNodeKinds(JsonNode original, JsonNode owned) {
++    if (original == null || owned == null || original.getClass() != owned.getClass()) {
++      return false;
++    }
++    if (original.isObject()) {
++      if (original.size() != owned.size()) {
++        return false;
++      }
++      for (var fields = original.fields(); fields.hasNext(); ) {
++        var field = fields.next();
++        if (!sameSnapshotNodeKinds(field.getValue(), owned.get(field.getKey()))) {
++          return false;
++        }
++      }
++    } else if (original.isArray()) {
++      if (original.size() != owned.size()) {
++        return false;
++      }
++      for (int index = 0; index < original.size(); index++) {
++        if (!sameSnapshotNodeKinds(original.get(index), owned.get(index))) {
++          return false;
++        }
++      }
++    }
++    return true;
++  }
++
++  private VerifiedContext captureVerifiedContext(ObjectNode validated) {
++    try {
++      String representation = validated.toString();
++      // The private fixed JSON parser owns all containers; exact node kinds reject opaque input.
++      JsonNode parsed = contracts.parse(representation);
++      if (!(parsed instanceof ObjectNode snapshot)
++          || !sameSnapshotNodeKinds(validated, snapshot)
++          || !validated.equals(snapshot)
++          || !snapshot.toString().equals(representation)) {
++        return null;
++      }
++      return new VerifiedContext(this, contracts, snapshot, representation);
++    } catch (RuntimeException unavailable) {
++      return null;
++    }
++  }
++
++  public VerifiedContext verifyAndCapture(JsonNode session, JsonNode envelope) {
++    ObjectNode validated = context(session);
++    ObjectNode expected = identity(validated);
++    for (var fields = expected.fields(); fields.hasNext(); ) {
++      var field = fields.next();
++      require(field.getValue().equals(envelope.path(field.getKey())), "STALE_FENCE", 409);
++    }
++    return captureVerifiedContext(validated);
++  }
++
+   public void bump(String id) {
+     jdbc.update(
+         "UPDATE studio_guided_materializations SET "
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
+@@ -954,6 +954,150 @@
+         .isInstanceOf(GuidedSessionException.class);
+   }
+ 
++  private void verifyFreshContextQueries(JdbcTemplate observed, String id) {
++    org.mockito.Mockito.verify(observed).query(
++        org.mockito.ArgumentMatchers.eq("SELECT * FROM studio_guided_materializations WHERE session_id=?"),
++        org.mockito.ArgumentMatchers.<org.springframework.jdbc.core.RowMapper<ObjectNode>>any(),
++        org.mockito.ArgumentMatchers.eq(id));
++    for (String table : List.of("studio_guided_allocations", "studio_guided_producers", "studio_guided_consumer_edges")) {
++      org.mockito.Mockito.verify(observed).queryForList(
++          org.mockito.ArgumentMatchers.eq("SELECT document::text FROM " + table
++              + " WHERE session_id=? ORDER BY document::text"),
++          org.mockito.ArgumentMatchers.eq(String.class), org.mockito.ArgumentMatchers.eq(id));
++    }
++  }
++
++  @Test
++  void sameCallbackContextSuccessStillReadsAllRowsAndDefaultsStayStrict() {
++    String id = observing();
++    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
++    JdbcTemplate queried = org.mockito.Mockito.spy(jdbc);
++    var selected = new GuidedMaterializationService(queried, checked);
++    repository.transaction(() -> {
++      ObjectNode session = repository.lock(id).document();
++      var proof = selected.verifyAndCapture(session, frozenCallbackIdentities.get(id));
++      assertThat(proof).isNotNull();
++      org.mockito.Mockito.clearInvocations(queried, checked);
++      ObjectNode fresh = selected.context(session, proof);
++      assertThat(fresh.path("sessionId").asText()).isEqualTo(id);
++      verifyFreshContextQueries(queried, id);
++      org.mockito.Mockito.verify(checked, org.mockito.Mockito.never()).validate(
++          org.mockito.ArgumentMatchers.eq("v3/runner-context"), org.mockito.ArgumentMatchers.any());
++      selected.context(session);
++      org.mockito.Mockito.verify(checked).validate(
++          org.mockito.ArgumentMatchers.eq("v3/runner-context"), org.mockito.ArgumentMatchers.any());
++      selected.verify(session, frozenCallbackIdentities.get(id));
++      org.mockito.Mockito.verify(checked, org.mockito.Mockito.times(2)).validate(
++          org.mockito.ArgumentMatchers.eq("v3/runner-context"), org.mockito.ArgumentMatchers.any());
++      return null;
++    });
++  }
++
++  @Test
++  void completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack() {
++    String id = observing();
++    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
++    var selected = new GuidedMaterializationService(jdbc, checked);
++    repository.transaction(() -> {
++      ObjectNode session = repository.lock(id).document();
++      var proof = selected.verifyAndCapture(session, frozenCallbackIdentities.get(id));
++      assertThat(proof).isNotNull();
++      ObjectNode renewed = session.deepCopy();
++      String lease = Instant.parse(session.path("owner").path("leaseExpiresAt").asText())
++          .plusMillis(1).toString();
++      renewed.withObject("/owner").put("leaseExpiresAt", lease);
++      ObjectNode arrays = session.deepCopy();
++      arrays.withObject("/scope").withArray("approvedOrigins").add("https://additional.example.test");
++      ObjectNode reordered = session.deepCopy();
++      ObjectNode versions = (ObjectNode) reordered.path("versions");
++      JsonNode contract = versions.remove("contract");
++      versions.set("contract", contract);
++      for (ObjectNode changed : List.of(renewed, arrays, reordered)) {
++        org.mockito.Mockito.clearInvocations(checked);
++        ObjectNode fresh = selected.context(changed, proof);
++        assertThat(fresh.path("sessionId").asText()).isEqualTo(id);
++        org.mockito.Mockito.verify(checked).validate(
++            org.mockito.ArgumentMatchers.eq("v3/runner-context"), org.mockito.ArgumentMatchers.any());
++      }
++      var foreign = new GuidedMaterializationService(jdbc, checked)
++          .verifyAndCapture(session, frozenCallbackIdentities.get(id));
++      org.mockito.Mockito.clearInvocations(checked);
++      selected.context(session, foreign);
++      selected.context(session, null);
++      org.mockito.Mockito.verify(checked, org.mockito.Mockito.times(2)).validate(
++          org.mockito.ArgumentMatchers.eq("v3/runner-context"), org.mockito.ArgumentMatchers.any());
++      int initialRevision = selected.context(session).path("materializationRevision").asInt();
++      selected.bump(id); // Actual monotone materialization revision, guarded in PostgreSQL.
++      org.mockito.Mockito.clearInvocations(checked);
++      assertThat(selected.context(session, proof).path("materializationRevision").asInt())
++          .isEqualTo(initialRevision + 1);
++      org.mockito.Mockito.verify(checked).validate(
++          org.mockito.ArgumentMatchers.eq("v3/runner-context"), org.mockito.ArgumentMatchers.any());
++      return null;
++    });
++  }
++
++  @Test
++  void contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal() {
++    String id = observing();
++    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
++    var selected = new GuidedMaterializationService(jdbc, checked);
++    repository.transaction(() -> {
++      ObjectNode session = repository.lock(id).document();
++      ObjectNode wrongIdentity = frozenCallbackIdentities.get(id).deepCopy().put("contextRevision", 2);
++      assertThatThrownBy(() -> selected.verifyAndCapture(session, wrongIdentity)).hasMessage("STALE_FENCE");
++      ObjectNode wrongSchema = session.deepCopy();
++      wrongSchema.withObject("/owner").put("leaseExpiresAt", "fixed-invalid-time");
++      assertThatThrownBy(() -> selected.verifyAndCapture(wrongSchema, frozenCallbackIdentities.get(id)))
++          .hasMessage("INVALID_CONTRACT");
++      var proof = selected.verifyAndCapture(session, frozenCallbackIdentities.get(id));
++      assertThat(proof).isNotNull();
++      ObjectNode nonfinite = session.deepCopy();
++      nonfinite.withObject("/limits").put("maxObservationBytes", Double.NaN);
++      org.mockito.Mockito.clearInvocations(checked);
++      assertThatThrownBy(() -> selected.context(nonfinite, proof)).hasMessage("INVALID_CONTRACT");
++      org.mockito.Mockito.verify(checked, org.mockito.Mockito.never()).validate(
++          org.mockito.ArgumentMatchers.eq("v3/runner-context"), org.mockito.ArgumentMatchers.any());
++      selected.stop(id); // Same actual row becomes nonlive; old proof cannot authorize it.
++      assertThatThrownBy(() -> selected.context(session, proof)).hasMessage("STALE_FENCE");
++      return null;
++    });
++  }
++
++  @Test
++  void observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults() {
++    String id = observing();
++    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
++    var selected = new GuidedMaterializationService(jdbc, checked);
++    service.installBridge(selected, new GuidedPreparationStore(jdbc, contracts),
++        new GuidedBindingStore(jdbc, contracts, selected), assignments);
++    JsonNode observed = service.observeV2(worker, id, 1, "same-context", observationEnvelope(id, 1));
++    assertThat(observed.path("state").asText()).isEqualTo("PROPOSING");
++    org.mockito.Mockito.verify(checked).validate(
++        org.mockito.ArgumentMatchers.eq("v3/runner-context"), org.mockito.ArgumentMatchers.any());
++    repository.transaction(() -> {
++      ObjectNode session = repository.lock(id).document();
++      ObjectNode customSession = session.deepCopy();
++      ObjectNode customVersions =
++          new ObjectNode(com.fasterxml.jackson.databind.node.JsonNodeFactory.instance) {};
++      customVersions.setAll((ObjectNode) customSession.path("versions"));
++      customSession.set("versions", customVersions);
++      assertThat(selected.verifyAndCapture(customSession, frozenCallbackIdentities.get(id))).isNull();
++      RuntimeException unavailable = new IllegalStateException("fixed-capture-unavailable");
++      org.mockito.Mockito.doThrow(unavailable).when(checked)
++          .parse(org.mockito.ArgumentMatchers.contains("\"materializationRevision\":"));
++      var absent = selected.verifyAndCapture(session, frozenCallbackIdentities.get(id));
++      assertThat(absent).isNull();
++      selected.context(session, absent);
++      Error fatal = new AssertionError("fixed-capture-fatal");
++      org.mockito.Mockito.doThrow(fatal).when(checked)
++          .parse(org.mockito.ArgumentMatchers.contains("\"materializationRevision\":"));
++      assertThatThrownBy(() -> selected.verifyAndCapture(session, frozenCallbackIdentities.get(id)))
++          .isSameAs(fatal);
++      return null;
++    });
++  }
++
+   private GuidedSessionService observationValidationService(GuidedContracts validationContracts) {
+     var selected =
+         new GuidedSessionService(

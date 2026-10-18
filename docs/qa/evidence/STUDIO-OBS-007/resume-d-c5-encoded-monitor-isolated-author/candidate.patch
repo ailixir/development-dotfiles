@@ -1,0 +1,127 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -12827,6 +12827,7 @@
+     private final Map<String, byte[]> produced = new java.util.LinkedHashMap<>();
+     private final List<C5Stream> streams = new java.util.ArrayList<>();
+     private final C5CanaryStream encoded;
++    private final Object encodedMonitor = new Object();
+     private final ch.qos.logback.classic.Logger rootLogger;
+     private final ch.qos.logback.classic.Logger appLogger;
+     private final ch.qos.logback.classic.Level rootLevel, appLevel;
+@@ -12901,7 +12902,7 @@
+           new java.io.OutputStream() {
+             @Override
+             public void write(int value) {
+-              synchronized (C5Capture.this) {
++              synchronized (encodedMonitor) {
+                 try {
+                   encoded.write(value);
+                 } catch (RuntimeException invalid) {
+@@ -12912,7 +12913,7 @@
+ 
+             @Override
+             public void write(byte[] bytes, int offset, int length) {
+-              synchronized (C5Capture.this) {
++              synchronized (encodedMonitor) {
+                 try {
+                   encoded.write(bytes, offset, length);
+                 } catch (RuntimeException invalid) {
+@@ -12923,7 +12924,7 @@
+ 
+             @Override
+             public void close() {
+-              synchronized (C5Capture.this) {
++              synchronized (encodedMonitor) {
+                 encoded.closeInput();
+               }
+               // Original replacement/encoder footer closes this target; no raw history retained.
+@@ -13284,7 +13285,9 @@
+         assertThat(traceArmed && rootTraceObserved && appTraceObserved)
+             .as("actual original root/app TRACE levels during collection")
+             .isTrue();
+-        encoded.assertClean(false);
++        synchronized (encodedMonitor) {
++          encoded.assertClean(false);
++        }
+         streamedLogsCollected = true;
+         sinks.putAll(produced);
+         // Original encoded logs were fully streamed; no fake raw-log Map entry.
+@@ -13446,6 +13449,19 @@
+     }
+ 
+     void writeNumericEvidence() throws Exception {
++      long encodedBytes, encodedWriteCalls, encodedPatternHits, encodedInvalidWrites;
++      boolean encodedObserverFailed, captureTargetClosed;
++      int patternCount, patternBytes;
++      synchronized (encodedMonitor) {
++        encodedBytes = encoded.encodedBytes;
++        encodedWriteCalls = encoded.writeCalls;
++        encodedPatternHits = encoded.hits;
++        encodedInvalidWrites = encoded.invalidWrites;
++        encodedObserverFailed = encoded.failed;
++        captureTargetClosed = encoded.inputClosed;
++        patternCount = encoded.patterns.size();
++        patternBytes = encoded.patternBytes;
++      }
+       ObjectNode evidence =
+           C.object()
+               .put("mappedAppenders", 1)
+@@ -13453,16 +13469,16 @@
+               .putNull("appEvents")
+               .put("eventCountsStatus", "SUPPORT_UNOBSERVED")
+               .put("logCoverage", "STREAMED_ORIGINAL_ENCODED_OUTPUT")
+-              .put("encodedBytes", encoded.encodedBytes)
+-              .put("encodedWriteCalls", encoded.writeCalls)
+-              .put("encodedPatternHits", encoded.hits)
+-              .put("encodedInvalidWrites", encoded.invalidWrites)
+-              .put("encodedObserverFailed", encoded.failed)
++              .put("encodedBytes", encodedBytes)
++              .put("encodedWriteCalls", encodedWriteCalls)
++              .put("encodedPatternHits", encodedPatternHits)
++              .put("encodedInvalidWrites", encodedInvalidWrites)
++              .put("encodedObserverFailed", encodedObserverFailed)
+               .put("streamedLogsCollected", streamedLogsCollected)
+               .put("streamedLogsFinalChecked", streamedLogsFinalChecked)
+-              .put("captureTargetClosed", encoded.inputClosed)
+-              .put("patternCount", encoded.patterns.size())
+-              .put("patternBytes", encoded.patternBytes)
++              .put("captureTargetClosed", captureTargetClosed)
++              .put("patternCount", patternCount)
++              .put("patternBytes", patternBytes)
+               .put("rootTraceObserved", rootTraceObserved)
+               .put("appTraceObserved", appTraceObserved)
+               .put("httpBodies", httpBodies)
+@@ -13635,7 +13651,9 @@
+                 assertThat(appender.getOutputStream() == originalStream)
+                     .as("original output target actually restored")
+                     .isTrue();
+-                encoded.assertClean(true);
++                synchronized (encodedMonitor) {
++                  encoded.assertClean(true);
++                }
+                 streamedLogsFinalChecked = true;
+                 var finalBytes = new java.util.LinkedHashMap<>(produced);
+                 for (String value : values) {
+@@ -13647,12 +13665,20 @@
+         p3AttemptTeardown(failures, this::writeNumericEvidence);
+       } finally {
+         synchronized (this) {
++          boolean targetClosed = false;
++          if (producersDrained) {
++            synchronized (encodedMonitor) {
++              targetClosed = encoded.inputClosed;
++            }
++          }
+           if (producersDrained
+-              && encoded.inputClosed
++              && targetClosed
+               && appender.getOutputStream() == originalStream) {
+             p3AttemptTeardown(
+                 failures, () -> Files.deleteIfExists(TEMP.resolve("c5-private-values.json")));
+-            encoded.wipe();
++            synchronized (encodedMonitor) {
++              encoded.wipe();
++            }
+             produced.clear();
+           } else {
+             cleanupUnconfirmed = true;

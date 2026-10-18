@@ -1,0 +1,406 @@
+{
+  "schema": 1,
+  "story": "STUDIO-OBS-014",
+  "reviewer": "Quinn (independent QA)",
+  "updated": "2026-10-14T22:24:37.706663+00:00",
+  "verdict": "CONCERNS",
+  "waiver": {
+    "active": false
+  },
+  "decision": "Required behavior is supported by the frozen S4c source, independently parsed executed tests and documented compositional evidence. Former high side-effect bypass and absence of common refusal/confirmation integration are addressed. Nonblocking dedicated-case coverage and operational/documentation residuals remain explicitly owned; this is not external approval or deployment authorization.",
+  "methodology": {
+    "skill": "review-story/SKILL.md; qa-gate.md; qa-review-story.md; story-lifecycle.md",
+    "anti_self_review": "Reviewer made no product/test edits and was not the implementing lane. Only own QA evidence, gate, QA Results and canonical lifecycle updated.",
+    "scope": "Read prior draft all findings; latest B14/R14/C2a/C2b/D ledgers and architect/PO rulings; inspect current code, tests, SQL, docs and frozen outputs. No Gradle, builds, fixtures/deployment or full gates rerun.",
+    "source_binding": {
+      "head": "734ad704f",
+      "s4c_identity": "af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137",
+      "source_files_independently_compared": 1556,
+      "mismatches": 0,
+      "manifest": "review-source-manifest.json",
+      "protected_story": "story-review-identity.json"
+    },
+    "coderabbit": "Unavailable: neither PATH coderabbit nor executable ~/.local/bin/coderabbit exists on this Darwin environment. Independent manual security/requirements/source review used per story fallback, not a claimed automated pass.",
+    "evidence_hygiene": "Raw XML/logs remain in coordinator scratchpad. Repository evidence includes hashes and normalized summaries only; no private host paths copied.",
+    "resource_limits": "Bounded final review; no delegation, commits, pushes, database recreation, or external messages. Whole-wave USD 500 ceiling acknowledged; actual billing unavailable."
+  },
+  "verification": {
+    "backend": {
+      "tests": 2084,
+      "passed": 2059,
+      "skipped": 25,
+      "failures": 0,
+      "errors": 0
+    },
+    "backend_classes": 285,
+    "backend_gate": "S4c clean check BUILD SUCCESSFUL 50m31s; Jacoco verification/report executed; checkstyle and spotless passed.",
+    "runner": {
+      "unit": {
+        "passed": 1351,
+        "skipped": 29
+      },
+      "fixtures": {
+        "passed": 225,
+        "skipped": 9
+      },
+      "deployment": {
+        "passed": 313,
+        "skipped": 0
+      },
+      "tsc_exit": 0,
+      "eslint_exit": 0,
+      "dist_sha256": "df65b6cd32e2361608f37707b95103580bc1bbf66d5a12ed3b440c04213c1db5"
+    },
+    "frontend": {
+      "passed": 701,
+      "skipped": 0,
+      "files": 56,
+      "tsc_exit": 0,
+      "eslint_exit": 0
+    },
+    "skips": "Backend 25 + runner unit 29 + fixtures 9 are explicitly excluded from passed counts. Provider real-model and external readiness skipped cases grant no compliance/benchmark credit.",
+    "unrelated_user_change": "useUrlListState clearAll and two tests are within the S4c frozen source and green; unrelated to 014, preserved without edits.",
+    "joined_old_new": "joined-old-new.json",
+    "guard_tallies": {
+      "Planning": {
+        "recorded_tests": 49,
+        "admitted_clicks": 5,
+        "planted_SIDE_EFFECT_DENIED": 5,
+        "confirmFirst": 2,
+        "unplanted_refusals": 0
+      },
+      "Replay": {
+        "recorded_tests": 40,
+        "admitted_clicks": 55,
+        "refusals": 0,
+        "confirmFirst": 0
+      },
+      "unit_denominator": 6,
+      "exclusions": [
+        "GuidedSessionIT and GuidedBridgeIntegrationTest have no translation guard path",
+        "Four hostile semanticCases excluded from grounded corpus only",
+        "Diagnostic operation-kind enum is not authored action"
+      ]
+    },
+    "source_drift_check": "No source differences against coordinator frozen start manifest."
+  },
+  "acceptance_criteria": {
+    "AC-1": {
+      "status": "MET",
+      "evidence": [
+        "ObservationPolicyIT 11/11: unapproved/pending refused, version approval/audit and origin subset",
+        "GuidedGovernanceMigrationIT 26/26: immutable dense versions, separate approver, trigger-only audit and approved CSI freeze",
+        "GuidedSessionIT v2 materialized-context case; Planning bootstrap refusal and timeout control",
+        "Runner policyHash 6/6, transport 14/14, guidedMain/config refusal and guided-dataflow 3/3; rules/applicationPolicy rejected before worker/runtime; no rule can widen frozen policy"
+      ],
+      "limits": "No claim that future schema F03 exact-field reads exist. No-read fixture proves source is not exported and Refresh still is; its TARGET_CHANGED branch is conditional and not exercised on a nonexistent node, as architect ruled."
+    },
+    "AC-2": {
+      "status": "MET AS DOCUMENT",
+      "evidence": [
+        "guided-data-flow.md discloses metadata export, sanitizer/password/known-secret controls, video, audit, publication copies, indefinite R-1 stores, interim R-2 policies and ED-01"
+      ],
+      "limits": "External Security/Compliance approval is not obtained; OBS-010 owns it."
+    },
+    "AC-3": {
+      "status": "MET BY COMPONENT + DATABASE EVIDENCE",
+      "evidence": [
+        "GuidedObservationPrunerIT 3/3 through actual bean/function: pruned results unchanged, published rows byte-identical, ObservedRevisionVerifier still verifies, window/FINALIZING negatives",
+        "GuidedGovernanceMigrationIT nonempty never-published copies deleted, published evidence immutable, terminal safe_result nulled only, seven retained keys; late writes refused EXPIRED"
+      ],
+      "limits": "The pruner test itself starts with zero copy rows; non-vacuous deletion proof is the migration IT. It verifies persisted revision eligibility after prune rather than launching a new browser replay specifically after pruning; immutable bytes plus green replay suite provide composed evidence."
+    },
+    "AC-4": {
+      "status": "MET WITH TEST-001 COVERAGE CONCERN",
+      "evidence": [
+        "Pure guard executes planted Delete account/Open reports and ungrounded target tests",
+        "Shared integration refusal path proven under DENY; source proves guard runs before admission",
+        "S4c joined counts and exact tallies; six-case complete/name-excluded unit denominator"
+      ],
+      "limits": "Dedicated structurally valid destructive/ungrounded integrated dispatch case was not executed. No such claim or waiver made."
+    },
+    "AC-5": {
+      "status": "MET WITH TEST-001 COVERAGE CONCERN",
+      "evidence": [
+        "Governed vocabulary constrained by V19/policy document",
+        "Pure tests Save vs Delete, authored Delete allowed and Submit order denied execute green",
+        "Common guard exception/audit/terminal branch is exercised by DENY ITs"
+      ],
+      "limits": "Exact destructive reason has unit evidence plus common-branch integration; direct destructive integration remains tracked."
+    },
+    "AC-6": {
+      "status": "MET",
+      "evidence": [
+        "AR-SEC001-FM U1-U7 and 2,520-node monotonic set in Guard 21/21",
+        "Five DENY real controls, two CLARIFY_FIRST workflows, all in Planning 49/49",
+        "ALLOW OBS-007 learning/replay and audit canary within Replay 40/40; prior recorder-fault teardown is fixed in final S4c"
+      ],
+      "limits": "DENY conservatively refuses buttons/links/toggles and Enter; native semantics cannot constrain arbitrary JS handlers on other keys/hover. Scope and residual are architect-ruled and PO acknowledged. Author copy belongs to OBS-008."
+    },
+    "AC-7": {
+      "status": "MET WITH TEST-005 LOW COVERAGE CONCERN",
+      "evidence": [
+        "Backend emits AUTHORED/SAVED_INPUT/PAGE; PAGE adds sanitized role/region",
+        "Closed clarification schema and generated contracts/fixtures; GuidedWireContractTest 7/7, StudioContractTest 13/13",
+        "Planning confirmation asserts AUTHORED label before dispatch"
+      ],
+      "limits": "Direct SAVED_INPUT emitter assertion remains open; secret references are IDs only."
+    },
+    "AC-8": {
+      "status": "MET",
+      "evidence": [
+        "RateLimitClassifierTest 5/5 for EXECUTE",
+        "GuidedCsiBudgetIT 5/5: two replicas, day/start refusal, real reservation hook mid-session failure, conditional monotone charges, ceiling invariant",
+        "V19 serialized CSI guard + append-only token days; BUDGET_EXCEEDED and Retry-After on database UTC clock"
+      ],
+      "limits": "Sizing is OBS-009/OPS-001, unchanged defaults."
+    },
+    "AC-9": {
+      "status": "MET",
+      "evidence": [
+        "StudioApiIT 8/8 includes missing key 400 before writes and same-key replay body",
+        "StudioExecuteIdempotencyFilterTest 2/2; OpenAPI mandatory key and current SHA pin match"
+      ],
+      "limits": "D-2b cached response reauthorization remains open; no implied security closure."
+    },
+    "AC-10": {
+      "status": "MET",
+      "evidence": [
+        "StudioActionAuditTest 5/5: closed 16 keys, no raw labels, approved origin, after-commit vs refusal timing",
+        "Replay auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass passed: nonempty registered OBS-007 canaries, admitted+replay events, exact key set, <=1KiB, no canary text",
+        "Planning refusal audit proves refused event under policy denial"
+      ],
+      "limits": "Actual SIEM provisioning/retention is external. Dictionary recovery residual SEC-003 disclosed."
+    },
+    "AC-11": {
+      "status": "MET AS DESIGN NOTE ONLY",
+      "evidence": [
+        "Dated artifact-hmac-design-note.md: Vault Transit choice, ObservedRevisionVerifier verification point, rotation/min-key-version and environment gate",
+        "Architect ar-ac11-and-refusal-codes ratifies design-only scope; F04 backlog named"
+      ],
+      "limits": "No HMAC implementation; E1-E8 UNCONFIRMED. F04 is pilot-blocking by default unless explicitly accepted in OBS-010; this gate gives no deployment approval."
+    },
+    "P1_legacy_admission": {
+      "status": "MET",
+      "evidence": [
+        "claimAdmission route/op and claim() absent; claimObserved-only admitted path retained",
+        "StudioAuthorizationIT legacy-route 404/405 no-write negative passed; class 28/28",
+        "AdmissionCasIT 14/14; old->new names and refusal-code changes architect-ratified; 43 public OpenAPI operations with matching confinement SHA"
+      ]
+    },
+    "dead_v2_matcher": {
+      "status": "MET",
+      "evidence": [
+        "Independent rg: zero production api/v2/studio hits, exactly three test-only hits in StudioExecuteIdempotencyFilterTest Javadoc/named negative method",
+        "Old StudioV2IdempotencyFilterTest absent; theRemovedV2PrefixIsNoLongerCovered passed",
+        "Other matcher scope unchanged from inherited baseline; D-2b not narrowed"
+      ]
+    }
+  },
+  "prior_findings": [
+    {
+      "id": "SEC-001",
+      "original_severity": "high",
+      "status": "RESOLVED",
+      "basis": "Guard now applies AR-SEC001-FM option B: only three proven non-activating click triples are exempt, Enter or any in-form press is side-effecting. Unlabelled forms, form=, role spoofing and descendants fail closed. S4c Guard 21/21 includes 2,520-node closed-world monotonicity enumeration; Planning executes five DENY controls and two one-time confirmations. PO acknowledgement recorded in 0.1.10. Patch 14 changes only backend guard/service/tests; no runner or contract hunk."
+    },
+    {
+      "id": "TEST-001",
+      "original_severity": "high",
+      "severity": "medium",
+      "status": "PARTIALLY RESOLVED; NONBLOCKING COVERAGE CONCERN",
+      "owner": "@dev B14; @po/coordinator owns placement",
+      "placement": "Proposed STUDIO-OBS-011 test-harness follow-up; not an already-added AC",
+      "basis": "Five real DENY refusals assert 422 POLICY_DENIED, FAILED, zero Submit actions/admissions and no submit side effect, plus refused-action audit. Two CLARIFY_FIRST cases assert a single AUTHORED confirmation before admission and exactly one real submit afterward. The shared guardAction -> exception -> stopRejected branch is exercised. Pure S4c guard tests independently assert ungrounded and destructive refusal and authored destructive allowance. Code inspection proves guardAction precedes reserveObligation/admitAndDispatch and all GuidedPolicyReason values share that terminal path. This closes the original high risk by compositional evidence, not by claiming the named Delete-account scenario ran end-to-end. No integrated UNGROUNDED_TARGET or DESTRUCTIVE_VERB event occurred: hostileCurrentPageCannotSubstituteAnotherPermittedEffect fails earlier INVALID_CONTRACT/BINDING_ORDER. The missing dedicated integration remains an explicit medium coverage improvement; no AC is waived.",
+      "action": "Add a structurally valid ungrounded/destructive proposal integration that reaches the guard, asserts zero prepare/admission and the exact audited reason."
+    },
+    {
+      "id": "SEC-002",
+      "original_severity": "medium",
+      "status": "RESOLVED",
+      "basis": "An element target missing from current sanitized observation is rejected UNGROUNDED_TARGET before locator fallback. The real call passes targetNodeId. anElementTargetMissingFromTheObservationIsRefusedUngrounded passed for click/press/check with present-node control."
+    },
+    {
+      "id": "TEST-002",
+      "original_severity": "medium",
+      "status": "RESOLVED",
+      "basis": "GuidedCsiBudgetIT.aDayExhaustedMidSessionRefusesTheNextReservationAndEndsTheSessionBudgetExceeded passed; production reservation hook refuses after daily exhaustion, ends FAILED BUDGET_EXCEEDED, and changes neither CSI nor session counters. Class 5/5."
+    },
+    {
+      "id": "REQ-001",
+      "original_severity": "medium",
+      "status": "RESOLVED",
+      "basis": "GuidedSessionIT.theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash passed with materialized v2 document/hash plus unchanged frozen v1. Planning definite bootstrap refusal passed (one context, 409 retryable:false, FAILED RUNTIME_INCOMPATIBLE, no later runner/model requests). Real 15-second timeout negative control passed with exactly three context deliveries then terminal exhaustion. Runner policyHash 6/6 separately proves mismatched or switched policy rejection."
+    },
+    {
+      "id": "REQ-002",
+      "original_severity": "medium",
+      "status": "RESOLVED",
+      "basis": "S4c joined class counts independently compared to S4: Planning 40->49; Replay 39->40; Session 43->44; Bridge 37->37, no removed cases or skips. Frozen-source GuardDecisionTally reports Planning 5 admitted clicks, 5 planted SIDE_EFFECT_DENIED and 2 confirmations; Replay 55 admitted clicks and zero refusals/confirmations. No unplanted refusal. Session/Bridge construct no GuidedTranslationService and are name-excluded from guard reachability. Six-case unit denominator includes P14 CONTROL_VALUE. Four hostile semantic cases excluded only from grounded denominator. Exact snapshots and named additions retained."
+    },
+    {
+      "id": "REL-001",
+      "original_severity": "medium",
+      "severity": "medium",
+      "status": "OPEN; NONBLOCKING",
+      "owner": "@dev runner/backend; @qa",
+      "placement": "STUDIO-OBS-009 AC-12 operational observation, also coordinate OBS-013 launch flake",
+      "basis": "Historical S3b runner 503 was never attributed. S4c Replay 40/40 includes the formerly affected ordinary dispatch and no assertion failure recurred. This green run does not establish a cause or provide a complete correlated coordinator-code inventory. R13 separately reported an unexplained CONTEXT_LOST under high load; do not conflate it with the 503 or label either fixed. Both observed outcomes fail closed.",
+      "action": "Collect correlated admission/coordinator codes and load in OBS-009; an unexplained recurrence requires attribution before accepting that failed run."
+    },
+    {
+      "id": "OPS-001",
+      "original_severity": "medium",
+      "severity": "medium",
+      "status": "OPEN; RULED CAPACITY TRADEOFF",
+      "owner": "@architect + @pm",
+      "placement": "STUDIO-OBS-009 D-C benchmark and existing tuning path",
+      "basis": "Persisted defaults remain concurrent 3, input 5,242,880, output 640,000; charging full reservation ceilings without refund is ruled behavior. About 21 controlled sessions/day matches the ruled 20 full-ceiling sessions, not an implementation bug. Real-model capacity is unmeasured.",
+      "action": "Size from D-C measurements with architect ruling/PM acknowledgement; retain UTC-midnight Retry-After semantics."
+    },
+    {
+      "id": "ARCH-001",
+      "original_severity": "low",
+      "severity": "low",
+      "status": "OPEN",
+      "owner": "@architect",
+      "placement": "STUDIO-OBS-014 gate follow-up",
+      "basis": "Guard order is absent target -> destructive -> grounding -> stance. AR-SEC001-FM explicitly says it does not rule ARCH-001. Both applicable destructive/ungrounded paths refuse before dispatch, so this is closed-code precedence documentation, not a bypass.",
+      "action": "Ratify precedence in a dated ruling."
+    },
+    {
+      "id": "TEST-003",
+      "original_severity": "low",
+      "severity": "low",
+      "status": "OPEN",
+      "owner": "@dev runner",
+      "placement": "Proposed STUDIO-OBS-011 test-harness follow-up; @po/coordinator placement",
+      "basis": "Same-key replay after a refused context returns IDENTITY_MISMATCH because no runtime exists; test permits SCHEMA too. Backend sends fresh context keys, so production callers do not depend on this branch; both codes fail closed.",
+      "action": "Assert exact replay code or document the replay normalization rule."
+    },
+    {
+      "id": "TEST-004",
+      "original_severity": "low",
+      "status": "RESOLVED",
+      "basis": "ObservationPolicyRouteIT.everyPolicyRouteRefusesAnUnauthenticatedRequest401AndWritesNothing passed: GET lookup/read and POST create/version/approval each return 401 and create no policy. Four test methods, five route probes inside this method."
+    },
+    {
+      "id": "TEST-005",
+      "original_severity": "low",
+      "severity": "low",
+      "status": "OPEN",
+      "owner": "@dev B14",
+      "placement": "Proposed STUDIO-OBS-011 test-harness follow-up; OBS-008 consumes labels",
+      "basis": "SAVED_INPUT emission is present and contract fixture proves the closed shape, but no direct backend assertion for that source kind. AUTHORED confirmation and PAGE flow are covered.",
+      "action": "Add a configuration-reference clarification case asserting SAVED_INPUT and no secret value."
+    },
+    {
+      "id": "TEST-006",
+      "original_severity": "low",
+      "severity": "low",
+      "status": "OPEN",
+      "owner": "@dev test-harness",
+      "placement": "STUDIO-OBS-011 harness split",
+      "basis": "ReplayIT still uses static mutable primaryCsi/coreRole. Isolation/cleanup assertions and fresh CSI stop silent cross-test budget contamination; a failure can still cascade. S4c complete class is green.",
+      "action": "Move identity/CSI state to per-test fixture ownership during harness split."
+    },
+    {
+      "id": "DB-001",
+      "original_severity": "low",
+      "severity": "low",
+      "status": "OPEN",
+      "owner": "@data-engineer",
+      "placement": "STUDIO-OBS-014 migration documentation; follow-up before altering constraints",
+      "basis": "V19 document/observation hash equality and regex CHECKs remain inline and get generated PostgreSQL names. Enforcement proven by 26 migration cases; issue is future migration maintainability.",
+      "action": "Record actual catalog names before any follow-up alteration; no post-gate migration rewrite implied."
+    },
+    {
+      "id": "MNT-001",
+      "original_severity": "low",
+      "severity": "low",
+      "status": "OPEN",
+      "owner": "coordinator",
+      "placement": "Post-S4 workspace cleanup, tracked by STUDIO-OBS-014 gate",
+      "basis": "Literal empty contracts/v3/*.json directory remains. Current readers filter .schema.json, git cannot track it, no present product effect.",
+      "action": "Remove the empty directory in coordinator-owned cleanup; QA did not mutate it."
+    },
+    {
+      "id": "SEC-003",
+      "original_severity": "low",
+      "severity": "low",
+      "status": "OPEN; DISCLOSED",
+      "owner": "Security & Compliance; @pm if mitigation requested",
+      "placement": "STUDIO-OBS-010 compliance review; separately place any keyed audit-label design",
+      "basis": "targetLabelHash is truncated unkeyed SHA-256 of scopeHash:label and common labels remain dictionary-recoverable. Data-flow doc discloses this. Correction to prior draft: STUDIO-OBS-F04 is artifact HMAC, not audit-label HMAC, so F04 does not itself close SEC-003.",
+      "action": "Keep disclosure in compliance decision; obtain separate placement if keyed label hashing is required."
+    }
+  ],
+  "named_external_and_product_residuals": [
+    {
+      "item": "D-2b cached 2xx reauthorization",
+      "owner": "@qa security + platform/backend",
+      "placement": "UI-STUDIO-GA-PLAN D-2b / OBS-010 security readiness",
+      "status": "OPEN; governed policy POST cache is also in scope. Five policy operations are two GET and three POST; prior draft incorrectly called all five POST."
+    },
+    {
+      "item": "R-1 indefinite guided stores",
+      "owner": "@pm/@architect; Security & Compliance",
+      "placement": "STUDIO-OBS-F01; OBS-010 AC-4",
+      "status": "Disclosed; becomes release blocker if compliance rejects retention."
+    },
+    {
+      "item": "R-2 learning versus replay policy sources",
+      "owner": "@pm/@architect",
+      "placement": "STUDIO-OBS-F02; mixed-mode touchpoint OBS-015",
+      "status": "Interim: governed origins subset of TrustedPolicy; narrowing learning does not revoke published replay."
+    },
+    {
+      "item": "Exact-field nonscalar reads",
+      "owner": "@pm/@architect",
+      "placement": "STUDIO-OBS-F03, measured in OBS-009 AC-7",
+      "status": "Not in OBS-014; mounted rules cannot bypass governance."
+    },
+    {
+      "item": "Artifact HMAC / external E1-E8",
+      "owner": "Platform/SRE and PUT Core for E4; @pm/@po",
+      "placement": "STUDIO-OBS-F04; OBS-010 pilot readiness",
+      "status": "Design only; E1-E8 UNCONFIRMED, implementation gate E1-E4. No deployed enforcement claim."
+    },
+    {
+      "item": "Compliance approval and gateway retention ED-01",
+      "owner": "Security & Compliance, gateway owner",
+      "placement": "STUDIO-OBS-010",
+      "status": "Approval not obtained; gateway retention unresolved."
+    },
+    {
+      "item": "SIEM sink and audit-retention Q3",
+      "owner": "Platform/SRE + Security",
+      "placement": "OBS-009 ops inputs / OBS-010 sign-off",
+      "status": "Actual sink not validated by local audit-canary tests."
+    },
+    {
+      "item": "Policy refusal/confirmation UX",
+      "owner": "@dev frontend + @ux-design-expert",
+      "placement": "STUDIO-OBS-008 inherited obligation from PO ruling B",
+      "status": "Copy/rendering obligation remains there; no frontend completion claimed by this gate."
+    }
+  ],
+  "quality_checks": {
+    "code_review": "CONCERNS: low maintainability and exact reason precedence remain",
+    "unit_integration_tests": "CONCERNS: executed suite green; direct destructive/ungrounded integration and SAVED_INPUT assertion remain",
+    "acceptance_criteria": "MET with explicitly documented compositional coverage limits; no waiver",
+    "regression": "PASS for frozen executed gates, skips excluded",
+    "performance_reliability": "CONCERNS: unattributed historic failure and capacity sizing tracked",
+    "security": "Required controls pass; named external/release items remain open",
+    "documentation_traceability": "PASS: executor handoff reconciled and independent evidence/source manifests retained"
+  },
+  "administrative_closure_requirement": "Coordinator/PO must place the named nonblocking follow-ups and carry the external readiness constraints before administrative closure; QA does not edit other stories or the README. Done records this CONCERNS gate, not completed follow-up work.",
+  "reviewed_revision": "worktree-s4c:sha256:af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137",
+  "protected_story_content_sha256": "8c66f171ce9fd3e709132d9725d908b8900fb4a66fa3155c4f32a2b826b5d28b",
+  "final_source_recheck": {
+    "at": "2026-10-14T22:25:36.468933Z",
+    "files": 1556,
+    "changed": 0
+  },
+  "post_gate_bookkeeping": "Coordinator checked the completed independent-QA checkbox; QA rebound protected-story identity. No other protected content changed."
+}

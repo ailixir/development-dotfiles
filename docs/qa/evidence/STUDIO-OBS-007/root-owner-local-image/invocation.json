@@ -1,0 +1,33 @@
+{
+  "commands": [
+    [
+      "docker",
+      "build",
+      "--pull=false",
+      "--progress=plain",
+      "--build-arg",
+      "IMAGE_TAG=checks-studio-obs007-local:20261010-owner",
+      "--tag",
+      "checks-studio-obs007-local:20261010-owner",
+      "."
+    ],
+    [
+      "docker",
+      "build",
+      "--pull=false",
+      "--progress=plain",
+      "--build-arg",
+      "IMAGE_TAG=checks-studio-obs007-local:20261010-owner",
+      "--target",
+      "build",
+      "--tag",
+      "checks-studio-obs007-local:20261010-owner-build",
+      "."
+    ]
+  ],
+  "cwd": "studio-runner",
+  "localOnly": true,
+  "internalOrDeployedProof": false,
+  "candidateResultSha256": "50f7f06ac97ad3e04b18e7e1df40b71a461fce688e083b2fcb9d949d63369c8c",
+  "startedAt": "2026-10-10T12:01:00.422646+00:00"
+}

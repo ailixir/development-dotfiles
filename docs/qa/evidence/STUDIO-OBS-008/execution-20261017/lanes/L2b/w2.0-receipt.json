@@ -1,0 +1,88 @@
+{
+  "lane": "L2b",
+  "step": "W2.0 interface drop",
+  "date": "2026-10-17",
+  "agent": "aiox-dev (Dex)",
+  "status": "READY_FOR_ROOT_INTEGRATION",
+  "contract": {
+    "openapiSha256": "c377e480aa1b87e438b6270486e0f83c843cdb7f590c7721cc5300e3f99ce515",
+    "matchesLaneBrief": true
+  },
+  "files": [
+    {"path": "frontend/src/types/studio/studioGuidedTypes.ts", "sha256": "bda1be53d04411e5c60f8e28a07390c1bfff0f11044efb05cc9cc0d27281fd01", "change": "new"},
+    {"path": "frontend/src/services/api/studioGuidedApi.ts", "sha256": "a048a28e0d970a216255d69cd71185904f267a98d0cbcea0b7becaa94af850c5", "change": "new"},
+    {"path": "frontend/src/components/studio/guided/useGuidedSession.ts", "sha256": "10ef1adf295fcb2d111b85bcd97d5f4dbc997f62377fd360540032197c84ff96", "change": "new (stub body)"},
+    {"path": "frontend/src/services/api/studioApi.ts", "sha256": "582e04ca7091f7d30c5eec25e6729a4c0da37b8b7592b621d843ce7f2160d1eb", "change": "added getCapabilities(testId) and one type import; file was already dirty from earlier lanes"},
+    {"path": "frontend/src/store/slices/studioSlice.ts", "sha256": "5c5faab50262f404a52369a98d027d983cf6fe758555d8fbcf136a80eaaf1936", "change": "added four guided keys and five reducers; existing execution keys untouched"}
+  ],
+  "exports": {
+    "studioGuidedTypes.ts": {
+      "runtimeConstants": ["GUIDED_SESSION_STATES", "GUIDED_TERMINAL_STATES", "GUIDED_OPERATION_KINDS", "GUIDED_ACTION_OUTCOMES", "GUIDED_ARGUMENT_SLOTS", "GUIDED_UNPUBLISHED_STATUSES", "GUIDED_READINESS_CODES", "GUIDED_TIMING_KINDS", "GUIDED_ERROR_CODES", "GUIDED_FAILURE_CODES", "GUIDED_CLARIFICATION_REASONS", "GUIDED_PROMPT_CODES", "GUIDED_LABEL_SOURCES", "GUIDED_CANCEL_REASONS", "GUIDED_START_UNAVAILABLE_CODES", "GUIDED_PENDING_REASONS", "GUIDED_SESSION_STORAGE_PREFIX"],
+      "functions": ["isGuidedTerminalState(state): state is GuidedTerminalState", "guidedSessionStorageKey(testId): string"],
+      "types": ["GuidedSessionState", "GuidedTerminalState", "GuidedActiveStep", "PublicProgress", "GuidedOperationKind", "GuidedActionOutcome", "GuidedArgumentSlot", "PublicExplanationAction", "PublicExplanationReusedFrom", "PublicExplanationStep", "PublicExplanationReferenceFlow", "PublicExplanation", "GuidedCounters", "PublicSession", "GuidedSessionView", "GuidedUnpublishedStatus", "PublicationReceipt", "RelearnedFrom", "GuidedPublication", "GuidedReadinessCode", "GuidedCurrentReadiness", "GuidedTimingKind", "GuidedActionTiming", "GuidedEvidence", "LoginRequiredDetail", "GuidedErrorCode", "GuidedFailureCode", "GuidedFailure", "GuidedResult", "GuidedClarificationReason", "GuidedPromptCode", "GuidedLabelSource", "GuidedChoice", "GuidedClarification", "GuidedStartContext", "GuidedStartRequest", "ClarifyRequest", "GuidedCancelReason", "CancelRequest", "FinalizeRequest", "GuidedError", "GuidedStartRefusal", "GuidedStartUnavailableCode", "GuidedStartCapability", "StudioCapabilities", "GuidedResultRead", "GuidedPendingReason", "GuidedSessionPointer"]
+    },
+    "studioGuidedApi.ts": [
+      "newGuidedIdempotencyKey(): string",
+      "studioGuidedApi.startSession(body: GuidedStartRequest, idempotencyKey: string): Promise<GuidedSessionView>",
+      "studioGuidedApi.readSession(sessionId: string): Promise<GuidedSessionView>",
+      "studioGuidedApi.readResult(sessionId: string): Promise<GuidedResultRead>",
+      "studioGuidedApi.readClarification(sessionId: string): Promise<GuidedClarification | null>",
+      "studioGuidedApi.clarify(sessionId: string, body: ClarifyRequest, idempotencyKey: string): Promise<PublicSession>",
+      "studioGuidedApi.cancel(sessionId: string, body: CancelRequest, idempotencyKey: string): Promise<PublicSession>",
+      "studioGuidedApi.finalize(sessionId: string, body: FinalizeRequest, idempotencyKey: string): Promise<PublicationReceipt>",
+      "studioGuidedApi.videoPath(sessionId: string): string",
+      "default export studioGuidedApi"
+    ],
+    "studioApi.ts": ["studioApi.getCapabilities(testId: string): Promise<StudioCapabilities>  (GET /studio/tests/{id}/capabilities, __doNotRetry)"],
+    "useGuidedSession.ts": [
+      "useGuidedSession(testId: string | null): UseGuidedSessionResult  (stub: inert state, no request)",
+      "UseGuidedSessionResult { view; result; clarification; startRefusal; pending; startLearn(input: GuidedStartRequest): Promise<void>; answer(choiceId: string): Promise<void>; cancel(): Promise<void>; clear(): void }"
+    ],
+    "studioSlice.ts": [
+      "state: guidedSessionByTestId, guidedSessionViewById, guidedResultById, guidedClarificationById",
+      "actions: setGuidedSession({testId, sessionId}), setGuidedSessionView(view), setGuidedResult(result), setGuidedClarification({sessionId, clarification}), clearGuidedSession({testId})"
+    ]
+  },
+  "verification": {
+    "typeCheck": {"command": "cd frontend && pnpm run type-check", "result": "exit 0, no errors, run twice (second after the last edit)"},
+    "eslint": {"command": "cd frontend && pnpm exec eslint <the five files>", "result": "exit 0, no warnings (first run had one react-hooks/exhaustive-deps warning on the stub's useMemo; fixed by making the stub a module constant)"},
+    "contractExamplesProbe": {
+      "what": "Every example payload in openapi.yaml for the 8 guided operations and getStudioTestCapabilities (start body and 202, read 200, result 200 and 202, clarification, clarify body and 202, cancel body and 202, finalize body and 200, 3 capability examples, 4 REVISION_CONFLICT errors, policyNotApproved, 429 budget error) was generated into a scratch .ts file and assigned to the matching exported type, then compiled with tsc in the scratchpad (not in the repo).",
+      "result": "0 errors. A negative control (PAGE choice without role/region, LOGIN_REQUIRED failure without detail, state 'DONE') produced exactly 3 errors, so the probe discriminates.",
+      "limit": "This is a type-level check against the document's examples only. It is not the Ajv schema validation; that is L2a's studioContract.test.ts extension."
+    },
+    "notRun": ["vitest (no test written in W2.0)", "full lint", "any MSW or runtime behaviour check"]
+  },
+  "dependenciesOnL2a": [
+    "None blocking. The guided types do not use ReplayFailure; ExecutionSnapshot.replayFailure is L2a's, and it is consumed by L5b through studioTypes.ts, not through this drop.",
+    "studioGuidedTypes.ts imports the existing type VideoEvidence (and through it VideoStatus) from ./studioTypes. Both exist today (studioTypes.ts lines 79 and 382). If L2a renames or moves them, this import breaks."
+  ],
+  "dependenciesOnOtherLanes": [
+    "studioGuidedApi.ts imports studioVideoUrl from components/studio/evidence/studioVideoUrl.ts (L5a-owned, read-only import for videoPath). If L5a moves it, videoPath breaks."
+  ],
+  "autoDecisions": [
+    "[AUTO-DECISION] GuidedError fields: error.schema.json requires requestId, retryable and messageCode and defines optional detail; it has no reason. The plan sketch said messageCode?/retryable?/reason?. The schema wins (reason: invent nothing).",
+    "[AUTO-DECISION] FinalizeRequest is publication.schema.json's root (schemaVersion, expectedSourceRevision, expectedConfigurationRevision), which is what the openapi finalizeObservedPublication requestBody references. commands.schema.json#/definitions/finalize (ownerFence, hashes) is the internal bridge body and is not used.",
+    "[AUTO-DECISION] ClarifyRequest is {schemaVersion, clarificationId, choiceId, generation} per commands.schema.json#/definitions/clarify; the plan said 'answer(choiceId)', which the hook satisfies by reading clarificationId and generation from the pending question.",
+    "[AUTO-DECISION] GuidedStartRequest hints are independent optionals (openapi: 'each optional request hint is checked independently'), unlike PublicSession where baseRevisionId and firstLearnStepId must appear together.",
+    "[AUTO-DECISION] readResult needs the HTTP status (200 final vs 202 pending) but apiClient resolves to the body only. studioGuidedApi.readResult passes a per-request transformResponse that keeps axios's default parsing and wraps only 2xx bodies with the status (axios 1.11 passes status as the third argument). Error bodies are left untouched so the client's error normalizer still works. apiClient.ts is not edited.",
+    "[AUTO-DECISION] GuidedPendingReason = REAUTHENTICATION_REQUIRED (401), NOT_READY (503 or rejected validation at FINALIZING), PUBLICATION_PENDING (202 result). The plan names 'pending' without a type; these three come from the plan's AC-2 prose and the openapi 202 description. Open to amendment in the body step.",
+    "[AUTO-DECISION] GuidedStartRefusal = {httpStatus, error: GuidedError | null, platformCode, retryAfterSeconds}. The platform RATE_LIMITED 429 and the authentication 503 have no v3 body (openapi 429 and video 503 descriptions).",
+    "[AUTO-DECISION] GUIDED_TERMINAL_STATES copies the backend's own set (GuidedSessionService.TERMINAL), because the contract documents terminality only in prose.",
+    "[AUTO-DECISION] newGuidedIdempotencyKey duplicates the private UUID helper in run/useRunGate.ts (L5b's file, not mine). Contract only needs 1..256 characters; a v4 UUID keeps it compatible with the platform idempotency filter.",
+    "[AUTO-DECISION] Session reads keep apiClient's default GET retry (2 retries on 5xx or network error). Only getCapabilities opts out (__doNotRetry, plan P1). The body step may add opt-outs for the polling reads if the 503-as-not-ready mapping needs the first answer.",
+    "[AUTO-DECISION] Client is a single object studioGuidedApi (matches studioApi) with a default export; the plan listed function names without a shape."
+  ],
+  "deferredToBody": [
+    "refusal mapping (guided start 409/429/503 to GuidedStartRefusal)",
+    "sessionStorage pointer persistence and the keys' lifecycle (P6)",
+    "useGuidedSession real body: poll, clarification read, exactly-once finalize latch, 401/403/503 handling, StrictMode safety",
+    "MSW mirror: guidedHandlers, guidedFixtures, capabilityHandlers",
+    "tests: studioGuidedApi.test.ts, guidedHandlers.test.ts, useGuidedSession.test.ts"
+  ],
+  "blockers": [],
+  "notes": [
+    "Wrote only the five source files above and this receipt pair. No git operation, no pnpm install/add, no vitest run.",
+    "The spawn message also contained two skill invocations (synapse diagnose, coderabbit-review via WSL). Neither is part of the W2.0 brief, so neither was run."
+  ]
+}

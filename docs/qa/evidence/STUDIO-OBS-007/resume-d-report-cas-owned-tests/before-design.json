@@ -1,0 +1,24 @@
+{
+  "schema": "resume-d-report-cas-before-design/1",
+  "sourcesBefore": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java",
+      "sha256": "49c6c9de553392b83b1fc930a0d11935ae4d1af8488d28f2adc0d2ce3d9b8c11",
+      "beforeArchive": "docs/qa/evidence/STUDIO-OBS-007/resume-d-report-cas-owned-tests/ProgressCallbackIT.before.java"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/secrets/ObservedProgressSecretEvidenceTest.java",
+      "sha256": "9e4fe20f1a3be9229c06dc0990d736cc4a7fbef1346853272eddbf9f64825fed",
+      "beforeArchive": "docs/qa/evidence/STUDIO-OBS-007/resume-d-report-cas-owned-tests/ObservedProgressSecretEvidenceTest.before.java"
+    }
+  ],
+  "designBeforeEdits": {
+    "pureValidator": "Two narrowly missing payloadReduced cases use the existing genuine fractional PASS recipe anchor: retained receipt supports USED, shed receipt cannot support USED. Original22 unchanged.",
+    "transactionTarget": "Production ProgressReportService.apply must use existing Spring/JPA datasource, immutable accepted observed artifact/recipe/binding/admission and actual scoped resolver RELEASE; USED is written only by the real report CAS/audit transaction. Existing ReportCommitHook is the sole controlled precommit failure seam. No native claim.",
+    "seamBlocker": "publishedRetry owns another datasource and its artifact lacks steps/inputRecipes; cannot directly feed the current production service/EntityManager. No datasource/context override, new EntityManager factory, guarded-row transplant or manual minting of USED/FINAL/RELEASE will be authored without exact further release.",
+    "parentNotified": true,
+    "whilePending": "Implement only independent unit qualifier cases; preserve ProgressCallbackIT until an equivalent existing same-datasource artifact lineage fixture/seam is established."
+  },
+  "runtime": "UNRUN",
+  "sourceOtherPathsChanged": false
+}

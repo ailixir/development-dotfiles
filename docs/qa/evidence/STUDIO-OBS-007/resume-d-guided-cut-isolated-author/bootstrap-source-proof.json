@@ -1,0 +1,20 @@
+{
+  "sourceOnly": true,
+  "nestedChildUsesNoEnclosingStaticIdentifiers": true,
+  "forbiddenOuterReferencesAbsent": [
+    "actualJdbc",
+    "DATABASE",
+    "RELAY",
+    "TEMP",
+    "DOCUMENTS",
+    "BY_TEST",
+    "BY_SESSION",
+    "C",
+    "GuidedServiceTransportFaultIT."
+  ],
+  "nestedChildOwnConfigJdbcContractsClockAndTls": true,
+  "sameLogicalOwnedDatabaseCoordinates": true,
+  "noSpringApplicationOrFlywayOrContainerBootstrapInChild": true,
+  "guardPredicates": "Config-local exact source/current/CSI/environment/principal/test/session/reference predicates with original row locks; no permissive existing-authority resolver",
+  "compiledBytecodeGetstaticProof": "UNRUN; coordinator must inspect child+anonymous classes before execution"
+}

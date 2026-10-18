@@ -1,0 +1,46 @@
+{
+  "status": "ISOLATED_MERGED_FROZEN_UNFORMATTED_UNCOMPILED_RUNTIME_UNRUN",
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-c4-isolated-merge-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-c4-isolated-merge-context.txt"
+  ],
+  "newBaseArchive": "docs/qa/evidence/STUDIO-OBS-007/resume-pg-once-static/formatted.java",
+  "newBaseSha256": "d2f6ba233073acc31a1a1e07df9ed2abca5c5620de2fb1f947897c2d47ff532a",
+  "reviewedOldCandidateSha256": "5162ee16fa9c096f231d2e64b46ca4f7654a8bb6567d32534d5ded4dc3e6bdc4",
+  "manifest": [
+    {
+      "intendedPath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "beforeSha256": "d2f6ba233073acc31a1a1e07df9ed2abca5c5620de2fb1f947897c2d47ff532a",
+      "candidateSha256": "c242f4b584957ebe1d51972828a121b383208c7969921a0acff01a288578b39f",
+      "beforeCopy": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-merge/before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "candidateCopy": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-merge/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java"
+    },
+    {
+      "intendedPath": "backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java",
+      "beforeSha256": "92b20b5a3cf02a317340e8316cb8396a002fc78f5d264484dd4878990c7512ad",
+      "candidateSha256": "08c9ff21b40e7d14d895fa7bd4f20c1d5f146934d9136746a2a3c0cb2542ced6",
+      "beforeCopy": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-merge/before/backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java",
+      "candidateCopy": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-merge/candidate/backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java"
+    }
+  ],
+  "mechanicalHunks": 5,
+  "allHunksUniqueExactUnchangedContext": true,
+  "conflicts": [],
+  "removingOnlyReviewedC4ChangesReconstructsExactNewBase": true,
+  "reconstructedBaseSha256": "d2f6ba233073acc31a1a1e07df9ed2abca5c5620de2fb1f947897c2d47ff532a",
+  "currentSamplerAndPgObserverBytesPreserved": true,
+  "original26BodiesByteIdentical": true,
+  "tests": 28,
+  "newCases": 2,
+  "bodyProof": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-merge/original26-body-proof.json",
+  "hunkProof": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-merge/mechanical-hunk-proof.json",
+  "patch": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c4-isolated-merge/source.patch",
+  "patchSha256": "1707e760d59294a03785457d4336ad36105d07c51c8c6ae7f62803cc1990bdf5",
+  "arrayAssertion": "Existing reviewed explicit parsed.isArray AND parsed.isEmpty preserved",
+  "fakeSetterCandidateByteIdenticalToReviewed08c9": true,
+  "captureProviderClocksAndOriginalFaultRetryBehavior": "Only exact reviewed delta transplanted; no new behavior",
+  "liveSourceWrites": 0,
+  "runtimeActions": [],
+  "application": "Coordinator-owned after diagnostic55641 terminal, source review and exact live-base binding; no stale base overwrite",
+  "remainingGates": "Source review, application, actual scoped formatter/compiler and two genuine C4 workflows UNRUN"
+}

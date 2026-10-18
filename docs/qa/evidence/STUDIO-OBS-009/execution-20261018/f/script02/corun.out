@@ -1,0 +1,78 @@
+[0;36m[co-run][0m API + studio-runner (dist/main.js over TLS), one session. Ports are chosen by the test.
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :buildSrc:checkKotlinGradlePluginConfigurationErrors
+> Task :buildSrc:compileKotlin UP-TO-DATE
+> Task :buildSrc:compileJava NO-SOURCE
+> Task :buildSrc:compileGroovy NO-SOURCE
+> Task :buildSrc:pluginDescriptors UP-TO-DATE
+> Task :buildSrc:processResources NO-SOURCE
+> Task :buildSrc:classes UP-TO-DATE
+> Task :buildSrc:jar UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava UP-TO-DATE
+> Task :processTestResources UP-TO-DATE
+> Task :testClasses UP-TO-DATE
+> Task :verifyRunnerDist
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+
+> Task :test
+
+ObservedCoRunIT > theFoldedRunnerRunsAPublishedObservedPlanToPassed() PASSED
+
+ObservedCoRunIT > duplicateRequestsNeverStartASecondRunWhileTheRunnerIsSaturated() PASSED
+
+ObservedCoRunIT > duplicateRequestsNeverStartASecondRunWhileTheRunnerHasFreeCapacity() PASSED
+
+ObservedCoRunIT > aLostAcknowledgmentIsNeverAResend() PASSED
+
+ObservedCoRunIT > aPublicCancelMidStepStopsTheLiveBrowserAndEndsCancelled() PASSED
+
+ObservedCoRunIT > aRunnerKillMidRunIsSettledByRecoveryAndNeverRedispatched() PASSED
+
+ObservedCoRunIT > aRestartedRunnerIsNeverHandedTheOldRunAndAStaleOwnerIsRefused() PASSED
+
+ObservedCoRunIT > lateCallbacksAfterTheTerminalStateChangeNothing() PASSED
+
+ObservedCoRunIT > aRunStillPassesAfterEveryFault() PASSED
+
+ObservedCoRunIT > aPublicCancelOfALiveGuidedBrowserMidActionTearsItDownAndFreesTheSlot() PASSED
+
+ObservedCoRunIT > aGuidedWorkerKillMidActionLeavesNoBrowserAndNeverASecondDispatch() PASSED
+
+ObservedCoRunIT > aSecretReachesTheRealRunnerAndLeavesNoCanaryAnywhere() PASSED
+
+{"timestamp":"2026-10-18T14:29:06.178192-04:00","level":"INFO","logger":"com.citi.put.checks.scheduling.CronDispatcher","thread":"SpringApplicationShutdownHook","message":"CronDispatcher drained all in-flight executions","service":"checks-backend"}
+
+> Task :retainOriginalGuidedCohort
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 4m 16s
+11 actionable tasks: 4 executed, 7 up-to-date
+
+[0;36m[co-run][0m legs executed: 12 · failures: 0 · errors: 0 · skipped: 0
+[0;36m[co-run][0m evidence written to docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f/script02/fault-injection.json
+
+[0;36m[co-run][0m PASS    base          runs=3 repeatedDispatches=0  one published plan runs to PASSED through the real runner
+[0;36m[co-run][0m PASS    duplicate     runs=6 repeatedDispatches=0  duplicate requests (public Run, racing dispatchers, wire duplicate, replayed callbacks)
+[0;36m[co-run][0m PASS    ackLoss       runs=3 repeatedDispatches=0  acknowledgment loss: the real send, then an ambiguous answer; never a resend
+[0;36m[co-run][0m PASS    publicCancel  runs=3 repeatedDispatches=0  public HTTP cancel in the middle of a step; the browser tree is gone
+[0;36m[co-run][0m PASS    runnerKill    runs=3 repeatedDispatches=0  runner SIGKILL mid-run; recovery settles it; the browser tree is gone
+[0;36m[co-run][0m PASS    restart       runs=6 repeatedDispatches=0  process restart and stale owner: the new process is handed nothing; the old owner is refused
+[0;36m[co-run][0m PASS    lateCallback  runs=3 repeatedDispatches=0  late callbacks after the terminal state change nothing
+[0;36m[co-run][0m PASS    afterFaults   runs=3 repeatedDispatches=0  a run still passes after every fault
+[0;36m[co-run][0m PASS    secretCanary  runs=3 repeatedDispatches=0  a secret saved over the public route reaches the real runner and the real browser, and leaves no form of itself in any database column, runner log, report or stored file
+[0;36m[co-run][0m PASS    guidedPublicCancel runs=3 repeatedDispatches=0  public HTTP cancel of a live guided browser mid-action: CANCELLED, the browser tree is gone, the one navigation dispatched once, the slot free
+[0;36m[co-run][0m PASS    guidedWorkerKill runs=3 repeatedDispatches=0  SIGKILL of the folded runner with a live guided browser: no runner process or guided browser survives the window, the in-flight action is never dispatched again, a new runner process is handed none
+[0;36m[co-run][0m runs: 39 · repeated dispatches: 0 · runner generations: 42 · GUIDED_START_FAILED lines: 0
+[0;36m[co-run][0m observation: runnerKill: the killed runner's replay child and browser tree lived 29922 ms after the SIGKILL with a 30 s step timeout (nothing in the runner can reap them; they leave when their own step ends)
+[0;36m[co-run][0m observation: runnerKill: the killed runner's replay child and browser tree lived 10012 ms after the SIGKILL with a 10 s step timeout (nothing in the runner can reap them; they leave when their own step ends)
+[0;36m[co-run][0m observation: runnerKill: the killed runner's replay child and browser tree lived 10037 ms after the SIGKILL with a 10 s step timeout (nothing in the runner can reap them; they leave when their own step ends)
+[0;36m[co-run][0m the co-run is GREEN: the API and the studio-runner ran together and agreed on every leg.

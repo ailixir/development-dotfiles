@@ -1,0 +1,101 @@
+{
+  "scope": "READ_ONLY_C14_TEXT_POSITIVE_THIRD_NEXTACTION_GROUNDING_DIAGNOSIS",
+  "sourceBinding": {
+    "gate": "resume-c14-published-control-first-current",
+    "sourcesZipSha256": "f0b77ea3bb0dbb9924227501304145bc14adb22b16c64483588094354d1e4914",
+    "closedBoundarySha256": "312d35b24089e3e18f8ec5f2ecd6a482cfe098bc1de6f4b4ba8d7e74c63e21f0",
+    "archivedPublicationSha256": "8e0611961e242daa9f5db15e5925f059acd4afddf59e58fab25a55ffeba54c53",
+    "currentPublicationSha256": "1010bb310f80928b0ee008834dda124de8a615e1026fa7cf9f86a91c35143213",
+    "collectorSha256": "ba31be90d04885e6329ae02f6559205325740cbd46960a438150a890557c27a2",
+    "archivedAndCurrentP14ModelByteIdentical": true,
+    "p14ModelBodySha256": "35921b5e46d6a39542ada2327e85e37ba5d55ca94e3c5a78a770047896aba986"
+  },
+  "actualRetainedBoundary": {
+    "sourcePlan": "APPLIED",
+    "nextAction1": "APPLIED/navigate",
+    "nextAction2": "APPLIED/read",
+    "nextAction3": "REJECTED",
+    "nextAction3ProviderMappedCode": "OTHER",
+    "nextAction3ResponseStatus": "OTHER",
+    "nextAction3ParsedOperation": "UNCLASSIFIED",
+    "actualNavigation": "SUCCEEDED/OK/count1",
+    "actualControlRead": "SUCCEEDED/OK/count1",
+    "sessionTerminal": "FAILED",
+    "mappedCode": "INVALID_CONTRACT",
+    "providerCaughtRuntimeFailureCount": 0,
+    "publication": "UNREACHED",
+    "passwordMutation": "UNREACHED",
+    "actualFirstThrownValidationCode": "UNOBSERVED"
+  },
+  "provedSourceContradiction": {
+    "fixtureClass": "GuidedPublicationReplayIT",
+    "archiveMarkupLine": 5685,
+    "currentMarkupLine": 5864,
+    "markupSemantics": "TEXT consumer has a visible associated Destination label and a textarea labelled by it; both are real original page elements.",
+    "collectorClass": "observationCollector.ts",
+    "labelNameLine": 383,
+    "textareaAssociatedLabelLines": [
+      351,
+      361
+    ],
+    "nativeRoleLines": [
+      364,
+      366
+    ],
+    "relevanceLine": 423,
+    "exportLines": [
+      430,
+      434
+    ],
+    "semantics": "Label is relevant despite role generic, derives its Destination name from bounded caption text and exports elementType other/actionable=false when safe. Textarea independently derives Destination from its associated label, has role textbox/elementType textarea/controlType textarea/actionable=true. The collector intentionally permits same-name caption and actual control; no global name-uniqueness invariant exists.",
+    "fixtureModelArchiveLines": [
+      5784,
+      5789
+    ],
+    "fixtureModelCurrentLine": 6072,
+    "contradiction": "p14Model matches only name then asserts one match before checking operation/role. With both legitimate eligible exported nodes it throws AssertionError before building the consumer action. Caption and textbox are semantically distinct, not ambiguous duplicate textbox controls.",
+    "qualification": "Actual third request node array/exception is not retained; whether both nodes were present in that particular request is UNOBSERVED. Source-level incompatibility is demonstrated, exact runtime rejection cause is not."
+  },
+  "originalPassingModelComparison": {
+    "archiveDefaultModelLines": [
+      11881,
+      11885,
+      11890,
+      11895
+    ],
+    "fact": "Original generic passing model overwrites its selected node for every same-name match, then copies that node role into the locator; it does not impose p14Model global name uniqueness. Existing P3 role-grounded model explicitly filters expected role. Reusing role-aware grounding is appropriate; silently taking first/last is not the proposed correction."
+  },
+  "narrowSourceProposalIfRootApproves": {
+    "ownedPath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "site": "p14Model nonnavigate selection for the intrinsic Destination fill only",
+    "delta": "Match name Destination AND actual role textbox AND elementType textarea for that accepted fill obligation, then keep the exact uniqueness assertion within the eligible genuine textbox controls. All other operators/selection logic unchanged.",
+    "whyWithinApprovedFixture": "This removes a structural caption from the eligible control set using existing genuine exported semantics; it does not add a node, mutate source need/binding/recipe, relax target checks, change the DOM or policy, add an action or choose a fallback.",
+    "preserve": [
+      "Real successful controlValue read and scoped business-read policy",
+      "Original source plan/need/producer/binding consumer slot and operation order",
+      "Uniqueness assertion among actual eligible Destination textareas",
+      "Two published TEXT-before-password workflows and one reused text assertion",
+      "Exact TARGET_DRIFT/ASSERTION_FAILED expected first guards",
+      "No unrelated click or extra comparator/case/framework"
+    ],
+    "status": "PROPOSAL_ONLY_NOT_AUTHORED"
+  },
+  "remainingUnknowns": [
+    "Actual first third-request exception/response body discarded or unparsed",
+    "Actual caption/textbox node multiplicity/roles in that third request",
+    "Any later consumer/publication/password-mutation guard remains unexecuted"
+  ],
+  "actions": {
+    "sourceEdits": 0,
+    "runtime": 0,
+    "sql": 0,
+    "probes": 0,
+    "network": 0,
+    "models": 0,
+    "reports": 1
+  },
+  "privacy": "No raw model body, observed values, generated canaries, credentials, identities or runtime paths persisted; only fixed source fields/codes/locations/ordinals.",
+  "whole19AcPass": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE"
+}

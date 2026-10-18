@@ -1,0 +1,173 @@
+{
+  "schema": "fresh-owner-b-counter-lifecycle-independent-review/1",
+  "verdict": "SCOPED_FINDINGS",
+  "mode": "INDEPENDENT_EXACT_READONLY_SOURCE_REVIEW",
+  "scope": {
+    "reviewed": "Only negative dispatch counter, ordinary successful callback capture and numeric diagnostics, grouped ordinary cleanup, and class-owned resource initialization/extraction/termination repair hunks.",
+    "locationBasis": "All Java line numbers refer to the immutable authored archive, never the mutable working source.",
+    "sourceEdits": false,
+    "mutablePublicationSourceRead": false,
+    "onlyWrite": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-b-counter-lifecycle-review.json",
+    "runtimeBuildTestsGradleBrowserProcessCommandsModelsSpawns": false,
+    "whole19QAOrLifecycleVerdict": false
+  },
+  "identity": {
+    "authoredPath": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-core-stop-final-format/GuidedPublicationReplayIT-authored.java",
+    "authoredSHA256": "7c3bddf88dd51bbfa062461e1b61e84302782cc4fb2fd2cd1f37c2f7119d984a",
+    "expectedAuthoredSHA256": "7c3bddf88dd51bbfa062461e1b61e84302782cc4fb2fd2cd1f37c2f7119d984a",
+    "patchPath": "docs/qa/evidence/STUDIO-OBS-007/b-ordinary-counter-capture-repair/one-file.patch",
+    "patchSHA256": "dfb2b2aca8190ce1446fb0be3f41faef61774fc93ee6f860c311bbf92ab5a0ad",
+    "repairReportPath": "docs/qa/evidence/STUDIO-OBS-007/b-ordinary-counter-capture-repair/result.json",
+    "repairReportSHA256": "b11f788385857530588751f5f62598b4de26a65d5e14d0c79f740538a6cda4a5",
+    "reportPrefixB11f7883Verified": true,
+    "reconstructedParentSHA256": "2bdf197f0f31defe7f3f86012c6d1ead902da7d46567ef1584d828d8ae43857b",
+    "exactReversePatchVerified": true,
+    "formatterReanchor": {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-core-stop-final-format/GuidedPublicationReplayIT-formatted.java",
+      "sha256": "695e44e0030ffa83a446ad0bc18d0d4ad53dd0734314730984805de887dfa0d7",
+      "manifest": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-core-stop-final-format/result.json",
+      "manifestSHA256": "34bbd9bd86c6ef5f09ffbd65897f6f3024e18ddea5968f76b8bc93bee1cc3de7",
+      "independentLexicalTokenEquality": true,
+      "manifestUnexpectedChanges": [],
+      "authority": "This is a separate immutable formatted archive identity. The authored SHA is not asserted for any mutable file or runtime input."
+    },
+    "runtimeReanchor": {
+      "status": "NOT_REVIEWED_OR_RUN",
+      "requirement": "Coordinator must bind any later runtime selector receipt to its exact actual formatted input SHA and this authored-to-formatted archive mapping; prior two PASS receipts and failed Scope2 run do not establish this repair."
+    }
+  },
+  "findings": [
+    {
+      "id": "B-COUNTER-LIFECYCLE-001",
+      "severity": "P1",
+      "title": "A failed application drain prevents remaining owned teardown attempts",
+      "location": {
+        "line": 6327,
+        "relatedLines": [
+          6232,
+          6234,
+          6244,
+          6246,
+          6330,
+          6346
+        ]
+      },
+      "detail": "stop() calls stopOwnedApplicationJobs() before entering the per-process all-attempt loop. Any ownership assertion, scheduler timeout, async drain failure, context close failure or teardown evidence-write failure exits directly to catch, so guidedWorker, ordinaryWorker and SECRET_FIXTURE are never attempted. Within stopOwnedApplicationJobs(), a failed scheduled await also prevents shutdown of every wrapped async delegate; a failed async await skips later termination observations. The all-attempt process loop only applies after the entire preceding lifecycle operation succeeds.",
+      "impact": "The failure path leaves real owned work and child processes running and cannot provide the requested all-attempt teardown evidence. Retaining PostgreSQL on uncertainty is correct but does not discharge the independent cleanup attempts.",
+      "requestedChange": "Retain the first lifecycle error and independently attempt safe shutdown/drain of all captured owned services and bounded teardown of each owned process, aggregating subsequent failures. Keep context/endpoint/PG destruction gated on confirmed dependencies; never mark uncertain work stopped."
+    },
+    {
+      "id": "B-COUNTER-LIFECYCLE-002",
+      "severity": "P2",
+      "title": "Context closer termination failure replaces the primary close error",
+      "location": {
+        "line": 6264,
+        "relatedLines": [
+          6259,
+          6261,
+          6262,
+          6265,
+          6266,
+          6267
+        ]
+      },
+      "detail": "If closed.get throws (including its real timeout or ExecutionException), the catch rethrows that error, but finally performs throwing awaitTermination/isTerminated assertions without preserving the pending primary. A close operation that ignores interruption makes awaitTermination(5s) return false and its AssertionError replaces the original get failure. An InterruptedException from that wait likewise replaces the pending primary.",
+      "impact": "The exact unconfirmed-close branch loses the real close failure or timeout that explains why resource teardown was blocked.",
+      "requestedChange": "Capture the primary close error, attempt bounded closer shutdown/termination independently, and suppress subsequent cleanup errors onto the primary instead of throwing over it. Preserve the actual termination requirement."
+    },
+    {
+      "id": "B-COUNTER-LIFECYCLE-003",
+      "severity": "P2",
+      "title": "Failed FINAL capture diagnostics have no failure-path export",
+      "location": {
+        "line": 4066,
+        "relatedLines": [
+          4068,
+          4070,
+          4102,
+          4250,
+          4255,
+          4267,
+          4672,
+          4694
+        ]
+      },
+      "detail": "The capture catch increments only in-memory P3_CAPTURE_DIAGNOSTICS. p3WriteCaptureDiagnostics is called solely on the genuine no-transport cleanup success branch or at the end of p3RunnerReport after a FINAL exists and all ledger identity assertions pass. If the successful original FINAL response cannot be parsed/counted/DTO-read, P3_FINAL_REPORTS remains absent, the report assertion or cleanup deadline fails, and neither route writes the failure metrics. Identity assertion failures similarly skip the export.",
+      "impact": "The new numeric-capture failure evidence is lost on precisely the runtime failure it is intended to explain. The success flag still fails closed, but an archive cannot distinguish silence from a recorded capture failure using these counters.",
+      "requestedChange": "Export safe per-owner case/execution-ordinal counters on every cleanup attempt, including failed capture/missing FINAL and identity failures, while preserving the original primary error and never creating a FINAL or cleanup-success witness. Do not export raw bodies, secrets, IDs or exception text."
+    },
+    {
+      "id": "B-COUNTER-LIFECYCLE-004",
+      "severity": "P2",
+      "title": "Depth scan admits a sixty-fifth empty container",
+      "location": {
+        "line": 4047,
+        "relatedLines": [
+          4077,
+          4078,
+          4092,
+          4094
+        ]
+      },
+      "detail": "The scan starts the root at depth 0 and rejects only depth >64. Thus a chain of 65 containers ends at depth 64 and passes when its deepest container is empty; there is no child call to trigger the rejection. The pinned guided parser counts the root structural token as depth 1 and refuses the sixty-fifth container. RunnerReport.runtimeVersions is Map<String,Object>, so the DTO read does not inherently restore this depth bound.",
+      "impact": "The replacement test capture does not enforce the requested depth64 structural limit, despite the repair report claiming it does.",
+      "requestedChange": "Count container nesting with the root container at 1 and reject the sixty-fifth structural level, without changing the production integer parser or ordinary numeric compatibility."
+    }
+  ],
+  "verifiedSourceProperties": {
+    "negativeCounter": "The only modified test body changes the exact P3_FAIL_READ negative dispatcher count from 1 to 0. The subsequent actual ERROR/REFERENCE_UNAVAILABLE, read delta1, consumed failure hook, empty native receipts, no foreign reads, no sender diagnostic, null browser/admission receipt and actual UNAVAILABLE audit1/scope assertions remain byte-identical.",
+    "ordinaryCapture": "Tracked execution progress callback forwards the original chain exactly once. Only an original 2xx and nonempty cached body enters capture. Strict UTF-8 REPORT decode precedes C.parse, whose actual mapper enables strict duplicate detection and FAIL_ON_TRAILING_TOKENS. Numeric scan rejects nonfinite values and accepts ordinary fractional doubles; no Math.round, truncation or canonical-v1 rewriting is introduced. Original StrictInternalBodyReader reads the actual RunnerReport DTO after the scan. Parse/error/silence never inserts a FINAL. Depth and failed diagnostic export gaps are separately reported.",
+    "soleSuccessWitness": "Attempted transport cleanup requires genuine terminal snapshot + streamComplete + accepted-at joined ledger DONE and an actual original successful FINAL. p3RunnerReport retains matching executionId, attemptId, admissionId, runnerInstanceId and runnerSequence against the durable ledger. Pre-send cleanup remains independently guarded by null attempt/admission/admission receipt plus no actual sender diagnostic and absorbing DONE; this is not represented as runner success.",
+    "groupedOrdinaryCleanup": "One monotonic 60-second deadline is created before all ordinary cancel/GET work. Cancel and GET HTTP request timeouts are min(15s, remaining). GET start cadence is shared across owners at >=1 second; no new GET30ms loop exists. Actual 429 must have real RATE_LIMITED nested error code (matches production RateLimitFilter) and positive numeric Retry-After; its real wait is added to shared cadence and fails sticky if it cannot fit. Requests retain actual owner cookies; no caller/admin/bucket/rate-limit relaxation or POST replay introduced. The existing guided cleanup runs separately after the ordinary group.",
+    "resourceOwnership": "Exact injected owning context is verified against local JdbcTemplate and session repository identities, owned DB URL and server port. Only local existing singleton objects are inspected. Approved resource-only reflection is scheduledExecutor and inherited activeThreads, plus TaskExecutorAdapter.concurrentExecutor -> SemaphoreBoundedExecutor.delegate. Public ThreadPool handles are used for other supported executor types. Identity sets deduplicate handles and ForkJoinPool is rejected. No arbitrary private walk, auth/state reflection, common-pool shutdown or other-context shutdown exists in the delta.",
+    "trackingAndNormalTermination": "Static BeanPostProcessor applies setTaskTerminationTimeout(60000) in postProcessBeforeInitialization for actual SimpleAsyncTaskScheduler beans. Pinned Spring class metadata confirms the field chain and timeout setter initializes tracking. Scheduled task kinds are counted and cancel(false) attempted. On the normal path actual scheduled executor awaitTermination/isTerminated precedes activeThreads empty and scheduler.close; wrapped services are shutdown and verified terminated before owned context close. Context inactive is additional evidence, never the sole proof. Normal process helper observes captured descendant exits, bounds graceful wait30s and force wait5s; endpoints and PG follow successful process confirmation. Failure all-attempt and primary preservation gaps are reported above.",
+    "productionDelta": "Exact one-file patch reconstructs the claimed parent SHA. No production parser, schema, rate limit or default reservation modification is part of this repair. Coordinator before/after formatter manifests list only the two reported test files changed and no unexpected file."
+  },
+  "pinnedSpringVerification": {
+    "method": "Read local JAR bytes and ZIP/class metadata only; no JVM, shell, Gradle, application or process command execution.",
+    "version": "6.1.14",
+    "springContextSHA256": "da76b53f6a20f09b38052a300435f3245780d30deb46ec5dd75314cda06fd365",
+    "springCoreSHA256": "e15a1179fc9642ffed13ca55e2863e2da524ccd1083b7c6f1b5cfd5733f3b2c5",
+    "confirmedFields": [
+      "SimpleAsyncTaskScheduler.scheduledExecutor:ScheduledExecutorService",
+      "SimpleAsyncTaskExecutor.activeThreads:Set",
+      "TaskExecutorAdapter.concurrentExecutor:Executor",
+      "SemaphoreBoundedExecutor.delegate:Executor"
+    ]
+  },
+  "preservation": {
+    "originalNineBodiesByteIdenticalToExactRepairParent": true,
+    "otherEightNewBodiesByteIdenticalToExactRepairParent": true,
+    "onlyChangedBody": "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope",
+    "onlyExactNegativeCounterChanged": true,
+    "all18NamesAndOrderAndDeclarationsUnchanged": true,
+    "budget4000_32000_128000LinesUnchanged": true,
+    "production4096DefaultNotModifiedByPatch": true,
+    "actualReadAuditNoSendAssertionsRetained": true,
+    "testNames": [
+      "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+      "queuedAndPreReadyRefusals",
+      "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+      "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays",
+      "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance",
+      "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork",
+      "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays",
+      "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall",
+      "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+      "actualCoreMayUseDenialStartsNoSessionAndNoBrowser",
+      "actualCoreGuidedSameSecretIdStaysWithinPersistedScope",
+      "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope",
+      "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure",
+      "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch",
+      "actualGuidedRegistrationPassingAssertRemainsPassed",
+      "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection",
+      "actualPublishedWrongPasswordAnnotatesEarlierSecretFill",
+      "actualPublishedRegistrationPassingAssertRemainsPassed"
+    ]
+  },
+  "limitations": [
+    "Static source review only; no compile, runtime, test, browser, process, all18/all19, QA or lifecycle PASS produced.",
+    "The previous float incompatibility is not retroactively credited as actual archived fractional data. A later successful runtime FINAL and numeric diagnostic receipt bound to the actual formatted source must establish the cause.",
+    "Known resource field validity and normal-path ordering are source evidence; they do not establish that actual tasks, owned process descendants or the Spring cache listener have completed at runtime."
+  ]
+}

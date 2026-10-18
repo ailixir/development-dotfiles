@@ -1,0 +1,90 @@
+[
+ {
+  "name": "F1-launcher-reports-cancelled-not-reason",
+  "exit": 1,
+  "summary": [
+   1,
+   6,
+   7
+  ],
+  "failed": [
+   "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a TIMEOUT reason (the runtime\\'s budg\u2026'), naming 'TIMEOUT', with the same teardown"
+  ]
+ },
+ {
+  "name": "F2-late-spawn-wait-fixed-one-second",
+  "exit": 1,
+  "summary": [
+   1,
+   6,
+   7
+  ],
+  "failed": [
+   "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down kills a Chrome that spawns after the teardown's first listing, and holds the close open until the launch has settled"
+  ]
+ },
+ {
+  "name": "F3-encoder-not-a-marker",
+  "exit": 1,
+  "summary": [
+   1,
+   6,
+   7
+  ],
+  "failed": [
+   "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down with a recording on disk: kills the encoder as well, and leaves the recorder's files exactly as they were"
+  ]
+ },
+ {
+  "name": "F4-survivors-ignored",
+  "exit": 1,
+  "summary": [
+   1,
+   6,
+   7
+  ],
+  "failed": [
+   "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down Quinn F5: refuses to confirm the teardown while a process it enumerated is still alive, and leaves the scratch directory in place"
+  ]
+ },
+ {
+  "name": "F5-cause-dropped",
+  "exit": 1,
+  "summary": [
+   2,
+   8,
+   10
+  ],
+  "failed": [
+   "awaits actual scratch removal after guided preparation rejection without an acquired context",
+   "awaits actual scratch removal after guided initial-launch rejection without an acquired context"
+  ]
+ },
+ {
+  "name": "F5b-scratch-not-removed",
+  "exit": 1,
+  "summary": [
+   4,
+   6,
+   10
+  ],
+  "failed": [
+   "awaits actual scratch removal after guided preparation rejection without an acquired context",
+   "awaits actual scratch removal after guided initial-launch rejection without an acquired context",
+   "retains cleanup capability after actual context acquisition and never deletes scratch before confirmed context closure",
+   "refuses a Default directory redirected after actual launch rather than accepting its newly canonical outside path"
+  ]
+ },
+ {
+  "name": "F5c-phase-mislabelled",
+  "exit": 1,
+  "summary": [
+   1,
+   9,
+   10
+  ],
+  "failed": [
+   "awaits actual scratch removal after guided preparation rejection without an acquired context"
+  ]
+ }
+]

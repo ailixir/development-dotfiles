@@ -161,11 +161,27 @@ optional.
 
 #### Findings that outlived their stories
 
-- **Node major mismatch (ED-05, open item O-2a).** The Playwright base image
+- **Node major mismatch (ED-05, open item O-2a).** ~~The Playwright base image
   ships Node 24 while `.nvmrc` pins 22. `.nvmrc` was deliberately **not**
   widened to make the check pass; `check:pins` now fails loudly and directs the
   fix at the image. Either the internal image ships the pinned major, or
-  ADR-001 §4.2 is amended.
+  ADR-001 §4.2 is amended.~~
+  **2026-10-17 (@po): resolved in source, ~~in-image re-verification pending
+  (015 gate run)~~ in-image verified 2026-10-17: final-gates07 check-pins
+  --require-image exit 0, node v24.20.0, nodeMajorPin 24, chromiumBuild 1243
+  (final-gates07/receipt.json).** *(Later 2026-10-17, @po: the image is the
+  local gate build `put-checks-studio-runner:obs015-final07-local`; the
+  deployed internal image is not measured. Path:
+  `docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/receipt.json`.)*
+  STUDIO-OBS-015 writer window W9 took the ADR-001 §4.2
+  amendment route: the runner pins moved to Node 24 (`.nvmrc` `24`,
+  `engines.node` `>=24.11.0 <25.0.0`) to match the Playwright 1.63 image, which
+  ships Node 24.20.0. `check:pins` itself was not changed. Evidence:
+  `docs/qa/evidence/STUDIO-OBS-015/execution-20261015/ed05-pin-fix01/analysis.md`.
+  Only the Node-pin sub-item moves. **ED-05 as a whole stays open**: the
+  internal image, non-root user, seccomp and CA bundle remain Platform/SRE's.
+  **Open item:** the external CI pipeline must move to Node 24 (@devops,
+  outside the repo).
 - **Readiness predicate (carried to 10.8).** Readiness must key on
   `confirmed_revision_id` still matching both draft revisions, never on
   `compile_status = 'READY'`. A failed optional recompile de-readies a confirmed

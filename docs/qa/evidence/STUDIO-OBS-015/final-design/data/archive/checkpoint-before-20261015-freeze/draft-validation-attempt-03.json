@@ -1,0 +1,560 @@
+{
+  "classification": "DRAFT_SQL_ONLY_NOT_PRODUCTION_IMPLEMENTATION_OR_FLYWAY_PROOF",
+  "startedAt": "2026-10-14T22:52:38.172850+00:00",
+  "commands": [
+    {
+      "argv": [
+        "initdb",
+        "-D",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/.scratch-pg-c650paww/data",
+        "--auth=trust",
+        "--no-locale",
+        "-E",
+        "UTF8"
+      ],
+      "exitCode": 0,
+      "stdout": "The files belonging to this database system will be owned by user \"brunobuger\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"C\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are disabled.\n\ncreating directory /Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/.scratch-pg-c650paww/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... posix\nselecting default max_connections ... 100\nselecting default shared_buffers ... 128MB\nselecting default time zone ... America/New_York\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\nSuccess. You can now start the database server using:\n\n    pg_ctl -D /Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/.scratch-pg-c650paww/data -l logfile start\n\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "pg_ctl",
+        "-D",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/.scratch-pg-c650paww/data",
+        "-l",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/.scratch-pg-c650paww/server.log",
+        "-o",
+        "-h 127.0.0.1 -p 63121 -c unix_socket_directories=''",
+        "-w",
+        "start"
+      ],
+      "exitCode": 0,
+      "stdout": "waiting for server to start.... done\nserver started\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V1__init.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V2__schedule_next_execution.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V3__check_templates_seed.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V4__secrets_encrypted_value.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V5__story_3_schema_additions.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V6__report_next_delivery.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V7__partition_remaining_tables_and_defaults.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V8__failed_dispatches_and_report_failures.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V9__schedules_check_type_column.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V10__uppercase_status_standardization.sql"
+      ],
+      "exitCode": 0,
+      "stdout": " _drop_check_constraints \n-------------------------\n \n(1 row)\n\n _drop_check_constraints \n-------------------------\n \n(1 row)\n\n _drop_check_constraints \n-------------------------\n \n(1 row)\n\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V11__check_acknowledge_assign.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V12__tests_revisions.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "psql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V12__tests_revisions.sql:73: NOTICE:  V12: quarantined 0 ui_tests row(s) with a missing or unregistered CSI\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V12__tests_revisions.sql:147: NOTICE:  V14: renamed 0 ui_tests row(s) from chrome to chromium\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V12__tests_revisions.sql:147: NOTICE:  V14: converted 0 ui_tests row(s) from a non-chrome legacy engine to chromium; they remain unlearned until a guided publication\n"
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V13__executions_ledger.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "psql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V13__executions_ledger.sql:236: NOTICE:  V14: backfilled csi_id on 0 ui_test_executions row(s)\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V13__executions_ledger.sql:236: NOTICE:  V14: 0 ui_test_executions row(s) remain without a CSI and are quarantined from every user-facing query\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V13__executions_ledger.sql:302: NOTICE:  V14: created 0 partition locator(s) for pre-existing execution history\n"
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V14__guided_sessions.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V15__publication.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V16__scheduling.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V17__secret_use_audit.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V18__drop_plaintext_secrets.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V19__guided_governance.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/main/resources/db/migration/V20__guided_session_recording.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/V21__guided_session_replaying_prefix.sql"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-c",
+        "SELECT conname,pg_get_constraintdef(oid) FROM pg_constraint WHERE conname IN ('ck_guided_session_state_v3','studio_guided_translation_state_continuation_check','fk_015_materialization_head'); SELECT studio_015_declarations('{\"variables\":[],\"secrets\":[],\"authoredDeclarations\":[]}'::jsonb) AS empty_declarations_valid; SELECT studio_015_declarations('{\"variables\":[],\"secrets\":[],\"authoredDeclarations\":[{\"referenceId\":\"vault://x\",\"kind\":\"secretRef\",\"secretId\":\"LOGIN_PASSWORD\"}]}'::jsonb) AS opaque_alias_valid;"
+      ],
+      "exitCode": 0,
+      "stdout": " opaque_alias_valid \n--------------------\n f\n(1 row)\n\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "psql",
+        "-X",
+        "-q",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "63121",
+        "-d",
+        "postgres",
+        "-1",
+        "-f",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql"
+      ],
+      "exitCode": 0,
+      "stdout": " ensure \n--------\n \n(1 row)\n\n ensure \n--------\n \n(1 row)\n\n ensure \n--------\n \n(1 row)\n\n ensure \n--------\n \n(1 row)\n\n ensure \n--------\n \n(1 row)\n\n ensure \n--------\n \n(1 row)\n\n ensure \n--------\n \n(1 row)\n\n ensure \n--------\n \n(1 row)\n\n ensure \n--------\n \n(1 row)\n\n ensure \n--------\n \n(1 row)\n\n expect_error \n--------------\n \n(1 row)\n\n expect_error \n--------------\n \n(1 row)\n\n expect_error \n--------------\n \n(1 row)\n\n expect_error \n--------------\n \n(1 row)\n\n expect_error \n--------------\n \n(1 row)\n\n expect_error \n--------------\n \n(1 row)\n\n ensure \n--------\n \n(1 row)\n\n ensure \n--------\n \n(1 row)\n\n ensure \n--------\n \n(1 row)\n\n expect_error \n--------------\n \n(1 row)\n\n ensure \n--------\n \n(1 row)\n\n",
+      "stderr": "psql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:4: NOTICE:  PASS complete declaration identity\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:5: NOTICE:  PASS missing version refused\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:6: NOTICE:  PASS unsafe secret ID refused\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:13: NOTICE:  PASS initial header captured\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:15: NOTICE:  PASS V1 secret proof before append\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:19: NOTICE:  PASS one append one header\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:20: NOTICE:  PASS raw inputs stored once\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:21: NOTICE:  PASS historical snapshot reconstructed\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:22: NOTICE:  PASS V1 secret reference after V2 head\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:23: NOTICE:  PASS V1 consumed secret after V2 head\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:24: NOTICE:  PASS refusal incremental history is immutable\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:25: NOTICE:  PASS refusal incremental history is immutable\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:26: NOTICE:  PASS refusal context delivery pending\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:27: NOTICE:  PASS refusal model reservation refused\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:28: NOTICE:  PASS refusal input change requires append version\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:30: NOTICE:  PASS refusal delivery ACK identity invalid\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:32: NOTICE:  PASS exact ACK clears barrier\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:34: NOTICE:  PASS historical birth metadata independent of later bumps\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:35: NOTICE:  PASS stale preparation cannot admit against old version\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:36: NOTICE:  PASS refusal materialization append refused\npsql:/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql:37: NOTICE:  PASS live session not pruned\n"
+    },
+    {
+      "argv": [
+        "pg_ctl",
+        "-D",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/final-design/data/.scratch-pg-c650paww/data",
+        "-m",
+        "fast",
+        "-w",
+        "stop"
+      ],
+      "exitCode": 0,
+      "stdout": "waiting for server to shut down.... done\nserver stopped\n",
+      "stderr": ""
+    }
+  ],
+  "version": "PostgreSQL 14.17 (Homebrew)",
+  "frozenMigrationHashes": {
+    "backend/src/main/resources/db/migration/V1__init.sql": "2e010e6e1e6f01706acb0f644ad37a3ba0340363979a994de34a4b33ba750e29",
+    "backend/src/main/resources/db/migration/V2__schedule_next_execution.sql": "7a36462fcceb86d2ccb533c0743c20bcfedadb819f9674c0d1e8eb847830ca7f",
+    "backend/src/main/resources/db/migration/V3__check_templates_seed.sql": "8c356f1081df490cbc213f31330883f8be477de722fc737d588f52e2ef8b48ee",
+    "backend/src/main/resources/db/migration/V4__secrets_encrypted_value.sql": "91662e9f2c8f07e24d85d15d5ce7e5508d4f20ddfc78fdfd1dbfa083f30b24a7",
+    "backend/src/main/resources/db/migration/V5__story_3_schema_additions.sql": "b930941c1b7ba06b8e34b67021425cffedd3264b225607ff3f170ba4545f0477",
+    "backend/src/main/resources/db/migration/V6__report_next_delivery.sql": "d4669fed42d82824f278364845540ee4318ee9ab243bc0780a68c5092695d913",
+    "backend/src/main/resources/db/migration/V7__partition_remaining_tables_and_defaults.sql": "ee6f50fe699f70af713a7c739acb4eb358a562837e8c43ffb130a6604fb62174",
+    "backend/src/main/resources/db/migration/V8__failed_dispatches_and_report_failures.sql": "78ad49e718124c78f6e7a3a5a64b203f175c73642f2754a01647166c89ec89be",
+    "backend/src/main/resources/db/migration/V9__schedules_check_type_column.sql": "9c91a6b11df2f9b012a638cbf1e0ae921d4dd09c0710a22db9d3c5a18c412f0d",
+    "backend/src/main/resources/db/migration/V10__uppercase_status_standardization.sql": "714ea331197e4b30000b5f5706262172ee1b17ba0f7b13f6c7c33cb44abdba26",
+    "backend/src/main/resources/db/migration/V11__check_acknowledge_assign.sql": "13a95eb5154cc4f3bc037bbfcd1c498faf5b0ecd62473857fab0a2a181179732",
+    "backend/src/main/resources/db/migration/V12__tests_revisions.sql": "274c26c4d41fbd991e157ec6372d08ca5c53ebe0a9e2d7a7252838228057d0d7",
+    "backend/src/main/resources/db/migration/V13__executions_ledger.sql": "f258e01be9963e58b47d6dfef7171e4cd36043e82e4c0f2ea78ec439f47abeb7",
+    "backend/src/main/resources/db/migration/V14__guided_sessions.sql": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357",
+    "backend/src/main/resources/db/migration/V15__publication.sql": "ef092dfff93a24c4a05dc9afee6ba4a3b9a054f6cf39ca4059c186ff10777b40",
+    "backend/src/main/resources/db/migration/V16__scheduling.sql": "6d7f4888aabf4a7206bfff9bd242ee15037121e74ed2c3fa32156a4ed862ab72",
+    "backend/src/main/resources/db/migration/V17__secret_use_audit.sql": "a5b6a89525f3b53769678361c204ba3a78564f9f108aeb0979c184a702bc3ba7",
+    "backend/src/main/resources/db/migration/V18__drop_plaintext_secrets.sql": "febfd5eb1624240e58d87bd92bdb2d4b82c762a7cf6fd94de8077eb6f2fc7c9f",
+    "backend/src/main/resources/db/migration/V19__guided_governance.sql": "628b47efbb656aef8a3260f03e7dc77d988555a306652b4d433b8796e3424855",
+    "backend/src/main/resources/db/migration/V20__guided_session_recording.sql": "e26da3077ca90fc0f3c6d7f4fc7156d416c39b66482330acb24d62d61514acc2"
+  },
+  "draftSqlSha256": "b6a9278c3d2431cc90965e02300ba078166dcc63be700a36b5b483c9446f94de",
+  "status": "PASS_DRAFT_DDL_AND_LISTED_SMOKE_ONLY",
+  "serverLogTail": "2026-10-14 18:52:38.672 EDT [80722] LOG:  starting PostgreSQL 14.17 (Homebrew) on aarch64-apple-darwin23.6.0, compiled by Apple clang version 16.0.0 (clang-1600.0.26.6), 64-bit\n2026-10-14 18:52:38.673 EDT [80722] LOG:  listening on IPv4 address \"127.0.0.1\", port 63121\n2026-10-14 18:52:38.688 EDT [80732] LOG:  database system was shut down at 2026-10-14 18:52:38 EDT\n2026-10-14 18:52:38.696 EDT [80722] LOG:  database system is ready to accept connections\n",
+  "isolatedDirectoryRemoved": true,
+  "finishedAt": "2026-10-14T22:52:39.432310+00:00"
+}

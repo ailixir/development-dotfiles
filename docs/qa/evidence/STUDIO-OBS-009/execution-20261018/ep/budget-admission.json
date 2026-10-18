@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "kind": "BUDGET_ADMISSION_LEDGER",
+  "appendOnly": true,
+  "admissions": [
+    {
+      "seq": 1,
+      "prevEntrySha256": null,
+      "status": "ADMISSION_REFUSED_PRICE_UNKNOWN",
+      "purpose": "ac7-benchmark",
+      "decidedAt": "2026-10-18T16:33:23.239Z",
+      "admittedAt": null,
+      "admittedBy": null,
+      "manifestSha256": "a901a0d9030cb5c7a17b0f3f2947134403e8323aab720d31c051c625b93cdbbc",
+      "ceilingUsd": 500,
+      "ceilingScope": "whole OBS wave (README), not a per-benchmark allowance",
+      "remainingUsdAtAdmission": null,
+      "allocationUsd": null,
+      "stopThresholdUsd": null,
+      "priceSource": null,
+      "computed": {
+        "plannedRuns": 75,
+        "plannedSessions": 81,
+        "contingencySessions": 122,
+        "sessionsUsedForCaps": 122,
+        "tokenCapIn": 31981568,
+        "tokenCapOut": 3904000,
+        "costBoundUsd": null
+      },
+      "enforcedCaps": {
+        "maxModelInputTokensTotal": 262144,
+        "maxModelOutputTokensTotal": 32000,
+        "maxOutputTokensPerCall": 4096,
+        "maxModelProposals": 100,
+        "csiDailyInputTokens": 5242880,
+        "csiDailyOutputTokens": 640000,
+        "maxConcurrentSessionsPerCsi": 3,
+        "source": "code defaults (GuidedSessionProperties @DefaultValue, GuidedTranslationProperties @DefaultValue, application.yml csi-budget); the deployed values are not known"
+      },
+      "perCsiPlan": null,
+      "measuredProposalsPerSession": null,
+      "pinned": null,
+      "notAdmittedBecause": [
+        "unrun, owner ED-01 gateway owner (TBD): no gateway price list",
+        "B8 is unknown; nothing is converted from the 2026-10-04 call count (473 of 500 calls) into dollars"
+      ]
+    },
+    {
+      "seq": 2,
+      "prevEntrySha256": "0e7631ace4f82ec1934664326d76b63e5580d5e9039f7566bcfd28e74c1e1ffd",
+      "status": "ADMISSION_REFUSED_PRICE_UNKNOWN",
+      "purpose": "ac8-schema-probe",
+      "decidedAt": "2026-10-18T16:33:23.282Z",
+      "admittedAt": null,
+      "admittedBy": null,
+      "manifestSha256": null,
+      "ceilingUsd": 500,
+      "ceilingScope": "whole OBS wave (README), not a per-benchmark allowance",
+      "remainingUsdAtAdmission": null,
+      "allocationUsd": null,
+      "stopThresholdUsd": null,
+      "priceSource": null,
+      "computed": {
+        "plannedRuns": null,
+        "plannedSessions": null,
+        "contingencySessions": null,
+        "sessionsUsedForCaps": 3,
+        "tokenCapIn": 786432,
+        "tokenCapOut": 96000,
+        "costBoundUsd": null
+      },
+      "enforcedCaps": {
+        "maxModelInputTokensTotal": 262144,
+        "maxModelOutputTokensTotal": 32000,
+        "maxOutputTokensPerCall": 4096,
+        "maxModelProposals": 100,
+        "csiDailyInputTokens": 5242880,
+        "csiDailyOutputTokens": 640000,
+        "maxConcurrentSessionsPerCsi": 3,
+        "source": "code defaults (GuidedSessionProperties @DefaultValue, GuidedTranslationProperties @DefaultValue, application.yml csi-budget); the deployed values are not known"
+      },
+      "perCsiPlan": null,
+      "measuredProposalsPerSession": null,
+      "pinned": null,
+      "notAdmittedBecause": [
+        "unrun, owner ED-01 gateway owner (TBD): no gateway price list",
+        "B8 is unknown; nothing is converted from the 2026-10-04 call count (473 of 500 calls) into dollars"
+      ]
+    },
+    {
+      "seq": 3,
+      "prevEntrySha256": "7369a7f387702992ffc5b4ef7cfecd8a36ce3edbe3cfb5cf45fb7d406199a334",
+      "status": "ADMISSION_REFUSED_PRICE_UNKNOWN",
+      "purpose": "ac7-benchmark",
+      "decidedAt": "2026-10-18T17:29:58.147Z",
+      "admittedAt": null,
+      "admittedBy": null,
+      "manifestSha256": "e4785112885541c03f7ebed2b08bdc878a183d8e692b62140fa4491560df285b",
+      "ceilingUsd": 500,
+      "ceilingScope": "whole OBS wave (README), not a per-benchmark allowance",
+      "remainingUsdAtAdmission": null,
+      "allocationUsd": null,
+      "stopThresholdUsd": null,
+      "priceSource": null,
+      "computed": {
+        "plannedRuns": 75,
+        "plannedSessions": 81,
+        "contingencySessions": 122,
+        "sessionsUsedForCaps": 122,
+        "tokenCapIn": 31981568,
+        "tokenCapOut": 3904000,
+        "costBoundUsd": null
+      },
+      "enforcedCaps": {
+        "maxModelInputTokensTotal": 262144,
+        "maxModelOutputTokensTotal": 32000,
+        "maxOutputTokensPerCall": 4096,
+        "maxModelProposals": 100,
+        "csiDailyInputTokens": 5242880,
+        "csiDailyOutputTokens": 640000,
+        "maxConcurrentSessionsPerCsi": 3,
+        "source": "code defaults (GuidedSessionProperties @DefaultValue, GuidedTranslationProperties @DefaultValue, application.yml csi-budget); the deployed values are not known"
+      },
+      "perCsiPlan": null,
+      "measuredProposalsPerSession": {
+        "kind": "MEASURED_PROPOSALS_PER_SESSION",
+        "provider": "local fixture provider, no model",
+        "fixtureCeilingPerCall": 2048,
+        "productionPerCall": 4096,
+        "tenStepBaseSessions": {
+          "editStep4Base": 13,
+          "insertStepBase": 13
+        },
+        "incrementalSessions": {
+          "editStep4": 9,
+          "insertStep": 10
+        },
+        "peakAcrossAll36Evidence": 14,
+        "verdict": "REFUTES_7_PROPOSALS_PER_SESSION_ASSUMPTION",
+        "caveat": "a local run can refute, never confirm",
+        "evidence": "execution-20261018/ep/b7-proposals.json"
+      },
+      "pinned": null,
+      "notAdmittedBecause": [
+        "unrun, owner ED-01 gateway owner (TBD): no gateway price list",
+        "B8 is unknown; nothing is converted from the 2026-10-04 call count (473 of 500 calls) into dollars"
+      ]
+    },
+    {
+      "seq": 4,
+      "prevEntrySha256": "37bb59f0d89f6c852c9315d62f39889dfe3a3cf3bffa501037a5543918d231a5",
+      "status": "ADMISSION_REFUSED_PRICE_UNKNOWN",
+      "purpose": "ac8-schema-probe",
+      "decidedAt": "2026-10-18T17:29:58.235Z",
+      "admittedAt": null,
+      "admittedBy": null,
+      "manifestSha256": null,
+      "ceilingUsd": 500,
+      "ceilingScope": "whole OBS wave (README), not a per-benchmark allowance",
+      "remainingUsdAtAdmission": null,
+      "allocationUsd": null,
+      "stopThresholdUsd": null,
+      "priceSource": null,
+      "computed": {
+        "plannedRuns": null,
+        "plannedSessions": null,
+        "contingencySessions": null,
+        "sessionsUsedForCaps": 3,
+        "tokenCapIn": 786432,
+        "tokenCapOut": 96000,
+        "costBoundUsd": null
+      },
+      "enforcedCaps": {
+        "maxModelInputTokensTotal": 262144,
+        "maxModelOutputTokensTotal": 32000,
+        "maxOutputTokensPerCall": 4096,
+        "maxModelProposals": 100,
+        "csiDailyInputTokens": 5242880,
+        "csiDailyOutputTokens": 640000,
+        "maxConcurrentSessionsPerCsi": 3,
+        "source": "code defaults (GuidedSessionProperties @DefaultValue, GuidedTranslationProperties @DefaultValue, application.yml csi-budget); the deployed values are not known"
+      },
+      "perCsiPlan": null,
+      "measuredProposalsPerSession": {
+        "kind": "MEASURED_PROPOSALS_PER_SESSION",
+        "provider": "local fixture provider, no model",
+        "fixtureCeilingPerCall": 2048,
+        "productionPerCall": 4096,
+        "tenStepBaseSessions": {
+          "editStep4Base": 13,
+          "insertStepBase": 13
+        },
+        "incrementalSessions": {
+          "editStep4": 9,
+          "insertStep": 10
+        },
+        "peakAcrossAll36Evidence": 14,
+        "verdict": "REFUTES_7_PROPOSALS_PER_SESSION_ASSUMPTION",
+        "caveat": "a local run can refute, never confirm",
+        "evidence": "execution-20261018/ep/b7-proposals.json"
+      },
+      "pinned": null,
+      "notAdmittedBecause": [
+        "unrun, owner ED-01 gateway owner (TBD): no gateway price list",
+        "B8 is unknown; nothing is converted from the 2026-10-04 call count (473 of 500 calls) into dollars"
+      ]
+    }
+  ]
+}

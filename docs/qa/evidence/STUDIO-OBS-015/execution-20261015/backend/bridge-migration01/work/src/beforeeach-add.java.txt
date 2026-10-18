@@ -1,0 +1,31 @@
+    // aria-bridge-ruling01 N6: the real source of truth is one ui_tests row (planning IT shape).
+    configuredInput =
+        testName.equals("authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly");
+    PROVIDER_KINDS.clear();
+    sourcePlan = null;
+    nextSelection = null;
+    jdbc.update(
+        "INSERT INTO users(id,sso_id,name,email,created_at) VALUES (?,'guided-fixture','Guided"
+            + " Test','user-1',now()) ON CONFLICT DO NOTHING",
+        UUID.randomUUID());
+    jdbc.update(
+        "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) VALUES"
+            + " ('CSI-123','Guided fixture','Ops','HIGH','user-1','Production') ON CONFLICT DO"
+            + " NOTHING");
+    testId = UUID.randomUUID();
+    step = UUID.randomUUID();
+    var authoring =
+        new AuthoringV2Request(2, null, List.of(new AuthoringStep(step, sourceText(), null)));
+    ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+    jdbc.update(
+        "INSERT INTO ui_tests(id, name, csi_id, environment, browser, steps, variables, authoring,"
+            + " authoring_revision_inputs, created_by, created_at, updated_at) VALUES (?, 'Guided"
+            + (" bridge','CSI-123','fixture','chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,'user"
+                + "-1',now(),now())"),
+        testId,
+        mapper.writeValueAsString(List.of(sourceText())),
+        configuredInput
+            ? "[{\"name\":\"config\",\"kind\":\"plain\",\"value\":\"" + CONFIG_INPUT + "\"}]"
+            : "[]",
+        mapper.writeValueAsString(authoring),
+        mapper.writeValueAsString(AuthoringRevisionIdentity.create(authoring, Map.of())));

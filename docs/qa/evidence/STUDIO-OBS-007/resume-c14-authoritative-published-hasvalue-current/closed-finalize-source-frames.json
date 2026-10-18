@@ -1,0 +1,37 @@
+[
+  {
+    "exceptionCode": "PUBLICATION_CONFLICT",
+    "sourceFrames": [
+      {
+        "class": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+        "method": "require",
+        "line": 35
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRepository",
+        "method": "authority",
+        "line": 500
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRepository",
+        "method": "finish",
+        "line": 167
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPlanPublisher",
+        "method": "lambda$finalizeForUser$4",
+        "line": 161
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.session.GuidedSessionRepository",
+        "method": "lambda$transaction$0",
+        "line": 26
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT$RuntimeHooks$1",
+        "method": "execute",
+        "line": 797
+      }
+    ]
+  }
+]

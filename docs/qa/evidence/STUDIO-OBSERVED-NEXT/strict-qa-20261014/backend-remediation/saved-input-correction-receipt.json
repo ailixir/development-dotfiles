@@ -1,0 +1,13 @@
+{
+  "time": "2026-10-14T23:26:41.608359+00:00",
+  "attempt": "backend-joined-targeted-attempt01",
+  "result": "11_TOTAL_10_PASS_1_FAIL_ZERO_SKIP",
+  "failure": "aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue: expectedAWAITING_CLARIFICATION actualPROPOSING",
+  "diagnosis": "Classifier plain configurationReferences include referenceName but frozen source-reference plain configuration branch additionalProperties=false forbids it. First controlled provider source question was invalid; one-shot flag consumed and repair returned default plan.",
+  "fix": "Strip referenceName only for nonsecret configuration provenance. Validate controlled model response before sending. Assert exactly one SOURCE_PLAN delivery so automatic repair can never make this emission test appear green. All existing labels,value secrecy,no-materialization,no-submit assertions retained.",
+  "beforeSha256": "82b484c96a18477c50e2b2e56eb41cf12f30a313c919c84e0067fe946ebd8d23",
+  "afterSha256": "f42d344edc08188804a326ac4c3730858adc07c8925112c89e2a11bddeb6c7f8",
+  "patch": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/saved-input-correction.patch",
+  "execution": "NO_TESTS_RUN_BY_DEVELOPER_ROOT_OWNS_RETRY",
+  "productionChanged": false
+}

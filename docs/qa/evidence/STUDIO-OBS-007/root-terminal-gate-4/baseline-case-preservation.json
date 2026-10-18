@@ -1,0 +1,84 @@
+{
+  "baseline": 143,
+  "allBaselineNamesRetained": true,
+  "classes": [
+    {
+      "class": "TEST-com.citi.put.checks.studio.guided.publication.SecretAuditLifecycleIT.xml",
+      "baselineNames": 7,
+      "currentNames": 7,
+      "missing": [],
+      "added": []
+    },
+    {
+      "class": "TEST-com.citi.put.checks.studio.dispatch.DispatcherIT.xml",
+      "baselineNames": 26,
+      "currentNames": 26,
+      "missing": [],
+      "added": []
+    },
+    {
+      "class": "TEST-com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest.xml",
+      "baselineNames": 22,
+      "currentNames": 22,
+      "missing": [],
+      "added": []
+    },
+    {
+      "class": "TEST-com.citi.put.checks.studio.guided.secret.SecretUseAuditIT.xml",
+      "baselineNames": 21,
+      "currentNames": 30,
+      "missing": [],
+      "added": [
+        "ordinaryRuntimeWriterCanSettleButCannotAlterOrTruncateTerminalEvidence()",
+        "terminalCutRejectsLaterReadReleaseDispatchAndReceiptOnlyRequest()",
+        "terminalReceiptAndUnlinkedSummaryExpireInTheSameRetentionMonth()",
+        "terminalReceiptOwnerHistoryAndSummariesRollbackTogether()",
+        "terminalReceiptRequiresExactActualWinnerCodeTimeAndPhysicalTransaction()",
+        "terminalSavepointReceiptOrWinnerWritesAreExplicitlyProhibited()",
+        "terminalSettlementPreservesActualLinkedPositiveAndHasNoRetryAuthority()",
+        "terminalWinnerClassifiesExactUnsettledNoReadAndPossibleReadDeclarations()",
+        "waitedTerminalCutUsesFreshCommittedReadEntryInsteadOfStaleNoReadView()"
+      ]
+    },
+    {
+      "class": "TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "baselineNames": 20,
+      "currentNames": 23,
+      "missing": [],
+      "added": [
+        "rawTerminalReceiptCannotCommitWithoutCompleteExactSummaries()",
+        "terminalCrossMonthClockCannotEvadeActualAttemptReceiptIdentity()",
+        "terminalRawBeforeImageScopeAndCompleteClassificationCannotBeForged()"
+      ]
+    },
+    {
+      "class": "TEST-com.citi.put.checks.studio.secrets.VaultStreamingReadTest.xml",
+      "baselineNames": 2,
+      "currentNames": 2,
+      "missing": [],
+      "added": []
+    },
+    {
+      "class": "TEST-com.citi.put.checks.studio.secrets.VaultResolutionDecisionTest.xml",
+      "baselineNames": 5,
+      "currentNames": 5,
+      "missing": [],
+      "added": []
+    },
+    {
+      "class": "TEST-com.citi.put.checks.studio.dispatch.StudioDispatcherFailureIT.xml",
+      "baselineNames": 11,
+      "currentNames": 11,
+      "missing": [],
+      "added": []
+    },
+    {
+      "class": "TEST-com.citi.put.checks.studio.recovery.RecoveryIT.xml",
+      "baselineNames": 25,
+      "currentNames": 25,
+      "missing": [],
+      "added": []
+    }
+  ],
+  "newSeparateClasses": "Protocol11+Terminal20 plus D12 added across baseline data classes; total186"
+}

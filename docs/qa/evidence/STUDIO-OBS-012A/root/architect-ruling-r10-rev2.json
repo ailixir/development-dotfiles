@@ -1,0 +1,129 @@
+{
+ "story": "STUDIO-OBS-012A",
+ "artifact": "architect-ruling-r10-rev2",
+ "supersedes": "docs/qa/evidence/STUDIO-OBS-012A/root/architect-ruling-r9-r10.json, R10a and R10b only. R9 and R10c stand unchanged.",
+ "architect": "Aria (@architect)",
+ "date": "2026-10-13",
+ "authority": {
+  "productEdits": false,
+  "testEdits": false,
+  "storyEdits": false,
+  "buildsOrSuitesExecuted": false,
+  "gitWrites": "none",
+  "onlyFileWritten": "docs/qa/evidence/STUDIO-OBS-012A/root/architect-ruling-r10-rev2.json"
+ },
+ "inputsRead": [
+  "docs/qa/evidence/STUDIO-OBS-012A/r10-instrumentation/ledger.json (complete)",
+  "docs/qa/evidence/STUDIO-OBS-012A/root/architect-ruling-r9-r10.json (my previous R10a, R10b and R10c)",
+  "Source reading carried over from the previous ruling: runCoordinator.ts L371-415 and L744-748, launcher.ts L250-300 and L450-479, tree.ts L48-60 and L226-233, and the GuidedPublicationReplayIT p4/p6/p8 instrumentation"
+ ],
+ "verificationNote": "No build or test was run. 'Verified' means a number or fact stated in the r10-instrumentation ledger (Dex, tapped scratch-only runs) or read from source. 'Inference' means my reasoning over those numbers.",
+ "correctionOfPriorRuling": "My R10b inference (the run-3 cause was probably a launch-wait TIMEOUT) was wrong. The ledger verifies outer RUN_ERROR / errorMessage INTERNAL_ERROR, a pre-Ready end about 1.7 s after acceptance, and the child leaving through its own process.exit, since the producer-3 exit wrapper sealed. The R10b stop condition fired correctly.",
+ "rulings": [
+  {
+   "id": "R10-rev2-1",
+   "question": "Proceed with R10a I1-I3 now?",
+   "decision": "YES, now, in 012A. The defect is measured, and the scope is widened slightly as follows.",
+   "facts": {
+    "verified": [
+     "Producer-2 runs a synchronous revPublish (open, write, fsync, rename on the runner parent loop) with p50 about 3.1-3.9 ms. Single calls reached 458.7 ms (base3-8, load about 7-9, loop-delay max 526 ms, control-read max 448 ms in the same child) and 245.9 ms (load4-6, control-read max 921 ms).",
+     "p6ChildCutSpawner calls a synchronous revMode() on every send and every child IPC message. On control GETs it took 0.06-0.12 ms typical and 5.8 ms worst. The producer-2 revMode() on the same GETs reached 15.4 ms once. The whole synchronous control-GET send path reached 60.4 ms per run at worst."
+    ]
+   },
+   "scope": {
+    "owner": "@dev (Dex, R10 lane). Test file only: backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java. No product files.",
+    "I1": "No synchronous file-system call from test instrumentation on the runner PARENT event loop on the run path. (a) Producer-2 revPublish moves to fs/promises (O_EXCL|O_NOFOLLOW open, write, filehandle.sync(), close, rename), serialized on one promise chain, with identical modes, confinement checks and sample content. (b) No reaction with synchronous work is registered on the runner's own request promise. Observe from a separate branch and defer with setImmediate. (c) WIDENED: the revMode() reads in producer 2 and in p6ChildCutSpawner (both the send wrapper and handle.onMessage) use one cached mode, refreshed asynchronously (watchFile at 25 ms or fs/promises). The cut spawner reads it only where it needs it (POSTs and selected IPC kinds). The child-side producer-3 wrappers are out of I1 scope: they do not sit on the parent's control path, and changing them now would disturb the open run-3 observation (R10-rev2-2).",
+    "I2": "REFINED: the attribution must be time-correlated. The ledger's monitorEventLoopDelay max covers spawn to child exit, including post-outcome close and kill, so it cannot be tied to the missed read. Required, all numeric and value-free: (a) for every selected control read, the send-to-settle ms and the maximum loop stall observed DURING that read, from a 10 ms setInterval drift sampler started at send and stopped at settle; (b) for the read that triggered a 'control-window' self-stop, the same numbers plus whether any instrumentation publish or a launcher kill() overlapped it; (c) the existing run-level histogram stays as context. These go into the producer-2 sample. The sample key count check at L8767-8768 is updated in the same change and is not a product assertion.",
+    "I3": "Unchanged from the previous ruling. In p8C6Run kinds 1-2, assert as a precondition that there was no 'control-window' run.cancel_requested for the execution, with the I2 numbers in the description. The test still fails on a miss.",
+    "R10b-message": "Unchanged. A failed c6Pending wait reports ledger state, browser_started_at, and the FINAL errorCode/errorMessage."
+   },
+   "stopConditions": [
+    "I1 changes any producer event order, count, seq or sent==acked semantics. Stop.",
+    "I1 needs a product hook or any studio-runner/src or dist change. Stop.",
+    "Any change to a window, margin, poll interval, step/run/launch/stop timeout, the observer AbortSignal, or a C6 assertion. Stop."
+   ]
+  },
+  {
+   "id": "R10-rev2-2",
+   "question": "Disposition of the unreproduced run-3 RUN_ERROR / INTERNAL_ERROR.",
+   "decision": "OPEN UNDER OBSERVATION, with a permanent low-cost attribution diagnostic in the test, limited to observation through wrappers that already exist. It does not block 012A on its own. It does block credit for any run in which it recurs unattributed.",
+   "facts": {
+    "verified": [
+     "Run 3: INTERNAL_ERROR about 1.7 s after acceptance. The child exited through its own process.exit (the producer-3 exit wrapper sealed). No run.cancel_requested. No host sleep.",
+     "17 tapped kind-1 executions in isolation, loads 6-93: no run-3 path, no protocol-violation kill, no child dispatch-catch, and every result was schema-valid Result3.",
+     "Isolation lacks the full-class worker preload state: run 3's kind 1 came after about 29 earlier cases in long-lived workers."
+    ],
+    "inferred": [
+     "Two candidates remain: (a) the child reported INTERNAL_ERROR for an unmapped exception in its pre-Ready path, which is wrapped by several test preloads; (b) the parent rejected the child's result as a protocol violation. Accumulated full-class instrumentation state is a plausible factor because isolation never reproduced it. That is not shown."
+    ],
+    "safety": "The run-3 outcome is fail-closed and conformant. No browser start was reported, the pre-Ready FINAL was accepted and settled (DONE, error_code NULL, no strand), and there was no USED audit. The open question is diagnosability, not security."
+   },
+   "diagnostic": {
+    "owner": "@dev (R10 lane), in the same GuidedPublicationReplayIT change as I1-I3.",
+    "allowed": [
+     "Parent side, through the existing p6ChildCutSpawner wrappers (spawner, handle.onMessage, handle.kill, exit): per observed child, the kind of every IPC message received and, for 'result', its errorCode plus a Result3 schema-valid boolean from the runner's own validator; the call site of every handle.kill() as a fixed enum (violation-catch, performStop-grace, other) derived from the stack, without recording raw frames; and the exit code and signal.",
+     "Child side, through the existing producer-3 process.send/exit wrappers only: the errorCode of the outgoing 'result' and whether 'ready' was sent.",
+     "Write the result into the existing failed-test-state evidence (numeric, enum or fixed-code values only; no values, paths, messages or raw stacks), asynchronously, at child exit."
+    ],
+    "forbidden": [
+     "Committing the module-customization load hook that rewrites dist/run/childRuntime.js in memory. It was acceptable for a one-off scratch diagnostic. As a permanent fixture it is itself an instrumentation-interference candidate of exactly the suspected class, and it hides product source behind a test rewrite (ADR-SC-005 D-A spirit).",
+     "Any product logging change for this item in 012A. A child-side value-free exception-class log is a candidate for OBS-009 with R10-OBS-2."
+    ],
+    "costCeiling": "Per message the diagnostic may only append to an in-memory array. File I/O is asynchronous and happens once, at exit. It must add nothing synchronous to the parent control path (consistent with I1)."
+   },
+   "classificationRules": [
+    "A recurrence where the diagnostic shows a parent violation-catch kill, or a non-schema-valid result, or a missing result after a 'launch' was processed: this is instrumentation or IPC interference. That is a test defect: stop, report to me, and fix the wrapper. Product files stay unchanged unless I rule otherwise.",
+    "A recurrence where the child-sent result is INTERNAL_ERROR with no violation: an unmapped child pre-Ready exception. Stop and escalate to me. Whether it is product or preload depends on which preload wrappers were active; I rule it with the evidence.",
+    "No recurrence: the item stays open, owned by @qa (Quinn) as a CONCERNS entry on the 012A gate and carried to STUDIO-OBS-009 by @po. It closes after the OBS-009 full-class runs show no recurrence with the diagnostic active, or after an attributed occurrence is fixed."
+   ]
+  },
+  {
+   "id": "R10-rev2-3",
+   "question": "Does the 1198 ms control read at load 17-28, with a 398 ms parent loop delay, now point at product code? What must 012A change?",
+   "decision": "NO. It does not meet the stop condition as evidence against product code. The run is attributable to extreme synthetic CPU load, measured without time correlation. 012A changes nothing in the product. I1-I3 (test) proceed. The stop condition is restated so that it can be met only by time-correlated evidence on a non-synthetic host.",
+   "facts": {
+    "verified": [
+     "load4-7: 4 busy-loop burners, load 17-28. One control read took 1198 ms send-to-settle against the 975 ms budget. Run-level loop-delay max 398 ms. Producer-2 publish max 12 ms, cut-spawner mode read max 0.2 ms. The self-stop came 7.8 s after the step-deadline cut while the child was still closing. Then stop, a 5 s grace expiry, the only kill() from performStop, and SIGKILL.",
+     "controlRead is measured send-to-settle on the parent loop and includes parent loop delay (ledger caveat). The histogram window runs spawn to child exit and includes the post-self-stop performStop/kill path.",
+     "launcher kill() calls signalProcessTree with the default synchronous readProcessTable() (spawnSync ps, timeout 5000 ms). This is my R10-OBS-1, and in load4-7 it ran after the self-stop."
+    ],
+    "inferred": [
+     "In load4-7 the 398 ms histogram maximum cannot be placed before the missed read. A plausible source is the post-stop spawnSync ps under heavy CPU contention (R10-OBS-1), and that would be a consequence of the miss, not its cause. Even if all 398 ms fell inside the read, about 800 ms remains as response latency of the test JVM's /control endpoint plus OS scheduling, with 4 burners competing for every core. That is environmental.",
+     "16 of 17 tapped kind-1 runs passed, including 7 of 8 under burners. Every run without burners passed with control-read max <= 448 ms, and the 448 ms one coincided with the 458.7 ms instrumentation publish. Under no-burner conditions the only measured contributor of a large stall is the test's own synchronous publish, which I1 removes."
+    ]
+   },
+   "stopConditionRestated": "Product code becomes the suspect only if ALL of the following hold for a 'control-window' self-stop: (1) it happens on a run with I1 in place; (2) no synthetic load is present (no burners, no concurrent Gradle/IT lanes, under the gate hygiene of R10-rev2-4); (3) the I2 per-read stall during the missed read is >= 100 ms; (4) no instrumentation publish and no launcher kill() overlapped that read. Then stop, escalate to me with the numbers, and I order a parent synchronous-work inventory (a CPU profile of the runner parent). If (3) fails but send-to-settle is close to 975 ms, the suspect is backend /control latency in the test JVM (pool or GC). Stop and escalate likewise. Nothing about windows changes in either case.",
+   "012AChanges": {
+    "product": "None.",
+    "test": "I1 (widened), I2 (time-correlated), I3, the R10b message, and the R10-rev2-2 diagnostic. All in GuidedPublicationReplayIT.java.",
+    "deferredUnchanged": [
+     "R10-OBS-1 (synchronous ps in kill) stays deferred. It acts after the stop decision, and its fix is safety-critical. It is now evidenced, not only read: load4-7's only kill() came from performStop. @po records it with an owner for the OBS-009 runner hardening item.",
+     "R10c (post-Ready unrecorded self-stop labelled CANCELLED) stays deferred to OBS-009. load4-7 shows the window where it bites: the secret-bearing poll stays live during a slow child close after the step-deadline cut, by design, because the outcome is not yet known. Carry that observation into the OBS-009 design."
+    ]
+   }
+  },
+  {
+   "id": "R10-rev2-4",
+   "question": "Full-class credit rule for GuidedPublicationReplayIT, given a full `check` (run 4, post-R8+R9) is running.",
+   "decision": "Composite credit. Run 4 can credit every class and task except GuidedPublicationReplayIT. GuidedPublicationReplayIT is credited only on its final source, through two consecutive green full-class runs under gate hygiene.",
+   "rules": [
+    "C1. Run 4 (`check`, post-R8+R9) credits all tasks and classes except GuidedPublicationReplayIT, provided that the tree digest of backend/src, studio-runner/src and studio-runner/dist, excluding GuidedPublicationReplayIT.java, is byte-identical between run 4's start and the final tree. Record both digests. Any other change after run 4 voids C1 for the affected module, and its gate reruns.",
+    "C2. GuidedPublicationReplayIT's run-4 result is informative only, whether green or red, because its source changes with I1-I3 and the diagnostic. A run-4 red in that class does not void C1 if every red is in that class and the BeforeEach cascade guard is classified per the r8-selfstop practice.",
+    "C3. GuidedPublicationReplayIT credit: two CONSECUTIVE full-class runs (all cases, normal order, no isolation, no selection), both green, on the final test source and the same dist. Record the test-file sha256 and the dist digest. Run them under gate hygiene: no burners, no other Gradle or IT lane holding the machine, the host kept awake (caffeinate), and load1m sampled every 5 s and recorded. 'Green' also requires that I3 never tripped and that the R10-rev2-2 diagnostic recorded no INTERNAL_ERROR pre-Ready end in any C6 case.",
+    "C4. A red full-class run between attempts is disclosed, not discarded, with its classification. An I3 precondition trip with I2 numbers outside the R10-rev2-3 product criteria (synthetic load present, or an overlap shown) resets the consecutive count but does not block, so attempts may continue. An I3 trip meeting the product criteria, or any unattributed failure (including a run-3-style INTERNAL_ERROR that the diagnostic cannot classify), STOPS crediting and escalates to me.",
+    "C5. Static tasks for the changed test file (spotlessCheck, checkstyleTest, compileTestJava) run fresh, not UP-TO-DATE, on the final source. Use --rerun if needed, as in the authz-grant lane.",
+    "C6. The final 012A gate record lists: run-4 C1 credit, the two C3 runs, any C4 reds with classifications, and the open R10-rev2-2 CONCERNS item with its owner (@qa) and carry-forward (@po to OBS-009)."
+   ],
+   "stopConditions": [
+    "Run 4 shows a red outside GuidedPublicationReplayIT. Normal triage: C1 is not granted for that module.",
+    "The final-tree digest outside GuidedPublicationReplayIT.java differs from run 4's. Do not use C1; rerun `check`.",
+    "Anyone proposes isolation, reordering, @Disabled, a retry-until-green inside a single run, or relaxing a bound to obtain C3. Stop."
+   ]
+  }
+ ],
+ "tradeoffs": [
+  "Keeping the run-3 item open, instead of hunting it now, accepts a small residual risk of an unexplained pre-Ready INTERNAL_ERROR. The alternative was a permanent in-memory rewrite of product modules in the test, which would add an interference source of the very class under suspicion. A wrapper-only diagnostic attributes the next occurrence at near-zero cost.",
+  "Ruling that load4-7 is environmental, not product, rests on the absence of time correlation and on the synthetic burners. The restated stop condition makes the opposite conclusion reachable with the right evidence, instead of ruling it out.",
+  "Composite credit avoids a third 2.5 h `check` for a test-only change. It holds only while the digests prove nothing else moved."
+ ]
+}

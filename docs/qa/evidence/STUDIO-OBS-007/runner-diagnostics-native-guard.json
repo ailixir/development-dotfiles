@@ -1,0 +1,18 @@
+{
+  "mode": "native-guard",
+  "actualChromium": true,
+  "productionGuidedRuntime": true,
+  "rawContainsReleasedCanary": false,
+  "rawErrorObservedBeforeRedaction": true,
+  "diagnosticSinks": [
+    "callback.errorMessage",
+    "diagnosticJSONL",
+    "stderr"
+  ],
+  "redactionBeforeBounds": true,
+  "utf8Bytes": 21,
+  "secretFrameDropped": true,
+  "authoritativeJournalUnchanged": true,
+  "joinedCorePostgres": false,
+  "nativeCanaryRequirement": "OPEN: native trusted collector refused with a code-only error; separate Playwright readonly probe cannot substitute"
+}

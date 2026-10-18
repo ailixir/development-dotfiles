@@ -1,0 +1,292 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+@@ -2087,6 +2087,233 @@
+     assertThat(NAVIGATION_DESTINATIONS).isEmpty();
+   }
+ 
++  @Test
++  void aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch()
++      throws Exception {
++    assertThat(fixture.worker.isAlive()).isTrue();
++    JsonNode initialCounter = C.parse(Files.readString(fixture.livePolicyCounter));
++    assertThat(initialCounter.path("registered").asBoolean()).isTrue();
++    assertThat(initialCounter.path("launches").asInt()).isZero();
++    assertThat(fixture.worker.descendants().filter(ProcessHandle::isAlive).count()).isZero();
++    String id = startSession();
++    String frozenBefore =
++        jdbc.queryForObject(
++            "SELECT to_jsonb(p)::text FROM studio_guided_session_policies p WHERE session_id=?",
++            String.class,
++            id);
++    String frozenHash =
++        jdbc.queryForObject(
++            "SELECT observation_policy_hash FROM studio_guided_session_policies WHERE session_id=?",
++            String.class,
++            id);
++    JsonNode approvedPolicy =
++        repository.transaction(() -> store.frozenPolicy(id).path("applicationPolicy").deepCopy());
++    assertThat(GuidedContracts.hash(approvedPolicy)).isEqualTo(frozenHash);
++    long fence =
++        dispatch
++            .assign(fixture.controller, id, "translation-assignment", properties.workerId())
++            .path("ownerFence")
++            .asLong();
++    JsonNode assigned = repository.transaction(() -> repository.lock(id).document().deepCopy());
++    String assignmentBefore =
++        jdbc.queryForObject(
++            "SELECT (to_jsonb(a)-'live')::text FROM studio_guided_assignments a WHERE session_id=?",
++            String.class,
++            id);
++    String sourceBefore =
++        jdbc.queryForObject(
++            "SELECT to_jsonb(m)::text FROM studio_guided_source_manifests m WHERE session_id=?",
++            String.class,
++            id);
++    var realClient =
++        new GuidedRunnerClient(
++            URI.create("https://localhost:" + Environment.RUNNER_PORT),
++            Environment.TLS,
++            () -> Environment.token("backend-controller", "controller-1", "studio-guided-runner"),
++            C);
++    var measuredClient = org.mockito.Mockito.spy(realClient);
++    var original = new AtomicReference<JsonNode>();
++    var forged = new AtomicReference<JsonNode>();
++    var materialBefore = new AtomicReference<String>();
++    var contextCalls = new AtomicInteger();
++    org.mockito.Mockito.doAnswer(
++            invocation -> {
++              JsonNode genuine = invocation.getArgument(1);
++              original.set(genuine.deepCopy());
++              assertThat(genuine.path("applicationPolicy")).isEqualTo(approvedPolicy);
++              assertThat(genuine.path("policyHash").asText()).isEqualTo(frozenHash);
++              ObjectNode changed = genuine.deepCopy();
++              changed.put(
++                  "policyHash",
++                  frozenHash.equals("0".repeat(64)) ? "1".repeat(64) : "0".repeat(64));
++              C.validate("v3/runner-context", changed);
++              assertThat(changed.path("policyHash")).isNotEqualTo(genuine.path("policyHash"));
++              ObjectNode unchanged = changed.deepCopy();
++              unchanged.set("policyHash", genuine.path("policyHash"));
++              assertThat(unchanged).isEqualTo(genuine);
++              forged.set(changed.deepCopy());
++              materialBefore.set(
++                  jdbc.queryForObject(
++                      "SELECT (to_jsonb(m)-'live')::text FROM studio_guided_materializations m WHERE session_id=?",
++                      String.class,
++                      id));
++              contextCalls.incrementAndGet();
++              return realClient.send("context", changed);
++            })
++        .when(measuredClient)
++        .send(
++            org.mockito.ArgumentMatchers.eq("context"),
++            org.mockito.ArgumentMatchers.any(JsonNode.class));
++    var bridge = new GuidedDispatchService(sessions, materialization, measuredClient);
++    var continuation = translationWithBridge(bridge);
++    var log = new ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>();
++    log.start();
++    var logger =
++        (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(GuidedRunnerClient.class);
++    logger.addAppender(log);
++    try {
++      var refusal =
++          org.assertj.core.api.Assertions.catchThrowableOfType(
++              () ->
++                  continuation.plan(
++                      fixture.controller, id, fence, "actual-forged-policy", command(id)),
++              GuidedSessionException.class);
++      assertThat(refusal).isNotNull();
++      assertThat(refusal.getMessage()).isEqualTo("RUNTIME_INCOMPATIBLE");
++      assertThat(refusal.status()).isEqualTo(409);
++      assertThat(refusal.retryable()).isFalse();
++      assertThat(refusal.messageCode()).isEqualTo(GuidedRunnerClient.CONTEXT_REFUSED);
++      assertThat(contextCalls.get()).isEqualTo(1);
++      assertThat(PROVIDER_KINDS).containsExactly("SOURCE_PLAN");
++      assertThat(log.list)
++          .anyMatch(
++              event ->
++                  event
++                      .getFormattedMessage()
++                      .equals(
++                          "Guided runner refused the context for session "
++                              + id
++                              + " (contextHash "
++                              + GuidedContracts.hash(forged.get())
++                              + "): IDENTITY_MISMATCH"));
++      Environment.await(
++          () ->
++              repository.transaction(
++                  () ->
++                      repository
++                          .lock(id)
++                          .progress()
++                          .path("teardownStatus")
++                          .asText()
++                          .equals("CONFIRMED")),
++          10000);
++      JsonNode failed = repository.transaction(() -> repository.lock(id).document().deepCopy());
++      JsonNode progress = repository.transaction(() -> repository.lock(id).progress().deepCopy());
++      assertThat(failed.path("state").asText()).isEqualTo("FAILED");
++      assertThat(progress.path("errorCode").asText()).isEqualTo("RUNTIME_INCOMPATIBLE");
++      assertThat(progress.path("translationBootstrap").path("deliveries")).hasSize(1);
++      assertThat(
++              progress
++                  .path("translationBootstrap")
++                  .path("deliveries")
++                  .get(0)
++                  .path("outcome")
++                  .asText())
++          .isEqualTo("REFUSED");
++      assertThat(failed.path("counters").path("observations").asInt()).isZero();
++      assertThat(progress.path("observation").isMissingNode()).isTrue();
++      for (String field :
++          List.of("scope", "scopeHash", "versions", "limits", "sourceSteps", "runAuthorization")) {
++        assertThat(failed.path(field))
++            .as("unchanged session %s", field)
++            .isEqualTo(assigned.path(field));
++      }
++      assertThat(failed.path("owner").path("fence").asLong()).isEqualTo(fence);
++      assertThat(
++              jdbc.queryForObject(
++                  "SELECT to_jsonb(p)::text FROM studio_guided_session_policies p WHERE session_id=?",
++                  String.class,
++                  id))
++          .isEqualTo(frozenBefore);
++      assertThat(
++              jdbc.queryForObject(
++                  "SELECT (to_jsonb(m)-'live')::text FROM studio_guided_materializations m WHERE session_id=?",
++                  String.class,
++                  id))
++          .isEqualTo(materialBefore.get());
++      assertThat(original.get().path("policyHash").asText()).isEqualTo(frozenHash);
++      assertThat(
++              jdbc.queryForObject(
++                  "SELECT (to_jsonb(a)-'live')::text FROM studio_guided_assignments a WHERE session_id=?",
++                  String.class,
++                  id))
++          .isEqualTo(assignmentBefore);
++      assertThat(
++              jdbc.queryForObject(
++                  "SELECT to_jsonb(m)::text FROM studio_guided_source_manifests m WHERE session_id=?",
++                  String.class,
++                  id))
++          .isEqualTo(sourceBefore);
++      for (String table :
++          List.of(
++              "studio_guided_actions",
++              "studio_guided_preparations",
++              "studio_guided_obligation_admissions",
++              "studio_guided_publication_observations")) {
++        assertThat(
++                jdbc.queryForObject(
++                    "SELECT count(*) FROM " + table + " WHERE session_id=?", Integer.class, id))
++            .as("zero row in %s", table)
++            .isZero();
++      }
++      assertThat(NAVIGATION_DESTINATIONS).isEmpty();
++      assertThat(SUBMITS.get()).isZero();
++      JsonNode beforeAgain = C.parse(Files.readString(fixture.livePolicyCounter));
++      assertThat(beforeAgain.path("registered").asBoolean()).isTrue();
++      assertThat(beforeAgain.path("launches").asInt()).isZero();
++      assertThat(beforeAgain.path("rpcs").path("context").asInt()).isEqualTo(1);
++      assertThat(fixture.worker.descendants().filter(ProcessHandle::isAlive).count()).isZero();
++      int allClientCalls =
++          org.mockito.Mockito.mockingDetails(measuredClient).getInvocations().size();
++      JsonNode again =
++          continuation.plan(fixture.controller, id, fence, "after-actual-forgery", command(id));
++      assertThat(again.path("state").asText()).isEqualTo("FAILED");
++      assertThat(C.parse(Files.readString(fixture.livePolicyCounter))).isEqualTo(beforeAgain);
++      assertThat(org.mockito.Mockito.mockingDetails(measuredClient).getInvocations())
++          .hasSize(allClientCalls);
++      assertThat(PROVIDER_KINDS).containsExactly("SOURCE_PLAN");
++      assertThat(repository.transaction(() -> repository.lock(id).document().deepCopy()).toString())
++          .isEqualTo(failed.toString());
++      assertThat(repository.transaction(() -> repository.lock(id).progress().deepCopy()).toString())
++          .isEqualTo(progress.toString());
++      assertThat(fixture.worker.descendants().filter(ProcessHandle::isAlive).count()).isZero();
++      var proof =
++          C.object()
++              .put("sessionId", id)
++              .put("workerPid", fixture.worker.pid())
++              .put("originalPolicyHash", frozenHash)
++              .put("forgedPolicyHash", forged.get().path("policyHash").asText())
++              .put("runnerCode", "IDENTITY_MISMATCH")
++              .put("state", "FAILED")
++              .put("errorCode", "RUNTIME_INCOMPATIBLE")
++              .put("contextCalls", contextCalls.get())
++              .put("observations", 0)
++              .put("ownedBrowserChildren", 0)
++              .put("secondContinuationRpcDelta", 0)
++              .put(
++                  "wrapperHash",
++                  GuidedContracts.hash(
++                      C.object().put("script", Files.readString(fixture.livePolicyWrapper))));
++      proof.set("actualWorkerMeasurements", beforeAgain);
++      Path destination = Path.of("build", "strict-live-policy-proof.json");
++      Files.createDirectories(destination.getParent());
++      Files.writeString(destination, proof.toPrettyString());
++    } finally {
++      logger.detachAppender(log);
++      log.stop();
++    }
++  }
++
+   /**
+    * ar-2-r14-stops ruling 2 tests[1] (STUDIO-OBS-014 AC-1 clarification h2): the runner definitely
+    * refuses the first bootstrap context with IDENTITY_MISMATCH. Exactly one context request is
+@@ -3471,6 +3698,8 @@
+                 List.of(new CsiOwnershipEntry("CSI-123", "owner"))));
+     Process worker;
+     Path workerLog;
++    Path livePolicyCounter;
++    Path livePolicyWrapper;
+ 
+     void startWorker(org.junit.jupiter.api.TestInfo testInfo) throws Exception {
+       String testName = testInfo.getTestMethod().orElseThrow().getName();
+@@ -3576,8 +3805,44 @@
+       Path mounted = TEMP.resolve("worker.json");
+       Files.writeString(mounted, config.toString());
+       workerLog = Files.createTempFile(TEMP, "worker-", ".log");
+-      var process =
+-          new ProcessBuilder("node", WORKER_SNAPSHOT.resolve("run/guidedMain.js").toString());
++      Path entrypoint = WORKER_SNAPSHOT.resolve("run/guidedMain.js");
++      if (testName.equals(
++          "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch")) {
++        livePolicyCounter = TEMP.resolve("live-policy-counter-" + UUID.randomUUID() + ".json");
++        livePolicyWrapper = TEMP.resolve("live-policy-wrapper-" + UUID.randomUUID() + ".mjs");
++        String playwright =
++            Path.of("../studio-runner/node_modules/playwright/index.mjs")
++                .toAbsolutePath()
++                .normalize()
++                .toUri()
++                .toString();
++        String counter = new ObjectMapper().writeValueAsString(livePolicyCounter.toString());
++        String main = new ObjectMapper().writeValueAsString(entrypoint.toUri().toString());
++        // Measurement only: exact production module, original Playwright call-through, and actual
++        // HTTPS request events. No body, token, config, result or browser replacement is observed.
++        String script =
++            "import {chromium} from '"
++                + playwright
++                + "';"
++                + "import fs from 'node:fs';import https from 'node:https';"
++                + "import {syncBuiltinESMExports} from 'node:module';const file="
++                + counter
++                + ";"
++                + "const original=chromium.launchPersistentContext;"
++                + "const state={registered:typeof original==='function',launches:0,rpcs:{}};"
++                + "const save=()=>fs.writeFileSync(file,JSON.stringify(state),{mode:0o600});save();"
++                + "chromium.launchPersistentContext=function(...args){state.launches++;save();"
++                + "return Reflect.apply(original,this,args);};"
++                + "const serverFactory=https.createServer;https.createServer=function(...args){"
++                + "const server=Reflect.apply(serverFactory,this,args);server.prependListener('request',req=>{"
++                + "const route=(req.url||'').split('/').at(-1);state.rpcs[route]=(state.rpcs[route]||0)+1;save();});"
++                + "return server;};syncBuiltinESMExports();await import("
++                + main
++                + ");";
++        Files.writeString(livePolicyWrapper, script);
++        entrypoint = livePolicyWrapper;
++      }
++      var process = new ProcessBuilder("node", entrypoint.toString());
+       process.environment().put("STUDIO_GUIDED_CONFIG_FILE", mounted.toString());
+       // STUDIO-OBS-013/014 S3: a per-class object store, never a shared default directory.
+       process

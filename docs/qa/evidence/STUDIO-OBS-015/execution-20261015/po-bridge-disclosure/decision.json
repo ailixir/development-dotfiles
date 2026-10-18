@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "artifact": "Bridge ruling disclosures (GuidedBridgeIntegrationTest 38 -> 9 + 16 + 13) and F-1 placement",
+  "date": "2026-10-16T10:46:07Z",
+  "owner": "Pax (@po)",
+  "authority": "@architect (Aria) bridge ruling section 5 assigns the count-reconciliation record and the OBS-014 AC-4 / OBS-009 AC-12 i placements to @po; section 6 F-1 leaves placement to @po/coordinator ('an OBS-015 follow-up, or OBS-011 class C'). The coordinator relayed the task and the single-path/no-compat framing. No user decision is claimed.",
+  "sources": {
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w2-window01/aria-bridge-ruling01/ruling.md": "353d896f94275ddf0642ef529add5257c03c3907e293c4a2cbeb31fb562817e5",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w2-window01/aria-bridge-ruling01/ruling.json": "0c431939dd8cf25cb2fb43e33a6165c2c4f39e753297b6a0746116cfd2bb8ed4",
+    "docs/architecture/ADR-SC-005-single-path-observed-authoring.md": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4"
+  },
+  "anchorsVerifiedByPo": {
+    "method": "read-only grep/sed, shasum -a 256, one python3 -I name cross-check; working tree 2026-10-16; no Gradle, no test run",
+    "verified": [
+      "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java sha256 d48d4f0d9e61ba0c000b7013683858244873980d5fd9a1bb40c66e297d4ffc3f (equals ruling sha256After): 38 @Test methods; name set == ruling.json disclosure retainedUnchanged(9) + moved(16) + retired(13), symmetric difference empty",
+      "ruling.json cases: MIGRATE 16, RETIRE 12, RETIRE-OBSOLETE 1",
+      "GuidedBridgeIntegrationTest has 0 references to GuidedTranslationService (OBS-014 AC-4 exclusion still holds)",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java sha256 d10ec5cbfdecdfba4f8f8dabbeae21008e3d0192f16e6108791182d10d5f3eda: 'if (translation != null && translation.exists(id))' at :353, :799, :832, :1375, :1923",
+      "GuidedSessionService.java:691-696 start initializes translation state when access instanceof GuidedProductionSessionAccess",
+      "GuidedSessionConfiguration session bean calls service.installTranslation(translation, questions) with no property condition; GuidedProductionSessionAccess is the only main GuidedSessionAccess, registered @ConditionalOnMissingBean",
+      "studio.guided-authoring.translation.enabled (matchIfMissing=true) gates GuidedTranslationService, GuidedTranslationCoordinator, GuidedPlanningController only",
+      "GuidedSessionIT.java sha256 4c5236fd7056c292e9b9225340321282beed6589c5165ef02e8e97080613fa6a: 44 @Test",
+      "GuidedServiceTransportFaultIT.java sha256 7d711a43135c6f1312fb0ee026fd1c78b0ce27ed9f0b530babf1abe143be01e9: 20 @Test + 1 @ParameterizedTest"
+    ],
+    "corrections": [
+      "Ruling section 3 caveat says GuidedSessionIT and GuidedServiceTransportFaultIT 'never call installTranslation [V: grep]'. At the cited hash, GuidedServiceTransportFaultIT.translationTeardownService (:4018-4025) installs translation for the H8 teardown cases. Whether those cases admit through the conditional is NOT verified by @po; carried as an OBS-011 F-1 a T0 re-check. F-1's conclusion is unchanged.",
+      "Ruling F-1 cites GuidedSessionIT (43); the tree has 44 @Test (OBS-014 recorded 43 -> 44). TransportFaultIT '28' is executions including parameter rows."
+    ]
+  },
+  "disclosure": {
+    "bridgeBefore": 38,
+    "retainedUnchanged": 9,
+    "migrated": 16,
+    "retired": 12,
+    "retiredObsolete": 1,
+    "newClass": "GuidedBridgePlannedIT",
+    "reconciliation": "OBS-012A port proof GuidedBridgeIntegrationTest 37=37 + H8 stopRetryAfterCloseCompletesConfirmsWithSameKey = 38 = 9 + 16 + 13",
+    "adrException": "ADR-SC-005:57 'v1 guided ITs are ported, not dropped' governed the v1->v3 port; the 13 retirements are the documented architect exception (single-path unreachability and duplication, per-case covering tests), not a reinterpretation",
+    "residual": "No joined test combines real-navigation echo with a backend DB canary scan for a password echo; substitute = runner fixtures-tier guided-targets.test.ts:153 + studio_guided_commands response scan in migrated #27",
+    "citationLimit": "GuidedSessionIT / GuidedServiceTransportFaultIT citations (RETIRE coverage for #6, #9, #11, #15, #17, #24, #26, #28 and any 015 evidence) credit post-admission behaviour only until F-1 lands",
+    "nameListsAuthoritative": "ruling.json disclosure.retired / moved / retainedUnchanged"
+  },
+  "placements": [
+    {
+      "id": "BRIDGE-DISCLOSURE",
+      "destination": "015",
+      "anchor": "Dev Agent Record: appended 'PO disclosure — bridge IT migration and retirement (2026-10-16)' paragraph; Change Log 0.1.7",
+      "status": "RECORDED",
+      "note": "Ruling section 5 assigns this Dev Agent Record entry to @po. Execution acceptance (9/9 + 16/16, 0 skipped, dist digest) remains Dex's per ruling section 4.6; not credited here."
+    },
+    {
+      "id": "PORT-PROOF-NOTE",
+      "destination": "012A",
+      "anchor": "## Post-closure note — bridge port-proof count (2026-10-16), before Change Log; Change Log 0.2.7",
+      "status": "RECORDED",
+      "note": "Status Done, QA Results and the ticked 37=37 item unchanged; dated note only."
+    },
+    {
+      "id": "AC4-EXCLUSION",
+      "destination": "014",
+      "anchor": "## Post-closure disclosure — AC-4 named exclusions (2026-10-16), end of file; Change Log 0.1.19",
+      "status": "RECORDED",
+      "action": "GuidedBridgePlannedIT added to AC-4 named exclusions: constructs GuidedTranslationService but plans only navigate/read/fill (0 click/press/check), adds 0 to the denominator; loses the exclusion if it ever plans click/press/check."
+    },
+    {
+      "id": "AC12I-DIST",
+      "destination": "009",
+      "anchor": "AC-12 i addendum after item j; Change Log 0.3.12",
+      "status": "OPEN",
+      "action": "GuidedBridgePlannedIT joins the guided ITs whose spawned studio-runner/dist digest is recorded per run; QA credit per i unchanged; the AC-12 backend suite names both bridge classes (9 + 16)."
+    },
+    {
+      "id": "F-1",
+      "inventoryId": "CLN-F1",
+      "inventoryClass": "C",
+      "destination": "011",
+      "anchor": "AC-2 obligation F-1 a-g (after AC-2); T1 sub-item; File List 'Folds and splits' entry; Change Log 0.2.5",
+      "owner": "@dev backend (single GuidedSessionService owner) + @architect (T0 shape ruling) + @qa",
+      "action": "a facts re-verified at HEAD; b migrate GuidedSessionIT / GuidedServiceTransportFaultIT positive admissions to planner-issued obligations (ruling section 4 reserve/admit; R-1..R-5; hand-crafted proposals negative-only; names and counts ported, drops need an @architect R-6 ruling); c make the admission gate unconditional and remove translation-absent arms at all five sites, exact refusal per site and the :691-695 instanceof fate ruled by @architect at T0, plus a 409 RUNTIME_INCOMPATIBLE no-write negative test; d neutrality proof (no AC-7 exception); e lands in T1 before the AC-4 (c) split, whose unchanged baseline is the migrated classes by sha256; f ruling section 4.1 orphaned bridge helpers and F-3 duplicated bridge fixture folded; g not release-blocking, carried forward if not done.",
+      "status": "OPEN",
+      "completion_condition": "a-f evidenced in OBS-011, or the item listed in its Carried forward table with owner @dev + @architect; never dropped silently."
+    }
+  ],
+  "f1DestinationRationale": {
+    "chosen": "011",
+    "rejected015": [
+      "ADR-SC-005 placement map row OBS-015 is D-D only; the ADR names no translation-absent branch; ADR 'v1 service branches' removal was 012A (Done), and F-1 is not a v1 branch ([I] OBS-004-era bridge composition)",
+      "015 is InProgress under a frozen evidence ledger; migrating about 65 test methods (44 + 21) is not needed by any D-D AC and would widen scope",
+      "015 risk is contained by the recorded citation limit (post-admission evidence only)",
+      "The ruling itself offers OBS-011 class C as a valid home"
+    ],
+    "why011": [
+      "Behaviour-neutral in the production composition (verified unreachable): matches the thin final sweep and OBS-011 AC-1 'new candidates created by OBS-007..015 (dead ... branches)'",
+      "OBS-011 already owns the GuidedSessionService claim() split from the final shape with one owner; F-1 sequenced in T1 before it",
+      "Single-path/no-compat rule satisfied before GA sweep closes; LOW severity and unreachable, so not an OBS-010 release blocker"
+    ]
+  },
+  "autoDecisions": [
+    "[AUTO-DECISION] F-1 home 015 vs 011 -> 011 AC-2 obligation (reason: f1DestinationRationale).",
+    "[AUTO-DECISION] F-1 inventory class -> C (still referenced by tests; migrate first; decision recorded; ruling wording 'class C').",
+    "[AUTO-DECISION] Scope of removal -> all five translation-absent sites; per-site refusal and the :691-695 instanceof left to @architect at 011 T0; @po picks no option.",
+    "[AUTO-DECISION] Ruling section 4.1 orphaned helpers and F-3 duplication -> placed as F-1 f (ruling assigns both to OBS-011; otherwise silently unplaced).",
+    "[AUTO-DECISION] Record in Done stories 012A/014 -> dated post-closure notes plus Change Log rows, Status/QA Results untouched (Epic 10 dated-note convention).",
+    "[AUTO-DECISION] Where in 015 -> appended PO paragraph in the Dev Agent Record, as ruling section 5 directs, rather than a separate section."
+  ],
+  "flagsForLead": [
+    ".ai/STUDIO-OBS-014-close.json storySha256After 58a789ff... and .ai/STUDIO-OBS-012A-close.json artifactHashes.storyAfter b0b79c13... no longer equal the story files; protected content unchanged; @po did not edit .ai/.",
+    "Dex owns the ruling section 2 comment edit (GuidedBridgeIntegrationTest.java:2759) and the 015 File List entry for GuidedBridgePlannedIT.",
+    "[I] OBS-009 AC-11 k 'IT teardown reaps descendants' likely also covers GuidedBridgePlannedIT; not placed (ruling asked only AC-12 i)."
+  ],
+  "downstreamVerification": {
+    "009": {"beforeSha256": "c55f0e9466765fad9b9e5022ef484d53225af031321e4462a1bbd1f76e600a57", "afterSha256": "1ec144877e836a64f39a19f67164fa791b710818151f21617a3105fa2a6cf3b0", "acTextUnchanged": true, "tasksUnchanged": true, "status": "Ready"},
+    "011": {"beforeSha256": "bdb641c5fc3afac7f3715c266ccf705b7dd8b94dff7e02d814486c48b4aa1aa5", "afterSha256": "3d8688a9f2a4ebd3f7294e8f3b16a7390ccaf3b44366e7cb2826135a030a0a13", "acTextUnchanged": true, "tasksUnchanged": "existing tasks unchanged; one T1 sub-item added", "status": "Ready"},
+    "012A": {"beforeSha256": "b0b79c1354227da2882241272c3f77ade52507e91a3af3e01dc7336075ada150", "afterSha256": "026e8f62bf0ef23834cf3784c0d7e6a19b6fd9561b390995fcfac521cc49f71e", "acTextUnchanged": true, "tasksUnchanged": true, "qaResultsUnchanged": true, "status": "Done"},
+    "014": {"beforeSha256": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42", "afterSha256": "ba4f75fb2699cbfe7abae7637fefd47a541b68c056d066a5a717c8500c80fcf1", "acTextUnchanged": true, "tasksUnchanged": true, "qaResultsUnchanged": true, "status": "Done"},
+    "015": {"beforeSha256": "6366821457996a9bd7813653c1d2b3891c37c3c958ff0e57c6718442980c0d25", "afterSha256": "61c981bda75b55adc8e7b5d8ff4dc3e5cc0910cf80118e7f6272c680dc2630e6", "acTextUnchanged": true, "tasksUnchanged": true, "fileListUnchanged": true, "status": "InProgress"}
+  },
+  "scopePreserved": [
+    "No write under backend/, frontend/, studio-runner/, tools/, docs/specs/, .github/",
+    "Append/insert-only story edits; no existing line rewritten",
+    "No Status change in 009, 011, 012A, 014 or 015",
+    "No QA verdict, waiver or credit"
+  ],
+  "notRun": ["Gradle", "runner tests", "synapse diagnostics and checklist-runner skills (not related to this mission)"]
+}

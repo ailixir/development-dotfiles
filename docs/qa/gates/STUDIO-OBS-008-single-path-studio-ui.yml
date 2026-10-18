@@ -1,0 +1,66 @@
+schema: 1
+story: "STUDIO-OBS-008"
+gate: CONCERNS
+status_reason: >-
+  All AC-1..AC-9 and inherited obligations met on S_F2; backend 2531/2506/0/0/25 (skips equal the approved 25, 0 names lost vs 015), JaCoCo above minimums, frontend 1367/1367, e2e 13/13. CONCERNS for tracked non-blocking items (D-8 mirror residue, deferred copy/security lows, commit-set coupling, pending user decision).
+reviewer: "Quinn"
+reviewed_revision: "source-digest:50692d55e40807f67bf959f0d9672d9305d69b72ad693860506a3f7055e12dd3 dist-digest:897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c"
+updated: "2026-10-18T04:10:00Z"
+story_version_reviewed: "0.3.17"
+story_status_observed: "InReview"
+story_status_after: "Done"
+lifecycle_change: "InReview to Done applied by QA"
+narrative: "docs/qa/evidence/STUDIO-OBS-008/qa-gate-20261017/gate.md"
+json: "docs/qa/evidence/STUDIO-OBS-008/qa-gate-20261017/gate.json"
+
+top_issues:
+  - id: "REQ-001"
+    severity: low
+    finding: "D-8 mirror residue: handlers.ts:177 secretId ?? name remains; authoring mirror does not require secretId on a secretRef; unreachable from the page"
+    suggested_action: "Owner @dev; tracked in C-OBS008-5 in STUDIO-OBS-011"
+  - id: "REQ-002"
+    severity: low
+    finding: "Variables dialog can save a plain variable plus a secret row that the backend refuses at start with an undeclared 422 AUTHORING_REFERENCE_AMBIGUOUS; UI shows the code"
+    suggested_action: "Owner @architect / 009 C9 lane; tracked in C-OBS008-4 in STUDIO-OBS-009"
+  - id: "MNT-001"
+    severity: low
+    finding: "guidedNarratives.ts ships basis/source/note/facts (internal doc paths, quotes) in the production bundle"
+    suggested_action: "Owner @dev; tracked in C-OBS008-3 in STUDIO-OBS-011"
+  - id: "UX-F08"
+    severity: low
+    finding: "Nine whole copy Lows (UX-08,10,11,14,17,18,19,20,21), UX-09 prefix form, UX-13 'that step' wording, UX-02 question cue"
+    suggested_action: "Owner @ux-design-expert; tracked in STUDIO-OBS-F08 in README backlog"
+  - id: "SEC-001"
+    severity: low
+    finding: "UX-21: page-derived role and region render as plain captions outside the untrusted box"
+    suggested_action: "Owner @dev + @ux-design-expert; tracked in inside STUDIO-OBS-F08"
+  - id: "REQ-003"
+    severity: low
+    finding: "User decision pending: 'Someone pressed Stop' is untrue after None of these / declined confirmation"
+    suggested_action: "Owner user; tracked in README pending user decision"
+  - id: "TEST-001"
+    severity: medium
+    finding: "Copy-table tests read untracked/uncommitted files and pinned story text; tree is uncommitted 015 plus 008; partial commit turns 240+ tests red"
+    suggested_action: "Owner @devops; tracked in Dev Agent Record commit-set notes"
+  - id: "MNT-003"
+    severity: low
+    finding: "Leftovers without placed destination: W5-8 executeTest key optional, W5-9, W5-10, F-L5a-4, F-L5b-7/M6"
+    suggested_action: "Owner @dev; tracked in Dev Agent Record outbound list"
+  - id: "MNT-002"
+    severity: low
+    finding: "Lint warnings 302 to 308"
+    suggested_action: "Owner none; tracked in none"
+  - id: "TEST-002"
+    severity: low
+    finding: "pageGuidedRun.test.tsx 311 s under load in sandbox; passed in final run"
+    suggested_action: "Owner @dev; tracked in watch"
+  - id: "TEST-003"
+    severity: info
+    finding: "E2E MSW only, D5 local; no live integration claimed"
+    suggested_action: "Owner STUDIO-OBS-009; tracked in 009"
+  - id: "REL-001"
+    severity: info
+    finding: "V22 VALIDATE lock window unmeasured at production size"
+    suggested_action: "Owner STUDIO-OBS-010; tracked in release readiness"
+
+waiver: { active: false }

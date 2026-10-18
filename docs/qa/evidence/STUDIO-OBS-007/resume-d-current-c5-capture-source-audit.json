@@ -1,0 +1,105 @@
+{
+  "scope": "BOUNDED_CURRENT_C5_CAPTURE_SOURCE_COST_AND_ROTATION_COVERAGE_AUDIT",
+  "disposition": "ROTATION_STREAM_MATCHER_PREREQUISITE_CONFIRMED_SOURCE_REPAIR_DESIGN_ONLY_COST_NOT_ATTRIBUTED",
+  "source": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "sourceSha256": "f8d429f9a6fcdaa4cf2a1f3d5404e67d1049834ee3cd6640f249b925c35f5850",
+  "sourceSegmentSha256": {
+    "capture": "5a48029fb6f27c2e2b64d4ae3a368df4db8bde8d93da089974ba832f819a83c3",
+    "stream": "13893d3faacfe61babece98bc7da800ff75b7e5a2c2b22e9adf9635b1809e2d4",
+    "sampler": "25ceae7210c38f9e0bed0d2e1b5c7ed241162b2e0769dbf47b131969a943f206"
+  },
+  "diagnosticAuthority": ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-current-c5-capture-source-audit-context.txt",
+  "retainedDiagnosticFacts": {
+    "jdbcWaitSamples": 302,
+    "logRunnableSamples": 105,
+    "pgCandidateCategory": "MANIFEST_CLIENT_READ",
+    "pgBlockers": 0,
+    "exactClaimAttribution": false,
+    "lastHandlerMs": 1434.969792,
+    "terminalCode": "LEASE_LOST"
+  },
+  "prominentCoveragePrerequisite": {
+    "anchors": [
+      "Publication ninth:3633-3643",
+      "Publication rotation:3712-3731",
+      "C5Capture constructor:12029-12032",
+      "C5CanaryStream constructor:12971-13008",
+      "C5Capture.writeProfileValues:12190-12216",
+      "C5Capture.collect:12450 onward / close:12750 onward"
+    ],
+    "proved": "Ninth opens encoded matcher with an initial one-element mutable known-value list. Later run1 creates/adds the second controlled value and refreshes profile-side known values. The original encoded matcher owns constructor-built byte patterns/prefix/state only; there is no extension or rebuild. Mutating the list does not add stream patterns. Thus original ROOT/APP encoded bytes are all consumed but rotated-value variants are missing from the streamed log matcher.",
+    "limits": "Other retained sink scans read the expanded mutable list and can cover rotation; they do not recover original encoded log history because that history is intentionally not retained. Prior whole C5 already red; no actual leak or runtime PASS is inferred. Rotated streaming-log privacy remains unavailable until coverage is repaired and source-bound workflow reruns.",
+    "exactMinimumRepairDesign": [
+      "In existing ninth setup before C5Capture construction, generate the same one controlled rotated value that was formerly generated inside run1. Register initial and rotated values once in the existing canaries list before original matcher/capture opens.",
+      "Keep actual Vault rotate, approved-origin bind, controlled fixture rotate POST, writeProfileValues and second replay at the original later run1 point. Only use the preregistered variable instead of generating a fresh value there, and remove the redundant later list append so the list remains exactly those two controlled values.",
+      "All original source/config references, tuple/version/hash/receipt/replay scopes, body/assertion/authority/timer/native/provider call counts and rotation identity comparisons remain unchanged. This is fixture-oracle preregistration, not early resolution or early Vault rotation.",
+      "Matcher contains every original fifteen variants for both actual returned values from opening through genuine owner/output closure. No update/replay of raw log history, extra provider read, new stream, instrumentation or test required.",
+      "Preserve initial/final all-sink and profile scans and original capture closure. Root exact source review before authoring; whole-source inverse and old-case proof needed for any later candidate."
+    ],
+    "tradeoff": "This required coverage correction can increase KMP pattern work from fifteen to thirty; it does not explain or solve the observed latency and cannot be omitted for performance."
+  },
+  "sourceCostFindings": [
+    {
+      "id": "COST01",
+      "anchors": [
+        "C5Capture original OutputStream replacement:12064-12106",
+        "C5CanaryStream.write/consume:13011-13065"
+      ],
+      "fact": "Original encoder writes directly into bounded KMP prefix/state under C5Capture monitor. No added byte-array history/copy, duplicate log message rendering or second encoder call occurs in this output seam. It scans every valid later byte even after a hit; current global start-byte fast path is source-exact.",
+      "recommendation": "Do not replace full TRACE with lesser logger levels, retain encoded raw histories, drop bytes/variants or remove closing scans. Original encoder/TRACE log production cost remains mandatory."
+    },
+    {
+      "id": "COST02",
+      "anchors": [
+        "C5Capture.recordHttp:12333-12353",
+        "C5Capture OutputStream monitor:12067-12094"
+      ],
+      "fact": "recordHttp holds the SAME capture monitor while converting an already-returned String to UTF8 and scanning all current canary variants. This can block original server log writes independently of log encoder cost. Those arrays are private and scan itself does not mutate matcher/produced state.",
+      "minimumConditionalProposal": "After preregistration fixes the ninth inventory, move only the private response UTF8 conversion/absence scan outside the synchronized metadata update; keep original all-byte immediate assertion before produced insertion, original size/failure/status counters and produced map under the same monitor. Do not introduce a cache or remove later scans. Requires exact source/lifetime review, since other callers may pass a mutable list and failure ordering must remain original. No author release or measured benefit here."
+    },
+    {
+      "id": "COST03",
+      "anchors": [
+        "recordClaim:12240-12269",
+        "observedReportCapture filter:1054-1069"
+      ],
+      "fact": "Claim diagnostic takes the same capture monitor for numeric JSON/file operations AFTER original chain, while logs use that monitor. ContentCachingRequestWrapper caches actual consumed body and getContentAsByteArray makes a copy used only for length in claim diagnostic. HandlerNanos is evaluated before recordClaim, so diagnostic time is not in that scalar although it may delay servlet completion/contend with other threads.",
+      "recommendation": "No safe copy-removal proposed: metadata Content-Length is not equivalent to actual consumed bytes, and replacing the wrapper would create a new observation seam. Diagnostic file I/O cannot simply be dropped while retained evidence is required. Attribution to the observed slow handler is unproved."
+    },
+    {
+      "id": "COST04",
+      "anchors": [
+        "recordHttp immediate scan:12334-12338",
+        "collect/close all-sink scans:12410-12509,12750-12780",
+        "assertJoinedSinkAbsent:12946-12955"
+      ],
+      "fact": "Immediate HTTP absence checks and later all-sink scans repeat variant construction and scanning, but grade different temporal closure points and preserve immediate failure before further actions. Snapshot/PG/model/final-callback serialization is actual joined-sink evidence, not duplicate log serialization.",
+      "recommendation": "Do not remove early/final/late scans or reuse mutable pre-close sink snapshots as if final. A per-call immutable variant inventory could avoid repeated pure variant generation, but no dominant cost/1s benefit is demonstrated and rotation/mutable-list correctness must be proved first."
+    }
+  ],
+  "attributionLimits": [
+    "Sample counts are not exclusive wall-clock costs; LOG_ENCODER includes original logback/netlogstash frames plus fixture stream work below them.",
+    "The private PG snapshot has zero blockers and exactClaimAttribution=false. It cannot establish that the manifest ClientRead candidate is the selected slow claim, its holder or its cause.",
+    "Current encodedBytes/writeCalls/patternCount/patternBytes are cumulative; they are not correlated to one claim ordinal. Server handler scalar excludes final recordClaim work and does not measure client completion.",
+    "No performance benefit, original 1000ms client success or genuine holder attribution follows from this source audit."
+  ],
+  "minimumExistingDiscriminator": "Use existing same-run closed claim ordinal/status/handlerNanos, sampler category/thread-state counts and encoded byte/write/pattern counters together; they can bound total work but cannot split one selected claim between encoder and fixture matcher. The original classify source currently treats any logback ancestor as LOG_ENCODER. A more specific fixed-source fixture-scan classification would require separately reviewed diagnostic-only source scope; none is added or requested by this report.",
+  "preservedRequirements": [
+    "Original full ROOT plus com.citi.put.checks TRACE/every installed appender",
+    "All fifteen literal/encoded variants and every produced byte for every actually returned value",
+    "Original opening and genuine owner/callback/resource closing, all actual HTTP/problem/SSE/PG/model/cache/metric/profile sinks and late scans",
+    "Original one-second request/lease and all authority/scope/canonical/native/provider behavior"
+  ],
+  "actions": {
+    "sourceEdits": 0,
+    "runtime": 0,
+    "newInstrumentation": 0,
+    "newCases": 0,
+    "newFrameworks": 0,
+    "clockChanges": 0
+  },
+  "whole19AcPass": false,
+  "lifecycleVerdict": null,
+  "wholeWaveCeilingUsd": 500,
+  "billingTelemetry": "UNAVAILABLE"
+}

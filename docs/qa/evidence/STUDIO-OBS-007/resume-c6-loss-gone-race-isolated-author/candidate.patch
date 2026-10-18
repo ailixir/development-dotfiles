@@ -1,0 +1,13 @@
+--- docs/qa/evidence/STUDIO-OBS-007/resume-c6-loss-gone-race-isolated-author/before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java	2026-10-11 18:24:51
++++ docs/qa/evidence/STUDIO-OBS-007/resume-c6-loss-gone-race-isolated-author/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java	2026-10-11 18:24:51
+@@ -8161,7 +8161,9 @@
+               () -> {
+                 if (member.handle().isAlive()) {
+                   p6SameProcess(member.handle(), member.started());
+-                  assertThat(p6Status(member.handle()).group()).isEqualTo(member.group());
++                  P6ProcessStatus actual = p6Status(member.handle());
++                  if ("X".equals(actual.state()) && !member.handle().isAlive()) return;
++                  assertThat(actual.group()).isEqualTo(member.group());
+                   p6SameProcess(member.handle(), member.started());
+                   if (!member.handle().destroyForcibly()) {
+                     throw new IllegalStateException("C6 captured browser descendant kill refused");

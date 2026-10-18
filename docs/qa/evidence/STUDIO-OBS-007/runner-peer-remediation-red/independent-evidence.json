@@ -1,0 +1,139 @@
+{
+  "reviewerExecuted": [
+    {
+      "name": "focused owner tests",
+      "command": "node node_modules/vitest/vitest.mjs run test/run/passwordControlResolution.test.ts test/run/passwordControlTransport.test.ts test/run/secretReplay.test.ts test/run/observedChildRuntime.test.ts test/guided/diagnostics.test.ts test/guided/runtime.test.ts test/observedV3TupleValidation.test.ts test/run/browserProfilePreferences.test.ts --coverage.enabled=false --maxWorkers=1 --fileParallelism=false --cache=false",
+      "cwd": "studio-runner",
+      "session": 45036,
+      "exitCode": 0,
+      "files": 8,
+      "passed": 92,
+      "skipped": 0,
+      "scope": "Unit/control-port focused tests, no Gradle/global coverage/browser/backend join; source hashes above."
+    },
+    {
+      "name": "independent characterization probes",
+      "command": "node studio-runner/node_modules/vitest/vitest.mjs run --config /tmp/studio-obs007-aria-probes/vitest.config.mjs --coverage.enabled=false --cache=false",
+      "exitCode": 0,
+      "passed": 2,
+      "interpretation": "Assertions deliberately expect the defective behavior; this is RED security/classification reproduction, not security PASS.",
+      "facts": [
+        {
+          "probe": "prior-secret-cancel",
+          "callbackLeaksPriorValue": true,
+          "stderrLeaksPriorValue": true,
+          "diagnosticLeaksPriorValue": true,
+          "browser": "stub",
+          "joined": false
+        },
+        {
+          "probe": "substring-no-effect",
+          "incorrectlyClassifiedNoEffect": true,
+          "actualBrowserTriggerReproduced": false
+        }
+      ],
+      "productionModules": "Actual current GuidedRuntime and createPasswordControl imported directly; browser/CDP ports controlled stubs; test-only synthetic canary, no Vault value.",
+      "source": "import {it,expect} from '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/dist/index.js';\nimport {mkdtemp,rm,readFile,readdir,writeFile} from 'node:fs/promises';\nimport {join} from 'node:path';\nimport {GuidedRuntime} from '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/src/guided/runtime.ts';\nimport {hash,identity} from '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/src/guided/contracts.ts';\nimport {guidedContext,proposal,dispatch} from '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/helpers/guided.ts';\nimport {createPasswordControl,PasswordNoEffect} from '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/src/run/passwordControl.ts';\nconst facts:any[]=[];\nit('characterizes prior released value redaction during cancellation after a later action',async()=>{\n const origin='https://example.test',context=guidedContext(origin),canary='aria-prior-released-value';context.sourceStepIds=['nav','fill','submit'];\n context.authoredInputs.inputs.push({inputId:'pass',sourceStepId:'fill',kind:'secretRef',intendedSlot:'fill.value',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'fill',referenceId:'pass-ref',referenceName:'PASS',kind:'secretRef',intendedSlot:'fill.value'}});\n context.authoredInputs.inputs.push({inputId:'assertion',sourceStepId:'submit',kind:'nonsecretText',value:'Expected title',intendedSlot:'assert.expected',provenance:{referenceKind:'sourceSpan',sourceRevision:context.sourceRevision,stepId:'submit',startUtf16:0,endUtf16:14,kind:'nonsecretText',intendedSlot:'assert.expected'}});context.authoredInputsHash=hash(context.authoredInputs);\n const directory=await mkdtemp('/tmp/aria-cancel-'),messages:any[]=[],stderr:string[]=[];let generation=0,finishClose:()=>void=()=>{};let runtime:GuidedRuntime;\n const browser:any={evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:'creation',bootstrapId:'bootstrap',documentId:'blank',url:'about:blank',origin:null,generation:0},blankMatches:async()=>true,navigateBlank:async()=>{},close:()=>new Promise<void>(resolve=>{finishClose=resolve;}),observations:{withhold:async()=>{},dispose:async()=>{},pageMatches:async()=>true,preparePassword:async()=>{},fillPassword:async()=>{},assertPage:async()=>{void runtime.stop('CANCELLED');throw new Error(canary);},observe:async()=>({observation:{schemaVersion:3,sessionId:context.sessionId,scopeHash:context.scopeHash,documentId:'document',generation:++generation,origin,observedAt:new Date().toISOString(),coverage:{mode:'semantic',complete:false,truncated:false,withheldRegions:1,passwordControls:1,reason:'sensitivity'},nodes:[]},json:'',bytes:0,observationHash:''})}};\n runtime=new GuidedRuntime(context,{workerId:context.workerId,journalDirectory:directory,rules:[],launch:async()=>browser,callback:async(route,body)=>{messages.push({route,body});},diagnosticStderr:text=>stderr.push(text)});\n const perform=async(step:string,operation:any,secret?:any)=>{const previous=messages.filter(m=>m.route==='observations').at(-1)?.body.observation;const evidence=previous?{kind:'observedDocument',sessionId:context.sessionId,contextId:context.contextId,documentId:previous.documentId,generation:previous.generation,origin,observationHash:hash(previous)}:browser.evidence;const p=proposal(context,evidence as any,step,operation,step==='fill'?{kind:'passwordControl',documentId:evidence.documentId,generation:evidence.generation}:undefined);const proof=await runtime.prepare({...identity(context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Date.now()+10000).toISOString()});return runtime.dispatch({...dispatch(context,p,proof),...(secret?{secret}:{})});};\n try{await runtime.start();await perform('nav',{kind:'navigate',destinationInputId:'input-nav'});await perform('fill',{kind:'fill',value:{kind:'secretRef',sourceInputId:'pass'}},{secretId:'PASS',value:canary,versionId:'v1',allowedOrigins:[origin]});const pending=perform('submit',{kind:'assert',predicate:'title',expected:{kind:'authoredLiteral',sourceInputId:'assertion'}});for(let i=0;i<100&&!messages.some(m=>m.route==='outcomes'&&m.body.ledger.coordinate.stepId==='submit');i++)await new Promise(r=>setTimeout(r,5));const outcome=messages.find(m=>m.route==='outcomes'&&m.body.ledger.coordinate.stepId==='submit')?.body;expect(outcome).toBeDefined();const file=(await readdir(directory)).find(f=>f.endsWith('.diagnostic.jsonl'));const persisted=file?await readFile(join(directory,file),'utf8'):'';const result={probe:'prior-secret-cancel',callbackLeaksPriorValue:outcome.errorMessage.includes(canary),stderrLeaksPriorValue:stderr.join('').includes(canary),diagnosticLeaksPriorValue:persisted.includes(canary),browser:'stub',joined:false};facts.push(result);expect(result.callbackLeaksPriorValue).toBe(true);expect(result.stderrLeaksPriorValue).toBe(true);expect(result.diagnosticLeaksPriorValue).toBe(true);finishClose();await pending;}finally{finishClose();await runtime.stop('CANCELLED');await rm(directory,{recursive:true,force:true});await writeFile('/tmp/studio-obs007-aria-probes/facts.json',JSON.stringify(facts,null,2));}\n});\nit('characterizes substring native classification without proving a native browser trigger',async()=>{const target={kind:'passwordControl' as const,documentId:'document',generation:1},state={closed:false,busy:false,generation:1,observedNavigation:0,navigation:0,documentId:'document',available:true};const control=createPasswordControl({current:()=>state,call:async()=>({result:{},exceptionDetails:{exception:{description:'TypeError: unrelated native failure after a write mentions TARGET_CHANGED'}}})},()=>{},async()=>{});let noEffect=false;try{await control.fillPassword(target,'https://example.test',['https://example.test'],'test-only');}catch(error){noEffect=error instanceof PasswordNoEffect;}facts.push({probe:'substring-no-effect',incorrectlyClassifiedNoEffect:noEffect,actualBrowserTriggerReproduced:false});expect(noEffect).toBe(true);await writeFile('/tmp/studio-obs007-aria-probes/facts.json',JSON.stringify(facts,null,2));});\n",
+      "config": "export default {root:'/tmp/studio-obs007-aria-probes',cacheDir:'/tmp/studio-obs007-aria-probes/cache',test:{include:['review.test.ts'],environment:'node',coverage:{enabled:false},fileParallelism:false,maxWorkers:1}};\n",
+      "probeSha256": "85f60602500c3bb3cb9c792c72fa85c97bf3d62213324229eae3f8d0a21c506b",
+      "factsSha256": "c5c9961645751c75351d48e3087d389a19235a5379ca724503c0f92034f83423"
+    },
+    {
+      "name": "blank actual-browser effective-profile probe",
+      "command": "node studio-runner/node_modules/vitest/vitest.mjs run --config /tmp/studio-obs007-aria-probes/vitest.profile.config.mjs --coverage.enabled=false --cache=false",
+      "exitCode": 1,
+      "result": "Launch failed: Target page/context/browser closed; headless Chromium SIGTRAP with sandbox thermal-observer startup error. No effective preferences were observed.",
+      "scope": "No secrets, joins or broad fixture tier; no unsandboxed retry.",
+      "probeSha256": "8ef66a1779ad691d2a2d85d64f80915521db3217bd26e0bfb6969292c4fa5bd7"
+    }
+  ],
+  "ownerReportsReadNotExecuted": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-t3-candidate/result.json",
+      "scope": "Revision2 type/lint/build/local pins green; default1610 passed/29 existing skips; Chromium326 passed/10 existing skips; deployment313 passed/0 skips. Frozen source/dist hashes independently matched. Logs/report read, not reviewer-executed gates. No image/production/joined/whole-story claim."
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-diagnostics-native-guard.json",
+      "scope": "Owner actual Chromium plus production GuidedRuntime; authentic guarded raw TARGET_CHANGED, released canary false; callback/diagnostic/stderr only, no Core/PG join."
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-diagnostics-injected-released-value.json",
+      "scope": "Owner actual Chromium plus production runtime injected released-value control, raw true and three sinks redacted, UTF8\u22642048. Not native or all-sink/joined proof."
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-diagnostic-cancel-red/manifest.json",
+      "scope": "Historical red reconstructed prior-byte diagnostic lifetime reproduction; current-argument correction inspected, prior-value gap independently reproduced."
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/runner-guided-uncertainty-red/manifest.json",
+      "scope": "Historical generic postcall target-changed red proof; current generic handling inspected and focused tests pass. No actual native trigger for new substring concern."
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/root-session-port-green/result.json",
+      "scope": "Root actual realPG lifecycle30, original names, zero skips; scoped ports, not actual browser/Core joined native C6."
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/root-guided-security-ports-green/result.json",
+      "scope": "Root HTTP/JWT/security/wire20, not an independently executed reviewer gate."
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/data-uncertainty-green/result.json",
+      "scope": "Dara actualPG29 terminal exit0 archive now present. SQL/recorder uncertainty scope only; not actual Vault/Core/browser crash/native join."
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/data-uncertainty-green/post-release-source-delta.json",
+      "scope": "Dara snapshot preceded B caller/helper delta; original test receipt must not be credited as final-source integration."
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-007/lane-b-core-gate-red/result.json",
+      "scope": "Latest checkpoint B actual202 tests,53 failures,0 skips; owner classified37 legacy truncate-fixture and16 actual Node validation refusals. Read-only attribution; fixes/exclusive rerun remain B, no reviewer Gradle."
+    }
+  ],
+  "canonicalRead": [
+    "AGENTS.md",
+    ".codex/skills/aiox-architect/SKILL.md",
+    ".aiox-core/development/agents/architect.md",
+    ".aiox-core/development/tasks/architect-analyze-impact.md",
+    ".aiox-core/constitution.md",
+    "docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+    "docs/architecture/ADR-SC-005-single-path-observed-authoring.md",
+    "docs/specs/studio-observed-authoring/secret-login-design.md",
+    "docs/specs/studio-observed-authoring/secret-login-security-review.md",
+    ".ai/STUDIO-OBS-007-architect-t0-rulings.json",
+    "docs/qa/evidence/STUDIO-OBS-007/t2-po-consistency-delta.json",
+    "docs/qa/evidence/STUDIO-OBS-007/t2-po-delta-application.json",
+    ".aiox/waves/STUDIO-OBS-SINGLE-PATH/execution-audit.json"
+  ],
+  "pathResolution": "Requested studio-runner/src/run/coordinator.ts does not exist; inspected actual studio-runner/src/server/runCoordinator.ts. No substitute execution claim.",
+  "additionalArtifactsObserved": [
+    {
+      "path": "/tmp/studio-obs007-aria-probes/profile-facts.json",
+      "sha256": "cbfc571999697854eef4ea9b8a265dffe01233ac7c41ddea68f0bc20d9d4b56d",
+      "facts": {
+        "actualChromium": true,
+        "version": "153.0.8010.12",
+        "noSecrets": true,
+        "profileEntries": [
+          "Default",
+          "Preferences"
+        ],
+        "prewrittenPreferences": {
+          "credentials_enable_service": false,
+          "profile": {
+            "password_manager_enabled": false
+          },
+          "autofill": {
+            "profile_enabled": false,
+            "credit_card_enabled": false
+          },
+          "session": {
+            "restore_on_startup": 5
+          }
+        },
+        "activeDefaultPreferences": null
+      },
+      "provenance": "Appeared after the recorded reviewer launch-failure receipt. No corresponding successful execution/exit receipt was reviewed; not credited as reviewer-executed browser proof. The artifact itself has activeDefaultPreferences:null and therefore still does not establish effective preferences."
+    }
+  ]
+}

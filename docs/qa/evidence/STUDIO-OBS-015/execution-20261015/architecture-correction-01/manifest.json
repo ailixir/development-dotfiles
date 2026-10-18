@@ -1,0 +1,47 @@
+{
+  "artifact": "015 correction01 immutable architecture design manifest",
+  "createdAt": "2026-10-15T04:33:01.405154+00:00",
+  "status": "DESIGN_CORRECTION_COMPLETE_PENDING_INDEPENDENT_QA_CINT_AND_ACTUAL_IMPLEMENTATION",
+  "files": {
+    "check-design.cjs": "cc41d86169be2ba5481cfd565d9d42177ee58c0f0a2a355411854311009c71d6",
+    "completion-receipt.json": "179d1e7aee28c1c5878fd29a57a0b5a898e4aec2635a8e7dd22bfa668a4d6b6a",
+    "design-check-result.json": "f4565aa2d72c43621ee3cc21196aa6e3fef68115278a0a0ac2c40a0055d52a9c",
+    "fixtures.json": "cfe0a1bae262ad988a93f7400011fafb0812c575a2698037202d31733807fc6b",
+    "generate-design.py": "6f6109fceb77caea124f60b8ebf723c843fa85332736d73f4116dc1ce2559d1f",
+    "implementation-mapping.json": "4d6832026b9b283b4778cdb9067a4a750226b40e16f178a125139b0e34094fb8",
+    "interfaces.schema.json": "31460bc84408df57dd5127dcedced9f8f631b5c80e78f183c73b69d6e5bce5bb",
+    "ruling.md": "4cfd50b1a9d3bae194584791455512914b1feb780670d33e9ade822c6d051688",
+    "test-delta.json": "b2a74704d224c9481a8ad01b3f1037fd9f8786a86711350a0b515e54f2b54342"
+  },
+  "historicalManifestChecks": {
+    "architect": "54c5551d6d3316b3cc384fc4ebbf6d78476840130625476f2af50e193efc3818",
+    "data": "63b9ec46a4c800f1a08c267f929049fab55d458e9910128eae2b6ce7aa3640d0",
+    "architectureFilesVerified": 22,
+    "dataFilesVerified": 32,
+    "mismatches": []
+  },
+  "sourceSnapshots": {
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/manifest.json": "54c5551d6d3316b3cc384fc4ebbf6d78476840130625476f2af50e193efc3818",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/data/manifest.json": "63b9ec46a4c800f1a08c267f929049fab55d458e9910128eae2b6ce7aa3640d0",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/qa-readiness-final.json": "7e440341dc116d31c01704beae0d3158eefe3d09876619d45cd89953a1423370",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/implementation-receipt.json": "38f442ba0ff87c191a2c795ad56eda05c4c2a5b5d0e7d04a86f00d28b3d996f1",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/touched-files.json": "edc84ffb59d0ce85322ef2953d5f1d66ba4859e514c7aa3a3b07d143a355f5b5",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/checkpoint-architecture-dependency.json": "d677e9643da8a5b5d67d0bb2aae86cf9eb9b2f027e874938b2ebc919cce4c40d",
+    "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json": "078edacd45c880b3acbc0f4d82a709f8496d72aad685da8fa37aaf7746a487de",
+    "docs/specs/studio-observed-authoring/contracts/v3/revision.schema.json": "e37b2bd9869d42af323b2ad321e731a2556a8c44ebdc86f52c2e505fc1ea3531",
+    "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json": "757fdb6197367bffb7f5d2242db5d1d6f76565156b1314673377182319629324",
+    "studio-runner/src/validator/observedReplay.ts": "5b10290ccf0a9d3ffe247ff32bd245faba338126acab0c885bbe3e1777f87fb9",
+    "studio-runner/src/validator/observedReferencePolicy.ts": "3f57d0acb304df8a5dc626c6fe4f3161f90444f97d2d2a3cc12a8787ada6a948",
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/IncrementalAuthoringIdentity.java": "bcf9271b378557c6a7cfd80b90296eb98dfea7f4a0df8d47c3f649ccbacddc7c",
+    "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringRevisionIdentity.java": "80f41e2f0e4dc8d923932afb5b7ee29bc24b07aecdebbcab2340f1daf1e4f504",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java": "b3769877088421d7d4690d663efecc35cf016044cc9ee4849fbed74ef722b23f",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java": "4e0b4f6bdf7bf4b3b4260eefa3ff4b8537046e21f2b87be198de0bbd803ebb37",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java": "c44d5af6b9577b3543a234be33ac6c97e0535d093791ffae936c0f5316d0021c",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java": "9c6b155204eb78359243a99d5d46544e788d7c5381abdf2a1f4f2f1443aeaf1c",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringV2Request.java": "455275e8da934aa7092ee81917cd97d472cfbd980fc45e65f048cc407acfa211",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/StepAuthoringContext.java": "012581ffd2d3c682aee3950f351208bf9fa6376d09a5f39f6dad56c05b366ac4",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/GlobalAuthoringContext.java": "39e97dea4eed7ce551cb2b2a316b143eb5f5cad2e561588547fc5374c59f02c6",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/TargetHint.java": "d7542aa8ccf73b475c69431bafe4bad14492822f3fa4bb51a4db7393c0df3f52"
+  },
+  "instructions": "Independent review uses check-design.cjs --verify for read-only bounded schema/hash checks. Generator/check output mutation requires a new freeze and review. No production contract is installed by this manifest."
+}

@@ -1,0 +1,73 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java
++++ backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java
+@@ -127,6 +127,7 @@
+       com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlan.validate(C,plan);
+       jdbc.update("INSERT INTO studio_guided_translation_plans(session_id,plan_revision,parent_revision,plan,plan_hash) VALUES (?,1,0,?::jsonb,?)",id,plan.toString(),GuidedContracts.hash(plan));jdbc.update("UPDATE studio_guided_translation_state SET plan_revision=1,continuation='OBSERVING' WHERE session_id=?",id);
+       ObjectNode execution=C.object().put("kind","initialBlank").put("sessionId",id).put("contextId",id+"-context").put("creationId",id+"-creation").put("documentId",id+"-blank").put("bootstrapId",id+"-bootstrap").put("url","about:blank").putNull("origin").put("generation",0);
++      persistOriginalBootstrap(jdbc,sessions,current,base,inputs,execution);
+       ObjectNode proposal=C.object().put("schemaVersion",3).put("sessionId",id).put("scopeHash",session.path("scopeHash").asText()).put("generation",0).put("evidenceHash",GuidedContracts.hash(execution)).put("authoredInputsHash",inputsHash).put("contextRevision",1);proposal.putObject("coordinate").put("stepId",step.toString()).put("ordinal",0);proposal.putObject("target").put("kind","page").put("documentId",id+"-blank").put("generation",0);proposal.putObject("operation").put("kind","navigate").put("destinationInputId",input.path("inputId").asText());proposal.set("executionEvidence",execution);String digest=GuidedContracts.hash(proposal);
+       ObjectNode proof=C.object().put("schemaVersion",3).put("sessionId",id).put("workerId","legacy-worker").put("ownerFence",1).put("scopeHash",session.path("scopeHash").asText()).put("contextId",id+"-context").put("contextRevision",1).put("sourceRevision","1").put("configurationRevision","1").put("preparationId",id+"-prep").put("requestDigest",digest).put("evidenceHash",GuidedContracts.hash(execution)).put("authoredInputsHash",inputsHash).put("expiresAt",PublicationContracts.time(Instant.now().plusSeconds(30)));proof.putObject("versions").put("contract",3);
+       current.progress().set("executionEvidence",execution);sessions.save(current);jdbc.update("INSERT INTO studio_guided_preparations(session_id,preparation_id,context_id,owner_fence,request_digest,proof,expires_at) VALUES (?,?,?,1,?,?::jsonb,?::timestamptz)",id,id+"-prep",id+"-context",digest,proof.toString(),proof.path("expiresAt").asText());
+@@ -151,6 +152,42 @@
+     tx.executeWithoutResult(status->commitHistoricalV20(jdbc,tx,command));
+     assertThat(jdbc.queryForObject("SELECT count(*) FROM ui_test_revisions r JOIN studio_guided_publications p ON p.revision_id=r.id AND p.session_id=r.guided_session_id WHERE r.id=?",Integer.class,revision)).isEqualTo(1);
+     return new Seed(test,revision,step,"1","1",candidate.hashes().path("revisionDigest").asText(),row(jdbc,"ui_test_revisions","id",revision),row(jdbc,"studio_guided_publications","session_id",id),id);
++  }
++
++  /** Controlled original fixture ACK, persisted before its action; no worker/browser claim. */
++  private static void persistOriginalBootstrap(JdbcTemplate jdbc,GuidedSessionRepository sessions,
++      GuidedSessionRepository.Session current,PublicationContracts.Base base,JsonNode inputs,JsonNode initial) {
++    JsonNode session=current.document();String id=session.path("sessionId").asText();
++    assertThat(current.progress().has("translationBootstrap")).isFalse();
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_actions WHERE session_id=?",Integer.class,id)).isZero();
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",Integer.class,id)).isZero();
++    C.validate("v3/authored-inputs",inputs);C.validate("v3/execution-evidence",initial);
++    assertThat(C.parse(jdbc.queryForObject("SELECT authored_inputs::text FROM studio_guided_materializations WHERE session_id=?",String.class,id))).isEqualTo(inputs);
++    String inputsHash=GuidedContracts.hash(inputs);
++    assertThat(jdbc.queryForObject("SELECT authored_inputs_hash FROM studio_guided_materializations WHERE session_id=?",String.class,id)).isEqualTo(inputsHash);
++    String worker=session.path("owner").path("workerId").asText();int fence=session.path("owner").path("fence").asInt();
++    ObjectNode context=C.object().put("schemaVersion",3).put("sessionId",id).put("workerId",worker).put("ownerFence",fence)
++        .put("scopeHash",session.path("scopeHash").asText()).put("contextId",initial.path("contextId").asText()).put("contextRevision",1)
++        .put("materializationRevision",1).put("authoredInputsHash",inputsHash).put("expiresAt",session.path("expiresAt").asText())
++        .put("leaseExpiresAt",session.path("owner").path("leaseExpiresAt").asText());
++    context.putObject("versions").put("contract",3);context.set("approvedOrigins",session.path("scope").path("approvedOrigins").deepCopy());
++    ArrayNode ids=context.putArray("sourceStepIds");session.path("sourceSteps").forEach(step->ids.add(step.path("stepId")));
++    context.set("authoredInputs",inputs.deepCopy());context.set("limits",session.path("limits").deepCopy());
++    for(String[] table:new String[][]{{"allocations","studio_guided_allocations"},{"producers","studio_guided_producers"},{"consumerEdges","studio_guided_consumer_edges"}}) {
++      ArrayNode facts=context.putArray(table[0]);jdbc.queryForList("SELECT document::text FROM "+table[1]+" WHERE session_id=? ORDER BY document::text",String.class,id).forEach(json->facts.add(C.parse(json)));
++    }
++    JsonNode application=C.parse(jdbc.queryForObject("SELECT v.document::text FROM studio_guided_session_policies s JOIN studio_guided_policy_versions v ON v.policy_id=s.policy_id AND v.version=s.policy_version WHERE s.session_id=?",String.class,id)).path("applicationPolicy");
++    context.set("applicationPolicy",application.deepCopy());context.put("policyHash",GuidedContracts.hash(application));
++    ObjectNode identity=C.object().put("workerId",worker).put("fence",fence).put("scopeHash",session.path("scopeHash").asText());
++    for(String field:List.of("sourceRevision","configurationRevision")){context.set(field,base.document().path(field));identity.set(field,base.document().path(field));}
++    C.validate("v3/runner-context",context);
++    ObjectNode marker=current.progress().putObject("translationBootstrap").put("phase","READY");marker.set("identity",identity);marker.set("context",context);
++    marker.putObject("metadataAcknowledgement").put("version",2).put("deliveryId",id+"-metadata")
++        .put("contextHash",GuidedContracts.hash(context)).put("identityHash",GuidedContracts.hash(identity));
++    ObjectNode receipt=current.progress().putObject("translationBootstrapEvidence").put("contextId",context.path("contextId").asText()).put("contextRevision",1)
++        .put("workerId",worker).put("ownerFence",fence).put("scopeHash",session.path("scopeHash").asText());
++    receipt.set("sourceRevision",base.document().path("sourceRevision"));receipt.set("configurationRevision",base.document().path("configurationRevision"));
++    current.progress().set("executionEvidence",initial.deepCopy());sessions.save(current);
+   }
+ 
+   public static void assertPreservedAtHead(DataSource source,Seed seed) {
+@@ -264,6 +301,19 @@
+         || jdbc.queryForObject("SELECT count(*) FROM studio_guided_publication_observations WHERE session_id=?",Integer.class,id)!=0)
+       throw new IllegalStateException("Historical V20 fixture scope exceeded");
+     raw.putArray("observations");raw.putArray("sourceSelections");raw.putNull("incrementalEvidence");
++    JsonNode progress=C.parse(jdbc.queryForObject("SELECT progress::text FROM studio_guided_sessions WHERE session_id=?",String.class,id));
++    ObjectNode bootstrap=raw.putObject("bootstrap");
++    bootstrap.set("marker",progress.path("translationBootstrap").deepCopy());
++    bootstrap.set("receipt",progress.path("translationBootstrapEvidence").deepCopy());
++    JsonNode initial=null;
++    for(JsonNode prepared:preps) {
++      if(prepared.path("executionEvidence").path("kind").asText().equals("initialBlank")) {
++        if(initial!=null&&!initial.equals(prepared.path("executionEvidence")))throw new IllegalStateException("Historical fixture has inconsistent original blank evidence");
++        initial=prepared.path("executionEvidence");
++      }
++    }
++    if(initial==null)throw new IllegalStateException("Historical fixture lacks captured original blank evidence");
++    C.validate("v3/execution-evidence",initial);bootstrap.set("initialEvidence",initial.deepCopy());
+     return new PublicationContracts.Evidence(raw);
+   }
+ 

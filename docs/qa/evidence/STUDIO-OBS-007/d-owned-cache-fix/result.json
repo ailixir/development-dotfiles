@@ -1,0 +1,68 @@
+{
+  "schema": "d-owned-cache-fix/1",
+  "state": "FROZEN_SOURCE_CANDIDATE_AWAITING_COORDINATOR_FORMAT_COMPILE_RUNTIME",
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-owned-cache-fix-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-owned-cache-fix-context.txt"
+  ],
+  "sourceHashes": {
+    "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "beforeSha256": "bc6bb88bf3ffb675c07940abf94d8316de5ba7fcd915bb4ca084355554d251ca",
+    "afterSha256": "25f5edf22c9d2ae85c3e717b76b28953c0f62b42e9597137167bf6227d8b212f",
+    "patchSha256": "a399fd4384b288a6d3b4edd410ab371797952e416c80ebee488e15923eb73659",
+    "oldNineMethodByteIdentical": true,
+    "oldModeBlockByteIdentical": true,
+    "privateFaultAndStopOwnerAndFourControlsByteIdentical": true,
+    "expectedDomainInvocations": 14
+  },
+  "cacheIdentityMatrix": [
+    {
+      "seam": "capture",
+      "source": "Class-local OwnedCacheListener implements TestExecutionListener.prepareTestInstance under MERGE_WITH_DEFAULTS; verifies exact testClass and equality to dependency-injected application context before retaining actual TestContext. No new guessed manager/global cache/reflection.",
+      "status": "SOURCE_CANDIDATE_RUNTIME_UNRUN"
+    },
+    {
+      "seam": "identity",
+      "source": "AfterAll requires captured framework testClass, loaded cache entry, and exact same ownedContext reference before inspecting actual executor handles; mismatch fails before PG teardown.",
+      "status": "SOURCE_CANDIDATE_RUNTIME_UNRUN"
+    },
+    {
+      "seam": "drain/order",
+      "source": "All genuine SourceStopOwner drains and actual scheduler/executor shutdown plus isTerminated verification precede markApplicationContextDirty(CURRENT_LEVEL). Relay and PG remain available until completion; interruption preservation remains.",
+      "status": "SOURCE_CANDIDATE_RUNTIME_UNRUN"
+    },
+    {
+      "seam": "close/evict",
+      "source": "Framework markApplicationContextDirty evicts/closes this exact cache entry, checks inactive captured context and hasApplicationContext false without reloading it. AFTER_CLASS annotation retained for idempotent later framework eviction. No manual context.close or global cache clearing.",
+      "status": "SOURCE_CANDIDATE_RUNTIME_UNRUN"
+    }
+  ],
+  "historicalEvidence": "Coordinator reported previous formatted bc6 source all14 domain methods PASS; fresh XML included a synthetic after-class executionError because manual close retained inactive cached context. This report does not reinterpret that failing class result as green.",
+  "changedScope": "Only approved existing IT imports/listener registration/capture field/class plus narrow AfterAll termination/eviction helper/comment. All14 test bodies and stop-owner guards/interrupt/error logic unchanged.",
+  "preserved": [
+    "Default Spring test listeners remain merged, AFTER_CLASS annotation retained.",
+    "Actual owned-operation drain and executor termination remain required before PG teardown; no timeout/flag alone constitutes completed ownership.",
+    "No production, other source, global cache, migration, role, wire, schema, canonical, pin or budget changes."
+  ],
+  "execution": {
+    "compilation": "NOT_RUN",
+    "formatting": "NOT_RUN",
+    "runtime": "NOT_RUN",
+    "tests": "NOT_RUN",
+    "Gradle": "NOT_RUN",
+    "Docker": "NOT_RUN",
+    "processActions": []
+  },
+  "limits": [
+    "Framework API/order/capture closure requires coordinator current-source compile and actual class teardown proof.",
+    "No current-source PASS, whole-Future/common-pool termination/general DB deadline/all19/Core/browser/QA/lifecycle claim."
+  ],
+  "archives": {
+    "before.java": "docs/qa/evidence/STUDIO-OBS-007/d-owned-cache-fix/before.java",
+    "after.java": "docs/qa/evidence/STUDIO-OBS-007/d-owned-cache-fix/after.java",
+    "source.patch": "docs/qa/evidence/STUDIO-OBS-007/d-owned-cache-fix/source.patch",
+    "hashes.json": "docs/qa/evidence/STUDIO-OBS-007/d-owned-cache-fix/hashes.json",
+    "matrix.json": "docs/qa/evidence/STUDIO-OBS-007/d-owned-cache-fix/matrix.json"
+  },
+  "nextOwner": "Coordinator owns scoped formatting/current14-case class execution and immutable source re-review; source parked."
+}

@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "scope": "READONLY_INDEPENDENT_EXACT_ISOLATION_REPAIR_SOURCE_DIFF_REVIEW_ONLY",
+  "verdict": "CHANGES_REQUIRED_SOURCE_ONLY_NOT_RUNTIME_OR_QA_APPROVAL",
+  "reason": "R-ISO-SOURCE-01 and 02 are resolved at source level. R-ISO-SOURCE-03 and 04 are partially repaired but remain unresolved for rejected SDK acquisition scan coverage and honest constructor descriptor-cleanup reporting. Isolation native cases remain unrun.",
+  "inputBindings": {
+    "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "af961521a414a1c043f6fec79bd28a8d9816295d0983e4757483bad08b0e8114",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair/result.json": "f1ba277511b902763f3de39700fa33d007689b0b52047657e52bd2faeb3f161d",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair/candidate.patch": "f9ece0069c9f8a9f1a8e31c329f0b2296fd7a7b3625b3ec63bfc627738e755c3",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair/before.test.ts": "21bf4996fd5c62ac1de6eb55190762c80168ab4d78abca63e8afde5ebe993b97",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair/after.test.ts": "af961521a414a1c043f6fec79bd28a8d9816295d0983e4757483bad08b0e8114",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair/before-bindings.json": "896d589478bec3c77542ff0b996cc0d863044390971fc7379c577ce27e0b7eee",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair/source-manifest.json": "d07c7a1ba236cf179ac9b46d508c542993806b12bf70e29c5ba776159e6cdc52",
+    "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair/dist-manifest.json": "7c10a486e83ae076f27fc09f9839e6b93fb6657ff39cd4391043b237a9dd9a27",
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-runner-isolation-static/source-dist.zip": "b1f6367f0e46a1452fa145df4697812a32e13306e4195c37249b4bdbd0c063be",
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-r-isolation-source-review.json": "f19df19dde157065bb4c9688541a4902de12955e7ad86c03a555858738ca8a69",
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-runner-isolation-static-2/result.json": "3164c6ebf016df0a3953c882a311ba0e88c6258b8cb5f421ef63977e885bcd07"
+  },
+  "bindingVerification": {
+    "oldArchiveTestSha256": "21bf4996fd5c62ac1de6eb55190762c80168ab4d78abca63e8afde5ebe993b97",
+    "newTestSha256": "af961521a414a1c043f6fec79bd28a8d9816295d0983e4757483bad08b0e8114",
+    "archiveEqualsBeforeSnapshot": true,
+    "liveEqualsAfterSnapshot": true,
+    "regeneratedUnifiedDiffEqualsPatch": true,
+    "sourceManifestEntriesIndependentlyRehashed": 256,
+    "sourceManifestMismatches": [],
+    "distManifestEntriesIndependentlyRehashed": 274,
+    "distManifestMismatches": [],
+    "sourceDeltaFromBeforeBindings": [
+      "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts"
+    ],
+    "distDeltaFromBeforeBindings": [],
+    "oldArchiveSourcePathsCompared": 249,
+    "oldArchiveOmitsSevenManifestPaths": true,
+    "sharedArchiveSourceChangedPaths": [
+      "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts"
+    ],
+    "sourceCompilationEquivalenceProved": false
+  },
+  "findings": [
+    {
+      "id": "R-ISO-SOURCE-01",
+      "status": "RESOLVED_SOURCE_ONLY_UNRUN",
+      "severity": "NONE",
+      "lines": [
+        318,
+        319,
+        320,
+        321,
+        322,
+        323
+      ],
+      "evidence": "Genuine A producer is copied from actual successful read availability/admission and posted with otherwise current B identity and revision+1. Exact HTTP409/CONTEXT_LOST is required; stale A envelope at B route requires HTTP409/IDENTITY_MISMATCH. Scalar codes/statuses are recorded. Runtime update instrumentation records B accepting/active/no binding/no A after foreign producer rejection. A fresh valid B context HTTP200 and corresponding runtime checkpoint prove continued source-authored liveness after the identity refusal. Production runtime.ts producer-local equality check and transport.ts envelope check match these expected paths."
+    },
+    {
+      "id": "R-ISO-SOURCE-02",
+      "status": "RESOLVED_SOURCE_ONLY_UNRUN",
+      "severity": "NONE",
+      "lines": [
+        309,
+        314,
+        316,
+        317,
+        324
+      ],
+      "evidence": "Actual A after-merge inventory requires containsA, positive size and bytes before stop; disposed A tag must equal that tag. Immediately after fresh B context and before foreign producer metadata or credential delivery, initial B after-merge tag exists, differs from A and contains neither canary; B runtime is active/accepting with no A or binding. After actual password dispatch succeeds, before submit, same B inventory tag requires B present/A absent and nativeCount=1. Initial B size zero is not required."
+    },
+    {
+      "id": "R-ISO-SOURCE-03",
+      "status": "PARTIALLY_RESOLVED_REPAIR_REQUIRED",
+      "severity": "HIGH",
+      "lines": [
+        150,
+        151,
+        152,
+        153,
+        199,
+        202,
+        203
+      ],
+      "resolved": "stdout/stderr proxies delegate original receiver/all arguments/return via Reflect.apply; scalar streaming prefixes and per-sink/variant counts retain no chunks. Diagnostic callback preserves stderr effect. Both canaries now have distinct URI/double URI/UTF16BE/hex/base64/Unicode escape coverage; A normalization variants differ, B normalization variants coincide. Callback/journal/profile scans and serialized final evidence scans are present; extant file scan errors become scalar cleanup issues.",
+      "unresolved": "launchScratch is captured at SDK invocation but assigned to client.scratch only inside the fulfilled launch promise handler. When launchPersistentContext rejects, that owned profile root is absent from scanExtant. Production launchGuidedBrowser catches a no-context launch failure and calls disposeScratch before returning/rejecting (browser.ts:573-579); the later options.launch catch scan cannot inspect deleted files. Thus the claimed failure-safe scans of every partially acquired root before deletion are not established.",
+      "repair": "Record the actual owned SDK profile parent immediately before invoking SDK launch and cover rejection-time files before original production disposal, using test-local original-method forwarding and scalar scan results. Keep fixture and production bytes unchanged; report inaccessible/deleted unscanned roots honestly rather than a zero-hit proof."
+    },
+    {
+      "id": "R-ISO-SOURCE-04",
+      "status": "PARTIALLY_RESOLVED_REPAIR_REQUIRED",
+      "severity": "HIGH",
+      "lines": [
+        114,
+        115,
+        116,
+        118,
+        267,
+        268,
+        269,
+        270
+      ],
+      "resolved": "F/S/directory/callback release capabilities are registered on acquisition. SDK setup rejection attempts context/browser close and restores descriptors, rethrowing the primary error. Cleanup releases the gate promptly, attempts remaining releases with a shared 5000ms await budget, records timeout/rejection rather than proving closure, retains journal with tracked live writers, clears worker/clients/setup/restorer references. Ordinary SDK/private wrappers return original promises; explicit close gate remains the timing exception.",
+      "unresolved": "restoreAll catches descriptor restoration failures into cleanupIssues, while the acquired descriptors release returns Promise.resolve regardless. Construction catch records only constructionIssues. A failed descriptor restore during construction unwind therefore appears as confirmed descriptors release with unresolved=false; the actual cleanupIssues are omitted. A failed restore closure has also been spliced out, so retained restoration capability is lost while a patched global can remain installed. This violates honest unresolved closure on the setup-failure path.",
+      "repair": "Propagate descriptor restore failures into the constructor failure evidence/confirmed status while preserving the original thrown construction error. Keep all release attempts bounded and attempted; do not report unresolved=false when any descriptor remains unrestored."
+    }
+  ],
+  "resolvedFindingIds": [
+    "R-ISO-SOURCE-01",
+    "R-ISO-SOURCE-02"
+  ],
+  "unresolvedFindingIds": [
+    "R-ISO-SOURCE-03",
+    "R-ISO-SOURCE-04"
+  ],
+  "constraints": {
+    "exactlyThreeIsolationCases": true,
+    "caseNames": [
+      "ISO1",
+      "ISO2",
+      "ISO3"
+    ],
+    "unchangedReviewedExtraction": {
+      "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "417c8ae2f6fb845eb4f7f802b037efc5638ee53ab0fcab41e4a7d8553bf763ad",
+      "studio-runner/test/fixtures/guided-dataflow/server.ts": "c8420f7dc5420a085b0c5b51f92251b8418e6f6c7e4d891d2eb084cd15ee1f61"
+    },
+    "extractionBytesEqualOldArchive": true,
+    "noProductionSourceChange": true,
+    "noProductionApiPolicyFlagsSandboxChange": true,
+    "FOperationsOnlyReadGrantAndSPASSOnlyOriginsPreserved": true,
+    "noOldAEcho": true,
+    "noFourthGrantProbe": true,
+    "noPhysicalHeapClaim": true,
+    "noRetainedRawInventoryOrMockArchives": true,
+    "ordinaryDelegationOriginalReceiverArgumentsReturnsPromises": true,
+    "strictFailurePreservationAndCleanupFullySatisfied": false
+  },
+  "existingGateEvidence": {
+    "secondStaticGate": {
+      "typeExit": 0,
+      "lintExit": 0,
+      "driftPaths": [],
+      "nativeRun": false
+    },
+    "classification": "Read existing gate result; reviewer reran no checks. Source/dist manifests rehashed independently. Static PASS is not isolation native PASS.",
+    "originalDataflowNativeCases": "User reports original three retained cases pass after exact extraction; not rerun by reviewer."
+  },
+  "scopeLimits": [
+    "No isolation native cases executed; SDK interception, native counts, focus callbacks, TLS proxy and actual closure remain runtime-unverified.",
+    "5000ms bounds awaited cleanup, not synchronous filesystem scans or forced underlying promise settlement. Pending operations can retain references; dropped harness roots do not prove physical heap erasure.",
+    "Tracked PIDs sampled at SDK launch settlement; not continuous discovery of all later descendants.",
+    "No execution release, QA/lifecycle approval, backend/Core/Vault CSI proof, full19 or whole acceptance approval. Coordinator alone owns all9 backend/Core/compiled-browser gate. Full19/default-negative/Core fault-sink-control/image/QA proof remain open."
+  ],
+  "executionRelease": false,
+  "qaApproved": false,
+  "lifecycleVerdict": null,
+  "coordination": {
+    "newAgents": 0,
+    "contacts": 0,
+    "dispatchChanges": 0,
+    "cap": 4,
+    "roles": "root, coordinator and two read-only reviewers",
+    "wholeWaveCeilingUsd": 500,
+    "billing": "UNAVAILABLE_NOT_MEASURED"
+  },
+  "workPerformed": {
+    "sourceEdits": 0,
+    "tests": 0,
+    "runtime": 0,
+    "builds": 0,
+    "browserLaunches": 0,
+    "gradle": 0,
+    "models": 0,
+    "processLifecycleActions": 0,
+    "lifecycleChanges": 0,
+    "contacts": 0,
+    "goalChanges": 0,
+    "dispatchChanges": 0,
+    "distWrites": 0,
+    "evidenceWrites": 1
+  }
+}

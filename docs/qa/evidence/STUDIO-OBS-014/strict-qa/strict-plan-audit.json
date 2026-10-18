@@ -1,0 +1,286 @@
+{
+  "schema": 1,
+  "story": "STUDIO-OBS-014",
+  "reviewer": "Quinn independent strict-plan QA",
+  "updated": "2026-10-14T23:02:25.842620+00:00",
+  "verdict": "FAIL",
+  "doneAllowed": false,
+  "userRule": "Only Done after every planned QA validation has executed and is green; CONCERNS/WAIVED/deferred local QA is not completion.",
+  "scope": "Read-only audit; evidence files only. No Gradle/browser/dist/source mutations. No 015 implementation.",
+  "proofRecheck": "independent-proof-recheck.json",
+  "sourceBinding": {
+    "checked": 1552,
+    "changed": [],
+    "manifestSha256": "8468756ee975df9e9e2c351c6f93934f7cc26d90ff2c5f50cf27082885c750f7"
+  },
+  "plannedRequirements": [
+    {
+      "id": "T0",
+      "requirement": "Independent architect rulings, single file ownership, closed reason codes, forward V19",
+      "status": "EXECUTED_PASS",
+      "proof": [
+        "ar-2-3-obs014.json",
+        "ar-2-r14-stops.json",
+        "ar-mounted-rules.json",
+        "ar-sec001-form-membership.json",
+        "PO acknowledgements and lane ledgers"
+      ],
+      "remaining": "ARCH-001 closed-code precedence still needs dated architect ratification for a concern-free gate."
+    },
+    {
+      "id": "AC1-policy-governance",
+      "requirement": "Approval required; pending edit refuses start with zero writes; v2 hash/document freeze; dense immutable approval/audit chain",
+      "status": "EXECUTED_PASS",
+      "proof": [
+        "ObservationPolicyIT:11 passed",
+        "ObservationPolicyRouteIT:4 passed, including five unauthenticated route probes",
+        "GuidedGovernanceMigrationIT:26 passed",
+        "GuidedSessionIT.theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash"
+      ]
+    },
+    {
+      "id": "AC1-runner-binding",
+      "requirement": "Policy hash validates before export; mount applicationPolicy/rules refused; policy does not widen trusted origin/read scope",
+      "status": "EXECUTED_PASS",
+      "proof": [
+        "policyHash.test.ts:6 passed",
+        "transport.test.ts:14 passed",
+        "guidedMain/guidedConfig tests and guided-dataflow fixture: all present in green S4c logs",
+        "ObservationPolicyIT.originsOutsideTheTrustedPolicyAreInvalidAtWriteAndIncompatibleAtStart"
+      ],
+      "remaining": "TEST-003 duplicate refused-context response permits either IDENTITY_MISMATCH or SCHEMA; tighten to the observed exact normalization."
+    },
+    {
+      "id": "AC1-bootstrap-rulings",
+      "requirement": "Definite context refusal terminal on first request; next continuation sends nothing; timeouts still retry exactly3",
+      "status": "EXECUTED_PASS",
+      "proof": [
+        "GuidedPlanningIntegrationTest.aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried",
+        "GuidedPlanningIntegrationTest.aTimedOutBootstrapContextStillRetriesAndExhaustsAfterThreeDeliveries",
+        "GuidedDispatchContextRefusalTest:2 passed",
+        "GuidedRunnerContextRefusalTest:3 passed"
+      ]
+    },
+    {
+      "id": "AC2",
+      "requirement": "Data-flow document describes exact export/retention, controls, copies, indefinite residuals, video, audit, ED01 unknown",
+      "status": "DOCUMENT_PRESENT_REVIEWED",
+      "proof": [
+        "guided-data-flow.md sections1-5",
+        "Original PO X6/R1/R2 and AR2 disclosures"
+      ],
+      "remaining": "Several sections retain historical future tense after S3 landed; update the dated document to actual final behavior. External compliance approval is explicitly OBS010, never claimed here."
+    },
+    {
+      "id": "AC3-prune-storage",
+      "requirement": "Prune progress and safe_result after window; nonempty never-published copies removed; keep published provenance immutable",
+      "status": "EXECUTED_PASS",
+      "proof": [
+        "GuidedObservationPrunerIT:3 passed",
+        "GuidedGovernanceMigrationIT.pruneRemovesEveryUnlistedKeyNullsTerminalResultsAndKeepsAttemptTimestamps",
+        "GuidedGovernanceMigrationIT.pruneDeletesNeverPublishedCopiesAndKeepsBasesAndAttempts",
+        "GuidedGovernanceMigrationIT.pruneKeepsEveryPublicationRowOfAPublishedSessionByteIdentical",
+        "Late settlement EXPIRED, retained allowlist, FINALIZING/window refusals executed"
+      ]
+    },
+    {
+      "id": "AC3-post-prune-replay",
+      "requirement": "IT proves a pruned session remains publish/replay-capable from its revision with removed content",
+      "status": "MISSING_REQUIRED_EXECUTION",
+      "proof": [
+        "Current aPublishedSessionKeepsItsPublicationRowsAndItsRevisionStillVerifies invokes ObservedRevisionVerifier only; synthetic fixture publishes empty obligations.",
+        "Current ReplayIT executes actual browser replay, but no prune occurs in that class."
+      ],
+      "remaining": "Add an actual production learning -> publish -> age eligible source session -> real pruner -> ordinary recorded browser replay proof; assert removed progress/safe_result and byte-identical retained published receipt/plan/provenance. Never infer this oracle by composing independent runs."
+    },
+    {
+      "id": "AC4-guard-grounding",
+      "requirement": "Planted Delete account/Open reports is rejected with closed reason and zero dispatch; valid grounded cases not regressed",
+      "status": "MISSING_REQUIRED_INTEGRATION",
+      "proof": [
+        "GuidedActionGuardTest.thePlantedDeleteAccountClickForOpenReportsIsRefusedBeforeAnyDispatch",
+        "GuidedActionGuardTest.aTargetTheAuthoredStepDoesNotNameIsUngrounded",
+        "GuidedActionGuardTest.anElementTargetMissingFromTheObservationIsRefusedUngrounded"
+      ],
+      "remaining": "Pure tests pass, but no integrated UNGROUNDED_TARGET/DESTRUCTIVE_VERB occurs. hostileCurrentPageCannotSubstituteAnotherPermittedEffect fails earlier INVALID_CONTRACT/BINDING_ORDER and cannot stand in for the intended validator case. Add structurally valid joined cases reaching actual guard, assert422 POLICY_DENIED, rejected attempt, FAILED/result POLICY_DENIED, exact reason audit, no preparation/admission/native effect."
+    },
+    {
+      "id": "AC4-corpus",
+      "requirement": "Four joined classes counted old/new, every click/press/check guard decision counted, planted refusal names and unit denominator complete",
+      "status": "EXECUTED_PASS",
+      "proof": [
+        "Planning40->49; Replay39->40; Session43->44; Bridge37->37; no removed/skipped cases",
+        "Planning5 admitted clicks,5 SIDE_EFFECT_DENIED,2 confirmations; Replay55 admitted clicks,0 refusal",
+        "B14 six-pair calibration including P14 CONTROL_VALUE with explicit exclusions"
+      ],
+      "remaining": "Recount on changed source after new guard tests; new planted reasons must be named, never compared to the old all-SIDE_EFFECT_DENIED tally."
+    },
+    {
+      "id": "AC5",
+      "requirement": "Save versus Delete exact destructive vocabulary, authored destructive allowance, nothing dispatched on refusal",
+      "status": "MISSING_REQUIRED_INTEGRATION",
+      "proof": [
+        "GuidedActionGuardTest.clickSaveOnAPageWithSaveAndDeleteMakesOnlySaveEligible",
+        "GuidedActionGuardTest.anAuthoredDestructiveVerbAllowsTheControl",
+        "GuidedActionGuardTest.bareSubmitIsNotDestructiveButSubmitOrderIs"
+      ],
+      "remaining": "Unit decisions green; exact integrated DESTRUCTIVE_VERB before dispatch is absent. Add an authored destructive positive integrated control under ALLOW, to distinguish refusal caused by guard structure from a broken fixture."
+    },
+    {
+      "id": "AC6",
+      "requirement": "DENY login submit refused; CLARIFY_FIRST asks exactly once with authored label; ALLOW OBS007 real E2E remains green",
+      "status": "EXECUTED_PASS",
+      "proof": [
+        "Planning governedDenyRefusesTheFormSubmitBeforeAnyDispatchAndFailsPolicyDenied:button,input",
+        "Planning governedDenyRefusesAnUnlabelledOrFormAttributeSubmit:unlabelled-button,unlabelled-input,form-attribute",
+        "Planning two governedClarifyFirst cases; exact AUTHORED and zero preconfirmation admission; real submit once afterward",
+        "GuidedActionGuardTest21 passed including2520-node monotonic closed-world set",
+        "ReplayIT40 passed including actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel"
+      ]
+    },
+    {
+      "id": "AC7",
+      "requirement": "Closed labelSource AUTHORED/SAVED_INPUT/PAGE with safe PAGE role/region and secret IDs only",
+      "status": "MISSING_DIRECT_EMITTER_ASSERTION",
+      "proof": [
+        "AUTHORED assert in Planning confirmations/sourceSpan cases",
+        "PAGE assert in configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules",
+        "Generated clarification schema fixtures and GuidedWireContractTest7/StudioContractTest13 green"
+      ],
+      "remaining": "SAVED_INPUT production branch GuidedTranslationService1646 has no direct emitter assertion. Add real configurationReference source clarification assertion incl secret-ID-only/no-value canary if secret choice used; schema fixture alone does not prove producer."
+    },
+    {
+      "id": "AC8",
+      "requirement": "EXECUTE classification; persisted perCSI concurrency across replicas; daily budget at start and next model reserve; RetryAfter UTC",
+      "status": "EXECUTED_PASS",
+      "proof": [
+        "RateLimitClassifierTest5",
+        "GuidedCsiBudgetIT5 including twoReplicasStartingTogetherOnOneCsiYieldExactlyOneSessionAndARetryableRefusal and aDayExhaustedMidSessionRefusesTheNextReservationAndEndsTheSessionBudgetExceeded",
+        "V19 conditional charge, append-only days and CSI lock cases"
+      ],
+      "remaining": "Measured real-model capacity tuning belongs OBS009; no claim it was executed."
+    },
+    {
+      "id": "AC9",
+      "requirement": "HTTP replay execute requires IdempotencyKey; same key returns cached response; pins exact",
+      "status": "EXECUTED_PASS",
+      "proof": [
+        "StudioApiIT.anExecuteWithoutAnIdempotencyKeyIsRefusedBeforeAnyWrite",
+        "StudioApiIT.aRetriedExecuteWithTheSameKeyReturnsTheSameExecution",
+        "StudioExecuteIdempotencyFilterTest.retriedExecuteReplaysResponseWithoutASecondMutation",
+        "OpenAPI/confinement/StudioContractTest current43 operation pins"
+      ],
+      "remaining": "D2b cached-response reauthorization is explicitly not resolved in this story; do not implement it silently under this audit."
+    },
+    {
+      "id": "AC10",
+      "requirement": "Admitted guided/replay structured audit IDs/codes, bounded event shape, canary scan over actual OBS007 run",
+      "status": "EXECUTED_PASS",
+      "proof": [
+        "StudioActionAuditTest5",
+        "ReplayIT.auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass",
+        "Planning SIDE_EFFECT_DENIED audit cases"
+      ],
+      "remaining": "Actual SIEM sink is OBS009 deployment. targetLabelHash dictionary residual disclosed for OBS010 and separate from artifact HMAC."
+    },
+    {
+      "id": "AC11",
+      "requirement": "Dated Vault Transit HMAC design, verification at ObservedRevisionVerifier, rotation; no current implementation",
+      "status": "DOCUMENT_PRESENT_REVIEWED",
+      "proof": [
+        "artifact-hmac-design-note.md dated2026-10-13",
+        "ar-ac11-and-refusal-codes.json",
+        "F04 explicit E1-E8 UNCONFIRMED"
+      ],
+      "remaining": "No code/Vault call required or allowed merely to green this design-only AC."
+    },
+    {
+      "id": "INHERITED-admission",
+      "requirement": "Delete legacy admission route/op; observed-only auth/CAS tests re-pointed by name;404/405 zero-write negative",
+      "status": "EXECUTED_PASS",
+      "proof": [
+        "StudioAuthorizationIT.theLegacyAdmissionRouteIsGoneAndWritesNothing",
+        "StudioAuthorizationIT28; AdmissionCasIT14",
+        "B14/C2a old/new renamed/drop inventory and architect refusal-code ratification"
+      ]
+    },
+    {
+      "id": "INHERITED-matcher",
+      "requirement": "Delete dead v2 idempotency matcher only; exact allowed test residues; old test removed; replay guard named",
+      "status": "EXECUTED_PASS",
+      "proof": [
+        "StudioExecuteIdempotencyFilterTest.theRemovedV2PrefixIsNoLongerCovered",
+        "Static current production0hits/test exactly1file3hits; old class absent"
+      ]
+    },
+    {
+      "id": "T5-full-gates",
+      "requirement": "Affected backend/runner units,fixtures,deployment,contracts,typecheck,lint,full backend clean check and observed E2E all recorded",
+      "status": "EXECUTED_PASS_FOR_FROZEN_SOURCE",
+      "proof": [
+        "S4c clean check2084total=2059passed+25skipped; 285XML independently rehashed",
+        "Runner1351passed29skipped; fixtures225passed9skipped; deployment313passed",
+        "No relevant014selected XML skips; skipped external cases grant no credit"
+      ],
+      "remaining": "After source changes root must rerun all affected checks and final full integration gate; old all-green logs do not cover new tests/code."
+    }
+  ],
+  "requiredMissing": [
+    "AC3-post-prune-replay",
+    "AC4-guard-grounding",
+    "AC5",
+    "AC7"
+  ],
+  "localGateConcernsToResolve": [
+    "ARCH001 dated precedence ratification",
+    "TEST003 exact rejected-context replay code",
+    "TEST006 static mutable fixture ownership must be concretely justified or corrected under independent review",
+    "DB001 record generated V19 catalog constraint names without rewriting historical migration",
+    "MNT001 remove literal empty directory under coordinator ownership if still present",
+    "AC2 stale future-tense status in final data-flow doc"
+  ],
+  "emptyLiteralDirectoryStillExists": true,
+  "staticChecks": [
+    {
+      "argv": [
+        "rg",
+        "-n",
+        "api/v2/studio",
+        "backend/src/main"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "rg",
+        "-l",
+        "api/v2/studio",
+        "backend/src"
+      ],
+      "exit": 0,
+      "stdout": "backend/src/test/java/com/citi/put/checks/config/StudioExecuteIdempotencyFilterTest.java\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "rg",
+        "-n",
+        "api/v2/studio",
+        "backend/src/test/java/com/citi/put/checks/config/StudioExecuteIdempotencyFilterTest.java"
+      ],
+      "exit": 0,
+      "stdout": "25: * deleted {@code /api/v2/studio} compile routes) with 2 methods of 1 invocation each: the same\n27: * the deleted {@code /api/v2/studio/**} matcher no longer covers anything. {@code\n78:    String path = \"/api/v2/studio/tests\";\n",
+      "stderr": ""
+    }
+  ],
+  "excludedDownstreamRequirements": [
+    "Security/Compliance approval and gateway ED01 retention (OBS010)",
+    "Real SIEM sink and real-model DC calibration/capacity (OBS009)",
+    "D2b cached2xx reauthorization named open by AC9",
+    "F01 indefinite nonAC3 stores, F02 replay/learning policy unification,F03 governed exact-field reads,F04 artifact HMAC implementation all explicitly outside014"
+  ],
+  "antiWaiver": "Missing local planned oracles remain required here; downstream ownership does not make them green. Externally scoped work is neither run nor passed by this audit.",
+  "fullExecutedTestcaseIndex": "independent-proof-recheck.json"
+}

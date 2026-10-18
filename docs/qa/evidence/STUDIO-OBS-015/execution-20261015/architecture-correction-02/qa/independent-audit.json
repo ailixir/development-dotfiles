@@ -1,0 +1,616 @@
+{
+  "classification": "INDEPENDENT_ISOLATED_SYNTHETIC_PROJECTION_DESIGN_ONLY",
+  "createdAt": "2026-10-15T04:55:42.487476+00:00",
+  "manifestSha256": "879aaa09344878f846b34dc4d1c98c8d117c2fd51e27ffe445d505e16dbb838a",
+  "boundFiles": [
+    {
+      "file": "check-design.cjs",
+      "expected": "9fceb9da44164f863439bb9483e3a5123d13ed84746a463e4bfe64ea50af1936",
+      "actual": "9fceb9da44164f863439bb9483e3a5123d13ed84746a463e4bfe64ea50af1936",
+      "ok": true
+    },
+    {
+      "file": "completion-receipt.json",
+      "expected": "0ac2002bd3709823f5d9b62dccd319287601957c6cba3e3555c7463514d892f7",
+      "actual": "0ac2002bd3709823f5d9b62dccd319287601957c6cba3e3555c7463514d892f7",
+      "ok": true
+    },
+    {
+      "file": "design-check-result.json",
+      "expected": "3d1c7aba181988e30d6fb50e7ea8b8be4f2130e74f63bedfaa2107eef51ac9a1",
+      "actual": "3d1c7aba181988e30d6fb50e7ea8b8be4f2130e74f63bedfaa2107eef51ac9a1",
+      "ok": true
+    },
+    {
+      "file": "fixtures.json",
+      "expected": "2d28a7c9b8092a87968e02facb58607eb3514304d0b04d65079131d9303bdf25",
+      "actual": "2d28a7c9b8092a87968e02facb58607eb3514304d0b04d65079131d9303bdf25",
+      "ok": true
+    },
+    {
+      "file": "generate-design.py",
+      "expected": "21c094497db993134ef4be63c47cf29ed8194fe8e608eb25c681e1dbe4b3b546",
+      "actual": "21c094497db993134ef4be63c47cf29ed8194fe8e608eb25c681e1dbe4b3b546",
+      "ok": true
+    },
+    {
+      "file": "implementation-mapping.json",
+      "expected": "2545d13a894285fab7f6cf4ef2a01573c8a7c8a1c2d016f4fe5e36876bf26bf5",
+      "actual": "2545d13a894285fab7f6cf4ef2a01573c8a7c8a1c2d016f4fe5e36876bf26bf5",
+      "ok": true
+    },
+    {
+      "file": "ruling.md",
+      "expected": "96b15fbe740a4d89ce4db418db4880e4c374b08d91fce9fa9ce84ae4aa3a87da",
+      "actual": "96b15fbe740a4d89ce4db418db4880e4c374b08d91fce9fa9ce84ae4aa3a87da",
+      "ok": true
+    },
+    {
+      "file": "test-delta.json",
+      "expected": "86ceeb7e82376e605a4f65f2357a03f583a0a0c001c24b4dcc824cc42eb28485",
+      "actual": "86ceeb7e82376e605a4f65f2357a03f583a0a0c001c24b4dcc824cc42eb28485",
+      "ok": true
+    }
+  ],
+  "preservedHistoricalFiles": [
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/acceptance-delta.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/acceptance-inventory.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/algorithms.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/acceptance-delta.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/algorithms.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/archive-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/check-design.cjs",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/contract-edits.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/design-check-result.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/fixtures.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/generate-design-fixtures.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/implementation-ruling.md",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/interfaces.schema.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/archive/checkpoint-before-freeze-20261015/manifest.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/check-design.cjs",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/completion-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/contract-edits.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/design-check-result.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/fixtures.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/generate-design-fixtures.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/implementation-ruling.md",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/interfaces.schema.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/V21__guided_session_replaying_prefix.sql",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/V21__guided_session_replaying_prefix.sql",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/archive-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/checkpoint.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-smoke.sql",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validate.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validation-attempt-01.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validation-attempt-02.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validation-attempt-03.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validation-attempt-04.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validation-attempt-05.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/draft-validation-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/interface-and-test-spec.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/make-draft-smoke.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/manifest.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/schema-surface-disposition.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/archive/checkpoint-before-20261015-freeze/write-design-spec.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/checkpoint.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-smoke.sql",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validate.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validation-attempt-01.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validation-attempt-02.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validation-attempt-03.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validation-attempt-04.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validation-attempt-05.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/draft-validation-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/final-parity.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/final-readiness-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/interface-and-test-spec.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/make-draft-smoke.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/schema-surface-disposition.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/data/write-design-spec.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/check-design.cjs",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/completion-receipt.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/design-check-result.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/fixtures.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/generate-design.py",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/implementation-mapping.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/interfaces.schema.json",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/ruling.md",
+      "ok": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/test-delta.json",
+      "ok": true
+    }
+  ],
+  "diagnosticSourceSnapshots": [
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "captured": "a728166231f8e1508e88a6bcf91b67933a95a7c5587f41613ce2109200878b96",
+      "observed": "a728166231f8e1508e88a6bcf91b67933a95a7c5587f41613ce2109200878b96",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+      "captured": "259b45131c3acd98073b7404d9fc8213bd71be23761724d708aa79d46599a5d3",
+      "observed": "7e986c778ef58276fb69033d5a27cc1f029ee10efa0484cea441673845cdc924",
+      "unchanged": false
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java",
+      "captured": "3b674c2e42f75ae9e93d1d8ca1cf18f23dd70a2441064d055c176f848bf2a205",
+      "observed": "3b674c2e42f75ae9e93d1d8ca1cf18f23dd70a2441064d055c176f848bf2a205",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java",
+      "captured": "9c9af5c53742944c99664f996f1d056e8da326e7d1a09b154c33700c94777d4b",
+      "observed": "9c9af5c53742944c99664f996f1d056e8da326e7d1a09b154c33700c94777d4b",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "captured": "4ffae6cda14b71a421895cc7670c8d3c3f8bb9e0b312b3f2fcfa960febd1f132",
+      "observed": "4ffae6cda14b71a421895cc7670c8d3c3f8bb9e0b312b3f2fcfa960febd1f132",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java",
+      "captured": "d3347f7358de02d7468a79e1562b6ed471ba4e84a32449ae94a2ed64fc632cad",
+      "observed": "f1bf00d0c6f52e250a987f9cbcc9e0f2db1601f9673aadf3919b59245ea28925",
+      "unchanged": false
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "captured": "bc831e85d5a608248765944bcafe39944ec5ef7e573788d0df72869af527929d",
+      "observed": "bc831e85d5a608248765944bcafe39944ec5ef7e573788d0df72869af527929d",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V14__guided_sessions.sql",
+      "captured": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357",
+      "observed": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql",
+      "captured": "a4e0c441ebcda29f00cc382fb7ed8eb6ce408a44b53a758e8c20277ee05f4a91",
+      "observed": "a4e0c441ebcda29f00cc382fb7ed8eb6ce408a44b53a758e8c20277ee05f4a91",
+      "unchanged": true
+    },
+    {
+      "file": "studio-runner/src/validator/observedReplay.ts",
+      "captured": "5b10290ccf0a9d3ffe247ff32bd245faba338126acab0c885bbe3e1777f87fb9",
+      "observed": "5b10290ccf0a9d3ffe247ff32bd245faba338126acab0c885bbe3e1777f87fb9",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json",
+      "captured": "01ab8b0d8230afa22a8e8ce0a3972e73f266e5d15ef28b3da2c11a045a160a9a",
+      "observed": "01ab8b0d8230afa22a8e8ce0a3972e73f266e5d15ef28b3da2c11a045a160a9a",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/allocation.schema.json",
+      "captured": "8261aca9be0cfdda5081e0e8d15e29b25f2dc3b1be8b385b2d5524fd2498a3e6",
+      "observed": "8261aca9be0cfdda5081e0e8d15e29b25f2dc3b1be8b385b2d5524fd2498a3e6",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/bridge.schema.json",
+      "captured": "039ad4017a8256481d4109d37dfcfc919767094fd1610988d16706fef1065817",
+      "observed": "039ad4017a8256481d4109d37dfcfc919767094fd1610988d16706fef1065817",
+      "unchanged": true
+    }
+  ],
+  "checks": [
+    {
+      "name": "failed-consumer-replaced-with-literal-retains-zero-consumer-producer",
+      "ok": true,
+      "expected": "ACCEPT",
+      "result": {
+        "bindingIds": [
+          "binding-B"
+        ],
+        "consumerAdmissions": [],
+        "excludedEdges": 1,
+        "stableProducerSemanticHashes": [
+          "binding-B"
+        ],
+        "rawAllocationHash": "1d5c699f3c9da6898457c64c5789505ba590b589dd80435af2c9b30b31ade0b5",
+        "effectiveAllocationHash": "a2261046a52f7a9debd8a4ca8ab19cfdfe4c97f59f75ab56c51a6a3432deac12",
+        "rawEdgeHash": "8db56081e6d2d4c735bd549ce2a5afe1ddff0c7855ff6caeaf839855e5f7b97e"
+      }
+    },
+    {
+      "name": "pre-admission-drift-drops-unperformed-import-intent-only",
+      "ok": true,
+      "expected": "ACCEPT",
+      "result": {
+        "bindingIds": [
+          "binding-B"
+        ],
+        "consumerAdmissions": [],
+        "excludedEdges": 0,
+        "stableProducerSemanticHashes": [
+          "binding-B"
+        ],
+        "rawAllocationHash": "1d5c699f3c9da6898457c64c5789505ba590b589dd80435af2c9b30b31ade0b5",
+        "effectiveAllocationHash": "a2261046a52f7a9debd8a4ca8ab19cfdfe4c97f59f75ab56c51a6a3432deac12",
+        "rawEdgeHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      }
+    },
+    {
+      "name": "successful-same-step-slot-use-cannot-be-hidden-by-later-failed-attempt",
+      "ok": true,
+      "expected": "ACCEPT",
+      "result": {
+        "bindingIds": [
+          "binding-B"
+        ],
+        "consumerAdmissions": [
+          "successful-B"
+        ],
+        "excludedEdges": 1,
+        "stableProducerSemanticHashes": [
+          "binding-B"
+        ],
+        "rawAllocationHash": "1d5c699f3c9da6898457c64c5789505ba590b589dd80435af2c9b30b31ade0b5",
+        "effectiveAllocationHash": "1d5c699f3c9da6898457c64c5789505ba590b589dd80435af2c9b30b31ade0b5",
+        "rawEdgeHash": "9d4f0fab3c2af2ed5fb0f5dc1b3dc256b040f3379648ddde21b3335cb9111d9d"
+      }
+    },
+    {
+      "name": "never-executed-imported-producer-keeps-raw-allocation-only",
+      "ok": true,
+      "expected": "ACCEPT",
+      "result": {
+        "bindingIds": [
+          "binding-B"
+        ],
+        "consumerAdmissions": [],
+        "excludedEdges": 1,
+        "stableProducerSemanticHashes": [
+          "binding-B"
+        ],
+        "rawAllocationHash": "8687fe7e5f664e9e74830e2e41e8e45c4959e8e03f16d9d22c6f717dbdde7246",
+        "effectiveAllocationHash": "a2261046a52f7a9debd8a4ca8ab19cfdfe4c97f59f75ab56c51a6a3432deac12",
+        "rawEdgeHash": "8db56081e6d2d4c735bd549ce2a5afe1ddff0c7855ff6caeaf839855e5f7b97e"
+      }
+    },
+    {
+      "name": "erase-raw-history-or-hash",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "raw allocation hash retained"
+    },
+    {
+      "name": "unknown-edge-cannot-be-excluded",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "every raw edge accounted"
+    },
+    {
+      "name": "native-started-is-not-positive-refusal",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "positive no-native only"
+    },
+    {
+      "name": "excluded-assertion-failure-not-target-drift",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "only positively uninvoked spent failure"
+    },
+    {
+      "name": "different-receipt-preparation",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "original prep facet joins"
+    },
+    {
+      "name": "different-excluded-binding",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "exact binding and slot"
+    },
+    {
+      "name": "missing-first-suffix-acceptance",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "committed unique first suffix authority"
+    },
+    {
+      "name": "missing-retained-producer-zero-consumer",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "zero-consumer only retained successful imported read"
+    },
+    {
+      "name": "new-model-orphan-not-imported",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "never-produced raw allocation imported after boundary"
+    },
+    {
+      "name": "stale-model-only-intent-cannot-be-dropped",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "only proven prefix import can be removed"
+    },
+    {
+      "name": "wrong-need-identity",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "exact need/raw identity"
+    },
+    {
+      "name": "successful-edge-cannot-disappear-from-final-need",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "exact successful coarse consumer pairs"
+    },
+    {
+      "name": "successful-edge-cannot-disappear-from-raw-history",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "successful use edge bijection"
+    },
+    {
+      "name": "later-plan-may-not-shed-consumer",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "later consumer shedding refused"
+    },
+    {
+      "name": "later-plan-may-not-drop-success-meaning",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "later ordinary obligation disappeared"
+    },
+    {
+      "name": "retained-read-cannot-disappear-as-need",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "exact need/raw identity"
+    },
+    {
+      "name": "pre-admission-cannot-have-an-admitted-edge",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "every raw edge accounted"
+    },
+    {
+      "name": "future-import-producer-cannot-hide-success",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "head conserves successful admission meanings"
+    },
+    {
+      "name": "wrong-edge-origin",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "exact coordinate and origin"
+    },
+    {
+      "name": "unaccounted-pending-edge",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "every raw edge accounted"
+    },
+    {
+      "name": "second-excluded-spent-attempt",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "sole excluded attempt"
+    },
+    {
+      "name": "different-historical-owner-fence",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "exact historical prep identity"
+    },
+    {
+      "name": "producer-availability-wrong-context",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "producer historical availability facet"
+    },
+    {
+      "name": "later-unperformed-obligation-cannot-disappear",
+      "ok": true,
+      "expected": "REJECT",
+      "reason": "later ordinary obligation disappeared"
+    }
+  ],
+  "errors": [],
+  "applicationTestsExecuted": 0,
+  "databaseCommandsExecuted": 0,
+  "browserCommandsExecuted": 0,
+  "buildsExecuted": 0,
+  "limits": "Facets assume core basis/import/receipt authority prevalidation. Sidecar history is backend DB-only proof obligation, never a new wire field or actual authentication/native evidence.",
+  "status": "PASS"
+}

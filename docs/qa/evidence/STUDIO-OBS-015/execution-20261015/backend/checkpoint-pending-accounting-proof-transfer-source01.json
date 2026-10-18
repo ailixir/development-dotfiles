@@ -1,0 +1,128 @@
+{
+  "artifact": "STUDIO-OBS-015 explicit pending-accounting proof transfer to original lawfulappend-input source01",
+  "at": "2026-10-15T19:00:41.168472+00:00",
+  "owner": "Dex/backend015_resume",
+  "status": "SOURCE_ONLY_ATOMIC_SOURCE_DIST_HOLD_PENDING_INDEPENDENT_REVIEW_AND_REQUIRED_ACTUAL_EXECUTION",
+  "sourceDistHold": true,
+  "commandsLive": false,
+  "compileStatus": "UNCOMPILED",
+  "executionStatus": "UNEXECUTED",
+  "qaVerdict": null,
+  "lifecycleChange": null,
+  "ownedSources": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "beforeSha256": "becd23ea5012300f6f95e9b14829310036cfb229bd800977216ff2b0c798cdf7",
+      "afterSha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+      "beforeArchive": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/source-before/GuidedPlanningIntegrationTest.java",
+      "afterArchive": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/source-after/GuidedPlanningIntegrationTest.java"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "beforeSha256": "2217294616464c29da1ece11f57970d948166058519f9563b35d035ed6436ce2",
+      "afterSha256": "246e355b2cdc237957a519d17fdfab81f6fc230102f94176b6df99799fb56bf4",
+      "beforeArchive": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/source-before/GuidedPublicationReplayIT.java",
+      "afterArchive": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/source-after/GuidedPublicationReplayIT.java"
+    }
+  ],
+  "authority": {
+    "reviewManifest": "backend/feedback03-append-diagnosis/manifest.json",
+    "reviewManifestSha256": "e515ca2e9077cc499977c95b2003b80f04b4983508a88696d688d864543ef393",
+    "explicitRootDecision": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/feedback03-proof-transfer-decision.json",
+    "explicitRootDecisionSha256": "82bc76fd47c2e110272f06962e6605442d321e9886492d209b7db2a7471405ba"
+  },
+  "preciseDeltas": {
+    "Planning": "Removeonlynew129linetest; wholefileoriginal1b587recovered",
+    "JOIN": "Add71lineswithinassertPendingContextGuardsThenRelease only: reallegalpendingcheckpoint+twoactualaccountingcalls/fullfactinvariance;sameoriginalACKlatchandallnegatives/historyassertionsunchanged"
+  },
+  "preservation": {
+    "planningWholeOriginalSha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+    "planningExpectedOriginalSha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+    "planningWholeOriginalByteExact": true,
+    "reinsertingOnlyRetired129LineTestRecoversExactLeasedBefore": true,
+    "joinRemovingOnlyBoundedAccountingInsertionRecoversExactLeasedBefore": true,
+    "joinInverseSha256": "2217294616464c29da1ece11f57970d948166058519f9563b35d035ed6436ce2",
+    "allOriginalJoinTestBodiesLabelsAssertionsSameByFullFileInverse": true,
+    "sameLatchWaitAndTryFinallyRelease": true,
+    "negativeReserveAttemptBumpStaleAdmitBlocksByteExact": true,
+    "existingPendingSnapshotFullHistoryAndPostReleaseAckAssertionsByteExact": true,
+    "newJUnitMethods": 0,
+    "retiredNewOnlyMethods": 1,
+    "join46Methods80Invocations43Default37Low35LabelsUnchanged": true,
+    "newAccountingScope": "Only synchronouspositivecheckpoint under current session lock; no wait/sleep/latch release/negativecatch inside; existing negative transactions outside lock unchanged"
+  },
+  "assertionMapPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/assertion-map.json",
+  "proofCountAndSelectorsPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/proof-count-and-selectors.json",
+  "protectedGuardsPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/protected-guards.json",
+  "unexpectedFrozenNamedDrift": [],
+  "concurrency": "Only2leasedTESTpaths changed. OtherownerBuilder/BuilderTest sourcewrites disjoint; no whole-tree stability claim. Sessione3b1/Basis2d60/materialization/translation/build/C/Wire/Node/schema/migrations/oracles untouched.",
+  "historicalActualFailure": "Feedback03receipt3a54e999f5bb236550c717e856c5de781d53248c658bfb8d39e52fa0e473ef20 actual293/291PASS2FAIL0skip/lowNOTRUN unchanged; no newruntimeproof/metrics/native orbudgetclaim.",
+  "remaining": "Requiredpendingaccountingproof isUNRUNuntiloriginalappend-inputwithinwhole35or37taskexecutes. Full37low+43default/80once/all35/86acceptance24IPC55SQL/B1B2B3B4/privateCoreVaultnative/fullconfigurednormalcheckscoverage/crossReplica/deployment/independent015QA/PO/rootclosure then008/item85originalOPENunamended unchanged.",
+  "artifacts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/assertion-map.json",
+      "sha256": "46dc3d7950e3fd29ed3cf6f4a6badbe5b93ec1822e5e13665016c6d291c69cc9",
+      "bytes": 2015
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/changes.patch",
+      "sha256": "429c708d190e28784472b2ad7f80bb6be6a7edaa10f585c95ed1ffe6c6371731",
+      "bytes": 15102
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/joined-accounting-insertion.java.txt",
+      "sha256": "c1fe7083553e9f6fd963f3e8a0de7d7a5e3b12d7df6136fe4ba3d92e90034114",
+      "bytes": 5552
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/preservation.json",
+      "sha256": "dfa365f296c81c065e64dd8a7cea15f91743a050bf45cdc169cfc27654d19906",
+      "bytes": 1071
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/proof-count-and-selectors.json",
+      "sha256": "0f87ae6e2c32dcf87a663d1a0b2b20b00f841eccc8b1cc66b39a5926a1dd1017",
+      "bytes": 1519
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/protected-guards.json",
+      "sha256": "ba8fef5ce923c936e13cc9b00a66e84dd75bba454fa573bacf0f24fd8454cf35",
+      "bytes": 4112
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/retired-illegal-test.java.txt",
+      "sha256": "3e4983a50baace068e5df420024de864ab14d0fc182cd237bc008a380fc1dcba",
+      "bytes": 7981
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/source-after/GuidedPlanningIntegrationTest.java",
+      "sha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+      "bytes": 168031
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/source-after/GuidedPublicationReplayIT.java",
+      "sha256": "246e355b2cdc237957a519d17fdfab81f6fc230102f94176b6df99799fb56bf4",
+      "bytes": 1006367
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/source-before/GuidedPlanningIntegrationTest.java",
+      "sha256": "becd23ea5012300f6f95e9b14829310036cfb229bd800977216ff2b0c798cdf7",
+      "bytes": 176012
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/source-before/GuidedPublicationReplayIT.java",
+      "sha256": "2217294616464c29da1ece11f57970d948166058519f9563b35d035ed6436ce2",
+      "bytes": 1000815
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/source-before-hashes.json",
+      "sha256": "0b4b54ba4f7b9f49e42a615903e3a518fde2c346069caf16518e3e946f678eab",
+      "bytes": 351
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/pending-accounting-proof-transfer-source01/source-notes.txt",
+      "sha256": "0c689fa7f827fe476b0469c2e9f867f2a76c3364dc68377e8fa68c4c76ebf10b",
+      "bytes": 1781
+    }
+  ]
+}

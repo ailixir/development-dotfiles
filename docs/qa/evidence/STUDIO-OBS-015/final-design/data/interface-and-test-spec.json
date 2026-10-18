@@ -1,0 +1,327 @@
+{
+  "artifact": "STUDIO-OBS-015 executable data design and test specification",
+  "status": "FINAL_DATA_DESIGN_PENDING_INDEPENDENT_COMBINED_QA_AND_ROOT_RELEASE",
+  "productionImplementation": "Not started; draft SQL only. No Gradle/runner builds, installed production migration, dev database recreation, source/story/CLI edits or external operations.",
+  "authority": {
+    "PO": "../../resume-po-review.json, PO-A1..PO-A6 accepted scope-preserving mechanisms",
+    "architect": "../architect/implementation-ruling.md and direct A1..A6 interface agreement during final design",
+    "budget": "USD500 whole wave ceiling; actual billing unavailable"
+  },
+  "closedDecisions": {
+    "references": "Existing references JSON has exactly variables,secrets,authoringIdentityVersion:1,authoredDeclarations sorted by UTF-8 referenceId. Context uses exact StudioVariable.name; secret tokens use declared secretId. Missing/ambiguous references fail. Secret dot/dotdot rejected. No new revision column.",
+    "historicalBase": "Read only immutable revision identity. Incomplete base refuses implicit reuse. Explicit first current step is full learning without reuse and may refresh only current derived cache after full source/config CAS; V12 captures it; old revision untouched.",
+    "prefixMode": "Immutable relearn_plan, pending predicate initialIndex>0 and no switch. State and continuation REPLAYING_PREFIX remain stable; attempt and counter guards apply even during PREPARING. One-way switch to SOURCE_PLAN.",
+    "prefixProgram": "Exact canonical closed schemaVersion/baseRevisionId/baseRevisionDigest/sourceStepIds/actions envelope; actions from base learnedPlan minus admissionId plus exact artifact guard. No raw values/old authorization.",
+    "materialization": "Normalized immutable headers (versions1..201) and input entries (ordinals0..199), reconstructed snapshots, exact deferred head FK. Same context/browser/scope/source/config/worker/fence. Nonempty append only in MATERIALIZE, old+1 checked revision and exact old entry prefix. 32768 canonical UTF-8 bytes per input, 1MiB canonical full payload/aggregate entries, max200 inputs.",
+    "noInflight": "Append and prepare/admit/consume serialize on session lock. Append refuses ADMITTED, DISPATCHING, UNKNOWN_OUTCOME, unexpired unconsumed preparations and pending delivery. Stale old proof fails current-version/ACK gate; historical completed proof remains verifiable.",
+    "delivery": "Every pinned-base session carries immutable paired prefixProgram/prefixProgramHash through prefix and suffix, including EMPTY_PREFIX. No-plan sessions omit both. Append>=2 creates PENDING. Freeze complete RunnerContext metadata minus authoredInputs once; reconstruct pinned inputs to hash exact whole issued context. ACK exact delivery/version/input hash/context hash/birth materialization revision and full scope/owner/source identity; original issued lease remains immutable and must still be valid. No actions/model/counter/bump until ACK. Initial version uses existing bootstrap, no fabricated historical ACK.",
+    "noInvocation": "Closed PRE_ADMISSION or ADMITTED_PRE_INVOCATION receipt. Same current worker RS256/mTLS verified by existing outcome callback; receiptHash is integrity, never authentication. SQL binds issued request, program, coordinate, current scope/source/version and consumed preparation/action for admitted branch. Exactly one receipt/switch. Actual native-count and trusted-boundary proof requires runner tests.",
+    "attempts": "Semantic ordinals0..7 and maxStatementsPerStep unchanged. Immutable action and association attempt_ordinal0..1; ledger field matches column. Attempt1 only for sole drift coordinate with exact admitted attempt0 no-invocation proof. Every admission counts maxActions<=200. Older document bytes remain immutable; new column0 is proven by historical single-coordinate uniqueness, not guessed usage.",
+    "suffixPlan": "One immutable suffix_acceptance binds new plan revision and actual retained successful admissions/meanings. Only unexecuted imports and sole proven no-invocation spent attempt can be replaced; subsequent replans stay monotonic.",
+    "publication": "Full metadata/maps required on new revisions. Pinned-base and actual completed-prefix keys must equal step_reuse_provenance exactly. All successful ledger actions appear once per coordinate; every excluded consumed failure requires exact receipt. learnedPlan.incremental equals immutable plan/switch. Complete graph and all versions/attempts committed by existing hashes; pure Java/runner verifier checks content and evidence.",
+    "result": "PublicationReceipt requires relearnedFrom even when null; omission is refused. Before committed switch, relearnedFrom=null. After BOUNDARY/DRIFT/EMPTY_PREFIX, stepId is entered effective learning boundary; driftSwitchStepId=j if drift. It never claims learning completed or publication succeeded. Initial k remains immutable session firstLearnStepId.",
+    "emptyBoundary": "Base+k1 gets EMPTY_PREFIX switch at index0, no prefix operation or fake receipt. Tail deletion learns last surviving step; no empty suffix/end sentinel. Delete-all start refuses before writes.",
+    "retention": "V19 retained-progress keys and pruner unchanged. Safe plan/switch/request/receipt/version metadata survives independently. Existing source manifests/materialized values/proposals/plans/command caches remain F01 residual; normalized entries add no distinct new values and avoid snapshot duplication. No claim that raw inputs are pruned, no Security/OBS010 retention-gate waiver.",
+    "secrets": "V17 ordinary RELEASE lineage uses actual historical materialization version. V17:515 remains terminal unlinked USAGE/no-decision gate. Receipt does not change existing factual release or conservative non-OK UNKNOWN_OUTCOME usage into NOT_USED. No old secret value or authorization reused."
+  },
+  "schemaSurfaceAudit": "schema-surface-disposition.json (33/33 dispositions)",
+  "newObjects": [
+    "studio_guided_relearn_plans",
+    "studio_guided_relearn_switches",
+    "studio_guided_materialization_versions",
+    "studio_guided_materialization_inputs",
+    "studio_guided_materialization_snapshots view",
+    "studio_guided_materialization_deliveries",
+    "studio_guided_prefix_requests",
+    "studio_guided_no_invocation_receipts",
+    "studio_guided_suffix_acceptances"
+  ],
+  "lockAndTransactionOrder": [
+    "Session row lock first, existing current source lock next where required; do not reverse current session/source publication ordering.",
+    "Start session/manifest/translation/base/policy, relearn plan and continuation/EMPTY_PREFIX commit together before assignment.",
+    "Append current pointer + normalized entries/header + PENDING delivery commit atomically; version FK validates at commit.",
+    "Authenticated no-invocation callback inserts receipt while spent action DISPATCHING, then settles FAILED/TARGET_CHANGED, inserts immutable switch, exits prefix continuation/state, and commits all or rolls all back.",
+    "Suffix-plan acceptance plus appended plan head/retained meaning checks commit together.",
+    "Publication uses current-source/config CAS, complete identity/cache verification and revision/receipt/deferred guards in one transaction."
+  ],
+  "applicationResponsibilitiesNotClaimedAsSqlProof": [
+    "RS256/mTLS/worker-subject authentication and runtime nativeInvocationStarted boundary",
+    "Canonical full authored reference union and base/draft hash recomputation",
+    "Observed guard and policy enforcement on same browser and existing observation lineage",
+    "Exact source input recipe provenance, graph projection and byte-preserving fresh value transfer",
+    "Complete publicationEvidenceHash commitment of every materialization header/entry hash, request, receipt, switch and consumed attempt",
+    "No model gateway calls from prefix bootstrap/proposal/prepare/finalization",
+    "All idempotent retries return prior recorded facts without re-invocation"
+  ],
+  "headAndTargetInventory": {
+    "countBasis": "Static source @Test/@ParameterizedTest annotation counts; not executed cases, reports, or assertions of passing. Counted 2026-10-14; concurrent owners can change source counts.",
+    "headAssertionFiles": [
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+        "anchors": [
+          "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java:100",
+          "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java:108"
+        ],
+        "before": "head \"20\"; later versions 19 and 20",
+        "after": "head \"21\"; append 21:guided session replaying prefix",
+        "staticTestDeclarationsBefore": 9,
+        "staticParameterizedDeclarationsBefore": 0,
+        "afterDeclarationCount": "same for head-pin edits alone; implementation additions reported separately"
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/ErrorCodeConstraintMigrationIT.java",
+        "anchors": [
+          "backend/src/test/java/com/citi/put/checks/studio/ErrorCodeConstraintMigrationIT.java:73",
+          "backend/src/test/java/com/citi/put/checks/studio/ErrorCodeConstraintMigrationIT.java:136"
+        ],
+        "before": "HEAD=\"20\"",
+        "after": "HEAD=\"21\"; retain V13 sole error-code definition proof",
+        "staticTestDeclarationsBefore": 5,
+        "staticParameterizedDeclarationsBefore": 0,
+        "afterDeclarationCount": "same for head-pin edits alone; implementation additions reported separately"
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedRecordingMigrationIT.java",
+        "anchors": [
+          "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedRecordingMigrationIT.java:53",
+          "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedRecordingMigrationIT.java:54"
+        ],
+        "before": "max version \"20\"",
+        "after": "max version \"21\"; keep version 20 description assertion",
+        "staticTestDeclarationsBefore": 8,
+        "staticParameterizedDeclarationsBefore": 0,
+        "afterDeclarationCount": "same for head-pin edits alone; implementation additions reported separately"
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedGovernanceMigrationIT.java",
+        "anchors": [
+          "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedGovernanceMigrationIT.java:974"
+        ],
+        "before": "V18->head max version \"20\"",
+        "after": "max version \"21\"; retain before/after row equality",
+        "staticTestDeclarationsBefore": 26,
+        "staticParameterizedDeclarationsBefore": 0,
+        "afterDeclarationCount": "same for head-pin edits alone; implementation additions reported separately"
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+        "anchors": [
+          "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java:250",
+          "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java:253"
+        ],
+        "before": "max 20 and zero versions >20",
+        "after": "max 21 and zero versions >21",
+        "staticTestDeclarationsBefore": 23,
+        "staticParameterizedDeclarationsBefore": 0,
+        "afterDeclarationCount": "same for head-pin edits alone; implementation additions reported separately"
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+        "anchors": [
+          "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java:624"
+        ],
+        "before": "installed ordered versions 1..20",
+        "after": "installed ordered versions 1..21",
+        "staticTestDeclarationsBefore": 12,
+        "staticParameterizedDeclarationsBefore": 0,
+        "afterDeclarationCount": "same for head-pin edits alone; implementation additions reported separately"
+      }
+    ],
+    "fixtureTargetFiles": [
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java:125",
+        "before": "target(\"20\")",
+        "after": "target(\"21\") or deliberate no-target head fixture before state-writing code lands",
+        "staticTestDeclarationsBefore": 44,
+        "staticParameterizedDeclarationsBefore": 0
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java:151",
+        "before": "target(\"20\")",
+        "after": "target(\"21\") or deliberate no-target head fixture before state-writing code lands",
+        "staticTestDeclarationsBefore": 12,
+        "staticParameterizedDeclarationsBefore": 1
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java:379",
+        "before": "target(\"20\")",
+        "after": "target(\"21\") or deliberate no-target head fixture before state-writing code lands",
+        "staticTestDeclarationsBefore": 37,
+        "staticParameterizedDeclarationsBefore": 0
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java:130",
+        "before": "target(\"20\")",
+        "after": "target(\"21\") or deliberate no-target head fixture before state-writing code lands",
+        "staticTestDeclarationsBefore": 4,
+        "staticParameterizedDeclarationsBefore": 0
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java:3177",
+        "before": "target(\"20\")",
+        "after": "target(\"21\") or deliberate no-target head fixture before state-writing code lands",
+        "staticTestDeclarationsBefore": 18,
+        "staticParameterizedDeclarationsBefore": 0
+      }
+    ],
+    "preserveHistoricalTargets": [
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java:88",
+        "reason": "V18 historical baseline tests, including V15 same-scope snapshot constraint, remain historical; do not globally replace every target."
+      },
+      {
+        "file": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationMigrationTest.java",
+        "anchor": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationMigrationTest.java:47",
+        "reason": "Explicit V14 baseline remains; new head suite supplies new state/continuation coverage."
+      }
+    ],
+    "existingRegressionsToExtend": [
+      "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedGovernanceMigrationIT.java:174 (nonterminal prune list includes replay after V21)",
+      "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java:182 (same-scope/hash reuse constraints retained)",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java:275 (AWAITING_AUTH remains refused by same named state CHECK)"
+    ],
+    "newClass": {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+      "before": "absent",
+      "after": "new isolated PostgreSQL 15 Flyway suite, only after corrected V21 is released",
+      "exactCaseInventory": [
+        "fresh V1-V21 reaches head/description with no pending migration",
+        "populated V20->V21 leaves existing session/revision/policy/recording rows unchanged",
+        "V1-V20 resource checksums unchanged; Flyway validation succeeds",
+        "insert-positive REPLAYING_PREFIX document+column accepted, unknown state and mismatched document state rejected",
+        "old state vocabulary retained; terminal cannot reopen; replay -> observing/finalizing/failed/cancelled/expired as ruled",
+        "attempt INSERT while replay refused; enter replay with RESERVED/CALLING refused; settled-only entry allowed",
+        "two-connection races: attempt reservation vs replay entry both orderings, rollback, no inconsistent surviving pair",
+        "direct counter reserve and both gateways prevented in prefix (application integration companion)",
+        "prune false/refused while replay; expired replay becomes terminal before pruning; CSI concurrency counts unexpired replay",
+        "chosen continuation value accepted and unknown continuation refused; persisted checkpoint restart routes replay",
+        "chosen immutable base/k/switch fields reject mutation/wrong base; result provenance survives prune",
+        "chosen receipt shape accepts real relearnedFrom and rejects forged/incomplete switch lineage",
+        "new publication stores all step hashes and exact contiguous reusedFrom; wrong scope/hash/base/suffix reuse refused",
+        "empty/tail deletion behavior follows ruling; delete-all learn refused without writes",
+        "materialization design preserves old prefix proof/secret lineage at suffix planning transition"
+      ]
+    }
+  },
+  "additionalFixtureWork": {
+    "owner": "Dara coordinates one schema-head writer; dev/C-int update fixtures in the same released unit",
+    "why": "Six head pins plus five target changes alone do not port production tests to new mandatory declarations/maps/attempt fields.",
+    "files": [
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java (shared prepareObserved/revision fixtures)",
+      "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java (explicit metadata insertion helper; historical V18 target stays)",
+      "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json and publication-fixtures.json (ledger attemptOrdinal0, complete references/maps/incremental null, new receipt examples through C-int)",
+      "All callers of shared head fixture receive real complete identity; do not disable triggers or forge historical success."
+    ],
+    "counts": "Previously recorded source declaration counts remain before values. No Java tests edited/executed here; actual after counts reported only by implementation owner."
+  },
+  "namedTestSpecification": {
+    "newMigrationClass": "GuidedReplayingPrefixMigrationIT",
+    "plannedMigrationMethods": [
+      "freshV1ToV21HasExpectedHeadDescriptionAndNoPendingMigrations",
+      "populatedV20UpgradePreservesExistingDocumentBytesAndAddsExactHistory",
+      "frozenV1ToV20ResourceChecksumsRemainUnchanged",
+      "replayingPrefixInsertRequiresRealProgramAndContinuation",
+      "unknownStateAndUnknownContinuationAreRefused",
+      "oldTerminalCannotReopenPrefix",
+      "prefixCallbacksCannotChangeToGenericActingObservingOrProposing",
+      "preparingWithPendingPrefixCannotReserveModelOrIncrementCounters",
+      "explicitPrefixStateWithoutProgramCannotInsertModelAttempt",
+      "concurrentPrefixEntryAndModelReservationSerializeBothOrders",
+      "initialMaterializationCreatesOneHeaderAndNormalizedInputEntries",
+      "appendPreservesEveryPriorEntryAndBindsPreviousHash",
+      "appendNoopReturnsExistingVersionWithoutWrite",
+      "appendRefusesMutationDeletionCollisionGapOrOverflow",
+      "canonicalByteBoundsAcceptSupportedUnicodeAndControlEscapes",
+      "appendRefusesAdmittedDispatchingUnknownAndUnexpiredUnconsumedPreparation",
+      "appendVersusPrepareAdmitConsumeSerializesWithoutStaleExecution",
+      "appendCommitCreatesPendingDeliveryAtomically",
+      "pendingDeliveryFencesActionsModelReservationsAndMetadataBumps",
+      "issuedContextMetadataAndHashAreWriteOnceAcrossRetryAndLeaseRenewal",
+      "issuedContextRequiresExactImmutableProgramPairForEveryPinnedBaseSession",
+      "ordinaryContextRejectsHalfOrForgedProgramPair",
+      "ackRequiresExactVersionHashContextHashBirthMetadataOwnerAndLiveOriginalLease",
+      "concurrentAppendRetriesProduceOneVersionAndOneDeliveryIdentity",
+      "oldCompletedPreparationJoinsItsVersionAfterHeadAdvances",
+      "oldSecretReleaseAndUseJoinTheirHistoricalVersion",
+      "contextHeaderBirthMetadataDoesNotRejectLaterGraphMetadataRevision",
+      "preAdmissionReceiptRequiresIssuedExactRequestAndNoActionAtCoordinate",
+      "admittedReceiptRequiresExactConsumedAttemptZeroAndPreparation",
+      "driftReceiptAndSwitchCommitAtomicallyOrNotAtAll",
+      "wrongOwnerScopeSourceVersionHashProgramOperationOrEvidenceReceiptIsRefused",
+      "oneDriftReceiptAndOneSwitchPerSessionCannotBeRewritten",
+      "onlyProvenNoInvocationAllowsAttemptOneAtSameSemanticCoordinate",
+      "spentAndReplacementAttemptsBothConsumeActionBudget",
+      "suffixAcceptancePreservesEverySuccessfulPriorMeaning",
+      "boundariesIncludeEmptyPrefixAtK1ButNeverEmptySuffix",
+      "completeMetadataRequiredForNewRevisionWithoutHistoricalBackfill",
+      "reuseMustNameImmediatePinnedBaseAndExactContiguousPrefix",
+      "postDriftSuffixAndWrongSameTestBaseCannotBeMarkedReused",
+      "effectiveActionsAreUniqueCompleteSuccessfulAndMatchLedger",
+      "excludedFailureRequiresExactImmutableNoInvocationReceipt",
+      "publicationReceiptRejectsWrongRelearnedBoundaryOrExtraKeys",
+      "publicationReceiptRequiresExplicitNullBeforeAnyCommittedSwitch",
+      "prefixFailureBeforeSwitchReportsNoRelearnedFrom",
+      "failedPlanningAfterCommittedSwitchRetainsEnteredBoundaryWithoutSuccessClaim",
+      "prunePreservesSafeSwitchReceiptHistoryAndExistingF01Residual",
+      "livePrefixCannotPruneAndExpiredPrefixFirstBecomesTerminal",
+      "recordingFactAndGovernedPolicyRemainUnchangedAcrossPrefixSuffix"
+    ],
+    "plannedMigrationMethodCount": 48,
+    "applicationRunnerJoinedCases": [
+      "opaqueContextAliasResolvesOnlyExactDeclaredNameAndNeverUriSuffix",
+      "baseIdentityMissingRefusesImplicitReuseButExplicitStepOneFullLearnSucceeds",
+      "fullLearnRecomputesStaleDraftIdentityCacheBeforeV12Capture",
+      "prefixInputAndBindingIdsStayStableWhileValuesAreFresh",
+      "deletingLastSuffixConsumerRetainsExecutedPrefixProducerWithZeroConsumers",
+      "unusedInputsRemainProofOnlyAndUnusedSecretsAreNotResolvedByFutureReplay",
+      "untrustedModelClientOrWrongWorkerCannotCommitNoInvocationReceipt",
+      "preAdmissionAuthenticatedOutcomeCanSwitchWithoutFabricatedLedgerAdmission",
+      "finalGuardRaceCallsNativeZeroTimesForSpentAdmissionAndOnceForReplacement",
+      "invocationStartedUnknownAcknowledgementAssertionFailAndPolicyRefusalStayTerminal",
+      "duplicateCallbackAfterSwitchReturnsCommittedReceiptWithoutSendOrPlanning",
+      "secretReleasedBeforeNoInvocationRetainsFactualReleaseAndConservativeUnknownUsage",
+      "joinedEditFourOfTenPreservesPrefixHashesAndChargesOnlySuffixModels",
+      "joinedInsertDeleteReorderTailToOneMultiTailAndAppendAfterLastUseRuledK",
+      "httpDeleteAllStartWritesNoSessionBudgetOrPublication",
+      "sameRecordingCoversPrefixAndSuffixWithOffsets",
+      "unchangedSecondRunUsesOrdinaryReplayWithZeroModelCalls",
+      "finalizationNeverCallsModelOrBrowser"
+    ],
+    "allListedStatus": "PLANNED, not executed. Isolated draft-smoke.sql only covers the separately reported storage subset."
+  },
+  "dependencyOrder": [
+    {
+      "order": 1,
+      "owner": "Aria/C-int + root",
+      "deliverable": "Freeze matching architecture contracts/vectors, data checkpoint and independent QA; root verifies predecessor closed windows and hashes."
+    },
+    {
+      "order": 2,
+      "owner": "C-int only",
+      "deliverable": "C3a/C3b schemas/generated bundles/quoted pins, operation count43 retained; no second generation."
+    },
+    {
+      "order": 3,
+      "owner": "Dara only",
+      "deliverable": "After explicit root release, copy approved draft V21 to production migration resources; port schema-head pins/fixtures and add isolated PostgreSQL15 Flyway class. V1-V20 frozen."
+    },
+    {
+      "order": 4,
+      "owner": "Designated dev owners",
+      "deliverable": "Implement authoring identity/cache, stable prefix/receipt/attempt/version/history/ACK ports and pure publication verification; disjoint files and serialized shared guided owner."
+    },
+    {
+      "order": 5,
+      "owner": "Root test window + independent QA",
+      "deliverable": "Real PostgreSQL15/Flyway fresh+upgrade, backend/rdsParity, runner native-call/auth/secret races and real joined 10-step/video oracle; preserve source/artifact hashes and actual test counts."
+    }
+  ],
+  "draftValidation": "draft-validation-receipt.json; local PG14 psql only. No Flyway schema-history/checksum or PG15 compatibility claim; no live browser/model/provider/secret evidence.",
+  "checkpointReason": "User authorized execution through 015 and008; root delegated a bounded final C1/C3 freeze before production implementation. Freeze captures completed data design and actual disposable draft checks, not application/Flyway/browser proof or independent combined QA approval."
+}

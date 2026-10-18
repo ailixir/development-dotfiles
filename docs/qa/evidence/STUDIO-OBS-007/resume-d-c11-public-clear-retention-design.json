@@ -1,0 +1,108 @@
+{
+  "scope": "READ_ONLY_ARCHITECT_QA_C11_PUBLIC_SCRATCH_PRECLEAR_PROFILE_RETENTION",
+  "status": "MINIMUM_PUBLIC_DEPENDENCY_DESIGN_FOR_ROOT_REVIEW_NO_AUTHOR_RELEASE",
+  "sourceBindings": {
+    "studio-runner/src/server/application.ts": "cca8d9208bb4620e10edb28c94852475cbf1bd1cef2d6a0dd676ad871509577f",
+    "studio-runner/src/server/index.ts": "3326aeb7496c0cd02a0bbcff003a8d5d20e4dad57b1f950ad02222f883d2ca86",
+    "studio-runner/src/server/scratch.ts": "54366f3c432578e94e2eb91c1376b428cbef9088a9608be66adb3632ea11aec4",
+    "studio-runner/src/server/runCoordinator.ts": "f2fb612e7312cf26768d6bc3ccc687a7735b5182a4b4a1be1578b8b2548ac77b",
+    "studio-runner/src/run/launcher.ts": "dd6b6c71b97eab7396d7b67b752a5cbfbc6d2df51b2d89c0bf37ebeafa41443d",
+    "studio-runner/src/run/scratchLayout.ts": "a923b03081bd6ee74d1e12453371b07debbcd6283a31241b17921c3cda334462",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "e23d8a0e55643c57d6eacc8c183f0617e35b4221576a57ff0206627e83f599cb"
+  },
+  "existingFacts": {
+    "C11FunctionalPosition": "PASS_SOURCEBOUND_PER_COORDINATOR",
+    "privacyFirstFailure": "actualProfileCount1 below originalMinimum2",
+    "selectedPostFaultProfile": "UNOBSERVED",
+    "rawSdkManagedLossDesign": "Stillblocked/unapproved; this task is distinct compiledchildretirement only."
+  },
+  "publicSeams": [
+    {
+      "anchor": "application.ts:47-52,128-133 / server/index.ts:48",
+      "fact": "ApplicationDependencies.scratch is public; default createFsScratchStore(config.scratchDir) is exported. Inject a test-onlyforwarding instance of this samefactory in existinggeneratedordinarydependencybag, no privatefactory/SDK interception."
+    },
+    {
+      "anchor": "scratch.ts:22-44 / runCoordinator.ts:645,824-834,949-975",
+      "fact": "Originalcreate uses realadmissionId and returnsactualallocatedRunScratch.path. Originalclear removes samepath onlyafter originalsessionclose/killsettlement/evidence; beforeclear is the still-existing postfaultprofile retention window. No additionalcreate/clear call needed."
+    },
+    {
+      "anchor": "p6ChildCutSpawner / launcher.ts:1001-1009,295-301",
+      "fact": "Existingactualspawn handle allows observing SAME originalquiesce result consumed by performStop. Stricttrue is a genuine originalowned-treequiescence result; false/missing/rejected isunknown. Observer mustnot callquiesce itself or changeargs/bound."
+    },
+    {
+      "anchor": "existingp4NativeCloseObserverSdk c5Variants/c5ProfileHitCategory/c5ProfileScan",
+      "fact": "Originalpure strictfilesystemscanner already implements15canaryvariants, rootuid/mode/canonical checks, boundedinventory, fdNOFOLLOW/devino/stablebytes and controlledsymlink policy and samecountsfamily. Share this exactscanner withparent, do notreplace it with regularfileonly snapshot or countpadding."
+    }
+  ],
+  "minimalSourceDesign": [
+    {
+      "step": 1,
+      "site": "Existinggeneratedordinaryscript createApplication dependency bag",
+      "delta": "Construct exactlythe originalpublic fsScratchStore from the same loadedconfig scratchDir and pass a forwarding ScratchStore as scratch. Forwardlist/clearAll unchanged; create invokesoriginal once with actualadmissionId, returns exactoriginalpromise/result/errors. Attach creationobservation todecorate onlyactualreturnedRunScratch.clear beforeoriginalcallerresumes; path remainsoriginalallocatedpath."
+    },
+    {
+      "step": 2,
+      "site": "Existingp6ChildCutSpawner handle observation",
+      "delta": "For selectedC11 only, save originalquiesce descriptor/function. Wrapper invokes it once exactreceiver/args; attaches success/rejection observation and returns exactoriginalpromise. Record strictbooleantrue onlyfrom actualfulfillment, or observedfalse/missing/rejected asnoncomplete. Do not modify originalReady/PID/header or addmessage/channel/call."
+    },
+    {
+      "step": 3,
+      "site": "Same private existing case/Ready map and realScratch allocation",
+      "delta": "Join actualcreate admissionId to exactReady admissionId, runId/execution, attempt, actualforkPID and capturedprofiledevino from originalproducer. Match selectedmode childCut=true/c6ordinarypending and exactepoch; validate sameaccepted execution/attempt/profile/build usingoriginalcaseproof. Missing/ambiguousjoin refuses observercredit, notborrow anotherprofile."
+    },
+    {
+      "step": 4,
+      "site": "OriginalselectedRunScratch.clear wrapper",
+      "delta": "Immediatelybefore ORIGINALclear, require observedquiesce===true for this exactspawn/admission and originalallocated canonicalroot/profile uid0700/devino match. Run sameoriginalstrictprofile scanner on actualprofile leaf. Never inferquiescence from FINAL,status,signal,emptydirectory or missingresult. Observe synchronousmetadata/scanner privately; no newwait,probe or nativecall."
+    },
+    {
+      "step": 5,
+      "site": "Pure scanner scriptsharing",
+      "delta": "Extract existingc5Variants/c5ProfileHitCategory/c5ProfileScan source into one JavaString factory parameterized by the same originalprivate values/countpaths; use it in SDK close observer and selectedparent pre-clear wrapper. Prove generatedoldSDKscanner bytes/guards/15variants unchanged after expansion, with no SDKhook imported/installed inparent. ExistingcountJSON/failuremarker path stayssame; no newcountfamily/protocol."
+    },
+    {
+      "step": 6,
+      "site": "ExistingC11 private numeric evidence/cleanup",
+      "delta": "Associate actualscanner invocation/rowordinal with selectedpre-clear join; record onlyfixednumeric/boolean observedflags inexistingcaseevidence. A successfulsecondactualscan supplies the existingprofileminimum; no fakecounter or relaxedmin. Retain originalmanifest/FINAL/UNKNOWN/read1 and actualchild/residualtreeexit proof; it remains terminatedproducer proof, nothealthySDK/seal/heapwipe."
+    }
+  ],
+  "orderingProof": "Realcreate(admission) \u2192 originalchildspawn/Ready identity \u2192 realprimitivepending/fault \u2192 originalparent session.close + samequiesce fulfilledtrue \u2192 originalevidence/manifestsettlement \u2192 SAME publicRunScratch.clear observer strictscanner \u2192 originalclear once \u2192 originalvaluewipe/FINAL. The observerquiesce .then attachesbeforeproductionawait continuation, so resultisavailable forlaterclear withoutanotherwait/call.",
+  "forwardingAndFailureFlow": [
+    "Observerfailure mustbe recordedas fixedsticky failure/unobserved privately; it cannotthrowbefore originalcreate/clear/quiesce or prevent/retrythosecalls.",
+    "Scan isoriginalsynchronousscanner. Catchitsobserverfailure, then alwaysinvokeoriginalclear once and returnits exactpromise; originalclear success/result/rejection unchanged. If clearrejects, retainoriginalerror; observerstatus failslaterprivacygrading, notreplaceprimary.",
+    "Ifcreationobservationcannotinstall clearwrapper, markscanUNOBSERVED and returnoriginalcreationresult; no newallocation/normalizedpath or forgedjoin.",
+    "Iforiginalquiescefalse/rejects/missing, do notscan/recordcomplete. Stilloriginalclear runs underoriginalproductioncontract. Existingmandatoryprofilegrade staysopen/red ratherthanclaim absentfiles clean.",
+    "No extraquiesce/wait/cancel/stop/provider/model/browser call, no newwatcher/SDKfactory reflection/proxy. Original1s/5squiesce cleanup/step/deadline budgets unchanged.",
+    "Knowncanarycomparisonfile isintentionalprivate testoracle, not anewresolvedvaluechannel. Do notlog/path/ID/body/exception fields; scannerexports onlyoriginalfixedcounts/categories."
+  ],
+  "bindingChecks": [
+    "Actualallocatedpath equals originalstore result, canonicalownedroot containment and originaladmission shape",
+    "Exactsameadmission Ready/PID/execution/attempt/profile/build tuple, not latestglobalprofile byitself",
+    "Selectedprofile uid/mode/devino corresponds originalchildreceipt and originalownedpath beforeclear; no symlink/pointerborrow",
+    "Quiesceobserved stricttrue from sameactualspawn handle, onlyafter originalcall fulfilled",
+    "Originalstrictscanner15variants/inventory/fd/link/size/postreadchange guards and failedmarker retained",
+    "Missingflags/receipts/identity/quiesce =>UNOBSERVED, neverfalse/zero/success"
+  ],
+  "tradeoffs": [
+    "Synchronouspost-quiescence filesystemscan addsfixture-onlyclear latency; it occursaftercontrolpoll/effects ended and grantsno execution time. No causalperformanceclaim.",
+    "Ifselectedprofile alreadyremoved or quiescefalse, this honestseam cannotprove profileabsence; originalmin staysunmet and root mustdispose firstboundary.",
+    "Originalglobalprofilecount alone needs selectedinvocation correlation so an extra warmupscan cannotmasquerade as postfaultscan. Use existingprivatecasecounter/rowordinal, not rawidentity export.",
+    "Pure script extraction requires exactexpansion/preservation proof; no independent weakerJavafilewalk scanner."
+  ],
+  "futureOwnedScope": "OneisolatedexistingPublication testfixture afterrootrelease: publicDI/scriptsharing/quiesceresult observation only; production/scratchfactory/SDK/publicinterface unchanged. No newmandatorycase/framework.",
+  "actions": {
+    "reports": 1,
+    "sourceEdits": 0,
+    "runtime": 0,
+    "builds": 0,
+    "sql": 0,
+    "models": 0,
+    "newTests": 0
+  },
+  "lifecycleVerdict": null,
+  "acceptanceWaiver": false,
+  "whole19AcPass": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE",
+  "privacy": "Repositoryanchors/sourcehashes/fixedcontracts/numericbooleans only; no rawmetadata, values, IDs, paths, arguments/results/errors/logs exported."
+}

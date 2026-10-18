@@ -1,0 +1,177 @@
+{
+ "fixtures": {
+  "file": "execution/runner-final-fixtures06.log",
+  "total": 11,
+  "lines": [
+   {
+    "logLine": "9-10",
+    "operation": "context x2",
+    "session": "30407db83425c20f",
+    "elapsedMs": [
+     1,
+     0
+    ],
+    "links": [
+     "CONTEXT_LOST"
+    ],
+    "classification": "injected-by-test [inference: emitted before the first file finished, so the lines are not attributed to an individual test]"
+   },
+   {
+    "logLine": "11",
+    "operation": "assign",
+    "session": "30407db83425c20f",
+    "elapsedMs": 0,
+    "links": [
+     "CONTEXT_LOST"
+    ],
+    "classification": "injected-by-test [inference, same as above]"
+   },
+   {
+    "logLine": "102-103",
+    "operation": "context, assign",
+    "session": "4e3a8b4fc85f0397",
+    "elapsedMs": [
+     1,
+     1
+    ],
+    "links": [
+     "CONTEXT_LOST"
+    ],
+    "classification": "injected-by-test [inference: directly after the compiled ready-*-stop settle tests, followed by 'cdpSession.send: Target page, context or browser has been closed']"
+   },
+   {
+    "logLine": "105-106",
+    "operation": "context, assign",
+    "session": "b98dce30588392a9",
+    "elapsedMs": [
+     1,
+     0
+    ],
+    "links": [
+     "CONTEXT_LOST"
+    ],
+    "classification": "injected-by-test [inference, same context]"
+   },
+   {
+    "logLine": "108-109",
+    "operation": "context, assign",
+    "session": "9d56c58e97bf96ea",
+    "elapsedMs": [
+     1,
+     0
+    ],
+    "links": [
+     "CONTEXT_LOST"
+    ],
+    "classification": "injected-by-test [inference, same context]"
+   },
+   {
+    "logLine": "174",
+    "operation": "context",
+    "session": "96935b70bfd905cb",
+    "elapsedMs": 3,
+    "links": [
+     "CONTEXT_LOST"
+    ],
+    "classification": "injected-by-test [inference: between mixed-mode-prefix and guided-secret-isolation; not attributed to one test]"
+   },
+   {
+    "logLine": "188",
+    "operation": "assign",
+    "session": "3094eb70a96460c6",
+    "elapsedMs": 22,
+    "links": [
+     "CONTEXT_LOST",
+     "IDENTITY_MISMATCH"
+    ],
+    "classification": "injected-by-test (guided-secret-stale-grant.test.ts, 'rejects the genuine retired CSI-A grant', printed right after the line)"
+   }
+  ],
+  "maxElapsedMs": 22,
+  "timeoutCause": 0,
+  "atOrAbove15000ms": 0,
+  "fields": "operation, session, elapsedMs, links[{name, code}]. These lines carry no phase, loss or kind field (those exist only on links that have them)."
+ },
+ "unit": {
+  "GUIDED_START_FAILED": 0,
+  "CONTEXT_LOST": "2 text lines (log lines 39-40: 'Error: CONTEXT_LOST' printed by a passing unit test)"
+ },
+ "deployment": {
+  "GUIDED_START_FAILED": 0,
+  "CONTEXT_LOST": 0
+ },
+ "typecheckLintPinsBuildImageContracts": {
+  "GUIDED_START_FAILED": 0,
+  "CONTEXT_LOST": 0
+ },
+ "backend": {
+  "gradleStdoutLog": {
+   "file": "execution/final-gate-attempt05-20261017T0543.log",
+   "GUIDED_START_FAILED": 0,
+   "CONTEXT_LOST": 0,
+   "UNKNOWN_OUTCOME": "1 text line (a test name or assertion)"
+  },
+  "backendWarnLinesInTestXml": [
+   {
+    "file": "execution/final-gate-attempt05-20261017T0543-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT.xml",
+    "line": 411,
+    "time": "06:20:47.712 EDT",
+    "message": "Guided runner refused the context for session 788dbe2b-e9c4-4878-8105-07533c834119: CONTEXT_LOST",
+    "classification": "injected-by-test (verified in source): lateRenewalResponseAfterStopCannotReviveContextOrOwnership cancels the session, waits for teardown CONFIRMED, then sends assign and context and asserts UNKNOWN_OUTCOME. Backend maps closed code CONTEXT_LOST to UNKNOWN_OUTCOME 409 (CONTEXT_CLOSED_REFUSAL)."
+   },
+   {
+    "file": "execution/final-gate-attempt05-20261017T0543-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+    "line": 395,
+    "time": "06:35:44.836 EDT",
+    "message": "Guided runner refused the context for session 24be8069-a5f3-4852-8057-d8aba26789fc: CONTEXT_LOST",
+    "classification": "injected-by-test [inference]: by timing it falls in incrementalDriftAuthorityRejectsEveryExactJoin (about 06:34:35 to 06:35:47), which refuses the authentic body for 'a cancelled session and a naturally expired owner lease'; the 29 s quiet gap before it fits the lease-expiry wait. I did not read that part of the test; the runner-side line shows elapsedMs 1."
+   }
+  ],
+  "runnerSideLines": {
+   "file": "final-gates06/backend-runner-side-lines/guided-start-failed-worker-logs.tsv",
+   "source": "worker stderr files left in the macOS temp dir by the ITs (not captured by Gradle). Found by scanning every file modified between 05:43 and 07:16 EDT.",
+   "total": 5,
+   "lines": [
+    {
+     "worker": "guided-bridge-planned-*/worker-1139718361269226342.log",
+     "mtime": "06:20:47",
+     "lines": [
+      "assign session fa254f06f08a2fa8 elapsedMs 0 [CONTEXT_LOST]",
+      "context session fa254f06f08a2fa8 elapsedMs 0 [CONTEXT_LOST]"
+     ],
+     "classification": "injected-by-test (this is the runner side of the 06:20:47 backend refusal above; same second)"
+    },
+    {
+     "worker": "guided-bridge-*/worker-12091146293721381249.log",
+     "mtime": "06:18:51",
+     "lines": [
+      "assign session d9ce9cabb19aff14 elapsedMs 1 [CONTEXT_LOST]"
+     ],
+     "classification": "injected-by-test [inference: GuidedBridgeIntegrationTest has stop-then-assign tests (stopRetryAfterCloseCompletesConfirmsWithSameKey, assignmentRenewsBeforeContext...); not mapped to one test]"
+    },
+    {
+     "worker": "guided-bridge-*/worker-15099185527144922368.log",
+     "mtime": "06:18:54",
+     "lines": [
+      "assign session 16d8600000ddc54e elapsedMs 64 [CONTEXT_LOST, IDENTITY_MISMATCH]"
+     ],
+     "classification": "injected-by-test [inference, same class]"
+    },
+    {
+     "worker": "obs007-joined-*/owned-generations/generation-9/guided.log",
+     "mtime": "06:35:47",
+     "lines": [
+      "context session 504f0d5921a8ea8c elapsedMs 1 [CONTEXT_LOST]"
+     ],
+     "classification": "injected-by-test [inference: the ReplayIT refusal at 06:35:44.8 belongs to this window; mtime is last-write time]"
+    }
+   ],
+   "maxElapsedMs": 64,
+   "timeoutCause": 0,
+   "atOrAbove15000ms": 0
+  },
+  "realRel001RecurrenceSignal": false,
+  "coordinatorTriageRule": "UNKNOWN_OUTCOME 409 together with a runner GUIDED_START_FAILED line at elapsedMs >= 15000 is D4 edge (a)/(b). No such pair occurred: the largest runner-side elapsedMs in the backend run is 64, and no line has a TIMEOUT cause.",
+  "caveat": "The runner-side files are temp files that survive only until the OS cleans them. Other worker logs from the window that were already deleted by a test teardown cannot be checked. Gradle stdout and the test XML hold none of these lines."
+ }
+}

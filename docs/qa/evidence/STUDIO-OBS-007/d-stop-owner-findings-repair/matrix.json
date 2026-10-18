@@ -1,0 +1,17 @@
+[
+  {
+    "finding": "D-STOP-01",
+    "candidate": "Source/preregister/session/thread/count guards are outside original-operation completion try/finally. A separate guardFailure/outcome latch exposes rejected unstarted state while genuine completed latch is untouched. Invocation counters increment only immediately at original sender/super.execute entry after all guards. operationsComplete rejects every guard failure, and drain throws an explicit cause-preserving rejected/unstarted diagnostic; proxy/context refuses destruction rather than report genuine completion. A fresh diagnostic avoids automatic TWR self-suppression of the guard Throwable.",
+    "status": "SOURCE_CANDIDATE_RUNTIME_UNRUN"
+  },
+  {
+    "finding": "D-STOP-02",
+    "candidate": "Deliberate observation interruption is isolated in an actual owned virtual observation thread. It records the actual interrupted await and restoration at actor method exit; actor is joined in normal/failure cleanup. Main/cleanup thread newly received interruptions are never erased by outer finally; entry flag and caught InterruptedException are restored, join/drain temporarily clear only with restoration. No reset to entry snapshot remains.",
+    "status": "SOURCE_CANDIDATE_RUNTIME_UNRUN"
+  },
+  {
+    "finding": "D-STOP-03",
+    "candidate": "After independent drain/join, actual late sender/confirmation/guard/observer errors are appended to primary through identity-based distinct suppression. Original private fault aggregation is likewise protected. Only a refusal Throwable already positively asserted with exact genuine HTTP/JDBC and persisted state evidence is classified as intentional; an earlier observation/assertion failure cannot silently discard that unasserted later operation failure.",
+    "status": "SOURCE_CANDIDATE_RUNTIME_UNRUN"
+  }
+]

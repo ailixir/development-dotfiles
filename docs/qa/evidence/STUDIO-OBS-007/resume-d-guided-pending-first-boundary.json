@@ -1,0 +1,207 @@
+{
+  "scope": "READ_ONLY_GUIDED_BROWSER_LOSS_PENDING_PREREQUISITE",
+  "sourceBinding": {
+    "gate": "resume-c6-guided-loss-current",
+    "sourceZipSha256": "df759c9fd15611b27377a931b2a16630c3706cbe8f5d5566ee8e701b72fe713c",
+    "publicationSha256": "591e372f6d06fff8255d20500a681e7c8385dbbe3c8a0e0dc4c05ef84dc92c29",
+    "resultSha256": "7cd7cbd00f8b5f9abd23bb075a7dead03b1b39dc371f3d7a32de557b7f70d047",
+    "xmlSha256": "be12f06aaaa000a2fb8a0e94809e9e9fd53648eea5d8d8af5d66cd79227a6575",
+    "artifactWindowEndsWithGate": true
+  },
+  "firstBoundary": {
+    "class": "GuidedPublicationReplayIT",
+    "method": "p8C6Run",
+    "line": 7177,
+    "prerequisite": "real password focus ingress plus contemporaneous original Node pending acknowledgement",
+    "waitSeconds": 15,
+    "actualLatchResult": false,
+    "primaryOwnedPidBinding": "UNREACHED",
+    "physicalBrowserCut": "UNREACHED",
+    "cutCleanupNotEvidenceOfOriginalCut": true,
+    "secondaryFailure": {
+      "method": "p8AwaitC6Closed",
+      "line": 7462,
+      "fixedFlag": "P4_NOTIFICATION_FAILED",
+      "causalAttribution": "UNPROVEN"
+    }
+  },
+  "retainedFinalFactsNotWaitTimeTelemetry": {
+    "bootstrapPhase": "READY",
+    "materializationPresent": true,
+    "finalSessionState": "CANCELLED",
+    "finalMappedError": "OTHER",
+    "modelHttpCalls": 4,
+    "physicalProviderReads": 1,
+    "providerFailures": 0,
+    "modelProposals": 4,
+    "modelInputCeilingsTotal": 60109,
+    "modelOutputCeilingsTotal": 16000,
+    "observations": 4,
+    "actions": 3,
+    "sanitizedEvidenceBytes": 8492,
+    "passwordControls": 1,
+    "withheldRegions": 2,
+    "recordedActions": [
+      {
+        "operation": "navigate",
+        "state": "SUCCEEDED",
+        "outcome": "OK",
+        "ordinal": 0,
+        "dispatchCount": 1,
+        "generation": 0
+      },
+      {
+        "operation": "fill",
+        "state": "SUCCEEDED",
+        "outcome": "OK",
+        "ordinal": 0,
+        "dispatchCount": 1,
+        "generation": 2
+      },
+      {
+        "operation": "fill",
+        "state": "SUCCEEDED",
+        "outcome": "OK",
+        "ordinal": 1,
+        "dispatchCount": 1,
+        "generation": 3
+      }
+    ],
+    "modelAttempts": [
+      {
+        "kind": "SOURCE_PLAN",
+        "status": "APPLIED",
+        "responseSchemaVersion": 3
+      },
+      {
+        "kind": "NEXT_ACTION",
+        "status": "APPLIED",
+        "operation": "navigate",
+        "responseSchemaVersion": 3
+      },
+      {
+        "kind": "NEXT_ACTION",
+        "status": "APPLIED",
+        "operation": "fill",
+        "responseSchemaVersion": 3
+      },
+      {
+        "kind": "NEXT_ACTION",
+        "status": "APPLIED",
+        "operation": "fill",
+        "responseSchemaVersion": 3
+      }
+    ],
+    "allOwnedTeardownsConfirmed": false
+  },
+  "retainedNumericProducer": {
+    "producer": 1,
+    "pathOrdinal": 1,
+    "kindOrdinal": 3,
+    "sent": 22,
+    "acked": 22,
+    "pending": 0,
+    "originalPending": 0,
+    "failed": false,
+    "sealed": true,
+    "contextBound": true,
+    "perEventTranscriptRetained": false,
+    "firstPendingSampleCountRetained": false,
+    "focusIngressTimeRetained": false,
+    "probeCreationTimeRetained": false,
+    "nativeEntryAndSettlementTimesRetained": false
+  },
+  "sourceHandshake": [
+    {
+      "class": "GuidedPublicationReplayIT",
+      "lines": [
+        7156,
+        7165,
+        7174,
+        7177,
+        7193
+      ],
+      "fact": "Case initializes kind3/path1, creates a real guided session, then waits15s; original owned PID discovery follows only a successful latch."
+    },
+    {
+      "class": "GuidedPublicationReplayIT",
+      "lines": [
+        9430,
+        9435
+      ],
+      "fact": "Case-owned original page focusin notification precedes an8000ms real page-world blocking interval and original focus-exit notification; this is source construction, not proof those events reached this invocation."
+    },
+    {
+      "class": "GuidedPublicationReplayIT",
+      "lines": [
+        9227,
+        9246
+      ],
+      "fact": "Accepted first focus-enter for the selected current phase records actual Java focus time and writes original pending-probe1; duplicate focus is rejected."
+    },
+    {
+      "class": "GuidedPublicationReplayIT",
+      "lines": [
+        6515,
+        6530
+      ],
+      "fact": "Numeric event10 counts down only with started owner, nonzero real focus timestamp, permitted sample count, ok=true, operation1 and exactly one matching active native invocation. Aggregate22 acknowledgements do not reveal whether event10 occurred or its time."
+    },
+    {
+      "class": "GuidedPublicationReplayIT",
+      "lines": [
+        9320,
+        9343,
+        7462
+      ],
+      "fact": "Page-notification RuntimeException or nonmatching IO-loss branches independently set P4_NOTIFICATION_FAILED; accepted selected focus-enter IO loss has a separate provisional flag. Actual first failing page branch/cause is not retained."
+    }
+  ],
+  "additionalSupport": {
+    "profileFiles": 171,
+    "profileBytes": 8731666,
+    "profilePatternHits": 0,
+    "knownLinks": 4,
+    "profileFailed": false,
+    "initialGrantCheckSuccess": true,
+    "initialGrantRemainingMs": 29987,
+    "initialAssignmentRemainingMs": 599610,
+    "firstThreeGrantSamplesSuccess": true,
+    "firstThreeGrantSampleCodes": [
+      0,
+      0,
+      0
+    ],
+    "grantSupportLimit": "Only existing initial/renewal sample success; not a complete timeline or proof of healthy pending notification."
+  },
+  "conclusion": {
+    "proven": "The combined first pending prerequisite missed its original15s wait. Real bootstrap/actions/provider and clean final numeric-producer delivery occurred, but their retained final snapshots cannot time them relative to that wait. No actual PID-bound browser-loss cut occurred.",
+    "firstUnderlyingCause": "UNOBSERVED_FROM_RETAINED_FIELDS",
+    "notInferred": [
+      "No invented native pending state from provider read or consumed action.",
+      "No attribution to page handler vs Node probe vs bootstrap delay from aggregate producer counts.",
+      "No causal attribution of secondary notification sticky failure to primary latch miss.",
+      "No healthy cleanup/full C6/redaction/browser-loss credit from partial snapshots."
+    ]
+  },
+  "missingDefiningFields": [
+    "Original first focus event/time or exact page-notification first refusal code",
+    "Original probe1 creation/receipt and event10 sequence/time",
+    "Original native entry/settlement timing relative to first15s wait"
+  ],
+  "actions": {
+    "sourceEdits": 0,
+    "runtime": 0,
+    "sql": 0,
+    "network": 0,
+    "processActions": 0,
+    "waiterOrCutChanges": 0,
+    "instrumentation": 0,
+    "models": 0,
+    "reports": 1
+  },
+  "privacy": "Only fixed source codes/locations/ordinals/counters persisted; owned generated values, credentials, identities and runtime paths remain private.",
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE",
+  "wholeAcceptanceClaim": false
+}

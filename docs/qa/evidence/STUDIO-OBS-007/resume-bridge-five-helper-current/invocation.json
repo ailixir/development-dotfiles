@@ -1,0 +1,30 @@
+{
+  "command": [
+    "./gradlew",
+    "test",
+    "--rerun-tasks",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.freshObservationConnectsTwoAuthoredStepsWithoutReplayingProducer",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.committedObservationRecoversLostHttpResponseWithoutAnotherCollection",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration",
+    "--tests",
+    "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation"
+  ],
+  "classes": [
+    "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.freshObservationConnectsTwoAuthoredStepsWithoutReplayingProducer",
+    "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.committedObservationRecoversLostHttpResponseWithoutAnotherCollection",
+    "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation",
+    "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration",
+    "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation"
+  ],
+  "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "startedAt": "2026-10-11T13:31:13.127043+00:00",
+  "fixturePrerequisites": {
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+  },
+  "prerequisiteSelected": false
+}

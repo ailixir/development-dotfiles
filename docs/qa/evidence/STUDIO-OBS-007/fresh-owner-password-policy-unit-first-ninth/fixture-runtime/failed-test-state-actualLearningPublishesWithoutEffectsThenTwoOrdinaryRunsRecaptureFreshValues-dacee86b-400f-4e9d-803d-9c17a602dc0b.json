@@ -1,0 +1,215 @@
+{
+  "schemaVersion" : 1,
+  "sessionId" : "dacee86b-400f-4e9d-803d-9c17a602dc0b",
+  "testId" : "a6756434-dda4-4953-940c-a55e1c2280be",
+  "state" : "SUCCEEDED",
+  "errorCode" : "OTHER",
+  "bootstrapPhase" : "READY",
+  "materializationPresent" : true,
+  "counters" : {
+    "actions" : 5,
+    "observations" : 7,
+    "modelProposals" : 6,
+    "modelInputTokens" : 90482,
+    "modelOutputTokens" : 24576,
+    "sanitizedEvidenceBytes" : 20255
+  },
+  "coordinate" : {
+    "stepIndex" : 3,
+    "generation" : 7
+  },
+  "observationCounts" : {
+    "passwordControls" : 0,
+    "withheldRegions" : 0
+  },
+  "acquisition" : {
+    "allowanceMs" : 30000,
+    "totalExtraPolls" : 0
+  },
+  "activeAcquisition" : {
+    "extraPolls" : 0
+  },
+  "fixtureModelHttpCalls" : 12,
+  "fixturePhysicalProviderReads" : 0,
+  "fixtureProviderFailures" : 0,
+  "fixtureModelKinds" : {
+    "SOURCE_PLAN" : 2,
+    "NEXT_ACTION" : 10,
+    "VERIFY_STEP" : 0
+  },
+  "continuation" : "FINALIZING",
+  "translationCounters" : {
+    "planRevision" : 2
+  },
+  "declarations" : [ ],
+  "obligations" : [ {
+    "operationKind" : "navigate",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 0,
+    "referenceIndex" : 0
+  }, {
+    "operationKind" : "read",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "occurrence" : 1
+  }, {
+    "operationKind" : "fill",
+    "stepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "click",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 0
+  }, {
+    "operationKind" : "assert",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "occurrence" : 1
+  } ],
+  "actions" : [ {
+    "operationKind" : "fill",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "admissionId" : "2d121c9a-526b-4071-9e02-f8db2fe7bc08",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 3
+  }, {
+    "operationKind" : "click",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "admissionId" : "9b71bb89-5cc8-4e9c-9cf3-5fe7642a4d3d",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 5
+  }, {
+    "operationKind" : "assert",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "admissionId" : "d23c4b50-e8a5-4caf-9f42-cb330c17b66d",
+    "ordinal" : 1,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 6
+  }, {
+    "operationKind" : "navigate",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "admissionId" : "ba32628d-818c-434b-ba93-1c91f51ab0fc",
+    "ordinal" : 0,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 0
+  }, {
+    "operationKind" : "read",
+    "state" : "SUCCEEDED",
+    "outcomeCode" : "OK",
+    "stepId" : "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "admissionId" : "46ac6513-3a9e-42de-b9a9-f661655e17f4",
+    "ordinal" : 1,
+    "dispatchCount" : 1,
+    "ownerFence" : 1,
+    "generation" : 1
+  } ],
+  "modelAttempts" : [ {
+    "kind" : "SOURCE_PLAN",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  }, {
+    "kind" : "NEXT_ACTION",
+    "status" : "APPLIED",
+    "providerCode" : "OTHER",
+    "attemptnumber" : 1,
+    "inputtokens" : 20,
+    "outputtokens" : 40
+  } ],
+  "testMethod" : "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+  "executions" : [ {
+    "actualDispatchClientInvoked" : true,
+    "actualDispatchClient" : {
+      "sendOutcome" : {
+        "kind" : "ACCEPTED",
+        "retryable" : false,
+        "reason" : "NONE"
+      }
+    },
+    "id" : "8fe4b7c3-b9fe-48a6-8ecd-26e024516303",
+    "revision_id" : "aa7d18a1-1327-43ad-bea4-83cc7d29904c",
+    "attempt_id" : "b245a6e3-3c00-4c82-9e5a-a7bbe9d6062f",
+    "accepted_attempt_id" : "b245a6e3-3c00-4c82-9e5a-a7bbe9d6062f",
+    "status" : "PASSED",
+    "ledgerState" : "DONE",
+    "errorCode" : "NONE",
+    "ledger_present" : true,
+    "admission_present" : true,
+    "observed_receipt_present" : true,
+    "browser_started" : true,
+    "video_present" : true,
+    "manifest_present" : true,
+    "step_results_present" : true,
+    "snapshot_revision" : 8,
+    "last_runner_sequence" : 8,
+    "elapsed_ms" : 2212
+  }, {
+    "actualDispatchClientInvoked" : true,
+    "actualDispatchClient" : {
+      "sendOutcome" : {
+        "kind" : "ACCEPTED",
+        "retryable" : false,
+        "reason" : "NONE"
+      }
+    },
+    "id" : "fb514035-9cc1-4b70-b388-8b7951ddcd8a",
+    "revision_id" : "aa7d18a1-1327-43ad-bea4-83cc7d29904c",
+    "attempt_id" : "9900a8c8-7065-4d5d-a015-9b19d527ed5e",
+    "accepted_attempt_id" : "9900a8c8-7065-4d5d-a015-9b19d527ed5e",
+    "status" : "PASSED",
+    "ledgerState" : "DONE",
+    "errorCode" : "NONE",
+    "ledger_present" : true,
+    "admission_present" : true,
+    "observed_receipt_present" : true,
+    "browser_started" : true,
+    "video_present" : true,
+    "manifest_present" : true,
+    "step_results_present" : true,
+    "snapshot_revision" : 8,
+    "last_runner_sequence" : 8,
+    "elapsed_ms" : 2089
+  } ]
+}

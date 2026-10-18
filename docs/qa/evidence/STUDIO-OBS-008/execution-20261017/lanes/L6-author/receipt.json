@@ -1,0 +1,251 @@
+{
+  "lane": "L6-author",
+  "wave": "W3",
+  "date": "2026-10-17",
+  "agent": "aiox-dev (Dex)",
+  "exit": "SPECS_WRITTEN_NOT_EXECUTED",
+  "files": [
+    {
+      "path": "frontend/e2e/studio-guided.spec.ts",
+      "action": "new",
+      "sha256": "8ab624fc40ff8c12e697cdf67070dabfa8b0abb06f65cb3be37f5986bab77db1",
+      "listedTests": 8
+    },
+    {
+      "path": "frontend/e2e/studio-authoring-real-backend.spec.ts",
+      "action": "new",
+      "sha256": "32e904b917771f909b9e8ac4d57da81e066f8f88d1b7f44e5b4a742f7a54ea4c",
+      "listedTests": 2
+    }
+  ],
+  "notTouched": [
+    "frontend/playwright.config.ts",
+    "frontend/e2e/start-servers.mjs",
+    "frontend/e2e/mswProxy.ts",
+    "frontend/e2e/harness.spec.ts",
+    "frontend/e2e/tsconfig.json",
+    "frontend/src/**",
+    "docs/stories/**",
+    ".aiox-core/core/permissions/dispatch-governance.js"
+  ],
+  "verify": {
+    "tsc_e2e": {
+      "cmd": "pnpm exec tsc -p e2e/tsconfig.json --noEmit",
+      "exit": 0
+    },
+    "eslint_e2e": {
+      "cmd": "pnpm exec eslint e2e playwright.config.ts --ext .ts,.mjs",
+      "exit": 0,
+      "note": "first run found one no-irregular-whitespace (literal U+200B in a regex); fixed to the \\u200b escape"
+    },
+    "list_msw": {
+      "cmd": "pnpm exec playwright test --list",
+      "exit": 0,
+      "total": 13,
+      "files": 2,
+      "studioGuidedListed": 8,
+      "realBackendSpecListed": false
+    },
+    "list_real_backend": {
+      "cmd": "CHECKS_E2E_REAL_BACKEND=1 pnpm exec playwright test --list",
+      "exit": 0,
+      "total": 2,
+      "files": 1,
+      "project": "real-backend"
+    },
+    "list_project_without_flag": {
+      "exit": 1,
+      "message": "Project(s) \"real-backend\" not found. Available projects: \"msw\""
+    },
+    "listStartsServers": {
+      "observed": false,
+      "basis": "lsof on 4177/4178 empty before and after each --list; no start-servers process seen",
+      "kind": "inference from absence"
+    },
+    "notRun": [
+      "any spec execution",
+      "vitest",
+      "gradle",
+      "bootRun",
+      "src/test/a11y"
+    ]
+  },
+  "flowToTest": [
+    {
+      "item": "author (edit, add, reorder, save, stable IDs)",
+      "spec": "studio-guided.spec.ts",
+      "test": "author edits, adds and reorders steps with stable IDs, then a first Run learns and finalizes on its own"
+    },
+    {
+      "item": "Run, learn, auto-finalize, request counts",
+      "spec": "studio-guided.spec.ts",
+      "test": "same"
+    },
+    {
+      "item": "clarification with PAGE label",
+      "spec": "studio-guided.spec.ts",
+      "test": "a page-derived choice is shown as untrusted text, answered once, and the Run completes",
+      "scenario": "guided-clarification-page"
+    },
+    {
+      "item": "None of these (cancel once, focus step N)",
+      "spec": "studio-guided.spec.ts",
+      "test": "\"None of these\" cancels once, sends no answer, and moves focus to that step",
+      "scenario": "guided-clarification-page"
+    },
+    {
+      "item": "login-required both variants both actions",
+      "spec": "studio-guided.spec.ts",
+      "test": "blocked by login (...) names step 1, offers both actions, finalizes nothing",
+      "scenarios": [
+        "guided-login-required-no-login-steps",
+        "guided-login-required-login-steps-failed"
+      ]
+    },
+    {
+      "item": "later replay with request counts",
+      "spec": "studio-guided.spec.ts",
+      "test": "a later Run of a READY test replays: one execute, no guided session"
+    },
+    {
+      "item": "mixed mode",
+      "spec": "studio-guided.spec.ts",
+      "test": "mixed mode: a changed draft repeats the saved prefix, learns from the changed step and finalizes"
+    },
+    {
+      "item": "narrow layout 375x812 (AC-8 a)",
+      "spec": "studio-guided.spec.ts",
+      "test": "narrow layout: the blocked-by-login actions stay inside the viewport width",
+      "scenario": "guided-login-required-no-login-steps"
+    },
+    {
+      "item": "D5 preconditions",
+      "spec": "studio-authoring-real-backend.spec.ts",
+      "test": "preconditions: the backend answers, Studio is on, and a CSI is registered"
+    },
+    {
+      "item": "D5 create, edit, reorder, save, stable IDs, reload, getTest, capabilities shape",
+      "spec": "studio-authoring-real-backend.spec.ts",
+      "test": "create a draft, then add, edit and reorder steps and save: step IDs stay stable"
+    }
+  ],
+  "notInThisE2E_vitestOnly": [
+    "unknown outcome",
+    "publication conflict",
+    "replay drift",
+    "POLICY_DENIED",
+    "BUDGET_EXCEEDED",
+    "reference insert",
+    "capability off/on",
+    "never-echo canaries",
+    "reconnect without double-submit",
+    "POLICY_NOT_APPROVED start feedback"
+  ],
+  "reconcileInW4": [
+    {
+      "id": "R1",
+      "selector": "button 'Run Test' enabled for UNLEARNED and NEEDS_RELEARN drafts",
+      "assumption": "L5b enables learning Run and keeps RUN_LABEL"
+    },
+    {
+      "id": "R2",
+      "selector": "guided status, question, completion, login sentences, chips visible in the page with L5a copy",
+      "assumption": "L5b mounts the L5a components; ChecksStudioPage had no guided import when read"
+    },
+    {
+      "id": "R3",
+      "selector": "watchStatusLines (MutationObserver over document.body.innerText)",
+      "assumption": "timing-sensitive; order only"
+    },
+    {
+      "id": "R4",
+      "selector": "getByTestId('studio-save-state') text 'Saved'",
+      "assumption": "existing id kept; no role available"
+    },
+    {
+      "id": "R5",
+      "selector": "heading 'Variables' after Open Variables",
+      "assumption": "callback opens existing Variables dialog"
+    },
+    {
+      "id": "R6",
+      "selector": "textbox 'Step N' focused after Go to step N / None of these",
+      "assumption": "L5b focuses the row via stepInputId"
+    },
+    {
+      "id": "R7",
+      "selector": "text 'The run was stopped on request' after None of these",
+      "assumption": "existing CANCELLED narrative"
+    },
+    {
+      "id": "R8",
+      "selector": "radio /^Reference/, /^None of these/, button Continue",
+      "assumption": "names come from FormControlLabel text"
+    },
+    {
+      "id": "R9",
+      "selector": "no unhandled /api/v1/studio/ request during a full learn",
+      "assumption": "L5b adds no unserved Studio route"
+    },
+    {
+      "id": "R10",
+      "selector": "NEEDS_RELEARN fixture seeded into the list by a no-op PUT",
+      "assumption": "mock authoring store behaviour"
+    },
+    {
+      "id": "R11",
+      "selector": "no assertion on start-body hints",
+      "assumption": "left to L5b/L2b"
+    }
+  ],
+  "requirementsForW4": {
+    "proxyScenarios": [
+      {
+        "name": "guided-clarification-page",
+        "apply": "setGuidedScenario(learnWithQuestion('PAGE_CHOICE', 1)) after resetStudioMocks()"
+      },
+      {
+        "name": "guided-login-required-no-login-steps",
+        "apply": "setGuidedScenario(loginRequired(false)) after resetStudioMocks()"
+      },
+      {
+        "name": "guided-login-required-login-steps-failed",
+        "apply": "setGuidedScenario(loginRequired(true)) after resetStudioMocks()"
+      }
+    ],
+    "proxyChangeOwner": "root or L6 with mswProxy.ts added to its write set; not in L6-author's write set",
+    "withoutScenarios": "5 of 8 MSW tests fail loudly (selectScenario names the scenario); first-Run, READY replay and mixed mode need none",
+    "unservedByMocks": [
+      "GET /api/v1/csi",
+      "GET /api/v1/features"
+    ],
+    "mswCommand": "cd frontend && pnpm exec playwright test e2e/studio-guided.spec.ts",
+    "realBackendCommand": "cd frontend && CHECKS_E2E_REAL_BACKEND=1 pnpm exec playwright test --project=real-backend e2e/studio-authoring-real-backend.spec.ts",
+    "bootRun": {
+      "profile": "local",
+      "identity": "bb12345 / checks-admin via LocalDevAuthFilter",
+      "env": {
+        "CHECKS_SOURCE_UI_TEST": "true",
+        "FLYWAY_LOCATIONS": "classpath:db/migration,classpath:db/seed (or insert a csi_systems row)",
+        "CHECKS_E2E_BACKEND_URL": "default http://127.0.0.1:8080"
+      },
+      "singleGradleProcess": true,
+      "unverified": [
+        "R__sample_data.sql applies on top of V1..V22 in the local profile",
+        "shape of GET /api/v1/csi",
+        "Idempotency-Key handling on POST /studio/tests from the browser"
+      ]
+    },
+    "staleNameInLanesJson": "STUDIO_E2E_REAL_BACKEND is replaced by CHECKS_E2E_REAL_BACKEND"
+  },
+  "deviations": [
+    "fail-not-skip on a missing proxy scenario",
+    "MSW author flow edits a fixture draft because /api/v1/csi is unserved",
+    "mixed mode seeded by a no-op PUT",
+    "one narrow-layout test added (AC-8 a); root may drop it",
+    "existing data-testid studio-save-state used; none added",
+    "D5 has no v1-body-refused negative (OBS-015 backend behaviour, not in D5)"
+  ],
+  "gitActions": "none: no commit, stash or push",
+  "pidsSignalled": []
+}

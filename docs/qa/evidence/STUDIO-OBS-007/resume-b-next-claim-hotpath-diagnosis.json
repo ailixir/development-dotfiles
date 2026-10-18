@@ -1,0 +1,89 @@
+{
+  "scope": "READ_ONLY_NEXT_EXACT_RENEWAL_REDUNDANCY_PROPOSAL",
+  "sourceBindings": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+      "sha256": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "sha256": "a5034ee98707552d927f48bc0a30e07896df913f3b706f42f15ee16c7b52144b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedAssignmentStore.java",
+      "sha256": "a08c61a0006ca586f06c8ef2d8e1938a43263b5559e78093844512f46db30ea6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+      "sha256": "c058bfc2a9b43ddc933db1296be8a9af0211cf82b2fbe0aefb0fc0efa8bbf0f7"
+    }
+  ],
+  "actualBounds": {
+    "latestRenewalServerHandlerMs": 993.535792,
+    "clientDeadlineMs": 1000,
+    "externalClientQueueNetworkBodyParse": "UNOBSERVED",
+    "manifestOnlyOptimization": "Guard tests passed; actual C5 still LEASE_LOST, not sufficient."
+  },
+  "exactRedundancy": {
+    "service": "GuidedSessionService.claim same&&liveLease branch797-799 calls save(session), command(...session.document), then returnsdeepCopy. Only owner.leaseExpiresAt changed by branch.",
+    "repository": "save validatescanonical/fullsession once then independently serializes document and progress; immediately following command serializes the exact unchanged document again and makes second JDBC roundtrip.",
+    "progress": "Production checkCurrent/checkSourceCurrent and assignments.authorizeClaim are reads/validations; only document is passed to access and neither mutates session.progress in this branch. Rewriting unchanged progress has no required renewal semantic effect.",
+    "notRedundant": "Full canonical/schema validation, requesthash/idempotency, current policy/scoped authorization/source identity/assignment proof, original lease clamp and returned deepCopy are retained. Compiled schemas alreadycached, no cache proposal."
+  },
+  "smallestCandidate": {
+    "status": "SOURCE_PROPOSAL_REQUIRES_ROOT_INDEPENDENT_APPROVAL",
+    "paths": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java"
+    ],
+    "api": "Narrow saveRenewalAndCommand(Session session,String key,String digest), transactionjoined and reachable only originalsame+live renewal branch. Other save/command APIs/callers unchanged.",
+    "steps": [
+      "Perform original full contracts.validate(session,document) unchanged.",
+      "Serialize updated sessiondocument ONCE; keep existing state/document/session-ID predicates. Do not reserialize or write unchanged progress.",
+      "Single PostgreSQL data-modifying CTE UPDATE studio_guided_sessions SET state=?,document=?::jsonb WHERE session_id=? RETURNING session_id,document then INSERT original studio_guided_commands(namespace,route,idempotency_key,request_digest,response) SELECT session_id,claim,originalkey,digest,document FROM updated. No newtable/column/cache/JSON authority.",
+      "Return original session.document.deepCopy unchanged after same surrounding transaction."
+    ],
+    "semanticPreservation": [
+      "Existing worker/schema/version/fence/same-live/assignment/current principalCSIenv/source/expiry checks stay before mutation.",
+      "Full canonical/schema validation still occurs before SQL; no new validated-snapshot bypass.",
+      "Original claim idempotency lookup/conflict remains before write; database commandunique/digest behavior remains.",
+      "Owner row alreadylocked; CTE UPDATE and INSERT share actual outer transaction and rollback together. No requiresnew/savepoint or partialcommit.",
+      "Original command snapshot JSONB equals same updateddocument; no responseauthority/data normalization.",
+      "Original progress remains persisted unchanged and atomic owner-row version advances; actual SQL guards stillfire fordocument update.",
+      "Original1000ms/cadence/TRACE/deadline and externalAPI/claimresult unchanged."
+    ],
+    "proofPrerequisites": [
+      "Root/data review exact triggering/order/version semantics of omitting unchangedprogress SET; no UPDATEOFprogress guard may be bypassed for a relevant owner/document mutation.",
+      "Verify current production branch mutates no progress; if any valid caller contract relies on a progress change retain serialization instead.",
+      "Preserve rowcount/owner absence refusal and existing uniquecommand rollback; avoid generic combinedwriter permitting unrelated states.",
+      "Decide whether scope restrictsv3 renewal; legacy acquisition/takeover/stop/nonrenewal APIs mustremain untouched."
+    ],
+    "tradeoffs": [
+      "One new narrow repository API/two mainfiles rather than generic lazytree/logging framework.",
+      "Changed SQLstatement shape reduces duplicated payload/roundtrip naturally; TRACE remainsenabled everyappender, no suppression.",
+      "Full-schemaDEBUG/canonical/source checks stillcost; no claim this supplies sufficient transportheadroom.",
+      "Returning deepCopy remainsimportant; removing it or caching mutable session snapshots is explicitly not proposed."
+    ]
+  },
+  "closestVerification": {
+    "existingClass": "GuidedSessionIT original30cases including renewal preservingACTING/FINALIZING/clarification/fence/deadline/inflightadmission and immutable-worker/stale refusal.",
+    "definingProof": "Using existing realPG fixtures, valid renewal keeps exactprogress and identical commandJSON snapshot; commandconflict/externalrollback leaves neither newlease nor command; malformedclosed session stillrefuses beforewrite. No new Corematrix/casesframework.",
+    "actualPerformance": "Coordinator original C5 first+ninth under required root/appTRACE and originaldeadline; all25 after success/source guard gates. Actual clientcompletion/newgrant needed, serverduration alone not C5 success."
+  },
+  "alternative": "If trigger/progress/API invariants do not permit narrow CTE, less invasive serialized-document reuse between existing two statements removes duplicate rendering only; likely smaller benefit, stillunmeasured. No schema/clock/TRACE or fixturetier waiver proposed.",
+  "actions": "One report only. No source/runtime/probe/SQL/Node/Gradle/build/model changes; concurrent Profile/helper gate coordinatorowned, not credited as this proposal execution. All19/fullwave remain open.",
+  "exactSqlAndOrdering": {
+    "proposedSql": "WITH updated AS (UPDATE studio_guided_sessions SET state=?,document=?::jsonb WHERE session_id=? RETURNING session_id,document) INSERT INTO studio_guided_commands(namespace,route,idempotency_key,request_digest,response) SELECT session_id,?,?,?,document FROM updated",
+    "bindings": "Originalstate, once-serialized updateddocument, originalid, fixedroute claim, originalkey/digest. No progress binding or new authority fields.",
+    "rowCount": "Returned INSERT count must equal1 for the already-locked genuine session. count0 means no UPDATE and no command; proposed failclosed FORBIDDEN_SCOPE403 (same repository.lock missing-row code), transaction rollback. Other counts impossible sessionprimarykey but stillrefuse.",
+    "missingUpdateTradeoff": "Old save ignores updatecount and then inserts command; this is unreachable in legitimate same-owner locked service branch. New narrow writer mustnot silently return success or orphancommand on missing row. Rootapproval needed for explicit stronger refusal.",
+    "uniqueConflict": "Original prior duplicate/digest check retained. If commandunique conflict still occurs, PostgreSQL entire CTE statement fails and rolls back UPDATE; surrounding physical transaction abort/rollback preserves original no partiallease/command behavior. Original idempotency conflict classification retained by service; no ONCONFLICTignore/requeue introduced.",
+    "rowTriggers": "SQLdependency INSERTSELECT updated RETURNING preserves ownerUPDATE before commandINSERT. Existing studied session immutable/revocation guards are FOR EACH ROW; they see same document/state transition. No skipped relevant progress-only guard assumed: root/data review all actual migrations before source release.",
+    "statementTriggers": "Combining statements can change statement-level AFTERtrigger ordering; root must confirm none relevant exists (not assume generic SQL equivalence). Deferred transaction-level guards/actualtopXID/outer commit/rollback remain at unchanged boundary.",
+    "javaCallbacks": "Current plain repository.save/command methods expose no Java commit/event callback between operations. Any genuine future/injected callback prerequisite mustbechecked; no hook swallowed or fabricated. Returned deepCopy and TransactionTemplate commit behavior remain unchanged."
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "mode": "no-login",
+  "reportsRoleCollision": false,
+  "actualAdapter": true,
+  "actualChromium": true,
+  "reachedUrl": "http://127.0.0.1:51789/login",
+  "result": {
+    "ok": false,
+    "errorCode": "TIMEOUT",
+    "secretUse": {}
+  },
+  "started": [
+    {
+      "stepIndex": 0,
+      "startedAtMs": 7738.860375
+    },
+    {
+      "stepIndex": 1,
+      "startedAtMs": 7754.502
+    }
+  ],
+  "finished": [
+    {
+      "stepIndex": 0,
+      "status": "PASS",
+      "startedAtMs": 7738.860375,
+      "finishedAtMs": 7754.355084,
+      "durationMs": 15.494708999999602,
+      "failure": null
+    },
+    {
+      "stepIndex": 1,
+      "status": "FAIL",
+      "startedAtMs": 7754.502,
+      "finishedAtMs": 12756.347875,
+      "durationMs": 5001.845874999999,
+      "failure": "TIMEOUT"
+    },
+    {
+      "stepIndex": 2,
+      "status": "SKIPPED",
+      "startedAtMs": null,
+      "finishedAtMs": null,
+      "durationMs": null,
+      "failure": null
+    }
+  ],
+  "receiptCount": 0,
+  "rejectedReceiptCount": 0,
+  "profileCanaryHits": [],
+  "nativeVideo": {
+    "path": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/secret-login-required-VNje6m/video/page@829486b35749835034f143c4559caace.webm",
+    "bytes": 15529,
+    "sha256": "c64da80ecc6f82eb1599ae0a181e8aec85ee1cd4024530aaba517fe9be721caf"
+  },
+  "learnedPublishedCoreProof": false
+}

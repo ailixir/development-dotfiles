@@ -1,0 +1,1707 @@
+diff --git a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
+@@ -110,9 +110,12 @@ public final class GuidedContracts {
+   // STUDIO-OBS-012A re-epoch: the {contract:3} tuple collapse changes the expanded session and
+   // replay-validation roots (they reach versions/profile by $ref); ledger/observation are
+   // unchanged. DECISION-1 (2026-10-13) re-epochs session again: it reaches limits by $ref and
+-  // limits.maxModelInputTokensTotal maximum/default moved 128000 -> 262144.
++  // limits.maxModelInputTokensTotal maximum/default moved 128000 -> 262144. MODEL-SIZING
++  // (2026-10-18, ruling option A-ii) re-epochs session once more: limits.maxModelOutputTokensTotal
++  // maximum/default 32000 -> 131072/98304 and limits.maxModelInputTokensTotal maximum/default
++  // 262144 -> 1572864/786432.
+   private static final String SESSION_SCHEMA_EPOCH =
+-      "d94e7972593b4d051d744f9be213b7f07be33e106f8bee1116f0d9a809db371e";
++      "dace2f2b43be2052997f7fff9c970b18e81b0f7b1931baba5ffd3a07f24f476b";
+   // STUDIO-OBS-014 C2a re-epochs replay-validation: ObservedQuestionContext.question $refs
+   // clarification.schema.json, which gained labelSource/role/region and two enum values.
+   private static final String REPLAY_VALIDATION_SCHEMA_EPOCH =
+diff --git a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java
+@@ -14,8 +14,8 @@ public record GuidedSessionProperties(
+     @DefaultValue("200") int maxActions,
+     @DefaultValue("400") int maxObservations,
+     @DefaultValue("100") int maxModelProposals,
+-    @DefaultValue("262144") int maxModelInputTokensTotal,
+-    @DefaultValue("32000") int maxModelOutputTokensTotal,
++    @DefaultValue("786432") int maxModelInputTokensTotal,
++    @DefaultValue("98304") int maxModelOutputTokensTotal,
+     @DefaultValue("32768") int maxObservationBytes,
+     @DefaultValue("500") int maxObservationNodes,
+     @DefaultValue("8") int maxObservationDepth,
+@@ -36,8 +36,8 @@ public record GuidedSessionProperties(
+         limits.getOrDefault("maxActions", 200),
+         limits.getOrDefault("maxObservations", 400),
+         limits.getOrDefault("maxModelProposals", 100),
+-        limits.getOrDefault("maxModelInputTokensTotal", 262144),
+-        limits.getOrDefault("maxModelOutputTokensTotal", 32000),
++        limits.getOrDefault("maxModelInputTokensTotal", 786432),
++        limits.getOrDefault("maxModelOutputTokensTotal", 98304),
+         limits.getOrDefault("maxObservationBytes", 32768),
+         limits.getOrDefault("maxObservationNodes", 500),
+         limits.getOrDefault("maxObservationDepth", 8),
+diff --git a/backend/src/main/resources/application.yml b/backend/src/main/resources/application.yml
+--- a/backend/src/main/resources/application.yml
++++ b/backend/src/main/resources/application.yml
+@@ -228,7 +228,8 @@ studio:
+       pruner-delay-ms: 3600000
+       batch-size: 100
+     # STUDIO-OBS-014 AC-8 (ruling AR-2 c): per-CSI limits on top of the per-session ceilings above.
+-    # Daily defaults are 20x the per-session model token ceilings (an estimate; OBS-009 tunes).
++    # Daily defaults hold 156 calls at the 4096 per-call reservation, about 12 ten-step base learns or
++    # 6.5 full-envelope sessions (MODEL-SIZING ruling 2026-10-18; OBS-009 T4 recalibrates).
+     csi-budget:
+       max-concurrent-sessions: ${STUDIO_GUIDED_CSI_MAX_CONCURRENT:3}
+       daily-model-input-tokens: ${STUDIO_GUIDED_CSI_DAILY_INPUT_TOKENS:5242880}
+diff --git a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -4010,14 +4010,27 @@ class GuidedPublicationReplayIT {
+         scoped.put("sessionOrdinal", sessionOrdinal);
+         JsonNode limits =
+             sessions.transaction(() -> sessions.lock(id).document().path("limits").deepCopy());
+-        assertThat(limits.path("maxModelOutputTokensTotal").asInt()).isEqualTo(32000);
+-        assertThat(limits.path("maxModelInputTokensTotal").asInt()).isEqualTo(262144);
++        // MODEL-SIZING (ruling 2026-10-18, option A-ii): the production session totals.
++        assertThat(limits.path("maxModelOutputTokensTotal").asInt()).isEqualTo(98304);
++        assertThat(limits.path("maxModelInputTokensTotal").asInt()).isEqualTo(786432);
+         assertThat(limits.path("maxModelProposals").asInt()).isEqualTo(100);
+         JsonNode counters =
+             sessions.transaction(() -> sessions.lock(id).document().path("counters").deepCopy());
+-        assertThat(counters.path("modelInputTokens").asLong()).isLessThanOrEqualTo(262144);
+-        assertThat(counters.path("modelOutputTokens").asLong()).isLessThanOrEqualTo(32000);
++        assertThat(counters.path("modelInputTokens").asLong()).isLessThanOrEqualTo(786432);
++        assertThat(counters.path("modelOutputTokens").asLong()).isLessThanOrEqualTo(98304);
+         assertThat(counters.path("modelProposals").asLong()).isLessThanOrEqualTo(100);
++        // Derived, not a run: this lane reserves at the fixture ceiling, so the production
++        // reservation is proposals x 4096, which must fit the frozen output total.
++        long derivedProductionOutput = counters.path("modelProposals").asLong() * 4096L;
++        assertThat(derivedProductionOutput)
++            .isLessThanOrEqualTo(limits.path("maxModelOutputTokensTotal").asLong());
++        scoped
++            .putObject("derivedProductionCeiling")
++            .put("derivedNotARun", true)
++            .put("perCallOutputTokens", 4096)
++            .put("proposals", counters.path("modelProposals").asLong())
++            .put("reservedOutputAtProductionCeiling", derivedProductionOutput)
++            .put("fitsFrozenOutputTotal", true);
+         copyDiagnosticNumbers(
+             counters,
+             scoped.putObject("actualCounters"),
+@@ -4051,10 +4064,10 @@ class GuidedPublicationReplayIT {
+                   priorInput + witness.path("serviceReservationInput").asLong());
+           assertThat(witness.path("cumulativeOutput").asLong())
+               .isGreaterThanOrEqualTo(priorOutput + FIXTURE_PROFILE.ceiling);
+-          assertThat(witness.path("inputTotalLimit").asLong()).isEqualTo(262144);
+-          assertThat(witness.path("outputTotalLimit").asLong()).isEqualTo(32000);
+-          assertThat(witness.path("cumulativeInput").asLong()).isLessThanOrEqualTo(262144);
+-          assertThat(witness.path("cumulativeOutput").asLong()).isLessThanOrEqualTo(32000);
++          assertThat(witness.path("inputTotalLimit").asLong()).isEqualTo(786432);
++          assertThat(witness.path("outputTotalLimit").asLong()).isEqualTo(98304);
++          assertThat(witness.path("cumulativeInput").asLong()).isLessThanOrEqualTo(786432);
++          assertThat(witness.path("cumulativeOutput").asLong()).isLessThanOrEqualTo(98304);
+           assertThat(witness.path("cumulativeProposals").asLong()).isGreaterThan(priorProposals);
+           priorProposals = witness.path("cumulativeProposals").asLong();
+           priorInput = witness.path("cumulativeInput").asLong();
+diff --git a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java
+@@ -155,8 +155,9 @@ class GuidedDefaultModelReservationIT {
+     translationProperties = context.getBean(GuidedTranslationProperties.class);
+     var sessionProperties = context.getBean(GuidedSessionProperties.class);
+     assertThat(translationProperties.maxOutputTokens()).isEqualTo(4096);
+-    assertThat(sessionProperties.maxModelOutputTokensTotal()).isEqualTo(32000);
+-    assertThat(sessionProperties.maxModelInputTokensTotal()).isEqualTo(262144);
++    // MODEL-SIZING (ruling 2026-10-18, option A-ii): 24 proposals x 4096 output, 24 x 32,768 input.
++    assertThat(sessionProperties.maxModelOutputTokensTotal()).isEqualTo(98304);
++    assertThat(sessionProperties.maxModelInputTokensTotal()).isEqualTo(786432);
+     assertThat(sessionProperties.maxModelProposals()).isEqualTo(100);
+     assertThat(translationProperties.maxInputBytes()).isEqualTo(65536);
+     jdbc = new JdbcTemplate(context.getBean(DataSource.class));
+@@ -216,13 +217,37 @@ class GuidedDefaultModelReservationIT {
+   }
+ 
+   @Test
+-  void realDefaultsSevenKnownUsageReservationsRefuseEighthBeforeProvider() {
+-    sevenAndRefuseEighth(false);
++  void realDefaultsTwentyFourKnownUsageReservationsRefuseTwentyFifthBeforeProvider() {
++    twentyFourAndRefuseTwentyFifth(false);
+   }
+ 
+   @Test
+-  void realDefaultsUnknownUsageKeepsCeilingsAndRefusesEighth() {
+-    sevenAndRefuseEighth(true);
++  void realDefaultsUnknownUsageKeepsCeilingsAndRefusesTwentyFifth() {
++    twentyFourAndRefuseTwentyFifth(true);
++  }
++
++  /**
++   * B7 (STUDIO-OBS-009 MODEL-SIZING): an ideal 10-step base learn needed 13 proposals, which the
++   * old 32,000 output total refused at the eighth. Under the production defaults all 13 fit, so the
++   * session is still live afterwards.
++   */
++  @Test
++  void realDefaultsB7ThirteenProposalBaseLearnFitsWithoutBudgetStop() {
++    for (int ordinal = 1; ordinal <= 13; ordinal++) {
++      var reserved = reserve("b7-call-" + ordinal, translationProperties.maxOutputTokens());
++      assertThat(reserved).isNotNull();
++      sendAndSettle(reserved, false);
++      assertFrozenIdentity(reserved);
++    }
++    var after = snapshot();
++    var counters = after.path("document").path("counters");
++    assertThat(counters.path("modelProposals").asInt()).isEqualTo(13);
++    assertThat(counters.path("modelOutputTokens").asInt()).isEqualTo(13 * 4096);
++    assertThat(counters.path("modelInputTokens").asLong()).isLessThanOrEqualTo(786432);
++    assertThat(after.path("document").path("state").asText()).isNotEqualTo("FAILED");
++    assertThat(after.path("progress").path("errorCode").asText()).isEmpty();
++    assertThat(sends).isEqualTo(13);
++    assertThat(attemptCount()).isEqualTo(13);
+   }
+ 
+   @Test
+@@ -265,9 +290,9 @@ class GuidedDefaultModelReservationIT {
+     assertThat(unchanged.path("document").path("counters").path("modelInputTokens").asInt())
+         .isZero();
+     assertThat(unchanged.path("progress").path("modelReservations").size()).isZero();
+-    sevenAndRefuseEighth(true);
++    twentyFourAndRefuseTwentyFifth(true);
+     var terminal = snapshot();
+-    assertThat(pendingControlledUsage).hasSize(7);
++    assertThat(pendingControlledUsage).hasSize(24);
+     for (var usage : pendingControlledUsage) {
+       repository.transaction(
+           () -> {
+@@ -284,17 +309,17 @@ class GuidedDefaultModelReservationIT {
+     assertThat(after.path("document").path("counters"))
+         .isEqualTo(terminal.path("document").path("counters"));
+     assertThat(after.path("progress").path("errorCode").asText()).isEqualTo("BUDGET_EXCEEDED");
+-    assertThat(sends).isEqualTo(7);
+-    assertThat(attemptCount()).isEqualTo(7);
++    assertThat(sends).isEqualTo(24);
++    assertThat(attemptCount()).isEqualTo(24);
+     assertThatThrownBy(() -> reserve("cannot-revive-terminal", 4096))
+         .isInstanceOf(GuidedSessionException.class)
+         .hasMessage("PUBLICATION_CONFLICT");
+-    assertThat(sends).isEqualTo(7);
++    assertThat(sends).isEqualTo(24);
+   }
+ 
+-  private List<Reservation> sevenAndRefuseEighth(boolean unknownUsage) {
++  private List<Reservation> twentyFourAndRefuseTwentyFifth(boolean unknownUsage) {
+     List<Reservation> attempts = new ArrayList<>();
+-    for (int ordinal = 1; ordinal <= 7; ordinal++) {
++    for (int ordinal = 1; ordinal <= 24; ordinal++) {
+       var reserved = reserve("planning-call-" + ordinal, translationProperties.maxOutputTokens());
+       assertThat(reserved).isNotNull();
+       sendAndSettle(reserved, unknownUsage);
+@@ -303,21 +328,22 @@ class GuidedDefaultModelReservationIT {
+     }
+     var before = snapshot();
+     assertThat(before.path("document").path("counters").path("modelOutputTokens").asInt())
+-        .isEqualTo(28672);
++        .isEqualTo(98304);
+     assertThat(before.path("document").path("counters").path("modelProposals").asInt())
+-        .isEqualTo(7);
++        .isEqualTo(24);
+     assertThat(before.path("document").path("counters").path("modelInputTokens").asLong())
+-        .isLessThanOrEqualTo(262144);
+-    assertThat(sends).isEqualTo(7);
+-    assertThat(attemptCount()).isEqualTo(7);
++        .isLessThanOrEqualTo(786432);
++    assertThat(sends).isEqualTo(24);
++    assertThat(attemptCount()).isEqualTo(24);
+     assertThat(
+             jdbc.queryForObject(
+                 "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND status=?",
+                 Long.class,
+                 sessionId,
+                 unknownUsage ? "UNKNOWN_CALL" : "REJECTED"))
+-        .isEqualTo(7);
+-    assertThat(reserve("eighth-refused-before-insert", translationProperties.maxOutputTokens()))
++        .isEqualTo(24);
++    assertThat(
++            reserve("twenty-fifth-refused-before-insert", translationProperties.maxOutputTokens()))
+         .isNull();
+     var terminal = snapshot();
+     assertThat(terminal.path("document").path("state").asText()).isEqualTo("FAILED");
+@@ -327,8 +353,8 @@ class GuidedDefaultModelReservationIT {
+     assertThat(
+             terminal.path("document").path("owner").equals(before.path("document").path("owner")))
+         .isTrue();
+-    assertThat(attemptCount()).isEqualTo(7);
+-    assertThat(sends).isEqualTo(7);
++    assertThat(attemptCount()).isEqualTo(24);
++    assertThat(sends).isEqualTo(24);
+     assertThat(terminal.path("progress").path("modelReservations").size()).isZero();
+     numericWitnesses.forEach(GuidedDefaultModelReservationIT::requireNumericEvidence);
+     return attempts;
+diff --git a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+@@ -2775,8 +2775,11 @@ class GuidedPlanningIntegrationTest {
+         capacity.equals("input")
+             ? inputCeiling(id) - 1_000 - beforeCounters.path("modelInputTokens").asLong()
+             : 50;
++    // Output lands 1,000 under the session's frozen output ceiling (31,000 at 32,000).
+     long outputDelta =
+-        capacity.equals("output") ? 31000 - beforeCounters.path("modelOutputTokens").asLong() : 0;
++        capacity.equals("output")
++            ? outputCeiling(id) - 1_000 - beforeCounters.path("modelOutputTokens").asLong()
++            : 0;
+     var instrumented = org.mockito.Mockito.spy(sessions);
+     org.mockito.Mockito.doAnswer(
+             invocation -> {
+@@ -2917,6 +2920,15 @@ class GuidedPlanningIntegrationTest {
+     assertThat(PROVIDER_KINDS).containsExactly("SOURCE_PLAN");
+   }
+ 
++  /** The immutable per-session output ceiling frozen into the session's limits at start. */
++  private int outputCeiling(String id) {
++    JsonNode ceiling =
++        repository.transaction(
++            () -> repository.lock(id).document().path("limits").path("maxModelOutputTokensTotal"));
++    assertThat(ceiling.isIntegralNumber()).isTrue();
++    return ceiling.intValue();
++  }
++
+   /** The immutable per-session input ceiling frozen into the session's limits at start. */
+   private int inputCeiling(String id) {
+     JsonNode ceiling =
+diff --git a/docs/specs/studio-observed-authoring/contracts/v3/limits.schema.json b/docs/specs/studio-observed-authoring/contracts/v3/limits.schema.json
+--- a/docs/specs/studio-observed-authoring/contracts/v3/limits.schema.json
++++ b/docs/specs/studio-observed-authoring/contracts/v3/limits.schema.json
+@@ -32,14 +32,14 @@
+     "maxModelInputTokensTotal": {
+       "type": "integer",
+       "minimum": 1,
+-      "maximum": 262144,
+-      "default": 262144
++      "maximum": 1572864,
++      "default": 786432
+     },
+     "maxModelOutputTokensTotal": {
+       "type": "integer",
+       "minimum": 1,
+-      "maximum": 32000,
+-      "default": 32000
++      "maximum": 131072,
++      "default": 98304
+     },
+     "maxObservationBytes": {
+       "type": "integer",
+diff --git a/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json b/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json
+--- a/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json
++++ b/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json
+@@ -1908,7 +1908,7 @@
+   },
+   "build": {
+     "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-    "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++    "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+     "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+     "chromiumBuild": "fixture-123"
+@@ -1972,7 +1972,7 @@
+       },
+       "requiredBuild": {
+         "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-        "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++        "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+         "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+         "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+         "chromiumBuild": "fixture-123"
+@@ -2012,7 +2012,7 @@
+         "csiId": "CSI-123",
+         "scopeHash": "16fbfbfa503e5d8903843d95dacdca5290575923072dad38f374a4c73d4c5fbc",
+         "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-        "buildHash": "e96a1c587ea9fa763091f247fd9e5a8c1ff5aafb90ff813eafc67ed59792c9a4",
++        "buildHash": "884836e0fb96ebdb8bb41277ad3894cef9f4257c8c21bcf4cb4879224d3bee75",
+         "currentPolicyHash": "b3db64673d94177c931b197e18e733925a20b90d2837306b5c8e328b5a082a78",
+         "issuedAt": "2026-10-09T00:00:00.000Z",
+         "expiresAt": "2026-10-09T00:00:30.000Z"
+@@ -2595,7 +2595,7 @@
+     },
+     "build": {
+       "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-      "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++      "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+       "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+       "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+       "chromiumBuild": "fixture-123"
+@@ -2628,7 +2628,7 @@
+       },
+       "build": {
+         "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-        "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++        "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+         "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+         "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+         "chromiumBuild": "fixture-123"
+@@ -2671,7 +2671,7 @@
+         },
+         "build": {
+           "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-          "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++          "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+           "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+           "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+           "chromiumBuild": "fixture-123"
+@@ -2686,7 +2686,7 @@
+     },
+     "build": {
+       "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-      "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++      "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+       "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+       "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+       "chromiumBuild": "fixture-123"
+@@ -3028,7 +3028,7 @@
+     },
+     "requiredBuild": {
+       "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-      "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++      "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+       "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+       "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+       "chromiumBuild": "fixture-123"
+@@ -4953,7 +4953,7 @@
+         },
+         "requiredBuild": {
+           "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-          "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++          "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+           "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+           "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+           "chromiumBuild": "fixture-123"
+@@ -6878,7 +6878,7 @@
+         },
+         "build": {
+           "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-          "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++          "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+           "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+           "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+           "chromiumBuild": "fixture-123"
+@@ -6918,7 +6918,7 @@
+           },
+           "requiredBuild": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -6958,7 +6958,7 @@
+             "csiId": "CSI-123",
+             "scopeHash": "16fbfbfa503e5d8903843d95dacdca5290575923072dad38f374a4c73d4c5fbc",
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "buildHash": "e96a1c587ea9fa763091f247fd9e5a8c1ff5aafb90ff813eafc67ed59792c9a4",
++            "buildHash": "884836e0fb96ebdb8bb41277ad3894cef9f4257c8c21bcf4cb4879224d3bee75",
+             "currentPolicyHash": "b3db64673d94177c931b197e18e733925a20b90d2837306b5c8e328b5a082a78",
+             "issuedAt": "2026-10-09T00:00:00.000Z",
+             "expiresAt": "2026-10-09T00:00:30.000Z"
+@@ -7543,7 +7543,7 @@
+         },
+         "build": {
+           "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-          "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++          "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+           "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+           "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+           "chromiumBuild": "fixture-123"
+@@ -7578,7 +7578,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -493242,7 +493242,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -493257,7 +493257,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -493972,7 +493972,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -493987,7 +493987,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -494698,7 +494698,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -494713,7 +494713,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -495427,7 +495427,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -495442,7 +495442,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -496157,7 +496157,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -496172,7 +496172,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -496538,7 +496538,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -496553,7 +496553,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -497267,7 +497267,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -497282,7 +497282,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -497998,7 +497998,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -498013,7 +498013,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -498319,7 +498319,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -498334,7 +498334,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -498642,7 +498642,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -498657,7 +498657,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -500151,7 +500151,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -500166,7 +500166,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -500881,7 +500881,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -500896,7 +500896,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -501612,7 +501612,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -501627,7 +501627,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -502343,7 +502343,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -502358,7 +502358,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -503074,7 +503074,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -503089,7 +503089,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -503805,7 +503805,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -503820,7 +503820,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -504536,7 +504536,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -504551,7 +504551,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -505267,7 +505267,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -505282,7 +505282,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -505997,7 +505997,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -506012,7 +506012,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -506728,7 +506728,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -506743,7 +506743,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -507458,7 +507458,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -507473,7 +507473,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -508187,7 +508187,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -508202,7 +508202,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -508917,7 +508917,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -508932,7 +508932,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -509647,7 +509647,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -509662,7 +509662,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -510377,7 +510377,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -510392,7 +510392,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -511107,7 +511107,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -511122,7 +511122,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -511837,7 +511837,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -511852,7 +511852,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "different-build"
+@@ -513297,7 +513297,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -513312,7 +513312,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -514012,7 +514012,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -514027,7 +514027,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -514742,7 +514742,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -514757,7 +514757,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -515472,7 +515472,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -515487,7 +515487,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -516204,7 +516204,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -516219,7 +516219,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -516947,7 +516947,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -516962,7 +516962,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -517690,7 +517690,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -517705,7 +517705,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -518420,7 +518420,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -518435,7 +518435,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -519150,7 +519150,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -519165,7 +519165,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -519873,7 +519873,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -519888,7 +519888,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -520610,7 +520610,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -520625,7 +520625,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -521340,7 +521340,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -521355,7 +521355,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -522070,7 +522070,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -522085,7 +522085,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -522800,7 +522800,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -522815,7 +522815,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -523530,7 +523530,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -523545,7 +523545,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -524261,7 +524261,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -524276,7 +524276,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -524991,7 +524991,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -525006,7 +525006,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -525721,7 +525721,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -525736,7 +525736,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -526451,7 +526451,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -526466,7 +526466,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -527181,7 +527181,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -527196,7 +527196,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+@@ -527911,7 +527911,7 @@
+               },
+               "build": {
+                 "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-                "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++                "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+                 "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                 "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                 "chromiumBuild": "fixture-123"
+@@ -527926,7 +527926,7 @@
+           },
+           "build": {
+             "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8",
+-            "schemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
++            "schemaBundleHash": "3dbdfdfb242147c1fd829209aab0e1fca100c8fc225391aacc160a2ade65a31a",
+             "referenceBundleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+             "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+             "chromiumBuild": "fixture-123"
+diff --git a/studio-runner/evaluation/README.md b/studio-runner/evaluation/README.md
+--- a/studio-runner/evaluation/README.md
++++ b/studio-runner/evaluation/README.md
+@@ -22,7 +22,7 @@ Rules the harness enforces:
+ - **Mutation controls.** Wrong target, reversed assertion, dropped submit and literal substitution are each injected against every oracle and must be rejected.
+ - **RS-1.** Every case has an explicit RS-1 mark (`[]` when it reads no value). Pages are not edited to dodge it. `rs1NonScalarReadGaps`, `authoredEchoUnobservableTargets` and `focusMutationRefusedFills` are present as integers on every run record, 0 when none.
+ - **Gate arithmetic is computed, not typed.** Class P only: 19 x 3 = 57 runs, at least 52 completions (51 of 57 fails), at most 5 failed. With the two staging cases unrun it is 51 runs, at least 46, and the result is `PARTIAL`, never a pass. The class-P denominator and the iframe-as-class-N reading are recommendations (T0 B2, B3), not rulings; the manifest says so.
+-- **Budget admission before any provider call.** `budget-admission.json` is an append-only, hash-chained ledger. A `D_C` run starts only if its latest entry is `ADMITTED` for exactly this manifest digest. With the price or the headroom unknown the status reads `ADMISSION_REFUSED_PRICE_UNKNOWN` or `ADMISSION_REFUSED_HEADROOM_UNKNOWN` and the harness makes zero provider calls. The stop rule halts after the session that crosses 80 percent of the allocation, or at the first false pass or leak.
++- **Budget admission before any provider call.** `budget-admission.json` is an append-only, hash-chained ledger. A `D_C` run starts only if its latest entry is `ADMITTED` for exactly this manifest digest. With the price or the headroom unknown the status reads `ADMISSION_REFUSED_PRICE_UNKNOWN` or `ADMISSION_REFUSED_HEADROOM_UNKNOWN` and the harness makes zero provider calls. The token caps and the cost bound come from an explicit proposal plan (planned proposals x contingency x the per-call ceiling for output; x bytes per call, or one named cap, for input), not from sessions x session totals (MODEL-SIZING, 2026-10-18). The stop rule halts after the session that crosses 80 percent of the allocation, or at the first false pass or leak; a session without reported usage is charged what it recorded as reserved, and only a session with nothing recorded is charged the session totals.
+ - **Self-tests are not evidence.** Runs driven by a scripted client are labelled `HARNESS_SELF_TEST_NOT_D_C_EVIDENCE` and their verdict is `NOT_EVIDENCE`.
+ 
+ Commands, from `studio-runner/` (Node 24):
+@@ -31,7 +31,7 @@ Commands, from `studio-runner/` (Node 24):
+ node evaluation/cli.mjs validate-corpus                 # structure, arithmetic, every pin re-read from disk
+ node evaluation/cli.mjs freeze-corpus                   # fills the pins, stamps manifestFrozenAt / manifestSha256
+ node evaluation/cli.mjs corpus-mutation-control         # positive control plus four mutants per oracle
+-node evaluation/cli.mjs admission-record LEDGER --create [--price-in --price-out --price-source --headroom --headroom-source --allocation]
++node evaluation/cli.mjs admission-record LEDGER --create --planned-proposals N --contingency F (--input-bytes-per-call N | --input-token-cap N) --plan-basis TEXT [--price-in --price-out --price-source --headroom --headroom-source --allocation]
+ node evaluation/cli.mjs admission-guard LEDGER          # exit 0 only when the latest entry is ADMITTED for this manifest
+ node evaluation/cli.mjs b7 EVIDENCE.json...             # proposals per session from fixture-provider budget evidence
+ node evaluation/cli.mjs benchmark CONFIG NEW_DIR        # live D_C run; refused without an ADMITTED ledger entry
+diff --git a/studio-runner/evaluation/cli.mjs b/studio-runner/evaluation/cli.mjs
+--- a/studio-runner/evaluation/cli.mjs
++++ b/studio-runner/evaluation/cli.mjs
+@@ -17,11 +17,21 @@ const out = (value) => { process.stdout.write(`${JSON.stringify(value, null, 2)}
+ 
+ /** Ceilings the ledger records. Code defaults (GuidedSessionProperties, GuidedTranslationProperties, application.yml); deployed values are NOT known. */
+ const CODE_DEFAULT_CAPS = Object.freeze({
+-  maxModelInputTokensTotal: 262144, maxModelOutputTokensTotal: 32000, maxOutputTokensPerCall: 4096, maxModelProposals: 100,
++  maxModelInputTokensTotal: 786432, maxModelOutputTokensTotal: 98304, maxOutputTokensPerCall: 4096, maxInputBytesPerCall: 65536, maxModelProposals: 100,
+   csiDailyInputTokens: 5242880, csiDailyOutputTokens: 640000, maxConcurrentSessionsPerCsi: 3,
+   source: 'code defaults (GuidedSessionProperties @DefaultValue, GuidedTranslationProperties @DefaultValue, application.yml csi-budget); the deployed values are not known',
+ });
+ 
++/** The explicit proposal plan the token caps come from (MODEL-SIZING). No default: a missing flag is a refusal. */
++function proposalPlanFromFlags(args) {
++  const number = (name) => (flag(args, name) === undefined ? undefined : Number(flag(args, name)));
++  return {
++    plannedProposals: number('--planned-proposals'), contingencyFactor: number('--contingency'),
++    inputBytesPerCall: number('--input-bytes-per-call'), inputTokenCap: number('--input-token-cap'),
++    basis: flag(args, '--plan-basis'),
++  };
++}
++
+ async function main() {
+   const args = process.argv.slice(2);
+   const [command, input, output, markdown] = args;
+@@ -84,9 +94,9 @@ async function main() {
+       headroomUsd: headroom === undefined ? null : { value: Number(headroom), source: flag(args, '--headroom-source') ?? null },
+       allocationUsd: flag(args, '--allocation') === undefined ? null : Number(flag(args, '--allocation')),
+       enforcedCaps: CODE_DEFAULT_CAPS,
++      proposalPlan: proposalPlanFromFlags(args),
+       measuredProposalsPerSession: flag(args, '--measured') ? JSON.parse(readFileSync(flag(args, '--measured'), 'utf8')) : null,
+       admittedBy: flag(args, '--admitted-by') ?? null,
+-      sessionsOverride: flag(args, '--sessions') === undefined ? null : Number(flag(args, '--sessions')),
+     });
+     const entry = appendAdmission(ledgerPath, decision, { create: args.includes('--create') });
+     out({ seq: entry.seq, status: entry.status, purpose: entry.purpose });
+@@ -132,7 +142,7 @@ async function main() {
+     'Usage: node evaluation/cli.mjs',
+     '  validate-manifest FILE | oracle-self-test | summarize FILE [OUT_JSON] [OUT_MD]      (compile-era oracle/report layer)',
+     '  validate-corpus [FILE] | freeze-corpus [FILE] | corpus-mutation-control [FILE]       (observed-authoring corpus)',
+-    '  admission-record LEDGER [--create] [--purpose P] [--no-manifest --sessions N] [--price-in --price-out --price-source --headroom --headroom-source --allocation] | admission-guard LEDGER [MANIFEST]',
++    '  admission-record LEDGER [--create] [--purpose P] [--no-manifest] --planned-proposals N --contingency F (--input-bytes-per-call N | --input-token-cap N) --plan-basis TEXT [--measured FILE] [--price-in --price-out --price-source --headroom --headroom-source --allocation] | admission-guard LEDGER [MANIFEST]',
+     '  b7 EVIDENCE_JSON... | benchmark CONFIG NEW_EVIDENCE_DIR                              (benchmark refuses without an ADMITTED ledger entry)',
+     '',
+   ].join('\n'));
+diff --git a/studio-runner/evaluation/observed-authoring/evaluate.d.mts b/studio-runner/evaluation/observed-authoring/evaluate.d.mts
+--- a/studio-runner/evaluation/observed-authoring/evaluate.d.mts
++++ b/studio-runner/evaluation/observed-authoring/evaluate.d.mts
+@@ -108,7 +108,10 @@ export declare function measureProposals(documents: JsonObject[], production?: {
+ };
+ 
+ export declare class AdmissionError extends Error { readonly code: string; constructor(code: string) }
+-export interface AdmissionComputed { plannedRuns: number | null; plannedSessions: number | null; contingencySessions: number | null; sessionsUsedForCaps: number | null; tokenCapIn: number | null; tokenCapOut: number | null; costBoundUsd: number | null }
++export interface ProposalPlan { plannedProposals: number; contingencyFactor: number; inputBytesPerCall?: number; inputTokenCap?: number; basis: string }
++export interface ProposalCaps { plannedProposals: number; contingencyFactor: number; contingencyProposals: number; tokenCapIn: number; tokenCapOut: number; capBasis: { output: string; input: string; plan: string } }
++export declare function proposalCaps(plan: ProposalPlan, caps: { maxOutputTokensPerCall: number; [extra: string]: unknown }): ProposalCaps;
++export interface AdmissionComputed { plannedRuns: number | null; plannedSessions: number | null; contingencySessions: number | null; plannedProposals: number; contingencyFactor: number; contingencyProposals: number; tokenCapIn: number; tokenCapOut: number; capBasis: { output: string; input: string; plan: string }; costBoundUsd: number | null }
+ export interface AdmissionDecision {
+   status: string; purpose: string; decidedAt: string; admittedAt: string | null; admittedBy: string | null; manifestSha256: string | null;
+   ceilingUsd: number; ceilingScope: string; remainingUsdAtAdmission: { value: number; source?: string | null } | null; allocationUsd: number | null; stopThresholdUsd: number | null;
+@@ -121,13 +124,13 @@ export declare function emptyLedger(): AdmissionLedger;
+ export declare function verifyLedger(ledger: unknown): string[];
+ export declare function computeAdmission(input: {
+   purpose: string; manifest?: CorpusManifest | null; price?: Price | null; headroomUsd?: { value: number; source?: string | null } | null; allocationUsd?: number | null; ceilingUsd?: number;
+-  enforcedCaps: { maxModelInputTokensTotal: number; maxModelOutputTokensTotal: number; [extra: string]: unknown }; perCsiPlan?: JsonObject | null; measuredProposalsPerSession?: unknown;
+-  pinned?: JsonObject | null; admittedBy?: string | null; now?: Date; notAdmittedBecause?: string[]; sessionsOverride?: number | null;
++  enforcedCaps: { maxModelInputTokensTotal: number; maxModelOutputTokensTotal: number; maxOutputTokensPerCall: number; [extra: string]: unknown }; proposalPlan: ProposalPlan; perCsiPlan?: JsonObject | null; measuredProposalsPerSession?: unknown;
++  pinned?: JsonObject | null; admittedBy?: string | null; now?: Date; notAdmittedBecause?: string[];
+ }): AdmissionDecision;
+ export declare function appendAdmission(path: string, decision: AdmissionDecision, options?: { create?: boolean }): AdmissionEntry;
+ export declare function guardStart(input: { ledger: AdmissionLedger; manifestSha256: string | null; purpose?: string; now?: Date }): AdmissionEntry;
+-export declare function createStopRule(input: { allocationUsd: number; price: Price; stopFraction?: number; reservedCeiling: { input: number; output: number } }): {
+-  record(session: { inputTokens: number | null; outputTokens: number | null; falsePass?: boolean; leak?: boolean }): { stop: boolean; reason: string | null; spentUsd: number; costBasis: string };
++export declare function createStopRule(input: { allocationUsd: number; price: Price; stopFraction?: number; reservedCeiling: { input: number; output: number }; perCallCeiling?: { input: number; output: number } | null }): {
++  record(session: { inputTokens: number | null; outputTokens: number | null; modelProposals?: number | null; falsePass?: boolean; leak?: boolean }): { stop: boolean; reason: string | null; spentUsd: number; costBasis: string };
+   nextSessionAllowed(): boolean; state(): { sessions: number; spentUsd: number; stopped: string | null; stopThresholdUsd: number };
+ };
+ 
+diff --git a/studio-runner/evaluation/observed-authoring/evaluate.mjs b/studio-runner/evaluation/observed-authoring/evaluate.mjs
+--- a/studio-runner/evaluation/observed-authoring/evaluate.mjs
++++ b/studio-runner/evaluation/observed-authoring/evaluate.mjs
+@@ -564,11 +564,12 @@ export function scoreReplayStability({ replays, required = 100, thresholdPct = 9
+ // ---------------------------------------------------------------------------------------------
+ /**
+  * `documents` are parsed `model-budget-evidence-*-final.json` files. They record the declared fixture
+- * ceiling per call and the session counters. This function can REFUTE the 7-proposals-per-session assumption
++ * ceiling per call and the session counters. This function can REFUTE the proposals-per-session assumption
++ * (24 at the MODEL-SIZING totals; 7 at the earlier totals, which a caller can still pass as `production`)
+  * and can never confirm it: a scripted provider shows what the orchestrator asks for, not what a real model
+  * needs (retries, clarifications).
+  */
+-export function measureProposals(documents, production = { perCallOutputTokens: 4096, outputTotal: 32000, inputTotal: 262144, csiDailyOutput: 640000, csiDailyInput: 5242880 }) {
++export function measureProposals(documents, production = { perCallOutputTokens: 4096, outputTotal: 98304, inputTotal: 786432, csiDailyOutput: 640000, csiDailyInput: 5242880 }) {
+   const maxProposals = Math.floor(production.outputTotal / production.perCallOutputTokens);
+   const sessions = [];
+   for (const doc of documents) {
+@@ -593,7 +594,7 @@ export function measureProposals(documents, production = { perCallOutputTokens:
+   return {
+     kind: 'B7_PROPOSAL_MEASUREMENT', label: SELF_TEST_LABEL, provider: 'local fixture provider (scripted gateway), no model call',
+     production, maxProposalsAtProductionCeilings: maxProposals, sessions, peakProposals: peak,
+-    verdict: refuted ? 'REFUTES_7_PROPOSALS_PER_SESSION_ASSUMPTION' : 'NOT_REFUTED_LOCALLY_NOT_CONFIRMED',
++    verdict: refuted ? 'REFUTES_PROPOSALS_PER_SESSION_ASSUMPTION' : 'NOT_REFUTED_LOCALLY_NOT_CONFIRMED',
+     caveat: 'A local run can refute the assumption but never confirm it. The fixture ran at the declared per-call ceiling, so the production-ceiling reservation is derived arithmetic ([I]), not a run at 4096.',
+   };
+ }
+@@ -631,18 +632,40 @@ export function verifyLedger(ledger) {
+ }
+ 
+ /**
+- * Builds one dated admission decision. Nothing is typed in: sessions come from the manifest, caps from the
+- * enforced ceilings, cost from price x tokens. Unknown price -> ADMISSION_REFUSED_PRICE_UNKNOWN (both unknown
++ * MODEL-SIZING (ruling-draft section 7 item 9): the admission token caps come from the PLANNED model calls, not
++ * from `sessions x session totals`. Each planned proposal reserves at most `maxOutputTokensPerCall` output (a repair
++ * is another proposal) and, for input, either `inputBytesPerCall` (bytes count as tokens) or one explicit cap that
++ * the owner names. `contingencyFactor` is stated by the caller (the admission has used 1.5 for the benchmark).
++ */
++export function proposalCaps(plan, caps) {
++  const positive = (value) => Number.isInteger(value) && value >= 1;
++  const bad = () => new Error('ADMISSION_PROPOSAL_PLAN');
++  if (!isRecord(plan) || !isRecord(caps) || !positive(caps.maxOutputTokensPerCall)) throw bad();
++  if (!positive(plan.plannedProposals) || typeof plan.contingencyFactor !== 'number' || !(plan.contingencyFactor >= 1)) throw bad();
++  if (typeof plan.basis !== 'string' || plan.basis === '') throw bad();
++  const perCall = plan.inputBytesPerCall !== undefined;
++  if (perCall === (plan.inputTokenCap !== undefined) || !positive(perCall ? plan.inputBytesPerCall : plan.inputTokenCap)) throw bad();
++  const contingencyProposals = Math.ceil(plan.plannedProposals * plan.contingencyFactor);
++  return {
++    plannedProposals: plan.plannedProposals, contingencyFactor: plan.contingencyFactor, contingencyProposals,
++    tokenCapOut: contingencyProposals * caps.maxOutputTokensPerCall,
++    tokenCapIn: perCall ? contingencyProposals * plan.inputBytesPerCall : plan.inputTokenCap,
++    capBasis: { output: 'contingencyProposals x maxOutputTokensPerCall', input: perCall ? 'contingencyProposals x inputBytesPerCall' : 'explicit input cap', plan: plan.basis },
++  };
++}
++
++/**
++ * Builds one dated admission decision. Nothing is typed in: sessions come from the manifest, token caps from the
++ * proposal plan, cost from price x tokens. Unknown price -> ADMISSION_REFUSED_PRICE_UNKNOWN (both unknown
+  * reads as price); unknown headroom -> ADMISSION_REFUSED_HEADROOM_UNKNOWN; a cost bound above the allocation or
+  * the headroom -> ADMISSION_REFUSED_OVER_ALLOCATION. Only a complete, in-bounds record can read ADMITTED.
+  */
+-export function computeAdmission({ purpose, manifest, price, headroomUsd, allocationUsd = null, ceilingUsd = 500, enforcedCaps, perCsiPlan = null, measuredProposalsPerSession = null, pinned = null, admittedBy = null, now = new Date(), notAdmittedBecause = [], sessionsOverride = null }) {
++export function computeAdmission({ purpose, manifest, price, headroomUsd, allocationUsd = null, ceilingUsd = 500, enforcedCaps, proposalPlan, perCsiPlan = null, measuredProposalsPerSession = null, pinned = null, admittedBy = null, now = new Date(), notAdmittedBecause = [] }) {
+   if (!ADMISSION_PURPOSES.includes(purpose)) throw new Error('admission purpose');
+   const plan = manifest === null || manifest === undefined ? null : sessionPlan(manifest);
+-  const sessions = sessionsOverride ?? (plan === null ? null : plan.contingencySessions);
+   const caps = enforcedCaps;
+-  const tokenCapIn = sessions === null ? null : sessions * caps.maxModelInputTokensTotal;
+-  const tokenCapOut = sessions === null ? null : sessions * caps.maxModelOutputTokensTotal;
++  const planned = proposalCaps(proposalPlan, caps);
++  const { tokenCapIn, tokenCapOut } = planned;
+   const priceKnown = price !== null && price !== undefined && Number.isFinite(price.pInPerMTok) && Number.isFinite(price.pOutPerMTok);
+   const headroomKnown = headroomUsd !== null && headroomUsd !== undefined && Number.isFinite(headroomUsd.value);
+   const costBound = priceKnown && tokenCapIn !== null ? (tokenCapIn * price.pInPerMTok + tokenCapOut * price.pOutPerMTok) / 1_000_000 : null;
+@@ -664,7 +687,7 @@ export function computeAdmission({ purpose, manifest, price, headroomUsd, alloca
+     allocationUsd: status === 'ADMITTED' ? allocationUsd : null,
+     stopThresholdUsd: status === 'ADMITTED' ? 0.8 * allocationUsd : null,
+     priceSource: priceKnown ? price : null,
+-    computed: { plannedRuns: plan?.runs ?? null, plannedSessions: plan?.sessions ?? null, contingencySessions: plan?.contingencySessions ?? null, sessionsUsedForCaps: sessions, tokenCapIn, tokenCapOut, costBoundUsd: costBound },
++    computed: { plannedRuns: plan?.runs ?? null, plannedSessions: plan?.sessions ?? null, contingencySessions: plan?.contingencySessions ?? null, plannedProposals: planned.plannedProposals, contingencyFactor: planned.contingencyFactor, contingencyProposals: planned.contingencyProposals, tokenCapIn, tokenCapOut, capBasis: planned.capBasis, costBoundUsd: costBound },
+     enforcedCaps: caps,
+     perCsiPlan, measuredProposalsPerSession, pinned,
+     notAdmittedBecause: reasons,
+@@ -705,10 +728,12 @@ export function guardStart({ ledger, manifestSha256, purpose = 'ac7-benchmark',
+ 
+ /**
+  * Evaluated after every session. Stops at >= 80 percent of the allocation or at the first hard-gate hit;
+- * the session that crosses completes, and the next one never starts. A session without reported usage
+- * costs its reserved ceiling (conservative). Resuming needs a new dated ledger entry.
++ * the session that crosses completes, and the next one never starts. A session without reported usage costs
++ * what it RECORDED as reserved (`modelProposals` x `perCallCeiling`, capped at the session totals), and only a
++ * session with neither costs `reservedCeiling` (MODEL-SIZING: the session totals are now 3x larger, so they stay
++ * the last resort and are no longer the normal fallback). Resuming needs a new dated ledger entry.
+  */
+-export function createStopRule({ allocationUsd, price, stopFraction = 0.8, reservedCeiling }) {
++export function createStopRule({ allocationUsd, price, stopFraction = 0.8, reservedCeiling, perCallCeiling = null }) {
+   let spent = 0;
+   let stopped = null;
+   let sessions = 0;
+@@ -717,12 +742,13 @@ export function createStopRule({ allocationUsd, price, stopFraction = 0.8, reser
+       if (stopped !== null) throw new AdmissionError('SESSION_AFTER_STOP');
+       sessions += 1;
+       const known = Number.isInteger(session.inputTokens) && Number.isInteger(session.outputTokens);
+-      const input = known ? session.inputTokens : reservedCeiling.input;
+-      const output = known ? session.outputTokens : reservedCeiling.output;
++      const recorded = !known && perCallCeiling !== null && Number.isInteger(session.modelProposals) && session.modelProposals >= 0;
++      const input = known ? session.inputTokens : recorded ? Math.min(session.modelProposals * perCallCeiling.input, reservedCeiling.input) : reservedCeiling.input;
++      const output = known ? session.outputTokens : recorded ? Math.min(session.modelProposals * perCallCeiling.output, reservedCeiling.output) : reservedCeiling.output;
+       spent += (input * price.pInPerMTok + output * price.pOutPerMTok) / 1_000_000;
+       if (session.falsePass === true || session.leak === true) stopped = 'STOPPED_HARD_GATE';
+       else if (spent >= stopFraction * allocationUsd) stopped = 'STOPPED_BUDGET_80';
+-      return { stop: stopped !== null, reason: stopped, spentUsd: spent, costBasis: known ? 'reported' : 'reserved-ceiling' };
++      return { stop: stopped !== null, reason: stopped, spentUsd: spent, costBasis: known ? 'reported' : recorded ? 'recorded-reservations' : 'reserved-ceiling' };
+     },
+     nextSessionAllowed() { return stopped === null; },
+     state() { return { sessions, spentUsd: spent, stopped, stopThresholdUsd: stopFraction * allocationUsd }; },
+@@ -895,7 +921,7 @@ export async function driveCase({ client: rawClient, entry, stepText, expected,
+   const run = newRun({ entry, rep, attempt, mode, manifest, startedAt, finishedAt: now(), observed, oracle, counters: learned.view.session.counters ?? {}, sessionId: learned.id });
+   run.secretOrPiiLeak = scan.leaks;
+   run.details = { canaryFindings: scan.findings };
+-  if (stopRule !== null) stopRule.record({ inputTokens: run.usage.inputTokens, outputTokens: run.usage.outputTokens, falsePass: oracle.falseSuccess, leak: scan.leaks > 0 });
++  if (stopRule !== null) stopRule.record({ inputTokens: run.usage.inputTokens, outputTokens: run.usage.outputTokens, modelProposals: run.usage.modelProposals, falsePass: oracle.falseSuccess, leak: scan.leaks > 0 });
+   return run;
+ }
+ 
+@@ -958,7 +984,7 @@ export async function driveIncremental({ client: rawClient, entry, caseFile, exp
+   const run = newRun({ entry, rep, attempt, mode, manifest, startedAt, finishedAt: now(), observed, oracle, counters, sessionId: finalLearned.id, incremental });
+   run.secretOrPiiLeak = scan.leaks;
+   run.details = { canaryFindings: scan.findings };
+-  if (stopRule !== null) stopRule.record({ inputTokens: run.usage.inputTokens, outputTokens: run.usage.outputTokens, falsePass: oracle.falseSuccess, leak: scan.leaks > 0 });
++  if (stopRule !== null) stopRule.record({ inputTokens: run.usage.inputTokens, outputTokens: run.usage.outputTokens, modelProposals: run.usage.modelProposals, falsePass: oracle.falseSuccess, leak: scan.leaks > 0 });
+   return run;
+ }
+ 
+@@ -1026,7 +1052,12 @@ export async function runBenchmark({ manifest, mode, client, ledger = null, pric
+   if (mode === 'D_C') {
+     if (select !== null) throw new Error('D_C runs the whole corpus');
+     guard = guardStart({ ledger, manifestSha256: manifest.manifestSha256 });
+-    stopRule = createStopRule({ allocationUsd: guard.allocationUsd, price: guard.priceSource, reservedCeiling: { input: guard.enforcedCaps.maxModelInputTokensTotal, output: guard.enforcedCaps.maxModelOutputTokensTotal } });
++    const recordedCaps = guard.enforcedCaps;
++    stopRule = createStopRule({
++      allocationUsd: guard.allocationUsd, price: guard.priceSource,
++      reservedCeiling: { input: recordedCaps.maxModelInputTokensTotal, output: recordedCaps.maxModelOutputTokensTotal },
++      perCallCeiling: Number.isInteger(recordedCaps.maxInputBytesPerCall) && Number.isInteger(recordedCaps.maxOutputTokensPerCall) ? { input: recordedCaps.maxInputBytesPerCall, output: recordedCaps.maxOutputTokensPerCall } : null,
++    });
+   } else if (mode !== 'HARNESS_SELF_TEST') throw new Error('mode');
+   const host = await startCorpusPages({ plantedSecrets });
+   const runs = [];
+diff --git a/studio-runner/src/guided/schemas.json b/studio-runner/src/guided/schemas.json
+--- a/studio-runner/src/guided/schemas.json
++++ b/studio-runner/src/guided/schemas.json
+@@ -4537,14 +4537,14 @@
+       "maxModelInputTokensTotal": {
+         "type": "integer",
+         "minimum": 1,
+-        "maximum": 262144,
+-        "default": 262144
++        "maximum": 1572864,
++        "default": 786432
+       },
+       "maxModelOutputTokensTotal": {
+         "type": "integer",
+         "minimum": 1,
+-        "maximum": 32000,
+-        "default": 32000
++        "maximum": 131072,
++        "default": 98304
+       },
+       "maxObservationBytes": {
+         "type": "integer",
+diff --git a/studio-runner/src/validator/observedSchemas.json b/studio-runner/src/validator/observedSchemas.json
+--- a/studio-runner/src/validator/observedSchemas.json
++++ b/studio-runner/src/validator/observedSchemas.json
+@@ -4872,14 +4872,14 @@
+       "maxModelInputTokensTotal": {
+         "type": "integer",
+         "minimum": 1,
+-        "maximum": 262144,
+-        "default": 262144
++        "maximum": 1572864,
++        "default": 786432
+       },
+       "maxModelOutputTokensTotal": {
+         "type": "integer",
+         "minimum": 1,
+-        "maximum": 32000,
+-        "default": 32000
++        "maximum": 131072,
++        "default": 98304
+       },
+       "maxObservationBytes": {
+         "type": "integer",
+diff --git a/studio-runner/test/evaluation/budgetAdmission.test.ts b/studio-runner/test/evaluation/budgetAdmission.test.ts
+--- a/studio-runner/test/evaluation/budgetAdmission.test.ts
++++ b/studio-runner/test/evaluation/budgetAdmission.test.ts
+@@ -7,30 +7,44 @@ import { tmpdir } from 'node:os';
+ import { join } from 'node:path';
+ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+ import {
+-  AdmissionError, appendAdmission, computeAdmission, createStopRule, emptyLedger, guardStart, measureProposals, runBenchmark, sessionPlan, verifyLedger,
+-  type AdmissionLedger, type StudioApiClient,
++  AdmissionError, appendAdmission, computeAdmission, createStopRule, emptyLedger, guardStart, measureProposals, proposalCaps, runBenchmark, sessionPlan, verifyLedger,
++  type AdmissionLedger, type ProposalPlan, type StudioApiClient,
+ } from '../../evaluation/observed-authoring/evaluate.mjs';
+ import { frozenManifest } from './observedCorpus.js';
+ 
+ const manifest = frozenManifest();
+-const CAPS = { maxModelInputTokensTotal: 262144, maxModelOutputTokensTotal: 32000, source: 'unit test' };
++// MODEL-SIZING (2026-10-18): the production session totals, and the explicit proposal plans the token caps come from.
++const CAPS = { maxModelInputTokensTotal: 786432, maxModelOutputTokensTotal: 98304, maxOutputTokensPerCall: 4096, maxInputBytesPerCall: 65536, source: 'unit test' };
++const BENCH_PLAN: ProposalPlan = { plannedProposals: 579, contingencyFactor: 1.5, inputBytesPerCall: 32768, basis: 'unit test: ruling-draft section 4 (193 per repetition x 3)' };
++const PROBE_PLAN: ProposalPlan = { plannedProposals: 3, contingencyFactor: 1, inputBytesPerCall: 65536, basis: 'unit test: AC-8 probe, 3 calls' };
+ const PRICE = { pInPerMTok: 1, pOutPerMTok: 4, source: 'unit-test price list' };
+ const NOW = new Date('2026-10-18T20:00:00.000Z');
+-const decide = (extra: Partial<Parameters<typeof computeAdmission>[0]> = {}) => computeAdmission({ purpose: 'ac7-benchmark', manifest, price: null, headroomUsd: null, enforcedCaps: CAPS, now: NOW, ...extra });
++const decide = (extra: Partial<Parameters<typeof computeAdmission>[0]> = {}) => computeAdmission({ purpose: 'ac7-benchmark', manifest, price: null, headroomUsd: null, enforcedCaps: CAPS, proposalPlan: BENCH_PLAN, now: NOW, ...extra });
+ 
+ let dir: string;
+ beforeAll(() => { dir = mkdtempSync(join(tmpdir(), 'admission-')); });
+ afterAll(() => { rmSync(dir, { recursive: true, force: true }); });
+ 
+ describe('computeAdmission', () => {
+-  it('derives sessions and token caps from the manifest: 81 sessions, 122 with contingency, scenario H bounds', () => {
++  it('derives sessions from the manifest and the token caps from the proposal plan, not from sessions x session totals', () => {
+     expect(sessionPlan(manifest)).toEqual({ runs: 75, sessions: 81, contingencySessions: 122 });
+     const base = decide();
+-    expect(base.computed).toMatchObject({ plannedSessions: 81, contingencySessions: 122, sessionsUsedForCaps: 122, tokenCapIn: 122 * 262144, tokenCapOut: 122 * 32000 });
+-    expect(81 * 262144).toBe(21_233_664);
+-    expect(81 * 32000).toBe(2_592_000);
+-    const five = Math.ceil(81 / Math.floor(5_242_880 / 262_144));
+-    expect(five).toBe(5);
++    // 579 planned proposals x 1.5 = 869 (ruling-draft section 4); output 869 x 4096, input 869 x 32,768.
++    expect(base.computed).toMatchObject({ plannedSessions: 81, contingencySessions: 122, plannedProposals: 579, contingencyProposals: 869, tokenCapIn: 869 * 32768, tokenCapOut: 869 * 4096 });
++    expect(869 * 4096).toBe(3_559_424);
++    // The old formula would have inflated the caps 3x: 122 x 98,304 = 11,993,088 output.
++    expect(base.computed.tokenCapOut).toBeLessThan(122 * 98304 / 3);
++    expect(base.computed.capBasis).toMatchObject({ output: 'contingencyProposals x maxOutputTokensPerCall', input: 'contingencyProposals x inputBytesPerCall' });
++  });
++
++  it('takes an explicit input cap instead of a per-call assumption, and refuses a plan that names neither or both', () => {
++    expect(proposalCaps({ plannedProposals: 10, contingencyFactor: 1, inputTokenCap: 500_000, basis: 'pm cap' }, CAPS)).toMatchObject({ tokenCapIn: 500_000, tokenCapOut: 40_960 });
++    const base: ProposalPlan = { plannedProposals: 10, contingencyFactor: 1, basis: 'x' };
++    expect(() => proposalCaps(base, CAPS)).toThrow('ADMISSION_PROPOSAL_PLAN');
++    expect(() => proposalCaps({ ...base, inputBytesPerCall: 1, inputTokenCap: 1 }, CAPS)).toThrow('ADMISSION_PROPOSAL_PLAN');
++    expect(() => proposalCaps({ ...base, inputBytesPerCall: 1, contingencyFactor: 0.5 }, CAPS)).toThrow('ADMISSION_PROPOSAL_PLAN');
++    expect(() => proposalCaps({ ...base, inputBytesPerCall: 1, plannedProposals: 0 }, CAPS)).toThrow('ADMISSION_PROPOSAL_PLAN');
++    expect(() => decide({ proposalPlan: undefined as unknown as ProposalPlan })).toThrow('ADMISSION_PROPOSAL_PLAN');
+   });
+ 
+   it('reads ADMISSION_REFUSED_PRICE_UNKNOWN when the price is unknown, whatever the headroom', () => {
+@@ -45,7 +59,7 @@ describe('computeAdmission', () => {
+   });
+ 
+   it('refuses a cost bound above the allocation, an allocation above the headroom, and one above the 500 ceiling', () => {
+-    const bound = (122 * 262144 * 1 + 122 * 32000 * 4) / 1_000_000;
++    const bound = (869 * 32768 * 1 + 869 * 4096 * 4) / 1_000_000;
+     expect(bound).toBeGreaterThan(40);
+     expect(decide({ price: PRICE, headroomUsd: { value: 300, source: 's' }, allocationUsd: 10 }).status).toBe('ADMISSION_REFUSED_OVER_ALLOCATION');
+     expect(decide({ price: PRICE, headroomUsd: { value: 30, source: 's' }, allocationUsd: 60 }).status).toBe('ADMISSION_REFUSED_OVER_ALLOCATION');
+@@ -116,7 +130,7 @@ describe('start guard and the counting stub', () => {
+     expect(() => guardStart({ ledger: admitted, manifestSha256: 'a'.repeat(64), now: new Date('2026-10-18T20:00:01.000Z') })).toThrow('MANIFEST_MISMATCH');
+     expect(() => guardStart({ ledger: admitted, manifestSha256: manifest.manifestSha256, purpose: 'ac8-schema-probe', now: new Date('2026-10-18T20:00:01.000Z') })).toThrow('PURPOSE_MISMATCH');
+     // Interleaved purposes: a later refused ac8 entry does not close an admitted ac7 entry, and does not open ac8 either.
+-    appendAdmission(q, decide({ purpose: 'ac8-schema-probe', manifest: null, sessionsOverride: 3, now: new Date('2026-10-18T20:05:00.000Z') }));
++    appendAdmission(q, decide({ purpose: 'ac8-schema-probe', manifest: null, proposalPlan: PROBE_PLAN, now: new Date('2026-10-18T20:05:00.000Z') }));
+     const interleaved = JSON.parse(readFileSync(q, 'utf8')) as AdmissionLedger;
+     expect(guardStart({ ledger: interleaved, manifestSha256: manifest.manifestSha256, now: new Date('2026-10-18T20:06:00.000Z') }).purpose).toBe('ac7-benchmark');
+     expect(() => guardStart({ ledger: interleaved, manifestSha256: null, purpose: 'ac8-schema-probe', now: new Date('2026-10-18T20:06:00.000Z') })).toThrow('LATEST_NOT_ADMITTED:ADMISSION_REFUSED_PRICE_UNKNOWN');
+@@ -185,6 +199,18 @@ describe('stop rule (80 percent of the allocation, or the first hard-gate hit)',
+     expect(stop.record({ inputTokens: null, outputTokens: null })).toMatchObject({ costBasis: 'reserved-ceiling', spentUsd: 1 });
+   });
+ 
++  it('charges what the session recorded as reserved (proposals x per-call ceilings, capped at the session totals) before the session totals', () => {
++    const recorded = () => createStopRule({ allocationUsd: 10, price: { pInPerMTok: 1_000_000 / 1000, pOutPerMTok: 0 }, reservedCeiling: { input: 1000, output: 100 }, perCallCeiling: { input: 100, output: 10 } });
++    // 3 recorded proposals x 100 input = 300 tokens = 0.3 USD, not the 1000-token session total.
++    expect(recorded().record({ inputTokens: null, outputTokens: null, modelProposals: 3 })).toMatchObject({ costBasis: 'recorded-reservations', spentUsd: 0.3 });
++    // Never more than the session total, whatever the proposal count says.
++    expect(recorded().record({ inputTokens: null, outputTokens: null, modelProposals: 50 })).toMatchObject({ costBasis: 'recorded-reservations', spentUsd: 1 });
++    // No recorded proposals and no usage: the session total, as before.
++    expect(recorded().record({ inputTokens: null, outputTokens: null, modelProposals: null })).toMatchObject({ costBasis: 'reserved-ceiling', spentUsd: 1 });
++    // Reported usage still wins.
++    expect(recorded().record({ inputTokens: 200, outputTokens: 0, modelProposals: 50 })).toMatchObject({ costBasis: 'reported', spentUsd: 0.2 });
++  });
++
+   it('resuming needs a new dated ledger entry: a STOPPED latest entry keeps the guard shut', () => {
+     const p = join(dir, 'stopped.json');
+     appendAdmission(p, decide({ price: PRICE, headroomUsd: { value: 300, source: 's' }, allocationUsd: 100, admittedBy: 'user' }), { create: true });
+@@ -200,15 +226,29 @@ describe('B7 proposal measurement (a local fixture run can refute, never confirm
+     sessions: [{ sessionOrdinal: 1, actualCounters: { modelProposals: proposals, modelOutputTokens: proposals * ceiling, modelInputTokens: proposals * 16_000 } }],
+   });
+ 
+-  it('refutes the 7-proposals-per-session assumption when a 10-step learn needs 13 proposals at a 2048 fixture ceiling', () => {
+-    const result = measureProposals([doc(13, 2048)]);
++  // The totals B7 was measured against, before MODEL-SIZING. Passing them keeps the 2026-10-18 B7 reading reproducible.
++  const BEFORE_MODEL_SIZING = { perCallOutputTokens: 4096, outputTotal: 32000, inputTotal: 262144, csiDailyOutput: 640000, csiDailyInput: 5242880 };
++
++  it('reproduces the B7 reading at the earlier totals: a 10-step learn needing 13 proposals refutes 7 at a 2048 fixture ceiling', () => {
++    const result = measureProposals([doc(13, 2048)], BEFORE_MODEL_SIZING);
+     expect(result.maxProposalsAtProductionCeilings).toBe(7);
+-    expect(result.verdict).toBe('REFUTES_7_PROPOSALS_PER_SESSION_ASSUMPTION');
++    expect(result.verdict).toBe('REFUTES_PROPOSALS_PER_SESSION_ASSUMPTION');
+     expect(result.sessions[0]).toMatchObject({ proposals: 13, reservedOutputAtFixtureCeiling: 26_624, reservedOutputAtProductionCeiling: 53_248, exceedsProductionOutputTotal: true });
+     expect(result.caveat).toContain('never confirm');
+   });
+ 
+-  it('does not confirm anything when the fixture needs 7 or fewer', () => {
++  it('at the production defaults 13 proposals fit (24 is the floor) and 25 refute it', () => {
++    const fits = measureProposals([doc(13, 2048)]);
++    expect(fits.maxProposalsAtProductionCeilings).toBe(24);
++    expect(fits.verdict).toBe('NOT_REFUTED_LOCALLY_NOT_CONFIRMED');
++    expect(fits.sessions[0]).toMatchObject({ reservedOutputAtProductionCeiling: 53_248, exceedsProductionOutputTotal: false });
++    const over = measureProposals([doc(25, 2048)]);
++    expect(over.verdict).toBe('REFUTES_PROPOSALS_PER_SESSION_ASSUMPTION');
++    expect(over.sessions[0]).toMatchObject({ proposals: 25, reservedOutputAtProductionCeiling: 102_400, exceedsProductionOutputTotal: true });
++  });
++
++  it('does not confirm anything when the fixture needs the floor or fewer', () => {
+     expect(measureProposals([doc(6, 2048)]).verdict).toBe('NOT_REFUTED_LOCALLY_NOT_CONFIRMED');
++    expect(measureProposals([doc(24, 2048)]).verdict).toBe('NOT_REFUTED_LOCALLY_NOT_CONFIRMED');
+   });
+ });

@@ -1,0 +1,91 @@
+{
+  "scope": "Independent source-only runtime and schema-split design review; not execution, QA, performance proof, or story completion",
+  "decision": "SUPPORT_EXACT_SESSION_SPLIT_WITH_CONDITIONS",
+  "execution": {
+    "productionOrTestFilesChanged": false,
+    "gradleOrRuntimeExecuted": false,
+    "rawRuntimeLogsRead": false,
+    "additionalInfrastructureProposed": false
+  },
+  "demonstratedMechanism": [
+    "GuidedOwnership.requestClaim establishes the secret renewal deadline at at most 1000ms before the claim adapter runs. Its AbortController and Promise.race reject local authority on timeout.",
+    "A claim server response and consumed body do not establish SDK acknowledgement. GuidedOwnership additionally checks stop epoch, existing local liveness, the complete session contract, assignment identity, owner fence and increasing bounded lease before applying it.",
+    "FINALIZING is already an active grant state. Same-owner backend renewals preserve the workflow state. There is no source-supported need to relax this handoff.",
+    "Renew failure stops the runtime, invalidates timers and drops values synchronously. After browser close the accepted lifecycle changes the backend session to FAILED or UNKNOWN_OUTCOME. Publication authority correctly refuses a non-FINALIZING session.",
+    "GuidedSessionService.claim always invokes optional full-session validation preparation for v3 before its locked transaction. The preparation consumes the same SDK request budget, and a failed bind can add a second full validation inside the lock.",
+    "Installed PropertiesValidator.validate invokes diagnostic logging with the current node and whole instance root, then passes that same root to nested property validation. Root TRACE therefore repeatedly formats the whole session during recursive field validation. This is source and installed-bytecode evidence, not a timing attribution to the failed execution."
+  ],
+  "sourceReferences": [
+    "ownership.ts:26 ACTIVE",
+    "ownership.ts:45 schedule",
+    "ownership.ts:56 checkGrant",
+    "ownership.ts:72 requestClaim",
+    "ownership.ts:111 renew",
+    "transport.ts:119 controllerRequest",
+    "transport.ts:152 guidedClaimClient",
+    "runtime.ts:319 closeResources",
+    "runtime.ts:336 stop",
+    "GuidedSessionService.java:743 claim",
+    "GuidedSessionService.java:2245 lifecycle",
+    "GuidedPublicationRepository.java:498 authority",
+    "GuidedPlanPublisher.java:457 original deadline creation",
+    "GuidedContracts.java:98 validatedCanonical",
+    "GuidedContracts.java:138 prepareRenewalValidation",
+    "GuidedContracts.java:292 schema",
+    "GuidedContracts.java:313 expand",
+    "Installed networknt PropertiesValidator.validate bytecode: diagnostic entry and recursive child call"
+  ],
+  "unproved": [
+    "Exact common SDK/server/lifecycle event timeline for the failed original case",
+    "Exclusive latency contribution of schema diagnostics, row-lock waiting, filesystem capture, JVM scheduling, or SDK scheduling",
+    "Actual optional proof branch and mismatch cause in the failed execution",
+    "Any achieved renewal or publication latency improvement"
+  ],
+  "independentSchemaAudit": {
+    "rootKeywordNames": ["$schema", "title", "type", "additionalProperties", "properties", "required"],
+    "propertyCount": 14,
+    "requiredCount": 14,
+    "rootObjectClosed": true,
+    "expandedTreeDefaultAnnotations": 15,
+    "defaultMutationEnabled": false,
+    "crossPropertyOrDynamicKeywordsPresent": false,
+    "referencesRemainAfterExistingExpansion": false,
+    "configuredWalkListenersOrCustomizerPresent": false,
+    "nativeFactoryConfiguration": "Existing default V7 factory; no new semantics or custom validator"
+  },
+  "candidate": {
+    "selection": "Replace optional renewal snapshot proof with exact frozen-session schema splitting at the existing full validation boundary",
+    "steps": [
+      "Retain the original canonical validation before schema evaluation.",
+      "For only the exact supported expanded v3/session schema, validate an original root shell whose properties retain all original names but have empty child schemas.",
+      "Evaluate every present property with its original already compiled child JsonSchema, using that property's value as its instance root.",
+      "Combine all shell and child results without dropping any field evaluation and preserve the fixed INVALID_CONTRACT 422 refusal.",
+      "Use original full-session validation when the exact schema epoch or expected compiled structure is unavailable.",
+      "Remove the optional per-request session pre-read, full validation preparation, bind snapshots and save-proof overload; renew through the ordinary current locked save validation."
+    ],
+    "equivalenceConditions": [
+      "The root shell retains type, required, additionalProperties, all original property names, and all other root keywords.",
+      "Explicit JSON null is present and must be evaluated; Java null alone represents a missing property.",
+      "Use the original compiled child schemas and unchanged default configuration, including format assertions and disabled default application.",
+      "Do not generalize this split to unknown schemas or a schema with cross-property, composition, dynamic-reference or data-reference semantics.",
+      "Build and safely publish the immutable compiled strategy once with the existing schema cache; do not retain session values or add runtime memoization.",
+      "All current revocation, permission, source, assignment, state, owner and lease checks remain in their existing guarded order."
+    ],
+    "tradeoffs": [
+      "Native diagnostics receive smaller instance roots and different relative paths/order, while all native validation still runs and TRACE capture remains enabled.",
+      "The exact-schema strategy adds a bounded compiled-schema assumption but removes request-scoped proof ownership, copying, extra reads and fallback duplication.",
+      "The simplification directly removes demonstrated amplification; it does not guarantee the real request fits 1000ms until the original case passes."
+    ]
+  },
+  "deferred": [
+    "SDK transport and ownership both validate session replies, but removing that duplicate is deferred because backend handler latency already exceeded the unchanged deadline.",
+    "No publication transaction, lease, stop, immutable deadline or authorization handoff changes are justified by this review.",
+    "No new sampler, E2E case, timeout allowance, logger filter, canary reduction, or unchanged rerun."
+  ],
+  "minimumVerification": [
+    "In the existing contract/session test scope, compare the candidate to an independently compiled original full schema for a valid session and mutations covering each root property, missing required values, extra root/nested fields, explicit null, numeric and array boundaries, malformed strings/formats and canonical-only refusals. Assert nonmutation, including default annotations.",
+    "Verify the unknown-schema and unexpected-compiled-structure path executes original full validation, and all current renewal/security defining tests remain green.",
+    "Run root-coordinated affected defining checks and strict checks once; reuse unchanged source-bound evidence.",
+    "After source-semantic approval and successful defining checks, execute one original mandatory C5 with unchanged ROOT+APP TRACE, all 30 canary variants, original 1000ms renewal and 2000ms stop guarantees, and unchanged immutable publication budget."
+  ]
+}

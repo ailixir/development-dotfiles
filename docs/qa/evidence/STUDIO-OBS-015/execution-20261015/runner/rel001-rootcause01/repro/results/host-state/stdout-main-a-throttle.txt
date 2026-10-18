@@ -1,0 +1,77 @@
+node                               v24.20.0
+other gates running                none
+load average (1 min)               6.09
+                                   load above 4: wait or accept a noisy baseline
+swap                               total = 4096.00M  used = 3255.44M  free = 840.56M  (encrypted)
+disk free on /System/Volumes/Data  126 GB
+chrome for testing                 <HOME>/Library/Caches/ms-playwright/chromium-1243 
+NODE_OPTIONS/DEBUG/PWDEBUG         
+scratch build (a)                  <SCRATCH>/repro-run/a/studio-runner
+protected pids (never signalled)   22246 44737 13577 13581
+PREFLIGHT OK
+results: <SCRATCH>/repro-run/results/main-a   variant: a   n: 300   modes: throttle   scratch: <TMP>//rel001.1g10VB
+--- throttle: start 00:59:54, load { 6.09 18.12 17.07 }, swap total = 4096.00M  used = 3215.44M  free = 880.56M  (encrypted)
+[throttle/a] 10/300 done, 0 failed
+[throttle/a] 20/300 done, 0 failed
+[throttle/a] 30/300 done, 0 failed
+[throttle/a] 40/300 done, 0 failed
+[throttle/a] 50/300 done, 0 failed
+[throttle/a] 60/300 done, 0 failed
+[throttle/a] 70/300 done, 0 failed
+[throttle/a] 80/300 done, 0 failed
+[throttle/a] 90/300 done, 0 failed
+[throttle/a] 100/300 done, 0 failed
+[throttle/a] 110/300 done, 0 failed
+[throttle/a] 120/300 done, 0 failed
+[throttle/a] 130/300 done, 0 failed
+[throttle/a] 140/300 done, 0 failed
+[throttle/a] 150/300 done, 0 failed
+[throttle/a] 160/300 done, 0 failed
+[throttle/a] 170/300 done, 0 failed
+[throttle/a] 180/300 done, 0 failed
+[throttle/a] 190/300 done, 0 failed
+[throttle/a] 200/300 done, 0 failed
+[throttle/a] 210/300 done, 0 failed
+[throttle/a] 220/300 done, 0 failed
+[throttle/a] 230/300 done, 0 failed
+[throttle/a] 240/300 done, 0 failed
+[throttle/a] 250/300 done, 0 failed
+[throttle/a] 260/300 done, 0 failed
+[throttle/a] 270/300 done, 0 failed
+[throttle/a] 280/300 done, 0 failed
+[throttle/a] 290/300 done, 0 failed
+[throttle/a] 300/300 done, 0 failed
+--- throttle: harness exit 0 at 01:15:04
+[probe throttle] 25/300
+[probe throttle] 50/300
+[probe throttle] 75/300
+[probe throttle] 100/300
+[probe throttle] 125/300
+[probe throttle] 150/300
+[probe throttle] 175/300
+[probe throttle] 200/300
+[probe throttle] 225/300
+[probe throttle] 250/300
+[probe throttle] 275/300
+[probe throttle] 300/300
+
+== cpu+mem (variant a) ==  n=300 ok=300 failed=0 (0.00%, 95% upper bound 0.99%)  close!=ok: 0
+   window: 2026-10-17T04:39:02.546Z .. 2026-10-17T04:52:32.427Z  node v24.20.0  playwright 1.63.0
+   launchMs          ok p50/p95/max 845/956/1412 ms
+   contextMs         ok p50/p95/max 859/968/1423 ms
+   bootstrapMs       ok p50/p95/max 877/988/1453 ms
+   recordingReadyMs  ok p50/p95/max 869/976/1448 ms
+
+== throttle (variant a) ==  n=300 ok=300 failed=0 (0.00%, 95% upper bound 0.99%)  close!=ok: 0
+   window: 2026-10-17T04:59:55.387Z .. 2026-10-17T05:15:04.433Z  node v24.20.0  playwright 1.63.0
+   launchMs          ok p50/p95/max 1171/1301/1593 ms
+   contextMs         ok p50/p95/max 1184/1321/1602 ms
+   bootstrapMs       ok p50/p95/max 1198/1350/1617 ms
+   recordingReadyMs  ok p50/p95/max 1186/1338/1587 ms
+
+== version probe cpu+mem.probe.jsonl ==  n=300 launchFailed=0  EMPTY at pre-patch read: 0/300  never filled: 0
+   fill relative to load (ms; positive = after load): observed 300, positive 300, p50 7.1, p95 23.9, max 77.6   wait after goto p95/max 7/39 ms
+
+== version probe throttle.probe.jsonl ==  n=300 launchFailed=0  EMPTY at pre-patch read: 0/300  never filled: 0
+   fill relative to load (ms; positive = after load): observed 300, positive 300, p50 7.2, p95 16.7, max 25.1   wait after goto p95/max 21/35 ms
+done. Raw per-iteration files hold local paths: keep *.raw.jsonl out of committed evidence.

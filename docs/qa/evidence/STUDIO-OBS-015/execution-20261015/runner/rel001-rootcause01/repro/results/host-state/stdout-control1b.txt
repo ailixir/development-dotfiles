@@ -1,0 +1,21 @@
+node                               v24.20.0
+other gates running                none
+load average (1 min)               2.99
+swap                               total = 7168.00M  used = 5600.38M  free = 1567.62M  (encrypted)
+disk free on /System/Volumes/Data  123 GB
+chrome for testing                 <HOME>/Library/Caches/ms-playwright/chromium-1243 
+NODE_OPTIONS/DEBUG/PWDEBUG         
+scratch build (ab)                 <SCRATCH>/repro-run/ab/studio-runner
+protected pids (never signalled)   22246 44737 13577 13581
+PREFLIGHT OK
+results: <SCRATCH>/repro-run/results/20261017T003608-ab   variant: ab   n: 5   modes: baseline   scratch: <TMP>//rel001.IL1m0A
+--- baseline: start 00:36:11, load { 2.99 3.66 4.26 }, swap total = 7168.00M  used = 5600.38M  free = 1567.62M  (encrypted)
+--- baseline: harness exit 0 at 00:36:27
+
+== baseline (variant ab) ==  n=5 ok=5 failed=0 (0.00%, 95% upper bound 45.07%)  close!=ok: 0
+   window: 2026-10-17T04:36:11.854Z .. 2026-10-17T04:36:27.864Z  node v24.20.0  playwright 1.63.0
+   launchMs          ok p50/p95/max 1531/1594/1594 ms
+   contextMs         ok p50/p95/max 1537/1601/1601 ms
+   bootstrapMs       ok p50/p95/max 1548/1619/1619 ms
+   recordingReadyMs  ok p50/p95/max 1543/1606/1606 ms
+done. Raw per-iteration files hold local paths: keep *.raw.jsonl out of committed evidence.

@@ -1,0 +1,91 @@
+{
+  "classification": "BOUNDED_PROOF_TRANSFER_SOURCE_NO_FINDINGS_ACTUAL35_OR37_REQUIRED_NOT_FORMAL_QA",
+  "checkpointSha256": "d71f838f25b5961063bac5b924681d3076d64ea2b3367196c959248e17a759a4",
+  "independentWholeFileProofs": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "onlyRetiredNewTestLines": 129,
+      "wholeOriginalRestoredSha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "onlyInsertedLines": 71,
+      "independentWholeInverseSha256": "2217294616464c29da1ece11f57970d948166058519f9563b35d035ed6436ce2"
+    }
+  ],
+  "checks": [
+    {
+      "id": "P01",
+      "result": "VERIFIED_SOURCE",
+      "subject": "Exacttwofiles/minimal transfer",
+      "detail": "Planningafterwhole1b587exact; beforebecd minusonlyretired129line test equalsafter. JOINafter246e minusonly71line accountinginsertion equalsentire2217. Independent unifieddiff equals429c708d archivedpatch.13payloadhashes verified; no other originalmethods/bodies/assertions changed."
+    },
+    {
+      "id": "P02",
+      "result": "VERIFIED_AUTHORIZED_MAPPING",
+      "subject": "Explicitdecision/proofcount",
+      "detail": "Rootdecision82bc76fd accepts retiringonlynewillegal Planningidentity asWITHDRAWN_NOTPASS andmappingrequirement tooriginalappend-input label. AlloriginalPlanning4callbacks+5latecontrolcases retained; selected10->9explicit. JOIN45singleton+1parameterized35=46methods/80invocations,43default+37low unchanged. No newskip/label/profile/budget/waiver."
+    },
+    {
+      "id": "P03",
+      "result": "VERIFIED_SOURCE_RUNTIME_PENDING",
+      "subject": "Genuine legal append premise",
+      "detail": "ExistingrealACKenteredpause reached onlyafteractualplanner learnSuffix/validatedacceptedplan commitsMATERIALIZE,productionmaterializationcreates2 thenrealrunnerupdate.71lines assertMATERIALIZE,!prefixpending,live2,noinflightactions/no liveunadmittedprep,non-nullpendingdelivery/currenthash,2headerssamecontext/previoushash/strictgrowthandalloldinputprefix nodes exact. No stateSQLwrite/fakecontext/delivery/clock."
+    },
+    {
+      "id": "P04",
+      "result": "VERIFIED_SOURCE",
+      "subject": "Sharedlock/transactionboundary",
+      "detail": "Onlysynchronouspositive accountingcheckpoint uses sessions.transaction +sessions.lock(id) actualFORUPDATE;2public accountingcalls participate through originalrole/access/fence-checked wrapper. No latchwait/ACKsend/sleep/negativecatch occurs inthattransaction. Originalreserve/PGattempt/bump/staleadmit negativeblocks remain outside it,byteexact andindependentlyrollbacksafe."
+    },
+    {
+      "id": "P05",
+      "result": "MEANINGFUL_UNEXECUTED_REGRESSION",
+      "subject": "Twoactualaccountingcalls/fullfacts",
+      "detail": "Eachcallmustreturntrue and freshsnapshot equal originalfullsnapshot:document/progress/counters/translation/context/pendingid/assignments plus fullownedtesttable digest containsallrows/plans/history/materializations/deliveries/source/base/preparations/actions/attempts/commands/revisions/dailybudget. Nofieldnormalization or lease omission; lockprevents ownsessionrenewalrace."
+    },
+    {
+      "id": "P06",
+      "result": "VERIFIED_SOURCE_RUNTIME_PENDING",
+      "subject": "No hiddenmetadata write/provider/nativeeffects",
+      "detail": "ACKenteredcausality follows existingdispatch.runnerContextissue/commit andactualRevRuntime.update; currentcontextmetadata/hashalreadyissuedbeforecheckpoint. runnerContext inbaseline usescurrentissuedcontext; no manualDBrow ormetadata patch. Snapshotincludesrealproviderbody/kind/failure/response/committedreservation,legacy/effects/navigation/pagevalues/ordinaryreads/replayinvocations/sessionnativeeventcounts. Twoaccounting callsaddno model/native capability."
+    },
+    {
+      "id": "P07",
+      "result": "VERIFIED_PRESERVATION_RUNTIME_PENDING",
+      "subject": "OperationalACKnegative/historyproof",
+      "detail": "OriginalreserveModelREVISION_CONFLICT,directPGattempt,bump andstaleadmit negatives andpending/fullimmutable snapshots remain wholefileexact. OperationalSessione3b1/ACK/currentversion/auth/owner/source/bootstrap/migrationguards remainnamedhashheld. Existing postreleasehistory checksactualACKNOWLEDGED/contextHash2/prefix/version growth/mixedcontextactions/forgedACKreject+duplicateidempotence retained."
+    },
+    {
+      "id": "P08",
+      "result": "VERIFIED_SOURCE_RUNTIME_PENDING",
+      "subject": "Latch/cleanupownership/noretry",
+      "detail": "All71newlinesinsideoriginaltry. Sameoriginalfinally releasesownedINCREMENTAL_ACK_RELEASE; no newpushContext,differentdelivery oruncertainretry. Sharedlockendsbeforenegativecalls andfinallyrelease; sameinflightoriginalRPCreturnsrealACK. OuterincrementalJoinedfinally andownedfailed-sessioncancel/recording/processcleanup unchanged. Actualboundedcompletion stillrequired."
+    },
+    {
+      "id": "P09",
+      "result": "VERIFIED_SOURCE",
+      "subject": "Otherproofs/currentinputsheld",
+      "detail": "12namedprotectedhashes match,including build/C/Wire/Session/Basis/materialization/translation/EffectiveGraph aslisted; collector/oracles/Node/schema notmodifiedbytwofileinverse. SeparateBuilder/rawhead review notduplicated. Alloriginalaudits/nonempty/eventkinds/closedkeys/1024bytes/canaries andall35subjectassertions preserved; oldactual03remains293/291PASS2FAIL/lowNOTRUN."
+    },
+    {
+      "id": "P10",
+      "result": "REQUIRED_RUNTIME_NO_RELEASE",
+      "subject": "Actualbranchselector andcomplete scope",
+      "detail": "ProofUNRUN until originalappend-input isactuallyexecuted bywhole35parameterizedmethod orwhole37lowtask withheldsource+freshoutputs; twoCore singletonrunsdonotselectit. No provedindividuallabelselector. Needcompile/fullscope/privateCoreVault/native/fullconfiguredcheckscoverage/crossReplica/independent015closurethen008;85originalOPENunamended. No source/runtime/formalgate release."
+    }
+  ],
+  "findings": [],
+  "sourceDisposition": "NO_FINDINGS_IN_AUTHORIZED_TWO_TEST_FILE_TRANSFER; currentchangesuncompiled/unexecuted",
+  "futureSelectors": {
+    "parameterized35": "./gradlew guidedIncrementalTest --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+    "whole37": "./gradlew guidedIncrementalTest",
+    "twoCoreSingletons": "Do notexerciseappend-input;nottransferredproof",
+    "PlanningActualPackage": "com.citi.put.checks.studio.guided.session"
+  },
+  "transferredProofStatus": "UNRUN; no actualPASS implied bysourceplacement orwithdrawncase",
+  "sourceRelease": false,
+  "formalStoryQaVerdict": null,
+  "lifecycleChange": false,
+  "reviewerRuntimeExecution": false
+}

@@ -1,0 +1,171 @@
+{
+  "story": "STUDIO-OBS-015",
+  "window": "w2-window01",
+  "agent": "Dex-W2 (@dev)",
+  "date": "2026-10-16",
+  "nonCredit": true,
+  "committed": false,
+  "productionSourceChanged": false,
+  "files": [
+    {
+      "path": "backend/build.gradle.kts",
+      "sha256Before": "b296cb7578e627e6d7a790f36b473508910bfc6ac1e48f1f9f9271eb60d0bcdf",
+      "sha256After": "6a2aba4b76e5b01365b67848539951b83a03f75c17b90b6a61c1650923baaa97",
+      "change": "remove testImplementation io.zonky.test:embedded-database-spring-test:2.5.1; comment; runtime embedded-postgres deps kept"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "sha256Before": "6d7361ae0966eff3c68d34e7f759aaf5a4ae74a72dcb7193fca64c7c982964a6",
+      "sha256After": "0524e8d08a309f9152984baa6868aa32764717c8a73eab8be56fe4c7d3909c35",
+      "change": "STEP_ID derived from v3 fixtures secretReference.stepId; 16 \"step-1\" literals replaced"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "sha256Before": "68b65fad044035bf8c3ec3dc57bf4ff2ac17527d9841b7955a16140403c17101",
+      "sha256After": "d48d4f0d9e61ba0c000b7013683858244873980d5fd9a1bb40c66e297d4ffc3f",
+      "change": "installTranslation in service bean; createSession initializes translation state (production-shaped)"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256Before": "03ec45efc0af75eb9cb38ebcc77995065fd4de17e236871b60c27508dd7936e3",
+      "sha256After": "03ec45efc0af75eb9cb38ebcc77995065fd4de17e236871b60c27508dd7936e3",
+      "change": "none (B2 methods reserved for Dex-D3)"
+    }
+  ],
+  "preImagesReconstructedAndVerified": true,
+  "diff": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w2-window01/w2.diff",
+    "sha256": "1ed5f834a7207da81944245de155e49eb62c049e847987a214e30cc50cf09fee"
+  },
+  "driftProof": {
+    "transportFaultIT": {
+      "refusal": "GuidedSourceReferenceValidator.resolve:75 stepExists false -> INVALID_CONTRACT",
+      "cause": "contracts/v3/fixtures.json secretReference.stepId step-1 -> 00000000-0000-4000-8000-000000000001",
+      "fixturesSha256": {
+        "baseline": "bdbd595696a6950799a1feb99ca338b1408e74f21eb37c8624d6d322203742c6",
+        "current": "b5942f63eaa520fe80ed7cde10018586a29c5e314283c79051009626bc1716f8"
+      },
+      "source": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/touched-files.json",
+      "h8Related": false
+    },
+    "bridge": {
+      "refusal": "GuidedSessionService.translationTransaction:174 translation!=null && exists -> RUNTIME_INCOMPATIBLE via contextDeliveryId",
+      "preH8BaseSha256": {
+        "GuidedSessionService": "055081ff6551de8eb640e589ffa8f5dd6d18876f64fd7264c1a1a6d432d1e3f8",
+        "GuidedDispatchService": "174d99ace9c47eeb85904002156eddc595c352590076917135e153411d5df963"
+      },
+      "h8Related": false,
+      "productionDefect": false,
+      "residual": {
+        "status": "BLOCKED",
+        "count": 29,
+        "code": "MISSING_SOURCE",
+        "site": "GuidedSessionService.admit:1375 -> GuidedTranslationStore.attachAdmission (no planner obligation admission)",
+        "needs": "architect/coordinator ruling"
+      }
+    }
+  },
+  "zonkyProbe": {
+    "replayItXml": {
+      "h8h6-w01-full01": {
+        "mappedPort": 3,
+        "zonkyListenerFrames": 5
+      },
+      "w2-w01-tfit-zonky01": {
+        "mappedPort": 0,
+        "zonkyListenerFrames": 0
+      }
+    },
+    "partialSelectionExecutionError": "scanCompleteAuditStream: the OBS-007 case registered its canaries (by design for partial selections)",
+    "fullReplayLaneRun": false
+  },
+  "runs": [
+    {
+      "label": "w2-w01-tfit-zonky01",
+      "note": "pre-bridge-edit tree; TFIT 5-selector set + one ReplayIT ordered case (Zonky probe)",
+      "resultsSha256": "ea9f06a7120af456584ea440978e604a59847b1fc2478411e00a657c1668b827",
+      "sourceDigest": "96dbef66c9eb0d4ed5b2d26f82bbef3873a100adb24c8ef29a1ff13fd9cdc276",
+      "exit": 1,
+      "counts": {
+        "total": 15,
+        "passed": 13,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "validationSucceeded": false,
+      "taskCollectionErrors": [
+        {
+          "task": "test",
+          "reason": "MISSING_FRESH_COHORT_FILE",
+          "file": "audit-final.json"
+        }
+      ],
+      "sourceStable": true,
+      "distStable": true,
+      "elapsedSeconds": 49.74
+    },
+    {
+      "label": "w2-w01-bridge-exp01",
+      "note": "bridge wiring attempt 1: manifest lacked policy (own error) -> V14 check 38/38",
+      "resultsSha256": "e5dff684d4db04c879e9c53d4d6be56141d271831318f07b4955c00ef704b611",
+      "sourceDigest": "1f3923c12bba53e6fe07545ec79b68a32f399face4bd417ebf82f266fc64aff1",
+      "exit": 1,
+      "counts": {
+        "total": 38,
+        "passed": 0,
+        "failed": 38,
+        "errors": 0,
+        "skipped": 0
+      },
+      "validationSucceeded": false,
+      "taskCollectionErrors": [],
+      "sourceStable": true,
+      "distStable": true,
+      "elapsedSeconds": 50.26
+    },
+    {
+      "label": "w2-w01-bridge-exp02",
+      "note": "final tree; whole GuidedBridgeIntegrationTest",
+      "resultsSha256": "d69dd28a30c60cc0c42d0132b6308c3dea2f757db7e30ebd543c65763a20925c",
+      "sourceDigest": "3416fea3ce1aa040511f139f9c420d50b1d9806df51a85705cf5a7440ee358bd",
+      "exit": 1,
+      "counts": {
+        "total": 38,
+        "passed": 9,
+        "failed": 29,
+        "errors": 0,
+        "skipped": 0
+      },
+      "validationSucceeded": false,
+      "taskCollectionErrors": [],
+      "sourceStable": true,
+      "distStable": true,
+      "elapsedSeconds": 200.89
+    },
+    {
+      "label": "w2-w01-tfit-class01",
+      "note": "final tree; whole TransportFaultIT + GuidedDispatchStopKeyTest",
+      "resultsSha256": "895bacb4fa760eb1973a8f84719593f587bd4d71ab9f78b42dae9e74bd7a6165",
+      "sourceDigest": "3416fea3ce1aa040511f139f9c420d50b1d9806df51a85705cf5a7440ee358bd",
+      "exit": 0,
+      "counts": {
+        "total": 28,
+        "passed": 28,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "validationSucceeded": true,
+      "taskCollectionErrors": [],
+      "sourceStable": true,
+      "distStable": true,
+      "elapsedSeconds": 42.22
+    }
+  ],
+  "notRun": [
+    "full ReplayIT lanes",
+    "spotless/checkstyle/spotbugs",
+    "CodeRabbit (WSL-only)"
+  ]
+}

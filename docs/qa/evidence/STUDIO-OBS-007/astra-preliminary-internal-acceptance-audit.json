@@ -1,0 +1,96 @@
+{
+  "status": "PRELIMINARY_READ_ONLY_ACCEPTANCE_AUDIT_NOT_FORMAL_QA",
+  "story": "STUDIO-OBS-007",
+  "storyStatus": "InProgress",
+  "scope": "Existing mandatory internal criteria, scoped reuse and already assigned external gates; no new test, infrastructure, runtime, source or lifecycle action",
+  "currentBlockingFlow": "Original secret C5 publication plus two ordinary replays remains failed at the pre-send immutable-budget check after the finite native-validation change. Current strict and139 affected tests passed; these do not replace C5.",
+  "concreteGapBeyondC5": {
+    "criterion": "AC-16 worker and non-worker observed dispatch",
+    "finding": "The available profile receipt does not demonstrate the explicit worker-profile observed-dispatch requirement.",
+    "requiredExistingObligation": "An API-accepted observed execution dispatches as an observed job on the observed route under both Spring worker and non-worker profiles, with worker readiness verifier wiring installed.",
+    "sourceEvidence": [
+      "ObservedProfileDriftTest.realApplicationComposesAllFlagPairsAndRetainsProfileBoundaries boots the test profile only; its four cases vary publication and replay flags.",
+      "resume-profile-helper-five-current/result.json contains those four profile cases plus one migration case, not a worker observed-dispatch case.",
+      "WorkerProfileIT tests generic worker beans, absent controllers, health, metrics and denied API access; it contains no observed execution proof.",
+      "The discovered worker SecretRevocationSweepIT cases exercise revocation, not API-accepted observed dispatch."
+    ],
+    "disposition": "Locate and bind an existing exact worker observed-dispatch receipt if one exists. Otherwise complete this existing AC-16 integration obligation at its Spring/HTTP/PG routing tier. Do not promote it to another Chromium or secret end-to-end workflow.",
+    "confidenceLimit": "This audit inspected source and the cited structured receipts; it does not assert that no unindexed external artifact exists."
+  },
+  "unmappedRequiredRegressionReceipt": {
+    "criterion": "AC-15 and AC-19 current InferenceMigrationLatestIT and staged V19 orders",
+    "finding": "Current receipt for the explicitly named InferenceMigrationLatestIT was not located in the structured story execution reports inspected.",
+    "knownSupport": "GuidedSecretLoginMigrationTest has actual fresh/staged-order installation and later scoped migration/data proof; immutable migration byte preservation is recorded.",
+    "sourceLimit": "data-migration-proof.md explicitly leaves current InferenceMigrationLatestIT as root phase-verification work. Its migration-only proof is not that named regression result.",
+    "disposition": "Bind an existing current execution receipt or run the existing unchanged migration regression as part of the final defining-tier gate. This is an evidence reconciliation item, not a demonstrated production defect or new case."
+  },
+  "staleInventoryItemsNowCovered": [
+    {
+      "obligation": "Guided committed consume before provider entry process position",
+      "evidence": [
+        "root-guided-preresolve-source-review.json",
+        "resume-guided-preresolve-twentytwo-current/result.json"
+      ],
+      "facts": "Later receipt passes22 cases:19 guided service/transport and3 ordinary resolver process cases, zero failures/errors/skips/drift. Current source includes the explicit actual consumed controller crash before resolution case. The older remaining-tier inventory must not reopen this as an unimplemented position."
+    },
+    {
+      "obligation": "Required replay child kill during secret fill",
+      "evidence": [
+        "resume-final-c11-midfill-one-current/result.json",
+        "root-acceptance-complexity-execution-checkpoint.json achieved facts"
+      ],
+      "facts": "One genuine joined case passed with required effect uncertainty, actual post-fault profile scan, producer quiescence and closure. It does not claim healthy killed-SDK sealing or heap wiping."
+    },
+    {
+      "obligation": "Six guided/published LOGIN outcomes",
+      "evidence": [
+        "fresh-owner-login-six-current/result.json"
+      ],
+      "facts": "Six actual cases passed with zero failures/errors/skips/drift at their recorded source. Older runner inventory statements that the six cases do not exist are superseded."
+    },
+    {
+      "obligation": "Default flags and kill switch",
+      "evidence": [
+        "lane-b-core-gate-3/result.json",
+        "GuidedTranslationDefaultsTest source"
+      ],
+      "facts": "Both existing default-context and nested kill-switch tests have green scoped execution entries. Final source binding remains required; this audit does not invent a missing implementation."
+    },
+    {
+      "obligation": "C14, C6, C4 and real control windows",
+      "evidence": [
+        "root-acceptance-complexity-execution-checkpoint.json achieved facts"
+      ],
+      "facts": "Later root records establish the five C14 logical obligations, distinct native/injected/supplementary C6 controls, both real C4 fault workflows, the revocation pair and native worst/slow/lost-response controls. Preserve exact scope and source bindings rather than rerunning superseded early failures as new obligations."
+    }
+  ],
+  "minimumRemainingInternalWorkIfC5Passes": [
+    "Resolve or map the explicit AC-16 worker observed-dispatch gap and the named migration regression receipt above.",
+    "Complete final source/build/schema/generated-resource/default/profile/port/regression evidence reconciliation. Select existing regressions affected by the changed publication and contract-validation boundaries; retain exact source or explicit semantic-impact justification for reuse.",
+    "Map original publication regressions, six LOGIN outcomes, C4/C6/C11/C14, native topology/origin/password variants and audit/caller/report negatives to their existing required tiers. The current C5 pair covers two original publication selectors; it does not silently turn every other existing selector green.",
+    "Reuse unchanged frontend958 and SDK1800/default coverage results and unchanged native/component receipts where their exact scope remains bound. Do not manufacture a full current suite pass from a partial historical gate or turn historical external skips into passed cases.",
+    "Complete T5 File List and Dev Agent Record with actual evidence/residuals, then the assigned architect gate and independent QA traceability review. T2 throughT6 and QA remain unchecked/unreviewed now; this audit cannot advance them."
+  ],
+  "complexitySimplifications": [
+    "Keep each required logical variant at its defining schema, unit, HTTP/PG, native or genuinely joined tier; no Cartesian browser copies of transactional or contract negatives.",
+    "Use existing first/secret publication flows, six LOGIN selectors and existing C4/C6/C11/C14 fixtures. Add no new mandatory E2E merely because a supporting observation exists.",
+    "Combine fresh selected receipts from the same frozen source honestly when that closes an existing regression inventory; do not rerun already green selectors solely to obtain one larger aggregate count.",
+    "Retain the genuine process-cut scope, actual physical read counters versus possible-read markers, unknown effects and unproduced sinks. No fabricated all-sink, heap-wipe or healthy-SDK closure claim.",
+    "CodeRabbit unavailability may use the already configured independent-review fallback; never invent a CodeRabbit PASS."
+  ],
+  "externalOrAssignedElsewhere": [
+    "Current production/internal-image and Node22 provenance remains unasserted without actual evidence; local native proof is not production image proof.",
+    "Outstanding staging seek calibration and live provider or human pilot gates remain explicit; controlled local seek proof cannot substitute for staging.",
+    "C8 heap/core-dump controls, C9 production/staging TLS and mutual-auth transport, C10 real Vault policy and manual video masking are assigned to OBS-009 and release/runbook gates to OBS-010.",
+    "UI/MSW secret-picker and no-echo half belongs to OBS-008; recorded first guided Run belongs to OBS-013; compile-path removal and migration rebaseline belong to OBS-012A.",
+    "Production secret authorization source and Vault provider enablement remain the separately assigned GA gates, not fabricated completion within this audit."
+  ],
+  "limits": "No whole nineteen-AC pass, final source fan-in, formal QA, deployment readiness or story closure is inferred. The latest C5 is still failed, and all old red evidence and external residuals remain.",
+  "actions": {
+    "sourceEdits": 0,
+    "newTests": 0,
+    "runtime": 0,
+    "builds": 0,
+    "lifecycleEdits": 0
+  }
+}

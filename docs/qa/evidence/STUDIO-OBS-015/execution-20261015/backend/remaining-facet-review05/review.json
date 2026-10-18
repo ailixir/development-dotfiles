@@ -1,0 +1,78 @@
+{
+  "artifact": "Independent Quinn remaining-facet planning review05",
+  "createdUtc": "2026-10-15T08:44:11.948438+00:00",
+  "status": "PLANNING_REVIEW_COMPLETE_IMPLEMENTATION_AND_EXECUTION_INCOMPLETE",
+  "storyGateVerdict": null,
+  "lifecycleTransition": null,
+  "remainingRows": 49,
+  "dispositions": {
+    "A": 36,
+    "B": 10,
+    "C": 3
+  },
+  "all86Preserved": true,
+  "all24Arch05Preserved": true,
+  "exact29FailuresPreserved": true,
+  "negativeRoutes": {
+    "OFFERED_CANDIDATE_REQUEST_VALIDATION": 12,
+    "PRIVATE_IMMUTABLE_OR_AUTHENTICATED_BACKEND_AUTHORITY": 15,
+    "PUBLIC_MINIMUM_ADMITTED_GRAPH_JOIN_PLUS_EXTERNAL_EXACT_HISTORY": 2
+  },
+  "firstMinimalBackendBatch": "B0",
+  "firstMinimalRunnerBatch": "R0",
+  "sourceChangesByReview": 0,
+  "testsExecutedByReview": 0,
+  "buildGradleDatabaseNativeCommandsExecutedByReview": 0,
+  "wholeTreeStableClaim": false,
+  "inputArtifacts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/source-coverage-map-05.json",
+      "sha256": "558cc386632a22ba4dd7e5015228245a64adb6d0ac287adcf29826651dc8caf9"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/runtime-source-checkpoint-05.json",
+      "sha256": "56aa898638e7dae94760748b3a11976b98a4e694b74244b6b7496b44b22150f8"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/validation-ledger.json",
+      "sha256": "9e58edc0e566b118aa83c184d66907136347844ce1f2bce2ae074c9a97404024"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/test-delta.json",
+      "sha256": "b2a74704d224c9481a8ad01b3f1037fd9f8786a86711350a0b515e54f2b54342"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-02/test-delta.json",
+      "sha256": "86ceeb7e82376e605a4f65f2357a03f583a0a0c001c24b4dcc824cc42eb28485"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/test-delta.json",
+      "sha256": "e5b642c3170f4a44005715cbb6a8f674eab9e962b07650ca0a6b0a8ee253194a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-04/ruling.md",
+      "sha256": "64a0368cb1c9834b95930629d43d7ec5745132a31ad22cfe7c850213c11cf77e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-05/qa-design/test-requirements.json",
+      "sha256": "ba68e1383864aa89a8b32d1accc3d9e461163195cf9d6654c571502d589d431a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-05/addendum-01/manifest.json",
+      "sha256": "e8880e8b5673fa574e2b9e2dc0adf51c3e2993e385c787823206ef49b7a21589"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-unit-feedback-attempt03-vitest.json",
+      "sha256": "e8a27a172476a8651db93bb0d2676eb8add24767c4e9303672de68067370fdf0"
+    }
+  ],
+  "originalInventory": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/final-design/qa-final/planned-test-inventory.json",
+    "sha256": "5bedc6df8961cfc2accf16541eb83e5b466fa4f6fa43e9b49c2c76a34bd13904"
+  },
+  "limits": [
+    "Source was inspected under checkpoint05; separately root-released Data08 and Runner18 repairs are not reviewed or credited.",
+    "Metadata inventory validation is not execution of application tests or assertions.",
+    "All original tier requirements remain; no Done, waiver or source release."
+  ]
+}

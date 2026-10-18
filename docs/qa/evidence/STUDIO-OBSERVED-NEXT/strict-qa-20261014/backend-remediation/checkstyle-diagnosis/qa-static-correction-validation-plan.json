@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "story": "STUDIO-OBS-014",
+  "reviewer": "Quinn independent QA",
+  "updated": "2026-10-15T00:21:42.226427+00:00",
+  "decision": "NORMAL_FULL_BACKEND_CHECK_REQUIRED_AFTER_CORRECTION",
+  "formalStoryVerdict": "PENDING; prior strict FAIL and current InReview preserved",
+  "doneAllowed": false,
+  "requirementBinding": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/t0-plan-012B-013-014.json",
+      "sha256": "f71f0073201e825d3f5b7590d648f60e71c25bd80a2c760d6e0097d403cc6a85"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+      "sha256": "584f806c9fe2b4631aede37388177763819db9bea813f62a18f40c0f49abd4ef"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/addendum.md",
+      "sha256": "13905a67327c82f5bc07022be5bde572f0054710c8b93a47329ef09d36dd6134"
+    },
+    {
+      "path": "backend/build.gradle.kts",
+      "sha256": "4833ddd1f67b6d21f3c3ddec847349e2eea316bb8538386ef69f772a6157ce3b"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/checkstyle-diagnosis/diagnosis.json",
+      "sha256": "4bef96d9115d2cfa79be97f4a171386a4d8cce6dad55aaeb7778634718a31d77"
+    }
+  ],
+  "basis": [
+    "Original T0 verification.backendStatic explicitly says full ./gradlew check at S4 with completion recorded.014 T5 requires full affected backend/runner suites and observed E2E.",
+    "User requires all planned QA validation completed and green. Actual checkstyleTest failure means attempt01 aggregate cannot satisfy that requirement regardless of later runtime outcome.",
+    "Dated final-source rule requires exact evidence binding; changing ReplayIT layout changes source digest and may change debug metadata. Hypothetical instruction/constant equivalence is not actual final compiled proof and does not replace the explicitly planned successful full aggregate."
+  ],
+  "candidateIndependentReview": [
+    {
+      "kind": "sql",
+      "literalContentsIndependentlyEqual": true,
+      "documents": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/checkstyle-diagnosis/sql-before-fragment.txt",
+          "sha256": "ac49d5266bb30c2e75e0da62814447dbe84eb82a57aba55f5204bdcdec2e5f7b",
+          "decodedLiteralSha256": "f9003c754595c739e48efde5c94aa57e03c20ee536d0ed7e2bf11166056106b8"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/checkstyle-diagnosis/sql-proposed-fragment.txt",
+          "sha256": "95317574ff78e86a57f02c345295e27afc66e5e25b0ec5de165791ab14cb5086",
+          "decodedLiteralSha256": "f9003c754595c739e48efde5c94aa57e03c20ee536d0ed7e2bf11166056106b8"
+        }
+      ],
+      "scope": "Candidate fragment literals only; no applied/compiled equivalence claim."
+    },
+    {
+      "kind": "script",
+      "literalContentsIndependentlyEqual": true,
+      "documents": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/checkstyle-diagnosis/script-before-fragment.txt",
+          "sha256": "9b54c8e7426ece80f98025b7f79637409f48848bbda828904edbe7799ae8899f",
+          "decodedLiteralSha256": "0380125410bddad282bc94bfde55fa4b8c7f76d2a5d8b377033b9fcff97d2e47"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/checkstyle-diagnosis/script-proposed-fragment.txt",
+          "sha256": "68ffd091780379d36e5f07641058729869944695852a6c6c75a317d651091912",
+          "decodedLiteralSha256": "0380125410bddad282bc94bfde55fa4b8c7f76d2a5d8b377033b9fcff97d2e47"
+        }
+      ],
+      "scope": "Candidate fragment literals only; no applied/compiled equivalence claim."
+    }
+  ],
+  "smallestHonestSequence": [
+    {
+      "step": 1,
+      "action": "Let current --continue attempt complete without source/build mutation; retain its actual exit, all test names/XML, guard tallies, JaCoCo reports/exec and every static task outcome. Archive full log plus source/dist before/after; preserve failed Checkstyle report.",
+      "credit": "Individual completed passing runtime checks remain historical executed evidence bound to pre-fix source/classes. Aggregate remains FAIL, never renamed green."
+    },
+    {
+      "step": 2,
+      "action": "After coordinator releases freeze, developer applies only2 bounded literal/comment layout corrections under existing formatter settings. Save exact before/after source, patch and decoded full SQL/JS equality; assert no assertions, runtime budgets, imports, class annotations, production source, schemas, migrations, runner inputs, build/config/thresholds or test selection changed.",
+      "credit": "Correction receipt is implementation evidence only."
+    },
+    {
+      "step": 3,
+      "action": "Run configured formatting if needed, then freeze final source and ignored dist. Run normal full backend check at final source with normal task dependencies and no test filters/exclusions/forced task states.",
+      "command": [
+        "./gradlew",
+        "check",
+        "--continue",
+        "--console=plain"
+      ],
+      "cwd": "backend",
+      "runtime": "Same Java21/toolchain/required DB/browser environment, root serialized window.",
+      "credit": "This completed aggregate can satisfy planned full check only if exit0 and every required task/test criterion is green. Existing standard Gradle UP-TO-DATE/FROM-CACHE decisions may be recorded honestly; never force them or manipulate outputs to evade required execution."
+    },
+    {
+      "step": 4,
+      "action": "Independent QA parses final task outcomes, all XML including crossReplicaTest, no missing/skipped required local oracle, full four-class corpus and planted-reason tallies, real post-prune native model0 replay, SAVED_INPUT single-source delivery, audit canaries and JaCoCo thresholds. Recheck final source/dist equality after consumers.",
+      "credit": "Only then assess final story gate; no completion from a running command."
+    }
+  ],
+  "exactCommands": {
+    "optionalConfiguredFormatterBeforeFreeze": [
+      "./gradlew",
+      "spotlessApply",
+      "--console=plain"
+    ],
+    "requiredFinalAggregate": [
+      "./gradlew",
+      "check",
+      "--continue",
+      "--console=plain"
+    ],
+    "optionalDiagnosticStaticBeforeLongAggregate": [
+      "./gradlew",
+      "spotlessCheck",
+      "checkstyleMain",
+      "checkstyleTest",
+      "spotbugsMain",
+      "--console=plain"
+    ],
+    "avoidRedundantClean": "Original T0 requires full check, not a second clean. Normal check is sufficient; clean check is also valid if root retains that stronger chosen command. Do not filter tests or use -x. Any static preflight failure requires correction before final aggregate credit."
+  },
+  "expectedNormalDependencies": [
+    "test",
+    "crossReplicaTest",
+    "checkstyleMain",
+    "checkstyleTest",
+    "spotlessCheck",
+    "spotbugsMain",
+    "jacocoTestReport",
+    "jacocoTestCoverageVerification",
+    "rdsParityLint",
+    "antiRegressionCheck",
+    "testcontainersAlignmentCheck",
+    "Any additional standard check dependency currently configured; this list is not permission to omit a task."
+  ],
+  "bytecodeEquivalenceDisposition": {
+    "mayCarryHistoricalRuntimeObservations": true,
+    "mayReplaceFinalRequiredAggregate": false,
+    "requiredForThisPlan": false,
+    "ifCollected": "Compare all40 top/nested test classes plus all production/test support inputs, full instructions/constants/bootstrap methods/runtime annotations/exception/stackmap metadata; separately enumerate debug/source-line differences. Mere equal strings or one javap method do not establish whole-class equivalence. Full normal rerun means this optional proof is diagnostic, not an alternate acceptance route.",
+    "limits": "Source/debug differences must remain explicit; never call source or class bytes identical when only normalized executable portions match."
+  },
+  "unaffectedGateCredit": {
+    "runnerFrontendContracts": "Previously executed final runner/frontend/contracts checks may retain credit only if their exact scoped inputs, configuration, dependencies, runtime and ignored dist remain unchanged; backend source-only layout correction does not itself require their rerun. Rebind manifests with explicit scoped unchanged proof.",
+    "backendRuntimeAttempt01": "Keep completed passing XML and actual behavior facts as historical proof. New successful full check provides final aggregate; do not combine a red aggregate and a static-only command and label them full check green.",
+    "skips": "Skipped/unavailable external criteria remain uncredited; required local skipped check blocks finalPASS."
+  },
+  "noActionByReviewer": "Read-only file review and this plan artifact only. No source/test/formatter/Gradle/native/build/CLI/git/story/gate/lifecycle action.015 production remains unstarted."
+}

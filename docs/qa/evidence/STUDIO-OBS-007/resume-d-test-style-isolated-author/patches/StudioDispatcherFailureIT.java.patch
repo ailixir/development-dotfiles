@@ -1,0 +1,30 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java
+@@ -86,8 +86,14 @@
+     }
+ 
+     public boolean sameGraph(Object... expected) {
+-      if (expected.length != graph.length) return false;
+-      for (int i = 0; i < graph.length; i++) if (expected[i] != graph[i]) return false;
++      if (expected.length != graph.length) {
++        return false;
++      }
++      for (int i = 0; i < graph.length; i++) {
++        if (expected[i] != graph[i]) {
++        return false;
++      }
++      }
+       return true;
+     }
+ 
+@@ -100,7 +106,9 @@
+       try {
+         observer.record(binding, failure, mappedCode, dispatchTime);
+       } catch (Throwable recordingFailure) {
+-        if (recordingFailure instanceof InterruptedException) Thread.currentThread().interrupt();
++        if (recordingFailure instanceof InterruptedException) {
++          Thread.currentThread().interrupt();
++        }
+         try {
+           observer.failed();
+         } catch (Throwable ignored) {

@@ -1,0 +1,11 @@
+--- backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java before
++++ backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java candidate
+@@ -604,7 +604,7 @@
+                 fixture.id(), "report-dispatcher", Instant.now().plusSeconds(60), Instant.now()))
+         .isEqualTo(1);
+     if (actualResolution) {
+-      var vault = new com.citi.put.checks.studio.secrets.FakeStudioVaultProvider();
++      var vault = new com.citi.put.checks.studio.secrets.FakeStudioVaultProvider(java.util.Map.of());
+       var scope =
+           com.citi.put.checks.studio.secrets.VaultScope.of(
+               fixture.original().path("csiId").asText(),

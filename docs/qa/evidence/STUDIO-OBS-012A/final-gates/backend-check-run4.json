@@ -1,0 +1,39 @@
+{
+ "tests": 1911,
+ "failures": 3,
+ "errors": 0,
+ "skipped": 25,
+ "failed": [
+  "com.citi.put.checks.studio.OptimisticSaveIT#initializationError",
+  "com.citi.put.checks.studio.guided.publication.ObservedReadEntryProtocolIT#noopObserverCannotSupplyAnUncommittedOrMissingEntry()",
+  "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest#[1] timing=before, loseResponse=false"
+ ],
+ "skippedNames": [
+  "com.citi.put.checks.scheduling.SharedSchedulingIT#sameCoordinatorRunsHttpTcpSplunkAndStudioThroughTheirExistingPipelines()",
+  "com.citi.put.checks.scheduling.SharedSchedulingIT#studioOnlyReplicaRunsWhenCatalogFlagIsOffAndDeduplicatesAgainstAnotherCoordinator()",
+  "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest#AC-18b \u2014 ranged reads against real Sonic (ED-03 / SPK-03 / 10.18 / 10.19)",
+  "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest#AC-19b \u2014 the media route through the real ingress (ED-06 / SPK-02 / 10.18 / 10.19)",
+  "com.citi.put.checks.studio.guided.translation.GuidedProviderEvaluationTest#approvedProviderEvaluationIsReportedUnavailableWithoutExplicitConfiguration(TestReporter)",
+  "com.citi.put.checks.studio.readiness.ExecutionReadinessTest#targetPolicySelectionAdvancesTheConfigurationRevision()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#aScheduledOccurrenceIsAcceptedWithNoRequestAuthentication()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#acceptedOccurrenceHasOneImmutableRunAndActivationAcrossResumeAndRecreation()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#activeManualWorkSkipsOverlapWithoutChangingManualPermission()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#authorizationWithdrawalBeforeAdmissionAndBeforeSendFailsClosed()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#callbackLedgerLockDoesNotBlockOverlapAndUncertaintyAfterResumeBlocksNextTick()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#capabilityOffDeferralExpiresBeforeAnyCatchupAndLifecycleSettlesPendingAudit()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#deadlineOverrunAdvancesCursorOnlyPastAttemptedCsi()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#deletionStopsFutureWorkButKeepsAuthorizedOccurrenceAudit()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#editedWriterRaceSerializesWithAcceptanceAndKeepsTheAcceptedRevision()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#failedCsiRotatesAwayRatherThanStarvingOtherEligibleWork()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#graceAndGrantAreRecheckedAfterPreflightBeforeAnyAcceptedWrite()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#quotaWaitCrossingGraceOrGrantWithdrawalNeverWritesAcceptedWork()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#rawReadinessChangesRefuseExplicitlyAndAnotherActivatorDoesNotRewriteAcceptedProvenance()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#replicasRacingAndRollbackCannotCreateDuplicateOrPartialAcceptedWork()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#updateRemovalAndInputInvalidationSettleDeferredWithoutOrphans()",
+  "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT#writeFailuresAtHistoryLedgerAndCursorBoundariesRollbackTheWholeOccurrenceUnit()",
+  "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest#AC-13b \u2014 canaries through the integrated path with real material (ED-02 / 10.19)",
+  "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest#AC-5b \u2014 resolution confined by the real vault's own policy (ED-02 / 10.18 / 10.19)",
+  "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest#AC-7b \u2014 real revocation through a non-bypassed session (ED-02 / 10.18 / 10.19)"
+ ],
+ "note": "run4 post-R9, caffeinate -i"
+}

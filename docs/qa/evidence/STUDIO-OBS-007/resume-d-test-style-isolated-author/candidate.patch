@@ -1,0 +1,2069 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java
+@@ -86,8 +86,14 @@
+     }
+ 
+     public boolean sameGraph(Object... expected) {
+-      if (expected.length != graph.length) return false;
+-      for (int i = 0; i < graph.length; i++) if (expected[i] != graph[i]) return false;
++      if (expected.length != graph.length) {
++        return false;
++      }
++      for (int i = 0; i < graph.length; i++) {
++        if (expected[i] != graph[i]) {
++        return false;
++      }
++      }
+       return true;
+     }
+ 
+@@ -100,7 +106,9 @@
+       try {
+         observer.record(binding, failure, mappedCode, dispatchTime);
+       } catch (Throwable recordingFailure) {
+-        if (recordingFailure instanceof InterruptedException) Thread.currentThread().interrupt();
++        if (recordingFailure instanceof InterruptedException) {
++          Thread.currentThread().interrupt();
++        }
+         try {
+           observer.failed();
+         } catch (Throwable ignored) {
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java
+@@ -243,11 +243,14 @@
+           "owner@example.test");
+       jdbc.update(
+           "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) "
+-              + "VALUES (?,'Report fixture','unit','LOW','owner@example.test','Development') ON CONFLICT(id) DO NOTHING",
++              + ("VALUES (?,'Report fixture','unit','LOW','owner@example.test',"
++                  + "'Development') ON CONFLICT(id) DO NOTHING"),
+           csi);
+       try {
+         jdbc.update(
+-            "INSERT INTO ui_tests(id,name,csi_id,environment,browser,viewport_width,viewport_height,timeout_seconds,wait_strategy,steps,created_by,authoring,authoring_revision_inputs) "
++            ("INSERT INTO ui_tests(id,name,csi_id,environment,browser,"
++                + "viewport_width,viewport_height,timeout_seconds,wait_strategy,"
++                + "steps,created_by,authoring,authoring_revision_inputs) ")
+                 + "VALUES (?,'Observed report fixture',?,?,?, ?,?,?,?,?::jsonb,'owner@example.test',?::jsonb,?::jsonb)",
+             testId,
+             csi,
+@@ -374,12 +377,17 @@
+                       .put("fence", 1)
+                       .put("leaseExpiresAt", Instant.now().plusSeconds(120).toString());
+               jdbc.update(
+-                  "UPDATE studio_guided_sessions SET state='FINALIZING',document=jsonb_set(jsonb_set(document,'{state}','\"FINALIZING\"'),'{owner}',?::jsonb) WHERE session_id=?",
++                  ("UPDATE studio_guided_sessions SET "
++                      + "state='FINALIZING',document=jsonb_set(jsonb_set(document,"
++                      + "'{state}','\"FINALIZING\"'),'{owner}',?::jsonb) WHERE "
++                      + "session_id=?"),
+                   owner.toString(),
+                   fixtureSession);
+               JsonNode plan = sharedBasis.path("translationPlan");
+               jdbc.update(
+-                  "INSERT INTO studio_guided_translation_plans(session_id,plan_revision,parent_revision,plan,plan_hash) VALUES (?,1,0,?::jsonb,?)",
++                  ("INSERT INTO studio_guided_translation_plans(session_id,"
++                      + "plan_revision,parent_revision,plan,plan_hash) VALUES "
++                      + "(?,1,0,?::jsonb,?)"),
+                   fixtureSession,
+                   plan.toString(),
+                   GuidedContracts.hash(plan));
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -986,12 +986,16 @@
+             public void record(
+                 JsonNode binding, RuntimeException failure, String code, java.time.Instant now) {
+               C5Capture active = c5Capture;
+-              if (active != null) active.recordPoolRefusal(binding, failure, code, now);
++              if (active != null) {
++                active.recordPoolRefusal(binding, failure, code, now);
++              }
+             }
+ 
+             public void failed() {
+               C5Capture active = c5Capture;
+-              if (active != null && active.poolRefusalTarget != null) active.failed = true;
++              if (active != null && active.poolRefusalTarget != null) {
++                active.failed = true;
++              }
+             }
+           });
+     }
+@@ -4358,7 +4362,9 @@
+         value);
+     // Extend this existing independent support case, never add another Core/browser case.
+     List<byte[]> byteLeaks = new java.util.ArrayList<>();
+-    for (String leak : encodedLeaks) byteLeaks.add(leak.getBytes(StandardCharsets.UTF_8));
++    for (String leak : encodedLeaks) {
++      byteLeaks.add(leak.getBytes(StandardCharsets.UTF_8));
++    }
+     byteLeaks.add(HexFormat.of().parseHex("c3a9f09f9880225c41207a2b")); // Literal UTF8.
+     byteLeaks.add(HexFormat.of().parseHex("e9003dd800de22005c00410020007a002b00")); // UTF16LE.
+     byteLeaks.add(HexFormat.of().parseHex("00e9d83dde000022005c00410020007a002b")); // UTF16BE.
+@@ -4392,7 +4398,9 @@
+       }
+       C5CanaryStream integerScanner = new C5CanaryStream(List.of(value));
+       try {
+-        for (byte octet : leak) integerScanner.write(Byte.toUnsignedInt(octet) | 0x100);
++        for (byte octet : leak) {
++          integerScanner.write(Byte.toUnsignedInt(octet) | 0x100);
++        }
+         integerScanner.closeInput();
+         assertThat(integerScanner.encodedBytes).isEqualTo(leak.length);
+         assertThat(integerScanner.writeCalls).isEqualTo(leak.length);
+@@ -4408,7 +4416,9 @@
+     try {
+       byte[] bytes = "%C3%A8%F0%9F%98%80%22%5CA%20z%2B".getBytes(StandardCharsets.UTF_8);
+       for (int offset = 0; offset < bytes.length; offset += 3)
+-        unrelated.write(bytes, offset, Math.min(3, bytes.length - offset));
++        {
++          unrelated.write(bytes, offset, Math.min(3, bytes.length - offset));
++        }
+       unrelated.closeInput();
+       unrelated.assertClean(true);
+     } finally {
+@@ -4435,7 +4445,9 @@
+     try {
+       byte[] chunk = new byte[65536];
+       java.util.Arrays.fill(chunk, (byte) '~');
+-      for (int index = 0; index < 2049; index++) volume.write(chunk, 0, chunk.length);
++      for (int index = 0; index < 2049; index++) {
++        volume.write(chunk, 0, chunk.length);
++      }
+       volume.closeInput();
+       assertThat(volume.encodedBytes)
+           .as("actual bytes exceed historical aggregate cap")
+@@ -4579,12 +4591,20 @@
+         p3AttemptTeardown(failures, () -> p3Scan(List.of(value)));
+         p3AttemptTeardown(failures, capture::writeNumericEvidence);
+         p3AttemptTeardown(failures, capture::close);
+-        if (!cleanupUnconfirmed) c5Capture = null;
++        if (!cleanupUnconfirmed) {
++          c5Capture = null;
++        }
+       } else
+-        failures.add(new IllegalStateException("Midfill terminated producer drain unconfirmed"));
++        {
++          failures.add(new IllegalStateException("Midfill terminated producer drain unconfirmed"));
++        }
+       if (!failures.isEmpty()) {
+-        if (primary != null) failures.forEach(primary::addSuppressed);
+-        else throwTeardownFailures(failures);
++        if (primary != null) {
++          failures.forEach(primary::addSuppressed);
++        }
++        else {
++          throwTeardownFailures(failures);
++        }
+       }
+     }
+   }
+@@ -4795,11 +4815,17 @@
+             p6ChildCut = null;
+           }
+         }
+-        if (!terminated || !failures.isEmpty()) cleanupUnconfirmed = true;
++        if (!terminated || !failures.isEmpty()) {
++          cleanupUnconfirmed = true;
++        }
+       }
+       if (!failures.isEmpty()) {
+-        if (primary != null) failures.forEach(primary::addSuppressed);
+-        else throwTeardownFailures(failures);
++        if (primary != null) {
++          failures.forEach(primary::addSuppressed);
++        }
++        else {
++          throwTeardownFailures(failures);
++        }
+       }
+     }
+   }
+@@ -4854,10 +4880,14 @@
+       p3AttemptTeardown(
+           failures,
+           () -> {
+-            if (!member.handle().isAlive()) return;
++            if (!member.handle().isAlive()) {
++              return;
++            }
+             p6SameProcess(member.handle(), member.started());
+             P6ProcessStatus actual = p6Status(member.handle());
+-            if ("X".equals(actual.state()) || actual.state().startsWith("Z")) return;
++            if ("X".equals(actual.state()) || actual.state().startsWith("Z")) {
++              return;
++            }
+             assertThat(actual.group() == member.group()).isTrue();
+             p6SameProcess(member.handle(), member.started());
+             p6Signal("-KILL", Long.toString(member.handle().pid()));
+@@ -4871,7 +4901,9 @@
+     long bytes = 0;
+     for (String directory : List.of("journal", "scratch", "objects")) {
+       Path root = TEMP.resolve(directory);
+-      if (!Files.isDirectory(root, java.nio.file.LinkOption.NOFOLLOW_LINKS)) continue;
++      if (!Files.isDirectory(root, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
++        continue;
++      }
+       assertThat(Files.isSymbolicLink(root)).isFalse();
+       try (var paths = Files.walk(root)) {
+         for (Path file :
+@@ -4993,22 +5025,30 @@
+     private void captureMidfill(
+         jakarta.servlet.http.HttpServletRequest request, byte[] bytes, int status) {
+       try {
+-        if (bytes.length > 262144) throw new IllegalArgumentException("Midfill callback bound");
++        if (bytes.length > 262144) {
++          throw new IllegalArgumentException("Midfill callback bound");
++        }
+         JsonNode body = C.parse(new String(bytes, StandardCharsets.UTF_8));
+-        if (status < 200 || status >= 300 || !"STARTED".equals(body.path("kind").asText())) return;
++        if (status < 200 || status >= 300 || !"STARTED".equals(body.path("kind").asText())) {
++          return;
++        }
+         if (!("Bearer " + CALLBACK).equals(request.getHeader("Authorization"))
+             || !execution.toString().equals(body.path("executionId").asText())
+             || !binding.path("attemptId").equals(body.path("attemptId"))
+             || !"observed-fixture".equals(body.path("runnerInstanceId").asText())
+             || "1".equals(request.getHeader("X-Fixture-Child-Observer-Failed")))
+-          throw new IllegalArgumentException("Midfill authenticated callback identity");
++          {
++            throw new IllegalArgumentException("Midfill authenticated callback identity");
++          }
+         String pid = request.getHeader("X-Fixture-Child-Pid");
+         String encoded = request.getHeader("X-Fixture-Child-Ready");
+         if (pid == null
+             || !pid.matches("[1-9][0-9]{0,12}")
+             || encoded == null
+             || encoded.length() > 4096)
+-          throw new IllegalArgumentException("Midfill actual Ready observation missing");
++          {
++            throw new IllegalArgumentException("Midfill actual Ready observation missing");
++          }
+         JsonNode observed =
+             C.parse(new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8));
+         if (!"ready".equals(observed.path("kind").asText())
+@@ -5020,14 +5060,18 @@
+             || !GuidedContracts.hash(binding.path("requiredProfile"))
+                 .equals(observed.path("profileHash").asText())
+             || !binding.path("requiredBuild").equals(observed.path("build")))
+-          throw new IllegalArgumentException("Midfill actual Ready binding differs");
++          {
++            throw new IllegalArgumentException("Midfill actual Ready binding differs");
++          }
+         if (report == null) {
+           childPid = Long.parseLong(pid);
+           ready = observed.deepCopy();
+           report = body.deepCopy();
+           positive.countDown();
+         } else if (childPid != Long.parseLong(pid) || !ready.equals(observed))
+-          throw new IllegalArgumentException("Midfill Ready identity changed");
++          {
++            throw new IllegalArgumentException("Midfill Ready identity changed");
++          }
+       } catch (RuntimeException invalid) {
+         failed = true;
+         positive.countDown();
+@@ -6003,8 +6047,12 @@
+         failures.add(new IllegalStateException("C14 original owner closure remains unconfirmed"));
+       }
+       if (!failures.isEmpty()) {
+-        if (primary != null) failures.forEach(primary::addSuppressed);
+-        else throwTeardownFailures(failures);
++        if (primary != null) {
++          failures.forEach(primary::addSuppressed);
++        }
++        else {
++          throwTeardownFailures(failures);
++        }
+       }
+     }
+   }
+@@ -6013,7 +6061,9 @@
+     UUID test = p14CreateSource(recipe);
+     VaultScope scope = VaultScope.of("CSI-123", "fixture", test);
+     int reads = COUNTED_VAULT.reads.size();
+-    if (!published) capture.armTrace();
++    if (!published) {
++      capture.armTrace();
++    }
+     int receiptBaseline = RECEIPTS.size();
+     String session = p3Start(test, "fixture");
+     capture.selectedGuidedSession = session;
+@@ -6241,7 +6291,8 @@
+           }
+           var rows =
+               jdbc.queryForList(
+-                  "SELECT document::text AS ledger,proposal::text AS proposal FROM studio_guided_actions WHERE session_id=?",
++                  ("SELECT document::text AS ledger,proposal::text AS proposal FROM "
++                      + "studio_guided_actions WHERE session_id=?"),
+                   id);
+           assertThat(rows.size()).isEqualTo(recipe == P14Recipe.CONTROL_VALUE ? 5 : 3);
+           for (var row : rows) {
+@@ -6338,7 +6389,8 @@
+                 field.path("ledger").path("admission").path("admissionId").asText();
+             var allocations =
+                 jdbc.queryForList(
+-                    "SELECT document::text FROM studio_guided_allocations WHERE session_id=? AND binding_id=? AND need_id='c14-field'",
++                    ("SELECT document::text FROM studio_guided_allocations WHERE "
++                        + "session_id=? AND binding_id=? AND need_id='c14-field'"),
+                     String.class,
+                     id,
+                     binding);
+@@ -6372,7 +6424,8 @@
+                 .isTrue();
+             var producers =
+                 jdbc.queryForList(
+-                    "SELECT document::text FROM studio_guided_producers WHERE session_id=? AND binding_id=? AND admission_id=?",
++                    ("SELECT document::text FROM studio_guided_producers WHERE "
++                        + "session_id=? AND binding_id=? AND admission_id=?"),
+                     String.class,
+                     id,
+                     binding,
+@@ -6434,7 +6487,8 @@
+                 .isTrue();
+             var edges =
+                 jdbc.queryForList(
+-                    "SELECT document::text FROM studio_guided_consumer_edges WHERE session_id=? AND consumer_admission_id=?"
++                    ("SELECT document::text FROM studio_guided_consumer_edges WHERE "
++                        + "session_id=? AND consumer_admission_id=?")
+                         + " AND argument_slot='fill.value' AND binding_id=? AND producer_admission_id=?",
+                     String.class,
+                     id,
+@@ -6892,7 +6946,9 @@
+         if (op.equals("fill")
+             && name.equals("Destination")
+             && !(candidate.path("role").asText().equals("textbox")
+-                && candidate.path("elementType").asText().equals("textarea"))) continue;
++                && candidate.path("elementType").asText().equals("textarea"))) {
++                  continue;
++                }
+         assertThat(node == null).as("unique real C14 exported target").isTrue();
+         node = candidate;
+       }
+@@ -7644,8 +7700,12 @@
+           if (state.c6Timing != null) {
+             state.c6Timing.mark(6);
+           }
+-          if (++state.c6PendingSamples == 1) state.c6Pending.countDown();
+-          else state.c6CutPending.countDown();
++          if (++state.c6PendingSamples == 1) {
++            state.c6Pending.countDown();
++          }
++          else {
++            state.c6CutPending.countDown();
++          }
+         } else if (state.c6Kind != 0 && event == 11) {
+           if (ordinal != 1 || reason != 1 || state.c6RawCalls != 0) {
+             throw new IllegalArgumentException("C6 raw scalar observation mismatch");
+@@ -7659,7 +7719,9 @@
+           }
+           state.c6NativeClose = true;
+           state.c6FenceAvailable = operation == 1;
+-          if (!state.c6FenceAvailable) P8_C6_CLOSED_UNKNOWN.add(state.c6Phase);
++          if (!state.c6FenceAvailable) {
++            P8_C6_CLOSED_UNKNOWN.add(state.c6Phase);
++          }
+         } else if (event == 1) {
+           if (state.started || ordinal != 1) {
+             throw new IllegalArgumentException("Unexpected selected owner");
+@@ -7673,7 +7735,9 @@
+           if (state.c6Kind != 0 && state.c6CutAt != 0) {
+             throw new IllegalArgumentException("C6 unexpected later native entry after cut");
+           }
+-          if (operation == 1 && state.c6Kind != 0) state.c6FillEntries++;
++          if (operation == 1 && state.c6Kind != 0) {
++            state.c6FillEntries++;
++          }
+           if (!state.started
+               || state.flippedAt != 0
+               || state.active.putIfAbsent(ordinal, operation) != null) {
+@@ -7689,7 +7753,9 @@
+             state.c6PrimitiveAt = System.nanoTime();
+             timingSite = 240;
+             p8WritePendingProbe(state, 1);
+-            if (state.c6Timing != null) state.c6Timing.mark(4);
++            if (state.c6Timing != null) {
++              state.c6Timing.mark(4);
++            }
+           }
+         } else if (event == 3) {
+           timingSite = 113;
+@@ -7783,7 +7849,9 @@
+         } else {
+           throw new IllegalArgumentException("Unknown scalar observer phase");
+         }
+-        if (state.c6Kind != 0) state.notifyAll();
++        if (state.c6Kind != 0) {
++          state.notifyAll();
++        }
+       }
+       accepted = true;
+     } catch (RuntimeException failure) {
+@@ -7845,7 +7913,9 @@
+             .put("case", state.ordinal)
+             .put("epoch", state.ordinal)
+             .put("path", state.path);
+-    if (state.c6Kind != 0) mode.put("c6", state.c6Kind);
++    if (state.c6Kind != 0) {
++      mode.put("c6", state.c6Kind);
++    }
+     if (state.execution != null) {
+       mode.put("executionId", state.execution.toString());
+       mode.put(
+@@ -8183,7 +8253,9 @@
+       synchronized (selected) {
+         while (!selected.c6NativeClose && !selected.failed && System.nanoTime() < deadline) {
+           long remaining = deadline - System.nanoTime();
+-          if (remaining <= 0) break;
++          if (remaining <= 0) {
++            break;
++          }
+           try {
+             java.util.concurrent.TimeUnit.NANOSECONDS.timedWait(selected, remaining);
+           } catch (InterruptedException interrupted) {
+@@ -8401,7 +8473,9 @@
+                 if (member.handle().isAlive()) {
+                   p6SameProcess(member.handle(), member.started());
+                   if (!member.handle().destroyForcibly())
+-                    throw new IllegalStateException("C6 residual owned writer kill refused");
++                    {
++                      throw new IllegalStateException("C6 residual owned writer kill refused");
++                    }
+                 }
+               });
+         }
+@@ -8462,8 +8536,12 @@
+         }
+       }
+       if (!failures.isEmpty()) {
+-        if (primary != null) failures.forEach(primary::addSuppressed);
+-        else throwTeardownFailures(failures);
++        if (primary != null) {
++          failures.forEach(primary::addSuppressed);
++        }
++        else {
++          throwTeardownFailures(failures);
++        }
+       }
+     }
+   }
+@@ -8531,7 +8609,9 @@
+                   "actual admitted overall deadline remains strictly later than actual step deadline")
+               .isPositive();
+         }
+-        if (kind == 1) state.c6CutAt = System.nanoTime();
++        if (kind == 1) {
++          state.c6CutAt = System.nanoTime();
++        }
+       }
+       P6OwnedPid primaryBrowser = kind == 3 ? p8OwnedPrimaryBrowser(state) : null;
+       if (kind == 3) {
+@@ -8577,7 +8657,9 @@
+             .isTrue();
+         var residualFailures = new java.util.ArrayList<Throwable>();
+         for (P6OwnedPid member : browserTree) {
+-          if (member.handle().pid() == primaryBrowser.handle().pid()) continue;
++          if (member.handle().pid() == primaryBrowser.handle().pid()) {
++            continue;
++          }
+           p3AttemptTeardown(
+               residualFailures,
+               () -> {
+@@ -8585,7 +8667,9 @@
+                   try {
+                     p6SameProcess(member.handle(), member.started());
+                     P6ProcessStatus actual = p6Status(member.handle());
+-                    if ("X".equals(actual.state()) && !member.handle().isAlive()) return;
++                    if ("X".equals(actual.state()) && !member.handle().isAlive()) {
++                      return;
++                    }
+                     assertThat(actual.group()).isEqualTo(member.group());
+                     p6SameProcess(member.handle(), member.started());
+                   } catch (Throwable originalCheckFailure) {
+@@ -8595,7 +8679,9 @@
+                     } catch (Throwable unknownLiveness) {
+                       // Unknown liveness preserves the original identity/status failure.
+                     }
+-                    if (confirmedGone) return;
++                    if (confirmedGone) {
++                      return;
++                    }
+                     throw originalCheckFailure;
+                   }
+                   if (!member.handle().destroyForcibly()) {
+@@ -8625,7 +8711,9 @@
+         assertThat(report.path("outcome").path("errorMessage").asText())
+             .isEqualTo("OUTCOME_UNKNOWN");
+       }
+-      if (kind == 2) assertThat(result.path("errorCode").asText()).isEqualTo("CANCELLED");
++      if (kind == 2) {
++        assertThat(result.path("errorCode").asText()).isEqualTo("CANCELLED");
++      }
+       assertThat(report.path("steps").get(1).path("failure").asText())
+           .isEqualTo(kind == 1 ? "OUTCOME_UNKNOWN" : "CANCELLED");
+       assertThat(report.path("steps").get(2).path("status").asText()).isEqualTo("SKIPPED");
+@@ -8690,7 +8778,9 @@
+     }
+     p3CleanupOwnedResources();
+     p8AssertUnknownUsageLineage(state);
+-    if (!browserTree.isEmpty()) p6AwaitProcesses(browserTree, true);
++    if (!browserTree.isEmpty()) {
++      p6AwaitProcesses(browserTree, true);
++    }
+     p8AwaitC6Closed(state);
+     if (kind == 2) {
+       assertThat(state.cutoffAt - state.c6CutAt)
+@@ -8716,7 +8806,9 @@
+     } else {
+       // No absent page fence is promoted into a zero-write assertion.
+       assertThat(state.c6NativeClose).isTrue();
+-      if (!state.c6FenceAvailable) assertThat(P8_C6_CLOSED_UNKNOWN).contains(state.c6Phase);
++      if (!state.c6FenceAvailable) {
++        assertThat(P8_C6_CLOSED_UNKNOWN).contains(state.c6Phase);
++      }
+       if (kind == 3) {
+         // This hook may observe managed CONTEXT_LOST; it supplies no genuine native-error credit.
+         assertThat(state.c6RawCalls).isEqualTo(1);
+@@ -8748,7 +8840,9 @@
+             .put("producedRedactedCallback", state.c6CallbackRedacted)
+             .put("realReleasedReads", 1)
+             .put("ownedBrowserTreeGone", !browserTree.isEmpty());
+-    if (capture.c6Timing != null) capture.c6Acceptance = acceptance.deepCopy();
++    if (capture.c6Timing != null) {
++      capture.c6Acceptance = acceptance.deepCopy();
++    }
+     p3WriteEvidence("c6-" + kind, acceptance);
+   }
+ 
+@@ -8824,7 +8918,9 @@
+         if (state.c6NativeClose
+             && state.restored
+             && (state.c6Kind == 3 || state.active.isEmpty())
+-            && (state.path == 2 || state.closed)) break;
++            && (state.path == 2 || state.closed)) {
++              break;
++            }
+       }
+       Thread.sleep(20);
+     }
+@@ -8844,7 +8940,9 @@
+         .as("exact descriptors restored after original dispatch lifetime")
+         .isTrue();
+     p8AssertManagedNativeState(state);
+-    if (state.path == 1) assertThat(state.closed).isTrue();
++    if (state.path == 1) {
++      assertThat(state.closed).isTrue();
++    }
+     assertThat(state.failed).isFalse();
+     if (state.c6InterruptedNotification) {
+       assertThat(
+@@ -8895,7 +8993,9 @@
+         assertThat(Files.getPosixFilePermissions(samplePath))
+             .isEqualTo(java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
+         sample = C.parse(Files.readString(samplePath));
+-        if (sample.path("contextBound").asBoolean()) break;
++        if (sample.path("contextBound").asBoolean()) {
++          break;
++        }
+       }
+       Thread.sleep(10);
+     }
+@@ -8951,18 +9051,26 @@
+       if (command.isEmpty()
+           || !Path.of(command).toRealPath().equals(pinned)
+           || java.util.Arrays.stream(arguments)
+-              .anyMatch(argument -> argument.startsWith("--type="))) continue;
++              .anyMatch(argument -> argument.startsWith("--type="))) {
++                continue;
++              }
+       List<String> profiles =
+           java.util.Arrays.stream(arguments)
+               .filter(argument -> argument.startsWith("--user-data-dir="))
+               .toList();
+-      if (profiles.size() != 1) continue;
++      if (profiles.size() != 1) {
++        continue;
++      }
+       Path profile = Path.of(profiles.getFirst().substring("--user-data-dir=".length()));
+       if (Files.isSymbolicLink(profile)
+           || !Files.isDirectory(profile, java.nio.file.LinkOption.NOFOLLOW_LINKS)
+-          || !profile.toRealPath().equals(profile)) continue;
++          || !profile.toRealPath().equals(profile)) {
++            continue;
++          }
+       if (((Number) Files.getAttribute(profile, "unix:dev")).longValue() != device
+-          || ((Number) Files.getAttribute(profile, "unix:ino")).longValue() != inode) continue;
++          || ((Number) Files.getAttribute(profile, "unix:ino")).longValue() != inode) {
++            continue;
++          }
+       assertThat(Files.getOwner(profile)).isEqualTo(Files.getOwner(TEMP));
+       assertThat(Files.getPosixFilePermissions(profile))
+           .isEqualTo(java.nio.file.attribute.PosixFilePermissions.fromString("rwx------"));
+@@ -8981,25 +9089,37 @@
+   private static void p8CaptureInjectedCallback(P4RevocationState state, byte[] bytes, int status) {
+     try {
+       if (status < 200 || status >= 300 || bytes.length < 1 || bytes.length > 262144)
+-        throw new IllegalArgumentException("C6 actual callback acceptance/bound mismatch");
++        {
++          throw new IllegalArgumentException("C6 actual callback acceptance/bound mismatch");
++        }
+       C5Capture capture = c5Capture;
+       if (capture == null)
+-        throw new IllegalArgumentException("C6 original sink capture unavailable");
++        {
++          throw new IllegalArgumentException("C6 original sink capture unavailable");
++        }
+       for (String value : capture.values)
+-        assertJoinedSinkAbsent(Map.of("c6-actual-callback", bytes), value);
++        {
++          assertJoinedSinkAbsent(Map.of("c6-actual-callback", bytes), value);
++        }
+       JsonNode outcome = C.parseWire(bytes);
+-      if (!outcome.path("errorMessage").isTextual()) return; // Earlier successes are not positives.
++      if (!outcome.path("errorMessage").isTextual()) {
++        return;
++      } // Earlier successes are not positives.
+       if (!outcome.path("sessionId").asText().equals(state.guidedSession)
+           || !outcome.path("ledger").path("state").asText().equals("UNKNOWN_OUTCOME")
+           || !outcome.path("ledger").path("outcomeCode").asText().equals("ACK_LOST")
+           || outcome.path("ledger").path("dispatchCount").asInt() != 1)
+-        throw new IllegalArgumentException("C6 consumed failure identity mismatch");
++        {
++          throw new IllegalArgumentException("C6 consumed failure identity mismatch");
++        }
+       String message = outcome.path("errorMessage").asText();
+       if (!message.contains("C6_RELEASED")
+           || !message.contains("REDACTED")
+           || message.getBytes(StandardCharsets.UTF_8).length > 2048
+           || message.length() > 2048)
+-        throw new IllegalArgumentException("C6 real callback is not bounded/redacted");
++        {
++          throw new IllegalArgumentException("C6 real callback is not bounded/redacted");
++        }
+       synchronized (state) {
+         state.c6CallbackRedacted++;
+       }
+@@ -9551,11 +9671,16 @@
+                 new AuthoringStep(UUID.fromString(THREE), texts.get(2), null)));
+     String variables =
+         password
+-            ? "[{\"name\":\"USER\",\"kind\":\"plain\",\"value\":\"p3-user\"},{\"name\":\"PASS\",\"kind\":\"secretRef\"}]"
++            ? ("[{\"name\":\"USER\",\"kind\":\"plain\",\"value\":\"p3-user\"},"
++                + "{\"name\":\"PASS\",\"kind\":\"secretRef\"}]")
+             : "[]";
+     jdbc.update(
+-        "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,authoring_revision_inputs,created_by,created_at,updated_at)"
+-            + " VALUES (?,'P3 controlled join',?,?,'chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,'fixture@example.invalid',now(),now())",
++        ("INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,"
++            + "variables,authoring,authoring_revision_inputs,created_by,"
++            + "created_at,updated_at)")
++            + (" VALUES (?,'P3 controlled "
++                + "join',?,?,'chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,"
++                + "'fixture@example.invalid',now(),now())"),
+         test,
+         csi,
+         environment,
+@@ -9795,13 +9920,15 @@
+               () -> sessions.lock(session).document().path("scope").path("principalId").asText());
+       rows =
+           jdbc.queryForList(
+-              "SELECT principal_id,csi_id,environment,test_id,secret_id FROM studio_secret_use_audit WHERE session_id=?",
++              ("SELECT principal_id,csi_id,environment,test_id,secret_id FROM "
++                  + "studio_secret_use_audit WHERE session_id=?"),
+               session);
+     } else {
+       principal = observedBinding(execution).path("principalId").asText();
+       rows =
+           jdbc.queryForList(
+-              "SELECT principal_id,csi_id,environment,test_id,secret_id FROM studio_secret_use_audit WHERE execution_id=?",
++              ("SELECT principal_id,csi_id,environment,test_id,secret_id FROM "
++                  + "studio_secret_use_audit WHERE execution_id=?"),
+               execution);
+     }
+     assertThat(rows.size()).isGreaterThanOrEqualTo(2);
+@@ -9887,16 +10014,19 @@
+         let revC6HighPending=0,revC6CdpPending=0;
+         let revLossRuntime=null,revLossBusy=2,revLossRestoreAttempt=0,revLossRestoreRefusal=0;
+         const revLossSelected=()=>revProducer===1&&revLocalMode?.c6===3;
+-        const revLossRefuse=code=>{if(revLossSelected()&&revLossRestoreRefusal===0)revLossRestoreRefusal=code;};
++        const revLossRefuse=code=>{if(revLossSelected()&&revLossRestoreRefusal===0)revLossRestoreRef\
++        usal=code;};
+         let revLocalMode=null,revWatching=false,revC6Probed=0;
+         let revC6ProfileDev=0,revC6ProfileIno=0,revC6ContextBound=false;
+         let revC6RunDeadline=0,revC6StepMs=0,revC6Restored=false,revC6RetryRestore=null;
+         let revActive=new Map();const revGroups=new Set();
+         let revLossLifetime=null;
+         const revManagedLoss=()=>revLossSelected()&&revLossLifetime?.retired===true;
+-        const revMode=()=>{try{return revFs.existsSync(revStateFile)?JSON.parse(revFs.readFileSync(revStateFile,'utf8')):null;}catch{return null;}};
++        const revMode=()=>{try{return revFs.existsSync(revStateFile)?JSON.parse(revFs.readFileSync(r\
++        evStateFile,'utf8')):null;}catch{return null;}};
+         const revMarker=()=>{try{const fd=revFs.openSync(revFailedFile,
+-          revFs.constants.O_WRONLY|revFs.constants.O_CREAT|revFs.constants.O_APPEND|revFs.constants.O_NOFOLLOW,0o600);
++          revFs.constants.O_WRONLY|revFs.constants.O_CREAT|revFs.constants.O_APPEND|revFs.constants.\
++        O_NOFOLLOW,0o600);
+           try{revFs.writeSync(fd,'1\\n');}finally{revFs.closeSync(fd);}}catch{}};
+         const revCheckRoot=()=>{
+           const root=revFs.lstatSync(revLedgerRoot);
+@@ -9910,20 +10040,25 @@
+             if(revFs.existsSync(target)){const old=revFs.lstatSync(target);
+               if(old.isSymbolicLink()||!old.isFile()||(old.mode&0o777)!==0o600)throw new Error('FILE');}
+             if(mode.c6===3&&revProducer===1&&revLossRuntime){
+-              const actualBusy=revLossRuntime.busy;revLossBusy=typeof actualBusy==='boolean'?Number(actualBusy):2;
++              const actualBusy=revLossRuntime.busy;revLossBusy=typeof \
++        actualBusy==='boolean'?Number(actualBusy):2;
+             }
+             // Retired raw status is the last actual observation, never fake settlement/zero.
+             const raw=revManagedLoss()?revLossLifetime.snapshot:null;
+             const body=JSON.stringify({case:mode.case,producer:revProducer,epoch:mode.epoch,role:revProducer,
+-              sent:revSeq,acked:revAcked,pending:revPending+revOriginalPending+(raw?.high??revC6HighPending)+revC6CdpPending,originalPending:revOriginalPending,
++              sent:revSeq,acked:revAcked,pending:revPending+revOriginalPending+(raw?.high??revC6High\
++        Pending)+revC6CdpPending,originalPending:revOriginalPending,
+               failed:revFailed,sealed,...(mode.c6?{profileDev:revC6ProfileDev,
+                 profileIno:revC6ProfileIno,contextBound:revC6ContextBound}:{}),
+-              ...(mode.c6===3&&revProducer===1?{highPending:raw?.high??revC6HighPending,cdpCreationPending:revC6CdpPending,
+-                nativeActive:raw?.active??revActive.size,busy:revLossBusy,restoreAttempt:revLossRestoreAttempt,
++              ...(mode.c6===3&&revProducer===1?{highPending:raw?.high??revC6HighPending,cdpCreationP\
++        ending:revC6CdpPending,
++                nativeActive:raw?.active??revActive.size,busy:revLossBusy,restoreAttempt:revLossRest\
++        oreAttempt,
+                 restoreRefusal:revLossRestoreRefusal}:{})});
+             if(Buffer.byteLength(body)>1024)throw new Error('BOUND');
+             revCheckRoot();
+-            const fd=revFs.openSync(tmp,revFs.constants.O_WRONLY|revFs.constants.O_CREAT|revFs.constants.O_EXCL|
++            const fd=revFs.openSync(tmp,revFs.constants.O_WRONLY|revFs.constants.O_CREAT|revFs.const\
++        ants.O_EXCL|
+               revFs.constants.O_NOFOLLOW,0o600);
+             try{revFs.writeFileSync(fd,body);revFs.fsyncSync(fd);}finally{revFs.closeSync(fd);}
+             revCheckRoot();
+@@ -9933,7 +10068,8 @@
+         const revFail=()=>{revFailed=true;revMarker();if(revLocalMode)revPublish(revLocalMode,revSealed);};
+         const revMaybeSeal=()=>{
+           if(revManagedLoss())return; // This epoch explicitly has no normal raw SDK seal.
+-          if(revSealing&&revPending===0&&revOriginalPending===0&&revC6HighPending===0&&revC6CdpPending===0){revSealed=true;revPublish(revLocalMode,true);}
++          if(revSealing&&revPending===0&&revOriginalPending===0&&revC6HighPending===0&&revC6CdpPendi\
++        ng===0){revSealed=true;revPublish(revLocalMode,true);}
+         };
+         const revInit=mode=>{
+           if(revCase===mode.case)return;
+@@ -9942,8 +10078,10 @@
+           if(revManagedLoss())revActive=new Map();
+           revCase=mode.case;revSeq=0;revPending=0;revAcked=0;revOriginalPending=0;
+           if(mode.c6){revNativeOrdinal=0;revC6Probed=0;revC6Restored=false;}
+-          if(mode.c6===3&&revProducer===1){revLossRuntime=null;revLossBusy=2;revLossRestoreAttempt=0;revLossRestoreRefusal=0;
+-            revLossLifetime={mode,active:revActive,high:0,operations:0,callbacks:0,cleanupAuthorized:false,retired:false,snapshot:null};}
++          if(mode.c6===3&&revProducer===1){revLossRuntime=null;revLossBusy=2;revLossRestoreAttempt=0\
++        ;revLossRestoreRefusal=0;
++            revLossLifetime={mode,active:revActive,high:0,operations:0,callbacks:0,cleanupAuthorized\
++        :false,retired:false,snapshot:null};}
+           else revLossLifetime=null;
+           if(mode.c6>=1&&mode.c6<=3){revStarted=false;revC6HighPending=0;revC6CdpPending=0;}
+           revTail=Promise.resolve();revLocalMode=mode;revSealing=false;revSealed=false;
+@@ -9958,7 +10096,8 @@
+                 revCheckRoot();
+                 const seal=JSON.parse(revFs.readFileSync(command,'utf8'));
+                 if(mode.c6&&Object.keys(seal).sort().join(',')==='case,epoch,probe,producer'
+-                  &&seal.case===mode.case&&seal.epoch===mode.epoch&&seal.producer===revProducer&&Number.isInteger(seal.probe)&&seal.probe>=1&&seal.probe<=2){
++                  &&seal.case===mode.case&&seal.epoch===mode.epoch&&seal.producer===revProducer&&Num\
++        ber.isInteger(seal.probe)&&seal.probe>=1&&seal.probe<=2){
+                   if(seal.probe<=revC6Probed)return;
+                   if(seal.probe!==revC6Probed+1)throw new Error('C6_PROBE_SEQUENCE');revC6Probed=seal.probe;
+                   const pending=[...revActive].filter(([,operation])=>operation===1);
+@@ -9967,7 +10106,8 @@
+                     pending.length===1&&revActive.size===1,Math.max(0,margin));return;
+                 }
+                 if(Object.keys(seal).sort().join(',')!=='case,epoch,producer,seal'||seal.case!==mode.case
+-                  ||seal.epoch!==mode.epoch||seal.producer!==revProducer||seal.seal!==true)throw new Error('EPOCH');
++                  ||seal.epoch!==mode.epoch||seal.producer!==revProducer||seal.seal!==true)throw \
++        new Error('EPOCH');
+                 if(mode.c6===3&&revProducer===1&&revLossLifetime)revLossLifetime.cleanupAuthorized=true;
+                 if(mode.c6&&revC6RetryRestore){
+                   // Existing teardown seal retries the retained selected restoration task.
+@@ -9989,16 +10129,20 @@
+           try{revInit(mode);}catch{revFail();return;}
+           if(revSealing||revSealed){revFail();return;}
+           revPending++;
+-          const body={case:mode.case,producer:revProducer,seq:++revSeq,event,ordinal,operation,reason,ok,deltaMicros};
++          const body={case:mode.case,producer:revProducer,seq:++revSeq,event,ordinal,operation,reaso\
++        n,ok,deltaMicros};
+           const acknowledgedAt=performance.now();
+           revTail=revTail.then(async()=>{
+             const response=await fetch(revOrigin+'/p3/revocation-observer',{method:'POST',
+-              headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(1000)});
++              headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSign\
++        al.timeout(1000)});
+             const ack=await response.json();
+             if(response.status!==200||Object.keys(ack).sort().join(',')!=='accepted,flipped,seq'
+-              ||ack.accepted!==true||ack.seq!==body.seq||typeof ack.flipped!=='boolean')throw new Error('OBSERVER');
++              ||ack.accepted!==true||ack.seq!==body.seq||typeof ack.flipped!=='boolean')throw new \
++        Error('OBSERVER');
+             revAcked++;
+-            if(event===4&&ack.flipped)revEmit(mode,8,0,0,0,true,Math.ceil((performance.now()-acknowledgedAt)*1000));
++            if(event===4&&ack.flipped)revEmit(mode,8,0,0,0,true,Math.ceil((performance.now()-acknowl\
++        edgedAt)*1000));
+           }).catch(()=>{revFail();}).finally(()=>{
+             revPending--;revPublish(mode,revSealed);revMaybeSeal();
+           });
+@@ -10014,7 +10158,8 @@
+                 Reflect.defineProperty(group.cap,name,descriptor):Reflect.deleteProperty(group.cap,name);
+                 if(!success)revLossRefuse(3);
+               }else revLossRefuse(2);}catch{revLossRefuse(3);}
+-              if(success)group.methods=group.methods.filter(item=>item[0]!==name);else{restored=false;revFail();}
++              if(success)group.methods=group.methods.filter(item=>item[0]!==name);else{restored=fals\
++        e;revFail();}
+             }
+             if(!group.methods.length){group.cap=null;revGroups.delete(group);}
+           }
+@@ -10043,13 +10188,16 @@
+                 return result;
+               }
+               const operation=name==='fillPassword'?1:args[0]?.operation?.kind==='click'?2:3;
+-              const ordinal=++revNativeOrdinal;revActive.set(ordinal,operation);revEmit(mode,2,ordinal,operation);
++              const ordinal=++revNativeOrdinal;revActive.set(ordinal,operation);revEmit(mode,2,ordin\
++        al,operation);
+               const settled=ok=>{revActive.delete(ordinal);revEmit(mode,3,ordinal,operation,0,ok);};
+-              let result;try{result=Reflect.apply(original,this,args);}catch(error){settled(false);throw error;}
++              let result;try{result=Reflect.apply(original,this,args);}catch(error){settled(false);t\
++        hrow error;}
+               try{result.then(()=>settled(true),()=>settled(false)).catch(()=>{revFail();});}catch{revFail();}
+               return result;
+             };
+-            try{if(!Reflect.defineProperty(cap,name,{...(descriptor??{configurable:true,writable:true,enumerable:true}),value:wrapped}))throw new Error('DESCRIPTOR');
++            try{if(!Reflect.defineProperty(cap,name,{...(descriptor??{configurable:true,writable:tru\
++        e,enumerable:true}),value:wrapped}))throw new Error('DESCRIPTOR');
+               group.methods.push([name,descriptor,wrapped]);}catch{revFail();}
+           }
+         };
+@@ -10077,11 +10225,15 @@
+         const c5GrantRecord=(args,success,error,elapsedMs)=>{
+           try{
+             const entry=args[0],grant=args[1],now=Date.now();
+-            const previous=Date.parse(entry?.grant?.owner?.leaseExpiresAt),next=Date.parse(grant?.owner?.leaseExpiresAt),
++            const previous=Date.parse(entry?.grant?.owner?.leaseExpiresAt),next=Date.parse(grant?.ow\
++        ner?.leaseExpiresAt),
+               expiry=Date.parse(entry?.assignment?.expiresAt);
+-            const valid=number=>Number.isFinite(number),delta=(left,right)=>valid(left)&&valid(right)?Math.trunc(left-right):0;
+-            const code=success?0:['LEASE_LOST','CONTEXT_LOST','IDENTITY_MISMATCH','INVALID_CONTRACT','POLICY_DENIED',
+-              'BUDGET_EXCEEDED','REVISION_CONFLICT','REVOKED','CLAIM_DENIED','CALLBACK_DENIED','BUSY'].indexOf(error?.message)+1;
++            const valid=number=>Number.isFinite(number),delta=(left,right)=>valid(left)&&valid(right\
++        )?Math.trunc(left-right):0;
++            const code=success?0:['LEASE_LOST','CONTEXT_LOST','IDENTITY_MISMATCH','INVALID_CONTRACT'\
++        ,'POLICY_DENIED',
++              'BUDGET_EXCEEDED','REVISION_CONFLICT','REVOKED','CLAIM_DENIED','CALLBACK_DENIED','BUSY\
++        '].indexOf(error?.message)+1;
+             const sample={ordinal:++c5GrantOrdinal,initial:args[2]===true,success,code,
+               previousValid:valid(previous),nextValid:valid(next),expiryValid:valid(expiry),
+               previousRemainingMs:delta(previous,now),nextRemainingMs:delta(next,now),
+@@ -10089,16 +10241,19 @@
+               validationMicros:valid(elapsedMs)?Math.ceil(elapsedMs*1000):0};
+             void (async()=>{const fd=await revFs.promises.open(c5GrantFile,revFs.constants.O_WRONLY|
+               revFs.constants.O_CREAT|revFs.constants.O_APPEND|revFs.constants.O_NOFOLLOW,0o600);
+-              try{await fd.writeFile(JSON.stringify(sample)+'\\n');}finally{await fd.close();}})().catch(c5GrantFail);
++              try{await fd.writeFile(JSON.stringify(sample)+'\\n');}finally{await \
++        fd.close();}})().catch(c5GrantFail);
+           }catch{c5GrantFail();}
+         };
+         const revStart=RevRuntime.prototype.start;
+-        RevRuntime.prototype.start=function(...args){const result=Reflect.apply(revStart,this,args),mode=revMode();
++        RevRuntime.prototype.start=function(...args){const \
++        result=Reflect.apply(revStart,this,args),mode=revMode();
+           if(mode?.active&&mode.path===1){const runtime=this;
+             result.then(()=>{try{
+               if(mode.c6){revInit(mode);if(!revGroups.size&&!revC6RetryRestore)revStarted=false;}
+               if(!runtime.accepting||revStarted)throw new Error('OWNER');
+-              if(mode.c6&&mode.path===1){const profile=revFs.lstatSync(runtime.browser.scratchDirectory+'/browser-profile');
++              if(mode.c6&&mode.path===1){const \
++        profile=revFs.lstatSync(runtime.browser.scratchDirectory+'/browser-profile');
+                 if(profile.isSymbolicLink()||profile.dev!==revC6ProfileDev||profile.ino!==revC6ProfileIno)
+                   throw new Error('C6_CONTEXT');revC6ContextBound=true;}
+               revStarted=true;revRuntimes.set(runtime,mode);
+@@ -10110,11 +10265,14 @@
+                   throw new Error('C6_HOOK_COLLISION');revGroups.add(group);
+                 const comparisons=()=>{const stat=revFs.lstatSync(c5ValuesFile);
+                   if(stat.isSymbolicLink()||!stat.isFile()||(stat.mode&0o777)!==0o600||stat.size>32768)
+-                    throw new Error('C6_VALUES');const values=JSON.parse(revFs.readFileSync(c5ValuesFile,'utf8'));
+-                  if(!Array.isArray(values)||values.length!==1||typeof values[0]!=='string'||values[0].length>4096)
++                    throw new Error('C6_VALUES');const \
++        values=JSON.parse(revFs.readFileSync(c5ValuesFile,'utf8'));
++                  if(!Array.isArray(values)||values.length!==1||typeof \
++        values[0]!=='string'||values[0].length>4096)
+                     throw new Error('C6_VALUES');return values;};
+                 if(mode.c6===3){
+-                  const descriptor=Object.getOwnPropertyDescriptor(options,'callback'),original=options.callback;
++                  const descriptor=Object.getOwnPropertyDescriptor(options,'callback'),original=opti\
++        ons.callback;
+                   const lifetime=revLossLifetime;
+                   if(typeof original!=='function'||!descriptor||!lifetime)throw new Error('C6_CALLBACK');
+                   const wrapped=function(...args){
+@@ -10123,7 +10281,8 @@
+                     try{result=Reflect.apply(original,this,args);}catch(error){done();throw error;}
+                     result.then(done,done).catch(()=>{revFail();});return result;
+                   };
+-                  if(!Reflect.defineProperty(options,'callback',{...descriptor,value:wrapped}))throw new Error('C6_CALLBACK');
++                  if(!Reflect.defineProperty(options,'callback',{...descriptor,value:wrapped}))throw\
++         new Error('C6_CALLBACK');
+                   group.methods.push(['callback',descriptor,wrapped]);
+                 }
+                 const hooks={onRawFailure(error){try{const text=error instanceof Error?error.message:'';
+@@ -10137,7 +10296,8 @@
+                   if(comparisons()[0]!==value){revFail();throw new Error('C6_RELEASE_MISMATCH');}
+                   throw new Error('C6_RELEASED '+value+' '+encodeURIComponent(value)+' '
+                     +Buffer.from(value).toString('base64')+' '+ '界'.repeat(3000));};
+-                for(const [name,hook] of Object.entries(hooks)){const descriptor=Object.getOwnPropertyDescriptor(options,name);
++                for(const [name,hook] of Object.entries(hooks)){const \
++        descriptor=Object.getOwnPropertyDescriptor(options,name);
+                   if(!Reflect.defineProperty(options,name,{configurable:true,writable:true,value:hook}))
+                     throw new Error('C6_HOOK');group.methods.push([name,descriptor,hook]);}
+               }
+@@ -10168,14 +10328,16 @@
+             else if(revStarted&&revOwners.get(entry)===mode.case)revEmit(mode,4,1);
+           }catch{revFail();}}return result;};
+         const revInvalidate=RevOwnership.prototype.invalidate;
+-        RevOwnership.prototype.invalidate=function(...args){const result=Reflect.apply(revInvalidate,this,args),mode=revMode();
++        RevOwnership.prototype.invalidate=function(...args){const \
++        result=Reflect.apply(revInvalidate,this,args),mode=revMode();
+           if(mode?.active&&mode.path===1&&revOwners.get(args[0])===mode.case){
+             if(args[0].stopped===true){if(!mode.c6)revEmit(mode,5,1);}else revFail();}return result;};
+         const revStop=RevRuntime.prototype.stop;
+         RevRuntime.prototype.stop=function(...args){const mode=revRuntimes.get(this);
+           if(mode&&!mode.c6){const restored=revRestore();revEmit(mode,6,1,0,0,restored);}
+           const result=Reflect.apply(revStop,this,args);
+-          if(mode){const reason=['REVOKED','LEASE_LOST','EXPIRED','CANCELLED','CONTEXT_LOST',...(mode.c6?['UNKNOWN_OUTCOME']:[])].indexOf(args[0])+1;
++          if(mode){const reason=['REVOKED','LEASE_LOST','EXPIRED','CANCELLED','CONTEXT_LOST',...(mod\
++        e.c6?['UNKNOWN_OUTCOME']:[])].indexOf(args[0])+1;
+             if(this.accepting===false&&reason>0)revEmit(mode,5,1,0,reason);else revFail();
+             const runtime=this;
+             if(mode.c6){
+@@ -10188,7 +10350,8 @@
+                     const lifetime=mode.c6===3?revLossLifetime:null;
+                     if(lifetime&&(!lifetime.cleanupAuthorized||!closeSucceeded))return false;
+                     const pending=()=>runtime.busy||revC6CdpPending||(lifetime?
+-                      lifetime.operations||lifetime.callbacks||revOriginalPending:revActive.size||revC6HighPending);
++                      lifetime.operations||lifetime.callbacks||revOriginalPending:revActive.size||re\
++        vC6HighPending);
+                     while(pending()&&performance.now()<deadline)
+                       await new Promise(resolve=>setTimeout(resolve,10));
+                     if(pending()||(lifetime&&runtime.active)){revLossRefuse(1);revFail();return false;}
+@@ -10196,7 +10359,8 @@
+                     if(!restored){revFail();return false;}
+                     revC6Restored=true;
+                     if(closeSucceeded&&!closedRecorded){closedRecorded=true;revEmit(mode,9,1);}
+-                    if(lifetime){lifetime.snapshot={high:revC6HighPending,active:revActive.size};lifetime.retired=true;}
++                    if(lifetime){lifetime.snapshot={high:revC6HighPending,active:revActive.size};lif\
++        etime.retired=true;}
+                     // Drop only after actual dispatch settlement and exact descriptor restore.
+                     revRuntimes.delete(runtime);
+                     if(revLossSelected()){const actualBusy=runtime.busy;
+@@ -10211,7 +10375,8 @@
+                   revLossRefuse(5);revFail();return retry();
+                 }).catch(()=>{revFail();});
+               } else {
+-                result.then(()=>mode.c6===3?true:revC6RetryRestore?.(),()=>{revLossRefuse(5);revFail();return revC6RetryRestore?.();})
++                result.then(()=>mode.c6===3?true:revC6RetryRestore?.(),()=>{revLossRefuse(5);revFail\
++        ();return revC6RetryRestore?.();})
+                   .catch(()=>{revFail();});
+               }
+             } else {
+@@ -10223,7 +10388,8 @@
+         // S2 observes original operation completion only; no native/provider/model/callback call added.
+         const s2States=new Map(),s2Methods=[];
+         const s2Mode=()=>{const mode=revMode();return mode?.s2===true&&mode.active===false
+-          &&Number.isInteger(mode.case)&&mode.case>0&&(mode.sessionId===null||typeof mode.sessionId==='string')?mode:null;};
++          &&Number.isInteger(mode.case)&&mode.case>0&&(mode.sessionId===null||typeof \
++        mode.sessionId==='string')?mode:null;};
+         const s2Publish=(state,closed=false,restored=false)=>{
+           try{revCheckRoot();const mode=s2Mode();if(!mode||mode.case!==state.epoch)throw new Error('S2_MODE');
+             const matches=[...s2States.values()].filter(item=>item.id===mode.sessionId).length;
+@@ -10231,7 +10397,8 @@
+             if(revFs.existsSync(target)){const old=revFs.lstatSync(target);
+               if(old.isSymbolicLink()||!old.isFile()||(old.mode&0o777)!==0o600)throw new Error('S2_FILE');}
+             const bytes=JSON.stringify({case:state.epoch,producer:1,epoch:state.epoch,failed:state.failed,
+-              closed,restored,stopFulfilled:state.stopFulfilled,active:state.runtime.active,busy:state.runtime.busy,
++              closed,restored,stopFulfilled:state.stopFulfilled,active:state.runtime.active,busy:sta\
++        te.runtime.busy,
+               operations:state.operations,callbacks:state.callbacks,matches,starts:state.starts});
+             if(Buffer.byteLength(bytes)>1024)throw new Error('S2_BOUND');
+             const fd=revFs.openSync(temporary,revFs.constants.O_WRONLY|revFs.constants.O_CREAT|
+@@ -10242,52 +10409,68 @@
+         };
+         const s2Restore=state=>{
+           let restored=true;
+-          for(const [object,name,descriptor,wrapped] of [[state.options,'callback',state.callbackDescriptor,state.callback],...s2Methods]){
++          for(const [object,name,descriptor,wrapped] of \
++        [[state.options,'callback',state.callbackDescriptor,state.callback],...s2Methods]){
+             if(Object.getOwnPropertyDescriptor(object,name)?.value!==wrapped
+               ||!Reflect.defineProperty(object,name,descriptor))restored=false;
+           }
+           return restored;
+         };
+         const s2Drain=state=>{
+-          const mode=s2Mode();if(!mode||mode.case!==state.epoch||mode.sessionId!==state.id||state.draining||state.closed)return;
++          const mode=s2Mode();if(!mode||mode.case!==state.epoch||mode.sessionId!==state.id||state.dr\
++        aining||state.closed)return;
+           if(!state.stopFulfilled)return;state.draining=true;
+           void (async()=>{const deadline=performance.now()+10000;
+             while((state.operations||state.callbacks||state.runtime.busy)&&performance.now()<deadline)
+               await new Promise(resolve=>setTimeout(resolve,10));
+-            if(state.failed||state.starts!==1||state.operations||state.callbacks||state.runtime.busy||state.runtime.active
+-              ||s2States.size!==1||[...s2States.values()].filter(item=>item.id===mode.sessionId).length!==1)throw new Error('S2_PENDING');
++            if(state.failed||state.starts!==1||state.operations||state.callbacks||state.runtime.busy\
++        ||state.runtime.active
++              ||s2States.size!==1||[...s2States.values()].filter(item=>item.id===mode.sessionId).len\
++        gth!==1)throw new Error('S2_PENDING');
+             const restored=s2Restore(state);if(!restored)throw new Error('S2_DESCRIPTOR');
+             state.closed=true;s2Publish(state,true,true);
+           })().catch(()=>{state.failed=true;s2Publish(state);}).finally(()=>{state.draining=false;});
+         };
+         const s2State=runtime=>{
+           const mode=s2Mode();if(!mode)return null;
+-          let state=s2States.get(runtime);if(state){if(state.epoch!==mode.case){state.failed=true;s2Publish(state);return null;}return state;}
++          let state=s2States.get(runtime);if(state){if(state.epoch!==mode.case){state.failed=true;s2\
++        Publish(state);return null;}return state;}
+           const options=runtime.options,descriptor=Object.getOwnPropertyDescriptor(options,'callback');
+-          if(!descriptor||typeof descriptor.value!=='function'||descriptor.configurable!==true){revMarker();return null;}
+-          state={runtime,options,id:runtime.currentIdentity.sessionId,epoch:mode.case,starts:0,operations:0,callbacks:0,
+-            stopFulfilled:false,draining:false,closed:false,failed:false,callbackDescriptor:descriptor,callback:null};
++          if(!descriptor||typeof descriptor.value!=='function'||descriptor.configurable!==true){revM\
++        arker();return null;}
++          state={runtime,options,id:runtime.currentIdentity.sessionId,epoch:mode.case,starts:0,opera\
++        tions:0,callbacks:0,
++            stopFulfilled:false,draining:false,closed:false,failed:false,callbackDescriptor:descript\
++        or,callback:null};
+           const original=descriptor.value;
+           state.callback=function(...args){state.callbacks++;let result;
+-            try{result=Reflect.apply(original,this,args);}catch(error){state.callbacks--;s2Drain(state);throw error;}
+-            try{result.then(()=>{state.callbacks--;s2Drain(state);},()=>{state.callbacks--;s2Drain(state);}).catch(()=>{state.failed=true;s2Publish(state);});}
++            try{result=Reflect.apply(original,this,args);}catch(error){state.callbacks--;s2Drain(sta\
++        te);throw error;}
++            try{result.then(()=>{state.callbacks--;s2Drain(state);},()=>{state.callbacks--;s2Drain(s\
++        tate);}).catch(()=>{state.failed=true;s2Publish(state);});}
+             catch{state.failed=true;s2Publish(state);}return result;};
+-          if(!Reflect.defineProperty(options,'callback',{...descriptor,value:state.callback})){revMarker();return null;}
++          if(!Reflect.defineProperty(options,'callback',{...descriptor,value:state.callback})){revMa\
++        rker();return null;}
+           s2States.set(runtime,state);return state;
+         };
+         for(const name of ['start','dispatch','refreshObservation','stop']){
+-          const descriptor=Object.getOwnPropertyDescriptor(RevRuntime.prototype,name),original=descriptor?.value;
++          const descriptor=Object.getOwnPropertyDescriptor(RevRuntime.prototype,name),original=descr\
++        iptor?.value;
+           if(typeof original!=='function'||descriptor.configurable!==true)throw new Error('S2_DESCRIPTOR');
+           const wrapped=function(...args){const state=s2State(this);
+             if(state&&name!=='stop'){state.operations++;if(name==='start')state.starts++;}
+             let result;try{result=Reflect.apply(original,this,args);}catch(error){
+-              if(state){if(name!=='stop')state.operations--;else state.failed=true;s2Drain(state);}throw error;}
+-            if(state){const settled=fulfilled=>{if(name==='stop'){if(fulfilled)state.stopFulfilled=true;else{state.failed=true;s2Publish(state);}}
++              if(state){if(name!=='stop')state.operations--;else \
++        state.failed=true;s2Drain(state);}throw error;}
++            if(state){const settled=fulfilled=>{if(name==='stop'){if(fulfilled)state.stopFulfilled=t\
++        rue;else{state.failed=true;s2Publish(state);}}
+                 else state.operations--;s2Drain(state);};
+-              try{result.then(()=>settled(true),()=>settled(false)).catch(()=>{state.failed=true;s2Publish(state);});}
++              try{result.then(()=>settled(true),()=>settled(false)).catch(()=>{state.failed=true;s2P\
++        ublish(state);});}
+               catch{state.failed=true;s2Publish(state);}}
+             return result;};
+-          if(!Reflect.defineProperty(RevRuntime.prototype,name,{...descriptor,value:wrapped}))throw new Error('S2_DESCRIPTOR');
++          if(!Reflect.defineProperty(RevRuntime.prototype,name,{...descriptor,value:wrapped}))throw \
++        new Error('S2_DESCRIPTOR');
+           s2Methods.push([RevRuntime.prototype,name,descriptor,wrapped]);
+         }
+         """
+@@ -10310,9 +10493,11 @@
+             &&args[0]?.url===mode.controlUrl;
+           if(selected){try{revInit(mode);}catch{revFail();}revOriginalPending++;}
+           let result;try{result=Reflect.apply(revSend,this,args);}catch(error){
+-            if(selected){revOriginalPending--;revFail();revPublish(mode,revSealed);revMaybeSeal();}throw error;}
++            if(selected){revOriginalPending--;revFail();revPublish(mode,revSealed);revMaybeSeal();}t\
++        hrow error;}
+           if(selected){result.then(outcome=>{try{
+-            if(outcome.kind==='response'&&outcome.status===200&&revValidControl(outcome.body,mode.executionId)){
++            if(outcome.kind==='response'&&outcome.status===200&&revValidControl(outcome.body,mode.ex\
++        ecutionId)){
+               if(!revRequestsCancel(outcome.body))revEmit(mode,4,1);
+             }
+           }catch{revFail();}finally{revOriginalPending--;revPublish(mode,revSealed);revMaybeSeal();}},
+@@ -10335,7 +10520,8 @@
+           on(event,listener){return Reflect.apply(process.on,process,[event,function(...args){
+             const mode=revMode(),message=args[0];
+             if(mode?.c6&&mode.path===2){
+-              if(message?.kind==='launch')revC6RunDeadline=Math.min(Date.parse(message.admission?.runDeadlineAt),Date.now()+message.totalRuntimeMs);
++              if(message?.kind==='launch')revC6RunDeadline=Math.min(Date.parse(message.admission?.ru\
++        nDeadlineAt),Date.now()+message.totalRuntimeMs);
+               if(message?.kind==='execute')revC6StepMs=message.stepTimeoutMs;
+             }
+             const result=Reflect.apply(listener,this,args);
+@@ -10365,18 +10551,25 @@
+     return """
+         const c5Variants=value=>{
+           const utf8=Buffer.from(value,'utf8'),le=Buffer.from(value,'utf16le'),be=Buffer.from(le);be.swap16();
+-          const percent=[...utf8].map(byte=>String.fromCharCode(37)+byte.toString(16).padStart(2,'0').toUpperCase()).join('');
+-          const unicode=[...Array(value.length)].map((_,index)=>String.fromCharCode(92)+'u'+value.charCodeAt(index).toString(16).padStart(4,'0')).join('');
++          const percent=[...utf8].map(byte=>String.fromCharCode(37)+byte.toString(16).padStart(2,'0'\
++        ).toUpperCase()).join('');
++          const unicode=[...Array(value.length)].map((_,index)=>String.fromCharCode(92)+'u'+value.ch\
++        arCodeAt(index).toString(16).padStart(4,'0')).join('');
+           const json=JSON.stringify(value),form=new URLSearchParams({v:value}).toString().slice(2);
+-          return [utf8,le,be,...[utf8.toString('base64'),utf8.toString('hex'),utf8.toString('hex').toUpperCase(),
+-            percent,percent.toLowerCase(),encodeURIComponent(value),form,form.replaceAll('+',String.fromCharCode(37)+'20'),
+-            unicode,unicode.toUpperCase().replaceAll('U','u'),json,json.slice(1,-1)].map(text=>Buffer.from(text,'utf8'))];
++          return [utf8,le,be,...[utf8.toString('base64'),utf8.toString('hex'),utf8.toString('hex').t\
++        oUpperCase(),
++            percent,percent.toLowerCase(),encodeURIComponent(value),form,form.replaceAll('+',String.\
++        fromCharCode(37)+'20'),
++            unicode,unicode.toUpperCase().replaceAll('U','u'),json,json.slice(1,-1)].map(text=>Buffe\
++        r.from(text,'utf8'))];
+         };
+         const c5ProfileHitCategory=relative=>{
+           const parts=relative.split('/'),name=parts.at(-1);
+           if(parts.some(part=>['Cache','Cache_Data'].includes(part)))return 0;
+-          if(parts.some(part=>['Code Cache','GPUCache','DawnCache','ShaderCache','GrShaderCache'].includes(part)))return 1;
+-          if(parts.some(part=>['Local Storage','Session Storage','IndexedDB','WebStorage','CacheStorage'].includes(part)))return 2;
++          if(parts.some(part=>['Code Cache','GPUCache','DawnCache','ShaderCache','GrShaderCache'].in\
++        cludes(part)))return 1;
++          if(parts.some(part=>['Local Storage','Session \
++        Storage','IndexedDB','WebStorage','CacheStorage'].includes(part)))return 2;
+           if(parts.includes('Sessions'))return 3;
+           if(['History','History-journal'].includes(name))return 4;
+           if(['Preferences','Secure Preferences','Local State'].includes(name))return 5;
+@@ -10392,16 +10585,20 @@
+             if(stat.isSymbolicLink()||!stat.isDirectory()||stat.dev!==canonical.dev||stat.ino!==canonical.ino
+               ||stat.uid!==process.getuid())throw new Error('ROOT');
+             const valuesStat=p4Fs.lstatSync(c5ValuesFile);
+-            if(valuesStat.isSymbolicLink()||!valuesStat.isFile()||(valuesStat.mode&0o777)!==0o600||valuesStat.size>32768)throw new Error('VALUES');
++            if(valuesStat.isSymbolicLink()||!valuesStat.isFile()||(valuesStat.mode&0o777)!==0o600||v\
++        aluesStat.size>32768)throw new Error('VALUES');
+             const values=JSON.parse(p4Fs.readFileSync(c5ValuesFile,'utf8'));
+-            if(!Array.isArray(values)||values.length<1||values.length>16||values.some(value=>typeof value!=='string'||value.length>4096))throw new Error('VALUES');
++            if(!Array.isArray(values)||values.length<1||values.length>16||values.some(value=>typeof \
++        value!=='string'||value.length>4096))throw new Error('VALUES');
+             const variants=values.flatMap(c5Variants),walk=path=>{
+               for(const entry of p4Fs.readdirSync(path,{withFileTypes:true})){
+                 const child=path+'/'+entry.name,info=p4Fs.lstatSync(child);
+                 if(info.isSymbolicLink()){
+-                  if(path!==root||!['SingletonLock','SingletonCookie','SingletonSocket','RunningChromeVersion'].includes(entry.name)
++                  if(path!==root||!['SingletonLock','SingletonCookie','SingletonSocket','RunningChro\
++        meVersion'].includes(entry.name)
+                     ||info.size>1024){
+-                    linkName=['SingletonLock','SingletonCookie','SingletonSocket','RunningChromeVersion'].indexOf(entry.name)+1;
++                    linkName=['SingletonLock','SingletonCookie','SingletonSocket','RunningChromeVers\
++        ion'].indexOf(entry.name)+1;
+                     linkRoot=path===root;linkType=1;linkBytes=Number.isFinite(info.size)?info.size:0;
+                     if(linkRoot&&linkName===4&&info.size<=1024){try{const target=p4Fs.readlinkSync(child);
+                       linkTargetRead=true;
+@@ -10424,28 +10621,37 @@
+                   if(!opened.isFile()||opened.dev!==info.dev||opened.ino!==info.ino
+                     ||opened.size>67108864||bytes+opened.size>268435456)throw new Error('FD');
+                   const buffer=Buffer.alloc(opened.size+1);let length=0;
+-                  while(length<buffer.length){const read=p4Fs.readSync(fd,buffer,length,buffer.length-length,null);
++                  while(length<buffer.length){const \
++        read=p4Fs.readSync(fd,buffer,length,buffer.length-length,null);
+                     if(read===0)break;length+=read;}
+                   const after=p4Fs.fstatSync(fd);
+                   if(length>opened.size||after.size!==length||after.dev!==opened.dev||after.ino!==opened.ino)
+                     throw new Error('CHANGED');
+                   const body=buffer.subarray(0,length);files++;bytes+=body.length;
+-                  for(const variant of variants)if(body.includes(variant)){hits++;hitCategories[c5ProfileHitCategory(child.slice(root.length+1))]++;}
++                  for(const variant of variants)if(body.includes(variant)){hits++;hitCategories[c5Pr\
++        ofileHitCategory(child.slice(root.length+1))]++;}
+                 }finally{p4Fs.closeSync(fd);}
+               }
+             };walk(root);
+           }catch(error){
+             failed=true;
+-            stage=['ROOT','VALUES','SYMLINK','LINKBOUND','BOUND','PATH','FD','CHANGED'].indexOf(error?.message)+1;
+-            errno=['EACCES','EPERM','ENOENT','ELOOP','ENOTDIR','EISDIR','EIO','EBADF','EMFILE','ENFILE'].indexOf(error?.code)+1;
+-            if(stage===0){const operation=['open','read','scandir','lstat','realpath','fstat','close','readlink'].indexOf(error?.syscall);
++            stage=['ROOT','VALUES','SYMLINK','LINKBOUND','BOUND','PATH','FD','CHANGED'].indexOf(erro\
++        r?.message)+1;
++            errno=['EACCES','EPERM','ENOENT','ELOOP','ENOTDIR','EISDIR','EIO','EBADF','EMFILE','ENFI\
++        LE'].indexOf(error?.code)+1;
++            if(stage===0){const operation=['open','read','scandir','lstat','realpath','fstat','close\
++        ','readlink'].indexOf(error?.syscall);
+               if(operation>=0)stage=9+operation;}
+           }
+           try{const fd=p4Fs.openSync(c5CountsFile,p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|
+             p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);
+-            try{p4Fs.writeSync(fd,JSON.stringify({files,bytes,hits,links,failed,stage,errno,linkName,linkRoot,linkType,linkBytes,linkTargetRead,linkTargetIsVersion,hitCategories})+'\\n');}finally{p4Fs.closeSync(fd);}}
+-          catch{try{const fd=p4Fs.openSync(c5CountsFile+'-failed',p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|
+-            p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);try{p4Fs.writeSync(fd,'1');}finally{p4Fs.closeSync(fd);}}catch{}}
++            try{p4Fs.writeSync(fd,JSON.stringify({files,bytes,hits,links,failed,stage,errno,linkName\
++        ,linkRoot,linkType,linkBytes,linkTargetRead,linkTargetIsVersion,hitCategories})+'\\n');}fina\
++        lly{p4Fs.closeSync(fd);}}
++          catch{try{const fd=p4Fs.openSync(c5CountsFile+'-failed',p4Fs.constants.O_WRONLY|p4Fs.const\
++        ants.O_CREAT|
++            p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);try{p4Fs.writeSync(fd,'1');}fin\
++        ally{p4Fs.closeSync(fd);}}catch{}}
+         };
+         """
+         .stripTrailing();
+@@ -10464,38 +10670,49 @@
+         const c5ValuesFile=%s,c5CountsFile=%s;
+         import {installObservationCollector as c6TrustedCollector} from %s;
+         %s
+-        // Selected C6 observes the original SDK primitive; current-document authority stays in production guards.
++        // Selected C6 observes the original SDK primitive; current-document authority stays in \
++        production guards.
+         const c6CdpHolders=new WeakMap();
+-        const c6FillSource='function(target, origin, allowedOrigins, value) { return this.fillPasswordResult(target, origin, allowedOrigins, value); }';
++        const c6FillSource='function(target, origin, allowedOrigins, value) { return \
++        this.fillPasswordResult(target, origin, allowedOrigins, value); }';
+         const c6InstallSource=c6TrustedCollector.toString();
+         const c6Drop=state=>{state.objectId=null;state.world=null;};
+         const c6InstallSend=(holder,session,page)=>{
+-          if(holder.sessions.has(session)){revFail();return;}holder.sessions.set(session,{page,frame:null,world:null,objectId:null});
+-          const state=holder.sessions.get(session),descriptor=Object.getOwnPropertyDescriptor(session,'send'),original=session.send;
++          if(holder.sessions.has(session)){revFail();return;}holder.sessions.set(session,{page,frame\
++        :null,world:null,objectId:null});
++          const state=holder.sessions.get(session),descriptor=Object.getOwnPropertyDescriptor(sessio\
++        n,'send'),original=session.send;
+           if(typeof original!=='function'){revFail();return;}
+           const group={cap:session,methods:[]};revGroups.add(group);
+           const wrapped=function(...args){
+-            // Only fixed source/opaque receiver metadata is read. The arguments array and result.value are untouched.
+-            const method=args[0],metadata=args[1],source=method==='Runtime.callFunctionOn'?metadata?.functionDeclaration:null;
++            // Only fixed source/opaque receiver metadata is read. The arguments array and \
++        result.value are untouched.
++            const method=args[0],metadata=args[1],source=method==='Runtime.callFunctionOn'?metadata?\
++        .functionDeclaration:null;
+             const receiver=method==='Runtime.callFunctionOn'?metadata?.objectId:null;
+             const install=source===c6InstallSource,fill=source===c6FillSource;
+             const probe=source==='function() { return true; }'&&receiver===state.objectId;
+             const worldRequest=method==='Page.createIsolatedWorld'&&typeof metadata?.worldName==='string'
+               &&metadata.worldName.startsWith('checks-observation-');
+             const frame=worldRequest?metadata.frameId:null,world=install?metadata?.executionContextId:null;
+-            if(worldRequest||source==='function() { this.dispose(); }'||method==='Runtime.releaseObjectGroup')c6Drop(state);
+-            let result;try{result=Reflect.apply(original,this,args);}catch(error){if(probe)c6Drop(state);throw error;}
++            if(worldRequest||source==='function() { this.dispose(); \
++        }'||method==='Runtime.releaseObjectGroup')c6Drop(state);
++            let result;try{result=Reflect.apply(original,this,args);}catch(error){if(probe)c6Drop(st\
++        ate);throw error;}
+             if(method==='Page.getFrameTree'||worldRequest||install||probe){
+               try{result.then(reply=>{try{
+                 if(this!==session||holder.closed)throw new Error('C6_CDP_IDENTITY');
+                 if(method==='Page.getFrameTree'){
+-                  const id=reply?.frameTree?.frame?.id;if(typeof id!=='string')throw new Error('C6_CDP_FRAME');state.frame=id;
++                  const id=reply?.frameTree?.frame?.id;if(typeof id!=='string')throw new \
++        Error('C6_CDP_FRAME');state.frame=id;
+                 }else if(worldRequest){
+-                  if(frame!==state.frame||!Number.isSafeInteger(reply?.executionContextId))throw new Error('C6_CDP_WORLD');
++                  if(frame!==state.frame||!Number.isSafeInteger(reply?.executionContextId))throw \
++        new Error('C6_CDP_WORLD');
+                   state.world=reply.executionContextId;
+                 }else if(install){
+                   const id=reply?.result?.objectId;
+-                  if(world!==state.world||state.frame===null||typeof id!=='string'||reply?.exceptionDetails!==undefined)
++                  if(world!==state.world||state.frame===null||typeof \
++        id!=='string'||reply?.exceptionDetails!==undefined)
+                     throw new Error('C6_CDP_INSTALL');
+                   state.objectId=id;
+                 }
+@@ -10511,37 +10728,46 @@
+                 &&holder.dev===revC6ProfileDev&&holder.ino===revC6ProfileIno&&revStarted
+                 &&(current.path===1?revC6ContextBound:revReady);
+               if(!owned){revFail();return result;}
+-              const ordinal=++revNativeOrdinal,active=revActive,lifetime=revLossSelected()?revLossLifetime:null;
++              const ordinal=++revNativeOrdinal,active=revActive,lifetime=revLossSelected()?revLossLi\
++        fetime:null;
+               active.set(ordinal,1);revEmit(holder.mode,2,ordinal,1);
+               const settled=fulfilled=>{
+                 const removed=active.delete(ordinal);
+-                if(lifetime?.retired)return; // Exact actual settlement remains private; no late observer output.
++                if(lifetime?.retired)return; // Exact actual settlement remains private; no late \
++        observer output.
+                 if(!removed)revFail();revEmit(holder.mode,3,ordinal,1,0,fulfilled);};
+               try{result.then(()=>settled(true),()=>settled(false)).catch(()=>{revFail();});}catch{revFail();}
+             }
+             return result;
+           };
+-          try{if(!Reflect.defineProperty(session,'send',{...(descriptor??{configurable:true,writable:true,enumerable:true}),value:wrapped}))
+-            throw new Error('C6_CDP_DESCRIPTOR');group.methods.push(['send',descriptor,wrapped]);}catch{revFail();}
++          try{if(!Reflect.defineProperty(session,'send',{...(descriptor??{configurable:true,writable\
++        :true,enumerable:true}),value:wrapped}))
++            throw new Error('C6_CDP_DESCRIPTOR');group.methods.push(['send',descriptor,wrapped]);}ca\
++        tch{revFail();}
+         };
+         const c6BindContext=(context,mode)=>{
+           revInit(mode);if(c6CdpHolders.has(context)){revFail();return;}
+           const holder={context,mode,dev:revC6ProfileDev,ino:revC6ProfileIno,closed:false,sessions:new Map()};
+           c6CdpHolders.set(context,holder);
+-          const descriptor=Object.getOwnPropertyDescriptor(context,'newCDPSession'),original=context.newCDPSession;
++          const descriptor=Object.getOwnPropertyDescriptor(context,'newCDPSession'),original=context\
++        .newCDPSession;
+           if(typeof original!=='function'){revFail();return;}
+           const group={cap:context,methods:[]};revGroups.add(group);
+           const wrapped=function(...args){const page=args[0];revC6CdpPending++;let result;
+-            try{result=Reflect.apply(original,this,args);}catch(error){revC6CdpPending--;revFail();throw error;}
++            try{result=Reflect.apply(original,this,args);}catch(error){revC6CdpPending--;revFail();t\
++        hrow error;}
+             try{result.then(session=>{try{
+               if(this!==context||holder.closed||!page||!session)throw new Error('C6_CDP_CONTEXT');
+               // The original SDK creation validates this Page under this same actual context.
+               c6InstallSend(holder,session,page);
+             }catch{revFail();}finally{revC6CdpPending--;revPublish(mode,revSealed);revMaybeSeal();}},
+-            ()=>{revC6CdpPending--;revFail();revPublish(mode,revSealed);revMaybeSeal();}).catch(()=>{revFail();});}
++            ()=>{revC6CdpPending--;revFail();revPublish(mode,revSealed);revMaybeSeal();}).catch(()=>\
++        {revFail();});}
+             catch{revFail();}return result;};
+-          try{if(!Reflect.defineProperty(context,'newCDPSession',{...(descriptor??{configurable:true,writable:true,enumerable:true}),value:wrapped}))
+-            throw new Error('C6_CDP_DESCRIPTOR');group.methods.push(['newCDPSession',descriptor,wrapped]);}catch{revFail();}
++          try{if(!Reflect.defineProperty(context,'newCDPSession',{...(descriptor??{configurable:true\
++        ,writable:true,enumerable:true}),value:wrapped}))
++            throw new Error('C6_CDP_DESCRIPTOR');group.methods.push(['newCDPSession',descriptor,wrap\
++        ped]);}catch{revFail();}
+         };
+         const c6ClosedContext=context=>{const holder=c6CdpHolders.get(context);if(holder){holder.closed=true;
+           for(const state of holder.sessions.values())c6Drop(state);}};
+@@ -10558,7 +10784,8 @@
+               const actual=p4Fs.lstatSync(args[0]),canonical=p4Fs.realpathSync(args[0]);
+               if(actual.isSymbolicLink()||!actual.isDirectory()||canonical!==args[0]
+                 ||actual.uid!==process.getuid()||(actual.mode&0o777)!==0o700
+-                ||!Number.isSafeInteger(actual.dev)||!Number.isSafeInteger(actual.ino))throw new Error('C6_PROFILE');
++                ||!Number.isSafeInteger(actual.dev)||!Number.isSafeInteger(actual.ino))throw new \
++        Error('C6_PROFILE');
+               revC6ProfileDev=actual.dev;revC6ProfileIno=actual.ino;
+             }catch(error){revFail();return Promise.resolve(Reflect.apply(context.close,context,[]))
+               .then(()=>{throw error;},closeFailure=>{revFail();throw closeFailure;});}}
+@@ -10606,7 +10833,8 @@
+                     &&browser!==null&&typeof browser?.isConnected==='function'&&browser.isConnected()===false;
+                   if(!unavailable){
+                     try{await Promise.race([fence(),new Promise((_,reject)=>{
+-                      timer=setTimeout(()=>reject(new Error('TIME')),Math.max(1,deadline-performance.now()));})]);}
++                      timer=setTimeout(()=>reject(new \
++        Error('TIME')),Math.max(1,deadline-performance.now()));})]);}
+                     finally{clearTimeout(timer);}
+                     fenceSucceeded=true;
+                   } // Genuine bound disconnection supplies UNKNOWN, never a healthy page fence.
+@@ -10627,7 +10855,8 @@
+                     // settle before descriptor removal. Neither timeout nor Stop grants this.
+                     const observerDeadline=performance.now()+1000;
+                     if(selected.path===2){
+-                      while((revActive.size||revC6HighPending||revC6CdpPending)&&performance.now()<observerDeadline)
++                      while((revActive.size||revC6HighPending||revC6CdpPending)&&performance.now()<o\
++        bserverDeadline)
+                         await new Promise(resolve=>setTimeout(resolve,10));
+                       if(revActive.size||revC6HighPending||revC6CdpPending)revFail();
+                       else{revC6Restored=revRestore();revEmit(selected,6,1,0,0,revC6Restored);}
+@@ -11125,7 +11354,8 @@
+             s.sealed=true;const deadline=performance.now()+2500;let timer;
+             try{
+               await Promise.race([Promise.all([...s.pending]),new Promise((_,reject)=>{
+-                timer=setTimeout(()=>reject(new Error('PENDING')),Math.max(1,deadline-performance.now()));})]);
++                timer=setTimeout(()=>reject(new \
++        Error('PENDING')),Math.max(1,deadline-performance.now()));})]);
+               if(s.pending.size||s.failed)throw new Error('FAILED');
+               await request('fence',{seq:s.sequence,pending:s.pending.size,failed:s.failed,
+                 writes:s.writes,submits:s.submits},deadline);
+@@ -11136,8 +11366,10 @@
+           })();
+           globalThis.__p4NativeObserver={seal};
+           document.addEventListener('input',event=>{
+-            if(event.target instanceof HTMLInputElement&&event.target.type==='password')void notify('write');});
+-          document.addEventListener('submit',()=>{void notify('submit');void seal().catch(()=>{s.failed=true;});});
++            if(event.target instanceof HTMLInputElement&&event.target.type==='password')void \
++        notify('write');});
++          document.addEventListener('submit',()=>{void notify('submit');void \
++        seal().catch(()=>{s.failed=true;});});
+           %s
+           void notify('registered');
+         })();</script>
+@@ -11697,10 +11929,14 @@
+     }
+ 
+     void enterCurrent() {
+-      if (sampler == null || stopping || System.nanoTime() >= end) return;
++      if (sampler == null || stopping || System.nanoTime() >= end) {
++        return;
++      }
+       try {
+         synchronized (gate) {
+-          if (stopping) return;
++          if (stopping) {
++            return;
++          }
+           if (executing.size() >= MAX_THREADS) {
+             status = Status.FAILED;
+             return;
+@@ -11735,7 +11971,9 @@
+           }
+           try {
+             for (Thread target : snapshot) {
+-              if (stopping || System.nanoTime() >= end) break;
++              if (stopping || System.nanoTime() >= end) {
++                break;
++              }
+               StackTraceElement[] stack = target.getStackTrace();
+               try {
+                 Thread.State state = target.getState(); // Observed state; not atomic with stack.
+@@ -11744,14 +11982,18 @@
+                   continue;
+                 }
+                 Segment segment = classify(stack);
+-                if (segment == Segment.OTHER) unattributed++;
++                if (segment == Segment.OTHER) {
++                  unattributed++;
++                }
+                 counts[segment.ordinal()][state.ordinal()]++;
+                 if (segment == Segment.JDBC_PATH && state == Thread.State.WAITING) {
+                   triggerPgOnce(target);
+                 }
+                 if (segment != Segment.OTHER
+                     && status != Status.FAILED
+-                    && status != Status.NON_QUIESCENT) status = Status.OBSERVED;
++                    && status != Status.NON_QUIESCENT) {
++                      status = Status.OBSERVED;
++                    }
+               } finally {
+                 java.util.Arrays.fill(stack, null);
+               }
+@@ -11796,22 +12038,38 @@
+     }
+ 
+     private static int pgStage(String original) {
+-      if (original == null || original.length() > 4096) return 6;
++      if (original == null || original.length() > 4096) {
++        return 6;
++      }
+       String sql = original.toLowerCase(java.util.Locale.ROOT).replaceAll("\\s+", " ").trim();
+       if (sql.startsWith("select state,revoked_at from studio_guided_sessions")
+-          && sql.contains("for update")) return 0;
++          && sql.contains("for update")) {
++            return 0;
++          }
+       if (sql.startsWith("select document::text,progress::text from studio_guided_sessions")
+-          && sql.contains("for update")) return 1;
++          && sql.contains("for update")) {
++            return 1;
++          }
+       if (sql.contains(" from ui_tests ")
+-          && (sql.contains("for update") || sql.contains("for no key update"))) return 2;
+-      if (sql.startsWith("select m.manifest::text from studio_guided_translation_state")) return 3;
+-      if (sql.startsWith("with updated as (update studio_guided_sessions")) return 4;
+-      if (sql.startsWith("update studio_guided_sessions")) return 5;
++          && (sql.contains("for update") || sql.contains("for no key update"))) {
++            return 2;
++          }
++      if (sql.startsWith("select m.manifest::text from studio_guided_translation_state")) {
++        return 3;
++      }
++      if (sql.startsWith("with updated as (update studio_guided_sessions")) {
++        return 4;
++      }
++      if (sql.startsWith("update studio_guided_sessions")) {
++        return 5;
++      }
+       return 6;
+     }
+ 
+     private static int pgWait(String type) {
+-      if (type == null) return 0;
++      if (type == null) {
++        return 0;
++      }
+       int index =
+           List.of("Lock", "LWLock", "IO", "Client", "IPC", "Timeout", "Activity", "BufferPin")
+               .indexOf(type);
+@@ -11819,7 +12077,9 @@
+     }
+ 
+     private static int pgEvent(String event) {
+-      if (event == null) return 0;
++      if (event == null) {
++        return 0;
++      }
+       int index =
+           List.of("transactionid", "tuple", "relation", "ClientRead", "ClientWrite", "DataFileRead")
+               .indexOf(event);
+@@ -11846,8 +12106,10 @@
+             statement.setMaxRows(64);
+             String catalog =
+                 "SELECT a.pid,a.query,a.wait_event_type,a.wait_event,b.pid AS blocker_pid,b.query AS blocker_query,"
+-                    + " EXISTS(SELECT 1 FROM pg_locks l WHERE l.pid=a.pid AND l.relation='studio_guided_sessions'::regclass) AS owner_relation,"
+-                    + " EXISTS(SELECT 1 FROM pg_locks l WHERE l.pid=a.pid AND l.relation='ui_tests'::regclass) AS source_relation"
++                    + (" EXISTS(SELECT 1 FROM pg_locks l WHERE l.pid=a.pid AND "
++                        + "l.relation='studio_guided_sessions'::regclass) AS owner_relation,")
++                    + (" EXISTS(SELECT 1 FROM pg_locks l WHERE l.pid=a.pid AND "
++                        + "l.relation='ui_tests'::regclass) AS source_relation")
+                     + " FROM pg_stat_activity a LEFT JOIN LATERAL unnest(pg_blocking_pids(a.pid)) blocked(pid) ON true"
+                     + " LEFT JOIN pg_stat_activity b ON b.pid=blocked.pid"
+                     + " WHERE a.datname=current_database() AND a.backend_type='client backend'"
+@@ -11871,16 +12133,26 @@
+                 if (privatePids.add(pid)) {
+                   pgStagesAndWaits[stage][wait]++;
+                   pgWaitEvents[pgEvent(rows.getString("wait_event"))]++;
+-                  if (stage < 6) candidates.add(pid);
++                  if (stage < 6) {
++                    candidates.add(pid);
++                  }
+                   boolean owner = rows.getBoolean("owner_relation"),
+                       source = rows.getBoolean("source_relation");
+-                  if (owner) pgRelations[0]++;
+-                  if (source) pgRelations[1]++;
+-                  if (!owner && !source) pgRelations[2]++;
++                  if (owner) {
++                    pgRelations[0]++;
++                  }
++                  if (source) {
++                    pgRelations[1]++;
++                  }
++                  if (!owner && !source) {
++                    pgRelations[2]++;
++                  }
+                 }
+                 int blocker = rows.getInt("blocker_pid");
+                 if (!rows.wasNull() && blockers.add(blocker))
+-                  pgBlockerStages[pgStage(blockerQuery)]++;
++                  {
++                    pgBlockerStages[pgStage(blockerQuery)]++;
++                  }
+               }
+             }
+           }
+@@ -11896,7 +12168,9 @@
+                   : pgCandidates == 1 ? PgStatus.OBSERVED : PgStatus.UNOBSERVED;
+         }
+       } catch (Throwable failed) {
+-        if (pgStatus != PgStatus.NON_QUIESCENT) pgStatus = PgStatus.FAILED;
++        if (pgStatus != PgStatus.NON_QUIESCENT) {
++          pgStatus = PgStatus.FAILED;
++        }
+         // Never retain/log raw SQL/IDs/credentials/exception.
+       } finally {
+         privatePids.clear();
+@@ -11922,7 +12196,9 @@
+                                   "com.citi.put.checks.studio.guided.session.GuidedSessionService")
+                           && (frame.getMethodName().equals("claim")
+                               || frame.getMethodName().startsWith("lambda$claim$")));
+-      if (!claim) return Segment.OTHER;
++      if (!claim) {
++        return Segment.OTHER;
++      }
+       String streamType = C5CanaryStream.class.getName();
+       String captureNestedType = C5Capture.class.getName() + "$";
+       for (StackTraceElement frame : stack) {
+@@ -11936,20 +12212,36 @@
+       for (StackTraceElement frame : stack) {
+         String type = frame.getClassName(), method = frame.getMethodName();
+         if (type.startsWith("ch.qos.logback.") || type.startsWith("net.logstash.logback."))
+-          return Segment.LOG_ENCODER;
++          {
++            return Segment.LOG_ENCODER;
++          }
+         if (type.startsWith("com.networknt.") || type.endsWith("GuidedContracts"))
+-          return Segment.SCHEMA;
+-        if (type.startsWith("com.fasterxml.jackson.")) return Segment.JSON_RENDER;
++          {
++            return Segment.SCHEMA;
++          }
++        if (type.startsWith("com.fasterxml.jackson.")) {
++          return Segment.JSON_RENDER;
++        }
+         if (type.startsWith("org.postgresql.") || type.startsWith("org.springframework.jdbc."))
+-          return Segment.JDBC_PATH;
++          {
++            return Segment.JDBC_PATH;
++          }
+         if (type.endsWith("GuidedSessionRepository") && method.equals("lock"))
+-          return Segment.OWNER_LOCK;
++          {
++            return Segment.OWNER_LOCK;
++          }
+         if (type.endsWith("GuidedProductionSessionAccess") && method.equals("checkCurrent"))
+-          return Segment.CURRENT_AUTH;
++          {
++            return Segment.CURRENT_AUTH;
++          }
+         if (type.endsWith("GuidedProductionSessionAccess") && method.equals("checkSourceCurrent")
+-            || type.endsWith("GuidedSourceSnapshotRepository")) return Segment.SOURCE_CHECK;
++            || type.endsWith("GuidedSourceSnapshotRepository")) {
++              return Segment.SOURCE_CHECK;
++            }
+         if (type.startsWith("org.springframework.transaction.") && method.equals("commit"))
+-          return Segment.COMMIT;
++          {
++            return Segment.COMMIT;
++          }
+       }
+       return Segment.OTHER;
+     }
+@@ -11960,42 +12252,54 @@
+       synchronized (gate) {
+         executing.clear();
+       }
+-      if (sampler == null) return;
++      if (sampler == null) {
++        return;
++      }
+       boolean restoreInterrupt = Thread.interrupted();
+       long deadline = System.nanoTime() + java.time.Duration.ofSeconds(1).toNanos();
+       try {
+         sampler.interrupt();
+         while (sampler.isAlive()) {
+           long remaining = deadline - System.nanoTime();
+-          if (remaining <= 0) break;
++          if (remaining <= 0) {
++            break;
++          }
+           try {
+             sampler.join(java.time.Duration.ofNanos(remaining));
+           } catch (InterruptedException interrupted) {
+             restoreInterrupt = true;
+           }
+         }
+-        if (sampler.isAlive()) status = Status.NON_QUIESCENT;
++        if (sampler.isAlive()) {
++          status = Status.NON_QUIESCENT;
++        }
+         Thread observer = pgObserver;
+         if (observer != null) {
+           observer.interrupt();
+           long pgDeadline = System.nanoTime() + Duration.ofSeconds(3).toNanos();
+           while (observer.isAlive()) {
+             long remaining = pgDeadline - System.nanoTime();
+-            if (remaining <= 0) break;
++            if (remaining <= 0) {
++              break;
++            }
+             try {
+               observer.join(Duration.ofNanos(remaining));
+             } catch (InterruptedException interrupted) {
+               restoreInterrupt = true;
+             }
+           }
+-          if (observer.isAlive()) pgStatus = PgStatus.NON_QUIESCENT;
++          if (observer.isAlive()) {
++            pgStatus = PgStatus.NON_QUIESCENT;
++          }
+         }
+       } finally {
+         synchronized (gate) {
+           executing.clear();
+           entered.clear();
+         }
+-        if (restoreInterrupt) Thread.currentThread().interrupt();
++        if (restoreInterrupt) {
++          Thread.currentThread().interrupt();
++        }
+       }
+       // Export counts ONLY if sampler joined. NON_QUIESCENT never claims all refs discarded:
+       // public virtual-thread getStackTrace can retry/yield without honoring interruption.
+@@ -12156,8 +12460,12 @@
+ 
+     private void writeS2Mode(String id) throws Exception {
+       ObjectNode mode = C.object().put("active", false).put("s2", true).put("case", s2Epoch);
+-      if (id == null) mode.putNull("sessionId");
+-      else mode.put("sessionId", id);
++      if (id == null) {
++        mode.putNull("sessionId");
++      }
++      else {
++        mode.put("sessionId", id);
++      }
+       Files.writeString(
+           TEMP.resolve("p4-revocation-state.json"), mode.toString(), StandardCharsets.UTF_8);
+     }
+@@ -12541,8 +12849,12 @@
+         java.time.Instant dispatchTime) {
+       JsonNode expected = poolRefusalTarget;
+       if (expected == null || !binding.path("executionId").equals(expected.path("executionId")))
++        {
++          return;
++        }
++      if (poolRefusalDiagnostic != null) {
+         return;
+-      if (poolRefusalDiagnostic != null) return;
++      }
+       var codes =
+           List.of(
+               "AUTHORIZATION_EXPIRED",
+@@ -12566,7 +12878,9 @@
+                                   .SecretUseRevokedException)
+                               failure)
+                           .getReferenceName());
+-      if (deniedReferenceObserved) code = 3;
++      if (deniedReferenceObserved) {
++        code = 3;
++      }
+       int source = 0, line = 0;
+       StackTraceElement[] frames = failure.getStackTrace();
+       try {
+@@ -12661,9 +12975,13 @@
+               .put("c4WindowsExecuted", c4WindowsExecuted)
+               .put("traceFromStart", traceFromStart)
+               .put("traceArmed", traceArmed);
+-      if (claimSamplerEvidence != null) evidence.setAll(claimSamplerEvidence.deepCopy());
++      if (claimSamplerEvidence != null) {
++        evidence.setAll(claimSamplerEvidence.deepCopy());
++      }
+       if (poolRefusalDiagnostic != null)
+-        evidence.set("poolOriginalRefusal", poolRefusalDiagnostic.deepCopy());
++        {
++          evidence.set("poolOriginalRefusal", poolRefusalDiagnostic.deepCopy());
++        }
+       Files.writeString(TEMP.resolve("c5-numeric-evidence.json"), evidence.toString());
+     }
+ 
+@@ -12751,7 +13069,9 @@
+               "pgSnapshotBlockerStageCounts",
+               "pgSnapshotRelationCounts",
+               "pgSnapshotWaitEventCounts")) {
+-        if (evidence.has(key)) claimSamplerEvidence.set(key, evidence.get(key).deepCopy());
++        if (evidence.has(key)) {
++          claimSamplerEvidence.set(key, evidence.get(key).deepCopy());
++        }
+       }
+       Files.writeString(path, evidence.toString(), StandardCharsets.UTF_8);
+       if (!joined || !pgJoined) {
+@@ -12996,18 +13316,26 @@
+     C5CanaryStream(List<String> values) {
+       try {
+         if (values == null || values.isEmpty() || values.size() > MAX_VALUES)
+-          throw new IllegalArgumentException("C5 stream value inventory bound");
++          {
++            throw new IllegalArgumentException("C5 stream value inventory bound");
++          }
+         for (String value : values) {
+           if (value == null || value.isEmpty() || value.length() > MAX_VALUE_CHARS)
+-            throw new IllegalArgumentException("C5 stream value bound");
++            {
++              throw new IllegalArgumentException("C5 stream value bound");
++            }
+           List<byte[]> variants = canaryByteVariants(value);
+           if (variants.size() != VARIANTS)
+-            throw new IllegalArgumentException("C5 stream variant count");
++            {
++              throw new IllegalArgumentException("C5 stream variant count");
++            }
+           for (byte[] variant : variants) {
+             if (variant.length == 0
+                 || variant.length > MAX_PATTERN_BYTES
+                 || patternBytes > MAX_TOTAL_PATTERN_BYTES - variant.length)
+-              throw new IllegalArgumentException("C5 stream pattern bound");
++              {
++                throw new IllegalArgumentException("C5 stream pattern bound");
++              }
+             patterns.add(variant);
+             patternBytes += variant.length;
+           }
+@@ -13020,8 +13348,12 @@
+           int[] prefix = new int[pattern.length];
+           for (int offset = 1, matched = 0; offset < pattern.length; offset++) {
+             while (matched > 0 && pattern[offset] != pattern[matched])
+-              matched = prefix[matched - 1];
+-            if (pattern[offset] == pattern[matched]) matched++;
++              {
++                matched = prefix[matched - 1];
++              }
++            if (pattern[offset] == pattern[matched]) {
++              matched++;
++            }
+             prefix[offset] = matched;
+           }
+           prefixes[index] = prefix;
+@@ -13047,19 +13379,25 @@
+ 
+     void write(int octet) {
+       writeCalls = increment(writeCalls);
+-      if (inputClosed || wiped) invalid();
++      if (inputClosed || wiped) {
++        invalid();
++      }
+       consume((byte) octet); // Original OutputStream.write(int) consumes its low eight bits.
+     }
+ 
+     void write(byte[] bytes, int offset, int length) {
+       writeCalls = increment(writeCalls);
+-      if (inputClosed || wiped) invalid();
++      if (inputClosed || wiped) {
++        invalid();
++      }
+       if (bytes == null || offset < 0 || length < 0 || offset > bytes.length - length) {
+         invalid();
+         return;
+       }
+       // No truncation/drop after a hit; every later valid byte is independently consumed.
+-      for (int index = offset; index < offset + length; index++) consume(bytes[index]);
++      for (int index = offset; index < offset + length; index++) {
++        consume(bytes[index]);
++      }
+     }
+ 
+     private void consume(byte octet) {
+@@ -13072,23 +13410,35 @@
+         failed = true;
+         return;
+       }
+-      if (activeStates == 0 && !startBytes[Byte.toUnsignedInt(octet)]) return;
++      if (activeStates == 0 && !startBytes[Byte.toUnsignedInt(octet)]) {
++        return;
++      }
+       for (int index = 0; index < patterns.size(); index++) {
+         byte[] pattern = patterns.get(index);
+         int[] prefix = prefixes[index];
+         int previous = states[index];
+         int matched = previous;
+-        while (matched > 0 && pattern[matched] != octet) matched = prefix[matched - 1];
+-        if (pattern[matched] == octet) matched++;
++        while (matched > 0 && pattern[matched] != octet) {
++          matched = prefix[matched - 1];
++        }
++        if (pattern[matched] == octet) {
++          matched++;
++        }
+         if (matched == pattern.length) {
+           hits = increment(hits);
+           matched = prefix[matched - 1];
+         }
+-        if (previous == 0 && matched > 0) activeStates++;
+-        else if (previous > 0 && matched == 0) activeStates--;
++        if (previous == 0 && matched > 0) {
++          activeStates++;
++        }
++        else if (previous > 0 && matched == 0) {
++          activeStates--;
++        }
+         states[index] = matched;
+       }
+-      if (activeStates < 0 || activeStates > patterns.size()) failed = true;
++      if (activeStates < 0 || activeStates > patterns.size()) {
++        failed = true;
++      }
+     }
+ 
+     void closeInput() {
+@@ -13107,12 +13457,20 @@
+           .as("released literal/encoded values absent from original encoded stream")
+           .isZero();
+       if (requireClosed)
+-        assertThat(inputClosed).as("original capture target was actually closed").isTrue();
++        {
++          assertThat(inputClosed).as("original capture target was actually closed").isTrue();
++        }
+     }
+ 
+     void wipe() {
+-      for (byte[] pattern : patterns) java.util.Arrays.fill(pattern, (byte) 0);
+-      for (int[] prefix : prefixes) if (prefix != null) java.util.Arrays.fill(prefix, 0);
++      for (byte[] pattern : patterns) {
++        java.util.Arrays.fill(pattern, (byte) 0);
++      }
++      for (int[] prefix : prefixes) {
++        if (prefix != null) {
++        java.util.Arrays.fill(prefix, 0);
++      }
++      }
+       java.util.Arrays.fill(states, 0);
+       java.util.Arrays.fill(startBytes, false);
+       activeStates = 0;
+@@ -13451,7 +13809,9 @@
+             + JSON.writeValueAsString(child.toString())
+             + "});const cutConfig=loadConfig("
+             + env
+-            + ");const app=createApplication(cutConfig,{launcher,http:revHttp,scratch:cutScratchStore(cutConfig.scratchDir),runtimeVersions:loadRuntimeVersions(),observed:{build,policies:["
++            + (");const app=createApplication(cutConfig,{launcher,http:revHttp,"
++                + "scratch:cutScratchStore(cutConfig.scratchDir),"
++                + "runtimeVersions:loadRuntimeVersions(),observed:{build,policies:[")
+             + POLICY
+             + ","
+             + P3_OTHER_POLICY
+@@ -13519,9 +13879,11 @@
+             const original=handle.quiesce;
+             if(typeof original==='function'){
+               handle.quiesce=function(...args){
+-                let result;try{result=Reflect.apply(original,this,args);}catch(error){stop.observed=true;stop.result=null;throw error;}
++                let result;try{result=Reflect.apply(original,this,args);}catch(error){stop.observed=\
++        true;stop.result=null;throw error;}
+                 try{result.then(value=>{stop.observed=true;stop.result=typeof value==='boolean'?value:null;},
+-                  ()=>{stop.observed=true;stop.result=null;}).catch(()=>{stop.observed=true;stop.result=null;});}
++                  ()=>{stop.observed=true;stop.result=null;}).catch(()=>{stop.observed=true;stop.res\
++        ult=null;});}
+                 catch{stop.observed=true;stop.result=null;}return result;
+               };
+             }
+@@ -13570,7 +13932,8 @@
+         %s
+         const cutCounts=()=>{
+           const stat=p4Fs.lstatSync(c5CountsFile);
+-          if(stat.isSymbolicLink()||!stat.isFile()||(stat.mode&0o777)!==0o600||stat.size>1048576)throw new Error('COUNTS');
++          if(stat.isSymbolicLink()||!stat.isFile()||(stat.mode&0o777)!==0o600||stat.size>1048576)thr\
++        ow new Error('COUNTS');
+           return p4Fs.readFileSync(c5CountsFile,'utf8').trimEnd().split('\\n');
+         };
+         const cutRecord=record=>{try{
+@@ -13579,34 +13942,44 @@
+           const fd=p4Fs.openSync(cutProfileWitnessFile,p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|
+             p4Fs.constants.O_TRUNC|p4Fs.constants.O_NOFOLLOW,0o600);
+           try{p4Fs.writeSync(fd,JSON.stringify(record));}finally{p4Fs.closeSync(fd);}
+-        }catch{try{const fd=p4Fs.openSync(c5CountsFile+'-failed',p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|
+-          p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);try{p4Fs.writeSync(fd,'1');}finally{p4Fs.closeSync(fd);}}catch{}}};
++        }catch{try{const fd=p4Fs.openSync(c5CountsFile+'-failed',p4Fs.constants.O_WRONLY|p4Fs.consta\
++        nts.O_CREAT|
++          p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);try{p4Fs.writeSync(fd,'1');}final\
++        ly{p4Fs.closeSync(fd);}}catch{}}};
+         const cutScratchStore=root=>{
+           const original=cutFsScratchStore(root);
+-          return {create(...args){const result=Reflect.apply(original.create,original,args),selected=revMode(),admission=args[0];
++          return {create(...args){const result=Reflect.apply(original.create,original,args),selected\
++        =revMode(),admission=args[0];
+             if(selected?.childCut===true&&selected.c6===2&&selected.path===2){
+               try{result.then(run=>{
+                 try{const descriptor=Object.getOwnPropertyDescriptor(run,'clear'),clear=run.clear;
+                   if(typeof clear!=='function')throw new Error('CLEAR');
+                   const wrapped=function(...clearArgs){
+-                    const record={case:selected.case,epoch:selected.epoch,postFaultScratchProfileObserved:false,
+-                      quiesceObserved:false,quiescentTrue:false,readyAllocationMatched:false,profileInodeMatched:false,
++                    const record={case:selected.case,epoch:selected.epoch,postFaultScratchProfileObs\
++        erved:false,
++                      quiesceObserved:false,quiescentTrue:false,readyAllocationMatched:false,profile\
++        InodeMatched:false,
+                       observerFailed:false,profileSampleOrdinal:0};
+                     try{
+                       const mode=revMode(),witness=cutReady.get(selected.executionId),stop=witness?.stop;
+-                      if(mode?.case!==selected.case||mode.epoch!==selected.epoch||mode.executionId!==selected.executionId
++                      if(mode?.case!==selected.case||mode.epoch!==selected.epoch||mode.executionId!=\
++        =selected.executionId
+                         ||!witness?.ready||witness.failed||witness.ready.runId!==selected.executionId
+                         ||witness.ready.admissionId!==admission||stop?.pid!==witness.pid
+-                        ||stop.mode.case!==selected.case||stop.mode.epoch!==selected.epoch||stop.mode.executionId!==selected.executionId)throw new Error('IDENTITY');
++                        ||stop.mode.case!==selected.case||stop.mode.epoch!==selected.epoch||stop.mod\
++        e.executionId!==selected.executionId)throw new Error('IDENTITY');
+                       record.readyAllocationMatched=true;record.quiesceObserved=stop.observed===true;
+                       record.quiescentTrue=stop.observed===true&&stop.result===true;
+                       if(!record.quiescentTrue)throw new Error('QUIESCENCE');
+-                      const allocated=p4Fs.realpathSync(run.path),rootPath=p4Fs.realpathSync(root),runStat=p4Fs.lstatSync(run.path);
++                      const allocated=p4Fs.realpathSync(run.path),rootPath=p4Fs.realpathSync(root),r\
++        unStat=p4Fs.lstatSync(run.path);
+                       if(allocated!==run.path||cutDirname(allocated)!==rootPath||runStat.isSymbolicLink()
+                         ||!runStat.isDirectory()||runStat.uid!==process.getuid()||(runStat.mode&0o777)!==0o700
+                         ||cutJoin(rootPath,admission)!==allocated)throw new Error('ALLOCATION');
+-                      const receipt=cutJoin(cutProducerRoot,selected.case+'-3.json'),stat=p4Fs.lstatSync(receipt);
+-                      if(stat.isSymbolicLink()||!stat.isFile()||(stat.mode&0o777)!==0o600||stat.size>1024)throw new Error('PROFILE');
++                      const receipt=cutJoin(cutProducerRoot,selected.case+'-3.json'),stat=p4Fs.lstat\
++        Sync(receipt);
++                      if(stat.isSymbolicLink()||!stat.isFile()||(stat.mode&0o777)!==0o600||stat.size\
++        >1024)throw new Error('PROFILE');
+                       const source=JSON.parse(p4Fs.readFileSync(receipt,'utf8'));
+                       if(source.case!==selected.case||source.epoch!==selected.epoch||source.producer!==3
+                         ||!Number.isSafeInteger(source.profileDev)||!Number.isSafeInteger(source.profileIno)
+@@ -13614,12 +13987,14 @@
+                       const profile=cutJoin(allocated,cutScratchLayout.profile),info=p4Fs.lstatSync(profile);
+                       if(info.isSymbolicLink()||!info.isDirectory()||p4Fs.realpathSync(profile)!==profile
+                         ||info.uid!==process.getuid()||(info.mode&0o777)!==0o700
+-                        ||info.dev!==source.profileDev||info.ino!==source.profileIno)throw new Error('PROFILE');
++                        ||info.dev!==source.profileDev||info.ino!==source.profileIno)throw new \
++        Error('PROFILE');
+                       record.profileInodeMatched=true;
+                       const before=cutCounts().length;c5ProfileScan(profile);const after=cutCounts();
+                       if(after.length!==before+1)throw new Error('SCAN');
+                       const sample=JSON.parse(after[before]);
+-                      if(sample.failed!==false||sample.hits!==0||!Number.isSafeInteger(sample.files)||sample.files<1
++                      if(sample.failed!==false||sample.hits!==0||!Number.isSafeInteger(sample.files)\
++        ||sample.files<1
+                         ||!Number.isSafeInteger(sample.bytes)||sample.bytes<1)throw new Error('SCAN');
+                       record.profileSampleOrdinal=before+1;record.postFaultScratchProfileObserved=true;
+                     }catch{record.observerFailed=true;}
+@@ -13627,12 +14002,17 @@
+                     // Observer refusal cannot prevent, retry or replace the original clear/error/promise.
+                     return Reflect.apply(clear,this,clearArgs);
+                   };
+-                  if(!Reflect.defineProperty(run,'clear',{...(descriptor??{configurable:true,writable:true,enumerable:true}),value:wrapped}))throw new Error('CLEAR');
+-                }catch{cutRecord({case:selected.case,epoch:selected.epoch,postFaultScratchProfileObserved:false,
+-                  quiesceObserved:false,quiescentTrue:false,readyAllocationMatched:false,profileInodeMatched:false,
++                  if(!Reflect.defineProperty(run,'clear',{...(descriptor??{configurable:true,writabl\
++        e:true,enumerable:true}),value:wrapped}))throw new Error('CLEAR');
++                }catch{cutRecord({case:selected.case,epoch:selected.epoch,postFaultScratchProfileObs\
++        erved:false,
++                  quiesceObserved:false,quiescentTrue:false,readyAllocationMatched:false,profileInod\
++        eMatched:false,
+                   observerFailed:true,profileSampleOrdinal:0});}
+-              },()=>{}).catch(()=>{cutRecord({case:selected.case,epoch:selected.epoch,postFaultScratchProfileObserved:false,
+-                quiesceObserved:false,quiescentTrue:false,readyAllocationMatched:false,profileInodeMatched:false,
++              },()=>{}).catch(()=>{cutRecord({case:selected.case,epoch:selected.epoch,postFaultScrat\
++        chProfileObserved:false,
++                quiesceObserved:false,quiescentTrue:false,readyAllocationMatched:false,profileInodeM\
++        atched:false,
+                 observerFailed:true,profileSampleOrdinal:0});});}catch{}
+             }return result;},clearAll(...args){return Reflect.apply(original.clearAll,original,args);},
+             list(...args){return Reflect.apply(original.list,original,args);}};
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java
+@@ -1357,7 +1357,9 @@
+           com.citi.put.checks.studio.dto.StepResult.pending(index, sourceSteps.get(index)));
+     }
+     db.jdbc.update(
+-        "INSERT INTO ui_test_executions(id,ui_test_id,status,started_at,revision_id,csi_id,principal,environment,observed_revision_binding,step_results) "
++        ("INSERT INTO ui_test_executions(id,ui_test_id,status,started_at,"
++            + "revision_id,csi_id,principal,environment,"
++            + "observed_revision_binding,step_results) ")
+             + "VALUES (?,?,'PENDING',?,?,?,?,?,?::jsonb,?::jsonb)",
+         execution,
+         db.testId,
+@@ -1369,7 +1371,9 @@
+         binding.toString(),
+         JSON.writeValueAsString(pendingSteps));
+     db.jdbc.update(
+-        "INSERT INTO studio_dispatch_ledger(execution_id,execution_accepted_at,test_id,csi_id,principal,pending_deadline_at) "
++        ("INSERT INTO studio_dispatch_ledger(execution_id,"
++            + "execution_accepted_at,test_id,csi_id,principal,"
++            + "pending_deadline_at) ")
+             + "VALUES (?,?,?,?,?,now()+interval '5 minutes')",
+         execution,
+         Timestamp.from(started),
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
+@@ -1007,7 +1007,8 @@
+                   actualJdbc.queryForMap(
+                       "SELECT s.document->>'state' AS state,"
+                           + "(EXISTS(SELECT 1 FROM studio_guided_materializations m WHERE m.session_id=s.session_id)"
+-                          + " OR EXISTS(SELECT 1 FROM studio_guided_assignments a WHERE a.session_id=s.session_id)) AS has_context "
++                          + (" OR EXISTS(SELECT 1 FROM studio_guided_assignments a WHERE "
++                              + "a.session_id=s.session_id)) AS has_context ")
+                           + "FROM studio_guided_sessions s WHERE s.session_id=?",
+                       scenario.sessionId);
+               if (Boolean.TRUE.equals(stored.get("has_context"))
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java
+@@ -571,7 +571,8 @@
+   private static JsonNode versions() {
+     return C.parse(
+         "{\"contract\":3,\"learnedPlan\":3,\"observation\":3,\"guidedPolicy\":3,"
+-            + "\"referencePolicy\":4,\"lowering\":2,\"artifact\":3,\"language\":\"observed-3\",\"executor\":\"observed-4\"}");
++            + ("\"referencePolicy\":4,\"lowering\":2,\"artifact\":3,"
++                + "\"language\":\"observed-3\",\"executor\":\"observed-4\"}"));
+   }
+ 
+   private void seedSource() throws Exception {
+@@ -580,14 +581,19 @@
+         new AuthoringV2Request(
+             2, null, List.of(new AuthoringStep(UUID.randomUUID(), "Open Orders", null)));
+     jdbc.update(
+-        "INSERT INTO users(id,sso_id,name,email,created_at) VALUES (?,'budget-user','Budget','budget@example.invalid',now())",
++        ("INSERT INTO users(id,sso_id,name,email,created_at) VALUES "
++            + "(?,'budget-user','Budget','budget@example.invalid',now())"),
+         UUID.randomUUID());
+     jdbc.update(
+         "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) VALUES"
+             + " ('CSI-123','Orders','Ops','HIGH','budget@example.invalid','Production')");
+     jdbc.update(
+-        "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,authoring_revision_inputs,created_by,created_at,updated_at)"
+-            + " VALUES (?,'Model default accounting','CSI-123','fixture','chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,'budget@example.invalid',now(),now())",
++        ("INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,"
++            + "variables,authoring,authoring_revision_inputs,created_by,"
++            + "created_at,updated_at)")
++            + (" VALUES (?,'Model default "
++                + "accounting','CSI-123','fixture','chromium',?::jsonb,'[]'::jsonb,"
++                + "?::jsonb,?::jsonb,'budget@example.invalid',now(),now())"),
+         testId,
+         JSON.writeValueAsString(List.of("Open Orders")),
+         JSON.writeValueAsString(source),
+--- before/backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java
+@@ -751,7 +751,9 @@
+   private Map<String, Object> observedHistory(UUID id) {
+     return jdbc.queryForMap(
+         "SELECT e.status,e.snapshot_revision,e.step_results::text,e.logs::text,"
+-            + "l.state,l.last_runner_sequence AS runner_sequence FROM ui_test_executions e JOIN studio_dispatch_ledger l ON l.execution_id=e.id "
++            + ("l.state,l.last_runner_sequence AS runner_sequence FROM "
++                + "ui_test_executions e JOIN studio_dispatch_ledger l ON "
++                + "l.execution_id=e.id ")
+             + "AND l.execution_accepted_at=e.started_at WHERE e.id=?",
+         id);
+   }

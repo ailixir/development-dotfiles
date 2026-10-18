@@ -1,0 +1,116 @@
+{
+  "story": "STUDIO-OBS-015",
+  "step": "w6-checkstyle-G4",
+  "agent": "Dex (@dev)",
+  "date": "2026-10-16",
+  "group": "G4",
+  "violationsBefore": 172,
+  "violationsBeforeByRule": {
+    "NeedBraces": 116,
+    "LineLength": 56
+  },
+  "violationsAfter": 0,
+  "tools": {
+    "checkstyle": "10.18.1 CLI, backend/config/checkstyle/checkstyle.xml, config_loc set",
+    "googleJavaFormat": "1.22.0 CLI, --skip-reflowing-long-strings (matches Spotless default, no reflow); --replace then --dry-run --set-exit-if-changed",
+    "java": "Temurin 21.0.10"
+  },
+  "gradleRun": false,
+  "formatterClean": true,
+  "neutrality": {
+    "tokenStream": "identical to originals after dropping braces and merging adjacent string literals joined by +, all 8 files",
+    "bytecode": "javac --release 21 of 8 files before vs after: 20 classes, same class set, javap -c -p -constants -v identical with constant-pool indices and LineNumberTable removed (0 differ)",
+    "logicChanged": false,
+    "indentationOrWhitespaceAroundSites": 0,
+    "bytecodeChangeSites": 0
+  },
+  "files": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java",
+      "scope": "main",
+      "sha256Before": "01eb18360ae5dacc80d76c38f66fa63e5a44311ab596822505bba8cfb34446d1",
+      "sha256After": "070b77bbb82559892e8ef742ed20448b7a0a78de38217d7e04933b7bd18e777b",
+      "violationsBefore": {},
+      "violationsAfter": 0,
+      "linesAdded": 13,
+      "linesRemoved": 6
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+      "scope": "main",
+      "sha256Before": "fab10754c98872a720415ae232835d8a9e7450e08558a54ea86f9d4c41a67fa6",
+      "sha256After": "af4633e91e6edb0642ee968f72d48d2be078f4f08c81d8c5e09c6c9cabad684d",
+      "violationsBefore": {},
+      "violationsAfter": 0,
+      "linesAdded": 2,
+      "linesRemoved": 1
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/StudioAuthorizationIT.java",
+      "scope": "test",
+      "sha256Before": "a0b32d9a1273e82ba7f1fd8c4ad276a39ab3048b4508123efc99573d50c3d907",
+      "sha256After": "d08725dc19f1d228b6c8511e9266887b0bfa7610a6e668c51f672347ea44768e",
+      "violationsBefore": {},
+      "violationsAfter": 0,
+      "linesAdded": 2,
+      "linesRemoved": 1
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+      "scope": "test",
+      "sha256Before": "92c253f1063a5898fb311dd9f5d5b11132a39a75976cd862ada1b2c53b736558",
+      "sha256After": "c49ac2779c88b2c2c7d087fb1408041fe037ee3431e92ae3bf7abc99ac87774f",
+      "violationsBefore": {},
+      "violationsAfter": 0,
+      "linesAdded": 79,
+      "linesRemoved": 34
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceTest.java",
+      "scope": "test",
+      "sha256Before": "bd814824ff1e411025a5aebdb7106cb60461c157c3f7390d50c856a19c2f44af",
+      "sha256After": "c26840ddb162dbdedf8d61d18600437a5dcae9ca658c75247b67dc81a9137143",
+      "violationsBefore": {},
+      "violationsAfter": 0,
+      "linesAdded": 4,
+      "linesRemoved": 2
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "scope": "test",
+      "sha256Before": "80d1c938ecef65450020fb0cd455ed6a6b543ad27dc1d8f46e3e3410f11332d1",
+      "sha256After": "592948cea23e5940fac9db44d7f16b03ea6def9aa162c89892f4962e724f4a2f",
+      "violationsBefore": {},
+      "violationsAfter": 0,
+      "linesAdded": 313,
+      "linesRemoved": 120
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalMaterializationEvidenceTest.java",
+      "scope": "test",
+      "sha256Before": "79d18492d5a01640a20abff18634e085815f9da008846bf0a1506387e88ec160",
+      "sha256After": "485270becb83e2f4a67258e43170fe56a946fe8925495b4089b43a7591a13103",
+      "violationsBefore": {},
+      "violationsAfter": 0,
+      "linesAdded": 17,
+      "linesRemoved": 6
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationMigrationTest.java",
+      "scope": "test",
+      "sha256Before": "e403c907a54d75d9e4ef808d6dc56aa24aea8e33c8958722ed3332b9fb02f6a5",
+      "sha256After": "e515c92d9f59ce93b2a60486daa33a7566e785e81c460a23b503a19684b22327",
+      "violationsBefore": {},
+      "violationsAfter": 0,
+      "linesAdded": 13,
+      "linesRemoved": 3
+    }
+  ],
+  "evidence": [
+    "checkstyle-cli-G4-before.xml",
+    "checkstyle-cli-G4-after.xml",
+    "braces.py",
+    "wrap.py",
+    "tok.py"
+  ]
+}

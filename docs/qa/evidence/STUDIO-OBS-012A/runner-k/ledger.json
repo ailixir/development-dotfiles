@@ -1,0 +1,2634 @@
+{
+ "story": "STUDIO-OBS-012A",
+ "lane": "K — runner (AC-3)",
+ "agent": "@dev (Dex)",
+ "date": "2026-10-12",
+ "scope": "Delete artifact-1 engine, /v1/* routes, legacy IPC; carve childRuntime to observed /v2/runs; cancel at DELETE /v2/runs/{id}; port shared types first.",
+ "packageManager": "studio-runner pins packageManager npm@11.3.0 (pnpm refuses); binaries invoked directly from node_modules/.bin, no npm/pnpm invocation, no dependency or lockfile change",
+ "deletedSource": {
+  "files": [
+   {
+    "path": "studio-runner/src/validator/ast.ts",
+    "lines": 739,
+    "sha256": "274011449ac5a346b80c6c824e37c3bf48681dabf24eb9f8ebfa8bd0c9894410"
+   },
+   {
+    "path": "studio-runner/src/validator/arguments.ts",
+    "lines": 714,
+    "sha256": "6f0b047029f142c681f74c43b33a05604ce915ed4c947363c5d63b198bf226ea"
+   },
+   {
+    "path": "studio-runner/src/validator/language.ts",
+    "lines": 292,
+    "sha256": "a427f570b75016ae0d11507dea2200ebb9e706bb1bf14bc5cb2d9d46b7380bce"
+   },
+   {
+    "path": "studio-runner/src/validator/references.ts",
+    "lines": 176,
+    "sha256": "9c3a5207827f3de76914c0705459b657800106412f9ee31ce790a134a44a2250"
+   },
+   {
+    "path": "studio-runner/src/validator/referencePolicy.ts",
+    "lines": 91,
+    "sha256": "772731f6344b1ff9a37bbf48106d4078934f6e05e95c0a1a36b4af25d2db332d"
+   },
+   {
+    "path": "studio-runner/src/validator/schema.ts",
+    "lines": 184,
+    "sha256": "de1c6fe858e8a7365fa38fbad9cbe7460de13b7aa3ca6fd9d4e8a1e847f05edf"
+   },
+   {
+    "path": "studio-runner/src/validator/bounds.ts",
+    "lines": 85,
+    "sha256": "a4bd504884cfb3d9e4d51d464abe3359c40a9f9ee4997b779318a005d959f920"
+   },
+   {
+    "path": "studio-runner/src/validator/diagnostics.ts",
+    "lines": 165,
+    "sha256": "6241a1841a587beb2cc67b08ea9b09b6ef3ba96a76425482971622fcd138a2e1"
+   },
+   {
+    "path": "studio-runner/src/validator/index.ts",
+    "lines": 111,
+    "sha256": "1fcf33a62e00e61a65303eda758f188fc6da29dc8c3e1da2aa5990f7e9459a23"
+   },
+   {
+    "path": "studio-runner/src/executor/operations.ts",
+    "lines": 157,
+    "sha256": "7ff813b5e3e63ab04d1054f6bccff1ed2b0543e2b57b3b40d2f1289997873e75"
+   },
+   {
+    "path": "studio-runner/src/executor/executor.ts",
+    "lines": 327,
+    "sha256": "e1e17e3d10f053f297b9a5e235854da04844a668034aef08e42b5392316973f2"
+   },
+   {
+    "path": "studio-runner/src/executor/pageLocation.ts",
+    "lines": 145,
+    "sha256": "41823612a770e99c23ed289f430962522ec2ce13d50bf9639bdc33fccaf2d167"
+   },
+   {
+    "path": "studio-runner/src/executor/refusals.ts",
+    "lines": 43,
+    "sha256": "479043eb9acffaff97f390e0fc0440e4613741aa175654569073c4a8189164d0"
+   },
+   {
+    "path": "studio-runner/src/executor/adapters/BrowserAdapter.ts",
+    "lines": 92,
+    "sha256": "2fd2867ca5c038a992ada89e275bb33fb3b5b5967b72efeca04bbade849379e7"
+   },
+   {
+    "path": "studio-runner/src/executor/adapters/StepReporter.ts",
+    "lines": 42,
+    "sha256": "5fd7162b9bb243cf0998be024b74e9518f6dbfc508cb662d99fe04ea2adb5614"
+   },
+   {
+    "path": "studio-runner/src/run/playwrightAdapter.ts",
+    "lines": 1157,
+    "sha256": "7a8b9a7b0fe866558bb5eada2e82cedc1963684eb8b64fe58ae6147359e6dc4b"
+   },
+   {
+    "path": "studio-runner/src/compat/compatibility.ts",
+    "lines": 201,
+    "sha256": "c68244af4c1c3699fae5a744c643b7647e63230be7ad3a15623663bc276f3e3b"
+   }
+  ],
+  "count": 17,
+  "lines": 4721,
+  "directoriesRemoved": [
+   "studio-runner/src/executor/adapters/"
+  ]
+ },
+ "portedTypesAndData": [
+  {
+   "what": "StepReporter, StepStartedEvent, StepFinishedEvent, StepStatus, Clock",
+   "from": "src/executor/adapters/StepReporter.ts",
+   "to": "src/executor/stepReporter.ts",
+   "importersRetargeted": [
+    "src/reporting/snapshot.ts",
+    "src/reporting/reportingStepReporter.ts",
+    "src/server/adapters.ts",
+    "src/run/timeline.ts",
+    "src/run/childRuntime.ts",
+    "src/run/launcher.ts",
+    "src/executor/observedReplay.ts",
+    "test/observedReplayExecutor.test.ts",
+    "test/reporting/observedProgressUse.test.ts",
+    "test/run/launcher.test.ts",
+    "test/fixtures-tier/observed-bootstrap-video.test.ts",
+    "test/fixtures-tier/secret-login.test.ts"
+   ]
+  },
+  {
+   "what": "RuntimeVersions interface",
+   "from": "src/compat/compatibility.ts",
+   "to": "src/compat/runtime-versions.ts"
+  },
+  {
+   "what": "fixture page route table (FIXTURE_PAGES)",
+   "from": "fixtures/reference/manifest.json pages block (read via test/helpers/reference-manifest.ts)",
+   "to": "test/helpers/pageServer.ts",
+   "reason": "observed fixtures suites (guided-targets, observed-authoring-snapshot) use the page server"
+  },
+  {
+   "what": "ValueResolver / BrowserAdapter / PageLike",
+   "disposition": "not ported: no observed consumer after the carve (BrowserSession.adapter removed; BrowserHandle.page kept as opaque object seam used only by fixtures-tier observed tests)"
+  }
+ ],
+ "modifiedSource": [
+  {
+   "path": "studio-runner/src/server/routes.ts",
+   "linesBefore": 353,
+   "linesAfter": 192,
+   "change": "POST /v1/validate, POST /v1/runs and DELETE /v1/runs/{id} removed; cancel served at DELETE /v2/runs/{id} on the same coordinator.cancel path; v1 body/refusal-log helpers removed"
+  },
+  {
+   "path": "studio-runner/src/server/runCoordinator.ts",
+   "linesBefore": 1291,
+   "linesAfter": 985,
+   "change": "submit() (v1), executeInProcess, createJobResolver, recordedProvenance/runningVersions/isCompatible, artifact revalidation, launchFailureKind, boundedCodes, admission option and takeOrigin/originSource removed; execute() takes a required observed job; stopAwareReporter reduced to openStepTracker (open-step tracking for the cancel kill path kept, artifact-1 FAIL→SKIPPED rewrite removed); control poll unchanged (verified byte-identical)"
+  },
+  {
+   "path": "studio-runner/src/server/application.ts",
+   "linesBefore": 276,
+   "linesAfter": 256,
+   "change": "v1 createAdmissionClient wiring and takeOrigin dependency removed"
+  },
+  {
+   "path": "studio-runner/src/server/adapters.ts",
+   "linesBefore": 220,
+   "linesAfter": 202,
+   "change": "BrowserSession.adapter removed, run required; SessionRunRequest = {reporter}; SessionOrigin.clock removed; LaunchOptions.observed required"
+  },
+  {
+   "path": "studio-runner/src/run/launcher.ts",
+   "linesBefore": 1048,
+   "linesAfter": 498,
+   "change": "legacy launch path, createInbox, settleRecording, observeScratchRecording, LaunchFailure, createChildOwnedAdapter, attachOutputRelay/MAX_CHILD_OUTPUT_LINES removed; launch() delegates to launchObservedChild (unchanged except session shape)"
+  },
+  {
+   "path": "studio-runner/src/run/childRuntime.ts",
+   "linesBefore": 937,
+   "linesAfter": 277,
+   "change": "carved to the observed /v2/runs child protocol: attachLegacyChildRuntime, launchInChild, executeInChild, settleTail, createChildResolver, createForwardingReporter, failureKindOf, text-entry/visible-only disclosure lines, legacy constants removed; attachChildRuntime binds the observed runtime directly; attachObservedChildRuntime body unchanged"
+  },
+  {
+   "path": "studio-runner/src/run/child.ts",
+   "linesBefore": 53,
+   "linesAfter": 53,
+   "change": "channel typed to ObservedChildMessage"
+  },
+  {
+   "path": "studio-runner/src/run/protocol.ts",
+   "linesBefore": 450,
+   "linesAfter": 32,
+   "change": "artifact-1 LaunchMessage/ExecuteMessage/ChildMessage, parsers, PROTOCOL_VERSION 1 removed; StopMessage, ParentMessage, ObservedParentMessage, ObservedChildMessage kept"
+  },
+  {
+   "path": "studio-runner/src/run/errors.ts",
+   "linesBefore": 229,
+   "linesAfter": 166,
+   "change": "v1-only failure kinds/codes removed: artifact-revalidation/ARTIFACT_REVALIDATION_FAILED, runtime-incompatible/RUNTIME_INCOMPATIBLE, sandbox-unavailable/BROWSER_SANDBOX_UNAVAILABLE, unsupported-multi-page/UNSUPPORTED_MULTI_PAGE, url-scheme-not-permitted/URL_SCHEME_NOT_PERMITTED, secret-origin-not-allowed/SECRET_ORIGIN_NOT_ALLOWED; failureKindForRefusal removed"
+  },
+  {
+   "path": "studio-runner/src/run/index.ts",
+   "linesBefore": 57,
+   "linesAfter": 40,
+   "change": "exports of deleted modules removed"
+  },
+  {
+   "path": "studio-runner/src/run/browserFactory.ts",
+   "linesBefore": 69,
+   "linesAfter": 75,
+   "change": "BrowserHandle.page typed object (opaque test inspection seam), PageLike import removed"
+  },
+  {
+   "path": "studio-runner/src/run/browser.ts",
+   "linesBefore": 580,
+   "linesAfter": 579,
+   "change": "PageLike import removed; page passed without the PageLike cast"
+  },
+  {
+   "path": "studio-runner/src/run/timeline.ts",
+   "linesBefore": 140,
+   "linesAfter": 117,
+   "change": "takeProcessOriginForFalsification removed (only consumer was the artifact-1 executor scale test)"
+  },
+  {
+   "path": "studio-runner/src/compat/index.ts",
+   "linesBefore": 30,
+   "linesAfter": 14,
+   "change": "compatibility exports removed; runtime-versions only"
+  },
+  {
+   "path": "studio-runner/src/compat/runtime-versions.ts",
+   "linesBefore": 126,
+   "linesAfter": 137,
+   "change": "RuntimeVersions type ported in from deleted compatibility.ts; comments"
+  },
+  {
+   "path": "studio-runner/src/executor/index.ts",
+   "linesBefore": 29,
+   "linesAfter": 9,
+   "change": "barrel reduced to redaction + step-reporting types"
+  },
+  {
+   "path": "studio-runner/src/index.ts",
+   "linesBefore": 37,
+   "linesAfter": 12,
+   "change": "validator/executor/version re-exports removed"
+  },
+  {
+   "path": "studio-runner/src/reporting/envelope.ts",
+   "linesBefore": 390,
+   "linesAfter": 71,
+   "change": "validateEnvelope, correspondence/secretOrigins validation, ENVELOPE_CODES, knownValuesOf removed; JobEnvelope trimmed to the observed projection fields; ACCEPTED_JOB_KEYS retained as data (canary tripwire + Lane C contract.test import)"
+  },
+  {
+   "path": "studio-runner/src/reporting/admissionClient.ts",
+   "linesBefore": 210,
+   "linesAfter": 72,
+   "change": "artifact-1 createAdmissionClient, verdict types, ADMISSION_COUNTERS, refusalCode removed; admitObserved/newAdmissionIdentity kept"
+  },
+  {
+   "path": "studio-runner/src/reporting/index.ts",
+   "linesBefore": 57,
+   "linesAfter": 47,
+   "change": "exports updated (admitObserved in, v1 client/envelope validator out)"
+  },
+  {
+   "path": "studio-runner/src/run/deadline.ts",
+   "linesBefore": 177,
+   "linesAfter": 177,
+   "change": "comment only (/v1/runs → /v2/runs)"
+  },
+  {
+   "path": "studio-runner/src/run/outputRelay.ts",
+   "linesBefore": 279,
+   "linesAfter": 279,
+   "change": "comment only (/v1/validate → /v2/validate-observed)"
+  },
+  {
+   "path": "studio-runner/src/server/config.ts",
+   "linesBefore": 586,
+   "linesAfter": 586,
+   "change": "comment only (validateTimeoutMs bounds /v2/validate-observed)"
+  }
+ ],
+ "addedSource": [
+  {
+   "path": "studio-runner/src/executor/stepReporter.ts",
+   "lines": 45,
+   "change": "ported verbatim (incl. OBS-007 detail field) from deleted executor/adapters/StepReporter.ts"
+  }
+ ],
+ "retainedOrphans": [
+  {
+   "path": "studio-runner/src/run/outputRelay.ts",
+   "why": "no production consumer after the legacy launch path went (observed launcher discards child output); general infra with its own 23 tests; not named by AC-3; left for architect/OBS-011 decision"
+  },
+  {
+   "path": "studio-runner/src/run/sandbox.ts",
+   "why": "isSandboxFailure has no production consumer after launchInChild went; SANDBOX_DISABLING_FLAG_SUFFIXES guard tests still use it; left for architect/OBS-011"
+  },
+  {
+   "path": "studio-runner/src/reporting/envelope.ts ACCEPTED_JOB_KEYS",
+   "why": "artifact-1 RunJob key set kept as data: test/run/canary.test.ts gate-shut tripwire (named by deferred.test.ts as re-run unchanged) and test/contract.test.ts (Lane C, do-not-edit) import it"
+  },
+  {
+   "path": "studio-runner/test/helpers/runner.ts validJob()",
+   "why": "artifact-1 job body kept only because test/contract.test.ts (Lane C, do-not-edit) imports it; no route accepts it"
+  },
+  {
+   "path": "studio-runner/src/versions.ts artifact-1 constants, scripts/{write-runtime-versions,check-pins}.mjs, compat/runtime-versions.ts required fields",
+   "why": "Lane C owns versions.ts and the pins; not changed here"
+  },
+  {
+   "path": "studio-runner/evaluation/browser-oracle.test.mjs",
+   "why": "node:test file (not a Vitest tier) importing dist/validator, dist/executor, dist/run/playwrightAdapter — compile-path inference evaluation (Story 10.26), outside the Lane K File List; will fail if run; needs owner decision"
+  },
+  {
+   "path": "studio-runner/eslint.boundary-rules.js message text, studio-runner/ci/stages.md, vitest.fixtures.config.ts comment",
+   "why": "tool configs/docs mention playwrightAdapter.ts / fixtures/reference; do-not-edit (tool configs)"
+  }
+ ],
+ "deletedTests": {
+  "files": [
+   {
+    "path": "studio-runner/test/adversarial-corpus.test.ts",
+    "lines": 110
+   },
+   {
+    "path": "studio-runner/test/executor.test.ts",
+    "lines": 500
+   },
+   {
+    "path": "studio-runner/test/language-surface.test.ts",
+    "lines": 205
+   },
+   {
+    "path": "studio-runner/test/reference-corpus.test.ts",
+    "lines": 57
+   },
+   {
+    "path": "studio-runner/test/reference-manifest.test.ts",
+    "lines": 136
+   },
+   {
+    "path": "studio-runner/test/reference-policy.test.ts",
+    "lines": 131
+   },
+   {
+    "path": "studio-runner/test/syntax-reference-drift.test.ts",
+    "lines": 217
+   },
+   {
+    "path": "studio-runner/test/validator-api.test.ts",
+    "lines": 180
+   },
+   {
+    "path": "studio-runner/test/run/adapter.test.ts",
+    "lines": 1520
+   },
+   {
+    "path": "studio-runner/test/run/protocol.test.ts",
+    "lines": 252
+   },
+   {
+    "path": "studio-runner/test/run/childRuntime.test.ts",
+    "lines": 702
+   },
+   {
+    "path": "studio-runner/test/server/correspondence.test.ts",
+    "lines": 200
+   },
+   {
+    "path": "studio-runner/test/fixtures-tier/assertion-semantics.test.ts",
+    "lines": 142
+   },
+   {
+    "path": "studio-runner/test/fixtures-tier/reference-execution.test.ts",
+    "lines": 329
+   },
+   {
+    "path": "studio-runner/test/fixtures-tier/rerender-resolution.test.ts",
+    "lines": 182
+   },
+   {
+    "path": "studio-runner/test/fixtures-tier/text-entry-equivalence.test.ts",
+    "lines": 117
+   },
+   {
+    "path": "studio-runner/test/fixtures-tier/visible-only-resolution.test.ts",
+    "lines": 150
+   },
+   {
+    "path": "studio-runner/test/fixtures-tier/real-chromium.test.ts",
+    "lines": 479
+   },
+   {
+    "path": "studio-runner/test/fixtures-tier/login-protected-session.test.ts",
+    "lines": 255
+   },
+   {
+    "path": "studio-runner/test/fixtures-tier/no-browser-on-refusal.test.ts",
+    "lines": 194
+   },
+   {
+    "path": "studio-runner/test/fixtures-tier/recording-coverage.test.ts",
+    "lines": 163
+   },
+   {
+    "path": "studio-runner/test/fixtures-tier/seek-calibration-pinned.test.ts",
+    "lines": 61
+   },
+   {
+    "path": "studio-runner/test/fixtures-tier/cancel-real-chromium.test.ts",
+    "lines": 912
+   },
+   {
+    "path": "studio-runner/test/helpers/reference-manifest.ts",
+    "lines": 186
+   },
+   {
+    "path": "studio-runner/test/helpers/fakeAdapters.ts",
+    "lines": 188
+   },
+   {
+    "path": "studio-runner/test/helpers/webm.test.ts",
+    "lines": 431
+   },
+   {
+    "path": "studio-runner/test/helpers/webm.ts",
+    "lines": 224
+   }
+  ],
+  "count": 27,
+  "lines": 8223
+ },
+ "deletedFixtures": {
+  "files": [
+   {
+    "path": "studio-runner/fixtures/adversarial/argument-count.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/argument-too-long.json",
+    "lines": 27
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/argument-type.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/argument-value-not-permitted.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/artifact-not-object.json",
+    "lines": 13
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/artifact-step-count-mismatch.json",
+    "lines": 23
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/artifact-step-limit-exceeded.json",
+    "lines": 33
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/artifact-steps-not-array.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/artifact-too-large.json",
+    "lines": 27
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/artifact-unknown-key.json",
+    "lines": 25
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/artifact-version-unsupported.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/ast-depth-exceeded.json",
+    "lines": 27
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/diagnostics-truncated.json",
+    "lines": 27
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/expression-assignment.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/expression-computed-member.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/expression-function.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/expression-new.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/expression-not-permitted.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/expression-optional-chain.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/expression-spread.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/expression-template-substitution.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/locator-chain-invalid.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/method-assertion-not-permitted.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/method-browser-context.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/method-filesystem.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/method-locator-nth.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/method-page-evaluate.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/option-accessor.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/option-computed-key.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/option-limit-exceeded.json",
+    "lines": 27
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/option-not-object.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/option-shorthand.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/option-unknown-key.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/option-value-type.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/prototype-access.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/receiver-not-permitted.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/receiver-process.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/receiver-require.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/reference-argument-invalid.json",
+    "lines": 24
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/reference-extra.json",
+    "lines": 24
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/reference-method-unknown.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/reference-missing.json",
+    "lines": 24
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/reference-policy-extra.json",
+    "lines": 40
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/reference-policy-invalid.json",
+    "lines": 42
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/reference-policy-missing.json",
+    "lines": 50
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/reference-position-not-permitted.json",
+    "lines": 24
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/reference-secret-in-press.json",
+    "lines": 24
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/reference-undeclared.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/regex-backreference.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/regex-flags-not-permitted.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/regex-invalid.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/regex-lookbehind.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/regex-too-long.json",
+    "lines": 27
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/regex-unsafe.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/selector-not-css.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/selector-xpath.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/statement-conditional.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/statement-declaration.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/statement-import.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/statement-limit-exceeded.json",
+    "lines": 27
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/statement-loop.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/statement-not-awaited.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/statement-not-expression.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/step-code-not-string.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/step-code-too-long.json",
+    "lines": 27
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/step-index-misaligned.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/step-not-object.json",
+    "lines": 18
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/step-text-mismatch.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/step-unknown-key.json",
+    "lines": 23
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/syntax-error.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/unsupported-typescript-expect.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/unsupported-typescript-locator-chain.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/adversarial/unsupported-typescript.json",
+    "lines": 22
+   },
+   {
+    "path": "studio-runner/fixtures/reference/action-check-uncheck.json",
+    "lines": 101
+   },
+   {
+    "path": "studio-runner/fixtures/reference/action-hover.json",
+    "lines": 68
+   },
+   {
+    "path": "studio-runner/fixtures/reference/action-press.json",
+    "lines": 55
+   },
+   {
+    "path": "studio-runner/fixtures/reference/action-select-option.json",
+    "lines": 61
+   },
+   {
+    "path": "studio-runner/fixtures/reference/assert-locator-contain-text.json",
+    "lines": 108
+   },
+   {
+    "path": "studio-runner/fixtures/reference/assert-locator-have-value.json",
+    "lines": 68
+   },
+   {
+    "path": "studio-runner/fixtures/reference/assert-locator-visible.json",
+    "lines": 68
+   },
+   {
+    "path": "studio-runner/fixtures/reference/assert-option-coverage.json",
+    "lines": 149
+   },
+   {
+    "path": "studio-runner/fixtures/reference/assert-page-have-title.json",
+    "lines": 38
+   },
+   {
+    "path": "studio-runner/fixtures/reference/assert-page-have-url.json",
+    "lines": 39
+   },
+   {
+    "path": "studio-runner/fixtures/reference/flow-login.json",
+    "lines": 183
+   },
+   {
+    "path": "studio-runner/fixtures/reference/locator-chained.json",
+    "lines": 86
+   },
+   {
+    "path": "studio-runner/fixtures/reference/locator-css-click.json",
+    "lines": 54
+   },
+   {
+    "path": "studio-runner/fixtures/reference/locator-get-by-label-fill.json",
+    "lines": 61
+   },
+   {
+    "path": "studio-runner/fixtures/reference/locator-get-by-placeholder-fill-variable.json",
+    "lines": 65
+   },
+   {
+    "path": "studio-runner/fixtures/reference/locator-get-by-role-click.json",
+    "lines": 66
+   },
+   {
+    "path": "studio-runner/fixtures/reference/locator-get-by-role-states.json",
+    "lines": 207
+   },
+   {
+    "path": "studio-runner/fixtures/reference/locator-get-by-test-id-fill-secret.json",
+    "lines": 65
+   },
+   {
+    "path": "studio-runner/fixtures/reference/locator-get-by-text-click.json",
+    "lines": 66
+   },
+   {
+    "path": "studio-runner/fixtures/reference/locator-text-exact-options.json",
+    "lines": 113
+   },
+   {
+    "path": "studio-runner/fixtures/reference/manifest.json",
+    "lines": 430
+   },
+   {
+    "path": "studio-runner/fixtures/reference/navigation-goto-options.json",
+    "lines": 37
+   },
+   {
+    "path": "studio-runner/fixtures/reference/navigation-goto.json",
+    "lines": 34
+   },
+   {
+    "path": "studio-runner/fixtures/reference/navigation-wait-for-url-options.json",
+    "lines": 40
+   },
+   {
+    "path": "studio-runner/fixtures/reference/navigation-wait-for-url.json",
+    "lines": 38
+   },
+   {
+    "path": "studio-runner/fixtures/reference/option-check-uncheck-hover.json",
+    "lines": 151
+   },
+   {
+    "path": "studio-runner/fixtures/reference/option-click-full.json",
+    "lines": 72
+   },
+   {
+    "path": "studio-runner/fixtures/reference/option-fill-press.json",
+    "lines": 107
+   },
+   {
+    "path": "studio-runner/fixtures/reference/option-select-option.json",
+    "lines": 64
+   }
+  ],
+  "count": 102,
+  "lines": 4419,
+  "byDirectory": {
+   "studio-runner/fixtures/adversarial": {
+    "files": 73,
+    "lines": 1725
+   },
+   "studio-runner/fixtures/reference": {
+    "files": 29,
+    "lines": 2694
+   }
+  }
+ },
+ "testReconciliation": {
+  "default": {
+   "baseline": {
+    "total": 1829,
+    "byStatus": {
+     "passed": 1800,
+     "skipped": 29
+    }
+   },
+   "after": {
+    "total": 1245,
+    "byStatus": {
+     "passed": 1200,
+     "skipped": 45
+    }
+   },
+   "namedDeletions": {
+    "count": 508,
+    "byStatus": {
+     "passed": 508
+    },
+    "files": {
+     "test/adversarial-corpus.test.ts": {
+      "count": 77,
+      "tests": [
+       "adversarial corpus rejects argument-count",
+       "adversarial corpus rejects argument-too-long",
+       "adversarial corpus rejects argument-type",
+       "adversarial corpus rejects argument-value-not-permitted",
+       "adversarial corpus rejects artifact-not-object",
+       "adversarial corpus rejects artifact-step-count-mismatch",
+       "adversarial corpus rejects artifact-step-limit-exceeded",
+       "adversarial corpus rejects artifact-steps-not-array",
+       "adversarial corpus rejects artifact-too-large",
+       "adversarial corpus rejects artifact-unknown-key",
+       "adversarial corpus rejects artifact-version-unsupported",
+       "adversarial corpus rejects ast-depth-exceeded",
+       "adversarial corpus rejects diagnostics-truncated",
+       "adversarial corpus rejects expression-assignment",
+       "adversarial corpus rejects expression-computed-member",
+       "adversarial corpus rejects expression-function",
+       "adversarial corpus rejects expression-new",
+       "adversarial corpus rejects expression-not-permitted",
+       "adversarial corpus rejects expression-optional-chain",
+       "adversarial corpus rejects expression-spread",
+       "adversarial corpus rejects expression-template-substitution",
+       "adversarial corpus rejects locator-chain-invalid",
+       "adversarial corpus rejects method-assertion-not-permitted",
+       "adversarial corpus rejects method-browser-context",
+       "adversarial corpus rejects method-filesystem",
+       "adversarial corpus rejects method-locator-nth",
+       "adversarial corpus rejects method-page-evaluate",
+       "adversarial corpus rejects option-accessor",
+       "adversarial corpus rejects option-computed-key",
+       "adversarial corpus rejects option-limit-exceeded",
+       "adversarial corpus rejects option-not-object",
+       "adversarial corpus rejects option-shorthand",
+       "adversarial corpus rejects option-unknown-key",
+       "adversarial corpus rejects option-value-type",
+       "adversarial corpus rejects prototype-access",
+       "adversarial corpus rejects receiver-not-permitted",
+       "adversarial corpus rejects receiver-process",
+       "adversarial corpus rejects receiver-require",
+       "adversarial corpus rejects reference-argument-invalid",
+       "adversarial corpus rejects reference-extra",
+       "adversarial corpus rejects reference-method-unknown",
+       "adversarial corpus rejects reference-missing",
+       "adversarial corpus rejects reference-policy-extra",
+       "adversarial corpus rejects reference-policy-invalid",
+       "adversarial corpus rejects reference-policy-missing",
+       "adversarial corpus rejects reference-position-not-permitted",
+       "adversarial corpus rejects reference-secret-in-press",
+       "adversarial corpus rejects reference-undeclared",
+       "adversarial corpus rejects regex-backreference",
+       "adversarial corpus rejects regex-flags-not-permitted",
+       "adversarial corpus rejects regex-invalid",
+       "adversarial corpus rejects regex-lookbehind",
+       "adversarial corpus rejects regex-too-long",
+       "adversarial corpus rejects regex-unsafe",
+       "adversarial corpus rejects selector-not-css",
+       "adversarial corpus rejects selector-xpath",
+       "adversarial corpus rejects statement-conditional",
+       "adversarial corpus rejects statement-declaration",
+       "adversarial corpus rejects statement-import",
+       "adversarial corpus rejects statement-limit-exceeded",
+       "adversarial corpus rejects statement-loop",
+       "adversarial corpus rejects statement-not-awaited",
+       "adversarial corpus rejects statement-not-expression",
+       "adversarial corpus rejects step-code-not-string",
+       "adversarial corpus rejects step-code-too-long",
+       "adversarial corpus rejects step-index-misaligned",
+       "adversarial corpus rejects step-not-object",
+       "adversarial corpus rejects step-text-mismatch",
+       "adversarial corpus rejects step-unknown-key",
+       "adversarial corpus rejects syntax-error",
+       "adversarial corpus rejects unsupported-typescript-expect",
+       "adversarial corpus rejects unsupported-typescript-locator-chain",
+       "adversarial corpus rejects unsupported-typescript",
+       "adversarial corpus never returns operations for a rejected step",
+       "adversarial corpus bounds every diagnostic excerpt to the failing node",
+       "adversarial corpus has at least one fixture for every denial class",
+       "adversarial corpus only declares known diagnostic codes as expected classes"
+      ],
+      "byStatus": {
+       "passed": 77
+      }
+     },
+     "test/executor.test.ts": {
+      "count": 34,
+      "tests": [
+       "trusted executor reports monotonic timings for every executed step (AC-14)",
+       "trusted executor stops at the first failing step and skips the rest with null timings (AC-14)",
+       "trusted executor bounds the failure message (AC-15)",
+       "trusted executor resolves a variable only through the resolver",
+       "trusted executor fails the step when a reference cannot be resolved",
+       "trusted executor survives a non-Error rejection without leaking its content",
+       "trusted executor refuses to run without an explicitly supplied run clock",
+       "trusted executor names the origin in the refusal, so the fix is obvious at the call site",
+       "trusted executor carries the clock it is given, at whatever scale it is given",
+       "trusted executor reports the executor version",
+       "variable-sourced goto URLs are scheme-checked at resolution refuses a file: value with URL_SCHEME_NOT_PERMITTED and never echoes it",
+       "variable-sourced goto URLs are scheme-checked at resolution refuses a javascript: value with URL_SCHEME_NOT_PERMITTED and never echoes it",
+       "variable-sourced goto URLs are scheme-checked at resolution refuses a data: value with URL_SCHEME_NOT_PERMITTED and never echoes it",
+       "variable-sourced goto URLs are scheme-checked at resolution refuses a relative value with URL_SCHEME_NOT_PERMITTED and never echoes it",
+       "variable-sourced goto URLs are scheme-checked at resolution refuses a scheme-relative value with URL_SCHEME_NOT_PERMITTED and never echoes it",
+       "variable-sourced goto URLs are scheme-checked at resolution refuses a empty value with URL_SCHEME_NOT_PERMITTED and never echoes it",
+       "variable-sourced goto URLs are scheme-checked at resolution lets an absolute https value through unchanged",
+       "variable-sourced goto URLs are scheme-checked at resolution lets an absolute http value through",
+       "variable-sourced goto URLs are scheme-checked at resolution reports no refusal for an ordinary step failure",
+       "a secret fill carries its id to the adapter passes the secret id for a secret value and nothing for a literal or variable",
+       "a secret fill carries its id to the adapter reports an adapter refusal as the run refusal",
+       "VAL-013 — a failed step names the page the browser was on appends origin + pathname and the title",
+       "VAL-013 — a failed step names the page the browser was on never emits the query, the fragment or the userinfo",
+       "VAL-013 — a failed step names the page the browser was on reduces a non-http scheme to the scheme, so a data: URL cannot carry the document",
+       "VAL-013 — a failed step names the page the browser was on redacts a known value in the path and in the title, and truncates the title",
+       "VAL-013 — a failed step names the page the browser was on VAL-020 — a URL inside the title is reduced like the location reduces a title that is itself a URL (Google /sorry) to origin + path",
+       "VAL-013 — a failed step names the page the browser was on VAL-020 — a URL inside the title is reduced like the location strips userinfo and fragment from a URL in the title",
+       "VAL-013 — a failed step names the page the browser was on VAL-020 — a URL inside the title is reduced like the location sanitizes a URL embedded in prose in place, keeping the prose",
+       "VAL-013 — a failed step names the page the browser was on VAL-020 — a URL inside the title is reduced like the location leaves a plain-text title unchanged",
+       "VAL-013 — a failed step names the page the browser was on VAL-020 — a URL inside the title is reduced like the location omits a title that, once sanitized, only repeats the location",
+       "VAL-013 — a failed step names the page the browser was on stays within the failure-message bound and keeps the location",
+       "VAL-013 — a failed step names the page the browser was on does not throw or wait when the page cannot be read",
+       "VAL-013 — a failed step names the page the browser was on reads the step end before the location, so the read never lengthens the step",
+       "VAL-013 — a failed step names the page the browser was on leaves a passing step untouched and does not read the page"
+      ],
+      "byStatus": {
+       "passed": 34
+      }
+     },
+     "test/helpers/webm.test.ts": {
+      "count": 19,
+      "tests": [
+       "AC-17 — the seek frame finder on frames from real AC-15 recordings carries the recordings and step populations it was transcribed with",
+       "AC-17 — the seek frame finder on frames from real AC-15 recordings reproduces the change list the fixtures tier computed from each recording",
+       "AC-17 — the seek frame finder on frames from real AC-15 recordings (a) mis-attributes each transcribed step under the unmodified slack, exactly as printed",
+       "AC-17 — the seek frame finder on frames from real AC-15 recordings (b) matches each of those steps to the change at its visible effect, within tolerance",
+       "AC-17 — the seek frame finder on frames from real AC-15 recordings (c) still matches every correctly attributed step of the same recordings to the same frame",
+       "AC-17 — the seek frame finder on frames from real AC-15 recordings matches a step reported just under one tolerance after a repaint to that repaint",
+       "story 10.32 AC-7 — the nearest earlier change, for a signed lead reads AC-15 run 7 step 4 as a small negative lead, not the printed +454.2 ms",
+       "story 10.32 AC-7 — the nearest earlier change, for a signed lead reads step 0 of both recordings against the recording’s own first frame",
+       "story 10.32 AC-7 — the nearest earlier change, for a signed lead takes a change exactly at the offset, and reports none before the first change",
+       "F-7 — the tolerance read refuses every form that would decouple it from the assertion refuses S7: the assertion compares against an expression",
+       "F-7 — the tolerance read refuses every form that would decouple it from the assertion refuses S8: an indented const shadows it in an inner scope",
+       "F-7 — the tolerance read refuses every form that would decouple it from the assertion refuses S10: the declaration is reformatted and a column-0 copy sits in a block comment",
+       "F-7 — the tolerance read refuses every form that would decouple it from the assertion refuses S7 with the exact assertion text left behind in a comment",
+       "F-7 — the tolerance read refuses every form that would decouple it from the assertion refuses a destructured shadow",
+       "F-7 — the tolerance read refuses every form that would decouple it from the assertion refuses a parameter shadow",
+       "F-7 — the tolerance read refuses every form that would decouple it from the assertion refuses a column-0 copy inside a template string",
+       "F-7 — the tolerance read refuses every form that would decouple it from the assertion refuses a let declaration beside the const",
+       "F-7 — the tolerance read refuses every form that would decouple it from the assertion refuses the assertion removed",
+       "F-7 — the tolerance read refuses every form that would decouple it from the assertion follows a changed value and ignores a line comment, on otherwise real text"
+      ],
+      "byStatus": {
+       "passed": 19
+      }
+     },
+     "test/language-surface.test.ts": {
+      "count": 62,
+      "tests": [
+       "option schemas await page.goto('https://a.example/', { timeout: 1000 });",
+       "option schemas await page.goto('https://a.example/', { waitUntil: 'commit' });",
+       "option schemas await page.goto('https://a.example/', { waitUntil: 'whenever' });",
+       "option schemas await page.goto('https://a.example/', { timeout: -1 });",
+       "option schemas await page.goto('https://a.example/', { timeout: 1.5 });",
+       "option schemas await page.goto('https://a.example/', { timeout: 10000000 });",
+       "option schemas await page.goto('https://a.example/', { waitUntil: 42 });",
+       "option schemas await page.goto('https://a.example/', { __proto__: 1 });",
+       "option schemas await page.goto('https://a.example/', { ...extra });",
+       "option schemas await page.goto('https://a.example/', { run() { return 1; } });",
+       "option schemas await page.goto('https://a.example/', {});",
+       "locator argument schemas await page.getByRole('button', { level: 3 }).click();",
+       "locator argument schemas await page.getByRole('heading', { name: /Welcome/i }).click();",
+       "locator argument schemas await page.getByRole('heading', { name: 42 }).click();",
+       "locator argument schemas await page.getByRole('wizard').click();",
+       "locator argument schemas await page.getByRole(role).click();",
+       "locator argument schemas await page.getByTestId('a').fill(`plain template`);",
+       "locator argument schemas await page.getByText('x').check({ force: false });",
+       "locator argument schemas await page.getByLabel('x').press('Control+Shift+A');",
+       "locator argument schemas await page.getByLabel('x').press('DoTheThing');",
+       "locator argument schemas await page.getByLabel('x').press('Enter', { delay: 10 });",
+       "locator argument schemas await page.locator('div[data-id=\"42\"] > span').click();",
+       "locator argument schemas await page.locator('  ').click();",
+       "locator argument schemas await page.locator('div:has-text(\"hi\")').click();",
+       "locator argument schemas await page.locator('div\\\\.escaped').click();",
+       "locator argument schemas await page.getByLabel('x').selectOption('GBP', { timeout: 1 });",
+       "locator argument schemas bounds a long string literal",
+       "locator argument schemas bounds a long selector",
+       "assertion shapes await expect(page.getByText('x')).toHaveValue('y');",
+       "assertion shapes await expect(page).toHaveTitle('Checks');",
+       "assertion shapes await expect(page).toBeVisible();",
+       "assertion shapes await expect(page.getByText('x')).toHaveURL('https://a.example/');",
+       "assertion shapes await expect(page, page).toHaveTitle('Checks');",
+       "assertion shapes await assert(page).toHaveTitle('Checks');",
+       "assertion shapes await expect(page.getByText('x')).not.toBeVisible();",
+       "assertion shapes await page.toHaveTitle('Checks');",
+       "assertion shapes await expect('literal').toHaveTitle('Checks');",
+       "reference positions accepts a variable as a goto URL",
+       "reference positions rejects a secret in a selector",
+       "reference positions rejects a variable in a selector as a type error",
+       "reference positions rejects a secret in an option value",
+       "reference positions rejects a reference name longer than the bound",
+       "reference positions rejects a non-literal reference name",
+       "chain and receiver edge cases await page.getByRole('button').getByFoo('x').click();",
+       "chain and receiver edge cases await page.getByRole('button').__proto__.click();",
+       "chain and receiver edge cases await page.getByRole('button')['click']();",
+       "chain and receiver edge cases await page.getByRole('button')?.click();",
+       "chain and receiver edge cases await ('literal').click();",
+       "chain and receiver edge cases await new Date().click();",
+       "chain and receiver edge cases await page.goto<string>('https://a.example/');",
+       "chain and receiver edge cases await page.locator<string>('div').click();",
+       "chain and receiver edge cases await expect<string>(page).toHaveTitle('t');",
+       "chain and receiver edge cases await (() => page)().click();",
+       "diagnostic bounds suppresses diagnostics beyond the per-step cap",
+       "executor barrel re-exports the public executor surface",
+       "trial actions are never executable rejects the trial key with either boolean for click",
+       "trial actions are never executable rejects the trial key with either boolean for check",
+       "trial actions are never executable rejects the trial key with either boolean for uncheck",
+       "trial actions are never executable rejects the trial key with either boolean for hover",
+       "trial actions are never executable rejects the trial key with either boolean for fill",
+       "trial actions are never executable rejects the trial key with either boolean for press",
+       "trial actions are never executable rejects the trial key with either boolean for selectOption"
+      ],
+      "byStatus": {
+       "passed": 62
+      }
+     },
+     "test/reference-corpus.test.ts": {
+      "count": 29,
+      "tests": [
+       "reference corpus is not empty",
+       "reference corpus validates and executes action-check-uncheck",
+       "reference corpus validates and executes action-hover",
+       "reference corpus validates and executes action-press",
+       "reference corpus validates and executes action-select-option",
+       "reference corpus validates and executes assert-locator-contain-text",
+       "reference corpus validates and executes assert-locator-have-value",
+       "reference corpus validates and executes assert-locator-visible",
+       "reference corpus validates and executes assert-option-coverage",
+       "reference corpus validates and executes assert-page-have-title",
+       "reference corpus validates and executes assert-page-have-url",
+       "reference corpus validates and executes flow-login",
+       "reference corpus validates and executes locator-chained",
+       "reference corpus validates and executes locator-css-click",
+       "reference corpus validates and executes locator-get-by-label-fill",
+       "reference corpus validates and executes locator-get-by-placeholder-fill-variable",
+       "reference corpus validates and executes locator-get-by-role-click",
+       "reference corpus validates and executes locator-get-by-role-states",
+       "reference corpus validates and executes locator-get-by-test-id-fill-secret",
+       "reference corpus validates and executes locator-get-by-text-click",
+       "reference corpus validates and executes locator-text-exact-options",
+       "reference corpus validates and executes navigation-goto-options",
+       "reference corpus validates and executes navigation-goto",
+       "reference corpus validates and executes navigation-wait-for-url-options",
+       "reference corpus validates and executes navigation-wait-for-url",
+       "reference corpus validates and executes option-check-uncheck-hover",
+       "reference corpus validates and executes option-click-full",
+       "reference corpus validates and executes option-fill-press",
+       "reference corpus validates and executes option-select-option"
+      ],
+      "byStatus": {
+       "passed": 29
+      }
+     },
+     "test/reference-manifest.test.ts": {
+      "count": 40,
+      "tests": [
+       "reference manifest records the pinned syntax reference version",
+       "reference manifest lists exactly the files in fixtures/reference",
+       "reference manifest names an existing fixture for every entry",
+       "reference manifest declares the coverage action-check-uncheck actually has",
+       "reference manifest declares the coverage action-hover actually has",
+       "reference manifest declares the coverage action-press actually has",
+       "reference manifest declares the coverage action-select-option actually has",
+       "reference manifest declares the coverage assert-locator-contain-text actually has",
+       "reference manifest declares the coverage assert-locator-have-value actually has",
+       "reference manifest declares the coverage assert-locator-visible actually has",
+       "reference manifest declares the coverage assert-option-coverage actually has",
+       "reference manifest declares the coverage assert-page-have-title actually has",
+       "reference manifest declares the coverage assert-page-have-url actually has",
+       "reference manifest declares the coverage flow-login actually has",
+       "reference manifest declares the coverage locator-chained actually has",
+       "reference manifest declares the coverage locator-css-click actually has",
+       "reference manifest declares the coverage locator-get-by-label-fill actually has",
+       "reference manifest declares the coverage locator-get-by-placeholder-fill-variable actually has",
+       "reference manifest declares the coverage locator-get-by-role-click actually has",
+       "reference manifest declares the coverage locator-get-by-role-states actually has",
+       "reference manifest declares the coverage locator-get-by-test-id-fill-secret actually has",
+       "reference manifest declares the coverage locator-get-by-text-click actually has",
+       "reference manifest declares the coverage locator-text-exact-options actually has",
+       "reference manifest declares the coverage navigation-goto-options actually has",
+       "reference manifest declares the coverage navigation-goto actually has",
+       "reference manifest declares the coverage navigation-wait-for-url-options actually has",
+       "reference manifest declares the coverage navigation-wait-for-url actually has",
+       "reference manifest declares the coverage option-check-uncheck-hover actually has",
+       "reference manifest declares the coverage option-click-full actually has",
+       "reference manifest declares the coverage option-fill-press actually has",
+       "reference manifest declares the coverage option-select-option actually has",
+       "permitted-surface completeness demonstrates every permitted method",
+       "permitted-surface completeness demonstrates no method outside the permitted surface",
+       "permitted-surface completeness demonstrates every permitted option key",
+       "permitted-surface completeness demonstrates no option key outside the permitted surface",
+       "permitted-surface completeness names a permitted method for every operation the executor can run",
+       "permitted-surface completeness demonstrates both reference kinds",
+       "fixture page bindings binds every example to a declared page",
+       "fixture page bindings ships every declared page",
+       "fixture page bindings maps every literal URL the corpus uses to a fixture page"
+      ],
+      "byStatus": {
+       "passed": 40
+      }
+     },
+     "test/reference-policy.test.ts": {
+      "count": 10,
+      "tests": [
+       "structural reference policy accepts references the step selects through its context, with no token in its text",
+       "structural reference policy rejects the same references without a policy, under the source-token rule",
+       "structural reference policy rejects a declared secret the policy does not allow with REFERENCE_EXTRA",
+       "structural reference policy rejects a required reference the code never uses with REFERENCE_MISSING",
+       "structural reference policy lets an allowed-but-not-required contextual default go unused or be used",
+       "structural reference policy rejects a retired version as REFERENCE_POLICY_INVALID without running step checks",
+       "structural reference policy rejects an unknown key as REFERENCE_POLICY_INVALID without running step checks",
+       "structural reference policy rejects a step count that does not match the source as REFERENCE_POLICY_INVALID without running step checks",
+       "structural reference policy rejects a required set outside the allowed set as REFERENCE_POLICY_INVALID without running step checks",
+       "structural reference policy rejects a non-string name as REFERENCE_POLICY_INVALID without running step checks"
+      ],
+      "byStatus": {
+       "passed": 10
+      }
+     },
+     "test/run/adapter.test.ts": {
+      "count": 119,
+      "tests": [
+       "matchers arrive as data and are compiled here keeps a literal a literal",
+       "matchers arrive as data and are compiled here compiles {source, flags} into a RegExp",
+       "matchers arrive as data and are compiled here does not let a global pattern’s lastIndex flip a polled assertion",
+       "locator chains are built segment by segment applies each segment to the previous locator",
+       "locator chains are built segment by segment resolves a CSS selector segment, which the fake-adapter tier could not",
+       "locator chains are built segment by segment passes every permitted getByRole state through",
+       "locator chains are built segment by segment resolves a declared variable inside a locator, and refuses when none can be",
+       "locator chains are built segment by segment compiles a regular expression used as a locator argument",
+       "locator chains are built segment by segment refuses a handle it did not produce",
+       "actions map the permitted options, and nothing else passes every click option through",
+       "actions map the permitted options, and nothing else falls back to the configured default timeout, not a library default",
+       "actions map the permitted options, and nothing else refuses trial mode defensively because it would report PASS without doing the action",
+       "actions map the permitted options, and nothing else drives press",
+       "actions map the permitted options, and nothing else drives check",
+       "actions map the permitted options, and nothing else drives uncheck",
+       "actions map the permitted options, and nothing else drives hover",
+       "actions map the permitted options, and nothing else drives selectOption",
+       "actions map the permitted options, and nothing else navigates with the permitted goto options",
+       "actions map the permitted options, and nothing else waits for a URL matcher",
+       "assertions poll the live page, and fail with a bounded message passes when the condition already holds, without sleeping",
+       "assertions poll the live page, and fail with a bounded message honours ignoreCase and useInnerText on toContainText",
+       "assertions poll the live page, and fail with a bounded message fails a text assertion with the matcher and a truncated actual",
+       "assertions poll the live page, and fail with a bounded message compares an input value exactly, and a pattern by match",
+       "assertions poll the live page, and fail with a bounded message checks the page URL, with ignoreCase",
+       "assertions poll the live page, and fail with a bounded message waits for visibility and reports a timeout as an assertion failure",
+       "assertions poll the live page, and fail with a bounded message treats a read that throws as a not-yet until the deadline",
+       "VAL-011 — a timed-out assertion says what it last read, or why it read nothing says no element matched when every read timed out, and never files the error name as text",
+       "VAL-011 — a timed-out assertion says what it last read, or why it read nothing names a strict-mode violation without quoting what it matched",
+       "VAL-011 — a timed-out assertion says what it last read, or why it read nothing keeps the error name, not the message, for any other read failure",
+       "VAL-011 — a timed-out assertion says what it last read, or why it read nothing keeps \"last seen\" with the text when text was read",
+       "VAL-011 — a timed-out assertion says what it last read, or why it read nothing does not describe a page-level reading as a locator that matched nothing",
+       "VAL-028 — a failed action says what went wrong, never what the page contains maps the live Wikipedia strict-mode violation to a count, with no markup",
+       "VAL-028 — a failed action says what went wrong, never what the page contains maps the live Google strict-mode violation to a count, with no markup",
+       "VAL-028 — a failed action says what went wrong, never what the page contains takes the count from the genuine head even when the listed markup repeats the phrase",
+       "VAL-028 — a failed action says what went wrong, never what the page contains says no element matched when a timeout never resolved the locator",
+       "VAL-028 — a failed action says what went wrong, never what the page contains names a timeout on \"element is not visible\" with a fixed phrase",
+       "VAL-028 — a failed action says what went wrong, never what the page contains names a timeout on \"element is not enabled\" with a fixed phrase",
+       "VAL-028 — a failed action says what went wrong, never what the page contains names a timeout on \"element is not editable\" with a fixed phrase",
+       "VAL-028 — a failed action says what went wrong, never what the page contains names a timeout on \"element is not stable\" with a fixed phrase",
+       "VAL-028 — a failed action says what went wrong, never what the page contains names repeated detaching as detached, including collapsed call-log lines",
+       "VAL-028 — a failed action says what went wrong, never what the page contains names a detached element, and an element covered by another",
+       "VAL-028 — a failed action says what went wrong, never what the page contains does not take a phrase from a markup line, and says the element matched but was not usable",
+       "VAL-028 — a failed action says what went wrong, never what the page contains maps the immediate refusal \"locator.fill: Error: Element is not an <input>, <textarea> or [contenteditable] element\" to a fixed phrase",
+       "VAL-028 — a failed action says what went wrong, never what the page contains maps the immediate refusal \"locator.selectOption: Error: Element is not a <select> element\" to a fixed phrase",
+       "VAL-028 — a failed action says what went wrong, never what the page contains maps the immediate refusal \"locator.click: Error: Element is not attached to the DOM\" to a fixed phrase",
+       "VAL-028 — a failed action says what went wrong, never what the page contains maps the immediate refusal \"locator.click: Error: Element is not visible\" to a fixed phrase",
+       "VAL-028 — a failed action says what went wrong, never what the page contains maps the immediate refusal \"locator.click: Target page, context or browser has been closed\" to a fixed phrase",
+       "VAL-028 — a failed action says what went wrong, never what the page contains keeps only the error name for anything else",
+       "VAL-028 — a failed action says what went wrong, never what the page contains replaces the Playwright error on every locator action, using the action’s timeout",
+       "VAL-028 — a failed action says what went wrong, never what the page contains leaves the runner’s own refusals unmapped",
+       "VAL-028 — a failed action says what went wrong, never what the page contains keeps the page suffix and the length bound through the executor",
+       "VAL-029 — a failed navigation never echoes a URL from the error maps a goto timeout, whose call log names the URL, to a fixed phrase",
+       "VAL-029 — a failed navigation never echoes a URL from the error keeps a net::ERR code and drops the URL after it",
+       "VAL-029 — a failed navigation never echoes a URL from the error drops a net::ERR-looking token that is not a closed code",
+       "VAL-029 — a failed navigation never echoes a URL from the error maps a waitForURL timeout, whose call log names the expected URL",
+       "VAL-029 — a failed navigation never echoes a URL from the error maps \"page.goto: Navigation to \\\"https://user:pw@app.example/login?token=abc#frag\\\" is interrupted by another navigation to \\\"https://user:pw@app.example/login?token=abc#frag\\\"\" to a fixed phrase",
+       "VAL-029 — a failed navigation never echoes a URL from the error maps \"page.goto: Cannot navigate to invalid URL\\nCall log:\\n  - navigating to \\\"https://user:pw@app.example/login?token=abc#frag\\\"\" to a fixed phrase",
+       "VAL-029 — a failed navigation never echoes a URL from the error maps \"page.goto: Target page, context or browser has been closed\" to a fixed phrase",
+       "VAL-029 — a failed navigation never echoes a URL from the error maps \"page.goto: NS_ERROR_UNKNOWN_HOST at https://user:pw@app.example/login?token=abc#frag\" to a fixed phrase",
+       "VAL-029 — a failed navigation never echoes a URL from the error replaces the Playwright error on goto and waitForURL, using the operation’s timeout",
+       "VAL-029 — a failed navigation never echoes a URL from the error keeps the page suffix (origin + path only) through the executor",
+       "VAL-013 — the adapter reads where the page is, raw, and only while the run is live returns the URL and the title as read",
+       "VAL-013 — the adapter reads where the page is, raw, and only while the run is live keeps the URL when the title cannot be read",
+       "VAL-013 — the adapter reads where the page is, raw, and only while the run is live reads nothing once the guard has stopped the run",
+       "AC-15 — the guard refuses every operation once the run is unsupported refuses before touching the page",
+       "AC-15 — the guard refuses every operation once the run is unsupported interrupts a polling assertion too",
+       "a secret is filled only on an origin it is bound to fills when the page origin is listed for the secret",
+       "a secret is filled only on an origin it is bound to refuses a different host with SECRET_ORIGIN_NOT_ALLOWED and types nothing",
+       "a secret is filled only on an origin it is bound to refuses a different scheme with SECRET_ORIGIN_NOT_ALLOWED and types nothing",
+       "a secret is filled only on an origin it is bound to refuses a different port with SECRET_ORIGIN_NOT_ALLOWED and types nothing",
+       "a secret is filled only on an origin it is bound to refuses about:blank with SECRET_ORIGIN_NOT_ALLOWED and types nothing",
+       "a secret is filled only on an origin it is bound to fails closed with no secretOrigins at all",
+       "a secret is filled only on an origin it is bound to fails closed with no entry for the secret",
+       "a secret is filled only on an origin it is bound to fails closed with an empty list",
+       "a secret is filled only on an origin it is bound to refuses when the page navigates off the bound origin while the fill waits",
+       "a secret is filled only on an origin it is bound to refuses when the pinned element sits in another origin",
+       "a secret is filled only on an origin it is bound to refuses when the pinned element sits in a detached document",
+       "a secret is filled only on an origin it is bound to types the secret into the pinned element, never through the re-resolving locator",
+       "a secret is filled only on an origin it is bound to leaves a non-secret fill unchecked",
+       "assertion semantics v2 regex flags= ignoreCase=undefined",
+       "assertion semantics v2 regex flags=i ignoreCase=undefined",
+       "assertion semantics v2 regex flags= ignoreCase=true",
+       "assertion semantics v2 regex flags=i ignoreCase=true",
+       "assertion semantics v2 regex flags=i ignoreCase=false",
+       "assertion semantics v2 regex flags= ignoreCase=false",
+       "assertion semantics v2 normalizes text and title strings on both sides, leaving regex and input literal",
+       "assertion semantics v2 canonicalizes URL strings without supplying a base URL",
+       "VAL-031 — text-entry role equivalence on fill and press uses an exact match as before and never counts the alternatives",
+       "VAL-031 — text-entry role equivalence on fill and press falls back to the one combobox when searchbox matches nothing, after the settle window",
+       "VAL-031 — text-entry role equivalence on fill and press applies to press as well, and names the alternative that matched",
+       "VAL-031 — text-entry role equivalence on fill and press acts on a matched authored role through the re-render gate on press too (VAL-041)",
+       "VAL-031 — text-entry role equivalence on fill and press gates on the unfiltered authored role when fill opts out with force (VAL-041)",
+       "VAL-031 — text-entry role equivalence on fill and press keeps the fixed strict failure when the authored role has two visible matches (VAL-041)",
+       "VAL-031 — text-entry role equivalence on fill and press refuses with a fixed message when two alternatives match, and types nothing",
+       "VAL-031 — text-entry role equivalence on fill and press lets a late exact match inside the settle window win",
+       "VAL-031 — text-entry role equivalence on fill and press fails with the VAL-028 timeout message when nothing ever matches",
+       "VAL-031 — text-entry role equivalence on fill and press builds the alternatives with the same name, exact and disabled options",
+       "VAL-031 — text-entry role equivalence on fill and press keeps the parent segment for the alternatives",
+       "VAL-031 — text-entry role equivalence on fill and press does not apply when the role carries expanded",
+       "VAL-031 — text-entry role equivalence on fill and press does not apply when the role carries checked",
+       "VAL-031 — text-entry role equivalence on fill and press does not apply when the role carries level",
+       "VAL-031 — text-entry role equivalence on fill and press does not apply to a non-text-entry role or a non-terminal text-entry segment",
+       "VAL-031 — text-entry role equivalence on fill and press leaves click, hover, check, selectOption and the assertions untouched",
+       "VAL-031 — text-entry role equivalence on fill and press refuses a secret on a disallowed origin before any resolution",
+       "VAL-031 — text-entry role equivalence on fill and press runs the guard before resolution, and between polls",
+       "VAL-031 — text-entry role equivalence on fill and press caps the settle window at 2 s for a long timeout",
+       "VAL-031 — text-entry role equivalence on fill and press maps a count failure through the fixed action messages, never the raw error",
+       "VAL-040 — actions resolve on visible elements only; assertions are unchanged acts on the one visible element when a hidden twin matches too, and discloses it",
+       "VAL-040 — actions resolve on visible elements only; assertions are unchanged keeps the strict-mode failure when two elements are visible, with N the visible count",
+       "VAL-040 — actions resolve on visible elements only; assertions are unchanged times out as \"not visible\" with one hidden element and none visible",
+       "VAL-040 — actions resolve on visible elements only; assertions are unchanged times out as \"not visible\" with two hidden elements (no strict-mode failure) and none visible",
+       "VAL-040 — actions resolve on visible elements only; assertions are unchanged acts once the hidden element becomes visible within the timeout",
+       "VAL-040 — actions resolve on visible elements only; assertions are unchanged does not disclose a single, visible match",
+       "VAL-040 — actions resolve on visible elements only; assertions are unchanged applies to every action the failure mapping covers",
+       "VAL-040 — actions resolve on visible elements only; assertions are unchanged leaves an explicit force: true unfiltered and uncounted, as before",
+       "VAL-040 — actions resolve on visible elements only; assertions are unchanged leaves the assertions unfiltered: a hidden twin changes nothing",
+       "VAL-040 — actions resolve on visible elements only; assertions are unchanged composes with the text-entry fallback: a hidden authored role falls back to the one visible alternative",
+       "VAL-040 — actions resolve on visible elements only; assertions are unchanged composes with the text-entry fallback: hidden alternatives do not make it ambiguous, nor match",
+       "VAL-040 — actions resolve on visible elements only; assertions are unchanged runs the secret-origin check before counting anything"
+      ],
+      "byStatus": {
+       "passed": 119
+      }
+     },
+     "test/run/childRuntime.test.ts": {
+      "count": 38,
+      "tests": [
+       "AC-10 — the origin is taken at recording readiness, and reported once answers ready with the paired reads before any step runs",
+       "AC-10 — the origin is taken at recording readiness, and reported once applies the launch message’s calibration to the origin, and echoes it (story 10.32 AC-3)",
+       "AC-10 — the origin is taken at recording readiness, and reported once takes the origin after the browser exists, not before",
+       "AC-10 — the origin is taken at recording readiness, and reported once reports every step reading on the run clock",
+       "AC-6a — a sandbox failure is named as one classifies a sandbox launch failure separately from a generic one",
+       "AC-6a — a sandbox failure is named as one never launches a second time after a launch failure",
+       "AC-7, AC-9 — the recording, and the words this story may use configures the recording geometry explicitly at context creation",
+       "AC-7, AC-9 — the recording, and the words this story may use reports PENDING for a playable recording, never STORED",
+       "AC-7, AC-9 — the recording, and the words this story may use reports FAILED when the flush produced no playable file",
+       "AC-7, AC-9 — the recording, and the words this story may use reports FAILED when closing the context threw",
+       "AC-8 — evidence and outcome are independent, in both directions (i) steps pass, recording fails → the run still passed",
+       "AC-8 — evidence and outcome are independent, in both directions (ii) a step fails, the recording is perfect → the run failed and the evidence did not",
+       "AC-8 — evidence and outcome are independent, in both directions stops at the first failure and reports the rest as SKIPPED with null timings",
+       "AC-8 — evidence and outcome are independent, in both directions redacts the canary out of a step failure message",
+       "AC-15 — a second page is explicit, never silent refuses the run with an unsupported-workflow code and message",
+       "AC-15 — a second page is explicit, never silent does not continue execution on the other page",
+       "AC-5 — the child exits on every path, with the browser closed first closes the context and exits after success",
+       "AC-5 — the child exits on every path, with the browser closed first closes the context and exits after step failure",
+       "AC-5 — the child exits on every path, with the browser closed first closes the context and exits after recording failure",
+       "AC-5 — the child exits on every path, with the browser closed first exits after a launch failure, with nothing to close",
+       "AC-5 — the child exits on every path, with the browser closed first closes and flushes the recording context on a stop message, rather than disposing",
+       "the tail settle — the recorder outlives the last operation, unless a stop is ordered waits for the load state and holds, after the last step and before the close",
+       "the tail settle — the recorder outlives the last operation, unless a stop is ordered settles after a failing step too: the failure state is what the video should end on",
+       "the tail settle — the recorder outlives the last operation, unless a stop is ordered a page that never reaches load within the bound changes nothing about the run (AC-8)",
+       "the tail settle — the recorder outlives the last operation, unless a stop is ordered is skipped entirely when the parent has already ordered a stop",
+       "the tail settle — the recorder outlives the last operation, unless a stop is ordered is abandoned, without the hold, when the stop arrives during it",
+       "the tail settle — the recorder outlives the last operation, unless a stop is ordered is bounded well inside the parent’s stop grace",
+       "the child refuses what it cannot accept, and leaves refuses a launch message carrying artifact source",
+       "the child refuses what it cannot accept, and leaves refuses an execute message carrying a code string, after the browser started",
+       "the child refuses what it cannot accept, and leaves refuses an out-of-order message",
+       "secret origin binding reaches the adapter and names the refusal fills the secret on a listed origin",
+       "secret origin binding reaches the adapter and names the refusal reports secret-origin-not-allowed when the page origin is not listed",
+       "secret origin binding reaches the adapter and names the refusal refuses a secret bound to no origin",
+       "failureKindOf names a refused step by its refusal, and an ordinary one as a step failure",
+       "VAL-031 rule 8 — the text-entry equivalence is disclosed to the operator formats one bounded line naming roles and the step only",
+       "VAL-031 rule 8 — the text-entry equivalence is disclosed to the operator logs one line, with the step index, when a fill used the equivalence",
+       "VAL-040 — visible-only resolution is disclosed to the operator formats one bounded line naming the step and the total only",
+       "VAL-040 — visible-only resolution is disclosed to the operator logs one line, with the step index, when a hidden twin was skipped"
+      ],
+      "byStatus": {
+       "passed": 38
+      }
+     },
+     "test/run/protocol.test.ts": {
+      "count": 30,
+      "tests": [
+       "the boundary accepts the validated operation list, as data accepts a well-formed launch message",
+       "the boundary accepts the validated operation list, as data accepts a well-formed execute message carrying operations and resolved values",
+       "story 10.32 AC-3 — seekOriginCalibrationMs on the launch message accepts the calibration production sends, 0, with no unknown-key problem",
+       "story 10.32 AC-3 — seekOriginCalibrationMs on the launch message accepts a positive calibration",
+       "story 10.32 AC-3 — seekOriginCalibrationMs on the launch message refuses a launch message without it",
+       "story 10.32 AC-3 — seekOriginCalibrationMs on the launch message refuses a calibration of -1",
+       "story 10.32 AC-3 — seekOriginCalibrationMs on the launch message refuses a calibration of -0.5",
+       "story 10.32 AC-3 — seekOriginCalibrationMs on the launch message refuses a calibration of NaN",
+       "story 10.32 AC-3 — seekOriginCalibrationMs on the launch message refuses a calibration of Infinity",
+       "story 10.32 AC-3 — seekOriginCalibrationMs on the launch message refuses a calibration of 0",
+       "story 10.32 AC-3 — seekOriginCalibrationMs on the launch message refuses a calibration of null",
+       "AC-3 — a message carrying a source field is refused refuses a top-level source by name",
+       "AC-3 — a message carrying a source field is refused refuses a top-level code by name",
+       "AC-3 — a message carrying a source field is refused refuses a top-level originalText by name",
+       "AC-3 — a message carrying a source field is refused refuses a top-level artifact by name",
+       "AC-3 — a message carrying a source field is refused refuses a top-level script by name",
+       "AC-3 — a message carrying a source field is refused refuses a top-level fn by name",
+       "AC-3 — a message carrying a source field is refused refuses a top-level body by name",
+       "AC-3 — a message carrying a source field is refused refuses a top-level expression by name",
+       "AC-3 — a message carrying a source field is refused refuses a source field hidden on a step",
+       "AC-3 — a message carrying a source field is refused refuses the artifact itself, which is the thing that must never cross",
+       "AC-3 — a message carrying a source field is refused refuses the launch message too, so the guard is not one message wide",
+       "default-deny on keys, the same posture the validator and the envelope take refuses a key nobody enumerated",
+       "default-deny on keys, the same posture the validator and the envelope take never reports a value, only a key name",
+       "default-deny on keys, the same posture the validator and the envelope take refuses a protocol version it does not implement",
+       "default-deny on keys, the same posture the validator and the envelope take refuses a non-object and a wrong kind",
+       "default-deny on keys, the same posture the validator and the envelope take reports every problem, not just the first",
+       "default-deny on keys, the same posture the validator and the envelope take refuses malformed fields rather than defaulting them",
+       "the parent reads only what it recognises accepts the four child message kinds",
+       "the parent reads only what it recognises drops anything else rather than guessing at it"
+      ],
+      "byStatus": {
+       "passed": 30
+      }
+     },
+     "test/server/correspondence.test.ts": {
+      "count": 15,
+      "tests": [
+       "AC-3 — a job whose values do not correspond to its declarations is refused before capacity refuses a declared secret with no value with 400, no capacity and no admission",
+       "AC-3 — a job whose values do not correspond to its declarations is refused before capacity refuses a declared variable with no value with 400, no capacity and no admission",
+       "AC-3 — a job whose values do not correspond to its declarations is refused before capacity refuses a value the artifact cannot name with 400, no capacity and no admission",
+       "AC-3 — a job whose values do not correspond to its declarations is refused before capacity refuses a name crossed between the two kinds with 400, no capacity and no admission",
+       "AC-3 — a job whose values do not correspond to its declarations is refused before capacity the experiment is capable of failing: the same job with corresponding values is admitted",
+       "AC-3 — a job whose values do not correspond to its declarations is refused before capacity reports correspondence problems with key names only, never a value",
+       "secretOrigins — optional, bound only to declared secrets, canonical origins only accepts canonical http(s) origins for a declared secret, and accepts absence",
+       "secretOrigins — optional, bound only to declared secrets, canonical origins only refuses an origin for a secret the job does not declare, by id only",
+       "secretOrigins — optional, bound only to declared secrets, canonical origins only refuses a path",
+       "secretOrigins — optional, bound only to declared secrets, canonical origins only refuses a trailing slash",
+       "secretOrigins — optional, bound only to declared secrets, canonical origins only refuses an uppercase host",
+       "secretOrigins — optional, bound only to declared secrets, canonical origins only refuses a default port",
+       "secretOrigins — optional, bound only to declared secrets, canonical origins only refuses a non-http scheme",
+       "secretOrigins — optional, bound only to declared secrets, canonical origins only refuses a non-URL",
+       "secretOrigins — optional, bound only to declared secrets, canonical origins only refuses a non-record, a non-array entry and an over-long list"
+      ],
+      "byStatus": {
+       "passed": 15
+      }
+     },
+     "test/syntax-reference-drift.test.ts": {
+      "count": 9,
+      "tests": [
+       "syntax-reference.md stays in step with the accepted language demonstrates a call to every permitted method",
+       "syntax-reference.md stays in step with the accepted language names every permitted option key",
+       "syntax-reference.md stays in step with the accepted language calls nothing the validator does not accept",
+       "syntax-reference.md stays in step with the accepted language uses no object-literal option key the validator does not accept",
+       "syntax-reference.md stays in step with the accepted language names no backticked identifier outside the accepted language",
+       "syntax-reference.md stays in step with the accepted language names every permitted regex flag",
+       "syntax-reference.md stays in step with the accepted language the rules catch the drift they exist for flags an option key the validator rejects, in prose or in code",
+       "syntax-reference.md stays in step with the accepted language the rules catch the drift they exist for flags a method the validator rejects",
+       "syntax-reference.md stays in step with the accepted language the rules catch the drift they exist for does not mistake CSS pseudo-classes for calls"
+      ],
+      "byStatus": {
+       "passed": 9
+      }
+     },
+     "test/validator-api.test.ts": {
+      "count": 26,
+      "tests": [
+       "validateArtifact returns typed operations rather than code (AC-11)",
+       "validateArtifact is pure: the same input yields a deeply equal result",
+       "validateArtifact honours overridden bounds (AC-10)",
+       "validateArtifact reports an empty step list when the envelope is unusable",
+       "validateArtifact rejects an empty step body",
+       "validateArtifact accepts a step with several permitted statements",
+       "policy resolution merges overrides over the documented defaults",
+       "artifact size measurement measures UTF-8 bytes",
+       "artifact size measurement treats unserializable input as over budget",
+       "regex safety scanner rejects (a+)+",
+       "regex safety scanner rejects (a)\\1",
+       "regex safety scanner rejects \\k<name>",
+       "regex safety scanner rejects (?<=a)b",
+       "regex safety scanner rejects a)b",
+       "regex safety scanner rejects (ab",
+       "regex safety scanner accepts dashboard",
+       "regex safety scanner accepts ^https://example\\.com/[a-z]+$",
+       "regex safety scanner accepts (ab)+",
+       "regex safety scanner accepts [()]+",
+       "regex safety scanner rejects every quantifier when nesting is configured to zero",
+       "source reference tokens extracts both token kinds",
+       "source reference tokens returns empty sets for a plain line",
+       "versions (AC-16) exports semantic versions",
+       "versions (AC-16) names the pinned parser",
+       "diagnostic codes are unique",
+       "diagnostic codes are recognised by the guard"
+      ],
+      "byStatus": {
+       "passed": 26
+      }
+     }
+    }
+   },
+   "namedDrops": {
+    "count": 78,
+    "byStatus": {
+     "passed": 78
+    },
+    "tests": [
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible accepts an artifact recorded on this exact runtime",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible compares the runner versions it actually ships",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible rejects a differing validatorSchema under the exact rule",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible rejects a differing syntaxReference under the exact rule",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible rejects a differing playwright under the exact rule",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible rejects a newer Playwright as firmly as an older one",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible applies the executor range to 1.0.0",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible applies the executor range to 0.9.0",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible applies the executor range to 2.0.0",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible applies the executor range to 1.0.1",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible applies the executor range to not-a-version",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible accepts a runtime ahead of the artifact within the executor major",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible runs a revision recorded under executor 2.0.0 on 2.1.0, and refuses the downgrade (VAL-031)",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "isCompatible reports every differing field at once",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "an artifact from an older validator schema is refused with RUNTIME_INCOMPATIBLE and reaches no adapter call",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/compat.test.ts",
+      "name": "an artifact from an older validator schema executes normally once the provenance matches the runtime",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/redaction.test.ts",
+      "name": "redaction never leaks a secret through the operation list, reporter or failure message (AC-13, AC-19)",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/redaction.test.ts",
+      "name": "redaction keeps the secret out of every validator diagnostic (AC-13)",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/reporting/reporting.test.ts",
+      "name": "AC-20 — the secret canary appears in no form on any outbound byte appears in no report body, in no log line and in no error message",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/reporting/reporting.test.ts",
+      "name": "AC-20 — the secret canary appears in no form on any outbound byte scrubs the canary from a launch failure that never reaches a step reporter",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/canary.test.ts",
+      "name": "AC-7a — the canary, in three shapes, across every surface that leaves this process shape 1 — a value interpolated into a formatted argument",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/canary.test.ts",
+      "name": "AC-7a — the canary, in three shapes, across every surface that leaves this process shape 2 — a value inside an exception message thrown from below the run path",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/canary.test.ts",
+      "name": "AC-7a — the canary, in three shapes, across every surface that leaves this process shape 3 — a value inside a nested object rendered by its own toString",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/canary.test.ts",
+      "name": "AC-7a — the canary, in three shapes, across every surface that leaves this process shape 1 — JSON-escapable bytes (carried as a formatted-argument)",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/canary.test.ts",
+      "name": "AC-7a — the canary, in three shapes, across every surface that leaves this process shape 2 — a strict prefix of another resolved value (carried as a exception-message)",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/canary.test.ts",
+      "name": "AC-7a — the canary, in three shapes, across every surface that leaves this process shape 3 — a short, common value (carried as a nested-toString)",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/canary.test.ts",
+      "name": "AC-7a — the canary, in three shapes, across every surface that leaves this process shape 4 — non-ASCII, multibyte (carried as a formatted-argument)",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/canary.test.ts",
+      "name": "AC-7a — the canary, in three shapes, across every surface that leaves this process shape 5 — regex metacharacters (carried as a exception-message)",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/canary.test.ts",
+      "name": "AC-7a — the canary, in three shapes, across every surface that leaves this process shape 6 — a variable value, not a secret (carried as a nested-toString)",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/canary.test.ts",
+      "name": "AC-7a — the canary, in three shapes, across every surface that leaves this process the experiment is capable of failing: the same surfaces do carry an unredacted control",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/canary.test.ts",
+      "name": "AC-9 — no resolved value is retained, and the assertion is made after a kill relays nothing at all for output the child produces after its tree was signalled",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/canary.test.ts",
+      "name": "AC-9 — no resolved value is retained, and the assertion is made after a kill leaves no scratch directory for a value to sit in",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/canary.test.ts",
+      "name": "AC-9 — no resolved value is retained, and the assertion is made after a kill wipes the resolver on the kill path, so nothing in the process can still produce a value",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/confinement.test.ts",
+      "name": "AC-1 — no Playwright import escapes the one module that starts a browser keeps the adapter itself Playwright-free, which is what makes it unit-testable",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/errors.test.ts",
+      "name": "AC-17(b) — the mapping is total in both directions reuses the compat module’s code rather than declaring a second spelling of it",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/launcher.test.ts",
+      "name": "AC-1, AC-20 — launch resolving means Chromium started classifies a sandbox failure reported before ready",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/launcher.test.ts",
+      "name": "AC-16 — step events reach 10.6’s reporter, across the process boundary a slow or failing reporter cannot block or alter a step",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/launcher.test.ts",
+      "name": "AC-1 — the parent does not drive the adapter of a child-owned session keeps the BrowserSession shape and refuses with the reason, not silently",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/launcher.test.ts",
+      "name": "AC-1 — the parent does not drive the adapter of a child-owned session refuses every method, so no operation is quietly a no-op",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/timeline.test.ts",
+      "name": "AC-11.3 — the scale, falsified puts the first step reading within a small, named bound of 0",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/timeline.test.ts",
+      "name": "AC-11.3 — the scale, falsified FAILS under a process-origin clock — the defect this story closes",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/run/timeline.test.ts",
+      "name": "AC-11.3 — the scale, falsified the fake clock’s startMs is not what makes the bound pass",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/admission.test.ts",
+      "name": "AC-6 — order of operations an invalid artifact reaches neither the pool nor the API",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/admission.test.ts",
+      "name": "AC-7 — admission identity belongs to this instance and this run reports the recorded runtime versions on the admission request",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/admission.test.ts",
+      "name": "AC-8 — a definite refusal stops the run 409 answers 409 and is explicit about non-acceptance",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/admission.test.ts",
+      "name": "AC-8 — a definite refusal stops the run 401 answers 503 ADMISSION_REJECTED and releases the slot",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/admission.test.ts",
+      "name": "AC-8 — a definite refusal stops the run 403 answers 503 ADMISSION_REJECTED and releases the slot",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/admission.test.ts",
+      "name": "AC-9 — an ambiguous outcome is not permission to replay records the ambiguity as a structured audit line plus a counter",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/cancel.test.ts",
+      "name": "D1 — the step a cancel interrupted is reported SKIPPED with the stop text rewrites the FAIL the closing context caused, on the PROGRESS and on the FINAL",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/deadline-outcome.test.ts",
+      "name": "AC-16 — a truncated run tells the truth about its video (a) the ordered stop completed and left a playable file → STORED, partial false",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/deadline-outcome.test.ts",
+      "name": "AC-16 — a truncated run tells the truth about its video (b) the grace expired, the tree was killed, and the file is nevertheless playable → STORED, partial TRUE",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/deadline-outcome.test.ts",
+      "name": "AC-16 — a truncated run tells the truth about its video never derives partial from the outcome, in either direction",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/evidence.test.ts",
+      "name": "AC-9 — the evidence vocabulary, and key discipline echoes the job’s server-derived keys exactly, inventing nothing",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/prelaunch.test.ts",
+      "name": "AC-2 — runtime compatibility is checked before any browser process exists launches when the recorded runtime and the running one agree",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/prelaunch.test.ts",
+      "name": "AC-2 — runtime compatibility is checked before any browser process exists creates no browser when they disagree, and reports RUNTIME_INCOMPATIBLE",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/prelaunch.test.ts",
+      "name": "AC-2 — runtime compatibility is checked before any browser process exists refuses an unreadable record rather than treating it as compatible",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/resolved-value-guards.test.ts",
+      "name": "AC-16a — a secret in a forbidden position is refused before capacity, with a real value behind it refuses a goto URL with no capacity taken and no admission",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/resolved-value-guards.test.ts",
+      "name": "AC-16a — a secret in a forbidden position is refused before capacity, with a real value behind it refuses a locator with no capacity taken and no admission",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/resolved-value-guards.test.ts",
+      "name": "AC-16a — a secret in a forbidden position is refused before capacity, with a real value behind it refuses an assertion argument with no capacity taken and no admission",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/resolved-value-guards.test.ts",
+      "name": "AC-16a — a secret in a forbidden position is refused before capacity, with a real value behind it refuses an option value with no capacity taken and no admission",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/resolved-value-guards.test.ts",
+      "name": "AC-16a — a secret in a forbidden position is refused before capacity, with a real value behind it the experiment is capable of failing: the same secret in a fill value is admitted",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/resolved-value-guards.test.ts",
+      "name": "AC-16a — a secret in a forbidden position is refused before capacity, with a real value behind it re-asserts token correspondence in both directions against the typed declaration",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "AC-4, AC-5 — POST /v1/validate validates without launching anything or creating scratch state",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "AC-4, AC-5 — POST /v1/validate returns bounded per-step diagnostics and never echoes the artifact",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "AC-4, AC-5 — POST /v1/validate rejects not JSON at all with this is not json",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "AC-4, AC-5 — POST /v1/validate rejects a JSON array with [1,2,3]",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "AC-4, AC-5 — POST /v1/validate rejects an unknown key with {\"artifact\":{},\"source\":[],\"policy\":{}}",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "AC-4, AC-5 — POST /v1/validate rejects a non-string source with {\"artifact\":{},\"source\":[1]}",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "AC-4, AC-5 — POST /v1/validate rejects an oversized body with 413 while it arrives",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "AC-4, AC-5 — POST /v1/validate rejects a source longer than the bound with 413",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "Story 10.35 AC-3 — a refused run body is recorded, by code and field name only records a missing required key as one JOB_INVALID line naming the field",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "Story 10.35 AC-3 — a refused run body is recorded, by code and field name only names an unknown key but never writes the value it carried",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "Story 10.35 AC-3 — a refused run body is recorded, by code and field name only records an artifact the validator refuses as one ARTIFACT_INVALID line",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "Story 10.35 AC-3 — a refused run body is recorded, by code and field name only records a body that is not JSON as one BODY_NOT_JSON line without echoing it",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "Story 10.35 AC-3 — a refused run body is recorded, by code and field name only records an oversized body as one BODY_TOO_LARGE line",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "Story 10.35 AC-3 — a refused run body is recorded, by code and field name only writes no refusal line for a job it admits",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/terminal-order.test.ts",
+      "name": "AC-1 — the store is called with the job’s keys and with no key the runner computed writes to keys deliberately unlike anything derivable from the run’s identity",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/server/timeline.test.ts",
+      "name": "AC-11.3 — every reading in the report is on the run timeline FAILS with a process-origin clock — the same run, the defect reinstated",
+      "baselineStatus": "passed"
+     }
+    ]
+   },
+   "portedRenamed": {
+    "count": 18,
+    "pairs": [
+     {
+      "file": "test/compat.test.ts",
+      "from": "loadRuntimeVersions reads the fields the compatibility check compares",
+      "to": "loadRuntimeVersions reads the recorded version fields",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/run/observedReplayProtocol.test.ts",
+      "from": "source-free observed IPC family accepts composed closed launch/execute and rejects them in unchanged legacy parsers",
+      "to": "source-free observed IPC family accepts composed closed launch/execute frames",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/run/observedReplayProtocol.test.ts",
+      "from": "refuses non-object launch frames in both explicit families: null",
+      "to": "refuses non-object launch frames: null",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/run/observedReplayProtocol.test.ts",
+      "from": "refuses non-object launch frames in both explicit families: %j",
+      "to": "refuses non-object launch frames: %j",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/run/observedReplayProtocol.test.ts",
+      "from": "refuses non-object launch frames in both explicit families: \"observed\"",
+      "to": "refuses non-object launch frames: \"observed\"",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/run/observedReplayProtocol.test.ts",
+      "from": "refuses non-object launch frames in both explicit families: 2",
+      "to": "refuses non-object launch frames: 2",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/server/concurrency.test.ts",
+      "from": "Case 3 — two instances, one attempt: exactly one browser launch (AC-7b) one runner wins, the other gets 409, launches nothing and never re-attempts",
+      "to": "Case 3 — two instances, one attempt: exactly one browser launch (AC-7b) one runner wins, the other gets 503, launches nothing and never re-attempts",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/server/concurrency.test.ts",
+      "from": "Case 4 — /v1/validate stays responsive while the slot is held answers validate concurrently with an in-flight admission",
+      "to": "Case 4 — /v2/validate-observed stays responsive while the slot is held answers validate concurrently with an in-flight admission",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/server/deadline-outcome.test.ts",
+      "from": "AC-3 — every deadline outcome is a distinguishable, truthful code row 2: the child never reports ready → ERROR / BROWSER_LAUNCH_FAILED",
+      "to": "AC-3 — every deadline outcome is a distinguishable, truthful code row 2: the child never reports ready → ERROR, named LAUNCH_UNKNOWN",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/server/hung-child.test.ts",
+      "from": "AC-14 — the control endpoints stay responsive while a child is hung answers a second POST /v1/runs with 429 and Retry-After rather than blocking on the hang",
+      "to": "AC-14 — the control endpoints stay responsive while a child is hung answers a second POST /v2/runs with 429 and Retry-After rather than blocking on the hang",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "from": "AC-2a — service identity on all four routes POST /v1/validate rejects a missing credential with 401 and a code only",
+      "to": "AC-2a — service identity on all four routes POST /v2/validate-observed rejects a missing credential with 401 and a code only",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "from": "AC-2a — service identity on all four routes POST /v1/validate rejects a wrong credential with 403",
+      "to": "AC-2a — service identity on all four routes POST /v2/validate-observed rejects a wrong credential with 403",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "from": "AC-2a — service identity on all four routes POST /v1/runs rejects a missing credential with 401 and a code only",
+      "to": "AC-2a — service identity on all four routes POST /v2/runs rejects a missing credential with 401 and a code only",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "from": "AC-2a — service identity on all four routes POST /v1/runs rejects a wrong credential with 403",
+      "to": "AC-2a — service identity on all four routes POST /v2/runs rejects a wrong credential with 403",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "from": "AC-11 — health and ready are four distinct states saturated: health 200, ready STILL 200, and /v1/runs answers 429",
+      "to": "AC-11 — health and ready are four distinct states saturated: health 200, ready STILL 200, and /v2/runs answers 429",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "from": "AC-11 — health and ready are four distinct states draining: health STILL 200, ready 503, and /v1/runs answers 503",
+      "to": "AC-11 — health and ready are four distinct states draining: health STILL 200, ready 503, and /v2/runs answers 503",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "from": "AC-4, AC-5 — POST /v1/validate cannot reserve a capacity slot: it answers while the pool is fully saturated",
+      "to": "AC-4 — POST /v2/validate-observed cannot reserve a capacity slot: it answers while the pool is fully saturated",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/server/routes.test.ts",
+      "from": "AC-4, AC-5 — POST /v1/validate reports an over-budget validation rather than answering silently slowly",
+      "to": "AC-4 — POST /v2/validate-observed reports an over-budget validation rather than answering silently slowly",
+      "afterStatus": "passed"
+     }
+    ]
+   },
+   "added": {
+    "count": 1,
+    "tests": [
+     {
+      "file": "test/server/routes.test.ts",
+      "name": "AC-3 — the callback destination is deployment configuration only serves none of the deleted artifact-1 routes (STUDIO-OBS-012A AC-3)",
+      "afterStatus": "passed"
+     }
+    ]
+   },
+   "laneCConcurrent": {
+    "droppedOrRenamedFrom": [
+     {
+      "file": "test/contract.test.ts",
+      "name": "AC-1 — internal contract accepts exactly the job keys the frozen RunJob declares — ADR-002 O-15"
+     },
+     {
+      "file": "test/run/confinement.test.ts",
+      "name": "AC-13 — this story makes no contract edit, and that is the criterion carries the ADR-SC-003 referencePolicy only on the two internal bodies, and no expectedIntent"
+     }
+    ],
+    "addedOrRenamedTo": [
+     {
+      "file": "test/generated-contracts.test.ts",
+      "name": "generated observed v3 bundles names exactly the four runner outputs it owns",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/generated-contracts.test.ts",
+      "name": "generated observed v3 bundles matches a fresh regeneration from contracts/v3 byte for byte",
+      "afterStatus": "passed"
+     },
+     {
+      "file": "test/run/confinement.test.ts",
+      "name": "AC-13 — this story makes no contract edit, and that is the criterion carries no artifact-1 ReferencePolicy schema and no expectedIntent",
+      "afterStatus": "passed"
+     }
+    ]
+   },
+   "reconciliation": {
+    "formula": "after = baseline − namedDeletions − namedDrops − renamedFrom + renamedTo + added − laneCDropped + laneCAdded",
+    "values": [
+     1829,
+     508,
+     78,
+     18,
+     18,
+     1,
+     2,
+     3
+    ],
+    "computed": 1245,
+    "observed": 1245,
+    "holds": true
+   }
+  },
+  "fixtures": {
+   "baseline": {
+    "total": 385,
+    "byStatus": {
+     "passed": 375,
+     "skipped": 10
+    }
+   },
+   "after": {
+    "total": 230,
+    "byStatus": {
+     "passed": 220,
+     "skipped": 9,
+     "failed": 1
+    }
+   },
+   "namedDeletions": {
+    "count": 143,
+    "byStatus": {
+     "passed": 142,
+     "skipped": 1
+    },
+    "files": {
+     "test/fixtures-tier/assertion-semantics.test.ts": {
+      "count": 29,
+      "tests": [
+       "runner agrees with actual Playwright 1.63 assertions 'url strings use URL canonicalization'",
+       "runner agrees with actual Playwright 1.63 assertions 'canonicalization does not erase path …'",
+       "runner agrees with actual Playwright 1.63 assertions 'relative URL string never inherits cu…'",
+       "runner agrees with actual Playwright 1.63 assertions 'URL regex stays raw'",
+       "runner agrees with actual Playwright 1.63 assertions 'text collapses both sides'",
+       "runner agrees with actual Playwright 1.63 assertions 'text does not ignore differing words'",
+       "runner agrees with actual Playwright 1.63 assertions 'innerText normalizes'",
+       "runner agrees with actual Playwright 1.63 assertions 'regex retains raw whitespace'",
+       "runner agrees with actual Playwright 1.63 assertions 'regex sees actual whitespace'",
+       "runner agrees with actual Playwright 1.63 assertions 'regex true adds i'",
+       "runner agrees with actual Playwright 1.63 assertions 'regex false removes i'",
+       "runner agrees with actual Playwright 1.63 assertions 'regex omitted preserves i'",
+       "runner agrees with actual Playwright 1.63 assertions 'regex omitted preserves case sensitiv…'",
+       "runner agrees with actual Playwright 1.63 assertions 'string ignores case only explicitly'",
+       "runner agrees with actual Playwright 1.63 assertions 'string case sensitive by default'",
+       "runner agrees with actual Playwright 1.63 assertions 'title normalizes expected and actual'",
+       "runner agrees with actual Playwright 1.63 assertions 'title negative companion'",
+       "runner agrees with actual Playwright 1.63 assertions 'title regex is raw'",
+       "runner agrees with actual Playwright 1.63 assertions 'value stays literal positive'",
+       "runner agrees with actual Playwright 1.63 assertions 'value is never text-normalized'",
+       "runner agrees with actual Playwright 1.63 assertions 'url regex true adds i'",
+       "runner agrees with actual Playwright 1.63 assertions 'url regex false removes i'",
+       "runner agrees with actual Playwright 1.63 assertions 'url regex omitted preserves i'",
+       "runner agrees with actual Playwright 1.63 assertions 'url regex omitted case sensitive'",
+       "runner agrees with actual Playwright 1.63 assertions 'url string ignores case explicitly'",
+       "runner agrees with actual Playwright 1.63 assertions 'url string stays case sensitive by de…'",
+       "runner agrees with actual Playwright 1.63 assertions rejects trial admission and performs an accepted real click",
+       "detached text reappearing at 150ms observes one deadline",
+       "detached text reappearing at 500ms observes one deadline"
+      ],
+      "byStatus": {
+       "passed": 29
+      }
+     },
+     "test/fixtures-tier/cancel-real-chromium.test.ts": {
+      "count": 16,
+      "tests": [
+       "a DELETE ends a live mid-step run inside the deployed grace (source: delete) navigation stall, sample 1/5",
+       "a DELETE ends a live mid-step run inside the deployed grace (source: delete) navigation stall, sample 2/5",
+       "a DELETE ends a live mid-step run inside the deployed grace (source: delete) navigation stall, sample 3/5",
+       "a DELETE ends a live mid-step run inside the deployed grace (source: delete) navigation stall, sample 4/5",
+       "a DELETE ends a live mid-step run inside the deployed grace (source: delete) navigation stall, sample 5/5",
+       "a DELETE ends a live mid-step run inside the deployed grace (source: delete) assertion stall, sample 1/5",
+       "a DELETE ends a live mid-step run inside the deployed grace (source: delete) assertion stall, sample 2/5",
+       "a DELETE ends a live mid-step run inside the deployed grace (source: delete) assertion stall, sample 3/5",
+       "a DELETE ends a live mid-step run inside the deployed grace (source: delete) assertion stall, sample 4/5",
+       "a DELETE ends a live mid-step run inside the deployed grace (source: delete) assertion stall, sample 5/5",
+       "the real 2 s control poll stops a run nobody sent a DELETE to (source: control) observes the recorded cancel within one interval plus a read",
+       "a PROGRESS acknowledgement carrying cancelRequested stops the run (source: progress-ack) stops mid-step on the ack of \"step 1 is running\", and step 2 never starts",
+       "a cancel before the browser exists starts none (source: delete) cancelled synchronously after admission: no fork, no STARTED, ERROR/CANCELLED",
+       "a cancel before the browser exists starts none (source: delete) cancelled while the browser is launching: stopped before any step, whichever branch ran",
+       "a browser that cannot close in time is killed by tree at the grace signals the tree at the grace, records the recording honestly, and still delivers CANCELLED",
+       "two runner instances: the DELETE lands on the pod that does not hold the run answers 404 there, and the owner still stops through its real poll"
+      ],
+      "byStatus": {
+       "passed": 16
+      }
+     },
+     "test/fixtures-tier/login-protected-session.test.ts": {
+      "count": 4,
+      "tests": [
+       "secret origin binding on real Chromium refuses to type the secret on an origin it is not bound to",
+       "secret origin binding on real Chromium refuses a secret with no declared origins",
+       "secret origin binding holds across a navigation during the wait refuses when the page redirects off the bound origin before the target appears",
+       "canonical login and protected page through POST /v1/runs authorizes context-selected references, preserves the authenticated session and retains no secret"
+      ],
+      "byStatus": {
+       "passed": 4
+      }
+     },
+     "test/fixtures-tier/no-browser-on-refusal.test.ts": {
+      "count": 5,
+      "tests": [
+       "AC-3 — a non-corresponding job starts no browser, established by looking for one starts no process at all for a declared secret with no value",
+       "AC-3 — a non-corresponding job starts no browser, established by looking for one starts no process at all for a declared variable with no value",
+       "AC-3 — a non-corresponding job starts no browser, established by looking for one starts no process at all for a value the artifact cannot name",
+       "AC-3 — a non-corresponding job starts no browser, established by looking for one starts no process at all for a name crossed between the two kinds",
+       "AC-3 — a non-corresponding job starts no browser, established by looking for one the observation is capable of seeing a process: a real browser appears in the same snapshot"
+      ],
+      "byStatus": {
+       "passed": 5
+      }
+     },
+     "test/fixtures-tier/real-chromium.test.ts": {
+      "count": 12,
+      "tests": [
+       "AC-7 — native webm at an explicitly configured resolution, flushed on close produces a readable file inside the per-run scratch directory, with a reported size",
+       "AC-7 — native webm at an explicitly configured resolution, flushed on close records at the configured geometry rather than a library default",
+       "AC-7 — native webm at an explicitly configured resolution, flushed on close creates exactly one recording, never one per page",
+       "AC-8 — the check outcome and the evidence state are independent (ii) a step fails and the recording is healthy",
+       "AC-15 — a popup is explicit, never silent closes the second page, refuses the run, and merges no video",
+       "AC-19 — no network egress beyond the local fixture pages reaches the loopback fixture host and nothing else",
+       "AC-19 — no network egress beyond the local fixture pages would notice a destination that is not the fixture server",
+       "AC-21, AC-22 — the canary, and the only thing the browser may write to reaches the field, and appears in no report, log, argument, environment or scratch file",
+       "AC-21, AC-22 — the canary, and the only thing the browser may write to confines the browser profile, downloads and temp output to the per-run scratch directory",
+       "AC-21, AC-22 — the canary, and the only thing the browser may write to leaves nothing behind once the run is cleared, recording included",
+       "AC-20 — admission → real Chromium launch → STARTED (closes 10.6 AC-14b) stamps browserStartedAt only once Chromium has actually started",
+       "AC-20 — admission → real Chromium launch → STARTED (closes 10.6 AC-14b) sends no STARTED at all when the launch fails"
+      ],
+      "byStatus": {
+       "passed": 12
+      }
+     },
+     "test/fixtures-tier/recording-coverage.test.ts": {
+      "count": 1,
+      "tests": [
+       "recording coverage — the video spans the run and ends after the last step ends at or after the last step, holds past it, spans the session, and shows the final repaint"
+      ],
+      "byStatus": {
+       "passed": 1
+      }
+     },
+     "test/fixtures-tier/reference-execution.test.ts": {
+      "count": 61,
+      "tests": [
+       "reference corpus against the fixture pages has a manifest entry for every example",
+       "reference corpus against the fixture pages executes action-check-uncheck through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes action-hover through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes action-press through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes action-select-option through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes assert-locator-contain-text through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes assert-locator-have-value through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes assert-locator-visible through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes assert-option-coverage through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes assert-page-have-title through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes assert-page-have-url through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes flow-login through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes locator-chained through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes locator-css-click through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes locator-get-by-label-fill through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes locator-get-by-placeholder-fill-variable through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes locator-get-by-role-click through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes locator-get-by-role-states through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes locator-get-by-test-id-fill-secret through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes locator-get-by-text-click through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes locator-text-exact-options through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes navigation-goto-options through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes navigation-goto through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes navigation-wait-for-url-options through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes navigation-wait-for-url through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes option-check-uncheck-hover through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes option-click-full through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes option-fill-press through the BrowserAdapter seam",
+       "reference corpus against the fixture pages executes option-select-option through the BrowserAdapter seam",
+       "reference corpus against the fixture pages targets elements that exist on the page action-check-uncheck is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page action-hover is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page action-press is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page action-select-option is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page assert-locator-contain-text is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page assert-locator-have-value is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page assert-locator-visible is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page assert-option-coverage is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page assert-page-have-title is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page assert-page-have-url is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page flow-login is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page locator-chained is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page locator-css-click is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page locator-get-by-label-fill is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page locator-get-by-placeholder-fill-variable is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page locator-get-by-role-click is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page locator-get-by-role-states is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page locator-get-by-test-id-fill-secret is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page locator-get-by-text-click is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page locator-text-exact-options is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page navigation-goto-options is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page navigation-goto is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page navigation-wait-for-url-options is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page navigation-wait-for-url is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page option-check-uncheck-hover is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page option-click-full is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page option-fill-press is bound to",
+       "reference corpus against the fixture pages targets elements that exist on the page option-select-option is bound to",
+       "reference corpus against the fixture pages serves every literal URL the corpus uses from a fixture page",
+       "reference corpus on the real pinned Chromium (10.3 AC-6b, 10.12 AC-18a) executes all 28 examples twice, identically, with CSS locators resolved in the live DOM",
+       "reference corpus on the real pinned Chromium (10.3 AC-6b, 10.12 AC-18a) reached the loopback fixture server and nothing else",
+       "reference corpus inside the pinned internal image (AC-18b) executes every example inside the internal Playwright image — deferred to ED-05/10.18"
+      ],
+      "byStatus": {
+       "passed": 60,
+       "skipped": 1
+      }
+     },
+     "test/fixtures-tier/rerender-resolution.test.ts": {
+      "count": 3,
+      "tests": [
+       "VAL-041 — actions on a re-rendered control in real Chromium fills, then presses Enter on an input replaced by an identical node while typing",
+       "VAL-041 — actions on a re-rendered control in real Chromium presses Enter on the combobox that replaced the counted searchbox (Wikipedia/Codex)",
+       "VAL-041 — actions on a re-rendered control in real Chromium keeps the authored searchbox when a same-name combobox is also visible (no new ambiguity)"
+      ],
+      "byStatus": {
+       "passed": 3
+      }
+     },
+     "test/fixtures-tier/seek-calibration-pinned.test.ts": {
+      "count": 1,
+      "tests": [
+       "story 10.32 AC-4 — the fixtures tier is pinned to an uncalibrated origin runs real Chromium with a seek-origin calibration of exactly 0"
+      ],
+      "byStatus": {
+       "passed": 1
+      }
+     },
+     "test/fixtures-tier/text-entry-equivalence.test.ts": {
+      "count": 5,
+      "tests": [
+       "VAL-031 — text-entry role equivalence in real Chromium fills and submits a combobox textarea authored as a nameless searchbox (benchmark C07)",
+       "VAL-031 — text-entry role equivalence in real Chromium fills the same control authored as textbox with its accessible name",
+       "VAL-031 — text-entry role equivalence in real Chromium leaves an exact searchbox match untouched",
+       "VAL-031 — text-entry role equivalence in real Chromium refuses to choose between two text-entry controls for a nameless searchbox",
+       "VAL-031 — text-entry role equivalence in real Chromium does not apply to click: a nameless searchbox click still times out"
+      ],
+      "byStatus": {
+       "passed": 5
+      }
+     },
+     "test/fixtures-tier/visible-only-resolution.test.ts": {
+      "count": 6,
+      "tests": [
+       "VAL-040 — visible-only resolution in real Chromium fills and submits the visible Wikipedia input past its hidden twins (getByPlaceholder)",
+       "VAL-040 — visible-only resolution in real Chromium fills the one visible Google-like Search control (getByLabel matching hidden elements)",
+       "VAL-040 — visible-only resolution in real Chromium keeps the strict-mode failure when two matches are visible, counting visible ones only",
+       "VAL-040 — visible-only resolution in real Chromium times out as \"not visible\" when the only match is hidden",
+       "VAL-040 — visible-only resolution in real Chromium leaves the assertions unchanged: a hidden twin still makes toBeVisible ambiguous",
+       "VAL-040 — visible-only resolution in real Chromium composes with the text-entry fallback: a hidden searchbox yields to the one visible combobox"
+      ],
+      "byStatus": {
+       "passed": 6
+      }
+     }
+    }
+   },
+   "namedDrops": {
+    "count": 12,
+    "byStatus": {
+     "passed": 12
+    },
+    "tests": [
+     {
+      "file": "test/fixtures-tier/deadline-cleanup.test.ts",
+      "name": "AC-11a — the process tree is gone, established by looking for it kills the browser below the Node layer when the ordered stop cannot complete",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/fixtures-tier/deadline-cleanup.test.ts",
+      "name": "AC-11a — the process tree is gone, established by looking for it leaves no tree behind on the ordinary success path either",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/fixtures-tier/deadline-cleanup.test.ts",
+      "name": "AC-16 — what a real killed recorder leaves, and what the runner says about it reports a salvaged prefix as PENDING/partial true, and nothing at all as UNAVAILABLE/false",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/fixtures-tier/deadline-cleanup.test.ts",
+      "name": "AC-16 — what a real killed recorder leaves, and what the runner says about it reports a cleanly flushed recording as PENDING/partial false, on a run that also timed out",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/fixtures-tier/deadline-cleanup.test.ts",
+      "name": "AC-12 — scratch, temp output and video artefacts are gone, asserted on the filesystem deletes the profile, the temp directory and a partially written video after a kill",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/fixtures-tier/deadline-cleanup.test.ts",
+      "name": "AC-13 — the next run succeeds after a killed one runs a second real browser end to end immediately after a kill",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/fixtures-tier/deadline-cleanup.test.ts",
+      "name": "AC-7a — the canary through a real Chromium, on a killed run appears in no captured child output, no result and no scratch file",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/fixtures-tier/deadline-cleanup.test.ts",
+      "name": "O-13 — the reported partiality reaches the wire, and the API now publishes it puts the real recorder observation on the serialized FINAL body",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/fixtures-tier/seek-measurement.test.ts",
+      "name": "AC-12a — step-seek accuracy against a local fixture page reports every attempted step within the measured tolerance of its visible effect",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/fixtures-tier/upload-evidence.test.ts",
+      "name": "AC-8, AC-18a — a real Chromium recording through the real local store stores the exact bytes at the job’s key and only then reports STORED",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/fixtures-tier/upload-evidence.test.ts",
+      "name": "AC-8, AC-18a — a real Chromium recording through the real local store writes a manifest beside it that names the same evidence disposition",
+      "baselineStatus": "passed"
+     },
+     {
+      "file": "test/fixtures-tier/upload-evidence.test.ts",
+      "name": "AC-8, AC-18a — a real Chromium recording through the real local store never uploads a run that produced nothing playable, and never calls it STORED",
+      "baselineStatus": "passed"
+     }
+    ]
+   },
+   "portedRenamed": {
+    "count": 0,
+    "pairs": []
+   },
+   "added": {
+    "count": 0,
+    "tests": []
+   },
+   "laneCConcurrent": {
+    "droppedOrRenamedFrom": [],
+    "addedOrRenamedTo": []
+   },
+   "reconciliation": {
+    "formula": "after = baseline − namedDeletions − namedDrops − renamedFrom + renamedTo + added − laneCDropped + laneCAdded",
+    "values": [
+     385,
+     143,
+     12,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "computed": 230,
+    "observed": 230,
+    "holds": true
+   }
+  },
+  "deployment": {
+   "baseline": {
+    "total": 313,
+    "byStatus": {
+     "passed": 313
+    }
+   },
+   "after": {
+    "total": 313,
+    "byStatus": {
+     "passed": 313
+    }
+   },
+   "namedDeletions": {
+    "count": 0,
+    "byStatus": {},
+    "files": {}
+   },
+   "namedDrops": {
+    "count": 0,
+    "byStatus": {},
+    "tests": []
+   },
+   "portedRenamed": {
+    "count": 0,
+    "pairs": []
+   },
+   "added": {
+    "count": 0,
+    "tests": []
+   },
+   "laneCConcurrent": {
+    "droppedOrRenamedFrom": [],
+    "addedOrRenamedTo": []
+   },
+   "reconciliation": {
+    "formula": "after = baseline − namedDeletions − namedDrops − renamedFrom + renamedTo + added − laneCDropped + laneCAdded",
+    "values": [
+     313,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "computed": 313,
+    "observed": 313,
+    "holds": true
+   }
+  }
+ },
+ "modifiedTests": [
+  {
+   "path": "studio-runner/test/helpers/runner.ts",
+   "change": "fake launcher now returns observed sessions (run required) steered by FakeRunScript; held launch honours the abort signal; fake HTTP treats /observed-admission as admission and answers a closed receipt by default; singleWinnerAdmission grants with receipts; observedJob/observedBody/OBSERVED_* helpers; validJob kept for Lane C contract.test only"
+  },
+  {
+   "path": "studio-runner/test/helpers/harness.ts",
+   "change": "observed support on by default; takeOrigin removed; RUNTIME_VERSIONS no longer imports versions.ts"
+  },
+  {
+   "path": "studio-runner/test/helpers/childDriver.ts",
+   "change": "rewritten: real launcher over fake spawn seam speaking Ready3/StepStarted3/StepFinished3/Result3"
+  },
+  {
+   "path": "studio-runner/test/helpers/child.ts",
+   "change": "fake page/locators/browser factory (Playwright-adapter fakes) removed; spawn seam kept; createFakePage is a stand-in object"
+  },
+  {
+   "path": "studio-runner/test/helpers/corpus.ts",
+   "change": "reference/adversarial loaders removed; packageRoot kept"
+  },
+  {
+   "path": "studio-runner/test/helpers/pageServer.ts",
+   "change": "route table ported inline (FIXTURE_PAGES)"
+  },
+  {
+   "path": "studio-runner/test/fixtures-tier/realRunner.ts",
+   "change": "runReal (artifact-1 run) and createScratch removed; untilMs kept for observed suites"
+  },
+  {
+   "path": "studio-runner/test/server/{routes,cancel,concurrency,deadline-outcome,hung-child,drain,evidence,terminal-order,timeline,prelaunch,admission,resolved-value-guards,surface}.test.ts",
+   "change": "ported to POST /v2/runs + DELETE /v2/runs/{id}; artifact-1-only cases dropped by name (see testReconciliation)"
+  },
+  {
+   "path": "studio-runner/test/reporting/reporting.test.ts",
+   "change": "ported to observed runs; 2 AC-20 cases dropped; body-size cap 700→1800 because the observed report floor is ~1755 bytes (measured), still below every full snapshot (1810+)"
+  },
+  {
+   "path": "studio-runner/test/run/{launcher,errors,timeline,canary,confinement,observedReplayProtocol,observedChildRuntime,outputRelay}.test.ts, test/redaction.test.ts, test/compat.test.ts",
+   "change": "artifact-1 cases dropped/ported; confinement: only the playwrightAdapter case removed (pin value untouched; Lane C had already re-anchored it)"
+  },
+  {
+   "path": "studio-runner/test/fixtures-tier/{deadline-cleanup,seek-measurement,upload-evidence}.test.ts",
+   "change": "reduced to their deferred live-skip records (9 skips kept); artifact-1 real-run cases dropped"
+  },
+  {
+   "path": "studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts",
+   "change": "execute({reporter}) call shape; removed always-true if(!session.run) guard"
+  }
+ ],
+ "grepGate": {
+  "command": "cd studio-runner && grep -rn -- '<pattern>' src | wc -l",
+  "src": {
+   "/v1/runs": 0,
+   "/v1/validate": 0,
+   "artifact_schema_version": 0,
+   "attachLegacyChildRuntime": 0,
+   "LEGACY_": 0
+  },
+  "testHits": {
+   "/v1/runs": {
+    "test/server/routes.test.ts": "guard literal: asserts 404 for the deleted route",
+    "test/server/cancel.test.ts": "guard literal: asserts DELETE /v1/runs/{id} is 404",
+    "test/contract.test.ts": "Lane C (do-not-edit)",
+    "test/run/confinement.test.ts": "Lane C comments around the pin",
+    "test/deployment/chart.test.ts": "comment (deployment tier, not owned)"
+   },
+   "/v1/validate": {
+    "test/server/routes.test.ts": "guard literal",
+    "test/contract.test.ts": "Lane C",
+    "test/run/confinement.test.ts": "Lane C comment",
+    "test/deployment/backend-env.test.ts": "Helm wiring test name (deployment tier, OBS-009 scope)"
+   },
+   "attachLegacyChildRuntime": {},
+   "LEGACY_": {}
+  }
+ },
+ "commands": [
+  {
+   "cmd": "./node_modules/.bin/tsc -p tsconfig.json --noEmit (noUnusedLocals/noUnusedParameters on)",
+   "result": "PASS, 0 errors"
+  },
+  {
+   "cmd": "./node_modules/.bin/tsc -p tsconfig.build.json --noEmit",
+   "result": "PASS"
+  },
+  {
+   "cmd": "./node_modules/.bin/eslint .",
+   "result": "PASS, 0 problems"
+  },
+  {
+   "cmd": "./node_modules/.bin/vitest run --reporter=json (default tier, vitest.config.ts)",
+   "result": "exit 1: 75 files, 1245 tests = 1200 passed, 0 failed, 45 skipped; test/contract.test.ts FAILS in beforeAll (POST /v1/validate now 404) so its 16 cases report skipped — Lane C owns that file; coverage not reported because a file failed"
+  },
+  {
+   "cmd": "./node_modules/.bin/vitest run --exclude test/contract.test.ts (default tier minus Lane C file, coverage on)",
+   "result": "exit 1: 74 files, 1229 tests = 1200 passed, 0 failed, 29 skipped; coverage gate FAILS only src/run/** lines/statements 77.77% < 85% (global 87.33/86.8/95.42/87.33; src/server 93.75 lines)"
+  },
+  {
+   "cmd": "./node_modules/.bin/vitest run --config vitest.fixtures.config.ts (run 1)",
+   "result": "exit 1: 30 files, 230 tests = 220 passed, 1 failed, 9 skipped; failure observed-secret-control lost-control-body cutoff 2000.09ms > 2000"
+  },
+  {
+   "cmd": "./node_modules/.bin/vitest run --config vitest.fixtures.config.ts (run 2)",
+   "result": "exit 1: 230 tests = 219 passed, 2 failed, 9 skipped; observed-secret-control lost-control-body 2010.41ms > 2000; observed-bootstrap-video normal-failure decoded-prefix-white assertion"
+  },
+  {
+   "cmd": "isolated reruns",
+   "result": "observed-secret-control.test.ts: 2 of 3 runs pass (fail 2006.28ms); observed-bootstrap-video.test.ts: 2 of 2 pass"
+  },
+  {
+   "cmd": "./node_modules/.bin/vitest run --config vitest.deployment.config.ts (STUDIO_RUNNER_IMAGE unset → default tag put-checks-studio-runner:10.18a-local, an existing local image, not rebuilt from this tree)",
+   "result": "exit 0: 8 files, 313 passed, 0 failed, 0 skipped"
+  }
+ ],
+ "baselines": {
+  "default": "docs/qa/evidence/STUDIO-OBS-012A/baseline-runner (1829 = 1800 passed + 29 skipped); source-hashes.json re-checked before editing: 90/90 runner sources unchanged",
+  "fixtures": "taken by this lane before editing: 385 = 375 passed + 10 skipped, 0 failed (same command)",
+  "deployment": "taken by this lane before editing: 313 passed (same command, same default image tag)"
+ },
+ "coverageBlocker": {
+  "gate": "vitest.config.ts thresholds 'src/run/**' lines/statements 85",
+  "baseline": "85.19% (met only because src/run/playwrightAdapter.ts, 1157 lines, was 99% covered)",
+  "after": "77.77% (2180/2803 lines)",
+  "why": "AC-3 deletes playwrightAdapter.ts; the largest remaining uncovered file is src/run/browser.ts (485 lines, 0%), the only Playwright importer, which the unit tier may not load (confinement AC-25); child.ts/guidedMain.ts are process entries. Even if every other uncovered src/run line were covered (138 lines), the ceiling is 2318/2803 = 82.7% < 85%.",
+  "notDone": "threshold not lowered, browser.ts not excluded, no v8-ignore added — vitest.config.ts is a do-not-edit tool config. Needs an owner ruling (e.g. measure browser.ts/child.ts/guidedMain.ts in the fixtures tier only)."
+ },
+ "flakes": [
+  {
+   "test": "test/fixtures-tier/observed-secret-control.test.ts > lost-control-body",
+   "evidence": "cutoff 2000.09 / 2010.41 / 2006.28 ms vs ≤2000 bound; startControlPoll in runCoordinator.ts verified byte-identical to the pre-change copy; passed in the pre-change baseline run and 2 of 3 isolated reruns",
+   "status": "not caused by this lane as far as verified; not reproduced against the pre-change tree with repeated runs"
+  },
+  {
+   "test": "test/fixtures-tier/observed-bootstrap-video.test.ts > normal-failure",
+   "evidence": "failed once under full-tier load (decoded prefix frames not all white), passed in run 1 and in 2 isolated reruns; only test edit was removing an always-true guard",
+   "status": "intermittent under load"
+  }
+ ],
+ "sideEffects": [
+  "Running the fixtures tier rewrites untracked docs/qa/evidence/STUDIO-OBS-007/runner-native-file-facts-*.json, runner-bootstrap-native-video*.json and runner-control-focus-candidate/oracle-*.json (the tests write them); this lane ran the tier 3 times (baseline + 2)",
+  "fixtures globalSetup emits into studio-runner/dist without cleaning, so dist/ still holds stale compiled artifact-1 files (dist is untracked build output)"
+ ],
+ "handoffs": {
+  "laneC": [
+   "test/contract.test.ts fails in beforeAll (POST /v1/validate → 404) — it still drives /v1/validate and /v1/runs and imports validJob/ACCEPTED_JOB_KEYS; re-point to the observed job, then validJob() in test/helpers/runner.ts can go",
+   "docs/specs/studio/openapi.yaml x-runner-error-codes still lists the six codes this lane removed (ARTIFACT_REVALIDATION_FAILED, RUNTIME_INCOMPATIBLE, BROWSER_SANDBOX_UNAVAILABLE, UNSUPPORTED_MULTI_PAGE, URL_SCHEME_NOT_PERMITTED, SECRET_ORIGIN_NOT_ALLOWED); the document itself says removing one is Class C, so the removal here rests on AC-3/ADR-SC-005 D-A and needs the matching contract edit + pin",
+   "confinement BASE_SHA256 was already re-anchored by Lane C (6af5428c…); this lane only removed the playwrightAdapter case in that file",
+   "src/versions.ts artifact-1 constants and scripts/check-pins / write-runtime-versions still carry validatorSchema/syntaxReference/executor; compat/runtime-versions.ts still requires those four fields"
+  ],
+  "backendLaneK": [
+   "cancel is served only at DELETE /v2/runs/{id}; DELETE /v1/runs/{id} is 404",
+   "the runner can no longer emit the six removed error codes"
+  ],
+  "architectOrOBS011": [
+   "src/run/** coverage gate (see coverageBlocker)",
+   "orphaned src/run/outputRelay.ts and isSandboxFailure",
+   "observed launcher kills the run when the reporter throws in a step-frame handler (the artifact-1 inbox swallowed it); the artifact-1 test for that property was dropped, not ported",
+   "observed pre-Ready launch failure reports ERROR/RUN_ERROR + LAUNCH_UNKNOWN, so deadline-outcome rows 2 and 5 now share errorCode RUN_ERROR and differ only by errorMessage",
+   "10.35 AC-3 refusal log line (runs.refused) existed only on the artifact-1 run route; /v2/runs refusals are not logged",
+   "observed evidence keys are derived in the runner from the binding (job-supplied keys case dropped)",
+   "observed runs use an empty redactor (closed producers), so a non-ObservedPreReadyFailure launch error message reaches FINAL outcome.errorMessage unredacted (pre-existing OBS-007 behaviour; the artifact-1 case that asserted a launch-failure canary was scrubbed was dropped because it depended on the v1 job-value redactor)"
+  ],
+  "OBS013": [
+   "real-recording evidence cases (upload-evidence, deadline-cleanup AC-16, seek AC-12a) were artifact-1 runs and are dropped; observed recording evidence coverage is OBS-013 scope; test/helpers/webm.ts frame finder deleted with its only consumer (recoverable from git)"
+  ]
+ },
+ "gitHygiene": {
+  "staged": "none (git diff --cached empty); deletions made with rm, not git rm",
+  "noCommitNoStash": true
+ }
+}

@@ -1,0 +1,83 @@
+{
+  "story": "STUDIO-OBS-007",
+  "status": "REVIEWABLE_PATCH_ONLY_NOT_APPLIED",
+  "createdAtUtc": "2026-10-10T18:00:35.394426+00:00",
+  "independentDesignReview": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-isolation-r2-review.json",
+    "sha256": "f88159a6e6cc88b5379923f1ae51301434aef5a70b35cbdfe88044b16d358a99"
+  },
+  "boundOriginalSha256": "3db23983b89cc5edbb34a79df914c9cdb4d9c7ea8394c6430357775fa9b782ea",
+  "patch": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/r-isolation-extraction-candidate.patch",
+    "sha256": "facb90d6997284b988fcb5d55b3649fb277c47ca1e6f437586cf81d93166f3b2",
+    "exactPaths": [
+      "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+      "studio-runner/test/fixtures/guided-dataflow/server.ts"
+    ]
+  },
+  "beforeAfter": [
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+      "beforeSha256": "3db23983b89cc5edbb34a79df914c9cdb4d9c7ea8394c6430357775fa9b782ea",
+      "proposedAfterSha256": "417c8ae2f6fb845eb4f7f802b037efc5638ee53ab0fcab41e4a7d8553bf763ad",
+      "actualSourceStillSha256": "3db23983b89cc5edbb34a79df914c9cdb4d9c7ea8394c6430357775fa9b782ea",
+      "beforeSnapshot": "docs/qa/evidence/STUDIO-OBS-007/r-isolation-extraction-candidate/before/studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+      "afterSnapshot": "docs/qa/evidence/STUDIO-OBS-007/r-isolation-extraction-candidate/after/studio-runner/test/fixtures-tier/guided-dataflow.test.ts"
+    },
+    {
+      "path": "studio-runner/test/fixtures/guided-dataflow/server.ts",
+      "before": "ABSENT",
+      "proposedAfterSha256": "c8420f7dc5420a085b0c5b51f92251b8418e6f6c7e4d891d2eb084cd15ee1f61",
+      "actualSourceStillAbsent": true,
+      "afterSnapshot": "docs/qa/evidence/STUDIO-OBS-007/r-isolation-extraction-candidate/after/studio-runner/test/fixtures/guided-dataflow/server.ts"
+    }
+  ],
+  "invariants": {
+    "serverBodyListenAddressValidationVerbatim": true,
+    "serverBodySha256": "58439e636ee4a70020f26ab42491c3a4249db9a6c36c79415dfc64dc00ae67cf",
+    "originalCloseExpressionVerbatim": true,
+    "originalCloseExpressionSha256": "ee5156349fccfbc64066967c4c26d4d18c07591c3d5b6fae80c7b1980a4911de",
+    "canaryLiteralVerbatim": true,
+    "canaryLiteralSha256": "f2e36e124cbf679b1e203f1bd098bd9812633b79ea22d8c4a21274df19eeeff7",
+    "allThreeOriginalModeNamesAndAssertionsVerbatim": true,
+    "defaultExactModePreserved": true,
+    "runtimeContext65InputsHashRulesPolicyActTargetRefreshBodyVerbatim": true,
+    "cleanupReverseOrderVerbatim": true,
+    "cleanupRegistrations": "fixture.close registration in original server position; directory rm registration then runtime.stop unchanged. Reverse execution remains runtime.stop\u2192rm\u2192original closeAllConnections/close.",
+    "fixtureOriginFormatter": "Original http://127.0.0.1:${String(address.port)}, computed from same actual listen/address; no port/origin remap",
+    "sameReceiptArrayAndCounterClosure": "Helper returns original receipts array and sourceRequests closure, no copies/reset/new semantics. Harness returns forwarding count thunk.",
+    "helperImports": [
+      "import { createServer } from 'node:http';"
+    ],
+    "helperImportsCreateNoServerRuntimeBrowserTests": "Only const literal/function declarations at module scope; createServer/listen solely inside explicit starter. No runtime/browser/vitest imports.",
+    "existingTestLosslessReconstructionVerified": true,
+    "newProductionAPI": false,
+    "markupPolicyGrantOrModeMutations": false
+  },
+  "sourceBinding": {
+    "currentExistingFiles": 254,
+    "proposedSourceFiles": 255,
+    "proposedManifest": "docs/qa/evidence/STUDIO-OBS-007/r-isolation-extraction-candidate/proposed-source-manifest.json",
+    "proposedManifestSha256": "640530909c5b3e76937e649dfb790e7b969b8326421831dd8e309e8dda56ac11"
+  },
+  "actualWrites": {
+    "sourceFiles": 0,
+    "distFiles": 0,
+    "models": 0,
+    "builds": 0,
+    "tests": 0,
+    "browserLaunches": 0,
+    "onlyEvidence": "patch, before/after snapshots and this manifest under docs/qa/evidence/STUDIO-OBS-007"
+  },
+  "actualDistDrift": [],
+  "requiredBeforeApply": [
+    "Independent exact two-path patch review against bound original bytes",
+    "Coordinator exact source authoring preflight/release",
+    "After apply independently allowed type/lint and actual original3 dataflow plus future3 isolation counts under exclusive browser/build lane; no tests run now"
+  ],
+  "limits": [
+    "Syntactic/behavior invariants checked by lossless text extraction only, not compiler/runtime PASS",
+    "No isolation test authored or executed; fourth stalegrant probe separate exact release",
+    "No workflow/QA/lifecycle/goal/policy/schema/source product changes"
+  ]
+}

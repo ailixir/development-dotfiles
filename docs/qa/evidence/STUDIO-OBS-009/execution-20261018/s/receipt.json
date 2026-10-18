@@ -1,0 +1,193 @@
+{
+ "lane": "S",
+ "story": "STUDIO-OBS-009",
+ "wave": "W2",
+ "date": "2026-10-18",
+ "agent": "aiox-dev (Dex)",
+ "verdict": "GREEN_WITH_BATON_REAL_TREE_RED_UNTIL_BATON",
+ "ac6": {
+  "a": "18 re-enabled, green",
+  "b": "only @Disabled removed; comment-only edits by name",
+  "c": "R7 conditioned + acceptance-first test",
+  "d": "3 deleted, 1 re-pointed, ReplayIT tripwire = baton",
+  "e": "@Disabled=6, DEFERRED=0, updateTest(=0",
+  "f": "acceptedAt/pending_deadline_at stamping NOT changed; no clock change"
+ },
+ "counts": {
+  "scratchWithBaton": {
+   "StudioScheduleApiIT": 22,
+   "SharedSchedulingIT": 4,
+   "ObservedScheduleAuthorityIT": 8,
+   "total": 34,
+   "failed": 0,
+   "skipped": 0
+  },
+  "realTreeWithoutBaton": {
+   "total": 34,
+   "passed": 12,
+   "failed": 22,
+   "skipped": 0,
+   "results": "execution/obs009-s-real01-results.json"
+  },
+  "red01": {
+   "total": 28,
+   "passed": 11,
+   "failed": 17,
+   "skipped": 0,
+   "note": "18th (editedWriterRace) passes vacuously",
+   "results": "execution/obs009-s-red01-results.json"
+  },
+  "reDisabledMethods": 18,
+  "atDisabled": 6,
+  "deferredGrep": 0
+ },
+ "reconciliation": "28 declared (18 skipped) - 3 named deletions + 9 named additions = 34 executed",
+ "deleted": [
+  "StudioScheduleApiIT.rawReadinessChangeRefusesWithLearnRequiredAndNoExecution",
+  "SharedSchedulingIT.sameCoordinatorRunsHttpTcpSplunkAndReachesTheStudioPipeline",
+  "SharedSchedulingIT.studioOnlyReplicaRunsWhenCatalogFlagIsOffAndDeduplicatesOccurrences"
+ ],
+ "repointed": [
+  "StudioScheduleApiIT.sourceMutationBlocksTheScheduleWithLearnRequired"
+ ],
+ "gates": {
+  "spotlessJavaCheck": "pass",
+  "checkstyleMain": "pass",
+  "checkstyleTest": "pass",
+  "spotbugsMain": "pass",
+  "where": "scratch tree sc06 (real tree + S files)"
+ },
+ "mutations": [
+  {
+   "mutation": "M1-drop-g3-processor",
+   "gradleExit": "1",
+   "total": 34,
+   "failed": [
+    "ObservedScheduleAuthorityIT.g3RefusesAScheduledSecretReferencingRunOutsideLocalAndTestEvenWhenTheGrantStands()"
+   ]
+  },
+  {
+   "mutation": "M2-drop-g3-dispatch-recheck",
+   "gradleExit": "1",
+   "total": 34,
+   "failed": [
+    "ObservedScheduleAuthorityIT.g3HoldsAgainAtDispatchRecheckForARunThatWasAcceptedUnderTheFixturePolicy()"
+   ]
+  },
+  {
+   "mutation": "M3-grant-bound-to-wrong-principal",
+   "gradleExit": "1",
+   "total": 34,
+   "failed": [
+    "StudioScheduleApiIT.rawReadinessChangesRefuseExplicitlyAndAnotherActivatorDoesNotRewriteAcceptedProvenance()",
+    "StudioScheduleApiIT.sourceMutationBlocksTheScheduleWithLearnRequired()",
+    "StudioScheduleApiIT.writeFailuresAtHistoryLedgerAndCursorBoundariesRollbackTheWholeOccurrenceUnit()",
+    "StudioScheduleApiIT.replicasRacingAndRollbackCannotCreateDuplicateOrPartialAcceptedWork()",
+    "StudioScheduleApiIT.editedWriterQueuedBehindAnAcceptanceKeepsExactlyTheAcceptedRevision()",
+    "StudioScheduleApiIT.authorizationWithdrawalBeforeAdmissionAndBeforeSendFailsClosed()",
+    "StudioScheduleApiIT.deadlineOverrunAdvancesCursorOnlyPastAttemptedCsi()",
+    "StudioScheduleApiIT.acceptedOccurrenceHasOneImmutableRunAndActivationAcrossResumeAndRecreation()",
+    "StudioScheduleApiIT.aScheduledOccurrenceIsAcceptedWithNoRequestAuthentication()",
+    "StudioScheduleApiIT.deletionStopsFutureWorkButKeepsAuthorizedOccurrenceAudit()",
+    "StudioScheduleApiIT.failedCsiRotatesAwayRatherThanStarvingOtherEligibleWork()",
+    "SharedSchedulingIT.sameCoordinatorRunsHttpTcpSplunkAndStudioThroughTheirExistingPipelines()",
+    "SharedSchedulingIT.studioOnlyReplicaRunsWhenCatalogFlagIsOffAndDeduplicatesAgainstAnotherCoordinator()",
+    "ObservedScheduleAuthorityIT.g3DoesNotRefuseASecretFreeObservedScheduleOnAProductionBackgroundSource()",
+    "ObservedScheduleAuthorityIT.g3AcceptsTheSameSecretReferencingRunUnderTheLocalFixturePolicy()",
+    "ObservedScheduleAuthorityIT.anObservedScheduleIsAcceptedUnderBackgroundAuthorityForTheSchedulePrincipal()",
+    "ObservedScheduleAuthorityIT.g3HoldsAgainAtDispatchRecheckForARunThatWasAcceptedUnderTheFixturePolicy()"
+   ]
+  },
+  {
+   "mutation": "M4-lose-row-serialization",
+   "gradleExit": "0",
+   "total": 34,
+   "failed": []
+  }
+ ],
+ "mutationNotCaught": "M4-lose-row-serialization (edit still serialized by the studio_schedules row)",
+ "files": [
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+   "sha256Before": "f3e52690a3df583c1a39ec1f76ca1883d03613f11a978b6b11bbda171a417d95",
+   "sha256After": "f3e52690a3df583c1a39ec1f76ca1883d03613f11a978b6b11bbda171a417d95",
+   "changed": false
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+   "sha256Before": "7530c317e8553b537e8d63a14a3f5c3c98644e897150e758404d7946e38b0feb",
+   "sha256After": "8ac947325e24a16590710eb77ba949c02328f97f0227dac0355f796a0798b90a",
+   "changed": true
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayRuntimeConfiguration.java",
+   "sha256Before": "541aa215d3a9779a13e5089951df678b54fc101cc2178256e5ce4de8ead44819",
+   "sha256After": "541aa215d3a9779a13e5089951df678b54fc101cc2178256e5ce4de8ead44819",
+   "changed": false
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+   "sha256Before": "5f08f595be87f807c236cab86d4996852afb2291b83038c490d888f2053f4b38",
+   "sha256After": "5f08f595be87f807c236cab86d4996852afb2291b83038c490d888f2053f4b38",
+   "changed": false
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java",
+   "sha256Before": "86b36ee2e157be9d34161d5c2ff754b40a572f7862ba6e6b03e67fc7fedda4c6",
+   "sha256After": "2a93cf9456d3f9dff981cf4f3becc486e3cd0ec4acbc6629b34b62c7a562d166",
+   "changed": true
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleService.java",
+   "sha256Before": "75ca902e3b29bdce422728a191ebf60749903508dd6cd16498851f0886de59d7",
+   "sha256After": "75ca902e3b29bdce422728a191ebf60749903508dd6cd16498851f0886de59d7",
+   "changed": false
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledDispatchAuthorization.java",
+   "sha256Before": "b95edd3d9cb94d6a668fc13644a86d1114eeda4f6d32eb490c4306ebd43cc957",
+   "sha256After": "8b6ac8699306d4edd6dc8c87c3a49c4852f576662de128ae44ed45bc349d93f4",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java",
+   "sha256Before": "1252f11d1c9d23993244b90c110e8612f0f9c72aa529c393c679e0edd668345f",
+   "sha256After": "e45d33c2168883689633f147daeaeddc221340961d3879f7e63e7e9f46dec3c1",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+   "sha256Before": "533fbee213a2adf3dbff16ed22d6bb9482372e159003246f4cbf7d569a91783f",
+   "sha256After": "b3df5185ce9fcb3f9215e1df37f791108f4eb687bc7cd2e337523d1ed17c5a95",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/scheduling/ObservedScheduleAuthorityIT.java",
+   "sha256Before": null,
+   "sha256After": "17c1816d984a9c3decdfe4a06e66e010e55c5a961ba07dc2fdc9395ca94a7585",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleApiIT.java",
+   "sha256Before": "66f193c5ecf4be86c1245fe1d32e666d075373fb4e0f69929a8c7d74e8ea6ff5",
+   "sha256After": "67c26122f9d60f63f23229736ca36620428c29f2b7e5f9f28a2158ef693bc319",
+   "changed": true
+  }
+ ],
+ "batons": [
+  "baton-acceptance-scheduled-grant.patch (StudioAcceptanceService.java, outside S write set; required for green)",
+  "baton-replayit-tripwire.patch (GuidedPublicationReplayIT.java line 18521; expected code inferred; run ReplayIT alone at F-merge)"
+ ],
+ "deviations": [
+  "StudioAcceptanceService needed (read-only for S) - shipped as patch",
+  "GuidedSessionException -> RUNTIME_INCOMPATIBLE handling added in processor (not named in AC-6)",
+  "new IT mocks StudioReferenceResolver"
+ ],
+ "findings": [
+  "scheduled grant TTL = manual (<=30s); slow dispatcher -> AUTHORIZATION_EXPIRED (inferred)",
+  "prepareScheduled duplicates ObservedReplayAuthorizer binding build",
+  "G-3 relies on StudioBackgroundAuthorization.localOnly() contract",
+  "only V16 CHECK keeps OBSERVED_SCHEDULE_AUTH_REQUIRED after baton 1"
+ ],
+ "owedExternally": []
+}

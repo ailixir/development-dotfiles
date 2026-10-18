@@ -1,0 +1,9 @@
+# node smoke of the patched evaluate.mjs (not vitest): admission caps from a proposal plan, stop-rule tiers, B7 defaults
+{"plannedProposals":579,"contingencyFactor":1.5,"contingencyProposals":869,"tokenCapOut":3559424,"tokenCapIn":28475392,"capBasis":{"output":"contingencyProposals x maxOutputTokensPerCall","input":"contingencyProposals x inputBytesPerCall","plan":"smoke"}}
+ADMISSION_REFUSED_PRICE_UNKNOWN {"plannedRuns":null,"plannedSessions":null,"contingencySessions":null,"plannedProposals":579,"contingencyFactor":1.5,"contingencyProposals":869,"tokenCapIn":28475392,"tokenCapOut":3559424,"capBasis":{"output":"contingencyProposals x maxOutputTokensPerCall","input":"contingencyProposals x inputBytesPerCall","plan":"smoke"},"costBoundUsd":null}
+throws ADMISSION_PROPOSAL_PLAN
+throws ADMISSION_PROPOSAL_PLAN
+throws ADMISSION_PROPOSAL_PLAN
+throws ADMISSION_PROPOSAL_PLAN
+[{"stop":false,"reason":null,"spentUsd":0.3,"costBasis":"recorded-reservations"},{"stop":false,"reason":null,"spentUsd":1,"costBasis":"recorded-reservations"},{"stop":false,"reason":null,"spentUsd":1,"costBasis":"reserved-ceiling"},{"stop":false,"reason":null,"spentUsd":0.2,"costBasis":"reported"}]
+REFUTES_PROPOSALS_PER_SESSION_ASSUMPTION 7 NOT_REFUTED_LOCALLY_NOT_CONFIRMED 24 REFUTES_PROPOSALS_PER_SESSION_ASSUMPTION NOT_REFUTED_LOCALLY_NOT_CONFIRMED

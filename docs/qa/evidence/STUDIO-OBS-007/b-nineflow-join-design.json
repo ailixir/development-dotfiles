@@ -1,0 +1,292 @@
+{
+  "schema": "studio-observed-b-nineflow-design/1",
+  "phase": "DESIGN_ONLY_UNEXECUTED",
+  "story": "STUDIO-OBS-007",
+  "scope": "Smallest staged real join, retaining every old/current named flow and all19AC obligations. No source change, runtime execution or acceptance verdict.",
+  "authority": "Current19AC/approved R3 design+Pax applications. Root264gate2+strictJava0 are scoped source gates, not current join proof; backend frozen while Aria69787/R repair run.",
+  "inspectedSourceHashes": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "dbf1c3c6848c3ec21235d7c43401113db46bd96bf2ebb30847f94f041c0bff64",
+    "backend/src/test/java/com/citi/put/checks/studio/secrets/FakeStudioVaultProvider.java": "92b20b5a3cf02a317340e8316cb8396a002fc78f5d264484dd4878990c7512ad",
+    "studio-runner/test/fixtures/secret-login/server.ts": "2cea73be1af48d4bcd3eaa1768f6c09899fbd8a380812d281641f85b67c3664a",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "77282bd5547b8daf91547b831a1fa4193a8e312667c650294efcd8f9f120586c",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java": "66f3665f63de906f5b1a4285aaf904b8527a3231066c28be7ee5c3f713a4bd02",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java": "7530c317e8553b537e8d63a14a3f5c3c98644e897150e758404d7946e38b0feb",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java": "848b4c80050a7eb03e713093d707b9c32ee99a079c2767a4f05397063435edd6",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java": "4b6e7092e85d33d314bf10a3af0187247c186548ba4d4492b5a45fbf96e9ddd7",
+    "backend/src/main/java/com/citi/put/checks/studio/evidence/LocalVideoObjectStore.java": "13bc203dd4bc27d53dabf31cfe491f38b4cb771bcace7cb6535fe8fab7219f4e",
+    "backend/src/main/java/com/citi/put/checks/studio/recovery/LocalResultManifestStore.java": "c279e0b620be3c7c2ba0328fc532d0fe9654e6da06c62c7bf5c9f13267a5bce7",
+    "backend/src/main/java/com/citi/put/checks/studio/sse/ExecutionEventsController.java": "54e0d55bc15ca0b858753b875a7baaa6e20fc3f41531809f68f1a5f55810a236"
+  },
+  "flowInventory": [
+    {
+      "order": 1,
+      "name": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+    },
+    {
+      "order": 2,
+      "name": "queuedAndPreReadyRefusals"
+    },
+    {
+      "order": 3,
+      "name": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness"
+    },
+    {
+      "order": 4,
+      "name": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays"
+    },
+    {
+      "order": 5,
+      "name": "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance"
+    },
+    {
+      "order": 6,
+      "name": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork"
+    },
+    {
+      "order": 7,
+      "name": "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays"
+    },
+    {
+      "order": 8,
+      "name": "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall"
+    },
+    {
+      "order": 9,
+      "name": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel"
+    }
+  ],
+  "currentGaps": [
+    "Ninth declares only LOGIN_PW and has no USER input",
+    "Global FakeVault.readCount is not a per-kind/per-scope physical secret counter",
+    "Home-only assertion does not exercise protected /reports",
+    "No same frozen artifact bytes/hash assertion across both replays",
+    "Non-null video_key/browser_started_at is not finalized/native-decoded/distinct video proof",
+    "Current scans cover only selected PG/model/worker logs; actual all-sink inventory not yet collected",
+    "Transport B01 five mutualTLS tests prove production sender buffering/bounds, not service consume/read/send/recovery"
+  ],
+  "releasePrerequisites": [
+    "Root releases exact B source/test ownership only after independent backend reviewer completes and R final repaired source/dist freeze is explicit",
+    "Capture current full backend source/resource/codegen/OpenAPI manifests, R source/dist/package-lock/runtime version/profile/reference/schema identities, fixture server.ts and actually selected full Chromium executable SHA/version; before/after manifests must match",
+    "Privately copy the frozen compiled dist to the harness with required package/module metadata and confined node_modules linkage, or hold R dist immutable for whole gate; never mixed-build imports",
+    "Use existing fixed full Chromium new-headless/sandbox/args[] and observed-4-full-chromium-1 controlled deployment policy. Executor observed-4/catalog observed-replay-3/language observed-3; no tuple/wire/config-mode/provider changes",
+    "Local fake catalog executableImageDigest is explicitly not a built image. Only root completed local image digest/provenance may be credited independently; Linuxarm, Node22/internal ED05/staging/manual/external permissions stay separate",
+    "Root serialized Gradle lease required; no schedules/remote deployment/real model/Vault invocation"
+  ],
+  "smallestCodeBatch": {
+    "owner": "B",
+    "primaryPath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "scope": "Modify only ninth source/config/model branch, nested counted test provider, safe collector and evidence checks; preserve names/order/assertions of all8 prior flows and ninth. Keep existing real ChecksApplication/Core fixture/mTLS guided/ordinary compiled worker/PG/gateway fixture/object store.",
+    "additionalPathsIfNeeded": [
+      "B-owned test-only join support and guided service-fault test class after exact separate root release; no D/R/schema/corpus/generator changes"
+    ],
+    "futureInitialSelector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT (all9 names, not isolated ninth). Before/after Counter multiplicities plus all old assertions preserved.",
+    "futureFollowingSelectors": [
+      "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+      "proposed B-owned GuidedServiceTransportFaultIT (actual service/PG/HTTPS worker or proxy joins; requires separate root file release)",
+      "all existing affected OBS006 siblings/current full backend regressions after scoped joins"
+    ]
+  },
+  "ninthConfiguration": {
+    "scope": {
+      "principal": "actual Core fixture actor fixture@example.invalid/user-1, independently authorized",
+      "csi": "CSI-123",
+      "environment": "fixture",
+      "testId": "fresh actual UI test UUID",
+      "secretId": "PASS",
+      "variableName": "USER"
+    },
+    "sourceSteps": [
+      {
+        "id": "existing ONE",
+        "text": "Open <actual secret fixture origin>/login.",
+        "operations": [
+          "navigate authored sourceSpan destination"
+        ]
+      },
+      {
+        "id": "existing TWO",
+        "text": "Enter <var USER> in User and <secret PASS> as password.",
+        "operations": [
+          "ordinal0 fill observed User textbox with configuration nonsecretText/authoredLiteral sourceInputId",
+          "ordinal1 fill node-free passwordControl with secretRef sourceInputId"
+        ]
+      },
+      {
+        "id": "existing THREE",
+        "text": "Click Sign in, open Reports and check Reports appears.",
+        "operations": [
+          "ordinal0 click observed Sign in button",
+          "ordinal1 click observed Reports link after actual /home redirect",
+          "ordinal2 assert actual Reports heading visible on cookie-protected /reports"
+        ]
+      }
+    ],
+    "configuration": "Before immutable capture, save USER kind=plain with known nonsecret fixture username and PASS kind=secretRef with no value. Store PASS only in scoped test Vault and actual fixture expectation. Any VARIABLE USER seed is the same nonsecret value only if current production preflight legitimately requires that existing variable path; never add a synthetic read.",
+    "modelReferencePlan": "Return actual sourceSpan destination plus exact manifest configuration reference for USER intendedSlot=fill.value/kind nonsecretText and PASS intendedSlot=fill.value/kind secretRef. Select by authentic referenceId/name/step/slot; no model-supplied value/provenance/node ID. Empty runtime needs; frozen inputRecipes retain IDs/kinds/slots. NEXT_ACTION locators/node IDs come only from current reached observations. Password target remains node-free; no second selector.",
+    "policy": "Keep existing broad structural-discovery grant plus approved fixture origin; assert structural Reports heading, so do not widen business-data read authority. Preserve existing8flow applicationPolicy read grants at original Core fixture origin. No cookies imported; browser logs in through actual form."
+  },
+  "counters": {
+    "implementation": "Nested test-only delegating counted provider around unchanged FakeStudioVaultProvider; record only sequence/kind/VaultScope/name/success-version and supplied char-array reference for erasure check, never a value/hash/body. Increment immediately on actual existing read entry; list/mayUse/rotate/create tracked separately. No extra reads to populate counters.",
+    "key": "kind|CSI|environment|testId|referenceName; serial phase deltas under exact ninth test scope, not a mutable invented execution label. Correlate safe provider versions and real audit/replay attempts.",
+    "expectedSecretPASS": "Learning exactly1 actual SECRET PASS read after real committed consume; finalize/readiness/idempotent finalize zero additional SECRET or VARIABLE value reads and zero action/submit effects; acceptance/prepare no SECRET value reads; each ordinary replay exactly1 fresh SECRET PASS read (total3). A rotation changes actual version/value only, not accepted artifact. Separate other-scope/name attempts must remain absent.",
+    "variableAccounting": "Report actual VARIABLE USER read/list deltas separately and verify legitimate current preflight/saved configuration path. Do not claim all acceptance reads0 from a global counter when nonsecret values may legitimately read. Immutable plainVariablesOf acceptance snapshot supplies replay USER; publication still requires all value-read kinds0.",
+    "gatewayAccounting": "Real outbound controlled vertex/guided HTTP spy + existing legacy gateway counter; freeze counts after actual learning, and assert no request to either gateway for finalize/idempotent finalize/readiness/two replays. Node validator is not a model call."
+  },
+  "phaseProof": [
+    {
+      "phase": "learn",
+      "requirements": [
+        "actual BFF cookie\u2192CoreHTTP ownership call",
+        "actual source classification/masked prompt/materialization/preparation/admission/consume and production GuidedDispatchService\u2192mTLS GuidedRunnerClient\u2192compiled worker/password primitive",
+        "fixture receives exactly1 accepted unique login receipt with expected USER/PASS and authenticated protected /reports reached",
+        "real session/action count1 and actual scoped RELEASE RESOLVED/version/USAGE USED; no value in source/proposal/materialization/plan/audit"
+      ]
+    },
+    {
+      "phase": "publish",
+      "requirements": [
+        "actual finalize endpoint and compiled validator/lowering/publication guards",
+        "zero new value reads of either kind, login/application submits0 and both gateway calls0",
+        "capture actual receipt revisionId/artifactHash, immutable revision artifact rawbytes/referencePolicy/inputRecipes/full scope/profile/build; independently hash canonical artifact using test-only reference canonicalization, never production derive as expected object",
+        "duplicate finalize/readiness preserves same receipt/hash and zero effects"
+      ]
+    },
+    {
+      "phase": "replay1",
+      "requirements": [
+        "actual execute acceptance/persisted configuration snapshot/current binding+grant+attempt",
+        "production dispatch tracked committed read-entry\u2192one PASS read\u2192atomic RELEASE/begin\u2192one actual ordinary worker admission/child Ready/Execute/browser fill",
+        "expected USER from immutable snapshot and first PASS canary, actual unique accepted receipt and protected assertion PASSED",
+        "actual report-CAS/progressive/final secretUse USED and one immutable summary, real version and receipt identities; fixed revision/authoring/reference/artifactHash"
+      ]
+    },
+    {
+      "phase": "rotate/replay2",
+      "requirements": [
+        "rotate existing scoped PASS only and actual fixture expectation; keep source/UI configuration/confirmed revision/profile/build unchanged",
+        "new real execution/attempt/grant and fresh physical PASS read/version; old RunJob/array is erased/unreachable and never reused",
+        "fixture accepted second replay receipt differs from learning/replay1; username equals saved USER and password comparison done only in private oracle",
+        "capture exactly unchanged artifact rawbytes/hash/receipt identity before and after both replays; distinct real native video keys/bytes/decoder evidence; gateways0"
+      ]
+    }
+  ],
+  "fixtureOracleBoundary": "server.ts /__receipts intentionally contains submitted password as a private test oracle. Read only in fixture test memory, compare without raw failure dumps, erase/dispose captured arrays at cleanup. Never persist/export those raw receipts as product evidence or count fixture-oracle storage/echo as privacy PASS. Evidence artifacts keep receipt IDs, accepted flags, safe counts and scope, no password/hash.",
+  "nativeVideo": {
+    "paths": "Use production ExecutionVideoService/LocalVideoObjectStore plus authenticated /api/v1/studio/executions/{id}/video range/full bytes and real local object keys derived by existing ManifestKeys. Await streamComplete/AVAILABLE and finalized nonempty regular non-symlink WebM/manifest, not only browser_started/video_key.",
+    "checks": [
+      "two actual execution-scoped video keys differ and belong to exact execution identities; native file byte hashes/lengths recorded and both fully decoded",
+      "use installed pinned decoder/ffmpeg or bounded test-only native decoding helper; record binary path/version/hash, actual stream dimensions/duration/frame counts and key seek frames, never fake size/magic-only success",
+      "decoded application frames show login USER, password masked control and protected Reports; diagnostic WebUI absent from actual app footage, honest partial/evidence metadata",
+      "verify existing timing/seek target against actual decoded initial/failure frames within500ms where applicable, no virtual timeline/prefix subtraction/transcode of production video",
+      "distinct artifact hash remains equal while receipt IDs/video keys/native recording bytes differ; empty/failed/missing decoder is OPEN/FAIL, not metadata PASS"
+    ],
+    "limits": "Guided first-Run video is OBS013 and manual masking inspection OBS009. Controlled decoded replay proof does not claim staging calibration, manual pilot or physical privacy of same-origin plaintext /echo residual."
+  },
+  "allSinks": {
+    "capture": "Enable test-controlled application TRACE on every existing root/attached appender and capture actual outputs before running tested effects. Keep parent DEBUG=pw:* planted to verify it is absent in actual child environment. Safe assertions/count artifacts avoid raw value/error dumping. No synthesized sink strings or unmounted debug/raw-value production channel.",
+    "inventory": [
+      "actual gateway outgoing bytes",
+      "actual API snapshot/result/clarification/explanation/repair bodies",
+      "real JSON problem responses on refused operations",
+      "authenticated SSE /api/v1/studio/executions/{id}/events bounded subscription until terminal",
+      "actual MeterRegistry names/tags/measurements or configured existing metrics endpoint",
+      "actual idempotency response cache/public duplicated command bytes and stored guided command records",
+      "child stdout/stderr at actual capture/discard boundary, relay output, ordinary parent log",
+      "actual step failure/report/manifest and received authenticated callbacks",
+      "separate bounded guided diagnostic JSONL plus hash-only authoritative GuidedJournal",
+      "all applicable PG source/manifests/materialization/translation actions/producers/commands/publication/revision/history/audit/read-entry/receipt rows",
+      "entire actual owned guided/recorded profile/user-data scratch trees before cleanup and after release; effective supported preferences/executable identity",
+      "actual objectstore manifests and available native video artifacts (binary text scan separate from decoded visual assertions)"
+    ],
+    "scan": "Private literal UTF8/UTF16, JSON/unicode escape, URL percent-encoded, base64 and hex variants for every released/rotated/prior value, including nonASCII/special characters. Scan actual produced bytes; absent/discarded sinks are explicitly verified at their boundary, not credited as scrubbed output. Query PG by safe scope/IDs and scan returned bytes in test memory, never bind the canary in TRACE SQL LIKE (which would contaminate logs). Persist only sink IDs/byte counts/hit counts/safe source identity.",
+    "applicableRuns": "Base successful9flow plus every required C4/C5/C6/fault/refusal/revocation sub-run. One happy login scan does not close all sink/control oracles."
+  },
+  "B01ServiceFaultMatrix": {
+    "goal": "Production GuidedSessionService.consume + GuidedDispatchService + real PG + counted scoped resolver + production bounded HTTPS client, authenticated actual compiled worker or bounded mTLS test relay. No mock WonConsumption/count booleans or handwritten final rows.",
+    "counts": "Measure winning dispatchCount0\u21921 and committed consume rows separately from physical value reads and exact actual dispatch POST/worker-received/fill effects. AlreadyConsumed recovery on same real admission makes zero extra consume wins/value reads/POSTs/keystrokes; command cache rows may exist but are not extra consumption.",
+    "rows": [
+      {
+        "cut": "fresh live ADMITTED/count0 before consume, genuine controller child JVM stop",
+        "expected": "reads0/sends0; fresh same-worker/context/proof recovery may win consume once and read/send at mostonce only while actual authority remains fresh; stale/expired/lostcontext refuses, no browser rebuild"
+      },
+      {
+        "cut": "after actual consume commit/count1 before resolver",
+        "expected": "genuine controller JVM kill with safe hash-only barrier; recovery AlreadyConsumed, reads0/sends0, exact consumed-no-decision UNKNOWN from real terminal owner and no fake RELEASE/version"
+      },
+      {
+        "cut": "after actual provider read before committed decision",
+        "expected": "genuine controller child JVM kill, independent parent provider count1/send0, arrays die with process, real unlinked consumed UNKNOWN; recovery reads/sends0, no extra bookkeeping read"
+      },
+      {
+        "cut": "actual send reaches compiled worker; proxy 200headers+partialneverEOF or errorheaders+partialneverEOF",
+        "expected": "one real consume/read/send, production <=15s/caller-deadline cancellation and buffer erasure; lost actual callback remains honest UNKNOWN; if genuine callback already committed success/failure preserve it, never overwrite with UNKNOWN just to satisfy test"
+      },
+      {
+        "cut": "actual interruption/authentic deadline or responsecap failure after consume",
+        "expected": "owned request/response/char buffers erased at bounded publisher cleanup, one attempt, no automatic retry; exact recovery zero-extra counters"
+      },
+      {
+        "cut": "actual completed200/failure controls and before-send origin/mayUse denial",
+        "expected": "preserve committed real verdicts/positive uses and backend proved no-send REFUSED separately; no fabricated effect status from generic transport text"
+      }
+    ],
+    "mechanism": "Use already-declared test-only volatile/hash-only fault seams/controlled mTLS proxy in test classpath, not mounted config/wire. Parent Core/backend callback authority and actual Node context remain live while a separate real coordinator/service child JVM is killed; prove original owner/fence/context is live instead of borrowing an expired lease. Control/drop callbacks only at actual authenticated handler boundary. Test source before/after manifests and genuine JVM PID/kill/exit/parent-side counts required.",
+    "limits": "Current root three observed resolver JVM cuts are valuable actual process proof but not these guided/service/Core/compiled-browser cuts. Current five HTTPS tests only prove sender behavior and must remain scoped. Real-model benchmark/enterprise Vault/gateway policy/staging are separate prerequisites."
+  },
+  "oracleMapping": [
+    {
+      "oracle": "AC1-4/SEC1-3",
+      "proof": "scoped name/RBAC/current principal/sourceInput/password count/origin refusal joins, wrongCSI/env/test/user isolation negative runs"
+    },
+    {
+      "oracle": "AC5-9/SEC4-8/C1-7",
+      "proof": "actual source/model/private materialization/reference/literal bounds, semantic typed fill and allowed origin/form/identity, streaming/char/byte erasure, C6 native/injected/supplementary distinct controls+all produced sinks"
+    },
+    {
+      "oracle": "AC10-13",
+      "proof": "prior-value budgets/diagnostic journals, fixed full browser effective prefs/profile tree, genuine service/controller recovery/no extra read/send, <=2s including actual request/queue/worstphase+one in-flight step revocation with no next-step typing"
+    },
+    {
+      "oracle": "AC14/C11/SEC9",
+      "proof": "real scoped RELEASE/USAGE/read-entry/terminal receipt/version/attempt/declaration/actual coordinate; rollback/cancel/reaper/positive PROGRESS\u2192actual childkill/lostFINAL current source"
+    },
+    {
+      "oracle": "AC15-17/SEC10",
+      "proof": "account-free real author-owned login, worker/!worker no-property graphs/default flags, execution kill switch and unchanged compile-path regressions"
+    },
+    {
+      "oracle": "AC18/section5",
+      "proof": "three login-drift scenarios x guided/replay reached-document failure correlation and exact loginStepsPresent true/false; passing registration stayspassing; base9th alone insufficient"
+    },
+    {
+      "oracle": "AC19/C12-20",
+      "proof": "actual current9flow/Core/PG/scoped counted Vault/compiled fullbrowser/native recordings/model0 + all explicitly required controls/sink scans; OBS009 C8-10/manual separated"
+    }
+  ],
+  "remainingUnproved": [
+    "first8 current fullmode operational regressions and correctedninth not executed under final combined source yet",
+    "real guided/service consume/read/send/recovery/genuine fault positions",
+    "actual PROGRESS positive through childkill/lostFINAL and callbackCAS/audit rollback/stale identity matrix",
+    "all six LOGIN_REQUIRED cases and all password count/shadow/SPA/cross-form/origin/refusal cases",
+    "worstphase actual revocation2s+inflight, actor isolation, auth expiry/wrongpassword/no-login outcomes",
+    "every allSink literal+encoded scan over all applicable controls, effective profile scratch and decoded native recordings",
+    "worker/!worker no-property boot, disabledexecution matrix and full affected compile/OBS006/regression/coverage gates unchanged",
+    "real image/platform Node22/ED05/internal registry/staging calibration/manual video/SIEM/pilot/external auth prerequisites and real modelbenchmark remain separate; no unavailable PASS"
+  ],
+  "cleanupAndBounds": "Fresh isolated real PG/test scope per independent fault family; no append-only TRUNCATE bypass. Bounded HTTP/SSE/worker startup/native decode/poll waits with actual PID handles. Restore logging/SSL/global fixture policy/user role state; close streams/executors/actual backend contexts, kill/reap process trees on failure, await owned native video finalization and actual scratch cleanup. Erase planted arrays/captured oracle buffers, retain only value-free manifests/counters/artifact IDs/source hashes.",
+  "nextOwnershipRequest": "After root release, B existing GuidedPublicationReplayIT ninth/counted wrapper/evidence collector only for initial all9 join. Additional B test-only fault/support paths require separate exact preflighted intent. R existing collector/child/native/profile/fixture helpers remain R-owned; no overwrite or second primitive/raw production channel. D persistence/recorders/partition staysD; root crash class/root4 oldguidedsuites/canonical/version/generation/pins stayroot.",
+  "nextGateRequest": "Root-only serialized compile + all9 GuidedPublicationReplayIT after B/R/source freezes, capture whole source/classpath/native/runtime identities and XML multiplicities. Follow exact service-fault/C/SEC selector batches with honest peroracle receipts; never aggregate unrelated historical builds into a current fullPASS.",
+  "actions": {
+    "designFileOnly": true,
+    "backendRunnerTestEdits": false,
+    "gradleOrProcessesStarted": false,
+    "modelsOrExternalContacts": false,
+    "lifecycleOrCanonicalChanged": false
+  },
+  "budget": {
+    "wholeWaveCeilingUSD": 500,
+    "actualBillingTelemetryAvailable": false,
+    "fullTenStoryGoalPreserved": true
+  }
+}

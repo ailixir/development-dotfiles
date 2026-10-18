@@ -1,0 +1,467 @@
+{
+  "at": "2026-10-15T05:43:52.752370+00:00",
+  "status": "55_SOURCE_METHODS_UNEXECUTED_ON_CURRENT_AMENDED_SQL",
+  "sqlSHA256": "b012ddddb44b599c4f8699be39281dd6f407b2cb93b41386a79eb22c06c4d179",
+  "testSHA256": "f927ee53627d1656c4e388029d055589e372f338731b65362e9f9f08bec1e6e1",
+  "original48Preserved": true,
+  "new7": 7,
+  "cases": [
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.freshV1ToV21HasExpectedHeadDescriptionAndNoPendingMigrations",
+      "sourceLine": 264,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.populatedV20UpgradePreservesExistingDocumentBytesAndAddsExactHistory",
+      "sourceLine": 273,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.frozenV1ToV20ResourceChecksumsRemainUnchanged",
+      "sourceLine": 339,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.replayingPrefixInsertRequiresRealProgramAndContinuation",
+      "sourceLine": 345,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.unknownStateAndUnknownContinuationAreRefused",
+      "sourceLine": 355,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.oldTerminalCannotReopenPrefix",
+      "sourceLine": 361,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.prefixCallbacksCannotChangeToGenericActingObservingOrProposing",
+      "sourceLine": 364,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.preparingWithPendingPrefixCannotReserveModelOrIncrementCounters",
+      "sourceLine": 367,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.explicitPrefixStateWithoutProgramCannotInsertModelAttempt",
+      "sourceLine": 375,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.concurrentPrefixEntryAndModelReservationSerializeBothOrders",
+      "sourceLine": 381,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.initialMaterializationCreatesOneHeaderAndNormalizedInputEntries",
+      "sourceLine": 441,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.appendPreservesEveryPriorEntryAndBindsPreviousHash",
+      "sourceLine": 444,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.appendNoopReturnsExistingVersionWithoutWrite",
+      "sourceLine": 447,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.appendRefusesMutationDeletionCollisionGapOrOverflow",
+      "sourceLine": 450,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.canonicalByteBoundsAcceptSupportedUnicodeAndControlEscapes",
+      "sourceLine": 466,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.appendRefusesAdmittedDispatchingUnknownAndUnexpiredUnconsumedPreparation",
+      "sourceLine": 514,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.appendVersusPrepareAdmitConsumeSerializesWithoutStaleExecution",
+      "sourceLine": 518,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.appendCommitCreatesPendingDeliveryAtomically",
+      "sourceLine": 524,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.pendingDeliveryFencesActionsModelReservationsAndMetadataBumps",
+      "sourceLine": 527,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.issuedContextMetadataAndHashAreWriteOnceAcrossRetryAndLeaseRenewal",
+      "sourceLine": 530,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.issuedContextRequiresExactImmutableProgramPairForEveryPinnedBaseSession",
+      "sourceLine": 533,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.ordinaryContextRejectsHalfOrForgedProgramPair",
+      "sourceLine": 541,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.ackRequiresExactVersionHashContextHashBirthMetadataOwnerAndLiveOriginalLease",
+      "sourceLine": 544,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.concurrentAppendRetriesProduceOneVersionAndOneDeliveryIdentity",
+      "sourceLine": 566,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.oldCompletedPreparationJoinsItsVersionAfterHeadAdvances",
+      "sourceLine": 571,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.oldSecretReleaseAndUseJoinTheirHistoricalVersion",
+      "sourceLine": 574,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.contextHeaderBirthMetadataDoesNotRejectLaterGraphMetadataRevision",
+      "sourceLine": 597,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.preAdmissionReceiptRequiresIssuedExactRequestAndNoActionAtCoordinate",
+      "sourceLine": 630,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.admittedReceiptRequiresExactConsumedAttemptZeroAndPreparation",
+      "sourceLine": 634,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.driftReceiptAndSwitchCommitAtomicallyOrNotAtAll",
+      "sourceLine": 638,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.wrongOwnerScopeSourceVersionHashProgramOperationOrEvidenceReceiptIsRefused",
+      "sourceLine": 641,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.oneDriftReceiptAndOneSwitchPerSessionCannotBeRewritten",
+      "sourceLine": 645,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.onlyProvenNoInvocationAllowsAttemptOneAtSameSemanticCoordinate",
+      "sourceLine": 648,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.spentAndReplacementAttemptsBothConsumeActionBudget",
+      "sourceLine": 652,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.suffixAcceptancePreservesEverySuccessfulPriorMeaning",
+      "sourceLine": 716,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.boundariesIncludeEmptyPrefixAtK1ButNeverEmptySuffix",
+      "sourceLine": 731,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.completeMetadataRequiredForNewRevisionWithoutHistoricalBackfill",
+      "sourceLine": 741,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "FAILED_BEFORE_INTENDED_ASSERTION_ON_RECEIPT_FK",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.reuseMustNameImmediatePinnedBaseAndExactContiguousPrefix",
+      "sourceLine": 752,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "FAILED_BEFORE_INTENDED_ASSERTION_ON_RECEIPT_FK",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.postDriftSuffixAndWrongSameTestBaseCannotBeMarkedReused",
+      "sourceLine": 760,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "FAILED_BEFORE_INTENDED_ASSERTION_ON_RECEIPT_FK",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.effectiveActionsAreUniqueCompleteSuccessfulAndMatchLedger",
+      "sourceLine": 773,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "FAILED_BEFORE_INTENDED_ASSERTION_ON_RECEIPT_FK",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.excludedFailureRequiresExactImmutableNoInvocationReceipt",
+      "sourceLine": 783,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "FAILED_BEFORE_INTENDED_ASSERTION_ON_RECEIPT_FK",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.publicationReceiptRejectsWrongRelearnedBoundaryOrExtraKeys",
+      "sourceLine": 787,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "FAILED_BEFORE_INTENDED_ASSERTION_ON_RECEIPT_FK",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.publicationReceiptRequiresExplicitNullBeforeAnyCommittedSwitch",
+      "sourceLine": 795,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "FAILED_BEFORE_INTENDED_ASSERTION_ON_RECEIPT_FK",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.prefixFailureBeforeSwitchReportsNoRelearnedFrom",
+      "sourceLine": 798,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.failedPlanningAfterCommittedSwitchRetainsEnteredBoundaryWithoutSuccessClaim",
+      "sourceLine": 801,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.prunePreservesSafeSwitchReceiptHistoryAndExistingF01Residual",
+      "sourceLine": 805,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.livePrefixCannotPruneAndExpiredPrefixFirstBecomesTerminal",
+      "sourceLine": 815,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.recordingFactAndGovernedPolicyRemainUnchangedAcrossPrefixSuffix",
+      "sourceLine": 826,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "HISTORICAL_SCOPED_PASS_ON_A4_ONLY",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.pendingPrefixAllowsOnlyExactServerSideEffectQuestion",
+      "sourceLine": 867,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "NOT_RUN",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": [
+        "IncrementalPolicyIT.confirmationResumesFreshSameBrowserThenSuffixWithoutSecondPrompt"
+      ]
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.pendingPrefixRejectsGenericStaleOrForgedWaitProof",
+      "sourceLine": 881,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "NOT_RUN",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": [
+        "IncrementalPolicyIT.waitingRecoveryCancellationAndAnswerRacesRemainAtMostOnce"
+      ]
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.pendingPrefixWaitFencesBothGatewaysAttemptInsertAndModelCounters",
+      "sourceLine": 912,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "NOT_RUN",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": [
+        "IncrementalPolicyIT.defaultCurrentPolicyPromptsPrefixWithoutModelOrNative",
+        "IncrementalSessionIT.prefixCallbacksNeverOpenModelReservation"
+      ]
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.pendingPrefixWaitCannotAdmitConsumeOrSwitch",
+      "sourceLine": 923,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "NOT_RUN",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": [
+        "IncrementalPolicyIT.directPrefixAdmissionCannotBypassConfirmation",
+        "IncrementalPolicyIT.prefixGuardDeniesGroundingDestructionAndDenyEvenAfterConsent"
+      ]
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.currentAnswerResumesOnlySamePrefixIdentity",
+      "sourceLine": 935,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "NOT_RUN",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": [
+        "IncrementalPolicyIT.confirmationResumesFreshSameBrowserThenSuffixWithoutSecondPrompt"
+      ]
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.prefixWaitCancellationExpiryAndOwnerLossNeverResurrect",
+      "sourceLine": 949,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "NOT_RUN",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": [
+        "IncrementalPolicyIT.waitingRecoveryCancellationAndAnswerRacesRemainAtMostOnce"
+      ]
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.prefixConfirmationAmendmentPreservesPopulatedV20AndAllExistingGuards",
+      "sourceLine": 968,
+      "currentSQLExecutionStatus": "NOT_RUN_ON_ARCH03_AMENDMENT",
+      "priorA4Evidence": "NOT_RUN",
+      "scope": "Actual PostgreSQL tables/state/constraints/counter/attempt fences; no actual browser/gateway/authenticated callback claim",
+      "requiredLinkedApplicationCases": []
+    }
+  ],
+  "pairedReceiptRepair": "All seven prior blocked cases now close real revision/publication/claim/validation cycles before constraints, preserving exact expected guard diagnostics.",
+  "upgradeCoverage": "Real V20 actions and valid paired publication,11 full existing row families + original action columns compared byte-exact; old incomplete revision identity/maps remain incomplete and implicit reuse refuses, no backfill.",
+  "applicationBoundary": "Both Java reservation entrypoints, authenticated controller authority, real no-native/model effects, recorder/browser continuity and fresh post-answer reprepare require linked application/joined execution; these SQL methods supply no such credit."
+}

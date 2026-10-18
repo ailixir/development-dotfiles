@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+  "caseName": "secret-focus-typeflip",
+  "evidenceId": "476573ff-2030-47bf-8217-62ce8e812a18",
+  "assertionPhaseStatus": "COMPLETED_NOT_FINAL_TEST_VERDICT",
+  "exportStatus": "VERIFIED_EXPORT",
+  "privateRecoveryDirectory": "secret-prefix-native-LjMeRU",
+  "commitments": {},
+  "records": [
+    {
+      "role": "secret-prefix",
+      "sessionId": "be730ff5-f716-41e5-8980-77dd28b53c89",
+      "contextId": "9907c42e-a424-4999-b834-30ebc2fe409c",
+      "contextRevision": 1,
+      "recordingId": "f57b4f59-f093-419a-8b5e-7918a75d312e",
+      "state": "STORED",
+      "partial": false,
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000801",
+          "admissionId": "7899d6a5-b399-49a1-afad-d94c36cf8b41",
+          "ordinal": 0,
+          "startMs": 16,
+          "endMs": 28
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000802",
+          "admissionId": "21f0d5bb-eea4-4693-bbc9-14268d682c5a",
+          "ordinal": 0,
+          "startMs": 66,
+          "endMs": null
+        }
+      ]
+    },
+    {
+      "role": "secret-prefix",
+      "admissionId": "21f0d5bb-eea4-4693-bbc9-14268d682c5a",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000802",
+        "ordinal": 0
+      },
+      "state": "UNKNOWN_OUTCOME",
+      "outcomeCode": "TARGET_CHANGED",
+      "attemptOrdinal": 0,
+      "contextRevision": 1,
+      "operationHash": "bf04a41c325d5304d4696717debe150e679074c83a5a9c9015fa61100f8e338b",
+      "authoredInputsHash": "99dddddb43ba2d16c3d89ae21462d5f827b3afa22bdc70449f1f152100c7e236"
+    }
+  ],
+  "phases": [
+    {
+      "role": "secret-prefix",
+      "media": "REGISTERED",
+      "seekFrames": "NOT_REACHED"
+    }
+  ],
+  "files": [
+    {
+      "role": "secret-prefix",
+      "state": "COPIED_VERIFIED",
+      "path": "secret-prefix.webm",
+      "byteLength": 9548,
+      "sha256": "2003da3f0ea471c66517bd32db72c7108a9c649a4d0acc35e9887a028bee9ebc",
+      "privacy": "VERIFIED_MASKED",
+      "checks": {
+        "assertions": "PASSED",
+        "decoder": "NOT_REACHED",
+        "seek": "NOT_REACHED"
+      }
+    }
+  ],
+  "cleanupAllowed": true
+}

@@ -1,0 +1,167 @@
+[
+  {
+    "selector": "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect()",
+    "type": "org.opentest4j.AssertionFailedError",
+    "fixedCodes": [
+      "UNKNOWN_OUTCOME",
+      "FINALIZING"
+    ],
+    "frames": [
+      {
+        "owner": "outer",
+        "method": "awaitFinalizing",
+        "line": 10723
+      },
+      {
+        "owner": "outer",
+        "method": "p4PositiveNativeControl",
+        "line": 7178
+      },
+      {
+        "owner": "outer",
+        "method": "p8C6Run",
+        "line": 6700
+      },
+      {
+        "owner": "outer",
+        "method": "p3Case",
+        "line": 5443
+      },
+      {
+        "owner": "outer",
+        "method": "p8C6Case",
+        "line": 6622
+      },
+      {
+        "owner": "outer",
+        "method": "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect",
+        "line": 4428
+      },
+      {
+        "owner": "C5Capture",
+        "method": "collect",
+        "line": 10134
+      },
+      {
+        "owner": "outer",
+        "method": "collectJoinedSinks",
+        "line": 10461
+      }
+    ],
+    "matchedFixedClosureMessages": []
+  },
+  {
+    "selector": "actualPublishedPublicCancelWhileNativePasswordWorldPending()",
+    "type": "org.opentest4j.AssertionFailedError",
+    "fixedCodes": [
+      "FAILED",
+      "FINALIZING"
+    ],
+    "frames": [
+      {
+        "owner": "outer",
+        "method": "awaitFinalizing",
+        "line": 10723
+      },
+      {
+        "owner": "outer",
+        "method": "p4PositiveNativeControl",
+        "line": 7178
+      },
+      {
+        "owner": "outer",
+        "method": "p8C6Run",
+        "line": 6700
+      },
+      {
+        "owner": "outer",
+        "method": "p3Case",
+        "line": 5443
+      },
+      {
+        "owner": "outer",
+        "method": "p8C6Case",
+        "line": 6622
+      },
+      {
+        "owner": "outer",
+        "method": "actualPublishedPublicCancelWhileNativePasswordWorldPending",
+        "line": 4434
+      },
+      {
+        "owner": "C5Capture",
+        "method": "collect",
+        "line": 10134
+      },
+      {
+        "owner": "outer",
+        "method": "collectJoinedSinks",
+        "line": 10461
+      }
+    ],
+    "matchedFixedClosureMessages": []
+  },
+  {
+    "selector": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending()",
+    "type": "org.opentest4j.AssertionFailedError",
+    "fixedCodes": [],
+    "frames": [
+      {
+        "owner": "outer",
+        "method": "p8C6Run",
+        "line": 6724
+      },
+      {
+        "owner": "outer",
+        "method": "p3Case",
+        "line": 5443
+      },
+      {
+        "owner": "outer",
+        "method": "p8C6Case",
+        "line": 6622
+      },
+      {
+        "owner": "outer",
+        "method": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending",
+        "line": 4440
+      },
+      {
+        "owner": "outer",
+        "method": "p3CleanupOwnedResources",
+        "line": 5702
+      },
+      {
+        "owner": "outer",
+        "method": "p3Case",
+        "line": 5450
+      },
+      {
+        "owner": "outer",
+        "method": "p8AwaitC6Closed",
+        "line": 6996
+      },
+      {
+        "owner": "outer",
+        "method": "p4AwaitRevocationObserverCompletion",
+        "line": 6273
+      }
+    ],
+    "matchedFixedClosureMessages": [
+      "Actual owned P3 cleanup remains unconfirmed"
+    ]
+  },
+  {
+    "selector": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks()",
+    "type": "org.opentest4j.AssertionFailedError",
+    "fixedCodes": [],
+    "frames": [
+      {
+        "owner": "outer",
+        "method": "beginOwnedSessionTracking",
+        "line": 1138
+      }
+    ],
+    "matchedFixedClosureMessages": []
+  }
+]

@@ -1,0 +1,317 @@
+{
+  "mode": "revoked",
+  "sourceGuidedWorker": true,
+  "compiledWorker": false,
+  "realMtlsJwt": true,
+  "backendRevocationAuditProved": false,
+  "scopeHash": "5be773c0b9be414e40761814bf118672de8c8a7b360c5d02855f821d13c5e0dd",
+  "sessionId": "407b781f-1589-4b1d-9712-ec1a7e37f222",
+  "absoluteExpiresAt": "2026-10-10T17:04:54.813Z",
+  "claimFacts": [
+    {
+      "started": 978.686625,
+      "timeoutMs": 10000,
+      "key": "49a49eb4-650f-4688-9155-c41c5310d279",
+      "completed": 985.733708
+    },
+    {
+      "started": 1991.475541,
+      "timeoutMs": 1000,
+      "key": "bf29d82e-e7a7-4cf5-a824-807f42600184",
+      "completed": 1999.754791
+    }
+  ],
+  "requestFacts": [
+    {
+      "started": 984.364041,
+      "key": "49a49eb4-650f-4688-9155-c41c5310d279",
+      "completed": 984.392583,
+      "leaseExpiresAt": "2026-10-10T17:03:24.885Z"
+    },
+    {
+      "started": 1999.018916,
+      "key": "bf29d82e-e7a7-4cf5-a824-807f42600184",
+      "completed": 1999.045041,
+      "leaseExpiresAt": "2026-10-10T17:03:25.900Z"
+    }
+  ],
+  "authorityStoppedAt": 2528.154375,
+  "stopReason": "CONTEXT_LOST",
+  "closeRequestedAt": 2528.405541,
+  "closeFinishedAt": 2624.894,
+  "launches": 1,
+  "nativeEntries": [],
+  "nativeEnds": [],
+  "inputEvents": 0,
+  "pids": [
+    84857,
+    84923,
+    84871,
+    84872,
+    84900,
+    84904,
+    84906,
+    84907
+  ],
+  "allObservedPidsGone": true,
+  "scratchPath": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/checks-guided-PwyxWq",
+  "scratchAbsent": true,
+  "messages": [
+    {
+      "route": "bootstrap-evidence",
+      "body": {
+        "schemaVersion": 3,
+        "sessionId": "407b781f-1589-4b1d-9712-ec1a7e37f222",
+        "workerId": "worker-one",
+        "ownerFence": 1,
+        "scopeHash": "5be773c0b9be414e40761814bf118672de8c8a7b360c5d02855f821d13c5e0dd",
+        "contextId": "e12efb05-2d70-43b4-aaac-a92bfa521191",
+        "contextRevision": 1,
+        "sourceRevision": "source-1",
+        "configurationRevision": "config-1",
+        "versions": {
+          "contract": 3,
+          "learnedPlan": 3,
+          "observation": 3,
+          "guidedPolicy": 3,
+          "referencePolicy": 4,
+          "lowering": 2,
+          "artifact": 3,
+          "language": "observed-3",
+          "executor": "observed-4"
+        },
+        "executionEvidence": {
+          "kind": "initialBlank",
+          "sessionId": "407b781f-1589-4b1d-9712-ec1a7e37f222",
+          "contextId": "e12efb05-2d70-43b4-aaac-a92bfa521191",
+          "creationId": "d6e0805a-c132-4d39-b7f2-da7ee788942e",
+          "documentId": "224f8e93-6e13-4a3e-b291-87d6ed7dc2b5",
+          "bootstrapId": "524857f5-983f-4496-b11f-7f6aadaf920b",
+          "url": "about:blank",
+          "origin": null,
+          "generation": 0
+        },
+        "evidenceHash": "960d46f94c20486b483f0539c3183b97268879922d6440d2de33dfc634a62f30"
+      }
+    },
+    {
+      "route": "outcomes",
+      "body": {
+        "schemaVersion": 3,
+        "sessionId": "407b781f-1589-4b1d-9712-ec1a7e37f222",
+        "workerId": "worker-one",
+        "ownerFence": 1,
+        "scopeHash": "5be773c0b9be414e40761814bf118672de8c8a7b360c5d02855f821d13c5e0dd",
+        "contextId": "e12efb05-2d70-43b4-aaac-a92bfa521191",
+        "contextRevision": 1,
+        "sourceRevision": "source-1",
+        "configurationRevision": "config-1",
+        "versions": {
+          "contract": 3,
+          "learnedPlan": 3,
+          "observation": 3,
+          "guidedPolicy": 3,
+          "referencePolicy": 4,
+          "lowering": 2,
+          "artifact": 3,
+          "language": "observed-3",
+          "executor": "observed-4"
+        },
+        "ledger": {
+          "schemaVersion": 3,
+          "sessionId": "407b781f-1589-4b1d-9712-ec1a7e37f222",
+          "coordinate": {
+            "stepId": "nav",
+            "ordinal": 0
+          },
+          "idempotencyKey": "0932607b-3b7d-42a1-879c-46b4a731ab65",
+          "requestDigest": "2e5a7d68fdc9e8e2d32505c687e6847f6ec7c0c12a845e85da52318a6075aa58",
+          "scopeHash": "5be773c0b9be414e40761814bf118672de8c8a7b360c5d02855f821d13c5e0dd",
+          "operationHash": "07002e4352c83906b7efd679f2ca2e2cd3932ea15b140beac4bb10c94f4c7145",
+          "generation": 0,
+          "documentId": "224f8e93-6e13-4a3e-b291-87d6ed7dc2b5",
+          "ownerFence": 1,
+          "admission": {
+            "admissionId": "cb1c4c6f-e26a-4bef-ba05-267992990da6",
+            "authorizationId": "authorization",
+            "admittedAt": "2026-10-10T17:02:56.350Z",
+            "policyDecisionHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          },
+          "state": "SUCCEEDED",
+          "dispatchCount": 1,
+          "outcomeCode": "OK",
+          "assertionPassed": null,
+          "executionEvidence": {
+            "kind": "initialBlank",
+            "sessionId": "407b781f-1589-4b1d-9712-ec1a7e37f222",
+            "contextId": "e12efb05-2d70-43b4-aaac-a92bfa521191",
+            "creationId": "d6e0805a-c132-4d39-b7f2-da7ee788942e",
+            "documentId": "224f8e93-6e13-4a3e-b291-87d6ed7dc2b5",
+            "bootstrapId": "524857f5-983f-4496-b11f-7f6aadaf920b",
+            "url": "about:blank",
+            "origin": null,
+            "generation": 0
+          },
+          "evidenceHash": "960d46f94c20486b483f0539c3183b97268879922d6440d2de33dfc634a62f30",
+          "authoredInputsHash": "34373f9c7bb31c88d53ffae9e2211a6a7e0cd08d06f42a7921d68bf14f45eb4e",
+          "contextRevision": 1,
+          "preparationId": "4022c0bd-6b99-4f2e-a5b3-4253197a1057"
+        },
+        "availability": null
+      }
+    },
+    {
+      "route": "observations",
+      "body": {
+        "schemaVersion": 3,
+        "sessionId": "407b781f-1589-4b1d-9712-ec1a7e37f222",
+        "workerId": "worker-one",
+        "ownerFence": 1,
+        "scopeHash": "5be773c0b9be414e40761814bf118672de8c8a7b360c5d02855f821d13c5e0dd",
+        "contextId": "e12efb05-2d70-43b4-aaac-a92bfa521191",
+        "contextRevision": 1,
+        "sourceRevision": "source-1",
+        "configurationRevision": "config-1",
+        "versions": {
+          "contract": 3,
+          "learnedPlan": 3,
+          "observation": 3,
+          "guidedPolicy": 3,
+          "referencePolicy": 4,
+          "lowering": 2,
+          "artifact": 3,
+          "language": "observed-3",
+          "executor": "observed-4"
+        },
+        "observation": {
+          "coverage": {
+            "complete": false,
+            "mode": "semantic",
+            "passwordControls": 1,
+            "reason": "sensitivity",
+            "truncated": false,
+            "withheldRegions": 2
+          },
+          "documentId": "d554a831-4c02-4e89-86f8-3610e2ecae71",
+          "generation": 1,
+          "nodes": [
+            {
+              "actionable": false,
+              "classification": "structuralOnly",
+              "controlType": "none",
+              "depth": 0,
+              "documentId": "d554a831-4c02-4e89-86f8-3610e2ecae71",
+              "elementType": "other",
+              "formId": null,
+              "generation": 1,
+              "labelNodeIds": [],
+              "locatorHints": [],
+              "name": "User",
+              "nodeId": "node-1-5",
+              "parentNodeId": null,
+              "policyRuleId": "structural",
+              "regionId": null,
+              "role": "generic",
+              "visible": true
+            },
+            {
+              "actionable": true,
+              "classification": "structuralOnly",
+              "controlType": "text",
+              "depth": 1,
+              "documentId": "d554a831-4c02-4e89-86f8-3610e2ecae71",
+              "elementType": "input",
+              "formId": null,
+              "generation": 1,
+              "labelNodeIds": [
+                "node-1-5"
+              ],
+              "locatorHints": [
+                {
+                  "exact": true,
+                  "kind": "testId",
+                  "value": "username"
+                },
+                {
+                  "exact": true,
+                  "kind": "role",
+                  "name": "User",
+                  "role": "textbox"
+                },
+                {
+                  "exact": true,
+                  "kind": "label",
+                  "value": "User"
+                }
+              ],
+              "name": "User",
+              "nodeId": "node-1-6",
+              "parentNodeId": "node-1-5",
+              "policyRuleId": "structural",
+              "regionId": null,
+              "role": "textbox",
+              "visible": true
+            },
+            {
+              "actionable": true,
+              "classification": "structuralOnly",
+              "controlType": "none",
+              "depth": 0,
+              "documentId": "d554a831-4c02-4e89-86f8-3610e2ecae71",
+              "elementType": "button",
+              "formId": null,
+              "generation": 1,
+              "labelNodeIds": [],
+              "locatorHints": [
+                {
+                  "exact": true,
+                  "kind": "role",
+                  "name": "Sign in",
+                  "role": "button"
+                }
+              ],
+              "name": "Sign in",
+              "nodeId": "node-1-8",
+              "parentNodeId": null,
+              "policyRuleId": "structural",
+              "regionId": null,
+              "role": "button",
+              "visible": true
+            }
+          ],
+          "observedAt": "2026-10-10T17:02:56.408Z",
+          "origin": "http://127.0.0.1:62957",
+          "schemaVersion": 3,
+          "scopeHash": "5be773c0b9be414e40761814bf118672de8c8a7b360c5d02855f821d13c5e0dd",
+          "sessionId": "407b781f-1589-4b1d-9712-ec1a7e37f222"
+        }
+      }
+    },
+    {
+      "route": "lifecycle",
+      "body": {
+        "schemaVersion": 3,
+        "sessionId": "407b781f-1589-4b1d-9712-ec1a7e37f222",
+        "workerId": "worker-one",
+        "ownerFence": 1,
+        "scopeHash": "5be773c0b9be414e40761814bf118672de8c8a7b360c5d02855f821d13c5e0dd",
+        "contextId": "e12efb05-2d70-43b4-aaac-a92bfa521191",
+        "contextRevision": 1,
+        "sourceRevision": "source-1",
+        "configurationRevision": "config-1",
+        "versions": {
+          "contract": 3,
+          "learnedPlan": 3,
+          "observation": 3,
+          "guidedPolicy": 3,
+          "referencePolicy": 4,
+          "lowering": 2,
+          "artifact": 3,
+          "language": "observed-3",
+          "executor": "observed-4"
+        },
+        "reason": "CONTEXT_LOST"
+      }
+    }
+  ]
+}

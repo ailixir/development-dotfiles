@@ -1,0 +1,313 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
+@@ -105,9 +105,11 @@
+     return representation;
+   }
+ 
+-  // Independent expanded v3/session oracle. Unknown contracts retain native root validation.
++  // Independent expanded root oracles. Unknown contracts retain native root validation.
+   private static final String SESSION_SCHEMA_EPOCH =
+       "0ac40665050057740ac8464cf0bd81ed1fdfb2d680326641c6eaff9aef6fb02d";
++  private static final String REPLAY_VALIDATION_SCHEMA_EPOCH =
++      "1f336674cf09a2e5c613195df584c9f34c6a2887620e8367f8a5e62647b54a63";
+ 
+   private record CompiledSchema(JsonSchema shape, Map<String, JsonSchema> properties) {
+     boolean valid(JsonNode value) {
+@@ -129,11 +131,17 @@
+ 
+   private CompiledSchema compileSchema(String name, JsonSchema original) {
+     CompiledSchema baseline = new CompiledSchema(original, Map.of());
+-    if (!name.equals("v3/session")) {
++    String epoch =
++        switch (name) {
++          case "v3/session" -> SESSION_SCHEMA_EPOCH;
++          case "v3/replay-validation" -> REPLAY_VALIDATION_SCHEMA_EPOCH;
++          default -> null;
++        };
++    if (epoch == null) {
+       return baseline;
+     }
+     try {
+-      if (!SESSION_SCHEMA_EPOCH.equals(hash(original.getSchemaNode()))) {
++      if (!epoch.equals(hash(original.getSchemaNode()))) {
+         return baseline;
+       }
+       var config = original.getValidationContext().getConfig();
+@@ -169,8 +177,8 @@
+         }
+         shapeProperties.set(property.getKey(), object());
+       }
+-      // The exact schema has only independent property constraints. Keep every root keyword
+-      // and property name, then run the original child schemas with their own diagnostic root.
++      // These exact roots have independent property constraints. Keep every root keyword
++      // and property name; original child schemas retain all nested applicators unchanged.
+       return new CompiledSchema(
+           JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7).getSchema(shape, config),
+           java.util.Collections.unmodifiableMap(new java.util.LinkedHashMap<>(properties)));
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java
+@@ -85,50 +85,80 @@
+   }
+ 
+   @Test
+-  void sessionValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults() throws Exception {
+-    ObjectNode session = fixtureSession("v3/");
+-    JsonSchema original = originalSchema("v3/session");
+-    org.assertj.core.api.Assertions.assertThat(originalAccepts(original, session)).isTrue();
+-    Object strategy = compiledSchema(original);
+-    var properties = strategy.getClass().getDeclaredMethod("properties");
+-    properties.setAccessible(true);
+-    org.assertj.core.api.Assertions.assertThat(
+-            ((java.util.Map<?, ?>) properties.invoke(strategy)).size())
+-        .isEqualTo(14);
+-    List<JsonNode> cases = new ArrayList<>();
+-    cases.add(session);
+-    collectMutations(session, "", session, cases);
+-    cases.add(contracts.parse("null"));
+-    cases.add(contracts.parse("[]"));
+-    cases.add(contracts.parse("1"));
+-    ObjectNode malformedDate = session.deepCopy();
+-    malformedDate.withObject("/owner").put("leaseExpiresAt", "not-a-date");
+-    cases.add(malformedDate);
+-    ObjectNode malformedUnicode = session.deepCopy();
+-    malformedUnicode.put("sessionId", Character.toString((char) 0xd800));
+-    cases.add(malformedUnicode);
+-    ObjectNode unsafeNumber = session.deepCopy();
+-    unsafeNumber.withObject("/counters").put("actions", 9007199254740992L);
+-    cases.add(unsafeNumber);
+-    var softly = new SoftAssertions();
+-    int index = 0;
+-    for (JsonNode value : cases) {
+-      String before = value.toString();
+-      boolean expected = originalAccepts(original, value);
+-      boolean accepted;
+-      try {
+-        String canonical = contracts.validateAndCanonical("v3/session", value);
+-        softly.assertThat(canonical.equals(GuidedContracts.canonical(value))).isTrue();
+-        accepted = true;
+-      } catch (GuidedSessionException refusal) {
+-        softly.assertThat(refusal.getMessage()).isEqualTo("INVALID_CONTRACT");
+-        softly.assertThat(refusal.status()).isEqualTo(422);
+-        accepted = false;
+-      }
+-      softly.assertThat(accepted).as("mutation %s", index++).isEqualTo(expected);
+-      softly.assertThat(before.equals(value.toString())).as("input unchanged").isTrue();
+-    }
+-    softly.assertAll();
++  void rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults() throws Exception {
++    for (String name : List.of("v3/session", "v3/replay-validation")) {
++      boolean replay = name.equals("v3/replay-validation");
++      ObjectNode document = replay ? fixtureValidationRequest() : fixtureSession("v3/");
++      JsonSchema original = originalSchema(name);
++      org.assertj.core.api.Assertions.assertThat(originalAccepts(original, document)).isTrue();
++      org.assertj.core.api.Assertions.assertThat(compiledPropertyCount(compiledSchema(name, original)))
++          .isEqualTo(replay ? 9 : 14);
++      List<JsonNode> cases = new ArrayList<>();
++      cases.add(document);
++      collectMutations(document, "", document, cases, !replay);
++      cases.add(contracts.parse("null"));
++      cases.add(contracts.parse("[]"));
++      cases.add(contracts.parse("1"));
++      if (replay) {
++        ObjectNode conditional = document.deepCopy();
++        conditional.withObject("/validationBasis/inputs/0")
++            .put("kind", "secretRef").put("intendedSlot", "assert.expected");
++        org.assertj.core.api.Assertions.assertThat(originalAccepts(original, conditional)).isFalse();
++        cases.add(conditional);
++        ObjectNode allowedConditional = conditional.deepCopy();
++        allowedConditional.withObject("/validationBasis/inputs/0").put("intendedSlot", "fill.value");
++        org.assertj.core.api.Assertions.assertThat(originalAccepts(original, allowedConditional)).isTrue();
++        cases.add(allowedConditional);
++        ObjectNode unknownOperation = document.deepCopy();
++        unknownOperation.withObject("/artifact/steps/0/operations/0/operation")
++            .put("kind", "unsupported-operation");
++        org.assertj.core.api.Assertions.assertThat(originalAccepts(original, unknownOperation)).isFalse();
++        cases.add(unknownOperation);
++        ObjectNode duplicate = document.deepCopy();
++        var sourceSteps = (com.fasterxml.jackson.databind.node.ArrayNode)
++            duplicate.at("/artifact/learnedPlan/sourceSteps");
++        sourceSteps.add(sourceSteps.get(0).deepCopy());
++        org.assertj.core.api.Assertions.assertThat(originalAccepts(original, duplicate)).isFalse();
++        cases.add(duplicate);
++        ObjectNode nestedExtra = document.deepCopy();
++        nestedExtra.withObject("/validationBasis/inputs/0").put("unexpected", true);
++        org.assertj.core.api.Assertions.assertThat(originalAccepts(original, nestedExtra)).isFalse();
++        cases.add(nestedExtra);
++      } else {
++        ObjectNode malformedDate = document.deepCopy();
++        malformedDate.withObject("/owner").put("leaseExpiresAt", "not-a-date");
++        cases.add(malformedDate);
++      }
++      ObjectNode malformedUnicode = document.deepCopy();
++      malformedUnicode.put(replay ? "claimId" : "sessionId", Character.toString((char) 0xd800));
++      cases.add(malformedUnicode);
++      ObjectNode unsafeNumber = document.deepCopy();
++      if (replay) {
++        unsafeNumber.put("schemaVersion", 9007199254740992L);
++      } else {
++        unsafeNumber.withObject("/counters").put("actions", 9007199254740992L);
++      }
++      cases.add(unsafeNumber);
++      var softly = new SoftAssertions();
++      int index = 0;
++      for (JsonNode value : cases) {
++        String before = value.toString();
++        boolean expected = originalAccepts(original, value);
++        boolean accepted;
++        try {
++          String canonical = contracts.validateAndCanonical(name, value);
++          softly.assertThat(canonical.equals(GuidedContracts.canonical(value))).isTrue();
++          accepted = true;
++        } catch (GuidedSessionException refusal) {
++          softly.assertThat(refusal.getMessage()).isEqualTo("INVALID_CONTRACT");
++          softly.assertThat(refusal.status()).isEqualTo(422);
++          accepted = false;
++        }
++        softly.assertThat(accepted).as("%s mutation %s", name, index++).isEqualTo(expected);
++        softly.assertThat(before.equals(value.toString())).as("input unchanged").isTrue();
++      }
++      softly.assertAll();
++    }
+   }
+ 
+   @Test
+@@ -160,23 +190,57 @@
+   }
+ 
+   @Test
+-  void unknownSessionEpochPreservesNativeCrossPropertyRefusal() throws Exception {
+-    ObjectNode changed = originalSchema("v3/session").getSchemaNode().deepCopy();
+-    changed
+-        .putArray("allOf")
+-        .addObject()
+-        .putObject("properties")
+-        .putObject("state")
+-        .put("const", "FAILED");
+-    JsonSchema original =
+-        JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7).getSchema(changed);
+-    ObjectNode session = fixtureSession("v3/");
+-    session.put("state", "OBSERVING");
+-    org.assertj.core.api.Assertions.assertThat(compiledAccepts(original, session)).isFalse();
+-    session.put("state", "FAILED");
+-    org.assertj.core.api.Assertions.assertThat(compiledAccepts(original, session))
+-        .isEqualTo(original.validate(session).isEmpty());
+-    org.assertj.core.api.Assertions.assertThat(compiledAccepts(original, session)).isTrue();
++  void unknownRootEpochPreservesNativeCrossPropertyRefusal() throws Exception {
++    for (String name : List.of("v3/session", "v3/replay-validation")) {
++      boolean replay = name.equals("v3/replay-validation");
++      String field = replay ? "snapshotHash" : "state";
++      String accepted = replay ? "a".repeat(64) : "FAILED";
++      String rejected = replay ? "b".repeat(64) : "OBSERVING";
++      ObjectNode changed = originalSchema(name).getSchemaNode().deepCopy();
++      changed.putArray("allOf").addObject().putObject("properties")
++          .putObject(field).put("const", accepted);
++      JsonSchema original = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7)
++          .getSchema(changed);
++      org.assertj.core.api.Assertions.assertThat(compiledPropertyCount(compiledSchema(name, original)))
++          .isZero();
++      ObjectNode document = replay ? fixtureValidationRequest() : fixtureSession("v3/");
++      document.put(field, rejected);
++      org.assertj.core.api.Assertions.assertThat(originalAccepts(original, document)).isFalse();
++      org.assertj.core.api.Assertions.assertThat(compiledAccepts(name, original, document)).isFalse();
++      document.put(field, accepted);
++      org.assertj.core.api.Assertions.assertThat(originalAccepts(original, document)).isTrue();
++      org.assertj.core.api.Assertions.assertThat(compiledAccepts(name, original, document)).isTrue();
++    }
++    String fragment = "v3/replay-validation#/definitions/ValidationBasis";
++    JsonSchema original = originalSchema(fragment);
++    org.assertj.core.api.Assertions.assertThat(compiledPropertyCount(compiledSchema(fragment, original)))
++        .isZero();
++    ObjectNode basis = fixtureValidationRequest().withObject("/validationBasis");
++    org.assertj.core.api.Assertions.assertThat(originalAccepts(original, basis)).isTrue();
++    contracts.validate(fragment, basis);
++    basis.put("unexpected", true);
++    org.assertj.core.api.Assertions.assertThatThrownBy(() -> contracts.validate(fragment, basis))
++        .hasMessage("INVALID_CONTRACT");
++  }
++
++  private ObjectNode fixtureValidationRequest() throws Exception {
++    JsonNode independent = contracts.parse(Files.readString(Path.of(
++        "../studio-runner/fixtures/observed-reference/fresh-order-reference.json")));
++    ObjectNode request = contracts.object().put("schemaVersion", 3)
++        .put("attemptId", "00000000-0000-4000-8000-000000000001")
++        .put("claimId", "00000000-0000-4000-8000-000000000002")
++        .put("snapshotHash", "a".repeat(64))
++        .put("basisHash", GuidedContracts.hash(independent.path("basis")));
++    request.set("requiredProfile", independent.path("artifact").path("profile").deepCopy());
++    request.set("requiredBuild", contracts.object()
++        .put("profileHash", GuidedContracts.hash(request.path("requiredProfile")))
++        .put("schemaBundleHash", "b".repeat(64))
++        .put("referenceBundleHash", "c".repeat(64))
++        .put("executableImageDigest", "d".repeat(64))
++        .put("chromiumBuild", "synthetic-component"));
++    request.set("artifact", independent.path("artifact").deepCopy());
++    request.set("validationBasis", independent.path("basis").deepCopy());
++    return request;
+   }
+ 
+   private ObjectNode fixtureSession(String version) throws Exception {
+@@ -199,15 +263,21 @@
+     return (JsonSchema) method.invoke(new GuidedContracts(), name);
+   }
+ 
+-  private Object compiledSchema(JsonSchema original) throws Exception {
++  private Object compiledSchema(String name, JsonSchema original) throws Exception {
+     var compile =
+         GuidedContracts.class.getDeclaredMethod("compileSchema", String.class, JsonSchema.class);
+     compile.setAccessible(true);
+-    return compile.invoke(contracts, "v3/session", original);
+-  }
+-
+-  private boolean compiledAccepts(JsonSchema original, JsonNode value) throws Exception {
+-    Object compiled = compiledSchema(original);
++    return compile.invoke(contracts, name, original);
++  }
++
++  private int compiledPropertyCount(Object compiled) throws Exception {
++    var properties = compiled.getClass().getDeclaredMethod("properties");
++    properties.setAccessible(true);
++    return ((java.util.Map<?, ?>) properties.invoke(compiled)).size();
++  }
++
++  private boolean compiledAccepts(String name, JsonSchema original, JsonNode value) throws Exception {
++    Object compiled = compiledSchema(name, original);
+     var validate = compiled.getClass().getDeclaredMethod("valid", JsonNode.class);
+     validate.setAccessible(true);
+     return (boolean) validate.invoke(compiled, value);
+@@ -223,7 +293,7 @@
+   }
+ 
+   private void collectMutations(
+-      ObjectNode original, String pointer, JsonNode node, List<JsonNode> cases) {
++      ObjectNode original, String pointer, JsonNode node, List<JsonNode> cases, boolean recursive) {
+     if (node.isObject()) {
+       ObjectNode extra = original.deepCopy();
+       ((ObjectNode) extra.at(pointer)).put("unexpected", true);
+@@ -240,6 +310,9 @@
+         ObjectNode wrongType = original.deepCopy();
+         ((ObjectNode) wrongType.at(pointer)).putArray(name);
+         cases.add(wrongType);
++        if (!recursive) {
++          continue; // Bound the larger replay corpus to the three root-field mutations.
++        }
+         if (field.getValue().isTextual()) {
+           ObjectNode empty = original.deepCopy();
+           ((ObjectNode) empty.at(pointer)).put(name, "");
+@@ -255,7 +328,7 @@
+             cases.add(changed);
+           }
+         }
+-        collectMutations(original, pointer + "/" + name, field.getValue(), cases);
++        collectMutations(original, pointer + "/" + name, field.getValue(), cases, true);
+       }
+     } else if (node.isArray()) {
+       ObjectNode empty = original.deepCopy();
+@@ -270,7 +343,7 @@
+         cases.add(oversized);
+       }
+       for (int index = 0; index < node.size(); index++) {
+-        collectMutations(original, pointer + "/" + index, node.get(index), cases);
++        collectMutations(original, pointer + "/" + index, node.get(index), cases, true);
+       }
+     }
+   }

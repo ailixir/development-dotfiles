@@ -1,0 +1,90 @@
+{
+  "scope": "Candidate Backend ownership only; no source release, execution or Data changes",
+  "patches": [
+    {
+      "owner": "Backend B0",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "allowed": [
+        "Preserve shared reserve/claim/finish authority as current session/base/source/head/live identity/expiry and complete actual stored ledger state gate",
+        "Permit at most one actual GuidedIncrementalStore.excluded-qualified row; keep all other failures/pending/unknown refused",
+        "Current commit only: configured lazy reader; builder.basis from actual locked source/session/original base/evidence; exact basis and stored attempt basisHash equality before writes",
+        "Keep independently rederived whole candidate/verdict/identity/grant/CAS/receipt/transaction checks"
+      ],
+      "forbidden": [
+        "Full head evidence reader in shared authority",
+        "Caller-provided authority facts, trusted boolean or bypass",
+        "Production schema-version probe/exception fallback",
+        "Filter pending/failed raw ledgers before authority/builder",
+        "Remove complete commit reread in favor of publisher-only check"
+      ]
+    },
+    {
+      "owner": "Backend B0",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayRuntimeConfiguration.java",
+      "allowed": [
+        "Package-private lazy repository reader-supplier composition from configured evidence bean via ObjectProvider; preserve existing verifier dependency cycle laziness"
+      ],
+      "forbidden": [
+        "Eager circular bean resolution",
+        "Caller proof input or alternative runtime schema branch"
+      ]
+    },
+    {
+      "owner": "Backend B0",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "allowed": [
+        "Existing configured reader installs lazy real ObservedRevisionVerifier; no change presently required"
+      ],
+      "forbidden": [
+        "Permit absent verifier on nonempty base proof",
+        "Change public configuration/property surface"
+      ]
+    },
+    {
+      "owner": "Backend B0",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java",
+      "status": "PROPOSED_NEW_NONMIGRATION_FILE",
+      "allowed": [
+        "Actual PostgreSQL15 direct repository positive/negative subjects in test-mapping.json; fixture authority disclosed; use existing frozen Data helper without modifying it",
+        "Configured reader exercised for genuine nonempty-prefix direct commit",
+        "Prove no stale complete-evidence or hidden-pending-ledger direct commit bypass"
+      ],
+      "forbidden": [
+        "Mock JDBC as PostgreSQL proof",
+        "Disabled constraints/triggers",
+        "Modify Data fixtures or migrations without separate root/Data release"
+      ]
+    },
+    {
+      "owner": "Backend joined single writer under root",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "allowed": [
+        "Existing actual joined admitted-drift/pre-admission/boundary/ordinary replay controls and exact B0 authority-only pending negative companion if lawful reachability fits existing harness"
+      ],
+      "forbidden": [
+        "Concurrent writes with other joined batches",
+        "Synthetic receipts claimed as real worker/native authority"
+      ]
+    },
+    {
+      "owner": "Backend B0",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+      "allowed": [
+        "Existing exact candidate comparison and excluded graph joins; keep pending authority case mapped to actual backend companion"
+      ],
+      "forbidden": [
+        "Claim private pending ledger is inferable from unchanged public basis",
+        "Drop original named obligation"
+      ]
+    }
+  ],
+  "heldDataPaths": [
+    "backend/src/main/resources/db/migration/*.sql",
+    "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+    "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java"
+  ],
+  "noDDLOrWireOrPublicOperationChange": true
+}

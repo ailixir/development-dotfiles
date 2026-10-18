@@ -1,0 +1,1165 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v3/replay-ipc.schema.json",
+  "title": "Observed replay replay-ipc",
+  "oneOf": [
+    {
+      "$ref": "https://checks.citi.example/contracts/observed/v3/replay-ipc.schema.json#/definitions/Launch3"
+    },
+    {
+      "$ref": "https://checks.citi.example/contracts/observed/v3/replay-ipc.schema.json#/definitions/Execute3"
+    },
+    {
+      "$ref": "https://checks.citi.example/contracts/observed/v3/replay-ipc.schema.json#/definitions/Ready3"
+    },
+    {
+      "$ref": "https://checks.citi.example/contracts/observed/v3/replay-ipc.schema.json#/definitions/StepStarted3"
+    },
+    {
+      "$ref": "https://checks.citi.example/contracts/observed/v3/replay-ipc.schema.json#/definitions/StepFinished3"
+    },
+    {
+      "$ref": "https://checks.citi.example/contracts/observed/v3/replay-ipc.schema.json#/definitions/Result3"
+    },
+    {
+      "$ref": "https://checks.citi.example/contracts/observed/v3/replay-ipc.schema.json#/definitions/Stop"
+    }
+  ],
+  "definitions": {
+    "TrustedPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "policyId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "policyVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "applicationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "environment": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "allowedOrigins": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 256,
+            "pattern": "^https?://[^/?#]+$"
+          },
+          "uniqueItems": true
+        },
+        "entryPolicyId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "applicationPolicy": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "policyRuleId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "allowStructuralDiscovery": {
+                  "const": true
+                },
+                "readGrants": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 32,
+                  "items": {
+                    "$ref": "https://checks.citi.example/contracts/observed/v3/replay-ipc.schema.json#/definitions/ReadGrant"
+                  }
+                }
+              },
+              "required": [
+                "policyRuleId",
+                "allowStructuralDiscovery",
+                "readGrants"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rules": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 128,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-ipc.schema.json#/definitions/FieldOverride"
+          }
+        }
+      },
+      "required": [
+        "version",
+        "policyId",
+        "policyVersion",
+        "applicationId",
+        "environment",
+        "allowedOrigins",
+        "entryPolicyId",
+        "applicationPolicy",
+        "rules"
+      ]
+    },
+    "ReadGrant": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "policyRuleId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "origin": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 256,
+          "pattern": "^https?://[^/?#]+$"
+        },
+        "region": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "application"
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "role"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "main",
+                    "region",
+                    "form"
+                  ]
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "exact": {
+                  "const": true
+                }
+              },
+              "required": [
+                "kind",
+                "role",
+                "name",
+                "exact"
+              ]
+            }
+          ]
+        },
+        "visibleText": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "classification": {
+              "const": "permittedBusinessData"
+            }
+          },
+          "required": [
+            "classification"
+          ]
+        },
+        "controlValue": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "classification": {
+              "const": "nonsecretApproved"
+            },
+            "types": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 6,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "text",
+                  "search",
+                  "email",
+                  "tel",
+                  "url",
+                  "textarea"
+                ]
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "classification",
+            "types"
+          ]
+        }
+      },
+      "required": [
+        "policyRuleId",
+        "origin",
+        "region"
+      ],
+      "anyOf": [
+        {
+          "properties": {
+            "visibleText": {}
+          },
+          "required": [
+            "visibleText"
+          ]
+        },
+        {
+          "properties": {
+            "controlValue": {}
+          },
+          "required": [
+            "controlValue"
+          ]
+        }
+      ]
+    },
+    "FieldOverride": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "testId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "policyRuleId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "classification": {
+          "type": "string",
+          "enum": [
+            "structuralOnly",
+            "permittedBusinessData",
+            "nonsecretApproved"
+          ]
+        },
+        "accessibleName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "testId",
+        "name",
+        "policyRuleId",
+        "classification"
+      ]
+    },
+    "Stop": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "stop"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Launch3": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "launch"
+        },
+        "protocolVersion": {
+          "const": 3
+        },
+        "mode": {
+          "const": "observed"
+        },
+        "runId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "attemptId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "admission": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/replay-job.schema.json#/definitions/AdmissionReceipt"
+        },
+        "profile": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/replay-profile.schema.json"
+        },
+        "build": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/replay-profile.schema.json#/definitions/BuildIdentity"
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "configurationHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "browser": {
+          "const": "chromium"
+        },
+        "viewport": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8192
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8192
+            }
+          },
+          "required": [
+            "width",
+            "height"
+          ]
+        },
+        "recording": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8192
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8192
+            }
+          },
+          "required": [
+            "width",
+            "height"
+          ]
+        },
+        "seekOriginCalibrationMs": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "scratchPath": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "totalRuntimeMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "policy": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/replay-ipc.schema.json#/definitions/TrustedPolicy"
+        },
+        "scope": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/replay-profile.schema.json#/definitions/Scope"
+        }
+      },
+      "required": [
+        "kind",
+        "protocolVersion",
+        "mode",
+        "runId",
+        "attemptId",
+        "admission",
+        "profile",
+        "build",
+        "scopeHash",
+        "configurationHash",
+        "browser",
+        "viewport",
+        "recording",
+        "seekOriginCalibrationMs",
+        "scratchPath",
+        "totalRuntimeMs",
+        "policy",
+        "scope"
+      ]
+    },
+    "Execute3": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "execute"
+        },
+        "protocolVersion": {
+          "const": 3
+        },
+        "mode": {
+          "const": "observed"
+        },
+        "runId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "attemptId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "profileHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "configurationHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "waitStrategy": {
+          "type": "string",
+          "enum": [
+            "load",
+            "domcontentloaded",
+            "networkidle"
+          ]
+        },
+        "stepTimeoutMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-operation.schema.json#/definitions/Step"
+          }
+        },
+        "guards": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-operation.schema.json#/definitions/Guard"
+          }
+        },
+        "bindings": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 32,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-operation.schema.json#/definitions/RuntimeBinding"
+          }
+        },
+        "transfers": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 200,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-operation.schema.json#/definitions/Transfer"
+          }
+        },
+        "inputs": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 200,
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "inputId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "stepId": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "destination",
+                      "nonsecretText"
+                    ]
+                  },
+                  "intendedSlot": {
+                    "type": "string",
+                    "enum": [
+                      "navigate.destination",
+                      "fill.value",
+                      "selectOption.value",
+                      "assert.expected"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "maxLength": 4096
+                  }
+                },
+                "required": [
+                  "inputId",
+                  "stepId",
+                  "kind",
+                  "intendedSlot",
+                  "value"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "inputId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "stepId": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                  },
+                  "kind": {
+                    "const": "secretRef"
+                  },
+                  "intendedSlot": {
+                    "const": "fill.value"
+                  },
+                  "referenceName": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+                  }
+                },
+                "required": [
+                  "inputId",
+                  "stepId",
+                  "kind",
+                  "intendedSlot",
+                  "referenceName"
+                ]
+              }
+            ]
+          }
+        },
+        "secrets": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[A-Za-z0-9_.-]{1,64}$": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "maxProperties": 64
+        },
+        "secretOrigins": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[A-Za-z0-9_.-]{1,64}$": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 16,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 512,
+                "pattern": "^https?://[^/?#]+$"
+              }
+            }
+          },
+          "maxProperties": 64
+        }
+      },
+      "required": [
+        "kind",
+        "protocolVersion",
+        "mode",
+        "runId",
+        "attemptId",
+        "profileHash",
+        "configurationHash",
+        "waitStrategy",
+        "stepTimeoutMs",
+        "steps",
+        "guards",
+        "bindings",
+        "transfers",
+        "inputs",
+        "secrets",
+        "secretOrigins"
+      ]
+    },
+    "Ready3": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "ready"
+        },
+        "protocolVersion": {
+          "const": 3
+        },
+        "mode": {
+          "const": "observed"
+        },
+        "runId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "attemptId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "profileHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "build": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/replay-profile.schema.json#/definitions/BuildIdentity"
+        },
+        "admissionId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "browserStartedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "startedAtMs": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "calibrationOffsetMs": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "protocolVersion",
+        "mode",
+        "runId",
+        "attemptId",
+        "profileHash",
+        "build",
+        "admissionId",
+        "browserStartedAt",
+        "startedAtMs",
+        "calibrationOffsetMs"
+      ]
+    },
+    "StepStarted3": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "step-started"
+        },
+        "protocolVersion": {
+          "const": 3
+        },
+        "mode": {
+          "const": "observed"
+        },
+        "runId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "attemptId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "stepIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "stepId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "startedAtMs": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "kind",
+        "protocolVersion",
+        "mode",
+        "runId",
+        "attemptId",
+        "stepIndex",
+        "stepId",
+        "startedAtMs"
+      ]
+    },
+    "StepFinished3": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "step-finished"
+        },
+        "protocolVersion": {
+          "const": 3
+        },
+        "mode": {
+          "const": "observed"
+        },
+        "runId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "attemptId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "stepIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "stepId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "FAIL",
+            "SKIPPED"
+          ]
+        },
+        "startedAtMs": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "finishedAtMs": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "durationMs": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errorCode": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "INVALID_CONTRACT",
+                "PROFILE_MISMATCH",
+                "AUTHORIZATION_EXPIRED",
+                "POLICY_REFUSED",
+                "TARGET_DRIFT",
+                "READ_REFUSED",
+                "REFERENCE_REFUSED",
+                "ASSERTION_FAILED",
+                "CANCELLED",
+                "TIMEOUT",
+                "OUTCOME_UNKNOWN",
+                "INTERNAL_ERROR",
+                "LOGIN_REQUIRED",
+                "PASSWORD_CONTROL_READ_REFUSED",
+                "REFERENCE_MISMATCH"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "detail": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "stepId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "loginStepsPresent": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "stepId",
+            "loginStepsPresent"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "protocolVersion",
+        "mode",
+        "runId",
+        "attemptId",
+        "stepIndex",
+        "stepId",
+        "status",
+        "startedAtMs",
+        "finishedAtMs",
+        "durationMs",
+        "errorCode"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "errorCode": {
+                "const": "LOGIN_REQUIRED"
+              }
+            },
+            "required": [
+              "errorCode"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "stepId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "loginStepsPresent": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "stepId",
+                  "loginStepsPresent"
+                ]
+              },
+              "status": {
+                "const": "FAIL"
+              }
+            },
+            "required": [
+              "detail"
+            ]
+          },
+          "else": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "not": {}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Result3": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "result"
+        },
+        "protocolVersion": {
+          "const": 3
+        },
+        "mode": {
+          "const": "observed"
+        },
+        "runId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "attemptId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "admissionId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "profileHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "build": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/replay-profile.schema.json#/definitions/BuildIdentity"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "errorCode": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "INVALID_CONTRACT",
+                "PROFILE_MISMATCH",
+                "AUTHORIZATION_EXPIRED",
+                "POLICY_REFUSED",
+                "TARGET_DRIFT",
+                "READ_REFUSED",
+                "REFERENCE_REFUSED",
+                "ASSERTION_FAILED",
+                "CANCELLED",
+                "TIMEOUT",
+                "OUTCOME_UNKNOWN",
+                "INTERNAL_ERROR",
+                "LOGIN_REQUIRED",
+                "PASSWORD_CONTROL_READ_REFUSED",
+                "REFERENCE_MISMATCH"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recording": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "bytes": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 2147483647
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "errorCode": {
+              "oneOf": [
+                {
+                  "const": "RECORDING_FAILED"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "state": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "FAILED",
+                "UNAVAILABLE"
+              ]
+            },
+            "partial": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "path",
+            "bytes",
+            "errorCode",
+            "state",
+            "partial"
+          ]
+        },
+        "detail": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "stepId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "loginStepsPresent": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "stepId",
+            "loginStepsPresent"
+          ]
+        },
+        "secretUse": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[A-Za-z0-9_.-]{1,64}$": {
+              "type": "string",
+              "enum": [
+                "USED",
+                "NOT_USED",
+                "REFUSED"
+              ]
+            }
+          },
+          "maxProperties": 64
+        }
+      },
+      "required": [
+        "kind",
+        "protocolVersion",
+        "mode",
+        "runId",
+        "attemptId",
+        "admissionId",
+        "profileHash",
+        "build",
+        "ok",
+        "errorCode",
+        "recording",
+        "secretUse"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "errorCode": {
+                "const": "LOGIN_REQUIRED"
+              }
+            },
+            "required": [
+              "errorCode"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "stepId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "loginStepsPresent": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "stepId",
+                  "loginStepsPresent"
+                ]
+              },
+              "ok": {
+                "const": false
+              }
+            },
+            "required": [
+              "detail"
+            ]
+          },
+          "else": {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "not": {}
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

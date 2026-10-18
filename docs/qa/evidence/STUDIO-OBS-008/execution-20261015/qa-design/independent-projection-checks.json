@@ -1,0 +1,658 @@
+{
+  "classification": "INDEPENDENT_DESIGN_SCHEMA_AND_HASH_CHECKS_ONLY",
+  "createdAt": "2026-10-15T04:06:17.023Z",
+  "rulingsSha256": "1476ce905c4927a827b2bf05319031fb55c67806cca63b78a3264b67b4e37a7d",
+  "receiptSha256": "fe814e304efaaa71131f155bbd650523eaf0ac8441fee868f6fcb920d47029da",
+  "frozenBoundFileChecks": [
+    {
+      "file": "architect-ownership.json",
+      "expected": "71767d0662a31db38294fdc540bc0c8e3e88840000e3cfb95d5079339f41b5d4",
+      "actual": "71767d0662a31db38294fdc540bc0c8e3e88840000e3cfb95d5079339f41b5d4",
+      "ok": true
+    },
+    {
+      "file": "architect-public-projections.schema.json",
+      "expected": "3bc546dc5700813c13591c757f0f7b5e71c7ee14af55bb7a9e089094a0305d2e",
+      "actual": "3bc546dc5700813c13591c757f0f7b5e71c7ee14af55bb7a9e089094a0305d2e",
+      "ok": true
+    },
+    {
+      "file": "architect-rulings.json",
+      "expected": "1476ce905c4927a827b2bf05319031fb55c67806cca63b78a3264b67b4e37a7d",
+      "actual": "1476ce905c4927a827b2bf05319031fb55c67806cca63b78a3264b67b4e37a7d",
+      "ok": true
+    },
+    {
+      "file": "architect-test-delta.json",
+      "expected": "ac3357c0f162b0d6b7891fe9c5696468c82bd4dbec83e881d6a24d362f1e49b4",
+      "actual": "ac3357c0f162b0d6b7891fe9c5696468c82bd4dbec83e881d6a24d362f1e49b4",
+      "ok": true
+    }
+  ],
+  "sourceSnapshots": [
+    {
+      "file": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "expected": "9b7386d5e4230a1a2bff02bd474edb7796ace98e14ec0d047fa618038a3e4500",
+      "actual": "9b7386d5e4230a1a2bff02bd474edb7796ace98e14ec0d047fa618038a3e4500",
+      "unchanged": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/ux-implementation-plan.json",
+      "expected": "a2c33684fd58f6c9f77982f393337bb0ccdd8b8a73fbc9ca9aacc4da0c9d6753",
+      "actual": "a2c33684fd58f6c9f77982f393337bb0ccdd8b8a73fbc9ca9aacc4da0c9d6753",
+      "unchanged": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/po-scope-readiness.json",
+      "expected": "62636d6ca6a3ec34ed534eb2a3ce3f39191b5482f7fa4c4854ebad15e502d0e2",
+      "actual": "62636d6ca6a3ec34ed534eb2a3ce3f39191b5482f7fa4c4854ebad15e502d0e2",
+      "unchanged": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/manifest.json",
+      "expected": "54c5551d6d3316b3cc384fc4ebbf6d78476840130625476f2af50e193efc3818",
+      "actual": "54c5551d6d3316b3cc384fc4ebbf6d78476840130625476f2af50e193efc3818",
+      "unchanged": true
+    },
+    {
+      "file": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/contract-edits.json",
+      "expected": "1cb17b5fb8217a7240d62f9b431a5f9fe6a16b1b23d643cdedff4d0023f669f3",
+      "actual": "1cb17b5fb8217a7240d62f9b431a5f9fe6a16b1b23d643cdedff4d0023f669f3",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio/openapi.yaml",
+      "expected": "afec6c04cdd5bcc19e42b83f83656a342165c5e04407e90a7206de0b40c46183",
+      "actual": "70eab658558815565296e499dfab77aa789168cfc4c09ccf23fe67323fc86768",
+      "unchanged": false
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json",
+      "expected": "378ab88d0abedb156990f414c0b44ac8a8bdebfcbb791efb12fe0e6723401b26",
+      "actual": "378ab88d0abedb156990f414c0b44ac8a8bdebfcbb791efb12fe0e6723401b26",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json",
+      "expected": "7accd138c4b8385142e9c2b20f308912e2d0cc7b9afccf2d4aac4155ea0197ca",
+      "actual": "7accd138c4b8385142e9c2b20f308912e2d0cc7b9afccf2d4aac4155ea0197ca",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/commands.schema.json",
+      "expected": "7a8dbc6c5af455dce04304b33183187c001e95440978ef6aaf47da4fded9c0df",
+      "actual": "7a8dbc6c5af455dce04304b33183187c001e95440978ef6aaf47da4fded9c0df",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/publication.schema.json",
+      "expected": "f5314de5d45dd277945f820b9cb5526f88df0da2d49e36ab3a2b42fb81c75b36",
+      "actual": "f5314de5d45dd277945f820b9cb5526f88df0da2d49e36ab3a2b42fb81c75b36",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/action-timing.schema.json",
+      "expected": "d2cb597f799dfac20a020d26142e568524eed7c24986eb4ae1566c569c729e7d",
+      "actual": "d2cb597f799dfac20a020d26142e568524eed7c24986eb4ae1566c569c729e7d",
+      "unchanged": true
+    },
+    {
+      "file": "docs/specs/studio-observed-authoring/contracts/v3/versions.schema.json",
+      "expected": "02bc1bbc453daea97962b4ec330599bc66f7632e69a19b7780a610b96a320eb8",
+      "actual": "02bc1bbc453daea97962b4ec330599bc66f7632e69a19b7780a610b96a320eb8",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "expected": "994964975c26bf31259b7942011f43dc02fe74f031b93fa274965d41ce3a1642",
+      "actual": "994964975c26bf31259b7942011f43dc02fe74f031b93fa274965d41ce3a1642",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "expected": "176c6cbb7a089a68a59008bd19d6f36fe88667d2a6aead53246e3488b378d795",
+      "actual": "176c6cbb7a089a68a59008bd19d6f36fe88667d2a6aead53246e3488b378d795",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationController.java",
+      "expected": "125063244c9c6ac88e3963e030a3c0de85d6b4013716d65947e61291a30187cf",
+      "actual": "125063244c9c6ac88e3963e030a3c0de85d6b4013716d65947e61291a30187cf",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "expected": "655a7679b75e0268fecd5eb26f42a672afd77db36b0148e72930d0f44ae7232e",
+      "actual": "655a7679b75e0268fecd5eb26f42a672afd77db36b0148e72930d0f44ae7232e",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java",
+      "expected": "00cb3006ee0b505390ed23b0fb3ccc09b9169bd67ff1697523dd408edd51a42e",
+      "actual": "00cb3006ee0b505390ed23b0fb3ccc09b9169bd67ff1697523dd408edd51a42e",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayPins.java",
+      "expected": "da4dcec91b65cc4d44e0212c06632b6c90c7199b5297c93fcaaac0aa022212fa",
+      "actual": "da4dcec91b65cc4d44e0212c06632b6c90c7199b5297c93fcaaac0aa022212fa",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+      "expected": "c058bfc2a9b43ddc933db1296be8a9af0211cf82b2fbe0aefb0fc0efa8bbf0f7",
+      "actual": "c058bfc2a9b43ddc933db1296be8a9af0211cf82b2fbe0aefb0fc0efa8bbf0f7",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceSnapshotRepository.java",
+      "expected": "8d87928ce342c600189d77baae2c604947e9a086608fdb182e06b2827d1800f5",
+      "actual": "8d87928ce342c600189d77baae2c604947e9a086608fdb182e06b2827d1800f5",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java",
+      "expected": "bedf413de95924e0b69b7f59927b17210d4a2c78daca54cdfd2bee6b51e2315f",
+      "actual": "bedf413de95924e0b69b7f59927b17210d4a2c78daca54cdfd2bee6b51e2315f",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyService.java",
+      "expected": "0f5e4a3b1ba0769338c1a8433edf9ce07da01af919793b7b4e4f102839578452",
+      "actual": "0f5e4a3b1ba0769338c1a8433edf9ce07da01af919793b7b4e4f102839578452",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioVaultConfiguration.java",
+      "expected": "747ce5cb7db678a0badc19592e8c78c5f83e673ac71ee7479fc632ff66620e80",
+      "actual": "747ce5cb7db678a0badc19592e8c78c5f83e673ac71ee7479fc632ff66620e80",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsService.java",
+      "expected": "2178e6099b492978166c38b25a0b3893caf966bc070631d0c8eee1e8fc36de0f",
+      "actual": "2178e6099b492978166c38b25a0b3893caf966bc070631d0c8eee1e8fc36de0f",
+      "unchanged": true
+    },
+    {
+      "file": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleController.java",
+      "expected": "16740822336d9e02e46d1df585953067f0a06e663cd66bc987c06f9a15e0c6d5",
+      "actual": "16740822336d9e02e46d1df585953067f0a06e663cd66bc987c06f9a15e0c6d5",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/components/providers/realStudioStartup.test.ts",
+      "expected": "455e152297897987705954905fa450e1e2630065a0b9068eda0ac895ad797ac5",
+      "actual": "455e152297897987705954905fa450e1e2630065a0b9068eda0ac895ad797ac5",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/main.tsx",
+      "expected": "4aafc58c59aa1cb03b0bcfa2c39f33cb1b10dd5898b13b5873b54c4d90984c3c",
+      "actual": "4aafc58c59aa1cb03b0bcfa2c39f33cb1b10dd5898b13b5873b54c4d90984c3c",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/bootstrap.tsx",
+      "expected": "c22b7be8b1e5724616fe8ff1a92f1129894ec11aa3f8dcf8823a226459a60230",
+      "actual": "c22b7be8b1e5724616fe8ff1a92f1129894ec11aa3f8dcf8823a226459a60230",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/vite.config.ts",
+      "expected": "edbe5f18d8c104b57d88424a074afbdd36450fb2f6589f6203186ee334241212",
+      "actual": "edbe5f18d8c104b57d88424a074afbdd36450fb2f6589f6203186ee334241212",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/package.json",
+      "expected": "c8485306473e0b494c3f73f0f8817592410d4a5f5912b4ade6b0b3dc7eddd07d",
+      "actual": "c8485306473e0b494c3f73f0f8817592410d4a5f5912b4ade6b0b3dc7eddd07d",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/services/api/apiClient.ts",
+      "expected": "06659b78e595366a257801faa585cb02a7c974c18f3d23405a72fb66fb339c68",
+      "actual": "06659b78e595366a257801faa585cb02a7c974c18f3d23405a72fb66fb339c68",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/services/api/studioAuthoringTransport.ts",
+      "expected": "1b72681a10af99e8abffabdc6df5664a67d19eb369ce881fca61b9eefb90e9d0",
+      "actual": "1b72681a10af99e8abffabdc6df5664a67d19eb369ce881fca61b9eefb90e9d0",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/services/api/secretsApi.ts",
+      "expected": "21de78bee042d12c48539d3b9c067acb537084c4f867a0fc223824eec2bf2611",
+      "actual": "21de78bee042d12c48539d3b9c067acb537084c4f867a0fc223824eec2bf2611",
+      "unchanged": true
+    },
+    {
+      "file": "frontend/src/utils/config/studioCapabilities.ts",
+      "expected": "9e299300575105b1f1182aec0788f9b049c25b3e48822bc0363c4b23ceb51456",
+      "actual": "9e299300575105b1f1182aec0788f9b049c25b3e48822bc0363c4b23ceb51456",
+      "unchanged": true
+    },
+    {
+      "file": "docs/runbooks/studio-guided-authoring.md",
+      "expected": "53aee1dea748e110391e1499cc9b9c29ca6dc90d7eaae8075f81150b5c7a0773",
+      "actual": "53aee1dea748e110391e1499cc9b9c29ca6dc90d7eaae8075f81150b5c7a0773",
+      "unchanged": true
+    }
+  ],
+  "sourceSnapshotDriftMeaning": "Active015C-int production inputs are provisional for008; post015 rebaseline remains mandatory, never credit historical hashes as current.",
+  "schemaCases": [
+    {
+      "name": "capability-available-exact-context",
+      "definition": "StudioCapabilities",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "capability-off-context-unavailable",
+      "definition": "StudioCapabilities",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "capability-readable-without-execute",
+      "definition": "StudioCapabilities",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "capability-rejects-private-extra-value",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "capability-rejects-private-extra-provider",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "capability-rejects-private-extra-token",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "capability-rejects-private-extra-policy",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "capability-rejects-private-extra-csiId",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "context-required-schemaVersion",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "context-required-testId",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "context-required-sourceRevision",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "context-required-configurationRevision",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "context-required-environmentId",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "context-required-applicationId",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "context-required-versions",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "context-rejects-unsafe-number-revision",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "context-rejects-secret-value",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "context-unavailable-cannot-carry-context",
+      "definition": "StudioCapabilities",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "active-progress-exact-public-shape",
+      "definition": "PublicProgress",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "terminal-progress-no-active-step",
+      "definition": "PublicProgress",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "progress-rejects-zero-based-display-number",
+      "definition": "PublicProgress",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "progress-rejects-private-extra-value",
+      "definition": "PublicProgress",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "progress-rejects-private-extra-locator",
+      "definition": "PublicProgress",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "progress-rejects-private-extra-observation",
+      "definition": "PublicProgress",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "progress-rejects-private-extra-modelResponse",
+      "definition": "PublicProgress",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "failed-unattempted-explanation-shape",
+      "definition": "PublicExplanation",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "actual-kind-vocabulary-navigate",
+      "definition": "PublicExplanation",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "kind-rejects-fabricated-label-navigate",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "actual-kind-vocabulary-click",
+      "definition": "PublicExplanation",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "kind-rejects-fabricated-label-click",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "actual-kind-vocabulary-fill",
+      "definition": "PublicExplanation",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "kind-rejects-fabricated-label-fill",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "actual-kind-vocabulary-press",
+      "definition": "PublicExplanation",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "kind-rejects-fabricated-label-press",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "actual-kind-vocabulary-check",
+      "definition": "PublicExplanation",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "kind-rejects-fabricated-label-check",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "actual-kind-vocabulary-uncheck",
+      "definition": "PublicExplanation",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "kind-rejects-fabricated-label-uncheck",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "actual-kind-vocabulary-hover",
+      "definition": "PublicExplanation",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "kind-rejects-fabricated-label-hover",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "actual-kind-vocabulary-selectOption",
+      "definition": "PublicExplanation",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "kind-rejects-fabricated-label-selectOption",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "actual-kind-vocabulary-read",
+      "definition": "PublicExplanation",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "kind-rejects-fabricated-label-read",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "actual-kind-vocabulary-assert",
+      "definition": "PublicExplanation",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "kind-rejects-fabricated-label-assert",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "spent-and-fresh-attempts-distinct",
+      "definition": "PublicExplanation",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "third-attempt-refused",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "explanation-rejects-private-extra-value",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "explanation-rejects-private-extra-operation",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "explanation-rejects-private-extra-proposal",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "explanation-rejects-private-extra-locator",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "explanation-rejects-private-extra-url",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "explanation-rejects-private-extra-node",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "explanation-rejects-private-extra-policyReason",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "name": "reference-flow-exact-identities",
+      "definition": "PublicExplanation",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "reference-flow-rejects-value",
+      "definition": "PublicExplanation",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    }
+  ],
+  "counts": {
+    "schemaCases": 57,
+    "originalAcRows": 9,
+    "inheritedRows": 17,
+    "deltaCases": 16
+  },
+  "errors": [],
+  "status": "PASS",
+  "applicationTestsExecuted": 0,
+  "databaseCommandsExecuted": 0,
+  "browserCommandsExecuted": 0,
+  "buildsExecuted": 0
+}

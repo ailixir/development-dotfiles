@@ -1,0 +1,389 @@
+{
+  "schema": "fresh-owner-fault-sink-four-findings-source-resolution/1",
+  "reviewMode": "FRESH_INDEPENDENT_SOURCE_ONLY_EXACT_D18_SRC01_04",
+  "disposition": "BLOCKED_SOURCE",
+  "decision": "D18-SRC-01 and D18-SRC-03 are resolved in the exact authored c532 source under the parent-approved ROOT support amendment. D18-SRC-02 and D18-SRC-04 retain specific source gaps. No release of actual D18 producer tests or runtime PASS is granted.",
+  "sourceBindings": {
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-fault-sink-repair-authored-freeze/GuidedServiceTransportFaultIT.java": "c5323525f1d3a23ce7c3697073921290d0d7fa42a6fa468bfd4d50d1d92dd2ee",
+    "docs/qa/evidence/STUDIO-OBS-007/d-fault-sink-four-findings-repair/result.json": "59c89c98bd6caaff4eb297164e54d6dfeddbf499a70c35cd0053410729bd7b58",
+    "docs/qa/evidence/STUDIO-OBS-007/d-fault-sink-four-findings-repair/before.java": "46ca7dae139ef53a794193aa73295fa3968a83b2b527ad9c84e408a49f1f737f",
+    "docs/qa/evidence/STUDIO-OBS-007/d-fault-sink-four-findings-repair/after.java": "c5323525f1d3a23ce7c3697073921290d0d7fa42a6fa468bfd4d50d1d92dd2ee",
+    "docs/qa/evidence/STUDIO-OBS-007/d-fault-sink-four-findings-repair/repair.patch": "db255717b50be1234be6b1e0a6a000e5da33b2db9e7e15ea1c3f6e87629d7cab",
+    "docs/qa/evidence/STUDIO-OBS-007/d-fault-sink-four-findings-repair/preservation.json": "03f5784933cd03a4a58ae30fe6427c2460a7fd7d36379bf2ec22a95ed1832e2d",
+    "docs/qa/evidence/STUDIO-OBS-007/d-fault-sink-four-findings-repair/preauthor-scope.json": "38a3cc0cb8ecdfa2f6a7bd8b853d4f28a4661db84fd32664b75dfaf7085bad4b",
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-fault-sink-eighteen-source-resolution.json": "d18ef403b123a9021ef55cb8468fbae4384f11320db030ff6ab0fa36daac4774",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-root-trace-support-scope-amendment-intent.txt": "45b52072e8b410efb012b562dd1696541a413143115ec05f52e9bb629bbae55a",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-root-trace-support-scope-amendment-context.txt": "d3779c8ef24cf11643847ad4f533fed2c597b770cdda982273fafb1f25143cd7"
+  },
+  "scopeAuthority": {
+    "parent": "APPROVED_AS_EXPLICIT_USER_AUTHORITY",
+    "exactAmendmentIntent": ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-root-trace-support-scope-amendment-intent.txt",
+    "exactAmendmentContext": ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-root-trace-support-scope-amendment-context.txt",
+    "preauthorCheckpoint": "docs/qa/evidence/STUDIO-OBS-007/d-fault-sink-four-findings-repair/preauthor-scope.json",
+    "ROOT": "Applicable real cases require positive actual original-flow ROOT-routed non-marker RAW unique/delivery/field bytes and original-encoder complete JSON non-marker frames/bytes on EACH console. Quiet required ROOT, drop, overflow, unsupported route or drift fails.",
+    "APP": "TRACE and nonsensitive probes are REGISTRATION_SUPPORT_ONLY; zero actual APP is NO_PRODUCTION_UNEXERCISED with no absence/privacy/redactor credit. Actual APP events remain captured and scanned.",
+    "synthetic": "SUPPORT_ONLY, excluded from actual-production requirements.",
+    "globalActualCoreAPPAllC5C6": "OPEN",
+    "fullP6": false,
+    "all19": false
+  },
+  "findings": [
+    {
+      "id": "D18-SRC-01",
+      "status": "RESOLVED_SOURCE_ONLY",
+      "runtime": "UNRUN",
+      "lines": [
+        593,
+        599,
+        604,
+        611,
+        620,
+        623,
+        630,
+        661,
+        851,
+        855,
+        862,
+        868,
+        875,
+        889,
+        931,
+        944,
+        960,
+        981,
+        1001,
+        1193,
+        1204,
+        1213,
+        1221
+      ],
+      "sourceFacts": [
+        "RAW_IDENTITIES uses ILoggingEvent object identity; duplicate additive callbacks increment delivery counters without rescanning or incrementing unique non-marker counts. RAW_CURRENT attributes observed RAW field bytes to the same owner. Marker identity is excluded from actual production.",
+        "Every productionRequired real case requires positive rootRawUnique/rootRawDeliveries/rootRawBytes. Every original console independently requires positive complete parsed non-marker frames and bytes; counts are not summed to prove coverage.",
+        "QuarantineBytes records actual original-encoder writes with case ownership. countsRange parses complete newline-delimited JSON with textual logger/message, distinguishes markers and APP namespace and fails incomplete/unsupported frames. No new encoder is installed.",
+        "probeRoutes checks required marker delivery per console and fails any original console with no marker. APP zero is explicitly NO_PRODUCTION_UNEXERCISED; synthetic test is support only.",
+        "Exact original ConsoleAppender, active original composite encoder, filter/stream/state checks and loaded artifact digests remain; original appenders/encoders are not restarted. Only the supplementary RAW collector is started/stopped."
+      ],
+      "limits": "Source mechanics resolved; actual ROOT Spring/JDBC event production, complete framing, multiplicity and positive per-console delivery remain UNRUN."
+    },
+    {
+      "id": "D18-SRC-02",
+      "status": "BLOCKED_SOURCE",
+      "runtime": "UNRUN",
+      "lines": [
+        318,
+        772,
+        773,
+        1126,
+        1147,
+        1150,
+        1160,
+        1165,
+        1178,
+        1180,
+        1181,
+        1182,
+        1183,
+        1193,
+        1197,
+        1224,
+        1230,
+        4337,
+        4338
+      ],
+      "resolvedParts": [
+        "Actual provider read calls FaultCase.release before returning VaultEntry. preRelease verifies route identities, probes consoles, inspects every status and checks sticky FAILURES. Status prefix object identity rejects equal-size turnover; all ERROR/child entries fail. closedFault increments the durable failure ledger. No new provider/service/SQL/auth operations are added."
+      ],
+      "finding": "The final preRelease verification can still register a new route after marker/status preflight, and the registration allowance is based on the current case releases rather than a class-owned first-release boundary.",
+      "sourceFacts": [
+        "FaultCase.release passes hasRelease() to preRelease. On a first return in the current case this is false. beginCase also always calls preRelease(false).",
+        "preRelease runs verifyRoutes(afterRelease), probeRoutes(), inspectStatus(), then verifyRoutes(afterRelease). When afterRelease is false, the final verifyRoutes registers any newly existing inherited logger and attaches raw, after the last probe and status inspection. It can then return without proving that newly registered route delivery or inspecting status generated by the final verification.",
+        "A new logger outside ROOT/APP with no original attachment is not selected by the probeRoutes predicate at all. Registering it therefore does not independently prove its own marker delivery.",
+        "No class-wide sticky first-release latch closes registration once any case has returned an actual provider value; a later case begins with false and can register a late route."
+      ],
+      "consequence": "The source does not guarantee EACH supported route is already registered/probed/status-checked immediately before actual return, or restrict new inherited logger acceptance to the approved pre-first-release phase.",
+      "requiredCorrection": "Make the terminal pre-return route check reject newly discovered identities or repeat bounded route/delivery/status preflight until a stable already-probed inventory is established. Apply the approved first-release boundary durably across the class and prove each applicable inherited route, preserving the same supported quarantine and adding no product operations."
+    },
+    {
+      "id": "D18-SRC-03",
+      "status": "RESOLVED_SOURCE_ONLY",
+      "runtime": "UNRUN",
+      "lines": [
+        845,
+        846,
+        849,
+        4419,
+        4420,
+        4422,
+        4423,
+        4427,
+        4539,
+        4540,
+        4542,
+        4546,
+        4548,
+        4551,
+        4556,
+        4564,
+        4566,
+        4571,
+        4577,
+        4583,
+        4590,
+        274
+      ],
+      "sourceFacts": [
+        "The actual peer ledger and ThreadLocal are registered before the HttpsExchange cast, certificate/auth checks, request reading and Scenario lookup. Prelookup errors are retained transiently and scanned through peerError.",
+        "Original callback failure remains the same object assigned to Scenario.peerFailure; Scenario.failure, outcome and status are not replaced by observation. Original fallback header forwarding remains once and IOException/unchecked header failures are observed.",
+        "Nested finally independently performs original close, exit accounting and ThreadLocal removal even when close throws. An unsafe exiting callback receives only a fresh fixed enum/count AssertionError(String), without original cause or suppressed content.",
+        "Peer counter zero is not the closure oracle: drain joins actual peer threads and resourcesComplete also requires non-live owned threads, matching actual entry/exit counts and owner operation completion."
+      ],
+      "limits": "Actual error paths/thread completion remain UNRUN. Catastrophic JVM/allocation failures and immutable original Throwable storage are outside writable-copy erasure guarantees."
+    },
+    {
+      "id": "D18-SRC-04",
+      "status": "BLOCKED_SOURCE",
+      "runtime": "UNRUN",
+      "lines": [
+        432,
+        435,
+        436,
+        438,
+        441,
+        444,
+        447,
+        449,
+        450,
+        453,
+        456,
+        459,
+        685,
+        695,
+        699,
+        711,
+        730,
+        735,
+        740,
+        1240,
+        1250,
+        1251,
+        1252,
+        1257,
+        1260,
+        1261
+      ],
+      "resolvedParts": [
+        "scanAll independently handles bounded variants, each negative captured field and each original console, captures scan failures and continues remaining scans. terminalScan versions capture/release/encoded-write tails and requires a stable complete pass, otherwise records unavailability and fails.",
+        "Class finally inspects status and terminal-scans after restore failures and before wipe. Disposal requires closure, restoration, complete final scans and zero sticky failures, so restoration-success alone no longer grants wipe. Retention failures are captured/rescanned and the ledger is retained."
+      ],
+      "finding": "Partial restoration or a post-restoration status/scan failure leaves restored original console streams exposed until after another status inspection and terminal scan; re-quarantine is not the immediate failure boundary.",
+      "sourceFacts": [
+        "restore swaps each console back to its original stream and only then validates it. A subsequent route/validation failure can leave previously restored consoles on original streams while the method throws.",
+        "finishClass captures the restoration failure, enters finally, calls inspectStatus and terminalScan, and only afterward calls retainQuarantine when restored/scans/failures are unsafe. There is an explicit unquarantined interval during terminal failure observation/scanning.",
+        "If validation after a swap fails, retainQuarantine repeats route.validate(false) before the quarantine setter. That validation can fail again and skip the setter, leaving the original output installed while only counting/retaining the failure."
+      ],
+      "consequence": "The scan-before-wipe fix is present, but the required keep/reinstall supported quarantine with no unsafe console window is not guaranteed on the restoration failure paths. This is a source control-flow gap; no actual leak or runtime failure is asserted.",
+      "requiredCorrection": "On a restore/post-restore failure, reestablish every still-supported quarantine immediately before further status/error scanning, including consoles already restored earlier in the loop. Do not let a failing pre-swap validation leave a supported original output installed. Keep the independent stable final scans and retain all evidence whenever closure, retention or scans are unsafe; preserve public supported setters and original encoders/states without restart."
+    }
+  ],
+  "preservation": {
+    "status": "INDEPENDENT_STATIC_PASS",
+    "authoredAfterEqualsFrozen": true,
+    "repairPatchExactlyEqualsBeforeAfterDiff": true,
+    "reviewedCaseCount": 18,
+    "reviewedJavaTestMethodCount": 10,
+    "originalCaseCount": 17,
+    "originalJavaTestMethodCount": 9,
+    "allReviewed18BodiesByteEqual46ca": true,
+    "allOriginal17ReconstructExactly": true,
+    "sevenOriginalBodiesByteIdentical": true,
+    "twoOriginalBodiesOnlyApprovedObserverInsertions": true,
+    "newOrRemovedTests": 0,
+    "newProductServiceProviderSQLAuthOperationsInRepair": false,
+    "methods": [
+      {
+        "method": "syntheticFaultSinkScannerDetectsIndependentEncodedControls",
+        "reviewed46caBodySha256": "743d6b26d2d7f3e36685c8b7fd69b0f1c114c46d4340b411ff54c8f63a4bf99d",
+        "authoredC532BodySha256": "743d6b26d2d7f3e36685c8b7fd69b0f1c114c46d4340b411ff54c8f63a4bf99d",
+        "byteEqual46ca": true
+      },
+      {
+        "method": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery",
+        "reviewed46caBodySha256": "311dea6a992000acc2df25633186abba2759d02fc5bd6f7a06753cb1fef7a818",
+        "authoredC532BodySha256": "311dea6a992000acc2df25633186abba2759d02fc5bd6f7a06753cb1fef7a818",
+        "byteEqual46ca": true,
+        "originalBodySha256": "18f40ad026ae91888264c18651c1d1c752a97fc416c4366a3a8046338808c8b7",
+        "removedOnlyApprovedObserverLines": 4,
+        "originalReconstructedExactly": true
+      },
+      {
+        "method": "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit",
+        "reviewed46caBodySha256": "8d5a63c4613242091f0365c9228ef0130b84550d6fbcb28c30e565c9c8e0a45f",
+        "authoredC532BodySha256": "8d5a63c4613242091f0365c9228ef0130b84550d6fbcb28c30e565c9c8e0a45f",
+        "byteEqual46ca": true,
+        "originalBodySha256": "37bb6aa7d05330d1aeb6a754327435b427d960f89b504ccde5b4674db4d2dd4c",
+        "removedOnlyApprovedObserverLines": 3,
+        "originalReconstructedExactly": true
+      },
+      {
+        "method": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased",
+        "reviewed46caBodySha256": "24a929c6e1db1bc76e21c149d1b168551eb643b9d47dc44cd3e6765ccbf8ef9e",
+        "authoredC532BodySha256": "24a929c6e1db1bc76e21c149d1b168551eb643b9d47dc44cd3e6765ccbf8ef9e",
+        "byteEqual46ca": true,
+        "originalBodySha256": "24a929c6e1db1bc76e21c149d1b168551eb643b9d47dc44cd3e6765ccbf8ef9e",
+        "removedOnlyApprovedObserverLines": 0,
+        "originalReconstructedExactly": true
+      },
+      {
+        "method": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+        "reviewed46caBodySha256": "e464dc852bdb6c2620362f7491bec75ea9141c2925a2902d1752965c50213511",
+        "authoredC532BodySha256": "e464dc852bdb6c2620362f7491bec75ea9141c2925a2902d1752965c50213511",
+        "byteEqual46ca": true,
+        "originalBodySha256": "e464dc852bdb6c2620362f7491bec75ea9141c2925a2902d1752965c50213511",
+        "removedOnlyApprovedObserverLines": 0,
+        "originalReconstructedExactly": true
+      },
+      {
+        "method": "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent",
+        "reviewed46caBodySha256": "39efe2da2c783fffe1bc42f0ef1f17d60c99dd0ba4810ff37f1e613af5b7eea7",
+        "authoredC532BodySha256": "39efe2da2c783fffe1bc42f0ef1f17d60c99dd0ba4810ff37f1e613af5b7eea7",
+        "byteEqual46ca": true,
+        "originalBodySha256": "39efe2da2c783fffe1bc42f0ef1f17d60c99dd0ba4810ff37f1e613af5b7eea7",
+        "removedOnlyApprovedObserverLines": 0,
+        "originalReconstructedExactly": true
+      },
+      {
+        "method": "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose",
+        "reviewed46caBodySha256": "802a300347c78d99009521dba25587f9be1a3b504e80531a004473176abe9b2e",
+        "authoredC532BodySha256": "802a300347c78d99009521dba25587f9be1a3b504e80531a004473176abe9b2e",
+        "byteEqual46ca": true,
+        "originalBodySha256": "802a300347c78d99009521dba25587f9be1a3b504e80531a004473176abe9b2e",
+        "removedOnlyApprovedObserverLines": 0,
+        "originalReconstructedExactly": true
+      },
+      {
+        "method": "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose",
+        "reviewed46caBodySha256": "92640760fa6664186c0278511db1db509ab0e31c9f949531f44287e0c6027dce",
+        "authoredC532BodySha256": "92640760fa6664186c0278511db1db509ab0e31c9f949531f44287e0c6027dce",
+        "byteEqual46ca": true,
+        "originalBodySha256": "92640760fa6664186c0278511db1db509ab0e31c9f949531f44287e0c6027dce",
+        "removedOnlyApprovedObserverLines": 0,
+        "originalReconstructedExactly": true
+      },
+      {
+        "method": "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation",
+        "reviewed46caBodySha256": "73386ec024b9c7b1db12c5d663000e12f13ad843ce533b2e74039bcdc744c2f0",
+        "authoredC532BodySha256": "73386ec024b9c7b1db12c5d663000e12f13ad843ce533b2e74039bcdc744c2f0",
+        "byteEqual46ca": true,
+        "originalBodySha256": "73386ec024b9c7b1db12c5d663000e12f13ad843ce533b2e74039bcdc744c2f0",
+        "removedOnlyApprovedObserverLines": 0,
+        "originalReconstructedExactly": true
+      },
+      {
+        "method": "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose",
+        "reviewed46caBodySha256": "4af87a84dea4fb9972d3bdd600d06e523c4148013f7665b5c8f7eff69259f4cd",
+        "authoredC532BodySha256": "4af87a84dea4fb9972d3bdd600d06e523c4148013f7665b5c8f7eff69259f4cd",
+        "byteEqual46ca": true,
+        "originalBodySha256": "4af87a84dea4fb9972d3bdd600d06e523c4148013f7665b5c8f7eff69259f4cd",
+        "removedOnlyApprovedObserverLines": 0,
+        "originalReconstructedExactly": true
+      }
+    ]
+  },
+  "baselineArchive": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-publication23-transport17-current/sources.zip",
+    "sha256": "70d97415eb18ca41a8f307be59d2b44b2a81ec58d56e33088ec8ce5371dd0e8b",
+    "original17Member": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "original17MemberSha256": "f3862d94539e8a94f31653f0ffeeda493f6c181310d509954d65bb289648720c",
+    "selectedSixServices": [
+      {
+        "immutableArchiveMember": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+        "sha256": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+        "loggerCallsPresent": false
+      },
+      {
+        "immutableArchiveMember": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+        "sha256": "ceeec5a8ef899dced36c556b44ce2e1099fefe65084b7ffc4e3b0f69c4bc68dd",
+        "loggerCallsPresent": false
+      },
+      {
+        "immutableArchiveMember": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+        "sha256": "66f3665f63de906f5b1a4285aaf904b8527a3231066c28be7ee5c3f713a4bd02",
+        "loggerCallsPresent": false
+      },
+      {
+        "immutableArchiveMember": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+        "sha256": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d",
+        "loggerCallsPresent": false
+      },
+      {
+        "immutableArchiveMember": "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+        "sha256": "88ddd68e15fba59505e2856305f91fb5acfdc17c00af64b329e2a9bb01a8a52a",
+        "loggerCallsPresent": false
+      },
+      {
+        "immutableArchiveMember": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+        "sha256": "cb3329c3f290e7a409c3c2da98f890da2cf070e8c8102c4d1683f38abbc22ab2",
+        "loggerCallsPresent": false
+      }
+    ],
+    "authority": "Immutable source text only; no historical runtime credit."
+  },
+  "producerSinkLimits": {
+    "controlled503": "Exactly two complete503 cases retain intentional already-released source-positive support. Source snapshots are excluded from negative-target scans; no backend-redactor or client-receipt claim.",
+    "directJSON": "Already-returned typed JsonNode fields are DIRECT_OBJECT_REPRESENTATION; never emitted HTTP.",
+    "database": "Already-returned JDBC Strings/typed scalars only; never emitted HTTP or physical PG protocol bytes; no extra SQL.",
+    "callback": "Existing decoded HttpResponse.body String re-encoded UTF8, not exact original wire octets/charset.",
+    "unobservedReturns": "Unobserved and uncredited.",
+    "logging": "Original production encoder only; no new service logging calls or API/encoder additions.",
+    "scanScope": "Finite supported equality representations only, no heap-wide or arbitrary-transform claim."
+  },
+  "independence": {
+    "sourceAuthorship": false,
+    "exactImmutableAuthoredSourceReviewed": true,
+    "liveJavaRead": false,
+    "formatted6d0aRead": false,
+    "otherSourceResolutionReportsRead": false,
+    "allowedPreviousFourFindingReportRead": true,
+    "modelsStarted": false,
+    "subagentsSpawned": false,
+    "genericFullP6Replan": false
+  },
+  "execution": {
+    "runtime": "UNRUN",
+    "tests": "UNRUN",
+    "SQL": "UNRUN",
+    "Node": "UNRUN",
+    "Gradle": "UNRUN",
+    "build": "UNRUN",
+    "compiler": "UNRUN",
+    "formatter": "UNRUN",
+    "browser": "UNRUN",
+    "Docker": "UNRUN",
+    "native": "UNRUN"
+  },
+  "credit": {
+    "scopedSourcePASS": false,
+    "runtimePASS": false,
+    "all18Runtime": "UNRUN",
+    "ROOTSupport": "SOURCE_MECHANISMS_PRESENT_RUNTIME_UNRUN_NOT_FULL_PASS",
+    "APP": "REGISTRATION_SUPPORT_ONLY_NO_PRODUCTION_UNEXERCISED_NO_ABSENCE_CREDIT",
+    "globalActualCoreAPPAllC5C6": "OPEN",
+    "all19": false,
+    "fullP6": false,
+    "Core": false,
+    "enterpriseCore": false,
+    "image": false,
+    "historicalResults": "User context only, not imported into this verdict."
+  },
+  "writeScope": {
+    "soleWrittenArtifact": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-fault-sink-four-findings-source-resolution.json",
+    "sourceEdits": false,
+    "otherReportsWritten": false
+  },
+  "limits": [
+    "Review confined to the exact four prior issues and parent-approved amendment. No general fullP6 redesign or runtime authorization.",
+    "Static Python only compared source/artifact digests, immutable patch/method bodies and archive members and wrote this JSON. No Java tests, runtime, SQL, Node, Gradle, compiler, formatter, browser, Docker, models or spawns.",
+    "No actual runtime values, credentials, original Throwable content or value-derived hashes are persisted. Source/artifact hashes and code facts only."
+  ]
+}

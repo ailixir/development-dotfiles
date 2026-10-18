@@ -1,0 +1,303 @@
+{
+  "story": "STUDIO-OBS-015",
+  "artifact": "bridge-migration01",
+  "agent": "Dex-B (@dev)",
+  "date": "2026-10-16",
+  "implements": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w2-window01/aria-bridge-ruling01",
+  "nonCredit": true,
+  "committed": false,
+  "sourceChanged": false,
+  "gradleRun": false,
+  "writesOutsideEvidenceDir": "none in repo; compiles/tool temp files in the session scratchpad only",
+  "patch": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/bridge.patch",
+    "apply": "git apply -p0",
+    "applyCheckLiveTree": "OK",
+    "reverseCheck": "fails (not yet applied)",
+    "roundTripEqualsWorkOut": true,
+    "files": [
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+        "sha256Before": "d48d4f0d9e61ba0c000b7013683858244873980d5fd9a1bb40c66e297d4ffc3f",
+        "sha256After": "a0ab8e7e0196a51bab73f8ab4d91ea4ffff9b7ab7c7f3bdc46523dd851aad8c1",
+        "tests": {
+          "before": 38,
+          "after": 9
+        }
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+        "sha256Before": null,
+        "sha256After": "760e84d0a8d2685817ca74af67fe5e40a96dd6199a0d4dafb385d9292c45acf7",
+        "tests": {
+          "before": 0,
+          "after": 16
+        }
+      }
+    ]
+  },
+  "buildGradleChange": "none required: default test task includes **/*IT.class; only GuidedPublicationReplayIT is partitioned",
+  "checks": {
+    "javac": "JDK 21.0.10 -proc:none -parameters; fresh compile of all live main sources + full test tree; base 0 errors (584 classes), patched 0 errors (587 classes); approximate classpath (newest Gradle-cache jar per artifact)",
+    "googleJavaFormat": "1.22.0 --skip-reflowing-long-strings: both outputs stable (0-line diff); base control not stable at :2759 (fixed by the ruling edit)",
+    "checkstyle": "10.18.1 backend/config/checkstyle: 0 violations both files (base control 0)",
+    "staticGuards": {
+      "G1_forbiddenStoreOrTables": 0,
+      "G2_202AdmissionsKeyedByAssociation": true,
+      "G3_admissionsPostsInIntegrationTest": 0,
+      "G4_providerKindsAssertedAfterEach": true
+    }
+  },
+  "notRun": [
+    "Gradle (any task) incl. ruling 4.6 acceptance 9/9 + 16/16",
+    "runtime of either class",
+    "CodeRabbit",
+    "npm lint/typecheck (no frontend change)",
+    "synapse diagnostics (out of mission scope)"
+  ],
+  "deviations": [
+    "D1 checkstyle names",
+    "D2 bindingId via repository.transaction",
+    "D3 provider fail-fast 500 + PROVIDER_FAULT kind",
+    "D4 dead admit helper removed from old class (guard G3)",
+    "D5 :2759 comment wrapped to 2 lines",
+    "D6 #25 restores captured counter",
+    "D7 #27 unused context local dropped",
+    "D8 #23 input lookup after plannedSession",
+    "D9 dead helpers dropped in new class",
+    "D10 PROVIDER.stop in AfterAll"
+  ],
+  "openPoints": [
+    "O-1 #16 assign probe key 'assignment' vs planner 'translation-assignment' (Aria)",
+    "O-2 first runtime run: record post-bootstrap state + studio-runner/dist digest",
+    "O-3 reserve latency inside #2 lease wait [I]"
+  ],
+  "inputs": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w2-window01/aria-bridge-ruling01/ruling.md",
+      "sha256": "353d896f94275ddf0642ef529add5257c03c3907e293c4a2cbeb31fb562817e5"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w2-window01/aria-bridge-ruling01/ruling.json",
+      "sha256": "0c431939dd8cf25cb2fb43e33a6165c2c4f39e753297b6a0746116cfd2bb8ed4"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "sha256": "d48d4f0d9e61ba0c000b7013683858244873980d5fd9a1bb40c66e297d4ffc3f"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "sha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46"
+    },
+    {
+      "path": "backend/build.gradle.kts",
+      "sha256": "6a2aba4b76e5b01365b67848539951b83a03f75c17b90b6a61c1650923baaa97"
+    },
+    {
+      "path": "backend/config/checkstyle/checkstyle.xml",
+      "sha256": "f7afefc18efb76cff25658a049d76d0f394334d331c9eff9915eebf53365cbed"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/guided-model-response.schema.json",
+      "sha256": "2d986c098548b604d6fe75a3597397eabe325705550a78286e76ae5ae2a176ca"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "78b2fcd52a8d48e5bd28a5f74d6e6eaf966b1f41cd7823029a9e662ce277a6f0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "sha256": "745223f046be477593a8f701a2fc4ed24d29dcfab6d19d32acabb011ed181165"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java",
+      "sha256": "2411f9ac24c1d21db7b43ee22ae91055b3aaefbce7f7652b276d4fc3d21e8b40"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+      "sha256": "d7b56a9e930f01b00e7c2d24fd9bddad146b601cdc89812235f2c1b2c674deeb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java",
+      "sha256": "b3769877088421d7d4690d663efecc35cf016044cc9ee4849fbed74ef722b23f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+      "sha256": "970e028452274874b6e55f15c8e7b2e4b06740405d14529c0222b94f60eb32fe"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java",
+      "sha256": "7a2bce45abe0483ba2f77f5a281a03697115983cf5eac8a8695f2bb5b8f271fd"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java",
+      "sha256": "d3ef363c54561f290c3d9629a7a7f9cdbdafdafd3bd0e1211a08853184ccd3a2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedStepVerifier.java",
+      "sha256": "77cd0b15eeac4a220f785d6f68d960b54dd1104a44cd91a9efb81023a95e732a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuard.java",
+      "sha256": "a74b03e4e54401b1f3ddaf21eefab581fadbd5cef6533620cf88378ed461385d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256": "cb6f3703b4a6be5a28e3e48b74c06feff0ad788847a7ad8106f8fa206025312b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java",
+      "sha256": "83ed8fa26c304d5b2b8d8df9be51681598908c36be27cf0791c20a632f07063b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+      "sha256": "ad8742a8426d757b198883be5fe089eae558e90e02d7b256340e24ac4dbf8fbe"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "d10ec5cbfdecdfba4f8f8dabbeae21008e3d0192f16e6108791182d10d5f3eda"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/bridge.patch",
+      "sha256": "387c9d2d9bc61d042ba4ee39616e63a8517e57053f26eb7fde07e46e475f1f13"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/notes.md",
+      "sha256": "bb2857114f072a82c6cf1a4a447f735c8b5e2072e0a6b1cb28a28d0a698d52f6"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/base/GuidedBridgeIntegrationTest.java",
+      "sha256": "d48d4f0d9e61ba0c000b7013683858244873980d5fd9a1bb40c66e297d4ffc3f"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/actualApplicationReplacementAfterPrepareNeverActsOnReplacement.java.txt",
+      "sha256": "b8b0e4a5beba86b1a45826700217610f492940d943035da2d444e86b512ee5df"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/actualDeferredCommitFailureSendsNothingAndRollsBackConsumption.java.txt",
+      "sha256": "64351c821a442ef33cbd29a929d32043b4478bacd69e4a338cd800f481ff491e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly.java.txt",
+      "sha256": "f3028e4f28fe5f2d21a8121cbc984cfcf8c5a9bad14146ad56be0047c716df8e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation.java.txt",
+      "sha256": "265f1b7f3a9b913aef0c78a535ebebb921412ec947a1629dc6ec9a87dcfa3fc9"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/committedObservationRecoversLostHttpResponseWithoutAnotherCollection.java.txt",
+      "sha256": "0508541642f2351bf499846d2276c661eeed1b2b726e2e6a194710ad2d94cf7f"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission.java.txt",
+      "sha256": "f3d0cb424b235f234afed62dd9265658ecb15639233ff0f6a77f52d043324534"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration.java.txt",
+      "sha256": "da21d86e28beb662abc9c6abe4610d651833135d8ecf7fcf18cda2c9b1b3a2f0"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/concurrentSameAndNewKeysHaveOneRealDispatch.java.txt",
+      "sha256": "1ce11b9977d5b603531022cc2fae63aa9a7854c5d34f8c02006e201855689443"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased.java.txt",
+      "sha256": "ee6b0e483e2c58d5cf1a44e7dc967ede3965d47a7b5f74ee4996ae1fc67fc027"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction.java.txt",
+      "sha256": "1b1251379ad4a46cd56740a18dcdc3b3c0c60dad4751c3073524ac1ecad93aac"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/lateRenewalResponseAfterStopCannotReviveContextOrOwnership.java.txt",
+      "sha256": "d5331486259f41aec516fb1052807ce8e765a8cf800bed1474d870c7deec063e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/nestedRollbackAndLostWinnerNeverManufactureSendAuthority.java.txt",
+      "sha256": "39d8b28be99fa05bc91d1381e3f139add422d14e16ae930ebf26f33cf00e9ebc"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay.java.txt",
+      "sha256": "c97a00769f3150dbb711cedc521319e9c07bf27693324baf8f6d65be553b8fe7"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch.java.txt",
+      "sha256": "cf4e8bc2de0acb086b8e2e556ad9ef19c0ddf812689302d826796891d45c0aa9"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue.java.txt",
+      "sha256": "b02d511ba354b59327dba6f7a6a4f20f355852455ca717a82dea667c0b516791"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/moved/refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation.java.txt",
+      "sha256": "0871c5753f54c86a93bd731802098a5ec8dd58cbde814e46b08b5d4ddb4a21a7"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/out/GuidedBridgeIntegrationTest.java",
+      "sha256": "a0ab8e7e0196a51bab73f8ab4d91ea4ffff9b7ab7c7f3bdc46523dd851aad8c1"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/out/GuidedBridgePlannedIT.java",
+      "sha256": "760e84d0a8d2685817ca74af67fe5e40a96dd6199a0d4dafb385d9292c45acf7"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/src/application.java.txt",
+      "sha256": "9892563c0ef449ecbe0405cfff14529785a36141516015a5dffe78d761b59d31"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/src/beforeeach-add.java.txt",
+      "sha256": "07390cf920d6683d942be6971fe38b3823608d9efdacdf808143cb3b6af7cfc7"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/src/head.java.txt",
+      "sha256": "a21cbfe1bdec9ed5246017b491509fee1817b30fb778cf479ba8abfa84b8859a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/src/helpers.java.txt",
+      "sha256": "84e7eb51bc21e39b83cb653f5c2424c3558395b5c2cf22d8a06ae4158600b3b2"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/src/provider-start.java.txt",
+      "sha256": "6fece832eaad3c4f594cf342280ffe4867afc12097fe33f86ec2a9bf182707e8"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/src/provider.java.txt",
+      "sha256": "c82930b728ea19e62e20a157f91ddff4de58f23b555474f553c0236a9508976d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/src/statics-add.java.txt",
+      "sha256": "2a88216563e40dd623e99dd5655a6167fcd67023bcd02a8b8b24c86a0f500a91"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/src/tail.java.txt",
+      "sha256": "c2659cc4845c9c7553a527ccdfafafc7f40b95a53f584f99530d70f93368c3fb"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/src/tests.java.txt",
+      "sha256": "9bde8f5195e02bbaa264e002c058727461fc71248c6c44a62eeb7d266f0a8213"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/tools/build.py",
+      "sha256": "b017a467bdfc8b8db1e870233d3ff0640dbc4bd08a45ad667500026c0cfc93a6"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/tools/cs.sh",
+      "sha256": "f373494c21d6a9c29ec326503712acb79310984a130ca876c345bc2bab9a7374"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/tools/gjf.sh",
+      "sha256": "3a0b7210511249ef71b621ddce2a3a50a47433db83b426549fd0167e860ccb2c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/tools/javac.sh",
+      "sha256": "632f331aede40c00e08af0fea6c8de180e4df5149db4daff730f91399a60becd"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/bridge-migration01/work/tools/spans.py",
+      "sha256": "f3212640d8b5ff669a00fa8efb738583050243e504b6453fa9b15af7ba7a0bac"
+    }
+  ]
+}

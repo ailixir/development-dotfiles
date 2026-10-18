@@ -1,0 +1,90 @@
+{
+  "storyId": "STUDIO-OBS-007",
+  "reviewType": "independent exact-file read-only static review",
+  "reviewer": "root reviewer; separate from source author B; no delegated agents",
+  "subject": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java",
+    "expectedSha256": "89ced8190462b6916b7b9a4d321f9f8f9181c907e2583c7b61155592b6045941",
+    "observedSha256": "89ced8190462b6916b7b9a4d321f9f8f9181c907e2583c7b61155592b6045941",
+    "exactMatch": true
+  },
+  "verdict": "SCOPED_PASS",
+  "scope": "Static source adequacy of SERVICE/STORE default budget reservation protocol and controlled gateway boundary only.",
+  "findings": [],
+  "checks": [
+    {
+      "topic": "Real default binding and production ceilings",
+      "result": "PASS",
+      "location": "GuidedDefaultModelReservationIT.java:92-94,131-174",
+      "evidence": "EnableConfigurationProperties binds production records in an AnnotationConfigApplicationContext. Only application/environment policy keys are supplied; all three budget keys are asserted absent before binding. Bound values are asserted as output4096, total output32000 and input128000. The production record annotations retain those defaults. No publication fixture import, inheritance or4000 override is present. The separately authorized positive publication fixture is outside this review."
+    },
+    {
+      "topic": "Actual PostgreSQL and authoritative session/store setup",
+      "result": "PASS",
+      "location": "GuidedDefaultModelReservationIT.java:61-62,96-130,160-204,575-692",
+      "evidence": "Testcontainers PostgreSQL15 and Flyway migrations through34 are used with a real datasource and DataSourceTransactionManager. Source, revision identity, user and CSI are persisted; production start, original assignment and worker claim establish fence1/PREPARING. A test-local access adapter reads persisted source and verifies ownership/policy/revisions; it is not the production access adapter. Attempt/reservation/counter/terminal rows are produced through production service/store methods, without direct fabrication, reflection, forced expiry, disabled guards or TRUNCATE."
+    },
+    {
+      "topic": "Seven reservations and eighth refusal",
+      "result": "PASS",
+      "location": "GuidedDefaultModelReservationIT.java:207-215,284-401,404-500",
+      "evidence": "Seven distinct request IDs use genuine SOURCE_PLAN requests from GuidedPromptAssembler and production store state. Under translationTransaction, production preflight precedes attempt insert and reserveModel. The counted controlled gateway checks absence of an active transaction, committed input/output reservation and CALLING row before incrementing sends. Assertions require output28672, proposals7, sends7 and seven settled attempt rows. Complete context/output-contract/schema envelope bytes plus2048 are reserved, and cumulative input headroom is checked before every request including the eighth; input/proposal exhaustion cannot explain output refusal. Eighth preflight returns null to commit FAILED/BUDGET_EXCEEDED, leaves counters/owner/seven rows unchanged, and performs no gateway send."
+    },
+    {
+      "topic": "Duplicate identity and changed ceiling",
+      "result": "PASS",
+      "location": "GuidedDefaultModelReservationIT.java:217-235,364-400,503-529",
+      "evidence": "A duplicate request ID/attempt after settlement returns send=false; the full document/progress snapshot, one attempt and one send remain unchanged. The same ID with output4095 must throw IDEMPOTENCY_CONFLICT and leave persistence unchanged. Stored immutable identity is compared with the returned original identity, output/input ceilings are checked, and the persisted digest is recomputed from all seven request identity fields. Production reserveAttempt compares that digest before returning a duplicate."
+    },
+    {
+      "topic": "Known low usage and unknown usage retain ceilings",
+      "result": "PASS",
+      "location": "GuidedDefaultModelReservationIT.java:284-322,464-500",
+      "evidence": "Controlled BUSY responses carry known20/40 usage and finish as REJECTED; controlled TIMEOUT responses carry null usage and finish as UNKNOWN_CALL. Both paths call production settleModel and finishAttempt, then require cumulative output28672 and refusal of the eighth. Production settlement adds only excess beyond reserved ceilings and removes reservation entries without refunding low/unknown usage. No successful plans/actions are manufactured."
+    },
+    {
+      "topic": "Rollback and late usage cannot revive terminal authority",
+      "result": "PASS",
+      "location": "GuidedDefaultModelReservationIT.java:237-281",
+      "evidence": "An outer repository transaction throws after reserve, testing rollback of the nested participating transaction. Assertions require zero attempts, proposals, input/output counters, reservations and sends. After seven unknown calls and committed budget stop, controlled late20/40 receipts are recorded through store.recordLateUsage under a session lock. Production reconcileLateModelUsage returns false; FAILED, BUDGET_EXCEEDED, owner and counters remain unchanged and another reservation throws PUBLICATION_CONFLICT. Late usage is below the reserved ceilings; excess late charging and reconciliation receipt completeness are not asserted by this case."
+    },
+    {
+      "topic": "Evidence boundaries and numerical witnesses",
+      "result": "PASS",
+      "location": "GuidedDefaultModelReservationIT.java:55-59,420-478,561-566",
+      "evidence": "The gateway is a counted GuidedLlmGatewayClient lambda invoked explicitly by the test helper after production claimSend commits. Its count witnesses that controlled invocation, not an SDK HTTP request. Numeric witnesses use local ordinals and numerical/boolean leaves and are checked in memory; they are not emitted runtime artifacts. Distinct requests exercise the exposed service/store protocol and do not establish an orchestrator retry schedule."
+    }
+  ],
+  "productionMethodsInspected": [
+    "GuidedSessionProperties configuration binding annotations and snapshot",
+    "GuidedTranslationProperties configuration binding annotations and validation",
+    "GuidedSessionRepository.transaction, lock, save and duplicate",
+    "GuidedSessionService.translationTransaction, modelReservationFitsLocked, reserveModel, settleModel, reconcileLateModelUsage, reconcileLateModelUsageLocked, internal, owner, active and stop",
+    "GuidedTranslationStore.hasAttempt, reserveAttempt, claimSend, currentAttempt, finishAttempt, recordLateUsage and lateUsageAdjustments",
+    "GuidedPromptAssembler.assemble and narrowly related schema/provenance projection",
+    "V32 model attempt constraints, live-attempt unique index, usage foreign key and immutable guards, included by Flyway target34"
+  ],
+  "limitations": [
+    "All four runtime cases remain unrun. Static review establishes source adequacy, not compilation or passing PostgreSQL execution.",
+    "No orchestrator retry policy, SDK HTTP, browser, Core, concurrent race or above-ceiling late-usage coverage is claimed.",
+    "The Spring context tests absent-key production record defaults; it does not load the complete application configuration or production dependency graph."
+  ],
+  "execution": {
+    "buildsRun": false,
+    "testsRun": false,
+    "runtimeStarted": false,
+    "processInspectionOrControlPerformed": false,
+    "sourceChanged": false,
+    "otherAgentsUsed": false,
+    "modelOverridesUsed": false,
+    "onlyWrittenPath": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-default-reservation-review.json"
+  },
+  "authority": {
+    "storyStatusRemains": "InProgress",
+    "all19RemainFalse": true,
+    "storyApproved": false,
+    "qaApproved": false,
+    "lifecycleTransitionPerformed": false,
+    "runtimeApprovalOrExecutionClaimed": false
+  }
+}

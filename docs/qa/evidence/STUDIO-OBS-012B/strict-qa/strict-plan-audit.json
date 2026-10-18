@@ -1,0 +1,748 @@
+{
+  "schema": 1,
+  "story": "STUDIO-OBS-012B",
+  "reviewer": "Quinn independent strict-plan-audit",
+  "capturedAt": "2026-10-14T23:08:56.800821+00:00",
+  "userRule": "Only done when all planned QA is executed and green;CONCERNS/WAIVED/deferred planned validation cannot count asDone.",
+  "overall": "PASS",
+  "localExecutableValidation": "PASS",
+  "sourceUnchanged": true,
+  "production015Unstarted": true,
+  "sourcesRead": [
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012B.story.md",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/t0-plan-012B-013-014.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/po-ruling-012B-allowlist.json",
+    "docs/qa/evidence/STUDIO-OBS-012B/ledger.json",
+    "docs/qa/evidence/STUDIO-OBS-012B/ux-gate.json",
+    "docs/qa/evidence/STUDIO-OBS-012B/resume-qa/review-report.json",
+    "docs/qa/gates/STUDIO-OBS-012B-compile-path-retirement-frontend-and-learn-vocabulary.yml",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/s0-plan-refresh.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/addendum.md"
+  ],
+  "matrix": [
+    {
+      "id": "AC1",
+      "requirement": "Delete review path and importer dependencies; relocate RETIRED guard before deletion; mutation red and restore green.",
+      "result": "PASS",
+      "proof": [
+        "static-audit.json"
+      ],
+      "tests": [
+        {
+          "file": "frontend/src/components/studio/run/runGate.test.tsx",
+          "name": " story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B) imports neither the legacy grammar parser nor the Python generator",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/run/runGate.test.tsx",
+          "name": " story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B) the import scanner sees every specifier form, so its silence means something",
+          "status": "passed"
+        }
+      ],
+      "negativeControl": "Historical mutation-red.txt:1 failed/1passed/17filtered; mutation-green.txt:2passed/17filtered. Hashes independently checked; current product hashes match independently reviewed source. Filtered cases are not credited."
+    },
+    {
+      "id": "AC2",
+      "requirement": "Delete CodeTab, inference, authoring-v2, legacy IR, Redux field, unused barrels; retain authoring transport only with live caller.",
+      "result": "PASS",
+      "proof": [
+        "static-audit.json",
+        "source-before.json"
+      ],
+      "tests": [
+        {
+          "file": "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+          "name": " AC-2: the page\u2019s own Run control is governed by the server and not by the editor STUDIO-OBS-012B: an unlearned draft shows the interim state, with no Code tab and no review controls",
+          "status": "passed"
+        }
+      ],
+      "staticChecks": "All58 deleted paths absent. Retired production symbols/imports0. studioApi imports studioAuthoringTransport; all transport writes/reads go through apiClient."
+    },
+    {
+      "id": "AC3",
+      "requirement": "Retire compile clients/types/MSW/artifact1 documents; single OpenAPI-derived readiness and handler coverage; exact PO allowlist; bidirectional negative controls; validate variables handler and v3 artifact fixtures.",
+      "result": "PASS",
+      "proof": [
+        "static-audit.json",
+        "fe-default-workers.json"
+      ],
+      "tests": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " the mock fixtures match the OpenAPI component schemas every execution fixture carries every required snapshot field",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " the mock fixtures match the OpenAPI component schemas every execution fixture validates against the snapshot schema",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " the mock fixtures match the OpenAPI component schemas every test fixture validates against the test schema",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " the mock fixtures match the OpenAPI component schemas only the canonical engine appears in any fixture",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " the fixtures exercise the whole contract surface covers every terminal outcome",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " the fixtures exercise the whole contract surface covers every evidence state",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " the fixtures exercise the whole contract surface represents a timeout as ERROR with a code, never as a status",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " the fixtures exercise the whole contract surface gives skipped and unstarted steps null timings",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " the fixtures exercise the whole contract surface never exposes a storage key or an external URL as the video source",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " the fixtures exercise the whole contract surface invents no confirmation metadata for legacy history",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " the fixtures exercise the whole contract surface contains data for a CSI the mock principal cannot read",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B: the readiness vocabulary is read from the document, never transcribed TestDto.readiness matches the runtime carrier in both directions",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B: the readiness vocabulary is read from the document, never transcribed the tests-list chip words every declared readiness, each distinctly",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B: the readiness vocabulary is read from the document, never transcribed LEARN_REQUIRED is the execute conflict a non-READY draft answers",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11c: ADR-002 \u00a721\u2019s two properties, and the examples that carry them every getTest example validates against the amended TestDto",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11c: ADR-002 \u00a721\u2019s two properties, and the examples that carry them declares the confirmed artifact pair on TestDto and nulls it on the list projection",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B: every published artifact fixture is the v3 replay artifact every non-null confirmedRevisionArtifact fixture validates against contracts/v3/replay-artifact.schema.json",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B: the readiness fixtures match the contract every readiness fixture validates against TestDto",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B: the readiness fixtures match the contract no readiness fixture carries a field the contract does not declare",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the terminal error vocabulary is asserted against the document (O-12) ExecutionErrorCode matches the runtime carrier in both directions",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the terminal error vocabulary is asserted against the document (O-12) every declared code has a rendered narrative, and every narrative a declared code",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the terminal error vocabulary is asserted against the document (O-12) a code outside the document is an error rather than a generic failure",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the terminal error vocabulary is asserted against the document (O-12) [PROV-ERRCODE] the expectation is read from the document rather than transcribed",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the execute route\u2019s refusals are read from the document execute's conflict codes match the UI's, in both directions",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the execute route\u2019s refusals are read from the document every execute refusal names who clears it, and the two definite ones offer no retry",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the execute route\u2019s refusals are read from the document the 429 and 503 narratives exist without borrowing a code the document only exemplifies",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry derives the public operations from the document, so the check has something to cover",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry no handler for a route that no longer exists; every surviving public route has a handler",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry every allowlist entry carries a class, an owner and a reason",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry fails closed: a new public operation with no handler and no entry is reported",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the run gate covers the readiness states the document declares every readiness maps to an action, and exactly one of them dispatches directly",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the run gate covers the readiness states the document declares every other declared state needs a learning Run",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the run gate covers the readiness states the document declares a readiness outside the document is an error rather than a permissive default",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the execution corpus matches the contract every 10.11a execution fixture validates against the snapshot schema",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the execution corpus matches the contract no 10.11a execution fixture carries a field the contract does not declare",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11b: the scripted transport frames match the contract every scenario frame validates against ExecutionSnapshot",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11b: the scripted transport frames match the contract every scenario frame carries every required field and nothing the contract does not declare",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: [VAC-18] the AC-22 required set is the document\u2019s, not an editable literal the matrix ids are exactly the ids the document\u2019s vocabularies imply, in both directions",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: [VAC-18] the AC-22 required set is the document\u2019s, not an editable literal the matrix carries one entry per required id and no duplicates, counted rather than sampled",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the configured timeout is inside the bound the contract declares the declared bound is narrow enough for the old value to violate it",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the configured timeout is inside the bound the contract declares defaultConfiguration() is inside it, and validates against TestConfiguration",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the configured timeout is inside the bound the contract declares the legacy millisecond value would be caught by this schema, so the check discriminates",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.16a: every VideoStatus renders a distinct, named state (AC-1) the evidence narratives cover VideoStatus exactly, in both directions",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.16a: every VideoStatus renders a distinct, named state (AC-1) no two states render the same name, and none renders the same statement",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.16a: every VideoStatus renders a distinct, named state (AC-1) no fixture anywhere says partial: true without an AVAILABLE or PROCESSING recording (AC-14(c))",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.16a: every VideoStatus renders a distinct, named state (AC-1) a VideoStatus outside the document is an error rather than a generic panel",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.16a: every VideoStatus renders a distinct, named state (AC-1) the playback-failure, partial and no-run wordings are none of the five states",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.16a: the mock video route answers only as the document declares (AC-13) every refusal body validates against ErrorResponse, and names the declared example code",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.16a: the mock video route answers only as the document declares (AC-13) every status the route produces over the whole fixture set is declared for getExecutionVideo",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the demo-scale list fixtures match the contract every demo test validates against TestDto",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the demo-scale list fixtures match the contract every demo run validates against ExecutionSnapshot and carries only declared fields",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the demo-scale list fixtures match the contract is rich enough to demo the lists",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares tests: default sort is updatedAt,desc with an id tie-breaker, and pages do not overlap",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares tests: q, environment, csiId and lastRun narrow the list",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares tests: name sort is case-insensitive and lastRunAt keeps never-run drafts last",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares caps size at 100",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares executions: default sort is acceptedAt,desc with an id tie-breaker",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares executions: every item carries testName, null for a deleted test",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares executions: deleting a test turns its runs into testName null and hides the test",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares executions: status filter maps CANCELLED like isCancelledOutcome, and ERROR excludes it",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares executions: q matches the test name, csiId narrows, durationMs sorts with nulls last",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares executions: unfinished runs order newest accepted first in both duration directions (QA 10.46)",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares answers 400 for /tests?sort=createdAt,desc",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares answers 400 for /tests?sort=name,sideways",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares answers 400 for /tests?lastRun=SKIPPED",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares answers 400 for /executions?sort=name,asc",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares answers 400 for /executions?status=TIMEOUT",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares lastRun and status filter values are case-insensitive, as on the backend (MNT-001)",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the list query parameters are emulated as the contract declares an unknown execution answers 404 (MNT-001)",
+          "status": "passed"
+        }
+      ],
+      "negativeControls": "Missing getExecution handler ->P2 failure; dummy classA readGuidedSession ->P4 stale failure; dummy classC lookupGuidedPolicy ->P4 stale failure; restored block4passes. Historical raw logs hashed in static-audit.json."
+    },
+    {
+      "id": "AC4_SF2",
+      "requirement": "READY executes once with0compile calls; all other declared readiness disabled with exact interim sentence;409LEARN_REQUIRED once without preparation narrative; dirty save re-read and live-region outcome.",
+      "result": "PASS",
+      "tests": [
+        {
+          "file": "frontend/src/components/studio/run/runGate.test.tsx",
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (a) READY: Run sends one execute and nothing else",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/run/runGate.test.tsx",
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (b) every non-READY readiness: Run is disabled and states the interim sentence, and sends nothing",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/run/runGate.test.tsx",
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (c) a 409 LEARN_REQUIRED from execute is shown as itself, once, with no preparation narrative",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/run/runGate.test.tsx",
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (d) a dirty READY draft whose save leaves it unlearned stops after the save and says why",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/run/runGate.test.tsx",
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (e) the learned chip says \"Learned \u00b7 ready to repeat\" for READY",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/run/runGate.test.tsx",
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (f) UX-A11Y-001: unsaved edits hide the learned chip, and the stop after the save is announced by a persistent polite live region",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/run/runGate.test.tsx",
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (g) the busy spinner is decorative and names no retired phase",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+          "name": " AC-2: the page\u2019s own Run control is governed by the server and not by the editor a READY draft produces exactly one POST /execute from the page, with no step grammar check",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+          "name": " AC-2: the page\u2019s own Run control is governed by the server and not by the editor STUDIO-OBS-012B: an unlearned draft shows the interim state, with no Code tab and no review controls",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+          "name": " AC-2: the page\u2019s own Run control is governed by the server and not by the editor STUDIO-OBS-012B: a draft with no steps shows the never-learned empty state verbatim",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+          "name": " the simple Save and Run workflow marks edits unsaved, keeps Run available because Run saves first, and protects navigation until the user decides",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+          "name": " the draft the page sends carries a timeout the contract would accept Save sends a timeoutSeconds inside the declared bound, observed at the mock server",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+          "name": " VAL-042: the first Run press on a freshly opened saved test acts READY: one press, with nothing touched first, starts exactly one execute and no save",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+          "name": " Story 10.48 AC-10b: on the page, a caller who may not run sees why before pressing Run canManage false disables the page\u2019s Run with on-page text and sends no execute",
+          "status": "passed"
+        }
+      ],
+      "staticChecks": "useLiveRunsRefresh no compile bounds import, original bounded polling retained."
+    },
+    {
+      "id": "AC5",
+      "requirement": "No compile UI vocabulary; exact empty-state sentence; exact learned chip; no prematurely introduced step-k relearn promise.",
+      "result": "PASS",
+      "proof": [
+        "static-audit.json"
+      ],
+      "tests": [
+        {
+          "file": "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+          "name": " AC-2: the page\u2019s own Run control is governed by the server and not by the editor STUDIO-OBS-012B: an unlearned draft shows the interim state, with no Code tab and no review controls",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+          "name": " AC-2: the page\u2019s own Run control is governed by the server and not by the editor STUDIO-OBS-012B: a draft with no steps shows the never-learned empty state verbatim",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/run/runGate.test.tsx",
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (e) the learned chip says \"Learned \u00b7 ready to repeat\" for READY",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/run/runGate.test.tsx",
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (g) the busy spinner is decorative and names no retired phase",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " STUDIO-OBS-012B COPY-002/COPY-003: schedule refusal copy uses learn vocabulary and stays true in the interim build LEARN_REQUIRED, RUNTIME_INCOMPATIBLE and ACTIVATION_REVISION_MISMATCH read as the UX gate worded them",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows opens from the test row menu and returns focus to the row action after closing",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows shows five due slots, creates Paused and explicitly resumes the exact confirmed revision by keyboard",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows dirty authoring blocks create and Resume, while Pause ignores an invalid unsaved cron",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows an enabled schedule blocked by executable edits can still be explicitly paused",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows STUDIO-OBS-012B COPY-002: a never-learned test says Resume waits for a learning Run, without sending the author to Run",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows preserves edits on version conflict and reloads only when the operator chooses",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows requires investigation acknowledgment for the exact uncertainty set before Resume",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows new manual uncertainty blocks presentation before the producer updates ENABLED, and investigated Resume acknowledges the exact set",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows disabled scheduling remains readable and cannot advertise an available mutation",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows list summary labels persisted enabled intent without implying that a disabled producer runs",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows summary distinguishes new uncertainty from enabled intent and preserves an explicitly Paused choice",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows schedule dialog labels and structure pass the automated accessibility rules supported by jsdom",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows standalone uncertainty links stay under /studio rather than the federated route",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "name": " Studio schedule operator flows pages actual occurrence links and refusals without inventing browser evidence; removal retains history",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "id": "AC6_COUNTS",
+      "requirement": "Fresh baseline; name every dropped/added test; independently reconcile final suite.",
+      "result": "PASS",
+      "proof": [
+        "name-reconciliation.json",
+        "fe-default-workers.json"
+      ],
+      "detail": "Exact name delta854-216+57+4+3-1=701. Last delta includes2 unrelated hook cases and1 unrelated StudioRunsPage title rename. Historical854-case baseline includes28 failing cases and5 unloadable suites; no hidden cases are invented. S0 refresh explicitly replaced commit binding with read-only tree identities;current source manifest matches reviewed source and source-before/source-after are identical."
+    },
+    {
+      "id": "AC6_GATES",
+      "requirement": "type-check,lint,production build,full tests green after final C2b and UX code.",
+      "result": "PASS",
+      "proof": [
+        "execution-receipt.json"
+      ],
+      "detail": "Exclusive sequential fresh current-source run:default-workers701passed0fail0skip;tsc0;eslint0errors302existing warnings;webpack0errors1existing asset-size advisory. No test,worker or timeout override and no source edits."
+    },
+    {
+      "id": "AC6_A11Y",
+      "requirement": "Existing7-surfaceWCAG suite runs; retain surfaces4/5 with pending-rewrite comments; allow known axe-results regeneration.",
+      "result": "PASS",
+      "proof": [
+        "execution-receipt.json"
+      ],
+      "tests": [
+        {
+          "file": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+          "name": " AC-12(a): axe-core conformance scan of the seven named Studio surfaces surface 1 \u2014 the Studio tests list (StudioTestsPage)",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+          "name": " AC-12(a): axe-core conformance scan of the seven named Studio surfaces surface 2 \u2014 the Studio runs list (StudioRunsPage)",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+          "name": " AC-12(a): axe-core conformance scan of the seven named Studio surfaces surface 3 \u2014 ChecksStudioPage, author state",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+          "name": " AC-12(a): axe-core conformance scan of the seven named Studio surfaces surface 4 \u2014 ChecksStudioPage, compile-review state",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+          "name": " AC-12(a): axe-core conformance scan of the seven named Studio surfaces surface 5 \u2014 ChecksStudioPage, confirm state",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+          "name": " AC-12(a): axe-core conformance scan of the seven named Studio surfaces surface 6 \u2014 ChecksStudioPage, run / SSE-progress state",
+          "status": "passed"
+        },
+        {
+          "file": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+          "name": " AC-12(a): axe-core conformance scan of the seven named Studio surfaces surface 7 \u2014 ChecksStudioPage, video-playback state",
+          "status": "passed"
+        }
+      ],
+      "limit": "Explicit story scope allows duplicate interim UNLEARNED scans under old names. Browser contrast,target-size,guided state rewrite belong to008 and are not unmet012B planned QA. Current existing critical/serious pin is empty on every surface; moderate findings remain disclosed, no new conformance claim."
+    },
+    {
+      "id": "SF1_SF4_SF5",
+      "requirement": "Name13extra review case drops; include affected schedule/page tests; consolidate risks.",
+      "result": "PASS",
+      "proof": [
+        "../ledger.json",
+        "name-reconciliation.json"
+      ],
+      "detail": "artifactSummary suite unloadable at baseline and uncredited;compilePollBounds4cases named; actual FileList includes SF4 files; story Consolidated risks explicitly includes interim build,no intermediate release,a11y artifacts,bounded workers,allowlist,review fallback."
+    },
+    {
+      "id": "QA_FALLBACK",
+      "requirement": "Independent code review;CodeRabbit if installed with configured skip-if-unavailable fallback.",
+      "result": "PASS_WITH_CONFIGURED_TOOL_FALLBACK",
+      "detail": "CodeRabbit absent from PATH and ~/.local/bin/coderabbit; .aiox-core/core-config.yaml:231 skip_if_not_installed:true. Independent Quinn source review used. No CodeRabbitPASS invented. No additional optional external tooling required."
+    },
+    {
+      "id": "UX_GATE",
+      "requirement": "Independent UX gate for vocabulary/copy fidelity, separate SDCQA verdict.",
+      "result": "PASS",
+      "proof": [
+        "final-ux-gate.json"
+      ],
+      "detail": "IndependentUma final current-source copy/accessibility gatePASS. Every original required finding closed with exact source+test proof; historicalCONCERNS receipt preserved."
+    },
+    {
+      "id": "C4_NO_RELEASE",
+      "requirement": "No release between012B and008.",
+      "result": "ACTIVE_BOUNDARY",
+      "detail": "012B is an intentionally incomplete consumer for nonREADY learning; guided transport is008scope. No deployment/release authorized or performed. This is an ongoing release condition, not a runnable test to fabricate."
+    }
+  ],
+  "pending": [],
+  "implementationFixesNeeded": [],
+  "testSourceFixesNeeded": [],
+  "sourceProof": "363source hashes exactly match prior independently reviewed source;all58deletions absent;no source drift across fresh execution including axe-results artifact.",
+  "executionSummary": {
+    "files": 56,
+    "passed": 701,
+    "failed": 0,
+    "skipped": 0,
+    "defaultWorkerOverride": false,
+    "tscExit": 0,
+    "eslintExit": 0,
+    "existingLintWarnings": 302,
+    "productionBuildExit": 0,
+    "existingBuildWarnings": 1,
+    "wcagCasesPassed": 7
+  },
+  "evidenceIntegrity": {
+    "reviewedSourceDigest": "341cdc10358de0f03840d1668b2eaaadcfc3a7f710c5b2a0223b6ee4e7882d34",
+    "defaultWorkerResultsSha256": "1b84c759de0240a2fb588b09f287afa7871cb4e106efaaebc2f183aa79fa39bc"
+  },
+  "limits": [
+    "No source or gate/story/lifecycle edits by this reviewer;root owns pending final verdict coordination."
+  ],
+  "priorFindingsClosed": [
+    {
+      "id": "PROC-S0",
+      "resolution": "Original2026-10-13 S0 refresh explicitly supersedes T0,correctionX9 and treeIdentity_replacesRK11 replace leadcommit with read-only source/dist hashes under existing no-commit instruction. This is original authority,not a new waiver. Historical baseline remains failed/unloadable where recorded;current final701-case gate is green.",
+      "authority": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/s0-plan-refresh.json",
+      "authoritySha256": "614b1714153bffb9814936864942124952dcbefc5a668c0a7af493000c36e12c",
+      "ruleVerbatim": "No commit, stash, write-tree or other git object write (user rule: no commits without an explicit ask; the stash stack is shared). Baselines and every credit are bound to a read-only tree identity.",
+      "supersedes": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/t0-plan-012B-013-014.json (2026-10-12, written before 012A converged). That file is kept as history. Where the two disagree, this file applies."
+    }
+  ],
+  "processCorrection": "Initial strict audit overlooked original s0-plan-refresh supersession;root/Aria pointed to it,Quinn independently read it and removed the obsolete commit precondition. Initial receipt retained for audit.",
+  "reviewedRevision": "scoped-source-sha256:d39ca2799673251f7ca1cc36c797e29e931338034c1975ae1b08fa74a23f6d6f",
+  "sourceUnchangedWithin012BScope": true,
+  "sourceReconciliation": "final-source-binding.json explicitly records separate013/014 source changes,one unrelated documentary tense correction and removal of an empty literal directory. No whole global tree unchanged claim.",
+  "finalUxGate": {
+    "path": "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/final-ux-gate.json",
+    "verdict": "PASS",
+    "sha256": "52d1d08c17cea011363e4785f96009286eca6e05bf097425ae578ee539005ec8"
+  },
+  "baselineResolution": "baseline-failure-resolution.json resolves all28historical failed names and5unloadable suites to explicit retirements or actual passing replacements;historical baseline remains not-green.",
+  "unresolvedLocalConcerns": [],
+  "editsByFinalReviewer": [
+    "012B canonicalQA gate",
+    "012B story lifecycle/QAResults/ChangeLog",
+    "012B strict-qa evidence only"
+  ]
+}

@@ -1,0 +1,320 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java
+@@ -6,17 +6,22 @@
+ import com.citi.put.checks.studio.guided.session.GuidedContracts;
+ import com.citi.put.checks.studio.guided.session.GuidedSessionException;
+ import com.fasterxml.jackson.databind.JsonNode;
++import com.fasterxml.jackson.databind.ObjectMapper;
+ import com.fasterxml.jackson.databind.node.ObjectNode;
+ import java.nio.file.Files;
+ import java.nio.file.Path;
+ import java.time.Instant;
++import java.util.ArrayList;
++import java.util.HashMap;
+ import java.util.List;
++import java.util.Map;
+ import java.util.UUID;
+ import java.util.concurrent.atomic.AtomicInteger;
+ import org.junit.jupiter.api.Test;
+ import org.junit.jupiter.api.DisplayName;
+ import org.junit.jupiter.params.ParameterizedTest;
+ import org.junit.jupiter.params.provider.ValueSource;
++import org.springframework.jdbc.core.JdbcTemplate;
+ 
+ /**
+  * Real head PostgreSQL and current writer boundaries. Upstream learning/validator facts in the
+@@ -272,4 +277,294 @@
+       assertThat(durableSnapshot(db)).as("failed direct commit leaves every authority/write row unchanged").isEqualTo(before);
+     }
+   }
++
++  /**
++   * Real PostgreSQL queries with explicitly substituted returned rows, never SQL corruption or
++   * mocked JDBC. Only the reader's datasource is shared; the production writer uses db.jdbc.
++   * Original source/history rows and triggers are untouched. This ordinary, single-version
++   * relational fixture supplies controlled upstream outcomes, not native or HTTP authority.
++   */
++  private static final class PrivateReadBoundary extends JdbcTemplate {
++    private static final String INPUTS = "SELECT input_ordinal,input_id,introduced_revision,document::text FROM"
++        + " studio_guided_materialization_inputs WHERE session_id=? ORDER BY input_ordinal";
++    private static final String VERSIONS = "SELECT * FROM studio_guided_materialization_versions WHERE session_id=? ORDER BY context_revision";
++    private static final String CURRENT = "SELECT context_revision,authored_inputs_hash,authored_inputs::text FROM"
++        + " studio_guided_materializations WHERE session_id=?";
++    private static final String MANIFEST = "SELECT manifest::text,manifest_hash FROM studio_guided_source_manifests WHERE session_id=?";
++    private final String sessionId;
++    private String mutation;
++    private int substitutions, inputReads, versionReads, currentReads;
++
++    PrivateReadBoundary(JdbcTemplate actual, String sessionId) {
++      super(java.util.Objects.requireNonNull(actual.getDataSource()));
++      this.sessionId = sessionId;
++    }
++
++    void arm(String mutation) {
++      this.mutation = mutation;
++      substitutions = inputReads = versionReads = currentReads = 0;
++    }
++
++    @Override
++    public List<Map<String, Object>> queryForList(String sql, Object... args) {
++      List<Map<String, Object>> actual = super.queryForList(sql, args);
++      if (!sql.equals(INPUTS) && !sql.equals(VERSIONS)) return actual;
++      assertThat(args).containsExactly(sessionId);
++      if (sql.equals(INPUTS)) inputReads++; else versionReads++;
++      if (mutation == null) return actual;
++      List<Map<String, Object>> offered = new ArrayList<>();
++      actual.forEach(row -> offered.add(new HashMap<>(row)));
++      boolean changed = false;
++      if (sql.equals(INPUTS)) {
++        switch (mutation) {
++          case "private-value", "private-provenance" -> {
++            ObjectNode input = PublicationContracts.copy(C.parse((String) offered.get(1).get("document")));
++            assertThat(input.path("kind").asText()).isEqualTo("nonsecretText");
++            if (mutation.equals("private-value")) input.put("value", "DIFFERENT_PRIVATE_VALUE");
++            else {
++              ObjectNode provenance = (ObjectNode) input.path("provenance");
++              assertThat(provenance.path("referenceKind").asText()).isEqualTo("sourceSpan");
++              provenance.put("endUtf16", provenance.path("endUtf16").asInt() + 1);
++            }
++            offered.get(1).put("document", input.toString());
++            changed = true;
++          }
++          case "input-order" -> { java.util.Collections.swap(offered, 0, 1); changed = true; }
++          case "missing-input" -> { offered.removeLast(); changed = true; }
++          case "introduced-version" -> { offered.getFirst().put("introduced_revision", 2); changed = true; }
++          default -> { /* Other mutations target a different exact returned query. */ }
++        }
++      } else {
++        switch (mutation) {
++          case "header-hash" -> { offered.getFirst().put("authored_inputs_hash", "0".repeat(64)); changed = true; }
++          case "header-count" -> {
++            offered.getFirst().put("input_count", ((Number) offered.getFirst().get("input_count")).intValue() - 1);
++            changed = true;
++          }
++          case "header-provenance" -> {
++            ObjectNode identity = PublicationContracts.copy(C.parse(String.valueOf(offered.getFirst().get("authored_inputs_identity"))));
++            identity.put("sourceRevision", "2");
++            offered.getFirst().put("authored_inputs_identity", identity.toString());
++            changed = true;
++          }
++          default -> { /* Other mutations target a different exact returned query. */ }
++        }
++      }
++      if (changed) {
++        assertThat(offered.equals(actual)).as("returned history substitution changes its selected preimage").isFalse();
++        substitutions++;
++      }
++      return offered;
++    }
++
++    @Override
++    public Map<String, Object> queryForMap(String sql, Object... args) {
++      Map<String, Object> actual = super.queryForMap(sql, args);
++      if (sql.equals(CURRENT)) currentReads++;
++      if (mutation == null || (!sql.equals(CURRENT) && !sql.equals(MANIFEST))) return actual;
++      assertThat(args).containsExactly(sessionId);
++      Map<String, Object> offered = new HashMap<>(actual);
++      if (sql.equals(CURRENT) && mutation.equals("current-private-value")) {
++        ObjectNode full = PublicationContracts.copy(C.parse((String) actual.get("authored_inputs")));
++        ((ObjectNode) full.path("inputs").get(1)).put("value", "DIFFERENT_PRIVATE_VALUE");
++        offered.put("authored_inputs", full.toString());
++      } else if (sql.equals(MANIFEST) && mutation.startsWith("manifest-")) {
++        ObjectNode manifest = PublicationContracts.copy(C.parse((String) actual.get("manifest")));
++        if (mutation.equals("manifest-checksum")) {
++          offered.put("manifest_hash", "0".repeat(64));
++        } else {
++          switch (mutation) {
++            case "manifest-private-plain", "manifest-missing-plain" -> {
++              int selected = 0;
++              for (JsonNode value : manifest.path("configurationValues")) {
++                if (value.path("referenceName").asText().equals("saved-label")) {
++                  // The classifier freezes all four legal slots for this exact declaration.
++                  // Change each copy together so refusal proves the declaration hash join,
++                  // rather than stopping at inconsistent duplicate configuration values.
++                  if (mutation.equals("manifest-private-plain")) ((ObjectNode) value).put("value", "DIFFERENT_PRIVATE_VALUE");
++                  else ((ObjectNode) value).remove("value");
++                  selected++;
++                }
++              }
++              assertThat(selected).as("the positive parent freezes every slot for its exact declared private value").isEqualTo(4);
++            }
++            case "manifest-authored-context" -> {
++              ((ObjectNode) manifest.path("authoringSnapshot").path("steps").get(2)
++                  .path("context").path("entries").get(1)).put("value", "A different complete source");
++              ObjectNode identity = C.object().put("authoringIdentityVersion", 1);
++              identity.set("authoring", manifest.path("authoringSnapshot"));
++              identity.set("authoredDeclarations", manifest.path("authoredDeclarations"));
++              var substituted = com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.snapshot(identity);
++              manifest.set("authoringRevisionInputs", new ObjectMapper().valueToTree(substituted.identity().inputs()));
++            }
++            default -> throw new AssertionError("Unrecognized manifest substitution");
++          }
++          // Attacker reseals only the returned full private manifest, never the stored original
++          // or its start-base public hash. The context attack must pass snapshotEvidence first.
++          offered.put("manifest", manifest.toString());
++          offered.put("manifest_hash", GuidedContracts.hash(manifest));
++        }
++      } else return actual;
++      assertThat(offered.equals(actual)).as("returned private substitution changes its selected preimage").isFalse();
++      substitutions++;
++      return offered;
++    }
++  }
++
++  /** Whole test-owned durable rows and trigger definitions; assertions expose only one digest. */
++  private static String privateAuthoritySnapshot(GuidedPublicationMigrationTest.Database db) {
++    ObjectNode snapshot = C.object();
++    for (String table : db.jdbc.queryForList(
++        "SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename", String.class)) {
++      assertThat(table).matches("[a-z0-9_]+");
++      snapshot.set(table, C.parse(db.jdbc.queryForObject(
++          "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text),'[]'::jsonb)::text FROM public."
++              + table + " t", String.class)));
++    }
++    snapshot.set("_triggers", C.parse(db.jdbc.queryForObject(
++        "SELECT COALESCE(jsonb_agg(jsonb_build_object('table',c.relname,'name',t.tgname,"
++            + "'enabled',t.tgenabled,'definition',pg_get_triggerdef(t.oid)) ORDER BY c.relname,t.tgname),'[]'::jsonb)::text"
++            + " FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace"
++            + " WHERE n.nspname='public' AND NOT t.tgisinternal", String.class)));
++    return GuidedContracts.hash(snapshot);
++  }
++
++  private static void assertCommitRollback(
++      GuidedPublicationMigrationTest.Database db, GuidedPublicationRepository writer,
++      PublicationContracts.Commit command, String original) {
++    db.tx.executeWithoutResult(t -> {
++      assertThat(writer.commit(command, Instant.now())).isNotNull();
++      assertThat(db.jdbc.queryForObject("SELECT count(*) FROM ui_test_revisions WHERE guided_session_id=?",
++          Integer.class, command.sessionId())).isEqualTo(1);
++      assertThat(db.jdbc.queryForObject("SELECT confirmed_revision_id FROM ui_tests WHERE id=?",
++          UUID.class, db.testId)).isEqualTo(command.revisionId());
++      t.setRollbackOnly();
++    });
++    assertThat(privateAuthoritySnapshot(db)).as("positive publication rollback preserves every original row and trigger").isEqualTo(original);
++  }
++
++  private static JsonNode assertStoredPrivateProjection(
++      GuidedPublicationMigrationTest.Database db, PublicationContracts.Base base) {
++    String id = db.fixtureSession();
++    JsonNode raw = db.tx.execute(t -> db.evidence.read(id)).document();
++    JsonNode full = C.parse(db.jdbc.queryForObject(
++        "SELECT authored_inputs::text FROM studio_guided_materializations WHERE session_id=?", String.class, id));
++    var rows = db.jdbc.queryForList(PrivateReadBoundary.INPUTS, id);
++    JsonNode history = raw.path("materializationEvidence");
++    assertThat(history.path("versions").size()).as("this lawful parent proves exactly one original version").isEqualTo(1);
++    assertThat(rows.size()).isEqualTo(3);
++    assertThat(history.path("entries").size()).isEqualTo(rows.size());
++    assertThat(full.path("inputs").size()).isEqualTo(rows.size());
++    assertThat(GuidedContracts.hash(full).equals(history.path("versions").get(0).path("authoredInputsHash").asText()))
++        .as("full private envelope is hashed before values are removed").isTrue();
++    for (int ordinal = 0; ordinal < rows.size(); ordinal++) {
++      JsonNode privateInput = C.parse((String) rows.get(ordinal).get("document"));
++      JsonNode entry = history.path("entries").get(ordinal);
++      assertThat(((Number) rows.get(ordinal).get("input_ordinal")).intValue()).isEqualTo(ordinal);
++      assertThat(((Number) rows.get(ordinal).get("introduced_revision")).intValue()).isEqualTo(1);
++      assertThat(privateInput.equals(full.path("inputs").get(ordinal))).as("stored normalized input equals its private envelope member").isTrue();
++      assertThat(GuidedContracts.hash(privateInput).equals(entry.path("inputHash").asText()))
++          .as("entry hash uses the original private value-bearing input").isTrue();
++      ObjectNode safe = PublicationContracts.copy(privateInput); safe.remove("value");
++      assertThat(entry.path("inputOrdinal").asInt()).isEqualTo(ordinal);
++      assertThat(entry.path("introducedContextRevision").asInt()).isEqualTo(1);
++      assertThat(safe.equals(entry.path("metadata"))).as("metadata is exact original minus value only").isTrue();
++      assertThat(entry.path("metadata").has("value")).isFalse();
++      assertThat(raw.path("materialization").path("inputs").get(ordinal).has("value")).isFalse();
++    }
++    var stored = db.jdbc.queryForMap(PrivateReadBoundary.MANIFEST, id);
++    ObjectNode manifest = PublicationContracts.copy(C.parse((String) stored.get("manifest")));
++    assertThat(GuidedContracts.hash(manifest).equals(stored.get("manifest_hash"))).as("stored full private manifest checksum").isTrue();
++    assertThat(manifest.has("configurationValues")).isTrue();
++    manifest.remove("configurationValues");
++    assertThat(manifest.has("authoringSnapshot")).isTrue();
++    assertThat(manifest.equals(raw.path("sourceManifest"))).as("public manifest removes configurationValues only").isTrue();
++    assertThat(GuidedContracts.hash(manifest).equals(base.document().path("sourceManifestHash").asText()))
++        .as("original start base commits the full authoring snapshot preimage").isTrue();
++    manifest.remove("authoringSnapshot");
++    assertThat(GuidedContracts.hash(manifest).equals(base.document().path("sourceManifestHash").asText()))
++        .as("omitting the authoring snapshot changes that original preimage").isFalse();
++    return raw;
++  }
++
++  @ParameterizedTest(name = "stored private returned history {0}")
++  @ValueSource(strings = {"private-value", "private-provenance", "input-order", "missing-input",
++      "introduced-version", "header-hash", "header-count", "header-provenance", "current-private-value"})
++  void storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary(String mutation) throws Exception {
++    try (var owner = new GuidedPublicationMigrationTest.Database();
++        var db = new GuidedPublicationMigrationTest.Database(owner.jdbc, owner.tx, "b3a-history", fixtures().path("basis").deepCopy())) {
++      var base = db.capture(); db.finalizing();
++      var command = prepareStored(db, base);
++      JsonNode originalRead = assertStoredPrivateProjection(db, base);
++      String original = privateAuthoritySnapshot(db);
++      var boundary = new PrivateReadBoundary(db.jdbc, db.fixtureSession());
++      var reader = new GuidedPublicationEvidenceRepository(boundary, C);
++      var reads = new AtomicInteger();
++      var writer = new GuidedPublicationRepository(db.jdbc, C, () -> { reads.incrementAndGet(); return reader; });
++      assertCommitRollback(db, writer, command, original);
++      assertThat(reads).hasValue(1);
++      boundary.arm(mutation);
++      assertThatThrownBy(() -> db.tx.execute(t -> writer.commit(command, Instant.now())))
++          .isInstanceOf(GuidedSessionException.class).hasMessage("EVIDENCE_MISMATCH");
++      assertThat(reads).as("the current writer reached the actual private evidence reader").hasValue(2);
++      assertThat(boundary.substitutions).as("one exact returned SQL preimage was substituted").isEqualTo(1);
++      assertThat(boundary.inputReads).isEqualTo(1);
++      assertThat(boundary.versionReads).isEqualTo(mutation.equals("input-order") ? 0 : 1);
++      assertThat(boundary.currentReads).isEqualTo(mutation.equals("current-private-value") ? 1 : 0);
++      assertThat(privateAuthoritySnapshot(db)).as("refused substituted read preserves every original row and trigger").isEqualTo(original);
++      boundary.arm(null);
++      JsonNode restored = db.tx.execute(t -> reader.read(db.fixtureSession())).document();
++      assertThat(restored.equals(originalRead)).as("restoring the reader recovers the exact stored evidence").isTrue();
++      assertCommitRollback(db, writer, command, original);
++      assertThat(reads).hasValue(3);
++      assertThat(boundary.substitutions).isZero();
++    }
++  }
++
++  @ParameterizedTest(name = "stored source returned manifest {0}")
++  @ValueSource(strings = {"manifest-checksum", "manifest-private-plain", "manifest-missing-plain", "manifest-authored-context"})
++  void storedSourceManifestRequiresOriginalImmutableSourcePreimage(String mutation) throws Exception {
++    try (var owner = new GuidedPublicationMigrationTest.Database();
++        var db = new GuidedPublicationMigrationTest.Database(owner.jdbc, owner.tx, "b3a-manifest", fixtures().path("basis").deepCopy())) {
++      var base = db.capture(); db.finalizing();
++      var command = prepareStored(db, base);
++      JsonNode originalRead = assertStoredPrivateProjection(db, base);
++      String original = privateAuthoritySnapshot(db);
++      var boundary = new PrivateReadBoundary(db.jdbc, db.fixtureSession());
++      var reader = new GuidedPublicationEvidenceRepository(boundary, C);
++      var reads = new AtomicInteger();
++      var writer = new GuidedPublicationRepository(db.jdbc, C, () -> { reads.incrementAndGet(); return reader; });
++      assertCommitRollback(db, writer, command, original);
++      assertThat(reads).hasValue(1);
++      boundary.arm(mutation);
++      if (mutation.equals("manifest-authored-context")) {
++        // A coherent substituted read passes snapshotEvidence and complete history reconstruction.
++        // The original pinned base then rejects its changed public manifest at the builder boundary.
++        JsonNode offered = db.tx.execute(t -> reader.read(db.fixtureSession())).document();
++        assertThat(boundary.substitutions).isEqualTo(1);
++        assertThat(boundary.currentReads).isEqualTo(1);
++        assertThat(offered.path("sourceManifest").equals(originalRead.path("sourceManifest"))).isFalse();
++        assertThat(offered.path("snapshotEvidence").path("current").path("authoring")
++            .equals(offered.path("sourceManifest").path("authoringSnapshot"))).isTrue();
++        assertThat(GuidedContracts.hash(offered.path("sourceManifest")).equals(base.document().path("sourceManifestHash").asText())).isFalse();
++        assertThat(privateAuthoritySnapshot(db)).isEqualTo(original);
++        boundary.arm(mutation);
++      }
++      String code = mutation.equals("manifest-missing-plain") ? "MISSING_SOURCE" : "EVIDENCE_MISMATCH";
++      assertThatThrownBy(() -> db.tx.execute(t -> writer.commit(command, Instant.now())))
++          .isInstanceOf(GuidedSessionException.class).hasMessage(code);
++      assertThat(reads).as("the current writer reached the actual private evidence reader").hasValue(2);
++      assertThat(boundary.substitutions).as("one exact returned manifest preimage was substituted").isEqualTo(1);
++      assertThat(boundary.inputReads).as("only the coherent context attack passes the private snapshot reader")
++          .isEqualTo(mutation.equals("manifest-authored-context") ? 1 : 0);
++      assertThat(boundary.currentReads).isEqualTo(mutation.equals("manifest-authored-context") ? 1 : 0);
++      assertThat(privateAuthoritySnapshot(db)).as("refused manifest substitution preserves every original row and trigger").isEqualTo(original);
++      boundary.arm(null);
++      JsonNode restored = db.tx.execute(t -> reader.read(db.fixtureSession())).document();
++      assertThat(restored.equals(originalRead)).as("restoring the reader recovers the original immutable source preimage").isTrue();
++      assertCommitRollback(db, writer, command, original);
++      assertThat(reads).hasValue(3);
++      assertThat(boundary.substitutions).isZero();
++    }
++  }
+ }

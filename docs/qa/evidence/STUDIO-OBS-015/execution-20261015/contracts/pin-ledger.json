@@ -1,0 +1,29 @@
+{
+  "story": "STUDIO-OBS-015",
+  "lane": "C3a+C3b",
+  "publicOpenAPI": {
+    "oldQuotedSHA256": "afec6c04cdd5bcc19e42b83f83656a342165c5e04407e90a7206de0b40c46183",
+    "newQuotedSHA256": "54fd12cd9951cad6caa32e78693598eb0a23d4333a11749e2083b340d503cd0d",
+    "pinLocations": [
+      "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java",
+      "studio-runner/test/run/confinement.test.ts"
+    ],
+    "operationsBefore": 43,
+    "operationsAfter": 43,
+    "errorEnumChanged": false
+  },
+  "observedSchemaBundle": {
+    "oldCanonicalSHA256": "2740ec926523dc2adfef8b6d0dac385b1b8654e08842e99fac9a5209c1cbef1f",
+    "newCanonicalSHA256": "e53fb13378b71b6332a89d21b7ba661af994f71d4f6033efa233b61f5a2c6c19"
+  },
+  "generation": {
+    "sourceGeneration": "contracts/v3 only",
+    "writeInvocations": 1,
+    "guidedSchemas": 25,
+    "replaySchemas": 31,
+    "generatedOutputs": 4,
+    "backendPackaging": "backend/build.gradle.kts processResources packages v3/*.schema.json directly; no second Java schema copy or Gradle invocation"
+  },
+  "sourceHashLedger": "touched-files.json",
+  "sourceHashLedgerSHA256": "edc84ffb59d0ce85322ef2953d5f1d66ba4859e514c7aa3a3b07d143a355f5b5"
+}

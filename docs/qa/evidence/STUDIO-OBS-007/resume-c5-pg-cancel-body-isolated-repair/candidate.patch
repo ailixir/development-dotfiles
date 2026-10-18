@@ -1,0 +1,10 @@
+--- docs/qa/evidence/STUDIO-OBS-007/resume-c5-pg-cancel-body-isolated-repair/before/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java	2026-10-11 19:50:11
++++ docs/qa/evidence/STUDIO-OBS-007/resume-c5-pg-cancel-body-isolated-repair/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java	2026-10-11 19:50:11
+@@ -2560,7 +2560,6 @@
+                   UUID.randomUUID().toString(),
+                   C.object()
+                       .put("schemaVersion", 3)
+-                      .put("sessionId", scenario.sessionId)
+                       .put("reason", "userRequested"));
+             }
+           });

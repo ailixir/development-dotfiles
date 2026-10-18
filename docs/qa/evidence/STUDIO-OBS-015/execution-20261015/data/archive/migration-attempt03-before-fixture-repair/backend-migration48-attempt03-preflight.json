@@ -1,0 +1,268 @@
+{
+  "at": "2026-10-15T05:07:17.366906+00:00",
+  "releaseSha256": "0a61944d39412beae776490f739c23fb93e6c090e90882202949e1163569b552",
+  "holdSha256": "1d965bac4dc2616d82b82fc3c0bda943ee012bc40ef1f902b4d73f3e88207872",
+  "authorizedCorrections": [
+    "backend/migration48-compile-name-collision-correction.json",
+    "data/migration-compile-correction-01.json"
+  ],
+  "heldChecks": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/ErrorCodeConstraintMigrationIT.java",
+      "expected": "003ce9a0807d8e062ca0e97bf8daf2f5025b4ad3ed624be99c40c2ab4c3913d6",
+      "actual": "003ce9a0807d8e062ca0e97bf8daf2f5025b4ad3ed624be99c40c2ab4c3913d6"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java",
+      "expected": "01e63bfd18d925f118836c01eb704c3b5b20ff3b1cc83c6ae90932291e69df18",
+      "actual": "01e63bfd18d925f118836c01eb704c3b5b20ff3b1cc83c6ae90932291e69df18"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+      "expected": "86b44d31b12f51e0f624ec2d34ba63a99d692f786c396faa24ecab72dad61625",
+      "actual": "86b44d31b12f51e0f624ec2d34ba63a99d692f786c396faa24ecab72dad61625"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedGovernanceMigrationIT.java",
+      "expected": "f5842d165e12afcc0684c47469076b123e7bbbb487a95e792456c5b6a0a5ce56",
+      "actual": "f5842d165e12afcc0684c47469076b123e7bbbb487a95e792456c5b6a0a5ce56"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedRecordingMigrationIT.java",
+      "expected": "26f607b782fe90c45079e66b0d1fcc3c83ab055df87b6dab6fc73411bb1695b5",
+      "actual": "26f607b782fe90c45079e66b0d1fcc3c83ab055df87b6dab6fc73411bb1695b5"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "expected": "43e4637931159c66b6a1b02e08cd54b2cd274e73857e5acf829fd175c43fcf78",
+      "actual": "43e4637931159c66b6a1b02e08cd54b2cd274e73857e5acf829fd175c43fcf78"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+      "expected": "48e3f1b82f8e47d60be17444c26e072b59dfce830bb64ccad50c94d46fcb06c9",
+      "actual": "48e3f1b82f8e47d60be17444c26e072b59dfce830bb64ccad50c94d46fcb06c9"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationMigrationTest.java",
+      "expected": "db319a8f41146efe85a4f9b6949ad234f2f1a5d367bb013806966a1605f83bd9",
+      "actual": "db319a8f41146efe85a4f9b6949ad234f2f1a5d367bb013806966a1605f83bd9"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql",
+      "expected": "a4e0c441ebcda29f00cc382fb7ed8eb6ce408a44b53a758e8c20277ee05f4a91",
+      "actual": "a4e0c441ebcda29f00cc382fb7ed8eb6ce408a44b53a758e8c20277ee05f4a91"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+      "expected": "437015a43b2fab7ca0467b8fa2c9ad81bbe89256f31066aa104d0fa608db4070",
+      "actual": "437015a43b2fab7ca0467b8fa2c9ad81bbe89256f31066aa104d0fa608db4070"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "expected": "1cfe555c431d0f15bd70dfa782d09da05b18e15c85f860af7ecd9a7e3077fcc3",
+      "actual": "1cfe555c431d0f15bd70dfa782d09da05b18e15c85f860af7ecd9a7e3077fcc3"
+    }
+  ],
+  "sourceTestMethods": [
+    "freshV1ToV21HasExpectedHeadDescriptionAndNoPendingMigrations",
+    "populatedV20UpgradePreservesExistingDocumentBytesAndAddsExactHistory",
+    "frozenV1ToV20ResourceChecksumsRemainUnchanged",
+    "replayingPrefixInsertRequiresRealProgramAndContinuation",
+    "unknownStateAndUnknownContinuationAreRefused",
+    "oldTerminalCannotReopenPrefix",
+    "prefixCallbacksCannotChangeToGenericActingObservingOrProposing",
+    "preparingWithPendingPrefixCannotReserveModelOrIncrementCounters",
+    "explicitPrefixStateWithoutProgramCannotInsertModelAttempt",
+    "concurrentPrefixEntryAndModelReservationSerializeBothOrders",
+    "initialMaterializationCreatesOneHeaderAndNormalizedInputEntries",
+    "appendPreservesEveryPriorEntryAndBindsPreviousHash",
+    "appendNoopReturnsExistingVersionWithoutWrite",
+    "appendRefusesMutationDeletionCollisionGapOrOverflow",
+    "canonicalByteBoundsAcceptSupportedUnicodeAndControlEscapes",
+    "appendRefusesAdmittedDispatchingUnknownAndUnexpiredUnconsumedPreparation",
+    "appendVersusPrepareAdmitConsumeSerializesWithoutStaleExecution",
+    "appendCommitCreatesPendingDeliveryAtomically",
+    "pendingDeliveryFencesActionsModelReservationsAndMetadataBumps",
+    "issuedContextMetadataAndHashAreWriteOnceAcrossRetryAndLeaseRenewal",
+    "issuedContextRequiresExactImmutableProgramPairForEveryPinnedBaseSession",
+    "ordinaryContextRejectsHalfOrForgedProgramPair",
+    "ackRequiresExactVersionHashContextHashBirthMetadataOwnerAndLiveOriginalLease",
+    "concurrentAppendRetriesProduceOneVersionAndOneDeliveryIdentity",
+    "oldCompletedPreparationJoinsItsVersionAfterHeadAdvances",
+    "oldSecretReleaseAndUseJoinTheirHistoricalVersion",
+    "contextHeaderBirthMetadataDoesNotRejectLaterGraphMetadataRevision",
+    "preAdmissionReceiptRequiresIssuedExactRequestAndNoActionAtCoordinate",
+    "admittedReceiptRequiresExactConsumedAttemptZeroAndPreparation",
+    "driftReceiptAndSwitchCommitAtomicallyOrNotAtAll",
+    "wrongOwnerScopeSourceVersionHashProgramOperationOrEvidenceReceiptIsRefused",
+    "oneDriftReceiptAndOneSwitchPerSessionCannotBeRewritten",
+    "onlyProvenNoInvocationAllowsAttemptOneAtSameSemanticCoordinate",
+    "spentAndReplacementAttemptsBothConsumeActionBudget",
+    "suffixAcceptancePreservesEverySuccessfulPriorMeaning",
+    "boundariesIncludeEmptyPrefixAtK1ButNeverEmptySuffix",
+    "completeMetadataRequiredForNewRevisionWithoutHistoricalBackfill",
+    "reuseMustNameImmediatePinnedBaseAndExactContiguousPrefix",
+    "postDriftSuffixAndWrongSameTestBaseCannotBeMarkedReused",
+    "effectiveActionsAreUniqueCompleteSuccessfulAndMatchLedger",
+    "excludedFailureRequiresExactImmutableNoInvocationReceipt",
+    "publicationReceiptRejectsWrongRelearnedBoundaryOrExtraKeys",
+    "publicationReceiptRequiresExplicitNullBeforeAnyCommittedSwitch",
+    "prefixFailureBeforeSwitchReportsNoRelearnedFrom",
+    "failedPlanningAfterCommittedSwitchRetainsEnteredBoundaryWithoutSuccessClaim",
+    "prunePreservesSafeSwitchReceiptHistoryAndExistingF01Residual",
+    "livePrefixCannotPruneAndExpiredPrefixFirstBecomesTerminal",
+    "recordingFactAndGovernedPolicyRemainUnchangedAcrossPrefixSuffix"
+  ],
+  "sourceMethodCount": 48,
+  "activeGradleBuildProcesses": [],
+  "sourceConfiguration": {
+    "image": "postgres:15-alpine",
+    "database": "obs015_migrations",
+    "containerLifecycle": "BeforeAll PG.start(); AfterAll PG.stop()",
+    "upgradeDatabase": "CREATE/DROP isolated upgrade_<uuid> within test container only",
+    "testcontainersVersion": "1.20.2"
+  },
+  "image": {
+    "Id": "sha256:ed8478222652ed5ec9cd22a74417af86b61d7cf03bea9bb4d3193be315c16567",
+    "RepoDigests": [
+      "postgres@sha256:fe0737ba566a2c5b2a28f34433c0a423261900ec17b9bf7ad115e1aae7e57f1b"
+    ],
+    "Architecture": "arm64",
+    "Os": "linux",
+    "versionEnvironment": [
+      "PG_MAJOR=15",
+      "PG_VERSION=15.19"
+    ]
+  },
+  "existingContainers": [
+    {
+      "Command": "\"sh -c '\\ncat <<'EOF'\u2026\"",
+      "CreatedAt": "2026-08-05 17:16:47 -0400 EDT",
+      "ID": "ef530f12a94c",
+      "Image": "public.ecr.aws/supabase/postgres:17.6.1.095",
+      "Labels": "com.docker.compose.project=outvo,com.supabase.cli.project=outvo",
+      "LocalVolumes": "1",
+      "Mounts": "supabase_db_ou\u2026",
+      "Names": "supabase_db_outvo",
+      "Networks": "supabase_network_outvo",
+      "Ports": "0.0.0.0:54322->5432/tcp",
+      "RunningFor": "2 months ago",
+      "Size": "38.3kB (virtual 1.29GB)",
+      "State": "running",
+      "Status": "Up 10 days (healthy)"
+    },
+    {
+      "Command": "\"docker-entrypoint.s\u2026\"",
+      "CreatedAt": "2026-06-25 17:51:24 -0400 EDT",
+      "ID": "e7c5cedaa947",
+      "Image": "public.ecr.aws/supabase/studio:2026.03.23-sha-b7847b7",
+      "Labels": "com.docker.compose.project=outvo,com.supabase.cli.project=outvo,desktop.docker.io/binds/0/Source=/Users/brunobuger/workspace/startup/products-core/products/outvo/supabase/snippets,desktop.docker.io/binds/0/SourceKind=hostFile,desktop.docker.io/binds/0/Target=/Users/brunobuger/workspace/startup/products-core/products/outvo/supabase/snippets",
+      "LocalVolumes": "0",
+      "Mounts": "/host_mnt/User\u2026",
+      "Names": "supabase_studio_outvo",
+      "Networks": "supabase_network_outvo",
+      "Ports": "0.0.0.0:54323->3000/tcp",
+      "RunningFor": "3 months ago",
+      "Size": "0B (virtual 1.17GB)",
+      "State": "running",
+      "Status": "Up 10 days (healthy)"
+    },
+    {
+      "Command": "\"docker-entrypoint.s\u2026\"",
+      "CreatedAt": "2026-06-25 17:51:24 -0400 EDT",
+      "ID": "f7cc98e52573",
+      "Image": "public.ecr.aws/supabase/postgres-meta:v0.96.1",
+      "Labels": "com.docker.compose.project=outvo,com.supabase.cli.project=outvo",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Names": "supabase_pg_meta_outvo",
+      "Networks": "supabase_network_outvo",
+      "Ports": "8080/tcp",
+      "RunningFor": "3 months ago",
+      "Size": "0B (virtual 375MB)",
+      "State": "running",
+      "Status": "Up 10 days (healthy)"
+    },
+    {
+      "Command": "\"docker-entrypoint.s\u2026\"",
+      "CreatedAt": "2026-06-25 17:51:24 -0400 EDT",
+      "ID": "2de89bb7e532",
+      "Image": "public.ecr.aws/supabase/storage-api:v1.44.11",
+      "Labels": "com.supabase.cli.project=outvo,com.docker.compose.project=outvo",
+      "LocalVolumes": "1",
+      "Mounts": "supabase_stora\u2026",
+      "Names": "supabase_storage_outvo",
+      "Networks": "supabase_network_outvo",
+      "Ports": "5000/tcp",
+      "RunningFor": "3 months ago",
+      "Size": "0B (virtual 689MB)",
+      "State": "running",
+      "Status": "Up 10 days (healthy)"
+    },
+    {
+      "Command": "\"postgrest\"",
+      "CreatedAt": "2026-06-25 17:51:24 -0400 EDT",
+      "ID": "00b597376518",
+      "Image": "public.ecr.aws/supabase/postgrest:v14.7",
+      "Labels": "com.docker.compose.project=outvo,com.supabase.cli.project=outvo,org.opencontainers.image.ref.name=ubuntu,org.opencontainers.image.version=24.04",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Names": "supabase_rest_outvo",
+      "Networks": "supabase_network_outvo",
+      "Ports": "3000/tcp",
+      "RunningFor": "3 months ago",
+      "Size": "0B (virtual 439MB)",
+      "State": "running",
+      "Status": "Up 10 days"
+    },
+    {
+      "Command": "\"/mailpit\"",
+      "CreatedAt": "2026-06-25 17:51:23 -0400 EDT",
+      "ID": "b656761ec810",
+      "Image": "public.ecr.aws/supabase/mailpit:v1.22.3",
+      "Labels": "org.opencontainers.image.title=Mailpit,org.opencontainers.image.url=https://mailpit.axllent.org,com.docker.compose.project=outvo,com.supabase.cli.project=outvo,org.opencontainers.image.description=An email and SMTP testing tool with API for developers,org.opencontainers.image.documentation=https://mailpit.axllent.org/docs/,org.opencontainers.image.licenses=MIT,org.opencontainers.image.source=https://github.com/axllent/mailpit",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Names": "supabase_inbucket_outvo",
+      "Networks": "supabase_network_outvo",
+      "Ports": "1025/tcp, 1110/tcp, 0.0.0.0:54324->8025/tcp",
+      "RunningFor": "3 months ago",
+      "Size": "4.4MB (virtual 33.3MB)",
+      "State": "running",
+      "Status": "Up 10 days (healthy)"
+    },
+    {
+      "Command": "\"auth\"",
+      "CreatedAt": "2026-06-25 17:51:23 -0400 EDT",
+      "ID": "72d2cab02903",
+      "Image": "public.ecr.aws/supabase/gotrue:v2.188.1",
+      "Labels": "com.docker.compose.project=outvo,com.supabase.cli.project=outvo",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Names": "supabase_auth_outvo",
+      "Networks": "supabase_network_outvo",
+      "Ports": "9999/tcp",
+      "RunningFor": "3 months ago",
+      "Size": "0B (virtual 50.2MB)",
+      "State": "running",
+      "Status": "Up 10 days (healthy)"
+    },
+    {
+      "Command": "\"sh -c 'cat <<'EOF' \u2026\"",
+      "CreatedAt": "2026-06-25 17:51:21 -0400 EDT",
+      "ID": "d7391c192b4e",
+      "Image": "public.ecr.aws/supabase/kong:2.8.1",
+      "Labels": "com.docker.compose.project=outvo,com.supabase.cli.project=outvo,maintainer=Kong <support@konghq.com>",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Names": "supabase_kong_outvo",
+      "Networks": "supabase_network_outvo",
+      "Ports": "8001/tcp, 8088/tcp, 8443-8444/tcp, 0.0.0.0:54321->8000/tcp",
+      "RunningFor": "3 months ago",
+      "Size": "53.9kB (virtual 149MB)",
+      "State": "running",
+      "Status": "Up 10 days (healthy)"
+    }
+  ],
+  "singleAuthorizedCommand": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend.py backend-migration48-attempt03 test --tests com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT --console=plain"
+}

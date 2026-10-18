@@ -1,0 +1,298 @@
+{
+  "story": "STUDIO-OBS-007",
+  "scope": "CURRENT_SOURCE_GUIDED_WORKER_REAL_MTLS_BROWSER_RENEWAL_ORACLES",
+  "capturedAtUtc": "2026-10-10T17:16:46.815885+00:00",
+  "changedSourcePaths": [
+    "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts"
+  ],
+  "productionSourceChanges": [],
+  "distChanges": [],
+  "sourceCount": 254,
+  "distCount": 274,
+  "buildInputsCount": 110,
+  "onlyCorrection": "Legitimate distinct nav/fill per-command idempotency keys; closed safe allowlist response status/code diagnostics (unknown OTHER); all native/clock/effect/lease expectations unchanged.",
+  "gates": [
+    {
+      "command": "npm run type-check",
+      "session": 21246,
+      "exitCode": 0,
+      "log": "type.log"
+    },
+    {
+      "command": "npm exec -- eslint test/fixtures-tier/guided-secret-ownership.test.ts",
+      "session": 60463,
+      "exitCode": 0,
+      "log": "lint.log"
+    },
+    {
+      "command": "npm run test:fixtures -- test/fixtures-tier/guided-secret-ownership.test.ts --bail=1 --reporter=default --reporter=json --outputFile.json=../docs/qa/evidence/STUDIO-OBS-007/runner-guided-renew-execution-2/tests.json",
+      "session": 88129,
+      "exitCode": 0,
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "names": [
+        "uses actual mTLS and native focus for guided secret ownership: revoked",
+        "uses actual mTLS and native focus for guided secret ownership: slow-grant",
+        "uses actual mTLS and native focus for guided secret ownership: lost-body-late-grant",
+        "uses actual mTLS and native focus for guided secret ownership: hard-expiry"
+      ],
+      "log": "fixtures.log"
+    }
+  ],
+  "actualMeasurements": [
+    {
+      "mode": "hard-expiry",
+      "cutoffMs": null,
+      "focusMs": 11985.733292,
+      "t0Ms": null,
+      "authorityStoppedMs": 16405.236709,
+      "stopReason": "EXPIRED",
+      "nativePendingAtFocus": 1,
+      "nativeEntryMs": 11984.718375,
+      "nativeEndMs": 16413.627667,
+      "contextCloseAfterAuthorityMs": 57.3570409999993,
+      "claimDurationsMs": [
+        7.0136249999995925,
+        4.532167000001209,
+        4.663875000000189,
+        4.422625000001062,
+        4.404333000000406
+      ],
+      "claimRequestBoundsMs": [
+        4865,
+        1000,
+        1000,
+        1000,
+        856
+      ],
+      "renewalEpochSkewMs": [
+        0.0,
+        -0.8253330000006827,
+        1.8234169999996084,
+        -0.4379160000007687
+      ],
+      "lateGrantWriteAt": null,
+      "lateGrantResponseClosed": null,
+      "actualPids": [
+        96107,
+        96134,
+        96113,
+        96114,
+        96115,
+        96117,
+        96118,
+        96119,
+        96153,
+        96136,
+        96137
+      ],
+      "allObservedPidsGone": true,
+      "scratchAbsent": true,
+      "inputEvents": 0
+    },
+    {
+      "mode": "lost-body-late-grant",
+      "cutoffMs": 1997.084499999999,
+      "focusMs": 8382.663625,
+      "t0Ms": 8870.449167,
+      "authorityStoppedMs": 10867.533667,
+      "stopReason": "LEASE_LOST",
+      "nativePendingAtFocus": 1,
+      "nativeEntryMs": 8381.921,
+      "nativeEndMs": 10873.906959,
+      "contextCloseAfterAuthorityMs": 69.74054199999955,
+      "claimDurationsMs": [
+        4.331541999999899,
+        6.002209000000221,
+        1002.4854169999999
+      ],
+      "claimRequestBoundsMs": [
+        10000,
+        1000,
+        1000
+      ],
+      "renewalEpochSkewMs": [
+        0.0,
+        -0.7864579999986745
+      ],
+      "lateGrantWriteAt": 11369.183875,
+      "lateGrantResponseClosed": true,
+      "actualPids": [
+        95939,
+        95986,
+        95947,
+        95948,
+        95949,
+        95951,
+        95952,
+        95953,
+        96004,
+        95988,
+        95989
+      ],
+      "allObservedPidsGone": true,
+      "scratchAbsent": true,
+      "inputEvents": 0
+    },
+    {
+      "mode": "revoked",
+      "cutoffMs": 993.0731249999999,
+      "focusMs": 1931.848959,
+      "t0Ms": 2763.370459,
+      "authorityStoppedMs": 3756.443584,
+      "stopReason": "REVOKED",
+      "nativePendingAtFocus": 1,
+      "nativeEntryMs": 1929.800834,
+      "nativeEndMs": 3765.360584,
+      "contextCloseAfterAuthorityMs": 82.8745829999998,
+      "claimDurationsMs": [
+        6.860749999999939,
+        8.553250000000162,
+        9.592875000000276,
+        4.430917000000136
+      ],
+      "claimRequestBoundsMs": [
+        10000,
+        1000,
+        1000,
+        1000
+      ],
+      "renewalEpochSkewMs": [
+        0.0,
+        4.271166999999878,
+        -2.1578749999998763
+      ],
+      "lateGrantWriteAt": null,
+      "lateGrantResponseClosed": null,
+      "actualPids": [
+        95618,
+        95678,
+        95656,
+        95657,
+        95658,
+        95660,
+        95661,
+        95662,
+        95701,
+        95680,
+        95682
+      ],
+      "allObservedPidsGone": true,
+      "scratchAbsent": true,
+      "inputEvents": 0
+    },
+    {
+      "mode": "slow-grant",
+      "cutoffMs": null,
+      "focusMs": 4399.079125,
+      "t0Ms": null,
+      "authorityStoppedMs": 7760.693209,
+      "stopReason": "CANCELLED",
+      "nativePendingAtFocus": 1,
+      "nativeEntryMs": 4398.31075,
+      "nativeEndMs": 7764.817292,
+      "contextCloseAfterAuthorityMs": 61.6084579999997,
+      "claimDurationsMs": [
+        4.26583299999993,
+        854.7622499999998,
+        855.7044999999998,
+        859.1554169999999
+      ],
+      "claimRequestBoundsMs": [
+        10000,
+        1000,
+        1000,
+        1000
+      ],
+      "renewalEpochSkewMs": [
+        0.0,
+        1.743959000000359,
+        2.0965000000005602
+      ],
+      "lateGrantWriteAt": null,
+      "lateGrantResponseClosed": null,
+      "actualPids": [
+        95761,
+        95806,
+        95767,
+        95768,
+        95769,
+        95771,
+        95772,
+        95773,
+        95824,
+        95808,
+        95809
+      ],
+      "allObservedPidsGone": true,
+      "scratchAbsent": true,
+      "inputEvents": 0
+    }
+  ],
+  "actualFactsFiles": [
+    "oracle-hard-expiry.json",
+    "oracle-lost-body-late-grant.json",
+    "oracle-revoked.json",
+    "oracle-slow-grant.json"
+  ],
+  "proofBoundary": {
+    "real": "Actual createGuidedServer/source ownership+runtime+launchGuidedBrowser; real mutually authenticated HTTPS, exactfingerprint/JWT/scope/fence, fullsandboxedChromium/effectivepreferences/solecollector/nativeCDP; real clocks and native pendingfocus events. Original SDK/Runtime methods unchanged by spies.",
+    "cutoff": "Actual accepting=false after original runtime.stop. t0 after actual successful renew response during native focus. Request time, queue and deadline included; revoked993ms and lostbody1997ms. Physical context close/teardown measured separately.",
+    "slow": "Server delay850ms, real request855..859ms, three successful renewal epochs within200ms skew; serial claim max1, no renewedcontext/start-budget reset.",
+    "expiry": "Actual fixed session/lease hardexpiry during native focus, EXPIRED reason; same capped grant cannot extend deadline, context/assignment retries refused.",
+    "lateGrant": "Lostbody actual valid remainder write attempted1500ms later after response alreadydestroyed. This proves latewrite attempt/notaccepted and closedworker denial; does not claim it was actually delivered.",
+    "effects": "One real native entry, no input events and no submissions; later secret prepare refused;11 observedPIDs percase gone and owned scratch removed. No actual sequential/multi-CSI isolation/ownershipslot reuse proof.",
+    "sinks": "Existing assertions scan actual callback/authoritative/diagnostic journal text for literal/URL/base64 canary. Four actual stderr native TargetClosed lines code-only in captured fixturelog; not injected/raw-positive/fulljoinedC6 proof.",
+    "excluded": "Actual backend mayUse/revoked_at/Vault/DBaudit/controller serviceCore and compiled guided process not proved. Source guided owning-worker harness only, no unavailable-oracle PASS."
+  },
+  "cleanup": {
+    "newRelevantProcessesStillAlive": [],
+    "recentMatchingScratchRemaining": [],
+    "perCaseAllObservedPidsGone": true,
+    "perCaseScratchAbsent": true
+  },
+  "freeze": {
+    "source": "source-manifest.json",
+    "dist": "dist-manifest.json",
+    "buildInputs": "build-inputs-manifest.json",
+    "zip": "current-source-dist-buildinputs.zip",
+    "runtime": "runtime-versions.json",
+    "browser": "browser-provenance.json"
+  },
+  "preservedRed": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/runner-guided-renew-execution/result.json",
+    "sha256": "0662db35b670d94fce10577333094a2fc4eaafde8466b248ed56f02b12ae28c4",
+    "scope": "Actual earlier409/no native due likelyduplicatepreparekey; raw409body wasnotcaptured and cause remains source-supported. Currentgreen doesnotrewrite thatreceipt"
+  },
+  "remaining": [
+    "Isolation3/oldcanaryecho privacy design not released or implemented",
+    "Actual Core/PG/Vault/guidedcontrollerprocesscuts/all-sink/queued-live-revocation/positiveUSEDreaper joins",
+    "Current full unchanged-threshold defaultcoverage/Chromium/deployment/type/lint/build/pins and independentdelta/lifecycleQA",
+    "Fresh actual image/Node22internalED05, manual/staging/pilot gates; oldimage and7290byte historicalmissingpixels limits unchanged"
+  ],
+  "liveRProcesses": [],
+  "qaApproved": false,
+  "artifactSha256": {
+    "browser-provenance.json": "d5c19b48a4d37659821441b462c3f131c6101d2e2145de464d130c55412b2a91",
+    "source-manifest.json": "004b135623a1ac235b5fa58f29d4baafea7f8beb3b032172d37e2c74cda3cf0e",
+    "before-bindings.json": "b26ef0dae950b67b7c8abe3a0f975fd23dc75602f43216a9e04c072dbe6f93c8",
+    "oracle-hard-expiry.json": "f40c7fefd960facfdc2a2139d352f958c27dd6771f53d5809c81afac8a0b3738",
+    "tests.json": "6805923a6b353482cb8b13ef2529ed104ecb8efc5080cd1b3b4a3dddd3ca8bf7",
+    "lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runtime-versions.json": "ff9d2b4c8867c6cd1fa27c2019838b0ce25d2ee39c219fa0b6c24e2fa0928b8c",
+    "test-before.test.ts": "6a7505e08cd08a79370ea7bbec61c4b54c25b98b0fe5f394fa1adec70a7eba3a",
+    "current-source-dist-buildinputs.zip": "6e184d6b8315da7eece16b5fb8cc7343b4809154da8a9f0832496c4ff5c88084",
+    "oracle-lost-body-late-grant.json": "0498bc6100482c27464a0b4df47febadc00d515ff70e52be31df3240d63f9089",
+    "oracle-revoked.json": "f60cbe425915a27c74eac12c632db425e703415e9d3628a8153b9e75c77c304d",
+    "test-source.test.ts": "c6f789268dc25478d61d83204cf11ec4d97be4f2a8b04743d5c68af6a2e24df4",
+    "processes-before.txt": "825991207a6113603643e90dc57197773a0819def884f9cb6d29594787d38283",
+    "processes-after.txt": "18770cda68fc76fc222b57d3238482072a3b2d9e3389030b8a589f153343497d",
+    "oracle-slow-grant.json": "e7547d3909cae2bb9b19ffccbe4c9f3ca075f7634605d77b7e62fc8c11b6ccc0",
+    "fixtures.log": "11a8c8f34f74da613ba3f027de9dba0255a2c5f03ba4e0ef865ab0888ab3e305",
+    "dist-manifest.json": "6e9d8338e70d69936ef6298052d712044bb523cc963294477ad71daa8a171bb0",
+    "type.log": "66cb0d88cd3e949228a13daec3e65de0ce0c25b1b7278f1ffdb96dcd2886dfc9",
+    "build-inputs-manifest.json": "d1a041a02d6440883ce5b4c1d9f089dd86fc316e53842cbf5c3a4558f6805c6d"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "status": "SOURCE_FROZEN_CHECKS_UNRUN",
+  "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+  "beforeSha256": "48ce3c73f12b76f89075b04a10abb8febab8ac540d1f3073f1ce8a6a21d4dc6e",
+  "afterSha256": "3286e59541e93e393272d43886ce7e739e75dff4412cf98f1b9ffdcbf03c82d7",
+  "exactDelta": {
+    "original": "          committed.progress().remove(\"observationRefresh\");\n          repository.save(committed);",
+    "replacement": "          if (committed.progress().remove(\"observationRefresh\") != null) {\n            repository.save(committed);\n          }",
+    "originalOccurrenceCount": 1,
+    "reverseReplacementRestoresAllBytes": true
+  },
+  "preservation": [
+    "All other source bytes identical",
+    "Second lock retained",
+    "First full validation/write and every scope/auth/materialization/generation/idempotency/command guard retained",
+    "Present refresh and explicit JSON null removal still persisted",
+    "No schema/SQL/TRACE/timeout/cadence/authority change"
+  ],
+  "checks": {
+    "runtime": "UNRUN",
+    "tests": "UNRUN",
+    "formatter": "UNRUN",
+    "compiler": "UNRUN",
+    "sql": "UNRUN"
+  },
+  "limits": "No performance or semantic runtime PASS claim; coordinator owns verification."
+}

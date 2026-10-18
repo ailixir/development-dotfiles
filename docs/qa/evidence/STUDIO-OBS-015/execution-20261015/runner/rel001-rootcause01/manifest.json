@@ -1,0 +1,59 @@
+{
+ "id": "rel001-rootcause01",
+ "agent": "Dex (@dev)",
+ "date": "2026-10-16",
+ "readOnly": true,
+ "sourceDigestAtAnalysis": "f071984a46af15a039140e11135c0223092b338fd79d3a985757421ab323cabe",
+ "distDigestAtAnalysis": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e",
+ "rootCause": {
+  "established": false,
+  "confidence": "D1 (cause swallowed, never logged) certain; leading trigger candidate H1 about 35 percent",
+  "leadingCandidate": "verifyBrowserPreferences reads chrome://version fields before the page fills them, during a Chrome start 3.2-3.9x slower than the other 18 in the run"
+ },
+ "patches": {
+  "fix-a-cause-preservation.patch": "36826300172c70a41eda1c55bda25ff907563c3e42054bf960f2d344f3b5d62a",
+  "fix-b-probe-readiness.patch": "3d9f05826384339a84cfe6412b14daa9433f2404b90104272544b4bcbc577ad5",
+  "fix.patch": "4508e52dc6f5ad6cfdc2d488d2468878a8a00902b8047cd6971c4c1efe6c6cf3"
+ },
+ "patchBaseFileSha256_workingTree": {
+  "studio-runner/src/guided/diagnostics.ts": "cd355ead668fc54953c8a06acf8da13a317b103ced1357d68eef516c6f2a7637",
+  "studio-runner/src/guided/ownership.ts": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf",
+  "studio-runner/src/guided/runtime.ts": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+  "studio-runner/src/guided/transport.ts": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+  "studio-runner/src/run/browser.ts": "19893b2aeda17b4d94b4ddb45977fb170cea45035a78cc4e6a1b3f904de21dd9",
+  "studio-runner/src/run/guidedBrowser.ts": "8c4d36a38f1901b93f3d6185955b2cb2b5a1bd7e06bbd93a6479e0c2a3158ce1",
+  "studio-runner/src/run/versionProbe.ts": null,
+  "studio-runner/test/fixtures-tier/guided-recording.test.ts": "a3fdac9a5f0bd01b66b676f51ecffbdfdc4498e760c2a8ac5bdaf0af3dbb9b5b",
+  "studio-runner/test/guided/diagnostics.test.ts": "1bc276942913d948a6fac29f3bca8b5b399a0cc5baa1491e01071c6885a29e81",
+  "studio-runner/test/guided/ownership.test.ts": "fc4cb4f4c617830c75a32572e8cc381cd933310b33ea0d3ee212e91f1f9865e4",
+  "studio-runner/test/guided/runtime.test.ts": "dfd1bad817e5eb33aaa9e7e6357723544f182342b8203753712f212744a4e814",
+  "studio-runner/test/guided/transport.test.ts": "923d54920369929b34b1ef5cca0dd60f935de2f0e9fba471363e3ce31026b3da",
+  "studio-runner/test/run/versionProbe.test.ts": null
+ },
+ "applyCheck": "git apply --check -p1 from repo root: fix.patch, fix-a-cause-preservation.patch, fix-b-probe-readiness.patch all clean; A then B equals fix.patch (verified in a scratch copy)",
+ "notRun": [
+  "tsc type-check",
+  "eslint",
+  "vitest (any tier)",
+  "gradle",
+  "docker",
+  "npm/pnpm"
+ ],
+ "raw": {
+  "raw/unified-log-chrome-launches-20261016T2025-2027.txt": "d95fdd643274b93b166315132285c264c5bd709c3118a109f9d07b64b6ce1c18"
+ },
+ "repro": {
+  "chrome-ready-times.py": "38f8a3aeb49a9e45728cf4a0d62ac2bf568780dcd3d46f23d2042f83baab27a2",
+  "harness-stress.mjs": "61b97882b494195857f132a1569f97ce2224c83621f94b30a3558ed6a0727f5b",
+  "lib.sh": "1a9201f74826557b546597bc3fb2f05254b13a1a1bb3e4a6f3e24261476f6c55",
+  "mem-hold.mjs": "0f59a1f585faac217337253ecd42700a8a6b61b68c7e281767aa4a8464d100cc",
+  "preflight.sh": "34ced452932bbe2d691ccc9d55bbbf9ae033f38f2ba61e36c82672328dc7c76e",
+  "prepare-scratch.sh": "15b5ab253c5667bb21e6cb287eb71a95ff7d7220fd7754558d2e20dc97557487",
+  "probe-version-race.mjs": "5d50fbda850d198a4952659b6aabd8bf90d32f4c61e29321a3c391af11d12cab",
+  "run-fix-validation.sh": "ebe61e013b90f284ab1883556ebfefcea2052c86e7e7a6193fe11e944e39ed7d",
+  "run-matrix.sh": "09fd6bcb0207f292313b61d4770b5f1869eeca573c6e94a9c044e90887f2aab0",
+  "runbook.md": "3974ba5d0ab706f3b40f042c93e1f6ef63cf8866a672190b0e94a7a94795b5a7",
+  "tally.mjs": "85b30baae26bb45dbe50bd4f390aab490766d7244f96d3ab0d4a1fe820ca7a48"
+ },
+ "reproStatus": "prepared and syntax-checked only; nothing executed, no Chrome launched, scratch build not made; attempt04 was running"
+}

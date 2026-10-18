@@ -1,0 +1,11 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+@@ -2580,7 +2580,7 @@
+     static {
+       try {
+         TEMP = Files.createTempDirectory("guided-translation-");
+-        WORKER_SNAPSHOT = TEMP.resolve("worker-dist");
++        WORKER_SNAPSHOT = TEMP.resolve("dist");
+         Path sourceBuild = Path.of("../studio-runner/dist").toAbsolutePath().normalize();
+         try (var files = Files.walk(sourceBuild)) {
+           for (Path source : files.toList()) {

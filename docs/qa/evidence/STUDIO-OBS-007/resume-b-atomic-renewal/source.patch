@@ -1,0 +1,152 @@
+--- backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java.before
++++ backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java
+@@ -67,6 +67,23 @@
+         session.document().toString(),
+         session.progress().toString(),
+         session.document().path("sessionId").asText());
++  }
++
++  /** Caller holds the same-owner live session lock; renewal leaves progress unchanged. */
++  public void saveRenewalAndCommand(Session session, String key, String digest) {
++    GuidedSessionException.require(
++        org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive(),
++        "RUNTIME_INCOMPATIBLE", 409);
++    contracts.validate("session", session.document());
++    String document = session.document().toString();
++    int inserted = jdbc.update(
++        "WITH updated AS (UPDATE studio_guided_sessions SET state=?,document=?::jsonb"
++            + " WHERE session_id=? RETURNING session_id,document)"
++            + " INSERT INTO studio_guided_commands(namespace,route,idempotency_key,request_digest,response)"
++            + " SELECT session_id,'claim',?,?,document FROM updated",
++        session.document().path("state").asText(), document,
++        session.document().path("sessionId").asText(), key, digest);
++    GuidedSessionException.require(inserted == 1, "FORBIDDEN_SCOPE", 403);
+   }
+ 
+   public void namespaceLock(String namespace) {
+--- backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java.before
++++ backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -794,8 +794,7 @@
+             // Ownership maintenance is not an acquisition or a workflow transition. Keeping the
+             // fence also preserves outstanding admission/callback identities for this live owner.
+             ((ObjectNode) owner).put("leaseExpiresAt", lease.toString());
+-            repository.save(session);
+-            repository.command(id, "claim", key, digest, session.document());
++            repository.saveRenewalAndCommand(session, key, digest);
+             return session.document().deepCopy();
+           }
+           require(fence < Integer.MAX_VALUE, "STALE_FENCE", 409);
+--- backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java.before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
+@@ -743,6 +743,111 @@
+   }
+ 
+   @Test
++  void atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot() {
++    String id = observing();
++    service.observe(worker, id, 1, "before-atomic-renew", observation(id, 1));
++    JsonNode beforeProgress = persistedProgress(id);
++    JsonNode before = repository.transaction(() -> repository.lock(id).document().deepCopy());
++    clock.now = clock.now.plusSeconds(5);
++    JsonNode renewed = service.claim(worker, id, "atomic-renew", claim(id, "worker-1", 1));
++    assertThat(persistedProgress(id)).isEqualTo(beforeProgress);
++    assertThat(renewed.path("owner").path("fence")).isEqualTo(before.path("owner").path("fence"));
++    assertThat(renewed.path("expiresAt")).isEqualTo(before.path("expiresAt"));
++    assertThat(renewed.path("counters")).isEqualTo(before.path("counters"));
++    JsonNode command = contracts.parse(jdbc.queryForObject(
++        "SELECT response::text FROM studio_guided_commands WHERE namespace=? AND route='claim'"
++            + " AND idempotency_key=?", String.class, id, "atomic-renew"));
++    assertThat(command).isEqualTo(renewed);
++    assertThat(persistedDocument(id)).isEqualTo(renewed);
++    ((ObjectNode) renewed).withObject("/owner").put("workerId", "caller-mutated-copy");
++    assertThat(persistedDocument(id).path("owner").path("workerId").asText()).isEqualTo("worker-1");
++  }
++
++  @Test
++  void atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate() {
++    String id = observing();
++    ObjectNode request = claim(id, "worker-1", 1);
++    service.claim(worker, id, "conflicting-renew", request);
++    JsonNode before = repository.transaction(() -> repository.lock(id).document().deepCopy());
++    JsonNode beforeProgress = persistedProgress(id);
++    clock.now = clock.now.plusSeconds(5);
++    assertThatThrownBy(() -> repository.transaction(() -> {
++      var session = repository.lock(id);
++      session.document().withObject("/owner").put("leaseExpiresAt", clock.now.plusSeconds(30).toString());
++      repository.saveRenewalAndCommand(session, "conflicting-renew", GuidedContracts.hash(request));
++      return null;
++    })).isInstanceOf(org.springframework.dao.DuplicateKeyException.class);
++    assertThat(persistedDocument(id)).isEqualTo(before);
++    assertThat(persistedProgress(id)).isEqualTo(beforeProgress);
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_commands"
++        + " WHERE namespace=? AND route='claim' AND idempotency_key=?", Integer.class, id, "conflicting-renew"))
++        .isEqualTo(1);
++    assertThat(contracts.parse(jdbc.queryForObject("SELECT response::text FROM studio_guided_commands"
++        + " WHERE namespace=? AND route='claim' AND idempotency_key=?", String.class, id, "conflicting-renew")))
++        .isEqualTo(before);
++  }
++
++  @Test
++  void atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit() {
++    String id = observing();
++    JsonNode before = repository.transaction(() -> repository.lock(id).document().deepCopy());
++    JsonNode beforeProgress = persistedProgress(id);
++    clock.now = clock.now.plusSeconds(5);
++    assertThatThrownBy(() -> repository.transaction(() -> {
++      JsonNode renewed = service.claim(worker, id, "outer-rollback-renew", claim(id, "worker-1", 1));
++      assertThat(renewed.path("owner").path("leaseExpiresAt"))
++          .isNotEqualTo(before.path("owner").path("leaseExpiresAt"));
++      assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_commands"
++          + " WHERE namespace=? AND route='claim' AND idempotency_key=?", Integer.class, id, "outer-rollback-renew"))
++          .isEqualTo(1);
++      throw new IllegalStateException("Controlled outer renewal rollback");
++    })).isInstanceOf(IllegalStateException.class).hasMessage("Controlled outer renewal rollback");
++    assertThat(persistedDocument(id)).isEqualTo(before);
++    assertThat(persistedProgress(id)).isEqualTo(beforeProgress);
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_commands"
++        + " WHERE namespace=? AND route='claim' AND idempotency_key=?", Integer.class, id, "outer-rollback-renew"))
++        .isZero();
++  }
++
++  @Test
++  void atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand() {
++    String id = observing();
++    JsonNode before = repository.transaction(() -> repository.lock(id).document().deepCopy());
++    JsonNode beforeProgress = persistedProgress(id);
++    assertThatThrownBy(() -> repository.transaction(() -> {
++      var session = repository.lock(id);
++      session.document().put("unexpectedRenewalField", true);
++      repository.saveRenewalAndCommand(session, "invalid-schema-renew", GuidedContracts.hash(claim(id, "worker-1", 1)));
++      return null;
++    })).hasMessage("INVALID_CONTRACT");
++    assertThat(persistedDocument(id)).isEqualTo(before);
++    assertThat(persistedProgress(id)).isEqualTo(beforeProgress);
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_commands"
++        + " WHERE namespace=? AND route='claim' AND idempotency_key=?", Integer.class, id, "invalid-schema-renew"))
++        .isZero();
++    String absent = UUID.randomUUID().toString();
++    assertThatThrownBy(() -> repository.transaction(() -> {
++      var original = repository.lock(id);
++      ObjectNode missing = original.document().deepCopy().put("sessionId", absent);
++      repository.saveRenewalAndCommand(new GuidedSessionRepository.Session(missing, original.progress()),
++          "missing-owner-renew", GuidedContracts.hash(claim(absent, "worker-1", 1)));
++      return null;
++    })).hasMessage("FORBIDDEN_SCOPE");
++    assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_commands WHERE namespace=?",
++        Integer.class, absent)).isZero();
++    assertThat(persistedDocument(id)).isEqualTo(before);
++  }
++
++  private JsonNode persistedDocument(String id) {
++    return repository.transaction(() -> repository.lock(id).document().deepCopy());
++  }
++
++  private JsonNode persistedProgress(String id) {
++    return contracts.parse(jdbc.queryForObject("SELECT progress::text FROM studio_guided_sessions WHERE session_id=?",
++        String.class, id));
++  }
++
++  @Test
+   void liveOwnerRenewalPreservesAdmittedAndDispatchedActions() {
+     String id = observing();
+     service.observe(worker, id, 1, "observe", observation(id, 1));

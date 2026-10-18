@@ -1,0 +1,574 @@
+{
+  "artifact": "STUDIO-OBS-015 actual supported2048 two-method Core feedback01",
+  "at": "2026-10-15T17:47:14.531707+00:00",
+  "owner": "Dex/backend015_resume",
+  "status": "FAIL_TWO_METHODS_AND_FINAL_AUDIT_LIFECYCLE_ALL_PRIOR_PROOFS_OPEN",
+  "qaVerdict": null,
+  "lifecycleChange": null,
+  "allSourceDistHold": true,
+  "commandsLive": false,
+  "disjointSourceMayResumeAfterActualCommandTerminal": true,
+  "testedSourceStabilityIsCapturedBeforeAfterOnly": true,
+  "exactOuterCommand": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py backend-incremental2048-core-feedback-attempt01 --test-tasks guidedIncrementalTest --require-exec-tasks guidedIncrementalTest -- guidedIncrementalTest --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays' --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStartCannotWidenTrustedOriginCeiling'",
+  "invocations": 1,
+  "actualHandle": 17342,
+  "actualResult": {
+    "command": [
+      "caffeinate",
+      "-i",
+      "./gradlew",
+      "guidedIncrementalTest",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStartCannotWidenTrustedOriginCeiling"
+    ],
+    "cwd": "backend",
+    "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+    "started": "2026-10-15T17:38:13.539842+00:00",
+    "elapsedSeconds": 126.1,
+    "exit": 1,
+    "counts": {
+      "total": 3,
+      "passed": 0,
+      "failed": 3,
+      "errors": 0,
+      "skipped": 0
+    },
+    "testcases": [
+      {
+        "task": "guidedIncrementalTest",
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "name": "incrementalStartCannotWidenTrustedOriginCeiling()",
+        "status": "FAIL"
+      },
+      {
+        "task": "guidedIncrementalTest",
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "name": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays()",
+        "status": "FAIL"
+      },
+      {
+        "task": "guidedIncrementalTest",
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "name": "executionError",
+        "status": "FAIL"
+      }
+    ],
+    "xmlFiles": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+        "sha256": "918b453f6ec80042ce489f5ab2527cbd9400bd237e45ec5228060f0aa5cb61db",
+        "bytes": 12415491,
+        "mtimeNs": 1792086019065486563,
+        "mode": "0o644",
+        "task": "guidedIncrementalTest"
+      }
+    ],
+    "guardTallies": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guard-tally/GuidedPublicationReplayIT.json",
+        "sha256": "75e1555d061730d3732e31bbb59e286e157eba44b49cc300d13b3c379f5a3af6",
+        "bytes": 728,
+        "mtimeNs": 1792086017897939165,
+        "mode": "0o644"
+      }
+    ],
+    "logSha256": "5a2c3fd56e11123f47fa13dda2b2a04c6de8edf3e4bd9b5396396425c2669c14",
+    "sourceStable": true,
+    "distStable": true,
+    "testInputStable": true,
+    "testInputDigestBefore": "79d1e7f281b4d1d5783c57b4c7def4de711ed2a123c348a47ee60085bbca4e9d",
+    "testInputDigestAfter": "79d1e7f281b4d1d5783c57b4c7def4de711ed2a123c348a47ee60085bbca4e9d",
+    "defaultTaskBaseReceipt": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-default-task-base-results.json",
+      "sha256": "5f85d1408429d0d9035f1e7e385a814f73035b73bdee2c4fffc8e3913771a255",
+      "bytes": 1370,
+      "mtimeNs": 1792086019640853427,
+      "mode": "0o644"
+    },
+    "legacyWrapper": {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend.py",
+      "sha256": "ace5061c9ab4dadede31fbfe693440c12b68ecb1f72b0dbf2760979bb6e50985",
+      "bytes": 3805,
+      "mtimeNs": 1792037228572819798,
+      "mode": "0o644"
+    },
+    "taskedWrapper": {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py",
+      "sha256": "b81dbb25086aaebe4a001512cabdb4c8a071f3c3c2c43908adf298a140ab3b3b",
+      "bytes": 14080,
+      "mtimeNs": 1792084987085667099,
+      "mode": "0o644"
+    },
+    "explicitTestTasks": [
+      "guidedIncrementalTest"
+    ],
+    "requiredFreshExecTasks": [
+      "guidedIncrementalTest"
+    ],
+    "expectedHistoricalSkips": [],
+    "historicalSkipSource": null,
+    "skipPolicy": "Zero skipped cases unless they equal the independently approved exact task/class/name multiset",
+    "taskResults": {
+      "guidedIncrementalTest": {
+        "counts": {
+          "total": 3,
+          "passed": 0,
+          "failed": 3,
+          "errors": 0,
+          "skipped": 0
+        },
+        "freshXmlFiles": 1,
+        "freshHtmlIndex": true,
+        "freshExec": true,
+        "execRequired": true,
+        "joinCasesPresent": true,
+        "freshJoinCohorts": 1
+      }
+    },
+    "testHtmlFiles": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/html/classes/com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.html",
+        "sha256": "76ae1e299257640bcacde3cc9bb8a6b42a5fe60531cecb6e8749cac96811ac32",
+        "bytes": 12209595,
+        "mtimeNs": 1792086019157323962,
+        "mode": "0o644",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/html/css/base-style.css",
+        "sha256": "a10a4ef75ca2601b44bfdaf3112a5854f6376f68d7cbaf6958286f04488d293b",
+        "bytes": 2645,
+        "mtimeNs": 1792086019159057945,
+        "mode": "0o644",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/html/css/style.css",
+        "sha256": "61866908fd7eb09c79e96239f69db2e8cc5c6526cdb308eba0535ed2a0f6a263",
+        "bytes": 1135,
+        "mtimeNs": 1792086019159741230,
+        "mode": "0o644",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/html/index.html",
+        "sha256": "ad64f76317a8ee5d055e85c8d85124567097c4dfb53c71198e75a8fcff88875f",
+        "bytes": 3634,
+        "mtimeNs": 1792086019068154328,
+        "mode": "0o644",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/html/js/report.js",
+        "sha256": "fc89c6d002d18f4662065c9887b2cda8f8486f2737d4ad0f2fdeac0ad58a44dc",
+        "bytes": 5252,
+        "mtimeNs": 1792086019159895978,
+        "mode": "0o644",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/html/packages/com.citi.put.checks.studio.guided.publication.html",
+        "sha256": "035738be9780a0df173cc2ce607fd76bcaf66436357abaf16a5ed03fd6523119",
+        "bytes": 3297,
+        "mtimeNs": 1792086019068088996,
+        "mode": "0o644",
+        "task": "guidedIncrementalTest"
+      }
+    ],
+    "jacocoExecFiles": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/jacoco/guidedIncrementalTest.exec",
+        "sha256": "df98db13d7b29cf5e0a17814e10a05e19a3f7f2324242e636f7642d278b98a7f",
+        "bytes": 973757,
+        "mtimeNs": 1792086018479881423,
+        "mode": "0o644",
+        "task": "guidedIncrementalTest",
+        "nonempty": true
+      }
+    ],
+    "guidedCohortFiles": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/cohort.json",
+        "sha256": "73700f196506c69ff4c9cd7cad265abe7581f73f40df740b356974d64c6837af",
+        "bytes": 6804,
+        "mtimeNs": 1792086017898444535,
+        "mode": "0o600",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/guard-tally.json",
+        "sha256": "75e1555d061730d3732e31bbb59e286e157eba44b49cc300d13b3c379f5a3af6",
+        "bytes": 728,
+        "mtimeNs": 1792086017898124121,
+        "mode": "0o600",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/model-budget-evidence-guidedIncrementalTest-1-incrementalStartCannotWidenTrustedOriginCeiling-singleton-after-each.json",
+        "sha256": "52f3f7f4e5fefc3cb7e5d4fb14ce44a744868b69aefebba1d20f9de2751b83c1",
+        "bytes": 7645,
+        "mtimeNs": 1792085918985617856,
+        "mode": "0o600",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/model-budget-evidence-guidedIncrementalTest-1-incrementalStartCannotWidenTrustedOriginCeiling-singleton-final.json",
+        "sha256": "52f3f7f4e5fefc3cb7e5d4fb14ce44a744868b69aefebba1d20f9de2751b83c1",
+        "bytes": 7645,
+        "mtimeNs": 1792086017682998213,
+        "mode": "0o600",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/model-budget-evidence-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-after-each.json",
+        "sha256": "47649caf0f50bc26cba9905f8a5d569788428e61c1b35ca1ca689baf850ff391",
+        "bytes": 7894,
+        "mtimeNs": 1792086017320092242,
+        "mode": "0o600",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/model-budget-evidence-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-final.json",
+        "sha256": "47649caf0f50bc26cba9905f8a5d569788428e61c1b35ca1ca689baf850ff391",
+        "bytes": 7894,
+        "mtimeNs": 1792086017720867428,
+        "mode": "0o600",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/privacy-guidedIncrementalTest-1-incrementalStartCannotWidenTrustedOriginCeiling-singleton.json",
+        "sha256": "8761c13cdc3db876181dff23b14736a99a0734725618c4517e3a7e2e148a3345",
+        "bytes": 6262,
+        "mtimeNs": 1792086017721913501,
+        "mode": "0o600",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/privacy-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton.json",
+        "sha256": "dba9d2417a7cf2cb24287d821db77e5699e41e6d183791edf255cc94619d893f",
+        "bytes": 6316,
+        "mtimeNs": 1792086017722071417,
+        "mode": "0o600",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/responses-guidedIncrementalTest-1-incrementalStartCannotWidenTrustedOriginCeiling-singleton-after-each.json",
+        "sha256": "6f06595a7dc978686e7b7205d1e1c406214d39ab8b69abd60f50cf485a0d78c4",
+        "bytes": 10734,
+        "mtimeNs": 1792085919007830723,
+        "mode": "0o600",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/responses-guidedIncrementalTest-1-incrementalStartCannotWidenTrustedOriginCeiling-singleton-final.json",
+        "sha256": "a5cbcb1fafb27278ecf6022130bc0199f119b59a2d6ba75ecb465758ae3785b6",
+        "bytes": 11411,
+        "mtimeNs": 1792086017683524333,
+        "mode": "0o600",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/responses-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-after-each.json",
+        "sha256": "846731a847d844b210056334fb6d1c10432776a3fceefa7bbf5f10d1c90b163b",
+        "bytes": 10786,
+        "mtimeNs": 1792086017403022185,
+        "mode": "0o600",
+        "task": "guidedIncrementalTest"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-task-outputs/guidedIncrementalTest/cohorts/e17ffdd3-ca5d-45c6-ad75-7b85814b52cf/2f307628-af53-4cc1-8cd0-f313afa914fb/responses-guidedIncrementalTest-2-incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays-singleton-final.json",
+        "sha256": "6659452dbc8f8a1cd67c4a4176f1d284a83861daae246ea3061825bacc7a4031",
+        "bytes": 11463,
+        "mtimeNs": 1792086017721244675,
+        "mode": "0o600",
+        "task": "guidedIncrementalTest"
+      }
+    ],
+    "taskCollectionErrors": [
+      {
+        "task": "guidedIncrementalTest",
+        "reason": "MISSING_FRESH_COHORT_FILE",
+        "file": "audit-final.json"
+      }
+    ],
+    "taskCollectionComplete": false,
+    "scope": "Explicit fresh Test-task outputs only; merged coverage, complete JOIN80 case union, per-invocation budget/audit/private media proof require separate assessment.",
+    "gradleExit": 1,
+    "validationSucceeded": false
+  },
+  "actualCounts": {
+    "total": 3,
+    "passed": 0,
+    "failed": 3,
+    "errors": 0,
+    "skipped": 0
+  },
+  "countScope": "TASK-qualified guidedIncrementalTest XML:2selected methods FAIL +executionError final audit lifecycle FAIL. Legacy default-task-base0 cases is partial output, not this task result. Original80invocation count is not changed by reporting lifecycle failure.",
+  "compile": "Main and alltest compile UP-TO-DATE from successful compile02; no freshcompile requested",
+  "rootCollector": "First real task-qualified collector preserved fresh XML/HTML/nonempty973757byteexec/12cohort files/canonicalguard. Correctly RED for missing audit-final.json, plus actual Gradle/test/lifecycle failure. No skips/duplicate/source drift/exclusion permitted.",
+  "failures": [
+    {
+      "case": "incrementalStartCannotWidenTrustedOriginCeiling()",
+      "firstAssertion": "refusal preserves all source/session/base/budget/revision bytes",
+      "actualExpectedDifference": "Exactly one leaf /studio_guided_sessions/0/progress/teardownStatus expectedPENDING actualCONFIRMED; all other full captured fields identical. Parsed directly from huge expected/actual snapshot; raw values not re-exported.",
+      "owner": "Backend JOIN snapshot precondition/concurrent base teardown. Requires real stable checkpoint, no field removal/normalization/equality weakening. No source fix authorized or made.",
+      "reached": "Real10step base completed12successful actions,13APPLIED model calls; base publication200/READY and draftedit4 reached. Existing origin/revision refusal checks reach snapshot assertion.",
+      "unreached": "Trusted current-context comparison and exact409RUNTIME_INCOMPATIBLE widening refusal; mixed prefix/suffix/finalize/replay/video assertions."
+    },
+    {
+      "case": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays()",
+      "firstAssertion": "Second explicit learning did not finalize; existing90second awaitFinalizing atJOIN18585, caller3536",
+      "actualStateBeforeCleanup": "Accepted mixed session PREPARING,0actions/observations/modelproposals/input/output, no materialization/obligations/admissions/attempts; initial base SUCCEEDED12actions/13APPLIEDcalls. Actual failure cleanup subsequently cancels the mixed session and confirms teardown.",
+      "observedCause": "664actual retained REVISION_CONFLICT diagnostics, all first root at GuidedSessionService.reconcileLateModelUsageLocked183 via reconcileLateModelUsage170. That source has an unconditional require(!incremental.pending(...)) before accounting. This is a concrete current production pending/bootstrap accounting path refusal, not input/output exhaustion. Detailed independent diagnosis owned by Quinn; no timeout/budget/guard workaround made.",
+      "reached": "Real initial10step base publication, edit4, main start-refusal checks and accepted mixed request; no second-learning native/model work.",
+      "unreached": "Prefix1..3model0/freshbinding/nativeobservation, suffix4..10alwaysrelearn/samehandle+ObservationSession, merged snapshots/provenance/READY, zeroeffectsfinalize, ordinarymodel0replay, decodedcontinuousvideo."
+    },
+    {
+      "case": "executionError",
+      "firstAssertion": "Final complete audit requires GUIDED_ACTION_ADMITTED and REPLAY_DISPATCHED. Actual24admitted events and0replay; required-replay presence fails.",
+      "owner": "Honest final lifecycle failure downstream of earlier method failures; do not waive/drop nonempty/required-event assertions.",
+      "reaches": "Audit19actual registered canaries nonempty and admitted event presence; private observed-value scan and producer drain completed.",
+      "unreached": "Audit closedkeys/1024UTF8/no-canary loop follows failed event-presence predicate; cannot claim it executed. scanFinalAuditBoundary throws before audit-final.json; collector records missing file."
+    }
+  ],
+  "budgetAndCapacityActual": {
+    "summaryPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/safe-actual-budget-response-summary.json",
+    "baseSessions": 2,
+    "perBase": "13actualAPPLIED sentcalls(SOURCE_PLAN1,NEXT_ACTION12,VERIFY0); input218206/output26624/proposals13, unchangedlimits262144/32000/100;2048service/reservation/persisted/gateway/HTTPwitnesses complete and no-refund assertions returned.",
+    "response": "Each base source plan text2722UTF8bytes, envelope maximum3277bytes; NEXT_ACTION maxtext524; all26calls APPLIED/served/joined; actualpostflighttextbound65536; exactpercalllengths/hashes retained in immutable finalresponsefiles.",
+    "usage": "Controlled provider retains declared20input/40output percall; not realLLM token measurements or default4096 capability.",
+    "suffix": "Mixedsession0calls/tokens; planned9suffixcalls/inputbudget/nativebehavior UNEXECUTED."
+  },
+  "cohortAndScans": {
+    "actualRunId": "e17ffdd3-ca5d-45c6-ad75-7b85814b52cf",
+    "actualCohortId": "2f307628-af53-4cc1-8cd0-f313afa914fb",
+    "lane": "guidedIncrementalTest",
+    "profile": "incremental2048",
+    "invocations": [
+      {
+        "afterEachComplete": true,
+        "displayLabel": "incrementalStartCannotWidenTrustedOriginCeiling()",
+        "invocationOrdinal": 1,
+        "method": "incrementalStartCannotWidenTrustedOriginCeiling",
+        "passed": false,
+        "variant": "singleton",
+        "variantOrdinal": 0
+      },
+      {
+        "afterEachComplete": true,
+        "displayLabel": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays()",
+        "invocationOrdinal": 2,
+        "method": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+        "passed": false,
+        "variant": "singleton",
+        "variantOrdinal": 0
+      }
+    ],
+    "auditComplete": false,
+    "privacyComplete": true,
+    "modelEvidenceComplete": true,
+    "budgetEvidenceComplete": true,
+    "responseEvidenceComplete": true,
+    "producersDrained": true,
+    "retentionFailures": 0,
+    "privateObservedValuesScanned": 2,
+    "sinkCount": 30,
+    "privacyScope": "Actual two base observed values across original production sink policy; no secret007/Vault scenario selected, no broad privateauthority claim. Unique2actual invocation after-each/final budget+response/privacy preserved; privacyfiles explicitly wholecohort inventory, not2independent scans.",
+    "canonicalGuard": "Real immutable low guard-tally bytes retained; guaranteed retainIncrementalGuidedCohort task ran after failure. Prior canonical file restored only after fresh archive."
+  },
+  "readinessCleanupMedia": {
+    "summaryPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/safe-lifecycle-media-summary.json",
+    "actualReadyMarkers": [
+      {
+        "fileName": "owned-ready-18f70ad6-785c-477a-9765-791a6801bd5f.json",
+        "role": "ordinary",
+        "pid": 60548,
+        "generation": 1,
+        "port": 58830,
+        "matchingReadyEvent": true
+      },
+      {
+        "fileName": "owned-ready-5ceb35c1-d757-4ecf-ac36-a5c5c7f98358.json",
+        "role": "guided",
+        "pid": 60880,
+        "generation": 2,
+        "port": 58829,
+        "matchingReadyEvent": true
+      },
+      {
+        "fileName": "owned-ready-9809fe49-d212-455f-9b1d-594dcabf7c71.json",
+        "role": "guided",
+        "pid": 60536,
+        "generation": 1,
+        "port": 58829,
+        "matchingReadyEvent": true
+      },
+      {
+        "fileName": "owned-ready-01460a32-ca07-41d6-879e-b036a1258b39.json",
+        "role": "ordinary",
+        "pid": 60901,
+        "generation": 2,
+        "port": 58830,
+        "matchingReadyEvent": true
+      },
+      {
+        "fileName": "owned-ready-e75593cf-7c1a-45d8-9d64-e1d8ac293860.json",
+        "role": "secret",
+        "pid": 60024,
+        "generation": 0,
+        "port": 58827,
+        "matchingReadyEvent": true
+      }
+    ],
+    "generationOrderEventIndices": {
+      "1": {
+        "pairSpawnIndices": [
+          6,
+          8
+        ],
+        "pairExitIndices": [
+          26,
+          28,
+          31,
+          54,
+          55,
+          65,
+          66
+        ]
+      },
+      "2": {
+        "pairSpawnIndices": [
+          29,
+          32
+        ],
+        "pairExitIndices": [
+          57,
+          59,
+          67,
+          68
+        ]
+      }
+    },
+    "proofScope": "Existing actual readiness assertions returned before bodies; markers/registry contain actual PID/start/command/config/nonce hashes. No foreign connection or extra probe by this agent. Generation1 pair exits before generation2 starts are observable in actual event sequence.",
+    "allRegisteredRootsGone": true,
+    "allRecordedDescendantPidsGone": true,
+    "registeredRootCount": 9,
+    "recordedDescendantCount": 29,
+    "cleanupFailures": 0,
+    "forceSignals": 0,
+    "actualContextClosed": true,
+    "actualFrameworkCacheEvicted": true,
+    "nativeVideoCount": 2,
+    "originalMediaAndJournalRetained": true,
+    "decoderExecuted": false,
+    "extraNativeActionsOrSignalsByAgent": false,
+    "inheritedFiveUntouched": [
+      22246,
+      67717,
+      13577,
+      13581,
+      44737
+    ]
+  },
+  "capture": {
+    "manifestPath": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/capture-manifest.json",
+    "safeOriginalFileCount": 702,
+    "valueFreeLogProjectionCount": 4,
+    "noPrivateCredentialsRawModelsOrSourceCopied": true,
+    "scope": "Explicit ownedTEMPallowlist+taskedcollector; not an entire TEMP dump. Original safe observations/journal/video/worker/responsecohorts retained; no extra decoder or cleanup invented."
+  },
+  "fixedRestoration": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/fixed-output-restoration.json",
+    "priorFiles": 1022,
+    "priorByteExact": true,
+    "changedOriginalsRestored": 1,
+    "freshArchivedFileCount": 24,
+    "mismatches": [],
+    "newTaskFilesRetained": 23,
+    "newFileScope": "First-created low task/cohort files kept in fixedtree and immutablearchive; no stale/historical credit; all prior1022fixedbytes restored."
+  },
+  "sourceAndDistActual": {
+    "sourceStable": true,
+    "testInputStable": true,
+    "distStable": true,
+    "sourceDigest": "79d1e7f281b4d1d5783c57b4c7def4de711ed2a123c348a47ee60085bbca4e9d",
+    "distDigest": "9f2a53fdd175232db3104dc826c556bf85664e782026105085415141ff7de26d",
+    "sourceExclusions": [],
+    "testedOwnedHashes": {
+      "backend/build.gradle.kts": "f77c28b83c96b8a0e59c8cfd2419e4faaecacc9b1438e0237ee7bc3d61d61490",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "9f56c92947fe4030fe2f58d79ef6d4f209185a52c5c2efb9840f962df47b61be",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "597942a8fdf2e8b366bb7a180073db1542943631ba1478750c0a1fdadb0baa15"
+    }
+  },
+  "remaining": "Both selected end-to-end methods stillFAIL;37low/43default/full80once-only/fullcheck dualexec/report/unchangedcoverage/crossReplica remain required. FullB1R1B2B3B4R2/86acceptance+24IPC+55SQL+35joined/15privateauthority/Core/Vault/native/fullnormalstaticcoverage/deployment/independent015QA/PO/rootclosure then008 unchanged. Main ordinarily has one replay; broader2fresh ordinary replay obligation not replaced. Original85OPENpendingunamended.",
+  "historicalEvidence": "Failed4000Core05 and all earlier receipts/media/logs preserved; no retroactivePASS. No source edits/retry/extraGradle/tests/decoder/native/DBconnections/processsignals/threshold/skip/schema/lifecycle changes in this execution.",
+  "artifacts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-before.json",
+      "sha256": "f1cbf5d6c9d367e91070e01e5be76d3960ca3962e6722f3cace4c4014ef7d552",
+      "bytes": 327952
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-after.json",
+      "sha256": "d2bceecaac8c67e6c1734476c0b7036e47e6560a3331f609cb7bedb255de9e61",
+      "bytes": 327952
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-results.json",
+      "sha256": "42459374ecd4d1224a7b1104bedc3426aa48cfa28cd23dd5e6778b7fae7aad4b",
+      "bytes": 14368
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-default-task-base-results.json",
+      "sha256": "5f85d1408429d0d9035f1e7e385a814f73035b73bdee2c4fffc8e3913771a255",
+      "bytes": 1370
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01.log",
+      "sha256": "5a2c3fd56e11123f47fa13dda2b2a04c6de8edf3e4bd9b5396396425c2669c14",
+      "bytes": 2064
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/fixed-before.json",
+      "sha256": "34b924123345a959a0b2423b75fd86b1400e29b8fbc11d5b48e06bd60bdb6455",
+      "bytes": 502897
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/fixed-output-restoration.json",
+      "sha256": "016df300175d80f3ddc82fed90a276beeaceab2b0f41f5adea75a1cd442e91bf",
+      "bytes": 19310
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/capture-manifest.json",
+      "sha256": "6eea23c1145430e36f1f32389fe4208f22c87f01f75ee53ef034fa8d3d9a6a22",
+      "bytes": 436890
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/owned-cleanup-verification.json",
+      "sha256": "8062bf38c78fa9693193cef55eb0403e73d53c9e33a49a1a67953f9d83a43875",
+      "bytes": 3720
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/safe-refusal-snapshot-differences.json",
+      "sha256": "3432f594405e285801bee995022d041508ea4f29c421462b5222b33e15b816b5",
+      "bytes": 669
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/safe-exception-groups.json",
+      "sha256": "8879ac0bfc6c189388be6dd08e4c1cdc8d5de6413c483195e357e5a42bcbc735",
+      "bytes": 917
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/safe-actual-budget-response-summary.json",
+      "sha256": "20a4921570ccd79642adc731d44f4939baf1978a215ebf0b32670040d275d54e",
+      "bytes": 9373
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-incremental2048-core-feedback-attempt01-artifacts/safe-lifecycle-media-summary.json",
+      "sha256": "17711eca499d5fe6b41c5e9438a01b77b3adb1a976a8203eb8b6cba2a80fdb9d",
+      "bytes": 5165
+    }
+  ]
+}

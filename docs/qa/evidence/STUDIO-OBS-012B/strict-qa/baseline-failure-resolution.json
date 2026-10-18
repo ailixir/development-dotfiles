@@ -1,0 +1,428 @@
+{
+  "capturedAt": "2026-10-14T23:08:14.178860+00:00",
+  "failedNamedCases": [
+    {
+      "file": "frontend/src/components/studio/review/compilePollBounds.test.ts",
+      "historicalName": " AC-23: the COMPILING watch is bounded by a number the server already publishes the watch window is the shipped sweep threshold plus one shipped sweep interval",
+      "historicalStatus": "failed",
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1/AC3: remove compile wait/poll and diagnostics-bound implementations with their tests; exact dropped name retained in name-reconciliation.json"
+    },
+    {
+      "file": "frontend/src/components/studio/run/compileWait.test.tsx",
+      "historicalName": " G4: the client wait is the server watch window, and the number is pinned equals the abandonment threshold plus one sweep interval from the shipped config",
+      "historicalStatus": "failed",
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1/AC3: remove compile wait/poll and diagnostics-bound implementations with their tests; exact dropped name retained in name-reconciliation.json"
+    },
+    {
+      "file": "frontend/src/components/studio/run/compileWait.test.tsx",
+      "historicalName": " G4: the client wait is the server watch window, and the number is pinned outlasts the server attempt budget, so a healthy compile always settles inside it",
+      "historicalStatus": "failed",
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1/AC3: remove compile wait/poll and diagnostics-bound implementations with their tests; exact dropped name retained in name-reconciliation.json"
+    },
+    {
+      "file": "frontend/src/components/studio/run/refusals.test.tsx",
+      "historicalName": " AC-4: every declared refusal of the execute route is handled distinctly renders a narrative for every declared 409 \u2014 FX-EXECUTE-409-COMPILE_REQUIRED, FX-EXECUTE-409-RUNTIME_INCOMPATIBLE, FX-EXECUTE-409-IDEMPOTENCY_KEY_REUSED, FX-EXECUTE-409-TEST_DELETED, FX-EXECUTE-409-TEST_QUARANTINED",
+      "historicalStatus": "failed",
+      "resolution": "REPOINTED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/components/studio/run/refusals.test.tsx",
+          "name": " AC-4: every declared refusal of the execute route is handled distinctly renders a narrative for every declared 409 \u2014 FX-EXECUTE-409-LEARN_REQUIRED, FX-EXECUTE-409-RUNTIME_INCOMPATIBLE, FX-EXECUTE-409-IDEMPOTENCY_KEY_REUSED, FX-EXECUTE-409-TEST_DELETED, FX-EXECUTE-409-TEST_QUARANTINED",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/confirmedRevisionEscalation.test.ts",
+      "historicalName": " ADR-002 \u00a712 escalation: a revision a client may act on must have a readable artifact the document still publishes the revision identifiers this property is asserted over",
+      "historicalStatus": "failed",
+      "resolution": "RETAINED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/confirmedRevisionEscalation.test.ts",
+          "name": " ADR-002 \u00a712 escalation: a revision a client may act on must have a readable artifact the document still publishes the revision identifiers this property is asserted over",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/diagnosticsBounds.test.ts",
+      "historicalName": " the diagnostics caps and marker match the server that produces them the marker is the one DiagnosticsBounder appends",
+      "historicalStatus": "failed",
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1/AC3: remove compile wait/poll and diagnostics-bound implementations with their tests; exact dropped name retained in name-reconciliation.json"
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/diagnosticsBounds.test.ts",
+      "historicalName": " the diagnostics caps and marker match the server that produces them the caps are the deployed defaults",
+      "historicalStatus": "failed",
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1/AC3: remove compile wait/poll and diagnostics-bound implementations with their tests; exact dropped name retained in name-reconciliation.json"
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " the mock fixtures match the OpenAPI component schemas every test fixture validates against the test schema",
+      "historicalStatus": "failed",
+      "resolution": "RETAINED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " the mock fixtures match the OpenAPI component schemas every test fixture validates against the test schema",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.10: the compile vocabularies are read from the document, never transcribed every compileStatus the document declares renders a distinct, named state",
+      "historicalStatus": "failed",
+      "resolution": "REPOINTED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B: the readiness vocabulary is read from the document, never transcribed the tests-list chip words every declared readiness, each distinctly",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.10: the compile vocabularies are read from the document, never transcribed the compileError code set matches x-compile-error-codes in both directions",
+      "historicalStatus": "failed",
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1/AC3/AC4 remove compile confirmation, compile error/diagnostic vocabulary and compile-wait action. These exact dropped names remain in reconciliation; no semantic replacement is invented."
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.10: the compile vocabularies are read from the document, never transcribed confirm-compile's conflict codes match the UI's, in both directions",
+      "historicalStatus": "failed",
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1/AC3/AC4 remove compile confirmation, compile error/diagnostic vocabulary and compile-wait action. These exact dropped names remain in reconciliation; no semantic replacement is invented."
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.10: the compile vocabularies are read from the document, never transcribed compile's conflict codes match the UI's, in both directions",
+      "historicalStatus": "failed",
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1/AC3/AC4 remove compile confirmation, compile error/diagnostic vocabulary and compile-wait action. These exact dropped names remain in reconciliation; no semantic replacement is invented."
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.10: the compile vocabularies are read from the document, never transcribed compile's four authoring-bound 400 codes are the four the UI words",
+      "historicalStatus": "failed",
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1/AC3/AC4 remove compile confirmation, compile error/diagnostic vocabulary and compile-wait action. These exact dropped names remain in reconciliation; no semantic replacement is invented."
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.11c: ADR-002 \u00a721\u2019s two properties, and the examples that carry them the candidate artifact in the ready example validates against artifact.schema.json",
+      "historicalStatus": "failed",
+      "resolution": "EXPLICIT_RETIREMENT_WITH_V3_REPLACEMENT",
+      "authority": "PO 2026-10-13 AC3 orphan artifact1 schema removal",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B: every published artifact fixture is the v3 replay artifact every non-null confirmedRevisionArtifact fixture validates against contracts/v3/replay-artifact.schema.json",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.11c: ADR-002 \u00a721\u2019s two properties, and the examples that carry them declares both properties on TestDto and neither on the list projection",
+      "historicalStatus": "failed",
+      "resolution": "REPOINTED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11c: ADR-002 \u00a721\u2019s two properties, and the examples that carry them declares the confirmed artifact pair on TestDto and nulls it on the list projection",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.11c: ADR-002 \u00a721\u2019s two properties, and the examples that carry them the hash the client reads is declared as the value the confirm body sends",
+      "historicalStatus": "failed",
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1/AC3/AC4 remove compile confirmation, compile error/diagnostic vocabulary and compile-wait action. These exact dropped names remain in reconciliation; no semantic replacement is invented."
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.10: the compile-review fixtures match the amended contract every compile-review fixture validates against TestDto",
+      "historicalStatus": "failed",
+      "resolution": "REPOINTED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B: the readiness fixtures match the contract every readiness fixture validates against TestDto",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.10: the compile-review fixtures match the amended contract no compile-review fixture carries a field the contract does not declare",
+      "historicalStatus": "failed",
+      "resolution": "REPOINTED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " STUDIO-OBS-012B: the readiness fixtures match the contract no readiness fixture carries a field the contract does not declare",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.10: the compile-review fixtures match the amended contract every diagnostics document validates against CompileDiagnostics",
+      "historicalStatus": "failed",
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1/AC3/AC4 remove compile confirmation, compile error/diagnostic vocabulary and compile-wait action. These exact dropped names remain in reconciliation; no semantic replacement is invented."
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.11a: the execute route\u2019s refusals are read from the document execute's conflict codes match the UI's, in both directions",
+      "historicalStatus": "failed",
+      "resolution": "RETAINED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the execute route\u2019s refusals are read from the document execute's conflict codes match the UI's, in both directions",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.11a: the execute route\u2019s refusals are read from the document every execute refusal names who clears it, and the two definite ones offer no retry",
+      "historicalStatus": "failed",
+      "resolution": "RETAINED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the execute route\u2019s refusals are read from the document every execute refusal names who clears it, and the two definite ones offer no retry",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.11a: the run gate covers the compile states the document declares every compileStatus maps to an action, and exactly one of them dispatches directly",
+      "historicalStatus": "failed",
+      "resolution": "REPOINTED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the run gate covers the readiness states the document declares every readiness maps to an action, and exactly one of them dispatches directly",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.11a: the run gate covers the compile states the document declares exactly one state makes Run wait rather than act",
+      "historicalStatus": "failed",
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1/AC3/AC4 remove compile confirmation, compile error/diagnostic vocabulary and compile-wait action. These exact dropped names remain in reconciliation; no semantic replacement is invented."
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.11a: the run gate covers the compile states the document declares every other declared state is prepared by Run rather than blocking it",
+      "historicalStatus": "failed",
+      "resolution": "REPOINTED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: the run gate covers the readiness states the document declares every other declared state needs a learning Run",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.11a: [VAC-18] the AC-22 required set is the document\u2019s, not an editable literal the matrix ids are exactly the ids the document\u2019s vocabularies imply, in both directions",
+      "historicalStatus": "failed",
+      "resolution": "RETAINED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: [VAC-18] the AC-22 required set is the document\u2019s, not an editable literal the matrix ids are exactly the ids the document\u2019s vocabularies imply, in both directions",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.11a: [VAC-18] the AC-22 required set is the document\u2019s, not an editable literal the matrix carries one entry per required id and no duplicates, counted rather than sampled",
+      "historicalStatus": "failed",
+      "resolution": "RETAINED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.11a: [VAC-18] the AC-22 required set is the document\u2019s, not an editable literal the matrix carries one entry per required id and no duplicates, counted rather than sampled",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "historicalName": " story 10.46: the demo-scale list fixtures match the contract every demo test validates against TestDto",
+      "historicalStatus": "failed",
+      "resolution": "RETAINED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "name": " story 10.46: the demo-scale list fixtures match the contract every demo test validates against TestDto",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioEscalation.test.ts",
+      "historicalName": " ADR-002 \u00a712 escalation: a request body may not require what no response returns the document still declares the operations this property is asserted over",
+      "historicalStatus": "failed",
+      "resolution": "RETAINED_CURRENT_PASS",
+      "current": [
+        {
+          "file": "frontend/src/services/mocks/studio/studioEscalation.test.ts",
+          "name": " ADR-002 \u00a712 escalation: a request body may not require what no response returns the document still declares the operations this property is asserted over",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "unloadableSuites": [
+    {
+      "file": "frontend/src/components/studio/review/artifactSummary.test.ts",
+      "historicalStatus": "failed",
+      "historicalLoadError": "ENOENT: no such file or directory, open 'studio-runner/src/validator/language.ts'",
+      "caseCountUncredited": true,
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1 deletes review/** including artifactSummary,compileStates,confirmFlow,recompile. Missing baseline cases are not invented as drops."
+    },
+    {
+      "file": "frontend/src/components/studio/review/compileStates.test.tsx",
+      "historicalStatus": "failed",
+      "historicalLoadError": "Cannot read properties of undefined (reading 'enum')",
+      "caseCountUncredited": true,
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1 deletes review/** including artifactSummary,compileStates,confirmFlow,recompile. Missing baseline cases are not invented as drops."
+    },
+    {
+      "file": "frontend/src/components/studio/review/confirmFlow.test.tsx",
+      "historicalStatus": "failed",
+      "historicalLoadError": "Cannot read properties of undefined (reading 'enum')",
+      "caseCountUncredited": true,
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1 deletes review/** including artifactSummary,compileStates,confirmFlow,recompile. Missing baseline cases are not invented as drops."
+    },
+    {
+      "file": "frontend/src/components/studio/review/recompile.test.tsx",
+      "historicalStatus": "failed",
+      "historicalLoadError": "Cannot read properties of undefined (reading 'post')",
+      "caseCountUncredited": true,
+      "resolution": "EXPLICIT_RETIREMENT",
+      "authority": "012B AC1 deletes review/** including artifactSummary,compileStates,confirmFlow,recompile. Missing baseline cases are not invented as drops."
+    },
+    {
+      "file": "frontend/src/components/studio/run/runGate.test.tsx",
+      "historicalStatus": "failed",
+      "historicalLoadError": "Cannot read properties of undefined (reading 'enum')",
+      "caseCountUncredited": true,
+      "resolution": "RETAINED_CURRENT_PASS",
+      "currentCaseCount": 21,
+      "currentCases": [
+        {
+          "name": " AC-1: Run replays a READY draft and only a READY draft enumerating every readiness the document declares \u2014 FX-RUNGATE-STATE-UNLEARNED, FX-RUNGATE-STATE-LEARNING, FX-RUNGATE-STATE-READY, FX-RUNGATE-STATE-NEEDS_RELEARN",
+          "status": "passed"
+        },
+        {
+          "name": " AC-1: Run replays a READY draft and only a READY draft a state the document does not declare is a loud failure rather than a permissive default",
+          "status": "passed"
+        },
+        {
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (a) READY: Run sends one execute and nothing else",
+          "status": "passed"
+        },
+        {
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (b) every non-READY readiness: Run is disabled and states the interim sentence, and sends nothing",
+          "status": "passed"
+        },
+        {
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (c) a 409 LEARN_REQUIRED from execute is shown as itself, once, with no preparation narrative",
+          "status": "passed"
+        },
+        {
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (d) a dirty READY draft whose save leaves it unlearned stops after the save and says why",
+          "status": "passed"
+        },
+        {
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (e) the learned chip says \"Learned \u00b7 ready to repeat\" for READY",
+          "status": "passed"
+        },
+        {
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (f) UX-A11Y-001: unsaved edits hide the learned chip, and the stop after the save is announced by a persistent polite live region",
+          "status": "passed"
+        },
+        {
+          "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (g) the busy spinner is decorative and names no retired phase",
+          "status": "passed"
+        },
+        {
+          "name": " AC-2: client-side English-grammar validation is no longer an execution gate the discriminating half: a draft runs when the server says READY",
+          "status": "passed"
+        },
+        {
+          "name": " AC-2: client-side English-grammar validation is no longer an execution gate the companion half: the client\u2019s opinion of the English still gates nothing \u2014 the server\u2019s state decides what Run does",
+          "status": "passed"
+        },
+        {
+          "name": " AC-2: client-side English-grammar validation is no longer an execution gate a programmatic run request is governed by the same predicate as the button",
+          "status": "passed"
+        },
+        {
+          "name": " AC-2: client-side English-grammar validation is no longer an execution gate a second activation while the first is in flight produces one request, not two",
+          "status": "passed"
+        },
+        {
+          "name": " AC-3(a): client-generated Python is retired renders no generator-derived text for any fixture",
+          "status": "passed"
+        },
+        {
+          "name": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run canManage false: Run stays visible, disabled, described by on-page text, and sends nothing",
+          "status": "passed"
+        },
+        {
+          "name": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run canManage true: Run is enabled and carries no reason",
+          "status": "passed"
+        },
+        {
+          "name": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run a failed capabilities read is unknown, never a denial: Run stays enabled",
+          "status": "passed"
+        },
+        {
+          "name": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run a pending capabilities read does not disable Run",
+          "status": "passed"
+        },
+        {
+          "name": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run reads the capability once per selected test, not once per render or refresh",
+          "status": "passed"
+        },
+        {
+          "name": " story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B) imports neither the legacy grammar parser nor the Python generator",
+          "status": "passed"
+        },
+        {
+          "name": " story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B) the import scanner sees every specifier form, so its silence means something",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "unresolved": [],
+  "historicalBaselineIsNotGreen": true
+}

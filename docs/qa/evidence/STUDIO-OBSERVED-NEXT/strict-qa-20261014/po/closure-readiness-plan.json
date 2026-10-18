@@ -1,0 +1,1132 @@
+{
+  "schema": 1,
+  "author": "Pax (@po), closure-readiness inventory only",
+  "capturedUtc": "2026-10-15T01:32:42.549760+00:00",
+  "decision": "NOT_READY_TO_CLOSE;NO_CLOSURE_EXECUTED",
+  "authorization": "Root requested evidence-only planning; only this po/closure-readiness-plan.json may be written. No new acceptance conditions.",
+  "completionPolicy": "Every originally planned applicable local check actually green; independent strict PASS only; no CONCERNS/WAIVED/local deferral completion.",
+  "scopeLocks": {
+    "012B": "Done0.3.7 strictPASS, administrative closure and rootCLI verified; preserve all files/keys unchanged",
+    "013": "InReview0.2.6",
+    "014": "InReview0.1.15",
+    "015": "Production unstarted; Ready/SDC develop metadata is not technical signoff or runtime implementation",
+    "008_009_010_011": "Ready; no lifecycle/status change authorized",
+    "budgetUSD": 500,
+    "actualBilling": "unavailable; ceiling is declared, measured spend compliance cannot be claimed"
+  },
+  "authority": {
+    "Dex": "Implementation and actual Dev Agent Record/File List handoff; no lifecycle approval",
+    "Aria": "Technical rulings/source review; no QA lifecycle transition",
+    "Quinn": "Final independent actual evidence review, canonical gate PASS and InReview\u2192Done only after all planned local green",
+    "Pax": "Administrative close only on alreadyDone verified exact current QA provenance; never changes lifecycle/QA results",
+    "Orion": "Exclusively dispatch preflight, resource windows, CLI review/close verify+markdone and wave reconciliation; no root selfapproval"
+  },
+  "blockingMissingRecordsNow": [
+    {
+      "id": "G1-final-profile-proof",
+      "owner": "Dex\u2192Aria/Quinn\u2192executor",
+      "missing": "Current three-path profile fixture correction receipt/exact-byte independent source approval and authorized actual full profile-file proof. Existing accepted plan is not execution or story approval.",
+      "sources": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/profile-safety-fixture-ruling.md",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa013/profile-safety-fixture-plan-review.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-cleanup-diagnosis/diagnosis.json",
+          "existsAtInventory": true
+        }
+      ],
+      "limit": "No new production fix prescribed; retain actual live attack, exact CONTEXT_LOST, actual production close/firstESRCH and no fixture fallback timing credit."
+    },
+    {
+      "id": "G2-final-shared-execution",
+      "owner": "Root released independent executor",
+      "missing": "Fresh final runner fullunit/coverage/type/fullLint/fullnative/deployment, then mandatory normal unfiltered fullbackend check/JaCoCo/static/allTesttasks+fourclass guardtallies on frozen final inputs/dist. Previously focused13 and all4 controls PASS do not turn fullnative231/1/9 green.",
+      "sources": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/integration-readiness-full-native-failed-attempt03.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/live-original-proofs-review.json",
+          "pointer": "/finalGatePending",
+          "existsAtInventory": true
+        }
+      ],
+      "existingHonestFacts": "Original backend2076PASS25skips+additionalcrossReplica2PASS was aggregateEXIT1(checkstyleTest/spotlessJavaCheck); minimal2literalformat correction staticPASS/46class equivalence is diagnostic, not normal fullcheck. Last unit1462PASS29skips/type/fullLint0 andfocused13PASS precede current profile edit. All skips uncredited. Deployment313 earlierPASS is not pending final-byte deployment receipt."
+    },
+    {
+      "id": "G3-executor-metadata",
+      "owner": "Dex/designated coordinator before finalQuinn story binding",
+      "missing": "Final story DAR/FileList and actual executed counts/exits/sourcebinding reconciled; current013 says controls unexecuted/backend running/1384units and014 still says whole ordered class pending. Preserve these dated earlier facts as history, append current facts.",
+      "sources": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+          "line": 157,
+          "paragraphContains": "### Strict revalidation executor record"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+          "line": 294,
+          "paragraphContains": "### Strict revalidation executor record"
+        }
+      ],
+      "requirementOrigin": "close-story existing AC/tasks/FileList/quality completeness, not new acceptance"
+    },
+    {
+      "id": "G4-final-independent-gates",
+      "owner": "Separate Quinn013 andQuinn014",
+      "missing": "Canonical finalPASS gates, reviewer, exact reviewed_revision/source+dist manifest, protected/story digest/normalization, complete AC+original plan mapping and finalDone lifecycle record. Current canonical gates and .ai close reports are historicalCONCERNS.",
+      "sources": [
+        {
+          "path": "docs/qa/gates/STUDIO-OBS-013-record-the-learning-run-video-step-offsets-and-seek.yml",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/gates/STUDIO-OBS-014-action-safety-and-governance-for-the-learning-run.yml",
+          "existsAtInventory": true
+        }
+      ],
+      "limit": "No story PASS/Done can be inferred from bounded source reviews, original proofPASS, denominator acceptance or owner receipts."
+    },
+    {
+      "id": "G5-postDone-admin",
+      "owner": "Pax thenOrion",
+      "missing": "New strict closure-key rows/README markers, archived historical .ai reports and new .ai strict reports/receipts; root review/close phase verification and wave refresh. These cannot exist yet and are not pre-QA implementation blockers.",
+      "sources": [
+        {
+          "path": ".aiox/sdc/STUDIO-OBS-013/state.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": ".aiox/sdc/STUDIO-OBS-014/state.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": ".aiox/waves/STUDIO-OBS-SINGLE-PATH/state.json",
+          "existsAtInventory": true
+        }
+      ]
+    }
+  ],
+  "preQaStoryReconciliation": {
+    "013": {
+      "darAnchor": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+        "line": 157,
+        "paragraphContains": "### Strict revalidation executor record"
+      },
+      "fileListAnchor": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+        "line": 94,
+        "paragraphContains": "## File List"
+      },
+      "addActualTestPaths": [
+        "studio-runner/test/helpers/nativeControlReadiness.ts",
+        "studio-runner/test/nativeControlReadiness.test.ts",
+        "studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+        "studio-runner/test/helpers/profileSafetyFixture.ts",
+        "studio-runner/test/profileSafetyFixture.test.ts",
+        "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts"
+      ],
+      "reconcile": "Original lane manifest + strict backend/runner receipts + six padding paths already recorded + three readiness paths + three profile paths (deduplicate existing fixture). Record profile paths as actual only once delivered. Preserve dead recording-coverage.test.ts applicability, guidedSSE N/A, recorderfault host deviation, unknown historical failures and current external limits. Latest success counts only from final raw results; no forecasts as passes."
+    },
+    "014": {
+      "darAnchor": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+        "line": 294,
+        "paragraphContains": "### Strict revalidation executor record"
+      },
+      "fileListAnchor": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+        "line": 210,
+        "paragraphContains": "## File List"
+      },
+      "actualCodePathsAlreadyListed": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+        "studio-runner/test/guided/transport.test.ts",
+        "docs/specs/studio-observed-authoring/guided-data-flow.md"
+      ],
+      "reconcile": "Add actual live-forgery case in samePlanning file and source-free mounted-process harness as evidence (not production scope); twoJava formatting changes stay same existingReplay file. Reconcile original56Planning runtimePASS then live1PASS, final actualPlanning57 expected only if observed. OrderedReplay40 archivedPASS + final normalcheck pending until actualgreen. Name final fourclass/tally/denominator receipts; one legitimate existing backend materialization preserved, neverzero."
+    },
+    "tasks": "Implementation tasks already checked; do not recheck eventualPR/push box, which is conditional and not requested. IndependentQA checkbox is true only when actual finalQA performed. Do not alter AC meaning or claim external tasks complete.",
+    "versions": {
+      "principle": "Increment current latest changelog version per actual authorized writer; no fixed future version preallocated. PO appends one keyed administrative row afterQA row and preservesQA revision.",
+      "minimalWithOneNewExecutorRow": {
+        "013": {
+          "executor": "0.2.7",
+          "QA": "0.2.8",
+          "PO": "0.2.9"
+        },
+        "014": {
+          "executor": "0.1.16",
+          "QA": "0.1.17",
+          "PO": "0.1.18"
+        }
+      },
+      "ifNoExecutorVersionRow": {
+        "013": {
+          "QA": "0.2.7",
+          "PO": "0.2.8"
+        },
+        "014": {
+          "QA": "0.1.16",
+          "PO": "0.1.17"
+        }
+      },
+      "note": "Any intervening row shifts versions; final close reads actual QA-owned version, never rewrites earlier rows."
+    }
+  },
+  "postPassAdministrativeSequence": [
+    {
+      "step": 1,
+      "owner": "Orion",
+      "action": "After independentQuinn strictPASS+Done, exact preflight/dispatchPax. No preflight or CLI execution by this inventory."
+    },
+    {
+      "step": 2,
+      "owner": "Pax",
+      "action": "Re-read each story currentDone/tasks/FileList and final approved gate; rederive finalsource+dist identity and review/story binding. Strictpolicy acceptsPASS only. Halt if missing/stale/mismatch; no adminwrite."
+    },
+    {
+      "step": 3,
+      "owner": "Pax",
+      "action": "Resolve closure key per task: STORY:commit:SHA if actually available, otherwiseSTORY:pr:NUMBER if actually available, otherwiseSTORY:digest:EXACT_QA_reviewed_revision. No newcommit authorized; expected digest form but exactfuturevalue unknown. A historicalS4c key does not satisfy strictfinalrevision."
+    },
+    {
+      "step": 4,
+      "owner": "Pax",
+      "action": "Archive current historical .ai/STORY-close.json byte-exact into STORY/strict-qa/history/close-before-strict-pass.json; preserve oldgate/review/history and oldclosuremarkers. If finalQA alreadyarchives oldcanonicalgate, link it; no PO rewritingQA."
+    },
+    {
+      "step": 5,
+      "owner": "Pax",
+      "action": "Each artifact independently keyed, atomicwrites: add missing new strict marker to README first; append exactlyone new storyChangeLog adminrow plus explicit superseding adminnote. Never changeDone/QAResults/AC/tasks/FileList duringclose. Preserve priorCONCERNS rows and keys; label old013/014 closures historical, as012B example already does."
+    },
+    {
+      "step": 6,
+      "owner": "Pax",
+      "action": "Create strict-qa/strict-closure-receipt.json and replace .ai/STORY-close.json with new strict report linking archivedoldreport. Record author/reviewer/PASS/reviewed_revision/newkey/source+dist+rawartifact hashes/actualqualitycounts+namedskips/ACmapping/currentstorybeforeafter/version/normalization/statusDone\u2192Done/lifecycleTransitionByPo=false/idempotency and externalbounds. Reverse only exactPO additions to reconstruct exactQA-reviewedstory; preserve independentQAtext. Verify keyed second-run no-op independently for both story and README; on partial atomic-write interruption retry only the missing artifact. Existing protocol-fixture validation may be reused rather than introducing a new product test."
+    },
+    {
+      "step": 7,
+      "owner": "Pax",
+      "action": "Write new evidence-only po closure-placements-reconciliation.json, preserving resume-20261014/po-closure-placements.json unchanged as history. Append minimal superseding per-obligation dispositions in008/009/010/011 carried sections; no downstreamStatus/AC/task change; no015edit/signoff."
+    },
+    {
+      "step": 8,
+      "owner": "Orion",
+      "action": "Own sdc review/close verify and markdone for013/014, currentwave refresh/advance only after bothstrictclosures verified. Save exactCLIoutputs under strictORCHevidence; reconcile currentcheckpoint/executionplan/MASTER-HANDOFF/coordinator with actual allgreen, not old15designreadiness claims.015 remains unstarted and stillrequires independenttechnical READY_FOR_IMPLEMENTATION; root exclusively owns nextdispatch."
+    }
+  ],
+  "exactAdministrativeTargets": {
+    "stories": [
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md"
+    ],
+    "index": {
+      "path": "docs/stories/STUDIO-OBSERVED/README.md",
+      "anchors": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/README.md",
+          "line": 3,
+          "paragraphContains": "**2026-10-14 strict QA reopening"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/README.md",
+          "line": 88,
+          "paragraphContains": "**Current checkpoint \u2014 PO closures"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/README.md",
+          "line": 94,
+          "paragraphContains": "**Next dependency-eligible story"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/README.md",
+          "line": 96,
+          "paragraphContains": "**OBS-015 design continuation"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/README.md",
+          "line": 205,
+          "paragraphContains": "- STUDIO-OBS-013: **Done"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/README.md",
+          "line": 207,
+          "paragraphContains": "- STUDIO-OBS-014: **Done"
+        }
+      ],
+      "action": "Update currentbanner/start-here to actualfinalstate; qualify dated oldcheckpoint/evidences/015batch4 claims as history; append new013/014 strictmarkers, retain oldkeys. Preserve012B strictentry and no release waiver."
+    },
+    "reports": [
+      ".ai/STUDIO-OBS-013-close.json",
+      ".ai/STUDIO-OBS-014-close.json",
+      "docs/qa/evidence/STUDIO-OBS-013/strict-qa/history/close-before-strict-pass.json",
+      "docs/qa/evidence/STUDIO-OBS-014/strict-qa/history/close-before-strict-pass.json",
+      "docs/qa/evidence/STUDIO-OBS-013/strict-qa/strict-closure-receipt.json",
+      "docs/qa/evidence/STUDIO-OBS-014/strict-qa/strict-closure-receipt.json",
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json"
+    ],
+    "rootOwnedBookkeeping": [
+      ".aiox/sdc/STUDIO-OBS-013/state.json",
+      ".aiox/sdc/STUDIO-OBS-014/state.json",
+      ".aiox/waves/STUDIO-OBS-SINGLE-PATH/state.json",
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/execution-plan.json",
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/coordinator-checkpoint.json",
+      ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/MASTER-HANDOFF.md"
+    ],
+    "finalGateOwnedByQa": [
+      "docs/qa/gates/STUDIO-OBS-013-record-the-learning-run-video-step-offsets-and-seek.yml",
+      "docs/qa/gates/STUDIO-OBS-014-action-safety-and-governance-for-the-learning-run.yml"
+    ],
+    "notNewClosureTargets": "012B and old001\u2013012A closures/CLIstates unchanged;015 noadminclosure/designsignoff. Historical STUDIO-OBSERVED wave state is not current SINGLE-PATH wave.",
+    "rootOptionalCurrentCoordinator": ".aiox/waves/STUDIO-OBSERVED/coordinator.md only if Orion is still maintaining it as a live continuation record; never rewrite archived historical coordinator records merely to make all files agree."
+  },
+  "denominatorAndMaterialization": {
+    "acceptedProof": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/live-original-proofs-review.json",
+      "pointer": "/denominator",
+      "existsAtInventory": true
+    },
+    "reconciledArtifact": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/denominator-reconciliation/014-unit-denominator-reconciliation.json",
+      "existsAtInventory": true
+    },
+    "requiredNarrative": "Original six assertedpairs remain historical; supplementarygroundedpositive siteinventory addsSave/Delete =8 with actualtrailingassertion differences disclosed. Named a2/c2 negative exclusions; a3 applies only four originalhostile semantics, never blanketexclusion. NewSAVED_INPUT and forgedcontext stopbeforeNEXT_ACTION so0guarddecisions. Final corpus/tallies must rebound to actualfinalsource. Forgedhash proves no additional effects/observation/browser; one pre-existing legitimate backendmaterialization remains identity-equal except legitimate teardownliveflags, never claimzeromaterializations."
+  },
+  "downstreamCarryForwards": [
+    {
+      "id": "FE-WORKERS",
+      "destinationStory": "STUDIO-OBS-008",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 201,
+        "paragraphContains": "**FE-WORKERS**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "FE-WORKERS",
+        "sourceFindingIds": [
+          "012B:TEST-001"
+        ]
+      },
+      "obligation": "Default-worker execution and attribution, previously deferred from012B.",
+      "readinessNow": "LOCAL_OBLIGATION_ALREADY_CLOSED_BY_012B_STRICT_PASS",
+      "proof": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/fe-default-workers.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/strict-closure-receipt.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": ".ai/STUDIO-OBS-012B-close.json",
+          "pointer": "/quality",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "Append superseding disposition to008 carried paragraph: fresh default-worker701/701 now proved; no permanent min/max worker restriction follows from old paragraph. Preserve original paragraph as dated history and012B unchanged.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "FE-A11Y",
+      "destinationStory": "STUDIO-OBS-008",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 202,
+        "paragraphContains": "**FE-A11Y**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "FE-A11Y",
+        "sourceFindingIds": [
+          "012B:TEST-003",
+          "012B:OBS-UX-2",
+          "012B:OBS-UX-3",
+          "012B:OBS-UX-EMPTY"
+        ]
+      },
+      "obligation": "Replace duplicate UNLEARNED surfaces with actual guided states; browser contrast/target-size/focus/labels/tooltips/Add-step association.",
+      "readinessNow": "ORIGINAL_008_SCOPE_REMAINS_OPEN",
+      "proof": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/final-ux-gate.json",
+          "pointer": "/accessibility",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "Retain008 obligation. Cite012B automated7-case PASS and its exact limits; no distinct-guided/browser conformance pass and no deferred required012B work remains.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "PLAYBACK-COST",
+      "destinationStory": "STUDIO-OBS-008",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 203,
+        "paragraphContains": "**PLAYBACK-COST**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "PLAYBACK-COST",
+        "sourceFindingIds": [
+          "013:ARCH-001"
+        ]
+      },
+      "obligation": "Ratify every-range authorization, identity-before-echo, disabled-store-before-expiry; characterize locking/Core playback cost.",
+      "readinessNow": "RATIFICATIONS_PROVED_RANGE_LOAD_STILL_OPEN",
+      "proof": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/addendum.md",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa013/final-readiness-matrix.json",
+          "pointer": "/matrix",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-all-test-tasks-receipt.json",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "After013 finalPASS mark A13-1/2/3 ratification and explicit conformance cases satisfied in013. Retain only measured repeated-range playback load work in008; preserve stronger authorization and no throughput claim.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "PLAYBACK-COPY",
+      "destinationStory": "STUDIO-OBS-008",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 204,
+        "paragraphContains": "**PLAYBACK-COPY**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "PLAYBACK-COPY",
+        "sourceFindingIds": [
+          "013:MNT-001"
+        ]
+      },
+      "obligation": "Neutral guided unavailable/expired recording copy while preserving status/code semantics.",
+      "readinessNow": "OPEN_ORIGINAL_DOWNSTREAM_SCOPE",
+      "proof": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+          "existsAtInventory": true,
+          "paragraphContains": "Administrative closure notes"
+        }
+      ],
+      "minimalPostPassReconciliation": "Retain with008 UX owner;013 privacy/log fix and backend status tests do not prove final neutral author copy.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "FE-CONSUMERS",
+      "destinationStory": "STUDIO-OBS-008",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 205,
+        "paragraphContains": "**FE-CONSUMERS**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "FE-CONSUMERS",
+        "sourceFindingIds": [
+          "012B:class-A-allowlist",
+          "014:Policy refusal/confirmation UX"
+        ]
+      },
+      "obligation": "Class-A temporary contract consumers, governed-refusal and side-effect-confirmation UX, labelSource, no intermediate release.",
+      "readinessNow": "OPEN_ORIGINAL_DOWNSTREAM_SCOPE",
+      "proof": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/strict-closure-receipt.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/po-sec001-ruling-b-ack.json",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "Retain class A/B/C ownership and008 implementation/testing obligations; no014 backend pass credits author-facing consumers.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "RUNNER-LAUNCH",
+      "destinationStory": "STUDIO-OBS-009",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+        "line": 328,
+        "paragraphContains": "**RUNNER-LAUNCH**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "RUNNER-LAUNCH",
+        "sourceFindingIds": [
+          "013:REL-002",
+          "014:REL-001"
+        ]
+      },
+      "obligation": "Correlated launch/coordinator/IPC/load diagnostics; keep CONTEXT_LOST and503 distinct; bound and classify actual recurrence.",
+      "readinessNow": "HISTORICAL_CAUSES_UNATTRIBUTED_DEPLOYED_SCOPE_OPEN",
+      "proof": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/addendum.md",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa013/final-readiness-matrix.json",
+          "pointer": "/matrix",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/integration-readiness-full-native-failed-attempt03.json",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "Record local strict startup/content/cleanup cases only when finalPASS. Keep historical CONTEXT_LOST and503 unroot-caused; passing later runs do not fix history or establish representative folded/deployed reliability. Current profile fixture diagnosis is a separate test-ownership gap, not attribution of historical production failures.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "RUNNER-SCRATCH",
+      "destinationStory": "STUDIO-OBS-009",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+        "line": 329,
+        "paragraphContains": "**RUNNER-SCRATCH**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "RUNNER-SCRATCH",
+        "sourceFindingIds": [
+          "013:REL-001"
+        ]
+      },
+      "obligation": "Bounded ownership-marked startup sweep and actual SIGKILL/restart residue proof.",
+      "readinessNow": "LOCAL_PROOF_LOCATED_FINAL_GATE_PENDING_FOLDED_SCOPE_OPEN",
+      "proof": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/addendum.md",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/portability-addendum.md",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/implementation-receipt.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/kill-attempt04-results.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/linux-recording-scratch-smoke-results.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa013/final-readiness-matrix.json",
+          "pointer": "/matrix",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "After013 finalPASS mark original local kill/restart obligation implemented/proved in013, referencing final complete fixture receipt.009 retains folding the existing utility into one process/image startup and representative deployed termination proof. Preserve legacy unmarked directories/foreign-live/unknown owners; never claim SIGKILL finally or broad sameUID isolation.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "MODEL-SIZING",
+      "destinationStory": "STUDIO-OBS-009",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+        "line": 330,
+        "paragraphContains": "**MODEL-SIZING**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "MODEL-SIZING",
+        "sourceFindingIds": [
+          "014:OPS-001"
+        ]
+      },
+      "obligation": "D-C real-provider sizing and budget-denominator measurements, architect/PM tuning authority.",
+      "readinessNow": "OPEN_REAL_MODEL_MEASUREMENT",
+      "proof": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+          "existsAtInventory": true,
+          "paragraphContains": "Publish the measured per-run"
+        }
+      ],
+      "minimalPostPassReconciliation": "Retain unchanged. Controlled perCSI budget tests and full-ceiling explanation are not real-model capacity or cost measurements.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "LIVE-RECORDING",
+      "destinationStory": "STUDIO-OBS-009",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+        "line": 331,
+        "paragraphContains": "**LIVE-RECORDING**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "LIVE-RECORDING",
+        "sourceFindingIds": [
+          "013:external-Sonic",
+          "013:C-17",
+          "014:SIEM sink and audit-retention Q3"
+        ]
+      },
+      "obligation": "Actual Sonic range/lifecycle/ingress, human C-17 masking and real SIEM/retention inputs.",
+      "readinessNow": "OPEN_EXTERNAL_OR_MANUAL",
+      "proof": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+          "existsAtInventory": true,
+          "paragraphContains": "AC-10 \u2014 Wire canaries"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/live-original-proofs-review.json",
+          "pointer": "/finalGatePending",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "Retain as unrun/unobtained with owners; local Chromium/local store/forged-policy/mounted-worker process proofs do not satisfy real Sonic/gateway/Vault/SIEM/manual checks.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "VIDEO-LOGGING",
+      "destinationStory": "STUDIO-OBS-010",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+        "line": 128,
+        "paragraphContains": "**VIDEO-LOGGING**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "VIDEO-LOGGING",
+        "sourceFindingIds": [
+          "013:TEST-003"
+        ]
+      },
+      "obligation": "Strict AR-1 INFO+ invariant, no key/bucket/endpoint/cause-chain leakage through sharedVideoObjectServer.",
+      "readinessNow": "LOCAL_PROOF_LOCATED_FINAL_GATE_PENDING",
+      "proof": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/addendum.md",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/implementation-receipt.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa013/final-readiness-matrix.json",
+          "pointer": "/matrix",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-focused-attempt02-results.json",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "After013 finalPASS mark logging implementation + captured full-throwable metadata/range \u00d7 execution/guided cases resolved in013.010 only carries accurate runbook/evidence-access disclosure; do not keep original local logging validation deferred or claim observed plaintext secret leak.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "CACHE-REAUTH",
+      "destinationStory": "STUDIO-OBS-010",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+        "line": 129,
+        "paragraphContains": "**CACHE-REAUTH**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "CACHE-REAUTH",
+        "sourceFindingIds": [
+          "014:D-2b cached 2xx reauthorization"
+        ]
+      },
+      "obligation": "D-2b cached2xx reauthorization including twoGET/threePOST policy operations.",
+      "readinessNow": "OPEN_ORIGINAL_SECURITY_READINESS",
+      "proof": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/live-original-proofs-review.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-readiness-matrix.json",
+          "pointer": "/externalScopeNoPassClaim",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "Retain explicitly open; policy-hash forgery terminality and idempotency replay do not resolve cached-response reauthorization.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "AUDIT-LABEL-PRIVACY",
+      "destinationStory": "STUDIO-OBS-010",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+        "line": 130,
+        "paragraphContains": "**AUDIT-LABEL-PRIVACY**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "AUDIT-LABEL-PRIVACY",
+        "sourceFindingIds": [
+          "014:SEC-003"
+        ]
+      },
+      "obligation": "Dictionary recovery of truncated unkeyed SHA256(scopeHash:label) targetLabelHash.",
+      "readinessNow": "OPEN_EXTERNAL_SECURITY_COMPLIANCE_DECISION",
+      "proof": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+          "existsAtInventory": true,
+          "paragraphContains": "**AUDIT-LABEL-PRIVACY**"
+        }
+      ],
+      "minimalPostPassReconciliation": "Retain explicit risk/owner/disposition. If keyed audit-label hashing is required,PM separately scopes mitigation before approval. F04 artifact HMAC does NOT fix reversible targetLabelHash.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "EXTERNAL-READINESS",
+      "destinationStory": "STUDIO-OBS-010",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+        "line": 131,
+        "paragraphContains": "**EXTERNAL-READINESS**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "EXTERNAL-READINESS",
+        "sourceFindingIds": [
+          "014:R-1 indefinite guided stores",
+          "014:R-2 learning versus replay policy sources",
+          "014:Exact-field nonscalar reads",
+          "014:Artifact HMAC / external E1-E8",
+          "014:Compliance approval and gateway retention ED-01"
+        ]
+      },
+      "obligation": "Retention/policy/RS1/HMAC residuals plus actual gateway/Vault/staging/SIEM/security/compliance/deployment gates.",
+      "readinessNow": "OPEN_EXTERNAL_AND_F01_F04",
+      "proof": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/README.md",
+          "existsAtInventory": true,
+          "paragraphContains": "**STUDIO-OBS-F01**"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/README.md",
+          "existsAtInventory": true,
+          "paragraphContains": "**STUDIO-OBS-F02**"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/README.md",
+          "existsAtInventory": true,
+          "paragraphContains": "**STUDIO-OBS-F03**"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/README.md",
+          "existsAtInventory": true,
+          "paragraphContains": "**STUDIO-OBS-F04**"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+          "existsAtInventory": true,
+          "paragraphContains": "AC-4 \u2014 Release readiness"
+        }
+      ],
+      "minimalPostPassReconciliation": "Retain gates exactly. F01 indefinite stores requires external retention disposition;F02 learning/replay unification follows architect/015T0/security conditions;F03 determined by009 actual benchmark rs1NonScalarReadGaps;F04 Transit E1-E4 gates start,E1-E8 UNCONFIRMED,pilot-blocking unless external named-residual acceptance. D-B/devDB recreation/G1-G3/C2-C3/ED01/ED02/SIEM/Q3 remain explicitly open; no deploy/install/recreate or external-provider approval claimed.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "RECORDING-RUNBOOK-COPY",
+      "destinationStory": "STUDIO-OBS-010",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+        "line": 132,
+        "paragraphContains": "**RECORDING-RUNBOOK-COPY**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "RECORDING-RUNBOOK-COPY",
+        "sourceFindingIds": [
+          "013:MNT-001"
+        ]
+      },
+      "obligation": "Neutral wording agreed by008, honest storage/code semantics in single-path runbook.",
+      "readinessNow": "OPEN_ORIGINAL_DOWNSTREAM_SCOPE",
+      "proof": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+          "existsAtInventory": true,
+          "paragraphContains": "AC-5 \u2014 Operations runbook"
+        }
+      ],
+      "minimalPostPassReconciliation": "Retain; adopt008 agreed wording later. Local technical privacy correction is not full010 runbook completion.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "GUARD-INTEGRATION",
+      "destinationStory": "STUDIO-OBS-011",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+        "line": 144,
+        "paragraphContains": "**GUARD-INTEGRATION**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "GUARD-INTEGRATION",
+        "sourceFindingIds": [
+          "014:TEST-001"
+        ]
+      },
+      "obligation": "Structurally valid UNGROUNDED_TARGET/DESTRUCTIVE_VERB actually reach guard and assert exact reason/audit/terminal/zero prepare-admission-dispatch;authored positive controls.",
+      "readinessNow": "ACTUAL_JOINED_PROOF_LOCATED_FINAL_GATE_PENDING",
+      "proof": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-readiness-matrix.json",
+          "pointer": "/requirementsMatrix",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/archived-test-proof-recheck.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/backend-final-clean-check-attempt01-guard-tally/GuidedPlanningIntegrationTest.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/denominator-reconciliation/014-unit-denominator-reconciliation.json",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "After014 finalPASS mark specific original local integrations resolved in014, no longer011 missing coverage. Link exact finalPlanning XML/tally, including absent-destructive precedence and Save/DeleteALLOW positives. Preserve broader011 harness maintenance; do not credit earlier failed aggregate as final.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "HARNESS-EXACTNESS",
+      "destinationStory": "STUDIO-OBS-011",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+        "line": 145,
+        "paragraphContains": "**HARNESS-EXACTNESS**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "HARNESS-EXACTNESS",
+        "sourceFindingIds": [
+          "014:TEST-003",
+          "014:TEST-005",
+          "014:TEST-006"
+        ]
+      },
+      "obligation": "Exact duplicate IDENTITY_MISMATCH; actual SAVED_INPUT producer without private value; review mutable Core/CSI fixture ownership.",
+      "readinessNow": "EXACT_TESTS_AND_OWNERSHIP_REMEDIATION_PROVED_FINAL_GATE_PENDING",
+      "proof": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/re-review-notes.json",
+          "pointer": "/localConcernDisposition/1",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/correction-review.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/saved-input-correction-receipt.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-readiness-matrix.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/implementation-receipt.json",
+          "pointer": "/changes",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "After014 finalPASS resolve exact replay andSAVED_INPUT checks in014. Record QA-approved SAME_THREAD + class-owned Core/CSI reset/fresh identity/sticky cleanup as actual alternative; do not falsely claim per-test conversion occurred. Future class split remains011 original code-health scope, without resurrecting completed local checks.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "GUARD-PRECEDENCE",
+      "destinationStory": "STUDIO-OBS-011",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+        "line": 146,
+        "paragraphContains": "**GUARD-PRECEDENCE**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "GUARD-PRECEDENCE",
+        "sourceFindingIds": [
+          "014:ARCH-001"
+        ]
+      },
+      "obligation": "Ratify absent-target \u2192 destructive \u2192 grounding \u2192 stance with exact precedence negatives.",
+      "readinessNow": "DATED_RULING_AND_CONFORMANCE_PROOF_LOCATED_FINAL_GATE_PENDING",
+      "proof": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/addendum.md",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/re-review-notes.json",
+          "pointer": "/localConcernDisposition/0",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-readiness-matrix.json",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "After014 finalPASS mark dated ratification and executed conformance satisfied in014; preserve original AR-SEC001-FM and future011 doc stewardship. No remaining ratification request.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "DDL-DOCUMENTATION",
+      "destinationStory": "STUDIO-OBS-011",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+        "line": 147,
+        "paragraphContains": "**DDL-DOCUMENTATION**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "DDL-DOCUMENTATION",
+        "sourceFindingIds": [
+          "013:ARCH-002",
+          "014:DB-001"
+        ]
+      },
+      "obligation": "AR1 correct PostgreSQL varchar256+ASCII+regex; actual V19 generated CHECK names before any future alteration.",
+      "readinessNow": "RATIFICATION_AND_ACTUAL_CATALOG_PROOF_LOCATED_FINAL_GATE_PENDING",
+      "proof": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/addendum.md",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/data/v19-constraint-catalog.json",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/re-review-notes.json",
+          "pointer": "/localConcernDisposition/2",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa013/final-readiness-matrix.json",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "After013/014 finalPASS mark A13-4 and catalog24 names recorded. Retain use of exact names before future alterations and unchangedV1-V20; catalog receipt is not migration installation/runtime proof, and no migration rewrite authorized.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "CLEANUP-OBSERVATIONS",
+      "destinationStory": "STUDIO-OBS-011",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+        "line": 148,
+        "paragraphContains": "**CLEANUP-OBSERVATIONS**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "CLEANUP-OBSERVATIONS",
+        "sourceFindingIds": [
+          "012B:OBS-UX-1",
+          "014:MNT-001"
+        ]
+      },
+      "obligation": "RunDetailsDrawer confirmed-revision wording review; remove literal empty contracts/v3/*.json directory only after emptiness proof.",
+      "readinessNow": "MIXED_EMPTY_DIRECTORY_RESOLVED_VOCABULARY_REMAINS",
+      "proof": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-014/strict-qa/re-review-notes.json",
+          "pointer": "/localConcernDisposition/3",
+          "existsAtInventory": true
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+          "existsAtInventory": true,
+          "paragraphContains": "Stale implementation tense"
+        }
+      ],
+      "minimalPostPassReconciliation": "After014 finalPASS record empty-directory removal already resolved; retain011 vocabulary inventory and Live-surface/history protections. Do not treat deletion of a literal directory as deletion of contract JSON files; do not claim RunDetailsDrawer wording was fixed.",
+      "downstreamLifecycleChangeAllowed": false
+    },
+    {
+      "id": "REVIEW-EVIDENCE-HYGIENE",
+      "destinationStory": "STUDIO-OBS-011",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+        "line": 149,
+        "paragraphContains": "**REVIEW-EVIDENCE-HYGIENE**"
+      },
+      "originalPlacement": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+        "placementId": "REVIEW-EVIDENCE-HYGIENE",
+        "sourceFindingIds": [
+          "012B:TEST-002",
+          "012B:EVD-001"
+        ]
+      },
+      "obligation": "Commented-import mutation is text-scanner proof only; preserve archives and path/hash hygiene.",
+      "readinessNow": "OBSERVATIONAL_HISTORY_REMAINS_NO_NEW_ACCEPTANCE",
+      "proof": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+          "existsAtInventory": true,
+          "paragraphContains": "**REVIEW-EVIDENCE-HYGIENE**"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-012B/strict-qa/final-gate-receipt.json",
+          "existsAtInventory": true
+        }
+      ],
+      "minimalPostPassReconciliation": "Retain as history/optional guard strengthening and archive-first policy. Adds no mandatory new product behavior or local012B gate; no rewrite of old raw evidence.",
+      "downstreamLifecycleChangeAllowed": false
+    }
+  ],
+  "recordingFixtureApplicability": {
+    "source": {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+      "line": 210,
+      "paragraphContains": "Applicability: the retired"
+    },
+    "state": "Existing PO ruling retained; finalactualguided-recording4 mustgreen",
+    "limit": "Retiredrecording-coverage.test.ts replacement is not a new testrequest or waiver; SSE N/A remainsN/A."
+  },
+  "historicalClosures": {
+    "013": {
+      "verdict": "CONCERNS",
+      "reviewed_revision": "s4c-worktree:sha256:af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137",
+      "closureKey": "STUDIO-OBS-013:digest:s4c-worktree:sha256:af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137"
+    },
+    "014": {
+      "verdict": "CONCERNS",
+      "reviewed_revision": "worktree-s4c:sha256:af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137",
+      "closureKey": "STUDIO-OBS-014:digest:worktree-s4c:sha256:af26d1b1a2a31702f23715d5529fa194426709a4ce8b25e2eca2d42b7d959137"
+    }
+  },
+  "sourceSnapshot": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "a3e2fe4c0bebc01d91b0fa0b062c49d031e203ab2a522ee9b04d9f06df797198"
+    },
+    {
+      "path": ".codex/skills/aiox-po/SKILL.md",
+      "sha256": "7e4b06e70fd44658f3a9abb7b20ec0e8a31a2cb41ccddc0ec784c56cb41acff4"
+    },
+    {
+      "path": ".aiox-core/development/agents/po.md",
+      "sha256": "f0090329fd2c2871d3b46d0b2ea1bb9ff3fe48c589fc25ed3d90cf2032621cfd"
+    },
+    {
+      "path": ".aiox-core/development/tasks/po-close-story.md",
+      "sha256": "418fbd93861be71900d51e2e2ecba8959b2ca6f4ac2a67abf7d363e7c31763f9"
+    },
+    {
+      "path": ".aiox-core/constitution.md",
+      "sha256": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1"
+    },
+    {
+      "path": "/Users/brunobuger/.agents/skills/close-story/SKILL.md",
+      "sha256": "2417d67401eff64cdf77d9f12a7b175851b7696afc2661a758427fdb0662440b"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/execution-plan.json",
+      "sha256": "4bf8c2c4b4eb3fa1c6c02aac4df23a71b24fb12ee0a21f8778922e27000c16d5"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/resume-20261014/po-closure-placements.json",
+      "sha256": "1f570cd641d84c2b867335d918c15801e6fc7a65b2d5983c3714e07112122c90"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/coordinator-checkpoint.json",
+      "sha256": "995f3867dcfe7bc57b0544c09fcb9ba8e30676936e54ea2b09cb02ec1aced143"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/MASTER-HANDOFF.md",
+      "sha256": "e6cc9190397be78ce3cbb555e56d4497de2d797eea67b8bbdd1bcda3708607bd"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/README.md",
+      "sha256": "61fb59f69eb1611eb80a2fc60028b3e6a8005b06e97ad5317ba2211e413e650a"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "sha256": "b5c100073debfe970abaac8698210b6c6f56693c96945e68cdfeeb76603a62cd"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "sha256": "d060b162fec1378d21b218311db83b05df9500f6c2780dfd5647d99764fe4c49"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+      "sha256": "08241b6f9fb86622108fd82783c9270d404d2526d326ffc8d74ce513ecd97c8b"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+      "sha256": "6f7efb4753ba4ff1440bfad0846708bbf0cd9d8dec45f6a1c368404349383cff"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+      "sha256": "cb926a715d9698b3b4254a0f1fb55ac0aa93e2d9d0ff51238cb2d6f35b14d649"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+      "sha256": "584f806c9fe2b4631aede37388177763819db9bea813f62a18f40c0f49abd4ef"
+    },
+    {
+      "path": ".ai/STUDIO-OBS-013-close.json",
+      "sha256": "701731e681beee5c742eb81d732126f5981d784b27a1ec706ea8f952f27658f1"
+    },
+    {
+      "path": ".ai/STUDIO-OBS-014-close.json",
+      "sha256": "01f348287bf1d9dd01e497ca61974c70f289117b62817cba0319513dc55ebe91"
+    },
+    {
+      "path": ".ai/STUDIO-OBS-012B-close.json",
+      "sha256": "071b3f72f2c4b01c37b0c41d6b5a66a9f31d1e407ea30a455080622de49339b0"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBS-013/state.json",
+      "sha256": "516d29ebc4475987533ec24cc88cf12b84547eae4b4adc626121b19bb2a7b4da"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBS-014/state.json",
+      "sha256": "88ed91929a969e5860e424290b195562fa5a5a28549b5b0c5715afa96c63fe3f"
+    },
+    {
+      "path": ".aiox/waves/STUDIO-OBS-SINGLE-PATH/state.json",
+      "sha256": "ad05dc5055115611857caaf30c266f8ab9aa4b8b44a1f8839097e3e9d2ef8531"
+    }
+  ],
+  "inventoryOperations": "Read files and write only this plan. No tests/build/process/native/Gradle/CLI/git/deploy/install/devDB recreation/newagents or other artifact/lifecycle/source/config/dist edits. Future root preflight and final gate evidence are required; this plan is not closure acceptance.",
+  "currentEvidenceSummary": {
+    "013": "Four native readiness controls passed both focused and full attempt03; all20 mandatory native/kill/guided cases passed in that failed full run. Existing profile attack fixture was its sole failure; final correction and full gates remain pending. No claim of primary historical error cause.",
+    "014": "Independent bounded PASS for actual real-backend/real-worker forged-policy test1/1 and valid mounted-worker baseline plus3 bad rules variants; denominator temporal correction accepted, not final story PASS.",
+    "sources": [
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/integration-readiness-full-native-failed-attempt03.json",
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/live-original-proofs-review.json"
+    ]
+  }
+}

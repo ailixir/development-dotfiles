@@ -1,0 +1,41 @@
+{
+  "scope": "Exact selected current backend gate only; no whole-story QA verdict",
+  "gradleExitCode": 1,
+  "sourceDrift": [],
+  "results": [
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.ProgressCallbackIT",
+      "tests": 20,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidenceTest",
+      "tests": 24,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "finishedAt": "2026-10-11T09:12:04.870250+00:00",
+  "tests": 78,
+  "failures": 4,
+  "errors": 0,
+  "skipped": 0,
+  "pass": false
+}

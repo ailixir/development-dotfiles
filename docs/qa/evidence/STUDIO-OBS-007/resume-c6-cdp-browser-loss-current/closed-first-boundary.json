@@ -1,0 +1,115 @@
+{
+  "firstFailure": [
+    {
+      "type": "java.lang.IllegalStateException",
+      "frames": [
+        "GuidedPublicationReplayIT.p3CleanupOwnedResources(GuidedPublicationReplayIT.java:6872)",
+        "GuidedPublicationReplayIT.p8C6Run(GuidedPublicationReplayIT.java:8210)",
+        "GuidedPublicationReplayIT.lambda$p8C6Case$174(GuidedPublicationReplayIT.java:7964)",
+        "GuidedPublicationReplayIT.p3Case(GuidedPublicationReplayIT.java:6613)",
+        "GuidedPublicationReplayIT.p8C6Case(GuidedPublicationReplayIT.java:7964)",
+        "GuidedPublicationReplayIT.actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending(GuidedPublicationReplayIT.java:4550)",
+        "GuidedPublicationReplayIT.p8AwaitC6Closed(GuidedPublicationReplayIT.java:8361)",
+        "GuidedPublicationReplayIT.p4AwaitRevocationObserverCompletion(GuidedPublicationReplayIT.java:7479)"
+      ]
+    }
+  ],
+  "currentOwnedFixedFacts": [
+    {
+      "numeric": {
+        "diagSelectedStateObserved": true,
+        "diagSameJavaMonotonicClock": true,
+        "diagIngressNotNativeApiClock": true,
+        "diagWaitResultObserved": true,
+        "diagWaitResult": true,
+        "diagNativeOrdinalObserved": true,
+        "diagNativeOrdinal": 2,
+        "diagNativeEntryAccepted": true,
+        "diagNativeSettleAccepted": false,
+        "diagFirstRefusalObserved": true,
+        "diagFirstRefusalOrdinal": 200,
+        "diagFirstRefusalElapsedNanos": 6931902916,
+        "diagFirstRefusalScopeKnown": false,
+        "diagProvisionalFocusLossObserved": false,
+        "diagObservationFailed": false,
+        "diagWaitBeginObserved": true,
+        "diagWaitBeginElapsedNanos": 1129128291,
+        "diagWaitExitObserved": true,
+        "diagWaitExitElapsedNanos": 6800160625,
+        "diagNativeEntryIngressObserved": true,
+        "diagNativeEntryIngressElapsedNanos": 6772721875,
+        "diagFocusAcceptedObserved": false,
+        "diagFocusAcceptedElapsedNanos": 0,
+        "diagProbe1WriteCompleteObserved": true,
+        "diagProbe1WriteCompleteElapsedNanos": 6775226583,
+        "diagPendingIngressObserved": true,
+        "diagPendingIngressElapsedNanos": 6799994916,
+        "diagPendingAcceptedObserved": true,
+        "diagPendingAcceptedElapsedNanos": 6800021416,
+        "diagNativeSettleIngressObserved": false,
+        "diagNativeSettleIngressElapsedNanos": 0,
+        "diagSnapshotPartialNotClosureWitness": true,
+        "diagQuarantineRetained": true,
+        "diagEarlySnapshotObserved": true,
+        "earlydiagSelectedStateObserved": true,
+        "earlydiagSameJavaMonotonicClock": true,
+        "earlydiagIngressNotNativeApiClock": true,
+        "earlydiagWaitResultObserved": true,
+        "earlydiagWaitResult": true,
+        "earlydiagNativeOrdinalObserved": true,
+        "earlydiagNativeOrdinal": 2,
+        "earlydiagNativeEntryAccepted": true,
+        "earlydiagNativeSettleAccepted": false,
+        "earlydiagFirstRefusalObserved": false,
+        "earlydiagFirstRefusalOrdinal": 0,
+        "earlydiagFirstRefusalElapsedNanos": 0,
+        "earlydiagFirstRefusalScopeKnown": false,
+        "earlydiagProvisionalFocusLossObserved": false,
+        "earlydiagObservationFailed": false,
+        "earlydiagWaitBeginObserved": true,
+        "earlydiagWaitBeginElapsedNanos": 1129128291,
+        "earlydiagWaitExitObserved": true,
+        "earlydiagWaitExitElapsedNanos": 6800160625,
+        "earlydiagNativeEntryIngressObserved": true,
+        "earlydiagNativeEntryIngressElapsedNanos": 6772721875,
+        "earlydiagFocusAcceptedObserved": false,
+        "earlydiagFocusAcceptedElapsedNanos": 0,
+        "earlydiagProbe1WriteCompleteObserved": true,
+        "earlydiagProbe1WriteCompleteElapsedNanos": 6775226583,
+        "earlydiagPendingIngressObserved": true,
+        "earlydiagPendingIngressElapsedNanos": 6799994916,
+        "earlydiagPendingAcceptedObserved": true,
+        "earlydiagPendingAcceptedElapsedNanos": 6800021416,
+        "earlydiagNativeSettleIngressObserved": false,
+        "earlydiagNativeSettleIngressElapsedNanos": 0
+      },
+      "producer": [
+        {
+          "producer": 1,
+          "sent": 12,
+          "acked": 12,
+          "pending": 1,
+          "originalPending": 0,
+          "failed": true,
+          "sealed": false,
+          "contextBound": true
+        }
+      ],
+      "originalState": {
+        "state": "UNKNOWN_OUTCOME",
+        "errorCode": "OTHER",
+        "bootstrapPhase": "READY",
+        "materializationPresent": true,
+        "fixturePhysicalProviderReads": 1,
+        "fixtureProviderFailures": 0,
+        "fixtureModelHttpCalls": 4,
+        "fixtureModelKinds": {
+          "SOURCE_PLAN": 1,
+          "NEXT_ACTION": 3,
+          "VERIFY_STEP": 0
+        }
+      }
+    }
+  ],
+  "sourceDrift": []
+}

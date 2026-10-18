@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+  "caseName": "secret-valid",
+  "evidenceId": "0d9c1f9a-68fe-46e7-a816-30d70dd0ab09",
+  "assertionPhaseStatus": "COMPLETED_NOT_FINAL_TEST_VERDICT",
+  "exportStatus": "VERIFIED_EXPORT",
+  "privateRecoveryDirectory": "secret-prefix-native-OnKcy8",
+  "commitments": {},
+  "records": [
+    {
+      "role": "secret-prefix",
+      "sessionId": "80b264d7-f6b9-4d76-ac5f-76523c3c8eb1",
+      "contextId": "fef0419d-2ce5-404e-91c5-ca33986cc9a9",
+      "contextRevision": 2,
+      "recordingId": "e6d231ed-0498-4f2b-82fb-07328fe2478e",
+      "state": "STORED",
+      "partial": false,
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000801",
+          "admissionId": "a6b39c23-db0f-4402-ba97-ecb91297132c",
+          "ordinal": 0,
+          "startMs": 21,
+          "endMs": 37
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000802",
+          "admissionId": "bec667b0-ee0e-4dba-b538-10058d6e1657",
+          "ordinal": 0,
+          "startMs": 74,
+          "endMs": 76
+        }
+      ]
+    },
+    {
+      "role": "secret-prefix",
+      "admissionId": "bec667b0-ee0e-4dba-b538-10058d6e1657",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000802",
+        "ordinal": 0
+      },
+      "state": "SUCCEEDED",
+      "outcomeCode": "OK",
+      "attemptOrdinal": 0,
+      "contextRevision": 1,
+      "operationHash": "dc3ed6cf9280f9294fa0ccf4debe4e4a68c39ca70da63229ae5477a47de8d85d",
+      "authoredInputsHash": "867c355c159497fbe47bbaf493768508f24479e625d171cd0dcb136376a880cc"
+    }
+  ],
+  "phases": [
+    {
+      "role": "secret-prefix",
+      "media": "REGISTERED",
+      "seekFrames": "NOT_REACHED"
+    }
+  ],
+  "files": [
+    {
+      "role": "secret-prefix",
+      "state": "COPIED_VERIFIED",
+      "path": "secret-prefix.webm",
+      "byteLength": 10599,
+      "sha256": "25fc151a11c97f14b6029b0e6221530c94b84b10cfa076e0be9eeaac752753c8",
+      "privacy": "VERIFIED_MASKED",
+      "checks": {
+        "assertions": "PASSED",
+        "decoder": "NOT_REACHED",
+        "seek": "NOT_REACHED"
+      }
+    }
+  ],
+  "cleanupAllowed": true
+}

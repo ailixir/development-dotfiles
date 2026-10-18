@@ -1,0 +1,34 @@
+{
+  "scope": "INDEPENDENT_QA_PO_SOURCE_ONLY_INDEXED_KMP_DESIGN_REVIEW",
+  "disposition": "GO_ISOLATED_AUTHOR_WITH_OLD_NEW_PARITY_PREREQUISITE",
+  "designPath": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c5-indexed-kmp-dispatch-design.json",
+  "designSha256": "1097af8487fa5665d4e4f45a4dcde0f56c41063ea78ad621d516d4013bf9ef3a",
+  "fixtureSourceSha256": "6a1adfd4ba05a52f539cf38e31f97bce091c36491c7f5ee61c77e85bc599070e",
+  "coreProof": "OLDactive IDs and matching-firstbyte IDs with OLDstate0 form disjoint complete candidate union before any update. Omitted zero-state wrong-firstbyte transition has no fallback/equality/hit/state/count effect. Ascending original indices preserve overflow/failure ordering; same original KMPbody preserves overlap and hit multiplicity.",
+  "requiredInvariants": [
+    "Buckets preserve EVERY original pattern index once, including byte-identical variants/patterns; no deduplication by content/value. Bounds P<=240, immutable membership during consumption, fixed scratch/active capacity P.",
+    "Build entire ordered duplicate-free scratch list before updating any state. Validate index/bucket/list bounds before dereference; active rebuilding may not mutate scratch or use post-update state to decide candidacy.",
+    "Retain original activeStates adjustment and full state-vector positive inventory assertion. Rebuilt active list must equal original activeStates; invalid duplicate/order/index/readiness integrity is sticky failure, never clean absence.",
+    "Constructor publishes ready only after complete metadata. RuntimeException remains sticky invalid with no rawcause; partial metadata cannot be consumed or exported clean. Fatal Error behavior unchanged. Every valid byte increments original count before integrity checks, including post-hit/failed/late tails.",
+    "Same existing serialized writer/stream lifetime/order only; no async, extra stream, history, memoized absence or new matching algorithm. All new active/scratch/bucket entries and references are wiped with original patterns/prefix/states/startbytes."
+  ],
+  "independentParityRequired": "Ignored one-off OLDfullscan versus NEWindexed artifact on SAME original variants and independently supplied hardcoded controls, comparing full states/activeStates/hits including duplicate multiplicity/bytes/writecalls/invalid/failed/closure/wipe at byte/write boundaries. Include all splits/offset/intlow8/overlap/reset/mixedbytes/twovalues30patterns/oldvolume/invalid/overflow/late/wipe. Parity mismatch is NO_GO; source theorem alone is not runtime proof.",
+  "existingTests": "Keep all37 original test bodies/assertions byte-exact; existing syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls smoke unchanged. No new mandatory Core/browser case/framework.",
+  "privacyScope": "AC9 backend model masking/fullROOT+APP/everyappender/all15variants per actual value/all30patterns/currentfinaldrains/sinks/strict1000ms remain mandatory. No missing/failed metadata positivezero claim or sampled privacy coverage.",
+  "tradeoffs": [
+    "Unchanged full scan: simplest implementation, O(P) transition consideration whenever any prefix/startbyte is relevant.",
+    "Indexed dispatch: bounded extra3P integers+256slots and more invariant work, sameKMP/ordering; worstcase stillO(P), no quantified benefit.",
+    "Trie/offlinehistory/asynchronous processing/sampling: unnecessary new algorithm/lifetime/privacy complexity, outside scope."
+  ],
+  "currentFacts": {
+    "C5": "RED",
+    "lastUnprofiledClaimMs": 1074.07625,
+    "priorFinalize409Cause": "UNOBSERVED",
+    "scannerExclusiveCostOrCausality": "UNOBSERVED"
+  },
+  "sourceApplyAuthorized": false,
+  "buildRuntimeAuthorized": false,
+  "performanceClaim": false,
+  "formalQaOrLifecycleChanged": false,
+  "rootCandidateReviewBeforeApplyRequired": true
+}

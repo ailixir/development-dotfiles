@@ -1,0 +1,92 @@
+[
+  {
+    "class": "GuidedPlanningIntegrationTest",
+    "s4-xml": {
+      "tests": 40,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "xml_sha256": "716c793b97115e51a9a4c3e37270da36f48474e13e2cdfebe00a7858bc85627a"
+    },
+    "s4c-xml": {
+      "tests": 49,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "xml_sha256": "6ea0c9084a3e2e12e18e499f11cdc96181da51573f6478a5444fa1b7325cc445"
+    },
+    "added_cases": [
+      "[1] control=button",
+      "[1] control=unlabelled-button",
+      "[2] control=input",
+      "[2] control=unlabelled-input",
+      "[3] control=form-attribute",
+      "aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried()",
+      "aTimedOutBootstrapContextStillRetriesAndExhaustsAfterThreeDeliveries()",
+      "governedClarifyFirstAsksOnceBeforeAnUnlabelledFormSubmit()",
+      "governedClarifyFirstAsksOnceBeforeTheFormSubmitAndConfirmingContinues()"
+    ],
+    "removed_cases": []
+  },
+  {
+    "class": "GuidedPublicationReplayIT",
+    "s4-xml": {
+      "tests": 39,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "xml_sha256": "a74f8d775a7e6427723737a500de4f25740de372f65c31447ae3132b590f5878"
+    },
+    "s4c-xml": {
+      "tests": 40,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "xml_sha256": "1d2005e75a5fd8ebbc7b5638f6185757cc787a8e04add018a6de6b078402bc99"
+    },
+    "added_cases": [
+      "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes()"
+    ],
+    "removed_cases": []
+  },
+  {
+    "class": "GuidedSessionIT",
+    "s4-xml": {
+      "tests": 43,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "xml_sha256": "3f30b6115692644bf6d0f6a069bb059fbbe3cdf7de05fcd57cd9c7d71b0e71dd"
+    },
+    "s4c-xml": {
+      "tests": 44,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "xml_sha256": "df570978dc0d662ea7bdb78b3c7696158a541c78d663f5e4d0aec969efb48517"
+    },
+    "added_cases": [
+      "theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash()"
+    ],
+    "removed_cases": []
+  },
+  {
+    "class": "GuidedBridgeIntegrationTest",
+    "s4-xml": {
+      "tests": 37,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "xml_sha256": "218d282bb232f3a85acf64bb7a4f612b39603575d535bb57e89c8ece398c5457"
+    },
+    "s4c-xml": {
+      "tests": 37,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "xml_sha256": "f91678f5b372db6988319133b0b06c714532dcb304481caab6dfee7297be3f76"
+    },
+    "added_cases": [],
+    "removed_cases": []
+  }
+]

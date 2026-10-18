@@ -1,0 +1,82 @@
+{
+  "artifact": "STUDIO-OBS-015 selected Java feedback02 narrow compiler repair01",
+  "at": "2026-10-15T08:32:59.057475+00:00",
+  "owner": "Dex/backend015_resume",
+  "status": "SOURCE_ONLY_UNCOMPILED_ATOMIC_HOLD",
+  "sourceHold": true,
+  "authority": "Root narrow source-only release for exactly two package-access diagnostics; no scope expansion.",
+  "inputFeedback": {
+    "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt02.log",
+    "sha256": "e269501bb5130c76af2705d6c8c096b4afb96d414cae6bba32d084e61fca0424",
+    "mainCompile": "PASS_AT_FEEDBACK02_CAPTURE",
+    "testCompile": "FAILED_TWO_PACKAGE_ACCESS_ERRORS",
+    "testCasesExecuted": 0,
+    "databaseStartup": false,
+    "diagnostics": [
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java:2972: error: Identity is not public in GuidedInternalSecurity; cannot be accessed from outside package",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java:3091: error: Identity is not public in GuidedInternalSecurity; cannot be accessed from outside package"
+    ]
+  },
+  "touchedSources": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "beforeSha256": "62b230373b655c28681fb89facddf16906b6b8ae5126f78416a8eb1529829932",
+      "afterSha256": "2256f3148e9dab679b261a3134deaeffe4673642e0faa782fb1b5aa5b73bddd8",
+      "change": "Exactly two constructor expressions replaced by test-only controller factory; all remaining source bytes preserved.",
+      "replacementOccurrences": 2,
+      "reverseReplacementReconstructsOriginalSha256": "62b230373b655c28681fb89facddf16906b6b8ae5126f78416a8eb1529829932",
+      "originalReconstructionMatchesBefore": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedInternalIdentityFixture.java",
+      "beforeSha256": null,
+      "afterSha256": "fc6bd92c5c575ed990134e2d99e74b7d42f9e7230133971d0246636c519fd8c6",
+      "change": "New12line test-only package-local-access factory returns Authentication carrying exact existing controller-1/backend-controller GuidedInternalSecurity.Identity; no reflection, production change or fake callback."
+    }
+  ],
+  "productionSecurity": {
+    "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java",
+    "beforeSha256": "2c44c6a50a42b3c654aa87f6ed0b3fd32a60e4946a4cb772ac3632851a99f3df",
+    "afterSha256": "2c44c6a50a42b3c654aa87f6ed0b3fd32a60e4946a4cb772ac3632851a99f3df",
+    "unchanged": true,
+    "identityVisibility": "Package-private, unchanged; requireRole still checks exact internal Identity type."
+  },
+  "subjectPreservation": [
+    {
+      "diagnosticLine": 2972,
+      "selector": "GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+      "parameter": "confirm-owner-loss",
+      "helper": "confirmIncrementalPrefix",
+      "preserved": "Reads actual current owner/fence runnerContext using same role/subject, then actual GuidedDispatchService.stop(context,LEASE_LOST), real runtime grant invalidation/browser close/owning-worker lifecycle; waits FAILED and late public clarify409; no fabricated lifecycle callback."
+    },
+    {
+      "diagnosticLine": 3091,
+      "selector": "GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+      "parameter": "append-input",
+      "helper": "assertPendingContextGuardsThenRelease",
+      "preserved": "Actual runner update held before real ACK; actual pending delivery1; actual reserveModel/attempt/materialization and staleadmit guards; unchanged0write/model/effect snapshots and originalACK release; same exact controller identity."
+    },
+    {
+      "selector": "GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+      "parameters": [
+        "drift-auth",
+        "drift-auth-pre"
+      ],
+      "preserved": "Actual HTTPS owning-worker callback/mTLS/JWT/fence positive and negative probes unchanged; new service-call fixture conveys no HTTP authentication proof."
+    }
+  ],
+  "sourceInspection": {
+    "reportedDiagnosticsAddressedInSource": true,
+    "remainingCrossPackageConstructorReferencesInOwnedFile": 0,
+    "sourceChangeBoundedToTwoExpressions": true
+  },
+  "executionAfterRepair": {
+    "compilation": "NOT_RUN",
+    "tests": 0,
+    "gradleDatabaseNativeBuildDistGenerationFormatCommands": 0,
+    "commandsLive": false
+  },
+  "unchangedEvidence": "Checkpoint05/source-map05, original failed feedback/log, story/AC/QA, Data07 migration/helpers, contracts/generated/oracles, runner/frontend and thresholds/skips untouched. Root must capture actual compilation/test feedback; no source-only pass or QA/Done.",
+  "remainingScope": "Full eight increments/86obligations and checkpoint05 explicit gaps remain; this narrow repair does not close any semantic facet.",
+  "hold": "All source/test/story/disclosure writes HOLD after this receipt until exact root release."
+}

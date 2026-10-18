@@ -1,0 +1,123 @@
+{
+ "story": "STUDIO-OBS-015",
+ "step": "w6-checkstyle-G5",
+ "group": "G5",
+ "date": "2026-10-16",
+ "checkstyle": {
+  "tool": "10.18.1 CLI, backend/config/checkstyle/checkstyle.xml, -Dconfig_loc=backend/config/checkstyle",
+  "before": 148,
+  "after": 0,
+  "beforeByRule": {
+   "LineLength": 52,
+   "NeedBraces": 83,
+   "Indentation": 11,
+   "WhitespaceAround": 2
+  }
+ },
+ "formatter": "google-java-format 1.22.0 --dry-run --set-exit-if-changed on the 10 files: exit 0",
+ "bytecode": {
+  "method": "javac 21 -g:none -proc:none, same sourcepath overlay (rest of tree identical), orig vs fixed G5 files",
+  "classes": 19,
+  "byteIdentical": 18,
+  "differing": [
+   "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest (test-only: switch expression extracted into new private static alteredEvidenceValue(String); 1 added method, same arms)"
+  ],
+  "mainClassesAllIdentical": true
+ },
+ "files": [
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+   "sha256Before": "3f315bb9ee15803f4f58f075bd3b1748895657c87f91c40b1f5e44363eeb26f7",
+   "sha256After": "c17c52985de22d762a4afd96b68d6e42b661af89a963f44273c74ccbf27e259d",
+   "violationsBefore": {
+    "LineLength": 1
+   },
+   "violationsAfter": {}
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedBasisValidator.java",
+   "sha256Before": "ccadd435262985844be199379b7029e3862265394d09cef30ecfa8cc56280153",
+   "sha256After": "5a4cc3f65bbc0c3d039f82aff21e2d66d239406ba7694e6159e40b2d91030d11",
+   "violationsBefore": {
+    "NeedBraces": 9
+   },
+   "violationsAfter": {}
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedEffectiveGraph.java",
+   "sha256Before": "7abb94a282c68cd16a29893d5941bc3dbc92f914ae8f463dbd570e4e2595ec97",
+   "sha256After": "02151dc07fe3d03cc8e14b46ad33ecdfbba7acb6299218004558480be7a886f3",
+   "violationsBefore": {
+    "NeedBraces": 4
+   },
+   "violationsAfter": {}
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceSnapshotRepository.java",
+   "sha256Before": "a3175a0d73da3deaa2a3ef6db6b3f7b7d6861cfc2631b28ff7218eaf237d96ee",
+   "sha256After": "442addeea22bf3e996448c282ff13145cd3d41dc7f4ea3d4fb6e4332f73d1b2b",
+   "violationsBefore": {
+    "WhitespaceAround": 2
+   },
+   "violationsAfter": {}
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/StudioApiIT.java",
+   "sha256Before": "1b8456ef00adce2b06addf463df1c889d1cdfdb81d965a313cb77eedf036deb0",
+   "sha256After": "d1358d17c335183dc4d45608a7584ee1cb9903f50d4728ff70b1c2bb0b4a102d",
+   "violationsBefore": {
+    "LineLength": 1
+   },
+   "violationsAfter": {}
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java",
+   "sha256Before": "d26355b99a9ef7bf537630d55072217af8adaafb6fc0d35ba4146ff798bef8f6",
+   "sha256After": "94ddfa3311f88b1bbf54ee3f52113ceb492210000496c1ffa21f70c1661cb971",
+   "violationsBefore": {
+    "LineLength": 1
+   },
+   "violationsAfter": {}
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java",
+   "sha256Before": "56a379c6e920b1a187a7ff768c9e9a41d552583075abf41eda46ebfcb7a5e164",
+   "sha256After": "62aa18f3c0825474e7e0e71e19aa645debf938a7730e276cb2960cb32a9a1525",
+   "violationsBefore": {
+    "NeedBraces": 5
+   },
+   "violationsAfter": {}
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisParityTest.java",
+   "sha256Before": "72348e6cfe3922392a651ea03bb76a7ad4289d41038cc9483df6443914cc886c",
+   "sha256After": "0872da7ea1705788a688818973c530235a059cf0e90ffa99139f21b09c6b8479",
+   "violationsBefore": {
+    "NeedBraces": 13,
+    "LineLength": 2,
+    "Indentation": 11
+   },
+   "violationsAfter": {}
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+   "sha256Before": "ec408f2e996b35e1a1b257c7326a52707c2078cf90df8df9f343167c33226f5e",
+   "sha256After": "2ad3d7cb00d52813e05d692d0a21d5c6d22d9e5be9904bf9ad5918e489f932e4",
+   "violationsBefore": {
+    "NeedBraces": 40,
+    "LineLength": 18
+   },
+   "violationsAfter": {}
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+   "sha256Before": "ee43f18565bc112555e6ace0f9f84898f0fe73413d4b12d5fb0cdddfa6123bde",
+   "sha256After": "03d5e84aacd91b1bbab5c04006ceb72d63215a5c3671c99f0b024efab4cf3d54",
+   "violationsBefore": {
+    "LineLength": 29,
+    "NeedBraces": 12
+   },
+   "violationsAfter": {}
+  }
+ ]
+}

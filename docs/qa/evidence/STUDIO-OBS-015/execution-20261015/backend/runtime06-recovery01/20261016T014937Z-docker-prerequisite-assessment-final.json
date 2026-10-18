@@ -1,0 +1,60 @@
+{
+  "at": "2026-10-16T01:49:37.096587+00:00",
+  "authoritativeRecoveryDockerAssessment": true,
+  "observedCommand": [
+    "docker",
+    "ps",
+    "-a",
+    "--format",
+    "limited ID/image/status/Testcontainers labels"
+  ],
+  "observedCommandExit": 1,
+  "failureCategory": "LOCAL_DAEMON_SOCKET_CONNECTION_UNAVAILABLE_AT_INITIAL_PROBE",
+  "cliMissing": false,
+  "activeContextEndpointEqualsInitialFailureEndpoint": true,
+  "sameEndpointRequiredByExistingHarnessProved": true,
+  "existingHarnessStrategySuccessEvidence": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-prefix-sync-core-feedback-attempt06-artifacts/recovery01-20261016T014423Z-before-cleanup/fixed-fresh/backend/build/test-results/guidedIncrementalTest/binary/output.bin",
+      "sha256": "0ded37f42d7daccf2ae38e7b8d16e036ee2c14c7e0ce280e01ae51d47614966b",
+      "successfulStrategyEndpoints": [
+        {
+          "strategySuccessAnchorOffset": 826,
+          "relativeSocketUriOffset": 49,
+          "scheme": "unix",
+          "resolvedSocketEqualsCliConfiguredSocket": true,
+          "exactCliPathEqual": false,
+          "rawEndpointValueExported": false
+        }
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-prefix-sync-authority-core-feedback-attempt05-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+      "sha256": "f46e5c9d95df818b949c9d1fa4304f4da7774e40d6cf0a3016b6318c332820f9",
+      "successfulStrategyEndpoints": [
+        {
+          "strategySuccessAnchorOffset": 90678,
+          "relativeSocketUriOffset": 49,
+          "scheme": "unix",
+          "resolvedSocketEqualsCliConfiguredSocket": true,
+          "exactCliPathEqual": false,
+          "rawEndpointValueExported": false
+        }
+      ]
+    }
+  ],
+  "harnessUsesPostgreSQLContainer": true,
+  "wrapperInheritsEnvironment": true,
+  "sourceDockerEndpointOverridePresent": false,
+  "dockerHostEnvironmentOverridePresent": false,
+  "propertiesDockerHostOverridePresent": false,
+  "wrongContextEstablished": false,
+  "containerStateAndCleanupLimit": "UNCONFIRMED: initial Docker inventory failed at configured local Unix socket; no exact current-run container ID proved, so no container cleanup or closure claimed. Socket filesystem metadata alone is not daemon connectivity.",
+  "noContainerActionServiceRestartOrReconnection": true,
+  "rawSecretsConfigEnvironmentAndContextValuesExported": false,
+  "supersedesInterpretation": [
+    "20261016T014811Z-docker-harness-endpoint-comparison.json",
+    "20261016T014839Z-docker-harness-endpoint-final.json"
+  ],
+  "interpretationCorrection": "Earlier exploratory broad 700-character segments included a later unrelated URI. This assessment binds the first URI within 200 characters after each exact successful Docker strategy message; earlier artifacts retained unchanged."
+}

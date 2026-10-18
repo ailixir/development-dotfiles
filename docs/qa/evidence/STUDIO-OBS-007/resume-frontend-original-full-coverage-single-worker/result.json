@@ -1,0 +1,25 @@
+{
+  "checks": [
+    {
+      "check": "full-coverage",
+      "exitCode": 1
+    }
+  ],
+  "tests": 958,
+  "passed": 957,
+  "failed": 1,
+  "pending": 0,
+  "maxWorkers": 1,
+  "minWorkers": 1,
+  "failures": [
+    {
+      "file": "frontend/src/pages/SplunkPrototypePage/SplunkPrototypePage.test.tsx",
+      "test": " SplunkPrototypePage combines thresholds across columns",
+      "timeout": true
+    }
+  ],
+  "sourceDrift": [],
+  "coverageThresholdFailures": [],
+  "finishedAt": "2026-10-12T01:54:33.382010+00:00",
+  "build": "NOT_RUN_AFTER_UNIT_FAILURE"
+}

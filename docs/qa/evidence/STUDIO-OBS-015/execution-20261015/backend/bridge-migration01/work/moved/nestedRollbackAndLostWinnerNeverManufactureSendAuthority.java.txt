@@ -1,0 +1,31 @@
+  @Test
+  void nestedRollbackAndLostWinnerNeverManufactureSendAuthority() throws Exception {
+    String id = prepareSession();
+    dispatch.pushContext(controller, id, 1);
+    JsonNode ledger = admit(id, navigation(id));
+    ObjectNode request = advanceRequest(id, ledger);
+    assertThatThrownBy(
+            () ->
+                repository.transaction(
+                    () -> sessions.consume(controller, id, 1, "nested", request)))
+        .hasMessage("RUNTIME_INCOMPATIBLE");
+    assertThat(action(id).path("dispatchCount").asInt()).isZero();
+    var results =
+        race(
+            () -> sessions.consume(controller, id, 1, "one", request),
+            () -> sessions.consume(controller, id, 1, "two", request));
+    assertThat(
+            results.stream().filter(GuidedSessionService.WonConsumption.class::isInstance).count())
+        .isEqualTo(1);
+    assertThat(
+            results.stream().filter(GuidedSessionService.AlreadyConsumed.class::isInstance).count())
+        .isEqualTo(1);
+    // Simulated controller death after commit/before send. Restart/status/cache has no permit.
+    new GuidedDispatchService(sessions, materialization, runner)
+        .dispatch(controller, id, 1, "after-restart", request);
+    assertThat(NAVIGATIONS.get()).isZero();
+    sessions.lostAcknowledgment(id);
+    assertThat(action(id).path("state").asText()).isEqualTo("UNKNOWN_OUTCOME");
+    assertThatThrownBy(() -> sessions.consume(controller, id, 1, "late", request))
+        .hasMessage("UNKNOWN_OUTCOME");
+  }

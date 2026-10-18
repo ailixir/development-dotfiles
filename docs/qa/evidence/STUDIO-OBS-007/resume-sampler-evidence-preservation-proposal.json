@@ -1,0 +1,9 @@
+{
+  "scope": "EXISTING_SAMPLER_NUMERIC_EVIDENCE_PRESERVATION_ONLY",
+  "sourceSha": "f072bd9c5016665b2acb6721cdf0eabbffc4ff3d80bf9615e889e53c7baf0fed",
+  "fact": "closeClaimSampler writes existing claimSampler/pgSnapshot fields to c5-numeric-evidence.json; later writeNumericEvidence creates new ObjectNode and overwrites them. Current diagnostic matrix unretained.",
+  "minimalDelta": "When current capture.claimSampler != null and existing owned numeric file exists, retain ONLY exact existing claimSampler/pgSnapshot field whitelist into newly generated evidence before original write. No arbitrary keys, raw bodies, IDs, new fields/files/samplers or sampling changes. Disabled path original/no extra reads.",
+  "preserved": "Original statuses/join/nonquiescent invalidity/counts rules; original product calls/clocks/log levels/cleanup/bytes/guards; diagnostic only not acceptance/exclusive cost.",
+  "verification": "One source inverse/hash check, scopedcompile then original exactenvtrue first+ninth diagnostic; inspect persisted fixed numeric matrix. No new E2E/supporting case.",
+  "authorStatus": "NOT_AUTHORED"
+}

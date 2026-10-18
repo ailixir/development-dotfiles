@@ -1,0 +1,86 @@
+{
+  "status": "SOURCE_FROZEN_CHECKS_UNRUN",
+  "authority": "resume-b-projection-reuse-author-intent.txt + context; root-b-projection-cache-review.json",
+  "files": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedModelProjection.java",
+      "beforeSha256": "df89d11dfcb07cc39c5429c4619ef3a55e27cafab364529b8df36c924774f2d2",
+      "afterSha256": "5561f8414e827d8691315dd73445b044faa2b5a6234df670cc81d6f767e0184f"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+      "beforeSha256": "1a12dbd6c57ace34493037c585e999e53a84708369fd746a6417234b6b6f9775",
+      "afterSha256": "0306630d3bf6c64b2370284d182e4fe49d6db74eed588637769e233f3e1cb57e"
+    }
+  ],
+  "productionDelta": "One private static final existing GuidedContracts validator; exact original validate name/document call remains before constructor deep-copy. Getter deep-copy unchanged. Frozen compiled-schema reuse only.",
+  "preservation": {
+    "oldCaseCount": 30,
+    "newCaseCount": 31,
+    "allOldBodiesByteIdentical": true,
+    "oldCaseNames": [
+      "knownAcquisitionSettlesCumulativelyAndRefundsOnlyOnce",
+      "committedCallbackRecoveryKeepsExactOriginalRequestAndChargesUnknownWindow",
+      "settledPollRestartAndLeaseRenewalKeepDeadlineAndCheckpoint",
+      "concurrentScannersShareOnePendingReservationAndOriginalKey",
+      "sourcePlanObligationAndFenceMismatchCannotRefundOrRestampPendingWork",
+      "exactPendingHashAndClosedProgressAreValidatedBeforeRecovery",
+      "lateSettlementAndClockRegressionRetainFullReservation",
+      "stepAndSessionPollCapsAndActualObservationByteCapsRetainCharges",
+      "immediateReadyAndClosedWindowsDoNotChargeIndependentModelOrHumanTime",
+      "oldPostEffectSessionCannotBackfillAllowanceButImmediateReadyRemainsCompatible",
+      "strictInitializationRequiresExistingSourceAndExactConfigurationWithoutPartialManifest",
+      "committedLateUsageSurvivesAcquisitionRefusalWithoutRevivingAttempt",
+      "privateAcquisitionVersionRequiresNumericLiteralRatherThanCoercion",
+      "compoundObligationsShareAllowanceAndOpenWindowCannotAdvanceSourceStep",
+      "coverageRefusesMatchingNodesAndSelectedLocatorCannotUseAnotherNamedCandidate",
+      "nodeFreeSecretCountOneEnablesInferenceOnlyForTheAcceptedPlan",
+      "passwordCountCannotBorrowAnotherStepSlotKindReferenceOrOperation",
+      "missingOrAmbiguousPasswordCountsRemainUnavailable",
+      "passwordHintPreservesObservationCoverageAndShapeRefusals",
+      "strictProviderBoundaryRefusesDuplicateTrailingProseAndIdentitySubstitution",
+      "providerSchemaIsSelfContainedSupportedAndBothIdentitiesArePinned",
+      "wrongAuthoredInputAndReversedAssertionAreRejectedIndependentlyOfModelConfidence",
+      "sourceChoiceConstrainsItsExactOccurrenceSlotOperationAndReferenceUse",
+      "replanningCannotRenameRemoveOrAppendRepeatedEffectsButInitialDistinctOccurrencesRemainValid",
+      "compactSelectionCannotRestampStaleSourcePlanFenceObservationOrMaterialization",
+      "currentManifestMatchesFullStateAndReturnsFreshPersistedProvenance",
+      "currentAuthorizationWithoutTranslationStateSkipsReferencesButStillChecksPolicy",
+      "currentManifestWithoutJoinedStateRefusesAndRequiresCallerTransaction",
+      "currentAuthorizationPreservesScopedReferenceOrderDuplicatesAndRevocation",
+      "cancellationAndAbsoluteDeadlineNeverRenewAProviderCall"
+    ],
+    "constructorAndGetterCopiesUnchanged": true,
+    "canonicalAndFullSchemaValidationOnEveryValue": true,
+    "sourceAuthTransactionsAndAuthorityUnchanged": true,
+    "traceAndTimingBoundsUnchanged": true,
+    "noSessionValueOrValidationResultCache": true
+  },
+  "newCases": [
+    "projectionValidatesMalformedAfterValidAndKeepsBothCopiesIsolated"
+  ],
+  "regression": {
+    "fixture": "Existing v3 planning-fixtures case1 used by strictProviderBoundary test",
+    "checks": [
+      "valid projection construction",
+      "mutating caller input does not affect original projection",
+      "actual different malformed additional field still rejects INVALID_CONTRACT after valid construction",
+      "mutating returned object does not affect original projection",
+      "subsequent valid projection remains accepted"
+    ],
+    "scope": "Unit validation/copy regression only; no cache-count mirror or performance claim"
+  },
+  "checks": {
+    "compiler": "UNRUN",
+    "formatter": "UNRUN",
+    "tests": "UNRUN",
+    "runtime": "UNRUN",
+    "sql": "UNRUN"
+  },
+  "requestedSelectors": [
+    "com.citi.put.checks.studio.guided.translation.GuidedTranslationTest",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel"
+  ],
+  "verificationNote": "Coordinator chooses exact current first/ninth names and runs unprofiled with original TRACE/1s/2s bounds after defining unit gate. First-use compile cost remains; exact blocker/dominant performance improvement unproved.",
+  "firstFlowSelection": "Use unchanged coordinator-authoritative first learning flow selector; no invented method name."
+}

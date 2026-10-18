@@ -1,0 +1,164 @@
+{
+  "artifact": "STUDIO-OBS-015 native02 valid duplicate fixture correction01",
+  "at": "2026-10-15T16:12:46.745767+00:00",
+  "owner": "Dex / runner015_resume",
+  "status": "ATOMIC_NODE_DIST_HOLD_SOURCE_ONLY_UNEXECUTED",
+  "authorization": "Sole old nativeguard diagnostic setup in secret-login.test.ts. Backend concurrently source-only JOIN+build budgetfixture; no actual runtime command.",
+  "frozenNative02Receipt": {
+    "path": "runner/native-feedback-attempt02-receipt.json",
+    "sha256": "fda3b13e32bd3d2597a49f2190b22e766bd7c2eca6d14febfdaeb568b985e791"
+  },
+  "beforeCapture": {
+    "path": "runner/native02-duplicate-fixture-repair01/before.json",
+    "sha256": "39c4c4fea627803737b141bb6794d52e438ea51c156e531a3ed51ef8c3310477"
+  },
+  "onlyChangedSource": {
+    "path": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+    "beforeSha256": "6f35aba0f69a21f2869c0451b290ea9adc9bbe4133fa91da4a7b886cb8302597",
+    "afterSha256": "c65db8941e89822efba639e9ea36d65405bef5d4732317750734d27f86c9a57d",
+    "beforeExactCode": {
+      "path": "runner/native02-duplicate-fixture-repair01/secret-login.test.ts.before.txt",
+      "sha256": "6f35aba0f69a21f2869c0451b290ea9adc9bbe4133fa91da4a7b886cb8302597"
+    },
+    "afterExactCode": {
+      "path": "runner/native02-duplicate-fixture-repair01/secret-login.test.ts.after.txt",
+      "sha256": "c65db8941e89822efba639e9ea36d65405bef5d4732317750734d27f86c9a57d"
+    },
+    "exactPatch": {
+      "path": "runner/native02-duplicate-fixture-repair01/secret-login.test.ts.patch",
+      "sha256": "f0d6daf753b7c7731772f02401d5422f59072f520aab9b8335378479595d4a71"
+    }
+  },
+  "correction": {
+    "cause": "Original dispatch deliberately erases request.secret. Reusing that mutated envelope gives SCHEMA before stopped-context guard, not a production lifetime bypass.",
+    "validDuplicate": "Native-guard mode only: structuredClone complete original dispatch BEFORE first runtime.dispatch. Positive frozen dispatch schema check and full canonical hash equality bind same original identity/preparation/admission/grant/operation/private frame, without body logging. No new valuefetch/release/admission.",
+    "preservedBoundary": "After UNKNOWN/TARGET_CHANGED,dispatchCount1,acceptingfalse,no drift, submit valid original duplicate and require exact CONTEXT_LOST. No production/schema/error/order change.",
+    "noNewWork": "Callback count/raw-failure count and journal bytes captured before negative attempt; assert unchanged after refusal. Existing exact-one durable fill INVOKING/consumption,zeroDOMwrite/profile/diagnostic/redaction/size/no-canary assertions retained.",
+    "privateErasure": "Duplicate.secret deleted in attempt finally and outer finally, including first-dispatch/schema/assertion failure. Original request.secret-erasure assertion remains. No copied frame persisted/exported/logged, no new release or masked/native write.",
+    "uncertainty": "Negative refusal of closed authority is not permission to retry an unknown native action."
+  },
+  "preservation": {
+    "inverseFullNative02SourceSha256": "6f35aba0f69a21f2869c0451b290ea9adc9bbe4133fa91da4a7b886cb8302597",
+    "inverseExact": true,
+    "allBytesOutsideOldDiagnosticTestUnchanged": true,
+    "new7R1BodiesUnchanged": true,
+    "all42NamesEachModesAnd48FourFileSubjectsRetained": true,
+    "injectedCountercontrol": "Original path/expectations unchanged; duplicate branch only nativeguard and undefined duplicate cleanup no-op for injected mode.",
+    "noTimeoutSkipThresholdExpectedContextLostChange": true
+  },
+  "all52OwnedSourceHashes": {
+    "studio-runner/evaluation/observed-authoring/cases/incremental-edit-step-4.json": "f04e70016563076decb46292ce0f18d6a819d488f94212bb2bdb11d4f6546b4a",
+    "studio-runner/evaluation/observed-authoring/cases/incremental-insert-step.json": "9a1831f52911dbddc8d7dc1575c7b6e22480b00098b11bea51b6f94f0bfabbc1",
+    "studio-runner/src/executor/observedReplay.ts": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+    "studio-runner/src/guided/contracts.ts": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+    "studio-runner/src/guided/evidence.ts": "03afea081e543fc920d2e8012b85951bde9ffd737eb5ba858af959c006340279",
+    "studio-runner/src/guided/journal.ts": "15da758e2e287926a7d404926323791ab3e1f72931bc3c4cb1741de8de9d86dd",
+    "studio-runner/src/guided/ownership.ts": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf",
+    "studio-runner/src/guided/runtime.ts": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+    "studio-runner/src/guided/transport.ts": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+    "studio-runner/src/run/childRuntime.ts": "0eb0c88a0d4a98b716fcc4dc0a070f5c2f0df028e4f6e668ca9ee0cd8526dd02",
+    "studio-runner/src/run/launcher.ts": "0dfeb39a76c046dd1df4b1b9df0cec238aa57c0c7b067b8824368ffc075e9fd7",
+    "studio-runner/src/run/loginRequired.ts": "f46ef274506a4e9ec51df04e081c2e321f1b1088e22a2732751845fe2b001b27",
+    "studio-runner/src/run/observedReplayAdapter.ts": "473653e3ded3312d433cbe23c1304ef722a164bed3b15cd883d7b836773515f4",
+    "studio-runner/src/run/protocol.ts": "46e23a90e8c6e64a7fa94e68bcff02c9b9f51254f2fb3180ae4065deef682fb8",
+    "studio-runner/src/validator/observedHistory.ts": "3fac42d11a71c88387effb74ad9c8ade01dc1ae8dfd75121aea4c3556829e007",
+    "studio-runner/src/validator/observedReferencePolicy.ts": "e6a2565b31ebb7339cc0ed15f9e9d8532d3c473f65709491129f6059108aebdb",
+    "studio-runner/src/validator/observedReplay.ts": "875da7952c8fb1ece09fdad48ffca822861dfe6cb742694f924995c98e5675df",
+    "studio-runner/src/validator/observedSnapshots.ts": "a8a53dedfa041aa9a671e1e03361fee5572cdfa9bc3abca91b5d53e160332928",
+    "studio-runner/test/controlReferencePreservation.test.ts": "86a2d54b5dd4d6603d643812391ea2b9d59211c312b176e0e3da4e4bc7cca0bd",
+    "studio-runner/test/currentWorldFactories.test.ts": "c1e5ead9c29157187857d17ab4c435fc6a95ecdcfb1203d817bbe75f3bc45d14",
+    "studio-runner/test/documentJson.test.ts": "0ec384914250541f410c9e0a63ddacd3ce12257aa6fe7ab06019a25db27de393",
+    "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "f5b613f5486b43a70c043b01a801f4ec8590bd8db2cd3ace8bf5510ca8fed685",
+    "studio-runner/test/fixtures-tier/guided-recording.test.ts": "3522915df575e7a0e98e71e74728545bdcb96fcf9b48b3178762c2ab5cc23574",
+    "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "10d97ab585a5af13a69b128a231eab0c6fd5e18780aec17cb3abcb803f752fd6",
+    "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts": "d1d524272fba634063ec6cf9491b6e14179f8d66dbc53898cffb47c2a84a6186",
+    "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts": "d6af50904a1a3187ae5b9b49478dd4232b28cf0b44e97807db765609876194d8",
+    "studio-runner/test/fixtures-tier/guided-wire.test.ts": "082e00e6de1af226c2d20a907cf28da0d9a70c49844c483ed06f1e75641b3a8f",
+    "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts": "adf11ab62de6cade54be1427daf60519ae270dceb5ee08b382c828b75b6622a2",
+    "studio-runner/test/fixtures-tier/secret-login.test.ts": "c65db8941e89822efba639e9ea36d65405bef5d4732317750734d27f86c9a57d",
+    "studio-runner/test/fixtures/guided-dataflow/server.ts": "db44223ecd775115e3f8cd1ee1a87f4877be1d74d6646f24979426638deb3932",
+    "studio-runner/test/guided/incrementalRuntime.test.ts": "112def39b6fff4b2b6d4a45d180f5bb15d100f7b5e5d1494e1b84eca057cc519",
+    "studio-runner/test/guided/runtime.test.ts": "dfd1bad817e5eb33aaa9e7e6357723544f182342b8203753712f212744a4e814",
+    "studio-runner/test/guided/schemaAudit.test.ts": "c37d834a4956e379d289951e50365ac654c2f004c9df8b40bdef7e22de2e2f39",
+    "studio-runner/test/helpers/currentWorlds.ts": "1487feec0fa9f5e5ef3965e31648b8ab7671dbe7090750e9555677943a34d97c",
+    "studio-runner/test/helpers/documentJson.ts": "64f14fe565fdc562467781b85930025f61c0ee4a9a3ace3614dd769e1535a225",
+    "studio-runner/test/helpers/guided.ts": "af3c5687dcf62682253a58a2564177b507cfc0f61e57ee600cd81fda5255dc4d",
+    "studio-runner/test/helpers/incrementalNegativeBoundaries.ts": "94090a4d7e4a4f957cf8921007f57477c13c670786fe7fd318dcdf4de45fda16",
+    "studio-runner/test/helpers/openapi.ts": "e15c3b8295d0b30c5b2f0422121e8cd197af7ac6c9ca9fc882ac1f8fa533917d",
+    "studio-runner/test/helpers/publicationFixture.ts": "f9bf4c3afe0424275aecf1c256cb2528b99603e8655a68a89b4018f1d53e9773",
+    "studio-runner/test/helpers/retainedReplay.ts": "0ef0ebb4619283dc189361586f32f5c345857c2f28bb3112a16195bc2cd9d0ac",
+    "studio-runner/test/helpers/runner.ts": "4458ed1a65bca9016d2b1f9e396b09eb1a09bf5167a06ac74e8f383ffd65055e",
+    "studio-runner/test/observedIncrementalValidation.test.ts": "c140d89e3bcc397211b4283d8f9a9c83c60286b6ef0efb85c060461b25e92de4",
+    "studio-runner/test/retainedExecute.test.ts": "2aa49b583cd8c05a611d76d69537ca0abdba7657d962135a27ff935b4e5e7e0e",
+    "studio-runner/test/run/observedChildRuntime.test.ts": "d9fa80ce843238f949fee1509dc339515e70b3b17887d378aacda47bf7a43916",
+    "studio-runner/test/run/observedPreparedAdapter.test.ts": "3d5076e153008c06bc63418c4e2ddfdbf6cb6ff664863cd937b020a8861c5d88",
+    "studio-runner/test/run/secretReplay.test.ts": "dc43402d1c3c2f2e5fe4d520e16c2f8b6a188a58c363dcb0e2a6b19470041226",
+    "studio-runner/test/schemaSemantics.test.ts": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb",
+    "studio-runner/test/server/observedReplayAdmission.test.ts": "3a355a5216d7afcbf07b4afa5de494526bc92739763ddb5a7d2de827ab1c275d",
+    "studio-runner/test/server/observedReplayAuthorization.test.ts": "af79cffc7d66e57be89729e140ad9bed9960535529ec3fe8fd4e6d35853413fd",
+    "studio-runner/test/server/observedReplayRoutes.test.ts": "4ddc7d9bf32b2312e0c99bd778cbff17ee4b0d610cf696a4369e3bbab706d288",
+    "studio-runner/test/helpers/observedNativeEvidence.ts": "b3d0669bbbac9e9af56e9ae688b16e191750d279617a17ff8e7d5d7a69a2ee61",
+    "studio-runner/test/observedReplayExecutor.test.ts": "92672ba590eef959ecd52b6e55b2d8829ea61207b76cb19142a249f088a055ae"
+  },
+  "protectedInputs": {
+    "studio-runner/src/guided/runtime.ts": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+    "studio-runner/src/guided/transport.ts": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+    "studio-runner/src/run/observedReplayAdapter.ts": "473653e3ded3312d433cbe23c1304ef722a164bed3b15cd883d7b836773515f4",
+    "studio-runner/src/guided/contracts.ts": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+    "studio-runner/src/executor/observedReplay.ts": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+    "studio-runner/src/validator/observedHistory.ts": "3fac42d11a71c88387effb74ad9c8ade01dc1ae8dfd75121aea4c3556829e007",
+    "studio-runner/test/helpers/incrementalNegativeBoundaries.ts": "94090a4d7e4a4f957cf8921007f57477c13c670786fe7fd318dcdf4de45fda16",
+    "studio-runner/test/schemaSemantics.test.ts": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb",
+    "studio-runner/test/observedSnapshotPreimages.test.ts": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa",
+    "studio-runner/vitest.config.ts": "c833caed66dc39aed1677db7cab921e97a5eb5b36291429c5f5e90f1a28c08f8",
+    "studio-runner/vitest.fixtures.config.ts": "2d51915fec9757e34ed1c0c2311fd1362abab917bfa1c5bf8b70ab47cb2c3f87"
+  },
+  "protectedUnchanged": true,
+  "nativeEvidenceHelper": {
+    "path": "studio-runner/test/helpers/observedNativeEvidence.ts",
+    "sha256": "b3d0669bbbac9e9af56e9ae688b16e191750d279617a17ff8e7d5d7a69a2ee61",
+    "unchanged": true
+  },
+  "staticChecks": [
+    {
+      "command": "npm run type-check",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "log": {
+        "path": "runner/native02-duplicate-fixture-repair01/type.log",
+        "sha256": "66cb0d88cd3e949228a13daec3e65de0ce0c25b1b7278f1ffdb96dcd2886dfc9"
+      },
+      "scope": "STATIC_ONLY"
+    },
+    {
+      "command": "./node_modules/.bin/eslint test/fixtures-tier/secret-login.test.ts",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "log": {
+        "path": "runner/native02-duplicate-fixture-repair01/lint.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "scope": "STATIC_ONLY"
+    }
+  ],
+  "initialStaticFailures": [],
+  "dist": {
+    "sha256": "9f2a53fdd175232db3104dc826c556bf85664e782026105085415141ff7de26d",
+    "unchanged": true,
+    "productionChanged": false,
+    "rebuildRequiredForThisTestOnlyRepair": false,
+    "currentBuild": "build07 compiled unchanged adapter. image/chromiumBuild NOT_ASSERTED limits remain."
+  },
+  "actualExecutionThisTask": {
+    "unitTests": false,
+    "nativeBrowser": false,
+    "GradleJVMDB": false,
+    "buildDist": false,
+    "generationInstallFormat": false,
+    "staticOnly": true
+  },
+  "sourceScope": "Only Node52/protected compared during concurrent disjoint Backend source work, no new current-global tested-source claim. Native02 actual bb35/dist9f2 stable facts remain immutable.",
+  "requiredActualValidation": "Root serialized complete four-file native03 with48subjects after allownersheld. Valid negative parent, exact stoppedcontext guard and all old diagnostics/privacy/nativefence assertions must execute. No focused substitute, expected-code weakening, native retry or source-onlyPASS.",
+  "remaining": "All priorfailurecaptures retained. Full0156increments/86+24+55+35/Core-issuedArtifactLaunch/Vault RELEASE+USAGE/private immutablePG/history/15companions/fullqualitycoverage/crossReplica/deployment/independentQA/PO/rootclosure then008 mandatory. Original85OPEN/unamended.",
+  "hold": "AllNode source/tests/helpers/dist atomicHOLD after checkpoint+terminalstaticchecks. No further writes/checks/tests/build/native until rootrelease; slotreturned."
+}

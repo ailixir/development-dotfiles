@@ -2621,6 +2621,72 @@ external_dependencies:
     # filter's own comments number the paths differently (core-service = "path 1", headers = "path 2");
     # the description keeps @po's order, which is evaluation order. The 10.19 drafting gate on this owner
     # is lifted; ED-02-dependent criteria in 10.19 are Blocked on the external ticket (to be linked).
+    #
+    # @pm (Morgan) 2026-10-13 — E1–E8 recorded here, NEXT TO ED-02, as directed by @architect in
+    # docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-ac11-and-refusal-codes.json (ruling 1,
+    # externalDependencies_UNCONFIRMED; ownerActions @pm). They are the external prerequisites of the
+    # artifact-HMAC custody decision (HashiCorp Vault Transit on the same platform Vault that ED-02
+    # covers), which the follow-up backlog item STUDIO-OBS-F04 implements
+    # (docs/stories/STUDIO-OBSERVED/README.md, "Follow-up backlog"). They are NESTED under ED-02 on
+    # purpose, not given top-level ids. docs/qa/scripts/verify-staging-registration.mjs reads only
+    # `  - id: ED-NN` entries and their 4-space `status:`/`owner:` lines, and these items do not gate
+    # Epic 10's staging acceptance. ED-02's own owner, status and ticket are UNCHANGED by this
+    # addition. Item text is the ruling's, condensed. No ticket exists, and none is invented. F04
+    # entry gate: E1–E4 CONFIRMED by Platform/SRE with ticket references. Until then, no
+    # deployed environment may claim artifact HMAC protection.
+    related_external_dependencies:
+      source: "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-ac11-and-refusal-codes.json — ruling1_AC11_keyCustody.externalDependencies_UNCONFIRMED (@architect, 2026-10-13)"
+      consumer: "STUDIO-OBS-F04 — Artifact HMAC via Vault Transit (entry gate E1–E4; exit gate: before any deployed observed-replay pilot, or a named residual accepted in the OBS-010 review)"
+      recorded_by: "@pm (Morgan), 2026-10-13"
+      items:
+        - id: E1
+          item: "Transit secrets engine enabled on the platform Vault namespace that serves this service; mount path known."
+          owner: "Platform/SRE (platform Vault team)"
+          status: UNCONFIRMED
+          external_ticket: "to be linked"
+          f04_entry_gate: true
+        - id: E2
+          item: "Dedicated key for artifact HMAC, created non-exportable with deletion_allowed=false, of a key type that supports HMAC."
+          owner: "Platform/SRE"
+          status: UNCONFIRMED
+          external_ticket: "to be linked"
+          f04_entry_gate: true
+        - id: E3
+          item: "Least-privilege Vault policy for the backend identity: only 'update' on {mount}/hmac/{key}/* and {mount}/verify/{key}/*; no keys/*, rotate, export or config capability."
+          owner: "Platform/SRE"
+          status: UNCONFIRMED
+          external_ticket: "to be linked"
+          f04_entry_gate: true
+        - id: E4
+          item: "Backend→Vault auth method and token delivery (same mounted-token pattern as KV, or another method). Same open question as ED-02."
+          owner: "Platform/SRE; shared with the ED-02 owner, PUT Core platform (Core BFF)"
+          status: UNCONFIRMED
+          external_ticket: "to be linked"
+          f04_entry_gate: true
+        - id: E5
+          item: "A Vault audit device is enabled and covers Transit hmac/verify calls."
+          owner: "Platform/SRE"
+          status: UNCONFIRMED
+          external_ticket: "to be linked"
+          f04_entry_gate: false
+        - id: E6
+          item: "Transit latency/availability SLO, set against the replay latency budget (one verify call per replay)."
+          owner: "Platform/SRE"
+          status: UNCONFIRMED
+          external_ticket: "to be linked"
+          f04_entry_gate: false
+        - id: E7
+          item: "Ownership and cadence of the rotation runbook (Transit rotate step and the backend min-key-version raise)."
+          owner: "Platform/SRE"
+          status: UNCONFIRMED
+          external_ticket: "to be linked"
+          f04_entry_gate: false
+        - id: E8
+          item: "Semantics of min_decryption_version for HMAC verify on the platform's Vault version. Informational only; the design does not rely on it."
+          owner: "Platform/SRE"
+          status: UNCONFIRMED
+          external_ticket: "to be linked"
+          f04_entry_gate: false
 
   - id: ED-03
     name: "Sonic write/read credentials and lifecycle behavior"

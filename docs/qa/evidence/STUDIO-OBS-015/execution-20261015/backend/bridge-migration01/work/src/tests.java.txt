@@ -1,0 +1,747 @@
+  @Test
+  void realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch() throws Exception {
+    String id = plannedSession(planDataflow());
+    assertThat(CONNECTIONS.get()).isEqualTo(1);
+    assertThat(NAVIGATIONS.get()).isZero();
+    JsonNode blank = progress(id).path("executionEvidence");
+    assertThat(blank.path("origin").isNull()).isTrue();
+    assertThat(blank.path("kind").asText()).isEqualTo("initialBlank");
+    ObjectNode navigate = proposal(id, 0, "navigate", null);
+    navigate.withObject("/operation").put("destinationInputId", inputId(id, 0));
+    JsonNode navigateAssociation = reserve(id, navigate);
+    JsonNode first = admit(id, navigateAssociation);
+    JsonNode firstConsumed = advance(id, first, "first");
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(progress(id).path("executionEvidence").path("kind").asText())
+        .isEqualTo("observedDocument");
+    assertThat(advance(id, first, "first").path("dispatchCount").asInt()).isEqualTo(1);
+    assertThat(advance(id, first, "new-key").path("dispatchCount").asInt()).isEqualTo(1);
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    String binding = bindingId(id, "order");
+    ObjectNode premature = proposal(id, 1, "fill", "destination");
+    premature
+        .withObject("/operation")
+        .set("value", CONTRACTS.object().put("kind", "binding").put("bindingId", binding));
+    // Negative probe (R-4): a hand-crafted consumer before its producer is refused.
+    JsonNode refusedOrder =
+        post(
+            id,
+            "admissions",
+            premature,
+            "before-producer",
+            token("backend-controller", "controller-1", "studio-guided-controller"),
+            422);
+    assertThat(refusedOrder.path("code").asText()).isEqualTo("MISSING_SOURCE");
+    assertThat(actionCount(id)).isEqualTo(1);
+    ObjectNode read = proposal(id, 1, "read", "source");
+    read.withObject("/operation")
+        .put("bindingId", binding)
+        .set(
+            "recipe",
+            CONTRACTS
+                .object()
+                .put("kind", "visibleText")
+                .put("classification", "permittedBusinessData")
+                .put("policyRuleId", "business-read"));
+    JsonNode readLedger = admit(id, reserve(id, read));
+    advance(id, readLedger, "read");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_producers WHERE session_id=?",
+                Integer.class,
+                id))
+        .isEqualTo(1);
+    ObjectNode callback = materialization.identity(sessions.runnerContext(controller, id, 1));
+    callback.set(
+        "ledger",
+        CONTRACTS.parse(
+            jdbc.queryForObject(
+                "SELECT document::text FROM studio_guided_actions WHERE admission_id=?",
+                String.class,
+                readLedger.path("admission").path("admissionId").asText())));
+    JsonNode receipt =
+        CONTRACTS
+            .parse(
+                jdbc.queryForObject(
+                    "SELECT document::text FROM studio_guided_producers WHERE session_id=?",
+                    String.class,
+                    id))
+            .path("availability");
+    callback.set("availability", receipt);
+    int revision =
+        sessions.runnerContext(controller, id, 1).path("materializationRevision").asInt();
+    post(
+        id,
+        "outcomes",
+        callback,
+        "duplicate-read",
+        token("owning-worker", "worker-1", "studio-guided-controller"),
+        202);
+    assertThat(sessions.runnerContext(controller, id, 1).path("materializationRevision").asInt())
+        .isEqualTo(revision);
+    ObjectNode changedReceipt = callback.deepCopy();
+    changedReceipt.withObject("/availability").put("bindingId", "changed");
+    post(
+        id,
+        "outcomes",
+        changedReceipt,
+        "changed-receipt",
+        token("owning-worker", "worker-1", "studio-guided-controller"),
+        409);
+    ObjectNode valueLeak = callback.deepCopy();
+    valueLeak.withObject("/availability").put("value", CAPTURE);
+    JsonNode refused =
+        post(
+            id,
+            "outcomes",
+            valueLeak,
+            "private-value",
+            token("owning-worker", "worker-1", "studio-guided-controller"),
+            422);
+    assertThat(refused.toString()).doesNotContain(CAPTURE);
+    ObjectNode fill = proposal(id, 2, "fill", "destination");
+    fill.withObject("/operation")
+        .set("value", CONTRACTS.object().put("kind", "binding").put("bindingId", binding));
+    JsonNode fillLedger = admit(id, reserve(id, fill));
+    advance(id, fillLedger, "fill");
+    await(() -> RECEIPT.get() != null, 5000);
+    assertThat(RECEIPT.get()).isEqualTo(CAPTURE);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_consumer_edges WHERE session_id=?",
+                Integer.class,
+                id))
+        .isEqualTo(1);
+    String persisted =
+        jdbc.queryForObject(
+            "SELECT string_agg(document::text,'') FROM studio_guided_producers WHERE session_id=?",
+            String.class,
+            id);
+    assertThat(persisted).doesNotContain(CAPTURE, "valueHash", "length", "sample");
+    JsonNode admittedNavigate = navigateAssociation.path("proposal");
+    assertThat(
+            GuidedContracts.hash(
+                CONTRACTS.object().set("coordinate", admittedNavigate.path("coordinate"))))
+        .hasSize(64);
+    assertThat(firstConsumed.path("operationHash").asText())
+        .isEqualTo(operationHash(admittedNavigate));
+    ObjectNode fake = (ObjectNode) admittedNavigate.deepCopy();
+    fake.withObject("/executionEvidence").put("origin", ORIGIN);
+    assertThat(operationHash(fake)).isNotEqualTo(operationHash(admittedNavigate));
+    sessions.cancel(
+        user,
+        id,
+        "cancel",
+        CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
+    await(() -> progress(id).path("teardownStatus").asText().equals("CONFIRMED"), 5000);
+    assertThatThrownBy(() -> sessions.runnerContext(controller, id, 1)).hasMessage("CANCELLED");
+    // ar-mounted-rules qaOracle (3), moved from the retired configured-region case: the mounted
+    // worker.json carries neither `rules` nor `applicationPolicy`; the read above was authorized by
+    // the governed policy alone.
+    JsonNode mounted = CONTRACTS.parse(Files.readString(TEMP.resolve("worker.json")));
+    assertThat(mounted.has("rules")).isFalse();
+    assertThat(mounted.has("applicationPolicy")).isFalse();
+    // aria-bridge-ruling01 §4.3: compensating DB oracle for the retired private-echo case.
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT string_agg(response::text,'') FROM studio_guided_commands WHERE namespace=?",
+                String.class,
+                id))
+        .doesNotContain(CAPTURE.strip());
+  }
+
+  @Test
+  void concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission() throws Exception {
+    String id = plannedSession(planNav());
+    JsonNode association = reserve(id, navigation(id));
+    var admissions =
+        race(
+            () ->
+                dispatch.prepareAndAdmit(
+                    controller,
+                    id,
+                    1,
+                    association.path("admissionKey").asText(),
+                    association.path("proposal")),
+            () ->
+                dispatch.prepareAndAdmit(
+                    controller,
+                    id,
+                    1,
+                    association.path("admissionKey").asText(),
+                    association.path("proposal")));
+    assertThat(admissions.get(0).path("admission")).isEqualTo(admissions.get(1).path("admission"));
+    assertThat(actionCount(id)).isEqualTo(1);
+    advance(id, admissions.get(0), "once");
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+  }
+
+  @Test
+  void concurrentSameAndNewKeysHaveOneRealDispatch() throws Exception {
+    String id = plannedSession(planNav());
+    JsonNode ledger = admit(id, reserve(id, navigation(id)));
+    ObjectNode request = advanceRequest(id, ledger);
+    var results =
+        race(
+            () -> dispatch.dispatch(controller, id, 1, "same", request),
+            () -> dispatch.dispatch(controller, id, 1, "same", request),
+            () -> dispatch.dispatch(controller, id, 1, "other", request));
+    assertThat(results).hasSize(3);
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_commands WHERE route='v2-consume'",
+                Integer.class))
+        .isEqualTo(2);
+  }
+
+  @Test
+  void nestedRollbackAndLostWinnerNeverManufactureSendAuthority() throws Exception {
+    String id = plannedSession(planNav());
+    JsonNode ledger = admit(id, reserve(id, navigation(id)));
+    ObjectNode request = advanceRequest(id, ledger);
+    assertThatThrownBy(
+            () ->
+                repository.transaction(
+                    () -> sessions.consume(controller, id, 1, "nested", request)))
+        .hasMessage("RUNTIME_INCOMPATIBLE");
+    assertThat(action(id).path("dispatchCount").asInt()).isZero();
+    var results =
+        race(
+            () -> sessions.consume(controller, id, 1, "one", request),
+            () -> sessions.consume(controller, id, 1, "two", request));
+    assertThat(
+            results.stream().filter(GuidedSessionService.WonConsumption.class::isInstance).count())
+        .isEqualTo(1);
+    assertThat(
+            results.stream().filter(GuidedSessionService.AlreadyConsumed.class::isInstance).count())
+        .isEqualTo(1);
+    // Simulated controller death after commit/before send. Restart/status/cache has no permit.
+    new GuidedDispatchService(sessions, materialization, runner)
+        .dispatch(controller, id, 1, "after-restart", request);
+    assertThat(NAVIGATIONS.get()).isZero();
+    sessions.lostAcknowledgment(id);
+    assertThat(action(id).path("state").asText()).isEqualTo("UNKNOWN_OUTCOME");
+    assertThatThrownBy(() -> sessions.consume(controller, id, 1, "late", request))
+        .hasMessage("UNKNOWN_OUTCOME");
+  }
+
+  @Test
+  void actualDeferredCommitFailureSendsNothingAndRollsBackConsumption() throws Exception {
+    String id = plannedSession(planNav());
+    JsonNode ledger = admit(id, reserve(id, navigation(id)));
+    ObjectNode request = advanceRequest(id, ledger);
+    jdbc.execute(
+        "CREATE FUNCTION bridge_fail_commit() RETURNS trigger LANGUAGE plpgsql AS $$ "
+            + "BEGIN RAISE EXCEPTION 'injected commit failure'; END $$");
+    jdbc.execute(
+        "CREATE CONSTRAINT TRIGGER bridge_fail_commit AFTER INSERT ON "
+            + "studio_guided_commands DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN "
+            + "(NEW.route='v2-consume') EXECUTE FUNCTION bridge_fail_commit()");
+    try {
+      assertThatThrownBy(() -> dispatch.dispatch(controller, id, 1, "failed-commit", request))
+          .isInstanceOf(org.springframework.transaction.TransactionException.class);
+      assertThat(NAVIGATIONS.get()).isZero();
+      assertThat(action(id).path("dispatchCount").asInt()).isZero();
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_commands WHERE route='v2-consume'",
+                  Integer.class))
+          .isZero();
+    } finally {
+      jdbc.execute("DROP TRIGGER bridge_fail_commit ON studio_guided_commands");
+      jdbc.execute("DROP FUNCTION bridge_fail_commit()");
+    }
+    dispatch.dispatch(controller, id, 1, "after-rollback", request);
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+  }
+
+  @Test
+  void currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased()
+      throws Exception {
+    String id = plannedSession(planDataflow());
+    JsonNode ledger = admit(id, reserve(id, navigation(id)));
+    ObjectNode request = advanceRequest(id, ledger);
+    var locked = new CountDownLatch(1);
+    var release = new CountDownLatch(1);
+    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+      var edit =
+          executor.submit(
+              () ->
+                  repository.transaction(
+                      () -> {
+                        jdbc.queryForObject(
+                            "SELECT source_revision FROM ui_tests WHERE id=? FOR UPDATE",
+                            Long.class,
+                            testId);
+                        locked.countDown();
+                        try {
+                          release.await();
+                        } catch (InterruptedException failure) {
+                          Thread.currentThread().interrupt();
+                          throw new IllegalStateException(failure);
+                        }
+                        jdbc.update(
+                            "UPDATE ui_tests SET source_revision=source_revision+1 WHERE id=?",
+                            testId);
+                        return null;
+                      }));
+      assertThat(locked.await(5, TimeUnit.SECONDS)).isTrue();
+      var consume = executor.submit(() -> dispatch.dispatch(controller, id, 1, "blocked", request));
+      Thread.sleep(100);
+      assertThat(consume.isDone()).isFalse();
+      release.countDown();
+      edit.get(5, TimeUnit.SECONDS);
+      assertThatThrownBy(() -> consume.get(5, TimeUnit.SECONDS))
+          .hasCauseInstanceOf(GuidedSessionException.class);
+    }
+    assertThat(NAVIGATIONS.get()).isZero();
+    assertThat(action(id).path("dispatchCount").asInt()).isZero();
+    jdbc.update("UPDATE ui_tests SET source_revision=1 WHERE id=?", testId);
+    jdbc.update(
+        "UPDATE ui_tests SET configuration_revision=configuration_revision+1 WHERE id=?", testId);
+    assertThatThrownBy(
+            () -> dispatch.dispatch(controller, id, 1, "configuration-revision", request))
+        .hasMessage("REVISION_CONFLICT");
+    assertThat(NAVIGATIONS.get()).isZero();
+    assertThat(action(id).path("dispatchCount").asInt()).isZero();
+    jdbc.update("UPDATE ui_tests SET configuration_revision=1 WHERE id=?", testId);
+    // A direct controller allocation call (precedent: planning IT, ReplayIT) is not obligation
+    // authority; the planner already allocated this need at bootstrap.
+    ObjectNode need =
+        CONTRACTS.object().put("needId", "order").put("producerStepId", stepId(id));
+    need.putArray("consumers")
+        .add(CONTRACTS.object().put("stepId", stepId(id)).put("argumentSlot", "fill.value"));
+    JsonNode allocation = sessions.allocateBinding(controller, id, 1, "allocate", need);
+    assertThat(allocation.path("bindingId").asText()).isEqualTo(bindingId(id, "order"));
+    ObjectNode more = need.deepCopy();
+    ((com.fasterxml.jackson.databind.node.ArrayNode) more.path("consumers"))
+        .add(CONTRACTS.object().put("stepId", stepId(id)).put("argumentSlot", "assert.expected"));
+    assertThat(sessions.allocateBinding(controller, id, 1, "append", more).path("bindingId"))
+        .isEqualTo(allocation.path("bindingId"));
+    assertThatThrownBy(() -> sessions.allocateBinding(controller, id, 1, "erase", need))
+        .hasMessage("IDEMPOTENCY_CONFLICT");
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE studio_guided_allocations SET "
+                        + "document=jsonb_set(document,'{consumers}','[]'::jsonb) WHERE session_id=?",
+                    id))
+        .isInstanceOf(org.springframework.dao.DataAccessException.class);
+    assertThat(
+            sessions
+                .runnerContext(controller, id, 1)
+                .path("allocations")
+                .get(0)
+                .path("consumers")
+                .size())
+        .isEqualTo(2);
+  }
+
+  @Test
+  void actualApplicationReplacementAfterPrepareNeverActsOnReplacement() throws Exception {
+    String id = plannedSession(planNavLit());
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    ObjectNode fill = proposal(id, 1, "fill", "destination");
+    fill.withObject("/operation")
+        .set(
+            "value",
+            CONTRACTS
+                .object()
+                .put("kind", "authoredLiteral")
+                .put("sourceInputId", inputId(id, 1)));
+    JsonNode admitted = admit(id, reserve(id, fill));
+    replaceTarget = true;
+    await(() -> MUTATIONS.get() > 0, 5000);
+    advance(id, admitted, "stale-target");
+    JsonNode result =
+        CONTRACTS.parse(
+            jdbc.queryForObject(
+                "SELECT document::text FROM studio_guided_actions WHERE admission_id=?",
+                String.class,
+                admitted.path("admission").path("admissionId").asText()));
+    assertThat(result.path("dispatchCount").asInt()).isEqualTo(1);
+    assertThat(result.path("state").asText()).isEqualTo("FAILED");
+    assertThat(result.path("outcomeCode").asText()).isEqualTo("TARGET_CHANGED");
+    assertThat(RECEIPT.get()).isNull();
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+  }
+
+  @Test
+  void producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay() throws Exception {
+    String id = plannedSession(planDataflow());
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    ObjectNode read = proposal(id, 1, "read", "source");
+    read.withObject("/operation")
+        .put("bindingId", bindingId(id, "order"))
+        .set(
+            "recipe",
+            CONTRACTS
+                .object()
+                .put("kind", "visibleText")
+                .put("classification", "permittedBusinessData")
+                .put("policyRuleId", "business-read"));
+    JsonNode admission = admit(id, reserve(id, read));
+    jdbc.execute(
+        "CREATE FUNCTION bridge_fail_producer() RETURNS trigger LANGUAGE plpgsql AS $$ "
+            + "BEGIN RAISE EXCEPTION 'injected producer failure'; END $$");
+    jdbc.execute(
+        "CREATE TRIGGER bridge_fail_producer AFTER INSERT ON studio_guided_producers FOR "
+            + "EACH ROW EXECUTE FUNCTION bridge_fail_producer()");
+    try {
+      advance(id, admission, "read-with-lost-callback");
+    } finally {
+      jdbc.execute("DROP TRIGGER bridge_fail_producer ON studio_guided_producers");
+      jdbc.execute("DROP FUNCTION bridge_fail_producer()");
+    }
+    await(
+        () ->
+            jdbc.queryForObject(
+                    "SELECT state FROM studio_guided_sessions WHERE session_id=?", String.class, id)
+                .equals("UNKNOWN_OUTCOME"),
+        5000);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_producers WHERE session_id=?",
+                Integer.class,
+                id))
+        .isZero();
+    JsonNode stored =
+        CONTRACTS.parse(
+            jdbc.queryForObject(
+                "SELECT document::text FROM studio_guided_actions WHERE admission_id=?",
+                String.class,
+                admission.path("admission").path("admissionId").asText()));
+    assertThat(stored.path("state").asText()).isEqualTo("UNKNOWN_OUTCOME");
+    assertThatThrownBy(
+            () -> dispatch.dispatch(controller, id, 1, "retry", advanceRequest(id, admission)))
+        .hasMessage("UNKNOWN_OUTCOME");
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(RECEIPT.get()).isNull();
+  }
+
+  @Test
+  void authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly() throws Exception {
+    String id = plannedSession(planConfig());
+    JsonNode input = input(id, 1);
+    assertThat(input.path("provenance").path("referenceKind").asText()).isEqualTo("configuration");
+    assertThat(input.path("value").asText()).isEqualTo(CONFIG_INPUT);
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    ObjectNode fill = proposal(id, 1, "fill", "destination");
+    fill.withObject("/operation")
+        .set(
+            "value",
+            CONTRACTS
+                .object()
+                .put("kind", "authoredLiteral")
+                .put("sourceInputId", input.path("inputId").asText()));
+    advance(id, admit(id, reserve(id, fill)), "configured-fill");
+    await(() -> RECEIPT.get() != null, 5000);
+    assertThat(RECEIPT.get()).isEqualTo(CONFIG_INPUT);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT string_agg(document::text,'') FROM studio_guided_actions WHERE session_id=?",
+                String.class,
+                id))
+        .doesNotContain(CONFIG_INPUT);
+  }
+
+  @Test
+  void lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction() throws Exception {
+    String id = plannedSession(planNavLit());
+    JsonNode first = admit(id, reserve(id, navigation(id)));
+    advance(id, first, "first");
+    ObjectNode fill = proposal(id, 1, "fill", "destination");
+    fill.withObject("/operation")
+        .set(
+            "value",
+            CONTRACTS
+                .object()
+                .put("kind", "authoredLiteral")
+                .put("sourceInputId", inputId(id, 1)));
+    JsonNode second = admit(id, reserve(id, fill));
+    sessions.consume(controller, id, 1, "second", advanceRequest(id, second));
+    sessions.lostAcknowledgment(id, first.path("admission").path("admissionId").asText());
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT document->>'state' FROM studio_guided_actions WHERE admission_id=?",
+                String.class,
+                second.path("admission").path("admissionId").asText()))
+        .isEqualTo("DISPATCHING");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT state FROM studio_guided_sessions WHERE session_id=?", String.class, id))
+        .isEqualTo("ACTING");
+    sessions.lostAcknowledgment(id, second.path("admission").path("admissionId").asText());
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT state FROM studio_guided_sessions WHERE session_id=?", String.class, id))
+        .isEqualTo("UNKNOWN_OUTCOME");
+  }
+
+  @Test
+  void realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue() throws Exception {
+    String id = plannedSession(planDataflow());
+    Instant firstLease = Instant.parse(session(id).path("owner").path("leaseExpiresAt").asText());
+    String hardExpiry = session(id).path("expiresAt").asText();
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    String binding = bindingId(id, "order");
+    ObjectNode read = proposal(id, 1, "read", "source");
+    read.withObject("/operation")
+        .put("bindingId", binding)
+        .set(
+            "recipe",
+            CONTRACTS
+                .object()
+                .put("kind", "visibleText")
+                .put("classification", "permittedBusinessData")
+                .put("policyRuleId", "business-read"));
+    advance(id, admit(id, reserve(id, read)), "read");
+    // Trusted coordinator test setup ONLY (R-5 round trip); this does not implement005 question
+    // semantics/UI.
+    repository.transaction(
+        () -> {
+          var current = repository.lock(id);
+          current.document().put("state", "AWAITING_CLARIFICATION");
+          repository.save(current);
+          return null;
+        });
+    JsonNode originalProgress = progress(id);
+    String producer =
+        jdbc.queryForObject(
+            "SELECT document::text FROM studio_guided_producers WHERE session_id=?",
+            String.class,
+            id);
+    await(() -> Instant.now().isAfter(firstLease.plusMillis(500)), 35000);
+    assertThat(session(id).path("state").asText()).isEqualTo("AWAITING_CLARIFICATION");
+    assertThat(session(id).path("owner").path("fence").asInt()).isEqualTo(1);
+    assertThat(Instant.parse(session(id).path("owner").path("leaseExpiresAt").asText()))
+        .isAfter(firstLease);
+    assertThat(session(id).path("expiresAt").asText()).isEqualTo(hardExpiry);
+    assertThat(progress(id)).isEqualTo(originalProgress);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT document::text FROM studio_guided_producers WHERE session_id=?",
+                String.class,
+                id))
+        .isEqualTo(producer);
+    assertThat(claimCount(id)).isGreaterThanOrEqualTo(3);
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    // The planner's assignment key (GuidedTranslationService.plan), so the duplicate keeps meaning.
+    JsonNode duplicate = dispatch.assign(controller, id, "translation-assignment", "worker-1");
+    assertThat(duplicate.path("assignment")).isEqualTo(assignment(id));
+    assertThat(Instant.parse(duplicate.path("leaseExpiresAt").asText())).isAfter(firstLease);
+    repository.transaction(
+        () -> {
+          var current = repository.lock(id);
+          current.document().put("state", "PROPOSING");
+          repository.save(current);
+          return null;
+        });
+    ObjectNode fill = proposal(id, 2, "fill", "destination");
+    fill.withObject("/operation")
+        .set("value", CONTRACTS.object().put("kind", "binding").put("bindingId", binding));
+    advance(id, admit(id, reserve(id, fill)), "fill-after-renewal");
+    await(() -> RECEIPT.get() != null, 5000);
+    assertThat(RECEIPT.get()).isEqualTo(CAPTURE);
+  }
+
+  @Test
+  void lateRenewalResponseAfterStopCannotReviveContextOrOwnership() throws Exception {
+    String id = plannedSession(planNav());
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    ObjectNode oldContext = sessions.runnerContext(controller, id, 1);
+    HOLD_NEXT_CLAIM.set(true);
+    assertThat(claimResponseCaptured.await(15, TimeUnit.SECONDS)).isTrue();
+    sessions.cancel(
+        user,
+        id,
+        "cancel-delayed-renewal",
+        CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
+    await(() -> progress(id).path("teardownStatus").asText().equals("CONFIRMED"), 5000);
+    releaseClaimResponse.countDown();
+    Thread.sleep(200);
+    assertThatThrownBy(() -> runner.send("assign", assignment(id), "assignment"))
+        .hasMessage("UNKNOWN_OUTCOME");
+    assertThatThrownBy(() -> runner.send("context", oldContext)).hasMessage("UNKNOWN_OUTCOME");
+    assertThat(session(id).path("state").asText()).isEqualTo("CANCELLED");
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+  }
+
+  @Test
+  void committedObservationRecoversLostHttpResponseWithoutAnotherCollection() throws Exception {
+    String id = plannedSession(planNav());
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    ObjectNode request = refreshRequest(id);
+    int before = session(id).path("counters").path("observations").asInt();
+    var proxy = com.sun.net.httpserver.HttpsServer.create(new InetSocketAddress("localhost", 0), 0);
+    proxy.setHttpsConfigurator(
+        new com.sun.net.httpserver.HttpsConfigurator(TLS) {
+          @Override
+          public void configure(com.sun.net.httpserver.HttpsParameters parameters) {
+            var ssl = TLS.getDefaultSSLParameters();
+            ssl.setNeedClientAuth(true);
+            parameters.setSSLParameters(ssl);
+          }
+        });
+    AtomicInteger requests = new AtomicInteger();
+    proxy.createContext(
+        "/",
+        exchange -> {
+          try {
+            JsonNode body =
+                CONTRACTS.parse(
+                    new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+            runner.send("observe", body, exchange.getRequestHeaders().getFirst("Idempotency-Key"));
+            requests.incrementAndGet();
+            // Replace only the final runner response after the real callback already committed.
+            exchange.sendResponseHeaders(503, -1);
+          } catch (RuntimeException failure) {
+            exchange.sendResponseHeaders(500, -1);
+          } finally {
+            exchange.close();
+          }
+        });
+    proxy.start();
+    try {
+      var faultClient =
+          new GuidedRunnerClient(
+              URI.create("https://localhost:" + proxy.getAddress().getPort()),
+              TLS,
+              () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+              CONTRACTS);
+      var faultDispatch = new GuidedDispatchService(sessions, materialization, faultClient);
+      JsonNode result = faultDispatch.observe(controller, id, 1, "lost-refresh-response", request);
+      assertThat(result.path("observation")).isEqualTo(progress(id).path("observation"));
+      assertThat(faultDispatch.observe(controller, id, 1, "lost-refresh-response", request))
+          .isEqualTo(result);
+      assertThat(requests.get()).isEqualTo(1);
+      assertThat(session(id).path("counters").path("observations").asInt()).isEqualTo(before + 1);
+      assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    } finally {
+      proxy.stop(0);
+    }
+  }
+
+  @Test
+  void refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation()
+      throws Exception {
+    String id = plannedSession(planNavLit());
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    ObjectNode request = refreshRequest(id);
+    ObjectNode wrong = request.deepCopy().put("contextId", "foreign-context");
+    assertThatThrownBy(() -> dispatch.observe(controller, id, 1, "wrong-context", wrong))
+        .hasMessage("STALE_FENCE");
+    // R-5: the forced pause and the counter ceiling are round trips to the exact prior state.
+    int observations = session(id).path("counters").path("observations").asInt();
+    repository.transaction(
+        () -> {
+          var current = repository.lock(id);
+          current.document().put("state", "AWAITING_CLARIFICATION");
+          repository.save(current);
+          return null;
+        });
+    assertThatThrownBy(() -> dispatch.observe(controller, id, 1, "paused-refresh", request))
+        .hasMessage("STALE_GENERATION");
+    repository.transaction(
+        () -> {
+          var current = repository.lock(id);
+          current.document().put("state", "PROPOSING");
+          current
+              .document()
+              .withObject("/counters")
+              .put(
+                  "observations",
+                  current.document().path("limits").path("maxObservations").asInt());
+          repository.save(current);
+          return null;
+        });
+    assertThatThrownBy(() -> dispatch.observe(controller, id, 1, "over-budget", request))
+        .hasMessage("BUDGET_EXCEEDED");
+    repository.transaction(
+        () -> {
+          var current = repository.lock(id);
+          current.document().withObject("/counters").put("observations", observations);
+          repository.save(current);
+          return null;
+        });
+    ObjectNode fill = proposal(id, 1, "fill", "destination");
+    fill.withObject("/operation")
+        .set(
+            "value",
+            CONTRACTS
+                .object()
+                .put("kind", "authoredLiteral")
+                .put("sourceInputId", inputId(id, 1)));
+    admit(id, reserve(id, fill));
+    // The refusal below is attributable to the active admission, not to a stale generation.
+    assertThat(progress(id).path("generation").asInt())
+        .isEqualTo(request.path("expectedGeneration").asInt());
+    assertThatThrownBy(() -> dispatch.observe(controller, id, 1, "active-admission", request))
+        .hasMessage("STALE_GENERATION");
+    sessions.cancel(
+        user,
+        id,
+        "cancel",
+        CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
+    assertThatThrownBy(() -> dispatch.observe(controller, id, 1, "after-cancel", request))
+        .hasMessage("CANCELLED");
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(FILL_RECEIPTS.get()).isZero();
+  }
+
+  @Test
+  void concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration() throws Exception {
+    String id = plannedSession(planNav());
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    ObjectNode request = refreshRequest(id);
+    int observations = session(id).path("counters").path("observations").asInt();
+    var results =
+        race(
+            () -> dispatch.observe(controller, id, 1, "same-refresh", request),
+            () -> dispatch.observe(controller, id, 1, "same-refresh", request));
+    assertThat(results.get(0)).isEqualTo(results.get(1));
+    assertThat(session(id).path("counters").path("observations").asInt())
+        .isEqualTo(observations + 1);
+    assertThat(actionCount(id)).isEqualTo(1);
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+  }
+
+  @Test
+  void cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation() throws Exception {
+    String id = plannedSession(planNav());
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    ObjectNode request = refreshRequest(id);
+    int generation = progress(id).path("generation").asInt();
+    HOLD_NEXT_REFRESH.set(true);
+    try (var executor = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+      var collecting =
+          executor.submit(
+              () -> {
+                try {
+                  dispatch.observe(controller, id, 1, "cancel-refresh", request);
+                  return "unexpected-success";
+                } catch (RuntimeException failure) {
+                  return failure.getMessage();
+                }
+              });
+      assertThat(refreshCallbackHeld.await(5, TimeUnit.SECONDS)).isTrue();
+      assertThat(session(id).path("state").asText()).isEqualTo("OBSERVING");
+      assertThatThrownBy(
+              () -> dispatch.observe(controller, id, 1, "different-inflight-key", request))
+          .hasMessage("STALE_GENERATION");
+      sessions.cancel(
+          user,
+          id,
+          "cancel-refresh",
+          CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
+      releaseRefreshCallback.countDown();
+      assertThat(collecting.get(10, TimeUnit.SECONDS))
+          .isIn("CANCELLED", "UNKNOWN_OUTCOME", "STALE_FENCE");
+    }
+    assertThat(session(id).path("state").asText()).isEqualTo("CANCELLED");
+    assertThat(progress(id).path("generation").asInt()).isEqualTo(generation);
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(FILL_RECEIPTS.get()).isZero();
+  }
+

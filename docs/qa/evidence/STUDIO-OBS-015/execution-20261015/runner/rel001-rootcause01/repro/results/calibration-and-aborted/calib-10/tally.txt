@@ -1,0 +1,8 @@
+
+== throttle+cpu (variant a) ==  n=8 ok=7 failed=1 (12.50%, 95% upper bound 47.09%)  close!=ok: 1
+   window: 2026-10-17T05:25:03.274Z .. 2026-10-17T05:31:53.444Z  node v24.20.0  playwright 1.63.0
+      1  D4 hang (start did not finish in time) at LAUNCH
+   launchMs          ok p50/p95/max 36092/39701/39701 ms
+   contextMs         ok p50/p95/max 36410/40083/40083 ms
+   bootstrapMs       ok p50/p95/max 36493/40147/40147 ms
+   recordingReadyMs  ok p50/p95/max 34794/38504/38504 ms

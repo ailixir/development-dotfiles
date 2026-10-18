@@ -1,0 +1,579 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -3880,6 +3880,9 @@
+           .as("publication performs zero value reads")
+           .isEqualTo(1);
+       assertThat(MODEL_WIRE.size()).isEqualTo(learningModels);
++      // STUDIO-OBS-013 AC-6 / TEST-001: the guided learn run itself is recorded (AR-QA TEST001).
++      ObjectNode guidedRecording = assertGuidedLearnRunRecorded(sessionId, sinkBytes);
++      String guidedVideoKey = guidedRecording.path("videoKey").asText();
+       var executions = new java.util.ArrayList<UUID>();
+       for (int run = 0; run < 2; run++) {
+         String actual = run == 0 ? canary : rotatedCanary;
+@@ -4048,6 +4051,7 @@
+           .isEqualTo(2);
+       assertThat(executions).doesNotHaveDuplicates();
+       assertThat(videoKeys).doesNotHaveDuplicates();
++      assertThat(videoKeys).doesNotContain(guidedVideoKey);
+       assertThat(videoHashes).doesNotHaveDuplicates();
+       assertThat(
+               COUNTED_VAULT.readCount(
+@@ -4091,6 +4095,7 @@
+                   "TRACE/SSE/metrics/profile-before-cleanup/all fault sinks and actual service"
+                       + " consume/read/send/recovery remain unproved");
+       evidence.set("workerIdentity", workerIdentity);
++      evidence.set("guidedRecording", guidedRecording);
+       evidence.set("nativeVideos", decodedVideos);
+       evidence.set("videoKeys", JSON.valueToTree(videoKeys));
+       evidence.set("executionIds", JSON.valueToTree(executions));
+@@ -4152,7 +4157,512 @@
+       }
+     }
+   }
++
++  // ── STUDIO-OBS-013 TEST-001 (AR-QA ar-qa-sec001-test001.json): the guided learn run's own
++  // recording, joined: real backend, PostgreSQL, guided worker on Chromium, filesystem store. ──
++
++  /** The replica sets no grace, so it judges the window with the record's own default. */
++  private static final Duration GUIDED_SETTLE_GRACE =
++      com.citi.put.checks.studio.guided.evidence.GuidedRecordingProperties.DEFAULT_SETTLE_GRACE;
++
++  /** The guided manifest disclosure (AC-5), as the runner writes it. */
++  private static final String GUIDED_DISCLOSURE =
++      "Password fills are rendered as masked dots (password-only rule). A page that later"
++          + " displays a secret in plain text is not protected by this recording.";
+ 
++  /** Polls the result (bounded, inside settle-grace) until the video is no longer PROCESSING. */
++  private JsonNode awaitGuidedVideoSettled(String sessionId) throws Exception {
++    long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
++    JsonNode result;
++    do {
++      result =
++          publicCall("/api/v1/studio/guided-sessions/" + sessionId + "/result", null, 200, null);
++      if (!result.path("evidence").path("video").path("status").asText().equals("PROCESSING")) {
++        break;
++      }
++      Thread.sleep(100);
++    } while (System.nanoTime() < deadline);
++    C.validate("v3/result", result);
++    return result;
++  }
++
++  private HttpResponse<byte[]> guidedVideoRead(String sessionId, String range, boolean cookie)
++      throws Exception {
++    var builder =
++        HttpRequest.newBuilder(
++                URI.create(
++                    "https://localhost:"
++                        + port
++                        + "/api/v1/studio/guided-sessions/"
++                        + sessionId
++                        + "/video"))
++            .timeout(Duration.ofSeconds(15))
++            .GET();
++    if (cookie) {
++      builder.header("Cookie", "put_session=" + COOKIE);
++    }
++    if (range != null) {
++      builder.header("Range", range);
++    }
++    return HttpClient.newBuilder()
++        .sslContext(TLS)
++        .build()
++        .send(builder.build(), HttpResponse.BodyHandlers.ofByteArray());
++  }
++
++  /** Exactly one V20 fact for the session. */
++  private Map<String, Object> guidedRecordingRow(String sessionId) {
++    var rows =
++        jdbc.queryForList(
++            "SELECT state, partial, video_key, manifest_key, timings::text AS timings,"
++                + " expires_at IS NOT NULL AS has_expiry FROM studio_guided_session_recordings"
++                + " WHERE session_id=?",
++            sessionId);
++    assertThat(rows).as("exactly one V20 recording fact").hasSize(1);
++    return rows.get(0);
++  }
++
++  private String guidedRecordingRowState(String sessionId) {
++    var rows =
++        jdbc.queryForList(
++            "SELECT state FROM studio_guided_session_recordings WHERE session_id=?",
++            String.class,
++            sessionId);
++    return rows.isEmpty() ? null : rows.get(0);
++  }
++
++  /**
++   * What a replica with no recording store must publish, from the stored fact and the DB-clock
++   * window (AR-1 R1 table with servesRecordings false).
++   */
++  private String replicaExpectedVideoStatus(String sessionId) {
++    Map<String, Object> row =
++        jdbc.queryForMap(
++            "SELECT s.state AS session_state, r.state AS recording_state,"
++                + " clock_timestamp() < s.expires_at + make_interval(secs => ?) AS within"
++                + " FROM studio_guided_sessions s LEFT JOIN studio_guided_session_recordings r"
++                + " ON r.session_id = s.session_id WHERE s.session_id=?",
++            (double) GUIDED_SETTLE_GRACE.toSeconds(),
++            sessionId);
++    Object recording = row.get("recording_state");
++    if (recording == null) {
++      boolean terminal =
++          List.of(
++                  "SUCCEEDED",
++                  "PUBLICATION_CONFLICT",
++                  "FAILED",
++                  "UNKNOWN_OUTCOME",
++                  "CANCELLED",
++                  "EXPIRED")
++              .contains(String.valueOf(row.get("session_state")));
++      return !terminal || Boolean.TRUE.equals(row.get("within")) ? "PROCESSING" : "UNAVAILABLE";
++    }
++    return switch (String.valueOf(recording)) {
++      case "AVAILABLE", "UNAVAILABLE" -> "UNAVAILABLE";
++      case "FAILED" -> "FAILED";
++      default -> throw new AssertionError("unexpected stored recording state " + recording);
++    };
++  }
++
++  private static int guidedTimingKindRank(String kind) {
++    int rank = List.of("prefixReplay", "step", "clarificationWait", "action").indexOf(kind);
++    assertThat(rank).as("timing kind %s", kind).isNotNegative();
++    return rank;
++  }
++
++  /** Independent R2 order check: startMs, kind rank, ordinal (null first), stepId code points. */
++  private static int guidedTimingOrder(JsonNode a, JsonNode b) {
++    int byStart = Long.compare(a.path("startMs").asLong(), b.path("startMs").asLong());
++    if (byStart != 0) {
++      return byStart;
++    }
++    int byKind =
++        Integer.compare(
++            guidedTimingKindRank(a.path("kind").asText()),
++            guidedTimingKindRank(b.path("kind").asText()));
++    if (byKind != 0) {
++      return byKind;
++    }
++    long ordinalA = a.path("ordinal").isNull() ? -1 : a.path("ordinal").asLong();
++    long ordinalB = b.path("ordinal").isNull() ? -1 : b.path("ordinal").asLong();
++    if (ordinalA != ordinalB) {
++      return Long.compare(ordinalA, ordinalB);
++    }
++    return java.util.Arrays.compare(
++        a.path("stepId").asText().codePoints().toArray(),
++        b.path("stepId").asText().codePoints().toArray());
++  }
++
++  /**
++   * AC-6 happy half on the OBS-007 login learn run: AVAILABLE, the V20 fact, the stored WebM, an
++   * authenticated 206, offsets equal to the dispatched ledger, a clean manifest. Adds the guided
++   * bytes to {@code sinks} for the method's canary scan. Returns the evidence record.
++   */
++  private ObjectNode assertGuidedLearnRunRecorded(String sessionId, Map<String, byte[]> sinks)
++      throws Exception {
++    JsonNode result = awaitGuidedVideoSettled(sessionId);
++    JsonNode video = result.path("evidence").path("video");
++    assertThat(video.path("status").asText()).as(video.toString()).isEqualTo("AVAILABLE");
++    assertThat(video.path("partial").isBoolean() && !video.path("partial").booleanValue())
++        .as("partial is false")
++        .isTrue();
++    assertThat(video.path("error").isNull()).isTrue();
++    assertThat(video.path("expiresAt").isTextual()).isTrue();
++    assertThat(result.path("evidence").path("ref").asText()).isEqualTo(sessionId);
++    assertThat(result.path("replayVerified").asBoolean()).isFalse();
++
++    // V20 fact; the backend's key derivation agrees with what the runner uploaded under.
++    Map<String, Object> row = guidedRecordingRow(sessionId);
++    assertThat(row.get("state")).isEqualTo("AVAILABLE");
++    assertThat(row.get("partial")).isEqualTo(false);
++    assertThat(row.get("has_expiry")).isEqualTo(true);
++    String csi =
++        jdbc.queryForObject(
++            "SELECT document->'scope'->>'csiId' FROM studio_guided_sessions WHERE session_id=?",
++            String.class,
++            sessionId);
++    var keys =
++        com.citi.put.checks.studio.guided.evidence.GuidedRecordingKeys.derive(csi, sessionId)
++            .orElseThrow();
++    String videoKey = String.valueOf(row.get("video_key"));
++    String manifestKey = String.valueOf(row.get("manifest_key"));
++    assertThat(videoKey).isEqualTo(keys.videoKey());
++    assertThat(manifestKey).isEqualTo(keys.manifestKey());
++
++    // The stored object.
++    Path objects = TEMP.resolve("objects");
++    Path file = objects.resolve(videoKey).normalize();
++    assertThat(file.startsWith(objects)).isTrue();
++    assertThat(Files.isRegularFile(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)).isTrue();
++    assertThat(Files.isSymbolicLink(file)).isFalse();
++    byte[] bytes = Files.readAllBytes(file);
++    assertThat(bytes.length).as("larger than the 1 KiB range read").isGreaterThan(1024);
++    assertThat(HexFormat.of().formatHex(bytes, 0, 4)).isEqualTo("1a45dfa3");
++    ObjectNode decoded = decodeJoinedVideo(file, UUID.fromString(sessionId));
++
++    // Authenticated range read, and the unauthenticated refusal.
++    HttpResponse<byte[]> ranged = guidedVideoRead(sessionId, "bytes=0-1023", true);
++    assertThat(ranged.statusCode()).isEqualTo(206);
++    assertThat(ranged.headers().firstValue("Content-Range"))
++        .contains("bytes 0-1023/" + bytes.length);
++    assertThat(ranged.body()).isEqualTo(java.util.Arrays.copyOfRange(bytes, 0, 1024));
++    HttpResponse<byte[]> anonymous = guidedVideoRead(sessionId, "bytes=0-1023", false);
++    assertThat(anonymous.statusCode()).isEqualTo(401);
++    String exposed =
++        result
++            + "|"
++            + ranged.headers().map()
++            + "|"
++            + anonymous.headers().map()
++            + "|"
++            + new String(anonymous.body(), StandardCharsets.UTF_8);
++    for (String forbidden :
++        List.of(videoKey, manifestKey, "put-checks-studio-evidence", objects.toString())) {
++      assertThat(exposed).as("public surface names %s", forbidden).doesNotContain(forbidden);
++    }
++
++    // Offsets: one action item per dispatched admission, one step item per step, sorted, bounded.
++    JsonNode timings = result.path("actionTimings");
++    assertThat(GuidedContracts.canonical(C.parse(String.valueOf(row.get("timings")))))
++        .as("V20 timings are served verbatim")
++        .isEqualTo(GuidedContracts.canonical(timings));
++    long maxMs =
++        jdbc.queryForObject(
++            "SELECT (document->'limits'->>'maxSessionSeconds')::bigint * 1000"
++                + " FROM studio_guided_sessions WHERE session_id=?",
++            Long.class,
++            sessionId);
++    var ledger = new java.util.HashMap<String, String>();
++    var ordinals = new java.util.HashMap<String, Integer>();
++    for (var action :
++        jdbc.queryForList(
++            "SELECT admission_id, step_id, ordinal FROM studio_guided_actions"
++                + " WHERE session_id=? AND (document->>'dispatchCount')::integer = 1",
++            sessionId)) {
++      ledger.put(String.valueOf(action.get("admission_id")), String.valueOf(action.get("step_id")));
++      ordinals.put(
++          String.valueOf(action.get("admission_id")), ((Number) action.get("ordinal")).intValue());
++    }
++    assertThat(ledger).as("the learn run dispatched actions").isNotEmpty();
++    var actionItems = new java.util.LinkedHashMap<String, JsonNode>();
++    var stepItems = new java.util.LinkedHashMap<String, JsonNode>();
++    JsonNode previous = null;
++    for (JsonNode item : timings) {
++      long start = item.path("startMs").asLong();
++      assertThat(item.path("startMs").isIntegralNumber() && start >= 0 && start <= maxMs)
++          .as("startMs bounded: %s", item)
++          .isTrue();
++      if (!item.path("endMs").isNull()) {
++        assertThat(item.path("endMs").asLong()).isBetween(start, maxMs);
++      }
++      if (previous != null) {
++        assertThat(guidedTimingOrder(previous, item)).as("R2 order").isNegative();
++      }
++      previous = item;
++      String kind = item.path("kind").asText();
++      if (kind.equals("action")) {
++        String admission = item.path("admissionId").asText();
++        assertThat(actionItems.put(admission, item)).as("one item per admission").isNull();
++        assertThat(item.path("stepId").asText()).isEqualTo(ledger.get(admission));
++        assertThat(item.path("ordinal").asInt()).isEqualTo(ordinals.get(admission));
++      } else {
++        assertThat(kind).as("OBS-013 emits step and action only").isEqualTo("step");
++        assertThat(stepItems.put(item.path("stepId").asText(), item)).isNull();
++      }
++    }
++    assertThat(actionItems.keySet())
++        .as("happy path: every dispatched action has its reading (AR-1 auto-decision 5)")
++        .containsExactlyInAnyOrderElementsOf(ledger.keySet());
++    assertThat(stepItems.keySet()).containsExactlyInAnyOrderElementsOf(Set.copyOf(ledger.values()));
++    for (var step : stepItems.entrySet()) {
++      long min =
++          actionItems.values().stream()
++              .filter(item -> item.path("stepId").asText().equals(step.getKey()))
++              .mapToLong(item -> item.path("startMs").asLong())
++              .min()
++              .orElseThrow();
++      assertThat(step.getValue().path("startMs").asLong()).isEqualTo(min);
++    }
++
++    // Manifest: the runner's audit record next to the video, runner vocabulary (STORED).
++    Path manifest = objects.resolve(manifestKey).normalize();
++    assertThat(manifest.startsWith(objects)).isTrue();
++    assertThat(Files.isRegularFile(manifest, java.nio.file.LinkOption.NOFOLLOW_LINKS)).isTrue();
++    byte[] manifestBytes = Files.readAllBytes(manifest);
++    JsonNode manifestBody = C.parse(new String(manifestBytes, StandardCharsets.UTF_8));
++    assertThat(manifestBody.path("kind").asText()).isEqualTo("guidedRecording");
++    assertThat(manifestBody.path("sessionId").asText()).isEqualTo(sessionId);
++    assertThat(manifestBody.path("evidenceState").asText()).isEqualTo("STORED");
++    assertThat(manifestBody.path("evidencePartial").asBoolean()).isFalse();
++    assertThat(manifestBody.path("videoKey").asText()).isEqualTo(videoKey);
++    assertThat(manifestBody.path("manifestKey").asText()).isEqualTo(manifestKey);
++    assertThat(manifestBody.path("disclosure").asText()).isEqualTo(GUIDED_DISCLOSURE);
++    var servedActions = C.parse("[]");
++    for (JsonNode item : timings) {
++      if (item.path("kind").asText().equals("action")) {
++        ((com.fasterxml.jackson.databind.node.ArrayNode) servedActions).add(item);
++      }
++    }
++    assertThat(GuidedContracts.canonical(manifestBody.path("timings")))
++        .isEqualTo(GuidedContracts.canonical(servedActions));
++
++    sinks.put("guided-result", result.toString().getBytes(StandardCharsets.UTF_8));
++    sinks.put(
++        "guided-v20-timings", String.valueOf(row.get("timings")).getBytes(StandardCharsets.UTF_8));
++    sinks.put("guided-manifest", manifestBytes);
++    sinks.put("guided-native-video", bytes);
++    sinks.put("guided-video-range", ranged.body());
++
++    ObjectNode evidence =
++        C.object()
++            .put("sessionId", sessionId)
++            .put("videoKey", videoKey)
++            .put("videoBytes", bytes.length)
++            .put("actionItems", actionItems.size())
++            .put("stepItems", stepItems.size())
++            .put("rangeStatus", ranged.statusCode());
++    evidence.set("decoded", decoded);
++    return evidence;
++  }
++
++  /**
++   * AC-6 fault half: a recorder-side fault mid-session (the live WebM removed from the recorder's
++   * directory after the first dispatched action, as runner recorderFileLost) settles UNAVAILABLE,
++   * the session still finishes, and no video object exists. The store is the same one the happy
++   * path proves AVAILABLE with, so UNAVAILABLE here can only come from the injected fault.
++   */
++  @Test
++  @org.junit.jupiter.api.Order(9)
++  void guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes() throws Exception {
++    coreRole = "owner";
++    String canary = "JOINED-FAULT-" + UUID.randomUUID();
++    var fixtureHttp = HttpClient.newHttpClient();
++    fixtureHttp.send(
++        HttpRequest.newBuilder(URI.create(SECRET_ORIGIN + "/__reset"))
++            .POST(HttpRequest.BodyPublishers.noBody())
++            .build(),
++        HttpResponse.BodyHandlers.discarding());
++    fixtureHttp.send(
++        HttpRequest.newBuilder(URI.create(SECRET_ORIGIN + "/__rotate"))
++            .POST(HttpRequest.BodyPublishers.ofString(canary))
++            .build(),
++        HttpResponse.BodyHandlers.discarding());
++    UUID testId =
++        createSource(
++            List.of(
++                "Open " + SECRET_ORIGIN + "/login.",
++                "Enter <var USER> in User and <secret PASS> as password.",
++                "Click Sign in, check Home, open Reports and check Reports appears."));
++    jdbc.update(
++        ("UPDATE ui_tests SET variables='[{\"name\":\"USER\",\"kind\":\"plain\","
++            + "\"value\":\"fixture-user\"},{\"name\":\"PASS\",\"kind\":\"secretRef\"}]'::jsonb"
++            + " WHERE id=?"),
++        testId);
++    var vaultScope =
++        com.citi.put.checks.studio.secrets.VaultScope.of(primaryCsi, "fixture", testId);
++    VAULT.rotate(
++        com.citi.put.checks.studio.secrets.StudioVaultProvider.ReferenceKind.SECRET,
++        vaultScope,
++        "PASS",
++        canary);
++    VAULT.bindOrigins(
++        com.citi.put.checks.studio.secrets.StudioVaultProvider.ReferenceKind.SECRET,
++        vaultScope,
++        "PASS",
++        SECRET_ORIGIN);
++    var canaries = new java.util.ArrayList<String>(List.of(canary));
++    AUDIT_CANARIES.add(canary);
++    var sinkBytes = new java.util.LinkedHashMap<String, byte[]>();
++    C5Capture capture = new C5Capture(canaries, false);
++    c5Capture = capture;
++    Throwable c5PrimaryFailure = null;
++    secretLoginScenario = true;
++    s2TraceBinding = new S2TraceBinding(vaultScope, capture);
++    try {
++      capture.beginS2(++p3CaptureCaseOrdinal);
++      capture.writeProfileValues();
++      long launchesBefore = p3LaunchCounter().path("count").asLong();
++      String sessionId = startLearning(testId);
++
++      // Inject: after the first dispatched action, remove the live recording file.
++      Path recorderDirectory = null;
++      int removed = 0;
++      long deadline = System.nanoTime() + Duration.ofSeconds(90).toNanos();
++      while (System.nanoTime() < deadline) {
++        JsonNode launches = p3LaunchCounter();
++        Integer dispatched =
++            jdbc.queryForObject(
++                "SELECT count(*) FROM studio_guided_actions WHERE session_id=?"
++                    + " AND (document->>'dispatchCount')::integer = 1",
++                Integer.class,
++                sessionId);
++        if (launches.path("count").asLong() > launchesBefore
++            && launches.path("lastRecordVideoDir").isTextual()
++            && dispatched != null
++            && dispatched > 0) {
++          assertThat(
++                  jdbc.queryForObject(
++                      "SELECT state FROM studio_guided_sessions WHERE session_id=?",
++                      String.class,
++                      sessionId))
++              .as("the fault lands mid-session, before the recording is closed")
++              .isNotIn(
++                  "FINALIZING",
++                  "SUCCEEDED",
++                  "PUBLICATION_CONFLICT",
++                  "FAILED",
++                  "UNKNOWN_OUTCOME",
++                  "CANCELLED",
++                  "EXPIRED");
++          recorderDirectory = Path.of(launches.path("lastRecordVideoDir").asText());
++          try (var files = Files.list(recorderDirectory)) {
++            for (Path recorded : files.toList()) {
++              Files.delete(recorded);
++              removed++;
++            }
++          }
++          break;
++        }
++        Thread.sleep(20);
++      }
++      assertThat(recorderDirectory)
++          .as("guided recorder directory observed; logs %s", TEMP)
++          .isNotNull();
++      assertThat(removed).as("the live recording file was removed").isPositive();
++
++      // The session still finishes.
++      awaitFinalizing(sessionId);
++      publicCall(
++          "/api/v1/studio/guided-sessions/" + sessionId + "/finalize",
++          C.object()
++              .put("schemaVersion", 3)
++              .put("expectedSourceRevision", "1")
++              .put("expectedConfigurationRevision", "1"),
++          200,
++          UUID.randomUUID().toString());
++
++      JsonNode result = awaitGuidedVideoSettled(sessionId);
++      JsonNode video = result.path("evidence").path("video");
++      assertThat(video.path("status").asText()).as(video.toString()).isEqualTo("UNAVAILABLE");
++      assertThat(video.path("error").isNull()).isTrue();
++      assertThat(video.path("expiresAt").isNull()).isTrue();
++      assertThat(video.path("partial").isBoolean() && !video.path("partial").booleanValue())
++          .isTrue();
++      assertThat(result.path("actionTimings").isArray()).isTrue();
++      assertThat(result.path("actionTimings")).isEmpty();
++
++      Map<String, Object> row = guidedRecordingRow(sessionId);
++      assertThat(row.get("state")).isEqualTo("UNAVAILABLE");
++      assertThat(row.get("partial")).isEqualTo(false);
++      assertThat(row.get("has_expiry")).isEqualTo(false);
++      assertThat(C.parse(String.valueOf(row.get("timings"))).isArray()).isTrue();
++      assertThat(C.parse(String.valueOf(row.get("timings")))).isEmpty();
++
++      // No fake video: the object is absent, the manifest says UNAVAILABLE, the route says 404.
++      Path objects = TEMP.resolve("objects");
++      Path file = objects.resolve(String.valueOf(row.get("video_key"))).normalize();
++      assertThat(file.startsWith(objects)).isTrue();
++      assertThat(Files.notExists(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)).isTrue();
++      Path manifest = objects.resolve(String.valueOf(row.get("manifest_key"))).normalize();
++      assertThat(manifest.startsWith(objects)).isTrue();
++      byte[] manifestBytes = Files.readAllBytes(manifest);
++      JsonNode manifestBody = C.parse(new String(manifestBytes, StandardCharsets.UTF_8));
++      assertThat(manifestBody.path("evidenceState").asText()).isEqualTo("UNAVAILABLE");
++      assertThat(manifestBody.path("timings").isArray()).isTrue();
++      assertThat(manifestBody.path("timings")).isEmpty();
++      assertThat(manifestBody.path("disclosure").asText()).isEqualTo(GUIDED_DISCLOSURE);
++      HttpResponse<byte[]> refused = guidedVideoRead(sessionId, null, true);
++      assertThat(refused.statusCode()).isEqualTo(404);
++      assertThat(C.parse(new String(refused.body(), StandardCharsets.UTF_8)).path("error").asText())
++          .isEqualTo("VIDEO_UNAVAILABLE");
++
++      sinkBytes.put("fault-result", result.toString().getBytes(StandardCharsets.UTF_8));
++      sinkBytes.put("fault-manifest", manifestBytes);
++      collectJoinedSinks(sinkBytes);
++      for (String value : canaries) {
++        assertJoinedSinkAbsent(sinkBytes, value);
++      }
++      capture.writeNumericEvidence();
++    } catch (Exception | Error original) {
++      c5PrimaryFailure = original;
++      throw original;
++    } finally {
++      var failures = new java.util.ArrayList<Throwable>();
++      p3AttemptTeardown(failures, this::p3CleanupOwnedResources);
++      p3AttemptTeardown(failures, capture::awaitS2Completion);
++      if (failures.isEmpty() && !cleanupUnconfirmed) {
++        p3AttemptTeardown(failures, () -> p3Scan(canaries));
++        p3AttemptTeardown(failures, capture::writeNumericEvidence);
++        p3AttemptTeardown(failures, capture::close);
++        if (!cleanupUnconfirmed) {
++          c5Capture = null;
++          secretLoginScenario = false;
++          s2TraceBinding = null;
++          p3OwnedGuidedCookies.clear();
++          p3OwnedOrdinaryCookies.clear();
++          p3AttemptTeardown(
++              failures,
++              () ->
++                  Files.writeString(
++                      TEMP.resolve("p4-revocation-state.json"),
++                      "{\"active\":false}",
++                      StandardCharsets.UTF_8));
++        }
++      } else {
++        cleanupUnconfirmed = true;
++        failures.add(
++            new IllegalStateException("S2 actual secret-bearing owner completion unconfirmed"));
++      }
++      if (!failures.isEmpty()) {
++        if (c5PrimaryFailure != null) {
++          failures.forEach(c5PrimaryFailure::addSuppressed);
++        } else {
++          throwTeardownFailures(failures);
++        }
++      }
++    }
++  }
++
+   /** Test-only accounting at the existing provider seam; it never resolves an extra value. */
+   @Test
+   @org.junit.jupiter.api.Order(10)
+@@ -12206,7 +12716,10 @@
+         + "if(registered){chromium.launchPersistentContext=function(...args){const state=JSON.parse(fs.readFileSync("
+         + file
+         + ",'utf8'));"
+-        + "state.count++;fs.writeFileSync("
++        + "state.count++;const recording=args[1]&&args[1].recordVideo;"
++        // STUDIO-OBS-013 TEST-001: the guided recording directory, for the recorder-fault test.
++        + "if(recording&&typeof recording.dir==='string'){state.lastRecordVideoDir=recording.dir;}"
++        + "fs.writeFileSync("
+         + file
+         + ",JSON.stringify(state),{mode:0o600});return Reflect.apply(original,this,args);};}"
+         + p4NativeCloseObserverSdk()
+@@ -16018,6 +16531,7 @@
+               .GET()
+               .build();
+       int before = CORE_CALLS.get();
++      String expectedVideo = replicaExpectedVideoStatus(id);
+       var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+       assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
+       assertThat(CORE_CALLS.get()).isGreaterThan(before);
+@@ -16033,7 +16547,16 @@
+       // or UNAVAILABLE after it; never AVAILABLE here.
+       JsonNode video = result.path("evidence").path("video");
+       assertThat(video.isObject()).as(video.toString()).isTrue();
+-      assertThat(video.path("status").asText()).isIn("UNAVAILABLE", "PROCESSING");
++      // AR-QA TEST001 line16036: exact, from the stored recording row on the shared database and
++      // the DB-clock window, judged before and after the replica read. Not AC-6 evidence.
++      assertThat(replicaExpectedVideoStatus(id))
++          .as("no recording fact landed and no DB-clock window edge passed during the read")
++          .isEqualTo(expectedVideo);
++      assertThat(video.path("status").asText()).as(video.toString()).isEqualTo(expectedVideo);
++      if ("AVAILABLE".equals(guidedRecordingRowState(id))) {
++        assertThat(video.path("error").asText())
++            .isEqualTo(com.citi.put.checks.studio.ExecutionSnapshotMapper.NO_RECORDING_STORE);
++      }
+     }
+   }
+ 

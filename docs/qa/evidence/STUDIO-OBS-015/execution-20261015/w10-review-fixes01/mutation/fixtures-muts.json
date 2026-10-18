@@ -1,0 +1,100 @@
+[
+ {
+  "name": "F1-launcher-reports-cancelled-not-reason",
+  "edits": [
+   [
+    "src/run/browser.ts",
+    "launchFailureCause(error,signal)",
+    "error"
+   ]
+  ],
+  "files": [
+   "test/fixtures-tier/guided-start-deadline.test.ts"
+  ],
+  "fixtures": true
+ },
+ {
+  "name": "F2-late-spawn-wait-fixed-one-second",
+  "edits": [
+   [
+    "src/run/browser.ts",
+    "const waitMs=seen.size===0?Math.max(LATE_LAUNCH_GRACE_MS,backstopAt-Date.now()):LATE_LAUNCH_GRACE_MS;",
+    "const waitMs=LATE_LAUNCH_GRACE_MS;"
+   ]
+  ],
+  "files": [
+   "test/fixtures-tier/guided-start-deadline.test.ts"
+  ],
+  "fixtures": true
+ },
+ {
+  "name": "F3-encoder-not-a-marker",
+  "edits": [
+   [
+    "src/run/browser.ts",
+    "launchMarkers(scratchDirectory,recording?.dir)",
+    "launchMarkers(scratchDirectory)"
+   ]
+  ],
+  "files": [
+   "test/fixtures-tier/guided-start-deadline.test.ts"
+  ],
+  "fixtures": true
+ },
+ {
+  "name": "F4-survivors-ignored",
+  "edits": [
+   [
+    "src/run/browser.ts",
+    "if((await survivorsOf([...seen],500)).length>0)throw new Error('CONTEXT_LOST');",
+    "void survivorsOf([...seen],500);"
+   ]
+  ],
+  "files": [
+   "test/fixtures-tier/guided-start-deadline.test.ts"
+  ],
+  "fixtures": true
+ },
+ {
+  "name": "F5-cause-dropped",
+  "edits": [
+   [
+    "src/run/browser.ts",
+    "throw new GuidedLaunchFailure(()=>Promise.resolve(),error,phase);",
+    "throw new GuidedLaunchFailure(()=>Promise.resolve(),undefined,phase);"
+   ]
+  ],
+  "files": [
+   "test/fixtures-tier/browser-profile-safety.test.ts"
+  ],
+  "fixtures": true
+ },
+ {
+  "name": "F5b-scratch-not-removed",
+  "edits": [
+   [
+    "src/run/browser.ts",
+    "if(acquired)await acquired.close().catch(() => { throw new Error('CONTEXT_LOST'); }); await disposeScratch(); };",
+    "if(acquired)await acquired.close().catch(() => { throw new Error('CONTEXT_LOST'); }); };"
+   ]
+  ],
+  "files": [
+   "test/fixtures-tier/browser-profile-safety.test.ts"
+  ],
+  "fixtures": true
+ },
+ {
+  "name": "F5c-phase-mislabelled",
+  "edits": [
+   [
+    "src/run/browser.ts",
+    "let phase:GuidedLaunchPhase='PROFILE';",
+    "let phase:GuidedLaunchPhase='PROCESS';"
+   ]
+  ],
+  "files": [
+   "test/fixtures-tier/browser-profile-safety.test.ts"
+  ],
+  "fixtures": true
+ }
+]

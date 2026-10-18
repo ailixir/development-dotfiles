@@ -1,0 +1,1306 @@
+{
+  "artifact": "STUDIO-OBS-008 lane and wave plan (machine-readable companion of implementation-plan.md)",
+  "author": "Aria (@architect)",
+  "createdAt": "2026-10-16",
+  "status": "PREP_ONLY_IMPLEMENTATION_HELD_UNTIL_015_DONE",
+  "repoRoot": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "builtOn": [
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/architect-rulings.json",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/architect-ownership.json",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/architect-test-delta.json",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/ux-implementation-plan.json",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/qa-design-readiness.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/execute-015-008/claude-feasibility-008-011.md"
+  ],
+  "baselineObserved20261016": {
+    "story015Status": "InProgress",
+    "story008Status": "Ready",
+    "openapiSha256Prefix": "c053a7f75656",
+    "openapiSha256AtP1P7Ruling": "afec6c04cdd5bcc19e42b83f83656a342165c5e04407e90a7206de0b40c46183",
+    "openapiOperations": {
+      "total": 43,
+      "public": 35,
+      "internal": 8
+    },
+    "sessionViewSha256Prefix": "378ab88d0abe",
+    "resultSha256Prefix": "7accd138c4b8",
+    "progressOrExplanationInContracts": false,
+    "capabilitiesRouteInOpenapi": false,
+    "guidedIdempotencyKeyRequiredOn": [
+      "startGuidedSession",
+      "clarifyGuidedSession",
+      "cancelGuidedSession",
+      "finalizeObservedPublication"
+    ],
+    "classAAllowlistLines": "frontend/src/services/mocks/studio/studioContract.test.ts:508-518",
+    "frontendLockfile": "package-lock.json (no pnpm-lock.yaml)",
+    "playwrightTestInstalled": false,
+    "runnerPlaywrightVersion": "1.63.0",
+    "vitestDefaultIncludeCatchesE2eSpecs": true,
+    "replayLoginRequiredPublicField": false,
+    "secretFillPolicyDeniedPublicDiscriminator": false,
+    "collectorOutputHardcodedTo015": true
+  },
+  "lanes": [
+    {
+      "id": "L0",
+      "name": "C-int contract unit",
+      "agent": "@dev (contract integrator)",
+      "singleWriter": true,
+      "waves": [
+        "W1",
+        "F1:C-int-2"
+      ],
+      "dependsOn": [
+        "W0"
+      ],
+      "backendWork": false,
+      "files": [
+        "docs/specs/studio/openapi.yaml",
+        "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/v3/public-ui-projections.schema.json (new)",
+        "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json",
+        "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+        "docs/specs/studio-observed-authoring/contracts/v3/wire-parity.fixtures.json",
+        "docs/specs/studio/examples/context-authoring-valid.json (F1 only: delete legacy-empty-context)",
+        "docs/specs/studio/examples/context-authoring-invalid.json (F1 only: delete mixed-legacy case)",
+        "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java (pin lines only)",
+        "studio-runner/test/run/confinement.test.ts (pin only)",
+        "generator outputs via tools/build-studio-observed-schemas.cjs only (expected unchanged)",
+        "docs/runbooks/studio-guided-authoring.md (public finalize paragraph per P7)"
+      ],
+      "acs": [
+        "AC-1",
+        "AC-3",
+        "AC-5a",
+        "AC-6",
+        "V2-e"
+      ],
+      "verify": [
+        "node -e \"require('./tools/build-studio-observed-schemas.cjs').check()\"",
+        "node tools/check-studio-observed-contracts.cjs",
+        "cd studio-runner && pnpm exec vitest run test/run/confinement.test.ts",
+        "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/run-backend-tasked.py c008-pins01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.StudioContractTest'"
+      ],
+      "exit": "Old/new OpenAPI hashes quoted; op count measured (expected 43->44); expected-red ledger recorded with exact test names"
+    },
+    {
+      "id": "L1",
+      "name": "Backend capability + public projections",
+      "agent": "@dev backend",
+      "singleWriter": true,
+      "onlyBackendWriter": true,
+      "waves": [
+        "W2",
+        "W4:playback-measurement"
+      ],
+      "dependsOn": [
+        "L0"
+      ],
+      "backendWork": true,
+      "files": [
+        "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsCapabilityController.java (new)",
+        "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioCapabilitiesService.java (new)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedPublicPresentationProjector.java (new)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java (projection wiring only)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java (shared projection call only)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java (read-only scoped query)",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayPins.java (read-only helper, only if needed)",
+        "backend/src/test/java/com/citi/put/checks/studio/secrets/StudioCapabilitiesIT.java (new)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedPublicPresentationIT.java (new)",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedPlaybackLoadIT.java (new)"
+      ],
+      "conditionalFiles": "If D1=A: replay failure projection files ruled in P8 (mapper/ingestion; persistence via @data-engineer) join this lane",
+      "acs": [
+        "AC-2",
+        "AC-3",
+        "AC-5a",
+        "AC-6",
+        "AC-7",
+        "PLAYBACK-COST"
+      ],
+      "verify": [
+        "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/run-backend-tasked.py be008-cap01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.secrets.StudioCapabilitiesIT' --tests 'com.citi.put.checks.studio.StudioContractTest'",
+        "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/run-backend-tasked.py be008-proj01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedPublicPresentationIT' --tests 'com.citi.put.checks.studio.guided.publication.*'",
+        "W4: python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/run-backend-tasked.py be008-playback01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.evidence.GuidedPlaybackLoadIT'"
+      ],
+      "exit": "Zero unapproved skips; sourceStable/testInputStable true; architect-test-delta backend cases mapped",
+      "prohibited": [
+        "session state machine changes",
+        "native dispatch/retry/budget/policy authority changes",
+        "schema or migration edits (unless D1=A via @data-engineer)",
+        "StudioContractTest edits"
+      ]
+    },
+    {
+      "id": "L2a",
+      "name": "v2 authoring migration + MSW seam owner",
+      "agent": "@dev frontend",
+      "waves": [
+        "W2",
+        "F1"
+      ],
+      "dependsOn": [
+        "L0"
+      ],
+      "backendWork": false,
+      "files": [
+        "frontend/src/services/api/studioAuthoringTransport.ts",
+        "frontend/src/services/api/studioAuthoringTransport.test.ts",
+        "frontend/src/types/studio/legacyStudioAuthoringAdapter.ts (delete)",
+        "frontend/src/types/studio/legacyStudioAuthoringAdapter.test.ts (delete)",
+        "frontend/src/types/studio/studioContextContract.test.ts",
+        "frontend/src/types/studio/studioTypes.ts",
+        "frontend/src/services/mocks/studio/handlers.ts",
+        "frontend/src/services/mocks/studio/authoringHandlers.ts",
+        "frontend/src/services/mocks/studio/authoringHandlers.test.ts",
+        "frontend/src/services/mocks/studio/authoringState.ts",
+        "frontend/src/services/mocks/studio/studioContract.test.ts",
+        "frontend/src/services/mocks/studio/server.ts",
+        "frontend/src/components/studio/tests/CreateTestDialog.tsx",
+        "frontend/src/components/studio/scheduling/StudioScheduleDialog.tsx",
+        "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+        "frontend/src/pages/CreateCheckPage/CreateCheckPage.tsx"
+      ],
+      "batonFiles": {
+        "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": "W2 (v2 step model only) -> L5b at F1",
+        "frontend/src/pages/ChecksStudioPage/*.test.tsx": "W2 (v2 only) -> L5b at F1",
+        "frontend/src/components/studio/run/useRunGate.ts": "W2 (reader type only) -> L5b at F1"
+      },
+      "acs": [
+        "AC-1 (contract harness)",
+        "V2-a",
+        "V2-b",
+        "V2-c",
+        "V2-d",
+        "V2-f",
+        "V2-g1",
+        "V2-g2",
+        "ALLOWLIST"
+      ],
+      "verify": [
+        "cd frontend && pnpm exec vitest run src/services/api/studioAuthoringTransport.test.ts src/types/studio src/services/mocks/studio/authoringHandlers.test.ts src/services/mocks/studio/studioContract.test.ts src/components/studio/scheduling src/pages/ChecksStudioPage --maxWorkers=2",
+        "cd frontend && pnpm run type-check",
+        "cd frontend && pnpm exec eslint <changed files>",
+        "grep -rn -i \"legacy\" backend/src/main/java/com/citi/put/checks/studio studio-runner/src frontend/src",
+        "grep -rn \"legacyStudioAuthoringAdapter\\|AUTHORING_V2_REQUIRED\\|LEGACY_AUTHORING\" frontend/src (expect 0)"
+      ],
+      "f1Duties": [
+        "compose guidedHandlers + capabilityHandlers + secretsHandlers into studioHandlers",
+        "remove 10 class-A entries; capability op covered by handler, never allowlisted",
+        "co-land V2-b deletions with L0 C-int-2 fixture deletion",
+        "quote final allowlist (class B streamExecution, class C policy)"
+      ]
+    },
+    {
+      "id": "L2b",
+      "name": "Guided transport, types, MSW mirror, session hook",
+      "agent": "@dev frontend",
+      "waves": [
+        "W2.0:interface-drop",
+        "W2"
+      ],
+      "dependsOn": [
+        "L0"
+      ],
+      "backendWork": false,
+      "files": [
+        "frontend/src/types/studio/studioGuidedTypes.ts (new)",
+        "frontend/src/services/api/studioGuidedApi.ts (new)",
+        "frontend/src/services/api/studioGuidedApi.test.ts (new)",
+        "frontend/src/services/api/studioApi.ts (getCapabilities)",
+        "frontend/src/services/mocks/studio/guidedHandlers.ts (new)",
+        "frontend/src/services/mocks/studio/guidedFixtures.ts (new, derived from v3 fixtures)",
+        "frontend/src/services/mocks/studio/capabilityHandlers.ts (new)",
+        "frontend/src/services/mocks/studio/guidedHandlers.test.ts (new)",
+        "frontend/src/store/slices/studioSlice.ts (guided keys)"
+      ],
+      "batonFiles": {
+        "frontend/src/components/studio/guided/useGuidedSession.ts (new)": "W2 -> L5b at F1",
+        "frontend/src/components/studio/guided/useGuidedSession.test.ts (new)": "W2 -> L5b at F1"
+      },
+      "namedReduxKeys": [
+        "guidedSessionByTestId",
+        "guidedSessionViewById",
+        "guidedResultById",
+        "guidedClarificationById"
+      ],
+      "sessionStorageKey": "checks.studio.guided.v1:<testId> -> {testId, sessionId, startKey, finalizeKey, startRequest}",
+      "acs": [
+        "AC-1",
+        "AC-2",
+        "POLICY_NOT_APPROVED (typed error)"
+      ],
+      "verify": [
+        "cd frontend && pnpm exec vitest run src/services/api/studioGuidedApi.test.ts src/services/mocks/studio/guidedHandlers.test.ts src/components/studio/guided/useGuidedSession.test.ts --maxWorkers=2",
+        "cd frontend && pnpm run type-check",
+        "cd frontend && pnpm exec eslint <changed files>"
+      ]
+    },
+    {
+      "id": "L3",
+      "name": "Browser harness (test-only, P5)",
+      "agent": "@dev frontend test-infra",
+      "waves": [
+        "W2"
+      ],
+      "continuesAs": "L6",
+      "dependsOn": [
+        "W0:D3"
+      ],
+      "backendWork": false,
+      "files": [
+        "frontend/playwright.config.ts (new)",
+        "frontend/e2e/start-servers.mjs (new)",
+        "frontend/e2e/mswProxy.ts (new)",
+        "frontend/e2e/tsconfig.json (new)",
+        "frontend/e2e/harness.spec.ts (new)",
+        "frontend/e2e/fixtures/studio-run.webm (new, generated non-secret)",
+        "frontend/vitest.config.ts (exclude e2e/**)",
+        "frontend/package.json (exact @playwright/test 1.63.0)",
+        "frontend/package-lock.json or pnpm lockfile per D3"
+      ],
+      "acs": [
+        "AC-9 (config)",
+        "AC-8 (browser companion infra)"
+      ],
+      "verify": [
+        "cd frontend && pnpm exec playwright test e2e/harness.spec.ts",
+        "cd frontend && pnpm exec vitest run src/components/providers/realStudioStartup.test.ts",
+        "cd frontend && pnpm exec vitest list (no e2e/ files)",
+        "cd frontend && pnpm exec tsc -p e2e/tsconfig.json --noEmit"
+      ],
+      "prohibited": [
+        "production main/bootstrap/config edits",
+        "mockServiceWorker.js or browser worker",
+        "unhandled request reaching a network target"
+      ]
+    },
+    {
+      "id": "L4",
+      "name": "References, secrets and runtime capability",
+      "agent": "@ux-design-expert with @dev technical gate",
+      "waves": [
+        "W2"
+      ],
+      "dependsOn": [
+        "L0",
+        "W2.0"
+      ],
+      "backendWork": false,
+      "files": [
+        "frontend/src/components/studio/references/ReferencePicker.tsx (new)",
+        "frontend/src/components/studio/references/referenceTokens.ts (new)",
+        "frontend/src/components/studio/references/index.ts (new)",
+        "frontend/src/components/studio/references/referencePicker.test.tsx (new)",
+        "frontend/src/components/studio/references/referenceTokens.test.ts (new)",
+        "frontend/src/components/studio/SecretInput.tsx",
+        "frontend/src/components/studio/SecretInput.test.tsx",
+        "frontend/src/services/mocks/studio/secretsHandlers.ts (new)",
+        "frontend/src/components/checks/wizard/configs/UiTestConfig.tsx",
+        "frontend/src/components/studio/templates/quickStartTemplates.ts",
+        "frontend/src/components/studio/templates/quickStartTemplates.test.ts",
+        "frontend/src/components/studio/OnboardingCoach.tsx"
+      ],
+      "batonFiles": {
+        "frontend/src/utils/config/studioCapabilities.ts": "W2 (adds useStudioCapabilities; constant kept for page) -> L5b at F1 (deletes STUDIO_CAPABILITIES)"
+      },
+      "acs": [
+        "AC-5b",
+        "AC-5c",
+        "AC-5a (frontend)"
+      ],
+      "verify": [
+        "cd frontend && pnpm exec vitest run src/components/studio/references src/components/studio/SecretInput.test.tsx src/components/studio/templates src/components/checks/wizard --maxWorkers=2",
+        "cd frontend && pnpm run type-check",
+        "cd frontend && pnpm exec eslint <changed files>"
+      ]
+    },
+    {
+      "id": "L5a",
+      "name": "Guided and evidence presentational components (routine addition; foldable into L5b)",
+      "agent": "@ux-design-expert with @dev technical gate",
+      "waves": [
+        "W2"
+      ],
+      "dependsOn": [
+        "L0",
+        "W2.0"
+      ],
+      "backendWork": false,
+      "files": [
+        "frontend/src/components/studio/guided/GuidedRunStatus.tsx (new)",
+        "frontend/src/components/studio/guided/GuidedClarification.tsx (new)",
+        "frontend/src/components/studio/guided/LoginRequiredNotice.tsx (new)",
+        "frontend/src/components/studio/guided/GuidedCompletion.tsx (new)",
+        "frontend/src/components/studio/guided/ReadinessChip.tsx (new)",
+        "frontend/src/components/studio/guided/PlanExplanation.tsx (new)",
+        "frontend/src/components/studio/guided/guidedNarratives.ts (new)",
+        "frontend/src/components/studio/guided/index.ts (new)",
+        "frontend/src/components/studio/guided/guided.test.tsx (new)",
+        "frontend/src/components/studio/guided/clarification.test.tsx (new)",
+        "frontend/src/components/studio/guided/loginRequired.test.tsx (new)",
+        "frontend/src/components/studio/guided/planExplanation.test.tsx (new)",
+        "frontend/src/components/studio/evidence/** (VideoEvidencePanel, useVideoSeek, seekEligibility, studioVideoUrl, videoEvidenceNarratives + tests)"
+      ],
+      "acs": [
+        "AC-3",
+        "AC-4 (guided)",
+        "AC-6 (UI)",
+        "AC-7",
+        "AC-8 (component level)",
+        "POLICY-a",
+        "POLICY-b",
+        "POLICY_NOT_APPROVED copy",
+        "KL-015-Q4 (conditional)",
+        "PLAYBACK-COPY"
+      ],
+      "verify": [
+        "cd frontend && pnpm exec vitest run src/components/studio/guided src/components/studio/evidence --maxWorkers=2",
+        "cd frontend && pnpm run type-check",
+        "cd frontend && pnpm exec eslint <changed files>"
+      ],
+      "blockedItems": {
+        "replay drift copy/action": "D1",
+        "secret-fill POLICY_DENIED copy": "D2"
+      }
+    },
+    {
+      "id": "L5b",
+      "name": "Page integrator",
+      "agent": "@ux-design-expert (story executor) with @dev technical gate",
+      "waves": [
+        "W3"
+      ],
+      "dependsOn": [
+        "F1"
+      ],
+      "backendWork": false,
+      "files": [
+        "frontend/src/pages/ChecksStudioPage/** (baton from L2a)",
+        "frontend/src/components/studio/run/** (useRunGate baton from L2a)",
+        "frontend/src/components/studio/runs/**",
+        "frontend/src/components/studio/tests/testListPresentation.ts",
+        "frontend/src/components/studio/scheduling/schedulePresentation.ts",
+        "frontend/src/components/studio/guided/useGuidedSession.ts (+test) (baton from L2b)",
+        "frontend/src/utils/config/studioCapabilities.ts (baton from L4)",
+        "L5a files after recorded baton at F1"
+      ],
+      "acs": [
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5 (editor wiring)",
+        "AC-6",
+        "AC-7",
+        "AC-8",
+        "AC-9 (Vitest flows)"
+      ],
+      "verify": [
+        "cd frontend && pnpm exec vitest run src/pages/ChecksStudioPage src/components/studio/run src/components/studio/runs --maxWorkers=3",
+        "cd frontend && pnpm run type-check",
+        "cd frontend && pnpm run lint",
+        "grep -rn \"STUDIO_CAPABILITIES\" frontend/src (expect 0)"
+      ]
+    },
+    {
+      "id": "L6",
+      "name": "A11y audit + Playwright E2E",
+      "agent": "L3 owner (@dev); Uma independent a11y review",
+      "waves": [
+        "W4"
+      ],
+      "dependsOn": [
+        "L5b"
+      ],
+      "backendWork": false,
+      "files": [
+        "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+        "docs/qa/accessibility/axe-results.json (serialized single writer)",
+        "frontend/e2e/studio-guided.spec.ts (new)",
+        "frontend/e2e/studio-guided-accessibility.spec.ts (new)",
+        "frontend/e2e/studio-authoring-real-backend.spec.ts (new, only if D5 adopted; non-gating)"
+      ],
+      "acs": [
+        "AC-8",
+        "AC-9",
+        "FE-A11Y"
+      ],
+      "verify": [
+        "cd frontend && pnpm exec vitest run src/test/a11y/studioWcagAudit.test.tsx",
+        "cd frontend && pnpm exec playwright test"
+      ]
+    }
+  ],
+  "sharedFilesSingleOwner": {
+    "docs/specs/studio/openapi.yaml": "L0",
+    "docs/specs/studio-observed-authoring/contracts/v3/*": "L0",
+    "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java": "L0 (pins only)",
+    "studio-runner/test/run/confinement.test.ts": "L0 (pin only)",
+    "frontend/src/services/mocks/studio/handlers.ts": "L2a",
+    "frontend/src/services/mocks/studio/studioContract.test.ts": "L2a",
+    "frontend/src/services/mocks/studio/server.ts": "L2a",
+    "frontend/src/services/api/studioApi.ts": "L2b",
+    "frontend/src/store/slices/studioSlice.ts": "L2b",
+    "frontend/package.json + lockfile + vitest.config.ts": "L3",
+    "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": "L2a (W2) -> L5b (W3+)",
+    "docs/qa/accessibility/axe-results.json": "L6"
+  },
+  "waves": [
+    {
+      "id": "W0",
+      "owner": "root",
+      "items": [
+        "015 QA PASS Done + PO closure + root CLI (user U1 upstream)",
+        "re-baseline hashes/op count/015-touched FE files",
+        "Docker + JDK21 availability",
+        "008 collector copy (output path only)",
+        "Aria re-validates P1-P7 vs final 015; P8 if D1=A",
+        "record D1/D2/D3",
+        "T0 Dev Agent Record: capability ruling, canonical copy, Redux keys"
+      ]
+    },
+    {
+      "id": "W1",
+      "lanes": [
+        "L0"
+      ],
+      "exit": "contract self-checks green; expected-red ledger recorded"
+    },
+    {
+      "id": "W2.0",
+      "lanes": [
+        "L2b"
+      ],
+      "exit": "interface drop integrated; type-check green"
+    },
+    {
+      "id": "W2",
+      "lanes": [
+        "L1",
+        "L2a",
+        "L2b",
+        "L3",
+        "L4",
+        "L5a"
+      ],
+      "parallel": true,
+      "exit": "each lane focused verification green"
+    },
+    {
+      "id": "F1",
+      "owner": "root",
+      "items": [
+        "L2a composition + allowlist zero",
+        "L0 C-int-2 fixture deletion co-landed with V2-b",
+        "L1 focused backend gate",
+        "batons recorded with hashes"
+      ],
+      "exit": "expected-red ledger empty"
+    },
+    {
+      "id": "W3",
+      "lanes": [
+        "L5b"
+      ],
+      "exit": "page/run suites green; STUDIO_CAPABILITIES grep 0"
+    },
+    {
+      "id": "W4",
+      "lanes": [
+        "L6",
+        "L1:playback-measurement"
+      ],
+      "parallel": true,
+      "exit": "browser suites green on frozen source"
+    },
+    {
+      "id": "W5",
+      "owner": "root then independent reviewers",
+      "items": [
+        "serialized FE type-check/lint/full Vitest default workers/build/Playwright",
+        "backend final gate per 015 final-gates-runbook01 recipe via 008 collector",
+        "runner pins",
+        "independent Dex, Uma, Quinn reviews; QA alone sets Done"
+      ]
+    }
+  ],
+  "expectedRedLedgerW1toF1": [
+    "frontend studioContract.test.ts P2: getStudioTestCapabilities has no handler (never allowlisted per P1)",
+    "backend StudioContractTest route/implementation parity for the capability op until L1 controller exists",
+    "backend tests validating session-view/result bodies against schemas with required progress/explanation until L1 projector"
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "owner": "user/PO + Aria P8 + @data-engineer",
+      "question": "Replay LOGIN_REQUIRED (AC-4) and replay drift Learn-again (AC-3) have no public replay field",
+      "recommendation": "A: closed optional replay failure projection via C-int + L1 (+persistence check); fallback B: explicit PO amendment",
+      "paxRef": "A1"
+    },
+    {
+      "id": "D2",
+      "owner": "PO",
+      "question": "AC-3 secret-fill POLICY_DENIED copy has no public discriminator",
+      "recommendation": "B: PO record not renderable on landed contract unless carried by D1-A",
+      "paxRef": "A2"
+    },
+    {
+      "id": "D3",
+      "owner": "user",
+      "question": "Install @playwright/test with pnpm against npm lockfiles",
+      "recommendation": "A: npm install --save-exact for the dependency only, pnpm for running scripts; user decides"
+    },
+    {
+      "id": "D4",
+      "owner": "root",
+      "question": "Adopt L5a parallel lane",
+      "recommendation": "adopt; foldable into L5b"
+    },
+    {
+      "id": "D5",
+      "owner": "PO/QA",
+      "question": "Local real-backend authoring smoke",
+      "recommendation": "adopt as non-gating evidence; never credited as OBS-009"
+    },
+    {
+      "id": "U1",
+      "owner": "user",
+      "question": "015 item 85",
+      "recommendation": "upstream blocker"
+    }
+  ],
+  "autoDecisions": [
+    "AD-1 hand-written, document-asserted guided types; no codegen dependency",
+    "AD-2 capability/secrets MSW handlers in new lane-owned files composed by L2a",
+    "AD-3 'None of these — I'll edit step N' cancels the session with its stable key then focuses step N; no synthetic choiceId (Uma/PO to confirm)",
+    "AD-4 Redux keys and sessionStorage key as named in L2b"
+  ],
+  "testsExecuted": 0,
+  "sourceChanges": false,
+  "reconciliationWithPax039": {
+    "source": "docs/qa/evidence/STUDIO-OBS-008/prep-20261016/po-delta-validation.md (story 0.3.9)",
+    "A1": "= D1 (architect T0)",
+    "A2": "= D2 (architect T0)",
+    "A3": "= AD-3 (cancel reason userRequested, then focus step N; also declined side-effect confirmation)",
+    "D-1": "L2b keys on start/clarify/cancel/finalize",
+    "D-3": "L2b/L5b never send firstLearnStepId other than server's; FIRST_LEARN_STEP_NARROWED rendered as refusal",
+    "D-4": "L5a copy (Uma) for readinessReason BASE_IDENTITY_INCOMPLETE; L5b explicit first-step start on user action",
+    "D-8": "L2a removes handlers.ts:173 name fallback; W2 baton ChecksStudioPage.tsx:122 never writes secretId null; L4 inserts by secretId",
+    "D-9": "L2a getTest(id) no param; v2 TestRequest; csiId required on create; revisions required on update",
+    "D-10": "L5a action seek only from kind:action timings with AVAILABLE video; absent/partial/null status -> unavailable narrative",
+    "D-11": "L5b Run disabled for zero-step draft; refusal copy names no cause"
+  },
+  "w0Refold20261017": {
+    "title": "W0 refold 2026-10-17 (append-only; governs over the 2026-10-16 lanes, waves and decisions above where they disagree)",
+    "author": "Aria (@architect)",
+    "date": "2026-10-17",
+    "status": "READY_FOR_W1_DISPATCH_AFTER_ROOT_DECISIONS_R1_R4",
+    "inputs": {
+      "story": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md sha256 be87eaac686c637ea10d0d0678eccdbc85dd73ddc12a86acce70a3cee79282b5 (0.3.13, block 'PO scope decision - 2026-10-17 (user)')",
+      "ruling": "t0-rulings/ruling.md sha256 1127e9950d8228343599ac8b66253b62bd70c681c8a0c269b128873163842497 (A1.7 ownership deltas)",
+      "obligations": "obligations.json, G-1..G-5 amended20261017 appended by this refold (sha256 after: 5fbfc9e4890e8f0ac2f1e3bd7667ec5daa75512aa3fdb23e1b8938a347c2327b)",
+      "secondUserScopeChange": "2026-10-17, relayed by root, verbatim: \"Remove the a11y (accessibility) that are not must have, for instance we don't have to have shortcuts and we dont have handicap users for now\". Supersedes the A11 real-browser change. Recorded concurrently by Pax as PO scope decision 2 (ADR-SC-006-accessibility-scope-functional-only.md; story sha256 73c09cb2b8c0e340b093600d183078c5c36062483f7aacea998ee31a2120b8a7; obligations.json amended20261017b on AC-8, G-7, FE-A11Y). This refold matches it"
+    },
+    "w0FactsFromRoot": {
+      "story015": "Done (QA CONCERNS)",
+      "flywayHead": "V21 -> A1 migration is V22__execution_replay_failure.sql (also listed by Aria with ls | sort -V on 2026-10-17)",
+      "contractHashesMatch008Amendment": {
+        "openapi": "c053a7f7",
+        "session-view": "378ab88d",
+        "result": "7accd138",
+        "commands": "7a8dbc6c",
+        "publication.schema": "f5314de5",
+        "action-timing": "d2cb597f",
+        "versions": "02bc1bbc",
+        "aria": "Re-hashed by Aria on 2026-10-17 with shasum -a 256: all seven prefixes match"
+      }
+    },
+    "environment": {
+      "N24": "PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH. Required on every runner command and every backend Gradle command (backend ITs spawn host node). Host default is 23.10",
+      "frontendNode": "Host default (23.10; vitest.config.ts EventSource note was measured on it). Each frontend lane records node --version in its receipt",
+      "backendCollector": "From the repo root: <N24> python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py obs008-<lane>-<n> --test-tasks test -- test --tests '<class>' ... --no-daemon. One Gradle process at a time, root-serialized (bootRun included)",
+      "runnerCollector": "From the repo root: <N24> python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-runner.py obs008-<label> node node_modules/vitest/vitest.mjs run ... (015's recipe; no package manager involved). The pnpm form, if wanted: cd studio-runner && pnpm --config.package-manager-strict=false exec vitest run ..., because studio-runner/package.json declares packageManager npm@11.3.0",
+      "frontendPnpm": "frontend/package.json declares no packageManager field, so plain pnpm run / pnpm exec apply before and after U2. Frontend lanes start only after U2 exits and install with pnpm install --frozen-lockfile",
+      "sourceHold": "Both collectors hash a manifest of backend/, frontend/, studio-runner/, tools/, docs/specs/, .github/, root package files and AGENTS.md before and after the run (strict-qa-20261014/capture-manifest.py). An edit anywhere in that scope during a run makes sourceStable false. See root decision R1",
+      "receiptLocation": "Both collectors write to docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/ (hard-coded). obs008- labels keep them distinct. See root decision R2",
+      "models": "aiox-dev, aiox-qa, aiox-devops: sonnet, effort high. UI copy executor: aiox-ux (Uma). aiox-data-engineer and aiox-ux model not specified to me"
+    },
+    "scope": {
+      "in": [
+        "AC-1..AC-9 as amended; D-1..D-12; A1 (replayFailure, without the optional SnapshotFailed null example); A2 (copy struck, negative assertion); A3 (cancel then focus step N, no CANCELLED wording variant); U1; U2",
+        "D5: frontend/e2e/studio-authoring-real-backend.spec.ts against local bootRun, local profile, LocalDevAuthFilter (changed from optional to IN)",
+        "F4/R4 note in docs/architecture/studio-inference-contract-v1.md:124 by L0 in the W1 unit",
+        "Kept from accessibility (functional, security or convention): focus to step N's editor row for 'None of these' and 'Go to step N'; expiry warnings as text; visible seek-button labels; untrusted styling of PAGE labels; narrow responsive layout (375x812 case in AC-9); existing jsdom studioWcagAudit.test.tsx stays green as a regression guard only (baseline regenerated only if 008 UI breaks it)",
+        "FE-CONSUMERS and FE-WORKERS carried items"
+      ],
+      "removed": [
+        "PLAYBACK-COST: L1 GuidedPlaybackLoadIT and its W4 backend window (user 2026-10-17; open post-GA backlog, not passed, not waived)",
+        "PLAYBACK-COPY: neutral recording wording in L5a (user 2026-10-17; open post-GA backlog, owner @ux-design-expert)",
+        "A3 user-initiated CANCELLED wording variant",
+        "Optional replayFailure: null example on SnapshotFailed",
+        "Manual screen-reader pass, 320px/200% reflow, forced-colors, video text alternative",
+        "Second user change: live region and announcements; clarification focus-on-entry and radiogroup keyboard handling/tests beyond MUI defaults; aria-current=\"step\"; prefers-reduced-motion; CLN-11 surface 4/5 rewrite; contrast/target-size axe rules; e2e/studio-guided-accessibility.spec.ts; FE-A11Y items; the a11y part of Uma's W5 review; the WCAG 2.1 AA conformance target"
+      ],
+      "reportingRule": "Removed items are reported as 'descoped by the user, 2026-10-17', never PASS, N/A or waived"
+    },
+    "waves": [
+      {
+        "id": "W0",
+        "owner": "root",
+        "remaining": [
+          "Docker daemon + JDK 21 check (Testcontainers)",
+          "re-baseline sha256 of every lane file below",
+          "root decisions R1-R3",
+          "recommended: checkpoint the 015-Done tree (R4)"
+        ]
+      },
+      {
+        "id": "W1",
+        "lanes": [
+          "U2",
+          "L0",
+          "DE",
+          "L1-A"
+        ],
+        "parallel": true,
+        "exit": "U2: one pnpm lockfile, frontend baseline green. L0: contract checks green, ledger recorded. DE: V22 + head pins green. L1-A: unit cases green (ITs may finish in W2 after DE)"
+      },
+      {
+        "id": "W2",
+        "lanes": [
+          "L2a",
+          "L3H",
+          "L2b (W2.0 drop first)",
+          "L4",
+          "L5a",
+          "L1-P"
+        ],
+        "parallel": true,
+        "starts": "L2a and L3H at U2 exit; L2b W2.0 at U2+L0 exit; L4, L5a and L2b body when root has integrated W2.0 (type-check green); L1-P at L0 exit after L1-A",
+        "exit": "each lane's focused verification green"
+      },
+      {
+        "id": "F1",
+        "owner": "root, serialized",
+        "items": [
+          "L2a composes guided/capability/secrets handlers; class-A allowlist to zero",
+          "L0-F1 deletes the two legacy context-authoring fixture cases in the same slot as L2a's V2-b deletions",
+          "backend focused gate: one obs008-f1-be01 run with the union of the L0, DE, L1-A and L1-P selectors",
+          "batons recorded with hashes: ChecksStudioPage/useRunGate L2a->L5b, useGuidedSession L2b->L5b, studioCapabilities L4->L5b, L5a files->L5b"
+        ],
+        "exit": "expected-red ledger empty; type-check, contract tests and focused suites green"
+      },
+      {
+        "id": "W3",
+        "lanes": [
+          "L5b",
+          "L6-author"
+        ],
+        "parallel": true,
+        "exit": "page/run/guided suites green; STUDIO_CAPABILITIES grep 0; E2E specs compile"
+      },
+      {
+        "id": "W4",
+        "lanes": [
+          "L6"
+        ],
+        "exit": "studio-guided.spec.ts green against MSW; D5 smoke green against local bootRun (non-gating, not OBS-009); jsdom audit green as regression guard"
+      },
+      {
+        "id": "W5",
+        "owner": "root, then independent reviewers",
+        "items": [
+          "cd frontend && pnpm run type-check && pnpm run lint && pnpm exec vitest run && pnpm run build && pnpm run test:e2e",
+          "backend final gate via the collector (015 final-gates recipe, obs008-final-* labels, N24)",
+          "runner pin via run-runner.py (N24)",
+          "Dex technical review; Uma UX/copy review (no a11y review); Quinn QA alone sets Done"
+        ]
+      }
+    ],
+    "w1Dispatch": {
+      "immediatelyInParallel": [
+        "U2 (aiox-dev)",
+        "L0 C-int W1 unit (aiox-dev)",
+        "DE V22 (aiox-data-engineer)",
+        "L1-A backend derivation (aiox-dev)"
+      ],
+      "whyParallelIsSafe": "L0, DE and L1-A write nothing under frontend/. W1 write sets are disjoint (overlap check: 0). Their Gradle and runner collector runs still need the source hold of R1 while U2 is writing frontend/package.json and the lockfile",
+      "afterU2Exits": [
+        "L2a (v2 authoring first; A1 types/MSW after L0 exits)",
+        "L3H (harness + U2 docs)"
+      ],
+      "afterU2AndL0Exit": [
+        "L2b W2.0 interface drop",
+        "then L2b body, L4, L5a once root integrates W2.0",
+        "L1-P (needs L0 exit; same agent as L1-A)"
+      ]
+    },
+    "criticalPath": "W0 -> max(U2, L0) -> L2b W2.0 -> {L2b body, L4, L5a, L2a} -> F1 -> L5b (page, the longest unit) -> L6 (W4) -> W5 gates and reviews. The backend chain (L0, DE -> L1-A -> L1-P) runs beside it and must close by F1, because F1 needs the backend ledger rows green. If L1-P slips, it becomes the critical path at F1",
+    "expectedRedLedgerW1toF1": [
+      "R1 backend StudioContractTest ExecutionSnapshot record parity: red from the moment L0's openapi or L1-A's DTO lands alone until both have landed. Root takes the first parity receipt after both",
+      "R2 backend StudioContractTest capability route parity (x-implemented-by) until L1-P adds the controller",
+      "R3 backend tests that validate session-view/result bodies, if P2/P3 add required fields, until L1-P's projector (candidates: guided.publication.ObservedProfileDriftTest, guided.retention.GuidedObservationPrunerIT; L0 records the exact names at W1 exit)",
+      "R4 frontend studioContract.test.ts: getStudioTestCapabilities has no handler until F1 (never allowlisted)",
+      "No head-pin red: DE lands V22 and the six head-pin edits atomically"
+    ],
+    "rootDecisions": [
+      {
+        "id": "R1",
+        "question": "Source hold for collector runs. The manifest includes frontend/, so a backend or runner receipt taken while any frontend lane is editing is sourceStable=false",
+        "options": "A: root opens short hold windows (all lanes pause writes) for every obs008 collector run. B: focused backend/runner runs during active editing are non-evidentiary (sourceStable false accepted); lane-exit and gate runs must be stable inside a hold window",
+        "recommendation": "B (keeps W1/W2 parallel; evidence still comes only from stable runs)"
+      },
+      {
+        "id": "R2",
+        "question": "obs008 receipts land in the closed STUDIO-OBS-015 evidence directory",
+        "options": "A: accept and cite that path in the 008 Dev Agent Record. B: root copies both collectors with only the output path changed to docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution",
+        "recommendation": "B (015's closed evidence stays untouched); A is acceptable if root prefers the scripts as they are"
+      },
+      {
+        "id": "R3",
+        "question": "D5 needs ./gradlew bootRun, which the tasked collector cannot run (test tasks only)",
+        "options": "Run bootRun directly as the single Gradle process of its window, N24 first; evidence = bootRun log + Playwright JSON report under the 008 evidence path",
+        "recommendation": "approve"
+      },
+      {
+        "id": "R4",
+        "question": "The 015-Done tree is uncommitted (git status ~1,247 entries on 2026-10-17)",
+        "recommendation": "checkpoint it (root/@devops) before W1 so 008 diffs are separable. Root's call"
+      },
+      {
+        "id": "R5",
+        "question": "PO record of the second scope change",
+        "recommendation": "RESOLVED during the refold: Pax recorded it (ADR-SC-006, story 73c09cb2..., obligations amended20261017b). No root action"
+      }
+    ],
+    "decisionsClosedFromPriorPlan": {
+      "D1": "closed by A1 (user U1)",
+      "D2": "closed by A2",
+      "D3": "closed by U2 (option B, pnpm migration)",
+      "D4": "adopted (L5a)",
+      "D5": "IN (user 2026-10-17)",
+      "U1": "closed (015 Done)"
+    },
+    "lanes": [
+      {
+        "id": "U2",
+        "lane": "L3 (U2 core)",
+        "name": "frontend npm -> pnpm migration (single writer of package.json + lockfile)",
+        "agent": "aiox-dev (Dex)",
+        "model": "sonnet, effort high",
+        "wave": "W1",
+        "group": "W1",
+        "startsWhen": [
+          "W0 closed"
+        ],
+        "writes": [
+          "frontend/package.json",
+          "frontend/pnpm-lock.yaml (new)",
+          "frontend/package-lock.json (delete)",
+          "frontend/.npmrc (new, only if required; reason recorded)"
+        ],
+        "steps": [
+          "cd frontend && pnpm import",
+          "rm frontend/package-lock.json",
+          "cd frontend && pnpm add -D --save-exact @playwright/test@1.63.0"
+        ],
+        "verify": [
+          "cd frontend && pnpm install --frozen-lockfile",
+          "cd frontend && pnpm exec playwright --version   # expect Version 1.63.0; Chromium 1243 is already cached, no browser download",
+          "cd frontend && pnpm run type-check && pnpm run lint && pnpm run build",
+          "cd frontend && pnpm exec vitest run --maxWorkers=3   # record files/tests against the 015 live-tree baseline",
+          "cd frontend && pnpm run dev:standalone -- --open=false (curl 127.0.0.1:5173 -> 200, then stop); pnpm run dev (curl 127.0.0.1:3002 -> 200, then stop)",
+          "test ! -e frontend/package-lock.json && test -f frontend/pnpm-lock.yaml"
+        ],
+        "exit": "One lockfile (pnpm-lock.yaml). All verify rows green, counts recorded. Root records the lockfile sha256; every later frontend lane installs with pnpm install --frozen-lockfile against it",
+        "notes": [
+          "frontend/package.json declares no packageManager field (verified 2026-10-17), so plain pnpm run / pnpm exec work; no --config.package-manager-strict=false is needed for frontend/",
+          "There is no msw:init script and no public/mockServiceWorker.js (verified). Record that as a finding; do not create one (P5 forbids a browser worker)",
+          "Inference, not run: pnpm in a non-TTY shell may refuse to replace an npm-built node_modules. Deleting the gitignored frontend/node_modules first is the expected fix; record it",
+          "Inference, not run: pnpm installs the file:../../put-core-components dependency as a copy rather than npm's symlink. Keep the file: spec and record the behaviour; changing it to link: is a root call",
+          "No other frontend lane runs anything in frontend/ until this lane exits (node_modules is being replaced)"
+        ]
+      },
+      {
+        "id": "L0",
+        "lane": "L0 C-int W1 unit",
+        "name": "Contract integrator: P1-P3 + A1 OpenAPI + pins + ADR-002 section 13 + F4/R4 note",
+        "agent": "aiox-dev (Dex, contract integrator)",
+        "model": "sonnet, effort high",
+        "wave": "W1",
+        "group": "W1",
+        "startsWhen": [
+          "W0 closed"
+        ],
+        "writes": [
+          "docs/specs/studio/openapi.yaml",
+          "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json",
+          "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json",
+          "docs/specs/studio-observed-authoring/contracts/v3/public-ui-projections.schema.json (new)",
+          "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json",
+          "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+          "docs/specs/studio-observed-authoring/contracts/v3/wire-parity.fixtures.json",
+          "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java (BASE_SHA256 lines 82-83 only)",
+          "studio-runner/test/run/confinement.test.ts (line 287 pin only)",
+          "docs/architecture/ADR-002-internal-contract-surface.md (section 13 class C rows only)",
+          "docs/architecture/studio-inference-contract-v1.md (one dated F4 note at line 124 only)",
+          "docs/runbooks/studio-guided-authoring.md (P7 finalize paragraph only)"
+        ],
+        "content": [
+          "P1 capability op + StudioCapabilities (43 -> 44 operations); P2 PublicProgress on session-view and result; P3 PublicExplanation on result",
+          "A1: ReplayFailure component + ExecutionSnapshot.replayFailure + 3 getExecution examples. NOT the optional replayFailure:null on SnapshotFailed (descoped R8)",
+          "F4 note verbatim: \"Exception (PO R4, 2026-10-16): a string `toContainText` expectation that is empty after whitespace normalization never passes.\" Before/after sha256 recorded; @architect confirms",
+          "One re-anchor: old c053a7f75656628a1b3e031e02f40f4982aa3a85fc241a4c87c7229460f5d70f -> measured W1 digest, quoted in both pin comments"
+        ],
+        "verify": [
+          "PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH node -e \"require('./tools/build-studio-observed-schemas.cjs').check()\"",
+          "PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH node tools/check-studio-observed-contracts.cjs",
+          "shasum -a 256 docs/specs/studio/openapi.yaml docs/architecture/studio-inference-contract-v1.md",
+          "PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-runner.py obs008-c-confinement01 node node_modules/vitest/vitest.mjs run test/run/confinement.test.ts -t 'pins the entire reviewed OpenAPI document including observed routes' --coverage.enabled=false",
+          "PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py obs008-c-pins01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.StudioContractTest' --no-daemon   # expected-red rows only (ledger)"
+        ],
+        "exit": "Generator check() unchanged outputs; op count 44 measured; pins green in the runner; StudioContractTest red only on ledger rows; exact red test names recorded",
+        "f1": {
+          "id": "L0-F1 (C-int-2)",
+          "writes": [
+            "docs/specs/studio/examples/context-authoring-valid.json",
+            "docs/specs/studio/examples/context-authoring-invalid.json"
+          ],
+          "with": "L2a V2-b deletions in the same root slot"
+        }
+      },
+      {
+        "id": "DE",
+        "lane": "@data-engineer V22",
+        "name": "A1 persistence: V22__execution_replay_failure.sql + head pins",
+        "agent": "aiox-data-engineer (Dara)",
+        "model": "per root (not specified)",
+        "wave": "W1",
+        "group": "W1",
+        "startsWhen": [
+          "W0 closed (head measured V21)"
+        ],
+        "writes": [
+          "backend/src/main/resources/db/migration/V22__execution_replay_failure.sql (new)",
+          "backend/src/test/java/com/citi/put/checks/studio/ExecutionReplayFailureMigrationIT.java (new)",
+          "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java (head pin line 100 only)",
+          "backend/src/test/java/com/citi/put/checks/studio/ErrorCodeConstraintMigrationIT.java (HEAD constant line 73 only)",
+          "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedGovernanceMigrationIT.java (head pin line 974 only)",
+          "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedRecordingMigrationIT.java (head pin line 53 only)",
+          "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java (max-version head assertions 962/969 only; the V21 description assertion stays)",
+          "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java (version list line 1337: append \"22\")"
+        ],
+        "verify": [
+          "PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py obs008-db-v22-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.ExecutionReplayFailureMigrationIT' --tests 'com.citi.put.checks.studio.InferenceMigrationLatestIT' --tests 'com.citi.put.checks.studio.ErrorCodeConstraintMigrationIT' --tests 'com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT' --tests 'com.citi.put.checks.studio.guided.GuidedRecordingMigrationIT' --tests 'com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT' --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest' --no-daemon",
+          "grep -rn 'isEqualTo(\"21\")\\|HEAD = \"21\"' backend/src/test/java/com/citi/put/checks/studio   # remaining hits classified as V21-specific, not head pins"
+        ],
+        "exit": "V22 migrates at head; CHECK admits exactly the 3 shapes; a future partition inherits the columns; no head-pin test left at 21. Lock/NOT VALID analysis recorded",
+        "notes": [
+          "Six head-pinned tests found by grep on 2026-10-17; Dara re-greps before editing. V22 and the pin edits land atomically, so no head-pin red is ever expected"
+        ]
+      },
+      {
+        "id": "L1-A",
+        "lane": "L1 backend, unit A (A1 derivation)",
+        "name": "replayFailure derivation, persistence, mapping",
+        "agent": "aiox-dev (Dex, sole backend main-source writer)",
+        "model": "sonnet, effort high",
+        "wave": "W1",
+        "group": "W1",
+        "startsWhen": [
+          "W0 closed. Unit tests need nothing else; ITs need DE exit (V22)"
+        ],
+        "writes": [
+          "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java",
+          "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java",
+          "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java (applyFinal only)",
+          "backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java",
+          "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java",
+          "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionSnapshotDto.java",
+          "backend/src/main/java/com/citi/put/checks/studio/dto/ReplayFailure.java (new)",
+          "backend/src/test/java/com/citi/put/checks/studio/internal/RunnerReportProjectionTest.java",
+          "backend/src/test/java/com/citi/put/checks/studio/ExecutionSnapshotMapperTest.java",
+          "backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java",
+          "backend/src/test/java/com/citi/put/checks/studio/sse/SseStreamingIT.java (SSE frame equality only, if ProgressCallbackIT cannot observe the frame)"
+        ],
+        "notes": [
+          "Add a project(...) overload; keep the existing overloads so EvidenceRetentionTest.java:112 compiles unchanged. If that is impossible, stop and ask root for that file",
+          "Learn-again acceptance (A1.5 #13): cite an existing 015 case; a new test file needs root approval first"
+        ],
+        "verify": [
+          "PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py obs008-be-a1-unit01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.internal.RunnerReportProjectionTest' --tests 'com.citi.put.checks.studio.ExecutionSnapshotMapperTest' --no-daemon",
+          "PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py obs008-be-a1-it01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.internal.ProgressCallbackIT' --tests 'com.citi.put.checks.studio.sse.SseStreamingIT' --no-daemon   # after DE exit"
+        ],
+        "exit": "A1.5 cases 1-12 mapped to test names, green; canary case green"
+      },
+      {
+        "id": "L3H",
+        "lane": "L3 harness + U2 docs",
+        "name": "Playwright harness (P5) and U2 doc updates",
+        "agent": "aiox-dev (Dex, L3 owner; continues as L6)",
+        "model": "sonnet, effort high",
+        "wave": "W2",
+        "group": "W2",
+        "startsWhen": [
+          "U2 exit"
+        ],
+        "writes": [
+          "frontend/playwright.config.ts (new; MSW project default, real-backend project behind an env flag)",
+          "frontend/e2e/start-servers.mjs (new; MSW mode and real-backend mode via VITE_API_URL)",
+          "frontend/e2e/mswProxy.ts (new)",
+          "frontend/e2e/tsconfig.json (new)",
+          "frontend/e2e/harness.spec.ts (new)",
+          "frontend/e2e/fixtures/studio-run.webm (new, generated, non-secret)",
+          "frontend/vitest.config.ts (exclude e2e/**)",
+          "CLAUDE.md (frontend lines)",
+          "AGENTS.md (frontend lines)",
+          "README.md (frontend lines)",
+          "frontend/README.md",
+          "MFE_GUIDE.md (frontend lines)",
+          "ARCH.md (frontend lines)",
+          ".github/copilot-instructions.md",
+          ".cursor/rules.md",
+          ".cursor/rules/development.mdc",
+          "dev.sh (frontend lines only)"
+        ],
+        "verify": [
+          "cd frontend && pnpm exec playwright test e2e/harness.spec.ts",
+          "cd frontend && pnpm exec vitest list | grep -c \"/e2e/\"   # expect 0",
+          "cd frontend && pnpm exec tsc -p e2e/tsconfig.json --noEmit",
+          "cd frontend && pnpm exec vitest run src/components/providers/realStudioStartup.test.ts",
+          "grep -n \"npm run\\|npm install\\|npm ci\" CLAUDE.md AGENTS.md README.md frontend/README.md MFE_GUIDE.md ARCH.md .github/copilot-instructions.md .cursor/rules.md .cursor/rules/development.mdc dev.sh   # frontend hits 0; runner/root hits classified out of scope"
+        ],
+        "exit": "Harness self-test green (zero service workers, unhandled request -> 502, WebM range -> 206); no e2e file collected by Vitest; CI re-check recorded (\"no workflow found\" is a finding)"
+      },
+      {
+        "id": "L2a",
+        "lane": "L2a",
+        "name": "v2 authoring migration + MSW seam owner + A1 types/MSW",
+        "agent": "aiox-dev (Dex)",
+        "model": "sonnet, effort high",
+        "wave": "W2",
+        "group": "W2",
+        "startsWhen": [
+          "U2 exit (v2 work)",
+          "L0 exit (A1 types, MSW snapshots, enum parity)"
+        ],
+        "writes": [
+          "frontend/src/services/api/studioAuthoringTransport.ts",
+          "frontend/src/services/api/studioAuthoringTransport.test.ts",
+          "frontend/src/types/studio/legacyStudioAuthoringAdapter.ts (delete)",
+          "frontend/src/types/studio/legacyStudioAuthoringAdapter.test.ts (delete)",
+          "frontend/src/types/studio/studioContextContract.test.ts",
+          "frontend/src/types/studio/studioTypes.ts",
+          "frontend/src/services/mocks/studio/handlers.ts",
+          "frontend/src/services/mocks/studio/authoringHandlers.ts",
+          "frontend/src/services/mocks/studio/authoringHandlers.test.ts",
+          "frontend/src/services/mocks/studio/authoringState.ts",
+          "frontend/src/services/mocks/studio/studioContract.test.ts",
+          "frontend/src/services/mocks/studio/server.ts",
+          "frontend/src/services/mocks/studio/fixtures.ts",
+          "frontend/src/services/mocks/studio/readinessFixtures.ts",
+          "frontend/src/services/mocks/studio/executionFixtures.ts",
+          "frontend/src/services/mocks/studio/executionScenarios.ts",
+          "frontend/src/services/mocks/studio/executionFixtureMatrix.test.ts (only if the 3 A1 snapshots require it)",
+          "frontend/src/services/mocks/studio/executionScenarioMatrix.test.ts (only if required)",
+          "frontend/src/services/mocks/studio/studioHandlers.test.ts (only if composition requires it)",
+          "frontend/src/components/studio/tests/CreateTestDialog.tsx",
+          "frontend/src/components/studio/scheduling/StudioScheduleDialog.tsx",
+          "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+          "frontend/src/pages/CreateCheckPage/CreateCheckPage.tsx",
+          "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx (baton W2: v2 step model only)",
+          "frontend/src/pages/ChecksStudioPage/*.test.tsx (baton W2: v2 only)",
+          "frontend/src/components/studio/run/useRunGate.ts (baton W2: reader type only)"
+        ],
+        "verify": [
+          "cd frontend && pnpm exec vitest run src/services/api/studioAuthoringTransport.test.ts src/types/studio src/services/mocks/studio src/components/studio/scheduling src/pages/ChecksStudioPage --maxWorkers=2",
+          "cd frontend && pnpm run type-check",
+          "cd frontend && pnpm exec eslint <changed files>",
+          "grep -rn \"legacyStudioAuthoringAdapter\\|AUTHORING_V2_REQUIRED\\|LEGACY_AUTHORING\" frontend/src   # expect 0",
+          "grep -rn -i \"legacy\" frontend/src   # M12, hits recorded and classified"
+        ],
+        "exit": "V2 a-g evidence; A1 enum parity + negative fixture green; batons handed to L5b at F1 with hashes",
+        "f1": {
+          "id": "L2a-F1",
+          "duties": [
+            "compose guidedHandlers + capabilityHandlers + secretsHandlers",
+            "remove the 10 class-A allowlist entries; capability op covered, never allowlisted",
+            "co-land V2-b deletions with L0-F1",
+            "quote the final allowlist"
+          ]
+        }
+      },
+      {
+        "id": "L2b",
+        "lane": "L2b",
+        "name": "guided transport, types, MSW mirror, session hook (W2.0 interface drop first)",
+        "agent": "aiox-dev (Dex)",
+        "model": "sonnet, effort high",
+        "wave": "W2 (W2.0 drop, then body)",
+        "group": "W2",
+        "startsWhen": [
+          "U2 exit AND L0 exit"
+        ],
+        "writes": [
+          "frontend/src/types/studio/studioGuidedTypes.ts (new)",
+          "frontend/src/services/api/studioGuidedApi.ts (new)",
+          "frontend/src/services/api/studioGuidedApi.test.ts (new)",
+          "frontend/src/services/api/studioApi.ts",
+          "frontend/src/services/mocks/studio/guidedHandlers.ts (new)",
+          "frontend/src/services/mocks/studio/guidedFixtures.ts (new)",
+          "frontend/src/services/mocks/studio/capabilityHandlers.ts (new)",
+          "frontend/src/services/mocks/studio/guidedHandlers.test.ts (new)",
+          "frontend/src/store/slices/studioSlice.ts",
+          "frontend/src/components/studio/guided/useGuidedSession.ts (new; baton -> L5b at F1)",
+          "frontend/src/components/studio/guided/useGuidedSession.test.ts (new; baton -> L5b at F1)"
+        ],
+        "verify": [
+          "cd frontend && pnpm exec vitest run src/services/api/studioGuidedApi.test.ts src/services/mocks/studio/guidedHandlers.test.ts src/components/studio/guided/useGuidedSession.test.ts --maxWorkers=2",
+          "cd frontend && pnpm run type-check",
+          "cd frontend && pnpm exec eslint <changed files>"
+        ],
+        "exit": "W2.0: types, client signatures, hook stubs integrated by root, type-check green. Body: keys on all four guided mutations (D-1), reload/lost-response/StrictMode cases green"
+      },
+      {
+        "id": "L4",
+        "lane": "L4",
+        "name": "references, secrets, runtime capability",
+        "agent": "aiox-ux (Uma) with @dev technical gate",
+        "model": "per root (not specified)",
+        "wave": "W2",
+        "group": "W2",
+        "startsWhen": [
+          "W2.0 integrated"
+        ],
+        "writes": [
+          "frontend/src/components/studio/references/ReferencePicker.tsx (new)",
+          "frontend/src/components/studio/references/referenceTokens.ts (new)",
+          "frontend/src/components/studio/references/index.ts (new)",
+          "frontend/src/components/studio/references/referencePicker.test.tsx (new)",
+          "frontend/src/components/studio/references/referenceTokens.test.ts (new)",
+          "frontend/src/components/studio/SecretInput.tsx",
+          "frontend/src/components/studio/SecretInput.test.tsx",
+          "frontend/src/services/mocks/studio/secretsHandlers.ts (new)",
+          "frontend/src/components/checks/wizard/configs/UiTestConfig.tsx",
+          "frontend/src/components/studio/templates/quickStartTemplates.ts",
+          "frontend/src/components/studio/templates/quickStartTemplates.test.ts",
+          "frontend/src/components/studio/OnboardingCoach.tsx",
+          "frontend/src/utils/config/studioCapabilities.ts (baton -> L5b at F1)"
+        ],
+        "verify": [
+          "cd frontend && pnpm exec vitest run src/components/studio/references src/components/studio/SecretInput.test.tsx src/components/studio/templates src/components/checks/wizard --maxWorkers=2",
+          "cd frontend && pnpm run type-check",
+          "cd frontend && pnpm exec eslint <changed files>"
+        ],
+        "exit": "Never-echo canaries; capability off/on/unknown/error; picker inserts <secret ID> by secretId (D-8)"
+      },
+      {
+        "id": "L5a",
+        "lane": "L5a",
+        "name": "guided and evidence presentational components + LoginRequiredNotice adapter",
+        "agent": "aiox-ux (Uma) with @dev technical gate",
+        "model": "per root (not specified)",
+        "wave": "W2",
+        "group": "W2",
+        "startsWhen": [
+          "W2.0 integrated; ReplayFailure type from L2a (read only) for the adapter"
+        ],
+        "writes": [
+          "frontend/src/components/studio/guided/GuidedRunStatus.tsx (new)",
+          "frontend/src/components/studio/guided/GuidedClarification.tsx (new)",
+          "frontend/src/components/studio/guided/LoginRequiredNotice.tsx (new; loginNoticeFrom adapter + step-less variant)",
+          "frontend/src/components/studio/guided/GuidedCompletion.tsx (new)",
+          "frontend/src/components/studio/guided/ReadinessChip.tsx (new)",
+          "frontend/src/components/studio/guided/PlanExplanation.tsx (new)",
+          "frontend/src/components/studio/guided/guidedNarratives.ts (new)",
+          "frontend/src/components/studio/guided/index.ts (new)",
+          "frontend/src/components/studio/guided/guided.test.tsx (new)",
+          "frontend/src/components/studio/guided/clarification.test.tsx (new)",
+          "frontend/src/components/studio/guided/loginRequired.test.tsx (new)",
+          "frontend/src/components/studio/guided/planExplanation.test.tsx (new)",
+          "frontend/src/components/studio/evidence/**"
+        ],
+        "verify": [
+          "cd frontend && pnpm exec vitest run src/components/studio/guided src/components/studio/evidence --maxWorkers=2",
+          "cd frontend && pnpm run type-check",
+          "cd frontend && pnpm exec eslint <changed files>"
+        ],
+        "exit": "Copy table with per-string source citations; PAGE labels rendered as untrusted text; expiry warnings as text; visible seek labels; no live region, aria-current, reduced-motion or PLAYBACK-COPY work (descoped)"
+      },
+      {
+        "id": "L1-P",
+        "lane": "L1 backend, unit P (P1-P3)",
+        "name": "capability route + public presentation projector",
+        "agent": "aiox-dev (Dex, same agent as L1-A)",
+        "model": "sonnet, effort high",
+        "wave": "W2",
+        "group": "W2",
+        "startsWhen": [
+          "L0 exit AND L1-A exit (same agent)"
+        ],
+        "writes": [
+          "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsCapabilityController.java (new)",
+          "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioCapabilitiesService.java (new)",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedPublicPresentationProjector.java (new)",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java (projection wiring only)",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java (shared projection call only)",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java (read-only scoped query)",
+          "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayPins.java (read-only helper, only if needed)",
+          "backend/src/test/java/com/citi/put/checks/studio/secrets/StudioCapabilitiesIT.java (new)",
+          "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedPublicPresentationIT.java (new)",
+          "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java (baton from L0 after W1 exit: ReplayFailure parity line + capability assertions; never the pin lines)"
+        ],
+        "verify": [
+          "PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py obs008-be-cap01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.secrets.StudioCapabilitiesIT' --tests 'com.citi.put.checks.studio.StudioContractTest' --no-daemon",
+          "PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py obs008-be-proj01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedPublicPresentationIT' --tests 'com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest' --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceTest' --no-daemon"
+        ],
+        "exit": "StudioContractTest fully green (ledger rows R1-R3 closed); zero unapproved skips; sourceStable true",
+        "removed": "GuidedPlaybackLoadIT and its W4 backend window (PLAYBACK-COST descoped by the user 2026-10-17)"
+      },
+      {
+        "id": "L5b",
+        "lane": "L5b",
+        "name": "page integrator",
+        "agent": "aiox-ux (Uma, story executor) with @dev technical gate",
+        "model": "per root (not specified)",
+        "wave": "W3",
+        "group": "W3",
+        "startsWhen": [
+          "F1 closed (batons recorded)"
+        ],
+        "writes": [
+          "frontend/src/pages/ChecksStudioPage/**",
+          "frontend/src/components/studio/run/**",
+          "frontend/src/components/studio/runs/**",
+          "frontend/src/components/studio/tests/testListPresentation.ts",
+          "frontend/src/components/studio/scheduling/schedulePresentation.ts",
+          "frontend/src/components/studio/guided/useGuidedSession.ts",
+          "frontend/src/components/studio/guided/useGuidedSession.test.ts",
+          "frontend/src/utils/config/studioCapabilities.ts",
+          "frontend/src/components/studio/guided/GuidedRunStatus.tsx",
+          "frontend/src/components/studio/guided/GuidedClarification.tsx",
+          "frontend/src/components/studio/guided/LoginRequiredNotice.tsx",
+          "frontend/src/components/studio/guided/GuidedCompletion.tsx",
+          "frontend/src/components/studio/guided/ReadinessChip.tsx",
+          "frontend/src/components/studio/guided/PlanExplanation.tsx",
+          "frontend/src/components/studio/guided/guidedNarratives.ts",
+          "frontend/src/components/studio/guided/index.ts",
+          "frontend/src/components/studio/guided/guided.test.tsx",
+          "frontend/src/components/studio/guided/clarification.test.tsx",
+          "frontend/src/components/studio/guided/loginRequired.test.tsx",
+          "frontend/src/components/studio/guided/planExplanation.test.tsx",
+          "frontend/src/components/studio/evidence/**"
+        ],
+        "content": [
+          "three Run modes; auto-finalize; executionErrorNarratives: replayFailure precedence; drift Learn again only under the A1 conditions; A3 cancel then focus step N (no CANCELLED wording variant); Go to step N focus; STUDIO_CAPABILITIES deleted; AC-9 Vitest flows incl. the 7 A1.6 cases and 3 A3 cases"
+        ],
+        "verify": [
+          "cd frontend && pnpm exec vitest run src/pages/ChecksStudioPage src/components/studio/run src/components/studio/runs src/components/studio/guided --maxWorkers=3",
+          "cd frontend && pnpm run type-check && pnpm run lint",
+          "grep -rn \"STUDIO_CAPABILITIES\" frontend/src   # expect 0"
+        ],
+        "exit": "AC-9 flow list one-to-one with tests; narrow layout case green"
+      },
+      {
+        "id": "L6-author",
+        "lane": "L6 (spec authoring only)",
+        "name": "first E2E + D5 smoke specs, written while L5b integrates; no gating runs",
+        "agent": "aiox-dev (Dex, L3 owner)",
+        "model": "sonnet, effort high",
+        "wave": "W3",
+        "group": "W3",
+        "startsWhen": [
+          "F1 closed"
+        ],
+        "writes": [
+          "frontend/e2e/studio-guided.spec.ts (new)",
+          "frontend/e2e/studio-authoring-real-backend.spec.ts (new)"
+        ],
+        "verify": [
+          "cd frontend && pnpm exec tsc -p e2e/tsconfig.json --noEmit"
+        ],
+        "exit": "Specs compile; executed in W4 on frozen source"
+      },
+      {
+        "id": "L6",
+        "lane": "L6",
+        "name": "Playwright first E2E, D5 real-backend smoke, regression-only jsdom audit",
+        "agent": "aiox-dev (Dex, L3 owner)",
+        "model": "sonnet, effort high",
+        "wave": "W4",
+        "group": "W4",
+        "startsWhen": [
+          "W3 exit; source frozen except L6 files"
+        ],
+        "writes": [
+          "frontend/e2e/studio-guided.spec.ts",
+          "frontend/e2e/studio-authoring-real-backend.spec.ts",
+          "frontend/playwright.config.ts",
+          "frontend/e2e/start-servers.mjs",
+          "frontend/src/test/a11y/studioWcagAudit.test.tsx (only if 008 UI breaks it: baseline keys regenerated; no surface rewrite, no rule change)",
+          "docs/qa/accessibility/axe-results.json (side effect of the audit run; single serialized writer)"
+        ],
+        "verify": [
+          "cd frontend && pnpm exec playwright test e2e/studio-guided.spec.ts",
+          "cd backend && PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH ./gradlew bootRun --no-daemon   # local profile, LocalDevAuthFilter fixed dev identity; the only Gradle process while it runs",
+          "cd frontend && STUDIO_E2E_REAL_BACKEND=1 pnpm exec playwright test --project=real-backend e2e/studio-authoring-real-backend.spec.ts   # flag name is L3's choice",
+          "cd frontend && pnpm exec vitest run src/test/a11y/studioWcagAudit.test.tsx"
+        ],
+        "exit": "First E2E green against MSW (never claimed live); D5 green and recorded as non-gating local evidence (not OBS-009); audit green as a regression guard. If the audit baseline is regenerated, before/after are recorded (ADR-SC-006 / G-7 amended20261017b)",
+        "removed": "e2e/studio-guided-accessibility.spec.ts; surface 4/5 rewrite; contrast/target-size rules; FE-A11Y items (second user scope change 2026-10-17)"
+      }
+    ],
+    "writeOverlapCheck": {
+      "script": "node refold.cjs (scratchpad; reproduced in implementation-plan.md section R.7)",
+      "overlapTotal": 0,
+      "perGroup": {
+        "W1": {
+          "lanes": [
+            "U2",
+            "L0",
+            "DE",
+            "L1-A"
+          ],
+          "overlaps": 0
+        },
+        "W2": {
+          "lanes": [
+            "L3H",
+            "L2a",
+            "L2b",
+            "L4",
+            "L5a",
+            "L1-P"
+          ],
+          "overlaps": 0
+        },
+        "W3": {
+          "lanes": [
+            "L5b",
+            "L6-author"
+          ],
+          "overlaps": 0
+        },
+        "W4": {
+          "lanes": [
+            "L6"
+          ],
+          "overlaps": 0
+        },
+        "F1": {
+          "lanes": [
+            "L0-F1",
+            "L2a-F1"
+          ],
+          "overlaps": 0
+        }
+      }
+    }
+  }
+}

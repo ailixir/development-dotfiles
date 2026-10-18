@@ -1,0 +1,21 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -550,9 +550,15 @@
+     OWNED_FIXTURE_PROCESSES.add(root);
+     long until = System.nanoTime() + Duration.ofMillis(500).toNanos();
+     while (root.handle.isAlive() && System.nanoTime() < until) {
+-      var info = root.handle.info();
+-      if (info.startInstant().isPresent() && info.commandLine().isPresent()) {
+-        root.started = info.startInstant().orElseThrow(); root.commandHash = ownedCommandHash(root.handle); break;
++      // crash-reaper-diagnosis01: ProcessHandle.info() is a fresh OS snapshot on every call and may throw
++      // on macOS under load; a short-lived /bin/ps or /bin/kill can also exit between two snapshots. Read
++      // identity from ONE snapshot and retry inside the same 500 ms window; still fail-closed below.
++      ProcessHandle.Info info;
++      try { info = root.handle.info(); }
++      catch (RuntimeException unavailable) { Thread.sleep(5); continue; }
++      var observedCommand = info.commandLine();
++      if (info.startInstant().isPresent() && observedCommand.isPresent()) {
++        root.started = info.startInstant().orElseThrow(); root.commandHash = ownedCommandHash(observedCommand.orElseThrow()); break;
+       }
+       Thread.sleep(5);
+     }

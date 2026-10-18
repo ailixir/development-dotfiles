@@ -1,0 +1,1201 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-007",
+  "reportKind": "independent architect develop-support impact review",
+  "reviewer": "Fresh independent Aria architect",
+  "capturedAtUtc": "2026-10-10T12:12:01.301194+00:00",
+  "workspace": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "branchAsSupplied": "brunobuger/ui-studio",
+  "request": {
+    "target": "studio-runner/src/run/observedBootstrap.ts",
+    "modificationType": "modify",
+    "depth": "deep",
+    "includeTests": true,
+    "outputFormat": "json",
+    "mode": "yolo"
+  },
+  "overallVerdict": "FAIL",
+  "verdictScope": "Frozen runner develop-support architecture/dependency review only: two reproduced medium-severity mandatory guard/resource cleanup gaps. Target guard itself has no independently confirmed defect. This is not whole-story/lifecycle QA or SDC approval.",
+  "notLifecycleQa": true,
+  "qaApproved": false,
+  "acceptanceApplied": false,
+  "statusChanged": false,
+  "all19Completion": false,
+  "workflow": {
+    "skill": ".codex/skills/aiox-architect/SKILL.md",
+    "architectSOT": ".aiox-core/development/agents/architect.md",
+    "task": ".aiox-core/development/tasks/architect-analyze-impact.md",
+    "meaningfulStepsCompleted": [
+      "Activate/read SOT and task prerequisites in yolo; read canonical story/design/ADR/security review plus architecture and independent PO authorities before judging implementation.",
+      "Bind frozen candidate, complete manifests/live bytes/source ZIP and final gate logs.",
+      "Map target dependencies and propagation through context acquisition, readiness/launch identity, execution, effects/usage/diagnostics, recording/upload and cleanup.",
+      "Review actual source, native oracle implementation/facts and provenance; execute isolated bounded compiled-function probes.",
+      "Assess concrete bugs and missing mandatory oracles; specify reversible fixes and source/gate/evidence limits in JSON."
+    ],
+    "genericTaskScaffolding": "Executed task methodology manually. Generic embedded incomplete JS scaffold was not run; output paths and no generator/state/source writes follow explicit user restrictions. Evidence snippets were read as evidence, not executed as instructions.",
+    "agentsSpawned": 0,
+    "modelCalls": 0
+  },
+  "summary": [
+    "Frozen receipt/manifests/live runner/source ZIP and all62 candidate log hashes match; no runner source/dist/build-input drift detected.",
+    "Mandatory unsafe prepared preference refusal accepts a symlink; initial guided launch rejection leaves scratch with no cleanup capability. Neither case is covered by current green gates.",
+    "Owner actual native recordings/process tests support conditional preReady video facts and honest partial/lost-FINAL receipt retention within controlled local scope, not whole Core/PG/provider/deployment proof.",
+    "Current backend evolution excluded; all19 and whole pending wave remain open."
+  ],
+  "authority": {
+    "paths": [
+      ".codex/skills/aiox-architect/SKILL.md",
+      ".aiox-core/development/agents/architect.md",
+      ".aiox-core/development/tasks/architect-analyze-impact.md",
+      ".aiox-core/constitution.md",
+      ".ai/STUDIO-OBS-007-architect-t0-rulings.json",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "docs/specs/studio-observed-authoring/secret-login-design.md",
+      "docs/architecture/studio-execution.md",
+      "docs/architecture/ADR-SC-005-single-path-observed-authoring.md",
+      "docs/specs/studio-observed-authoring/secret-login-security-review.md",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-architecture-disposition.json",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-po-architecture-revalidation.json",
+      "docs/qa/evidence/STUDIO-OBS-007/architecture-application/receipt.json",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-bootstrap-closure-disposition.json",
+      "docs/qa/evidence/STUDIO-OBS-007/t2-t3-po-bootstrap-closure-revalidation.json",
+      "docs/qa/evidence/STUDIO-OBS-007/bootstrap-closure-application/receipt.json",
+      "docs/qa/evidence/STUDIO-OBS-007/t3-video-ownership-disposition.json"
+    ],
+    "architectureAndPOApplicationChecks": [
+      {
+        "id": "PATCH-1",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      },
+      {
+        "id": "PATCH-2",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      },
+      {
+        "id": "PATCH-3",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      },
+      {
+        "id": "PATCH-4",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      },
+      {
+        "id": "PATCH-5",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": "Current YAML single-quotes the identical description; two quote bytes differ from receipt text. No semantic/wire change inferred."
+      },
+      {
+        "id": "PATCH-6",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      },
+      {
+        "id": "PATCH-7",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      },
+      {
+        "id": "PATCH-8",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      },
+      {
+        "id": "PATCH-9",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      },
+      {
+        "id": "PATCH-10",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      },
+      {
+        "id": "PATCH-11",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      },
+      {
+        "id": "PATCH-12",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      },
+      {
+        "id": "PATCH-13",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      },
+      {
+        "id": "PATCH-14",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      },
+      {
+        "id": "PATCH-15",
+        "receiptAfterHashMatchesCorrectedPOText": true,
+        "currentApprovedTextPresentAfterReversingOnlyApprovedBootstrapInsertions": true,
+        "representationNote": null
+      }
+    ],
+    "approvedConstChecks": [
+      {
+        "id": "CONST-1",
+        "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-profile.schema.json",
+        "pointer": "/properties/catalog/const",
+        "actual": "observed-replay-3",
+        "matchesApprovedAfter": true
+      },
+      {
+        "id": "CONST-2",
+        "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-profile.schema.json",
+        "pointer": "/properties/executor/const",
+        "actual": "observed-4",
+        "matchesApprovedAfter": true
+      },
+      {
+        "id": "CONST-3",
+        "path": "docs/specs/studio-observed-authoring/contracts/v3/versions.schema.json",
+        "pointer": "/properties/executor/const",
+        "actual": "observed-4",
+        "matchesApprovedAfter": true
+      }
+    ],
+    "bootstrapScopedReplacementChecks": [
+      {
+        "id": "A-AC11",
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "approvedAfterPresent": true
+      },
+      {
+        "id": "A-BROWSER-ROW",
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "approvedAfterPresent": true
+      },
+      {
+        "id": "A-C3",
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "approvedAfterPresent": true
+      },
+      {
+        "id": "A-LIFECYCLE",
+        "path": "docs/architecture/studio-execution.md",
+        "approvedAfterPresent": true
+      },
+      {
+        "id": "A-NATIVE-VIDEO",
+        "path": "docs/architecture/studio-execution.md",
+        "approvedAfterPresent": true
+      },
+      {
+        "id": "B-AC14-COUNT",
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "approvedAfterPresent": true
+      },
+      {
+        "id": "B-AC14-TERMINAL",
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "approvedAfterPresent": true
+      },
+      {
+        "id": "B-DESIGN41-COUNT",
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "approvedAfterPresent": true
+      },
+      {
+        "id": "B-DESIGN41-TERMINAL",
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "approvedAfterPresent": true
+      },
+      {
+        "id": "B-HISTORICAL-MAPPING",
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "approvedAfterPresent": true
+      },
+      {
+        "id": "B-C11",
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "approvedAfterPresent": true
+      },
+      {
+        "id": "AB-AC19",
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "approvedAfterPresent": true
+      }
+    ],
+    "architectureReceiptCount": 18,
+    "architectureCanonicalCount": 15,
+    "architectureConstCount": 3,
+    "bootstrapReceiptCount": 12,
+    "videoOwnershipAuthoritySha256": "d6b28a97a448c587dde68df50dd6af9ce0b290d06c3a965ef57bc89201b3d014",
+    "videoDisposition": "V1-V4 existing-authority implementation approved; V5 actual evidence judged from frozen native tests/facts with stated limits. No wire/canonical expansion.",
+    "supersessions": "Four supported effective preference keys replace only the independently PO-approved historical unsupported key claim. Approved C6 replacement preserves native code-only, supplementary raw-canary-positive and injected released-value production controls. Historical unmet statements remain evidence history."
+  },
+  "candidateBinding": {
+    "files": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/result.json",
+        "expectedSha256": "50f7f06ac97ad3e04b18e7e1df40b71a461fce688e083b2fcb9d949d63369c8c",
+        "actualSha256": "50f7f06ac97ad3e04b18e7e1df40b71a461fce688e083b2fcb9d949d63369c8c",
+        "matches": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/source-manifest.json",
+        "expectedSha256": "a72979959e18a3e1976a8bc9495291d8aa4abf1b0ea3d97d2a6c6f887d0a1c2a",
+        "actualSha256": "a72979959e18a3e1976a8bc9495291d8aa4abf1b0ea3d97d2a6c6f887d0a1c2a",
+        "matches": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/dist-manifest.json",
+        "expectedSha256": "251baec2858784ce147a8b0c00dc7dd693e8c958668e6b8055d2f66f91c1e443",
+        "actualSha256": "251baec2858784ce147a8b0c00dc7dd693e8c958668e6b8055d2f66f91c1e443",
+        "matches": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/build-inputs-manifest.json",
+        "expectedSha256": "bf6fea4b154e0acdcbec2922f81727d9667fa35575929a847f363925928718af",
+        "actualSha256": "bf6fea4b154e0acdcbec2922f81727d9667fa35575929a847f363925928718af",
+        "matches": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/source-dist-build-inputs.zip",
+        "expectedSha256": "042adc393fb106d92466e376db68b301daa48f1112060a14483e5234f25f022d",
+        "actualSha256": "042adc393fb106d92466e376db68b301daa48f1112060a14483e5234f25f022d",
+        "matches": true
+      }
+    ],
+    "manifests": {
+      "source": {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/source-manifest.json",
+        "fileSha256": "a72979959e18a3e1976a8bc9495291d8aa4abf1b0ea3d97d2a6c6f887d0a1c2a",
+        "aggregateAsDeclared": "77d22f99be395f04856e120de3645ba636decf8eba13f6ebd69251aad4178710",
+        "count": 251,
+        "embeddedCandidateExactlyEqual": true
+      },
+      "dist": {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/dist-manifest.json",
+        "fileSha256": "251baec2858784ce147a8b0c00dc7dd693e8c958668e6b8055d2f66f91c1e443",
+        "aggregateAsDeclared": "ab1e673fb24b0bb5625d374dc63a32ddbca06bdf9242c9aa4f326ed895696b60",
+        "count": 274,
+        "embeddedCandidateExactlyEqual": true
+      },
+      "buildInputs": {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/build-inputs-manifest.json",
+        "fileSha256": "bf6fea4b154e0acdcbec2922f81727d9667fa35575929a847f363925928718af",
+        "aggregateAsDeclared": "3d25e95e49f363b26ea342c605fa8cf3c8ac5420af1f59a65206115a041f72cb",
+        "count": 110,
+        "embeddedCandidateExactlyEqual": true
+      }
+    },
+    "membershipCount": 635,
+    "uniqueManifestPaths": 532,
+    "zipEntryCount": 532,
+    "sourceCount": 251,
+    "distCount": 274,
+    "buildInputCount": 110,
+    "mismatchCount": 0,
+    "sourceDrift": "ZERO against frozen manifests, independently checked before probes and again at report time. Canonical current YAML description quoting noted in authority checks; semantic text unchanged. Evolving backend is not bound as a runner verdict.",
+    "logCount": 62,
+    "logMismatchCount": 0,
+    "detailsPath": "docs/qa/evidence/STUDIO-OBS-007/r-owner-independent-peer-source-hashes.json"
+  },
+  "findings": [
+    {
+      "id": "RIP-F1",
+      "severity": "MEDIUM",
+      "verdict": "FAIL",
+      "kind": "reproduced mandatory guard gap",
+      "path": "studio-runner/src/run/scratchLayout.ts",
+      "line": 41,
+      "relatedLocations": [
+        {
+          "path": "studio-runner/src/run/scratchLayout.ts",
+          "line": 35
+        },
+        {
+          "path": "studio-runner/src/run/browser.ts",
+          "line": 60
+        }
+      ],
+      "trigger": "A prepared Default/Preferences symlink points outside the profile to valid four-key JSON. requireBrowserPreferences accepts it before launch.",
+      "proof": [
+        "IP-1 reproduced against frozen compiled production function.",
+        "readFileSync follows the Preferences symlink; no lstat/no-follow descriptor, owner/type/confinement validation precedes parsing. prepareBrowserProfile also writes through an existing path.",
+        "Effective probe canonicalizes profile/Default as its expected value, then compares browser path against that canonical value; it does not independently establish Default remained inside canonical owned profile. Default-directory escape is source inference, not independently native reproduced.",
+        "browserProfilePreferences.test.ts tests absence, malformed JSON and wrong values, but has no unsafe-path/link negative."
+      ],
+      "authority": {
+        "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+        "line": 104,
+        "requirement": "Refuse missing, malformed or unsafe prepared preferences before launch; verify actual active Default profile confinement."
+      },
+      "impact": "The mandatory unsafe-prelaunch negative contract is not implemented completely in the shared recorded/guided preference boundary. Fresh exclusive scratch and trusted Node reduce exploit reachability; no secret disclosure or actual outside-profile Chromium write is claimed.",
+      "introducedByTargetChange": "NOT_ESTABLISHED; review of current bytes, not a baseline diff.",
+      "exactReversibleRepair": [
+        "In scratchLayout.ts, validate canonical owned profile and Default directories remain inside the admitted scratch/profile with private modes, reject symlinks/replacements and validate the Preferences regular owned file. Use bounded O_NOFOLLOW descriptor read/fstat instead of path-following readFileSync. Write prepared Preferences only to the fresh intended owned location without following links.",
+        "In browser.ts verifyBrowserPreferences, establish canonical Default confinement before treating that path as the expected active profile. Keep all four existing registered values and the fixed browser mode unchanged.",
+        "Add focused missing/malformed/unsafe-file-symlink and Default-directory-symlink negatives proving refusal before any launch call, plus a valid owned-profile positive. Rebuild/rebind only under root authorization after unfreezing; this review makes no changes."
+      ],
+      "acceptanceChangeRequired": false,
+      "newWireStatusOrPinRequired": false
+    },
+    {
+      "id": "RIP-F2",
+      "severity": "MEDIUM",
+      "verdict": "FAIL",
+      "kind": "reproduced runtime resource cleanup gap",
+      "path": "studio-runner/src/run/browser.ts",
+      "line": 530,
+      "relatedLocations": [
+        {
+          "path": "studio-runner/src/run/browser.ts",
+          "line": 528
+        },
+        {
+          "path": "studio-runner/src/run/browser.ts",
+          "line": 532
+        }
+      ],
+      "trigger": "Guided persistent-context launch rejects after fresh checks-guided scratch and profile creation, or prelaunch preparation throws after mkdtemp.",
+      "proof": [
+        "IP-2 invoked the frozen compiled factory with isolated rejecting Playwright stub and observed one leftover scratch directory and no returned cleanup capability.",
+        "mkdtemp, prepareBrowserProfile and await launchPersistentContext precede the try/catch. The catch can return GuidedLaunchFailure cleanup only after context acquisition.",
+        "Normal launch failures such as unavailable executable or sandbox denial reach this rejection path; these native failures were not independently run."
+      ],
+      "authority": {
+        "path": "studio-runner/src/run/scratchLayout.ts",
+        "line": 7,
+        "requirement": "Per-session/per-run scratch is cleared on launch failure, error and drain; browser profile isolation/cleanup remains mandatory under AC-11."
+      },
+      "impact": "Each unsuccessful guided startup can leave a fresh profile/temp tree. Retry accumulation and any files written during failed native startup persist without a cleanup handle. No secret had been supplied in the independent probe; no live process leak is asserted. Recorded parent-owned scratch cleanup is separately present and is not this finding.",
+      "introducedByTargetChange": "NOT_ESTABLISHED; shared browser dependency reviewed with the frozen target.",
+      "exactReversibleRepair": [
+        "Move scratch/profile preparation and context launch under an enclosing acquisition cleanup boundary. If no context was acquired, await removal of the owned newly created scratch on every preparation/launch rejection before returning the existing failure mapping.",
+        "After context acquisition, preserve the existing cleanup capability and truthful refusal if actual context closure cannot be confirmed; do not erase scratch while an acquired browser may still be writing.",
+        "Add an isolated factory launch-rejection/preparation-rejection cleanup oracle and successful-close positive. Preserve guided unrecorded startup scope, sole production password channel, all deadlines and wire/status semantics."
+      ],
+      "acceptanceChangeRequired": false,
+      "newWireStatusOrPinRequired": false
+    }
+  ],
+  "inspectionChecks": [
+    {
+      "area": "startup guard/latch authorization",
+      "status": "SCOPED_PASS_SOURCE_AND_INSPECTED_OWNER_NATIVE_TESTS",
+      "paths": [
+        "studio-runner/src/run/observedBootstrap.ts",
+        "studio-runner/src/run/browser.ts",
+        "studio-runner/test/run/observedBootstrap.test.ts",
+        "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts"
+      ],
+      "assessment": "Guard listener is attached at first recorded context acquisition before context.pages inspection; immediate sole startup reconciliation, permanent unexpected-page latch and late subscriber notification hold. Only issued one pending application newPage is authorized; returned identity/current sole page/blank world must agree. Closed unexpected pages do not clear readiness refusal. No confirmed defect found in target guard itself. Native wrappers execute actual SDK context with popup/delete/expiry/close failure cases; unit guard evidence remains distinct."
+    },
+    {
+      "area": "fixed full Chromium and effective profile policy",
+      "status": "FAIL_UNSAFE_PRELAUNCH_BOUNDARY",
+      "paths": [
+        "studio-runner/src/run/scratchLayout.ts",
+        "studio-runner/src/run/browser.ts",
+        "studio-runner/test/fixtures-tier/secret-login.test.ts"
+      ],
+      "assessment": "Fixed channel chromium/headless true/sandbox true/args [] and effective credentials_enable_service=false, autofill.profile_enabled=false, autofill.credit_card_enabled=false, session.restore_on_startup=5 are enforced and owner fixture checks actual WebUI values/executable/active profile plus pre-close recorded/guided scratch canary scans. Unsupported legacy password-manager key stays historical/superseded; no new key demanded. RIP-F1 prevents a full profile guard PASS."
+    },
+    {
+      "area": "sequential same-context startup recording disposal and app readiness",
+      "status": "SCOPED_PASS_SOURCE_AND_INSPECTED_OWNER_NATIVE_TESTS",
+      "assessment": "Await startup page close, authentic startup Video.path, confined nonsymlink native file, SDK delete, empty video directory/current page set, then create sole clean app in the same persistent recorded context. App page alone supplies blank/CDP world, recording capability and paired origin sample once before Ready. Startup WebUI is never manifest/video fallback or uploaded. Capability/deletion oracle independently complements limited decoded pixels; no diagnostic-prefix arithmetic/transcode."
+    },
+    {
+      "area": "absolute deadlines/cancel/late launch/ordered stop/tree quiescence",
+      "status": "CONCERNS_EVIDENCE_LIMITS_AND_RIP_F2",
+      "assessment": "Child preserves startup deadline and continuous runtime/admission bounds across opening, deletion, capture, Ready and execution; stop aborts immediately, retains pending opening and disposes late actual handle. Parent seals ownership before stop and uses existing stopTimeoutMs ordered grace then forced kill, then separately bounded post-SIGKILL quiescence inside cleanup/drain/evidence windows. No runtime/admission renewal. Recorded owner six-phase real process facts establish labeled native child/browser/encoder PIDs gone in those controlled cases. Independent enumeration unavailable. Detached-writer test deliberately waits 75ms so 25ms tracker can observe it; fast leader-exit-before-first-sample adversarial coverage is absent. Do not infer universal orphan safety. Guided initial rejection leaks scratch: RIP-F2."
+    },
+    {
+      "area": "authentic private app-video capability and streaming",
+      "status": "SCOPED_PASS_SOURCE_AND_INSPECTED_TESTS",
+      "paths": [
+        "studio-runner/src/run/appVideoOwnership.ts",
+        "studio-runner/src/run/recording.ts",
+        "studio-runner/src/run/evidenceUpload.ts"
+      ],
+      "assessment": "Native sole appVideo.path captured privately under bound after creation, identity matches actual run/attempt/admission/runner and actual parent/child PID/scratch dev+ino/video basename. Closed duplicate-aware <=4096 receipt, private modes, confined paths, atomic link/no-overwrite and live checks; parent seals once, no late adoption. Receipt supplies neither Execute/Ready/usage nor deployment provenance. Quiescence precedes native inspection; regular owned single-link nofollow file, four-byte prefix/size inspection; retry stream opens pinned same-file descriptor rather than selecting another directory video or reading whole file. Compromised same-UID host resistance is not claimed."
+    },
+    {
+      "area": "password uniqueness/handle pinning/sole isolated CDP primitive",
+      "status": "SCOPED_PASS_SOURCE_AND_LOCAL_FIXTURE_EVIDENCE",
+      "paths": [
+        "studio-runner/src/run/passwordControl.ts",
+        "studio-runner/src/run/observationCollector.ts"
+      ],
+      "assessment": "Rendered unique password candidate bounded through open shadows; metadata/generation/document/origin guards, withhold before fill, pin exact handle and repeat attached/type/uniqueness/form.action/approved-origin/focus guard immediately before sole trusted isolated-CDP value-write/input/change. No selector-driven second production fill channel. Private proven no-effect codes distinguish prewrite refusal from generic uncertain in-flight loss. Native timeout/cancel/context loss joined oracle remains open."
+    },
+    {
+      "area": "transient literal guard and diagnostic lifetime/sinks",
+      "status": "SCOPED_PASS_SOURCE_AND_C6_CONTROLS_JOIN_PENDING",
+      "paths": [
+        "studio-runner/src/executor/observedReplay.ts",
+        "studio-runner/src/validator/observedReplay.ts",
+        "studio-runner/src/guided/runtime.ts",
+        "studio-runner/src/guided/diagnostics.ts",
+        "studio-runner/src/guided/transport.ts"
+      ],
+      "assessment": "Resolved literal comparison runs before replay interpolation/effect; pure validation remains separate from transient actual-secret guard. Guided hashes strip secret frame; failure values/redactor retained privately across stop until current diagnostics callbacks/sidecar/stderr complete, then finally erase local references. Redact raw name/message before combined interpolation and byte/character/session bounds. Approved C6 three distinct controls preserved: authentic sole-CDP native code-only TARGET_CHANGED, supplementary actual Playwright /slow raw-canary-positive plus safe-[REDACTED]-positive/no-canary, injected actual released-value production diagnostics. Neither absent discarded output nor private fixture proves joined Core/PG all-sink scan."
+    },
+    {
+      "area": "sparse cumulative actual PASS usage",
+      "status": "SCOPED_PASS_RUNNER_SOURCE_PRIVATE_TESTS_JOIN_PENDING",
+      "paths": [
+        "studio-runner/src/run/launcher.ts",
+        "studio-runner/src/run/secretUse.ts",
+        "studio-runner/src/reporting/snapshot.ts"
+      ],
+      "assessment": "Parent authenticates ready/result identities and raw step index/order/timings; frozen recipe/input/slot binding derives only actual completed PASS positive USED. STARTED has no use; PROGRESS USED-only cumulative positives lose unsupported entries if payload reduction sheds PASS receipts. Missing FINAL retains authentic completed positives, cannot invent negative facts from absent/started/failed/unknown effect. Existing USED/NOT_USED/REFUSED only; guided backend conservative OK->USED/non-success->UNKNOWN unchanged. Native lost-FINAL fixture has secrets={} and proves PASS receipts/partial video, not actual secret-use persistence or winning PostgreSQL CAS."
+    },
+    {
+      "area": "revocation and one-inflight semantics",
+      "status": "SCOPED_SOURCE_CONCERNS_JOIN_PENDING",
+      "assessment": "Absolute one-second renewal/control polling and one-second bounded request budget fail closed; inFlight/busy guards exclude a second dispatch; stop invalidates epoch/authority and aborts pending operations without resurrection. Unit/private transport callbacks are not real current grant/revocation/read/queued ownership joins. Genuine consumed step may complete once; no next action after revoked control. Counted provider/send/keystroke and current backend joins remain root/B obligations."
+    },
+    {
+      "area": "LOGIN_REQUIRED truth",
+      "status": "SCOPED_PASS_SOURCE_AND_LOCAL_CHROMIUM_FIXTURES",
+      "assessment": "The structural signature requires at least one password control plus exported visible actionable button/input or role=button; no text/login heuristic. Replay changes only the actual failing nonsecret TARGET_DRIFT/POLICY case under that signature. A declared secret recipe is not successful prior login evidence; completed successful secret flow and subsequent auth drift remain real facts. Failure remains FAILED, no new status or weakening."
+    },
+    {
+      "area": "source/dist/provenance/reference packaging",
+      "status": "SCOPED_PASS_LOCAL_BINDING_ONLY",
+      "assessment": "Independently match candidate receipt, all manifests/live bytes/all ZIP memberships/all 62 log hashes; schemas and fixture bundle canonical hashes agree with dist metadata, canonical accepted choice matches packaged reference, launcher byte hash matches. Docker runtime includes dist and browser-provenance script; installed current macOS full Chromium executable SHA matches. observed-4/catalog observed-replay-3 and unchanged observed-3 language are authorized; local Node v23.10.0 engine-compatible is not Node22/internal ED05 proof. Image null/NOT_ASSERTED; no deployed image assertion."
+    }
+  ],
+  "independentProbes": [
+    {
+      "id": "IP-1",
+      "status": "EXECUTED_REPRODUCED",
+      "productionModule": "studio-runner/dist/run/scratchLayout.js",
+      "method": "Import frozen compiled requireBrowserPreferences and prepareBrowserProfile. In a fresh isolated private temp root, prepare normal profile, replace Default/Preferences by symlink to identical outside-profile JSON, invoke requireBrowserPreferences. Remove the entire isolated root in finally. No browser launch.",
+      "actualOutput": {
+        "probe": "prepared-preference-symlink",
+        "compiledProductionFunction": true,
+        "browserLaunched": false,
+        "symlinkAccepted": true
+      },
+      "limits": "Demonstrates missing mandatory unsafe-prelaunch refusal, not a production same-UID compromise or Chromium following the link at runtime."
+    },
+    {
+      "id": "IP-2",
+      "status": "EXECUTED_REPRODUCED",
+      "productionModule": "studio-runner/dist/run/browser.js",
+      "method": "In an isolated Node process, replace Playwright launchPersistentContext with a rejecting in-memory stub. Point only that process TMPDIR to an isolated private temp root. Invoke compiled launchGuidedBrowser with no secrets. Count checks-guided directories after rejection. Restore stub/TMPDIR and remove temp root in finally. No browser launch.",
+      "actualOutput": {
+        "probe": "guided-launch-rejection-cleanup",
+        "compiledProductionFactory": true,
+        "launchRejectedByIsolatedStub": true,
+        "browserLaunched": false,
+        "error": "ISOLATED_LAUNCH_REJECTION",
+        "leftoverScratchDirectories": 1,
+        "cleanupCapabilityReturned": false
+      },
+      "limits": "Real compiled factory cleanup behavior with injected launch rejection; no native Chromium startup failure or remaining browser process is asserted."
+    },
+    {
+      "id": "IP-3",
+      "status": "CAPABILITY_CHECK_EXECUTED_RUNTIME_PROBE_UNEXECUTED",
+      "productionModule": "studio-runner/dist/run/tree.js",
+      "method": "Invoke canEnumerateProcessTree in this sandbox before any process-tree runtime experiment.",
+      "actualOutput": {
+        "probe": "independent-process-table-capability",
+        "enumerationAvailable": false,
+        "runtimeTreeProbeExecuted": false
+      },
+      "limits": "Process-table capability unavailable in this sandbox. No child/writer/native tree test spawned; no independent runtime PASS or residual PID conclusion."
+    },
+    {
+      "id": "IP-4",
+      "status": "EXECUTED_MATCH",
+      "method": "Read and SHA256 the current local Playwright full Chromium executable; do not execute it.",
+      "path": "/Users/brunobuger/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+      "sha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a",
+      "browserExecuted": false,
+      "imageProvenance": "NOT_ASSERTED"
+    }
+  ],
+  "currentGateProvenance": {
+    "producer": "Runner owner final source-bound candidate; inspected actual logs and matching log hashes. No gate independently rerun in this review.",
+    "gates": {
+      "build": {
+        "command": "npm run build",
+        "exit": 0,
+        "log": "obs007-r-owner-build-final.log"
+      },
+      "chromium": {
+        "command": "npm run test:fixtures",
+        "exit": 0,
+        "failed": 0,
+        "filesPassed": 25,
+        "log": "obs007-r-owner-fixtures-final1.log",
+        "passed": 345,
+        "skipped": 10
+      },
+      "default": {
+        "command": "npm test",
+        "coverageThresholds": "unchanged and passed",
+        "exit": 0,
+        "failed": 0,
+        "filesPassed": 86,
+        "filesSkipped": 1,
+        "log": "obs007-r-owner-default-final1.log",
+        "passed": 1743,
+        "skipped": 29
+      },
+      "deployment": {
+        "command": "npm run test:deployment",
+        "exit": 0,
+        "failed": 0,
+        "filesPassed": 8,
+        "log": "obs007-r-owner-deployment-final1.log",
+        "passed": 313,
+        "skipped": 0
+      },
+      "lint": {
+        "command": "npm run lint",
+        "exit": 0,
+        "log": "obs007-r-owner-lint-final.log"
+      },
+      "localPins": {
+        "command": "npm run check:pins",
+        "exit": 0,
+        "image": "NOT_ASSERTED",
+        "internalNode22ED05": "OPEN",
+        "log": "obs007-r-owner-pins-final.log"
+      },
+      "typecheck": {
+        "command": "npm run typecheck",
+        "exit": 0,
+        "log": "obs007-r-owner-typecheck-final.log"
+      }
+    },
+    "coverage": {
+      "global": {
+        "branches": {
+          "covered": 5085,
+          "pct": 87.46,
+          "skipped": 0,
+          "total": 5814
+        },
+        "branchesTrue": {
+          "covered": 0,
+          "pct": 100,
+          "skipped": 0,
+          "total": 0
+        },
+        "functions": {
+          "covered": 767,
+          "pct": 96.11,
+          "skipped": 0,
+          "total": 798
+        },
+        "lines": {
+          "covered": 10740,
+          "pct": 90.78,
+          "skipped": 0,
+          "total": 11830
+        },
+        "statements": {
+          "covered": 10740,
+          "pct": 90.78,
+          "skipped": 0,
+          "total": 11830
+        }
+      },
+      "runBranchesPercent": 83.84,
+      "runFunctionsPercent": 96.91,
+      "runLinesStatementsPercent": 85.23
+    },
+    "interpretation": [
+      "Actual default final log1743 passed/29 retained skipped,86 passed files/1 skipped; Chromium345/10 retained skip25 files; deployment313/0skip8 files. Type/lint/build/local pins recorded exit0.",
+      "Coverage summary/global table agrees:90.78 lines/statements,87.46 branches,96.11functions; run85.23lines/statements83.84branches96.91functions; unchanged passing thresholds. Coverage does not cover untested unsafe-link input. browser.ts has0 default-tier coverage; actual Chromium tier separate.",
+      "Deployment tier is local SEC2/native shim and declaration/static tests, not installed/deployed/internal image runtime.",
+      "62 logs include historical red/type/lint/coverage/native-short-encoder cases. obs007-r-owner-nativefacts1.log kept actual early red expecting playable partial for physically absent recording; final honest FAILED classification follows existing authority and does not require impossible encoder bytes."
+    ]
+  },
+  "nativeEvidence": {
+    "basis": "Owner archived real full Chromium compiled-child tests/facts inspected and linked to actual production functions. Not independently rerun/decoded here; original scratch/native binaries removed after tests and ZIP packages source/dist/build inputs, not proof that this reviewer decoded a video.",
+    "bootstrapCapabilityPath": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/runner-bootstrap-capability-oracle.json",
+    "processPhaseMatrix": [
+      {
+        "phase": "no-app",
+        "factPath": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/runner-bootstrap-process-tree-no-app.json",
+        "preclearPath": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/runner-owner-preclear-no-app.json",
+        "terminalEvidence": {
+          "videoKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.webm",
+          "manifestKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.result.json",
+          "state": "UNAVAILABLE",
+          "partial": false
+        },
+        "executeSends": 0,
+        "applicationVisits": 0,
+        "readySentCount": 0,
+        "parentReadyAccepted": false,
+        "objectStoreVideoFiles": 0,
+        "decodedBlankAppNativeFrames": null,
+        "observedPidCount": 8,
+        "ownerTestAssertedAllObservedPidsGone": true,
+        "scratchEmpty": true,
+        "capacityInUse": 0,
+        "preclearFacts": {
+          "phase": "no-app",
+          "quiescenceFacts": {
+            "ok": true,
+            "budget": 500,
+            "elapsedMs": 35
+          },
+          "nativeFacts": {
+            "files": [
+              {
+                "basename": "page@00edc09affd58dcd022dbbfd83cdd768.webm",
+                "bytes": 0,
+                "headHex": "00000000",
+                "nlink": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "phase": "captured-unpublished",
+        "factPath": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/runner-bootstrap-process-tree-captured-unpublished.json",
+        "preclearPath": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/runner-owner-preclear-captured-unpublished.json",
+        "terminalEvidence": {
+          "videoKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.webm",
+          "manifestKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.result.json",
+          "state": "UNAVAILABLE",
+          "partial": false
+        },
+        "executeSends": 0,
+        "applicationVisits": 0,
+        "readySentCount": 0,
+        "parentReadyAccepted": false,
+        "objectStoreVideoFiles": 0,
+        "decodedBlankAppNativeFrames": null,
+        "observedPidCount": 8,
+        "ownerTestAssertedAllObservedPidsGone": true,
+        "scratchEmpty": true,
+        "capacityInUse": 0,
+        "preclearFacts": {
+          "phase": "captured-unpublished",
+          "quiescenceFacts": {
+            "ok": true,
+            "budget": 500,
+            "elapsedMs": 36
+          },
+          "nativeFacts": {
+            "files": [
+              {
+                "basename": "page@2ad886bdb18564b4abecea0cf672555d.webm",
+                "bytes": 0,
+                "headHex": "00000000",
+                "nlink": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "phase": "committed-before-ready",
+        "factPath": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/runner-bootstrap-process-tree-committed-before-ready.json",
+        "preclearPath": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/runner-owner-preclear-committed-before-ready.json",
+        "terminalEvidence": {
+          "videoKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.webm",
+          "manifestKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.result.json",
+          "state": "FAILED",
+          "partial": false
+        },
+        "executeSends": 0,
+        "applicationVisits": 0,
+        "readySentCount": 0,
+        "parentReadyAccepted": false,
+        "objectStoreVideoFiles": 0,
+        "decodedBlankAppNativeFrames": null,
+        "observedPidCount": 8,
+        "ownerTestAssertedAllObservedPidsGone": true,
+        "scratchEmpty": true,
+        "capacityInUse": 0,
+        "preclearFacts": {
+          "phase": "committed-before-ready",
+          "quiescenceFacts": {
+            "ok": true,
+            "budget": 500,
+            "elapsedMs": 37
+          },
+          "nativeFacts": {
+            "receipt": {
+              "schemaVersion": 1,
+              "kind": "observed-app-video",
+              "runId": "00000000-0000-4000-8000-000000000020",
+              "attemptId": "00000000-0000-4000-8000-000000000021",
+              "admissionId": "572f4569-1e43-4d83-b241-d25d1a26f0f8",
+              "runnerInstanceId": "bootstrap-tree-fixture",
+              "parentPid": 41118,
+              "childPid": 47969,
+              "scratchDev": "16777229",
+              "scratchIno": "198977258",
+              "videoBasename": "page@1e7c630f849097a92edf520abdae38ba.webm"
+            },
+            "files": []
+          }
+        }
+      },
+      {
+        "phase": "ready-sent-dropped",
+        "factPath": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/runner-bootstrap-process-tree-ready-sent-dropped.json",
+        "preclearPath": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/runner-owner-preclear-ready-sent-dropped.json",
+        "terminalEvidence": {
+          "videoKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.webm",
+          "manifestKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.result.json",
+          "state": "FAILED",
+          "partial": false
+        },
+        "executeSends": 0,
+        "applicationVisits": 0,
+        "readySentCount": 1,
+        "parentReadyAccepted": false,
+        "objectStoreVideoFiles": 0,
+        "decodedBlankAppNativeFrames": null,
+        "observedPidCount": 8,
+        "ownerTestAssertedAllObservedPidsGone": true,
+        "scratchEmpty": true,
+        "capacityInUse": 0,
+        "preclearFacts": {
+          "phase": "ready-sent-dropped",
+          "quiescenceFacts": {
+            "ok": true,
+            "budget": 500,
+            "elapsedMs": 37
+          },
+          "nativeFacts": {
+            "receipt": {
+              "schemaVersion": 1,
+              "kind": "observed-app-video",
+              "runId": "00000000-0000-4000-8000-000000000020",
+              "attemptId": "00000000-0000-4000-8000-000000000021",
+              "admissionId": "a375759d-cd52-4306-9eac-1dfde0352888",
+              "runnerInstanceId": "bootstrap-tree-fixture",
+              "parentPid": 41118,
+              "childPid": 53138,
+              "scratchDev": "16777229",
+              "scratchIno": "198977757",
+              "videoBasename": "page@9b0877232b1d16d124c8a6b178b06860.webm"
+            },
+            "files": [
+              {
+                "basename": "page@9b0877232b1d16d124c8a6b178b06860.webm",
+                "bytes": 0,
+                "headHex": "00000000",
+                "nlink": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "phase": "committed-before-ready-orderly",
+        "factPath": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/runner-bootstrap-process-tree-committed-before-ready-orderly.json",
+        "preclearPath": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/runner-owner-preclear-committed-before-ready-orderly.json",
+        "terminalEvidence": {
+          "videoKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.webm",
+          "manifestKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.result.json",
+          "state": "STORED",
+          "partial": false
+        },
+        "executeSends": 0,
+        "applicationVisits": 0,
+        "readySentCount": 0,
+        "parentReadyAccepted": false,
+        "objectStoreVideoFiles": 1,
+        "decodedBlankAppNativeFrames": 25,
+        "observedPidCount": 8,
+        "ownerTestAssertedAllObservedPidsGone": true,
+        "scratchEmpty": true,
+        "capacityInUse": 0,
+        "preclearFacts": {
+          "phase": "committed-before-ready-orderly",
+          "quiescenceFacts": {
+            "ok": true,
+            "budget": 500,
+            "elapsedMs": 23
+          },
+          "nativeFacts": {
+            "receipt": {
+              "schemaVersion": 1,
+              "kind": "observed-app-video",
+              "runId": "00000000-0000-4000-8000-000000000020",
+              "attemptId": "00000000-0000-4000-8000-000000000021",
+              "admissionId": "867f0efa-1f39-4986-81f5-caefa32dffa8",
+              "runnerInstanceId": "bootstrap-tree-fixture",
+              "parentPid": 41118,
+              "childPid": 51451,
+              "scratchDev": "16777229",
+              "scratchIno": "198977497",
+              "videoBasename": "page@366958ccfc171dafb31949fe975a3afb.webm"
+            },
+            "files": [
+              {
+                "basename": "page@366958ccfc171dafb31949fe975a3afb.webm",
+                "bytes": 3489,
+                "headHex": "1a45dfa3",
+                "nlink": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "phase": "ready-received-stop",
+        "factPath": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/runner-bootstrap-process-tree-ready-received-stop.json",
+        "preclearPath": "docs/qa/evidence/STUDIO-OBS-007/runner-owner-candidate/runner-owner-preclear-ready-received-stop.json",
+        "terminalEvidence": {
+          "videoKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.webm",
+          "manifestKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.result.json",
+          "state": "STORED",
+          "partial": false
+        },
+        "executeSends": 0,
+        "applicationVisits": 0,
+        "readySentCount": 1,
+        "parentReadyAccepted": true,
+        "objectStoreVideoFiles": 1,
+        "decodedBlankAppNativeFrames": 25,
+        "observedPidCount": 8,
+        "ownerTestAssertedAllObservedPidsGone": true,
+        "scratchEmpty": true,
+        "capacityInUse": 0,
+        "preclearFacts": {
+          "phase": "ready-received-stop",
+          "quiescenceFacts": {
+            "ok": true,
+            "budget": 1500,
+            "elapsedMs": 25
+          },
+          "nativeFacts": {
+            "receipt": {
+              "schemaVersion": 1,
+              "kind": "observed-app-video",
+              "runId": "00000000-0000-4000-8000-000000000020",
+              "attemptId": "00000000-0000-4000-8000-000000000021",
+              "admissionId": "69a4ff15-7d7d-4a6c-a9a1-af964e90bfbd",
+              "runnerInstanceId": "bootstrap-tree-fixture",
+              "parentPid": 41118,
+              "childPid": 56543,
+              "scratchDev": "16777229",
+              "scratchIno": "198977997",
+              "videoBasename": "page@360d23e5240024b9f84dd1168b456a49.webm"
+            },
+            "files": [
+              {
+                "basename": "page@360d23e5240024b9f84dd1168b456a49.webm",
+                "bytes": 3489,
+                "headHex": "1a45dfa3",
+                "nlink": 1
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "classifications": [
+      "No actual app/captured-unpublished without committed authentic ownership -> UNAVAILABLE, zero video upload.",
+      "Authentic owned native file physically absent/zero/tiny -> FAILED; untouched blank forced-loss encoder cannot be required to produce playable bytes.",
+      "Actual orderly preReady app SDK close -> authentic3489-byte recording,25 decoded white native frames, STORED/partialfalse with no Ready/Execute/app visits. Ready-accepted/no-Execute immediate stop similarly STORED.",
+      "PostReady forced actual tree loss retains exact playable1835008-byte native prefix PENDING/partialtrue; premature-EOF decoder result is honest partial.",
+      "Actual two completed PASS steps with dropped FINAL retains positive step receipts and15336-byte native video PENDING/partialtrue; result remains non-success when final is absent. Job contains no secrets, so no actual secret USED/PG summary claim."
+    ],
+    "limits": [
+      "Normal/lost-FINAL killedPids=[] makes allObservedPidsGone vacuous in those video tests; do not credit process proof there. Forced-loss nonempty captured PIDs and separate six-phase actual labeled PID checks are different evidence.",
+      "Scaled1x1 prefix0 gives prefixFrameCount0 and decodedPrefixWhite vacuous; cannot independently prove absence of startup WebUI frames. Use separate authentic Video capability/startup deletion/sole-app oracle and full white native blank-frame oracle.",
+      "Recorded initial/failure native controlled seeks all within500ms (normal11.03->0 and41.72->80ms, forced4.36->0 and28.17->80ms, lost-final16.25->0 and44.89->80ms). No general app/staging calibration credited.",
+      "Field actualSuspendedDescendantPids also labels the orderly/Ready-stop captured set; source does not SIGSTOP those orderly modes. Captured/labeled actual native PID checks still run.",
+      "Filesystem receipt/EBML-prefix synthetic tests prove private ownership/size/stream boundaries only, never a native playable encoder video. Detached Node writer is actual process-only proof, never browser/encoder proof."
+    ]
+  },
+  "provenance": {
+    "runtime": {
+      "playwright": "1.63.0",
+      "playwrightLocked": "1.63.0",
+      "playwrightImageTag": "1.63.0",
+      "chromiumBuild": null,
+      "node": "v23.10.0",
+      "nodeEngineRange": ">=22.11.0 <25.0.0",
+      "nodeMajorPin": "22",
+      "validatorSchema": "2.0.0",
+      "validatorParser": "typescript@5.9.3",
+      "syntaxReference": "2.1.0",
+      "executor": "2.1.0",
+      "artifact": 1,
+      "image": null,
+      "observedSchemaBundleHash": "5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2",
+      "observedReferenceBundleHash": "762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2",
+      "observedChromiumBuild": "1243",
+      "observedBrowserProvenance": {
+        "channel": "chromium",
+        "headless": true,
+        "chromiumSandbox": true,
+        "args": [],
+        "platform": "darwin",
+        "arch": "arm64",
+        "revision": "1243",
+        "executableRelativePath": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+        "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+      },
+      "observedBrowserLauncherSha256": "b4f4c4ad1abd09b226c2640437f227bfc3e9e797ac5e174fb79b9c2b3a06076e"
+    },
+    "independentPackagingChecks": {
+      "schemaSourceDistSame": true,
+      "schemaHashMatch": true,
+      "referenceSourceDistSame": true,
+      "referenceHashMatch": true,
+      "canonicalChoiceSame": true,
+      "browserLauncherBytesHashMatch": true,
+      "tuple": {
+        "executor": "observed-4",
+        "catalog": "observed-replay-3",
+        "language": "observed-3"
+      }
+    },
+    "localExecutableReadHash": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a",
+    "localExecutableIsActual": true,
+    "imageProvenance": "NOT_ASSERTED",
+    "internalNode22ED05": "OPEN",
+    "localNode": "v23.10.0",
+    "nativeOwnerFullChromium": "153.0.8010.12 revision1243, darwin arm64, Playwright1.63.0",
+    "imageOrCatalogAuthorityLimit": "Controlled native fixture catalog digest is synthetic authorization fixture, not actual deployed/internal image provenance. Private video capability is not execution/Ready/usage/provenance authority."
+  },
+  "pendingMandatoryOracles": [
+    {
+      "id": "P1",
+      "severity": "HIGH",
+      "status": "OPEN_MANDATORY_JOIN_NOT_SOURCE_DEFECT_VERDICT",
+      "obligation": "AC-19 actual current CoreHTTP/PostgreSQL/counted Vault USER/PASS -> guided learn/publish -> two real rotations/ordinary replays (nine-flow), stable artifactHash, actual distinct fixture receipts, silent gateways/no replay model calls; positive/negative real provider/read/send counters.",
+      "repairOrOracle": "Root/B after B freeze owns serialized current compiled backend/runner join. Bind current source and authentic provider counters, not copied historical gate4 or local handcrafted job fixtures."
+    },
+    {
+      "id": "P2",
+      "severity": "HIGH",
+      "status": "OPEN_MANDATORY_JOIN",
+      "obligation": "Actual sole production password primitive in-flight timeout/cancellation/context or transport loss; all applicable literal/encoded canary sinks across child stdout/stderr boundary, relay, step failure, manifest, callbacks, diagnostic and authoritative journals, parent log under approved C6.",
+      "repairOrOracle": "Retain authentic code-only refusal and injected/supplementary positive controls separately; add bounded actual in-flight sole-CDP loss joins with physical effect knowledge and full sink inventory. No added production selector/fill/raw-value channel."
+    },
+    {
+      "id": "P3",
+      "severity": "HIGH",
+      "status": "OPEN_MANDATORY_JOIN",
+      "obligation": "Real current guided/controller service process crashes, resolver before-entry/after-read cuts, revocation between passes/queued/live/expired owner joins, one in-flight/no next action, atomic read-entry/no-send/terminal audit facts; losing CAS and rollback append zero.",
+      "repairOrOracle": "Current compiled service crash harness with counted provider/read/send/keystroke facts and current PostgreSQL receipts. Root actual3cut against historical gate4 is historical scoped evidence only; no current backend verdict here."
+    },
+    {
+      "id": "P4",
+      "severity": "HIGH",
+      "status": "OPEN_MANDATORY_JOIN",
+      "obligation": "Actual secret-fill PASS PROGRESS USED -> compiled child loss/lost FINAL -> reaper retains exactly one immutable positive summary. Forged/nonsecret/wrong-attempt/admission/runner/sequence/profile/build/recipe, invalid raw timing, unsupported reduced payload and contradictory negative FINAL/CAS rollback negative matrix.",
+      "repairOrOracle": "Use real accepted recipe/release plus actual completed sole primitive secret operation, real winning report CAS, child termination/final callback loss and current PG audit rows. Native lost-FINAL test secrets={} cannot close it."
+    },
+    {
+      "id": "P5",
+      "severity": "MEDIUM",
+      "status": "UNEXECUTED_INDEPENDENT_CONCERN",
+      "path": "studio-runner/src/run/launcher.ts",
+      "line": 293,
+      "testPath": "studio-runner/test/run/observedWriterQuiescence.test.ts",
+      "testLine": 15,
+      "obligation": "Retained PID tracking samples every25ms; current detached-writer oracle sleeps75ms before leader exit. Missing adversarial fast orphan creation/leader exit before first snapshot coverage.",
+      "proof": "Source inference only; process table unavailable here (IP-3), so neither leak nor successful removal is independently asserted. Actual native six-phase PID evidence remains credited only in its observed controlled positions.",
+      "repairOrOracle": "Under root owned isolated process-capable lane, fork leader which creates detached writer and immediately exits before another tree sample; compare actual independently captured writer PID after production stop/quiescence. If it leaks, retain actual spawned process group/tree identities or fail closed until quiescent without unbounded wait, unrelated PID killing or runtime renewal. Do not change current test/status in this review."
+    },
+    {
+      "id": "P6",
+      "severity": "HIGH",
+      "status": "OPEN_EXTERNAL_PROVENANCE",
+      "obligation": "Actual isolated installed/deployed internal image build/startup/require-image, Node22/ED05, gateway/Vault/SIEM/staging/general application seek, pilot/manual gates.",
+      "repairOrOracle": "Root separate authorized internal lane. Local macOS executable and deployment-tier declaration tests do not close image/staging/pilot evidence."
+    }
+  ],
+  "all19Obligations": [
+    {
+      "ac": "AC-1",
+      "title": "AC-1 — v3 contracts and version tuple.",
+      "completion": false,
+      "reviewScopeNote": "Authorized tuple/runner bundle checks inspected; full cross-system contracts still require root closure."
+    },
+    {
+      "ac": "AC-2",
+      "title": "AC-2 — Internal `openapi.yaml` closed-schema bump.",
+      "completion": false,
+      "reviewScopeNote": "Existing runner usage semantics inspected; current backend/openapi operation/transport gates excluded from verdict."
+    },
+    {
+      "ac": "AC-3",
+      "title": "AC-3 — `secretRef` end to end.",
+      "completion": false,
+      "reviewScopeNote": "Local controlled runner secret recipes/fixtures inspected; actual Core/provider publish/replay end-to-end open."
+    },
+    {
+      "ac": "AC-4",
+      "title": "AC-4 — Right moment: step binding (I-A1).",
+      "completion": false,
+      "reviewScopeNote": "Runner frozen sourceInput/step/slot checks inspected; complete real bound backend/provider join open."
+    },
+    {
+      "ac": "AC-5",
+      "title": "AC-5 — Trusted password-control resolution (security condition 1, tightened by R1-1/R1-2/R1-3).",
+      "completion": false,
+      "reviewScopeNote": "Sole isolated primitive source/local native controls inspected; genuine in-flight loss join open."
+    },
+    {
+      "ac": "AC-6",
+      "title": "AC-6 — Just-in-time delivery, scoping, digests (I-A2, I-A3, F-7, F-10).",
+      "completion": false,
+      "reviewScopeNote": "Secret frame hash stripping/scoping runner source inspected; backend resolution/grant/read-entry evidence open."
+    },
+    {
+      "ac": "AC-7",
+      "title": "AC-7 — Replay secrets through the ordinary dispatch pass.",
+      "completion": false,
+      "reviewScopeNote": "Ordinary replay runner validation present; real current ordinary dispatch/counted outage/refusal/rotation joins open."
+    },
+    {
+      "ac": "AC-8",
+      "title": "AC-8 — No value reads on password controls (F-6).",
+      "completion": false,
+      "reviewScopeNote": "No password value read in inspected collector source; local fixture evidence not whole-system closure."
+    },
+    {
+      "ac": "AC-9",
+      "title": "AC-9 — Backend sinks (I-B4, F-4).",
+      "completion": false,
+      "reviewScopeNote": "Backend sink verdict excluded; current all-sink join remains mandatory."
+    },
+    {
+      "ac": "AC-10",
+      "title": "AC-10 — Runner sinks (I-B5, SEC-7, F-10).",
+      "completion": false,
+      "reviewScopeNote": "Runner redactor lifetime/C6 controls inspected; genuine compiled Core all-sink loss join remains open."
+    },
+    {
+      "ac": "AC-11",
+      "title": "AC-11 — Browser profile disk sink (F-3).",
+      "completion": false,
+      "reviewScopeNote": "Scoped FAIL: unsafe prepared preference accepted and guided startup scratch leak; local native profile/cleanup evidence otherwise scoped."
+    },
+    {
+      "ac": "AC-12",
+      "title": "AC-12 — One value bound; secrets API pin (F-5, I-B6).",
+      "completion": false,
+      "reviewScopeNote": "API/value-bound backend gate excluded; no new bound/schema requested."
+    },
+    {
+      "ac": "AC-13",
+      "title": "AC-13 — No stale frame; bounded post-release window; revocation (I-A3, F-2).",
+      "completion": false,
+      "reviewScopeNote": "One-inflight/poll source inspected; actual current release/revocation/queued joins open."
+    },
+    {
+      "ac": "AC-14",
+      "title": "AC-14 — Audit table and rows (SEC-9, I-C10).",
+      "completion": false,
+      "reviewScopeNote": "Runner sparse positive receipt source inspected; winning PG monotonic/CAS/crash audit closure open."
+    },
+    {
+      "ac": "AC-15",
+      "title": "AC-15 — Account-provider removal and V34.",
+      "completion": false,
+      "reviewScopeNote": "Backend account/V34 removal excluded from runner verdict; root full-wave obligation."
+    },
+    {
+      "ac": "AC-16",
+      "title": "AC-16 — ARCH-6 / ARCH-7 profile split.",
+      "completion": false,
+      "reviewScopeNote": "Backend worker/profile dispatch excluded; root full-wave obligation."
+    },
+    {
+      "ac": "AC-17",
+      "title": "AC-17 — Single-path flag defaults.",
+      "completion": false,
+      "reviewScopeNote": "Local source/declaration evidence is not deployed flag/platform gate."
+    },
+    {
+      "ac": "AC-18",
+      "title": "AC-18 — `LOGIN_REQUIRED` on guided learn and observed replay (design R3 §5).",
+      "completion": false,
+      "reviewScopeNote": "Structural source and local Chromium fixture inspected; whole joined flow open."
+    },
+    {
+      "ac": "AC-19",
+      "title": "AC-19 — Controlled fixture and executed oracles.",
+      "completion": false,
+      "reviewScopeNote": "Final runner tiers/source/native facts inspected, independent gaps found; all listed current joined/native/process/external oracles remain mandatory."
+    }
+  ],
+  "independentExecutionLimits": {
+    "noBroadGates": true,
+    "noSharedProcessBuildTestResultsMutated": true,
+    "browserExecutedByReviewer": false,
+    "nativeDecoderExecutedByReviewer": false,
+    "processTreeRuntimeProbe": "UNEXECUTED: process enumeration unavailable in sandbox",
+    "isolatedProbeOutputs": "Embedded only in this report; isolated temp roots removed. Stub/environment changes were process-local and restored; no source/dist changes.",
+    "wholeStoryBackendCorePgProviderModelVaultProof": false,
+    "wholeWaveBilling": {
+      "ceilingUsd": 500,
+      "shared": true,
+      "actualBillingAvailable": false
+    },
+    "noExternalContacts": true,
+    "onlyWorkspaceWrites": [
+      "docs/qa/evidence/STUDIO-OBS-007/r-owner-independent-peer.json",
+      "docs/qa/evidence/STUDIO-OBS-007/r-owner-independent-peer-source-hashes.json"
+    ]
+  },
+  "handoff": {
+    "runnerOwner": "Root may authorize unfreezing R solely for RIP-F1/F2 reversible source/oracle repairs, rebuild and rebind a new candidate; do not treat this report as source-write permission.",
+    "root": "Keep serialized Gradle/backend gate lane and await B freeze. Read current reports against exact frozen binding. Preserve native classifications and all C6 controls; close remaining actual joined obligations before whole-story QA.",
+    "wave": "007 -> 012A -> {012B | 013 | 014} -> 015 -> 008 -> 009 -> 010 -> 011 remains pending. OBS007 InProgress, T0/T1 checked only as supplied. No lifecycle/goal/verify/commit/push/deploy action performed."
+  },
+  "branch": "brunobuger/ui-studio",
+  "branchInspection": "Read actual git branch --show-current after report; matches supplied branch.",
+  "impactAnalysis": {
+    "targetRole": "Small trusted startup guard/deadline helper,28 lines; review follows security and evidence effects through its callers rather than assigning Core/database authority to it.",
+    "directPropagation": [
+      "observedBootstrap.ts -> browser.ts recorded persistent-context startup and readiness handle",
+      "browser.ts -> childRuntime.ts late opening/stop cleanup, actual native app path capture, private ownership publication and Ready",
+      "childRuntime.ts -> launcher.ts authenticated parent readiness/step/result receipts, ordered teardown and sealed owner video inspection",
+      "launcher.ts -> runCoordinator.ts evidence upload, sparse cumulative progress and terminal outcome; pinned video stream through evidenceUpload.ts",
+      "Shared browser.ts/scratchLayout.ts -> guided/runtime.ts profile startup, isolated password observation/effects and stop diagnostics lifetime"
+    ],
+    "changeRisk": "HIGH security/evidence sensitivity; two current medium source defects independently reproduced. Caller and oracle boundary failures can alter readiness or leak scratch even while the target helper unit tests pass. No baseline attribution or actual secret leak is inferred.",
+    "affectedTests": [
+      "run/observedBootstrap.test.ts",
+      "run/browserProfilePreferences.test.ts",
+      "run/appVideoOwnership.test.ts",
+      "run/observedWriterQuiescence.test.ts",
+      "fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "fixtures-tier/observed-bootstrap-video.test.ts",
+      "fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "fixtures-tier/secret-login.test.ts"
+    ],
+    "recommendedBoundedFollowup": "Root-controlled R unfreeze/reversible fixes and focused actual boundary regressions, then newly bound source/dist candidate and existing final tiers. Current review neither mutates freeze nor grants source/test writes. Full joined backend/provider/external obligations stay separate."
+  }
+}

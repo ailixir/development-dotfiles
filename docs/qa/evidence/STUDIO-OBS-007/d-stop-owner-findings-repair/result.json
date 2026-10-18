@@ -1,0 +1,75 @@
+{
+  "schema": "d-stop-owner-findings-repair/1",
+  "state": "FROZEN_SOURCE_CANDIDATE_AWAITING_COORDINATOR_FORMAT_COMPILE_RUNTIME_AND_INDEPENDENT_REVIEW",
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-stop-owner-findings-repair-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-stop-owner-findings-repair-context.txt",
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-d-stop-owner-review.json"
+  ],
+  "sourceHashes": {
+    "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "beforeSha256": "ea7fb2b07d040747973d17be78953271933b09089765e73fa322cd5ee0ae0e37",
+    "afterSha256": "01d36daf88e8758132d94a267bdbaa216f494c5e2039d6c6784c223bbb42c466",
+    "patchSha256": "9f914dd696ad98140a66736a865b8fdf533781210935bdb3dc0f3f4145ebf2c9",
+    "originalNineMethodSha256": "ec8ce679e86bd1c931aa3006e5d79af2fe7387fdfb4557874bd257303d2d724b",
+    "originalNineMethodByteIdentical": true,
+    "originalModeBlockByteIdentical": true,
+    "existingExplicitMethods": [
+      "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit",
+      "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose",
+      "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose",
+      "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation",
+      "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose"
+    ],
+    "expectedRuntimeInvocations": 14
+  },
+  "findingsMatrix": [
+    {
+      "finding": "D-STOP-01",
+      "candidate": "Source/preregister/session/thread/count guards are outside original-operation completion try/finally. A separate guardFailure/outcome latch exposes rejected unstarted state while genuine completed latch is untouched. Invocation counters increment only immediately at original sender/super.execute entry after all guards. operationsComplete rejects every guard failure, and drain throws an explicit cause-preserving rejected/unstarted diagnostic; proxy/context refuses destruction rather than report genuine completion. A fresh diagnostic avoids automatic TWR self-suppression of the guard Throwable.",
+      "status": "SOURCE_CANDIDATE_RUNTIME_UNRUN"
+    },
+    {
+      "finding": "D-STOP-02",
+      "candidate": "Deliberate observation interruption is isolated in an actual owned virtual observation thread. It records the actual interrupted await and restoration at actor method exit; actor is joined in normal/failure cleanup. Main/cleanup thread newly received interruptions are never erased by outer finally; entry flag and caught InterruptedException are restored, join/drain temporarily clear only with restoration. No reset to entry snapshot remains.",
+      "status": "SOURCE_CANDIDATE_RUNTIME_UNRUN"
+    },
+    {
+      "finding": "D-STOP-03",
+      "candidate": "After independent drain/join, actual late sender/confirmation/guard/observer errors are appended to primary through identity-based distinct suppression. Original private fault aggregation is likewise protected. Only a refusal Throwable already positively asserted with exact genuine HTTP/JDBC and persisted state evidence is classified as intentional; an earlier observation/assertion failure cannot silently discard that unasserted later operation failure.",
+      "status": "SOURCE_CANDIDATE_RUNTIME_UNRUN"
+    }
+  ],
+  "rejectedOwnershipSemantics": "Guard rejection is failed/unstarted, not completed. Its separate outcome signal wakes cleanup only to fail explicitly, never releases the genuine completed latch or establishes operationsComplete. Proxy/context destruction is refused on this path and cannot be reported reaped/PASS. There is no successful watchdog/timeout path.",
+  "interruptTopology": "Deliberate control interrupt belongs to the observation actor; actual main/cleanup external flags remain through method exit. The actor is genuinely joined after gates are released and actual operations finish/fail; no alive-thread buffer mutation or Future-state completion inference.",
+  "errorTopology": "Primary kept. All unexpected cleanup/operation errors preserved distinctly. Intentionally asserted actual HTTP503 or PSQL08 refusals remain separately documented expected outcomes; a not-yet-asserted refusal arising during cleanup is attached. Genuine original calls and physical transactions remain unchanged.",
+  "preserved": [
+    "Original nine method and Mode block byte-identical. All14 names/scenarios remain; no assertion inventory reduction.",
+    "Same routed datasource and original sender/super.execute forwarding retained. Authenticated HTTP503 and actual JDBC08 controls preserved.",
+    "Original private fault actual reads/posts/consume, UNKNOWN409/interrupt/zero arrays, unresolved pre-rescue facts, recovery and separate authorized cancellation remain.",
+    "Existing explicit Spring context/scheduler actual termination before PostgreSQL and AFTER_CLASS cache eviction unchanged.",
+    "No production/migration/role/schema/canonical/generated/pin/B/R/budget/lifecycle edits; optional JDBC timeouts remain absent."
+  ],
+  "execution": {
+    "runtime": "NOT_RUN",
+    "compilation": "NOT_RUN",
+    "formatting": "NOT_RUN",
+    "tests": "NOT_RUN",
+    "Gradle": "NOT_RUN",
+    "Docker": "NOT_RUN",
+    "processActions": []
+  },
+  "limits": [
+    "No whole outer Future/common-pool join, general DB deadline, held-row/pool/primary-outage or permanently blocked work bound.",
+    "Rejected ownership is honest failure with retained resources, never certified completed cleanup.",
+    "All14 current-source invocations remain UNRUN; no source-only self-closure of independent findings, QA/all19/Core/browser/lifecycle verdict."
+  ],
+  "archives": {
+    "before.java": "docs/qa/evidence/STUDIO-OBS-007/d-stop-owner-findings-repair/before.java",
+    "after.java": "docs/qa/evidence/STUDIO-OBS-007/d-stop-owner-findings-repair/after.java",
+    "source.patch": "docs/qa/evidence/STUDIO-OBS-007/d-stop-owner-findings-repair/source.patch",
+    "hashes.json": "docs/qa/evidence/STUDIO-OBS-007/d-stop-owner-findings-repair/hashes.json",
+    "matrix.json": "docs/qa/evidence/STUDIO-OBS-007/d-stop-owner-findings-repair/matrix.json"
+  },
+  "nextOwner": "Coordinator controls formatting, current compile/runtime and independent re-review; source parked."
+}

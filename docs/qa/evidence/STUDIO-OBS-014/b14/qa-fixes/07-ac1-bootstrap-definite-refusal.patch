@@ -1,0 +1,168 @@
+diff --git a/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java b/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java
+@@ -136,6 +136,13 @@
+         409);
+     contracts.validate("v3/guided-planning-commands", command);
+     require(id.equals(command.path("sessionId").asText()), "INVALID_CONTRACT", 422);
++    // ar-2-r14-stops ruling 2 (tests[1]): a continuation of a session that a definite runner
++    // refusal of its bootstrap context ended returns that terminal session and makes no runner,
++    // model or assignment request. Every other terminal continuation is unchanged.
++    JsonNode refused = refusedBootstrapSession(controller, id);
++    if (refused != null) {
++      return refused;
++    }
+     if (fence == 0) {
+       JsonNode owned =
+           dispatch.assign(controller, id, "translation-assignment", properties.workerId());
+@@ -2138,6 +2145,29 @@
+             controller, id, fence, current -> current.progress().path("generation").asInt());
+     identity.put("expectedGeneration", generation);
+     dispatch.observe(controller, id, fence, "refresh-" + generation, identity);
++  }
++
++  /**
++   * The safe view of a session that ended FAILED because the runner definitely refused a bootstrap
++   * context delivery (outcome REFUSED, recorded by {@link #refuseBootstrapDelivery}), else null.
++   */
++  private JsonNode refusedBootstrapSession(Authentication controller, String id) {
++    com.citi.put.checks.studio.guided.session.GuidedInternalSecurity.requireRole(
++        controller, "backend-controller");
++    return repository.transaction(
++        () -> {
++          var session = repository.lock(id);
++          if (!session.document().path("state").asText().equals("FAILED")) {
++            return null;
++          }
++          for (JsonNode delivery :
++              session.progress().path("translationBootstrap").path("deliveries")) {
++            if (delivery.path("outcome").asText().equals("REFUSED")) {
++              return safe(session.document());
++            }
++          }
++          return null;
++        });
+   }
+ 
+   private ObjectNode safe(JsonNode session) {
+diff --git a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+@@ -528,6 +528,7 @@
+   @Autowired GuidedTranslationService translation;
+   @Autowired GuidedClarificationContextStore questions;
+   @Autowired GuidedDispatchService dispatch;
++  @Autowired GuidedMaterializationService materialization;
+   @Autowired GuidedLlmGatewayClient gateway;
+   @Autowired GuidedSourceInputResolver inputs;
+   @Autowired GuidedTranslationProperties properties;
+@@ -1791,6 +1792,109 @@
+         .isEqualTo("FAILED");
+     assertThat(PROVIDER_KINDS).containsExactly("SOURCE_PLAN");
+     assertThat(NAVIGATION_DESTINATIONS).isEmpty();
++  }
++
++  /**
++   * ar-2-r14-stops ruling 2 tests[1] (STUDIO-OBS-014 AC-1 clarification h2): the runner definitely
++   * refuses the first bootstrap context with IDENTITY_MISMATCH. Exactly one context request is
++   * made, the session is FAILED with errorCode RUNTIME_INCOMPATIBLE, the caller gets 409
++   * retryable:false, and a second continuation makes zero runner (and zero model) requests and
++   * returns the terminal session. The real GuidedRunnerClient classifies the stub's reply.
++   */
++  @Test
++  void aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried() throws Exception {
++    String id = startSession();
++    long fence =
++        dispatch
++            .assign(fixture.controller, id, "translation-assignment", properties.workerId())
++            .path("ownerFence")
++            .asLong();
++    try (var runner = new StubRunner("{\"code\":\"IDENTITY_MISMATCH\"}", false)) {
++      var continuation = translationWithBridge(runner.dispatch(sessions, materialization));
++      var refusal =
++          org.assertj.core.api.Assertions.catchThrowableOfType(
++              () ->
++                  continuation.plan(fixture.controller, id, fence, "refused-context", command(id)),
++              GuidedSessionException.class);
++      assertThat(refusal).isNotNull();
++      assertThat(refusal.getMessage()).isEqualTo("RUNTIME_INCOMPATIBLE");
++      assertThat(refusal.status()).isEqualTo(409);
++      assertThat(refusal.retryable()).isFalse();
++      assertThat(runner.operations).as("exactly one context request").containsExactly("context");
++      JsonNode failed = repository.transaction(() -> repository.lock(id).document().deepCopy());
++      assertThat(failed.path("state").asText()).isEqualTo("FAILED");
++      assertThat(
++              repository.transaction(
++                  () -> repository.lock(id).progress().path("errorCode").asText()))
++          .isEqualTo("RUNTIME_INCOMPATIBLE");
++      int modelCalls = PROVIDER_KINDS.size();
++      JsonNode again =
++          continuation.plan(fixture.controller, id, fence, "after-refusal", command(id));
++      assertThat(again.path("state").asText()).as("the terminal session").isEqualTo("FAILED");
++      assertThat(runner.operations).as("no runner request on continuation").hasSize(1);
++      assertThat(PROVIDER_KINDS).as("no model request on continuation").hasSize(modelCalls);
++      assertThat(NAVIGATION_DESTINATIONS).isEmpty();
++    }
++  }
++
++  /**
++   * A stub guided runner over the fixture's TLS identity: records every operation, and either
++   * answers 409 with {@code reply} or never answers (until closed).
++   */
++  private static final class StubRunner implements AutoCloseable {
++    final List<String> operations = new CopyOnWriteArrayList<>();
++    private final com.sun.net.httpserver.HttpsServer server;
++    private final java.util.concurrent.CountDownLatch release =
++        new java.util.concurrent.CountDownLatch(1);
++    private final java.util.concurrent.ExecutorService executor =
++        java.util.concurrent.Executors.newCachedThreadPool();
++
++    StubRunner(String reply, boolean hang) throws Exception {
++      server = com.sun.net.httpserver.HttpsServer.create(new InetSocketAddress("localhost", 0), 0);
++      server.setHttpsConfigurator(new com.sun.net.httpserver.HttpsConfigurator(Environment.TLS));
++      server.setExecutor(executor);
++      server.createContext(
++          "/",
++          exchange -> {
++            exchange.getRequestBody().readAllBytes();
++            String path = exchange.getRequestURI().getPath();
++            operations.add(path.substring(path.lastIndexOf('/') + 1));
++            try {
++              if (hang) {
++                release.await(60, java.util.concurrent.TimeUnit.SECONDS);
++                return;
++              }
++              byte[] body = reply.getBytes(StandardCharsets.UTF_8);
++              exchange.getResponseHeaders().add("Content-Type", "application/json");
++              exchange.sendResponseHeaders(409, body.length);
++              exchange.getResponseBody().write(body);
++            } catch (InterruptedException interrupted) {
++              Thread.currentThread().interrupt();
++            } finally {
++              exchange.close();
++            }
++          });
++      server.start();
++    }
++
++    GuidedDispatchService dispatch(
++        GuidedSessionService sessions, GuidedMaterializationService materialization) {
++      return new GuidedDispatchService(
++          sessions,
++          materialization,
++          new GuidedRunnerClient(
++              URI.create("https://localhost:" + server.getAddress().getPort()),
++              Environment.TLS,
++              () -> Environment.token("backend-controller", "controller-1", "studio-guided-runner"),
++              C));
++    }
++
++    @Override
++    public void close() {
++      release.countDown();
++      server.stop(0);
++      executor.shutdownNow();
++    }
+   }
+ 
+   @Test

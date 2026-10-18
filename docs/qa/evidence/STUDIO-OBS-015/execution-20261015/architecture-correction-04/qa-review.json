@@ -1,0 +1,211 @@
+{
+  "artifact": "Independent Quinn ARCH015-04 accepted-plan schema addendum review",
+  "reviewer": "Quinn /root/quinn015_design independent from Aria/C-int/backend/runner owners",
+  "createdAt": "2026-10-15T05:43:27.675939+00:00",
+  "story": "STUDIO-OBS-015",
+  "reviewKind": "NARROW_IN_MEMORY_DESIGN_PATCH_AUTHORIZATION_ONLY",
+  "status": "READY_FOR_C_INT_PATCH",
+  "readyForCIntPatch": true,
+  "patchInstalled": false,
+  "cintIntegrationGreen": false,
+  "storyQualityVerdict": null,
+  "storyDone": false,
+  "manifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-04/manifest.json",
+    "sha256": "1cc89ac2cb5947c36701147546ec9cb15c8f6ee890490b255626093a34e71697",
+    "boundFiles": 8,
+    "mismatches": [],
+    "preservedPriorFiles": 82,
+    "priorMismatches": []
+  },
+  "authorizedPatch": [
+    {
+      "op": "test",
+      "path": "/definitions/AcceptedTranslationPlan/properties/needs/items/properties/consumers/minItems",
+      "value": 1
+    },
+    {
+      "op": "replace",
+      "path": "/definitions/AcceptedTranslationPlan/properties/needs/items/properties/consumers/minItems",
+      "value": 0
+    }
+  ],
+  "onlyAuthorizedProductionFile": "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json",
+  "assessment": [
+    {
+      "id": "SCALAR-ONLY",
+      "status": "DESIGN_SUFFICIENT",
+      "evidence": "Independent deep object diff of owned before-schema and in-memory after-schema proves only AcceptedTranslationPlan.needs.items.consumers.minItems1→0 changes. All existing required/closed fields, item shape,max200 and need/binding/producer identities remain unchanged. No new field, publicoperation, versionfallback, generation or SQL change. Actualproduction installation/generation is not performed by QA."
+    },
+    {
+      "id": "PARALLEL-COPIES",
+      "status": "DESIGN_SUFFICIENT",
+      "evidence": "Independently recursively scanned every productionv3 schema and found six consumer-array definitions. allocation/binding/planning-context/source-selection are already trustedmin0. AcceptedTranslationPlan trustedcopy is the only intended1→0. Complete productionguided-model-response SHA remains2d986c098548b604d6fe75a3597397eabe325705550a78286e76ae5ae2a176ca and rawnewneedmin1 is preserved; emptyrawneed rejects and nonemptyrawshape remains valid. Trusted accepted/question-plan witnesses share definition but never waive existing exactsemantic joins."
+    },
+    {
+      "id": "RETAINED-ZERO-BOUNDARY",
+      "status": "DESIGN_SUFFICIENT_RUNTIME_UNVERIFIED",
+      "evidence": "Patched shape admits zero but grants no trust. Focused independent proof requires nonempty originalprefix, immutable exactbase ID/digest/program, actual current SUCCEEDED dispatch1 read retained in switch/firstsuffix, same raw need identity, base/import coordinate/recipe/origin, exact historical preparation/availability/inputversion, complete raw edge partition and no successful binding use omitted. Rawallocations/bootstrap allocationHash and failededge history remain unmodified. New model/suffix/orphan/unread/unproved producer cannot qualify; claimed trusted attribute is a closedshape error."
+    },
+    {
+      "id": "HISTORY-AND-CREDIT",
+      "status": "DESIGN_SUFFICIENT_NO_INTEGRATION_CREDIT",
+      "evidence": "ARCH015-02 no-schema-change assumption missed this inline trustedcopy; original records remain byteexact and this explicitaddendum records the omission. Both complete immutable failedC-int witnesses fail before only at consumers minItems and pass the in-memorypatched shape. Focused joins are selected designproof, not the complete Java/TSoracle, authenticatednative proof or completedsourcegeneration. C-int remains explicitly NOT_GREEN until sourcepatch/generation/parity/completepositives+semanticnegatives finish with newafterfreeze."
+    }
+  ],
+  "independentChecks": {
+    "status": "PASS",
+    "cases": 16,
+    "twoFullWitnesses": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-02-03/failed-full-basis-admitted-binding-replacement.json",
+        "sha256": "29f4738b4eab2220adcfdf23004d0672a6e15b650c3f7362a29d9a9fe22a30ec",
+        "expectedBeforeSchema": false,
+        "expectedAfterSchema": true,
+        "semanticCondition": "Actualsuccessfulcurrentretainedprefixproducer withverifiedbase/import/availability andexact02effectivegraph; not a blanketorphanneed exception."
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-02-03/failed-full-basis-pre-admission.json",
+        "sha256": "ba27068f9b449c3d2e04d2ba3d88033dc3755204485e39792fcf71eddcd1d433",
+        "expectedBeforeSchema": false,
+        "expectedAfterSchema": true,
+        "semanticCondition": "Actualsuccessfulcurrentretainedprefixproducer withverifiedbase/import/availability andexact02effectivegraph; not a blanketorphanneed exception."
+      }
+    ],
+    "witnessResults": [
+      {
+        "name": "admitted-binding-replacement",
+        "before": false,
+        "after": true,
+        "oldErrors": [
+          {
+            "instancePath": "/translationPlan/needs/0/consumers",
+            "schemaPath": "#/properties/needs/items/properties/consumers/minItems",
+            "keyword": "minItems",
+            "params": {
+              "limit": 1
+            },
+            "message": "must NOT have fewer than 1 items"
+          }
+        ],
+        "focusedProof": true,
+        "ok": true
+      },
+      {
+        "name": "pre-admission",
+        "before": false,
+        "after": true,
+        "oldErrors": [
+          {
+            "instancePath": "/translationPlan/needs/0/consumers",
+            "schemaPath": "#/properties/needs/items/properties/consumers/minItems",
+            "keyword": "minItems",
+            "params": {
+              "limit": 1
+            },
+            "message": "must NOT have fewer than 1 items"
+          }
+        ],
+        "focusedProof": true,
+        "ok": true
+      }
+    ],
+    "focusedNegatives": [
+      "no incremental authority",
+      "unread/orphan producer",
+      "failed producer",
+      "unretained successful producer",
+      "foreign immutable base pin",
+      "missing verified base binding",
+      "missing prefix read",
+      "wrong historical context",
+      "unknown/pending raw edge",
+      "hidden actual successful binding use",
+      "native-started excluded edge"
+    ],
+    "rawModelEmptyRejected": true,
+    "rawModelNonemptyUnchanged": true,
+    "claimedTrustFlagRejected": true,
+    "consumerDefinitions": [
+      {
+        "file": "allocation.schema.json",
+        "pointer": "/properties/consumers/minItems",
+        "minimum": 0
+      },
+      {
+        "file": "binding.schema.json",
+        "pointer": "/properties/consumers/minItems",
+        "minimum": 0
+      },
+      {
+        "file": "guided-model-response.schema.json",
+        "pointer": "/oneOf/0/properties/needs/items/properties/consumers/minItems",
+        "minimum": 1
+      },
+      {
+        "file": "planning-context.schema.json",
+        "pointer": "/properties/needs/items/properties/consumers/minItems",
+        "minimum": 0
+      },
+      {
+        "file": "replay-validation.schema.json",
+        "pointer": "/definitions/AcceptedTranslationPlan/properties/needs/items/properties/consumers/minItems",
+        "minimum": 1
+      },
+      {
+        "file": "source-selection.schema.json",
+        "pointer": "/properties/needs/items/properties/consumers/minItems",
+        "minimum": 0
+      }
+    ],
+    "exactChangedPointers": [
+      "/definitions/AcceptedTranslationPlan/properties/needs/items/properties/consumers/minItems"
+    ],
+    "diagnosticSourceDrift": [],
+    "scope": "Only in-memory schema and focused identity/graph checks. Existing01complete snapshot reconstruction and02raw graph/history/native rules remain mandatory; selected checks cannot substitute full semantic oracle or application acceptance.",
+    "applicationTestsExecuted": 0,
+    "databaseCommandsExecuted": 0,
+    "browserCommandsExecuted": 0,
+    "buildCommandsExecuted": 0,
+    "generatorCommandsExecuted": 0
+  },
+  "originalApplicationScope": {
+    "newCasesAdded": 0,
+    "mapping": [
+      "Original IncrementalPublicationIT.deletedLastConsumerRetainsProvenPrefixRead",
+      "ARCH015-02 IncrementalPublicationIT.excludedBindingConsumerRetainsRawIntentAndPublishesLiteralReplacement",
+      "ARCH015-02 IncrementalGraphProjectionTest.zeroConsumerRequiresRetainedActualProducer",
+      "ARCH015-02 IncrementalGraphProjectionTest.rejectsEveryUnaccountedOrUnprovenEdge",
+      "Correction01 SnapshotBasisValidationTest.candidateMapsAreDerivedBeforeArtifactHash and exactcurrent/base identity parity"
+    ],
+    "assessment": "This is a schema-port correction for already-required deleted-consumer/retained-producer/edge/orphan tests, not new product scope or an acceptance reduction. Preserve original and01/02/03actual obligations and all recorded foundation scopes."
+  },
+  "blockingDesignFindings": [],
+  "requiredCIntActions": [
+    "Preserve exact failed02-03checkpoint/witnesses and historicalsourcebytes.",
+    "Apply exactly authorizedsourcepointertest1thenreplace0, regenerate once through existinggenerator and verify source/generated parity and rawmodelmin1/fullhash. Never handeditgeneratedfiles.",
+    "Finish complete selected positive ANDsemanticnegativewitnesses in existingcontractoracle; any failure remains red and is fixed under appropriate owner. Do not call schema-validonly green.",
+    "Freeze exactaftermanifest/receipt and hand tobackend/runnerowners; actualJava/TS/PG/native/joined/privateproof/fullQA remain necessary beforeDone."
+  ],
+  "notClaimed": [
+    "Productionpatch or generatedoutput update",
+    "C-int semantic/generation/parity green",
+    "Complete runtime/Java/TS/auth/native validation",
+    "New application feature/count/requirement",
+    "StoryPASS/Done",
+    "Commit/push/install/deploy/SQL/DBaction"
+  ],
+  "auditFiles": {
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-04/qa/independent-audit.json": "756e1e99306d103107462271e17b397d94ef50d5fe9e209839ce9b09acd2bf06",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-04/qa/independent.cjs": "6d7af4261a54a39c5fcf71232bee12d1173707059507eac383089fe00fe03bba",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-04/qa/owner-readonly-check.json": "1d6a78faf64741d2cb55d9c4d7a254ec74a20f9d32165619b78ccce5100df082"
+  },
+  "writeScope": [
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-04/qa-review.json",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-04/qa/**"
+  ],
+  "budget": {
+    "wholeWaveCeilingUSD": 500,
+    "actualBilling": "unavailable"
+  }
+}

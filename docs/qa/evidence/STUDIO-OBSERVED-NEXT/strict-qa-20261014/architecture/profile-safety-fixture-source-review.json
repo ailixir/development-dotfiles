@@ -1,0 +1,165 @@
+{
+  "artifact": "Aria-independent-profile-safety-fixture-final-byte-review-attempt03",
+  "decision": "ACCEPT_ARCHITECTURE_SOURCE_ONLY_FOR_ROOT_SERIALIZED_NATIVE_VALIDATION",
+  "sourceApproved": true,
+  "notStoryGate": true,
+  "doneAllowed": false,
+  "nativeExecutionAuthorizedByThisReview": false,
+  "scope": "Read-only source/API/receipt inspection and independent hashing; only this architecture evidence JSON written. No source/test/build/native/process/CLI/config/dist/story/gate/lifecycle mutation. OBS-015 unstarted; declared shared USD500 ceiling, actual billing unavailable.",
+  "authority": [
+    {
+      "path": "architecture/profile-safety-fixture-ruling.md",
+      "sha256": "9deafbd7bf5a60e2730778043a9954e82450864af91c919b4d8d8bbcc6b2933d"
+    },
+    {
+      "path": "qa013/profile-safety-fixture-plan-review.json",
+      "sha256": "45271d2463bd05ae7cfe19394d83d7d68d4eeb66e0ddbee5147f30fa9651d48a"
+    }
+  ],
+  "reviewedFreeze": [
+    {
+      "path": "runner-remediation/profile-safety-fixture/source-checkpoint-attempt03.json",
+      "sha256": "cb3fe1bcb0e70570c98ee6a66e502e75baf853d87d25654ff9d2951eb788b276"
+    },
+    {
+      "path": "runner-remediation/profile-safety-fixture/implementation-receipt-attempt03.json",
+      "sha256": "2c7a5a59aab0c9f2993d832f97861dd07afcb6166fb7228ab8179dbd88032891"
+    },
+    {
+      "path": "runner-remediation/profile-safety-fixture/implementation-attempt03.patch",
+      "sha256": "e2924d787948746cb615b7f27444a6076fdbc16c48333da6c0e9aad2c6806d88"
+    },
+    {
+      "path": "runner-remediation/profile-safety-fixture/privacy-correction-attempt03.patch",
+      "sha256": "ed889c8011a7df414a13f8d228c3b7bd889fa7332a7a1e1b07cb3546422fc038"
+    },
+    {
+      "path": "runner-remediation/profile-safety-fixture/before.json",
+      "sha256": "185c12e2301698ff7bbc2b8e0e00d5952593f6855b6711f72f9cc16ffe671e23"
+    },
+    {
+      "path": "runner-remediation/profile-safety-fixture/after-attempt03.json",
+      "sha256": "d141c97948c90a6a88bb12c74ba3987c697ba030792edc44a619a414f53bc183"
+    }
+  ],
+  "independentlyHashedSources": [
+    {
+      "path": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "sha256": "941a658043fcc687d30311b8fff34d4ffd1bc02ca2b517cac21dc8fde6d855f7"
+    },
+    {
+      "path": "studio-runner/test/helpers/profileSafetyFixture.ts",
+      "sha256": "8147b47e798c68291255f13c106f6c052c38b7d3e5651c54367b1fb59cde1617"
+    },
+    {
+      "path": "studio-runner/test/profileSafetyFixture.test.ts",
+      "sha256": "f88f26bb41e94517a9e8da90f145bcb9f30fd44d9152a6e20ba9dafb61310e81"
+    }
+  ],
+  "blockingFindings": [],
+  "independentBridge": {
+    "lastFullNativeAttempt03ToCorrectionBefore": "All1581 captured input hashes identical; no added/removed entries.",
+    "beforeInputs": 1581,
+    "afterInputs": 1583,
+    "changedExisting": [
+      "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts"
+    ],
+    "added": [
+      "studio-runner/test/helpers/profileSafetyFixture.ts",
+      "studio-runner/test/profileSafetyFixture.test.ts"
+    ],
+    "all1583AfterEntriesRehashedAgainstCurrentFiles": true,
+    "currentHashMismatches": [],
+    "distBefore": 238,
+    "distAfter": 238,
+    "distChanged": [],
+    "all238DistFilesRehashed": true,
+    "receiptReferencedArtifactsRehashed": 44,
+    "receiptHashMismatches": [],
+    "otherOriginalCases": [
+      {
+        "block": "Five prelaunch attacks +two no-context stages +acquired-context failure case",
+        "byteIdentical": true,
+        "bytes": 4731,
+        "sha256": "2e5704550e13045a47ef4648803f19d037d0183c666923d0e57daadf058b7779"
+      },
+      {
+        "block": "Positive confined launch suffix",
+        "byteIdentical": true,
+        "bytes": 886,
+        "sha256": "c333061f6f7687be886f60035a288c93f40c626090f3d8cf2c4e0052eec620b0"
+      }
+    ],
+    "preserved": "Production browser/profile guards, backend PlanningIT96a1e2..., config/dist, native readiness helper786bcc.../51cases385638..., blank helper9d70.../27casesd96c... unchanged.",
+    "privacyCorrectionBridge": {
+      "comparedInputs": 1583,
+      "changedOnly": [
+        "studio-runner/test/helpers/profileSafetyFixture.ts",
+        "studio-runner/test/profileSafetyFixture.test.ts"
+      ],
+      "newOrRemovedInputs": [],
+      "currentHashMismatches": [],
+      "distFilesCompared": 238,
+      "distChanged": [],
+      "nativeFixtureUnchanged": true
+    }
+  },
+  "otherwiseConformingSource": [
+    "Actual context retained before post-acquisition awaits; every setup/mutation failure is recorded and same context returned; assertAttack keeps partial setup permanently red for either returned success or failure capability.",
+    "Original live rename, canary only after rename, symlink and moved-directory identity checks preserved; connected/nonclosing before/after attack; original GFL/CONTEXT_LOST/checks-guided absence plus outside identity/canary checks present.",
+    "Production expected-failure capability explicitly invokes memoized saved actual close; raw request/fulfillment/events recorded before PID observation. Public owned-browser CDP snapshots only, positive bounded IDs and <=1024 union.",
+    "First LIVE/UNKNOWN/invalid/missing event observation rejects permanently; later <=5s/50ms polling is cleanup-only. Fallback cannot earn missing production-close credit. Root removal requires owned confirmation; no nonzero PID signal/private SDK/global scan/close or rm retry.",
+    "Late sessions/capture rejections are consumed and joined; saved close memoized; original primary and ordered cleanup error objects retained in memory including thrown undefined; remaining safe stages run after errors.",
+    "Installed persistent public-browser association chain independently inspected at core55505/63320/62432 and SDK close contracts reviewed; source compatibility is not native availability proof.",
+    "Fixture scheduling and PID gate do not prove unchanged production descendant-quiescence behavior. This distinction remains explicit.",
+    "Final safe diagnostic extraction closes the independently identified accessor bypass; strict whitelisted primary/secondary codes preserve EEXIST versus ENOTEMPTY without persisting original messages/properties. Installed Vitest serializeValue honors the top-level Error.toJSON, which includes fixed facts and excludes raw nested errors."
+  ],
+  "validationEvidence": {
+    "finalReport": {
+      "path": "runner-remediation/profile-safety-fixture/pure-attempt06-vitest.json",
+      "sha256": "2c5ce8d9ea751aa3df397812235600a5948055ffcffa87b30c62f9e5bfb6561e",
+      "passed": 67,
+      "failed": 0,
+      "pending": 0,
+      "success": true
+    },
+    "finalLog": {
+      "path": "runner-remediation/profile-safety-fixture/pure-attempt06.log",
+      "sha256": "64d9bb3999b0daacb9745b2e8bb576bc4f473a73760422321abac4d103eb59fa"
+    },
+    "finalTypeAndScopedLint": "Retained final attempt06 receipt records full tsc exit0 and scoped three-file eslint exit0; both final logs independently hashed empty SHAe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855. Reviewer ran no validations.",
+    "criticalInspection": "Read all deferred/fake-clock/public-session/mutation/PID/error controls and six new accessor cases, not pass counts alone. These exercise partial attack handoff, returned success/failure resource retention, raw close before removal, first PID failure persistence after cleanup polling, missing production-close rejection, bounded union/capture, late sessions and rejection disposal, foreign adapter refusal, primary/secondary error order, thrown undefined, canary/identity failures and reporter privacy.",
+    "limitations": "Injected ports prove resource ordering and discrimination, not actual Chromium/CDP/SDK/PID integration. Public persistent-browser chain is source-compatible but actual native availability/first-post-close quiescence remains unproved until fresh runtime execution.",
+    "historical": "Initial pure52/1/type2/lint1, intermediate58/59 and rejected61 reports stay dated evidence. Their checkpoints/receipts were preserved; current source acceptance binds only67-case attempt03."
+  },
+  "remainingRequired": [
+    "Independent Quinn final-byte source disposition, then root alone decides serialized native release under a fresh exact source/dist freeze.",
+    "Execute all10 original browser-profile-safety cases unskipped, with actual completed live attack, exact GFL/CONTEXT_LOST refusal, production saved-real-close request/fulfillment, first PID observation, outside canary/identity and scratch/root cleanup evidence.",
+    "Fresh complete fixtures, deployment, mandatory normal backend and every remaining planned local gate remain required. No blind retry, weakened assertion, PID wait-assisted green, threshold/timeout growth or production edit.",
+    "Any incomplete attack, unexpected production success, first post-SDK LIVE/UNKNOWN PID, cleanup uncertainty, canary change or repeated ENOTEMPTY after measured quiescence stops for diagnosis. OBS-015 remains unstarted; no Done before all planned local gates are green."
+  ],
+  "historicalRejectedReview": {
+    "path": "architecture/profile-safety-fixture-source-review-attempt02-rejected.json",
+    "sha256": "8d73d73b493f218480ff908cb12303c21bb9ee8d348744a0eed960fdc3e45dfd",
+    "decision": "Attempt02 remains rejected historical evidence; no retroactive source/native approval."
+  },
+  "resolvedFindings": [
+    {
+      "id": "PROFILE-DIAGNOSTIC-ACCESSOR-001",
+      "status": "RESOLVED_IN_FROZEN_ATTEMPT03",
+      "rejectedSourceSha256": "7b7b11b94481d012b73b40b2a11d7f79f843d634add3c2e8b6f61316af644e84",
+      "rootAuthorization": "Root explicitly released exactly helper/unit privacy remediation after the independent blocking finding; fixture and all ownership/PID/runtime behavior remained frozen.",
+      "sourceResolution": "profileDiagnosticCode reads own property descriptors for code/message/name, rejects accessor descriptors without invoking getters, caches primitive descriptor values, validates the exact cached string and returns that same string. No ProfileFixtureError special branch rereads a property. Proxy descriptor failure maps fixed UNEXPECTED. Inherited code getters are ignored without invocation. Unknown messages/codes remain UNEXPECTED; only fixed whitelist/ASSERTION/CLEANUP_MULTIPLE values can serialize.",
+      "regressionResolution": "Six added actual helper orchestration/data cases: changing generic code, Error message, ProfileFixtureError code, ProfileFixtureError message, name accessor, and stable own/inherited data handling. Each accessor case exercises both primary and REMOVE secondary classification, asserts original object retained, UNEXPECTED fixed output, zero getter reads before/after toJSON, and absence of private canaries. Existing EEXIST+ENOTEMPTY stable-data serialization proof remains.",
+      "narrowDiffVerified": "privacy-correction-attempt03.patch independently read: only profileDiagnosticCode implementation and six unit cases/import changed from rejected attempt02. Native fixture941a..., resource ownership, close timing, PID logic and attack sequence unchanged.",
+      "historicalFinding": "See exact preserved rejected review for original repeated-read bypass; no historical private-data disclosure was claimed."
+    }
+  ],
+  "remainingLimits": [
+    "Test-owned PID observation changes fixture scheduling and cannot prove unmodified production descendant-quiescence behavior. Saved real-close invocation/fulfillment are recorded before PID observation; first LIVE/UNKNOWN/invalid or missing-event observation remains red even if later cleanup succeeds.",
+    "PID evidence covers initial+preclose retained browser-reported IDs only. It is not proof against arbitrary future/reparented processes. EPERM/unknown/reused-live PID is never credited dead.",
+    "SDK/CDP/OS operations are not intrinsically cancellable by a Promise race. Unsettled close/session/probe cleanup remains red under existing120000ms outer guard; no hard OS cancellation guarantee.",
+    "Unknown original error details remain in memory only; fixed code/phase/attack/close/PID facts are persisted. Conservative UNEXPECTED classification is intentional privacy behavior.",
+    "Original full native attempt03 remains red231PASS/1FAIL/9uncredited historical skips; exact original ENOTEMPTY branch remains unproved. This source review gives no QA/story gate or execution release."
+  ]
+}

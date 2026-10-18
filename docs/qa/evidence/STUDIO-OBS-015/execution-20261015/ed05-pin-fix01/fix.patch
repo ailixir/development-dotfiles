@@ -1,0 +1,293 @@
+--- a/docs/architecture/ADR-001-studio-runner-scaffolding.md
++++ b/docs/architecture/ADR-001-studio-runner-scaffolding.md
+@@ -119,6 +119,8 @@
+ 
+ CI (story 10.3) asserts all four agree and that `node --version` inside the image matches `engines`/`.nvmrc`; any mismatch fails the build. `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` is set in the Dockerfile and in CI so `postinstall` never fetches browsers; the browsers are the image's. Locally, developers install the matching browser with `npx playwright install chromium` at the pinned version; Playwright refuses to launch a browser build that does not match the package, so drift fails loudly rather than silently.
+ 
++**Amendment (ED-05 pin-fix01).** `.nvmrc` pins the Node major shipped by the pinned Playwright image, as §3 says, and follows it. The image at the pinned version (`mcr.microsoft.com/playwright:v1.63.0-noble`) ships Node v24.20.0, so `.nvmrc` is `24` and `engines.node` is `>=24.11.0 <25.0.0`. The pinned image tag ships a single Node major, so a Node 22 image would be a locally assembled variant outside the tag convention above; that path is declined. Supporting a single Node major is the rule: no other major is accepted by `engines`, `check:pins` or the image. A Playwright bump whose image ships a new Node major moves `.nvmrc` and `engines.node` in the same PR as the other pin copies.
++
+ **Upgrade procedure.** One PR bumps all four copies, regenerates `runtime-versions.json`, runs the reference and adversarial corpora, and records compatibility for existing confirmed revisions (§4.6: runtime upgrades revalidate; incompatible revisions are blocked with an explanation, never reinterpreted). Model/prompt/language-policy/syntax-reference versions are pinned alongside in the same file by the backend (§4.3); the runner only records what it runs.
+ 
+ **Floor.** The exact version is chosen in 10.3 against the internal image; the 2026-08-13 research recorded a floor of Playwright ≥ 1.59. No version is asserted here.
+--- a/studio-runner/.nvmrc
++++ b/studio-runner/.nvmrc
+@@ -1 +1 @@
+-22
++24
+--- a/studio-runner/README.md
++++ b/studio-runner/README.md
+@@ -537,27 +537,26 @@
+ 
+ #### The Node pin
+ 
+-`.nvmrc` and `engines.node` are not two spellings of the same thing, and `check:pins` treats them
+-differently on purpose:
++`.nvmrc` and `engines.node` pin the **same single major**, and `check:pins` asserts that they do:
+ 
+ | Copy | What it pins | Asserted how |
+ |---|---|---|
+-| `.nvmrc` (`22`) | the Node major **the image must ship** | equals the `engines.node` floor major; and equals the major of the recorded `node` whenever the record came from inside the pinned image |
+-| `engines.node` (`>=22.11.0 <25.0.0`) | what the package is allowed to be installed and built on | the recorded `node` must satisfy it, everywhere |
++| `.nvmrc` (`24`) | the Node major **the pinned image ships** (`mcr.microsoft.com/playwright:v1.63.0-noble` carries Node v24.20.0) | equals the `engines.node` floor major; and equals the major of the recorded `node` whenever the record came from inside the pinned image |
++| `engines.node` (`>=24.11.0 <25.0.0`) | what the package is allowed to be installed and built on: Node 24 LTS, patch releases only | the recorded `node` must satisfy it, everywhere |
+ 
+-Story 10.2 widened `engines.node` to a range deliberately, so the package still installs on a
+-developer machine running a newer Node under `engine-strict=true`. That widening is not licence for
+-the *image* to drift: ADR-001 §4.2 scopes the `.nvmrc` obligation to the image ("`node --version`
+-inside the image"), and that is exactly where `check:pins` applies it. "Inside the image" is read
+-off the record — a recorded `chromiumBuild` exists only under the image's `PLAYWRIGHT_BROWSERS_PATH`
+-— so it cannot be asserted by a flag, and dropping it to dodge the rule fails `--require-image` on
+-the missing field instead.
++There is one supported Node major and no second path. A developer machine on any other major
++(Node 23 or 22 included) is not supported: `engine-strict=true` rejects the install and
++`check:pins` rejects a build recorded on it. ADR-001 §3 defines `.nvmrc` as the Node major shipped
++by the pinned Playwright image, so it follows the image: a Playwright bump whose image ships a new
++Node major moves `.nvmrc` and `engines.node` in that same change (see the upgrade procedure).
++"Inside the image" is read off the record — a recorded `chromiumBuild` exists only under the
++image's `PLAYWRIGHT_BROWSERS_PATH` — so it cannot be asserted by a flag, and dropping it to dodge
++the rule fails `--require-image` on the missing field instead.
+ 
+-> **Known conflict (`ED-05`).** The public `mcr.microsoft.com/playwright:v1.63.0-noble` base image
+-> ships Node v24.20.0, which satisfies `engines.node` but is not the `.nvmrc` major. `check:pins`
+-> therefore **fails** against that image, by design, and says so. The fix belongs to the internal
+-> image or to an ADR amendment. Widening `.nvmrc` to match whatever the base image ships would
+-> delete the only copy that pins Node and is not an acceptable way to make the pipeline green.
++> **Resolved (`ED-05`, O-2a).** The pins used to say 22 while the public base image shipped Node
++> v24.20.0, which made `check:pins --require-image` fail by design. The pins now follow the image
++> (ADR-001 §4.2 amendment). The internal image `ED-05` delivers must keep the `v<version>-<distro>`
++> tag convention and ship Node 24; `check:pins --require-image` is what proves it.
+ 
+ ### Runtime upgrade procedure
+ 
+@@ -610,10 +609,9 @@
+ 
+ ## Node version
+ 
+-`.nvmrc` pins the Node major shipped by the Playwright image (22). `engines.node` is expressed as a
+-range rather than `22.x` so the package also installs on a developer machine running a newer Node;
+-`engine-strict=true` still rejects anything outside the range, and story 10.3's CI check asserts the
+-Node version inside the image against `.nvmrc`.
++`.nvmrc` pins the Node major shipped by the Playwright image (24). `engines.node` is
++`>=24.11.0 <25.0.0`: Node 24 LTS, patch releases only. `engine-strict=true` rejects anything outside
++the range, and story 10.3's CI check asserts the Node version inside the image against `.nvmrc`.
+ 
+ ### Guided observed-2 worker
+ 
+--- a/studio-runner/ci/stages.md
++++ b/studio-runner/ci/stages.md
+@@ -16,19 +16,18 @@
+ | `IMAGE_TAG` | full image tag being built | Recorded as `image` in `runtime-versions.json`. Only set on stages 5–7 when they run inside the image. |
+ | `PLAYWRIGHT_BROWSERS_PATH` | inherited from the image | Source of the recorded `chromiumBuild`. Never point it at a mixed-version browser root. |
+ 
+-**Node.** `.nvmrc` (22) pins the Node major **the image must ship**; `engines.node`
+-(`>=22.11.0 <25.0.0`) is the wider range story 10.2 chose deliberately so the package still
+-installs on a newer developer machine. `.npmrc` sets `engine-strict=true`, so a Node outside the
+-range fails at install time rather than at runtime. Stage 3 asserts the recorded Node against the
+-range everywhere, and against the `.nvmrc` major whenever the record came from inside the pinned
+-image.
++**Node.** `.nvmrc` (24) pins the Node major **the image ships**; `engines.node`
++(`>=24.11.0 <25.0.0`) allows that one major, patch releases only. `.npmrc` sets
++`engine-strict=true`, so a Node outside the range fails at install time rather than at runtime.
++Stage 3 asserts the recorded Node against the range everywhere, and against the `.nvmrc` major
++whenever the record came from inside the pinned image. Every stage that runs on the host, including
++the unit tier (its pins tests record the host's `process.version`), needs Node 24.
+ 
+-> **OPEN — stage 6a fails today, deliberately.** The public
+-> `mcr.microsoft.com/playwright:v1.63.0-noble` base image ships **Node v24.20.0**, not 22. Stage 6a
+-> now names that as a failure instead of passing quietly. It is a real conflict, not a check bug:
+-> the internal image (`ED-05`) must be built on the `.nvmrc` major, or `.nvmrc` must be changed by
+-> ADR amendment with @architect. Do **not** widen `.nvmrc` to turn the pipeline green — that
+-> deletes the only copy that pins Node.
++> **RESOLVED — O-2a.** The public `mcr.microsoft.com/playwright:v1.63.0-noble` base image ships
++> **Node v24.20.0**. The pins used to say 22, so stage 6a failed by design; the pins now follow the
++> image (ADR-001 §4.2 amendment, ED-05 pin-fix01). The internal image (`ED-05`) must ship the
++> `.nvmrc` major (24); stage 6a is what proves it. Do **not** widen `.nvmrc` or `engines.node` to
++> turn the pipeline green — a base-image change that moves the Node major moves both in one change.
+ 
+ ## Stages
+ 
+@@ -170,15 +169,13 @@
+   `IMAGE_TAG` build arg that was omitted arrives as an empty string inside the image; empty and
+   whitespace-only count as *not recorded*, so the slip this stage exists to catch is caught.
+ - The recorded `node` is asserted here too — this is where the `.nvmrc` major rule applies.
+-  **Expect this stage to fail against the public base image** until `ED-05` lands (see Environment
+-  above). Record it as a real failure; do not waive it by editing `.nvmrc`.
+-- **Open item O-2a is still open, and story 10.12 did not resolve it.** The public base image at
+-  the pinned Playwright version ships Node v24.20.0 against a `.nvmrc` of 22, so this stage fails
+-  by design. 10.12 ran Chromium on a developer machine, where the in-image rule does not apply —
+-  it is read off `chromiumBuild`, which only exists under the image's `PLAYWRIGHT_BROWSERS_PATH` —
+-  and `test/run/confinement.test.ts` now asserts `.nvmrc` still reads `22` and that
+-  `engines.node` is unchanged, so a convenience edit is a red build rather than a quiet one. The
+-  fix remains a base-image choice under `ED-05` or an ADR-001 §4.2 amendment.
++  The public base image ships Node v24.20.0 and `.nvmrc` pins 24, so the Node rule passes against
++  it; the internal image `ED-05` delivers must ship the same major.
++- **Open item O-2a is resolved by moving the pins, not by touching the check.** Story 10.12 ran
++  Chromium on a developer machine, where the in-image rule does not apply — it is read off
++  `chromiumBuild`, which only exists under the image's `PLAYWRIGHT_BROWSERS_PATH` —
++  and `test/run/confinement.test.ts` asserts `.nvmrc` reads `24` and that `engines.node` is
++  `>=24.11.0 <25.0.0`, so changing one without the other is a red build rather than a quiet one.
+ - This is the stage that makes the browser build and the Node major part of the pin rather than a
+   convention.
+ 
+@@ -284,5 +281,5 @@
+ |---|---|---|
+ | O-1 | Pipeline definition location, image-build slot, registry credentials | @devops |
+ | O-2 | Internal Playwright image following the `v<version>-<distro>` tag convention (`ED-05`) | Platform/SRE |
+-| O-2a | **The internal image must ship the `.nvmrc` Node major (22).** The public base image at the pinned Playwright version ships Node v24.20.0, so stage 6a fails today by design. Resolving it is either a base-image choice (`ED-05`) or an ADR-001 §4.2 amendment — not a change to `.nvmrc`. | Platform/SRE with @architect |
++| O-2a | **Resolved by pin-fix01 (pins moved to the image's Node 24; ADR-001 §4.2 amendment).** The internal image must still ship the `.nvmrc` Node major (24); stage 6a proves it in the deployed image. | Platform/SRE with @architect (verification only) |
+ | O-3 | Location of the language-neutral contract files consumed by `backend/` and `studio-runner/` | 10.1 |
+--- a/studio-runner/package-lock.json
++++ b/studio-runner/package-lock.json
+@@ -24,7 +24,7 @@
+         "yaml": "2.9.0"
+       },
+       "engines": {
+-        "node": ">=22.11.0 <25.0.0"
++        "node": ">=24.11.0 <25.0.0"
+       }
+     },
+     "node_modules/@ampproject/remapping": {
+--- a/studio-runner/package.json
++++ b/studio-runner/package.json
+@@ -7,7 +7,7 @@
+   "license": "UNLICENSED",
+   "packageManager": "npm@11.3.0",
+   "engines": {
+-    "node": ">=22.11.0 <25.0.0"
++    "node": ">=24.11.0 <25.0.0"
+   },
+   "exports": {
+     ".": "./dist/index.js"
+--- a/studio-runner/test/pins.test.ts
++++ b/studio-runner/test/pins.test.ts
+@@ -477,20 +477,29 @@
+   });
+ 
+   /**
+-   * The regression QA found: the public `mcr.microsoft.com/playwright:v1.63.0-noble` image ships
+-   * Node v24.20.0 against a `.nvmrc` of 22, and the check said OK. This is that exact record.
++   * The regression QA found (10.3): an image whose Node major is not the `.nvmrc` major was
++   * reported OK. The public `mcr.microsoft.com/playwright:v1.63.0-noble` image ships Node
++   * v24.20.0 and `.nvmrc` now pins 24, so the live record passes; this is the same in-image rule
++   * proven against the major the repository used to pin (22), so it stays a tested rule.
+    */
+-  it('fails on the Node the pinned Playwright image actually ships', () => {
+-    const { status, output } = invoke(withRecordedNode('v24.20.0', '1243'), []);
++  it('fails on an image that ships another Node major than .nvmrc', () => {
++    const { status, output } = invoke(withRecordedNode('v22.20.0', '1243'), []);
+     expect(status).toBe(1);
+     expect(output).toContain(
+       'the Node major inside the pinned Playwright image disagrees with .nvmrc',
+     );
+-    expect(output).toContain('major 24');
++    expect(output).toContain('major 22');
+     expect(output).toContain('ED-05');
+     expect(output).toContain('FIX THE IMAGE, NOT THIS FILE');
+   });
+ 
++  /** The exact record the pinned public image produces (final-gates01 image-final01-runtime-versions.json). */
++  it('passes on the Node the pinned Playwright image actually ships', () => {
++    const result = checkPins(withRecordedNode('v24.20.0', '1243'));
++    expect(result.failures).toEqual([]);
++    expect(result.ok).toBe(true);
++  });
++
+   it('fails on any in-image Node major other than .nvmrc', () => {
+     const result = checkPins(withRecordedNode('v23.10.0', '1243'));
+     expect(result.ok).toBe(false);
+@@ -500,19 +509,21 @@
+   });
+ 
+   it('passes when the in-image Node major equals .nvmrc', () => {
+-    const result = checkPins(withRecordedNode('v22.11.0', '1243'));
++    const result = checkPins(withRecordedNode('v24.11.0', '1243'));
+     expect(result.failures).toEqual([]);
+     expect(result.ok).toBe(true);
+   });
+ 
+   /**
+-   * Off the image the `engines` range is the contract, not `.nvmrc`: story 10.2 widened it
+-   * deliberately so the package still installs — and builds — on a newer developer machine.
++   * Off the image the `engines` range is the contract, and it names one major: a build recorded on
++   * a developer machine running another major (Node 23 here, 22 before ED-05 pin-fix01) is refused.
+    */
+-  it('permits an off-image Node whose major differs from .nvmrc but satisfies engines', () => {
+-    const result = checkPins(withRecordedNode('v24.20.0', null));
+-    expect(result.failures).toEqual([]);
+-    expect(result.ok).toBe(true);
++  it('refuses an off-image Node of another major, because engines names one major', () => {
++    const result = checkPins(withRecordedNode('v23.10.0', null));
++    expect(result.ok).toBe(false);
++    expect(result.failures.join('\n')).toContain(
++      'the recorded Node version does not satisfy engines.node',
++    );
+   });
+ 
+   /** The in-image rule cannot be dodged by dropping the field that triggers it. */
+--- a/studio-runner/test/run/confinement.test.ts
++++ b/studio-runner/test/run/confinement.test.ts
+@@ -405,20 +405,21 @@
+   });
+ });
+ 
+-describe('AC-23 — the pins hold and .nvmrc is not touched', () => {
+-  it('still reads 22', () => {
+-    // The public base image at the pinned Playwright version ships Node v24.20.0 against this
+-    // `.nvmrc` of 22. That mismatch is `ci/stages.md` open item **O-2a**, owned by `ED-05`, and
+-    // the fix is a base-image choice or an ADR-001 §4.2 amendment — never a convenience edit
+-    // here. This assertion is what makes such an edit a red build instead of a quiet one.
+-    expect(readFileSync(join(packageRoot, '.nvmrc'), 'utf8').trim()).toBe('22');
++describe('AC-23 — the pins hold and the Node pin follows the image', () => {
++  it('reads the Node major the pinned Playwright image ships', () => {
++    // The public base image at the pinned Playwright version ships Node v24.20.0, and `.nvmrc`
++    // pins that major (`ci/stages.md` open item O-2a, closed by ED-05 pin-fix01 under an ADR-001
++    // §4.2 amendment). `.nvmrc` follows the image: a base-image change that moves the Node major
++    // moves this file and `engines.node` in the same change. This assertion is what makes one
++    // without the other a red build instead of a quiet one.
++    expect(readFileSync(join(packageRoot, '.nvmrc'), 'utf8').trim()).toBe('24');
+   });
+ 
+-  it('keeps the engines range as it was, so the mismatch cannot be widened away either', () => {
++  it('keeps a single supported Node major in engines, so no second path is widened in', () => {
+     const pkg = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8')) as {
+       engines?: { node?: string };
+     };
+-    expect(pkg.engines?.node).toBe('>=22.11.0 <25.0.0');
++    expect(pkg.engines?.node).toBe('>=24.11.0 <25.0.0');
+   });
+ 
+   it('keeps the Playwright pin at 1.63.0 in all four declared copies', () => {
+--- a/studio-runner/test/runtime-versions.test.ts
++++ b/studio-runner/test/runtime-versions.test.ts
+@@ -213,18 +213,18 @@
+   const source=join(packageRoot,'src','validator','observedSchemas.json');cpSync(source,join(root,'src','validator','observedSchemas.json'));cpSync(source,join(root,'dist','validator','observedSchemas.json'));
+   const original=JSON.stringify({controlled:'untouched-é🧪'});writeFileSync(join(root,'fixtures','observed-reference','fixture.json'),original);
+   const choiceDir=join(workspace,'docs','specs','studio-observed-authoring','contracts','v3');mkdirSync(choiceDir,{recursive:true});const choiceFile=join(choiceDir,'publication-fixtures.json');writeFileSync(choiceFile,JSON.stringify(publicationReferences));
+-  writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v22.13.0'});
++  writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v24.20.0'});
+   expect(checkPins(root).ok).toBe(true);expect(readFileSync(join(root,'fixtures','observed-reference','fixture.json'),'utf8')).toBe(original);
+   const packaged=JSON.parse(readFileSync(join(root,'dist','observed-reference.json'),'utf8')) as Record<string,unknown>;expect(packaged['accepted-observed-choice.json']).toEqual(publicationReferences.observedChoice);
+   const stale=structuredClone(publicationReferences);stale.observedChoice.description+='changed';writeFileSync(choiceFile,JSON.stringify(stale));expect(checkPins(root).failures).toContain('Observed packaged reference bundle is stale.');
+   writeFileSync(choiceFile,'{}');expect(checkPins(root).failures).toContain('Observed packaged support files are missing or invalid.');
+-  expect(()=>writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v22.13.0'})).toThrow('Observed choice reference evidence is missing or invalid.');
++  expect(()=>writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v24.20.0'})).toThrow('Observed choice reference evidence is missing or invalid.');
+   // The Docker build has no monorepo docs mount. Its mandatory packaged bytes retain the
+   // same virtual key/content and independently hashed reference identity.
+-  rmSync(join(workspace,'docs'),{recursive:true,force:true});writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v22.13.0'});
++  rmSync(join(workspace,'docs'),{recursive:true,force:true});writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v24.20.0'});
+   expect(JSON.parse(readFileSync(join(root,'dist','observed-reference.json'),'utf8')) as unknown).toEqual(packaged);
+   const runtime=JSON.parse(readFileSync(join(root,'dist','runtime-versions.json'),'utf8')) as {observedReferenceBundleHash:string};expect(runtime.observedReferenceBundleHash).toBe(hashObserved(packaged));expect(checkPins(root).ok).toBe(true);
+-  rmSync(join(root,'fixtures','observed-reference','accepted-observed-choice.json'));expect(()=>writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v22.13.0'})).toThrow('Observed choice reference evidence is missing or invalid.');expect(checkPins(root).ok).toBe(false);
++  rmSync(join(root,'fixtures','observed-reference','accepted-observed-choice.json'));expect(()=>writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v24.20.0'})).toThrow('Observed choice reference evidence is missing or invalid.');expect(checkPins(root).ok).toBe(false);
+ });
+ it('builds packaged observed bundles and refuses a stale schema/reference artifact independently',()=>{
+   const root=mkdtempSync(join(tmpdir(),'observed-package-'));directories.push(root);
+@@ -232,7 +232,7 @@
+   mkdirSync(join(root,'src','validator'),{recursive:true});mkdirSync(join(root,'dist','validator'),{recursive:true});mkdirSync(join(root,'fixtures','observed-reference'),{recursive:true});
+   const schemaFile=join(packageRoot,'src','validator','observedSchemas.json');cpSync(schemaFile,join(root,'src','validator','observedSchemas.json'));cpSync(schemaFile,join(root,'dist','validator','observedSchemas.json'));
+   mkdirSync(join(root,'dist/run'),{recursive:true});cpSync(join(packageRoot,'dist','run','browser.js'),join(root,'dist','run','browser.js'));writeFileSync(join(root,'fixtures/observed-reference/accepted-observed-choice.json'),JSON.stringify(publicationReferences.observedChoice));writeFileSync(join(root,'fixtures','observed-reference','fixture.json'),JSON.stringify({controlled:'reference'}));
+-  writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v22.13.0'});
++  writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v24.20.0'});
+   expect(checkPins(root).ok).toBe(true);
+   writeFileSync(join(root,'fixtures','observed-reference','fixture.json'),JSON.stringify({controlled:'mutated'}));expect(checkPins(root).failures).toContain('Observed packaged reference bundle is stale.');
+   writeFileSync(join(root,'dist','validator','observedSchemas.json'),'{}');expect(checkPins(root).failures).toContain('Observed packaged schema bundle is stale.');

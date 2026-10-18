@@ -1,0 +1,95 @@
+{
+  "scope": "READ_ONLY_ARCHITECT_QA_S2_MINIMUM_SECRET_BEARING_CLOSING_DESIGN",
+  "disposition": "MINIMAL_EXISTING_WRAPPER_DESIGN_FOR_ROOT_REVIEW_NOT_SOURCE_RELEASE_OR_QA",
+  "publicationBaseSha256": "a2fed633182be340236451f75575cb50112880e64d2e3a30b73cf763567fb926",
+  "sourceBindings": {
+    "studio-runner/src/guided/runtime.ts": "75fc33b1cd1cbc59bcb746811caff879d7217b22de8b08b374eec173dacf271c",
+    "studio-runner/src/guided/ownership.ts": "030443d7478791e2f980763a4e30a4b2daba922836d0c5ac9650e141995b31c4",
+    "studio-runner/src/guided/transport.ts": "fc447a2efdf666c9b4ed319685e1d59875787fa11ec3a3e070171ae5da5ae3bf",
+    "studio-runner/src/server/runCoordinator.ts": "f2fb612e7312cf26768d6bc3ccc687a7735b5182a4b4a1be1578b8b2548ac77b",
+    "studio-runner/src/reporting/reportClient.ts": "4815994d27338fcb2d4338de1f6008d74585947a534cbb6a98828ff85b82ec7f",
+    "studio-runner/src/reporting/reportingStepReporter.ts": "4684cb616792963d5f3ab4895aa78834bf3e35801f54177c579f67bf784d6eed",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "ceeec5a8ef899dced36c556b44ce2e1099fefe65084b7ffc4e3b0f69c4bc68dd",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "0a26aeec0574fae1256ff15057fdb3c268de7a2f26b8977296b5e31c25d42ddd"
+  },
+  "priorFinding": "docs/qa/evidence/STUDIO-OBS-007/resume-d-s2-isolated-candidate/result.json",
+  "correctionToPriorScope": "The prior finding correctly identified acknowledgements preceding full task return. Full return/global thread quiescence is not inherently required when the remaining producer is source-proven names-only. Keep a real completion observation for guided per-action redaction; do not turn ordinary names-only bookkeeping into another required E2E.",
+  "canonicalPreserved": "Original C5 two-path ROOT plus com.citi.put.checks TRACE/all original appenders during actual secret-bearing work, all earlier byte captures/scans installed, existing1000ms renewal unchanged; no red waiver.",
+  "guidedSecretBearingTail": {
+    "anchors": [
+      "runtime.ts:204-216,269-276",
+      "runtime.ts:281-309",
+      "runtime.ts:309-332",
+      "ownership.ts:132-153",
+      "GuidedSessionService.java:2230-2267"
+    ],
+    "fact": "Dispatch retains failureValues, failureRedactor and diagnostics across awaits; a real stop can finish browser/lifecycle while that action still reaches diagnostic.record, outcome callback and finally. busy becomes false only after those dispatch-local references are dropped. refreshObservation also holds busy until observe/observation callback finishes. Stop awaits original browser close/disposal and lifecycle callback but does not itself await dispatch; CONFIRMED alone is insufficient.",
+    "minimumCompletion": "Exact selected runtime original stop fulfilled, active===false from original getter, busy===false, tracked original dispatch/refresh/start promises settled, and all tracked original runtime callbacks settled. A flag produced before finally or a terminal document cannot substitute.",
+    "doNotAwaitInsideStop": "Never make the stop wrapper await dispatch completion: original dispatch catch awaits stop and would deadlock. Return original stop promise unchanged; attach an independent completion observation after it settles, using existing finite10s observation pattern. Timeout means failed/unconfirmed; not completion."
+  },
+  "ordinaryTailClassification": {
+    "anchors": [
+      "runCoordinator.ts:824-834,881-924,949-975,1187",
+      "reportingStepReporter.ts:148-163",
+      "reportClient.ts:126-154,204-241"
+    ],
+    "beforeFinal": "Original session.close and kill promises settle, progress deliveries settle, evidence/manifest settle, scratch is cleared, resolver maps wiped, observed inputs/secrets strings cleared, and values_wiped is emitted before sendFinal. Existing original FINAL/DONE/streamComplete plus authenticated fixture report and success assertions therefore anchor the completed secret-bearing child/evidence/value phase.",
+    "afterFinal": "report.terminal_delivered contains executionId/attemptId/admissionId/runnerSequence and attempts only. Rejection/abandon paths contain fixed delivery code/status/reason/attempt fields; execute catch logs fixed INTERNAL_ERROR, and task finally releases slot/removes task. No provider/browser/model/secret serialization resumes there.",
+    "retainedStateQualification": "Frozen terminal bytes, snapshot and closures can remain until delivery returns; do not claim heap is empty or whole parent stopped. In this exact observed path the parent redactor is createRedactor([]), job observed secrets/inputs have been wiped, child raw output is discarded, and report producer is closed/data-free. Retry bytes are the same already-sanitized FINAL; a late retry must not be relabeled a new secret-bearing resolution.",
+    "recommendation": "Retain actual ordinary FINAL/DONE and original session/resource-close source anchors plus existing received FINAL privacy scan; source-tier proof of names-only tail suffices. No new task-exit watcher/global shutdown/new mandatory case needed merely to observe terminal_delivered or inFlight deletion.",
+    "limits": "Applies to exact observed ninth and its original two PASSED replay runs; not an arbitrary legacy job, future logger payload, retained raw error or heap-wipe guarantee. Source changes to these paths require renewed review."
+  },
+  "minimalIsolatedAuthoringDesign": [
+    {
+      "step": 1,
+      "sites": "ninth:3588-3954 / CountedLoginVault:10564-10645",
+      "delta": "Original capture installed before learning with traceFromStart=false. Exact selected capture/VaultScope/SECRET/PASS binding is fixed before any original delegate read. Arm unchanged ROOT+APP TRACE and verify original routing before read; mismatch throws fixed failure without provider read. Keep canary inventory, scans and both replay rotations unchanged."
+    },
+    {
+      "step": 2,
+      "sites": "existing p4GuidedRevocationObservers:9480-9601 / original scalar support:9332-9475",
+      "delta": "Add only an S2-selected per-runtime completion observer to the existing generated test wrapper, using the same actual original GuidedRuntime identities/prototypes and descriptor-preservation approach. Record original promise completion for start, dispatch and refreshObservation; preserve every original call once, original arguments/result/rejection. Wrap that runtime original options.callback with descriptor preservation to count its original promise settlements. No extra callback/native/provider/model invocation or raw Throwable recording."
+    },
+    {
+      "step": 3,
+      "sites": "existing revStop wrapper:9556-9594",
+      "delta": "For the selected S2 owner, original stop promise fulfillment plus original active=false and operation/callback counters0 and busy=false precede completion receipt and descriptor restoration. Reuse finite10s polling of the existing C6 pattern, independent from original returned stop. Rejection, descriptor drift, lost observation or timeout is sticky failure; leave observer/quarantine installed if not complete. Existing C6 modes and event protocol stay byte-identical."
+    },
+    {
+      "step": 4,
+      "sites": "existing private p4 mode/producer ledger support:9343-9392,7466-7535",
+      "delta": "Use the already-owned private numeric producer receipt and mode channel for a distinct S2 selection, never a fabricated C6/revocation case/reason/native event. Before startLearning publish S2 enablement with names-only exact owner selection once known; retain per-runtime counts from actual start so an early callback cannot be missed. Later bind original accepted session identity to its actual tracked runtime before secret read. Fail ambiguous/no-match selection. No new file family, watcher, channel or status. Exact closed selection/receipt extension needs root source review before authoring."
+    },
+    {
+      "step": 5,
+      "sites": "publicCall accepted owner tracking:12698-12742 / p3 cleanup:6790-6928 / ninth finally:3938-3954",
+      "delta": "Register actual ninth guided and two ordinary accepted owners with the original scoped cleanup helpers before response observation/assertions can fail, and enable original ordinary FINAL capture for those IDs. In ninth finally independently attempt original owner cleanup, require selected guided completion receipt and actual ordinary FINAL/resource-close proof, then late scans/numeric evidence and capture.close. Preserve original primary plus every suppressed cleanup error. If required guided closure fails, do not restore/wipe capture or clear its authority; retain sticky cleanupUnconfirmed/quarantine."
+    }
+  ],
+  "selectionPremiseToResolveInSourceReview": "Exact S2 mode must be separate from existing C6/revocation fields and defaults. Track original start/callbacks before the accepted start response races runtime initialization; bind the actual returned session rather than guessing runtime from value-file existence or a global boolean. No raw identity is exported in this recommendation. Runtime-scoped identity can remain only in private local test metadata.",
+  "observationAndCallbackProof": "start owns bootstrap callback; dispatch owns outcome/collectObservation and diagnostics; refresh owns collectObservation; closeResources owns lifecycle callback. Counting original promise settlements and original callback completions covers these without a new prepare action or collectObservation invocation. busy alone is necessary but not the entire completion predicate. Once stopped, original live/checkIdentity gates deny new dispatch/refresh; active callbacks already entered must still be drained.",
+  "backendTail": "GuidedDispatchService.java:171-209 uses try-with-resolved around sendSecret; GuidedRunnerClient erases owned request/secret buffers in its original finally before return. Subsequent trusted lostAcknowledgment/stop confirmation uses names-only identity/context metadata. Keep actual delivered provider-array wipe assertions; do not require shared backend executor termination just for post-commit names-only bookkeeping.",
+  "tradeoffs": [
+    "Small selected test-wrapper observation cost and private numeric receipt update, no production authority/deadline change. This is a proposal before infrastructure, not applied code.",
+    "Completion promise observer must not swallow original operation rejection or add a blocking dependency to stop.",
+    "Existing late scans remain required; names-only classification does not permit disabling ROOT/APP TRACE during any real resolution/callback/evidence window.",
+    "Failure while selected owner is unconfirmed retains quarantine and original primary; it may honestly fail the workflow rather than force shutdown or invent completion.",
+    "No guarantee the1s renewal red becomes green. No new mandatory test/framework/global all-thread quiescence requirement."
+  ],
+  "authorScopeIfApproved": "One isolated existing Publication source only; original36 cases, scripts/default C6 modes preserved except explicitly reviewed selected S2 wrapper/phase/closure edits. No production or runner source changes.",
+  "actions": {
+    "reports": 1,
+    "sourceEdits": 0,
+    "runtime": 0,
+    "sql": 0,
+    "models": 0,
+    "newTests": 0
+  },
+  "runtime": "UNRUN",
+  "lifecycleVerdict": null,
+  "acceptanceWaiver": false,
+  "whole19AcPass": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE",
+  "privacy": "Fixed categories and repository anchors/hashes only; no canaries, credentials, runtime identities or raw logs exported."
+}

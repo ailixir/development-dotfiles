@@ -1,5 +1,7 @@
 # Studio inference remediation and compilation plan
 
+> **Superseded (2026-10-12):** Superseded by [ADR-SC-005](ADR-SC-005-single-path-observed-authoring.md) (single observed path; compile-to-READY removed in STUDIO-OBS-012A).
+
 **Date:** 2026-09-16 · **Status:** Implementation in progress. See [execution record](studio-inference-execution-log.md), [C0 contract](studio-inference-contract-v1.md), and stories10.20–10.26; release gates remain open.
 
 This plan addresses the [inference review](studio-inference-review-2026-09-16.md) and the requirement to support both full compilation and incremental updates to a previously working test. It extends the [Studio compiler architecture](studio-execution.md#4-studio-step-compiler); contract changes below must be incorporated into the OpenAPI definitions, persistence migrations, and implementation stories before shipping. Existing closed contracts are not implicitly widened by this document.

@@ -1,0 +1,564 @@
+{
+  "collector": [
+    {
+      "label": "obs009-f-corun08",
+      "role": "FINAL: the run committed fault-injection.json is judged from (12 / 12, source and dist stable); final bytes of ObservedCoRunIT, sha256 ccc9f40b...",
+      "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-corun08-results.json",
+      "exit": 0,
+      "gradleExit": 0,
+      "counts": {
+        "total": 12,
+        "passed": 12,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "distStable": true,
+      "sourceDigest": "33dabb1b8f8f0467330863ef0dd7a2d6c447f83d833e9efe874d1e09ecd50fb3",
+      "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "elapsedSeconds": 256.67
+    },
+    {
+      "label": "obs009-f-stress01",
+      "role": "the guided public-cancel case alone, ten repetitions (CORUN_REPEATS=10), final bytes, stable",
+      "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-stress01-results.json",
+      "exit": 0,
+      "gradleExit": 0,
+      "counts": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "distStable": true,
+      "sourceDigest": "33dabb1b8f8f0467330863ef0dd7a2d6c447f83d833e9efe874d1e09ecd50fb3",
+      "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "elapsedSeconds": 54.62
+    },
+    {
+      "label": "obs009-f-reuse01",
+      "role": "named proofs re-run at this dist (see reusedProofs); source NOT stable: other lanes edited during the run, dist stable",
+      "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-reuse01-results.json",
+      "exit": 2,
+      "gradleExit": 0,
+      "counts": {
+        "total": 168,
+        "passed": 168,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": false,
+      "distStable": true,
+      "sourceDigest": "71eac1e7005569b53092a0b4e79b9ea7525e5e493451053fccb11ac2c2ebf802",
+      "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "elapsedSeconds": 202.78
+    },
+    {
+      "label": "obs009-f-corun07",
+      "role": "12 cases, 11 passed: the guided cancel case failed once on a byte comparison of the session row taken while the teardown confirmation was still writing it; fixed by waiting for a quiet row (see findings F-G)",
+      "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-corun07-results.json",
+      "exit": 1,
+      "gradleExit": 1,
+      "counts": {
+        "total": 12,
+        "passed": 11,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "distStable": true,
+      "sourceDigest": "a5a9f8db62756b6b9ee6b8302fc3b02d9c18f857c44f86815d95dea71f4bcc7c",
+      "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "elapsedSeconds": 252.25
+    },
+    {
+      "label": "obs009-f-corun06",
+      "role": "12 cases, 11 passed: the secret case failed because the entitlement was granted to the email, not to the Core user id the public Run carries (\"uid-\" + email); fixed in the test",
+      "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-corun06-results.json",
+      "exit": 1,
+      "gradleExit": 1,
+      "counts": {
+        "total": 12,
+        "passed": 11,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "distStable": true,
+      "sourceDigest": "833aa5fded12692f6b25b3df1c55bdd8b1f01d2d97b12ce51292487fd93dfb65",
+      "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "elapsedSeconds": 232.48
+    },
+    {
+      "label": "obs009-f-corun05",
+      "role": "11 cases (before the secret case), 11 / 11, stable",
+      "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-corun05-results.json",
+      "exit": 0,
+      "gradleExit": 0,
+      "counts": {
+        "total": 11,
+        "passed": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "distStable": true,
+      "sourceDigest": "e7eda55c00207d58a90f639202f7edf3e75f85f803425dcf2a00e0765649d8e0",
+      "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "elapsedSeconds": 230.98
+    },
+    {
+      "label": "obs009-f-corun04",
+      "role": "11 cases, 11 / 11, stable",
+      "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-corun04-results.json",
+      "exit": 0,
+      "gradleExit": 0,
+      "counts": {
+        "total": 11,
+        "passed": 11,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "distStable": true,
+      "sourceDigest": "7ab1593783fc9ed888d9dff94d90dcb2bd1bdbe53191165a2539893cc9408b83",
+      "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "elapsedSeconds": 231.05
+    },
+    {
+      "label": "obs009-f-corun03",
+      "role": "10 cases, three runs per leg, 10 / 10, stable",
+      "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-corun03-results.json",
+      "exit": 0,
+      "gradleExit": 0,
+      "counts": {
+        "total": 10,
+        "passed": 10,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "distStable": true,
+      "sourceDigest": "71eac1e7005569b53092a0b4e79b9ea7525e5e493451053fccb11ac2c2ebf802",
+      "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "elapsedSeconds": 213.73
+    },
+    {
+      "label": "obs009-f-corun02",
+      "role": "10 cases, one run per leg, 10 / 10; source NOT stable (other lanes edited during the run), dist stable",
+      "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-corun02-results.json",
+      "exit": 2,
+      "gradleExit": 0,
+      "counts": {
+        "total": 10,
+        "passed": 10,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": false,
+      "distStable": true,
+      "sourceDigest": "b3e174df233e74f1738d6ae1ba4179a592c6ef10d76e3855f1efee22aa2ff663",
+      "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "elapsedSeconds": 109.66
+    },
+    {
+      "label": "obs009-f-corun01",
+      "role": "8 cases, replay legs only, one run per leg, 8 / 8, stable",
+      "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-corun01-results.json",
+      "exit": 0,
+      "gradleExit": 0,
+      "counts": {
+        "total": 8,
+        "passed": 8,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "distStable": true,
+      "sourceDigest": "cc3f40f2e7adb3769e6d4699de3ebd5190e643127f4b1a72a829d0a353d0b18b",
+      "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+      "elapsedSeconds": 103.82
+    }
+  ],
+  "negativeControls": [
+    {
+      "id": "M1",
+      "what": "StudioDispatcher: a resend on an AMBIGUOUS answer (the regression HttpRunnerDispatchClient's Javadoc forbids)",
+      "how": "scratch compile of the one class, swapped ahead of the main classes on the test classpath by an init script; the shared checkout and build output are untouched",
+      "files": {
+        "original_sha256": "de7b12c556eb5a4a32862484f34d8de4cf16b1942ad079b33dc2743f9c76e05f",
+        "mutated_sha256": "e0c69d810cb1530d1f84e89526e8c50fb888febcb86d3aab1a8d8e655a7cae7b",
+        "checkout_sha256_after": "de7b12c556eb5a4a32862484f34d8de4cf16b1942ad079b33dc2743f9c76e05f"
+      },
+      "runs": [
+        "obs009-f-mut01 (class bytes of corun03)",
+        "obs009-f-mut03 (final bytes)"
+      ],
+      "testsRun": "ObservedCoRunIT.aLostAcknowledgmentIsNeverAResend",
+      "expected": "RED",
+      "result": "RED both times",
+      "failure": "org.opentest4j.AssertionFailedError: [dispatcher sends for ackLoss: [send:ACCEPTED, acknowledgment-lost, send:DEFINITE_REFUSAL]]  | expected: 1 |  but was: 2",
+      "collectors": [
+        {
+          "label": "obs009-f-mut01",
+          "role": "M1, earlier bytes",
+          "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-mut01-results.json",
+          "exit": 1,
+          "gradleExit": 1,
+          "counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "distStable": true,
+          "sourceDigest": "71eac1e7005569b53092a0b4e79b9ea7525e5e493451053fccb11ac2c2ebf802",
+          "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+          "elapsedSeconds": 26.28
+        },
+        {
+          "label": "obs009-f-mut03",
+          "role": "M1, final bytes",
+          "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-mut03-results.json",
+          "exit": 1,
+          "gradleExit": 1,
+          "counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "distStable": true,
+          "sourceDigest": "33dabb1b8f8f0467330863ef0dd7a2d6c447f83d833e9efe874d1e09ecd50fb3",
+          "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+          "elapsedSeconds": 23.5
+        }
+      ]
+    },
+    {
+      "id": "M2",
+      "what": "GuidedSessionService.installStopSender: the stop is swallowed, so the runner is never told to close the guided browser",
+      "how": "same recipe",
+      "files": {
+        "original_sha256": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5",
+        "mutated_sha256": "4a7387c93417c966cb37e3cb6138d53a6ed106697fc86d4a5f9df5f9b7751c8f",
+        "checkout_sha256_after": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5"
+      },
+      "runs": [
+        "obs009-f-mut02 (class bytes of corun04)",
+        "obs009-f-mut04 (final bytes)"
+      ],
+      "testsRun": "ObservedCoRunIT.aPublicCancelOfALiveGuidedBrowserMidActionTearsItDownAndFreesTheSlot (CORUN_REPEATS=1)",
+      "expected": "RED",
+      "result": "RED both times",
+      "failure": "java.lang.AssertionError: [the runner was told to stop]  | Expecting actual: |   0 | to be greater than: |   0 | ",
+      "collectors": [
+        {
+          "label": "obs009-f-mut02",
+          "role": "M2, earlier bytes",
+          "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-mut02-results.json",
+          "exit": 1,
+          "gradleExit": 1,
+          "counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": false,
+          "distStable": true,
+          "sourceDigest": "7ab1593783fc9ed888d9dff94d90dcb2bd1bdbe53191165a2539893cc9408b83",
+          "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+          "elapsedSeconds": 32.54
+        },
+        {
+          "label": "obs009-f-mut04",
+          "role": "M2, final bytes",
+          "results": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-f-mut04-results.json",
+          "exit": 1,
+          "gradleExit": 1,
+          "counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "distStable": true,
+          "sourceDigest": "33dabb1b8f8f0467330863ef0dd7a2d6c447f83d833e9efe874d1e09ecd50fb3",
+          "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+          "elapsedSeconds": 31.55
+        }
+      ],
+      "note": "What caught it is the runner's guided stop-route counter, not the browser tree: with the stop swallowed the tree still left inside the 15 s bound (the backend's cancel ends its in-flight dispatch to the runner [I: the likely mechanism]). So 'the tree is gone' alone does not show that the stop was sent; the stop-route assertion does."
+    }
+  ],
+  "reusedProofs": {
+    "run": "obs009-f-reuse01",
+    "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+    "sourceStable": false,
+    "counts": {
+      "total": 168,
+      "passed": 168,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "classes": [
+      "com.citi.put.checks.studio.CancelIT",
+      "com.citi.put.checks.studio.StudioIdempotencyIT",
+      "com.citi.put.checks.studio.guided.bridge.GuidedPrefixReceiptVerificationTest",
+      "com.citi.put.checks.studio.guided.bridge.GuidedRunnerContextRefusalTest",
+      "com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT",
+      "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "com.citi.put.checks.studio.guided.translation.GuidedStepVerifierTest",
+      "com.citi.put.checks.studio.internal.ProgressCallbackIT",
+      "com.citi.put.checks.studio.recovery.RecoveryIT"
+    ],
+    "proofs": [
+      {
+        "leg": "duplicate",
+        "class": "GuidedSessionIT",
+        "case": "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch",
+        "status": "PASS"
+      },
+      {
+        "leg": "duplicate",
+        "class": "ProgressCallbackIT",
+        "case": "aDuplicateReplayFinalDoesNotChangeThePersistedCause",
+        "status": "PASS"
+      },
+      {
+        "leg": "ackLoss (guided hop)",
+        "class": "GuidedServiceTransportFaultIT",
+        "case": "(class: 39 cases of lost, late and corrupt responses on the guided transport)",
+        "cases": 39,
+        "allPassed": true
+      },
+      {
+        "leg": "restart",
+        "class": "RecoveryIT",
+        "case": "restartBeforeSendReclaimsAndDispatchesExactlyOnce",
+        "status": "PASS"
+      },
+      {
+        "leg": "restart",
+        "class": "RecoveryIT",
+        "case": "restartAfterAdmissionWithNoStartedIsStartTimeoutAndNeverASecondDispatch",
+        "status": "PASS"
+      },
+      {
+        "leg": "restart",
+        "class": "RecoveryIT",
+        "case": "restartDuringExecutionPastTheRunDeadlineIsStaleAndNeverASecondDispatchOrAReplay",
+        "status": "PASS"
+      },
+      {
+        "leg": "restart",
+        "class": "RecoveryIT",
+        "case": "restartAfterTheManifestWriteYieldsTheRealResultRatherThanStale",
+        "status": "PASS"
+      },
+      {
+        "leg": "stale owner",
+        "class": "GuidedLifecycleReasonIT",
+        "case": "aCallbackPastTheLeaseIsStillRefusedStaleFenceAndNothingIsStopped",
+        "status": "PASS"
+      },
+      {
+        "leg": "stale owner",
+        "class": "GuidedPrefixReceiptVerificationTest",
+        "case": "eachOfTheElevenBoundFieldsMismatchedIsStaleFence",
+        "status": "PASS"
+      },
+      {
+        "leg": "late callback",
+        "class": "RecoveryIT",
+        "case": "aStaleCallbackAfterAReaperFinalizationChangesNothingAndDispatchesNoRun",
+        "status": "PASS"
+      },
+      {
+        "leg": "late callback",
+        "class": "RecoveryIT",
+        "case": "aLateReportCannotRegressTheReapersTerminalStateAndViceVersa",
+        "status": "PASS"
+      },
+      {
+        "leg": "late callback",
+        "class": "ProgressCallbackIT",
+        "case": "aStaleCallbackCannotRegressAFinalStateAndLeavesTheHistoryRowUnchanged",
+        "status": "PASS"
+      },
+      {
+        "leg": "late callback",
+        "class": "ProgressCallbackIT",
+        "case": "anOlderLateCompletionDoesNotOverwriteANewerRun",
+        "status": "PASS"
+      },
+      {
+        "leg": "unknown action stops as UNKNOWN_OUTCOME",
+        "class": "GuidedLifecycleReasonIT",
+        "case": "aDispatchingActionStillEndsUnknownOutcomeWhateverTheReason",
+        "status": "PASS"
+      },
+      {
+        "leg": "unknown action stops as UNKNOWN_OUTCOME",
+        "class": "GuidedRunnerContextRefusalTest",
+        "case": "anyOtherContextReplyStaysAnUnknownOutcome",
+        "status": "PASS"
+      },
+      {
+        "leg": "unknown action stops as UNKNOWN_OUTCOME",
+        "class": "GuidedStepVerifierTest",
+        "case": "missingSubmitUnknownOutcomeWrongDigestAndFalseAssertionCannotComplete",
+        "status": "PASS"
+      },
+      {
+        "leg": "cancel (service level)",
+        "class": "CancelIT",
+        "case": "aRunningCancelIsRelayedExactlyOnceAndTheRunnersFinalEndsItCancelled",
+        "status": "PASS"
+      },
+      {
+        "leg": "cancel (service level)",
+        "class": "CancelIT",
+        "case": "aDeleteThatReachesTheWrongPodIsNotAnAcknowledgementAndThePullCompletesTheCancel",
+        "status": "PASS"
+      },
+      {
+        "leg": "cancel (service level)",
+        "class": "CancelIT",
+        "case": "aCancelBetweenTheSendAndTheAdmissionIsRefusedAdmissionAndEndsCancelled",
+        "status": "PASS"
+      }
+    ],
+    "alsoNamed": [
+      {
+        "class": "GuidedBridgePlannedIT",
+        "case": "lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction",
+        "where": "F-merge guided83 run (83/83 on dist 4add1307...), docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f-merge/status2.txt; not re-run by lane F"
+      },
+      {
+        "class": "GuidedBridgeIntegrationTest",
+        "case": "aWedgedGuidedBrowserIsTerminatedInsideTheBackendDeadlineAndTheSlotIsReleased",
+        "where": "same"
+      }
+    ],
+    "note": "Named, not extended. Each was run green by lane F at this dist; none of them is a live runner-process proof, which is why the legs above exist."
+  },
+  "notClaimed": [
+    "Any real-model or real-provider call: the guided legs replace the model at the GuidedLlmGatewayClient seam and nowhere else (plan = the navigation the authored step implies; action = that navigation)",
+    "A model-learned plan: the published plans are seeded through the production publication writers (synthetic navigate-only evidence) with the loopback origin and the real runner build identity",
+    "The deployed stack, pods, Vault or an approved staging application",
+    "Browser tree reaping inside a pod after a container kill (a killed container ends its processes [I]; the in-cluster check stays with @devops)",
+    "Linux behaviour of the harness: macOS / JDK 21 only",
+    "Mid-run secret revocation on the live stack and worker-profile dispatch on real pods (AC-11, owed externally)",
+    "Backend-process restart in the live co-run: the backend runs in the test JVM for the whole class; the restart legs restart the runner. Backend restart is RecoveryIT, named above",
+    "A secret on the guided path (the D3 scan after a guided co-run with a secret login): the secret leg is on the replay path; the guided legs carry no secret",
+    "The canary scan reads database columns as text or bytes and stored files as bytes; a recording's pixels are not read (the password field is masked by the runner, and the recording is the runner's evidence, not the backend's)"
+  ],
+  "owedExternally": [
+    "live revocation (OBS-007 AC-13 under real polling)",
+    "worker-profile dispatch of an observed execution on deployed pods (OBS-007 AC-16)",
+    "R8.2 e (U4): a rejected terminal settles within start_deadline + one recovery poll on a deployed stack",
+    "in-cluster browser-tree reaping after a runner container kill (@devops)"
+  ],
+  "findings": [
+    {
+      "id": "F-A",
+      "tag": "V",
+      "severity": "observation (medium for host and developer runs)",
+      "title": "A runner SIGKILL leaves its replay child and browser tree alive until the step ends",
+      "evidence": "runnerKill, 3 runs: the node child and the whole Chromium tree left 30.1 s after the kill with a 30 s step timeout, and 10.0 s and 10.0 s after it with a 10 s timeout (documents orphanWindowMs 90000; every process left together). Lifetime tracks the step timeout, not the kill. Code: studio-runner/src/run/child.ts, childRuntime.ts and launcher.ts hold no parent-death handling (no 'disconnect' listener; launcher.ts only listens for the child's 'exit').",
+      "contrast": "A guided browser dies with the runner: guidedWorkerKill, 3 runs, tree gone 0.31-0.33 s after the kill.",
+      "owner": "@architect with @dev runner",
+      "ask": "decide whether the replay child should exit when its IPC channel closes; until then the AC-11 k wording 'no orphaned browser tree' holds for the guided path and for cancel, not for a runner SIGKILL on a host. In a pod a killed container ends its processes [I; @devops to check]."
+    },
+    {
+      "id": "F-B",
+      "tag": "V",
+      "severity": "observation",
+      "title": "A duplicate POST /v2/runs is refused by capacity or by the backend admission, not by the runner",
+      "evidence": "duplicate leg: pool 1: the duplicate is answered 429 CAPACITY_SATURATED (the client classes it a retryable definite refusal); pool 2: the duplicate takes a slot, its admission is refused 409 by the backend CAS (observed-admission#1), the runner answers 503 and the client classes it AMBIGUOUS. Either way one replay child, one admission, one attempt. Code: runCoordinator.submitObserved has no execution-id duplicate check; the backend admission is the authority.",
+      "owner": "@architect (information)"
+    },
+    {
+      "id": "F-C",
+      "tag": "V",
+      "severity": "information",
+      "title": "What 'refused' means for a stale or late callback",
+      "evidence": "Replays after the run is over: observed-admission 409; earlier progress sequences 409; the last applied progress sequence 200 (idempotent echo); cross-run replays 400 or 403; guided: claim, outcomes and lifecycle 409, a repeated bootstrap-evidence 202 (idempotent echo). In every case the snapshot revision, ledger state, last_runner_sequence, attempt id, owner fence, action rows and (guided) the session document and progress are unchanged.",
+      "owner": "@qa (reading aid)"
+    },
+    {
+      "id": "F-D",
+      "tag": "V",
+      "severity": "low",
+      "title": "checkstyleTest is red on another lane's file, not on lane F's",
+      "evidence": "static-gates-obs009-f-corun0{3,4,5}.log: one violation, backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSchemaProbeIT.java:240 (124 > 120 columns). spotlessCheck is green and ObservedCoRunIT has no violation.",
+      "owner": "lane EP / root"
+    },
+    {
+      "id": "F-E",
+      "tag": "V",
+      "severity": "low",
+      "title": "The shared publication fixture cannot feed a real runner",
+      "evidence": "ObservedPublicationFixture fixes ORIGIN (https://studio-fixture.example.test) and a synthetic build identity (catalog private, executableImageDigest 'd'x64). A real runner refuses the build and no browser reaches the origin. Lane F adapted publish()/learn() inside ObservedCoRunIT (about 230 lines, Publisher) instead of editing the fixture (outside its write set).",
+      "owner": "root: parameterise the fixture (origin and catalog) in a later lane and delete the copy"
+    },
+    {
+      "id": "F-F",
+      "tag": "V",
+      "severity": "information",
+      "title": "A forced worker kill ends the in-flight guided action as UNKNOWN_OUTCOME at once",
+      "evidence": "guidedWorkerKill, 3 runs: sessionStateAfterKill UNKNOWN_OUTCOME 339, 359 and 343 ms after the kill; one action row; the killed runner got one dispatch and the new runner process none.",
+      "owner": "@qa (credits AC-11 'unknown actions stop as UNKNOWN_OUTCOME', live half)"
+    },
+    {
+      "id": "F-G",
+      "tag": "I",
+      "severity": "information",
+      "title": "The guided session row keeps changing for a moment after a public cancel",
+      "evidence": "In 1 of 13 repetitions of the guided cancel case (corun07) a byte comparison of the session's document and progress, taken right after the browser tree left, differed from one taken after the replays. Waiting for three identical looks and teardownStatus CONFIRMED before the baseline made 13 of 13 repetitions pass (corun08 three, stress01 ten). I did not capture which field changed (the failing build had no field diff); the teardown confirmation writes progress.teardownStatus on its own thread after commit (GuidedSessionService.teardownAttempt) [I].",
+      "owner": "@qa (reading aid for any byte-for-byte comparison of a cancelled session)"
+    },
+    {
+      "id": "F-H",
+      "tag": "V",
+      "severity": "information",
+      "title": "The public Run's principal is the Core user id, not the email",
+      "evidence": "Over the public routes the identity headers carry X-User-Id 'uid-<email>', so the secret-use entitlement for a public Run must be granted to that id. D3's IT grants the email because it calls the service directly. A harness that mixes the two gets 400 UNKNOWN_REFERENCE 'not a reference this CSI may use' (corun06).",
+      "owner": "harness authors"
+    }
+  ],
+  "scriptForm": {
+    "label": "script03",
+    "command": "bash tools/corun.sh --skip-build (under the Gradle lock; CORUN_GRADLE_ARGS=--no-daemon, CORUN_EXPECT_DIST=D_F), final tools/corun.sh and tools/corun-report.mjs",
+    "exit": 0,
+    "cases": 12,
+    "runs": 39,
+    "runnerGenerations": 42,
+    "report": "GREEN",
+    "evidence": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f/script03/fault-injection.json",
+    "sourceManifests": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f/script03/manifest-before.json = manifest-after.json (source and dist stable)",
+    "earlier": "script01 (11 cases) and script02 (12 cases, before the last comment-only edit of corun.sh) were green and stable too"
+  }
+}

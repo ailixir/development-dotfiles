@@ -1,0 +1,268 @@
+{
+  "artifact": "STUDIO-OBS-015 unit06 sole ACK mutant fixture source repair01",
+  "at": "2026-10-15T09:43:07.956008+00:00",
+  "owner": "Dex / runner015_resume",
+  "status": "ATOMIC_HOLD_SOURCE_REPAIRED_NOT_EXECUTED",
+  "authorization": "Root exact source-only final forged destination value construction repair in existing incrementalRuntime test; whole tsc/scopedlint only.",
+  "priorActualEvidence": {
+    "receipt": "runner/unit-feedback-attempt06-receipt.json",
+    "sha256": "de7007979ad2bc3b6944c6de9756abe32d402450c8dec1846d25e680cb733677",
+    "actualCounts": {
+      "collected": 1926,
+      "passed": 1896,
+      "failed": 1,
+      "skipped": 29,
+      "files": {
+        "total": 103,
+        "passed": 101,
+        "failed": 1,
+        "skipped": 1,
+        "failedToLoad": 0,
+        "beforeAllAborted": 0
+      },
+      "vitestLogicalSuites": {
+        "total": 333,
+        "passed": 331,
+        "failed": 2
+      },
+      "reportedUnhandledErrors": 0,
+      "unhandledEvidence": "No Unhandled Error/Unhandled Rejection/uncaughtException section in actual full log. No suppression."
+    },
+    "soleFailure": "Expected CONTEXT_REVISION but invalid destination URI changed caused SCHEMA before intended delivery hash conflict. Unit06 source/diststable; no production defect demonstrated."
+  },
+  "exactBeforeAfterProof": {
+    "path": "studio-runner/test/guided/incrementalRuntime.test.ts",
+    "line": 90,
+    "beforeSha256": "c0b7a1c795bab75c78c3c18366e05fcd03f6ea5eb6c8f4b9dafe2802ee01b839",
+    "afterSha256": "78c54182f1e09184433aba31572334ed528828928ff5792abab270289e87aeed",
+    "reverseReplacementSha256": "c0b7a1c795bab75c78c3c18366e05fcd03f6ea5eb6c8f4b9dafe2802ee01b839",
+    "exactBefore": "input.value='changed';",
+    "exactAfter": "const changedDestination=new URL(input.value);changedDestination.searchParams.set('historicalAckConflict','1');input.value=changedDestination.href;",
+    "replacementCount": 1,
+    "allOtherFileBytesUnchanged": true,
+    "reverseRestoresOriginalBytesAndSha256": true,
+    "proofArtifact": "runner/unit06-ack-mutant-repair01-literal-proof.json",
+    "proofArtifactSha256": "b73006269c82e2a34923fedcb0567d8b18fa5c457c8023e5bed4da80c2e0149a"
+  },
+  "intendedMutation": {
+    "sourceValue": "Existing input-nav destination value from actual guidedContext fixture (https://example.test/source), used directly through new URL(input.value).",
+    "change": "Set historicalAckConflict query parameter to1 and write URL.href. Existing fixture has no such query, so value differs; URL retains absolute http(s) URI, exact existing origin/scheme/path rather than inventing an origin or scheme.",
+    "allOtherFields": "kind destination, inputId,sourceStepId,slot,provenance,same deliveryId and context/materialization revisions remain byte-identical. Existing authoredInputsHash recomputation and expected CONTEXT_REVISION remain unchanged.",
+    "requiredGuard": "runtime.update validates closed RunnerContext/URI first, then finds original deliveryId ACK and compares prior.contextHash against changed issuedHash. This malicious same-delivery historical input rewrite should reach the existing immutable-context conflict guard rather than schema rejection.",
+    "noProductionChange": "No validator/error/order/guard/schema modification. No runtime execution in this repair window; validity explanation is source-based and still requires real fullunit07."
+  },
+  "preservedAssertions": {
+    "testName": "appends only after withhold and ACKs exact issued context despite a newer live lease",
+    "originalPositiveWithholding": "Pending append ACK waits for withholding new-private-value.",
+    "leaseAndIssuedHash": "Acknowledged newer live lease retained separately; exact original issued next contextHash and ContextAcknowledgement schema preserved.",
+    "historicalIdempotency": "Duplicate exact delivery returns original historical ACK.",
+    "finalExpectedError": "CONTEXT_REVISION unchanged",
+    "all14Prefix29Boundary1926Names": "No tests added/removed/renamed/skipped. All guards/fingerprints and original malicious scopes remain."
+  },
+  "allOwnedSourceHashes": {
+    "studio-runner/evaluation/observed-authoring/cases/incremental-edit-step-4.json": "f04e70016563076decb46292ce0f18d6a819d488f94212bb2bdb11d4f6546b4a",
+    "studio-runner/evaluation/observed-authoring/cases/incremental-insert-step.json": "9a1831f52911dbddc8d7dc1575c7b6e22480b00098b11bea51b6f94f0bfabbc1",
+    "studio-runner/src/executor/observedReplay.ts": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+    "studio-runner/src/guided/contracts.ts": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+    "studio-runner/src/guided/evidence.ts": "03afea081e543fc920d2e8012b85951bde9ffd737eb5ba858af959c006340279",
+    "studio-runner/src/guided/journal.ts": "15da758e2e287926a7d404926323791ab3e1f72931bc3c4cb1741de8de9d86dd",
+    "studio-runner/src/guided/ownership.ts": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf",
+    "studio-runner/src/guided/runtime.ts": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+    "studio-runner/src/guided/transport.ts": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+    "studio-runner/src/run/childRuntime.ts": "0eb0c88a0d4a98b716fcc4dc0a070f5c2f0df028e4f6e668ca9ee0cd8526dd02",
+    "studio-runner/src/run/launcher.ts": "0dfeb39a76c046dd1df4b1b9df0cec238aa57c0c7b067b8824368ffc075e9fd7",
+    "studio-runner/src/run/loginRequired.ts": "f46ef274506a4e9ec51df04e081c2e321f1b1088e22a2732751845fe2b001b27",
+    "studio-runner/src/run/observedReplayAdapter.ts": "ec6aa3fea89030dff318e7c0c441a5d5a499f2b62e31992aec6ac5d749616f81",
+    "studio-runner/src/run/protocol.ts": "46e23a90e8c6e64a7fa94e68bcff02c9b9f51254f2fb3180ae4065deef682fb8",
+    "studio-runner/src/validator/observedHistory.ts": "3fac42d11a71c88387effb74ad9c8ade01dc1ae8dfd75121aea4c3556829e007",
+    "studio-runner/src/validator/observedReferencePolicy.ts": "e6a2565b31ebb7339cc0ed15f9e9d8532d3c473f65709491129f6059108aebdb",
+    "studio-runner/src/validator/observedReplay.ts": "875da7952c8fb1ece09fdad48ffca822861dfe6cb742694f924995c98e5675df",
+    "studio-runner/src/validator/observedSnapshots.ts": "a8a53dedfa041aa9a671e1e03361fee5572cdfa9bc3abca91b5d53e160332928",
+    "studio-runner/test/controlReferencePreservation.test.ts": "86a2d54b5dd4d6603d643812391ea2b9d59211c312b176e0e3da4e4bc7cca0bd",
+    "studio-runner/test/currentWorldFactories.test.ts": "c1e5ead9c29157187857d17ab4c435fc6a95ecdcfb1203d817bbe75f3bc45d14",
+    "studio-runner/test/documentJson.test.ts": "0ec384914250541f410c9e0a63ddacd3ce12257aa6fe7ab06019a25db27de393",
+    "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "f5b613f5486b43a70c043b01a801f4ec8590bd8db2cd3ace8bf5510ca8fed685",
+    "studio-runner/test/fixtures-tier/guided-recording.test.ts": "3522915df575e7a0e98e71e74728545bdcb96fcf9b48b3178762c2ab5cc23574",
+    "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "10d97ab585a5af13a69b128a231eab0c6fd5e18780aec17cb3abcb803f752fd6",
+    "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts": "d1d524272fba634063ec6cf9491b6e14179f8d66dbc53898cffb47c2a84a6186",
+    "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts": "d6af50904a1a3187ae5b9b49478dd4232b28cf0b44e97807db765609876194d8",
+    "studio-runner/test/fixtures-tier/guided-wire.test.ts": "082e00e6de1af226c2d20a907cf28da0d9a70c49844c483ed06f1e75641b3a8f",
+    "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts": "f974ba2c570fd025f039dfd7af77a537dc8efbdc77b30bfae531d176f7384c1e",
+    "studio-runner/test/fixtures-tier/secret-login.test.ts": "3edd5a500b3b9628b15f29fad5d6815bfa3d0fb64c80cdcc5b003d8895a4f322",
+    "studio-runner/test/fixtures/guided-dataflow/server.ts": "7b226210744c0531acace3309fdf661098c1455531e31ff4d0323faee35586eb",
+    "studio-runner/test/guided/incrementalRuntime.test.ts": "78c54182f1e09184433aba31572334ed528828928ff5792abab270289e87aeed",
+    "studio-runner/test/guided/runtime.test.ts": "dfd1bad817e5eb33aaa9e7e6357723544f182342b8203753712f212744a4e814",
+    "studio-runner/test/guided/schemaAudit.test.ts": "c37d834a4956e379d289951e50365ac654c2f004c9df8b40bdef7e22de2e2f39",
+    "studio-runner/test/helpers/currentWorlds.ts": "1487feec0fa9f5e5ef3965e31648b8ab7671dbe7090750e9555677943a34d97c",
+    "studio-runner/test/helpers/documentJson.ts": "64f14fe565fdc562467781b85930025f61c0ee4a9a3ace3614dd769e1535a225",
+    "studio-runner/test/helpers/guided.ts": "af3c5687dcf62682253a58a2564177b507cfc0f61e57ee600cd81fda5255dc4d",
+    "studio-runner/test/helpers/incrementalNegativeBoundaries.ts": "94090a4d7e4a4f957cf8921007f57477c13c670786fe7fd318dcdf4de45fda16",
+    "studio-runner/test/helpers/openapi.ts": "e15c3b8295d0b30c5b2f0422121e8cd197af7ac6c9ca9fc882ac1f8fa533917d",
+    "studio-runner/test/helpers/publicationFixture.ts": "f9bf4c3afe0424275aecf1c256cb2528b99603e8655a68a89b4018f1d53e9773",
+    "studio-runner/test/helpers/retainedReplay.ts": "0ef0ebb4619283dc189361586f32f5c345857c2f28bb3112a16195bc2cd9d0ac",
+    "studio-runner/test/helpers/runner.ts": "4458ed1a65bca9016d2b1f9e396b09eb1a09bf5167a06ac74e8f383ffd65055e",
+    "studio-runner/test/observedIncrementalValidation.test.ts": "c140d89e3bcc397211b4283d8f9a9c83c60286b6ef0efb85c060461b25e92de4",
+    "studio-runner/test/retainedExecute.test.ts": "72c55adc93e466a58116e7726fec4e8f5c3b0ba862fdfc895b3f549857585342",
+    "studio-runner/test/run/observedChildRuntime.test.ts": "d9fa80ce843238f949fee1509dc339515e70b3b17887d378aacda47bf7a43916",
+    "studio-runner/test/run/observedPreparedAdapter.test.ts": "3d5076e153008c06bc63418c4e2ddfdbf6cb6ff664863cd937b020a8861c5d88",
+    "studio-runner/test/run/secretReplay.test.ts": "dc43402d1c3c2f2e5fe4d520e16c2f8b6a188a58c363dcb0e2a6b19470041226",
+    "studio-runner/test/schemaSemantics.test.ts": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb",
+    "studio-runner/test/server/observedReplayAdmission.test.ts": "3a355a5216d7afcbf07b4afa5de494526bc92739763ddb5a7d2de827ab1c275d",
+    "studio-runner/test/server/observedReplayAuthorization.test.ts": "af79cffc7d66e57be89729e140ad9bed9960535529ec3fe8fd4e6d35853413fd",
+    "studio-runner/test/server/observedReplayRoutes.test.ts": "4ddc7d9bf32b2312e0c99bd778cbff17ee4b0d610cf696a4369e3bbab706d288"
+  },
+  "ownedSourceCount": 50,
+  "protectedInputs": [
+    {
+      "path": "studio-runner/src/run/observedReplayAdapter.ts",
+      "sha256": "ec6aa3fea89030dff318e7c0c441a5d5a499f2b62e31992aec6ac5d749616f81",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "studio-runner/src/guided/runtime.ts",
+      "sha256": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "studio-runner/src/guided/transport.ts",
+      "sha256": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "studio-runner/src/guided/contracts.ts",
+      "sha256": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "studio-runner/src/guided/schemas.json",
+      "sha256": "8d21a51550084780d3a4da7a1a482beb717886de57bae4de72a5274db18cdd95",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "studio-runner/src/guided/types.ts",
+      "sha256": "f72139502ca8c040ffed5546364c76af0a2473b547bac8c0f3c78020332ec3fa",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "studio-runner/src/validator/observedSchemas.json",
+      "sha256": "357f6c428f6b85c4bcc3894d6b4c564b291e9642cded402d2c1d0811750e9d29",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "studio-runner/src/executor/observedOperations.ts",
+      "sha256": "f0e069494676314ab9898f7399b3ecd895d1740aeab963ab7d4d9eec9ba76856",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "studio-runner/test/helpers/incrementalNegativeBoundaries.ts",
+      "sha256": "94090a4d7e4a4f957cf8921007f57477c13c670786fe7fd318dcdf4de45fda16",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "sha256": "c140d89e3bcc397211b4283d8f9a9c83c60286b6ef0efb85c060461b25e92de4",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "studio-runner/test/guided/runtime.test.ts",
+      "sha256": "dfd1bad817e5eb33aaa9e7e6357723544f182342b8203753712f212744a4e814",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "studio-runner/test/run/secretReplay.test.ts",
+      "sha256": "dc43402d1c3c2f2e5fe4d520e16c2f8b6a188a58c363dcb0e2a6b19470041226",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "studio-runner/test/schemaSemantics.test.ts",
+      "sha256": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/authored-inputs.schema.json",
+      "sha256": "9ff02b3dd33bfb2c27e012adb3c0fd421085e67bbc5371e43bda9accd043b2e5",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/bridge.schema.json",
+      "sha256": "039ad4017a8256481d4109d37dfcfc919767094fd1610988d16706fef1065817",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "sha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+      "unchangedFromUnit06": true
+    },
+    {
+      "path": "studio-runner/vitest.config.ts",
+      "sha256": "c833caed66dc39aed1677db7cab921e97a5eb5b36291429c5f5e90f1a28c08f8",
+      "unchangedFromUnit06": true
+    }
+  ],
+  "checks": {
+    "wholeTypeScript": {
+      "command": "npm run type-check",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "log": "runner/type-unit06-ack-mutant-repair01.log",
+      "sha256": "66cb0d88cd3e949228a13daec3e65de0ce0c25b1b7278f1ffdb96dcd2886dfc9"
+    },
+    "scopedLint": {
+      "command": "./node_modules/.bin/eslint test/guided/incrementalRuntime.test.ts",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "log": "runner/lint-unit06-ack-mutant-repair01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "actualExecutionThisRelease": {
+    "tests": false,
+    "build": false,
+    "nativeBrowser": false,
+    "dbGradle": false,
+    "generationInstallFormat": false
+  },
+  "dist": {
+    "sha256": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "unchangedFromBuild06": true
+  },
+  "nextRunnableMapping": "Separate root exact full defaultunit07 with all1926multiplicities/29historicalskips/normalV8thresholds, then actual mainnative/joined window. Current sole unit06failed assertion still unproven until fresh execution. No retry/selective execution authorized by this checkpoint.",
+  "fullObligationMappingPreserved": {
+    "R1": [
+      "test/guided/ownership.test.ts",
+      "test/guided/transport.test.ts",
+      "test/guided/runtime.test.ts",
+      "test/guided/schemaAudit.test.ts"
+    ],
+    "R2": [
+      "test/guided/incrementalRuntime.test.ts samehandle/session/WAIT/prepare",
+      "test/fixtures-tier/mixed-mode-prefix.test.ts actual recorded handle source"
+    ],
+    "R3": [
+      "test/guided/incrementalRuntime.test.ts exact issued ACK/withhold/historical/concurrent versions",
+      "test/observedIncrementalValidation.test.ts historical versions/header/bootstrap"
+    ],
+    "R4": [
+      "test/guided/incrementalRuntime.test.ts durable fence/spent0/replacement1/callbackloss/policy/nativeStarted",
+      "test/run/observedPreparedAdapter.test.ts secret positive usage versus INVOKING fence"
+    ],
+    "R5": [
+      "test/observedIncrementalValidation.test.ts complete snapshot/base/graph/header/exclusion",
+      "test/retainedExecute.test.ts complete proof50witnesses/security/bounds",
+      "test/observedReplayValidation.test.ts original19/39/coherent parents",
+      "test/controlReferencePreservation.test.ts12catalog mutants and control semantics",
+      "test/currentWorldFactories.test.ts raw/effective/factory isolation"
+    ],
+    "R6": [
+      "test/fixtures-tier/mixed-mode-prefix.test.ts native10base/prefix3-suffix7/sourceOnly",
+      "test/fixtures-tier/observed-replay.test.ts native ordinary/control/model0/sourceOnly",
+      "test/fixtures-tier/observed-replay-privacy.test.ts native read/privacy/refusal/sourceOnly",
+      "test/fixtures-tier/guided-dataflow.test.ts regionControl/sourceOnly",
+      "evaluation/observed-authoring/cases/incremental-edit-step-4.json",
+      "evaluation/observed-authoring/cases/incremental-insert-step.json"
+    ],
+    "reviewed24Facets": "Exact prescribed mapping retained from checkpoint-repaired-arch05-source-01.json and failed actual unit02 receipt; no facet is closed by this source checkpoint."
+  },
+  "remaining": "All6increments/86acceptance/24ARCH05facets/55migrationmethods/fullconfiguredcheckscoverage/native/deployment/head/actualjoined/video/corpus/independent015closure then008 remain required. Coverage NOT_EVALUATED on actual failed unit06; all15realbackendprivateauthority companions remain UNFULFILLED by synthetic runner oracles. No source-only PASS/QA/Done or real authority credit.",
+  "hold": "All50runner owned source/tests/helpers and dist atomically HELD after this immutable checkpoint. No further source edit/check/test/build/native/DB/etc without explicit root release. Returning slot."
+}

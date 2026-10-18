@@ -1,0 +1,132 @@
+{
+  "observerStarted": "2026-10-15T05:51:17.133643+00:00",
+  "containers": [
+    {
+      "observedAt": "2026-10-15T05:51:24.989816+00:00",
+      "id": "bb58a345f07dc880722471091b120ededdc8ec6bf072b7098a699872f2e64ce5",
+      "imageId": "sha256:ed8478222652ed5ec9cd22a74417af86b61d7cf03bea9bb4d3193be315c16567",
+      "configuredImage": "postgres:15-alpine",
+      "name": "/nice_cannon",
+      "created": "2026-10-15T05:51:24.662935971Z",
+      "labels": {
+        "org.testcontainers": "true",
+        "org.testcontainers.lang": "java",
+        "org.testcontainers.sessionId": "4a43f045-6e8c-4e8c-bc02-25a04a49e569",
+        "org.testcontainers.version": "1.20.2"
+      },
+      "versionQuery": {
+        "command": "docker exec <owned-testcontainer> psql -U test -d obs015_migrations -Atc SELECT version(), current_setting(server_version), current_database();",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "psql: error: connection to server on socket \"/var/run/postgresql/.s.PGSQL.5432\" failed: No such file or directory\n\tIs the server running locally and accepting connections on that socket?\n"
+      },
+      "containerLogs": "The files belonging to this database system will be owned by user \"postgres\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"en_US.utf8\".\nThe default database encoding has accordingly been set to \"UTF8\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are disabled.\n\nfixing permissions on existing directory /var/lib/postgresql/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... posix\nselecting default max_connections ... 100\nselecting default shared_buffers ... 128MB\nselecting default time zone ... UTC\ncreating configuration files ... ok\n"
+    },
+    {
+      "observedAt": "2026-10-15T05:51:25.217562+00:00",
+      "id": "bb58a345f07dc880722471091b120ededdc8ec6bf072b7098a699872f2e64ce5",
+      "imageId": "sha256:ed8478222652ed5ec9cd22a74417af86b61d7cf03bea9bb4d3193be315c16567",
+      "configuredImage": "postgres:15-alpine",
+      "name": "/nice_cannon",
+      "created": "2026-10-15T05:51:24.662935971Z",
+      "labels": {
+        "org.testcontainers": "true",
+        "org.testcontainers.lang": "java",
+        "org.testcontainers.sessionId": "4a43f045-6e8c-4e8c-bc02-25a04a49e569",
+        "org.testcontainers.version": "1.20.2"
+      },
+      "versionQuery": {
+        "command": "docker exec <owned-testcontainer> psql -U test -d obs015_migrations -Atc SELECT version(), current_setting(server_version), current_database();",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "psql: error: connection to server on socket \"/var/run/postgresql/.s.PGSQL.5432\" failed: No such file or directory\n\tIs the server running locally and accepting connections on that socket?\n"
+      },
+      "containerLogs": "The files belonging to this database system will be owned by user \"postgres\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"en_US.utf8\".\nThe default database encoding has accordingly been set to \"UTF8\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are disabled.\n\nfixing permissions on existing directory /var/lib/postgresql/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... posix\nselecting default max_connections ... 100\nselecting default shared_buffers ... 128MB\nselecting default time zone ... UTC\ncreating configuration files ... ok\nrunning bootstrap script ... ok\n"
+    },
+    {
+      "observedAt": "2026-10-15T05:51:25.416655+00:00",
+      "id": "bb58a345f07dc880722471091b120ededdc8ec6bf072b7098a699872f2e64ce5",
+      "imageId": "sha256:ed8478222652ed5ec9cd22a74417af86b61d7cf03bea9bb4d3193be315c16567",
+      "configuredImage": "postgres:15-alpine",
+      "name": "/nice_cannon",
+      "created": "2026-10-15T05:51:24.662935971Z",
+      "labels": {
+        "org.testcontainers": "true",
+        "org.testcontainers.lang": "java",
+        "org.testcontainers.sessionId": "4a43f045-6e8c-4e8c-bc02-25a04a49e569",
+        "org.testcontainers.version": "1.20.2"
+      },
+      "versionQuery": {
+        "command": "docker exec <owned-testcontainer> psql -U test -d obs015_migrations -Atc SELECT version(), current_setting(server_version), current_database();",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "psql: error: connection to server on socket \"/var/run/postgresql/.s.PGSQL.5432\" failed: No such file or directory\n\tIs the server running locally and accepting connections on that socket?\n"
+      },
+      "containerLogs": "The files belonging to this database system will be owned by user \"postgres\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"en_US.utf8\".\nThe default database encoding has accordingly been set to \"UTF8\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are disabled.\n\nfixing permissions on existing directory /var/lib/postgresql/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... posix\nselecting default max_connections ... 100\nselecting default shared_buffers ... 128MB\nselecting default time zone ... UTC\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nsh: locale: not found\n2026-10-15 05:51:25.279 UTC [41] WARNING:  no usable system locales were found\n"
+    },
+    {
+      "observedAt": "2026-10-15T05:51:25.608840+00:00",
+      "id": "bb58a345f07dc880722471091b120ededdc8ec6bf072b7098a699872f2e64ce5",
+      "imageId": "sha256:ed8478222652ed5ec9cd22a74417af86b61d7cf03bea9bb4d3193be315c16567",
+      "configuredImage": "postgres:15-alpine",
+      "name": "/nice_cannon",
+      "created": "2026-10-15T05:51:24.662935971Z",
+      "labels": {
+        "org.testcontainers": "true",
+        "org.testcontainers.lang": "java",
+        "org.testcontainers.sessionId": "4a43f045-6e8c-4e8c-bc02-25a04a49e569",
+        "org.testcontainers.version": "1.20.2"
+      },
+      "versionQuery": {
+        "command": "docker exec <owned-testcontainer> psql -U test -d obs015_migrations -Atc SELECT version(), current_setting(server_version), current_database();",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "psql: error: connection to server on socket \"/var/run/postgresql/.s.PGSQL.5432\" failed: FATAL:  database \"obs015_migrations\" does not exist\n"
+      },
+      "containerLogs": "The files belonging to this database system will be owned by user \"postgres\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"en_US.utf8\".\nThe default database encoding has accordingly been set to \"UTF8\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are disabled.\n\nfixing permissions on existing directory /var/lib/postgresql/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... posix\nselecting default max_connections ... 100\nselecting default shared_buffers ... 128MB\nselecting default time zone ... UTC\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\n\nSuccess. You can now start the database server using:\n\n    pg_ctl -D /var/lib/postgresql/data -l logfile start\n\nwaiting for server to start....2026-10-15 05:51:25.619 UTC [59] LOG:  starting PostgreSQL 15.19 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit\n2026-10-15 05:51:25.619 UTC [59] LOG:  listening on Unix socket \"/var/run/postgresql/.s.PGSQL.5432\"\n2026-10-15 05:51:25.621 UTC [62] LOG:  database system was shut down at 2026-10-15 05:51:25 UTC\n2026-10-15 05:51:25.624 UTC [59] LOG:  database system is ready to accept connections\n2026-10-15 05:51:25.666 UTC [72] FATAL:  database \"obs015_migrations\" does not exist\nsh: locale: not found\n2026-10-15 05:51:25.279 UTC [41] WARNING:  no usable system locales were found\ninitdb: warning: enabling \"trust\" authentication for local connections\ninitdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.\n"
+    },
+    {
+      "observedAt": "2026-10-15T05:51:25.823501+00:00",
+      "id": "bb58a345f07dc880722471091b120ededdc8ec6bf072b7098a699872f2e64ce5",
+      "imageId": "sha256:ed8478222652ed5ec9cd22a74417af86b61d7cf03bea9bb4d3193be315c16567",
+      "configuredImage": "postgres:15-alpine",
+      "name": "/nice_cannon",
+      "created": "2026-10-15T05:51:24.662935971Z",
+      "labels": {
+        "org.testcontainers": "true",
+        "org.testcontainers.lang": "java",
+        "org.testcontainers.sessionId": "4a43f045-6e8c-4e8c-bc02-25a04a49e569",
+        "org.testcontainers.version": "1.20.2"
+      },
+      "versionQuery": {
+        "command": "docker exec <owned-testcontainer> psql -U test -d obs015_migrations -Atc SELECT version(), current_setting(server_version), current_database();",
+        "exit": 2,
+        "stdout": "",
+        "stderr": "psql: error: connection to server on socket \"/var/run/postgresql/.s.PGSQL.5432\" failed: No such file or directory\n\tIs the server running locally and accepting connections on that socket?\n"
+      },
+      "containerLogs": "The files belonging to this database system will be owned by user \"postgres\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"en_US.utf8\".\nThe default database encoding has accordingly been set to \"UTF8\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are disabled.\n\nfixing permissions on existing directory /var/lib/postgresql/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... posix\nselecting default max_connections ... 100\nselecting default shared_buffers ... 128MB\nselecting default time zone ... UTC\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\n\nSuccess. You can now start the database server using:\n\n    pg_ctl -D /var/lib/postgresql/data -l logfile start\n\nwaiting for server to start....2026-10-15 05:51:25.619 UTC [59] LOG:  starting PostgreSQL 15.19 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit\n2026-10-15 05:51:25.619 UTC [59] LOG:  listening on Unix socket \"/var/run/postgresql/.s.PGSQL.5432\"\n2026-10-15 05:51:25.621 UTC [62] LOG:  database system was shut down at 2026-10-15 05:51:25 UTC\n2026-10-15 05:51:25.624 UTC [59] LOG:  database system is ready to accept connections\n2026-10-15 05:51:25.666 UTC [72] FATAL:  database \"obs015_migrations\" does not exist\n done\nserver started\nCREATE DATABASE\n\n\n/usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*\n\nwaiting for server to shut down....2026-10-15 05:51:25.755 UTC [59] LOG:  received fast shutdown request\n2026-10-15 05:51:25.755 UTC [59] LOG:  aborting any active transactions\n2026-10-15 05:51:25.756 UTC [59] LOG:  background worker \"logical replication launcher\" (PID 65) exited with exit code 1\n2026-10-15 05:51:25.756 UTC [60] LOG:  shutting down\n2026-10-15 05:51:25.756 UTC [60] LOG:  checkpoint starting: shutdown immediate\n2026-10-15 05:51:25.766 UTC [60] LOG:  checkpoint complete: wrote 922 buffers (5.6%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.010 s, sync=0.001 s, total=0.010 s; sync files=0, longest=0.000 s, average=0.000 s; distance=4249 kB, estimate=4249 kB\n2026-10-15 05:51:25.769 UTC [59] LOG:  database system is shut down\n done\nserver stopped\n\nPostgreSQL init process complete; ready for start up.\n\nsh: locale: not found\n2026-10-15 05:51:25.279 UTC [41] WARNING:  no usable system locales were found\ninitdb: warning: enabling \"trust\" authentication for local connections\ninitdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.\n2026-10-15 05:51:25.868 UTC [1] LOG:  starting PostgreSQL 15.19 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit\n2026-10-15 05:51:25.868 UTC [1] LOG:  listening on IPv4 address \"0.0.0.0\", port 5432\n2026-10-15 05:51:25.868 UTC [1] LOG:  listening on IPv6 address \"::\", port 5432\n2026-10-15 05:51:25.869 UTC [1] LOG:  listening on Unix socket \"/var/run/postgresql/.s.PGSQL.5432\"\n2026-10-15 05:51:25.870 UTC [88] LOG:  database system was shut down at 2026-10-15 05:51:25 UTC\n2026-10-15 05:51:25.872 UTC [1] LOG:  database system is ready to accept connections\n"
+    },
+    {
+      "observedAt": "2026-10-15T05:51:26.018298+00:00",
+      "id": "bb58a345f07dc880722471091b120ededdc8ec6bf072b7098a699872f2e64ce5",
+      "imageId": "sha256:ed8478222652ed5ec9cd22a74417af86b61d7cf03bea9bb4d3193be315c16567",
+      "configuredImage": "postgres:15-alpine",
+      "name": "/nice_cannon",
+      "created": "2026-10-15T05:51:24.662935971Z",
+      "labels": {
+        "org.testcontainers": "true",
+        "org.testcontainers.lang": "java",
+        "org.testcontainers.sessionId": "4a43f045-6e8c-4e8c-bc02-25a04a49e569",
+        "org.testcontainers.version": "1.20.2"
+      },
+      "versionQuery": {
+        "command": "docker exec <owned-testcontainer> psql -U test -d obs015_migrations -Atc SELECT version(), current_setting(server_version), current_database();",
+        "exit": 0,
+        "stdout": "PostgreSQL 15.19 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit|15.19|obs015_migrations\n",
+        "stderr": ""
+      },
+      "containerLogs": "The files belonging to this database system will be owned by user \"postgres\".\nThis user must also own the server process.\n\nThe database cluster will be initialized with locale \"en_US.utf8\".\nThe default database encoding has accordingly been set to \"UTF8\".\nThe default text search configuration will be set to \"english\".\n\nData page checksums are disabled.\n\nfixing permissions on existing directory /var/lib/postgresql/data ... ok\ncreating subdirectories ... ok\nselecting dynamic shared memory implementation ... posix\nselecting default max_connections ... 100\nselecting default shared_buffers ... 128MB\nselecting default time zone ... UTC\ncreating configuration files ... ok\nrunning bootstrap script ... ok\nperforming post-bootstrap initialization ... ok\nsyncing data to disk ... ok\n\n\nSuccess. You can now start the database server using:\n\n    pg_ctl -D /var/lib/postgresql/data -l logfile start\n\nwaiting for server to start....2026-10-15 05:51:25.619 UTC [59] LOG:  starting PostgreSQL 15.19 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit\n2026-10-15 05:51:25.619 UTC [59] LOG:  listening on Unix socket \"/var/run/postgresql/.s.PGSQL.5432\"\n2026-10-15 05:51:25.621 UTC [62] LOG:  database system was shut down at 2026-10-15 05:51:25 UTC\n2026-10-15 05:51:25.624 UTC [59] LOG:  database system is ready to accept connections\n2026-10-15 05:51:25.666 UTC [72] FATAL:  database \"obs015_migrations\" does not exist\n done\nserver started\nCREATE DATABASE\n\n\n/usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*\n\nwaiting for server to shut down....2026-10-15 05:51:25.755 UTC [59] LOG:  received fast shutdown request\n2026-10-15 05:51:25.755 UTC [59] LOG:  aborting any active transactions\n2026-10-15 05:51:25.756 UTC [59] LOG:  background worker \"logical replication launcher\" (PID 65) exited with exit code 1\n2026-10-15 05:51:25.756 UTC [60] LOG:  shutting down\n2026-10-15 05:51:25.756 UTC [60] LOG:  checkpoint starting: shutdown immediate\n2026-10-15 05:51:25.766 UTC [60] LOG:  checkpoint complete: wrote 922 buffers (5.6%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.010 s, sync=0.001 s, total=0.010 s; sync files=0, longest=0.000 s, average=0.000 s; distance=4249 kB, estimate=4249 kB\n2026-10-15 05:51:25.769 UTC [59] LOG:  database system is shut down\n done\nserver stopped\n\nPostgreSQL init process complete; ready for start up.\n\nsh: locale: not found\n2026-10-15 05:51:25.279 UTC [41] WARNING:  no usable system locales were found\ninitdb: warning: enabling \"trust\" authentication for local connections\ninitdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.\n2026-10-15 05:51:25.868 UTC [1] LOG:  starting PostgreSQL 15.19 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit\n2026-10-15 05:51:25.868 UTC [1] LOG:  listening on IPv4 address \"0.0.0.0\", port 5432\n2026-10-15 05:51:25.868 UTC [1] LOG:  listening on IPv6 address \"::\", port 5432\n2026-10-15 05:51:25.869 UTC [1] LOG:  listening on Unix socket \"/var/run/postgresql/.s.PGSQL.5432\"\n2026-10-15 05:51:25.870 UTC [88] LOG:  database system was shut down at 2026-10-15 05:51:25 UTC\n2026-10-15 05:51:25.872 UTC [1] LOG:  database system is ready to accept connections\n"
+    }
+  ],
+  "observerEnded": "2026-10-15T05:51:26.090870+00:00"
+}

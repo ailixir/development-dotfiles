@@ -1,0 +1,77 @@
+{
+  "artifact": "STUDIO-OBS-015 B4a-source03 independent Quinn bounded review",
+  "capturedAt": "2026-10-15T18:14:42.471637+00:00",
+  "classification": "BOUNDED_SOURCE_REVIEW_WITH_FINDINGS_AND_OWNER_RUNTIME_BINDING_NOT_A_STORY_GATE",
+  "checkpoint": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-b4a-source03.json",
+    "sha256": "a699068b00b9748920ef25237b8a2d3076bc65d8065c740a26168d0882a0af50",
+    "bytes": 13588
+  },
+  "ownedAfter": {
+    "backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java": {
+      "sha256": "8c110961bc1c6897e0c8e75e0733f61925579f9fa970854fa5c377add3aa0b9d",
+      "bytes": 8744
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java": {
+      "sha256": "7aa79cbe6d7d80534fb999c1cddfa88a437dff876caa4655123688962968c3bd",
+      "bytes": 41554
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java": {
+      "sha256": "0144622dc93ab58e92ef4fe17f815f772afa763c0857b6c7afe4292ff2a80554",
+      "bytes": 69373
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalBoundaryFixture.java": {
+      "sha256": "7958ba808637442c244799061051017c0ff354fb0b31189be81884955d58fe7f",
+      "bytes": 27005
+    }
+  },
+  "findingIds": [
+    "B4A03-QA-01",
+    "B4A03-QA-02"
+  ],
+  "findings": {
+    "testAdequacy": 1,
+    "actualExistingContractGap": 1
+  },
+  "source03ActualCases": {
+    "total": 15,
+    "passed": 15,
+    "adequacyQualified": true
+  },
+  "actualCombinedRun": {
+    "exit": 1,
+    "total": 189,
+    "passed": 161,
+    "failed": 28,
+    "skipped": 0,
+    "lowTask": "NOT_RUN"
+  },
+  "payloads": {
+    "review.md": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source03/qa-review/review.md",
+      "sha256": "a19fbc2ec0c3df9e63a725642fd1fa8a5ccc1b7064059946862ce8bb0a6b189d",
+      "bytes": 8408
+    },
+    "checks.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source03/qa-review/checks.json",
+      "sha256": "de3efbdbe1eb482656d60d30a9da04d388573f93150caff63253ae9b4cfcfb32",
+      "bytes": 19857
+    },
+    "source-inventory.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source03/qa-review/source-inventory.json",
+      "sha256": "b64f9a9bddd04d8774bcdda6713d2edd5e542e1ac8407e84effeb85698bb4caf",
+      "bytes": 17582
+    }
+  },
+  "formalVerdict": null,
+  "lifecycleTransition": null,
+  "sourceReleaseGranted": false,
+  "runtimeExecutedByReviewer": false,
+  "sourceEditedByReviewer": false,
+  "outputsOnly": [
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source03/qa-review/review.md",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source03/qa-review/checks.json",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source03/qa-review/source-inventory.json",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/b4a-source03/qa-review/manifest.json"
+  ]
+}

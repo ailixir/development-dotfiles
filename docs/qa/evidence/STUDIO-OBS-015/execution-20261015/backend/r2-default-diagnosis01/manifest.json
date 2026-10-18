@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "author": "Dex-D (@dev, diagnosis only)",
+  "createdAt": "2026-10-16T05:11:09.780553+00:00",
+  "subjectRun": "backend-r2-join-b1a-b3a-attempt01",
+  "lane": "test",
+  "counts": {
+    "total": 89,
+    "passed": 74,
+    "failed": 15
+  },
+  "rootCauses": {
+    "A": {
+      "tests": [
+        "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead",
+        "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead"
+      ],
+      "assertion": "ReplayIT:14757 validatorCountPredicate",
+      "cause": "hard-coded validator line 363; 015 admitPlan (+18 lines) moved count predicate to 381",
+      "evidence": "r2-temp-copies/p4-first-guard-diagnostic-{0,2}.json actualActionLine=381",
+      "sharedCause": true
+    },
+    "B": {
+      "tests": [
+        "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending"
+      ],
+      "cause": "015 owned-process verify in p8KillRefusedWhileAlive throws NoSuchElementException for a macOS zombie descendant (no commandLine)",
+      "verifiedProbe": "zombie isAlive=true startInstant present commandLine absent ps stat Z",
+      "zombieAtR2Instant": "inferred"
+    },
+    "C": {
+      "tests": [
+        "executionError"
+      ],
+      "cause": "TOCTOU cursor.parent() double read at ReplayIT:558-559 in owned-process observer",
+      "timing": "inferred during Order 31"
+    },
+    "cascade": {
+      "count": 11,
+      "guard": "ReplayIT:2592 cleanupUnconfirmed from B"
+    }
+  },
+  "f2": "real latent (Order 42 last statement); fixed in patch",
+  "f3": "not causal in R2; not patched; optional Map.of(\"USER\",\"p3-user\")",
+  "productionDefect": false,
+  "gradleRun": false,
+  "liveSubjects": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "4242ac27020814fe57355116a06ef1271b4a0c2f247d2847ea3c28888ec55b33",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java": "2411f9ac24c1d21db7b43ee22ae91055b3aaefbce7f7652b276d4fc3d21e8b40"
+  },
+  "patch": {
+    "path": "fix.patch",
+    "sha256": "42d7e8bad06632868e3817f2b8b564988cfbe00ffad90c9a9340ad1fff742b35",
+    "target": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "targetSha256": "4242ac27020814fe57355116a06ef1271b4a0c2f247d2847ea3c28888ec55b33",
+    "applyCheck": "git apply --check -p0 OK",
+    "patchedSha256": "25f12ca218ccb50b2a9f282f38192b91d1dc9b61f3abf158b913ac3e8055c33e",
+    "javac": "base 0 errors; patched 0 errors (JDK21, outside Gradle)"
+  },
+  "r2TempDir": "$TMPDIR/obs007-joined-9841043985701268732",
+  "files": {
+    "fix.patch": "42d7e8bad06632868e3817f2b8b564988cfbe00ffad90c9a9340ad1fff742b35",
+    "review.md": "4c708dd3509607d4afed6f7d7684149b5c455f9e269eff6e1f6c4b36f8744af8",
+    "r2-temp-copies/failed-test-cleanup-test-32-actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending-singleton.json": "fb64a26f148f41f8a7978811953f0d5e574142286fcbf407c74f9910fc6f2527",
+    "r2-temp-copies/p4-first-guard-diagnostic-2.json": "47dd26c27a5fe341e6cf9669364d137d4c2253950ebd3809ac72918a962658fa",
+    "r2-temp-copies/p4-first-guard-diagnostic-0.json": "1041aa5e2b051cfd224d1af39fff185e88336b78187d15adfc6395c1c9812792"
+  }
+}

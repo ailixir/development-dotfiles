@@ -1,0 +1,135 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java
+@@ -178,13 +178,29 @@
+           || proof.contracts != this
+           || proof.root != schemas.get("v3/session")
+           || !sameRenewalTree(proof.snapshot, current)
+-          || !proof.snapshot.equals(current)
+-          || !proof.representation.equals(current.toString())) {
++          || !(current.path("owner") instanceof ObjectNode)
++          || current.path("owner").path("leaseExpiresAt").getClass()
++              != proof.snapshot.path("owner").path("leaseExpiresAt").getClass()) {
++        return null;
++      }
++      String representation = current.toString();
++      JsonNode copied = JSON.readTree(representation);
++      if (!(copied instanceof ObjectNode adjusted)
++          || !sameRenewalTree(current, adjusted)
++          || !current.equals(adjusted)
++          || !representation.equals(adjusted.toString())) {
++        return null;
++      }
++      ((ObjectNode) adjusted.path("owner"))
++          .set("leaseExpiresAt", proof.snapshot.path("owner").path("leaseExpiresAt"));
++      if (!sameRenewalTree(proof.snapshot, adjusted)
++          || !proof.snapshot.equals(adjusted)
++          || !proof.representation.equals(adjusted.toString())) {
+         return null;
+       }
+       return new RenewalValidation(
+           this, proof.root, proof.owner, proof.snapshot, proof.representation, current);
+-    } catch (RuntimeException unavailable) {
++    } catch (IOException | RuntimeException unavailable) {
+       return null;
+     }
+   }
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
+@@ -1061,6 +1061,85 @@
+         .prepareRenewalValidation(org.mockito.ArgumentMatchers.any());
+     assertThatThrownBy(() -> selected.prepareRenewalValidation(id))
+         .isInstanceOf(AssertionError.class);
++  }
++
++  @Test
++  void completedPublicRenewalLeaseDriftBindsWithoutMutatingEitherInputAndStillWritesFreshOwner() {
++    String id = observing();
++    ObjectNode original = (ObjectNode) persistedDocument(id);
++    String originalRepresentation = original.toString();
++    var proof = contracts.prepareRenewalValidation(original);
++    assertThat(proof).isNotNull();
++    clock.now = clock.now.plusSeconds(1);
++    JsonNode renewed = service.claim(worker, id, "intervening-real-renewal", claim(id, "worker-1", 1));
++    assertThat(renewed.path("owner").path("leaseExpiresAt")
++        .equals(original.path("owner").path("leaseExpiresAt"))).isFalse();
++    assertThat(original.toString().equals(originalRepresentation)).isTrue();
++    repository.transaction(() -> {
++      var current = repository.lock(id);
++      String beforeBind = current.document().toString();
++      var bound = contracts.bindRenewalValidation(proof, current.document());
++      assertThat(bound).isNotNull();
++      assertThat(current.document().toString().equals(beforeBind)).isTrue();
++      assertThat(original.toString().equals(originalRepresentation)).isTrue();
++      assertThat(contracts.validateRenewalOwner(bound, current.document().deepCopy())).isFalse();
++      current.document().withObject("/owner").put("leaseExpiresAt",
++          clock.instant().plusSeconds(30).toString());
++      repository.saveRenewalAndCommand(current, "lease-drift-bound-renewal", "digest", bound);
++      return null;
++    });
++    assertThat(persistedDocument(id).path("owner").path("leaseExpiresAt").asText())
++        .isEqualTo(clock.instant().plusSeconds(30).toString());
++    JsonNode beforeInvalid = persistedDocument(id);
++    var freshProof = repository.prepareRenewalValidation(id);
++    assertThat(freshProof).isNotNull();
++    assertThatThrownBy(() -> repository.transaction(() -> {
++      var current = repository.lock(id);
++      var bound = contracts.bindRenewalValidation(freshProof, current.document());
++      assertThat(bound).isNotNull();
++      current.document().withObject("/owner").put("leaseExpiresAt", "not-a-date");
++      repository.saveRenewalAndCommand(current, "lease-drift-invalid-final", "digest", bound);
++      return null;
++    })).hasMessage("INVALID_CONTRACT");
++    assertThat(persistedDocument(id).equals(beforeInvalid)).isTrue();
++    assertThat(jdbc.queryForObject(
++        "SELECT count(*) FROM studio_guided_commands WHERE namespace=?"
++            + " AND idempotency_key='lease-drift-invalid-final'", Integer.class, id)).isZero();
++  }
++
++  @Test
++  void leaseDriftDoesNotBlessStateSourceCountersOwnerTypesRepresentationOrForeignProof() {
++    String id = observing();
++    ObjectNode original = (ObjectNode) persistedDocument(id);
++    var proof = contracts.prepareRenewalValidation(original);
++    assertThat(proof).isNotNull();
++    ObjectNode leaseOnly = original.deepCopy();
++    leaseOnly.withObject("/owner").put("leaseExpiresAt", clock.instant().plusSeconds(31).toString());
++    assertThat(contracts.bindRenewalValidation(proof, leaseOnly)).isNotNull();
++    ObjectNode state = leaseOnly.deepCopy().put("state", "FINALIZING");
++    ObjectNode source = leaseOnly.deepCopy();
++    source.withObject("/scope").put("sourceRevision", "999");
++    ObjectNode counters = leaseOnly.deepCopy();
++    counters.withObject("/counters").put("modelProposals",
++        counters.path("counters").path("modelProposals").asInt() + 1);
++    ObjectNode workerChanged = leaseOnly.deepCopy();
++    workerChanged.withObject("/owner").put("workerId", "another-owned-fixture-worker");
++    ObjectNode fence = leaseOnly.deepCopy();
++    fence.withObject("/owner").put("fence", 2);
++    ObjectNode typedLease = leaseOnly.deepCopy();
++    typedLease.withObject("/owner").put("leaseExpiresAt", 1);
++    ObjectNode reordered = contracts.object();
++    java.util.List<String> names = new java.util.ArrayList<>();
++    leaseOnly.fieldNames().forEachRemaining(names::add);
++    java.util.Collections.reverse(names);
++    names.forEach(name -> reordered.set(name, leaseOnly.get(name).deepCopy()));
++    for (ObjectNode mismatch : java.util.List.of(
++        state, source, counters, workerChanged, fence, typedLease, reordered)) {
++      assertThat(contracts.bindRenewalValidation(proof, mismatch)).isNull();
++    }
++    assertThat(contracts.bindRenewalValidation(null, leaseOnly)).isNull();
++    assertThat(new GuidedContracts().bindRenewalValidation(proof, leaseOnly)).isNull();
++    assertThat(original.equals(persistedDocument(id))).isTrue();
+   }
+ 
+   private JsonNode persistedDocument(String id) {
+--- a/docs/specs/studio-observed-authoring/secret-login-design.md
++++ b/docs/specs/studio-observed-authoring/secret-login-design.md
+@@ -326,3 +326,9 @@
+ The validator-only request path may reuse the canonical String already computed by the original Contracts validation instead of traversing the same privately assembled JSON again. Public void validate retains canonicalization, conditional v3 name normalization, the same cached schema and fixed refusal ordering; a successful return-value helper shares that exact body. No result is returned before strict schema success. Client UTF-8 encoding, byte limit, credential supplier, immutable deadline, one HTTP send, bounded response and verdict checks retain their order.
+ 
+ Configured networknt draft-7 validation must not mutate the input; existing schema resources have no application defaults or injected custom validator configuration. This is a supported standard Jackson/private Publisher request contract, not arbitrary concurrent mutable node or mocked successful-null return equivalence. Existing production configuration and real Contracts tests remain the authority. No owned token, cache, schema bypass, timeout reset or logger change is added. One fewer off-lock canonical traversal adds API coupling and does not establish exclusive cost, causality, latency improvement or C5 acceptance. The already-expired immutable budget remains expired; HTTP send and validator response are not credited.
++
++### Same-owner lease drift in the private schema comparison
++
++A completed intervening same-owner renewal may change only owner.leaseExpiresAt between the detached read and fresh guarded owner lock. The private bind may normalize that scalar only in its separately owned comparison copy after complete closed-node class, JSON and serialized roundtrip parity. Every nonlease field, worker/fence, array, numeric representation and field order remains exact. Current and captured proof trees are never mutated; the token binds the original fresh current object. State/source/counter or any other drift still takes original strict fallback.
++
++Original live-lease, authorization, source, assignment and duplicate checks precede binding; original clipped lease mutation remains. At the original save point, whole canonicalization and the same independently pinned compiled FULL OWNER child validate the actual final owner/lease, with original fixed INVALID_CONTRACT and SQL rollback semantics. No current authority or old lease is cached. Optional nonfatal copy/match failure returns unavailable; Error timing remains explicit. Another owned parse/copy/comparison may cost more than avoided fallback, and no sample causality, latency improvement or acceptance is claimed. No new state validator, API, query, diagnostic or framework is introduced;1000ms/2000ms/immutable publication deadline/full TRACE remain.

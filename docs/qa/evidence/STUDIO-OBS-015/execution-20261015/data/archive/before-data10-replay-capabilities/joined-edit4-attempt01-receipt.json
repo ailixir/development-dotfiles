@@ -1,0 +1,185 @@
+{
+  "artifact": "STUDIO-OBS-015 first actual main edit4 joined invocation receipt01",
+  "at": "2026-10-15T09:52:53.260611+00:00",
+  "owner": "Dex/backend015_resume execution-only",
+  "sourceHold": true,
+  "commandAuthorization": "Exact root single invocation; no retries, fixes, extra tests/build/native commands or source writes.",
+  "invocation": {
+    "wrapper": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend.py backend-joined-edit4-attempt01 test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays' --rerun-tasks",
+    "liveSession": 44747,
+    "terminal": true,
+    "exit": 1,
+    "elapsedSeconds": 14.13,
+    "counts": {
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "actualTestcases": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "name": "initializationError",
+        "status": "FAIL"
+      }
+    ],
+    "selectedMethodExecuted": false,
+    "selectionOutcome": "1 initializationError; zero main-flow cases executed, no skippedcases. Compilation did execute successfully."
+  },
+  "stability": {
+    "sourceStable": true,
+    "testInputStable": true,
+    "distStable": true,
+    "sourceDigest": "d421be06dc9e1ffdbbd227edf076ed64662b43afdacc7500196788a02a3ce074",
+    "distDigest": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+    "mainCompile": "PASS",
+    "testCompile": "PASS"
+  },
+  "actualEngine": {
+    "image": "postgres:15-alpine",
+    "version": "PostgreSQL15.19",
+    "containerId": "7f0de1d45ee530676943f58d7d91b85bc81f4555f5d548168674b8074cb7fef1",
+    "flywayTargetReached": "V20 exactly; normal Spring V21boot not reached",
+    "engineLog": [
+      "05:49:01.075 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:53397/test (PostgreSQL 15.19)"
+    ],
+    "migrationLog": [
+      "05:49:01.804 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 20 migrations to schema \"public\", now at version v20 (execution time 00:00.454s)"
+    ],
+    "ownedContainerAfterTerminal": "Absent from actual dockerps; Ryuk likewise absent. No DB/nativeconnection made afterfailure."
+  },
+  "failure": {
+    "phase": "Static initializer pre-Spring legacy V20 fixture",
+    "top": "ExceptionInInitializerError at GuidedPublicationReplayIT.java848",
+    "cause": "GuidedSessionException INVALID_CONTRACT from GuidedContracts.validatedCanonical104 -> GuidedPlanBuilder.basis472",
+    "callgraph": [
+      "LegacyV20ConfirmedBaseFixture.seedPreparedV20:141/117",
+      "LegacyV20ConfirmedBaseFixture.seedV20Cases:61/60",
+      "GuidedPublicationReplayIT.<clinit>:842/848"
+    ],
+    "rootCauseReadOnlyFinding": "LegacyV20ConfirmedBaseFixture lines102/114 scope.capabilities includes observe and requirements.capabilities copies that wholearray. builder.basis preserves replayRequirements from originalbase and validates completeValidationBasis. Frozen replay-profile#/definitions/ReplayRequirements.properties.capabilities.items.enum excludes observe. This is a specific schema-invalid fixture projection; no production/schema change or weakened oracle is authorized.",
+    "confidence": "Direct source/callgraph/schema evidence for invalid observe capability; completeexception stack retained. No rerun or artificial validation was used.",
+    "repairOwner": "Data-owned LegacyV20ConfirmedBaseFixture; root must release any source repair. Backend/native/runner not blamed by this preboot failure."
+  },
+  "reached": {
+    "ownedUniqueTempCreated": true,
+    "controlledSecretFixtureNodeStarted": true,
+    "ownedDisposablePostgres15Started": true,
+    "prebootMigrationsThrough20": true,
+    "prebootPrimarySeedFinished": false,
+    "prebootStaleCacheSiblingSeeded": false,
+    "springApplicationBoot": false,
+    "beforeEachSessionTracking": false,
+    "selectedMethodBody": false,
+    "guidedWorkerStarted": false,
+    "ordinaryWorkerStarted": false,
+    "actualRecordedChromiumForThisInvocation": false,
+    "mainCoreHttpMtlsModelOrNativeProof": false
+  },
+  "mainAssertionAssessment": [
+    {
+      "subject": "Initial ten-step actual learn/publish",
+      "status": "NOT_REACHED_INITIALIZATION_FAILED"
+    },
+    {
+      "subject": "HTTP edit4 and NEEDS_RELEARN boundary4",
+      "status": "NOT_REACHED_INITIALIZATION_FAILED"
+    },
+    {
+      "subject": "One recordedhandle+ObservationSession mixedprefix/suffix",
+      "status": "NOT_REACHED_INITIALIZATION_FAILED"
+    },
+    {
+      "subject": "Model-free prefix1..3 and freshstablebinding",
+      "status": "NOT_REACHED_INITIALIZATION_FAILED"
+    },
+    {
+      "subject": "Suffix4..10 always re-learned",
+      "status": "NOT_REACHED_INITIALIZATION_FAILED"
+    },
+    {
+      "subject": "Exact merged snapshots/currentadmissionprovenance/READY",
+      "status": "NOT_REACHED_INITIALIZATION_FAILED"
+    },
+    {
+      "subject": "Finalize0model/browser/native effects",
+      "status": "NOT_REACHED_INITIALIZATION_FAILED"
+    },
+    {
+      "subject": "Continuousdecodedvideo/offsets/privacy",
+      "status": "NOT_REACHED_INITIALIZATION_FAILED"
+    },
+    {
+      "subject": "Sameartifact unchanged ordinaryreplaymodel0",
+      "status": "NOT_REACHED_INITIALIZATION_FAILED"
+    }
+  ],
+  "guardTallies": {
+    "fresh": [],
+    "meaning": "No main-test beforeEach/afterEach tally ran; no guardgreen/coverage claim."
+  },
+  "artifacts": {
+    "preflight": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-attempt01-preflight.json",
+      "sha256": "2ed927a898f354a75e2a16a9cfebc9fc3035b474fea0a5874cfdb996bfab4325"
+    },
+    "result": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-attempt01-results.json",
+      "sha256": "921ace54bb814d2a8940640dff5bd4b9d186c08bdbf3a155f74fce8edde0eb47"
+    },
+    "log": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-attempt01.log",
+      "sha256": "cd795d1fd7322cbb01eb67a6055e342a1df69ed6612af38d597292f02bb43a90"
+    },
+    "xml": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+        "sha256": "eec37fea02d012497928a73fd74b73bf25b23b73e1085167c39c8d77c9526c6c"
+      }
+    ],
+    "stack": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-attempt01-artifacts/initialization-failure.txt",
+      "sha256": "0445d0a4d9b789dfd71d8faab858f6cd6f40b479ef24d391a5c1eaca2f91d436"
+    },
+    "capture": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-attempt01-artifacts/capture-manifest.json",
+      "sha256": "bccdced065289c1081e14bb7fcf4c5d3b7b04ca759cbc9972656e8b408e47ed5"
+    },
+    "ownedTemp": "/private/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-11426084619290205151",
+    "priorMatchingTempDirectoryCount": 250,
+    "actualNativeMedia": {
+      "webm": 0,
+      "png": 0,
+      "manifests": 0,
+      "guidedLogExists": false,
+      "ordinaryLogExists": false,
+      "nativeEventsExists": false
+    },
+    "privacy": "Only owned secretfixture stderr sanitizedcopy and localorigin announcement copied from TEMP.9JWT/key/certificate/config files excluded; full sourcefiles preserved in TEMP, hashes-only inventory. No private credentialcontent printed.",
+    "fixedOutputs": "Before/after archive of originalfixed Gradle results/reports/guardtallies;46preexistingfiles restored byte-identically,0mismatch. NewuniquefailureXML remains and allafteroutputs archived. No historicalreceipt/media rewritten/deleted."
+  },
+  "processAndCleanup": {
+    "inheritedUntouched": [
+      13577,
+      13581,
+      22246,
+      44737
+    ],
+    "inheritedClassification": "Old Chromium/guidedMain and idle GradleDaemon; no connection or kill. Prelaunch no competing active wrapper/native/build/unit.",
+    "actualOwnedFixturePid": 45813,
+    "ownershipEvidence": "Owned unique TEMP stderr contains(node:45813), PIDstartedat invocation and nowPPID1, node secret-login/server.ts.",
+    "ownedListener": "127.0.0.1:53389 observed with read-only lsof, not contacted.",
+    "cleanupFailure": "Static initializer failed before ownedTestExecutionListener/testinstance teardown. Owned secretfixture process survives; no arbitrary cleanup/kill invented. Root notified to manage separately.",
+    "activeGradleOrNativeTestHandle": false,
+    "ownedIdleFixtureServerRemains": true
+  },
+  "sourceInputHashes": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "2256f3148e9dab679b261a3134deaeffe4673642e0faa782fb1b5aa5b73bddd8",
+    "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java": "ede60569a84cd7ef5f9e007dd9cbf2948e822d2bd47aad382c6217425828e9a6",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": "ac801042dd7a94468ff68a5ad7e4efe48ab310a9f12a93d290730243d755d128",
+    "docs/specs/studio-observed-authoring/contracts/v3/replay-profile.schema.json": "adf91ed11e9d878ef31d4ee87902e76e27e8ec53b14cf61e79acb8717102fbe4"
+  },
+  "remaining": "This singlefailed preboot invocation proves no main core edit4 acceptance. All35parameter variants/secretfaults/15privateauthority/full86/24/55/fullconfiguredcheck+coverage/native/joined/deployment/independent015closure then008 remain required. Row85 remains originalsubjectOPEN/userclarificationpending; no change. No source-onlyPASS/QA/Done/lifecycle change."
+}

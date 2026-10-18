@@ -1,0 +1,15 @@
+{
+  "result": "GO_MINIMAL_ANCHOR_REPAIR",
+  "checks": {
+    "baseHash": true,
+    "candidateHash": true,
+    "liveBase": true,
+    "exactInverse": true,
+    "expectedIndependent": true,
+    "patchHash": true
+  },
+  "authorReceiptSha256": "d28b40b8f2b6ba9257b8de5f7e697dbb76d71cf9aa2c96f8440ec61e8e4f4c32",
+  "independentOracleSha256": "f8ce5e840fb2bc0b1482fbab4a33b3f0fbcfa9a0d6b29c550e7d5809f9e3d3a3",
+  "reviewCorrection": "First root inverse script missed actualcomment wording; exactdiffcomment removal proves wholeinverse, no candidate change.",
+  "limits": "One fixed expectation pluscomment; no fixture/production/otherassertion change; failure retained; runtime unrun"
+}

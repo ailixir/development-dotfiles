@@ -1,0 +1,150 @@
+{
+  "artifact": "STUDIO-OBS-015 C-int complete ARCH015-01 through04 selected conformance freeze",
+  "owner": "Dex /root/cint015",
+  "createdAt": "2026-10-15T06:15:39.025790+00:00",
+  "status": "SELECTED_CONTRACT_LANE_GREEN_APPLICATION_AND_STORY_QA_PENDING",
+  "laneGreen": true,
+  "sourceHeldAfterFreeze": true,
+  "authority": {
+    "02QaSHA256": "003fce36c88cfe4e19d88180f08d8bbc8a24b54e2a6691fd7e6007dcd01a6817",
+    "03QaSHA256": "0c97a71d73c192d61708b6798e311aeeae5c31fc27c98264c5c8a94e38d14e8e",
+    "04ManifestSHA256": "1cc89ac2cb5947c36701147546ec9cb15c8f6ee890490b255626093a34e71697",
+    "04QaSHA256": "0999abd94e23280c2740fbb11f237b7309b5d5f14491a6cf777f69baa15fffdf",
+    "structuralPatch": "Only trusted AcceptedTranslationPlan consumer minItems1\u21920. Raw model min1 and full raw model bytes unchanged."
+  },
+  "counts": {
+    "strictSchemas": 43,
+    "fixtureSemanticCanonicalChecks": 452,
+    "planningCases": 53,
+    "publicationChecks": 122,
+    "incrementalChecks": 138,
+    "snapshotCorrectionChecks": 49,
+    "graphTimingHistoryPublicWaitCases": 78,
+    "publicOperations": 43,
+    "publicExamples": 40,
+    "completeGraphPositives": 4,
+    "completeGraphNegatives": 43,
+    "additionalCompleteHistoricalBaseWitnesses": 4,
+    "timingCases": 15,
+    "publicWaitingSchemaCases": 8,
+    "syntheticHistorySidecarCases": 8,
+    "allSixConsumerDefinitionsAudited": 6,
+    "frozenHistoricalArtifactComparisons": 90,
+    "generatedGuidedSchemas": 25,
+    "generatedObservedSchemas": 32,
+    "generatedOutputsProduced": 4,
+    "generatedOutputContentChanges": 1,
+    "guidedTypes": 79,
+    "observedTypes": 149,
+    "generationWrites": 1,
+    "generationWritesAfterCheckpointResume": 0,
+    "changedFiles": 4,
+    "applicationAcceptanceExecuted": 0,
+    "databaseCommands": 0,
+    "browserCommands": 0,
+    "gradleCommands": 0,
+    "runtimeBuilds": 0
+  },
+  "implementation": [
+    "Existing contract oracle partitions all raw edges by actual successful admission or sole fully proved noninvoked excluded attempt; unknown/native-started/policy/assertion/uncertain/history attacks reject.",
+    "Raw allocations/edges/producers/bootstrap hash remain byte exact. Only local successful graph projection feeds frozen snapshot helper; full publication commitment hashes original entire raw basis.",
+    "Qualified first-suffix import removals and raw unused imported producer require exact base/program/coordinate/retained identity. No ordinary/model orphan exception.",
+    "Exact producer recipe/origin/historical availability and successful consumer bijection retained; successful same-step/slot meanings survive later excluded attempts.",
+    "Effective transfers derived deterministically from only actual successful edges and checked against both basis and candidate. Excluded failed edge never becomes executable transfer.",
+    "Candidate policy bindings/transfers, complete raw-basis publication-evidence envelope, effective admission tuple ARRAY, current authorization and source/input/config identity verified.",
+    "Snapshot correction01helper remains byte exact; authoritative source/base/maps and all prior privacy/canonical/hash tests continue green.",
+    "Public AWAITING_CLARIFICATION with paired incremental IDs uses existing closed schemas. Private confirmation markers/extra consent fields/page-role leakage reject; no consent/native authority inferred.",
+    "Action timings preserve exact readings, one per actual dispatched admission and final scalar admission-ID tie-break; duplicate/unknown/undispatched/reversed/noninteger/bounds/extra-field readings reject. Empty readings do not fabricate stamp.",
+    "Synthetic immutable-row sidecars check first transition and later monotonicity only; complete real backend intermediate plan history remains backend authority, unavailable from wire."
+  ],
+  "preservation": {
+    "allExistingDataUsedCasePayloads": "All original basis/artifact/observedChoice/incrementalContracts/snapshotCorrection/positive/negative objects deep-equal before. Only14necessary existing buildHash/schemaBundleHash paths changed; all new graph/timing/wait/history witnesses appended.",
+    "rawModelByteExact": true,
+    "correction01HelperByteExact": true,
+    "originalCorrection01ReceiptSHA256": "d77ab91bcca191a25370c70c330f141005d526efb2c237615e0156381263ad21",
+    "historicalFailedCheckpointSHA256": "f764d35c8c24a298661261efe38a932acdc14996e4b8536b6c3801d2f3694078",
+    "heldPostPatchCheckpointSHA256": "92452a2d6d3795a3f4babcd40a8c9a1236f19c7bc19a91d7c81dc7f58cf593d9",
+    "frozenDesignAndPriorEvidence": "90bound artifacts rehashed, no mismatch. All failed checkpoint and diagnostic evidence preserved.",
+    "story": "not edited",
+    "noPublicShapeStateOperationOrFallbackChange": true
+  },
+  "selectedCommands": [
+    {
+      "name": "oracle",
+      "command": "node tools/check-studio-observed-contracts.cjs",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-02-03/contract-oracle.log",
+      "exitCode": 0,
+      "wallTimeSeconds": 1.327702792,
+      "logSHA256": "f818d337aabec918d898a16a03a082dc85257905f46da7cdf36d3e0813adf53b"
+    },
+    {
+      "name": "parity",
+      "command": "node tools/build-studio-observed-schemas.cjs --check",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-02-03/generator-parity.log",
+      "exitCode": 0,
+      "wallTimeSeconds": 6.333e-06,
+      "logSHA256": "785745b252f39a1a2f24ec7875449b8ba3b4c9c77edf14aa0cd21db7a714eead"
+    },
+    {
+      "name": "pins",
+      "command": "node docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/check-pins.cjs",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-02-03/pin-status-check.json",
+      "exitCode": 0,
+      "wallTimeSeconds": 6.542e-06,
+      "logSHA256": "e9c9ef8d63856b307dcb76a7565536708f00a2c071e30eb77bde7e6ae37d8ddf"
+    },
+    {
+      "name": "audit",
+      "command": "node docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-02-03/audit-selected.cjs",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-02-03/selected-audit.json",
+      "exitCode": 0,
+      "wallTimeSeconds": 0.607009708,
+      "logSHA256": "1fe94398306d9febf5f12b03b802914e5139d95e9f4a8946d8f9895f0e746cca"
+    }
+  ],
+  "generationRecord": {
+    "command": "node tools/build-studio-observed-schemas.cjs",
+    "exitCode": 0,
+    "performedOnceBeforeSQLHold": true,
+    "record": "generation-write.json",
+    "backendPackaging": "processResources packages sourcev3schemas directly; no second Java schema copy or Gradle run"
+  },
+  "consumerHandoff": {
+    "generatedCanonicalObservedBundleHash": "ce58d620c27bb84f4233151275373aba24467f748c7152a12f1ef3d2d85381aa",
+    "schemaFileSHA256": "40d547d9891561541947b591ffa6ba1d07ae2caff7349fd780db4acc8d5313d7",
+    "generatedObservedFileSHA256": "f84cf6ca767a13af7fa1df7e892b72f975f2652a51c7b2347a26f08c7d17b4f0",
+    "fixtureClassification": "graphTimingConformance.graphCases expected ACCEPT=4positive, REJECT=43negative; historyCases are sidecars, not ValidationBasis; timing/publicWaiting use ACCEPT/REJECT. Existing basisCases use VALID/exacterrorcode; snapshotCorrection separate arrays.",
+    "ownersNotified": [
+      "backend015_resume",
+      "runner015_resume"
+    ]
+  },
+  "remainingConcerns": [
+    "Separate runner Execute3 ordinary-replay retained-zero-consumer provenance interface issue reported by root remains unresolved/outside this contract assignment; no IPC/schema expansion inferred or made.",
+    "Actual current-owner consent, RS256/mTLS/native/no-effect/browser/video proof and complete retained DBplan-history audit are not established by synthetic conformance.",
+    "Actual Java/runner/PG/joined/full coverage/technical/story QA still required. Root-reported SQL55/55 is other-owner evidence, not a C-int executed gate."
+  ],
+  "historicalFailures": [
+    "schema-gap-failure.json: original2zero-consumer witnesses structurally blocked before authorized04patch; preserved exactly.",
+    "resume-initial-oracle-failure.log: overbroad first-suffix projection check reached legacy no-projection drift witness; check scoped to the actual authorized import/zero-consumer projection exception, preserving original canonical cases.",
+    "audit-harness-path-failure.json: initial audit prefixed already-rooted historical manifest keys; resolver corrected, no product case removed."
+  ],
+  "artifacts": {
+    "before": "before-manifest.json and before/**",
+    "manifest": "touched-files.json",
+    "manifestSHA256": "fb1c2e03a0a0c67ff7da8bdef074378fc39514baa3601c6c1a6baa19c9c12b8d",
+    "pins": "pin-ledger.json",
+    "selectedChecks": "selected-checks.json",
+    "audit": "selected-audit.json"
+  },
+  "budget": {
+    "wholeWaveCeilingUSD": 500,
+    "actualSpend": "unavailable"
+  },
+  "notPerformed": [
+    "new schema generation after checkpoint",
+    "runtime/business Java/shared fixture helper/SQL/frontend/story/frozen design/gate edits",
+    "Gradle/DB/native/dist/runtimebuild/dependencyinstall",
+    "commit/push/deploy"
+  ]
+}

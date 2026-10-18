@@ -1,0 +1,113 @@
+diff --git a/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuard.java b/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuard.java
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuard.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuard.java
+@@ -16,8 +16,9 @@
+  * observed node the model was shown, the authored step text, the step's saved-input texts and the
+  * frozen governed policy document. It never reads raw DOM and never exports anything.
+  *
+- * <p>Order of checks: the destructive-verb guard (AC-5), then grounding (AC-4), then the
+- * side-effect stance (AC-6). Each refusal is one closed {@link GuidedPolicyReason}.
++ * <p>Order of checks: an element target the observation does not contain (AC-4, fail closed), then
++ * the destructive-verb guard (AC-5), then grounding (AC-4), then the side-effect stance (AC-6).
++ * Each refusal is one closed {@link GuidedPolicyReason}.
+  *
+  * <ul>
+  *   <li><b>Grounding</b> ({@code click}, {@code press}, {@code check}): the target's safe label
+@@ -87,6 +88,43 @@
+       List<String> savedInputs,
+       JsonNode policy,
+       boolean confirmed) {
++    return evaluate(
++        kind,
++        node == null ? null : node.path("nodeId").asText(null),
++        node,
++        locatorLabel,
++        authoredText,
++        savedInputs,
++        policy,
++        confirmed);
++  }
++
++  /**
++   * As {@link #evaluate(String, JsonNode, String, String, List, JsonNode, boolean)}, for a proposal
++   * whose target names {@code targetNodeId}.
++   *
++   * <p>STUDIO-OBS-014 SEC-002: an element target ({@code targetNodeId} non-null) of a grounded or
++   * side-effecting kind whose node is absent from the observation ({@code node} null) is refused
++   * {@link GuidedPolicyReason#UNGROUNDED_TARGET} (ruled AC-4 code: a target not traceable to the
++   * authored text). Without its observed node there is no sanitized label or form/link signal, and
++   * the locator text is the model's own choice, so the guard fails closed rather than judging it.
++   *
++   * @param targetNodeId the proposal target's node id, or null for a page or password target
++   */
++  public static Decision evaluate(
++      String kind,
++      String targetNodeId,
++      JsonNode node,
++      String locatorLabel,
++      String authoredText,
++      List<String> savedInputs,
++      JsonNode policy,
++      boolean confirmed) {
++    if (targetNodeId != null
++        && node == null
++        && (GROUNDED_KINDS.contains(kind) || EFFECT_KINDS.contains(kind))) {
++      return new Decision(GuidedPolicyReason.UNGROUNDED_TARGET, false, false);
++    }
+     String label =
+         node != null && !node.path("name").asText("").isBlank()
+             ? node.path("name").asText()
+diff --git a/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java b/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java
+@@ -1256,9 +1256,12 @@
+             .path("status")
+             .asText()
+             .equals("CONFIRMED");
++    // SEC-002: an element target missing from the observation is refused (fail closed), never
++    // judged on the model's locator text alone.
+     var decision =
+         GuidedActionGuard.evaluate(
+             proposal.path("operation").path("kind").asText(),
++            target.path("nodeId").isTextual() ? target.path("nodeId").asText() : null,
+             node,
+             locatorLabel,
+             authored,
+diff --git a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuardTest.java b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuardTest.java
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuardTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuardTest.java
+@@ -58,6 +58,34 @@
+         .isEqualTo(GuidedPolicyReason.UNGROUNDED_TARGET);
+   }
+ 
++  /**
++   * SEC-002: an element target whose node is not in the observation fails closed as
++   * UNGROUNDED_TARGET for every grounded or side-effecting kind, even when the model's own locator
++   * text matches the authored step and the stance is ALLOW.
++   */
++  @Test
++  void anElementTargetMissingFromTheObservationIsRefusedUngrounded() {
++    for (String kind : List.of("click", "press", "check")) {
++      var decision =
++          GuidedActionGuard.evaluate(
++              kind, "node-9-404", null, "Submit", "Click Submit", List.of(), policy("ALLOW"), true);
++      assertThat(decision.refusal()).as(kind).isEqualTo(GuidedPolicyReason.UNGROUNDED_TARGET);
++    }
++    // Control: the same proposal with its node observed is eligible.
++    assertThat(
++            GuidedActionGuard.evaluate(
++                    "click",
++                    "node-9-404",
++                    button("Submit", null).put("nodeId", "node-9-404"),
++                    "Submit",
++                    "Click Submit",
++                    List.of(),
++                    policy("ALLOW"),
++                    true)
++                .refused())
++        .isFalse();
++  }
++
+   @Test
+   void fillAndNavigateAreNotSubjectToGrounding() {
+     assertThat(

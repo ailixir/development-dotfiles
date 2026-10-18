@@ -1,0 +1,1469 @@
+{
+ "story": "STUDIO-OBS-012A",
+ "lane": "K_backend (AC-1, AC-2)",
+ "agent": "Dex (@dev), AGENT_NAME=backend-K",
+ "date": "2026-10-12",
+ "bindingInputs": [
+  "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012A.story.md (AC-1, AC-2, PO T0 reconciliation)",
+  "docs/architecture/ADR-SC-005-single-path-observed-authoring.md",
+  "docs/qa/evidence/STUDIO-OBS-012A/aria-t0-architecture-reconciliation.json",
+  "docs/qa/evidence/STUDIO-OBS-012A/po-t0-reconciliation.json",
+  "docs/qa/evidence/STUDIO-OBS-012A/t0-gateway-caller-inventory.json"
+ ],
+ "gitOperations": "none (no add/commit/stash/reset/checkout/restore/clean); deletions by plain rm",
+ "autoDecisions": [
+  "[AUTO-DECISION] Neutral credential deadline helper name -> gateway/CredentialBudget (reason: matches the existing CredentialBudgetTest; carries only remaining/cap/onCancel/cancel/isCancelled from CompileBudget, fixed at construction, never reset; proposal/transport/usage accounting and backoff dropped).",
+  "[AUTO-DECISION] StudioGatewayProperties drops temperature, retry, artifactSchema, structuredOutput, the 13-arg compatibility constructor and effectiveThinkingLevel (reason: Aria T0 \"remove artifact-schema/compile-only properties and obsolete temperature compatibility\"; guided path is single-send and never read them). Kept: endpoint, project, location, model, credentials, requestTimeout, maxConcurrency, maxInputBytes, maxOutputBytes, maxOutputTokens, thinkingLevel, providerFeatures.",
+  "[AUTO-DECISION] StudioGatewaySelectionProperties.Provider loses RECORDED_FIXTURE (reason: AC-1 \"no recorded compiler provider\"); application-local.yml default becomes disabled.",
+  "[AUTO-DECISION] Save-time authoring bounds move to studio.authoring.max-steps / max-line-chars (StudioAuthoringProperties, defaults 100/1024 unchanged); the compile-only max-source-bytes bound and requireWithinLimits are retired. Message suffix \"before compiling\" removed.",
+  "[AUTO-DECISION] StudioRunnerProperties drops validateTimeout (only the deleted /v1/validate client read it) and VALIDATE_PATH; RUNS_PATH=/v2/runs; runUrl(id) -> DELETE /v2/runs/{id}; registered by dispatch/StudioRunnerConfiguration, which also performs the startup validation StudioCompileConfig used to do.",
+  "[AUTO-DECISION] Readiness state derivation: READY when the execute predicate is ready; else LEARNING when a non-terminal unexpired studio_guided_sessions row exists for the test; else UNLEARNED. NEEDS_RELEARN is declared, never produced (OBS-015). Computed on GET /tests/{id}, the write responses and per row on GET /tests (Lane C TestDto requires it on the list route).",
+  "[AUTO-DECISION] UITestDto aligned to Lane C TestDto (in docs/specs/studio/openapi.yaml): compileStatus, currentCandidateRevisionId, currentCandidateArtifactHash, currentCandidateArtifact, compileError, compileDiagnostics removed; readiness and firstChangedStepId added. Consequently dto CompileErrorDto/CompileDiagnosticsDto/CompileDiagnosticDto/CompileStepDiagnosticsDto deleted (no remaining users).",
+  "[AUTO-DECISION] Acceptance keeps the no-grant entry accept() as the refusal path (kill switch, lifecycle, idempotent replay, LEARN_REQUIRED, AUTHORIZATION_REQUIRED) - it can no longer create an execution; non-observed execution construction and the v1 dispatcher job/send body were deleted.",
+  "[AUTO-DECISION] Backend compile-only resources studio/artifact.schema.json, output-contract.md, syntax-reference.md and recorded-fixtures/*.json deleted with their only readers (CompilePins/StudioGatewayConfig/RecordedFixtureCorpus).",
+  "[AUTO-DECISION] v1-fixture execution ITs are left compile-green but not ported: an observed (GUIDED_RUN) revision needs the full publication proof graph, which no Spring-context fixture provides yet. They fail 409 LEARN_REQUIRED by design (see knownFailingByDesign).",
+  "[AUTO-DECISION] GuidedPublicationReplayIT not edited (DO NOT EDIT); this lane compiled/ran tests with an out-of-tree Gradle init script excluding that one file (repository build files unchanged)."
+ ],
+ "movedFiles": [
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiGatewayTransport.java",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/gateway/GenAiGatewayTransport.java"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/StudioGatewayConfig.java",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewayConfig.java"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/StudioGatewayProperties.java",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewayProperties.java"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/StudioGatewaySelectionProperties.java",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewaySelectionProperties.java"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/BudgetedAuthTransport.java",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/gateway/BudgetedAuthTransport.java"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/BoundedCredentialProvider.java",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/gateway/BoundedCredentialProvider.java"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayFailureClassifier.java",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/gateway/GatewayFailureClassifier.java"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayOutcome.java",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/gateway/GatewayOutcome.java"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayErrorCode.java",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/gateway/GatewayErrorCode.java"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/CompileBudget.java (credential subset)",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/gateway/CredentialBudget.java",
+   "note": "extracted, not moved; CompileBudget deleted"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/CredentialPatternScreen.java",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/CredentialPatternScreen.java",
+   "note": "content unchanged except package"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/AuthoringLimits.java",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringLimits.java",
+   "note": "save-time guards only (requireSaveable, blankStepMessage, SOURCE_TOO_MANY_STEPS/SOURCE_LINE_TOO_LONG/INVALID_STEPS)"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/ConfigurationChangeClassifier.java",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/authoring/ConfigurationChangeClassifier.java",
+   "note": "unchanged except package"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/validator/StudioRunnerProperties.java",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerProperties.java",
+   "note": "/v2/runs only"
+  },
+  {
+   "from": "backend/src/main/java/com/citi/put/checks/studio/compile/StudioCompileProperties.Authoring",
+   "to": "backend/src/main/java/com/citi/put/checks/studio/authoring/StudioAuthoringProperties.java",
+   "note": "prefix studio.authoring"
+  }
+ ],
+ "newMainFiles": [
+  "backend/src/main/java/com/citi/put/checks/studio/gateway/CredentialBudget.java",
+  "backend/src/main/java/com/citi/put/checks/studio/authoring/StudioAuthoringProperties.java",
+  "backend/src/main/java/com/citi/put/checks/studio/authoring/StudioAuthoringConfiguration.java",
+  "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java",
+  "backend/src/main/java/com/citi/put/checks/studio/readiness/StudioReadiness.java"
+ ],
+ "deletedMainFiles": [
+  "backend/src/main/java/com/citi/put/checks/studio/compile/ArtifactCanonicalizer.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/AuthoringLimits.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/CandidateRevision.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/CompileAbandonmentSweeper.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/CompileBudget.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/CompileErrorCode.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/CompileExecutor.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/CompileInputs.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePins.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePipeline.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/CompileRequest.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/ConfigurationChangeClassifier.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/ContextCompileInputs.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/ContextPromptSection.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/CredentialPatternScreen.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/DiagnosticsBounder.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/InferenceCaptureStore.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/IntentRevisionVerifier.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/PromptAssembler.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/PublishResult.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/README.md",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/RepairPromptAssembler.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/StepReferencePolicyDeriver.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/StudioCompileConfig.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/StudioCompileProperties.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/VersionedIntentDeriver.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/BoundedCredentialProvider.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/BudgetedAuthTransport.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/CompileRequest.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/CompileResponse.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/DisabledLlmGatewayClient.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayAuditLogger.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayErrorCode.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayErrorScrubber.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayFailureClassifier.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayOutcome.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayPayloadSerializer.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayProvenance.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GatewayResponseParser.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiGatewayTransport.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClient.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/LlmGatewayClient.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/RecordedFixtureCorpus.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/RecordedFixtureGatewayClient.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/StudioGatewayConfig.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/StudioGatewayProperties.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/StudioGatewaySelectionProperties.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/incremental/CompilationPlanner.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/incremental/IncrementalAssembler.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/validator/RunnerDiagnostic.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/validator/RunnerValidationClient.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/validator/StudioRunnerProperties.java",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/validator/ValidationOutcome.java",
+  "backend/src/main/java/com/citi/put/checks/studio/dto/CompileAcceptedDto.java",
+  "backend/src/main/java/com/citi/put/checks/studio/dto/CompileDiagnosticDto.java",
+  "backend/src/main/java/com/citi/put/checks/studio/dto/CompileDiagnosticsDto.java",
+  "backend/src/main/java/com/citi/put/checks/studio/dto/CompileErrorDto.java",
+  "backend/src/main/java/com/citi/put/checks/studio/dto/CompileStepDiagnosticsDto.java",
+  "backend/src/main/java/com/citi/put/checks/studio/dto/ConfirmCompileRequestDto.java",
+  "backend/src/main/java/com/citi/put/checks/studio/dto/EvidenceReference.java",
+  "backend/src/main/java/com/citi/put/checks/studio/readiness/RuntimePinProperties.java",
+  "backend/src/main/resources/studio/artifact.schema.json",
+  "backend/src/main/resources/studio/output-contract.md",
+  "backend/src/main/resources/studio/recorded-fixtures/example-domain-url.json",
+  "backend/src/main/resources/studio/recorded-fixtures/wikipedia-home-url.json",
+  "backend/src/main/resources/studio/recorded-fixtures/wikipedia-search-variable.json",
+  "backend/src/main/resources/studio/syntax-reference.md"
+ ],
+ "editedMainFiles": {
+  "behaviour": [
+   "backend/src/main/java/com/citi/put/checks/studio/StudioService.java (compileTest/confirmCompile, CompilePipeline/CompileStateService removed; compile-state writes removed; schedule invalidation code LEARN_REQUIRED; readiness projected on single and list reads; enqueueCompile/preserveAuthoring overloads removed)",
+   "backend/src/main/java/com/citi/put/checks/studio/StudioController.java (POST /tests/{id}/compile and /confirm-compile removed; validate-variables kept)",
+   "backend/src/main/java/com/citi/put/checks/studio/StudioRepository.java (findCsiIdIncludingWithheld and findLifecycleState removed - only the compile routes read them)",
+   "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java (observed family only; LEARN_REQUIRED; no runtime pin; readiness(UUID) state)",
+   "backend/src/main/java/com/citi/put/checks/studio/readiness/ReadinessVerdict.java (LEARN_REQUIRED replaces COMPILE_REQUIRED)",
+   "backend/src/main/java/com/citi/put/checks/studio/dispatch/ExecutionReadiness.java (Verdict.LEARN_REQUIRED/learnRequired)",
+   "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java (observed family only)",
+   "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java (v1 job path, DispatchAuthorization/StudioReferenceResolver ctor params removed; a row without an observed binding closes DISPATCH_FAILED; cancel relay DELETE /v2/runs/{id})",
+   "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java (POST /v2/runs observed body only; non-observed job refused NOT_OBSERVED before serialization; DELETE /v2/runs/{id})",
+   "backend/src/main/java/com/citi/put/checks/studio/dto/UITestDto.java (Lane C TestDto shape; readiness, firstChangedStepId)",
+   "backend/src/main/java/com/citi/put/checks/studio/gateway/* (prefix studio.gateway; compile beans and recorded-fixture selection removed)",
+   "backend/src/main/resources/application.yml, application-local.yml, application-staging.yml, application-test.yml"
+  ],
+  "importOrCommentOnly": [
+   "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GenAiGuidedLlmGatewayClient.java (import)",
+   "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java (import removed, same package)",
+   "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java (import removed, same package)",
+   "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java (import)",
+   "backend/src/main/java/com/citi/put/checks/studio/dto/LegacyStudioAdapter.java (import, javadoc)",
+   "backend/src/main/java/com/citi/put/checks/studio/dto/StudioAuthoringMapper.java (import, comment)",
+   "backend/src/main/java/com/citi/put/checks/studio/UITestRevisionRepository.java (javadoc)",
+   "backend/src/main/java/com/citi/put/checks/studio/dispatch/RunnerDispatchClient.java (javadoc)",
+   "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchMetrics.java (metric description POST /v2/runs)",
+   "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java (javadoc)",
+   "backend/src/main/java/com/citi/put/checks/studio/dispatch/ExecutionReferences.java (javadoc)",
+   "backend/src/main/java/com/citi/put/checks/studio/dispatch/README.md",
+   "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java (javadoc)",
+   "backend/src/main/java/com/citi/put/checks/studio/internal/dto/ExecutionControl.java (javadoc)",
+   "backend/src/main/java/com/citi/put/checks/studio/validation/VariableReferenceValidator.java (javadoc)"
+  ]
+ },
+ "configuration": {
+  "removedKeys": [
+   "studio.authoring.v2-enabled",
+   "studio.compile.incremental.enabled",
+   "studio.compile.gateway.* (renamed, see below)",
+   "studio.compile.gateway.structured-output",
+   "studio.compile.gateway.retry.*",
+   "studio.compile.gateway.artifact-schema",
+   "studio.compile.pipeline.*",
+   "studio.compile.repair.*",
+   "studio.compile.abandonment.*",
+   "studio.compile.authoring.max-source-bytes",
+   "studio.compile.diagnostics.*",
+   "studio.runner.validate-timeout",
+   "studio.runtime.pin.*"
+  ],
+  "renamedPrefix": {
+   "studio.compile.gateway": "studio.gateway",
+   "alias": "none"
+  },
+  "movedKeys": {
+   "studio.compile.authoring.max-steps": "studio.authoring.max-steps",
+   "studio.compile.authoring.max-line-chars": "studio.authoring.max-line-chars"
+  },
+  "envVarsNoLongerRead": [
+   "STUDIO_AUTHORING_V2_ENABLED",
+   "STUDIO_INCREMENTAL_ENABLED",
+   "STUDIO_GATEWAY_STRUCTURED_OUTPUT",
+   "STUDIO_GATEWAY_ARTIFACT_SCHEMA",
+   "STUDIO_COMPILE_*",
+   "STUDIO_RUNNER_VALIDATE_TIMEOUT",
+   "STUDIO_RUNTIME_*"
+  ],
+  "envVarsRenamed": {
+   "STUDIO_COMPILE_MAX_STEPS": "STUDIO_AUTHORING_MAX_STEPS",
+   "STUDIO_COMPILE_MAX_LINE_CHARS": "STUDIO_AUTHORING_MAX_LINE_CHARS"
+  },
+  "unchangedEnvVars": "STUDIO_GATEWAY_* names kept (only the property prefix moved)"
+ },
+ "leftoverLeavesForM": [
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/compile/CompileState.java",
+   "usedBy": [
+    "backend/src/main/java/com/citi/put/checks/studio/entity/UITest.java (field compileStatus, column compile_status)"
+   ],
+   "testUsers": [
+    "backend/src/test/java/com/citi/put/checks/studio/readiness/ExecutionReadinessTest.java (noValueOfCompileStatusMakesAnUnconfirmedDraftReady)",
+    "backend/src/test/java/com/citi/put/checks/studio/readiness/DeReadyCarryForwardTest.java"
+   ],
+   "action": "M must delete with UITest.compileStatus/compileRequestId/compileError/compileDiagnostics/currentCandidateRevisionId fields and update those two tests"
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/entity/UITest.java:97",
+   "note": "javadoc text \"from compile/confirm/execute\" is the one remaining \"compile/\" grep hit in backend/src/main; entity owned by M"
+  }
+ ],
+ "nonOwnedSubstitutions": {
+  "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": [
+   {
+    "line": 8,
+    "from": "import com.citi.put.checks.studio.compile.gateway.StudioGatewayProperties;",
+    "to": "import com.citi.put.checks.studio.gateway.StudioGatewayProperties;",
+    "compileBlocking": true
+   },
+   {
+    "lines": "782-789, 15051, 15186, 15187",
+    "from": "\"studio.compile.gateway.<key>\"",
+    "to": "\"studio.gateway.<key>\"",
+    "compileBlocking": false
+   },
+   {
+    "lines": "~1006-1025 (recordedObservedRefusals bean)",
+    "from": "parameters/arguments DispatchAuthorization authorization, StudioReferenceResolver references passed to RecordingDispatcher",
+    "to": "remove both; RecordingDispatcher(statements, revisions, runner, properties, mapper, jdbc, transactions, observer)",
+    "compileBlocking": true
+   },
+   {
+    "lines": "~5800-5812 (sameGraph)",
+    "from": "getBean(DispatchAuthorization.class), getBean(StudioReferenceResolver.class) in the expected graph",
+    "to": "remove both entries",
+    "compileBlocking": false
+   },
+   {
+    "line": 2843,
+    "from": "contains(\"COMPILE_REQUIRED\")",
+    "to": "contains(\"LEARN_REQUIRED\")",
+    "compileBlocking": false
+   }
+  ],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java": "COMPILE_REQUIRED in schedule CHECK assertions - Lane M (pinned migration test)",
+  "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioSchedulingSchemaIT.java": "COMPILE_REQUIRED in schedule CHECK assertions - Lane M (V16 LEARN_REQUIRED)",
+  "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md:201": "\"The actual compile provider settings select the concrete guided gateway\" -> studio.gateway provider settings (guided-session docs; Lane C/OBS-011)",
+  "dev.sh:148,350-351,472": "exports STUDIO_GATEWAY_PROVIDER=recorded-fixture by default; that value now fails startup (\"must be one of disabled, vertex\") - change the default to disabled (owner: devops/root)",
+  "frontend/src/components/studio/review/compilePollBounds.test.ts, frontend/src/services/mocks/studio/diagnosticsBounds.test.ts": "read STUDIO_COMPILE_ABANDONMENT_* / STUDIO_COMPILE_MAX_DIAGNOSTICS_* from backend application.yml, which no longer carries them - OBS-012B deletes these suites"
+ },
+ "handoffs": {
+  "laneC": [
+   "StudioContractTest re-anchor (compile expectations already removed here): declaredOperationStatusSetsAndMarkersMatchTheReviewedContract still pins 34 (document now 38 with C guided/validate-variables/DELETE /v2/runs/{id}); internalRoutesStayOffThePublicSurfaceAndNameWhatServesThem pins 11 (document 9) and its list lacks \"DELETE /v2/runs/{id}\" (removed: POST /v1/validate, POST /v1/runs, DELETE /v1/runs/{id}); everyRouteTheContractPresentsAsShippedIsActuallyReachable fails only on the seven /api/v1/studio/guided-sessions routes (C Java route move). The validate-variables exclusion was removed here because AC-2 documents the route.",
+   "ExecutionVideoContractTest re-anchor: compileTest/confirmCompile/runnerValidateArtifact/runnerAdmitRun removed from the pinned sets here; remaining 4 failures are C additions (guided operations, x-implemented-by values STUDIO-OBS-003/006/Studio v1 WP6 vs EPIC-10 manifest, 401 count 23->29).",
+   "OpenAPI: TestDto already matches backend UITestDto (readiness, firstChangedStepId; compile fields gone). POST /tests/{id}/execute 409 codes now LEARN_REQUIRED, RUNTIME_INCOMPATIBLE, IDEMPOTENCY_KEY_REUSED, TEST_DELETED, TEST_QUARANTINED, plus AUTHORIZATION_REQUIRED from observed acceptance (pre-existing).",
+   "Guided Java still validates v1 schema names (e.g. GuidedSessionProperties.snapshot -> contracts.validate(\"limits\")): with v1/v2 contracts deleted, GuidedSessionService.start throws \"Missing observed schema\" -> GuidedPlanningIntegrationTest 40, GuidedDefaultModelReservationIT 4, ObservedProfileDriftTest 4 fail. Not caused by Lane K.",
+   "Apply the GuidedPublicationReplayIT substitutions above."
+  ],
+  "laneM": [
+   "Delete compile/CompileState.java with the UITest compile fields (compileStatus, compileRequestId, compileError, compileDiagnostics, currentCandidateRevisionId) and drop the CompileState usages in ExecutionReadinessTest/DeReadyCarryForwardTest (forceCompileStatus/compile_status loops).",
+   "V16 must accept LEARN_REQUIRED in ck_studio_schedule_occurrences_code (Java now writes LEARN_REQUIRED via StudioScheduleProcessor.refuse(verdict.code()) and StudioScheduleInvalidation.settle); until then a refused scheduled occurrence for an unready test violates the current V26/V33 CHECK.",
+   "GuidedPublicationRepository/GuidedPublicationBaseRepository/ObservedRevisionVerifier still read/write compile_request_id, current_candidate_revision_id, compile_status=READY (Lane C/M files, untouched here).",
+   "Readiness no longer reads intent_derivation_version, reference_policy, provenance, source, authoring/authoring_revision_inputs of the revision, or artifact_schema_version; READINESS_QUERY columns are the final set M must keep (see ExecutionReadinessService.READINESS_QUERY), plus studio_guided_sessions(test_id,state,expires_at) for LEARNING.",
+   "StudioExecutionFixtures.confirmRevision/ordinaryRevision insert ordinary (artifact_schema_version=1, publication_kind NULL) revisions; the V12 re-baseline admits only GUIDED_RUN revisions, so those fixtures and every test using them must move to an observed publication fixture."
+  ],
+  "root": [
+   "v1-fixture execution ITs (knownFailingByDesign) need an observed (GUIDED_RUN) publication fixture usable inside a Spring context plus a replay grant, or named retirement; owner not assigned by the story (natural home: Lane M fixture work or a dedicated fixture task).",
+   "Full replay with a counting provider stub (DeReadyCarryForwardTest now proves zero guided calls across readiness, an execute refusal and a real HTTP /v2/runs send of the frozen ObservedJob, but not a dispatcher-driven observed replay of a real publication).",
+   "Lane K run deleted backend/build/test-results/test once (shared build dir) before its first focused run."
+  ],
+  "runnerK": [
+   "Backend now sends only POST /v2/runs and DELETE /v2/runs/{id} (same bearer). Backend resources studio/syntax-reference.md, output-contract.md, artifact.schema.json were deleted (runner test syntax-reference-drift.test.ts that read syntax-reference.md is already gone)."
+  ],
+  "obs012B": [
+   "GET /tests and GET /tests/{id} carry readiness (UNLEARNED|LEARNING|READY; NEEDS_RELEARN never yet) and firstChangedStepId=null; compileStatus/currentCandidate*/compileError/compileDiagnostics are gone from the response; POST /compile and /confirm-compile are 404."
+  ]
+ },
+ "tests": {
+  "deletedFiles": [
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/AbandonedCompileSweepIT.java",
+    "testMethods": [
+     "everyTerminalTransitionClearsTheCompileClockAndBeginCompileSetsIt",
+     "anAbandonedCompileIsSweptToTheSameOutcomePublishErrorProduces",
+     "ahealthyInFlightCompileIsNeverSwept",
+     "theConfiguredSweepSettlesACompileJustPastTheShortenedThresholdAndNoSooner",
+     "theSweepStopsAtItsBatchSizeAndTheNextRunContinues",
+     "theSweepRefusesAnUnusableThresholdOrBatchRatherThanRunningUnbounded",
+     "asweepInterleavedWithAnInFlightPublishLeavesExactlyOneWinner",
+     "alatePublishArrivingAfterTheSweepIsDiscardedOutOfOrder"
+    ],
+    "count": 8
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/AbstractRepairPipelineTest.java",
+    "testMethods": [],
+    "count": 0
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/ArtifactVersionPinTest.java",
+    "testMethods": [
+     "theFrozenSchemaDeliberatelyAcceptsAVersionTwoArtifact",
+     "theParserRejectsASchemaValidVersionTwoArtifact",
+     "thePinIsOneConstantReadByEveryConsumer",
+     "thePipelineOwnsTheReAssertionRatherThanTrustingTheClient"
+    ],
+    "count": 4
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/CompileBoundsTest.java",
+    "testMethods": [
+     "anEmptySourceIsRefusedWithAnActionableCodeNotAnInternalError",
+     "aBlankOrWhitespaceOnlyStepIsRefusedNamingItsNumber",
+     "exactlyTheStepCapIsAcceptedAndOneMoreIsRejected",
+     "exactlyTheLineCapIsAcceptedAndOneMoreIsRejected",
+     "theLineRejectionNamesTheStepAndNeverEchoesTheLine",
+     "exactlyTheSourceByteCapIsAcceptedAndOneMoreByteIsRejected",
+     "sourceBytesAreCountedInUtf8NotCharacters",
+     "saturationRefusesTheNextAttemptRatherThanQueueingIt",
+     "theBudgetExpiresTheAttemptAndTheLateResultPublishesNothing",
+     "exactlyOneOfTheBudgetAndTheWorkerEverSettlesAnAttempt",
+     "theAttemptBudgetMustBeStrictlyGreaterThanTheGatewayRequestTimeout",
+     "aHostileValidatorResponseIsBoundedAndSaysThatItWasTruncated",
+     "exactlyThePerStepCapIsKeptAndTheEleventhIsDroppedWithAMarker",
+     "aMessageExactlyAtTheCapIsKeptWholeAndOneCharacterMoreIsMarked",
+     "everyStepGetsAnEntryEvenWhenTheValidatorReturnedNone"
+    ],
+    "count": 15
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/CompileBudgetExpiryTest.java",
+    "testMethods": [
+     "anExpiredAttemptIsAbandonedAndItsLateResultChangesNothing"
+    ],
+    "count": 1
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/CompileBudgetPropagationTest.java",
+    "testMethods": [
+     "anExpiredBudgetCancelsTheInFlightCallAndReleasesItsCapacitySlot"
+    ],
+    "count": 1
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/CompileBudgetTest.java",
+    "testMethods": [
+     "cancellationWakesBackoffAndRunsEveryCancellationHook",
+     "proposalAndTransportLimitsCannotBeResetByRepairs",
+     "absentUsageDoesNotMasqueradeAsZeroAndRemovedCallbacksDoNotRun"
+    ],
+    "count": 3
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/CompileFingerprintTest.java",
+    "testMethods": [
+     "theFingerprintIsA64CharacterHexHashAndIgnoresSettingsKeyOrder",
+     "theExecutor210PinBumpChangesTheFingerprint",
+     "theDefaultOverloadUsesTheCurrentCodePins",
+     "gatewaySettingsModelAndMaxOutputTokensAreInputs",
+     "theThinkingLevelIsAnInputIncludingTheProviderDefaultFallback",
+     "thePromptVersionIsAnInput",
+     "thePromptVersionAdvancedPastThePre1045Layout",
+     "theSyntaxReferenceIntentAndReferencePolicyVersionsAreInputs",
+     "everyRuntimePinIsAnInput"
+    ],
+    "count": 9
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/CompilePipelineIT.java",
+    "testMethods": [
+     "theDraftIsCommittedAndReadableFromASecondConnectionWhileTheCompileIsStillInFlight",
+     "savingADraftThroughTheServiceStartsNoCompile",
+     "savingV2AuthoringPreparesNothingUntilTheCompileIsAskedFor",
+     "aNameOnlyEditEnqueuesNothing",
+     "aRefusedCompileLeavesTheDraftSaved",
+     "anOlderCompileOfIdenticalUneditedSourceIsDiscardedRatherThanPublished",
+     "twoInFlightCompilesCompletingInReverseOrderLeaveTheNewerCandidateCurrent",
+     "everyReferenceCorpusExampleCompilesEndToEndAgainstTheStubGateway",
+     "nothingCanBeConfirmedOnceTheDraftIsNeedsRevision",
+     "aSaturatedPoolRefusesTheNextCompileWhileOrdinaryReadsStayResponsive",
+     "aGatewayOutageLeavesTheDraftRetryableAndAnUnchangedConfirmedTestRunnable",
+     "everyNegativeReadinessCaseIssuesNoRunnerCallOnTheWire",
+     "aCompileAbandonedMidFlightIsSweptToStaleWithNoCandidateAndItsLateResultIsDropped",
+     "theCompilePipelineCompletesWithAVaultProviderWhoseEveryMethodThrows",
+     "aValueInTheVaultReachesNoGatewayPayloadNoAuditLineAndNoPrompt"
+    ],
+    "count": 15
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/CompilePipelineSourceAdmissionTest.java",
+    "testMethods": [
+     "anEmptyDraftIsRefusedWithInvalidStepsAndNoCompileBegins",
+     "aWhitespaceOnlyStepIsRefusedBeforeTheGatewayIsPaidFor"
+    ],
+    "count": 2
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/CompilePipelineTest.java",
+    "testMethods": [
+     "aSuccessfulCompileIsAcceptedForTheCallerThatAskedForIt",
+     "arecompileOfUnchangedSourceIsItsOwnAttemptAndLeavesThePriorRevisionIntact",
+     "theCandidateRevisionCarriesTheVersionsSectionEightPointOneRequires",
+     "authoringV2CompilePersistsTheDerivationVersionInColumnAndProvenance",
+     "theStoredReferencesCarryNamesAndNoValues",
+     "everyGatewayErrorCodeBecomesAStaleDraftCarryingThatCodeAndNothingElse",
+     "aFailedGatewayCallNeverReachesTheValidator",
+     "aSchemaValidVersionTwoArtifactIsNeverValidatedOrPersisted",
+     "aRejectedArtifactBecomesNeedsRevisionWithIndexAlignedDiagnosticsAndNoError",
+     "twoCompilesOfByteIdenticalSourceIssueTwoGatewayCallsBecauseThereIsNoCache",
+     "anOverLimitDraftIsRejectedWithoutBeginningACompile",
+     "anInlineCredentialIsRejectedBeforeGatewaySubmission",
+     "aValidatorFiveHundredLeavesTheDraftStaleAndRetryableWithoutASecondCall",
+     "theCapturingSinkIsLiveAndRendersFormattedArgumentsAndThrowables",
+     "aSuccessfulCompileHandsNoSourceArtifactOrResolvedValueToTheLogSink",
+     "aGatewayFailureWhoseReasonQuotesTheSourceHandsNothingToTheLogSink",
+     "aThrownExceptionQuotingTheSourceNeverReachesTheLogSink",
+     "aDiagnosticExcerptNestedInsideTheValidationOutcomeNeverReachesTheLogSink",
+     "aCompileThatCouldNotEvenStartNeverLogsTheSourceItRefused"
+    ],
+    "count": 19
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/CompileRouteContractDivergenceTest.java",
+    "testMethods": [
+     "compilingADeletedTestAnswersTheDeclaredStatusCode",
+     "theProducedConflictCodesEqualTheOperationsDeclaredSet",
+     "theTwoOperationsThatAlreadyCarryTheSameConflictShowHowSmallTheAmendmentIs",
+     "theServiceGuardReallyDoesThrowAConflictForADeletedOrQuarantinedTest",
+     "theOperationIsNoLongerMarkedAsNotYetImplementedAndNoOtherMarkerMoved",
+     "authorizationIsEvaluatedBeforeTheLifecycleGuard",
+     "theLifecycleGuardIsEvaluatedBeforeTheAuthoringBounds",
+     "theDeclaredBadRequestCodesAreAnsweredWithNoCompileStateMoved",
+     "aCompilableDraftIsAcceptedWithTheFrozenBody"
+    ],
+    "count": 9
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/CompileStartedAtMigrationIT.java",
+    "testMethods": [
+     "v16AppliesToADatabaseHoldingDraftsInEveryCompileState",
+     "theColumnAndItsPartialIndexExist",
+     "onlyTheStrandedCompilingRowIsBackfilledAndItIsBackfilledToTheMigrationsClock",
+     "theInvariantHoldsAcrossEveryRowAfterTheMigration",
+     "noConfirmedOrCandidateRevisionMovedAndNoRevisionRowWasTouched",
+     "theSoftDeletedAndQuarantinedRowsSurvivedUnchanged"
+    ],
+    "count": 6
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/CompileStateSurfaceTest.java",
+    "testMethods": [
+     "noClassInTheCompileOrReadinessPackagesWritesACompileStateColumn",
+     "theReadinessGateReadsNoCompileStateColumnAtAll"
+    ],
+    "count": 2
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/ConfirmFixtures.java",
+    "testMethods": [],
+    "count": 0
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/ConfirmationWriteOnceIT.java",
+    "testMethods": [
+     "reconfirmingTheSameRevisionIsAConflictAndNotAServerError",
+     "aDifferentPrincipalCannotOverwriteSomebodyElsesConfirmation",
+     "asecondRevisionConfirmsAndTheFirstRevisionsIdentityIsUntouched",
+     "anOlderConfirmedRevisionCannotBeConfirmedAgainWhileANewerCandidateAwaits"
+    ],
+    "count": 4
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/ContextAggregateBudgetTest.java",
+    "testMethods": [
+     "repairAndTransportRetriesChargeRepeatedInputAndStopBeforeNextCall",
+     "individuallyValidAttemptsFailClosedWhenAggregateBytesAreExhausted",
+     "aggregateBoundsMustBePositive"
+    ],
+    "count": 3
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/ContextPromptSectionTest.java",
+    "testMethods": [
+     "maliciousContextRemainsJsonDataAndExactLiteralsAreNotTruncated",
+     "oversizedEssentialLiteralFailsRatherThanTruncating",
+     "oneSourceStepAlwaysProducesOnePromptBoundary"
+    ],
+    "count": 3
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/DiagnosticsExposureEscalationTest.java",
+    "testMethods": [
+     "afailedCompileLeavesADocumentTheRouteReturnsWithItsTruncationFlagsIntact",
+     "afailedGatewayLeavesABoundedCodeTheRouteReturns",
+     "atMostOneOfTheTwoFieldsIsEverNonNull",
+     "theListProjectionOmitsTheDiagnosticsAndKeepsTheError",
+     "aRefusalMessageIsReturnedByTheRouteWithItsCredentialRedacted"
+    ],
+    "count": 5
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/ExactConfirmationIT.java",
+    "testMethods": [
+     "aWrongRevisionIdIsStaleCandidateAndWritesNothing",
+     "aWrongArtifactHashIsStaleCandidateAndWritesNothing",
+     "aSourceRevisionOffByOneIsStaleCandidateAndWritesNothing",
+     "aConfigurationRevisionOffByOneIsStaleCandidateAndWritesNothing",
+     "aStaleTabCannotApproveANewerArtifactOfTheSameSource",
+     "aByteIdenticalRecompileLeavesTheTabsOwnRevisionConfirmable",
+     "anEditedSourceUnderneathTheTabIsRefusedAndNamesWhatMoved",
+     "anEditedConfigurationUnderneathTheTabIsRefused",
+     "aRecompileInFlightIsRefusedByTheAwaitingConfirmationPrecondition",
+     "aNameOnlyEditLeavesTheCandidateConfirmable",
+     "aValidCandidateConfirmsToReadyAndRecordsTheAuthenticatedPrincipal",
+     "aMixedVerdictBlocksConfirmationIncludingWithTheOlderRevisionId"
+    ],
+    "count": 12
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/InferenceCaptureIntegrationTest.java",
+    "testMethods": [
+     "capturePersistsExactSourceBeforeLaterEditAndRejectsItsLateCandidate",
+     "editorCannotSlipBetweenLockedSourceReadAndRequestRevisionTag",
+     "versionedCaptureRequiresCutoverAndDoesNotChangeDraftOnRefusal",
+     "cutoverSeparatesIdenticalRequestsButSameRequestPublicationIsIdempotent",
+     "cutoverPublisherPersistsReferencePolicyForContextAwareDraft",
+     "passingFullEvidencePermitsOnlyChangedSuffixAndMissingRuntimeEvidenceDoesNot",
+     "changingOnlyScopeCannotReuseAnIdenticalPassingArtifact",
+     "flagOffReportsIncrementalDisabledBeforeScopeOrLegacyReasons",
+     "passingEvidenceRecordedUnderAnotherCsiIsNeverABaseline",
+     "anIdenticalConfirmedPassingRevisionOfAnotherCsisTestIsNeverABaseline",
+     "confirmationBindsTheCapturedScopeOnBothConfirmationPaths",
+     "versionedConfirmationAcceptsOnlyTheExactCapturedAuthoringHash",
+     "configurationOnlyReuseNeedsNoHistoricalPassButTextReversionDoes",
+     "expiredCaptureCannotPublishEvenIfWorkerPreviouslyClaimedSettlement",
+     "draftLockThenDelayedInsertCannotSpendTheDeadlineTwiceOrLeaveAnOrphan"
+    ],
+    "count": 15
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/IntentDerivationMigrationIT.java",
+    "testMethods": [
+     "historicalV2RowsRemainUnversionedAndCannotBeRewritten",
+     "newV2RowsRequireVersionAndVersionParticipatesInDedupIdentity"
+    ],
+    "count": 2
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/LiveProposalPipelineTest.java",
+    "testMethods": [
+     "anEnvelopeIsAssembledIntoAnArtifactBeforeValidation",
+     "anUnsupportedStepEndsTheCompileWithTheModelsReasonAndNoValidatorCall",
+     "aRefusalMessageCarryingACredentialIsRedactedBeforeItIsStored",
+     "aRepairCarriesTheRejectedEnvelopeAndTheSameStepIds",
+     "whitespaceOnlyCodeIsAGatewayParseFailureWithNoValidatorCall"
+    ],
+    "count": 5
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/NoAutoConfirmTest.java",
+    "testMethods": [
+     "theConfirmCallDetectorMatchesAnyReceiverSoAnAbsenceIsAnAbsence",
+     "theConfirmationWriterDetectorMatchesEveryWriteShape",
+     "exactlyTwoConfirmationWritersExistTheManualConfirmAndTheRunAutoAccept",
+     "theConfirmTransitionHasExactlyOneProductionCaller",
+     "noScheduledOrStartupComponentCanReachTheConfirmation",
+     "theConfirmerIsAlwaysTheAuthenticatedPrincipal",
+     "noConfigurationKeyCanAutoConfirmOrSkipTheConfirmationRoute",
+     "everySeedingHelperIsTestScopedAndDrivesTheRealTransition"
+    ],
+    "count": 8
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/PromptAssemblyTest.java",
+    "testMethods": [
+     "theRequestCarriesTheThreeInputsAndTheDeclaredMetadata",
+     "referencesStayOpaqueAndNoResolvedValueIsCarried",
+     "theFenceSurvivesALineThatTriesToBreakOutOfIt",
+     "everyStepIsFencedWithItsIndexInAuthorOrder",
+     "thePromptAssemblerHasNoSurfaceThroughWhichAResolvedValueCouldArrive",
+     "knownCredentialPatternsAreRejectedBeforeTheGateway",
+     "theRejectionNamesThePatternClassAndTheStepAndNeverEchoesTheMatch",
+     "theWholeReferenceCorpusPassesTheScreen",
+     "anOrdinaryInstructionThatMerelyNamesAPasswordFieldIsNotAFalsePositive",
+     "noMessageInTheModuleClaimsCredentialDetectionIsComplete",
+     "noLogSiteInTheCompilePackageCarriesSourceArtifactOrResolvedValues"
+    ],
+    "count": 11
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/PromptLayoutTest.java",
+    "testMethods": [
+     "twoDifferentTestsShareByteIdenticalSystemInstructionWithNoIdsReferencesOrMode",
+     "theGlobalContextAppearsExactlyOnceAndLeadsTheSteps",
+     "theGlobalContextIsLabelledUntrustedAndScopedToEveryStep",
+     "referenceNamesAndTheFrozenWritableIdsTravelInTheContentsAfterTheStaticBlock",
+     "theSizeCapIsMeasuredAfterDeduplication",
+     "anOversizedCompleteContextIsRefusedAndAnAcceptedOneIsNeverTruncated"
+    ],
+    "count": 6
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/ProposalFixtures.java",
+    "testMethods": [],
+    "count": 0
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/ProvenanceUsageTest.java",
+    "testMethods": [
+     "thoughtsCachedAndTotalTokensArePersistedWhenReported",
+     "anAbsentCachedContentCountIsStoredAsNullNotZero",
+     "noVendorUsageStoresEveryCountAsNullAndUsageUnavailable",
+     "aMissingGatewayProvenanceIsUnavailableNotZero"
+    ],
+    "count": 4
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/ReferencePolicyMigrationIT.java",
+    "testMethods": [
+     "historicalV2RowsKeepTheirExpectationAndCannotGainAPolicy",
+     "newV2RowsRequireAPolicyButNoExpectationAndThePolicyIsPartOfIdentity"
+    ],
+    "count": 2
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/RepairBoundsTest.java",
+    "testMethods": [
+     "oneFullAttemptFitsTheShippedBudgetAndTheRemovedArithmeticIsNotEnforced",
+     "theConfiguredDeploymentFitsOneFullAttemptInTheBudget",
+     "theSweepThresholdMustStrictlyExceedTheBudgetAtExactlyThatBoundary",
+     "agatewayBusyOnARepairEndsTheLoopWithThatCodeAndNoFurtherAttempt",
+     "everyGatewayFailureModeOnARepairIsARetryableStaleCarryingThatCode",
+     "avalidatorOutageOnARepairEndsTheLoopWithValidatorUnavailable",
+     "theRejectedProposalIsCappedWithAnExplicitMarkerAndNeverSplitsACharacter"
+    ],
+    "count": 7
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/RepairBudgetExpiryTest.java",
+    "testMethods": [
+     "anExpiryDuringARepairIsAbandonedAndItsLateResultChangesNothing"
+    ],
+    "count": 1
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/RepairExhaustionTest.java",
+    "testMethods": [
+     "theStoredDocumentDescribesTheFinalAttemptAndNotAnAccumulationOfThree",
+     "theExhaustedDocumentCarriesTheAttemptCountAndTheExhaustedMarker",
+     "theAttemptCountIsAMeasurementAndNotAConstant",
+     "threeHostileVerdictsLeaveOneBoundedDocumentWithinTheCap",
+     "exhaustionPublishesThroughPublishInvalidAndWritesNoRevision"
+    ],
+    "count": 5
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/RepairLoopTest.java",
+    "testMethods": [
+     "validOnTheFirstAttemptIssuesOneProposalAndOneValidation",
+     "validAfterTheFirstRepairIssuesTwoProposalsAndTwoValidations",
+     "validAfterTheSecondRepairIssuesThreeProposalsAndThreeValidations",
+     "neverValidStopsAtThreeAttemptsAndNeedsRevision",
+     "theCallCountIsTheConfiguredBoundAndNotALiteral",
+     "everyRepairCarriesThePreviousAttemptsBoundedDiagnosticsAndTheFirstCarriesNone",
+     "everyRepairKeepsTheSameKindAndWritableIdsAndCarriesThePreviousRejectedProposal",
+     "aVersionTwoArtifactFromARepairIsRejectedByThePinAndNeverValidated",
+     "aParserRejectedEnvelopeConsumesOneRepairAndTheRepairPublishes",
+     "parserRejectionsOnEveryAttemptEndStaleGatewayParseFailureAtTheBound",
+     "aParserRejectionOnARepairIsRepairedWithTheEnvelopeInstruction",
+     "anUnusableFinishReasonStaysTerminalWithNoRepair",
+     "asuccessfulRepairIsAcceptedForTheCallerThatAskedForIt",
+     "noClassOnTheCompilePathReferencesTheConfirmTransition"
+    ],
+    "count": 14
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/RepairRedactionTest.java",
+    "testMethods": [
+     "theCapturingSinkIsLiveAndRendersFormattedArguments",
+     "noStoredSecretValueReachesAnyRepairPayloadDocumentOrAuditLine",
+     "theReferenceTravelsAndTheValueDoesNot",
+     "neitherPromptAssemblerCanReachASecretsServiceAtAll",
+     "theRejectedProposalInEveryRepairIsRedactedAndCarriesNoResolvedValue",
+     "theAuditLineRecordsTheRealAttemptNumberAndNoRequestBody",
+     "aPrivateKeyInTheRejectedProposalIsRedactedHeaderThroughFooter",
+     "aUnicodeEscapedCredentialInTheRejectedProposalIsRedacted"
+    ],
+    "count": 8
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/RepairStubs.java",
+    "testMethods": [],
+    "count": 0
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/RunCompileAfterV19Test.java",
+    "testMethods": [
+     "aV1RunCompileReachesReadyLinkedToItsRequestAfterV19",
+     "theCutoverIsRolledBackSoTheHeadSchemaIsUntouched"
+    ],
+    "count": 2
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/RunConfirmationTest.java",
+    "testMethods": [
+     "aRunCompileStoresItsCompileRequestWithTheServerStampedRunTrigger",
+     "theRequestRowAndTheDraftTransitionCommitOrRollBackTogether",
+     "aRunCompileIsAcceptedForItsRequesterAndRecordedAsARunConfirmation",
+     "aRunCompilePastItsRequestDeadlineIsRefusedAndNeverReachesReady",
+     "aCompileWhoseRequestTriggerIsNotRunPublishesAwaitingConfirmation",
+     "aCandidateWhoseConfirmerIsNotTheRequesterPublishesAwaitingConfirmation",
+     "theManualConfirmationIsRecordedAsManual",
+     "beforeV19TheOutcomeOfARunCompileCannotNameItsRevision"
+    ],
+    "count": 8
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/RunnerPinDriftTest.java",
+    "testMethods": [
+     "thePinnedSyntaxReferenceVersionEqualsTheRunnersOwn",
+     "theSyntaxReferenceBodyDeclaresTheVersionItIsShippedAs",
+     "thePinnedArtifactVersionEqualsTheRunnersArtifactVersion",
+     "theBackendStepCapIsNotLooserThanTheRunnersMaxSteps",
+     "theDiagnosticsCapsAreAlignedWithTheRunnersOwn"
+    ],
+    "count": 5
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/RunnerValidationClientTest.java",
+    "testMethods": [
+     "theRequestCarriesExactlyArtifactSourceAndReferencesUnderTheServiceIdentity",
+     "noResolvedValueTravelsOnTheValidationRequest",
+     "aFiveHundredIsACompileFailureAndIsNeverRetried",
+     "aTimeoutIsACompileFailureAndIsNeverRetried",
+     "theClientCountsEveryCallItIssues",
+     "aRejectedArtifactIsStillATwoHundredAndIsReportedAsAVerdict",
+     "malformedOrContradictoryVerdictsCannotAuthorizePublication",
+     "sharedBudgetCancelsSlowValidationAndForbidsCallsAfterExpiry",
+     "cancellationReleasesAnActiveValidatorBeforeItsPerCallTimeout",
+     "oversizedVerdictIsRejectedByBothTransports",
+     "anUnconfiguredRunnerIsUnavailableRatherThanSkipped",
+     "aRelativeOrNonHttpBaseUrlFailsStartup",
+     "theValidateUrlIsBuiltFromConfigurationAndNothingElse"
+    ],
+    "count": 13
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/ScriptedRepairGateway.java",
+    "testMethods": [],
+    "count": 0
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/SemanticHonestyTest.java",
+    "testMethods": [
+     "theDetectorFindsAPlantedClaimSoAnAbsenceIsAnAbsence",
+     "noJavaStringOnTheCompileRepairOrConfirmationSurfaceClaimsSemanticCorrectness",
+     "theCompileReadmeClaimsNoSemanticCorrectnessEither",
+     "noDescriptionInTheFrozenContractClaimsSemanticCorrectness",
+     "theSchemasThisStoryFillsInAreDeclared"
+    ],
+    "count": 5
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/TargetPolicyGapTest.java",
+    "testMethods": [
+     "achangedTargetPolicyAdvancesTheConfigurationRevision",
+     "theClassifierStillRecordsTheTargetPolicyGap",
+     "everyReachableExecutionAffectingFieldAdvancesTheConfigurationRevision",
+     "theOnlyLegalBrowserIsTheCanonicalOneSoABrowserChangeIsARefusalRatherThanARevision",
+     "aNameOrDescriptionChangeAdvancesNeitherRevision"
+    ],
+    "count": 5
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/VersionedIntentDeriverTest.java",
+    "testMethods": [
+     "policyIsDerivedFromTokensAndStructuredContextOnly",
+     "canonicalPolicyVerifiesAndEverySemanticMutationFails",
+     "versionSourceIdentityAndStrictBoundsFailClosed",
+     "savedEvidenceIdentityParticipatesInVerification",
+     "completeRevisionIdentityContractRejectsMissingChangedReorderedAndDuplicateInputs"
+    ],
+    "count": 5
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/CompileRequestTest.java",
+    "testMethods": [
+     "sourceLinesAreDefensivelyCopied",
+     "attemptMustBeOneBased",
+     "metadataIsRequired"
+    ],
+    "count": 3
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/GatewayAuditTest.java",
+    "testMethods": [
+     "auditLineCarriesExactlyTheAgreedFields",
+     "auditLineNeverCarriesPromptOrResponseContent",
+     "sourceTextReachesTheWireButNeverTheAuditOrDiagnosticStream",
+     "aGatewayErrorBodyEchoingTheCanaryNeverReachesTheReasonOrTheLogs",
+     "anUnparseableResponseEchoingTheCanaryNeverReachesTheReasonOrTheLogs",
+     "anExceptionMessageEchoingTheCanaryIsRedacted",
+     "gatewayErrorBodyEchoingTheRequestIsScrubbedBeforeLogging",
+     "anExceptionMessageThatEchoesTheRequestIsRedacted",
+     "anOverlongExceptionMessageIsTruncated",
+     "disabledClientAuditsWithoutTouchingTheNetwork"
+    ],
+    "count": 10
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/GatewayDisabledIT.java",
+    "testMethods": [
+     "creatingAndUpdatingADraftNeverReachesTheGateway",
+     "theDisabledProviderSelectsAClientThatOpensNoSocket"
+    ],
+    "count": 2
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/GatewayResponseParserTest.java",
+    "testMethods": [
+     "pureJsonIsAccepted",
+     "proseWrappedJsonIsAccepted",
+     "bracesInsideStringsDoNotTruncateTheDocument",
+     "anUnterminatedObjectIsRejected",
+     "proseWithoutJsonIsRejected",
+     "emptyAnswersAreRejected",
+     "unknownArtifactFieldsAreRejected",
+     "aWrongArtifactVersionIsRejected",
+     "aMissingSchemaResourceFailsFast",
+     "aValidEnvelopeCarriesNoRejection",
+     "eachSyntaxDefectHasItsOwnReasonDecidedByParseStageNotMessage",
+     "eachEnvelopeDefectHasItsOwnReason",
+     "eachStepDefectHasItsOwnReasonAndTheZeroBasedPosition",
+     "onlyParserDetectedReasonsAreRepairable"
+    ],
+    "count": 14
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/GenAiGatewayAuditTest.java",
+    "testMethods": [
+     "actualProductionTransportAuditsSuccessMalformedAndEchoedErrorsWithoutSource",
+     "aStepRejectionIsAuditedAsACodeAndPositionWithoutTheModelText",
+     "anUnusableFinishReasonIsAuditedAsATerminalFinishReasonRejection"
+    ],
+    "count": 3
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClientTest.java",
+    "testMethods": [
+     "sendsSchemaTokensAndCapturesUnavailableUsageTruthfully",
+     "rejectsTruncationEvenWhenTextContainsValidEnvelope",
+     "retriesAreBoundedWithoutSdkAmplification",
+     "retryAfterZeroCannotAddUnaccountedHttpRetriesToCompile",
+     "cancellationStopsActualTransportAndRecoversSingleCapacity",
+     "activeCallUsesRemainingDeadlineAndDoesNotRetryTimeout",
+     "transportSocketTimeoutsDeriveFromRequestTimeout",
+     "responseSlowerThanOkHttpDefaultReadTimeoutSucceeds",
+     "recordsPresentVendorUsageAcrossTheSharedRequest",
+     "expiredBudgetNeverStartsTransport",
+     "staticPrefixTravelsAsSystemInstructionAndPerRequestLinesFollowIt",
+     "twoDifferentTestsSendByteIdenticalSystemInstructions",
+     "thinkingLevelIsSentExplicitlyAndNeverWithABudget",
+     "systemInstructionSwitchOffSendsTheIdenticalStaticBytesFirstInContents",
+     "thinkingConfigSwitchOffOmitsTheFieldAndRecordsProviderDefault",
+     "compilationSettingsCarryTheThinkingLevel",
+     "compilationSettingsRecordProviderSchemaVersionTwo",
+     "theWireSchemaIsThePerStatusAnyOf",
+     "oversizedInputIsRejectedBeforeAnyNetworkCall",
+     "saturatedConcurrencyFailsFastWithoutTransport",
+     "oversizedOutputIsDiscarded",
+     "retryCountIsReportedAndBounded",
+     "noSamplingParametersAreSentOnTheWire",
+     "responseWithoutCandidatesIsAParseFailureThatLeaksNoSource"
+    ],
+    "count": 24
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/InferenceEnvelopeTest.java",
+    "testMethods": [
+     "acceptsGeneratedAndTerminalVariants",
+     "rejectsFencesTrailingDocumentsDuplicateKeysAndForeignIds"
+    ],
+    "count": 2
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/ProviderSchemaDeterminismTest.java",
+    "testMethods": [
+     "serializedSchemaMatchesTheGoldenBytesInAnyJvm",
+     "twoFreshBuildsSerializeToIdenticalBytes",
+     "everyMapInTheSchemaHasAConstructionFixedIterationOrder",
+     "writableStepIdsKeepTheirRequestOrder",
+     "parserValidGeneratedAndRefusalEnvelopesSatisfyTheSchema",
+     "refusalWithoutMessageOrGeneratedWithoutCodeViolatesTheSchema"
+    ],
+    "count": 6
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/RecordedFixtureGatewayClientTest.java",
+    "testMethods": [
+     "aRecordedSourceIsAnsweredWithItsRecordedArtifact",
+     "provenanceNamesTheCorpusRatherThanAModel",
+     "anUnrecordedSourceIsReportedAsTranslationBeingUnavailable",
+     "aFailureReasonCarriesNoneOfTheSourceItCouldNotAnswer",
+     "theV2EnvelopeFencingIsReadBackToTheSameSource",
+     "aMalformedFixtureFailsLoudlyRatherThanAnsweringNothing",
+     "twoFixturesRecordingTheSameSourceAreRefused",
+     "theShippedCorpusLoadsAndCoversTheLocalScenarios",
+     "everyShippedFixtureSatisfiesTheArtifactSchema"
+    ],
+    "count": 9
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/UsageCaptureTest.java",
+    "testMethods": [
+     "recordsThoughtsCachedAndTotalTokensWhenReported",
+     "absentCachedContentCountIsNullNotZero",
+     "noVendorUsageRecordsNullCountsAndUsageUnavailable",
+     "partialCoreUsageIsUnavailableButKeepsTheReportedCounts",
+     "usageIsRecordedOnARejectedProposalToo",
+     "recordsProviderDefaultWhenThinkingConfigIsSwitchedOff",
+     "auditLineCarriesCountsButNoStepText"
+    ],
+    "count": 7
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/compile/incremental/CompilationPlannerTest.java",
+    "testMethods": [
+     "finalEditReusesExactPrefixAndNeverClaimsExecutionReuse",
+     "middleEditRegeneratesEntireSuffixAndEarlyEditAllSteps",
+     "unknownScopeOrUnprovenLegacyBaselineNeverReusesPrefix",
+     "changedPinsStructuralEditsAndExplicitRebuildCannotReuse",
+     "unchangedConfigurationCandidateCanReuseWithoutPassingEvidenceEvenWhenFlagOff",
+     "flagOffReportsIncrementalDisabledAheadOfEveryIncompatibilityReason",
+     "flagOnKeepsTheIncompatibilityReasons",
+     "patchCannotWriteProtectedOmitDuplicateOrSupplySource",
+     "unsupportedMeansNoExecutablePartialArtifactOrOldCodeFallback",
+     "staleRetainedSourceRejectedBeforeAssembly"
+    ],
+    "count": 10
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/CandidateArtifactProjectionIT.java",
+    "testMethods": [
+     "aDraftWithACandidatePublishesThePersistedHashAndArtifact",
+     "aDraftWithNoCandidatePublishesNullForBoth",
+     "theListProjectionNullsBothOnARowThatPublishesThemOnTheSingleRead",
+     "theArtifactAndHashBelongToTheCandidateAndNotToTheConfirmedRevision",
+     "theRevisionRowIsWhatGuaranteesTheArtifactAndItsHashTravelTogether",
+     "failedRecompilePreservesConfirmedCodeAndUnconfirmedDraftHasNoConfirmedPair",
+     "foreignConfirmedRevisionLinkNeverExposesAnotherTestsCode"
+    ],
+    "count": 7
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/CompileStateServiceTest.java",
+    "testMethods": [
+     "beginCompilePersistsARequestIdentityWithTheRevisionsItWasStartedFor",
+     "reversedCompletionKeepsTheNewestCandidateAndDiscardsTheOlderRequest",
+     "twoCompilesOfIdenticalTextCannotPublishTheOlderOne",
+     "derivationVersionParticipatesInIdentityWhileCompleteIdentityStillDeduplicates",
+     "aCandidateForASupersededSourceRevisionIsDiscarded",
+     "publishInvalidRecordsDiagnosticsAndLeavesTheDraftUnrunnable",
+     "publishErrorFallsBackToStaleWithoutTouchingTheDraft",
+     "anInvalidResultFromASupersededRequestIsDiscarded",
+     "confirmRecordsTheIdentityOnceAndMarksTheDraftReady",
+     "confirmRejectsAnArtifactHashTheAuthorNeverReviewed",
+     "referencePolicyIsPersistedWithTheImmutableCandidate",
+     "confirmRejectsARevisionThatIsNoLongerTheCurrentCandidate",
+     "confirmIsWriteOnceEvenWhenRetried",
+     "confirmRejectsRevisionsThatDoNotMatchTheDraft",
+     "aConfigurationEditDuringAnInFlightCompileDiscardsEveryResultOfThatCompile",
+     "aPublishQueuedBehindAnUncommittedEditIsDiscardedWhenTheLockIsGranted",
+     "publishErrorLeavesNoConfirmableCandidateBehind",
+     "confirmRejectsADraftThatIsNotAwaitingConfirmation",
+     "aConfirmQueuedBehindAnUncommittedCompileFailureIsRejected",
+     "aSoftDeletedTestBlocksCompileAndConfirmButKeepsItsRevisionsReadable",
+     "aQuarantinedTestBlocksCompileAndConfirm",
+     "anUnknownTestIsRejectedBeforeAnyStateChange"
+    ],
+    "count": 22
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/ConfirmCompileRouteTest.java",
+    "testMethods": [
+     "anExactConfirmationReturnsTheFrozenTestDtoBody",
+     "theProducedConflictCodesEqualTheOperationsDeclaredSet",
+     "theOperationDeclaresNoStatusTheRouteCannotAnswerAndNoneTheRouteAnswersIsUndeclared",
+     "authorizationIsEvaluatedBeforeTheLifecycleGuard",
+     "aReaderOfTheCsiIsForbiddenRatherThanToldAboutTheCandidate",
+     "anAuthorizedOwnerIsRefusedTheTwoLifecycleCodesSeparately",
+     "aMalformedBodyIsBadRequestForAuthorizedAndUnauthorizedCallersAlike",
+     "anIdentitylessCallerIsUnauthorized",
+     "everyMalformedBodyIsBadRequestAndWritesNothing",
+     "anUndeclaredExtraKeyIsIgnoredRatherThanRejected"
+    ],
+    "count": 10
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/ArtifactSchemaDriftTest.java",
+    "testMethods": [
+     "theClasspathCopyIsByteIdenticalToTheCanonicalContract",
+     "theSchemaAcceptsItsOwnExamplesAndRejectsAMisalignedArtifact",
+     "theCanonicalPathIsTheOneThePoDecided"
+    ],
+    "count": 3
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/readiness/SweepDoesNotDeReadyIT.java",
+    "testMethods": [
+     "aStrandedThenSweptDraftStaysReadyOnTheRevisionItConfirmed",
+     "executeIsAcceptedBothBeforeAndAfterTheSweep",
+     "theSweepWritesNoColumnTheReadinessPredicateReads"
+    ],
+    "count": 3
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/corun/StudioCoRunIT.java",
+    "testMethods": [
+     "theRunnerIsUpEnforcesItsIdentityAndAcceptsTheCredentialTheApiWasGiven",
+     "theApiCompilesADraftThroughTheRealRunnerValidateRoute",
+     "theApiDispatchesAConfirmedRevisionToTheRealRunner",
+     "theRunnerReportsBackAndTheApiAcceptsWhatItSends",
+     "aTrivialPassingTestRunsToPassedAndItsLedgerSettlesDone",
+     "aLiveMidStepRunIsStoppedByTheControlReadAloneAfterAnHttpCancel",
+     "aLiveMidStepRunIsStoppedByTheDeleteRelayTheDispatcherSends",
+     "aQueuedCancelIsClosedByTheApiAndNoBrowserIsEverLaunched",
+     "aCancelBetweenTheSendAndTheAdmissionIsRefusedAdmissionAndNoBrowserStarts",
+     "aCancelRightAfterTheAdmissionEndsCancelledOnWhicheverBranchTheRunnerTook",
+     "aTrivialPassingTestStillRunsToPassedAfterEveryCancel"
+    ],
+    "count": 11,
+    "gating": "@EnabledIfEnvironmentVariable(STUDIO_CORUN=1)"
+   }
+  ],
+  "deletedHelperFiles": [
+   "backend/src/test/java/com/citi/put/checks/studio/compile/AbstractRepairPipelineTest.java",
+   "backend/src/test/java/com/citi/put/checks/studio/compile/ConfirmFixtures.java",
+   "backend/src/test/java/com/citi/put/checks/studio/compile/ProposalFixtures.java",
+   "backend/src/test/java/com/citi/put/checks/studio/compile/RepairStubs.java",
+   "backend/src/test/java/com/citi/put/checks/studio/compile/ScriptedRepairGateway.java",
+   "backend/src/test/java/com/citi/put/checks/corun/BlackHolePage.java",
+   "backend/src/test/java/com/citi/put/checks/corun/CallbackProxy.java",
+   "backend/src/test/java/com/citi/put/checks/corun/CoRunEnvironment.java",
+   "backend/src/test/java/com/citi/put/checks/corun/CoRunFailure.java",
+   "backend/src/test/java/com/citi/put/checks/corun/FixturePage.java",
+   "backend/src/test/java/com/citi/put/checks/corun/RunnerProcess.java"
+  ],
+  "partialDrops": [
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedGatewayPrivacyTest.java",
+    "dropped": [
+     "legacyCompileAndGuidedUseOneCapacityPool"
+    ],
+    "reason": "compile client (GenAiLlmGatewayClient/CompileRequest/CompileBudget) edge deleted; shared-capacity property stays covered by cancellationStopsSocketThenReleasesSharedCapacity"
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+    "dropped": [
+     "olderRealCompilerIsDiscardedAfterGuidedCommitClearsItsPointer",
+     "olderCompilerWinningFirstInvalidatesGuidedBaseWithoutSourceEdit",
+     "actualCompileAndSweeperProducePointerAbaButEpochStillFences",
+     "actualManualConfirmationAfterBaseIsANewerHead"
+    ],
+    "reason": "compile writer (CompileStateService) racing the guided publication no longer exists"
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/authoring/StudioAuthoringRevisionTest.java",
+    "dropped": [
+     "contextEditDropsLateCompileAndRevisionSnapshotNeverChanges",
+     "corruptV2ReferencePolicyIsCompileRequiredBeforeAnyExecutionOrLedgerWrite",
+     "semanticallyInvalidCandidateCannotBeConfirmed",
+     "missingRevisionIdentityCannotBeConfirmed",
+     "revisionIdentityMutationsRefuseAcceptanceWithoutDurableSideEffects",
+     "readinessVerificationNeverReadsMutableDraftAuthoring",
+     "unsupportedDerivationVersionRefusesBeforeExecutionAndLedgerEffects"
+    ],
+    "reason": "compile candidate publish/confirm and artifact-1 IntentRevisionVerifier readiness retired"
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java",
+    "dropped": [
+     "theCompileRouteIsShippedAndTheMarkerCameOffForThatOperationOnly",
+     "theConfirmRouteIsShippedAndTheMarkerCameOffForThatOperationOnly"
+    ],
+    "reason": "compile and confirm-compile routes removed (AC-2)"
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/readiness/ExecutionReadinessTest.java",
+    "dropped": [
+     "aConfirmedUneditedDraftIsReady",
+     "noValueOfCompileStatusChangesTheVerdict",
+     "editedTextUnderAnUnmovedCounterIsCaughtOnlyByTheReHash",
+     "aTamperedArtifactIsCaughtByItsOwnHash",
+     "aCandidateNobodyConfirmedSaysThatItIsWaiting",
+     "sourceEditedSinceConfirmationSaysWhichRevisionsDisagree",
+     "configurationEditedSinceConfirmationNamesTheFieldsThatCount",
+     "aNameOrDescriptionOnlyEditIsNotANegativeCase",
+     "anOlderValidatorSchemaVersionIsRefusedAndTheRevisionIsPreserved",
+     "anOlderSyntaxReferenceVersionIsRefused",
+     "anArtifactSchemaVersionOtherThanThePinIsRefused",
+     "aRevisionConfirmedUnderExecutor200StaysReadyOnThe210Pin",
+     "theBackendDoesNotCompareTheRangedPlaywrightOrExecutorTerms",
+     "theSeamAndTheIdentifiedFormAgreeOnAReadyDraft"
+    ],
+    "reason": "artifact-1 READY semantics, runtime pins (studio.runtime.pin) and candidate messages retired; an ordinary revision is never ready. Observed-family counter/hash/authoring terms are exercised by the joined publication/replay suites, not here"
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/readiness/DeReadyCarryForwardTest.java",
+    "dropped": [
+     "aStaleDraftAfterAFailedOptionalRecompileIsStillRunnable",
+     "aDraftWithARecompileInFlightIsStillRunnable",
+     "aDraftLeftNeedsRevisionByAFailedValidationIsStillRunnable",
+     "falsificationTheThreeCasesGoRedWhenThePredicateReadsCompileStatus",
+     "theRuntimePinIsRealConfigurationAndNotASwitch"
+    ],
+    "reason": "compile de-ready (optional recompile) cases and runtime pin retired"
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/gateway/StudioGatewayConfigTest.java (ported)",
+    "dropped": [
+     "anAbsentArtifactSchemaFailsStartup"
+    ],
+    "reason": "studio.compile.gateway.artifact-schema property and its resource removed"
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/dispatch/InternalBodyContractConformanceTest.java",
+    "dropped": [
+     "theSerializedBytesValidateAgainstTheSchemaTheFrozenDocumentDeclares[ValidateRequest] (parameterized invocation only; method kept)"
+    ],
+    "reason": "compile-only RunnerValidationClient /v1/validate producer removed"
+   }
+  ],
+  "ported": [
+   {
+    "from": "backend/src/test/java/com/citi/put/checks/studio/compile/NoRuntimeLlmTest.java",
+    "to": "backend/src/test/java/com/citi/put/checks/studio/gateway/NoRuntimeLlmTest.java",
+    "methods": [
+     "noClassOutsideTheCompilePackageReferencesTheGateway",
+     "theScanIsNotVacuous",
+     "theReadinessPackageCannotReachTheGatewayEither",
+     "guidedAllowanceIsExactAndBothProviderPathsRemainUnreachableFromOrdinaryExecution",
+     "injectedDirectAndTransitiveProviderEdgesFailTheOracle"
+    ],
+    "count": 5,
+    "notes": "gateway package is com.citi.put.checks.studio.gateway; authoring-only allowance GenAiGuidedLlmGatewayClient->GenAiGatewayTransport kept; compile client nodes (LlmGatewayClient, GenAiLlmGatewayClient, RecordedFixtureGatewayClient, DisabledLlmGatewayClient) removed from the provider set (compile edge deleted)"
+   },
+   {
+    "from": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/CredentialBudgetTest.java",
+    "to": "backend/src/test/java/com/citi/put/checks/studio/gateway/CredentialBudgetTest.java",
+    "methods": [
+     "stalledRealGoogleTokenRefreshExpiresAndReleasesCompileAndGatewayCapacity",
+     "explicitCancellationClosesCredentialSocketBeforeItsLongDeadline",
+     "unknownCredentialProvidersFailClosedBeforeAnUnboundedRefreshCanRun"
+    ],
+    "count": 3,
+    "notes": "parameterized case (2 invocations) rewritten against GenAiGatewayTransport.Lease + BoundedCredentialProvider instead of the deleted compile client/CompileExecutor; same oracles: stalled refresh expires before any model call, permit released, token reused, cancelled budget sends nothing"
+   },
+   {
+    "from": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/GatewayFailureClassifierTest.java",
+    "to": "backend/src/test/java/com/citi/put/checks/studio/gateway/GatewayFailureClassifierTest.java",
+    "methods": [
+     "interruptedIoWithoutTimeoutRemainsATransportFailure",
+     "okhttpCallDeadlineIsATimeoutEvenBeforeTheCompileTimerFires",
+     "unavailableAndResourceExhaustedAreRetried",
+     "connectionRefusedAndResetAreRetried",
+     "timeoutsAreNeverRetried",
+     "ambiguousServerErrorsAreNotRetried",
+     "outcomeAndErrorCodeFollowTheClassification"
+    ],
+    "count": 7,
+    "notes": "package only"
+   },
+   {
+    "from": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/StudioGatewayPropertiesTest.java",
+    "to": "backend/src/test/java/com/citi/put/checks/studio/gateway/StudioGatewayPropertiesTest.java",
+    "methods": [
+     "vertexGatewayReportsEveryMissingValueAtOnce",
+     "serviceAccountModeRequiresAKeyFile",
+     "aCompleteConfigurationValidates",
+     "defaultsAreSafe",
+     "bindingDefaultsToLowAndSendsEveryProviderFeature",
+     "bindingAcceptsTheSupportedThinkingLevels",
+     "bindingRejectsMinimalAndUnspecifiedThinkingLevels",
+     "degradationSwitchesBindAndRecordProviderDefault",
+     "applicationYamlDefaultsToLowAndTheEnvironmentOverridesIt"
+    ],
+    "count": 9,
+    "notes": "prefix studio.gateway; assertions on removed temperature/structuredOutput/retry/artifact-schema/effectiveThinkingLevel dropped"
+   },
+   {
+    "from": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/StudioGatewayConfigTest.java",
+    "to": "backend/src/test/java/com/citi/put/checks/studio/gateway/StudioGatewayConfigTest.java",
+    "methods": [
+     "theDefaultIsTheDisabledClient",
+     "anExplicitDisabledProviderSelectsTheDisabledClient",
+     "theLocalProfileAloneStillSelectsTheDisabledClient",
+     "vertexWithoutConfigurationFailsStartup",
+     "deployedStudioRefusesToAdvertiseTranslationWithoutVertex",
+     "unknownProviderFailsConfigurationValidation",
+     "aMissingServiceAccountKeyFileIsReportedByPath"
+    ],
+    "count": 7,
+    "notes": "asserts the GuidedLlmGatewayClient bean answers DISABLED; missing key file now reported by GenAiGatewayTransport"
+   },
+   {
+    "from": "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/GatewayTestSupport.java",
+    "to": "backend/src/test/java/com/citi/put/checks/studio/gateway/GatewayTestSupport.java",
+    "methods": [],
+    "count": 0,
+    "notes": "helper reduced to properties/budget/generateContentBody"
+   }
+  ],
+  "newTests": [
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+    "method": "aJobWithoutAnObservedBindingIsATerminalNamedRefusalAndSendsNothing",
+    "why": "AC-2 observed job only"
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/readiness/ExecutionReadinessTest.java",
+    "method": "anOrdinaryConfirmedRevisionIsNeverReady",
+    "why": "D-A one family; LEARN_REQUIRED"
+   },
+   {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/readiness/ExecutionReadinessTest.java",
+    "method": "anInProgressGuidedSessionIsLearningAndATerminalOneIsNot",
+    "why": "readiness vocabulary UNLEARNED/LEARNING"
+   }
+  ],
+  "editedKeptTests": [
+   "backend/src/test/java/com/citi/put/checks/studio/ConfigurationRevisionTest.java (compile setup removed; revision counters + readiness)",
+   "backend/src/test/java/com/citi/put/checks/studio/CsiImmutabilityIT.java",
+   "backend/src/test/java/com/citi/put/checks/studio/RevisionRetentionIT.java",
+   "backend/src/test/java/com/citi/put/checks/studio/StudioVisibilityIT.java (ordinary revision via StudioExecutionFixtures.ordinaryRevision)",
+   "backend/src/test/java/com/citi/put/checks/studio/StudioExecutionFixtures.java (no compile helpers; ordinaryRevision added)",
+   "backend/src/test/java/com/citi/put/checks/studio/StudioServiceExecuteAuthorizationTest.java",
+   "backend/src/test/java/com/citi/put/checks/studio/StudioServiceWriteAuthorizationTest.java",
+   "backend/src/test/java/com/citi/put/checks/studio/StudioIdempotencyIT.java (constructor)",
+   "backend/src/test/java/com/citi/put/checks/studio/StudioAuthoringApiIT.java (CompilePipeline mock removed)",
+   "backend/src/test/java/com/citi/put/checks/studio/StudioWriteValidationControllerTest.java (AuthoringLimits/StudioAuthoringProperties)",
+   "backend/src/test/java/com/citi/put/checks/studio/OptimisticSaveIT.java, StudioApiIT.java (compileStatus STALE -> readiness UNLEARNED)",
+   "backend/src/test/java/com/citi/put/checks/studio/dispatch/AcceptanceIT.java, StudioAuthorizationIT.java, scheduling/StudioScheduleApiIT.java (COMPILE_REQUIRED -> LEARN_REQUIRED; updateTest overload)",
+   "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunJobFixtures.java (observed job from frozen ObservedJob example)",
+   "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java, JobBodyLeakTest.java, StudioDispatchMetricsTest.java, InternalBodyContractConformanceTest.java (/v2/runs, observed body, v3 replay-job schema)",
+   "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatcherIT.java, StudioDispatcherFailureIT.java, ObservedTerminalSettlementIT.java, StudioKillSwitchWiringTest.java (StudioDispatcher constructor)",
+   "backend/src/test/java/com/citi/put/checks/studio/readiness/ReadinessFixtures.java",
+   "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedGatewayPrivacyTest.java, GuidedPlanningIntegrationTest.java, GuidedProviderEvaluationTest.java, GuidedTranslationTest.java, GuidedSourceClassifierTest.java, GuidedDefaultModelReservationIT.java (gateway/CredentialPatternScreen imports, prefix, constructor)",
+   "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java (prefix; compile client bean assertion removed)",
+   "backend/src/test/java/com/citi/put/checks/studio/evidence/ExecutionVideoContractTest.java, StudioContractTest.java (compile expectations removed)"
+  ],
+  "staticCounts": {
+   "compilePackageBefore": {
+    "files": 60,
+    "testMethods": 374,
+    "standaloneTestAnnotations": 372
+   },
+   "compileDeletedFiles": {
+    "files": 54,
+    "testMethods": 342
+   },
+   "compilePortedFiles": {
+    "files": 6,
+    "methodsBefore": 32,
+    "methodsAfter": 31,
+    "dropped": 1
+   },
+   "otherDeletedFiles": {
+    "files": [
+     "backend/src/test/java/com/citi/put/checks/studio/CandidateArtifactProjectionIT.java",
+     "backend/src/test/java/com/citi/put/checks/studio/CompileStateServiceTest.java",
+     "backend/src/test/java/com/citi/put/checks/studio/ConfirmCompileRouteTest.java",
+     "backend/src/test/java/com/citi/put/checks/studio/ArtifactSchemaDriftTest.java",
+     "backend/src/test/java/com/citi/put/checks/studio/readiness/SweepDoesNotDeReadyIT.java",
+     "backend/src/test/java/com/citi/put/checks/corun/StudioCoRunIT.java"
+    ],
+    "testMethods": 56
+   },
+   "partialDrops": 33,
+   "newTestMethods": 3,
+   "note": "Static source counts, not executed-pass counts. Root reconciles against the frozen runtime baseline (2000 tests) by name."
+  }
+ },
+ "knownFailingByDesign": {
+  "cause": "An ordinary (artifact-1) confirmed revision from StudioExecutionFixtures is no longer runnable: execute is refused 409 LEARN_REQUIRED, so every downstream ledger/dispatch/callback/SSE/video/schedule assertion fails. Port to an observed publication fixture (root/M).",
+  "measuredRun": "focused3 (38 classes, Lane K tree, ReplayIT excluded): 489 tests, 277 failed; 259 with the LEARN_REQUIRED message, the rest consequences of no execution existing, plus 5 failures already in the frozen baseline (ErrorCodeVocabularyTest x2, ObservedAdmissionSecurityIT x3).",
+  "perClass": {
+   "CancelIT": "16/16",
+   "LastRunProjectionIT": "3/3",
+   "StudioAuthorizationIT": "27/27",
+   "StudioApiIT": "2/7",
+   "ExecutionVideoRefusalEnvelopeIT": "2/2",
+   "SseStreamingIT": "13/13",
+   "ExecutionVideoRangeIT": "9/9",
+   "StudioOverloadIT": "2/2",
+   "ExecutionVideoEvidenceIT": "15/15",
+   "StudioIdempotencyIT": "5/5",
+   "ExecutionVideoAuthorizationIT": "14/14",
+   "StudioScheduleApiIT": "19/21",
+   "RecoveryIT": "25/25",
+   "StudioSecretsControllerIT": "1/12",
+   "StudioDispatchMetricsIT": "2/2",
+   "AcceptanceIT": "8/11",
+   "LedgerCancelTransitionsIT": "14/14",
+   "ProgressCallbackIT": "20/20",
+   "EvidencePartialCallbackIT": "16/16",
+   "AdmissionCasIT": "15/15 (3 of them also baseline failures)",
+   "DispatcherIT": "26/26",
+   "RevocationRotationIT": "9/9",
+   "SharedSchedulingIT": "3/4",
+   "SseCrossReplicaIT": "not reported in that run (no XML) - unverified"
+  },
+  "notFailing": [
+   "LedgerStateMachineIT 8/8",
+   "StudioSchedulingSchemaIT 20/20",
+   "StudioSecretsServiceTest 11/11",
+   "GuidedTranslationDefaultsTest 2/2",
+   "ExecutionErrorCodeContractEscalationTest 2/2",
+   "StudioCsiScopingIT 6/6",
+   "StudioListQueryIT 19/19",
+   "OptimisticSaveIT 3/3",
+   "AuthorMirrorIT 2/2",
+   "LegacyStudioAdapterTest 11/11",
+   "StudioBoundedResourcesTest 4/4",
+   "StudioSaveInCallerTransactionIT 4/4"
+  ]
+ },
+ "gradle": [
+  {
+   "cmd": "gradle-locked.sh compileJava",
+   "result": "FAILED once (duplicate local variable in ExecutionReadinessService), then SUCCESS on every later run"
+  },
+  {
+   "cmd": "gradle-locked.sh compileTestJava (no exclusion)",
+   "result": "FAILED - only foreign-owned GuidedPublicationReplayIT.java: line 8 (package com.citi.put.checks.studio.compile.gateway does not exist), 1249 (StudioGatewayProperties), 1016 (RecordingDispatcher constructor). All other test sources compile."
+  },
+  {
+   "cmd": "gradle-locked.sh -I <scratchpad>/exclude-replayit.init.gradle.kts compileJava compileTestJava checkstyleMain checkstyleTest",
+   "result": "SUCCESS (final)"
+  },
+  {
+   "cmd": "gradle-locked.sh spotlessCheck / spotlessApply",
+   "result": "violations only in Lane K files; spotlessApply then spotlessCheck SUCCESS (final)"
+  },
+  {
+   "cmd": "gradle-locked.sh spotbugsMain",
+   "result": "SUCCESS"
+  },
+  {
+   "cmd": "gradle-locked.sh -I <init> test (final focused, 38 classes)",
+   "result": "376 tests, 321 passed, 55 failed, 2 skipped. All 55 are Lane C in flight: StudioContractTest 3 + ExecutionVideoContractTest 4 (contract re-anchor), GuidedPlanningIntegrationTest 40 + GuidedDefaultModelReservationIT 4 + ObservedProfileDriftTest 4 (\"Missing observed schema\": v1/v2 contracts deleted while guided Java still validates v1 names). Every gateway, readiness, dispatch, authoring, CRUD, revision and guided-transport class: 0 failures.",
+   "skipped": [
+    "ExecutionReadinessTest.targetPolicySelectionAdvancesTheConfigurationRevision (@Disabled, pre-existing)",
+    "GuidedProviderEvaluationTest live evaluation (no env, pre-existing)"
+   ]
+  },
+  {
+   "cmd": "gradle-locked.sh -I <init> test (execution-infra, 38 classes)",
+   "result": "489 tests, 277 failed - see knownFailingByDesign"
+  },
+  {
+   "cmd": "not run",
+   "result": "full ./gradlew check and the full studio.* suite (instructed not to)"
+  }
+ ],
+ "greps": [
+  "### grep -rn -- 'compile/' backend/src/main | grep -v /db/migration/",
+  "backend/src/main/java/com/citi/put/checks/studio/entity/UITest.java:97:   * and from compile/confirm/execute, but are never deleted or reassigned (BRD \u00a79).",
+  "### count=1",
+  "### grep -rn -- 'confirmCompile' backend/src/main | grep -v /db/migration/",
+  "### count=0",
+  "### grep -rn -- 'confirm-compile' backend/src/main | grep -v /db/migration/",
+  "### count=0",
+  "### grep -rn -- 'COMPILE_REQUIRED' backend/src/main | grep -v /db/migration/",
+  "### count=0",
+  "### grep -rn -- 'studio.runtime.pin' backend/src/main | grep -v /db/migration/",
+  "### count=0",
+  "### grep -rn -- 'studio.compile' backend/src/main | grep -v /db/migration/",
+  "backend/src/main/java/com/citi/put/checks/studio/entity/UITest.java:3:import com.citi.put.checks.studio.compile.CompileState;",
+  "backend/src/main/java/com/citi/put/checks/studio/compile/CompileState.java:1:package com.citi.put.checks.studio.compile;",
+  "### count=2",
+  "### grep -rn -- '/v1/runs' backend/src/main | grep -v /db/migration/",
+  "### count=0",
+  "### grep -rn -- '/v1/validate' backend/src/main | grep -v /db/migration/",
+  "### count=0",
+  "### grep -rn -- 'v2-enabled' backend/src/main | grep -v /db/migration/",
+  "### count=0",
+  "### grep -rn -- 'incremental.enabled' backend/src/main | grep -v /db/migration/",
+  "### count=0",
+  "### grep -rn -- 'recorded-fixture' backend/src/main | grep -v /db/migration/",
+  "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md:201:Enable the production composition with `studio.guided-authoring.translation.enabled=true`, approved `allow-authored-nonsecret=true`, explicit ",
+  "### count=1",
+  "### grep -rln -- 'COMPILE_REQUIRED' backend/src/main/resources/db/migration",
+  "backend/src/main/resources/db/migration/V24__studio_reference_policy.sql",
+  "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql",
+  "backend/src/main/resources/db/migration/V26__studio_scheduling.sql",
+  "### grep -rln -- 'compile/' backend/src/main/resources/db/migration",
+  "backend/src/main/resources/db/migration/V12__ui_test_revisions_and_compile_state.sql",
+  "### grep -rln -- 'studio.compile' backend/src/main/resources/db/migration",
+  "backend/src/main/resources/db/migration/V16__studio_compile_started_at.sql",
+  "### grep -rln -- 'studio.compile' backend/src/test",
+  "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "backend/src/test/java/com/citi/put/checks/studio/readiness/ExecutionReadinessTest.java",
+  "backend/src/test/java/com/citi/put/checks/studio/readiness/DeReadyCarryForwardTest.java",
+  "### grep -rln -- 'studio/compile' backend/src/test",
+  "### grep -rln -- 'COMPILE_REQUIRED' backend/src/test",
+  "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+  "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioSchedulingSchemaIT.java",
+  "### grep -rln -- 'compile.gateway' backend/src/test",
+  "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "### grep -rln -- 'compile.validator' backend/src/test"
+ ],
+ "unverified": [
+  "GuidedPublicationReplayIT (excluded from compile here; owner applies substitutions)",
+  "observed dispatcher-driven replay with a counting provider stub",
+  "readiness per row on GET /tests: N readiness evaluations per page (up to 100) - no performance measurement",
+  "runtime behaviour of dev.sh local profile after the provider rename",
+  "SseCrossReplicaIT result"
+ ]
+}

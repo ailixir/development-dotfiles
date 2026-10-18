@@ -1,0 +1,28 @@
+{
+  "artifact": "ARCH015-05 immutable design manifest",
+  "status": "DESIGN_ONLY_PENDING_INDEPENDENT_QUINN_MAPPING_AND_ORION_RELEASE",
+  "story": "STUDIO-OBS-015",
+  "generationBaseline": "ce58d620c27bb84f4233151275373aba24467f748c7152a12f1ef3d2d85381aa",
+  "files": {
+    "ruling.md": "1744c2cd04c387306b621c65b93cf5efe75a0758e5cbf93bf3e358227e7f3cb8",
+    "issue.json": "5e496ee22773a603a8e5850769f5533eb4fab7a9214fd3235568bacf0632a3e4",
+    "patch-map.json": "6e039a6f782f5b10392c505d9c25028765297d7300747105ae8ab6124dffa65a",
+    "test-mapping.json": "5279390d814f632e2d7c8a6e96ff04e6ddfdc60280f92c2a3022c5848a210516",
+    "source-observations.json": "8d8d2ad953b55885ac2353cbaa7acc7a812f37ecf1d25d27c60b921c02a4e134",
+    "check-design.py": "ea23ba8b3825ea51b29f7b371a262a6f54653554928c8358dded6bf3c2d26289",
+    "design-check-result.json": "d142a8dca13ea1666d342725f4e7670c49d54497d4dffb0861bd0882c3d6f173"
+  },
+  "releaseBlockers": [
+    "Independent Quinn review of exact manifest/hash and mapping",
+    "Orion explicit held-delta/C-int release",
+    "Authorized C-int source-schema mini-generation, all dependent commitments/pins and frozen after receipt",
+    "Owned runner/backend implementation and actual existing positive/negative/ordinary replay acceptance execution"
+  ],
+  "notClaimed": [
+    "production/source/schema/test edits",
+    "generator/build/database/native execution",
+    "implementation or story QA green",
+    "story lifecycle change"
+  ],
+  "scope": "Only this directory written; no prior artifact rewritten. Independent QA writes a separate review binding this manifest hash."
+}

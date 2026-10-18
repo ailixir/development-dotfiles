@@ -1,0 +1,37 @@
+# role-model facts (TF-5 a input), read 2026-10-18
+18:  flyway:
+19-    enabled: true
+20-    locations: ${FLYWAY_LOCATIONS:classpath:db/migration}
+21-    baseline-on-migrate: false
+22-    validate-on-migrate: true
+23-
+helm-chart/put-checks/values-prod.yaml:88:        - SPRING_DATASOURCE_URL
+helm-chart/put-checks/values-prod.yaml:89:        - SPRING_DATASOURCE_USERNAME
+helm-chart/put-checks/values-prod.yaml:90:        - SPRING_DATASOURCE_PASSWORD
+helm-chart/put-checks/values-prod.yaml:118:        - SPRING_DATASOURCE_URL
+helm-chart/put-checks/values-prod.yaml:119:        - SPRING_DATASOURCE_USERNAME
+helm-chart/put-checks/values-prod.yaml:120:        - SPRING_DATASOURCE_PASSWORD
+helm-chart/put-checks/values-uat.yaml:82:        - SPRING_DATASOURCE_URL
+helm-chart/put-checks/values-uat.yaml:83:        - SPRING_DATASOURCE_USERNAME
+helm-chart/put-checks/values-uat.yaml:84:        - SPRING_DATASOURCE_PASSWORD
+helm-chart/put-checks/values-uat.yaml:112:        - SPRING_DATASOURCE_URL
+helm-chart/put-checks/values-uat.yaml:113:        - SPRING_DATASOURCE_USERNAME
+helm-chart/put-checks/values-uat.yaml:114:        - SPRING_DATASOURCE_PASSWORD
+helm-chart/put-checks/values-dev.yaml:30:  # nothing; SPRING_DATASOURCE_* outranks that profile file.
+helm-chart/put-checks/values-dev.yaml:34:        - SPRING_DATASOURCE_URL
+helm-chart/put-checks/values-dev.yaml:35:        - SPRING_DATASOURCE_USERNAME
+helm-chart/put-checks/values-dev.yaml:36:        - SPRING_DATASOURCE_PASSWORD
+helm-chart/put-checks/values-dev.yaml:79:  # nothing; SPRING_DATASOURCE_* outranks that profile file.
+helm-chart/put-checks/values-dev.yaml:83:        - SPRING_DATASOURCE_URL
+helm-chart/put-checks/values-dev.yaml:84:        - SPRING_DATASOURCE_USERNAME
+helm-chart/put-checks/values-dev.yaml:85:        - SPRING_DATASOURCE_PASSWORD
+helm-chart/put-checks/values.yaml:156:        - SPRING_DATASOURCE_URL
+helm-chart/put-checks/values.yaml:157:        - SPRING_DATASOURCE_USERNAME
+helm-chart/put-checks/values.yaml:158:        - SPRING_DATASOURCE_PASSWORD
+helm-chart/put-checks/values.yaml:254:        - SPRING_DATASOURCE_URL
+helm-chart/put-checks/values.yaml:255:        - SPRING_DATASOURCE_USERNAME
+helm-chart/put-checks/values.yaml:256:        - SPRING_DATASOURCE_PASSWORD
+# migrations with whole-word GRANT/REVOKE/SECURITY DEFINER/DEFAULT PRIVILEGES:
+backend/src/main/resources/db/migration/V17__secret_use_audit.sql:674:REVOKE UPDATE,DELETE,TRUNCATE ON studio_secret_use_audit FROM PUBLIC;
+backend/src/main/resources/db/migration/V17__secret_use_audit.sql:684:REVOKE UPDATE,DELETE,TRUNCATE ON studio_observed_secret_read_entries,studio_observed_no_send_decisions FROM PUBLIC;
+backend/src/main/resources/db/migration/V17__secret_use_audit.sql:689:REVOKE UPDATE,DELETE,TRUNCATE ON studio_observed_terminal_secret_settlements FROM PUBLIC;

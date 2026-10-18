@@ -1,0 +1,72 @@
+{
+  "state": "FROZEN_ISOLATED_SOURCE_UNBUILT_UNRUN_NOT_APPLIED",
+  "sources": [
+    {
+      "path": "studio-runner/src/server/runCoordinator.ts",
+      "baseSha256": "f2fb612e7312cf26768d6bc3ccc687a7735b5182a4b4a1be1578b8b2548ac77b",
+      "candidateSha256": "2060af4f77e6edc6016203127dbac542eed0fae6ec88203260630be8ba62931d",
+      "wholeInverseBytesExact": true
+    },
+    {
+      "path": "studio-runner/test/server/observedReplayAdmission.test.ts",
+      "baseSha256": "34d24042d867dc5bdb04811fe947903d5270ef781534a6adf1389081fd11036e",
+      "candidateSha256": "d17a4a3ae54710262b008adf1300414088135b0f8886ffb99dfcbd530160e9e1",
+      "wholeInverseBytesExact": true
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-secret-control.test.ts",
+      "baseSha256": "c848458157e0a4fddf54aa724ec30316e43d325c13d1f6f411140b95cf87b062",
+      "candidateSha256": "ad2c3cb8523188abe584aba76bc713a32883f2e143fff20510bf3142967a72f4",
+      "wholeInverseBytesExact": true
+    }
+  ],
+  "wholeInverseBytesExact": true,
+  "oldUnitSourceEntireEmbeddedByteExact": true,
+  "nativeFixtureEntireInverseOnePredicateOnly": true,
+  "controlledJobHelperExactAfterNameOnlyReconstruction": true,
+  "controlledJobHelperOriginalSha256": "764a5488fe06ddd020d93e39c712e4750fafb1f7d1ac899acc302766dc1ec4e5",
+  "productionProof": [
+    "Same original fixed nextPoll epoch/end, no margin/tolerance/jitter/widening",
+    "HTTP original once with same scope/body/headers, budget positive min1000/fixedend-now; initialexpired stops before send",
+    "Original rejection consumer attached even postsetupexpired; independent existing timer recomputes against SAME end aftersendsetup",
+    "After race/clearing timer/isStopped, expired currentnow>=SAME end stops before response validation/acceptance; latevalid200 denied",
+    "Original nonsecret send timeout/request await/cadence and original secret control validation/nextPoll increment/stop source unchanged"
+  ],
+  "unitProof": [
+    "Three added unit branches in existing observed admission file, existing FakeScheduler/real app validated observed job/pre-Ready original abort path",
+    "Pure controlled secret artifact helper copied from existing native fixture with name-only substitution; no import/register of native tests and no secretflag/schema bypass",
+    "Late1037 request963; same fake send setup+5 => independenttimer958 and original absolute2000 stop",
+    "Initialexpired2000 no control GET/request timer",
+    "Latevalidresponse at2000 while existing timerundispatched must stop and cannot schedule nextpoll",
+    "Fake pending launch releases via original AbortSignal and ObservedPreReadyFailure; original FINAL/pool cleanup checked, no native/provider/Core/audit credit"
+  ],
+  "nativeProof": [
+    "All four existing native modes and900ms slowresponse, original2000 cutoff, actual CDP pending/effect/UNKNOWN/identity/resource/scratch/profile/privacy assertions unchanged",
+    "Only everytimeout===1000 becomes everytimeout finitepositive<=1000, paired with exact remainingbudget unit branches",
+    "No generated child script or artifact helper changes; all cookednative script literals byte-identical"
+  ],
+  "pending": [
+    "Root independent exact source review before any live integration/static/units/native workflow",
+    "Type/lint/build/unit and native tests UNRUN; source math is not timing PASS promise",
+    "Node dispatch lag can still make actual stop late; original2s bound remains strict"
+  ],
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-native-absolute-window-isolated-author-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/resume-d-native-absolute-window-isolated-author-context.txt",
+    "docs/qa/evidence/STUDIO-OBS-007/root-native-absolute-window-design-review.json"
+  ],
+  "actions": {
+    "liveSourceWrites": 0,
+    "builds": 0,
+    "runtime": 0,
+    "newBrowserCases": 0,
+    "newFrameworks": 0,
+    "newTimersOrApi": 0,
+    "providerOrNativeCallsAdded": 0,
+    "waivers": 0
+  },
+  "whole19AcPass": false,
+  "lifecycleVerdict": null,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE"
+}

@@ -1,0 +1,74 @@
+{
+  "status": "READ_ONLY_CONDITIONAL_EQUIVALENCE_DESIGN_FROZEN",
+  "sourceSha256": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "2e36ed91ede412076a34780adbe0d9378bba68b120c6f243139cf2bd97eca6bc",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "a8fec6d16dea5567caab96e7bd565fac9ada9ed501951a58eda52f77e615e377",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java": "c6f424bab316112ed9b03cc07176df84afd87142a6804a91d7fa835ef8d97503",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java": "c058bfc2a9b43ddc933db1296be8a9af0211cf82b2fbe0aefb0fc0efa8bbf0f7",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java": "d026d97c0b7f3f1de223d0d4bef742b39ac12d00d0c245278ba592b04c0a6569"
+  },
+  "scope": "observeV2 private locked-session forwarding only; remove one redundant owner SELECT and its document/progress strict parses; no checks skipped",
+  "conclusion": "Semantically feasible for the reviewed production/default-REQUIRED graph. Requires root approval of precise private shared-body extraction; no code authorized/applied by this report. No guarantee of performance or arbitrary custom callback/database-fault trace equivalence.",
+  "noInterveningWriteProof": [
+    "observeV2 initial repository.lock returns parsed same-row document/progress while taking owner FOR UPDATE. Outer TransactionTemplate is default REQUIRED in GuidedSessionConfiguration.",
+    "Production checkCurrent only checks configured policy, translation existence/current manifest and names-only mayUse; it does not mutate passed session or update the session row.",
+    "owner and active are guard/clock reads. materialization.verify constructs and validates read-only context/identity; inspected context uses SELECT and result ObjectNode construction, not session updates.",
+    "Outer duplicate lookup is SELECT; hash is canonical/hash construction. Initial observationRefresh lookup and callback/generation guards do not mutate session.",
+    "Nested original observe validates input/path and internal role/key before entering its REQUIRED transaction. Until internal repository.lock there has been no session write. Another transaction cannot update/delete the already-locked owner row.",
+    "Thus the initial parsed Session equals the row a second lock would parse. Fresh current/source/auth/duplicate checks on related state must still execute at the original second-stage positions."
+  ],
+  "smallestForwardingShape": {
+    "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+    "publicContract": "Public observe signature, standalone transaction/lock behavior, input validation/error ordering and return-copy semantics unchanged. Implementation may delegate to a private overload containing the exact existing observe body; no new public parameter.",
+    "privateObserveOverload": "Accept an ephemeral alreadyLocked Session only from observeV2 after its authentic original lock. Otherwise execute the exact original observation schema/path/body. Forward the existing observation transition through a private internal overload.",
+    "privateInternalOverload": "Keep role/key before repository.transaction. Keep that nested transaction invocation and all callbacks; inside it select the already-locked Session for this private call, or perform original repository.lock for ordinary/public calls. Then execute the exact original internal callback body without deleting/reordering any guard/command/finalize branch.",
+    "observeV2Change": "Replace only the original observe call with private locked-session overload using its exact already-locked Session. Keep absent-intent return and present-intent final reload/removal/command/save unchanged.",
+    "constraints": [
+      "Session parameter never originates in HTTP/model input and never crosses requests/calls/threads/transactions.",
+      "No ThreadLocal, cache, alternate resolver, fake authentication or fabricated state.",
+      "No new early guard with changed public error precedence; helper precondition is enforced by its only private call site under the authentic outer lock.",
+      "If root requires public observe SOURCE BODY byte-identical rather than public behavior/API unchanged, this shared-helper candidate must be rejected or separately amended; achieving that with a ThreadLocal repository bypass is expressly not proposed."
+    ]
+  },
+  "exactPreservedOrder": [
+    "Outer bridge schema/path \u2192 outer transaction/owner lock \u2192 current \u2192 owner clock/fence \u2192 active clock/state \u2192 materialization verify \u2192 outer duplicate/hash \u2192 intent guards",
+    "Original observation schema \u2192 path \u2192 role \u2192 key \u2192 nested REQUIRED callback",
+    "Only second owner SELECT+two strict JSON parses removed; second current check remains \u2192 owner clock/fence remains \u2192 request digest \u2192 duplicate SELECT and original duplicate response branches \u2192 active clock/state \u2192 source-current locking/authoring identity and original exception branch",
+    "Original observation state/version/scope \u2192 canonical byte/node/depth limits \u2192 generation \u2192 origin \u2192 counters \u2192 observed evidence/materialization.context \u2192 state change \u2192 full validated save \u2192 response deep copy \u2192 observation command insert",
+    "Return to unchanged outer missing-intent early return or original present-intent reload/refresh-result command/remove+save \u2192 outer physical commit/rollback"
+  ],
+  "responseAndAliasing": [
+    "Public standalone observe still reloads its own Session and returns a deep copy.",
+    "Locked private path returns a deep copy from the same original transition. No initial stale outer document response is substituted.",
+    "Reusing outer Session changes its in-memory state during the transition; later observeV2 uses only the already captured intent and result before the original present-intent reload. observe does not alter observationRefresh, so the captured intent remains equivalent.",
+    "Production current/materialization guards do not retain or mutate Session references. A custom reentrant checkCurrent that writes/mutates the session is outside this proof; do not silently extend the optimization to such a graph."
+  ],
+  "exceptionsAndTransactions": [
+    "Retain nested TransactionTemplate.execute, not direct callback invocation: nested exception propagation and rollback-only marking remain as original.",
+    "Per-value schema/auth/current/source/clock/state/budget/hash/command/save exceptions remain in original order and propagate to the outer transaction unchanged.",
+    "Original first save/command conflict/deferred-commit failures still roll back physical state; external caller rollback remains effective.",
+    "Guard clock calls remain at the same logical positions. Their wall-clock instants naturally occur earlier after removal of work; no deadline/cadence extension or clock reset is proposed.",
+    "A failure deliberately injected ONLY into the removed redundant SELECT cannot be preserved after that SELECT is removed. This is not asserted identical behavior under every arbitrary database-fault schedule; root must approve that standard optimization boundary."
+  ],
+  "verificationRequiredIfReleased": [
+    "Source extraction proof that the original observation and internal transition bodies/ordered calls are preserved; no route-specific guard skipped.",
+    "Existing Session34 and Bridge5 real semantics, including duplicate, failed observation, refresh concurrency, source/fence/budget/cancel refusal and recovery after committed response loss.",
+    "Closest existing real callback rollback/command-conflict cases must retain physical rollback and response-copy invariants; do not use SQL-count mirror as sole proof.",
+    "Unprofiled original first+ninth with unchanged TRACE/1s ownership/cadence/2s revocation. No sufficient-performance claim beforehand."
+  ],
+  "rejectedAlternatives": [
+    "Skip duplicate current/source checks because outer already checked",
+    "Drop nested REQUIRED participation",
+    "Global/internal repository bypass or per-request Session cache",
+    "Move validations outside original lock/commit",
+    "Reuse public/helper across arbitrary transaction scopes"
+  ],
+  "checks": {
+    "sourceMutation": false,
+    "runtime": false,
+    "compilerTests": false,
+    "sql": false,
+    "models": false
+  },
+  "next": "Root substantive exact helper/source-body disposition before authoring; no broad refactor."
+}

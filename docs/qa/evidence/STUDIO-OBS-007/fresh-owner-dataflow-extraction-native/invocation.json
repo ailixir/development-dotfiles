@@ -1,0 +1,15 @@
+{
+  "command": [
+    "npm",
+    "run",
+    "test:fixtures",
+    "--",
+    "test/fixtures-tier/guided-dataflow.test.ts",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-007/fresh-owner-dataflow-extraction-native/tests.json"
+  ],
+  "startedAt": "2026-10-10T19:14:00.872081+00:00",
+  "excludedUnselectedActivelyAuthoredFile": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+  "scope": "original3 native dataflow only; no newisolationcases"
+}

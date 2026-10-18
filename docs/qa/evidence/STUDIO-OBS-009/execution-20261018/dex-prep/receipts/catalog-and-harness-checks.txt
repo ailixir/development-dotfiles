@@ -1,0 +1,5 @@
+# test/print-observed-catalog.test.ts logic, run through a minimal vitest shim on node --experimental-strip-types (NOT vitest) against the real dist/ functions
+PASS 34 FAIL 0
+# mutation checks of the script (each must turn the shim red): wrong schema hash -> 9 red; no reference staleness check -> 2 red; skip unsupported property keyword -> 1 red; no sha256: strip -> 2 red
+# tsc --noEmit (repo tsconfig, strict + noUncheckedIndexedAccess + exactOptionalPropertyTypes) on an overlay tree holding the new test + d.mts: exit 0
+# tsc --noEmit on test/evaluation/*.ts with the patched evaluate.mjs/.d.mts/cli.mjs/budgetAdmission.test.ts: exit 0

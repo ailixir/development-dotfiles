@@ -1,0 +1,98 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java.before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -256,6 +256,7 @@
+         c6PendingSamples;
+     volatile long c6FocusAt, c6PendingAt, c6CutAt, c6DeadlineMarginMs;
+     volatile boolean c6NativeClose, c6FenceAvailable, c6InterruptedNotification, c6ProducerSealed;
++    C5Capture c6Capture;
+     List<P6OwnedPid> c6BrowserTree = List.of();
+     final java.util.concurrent.CountDownLatch c6Pending =
+         new java.util.concurrent.CountDownLatch(1);
+@@ -5187,6 +5188,19 @@
+         assertThat(P7_OUTAGE_SCOPE.compareAndSet(null, scope)).isTrue();
+       }
+       assertThat(dispatcher.dispatchOnce()).isEqualTo(capacity ? 1 : 0);
++      if (capacity) {
++        var original = ACTUAL_DISPATCH_DIAGNOSTICS.get(execution);
++        assertThat(original != null).isTrue();
++        JsonNode originalRefusal = original.path("sendOutcome");
++        assertThat(
++                "DEFINITE_REFUSAL".equals(originalRefusal.path("kind").asText())
++                    && originalRefusal.path("retryable").asBoolean()
++                    && originalRefusal.path("classifiedHttpStatus").asInt() == 429)
++            .isTrue();
++        Files.writeString(
++            TEMP.resolve("initial-context-state.json"), "{\"pause\":false,\"fail\":false}");
++        paused = false;
++      }
+       assertThat(VAULT.readCount() - attempted).isEqualTo(1);
+       assertThat(
+               COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS")
+@@ -5251,9 +5265,6 @@
+                     execution,
+                     UUID.fromString(attempt)))
+             .isZero();
+-        Files.writeString(
+-            TEMP.resolve("initial-context-state.json"), "{\"pause\":false,\"fail\":false}");
+-        paused = false;
+         p3AwaitExecution(blocker, "PASSED");
+         // Only the genuine holder is cleaned; global cleanup would cancel the queued retry owner.
+         p3CleanupOrdinary(blocker, p3Cookie, System.nanoTime() + Duration.ofSeconds(60).toNanos());
+@@ -6614,7 +6625,7 @@
+   // receipts below establish observation/ownership only, never execution or usage authority.
+   private void p8C6Case(int kind) throws Exception {
+     String value = "C6-PRIVATE-" + UUID.randomUUID() + "-+/界";
+-    C5Capture capture = new C5Capture(List.of(value));
++    C5Capture capture = new C5Capture(List.of(value), false);
+     c5Capture = capture;
+     Throwable primary = null;
+     try {
+@@ -6686,6 +6697,7 @@
+ 
+   private void p8C6Run(int kind, String value, C5Capture capture) throws Exception {
+     assertThat(kind).isBetween(1, 4);
++    assertThat(p4Revocation).as("prior owned observer is genuinely closed").isNull();
+     p3Mode = P3Mode.LOGIN;
+     p3Grant("CSI-456", "fixture-other");
+     UUID test = p3CreateSource("CSI-456", "fixture-other", true);
+@@ -6704,6 +6716,7 @@
+     P4RevocationState state =
+         new P4RevocationState(P4_REVOCATION_CASE.incrementAndGet(), kind <= 2 ? 2 : 1, test, jdbc);
+     state.c6Kind = kind;
++    state.c6Capture = capture;
+     state.c6Phase = p4StartObserverPhase(1);
+     p4Revocation = state;
+     p4WriteRevocationMode(state);
+@@ -9208,6 +9221,32 @@
+ 
+     @Override
+     public Optional<VaultEntry> read(ReferenceKind kind, VaultScope scope, String name) {
++      P4RevocationState selected = p4Revocation;
++      if (selected != null
++          && selected.c6Kind >= 1
++          && selected.c6Kind <= 4
++          && kind == ReferenceKind.SECRET
++          && name.equals("PASS")
++          && VaultScope.of("CSI-456", "fixture-other", selected.test).equals(scope)) {
++        C5Capture active = c5Capture;
++        if (active == null || active != selected.c6Capture) {
++          selected.failed = true;
++          if (selected.c6Capture != null) {
++            synchronized (selected.c6Capture) {
++              selected.c6Capture.failed = true;
++            }
++          }
++        } else {
++          try {
++            active.armTrace();
++          } catch (RuntimeException | AssertionError failure) {
++            selected.failed = true;
++            synchronized (active) {
++              active.failed = true;
++            }
++          }
++        }
++      }
+       VaultScope disappearing = P3_FAIL_READ.get();
+       if (kind == ReferenceKind.SECRET
+           && name.equals("PASS")

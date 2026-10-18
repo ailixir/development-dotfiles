@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v3/assignment-receipt.schema.json",
+  "title": "Observed v3 scoped assignment receipt",
+  "description": "OWNED requires a validated live worker claim; ownerFence equals expectedFence + 1 and leaseExpiresAt never exceeds assignment.expiresAt. STOPPED can retain the historical grant or have both grant fields null; it never permits launch or renewal. Cross-record/runtime checks enforce relationships and liveness.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 3
+    },
+    "assignment": {
+      "$ref": "https://checks.citi.example/contracts/observed/v3/assignment.schema.json"
+    },
+    "status": {
+      "enum": [
+        "OWNED",
+        "STOPPED"
+      ]
+    },
+    "ownerFence": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "leaseExpiresAt": {
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "assignment",
+    "status",
+    "ownerFence",
+    "leaseExpiresAt"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "OWNED"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "ownerFence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "leaseExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
+          }
+        }
+      },
+      "else": {
+        "oneOf": [
+          {
+            "properties": {
+              "ownerFence": {
+                "type": "null"
+              },
+              "leaseExpiresAt": {
+                "type": "null"
+              }
+            }
+          },
+          {
+            "properties": {
+              "ownerFence": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "leaseExpiresAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

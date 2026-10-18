@@ -1,0 +1,43 @@
+{
+  "classification": "BOUNDED_NARROW_DELTA_NO_NEW_FINDINGS_COMPILE02_PASS_RUNTIME_PENDING_NOT_FORMAL_QA",
+  "priorReviewManifestSha256": "8afa23c429674c091b1591bd4050f55d23d50c5170502ebddf2d39b0de0b1181",
+  "sourceCheckpointSha256": "4971fbd9f9b09b28bb7c454366c6d57d922d8bcdbfebeff5522d8c950e42d3c2",
+  "payloads": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/core05-budget-fixture-source01/qa-fix-delta01/review.md",
+      "sha256": "bcc4a7c11b87c48dc68c205da7a08b78a23b586d856cac514d75167baf1c7e9e",
+      "bytes": 7963
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/core05-budget-fixture-source01/qa-fix-delta01/checks.json",
+      "sha256": "68a662a88c5eaaf26bc11f469d460e38312dba9af9ebe74ffaa1a655d49c8c2a",
+      "bytes": 5859
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/core05-budget-fixture-source01/qa-fix-delta01/source-inventory.json",
+      "sha256": "7402a3410c9c8e7b2b2a05cf1e9a6bb4d62d03f1bad97d02d23a324c88a3cb82",
+      "bytes": 93089
+    }
+  ],
+  "inputCount": 136,
+  "namedInputsStableAtWrite": true,
+  "globalStabilityClaim": false,
+  "checks": 8,
+  "sourceDisposition": {
+    "F1": "RESOLVED_SOURCE_ONLY",
+    "F2": "RESOLVED_SOURCE_ONLY",
+    "F3": "RESOLVED_SOURCE_ONLY"
+  },
+  "newFindings": [],
+  "prior16ChecksRetained": true,
+  "compile02SuccessClaim": "Actual configuration/main/alltest compilationPASS only",
+  "runtimeProof": "UNPROVEN; no task/test/DB/native/coverage acceptance from source review",
+  "reviewerSourceWrites": false,
+  "reviewerRuntimeExecution": false,
+  "sourceRelease": false,
+  "formalStoryQaVerdict": null,
+  "lifecycleChange": false,
+  "row85": "originalOPENpendingunamended",
+  "full015then008ScopeUnchanged": true,
+  "compile02ReceiptSha256": "b939f48e4321f13e5b60ebf8345911b9720fbf2a3a5bc816a3c748a25b9f8cba"
+}

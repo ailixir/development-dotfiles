@@ -1,0 +1,219 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -5507,39 +5507,77 @@
+     String session = p3Start(test, "fixture");
+     capture.selectedGuidedSession = session;
+     if (!published) {
++      ObjectNode unavailable = p14AwaitAcquisitionWindow(session, recipe);
++      // The unchanged30s wait starts only after the real target acquisition window exists.
++      // Neither the window deadline, product allowance, owner lease nor poll caps are changed.
+       awaitState(session, "FAILED");
+-      JsonNode result =
+-          p3Call(p3Cookie, "/api/v3/studio/guided-sessions/" + session + "/result", null, 200);
+-      assertThat(result.path("failure").path("code").asText()).isEqualTo("RUNTIME_INCOMPATIBLE");
+-      JsonNode observation =
+-          sessions.transaction(
+-              () -> sessions.lock(session).progress().path("observation").deepCopy());
+-      p14PasswordObservation(observation);
+-      assertThat(
+-              P3_INVOCATIONS.stream()
+-                  .anyMatch(kind -> kind.equals("read") || kind.equals("assert")))
+-          .as("no successful requested password operation; pre-admission guard is distinct")
+-          .isFalse();
+-      assertThat(
+-              jdbc.queryForObject(
+-                  "SELECT count(*) FROM studio_guided_actions WHERE session_id=?"
+-                      + " AND step_id IN (?,?) AND admission_id IS NOT NULL",
+-                  Long.class,
+-                  session,
+-                  TWO,
+-                  THREE))
++      ObjectNode terminal = p14AcquisitionSnapshot(session);
++      p14AssertAcquisitionIdentity(terminal, recipe);
++      JsonNode firstActive = unavailable.path("progress").path("translationAcquisition").path("active");
++      JsonNode lastMarker = terminal.path("progress").path("translationAcquisition");
++      JsonNode lastActive = lastMarker.path("active");
++      for (String field : List.of("stepId", "stepIndex", "planRevision", "planHash",
++          "obligationId", "targetIntentHash", "workerId", "ownerFence")) {
++        assertThat(firstActive.path(field).equals(lastActive.path(field)))
++            .as("same authentic Field acquisition identity through terminal").isTrue();
++      }
++      for (String field : List.of("windowId", "openedAt", "deadline", "reservedMs")) {
++        assertThat(firstActive.path("window").path(field).equals(lastActive.path("window").path(field)))
++            .as("same bounded original acquisition window").isTrue();
++      }
++      assertThat(unavailable.path("materialization").equals(terminal.path("materialization")))
++          .as("original immutable materialization survives actual stop").isTrue();
++      JsonNode firstDocument = unavailable.path("document"), lastDocument = terminal.path("document");
++      assertThat(firstDocument.path("scope").equals(lastDocument.path("scope"))).isTrue();
++      assertThat(firstDocument.path("owner").path("workerId")
++          .equals(lastDocument.path("owner").path("workerId"))).isTrue();
++      assertThat(firstDocument.path("owner").path("fence")
++          .equals(lastDocument.path("owner").path("fence"))).isTrue();
++      assertThat(terminal.path("progress").path("errorCode").asText().equals("BUDGET_EXCEEDED"))
++          .as("actual terminal acquisition refusal, never cancellation or generic error").isTrue();
++      JsonNode result = p3Call(p3Cookie,
++          "/api/v3/studio/guided-sessions/" + session + "/result", null, 200);
++      assertThat(result.path("failure").path("code").asText().equals("BUDGET_EXCEEDED"))
++          .isTrue();
++      boolean deadlineReached = !Instant.parse(lastActive.path("window").path("deadline").asText())
++          .isAfter(Instant.now());
++      boolean stepPollCapReached = lastActive.path("extraPolls").asInt() == 32;
++      boolean sessionPollCapReached = lastMarker.path("totalExtraPolls").asInt() == 200;
++      assertThat(deadlineReached || stepPollCapReached || sessionPollCapReached)
++          .as("exact original acquisition deadline or acquisition poll cap").isTrue();
++      assertThat(lastActive.path("extraPolls").asInt()).isBetween(1, 32);
++      assertThat(lastMarker.path("totalExtraPolls").asInt()).isBetween(1, 200);
++      JsonNode counts = lastDocument.path("counters"), limits = lastDocument.path("limits");
++      assertThat(counts.path("actions").asInt()).isEqualTo(1);
++      assertThat(counts.path("modelProposals").asInt()).isEqualTo(2);
++      for (String field : List.of("modelProposals", "modelInputTokens", "modelOutputTokens")) {
++        assertThat(counts.path(field).equals(firstDocument.path("counters").path(field)))
++            .as("no Field inference or later model budget exhaustion").isTrue();
++      }
++      assertThat(counts.path("actions").asLong()).isLessThan(limits.path("maxActions").asLong());
++      assertThat(counts.path("modelProposals").asLong()).isLessThan(limits.path("maxModelProposals").asLong());
++      assertThat(counts.path("modelInputTokens").asLong()).isLessThan(limits.path("maxModelInputTokensTotal").asLong());
++      assertThat(counts.path("modelOutputTokens").asLong()).isLessThan(limits.path("maxModelOutputTokensTotal").asLong());
++      assertThat(counts.path("observations").asLong()).isLessThan(limits.path("maxObservations").asLong());
++      assertThat(limits.path("maxSanitizedEvidenceBytesTotal").asLong()
++          - counts.path("sanitizedEvidenceBytes").asLong())
++          .isGreaterThanOrEqualTo(limits.path("maxObservationBytes").asLong());
++      assertThat(P3_INVOCATIONS.stream().anyMatch(kind -> kind.equals("read") || kind.equals("assert")))
++          .as("no requested password operation completed; acquisition precedes admission").isFalse();
++      assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_actions WHERE session_id=?"
++          + " AND step_id IN (?,?) AND admission_id IS NOT NULL", Long.class, session, TWO, THREE))
+           .isZero();
++      assertThat(COUNTED_VAULT.reads.size()).isEqualTo(reads);
+       p3AwaitTeardown(session);
+-      p3WriteEvidence(
+-          "c14-guided-" + recipe.ordinal(),
+-          C.object()
+-              .put("operator", recipe.ordinal())
+-              .put("path", 1)
+-              .put("signatureFalse", true)
+-              .put("passwordControls", 1)
+-              .put("groundingGuardRuntimeIncompatible", true)
+-              .put("requestedPasswordOperations", 0)
+-              .put("vaultValueReads", 0));
++      p3WriteEvidence("c14-guided-" + recipe.ordinal(), C.object()
++          .put("operator", recipe.ordinal()).put("path", 1).put("passwordControls", 1)
++          .put("nonterminalAcquisitionUnavailableSupport", true)
++          .put("sameOriginalWindowTerminalBudgetRefusal", true)
++          .put("originalAllowanceMs", lastMarker.path("allowanceMs").asLong())
++          .put("originalHelperWaitMs", 30000).put("deadlineReached", deadlineReached)
++          .put("stepPollCapReached", stepPollCapReached).put("sessionPollCapReached", sessionPollCapReached)
++          .put("extraPolls", lastActive.path("extraPolls").asInt())
++          .put("requestedPasswordOperations", 0).put("vaultValueReads", 0));
+     } else {
+       awaitFinalizing(session);
+       // A successful actual TEXT read/consumer or assertion is mandatory BEFORE mutation.
+@@ -5700,15 +5738,99 @@
+ 
+   private static void p14PasswordObservation(JsonNode observation) {
+     assertThat(observation.path("coverage").path("passwordControls").asInt(-1)).isEqualTo(1);
+-    assertThat(observation.path("coverage").path("complete").asBoolean()).isTrue();
+-    assertThat(
+-            java.util.stream.StreamSupport.stream(observation.path("nodes").spliterator(), false)
+-                .anyMatch(node -> node.path("name").asText().equals("Field")))
+-        .isFalse();
+-    assertThat(
+-            com.citi.put.checks.studio.guided.translation.LoginRequiredSignature.matches(
+-                observation))
+-        .isFalse();
++    assertThat(observation.path("coverage").path("complete").asBoolean()).isFalse();
++    assertThat(observation.path("coverage").path("truncated").asBoolean()).isFalse();
++    assertThat(observation.path("coverage").path("reason").asText()).isEqualTo("sensitivity");
++    assertThat(observation.path("coverage").path("withheldRegions").asInt()).isPositive();
++    for (JsonNode node : observation.path("nodes")) {
++      assertThat(node.path("name").asText().equals("Field")).isFalse();
++      for (JsonNode locator : node.path("locatorHints")) {
++        assertThat(locator.path("name").asText().equals("Field")
++            || locator.path("value").asText().equals("Field")).isFalse();
++      }
++    }
++  }
++
++  private ObjectNode p14AcquisitionSnapshot(String session) {
++    return sessions.transaction(() -> {
++      var current = sessions.lock(session);
++      ObjectNode snapshot = C.object();
++      snapshot.set("document", current.document().deepCopy());
++      snapshot.set("progress", current.progress().deepCopy());
++      snapshot.set("translation", plans.exists(session) ? plans.state(session).deepCopy() : C.object());
++      var materials = jdbc.queryForList(
++          "SELECT authored_inputs::text FROM studio_guided_materializations WHERE session_id=?",
++          String.class, session);
++      snapshot.set("materialization", materials.isEmpty() ? C.object() : C.parse(materials.getFirst()));
++      snapshot.set("actions", JSON.valueToTree(sessions.actions(session)));
++      return snapshot;
++    });
++  }
++
++  private ObjectNode p14AwaitAcquisitionWindow(String session, P14Recipe recipe) throws Exception {
++    long deadline = System.nanoTime() + Duration.ofSeconds(30).toNanos();
++    while (System.nanoTime() < deadline) {
++      ObjectNode current = p14AcquisitionSnapshot(session);
++      String state = current.path("document").path("state").asText();
++      assertThat(List.of("FAILED", "EXPIRED", "CANCELLED", "UNKNOWN_OUTCOME").contains(state))
++          .as("genuine Field acquisition prerequisite before any terminal substitute").isFalse();
++      JsonNode active = current.path("progress").path("translationAcquisition").path("active");
++      if (active.path("window").isObject() && active.path("extraPolls").asInt() > 0
++          && active.path("pending").isNull()) {
++        p14AssertAcquisitionIdentity(current, recipe);
++        assertThat(Instant.parse(active.path("window").path("deadline").asText())
++            .isAfter(Instant.now())).as("real acquisition window is still live at phase anchor").isTrue();
++        return current;
++      }
++      Thread.sleep(20);
++    }
++    throw new AssertionError("C14 authentic target acquisition window was not observed");
++  }
++
++  private void p14AssertAcquisitionIdentity(JsonNode snapshot, P14Recipe recipe) {
++    JsonNode document = snapshot.path("document"), progress = snapshot.path("progress");
++    JsonNode translation = snapshot.path("translation"), plan = translation.path("plan");
++    JsonNode marker = progress.path("translationAcquisition"), active = marker.path("active");
++    assertThat(marker.path("policy").asText()).isEqualTo("passive-target-1");
++    assertThat(marker.path("allowanceMs").asLong()).isEqualTo(30000);
++    assertThat(marker.path("sourceRevision").equals(document.path("scope").path("sourceRevision")))
++        .isTrue();
++    assertThat(marker.path("configurationRevision")
++        .equals(document.path("scope").path("configurationRevision"))).isTrue();
++    assertThat(active.path("stepId").asText().equals(TWO)).isTrue();
++    assertThat(active.path("stepIndex").asInt(-1)).isEqualTo(1);
++    assertThat(active.path("planRevision").asText().equals(translation.path("planRevision").asText())).isTrue();
++    assertThat(active.path("planHash").asText().equals(C.hash(plan))).isTrue();
++    assertThat(active.path("workerId").equals(document.path("owner").path("workerId"))).isTrue();
++    assertThat(active.path("ownerFence").equals(document.path("owner").path("fence"))).isTrue();
++    JsonNode accepted = null;
++    for (JsonNode obligation : plan.path("obligations")) {
++      if (obligation.path("stepId").asText().equals(TWO)
++          && obligation.path("occurrence").asInt(-1) == 0) {
++        assertThat(accepted == null).as("unique genuine accepted Field obligation").isTrue();
++        accepted = obligation;
++      }
++    }
++    assertThat(accepted != null).isTrue();
++    assertThat(accepted.path("targetIntent").asText()).isEqualTo("Field");
++    assertThat(accepted.path("operationKind").asText())
++        .isEqualTo(recipe == P14Recipe.CONTROL_VALUE ? "read" : "assert");
++    if (recipe == P14Recipe.HAS_VALUE) {
++      assertThat(accepted.path("predicate").asText()).isEqualTo("hasValue");
++    }
++    assertThat(active.path("obligationId").equals(accepted.path("obligationId"))).isTrue();
++    JsonNode targetIdentity = accepted.has("selectedLocator")
++        ? JSON.createArrayNode().add(accepted.path("targetIntent")).add(accepted.path("selectedLocator"))
++        : accepted.path("targetIntent");
++    assertThat(active.path("targetIntentHash").asText().equals(C.hash(targetIdentity))).isTrue();
++    assertThat(snapshot.path("materialization").isObject()
++        && !snapshot.path("materialization").isEmpty()).isTrue();
++    assertThat(snapshot.path("actions").size()).isEqualTo(1);
++    JsonNode navigation = snapshot.path("actions").get(0);
++    assertThat(navigation.path("coordinate").path("stepId").asText().equals(ONE)).isTrue();
++    assertThat(navigation.path("state").asText()).isEqualTo("SUCCEEDED");
++    assertThat(navigation.path("dispatchCount").asInt()).isEqualTo(1);
++    p14PasswordObservation(progress.path("observation"));
+   }
+ 
+   private static ObjectNode p14Model(ObjectNode result, JsonNode context, String kind) {

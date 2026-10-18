@@ -1,0 +1,303 @@
+{
+  "firstFailure": [
+    {
+      "test": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "frames": [
+        "GuidedPublicationReplayIT.awaitFinalizing(GuidedPublicationReplayIT.java:12482)",
+        "GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel(GuidedPublicationReplayIT.java:3650)"
+      ]
+    }
+  ],
+  "currentOwnedFixedFacts": [
+    {
+      "diagnostic": {
+        "encodedBytes": 42949713,
+        "encodedPatternHits": 0,
+        "streamedLogsFinalChecked": true,
+        "rootTraceObserved": true,
+        "appTraceObserved": true,
+        "traceFromStart": false,
+        "traceArmed": true,
+        "claimSamplerStatus": 2,
+        "claimSamplerJoined": true,
+        "claimSamplerCleanupConfirmed": true,
+        "claimSamplerDiagnosticOnly": true,
+        "claimSamplerCycles": 424,
+        "claimSamplerEmpty": 0,
+        "claimSamplerUnattributed": 2,
+        "claimSamplerCounts": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            192,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            21,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            1,
+            0,
+            0
+          ]
+        ],
+        "pgSnapshotStatus": 2,
+        "pgSnapshotJoined": true,
+        "pgSnapshotExactClaimAttribution": false,
+        "pgSnapshotRows": 2,
+        "pgSnapshotCandidates": 1,
+        "pgSnapshotBlockers": 1,
+        "pgSnapshotStageWaitCounts": [
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "pgSnapshotBlockerStageCounts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "pgSnapshotRelationCounts": [
+          2,
+          1,
+          0
+        ],
+        "pgSnapshotWaitEventCounts": [
+          0,
+          1,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "claims": [
+        {
+          "ordinal": 1,
+          "status": 202,
+          "handlerNanos": 9649250,
+          "consumed": true
+        },
+        {
+          "ordinal": 2,
+          "status": 202,
+          "handlerNanos": 15359334,
+          "consumed": true
+        },
+        {
+          "ordinal": 3,
+          "status": 202,
+          "handlerNanos": 134777125,
+          "consumed": true
+        },
+        {
+          "ordinal": 4,
+          "status": 202,
+          "handlerNanos": 991333291,
+          "consumed": true
+        },
+        {
+          "ordinal": 5,
+          "status": 202,
+          "handlerNanos": 122014375,
+          "consumed": true
+        },
+        {
+          "ordinal": 6,
+          "status": 202,
+          "handlerNanos": 546613042,
+          "consumed": true
+        },
+        {
+          "ordinal": 7,
+          "status": 202,
+          "handlerNanos": 719734500,
+          "consumed": true
+        },
+        {
+          "ordinal": 8,
+          "status": 202,
+          "handlerNanos": 795511375,
+          "consumed": true
+        },
+        {
+          "ordinal": 9,
+          "status": 409,
+          "handlerNanos": 2294893458,
+          "consumed": true
+        }
+      ],
+      "lifecycle": [
+        {
+          "ordinal": 1,
+          "status": 202,
+          "kind": "RUNTIME",
+          "reason": "LEASE_LOST",
+          "consumed": true
+        }
+      ],
+      "s2Completion": [
+        {
+          "failed": false,
+          "closed": true,
+          "restored": true,
+          "stopFulfilled": true,
+          "active": false,
+          "busy": false,
+          "operations": 0,
+          "callbacks": 0,
+          "matches": 1,
+          "starts": 1
+        }
+      ]
+    }
+  ],
+  "sourceDrift": [],
+  "diagnosticOnly": true
+}

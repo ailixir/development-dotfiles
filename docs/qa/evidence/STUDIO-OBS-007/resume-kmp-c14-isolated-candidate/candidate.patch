@@ -1,0 +1,109 @@
+--- before.java
++++ after.java
+@@ -4380,6 +4380,22 @@
+       unrelated.closeInput();
+       unrelated.wipe();
+     }
++    C5CanaryStream overlap = new C5CanaryStream(List.of("abab"));
++    try {
++      byte[] prefix = "ab".getBytes(StandardCharsets.UTF_8);
++      overlap.write(prefix, 0, prefix.length);
++      overlap.write('~'); // A non-start byte must clear a live partial match.
++      overlap.write(prefix, 0, prefix.length);
++      assertThat(overlap.hits).as("broken prefix is not a full match").isZero();
++      overlap.write(prefix, 0, prefix.length);
++      overlap.closeInput();
++      assertThat(overlap.encodedBytes).isEqualTo(7);
++      assertThat(overlap.hits).as("overlapping prefix still finds the real suffix").isPositive();
++      assertThatThrownBy(() -> overlap.assertClean(true)).isInstanceOf(AssertionError.class);
++    } finally {
++      overlap.closeInput();
++      overlap.wipe();
++    }
+     C5CanaryStream volume = new C5CanaryStream(List.of(value));
+     try {
+       byte[] chunk = new byte[65536];
+@@ -5638,7 +5654,7 @@
+           .isTrue();
+       JsonNode result =
+           p3Call(p3Cookie, "/api/v3/studio/guided-sessions/" + session + "/result", null, 200);
+-      assertThat(result.path("failure").path("code").asText().equals("BUDGET_EXCEEDED")).isTrue();
++      assertThat(result.path("errorCode").asText().equals("BUDGET_EXCEEDED")).isTrue();
+       boolean deadlineReached =
+           !Instant.parse(lastActive.path("window").path("deadline").asText())
+               .isAfter(Instant.now());
+@@ -5841,7 +5857,7 @@
+ 
+   private static String p14Markup() {
+     boolean password = p14Page == P14Page.PASSWORD;
+-    String actual = p14Page == P14Page.TEXT_MATCH ? p14Expected : p14Canary;
++    String actual = p14Page == P14Page.PASSWORD ? "" : p14Page == P14Page.TEXT_MATCH ? p14Expected : p14Canary;
+     String consumer =
+         p14Recipe == P14Recipe.CONTROL_VALUE && !password
+             ? "<label for='destination'>Destination</label><textarea id='destination'></textarea>"
+@@ -11388,6 +11404,8 @@
+     private final List<byte[]> patterns = new java.util.ArrayList<>();
+     private int[][] prefixes = new int[0][];
+     private int[] states = new int[0];
++    private final boolean[] startBytes = new boolean[256];
++    private int activeStates;
+     private long encodedBytes, writeCalls, hits, invalidWrites;
+     private int patternBytes;
+     private boolean failed, inputClosed, wiped;
+@@ -11415,6 +11433,7 @@
+         states = new int[patterns.size()];
+         for (int index = 0; index < patterns.size(); index++) {
+           byte[] pattern = patterns.get(index);
++          startBytes[Byte.toUnsignedInt(pattern[0])] = true;
+           int[] prefix = new int[pattern.length];
+           for (int offset = 1, matched = 0; offset < pattern.length; offset++) {
+             while (matched > 0 && pattern[offset] != pattern[matched])
+@@ -11462,22 +11481,28 @@
+ 
+     private void consume(byte octet) {
+       encodedBytes = increment(encodedBytes);
+-      if (wiped || states.length != patterns.size() || prefixes.length != patterns.size()) {
++      if (wiped || states.length != patterns.size() || prefixes.length != patterns.size()
++          || activeStates < 0 || activeStates > patterns.size()) {
+         failed = true;
+         return;
+       }
++      if (activeStates == 0 && !startBytes[Byte.toUnsignedInt(octet)]) return;
+       for (int index = 0; index < patterns.size(); index++) {
+         byte[] pattern = patterns.get(index);
+         int[] prefix = prefixes[index];
+-        int matched = states[index];
++        int previous = states[index];
++        int matched = previous;
+         while (matched > 0 && pattern[matched] != octet) matched = prefix[matched - 1];
+         if (pattern[matched] == octet) matched++;
+         if (matched == pattern.length) {
+           hits = increment(hits);
+           matched = prefix[matched - 1];
+         }
++        if (previous == 0 && matched > 0) activeStates++;
++        else if (previous > 0 && matched == 0) activeStates--;
+         states[index] = matched;
+       }
++      if (activeStates < 0 || activeStates > patterns.size()) failed = true;
+     }
+ 
+     void closeInput() {
+@@ -11485,6 +11510,8 @@
+     }
+ 
+     void assertClean(boolean requireClosed) {
++      assertThat(activeStates).as("exact positive KMP state inventory")
++          .isEqualTo((int) java.util.Arrays.stream(states).filter(state -> state > 0).count());
+       assertThat(failed).as("original encoded stream observer/counter integrity").isFalse();
+       assertThat(invalidWrites).as("original encoded stream invalid or late writes").isZero();
+       assertThat(encodedBytes).as("actual original encoded bytes consumed").isPositive();
+@@ -11500,6 +11527,8 @@
+       for (byte[] pattern : patterns) java.util.Arrays.fill(pattern, (byte) 0);
+       for (int[] prefix : prefixes) if (prefix != null) java.util.Arrays.fill(prefix, 0);
+       java.util.Arrays.fill(states, 0);
++      java.util.Arrays.fill(startBytes, false);
++      activeStates = 0;
+       patterns.clear();
+       prefixes = new int[0][];
+       states = new int[0];

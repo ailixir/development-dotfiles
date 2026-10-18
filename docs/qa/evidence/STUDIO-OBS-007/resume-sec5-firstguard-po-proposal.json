@@ -1,0 +1,31 @@
+{
+  "scope": "EXACT_SEC5_FIRST_DOMINATING_GUARD_PO_PROPOSAL_ONLY",
+  "status": "PROPOSED_NOT_APPLIED",
+  "at": "2026-10-11T08:42:55.581506+00:00",
+  "path": "docs/specs/studio-observed-authoring/secret-login-design.md",
+  "beforeSha256": "2fb230a817bc733afcf83463a41b016d71ab3578d3b3329a344b08f5021af37b",
+  "deltas": [
+    {
+      "old": "Failure is `POLICY_DENIED` with nothing typed.",
+      "new": "A fill reaching the origin-intersection check is refused with `POLICY_DENIED` and nothing typed. If the genuine earlier observation guard rejects an origin absent from `approvedOrigins`, assert exact `SCOPE_DENIED` at that boundary with no password pin or effects; do not bypass it to force a fill-time code. Public guided/replay code normalization is verified separately at its actual wiring boundary."
+    },
+    {
+      "old": "| SEC-5 | `allowedOrigins` without fixture origin \u2192 `POLICY_DENIED`, fixture keystroke log empty; origin allowed by Vault but absent from `approvedOrigins` \u2192 `POLICY_DENIED`. |",
+      "new": "| SEC-5 | Nonempty `allowedOrigins` without the fixture origin \u2192 exact `POLICY_DENIED` at the fill-time guard, fixture keystroke log empty. Origin allowed by Vault but absent from `approvedOrigins` \u2192 exact `SCOPE_DENIED` where the genuine observation guard dominates, before a password pin or effects; assert the actual source-bound first phase, not an invented later fill. Keep separately verified public-code normalization distinct from this native/component refusal. |"
+    }
+  ],
+  "sourceGuards": {
+    "studio-runner/src/run/observationCollector.ts": "ba31be90d04885e6329ae02f6559205325740cbd46960a438150a890557c27a2",
+    "studio-runner/src/run/browser.ts": "a397ece7c7dec06e643bc82b6a4862c5accf154c1c6b28d314ad3c7fab4ac02d"
+  },
+  "preserves": [
+    "Origin intersection exactallowedexclusionPOLICY_DENIED",
+    "Earlier approvedorigin SCOPE_DENIED no observe/pin/write/submit",
+    "Real declared successful navigation and otherfirstguard behaviors",
+    "No public guided/replay-code assertion fromnativecomponent",
+    "No newCorecopies/invalidartifacts/privateguardbypass"
+  ],
+  "sourceChanges": 0,
+  "lifecycleChanges": 0,
+  "completionClaim": false
+}

@@ -1,5 +1,7 @@
 # Studio inference production-readiness review — 2026-09-16
 
+> **Superseded (2026-10-12):** Superseded by [ADR-SC-005](ADR-SC-005-single-path-observed-authoring.md) (single observed path; compile-to-READY removed in STUDIO-OBS-012A).
+
 Reviewed in `wt/epic`, branch `epic/EPIC-10`, HEAD `e1684f8c7`, including the existing uncommitted integration work. Architecture review: Aria (`aiox-architect`), with an independent review of deterministic validation, the execution adapter, and focused reproductions. This is an engineering assessment, not a replacement for the story QA gates. No application code was changed during this review.
 
 **Assessment: retain the architecture, but do not describe the implementation as production-ready yet.** The compile-time LLM, restricted language, trusted executor, immutable revisions, and human confirmation are appropriate foundations. Several concrete defects can produce misleading validation or execution results. Live gateway compatibility, semantic translation quality, and production latency remain unmeasured.

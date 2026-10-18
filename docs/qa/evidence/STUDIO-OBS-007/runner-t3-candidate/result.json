@@ -1,0 +1,112 @@
+{
+  "capturedAt": "2026-10-10T06:47:34.938035+00:00",
+  "story": "STUDIO-OBS-007",
+  "lane": "R",
+  "candidateRevision": 2,
+  "overallStoryVerdict": "NOT_CLAIMED",
+  "sourceManifest": "source-hashes.json",
+  "distManifest": "dist-hashes.json",
+  "gates": {
+    "typecheck": {
+      "exitCode": 0
+    },
+    "lint": {
+      "exitCode": 0
+    },
+    "build": {
+      "exitCode": 0
+    },
+    "localPins": {
+      "exitCode": 0,
+      "imageProvenance": "NOT_ASSERTED",
+      "requireImage": "NOT_RUN"
+    },
+    "defaultWithCoverage": {
+      "exitCode": 0,
+      "filesPassed": 81,
+      "filesSkipped": 1,
+      "testsPassed": 1610,
+      "testsSkipped": 29,
+      "thresholdsUnchanged": true,
+      "coverageTotals": {
+        "lines": {
+          "total": 11593,
+          "covered": 10524,
+          "skipped": 0,
+          "pct": 90.77
+        },
+        "statements": {
+          "total": 11593,
+          "covered": 10524,
+          "skipped": 0,
+          "pct": 90.77
+        },
+        "functions": {
+          "total": 751,
+          "covered": 713,
+          "skipped": 0,
+          "pct": 94.94
+        },
+        "branches": {
+          "total": 5472,
+          "covered": 4773,
+          "skipped": 0,
+          "pct": 87.22
+        },
+        "branchesTrue": {
+          "total": 0,
+          "covered": 0,
+          "skipped": 0,
+          "pct": 100
+        }
+      }
+    },
+    "deployment": {
+      "exitCode": 0,
+      "filesPassed": 8,
+      "testsPassed": 313,
+      "testsSkipped": 0,
+      "proofScope": "Chart/security deployment regressions; existing shim attack container, not a revision2 deployed runner"
+    },
+    "fixtures": {
+      "exitCode": 0,
+      "filesPassed": 22,
+      "testsPassed": 326,
+      "testsSkipped": 10,
+      "seconds": 241.91,
+      "compiledProof": "Mandatory globalSetup emitted frozen revision2 before any child fork; post-run source/dist hashes match exact candidate."
+    }
+  },
+  "unresolved": [
+    "C6 native raw canary is OPEN: actual trusted CDP collector failures normalize to code-only errors, distinct from supplementary native Playwright.fill probe and injected released-value hook.",
+    "Actual Core HTTP/PostgreSQL/compiled-worker all-sink, revocation worst-phase/slow/lost response timing, gateway silence and audit/crash/race joins remain T4/B responsibilities and are not credited by R component tests.",
+    "Independent technical peer and lifecycle QA remain pending."
+  ],
+  "budget": {
+    "sharedWaveCeilingUSD": 500,
+    "actualSpend": "UNAVAILABLE"
+  },
+  "noPushDeployScheduleOrDone": true,
+  "sourceDrift": [],
+  "distDrift": [],
+  "logsSha256": {
+    "build.log": "50d8b286b802e2ce024ca6690dd1f1000b4bcd043b5615565d354c439374330a",
+    "default.log": "9e6e4707f7d5ba3b44f07b95087fd2ab7eb797bf61aa873586830ee4cbe5aa04",
+    "deployment.log": "8a4b8ce221d706b156e3cde4172c31d41c68cbbf655636bf7e7e7c72ab72b213",
+    "fixtures.log": "7a762c3f371432a2328b40d7b2d389a0286508f287a5c942935a2edd729e8072",
+    "lint.log": "2ad7d0e1b633ba6235332e7530595b11d60ef34da9c8f4316955d31dd21579e4",
+    "pins.log": "d4f91c9d30d1a96fac427e639cdab457eb2f377f9b8012636225f6a6a4601c5e",
+    "secret-chromium-focus.log": "97ff07b020d60369ce35d7e429200314b68b464d5b43ed75a7b25ff24117f2b3",
+    "typecheck.log": "bf2aa029bb2deb5530591dca1207249f7f0da44a20b8feef1b5decba7e510c7b"
+  },
+  "evidenceSha256": {
+    "coverage-summary.json": "ec1212baf4fe0d3d435bd44616baeb996591da2418a2c62aa8590b8fba2ce586",
+    "dist-hashes.json": "6b26ea40aa93b8127630547ee8481d72b2c181cb971a71b29cd823364b1180e3",
+    "file-ownership.json": "5341351baa9e130f7ac95eab99e9771b52834977cfcd0067ee89044f8760d254",
+    "oracle-status.json": "d800a018fe4f704c0f4949c0f8c966fa445f92c16de9eb65c42de1d62e2780ce",
+    "source-hashes.before-peer-fixes.json": "885ff6d120ddb81f2aead87916f880c4044f9918b53c65a4421993745a17013b",
+    "source-hashes.json": "535193899a762b445858492c500b2774d1b6131a4b3a0cbd0a06fb36a9d0ee8a"
+  },
+  "liveHandles": [],
+  "runnerGatesVerdict": "ALL_LISTED_LOCAL_GATES_GREEN; does not close unresolved whole-story/joined/native/image assertions"
+}

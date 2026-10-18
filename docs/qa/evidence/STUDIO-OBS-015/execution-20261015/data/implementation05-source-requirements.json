@@ -1,0 +1,123 @@
+{
+  "artifact": "Data implementation05 exact preserved source/fixture mapping",
+  "facets": [
+    {
+      "id": "V18-entry",
+      "source": "GuidedPublicationEvidenceFixture.requireV18",
+      "assertions": "PG15 + successful complete exact1..18; origin/all user guards enabled; later function/policy/normalized/relearn stores absent; head refused before writes; available19+ resources remain intentionally unapplied",
+      "selectors": [
+        "com.citi.put.checks.studio.InferenceMigrationIT",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry"
+      ],
+      "status": "SOURCE_WRITTEN_NOT_COMPILED_OR_EXECUTED",
+      "runnableCommands": [
+        "./gradlew test --tests 'com.citi.put.checks.studio.InferenceMigrationIT' --rerun-tasks",
+        "./gradlew test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry' --rerun-tasks"
+      ]
+    },
+    {
+      "id": "V18-real-pair",
+      "source": "commitHistoricalV18/publishHistoricalV18Observed",
+      "assertions": "Complete current typed source/classifier/basis/lowerer and exact candidate/profile/build/digest preimages, real reserve/claim/finish, session/draft/base/validated attempt locks, grant/source/config/scope/identity/pointer/epoch/owner/live deadlines and final head checks, derived cache refresh, actual V12capture, full24column revision + exact closed10key V15receipt, real reciprocal constraints, conditional pointer CAS/epoch/session transition, forced constraints and separate durable pair read",
+      "selectors": [
+        "com.citi.put.checks.studio.InferenceMigrationIT"
+      ],
+      "status": "SOURCE_WRITTEN_NOT_COMPILED_OR_EXECUTED",
+      "runnableCommands": [
+        "./gradlew test --tests 'com.citi.put.checks.studio.InferenceMigrationIT' --rerun-tasks"
+      ]
+    },
+    {
+      "id": "V18-anti-vacuity",
+      "source": "probeHistoricalAdapter + real finish wrong-verdict refusal",
+      "assertions": "Wrong candidate/absent attempt/wrong claim/wrong identity snapshot/wrong basis/wrong verdict, expired grant, real stale draft source/config and owner/fence/state/expiry mutations, stale pointer+epoch when real prior exists, missing pair23503/FK, altered receipt/extra relearnedFrom P0001, actual postwrite rollback and CAS failure; full draft/session/cache/attempt/revision/receipt state comparison after rollback",
+      "selectors": [
+        "com.citi.put.checks.studio.InferenceMigrationIT.revisionMustMatchCaptureAndProtectsEveryNewColumn",
+        "com.citi.put.checks.studio.InferenceMigrationIT.reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot",
+        "com.citi.put.checks.studio.InferenceMigrationIT.baselineIndexRequiresTruthfulFullMarkerAndSurvivesExecutionRetention"
+      ],
+      "status": "SOURCE_WRITTEN_NOT_COMPILED_OR_EXECUTED",
+      "runnableCommands": [
+        "./gradlew test --tests 'com.citi.put.checks.studio.InferenceMigrationIT.revisionMustMatchCaptureAndProtectsEveryNewColumn' --rerun-tasks",
+        "./gradlew test --tests 'com.citi.put.checks.studio.InferenceMigrationIT.reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot' --rerun-tasks",
+        "./gradlew test --tests 'com.citi.put.checks.studio.InferenceMigrationIT.baselineIndexRequiresTruthfulFullMarkerAndSurvivesExecutionRetention' --rerun-tasks"
+      ]
+    },
+    {
+      "id": "V18-same-coordinate-unequal-hash",
+      "source": "InferenceMigrationIT.reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot",
+      "assertions": "Prior staged same test/CSI/coordinate fixed; equalhash guard positive retained; rollback positive reused row savepoint then unequal hash with same prior revision forced actual metadata guard/refusal; all raw rows rollback-only; cross-test/wrong-coordinate negatives preserved",
+      "selectors": [
+        "com.citi.put.checks.studio.InferenceMigrationIT.reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot"
+      ],
+      "status": "SOURCE_WRITTEN_NOT_COMPILED_OR_EXECUTED",
+      "runnableCommands": [
+        "./gradlew test --tests 'com.citi.put.checks.studio.InferenceMigrationIT.reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot' --rerun-tasks"
+      ]
+    },
+    {
+      "id": "HEAD-capture-and-retention",
+      "source": "InferenceMigrationLatestIT",
+      "assertions": "Actual current Java publication; captured authoring equals draft, later edit leaves revision intact; original enumerated/all-current-column immutability; current published revision survives rolledback old-execution deletion; truthful FULL/partition/confirmation proofs retained",
+      "selectors": [
+        "com.citi.put.checks.studio.InferenceMigrationLatestIT"
+      ],
+      "status": "SOURCE_WRITTEN_NOT_COMPILED_OR_EXECUTED",
+      "runnableCommands": [
+        "./gradlew test --tests 'com.citi.put.checks.studio.InferenceMigrationLatestIT' --rerun-tasks"
+      ]
+    },
+    {
+      "id": "HEAD-current-Java-receipt",
+      "source": "GuidedPublicationMigrationTest.validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry",
+      "assertions": "Current production commit retained; publicReceipt has relearnedFrom and isNull; explicit historical entry refuses real head; full existing commit/postwrite rollback/pair/CAS/epoch/expiry/immutability/binding assertions retained",
+      "selectors": [
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.halfRevisionAndMissingObservationCannotCommit"
+      ],
+      "status": "SOURCE_WRITTEN_NOT_COMPILED_OR_EXECUTED",
+      "runnableCommands": [
+        "./gradlew test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry' --rerun-tasks",
+        "./gradlew test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.halfRevisionAndMissingObservationCannotCommit' --rerun-tasks"
+      ]
+    },
+    {
+      "id": "IncrementalPublicationIT.explicitFirstStepFullLearnDoesNotRequireOldIdentity",
+      "source": "LegacyV20ConfirmedBaseFixture.PreparedCases.incompleteImmutableBase + backend HTTP caller",
+      "assertions": "Fresh20 real policy/source/base+one navigation+copied prep/admission+complete pure lowered preimages+real reserve/claim/finish+checked historical SQL paired commit; no future row reference identity/maps; caller normal upgrade21; exact immutable old bytes/pointer/normalized history preserved; active head declarations guard and actual rollback-only metadata refusal; no durable incomplete head row; backend owns actual omission/narrowing/EMPTY_PREFIX/nullbaseproof/fulllearn/publish",
+      "selectors": [
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof"
+      ],
+      "status": "SOURCE_WRITTEN_NOT_COMPILED_OR_EXECUTED",
+      "runnableCommands": [
+        "./gradlew test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof' --rerun-tasks"
+      ]
+    },
+    {
+      "id": "IncrementalIdentityIT.explicitFullLearnWorksWithStaleDraftIdentityCache",
+      "source": "LegacyV20ConfirmedBaseFixture.PreparedCases.staleCurrentCache + backend distinct HTTP caller",
+      "assertions": "Atomically seed valid old paired20 source; prove old cache valid for exact oldv2; legitimately change current v2 text/context declaration and source/config1to2 under20 while retaining cache; prove old cache invalid for current source and expected current valid; unchanged old pair/counters/cache across normal21/read-only reconstruction; no HTTPsave before run; backend owns actual explicitfirst fulllearn/cache refresh before unchangedV12capture/full identity/counter preservation/READY",
+      "selectors": [
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache"
+      ],
+      "status": "SOURCE_WRITTEN_NOT_COMPILED_OR_EXECUTED",
+      "runnableCommands": [
+        "./gradlew test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache' --rerun-tasks"
+      ]
+    }
+  ],
+  "actualTestsExecuted": 0,
+  "actualDatabaseCommandsExecuted": 0,
+  "sourceInspectionOnly": "balanced Java delimiters and unchanged named method declarations; not compilation, runtime reachability or QA evidence",
+  "fullStillRequired": [
+    "com.citi.put.checks.studio.InferenceMigrationIT",
+    "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+    "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+    "com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest",
+    "com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+    "full backend/checks",
+    "all planned application/joined/native/independentQA and008"
+  ]
+}

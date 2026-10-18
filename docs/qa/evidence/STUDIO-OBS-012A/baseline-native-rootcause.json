@@ -1,0 +1,227 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "scope": "First pre-implementation native baseline failure only; baseline remains root-owned and running at review",
+  "disposition": "FIXTURE_CREDENTIAL_EXPIRY_DEMONSTRATED",
+  "acceptance_credit": false,
+  "first_failure": {
+    "class": "GuidedPublicationReplayIT",
+    "method": "actualPublishedWrongPasswordAnnotatesEarlierSecretFill",
+    "method_line": 4413,
+    "caller": "p3PublishedLogin",
+    "caller_line": 10076,
+    "boundary": "awaitFinalizing",
+    "failure_line": 14980,
+    "original_wait_seconds": 90,
+    "generic_second_learning_message_does_not_mean_two_learns_in_this_case": true,
+    "publication_reached": false,
+    "wrong_password_rotation_reached": false,
+    "ordinary_execute_reached": false
+  },
+  "owned_artifact_binding": {
+    "root_supplied_unique_current_binding": true,
+    "exact_failed_case_witness": true,
+    "source_fixture_matches_baseline_hash": true,
+    "private_paths_or_identifiers_exported": false,
+    "stale_xml_used_for_current_failure": false
+  },
+  "actual_after_failure_metadata": {
+    "state": "CANCELLED",
+    "continuation": "SOURCE_PLAN",
+    "publicationSnapshotPresent": false,
+    "publicationRevisionPresent": false,
+    "materializationPresent": false,
+    "fixtureModelHttpCalls": 0,
+    "fixturePhysicalProviderReads": 0,
+    "fixtureProviderFailures": 0,
+    "actions": 0,
+    "observations": 0,
+    "modelAttempts": 0,
+    "executions": 0,
+    "before_timeout_state": "NOT_RECORDED",
+    "state_recording_limit": "CANCELLED is the post-failure cleanup state, not an invented pre-timeout state."
+  },
+  "credential_evidence": {
+    "source_initialization_lines": [
+      435,
+      436,
+      437,
+      438,
+      439,
+      440
+    ],
+    "source_token_method_line": 16152,
+    "source_expiry_lines": [
+      16163,
+      16164
+    ],
+    "controller_and_translator_issued_only_at_fixture_initialization": true,
+    "worker_issued_at_startWorkers_line": 15229,
+    "declared_iat_to_exp_seconds": 300,
+    "all_three_actual_token_signatures_valid": true,
+    "comparison_clock": "actual preceding ordinary parent run.values_wiped timestamp versus signed token expiry; no file mtime",
+    "controller_remaining_seconds_at_preceding_wipe": -0.697,
+    "translator_remaining_seconds_at_preceding_wipe": -0.697,
+    "worker_remaining_seconds_at_preceding_wipe": 9.303,
+    "backend_strict_integer_second_expiry_already_fails_for_controller_and_translator": true,
+    "event_order_source": "RunCoordinator973 emits run.values_wiped before reporter.sendFinal979; prior published case passes its terminal wait and cleanup before ordered case17 starts. Case17 has no execution; later bodies are blocked.",
+    "no_raw_claims_tokens_audiences_subjects_ids_or_timestamps_exported": true
+  },
+  "source_mechanism": [
+    {
+      "source": "GuidedPublicationReplayIT.properties",
+      "lines": [
+        752,
+        753,
+        764,
+        765
+      ],
+      "finding": "The two fixed files feed the bridge controller and translation coordinator credentials across the reused class fixture."
+    },
+    {
+      "source": "GuidedTranslationCoordinator.continueRuns",
+      "lines": [
+        60,
+        119,
+        124,
+        131
+      ],
+      "finding": "The scheduler selects runnable sessions and reads the same token file for its internal plans/proposals POST. The returned HTTP response status is discarded; an authentication rejection creates no model attempt and does not itself terminalize the session."
+    },
+    {
+      "source": "GuidedInternalSecurity",
+      "lines": [
+        207,
+        208,
+        211,
+        212,
+        213
+      ],
+      "finding": "Authentication requires expires > current epoch second and lifetime <=300 seconds, with no expiry grace. The bound expired translator credential cannot authorize learning."
+    },
+    {
+      "source": "GuidedPublicationReplayIT.p3Case",
+      "lines": [
+        7553,
+        7572,
+        7573
+      ],
+      "finding": "Cases reuse existing worker processes unless the process fields are null; no per-case credential issuance is performed."
+    }
+  ],
+  "causal_scope": "Expired signed fixture credentials are a concrete sufficient blocker before model/worker progress. A recorded selected-session HTTP401 is not available, so the diagnosis does not pretend to measure that request or claim exclusive absence of another fault.",
+  "cleanup_cascade": {
+    "allActualTeardownsConfirmed": false,
+    "selected_sessions": 1,
+    "selected_cleanup_before_state": "CANCELLED",
+    "teardown_status": "UNSET",
+    "p3_cleanup_guard_lines": [
+      7582,
+      7585,
+      7800,
+      7806,
+      7833,
+      7836
+    ],
+    "after_each_guard_lines": [
+      1390,
+      1402,
+      1404
+    ],
+    "later_before_each_block_line": 1269,
+    "observed_later_blocked_case_count": 20,
+    "observed_later_blocked_case_names": [
+      "actualPublishedRegistrationPassingAssertRemainsPassed",
+      "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls",
+      "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead",
+      "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead",
+      "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution",
+      "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution",
+      "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+      "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+      "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper",
+      "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+      "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+      "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect",
+      "actualPublishedPublicCancelWhileNativePasswordWorldPending",
+      "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending",
+      "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks",
+      "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead",
+      "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead",
+      "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead",
+      "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion",
+      "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending"
+    ],
+    "interpretation": "Unknown actual teardown deliberately latches cleanupUnconfirmed. Later failures at1269 are fixture safety blocks; their bodies did not supply independent product failures. The initial timeout and every cascade failure remain in the baseline."
+  },
+  "database_refusal": {
+    "observed": true,
+    "source_locations": [
+      {
+        "file": "GuidedTranslationCoordinator.java",
+        "line": 60
+      },
+      {
+        "file": "GuidedTranslationStore.java",
+        "line": 1236
+      }
+    ],
+    "current_fixture_database_authority_bound": false,
+    "contribution": "UNPROVEN",
+    "limit": "DynamicPropertySource uses the current Testcontainers DB URL, but the bounded owned logs do not expose a uniquely bound current URL for comparison. A stale scheduled Spring context against a stopped prior container remains possible; no identity or exclusive timing attribution is invented."
+  },
+  "prior_case_evidence": {
+    "receipt": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-login-six-current/result.json",
+    "sha256": "e2724ff17d60d8fc30563aa9c0cacadcd47add63446b8381086f7d26b3c0d982",
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "gradleExitCode": 0,
+    "same_case_body_byte_identical": true,
+    "same_p3PublishedLogin_body_byte_identical": true,
+    "same_token_body_byte_identical": true,
+    "same_p3AwaitTeardown_body_byte_identical": true,
+    "awaitFinalizing_delta": "Current helper has a C5-only raw-state query branch; the selected p3 case uses the original sessions.transaction/lock branch and unchanged90-second deadline.",
+    "limit": "Prior six-case selection passed; it did not certify indefinite reuse of a single300-second credential across the longer37-case fixture."
+  },
+  "minimum_fix_proposal": {
+    "status": "DESIGN_ONLY_NOT_IMPLEMENTED",
+    "owner": "root fixture executor after baseline closes",
+    "scope": "Issue fresh signed fixture controller/translator/worker credentials at actual session/control/dispatch boundaries through the existing helper seam; use atomic file replacement for concurrent file readers. Keep issuer/key/subject/audience/role checks and300-second maximum unchanged.",
+    "preserve": [
+      "90-second learning wait",
+      "20-second teardown confirmation",
+      "SDK1-second renewal",
+      "2-second stop",
+      "immutable publication budget",
+      "real authorization",
+      "all existing test bodies and outcomes"
+    ],
+    "avoid": [
+      "production authentication relaxation",
+      "longer-lived tokens",
+      "background timer/renewal framework",
+      "blind retry of unchanged baseline",
+      "clearing cleanupUnconfirmed without actual teardown"
+    ]
+  },
+  "minimum_verification_proposal": {
+    "after_changed_fixture_source": "Root reruns the existing six LOGIN selectors in one owned context, including the selected wrong-password case and following registration case, then the already-required full baseline/final suite verifies the longer ordering. Bind source and preserve original red receipts.",
+    "existing_seam_check": "Independently confirm all intended boundary callers reach the refresh helper, files are atomically replaced with valid freshly signed <=300-second credentials, and actual teardown remains required. No additional browser flow or mandatory E2E case is introduced.",
+    "no_run_by_this_agent": true
+  },
+  "source_bindings": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "f51ba83f7d67234aa360219b12d92ceaf5f46161d967db675f6f026642dcaee7",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java": "6c95208b12a0776bcb478c094a1f0284c65cb3a646ce40e5d5b5a3d3b896ae8d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java": "5f52bf68e733829044afca036cd7c9f2b281f6eff8eef525f91ae0d2bfb2e0cf",
+    "studio-runner/src/server/runCoordinator.ts": "2060af4f77e6edc6016203127dbac542eed0fae6ec88203260630be8ba62931d"
+  },
+  "new_infrastructure": false,
+  "source_edits": false,
+  "runtime_or_build_execution": false,
+  "process_kill": false,
+  "billing": {
+    "shared_ceiling_usd": 500,
+    "actual": "unavailable"
+  }
+}

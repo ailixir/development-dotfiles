@@ -1,0 +1,62 @@
+Compiled from "ApplyDefaultsStrategy.java"
+public class com.networknt.schema.ApplyDefaultsStrategy {
+  static final com.networknt.schema.ApplyDefaultsStrategy EMPTY_APPLY_DEFAULTS_STRATEGY;
+
+  private final boolean applyPropertyDefaults;
+
+  private final boolean applyPropertyDefaultsIfNull;
+
+  private final boolean applyArrayDefaults;
+
+  public com.networknt.schema.ApplyDefaultsStrategy(boolean, boolean, boolean);
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+       4: iload_1
+       5: ifne          20
+       8: iload_2
+       9: ifeq          20
+      12: new           #2                  // class java/lang/IllegalArgumentException
+      15: dup
+      16: invokespecial #3                  // Method java/lang/IllegalArgumentException."<init>":()V
+      19: athrow
+      20: aload_0
+      21: iload_1
+      22: putfield      #4                  // Field applyPropertyDefaults:Z
+      25: aload_0
+      26: iload_2
+      27: putfield      #5                  // Field applyPropertyDefaultsIfNull:Z
+      30: aload_0
+      31: iload_3
+      32: putfield      #6                  // Field applyArrayDefaults:Z
+      35: return
+
+  public boolean shouldApplyPropertyDefaults();
+    Code:
+       0: aload_0
+       1: getfield      #4                  // Field applyPropertyDefaults:Z
+       4: ireturn
+
+  public boolean shouldApplyPropertyDefaultsIfNull();
+    Code:
+       0: aload_0
+       1: getfield      #5                  // Field applyPropertyDefaultsIfNull:Z
+       4: ireturn
+
+  public boolean shouldApplyArrayDefaults();
+    Code:
+       0: aload_0
+       1: getfield      #6                  // Field applyArrayDefaults:Z
+       4: ireturn
+
+  static {};
+    Code:
+       0: new           #7                  // class com/networknt/schema/ApplyDefaultsStrategy
+       3: dup
+       4: iconst_0
+       5: iconst_0
+       6: iconst_0
+       7: invokespecial #8                  // Method "<init>":(ZZZ)V
+      10: putstatic     #9                  // Field EMPTY_APPLY_DEFAULTS_STRATEGY:Lcom/networknt/schema/ApplyDefaultsStrategy;
+      13: return
+}

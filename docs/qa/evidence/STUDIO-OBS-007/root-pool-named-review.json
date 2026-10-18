@@ -1,0 +1,18 @@
+{
+  "scope": "SOURCE_ONLY_BOUNDED_AUTHOR_APPROVAL",
+  "proposalSha": "6c0657672d90569d14563f1b5b57dc148bb6bd3417fc5615d6d4da6d37d9cb8c",
+  "sourceSha": "4e2e21bec4c017cef3b2ec4fed6221c111afef70f76c0c25a7439e86189f0f9d",
+  "disposition": "APPROVE_EXACT_EXISTING_NAMED_HOLDER_SETUP",
+  "approved": "Prepare actual secret execution/binding/SSE/snapshot before dispatching paused holder with existing dispatch(holder). Retain real pause marker, ADMITTED/no-browser/zero-read proof, unchanged secret dispatchOnce for authentic429 and retry, early release, every audit/scope/holderPASSED/cleanup/privacy guard.",
+  "sourceFacts": [
+    "Existing named API uses real claim lease and dispatchClaimed",
+    "studio.execution.enabled=true in fixture; dispatcher.enabled=false only disables scheduled poll",
+    "New holder is not cancelled; original claim/dispatch cancellation guards retained"
+  ],
+  "tradeoff": "Named supporting holder setup does not exercise batch selection; secret fault/retry still uses original batch path.",
+  "limits": [
+    "Performance benefit unproved until execution",
+    "No new selective API/config/budget/deadline",
+    "No runtime PASS or holder failure waiver"
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "lane": "L6",
+  "wave": "W4",
+  "story": "STUDIO-OBS-008",
+  "date": "2026-10-17",
+  "agent": "dev",
+  "phase": "A+B-prep+B",
+  "status": "FINAL_GREEN",
+  "evidentiary": true,
+  "evidentiary_reason": "Phase B ran on the frozen source (digest eea9c8deb62a35aeb24108a71acf5c494f053fb326d1f8202c1a69b8b2c2f002)",
+  "files": [
+    {
+      "path": "frontend/e2e/studio-guided.spec.ts",
+      "sha256_before": "8ab624fc40ff8c12e697cdf67070dabfa8b0abb06f65cb3be37f5986bab77db1",
+      "sha256_after": "56a8bb7421ccf4bf5c81e732e1c2b95cbff11f779ae3bf7cb99eae3979b4e45e"
+    },
+    {
+      "path": "frontend/e2e/mswProxy.ts",
+      "sha256_before": "f431446dcd153813caeabe7b2ee2c1ead000c3268e9e0be32618049dbccf9aa4",
+      "sha256_after": "d41ce976c7a57a731305159b1b19b24b43fe6d1ec541aa346457469c068ce9f6"
+    },
+    {
+      "path": "frontend/e2e/start-servers.mjs",
+      "sha256_before": "00519a46b54b03cb1690c4ef4fad021d9ce296b8252225a1b8d876090fb734a6",
+      "sha256_after": "01b10542e4ea86185ccf0cb2528bb23c33be55acdf59862abcaf60e7091486ea",
+      "sha256_phaseB_prep": "2475c0c428d456f2f91e804774c1fb6e582fd50f231d5376f092b58a37f92854",
+      "note": "Origin rewrite reverted in Phase B prep; header comment names backend env"
+    },
+    {
+      "path": "frontend/e2e/studio-authoring-real-backend.spec.ts",
+      "sha256_before": "32e904b917771f909b9e8ac4d57da81e066f8f88d1b7f44e5b4a742f7a54ea4c",
+      "sha256_after": "32e904b917771f909b9e8ac4d57da81e066f8f88d1b7f44e5b4a742f7a54ea4c"
+    },
+    {
+      "path": "frontend/playwright.config.ts",
+      "sha256_before": "fe89cfbb0095a6c369301c3089e59596d8abc19478332ff1ab25024b077320f5",
+      "sha256_after": "fe89cfbb0095a6c369301c3089e59596d8abc19478332ff1ab25024b077320f5"
+    },
+    {
+      "path": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+      "sha256_before": "64f347784be9490c636487adab899f1f65f97fa38d6aafaae162de0e52551050",
+      "sha256_after": "64f347784be9490c636487adab899f1f65f97fa38d6aafaae162de0e52551050",
+      "note": "comments only (stale PENDING REWRITE comments); audit not yet run",
+      "sha256_phaseB_prep": "cf00ca4d9f6b75484d73e3f3e081f27fd9da63fd97d0ae8ed51f3a376cf79cc6"
+    },
+    {
+      "path": "docs/qa/accessibility/axe-results.json",
+      "sha256_before": "51c29bb491b25aafb91240a1b7f875bd4670b980adb43b13d344d8d8e014e961",
+      "sha256_after": "51c29bb491b25aafb91240a1b7f875bd4670b980adb43b13d344d8d8e014e961",
+      "note": "Phase B"
+    }
+  ],
+  "runs": [
+    {
+      "id": "A1",
+      "cmd": "pnpm exec playwright test e2e/studio-guided.spec.ts",
+      "project": "msw",
+      "exit": 1,
+      "passed": 6,
+      "failed": 2,
+      "skipped": 0,
+      "note": "spec locator ambiguity (completion text also in plan history), fixed",
+      "log": "logs/10-msw-guided-run1.log"
+    },
+    {
+      "id": "A2",
+      "cmd": "pnpm exec playwright test e2e/studio-guided.spec.ts",
+      "project": "msw",
+      "exit": 0,
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "log": "logs/11-msw-guided-run2.log"
+    },
+    {
+      "id": "A3",
+      "cmd": "pnpm exec playwright test e2e/harness.spec.ts",
+      "project": "msw",
+      "exit": 0,
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "log": "logs/12-msw-harness-run1.log"
+    },
+    {
+      "id": "A4",
+      "cmd": "pnpm exec playwright test e2e/studio-guided.spec.ts e2e/harness.spec.ts",
+      "project": "msw",
+      "exit": 0,
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "note": "mid L5b-F1 tree, non-evidentiary",
+      "log": "logs/13-msw-guided-harness-run3-midfix.log"
+    },
+    {
+      "id": "D1",
+      "cmd": "CHECKS_E2E_REAL_BACKEND=1 pnpm exec playwright test --project=real-backend e2e/studio-authoring-real-backend.spec.ts",
+      "project": "real-backend",
+      "exit": 1,
+      "passed": 1,
+      "failed": 1,
+      "skipped": 0,
+      "note": "POST /studio/tests 403 Invalid CORS request (Origin 127.0.0.1:4177 not allow-listed)",
+      "log": "logs/21-d5-real-backend-run1.log"
+    },
+    {
+      "id": "D2",
+      "cmd": "same",
+      "project": "real-backend",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "note": "after Origin rewrite in start-servers.mjs",
+      "log": "logs/22-d5-real-backend-run2.log"
+    },
+    {
+      "id": "D3",
+      "cmd": "same",
+      "project": "real-backend",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "note": "repeatability; 0 leftover drafts afterwards",
+      "log": "logs/23-d5-real-backend-run3.log"
+    }
+  ],
+  "d5": {
+    "classification": "local real-backend authoring smoke; non-gating; not live; not OBS-009",
+    "backend_cmd": "CHECKS_SOURCE_UI_TEST=true FLYWAY_LOCATIONS=classpath:db/migration,classpath:db/seed with-gradle-lock.py ./gradlew bootRun --no-daemon (node 24 on PATH)",
+    "profile": "local",
+    "seed_applied_cleanly": true,
+    "flyway_validated_migrations": 23,
+    "csi_count": 3,
+    "pids_started": {
+      "lock_python": 24675,
+      "gradlew_wrapper": 24677,
+      "gradle_build_jvm": 24709,
+      "app_jvm": 24887
+    },
+    "stopped": true,
+    "stop_signal": "SIGTERM to app JVM; bootRun exit 143 (BUILD FAILED line is expected)",
+    "port_8080_free_after": true,
+    "gradle_lock_free_after": true,
+    "backend_source_changed": false,
+    "superseded_note": "D2/D3 ran with an Origin rewrite that root reverted; D5 must be re-run on the frozen source with CHECKS_CORS_ALLOWED_ORIGINS=http://127.0.0.1:4177"
+  },
+  "product_defects": [],
+  "harness_defects_fixed": [],
+  "audit": {
+    "run": true,
+    "result": "7/7 passed",
+    "see": "phase_b.audit"
+  },
+  "final_runs_on_frozen_source": {
+    "run": true,
+    "see": "phase_b"
+  },
+  "cors": {
+    "env": "CHECKS_CORS_ALLOWED_ORIGINS",
+    "property": "checks.cors.allowed-origins",
+    "defined": "backend/src/main/resources/application.yml:112-113",
+    "bound": "backend/src/main/java/com/citi/put/checks/config/CorsProperties.java:7",
+    "used": "backend/src/main/java/com/citi/put/checks/config/SecurityConfig.java:197"
+  },
+  "phase_b_prep_checks": {
+    "eslint": {
+      "cmd": "pnpm exec eslint e2e playwright.config.ts --ext .ts,.mjs",
+      "exit": 0
+    },
+    "tsc": {
+      "cmd": "pnpm exec tsc -p e2e/tsconfig.json --noEmit",
+      "exit": 0
+    }
+  },
+  "phase_b": {
+    "audit": {
+      "cmd": "pnpm exec vitest run src/test/a11y/studioWcagAudit.test.tsx --minWorkers=1 --maxWorkers=2",
+      "exit": 0,
+      "files": 1,
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "baseline_regenerated": false,
+      "axe_results_sha256_before": "51c29bb491b25aafb91240a1b7f875bd4670b980adb43b13d344d8d8e014e961",
+      "axe_results_sha256_after": "9d3853da76e71a4b0c69a90ac3a5863345bdbb78076da9df09c6044a99a45934",
+      "log": "logs/31-audit-run1.log"
+    },
+    "msw_e2e": {
+      "cmd": "pnpm exec playwright test e2e/studio-guided.spec.ts e2e/harness.spec.ts",
+      "exit": 0,
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "log": "logs/40-msw-final.log"
+    },
+    "d5": {
+      "cmd": "CHECKS_E2E_REAL_BACKEND=1 pnpm exec playwright test --project=real-backend e2e/studio-authoring-real-backend.spec.ts",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "cors_env": "CHECKS_CORS_ALLOWED_ORIGINS=http://127.0.0.1:4177",
+      "origin_rewrite": false,
+      "pids_started": {
+        "lock_python": 34043,
+        "gradlew_wrapper": 34048,
+        "gradle_build_jvm": 34082,
+        "app_jvm": 34203
+      },
+      "stopped": true,
+      "ports_free_after": [
+        8080,
+        4177,
+        4178
+      ],
+      "gradle_lock_free_after": true,
+      "log": "logs/51-d5-real-backend-final.log"
+    },
+    "freeze_check": {
+      "source_digest_after": "eea9c8deb62a35aeb24108a71acf5c494f053fb326d1f8202c1a69b8b2c2f002",
+      "equals_freeze": true,
+      "files_changed_vs_freeze": [],
+      "files_added": [],
+      "files_removed": [],
+      "outside_manifest_changed_by_lane": [
+        "docs/qa/accessibility/axe-results.json"
+      ]
+    }
+  }
+}

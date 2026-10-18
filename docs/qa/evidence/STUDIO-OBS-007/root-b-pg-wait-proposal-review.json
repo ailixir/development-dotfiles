@@ -1,0 +1,14 @@
+{
+  "verdict": "APPROVED_BOUNDED_DIAGNOSTIC_AUTHORING",
+  "proposalSha256": "3ebd344728d836be332cec8f9b8f265fff2ab68d2ec9eef8d30486072732cae7",
+  "scope": "One existing Publication sampler/selectedfilter diagnostic, no new case or production change",
+  "conditions": [
+    "One atomic snapshot only during stillregistered original claim elapsed>=500ms and sampledJDBCWAITING; no periodicPGpoll/reconnect",
+    "Separate owned unpooled readonly connection; exact fixture connection credentials private; timeouts/boundedrows+queryclassification and independent rollback/close",
+    "Only catalog wait/blocker metadata, never authority rows writes; raw SQL/PIDs/values/IDs immediately discarded and fixed enum numeric output only",
+    "Truncation/overflow/failure/unexpectedmatching invalidates attribution; multiple matching backends unclassified, no guessed exactclaimPID",
+    "Preserve1sdeadline/cadence/2srevocation/TRACE/originalcalls/26 bodies; diagnostic overhead not acceptance"
+  ],
+  "limits": "Same-database snapshot can establish observed blockers/waits, not exclusive originalclaim attribution without PID binding. No structural fix authorized from source alone.",
+  "next": "Exact applied source review before coordinator compile/run; D isolatedC4 snapshot remains immutable"
+}

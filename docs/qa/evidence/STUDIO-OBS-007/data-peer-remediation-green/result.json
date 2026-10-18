@@ -1,0 +1,112 @@
+{
+  "story": "STUDIO-OBS-007",
+  "owner": "Dara implementation support",
+  "session": 61021,
+  "exitCode": 0,
+  "duration": "1m14s",
+  "command": "./gradlew --init-script /tmp/obs007-data-format.gradle spotlessJavaApply test --tests '*SecretUseAuditIT' --tests '*GuidedSecretLoginMigrationTest' --tests '*SecretAuditLifecycleIT'",
+  "workingDirectory": "backend",
+  "scopedFormat": "scoped-format.gradle targets only three Dara-owned Java files",
+  "classes": [
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-10-10T07:18:22",
+      "sha256": "d51dfe506b0141c00717fdc2198a2d2aae3d9329a5dca503337cb7c67558303e",
+      "testNames": [
+        "concurrentRetryRefreshersHaveExactlyOneWinner()",
+        "definiteRefusalAllowsOnlyOneOwnedFreshAttemptAndKeepsAcceptedIdentities()",
+        "freshAndBothStagedCutoverOrdersReachV34WithoutChangingOrdinaryCapability()",
+        "scopedReleaseUsageRetryAndAppendOnlyRowsNeverContainTheCanary()",
+        "exactV3ProfileAccountFreeScopeAndObservationCountsAreClosed()",
+        "crossMonthUsageAndLiveRecheckExpireWithReleaseWhileUnlinkedUsageKeepsOwnMonth()",
+        "unreachedDeclaringSummaryCannotRepeatWithCallerOrdinalSequenceOrClock()",
+        "consumedAckLossIsEvidenceBoundAndMissingMaterializationCannotBecomeUnused()",
+        "unreachedNotUsedHasNoFabricatedResolutionAndRejectsOtherNullableVariants()",
+        "ordinaryReplayReleaseRequiresAcceptedDeclarationAndAuthenticAttempt()",
+        "realNoSendOutageDecisionGrantsDifferentAuthorityAndCannotBeFabricated()",
+        "guardsFailLoudlyOnAwaitingAuthOrObservedBindingRows()",
+        "additiveStoredSecretLengthCodeKeepsEveryPriorTerminalValueAndRefusesUnknown()",
+        "liveRecheckIsUniqueAndPreservesOneTerminalUsageAndWriteOnceRevocation()",
+        "ordinaryWriterCannotAlterOrDropRetentionPartitions()",
+        "consumedNoDecisionRequiresAuthenticAdmissionAndKeepsNullResolutionHonest()",
+        "rawConcurrentConsumedUncertaintyHasOneWinnerAcrossRetentionClock()",
+        "concurrentUsageSummariesHaveExactlyOneWinner()",
+        "replayUsageUsesClosedCodesAndTheActualExecutionScope()",
+        "releasedReplayUncertaintyRequiresRealScopedReleaseAndNeverFakeAckStatus()"
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-10-10T07:17:54",
+      "sha256": "2209cd34842d250ab384123b892e689641b0d4193c373848b5d7f7367aa447f6",
+      "testNames": [
+        "concurrentConsumedUnknownWritersAreIdempotentAndCannotInventTwoSummaries()",
+        "ordinaryGuidedReleaseRequiresConsumedDeclarationMaterializationAndFence()",
+        "leastWriterCanRecordUsageButCannotRewriteOrPrunePartitions()",
+        "concurrentDuplicateWritersProduceOneRelease()",
+        "consumedWithoutDecisionIsHonestUnlinkedUncertaintyNeverUnreached()",
+        "committedResolutionCannotBeRelabelledNoDecisionAndLateUnknownPreservesPositive()",
+        "actualJavaBootstrapHealthSchedulerAndPrunerManageAuditLifecycle()",
+        "mixedKnownAndUnknownReplayUsageKeepsSparseWireSeparateAndRejectsAckWithoutEvidence()",
+        "rawAndRecorderWritersShareOwnerThenEventOrderWithoutDeadlock()",
+        "terminalNoDecisionCannotAcquireContradictoryLateRelease()",
+        "releaseUsageAndRevocationAreIdempotentImmutableScopedMetadata()",
+        "unreachedDeclarationHasOnlyOneTerminalNotUsedWithoutRelease()",
+        "auditAndDispatchStateCommitOrRollbackTogetherAndRequireTransaction()",
+        "consumedScopeRequiresActualAdmissionDeclarationFenceAndAckLossEvidence()"
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.SecretAuditLifecycleIT",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "timestamp": "2026-10-10T07:18:52",
+      "sha256": "bf47565d5cf774c40c15a5a67f221a8ba6914adf12665065b43177a6ad45d341",
+      "testNames": [
+        "actualZeroSendOutageDecisionRetainsDistinctRetryAuthorityAndRefusedUsage()",
+        "existingPositiveUsageSurvivesLaterTerminalOwnerUncertainty()",
+        "actualReaperCloseWritesOneUnknownSummaryWithoutInventingChildEffects()",
+        "authoritativeNoAdmissionRefusalSettlesExactAttemptBeforeRetry()",
+        "terminalHistoryLedgerAndUnknownAuditRollbackTogether()"
+      ]
+    }
+  ],
+  "database": "Actual Testcontainers PostgreSQL15-alpine",
+  "sourceManifest": "source-hashes.json",
+  "original29InventoryRetained": true,
+  "missingOriginalCases": [],
+  "preservedHistoricalMigrations": 33,
+  "allHistoricalBytesMatchHEAD": true,
+  "priorRed": [
+    "../data-peer-remediation-red",
+    "../data-peer-remediation-red-2"
+  ],
+  "limits": "SQL/authentic retained lineage/recorder/mixed locks/partition/5 B lifecycle cases only. No actual Vault/model/Chromium/crash/parent-relay or whole-story acceptance proof.",
+  "findings": {
+    "DB-PEER-01": "Duplicate declaring summary ordinal/sequence/clock evasion refused; absent actual action ordinal authenticity remains OPEN requiring exact source-reference/null-coordinate design ruling.",
+    "DB-PEER-02": "Implementation candidate: ordinary guided/replay RELEASE requires authentic declaration/materialization/admission/current owner attempt or real claimed zero-send decision lineage; negative oracles passed; independent re-review required.",
+    "DB-PEER-03": "B-owned caller atomicity outside Dara remediation; five selected B lifecycle cases green, not full dispatcher failure/race certification.",
+    "DB-PEER-04": "Implementation candidate: owner row\u2192owner advisory\u2192event advisory in Java/rawSQL; bounded controlled raw/recorder race green; independent re-review required."
+  },
+  "pending": [
+    "DB-PEER01 exact absence identity Aria/PO ruling",
+    "Ordinary replay partial-resolution unattempted summary Aria/PO ruling",
+    "Independent data re-review",
+    "B atomic dispatcher failure/race tests and full joined runtime oracles",
+    "Direct leaf TRUNCATE/future privileges and deployment role mapping proof from peer I05/I06 remain outside this scoped remediation"
+  ],
+  "totalTests": 39,
+  "totalFailures": 0,
+  "totalErrors": 0,
+  "totalSkipped": 0
+}

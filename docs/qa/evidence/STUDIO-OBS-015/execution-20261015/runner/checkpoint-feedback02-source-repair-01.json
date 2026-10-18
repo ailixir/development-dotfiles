@@ -1,0 +1,282 @@
+{
+  "artifact": "Runner015 owned feedback02 source repair checkpoint",
+  "at": "2026-10-15T07:48:56.838783+00:00",
+  "owner": "/root/runner015_resume",
+  "status": "ATOMIC_SOURCE_HOLD_RETURNING_SLOT_FOR_DATA_V18",
+  "sourceReadiness": "OWNED_REPAIRS_TYPE_LINT_GREEN_CANONICAL_DEPENDENCIES_AND_EXECUTION_PENDING",
+  "authority": "Root source-only owned runtime/test-helper repairs, followed by explicit atomic HOLD scheduling message. No tests/build/native/dist/DB/Gradle/generation run in this repair window.",
+  "storyScope": "All originalR1-R6/86acceptance/24reviewed05facets/native/joined/media/OBS007/013/014 remain mandatory. No lifecycle verdict.",
+  "preservedExecutionHistory": [
+    "runner/unit-feedback-attempt01-receipt.json",
+    "runner/build-feedback-attempt01-receipt.json",
+    "runner/build-unit-feedback-attempt02-receipt.json",
+    "execution/*runner-unit-feedback-attempt01*",
+    "execution/*runner-build-feedback-attempt01*",
+    "execution/*runner-build-feedback-attempt02*",
+    "execution/*runner-unit-feedback-attempt02*"
+  ],
+  "quinnCurrentVectorPlan": {
+    "manifest": "contracts/current-vector-preservation-plan/qa-design/manifest.json",
+    "sha256": "7abb78c79cd52658d4c5ba9b06ccf326fb7aca17d7b9ff1c8494ff4683617f8d",
+    "verdict": "READY_PLAN_ONLY; C-int owns actual canonical/control/choice/head/observation data unit; runner did not install data"
+  },
+  "sourceRepairs": [
+    {
+      "area": "Actual guided schema bundle",
+      "details": "Inventory all definitions and enforce closure/reference/keyword/format checks, then reject cycles only through refs and same-instance applicators/dependencies. Structural child traversal consumes an instance edge; definitions inventory is not evaluation. Seed nonprogress audit from every visited schema. Refuse permissive empty additionalProperties schema per inherited audit. Raw validate preflight preserves64depth and1Mnode ceiling before canonical recursion.",
+      "testSources": [
+        "test/guided/schemaAudit.test.ts actualbundle/declaration/nonprogress/unuseddeclaration/datarecursion",
+        "test/schemaSemantics.test.ts all15prior cases byte-unchanged"
+      ]
+    },
+    {
+      "area": "ARCH05 actual failed security negatives",
+      "details": "Require accepted Launch build schemaBundleHash equal current installed OBSERVED_SCHEMA_BUNDLE_HASH. Validate every sourceSpan recipe hash equals admitted artifact.sourceHash and each input recipe is actually referenced by effective actions; exact existing Launch/artifact/projection/scope/run/config checks and independent caps remain. No public retained-set/trust-flag interface.",
+      "testSources": [
+        "test/retainedExecute.test.ts existing50frozen cases + explicit coherent crossed-schema/foreign-recipe/unused-recipe negatives",
+        "test/run/observedChildRuntime.test.ts prior actualparent/child currentlaunch/repeatedrevision/Ready/secret sources preserved"
+      ]
+    },
+    {
+      "area": "Test-only aggregate reference reader",
+      "details": "Strict finite general-JSON reader for inert docs supports100.5/exponents/negativezero as exact test data; retains fatalUTF8/duplicatekeys/lonesurrogate/BOM/trailinggrammar/depth64/4Maggregate nodes/byte bound and own-property prototype safety. OpenAPI external allowlist32MiBaggregate/8MiBschemas unchanged. No production parser or integer rules changed.",
+      "testSources": [
+        "test/documentJson.test.ts numeric distinction + malformed/duplicate/UTF8/Unicode/depth/bytes/prototype cases",
+        "test/helpers/openapi.ts actual allowlisted reference resolution path"
+      ]
+    },
+    {
+      "area": "Positive secret prewrite usage",
+      "details": "Actual prepared adapter preserves PasswordNoEffect.noEffect for usage even if native fence is already INVOKING. Fence never rolls back and runtime drift still requires !nativeStarted. Direct retained secret test now exercises real performPreparedObservedAction with declared browser-free private ports/withholding instead of an incomplete fake adapter.",
+      "testSources": [
+        "test/run/observedPreparedAdapter.test.ts positive-prewrite versus uncertain postcall; INVOKING remains true/no repeat",
+        "test/retainedExecute.test.ts actual prepared adapter secret withholding/canary result assertion",
+        "existing007secret/runtime/lifecycle oracles unchanged"
+      ]
+    },
+    {
+      "area": "Owned factories and canonical-dependent selectors",
+      "details": "Strict typed test-document facade reads exact canonical bytes without auto-normalization or new facts. Explicit stale-build test deltas are created after current baseline checks instead of assuming canonical fixture stays historical. Config-map selects exact future controlValueReferenceUsedConfiguration and verifies full positive derivation before mutation. Original19basis mutations remain; same19 now apply to control world after validated positive parent;12catalog mutation names are exercised against declared control/used-config parents without changing their names or vectors.",
+      "testSources": [
+        "test/helpers/publicationFixture.ts mutable adversarial document types, no serialized schema additions",
+        "test/observedReplayValidation.test.ts shared19mutations + used-config selector + control subtype",
+        "test/controlReferencePreservation.test.ts all12declared names and5operation textarea/controlValue semantics",
+        "test/server/observedReplayRoutes.test.ts explicit stale exact bundle HTTP400",
+        "test/server/observedReplayAuthorization.test.ts valid baseline then coherent unsupported build mutation"
+      ]
+    }
+  ],
+  "schemaSemanticsSourceUnchanged": true,
+  "checks": [
+    {
+      "command": "npm run type-check",
+      "log": "type-feedback02-repair-07.log",
+      "exitCode": 0,
+      "scope": "whole runner source/tests; no emit"
+    },
+    {
+      "command": "15owned-path scoped ESLint",
+      "log": "lint-feedback02-repair-07.log",
+      "exitCode": 0,
+      "scope": "read-only; no fix/format"
+    }
+  ],
+  "testExecutionSinceSourceRepairs": {
+    "unit": 0,
+    "build": 0,
+    "native": 0,
+    "coverage": "NOT_RUN",
+    "dist": "untouched by runner; remains prior built f707cb60 snapshot, now behind source"
+  },
+  "priorFailureGroupStatus": [
+    {
+      "id": "JOB_EFFECTIVE_INPUT_PAYLOAD_CASCADE",
+      "priorActualFailures": 141,
+      "owner": "C-int authoritative core job fixture plus runner test scenario preservation",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "CANONICAL_HANDOFF_OR_SCENARIO_PENDING_NOT_WAIVED"
+    },
+    {
+      "id": "HISTORICAL_BUILD_TEST_NOW_CURRENT",
+      "priorActualFailures": 1,
+      "owner": "runner nonpin test",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "OWNED_SOURCE_REPAIR_WRITTEN_NOT_RUN"
+    },
+    {
+      "id": "ORIGINAL_CHOICE_INPUT_VERSION_IDENTITY",
+      "priorActualFailures": 39,
+      "owner": "C-int full witness authority + runner historical witness join review",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "CANONICAL_HANDOFF_OR_SCENARIO_PENDING_NOT_WAIVED"
+    },
+    {
+      "id": "KNOWN_CONTROL_REFERENCE_INCOMPLETE",
+      "priorActualFailures": 1,
+      "owner": "C-int/root authority needed",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "CANONICAL_HANDOFF_OR_SCENARIO_PENDING_NOT_WAIVED"
+    },
+    {
+      "id": "CONFIG_REFERENCE_TEST_SCENARIO_REMOVED_BY_EFFECTIVE_PROJECTION",
+      "priorActualFailures": 1,
+      "owner": "runner test scenario with C-int canonical authority",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "EXACT_DECLARED_COMPANION_SELECTOR_SOURCE_WRITTEN_DATA_PENDING"
+    },
+    {
+      "id": "FIRST_SUFFIX_ACCEPTANCE_HEAD_CONTRADICTION",
+      "priorActualFailures": 8,
+      "owner": "C-int full publication fixture chronology + runner join review",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "CANONICAL_HANDOFF_OR_SCENARIO_PENDING_NOT_WAIVED"
+    },
+    {
+      "id": "GRAPH_OBSERVATION_INVENTORY",
+      "priorActualFailures": 4,
+      "owner": "runner full basis accounting + C-int graph-world authority",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "CANONICAL_HANDOFF_OR_SCENARIO_PENDING_NOT_WAIVED"
+    },
+    {
+      "id": "ORIGINAL_ORDINARY_EFFECTIVE_VS_RAW_INPUTS",
+      "priorActualFailures": 1,
+      "owner": "runner effective filter + C-int original basis authority",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "CANONICAL_HANDOFF_OR_SCENARIO_PENDING_NOT_WAIVED"
+    },
+    {
+      "id": "APPENDED_BOOTSTRAP_ORIGINAL_HASH",
+      "priorActualFailures": 1,
+      "owner": "C-int historical basis fixture + runner exact issued context joins",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "CANONICAL_HANDOFF_OR_SCENARIO_PENDING_NOT_WAIVED"
+    },
+    {
+      "id": "AGGREGATE_TEST_PARSER_FRACTIONAL_TIMING",
+      "priorActualFailures": 1,
+      "owner": "runner test-only external reference helper",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "OWNED_SOURCE_REPAIR_WRITTEN_NOT_RUN"
+    },
+    {
+      "id": "EXECUTOR_FAKE_ADAPTER_SECRET_WITHHOLD_CONTRACT",
+      "priorActualFailures": 1,
+      "owner": "runner owned retained executor test seam",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "OWNED_SOURCE_REPAIR_WRITTEN_NOT_RUN"
+    },
+    {
+      "id": "ARCH05_CURRENT_SCHEMA_BUILD_CROSSED_ACCEPTED",
+      "priorActualFailures": 1,
+      "owner": "runner production proof validation",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "OWNED_SOURCE_REPAIR_WRITTEN_NOT_RUN"
+    },
+    {
+      "id": "ARCH05_FOREIGN_SOURCE_RECIPE_ACCEPTED",
+      "priorActualFailures": 1,
+      "owner": "runner artifact/proof local validation",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "OWNED_SOURCE_REPAIR_WRITTEN_NOT_RUN"
+    },
+    {
+      "id": "SECRET_POSITIVE_PREWRITE_USAGE_REGRESSION",
+      "priorActualFailures": 1,
+      "owner": "runner adapter/executor OBS007 regression",
+      "feedbackPreserved": true,
+      "actualReexecutionSinceRepair": false,
+      "repairStatus": "OWNED_SOURCE_REPAIR_WRITTEN_NOT_RUN"
+    }
+  ],
+  "originalFailedLoadStatus": {
+    "priorActualLoadFailures": 9,
+    "sourceRepairWritten": true,
+    "actualCurrentBundleRuntimeImport": "NOT_RUN_NO_PASS_CREDIT"
+  },
+  "remainingExplicitItems": [
+    "C-int must install exact Quinn declared control/control-used-config/choice/job/head/appended/graph-observation canonical parents and all regenerated dependent mutants; schemas/generated/pins/raw-model bytes remain their ownership. Runner made no canonical or packaged vector edit.",
+    "Used-configuration companion selector and new control preservation tests intentionally fail if that exact complete declared object is absent; no synthetic missing facts are supplied by runner.",
+    "Before any independent negative credit, remaining factory baseline guards must be completed after canonical handoff: currentJob should assert fully coherent positive before every adversarial swap; all observed-choice mutator factories should assert valid full original parent before mutation, not just rely on a separate positive test. Existing coherent-reseal group already asserts its parent. These source items remain assigned to runner for resume.",
+    "Quinn exact observation rule preserved: unanchored d913generation3 must reject; issued-prefix6fc observation must remain. No broad unused-observation allowance, raw evidence deletion or receipt substitution. C-int owns vector correction and new distinct unanchored negative.",
+    "Full default unit normalcoverage actualrerun remains required on final held source; prior1444pass/202fail/45skips with9loads is failed immutable evidence. No new pass/coverage credit from source checks.",
+    "Actual native same-browser/session, policy/secret/assertion/drift/no-repeat, continuous playable video/default consent, backendHTTP+PG15+worker/Chromium and ordinary replay remain separate mandatory windows. Synthetic whole-artifact admissions/ports are not historical/native authority.",
+    "All24reviewed05facets/originalsixincrements/86acceptance remain open until their prescribed actual tiers and independent review. No source count or control fixture declaration closes a case."
+  ],
+  "runnableMappings": {
+    "fullUnit": "Root captured run-runner.py full ./node_modules/.bin/vitest run with unchanged configured coverage after exact authorized build; no selective easier run proposed as acceptance",
+    "repairSourceSuites": [
+      "test/guided/schemaAudit.test.ts",
+      "test/schemaSemantics.test.ts",
+      "test/documentJson.test.ts",
+      "test/retainedExecute.test.ts",
+      "test/run/observedPreparedAdapter.test.ts",
+      "test/run/observedChildRuntime.test.ts",
+      "test/observedReplayValidation.test.ts",
+      "test/controlReferencePreservation.test.ts",
+      "test/server/observedReplayRoutes.test.ts",
+      "test/server/observedReplayAuthorization.test.ts"
+    ],
+    "allSixAnd24FacetMapping": "Inherited exact mapping remains in checkpoint-repaired-arch05-source-01.json and actual failure/coverage qualifications in build-unit-feedback-attempt02-receipt.json. This checkpoint adds repairs, never replaces prescribed tier/source obligations."
+  },
+  "changedFiles": {
+    "studio-runner/evaluation/observed-authoring/cases/incremental-edit-step-4.json": "f04e70016563076decb46292ce0f18d6a819d488f94212bb2bdb11d4f6546b4a",
+    "studio-runner/evaluation/observed-authoring/cases/incremental-insert-step.json": "9a1831f52911dbddc8d7dc1575c7b6e22480b00098b11bea51b6f94f0bfabbc1",
+    "studio-runner/src/executor/observedReplay.ts": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+    "studio-runner/src/guided/contracts.ts": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+    "studio-runner/src/guided/evidence.ts": "03afea081e543fc920d2e8012b85951bde9ffd737eb5ba858af959c006340279",
+    "studio-runner/src/guided/journal.ts": "15da758e2e287926a7d404926323791ab3e1f72931bc3c4cb1741de8de9d86dd",
+    "studio-runner/src/guided/ownership.ts": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf",
+    "studio-runner/src/guided/runtime.ts": "299d0c46d676644a56d6058205f0032ee6dd62c4b7765888cb5ea55c5383796f",
+    "studio-runner/src/guided/transport.ts": "1e8627c5668ce8834bbc779002779b170d784bd6af5782aea763840e786424aa",
+    "studio-runner/src/run/childRuntime.ts": "0eb0c88a0d4a98b716fcc4dc0a070f5c2f0df028e4f6e668ca9ee0cd8526dd02",
+    "studio-runner/src/run/launcher.ts": "0dfeb39a76c046dd1df4b1b9df0cec238aa57c0c7b067b8824368ffc075e9fd7",
+    "studio-runner/src/run/loginRequired.ts": "f46ef274506a4e9ec51df04e081c2e321f1b1088e22a2732751845fe2b001b27",
+    "studio-runner/src/run/observedReplayAdapter.ts": "aa0036d2d6df0d761f7a6f66f3823fba495a6f91bbe0c410de05a38dd4165dba",
+    "studio-runner/src/run/protocol.ts": "46e23a90e8c6e64a7fa94e68bcff02c9b9f51254f2fb3180ae4065deef682fb8",
+    "studio-runner/src/validator/observedHistory.ts": "21f41c3451f3158e458d5965cb50c43a47dd60bfface405f3028a4ffef7eb2d2",
+    "studio-runner/src/validator/observedReferencePolicy.ts": "e6a2565b31ebb7339cc0ed15f9e9d8532d3c473f65709491129f6059108aebdb",
+    "studio-runner/src/validator/observedReplay.ts": "875da7952c8fb1ece09fdad48ffca822861dfe6cb742694f924995c98e5675df",
+    "studio-runner/src/validator/observedSnapshots.ts": "a8a53dedfa041aa9a671e1e03361fee5572cdfa9bc3abca91b5d53e160332928",
+    "studio-runner/test/controlReferencePreservation.test.ts": "bbb428aab8cbb49539e5304f72645eb5d7e14f3f39525876e9bd9c39126c96f0",
+    "studio-runner/test/documentJson.test.ts": "0ec384914250541f410c9e0a63ddacd3ce12257aa6fe7ab06019a25db27de393",
+    "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "f5b613f5486b43a70c043b01a801f4ec8590bd8db2cd3ace8bf5510ca8fed685",
+    "studio-runner/test/fixtures-tier/guided-recording.test.ts": "3522915df575e7a0e98e71e74728545bdcb96fcf9b48b3178762c2ab5cc23574",
+    "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "10d97ab585a5af13a69b128a231eab0c6fd5e18780aec17cb3abcb803f752fd6",
+    "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts": "d1d524272fba634063ec6cf9491b6e14179f8d66dbc53898cffb47c2a84a6186",
+    "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts": "d6af50904a1a3187ae5b9b49478dd4232b28cf0b44e97807db765609876194d8",
+    "studio-runner/test/fixtures-tier/guided-wire.test.ts": "082e00e6de1af226c2d20a907cf28da0d9a70c49844c483ed06f1e75641b3a8f",
+    "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts": "f974ba2c570fd025f039dfd7af77a537dc8efbdc77b30bfae531d176f7384c1e",
+    "studio-runner/test/fixtures-tier/secret-login.test.ts": "3edd5a500b3b9628b15f29fad5d6815bfa3d0fb64c80cdcc5b003d8895a4f322",
+    "studio-runner/test/fixtures/guided-dataflow/server.ts": "7b226210744c0531acace3309fdf661098c1455531e31ff4d0323faee35586eb",
+    "studio-runner/test/guided/incrementalRuntime.test.ts": "121b3fd091fb2c44e183b84c8c774db4dc78e659e5d2df3c5158a5e88ae7db7c",
+    "studio-runner/test/guided/runtime.test.ts": "13fc6c777789e54cff437a97fbc2cbc0094e492168ed7507c032afde99a21253",
+    "studio-runner/test/guided/schemaAudit.test.ts": "c37d834a4956e379d289951e50365ac654c2f004c9df8b40bdef7e22de2e2f39",
+    "studio-runner/test/helpers/documentJson.ts": "64f14fe565fdc562467781b85930025f61c0ee4a9a3ace3614dd769e1535a225",
+    "studio-runner/test/helpers/guided.ts": "af3c5687dcf62682253a58a2564177b507cfc0f61e57ee600cd81fda5255dc4d",
+    "studio-runner/test/helpers/openapi.ts": "e15c3b8295d0b30c5b2f0422121e8cd197af7ac6c9ca9fc882ac1f8fa533917d",
+    "studio-runner/test/helpers/publicationFixture.ts": "f9bf4c3afe0424275aecf1c256cb2528b99603e8655a68a89b4018f1d53e9773",
+    "studio-runner/test/helpers/retainedReplay.ts": "0ef0ebb4619283dc189361586f32f5c345857c2f28bb3112a16195bc2cd9d0ac",
+    "studio-runner/test/observedIncrementalValidation.test.ts": "be4dcb0e6f39c99e4ce4ec4691cc5b972b6c8469c1e8f7f0c229c416731437b8",
+    "studio-runner/test/retainedExecute.test.ts": "72c55adc93e466a58116e7726fec4e8f5c3b0ba862fdfc895b3f549857585342",
+    "studio-runner/test/run/observedChildRuntime.test.ts": "d9fa80ce843238f949fee1509dc339515e70b3b17887d378aacda47bf7a43916",
+    "studio-runner/test/run/observedPreparedAdapter.test.ts": "3d5076e153008c06bc63418c4e2ddfdbf6cb6ff664863cd937b020a8861c5d88",
+    "studio-runner/test/schemaSemantics.test.ts": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb",
+    "studio-runner/test/server/observedReplayAuthorization.test.ts": "d0f5ab245f33ac1d05c11b0dd5fcb06a621c25696842d6ef6216b2e589848a68",
+    "studio-runner/test/server/observedReplayRoutes.test.ts": "4ddc7d9bf32b2312e0c99bd778cbff17ee4b0d610cf696a4369e3bbab706d288"
+  },
+  "hold": "All owned source/test writes now atomically HELD and slot returned. No commands, test/build/native/source edits after this receipt until root explicit release."
+}

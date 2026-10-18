@@ -1,0 +1,512 @@
+{
+  "scope": "ONE_OPTIONAL_FAMILY10_CALLER_DIAGNOSTIC_NOT_ACCEPTANCE",
+  "firstProjectFrames": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.awaitFinalizing(GuidedPublicationReplayIT.java:14077)",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel(GuidedPublicationReplayIT.java:3677)"
+  ],
+  "fixedHttpCodeIfReached": [],
+  "httpStatusIfReached": [
+    {
+      "expected": [],
+      "actual": []
+    }
+  ],
+  "failedState": {
+    "state": "FAILED",
+    "errorCode": "OTHER",
+    "bootstrapPhase": "READY",
+    "materializationPresent": true,
+    "fixtureModelHttpCalls": 7,
+    "fixturePhysicalProviderReads": 1,
+    "fixtureProviderFailures": 0,
+    "fixtureModelKinds": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 6,
+      "VERIFY_STEP": 0
+    }
+  },
+  "claimServerFixed": [
+    {
+      "status": 202,
+      "handlerNanos": 12514708,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 9081875,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 716390917,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 862808291,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 131426583,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 542941166,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 778074125,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 494095875,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 124625625,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 439023250,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 296074709,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 551732750,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 305982375,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 725892042,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 791995917,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 123544000,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 142077292,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 536206458,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 124030666,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 565542250,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 165827958,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 986618750,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 123671625,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 121454208,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 612201292,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 142323708,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 563493959,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 178472583,
+      "consumed": true
+    },
+    {
+      "status": 202,
+      "handlerNanos": 1008572542,
+      "consumed": true
+    }
+  ],
+  "lifecycleFixed": [
+    {
+      "status": 202,
+      "kind": "RUNTIME",
+      "reason": "LEASE_LOST",
+      "consumed": true
+    }
+  ],
+  "numericEvidence": {
+    "mappedAppenders": 1,
+    "rootEvents": null,
+    "appEvents": null,
+    "eventCountsStatus": "SUPPORT_UNOBSERVED",
+    "logCoverage": "STREAMED_ORIGINAL_ENCODED_OUTPUT",
+    "encodedBytes": 142199165,
+    "encodedWriteCalls": 69888,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsCollected": true,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 30,
+    "patternBytes": 3308,
+    "rootTraceObserved": true,
+    "appTraceObserved": true,
+    "httpBodies": 1,
+    "httpErrors": 0,
+    "jsonBodies": 1,
+    "problemBodies": 0,
+    "sseStreams": 0,
+    "metricBytes": 82004,
+    "cacheEntries": 2,
+    "cacheNonemptyRequired": true,
+    "cacheProduced": true,
+    "cacheUnproducedOutsideFilterRoutes": false,
+    "profileFiles": 171,
+    "knownRootLinks": 4,
+    "externalLinkTargetBytesScanned": false,
+    "c4WindowsExecuted": false,
+    "traceFromStart": false,
+    "traceArmed": true,
+    "claimSamplerStatus": 2,
+    "claimSamplerJoined": true,
+    "claimSamplerCleanupConfirmed": true,
+    "claimSamplerDiagnosticOnly": true,
+    "claimSamplerCycles": 1130,
+    "claimSamplerEmpty": 0,
+    "claimSamplerUnattributed": 2,
+    "claimSamplerCounts": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        338,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        105,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        5,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "pgSnapshotStatus": 2,
+    "pgSnapshotJoined": true,
+    "pgSnapshotExactClaimAttribution": true,
+    "pgSnapshotRows": 2,
+    "pgSnapshotCandidates": 1,
+    "pgSnapshotBlockers": 1,
+    "pgSnapshotStageWaitCounts": [
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "pgSnapshotBlockerStageCounts": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "pgSnapshotRelationCounts": [
+      2,
+      1,
+      0
+    ],
+    "pgSnapshotWaitEventCounts": [
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ]
+  },
+  "SQL0to6": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1
+  ],
+  "source7to12": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "translation13to19": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "method20to28": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "method29to39": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "partitionsNonadditive": true,
+  "bothSourceClassMetadataBindingsValidPostRun": true,
+  "exclusiveCost": "UNOBSERVED",
+  "guardCompletionNotClaimed": true,
+  "acceptanceCredit": false,
+  "repeatPlanned": false
+}

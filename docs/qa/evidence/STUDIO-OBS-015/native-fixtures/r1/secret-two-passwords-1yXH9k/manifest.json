@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+  "caseName": "secret-two-passwords",
+  "evidenceId": "b445df9c-4edf-411d-adf4-b075b4ac99b5",
+  "assertionPhaseStatus": "COMPLETED_NOT_FINAL_TEST_VERDICT",
+  "exportStatus": "VERIFIED_EXPORT",
+  "privateRecoveryDirectory": "secret-prefix-native-CLHFSq",
+  "commitments": {},
+  "records": [
+    {
+      "role": "secret-prefix",
+      "sessionId": "b99e0014-ca97-4cac-ba9e-65c5b4e6e630",
+      "contextId": "b14e90c6-08ed-4a8e-928d-74bf62416e41",
+      "contextRevision": 1,
+      "recordingId": "1c2d27ad-cbe5-430c-a7cf-187ea59519bf",
+      "state": "STORED",
+      "partial": false,
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000801",
+          "admissionId": "e3298015-9c9b-4577-a98a-34a814912dfc",
+          "ordinal": 0,
+          "startMs": 16,
+          "endMs": 30
+        }
+      ]
+    }
+  ],
+  "phases": [
+    {
+      "role": "secret-prefix",
+      "media": "REGISTERED",
+      "seekFrames": "NOT_REACHED"
+    }
+  ],
+  "files": [
+    {
+      "role": "secret-prefix",
+      "state": "COPIED_VERIFIED",
+      "path": "secret-prefix.webm",
+      "byteLength": 8613,
+      "sha256": "b510c504bbc4315baeeaef377a951d7050890ee63744efec649e1cc01d411649",
+      "privacy": "VERIFIED_MASKED",
+      "checks": {
+        "assertions": "PASSED",
+        "decoder": "NOT_REACHED",
+        "seek": "NOT_REACHED"
+      }
+    }
+  ],
+  "cleanupAllowed": true
+}

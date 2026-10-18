@@ -1,0 +1,19 @@
+  @Test
+  void concurrentSameAndNewKeysHaveOneRealDispatch() throws Exception {
+    String id = prepareSession();
+    dispatch.pushContext(controller, id, 1);
+    JsonNode ledger = admit(id, navigation(id));
+    ObjectNode request = advanceRequest(id, ledger);
+    var results =
+        race(
+            () -> dispatch.dispatch(controller, id, 1, "same", request),
+            () -> dispatch.dispatch(controller, id, 1, "same", request),
+            () -> dispatch.dispatch(controller, id, 1, "other", request));
+    assertThat(results).hasSize(3);
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_commands WHERE route='v2-consume'",
+                Integer.class))
+        .isEqualTo(2);
+  }

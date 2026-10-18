@@ -1,0 +1,22 @@
+--- studio-runner/src/run/observedReplayAdapter.ts@before
++++ studio-runner/src/run/observedReplayAdapter.ts@after
+@@ -101,7 +101,18 @@
+                 if (guard.target.kind !== 'initialBlank') {
+                     const settle = control.reserveObservation(additional); const collected = await observations.observe(); control.check(); guardLive(); settle(collected.bytes); observation = collected.observation; loginSignature = loginRequiredSignature(observation);
+                 }
+-                const prepared = await prepareObservedAction(handle, observations, action, guard, observation, { documentId: 'ordinary-blank', generation: 0 });
++                let prepared: ObservedPreparation;
++                try { prepared = await prepareObservedAction(handle, observations, action, guard, observation, { documentId: 'ordinary-blank', generation: 0 }); }
++                catch (error) {
++                    // A rejected preparation cannot restore cancelled, expired or withdrawn authority.
++                    control.check(); guardLive();
++                    if (error instanceof PasswordNoEffect && control.phase === 'PREPARING' && guard.target.kind === 'passwordControl' && action.operation.kind === 'fill' && action.operation.value.kind === 'secretRef') {
++                        if (error.message === 'PASSWORD_TARGET_ABSENT') throw new ObservedRefusal('POLICY_REFUSED', 'PASSWORD_TARGET_ABSENT', true);
++                        if (error.message === 'PASSWORD_TARGET_AMBIGUOUS') throw new ObservedRefusal('POLICY_REFUSED', 'PASSWORD_TARGET_AMBIGUOUS', true);
++                        if (error.message === 'TARGET_CHANGED') throw new ObservedRefusal('TARGET_DRIFT', 'TARGET_CHANGED', true);
++                    }
++                    throw error;
++                }
+                 control.check(); guardLive();
+                 if (prepared.kind === 'WAIT') { additional = true; continue; }
+                 return performPreparedObservedAction(handle, observations, action, guard, prepared.target, value, control, secret, waitStrategy, timeoutMs);

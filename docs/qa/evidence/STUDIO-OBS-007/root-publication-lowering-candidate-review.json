@@ -1,0 +1,41 @@
+{
+  "result": "GO_SOURCE_ONLY_PENDING_COMPONENT_TEST_SCOPE",
+  "authorReceiptSha256": "cb93dc11055223aa3de1b31f8803f4fdc8f8dfad0c01bf5bb328bc036b13774e",
+  "checks": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": {
+      "base": true,
+      "candidate": true,
+      "liveBase": true,
+      "wholeInverse": true
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java": {
+      "base": true,
+      "candidate": true,
+      "liveBase": true,
+      "wholeInverse": true
+    },
+    "docs/specs/studio-observed-authoring/secret-login-design.md": {
+      "base": true,
+      "candidate": true,
+      "liveBase": true,
+      "appendOnly": true
+    }
+  },
+  "productionProof": {
+    "wholeProductionInverse": true,
+    "originalGuardInBase": true,
+    "guardTwiceInCandidate": true,
+    "originalPrefix": true,
+    "originalClaimAndCommitFlow": true
+  },
+  "semanticReview": [
+    "Samepublisher privateowned completebasis/profile/build cuts + fullclass/shape/JSON/repr match; separatelowerer argumentcopies.",
+    "Originalfreshguards/pins order andoriginalfreshidentity/deadline/reserve/claim/validation/Core/commit/refusal flow byteexact.",
+    "Only optionalRuntime failures unavailable; originalfallback lower outsidecatch; Error early explicit.",
+    "Extra captureTX adds policy/CoremayUse/currentManifest reads as well as evidence/basis/pin checks; no performance/override-equivalence claim.",
+    "ExistingLowerer vector checks independentartifact +ownedcopy/nonmutation only; no Publisherbranch/rollback credit."
+  ],
+  "testGap": "Compactpubliccomponent adapter proposed, unimplemented; sourceGO is notintegration/QA approval.",
+  "runtime": "NOT_RUN",
+  "lifecycle": "No advancement"
+}

@@ -1,0 +1,14 @@
+{
+  "status": "FROZEN_ISOLATED_SOURCE_ONLY_FOR_ROOT_REVIEW",
+  "parentDesignSha256": "2db6bfaf58203ee273c8ac279d857a84ba21e6ab16cab7f7130a54baa4535cdd",
+  "baseSha256": "a3f2344499d0936bb7ab43e4a679cc2f9aa8fe5590fbfd58179d4213796c39fa",
+  "candidateSha256": "553f363f2e454c128fef350cd5092e945cca3fb62d0e6be70412d5435b4410fd",
+  "patchSha256": "9ec5e20e7546115d47cb8cc76e1a6f2683dc9e47aa45bb1884d6f40eb01c6406",
+  "inverseSha256": "a3f2344499d0936bb7ab43e4a679cc2f9aa8fe5590fbfd58179d4213796c39fa",
+  "wholeInverseExact": true,
+  "liveBaseUnchanged": true,
+  "scope": "Only validateRenewalOwner: capture original current.toString once, parse same String, use same local at immediate representation comparison. Every other byte unchanged.",
+  "preservation": "Both adjusted.toString calls remain distinct before/after restoring old lease; original class/JSON/epoch/reference/sole-lease checks, canonical and OWNER validation/fallback/error/SQL points unchanged. No cache, memo, query, diagnostic, doc, test, schema or outside-helper changes.",
+  "limits": "Bound standard privately owned single-callback input; no arbitrary concurrent/custom-node equivalence. One duplicate serialization removed, no measured cost/latency/cause/PASS claim. Existing1000ms/2000ms/full TRACE/closure remain unchanged.",
+  "execution": "UNRUN: no formatter/compiler/build/tests/runtime/SQL/lifecycle/commit/push/deploy. Sole coordinator owns integration/runtime. SharedUSD500 ceiling, actual billing unavailable."
+}

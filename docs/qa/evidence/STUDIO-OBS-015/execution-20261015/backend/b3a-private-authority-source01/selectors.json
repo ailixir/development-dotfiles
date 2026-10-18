@@ -1,0 +1,79 @@
+{
+  "executionStatus": "UNEXECUTED",
+  "rootMustScheduleOnlyAfterIndependentSourceReviewAndAllSourceFreezes": true,
+  "classSelector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT",
+  "existingWholeMethodSelectors": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.rawEdgeCannotNamePendingActionAgainstActualStoredAuthority",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.ordinaryCurrentCommitRechecksCompleteStoredEvidenceAndRollbackRemovesEveryWrite",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.directCurrentCommitKeepsExactClaimAndGrantAuthorityWithoutAnyWrite"
+  ],
+  "newWholeMethodSelectors": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.storedSourceManifestRequiresOriginalImmutableSourcePreimage"
+  ],
+  "allMethodParameterIdentities": [
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.rawEdgeCannotNamePendingActionAgainstActualStoredAuthority",
+      "parameters": [],
+      "invocations": 1
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.ordinaryCurrentCommitRechecksCompleteStoredEvidenceAndRollbackRemovesEveryWrite",
+      "parameters": [],
+      "invocations": 1
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.directCurrentCommitKeepsExactClaimAndGrantAuthorityWithoutAnyWrite",
+      "parameters": [
+        "claim",
+        "snapshot",
+        "finalize-digest",
+        "grant-principal",
+        "grant-csi",
+        "grant-session",
+        "grant-snapshot",
+        "grant-expired",
+        "grant-after-validation"
+      ],
+      "invocations": 9
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.storedPrivateHistoryCannotBeSubstitutedAtPublicationBoundary",
+      "parameters": [
+        "private-value",
+        "private-provenance",
+        "input-order",
+        "missing-input",
+        "introduced-version",
+        "header-hash",
+        "header-count",
+        "header-provenance",
+        "current-private-value"
+      ],
+      "invocations": 9
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorityIT.storedSourceManifestRequiresOriginalImmutableSourcePreimage",
+      "parameters": [
+        "manifest-checksum",
+        "manifest-private-plain",
+        "manifest-missing-plain",
+        "manifest-authored-context"
+      ],
+      "invocations": 4
+    }
+  ],
+  "expectedOriginalInvocations": 11,
+  "expectedNewInvocations": 13,
+  "expectedWholeClassInvocations": 24,
+  "tier": "Actual head PostgreSQL source/history rows and production reader/builder/current writer with explicitly substituted returned SQL rows; controlled relational upstream outcomes",
+  "notAsserted": [
+    "Real browser/native/model/worker authentication",
+    "HTTP/Core/Vault authority",
+    "Original15 route completeness",
+    "Multi-version history acceptance",
+    "Passing compilation or actual PostgreSQL execution"
+  ],
+  "runtimeCommandsGrantedOrExecuted": [],
+  "buildGradleOrCohortRegistryMutated": false
+}

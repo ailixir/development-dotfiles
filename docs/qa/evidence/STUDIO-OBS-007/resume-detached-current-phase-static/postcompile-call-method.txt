@@ -1,0 +1,449 @@
+private com.fasterxml.jackson.databind.JsonNode call(org.springframework.security.core.Authentication, java.lang.String, long, java.lang.String, com.citi.put.checks.studio.guided.translation.GuidedModelRequest$Kind, com.citi.put.checks.studio.guided.translation.GuidedTranslationService$ModelApplication);
+    Code:
+       0: new           #478                // class java/util/ArrayList
+       3: dup
+       4: invokespecial #480                // Method java/util/ArrayList."<init>":()V
+       7: astore        8
+       9: iconst_1
+      10: istore        9
+      12: iload         9
+      14: iconst_3
+      15: if_icmpgt     735
+      18: iload         9
+      20: istore        10
+      22: invokestatic  #481                // Method java/util/UUID.randomUUID:()Ljava/util/UUID;
+      25: invokevirtual #487                // Method java/util/UUID.toString:()Ljava/lang/String;
+      28: astore        11
+      30: aconst_null
+      31: astore        12
+      33: aload_0
+      34: getfield      #70                 // Field preparationCapability:Lcom/citi/put/checks/studio/guided/translation/GuidedPromptAssembler$PreparationCapability;
+      37: ifnull        98
+      40: aload_0
+      41: getfield      #12                 // Field sessions:Lcom/citi/put/checks/studio/guided/session/GuidedSessionService;
+      44: aload_1
+      45: aload_2
+      46: lload_3
+      47: aload_0
+      48: aload         6
+      50: aload         8
+      52: invokedynamic #490,  0            // InvokeDynamic #22:apply:(Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService;Lcom/citi/put/checks/studio/guided/translation/GuidedModelRequest$Kind;Ljava/util/List;)Ljava/util/function/Function;
+      57: invokevirtual #148                // Method com/citi/put/checks/studio/guided/session/GuidedSessionService.translationTransaction:(Lorg/springframework/security/core/Authentication;Ljava/lang/String;JLjava/util/function/Function;)Ljava/lang/Object;
+      60: checkcast     #183                // class com/fasterxml/jackson/databind/node/ObjectNode
+      63: astore        13
+      65: aload_0
+      66: getfield      #40                 // Field prompts:Lcom/citi/put/checks/studio/guided/translation/GuidedPromptAssembler;
+      69: aload_0
+      70: getfield      #70                 // Field preparationCapability:Lcom/citi/put/checks/studio/guided/translation/GuidedPromptAssembler$PreparationCapability;
+      73: aload         13
+      75: aload         5
+      77: iload         10
+      79: aload         6
+      81: aload_0
+      82: getfield      #56                 // Field properties:Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationProperties;
+      85: invokevirtual #493                // Method com/citi/put/checks/studio/guided/translation/GuidedTranslationProperties.maxOutputTokens:()I
+      88: invokevirtual #496                // Method com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.preparePure:(Lcom/citi/put/checks/studio/guided/translation/GuidedPromptAssembler$PreparationCapability;Lcom/fasterxml/jackson/databind/node/ObjectNode;Ljava/lang/String;ILcom/citi/put/checks/studio/guided/translation/GuidedModelRequest$Kind;I)Lcom/citi/put/checks/studio/guided/translation/GuidedPromptAssembler$PreparedProjection;
+      91: astore        12
+      93: goto          98
+      96: astore        13
+      98: aload         12
+     100: astore        13
+     102: aload_0
+     103: getfield      #12                 // Field sessions:Lcom/citi/put/checks/studio/guided/session/GuidedSessionService;
+     106: aload_1
+     107: aload_2
+     108: lload_3
+     109: aload_0
+     110: aload         6
+     112: aload_2
+     113: aload         5
+     115: aload_1
+     116: lload_3
+     117: iload         10
+     119: aload         8
+     121: aload         13
+     123: aload         11
+     125: invokedynamic #502,  0            // InvokeDynamic #23:apply:(Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService;Lcom/citi/put/checks/studio/guided/translation/GuidedModelRequest$Kind;Ljava/lang/String;Ljava/lang/String;Lorg/springframework/security/core/Authentication;JILjava/util/List;Lcom/citi/put/checks/studio/guided/translation/GuidedPromptAssembler$PreparedProjection;Ljava/lang/String;)Ljava/util/function/Function;
+     130: invokevirtual #148                // Method com/citi/put/checks/studio/guided/session/GuidedSessionService.translationTransaction:(Lorg/springframework/security/core/Authentication;Ljava/lang/String;JLjava/util/function/Function;)Ljava/lang/Object;
+     133: checkcast     #505                // class com/citi/put/checks/studio/guided/translation/GuidedTranslationService$Reserved
+     136: astore        14
+     138: goto          169
+     141: astore        15
+     143: aload_0
+     144: getfield      #12                 // Field sessions:Lcom/citi/put/checks/studio/guided/session/GuidedSessionService;
+     147: aload_1
+     148: aload_2
+     149: lload_3
+     150: invokevirtual #507                // Method com/citi/put/checks/studio/guided/session/GuidedSessionService.reconcileLateModelUsage:(Lorg/springframework/security/core/Authentication;Ljava/lang/String;J)Z
+     153: pop
+     154: aload_0
+     155: aload_1
+     156: aload_2
+     157: lload_3
+     158: aload         15
+     160: invokevirtual #510                // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.getMessage:()Ljava/lang/String;
+     163: invokevirtual #513                // Method stopRejected:(Lorg/springframework/security/core/Authentication;Ljava/lang/String;JLjava/lang/String;)V
+     166: aload         15
+     168: athrow
+     169: aload         14
+     171: ifnull        178
+     174: iconst_1
+     175: goto          179
+     178: iconst_0
+     179: ldc_w         #517                // String BUDGET_EXCEEDED
+     182: sipush        429
+     185: invokestatic  #87                 // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.require:(ZLjava/lang/String;I)V
+     188: aload         14
+     190: invokevirtual #519                // Method com/citi/put/checks/studio/guided/translation/GuidedTranslationService$Reserved.attempt:()Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationStore$Attempt;
+     193: invokevirtual #523                // Method com/citi/put/checks/studio/guided/translation/GuidedTranslationStore$Attempt.send:()Z
+     196: ifne          270
+     199: aload         14
+     201: invokevirtual #519                // Method com/citi/put/checks/studio/guided/translation/GuidedTranslationService$Reserved.attempt:()Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationStore$Attempt;
+     204: invokevirtual #528                // Method com/citi/put/checks/studio/guided/translation/GuidedTranslationStore$Attempt.identity:()Lcom/fasterxml/jackson/databind/JsonNode;
+     207: ldc_w         #530                // String result
+     210: invokevirtual #103                // Method com/fasterxml/jackson/databind/JsonNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+     213: astore        15
+     215: aload         15
+     217: invokevirtual #532                // Method com/fasterxml/jackson/databind/JsonNode.isMissingNode:()Z
+     220: ifne          235
+     223: aload         15
+     225: invokevirtual #535                // Method com/fasterxml/jackson/databind/JsonNode.isNull:()Z
+     228: ifne          235
+     231: iconst_1
+     232: goto          236
+     235: iconst_0
+     236: ldc_w         #538                // String IDEMPOTENCY_CONFLICT
+     239: sipush        409
+     242: invokestatic  #87                 // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.require:(ZLjava/lang/String;I)V
+     245: aload_0
+     246: getfield      #12                 // Field sessions:Lcom/citi/put/checks/studio/guided/session/GuidedSessionService;
+     249: aload_1
+     250: aload_2
+     251: lload_3
+     252: aload_0
+     253: aload         14
+     255: aload         15
+     257: aload_2
+     258: invokedynamic #540,  0            // InvokeDynamic #24:apply:(Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService;Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService$Reserved;Lcom/fasterxml/jackson/databind/JsonNode;Ljava/lang/String;)Ljava/util/function/Function;
+     263: invokevirtual #148                // Method com/citi/put/checks/studio/guided/session/GuidedSessionService.translationTransaction:(Lorg/springframework/security/core/Authentication;Ljava/lang/String;JLjava/util/function/Function;)Ljava/lang/Object;
+     266: checkcast     #104                // class com/fasterxml/jackson/databind/JsonNode
+     269: areturn
+     270: aload_0
+     271: getfield      #12                 // Field sessions:Lcom/citi/put/checks/studio/guided/session/GuidedSessionService;
+     274: aload_1
+     275: aload_2
+     276: lload_3
+     277: aload_0
+     278: aload         6
+     280: aload         14
+     282: aload         11
+     284: aload_2
+     285: invokedynamic #543,  0            // InvokeDynamic #25:apply:(Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService;Lcom/citi/put/checks/studio/guided/translation/GuidedModelRequest$Kind;Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService$Reserved;Ljava/lang/String;Ljava/lang/String;)Ljava/util/function/Function;
+     290: invokevirtual #148                // Method com/citi/put/checks/studio/guided/session/GuidedSessionService.translationTransaction:(Lorg/springframework/security/core/Authentication;Ljava/lang/String;JLjava/util/function/Function;)Ljava/lang/Object;
+     293: checkcast     #546                // class java/lang/Integer
+     296: invokevirtual #548                // Method java/lang/Integer.intValue:()I
+     299: istore        15
+     301: iload         15
+     303: iconst_m1
+     304: if_icmpeq     311
+     307: iconst_1
+     308: goto          312
+     311: iconst_0
+     312: ldc_w         #517                // String BUDGET_EXCEEDED
+     315: sipush        429
+     318: invokestatic  #87                 // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.require:(ZLjava/lang/String;I)V
+     321: iload         15
+     323: iconst_1
+     324: if_icmpne     331
+     327: iconst_1
+     328: goto          332
+     331: iconst_0
+     332: ldc_w         #538                // String IDEMPOTENCY_CONFLICT
+     335: sipush        409
+     338: invokestatic  #87                 // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.require:(ZLjava/lang/String;I)V
+     341: aload_0
+     342: getfield      #32                 // Field gateway:Lcom/citi/put/checks/studio/guided/translation/GuidedLlmGatewayClient;
+     345: aload         14
+     347: invokevirtual #551                // Method com/citi/put/checks/studio/guided/translation/GuidedTranslationService$Reserved.request:()Lcom/citi/put/checks/studio/guided/translation/GuidedModelRequest;
+     350: new           #555                // class com/citi/put/checks/studio/guided/translation/GuidedCallBudget
+     353: dup
+     354: aload         14
+     356: invokevirtual #557                // Method com/citi/put/checks/studio/guided/translation/GuidedTranslationService$Reserved.deadline:()Ljava/time/Instant;
+     359: aload_0
+     360: getfield      #60                 // Field clock:Ljava/time/Clock;
+     363: invokespecial #561                // Method com/citi/put/checks/studio/guided/translation/GuidedCallBudget."<init>":(Ljava/time/Instant;Ljava/time/Clock;)V
+     366: invokeinterface #564,  3          // InterfaceMethod com/citi/put/checks/studio/guided/translation/GuidedLlmGatewayClient.propose:(Lcom/citi/put/checks/studio/guided/translation/GuidedModelRequest;Lcom/citi/put/checks/studio/guided/translation/GuidedCallBudget;)Lcom/citi/put/checks/studio/guided/translation/GuidedModelResponse;
+     371: astore        16
+     373: goto          394
+     376: astore        17
+     378: new           #570                // class com/citi/put/checks/studio/guided/translation/GuidedModelResponse
+     381: dup
+     382: getstatic     #572                // Field com/citi/put/checks/studio/guided/translation/GuidedModelResponse$Code.TRANSPORT:Lcom/citi/put/checks/studio/guided/translation/GuidedModelResponse$Code;
+     385: aconst_null
+     386: aconst_null
+     387: aconst_null
+     388: aconst_null
+     389: invokespecial #578                // Method com/citi/put/checks/studio/guided/translation/GuidedModelResponse."<init>":(Lcom/citi/put/checks/studio/guided/translation/GuidedModelResponse$Code;Lcom/fasterxml/jackson/databind/JsonNode;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;)V
+     392: astore        16
+     394: aload         16
+     396: astore        17
+     398: aload_0
+     399: getfield      #12                 // Field sessions:Lcom/citi/put/checks/studio/guided/session/GuidedSessionService;
+     402: aload_1
+     403: aload_2
+     404: lload_3
+     405: aload_0
+     406: aload_1
+     407: aload_2
+     408: lload_3
+     409: aload         14
+     411: aload         17
+     413: aload         11
+     415: aload         6
+     417: aload         7
+     419: invokedynamic #581,  0            // InvokeDynamic #26:apply:(Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService;Lorg/springframework/security/core/Authentication;Ljava/lang/String;JLcom/citi/put/checks/studio/guided/translation/GuidedTranslationService$Reserved;Lcom/citi/put/checks/studio/guided/translation/GuidedModelResponse;Ljava/lang/String;Lcom/citi/put/checks/studio/guided/translation/GuidedModelRequest$Kind;Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService$ModelApplication;)Ljava/util/function/Function;
+     424: invokevirtual #148                // Method com/citi/put/checks/studio/guided/session/GuidedSessionService.translationTransaction:(Lorg/springframework/security/core/Authentication;Ljava/lang/String;JLjava/util/function/Function;)Ljava/lang/Object;
+     427: checkcast     #104                // class com/fasterxml/jackson/databind/JsonNode
+     430: astore        18
+     432: aload         18
+     434: ldc_w         #584                // String superseded
+     437: invokevirtual #103                // Method com/fasterxml/jackson/databind/JsonNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+     440: invokevirtual #232                // Method com/fasterxml/jackson/databind/JsonNode.asBoolean:()Z
+     443: ifne          450
+     446: iconst_1
+     447: goto          451
+     450: iconst_0
+     451: ldc           #247                // String STALE_GENERATION
+     453: sipush        409
+     456: invokestatic  #87                 // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.require:(ZLjava/lang/String;I)V
+     459: aload         18
+     461: ldc_w         #586                // String rejected
+     464: invokevirtual #103                // Method com/fasterxml/jackson/databind/JsonNode.path:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/JsonNode;
+     467: invokevirtual #232                // Method com/fasterxml/jackson/databind/JsonNode.asBoolean:()Z
+     470: ifne          476
+     473: aload         18
+     475: areturn
+     476: goto          676
+     479: astore        18
+     481: iconst_0
+     482: istore        19
+     484: aload_0
+     485: getfield      #12                 // Field sessions:Lcom/citi/put/checks/studio/guided/session/GuidedSessionService;
+     488: aload_1
+     489: aload_2
+     490: lload_3
+     491: aload_0
+     492: aload_2
+     493: aload         14
+     495: aload_1
+     496: lload_3
+     497: aload         17
+     499: invokedynamic #588,  0            // InvokeDynamic #27:apply:(Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService;Ljava/lang/String;Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService$Reserved;Lorg/springframework/security/core/Authentication;JLcom/citi/put/checks/studio/guided/translation/GuidedModelResponse;)Ljava/util/function/Function;
+     504: invokevirtual #148                // Method com/citi/put/checks/studio/guided/session/GuidedSessionService.translationTransaction:(Lorg/springframework/security/core/Authentication;Ljava/lang/String;JLjava/util/function/Function;)Ljava/lang/Object;
+     507: checkcast     #154                // class java/lang/Boolean
+     510: invokevirtual #156                // Method java/lang/Boolean.booleanValue:()Z
+     513: istore        19
+     515: goto          520
+     518: astore        20
+     520: iload         19
+     522: ifne          544
+     525: aload_0
+     526: getfield      #16                 // Field repository:Lcom/citi/put/checks/studio/guided/session/GuidedSessionRepository;
+     529: aload_0
+     530: aload_2
+     531: aload         14
+     533: aload         17
+     535: invokedynamic #591,  0            // InvokeDynamic #28:get:(Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService;Ljava/lang/String;Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService$Reserved;Lcom/citi/put/checks/studio/guided/translation/GuidedModelResponse;)Ljava/util/function/Supplier;
+     540: invokevirtual #595                // Method com/citi/put/checks/studio/guided/session/GuidedSessionRepository.transaction:(Ljava/util/function/Supplier;)Ljava/lang/Object;
+     543: pop
+     544: iload         19
+     546: ifeq          613
+     549: aload         6
+     551: getstatic     #446                // Field com/citi/put/checks/studio/guided/translation/GuidedModelRequest$Kind.NEXT_ACTION:Lcom/citi/put/checks/studio/guided/translation/GuidedModelRequest$Kind;
+     554: if_acmpne     613
+     557: ldc           #119                // String INVALID_CONTRACT
+     559: ldc_w         #599                // String POLICY_DENIED
+     562: ldc_w         #601                // String MISSING_SOURCE
+     565: ldc_w         #603                // String INSUFFICIENT_EVIDENCE
+     568: ldc_w         #605                // String REFERENCE_MISMATCH
+     571: invokestatic  #607                // InterfaceMethod java/util/Set.of:(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/util/Set;
+     574: aload         18
+     576: invokevirtual #510                // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.getMessage:()Ljava/lang/String;
+     579: invokeinterface #612,  2          // InterfaceMethod java/util/Set.contains:(Ljava/lang/Object;)Z
+     584: ifeq          613
+     587: aload_0
+     588: getfield      #12                 // Field sessions:Lcom/citi/put/checks/studio/guided/session/GuidedSessionService;
+     591: aload_1
+     592: aload_2
+     593: lload_3
+     594: invokevirtual #615                // Method com/citi/put/checks/studio/guided/session/GuidedSessionService.annotateLoginFailure:(Lorg/springframework/security/core/Authentication;Ljava/lang/String;J)Z
+     597: ifeq          613
+     600: aload_0
+     601: aload_0
+     602: getfield      #12                 // Field sessions:Lcom/citi/put/checks/studio/guided/session/GuidedSessionService;
+     605: aload_2
+     606: invokevirtual #618                // Method com/citi/put/checks/studio/guided/session/GuidedSessionService.secretSession:(Ljava/lang/String;)Lcom/fasterxml/jackson/databind/node/ObjectNode;
+     609: invokevirtual #406                // Method safe:(Lcom/fasterxml/jackson/databind/JsonNode;)Lcom/fasterxml/jackson/databind/node/ObjectNode;
+     612: areturn
+     613: iload         19
+     615: ifeq          661
+     618: iload         9
+     620: iconst_3
+     621: if_icmpge     661
+     624: ldc           #119                // String INVALID_CONTRACT
+     626: ldc_w         #621                // String BINDING_ORDER
+     629: invokestatic  #323                // InterfaceMethod java/util/List.of:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/util/List;
+     632: aload         18
+     634: invokevirtual #510                // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.getMessage:()Ljava/lang/String;
+     637: invokeinterface #623,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+     642: ifeq          661
+     645: aload         8
+     647: aload         18
+     649: invokevirtual #510                // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.getMessage:()Ljava/lang/String;
+     652: invokeinterface #624,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+     657: pop
+     658: goto          729
+     661: aload_0
+     662: aload_1
+     663: aload_2
+     664: lload_3
+     665: aload         18
+     667: invokevirtual #510                // Method com/citi/put/checks/studio/guided/session/GuidedSessionException.getMessage:()Ljava/lang/String;
+     670: invokevirtual #513                // Method stopRejected:(Lorg/springframework/security/core/Authentication;Ljava/lang/String;JLjava/lang/String;)V
+     673: aload         18
+     675: athrow
+     676: aload         17
+     678: invokevirtual #627                // Method com/citi/put/checks/studio/guided/translation/GuidedModelResponse.code:()Lcom/citi/put/checks/studio/guided/translation/GuidedModelResponse$Code;
+     681: getstatic     #631                // Field com/citi/put/checks/studio/guided/translation/GuidedModelResponse$Code.INVALID_RESPONSE:Lcom/citi/put/checks/studio/guided/translation/GuidedModelResponse$Code;
+     684: if_acmpne     693
+     687: iload         9
+     689: iconst_3
+     690: if_icmpne     718
+     693: aload_0
+     694: getfield      #12                 // Field sessions:Lcom/citi/put/checks/studio/guided/session/GuidedSessionService;
+     697: aload_1
+     698: aload_2
+     699: lload_3
+     700: ldc           #119                // String INVALID_CONTRACT
+     702: invokevirtual #634                // Method com/citi/put/checks/studio/guided/session/GuidedSessionService.failTranslation:(Lorg/springframework/security/core/Authentication;Ljava/lang/String;JLjava/lang/String;)V
+     705: new           #88                 // class com/citi/put/checks/studio/guided/session/GuidedSessionException
+     708: dup
+     709: ldc           #119                // String INVALID_CONTRACT
+     711: sipush        422
+     714: invokespecial #637                // Method com/citi/put/checks/studio/guided/session/GuidedSessionException."<init>":(Ljava/lang/String;I)V
+     717: athrow
+     718: aload         8
+     720: ldc_w         #640                // String INVALID_RESPONSE
+     723: invokeinterface #624,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+     728: pop
+     729: iinc          9, 1
+     732: goto          12
+     735: new           #88                 // class com/citi/put/checks/studio/guided/session/GuidedSessionException
+     738: dup
+     739: ldc_w         #517                // String BUDGET_EXCEEDED
+     742: sipush        429
+     745: invokespecial #637                // Method com/citi/put/checks/studio/guided/session/GuidedSessionException."<init>":(Ljava/lang/String;I)V
+     748: athrow
+    Exception table:
+       from    to  target type
+          40    93    96   Class java/lang/RuntimeException
+         102   138   141   Class com/citi/put/checks/studio/guided/session/GuidedSessionException
+         341   373   376   Class java/lang/RuntimeException
+         398   475   479   Class com/citi/put/checks/studio/guided/session/GuidedSessionException
+         484   515   518   Class com/citi/put/checks/studio/guided/session/GuidedSessionException
+    LineNumberTable:
+      line 766: 0
+      line 767: 9
+      line 768: 18
+      line 769: 22
+      line 770: 30
+      line 771: 33
+      line 773: 40
+      line 774: 57
+      line 780: 65
+      line 787: 85
+      line 781: 88
+      line 790: 93
+      line 788: 96
+      line 792: 98
+      line 795: 102
+      line 796: 130
+      line 926: 138
+      line 921: 141
+      line 923: 143
+      line 924: 154
+      line 925: 166
+      line 928: 169
+      line 929: 188
+      line 930: 199
+      line 931: 215
+      line 932: 245
+      line 948: 270
+      line 949: 290
+      line 971: 301
+      line 972: 321
+      line 975: 341
+      line 976: 347
+      line 980: 373
+      line 977: 376
+      line 978: 378
+      line 981: 394
+      line 983: 398
+      line 984: 424
+      line 1075: 432
+      line 1076: 459
+      line 1077: 473
+      line 1144: 476
+      line 1079: 479
+      line 1080: 481
+      line 1082: 484
+      line 1083: 504
+      line 1111: 515
+      line 1109: 518
+      line 1112: 520
+      line 1113: 525
+      line 1124: 544
+      line 1126: 571
+      line 1132: 576
+      line 1133: 594
+      line 1134: 600
+      line 1136: 613
+      line 1138: 629
+      line 1139: 645
+      line 1140: 658
+      line 1142: 661
+      line 1143: 673
+      line 1145: 676
+      line 1146: 693
+      line 1147: 705
+      line 1149: 718
+      line 767: 729
+      line 1151: 735
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+         65      28    13 captured   Lcom/fasterxml/jackson/databind/node/ObjectNode;
+        138       3    14 reserved   Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService$Reserved;
+        143      26    15 failure   Lcom/citi/put/checks/studio/guided/session/GuidedSessionException;
+        215      55    15   old   Lcom/fasterxml/jackson/databind/JsonNode;
+        373       3    16 response   Lcom/citi/put/checks/studio/guided/translation/GuidedModelResponse;
+        378      16    17 failure   Ljava/lang/RuntimeException;
+        432      44    18 applied   Lcom/fasterxml/jackson/databind/JsonNode;
+        484     192    19 rejected   Z
+        481     195    18 failure   Lcom/citi/put/checks/studio/guided/session/GuidedSessionException;
+         22     707    10 attemptNumber   I
+         30     699    11 translator   Ljava/lang/String;
+         33     696    12 prepared   Lcom/citi/put/checks/studio/guided/translation/GuidedPromptAssembler$PreparedProjection;
+        102     627    13 candidate   Lcom/citi/put/checks/studio/guided/translation/GuidedPromptAssembler$PreparedProjection;
+        169     560    14 reserved   Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService$Reserved;
+        301     428    15  send   I
+        394     335    16 response   Lcom/citi/put/checks/studio/guided/translation/GuidedModelResponse;
+        398     331    17 received   Lcom/citi/put/checks/studio/guided/translation/GuidedModelResponse;
+         12     723     9 index   I
+          0     749     0  this   Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService;
+          0     749     1 controller   Lorg/springframework/security/core/Authentication;
+          0     749     2    id   Ljava/lang/String;
+          0     749     3 fence   J
+          0     749     5   key   Ljava/lang/String;
+          0     749     6  kind   Lcom/citi/put/checks/studio/guided/translation/GuidedModelRequest$Kind;
+          0     749     7 apply   Lcom/citi/put/checks/studio/guided/translation/GuidedTranslationService$ModelApplication;
+          9     740     8 repairs   Ljava/util/List;

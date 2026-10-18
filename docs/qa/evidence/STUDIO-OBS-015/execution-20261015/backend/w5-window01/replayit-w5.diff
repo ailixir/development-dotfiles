@@ -1,0 +1,125 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -457,6 +457,8 @@
+   private static volatile long ownedGeneration;
+   private static final List<OwnedFixtureProcess> OWNED_FIXTURE_PROCESSES = new CopyOnWriteArrayList<>();
+   private static final List<Throwable> OWNED_FIXTURE_FAILURES = new CopyOnWriteArrayList<>();
++  // w4-qa-ack03 1a advisory: value-free count of D4(c) observer skips (root gone or zombie).
++  private static final AtomicInteger OWNED_OBSERVER_SKIPPED_TERMINATED = new AtomicInteger();
+   private static final java.util.concurrent.ScheduledExecutorService OWNED_PROCESS_OBSERVER =
+       java.util.concurrent.Executors.newSingleThreadScheduledExecutor(task -> {
+         Thread thread = new Thread(task, "joined-owned-process-observer"); thread.setDaemon(true); return thread;
+@@ -569,8 +571,10 @@
+               // w3-d4 (c): a root that exits between isAlive() and commandLine() is a reaped or
+               // zombie process (macOS drops a zombie's command line), as in p8TerminatedUnsignalled:
+               // skip only that; any live unverifiable root is still a failure.
+-              if (candidate.process.isAlive() && !candidate.stopping
+-                  && !p8TerminatedUnsignalled(candidate.handle)) OWNED_FIXTURE_FAILURES.add(failure);
++              if (candidate.process.isAlive() && !candidate.stopping) {
++                if (p8TerminatedUnsignalled(candidate.handle)) OWNED_OBSERVER_SKIPPED_TERMINATED.incrementAndGet();
++                else OWNED_FIXTURE_FAILURES.add(failure);
++              }
+             }
+           }
+         }, 0, 100, java.util.concurrent.TimeUnit.MILLISECONDS);
+@@ -789,7 +793,8 @@
+       try {
+         ObjectNode summary = C.object().put("registeredRoots", OWNED_FIXTURE_PROCESSES.size())
+             .put("cleanupFailureCount", failures.size()).put("metadataEvents", ownedProcessEvents)
+-            .put("metadataBytes", ownedProcessEventBytes);
++            .put("metadataBytes", ownedProcessEventBytes)
++            .put("observerSkippedTerminated", OWNED_OBSERVER_SKIPPED_TERMINATED.get());
+         var roots = summary.putArray("roots");
+         for (OwnedFixtureProcess root : OWNED_FIXTURE_PROCESSES) {
+           roots.addObject().put("role", root.role).put("generation", root.generation).put("pid", root.handle.pid())
+@@ -4765,7 +4770,15 @@
+           ObjectNode input = PublicationContracts.copy(C.parse((String) row.get("document")));
+           if (((Number) row.get("introduced_revision")).intValue() == introduced
+               && input.path("value").isTextual()) {
+-            input.put("value", "B3-DIFFERENT-PRIVATE-VALUE");
++            // w5 (B3B-1): a different value that is still schema-valid for its kind. The v1 input
++            // is the step-0 destination ("format": "uri"); a non-URI is refused one guard earlier
++            // (GuidedMaterializationEvidence:65 schema, INVALID_CONTRACT) and never reaches the
++            // full-version hash reconstruction (:66-68) this label pins.
++            input.put(
++                "value",
++                input.path("kind").asText().equals("destination")
++                    ? "https://b3-different-private-value.example.test/"
++                    : "B3-DIFFERENT-PRIVATE-VALUE");
+             row.put("document", input.toString());
+             changed = true;
+             break;
+@@ -5618,26 +5631,50 @@
+     probe.positive("edges-positive");
+     assertThat(probe.genuine.path("consumerEdges")).isNotEmpty();
+     assertThat(probe.genuine.path("incrementalEvidence").path("excludedAttempts")).hasSize(1);
++    // w5 (B3B-3): edges are read ORDER BY document::text (GuidedPublicationEvidenceRepository). For
++    // the admitted native0 edge and its replayed twin, the first differing jsonb key is the random
++    // consumerAdmissionId, so position 0 is the native0 edge in some runs. The edge labels attack a
++    // replayed edge: select it by identity and by earliest (step, ordinal, slot), never by position.
++    JsonNode genuineEdges = probe.genuine.path("consumerEdges");
++    int replayed = -1, native0Edges = 0;
++    for (int at = 0; at < genuineEdges.size(); at++) {
++      JsonNode candidate = genuineEdges.get(at);
++      if (candidate.path("consumerAdmissionId").asText().equals(native0)) {
++        native0Edges++;
++      } else if (replayed < 0
++          || b3EdgeOrder(candidate).compareTo(b3EdgeOrder(genuineEdges.get(replayed))) < 0) {
++        replayed = at;
++      }
++    }
++    assertThat(native0Edges)
++        .as("the admitted native0 attempt keeps exactly its one consumer edge")
++        .isEqualTo(1);
++    assertThat(replayed).as("a replayed (non-native0) consumer edge exists").isNotNegative();
++    final int edgeAt = replayed;
++    java.util.function.Function<ObjectNode, ObjectNode> edge =
++        b -> (ObjectNode) b.path("consumerEdges").get(edgeAt);
+     var labels = new java.util.LinkedHashMap<String, java.util.function.Consumer<ObjectNode>>();
+     labels.put(
+         "edge-unknown-admission",
+-        b -> b3Edge0(b).put("consumerAdmissionId", UUID.randomUUID().toString()));
++        b -> edge.apply(b).put("consumerAdmissionId", UUID.randomUUID().toString()));
+     labels.put(
+-        "edge-native0-excluded-admission", b -> b3Edge0(b).put("consumerAdmissionId", native0));
++        "edge-native0-excluded-admission",
++        b -> edge.apply(b).put("consumerAdmissionId", native0));
+     labels.put(
+         "edge-wrong-slot",
+         b ->
+-            b3Edge0(b)
++            edge.apply(b)
+                 .put(
+                     "argumentSlot",
+-                    b3Edge0(b).path("argumentSlot").asText().equals("fill.value")
++                    edge.apply(b).path("argumentSlot").asText().equals("fill.value")
+                         ? "assert.expected"
+                         : "fill.value"));
+-    labels.put("edge-wrong-binding", b -> b3Edge0(b).put("bindingId", "b3-unallocated-binding"));
+-    labels.put("edge-wrong-producer", b -> b3Edge0(b).put("producerAdmissionId", nav));
+     labels.put(
++        "edge-wrong-binding", b -> edge.apply(b).put("bindingId", "b3-unallocated-binding"));
++    labels.put("edge-wrong-producer", b -> edge.apply(b).put("producerAdmissionId", nav));
++    labels.put(
+         "edge-wrong-origin",
+-        b -> b3Edge0(b).put("destinationOrigin", "https://other.example.test"));
++        b -> edge.apply(b).put("destinationOrigin", "https://other.example.test"));
+     labels.put(
+         "producer-wrong-worker",
+         b ->
+@@ -5691,6 +5728,15 @@
+ 
+   private static ObjectNode b3Edge0(ObjectNode basis) {
+     return (ObjectNode) basis.path("consumerEdges").get(0);
++  }
++
++  /** UUID-independent edge order key: source step position, ordinal, then argument slot. */
++  private static String b3EdgeOrder(JsonNode edge) {
++    return String.format(
++        "%04d|%04d|%s",
++        INCREMENTAL_STEPS.indexOf(edge.path("coordinate").path("stepId").asText()),
++        edge.path("coordinate").path("ordinal").asInt(),
++        edge.path("argumentSlot").asText());
+   }
+ 
+   /** Exact producer identity, no fabricated consumer, no reusedFrom[j]; returns the read. */

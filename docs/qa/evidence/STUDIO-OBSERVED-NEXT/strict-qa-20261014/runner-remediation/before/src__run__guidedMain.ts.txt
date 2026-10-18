@@ -1,0 +1,35 @@
+/** Standalone long-lived guided worker. The config is a trusted mounted file, never job input. The
+ * observation application policy is not part of it: it arrives per session in the hash-bound runner
+ * context (STUDIO-OBS-014 AC-1). No parent IPC, replay artifact execution, gateway or credential
+ * resolution lives here. */
+import { readFile } from 'node:fs/promises';
+import { createGuidedServer, guidedCallback, guidedClaimClient } from '../guided/transport.js';
+import { launchGuidedBrowser } from './browser.js';
+import { insist } from '../guided/contracts.js';
+import {assertObservedBrowserStartup} from '../compat/runtime-versions.js';
+import { parseGuidedMountedConfig } from './guidedConfig.js';
+import { createGuidedRecorder } from '../guided/evidence.js';
+import { createConfiguredObjectStore, evidenceBoundsFrom, NODE_EVIDENCE_FILE_SYSTEM } from './objectStoreFactory.js';
+import { loadEvidenceConfig } from '../server/config.js';
+import { systemOriginSource } from './timeline.js';
+
+async function main(): Promise<void> {
+  insist(!process.env.DEBUG && !process.env.PWDEBUG && !process.env.NODE_DEBUG && !process.env.NODE_OPTIONS, 'CONFIGURATION_DENIED');
+  assertObservedBrowserStartup();
+  const file = process.env.STUDIO_GUIDED_CONFIG_FILE; insist(file, 'CONFIGURATION_DENIED');
+  const config = parseGuidedMountedConfig(await readFile(file, 'utf8'));
+  const tls = { key: await readFile(config.tlsKeyFile), cert: await readFile(config.tlsCertFile), ca: await readFile(config.tlsCaFile) };
+  // STUDIO-OBS-013: the same evidence keys, store and origin rule the replay runner uses.
+  const evidence = loadEvidenceConfig(process.env);
+  const objectStore = createConfiguredObjectStore(evidence);
+  const recorder = createGuidedRecorder({ store: objectStore.store, fileSystem: NODE_EVIDENCE_FILE_SYSTEM, bounds: evidenceBoundsFrom(evidence), size: { width: evidence.recordingWidth, height: evidence.recordingHeight }, calibrationOffsetMs: evidence.seekOriginCalibrationMs, originSource: systemOriginSource, now: () => performance.now(), sleep: ms => new Promise<void>(resolve => { setTimeout(resolve, ms); }) });
+  const app = createGuidedServer({ workerId: config.workerId, journalDirectory: config.journalDirectory, tls,
+    controllerJwt: { issuer: config.controllerIssuer, subject: config.controllerSubject, publicKey: await readFile(config.controllerPublicKeyFile, 'utf8') },
+    controllerCertificateFingerprint256: config.controllerCertificateFingerprint256, launch: launchGuidedBrowser, recorder,
+    claim: guidedClaimClient({ baseUrl: config.callbackBaseUrl, tls, controllerCertificateFingerprint256: config.controllerCertificateFingerprint256, token: async () => (await readFile(config.callbackTokenFile, 'utf8')).trim() }),
+    callback: guidedCallback({ baseUrl: config.callbackBaseUrl, tls, controllerCertificateFingerprint256: config.controllerCertificateFingerprint256, token: async () => (await readFile(config.callbackTokenFile, 'utf8')).trim() }) });
+  await new Promise<void>((resolve, reject) => { app.server.once('error', reject); app.server.listen(config.port, config.host, resolve); });
+  const stop = () => { void app.close().then(() => { process.exitCode = 0; }).catch(() => { process.exitCode = 1; }).finally(() => { objectStore.close(); }); };
+  process.once('SIGTERM', stop); process.once('SIGINT', stop);
+}
+void main().catch(() => { process.stderr.write('GUIDED_WORKER_UNAVAILABLE\n'); process.exitCode = 1; });

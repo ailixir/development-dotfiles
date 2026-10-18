@@ -1,0 +1,32 @@
+{
+  "status": "SOURCE_ONLY_BRANCH_UNOBSERVED_ONE_LOCAL_SERIALIZATION_REUSE_CONDITIONAL",
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "a3f2344499d0936bb7ab43e4a679cc2f9aa8fe5590fbfd58179d4213796c39fa",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "3d7ac2983354fdf98628c5668a23b0c2d3f49877c686b309c1a1ea5c9913b621",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "cc79311d3055e3887b7ee723a389bd3e25faa75ae5b0993ee8e6ad95df0fd72f",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": "81134a8802609b398b2680a6fd0ee14dcb122c22b9ab4301863790800caf07d0"
+  },
+  "currentClosedReceiptSha256": "42815506592b590ba47973db40504bc5358740b3f48d4d1d60704c118c82b342",
+  "actualEvidence": [
+    "Current claim/lifecycle/finalize fixed scalars show status/handler time/loss/prepare refusal only. No existing scalar identifies prepared proof, same-row match, OWNER selection or full fallback for this actual claim; selected branch is UNOBSERVED.",
+    "Existing47SessionIT actualPASS includes prepare proof nonnull and saved optimized OWNER path with spy never fullsession validation at save. This establishes actual default epoch pin/OWNER layout eligibility in that selected real-PG seam, not all production claims or timing dominance.",
+    "Current JSONB document-only capture and lock each parse separate owned ObjectNode; exact class/JSON/representation/root identity and actual beforelease fullrow match determine eligibility. Legitimate row/value/type/representation changes can trigger original fallback."
+  ],
+  "sourceWorkInventory": [
+    "Optional prelude: one document query+parse, serialize+roundtrip+class/JSON/repr match, actual full canonical+fullschema validation, root schema canonical/hash, compiled OWNER lookup.",
+    "Prelease bind: complete class/JSON/repr comparison.",
+    "Selected save: serialize/parse freshdocument, class/JSON/repr proof, adjusted solelease snapshot class/JSON/repr match, fresh whole canonical and fullOWNER validation.",
+    "Fallback additionally runs original full canonical+schema validation and atomic SQL; none of these source calls establish elapsed share."
+  ],
+  "oneNarrowProposal": {
+    "status": "CONDITIONAL_ISOLATED_SOURCE_REVIEW_ONLY",
+    "scope": "GuidedContracts.validateRenewalOwner local String reuse only, no field/cache/API",
+    "change": "At original line204 assign freshRepresentation=current.toString(); parse that String and use the SAME local freshRepresentation for line208 comparison, rather than serialize unchanged current a second time. Keep adjusted.toString calls separate before and after deliberate lease restoration.",
+    "reasoning": "Bound proof requires exact standard owned ObjectNode/closed classes/current reference; original JSON parser, sameRenewalTree and equals only inspect current and construct adjusted copy. No mutation of current occurs between original two serializations in the supported single-owner callback. The local String reflects exactly the fresh save-point representation; original optional catch covers serialization/parse failures.",
+    "preserve": "Complete fullrow/currentreference/class/JSON/serialized proof, adjusted solelease check, same contracts/root epoch/pin, fresh canonical refusal outsidecatch, OWNER fixedinvalid, fallback original public save, all SQL/guards/clocks remain.",
+    "tradeoff": "Removes one local serialization only on selected proof path; tiny possible benefit and extra local variable, no causal/timing promise. Arbitrary concurrent custom/mutable input semantics not asserted. Review beforeauthor; no unchanged performance run justified by this report alone."
+  },
+  "excluded": "No branch instrumentation, new query, sampler, static root eligibility cache, schema skip, crosscallback proof, budget/TRACE weakening or broadened framework proposed.",
+  "actions": "Read-only source and already closed scalar receipts; no edits/build/runtime/query/profiler/QA/lifecycle.",
+  "budget": "USD500 billing unavailable"
+}

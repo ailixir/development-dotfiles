@@ -1,0 +1,167 @@
+--- before/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java
++++ after/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java
+@@ -119,6 +119,11 @@
+         "EVIDENCE_MISMATCH",
+         422);
+     JsonNode materialization = raw.path("materialization");
++    JsonNode materializationEvidence = raw.path("materializationEvidence");
++    ObjectNode latestContext = GuidedMaterializationEvidence.versionContext(
++        contracts, materializationEvidence, materializationEvidence.path("versions").size());
++    require(materialization.path("inputs").equals(latestContext.path("inputs")),
++        "EVIDENCE_MISMATCH", 422);
+     result.set("authoredInputsHash", materialization.path("authoredInputsHash"));
+     ArrayNode inputs = result.putArray("inputs"),
+         configs = result.putArray("configurationReferences");
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java
++++ after/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java
+@@ -473,6 +473,150 @@
+                 .asText())
+         .isEqualTo("page");
+     assertThat(result.path("preparations").get(0).path("observationHash").isNull()).isTrue();
++  }
++
++  @ParameterizedTest(name = "complete detached input head refuses {0}")
++  @org.junit.jupiter.params.provider.ValueSource(strings = {
++      "missing-unused-input", "raw-row-order", "same-id-metadata-substitution"
++  })
++  void detachedCurrentInputsMatchCompleteHistoryBeforeEffectiveFiltering(String mutation)
++      throws Exception {
++    JsonNode independent = fixture("fresh-order-reference");
++    var f = new Original(independent.path("basis"));
++    JsonNode rawBefore = f.raw.deepCopy();
++    ObjectNode result = f.build();
++    assertThat(result).as("complete independent parent before %s", mutation).isEqualTo(f.expected);
++    assertThat(f.raw).isEqualTo(rawBefore);
++    ArrayNode rawInputs = array(object(f.raw, "materialization"), "inputs");
++    JsonNode completeInputs = rawInputs.deepCopy(), historyBefore = f.raw.path("materializationEvidence").deepCopy();
++    assertThat(rawInputs).hasSize(3);
++    assertThat(historyBefore.path("entries")).hasSize(3);
++    assertThat(historyBefore.at("/versions/0/inputCount").asInt()).isEqualTo(3);
++    assertThat(rawInputs.get(0).path("inputId").asText()).isEqualTo("input-destination");
++    assertThat(rawInputs.get(1).path("inputId").asText()).isEqualTo("input-label");
++    assertThat(rawInputs.get(2).path("inputId").asText()).isEqualTo("input-config");
++    for (int index = 0; index < 3; index++)
++      assertThat(rawInputs.get(index)).isEqualTo(historyBefore.path("entries").get(index).path("metadata"));
++    assertThat(result.path("inputs")).hasSize(2);
++    assertThat(result.path("inputs").get(0).path("inputId").asText()).isEqualTo("input-destination");
++    assertThat(result.path("inputs").get(1).path("inputId").asText()).isEqualTo("input-label");
++    assertThat(new ObservedArtifactLowerer(C).recipes(result))
++        .isEqualTo(independent.path("artifact").path("inputRecipes"));
++    assertThat(independent.path("artifact").path("inputRecipes").toString()).doesNotContain("input-config");
++    switch (mutation) {
++      case "missing-unused-input" -> rawInputs.remove(2);
++      case "raw-row-order" -> {
++        JsonNode first = rawInputs.get(0);
++        rawInputs.set(0, rawInputs.get(1)); rawInputs.set(1, first);
++      }
++      case "same-id-metadata-substitution" -> object(rawInputs.get(2), "provenance")
++          .put("referenceId", "different-saved-reference");
++      default -> throw new IllegalArgumentException(mutation);
++    }
++    JsonNode invalidRaw = f.raw.deepCopy();
++    assertThat(f.raw.path("materializationEvidence")).isEqualTo(historyBefore);
++    assertThatThrownBy(f::build).isInstanceOfSatisfying(GuidedSessionException.class, refusal -> {
++      assertThat(refusal.getMessage()).isEqualTo("EVIDENCE_MISMATCH");
++      assertThat(refusal.status()).isEqualTo(422);
++    });
++    assertThat(f.raw).as("refusal does not repair either supplied copy").isEqualTo(invalidRaw);
++    object(f.raw, "materialization").set("inputs", completeInputs.deepCopy());
++    assertThat(f.raw).as("restore the exact original rows and their order").isEqualTo(rawBefore);
++    assertThat(f.build()).as("exact restoration recovers the complete parent").isEqualTo(f.expected);
++  }
++
++  @Test
++  void appendedHistoricalHeadPreservesOriginalVersionsAndIndependentWholeBasis() throws Exception {
++    JsonNode corpus = C.parse(Files.readString(Path.of(
++        "../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json")));
++    JsonNode vector = null;
++    for (JsonNode row : corpus.path("incrementalContracts").path("basisCases"))
++      if (row.path("name").asText().equals("appendedHistorical")) vector = row;
++    assertThat(vector).isNotNull();
++    JsonNode frozen = vector.path("basis"), frozenBefore = frozen.deepCopy();
++    JsonNode privateInputs = vector.at("/authority/privateInputs"), privateBefore = privateInputs.deepCopy();
++    JsonNode versions = frozen.at("/materializationEvidence/versions");
++    assertThat(versions).hasSize(2);
++    assertThat(versions.get(0).path("inputCount").asInt()).isEqualTo(1);
++    assertThat(versions.get(1).path("inputCount").asInt()).isEqualTo(3);
++    assertThat(versions.get(1).path("birthMaterializationRevision").asInt()).isEqualTo(3);
++    C.validate("v3/authored-inputs", privateInputs);
++    assertThat(privateInputs.path("inputs")).hasSize(3);
++    assertThat(hash(privateInputs)).isEqualTo(versions.get(1).path("authoredInputsHash").asText());
++    ObjectNode originalPrivateVersion = copy(privateInputs);
++    originalPrivateVersion.putArray("inputs").add(privateInputs.path("inputs").get(0).deepCopy());
++    assertThat(hash(originalPrivateVersion)).isEqualTo(versions.get(0).path("authoredInputsHash").asText());
++    assertThat(hash(originalPrivateVersion)).isNotEqualTo(hash(privateInputs));
++    ArrayNode completeMetadata = C.object().putArray("inputs");
++    for (int index = 0; index < 3; index++) {
++      JsonNode privateInput = privateInputs.path("inputs").get(index);
++      ObjectNode metadata = copy(privateInput); metadata.remove("value");
++      JsonNode entry = frozen.at("/materializationEvidence/entries").get(index);
++      assertThat(hash(privateInput)).isEqualTo(entry.path("inputHash").asText());
++      assertThat(metadata).isEqualTo(entry.path("metadata"));
++      assertThat(hash(metadata)).as("public metadata never replaces private document commitment")
++          .isNotEqualTo(entry.path("inputHash").asText());
++      completeMetadata.add(metadata);
++    }
++
++    // Declared synthetic current head: metadata bumped after immutable context2 birth3.
++    // Only this subject adapts the ordinary reconstruction helper; bootstrap/ACK/actions stay old.
++    var f = new Original(frozen);
++    JsonNode bootstrapBefore = f.raw.path("bootstrap").deepCopy(), actionsBefore = f.raw.path("actions").deepCopy();
++    JsonNode preparationsBefore = f.raw.path("preparations").deepCopy();
++    ObjectNode materialization = object(f.raw, "materialization");
++    materialization.put("contextRevision", 2).put("materializationRevision", 4);
++    for (String field : List.of("contextId", "workerId", "ownerFence", "authoredInputsHash"))
++      materialization.set(field, versions.get(1).path(field));
++    materialization.set("inputs", completeMetadata);
++    assertThat(materialization.path("contextRevision").asInt()).isEqualTo(2);
++    assertThat(materialization.path("materializationRevision").asInt())
++        .isGreaterThan(versions.get(1).path("birthMaterializationRevision").asInt());
++    assertThat(f.raw.at("/bootstrap/marker/context/contextRevision").asInt()).isEqualTo(1);
++    assertThat(f.raw.at("/bootstrap/marker/context/materializationRevision").asInt()).isEqualTo(1);
++    assertThat(f.raw.at("/bootstrap/marker/context/authoredInputsHash"))
++        .isEqualTo(versions.get(0).path("authoredInputsHash"));
++    for (int index = 0; index < preparationsBefore.size(); index++) {
++      JsonNode preparation = preparationsBefore.get(index);
++      int revision = index < 2 ? 1 : 2;
++      assertThat(preparation.path("materializationRevision").asInt()).isEqualTo(index < 2 ? 2 : 4);
++      assertThat(preparation.at("/proof/contextRevision").asInt()).isEqualTo(revision);
++      assertThat(preparation.at("/proof/authoredInputsHash"))
++          .isEqualTo(versions.get(revision - 1).path("authoredInputsHash"));
++      assertThat(actionsBefore.get(index).path("contextRevision").asInt()).isEqualTo(revision);
++      assertThat(actionsBefore.get(index).path("authoredInputsHash"))
++          .isEqualTo(versions.get(revision - 1).path("authoredInputsHash"));
++    }
++    assertThat(actionsBefore).isEqualTo(vector.at("/authority/ledgers"));
++    assertThat(preparationsBefore).isEqualTo(frozen.path("preparations"));
++
++    ObjectNode expected = copy(frozen), manifest = C.object();
++    ArrayNode sourceRows = manifest.putArray("sourceSteps"), references = manifest.putArray("configurationReferences");
++    for (JsonNode source : frozen.path("sourceSteps"))
++      sourceRows.addObject().put("stepId", source.path("stepId").asText()).put("text", source.path("source").asText());
++    for (JsonNode ref : frozen.path("configurationReferences")) {
++      ObjectNode copy = copy(ref); copy.remove("inputId"); references.add(copy);
++    }
++    expected.put("sourceManifestHash", hash(manifest));
++    assertThat(f.raw.path("sourceManifest")).isEqualTo(manifest);
++    assertThat(f.expected).as("only independently calculated synthetic manifest adjustment").isEqualTo(expected);
++    JsonNode rawBefore = f.raw.deepCopy();
++    ObjectNode actual = f.build();
++    assertThat(actual).isEqualTo(expected);
++    assertThat(actual.path("materializationEvidence")).isEqualTo(frozen.path("materializationEvidence"));
++    assertThat(actual.path("bootstrap")).isEqualTo(frozen.path("bootstrap"));
++    assertThat(actual.path("actions")).isEqualTo(frozen.path("actions"));
++    assertThat(actual.path("preparations")).isEqualTo(frozen.path("preparations"));
++    assertThat(actual.path("inputs")).hasSize(2);
++    assertThat(materialization.path("inputs")).hasSize(3);
++    assertThat(new ObservedArtifactLowerer(C).recipes(actual))
++        .isEqualTo(vector.path("expectedArtifact").path("inputRecipes"));
++    assertThat(f.raw.path("bootstrap")).isEqualTo(bootstrapBefore);
++    assertThat(f.raw.path("actions")).isEqualTo(actionsBefore);
++    assertThat(f.raw.path("preparations")).isEqualTo(preparationsBefore);
++    assertThat(f.raw).isEqualTo(rawBefore);
++    assertThat(frozen).isEqualTo(frozenBefore);
++    assertThat(privateInputs).isEqualTo(privateBefore);
+   }
+ 
+   @Test

@@ -1,0 +1,127 @@
+{
+  "status": "READONLY_EXECUTION_DESIGN_UNEXECUTED",
+  "sourceBindings": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "94c956b187deba2afa334f563273bcbb562ea19b52c6f3af5b8a89047b26d97f",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretRevocationSweep.java": "3118bceb6372b9e3e0b05c57d765dcc52aaf82725b4d3d9e70843b3bd805c322",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/ExecutionControlService.java": "1ecc7135423f45b6832095c370f6faaeeefbbf845d728c59beec5743ff041e02",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java": "4b6e7092e85d33d314bf10a3af0187247c186548ba4d4492b5a45fbf96e9ddd7",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java": "7e994ec1bcc7542f7cab05e7e8f448d542713ef90940fe018bf424864b993ebd",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/ConfiguredSecretUseAuthorization.java": "a9a3fb16cfe87cc9cb0ee020dc3fd8301b0a1a68b05f2194fcb5e0a92509eba5",
+    "studio-runner/src/server/runCoordinator.ts": "f2fb612e7312cf26768d6bc3ccc687a7735b5182a4b4a1be1578b8b2548ac77b",
+    "studio-runner/src/guided/ownership.ts": "030443d7478791e2f980763a4e30a4b2daba922836d0c5ac9650e141995b31c4",
+    "studio-runner/src/guided/transport.ts": "fc447a2efdf666c9b4ed319685e1d59875787fa11ec3a3e070171ae5da5ae3bf",
+    "studio-runner/src/guided/runtime.ts": "75fc33b1cd1cbc59bcb746811caff879d7217b22de8b08b374eec173dacf271c"
+  },
+  "authority": {
+    "intent": ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-b-core-revocation-design-intent.txt",
+    "parentInventory": "fresh-owner-p4-seam-inventory.json",
+    "original18Bodies": "No changes proposed to existing bodies; add two separately named cases only after explicit author release",
+    "wireAndPolicy": "No new routes on product, wire fields, secret nodes, policy origins, budgets, deadline overrides, fake cancellation or reconstructed authorization frames"
+  },
+  "existingFacts": [
+    "Real authenticated HTTP Core /api/v1/users/me fixture establishes accepted principal and CSI ownership. P3 mayUse is a controlled @Primary StudioSecretUseAuthorization port, not a remote production Core secret-entitlement implementation.",
+    "ConfiguredSecretUseAuthorization explicitly states production Core secret-use policy is not connected on this branch. Any future local pair is Core identity + real production authority paths with controlled entitlement policy; enterprise Core/Vault proof remains separate.",
+    "Choose new CSI-456/fixture-other scope and P3-owned principal aliases with exact P3_PERMITTED tuples; remove both genuine accepted-principal aliases only for this scope/PASS. Existing CSI-123/fixture unconditional compatibility entitlement would otherwise defeat a flip and must not be used.",
+    "SecretRevocationSweep.executionRevoked synchronously locks ledger/history, queries current-attempt actual RESOLVED releases, invokes names-only mayUse, writes revoked_at IS NULL and LIVE_RECHECK against actual release. control/progress invoke it; !worker profile scheduled sweep is not relied upon.",
+    "Guided claim synchronously invokes guidedRevoked before actual original claim transaction. Actual declaration or release denial sets real revoked_at, calls original secretRevoked, and original guarded lifecycle schedules REVOKED worker stop; original claim returns409 SECRET_USE_REVOKED. guidedClaimClient maps403 or actual409 code to REVOKED.",
+    "Ordinary secret control epoch absolute1s, genuine request + local Promise.race deadline1000ms; current validSecretControl verifies exact executionId/cancelRequested/revoked body. Guided secret renewal epoch absolute1s with actual AbortController1000ms. No virtual timers.",
+    "Existing /invocation observer runs after invoke returns and does not observe password-fill entry or a received cancellation; existing FINAL witness alone cannot measure authority cutoff."
+  ],
+  "firstPair": {
+    "selectors": [
+      "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+      "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds"
+    ],
+    "setup": [
+      "Reuse p3Case ownership tracking, valid secondary policy, source-before-manifest APP origin/PASS binding and genuine USER/PASS login model/source recipe. Real counted secret provider resolves PASS once. No synthesized action/admission/release/lease rows.",
+      "Reuse existing seven-action login flow unchanged. Add default-off private APP native sign-in response barrier after genuine accepted POST was received; hold the actual response under a bounded private wait while original signin action remains in flight. Ordinary learning/publishing occurs with barrier off, value-free publication counters zero, then fresh ordinary accepted scope replays with barrier on. Guided learning enables barrier only for the new case.",
+      "Wait for genuine PASS RELEASE/one physical provider read and native sign-in POST. Observe a fully completed actual nonrevoked control200 or guided renewal202 acknowledgement after that release, then remove exact scoped entitlement tuple immediately after that original acknowledgement. Record removal under one monotonic observer clock; no manually inserted revoked_at or direct stop call."
+    ],
+    "bound": {
+      "limitMilliseconds": 2000,
+      "start": "Observer monotonic time immediately BEFORE atomic tuple removal (conservative earlier bound); also retain completed authentic nonrevoked ack time and ack-to-removal delta",
+      "end": "Receipt of original worker invalidation/cancel consumption and browser primitive cutoff, including original poll scheduling, real Core/API request+response, HTTP/IPC queues and observer delivery. Terminal SQL or FINAL receipt is not substituted for cutoff.",
+      "clock": "Use one private Java System.nanoTime observer ingress clock for bracketed flip and original-forward worker/child notices; any clock conversion/queue latency remains included. Cross-process performance.now values must never be subtracted without a shared-domain proof.",
+      "assertions": [
+        "cutoffReceipt-start<=2000ms, no tolerance silently added",
+        "Current original native-call observer records no new fill/click/keystroke/submission after cutoff; allowed one already-entered signin call identified by ordinal, never blanket one-extra-step allowance",
+        "Release barrier after cutoff/terminal cleanup only; any residual completion from that sole in-flight call is recorded separately and cannot grant a later action",
+        "No extra counted provider reads, runner sends, model calls or admission consumption generated by timing/audit observations"
+      ],
+      "uncertainty": "No runtime proof yet. Observers must detect actual authority invalidation before resource destruction; cleanup may exceed2s and is measured separately."
+    },
+    "ordinary": [
+      "Original createApplication/current compiled observed child and fixed fullChromium; no alternate adapter or injected control provider. Tap original HTTP response completion and original child channel cancel delivery/receive or original abort signal, forwarding receiver/arguments/result once. Preserve request and frame bytes. No jobs/body/value/cookies/token logging.",
+      "Check actual ledger identity, attempt, admitted receipt, browser start, original runner CANCELLED if returned and actual revoked_at. AUTHORIZATION_REVOKED only when real ERROR+CANCELLED with revoked_at and no cancel_requested_at; unknown wire cause remains unmapped. Preserve any earlier real progressive USED."
+    ],
+    "guided": [
+      "Original guidedMain/current GuidedOwnership and guidedClaimClient; tap original full renewal response completion, original assignment/runtime invalidation and browser resource stop boundary without calling stop or altering failure. Actual denial must be403 or409 SECRET_USE_REVOKED, never429.",
+      "Check real consumed admission/fence/coordinate, earlier actual USED, real session revoked_at and genuine terminal CANCELLED/progress SECRET_USE_REVOKED as currently produced. Do not relabel guided result with an ordinary API error code."
+    ]
+  },
+  "minimalProposedSeams": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "change": "Default-off exact P3 entitlement-removal helper plus two new methods; authentic APP sign-in response barrier with bounded latch; numeric-only private phase/ack witness routes; real response/owner/audit queries and same owned cleanup."
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "change": "Existing generated ordinary.mjs/recorded-child.mjs test wrappers: original-forward HTTP complete-response observer for selected run and native invoke/fillPassword entry/return plus actual cancel/abort receipt observer. No global mutation of product schemas/frames, no rawrequest payload retained."
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "change": "Existing p3-guided-launch-counter.mjs test wrapper may instrument actual imported compiled runtime/ownership prototype methods and SDK original native calls only after exact method identity review; record class/method/ordinal/reason from closed enums and numeric timestamps, never args containing value."
+    }
+  ],
+  "missingSeamsAndReleaseConditions": [
+    "Current publication file does not expose a strict original ordinary parent-control HTTP client or child cancel-consumed observer. Need bounded source design of actual transport wrapper and child original channel emitter before authoring; if existing exports cannot be wrapped without authority change, request separately owned runner test seam rather than invent a frame or fake cancellation.",
+    "Current guided launcher counts launchPersistentContext only; no original ownership invalidation/native-method witness. Need verify accessible exported GuidedRuntime/GuidedOwnership methods in frozen compiled module, while retaining original receiver/args/result exactly once. Do not export additional production state purely for tests without release.",
+    "A fillPassword/invoke entry observer proves primitive invocation; it alone does not prove absence of underlying DOM writes after cancellation inside that already-inflight primitive. If literal keystroke/write cutoff demands stronger observation, propose numeric-only original CDP write boundary tap subject to independent collector/privacy review. No second password selector or raw CDP params/results channel.",
+    "First pair must not claim worst queue-phase based only on server-response timing. Actual full-body acknowledgement completed at worker and actual cutoff consumed by child require original-forward witness. Stop design at these absent seams until release."
+  ],
+  "durableOracles": [
+    "Snapshot authentic release rows, audit decision/usage IDs transiently for joins; export numeric local ordinals/counts only. Assert revoked_at nonnull and unchanged after duplicate/concurrent real control/renew checks, one LIVE_RECHECK REVOKED_MID_RUN per actual release, original scope/attempt/coordinate/version binding and existing terminal USED preserved.",
+    "Duplicate/concurrent polls follow actual live run while owner is still eligible; after terminal owner repeated control must preserve durable fact rather than create late LIVE_RECHECK. Query mayUse counts and scoped provider counts independently; zero additional value reads.",
+    "Do not fabricate positive summaries from generic CANCELLED/ACK_LOST or missing FINAL; absent effects remain approved audit UNKNOWN_OUTCOME where genuine release uncertainty exists.",
+    "After timing check run original owner cancel/drain/identity FINAL validation, class listener3500 lifecycle, real profiles/PIDs/endpoints/PG cleanup; cleanup evidence separate from2s cutoff."
+  ],
+  "followOns": [
+    {
+      "case": "actualCoreOrdinarySlowControlResponseStillStopsWithinTwoSeconds",
+      "cut": "After genuine completed nonrevoked ack and tuple removal, next original backend control checks false entitlement/commits real revoked_at; hold original response about900ms before forwarding unchanged body. Real1s request bound remains; include queue delay.",
+      "claims": "Validate actual stop<=2s and preserve cause only if independently committed revoked_at; do not manufacture body or header."
+    },
+    {
+      "case": "actualCoreGuidedSlowRenewalResponseStillStopsWithinTwoSeconds",
+      "cut": "Same about900ms delay on authentic post-recheck claim refusal body. Original403/409 code forwarded, not synthesized; synchronous guidedStop may win first and is identified."
+    },
+    {
+      "case": "actualCoreOrdinaryLostControlBodyStopsLocallyWithoutInventedRevocation",
+      "cut": "Original request/header processing occurred, then real selected response remains incomplete; actual timer/transport stop. Separate revoked_at-present and absent control.",
+      "claims": "UNKNOWN/locallyCANCELLED cause is not labeledAUTHORIZATION_REVOKED without real durable revocation. No completed ack invented."
+    },
+    {
+      "case": "actualCoreGuidedLostRenewalBodyStopsLocallyWithoutInventedRevocation",
+      "cut": "Original real request then incomplete actual claim response; actualAbort1000ms + lease-loss path, do not mockstatus/reason."
+    },
+    {
+      "case": "actualCoreCancellationPrecedesRecordedMidRunRevocation",
+      "cut": "Real authenticated public cancel records cancel_requested_at, then exact tuple flip; preserve ERROR/CANCELLED\u2192API CANCELLED when both real facts exist. Countermeasure uses no fakecancel frame."
+    },
+    {
+      "case": "actualCoreCompletedPassFailureAndLoginRequiredRemainUnchanged",
+      "cut": "After genuine terminal PASSED/FAILED/LOGIN_REQUIRED, tuple removal and actual control must retain terminal result, original positive usage and no fabricatedmidrun audit."
+    }
+  ],
+  "pendingBroaderProof": [
+    "This design executes no CoreHTTP/browser/PG/timing oracle. Enterprise Core secret-entitlement integration remains unsupported on branch and not inferred from controlled port. Slow/lost, queued worst-phase, one-inflight DOM effects, concurrent audit, cancellation precedence and completed-result controls need distinct real runs; P5/P6/P7/P8/full19/QA remain pending."
+  ],
+  "checks": {
+    "sourceEdits": false,
+    "runtimeExecuted": false,
+    "buildsOrTests": false,
+    "modelsOrSubagents": false
+  },
+  "nextReleaseRequest": "Explicit one-file author scope only after exact original transport/native witness seam review and current runtime/dist freeze. Coordinator sole formatter/compile/browser gate. Initial selectors only proposed first two; run original18 regression later on finalsource. Preserve source hashes and genuine ack/tuple/cutoff receipts with scalar evidence."
+}

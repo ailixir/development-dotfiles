@@ -1,0 +1,3 @@
+allprojects {
+  tasks.withType(Checkstyle).configureEach { maxHeapSize = "2g" }
+}

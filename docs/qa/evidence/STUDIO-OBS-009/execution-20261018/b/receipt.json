@@ -1,0 +1,249 @@
+{
+ "lane": "B",
+ "story": "STUDIO-OBS-009",
+ "wave": "W2",
+ "date": "2026-10-18",
+ "agent": "aiox-dev (Dex)",
+ "verdict": "GREEN",
+ "files": [
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+   "sha256Before": "27b972be0d98e0f792acd9ad18c13dddbc2ab8c95e3a97dfa60a7a97950c381c",
+   "sha256After": "c9b8019dfc341633b8647fdce492814b31682a9ed2d5fd61a8516384ffafbfab"
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceService.java",
+   "sha256Before": "0f3be7586414f80debcc704d1ef65374bf5f108487a590cbf7018398bf867c12",
+   "sha256After": "19578626f97f05314dd3b7ec9bd91f79e1011d70838df425653b0d2f2f9cb5a2"
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+   "sha256Before": "c17c52985de22d762a4afd96b68d6e42b661af89a963f44273c74ccbf27e259d",
+   "sha256After": "0be7b180d7ea483a0b99abca38a03a63f6518d6e3f23f5d833c5e12b67b26cc2"
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+   "sha256Before": "7e994ec1bcc7542f7cab05e7e8f448d542713ef90940fe018bf424864b993ebd",
+   "sha256After": "7e994ec1bcc7542f7cab05e7e8f448d542713ef90940fe018bf424864b993ebd"
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java",
+   "sha256Before": "a753b6eeae60c87ec617e1cfcf810702d4c18bab3d2e6d463b9f3b93ed12155b",
+   "sha256After": "66a3dd75faabd8a4645e8df6d7767e1ed274d8a698ab3e750c945fde7d12bd66"
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+   "sha256Before": "e2cd2f6c6e3c4aae1a5597134c5372eab38d8d92be6a3260826d74f0bec4beb1",
+   "sha256After": "ebb679fc8ccf3e2e5df0252c1e27b54471e22388541bd3e35b82f90f007ed86f"
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedEvidenceConfiguration.java",
+   "sha256Before": "a44f726528edf8c60956717603299c6a480ceb3fa4b7021b3adced7d3660bdc7",
+   "sha256After": "27f9415d7a763f45f8297e1dec841953e41f3922ee8ffa1126110fe16ba9f639"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/StudioServiceWriteAuthorizationTest.java",
+   "sha256Before": "6139389c230e19c69909610c774f132cec267c9f9992d8cd99973471d44cbcd8",
+   "sha256After": "b7d546e86b9a15971d2bcef99625a46dbb3058b08ae31f1367759af1e3f98aae"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendIT.java",
+   "sha256Before": "9f2d3deb0741838593aebc33ff063e09631341950607dcf853171f53130a5487",
+   "sha256After": "89c2656553437dfb3d54e62c642165e966f6ddee1c2a385da254a3237dd3c974"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/internal/RunnerReportProjectionTest.java",
+   "sha256Before": "99f8e744a84185fa03e136c1d6c01fdb536ee2621b3e9702aaada7ec4338ff4c",
+   "sha256After": "8dc5e41c2d8592fa791c7fbf3c0cf006c9aae6ae4e847d501967a8697e4ae622"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/dispatch/PreReadyRevocationProbeIT.java",
+   "sha256Before": "6adce6065b88ef12ab84d9a983fa978cac4f34d7a255876aea81fade68536851",
+   "sha256After": "68b01220ee3c422619d7fd6ef0bb8879157929cbe3e373e26bebade31c656a5c"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceTest.java",
+   "sha256Before": "7204b45fa9249060c80a55db91adb76a29d13e367ced25e85aa58cb1ec44af98",
+   "sha256After": "cd8eb34ad78c6ea20a2b14734dee5440461e1484610768de14ad505010789c8f"
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/StudioReadLockOrderIT.java",
+   "sha256Before": null,
+   "sha256After": "2c138ff645fa051e6a2548b745a47e43372687897b9e5fc4a9393568692752f0"
+  }
+ ],
+ "notEdited": [
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+   "sha256": "7e994ec1bcc7542f7cab05e7e8f448d542713ef90940fe018bf424864b993ebd"
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java",
+   "sha256": "fc17ee639dee403a461bc454a794569b01c44f9c880dbb9d74b2e46c091bb78a"
+  }
+ ],
+ "runs": [
+  {
+   "label": "obs009-b-red01",
+   "counts": {
+    "total": 79,
+    "passed": 66,
+    "failed": 13,
+    "errors": 0,
+    "skipped": 0
+   },
+   "wrapperSourceStable": false,
+   "distStable": true,
+   "resultsSha256": "5eab9e0c8b7ac16270d7d6aa5dc458f394775352e8fdd9b7f8a8eb0a40176ecc"
+  },
+  {
+   "label": "obs009-b-01",
+   "counts": {
+    "total": 187,
+    "passed": 185,
+    "failed": 2,
+    "errors": 0,
+    "skipped": 0
+   },
+   "wrapperSourceStable": false,
+   "distStable": true,
+   "resultsSha256": "413d2216352d5ec007dc78762f0560e8abaddf27be1efed82a0097dc096cd898"
+  },
+  {
+   "label": "obs009-b-02",
+   "counts": {
+    "total": 13,
+    "passed": 5,
+    "failed": 8,
+    "errors": 0,
+    "skipped": 0
+   },
+   "wrapperSourceStable": false,
+   "distStable": true,
+   "resultsSha256": "48b7d69b434aa6be505f36b0cb926ed8aa6bae30d06481c2b1e0888647f5ebec"
+  },
+  {
+   "label": "obs009-b-03",
+   "counts": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+   },
+   "wrapperSourceStable": false,
+   "distStable": true,
+   "resultsSha256": "631ccfd2c2d21f089ab63d83a6c06fdc87a65ab9a5593a2698b06bb31aaafec6"
+  },
+  {
+   "label": "obs009-b-04",
+   "counts": {
+    "total": 413,
+    "passed": 413,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+   },
+   "wrapperSourceStable": false,
+   "distStable": true,
+   "resultsSha256": "3bb5a563cacb6dbe4ddeec201d0fb3adc547c99c4803d1075d75191fd5abc18a"
+  }
+ ],
+ "creditedRun": "obs009-b-04",
+ "creditedCounts": {
+  "total": 413,
+  "passed": 413,
+  "failed": 0,
+  "skipped": 0
+ },
+ "sourceStableNote": "wrapper exit 2 on obs009-b-03/-04 is sourceStable:false only (other lanes editing; root R3 non-evidentiary)",
+ "distDigest": "897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c",
+ "staticGates": {
+  "log": "b/obs009-b-static-gates-gradle.log",
+  "spotlessCheck": "pass",
+  "checkstyleTest": "pass",
+  "spotbugsMain": "pass",
+  "checkstyleMain": "FAILED outside lane B: guided/session/GuidedSessionConfiguration.java:292 WhitespaceAround (D3)"
+ },
+ "mutations": [
+  {
+   "id": "R1-M",
+   "expect": "R1-1 red",
+   "seen": "red",
+   "run": "obs009-b-mut01"
+  },
+  {
+   "id": "R1-M2",
+   "expect": "R1-3 red",
+   "seen": "red",
+   "run": "obs009-b-mut02"
+  },
+  {
+   "id": "R1-M3",
+   "expect": "R1-7 red",
+   "seen": "red",
+   "run": "obs009-b-mut03"
+  },
+  {
+   "id": "A-M",
+   "expect": "A2 red",
+   "seen": "red",
+   "run": "obs009-b-mut01"
+  },
+  {
+   "id": "TF-3-M",
+   "expect": "unit (e) + IT stranger red",
+   "seen": "red",
+   "run": "obs009-b-mut01"
+  },
+  {
+   "id": "P2-M",
+   "expect": "removed-keys red",
+   "seen": "red",
+   "run": "obs009-b-mut01"
+  },
+  {
+   "id": "D-11-M",
+   "expect": "self-stop vs drift pin red",
+   "seen": "red",
+   "run": "obs009-b-mut01"
+  },
+  {
+   "id": "LR-M (BL)",
+   "expect": "LR case 1 red",
+   "seen": "red",
+   "run": "obs009-b-mut01"
+  }
+ ],
+ "tripwires": {
+  "booleanSameIdentityBodies": 1,
+  "contextRevisionEqEqInEvidencePackage": 0
+ },
+ "acsCoveredLocal": [
+  "AC-9 TF-3",
+  "AC-11 R1 a-c",
+  "AC-11 ADJ-1 a-c (report boundary)",
+  "AC-11 f-h backend incl D-11 (pins, no production change)",
+  "AC-1 P2 b projection"
+ ],
+ "owedExternally": [
+  "R1 d joined proof (B-W3 after F-merge)",
+  "ADJ-1 joined real-runner leg (B-W3, F-merge dist digest)",
+  "QA security co-sign on ADJ-1 at the B gate",
+  "Aria ADR-002 s29.2 item 7 sentence and s13 row",
+  "runner lane: R10c runner half, keep outer CANCELLED for recorded revocation",
+  "C9/runner lane: P2 stamp removal, contract text, digest pins"
+ ],
+ "findings": [
+  "checkstyleMain red on D3 file GuidedSessionConfiguration.java:292",
+  "LR changes the stop-request reason to EXPIRED for an EXPIRED context lifecycle",
+  "P2: backend reads only observed* keys; validator is now 3:<hash>",
+  "R1: pending delivery at head 1 would answer RUNTIME_INCOMPATIBLE (inferred unreachable)"
+ ],
+ "batons": [
+  "land GuidedMaterializationService, GuidedSessionEvidenceService (6-arg), GuidedEvidenceConfiguration, GuidedSessionEvidenceTest, GuidedEvidencePendingAppendIT together",
+  "B-W3 after F-merge",
+  "QA ADJ-1 co-sign",
+  "ADR-002 note"
+ ]
+}

@@ -1,5 +1,7 @@
 # Studio inference execution record
 
+> **Superseded (2026-10-12):** Superseded by [ADR-SC-005](ADR-SC-005-single-path-observed-authoring.md) (single observed path; compile-to-READY removed in STUDIO-OBS-012A).
+
 Updated 2026-09-17 after story 10.27 failure remediation. Local core implementation is complete and independently reviewed within the scopes below. Release readiness remains unproven: external integration, load/evaluation and rollout gates are open. Changes are uncommitted in the user-selected existing `wt/epic` checkout, branch `epic/EPIC-10`, based on `e1684f8c74429d80bb68fb0d8718f66b22a5677f` plus the preserved integration fixes. No push, shared-environment migration or deployment was performed.
 
 ## Implemented

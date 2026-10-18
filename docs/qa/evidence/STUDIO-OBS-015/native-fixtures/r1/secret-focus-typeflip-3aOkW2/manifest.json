@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+  "caseName": "secret-focus-typeflip",
+  "evidenceId": "0d180c95-7198-4bd8-a287-53a3b3ecc81e",
+  "assertionPhaseStatus": "FAILED",
+  "exportStatus": "VERIFIED_EXPORT",
+  "privateRecoveryDirectory": "secret-prefix-native-0CLerG",
+  "commitments": {},
+  "records": [
+    {
+      "role": "secret-prefix",
+      "sessionId": "7e3d6e68-5f1d-4e75-83ee-7f4d3193beba",
+      "contextId": "6301baec-7994-4377-9b5e-fd38b8d074ed",
+      "contextRevision": 1,
+      "recordingId": "48321c62-e82b-43fb-b1f7-44c3ee223588",
+      "state": "STORED",
+      "partial": false,
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000801",
+          "admissionId": "4848ad8b-ef5c-4b54-95be-db5a4fa5dead",
+          "ordinal": 0,
+          "startMs": 26,
+          "endMs": 42
+        },
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000802",
+          "admissionId": "5aecf50e-7880-4224-aa82-8a4edd52dd78",
+          "ordinal": 0,
+          "startMs": 80,
+          "endMs": null
+        }
+      ]
+    },
+    {
+      "role": "secret-prefix",
+      "admissionId": "5aecf50e-7880-4224-aa82-8a4edd52dd78",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-000000000802",
+        "ordinal": 0
+      },
+      "state": "UNKNOWN_OUTCOME",
+      "outcomeCode": "TARGET_CHANGED",
+      "attemptOrdinal": 0,
+      "contextRevision": 1,
+      "operationHash": "529624c60969bcb9916e7d3586cf6d4e7d4ba60b82162319949bc7dfdb2bdafd",
+      "authoredInputsHash": "1f86f6af53b53d75bc66179de81979830e0718e07208436d71e5ac831a5c46b4"
+    }
+  ],
+  "phases": [
+    {
+      "role": "secret-prefix",
+      "media": "REGISTERED",
+      "seekFrames": "NOT_REACHED"
+    }
+  ],
+  "files": [
+    {
+      "role": "secret-prefix",
+      "state": "PRIVATE_RETAINED_UNVERIFIED",
+      "byteLength": 9624,
+      "sha256": "493b267e8b859a9cfb21e8841f77c2cd69bc585f2c4560854772c68f018b92b9",
+      "privacy": "UNVERIFIED",
+      "checks": {
+        "assertions": "FAILED",
+        "decoder": "NOT_REACHED",
+        "seek": "NOT_REACHED"
+      }
+    }
+  ],
+  "cleanupAllowed": false
+}

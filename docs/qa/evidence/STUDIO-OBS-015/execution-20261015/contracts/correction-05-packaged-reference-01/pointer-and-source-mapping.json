@@ -1,0 +1,453 @@
+{
+  "authority": "Root narrow packaged synchronization release; canonical current sources only",
+  "files": [
+    {
+      "path": "studio-runner/fixtures/observed-reference/accepted-observed-choice.json",
+      "source": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json#/observedChoice",
+      "mode": "exact whole object counterpart",
+      "canonicalHash": "1c10d4f0165574e2d9e9a58f6d93f775529ad30631baf828265eca8478991c18",
+      "deltas": [
+        {
+          "pointer": "/basis/sourceManifestHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "e806db69aa5de4ffa02b74b768cc0ba92b17f55078da2967996fcf303f23d453",
+          "newHash": "3169bd0cda726dae583e36125fea9245c9eece1251b23e6d01dbe853b5616479"
+        },
+        {
+          "pointer": "/basis/authoredInputsHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "66525ab4ce3e38a7444f00922caa4998d2eee33d227ae192ab1fdd4a59158ea8",
+          "newHash": "f042eaae06f19cdf3fb4f9eff65e738b52d06d087c7342f9b5c7961e9778da6e"
+        },
+        {
+          "pointer": "/basis/bootstrap/inputsHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "66525ab4ce3e38a7444f00922caa4998d2eee33d227ae192ab1fdd4a59158ea8",
+          "newHash": "f042eaae06f19cdf3fb4f9eff65e738b52d06d087c7342f9b5c7961e9778da6e"
+        },
+        {
+          "pointer": "/basis/obligationAssociations",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "f3f4af33779d9aa15052740ad751feb9cc48885fdab16ed7b67221c2170d937b",
+          "newHash": "353c2da36a61edca3e940a36b6ed33b4c2b192f8fd5c0b1aac2ddcb3bf76d2ee"
+        },
+        {
+          "pointer": "/basis/inputs",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "59da0ba9dc3ed35782109596f4aa9dc276a9e96182690006dd570beb19ebaaf2",
+          "newHash": "a28711f22f9e7c909f9bdf0c05a390a1e1233b0c56445c7d0b16a7edf4531858"
+        },
+        {
+          "pointer": "/basis/configurationReferences",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "838180659d644cfc8ee7723ed7b95543376b9dd552182aef264707db69b10439",
+          "newHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "pointer": "/basis/preparations",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "a254606f635155407634896e6bc883da756e9ec66b97176b0c35b1c51ee5673b",
+          "newHash": "4981f17678157f98ecb61c45a99d6726378b78e350c615318bc109bd8a4a2ea4"
+        },
+        {
+          "pointer": "/basis/actions",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "3ca2a2e1303a0744e15814aaf92ffec771184a83299bad5fa32c271b56dcceaa",
+          "newHash": "bb6edf5af65a15f8ad984050b4dd23dc8d3442a7b46d634b1b5163c6916851f3"
+        },
+        {
+          "pointer": "/basis/materializationEvidence",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "a28b82861884a6afd6314f30eddf21295a082fb79a7bb6c9631b60f166b48ca9"
+        },
+        {
+          "pointer": "/basis/incrementalEvidence",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+        },
+        {
+          "pointer": "/basis/snapshotEvidence",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "6463f2577a1c4ee6a071f2860c1bdfd1e45eb09dc60cf03452107f86c6833158"
+        },
+        {
+          "pointer": "/artifact/learnedPlan/authoredInputsHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "66525ab4ce3e38a7444f00922caa4998d2eee33d227ae192ab1fdd4a59158ea8",
+          "newHash": "f042eaae06f19cdf3fb4f9eff65e738b52d06d087c7342f9b5c7961e9778da6e"
+        },
+        {
+          "pointer": "/artifact/learnedPlan/stepSnapshotHashes",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "84f1d772e61fc303f0133afd7e4366a3d6b215d41d521e0e022424e7914efefd"
+        },
+        {
+          "pointer": "/artifact/learnedPlan/reusedFrom",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+        },
+        {
+          "pointer": "/artifact/learnedPlan/incremental",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+        },
+        {
+          "pointer": "/artifact/learnedPlanHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "ff697f54e3eabbd92c4cb04635accc3b476570d82590f9c0f1d997ed73797967",
+          "newHash": "37c19132cb318857e409f7973557a4e3d24524b2a97ac5ae47556368718d70a1"
+        },
+        {
+          "pointer": "/artifact/inputRecipes",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "042b8d5fd752e29c3ba110b3fa0c42e7f4d8ace3bfffd1fed6fe63e73e6f6e90",
+          "newHash": "15eb4dd3c7f5c46eb6b4959ad8fa6eed641be80b5656d915621e3406997cb9eb"
+        },
+        {
+          "pointer": "/artifact/replayPolicy/learnedPlanHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "ff697f54e3eabbd92c4cb04635accc3b476570d82590f9c0f1d997ed73797967",
+          "newHash": "37c19132cb318857e409f7973557a4e3d24524b2a97ac5ae47556368718d70a1"
+        },
+        {
+          "pointer": "/artifact/replayPolicy/admissionProvenanceHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "9818a6d2f60d1ab06dd951ddc25d0876746c4588f090785c89ac36e6e141fc02",
+          "newHash": "43abd95a3461f7e48344e0dcdf6ca7878e8bcd587f998d4a194ae6fdb97c5a95"
+        },
+        {
+          "pointer": "/artifact/replayPolicy/publicationEvidenceHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "26bb2a4c3229e06283374d8f467fed764d0e5d96d98ae5a6f4021f72298a2973",
+          "newHash": "8b0416535f9f35f4dc5da9efbe2c53f354cd2da3d0666bb44a563496e2edd83c"
+        },
+        {
+          "pointer": "/artifact/replayPolicy/inputs",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "042b8d5fd752e29c3ba110b3fa0c42e7f4d8ace3bfffd1fed6fe63e73e6f6e90",
+          "newHash": "15eb4dd3c7f5c46eb6b4959ad8fa6eed641be80b5656d915621e3406997cb9eb"
+        },
+        {
+          "pointer": "/hashes/learnedPlanHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "ff697f54e3eabbd92c4cb04635accc3b476570d82590f9c0f1d997ed73797967",
+          "newHash": "37c19132cb318857e409f7973557a4e3d24524b2a97ac5ae47556368718d70a1"
+        },
+        {
+          "pointer": "/hashes/artifactHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "f60d961b0ceb9463c73fd90c5bdeb1824749f2954aed11ee3a3371d46bcb5106",
+          "newHash": "39f863022c405d7a257b7a561d8d188098692c13152b4d44961748bd78607f86"
+        },
+        {
+          "pointer": "/hashes/referencePolicyHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "baa789c5a21af42b67f170820033692ad3251f7d128a9afec23b518e9e082aa8",
+          "newHash": "08d0f406ff08460308f8583acddfa6b6f48e3ec1e6cfc681877cbe725a75b64a"
+        },
+        {
+          "pointer": "/hashes/operationEquivalenceHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "faecfe96a87092b45bfe544f92a749dcd6cedde1f3f081f45b16db3bb297af36",
+          "newHash": "2ccc40c6d9215a208863f43441f43ce5096f0e225b09f8b85076a3b0587847ba"
+        },
+        {
+          "pointer": "/hashes/admissionProvenanceHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "9818a6d2f60d1ab06dd951ddc25d0876746c4588f090785c89ac36e6e141fc02",
+          "newHash": "43abd95a3461f7e48344e0dcdf6ca7878e8bcd587f998d4a194ae6fdb97c5a95"
+        },
+        {
+          "pointer": "/hashes/publicationEvidenceHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "26bb2a4c3229e06283374d8f467fed764d0e5d96d98ae5a6f4021f72298a2973",
+          "newHash": "8b0416535f9f35f4dc5da9efbe2c53f354cd2da3d0666bb44a563496e2edd83c"
+        },
+        {
+          "pointer": "/snapshotAuthority",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "c03901c6a34c1a70fddc92438f18eb23652cafb00cf01ae1172910e65be70e6f"
+        }
+      ]
+    },
+    {
+      "path": "studio-runner/fixtures/observed-reference/fresh-order-reference.json",
+      "source": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json#/{basis,artifact,snapshotAuthority}",
+      "mode": "exact basis/artifact/authority; description preserved; all eleven hashes recomputed from complete preimages",
+      "hashes": {
+        "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+        "configurationHash": "dc52a6ec856c6e30b512d428302844a530a3dc1b3dcf83ffa27e2e42401e23ee",
+        "authoringHash": "e5e180ed2cfadcd2beaf593b3fe050e22349ae16658b24b7dd00596dee1ca4fe",
+        "learnedPlanHash": "6b4c238335bcd42ffe873d2da5085a965a3785cabbec0c8bce6e3e60a062e507",
+        "artifactHash": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c",
+        "referencePolicyHash": "ddf27b619c9379b5070e381ce8fa475870cb87e8cd4b04408a898be7ca100994",
+        "operationEquivalenceHash": "17f2aec0d36e9dbcc95200157f2c187df60ab6f9e59a85b8a9c8040103e4d62d",
+        "admissionProvenanceHash": "d0f90ab35bb02f72c13f4e190c6cd3f078208ff770878d8f267abc377fe49b23",
+        "publicationEvidenceHash": "2ee83bcaf9f44c71cd58a96ad6b496337a5bb54e07ee0ae387e58f4ed2f87963",
+        "runAuthorizationHash": "18714bc2b1a152d048d8999d0da9f259cb3891f82346a91e8d0984b1fa856235",
+        "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8"
+      },
+      "deltas": [
+        {
+          "pointer": "/basis/sourceManifestHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "e806db69aa5de4ffa02b74b768cc0ba92b17f55078da2967996fcf303f23d453",
+          "newHash": "3169bd0cda726dae583e36125fea9245c9eece1251b23e6d01dbe853b5616479"
+        },
+        {
+          "pointer": "/basis/authoredInputsHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "66525ab4ce3e38a7444f00922caa4998d2eee33d227ae192ab1fdd4a59158ea8",
+          "newHash": "f042eaae06f19cdf3fb4f9eff65e738b52d06d087c7342f9b5c7961e9778da6e"
+        },
+        {
+          "pointer": "/basis/bootstrap/inputsHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "66525ab4ce3e38a7444f00922caa4998d2eee33d227ae192ab1fdd4a59158ea8",
+          "newHash": "f042eaae06f19cdf3fb4f9eff65e738b52d06d087c7342f9b5c7961e9778da6e"
+        },
+        {
+          "pointer": "/basis/obligationAssociations",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "e5442aa219cf804e52acd800b86db9530c4aa4843bbf11cbc12c22e8e78da496",
+          "newHash": "8eabf4581f35dda10ae908e09da95c683b9aed300ba3b3dd67fc3215e2be66c8"
+        },
+        {
+          "pointer": "/basis/inputs",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "59da0ba9dc3ed35782109596f4aa9dc276a9e96182690006dd570beb19ebaaf2",
+          "newHash": "a28711f22f9e7c909f9bdf0c05a390a1e1233b0c56445c7d0b16a7edf4531858"
+        },
+        {
+          "pointer": "/basis/configurationReferences",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "838180659d644cfc8ee7723ed7b95543376b9dd552182aef264707db69b10439",
+          "newHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        {
+          "pointer": "/basis/preparations",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "2489a6818fdccb87ba80621bee749a2565768aa63c5b3cee9ef2bc1002ad2323",
+          "newHash": "f271e1dde0ce325e96177aad95a852abce57bc3b392da1d5e390283e21670b92"
+        },
+        {
+          "pointer": "/basis/actions",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "ec349f2181eb9de54060458f7a80422f34f45e1b9142d8776852aad48f4068fe",
+          "newHash": "26f26653c1f61c58840673332a910499097aa8a2c3111c388e0fff9f57500380"
+        },
+        {
+          "pointer": "/basis/materializationEvidence",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "a28b82861884a6afd6314f30eddf21295a082fb79a7bb6c9631b60f166b48ca9"
+        },
+        {
+          "pointer": "/basis/incrementalEvidence",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+        },
+        {
+          "pointer": "/basis/snapshotEvidence",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "6463f2577a1c4ee6a071f2860c1bdfd1e45eb09dc60cf03452107f86c6833158"
+        },
+        {
+          "pointer": "/artifact/learnedPlan/authoredInputsHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "66525ab4ce3e38a7444f00922caa4998d2eee33d227ae192ab1fdd4a59158ea8",
+          "newHash": "f042eaae06f19cdf3fb4f9eff65e738b52d06d087c7342f9b5c7961e9778da6e"
+        },
+        {
+          "pointer": "/artifact/learnedPlan/stepSnapshotHashes",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "d816b859681fba82b114d215cd78d7be960459d7acd51dafa102474601d09b57"
+        },
+        {
+          "pointer": "/artifact/learnedPlan/reusedFrom",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+        },
+        {
+          "pointer": "/artifact/learnedPlan/incremental",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+        },
+        {
+          "pointer": "/artifact/learnedPlanHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "e5a0e0c34e5ce4aa822f5bd2dbcde78330f642eb42786205276a69f91ccf414f",
+          "newHash": "083788c4a3c69d4e38762282d095c494899c667b1f2fba6969b14cafbd35854f"
+        },
+        {
+          "pointer": "/artifact/inputRecipes",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "042b8d5fd752e29c3ba110b3fa0c42e7f4d8ace3bfffd1fed6fe63e73e6f6e90",
+          "newHash": "15eb4dd3c7f5c46eb6b4959ad8fa6eed641be80b5656d915621e3406997cb9eb"
+        },
+        {
+          "pointer": "/artifact/replayPolicy/learnedPlanHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "e5a0e0c34e5ce4aa822f5bd2dbcde78330f642eb42786205276a69f91ccf414f",
+          "newHash": "083788c4a3c69d4e38762282d095c494899c667b1f2fba6969b14cafbd35854f"
+        },
+        {
+          "pointer": "/artifact/replayPolicy/admissionProvenanceHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "3b1ca8d553572e8cb6ea80b8f0459a6158797d412f70b0d170aa3af695940c6f",
+          "newHash": "e4cafdfaa59f6b19b0ecbdb24a601417ab2dfada29fc09733a38b6b96b67234f"
+        },
+        {
+          "pointer": "/artifact/replayPolicy/publicationEvidenceHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "40043032dd49d69914009f8e300318c9db4cc7304d38ca4272ecac84ff64fbbb",
+          "newHash": "5740d2b8d2a54f15f876bbd5388c24b22b11614002c33bee0e58c46d5b2b47a9"
+        },
+        {
+          "pointer": "/artifact/replayPolicy/inputs",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "042b8d5fd752e29c3ba110b3fa0c42e7f4d8ace3bfffd1fed6fe63e73e6f6e90",
+          "newHash": "15eb4dd3c7f5c46eb6b4959ad8fa6eed641be80b5656d915621e3406997cb9eb"
+        },
+        {
+          "pointer": "/hashes/learnedPlanHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "e5a0e0c34e5ce4aa822f5bd2dbcde78330f642eb42786205276a69f91ccf414f",
+          "newHash": "083788c4a3c69d4e38762282d095c494899c667b1f2fba6969b14cafbd35854f"
+        },
+        {
+          "pointer": "/hashes/artifactHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "a9db73208fcf460a49481cb5aa42e5540bd1a28f9e97ccd946055c5618f1e757",
+          "newHash": "c054a1d0e98d0d321483f61381f4af894484ccc238c5cb1de84052417a3c9fc6"
+        },
+        {
+          "pointer": "/hashes/referencePolicyHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "95fb2fd7a7c63fbab67158f94185f4818653886248d576340d130e1698a62e9f",
+          "newHash": "7c97e18882ecbd779895d0d587f30a4c027cada72818a6a82522091185504cae"
+        },
+        {
+          "pointer": "/hashes/operationEquivalenceHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "7956df7f43c6660b7dc25c5f88378b77febef462f560f73eeef50beb9ecad562",
+          "newHash": "f99e3e1610a7942828aa630a332b76b930cbfec6fb94348ffcd3d337569d6a81"
+        },
+        {
+          "pointer": "/hashes/admissionProvenanceHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "3b1ca8d553572e8cb6ea80b8f0459a6158797d412f70b0d170aa3af695940c6f",
+          "newHash": "e4cafdfaa59f6b19b0ecbdb24a601417ab2dfada29fc09733a38b6b96b67234f"
+        },
+        {
+          "pointer": "/hashes/publicationEvidenceHash",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "40043032dd49d69914009f8e300318c9db4cc7304d38ca4272ecac84ff64fbbb",
+          "newHash": "5740d2b8d2a54f15f876bbd5388c24b22b11614002c33bee0e58c46d5b2b47a9"
+        },
+        {
+          "pointer": "/snapshotAuthority",
+          "oldPresent": false,
+          "newPresent": true,
+          "oldHash": null,
+          "newHash": "c03901c6a34c1a70fddc92438f18eb23652cafb00cf01ae1172910e65be70e6f"
+        }
+      ],
+      "canonicalFixtureRecipeCount": 2,
+      "priorStaleRecipeCount": 3,
+      "configurationReferencesBefore": 1,
+      "configurationReferencesAfter": 0,
+      "scope": "Authorized exact canonical counterpart synchronization. Tests depending on the old unused configuration metadata may still require later scenario-preserving fixture planning; no test/runtime compensation."
+    },
+    {
+      "path": "studio-runner/fixtures/observed-reference/manifest.json",
+      "source": "docs/specs/studio-observed-authoring/contracts/v3/publication-canonical-vectors.json",
+      "mode": "exact canonicalVectors; catalog identity and fixture unchanged",
+      "oldPositiveVectors": 8,
+      "currentPositiveVectors": 50,
+      "negativeVectorsUnchanged": true,
+      "deltas": [
+        {
+          "pointer": "/canonicalVectors/positive",
+          "oldPresent": true,
+          "newPresent": true,
+          "oldHash": "6be563575e9a307ed4df8283b1a9b86940e473542b88b2496c9ae541c3683d8c",
+          "newHash": "c0798506bd1147728c6c7dd2642910ffd20b2b217bf112b2502a80add8e6bb5b"
+        }
+      ]
+    }
+  ],
+  "commitments": {
+    "canonicalObservedSchemaBundleHash": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
+    "canonicalReferenceBundleBeforeHash": "4478293e3f5faaf6370bbc49e9109f6f186fa40aa487fc914bee6efe916b7389",
+    "canonicalReferenceBundleAfterHash": "3b1fcc67f83f5b2653eac2807b9fea0bdd6816ca08fb2d55f0c03d702040afe9",
+    "sourceBuildReferenceHash": "Synthetic canonical publication BuildIdentity remains unchanged; actual reference catalog hash is measured here, never written as fake runtime metadata. Existing build emitter will measure full source catalog on a separately authorized build."
+  }
+}

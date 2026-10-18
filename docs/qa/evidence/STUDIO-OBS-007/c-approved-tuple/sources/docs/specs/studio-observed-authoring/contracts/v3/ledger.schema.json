@@ -1,0 +1,176 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v3/ledger.schema.json",
+  "title": "Studio observed v3 ledger",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 3
+    },
+    "sessionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "coordinate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stepId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "stepId",
+        "ordinal"
+      ]
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "requestDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "scopeHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "operationHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "documentId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "ownerFence": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "admission": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "admissionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "authorizationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "admittedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
+        },
+        "policyDecisionHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "admissionId",
+        "authorizationId",
+        "admittedAt",
+        "policyDecisionHash"
+      ]
+    },
+    "state": {
+      "enum": [
+        "ADMITTED",
+        "DISPATCHING",
+        "SUCCEEDED",
+        "FAILED",
+        "UNKNOWN_OUTCOME",
+        "REVOKED"
+      ]
+    },
+    "dispatchCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "outcomeCode": {
+      "enum": [
+        "PENDING",
+        "OK",
+        "ASSERTION_FAILED",
+        "TARGET_CHANGED",
+        "POLICY_DENIED",
+        "TIMEOUT",
+        "ACK_LOST",
+        "CANCELLED"
+      ]
+    },
+    "assertionPassed": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "executionEvidence": {
+      "$ref": "https://checks.citi.example/contracts/observed/v3/execution-evidence.schema.json"
+    },
+    "evidenceHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "authoredInputsHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "contextRevision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "preparationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "sessionId",
+    "coordinate",
+    "idempotencyKey",
+    "requestDigest",
+    "scopeHash",
+    "operationHash",
+    "generation",
+    "documentId",
+    "ownerFence",
+    "admission",
+    "state",
+    "dispatchCount",
+    "outcomeCode",
+    "assertionPassed",
+    "executionEvidence",
+    "evidenceHash",
+    "authoredInputsHash",
+    "contextRevision",
+    "preparationId"
+  ]
+}

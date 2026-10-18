@@ -1,0 +1,751 @@
+{
+  "schema": 1,
+  "story": "STUDIO-OBS-014",
+  "reviewer": "Quinn independent strict QA",
+  "updated": "2026-10-15T02:00:55.366661+00:00",
+  "decision": "COMPLETED_RUNNER_EVIDENCE_ACCEPTED_FOR_PREAUDIT;FINAL_BACKEND_AND_EXECUTOR_HANDOFF_PENDING",
+  "formalStoryGate": false,
+  "doneAllowed": false,
+  "independentRechecks": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-runner-independent-rechecks.json",
+    "sha256": "465f66721fdb0e2c45112b35dac013b918d4d88de43947866ba0b6feb86df2a6",
+    "allGateLogsMatch": true,
+    "allGateSourcesDistStable": true,
+    "allNativeArtifactHashesMatch": true,
+    "allProfileFactsHashesMatch": true
+  },
+  "currentFreeze": {
+    "sourceCount": 1583,
+    "sourceDigest": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+    "distCount": 238,
+    "distDigest": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+    "sourceDrift": [],
+    "distDrift": []
+  },
+  "sixCompletedRunnerGates": [
+    {
+      "label": "runner-unit-final-attempt05",
+      "resultPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-unit-final-attempt05-results.json",
+      "resultSha256": "eebcdd3f4a865ba6090547733056303f9bd1d374ad5d1adbc53113c840ff698d",
+      "command": [
+        "./node_modules/.bin/vitest",
+        "run",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-unit-final-attempt05-vitest.json"
+      ],
+      "exit": 0,
+      "started": "2026-10-15T01:48:51.439125+00:00",
+      "logHashMatches": true,
+      "sourceManifestBefore": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceManifestAfter": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceFilesEqual": true,
+      "distBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distFilesEqual": true,
+      "independentCounts": {
+        "passed": 1529,
+        "skipped": 29
+      },
+      "rawReportHashMatches": true,
+      "rawReportSha256": "aa75af56d210efeac7dcbfe7f34b6cb8e315199691873f7ba3281a5a34ad2772",
+      "failedSuites": 0,
+      "runtimeErrors": 0
+    },
+    {
+      "label": "runner-tsc-final-attempt04",
+      "resultPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-tsc-final-attempt04-results.json",
+      "resultSha256": "5c3541c1bdca37946c99cd9bdc6990a184258f147141856b764b0c02a893732b",
+      "command": [
+        "./node_modules/.bin/tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ],
+      "exit": 0,
+      "started": "2026-10-15T01:49:15.219306+00:00",
+      "logHashMatches": true,
+      "sourceManifestBefore": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceManifestAfter": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceFilesEqual": true,
+      "distBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distFilesEqual": true,
+      "independentCounts": null
+    },
+    {
+      "label": "runner-eslint-final-attempt04",
+      "resultPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-eslint-final-attempt04-results.json",
+      "resultSha256": "0fcc21317b59d24793117109ca00c02b4e9ebdb3895bf55bf995b668f15dd8b1",
+      "command": [
+        "./node_modules/.bin/eslint",
+        "."
+      ],
+      "exit": 0,
+      "started": "2026-10-15T01:49:23.262460+00:00",
+      "logHashMatches": true,
+      "sourceManifestBefore": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceManifestAfter": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceFilesEqual": true,
+      "distBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distFilesEqual": true,
+      "independentCounts": null
+    },
+    {
+      "label": "runner-profile-safety-focused-attempt01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-profile-safety-focused-attempt01-results.json",
+      "resultSha256": "716e01368c8d887c951b67766ca0f9fed9d6493142b302e9a45efcefcf1ce7f9",
+      "command": [
+        "./node_modules/.bin/vitest",
+        "run",
+        "--config",
+        "vitest.fixtures.config.ts",
+        "test/fixtures-tier/browser-profile-safety.test.ts",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-profile-safety-focused-attempt01-vitest.json"
+      ],
+      "exit": 0,
+      "started": "2026-10-15T01:49:47.784936+00:00",
+      "logHashMatches": true,
+      "sourceManifestBefore": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceManifestAfter": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceFilesEqual": true,
+      "distBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distFilesEqual": true,
+      "independentCounts": {
+        "passed": 10
+      },
+      "rawReportHashMatches": true,
+      "rawReportSha256": "b0536742c37ec240ce23d0057a64a31dbd37c94352b125e52505691bfe34c93a",
+      "failedSuites": 0,
+      "runtimeErrors": 0
+    },
+    {
+      "label": "runner-fixtures-final-attempt04",
+      "resultPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-fixtures-final-attempt04-results.json",
+      "resultSha256": "4434df2156f2ad7137bbd1303c0be726e731f54a4237c28238ba643200249401",
+      "command": [
+        "./node_modules/.bin/vitest",
+        "run",
+        "--config",
+        "vitest.fixtures.config.ts",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-fixtures-final-attempt04-vitest.json"
+      ],
+      "exit": 0,
+      "started": "2026-10-15T01:50:30.351069+00:00",
+      "logHashMatches": true,
+      "sourceManifestBefore": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceManifestAfter": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceFilesEqual": true,
+      "distBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distFilesEqual": true,
+      "independentCounts": {
+        "passed": 232,
+        "skipped": 9
+      },
+      "rawReportHashMatches": true,
+      "rawReportSha256": "98ac54ebf1c6e2432cec9cc2851814481949e455f795aa6a176d7d0ff3834235",
+      "failedSuites": 0,
+      "runtimeErrors": 0
+    },
+    {
+      "label": "runner-deployment-final-attempt02",
+      "resultPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-deployment-final-attempt02-results.json",
+      "resultSha256": "1981a6a1a4b95994274c41c1a7ea1b4bc86baca951aeea78882577bb9aef7e02",
+      "command": [
+        "./node_modules/.bin/vitest",
+        "run",
+        "--config",
+        "vitest.deployment.config.ts",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-deployment-final-attempt02-vitest.json"
+      ],
+      "exit": 0,
+      "started": "2026-10-15T01:55:38.061062+00:00",
+      "logHashMatches": true,
+      "sourceManifestBefore": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceManifestAfter": "cd2c9609d6ba90536deff2528797a7e7686d27c3f75411a34c538ef8ce55e467",
+      "sourceFilesEqual": true,
+      "distBefore": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distAfter": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+      "distFilesEqual": true,
+      "independentCounts": {
+        "passed": 313
+      },
+      "rawReportHashMatches": true,
+      "rawReportSha256": "24e1a13f8bf0c2cd04d93d2eb7bccef104d86859431f46c015989705ce7ac7b6",
+      "failedSuites": 0,
+      "runtimeErrors": 0
+    }
+  ],
+  "coverage": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-unit-final-attempt05-coverage-summary.json",
+    "sha256": "b41d008474a68fe4908f938127d20bbb25b8f5862f19f60e3278029df1c7af6e",
+    "actual": {
+      "lines": {
+        "total": 7102,
+        "covered": 6898,
+        "skipped": 0,
+        "pct": 97.12
+      },
+      "statements": {
+        "total": 7102,
+        "covered": 6898,
+        "skipped": 0,
+        "pct": 97.12
+      },
+      "functions": {
+        "total": 621,
+        "covered": 607,
+        "skipped": 0,
+        "pct": 97.74
+      },
+      "branches": {
+        "total": 4780,
+        "covered": 4211,
+        "skipped": 0,
+        "pct": 88.09
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "configuredThresholdVerdict": "FinaldefaultVitestcoveragecommandexit0;no thresholdfailure reported. No backendJaCoCo claim yet."
+  },
+  "original014RunnerCaseCoverage": {
+    "unitCases": 132,
+    "fixtureCases": 79,
+    "allPassed": true,
+    "privacyHelperPureCases": 67,
+    "sharedNativeCases": 30,
+    "skipsUncreditedAndSameNames": {
+      "runner-unit-final-attempt05": true,
+      "runner-fixtures-final-attempt04": true
+    },
+    "skipScope": "29unit and9fixture entries are named historicalexternal/backlog/historypointer criteria, not014localpolicy controls; no creditgranted. Exactnames andoriginalcarries retainedin separateindex."
+  },
+  "nativeSecuritySummary": {
+    "profileFactCriteria": [
+      {
+        "factsPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/native-runs/redirect-IKPUfX/profile-safety.json",
+        "acquiredHandedOffAndLiveAttack": true,
+        "oneProductionRawClose": true,
+        "rawCloseBeforeFirstProbe": true,
+        "firstProbeAll7Dead": true,
+        "noFallbackOrErrors": true,
+        "canaryAndRoot": true
+      },
+      {
+        "factsPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/native-runs/redirect-QwnKm0/profile-safety.json",
+        "acquiredHandedOffAndLiveAttack": true,
+        "oneProductionRawClose": true,
+        "rawCloseBeforeFirstProbe": true,
+        "firstProbeAll7Dead": true,
+        "noFallbackOrErrors": true,
+        "canaryAndRoot": true
+      }
+    ],
+    "controls": [
+      {
+        "probe": "PREFS",
+        "geometry": {
+          "width": 640,
+          "height": 360
+        },
+        "informativeRejectedFrames": 26,
+        "finalFrameRejected": true,
+        "readinessBarrierQualified": true
+      },
+      {
+        "probe": "PREFS",
+        "geometry": {
+          "width": 800,
+          "height": 600
+        },
+        "informativeRejectedFrames": 25,
+        "finalFrameRejected": true,
+        "readinessBarrierQualified": true
+      },
+      {
+        "probe": "VERSION",
+        "geometry": {
+          "width": 640,
+          "height": 360
+        },
+        "informativeRejectedFrames": 25,
+        "finalFrameRejected": true,
+        "readinessBarrierQualified": true
+      },
+      {
+        "probe": "VERSION",
+        "geometry": {
+          "width": 800,
+          "height": 600
+        },
+        "informativeRejectedFrames": 25,
+        "finalFrameRejected": true,
+        "readinessBarrierQualified": true
+      }
+    ],
+    "all10ProfileCases": [
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "refuses unsafe preferences-symlink before invoking any browser launch",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "refuses unsafe default-symlink before invoking any browser launch",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "refuses unsafe preferences-replacement before invoking any browser launch",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "refuses unsafe preferences-hardlink before invoking any browser launch",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "refuses unsafe default-replacement before invoking any browser launch",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "awaits actual scratch removal after guided preparation rejection without an acquired context",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "awaits actual scratch removal after guided initial-launch rejection without an acquired context",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "retains cleanup capability after actual context acquisition and never deletes scratch before confirmed context closure",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "refuses a Default directory redirected after actual launch rather than accepting its newly canonical outside path",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+        "name": "launches the actual owned confined guided profile and removes it only after successful close",
+        "status": "passed"
+      }
+    ],
+    "all13ReadinessOwnershipTimingCases": [
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+        "name": "exact native blank classifier rejects actual 'chrome://version/' at 640 x 360 separately",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+        "name": "exact native blank classifier rejects actual 'chrome://prefs-internals/' at 640 x 360 separately",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+        "name": "exact native blank classifier rejects actual 'chrome://version/' at 800 x 600 separately",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+        "name": "exact native blank classifier rejects actual 'chrome://prefs-internals/' at 800 x 600 separately",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+        "name": "settles actual compiled no-app Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+        "name": "settles actual compiled captured-unpublished Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+        "name": "settles actual compiled committed-before-ready Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+        "name": "settles actual compiled committed-before-ready-orderly Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+        "name": "settles actual compiled ready-sent-dropped Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+        "name": "settles actual compiled ready-received-stop Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts",
+        "name": "decodes actual compiled normal-failure full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts",
+        "name": "decodes actual compiled forced-step-loss full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts",
+        "name": "decodes actual compiled completed-pass-lost-final full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+        "status": "passed"
+      }
+    ],
+    "all3RealKillCases": [
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/guided-recording-kill.test.ts",
+        "name": "parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=false)",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/guided-recording-kill.test.ts",
+        "name": "parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=true)",
+        "status": "passed"
+      },
+      {
+        "suite": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/fixtures-tier/guided-recording-kill.test.ts",
+        "name": "actual SIGINT gracefully settles real guided recorder and removes its owned recording bytes",
+        "status": "passed"
+      }
+    ],
+    "currentAT1T2B": {
+      "Aoffending": [],
+      "windowFrames": 26,
+      "appRegionRatio": 0.04615451388888889,
+      "loginRatio": 0.009381510416666667,
+      "finalRatio": 0.007734375,
+      "T2": {
+        "frames": 41,
+        "flaggedFrames": 41,
+        "maxOutsideApp": 625804
+      },
+      "a0": 16,
+      "t1": 40,
+      "t1MinusA0": 24
+    },
+    "structuralC": "Currentnamedguidedparitycase PASS: originalaboutblank/soleappfile/teardown assertions onunchangedsource, rawcase/reportbound; noextraCnumericfileinvented.",
+    "limits": "LocalcontrolledcatalogChromium only,not deployedimage/stagingproof. ProfilePIDbarrierchangesfixturefaultscheduling; SDKclosefulfilledbeforeFIRST7PIDDEAD isactualobservedproof, notgeneralOSdescendantquiescence. B seekalignment isnotconfidentiality. Nativeprobecontent intentionallydeleted;countsfacts/nativeappartifacthashes retained.",
+    "rawProofs": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/integration-profile-focused-native-proof.json",
+        "sha256": "20a31c049f2aec83a0d1e12ef5b5cacf447d47bf0b81d2f542bba507b4fa734b"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/integration-profile-full-native-proof.json",
+        "sha256": "9ff782c3a79e4360680b659eac850575224e935bc7a98253e4a9a0b5ae4f00af"
+      }
+    ]
+  },
+  "originalLocalObligationTrace": [
+    {
+      "id": "AC1-governance",
+      "originalLocalObligation": "Approved/current CSI owned policy with dense version/audit, trusted subset, v2 document/hash frozen",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Archivedattempt01backendindividualpasses+targetednewproof alreadyindependentlychecked;finalnormalrun mustfinishgreen",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "AC1-runner",
+      "originalLocalObligation": "Hash before export, forbidden mounted/server applicationPolicy/rules, no widened read authority",
+      "statusNow": "FINAL_RUNNER_EXECUTED_GREEN_REVIEWED",
+      "proofNow": "Finalrunnerrawnamedcaseindex docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-runner-independent-rechecks.json",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "AC1-context-refusal",
+      "originalLocalObligation": "Definite context refusal terminal firstreceipt; context timeout still exactly3; real forgery refusal before browser",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Independent original live proofsdocs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/live-original-proofs-review.json and finalmandatorybackend operatorresults pending",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "AC2",
+      "originalLocalObligation": "Accurate current export/retention/PII controls, published provenance and indefinite nonAC3 residual disclosure",
+      "statusNow": "FINAL_HANDOFF_AND_FORMAL_REVIEW_PENDING",
+      "proofNow": "Existing exactdocumentation/ruling scopedproof reviewed;finalDAR/contextdigest muststillbecreated",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "AC3",
+      "originalLocalObligation": "Actual pruning, published immutable proof, real model0 replay after pruning",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Archivedattempt01backendindividualpasses+targetednewproof alreadyindependentlychecked;finalnormalrun mustfinishgreen",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "AC4-grounding",
+      "originalLocalObligation": "Exact guarded invalid intent no reserve/prepare/admission/dispatch, rejection counted",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Archivedattempt01backendindividualpasses+targetednewproof alreadyindependentlychecked;finalnormalrun mustfinishgreen",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "AC4-corpus",
+      "originalLocalObligation": "Four joined classes old/new cases and guard decisions counted, no unplanted refusal",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Archivedattempt01backendindividualpasses+targetednewproof alreadyindependentlychecked;finalnormalrun mustfinishgreen",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "AC5",
+      "originalLocalObligation": "Destructive denial and authored Save/Delete ALLOW native positive controls",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Archivedattempt01backendindividualpasses+targetednewproof alreadyindependentlychecked;finalnormalrun mustfinishgreen",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "AC6",
+      "originalLocalObligation": "DENY all5realformshapes;2CLARIFY_FIRST oneauthoredconfirmation;ALLOW OBS007native E2E",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Archivedattempt01backendindividualpasses+targetednewproof alreadyindependentlychecked;finalnormalrun mustfinishgreen",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "AC7",
+      "originalLocalObligation": "Actual AUTHORED/SAVED_INPUT/PAGE safe producer andI-C11 secretIDonly",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Archivedattempt01backendindividualpasses+targetednewproof alreadyindependentlychecked;finalnormalrun mustfinishgreen",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "AC8",
+      "originalLocalObligation": "EXECUTE classification and persisted crossreplica CSI limits/dailybudget atstart+eachcall withRetryAfter",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Archivedattempt01backendindividualpasses+targetednewproof alreadyindependentlychecked;finalnormalrun mustfinishgreen",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "AC9",
+      "originalLocalObligation": "Mandatory IdempotencyKey atHTTPexecute, samekey cached, typedclosederror+pinnedOpenAPI",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Archivedattempt01backendindividualpasses+targetednewproof alreadyindependentlychecked;finalnormalrun mustfinishgreen",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "AC10",
+      "originalLocalObligation": "Every admittedguided/replay/refused structuredaudit codes/IDs and actual OBS007canaryscan",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Archivedattempt01backendindividualpasses+targetednewproof alreadyindependentlychecked;finalnormalrun mustfinishgreen",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "AC11",
+      "originalLocalObligation": "DatedVaultTransit artifactHMAC design/verification/rotationonly",
+      "statusNow": "FINAL_HANDOFF_AND_FORMAL_REVIEW_PENDING",
+      "proofNow": "Existing exactdocumentation/ruling scopedproof reviewed;finalDAR/contextdigest muststillbecreated",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "P1-admission",
+      "originalLocalObligation": "Legacyroute/opdeleted;repointednamedCAS/auth cases;404/405zerowrites",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Archivedattempt01backendindividualpasses+targetednewproof alreadyindependentlychecked;finalnormalrun mustfinishgreen",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "P1-deadmatcher",
+      "originalLocalObligation": "Dead/api/v2/studio matcherremoved;exacttest-only3hits+oldclassabsent",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Archivedattempt01backendindividualpasses+targetednewproof alreadyindependentlychecked;finalnormalrun mustfinishgreen",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "T5-static-and-aggregate",
+      "originalLocalObligation": "Fullbackendcheck,configuredquality/JaCoCo/parity/alignment,independentreview",
+      "statusNow": "FINAL_BACKEND_ACTUAL_COMPLETION_PENDING",
+      "proofNow": "Archivedattempt01backendindividualpasses+targetednewproof alreadyindependentlychecked;finalnormalrun mustfinishgreen",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "T5-runner-contracts",
+      "originalLocalObligation": "Affectedunits/nativefixtures+allrequiredsharedgates, schema/codegen/hash pins",
+      "statusNow": "FINAL_RUNNER_EXECUTED_GREEN_REVIEWED",
+      "proofNow": "Finalrunnerrawnamedcaseindex docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/final-runner-independent-rechecks.json",
+      "noLocalDeferralAllowed": true
+    },
+    {
+      "id": "ARCH-review",
+      "originalLocalObligation": "No originalQA silently replaced,exactreasonprecedence,realstartupprivacyproof remains",
+      "statusNow": "FINAL_HANDOFF_AND_FORMAL_REVIEW_PENDING",
+      "proofNow": "Existing exactdocumentation/ruling scopedproof reviewed;finalDAR/contextdigest muststillbecreated",
+      "noLocalDeferralAllowed": true
+    }
+  ],
+  "resolvedOriginalGapEvidence": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa014/live-original-proofs-review.json",
+      "sha256": "0f416254e4a094eda6168d0a39b77bf69fd71b7f9c61422c74a99753558e1de0"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/denominator-reconciliation/014-unit-denominator-reconciliation.json",
+      "sha256": "68f0794a704af76452ba113cde3a7b2096afccf2912c340904cb03e2bb476818"
+    }
+  ],
+  "denominatorAndHarness": "Finala2/c2namedinventory distinguishes3semanticinvalidnegatives+1groundedDENY,2additionalSave/Deletepositivesto8mappedinventory,2noguardSAVED/livecases. Existing6arrayhistorical. SAME_THREAD+class-ownedrole/CSIreset+stickyconfirmedcleanupreviewed andaccepted; no per-testconversionclaimed. FinalPlanning57/Replay40/fourclasstally still mustexecuteinfullbackend.",
+  "coderabbit": {
+    "authority": [
+      {
+        "path": ".aiox-core/core-config.yaml",
+        "sha256": "7bd8694cded2a845882f29e9c7b11d18ae531ad492a3cefb53a71100eb29bc31",
+        "line": 230,
+        "exact": "graceful_degradation:\n    skip_if_not_installed: true",
+        "meaning": "Explicitlyconfiguredskipofautomatedscanwhennotinstalled;notanautomatedPASS."
+      },
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+        "sha256": "584f806c9fe2b4631aede37388177763819db9bea813f62a18f40c0f49abd4ef",
+        "line": 208,
+        "exact": "Record an unavailable CodeRabbit tool and use the configured independent review fallback."
+      },
+      {
+        "path": ".aiox-core/development/tasks/qa-gate.md",
+        "sha256": "1c3e4467a7ceae1d4e8a0a946c0dfbabadfa42f78a5fd7e9ebba18d447036b72",
+        "line": 224,
+        "exact": "Story has been reviewed (manually or via review-story task)"
+      }
+    ],
+    "availabilityNow": {
+      "PATHExecutable": null,
+      "configuredNativePath": "/Users/brunobuger/.local/bin/coderabbit",
+      "exists": false,
+      "executable": false
+    },
+    "status": "AUTOMATED_TOOL_UNAVAILABLE_CONFIGURED_GRACEFUL_DEGRADATION_APPLIES",
+    "actualAlternative": "IndependentQuinnsecurity/requirements/source review plusindependentAria rulings/source reviews. Formalexactfinalstoryreviewstillpending, no fabricatedscanreport."
+  },
+  "pendingFinalBackend": {
+    "command": [
+      "./gradlew",
+      "check",
+      "--continue",
+      "--console=plain"
+    ],
+    "label": "backend-final-normal-check-attempt02",
+    "state": "RUNNING_NO_FINAL_CREDIT",
+    "noCurrentBuildXmlConsumed": true,
+    "expectedOnlyNotProof": "Standard2077PASS25samehistoricuncreditedskips inclPlanning57/Replay40 plus2crossReplica;actualfinalarchivedtaskXML authoritative.",
+    "required": [
+      "Exit0withnormalconfigureddependencies,nofilters/-x/exclusions/cachemanipulation",
+      "AllTesttaskXMLfreshness/hash/testnames,exact25skipattribution,no requiredlocalskip",
+      "Fourjoinedclasscaseinventory andallplantedguarddecisiontallies,includinglivecase0guarddecision",
+      "Fullstatic/Spotless/Checkstyle/SpotBugs/parity/alignmentandJaCoCoverificationgreen",
+      "Finalruntime/source/distbeforeafterstable,thenindependentformalreview"
+    ]
+  },
+  "pendingDexHandoff": {
+    "authority": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-readiness-plan.json",
+      "sha256": "558cec16c3260cb23e645afc47d25df4e6d64b3054b08e02188ba71de3381993"
+    },
+    "requiredBeforeFinalStoryDigest": {
+      "013": {
+        "darAnchor": {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+          "line": 157,
+          "paragraphContains": "### Strict revalidation executor record"
+        },
+        "fileListAnchor": {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md",
+          "line": 94,
+          "paragraphContains": "## File List"
+        },
+        "addActualTestPaths": [
+          "studio-runner/test/helpers/nativeControlReadiness.ts",
+          "studio-runner/test/nativeControlReadiness.test.ts",
+          "studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+          "studio-runner/test/helpers/profileSafetyFixture.ts",
+          "studio-runner/test/profileSafetyFixture.test.ts",
+          "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts"
+        ],
+        "reconcile": "Original lane manifest + strict backend/runner receipts + six padding paths already recorded + three readiness paths + three profile paths (deduplicate existing fixture). Record profile paths as actual only once delivered. Preserve dead recording-coverage.test.ts applicability, guidedSSE N/A, recorderfault host deviation, unknown historical failures and current external limits. Latest success counts only from final raw results; no forecasts as passes."
+      },
+      "014": {
+        "darAnchor": {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+          "line": 294,
+          "paragraphContains": "### Strict revalidation executor record"
+        },
+        "fileListAnchor": {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+          "line": 210,
+          "paragraphContains": "## File List"
+        },
+        "actualCodePathsAlreadyListed": [
+          "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+          "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "studio-runner/test/guided/transport.test.ts",
+          "docs/specs/studio-observed-authoring/guided-data-flow.md"
+        ],
+        "reconcile": "Add actual live-forgery case in samePlanning file and source-free mounted-process harness as evidence (not production scope); twoJava formatting changes stay same existingReplay file. Reconcile original56Planning runtimePASS then live1PASS, final actualPlanning57 expected only if observed. OrderedReplay40 archivedPASS + final normalcheck pending until actualgreen. Name final fourclass/tally/denominator receipts; one legitimate existing backend materialization preserved, neverzero."
+      },
+      "tasks": "Implementation tasks already checked; do not recheck eventualPR/push box, which is conditional and not requested. IndependentQA checkbox is true only when actual finalQA performed. Do not alter AC meaning or claim external tasks complete.",
+      "versions": {
+        "principle": "Increment current latest changelog version per actual authorized writer; no fixed future version preallocated. PO appends one keyed administrative row afterQA row and preservesQA revision.",
+        "minimalWithOneNewExecutorRow": {
+          "013": {
+            "executor": "0.2.7",
+            "QA": "0.2.8",
+            "PO": "0.2.9"
+          },
+          "014": {
+            "executor": "0.1.16",
+            "QA": "0.1.17",
+            "PO": "0.1.18"
+          }
+        },
+        "ifNoExecutorVersionRow": {
+          "013": {
+            "QA": "0.2.7",
+            "PO": "0.2.8"
+          },
+          "014": {
+            "QA": "0.1.16",
+            "PO": "0.1.17"
+          }
+        },
+        "note": "Any intervening row shifts versions; final close reads actual QA-owned version, never rewrites earlier rows."
+      }
+    },
+    "specific014": [
+      "UpdateactualPlanning57onlyafterobservedfinalfullcheck;recordnewrealpolicytamperandbadmountprocessproof/denominator;onelegitimatebackendmaterializationpreserved",
+      "Actualfinalrunner1529/232/313counts,type/fullLint+coverage andfinalrunlabels;retainallpriorredsasdatedhistory",
+      "Finalfourclass/tally/source/distmanifest andactualFileList;SAME_THREADfixedclassownershipnotinstanceconversion",
+      "ReconcilelocalTEST001/003/005,ARCH001,DB001,MNT001 asactuallyclosed;preservenonlocalRELIABILITY/OPS/SEC003/D2bF01-F04boundaries",
+      "Do notcheckconditionalPR/pushbox orclaimcurrentindependentQAcompletedbeforeformalreview"
+    ]
+  },
+  "externalNoPassClaims": [
+    "OBS009realmodelguardcalibration/capacity,actualSIEM/deployment/foldedruntime/staging/Sonic/Vault prerequisites andscheduledauthority",
+    "OBS010SecurityComplianceapprovalandED01gatewayretention,realpolicyapproverprovisioning,GA/pilotsignoff",
+    "ManualmaskC17 andstagingseekunobtained;providerexternal remainsuncredited",
+    "AC9D2b cachedresponse reauthorization explicitlynamedunresolved. F01nonAC3indefiniteretention,F02policysources,F03governedexactfields,F04artifactHMACimplementation externalprerequisitesunchanged;F04doesnotfixauditlabelhashprivacy."
+  ],
+  "newConcreteFindings": [],
+  "completionBoundary": "No new014localmissingobligation located afteroriginal2livegapsresolved. FormalPASS/Done blockeduntilactualfinalnormalbackendgreen,Dexhandoffandrootpreflightedindependentreview.012BstrictPASSunchanged;015unstarted.",
+  "reviewActions": "Readonlysource/log/report/hashchecksandevidencewritesonly. No tests/native/build/process/CLI/git/lifecycle action. DeclaredUSD500actualbillingunavailable."
+}

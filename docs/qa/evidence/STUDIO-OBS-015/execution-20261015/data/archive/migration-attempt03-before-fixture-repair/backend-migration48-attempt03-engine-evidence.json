@@ -1,0 +1,42 @@
+{
+  "status": "EXECUTED_OWNED_TESTCONTAINERS_POSTGRESQL",
+  "actualServerVersion": "15.19",
+  "serverVersionQuery": {
+    "command": "docker exec <owned-testcontainer> psql -U test -d obs015_migrations -Atc SELECT version(), current_setting(server_version), current_database();",
+    "exit": 0,
+    "stdout": "PostgreSQL 15.19 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit|15.19|obs015_migrations\n",
+    "stderr": ""
+  },
+  "containerId": "6c49f42089d063fd601d4f04d0ddd5a3505915aa6383849210c4716342c840d6",
+  "containerName": "/frosty_lalande",
+  "containerLabels": {
+    "org.testcontainers": "true",
+    "org.testcontainers.lang": "java",
+    "org.testcontainers.sessionId": "b32839f5-8ce9-4bac-bdac-b8b0f0f3439e",
+    "org.testcontainers.version": "1.20.2"
+  },
+  "actualImageId": "sha256:ed8478222652ed5ec9cd22a74417af86b61d7cf03bea9bb4d3193be315c16567",
+  "configuredImage": "postgres:15-alpine",
+  "repositoryDigests": [
+    "postgres@sha256:fe0737ba566a2c5b2a28f34433c0a423261900ec17b9bf7ad115e1aae7e57f1b"
+  ],
+  "actualArchitecture": "aarch64-unknown-linux-musl",
+  "testcontainersVersion": "1.20.2",
+  "flywayAndTestEngineEvidence": [
+    "01:07:33.190 [Test worker] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 1.20.2",
+    "01:07:35.979 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59287/obs015_migrations (PostgreSQL 15.19)",
+    "01:07:36.915 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 21 migrations to schema \"public\", now at version v21 (execution time 00:00.596s)",
+    "01:07:39.309 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59287/obs015_migrations (PostgreSQL 15.19)",
+    "01:07:39.358 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59287/obs015_migrations (PostgreSQL 15.19)",
+    "01:07:40.150 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59287/upgrade_cb5812eded1745fa96138ac7c09cb5bd (PostgreSQL 15.19)",
+    "01:07:40.745 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 20 migrations to schema \"public\", now at version v20 (execution time 00:00.440s)",
+    "01:07:40.771 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59287/upgrade_cb5812eded1745fa96138ac7c09cb5bd (PostgreSQL 15.19)",
+    "01:07:40.868 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 1 migration to schema \"public\", now at version v21 (execution time 00:00.061s)",
+    "01:07:40.878 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59287/upgrade_cb5812eded1745fa96138ac7c09cb5bd (PostgreSQL 15.19)"
+  ],
+  "observerReadinessErrors": {
+    "count": 5,
+    "explanation": "Read-only version probes during container bootstrap before socket/database readiness; separate from the48 JUnit cases. First successful query and test Flyway engine logs agree."
+  },
+  "databaseScope": "obs015_migrations and UUID-named upgrade database within owned container only; no user/dev database touched"
+}

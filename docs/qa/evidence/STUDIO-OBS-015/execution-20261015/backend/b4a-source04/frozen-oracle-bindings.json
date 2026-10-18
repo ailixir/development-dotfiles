@@ -1,0 +1,120 @@
+{
+  "classification": "READ_ONLY_FROZEN_DOCUMENT_INSPECTION_NOT_JAVA_EXECUTION",
+  "publicFixture": {
+    "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+    "sha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+    "bytes": 22720135
+  },
+  "bindings": {
+    "fresh-order-reference": {
+      "nodePath": "studio-runner/fixtures/observed-reference/fresh-order-reference.json",
+      "nodeFile": {
+        "sha256": "9de3139c8b5896f364cfcfca4a4492c91ba74c5754ba9519facb5ece9b582152",
+        "bytes": 68855
+      },
+      "docsPointer": "/",
+      "basisTreeEqual": true,
+      "artifactTreeEqual": true,
+      "declaredHashes": {
+        "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+        "configurationHash": "dc52a6ec856c6e30b512d428302844a530a3dc1b3dcf83ffa27e2e42401e23ee",
+        "authoringHash": "e5e180ed2cfadcd2beaf593b3fe050e22349ae16658b24b7dd00596dee1ca4fe",
+        "learnedPlanHash": "6b4c238335bcd42ffe873d2da5085a965a3785cabbec0c8bce6e3e60a062e507",
+        "artifactHash": "023a74abb72c95a84f2a01e70c9bcc273ff2a8211807b520e10f787db0d35d3c",
+        "referencePolicyHash": "ddf27b619c9379b5070e381ce8fa475870cb87e8cd4b04408a898be7ca100994",
+        "operationEquivalenceHash": "17f2aec0d36e9dbcc95200157f2c187df60ab6f9e59a85b8a9c8040103e4d62d",
+        "admissionProvenanceHash": "d0f90ab35bb02f72c13f4e190c6cd3f078208ff770878d8f267abc377fe49b23",
+        "publicationEvidenceHash": "2ee83bcaf9f44c71cd58a96ad6b496337a5bb54e07ee0ae387e58f4ed2f87963",
+        "runAuthorizationHash": "18714bc2b1a152d048d8999d0da9f259cb3891f82346a91e8d0984b1fa856235",
+        "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8"
+      },
+      "currentSessionId": "session-1",
+      "currentHeaderWorker": "worker-1",
+      "basisMetadataSessionIds": [
+        "session-1"
+      ]
+    },
+    "control-value-reference": {
+      "nodePath": "studio-runner/fixtures/observed-reference/control-value-reference.json",
+      "nodeFile": {
+        "sha256": "373bcd657e2f45b0a71284bed81e66c0e5c5de0f5608d8aab1d1dd6731ceeba1",
+        "bytes": 74138
+      },
+      "docsPointer": "/controlValueReference",
+      "basisTreeEqual": true,
+      "artifactTreeEqual": true,
+      "declaredHashes": {
+        "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+        "configurationHash": "dc52a6ec856c6e30b512d428302844a530a3dc1b3dcf83ffa27e2e42401e23ee",
+        "authoringHash": "e5e180ed2cfadcd2beaf593b3fe050e22349ae16658b24b7dd00596dee1ca4fe",
+        "learnedPlanHash": "0e4962a7efc0977db9762071f831e1dce924e1caf0835af5cff4cc0ba4ba7448",
+        "artifactHash": "cb8d73c4ee418bd18a84bd81b295a9aaa9d9cc5e1eb0befd0bc106b57510145b",
+        "referencePolicyHash": "792e8c458cb0891b75e3e5f1c3f07bcafd01ea36f36fa23efacd28b57d064643",
+        "operationEquivalenceHash": "c51f1928b835a52bec083b67b50bbc5bac23ec48baf9c6d4d2eec2949cb6bdbd",
+        "admissionProvenanceHash": "bb0a30119752e45d19df852db05cae5a15402fe3af3215a45d11e8d459df2e38",
+        "publicationEvidenceHash": "7a97677c96ece45fdb13ab27e9d986ab9fb5074eec8b629bbc25439c87c4aead",
+        "runAuthorizationHash": "d5502893a82f4677d2be372af300d116ba78fc4f5929ebccc0e0a52379a2df2c",
+        "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8"
+      },
+      "currentSessionId": "qa-control-current-01",
+      "currentHeaderWorker": "qa-control-worker-01",
+      "basisMetadataSessionIds": [
+        "qa-control-current-01"
+      ]
+    },
+    "observedChoice": {
+      "docsPointer": "/observedChoice",
+      "headerWorker": "qa-choice-worker-01",
+      "preparationWorkers": [
+        "qa-choice-worker-01"
+      ],
+      "declaredArtifactHash": "d846a0ca41fa432dd9ac7e87bf6d7cb36c37d96fc5fd64dee6d0ad1815dbb7b8",
+      "literalActualArtifactHashByIndependentCanonicalInspection": "d846a0ca41fa432dd9ac7e87bf6d7cb36c37d96fc5fd64dee6d0ad1815dbb7b8",
+      "staleConsumerLiteralRemoved": "8623b2ad1f7d95cb7f50a6a4cf48bfbea6ba88d7ac4c4825d038debde0ba9242",
+      "originalManifestDistinctionRetained": true
+    },
+    "wrongConfigParent": {
+      "docsPointer": "/controlValueReferenceUsedConfiguration",
+      "configurationReferences": [
+        {
+          "referenceId": "saved-label",
+          "referenceName": "saved-label",
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "inputId": "input-config",
+          "kind": "nonsecretText",
+          "intendedSlot": "fill.value"
+        }
+      ],
+      "independentRecipes": [
+        {
+          "inputId": "input-destination",
+          "stepId": "00000000-0000-4000-8000-000000000001",
+          "kind": "destination",
+          "intendedSlot": "navigate.destination",
+          "provenance": {
+            "kind": "sourceSpan",
+            "start": 5,
+            "end": 38,
+            "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055"
+          }
+        },
+        {
+          "inputId": "input-config",
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "kind": "nonsecretText",
+          "intendedSlot": "fill.value",
+          "provenance": {
+            "kind": "configuration",
+            "referenceId": "saved-label",
+            "referenceName": "saved-label"
+          }
+        }
+      ],
+      "declaredArtifactHash": "838c469ec4a7df22ef8a2e7694093d9946c147991d3e5e4bbcbfd445cb9ead0e",
+      "positiveSubject": "Full lowerer artifact equality plus recipes exact equality precedes existing referenceId mutation/refusal",
+      "freshConfigurationReferenceCount": 0
+    }
+  },
+  "noGoldenChanges": true,
+  "expectedFromActualProducer": false
+}

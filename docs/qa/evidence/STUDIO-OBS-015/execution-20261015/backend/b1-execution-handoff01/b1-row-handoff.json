@@ -1,0 +1,1549 @@
+{
+  "artifact": "B1 exact implementation handoff; source inspection only",
+  "createdAt": "2026-10-15T10:48:39.588247+00:00",
+  "sourceReleaseGranted": false,
+  "formalQAVerdict": null,
+  "lifecycleTransition": null,
+  "allOriginalObligationsRetained": 86,
+  "arch05FacetsRetained": 24,
+  "migrationCasesRetained": 55,
+  "indices0": [
+    14,
+    15,
+    16,
+    20,
+    26,
+    27,
+    48,
+    54,
+    55,
+    56,
+    80,
+    81,
+    82
+  ],
+  "rows": [
+    {
+      "ledgerIndex0": 14,
+      "originalObligation": {
+        "plannedName": "IncrementalStartIT.clientCannotNarrowServerBoundary",
+        "requirement": [
+          "AC-2"
+        ],
+        "tier": "Java HTTP + Postgres",
+        "assertions": "after k -> 409 REVISION_CONFLICT/FIRST_LEARN_STEP_NARROWED; before/equal accepted; foreign/deleted -> FIRST_LEARN_STEP_UNKNOWN; stale base -> BASE_REVISION_MISMATCH; every refusal writes nothing",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null
+      },
+      "review05Disposition": {
+        "ledgerIndex0": 14,
+        "plannedName": "IncrementalStartIT.clientCannotNarrowServerBoundary",
+        "originalRequiredTier": "Java HTTP + Postgres",
+        "originalRequiredAssertions": "after k -> 409 REVISION_CONFLICT/FIRST_LEARN_STEP_NARROWED; before/equal accepted; foreign/deleted -> FIRST_LEARN_STEP_UNKNOWN; stale base -> BASE_REVISION_MISMATCH; every refusal writes nothing",
+        "originalRemainingSourceFacets": [
+          "Dedicated deleted original step hint is not yet probed; unknown UUID is covered."
+        ],
+        "disposition": "A",
+        "dispositionMeaning": "ACTUAL_EXECUTABLE_SOURCE_OR_ASSERTION_GAP",
+        "owner": "Backend",
+        "inspectedSource": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2819,
+            "anchor": "private void assertIncrementalStartRefusalsLeaveNoWrites"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2459,
+            "anchor": "case \"delete4\" ->"
+          }
+        ],
+        "sourceSelectorsFromOwnerMap": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays"
+        ],
+        "originalParameterLabels": [
+          "before4at2",
+          "equal4",
+          "delete4"
+        ],
+        "independentFinding": "Random unknown UUID is covered; after deleting original step4 the actual deleted UUID is never submitted as firstLearnStepId. Add this precise existing-history HTTP409 FIRST_LEARN_STEP_UNKNOWN case with full zero-write/model/native comparison.",
+        "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+        "sourceReleaseGranted": false
+      },
+      "existingRunnable": {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "methods": [
+          "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "parameterLabels": [
+          "before4at2",
+          "equal4",
+          "delete4"
+        ],
+        "actualAssertions": [
+          "assertIncrementalStartRefusalsLeaveNoWrites already submits wrong base, random unknown UUID, and after-boundary hint; asserts HTTP409 code REVISION_CONFLICT plus specific message, byte snapshots and model/legacy/navigation/effect deltas zero. before4at2/equal4 run accepted earlier/equal paths. delete4 removes actual original fourth UUID."
+        ],
+        "executionCredit": "NONE; source inspection only; actual attempt03 is separate root-owned runtime evidence and original ledger status retained",
+        "ownerMapExactSelectors": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays"
+        ],
+        "runtimeCommands": [
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays"
+        ],
+        "selectorLimitation": "A parameterized method selector runs every ValueSource invocation; names/labels are not stand-alone Gradle selectors."
+      },
+      "genuinelyMissing": [
+        "Deleted original UUID never submitted as hint."
+      ],
+      "minimalConcreteDelta": [
+        "In delete4 branch submit start.deepCopy().put(firstLearnStepId,INCREMENTAL_STEPS.get(3)) before accepted start. Preserve random UUID case separately (do not overwrite same map key). Require HTTP409 REVISION_CONFLICT/FIRST_LEARN_STEP_UNKNOWN against actual edited draft. No production change indicated."
+      ],
+      "positiveControl": [
+        "Existing before4at2 and equal4 accepted; delete4 without removed hint proceeds at new current boundary."
+      ],
+      "refusalAndCounts": [
+        "Each refused request leaves incrementalAuthoritySnapshot exactly equal; MODEL_WIRE/LEGACY_MODEL_CALLS/NAVIGATIONS/RECEIPTS deltas0; no session/base/budget/reservation/revision."
+      ],
+      "proposedDedicatedMethods": [],
+      "requiredRuntimeCommands": [],
+      "sourceReferences": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2819,
+          "anchor": "private void assertIncrementalStartRefusalsLeaveNoWrites"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java",
+          "line": 25,
+          "anchor": "public Selection select"
+        }
+      ]
+    },
+    {
+      "ledgerIndex0": 15,
+      "originalObligation": {
+        "plannedName": "IncrementalStartIT.governedPrefixOriginPreflightWritesNothing",
+        "requirement": [
+          "AC-3",
+          "AC-4"
+        ],
+        "tier": "Java HTTP + Postgres",
+        "assertions": "403 ORIGIN_NOT_ALLOWED/PREFIX_ORIGIN_NOT_GOVERNED before session/base/budget writes; trusted ceiling remains",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null
+      },
+      "review05Disposition": {
+        "ledgerIndex0": 15,
+        "plannedName": "IncrementalStartIT.governedPrefixOriginPreflightWritesNothing",
+        "originalRequiredTier": "Java HTTP + Postgres",
+        "originalRequiredAssertions": "403 ORIGIN_NOT_ALLOWED/PREFIX_ORIGIN_NOT_GOVERNED before session/base/budget writes; trusted ceiling remains",
+        "originalRemainingSourceFacets": [
+          "Dedicated trusted-ceiling widening refusal is existing governance scope, not mapped to new incremental start here."
+        ],
+        "disposition": "A",
+        "dispositionMeaning": "ACTUAL_EXECUTABLE_SOURCE_OR_ASSERTION_GAP",
+        "owner": "Backend",
+        "inspectedSource": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2829,
+            "anchor": "ObjectNode withoutPrefixRead"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2838,
+            "anchor": "PREFIX_ORIGIN_NOT_GOVERNED"
+          }
+        ],
+        "sourceSelectorsFromOwnerMap": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays"
+        ],
+        "originalParameterLabels": [],
+        "independentFinding": "Current-policy origin exclusion is present. Add the incremental-start companion that attempts governed/trusted ceiling widening and proves refusal before any allocation/reservation/write; ordinary governance test names alone do not map its incremental trigger.",
+        "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+        "sourceReleaseGranted": false
+      },
+      "existingRunnable": {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "methods": [
+          "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+          "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "parameterLabels": [],
+        "actualAssertions": [
+          "Existing helper removes read grants/narrows governed origins to SECRET_ORIGIN, submits actual incremental start and asserts 403 ORIGIN_NOT_ALLOWED/PREFIX_ORIGIN_NOT_GOVERNED and all snapshots/counters unchanged."
+        ],
+        "executionCredit": "NONE; source inspection only; actual attempt03 is separate root-owned runtime evidence and original ledger status retained",
+        "ownerMapExactSelectors": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays"
+        ],
+        "runtimeCommands": [
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays"
+        ],
+        "selectorLimitation": "A parameterized method selector runs every ValueSource invocation; names/labels are not stand-alone Gradle selectors."
+      },
+      "genuinelyMissing": [
+        "No incremental trusted ceiling widening companion."
+      ],
+      "minimalConcreteDelta": [
+        "Add incrementalStartCannotWidenTrustedOriginCeiling. Use a valid incremental base/start and supported governed-policy approval while trusted policy includes both fixture origins; then start against narrower trusted pin configuration via an owned replica (existing historicalReplica/observedWorkerReplica patterns), keeping approved policy unchanged. Alternatively submit illegal widening through actual policy write endpoint and assert its existing INVALID_POLICY, then prove incremental start cannot acquire it; this write-refusal companion alone does not replace start-time ceiling recheck. Do not edit shared Data helpers or SQL-insert invalid approved rows."
+      ],
+      "positiveControl": [
+        "Start in owning original trusted configuration succeeds; existing governed-origin exclusion remains 403."
+      ],
+      "refusalAndCounts": [
+        "Start-time ceiling recheck is 409 RUNTIME_INCOMPATIBLE per ObservationPolicyService.activeForStart; do not replace this with invented403. All source/session/base/budget/revision bytes unchanged and both gateways/native/effect deltas0. Snapshot trusted pin/catalog bytes before/after."
+      ],
+      "proposedDedicatedMethods": [
+        "incrementalStartCannotWidenTrustedOriginCeiling"
+      ],
+      "requiredRuntimeCommands": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStartCannotWidenTrustedOriginCeiling"
+      ],
+      "sourceReferences": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2819,
+          "anchor": "private void assertIncrementalStartRefusalsLeaveNoWrites"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "line": 606,
+          "anchor": "var governed = policies.activeForStart"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyService.java",
+          "line": 171,
+          "anchor": "public ObservationPolicyRepository.ActivePolicy activeForStart"
+        }
+      ]
+    },
+    {
+      "ledgerIndex0": 16,
+      "originalObligation": {
+        "plannedName": "IncrementalSessionIT.prefixCallbacksNeverOpenModelReservation",
+        "requirement": [
+          "AC-3"
+        ],
+        "tier": "Java + Postgres",
+        "assertions": "Prefix observe/admit/consume/success/complete preserve REPLAYING_PREFIX; SOURCE_PLAN/proposal/direct reserve both denied before reservation and gateway call",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null
+      },
+      "review05Disposition": {
+        "ledgerIndex0": 16,
+        "plannedName": "IncrementalSessionIT.prefixCallbacksNeverOpenModelReservation",
+        "originalRequiredTier": "Java + Postgres",
+        "originalRequiredAssertions": "Prefix observe/admit/consume/success/complete preserve REPLAYING_PREFIX; SOURCE_PLAN/proposal/direct reserve both denied before reservation and gateway call",
+        "originalRemainingSourceFacets": [
+          "All observe/consume/success callback intermediate states require explicit per-callback PG assertions beyond final flow."
+        ],
+        "disposition": "A",
+        "dispositionMeaning": "ACTUAL_EXECUTABLE_SOURCE_OR_ASSERTION_GAP",
+        "owner": "Backend",
+        "inspectedSource": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2874,
+            "anchor": "private JsonNode confirmIncrementalPrefix"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 3085,
+            "anchor": "private void assertPendingContextGuardsThenRelease"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+            "line": 375,
+            "anchor": "prefixCallbacksCannotChangeToGenericActingObservingOrProposing"
+          }
+        ],
+        "sourceSelectorsFromOwnerMap": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "originalParameterLabels": [
+          "confirm-edit4",
+          "append-input"
+        ],
+        "independentFinding": "End-of-flow zero-before-switch and wait fences do not observe every callback. Capture actual observe/admit/consume/success/complete transitions at held callback boundaries and query both durable state and continuation; attempt both reservations before gateway invocation at the relevant states. SQL-only direct UPDATE guards are separate.",
+        "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+        "sourceReleaseGranted": false
+      },
+      "existingRunnable": {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "methods": [
+          "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "parameterLabels": [
+          "confirm-edit4",
+          "append-input"
+        ],
+        "actualAssertions": [
+          "observe writes pending? REPLAYING_PREFIX:PROPOSING; admit writes pending? REPLAYING_PREFIX:ACTING; success outcome writes pending? REPLAYING_PREFIX:OBSERVING; consume only changes action DISPATCHING/dispatchCount1. reserveModel and store.reserveAttempt explicitly refuse prefix pending. Existing wait/pending ACK tests assert direct fences and end-of-flow model0."
+        ],
+        "executionCredit": "NONE; source inspection only; actual attempt03 is separate root-owned runtime evidence and original ledger status retained",
+        "ownerMapExactSelectors": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "runtimeCommands": [
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "selectorLimitation": "A parameterized method selector runs every ValueSource invocation; names/labels are not stand-alone Gradle selectors."
+      },
+      "genuinelyMissing": [
+        "No actual committed callback-by-callback state/continuation snapshot. completeStep accepts pending prefix but unconditionally writes generic state, confirmed source defect."
+      ],
+      "minimalConcreteDelta": [
+        "Add incrementalPrefixCallbacksKeepStateAndFenceBothReservations. Extend existing JOIN-owned runtime wrapper with reversible per-session barrier before/after real observation/outcome callbacks and prepare/dispatch phases; release only after actual HTTP response transaction committed. Hold coordinator between iterations for stable assertions; never block while holding DB row lock. For admission/consume synchronous backend boundaries use JOIN-owned Spring spy/decorator or existing transaction observer after original commit, preserving exact one original invocation and WonConsumption distinction. Record state+translation continuation after observe/admit/consume/success and lawful completeStep. Fix S.completeStep state expression to incremental.pending(id)?REPLAYING_PREFIX:existing normal FINALIZING/OBSERVING expression; increment stepIndex as existing and leave continuation untouched. No new endpoint."
+      ],
+      "positiveControl": [
+        "Actual pending prefix step1 has navigate/read successful actions, exact real obligation associations, dispatchCount1 and genuine StepVerifier true. Invoke service.completeStep(controller,id,currentFence,uniqueKey,C.object().put(stepId,INCREMENTAL_STEPS.get(0))) after those successful callbacks and before next coordinator iteration; production access/StepVerifier, no fake verifier. Normal no-base completion still reaches OBSERVING then FINALIZING."
+      ],
+      "refusalAndCounts": [
+        "At every held pre-switch checkpoint state and continuation both REPLAYING_PREFIX; SOURCE_PLAN/proposals paths never invoke model gateway; service.reserveModel and plans.reserveAttempt for SOURCE_PLAN and NEXT_ACTION each409 REVISION_CONFLICT before any reservation/counter change. Both gateways delta0, immutable history unchanged by refusal; existing native successful work counted once. complete success may increment stepIndex once; do not demand zero writes for valid completion."
+      ],
+      "proposedDedicatedMethods": [
+        "incrementalPrefixCallbacksKeepStateAndFenceBothReservations"
+      ],
+      "requiredRuntimeCommands": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalPrefixCallbacksKeepStateAndFenceBothReservations"
+      ],
+      "sourceReferences": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "line": 1381,
+          "anchor": "public JsonNode completeStep"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "line": 1442,
+          "anchor": "public JsonNode reserveModel"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+          "line": 332,
+          "anchor": "private JsonNode advancePrefix"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+          "line": 54,
+          "anchor": "public void continueRuns"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+          "line": 861,
+          "anchor": "public Attempt reserveAttempt"
+        }
+      ]
+    },
+    {
+      "ledgerIndex0": 20,
+      "originalObligation": {
+        "plannedName": "IncrementalSessionIT.restartAndConcurrentDriftTransitionAreIdempotent",
+        "requirement": [
+          "AC-3",
+          "AC-4"
+        ],
+        "tier": "Java + Postgres",
+        "assertions": "Resume next unconsumed coordinate; concurrent duplicate transition has one effective j, one source plan reservation, no repeated dispatch",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null
+      },
+      "review05Disposition": {
+        "ledgerIndex0": 20,
+        "plannedName": "IncrementalSessionIT.restartAndConcurrentDriftTransitionAreIdempotent",
+        "originalRequiredTier": "Java + Postgres",
+        "originalRequiredAssertions": "Resume next unconsumed coordinate; concurrent duplicate transition has one effective j, one source plan reservation, no repeated dispatch",
+        "originalRemainingSourceFacets": [
+          "Concurrent duplicate actual drift callback and recovery at every unconsumed prefix coordinate remain absent."
+        ],
+        "disposition": "A",
+        "dispositionMeaning": "ACTUAL_EXECUTABLE_SOURCE_OR_ASSERTION_GAP",
+        "owner": "Backend + Runner",
+        "inspectedSource": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2943,
+            "anchor": "variant.equals(\"confirm-recover\")"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 3041,
+            "anchor": "private void assertActualDriftCallbackAuthorityThenRelease"
+          }
+        ],
+        "sourceSelectorsFromOwnerMap": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "originalParameterLabels": [
+          "confirm-recover",
+          "drift-auth"
+        ],
+        "independentFinding": "Coordinator reconstruction is only during a clarification wait. Add restart at actual next unconsumed prefix coordinates and concurrent duplicate authenticated drift transition, proving one immutable switch/effective j, one SOURCE_PLAN reservation and no replayed consumed/native action.",
+        "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+        "sourceReleaseGranted": false
+      },
+      "existingRunnable": {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "methods": [
+          "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "parameterLabels": [
+          "confirm-recover",
+          "drift-auth",
+          "drift-auth-pre"
+        ],
+        "actualAssertions": [
+          "confirm-recover constructs replacement coordinator and continueRuns twice at human wait; question/pending snapshot stays equal. prefixDrift row lock and duplicateReceipt precede effective switch. nextAction scans exact program actions and chooses first non-SUCCEEDED; ADMITTED existing dispatches, DISPATCHING becomes lostAcknowledgment rather than resend."
+        ],
+        "executionCredit": "NONE; source inspection only; actual attempt03 is separate root-owned runtime evidence and original ledger status retained",
+        "ownerMapExactSelectors": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "runtimeCommands": [
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "selectorLimitation": "A parameterized method selector runs every ValueSource invocation; names/labels are not stand-alone Gradle selectors."
+      },
+      "genuinelyMissing": [
+        "No recovery at every actual next unconsumed coordinate, no simultaneous authenticated exact drift callbacks."
+      ],
+      "minimalConcreteDelta": [
+        "Add incrementalPrefixRecoveryUsesNextUnconsumedCoordinate with MethodSource over every actual prefixProgram.actions coordinate, not just step numbers: gate after previous real committed success; replace coordinator only, preserve original runtime/browser/clock, call replacement continueRuns twice, release next operation. Include navigate/read within step1 and later ordinal pair. Add incrementalConcurrentAuthenticatedDriftCommitsOneSwitch for PRE_ADMISSION and ADMITTED_PRE_INVOCATION: capture original actual callback with existing /obs015-drift barrier; fire two mTLS owning-worker POSTs with exact same receipt/body using distinct keys and synchronized start; then let original worker send its callback (third duplicate)."
+      ],
+      "positiveControl": [
+        "Exact actual owning worker/TLS/fence callback202; original runner resumes and normal suffix planning completes; resumed coordinate equals GuidedIncrementalStore.nextAction at capture."
+      ],
+      "refusalAndCounts": [
+        "One no-invocation row, one switch/effective j/ordinal, one distinct SOURCE_PLAN attempt reservation (and one gateway call on successful fixture), exact retained IDs/order; original consumed actions remain dispatch1/native-completed1; admitted excluded original native0 plus exactly one fresh replacement. No uncertain DISPATCHING resend or browser restart. Capture repeated callback outcomes with same/different keys."
+      ],
+      "proposedDedicatedMethods": [
+        "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+        "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch"
+      ],
+      "requiredRuntimeCommands": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalConcurrentAuthenticatedDriftCommitsOneSwitch"
+      ],
+      "sourceReferences": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2943,
+          "anchor": "variant.equals(\"confirm-recover\")"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 3041,
+          "anchor": "private void assertActualDriftCallbackAuthorityThenRelease"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java",
+          "line": 262,
+          "anchor": "public JsonNode nextAction"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "line": 2245,
+          "anchor": "private JsonNode prefixDrift"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+          "line": 332,
+          "anchor": "private JsonNode advancePrefix"
+        }
+      ]
+    },
+    {
+      "ledgerIndex0": 26,
+      "originalObligation": {
+        "plannedName": "IncrementalRelearnIT.prefixAssertionFailureStopsWithoutReinterpretation",
+        "requirement": [
+          "AC-4",
+          "AC-6"
+        ],
+        "tier": "REAL JOINED assertion fixture",
+        "assertions": "Step2 assertion FAIL stops session, both gateways zero, no suffix and no revision published; original failing assertion retained",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null
+      },
+      "review05Disposition": {
+        "ledgerIndex0": 26,
+        "plannedName": "IncrementalRelearnIT.prefixAssertionFailureStopsWithoutReinterpretation",
+        "originalRequiredTier": "REAL JOINED assertion fixture",
+        "originalRequiredAssertions": "Step2 assertion FAIL stops session, both gateways zero, no suffix and no revision published; original failing assertion retained",
+        "originalRemainingSourceFacets": [
+          "Current assertion failure is step3 rather than ledger literal step2; preserve original subject but add exact requested coordinate companion."
+        ],
+        "disposition": "A",
+        "dispositionMeaning": "ACTUAL_EXECUTABLE_SOURCE_OR_ASSERTION_GAP",
+        "owner": "Backend",
+        "inspectedSource": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2419,
+            "anchor": "texts.add(variant.equals(\"assert-fail\")"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2768,
+            "anchor": "if (variant.equals(\"assert-fail\"))"
+          }
+        ],
+        "sourceSelectorsFromOwnerMap": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "originalParameterLabels": [
+          "assert-fail"
+        ],
+        "independentFinding": "Actual variant changes step3 assertion, whereas frozen requirement explicitly says step2. Keep its failing assertion oracle and add exact step2 companion with zero gateways/suffix/revision and factual failing ledger.",
+        "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+        "sourceReleaseGranted": false
+      },
+      "existingRunnable": {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "methods": [
+          "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "parameterLabels": [
+          "assert-fail"
+        ],
+        "actualAssertions": [
+          "Existing assert-fail authors assertion at step3, actual DOM changes output after focus; factual ASSERTION_FAILED booleanfalse action and FAILED result, zero models/receipts/switch/newrevision checked."
+        ],
+        "executionCredit": "NONE; source inspection only; actual attempt03 is separate root-owned runtime evidence and original ledger status retained",
+        "ownerMapExactSelectors": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "runtimeCommands": [
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "selectorLimitation": "A parameterized method selector runs every ValueSource invocation; names/labels are not stand-alone Gradle selectors."
+      },
+      "genuinelyMissing": [
+        "Literal frozen step2 assertion subject missing."
+      ],
+      "minimalConcreteDelta": [
+        "Keep assert-fail unchanged. Add incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned with lawful base step2 containing its actual assertion (e.g fill then assert ordinal1, step1 retained producer), only mixed DOM changes expected condition after read/fill. Extend JOIN local incremental model fixture for this exact authored assertion/ordinal. Do not move old test or label step3 as step2."
+      ],
+      "positiveControl": [
+        "Same step2 assertion passes during actual base learning/publication and unmodified mixed control."
+      ],
+      "refusalAndCounts": [
+        "Mixed step2 exact assertion admission FAILED/ASSERTION_FAILED/assertionPassedfalse, dispatch1; no later step execution, no switch/receipt/SOURCE_PLAN/model attempts; both gateways delta0, submit effect0, revision count stays1/base confirmed unchanged; result has relearnedFrom present null. Assertion native execution is expected1, never demand all native0."
+      ],
+      "proposedDedicatedMethods": [
+        "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned"
+      ],
+      "requiredRuntimeCommands": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned"
+      ],
+      "sourceReferences": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2419,
+          "anchor": "texts.add(variant.equals(\"assert-fail\")"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2746,
+          "anchor": "private void assertIncrementalTerminalRefusal"
+        }
+      ]
+    },
+    {
+      "ledgerIndex0": 27,
+      "originalObligation": {
+        "plannedName": "IncrementalRelearnIT.prefixPolicyRefusalStopsWithoutReinterpretation",
+        "requirement": [
+          "AC-4",
+          "AC-6"
+        ],
+        "tier": "REAL JOINED redirect/policy fixture",
+        "assertions": "Prefix origin/navigation/password-policy refusal stops, no model call or publication; never mislabeled target drift",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null
+      },
+      "review05Disposition": {
+        "ledgerIndex0": 27,
+        "plannedName": "IncrementalRelearnIT.prefixPolicyRefusalStopsWithoutReinterpretation",
+        "originalRequiredTier": "REAL JOINED redirect/policy fixture",
+        "originalRequiredAssertions": "Prefix origin/navigation/password-policy refusal stops, no model call or publication; never mislabeled target drift",
+        "originalRemainingSourceFacets": [
+          "Prefix redirect/navigation/password refusal companions are not all in this incremental variant."
+        ],
+        "disposition": "A",
+        "dispositionMeaning": "ACTUAL_EXECUTABLE_SOURCE_OR_ASSERTION_GAP",
+        "owner": "Backend + Runner",
+        "inspectedSource": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2511,
+            "anchor": "variant.equals(\"policy-prefix\") ? \"DENY\""
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2746,
+            "anchor": "private void assertIncrementalTerminalRefusal"
+          }
+        ],
+        "sourceSelectorsFromOwnerMap": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "originalParameterLabels": [
+          "policy-prefix"
+        ],
+        "independentFinding": "DENY stance is one positive refusal subject. Add actual incremental redirect/origin/navigation and password-policy companions with no-native/effect/model/publication, factual POLICY_DENIED and no drift reinterpretation; reuse lawful native fixture hooks.",
+        "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+        "sourceReleaseGranted": false
+      },
+      "existingRunnable": {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "methods": [
+          "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "parameterLabels": [
+          "policy-prefix"
+        ],
+        "actualAssertions": [
+          "Existing policy-prefix uses governed DENY and proves factual POLICY_DENIED, no protected step5 admission, no models/switch/revision. Runner runtime maps policyRefusal to FAILED/POLICY_DENIED only when provenBeforeEffect."
+        ],
+        "executionCredit": "NONE; source inspection only; actual attempt03 is separate root-owned runtime evidence and original ledger status retained",
+        "ownerMapExactSelectors": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "runtimeCommands": [
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "selectorLimitation": "A parameterized method selector runs every ValueSource invocation; names/labels are not stand-alone Gradle selectors."
+      },
+      "genuinelyMissing": [
+        "Actual prefix redirected origin, navigation policy and password-policy companions absent."
+      ],
+      "minimalConcreteDelta": [
+        "Add incrementalPrefixPolicyRefusalsNeverBecomeDrift with separate labels redirect-origin/navigation/password-policy. Use real owned HTTP redirect to denied origin after valid prefix navigation starts; denied destination must not receive request. Navigation proposal/current origin refusal must use actual prefix authority and current governed policy after valid start (not just start403). Password case uses existing actual password primitive fixture path, current governed password policy refusal before read/fill; keep OBS007 behavior and canary sinks. Add local JOIN hooks only to select fault, preserving actual runtime checks and callbacks."
+      ],
+      "positiveControl": [
+        "Identical valid origin/navigation/password control completes in real runner with expected1 navigation or fill before mutation; current owning callback transport valid."
+      ],
+      "refusalAndCounts": [
+        "Factual FAILED/POLICY_DENIED (preserve inherited password annotation mapping where applicable), no drift receipt/switch/suffix/publication/model attempts, both gateways0. Denied target effect/native0 and forbidden-origin request0; earlier permitted navigation may1. No fake TARGET_CHANGED, no retry."
+      ],
+      "proposedDedicatedMethods": [
+        "incrementalPrefixPolicyRefusalsNeverBecomeDrift"
+      ],
+      "requiredRuntimeCommands": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalPrefixPolicyRefusalsNeverBecomeDrift"
+      ],
+      "sourceReferences": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2511,
+          "anchor": "variant.equals(\"policy-prefix\") ? \"DENY\""
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2746,
+          "anchor": "private void assertIncrementalTerminalRefusal"
+        },
+        {
+          "path": "studio-runner/src/guided/runtime.ts",
+          "line": 439,
+          "anchor": "const policyRefusal ="
+        }
+      ]
+    },
+    {
+      "ledgerIndex0": 48,
+      "originalObligation": {
+        "plannedName": "IncrementalDriftIT.preAdmissionAndAdmittedReceiptsUseAuthenticatedAuthority",
+        "requirement": [
+          "AC-4"
+        ],
+        "tier": "HTTP+Postgres+real runner fault seam",
+        "assertions": "PRE_ADMISSION direct response alone insufficient; callback owning-worker/mTLS/assignment required; ADMITTED exact spent prep/version/operation and no-native fence; forged hash/model claims/late callbacks reject",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null
+      },
+      "review05Disposition": {
+        "ledgerIndex0": 48,
+        "plannedName": "IncrementalDriftIT.preAdmissionAndAdmittedReceiptsUseAuthenticatedAuthority",
+        "originalRequiredTier": "HTTP+Postgres+real runner fault seam",
+        "originalRequiredAssertions": "PRE_ADMISSION direct response alone insufficient; callback owning-worker/mTLS/assignment required; ADMITTED exact spent prep/version/operation and no-native fence; forged hash/model claims/late callbacks reject",
+        "originalRemainingSourceFacets": [
+          "All exact admitted preparation/admission mutation fields and late terminal callback need full source matrix."
+        ],
+        "disposition": "A",
+        "dispositionMeaning": "ACTUAL_EXECUTABLE_SOURCE_OR_ASSERTION_GAP",
+        "owner": "Backend + Runner",
+        "inspectedSource": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 3041,
+            "anchor": "private void assertActualDriftCallbackAuthorityThenRelease"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 3061,
+            "anchor": "for (String field : List.of(\"scopeHash\", \"authoredInputsHash\""
+          }
+        ],
+        "sourceSelectorsFromOwnerMap": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "originalParameterLabels": [
+          "drift-auth",
+          "drift-auth-pre"
+        ],
+        "independentFinding": "Current auth probes cover wrong worker/fence/token/mTLS and nine resealed fields. Extend exact original admitted prep/admission/context/config/obligation/assignment joins and late terminal callback, proving actual owning-worker transport refusal and no writes/native retry. Pure receipt hash/caller boolean is not authentication.",
+        "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+        "sourceReleaseGranted": false
+      },
+      "existingRunnable": {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "methods": [
+          "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "parameterLabels": [
+          "drift-auth",
+          "drift-auth-pre"
+        ],
+        "actualAssertions": [
+          "Existing owning worker callback capture barrier before original send; receipt nativeInvocationStartedfalse; no receipt/switch; four auth failures and nine independently resealed fields, pending/immutable equal, model attempts0. Finally releases original sender as positive control. Direct prepare DRIFT response checked against already committed duplicateReceipt only."
+        ],
+        "executionCredit": "NONE; source inspection only; actual attempt03 is separate root-owned runtime evidence and original ledger status retained",
+        "ownerMapExactSelectors": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "runtimeCommands": [
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "selectorLimitation": "A parameterized method selector runs every ValueSource invocation; names/labels are not stand-alone Gradle selectors."
+      },
+      "genuinelyMissing": [
+        "Complete crossed actual prep/admission/context/config/assignment matrix and late uncommitted terminal callback; authenticated concurrent duplicate companion shares20."
+      ],
+      "minimalConcreteDelta": [
+        "Add incrementalDriftAuthorityRejectsEveryExactJoin using existing barrier and sharedAuthorityMatrix; one mutation per probe, recompute receiptHash after schema-valid mutation, preserve malformed/hash mismatch separately. For prep/obligation fields absent from DriftReceipt mutate actual callback ledger or submit crossed real IDs; prove actual store/HTTP owner association, not fictitious added fields. Cover PRE direct response before callback cannot switch by holding original callback and inspecting durable zero until real worker callback. Reuse same helper for54."
+      ],
+      "positiveControl": [
+        "Release original untouched callback under mTLS+current owning JWT/header; it must202 and actual session reaches suffix/finalize. Every attack has valid held parent first."
+      ],
+      "refusalAndCounts": [
+        "Every refused probe snapshot full mutable+immutable rows/counters+no-invocation/prefixRequests/obligationAdmissions/materialization deliveries/commands unchanged; zero native at excluded coordinate, zero model/switch/receipt before positive control. Existing broad isIn403/409/422 must be replaced in new matrix by expected exact code at each boundary (auth401/403; owner body mismatch, schema422, semantic409); record actual response body."
+      ],
+      "proposedDedicatedMethods": [
+        "incrementalDriftAuthorityRejectsEveryExactJoin"
+      ],
+      "requiredRuntimeCommands": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalDriftAuthorityRejectsEveryExactJoin"
+      ],
+      "sourceReferences": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 3041,
+          "anchor": "private void assertActualDriftCallbackAuthorityThenRelease"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "line": 2245,
+          "anchor": "private JsonNode prefixDrift"
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql",
+          "line": 438,
+          "anchor": "CREATE FUNCTION studio_015_no_invocation_guard"
+        }
+      ]
+    },
+    {
+      "ledgerIndex0": 54,
+      "originalObligation": {
+        "plannedName": "IncrementalPublicationIT.excludedAttemptRequiresEveryExactAuthenticatedJoin",
+        "requirement": [
+          "AC-3",
+          "AC-4",
+          "AC-5",
+          "AC-6"
+        ],
+        "tier": "HTTP+Postgres+pure runner",
+        "assertions": "Admitted drift excluded action FAILED TARGET_CHANGED dispatch1 attempt0 exact original preparation/obligation association and receipt identity; mismatched worker/fence/context/version/request/operation/preparation/admission/evidence refuse; no invented spent PRE_ADMISSION action; no other omitted failed/unknown/dispatching row",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null
+      },
+      "review05Disposition": {
+        "ledgerIndex0": 54,
+        "plannedName": "IncrementalPublicationIT.excludedAttemptRequiresEveryExactAuthenticatedJoin",
+        "originalRequiredTier": "HTTP+Postgres+pure runner",
+        "originalRequiredAssertions": "Admitted drift excluded action FAILED TARGET_CHANGED dispatch1 attempt0 exact original preparation/obligation association and receipt identity; mismatched worker/fence/context/version/request/operation/preparation/admission/evidence refuse; no invented spent PRE_ADMISSION action; no other omitted failed/unknown/dispatching row",
+        "originalRemainingSourceFacets": [
+          "Complete every field crossed admission/preparation/obligation negative realHTTP matrix remains partial."
+        ],
+        "disposition": "A",
+        "dispositionMeaning": "ACTUAL_EXECUTABLE_SOURCE_OR_ASSERTION_GAP",
+        "owner": "Backend + Runner",
+        "inspectedSource": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 3041,
+            "anchor": "private void assertActualDriftCallbackAuthorityThenRelease"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2795,
+            "anchor": "private void assertIncrementalSpentAdmissionHasOneFreshNativeReplacement"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 3153,
+            "anchor": "private void assertIncrementalImmutableSourceAndPlanHistory"
+          }
+        ],
+        "sourceSelectorsFromOwnerMap": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "originalParameterLabels": [
+          "admitted-literal2",
+          "drift-auth",
+          "drift-auth-pre",
+          "unknown2"
+        ],
+        "independentFinding": "Complete exact real HTTP crossed prep/admission/obligation/context/config/version and no-invented PRE_ADMISSION spent row matrix, preserving valid owned callback baseline and zero writes. Include late terminal, other omitted failed/unknown/dispatching facts; TS local joins and SQL guards are companions, not actual authentication.",
+        "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+        "sourceReleaseGranted": false
+      },
+      "existingRunnable": {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "methods": [
+          "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "parameterLabels": [
+          "admitted-literal2",
+          "drift-auth",
+          "drift-auth-pre",
+          "unknown2"
+        ],
+        "actualAssertions": [
+          "assertIncrementalSpentAdmissionHasOneFreshNativeReplacement already checks ADMITTED receipt false native, two same-coordinate attempts0/1, originalFAILED TARGET_CHANGED dispatch1/native0, freshSUCCEEDED dispatch1/NATIVE_COMPLETED1. unknown2 proves actual native completed then UNKNOWN, no attempt1. Existing history probes are SQL mutation refusals, separate tier."
+        ],
+        "executionCredit": "NONE; source inspection only; actual attempt03 is separate root-owned runtime evidence and original ledger status retained",
+        "ownerMapExactSelectors": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "runtimeCommands": [
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "selectorLimitation": "A parameterized method selector runs every ValueSource invocation; names/labels are not stand-alone Gradle selectors."
+      },
+      "genuinelyMissing": [
+        "Complete authenticated matrix48 and actual builder exclusions for every other omitted FAILED/UNKNOWN/DISPATCHING row. No explicit PRE zero invented spent action join."
+      ],
+      "minimalConcreteDelta": [
+        "Reuse48 probes and positive controls once, retain54 separate row map. Add incrementalExcludedAttemptCannotHideOtherUnsettledActions: lawful actual action authority creates terminal FAILED or UNKNOWN via actual outcome, DISPATCHING via hold after consume; actual repository.read/build/finalize refuses omission. Do not disable guards or insert fake action history. For PRE assert callback ledger null/admissionIdnull/preparationIdnull, no spent action at drift coordinate before new suffix, no fabricated allocation/edge for PRE. Capture exact spent prep proof and original obligation association before callback and compare receipt+ledger+published exclusion byte identity."
+      ],
+      "positiveControl": [
+        "Existing admitted-literal2 successful final artifact retains producer, omits only exact authenticated failed spent attempt, fresh replacement succeeds; ordinary failed/unknown cannot publish."
+      ],
+      "refusalAndCounts": [
+        "Original admitted attemptOrdinal0/dispatch1/native0; replacement attempt1/dispatch1/native1 only after fresh suffix admission. PRE no old action/admission/prep; other FAILED/UNKNOWN/DISPATCHING never silently omitted. Refusal zero authority writes/new revision/native retry; pure runner validator companions separately retained R0/R1."
+      ],
+      "proposedDedicatedMethods": [
+        "incrementalExcludedAttemptCannotHideOtherUnsettledActions"
+      ],
+      "requiredRuntimeCommands": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalExcludedAttemptCannotHideOtherUnsettledActions"
+      ],
+      "sourceReferences": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2795,
+          "anchor": "private void assertIncrementalSpentAdmissionHasOneFreshNativeReplacement"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 3153,
+          "anchor": "private void assertIncrementalImmutableSourceAndPlanHistory"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "line": 2245,
+          "anchor": "private JsonNode prefixDrift"
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql",
+          "line": 438,
+          "anchor": "CREATE FUNCTION studio_015_no_invocation_guard"
+        }
+      ]
+    },
+    {
+      "ledgerIndex0": 55,
+      "originalObligation": {
+        "plannedName": "IncrementalMaterializationIT.emptyPrefixContextKeepsExactProgramPair",
+        "requirement": [
+          "AC-3",
+          "AC-4",
+          "AC-5",
+          "AC-6"
+        ],
+        "tier": "HTTP+Postgres+runner context",
+        "assertions": "Base-backed explicit first-step EMPTY_PREFIX carries empty PrefixProgram and hash during initial context and every delivery; half pair/changed pair/reforged digest rejected; no-base ordinary session omits pair",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null
+      },
+      "review05Disposition": {
+        "ledgerIndex0": 55,
+        "plannedName": "IncrementalMaterializationIT.emptyPrefixContextKeepsExactProgramPair",
+        "originalRequiredTier": "HTTP+Postgres+runner context",
+        "originalRequiredAssertions": "Base-backed explicit first-step EMPTY_PREFIX carries empty PrefixProgram and hash during initial context and every delivery; half pair/changed pair/reforged digest rejected; no-base ordinary session omits pair",
+        "originalRemainingSourceFacets": [
+          "Every empty-prefix subsequent context delivery tamper/rebootstrap realHTTP source not complete."
+        ],
+        "disposition": "A",
+        "dispositionMeaning": "ACTUAL_EXECUTABLE_SOURCE_OR_ASSERTION_GAP",
+        "owner": "Backend + Runner",
+        "inspectedSource": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+            "line": 544,
+            "anchor": "issuedContextRequiresExactImmutableProgramPairForEveryPinnedBaseSession"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+            "line": 552,
+            "anchor": "ordinaryContextRejectsHalfOrForgedProgramPair"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 3115,
+            "anchor": "private void assertIncrementalAppendAckHistory"
+          }
+        ],
+        "sourceSelectorsFromOwnerMap": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
+          "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.rejectsSuppliedSourceBaseAndSnapshotAttacks"
+        ],
+        "originalParameterLabels": [],
+        "independentFinding": "SQL empty-prefix program pair and ordinary half-pair refusals exist; current joined config-k1 does not assert every initial/subsequent delivery/rebootstrap tamper. Add actual HTTP/context and runner update companion for exact empty pair, half/changed/reforged pair refusal, no-base omission, no new browser/clock.",
+        "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+        "sourceReleaseGranted": false
+      },
+      "existingRunnable": {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "methods": [
+          "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof"
+        ],
+        "parameterLabels": [],
+        "actualAssertions": [
+          "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof executes explicit first step EMPTY_PREFIX and asserts empty actions/retained IDs, no baseProof, old base/receipt unchanged, full learn artifact. append-input validates v2 prefix pair hash, stable contextId, original delivery ACK and repeated ACK idempotence. SQL methods issuedContextRequiresExactImmutableProgramPairForEveryPinnedBaseSession/ordinaryContextRejectsHalfOrForgedProgramPair exist at SQL tier."
+        ],
+        "executionCredit": "NONE; source inspection only; actual attempt03 is separate root-owned runtime evidence and original ledger status retained",
+        "ownerMapExactSelectors": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
+          "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.rejectsSuppliedSourceBaseAndSnapshotAttacks"
+        ],
+        "runtimeCommands": [
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.rejectsSuppliedSourceBaseAndSnapshotAttacks"
+        ],
+        "selectorLimitation": "A parameterized method selector runs every ValueSource invocation; names/labels are not stand-alone Gradle selectors."
+      },
+      "genuinelyMissing": [
+        "Actual empty pair every initial/update/rebootstrap delivery matrix; ordinary no-base omission actual runner companion."
+      ],
+      "minimalConcreteDelta": [
+        "Add incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery. Start base-backed explicit firstStepId (config variant or historical existing fixture), capture initial runnerContext/issued bootstrap metadata; cause actual additional input append in empty-prefix suffix so v2 delivery is real, not SQL constructed; compare prefixProgram exact empty actions/sourceStepIds and hash to immutable pinned row on initial, duplicate delivery, ACK and rebootstrap call. Invoke original RevRuntime.update with each half-pair, changed pair+recomputed digest, forged hash and assert INPUT_IDENTITY/no accepted mutation; real backend acknowledgeContext HTTP path rejects corresponding invalid ACK at production boundary. Do not send attacker-controlled context to invented endpoint."
+      ],
+      "positiveControl": [
+        "Original empty pair accepts original context, exact update and duplicate/rebootstrap returns original ACK without new browser. Existing no-base ordinary session context omits both fields."
+      ],
+      "refusalAndCounts": [
+        "Tampered pair refuses before runtime context accepted; backend snapshots unchanged; original contextId/browser handle/launch count/recording clock retained; no model/native from refused update. Empty-prefix switch0 is legitimate, suffix model calls occur only after it. Finalize remains pure/no extra model."
+      ],
+      "proposedDedicatedMethods": [
+        "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery"
+      ],
+      "requiredRuntimeCommands": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery"
+      ],
+      "sourceReferences": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2340,
+          "anchor": "void historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 3115,
+          "anchor": "private void assertIncrementalAppendAckHistory"
+        },
+        {
+          "path": "studio-runner/src/guided/runtime.ts",
+          "line": 177,
+          "anchor": "for (const key of ['expiresAt','approvedOrigins'"
+        }
+      ]
+    },
+    {
+      "ledgerIndex0": 56,
+      "originalObligation": {
+        "plannedName": "IncrementalResultIT.receiptAndResultDistinguishBoundaryFromSuccess",
+        "requirement": [
+          "AC-3",
+          "AC-4",
+          "AC-5",
+          "AC-6"
+        ],
+        "tier": "HTTP+Postgres",
+        "assertions": "Required relearnedFrom null before committed switch; boundary/drift/empty prefix reports entered boundary after switch even when later SOURCE_PLAN fails; learnedFromThisRun/publication success false on failure; missing field and contradictory result refuse",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null
+      },
+      "review05Disposition": {
+        "ledgerIndex0": 56,
+        "plannedName": "IncrementalResultIT.receiptAndResultDistinguishBoundaryFromSuccess",
+        "originalRequiredTier": "HTTP+Postgres",
+        "originalRequiredAssertions": "Required relearnedFrom null before committed switch; boundary/drift/empty prefix reports entered boundary after switch even when later SOURCE_PLAN fails; learnedFromThisRun/publication success false on failure; missing field and contradictory result refuse",
+        "originalRemainingSourceFacets": [
+          "Dedicated boundary/full-empty SOURCE_PLANfail and missing/contradictory resultHTTP adversary incomplete."
+        ],
+        "disposition": "A",
+        "dispositionMeaning": "ACTUAL_EXECUTABLE_SOURCE_OR_ASSERTION_GAP",
+        "owner": "Backend",
+        "inspectedSource": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2573,
+            "anchor": "if (variant.equals(\"drift-plan-fail\"))"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2746,
+            "anchor": "private void assertIncrementalTerminalRefusal"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+            "line": 854,
+            "anchor": "failedPlanningAfterCommittedSwitchRetainsEnteredBoundaryWithoutSuccessClaim"
+          }
+        ],
+        "sourceSelectorsFromOwnerMap": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "originalParameterLabels": [
+          "drift-plan-fail",
+          "assert-fail",
+          "policy-prefix"
+        ],
+        "independentFinding": "Drift SOURCE_PLAN failure and pre-switch failure source exist. Add boundary and full-empty post-switch SOURCE_PLAN failures and actual result serialization/HTTP missing-or-contradictory-field adversaries with learnedFromThisRun/publication false. Do not synthesize a new public attacker-controlled result endpoint; use existing serializer/contract seams.",
+        "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+        "sourceReleaseGranted": false
+      },
+      "existingRunnable": {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "methods": [
+          "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "parameterLabels": [
+          "drift-plan-fail",
+          "assert-fail",
+          "policy-prefix"
+        ],
+        "actualAssertions": [
+          "drift-plan-fail real switch then SOURCE_PLAN UNSUPPORTED produces FAILED, reports boundary step2/driftSwitchStep2, learnedfalse/assertionsfalse and base-only revision. Pre-switch refusals report null. GuidedPublicationResultProjector handles base-backed HTTP result, sets relearnedFrom and validates v3/result; S.result is fallback. Existing result schema allOf requires learnedfalse unless publicationPUBLISHED, PUBLISHED requires outcomeSUCCEEDED, readytrue requires published. SQL failedPlanningAfterCommittedSwitchRetainsEnteredBoundaryWithoutSuccessClaim exists."
+        ],
+        "executionCredit": "NONE; source inspection only; actual attempt03 is separate root-owned runtime evidence and original ledger status retained",
+        "ownerMapExactSelectors": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "runtimeCommands": [
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "selectorLimitation": "A parameterized method selector runs every ValueSource invocation; names/labels are not stand-alone Gradle selectors."
+      },
+      "genuinelyMissing": [
+        "Boundary and full-empty SOURCE_PLAN failure actual HTTP; missing/contradictory result validation companions."
+      ],
+      "minimalConcreteDelta": [
+        "Add incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary with labels BOUNDARY and EMPTY_PREFIX (explicit base-backed first step), preserve original drift-plan-fail. Extend local model fixture failure condition to exact current scenario only after committed learningWindow; base SOURCE_PLAN must succeed. Fetch actual HTTP /result before switch and after failure. Clone actual HTTP serialized result and independently remove relearnedFrom; set learnedFromThisRuntrue while publicationREFUSED; set publicationPUBLISHED while outcomeFAILED using genuine existing receipt body; set currentReadinessreadytrue while publicationREFUSED. C.validate(v3/result) must reject each existing allOf contradiction. Do not create result-write endpoint or claim the validator-only mutation is HTTP execution authority. Live HTTP positive/failure result remains separate projector evidence."
+      ],
+      "positiveControl": [
+        "Base learns/publishes; normal BOUNDARY and explicit EMPTY_PREFIX succeed unchanged; actual before-switch response required field presentnull."
+      ],
+      "refusalAndCounts": [
+        "Post-switch result has exact entered boundary despite SOURCE_PLANFAILED; assertionsPassed/learnedFromThisRun/replayVerified/scheduleActivatedfalse; publicationREFUSED/receiptnull/currentReadinessreadyfalse, new revision0. One committed switch, no successful publication; legacy0, source model attempts as actual failed planning policy dictates, no invented model0 after switch. Missing relearnedFrom and each cross-field contradiction reject through existing v3/result required/allOf rules; actual HTTP result serialization itself retains exact flags and boundary."
+      ],
+      "proposedDedicatedMethods": [
+        "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary"
+      ],
+      "requiredRuntimeCommands": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary"
+      ],
+      "sourceReferences": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2573,
+          "anchor": "if (variant.equals(\"drift-plan-fail\"))"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 18711,
+          "anchor": "private static ObjectNode incrementalTenModel"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "line": 2585,
+          "anchor": "private ObjectNode result"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+          "line": 115,
+          "anchor": "private ObjectNode result"
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json",
+          "line": 263,
+          "anchor": "\"allOf\""
+        }
+      ]
+    },
+    {
+      "ledgerIndex0": 80,
+      "originalObligation": {
+        "plannedName": "IncrementalPolicyIT.prefixGuardDeniesGroundingDestructionAndDenyEvenAfterConsent",
+        "requirement": [
+          "ARCH015-03: inherited governed consent/model-free prefix/measured timing"
+        ],
+        "tier": "Real HTTP+PG+runner",
+        "assertions": "Fresh Save/Delete/unobserved-target/form-Enter guard cases under frozen policy stop POLICY_DENIED before effect/model, never drift reinterpretation, even current confirmed stance.",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null,
+        "sourceCorrection": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/test-delta.json"
+      },
+      "review05Disposition": {
+        "ledgerIndex0": 80,
+        "plannedName": "IncrementalPolicyIT.prefixGuardDeniesGroundingDestructionAndDenyEvenAfterConsent",
+        "originalRequiredTier": "Real HTTP+PG+runner",
+        "originalRequiredAssertions": "Fresh Save/Delete/unobserved-target/form-Enter guard cases under frozen policy stop POLICY_DENIED before effect/model, never drift reinterpretation, even current confirmed stance.",
+        "originalRemainingSourceFacets": [
+          "Dedicated actual fresh Save/Delete/unobserved-target/formEnter after current prefix consent is absent; defaultDENY case is not a substitute."
+        ],
+        "disposition": "A",
+        "dispositionMeaning": "ACTUAL_EXECUTABLE_SOURCE_OR_ASSERTION_GAP",
+        "owner": "Backend + Runner",
+        "inspectedSource": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2874,
+            "anchor": "private JsonNode confirmIncrementalPrefix"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2511,
+            "anchor": "variant.equals(\"policy-prefix\") ? \"DENY\""
+          }
+        ],
+        "sourceSelectorsFromOwnerMap": [],
+        "originalParameterLabels": [],
+        "independentFinding": "Current wait then confirmed Submit and default DENY are not fresh Save/Delete/unobserved-target/form-Enter under confirmed stance. Add exact hostile fresh post-answer proposal cases via actual guards before effect/model; expected POLICY_DENIED with no drift reinterpretation. No model/private marker injection or generic consent bypass.",
+        "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+        "sourceReleaseGranted": false
+      },
+      "existingRunnable": {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "methods": [],
+        "parameterLabels": [],
+        "actualAssertions": [
+          "Existing confirm-edit4 obtains legitimate current question+answer, refreshes, and executes confirmed Submit; policy-prefix tests frozen DENY. Guard evaluateProposal always reruns observation/grounding/destructive checks before consent stance."
+        ],
+        "executionCredit": "NONE; source inspection only; actual attempt03 is separate root-owned runtime evidence and original ledger status retained",
+        "ownerMapExactSelectors": [],
+        "runtimeCommands": [],
+        "selectorLimitation": "A parameterized method selector runs every ValueSource invocation; names/labels are not stand-alone Gradle selectors."
+      },
+      "genuinelyMissing": [
+        "Fresh Save/Delete/unobserved/formEnter negative guard matrix after actual consent absent."
+      ],
+      "minimalConcreteDelta": [
+        "Add incrementalFreshPostConsentGuardsDenyDangerousProposals with labels Save/Delete/unobserved-target/form-Enter. Obtain real current prefix question/answer first; hold after fresh observation/prepare before native. Reuse JOIN-owned preparePrefix wrapper to change only candidate target.nodeId to actual current observed Save/Delete node, or nonexistent node for unobserved case; preserve exact pinned coordinate/operation/locator/origin/request digest so verifyPrepared passes and refusal reaches guardAction. For form-Enter use dedicated lawful base prefix operation press Enter authored in actual source/model before base publication, with changed current candidate target that fails frozen grounding/destructive/stance checks; no universal rejection of legitimate authored Enter after valid consent. Keep separate frozen DENY Enter positive refusal. Do not mutate frozen policy or inject CONFIRMED/private markers. Fixture must show it actually reached guard with expected reason, not OPERATION_MISMATCH/TARGET_CHANGED earlier."
+      ],
+      "positiveControl": [
+        "Current real answer accepts and a fresh untampered Submit proposal succeeds under same frozen policy/observation. Valid authored Enter under confirmed CLARIFY_FIRST is lawful control if grounding passes; frozen DENY refuses side effect regardless of consent value, but never fabricate current consent under DENY."
+      ],
+      "refusalAndCounts": [
+        "Guard terminal FAILED/errorCodePOLICY_DENIED with closed UNGROUNDED_TARGET/DESTRUCTIVE_VERB/SIDE_EFFECT_DENIED as fixture determines; denied candidate action/admission/native/effect0, both gateways0 pre-switch, no drift receipt/switch/revision. Earlier authorized effects counted separately. Preserve canary/value/media sinks."
+      ],
+      "proposedDedicatedMethods": [
+        "incrementalFreshPostConsentGuardsDenyDangerousProposals"
+      ],
+      "requiredRuntimeCommands": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalFreshPostConsentGuardsDenyDangerousProposals"
+      ],
+      "sourceReferences": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2874,
+          "anchor": "private JsonNode confirmIncrementalPrefix"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+          "line": 1558,
+          "anchor": "private JsonNode guardAction"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuard.java",
+          "line": 77,
+          "anchor": "public static Decision evaluateProposal"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java",
+          "line": 313,
+          "anchor": "public void verifyPrepared"
+        }
+      ]
+    },
+    {
+      "ledgerIndex0": 81,
+      "originalObligation": {
+        "plannedName": "IncrementalPolicyIT.waitingRecoveryCancellationAndAnswerRacesRemainAtMostOnce",
+        "requirement": [
+          "ARCH015-03: inherited governed consent/model-free prefix/measured timing"
+        ],
+        "tier": "HTTP+PG concurrency+runner",
+        "assertions": "Duplicate keys/controller restart preserve one question; wrong user/choice/gen/source/context/lease/fence reject; cancel/expiry wins, no late effect/new browser/clock/uncertain retry.",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null,
+        "sourceCorrection": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/test-delta.json"
+      },
+      "review05Disposition": {
+        "ledgerIndex0": 81,
+        "plannedName": "IncrementalPolicyIT.waitingRecoveryCancellationAndAnswerRacesRemainAtMostOnce",
+        "originalRequiredTier": "HTTP+PG concurrency+runner",
+        "originalRequiredAssertions": "Duplicate keys/controller restart preserve one question; wrong user/choice/gen/source/context/lease/fence reject; cancel/expiry wins, no late effect/new browser/clock/uncertain retry.",
+        "originalRemainingSourceFacets": [
+          "Dedicated changedcontext-generation/leaseexpiry independent from gracefulLEASE_LOST needs executable companion."
+        ],
+        "disposition": "A",
+        "dispositionMeaning": "ACTUAL_EXECUTABLE_SOURCE_OR_ASSERTION_GAP",
+        "owner": "Backend + Runner",
+        "inspectedSource": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2943,
+            "anchor": "variant.equals(\"confirm-recover\")"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2971,
+            "anchor": "variant.equals(\"confirm-owner-loss\")"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 3012,
+            "anchor": "variant.equals(\"confirm-race\")"
+          }
+        ],
+        "sourceSelectorsFromOwnerMap": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "originalParameterLabels": [
+          "confirm-recover",
+          "confirm-cancel",
+          "confirm-expire",
+          "confirm-source-change",
+          "confirm-owner-loss",
+          "confirm-race"
+        ],
+        "independentFinding": "Wrong user/choice/generation, source edit, graceful owner stop, wait expiry and cancel/answer race source exist. Add independently changed current context/document generation and actual original lease expiry without conflating it with authenticated graceful LEASE_LOST; reject stale answer, no late effect/restart/new clock/uncertain resend.",
+        "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+        "sourceReleaseGranted": false
+      },
+      "existingRunnable": {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "methods": [
+          "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "parameterLabels": [
+          "confirm-recover",
+          "confirm-cancel",
+          "confirm-expire",
+          "confirm-source-change",
+          "confirm-owner-loss",
+          "confirm-race",
+          "confirm-long-wait"
+        ],
+        "actualAssertions": [
+          "Wrong clarification ID/generation/choice/user and fence; duplicate exact answer key; replacement coordinator preserves question; real source edit refusal; real clarification expiresAt elapses with credentials refreshed; graceful LEASE_LOST stop; cancel-answer race at-most1 protected admission/native. Long wait expires old prep while same owner renews."
+        ],
+        "executionCredit": "NONE; source inspection only; actual attempt03 is separate root-owned runtime evidence and original ledger status retained",
+        "ownerMapExactSelectors": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "runtimeCommands": [
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "selectorLimitation": "A parameterized method selector runs every ValueSource invocation; names/labels are not stand-alone Gradle selectors."
+      },
+      "genuinelyMissing": [
+        "Changed current document/generation or context identity independently; natural original owner lease expiry without graceful stop; exact question duplicate on restart."
+      ],
+      "minimalConcreteDelta": [
+        "Add incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry with separate labels generation/context/lease. For generation use actual owning worker observation/refresh if supported during wait; if API correctly refuses this operation, capture refusal and zero writes, then exercise crossed real current context via supported delivery boundary rather than SQL rewrite. Context change while valid wait may be invariant-forbidden: record forbidden transition, do not invent valid changed pending state. For lease intercept ONLY owning lease-renew callback in existing local worker callback wrapper for this exact session after original persisted lease recorded; leave worker/browser/recorder alive. Wait until original leaseExpiresAt genuinely passes while session/question hard expiry remains future, then submit original answer. No dispatch.stop/lifecycle LEASE_LOST, process kill, timestamp rewrite or new clock. Hold native before any uncertain dispatch."
+      ],
+      "positiveControl": [
+        "Legitimate duplicate key and reconstructed coordinator preserve identical original question; same owner renew allowed and confirm-long-wait succeeds with fresh prep after old prep expiry."
+      ],
+      "refusalAndCounts": [
+        "Wrong current gen/doc/context/source/owner/fence refuses409 expected STALE_GENERATION/STALE_FENCE or existing invariant; lease answer409 STALE_FENCE after measured original lease. Protected action/native/effect0, model0/switch0; no new browser/clock/retry. Cancel/expiry winner remains terminal; capture exact original deadlines and actual times. If actual runtime renewal is not separable by callback tap, declare runner hook dependency and ask root exact release, do not substitute graceful stop."
+      ],
+      "proposedDedicatedMethods": [
+        "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry"
+      ],
+      "requiredRuntimeCommands": [
+        "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry"
+      ],
+      "sourceReferences": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2950,
+          "anchor": "variant.equals(\"confirm-long-wait\")"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2971,
+          "anchor": "variant.equals(\"confirm-owner-loss\")"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2981,
+          "anchor": "variant.equals(\"confirm-expire\")"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "line": 732,
+          "anchor": "public JsonNode clarify"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "line": 2386,
+          "anchor": "private void ownerFromLivePrefix"
+        }
+      ]
+    },
+    {
+      "ledgerIndex0": 82,
+      "originalObligation": {
+        "plannedName": "IncrementalPolicyIT.directPrefixAdmissionCannotBypassConfirmation",
+        "requirement": [
+          "ARCH015-03: inherited governed consent/model-free prefix/measured timing"
+        ],
+        "tier": "HTTP+PG",
+        "assertions": "Unconfirmed direct internal admit is stale/state refusal with no action; normal coordinator asks instead of denying. Fresh post-answer proposal reruns actual guards; no model/private-marker injection.",
+        "executionStatus": "NOT_RUN",
+        "actualTestNames": [],
+        "evidence": [],
+        "independentReview": null,
+        "sourceCorrection": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-03/test-delta.json"
+      },
+      "review05Disposition": {
+        "ledgerIndex0": 82,
+        "plannedName": "IncrementalPolicyIT.directPrefixAdmissionCannotBypassConfirmation",
+        "originalRequiredTier": "HTTP+PG",
+        "originalRequiredAssertions": "Unconfirmed direct internal admit is stale/state refusal with no action; normal coordinator asks instead of denying. Fresh post-answer proposal reruns actual guards; no model/private-marker injection.",
+        "originalRemainingSourceFacets": [
+          "Fresh hostileproposal afterconsent cases are still missing as obligation80."
+        ],
+        "disposition": "A",
+        "dispositionMeaning": "ACTUAL_EXECUTABLE_SOURCE_OR_ASSERTION_GAP",
+        "owner": "Backend + Runner",
+        "inspectedSource": [
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2933,
+            "anchor": "String beforeDirect = incrementalPendingSnapshot(id)"
+          },
+          {
+            "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+            "line": 2934,
+            "anchor": "incrementalControllerProbe(id, current.path(\"owner\").path(\"fence\").asLong(), direct, 409, \"admissions\")"
+          }
+        ],
+        "sourceSelectorsFromOwnerMap": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "originalParameterLabels": [
+          "confirm-edit4"
+        ],
+        "independentFinding": "Pre-answer direct admission refusal and normal authored question source exist. Post-answer fresh hostile proposal guard companions are missing (same implementation batch as80, separate obligations retained). Preserve no private-marker/model bypass and zero action before confirmation.",
+        "requiredEvidence": "Actual captured passing execution at the originalRequiredTier for every originalRequiredAssertions clause; all applicable source-only/sidecar limitations retained. No execution credit from this review.",
+        "sourceReleaseGranted": false
+      },
+      "existingRunnable": {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "methods": [
+          "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "parameterLabels": [
+          "confirm-edit4"
+        ],
+        "actualAssertions": [
+          "Existing direct admissions controller request while actual question pending409 and pending snapshot equal; normal coordinator asks AUTHORED SIDE_EFFECT_CONFIRMATION; correct answer duplicates samekey202."
+        ],
+        "executionCredit": "NONE; source inspection only; actual attempt03 is separate root-owned runtime evidence and original ledger status retained",
+        "ownerMapExactSelectors": [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "runtimeCommands": [
+          "./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        ],
+        "selectorLimitation": "A parameterized method selector runs every ValueSource invocation; names/labels are not stand-alone Gradle selectors."
+      },
+      "genuinelyMissing": [
+        "Fresh post-answer hostile guard probes shared80."
+      ],
+      "minimalConcreteDelta": [
+        "Retain existing direct HTTP admission refusal; additionally assert exact code (current waiting state STALE_GENERATION), actions/preparations/reservations/native0 at protected coordinate and actual normal question unchanged. Run fresh guard matrix80 once and map its proof separately to82, with no model/private confirmation marker in outbound model, proposed action, public question or publication."
+      ],
+      "positiveControl": [
+        "Normal coordinator question not terminal deny; real current answer and fresh safe action succeeds on same runtime."
+      ],
+      "refusalAndCounts": [
+        "Unconfirmed HTTP internal admit refuses409/no action; post-answer fresh dangerous proposals POLICY_DENIED before effect. Confirmed flag never bypasses grounded/current snapshot; no model call0 before committed switch and no private marker injection."
+      ],
+      "proposedDedicatedMethods": [],
+      "requiredRuntimeCommands": [],
+      "sourceReferences": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+          "line": 2933,
+          "anchor": "String beforeDirect = incrementalPendingSnapshot(id)"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "line": 1191,
+          "anchor": "public JsonNode admit"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+          "line": 1558,
+          "anchor": "private JsonNode guardAction"
+        }
+      ]
+    }
+  ],
+  "sharedAuthorityMatrix": {
+    "alreadyProbedTransport": [
+      "wrong JWT subject worker",
+      "wrong X-Owner-Fence",
+      "invalid bearer",
+      "no client certificate"
+    ],
+    "alreadyProbedReceipt": [
+      "scopeHash",
+      "authoredInputsHash",
+      "contextRevision",
+      "requestDigest",
+      "operationHash",
+      "workerId",
+      "prefixProgramHash",
+      "evidenceHash",
+      "sourceRevision"
+    ],
+    "addReceiptIdentity": [
+      "sessionId/path cross-session",
+      "ownerFence body versus header",
+      "contextId",
+      "configurationRevision",
+      "coordinate.stepId",
+      "coordinate.ordinal",
+      "admissionId",
+      "preparationId"
+    ],
+    "addClosedShape": [
+      "schemaVersion",
+      "phase cross PRE/ADMITTED",
+      "attemptOrdinal",
+      "nativeInvocationStarted=true",
+      "missing receiptHash",
+      "unresealed receiptHash",
+      "unknown model claim/extra property",
+      "invalid reason"
+    ],
+    "addActualCrossedRows": [
+      "another valid admission same session/different coordinate",
+      "another valid preparation different operation/admission",
+      "same-coordinate different attempt admission",
+      "foreign session preparation/admission",
+      "original obligation association mismatched proposal/admission via supported reserve/admit boundary; do not forge immutable association rows",
+      "assignment generation/token/fence against actual current owner/dispatch assignment"
+    ],
+    "ledgerExactFields": [
+      "sessionId",
+      "ownerFence",
+      "scopeHash",
+      "coordinate",
+      "generation",
+      "contextRevision",
+      "authoredInputsHash",
+      "evidenceHash",
+      "operationHash",
+      "requestDigest",
+      "preparationId",
+      "admission.admissionId",
+      "state",
+      "outcomeCode",
+      "dispatchCount",
+      "attemptOrdinal",
+      "executionEvidence"
+    ],
+    "prepAuthorityFields": [
+      "workerId",
+      "ownerFence",
+      "scopeHash",
+      "contextId",
+      "contextRevision",
+      "authoredInputsHash",
+      "sourceRevision",
+      "configurationRevision",
+      "versions",
+      "preparationId",
+      "requestDigest",
+      "evidenceHash",
+      "expiresAt",
+      "prep.admission_id association"
+    ],
+    "terminal": [
+      "cancel original held callback before any accepted receipt; replay captured original HTTP body after terminal must refuse and write nothing",
+      "exact already-committed duplicate is historical202 even after terminal by intentional duplicateReceipt-before-active; distinguish this from new late callback"
+    ]
+  }
+}

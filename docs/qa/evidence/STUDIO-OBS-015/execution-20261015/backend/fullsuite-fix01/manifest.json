@@ -1,0 +1,316 @@
+{
+ "story": "STUDIO-OBS-015",
+ "label": "fullsuite-fix01",
+ "agent": "Dex-G (@dev)",
+ "applied": [
+  "fullsuite-triage-A",
+  "fullsuite-triage-E (+R1,R2)",
+  "fullsuite-triage-BC",
+  "fullsuite-triage-D (+R-2 test, wraps)",
+  "aria-cap-ruling01",
+  "crash-reaper-diagnosis01",
+  "po-triage-followups TF-1/TF-2"
+ ],
+ "runs": {
+  "fix01-targeted01": "INVALID: zsh passed the --tests list as one argument; Gradle failed in 3 s, 0 tests",
+  "fix01-targeted02": "26 classes: 331 total, 328 pass, 1 fail (StudioAuthoringMigrationIT.publicationCapturesTheExactV2InputsAndTheyAreWriteOnce, head-only fixture URL), 2 skips",
+  "fix01-targeted03": "StudioAuthoringMigrationIT 3/3 after fixture fix",
+  "fix01-r1-red01": "GuidedPublicationRaceTest with errorCode UPDATE temporarily removed from GuidedPublicationRepository.conflict: 13 total, 1 FAIL (expected PUBLICATION_CONFLICT, was null); repository restored, sha 1dab60f7 identical",
+  "fix01-targeted04": "StudioScheduleApiIT 22 total, 6 pass, 0 fail, 16 skip (historical @Disabled; collector exit 2 only for skip policy)",
+  "fix01-full-test01": "full test: 2411 total, 2385 pass, 1 fail (StudioScheduleApiIT.rawReadinessChange...), 25 skip; taskCollectionComplete true",
+  "fix01-full-test02": "full test: 2411 total, 2385 pass, 1 fail (GuidedPublicationReplayIT.actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper, harness race), 25 skip; taskCollectionComplete true; run before the crash-reaper harness patch and before TF-1/TF-2",
+  "fix01-replay-authority01": "ReplayIT + AuthorityIT after harness patch: 73/73, 0 skip, complete",
+  "fix01-tf01": "82 total (9 classes), 65 pass, 1 fail (new unit test used a draft with no revision inputs for a positive read), 16 skip",
+  "fix01-tf02": "StudioServiceWriteAuthorizationTest 7/7 after removing the positive read from the new test",
+  "fix01-full-incr01": "guidedIncrementalTest: 62/62, complete, final tree except nothing edited afterwards"
+ },
+ "results": {
+  "fullTest": {
+   "total": 2411,
+   "passed": 2385,
+   "failed": 1,
+   "skipped": 25,
+   "run": "fix01-full-test02"
+  },
+  "guidedIncrementalTest": {
+   "total": 62,
+   "passed": 62
+  },
+  "replayAuthority": {
+   "total": 73,
+   "passed": 73
+  },
+  "runnerUnit": {
+   "passed": 2229,
+   "failed": 0,
+   "skipped": 29,
+   "confinement": "19/19"
+  },
+  "frontend": {
+   "saveErrorMessage": "12/12",
+   "typeCheck": 0,
+   "lintErrors": 0
+  }
+ },
+ "files": [
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java",
+   "sha256Before": "5f40a0a11f240646d3cdbb006b2d57ded3271b3d130f459abed133a806e299c7",
+   "sha256BeforeTfStep": null,
+   "sha256After": "db602b57767ff00908b782fabdce1e5e5eb6cb7cc61fc7b200f159ce85ac10df",
+   "changed": true
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+   "sha256Before": "7bb9a5b00d041c4d1cc5e9fedb19b58365b6ada11a8d2acc380570f5015e9797",
+   "sha256BeforeTfStep": "aeacda850f83e550d84d3b233da8f5c27b704e9f82187fdbeba0516b9152ce50",
+   "sha256After": "8d1cab39b1d5e15cfb59689faf88306365969fac9893bc912217671d37566399",
+   "changed": true
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringLimits.java",
+   "sha256Before": "e7c03548a47a35e40d036c9392bd6513fe8aa030af19c7c0083b09c8ad05122b",
+   "sha256BeforeTfStep": null,
+   "sha256After": "53c422f9f029eee325f3fd32ad6d0731677eb88ce8e54925da8f1e3eaf951d14",
+   "changed": true
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/authoring/StudioAuthoringProperties.java",
+   "sha256Before": "e88da48c6b7c2c3049d0e250c4fee54900c91fa9b8d6d0548b75eae31ed9f38d",
+   "sha256BeforeTfStep": null,
+   "sha256After": "a9cd434b12668ac31f81a9fdc15ced4ce2f1422a8bfe12c0b9f2c69cf1f76622",
+   "changed": true
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringStep.java",
+   "sha256Before": "bc446c98e0bd8a28fc133f7bdce8479e4070654d1fe35526e58f5cc3fc17fb67",
+   "sha256BeforeTfStep": null,
+   "sha256After": "6aa873ed1f1d6c9c4cfe985203b8be9c58b2c52f90be9e53d096a6e382dce2da",
+   "changed": true
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/dto/StudioAuthoringMapper.java",
+   "sha256Before": "d57c72ca3a4de4d208c575dc19f3b2ee244c7c67d362c265bddb8ad9b60930b2",
+   "sha256BeforeTfStep": null,
+   "sha256After": "1c0371967adee0e4c985d51b5aaafe642c2424d3c40b456da1bfb01ad3c8e389",
+   "changed": true
+  },
+  {
+   "path": "backend/src/main/resources/application.yml",
+   "sha256Before": "2c7819284988e6e63bb8153588ab04ecba7dbc69b44a7d3e37e2bfa9493791e7",
+   "sha256BeforeTfStep": null,
+   "sha256After": "272736619835ac434ff9d4c69e2e4a42009e57cd4091ee4fb9bf6769ca728494",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/ExecutionSnapshotMapperTest.java",
+   "sha256Before": "6a9fcc0e72b526bfb23db8cb6390bf08b157a088fbc6abeee3e3c0f016d4da19",
+   "sha256BeforeTfStep": null,
+   "sha256After": "e0778aefb738bb1d5dd608c5ff72460ad21c8bde63499b635915ae07b176cbed",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/RevisionMigrationIT.java",
+   "sha256Before": "0afb8b0103e897e219ff25857f1ce294c3c0d53e128b40a46be49fd7d3cfee3e",
+   "sha256BeforeTfStep": null,
+   "sha256After": "9ea191282f390c0423d2cc363769dc03be2b8bede8f356539c332452619e5605",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/StudioApiIT.java",
+   "sha256Before": "cf6ae8d6592dc35154cda093d913aaaa2adc8a2cc28652c888a252a0dd802969",
+   "sha256BeforeTfStep": null,
+   "sha256After": "054ec83cd7007f5850dbb57a1fbabfb6a9411278fa0ddd0f5f9cde4d2278f609",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/StudioAuthorizationIT.java",
+   "sha256Before": "0fe212d88a314ac9589b115a901650e8c8afb65e20f6287263cfb367c6f94679",
+   "sha256BeforeTfStep": null,
+   "sha256After": "3a18defb5df8cea9e3f3e1f13b9283329148574e7639306a7c01fc25aef488bb",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java",
+   "sha256Before": "98211186bdab29c629b4f049a1bc99a2dd9f437bdc45b3ce63fd34a71d0267e3",
+   "sha256BeforeTfStep": null,
+   "sha256After": "77512bb8ccd89b13041e0574deea28f5efa5b6e2e711bcc0032f5a4afb564fe7",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/StudioServiceWriteAuthorizationTest.java",
+   "sha256Before": "9fbcc66b9f0f1497b6e84ec7c6f6a8da34a58a9ad1b7e64ed9771573de019029",
+   "sha256BeforeTfStep": "8d0de640708afe27a491350ae70d6c8e02c8c0fa30c4bdb72301950e7a171c36",
+   "sha256After": "d07f7e898daa56e8b715485e28265b7babf77379263003def292c4e17fd9fbd2",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/StudioVisibilityIT.java",
+   "sha256Before": "e79a818b961414071d1ecb36dc570afe79b9e1745a13a6c302dd49abc2891624",
+   "sha256BeforeTfStep": null,
+   "sha256After": "7a75d4797b0b747164b0e199cc5a63b2c47a754ee063e9959ab0fba867232551",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/StudioWriteValidationControllerTest.java",
+   "sha256Before": "2c9c7a400748329b708201d15a3248f28c986ce5e74ee4263ed7be2fec334b58",
+   "sha256BeforeTfStep": null,
+   "sha256After": "89fd01813a72cacb2d2556a7aad8f0c1e832e7b21c4dce76650dd1b6881eb890",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/authoring/StudioAuthoringMigrationIT.java",
+   "sha256Before": "a09f00fedaae2bc745f7a90631505f04c644bf04aa695f544d6fc9ccdfc7ae5f",
+   "sha256BeforeTfStep": null,
+   "sha256After": "31c0121d4e365597a143902d5312b08a01488ef20f641682317a87d85ec4de78",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/AcceptanceIT.java",
+   "sha256Before": "ce8ad0f88f02d03e905fc56bc108f70b12cab850d3e6122f5747cd92cd274d7e",
+   "sha256BeforeTfStep": null,
+   "sha256After": "2a57226eb3125f2a4885dd7ee71ad8b59bc2c0581c011224ccbe54cda56b5142",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatcherIT.java",
+   "sha256Before": "4395ab229b7e50183212b476eeb808bb35c1359347063c27196853348686378e",
+   "sha256BeforeTfStep": null,
+   "sha256After": "928dda6e6b4a3ef6cdacc4a48af03baf990df6730ae0075094153a94ec89824d",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingSeed.java",
+   "sha256Before": "dcf27305036898668b107498f1ef41483b467c4a9ce956188051c1aba19b0a19",
+   "sha256BeforeTfStep": null,
+   "sha256After": "01d39c6dff8d461ae338ff3cb4efdac63e0d59eb57aa10986e03621032eec56d",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+   "sha256Before": "309280bd21a36aeeb88c90d6709d1d98235a607201c01fff7fd9bf1c16cb6e3a",
+   "sha256BeforeTfStep": null,
+   "sha256After": "8622ba216c34aa830d32416b1534fd977d7d6c62be56fbdd92fd76364fc7921d",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+   "sha256Before": "21c4177988308574716b71e30933ac3163a8e648c42ea61ad5176b6f83a233ee",
+   "sha256BeforeTfStep": null,
+   "sha256After": "752cd7a85f97d3a5e2820617f5bc364ac98b41fb762df0f47a0a4c2ee193ebb6",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SecretAuditLifecycleIT.java",
+   "sha256Before": "9b38e058ceaa28c767ee14c08be982624ab537de746bf7998268684f2d2ef34e",
+   "sha256BeforeTfStep": null,
+   "sha256After": "c320b06b68c550eda760725458ed811398f050fc228d16246d31b15c20a412e7",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+   "sha256Before": "8c539ea40560f8c658c7cd6ecb3c61593c67baf2762a5c19497ec4d409eb9e7e",
+   "sha256BeforeTfStep": null,
+   "sha256After": "280e2d1768ee41c9be34e3b10659b1afa7714f5aa4e33de9dba75bb89f0bbeaa",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedGatewayPrivacyTest.java",
+   "sha256Before": "1876052135f5fbdb90f4b0cd60d24fbfd9e969d4044c68b753110fcce3774b36",
+   "sha256BeforeTfStep": null,
+   "sha256After": "fed54d4a63b1c0dab7316a847001ca3611d9a5c98ce7cb1d0c730510e689a002",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifierTest.java",
+   "sha256Before": "f10428cadb283c2bb557ba292bd1bae117f4a7160f4aa144a84aa6cbf7e002af",
+   "sha256BeforeTfStep": null,
+   "sha256After": "30bc341096c3436314aa3c4f5fd9dfaf4eaac45cc5bcd3b2b493d0167f84c2c7",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+   "sha256Before": "93c083cb0a74d8b0b331cbe3aadfebbabf1c562b06e6cae7ab35f96e4f71a458",
+   "sha256BeforeTfStep": null,
+   "sha256After": "2800a680af5b618ee8de790bfa4d5632f8e521ed2da8b08de6587e319e8b2593",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/readiness/DeReadyCarryForwardTest.java",
+   "sha256Before": "a2af4fbc5d2c7a685a943ef8634617d45cf235f45d9d8284ba6aba26c4b194a6",
+   "sha256BeforeTfStep": null,
+   "sha256After": "7188dd200e6ef59aea98631645c9d77d7ed246c79bc880ee18ff61864362c433",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/readiness/ExecutionReadinessTest.java",
+   "sha256Before": "4e04a4de674d0849b6eac8265e4e88f84db494b9ea5c01faab01629bc5c5c10f",
+   "sha256BeforeTfStep": null,
+   "sha256After": "b2fdf08bdbd21f03e62f00049e68c007a35e897c3ee8da888c05a65738f974a2",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleApiIT.java",
+   "sha256Before": "58facd993094ace99c41714033c89de562f7cd24c24dcfa81810952abec5f9a4",
+   "sha256BeforeTfStep": null,
+   "sha256After": "24f2b0f178bf3ecf4aa0f5954dcb45c5b3574f33ce0d13333f526dc29f8ffa38",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioSchedulingSchemaIT.java",
+   "sha256Before": "eff1e2bb5db69bca51693367e3d15018b8295125bba406361be0f6e06918b84f",
+   "sha256BeforeTfStep": null,
+   "sha256After": "7fdd3376c782f5bdc9b2781f4e448dd23d9e0e229eb7a0f36d55f30a23fb42ed",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedLedgerSeed.java",
+   "sha256Before": null,
+   "sha256BeforeTfStep": null,
+   "sha256After": "4769ffbcbb727b3a3802762561efddc36f79d6b8ff6365d7b36461f46bd5d68a",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+   "sha256Before": "80357798b080ab6f8cb1ba38c7828915fa37663e203b0280997c7937ebc432d0",
+   "sha256BeforeTfStep": null,
+   "sha256After": "5299170683418a1b3b950834e68487eab28731e078be023cff43722c08cd8266",
+   "changed": true
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/validation/VariableReferenceValidatorTest.java",
+   "sha256Before": "30605b45b2cb2a23b560ba8569cf82085644006f6dbff2ca972090643b3a516c",
+   "sha256BeforeTfStep": null,
+   "sha256After": "4ce418580b8bebcbe6b3a5e13ebda22a0d76bd1011ea03438b7e6b4b52798061",
+   "changed": true
+  },
+  {
+   "path": "docs/architecture/ADR-002-internal-contract-surface.md",
+   "sha256Before": "19e6273b94599c0dee4e0ac44343a52eeec43d98b22a132b35bf343f2b12d984",
+   "sha256BeforeTfStep": null,
+   "sha256After": "e4e92521b6518dbe50186b475e43cfe8f874c87e244037c95b5fff5228e998cf",
+   "changed": true
+  },
+  {
+   "path": "docs/specs/studio/openapi.yaml",
+   "sha256Before": "54fd12cd9951cad6caa32e78693598eb0a23d4333a11749e2083b340d503cd0d",
+   "sha256BeforeTfStep": null,
+   "sha256After": "c053a7f75656628a1b3e031e02f40f4982aa3a85fc241a4c87c7229460f5d70f",
+   "changed": true
+  },
+  {
+   "path": "frontend/src/pages/ChecksStudioPage/saveErrorMessage.test.ts",
+   "sha256Before": "dac8edb176ba8d72019e91a073cf198810dad03b987061e9d9d297d899ef1b8b",
+   "sha256BeforeTfStep": null,
+   "sha256After": "4ee9d4a2d0c03756f85a97eac66c14354dfa7db8a33ae60709096594be322707",
+   "changed": true
+  },
+  {
+   "path": "studio-runner/test/run/confinement.test.ts",
+   "sha256Before": "68917b2bbcbeb9ea769420c9df1dbc544616b4b32020702c6088cd00e4fb779c",
+   "sha256BeforeTfStep": null,
+   "sha256After": "2e0903dab25acb15c48a127fbb740609af50c4dce7e43552c71936c493f7af6b",
+   "changed": true
+  }
+ ]
+}

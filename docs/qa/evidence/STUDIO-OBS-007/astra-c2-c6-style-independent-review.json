@@ -1,0 +1,18 @@
+{
+  "verdict": "GO_EQUIVALENT_STYLE_CORRECTION",
+  "frozenPatchSha256": "802fc36f8706d36420d535df1b1dcc3699c0d455ea554439aaf577c0ef03b7df",
+  "currentSourceSha256": "c359d52c1fa10212fe63a77ff64097d7b13f835deb2699230ce5184f697801ff",
+  "checks": {
+    "currentHashMatchesRoot": true,
+    "allNonBraceTokensExactAfterAdjacentLiteralConcatenation": true,
+    "only22BraceTokensInserted": true,
+    "eightTextblocksExact": true,
+    "nineProductionPinsUnchanged": true
+  },
+  "manualBraceReview": "Eleven explicit single-statement blocks: byte-buffer clearing, probe close, startup break, complete-line return, two parser continue guards, completed true/else increments, and ordinary PID wait. Each retains original condition and exactly the original statement; no dangling-else or scope change.",
+  "assembledScriptPreservation": "Only an adjacent plain-ASCII Java string literal was split at a non-escape boundary; merging adjacent literal constants yields exact original tokens, including all dynamic script operands. Generated ordinary script bytes are therefore preserved relative to the frozen candidate. Eight textblocks are exact.",
+  "priorFailedCheckstyleRetained": true,
+  "runtimeAcceptance": false,
+  "sharedSourceEdits": false,
+  "buildOrRuntimeExecuted": false
+}

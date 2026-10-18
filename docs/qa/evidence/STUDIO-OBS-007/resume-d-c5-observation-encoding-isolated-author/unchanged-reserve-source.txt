@@ -1,0 +1,10 @@
+  private static void reserve(
+      GuidedSessionRepository.Session session, String counter, int amount, String maximum) {
+    ObjectNode counters = (ObjectNode) session.document().path("counters");
+    long next = counters.path(counter).asLong() + amount;
+    require(
+        amount >= 0 && next <= session.document().path("limits").path(maximum).asLong(),
+        "BUDGET_EXCEEDED",
+        429);
+    counters.put(counter, next);
+  }

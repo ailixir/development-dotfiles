@@ -1,0 +1,418 @@
+{
+  "artifact": "STUDIO-OBS-015 R1 source companion checkpoint02",
+  "at": "2026-10-15T14:14:46.399120+00:00",
+  "owner": "Dex / runner015_resume",
+  "status": "ATOMIC_SOURCE_HOLD_R1_SOURCE_COMPANIONS_UNEXECUTED_ACTUAL_AUTHORITY_OPEN",
+  "authorization": "Root R1 five test paths only; final CPU window explicitly allowed wholeTSC+scopedESLint. No runtime/native/test/build authority. Backend concurrently source-only disjoint JOIN lifecycle repair.",
+  "priorCheckpoint": {
+    "path": "runner/checkpoint-r1-source01.json",
+    "sha256": "313dcd6bae93599f8efdcd47fa41a9d12b5824071ed1ce4c16ea0c29a8240f97"
+  },
+  "beforeCapture": {
+    "path": "runner/r1-source02-before.json",
+    "sha256": "e7a675599ebd5f90e75d562cb7da4e315663faaa5b18d01ff03b018ecf949a93"
+  },
+  "boundPlan": {
+    "manifest": "backend/remaining-facet-review05/manifest.json",
+    "sha256": "958d4bc12a54db1bb4285f2ee1622c06a292ceb9fb4dc08124fc0da64562d5ea",
+    "batch": "R1",
+    "originalRows": [
+      27,
+      28,
+      45,
+      55,
+      76,
+      77,
+      80,
+      81,
+      82
+    ]
+  },
+  "leasedFilesBeforeAfter": [
+    {
+      "path": "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+      "beforeSha256": "dd95be15a59c377765ad52a4ca475af72e714916fb6f88931de5109561439689",
+      "afterSha256": "dd95be15a59c377765ad52a4ca475af72e714916fb6f88931de5109561439689",
+      "changed": false,
+      "reverseReconstructionSha256": "dd95be15a59c377765ad52a4ca475af72e714916fb6f88931de5109561439689",
+      "reverseMatchesBefore": true
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "beforeSha256": "3edd5a500b3b9628b15f29fad5d6815bfa3d0fb64c80cdcc5b003d8895a4f322",
+      "afterSha256": "60678e99d307e7e8297c992610d325bafc32386c36bb38e86c5f5280a9d122c6",
+      "changed": true,
+      "reverseReconstructionSha256": "3edd5a500b3b9628b15f29fad5d6815bfa3d0fb64c80cdcc5b003d8895a4f322",
+      "reverseMatchesBefore": true
+    },
+    {
+      "path": "studio-runner/test/observedReplayExecutor.test.ts",
+      "beforeSha256": "d58c6d5c78516e1eb3442ae3ad59a46bec808b194ec70e73ba7791eef77805e7",
+      "afterSha256": "d58c6d5c78516e1eb3442ae3ad59a46bec808b194ec70e73ba7791eef77805e7",
+      "changed": false,
+      "reverseReconstructionSha256": "d58c6d5c78516e1eb3442ae3ad59a46bec808b194ec70e73ba7791eef77805e7",
+      "reverseMatchesBefore": true
+    },
+    {
+      "path": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "beforeSha256": "1bf99299123559405e8ab4fa1a2ca30fab29d81cceb8946e6f53b5d283ccbbb2",
+      "afterSha256": "112def39b6fff4b2b6d4a45d180f5bb15d100f7b5e5d1494e1b84eca057cc519",
+      "changed": true,
+      "reverseReconstructionSha256": "1bf99299123559405e8ab4fa1a2ca30fab29d81cceb8946e6f53b5d283ccbbb2",
+      "reverseMatchesBefore": true
+    },
+    {
+      "path": "studio-runner/test/retainedExecute.test.ts",
+      "beforeSha256": "72c55adc93e466a58116e7726fec4e8f5c3b0ba862fdfc895b3f549857585342",
+      "afterSha256": "2aa49b583cd8c05a611d76d69537ca0abdba7657d962135a27ff935b4e5e7e0e",
+      "changed": true,
+      "reverseReconstructionSha256": "72c55adc93e466a58116e7726fec4e8f5c3b0ba862fdfc895b3f549857585342",
+      "reverseMatchesBefore": true
+    }
+  ],
+  "allOwnedSourceHashes": {
+    "studio-runner/evaluation/observed-authoring/cases/incremental-edit-step-4.json": "f04e70016563076decb46292ce0f18d6a819d488f94212bb2bdb11d4f6546b4a",
+    "studio-runner/evaluation/observed-authoring/cases/incremental-insert-step.json": "9a1831f52911dbddc8d7dc1575c7b6e22480b00098b11bea51b6f94f0bfabbc1",
+    "studio-runner/src/executor/observedReplay.ts": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+    "studio-runner/src/guided/contracts.ts": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+    "studio-runner/src/guided/evidence.ts": "03afea081e543fc920d2e8012b85951bde9ffd737eb5ba858af959c006340279",
+    "studio-runner/src/guided/journal.ts": "15da758e2e287926a7d404926323791ab3e1f72931bc3c4cb1741de8de9d86dd",
+    "studio-runner/src/guided/ownership.ts": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf",
+    "studio-runner/src/guided/runtime.ts": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+    "studio-runner/src/guided/transport.ts": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+    "studio-runner/src/run/childRuntime.ts": "0eb0c88a0d4a98b716fcc4dc0a070f5c2f0df028e4f6e668ca9ee0cd8526dd02",
+    "studio-runner/src/run/launcher.ts": "0dfeb39a76c046dd1df4b1b9df0cec238aa57c0c7b067b8824368ffc075e9fd7",
+    "studio-runner/src/run/loginRequired.ts": "f46ef274506a4e9ec51df04e081c2e321f1b1088e22a2732751845fe2b001b27",
+    "studio-runner/src/run/observedReplayAdapter.ts": "ec6aa3fea89030dff318e7c0c441a5d5a499f2b62e31992aec6ac5d749616f81",
+    "studio-runner/src/run/protocol.ts": "46e23a90e8c6e64a7fa94e68bcff02c9b9f51254f2fb3180ae4065deef682fb8",
+    "studio-runner/src/validator/observedHistory.ts": "3fac42d11a71c88387effb74ad9c8ade01dc1ae8dfd75121aea4c3556829e007",
+    "studio-runner/src/validator/observedReferencePolicy.ts": "e6a2565b31ebb7339cc0ed15f9e9d8532d3c473f65709491129f6059108aebdb",
+    "studio-runner/src/validator/observedReplay.ts": "875da7952c8fb1ece09fdad48ffca822861dfe6cb742694f924995c98e5675df",
+    "studio-runner/src/validator/observedSnapshots.ts": "a8a53dedfa041aa9a671e1e03361fee5572cdfa9bc3abca91b5d53e160332928",
+    "studio-runner/test/controlReferencePreservation.test.ts": "86a2d54b5dd4d6603d643812391ea2b9d59211c312b176e0e3da4e4bc7cca0bd",
+    "studio-runner/test/currentWorldFactories.test.ts": "c1e5ead9c29157187857d17ab4c435fc6a95ecdcfb1203d817bbe75f3bc45d14",
+    "studio-runner/test/documentJson.test.ts": "0ec384914250541f410c9e0a63ddacd3ce12257aa6fe7ab06019a25db27de393",
+    "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "f5b613f5486b43a70c043b01a801f4ec8590bd8db2cd3ace8bf5510ca8fed685",
+    "studio-runner/test/fixtures-tier/guided-recording.test.ts": "3522915df575e7a0e98e71e74728545bdcb96fcf9b48b3178762c2ab5cc23574",
+    "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "10d97ab585a5af13a69b128a231eab0c6fd5e18780aec17cb3abcb803f752fd6",
+    "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts": "d1d524272fba634063ec6cf9491b6e14179f8d66dbc53898cffb47c2a84a6186",
+    "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts": "d6af50904a1a3187ae5b9b49478dd4232b28cf0b44e97807db765609876194d8",
+    "studio-runner/test/fixtures-tier/guided-wire.test.ts": "082e00e6de1af226c2d20a907cf28da0d9a70c49844c483ed06f1e75641b3a8f",
+    "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts": "dd95be15a59c377765ad52a4ca475af72e714916fb6f88931de5109561439689",
+    "studio-runner/test/fixtures-tier/secret-login.test.ts": "60678e99d307e7e8297c992610d325bafc32386c36bb38e86c5f5280a9d122c6",
+    "studio-runner/test/fixtures/guided-dataflow/server.ts": "7b226210744c0531acace3309fdf661098c1455531e31ff4d0323faee35586eb",
+    "studio-runner/test/guided/incrementalRuntime.test.ts": "112def39b6fff4b2b6d4a45d180f5bb15d100f7b5e5d1494e1b84eca057cc519",
+    "studio-runner/test/guided/runtime.test.ts": "dfd1bad817e5eb33aaa9e7e6357723544f182342b8203753712f212744a4e814",
+    "studio-runner/test/guided/schemaAudit.test.ts": "c37d834a4956e379d289951e50365ac654c2f004c9df8b40bdef7e22de2e2f39",
+    "studio-runner/test/helpers/currentWorlds.ts": "1487feec0fa9f5e5ef3965e31648b8ab7671dbe7090750e9555677943a34d97c",
+    "studio-runner/test/helpers/documentJson.ts": "64f14fe565fdc562467781b85930025f61c0ee4a9a3ace3614dd769e1535a225",
+    "studio-runner/test/helpers/guided.ts": "af3c5687dcf62682253a58a2564177b507cfc0f61e57ee600cd81fda5255dc4d",
+    "studio-runner/test/helpers/incrementalNegativeBoundaries.ts": "94090a4d7e4a4f957cf8921007f57477c13c670786fe7fd318dcdf4de45fda16",
+    "studio-runner/test/helpers/openapi.ts": "e15c3b8295d0b30c5b2f0422121e8cd197af7ac6c9ca9fc882ac1f8fa533917d",
+    "studio-runner/test/helpers/publicationFixture.ts": "f9bf4c3afe0424275aecf1c256cb2528b99603e8655a68a89b4018f1d53e9773",
+    "studio-runner/test/helpers/retainedReplay.ts": "0ef0ebb4619283dc189361586f32f5c345857c2f28bb3112a16195bc2cd9d0ac",
+    "studio-runner/test/helpers/runner.ts": "4458ed1a65bca9016d2b1f9e396b09eb1a09bf5167a06ac74e8f383ffd65055e",
+    "studio-runner/test/observedIncrementalValidation.test.ts": "c140d89e3bcc397211b4283d8f9a9c83c60286b6ef0efb85c060461b25e92de4",
+    "studio-runner/test/retainedExecute.test.ts": "2aa49b583cd8c05a611d76d69537ca0abdba7657d962135a27ff935b4e5e7e0e",
+    "studio-runner/test/run/observedChildRuntime.test.ts": "d9fa80ce843238f949fee1509dc339515e70b3b17887d378aacda47bf7a43916",
+    "studio-runner/test/run/observedPreparedAdapter.test.ts": "3d5076e153008c06bc63418c4e2ddfdbf6cb6ff664863cd937b020a8861c5d88",
+    "studio-runner/test/run/secretReplay.test.ts": "dc43402d1c3c2f2e5fe4d520e16c2f8b6a188a58c363dcb0e2a6b19470041226",
+    "studio-runner/test/schemaSemantics.test.ts": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb",
+    "studio-runner/test/server/observedReplayAdmission.test.ts": "3a355a5216d7afcbf07b4afa5de494526bc92739763ddb5a7d2de827ab1c275d",
+    "studio-runner/test/server/observedReplayAuthorization.test.ts": "af79cffc7d66e57be89729e140ad9bed9960535529ec3fe8fd4e6d35853413fd",
+    "studio-runner/test/server/observedReplayRoutes.test.ts": "4ddc7d9bf32b2312e0c99bd778cbff17ee4b0d610cf696a4369e3bbab706d288"
+  },
+  "ownedSourceCount": 50,
+  "leasedAdditionalFileHash": {
+    "studio-runner/test/observedReplayExecutor.test.ts": "d58c6d5c78516e1eb3442ae3ad59a46bec808b194ec70e73ba7791eef77805e7"
+  },
+  "protectedInputs": {
+    "studio-runner/src/guided/runtime.ts": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+    "studio-runner/src/guided/transport.ts": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+    "studio-runner/src/run/observedReplayAdapter.ts": "ec6aa3fea89030dff318e7c0c441a5d5a499f2b62e31992aec6ac5d749616f81",
+    "studio-runner/src/guided/contracts.ts": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+    "studio-runner/src/executor/observedReplay.ts": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+    "studio-runner/src/validator/observedHistory.ts": "3fac42d11a71c88387effb74ad9c8ade01dc1ae8dfd75121aea4c3556829e007",
+    "studio-runner/test/helpers/incrementalNegativeBoundaries.ts": "94090a4d7e4a4f957cf8921007f57477c13c670786fe7fd318dcdf4de45fda16",
+    "studio-runner/test/schemaSemantics.test.ts": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb",
+    "studio-runner/test/observedSnapshotPreimages.test.ts": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa",
+    "studio-runner/vitest.config.ts": "c833caed66dc39aed1677db7cab921e97a5eb5b36291429c5f5e90f1a28c08f8",
+    "studio-runner/vitest.fixtures.config.ts": "2d51915fec9757e34ed1c0c2311fd1362abab917bfa1c5bf8b70ab47cb2c3f87"
+  },
+  "protectedUnchanged": true,
+  "onlyLeasedChanges": true,
+  "changedCount": 3,
+  "productionSourceChanged": false,
+  "all50OutsideThreeChangedFilesUnchanged": true,
+  "sourceReferences": {
+    "nativeSecret": {
+      "path": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "line": 326
+    },
+    "partialChildFactory": {
+      "path": "studio-runner/test/retainedExecute.test.ts",
+      "line": 98
+    },
+    "publicOrphanNegative": {
+      "path": "studio-runner/test/retainedExecute.test.ts",
+      "line": 131
+    },
+    "historicalAck": {
+      "path": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "line": 120
+    },
+    "preservedNativePartial": {
+      "path": "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+      "line": 178
+    }
+  },
+  "exactNineRowMapping": [
+    {
+      "index0": 27,
+      "plannedName": "IncrementalRelearnIT.prefixPolicyRefusalStopsWithoutReinterpretation",
+      "requiredTier": "REAL JOINED redirect/policy fixture",
+      "originalAssertions": "Prefix origin/navigation/password-policy refusal stops, no model call or publication; never mislabeled target drift",
+      "newSource": [
+        "Recorded prefix bad-origin released frame uses actual password-only primitive, enters native fence, writes zero and settles UNKNOWN/POLICY_DENIED without drift/retry.",
+        "Partial-coordinate executor policy refusal preserves earlier read withholding and stops later operations (pure ports)."
+      ],
+      "requiredActual": [
+        "Root actual native secret matrix; Core current-policy/redirect model0/publication0 companion B1/B2."
+      ],
+      "status": "OPEN_ACTUAL_TIER_REQUIRED_NO_SOURCE_ONLY_CREDIT"
+    },
+    {
+      "index0": 28,
+      "plannedName": "IncrementalRelearnIT.secretPrefixPreservesOBS007Oracles",
+      "requiredTier": "REAL JOINED password fixture + test Vault",
+      "originalAssertions": "Prefix secretRef fill uses recorded handle/password-only adapter; preflight and release/use audit joined to new session; current secret resolved per existing OBS007 rules; planted bytes absent from model/log/evidence/video; bad origin/0or2 passwords/type-flip/oversized/revoked secret fail unchanged; no literal/spanning token lowering",
+      "newSource": [
+        "Seven native prefix cases: valid, bad-origin, zero-password, two-passwords, focus-typeflip, oversize-frame, stopped-lease. Same recorded GuidedBrowser.handle/ObservationSession, no password-node export, exact prepare/evidence, empty DOM before close for negatives, journal/native timings and WebM/privacy scans.",
+        "Existing ordinary007 primitive/login/rotated-secret/profile/log/media controls preserved byte-exact after reversal of import/additions."
+      ],
+      "requiredActual": [
+        "All seven newly written native cases UNRUN.",
+        "Actual TestVault oversize/revocation/current-resolution RELEASE+USAGE audit and joined model/log/evidence/media authority remain B2. Oversize-frame is only closed released-frame validation; stopped-lease is only actual runtime.stop, not Vault revocation."
+      ],
+      "status": "OPEN_ACTUAL_TIER_REQUIRED_NO_SOURCE_ONLY_CREDIT"
+    },
+    {
+      "index0": 45,
+      "plannedName": "IncrementalMaterializationIT.secretLineagePinsActualHistoricalVersion",
+      "requiredTier": "Postgres+runner secret fixture",
+      "originalAssertions": "Secret read/release/use proves action version1 after headversion2; original release/usage unchanged; no false NOT_USED/REFUSED on stale/lost response",
+      "newSource": [
+        "Valid native secret prefix preserves completed secret action contextRevision1/authoredInputsHash after append+exact ACK v2; stale old prefix preparation rejects IDENTITY_MISMATCH.",
+        "No fake RELEASE/USAGE row or private server/Vault flag."
+      ],
+      "requiredActual": [
+        "Native secret case UNRUN.",
+        "B2 actual original Vault secret read/release/use rows on historical v1 after v2ACK plus lost/stale response audit classification remain mandatory."
+      ],
+      "status": "OPEN_ACTUAL_TIER_REQUIRED_NO_SOURCE_ONLY_CREDIT"
+    },
+    {
+      "index0": 55,
+      "plannedName": "IncrementalMaterializationIT.emptyPrefixContextKeepsExactProgramPair",
+      "requiredTier": "HTTP+Postgres+runner context",
+      "originalAssertions": "Base-backed explicit first-step EMPTY_PREFIX carries empty PrefixProgram and hash during initial context and every delivery; half pair/changed pair/reforged digest rejected; no-base ordinary session omits pair",
+      "newSource": [
+        "Source01 empty PrefixProgram/hash halfpair/mutatedpair case unchanged; actual Node11 passed that case at unit tier."
+      ],
+      "requiredActual": [
+        "B1 actual Core/PG every delivery/rebootstrap empty pair and ordinary no-base omission."
+      ],
+      "status": "OPEN_ACTUAL_TIER_REQUIRED_NO_SOURCE_ONLY_CREDIT"
+    },
+    {
+      "index0": 76,
+      "plannedName": "IncrementalGraphProjectionTest.zeroConsumerRequiresRetainedActualProducer",
+      "requiredTier": "Java+TS+ordinaryreplay",
+      "originalAssertions": "Retained exact successful prefix producer can have0consumers and same producer snapshot. Suffix-created/model orphan or unproven import cannot. Actual recipe/origin/availability/source identity exact; drift-step reusedFrom remains absent.",
+      "newSource": [
+        "Source01 actual partial-step native j0 read -> later j1 DOM replacement -> no-native drift -> suffix attempt1 on same handle/session/video preserved unchanged. Raw history/producer/value availability retained in declared fixture and no reusedFrom for drift step.",
+        "New partialCoordinateReplay declared authoring/config/graph factory verifies original parent first; local resealed artifact/Launch test admissions are explicitly synthetic. Positive accepted context and three malformed producer/retained/admission joins refuse before adapter.",
+        "Orphan-effective-admission tests only public artifact consumer admission/operation join; direct validateReplayArtifact asserts REFERENCE_MISMATCH. It does not infer missing hidden raw DB edge/allocation history.",
+        "Existing original child current build/source-span/projection/lifetime and two fresh valid admissions remain untouched."
+      ],
+      "requiredActual": [
+        "Five new default unit cases UNRUN; source01 native partial/two fresh native read runs UNRUN.",
+        "Mandatory B2/B3 same partial-step with genuinely Core-issued immutable Artifact3/Launch3 handoff, PG raw history and gateway0, same artifact hash in two fresh real admitted ordinary runs. Local fixture artifact/native execution cannot close this authority."
+      ],
+      "status": "OPEN_ACTUAL_TIER_REQUIRED_NO_SOURCE_ONLY_CREDIT"
+    },
+    {
+      "index0": 77,
+      "plannedName": "IncrementalDependencyIT.cumulativeAllocationAdapterPreservesPendingDeliveryOrder",
+      "requiredTier": "PG+runner",
+      "originalAssertions": "Firstsuffix narrower effective need causes cumulative union raw allocator request, not409shrink or historyrewrite; addnewconsumer beforeappend, preserve old metadata/proofs; stable retries no duplicate append/keybody mutation; no allocation bump during pendingACK/rebootstrap/browserrestart.",
+      "newSource": [
+        "Source01 pending ACK blocks metadata bump/refresh and preserves one launch/bootstrap; exact original historical ACK after metadata remains.",
+        "Source02 same original delivery ID with a changed schema-valid lease body rejects CONTEXT_REVISION, then exact original delivery still returns byte-exact ACK. No restart/rebootstrap.",
+        "Source01 native withhold-gated pending delivery preserves actual producer/raw graph before release unchanged."
+      ],
+      "requiredActual": [
+        "New rejection assertion UNRUN; actual native partial source UNRUN.",
+        "B1/B2 actual PG cumulative allocation union-before-append, concurrent request/idempotency/recovery/no metadata bump while pending."
+      ],
+      "status": "OPEN_ACTUAL_TIER_REQUIRED_NO_SOURCE_ONLY_CREDIT"
+    },
+    {
+      "index0": 80,
+      "plannedName": "IncrementalPolicyIT.prefixGuardDeniesGroundingDestructionAndDenyEvenAfterConsent",
+      "requiredTier": "Real HTTP+PG+runner",
+      "originalAssertions": "Fresh Save/Delete/unobserved-target/form-Enter guard cases under frozen policy stop POLICY_DENIED before effect/model, never drift reinterpretation, even current confirmed stance.",
+      "newSource": [
+        "Native bad-origin and executor pre-invocation policy refusal stop without target-drift reinterpretation at their actual primitive/unit tiers.",
+        "No caller consent sidecar or synthetic backend confirmation marker."
+      ],
+      "requiredActual": [
+        "B1 actual fresh current-confirmed Save/Delete/unobserved/formEnter grounding/guard matrix; runner cannot infer backend private confirmation."
+      ],
+      "status": "OPEN_ACTUAL_TIER_REQUIRED_NO_SOURCE_ONLY_CREDIT"
+    },
+    {
+      "index0": 81,
+      "plannedName": "IncrementalPolicyIT.waitingRecoveryCancellationAndAnswerRacesRemainAtMostOnce",
+      "requiredTier": "HTTP+PG concurrency+runner",
+      "originalAssertions": "Duplicate keys/controller restart preserve one question; wrong user/choice/gen/source/context/lease/fence reject; cancel/expiry wins, no late effect/new browser/clock/uncertain retry.",
+      "newSource": [
+        "Existing protected ACK wait remains native0 and same browser/session.",
+        "New stopped-lease case performs actual runtime.stop(LEASE_LOST) before dispatch and requires CONTEXT_LOST, fill native0, no secret write; not a natural expiry/revoked Vault substitute.",
+        "Fenced bad-origin/typeflip preserve UNKNOWN/nullend and cannot retry after zero observed password writes."
+      ],
+      "requiredActual": [
+        "New native cases UNRUN.",
+        "B1 actual current-session clarification duplicate/restart/wrong identity/context/generation/source/fence, original natural lease expiry/cancel races; B2 true Vault ownership/revocation."
+      ],
+      "status": "OPEN_ACTUAL_TIER_REQUIRED_NO_SOURCE_ONLY_CREDIT"
+    },
+    {
+      "index0": 82,
+      "plannedName": "IncrementalPolicyIT.directPrefixAdmissionCannotBypassConfirmation",
+      "requiredTier": "HTTP+PG",
+      "originalAssertions": "Unconfirmed direct internal admit is stale/state refusal with no action; normal coordinator asks instead of denying. Fresh post-answer proposal reruns actual guards; no model/private-marker injection.",
+      "newSource": [
+        "Existing preparation-only/no direct execution authority retained. Accepted Launch required at retained executor, no-context branch rejects before adapter. This is child/executor context authority, not a server clarification proof."
+      ],
+      "requiredActual": [
+        "B1 actual unconfirmed internal admit refusal/no action, normal coordinator clarification, new observation+ACK+prepare+actual guard rerun after explicit answer."
+      ],
+      "status": "OPEN_ACTUAL_TIER_REQUIRED_NO_SOURCE_ONLY_CREDIT"
+    }
+  ],
+  "newNativeFaultControls": {
+    "existingRoutesOnly": [
+      "/login",
+      "/no-password",
+      "/two-passwords",
+      "/trap"
+    ],
+    "realFocusTrap": "Existing /trap changes type=password to text on actual focus; no canned rejection or forced outcome.",
+    "badOrigin": "Released-frame allowedOrigins excludes current origin while context approved origin stays intact; primitive evaluates actual check.",
+    "zeroTwo": "Actual DOM password candidate count through ObservationSession.preparePassword; no selectors exported for password.",
+    "oversizeFrame": "Secret value exceeds frozen frame4096 bound; SCHEMA before invocation, explicitly no Vaultoversize proof.",
+    "stoppedLease": "Actual runtime.stop(LEASE_LOST) before dispatched prepared request; not Vaultrevocation or natural original-lease expiry.",
+    "nativeFence": "Valid/bad-origin/typeflip have exact one INVOKING fence; lasttwo remain UNKNOWN_OUTCOME/nullend even with empty password DOM, never reinterpreted as native0 drift/retry.",
+    "validHistoricalAction": "Secret fill action ledger v1 retained after context append/ACK v2; true Vault/audit lineage absent from this local test.",
+    "privacy": "Real recorder with unchanged monotonic clock, actual WebM size check, password DOM/preclose emptiness, profile/temp directory and message/stderr scans; original007 native privacy/audit fixtures untouched.",
+    "noOutsideHelperRequired": true
+  },
+  "publicJoinVsHiddenHistory": {
+    "newSubject": "orphan-effective-admission",
+    "inferablePredicate": "Supplied consumer edge coordinate must resolve to effective action with exact consumer admission ID, producer admission, bindingID and origin. validateReplayArtifact checks it before child/executor invocation.",
+    "notClaimed": "Missing/changed original raw DB allocation/edge/ledger history is not inferable from this synthetic artifact; no rawhistory flag/trusted set or private caller sidecar introduced. B3 complete original history remains required."
+  },
+  "testOnlySyntheticScope": {
+    "partialFactory": "Declared authoring identity/configuration/recipe/source hashes and snapshots are constructed solely as a coherent unit parent then mutated. They are not claimed independent snapshot oracle or real publication.",
+    "admission": "Rebound test Launch commitments carry existing types; current accepted context/lifetime/strict no-proof path preserved. No production source edits.",
+    "actual15PrivateBackendCompanions": "UNFULFILLED_BY_SYNTHETIC_RUNNER_ORACLE; each existing R0 mapping remains mandatory actual backend authority.",
+    "localNativePartial": "Source01 local native artifact/admissions are NATIVE_FIXTURE_ONLY_NO_DATABASE_PUBLICATION. Actual Core-issued artifact/Launch+PG handoff mandatory."
+  },
+  "preservation": {
+    "reverseProof": "For secret file remove appended matrix and exact new imports/helper import; for retained file remove appended block+ObservedRefusal import; for incremental file remove only added resealedLease line. Exact reconstructed SHA equals all five captured before hashes. No old test case bodies/names/skips changed except identical-data import via existing test-only bounded parser.",
+    "priorDefaultActual2182": "All Node11 original2182 multiplicities retained; expected next default total2187 due five new retained cases, subject to actual collection.",
+    "newDefaultCases": 5,
+    "newNativeCasesExcludedFromDefault": 7,
+    "originalPrefix15": "All15 existing prefix cases/names retained; only historicalACK body assertion added.",
+    "original29Routes": "All29 exact candidate/public/synthetic authority names and mutation guards unchanged.",
+    "snapshot255": "Exclusive newDex snapshot source byte-exact protected; all255 retained.",
+    "old35BackendVariants": "No Java source/variants edited; no Core proof.",
+    "noNewSkipsThresholdsFiltersOrExpectationsToActual": true
+  },
+  "checks": {
+    "wholeRunnerTypeScript": {
+      "command": "npm run type-check",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "path": "runner/type-r1-source02-final2.log",
+      "sha256": "66cb0d88cd3e949228a13daec3e65de0ce0c25b1b7278f1ffdb96dcd2886dfc9",
+      "scope": "STATIC_ONLY_NO_TEST_EXECUTION"
+    },
+    "allFiveLeasedScopedLint": {
+      "command": "./node_modules/.bin/eslint test/fixtures-tier/mixed-mode-prefix.test.ts test/fixtures-tier/secret-login.test.ts test/observedReplayExecutor.test.ts test/guided/incrementalRuntime.test.ts test/retainedExecute.test.ts",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "path": "runner/lint-r1-source02-final2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "scope": "STATIC_ONLY_NO_TEST_EXECUTION"
+    },
+    "preservedInitialFeedback": [
+      {
+        "path": "runner/type-r1-source02.log",
+        "sha256": "ebaad8b9b8a61d471767ffba515da233d7ef9149316a7fe6906a3b311e795c57",
+        "exit": 2,
+        "cause": "New declared assert action origin needed explicit non-null narrowing."
+      },
+      {
+        "path": "runner/lint-r1-source02.log",
+        "sha256": "96c9d00a3d5fc4cce03b1f4a2d20bf473d48863146450db0d6e4f2fc3ba0ef3d",
+        "exit": 1,
+        "cause": "Existing raw aggregate JSON TypeScript inference errors plus prefer-optional-chain; use existing bounded typed publicationFixture helper for identical canonical document, guard explicit non-null origin."
+      },
+      {
+        "path": "runner/type-r1-source02-final.log",
+        "sha256": "66cb0d88cd3e949228a13daec3e65de0ce0c25b1b7278f1ffdb96dcd2886dfc9",
+        "exit": 0
+      },
+      {
+        "path": "runner/lint-r1-source02-final.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "exit": 0
+      }
+    ]
+  },
+  "actualExecutionThisTask": {
+    "tests": false,
+    "nativeBrowser": false,
+    "buildDist": false,
+    "GradleDB": false,
+    "generationFormatInstall": false,
+    "staticOnly": true
+  },
+  "dist": {
+    "sha256": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839",
+    "unchanged": true,
+    "productionBuildInvalidated": false,
+    "fixtureGlobalSetup": "Native fixture config builds dist by globalSetup; root must serialize and expressly capture this separately authorized command, not infer authorization from source work."
+  },
+  "neededB1B2B3Interfaces": {
+    "B1": "Use existingcontext/clarification/admit/consume APIs and frozenmetadata/wireDTOs; runtime BUSY/source tests do not replace exact PG pendingACK/no-rebootstrap/cancel/lease/guard assertions. No additional Runnerhelperoutsidelease needed in this milestone.",
+    "B2": "Actual TestVault read/release/use/revoke/oversize faultsettings and scopedAudit rows remain in JOIN owncontrols. Runnerlaternativeprefixcases reuse existingpasswordfixture/Page DOM controls and released frame only, must label noVaultauthority.",
+    "B3": "Actual PG-backed partialstep artifact/receipt and two fresh ordinary replay admissions through existing Artifact3/Launch3/Execute3; evidence joins {baseRevisionId,driftStepId,retainedreadAdmissionId,excludedfillAdmissionId,rawallocatedpair/rawedge/effectivebindings,artifactHash,newrunIds,freshnativecaptures,modelgatewaycount0}. These are existingDTO/evidencemappings, no newwirefield/transportflag/privatesidecar authority."
+  },
+  "requiredActualCommands": {
+    "default": "From repo root, root separately authorizes captured python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-runner.py <fresh-label> ./node_modules/.bin/vitest run with unchanged normalV8/global+6scoped thresholds. No command run here.",
+    "native": "Root separately authorizes captured fixture config test/fixtures-tier/mixed-mode-prefix.test.ts and test/fixtures-tier/secret-login.test.ts (native globalSetup includes build); include preserved original native suites, media/decode/profile/privacy gates. No native run here.",
+    "Core": "Backend B1/B2/B3 original current clarification/policy/Vault/historicalPG/issuedartifact interfaces and actual joined browser tests; local unit/native fixture evidence cannot replace them.",
+    "full": "All original six increments,86acceptance,24IPC,55SQL,35backendvariants,full configured checks/coverage/native/joined and independent QA/PO/root015closure then008 remain."
+  },
+  "remainingSourceOrAuthority": {
+    "runnerNativeWrittenButUnrun": "Partial native readj0/laterj1 drift and two real ordinary fresh read runs source present from01; seven new secret native cases now written, still never executed. Strict artifact/native/media behavior may reveal defects in first actual window.",
+    "privateAndCoreSourceOwnedElsewhere": "B1/B2/B3 actual clarification/consent/source/lease race guards, actual TestVault oversized/revoked RELEASE+USAGE lineage and immutable issued artifact/rawhistory companions remain open, separate owners. No runner test lease can synthesize that authority.",
+    "pendingOtherBatches": "B4/R2,49remaining-facet/86inventory and all actual captured gates retained; no source-only overall completion.",
+    "row85": "Original pending user choice, unchanged/unamended; no timing alternative, coarsened clock or fabricated missing timestamp."
+  },
+  "priorActualEvidence": "Node11:2153pass0fail29historicalskip/allcoveragegreen at captured prior tree only; it does not validate these additions. No Node12/native prediction.",
+  "hold": "All50historicalrunner source and five R1 leased paths atomically HELD after this checkpoint. No further source/test/staticcheck/process/build/native until root explicit release. Returning slot."
+}

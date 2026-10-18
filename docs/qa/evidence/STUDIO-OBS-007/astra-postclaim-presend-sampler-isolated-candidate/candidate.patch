@@ -1,0 +1,324 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -809,6 +809,26 @@
+                     || org.springframework.transaction.support.TransactionSynchronizationManager
+                         .isActualTransactionActive()
+                     || !observer.observingCallbacks()) {
++                  if (capture != null
++                      && capture.claimSamplerSelected
++                      && capture.pendingFinalizer()
++                      && !org.springframework.transaction.support.TransactionSynchronizationManager
++                          .isActualTransactionActive()) {
++                    boolean[] committedCandidate = {false};
++                    T result = super.execute(status -> {
++                      T value = callback.doInTransaction(status);
++                      committedCandidate[0] = status.isNewTransaction() && !status.isRollbackOnly();
++                      return value;
++                    });
++                    if (committedCandidate[0]
++                        && !org.springframework.transaction.support.TransactionSynchronizationManager
++                            .isActualTransactionActive()
++                        && result instanceof PublicationContracts.Attempt attempt
++                        && attempt.status() == PublicationContracts.AttemptStatus.VALIDATING) {
++                      capture.afterPublicationClaim(attempt.validationDeadline());
++                    }
++                    return result;
++                  }
+                   return super.execute(callback);
+                 }
+                 return super.execute(
+@@ -1050,8 +1070,14 @@
+           (request, response, chain) -> {
+             var http = (jakarta.servlet.http.HttpServletRequest) request;
+             C5Capture activeC5 = c5Capture;
+-            if (activeC5 != null && activeC5.claimSamplerSelected) {
+-              activeC5.armClaimSampler(http);
++            if (activeC5 != null && activeC5.claimSamplerSelected
++                && activeC5.selectFinalizer(http)) {
++              try {
++                chain.doFilter(request, response);
++              } finally {
++                activeC5.retireFinalizer();
++              }
++              return;
+             }
+             P4RevocationState c6 = p4Revocation;
+             if (c6 != null
+@@ -11945,15 +11971,25 @@
+     private long empty, unattributed, cycles, claimSessionValidationSamples;
+     private final Thread sampler;
+     private final long end;
+-
+-    C5ClaimSampler(boolean selected) {
++    private Thread finalizer;
++    private final long publicationRemainingNanos;
++    // Disjoint rows: 59 unknown/canonical99/schema104, then 65 encoding/69 budget/82 send-call.
++    private final long[][] publicationPhases = new long[6][3];
++
++    C5ClaimSampler(boolean selected, Thread finalizer, long origin, long remainingNanos) {
++      publicationRemainingNanos = remainingNanos;
++      for (long[] row : publicationPhases) {
++        row[1] = -1;
++        row[2] = -1;
++      }
+       if (!selected) {
+         sampler = null;
+         end = 0;
+         return;
+       }
+       status = Status.UNOBSERVED;
+-      end = System.nanoTime() + java.time.Duration.ofSeconds(30).toNanos();
++      end = origin + java.time.Duration.ofSeconds(30).toNanos();
++      this.finalizer = finalizer;
+       sampler =
+           Thread.ofPlatform().daemon().name("private-c5-claim-sampler").unstarted(this::sample);
+       try {
+@@ -12105,6 +12141,7 @@
+       try {
+         while (!stopping && System.nanoTime() < end) {
+           Thread[] snapshot;
++          Thread finalizerSnapshot;
+           var claimSnapshot =
+               java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<Thread, Boolean>());
+           Map<Thread, PgClaimBinding> callbackSnapshot = new java.util.IdentityHashMap<>();
+@@ -12120,6 +12157,10 @@
+                     new java.util.IdentityHashMap<Thread, Boolean>());
+             union.addAll(executing);
+             union.addAll(bindings.keySet());
++            finalizerSnapshot = finalizer;
++            if (finalizerSnapshot != null) {
++              union.add(finalizerSnapshot);
++            }
+             snapshot = union.toArray(Thread[]::new); // Combined TOTAL <= 8, not eight per set.
+             union.clear();
+           }
+@@ -12147,6 +12188,9 @@
+                   }
+                   sampleSource(target, callbackSnapshot.get(target), null);
+                   continue;
++                }
++                if (target == finalizerSnapshot) {
++                  samplePublication(target, stack);
+                 }
+                 SourceClassification classification = sourceFamily(stack);
+                 sampleSource(target, callbackSnapshot.get(target), classification);
+@@ -12202,6 +12246,7 @@
+           entered.clear();
+           bindings.clear();
+           sourceSamples.clear();
++          finalizer = null;
+         }
+       }
+     }
+@@ -12213,7 +12258,72 @@
+           size++;
+         }
+       }
++      if (finalizer != null && !executing.contains(finalizer) && !bindings.containsKey(finalizer)) {
++        size++;
++      }
+       return size;
++    }
++
++    void retireFinalizer(Thread expected) {
++      synchronized (gate) {
++        if (finalizer == expected) {
++          finalizer = null;
++        }
++      }
++    }
++
++    private void samplePublication(Thread target, StackTraceElement[] stack) {
++      int client = -1, publisher = -1, canonical = -1, schema = -1, line = -1;
++      for (int i = 0; i < stack.length; i++) {
++        StackTraceElement frame = stack[i];
++        if (frame.getClassName().equals("com.citi.put.checks.studio.guided.publication.ObservedValidationClient")
++            && frame.getMethodName().equals("validate")
++            && "ObservedValidationClient.java".equals(frame.getFileName())) {
++          if (client >= 0) {
++            return;
++          }
++          client = i;
++          line = frame.getLineNumber();
++        } else if (frame.getClassName().equals("com.citi.put.checks.studio.guided.publication.GuidedPlanPublisher")
++            && frame.getMethodName().equals("finalizeForUser")
++            && "GuidedPlanPublisher.java".equals(frame.getFileName())
++            && frame.getLineNumber() == 135) {
++          publisher = i;
++        } else if (frame.getClassName().equals("com.citi.put.checks.studio.guided.session.GuidedContracts")
++            && frame.getMethodName().equals("validatedCanonical")
++            && "GuidedContracts.java".equals(frame.getFileName())) {
++          if (frame.getLineNumber() == 99) {
++            canonical = i;
++          } else if (frame.getLineNumber() == 104) {
++            schema = i;
++          }
++        }
++      }
++      if (client < 0 || publisher <= client) {
++        return;
++      }
++      int phase = line == 59
++          ? canonical >= 0 && canonical < client ? 1 : schema >= 0 && schema < client ? 2 : 0
++          : line == 65 ? 3 : line == 69 ? 4 : line == 82 ? 5 : -1;
++      if (phase < 0) {
++        return;
++      }
++      synchronized (gate) {
++        long now = System.nanoTime();
++        if (stopping || finalizer != target || now >= end) {
++          return;
++        }
++        long offset = now - (end - java.time.Duration.ofSeconds(30).toNanos());
++        long[] row = publicationPhases[phase];
++        row[0]++;
++        if (row[1] < 0) {
++          row[1] = offset;
++        }
++        row[2] = offset;
++        if (status != Status.FAILED && status != Status.NON_QUIESCENT) {
++          status = Status.OBSERVED;
++        }
++      }
+     }
+ 
+     private void sampleSource(
+@@ -12796,6 +12906,7 @@
+         executing.clear();
+         bindings.clear();
+         sourceSamples.clear();
++        finalizer = null;
+       }
+       if (sampler == null) {
+         return;
+@@ -12858,7 +12969,8 @@
+     private static final int MAX_BYTES = 128 * 1024 * 1024;
+     private volatile C5ClaimSampler claimSampler;
+     private final boolean claimSamplerSelected;
+-    private boolean claimSamplerArmed, claimSamplerClosed;
++    private boolean claimSamplerArmed, claimSamplerClosed, finalizerSelected;
++    private Thread selectedFinalizer;
+     private ObjectNode claimSamplerEvidence;
+     private final List<String> values;
+     private volatile String selectedGuidedSession;
+@@ -12977,25 +13089,73 @@
+       claimSamplerSelected = "true".equals(System.getenv("STUDIO_C5_CLAIM_DIAGNOSTIC"));
+     }
+ 
+-    synchronized void armClaimSampler(jakarta.servlet.http.HttpServletRequest request) {
++    synchronized boolean selectFinalizer(jakarta.servlet.http.HttpServletRequest request) {
+       String selected = selectedGuidedSession;
+-      if (!claimSamplerSelected
+-          || claimSamplerArmed
+-          || claimSamplerClosed
+-          || !secretLoginScenario
+-          || selected == null
++      if (!claimSamplerSelected || claimSamplerArmed || claimSamplerClosed || finalizerSelected
++          || selectedFinalizer != null || !secretLoginScenario || selected == null
+           || !request.getMethod().equals("POST")
+-          || !request
+-              .getRequestURI()
++          || !request.getRequestURI()
+               .equals("/api/v3/studio/guided-sessions/" + selected + "/finalize")) {
++        return false;
++      }
++      finalizerSelected = true;
++      selectedFinalizer = Thread.currentThread();
++      return true;
++    }
++
++    synchronized boolean pendingFinalizer() {
++      return claimSamplerSelected && !claimSamplerArmed && !claimSamplerClosed
++          && selectedFinalizer == Thread.currentThread();
++    }
++
++    synchronized void retireFinalizer() {
++      Thread current = Thread.currentThread();
++      if (selectedFinalizer == current) {
++        selectedFinalizer = null;
++      }
++      if (claimSampler != null) {
++        claimSampler.retireFinalizer(current);
++      }
++    }
++
++    synchronized void afterPublicationClaim(Instant deadline) {
++      if (!pendingFinalizer()) {
+         return;
+       }
+-      // One selected finalize window; retries and late callbacks cannot reset or re-arm it.
+-      claimSamplerArmed = true;
++      StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+       try {
+-        claimSampler = new C5ClaimSampler(true);
+-      } catch (RuntimeException unavailable) {
++        if (stack.length == 0 || stack.length > 512) {
++          return;
++        }
++        int boundary = -1;
++        for (int i = 0; i < stack.length; i++) {
++          if (stack[i].getClassName().equals("com.citi.put.checks.studio.guided.session.GuidedSessionRepository")
++              && stack[i].getMethodName().equals("transaction")) {
++            boundary = i;
++          }
++        }
++        if (boundary < 0 || boundary + 1 >= stack.length) {
++          return;
++        }
++        StackTraceElement caller = stack[boundary + 1];
++        if (!caller.getClassName().equals("com.citi.put.checks.studio.guided.publication.GuidedPlanPublisher")
++            || !caller.getMethodName().equals("finalizeForUser")
++            || !"GuidedPlanPublisher.java".equals(caller.getFileName())
++            || caller.getLineNumber() != 110) {
++          return;
++        }
++        claimSamplerArmed = true;
++        var field = GuidedPlanPublisher.class.getDeclaredField("clock");
++        field.setAccessible(true);
++        var clock = (java.time.Clock) field.get(ownedApplicationContext.getBean(GuidedPlanPublisher.class));
++        long origin = System.nanoTime();
++        long remaining = Duration.between(clock.instant(), deadline).toNanos();
++        claimSampler = new C5ClaimSampler(true, selectedFinalizer, origin, remaining);
++        selectedFinalizer = null; // Transfer only the thread, never the attempt or clock, to the bounded recorder.
++      } catch (ReflectiveOperationException | RuntimeException unavailable) {
+         lifecycleDiagnosticFailed = true;
++      } finally {
++        java.util.Arrays.fill(stack, null);
+       }
+     }
+ 
+@@ -13586,6 +13746,16 @@
+           .put("claimSamplerJoined", joined)
+           .put("claimSamplerCleanupConfirmed", joined && pgJoined)
+           .put("claimSamplerDiagnosticOnly", true);
++      boolean publicationObserved = joined && pgJoined && !cleanupUnconfirmed
++          && claimSampler.status != C5ClaimSampler.Status.FAILED
++          && claimSampler.status != C5ClaimSampler.Status.NON_QUIESCENT;
++      evidence.put("publicationBudgetObserved", publicationObserved);
++      evidence.put("publicationRemainingNanos", publicationObserved ? claimSampler.publicationRemainingNanos : 0L);
++      if (publicationObserved) {
++        evidence.set("publicationPhaseSamples", JSON.valueToTree(claimSampler.publicationPhases));
++      } else {
++        evidence.remove("publicationPhaseSamples");
++      }
+       if (!joined) {
+         evidence.remove(
+             List.of(
+@@ -13653,6 +13823,9 @@
+               "claimSamplerJoined",
+               "claimSamplerCleanupConfirmed",
+               "claimSamplerDiagnosticOnly",
++              "publicationBudgetObserved",
++              "publicationRemainingNanos",
++              "publicationPhaseSamples",
+               "claimSamplerCycles",
+               "claimSamplerEmpty",
+               "claimSamplerUnattributed",
+@@ -13684,6 +13857,7 @@
+       synchronized (this) {
+         // Shares the arm monitor: close-before-finalize permanently prevents a new sampler.
+         claimSamplerClosed = true;
++        selectedFinalizer = null;
+       }
+       var failures = new java.util.ArrayList<Throwable>();
+       boolean producersDrained = false;

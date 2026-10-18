@@ -1,0 +1,14 @@
+{
+  "scope": "SOURCE_ONLY_PASSIVE_PREQUERY_DESIGN_REVIEW",
+  "candidateSha256": "3e36c6bb052e35977076e48f78f10aa781f62b204d1fdb64fefa22d528df83e8",
+  "disposition": "APPROVE_ISOLATED_AUTHOR_WITH_ACTIVE_CALLBACK_LIFETIME_CONDITION",
+  "verified": "Existing original TransactionTemplate seam before callback and already physically-connected Hibernate logical connection plus handshake PG metadata permit passive binding without new SQL/borrow/wrapper. Unavailable/unsupported accessor must remain unobserved and preserve original callback/status/result/error once.",
+  "requiredLifetimeCorrection": [
+    "Association retained until HTTP filter leave alone may outlive actual transaction and permit pooled-connection reuse attribution. Bind ONLY outermost existing registered transaction callback; nested callbacks retain same original superclass path and do not replace binding.",
+    "Remove association in original callback finally, before callback result leaves into commit/rollback; original HTTP leave and samplerclose clear as backup. No lifecycle listener or altered transaction authority.",
+    "Use private immutable binding identity keyed existing bounded registered Thread. Snapshot may copy PID privately but exact attribution TRUE only if same binding remains active before AND after existing snapshot row inspection; otherwise FALSE/UNOBSERVED. No raw PID export/new numeric fields.",
+    "Cleanup must not replace original callback exception or change commit/rollback semantics. Retain original8registry/30s/cadence/PGtrigger/timeouts/18keys/30patterns/fullTRACE/request1s."
+  ],
+  "limits": "Commit-stage attribution after callback removed remains UNOBSERVED; matched waiter does not identify blocker method or prove exclusive latency. Diagnostic never acceptance.",
+  "next": "Isolated exact candidate root review before apply/static and ONE existing bounded diagnostic; no new case/framework/SQL/connection wrapper."
+}

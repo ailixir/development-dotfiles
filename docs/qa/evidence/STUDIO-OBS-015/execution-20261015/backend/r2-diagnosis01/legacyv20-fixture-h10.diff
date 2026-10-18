@@ -1,0 +1,13 @@
+diff --git a/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/49497aae-dbea-402b-a9a6-2d80f4cd2e4e/scratchpad/dexfix015-r2/LegacyV20ConfirmedBaseFixture.before.java b/backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java
+index 3e178db23..feba4e3f2 100644
+--- a/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/49497aae-dbea-402b-a9a6-2d80f4cd2e4e/scratchpad/dexfix015-r2/LegacyV20ConfirmedBaseFixture.before.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java
+@@ -200,7 +200,7 @@ public final class LegacyV20ConfirmedBaseFixture {
+     var jdbc=new JdbcTemplate(source);assertThat(jdbc.queryForObject("SELECT max(version::int) FROM flyway_schema_history WHERE success",Integer.class)).isEqualTo(21);
+     assertThat(row(jdbc,"ui_test_revisions","id",seed.baseRevisionId())).isEqualTo(seed.immutableBaseRowBytes());assertThat(row(jdbc,"studio_guided_publications","session_id",seed.sessionId())).isEqualTo(seed.immutableReceiptRowBytes());
+     assertThat(jdbc.queryForObject("SELECT confirmed_revision_id FROM ui_tests WHERE id=?",UUID.class,seed.testId())).isEqualTo(seed.baseRevisionId());
+-    assertThat(jdbc.queryForObject("SELECT NOT(\"references\" ? 'authoringIdentityVersion') AND step_snapshot_hashes IS NULL AND step_reuse_provenance IS NULL FROM ui_test_revisions WHERE id=?",Boolean.class,seed.baseRevisionId())).isTrue();
++    assertThat(jdbc.queryForObject("SELECT NOT(\"references\" ?? 'authoringIdentityVersion') AND step_snapshot_hashes IS NULL AND step_reuse_provenance IS NULL FROM ui_test_revisions WHERE id=?",Boolean.class,seed.baseRevisionId())).isTrue();
+     assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND attempt_ordinal=0",Integer.class,seed.sessionId())).isEqualTo(1);
+     assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_materialization_snapshots WHERE session_id=? AND authored_inputs_hash=studio_publication_hash(authored_inputs)",Integer.class,seed.sessionId())).isEqualTo(1);
+     assertThat(jdbc.queryForObject("SELECT to_regprocedure('studio_015_relearned_from(text)') IS NOT NULL AND EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='tr_015_revision_guard' AND tgenabled='O')",Boolean.class)).isTrue();

@@ -1,0 +1,239 @@
+--- backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java before
++++ backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java source-only candidate
+@@ -55,6 +55,9 @@
+   @Autowired private StudioDispatchLedgerStatements statements;
+   @Autowired private TransactionTemplate transactions;
+   @Autowired private JdbcTemplate jdbc;
++  @Autowired private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observedAuthorization;
++  @org.springframework.boot.test.mock.mockito.MockBean
++  private ProgressReportService.ReportCommitHook reportCommitHook;
+ 
+   private StudioExecutionFixtures fixtures;
+   private Authentication owner;
+@@ -467,6 +470,226 @@
+     assertThat(snapshot().logs())
+         .extracting(com.citi.put.checks.studio.dto.ExecutionLogEntry::stepIndex)
+         .containsExactly(null, 1);
++  }
++
++  /** Trusted test catalog only; old ordinary fixtures and their security/deadlines are unchanged. */
++  @org.springframework.test.context.DynamicPropertySource
++  static void observedReportCatalog(org.springframework.test.context.DynamicPropertyRegistry properties) {
++    var fixtureScope = observedFixtureDocument().path("basis");
++    String entitlement = com.citi.put.checks.studio.secrets.ConfiguredSecretUseAuthorization.key(
++        "owner@example.test", fixtureScope.path("csiId").asText(),
++        fixtureScope.path("replayRequirements").path("environment").asText());
++    properties.add("studio.secrets.entitlements[" + entitlement + "]", () -> "PASS");
++    properties.add("studio.observed-replay.catalog-json", () -> {
++      var fixture = observedFixtureDocument();
++      var catalog = new com.fasterxml.jackson.databind.ObjectMapper().createArrayNode();
++      var entry = catalog.addObject();
++      entry.set("profile", fixture.path("artifact").path("profile"));
++      entry.set("build", fixture.path("build"));
++      return catalog.toString();
++    });
++    properties.add("studio.observed-replay.policies-json", () -> {
++      var policies = new com.fasterxml.jackson.databind.ObjectMapper().createArrayNode();
++      policies.add(observedFixtureDocument().path("trustedPolicy"));
++      return policies.toString();
++    });
++  }
++
++  private static com.fasterxml.jackson.databind.node.ObjectNode observedFixtureDocument() {
++    try {
++      return (com.fasterxml.jackson.databind.node.ObjectNode) new com.fasterxml.jackson.databind.ObjectMapper()
++          .readTree(java.nio.file.Files.readString(java.nio.file.Path.of(
++              "../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json")));
++    } catch (java.io.IOException failure) { throw new IllegalStateException("Observed report fixture unavailable", failure); }
++  }
++
++  /** Controlled protocol evidence derived before immutable publication; never a native typing claim. */
++  private static com.fasterxml.jackson.databind.node.ObjectNode secretReportBasis() {
++    var basis = (com.fasterxml.jackson.databind.node.ObjectNode) observedFixtureDocument().path("basis").deepCopy();
++    var inputs = (com.fasterxml.jackson.databind.node.ArrayNode) basis.path("inputs");
++    String inputId = "input-config";
++    String stepId = null;
++    for (var input : inputs) {
++      if (!input.path("inputId").asText().equals(inputId)) { continue; }
++      var selected = (com.fasterxml.jackson.databind.node.ObjectNode) input;
++      selected.put("kind", "secretRef").remove("value");
++      ((com.fasterxml.jackson.databind.node.ObjectNode) selected.path("provenance")).put("kind", "secretRef");
++      stepId = selected.path("stepId").asText();
++    }
++    assertThat(stepId).isNotNull();
++    for (var source : basis.path("sourceSteps")) {
++      if (source.path("stepId").asText().equals(stepId)) {
++        ((com.fasterxml.jackson.databind.node.ObjectNode) source).put("source",
++            source.path("source").asText() + " Enter <secret PASS> as password.");
++      }
++    }
++    for (var reference : basis.path("configurationReferences")) {
++      if (reference.path("inputId").asText().equals(inputId)) {
++        ((com.fasterxml.jackson.databind.node.ObjectNode) reference).put("kind", "secretRef").put("referenceName", "PASS");
++      }
++    }
++    for (var preparation : basis.path("preparations")) {
++      var proposal = (com.fasterxml.jackson.databind.node.ObjectNode) preparation.path("proposal");
++      if (!proposal.path("operation").path("value").path("sourceInputId").asText().equals(inputId)) { continue; }
++      ((com.fasterxml.jackson.databind.node.ObjectNode) proposal.path("operation").path("value")).put("kind", "secretRef");
++      var target = proposal.putObject("target").put("kind", "passwordControl");
++      target.set("documentId", proposal.path("executionEvidence").path("documentId"));
++      target.set("generation", proposal.path("executionEvidence").path("generation"));
++      String operationHash = com.citi.put.checks.studio.guided.session.GuidedContracts.hash(proposal.path("operation"));
++      for (var action : basis.path("actions")) {
++        if (action.path("preparationId").equals(preparation.path("preparationId"))) {
++          ((com.fasterxml.jackson.databind.node.ObjectNode) action.path("ledger")).put("operationHash", operationHash);
++        }
++      }
++    }
++    return basis;
++  }
++
++  private com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.RetryFixture
++      observedReportOwner(boolean actualResolution) throws Exception {
++    var document = observedFixtureDocument();
++    var fixture = com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(
++        jdbc, transactions, "report-" + UUID.randomUUID(), secretReportBasis(),
++        (com.fasterxml.jackson.databind.node.ObjectNode) document.path("artifact").path("profile"),
++        (com.fasterxml.jackson.databind.node.ObjectNode) document.path("build"));
++    UUID attempt = UUID.fromString(fixture.original().path("attemptId").asText());
++    var lifecycle = new com.citi.put.checks.studio.secrets.SecretAuditLifecycle(
++        jdbc, new com.citi.put.checks.studio.secrets.SecretUseAuditRecorder(jdbc));
++    assertThat(statements.claim(fixture.id(), "report-dispatcher", Instant.now().plusSeconds(60), Instant.now())).isEqualTo(1);
++    if (actualResolution) {
++      var vault = new com.citi.put.checks.studio.secrets.FakeStudioVaultProvider();
++      var scope = com.citi.put.checks.studio.secrets.VaultScope.of(
++          fixture.original().path("csiId").asText(), fixture.original().path("environment").asText(), fixture.testId());
++      vault.rotate(com.citi.put.checks.studio.secrets.StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS", "report-boundary-control");
++      vault.bindOrigins(com.citi.put.checks.studio.secrets.StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS", "https://orders.example.test");
++      var resolver = new com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver(vault,
++          (principal, csi, environment, name) -> principal.equals("owner@example.test")
++              && csi.equals(scope.csiId()) && environment.equals(scope.environment()) && name.equals("PASS"));
++      try (var resolved = resolver.resolve(scope.csiId(), scope.environment(), fixture.testId(), "owner@example.test",
++          new com.citi.put.checks.studio.dispatch.ReferenceDeclarations(List.of(), List.of("PASS")),
++          secret -> transactions.executeWithoutResult(t -> lifecycle.replayReadEntry(fixture.original(), "report-dispatcher", secret)))) {
++        assertThat(vault.readCount()).isEqualTo(1); // Real controlled provider method, not a live Vault claim.
++        transactions.executeWithoutResult(t -> {
++          assertThat(statements.beginObservedDispatch(fixture.id(), "report-dispatcher", attempt)).isEqualTo(1);
++          lifecycle.replayRelease(fixture.original(), List.of("PASS"), resolved.secretVersions(),
++              com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome.RESOLVED);
++        });
++      }
++    } else {
++      transactions.executeWithoutResult(t -> assertThat(
++          statements.beginObservedDispatch(fixture.id(), "report-dispatcher", attempt)).isEqualTo(1));
++    }
++    var request = document.path("admissionRequest").deepCopy();
++    var ownedRequest = (com.fasterxml.jackson.databind.node.ObjectNode) request;
++    for (String field : List.of("executionId", "startedAt", "attemptId", "revisionId", "revisionDigest",
++        "artifactHash", "configurationHash", "learnedPlanHash", "referencePolicyHash", "publicationEvidenceHash", "scopeHash", "currentPolicyHash")) {
++      ownedRequest.set(field, fixture.original().path(field));
++    }
++    ownedRequest.put("runnerInstanceId", RUNNER).put("admissionId", UUID.randomUUID().toString());
++    ownedRequest.set("profile", fixture.original().path("requiredProfile"));
++    ownedRequest.set("build", fixture.original().path("requiredBuild"));
++    ownedRequest.set("grantId", fixture.original().path("replayGrant").path("grantId"));
++    var permit = observedAuthorization.prepareAdmission(fixture.id(), ownedRequest);
++    admissionService.claimObserved(fixture.id(), permit);
++    progressService.apply(fixture.id(), observedReport(fixture, RunnerReport.STARTED, 1, Map.of()));
++    return fixture;
++  }
++
++  private RunnerReport observedReport(
++      com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.RetryFixture fixture,
++      String kind, long sequence, Map<String, String> usage) {
++    var binding = fixture.original();
++    UUID admission = jdbc.queryForObject("SELECT admission_id FROM studio_dispatch_ledger WHERE execution_id=?", UUID.class, fixture.id());
++    var versions = Map.<String, Object>of("observedProfile", binding.path("requiredProfile").toString(),
++        "observedBuild", binding.path("requiredBuild").toString());
++    return new RunnerReport(fixture.id(), UUID.fromString(binding.path("attemptId").asText()), admission, RUNNER,
++        kind, sequence, Instant.now(), Instant.parse(binding.path("startedAt").asText()),
++        RunnerReport.STARTED.equals(kind) ? List.of() : List.of(new RunnerStepState(2, "PASS", 0.25, 10.75, 10.5, null)),
++        List.of(), false, versions, null, null, false, usage);
++  }
++
++  private Map<String, Object> observedHistory(UUID id) {
++    return jdbc.queryForMap("SELECT e.status,e.snapshot_revision,e.step_results::text,e.logs::text," +
++        "l.state,l.last_runner_sequence AS runner_sequence FROM ui_test_executions e JOIN studio_dispatch_ledger l ON l.execution_id=e.id " +
++        "AND l.execution_accepted_at=e.started_at WHERE e.id=?", id);
++  }
++
++  private List<Map<String, Object>> observedUsage(UUID id) {
++    return jdbc.queryForList("SELECT * FROM studio_secret_use_audit WHERE execution_id=? AND row_kind='USAGE'", id);
++  }
++
++  @Test
++  void observedWinningProgressAndDuplicateCommitOneUsedSummaryWithTheSnapshotCas() throws Exception {
++    try (var fixture = observedReportOwner(true)) {
++      var before = observedHistory(fixture.id());
++      var report = observedReport(fixture, RunnerReport.PROGRESS, 2, Map.of("PASS", "USED"));
++      assertThat(progressService.apply(fixture.id(), report).applied()).isTrue();
++      var after = observedHistory(fixture.id());
++      assertThat(((Number) after.get("snapshot_revision")).longValue()).isEqualTo(((Number) before.get("snapshot_revision")).longValue() + 1);
++      assertThat(after).containsEntry("runner_sequence", 2L);
++      var usage = observedUsage(fixture.id());
++      assertThat(usage).hasSize(1);
++      assertThat(usage.getFirst()).containsEntry("usage_outcome", "USED").containsEntry("outcome", "RESOLVED");
++      assertThat(progressService.apply(fixture.id(), report).applied()).isFalse();
++      assertThat(observedHistory(fixture.id())).isEqualTo(after);
++      assertThat(observedUsage(fixture.id())).isEqualTo(usage);
++    }
++  }
++
++  @Test
++  void observedProgressCommitHookFailureRollsBackSnapshotSequenceAndActualUsageTogether() throws Exception {
++    try (var fixture = observedReportOwner(true)) {
++      var before = observedHistory(fixture.id());
++      org.mockito.Mockito.doAnswer(invocation -> {
++        if (fixture.id().equals(invocation.getArgument(0))) {
++          assertThat(observedUsage(fixture.id())).hasSize(1); // Inside the real precommit transaction.
++          throw new IllegalStateException("Controlled report commit fault");
++        }
++        return null;
++      }).when(reportCommitHook).beforeCommit(org.mockito.ArgumentMatchers.any(UUID.class));
++      var report = observedReport(fixture, RunnerReport.PROGRESS, 2, Map.of("PASS", "USED"));
++      assertThatThrownBy(() -> progressService.apply(fixture.id(), report)).hasMessage("Controlled report commit fault");
++      assertThat(observedHistory(fixture.id())).isEqualTo(before);
++      assertThat(observedUsage(fixture.id())).isEmpty();
++      org.mockito.Mockito.reset(reportCommitHook);
++      assertThat(progressService.apply(fixture.id(), report).applied()).isTrue();
++      assertThat(observedUsage(fixture.id())).hasSize(1);
++    }
++  }
++
++  @Test
++  void observedProgressMissingScopedResolutionRefusesAndRollsBackItsWinningSnapshotCas() throws Exception {
++    try (var fixture = observedReportOwner(false)) {
++      var before = observedHistory(fixture.id());
++      assertThatThrownBy(() -> progressService.apply(fixture.id(),
++          observedReport(fixture, RunnerReport.PROGRESS, 2, Map.of("PASS", "USED"))))
++          .hasMessage("Missing scoped resolved secret release");
++      assertThat(observedHistory(fixture.id())).isEqualTo(before);
++      assertThat(observedUsage(fixture.id())).isEmpty();
++    }
++  }
++
++  @Test
++  void observedLosingProgressAndRealTerminalOwnerKeepTheEarlierUsedRowImmutable() throws Exception {
++    try (var fixture = observedReportOwner(true)) {
++      progressService.apply(fixture.id(), observedReport(fixture, RunnerReport.PROGRESS, 2, Map.of("PASS", "USED")));
++      var usage = observedUsage(fixture.id());
++      progressService.apply(fixture.id(), observedReport(fixture, RunnerReport.PROGRESS, 3, Map.of()));
++      var before = observedHistory(fixture.id());
++      assertThatThrownBy(() -> progressService.apply(fixture.id(),
++          observedReport(fixture, RunnerReport.PROGRESS, 2, Map.of("PASS", "USED"))))
++          .hasFieldOrPropertyWithValue("code", InternalCallbackCodes.SEQUENCE_REGRESSED);
++      assertThat(observedHistory(fixture.id())).isEqualTo(before);
++      assertThat(observedUsage(fixture.id())).isEqualTo(usage);
++      transactions.executeWithoutResult(t -> assertThat(
++          statements.closeByReaper(fixture.id(), ExecutionErrorCode.DISPATCH_UNKNOWN, Instant.now())).isEqualTo(1));
++      var terminal = observedHistory(fixture.id());
++      assertThatThrownBy(() -> progressService.apply(fixture.id(),
++          observedReport(fixture, RunnerReport.PROGRESS, 4, Map.of("PASS", "USED"))))
++          .hasFieldOrPropertyWithValue("code", InternalCallbackCodes.EXECUTION_SETTLED);
++      assertThat(observedHistory(fixture.id())).isEqualTo(terminal);
++      assertThat(observedUsage(fixture.id())).isEqualTo(usage);
++    }
+   }
+ 
+   // ── helpers ──────────────────────────────────────────────────────────────

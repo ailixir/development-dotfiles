@@ -1,0 +1,26 @@
+--- docs/qa/evidence/STUDIO-OBS-007/resume-d-guided-cut-isolated-author/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
++++ docs/qa/evidence/STUDIO-OBS-007/resume-d-guided-cut-isolated-author/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
+@@ -2670,15 +2670,17 @@
+         @Override
+         public GuidedSourceReferenceValidator.Sources sources(JsonNode session) {
+           checkSourceCurrent(session);
+-          require(cfg.path("source").size() == 1
+-              && cfg.path("source").get(0).path("stepId").asText().equals("step-1")
+-              && cfg.path("source").get(0).path("text").asText().equals("Enter <secret PASS> as password."),
++          JsonNode sourceSteps = cfg.path("source").path("steps");
++          require(sourceSteps.isArray() && sourceSteps.size() == 1, "REVISION_CONFLICT", 409);
++          JsonNode sourceStep = sourceSteps.get(0);
++          require(sourceStep.path("stepId").asText().equals("step-1")
++              && sourceStep.path("text").asText().equals("Enter <secret PASS> as password."),
+               "REVISION_CONFLICT", 409);
+           return new GuidedSourceReferenceValidator.Sources("source-1", "config-1",
+-              Map.of("step-1", new GuidedSourceReferenceValidator.Source(
+-                  cfg.path("source").get(0).path("text").asText(), List.of())),
++              Map.of(sourceStep.path("stepId").asText(), new GuidedSourceReferenceValidator.Source(
++                  sourceStep.path("text").asText(), List.of())),
+               Map.of("ref-PASS", new GuidedSourceReferenceValidator.ConfigurationValue(
+-                  null, "step-1", "secretRef", "fill.value",
++                  null, sourceStep.path("stepId").asText(), "secretRef", "fill.value",
+                   session.path("scopeHash").asText(), false, "PASS")));
+         }
+       };

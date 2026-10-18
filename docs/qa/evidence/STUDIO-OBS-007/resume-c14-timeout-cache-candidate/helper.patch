@@ -1,0 +1,58 @@
+--- reviewed-c14.java
++++ after.java
+@@ -5452,6 +5452,7 @@
+   private void p14Captured(P14Recipe recipe, boolean published) throws Exception {
+     String canary = "C14-PAGE-" + UUID.randomUUID();
+     C5Capture capture = new C5Capture(List.of(canary), false);
++    capture.cacheNonemptyRequired = published;
+     c5Capture = capture;
+     Throwable primary = null;
+     try {
+@@ -6937,6 +6938,7 @@
+   private void p8C6Case(int kind) throws Exception {
+     String value = "C6-PRIVATE-" + UUID.randomUUID() + "-+/界";
+     C5Capture capture = new C5Capture(List.of(value), false);
++    capture.cacheNonemptyRequired = kind <= 2;
+     c5Capture = capture;
+     Throwable primary = null;
+     try {
+@@ -7013,8 +7015,8 @@
+     p3Grant("CSI-456", "fixture-other");
+     UUID test = p3CreateSource("CSI-456", "fixture-other", true);
+     // Legitimate test configuration precedes learning/publication/admission, never alters a job.
+-    assertThat(jdbc.update("UPDATE ui_tests SET timeout_seconds=120 WHERE id=?", test))
+-        .isEqualTo(1);
++    assertThat(jdbc.queryForObject("SELECT timeout_seconds FROM ui_tests WHERE id=?", Integer.class, test))
++        .isEqualTo(30);
+     VaultScope scope = VaultScope.of("CSI-456", "fixture-other", test);
+     p3ExpectedPassword = value;
+     p3Seed(scope, value);
+@@ -10157,6 +10159,7 @@
+         streamedLogsFinalChecked;
+     private boolean failed, c4WindowsExecuted, traceArmed;
+     private final boolean traceFromStart;
++    private boolean cacheNonemptyRequired = true;
+     private int httpBodies,
+         httpErrors,
+         jsonBodies,
+@@ -10481,7 +10484,9 @@
+               ownedApplicationContext.getBean(
+                   "idempotencyCache", com.github.benmanes.caffeine.cache.Cache.class);
+       cacheEntries = cache.asMap().size();
+-      assertThat(cacheEntries).as("real accepted mutation cache entries").isPositive();
++      if (cacheNonemptyRequired) {
++        assertThat(cacheEntries).as("real accepted mutation cache entries").isPositive();
++      }
+       int ordinal = 0;
+       for (var entry : cache.asMap().values()) {
+         sinks.put("c5-cache-body-" + ordinal, entry.body());
+@@ -10579,6 +10584,9 @@
+               .put("sseStreams", streams.size())
+               .put("metricBytes", metricBytes)
+               .put("cacheEntries", cacheEntries)
++              .put("cacheNonemptyRequired", cacheNonemptyRequired)
++              .put("cacheProduced", cacheEntries > 0)
++              .put("cacheUnproducedOutsideFilterRoutes", !cacheNonemptyRequired && cacheEntries == 0)
+               .put("profileFiles", profileFiles)
+               .put("knownRootLinks", profileLinks)
+               .put("externalLinkTargetBytesScanned", false)

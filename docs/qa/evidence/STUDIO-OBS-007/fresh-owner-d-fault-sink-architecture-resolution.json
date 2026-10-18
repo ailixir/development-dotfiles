@@ -1,0 +1,365 @@
+{
+  "schema": "fresh-owner-d-fault-sink-architecture-resolution/1",
+  "reviewMode": "FRESH_INDEPENDENT_ARIA_DARA_REVIEWONLY",
+  "disposition": "BLOCKED_SOURCE_DESIGN",
+  "decision": "The bounded service/PG/mTLS source proposal is viable only with the concrete corrections below. Frozen proposal is not approved as written; no authoring, runtime execution, product privacy pass, or lifecycle closure is credited.",
+  "bindings": {
+    "designPath": "docs/qa/evidence/STUDIO-OBS-007/d-fault-sink-execution-design.json",
+    "designSha256": "f362d0af3020d4d5558441dd743a9e3931400cad6fffe13b8edd052ef950b87d",
+    "sourceZip": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-publication23-transport17-current/sources.zip",
+    "sourceZipSha256": "70d97415eb18ca41a8f307be59d2b44b2a81ec58d56e33088ec8ce5371dd0e8b",
+    "immutableSources": {
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": {
+        "sha256": "f3862d94539e8a94f31653f0ffeeda493f6c181310d509954d65bb289648720c",
+        "readAuthority": "immutable sources.zip"
+      },
+      "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java": {
+        "sha256": "66f3665f63de906f5b1a4285aaf904b8527a3231066c28be7ee5c3f713a4bd02",
+        "readAuthority": "immutable sources.zip"
+      },
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": {
+        "sha256": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+        "readAuthority": "immutable sources.zip"
+      },
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": {
+        "sha256": "e6d54ffee5bce7c5f18f92e198e455eaba321a95cb9d42adf354ce60fc049547",
+        "readAuthority": "immutable sources.zip"
+      },
+      "backend/src/main/java/com/citi/put/checks/config/logging/MaskingMessageJsonProvider.java": {
+        "sha256": "ea02ab1f17fec7fd0bb006ce83219f768844bfe6bf1d23be892db0f33f7d87f0",
+        "readAuthority": "immutable sources.zip"
+      },
+      "backend/src/main/java/com/citi/put/checks/config/logging/SecretMasker.java": {
+        "sha256": "58f0fec4c3477c5cf2f0aab4dc2b07e050a5137fbc2c4501acc7c4acc5c62a5e",
+        "readAuthority": "immutable sources.zip"
+      },
+      "backend/src/main/resources/logback-spring.xml": {
+        "sha256": "ea86a2075f19486361b270343ff191bc58582058bd7266968ec77fa3e7a922a3",
+        "readAuthority": "immutable sources.zip"
+      }
+    },
+    "mutableCurrentPublicationRead": false,
+    "buildFileSha256": "dab809b9129368c1643d80169bcdb773f9290af61e153a1e45069832f5db7289"
+  },
+  "independence": {
+    "designAuthorship": false,
+    "sourceAuthorship": false,
+    "freshReviewOfFrozenInputs": true,
+    "skills": [
+      "aiox-architect",
+      "aiox-data-engineer"
+    ],
+    "modelsSpawned": false,
+    "otherReviewReportsUsedAsAuthority": false
+  },
+  "localMetadata": [
+    {
+      "coordinate": "ch.qos.logback:logback-core:1.5.11",
+      "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-core/1.5.11/727bdb8dc75b6c392f9be56224503948abc248e8/logback-core-1.5.11.jar",
+      "sha256": "e0f242aa3c4411ce8c7ec304a5afeaa75224680890f5f813153ef807cbb9542e"
+    },
+    {
+      "coordinate": "ch.qos.logback:logback-core:1.5.11",
+      "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-core/1.5.11/a1cadf47a30eba236030d845aeaae37c47bd9d72/logback-core-1.5.11.pom",
+      "sha256": "aed8147c486b42704af02d5f005f0c648dbf4db4c7d7feb2f181f86558560fb4"
+    },
+    {
+      "coordinate": "ch.qos.logback:logback-classic:1.5.11",
+      "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-classic/1.5.11/277b7b962da7746862e42fb7bbd991fdd7b7b0b/logback-classic-1.5.11.pom",
+      "sha256": "eeeed8e3a080cb42694e01d6141b315aef555b84a7e06179ce9239d5554c7aed"
+    },
+    {
+      "coordinate": "ch.qos.logback:logback-classic:1.5.11",
+      "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-classic/1.5.11/c4473fb51fea6682ad477cf3c2206b8b9623b9d8/logback-classic-1.5.11.jar",
+      "sha256": "e223cce321ccb435d23e1dadfc6ceeccd862e2dabb1a2a5675318426f7fa1978"
+    },
+    {
+      "coordinate": "org.slf4j:slf4j-api:2.0.16",
+      "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/2.0.16/172931663a09a1fa515567af5fbef00897d3c04/slf4j-api-2.0.16.jar",
+      "sha256": "a12578dde1ba00bd9b816d388a0b879928d00bab3c83c240f7013bf4196c579a"
+    },
+    {
+      "coordinate": "org.slf4j:slf4j-api:2.0.16",
+      "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/2.0.16/921407ed2b847734f2601db035850cc2473f6453/slf4j-api-2.0.16.pom",
+      "sha256": "b1a00f5b1c4dbe62b805d65d23911a6f77063889d7cb1e86fe8389d6190473f7"
+    },
+    {
+      "coordinate": "org.springframework.boot:spring-boot:3.3.5",
+      "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot/3.3.5/1a0d1dc425d445503bd01c9aa3683aaebc524e3b/spring-boot-3.3.5.jar",
+      "sha256": "6a4a5c8a5b58c209705881e487b49445679ab69c858623fef700f634e24eb9c2"
+    },
+    {
+      "coordinate": "org.springframework.boot:spring-boot:3.3.5",
+      "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot/3.3.5/a9dfdb0599a3848c86b26f573c6d3f86cf2de5a4/spring-boot-3.3.5.pom",
+      "sha256": "c17389d0a8578ab6186866940f11fa2952de292fd0609f58b7a4791058eb51db"
+    },
+    {
+      "coordinate": "org.springframework.boot:spring-boot-dependencies:3.3.5",
+      "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-dependencies/3.3.5/627e52b5440a24d63f688d79c537f993fcc9c453/spring-boot-dependencies-3.3.5.pom",
+      "sha256": "4bbb8711434c4a2e60368fbe34fb6f5352404b7d07a102fd23f183dfd7574706"
+    },
+    {
+      "coordinate": "org.springframework.boot:spring-boot-starter-logging:3.3.5",
+      "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-logging/3.3.5/4732240c00cb8bcb0a71f188d4955b4d26abf063/spring-boot-starter-logging-3.3.5.pom",
+      "sha256": "24615b7af4025b8d53765dd9fd3852b77e9e29efe18daae1face2ce0ce9678e2"
+    },
+    {
+      "coordinate": "org.springframework.boot:spring-boot-starter-logging:3.3.5",
+      "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-logging/3.3.5/de318d4baa64f02631accf51d708e906b304b4cc/spring-boot-starter-logging-3.3.5.jar",
+      "sha256": "c8099e083f51280529657736d7a186c377e9f7e458363d8f5d0028d3166fac28"
+    },
+    {
+      "coordinate": "net.logstash.logback:logstash-logback-encoder:8.0",
+      "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/net.logstash.logback/logstash-logback-encoder/8.0/2c4cc18d0083aa2ee1fcce5a0808292f1e6ad77e/logstash-logback-encoder-8.0.pom",
+      "sha256": "47f6839728e29ab14ec3a5689ded24ac59650a9dd02cdb6d68b1ba87685816ab"
+    },
+    {
+      "coordinate": "net.logstash.logback:logstash-logback-encoder:8.0",
+      "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/net.logstash.logback/logstash-logback-encoder/8.0/73a2ae828d20f710be8439af3c1a53d21a62dc0f/logstash-logback-encoder-8.0.jar",
+      "sha256": "81fcbde1b5a7d673d6c0d0d4f1e0f79b676f948e6b92b912e9e0b75097458bd3"
+    }
+  ],
+  "dependencyConclusion": {
+    "source": "Frozen backend/build.gradle.kts lines 3,32,39; cached Boot 3.3.5 BOM and starter-logging POM; locally inspected jars",
+    "springBoot": "3.3.5",
+    "logbackCoreAndClassic": "1.5.11",
+    "slf4jApi": "2.0.16",
+    "logstashEncoder": "8.0",
+    "limitation": "Pinned source/BOM/cache evidence, not a running classpath or LoggerContext observation. Future preflight must verify class/code-source/backend identity against these bindings; cached presence alone never establishes resolved runtime identity."
+  },
+  "apiEvidence": [
+    {
+      "class": "ch.qos.logback.core.ConsoleAppender",
+      "command": "javap -classpath <pinned local jars> -c -p ch.qos.logback.core.ConsoleAppender",
+      "disassemblySha256": "60a59a2201936fa1072451a469cca219a6183bcae2e7a75d06807fab1253c260",
+      "exitCode": 0
+    },
+    {
+      "class": "ch.qos.logback.core.OutputStreamAppender",
+      "command": "javap -classpath <pinned local jars> -c -p ch.qos.logback.core.OutputStreamAppender",
+      "disassemblySha256": "2f75848a6456fb4b61e8ef033137426e0e60b3b8f66775489b45babba06e335e",
+      "exitCode": 0
+    },
+    {
+      "class": "ch.qos.logback.core.joran.spi.ConsoleTarget",
+      "command": "javap -classpath <pinned local jars> -c -p ch.qos.logback.core.joran.spi.ConsoleTarget",
+      "disassemblySha256": "0967d0c4747297b553a7345507de1671ae38792db685c690b40bd9cc5e87b569",
+      "exitCode": 0
+    },
+    {
+      "class": "ch.qos.logback.core.joran.spi.ConsoleTarget$1",
+      "command": "javap -classpath <pinned local jars> -c -p ch.qos.logback.core.joran.spi.ConsoleTarget$1",
+      "disassemblySha256": "1437662653c7d644fb5f2614d217f8070919373099433fc63b0c26a8a1e12cb6",
+      "exitCode": 0
+    },
+    {
+      "class": "ch.qos.logback.core.joran.spi.ConsoleTarget$2",
+      "command": "javap -classpath <pinned local jars> -c -p ch.qos.logback.core.joran.spi.ConsoleTarget$2",
+      "disassemblySha256": "03b7a166f0be5d788f2b78d185e568e958993f5265b8661b895e2a4284331423",
+      "exitCode": 0
+    },
+    {
+      "class": "ch.qos.logback.core.AsyncAppenderBase",
+      "command": "javap -classpath <pinned local jars> -c -p ch.qos.logback.core.AsyncAppenderBase",
+      "disassemblySha256": "0cdd7762b83020303e65611f6a993713c53d35d057d44e14f0c338979e68d407",
+      "exitCode": 0
+    },
+    {
+      "class": "ch.qos.logback.core.AsyncAppenderBase$Worker",
+      "command": "javap -classpath <pinned local jars> -c -p ch.qos.logback.core.AsyncAppenderBase$Worker",
+      "disassemblySha256": "4ff3a2b2f3446da1e9f5d393d638b3fea48e34baf399437287240bdff93fb0b3",
+      "exitCode": 0
+    },
+    {
+      "class": "ch.qos.logback.classic.AsyncAppender",
+      "command": "javap -classpath <pinned local jars> -c -p ch.qos.logback.classic.AsyncAppender",
+      "disassemblySha256": "47615ffee074a35fddf6b75bb6d58c838d0afc91c1703a982597fed7729c83fe",
+      "exitCode": 0
+    },
+    {
+      "class": "ch.qos.logback.classic.Logger",
+      "command": "javap -classpath <pinned local jars> -c -p ch.qos.logback.classic.Logger",
+      "disassemblySha256": "b2772c622ca3c1c63cf36dc0af2495d3b60d0bd3b180c3300d0aa53f3edd14f3",
+      "exitCode": 0
+    },
+    {
+      "class": "ch.qos.logback.core.UnsynchronizedAppenderBase",
+      "command": "javap -classpath <pinned local jars> -c -p ch.qos.logback.core.UnsynchronizedAppenderBase",
+      "disassemblySha256": "bcba20a3e261848e06472ce0ac8d9d28ad692dd57bd32163463a72e4ef7aac46",
+      "exitCode": 0
+    },
+    {
+      "class": "net.logstash.logback.encoder.CompositeJsonEncoder",
+      "command": "javap -classpath <pinned local jars> -c -p net.logstash.logback.encoder.CompositeJsonEncoder",
+      "disassemblySha256": "3131d9a6e89d468f3a82a52f342cf338a235857306dc685bef077e57946bd8f2",
+      "exitCode": 0
+    },
+    {
+      "class": "java.io.OutputStream",
+      "command": "javap -classpath <pinned local jars> -c -p java.io.OutputStream",
+      "disassemblySha256": "65f2932542b0eaaf1ba5dd78998f6f231e86d44cb7cd32b6f1a168280ac46f53",
+      "exitCode": 0
+    }
+  ],
+  "loggingConfiguration": {
+    "repositoryConfigMatchesFrozenHash": true,
+    "attachment": "One declared synchronous JSON_CONSOLE ConsoleAppender on ROOT; com.citi.put.checks has INFO and inherits additive parent delivery. No explicit async/file/network appender in this XML.",
+    "encoder": "LoggingEventCompositeJsonEncoder with timestamp,level,logger,thread,MDC,MaskingMessageJsonProvider,stackTrace,service pattern. Masking provider only transforms getFormattedMessage at immutable source lines 10-13. MDC and stackTrace are not masked by that provider. Raw arguments/message/Throwable must be independently observed.",
+    "springDefaults": "Boot defaults.xml defines converters/properties and explicit third-party logger levels; it does not attach another console/file appender. Root TRACE does not override explicit descendant levels.",
+    "profiles": "Frozen application-test.yml root INFO/application DEBUG; test annotation D108 root WARN; application.yml logging.config selects logback-spring.xml and has explicit Google/grpc WARN. Record and restore exact nullable explicit levels; effective-level restoration follows parent restoration.",
+    "runtimeInventory": "UNRUN. XML declaration never substitutes for all attached appenders, filters, turbo filters, status listeners, additive paths, or dynamically added/nonadditive logger detection."
+  },
+  "concreteBlockingFindings": [
+    {
+      "id": "D-ARCH-01",
+      "severity": "BLOCKING",
+      "finding": "Quarantine instruction lacks a safe public stream swap contract and wrongly leaves restart/async as an implementation choice.",
+      "evidence": "OutputStreamAppender.setOutputStream offsets 7-23 closes existing stream then assigns new stream and initializes encoder when started. closeOutputStream invokes encoderClose/footerBytes then close. ConsoleAppender.start offsets 0-23 obtains target stream and calls setOutputStream; start after quarantine would overwrite quarantine. CompositeJsonEncoder headerBytes/footerBytes both return EMPTY_BYTES.",
+      "requiredCorrection": "Support only the verified started synchronous ConsoleAppender with unchanged pinned composite encoder and the exact ConsoleTarget public stream identity, Jansi disabled, no unknown stream/encoder/filter behavior. Save getOutputStream identity, target, encoder identity/start state, appender started/immediateFlush, filter identities/order, levels/additivity. Call setOutputStream(bounded close-no-op quarantine) without stop/start; restore exact saved stream with setOutputStream while original encoder stays active. Never setEncoder, detach original appender, reset context, restart it, or change filters/target. Unknown footer/header/wrapper/close semantics => FAIL before producer release."
+    },
+    {
+      "id": "D-ARCH-02",
+      "severity": "BLOCKING",
+      "finding": "Root/application collectors alone do not prove every attached/additive route and async delivery; marker success cannot prove absence of drops.",
+      "evidence": "Logger.callAppenders offsets 8-30 invokes each logger attachment and stops at additive=false. AsyncAppenderBase.append can discard before preprocess; neverBlock put uses offer and ignores its Boolean. AsyncAppender marks TRACE/DEBUG/INFO discardable. Worker takes batches, so queue size zero can coexist with in-flight emission. stop joins only maxFlushTime and worker eventually detachAndStopAllAppenders.",
+      "requiredCorrection": "Smallest patch rejects all AsyncAppender/unknown AppenderAttachable wrappers, nonadditive routes, extra unquarantinable file/network appenders, unknown filters/turbo filters/status console listeners, route drift and incomplete inventory before a canary is produced. Do not stop/start async originals to claim restoration. Keep raw collector on each required logger path, identity-deduplicate resources but retain attachment multiplicity/counts. Post-case reinventory, TRACE registration at root/application and all relevant descendants, emitted raw/encoded counts, zero capture drops and zero status errors required. Unsupported route is an actual failed prerequisite, never an empty sink PASS."
+    },
+    {
+      "id": "D-ARCH-03",
+      "severity": "BLOCKING",
+      "finding": "Copying a cached response body back once in finally can change commitment, flushing, ordering and the failure body. A filter is not a new outward response generator.",
+      "evidence": "D3213-3236 existing callback sends once and checks HTTP202; D410 invokes services directly. Direct service outcomes are not servlet responses.",
+      "requiredCorrection": "Prefer bounded capture of actual response.body immediately after existing callback http.send and before assertions/parser. If server-side emitted response capture is necessary, a class-local forwarding tee must delegate each existing write/flush/commit/reset/status/error once, never buffer then copyBodyToResponse, never synthesize an error or rerun chain, never change handler/authentication. Capture only real owned requests; register an unproduced HTTP body as NONAPPLICABLE, not captured-negative. Unsupported async/ERROR dispatch, writer charset/reset behavior or committed-error routing => FAIL/unavailable. No new HTTP call to create evidence for direct service invocation."
+    },
+    {
+      "id": "D-ARCH-04",
+      "severity": "BLOCKING",
+      "finding": "Frozen original Throwable and existing assertion failure may contain canary and are unsafe for JUnit cause/suppressed or assertion expected/actual export.",
+      "evidence": "D563 asserts peerFailure directly; D593-595 asserts actual Throwable; D974-976 and D1224-1288 rethrow original and attach original cleanup failures. D2634-2643 mutates original suppressed list. Logback status errors can also retain Throwables.",
+      "requiredCorrection": "Use the exact closed JUnit failure disposition specified below around every owned test/template and owned lifecycle/cleanup exit. Preserve original object and original outcome/error in transient ledger through scans; export a separate fixed diagnostic with no original cause/suppressed/expected/actual payload. No claim of exported Throwable identity. A scanner failure cannot mask an original product failure, turn it into skip/pass, or overwrite Scenario.failure."
+    },
+    {
+      "id": "D-ARCH-05",
+      "severity": "BLOCKING",
+      "finding": "Always-finally must precede every disposal, include early setup/late errors and prevent retained canary Scenario objects from surviving through class shutdown. Bounded collection must not silently truncate or throw from a logger callback and be swallowed by Logback.",
+      "evidence": "D3161-3164 produces actual char[]; D670-678 wipes original arrays; D3351-3355 wipes received bytes; D3432-3438 wipes response bytes. D213-225 includes immutable canary String plus actual failures and arrays; BY_TEST/BY_SESSION keep scenarios. UnsynchronizedAppenderBase.doAppend catches Exception and publishes raw status error rather than failing the test synchronously.",
+      "requiredCorrection": "Register independent actual-release copy before returned provider chars are erased, capture sink bytes before their existing wipe, and place an outer ledger scope before any setup with possible release. Collect sticky ordinal failures in callbacks without content-bearing throws/logs. Keep original finally cleanup order; scan after actual owned operations drain while quarantine remains active. Release class-owned scenario map references only after last dependent owner/peer and scans; preserve class cleanup/cache-owner semantics and scan late listener/close errors. Missing, dropped, unsupported, scan/restoration failure always fails."
+    }
+  ],
+  "exactConsoleStreamDisposition": {
+    "publicAPI": "ConsoleAppender inherits public getOutputStream/setOutputStream. ConsoleTarget.SystemOut/SystemErr.getStream is public. The implementation streams are package-private ConsoleTarget$1/$2, not a public ConsoleOutputStream class in this pinned jar.",
+    "close": "Both ConsoleTarget anonymous streams override write overloads/flush to fetch current System.out/System.err dynamically; neither overrides close. java.io.OutputStream.close is a no-op. Thus this exact saved target stream is reusable after setOutputStream closes it, and System.out itself is not closed. An arbitrary saved OutputStream/PrintStream/Jansi stream is not covered.",
+    "allowedSwap": "Public getOutputStream identity must equal ConsoleTarget matching getTarget().getStream; pinned encoder must have inspected empty header/footer; appender already started, Jansi false. A bounded no-op-close quarantine accepts original encoder bytes, records sticky overflow and never forwards bytes. Keep original encoder/filter/appender active. Restore saved identity, verify descriptors and started state; do not stop/start. No System.setOut/setErr and no second encoder.",
+    "concurrency": "Serialize all class log capture and require future execution isolation from other producer tests. Per-class Java lock alone cannot serialize uncooperative other classes sharing JVM LoggerContext. Drain actual owned callers/peers/schedulers before restoring and reject route mutation; no proof of late-work absence from a quiet stream or a last marker.",
+    "async": "Unsupported in this smallest patch. Default queue256/discard threshold queue/5 and finite maxFlushTime; TRACE may drop, neverBlock may silently fail offer, queue empty does not prove worker idle, stop can leave worker alive and tears down delegates. Restoring a stopped async instance cannot be asserted reversible. Async support would require a separately reviewed lifecycle barrier/drop accounting seam."
+  },
+  "smallest18TransportPatch": {
+    "onlyAllowedSource": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "sourceEditsPerformed": false,
+    "selectors": [
+      "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.syntheticFaultSinkScannerDetectsIndependentEncodedControls"
+    ],
+    "allowedSeams": [
+      "Class-local serialized bounded capture/ledger/scanner/closed-failure helpers and owned invocation/lifecycle guard. Scope starts before owned setup; no canary-producing operation until actual logging prerequisite passes.",
+      "CountedProvider.read D3150-3164: after valid scope/actual dispatch assertion and reads increment, register independent copy of the actual returned char[] once. No new provider access/name lookup or production API hook.",
+      "Scenario test-only default-off switch: enable only the two complete503 modes in the existing parameterized test. In relay after callback D3316-3319 and only at complete respond D3337, create fixed application/problem+json with detail from already received body.secret.value after equality to ledger. Do not alter the callback outcome body, partial-response path, owner ledger, status or callbacks.",
+      "respond D3430-3438: bounded source/output-role capture of the same serialized bytes before original write/wipe; content-type overload only for the controlled503 response; preserve existing status,length,send/write order. A failed write is recorded as attempted bytes/failed delivery, never successful source receipt.",
+      "callback D3234-3236: capture actual response before assert/parse; source request is allowed authenticated control, response is downstream sink. No extra send, malformed callback, outcome mutation or worker errorMessage injection.",
+      "Direct original service return/Scenario.failure/peerFailure/cleanup-owner failures captured from existing variables, not a recreated exception or additional service/SQL invocation.",
+      "Optional strictly forwarding class-local HTTP response tee only under D-ARCH-03 contract; omit when no separate emitted-boundary claim is needed.",
+      "One new scanner-only @Test, independent literal UTF8/UTF16LE/BE/Base64/JSON/Unicode/hex/percent/component/form positives and near-miss negatives. Port only immutable e6d54 helper algorithm; use fixed labels and explicitly wipe transient byte variants."
+    ],
+    "requiredBehaviorRetention": {
+      "count": "9 Mode invocations + privatePG + heldRow + 2 setup controls + 4 stop controls = original17; add scanner-only test =>18. No extra runtime route or product operation.",
+      "nineModes": [
+        "COMPLETE_200_NO_CALLBACK",
+        "COMPLETE_200_OWNER_OK",
+        "COMPLETE_200_OWNER_FAILED",
+        "COMPLETE_503_NO_CALLBACK",
+        "COMPLETE_503_OWNER_OK",
+        "PARTIAL_200_NO_EOF",
+        "PARTIAL_503_NO_EOF",
+        "CALLER_EXPIRY_AFTER_CONSUME",
+        "INTERRUPT_AFTER_HEADERS"
+      ],
+      "oracles": "Retain actual dispatchCount/read/post/consume one, authenticated callback counts, provider/request zeroization, disconnect/EOF bounds, deadline/interrupt state, audit rows and outcomes, recovery/idempotency/stale-fence checks, database persisted-content assertion. Existing503 caller retains UNKNOWN_OUTCOME exception while ownerOK action remains SUCCEEDED/USED; no-callback action remains UNKNOWN_OUTCOME. PrivatePG SQLSTATE08 original error and suppressed UNKNOWN409, held-row genuine lock release/reconciliation, zero-read setup/stop guards, stop sender/confirmation refusal and drain-before-route-close, exact cache/context owner ordering remain untouched.",
+      "forbidden": "No production source/config/client subscriber changes; no altered status/deadline/read/send/consume/callback count/order, synthetic SQL/product outcome, detached appender, sanitized second encoder, canary-triggered logger event masquerading as a product event, or skipped assertion."
+    }
+  },
+  "sourceVsSinkRoles": {
+    "allowedActualSource": [
+      "Actual provider return and authorized secret dispatch wire",
+      "Controlled complete503 problem bytes built from the actual already-received release"
+    ],
+    "sourcePositive": "Require ledger equality, real read/post/consume1 and positive controlled source scan for both503 modes; report source write success separately from attempted emission.",
+    "downstreamAbsence": [
+      "Actual raw application events along every supported route",
+      "Original active encoder output in quarantine",
+      "Actual backend callback response bytes if produced",
+      "Actual returned service diagnostic/outcome representation and original Throwable message/cause/suppressed surfaces",
+      "Existing actual database document observation when already performed, without extra SQL"
+    ],
+    "non200Limit": "GuidedRunnerClient D-adjacent lines166,175-178,349-355 creates accepted=false subscriber on503, cancels subscription and completes exceptionally. It may not receive content at all. Do not change that to read/capture error body. Relay production is allowed ingress and does not establish backend receipt, discard timing, or redaction. Closed actual UNKNOWN/error/log surfaces remain scan targets.",
+    "zeroReadControls": "Explicit no-release lifecycle/registration observations; never released-value no-leak PASS.",
+    "syntheticControl": "Independent literal/log-delivery positives are source/control tagged and excluded from product-negative target scans for their own control value. Never log actual released canary merely to force registration.",
+    "registration": "Each applicable captured sink must have positive real registration and production count. Unproduced branch is NONAPPLICABLE; unsupported/missing required production/drop is FAIL, never unavailable treated as zero hits."
+  },
+  "alwaysFinallyContract": [
+    "Initialize bounded case ledger before setup; acquire capture gate; record partial-install restoration actions immediately. Preflight actual backend/routes/descriptors and quarantine all supported original outputs before release. Prove nonsensitive real root/application/descendant TRACE registration and delivery.",
+    "Record actual release copy once in CountedProvider.read; use case/scenario association across existing owned threads, not ThreadLocal alone. Preserve original buffers and counters so current zeroization assertions still observe original disposal. Capture actual sink fields synchronously before mutation/disposal.",
+    "Retain original primary identity in memory and preserve existing cleanup dependency/order and interruption handling. Drain caller, peer, stop and confirmation work on every exit, including setup/assertion/PG/cleanup errors; do not shorten existing joins or replace real cleanup with snapshots.",
+    "With quarantine active, scan every ledger release/encoding against every applicable target, and actual primary/cause/suppressed/peer/cleanup/status-error surfaces. Scan bounded sequences across write-chunk boundaries, not each chunk in isolation. Aggregate independent errors so one scanner failure does not stop the other scans; unreadable graph/field/node-limit => sticky FAIL.",
+    "Prove required post markers, emitted counts, zero drops and no route drift; restore exact nullable levels/additivity, remove only added collectors, restore original saved streams without restarting. Inspect restore-time emissions and late errors, rescan new quarantine bytes before wipe. A bounded repeat/fence failure => FAIL.",
+    "Wipe all writable release/variant/event/output/body buffers and release references only after scan and owned-work completion. Safe cleanup/scan/restore diagnostics may be attached transiently to original when appropriate; unsafe originals never escape to JUnit. Export only fixed labels, counts and booleans. Class/listener shutdown errors use same guard; if logging context reset or unquarantined late producer cannot be excluded, fail prerequisite and do not claim protected close coverage."
+  ],
+  "boundedMemoryAndDropPolicy": {
+    "suggestedExplicitCeilings": "Class-local constants: 4096 captured raw events, 4MiB original encoded bytes, 1MiB per actual HTTP representation, 4096 UTF16 chars per released value (production accepted bound), 64 Throwable nodes/4096 stack frames. Aggregate case memory additionally capped at32MiB. These are test observation bounds only, not transport/data limits.",
+    "overflow": "StickyAtomicBoolean plus counts at every admission; retain bounded prefix and mark drop for omitted bytes/events/fields/variants/graph nodes. Continue original transport and original cleanup, quarantine excess output without forwarding. Never silently truncate, mutate transport cancellation, or throw sensitive appender callback failures.",
+    "rawEventFields": "Snapshot actual raw/formatted message, String/primitive/known-safe typed arguments, MDC, marker/key-value values, ThrowableProxy causes/suppressed/stack text within bounds. Unknown object argument/marker recursion/throwing accessor is unobserved => FAIL; never invoke arbitrary toString or assume class-name-only scan sufficient.",
+    "scanCompleteness": "Ledger bytes come from actual producer, target chunks joined/stream-scanned with overlap; positive per-boundary counts, filter/status errors and drift are independently checked. A successful marker cannot cancel sticky failure."
+  },
+  "exactSafeJUnitFailureDisposition": {
+    "scope": "Test-class-local outer guard around all owned test and test-template invocations plus owned setup/cleanup/listener shutdown failure exits. Run the original inner assertions and cleanup unchanged; do not replace caught expected product errors. Must catch before JUnit/Gradle serializes failure.",
+    "transientOriginal": "Hold original Throwable identity in case ledger while original expected product outcome/code/status, Scenario.failure/peerFailure and cleanup errors remain unchanged. Scan its graph without logging/printing. Expected actual errors are evidence and do not alone become a new JUnit failure; detected leak or inability to inspect does.",
+    "exportedFailure": "On any unexpected primary, leak, unavailable scan, drop, unsupported route, or restore failure, emit a fresh class-local closed AssertionError: message from fixed enum code and numeric counts only; cause=null; no original suppressed exceptions; no AssertJ/opentest4j expected/actual wrappers; no content-derived class names/URLs/messages/stack labels. Its stack is only safe guard/source frames. Closed enum failure codes preserve failure category; actual product error identity/status remain transient. JUnit outcome remains FAILED, never aborted/skipped or success.",
+    "safeSecondary": "Aggregate scan/cleanup/restore failures as closed numeric ledger fields. If attaching secondary diagnostic to exported failure, create only fixed-message fresh diagnostics; never attach original or any object retaining original. Prefer one closed aggregate failure with no suppressed at all.",
+    "noUnsafeAttachment": "Even when only a nested suppressed/cause contains canary, export the closed failure. For opaque original/accessor/toString unable to prove safe, use same disposition. Never AssertionError(original), initCause(original), addSuppressed(original), getMessage in exported text, original.toString/printStackTrace, or assertThat(original) escaping outer guard.",
+    "memoryLifetime": "Original remains original in memory through outcome verification, cleanup, scans and disposition. Then release ledger/map references without mutating original messages/causes/stack. No exported identity claim. No persistent original failure artifact. Writable captured copies wiped; JVM String/Throwable/encoder-owned immutable allocations cannot be guaranteed physically erased.",
+    "coverageLimit": "A guard on method bodies alone does not protect Spring extension failure or afterTestClass close. Wrap owned listener close/error propagation in this same file; early class/bootstrap errors before any actual release are outside released-value scope. An unguarded exit after release is BLOCKING. Catastrophic JVM/OOM or malicious opaque accessor cannot be promised artifact-safe by this source patch."
+  },
+  "scannerEvidence": {
+    "immutablePublicationSha256": "e6d54ffee5bce7c5f18f92e198e455eaba321a95cb9d42adf354ce60fc049547",
+    "algorithmLines": "6317-6386",
+    "independentLiteralLines": "4091-4118",
+    "observations": "Existing vectors cover raw UTF8/UTF16/Base64/hex/Unicode/percent/component/form/JSON. Existing scanner allocates mutable variants but does not wipe them; adapted local helper must use finally wipe and fixed closed sink labels. Additional independent literal UTF16/Base64 positives in proposal are necessary and scanner-only. No Publication runtime fixture/control coverage transferred.",
+    "limits": "Finite supported encoding equality detection; no blanket proof against partial/disjoint encodings, encryption, compression, arbitrary representations or opaque arguments."
+  },
+  "privacyAndCreditLimits": [
+    "No actual release/body/credential/session/URL/content hash in this report or later exports. Raw event/output/body/original Throwable only transient.",
+    "No all-sinks/native/Core/Vault/browser/SSE/cache/profile/journal/metrics/worker-child coverage; source-only503 controlled fixture is not native worker redaction.",
+    "No file absence/disposed scratch/produced name/empty scan replaces actual negative target production.",
+    "Parent current40 ACTUALPASS/0errskipdrift and all19false are user context only, not reverified here and not upgraded. P6 close/failure/all-sinks coverage remains OPEN; Node22/image/external prerequisites unchanged.",
+    "This is a blocking source-design disposition with narrowly actionable corrections, not an implementation approval, runtime PASS or author self-review."
+  ],
+  "execution": {
+    "runtime": "UNRUN",
+    "app": "UNRUN",
+    "SQL": "UNRUN",
+    "tests": "UNRUN",
+    "build": "UNRUN",
+    "Gradle": "UNRUN",
+    "Docker": "UNRUN",
+    "browser": "UNRUN",
+    "compiler": "UNRUN",
+    "javap": "READONLY_COMPLETED",
+    "localMetadataAndFrozenSourceReview": "READONLY_COMPLETED",
+    "sourceChanges": false,
+    "metadataLifecycleChanges": false,
+    "otherReportsWritten": false,
+    "modelsOrSpawns": false,
+    "contacts": false,
+    "deploy": false,
+    "soleWrittenArtifact": "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-d-fault-sink-architecture-resolution.json"
+  }
+}

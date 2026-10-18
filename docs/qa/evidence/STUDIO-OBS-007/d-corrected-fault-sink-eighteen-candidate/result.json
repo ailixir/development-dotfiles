@@ -1,0 +1,212 @@
+{
+  "schema": "d-corrected-fault-sink-eighteen-candidate/1",
+  "status": "SOURCE_FROZEN_UNRUN",
+  "soleSourcePath": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+  "beforeSha256": "f3862d94539e8a94f31653f0ffeeda493f6c181310d509954d65bb289648720c",
+  "afterSha256": "46ca7dae139ef53a794193aa73295fa3968a83b2b527ad9c84e408a49f1f737f",
+  "bindings": {
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-corrected-fault-sink-eighteen-intent.txt": "6d65a12e8d9c2a436c27c46fa8429afebec81675c587be54ef5b90672ee17c38",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-corrected-fault-sink-eighteen-context.txt": "03310d6bd8e841abc2ebe2839c9813afa5b531b960ae715f2dbe75c2412af8c5",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-fault-sink-passive-return-amendment-intent.txt": "a25e583cfbe95273e7b2ca2c49e886b1eada4d342862ec8bbe8cf92fc9d344d7",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-fault-sink-passive-return-amendment-context.txt": "0d30454c9c6d34371b1ff03f9bfe807a7aeeafa762154c3b7dfbdccbb95a6c50",
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-d-fault-sink-architecture-resolution.json": "f884e47d44c60e409d896588fd142d78d8ae887a3280ffbc0d508fd9e6aa8d2d"
+  },
+  "historicalOriginalBlockedProposalUnchanged": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/d-fault-sink-execution-design.json",
+    "sha256": "f362d0af3020d4d5558441dd743a9e3931400cad6fffe13b8edd052ef950b87d",
+    "credit": "BLOCKED_AS_WRITTEN_HISTORY"
+  },
+  "bodyPreservation": {
+    "artifact": "original-body-preservation.json",
+    "originalCases": 17,
+    "originalJavaMethods": 9,
+    "unmodifiedMethodBodyCount": 7,
+    "insertionChangedMethodBodyCount": 2,
+    "allNineReconstructedExactly": true,
+    "newSyntheticMethod": "syntheticFaultSinkScannerDetectsIndependentEncodedControls",
+    "expectedFutureCaseCount": 18
+  },
+  "passiveSites": [
+    {
+      "line": 1414,
+      "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", context);",
+      "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+      "newOriginalServiceOrSqlCalls": 0
+    },
+    {
+      "line": 1448,
+      "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", admission);",
+      "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+      "newOriginalServiceOrSqlCalls": 0
+    },
+    {
+      "line": 1526,
+      "statement": "FaultCapture.observe(\"ACTUAL_DB_READ_BYTES\", rows);",
+      "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+      "newOriginalServiceOrSqlCalls": 0
+    },
+    {
+      "line": 1587,
+      "statement": "FaultCapture.observe(\"ACTUAL_DB_READ_BYTES\", persisted);",
+      "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+      "newOriginalServiceOrSqlCalls": 0
+    },
+    {
+      "line": 1709,
+      "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", context);",
+      "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+      "newOriginalServiceOrSqlCalls": 0
+    },
+    {
+      "line": 1743,
+      "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", admission);",
+      "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+      "newOriginalServiceOrSqlCalls": 0
+    },
+    {
+      "line": 1858,
+      "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", prior);",
+      "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+      "newOriginalServiceOrSqlCalls": 0
+    },
+    {
+      "line": 3071,
+      "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", context);",
+      "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+      "newOriginalServiceOrSqlCalls": 0
+    },
+    {
+      "line": 3105,
+      "statement": "FaultCapture.observe(\"DIRECT_OBJECT_REPRESENTATION\", admission);",
+      "role": "PASSIVE_ALREADY_RETURNED_TYPED_VALUE",
+      "newOriginalServiceOrSqlCalls": 0
+    }
+  ],
+  "scopeMatrix": [
+    {
+      "row": "COMPLETE_200_NO_CALLBACK",
+      "originalCallsAssertionsStatusDeadlines": "PRESERVED",
+      "actualRuntime": "UNRUN",
+      "controlled503SourceOnly": false
+    },
+    {
+      "row": "COMPLETE_200_OWNER_OK",
+      "originalCallsAssertionsStatusDeadlines": "PRESERVED",
+      "actualRuntime": "UNRUN",
+      "controlled503SourceOnly": false
+    },
+    {
+      "row": "COMPLETE_200_OWNER_FAILED",
+      "originalCallsAssertionsStatusDeadlines": "PRESERVED",
+      "actualRuntime": "UNRUN",
+      "controlled503SourceOnly": false
+    },
+    {
+      "row": "COMPLETE_503_NO_CALLBACK",
+      "originalCallsAssertionsStatusDeadlines": "PRESERVED",
+      "actualRuntime": "UNRUN",
+      "controlled503SourceOnly": true
+    },
+    {
+      "row": "COMPLETE_503_OWNER_OK",
+      "originalCallsAssertionsStatusDeadlines": "PRESERVED",
+      "actualRuntime": "UNRUN",
+      "controlled503SourceOnly": true
+    },
+    {
+      "row": "PARTIAL_200_NO_EOF",
+      "originalCallsAssertionsStatusDeadlines": "PRESERVED",
+      "actualRuntime": "UNRUN",
+      "controlled503SourceOnly": false
+    },
+    {
+      "row": "PARTIAL_503_NO_EOF",
+      "originalCallsAssertionsStatusDeadlines": "PRESERVED",
+      "actualRuntime": "UNRUN",
+      "controlled503SourceOnly": false
+    },
+    {
+      "row": "CALLER_EXPIRY_AFTER_CONSUME",
+      "originalCallsAssertionsStatusDeadlines": "PRESERVED",
+      "actualRuntime": "UNRUN",
+      "controlled503SourceOnly": false
+    },
+    {
+      "row": "INTERRUPT_AFTER_HEADERS",
+      "originalCallsAssertionsStatusDeadlines": "PRESERVED",
+      "actualRuntime": "UNRUN",
+      "controlled503SourceOnly": false
+    }
+  ],
+  "otherPreservedCases": [
+    "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit",
+    "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased",
+    "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+    "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent",
+    "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose",
+    "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose",
+    "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation",
+    "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose"
+  ],
+  "findings": {
+    "D-ARCH-01": "Original exact started nonJansi ConsoleAppender and original pinned composite encoder, target stream identity, empty header/footer, public stream swap only. Original encoder/filter/start/target/immediateFlush retained. Restore after actual resource closure only.",
+    "D-ARCH-02": "Actual loaded four dependency jar digests checked by future source; every attached/additive logger inventory, original filters/turbo/status listeners, attachment multiplicity, raw/encoded nonsensitive probes, route drift/drop/status errors sticky. Async/custom/nonadditive/unquarantinable routes fail prerequisite before provider release.",
+    "D-ARCH-03": "Capture actual original callback response.body and original serialized relay respond bytes before their original parse/write/wipe. Intentional complete503 problem uses already-received released value after original authenticated owner callback and ledger equality. Attempted write and actual successful write counters distinct.",
+    "D-ARCH-04": "Original unexpected Throwable remains transient through original inner assertions/cleanup and scans. Every owned invocation/lifecycle exit emits new plain fixed-code numeric AssertionError with null cause and no suppressed originals. Expected caught product errors remain expected evidence.",
+    "D-ARCH-05": "Class quarantine survives success/failure and remains until real callers/peer thread exit/sender+confirmation/context/schedulers close. Independent scans continue after drain/route observation failure. Actual provider char copy retained once before existing wipe. Writable observation arrays wiped and scenario/map references released only after closure and restoration scans."
+  },
+  "producerAndSinkRoles": {
+    "actualProviderCopy": "ACTUAL_AUTHORIZED_SOURCE_COPY; future real read count unchanged; no extra provider call",
+    "authorizedDispatchWire": "ALLOWED_SOURCE; existing receiver original scope/read/consume/equality assertions retained",
+    "controlled503Problem": "INTENTIONAL_ALLOWED_SOURCE; positive scan expected only two complete503 modes; write attempt/success distinct; no backend receive/redaction/privacy-negative claim",
+    "rawLogFields": "ACTUAL_APPLICATION_LOGGING_FIELDS; supplementary capture on supported inventory routes; raw arguments/MDC/markers/keyvalues/Throwable/stack inspected with typed bounds",
+    "encodedBytes": "ORIGINAL_ACTIVE_ENCODER_OUTPUT; quarantine joins actual writes across chunks; no second encoder",
+    "callbackResponse": "ACTUAL_EXISTING_HTTP_RESPONSE_BODY; captured after original send before assert/parse",
+    "directReturns": "DIRECT_OBJECT_REPRESENTATION; typed scalar field traversal of already-returned known JsonNode; not HTTP or new serialization",
+    "existingDbReads": "ACTUAL_DB_READ_BYTES; existing query returned String/typed-row scalar representations, not new query or physical database protocol proof",
+    "otherDirectOrDbReturns": "UNOBSERVED where not already retained/observed; no zero-absence credit",
+    "directServiceHttp": "NONAPPLICABLE; no service proxy, servlet tee or invented HTTP body",
+    "errorFields": "Actual Scenario.failure/peerFailure/source-owner error and original escaping Throwable graph, including cause/suppressed/SQL next exception; transient only",
+    "zeroReadControls": "NO_RELEASE lifecycle controls, never released-value privacy credit",
+    "synthetic": "Independent nonASCII literals for UTF8/UTF16LE/BE/Base64/JSON/Unicode upper+lower/hex/percent/component/form and near miss; support only, not actual producer credit"
+  },
+  "bounds": {
+    "rawEvents": 4096,
+    "loggerIdentities": 512,
+    "httpOrFieldBytes": 1048576,
+    "quarantineCapacityPerOriginalConsole": 4194304,
+    "observationPayloadReservationBytes": 33554432,
+    "variantReservationBytes": 524288,
+    "actualReleaseUtf16Units": 4096,
+    "throwableNodes": 64,
+    "stackFrames": 4096,
+    "rawArgumentsAndKeyValues": 64,
+    "policy": "Any unavailable/opaque/drop/overflow/drift/missing marker/status error is sticky failed observation. No silent truncation, arbitrary object stringification, or empty-sink PASS. Java immutable Strings, encoder-owned internals and JVM overhead are not claimed physically erased or heap-quota proved."
+  },
+  "lateOwnership": "Real peer thread termination and original sender/confirmation completion are required in addition to counters. Quarantine retained on incomplete ownership/resource failure; no timeout-as-drain or unsafe output restoration.",
+  "classLifecycle": "Original cache-owner listener order3500, original TestContext identity checks and complete actual close body kept. Framework context eviction/scheduler drain still precedes real PG teardown. Owned listener failures guarded without raw Throwable export.",
+  "execution": {
+    "compiler": "UNRUN",
+    "tests": "UNRUN",
+    "Gradle": "UNRUN",
+    "formatter": "UNRUN",
+    "runtime": "UNRUN",
+    "SQL": "UNRUN",
+    "Node": "UNRUN",
+    "native": "UNRUN",
+    "browser": "UNRUN",
+    "distOrClasspathMutation": false,
+    "otherSourceEdits": false,
+    "modelsSpawned": false
+  },
+  "nextCoordinatorSelectors": [
+    "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT"
+  ],
+  "limits": [
+    "Narrow fixture-provider/service/PG/authenticated controlled relay fault scope only.",
+    "No Core/Vault external/native browser/worker effects/SSE/cache/profile/metrics/journal/all-P6/full19/whole-wave QA credit.",
+    "Future isolated execution must establish actual loaded backend inventory, counts, no drops/drift and all18 cases; source-only receipt is not runtime PASS.",
+    "Finite complete equality encodings only; no arbitrary transform/encryption/compression/partial-value absence proof.",
+    "Actual allocator/JVM immutable/opaque catastrophic failure guarantees remain outside bounded writable observer copies."
+  ]
+}

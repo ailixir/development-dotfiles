@@ -1,0 +1,86 @@
+{
+  "scope": "READ_ONLY_BOUNDED_ACTUAL_C5_FOCUSED_FAILURE_DIAGNOSIS",
+  "sourceBindings": {
+    "publicationSha256": "35cc2452e38b0d28a77e7e99f5c45d8cdb67475dd71783fbb7fb1052dc1b983c",
+    "archive": "docs/qa/evidence/STUDIO-OBS-007/resume-c5-required-first-ninth-current",
+    "archivedSourceZipSha256": "b10458c7d3b19b24d056a1be3a2f3002b3ebc945da481ea907fc5616197075a8",
+    "sourceMatchesArchivedBytes": true,
+    "safeSessionMetadataSha256": "bcb60db7984db8b2eed3979461f473563b47c3ac3b87ee8c8ec6f74c3600b195"
+  },
+  "gate": {
+    "tests": 2,
+    "passes": 1,
+    "failures": 1,
+    "errors": 0,
+    "skips": 0,
+    "drift": 0,
+    "ninthFailure": "awaitFinalizing sees FAILED before finalize/publication/replay/sink assertions",
+    "lineBindings": [
+      "GuidedPublicationReplayIT.awaitFinalizing:7867",
+      "GuidedPublicationReplayIT.secretNinth:3496"
+    ]
+  },
+  "provedActualFacts": {
+    "state": "FAILED",
+    "errorCode": "OTHER",
+    "bootstrapPhase": "READY",
+    "materializationPresent": true,
+    "counters": {
+      "actions": 0,
+      "observations": 0,
+      "modelProposals": 1,
+      "modelInputTokens": 12598,
+      "modelOutputTokens": 4000,
+      "sanitizedEvidenceBytes": 0
+    },
+    "fixtureModelHttpCalls": 1,
+    "fixturePhysicalProviderReads": 0,
+    "fixtureProviderFailures": 0,
+    "fixtureModelKinds": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 0,
+      "VERIFY_STEP": 0
+    },
+    "sourcePlanAppliedCount": 1,
+    "nextActionAttempts": 0,
+    "actions": 0,
+    "currentContextJournalRecords": 1,
+    "currentAssignmentJournalRecords": 1,
+    "guidedLogBytes": 0,
+    "ownedCleanupConfirmed": true,
+    "privateValueFileDeleted": true,
+    "profileSample": {
+      "files": 140,
+      "bytes": 8406157,
+      "hits": 0,
+      "links": 0,
+      "failed": true
+    },
+    "postProfilePublicEncodedConsoleEvents": 4,
+    "postProfilePublicTraceEvents": 0
+  },
+  "causeClassification": {
+    "learningTerminalCause": "UNRETAINED_NOT_PROVEN",
+    "profileScanFailureCause": "UNRETAINED_NOT_PROVEN",
+    "relation": "FAILED/READY plus initial context journal confirms original startup/context reached bootstrap, then terminalized before first counted observation/NEXT_ACTION. No closed actual lifecycle reason/callback status retained. Profile scan occurs during close; failedtrue is incomplete privacy evidence, not proof it caused earlier learning failure.",
+    "codeOther": "safeFailureMetadata errorCode whitelist returns OTHER for absent/unlisted values; assignmentLifecycle can set FAILED without putting progress.errorCode. OTHER cannot be translated to guessed CONTEXT_LOST/LEASE_LOST.",
+    "logs": "guided.log empty. Current journal records are data-free digests and cannot expose reason. Public XML has no current session mention/terminal reason; no raw private TRACE body exported or reconstructed.",
+    "restoration": "Actual values-file absence and successful owned cleanup observed. Post-profile four genuine encoded console events with zero TRACE are consistent with restored stream/levels; exact in-memory logger references were not independently inspected.",
+    "incidentalFinalization": "Earlier PUBLICATION_CONFLICT diagnostic not assigned to ninth; ninth fails before finalize."
+  },
+  "smallestNextProposal": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "productionFix": "NONE_SUPPORTED_BY_CURRENT_FACTS",
+    "existingBoundary": "Existing observedReportCapture filter and original /internal/v2/studio/guided-sessions/{id}/lifecycle controller (GuidedInternalController.lifecycle); retain original chain/status/identity/error/result unchanged.",
+    "safeWitness": "For selected active C5 owned session only, transiently parse actual lifecycle request after original processing; record kind enum assignment/runtime, reason closed enum REVOKED/LEASE_LOST/EXPIRED/CANCELLED/CONTEXT_LOST/UNKNOWN_OUTCOME and actual HTTPstatus/numeric phase/count. Correlate actual context/session privately, export no IDs/request/headers/token/body/Throwable. This distinguishes actual runtime stop/assignment stop without adding SDK hooks, observers, extra calls or deadlines.",
+    "profileWitness": "Existing profile catch retains only failedtrue. Add only closed guard-stage/reason enum ROOT/VALUES/SYMLINK/LINKBOUND/BOUND/PATH/FD/CHANGED/OTHER from existing actual thrown code, not raw Error text/value/path. Preserve all scanner rejection/bounds/close forwarding. Separate file/sample completeness from session lifecycle reason.",
+    "sourceReleaseRequired": true,
+    "futureSelector": "Original focused first+ninth2 with fixed prior source prerequisite; keep all25 assertions/clock/budgets unchanged. No repeat broader gate until actual reason known."
+  },
+  "prohibitedConclusions": [
+    "Zero hits with failedtrue is not profile absence PASS.",
+    "No attribution to TRACE latency, claim renewal timeout, browser policy or changed file without actual retained reason.",
+    "No budget/time/guard waiver or speculative product repair."
+  ],
+  "actions": "Only this report written; no source edit/probe/runtime/SQL/Node/Gradle/browser/model operation. Mandatory C4/C5/C6/all19 remain open."
+}

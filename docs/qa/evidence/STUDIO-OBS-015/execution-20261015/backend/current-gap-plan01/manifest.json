@@ -1,0 +1,56 @@
+{
+  "artifact": "STUDIO-OBS-015 independent Quinn current-gap execution plan01",
+  "capturedAt": "2026-10-15T19:48:51.813842+00:00",
+  "classification": "READ_ONLY_CURRENT_GAP_PLANNING_NOT_FORMAL_STORY_QA",
+  "owner": "Quinn; root Orion",
+  "files": {
+    "next-batches.json": {
+      "sha256": "6e1d20f17c9802a6f747ded7bc521db4b047a2a248a84c7fabd9baf32adadb54",
+      "bytes": 48944
+    },
+    "requirement-map.json": {
+      "sha256": "cf63626da52b1a7d3c48aeaf913f6088876a87873ba5ac540f7be6cc5bdce003",
+      "bytes": 317243
+    },
+    "review.md": {
+      "sha256": "f362d2205354875bdba926cd0356fc8a6be7aeb34c858532218654837c74eedc",
+      "bytes": 9973
+    },
+    "source-inventory.json": {
+      "sha256": "dcc55bacffc13baf9e69e45ac19d38ffea7fca3a5c7a9c2f7ece73c16dfd0496",
+      "bytes": 53373
+    }
+  },
+  "inputInventory": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/source-inventory.json",
+    "sha256": "dcc55bacffc13baf9e69e45ac19d38ffea7fca3a5c7a9c2f7ece73c16dfd0496"
+  },
+  "scopeRetained": {
+    "acceptanceSubjects": 86,
+    "IPCfacets": 24,
+    "SQLmethods": 55,
+    "originalJOINinvocations": 80,
+    "originalParameterizedLabels": 35,
+    "privateAuthorityRoutes": 15,
+    "allOriginalRequiredGates": true,
+    "goal": "complete015 then full008 with all originally planned QA green"
+  },
+  "writesOnly": [
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/review.md",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/next-batches.json",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/requirement-map.json",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/source-inventory.json",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-gap-plan01/manifest.json"
+  ],
+  "movingProducerSourceNotInspectedAsFrozen": true,
+  "sourceDistHold": true,
+  "sourceReleaseGranted": false,
+  "testsExecuted": 0,
+  "buildsCompilersGradleNodeDBServicesNativeDecoderRuntimeProcesses": 0,
+  "subagents": 0,
+  "externalContacts": 0,
+  "original85": "OPEN_UNAMENDED_NO_USER_ANSWER",
+  "formalQAVerdict": null,
+  "lifecycleTransition": null,
+  "goalCompletion": false
+}

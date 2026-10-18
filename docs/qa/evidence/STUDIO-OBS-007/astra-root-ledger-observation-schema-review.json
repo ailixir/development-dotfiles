@@ -1,0 +1,46 @@
+{
+  "schemas": [
+    {
+      "schema": "v3/ledger.schema.json",
+      "expandedSha256": "2f365ba04a6254df0fb6c3930b01bdcecea5a494415f25cae4653e1aa870d6cb",
+      "rootKeys": [
+        "$schema",
+        "title",
+        "type",
+        "additionalProperties",
+        "properties",
+        "required"
+      ],
+      "properties": 20,
+      "allRequired": true
+    },
+    {
+      "schema": "v3/observation.schema.json",
+      "expandedSha256": "9be57abe1679bafcf7dbbcf3452a515dab7032c999ad630a241c7cbb856ac2d2",
+      "rootKeys": [
+        "$schema",
+        "title",
+        "type",
+        "additionalProperties",
+        "properties",
+        "required"
+      ],
+      "properties": 9,
+      "allRequired": true,
+      "nodesArrayKeys": [
+        "type",
+        "items",
+        "minItems",
+        "maxItems"
+      ],
+      "nodesItemKeys": [
+        "type",
+        "additionalProperties",
+        "properties",
+        "required"
+      ],
+      "nodesItemsObject": true
+    }
+  ],
+  "method": "Independent fullref/arraypointer expansion + sortedUTF8canonical"
+}

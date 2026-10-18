@@ -1,0 +1,21 @@
+--- GuidedPublicationReplayIT.before.java
++++ GuidedPublicationReplayIT.after.java
+@@ -239,14 +239,14 @@
+             .put("originalParent", child.originalParent());
+         var chain = descendant.putArray("ancestry"); child.ancestry().forEach(chain::add);
+       }
+-      String line = GuidedContracts.canonical(row) + "\n";
+-      if (ownedProcessEvents >= 4096 || ownedProcessEventBytes + line.length() > 2096000) {
++      byte[] line = (GuidedContracts.canonical(row) + "\n").getBytes(StandardCharsets.UTF_8);
++      if (ownedProcessEvents >= 4096 || ownedProcessEventBytes + line.length > 2096000) {
+         throw new IllegalStateException("Owned process metadata bound exceeded");
+       }
+       Path file = ownedFixtureTemp.resolve("owned-worker-generations.jsonl");
+       if (!Files.exists(file)) Files.createFile(file, java.nio.file.attribute.PosixFilePermissions.asFileAttribute(java.nio.file.attribute.PosixFilePermissions.fromString("rw-------")));
+-      Files.writeString(file, line, StandardCharsets.UTF_8, java.nio.file.StandardOpenOption.APPEND);
+-      ownedProcessEvents++; ownedProcessEventBytes += line.getBytes(StandardCharsets.UTF_8).length;
++      Files.write(file, line, java.nio.file.StandardOpenOption.APPEND);
++      ownedProcessEvents++; ownedProcessEventBytes += line.length;
+     } catch (Exception failure) { OWNED_FIXTURE_FAILURES.add(new IllegalStateException("Owned process metadata unavailable", failure)); }
+   }
+ 

@@ -1,0 +1,33 @@
+{
+  "artifact": "ARCH015-02 immutable architecture ruling manifest",
+  "createdAt": "2026-10-15T04:52:39.855275+00:00",
+  "status": "SOURCE_RULING_COMPLETE_PENDING_INDEPENDENT_QA_AND_ACTUAL_SOURCE_INTEGRATION",
+  "files": {
+    "check-design.cjs": "9fceb9da44164f863439bb9483e3a5123d13ed84746a463e4bfe64ea50af1936",
+    "completion-receipt.json": "0ac2002bd3709823f5d9b62dccd319287601957c6cba3e3555c7463514d892f7",
+    "design-check-result.json": "3d1c7aba181988e30d6fb50e7ea8b8be4f2130e74f63bedfaa2107eef51ac9a1",
+    "fixtures.json": "2d28a7c9b8092a87968e02facb58607eb3514304d0b04d65079131d9303bdf25",
+    "generate-design.py": "21c094497db993134ef4be63c47cf29ed8194fe8e608eb25c681e1dbe4b3b546",
+    "implementation-mapping.json": "2545d13a894285fab7f6cf4ef2a01573c8a7c8a1c2d016f4fe5e36876bf26bf5",
+    "ruling.md": "96b15fbe740a4d89ce4db418db4880e4c374b08d91fce9fa9ce84ae4aa3a87da",
+    "test-delta.json": "86ceeb7e82376e605a4f65f2357a03f583a0a0c001c24b4dcc824cc42eb28485"
+  },
+  "preservedManifests": {
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/manifest.json": {
+      "sha256": "54c5551d6d3316b3cc384fc4ebbf6d78476840130625476f2af50e193efc3818",
+      "boundFileCount": 22,
+      "mismatches": []
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/data/manifest.json": {
+      "sha256": "63b9ec46a4c800f1a08c267f929049fab55d458e9910128eae2b6ce7aa3640d0",
+      "boundFileCount": 32,
+      "mismatches": []
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/architecture-correction-01/manifest.json": {
+      "sha256": "6f74157cf539d89714a40bce147442ffae7f45d22c2d4c059d2183d522577f22",
+      "boundFileCount": 9,
+      "mismatches": []
+    }
+  },
+  "reviewInstruction": "Read ruling and source mapping; run check-design.cjs --verify for read-only isolated synthetic projection checks. No full basis/live authentication/native proof is claimed. Re-review actual Java/TS/PG source integration before acceptance."
+}

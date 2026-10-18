@@ -1,0 +1,1301 @@
+{
+  "artifact": "Dex-test-only-profile-safety-ownership-implementation",
+  "createdUtc": "2026-10-15T01:39:17.674686+00:00",
+  "verdict": "FROZEN_59_PURE_PASS_TYPE_AND_SCOPED_LINT_ZERO_INDEPENDENT_FINAL_BYTE_REVIEW_REQUIRED",
+  "notStoryGate": true,
+  "doneAllowed": false,
+  "story015": "UNSTARTED",
+  "nativeExecuted": false,
+  "buildExecuted": false,
+  "sourceWindow": "Exact3paths finalsourcefrozen, purevalidation complete; released to root and reviewers after receipt. No further edits without explicitrootrelease and priorreviewinvalidation.",
+  "authority": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/profile-safety-fixture-ruling.md",
+      "bytes": 19248,
+      "sha256": "9deafbd7bf5a60e2730778043a9954e82450864af91c919b4d8d8bbcc6b2933d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa013/profile-safety-fixture-plan-review.json",
+      "bytes": 13261,
+      "sha256": "45271d2463bd05ae7cfe19394d83d7d68d4eeb66e0ddbee5147f30fa9651d48a"
+    }
+  ],
+  "sourceCheckpoint": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/source-checkpoint.json",
+    "bytes": 1420,
+    "sha256": "e3e6ac4e0853fcaf97d14a8ca20c6fbe6ba1500b8d8699cbf96b5040539344de"
+  },
+  "sourceFacts": {
+    "createdUtc": "2026-10-15T01:38:03.445130+00:00",
+    "sources": [
+      {
+        "path": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+        "sha256": "941a658043fcc687d30311b8fff34d4ffd1bc02ca2b517cac21dc8fde6d855f7"
+      },
+      {
+        "path": "studio-runner/test/helpers/profileSafetyFixture.ts",
+        "sha256": "00c880785e1dc134110330baa6e74cc2941a0d81a2e4354cb34320db7c670ce1"
+      },
+      {
+        "path": "studio-runner/test/profileSafetyFixture.test.ts",
+        "sha256": "82ba3f6252f484be4abfa857811c66eeb8fd4a894862aa20b2a876e7166a5d42"
+      }
+    ],
+    "existingFrozenInputsCompared": 1581,
+    "changedExistingInputs": [
+      "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts"
+    ],
+    "newApprovedInputs": [
+      "studio-runner/test/helpers/profileSafetyFixture.ts",
+      "studio-runner/test/profileSafetyFixture.test.ts"
+    ],
+    "otherFrozenInputsUnchanged": true,
+    "distFilesCompared": 238,
+    "distUnchanged": true,
+    "otherNineOriginalProfileCasesByteIdentical": true,
+    "backendFinalPlanningIT": {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "sha256": "96a1e2e2bafb1b72fc0fb117e7307ddb902ab72baff4b491ec7718106ef9834b"
+    },
+    "productionInputsUnchanged": true,
+    "readinessAndBlankHelpersUnchanged": true,
+    "nativeExecuted": false,
+    "buildExecuted": false,
+    "sourceFrozenForIndependentReview": true
+  },
+  "diff": {
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/implementation.patch",
+    "bytes": 42058,
+    "sha256": "2b01719ff0f6ed0ab797f26f9a8742cf4441b52b4ae93a53f90261bed394404c"
+  },
+  "frozenBridge": {
+    "before": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/before.json",
+      "bytes": 319676,
+      "sha256": "185c12e2301698ff7bbc2b8e0e00d5952593f6855b6711f72f9cc16ffe671e23"
+    },
+    "after": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/after.json",
+      "bytes": 320001,
+      "sha256": "8114c7e1974ab5477085b7ddf82fc823344d2d8f5b9a56c3a863d2d371215df1"
+    },
+    "originalFixture": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/before-browser-profile-safety.test.ts.txt",
+      "bytes": 7444,
+      "sha256": "d5b17284368658941d516c974ea3f418b3f33b120f6611cdf7142441fe453457"
+    },
+    "sourceScope": "1581 priorfrozen originalinputs rehashed; only originalfailedfixture differs, plus2approvednewtestpaths. Other9originalcasebodies and allnon-importfilebytes outsidefailedcase independently compared identical.238runnerdistfiles identical. FinalPlanningIT96a1e2... identical.",
+    "runtimeDistDigestRetained": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2"
+  },
+  "implementation": [
+    "ActualChromiumlaunch/optionsunchanged; helper immediatelyownsactualcontext beforeawaitedobservations/mutations, installs savedrealclosewrapper and publiceventlisteners. Everypostacquisitionsetuperror is retained and SAMEcontext returned to production. Incompleteattackalwaysred regardlessGuidedBrowser orGuidedLaunchFailure result; returnedcapability retained beforeassertions.",
+    "Actualsharedattack helper sequences originalDefaultidentitycapture ->live renameoutsideconfinedleaf ->onlythenfixedcanarywrite ->symlink ->lstat/readlink/movedidentitychecks. Connected/nonclosing checks beforeinitialsnapshot, immediatelybeforeattack andafterattack. No prelaunch/closedcontextsubstitute,sleep,retry,SIGSTOP orfakeguard.",
+    "OriginalGuidedLaunchFailure assertion, CLEANUP_CAPABILITY branch, CONTEXT_LOST message and no checks-guided leftoverassertion retained; movedoutsideidentity and syntheticcanarybytes/inode unchanged assertions added beforefixture rootremoval.",
+    "OwnedpublicBrowser.newBrowserCDPSession with only SystemInfo.getProcessInfo for initialandpreclose snapshots. Allrowspositive-safeID/nonemptytype;browserentryrequired; fixedtypeenumonly; totalunion<=1024. No ps/privatefields/commandlineguess/foreignprocesskill.",
+    "Memoizedsingle savedrawclose invocation: production-requestcount and rawrequesttimestamp recorded beforecall, rawfulfillmenttimestamp recorded immediatelyonfulfillment, firstPIDprobe beforeanywait. Contextclose+browserdisconnectevents/disconnectedstate and firstallESRCH required. FirstLIVE/UNKNOWN/invalid/missingclose remainsred evenif5scleanupconditionpolllaterquiescent.",
+    "Wrapper/PIDgate explicitlyfixture scheduling, neverclaimofunchangedproductiondescendanttiming. Expectedproductionfailure.close itself must invoke savedrawclose exactlyonce. Cleanup/fallback cannot supplyproductionrequestcredit.",
+    "Afterfirstred, oneabsolute5000mscleanup-onlyPIDdeadline with atmostone<=50msconditiontimer. NoresetperPID/call/stage. Eachinitial/preclose CDPsnapshot maximum5000ms; latecompletion/rejection consumed andownedsessiondetached. Savedcontextclose not retried; one explicitlyownedbrowserSDKfallback onlyifconnected, neverturns earlierredgreen.",
+    "Onlysignal0 probes; ESRCHdefiniteDEAD, EPERM/unknownerrorsUNKNOWN, live/reusedPIDLIVE. No arbitrarykill/nonzerosignal. Root/pinsremoved only afterconfirmedownedquiescence; unconfirmedteardownpreservesroot andstaysred. Originalrmrecursive/forceoptions unchanged, nofsmaxRetries/backoff.",
+    "Primarypresenceexplicitinclthrownundefined. Orderedsecondarycleanupstages keeporiginalerrorsinmemory, continueonlyremaining safestages anddonotmaskbodyfailure. AggregateErrorpreservesmultiplesession/listenererrors; allcapturedtasksjoined withallSettled. Diagnosticswrite is itselforderedcleanupstage, never a maskingfinally.",
+    "Nativefacts persist onlyfixedbool/count/enum/timestampfields, neverrawerrors/profile/probecontent/media. Installed Vitstserializer honorsError.toJSON; ProfileFixtureFailure.toJSON emitsfixedfacts onlywhileoriginalprimary/secondaryerrors remaininmemory. Syntheticprivate-errorcanarytest confirmsserializationexclusion."
+  ],
+  "boundedResourceFacts": {
+    "maxPublicSnapshots": 2,
+    "maxDistinctOwnedPids": 1024,
+    "snapshotFailureCeilingMs": 5000,
+    "postRawCloseCleanupOnlyDeadlineMs": 5000,
+    "maxPendingConditionTimers": 1,
+    "maxPollIntervalMs": 50,
+    "savedRealContextCloseAttempts": 1,
+    "ownedBrowserFallbackAttempts": 1,
+    "nonzeroSignals": 0,
+    "filesystemMutationRetries": 0,
+    "filesystemRemovalRetries": 0,
+    "outerFixtureTimeoutUnchangedMs": 120000,
+    "hardCancellationLimit": "CDP/SDK/OS APIs are not intrinsicallycancelled byrace. Latecompletion/sessiondetach andrawSDK/fallbackclose are awaited; ifuncancellableAPI/ownedprocess cannotconfirm closure, outerexistingfixtureguard remainsandrootcannotbeclaimedclean. NohardOSkillorGCclaim.",
+    "futureProcessLimit": "Initial+preclose union provesonlycapturedownedbrowserPIDs. Itisnotproofagainstallfuture/reparentedprocesses. Any live/reused/unknownprobe keepsfirstobservationred."
+  },
+  "installedPublicPersistentBrowserVerification": {
+    "result": "SOURCE_COMPATIBLE_NONNULL_NORMAL_CHROMIUM_PERSISTENT_PATH; NOT_NATIVE_PROOF",
+    "sources": [
+      {
+        "path": "studio-runner/node_modules/playwright-core/lib/coreBundle.js",
+        "bytes": 3477183,
+        "sha256": "549070af3acabb3efcc4f55bfe6210f9f7c2fcf633cf7eaa59bfe60719969171"
+      },
+      {
+        "path": "studio-runner/node_modules/playwright-core/types/types.d.ts",
+        "bytes": 1131883,
+        "sha256": "2806f6d7810fba0306066d500cd716a6d1128d90af2c3cf71723e3ea0a8904c4"
+      },
+      {
+        "path": "studio-runner/node_modules/playwright-core/types/protocol.d.ts",
+        "bytes": 814210,
+        "sha256": "0410ed82a9ac63269dc1471ed249b280e2d461249a3a331e71cdb54cdf10db33"
+      },
+      {
+        "path": "studio-runner/node_modules/@vitest/utils/dist/error.js",
+        "bytes": 5218,
+        "sha256": "db4fb717645c259e9149beead55e48b85252646e3383e0b6fcef7f657f7f6c12"
+      }
+    ],
+    "chain": [
+      {
+        "path": "studio-runner/node_modules/playwright-core/lib/coreBundle.js",
+        "lines": "55505-55512",
+        "fact": "ServerpersistentlaunchcreatesBrowserDispatcher+contextdispatcher andreturnsboth."
+      },
+      {
+        "path": "studio-runner/node_modules/playwright-core/lib/coreBundle.js",
+        "lines": "55395-55400",
+        "fact": "BrowserDispatcher emitscontext for existingpersistent defaultcontext."
+      },
+      {
+        "path": "studio-runner/node_modules/playwright-core/lib/coreBundle.js",
+        "lines": "62675,62722-62724",
+        "fact": "ClientBrowsercontext event invokes_didCreateContext assigningcontext._browser=this."
+      },
+      {
+        "path": "studio-runner/node_modules/playwright-core/lib/coreBundle.js",
+        "lines": "63338-63345,62432-62434",
+        "fact": "ClientpersistentlaunchconsumesBrowser+context andpubliccontext.browser returnsassociatedbrowser."
+      },
+      {
+        "path": "studio-runner/node_modules/playwright-core/types/types.d.ts",
+        "lines": "10154-10158",
+        "fact": "Publicnullabletype documents null foroutside-normalbrowsercases(Android/Electron), notthisnormalChromiumpersistentchain. Missingbrowser remainshardsetupfailure; no privateworkaround."
+      },
+      {
+        "path": "studio-runner/node_modules/@vitest/utils/dist/error.js",
+        "lines": "24-45,124-156",
+        "fact": "InstalledVitestprocessError delegates toserializeValue; Error.toJSON ishonored beforeenumeratingerrorproperties. SafeJSONpreventsrawnestedoriginalerrorsfrompersisting."
+      }
+    ]
+  },
+  "pureValidation": [
+    {
+      "attempt": 1,
+      "command": "./node_modules/.bin/vitest run --coverage.enabled=false test/profileSafetyFixture.test.ts --reporter=default --reporter=json --outputFile='/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/pure-attempt01-vitest.json'",
+      "cwd": "studio-runner",
+      "exit": 1,
+      "passed": 52,
+      "failed": 1,
+      "pending": 0,
+      "report": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/pure-attempt01-vitest.json",
+        "bytes": 21002,
+        "sha256": "d24b2a77be1f9a37eacde594f21c4c8dc525c8f42d3e241442e8bb8b1b08ae24"
+      },
+      "log": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/pure-attempt01.log",
+        "bytes": 8581,
+        "sha256": "37c479d62ec13999df96bdf70afaac82c40297de0797e0ed12dbe250f4f0bf53"
+      },
+      "cases": [
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup complete attack hands the identical context to production and requires its own close before removal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup rename failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup canary-after-rename failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup symlink failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup identity failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup canary-write-undefined failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup partial rename plus returned success stays red and closes actual success handle",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup partial canary plus returned success stays red and closes actual success handle",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup partial symlink plus returned success stays red and closes actual success handle",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup unexpected success is retained and closed while original refusal assertion stays primary",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup unrelated error is never accepted as expected refusal or used as a foreign cleanup capability",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-browser after acquisition is recorded and same-context handoff survives",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-page after acquisition is recorded and same-context handoff survives",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup closing after acquisition is recorded and same-context handoff survives",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup foreign adapter cannot be closed/released/removed as owned",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup pending raw SDK close cannot permit profile/root removal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup disconnected event alone and context-closing boolean do not replace actual SDK fulfillment",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-context-event stays red after raw close fulfillment",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-disconnected-event stays red after raw close fulfillment",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup first LIVE permanently fails even when later probe confirms disappearance",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup first UNKNOWN permanently fails even when later probe confirms disappearance",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup unknown probe exception cannot be credited dead; later cleanup success stays red",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup live/reused PID persisting through absolute5s cleanup deadline preserves root",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup cleanup condition polling returns early with one <=50ms timer but keeps first-red result",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup initial/preclose union retains all observed owned IDs",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup saved close is memoized through repeated cleanup invocation; no extra snapshot or deadline",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup fixture fallback cannot supply missing production-close proof",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup close rejection retains original error, attempts only owned browser fallback, and remains red",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup fallback rejection retains root and ordered cleanup errors",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup body error and rm failure preserve primary and secondary without replacement",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup successful body plus cleanup failure is still red and diagnostics do not mask it",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup release/listener cleanup errors stay ordered and remaining safe remove/persist stages run",
+          "status": "failed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup CANARY_CHANGED stays primary after safe cleanup",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup CANARY_MISSING stays primary after safe cleanup",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup OUTSIDE_IDENTITY stays primary after safe cleanup",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup thrown undefined body is preserved with explicit presence",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 0",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 1",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 2",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 3",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 4",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 5",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 6",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 7",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 8",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources retains only numeric IDs/fixed process enums and discards unexpected fields",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources signal0 distinguishes ESRCH only; EPERM and other errors are unknown, live/reused is live",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources invalid initial capture hands context back, closes it, but never grants root deletion",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources preclose capture failure still invokes rawclose and invalidates first observation/removal",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources union over1024 never loses earlier IDs to make a close pass",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources capture deadline consumes late session creation and detaches it without sending",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources late rejected capture is consumed; session and listeners dispose and root remains",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources session detach failure is red and rawclose still executes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "attempt": 2,
+      "command": "./node_modules/.bin/vitest run --coverage.enabled=false test/profileSafetyFixture.test.ts --reporter=default --reporter=json --outputFile='/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/pure-attempt02-vitest.json'",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "passed": 58,
+      "failed": 0,
+      "pending": 0,
+      "report": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/pure-attempt02-vitest.json",
+        "bytes": 22777,
+        "sha256": "d0d21282a07865f89012484175c58714ae7d1b764be79b5955142099ef5cb393"
+      },
+      "log": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/pure-attempt02.log",
+        "bytes": 525,
+        "sha256": "e6556edef71707a312e2a959730587cc6117e35e86919a29dfb29c25aac0cd4a"
+      },
+      "cases": [
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at capture failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at rename failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at canary failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at symlink failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at verify failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup complete attack hands the identical context to production and requires its own close before removal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup rename failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup canary-after-rename failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup symlink failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup identity failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup canary-write-undefined failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup partial rename plus returned success stays red and closes actual success handle",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup partial canary plus returned success stays red and closes actual success handle",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup partial symlink plus returned success stays red and closes actual success handle",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup unexpected success is retained and closed while original refusal assertion stays primary",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup unrelated error is never accepted as expected refusal or used as a foreign cleanup capability",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-browser after acquisition is recorded and same-context handoff survives",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-page after acquisition is recorded and same-context handoff survives",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup closing after acquisition is recorded and same-context handoff survives",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup foreign adapter cannot be closed/released/removed as owned",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup pending raw SDK close cannot permit profile/root removal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup disconnected event alone and context-closing boolean do not replace actual SDK fulfillment",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-context-event stays red after raw close fulfillment",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-disconnected-event stays red after raw close fulfillment",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup first LIVE permanently fails even when later probe confirms disappearance",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup first UNKNOWN permanently fails even when later probe confirms disappearance",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup unknown probe exception cannot be credited dead; later cleanup success stays red",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup live/reused PID persisting through absolute5s cleanup deadline preserves root",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup cleanup condition polling returns early with one <=50ms timer but keeps first-red result",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup initial/preclose union retains all observed owned IDs",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup saved close is memoized through repeated cleanup invocation; no extra snapshot or deadline",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup fixture fallback cannot supply missing production-close proof",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup close rejection retains original error, attempts only owned browser fallback, and remains red",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup fallback rejection retains root and ordered cleanup errors",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup body error and rm failure preserve primary and secondary without replacement",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup successful body plus cleanup failure is still red and diagnostics do not mask it",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup release/listener cleanup errors stay ordered and remaining safe remove/persist stages run",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup CANARY_CHANGED stays primary after safe cleanup",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup CANARY_MISSING stays primary after safe cleanup",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup OUTSIDE_IDENTITY stays primary after safe cleanup",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup thrown undefined body is preserved with explicit presence",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 0",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 1",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 2",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 3",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 4",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 5",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 6",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 7",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 8",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources retains only numeric IDs/fixed process enums and discards unexpected fields",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources signal0 distinguishes ESRCH only; EPERM and other errors are unknown, live/reused is live",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources invalid initial capture hands context back, closes it, but never grants root deletion",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources preclose capture failure still invokes rawclose and invalidates first observation/removal",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources union over1024 never loses earlier IDs to make a close pass",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources capture deadline consumes late session creation and detaches it without sending",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources late rejected capture is consumed; session and listeners dispose and root remains",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources session detach failure is red and rawclose still executes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "attempt": 3,
+      "command": "./node_modules/.bin/vitest run --coverage.enabled=false test/profileSafetyFixture.test.ts --reporter=default --reporter=json --outputFile='/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/pure-attempt03-vitest.json'",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "passed": 58,
+      "failed": 0,
+      "pending": 0,
+      "report": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/pure-attempt03-vitest.json",
+        "bytes": 22780,
+        "sha256": "f22f3e35c6a4e4c280232890f6ede99baef57f33ae33381b897196774765ec95"
+      },
+      "log": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/pure-attempt03.log",
+        "bytes": 525,
+        "sha256": "b968102af4dec37227a1a418761dc5cf2387a3a3e64be70c3fce53c3b658b17b"
+      },
+      "cases": [
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at capture failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at rename failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at canary failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at symlink failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at verify failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup complete attack hands the identical context to production and requires its own close before removal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup rename failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup canary-after-rename failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup symlink failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup identity failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup canary-write-undefined failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup partial rename plus returned success stays red and closes actual success handle",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup partial canary plus returned success stays red and closes actual success handle",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup partial symlink plus returned success stays red and closes actual success handle",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup unexpected success is retained and closed while original refusal assertion stays primary",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup unrelated error is never accepted as expected refusal or used as a foreign cleanup capability",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-browser after acquisition is recorded and same-context handoff survives",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-page after acquisition is recorded and same-context handoff survives",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup closing after acquisition is recorded and same-context handoff survives",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup foreign adapter cannot be closed/released/removed as owned",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup pending raw SDK close cannot permit profile/root removal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup disconnected event alone and context-closing boolean do not replace actual SDK fulfillment",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-context-event stays red after raw close fulfillment",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-disconnected-event stays red after raw close fulfillment",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup first LIVE permanently fails even when later probe confirms disappearance",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup first UNKNOWN permanently fails even when later probe confirms disappearance",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup unknown probe exception cannot be credited dead; later cleanup success stays red",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup live/reused PID persisting through absolute5s cleanup deadline preserves root",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup cleanup condition polling returns early with one <=50ms timer but keeps first-red result",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup initial/preclose union retains all observed owned IDs",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup saved close is memoized through repeated cleanup invocation; no extra snapshot or deadline",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup fixture fallback cannot supply missing production-close proof",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup close rejection retains original error, attempts only owned browser fallback, and remains red",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup fallback rejection retains root and ordered cleanup errors",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup body error and rm failure preserve primary and secondary without replacement",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup successful body plus cleanup failure is still red and diagnostics do not mask it",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup release/listener cleanup errors stay ordered and remaining safe remove/persist stages run",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup CANARY_CHANGED stays primary after safe cleanup",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup CANARY_MISSING stays primary after safe cleanup",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup OUTSIDE_IDENTITY stays primary after safe cleanup",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup thrown undefined body is preserved with explicit presence",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 0",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 1",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 2",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 3",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 4",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 5",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 6",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 7",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 8",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources retains only numeric IDs/fixed process enums and discards unexpected fields",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources signal0 distinguishes ESRCH only; EPERM and other errors are unknown, live/reused is live",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources invalid initial capture hands context back, closes it, but never grants root deletion",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources preclose capture failure still invokes rawclose and invalidates first observation/removal",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources union over1024 never loses earlier IDs to make a close pass",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources capture deadline consumes late session creation and detaches it without sending",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources late rejected capture is consumed; session and listeners dispose and root remains",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources session detach failure is red and rawclose still executes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "attempt": 4,
+      "command": "./node_modules/.bin/vitest run --coverage.enabled=false test/profileSafetyFixture.test.ts --reporter=default --reporter=json --outputFile='/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/pure-attempt04-vitest.json'",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "passed": 59,
+      "failed": 0,
+      "pending": 0,
+      "report": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/pure-attempt04-vitest.json",
+        "bytes": 23193,
+        "sha256": "e4137350b2f2ae425c2681f3fb805da1dcee2dcfbc8fff5ca6db50580317edb1"
+      },
+      "log": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/pure-attempt04.log",
+        "bytes": 525,
+        "sha256": "1d642dae882cbbe2fc0a5ef71872267e1a2e13d9c80f55cf21f9666f275aea8b"
+      },
+      "cases": [
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at capture failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at rename failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at canary failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at symlink failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup actual attack sequencing stops at verify failure, hands off and never credits partial attack",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup complete attack hands the identical context to production and requires its own close before removal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup rename failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup canary-after-rename failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup symlink failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup identity failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup canary-write-undefined failure still hands back same context and cannot credit expected refusal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup partial rename plus returned success stays red and closes actual success handle",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup partial canary plus returned success stays red and closes actual success handle",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup partial symlink plus returned success stays red and closes actual success handle",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup unexpected success is retained and closed while original refusal assertion stays primary",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup unrelated error is never accepted as expected refusal or used as a foreign cleanup capability",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-browser after acquisition is recorded and same-context handoff survives",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-page after acquisition is recorded and same-context handoff survives",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup closing after acquisition is recorded and same-context handoff survives",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup foreign adapter cannot be closed/released/removed as owned",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup pending raw SDK close cannot permit profile/root removal",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup disconnected event alone and context-closing boolean do not replace actual SDK fulfillment",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-context-event stays red after raw close fulfillment",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup missing-disconnected-event stays red after raw close fulfillment",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup first LIVE permanently fails even when later probe confirms disappearance",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup first UNKNOWN permanently fails even when later probe confirms disappearance",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup unknown probe exception cannot be credited dead; later cleanup success stays red",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup live/reused PID persisting through absolute5s cleanup deadline preserves root",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup cleanup condition polling returns early with one <=50ms timer but keeps first-red result",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup initial/preclose union retains all observed owned IDs",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup saved close is memoized through repeated cleanup invocation; no extra snapshot or deadline",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup fixture fallback cannot supply missing production-close proof",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup close rejection retains original error, attempts only owned browser fallback, and remains red",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup fallback rejection retains root and ordered cleanup errors",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup body error and rm failure preserve primary and secondary without replacement",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup successful body plus cleanup failure is still red and diagnostics do not mask it",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup retains original errors in memory but serializes only fixed facts for the installed reporter",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup release/listener cleanup errors stay ordered and remaining safe remove/persist stages run",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup CANARY_CHANGED stays primary after safe cleanup",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup CANARY_MISSING stays primary after safe cleanup",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup OUTSIDE_IDENTITY stays primary after safe cleanup",
+          "status": "passed"
+        },
+        {
+          "name": "postlaunch fixture ownership and error-preserving cleanup thrown undefined body is preserved with explicit presence",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 0",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 1",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 2",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 3",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 4",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 5",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 6",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 7",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources rejects invalid capture 8",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources retains only numeric IDs/fixed process enums and discards unexpected fields",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources signal0 distinguishes ESRCH only; EPERM and other errors are unknown, live/reused is live",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources invalid initial capture hands context back, closes it, but never grants root deletion",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources preclose capture failure still invokes rawclose and invalidates first observation/removal",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources union over1024 never loses earlier IDs to make a close pass",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources capture deadline consumes late session creation and detaches it without sending",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources late rejected capture is consumed; session and listeners dispose and root remains",
+          "status": "passed"
+        },
+        {
+          "name": "bounded public-browser process capture and late resources session detach failure is red and rawclose still executes",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "typeAndScopedLint": [
+    {
+      "attempt": 1,
+      "command": "./node_modules/.bin/tsc -p tsconfig.json --noEmit",
+      "cwd": "studio-runner",
+      "exit": 2,
+      "log": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/typecheck-attempt01.log",
+        "bytes": 104,
+        "sha256": "82b241cf7e4b8b37f281c2f982b72e62344498e35f4ff50d7f41de14397ede8c"
+      }
+    },
+    {
+      "attempt": 1,
+      "command": "./node_modules/.bin/eslint test/helpers/profileSafetyFixture.ts test/profileSafetyFixture.test.ts test/fixtures-tier/browser-profile-safety.test.ts",
+      "cwd": "studio-runner",
+      "exit": 1,
+      "log": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/lint-attempt01.log",
+        "bytes": 986,
+        "sha256": "a0d838272ffecd8f449ed6a755059319369329062ee353cb08cc6c6cad9cd4b5"
+      }
+    },
+    {
+      "attempt": 2,
+      "command": "./node_modules/.bin/tsc -p tsconfig.json --noEmit",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "log": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/typecheck-attempt02.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "attempt": 2,
+      "command": "./node_modules/.bin/eslint test/helpers/profileSafetyFixture.ts test/profileSafetyFixture.test.ts test/fixtures-tier/browser-profile-safety.test.ts",
+      "cwd": "studio-runner",
+      "exit": 1,
+      "log": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/lint-attempt02.log",
+        "bytes": 362,
+        "sha256": "980f6d8959990a6564f33eb9f08909c40ab10f7fb84bb8635157a93f9992e776"
+      }
+    },
+    {
+      "attempt": 3,
+      "command": "./node_modules/.bin/tsc -p tsconfig.json --noEmit",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "log": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/typecheck-attempt03.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "attempt": 3,
+      "command": "./node_modules/.bin/eslint test/helpers/profileSafetyFixture.ts test/profileSafetyFixture.test.ts test/fixtures-tier/browser-profile-safety.test.ts",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "log": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/lint-attempt03.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "attempt": 4,
+      "command": "./node_modules/.bin/tsc -p tsconfig.json --noEmit",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "log": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/typecheck-attempt04.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "attempt": 4,
+      "command": "./node_modules/.bin/eslint test/helpers/profileSafetyFixture.ts test/profileSafetyFixture.test.ts test/fixtures-tier/browser-profile-safety.test.ts",
+      "cwd": "studio-runner",
+      "exit": 0,
+      "log": {
+        "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/lint-attempt04.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "attemptDispositions": [
+    {
+      "attempt": 1,
+      "result": "52PASS1FAIL;typeexit2;lint1(6findings)",
+      "diagnosis": "Onlypurefailurewaslistener-disposal fake replacingregistration, causing correctmissingcloseeventrefusal/rootpreservation. Repairedfake toregistereventandthrowonlyondisposal; fixedliteraltruehasPagetype, asyncclosure-readfunctions, type-onlyimports, expectedErrorobject and intentionalundefinedthrowadversarialtest. Originalredreportsretained."
+    },
+    {
+      "attempt": 2,
+      "result": "58PASS0FAIL0SKIP,type0,lint1(2require-awaittestfakefindings)",
+      "diagnosis": "Two intentionallyasyncfakefunctionsneeded explicitmicrotaskawait torepresentasyncfilesystem/bodyports. Nohelperpredicateorboundrelaxation."
+    },
+    {
+      "attempt": 3,
+      "result": "58PASS0FAIL0SKIP,type0,lint0",
+      "followingConcreteReview": "InstalledVitestserializedaggregateownproperties; originalerrors neededmemoryretentionwithoutpersistence. AddedfixedfactsError.toJSONand1private-errorcanarytest; finalnativelaunch/expectedrefusalbooleans added forrequiredreceiptclarity."
+    },
+    {
+      "attempt": 4,
+      "result": "59PASS0FAIL0SKIP,type0,scopedlint0",
+      "finalBytes": true
+    }
+  ],
+  "meaningfulPureEvidence": [
+    "Actualsharedattacksequencestopsatcapture/rename/canary/symlink/verifyfailure; same-contexthandoff andnoincompleteattackcredit.",
+    "SetupfailurereturnsGuidedBrowserorGuidedLaunchFailure; unexpectedproductionSuccess/unrelatedErrorstillred andcorrectreturnedcapabilityclosed.",
+    "Pendingrawclose/disconnected-only/closingboolean/missingevents cannotgrantremoval; productionrawcloseexactlyonce andfirstprobeorderedafterrawSDKfulfillment.",
+    "FirstLIVE/UNKNOWN thenlaterDEADremainred; persistent/reusedPID deadlinepreservesroot; one50msconditiontimer/5sdeadlineandmemoizationtested.",
+    "Initial/preclose PIDunion,missingbrowser/empty/malformed/negative/noninteger/oversizedrows andunionoverflow; capturefailuresstillattemptrealclose andpreserveroot.",
+    "LateCDPsessioncreation/rejectiondetachedandconsumed; session/listenercleanupfailuresordered; onlyexplicitownedbrowserfallback,foreignadapterdenied.",
+    "Primary+rmerror,body-success+cleanupfailure,multiplecleanupfailureorder,canarychanged/missing/wrongidentity,thrownundefinedpresence,andrawerrorserializationprivacy."
+  ],
+  "remainingRequired": [
+    "IndependentAria+Quinnfinal-byteapproval ofcheckpoint/3hashes/diff/puretype/lint before rootserializednativeexecution.",
+    "Execute all10originalbrowser-profile-safetycasesunskipped. Requireactualliveattack+handoff+expectedrefusal+productionrealcloserequest/fulfillment+firstallESRCH/publicevents+canary+ownedremoval facts. FirstLIVE/UNKNOWN orsetuperrorstaysredandreturnsfordiagnosis.",
+    "Freshcompletefixtures, fullrunnerunitcoverage/type/lint/deployment andmandatorynormalbackend aggregate/allotheralreadyplannedlocalgates underfresh exactsource/distbridges. Earlieroriginal014liveproofsremainbindingdatedproof;015unstarted.",
+    "Failedfullattempt03 remains231PASS1FAIL9historicaluncreditedskips; earlierfocused13PASS andunit1462PASS/29skips aredatedproof, notcurrentcompletegreen. No blindrerun/retry/budgetgrowth/productionchange."
+  ],
+  "scope": "Only3approvedtestsourcepaths+ownedimplementationevidencedirectory written. No nativebrowser/fixtures/build/dist/Gradle/SDK/config/production/guard/othercases/CLI/git/story/gate/lifecycle/commit/push/deploy/install/devDBrecreation or agents. Declaredshared500USDceiling; actualbillingunavailable."
+}

@@ -1,0 +1,310 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "artifact": "architect-rulings-wave1b",
+  "architect": "Aria (@architect)",
+  "date": "2026-10-13",
+  "authority": {
+    "productEdits": false,
+    "testEdits": false,
+    "storyEdits": false,
+    "migrationEdits": false,
+    "buildsOrSuitesExecuted": false,
+    "gitWrites": "none",
+    "onlyFileWritten": "docs/qa/evidence/STUDIO-OBS-012A/root/architect-rulings-wave1b.json"
+  },
+  "binding": [
+    "ADR-SC-005 D-A (one observed path; no legacy path, compatibility layer or versioned fallback)",
+    "ADR-SC-005 D-B (V12-V18 re-baseline; V1-V11 byte-identical)",
+    "ADR-SC-005 'Preserves' row: CSI authorization, dispatch ledger and admission CAS, video/evidence/SSE, scheduling (ADR-003/ADR-004)",
+    "ADR-SC-005 'Operations': observed schedules lifted behind G-3 in STUDIO-OBS-009",
+    "STUDIO-OBS-012A AC-1, AC-2, AC-6, AC-7 (after = baseline - named drops - named deletions + named ports; full backend check and runner tiers green; never mark a skipped or unavailable check as passed)",
+    "STUDIO-OBS-009 AC-6 / T3 (observed schedules lifted; OBSERVED_SCHEDULE_AUTH_REQUIRED no longer emitted when background authority exists)"
+  ],
+  "inputsRead": [
+    "docs/qa/evidence/STUDIO-OBS-012A/exec-fixtures/ledger.json",
+    "docs/qa/evidence/STUDIO-OBS-012A/root/deviation-runner-coverage-scope.json",
+    "docs/qa/evidence/STUDIO-OBS-012A/root/control-window-margin.json",
+    "docs/qa/evidence/STUDIO-OBS-012A/runner-coverage/ledger.json",
+    "docs/qa/evidence/STUDIO-OBS-012A/runner-trackTree/ledger.json",
+    "docs/qa/evidence/STUDIO-OBS-012A/aria-t0-architecture-reconciliation.json",
+    "docs/qa/evidence/STUDIO-OBS-012A/data-draft/handoff.json, migration-design.md, pinned-test-mapping.json, V13/V15/V16 drafts",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012A.story.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+    "docs/architecture/ADR-SC-005-single-path-observed-authoring.md",
+    "studio-runner/vitest.config.ts (coverage block), studio-runner/src/server/runCoordinator.ts, studio-runner/test/run/confinement.test.ts",
+    "backend: StudioDispatcher (HEAD and working tree), DispatchAuthorization, ProvisionalDispatchAuthorization, StudioScheduledDispatchAuthorization, ObservedReplayAuthorization, StudioAcceptanceService, StudioScheduleProcessor, StudioScheduleApiIT, SharedSchedulingIT, StudioAuthorizationIT, ExecutionVideoAuthorizationIT, SseStreamingIT, DispatcherIT"
+  ],
+  "verificationNote": "Everything below was read from source and evidence files. No build or test was run by the architect. All test classifications are provisional until the evidence condition stated in each ruling is met on the Lane M (V12-V18) tree; the exec-fixtures pass counts were taken under an uncommitted diagnostic shim and are not pass evidence.",
+
+  "rulings": [
+    {
+      "id": "R1",
+      "topic": "19 scheduled-run tests (StudioScheduleApiIT 17, SharedSchedulingIT 2)",
+      "verdict": "SPLIT DISPOSITION: Lane M V16 fix is mandatory in 012A; tests that need an ACCEPTED scheduled observed occurrence become named, owned OBS-009 deferrals; reachable halves are ported live; the compile-only half is deleted.",
+      "facts": {
+        "verified": [
+          "StudioAcceptanceService.acceptCore throws OBSERVED_SCHEDULE_AUTH_REQUIRED for every scheduled acceptance (scheduled != null) once the revision is observed; StudioScheduleProcessor refuses earlier at the artifact-family check (artifactFamily >= 2).",
+          "In StudioScheduleProcessor that refusal sits before the OVERLAP, UNCERTAIN_EXECUTION, DISPATCH_DISABLED, background-grant and acceptance steps, so none of those outcomes can be reached for an observed revision.",
+          "At HEAD these 19 tests passed on artifact-1 revisions. After D-A, observed is the only runnable family, so every acceptance-dependent schedule test is refused by design until OBS-009 AC-6.",
+          "Committed V26/V33 ck_studio_schedule_occurrences_code allows COMPILE_REQUIRED but not LEARN_REQUIRED, while main code now writes LEARN_REQUIRED (ReadinessVerdict, StudioScheduleProcessor readiness refusal). Until Lane M lands, every scheduled readiness refusal on the committed schema hits a CHECK violation, and that is a production defect.",
+          "The data-engineer V16 draft (data-draft/V16__scheduling.sql:121-131) already has LEARN_REQUIRED, no COMPILE_REQUIRED, and keeps OBSERVED_SCHEDULE_AUTH_REQUIRED as REFUSED-only. studio_schedules.blocked_code has no value CHECK.",
+          "GuidedPublicationReplayIT:2932 already asserts processor.process(...) == OBSERVED_SCHEDULE_AUTH_REQUIRED. That class is currently excluded from compilation (Lane C in flight).",
+          "OBS-009 File List already plans scheduling/ObservedScheduleAuthorityIT.java (new) for AC-6."
+        ]
+      },
+      "whatPrecedesClassification": {
+        "owner": "@data-engineer (Dara) with @dev, Lane M",
+        "action": "Land V16__scheduling with the drafted occurrence-code CHECK: LEARN_REQUIRED in, COMPILE_REQUIRED out, OBSERVED_SCHEDULE_AUTH_REQUIRED retained (minted per the story's Decisions-pending default and REFUSED-only). Port StudioSchedulingSchemaIT lines 298/314 (currently COMPILE_REQUIRED) to LEARN_REQUIRED as pinned-test-mapping.json already plans. No interim V35 or hotfix migration on the old chain (D-B).",
+        "rationale": "AC-2 (LEARN_REQUIRED replaces COMPILE_REQUIRED) and AC-6 (V16 content). Without this, the scheduler's own refusal path is broken in production code, which is a 012A regression and not OBS-009 scope."
+      },
+      "classificationRule": {
+        "evidence": "Classify each of the 19 by its FIRST failure on the Lane M tree (V12-V18 applied, no diagnostic shim), quoting the assertion/stack line in the ledger. A test qualifies for deferral ONLY if that first failure is the OBSERVED_SCHEDULE_AUTH_REQUIRED refusal (processor return value or StudioConflictException code). A test that fails for any other reason is a 012A defect and must be fixed, not deferred. A test that passes counts as a pass.",
+        "categories": {
+          "A_mustPassIn012A": "Asserted property does not need an accepted scheduled observed occurrence. Must be green in 012A.",
+          "B_split": "Test asserts a property reachable in 012A plus an acceptance-dependent property. Keep the ORIGINAL method body unchanged and defer it (category C). Add ONE new live method that proves only the reachable property; count it as a named port.",
+          "C_deferToObs009": "Every asserted property needs an ACCEPTED scheduled observed occurrence. Defer it as specified under 'acceptableDeferralForm'.",
+          "D_compileOnly": "Asserted property exists only because of compile state that is being deleted. Named deletion under AC-1/AC-6."
+        }
+      },
+      "provisionalDisposition": {
+        "note": "Provisional, read from the test bodies and processor ordering. Final placement follows the classificationRule evidence.",
+        "StudioScheduleApiIT": {
+          "C_deferToObs009": [
+            "aScheduledOccurrenceIsAcceptedWithNoRequestAuthentication",
+            "acceptedOccurrenceHasOneImmutableRunAndActivationAcrossResumeAndRecreation",
+            "activeManualWorkSkipsOverlapWithoutChangingManualPermission",
+            "authorizationWithdrawalBeforeAdmissionAndBeforeSendFailsClosed",
+            "callbackLedgerLockDoesNotBlockOverlapAndUncertaintyAfterResumeBlocksNextTick",
+            "capabilityOffDeferralExpiresBeforeAnyCatchupAndLifecycleSettlesPendingAudit",
+            "deadlineOverrunAdvancesCursorOnlyPastAttemptedCsi",
+            "deletionStopsFutureWorkButKeepsAuthorizedOccurrenceAudit",
+            "editedWriterRaceSerializesWithAcceptanceAndKeepsTheAcceptedRevision",
+            "failedCsiRotatesAwayRatherThanStarvingOtherEligibleWork",
+            "graceAndGrantAreRecheckedAfterPreflightBeforeAnyAcceptedWrite",
+            "quotaWaitCrossingGraceOrGrantWithdrawalNeverWritesAcceptedWork",
+            "replicasRacingAndRollbackCannotCreateDuplicateOrPartialAcceptedWork",
+            "updateRemovalAndInputInvalidationSettleDeferredWithoutOrphans",
+            "writeFailuresAtHistoryLedgerAndCursorBoundariesRollbackTheWholeOccurrenceUnit"
+          ],
+          "B_split": [
+            {
+              "original": "rawReadinessChangesRefuseExplicitlyAndAnotherActivatorDoesNotRewriteAcceptedProvenance",
+              "originalDisposition": "C (deferred unchanged; the 'another activator does not rewrite accepted provenance' half needs ACCEPTED)",
+              "newLivePort": "suggested name: rawReadinessChangeRefusesWithLearnRequiredAndNoExecution",
+              "newLiveAsserts": "source_revision bumped -> processor.process(testId) == 'LEARN_REQUIRED'; the occurrence is REFUSED with code LEARN_REQUIRED and executionId null. This is the end-to-end proof that V16's CHECK accepts the code the processor writes.",
+              "count": "+1 named port"
+            }
+          ],
+          "D_compileOnly_withPort": [
+            {
+              "original": "sourceMutationBlocksAndOptionalUnchangedCompileFailureDoesNot",
+              "disposition": "Named deletion. The 'optional unchanged compile failure does not block' property and its UPDATE ui_tests SET compile_status='STALE' arrangement are compile-only, and the column is dropped by the V12 re-baseline (exec-fixtures handoffsLaneM).",
+              "newLivePort": "suggested name: sourceMutationBlocksTheScheduleWithLearnRequired",
+              "newLiveAsserts": "enabled schedule + source edit through studio.updateTest -> schedule state BLOCKED, blockedCode LEARN_REQUIRED, requestedEnabled true. There is no ACCEPTED arrangement step and no compile_status. If the BLOCKED transition turns out to need a prior ACCEPTED occurrence, report it back; do not fake the arrangement.",
+              "count": "-1 named deletion, +1 named port"
+            }
+          ]
+        },
+        "SharedSchedulingIT": {
+          "constraint": "This class is Checks-core ADR-004 coverage (HTTP/TCP/Splunk through the shared coordinator), which OBS-009 does not affect. Disabling it wholesale would remove core coverage, so it is NOT acceptable.",
+          "B_split": [
+            {
+              "original": "sameCoordinatorRunsHttpTcpSplunkAndStudioThroughTheirExistingPipelines",
+              "originalDisposition": "C (deferred unchanged; Studio ACCEPTED + single-send dispatch half is OBS-009)",
+              "newLivePort": "suggested name: sameCoordinatorRunsHttpTcpSplunkAndReachesTheStudioPipeline",
+              "newLiveAsserts": "One coordinator tick yields HTTP/TCP/Splunk SUCCESS results and no GRAFANA result, exactly as in the original. The Studio occurrence exists exactly once with decision REFUSED and code OBSERVED_SCHEDULE_AUTH_REQUIRED, there are zero studio_dispatch_ledger rows for the test and zero runner sends, failed_dispatches is empty, and there are zero checks rows of type UI_TEST.",
+              "count": "+1 named port"
+            },
+            {
+              "original": "studioOnlyReplicaRunsWhenCatalogFlagIsOffAndDeduplicatesAgainstAnotherCoordinator",
+              "originalDisposition": "C (deferred unchanged; the 'one ledger row' assertion needs ACCEPTED)",
+              "newLivePort": "suggested name: studioOnlyReplicaRunsWhenCatalogFlagIsOffAndDeduplicatesOccurrences",
+              "newLiveAsserts": "The worker replica has no CronDispatcher and its coordinator runs. Two coordinators tick and produce exactly one occurrence (deduplication proven on the occurrence row), and that occurrence is REFUSED OBSERVED_SCHEDULE_AUTH_REQUIRED with zero ledger rows.",
+              "count": "+1 named port"
+            }
+          ]
+        }
+      },
+      "acceptableDeferralForm": {
+        "allowed": "JUnit 5 @Disabled on the ORIGINAL method only, with the method body otherwise unchanged except for edits Lane M forces (dropped columns such as compile_status must not stay referenced, so the class compiles). The reason string must be exactly of the form: \"DEFERRED STUDIO-OBS-009 AC-6/T3: observed scheduled runs are refused OBSERVED_SCHEDULE_AUTH_REQUIRED until background authority and G-3 land; re-enable unchanged\".",
+        "countedAs": "Skipped, NOT passed and NOT dropped. The method stays in 'after'. The ledger lists the deferrals by name in a separate bucket 'namedDeferralsToObs009'. Every pass/green claim for AC-7 must state the skipped total and, within it, the named deferrals.",
+        "notAllowed": [
+          "Rewriting an ACCEPTED assertion in StudioScheduleApiIT into a refusal assertion in place, which loses the restorable OBS-009 proof",
+          "Deleting an acceptance-dependent test, which loses scheduler mechanics coverage and breaks the ADR-SC-005 'Preserves scheduling' rule",
+          "Assumptions.assume*, Gradle tag or filter exclusion, class-level @Disabled, or any skip without the reason prefix above",
+          "A test-only switch, profile or property that lets scheduled observed runs through the acceptance gate (a test-only fallback, which D-A forbids and which would be a fabricated pass)",
+          "Pulling the OBS-009 AC-6 lift into 012A (it needs the Q2 outcome and G-3 production authorization sources, which are external, GA C-2)",
+          "Leaving the tests red (AC-7 needs a green full backend check)"
+        ],
+        "tripwire": "At the final tree, QA greps backend/src/test for @Disabled. The result must equal the pre-existing set (1, per the exec-fixtures shim run) plus exactly the named OBS-009 deferrals, and each deferral must carry the reason prefix."
+      },
+      "interimContractPinned": "The interim behaviour (observed schedules refused OBSERVED_SCHEDULE_AUTH_REQUIRED) must be asserted live on the final tree by: (a) the two SharedSchedulingIT live ports above; (b) GuidedPublicationReplayIT:2932, which must compile and run on the final tree once Lane C lands. Both are tripwires: they go red when OBS-009 lifts the refusal, which forces OBS-009 to re-enable the deferrals.",
+      "owners": [
+        {"owner": "@data-engineer + @dev (Lane M)", "action": "V16 occurrence-code CHECK as drafted; StudioSchedulingSchemaIT vocabulary port."},
+        {"owner": "@dev (exec-fixtures lane, after Lane M)", "action": "Re-run the 19 on the Lane M tree. Apply categories A/B/C/D by first-failure evidence. Add the 4 named live ports. Apply the @Disabled form to the deferrals. Delete sourceMutationBlocksAndOptionalUnchangedCompileFailureDoesNot by name. Update ledger buckets."},
+        {"owner": "@po (Pax)", "action": "Append the final named deferral list to STUDIO-OBS-009 AC-6/T3 as a re-enable obligation ('re-enable unchanged and green; delete the 012A interim live ports or re-point them to ACCEPTED'). This is an AC-level edit on another story, so it belongs to @po and not to @dev or @architect."},
+        {"owner": "@qa (independent)", "action": "Reproduce the classification evidence, the @Disabled tripwire and the reconciliation below."}
+      ],
+      "reconciliationProjection": {
+        "scope": "24 ported classes in exec-fixtures ledger (baseline 290)",
+        "provisional": "after = 290 - 0 drops - 4 deletions (3 RevocationRotationIT already named + sourceMutationBlocksAndOptionalUnchangedCompileFailureDoesNot) + 4 ports (rawReadiness live port, sourceMutation live port, 2 SharedSchedulingIT live ports) = 290 total methods. Of these, provisionally 18 are named OBS-009 deferrals (16 StudioScheduleApiIT + 2 SharedSchedulingIT) that count as skipped and not passed. Final numbers follow the evidence classification."
+      },
+      "tradeoffs": {
+        "chosen": "Named deferral + live ports of reachable halves",
+        "pros": ["No fabricated pass", "Scheduler mechanics bodies survive for OBS-009 unchanged", "V16 vocabulary proven end to end in 012A", "Core ADR-004 coverage stays live"],
+        "cons": ["Up to 18 skipped tests between 012A and OBS-009", "4 extra methods that OBS-009 must re-point or retire"],
+        "rejected": [
+          "Delete: capability loss in scheduling coverage that ADR-SC-005 preserves",
+          "Repoint in place: hides the acceptance proof behind a refusal assertion",
+          "Lift in 012A: scope creep plus an external G-3 dependency",
+          "Test-only bypass: a fallback switch that D-A forbids"
+        ]
+      }
+    },
+
+    {
+      "id": "R2",
+      "topic": "5 tests that mutate execution/test CSI via raw SQL, now refused by the DB for observed runs",
+      "verdict": "REBUILD all 5 (no deletion). Re-seat each mutation on an execution row the final schema legitimately allows to carry that state, and keep a precondition that proves the DB refuses the same mutation on an observed row.",
+      "tests": [
+        "StudioAuthorizationIT.aQuarantinedExecutionWithNoCsiIsUnreadableByEveryoneIncludingAdministrators",
+        "ExecutionVideoAuthorizationIT.aQuarantinedRowIsDeniedToEveryoneIncludingAdministrators",
+        "ExecutionVideoAuthorizationIT.movingTheExecutionRowsOwnCsiFlipsTheAnswer",
+        "ExecutionVideoAuthorizationIT.movingTheParentTestsCsiDoesNotChangeTheAnswer",
+        "SseStreamingIT.revokedAccessMidStreamStopsDeliveryWithinTheRefreshIntervalAndClosesWithASignal"
+      ],
+      "facts": {
+        "verified": [
+          "Re-baselined V13 draft keeps ui_test_executions.csi_id nullable and states 'the application excludes every NULL-CSI row from user-facing queries' (data-draft/V13__executions_ledger.sql:126,214-216).",
+          "The V15 draft studio_observed_execution_guard returns NEW without checks when observed_revision_binding IS NULL, unless revision_id points to a GUIDED_RUN revision (data-draft/V15__publication.sql:350-354). So an unbound row's csi_id can still be NULL or changed under the final schema.",
+          "ui_tests.csi_id is FK-pinned by studio_guided_publication_bases and studio_secret_use_audit on (id, csi_id) only once those rows exist. An unpublished test with no secret audit can still have its CSI changed at the DB level."
+        ],
+        "inference": "The route-level CSI authorization (execution's own CSI, NULL-CSI fail-closed, SSE refresh) is path-independent code that guards states the final schema still allows. For observed rows, execution CSI always equals test CSI and neither can change, so without these discriminating tests a regression that switched the route to a parent-test CSI lookup would never be detected."
+      },
+      "rationale": "ADR-SC-005 'Preserves CSI authorization ... video/evidence/SSE'. The tests are the falsification pair and the fail-closed proof for a security control, so deleting them loses security coverage. Re-seating is not a legacy path: no production code changes, no fallback is added, and the route answers from row state that the schema allows.",
+      "rebuildSpec": {
+        "seat": "One named support helper (e.g. StudioExecutionFixtures.unboundExecution(testId, csi, principal, environment, status)). It inserts a ui_test_executions row (plus the ledger/evidence rows each class's control half needs) with observed_revision_binding NULL, observed_admission_receipt NULL, and revision_id NULL or an ordinaryRevision (never a GUIDED_RUN revision; the guard refuses that). For movingTheParentTestsCsiDoesNotChangeTheAnswer, the parent test must be unpublished and have no secret-use audit rows.",
+        "keepControlHalf": "Each rebuilt test keeps its pre-mutation control: the same identity is served (200 or an open stream) on the unbound row before the mutation, so the after-state refusal is non-vacuous.",
+        "precondition": "Each rebuilt test first asserts that the original mutation on the class's observed (bound) execution is refused by the DB (DataAccessException with 'observed execution binding invalid' for execution CSI, and an FK violation for a published test's CSI). This pins the invariant behind the re-seat. Keep it inside the existing method; do not add a new method.",
+        "stopCondition": "If a route refuses or 404s an unbound row before mutation (so the control half cannot pass), STOP and return to @architect. Do not delete unilaterally and do not weaken the control."
+      },
+      "reconciliation": "Count-neutral: 5 in-place arrangement re-seats under the same names, 0 deletions, 0 ports. List them in the ledger under 'arrangementReseats' with from/to. Had deletion been chosen, the rule would have been after = baseline - 0 - 5 + 0 for those classes, and that option is rejected.",
+      "rejectedAlternatives": [
+        "Delete as unreachable: wrong, because the state is still reachable for unbound rows and the code branch is live; it would also lose the route-uses-own-CSI discrimination.",
+        "Tighten V13 (csi_id NOT NULL, every execution bound) so the state becomes unreachable: a behavioural schema redesign outside the re-baseline's mandate, which would also leave the route's quarantine branch as dead code. Candidate for STUDIO-OBS-011 class-C ruling, not 012A."
+      ],
+      "owners": [
+        {"owner": "@dev (exec-fixtures lane)", "action": "Implement the re-seat helper and the 5 rebuilds as specified; run the 3 classes on the Lane M tree; record evidence."},
+        {"owner": "@qa", "action": "Confirm each rebuilt test still has its control half and its precondition, and that counts are unchanged."}
+      ]
+    },
+
+    {
+      "id": "R3",
+      "topic": "DispatcherIT.aRevokedAuthorizationAtDispatchIsTerminalWithAnExplicitCodeAndNoSend: no dispatch-time authorization recheck for observed runs",
+      "verdict": "CONFIRMED real 012A-scope gap. Security severity HIGH. Owner: Lane K backend in 012A, not OBS-014.",
+      "facts": {
+        "verified": [
+          "At HEAD StudioDispatcher.dispatchClaimed returned into dispatchObserved BEFORE calling authorization.recheck (HEAD lines 276-291). Only the artifact-1 branch was rechecked, and the baseline test passed on that branch.",
+          "The working tree removed the DispatchAuthorization field and constructor parameter from StudioDispatcher. ProvisionalDispatchAuthorization, the only implementation, now has no production consumer.",
+          "ObservedReplayAuthorization.check verifies grant expiry, scope/policy hashes, grant field equality and ledger cancel/revoke/DONE. It does NOT check that the test is deleted or quarantined, that the CSI is still registered, or that a principal is present.",
+          "ObservedReplayAuthorization.refreshRetry mints a fresh grant (TTL <= 30000 ms) after a definite refusal or zero-send outage without re-checking test lifecycle, so grant TTL does not bound exposure across retries.",
+          "observed.job(...) resolves secrets (Vault read-entry audit) before beginResolvedObservedDispatch. A check placed only in the begin transaction would still read secrets for a revoked run."
+        ]
+      },
+      "securityImpact": "A soft-deleted or quarantined draft, or a de-registered CSI, still dispatches: Vault secrets are resolved and sent to the runner. That breaks AC-13a / §5.1.3 ('a permission revoked in between must stop the run ... terminal ERROR with an explicit code'). Because observed is now the only family, the control is unenforced for every run.",
+      "scopeRationale": "This is a capability regression caused by 012A's deletion of the legacy branch that held the only recheck call (baseline green, now red). ADR-SC-005 keeps 'readiness/acceptance/dispatch/ledger/admission'. The fix reuses an existing interface and adds no new governance, so it does not belong to OBS-014 (new P0/P1 governance). The ADR-planned fold of GuidedPublicationAuthorization into DispatchAuthorization stays in OBS-011.",
+      "fixDesign": {
+        "wiring": "Re-add DispatchAuthorization as a REQUIRED constructor dependency of StudioDispatcher (both the @Autowired public constructor and the package-private test constructor), exactly as at HEAD. Do not use @Autowired(required=false): a missing authorizer must fail context start (fail closed). Spring supplies ProvisionalDispatchAuthorization. DispatcherIT's manually built dispatchers pass it explicitly, as they did at HEAD.",
+        "placement": "In StudioDispatcher.dispatchClaimed, after the pending-deadline close and BEFORE observed.binding(...) and dispatchObserved(...), so it runs before refreshRetry, grant minting, any Vault read and any send. Every claimed attempt (first dispatch, lease-expiry re-claim, post-outage retry) passes through dispatchClaimed, so it is rechecked each time.",
+        "call": "authorization.recheck(executionId, testId, csiId, principal). Pass csi_id as (String) row.get(\"csi_id\") rather than String.valueOf(...), so a NULL CSI arrives as null; ProvisionalDispatchAuthorization already refuses null.",
+        "onRevoked": "catch DispatchAuthorization.AuthorizationRevokedException -> LOGGER.warn with executionId and the fixed message only -> close(executionId, ExecutionErrorCode.AUTHORIZATION_REVOKED, now) -> return false. This is the same terminal path as HEAD and the same plain close() that dispatchObserved already uses for a refreshRetry refusal. No retry, no requeue, no secret-use no-send fact (resolution was never entered), no runner send.",
+        "returnValue": "Discard the returned policy identity. The observed binding's currentPolicyHash is the recorded policy identity (exec-fixtures assertionRepoint for theDispatchedPolicyIdentityIsRecordedOnTheExecution). Do not write configuration_snapshot.dispatchPolicyIdentity.",
+        "otherExceptions": "Propagate as at HEAD (the lease expires and the row is re-claimed). Do not convert them into AUTHORIZATION_REVOKED.",
+        "scheduledSynergy": "ProvisionalDispatchAuthorization delegates to StudioScheduledDispatchAuthorization, which returns early for non-scheduled rows. That gives OBS-009 the background-grant recheck at send time with no further dispatcher change.",
+        "residualRisk": "There is a millisecond TOCTOU window between recheck and send (a soft delete committing in between). It existed identically at HEAD and is not a regression. Do not add row locks in 012A."
+      },
+      "tests": "DispatcherIT.aRevokedAuthorizationAtDispatchIsTerminalWithAnExplicitCodeAndNoSend must pass UNCHANGED. Recommended, non-blocking: also assert zero studio_secret_use_audit rows for that execution. The full DispatcherIT, RevocationRotationIT, CancelIT and StudioDispatchMetricsIT must stay green.",
+      "owners": [
+        {"owner": "@dev (Lane K backend)", "action": "Implement fixDesign in StudioDispatcher; no other production file."},
+        {"owner": "@qa", "action": "Confirm the recheck precedes binding lookup/refreshRetry/job resolution in source order, that the DispatcherIT case is green unchanged, and that the HIGH finding is closed in the gate."}
+      ]
+    },
+
+    {
+      "id": "R4",
+      "topic": "Runner coverage deviation: exclude src/run/browser.ts, child.ts, guidedMain.ts from unit-tier v8 coverage; thresholds unchanged",
+      "verdict": "ACCEPT with conditions.",
+      "facts": {
+        "verified": [
+          "test/run/confinement.test.ts AC-1 asserts src/run/browser.ts is the ONLY Playwright importer, and AC-25 forbids any non-fixtures test from importing the browser module or Playwright. child.ts and guidedMain.ts import ./browser.js, so loading them in the unit tier evades AC-25 by indirection.",
+          "Unit-tier ceiling with the three files counted: 81.16% src/run lines (runner-coverage/ledger.json). At HEAD the 85% was met only because the deleted artifact-1 playwrightAdapter.ts was well covered, so the margin came from padding and not from coverage of these files.",
+          "vitest.config.ts lists the three exact paths (no globs) with a comment naming the tier, and all thresholds are unchanged.",
+          "The browser.ts growth versus HEAD (+179/-60) predates 012A per runner-coverage/ledger.json (frozen pre-012A dist comparison). Inferred from that ledger, not from history. Its non-Playwright helpers already live in covered sibling modules (observedBootstrap, appVideoOwnership, scratchLayout, passwordControl)."
+        ]
+      },
+      "rationale": "This assigns code to the tier that can execute it (real Chromium child processes). It does not lower a gate: 10.12 AC-25 says no threshold is lowered, and none is. The alternatives break a NON-NEGOTIABLE confinement rule (mocking Playwright in the unit tier) or lower a threshold, which is forbidden.",
+      "conditions": [
+        "C1: The exclude list is exactly these three paths. Adding any further src/** exclusion needs a new architect ruling. QA diffs the exclude array on the final tree.",
+        "C2: Compensating proof is the fixtures tier on the final tree. The evidence must name the fixtures-tier files that execute each excluded entry point (at least observed-secret-control, observed-bootstrap-video and the guided bootstrap file that starts guidedMain) and record them green, with skipped counts. If the fixtures tier is unrun, this deviation is unsupported and AC-7 is not met.",
+        "C3: No pure (non-Playwright, non-process-entry) logic may be added to the three files. It belongs in a covered sibling module, following the existing pattern. QA reviews the final diff of the three files for this.",
+        "C4: Evidence quotes the unit-tier src/run/** figure with the exclusion applied and the figure without it (81.16% ceiling), so the deviation stays honest.",
+        "C5: Fixtures-tier coverage measurement of these files (NODE_V8_COVERAGE on child processes) is recommended but NOT required. If not done, record it as 'unmeasured' and never as covered."
+      ],
+      "rejectedAlternatives": [
+        "Mock Playwright in a unit test of browser.ts: breaks AC-1/AC-25 confinement and games the tripwire",
+        "Lower src/run/** below 85: forbidden",
+        "New child-process coverage framework as a gate: new tooling and scope beyond 012A"
+      ],
+      "owners": [
+        {"owner": "@dev (runner)", "action": "Satisfy C2 and C4 in evidence; keep C3."},
+        {"owner": "@qa (independent)", "action": "Independently accept or reject per deviation-runner-coverage-scope.json reviewRequired. Verify C1-C4."}
+      ]
+    },
+
+    {
+      "id": "R5",
+      "topic": "CONTROL_WINDOW_MARGIN_MS = 25 (runner acts earlier on a secret-bearing control window; never extends it)",
+      "verdict": "ACCEPT with conditions.",
+      "facts": {
+        "verified": [
+          "runCoordinator.ts:365 windowEnd = nextPoll + 1000 - CONTROL_WINDOW_MARGIN_MS, for secret-bearing runs only (non-secret runs have windowEnd null and are unaffected). requestBudget and timerBudget derive from windowEnd, so both shrink, and nothing is lengthened.",
+          "The constant is exported, documented as a latency promise and not configurable from environment or config.",
+          "Fixtures: observed-secret-control x10 consecutive went from 2/10 pass to 10/10 pass. Unit tier: 712 passed, 0 failed (control-window-margin.json). The fixtures test bound (2000 ms) is unchanged.",
+          "Root cause addressed separately: trackTree no longer blocks the event loop (runner-trackTree/ledger.json). Residual timer lateness in fixtures is 0.2-2.3 ms; probe max is 10-11 ms."
+        ]
+      },
+      "rationale": "OBS-007 AC-13 requires the secret-bearing run to stop within the bound (2 s including request/queue time). Acting up to 25 ms earlier is strictly more conservative, so AC-13 semantics are preserved and tightened. The only cost is availability: an authorized control response that arrives in the last 25 ms of a 1000 ms window now stops the run (fail-closed). That is the correct direction for a secret-bearing run.",
+      "conditions": [
+        "C1: Add one literal guard assertion, e.g. expect(CONTROL_WINDOW_MARGIN_MS).toBeGreaterThan(0) and toBeLessThanOrEqual(50). The current unit expectations are written in terms of the constant, so a negative value (which would extend the window) would not be caught there. This edit belongs to @dev; the architect does not make it.",
+        "C2: The constant stays a hard-coded exported constant. No env/config/Helm knob.",
+        "C3: The fixtures-tier 2000 ms bound in observed-secret-control.test.ts stays unchanged. The final-tree fixtures run is recorded with the measured cutoffs.",
+        "C4: Record the residual: the bound is met with ~25 ms headroom against observed timer lateness (max 10-11 ms in the probe). Under CPU starvation beyond that, the stop can still overrun, because Node timers are not real-time. That is a known limit and not a 012A defect. Control-endpoint latency approaching 975 ms raises spurious-stop risk; operability monitoring for that is tracked by OBS-009/GA §4.G and not here."
+      ],
+      "owners": [
+        {"owner": "@dev (runner)", "action": "Apply C1; keep C2; record C3/C4 in evidence."},
+        {"owner": "@qa", "action": "Verify C1-C3 on the final tree."}
+      ]
+    }
+  ],
+
+  "autoDecisions": [
+    "[AUTO-DECISION] Pull OBS-009 AC-6 (observed schedule lift) into 012A to green the 19? -> NO (reason: depends on the Q2 outcome and G-3 production authorization sources, which are external; ADR-SC-005 places it in OBS-009; it would be scope creep against the story order)",
+    "[AUTO-DECISION] Disable SharedSchedulingIT methods wholesale like StudioScheduleApiIT? -> NO, split instead (reason: they carry Checks-core ADR-004 HTTP/TCP/Splunk coverage that OBS-009 does not touch)",
+    "[AUTO-DECISION] Delete the 5 CSI-mutation tests as unreachable? -> NO, rebuild (reason: the final V13/V15 drafts still allow NULL or changed CSI on unbound rows; the discriminating pair is the only proof that the route authorizes against the execution's own CSI)",
+    "[AUTO-DECISION] Assign the dispatch recheck gap to OBS-014? -> NO, Lane K in 012A (reason: a regression caused by 012A's deletion of the only recheck call site; restores an existing control and adds no new governance)",
+    "[AUTO-DECISION] Require fixtures-tier v8 coverage for the excluded runner files? -> recommended, not required (reason: needs new child-process coverage tooling; honest 'unmeasured' labelling is enough)"
+  ],
+
+  "notRuledHere": [
+    "AdmissionCasIT.rawObservedFailure* x3: failing in the frozen baseline after the OBS-007 secret-login rescope. They still need a named disposition before AC-7 can claim green, but that question was not put to this ruling.",
+    "Legacy POST /internal/studio/executions/{id}/admission admitting an observed execution without an observed receipt (exec-fixtures finding): noted as main-code residue for Lane C/OBS-011. Not ruled here.",
+    "Clock-skew flake exposure (V34 grant issuedAt > clock_timestamp()): noted. Not ruled here."
+  ],
+
+  "securityFlags": [
+    {"id": "R3", "severity": "HIGH", "summary": "Observed runs are dispatched (secrets resolved and sent) for deleted/quarantined drafts or de-registered CSI; the AC-13a recheck is missing on the only execution family."},
+    {"id": "R1", "severity": "MEDIUM", "summary": "Committed V33 code CHECK rejects LEARN_REQUIRED, so scheduled readiness refusals fail with a constraint violation until Lane M V16 lands. This fails closed (no run), but the occurrence audit is lost."},
+    {"id": "R2", "severity": "INFO", "summary": "Rebuilding keeps fail-closed CSI authorization proofs. Deleting them would have removed the only discriminator for route-uses-own-CSI."}
+  ]
+}

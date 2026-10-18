@@ -1,0 +1,133 @@
+{
+ "group": "G2",
+ "story": "STUDIO-OBS-015",
+ "violationsBefore": 118,
+ "violationsAfter": 0,
+ "violationsBeforeByRule": {
+  "LineLength": 6,
+  "NeedBraces": 72,
+  "WhitespaceAround": 4,
+  "Indentation": 36
+ },
+ "checkstyle": "10.18.1 CLI, backend/config/checkstyle/checkstyle.xml, G2 files only: 0 violations",
+ "googleJavaFormat": "1.22.0 --dry-run --set-exit-if-changed on G2 files: exit 0",
+ "files": [
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+   "violationsBefore": {
+    "LineLength": 1,
+    "NeedBraces": 1
+   },
+   "sha256Before": "9791dbbb804c7e8e84a297cbc76714f5bf8b30ce81c3e3bf1951e58e6ba082ee",
+   "sha256After": "a7f3114799e6dfb7238f4393af2b84929926316ab761a43d8db55bcfddef74ac"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java",
+   "violationsBefore": {
+    "NeedBraces": 4
+   },
+   "sha256Before": "bd8fb4bb13b67e4106ca9cbc32fbdcd0e40684758da7bd09fcbbb62883940de2",
+   "sha256After": "473e326ad9e9823bf19a71ff6ddc63adddaf6ae856762036e0092132fa095251"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+   "violationsBefore": {
+    "NeedBraces": 1
+   },
+   "sha256Before": "9fed933563326032fefc7ee15690b4b5602387fc4311431438fa4f2559ecdcfd",
+   "sha256After": "58c846b4f5a0a0029cddcc49a7b46431f2f44d4dedb9a86102c4684064944b86"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+   "violationsBefore": {
+    "LineLength": 2,
+    "NeedBraces": 5
+   },
+   "sha256Before": "afb50a8e6effa201a731728f1a6204262458cf30629d4cc5ce7309ce80b1537f",
+   "sha256After": "32968d0b2e214a9710e92069a8139ef2bd28776665688327ff9dbd55e0837c3f"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/authoring/IncrementalIdentityTest.java",
+   "violationsBefore": {
+    "LineLength": 1
+   },
+   "sha256Before": "5784a85f8e4b30cc55f66a2c1fdb547305029f9094ae981581020447e4a5685e",
+   "sha256After": "4429cd982b0d2560da2c706546b2c38d0ac1b5ad4d4349c8532f04c3930d2de1"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalBoundaryFixture.java",
+   "violationsBefore": {
+    "NeedBraces": 21
+   },
+   "sha256Before": "ee9d39eb09dedc3f44c2ab029785168fcea57ca27f1c9dd8191924369a6a1ca4",
+   "sha256After": "09270e8c61437477ef9ffa91bc912ec540587974e94d721fc124178bbecc4115"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.java",
+   "violationsBefore": {
+    "NeedBraces": 18
+   },
+   "sha256Before": "d1fe55a80620a4b7707194408becaf1be93f3182c5e0c8b459668b37ba4b0a79",
+   "sha256After": "79a6c23ca5ced4fcdc5382d95b1fe60d868373c8eaeef8f26dd888c292513c02"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java",
+   "violationsBefore": {
+    "NeedBraces": 18,
+    "WhitespaceAround": 4,
+    "Indentation": 36
+   },
+   "sha256Before": "8c2fd56e2f60a58b19bc51c9a9ecf97f2dd58b1c9a54196ad8a84cf83c99d654",
+   "sha256After": "616ded592ff92de2137dd5c8f9797eb6eb06ec069135ea31e0eee33f12be77a2"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedBootstrapPlanHistoryIT.java",
+   "violationsBefore": {
+    "NeedBraces": 3,
+    "LineLength": 2
+   },
+   "sha256Before": "193dcdd0f8fd386cbcf6e41b6ffcf22c87c6739a022eb1251324a4ae21d85c75",
+   "sha256After": "be4122d79e2b5acd6eaf185f5c1997467c33af3b71f2ac3188d9b67ba27f5634"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java",
+   "violationsBefore": {
+    "NeedBraces": 1
+   },
+   "sha256Before": "d3486fe374110504141b26df69364597ed480dda6bd10c9fbd4ae96136a201de",
+   "sha256After": "150d2b7d964a0e1710d9996a7a28370cea796c1a40d85d4c06c020b4982d9f66"
+  }
+ ],
+ "bytecodeNeutrality": {
+  "onlyBefore": [],
+  "onlyAfter": [],
+  "byteIdentical": [
+   "com/citi/put/checks/studio/guided/publication/IncrementalBoundaryFixture$Parent.class",
+   "com/citi/put/checks/studio/guided/session/GuidedWireContractTest$CurrentCase.class",
+   "com/citi/put/checks/studio/guided/translation/GuidedTranslationService$ModelApplication.class",
+   "com/citi/put/checks/studio/guided/translation/GuidedTranslationService$PromptInputs.class",
+   "com/citi/put/checks/studio/guided/translation/GuidedTranslationService$Reserved.class",
+   "com/citi/put/checks/studio/guided/translation/GuidedTranslationStore$AcquisitionClaim.class",
+   "com/citi/put/checks/studio/guided/translation/GuidedTranslationStore$AcquisitionDisposition.class"
+  ],
+  "bytecodeIdenticalNotBytes": [
+   "com/citi/put/checks/studio/authoring/IncrementalIdentityTest.class",
+   "com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.class",
+   "com/citi/put/checks/studio/guided/publication/IncrementalBoundaryFixture.class",
+   "com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.class",
+   "com/citi/put/checks/studio/guided/publication/SnapshotBasisValidationTest.class",
+   "com/citi/put/checks/studio/guided/session/GuidedWireContractTest$OutcomeCase.class",
+   "com/citi/put/checks/studio/guided/translation/GuidedBootstrapPlanHistoryIT.class",
+   "com/citi/put/checks/studio/guided/translation/GuidedTranslationService.class",
+   "com/citi/put/checks/studio/guided/translation/GuidedTranslationStore$Attempt.class",
+   "com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.class",
+   "com/citi/put/checks/studio/internal/ProgressCallbackIT.class"
+  ],
+  "different": [
+   "com/citi/put/checks/studio/guided/session/GuidedWireContractTest.class"
+  ]
+ },
+ "bytecodeChangedClasses": [
+  "com/citi/put/checks/studio/guided/session/GuidedWireContractTest.class (test; 3 private helper methods added, see review.md)"
+ ]
+}

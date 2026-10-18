@@ -1,0 +1,89 @@
+{
+  "status": "FROZEN_CANDIDATE_AWAITING_PEER_REVIEW",
+  "scope": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java"
+  ],
+  "evidence": {
+    "receipt": "docs/qa/evidence/STUDIO-OBS-007/astra-publication-capture-pure-original-c5-current/closed-first-boundary.json",
+    "receiptSha256": "6b34ba92aa3268b1794896938a868504350d10b536eb1743cff95a3acf1936a3",
+    "demonstrated": "Original unprofiled C5 reached validator; immutable budget EXPIRED atremaining beforeHTTPsend afterschema/canonical/payload/token. Backendrenewals remainedbelow1s inobservedhandlers, notSDKack proof.",
+    "mechanism": "Installed nativevalidator propagatesroot to nested validators andlogsroot repeatedly atDEBUG inheritedbyROOTTRACE. Exactsessionstrategy alreadyavoids fullroot duplication there; replayrequest stillnativewhole-root.",
+    "unknown": "No exclusive timing attribution among schema/canonical/payload/token fromclosedboundary; no guarantee this rootonlysplit alone makes15s."
+  },
+  "options": [
+    {
+      "option": "Reset/lowerworkcharged/relaxdeadline orTRACE",
+      "selected": false,
+      "tradeoff": "Forbidden changes tobudget/privacy/controlsemantics."
+    },
+    {
+      "option": "Recursivegeneric schema rewrite",
+      "selected": false,
+      "tradeoff": "Unnecessary complexity andcross-applicator semanticproof notestablished; nestedartifact/basis rulesstay intact."
+    },
+    {
+      "option": "Second exactname/epoch inexistingcompiledstrategy",
+      "selected": true,
+      "tradeoff": "Minimalcompiletimeeligibility change; reduces repeatedcombinedrequestdiagnostic root butartifact/basis remainlarge nativechildroots andeffectsizeunproved."
+    }
+  ],
+  "schemaProof": {
+    "expandedSha256": "1f336674cf09a2e5c613195df584c9f34c6a2887620e8367f8a5e62647b54a63",
+    "rootKeys": [
+      "$schema",
+      "title",
+      "type",
+      "additionalProperties",
+      "properties",
+      "required"
+    ],
+    "properties": 9,
+    "required": 9,
+    "allRequired": true,
+    "rootCrossConstraints": false,
+    "defaults": 0,
+    "nestedApplicators": {
+      "allOf": 13,
+      "oneOf": 71,
+      "if": 17,
+      "then": 17,
+      "else": 7,
+      "not": 5,
+      "contains": 1,
+      "uniqueItems": 9
+    },
+    "remainingReferencesDataDependenciesUnevaluated": false,
+    "jsonPointerArrayIndicesHandled": true,
+    "proof": "Schema isrootclosedobjectconstraints AND eachoriginalpropertyschema. Root shell retainsallrootkeywords/propertynames; originalcompiledchildschema retainsallinternalconditional/composition/annotation state. No child split, replacement, guarddrop or altered dialect."
+  },
+  "implementation": "Addone exactv3/replay-validation epochconstant andexactname->epoch switchbeside existingv3/session; keepallcompilation/configguards/root-shell extraction/nativechild evaluation/fallback unchanged. Sameexisting schemascache holds onlycompiledmetadata. Canonicalfirst andsamefixedINVALID_CONTRACT422 remain. Fragments,othernames,unknownschemas/configurations remainoriginalwhole-root nativevalidator.",
+  "purity": "No newI/O,SQL,network,authorityeffect orruntimecache. Existingfrozenclasspath resource reads/schema compilation andTRACE diagnostics remainenabled. Inputcanonicalbytes/HTTPguardorder untouched.",
+  "definingTests": "Extend existingWire differential andunknown-epoch methods tobothnamedroots; original private schema(name) builds nativeoracle independently ofoptimizedstrategy. Replayrequest usesexisting independentfresh-order-reference artifact+basisfixture/profile andsame validcomponentmetadata construction alreadyproveninLowererclient-order test. Positive14/9propertyeligibility. Preservefullsessionmutations/defaultnonmutation; root-only replaymode emits27missing/null/typefieldvariants thenfocusednestedif/allOf positive+negative,operationoneOf negative,duplicateuniqueItems andclosednestedproperty. Keepcanonicalsafety/type/rootclosedchecks. Unknownreplayepoch nativeaccept/reject controls plusfragmentbaseline. SevenWirecases unchangedcount; Lowerer/client budgetorder testsunchanged.",
+  "invariants": [
+    "Existingv3/session strategy unchanged",
+    "No clientorPublisherorbudget change",
+    "No recursivevalidatorstrategy",
+    "All9originalchildschemas complete",
+    "AllpresentchildrenincludingNullNode evaluatewithoutshortcircuit",
+    "Rootrequired/type/additionalProperties retained",
+    "Immutable15s/real1s/2s unchanged",
+    "FullROOT+APPTRACE/all30canaryvariantsunchanged",
+    "Freshpublicationauthority andcapturefixpreserved",
+    "No newmandatoryE2E/framework/server"
+  ],
+  "baseHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "92793bb530ae379e642c20f1898973b426dfcce172f7066372da25c1dd69b13b",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java": "f94da685b470e4ca878ba777491e919a471ef147d43f5307723204701490c43c"
+  },
+  "unchangedHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationBudget.java": "ccababf7de7f83f6b516496962dd6c1ee419855782a4606fc2bc284a64be4437",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": "c9a36bac3fe1cbd5d98b4599734013bb3aa64cdac2922406e1df865d8e909b09",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java": "a07aae4fec5ab4f514f4e0978a3d80e13dc34ffbbeebbaaf1669b349004544d0"
+  },
+  "sharedEdits": false,
+  "buildsExecuted": false,
+  "runtimeStarted": false,
+  "peerDesign": "Independent runtime peer GO; focused nested cases must assert native expectedoutcomes topreventvacuous parity."
+}

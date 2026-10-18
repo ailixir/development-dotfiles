@@ -1,0 +1,58 @@
+{
+  "status": "SOURCE_CAUSE_IDENTIFIED_RUNTIME_PENDING",
+  "originalFailuresPreserved": true,
+  "cause": "Existing tests read/seed earlier migration vocabularies before SECRET_TOO_LONG was added by OBS007 V34. Current API and OpenAPI contain that code.",
+  "proposedResolution": "Port original nonvacuous enum/contract/DDL assertions and partition/dirty-row checks to final V13 vocabulary/V18 head; do not drop cases.",
+  "sourcePointers": [
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/ErrorCodeVocabularyTest.java",
+      "lines": [
+        {
+          "line": 33,
+          "text": "*   <li>the SQL \u2014 parsed out of {@code V20__studio_execution_cancel.sql}'s {@code CHECK \u2026 IN (\u2026)},"
+        },
+        {
+          "line": 53,
+          "text": "Path.of(\"src\", \"main\", \"resources\", \"db\", \"migration\", \"V20__studio_execution_cancel.sql\");"
+        },
+        {
+          "line": 70,
+          "text": "(Map<String, Object>) new Yaml().load(Files.readString(CONTRACT, StandardCharsets.UTF_8));"
+        },
+        {
+          "line": 80,
+          "text": ".isEqualTo(new TreeSet<>(ExecutionErrorCode.values()));"
+        },
+        {
+          "line": 257,
+          "text": "return Files.readString(MIGRATION, StandardCharsets.UTF_8);"
+        }
+      ]
+    },
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/ErrorCodeConstraintMigrationIT.java",
+      "lines": [
+        {
+          "line": 67,
+          "text": "* CANCELLED} arrived with V20 (Studio v1 WP4), so no row can hold it before V20 applies; seeding"
+        },
+        {
+          "line": 68,
+          "text": "* one at V16 would be seeding data V17 rightly refuses. V20's own list is compared with the enum"
+        },
+        {
+          "line": 72,
+          "text": "ExecutionErrorCode.values().stream()"
+        },
+        {
+          "line": 73,
+          "text": ".filter(code -> !ExecutionErrorCode.CANCELLED.equals(code))"
+        },
+        {
+          "line": 365,
+          "text": ".target(target)"
+        }
+      ]
+    }
+  ]
+}

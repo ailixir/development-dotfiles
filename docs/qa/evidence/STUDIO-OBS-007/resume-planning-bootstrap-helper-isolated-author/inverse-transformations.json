@@ -1,0 +1,10 @@
+[
+  {
+    "before": "        Files.writeString(TEMP.resolve(\"package.json\"), \"{\\\"type\\\":\\\"module\\\"}\");",
+    "after": "        Path browserProvenance = TEMP.resolve(\"scripts/browser-provenance.mjs\");\n        Files.createDirectories(browserProvenance.getParent());\n        Files.copy(Path.of(\"../studio-runner/scripts/browser-provenance.mjs\"), browserProvenance);\n        Files.writeString(TEMP.resolve(\"package.json\"), \"{\\\"type\\\":\\\"module\\\"}\");"
+  },
+  {
+    "before": "        Files.writeString(\n            Path.of(\"/tmp/studio-obs005-tested-worker.json\"), workerEvidence.toString());",
+    "after": "        hashes.put(\n            \"scripts/browser-provenance.mjs\",\n            HexFormat.of()\n                .formatHex(\n                    MessageDigest.getInstance(\"SHA-256\")\n                        .digest(Files.readAllBytes(browserProvenance))));\n        Files.writeString(\n            Path.of(\"/tmp/studio-obs005-tested-worker.json\"), workerEvidence.toString());"
+  }
+]

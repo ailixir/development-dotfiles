@@ -42,10 +42,24 @@ fallback which disables the sandbox; see below.)*
    recover its slot (10.13 behavior in the real environment)?
 
 **Folded in from story 10.19 AC-3 (the Node-major mismatch, `ci/stages.md` O-2a).** The internal
-pinned image's `node --version` must match `.nvmrc`/`engines`. Owner of the *resolution* is
+pinned image's `node --version` must match `.nvmrc`/`engines`. ~~Owner of the *resolution* is
 Platform/SRE with @architect (`studio-runner/ci/stages.md:301`): either the internal image ships the
-pinned major under `ED-05`, or ADR-001 §4.2 is amended. Story 10.19 owns only the **verification**
+pinned major under `ED-05`, or ADR-001 §4.2 is amended.~~ Story 10.19 owns only the **verification**
 in the deployed image. Recorded here because this spike is where the image is first run.
+
+**2026-10-17 (@po): Node-pin sub-item (O-2a) resolved in source, ~~in-image re-verification pending
+(015 gate run)~~ in-image verified 2026-10-17: final-gates07 check-pins --require-image exit 0, node
+v24.20.0, nodeMajorPin 24, chromiumBuild 1243 (final-gates07/receipt.json).** *(Later 2026-10-17,
+@po: the image is the local gate build `put-checks-studio-runner:obs015-final07-local`, not the
+deployed internal image, which this spike still has to measure. Path:
+`docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/receipt.json`.)* STUDIO-OBS-015 writer window W9 took the ADR-001 §4.2 amendment route. The runner
+pins moved to Node 24 (`.nvmrc` `24`, `engines.node` `>=24.11.0 <25.0.0`) to match the Playwright
+1.63 image, which ships Node 24.20.0. Evidence:
+`docs/qa/evidence/STUDIO-OBS-015/execution-20261015/ed05-pin-fix01/analysis.md`. The O-2a row is
+now at `studio-runner/ci/stages.md:284`. The internal pinned image must ship Node 24. **This spike
+and `ED-05` stay open**: the internal image, non-root user, seccomp and CA bundle (questions 1–5)
+remain Platform/SRE's. **Open item:** the external CI pipeline must move to Node 24 (@devops,
+outside the repo).
 
 ---
 
@@ -73,7 +87,7 @@ _Fill in during the spike. Leave a row empty rather than plausible._
 | 4. Read-only root + `emptyDir` scratch + `/dev/shm` | | | | |
 | 5. Internal image: non-root, CA bundle, init/reaping | | | | |
 | 6. Hung child killed; pod recovers its slot | | | | |
-| O-2a. Image `node --version` vs `.nvmrc`/`engines` | | | | |
+| O-2a. Image `node --version` vs `.nvmrc`/`engines` | **Not measured in a cluster.** Pins resolved in source (`.nvmrc` `24`, `engines.node` `>=24.11.0 <25.0.0`), ~~in-image re-verification pending (015 gate run)~~ in-image verified 2026-10-17: final-gates07 check-pins --require-image exit 0, node v24.20.0, nodeMajorPin 24, chromiumBuild 1243 (final-gates07/receipt.json), on the local gate build `put-checks-studio-runner:obs015-final07-local`. The deployed internal image is unmeasured. | `docs/qa/evidence/STUDIO-OBS-015/execution-20261015/ed05-pin-fix01/analysis.md` (the pin change only, not a spike finding); `docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/receipt.json` (local-image check, not a spike finding) | 2026-10-17 | @po (Pax), bookkeeping |
 
 ## Fallback if negative
 

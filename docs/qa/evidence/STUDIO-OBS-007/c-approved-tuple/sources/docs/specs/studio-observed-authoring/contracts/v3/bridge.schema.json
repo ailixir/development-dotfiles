@@ -1,0 +1,978 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json",
+  "definitions": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 3
+        },
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "workerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "ownerFence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "contextId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "contextRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "sourceRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "configurationRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "versions": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "sessionId",
+        "workerId",
+        "ownerFence",
+        "scopeHash",
+        "contextId",
+        "contextRevision",
+        "sourceRevision",
+        "configurationRevision",
+        "versions"
+      ]
+    },
+    "prepare": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 3
+        },
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "workerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "ownerFence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "contextId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "contextRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "sourceRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "configurationRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "versions": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
+        },
+        "proposal": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json"
+        },
+        "requestDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "sessionId",
+        "workerId",
+        "ownerFence",
+        "scopeHash",
+        "contextId",
+        "contextRevision",
+        "sourceRevision",
+        "configurationRevision",
+        "versions",
+        "proposal",
+        "requestDigest",
+        "expiresAt"
+      ]
+    },
+    "preparation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 3
+        },
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "workerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "ownerFence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "contextId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "contextRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "sourceRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "configurationRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "versions": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
+        },
+        "preparationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "requestDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "evidenceHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "authoredInputsHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "sessionId",
+        "workerId",
+        "ownerFence",
+        "scopeHash",
+        "contextId",
+        "contextRevision",
+        "sourceRevision",
+        "configurationRevision",
+        "versions",
+        "preparationId",
+        "requestDigest",
+        "evidenceHash",
+        "authoredInputsHash",
+        "expiresAt"
+      ]
+    },
+    "dispatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 3
+        },
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "workerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "ownerFence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "contextId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "contextRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "sourceRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "configurationRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "versions": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
+        },
+        "proposal": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json"
+        },
+        "ledger": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/ledger.schema.json"
+        },
+        "preparationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "consumerEdges": {
+          "type": "array",
+          "maxItems": 1,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/consumer-edge.schema.json"
+          }
+        },
+        "secret": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "secretId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "versionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "allowedOrigins": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 16,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 512,
+                "pattern": "^https?://[^/?#]+$"
+              }
+            }
+          },
+          "required": [
+            "secretId",
+            "value",
+            "versionId",
+            "allowedOrigins"
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "sessionId",
+        "workerId",
+        "ownerFence",
+        "scopeHash",
+        "contextId",
+        "contextRevision",
+        "sourceRevision",
+        "configurationRevision",
+        "versions",
+        "proposal",
+        "ledger",
+        "preparationId",
+        "consumerEdges"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "proposal": {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "fill"
+                      },
+                      "value": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "secretRef"
+                          }
+                        },
+                        "required": [
+                          "kind"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  }
+                },
+                "required": [
+                  "operation"
+                ]
+              }
+            },
+            "required": [
+              "proposal"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "secret": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "secretId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "versionId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "allowedOrigins": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 16,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "format": "uri",
+                      "maxLength": 512,
+                      "pattern": "^https?://[^/?#]+$"
+                    }
+                  }
+                },
+                "required": [
+                  "secretId",
+                  "value",
+                  "versionId",
+                  "allowedOrigins"
+                ]
+              }
+            },
+            "required": [
+              "secret"
+            ]
+          },
+          "else": {
+            "type": "object",
+            "properties": {
+              "secret": {
+                "not": {}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "stop": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "schemaVersion": {
+              "const": 3
+            },
+            "sessionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "workerId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "ownerFence": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "scopeHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "contextId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "contextRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "sourceRevision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "configurationRevision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "versions": {
+              "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
+            },
+            "reason": {
+              "enum": [
+                "CANCELLED",
+                "EXPIRED",
+                "UNKNOWN_OUTCOME",
+                "LEASE_LOST",
+                "CONTEXT_LOST",
+                "REVOKED"
+              ]
+            }
+          },
+          "required": [
+            "schemaVersion",
+            "sessionId",
+            "workerId",
+            "ownerFence",
+            "scopeHash",
+            "contextId",
+            "contextRevision",
+            "sourceRevision",
+            "configurationRevision",
+            "versions",
+            "reason"
+          ]
+        },
+        {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/assignment-stop.schema.json"
+        }
+      ]
+    },
+    "bootstrap": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 3
+        },
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "workerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "ownerFence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "contextId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "contextRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "sourceRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "configurationRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "versions": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
+        },
+        "executionEvidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "initialBlank"
+            },
+            "sessionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "contextId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "creationId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "documentId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "bootstrapId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "url": {
+              "const": "about:blank"
+            },
+            "origin": {
+              "type": "null"
+            },
+            "generation": {
+              "const": 0
+            }
+          },
+          "required": [
+            "kind",
+            "sessionId",
+            "contextId",
+            "creationId",
+            "documentId",
+            "bootstrapId",
+            "url",
+            "origin",
+            "generation"
+          ]
+        },
+        "evidenceHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "sessionId",
+        "workerId",
+        "ownerFence",
+        "scopeHash",
+        "contextId",
+        "contextRevision",
+        "sourceRevision",
+        "configurationRevision",
+        "versions",
+        "executionEvidence",
+        "evidenceHash"
+      ]
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 3
+        },
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "workerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "ownerFence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "contextId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "contextRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "sourceRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "configurationRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "versions": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
+        },
+        "ledger": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/ledger.schema.json"
+        },
+        "availability": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "bindingId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "producerAdmissionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "contextId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "workerId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "ownerFence": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 2147483647
+                }
+              },
+              "required": [
+                "bindingId",
+                "producerAdmissionId",
+                "contextId",
+                "workerId",
+                "ownerFence"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errorMessage": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "description": "Already-redacted failure diagnostic; redact actual resolved/known values before bounding or serialization. Not replay authority."
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "sessionId",
+        "workerId",
+        "ownerFence",
+        "scopeHash",
+        "contextId",
+        "contextRevision",
+        "sourceRevision",
+        "configurationRevision",
+        "versions",
+        "ledger",
+        "availability"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "errorMessage": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "errorMessage"
+            ]
+          },
+          "then": {
+            "properties": {
+              "ledger": {
+                "properties": {
+                  "dispatchCount": {
+                    "const": 1
+                  },
+                  "state": {
+                    "enum": [
+                      "FAILED",
+                      "UNKNOWN_OUTCOME"
+                    ]
+                  },
+                  "outcomeCode": {
+                    "not": {
+                      "enum": [
+                        "OK",
+                        "PENDING"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "dispatchCount",
+                  "state",
+                  "outcomeCode"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "ledger"
+            ],
+            "type": "object"
+          }
+        }
+      ]
+    },
+    "lifecycle": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "schemaVersion": {
+              "const": 3
+            },
+            "sessionId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "workerId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "ownerFence": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "scopeHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "contextId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "contextRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "sourceRevision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "configurationRevision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "versions": {
+              "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
+            },
+            "reason": {
+              "enum": [
+                "CANCELLED",
+                "EXPIRED",
+                "UNKNOWN_OUTCOME",
+                "LEASE_LOST",
+                "CONTEXT_LOST",
+                "REVOKED"
+              ]
+            }
+          },
+          "required": [
+            "schemaVersion",
+            "sessionId",
+            "workerId",
+            "ownerFence",
+            "scopeHash",
+            "contextId",
+            "contextRevision",
+            "sourceRevision",
+            "configurationRevision",
+            "versions",
+            "reason"
+          ]
+        },
+        {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/assignment-lifecycle.schema.json"
+        }
+      ]
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 3
+        },
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "workerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "ownerFence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "contextId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "contextRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "sourceRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "configurationRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "versions": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
+        },
+        "observation": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/observation.schema.json"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "sessionId",
+        "workerId",
+        "ownerFence",
+        "scopeHash",
+        "contextId",
+        "contextRevision",
+        "sourceRevision",
+        "configurationRevision",
+        "versions",
+        "observation"
+      ]
+    }
+  }
+}

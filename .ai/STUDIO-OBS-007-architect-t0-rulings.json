@@ -1,0 +1,79 @@
+{
+  "story": "STUDIO-OBS-007",
+  "date": "2026-10-10",
+  "owner": "Aria / Lane C",
+  "scope": "T0 architect reconciliation; no implementation or oracle PASS claimed",
+  "rulings": [
+    {
+      "id": "RULING-1",
+      "acceptanceCriteria": [
+        14,
+        19
+      ],
+      "decision": "Preserve the exact resolution outcome enum; add a separate usage_outcome column for USAGE codes (USED, NOT_USED, REFUSED or the guided ledger outcome). RELEASE forbids usage_outcome; USAGE requires it. Neither column stores a value.",
+      "oracle": "C-11 distinguishes declared-but-unreached from typed secrets; SEC-9 scans values and proves append-only."
+    },
+    {
+      "id": "RULING-2",
+      "acceptanceCriteria": [
+        6,
+        19
+      ],
+      "decision": "Digest the canonical dispatch body after removing the entire secret object. Independently bind the safe secret identity (secretId and sourceInputId) in the idempotency entry and compare it before returning a replay response. Values, Vault versions and origin lists never enter that entry.",
+      "oracle": "C-15: rotation changes no digest; changed secretId or sourceInputId refuses with IDEMPOTENCY_CONFLICT."
+    },
+    {
+      "id": "RULING-3",
+      "acceptanceCriteria": [
+        13,
+        19
+      ],
+      "decision": "Retain the worker revocation sweep for write-once revoked_at and audit. Deliver revocation independently through a synchronous names-only mayUse check on replay control reads/progress acknowledgements and guided claim/renewal. For secret-bearing runs/sessions, schedule control/renew requests on an absolute one-second cadence and cap each request at one second. A missed deadline fails closed by stopping locally; an explicit authorization denial stops guided runtime with REVOKED. Do not wait for a two-second sweep followed by another two-second poll. No new secret-bearing channel is added.",
+      "bound": "At most one second until the next request plus one second for its response/deadline, plus one already in-flight step. Network/provider failure cannot prolong fill authority because the request deadline stops locally.",
+      "oracle": "C-4 times from mayUse=false to local cancellation on guided learn and observed replay; exercises actual observed definite-refusal retry and Vault outage paths, not compile-path behavior. Sweep/audit evidence remains required."
+    },
+    {
+      "id": "RULING-4",
+      "acceptanceCriteria": [
+        3,
+        6,
+        7,
+        19
+      ],
+      "decision": "Keep publication/readiness verification pure: reject secret-token overlap, invalid provenance and literal secret uses without resolving Vault. Add a transient resolved-value check on each named verifier: ObservedRevisionVerifier.assertResolvedSecretLiterals receives the ephemeral resolution object inside ObservedReplayAuthorization.job(), and validator/observedReplay exposes the equivalent check invoked when Execute3.secrets arrives before execution. Both refuse a fill literal equal to a resolved declared secret. Neither verifier performs a Vault read, persists the values, nor retains them after the existing resolution/child lifetime.",
+      "oracle": "SEC-8 mutates an artifact to a resolved canary literal and proves both named verifiers reject; token-span mutation is rejected on the pure path; resolution remains inside ordinary dispatch and artifactHash remains rotation-invariant.",
+      "poAmendment": "None: both named verifiers perform the exact refusal, through explicit pure and transient entry points."
+    },
+    {
+      "id": "RULING-5",
+      "acceptanceCriteria": [
+        14,
+        19
+      ],
+      "decision": "Partition the audit by release_occurred_at: every USAGE row carries its RELEASE timestamp, while occurred_at records its actual event time. Keep related RELEASE/USAGE rows in the same retention month. Use an immutable insert trigger plus lock to prove the full scoped RELEASE locator; retain real session/admission/execution foreign keys. No self-FK is required by AC-14. Ordinary UPDATE/DELETE remains trigger-refused; the existing privileged partition-detach/drop pruner applies its existing twelve-month window. Backend adds this audit family/time-key to existing partition/bootstrap/health/retention manager allowlists.",
+      "oracle": "PostgreSQL migration/retention test proves wrong scope/locator refusal, ordinary UPDATE/DELETE refusal, cross-month USAGE release-month alignment and detach/drop pruning using the existing retention window.",
+      "qualification": "Root explicitly accepted this design after considering self-FK detach complexity; tests must prove the immutable scoped join and partition retention without claiming a foreign key exists."
+    },
+    {
+      "id": "RULING-6",
+      "acceptanceCriteria": [
+        14,
+        19
+      ],
+      "decision": "RELEASE means a release authorization decision, including zero-send refusals. Normal decisions carry decision_stage DISPATCH. Mid-run revocation appends a new RELEASE event with decision_stage LIVE_RECHECK and outcome REVOKED_MID_RUN, affected_release_id pointing to the prior RESOLVED release and its unchanged release_occurred_at. A full identity trigger proves scope/attempt/secret/coordinate; unique affected release+retention key prevents repeat. This event causes no send, no new release sequence and no additional terminal USAGE summary. Existing rows are never overwritten.",
+      "unreachedSecret": "A declared but unreached guided secret has never been resolved: append terminal USAGE NOT_USED with null release_id, admission_id and vault_version, declaring coordinate and session/attempt identity; release_occurred_at equals its own occurred_at solely for retention. This is the only unlinked usage variant. All other usage summaries require the scoped actual RELEASE. Do not fabricate a RELEASE or read Vault to satisfy an audit relationship. Resolution outcome is null only in this unlinked NOT_USED variant because no resolution decision occurred; every actual RELEASE and linked USAGE requires a nonnull member of the exact outcome enum. Null means absence, never an added outcome code.",
+      "oracle": "C-11 proves exactly one usage summary per declared secret including no-release NOT_USED; C-4 proves one unique live-recheck revocation event, no extra send, correct scoped linkage and immutable earlier usage.",
+      "schema": "row_kind remains RELEASE|USAGE; exact resolution outcome enum unchanged; decision_stage and affected_release_id carry safe structural event metadata only.",
+      "poAmendment": "Pending narrow independent PO delta: AC-14 outcome enum wording needs explicit null absence for unreached NOT_USED. Root owns amendment/revalidation; no GO claim here."
+    }
+  ],
+  "ownershipReconciliation": {
+    "laneC": "All story Lane C files; generated backend classpath copy is build-time backend/build.gradle.kts processResources output, not a source path (KI-1).",
+    "laneB": "GuidedTranslationConfiguration and GuidedSourceClassifier keep compile.CredentialPatternScreen until OBS-012A relocates it (KI-2). Root owns T1 RunnerReport and ExecutionControl DTO additions and mechanical producer callers; B owns behavioral implementation after T1.",
+    "laneR": "Root-approved mechanical v3 account/type removal, union narrowing, exact patternProperties validator support and version/fixture changes in T1; behavioral secret pipeline after compile-green release.",
+    "dataEngineer": "V34 and migration-only tests, including v3 validator-receipt/publication attempt guards, ck_observed_revision_origin artifact=3, observation schemaVersion=3 with closed coverage.passwordControls, and execution/receipt tuple checks. Named AC-15 list is not permission to leave other v2 guards blocking the v3 contract.",
+    "sequencing": "T0 security/data/root reconciliation before product edits; Lane C contracts and mechanical compile fixes form T1 before T2/T3; serialized Gradle lane owned by root."
+  },
+  "erratum": "Design R3 SEC-9 three-path residue becomes GUIDED and OBSERVED_REPLAY; authorization outcomes and usage outcomes remain distinct. Design wording correction does not amend any story AC.",
+  "verification": "No oracle executed and no compile-green claim at T0."
+}

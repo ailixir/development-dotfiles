@@ -1,0 +1,52 @@
+{
+  "story": "STUDIO-OBS-015",
+  "task": "frontend studioContract.test.ts diagnosis (read-only on source)",
+  "date": "2026-10-16",
+  "openapi_sha256_current": "c053a7f75656628a1b3e031e02f40f4982aa3a85fc241a4c87c7229460f5d70f",
+  "openapi_sha256_baseline_afec6c04": "afec6c04cdd5bcc19e42b83f83656a342165c5e04407e90a7206de0b40c46183",
+  "source_files_patched_sha256_before": {
+    "frontend/src/services/mocks/studio/fixtures.ts": "8ca48769d6d1ea67da31de391c917fde20c61224a309ab26f0bca9d016749ac4",
+    "frontend/src/services/mocks/studio/readinessFixtures.ts": "96d91060c516e1cebc27014545e2e92b7ce25d62405f555da8383930187056d1",
+    "frontend/src/services/mocks/studio/studioContract.test.ts": "fcc4bbad64e79db20d7472e79414a429825e0097b5d84a6bb3546df778ee0c6a",
+    "frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx": "480d14cd5a320b94e27b35dce3aef02bc00f140489d1200217fd9b44e8c91622"
+  },
+  "results": {
+    "contract_file_current_tree": {
+      "tests": 69,
+      "failed": 3
+    },
+    "contract_file_vs_baseline_openapi_afec6c04_probe": {
+      "tests": 69,
+      "failed": 0
+    },
+    "frontend_full_suite_current_tree": {
+      "files": 56,
+      "tests": 701,
+      "passed": 698,
+      "failed": 3,
+      "skipped": 0,
+      "flags": "--minWorkers=1 --maxWorkers=3"
+    },
+    "frontend_full_suite_patched_copy": {
+      "files": 56,
+      "tests": 701,
+      "passed": 701,
+      "failed": 0,
+      "note": "patch applied to a scratchpad copy of frontend/, not to the tree"
+    }
+  },
+  "patch_check": "git apply --check -p0 fix.patch from repo root: OK",
+  "artifacts": {
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/frontend-contract-diagnosis01/contract-run.log": "3f27beb913697bb856f01452f202dc4af2a30481daa327dd72be1c5facffd2de",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/frontend-contract-diagnosis01/fix.patch": "c335b3a2b3bf74cfc9c3de712bdbce9416a42b22a5bb7ba62dcc144f1401e378",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/frontend-contract-diagnosis01/full-vitest-patched.json": "aa19da9c9457fab27c6314593f750b4939b78fa9f3a43bb17e4ed701105d5322",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/frontend-contract-diagnosis01/full-vitest-patched.log": "d5a2f46083b21af4c0775af104bd0946eb442c27a8eeda7334a820bd3ecc370f",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/frontend-contract-diagnosis01/full-vitest.json": "2f7c4bc1ecb33a8a7a40369541830fac6b0d7bc7049344a2be66246a4634380b",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/frontend-contract-diagnosis01/full-vitest.log": "14cbf7db14f9b28a7dc4dc6264065560fe249c8dbc4494f4472a38669a20824a",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/frontend-contract-diagnosis01/probe/probe-baseline.log": "6884c127d541d17c89e8eeba71ad7b19d96c5a8f28dda315de459539cf518501",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/frontend-contract-diagnosis01/probe/probe-both.log": "a1414e8c9c2ab4d4b9214a89e1e04aaa82f25193c85b7b4b923676c7a7fc96fd",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/frontend-contract-diagnosis01/probe/studioContract.baseline.test.ts": "d54eebb2d448237a69c535ad0a97466a213752cf2b13994b325f3af1d4aa0431",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/frontend-contract-diagnosis01/probe/studioContract.patched.test.ts": "9c1dcad09be10301e44c1fe643e63c2c259e4106894ff77b633661b7aa33f2d6",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/frontend-contract-diagnosis01/probe/vitest.probe.config.ts": "6a210d377693d9854cd67a31610097e043d60b34f7c2861234d64f12320a8a27"
+  }
+}

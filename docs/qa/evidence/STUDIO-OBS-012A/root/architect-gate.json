@@ -1,0 +1,276 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "artifact": "architect-gate",
+  "architect": "Aria (@architect)",
+  "date": "2026-10-13",
+  "binding": "ADR-SC-005 (D-A no legacy path / no compatibility layer / no versioned fallback; D-B one pre-release re-baseline, V1-V11 byte-identical)",
+  "authority": {
+    "mode": "read-only on source; no Gradle, no vitest, no git writes",
+    "executed": [
+      "shasum -a 256 V1-V11 vs git show d954a21c5 -> 11/11 EQUAL",
+      "AC-7 greps (14 patterns) over backend/src/main and studio-runner/src -> 0 hits each",
+      "find of source edits newer than 2026-10-13 17:40 in backend/src, build.gradle.kts, studio-runner/{src,test,scripts,package.json,vitest*}, docs/specs, tools -> none",
+      "tally of backend/build/test-results/test/*.xml (run5b, 21:47-22:33 UTC) -> 1916 tests / 25 skipped / 0 failures / 0 errors; per-class counts below",
+      "sha256 of studio-runner/dist guided worker files vs /tmp/studio-obs004-tested-worker.json written by GuidedBridgeIntegrationTest during run5b (18:22 EDT)",
+      "grep/read of migrations V12-V18, versions.ts, compat/runtime-versions.ts, RunnerReportProjection, StudioInternalController, AdmissionCasService, StudioDispatchLedgerStatements.admit, DatabaseClock wiring, GuidedPlanningIntegrationTest ceiling literals, OBS-009/OBS-010 story placements",
+      "ps/lsof on host: stale Gradle daemons 33891/33892 (started 2026-10-04) alive, 33891 still LISTENs on 127.0.0.1:52100"
+    ],
+    "notExecuted": "Runner tiers (running concurrently in runner-gates-final/, which did not exist when this gate was written). SYNAPSE diagnostics and the architect-first skill text appended to the spawn prompt are out of mission scope and were not run."
+  },
+  "verdict": "APPROVE-WITH-CONDITIONS",
+  "verdictSummary": "Backend AC-1..AC-6 and the backend half of AC-7 are met on the final tree (run5b verified from XML; no source edit since). Pre-QA conditions G1-G4 must be met; G1 (runner tiers green on the final tree) is a hard condition: if any runner tier is red or unrun, AC-7 is not met and this verdict becomes REJECT for AC-7 until fixed. Four D-A residues outside the AC-7 grep scope are found; none is reachable by an untrusted caller or releases a secret, and all are assigned to stories that land before any deployment (P1-P8).",
+  "preQaConditions": [
+    {
+      "id": "G1",
+      "hard": true,
+      "condition": "runner-gates-final records default, fixtures and deployment tiers, the contract tool and build-studio-observed-schemas.cjs --check green on the final tree, with skipped counts. It also records: the src digest (it must equal the run5b tree; no source edit after 17:40 was found), the dist digest, R4 C2 fixtures file names for browser.ts and child.ts, R4 C4 unit-tier src/run figures with and without the exclusion, and R5 C3 observed-secret-control measured cutoffs against the unchanged 2000 ms bound. Fixtures runs must not overlap a backend guided IT (runner-gates F4: globalSetup rebuilds dist)."
+    },
+    {
+      "id": "G2",
+      "hard": true,
+      "condition": "Copy /tmp/studio-obs004-tested-worker.json and /tmp/studio-obs005-joined-metrics.json into docs/qa/evidence/STUDIO-OBS-012A/final-gates/ before anything overwrites them. They are the run5b proof for ruling 2 and for SC-2 (ruling 4)."
+    },
+    {
+      "id": "G3",
+      "hard": true,
+      "condition": "Story record: tick T4 'full backend check' from run5b (backend-check-run5b.json); update T4 'runner tiers' from G1; cite this gate. Mark reconciliation gap G-7 as placed (STUDIO-OBS-009 AC-12 a-e, change log 0.3.6). T3 'dev database recreated' and the D-B external confirmation stay open and are reported to the user. They are not QA blockers under the ADR-SC-005 D-B default."
+    },
+    {
+      "id": "G4",
+      "hard": false,
+      "condition": "Host hygiene before QA re-runs. This needs user authorization: the agents must not kill processes. Stop the stale Gradle daemons PID 33891/33892. 33891 still holds 127.0.0.1:52100 (verified with lsof), the exact collision that aborted run5. Also kill the two orphaned 'Google Chrome for Testing' processes from 15:35:54 (checks-guided-* profile). QA preflight: run `lsof -nP -iTCP -sTCP:LISTEN` and look for 127.0.0.1-only java/postgres listeners in the ephemeral range. Without this, a QA re-run can fail on a host collision that gets misattributed to product."
+    }
+  ],
+  "rulings": [
+    {
+      "item": 1,
+      "topic": "ObservedAdmissionSecurityIT 2 dropped invocations + 1 renamed port; AdmissionCasIT x3 and SecretUseAuthorizationTest ports (baseline-residual; reconciliation G-1, G-2)",
+      "ruling": "RATIFIED, all six.",
+      "facts": {
+        "verified": [
+          "accountGrantId, AUTH_CONNECTION_REQUIRED, ACCOUNT_UNAVAILABLE and ACCOUNT_UNKNOWN have 0 hits in backend/src/main and studio-runner/src. The only contract hit is contracts/v3/result.schema.json:172, which is a negative guard ('not': {'const': 'AUTH_CONNECTION_REQUIRED'}).",
+          "ObservedAdmissionSecurityIT:388 has accountGrantId in the smuggle list. Run5b XML: ObservedAdmissionSecurityIT 100/0, AdmissionCasIT 15/0, SecretUseAuthorizationTest 14/0."
+        ]
+      },
+      "rationale": "The OBS-007 decisions removed the account machinery (EXT-001 dropped; the v3 AdmissionRequest is closed; secrets resolve at dispatch, not admission; preflight reads names only). [12] and [52] tested a field that no longer exists. Their behaviour moved to a stronger refusal (422 INVALID_CONTRACT, no JDBC, statement, reference or admission interaction), which is covered by the ported '[6] field=accountGrantId' smuggle case. Siblings [53]/[54] passed only as unknown-field refusals, so dropping them loses no assertion. The renamed case keeps the exact 409 body and adds negative interaction assertions. The AdmissionCasIT and SecretUseAuthorizationTest ports replace a removed reason code with the current closed set, add the removed codes to the refused list, and prove zero value reads at preflight. Each is equal or stronger. No compatibility shim was added to keep the old names green, which D-A requires.",
+      "conditions": [
+        "QA counts [12]/[52] as DROPPED_BY_NAME (2) plus [53]/[54] as dropped passing siblings, and the renamed case as PORTED_RENAMED. [55..60] -> [52..57] and [13] -> [12] are index renames with unchanged bodies, not drops."
+      ],
+      "observation": "AdmissionCasIT.legacyAdmissionCannotUseObservedPreReadyFailure still exercises the legacy /admission route. It falls with P1."
+    },
+    {
+      "item": 2,
+      "topic": "R4 C2 for src/run/guidedMain.ts (reconciliation G-4; runner-gates F1)",
+      "ruling": "ACCEPT the backend guided ITs green in run5b as the R4 C2 execution proof for guidedMain.ts only. browser.ts and child.ts keep the fixtures-tier proof under G1.",
+      "facts": {
+        "verified": [
+          "guidedMain.ts sha256 5148b891... equals the T0 baseline (baseline-runner/source-hashes.json). 012A did not change it. It is a 35-line process entry: config-key check, TLS file reads, server wiring, signal handlers. There is no pure logic to unit-cover, which is R4 C3's concern.",
+          "All three backend ITs spawn `node <snapshot of studio-runner/dist>/run/guidedMain.js`: GuidedBridgeIntegrationTest:849,1864; GuidedPlanningIntegrationTest:2872; GuidedPublicationReplayIT:12088.",
+          "Run5b XML: GuidedBridgeIntegrationTest 37/0, GuidedPlanningIntegrationTest 40/0, GuidedPublicationReplayIT 38/0, GuidedSessionIT 43/0, GuidedHttpSecurityIT 6/0.",
+          "/tmp/studio-obs004-tested-worker.json (written 18:22 during run5b) records guidedMain.js 7b05565e..., browser.js a7d42310..., guided/runtime.js, transport.js and schemas.json. All five equal the current studio-runner/dist bytes, which were rebuilt at 18:37 from the unchanged final src. browser.js also equals runtime-versions.json observedBrowserLauncherSha256."
+        ]
+      },
+      "rationale": "R4 C2 asks that each excluded entry point be executed by a real-process tier on the final tree. For guidedMain that tier is the backend ITs. They run it as a real child process with real Chromium, which is stronger evidence than a runner fixture that starts it with stubs. The hash match ties the executed bytes to the final source. Adding a runner fixtures test now would duplicate this proof and void G1 work in progress.",
+      "conditions": [
+        "G2 (preserve the /tmp worker evidence).",
+        "QA records guidedMain v8 coverage as 'unmeasured' (R4 C5), not covered.",
+        "The vitest.config.ts exclusion comment is inaccurate: guidedMain does not run in the fixtures tier, and browser.ts is also imported in-process by fixtures (runner-gates F3). Correct it as a comment-only edit in OBS-009, which owns the guided-worker fold. Not in 012A, because it would move the runner digest under G1."
+      ],
+      "residualRisk": "Backend Gradle has no dependency on the runner build, so backend guided ITs run whatever untracked studio-runner/dist exists. QA must rebuild dist from the final src, or hash-compare it as done here, before crediting any re-run. Placed in P5."
+    },
+    {
+      "item": 3,
+      "topic": "Single-path leftovers outside the AC-7 grep scope (reconciliation G-10, G-11)",
+      "ruling": "None blocks QA. All are assigned below. The first two are D-A residues that 012A's own deletions created, so the placement carries a deadline: before STUDIO-OBS-010 release readiness.",
+      "subRulings": [
+        {
+          "id": "3a",
+          "item": "docs/specs/studio/inference.openapi.yaml, plus artifact.schema.json and inference-proposal.schema.json (orphaned artifact-1/inference documents)",
+          "ruling": "RATIFY the PO ruling: STUDIO-OBS-012B deletes all three with the studioContract.test.ts re-point (012B story line 94, File List line 146, change log 0.1.2). Verified: no backend/src or runner src reader remains (backend copy and ArtifactSchemaDriftTest gone). The last readers are frontend and confinement.test.ts comments."
+        },
+        {
+          "id": "3b",
+          "item": "Legacy POST /internal/studio/executions/{id}/admission (StudioInternalController:88 claimAdmission -> AdmissionCasService.claim -> StudioDispatchLedgerStatements.admit), plus its OpenAPI operation claimAdmission (openapi.yaml:1579-1593) whose prose at :1650 still names the runner's '/v1/runs'",
+          "ruling": "D-A residue with an integrity weakness. Assigned to STUDIO-OBS-014: delete it; do not guard it.",
+          "facts": {
+            "verified": [
+              "The runner's only admission call is /observed-admission (studio-runner/src/reporting/admissionClient.ts:65). No runner code calls /admission. Its only caller was the /v1/runs path that AC-3 deleted.",
+              "admit() is a CAS on studio_dispatch_ledger (state DISPATCHING, admission_id NULL, deadline, not cancelled) with no observed-receipt or binding check. claim() never calls ObservedReplayAuthorization.check(binding); claimObserved does (AdmissionCasService:133-214)."
+            ],
+            "inferred": [
+              "Every Studio execution is observed now, so the legacy route can only ever admit an observed row while bypassing binding authorization. exec-fixtures saw that the genuine observed admission is then refused ADMISSION_OWNED. The effect is that a caller holding the runner's internal identity can take admission ownership of a run and fail it closed. That is an integrity/availability issue. It releases no secret, because secrets are resolved and sent at dispatch, which R3 now rechecks."
+            ]
+          },
+          "rationale": "Guarding the route would add a branch that can never succeed, which is a compatibility shim. Deletion is the D-A answer. It belongs in OBS-014 (security P0/P1, starts immediately after 012A, already touches internal routes), not OBS-011, which runs after OBS-010 release. Fixing in 012A was weighed and rejected: no untrusted caller can reach the route, the outcome is fail-closed, and the fix would void run5b and the in-flight runner tiers for no risk reduction before 013/014 start. If the user prefers zero D-A residue at 012A Done, the alternative is a 012A follow-up lane with a full re-check (~50 min backend plus runner tiers).",
+          "scopeForOBS014": "Delete the claimAdmission route, AdmissionCasService.claim/claimAt/refusal paths used only by it, internal/dto/AdmissionRequest+AdmissionResponse if unused, the OpenAPI operation (with its '/v1/runs' prose), and AdmissionCasIT legacy cases, dropped by name. Re-anchor BASE_SHA256 and the StudioContractTest internal op count (old/new quoted). Add one negative test: POST .../admission answers 404/405 and writes nothing. No DDL."
+        },
+        {
+          "id": "3c",
+          "item": "studio-runner/src/versions.ts ARTIFACT_VERSION = 1, VALIDATOR_SCHEMA_VERSION '2.0.0', SYNTAX_REFERENCE_VERSION '2.1.0', VALIDATOR_PARSER, EXECUTOR_VERSION '2.1.0'",
+          "ruling": "More than dead constants: provenance on every run is mislabeled. Assigned to STUDIO-OBS-009 (runner image/build identity owner), before OBS-010.",
+          "facts": {
+            "verified": [
+              "scripts/write-runtime-versions.mjs writes them into dist/runtime-versions.json: artifact 1, validatorSchema 2.0.0, syntaxReference 2.1.0, executor 2.1.0, chromiumBuild null; observedChromiumBuild '1243' is separate.",
+              "main.ts:133 sends currentRuntimeVersions() as runtimeVersions on every observed report (runCoordinator.ts:444). It is persisted to ui_test_executions.runtime_versions.",
+              "RunnerReportProjection.projectRuntime (:502-512) projects validatorSchema and executor, the artifact-1 engine versions, and chromiumBuild (null) into the public execution RuntimeVersions.",
+              "The versions.ts javadoc cites fixtures/reference/, which no longer exists (studio-runner/fixtures has lint, observed-reference, pages)."
+            ]
+          },
+          "rationale": "D-A: an observed run must not be stamped with the identity of the deleted engine. Fixing it means changing the runtime-versions record schema, compat/runtime-versions required fields, stale-image detection (assertObservedBrowserStartup, check-pins), the public projection and possibly the OpenAPI RuntimeVersions description. That is OBS-009's image/build-identity work, and doing it here would void G1. No DDL is involved (runtime_versions is JSONB). No real data exists because dev DBs are recreated.",
+          "scopeForOBS009": "Report only observed identities: contract 3, observed bundle hashes, observed Chromium build, launcher sha, image. Remove artifact/validatorSchema/syntaxReference/validatorParser/executor from versions.ts, write-runtime-versions.mjs and the RuntimeVersions types. Re-point projectRuntime and the public RuntimeVersions field meanings. Name every test changed. The src/compat directory name may stay (it is build-provenance checking, not a compatibility layer), but its required-field list must change."
+        }
+      ]
+    },
+    {
+      "item": 4,
+      "topic": "DECISION-1 follow-ups: 8 fixture snapshot sites vs ~3 named; ceiling literals; SC-2 margin (reconciliation G-13)",
+      "ruling": "RATIFIED. The 8 sites stand, the literal re-expressions are correct, and SC-2 is not triggered. SC-2 retires when 012A is credited.",
+      "facts": {
+        "verified": [
+          "The DECISION-1 criterion ('update only where the snapshot mirrors every other default verbatim') was the normative rule. '~2100, ~2385, ~2667' was an illustrative parenthetical. The d1-ceiling lane verified that all 8 limits objects (4 semantic cases x session+context) matched the schema defaults with 15 keys. Editing only 3 would have left case 1's session and context limits inconsistent.",
+          "GuidedPlanningIntegrationTest: :988 and :1783 `inputCeiling(id) + 72_000`; :1896 `inputCeiling(id) - 1_000 - before`; :1962/:1970 200000/199900 unchanged (CANCELLED, not ceiling-coupled); :742 default pin `<= 262144`. GuidedSessionProperties:17/:39 and limits.schema.json:35-36 are 262144.",
+          "Run5b /tmp/studio-obs005-joined-metrics.json (18:26): reservedCounters.modelInputTokens = 130,147, the same as the d1-ceiling chosenIndex=1 value. The fixture value is deterministic, so the margin is a fixed 925 bytes, not noise. Note: the spawn prompt pairs 925 with 130,133. 925 is the margin for 130,147 (chosenIndex=1); 130,133 (chosenIndex=0) gives 939."
+        ]
+      },
+      "rationale": "SC-2 (131,072) was a stop-and-review trigger for crediting the three names under the new bound. It was not a product limit. It was not crossed, and utilization is 49.6% of 262,144. Keeping it as a standing threshold would make the next legitimate prompt change (+~116 B/request) look like a regression. The governing assertion is <= 262,144 under production defaults. Real calibration is pm-ack C-1 / F-1 in STUDIO-OBS-009 (verified placed: OBS-009 Dev Notes 'Carried note - per-session model budget calibration').",
+      "conditions": [
+        "pm-ack C-3 stands: QA independently confirms the re-expressed literals before crediting the three names. This gate's read is input to QA, not a credit.",
+        "fixtures.json (30 x 128000), session-it-documents.json:53 and runner test helpers LIMITS: 128000 stay unchanged (SC-3). They are schema-valid sub-ceiling values, not default mirrors."
+      ]
+    },
+    {
+      "item": 5,
+      "topic": "Chrome for Testing startup hang (run4-residual item 2; reconciliation G-8)",
+      "ruling": "Does not block 012A. Product ownership: STUDIO-OBS-009. Test-infra ownership: STUDIO-OBS-009 AC-12. Host cleanup: user (G4).",
+      "facts": {
+        "verified": [
+          "012A did not touch the guided launch: guidedMain.ts is byte-identical to T0, and the 012A delta in browser.ts is a removed type import (runner-gates R4_C3 versusBaseline).",
+          "launchGuidedBrowser (browser.ts:533) calls chromium.launchPersistentContext with no Studio-owned timeout, and none of the boundedStartup wrapping the replay path uses (browser.ts:140-158). Installed playwright-core sets DEFAULT_PLAYWRIGHT_LAUNCH_TIMEOUT = 180 s (coreBundle.js:4595). So the launch is not literally unbounded, but its only bound is a third-party default 12x the Java 15 s pushContext deadline.",
+          "The replay path's launcher spawns the child as its own process group and kills the tree (launcher.ts:238-299). The guided worker launches Chromium in-process and has no equivalent group.",
+          "Run5b: GuidedPlanningIntegrationTest 40/40, GuidedBridgeIntegrationTest 37/37. Two checks-guided-* processes are still alive on the host."
+        ],
+        "inferred": [
+          "The deadlock is in Chromium's fork child handler (xpc_atfork_child), not in repository code. The orphans survive because the IT force-kills the node worker before Playwright's 180 s launch timeout could reap the group."
+        ]
+      },
+      "rationale": "The failure is fail-closed: no bootstrap callback is sent, the API side is bounded at 15 s, and nothing is learned or published. Adding a launch bound is a runner product timeout change and belongs where the guided worker becomes the one runner process (ADR-SC-005 placement: one runner process/image is OBS-009). There it should adopt the replay path's discipline: a process group per browser, a Studio-owned startup deadline at or below the guided bootstrap budget, and tree reaping on kill (same family as R10-OBS-1, already OBS-009 AC-11 j).",
+      "placement": "P3."
+    },
+    {
+      "item": 6,
+      "topic": "Trigger zero app<->DB skew after R9; residual R9-OBS-1/2 placements",
+      "ruling": "RESOLVED for replay grants by DatabaseClock. R9-OBS-1/2 are verified placed. One new adjacent finding, R9-OBS-3 (inferred), is placed.",
+      "facts": {
+        "verified": [
+          "DatabaseClock.java reads SELECT clock_timestamp() (never now()), uncached. Both factories pass new DatabaseClock(jdbc): ObservedReplayConfiguration:21 and ObservedReplayRuntimeConfiguration:53. It is not a Spring Clock bean.",
+          "The V15 trigger keeps the zero-tolerance clause (:388 issuedAt > clock_timestamp() refuses), :341-342 and :409-410 unchanged in meaning. No tolerance was added.",
+          "Run5b XML: ObservedGrantClockIT 5/0, DispatcherIT 26/0. Run3's 28 failures (DispatcherIT 26, AcceptanceIT 2) are whole-class setup failures before R9. Their attribution to the two-clock grant refusal stays an inference (reconciliation G-6), and run4/run5b green post-R9 is consistent with it. Accept as 'attributed by inference, superseded'.",
+          "R9-OBS-1: STUDIO-OBS-009 AC-6 note (:71) and T-item (:151); STUDIO-OBS-010 AC-5 clock row (:34-40, :49). R9-OBS-2: OBS-010 AC-5 a. R10-OBS-1/2: OBS-009 AC-11 i/j."
+        ],
+        "inferred": [
+          "R9-OBS-3 (new): GuidedPublicationAuthorization.authorizePublication (:85, :96) and GuidedPlanPublisher (GuidedPublicationConfiguration:94) still use Clock.systemUTC(). V15:217 judges publication validation_deadline and leases against clock_timestamp(). This is the same two-clock class as R9-OBS-1, on the authoring/publication side. A JVM behind the DB lengthens a publication grant by the skew, and a JVM ahead shortens it. Not tested."
+        ]
+      },
+      "placement": "P6 (R9-OBS-3)."
+    },
+    {
+      "item": 7,
+      "topic": "Host-port collision class (run4 Zonky; run5 Docker *:P shadowed by a stale Gradle daemon's 127.0.0.1:P listener)",
+      "ruling": "Yes. Record it as a standing test-infra risk with a classification rule. The product fix is complete (LocalEmbeddedPostgresConfig). The residual is environmental and is placed in STUDIO-OBS-009 AC-12 plus the root Gradle wrapper preflight.",
+      "facts": {
+        "verified": [
+          "The LocalEmbeddedPostgresConfig fix (20000-32767, dual-stack exclusive probe) has LocalEmbeddedPostgresPortTest 3/3, and OptimisticSaveIT/ObservedReadEntryProtocolIT 3x green (run4-residual). Run5b green.",
+          "The run5 cause is still present now: PID 33891 LISTENs on 127.0.0.1:52100."
+        ]
+      },
+      "rationale": "On macOS/BSD a more specific 127.0.0.1:P or ::1:P listener shadows Docker Desktop's *:P for loopback clients. Any stale local JVM or postgres in the ephemeral range can therefore redirect a Testcontainers JDBC connection. Symptoms: EOFException at connect, `role \"test\" does not exist`, or a hang. CI agents are ephemeral, so the risk lives mainly on developer and agent hosts. The remaining in-repo latent hazard is GuidedPlanningIntegrationTest RUNNER_PORT via ServerSocket(0) with a 127.0.0.1-only readiness probe.",
+      "placement": "P4."
+    },
+    {
+      "item": 8,
+      "topic": "Run3 GuidedPublicationReplayIT INTERNAL_ERROR (R10-rev2-2)",
+      "ruling": "CONFIRMED: CONCERNS-carry, not a blocker. Placement verified: STUDIO-OBS-009 AC-12 a-e (:123-139), T-item :159, change log 0.3.6. Reconciliation G-7's 'no placement yet' is stale and must be updated (G3).",
+      "facts": {
+        "verified": [
+          "ReplayIT credit per R10-rev2 C3: two consecutive full-class 38/38 runs on final source (r10-rev2 ledger). Run5b is also 38/38 (XML).",
+          "The run-3 outcome was fail-closed: pre-Ready FINAL settled, no browser start, no USED audit (R10-rev2-2 safety)."
+        ]
+      },
+      "conditions": [
+        "QA gate verdict for 012A carries this as CONCERNS (observation open, owner OBS-009). Any unattributed recurrence in a QA re-run voids that run's credit (R10-rev2-2)."
+      ]
+    },
+    {
+      "item": 9,
+      "topic": "Data-model / ADR conformance spot-check (sample-verified, not from ledgers)",
+      "ruling": "CONFORMANT, with the D-A residues in item 3 and the authoring observation O-1.",
+      "checks": [
+        {"check": "V1-V11 byte-identical to d954a21c5", "result": "VERIFIED 11/11 EQUAL (shasum run by this gate)."},
+        {"check": "Migration directory is exactly V1-V18; backend/db absent", "result": "VERIFIED."},
+        {"check": "V12-V18 single path", "result": "VERIFIED by grep. No compile tables or columns. confirmation_source CHECK = 'GUIDED_RUN' only (V12:28). V14 guided-session state CHECK has no AWAITING_AUTH. V15 collapsed tuple studio_publication_profile(p) := p = '{\"contract\":3}' (V15:32-36), artifact_schema_version = 3 (V15:248). D-D columns step_snapshot_hashes / step_reuse_provenance present (V15:497-544). V16 codes include LEARN_REQUIRED and OBSERVED_SCHEDULE_AUTH_REQUIRED (REFUSED only). The remaining 'legacy' wording in V12/V13 concerns pre-Studio Checks-core rows from V1-V11 (in-place data normalisation), not a second Studio path."},
+        {"check": "No compat layer", "result": "VERIFIED for compile/v1/v2/observed-1/legacy IPC: 0 grep hits. Exceptions: item 3b legacy admission route, item 3c artifact-1 version stamps, O-1."},
+        {"check": "One OpenAPI", "result": "VERIFIED for the public contract: docs/specs/studio/openapi.yaml (38 operationId) is the only API document backend/runner read. inference.openapi.yaml is an orphan deleted by 012B (3a)."},
+        {"check": "Contracts v3 only", "result": "VERIFIED: contracts/ holds README.md and v3/ only. build.gradle.kts copies v3 into studio/observed-contracts."},
+        {"check": "{contract:3} tuple", "result": "VERIFIED: v3/versions.schema.json is {contract: const 3}, required, additionalProperties false. session.schema.json versions $ref's it. versions.ts OBSERVED_CONTRACT_VERSION = 3."},
+        {"check": "LEARN_REQUIRED / readiness vocabulary", "result": "VERIFIED: ExecutionReadiness.LEARN_REQUIRED; openapi.yaml:13-14 'UNLEARNED | LEARNING | READY | NEEDS_RELEARN', :662. COMPILE_REQUIRED/compileStatus have 0 hits in backend main, runner src and the public OpenAPI."},
+        {"check": "@Disabled set", "result": "VERIFIED 24 = 18 'DEFERRED STUDIO-OBS-009' + 6 pre-existing. Run5b skipped 25 = 24 + 1 assumption skip."}
+      ],
+      "accepted_as_is": "V12 contains stale labels in RAISE NOTICE text ('V14: renamed/converted ...', V12:143-144) and comments citing old numbers ('Retained V24 rule'). These are cosmetic. Forward-only resumes when 012A closes, and an edit now would void run5b's migration credit. Accepted permanently. Do not edit V12 after 012A Done."
+    },
+    {
+      "item": 10,
+      "topic": "Anything else that should block QA",
+      "ruling": "Nothing else blocks QA beyond G1-G4. Non-blocking observations for QA and PO follow.",
+      "observations": [
+        {
+          "id": "O-1",
+          "severity": "MEDIUM (D-A interpretation; inferred)",
+          "item": "Two authoring generations remain live in StudioService: the legacy v1 steps-list read path (findAuthoringById -> LegacyAuthoringRequest; LEGACY_AUTHORING 409 at :302/:359; 'first explicit v2 save promotes') plus LegacyStudioAdapter/UITestRequest.LegacyDeserializer. The OBS-011 inventory M12 classed them as live only because 'the v1 run path still uses' them, and 012A deleted that path. ADR-SC-005's removal list does not name them, so this is not a 012A AC miss.",
+          "placement": "P7."
+        },
+        {
+          "id": "O-2",
+          "severity": "MEDIUM (interpretation)",
+          "item": "frontend/src still calls the removed POST /tests/{id}/confirm-compile (reconciliation G-9: 25 hits). That is in scope for STUDIO-OBS-012B. Constraint: do not deploy or demo the 012A backend with the pre-012B frontend against a real backend, because those calls would 404. MSW-mocked dev is unaffected."
+        },
+        {
+          "id": "O-3",
+          "severity": "LOW",
+          "item": "Reconciliation G-5/G-12 (unnamed new runner cases and new backend test methods) need name-level checks by QA from the final vitest JSON and the run5b XML. G-17: CodeRabbit was not run, so QA does the fallback review."
+        },
+        {
+          "id": "O-4",
+          "severity": "INFO",
+          "item": "Guided routes are excluded from IdempotencyFilter (lane-c-java review item). That was the existing guided behaviour carried over by the route move, not a 012A change. QA confirms it is unchanged against the v3 route set."
+        }
+      ]
+    }
+  ],
+  "placementsForPO": [
+    {"id": "P1", "story": "STUDIO-OBS-014", "item": "Delete the legacy internal admission route and claimAdmission OpenAPI op (ruling 3b scope). Security/integrity flag MEDIUM. Must land before OBS-010."},
+    {"id": "P2", "story": "STUDIO-OBS-009", "item": "Replace artifact-1 runtime-version stamps with observed identities end to end (ruling 3c scope). Must land before OBS-010."},
+    {"id": "P3", "story": "STUDIO-OBS-009 (AC-11 beside j; AC-12)", "item": "Guided Chromium launch: Studio-owned startup bound at or below the guided bootstrap budget, process group per browser, tree reaping on kill and on worker stop. IT teardown reaps worker descendants (ProcessHandle.descendants). Correct the vitest.config.ts exclusion comment (comment-only). Replaces the 'ownership not ruled' pointer at OBS-009 :189."},
+    {"id": "P4", "story": "STUDIO-OBS-009 AC-12 (suite stability) + root ORCH tooling", "item": "Host-port collision class: classification rule (connect EOF / role \"test\" does not exist / connect hang after 'Container is started' => check lsof for a 127.0.0.1-only listener before attributing to product). gradle-locked.sh preflight warns on stale Gradle daemons and loopback-only listeners. Fix GuidedPlanningIntegrationTest RUNNER_PORT ServerSocket(0). Backend guided ITs record the dist digest they spawned."},
+    {"id": "P5", "story": "STUDIO-OBS-009", "item": "The backend guided ITs depend on an untracked studio-runner/dist. Make the dependency explicit: a Gradle task that builds or verifies dist, or a recorded digest check before guided ITs."},
+    {"id": "P6", "story": "STUDIO-OBS-011 fold (GuidedPublicationAuthorization -> DispatchAuthorization) + STUDIO-OBS-010 AC-5 clock row", "item": "R9-OBS-3: move publication-grant minting and judging to DatabaseClock in the fold. Until then the existing NTP row covers it."},
+    {"id": "P7", "story": "@po with @architect; candidate STUDIO-OBS-015 (D-D keys on stable step IDs)", "item": "O-1: decide whether legacy v1 authoring reads (LegacyAuthoringRequest, LEGACY_AUTHORING, LegacyStudioAdapter) are a second authoring generation under D-A, and remove them if so. Re-run the M12 legacy grep at HEAD."},
+    {"id": "P8", "story": "user / Platform-SRE (OBS-010 release record)", "item": "D-B external confirmation (never asked: externalMessageSent=false) and dev DB recreation (lane-m notRun command). Both reported to the user in the root's final summary."}
+  ],
+  "tradeoffs": [
+    {
+      "decision": "Assign the D-A residues 3b/3c to OBS-014/OBS-009 instead of fixing them in 012A",
+      "for": "Neither is reachable by an untrusted caller or releases a secret. No deployment exists. Fixing now voids the only green full check (49 min) and the in-flight runner tiers. Both target stories start before or alongside any consumer and land before OBS-010.",
+      "against": "The user's single-path preference (no residue) is not fully met at 012A Done, and the residue must be tracked across two stories.",
+      "override": "If the user wants zero residue at 012A Done: run one 012A follow-up lane doing 3b+3c, then a full backend check and all runner tiers again before QA."
+    },
+    {
+      "decision": "Backend guided ITs as R4 C2 proof for guidedMain",
+      "for": "Real process, real Chromium, hash-tied to the final bytes, file unchanged since T0.",
+      "against": "The proof lives in another module's tier. If those ITs are later moved or skipped, guidedMain silently loses execution coverage. Mitigated by P5."
+    }
+  ],
+  "forQA": [
+    "Gate inputs: this file, final-gates/reconciliation.json, final-gates/backend-check-run5b.json, runner-gates-final/ (G1).",
+    "Expected QA verdict class if G1-G3 hold: CONCERNS (R10-rev2-2 open under observation; D-A residues P1/P2 placed; G4 environment). FAIL only if G1 fails or QA's independent grep or reconciliation contradicts this gate."
+  ]
+}

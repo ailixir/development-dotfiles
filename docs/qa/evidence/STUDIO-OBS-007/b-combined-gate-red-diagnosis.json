@@ -1,0 +1,140 @@
+{
+  "schema": "studio-observed-combined-red-diagnosis/1",
+  "recordedAt": "2026-10-10T17:05:14.604695+00:00",
+  "scope": "READ_ONLY archived actual27 case gate, no runtime or acceptance claim",
+  "gate": {
+    "scope": "Exact selected current backend gate only; no whole-story QA verdict",
+    "gradleExitCode": 1,
+    "sourceDrift": [],
+    "results": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "tests": 9,
+        "failures": 6,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "finishedAt": "2026-10-10T16:52:32.877198+00:00",
+    "tests": 27,
+    "failures": 6,
+    "errors": 0,
+    "skipped": 0,
+    "pass": false
+  },
+  "bindings": {
+    "docs/qa/evidence/STUDIO-OBS-007/root-combined-remediation-gate/sources.zip": "1429fc40d86006e2518f655c119797c308812e0255f7dbe69e7690901bd65669",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "2854e26dfb370b29945265fca2c13468ee74d49ddb7a6d1d41eb59f4eed70bba",
+    "docs/qa/evidence/STUDIO-OBS-007/root-combined-remediation-gate/fixture-runtime/failed-test-state-actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel-6e2296b2-fdef-4558-b26f-aef22c43c668.json": "f1aab02dc7c06d6e7c6cd37617371c589125a23bec7c08a324441bd78d28f40d",
+    "docs/specs/studio-observed-authoring/contracts/v3/source-reference.schema.json": "184a99cc4018f5899eb8dc743dcb0a9283c19f3ff7371da99098eeee432e229c"
+  },
+  "publisher": {
+    "actualLearningState": "SUCCEEDED after real finalize, before ordinary ERROR",
+    "fixedTransactionGuard": "Actual first flow passed finalize under repaired source; original guard was addressed. No assertion of all historical caller ordering/race oracles."
+  },
+  "ninth": {
+    "facts": {
+      "state": "FAILED",
+      "errorCode": "INVALID_CONTRACT",
+      "actions": 0,
+      "observations": 0,
+      "providerReads": 0,
+      "providerFailures": 0,
+      "sourcePlanCalls": 3,
+      "attemptStatuses": [
+        "REJECTED",
+        "REJECTED",
+        "REJECTED"
+      ]
+    },
+    "concreteStaticDefect": "secretLoginModel SOURCE_PLAN deep-copies authentic USER configuration declaration, including referenceName, and only adds referenceKind/configurationRevision. Nonsecret configuration SourceReference branch additionalProperties:false does not allow referenceName; emitted USER reference is therefore invalid. SecretRef branch requires referenceName and must retain it.",
+    "schemaProof": {
+      "nonsecretAdditionalProperties": false,
+      "nonsecretAllowedKeys": [
+        "referenceKind",
+        "configurationRevision",
+        "stepId",
+        "referenceId",
+        "kind",
+        "intendedSlot"
+      ],
+      "secretAdditionalProperties": false,
+      "secretRequiresReferenceName": true
+    },
+    "minimalRepair": {
+      "owner": "B after root release",
+      "onlyPath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "change": "When converting authenticated declaration into source reference, remove referenceName ONLY for nonsecret USER branch. Preserve authenticated referenceId, actual stepId TWO, kind, intendedSlot and current configurationRevision; keep PASS referenceName. Preserve all9 bodies/assertions, references and expected effects.",
+      "avoid": [
+        "No SOURCE_PLAN status/question fields (schema excludes them)",
+        "No new schema fields, normalization or validation relaxation",
+        "No literal/password selectors or weakening assertions"
+      ]
+    },
+    "declarationCoordinateCorrection": "Archived declarations belong to TWO (aaaaaaaa\u2026), not ONE (cccccccc\u2026). This is correct for the authored USER/PASS step; sourceReference schema shape is the defect.",
+    "futureConcern": "After plan repair, verify actual password-count availability. acquisitionAvailable currently only examines named nodes for fills; password nodes are deliberately omitted. This is a separate source concern not reached in this gate."
+  },
+  "ordinaryReplay": {
+    "actualFacts": [
+      "First genuine publication succeeded; first ordinary execution f8987db7-a614-4107-a9df-d5374e46f817 reached ERROR instead of PASSED",
+      "Asynchronous publication likewise succeeded before ordinary ERROR",
+      "Ordinary merged log retains only runner.started/draining/drained; it has no admitted job or child diagnostic",
+      "Current safe AfterEach snapshots retain guided state/actions but no ordinary execution error_code or ledger stage; DB destroyed by AfterAll"
+    ],
+    "rootCauseStatus": "ACTUAL_CLOSED_ERROR_CODE_AND_STAGE_NOT_RETAINED",
+    "minimalDiagnostic": {
+      "onlyPath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "proposal": "Extend existing test-owned safe metadata snapshot to SELECT actual ui_test_executions/dispatch_ledger rows by authentic tracked testId: UUID execution/attempt/revision IDs, closed status/errorCode/state, numeric dispatch sequence/revision, admission/browser/video/report presence booleans. No raw job/binding/report/response/version/tokens/messages, no extra dispatch or validator/value calls. Capture before teardown so exact pre-send vs admitted/refused stage is observable.",
+      "ownership": "B only after root release; no speculative production or runner fix"
+    }
+  },
+  "otherFailures": {
+    "directDependencies": [
+      "queuedAndPreReadyRefusals",
+      "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness"
+    ],
+    "alternateLearning": {
+      "state": "FAILED",
+      "errorCode": "BUDGET_EXCEEDED",
+      "allowanceMs": 1000,
+      "actions": 2,
+      "observations": 4,
+      "models": {
+        "SOURCE_PLAN": 1,
+        "NEXT_ACTION": 6,
+        "VERIFY_STEP": 0
+      },
+      "activeSourceStepId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "facts": "Genuine navigate/read succeeded; later fill plan/choice reached BUDGET_EXCEEDED with allowance1000. No extra poll recorded. The original scenario intentionally asserts1000 allowance with model/human delay excluded; do not increase it or weaken its assertions. Exact active-acquisition elapsed/claim disposition or closed rejection metadata is needed before any timing-mechanism fix.",
+      "cause": "NOT_PINPOINTED"
+    }
+  },
+  "limits": [
+    "9 service and9 transport cases passed, scoped accurately; publication3 pass6 fail is not full story PASS",
+    "No source/Gradle/runner/schema edits or new models",
+    "No actual password guided/replay/video/sink oracle reached in ninth",
+    "First8 bodies remain protected; no scope reductions or unavailable PASS"
+  ],
+  "nextRequest": "Release only USER referenceName fixture shape repair plus safe ordinary execution/ledger metadata; root scoped format and actual all9 current source gate. Product repair follows actual closed ERROR code, not speculation."
+}

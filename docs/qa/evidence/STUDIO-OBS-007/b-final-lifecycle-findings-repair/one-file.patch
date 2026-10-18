@@ -1,0 +1,308 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java (695e)
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java (final findings)
+@@ -94,6 +94,9 @@
+       "studio.execution.dispatcher.enabled=false"
+     })
+ @ActiveProfiles("test")
++@org.springframework.test.context.TestExecutionListeners(
++    listeners = GuidedPublicationReplayIT.OwnedContextCapture.class,
++    mergeMode = org.springframework.test.context.TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
+ @org.springframework.test.annotation.DirtiesContext(
+     classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS,
+     hierarchyMode = org.springframework.test.annotation.DirtiesContext.HierarchyMode.CURRENT_LEVEL)
+@@ -865,6 +868,25 @@
+   @LocalServerPort int port;
+   @Autowired JdbcTemplate jdbc;
+   @Autowired org.springframework.context.ConfigurableApplicationContext ownedApplicationContext;
++  private org.springframework.test.context.TestContext ownedFrameworkContext;
++  private boolean ownedApplicationQuiescent;
++
++  public static final class OwnedContextCapture
++      extends org.springframework.test.context.support.AbstractTestExecutionListener {
++    @Override
++    public int getOrder() {
++      return 3000;
++    }
++
++    @Override
++    public void prepareTestInstance(org.springframework.test.context.TestContext testContext) {
++      assertThat(testContext.getTestClass()).isEqualTo(GuidedPublicationReplayIT.class);
++      var instance = (GuidedPublicationReplayIT) testContext.getTestInstance();
++      assertThat(testContext.getApplicationContext()).isSameAs(instance.ownedApplicationContext);
++      instance.ownedFrameworkContext = testContext;
++    }
++  }
++
+   @Autowired GuidedSessionRepository sessions;
+   @Autowired GuidedTranslationStore plans;
+   @Autowired StudioDispatcher dispatcher;
+@@ -4089,7 +4111,8 @@
+   }
+ 
+   private static long[] p3ReportNumericCounts(JsonNode node, int depth) {
+-    if (depth > 64) {
++    int structuralDepth = depth + (node.isContainerNode() ? 1 : 0);
++    if (structuralDepth > 64) {
+       throw new IllegalArgumentException("P3 callback witness depth");
+     }
+     long floats = 0, fractions = 0;
+@@ -4105,7 +4128,7 @@
+     }
+     if (node.isContainerNode()) {
+       for (JsonNode child : node) {
+-        long[] counts = p3ReportNumericCounts(child, depth + 1);
++        long[] counts = p3ReportNumericCounts(child, structuralDepth);
+         floats += counts[0];
+         fractions += counts[1];
+       }
+@@ -4198,6 +4221,12 @@
+         p3CleanupOrdinary(owned.getKey(), owned.getValue(), ordinaryDeadline);
+       } catch (Exception | AssertionError failure) {
+         failures.add(failure);
++      } finally {
++        try {
++          p3WriteCaptureDiagnostics(owned.getKey());
++        } catch (Exception | AssertionError diagnosticsFailure) {
++          failures.add(diagnosticsFailure);
++        }
+       }
+     }
+     for (var owned : new java.util.ArrayList<>(p3OwnedGuidedCookies.entrySet())) {
+@@ -6229,8 +6258,10 @@
+             org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler>();
+     int cancelledTasks = 0, fixedDelayTasks = 0, fixedRateTasks = 0, cronTasks = 0;
+     // Only actual local singleton identities: never instantiate or inspect another context's beans.
++    var failures = new java.util.ArrayList<Throwable>();
+     for (String name : factory.getSingletonNames()) {
+-      Object bean = factory.getSingleton(name);
++      try {
++        Object bean = factory.getSingleton(name);
+       if (bean
+           instanceof
+           org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor holder) {
+@@ -6279,59 +6310,85 @@
+       } else if (bean instanceof java.util.concurrent.ExecutorService executor) {
+         executors.add(executor);
+       }
+-    }
+-    assertThat(scheduled.size()).as("actual class-owned scheduler services").isPositive();
+-    assertThat(executors.size()).as("actual class-owned async delegates").isGreaterThanOrEqualTo(3);
+-    for (var executor : scheduled) {
+-      assertThat(executor instanceof java.util.concurrent.ForkJoinPool).isFalse();
++      } catch (Exception | AssertionError captureFailure) {
++        failures.add(captureFailure);
++      }
++    }
++    p3AttemptTeardown(failures, () -> assertThat(scheduled.size()).as("actual owned scheduler services").isPositive());
++    p3AttemptTeardown(failures, () -> assertThat(executors.size()).as("actual owned async delegates").isGreaterThanOrEqualTo(3));
++    for (var services : java.util.List.of(scheduled, executors)) {
++      for (var executor : new java.util.ArrayList<>(services)) {
++        if (executor instanceof java.util.concurrent.ForkJoinPool) {
++          failures.add(new IllegalStateException("Global or unsupported ForkJoin ownership refused"));
++          services.remove(executor);
++        }
++      }
++    }
++    long deadline = System.nanoTime() + Duration.ofSeconds(90).toNanos();
++    // All safe captured resources are attempted, even when another resource cannot be confirmed.
++    for (var scheduler : scheduled) {
++      p3AttemptTeardown(failures, scheduler::shutdown);
++    }
++    for (var scheduler : scheduled) {
++      p3AttemptTeardown(failures, () -> awaitOwnedExecutorTermination(scheduler, deadline));
++    }
++    for (var scheduler : simple) {
++      p3AttemptTeardown(failures, () -> {
++        Object tracked = org.springframework.test.util.ReflectionTestUtils.getField(scheduler, "activeThreads");
++        assertThat(tracked instanceof java.util.Set<?>).isTrue();
++        while (!((java.util.Set<?>) tracked).isEmpty() && System.nanoTime() < deadline) {
++          Thread.sleep(20);
++        }
++        assertThat(((java.util.Set<?>) tracked).isEmpty()).as("actual scheduler virtual bodies drained").isTrue();
++        scheduler.close();
++      });
+     }
+     for (var executor : executors) {
+-      assertThat(executor instanceof java.util.concurrent.ForkJoinPool).isFalse();
+-    }
+-    long deadline = System.nanoTime() + Duration.ofSeconds(90).toNanos();
+-    // Stop future submissions first while callback/provider/database endpoints remain alive.
+-    scheduled.forEach(java.util.concurrent.ExecutorService::shutdown);
+-    for (var scheduler : scheduled) {
+-      awaitOwnedExecutorTermination(scheduler, deadline);
+-    }
+-    for (var scheduler : simple) {
+-      Object tracked =
+-          org.springframework.test.util.ReflectionTestUtils.getField(scheduler, "activeThreads");
+-      while (!((java.util.Set<?>) tracked).isEmpty() && System.nanoTime() < deadline) {
+-        Thread.sleep(20);
+-      }
+-      assertThat(((java.util.Set<?>) tracked).isEmpty())
+-          .as("actual scheduler virtual bodies drained")
+-          .isTrue();
+-      scheduler.close();
+-    }
+-    executors.forEach(java.util.concurrent.ExecutorService::shutdown);
++      p3AttemptTeardown(failures, executor::shutdown);
++    }
+     for (var executor : executors) {
+-      awaitOwnedExecutorTermination(executor, deadline);
+-    }
++      p3AttemptTeardown(failures, () -> awaitOwnedExecutorTermination(executor, deadline));
++    }
++    throwTeardownFailures(failures);
+     // Context destruction (including managed private pools) happens only after observed jobs drain.
+-    var closer =
+-        java.util.concurrent.Executors.newSingleThreadExecutor(
+-            task -> {
+-              Thread thread = new Thread(task, "obs007-owned-context-close");
+-              thread.setDaemon(true);
+-              return thread;
+-            });
++    assertThat(ownedFrameworkContext != null).isTrue();
++    assertThat(ownedFrameworkContext.getTestClass()).isEqualTo(GuidedPublicationReplayIT.class);
++    assertThat(ownedFrameworkContext.getApplicationContext()).isSameAs(ownedApplicationContext);
++    var closer = java.util.concurrent.Executors.newSingleThreadExecutor(task -> {
++      Thread thread = new Thread(task, "obs007-owned-context-close");
++      thread.setDaemon(true);
++      return thread;
++    });
++    Throwable closePrimary = null;
++    java.util.concurrent.Future<?> closeFuture = null;
+     try {
+-      var closed = closer.submit(ownedApplicationContext::close);
++      closeFuture = closer.submit(() -> ownedFrameworkContext.markApplicationContextDirty(
++          org.springframework.test.annotation.DirtiesContext.HierarchyMode.CURRENT_LEVEL));
+       long remaining = deadline - System.nanoTime();
+       assertThat(remaining).isPositive();
++      closeFuture.get(remaining, java.util.concurrent.TimeUnit.NANOSECONDS);
++    } catch (Exception | AssertionError failure) {
++      closePrimary = failure;
++      if (closeFuture != null) {
++        closeFuture.cancel(true);
++      }
++    } finally {
+       try {
+-        closed.get(remaining, java.util.concurrent.TimeUnit.NANOSECONDS);
+-      } catch (Exception failure) {
+-        closed.cancel(true);
+-        throw failure;
+-      }
+-    } finally {
+-      closer.shutdownNow();
+-      assertThat(closer.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+-      assertThat(closer.isTerminated()).isTrue();
+-    }
++        closer.shutdownNow();
++        assertThat(closer.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
++        assertThat(closer.isTerminated()).isTrue();
++      } catch (Exception | AssertionError terminationFailure) {
++        if (closePrimary == null) {
++          closePrimary = terminationFailure;
++        } else {
++          closePrimary.addSuppressed(terminationFailure);
++        }
++      }
++    }
++    if (closePrimary != null) {
++      throwTeardownFailures(java.util.List.of(closePrimary));
++    }
++    assertThat(ownedFrameworkContext.hasApplicationContext()).isFalse();
+     assertThat(ownedApplicationContext.isActive()).isFalse();
+     for (var scheduler : scheduled) {
+       assertThat(scheduler.isTerminated()).isTrue();
+@@ -6339,6 +6396,7 @@
+     for (var executor : executors) {
+       assertThat(executor.isTerminated()).isTrue();
+     }
++    ownedApplicationQuiescent = true;
+     var metadata =
+         C.object()
+             .put("owningContextIdentity", System.identityHashCode(ownedApplicationContext))
+@@ -6351,8 +6409,33 @@
+             .put("trackedSchedulerBodiesEmpty", true)
+             .put("contextClosed", true)
+             .put("afterClassCacheEvictionConfigured", true)
++            .put("actualFrameworkCacheEntryEvicted", !ownedFrameworkContext.hasApplicationContext())
+             .put("commonPoolTerminationClaimed", false);
+     p3WriteEvidence("owned-context-teardown", metadata);
++  }
++
++  private static void p3AttemptTeardown(java.util.List<Throwable> failures, P3Action operation) {
++    try {
++      operation.run();
++    } catch (Exception | AssertionError failure) {
++      failures.add(failure);
++    }
++  }
++
++  private static void throwTeardownFailures(java.util.List<Throwable> failures) throws Exception {
++    if (failures.isEmpty()) {
++      return;
++    }
++    Throwable first = failures.getFirst();
++    for (int index = 1; index < failures.size(); index++) {
++      if (failures.get(index) != first) {
++        first.addSuppressed(failures.get(index));
++      }
++    }
++    if (first instanceof Exception exception) {
++      throw exception;
++    }
++    throw (Error) first;
+   }
+ 
+   private static void awaitOwnedExecutorTermination(
+@@ -6396,36 +6479,26 @@
+   @AfterAll
+   void stop() throws Exception {
+     retryRelease.countDown();
+-    boolean jobsStopped = false;
++    var failures = new java.util.ArrayList<Throwable>();
++    ownedApplicationQuiescent = false;
+     try {
+-      stopOwnedApplicationJobs();
+-      jobsStopped = true;
+-      var processFailures = new java.util.ArrayList<Throwable>();
++      p3AttemptTeardown(failures, this::stopOwnedApplicationJobs);
++      int processFailuresBefore = failures.size();
+       for (Process process : new Process[] {guidedWorker, ordinaryWorker, SECRET_FIXTURE}) {
+-        try {
+-          stopOwnedProcessTree(process);
+-        } catch (Exception | AssertionError failure) {
+-          processFailures.add(failure);
+-        }
+-      }
+-      if (!processFailures.isEmpty()) {
+-        var unconfirmed =
+-            new IllegalStateException("Actual owned fixture process teardown remains unconfirmed");
+-        processFailures.forEach(unconfirmed::addSuppressed);
+-        throw unconfirmed;
+-      }
+-      PROVIDER.stop(0);
+-      APP.stop(0);
+-      DB.stop();
+-    } catch (Exception | AssertionError failure) {
+-      if (!jobsStopped) {
+-        failure.addSuppressed(
+-            new IllegalStateException(
+-                "PostgreSQL retained because owned application work is not confirmed stopped"));
+-      }
+-      throw failure;
++        p3AttemptTeardown(failures, () -> stopOwnedProcessTree(process));
++      }
++      boolean processesQuiescent = failures.size() == processFailuresBefore;
++      if (ownedApplicationQuiescent && processesQuiescent) {
++        p3AttemptTeardown(failures, () -> PROVIDER.stop(0));
++        p3AttemptTeardown(failures, () -> APP.stop(0));
++        p3AttemptTeardown(failures, DB::stop);
++      } else {
++        failures.add(new IllegalStateException("Endpoints/PostgreSQL retained because actual owned dependencies remain unconfirmed"));
++      }
++      throwTeardownFailures(failures);
+     } finally {
+       SSLContext.setDefault(PREVIOUS_TLS);
+     }
+   }
++
+ }

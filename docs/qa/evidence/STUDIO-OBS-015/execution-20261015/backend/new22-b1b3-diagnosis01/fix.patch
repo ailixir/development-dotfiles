@@ -1,0 +1,195 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -1711,8 +1711,11 @@
+             if ("drift2".equals(incrementalDomVariant) || "pre-literal2".equals(incrementalDomVariant) || "drift-plan-fail".equals(incrementalDomVariant) || "drift-auth-pre".equals(incrementalDomVariant)) {
+               html = html.replace("<textarea id='destination'></textarea>", "<input id='destination'>");
+             } else if ("drift-first".equals(incrementalDomVariant)) {
+-              html = html.replace("<output aria-label='Order reference'>", "<span role='status' aria-label='Order reference'>")
+-                  .replace("</output><label for='destination'>", "</span><label for='destination'>");
++              // new22-b1b3-diagnosis01 (B3B-2): <span role=status> is guard-identical to <output>
++              // (role status, elementType other, same name), so it never drifted. An explicit
++              // role on the same readable <output> keeps the name and the read grant but fails the
++              // prefix acquire for role=status (TARGET_DRIFT at the read, ordinal 1).
++              html = html.replace("<output aria-label='Order reference'>", "<output role='region' aria-label='Order reference'>");
+             } else if ("assert-fail".equals(incrementalDomVariant)) {
+               html = html.replace("</body>", "<script>document.getElementById('destination').addEventListener('focus',()=>{"
+                   + "document.querySelector('output[aria-label=\"Order reference\"]').textContent='changed-after-read';});</script></body>");
+@@ -5062,6 +5065,12 @@
+       String before = incrementalAuthoritySnapshot(test);
+       int model = MODEL_WIRE.size(), effects = RECEIPTS.size(), navigation = NAVIGATIONS.get();
+       if (entry.getKey().equals("exact-alias")) {
++        // new22-b1b3-diagnosis01 (B3B-1): start preflight lists PASS in this case's own Vault
++        // scope (VaultStudioReferenceResolver.preflight); an unseeded fake scope is 404
++        // SECRET_UNAVAILABLE. Seed it as every other secret case does (p3Seed); never printed.
++        String aliasSecret = "b3-alias-" + UUID.randomUUID();
++        AUDIT_CANARIES.add(aliasSecret);
++        p3Seed(VaultScope.of(primaryCsi, "fixture", test), aliasSecret);
+         String id =
+             publicCall("/api/v1/studio/guided-sessions", start, 202, UUID.randomUUID().toString())
+                 .path("session")
+@@ -9839,8 +9848,11 @@
+                   fill.getFirst().path("admission").path("admissionId").asText(),
+                   "NATIVE_COMPLETED"))
+           .isEqualTo(1);
++      // openapi readGuidedResult: FINALIZING before /finalize is pending publication = 202.
+       JsonNode result =
+-          publicCall("/api/v1/studio/guided-sessions/" + parent.id + "/result", null, 200, null);
++          publicCall("/api/v1/studio/guided-sessions/" + parent.id + "/result", null, 202, null);
++      assertThat(result.path("outcome").asText()).isEqualTo("FINALIZING");
++      assertThat(result.path("publication").path("status").asText()).isEqualTo("PENDING");
+       assertThat(result.path("relearnedFrom"))
+           .isEqualTo(C.object().put("stepId", b1Step(1)).put("driftSwitchStepId", b1Step(1)));
+     }
+@@ -10387,7 +10399,9 @@
+       assertThat(pause.entered.await(45, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+       String key = "b1b-done-race-" + UUID.randomUUID();
+       var held = B1Cut.arm(B1Cut.Kind.PLAN_CONTINUATION_COMMIT, parent.id, null, key, 0);
+-      long planRevision = plans.state(parent.id).path("planRevision").asLong();
++      // GuidedTranslationStore.state requires an actual transaction (RUNTIME_INCOMPATIBLE).
++      long planRevision =
++          sessions.transaction(() -> plans.state(parent.id).path("planRevision").asLong());
+       var command =
+           C.object()
+               .put("schemaVersion", 3)
+@@ -10465,11 +10479,11 @@
+         assertThat(b1Count("studio_guided_prefix_requests", parent.id)).isEqualTo(requests);
+         assertThat(b1PrefixRows(parent.id)).isEqualTo(prefixRows);
+         assertThat(b1Count("studio_guided_relearn_switches", parent.id)).isEqualTo(1);
+-        assertThat(
+-                publicCall(
+-                        "/api/v1/studio/guided-sessions/" + parent.id + "/result", null, 200, null)
+-                    .path("relearnedFrom"))
+-            .isEqualTo(C.object().put("stepId", b1Step(3)));
++        // openapi readGuidedResult: a running (unpublished) session is pending publication = 202.
++        JsonNode running =
++            publicCall("/api/v1/studio/guided-sessions/" + parent.id + "/result", null, 202, null);
++        assertThat(running.path("publication").path("status").asText()).isEqualTo("PENDING");
++        assertThat(running.path("relearnedFrom")).isEqualTo(C.object().put("stepId", b1Step(3)));
+         assertThat(pause.failure).isNull();
+         assertThat(held.failure).isNull();
+       }
+@@ -11068,9 +11082,16 @@
+       JsonNode bootstrap =
+           sessions.transaction(
+               () -> sessions.lock(parent.id).progress().path("translationBootstrap").deepCopy());
+-      assertThat(bootstrap.path("deliveries")).hasSize(2);
+-      assertThat(bootstrap.path("metadataAcknowledgement").path("deliveryId"))
+-          .isEqualTo(bootstrap.path("deliveries").get(1).path("deliveryId"));
++      String scopeHash =
++          sessions.transaction(
++              () -> sessions.lock(parent.id).document().path("scopeHash").asText());
++      // GuidedTranslationService.bootstrapStage(READY) replaces the CONTEXT_PENDING marker, so its
++      // deliveries[] never survives READY; the committed beginBootstrapDelivery results do.
++      assertThat(bootstrap.path("phase").asText()).isEqualTo("READY");
++      List<String> deliveries = B1_BOOTSTRAP_DELIVERIES.getOrDefault(scopeHash, List.of());
++      assertThat(deliveries).as("rebootstrap: two committed deliveries").hasSize(2);
++      assertThat(bootstrap.path("metadataAcknowledgement").path("deliveryId").asText())
++          .isEqualTo(deliveries.get(1));
+       for (String metadata :
+           jdbc.queryForList(
+               "SELECT context_metadata::text FROM studio_guided_materialization_deliveries"
+@@ -11103,8 +11124,9 @@
+       var cut = B1Cut.arm(B1Cut.Kind.ADMIT_COMMIT, parent.id, b1Coordinate(2, 0), 0);
+       assertThat(cut.entered.await(45, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+       assertThat(b1Count("studio_guided_relearn_switches", parent.id)).isZero();
++      // openapi readGuidedResult: held mid-prefix the session is pending publication = 202.
+       JsonNode before =
+-          publicCall("/api/v1/studio/guided-sessions/" + parent.id + "/result", null, 200, null);
++          publicCall("/api/v1/studio/guided-sessions/" + parent.id + "/result", null, 202, null);
+       assertThat(before.has("relearnedFrom") && before.path("relearnedFrom").isNull()).isTrue();
+       assertThat(before.path("learnedFromThisRun").asBoolean()).isFalse();
+       assertThat(before.path("publication").path("status").asText()).isEqualTo("PENDING");
+@@ -11121,8 +11143,9 @@
+       assertThat(cut.failure).isNull();
+     }
+     try (var parent = b1Parent(new B1Spec().ready(0).mixedDom("b1d-empty-plan-fail"))) {
+-      JsonNode entered =
+-          publicCall("/api/v1/studio/guided-sessions/" + parent.id + "/result", null, 200, null);
++      // Unheld: the read may land before or after the SOURCE_PLAN failure, so the status is
++      // checked against the projected publication status (PENDING = 202, otherwise 200).
++      JsonNode entered = b1ResultPerContract(parent.id);
+       assertThat(entered.path("relearnedFrom")).isEqualTo(C.object().put("stepId", b1Step(0)));
+       JsonNode failed = b1AwaitTerminal(parent.id, Duration.ofSeconds(60));
+       assertThat(
+@@ -11144,6 +11167,9 @@
+       new java.util.concurrent.ConcurrentHashMap<>();
+   private static final java.util.concurrent.ConcurrentMap<String, List<String>>
+       B1_OBSERVED_ORIGINS = new java.util.concurrent.ConcurrentHashMap<>();
++  /** Committed translation-bootstrap delivery ids per session scopeHash, in commit order. */
++  private static final java.util.concurrent.ConcurrentMap<String, List<String>>
++      B1_BOOTSTRAP_DELIVERIES = new java.util.concurrent.ConcurrentHashMap<>();
+   private static final AtomicInteger B1_REDIRECTS = new AtomicInteger();
+   private static final String B1_INTERNAL = "/internal/v2/studio/guided-sessions/";
+   private static final String B1_UNAPPROVED = "https://unapproved.invalid/b1c";
+@@ -11310,6 +11336,18 @@
+         && result != null
+         && b1OnStack(B1A_SESSION_SERVICE, "committedObservationRefresh")) {
+       call.refreshCommitted = true;
++    }
++    // B1D-01: the delivery id of an actual committed bootstrap delivery (value-free, read only).
++    if (b1Recording
++        && result instanceof ObjectNode delivery
++        && delivery.hasNonNull("deliveryId")
++        && delivery.has("identity")
++        && b1OnStack(B1A_TRANSLATION + "GuidedTranslationService", "beginBootstrapDelivery")) {
++      B1_BOOTSTRAP_DELIVERIES
++          .computeIfAbsent(
++              delivery.path("identity").path("scopeHash").asText(),
++              ignored -> new CopyOnWriteArrayList<>())
++          .add(delivery.path("deliveryId").asText());
+     }
+     for (B1Cut cut : B1_CUTS) {
+       cut.afterOutermostCommit(result);
+@@ -11662,6 +11700,7 @@
+       b1WritePairControl(C.object());
+     } finally {
+       b1Recording = false;
++      B1_BOOTSTRAP_DELIVERIES.clear();
+       incrementalTenScenario = false;
+       incrementalDomVariant = null;
+       b1GuardsPage = false;
+@@ -12310,6 +12349,32 @@
+     return publicCall("/api/v1/studio/guided-sessions/" + id + "/result", null, 200, null);
+   }
+ 
++  /** GET /result; the status must be the one its own publication status implies (openapi). */
++  private JsonNode b1ResultPerContract(String id) throws Exception {
++    var response =
++        HttpClient.newBuilder()
++            .sslContext(TLS)
++            .build()
++            .send(
++                HttpRequest.newBuilder(
++                        URI.create(
++                            "https://localhost:"
++                                + port
++                                + "/api/v1/studio/guided-sessions/"
++                                + id
++                                + "/result"))
++                    .timeout(Duration.ofSeconds(15))
++                    .header("Cookie", "put_session=" + COOKIE)
++                    .GET()
++                    .build(),
++                HttpResponse.BodyHandlers.ofString());
++    JsonNode result = C.parse(response.body());
++    boolean pending = result.path("publication").path("status").asText().equals("PENDING");
++    assertThat(response.statusCode()).as(response.body()).isEqualTo(pending ? 202 : 200);
++    C.validate("v3/result", result);
++    return result;
++  }
++
+   private void b1AwaitRow(String sql, String id, Duration limit) throws Exception {
+     long end = System.nanoTime() + limit.toNanos();
+     while (jdbc.queryForObject(sql, Integer.class, id) == 0) {
+@@ -29638,7 +29703,10 @@
+       var references = result.putArray("sourceReferences");
+       var obligations = result.putArray("obligations");
+       var needs = result.putArray("needs");
+-      boolean literalReplacement = first > 0 && List.of("deleted-consumers", "admitted-literal2", "pre-literal2", "same-pair-literal").contains(incrementalDomVariant);
++      // new22-b1b3-diagnosis01 (B1B-04/B1B-05): B1 parents without mixedDom leave the variant
++      // null, and List.of(...).contains(null) throws NPE (provider 500 -> INVALID_CONTRACT).
++      String domVariant = incrementalDomVariant;
++      boolean literalReplacement = first > 0 && domVariant != null && List.of("deleted-consumers", "admitted-literal2", "pre-literal2", "same-pair-literal").contains(domVariant);
+       var bindingConsumers = new java.util.ArrayList<JsonNode>();
+       for (int at = first; at < source.size(); at++) {
+         String stepId = source.get(at).path("stepId").asText();

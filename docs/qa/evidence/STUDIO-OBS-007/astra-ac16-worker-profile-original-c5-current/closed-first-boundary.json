@@ -1,0 +1,61 @@
+{
+  "scope": "Existing AC16 worker/nonworker observed-dispatch and original unprofiled C5 flows",
+  "samplerEnabled": false,
+  "samplerFieldsAbsent": true,
+  "gate": {
+    "gradleExitCode": 0,
+    "sourceDrift": [],
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "freshResult": true,
+    "results": [
+      {
+        "test": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+        "pass": true
+      },
+      {
+        "test": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+        "pass": true
+      }
+    ],
+    "diagnosticEnabled": false,
+    "privateArtifactJoined": true,
+    "pass": true
+  },
+  "privacy": {
+    "encodedBytes": 468796854,
+    "encodedPatternHits": 0,
+    "encodedInvalidWrites": 0,
+    "encodedObserverFailed": false,
+    "streamedLogsCollected": true,
+    "streamedLogsFinalChecked": true,
+    "captureTargetClosed": true,
+    "patternCount": 30,
+    "rootTraceObserved": true,
+    "appTraceObserved": true
+  },
+  "diagnostic": {},
+  "privateValuesRemoved": true,
+  "claims": {
+    "count": 42,
+    "last202Ms": 40.918625,
+    "max202Ms": 544.640292,
+    "lastStatus": 409
+  },
+  "failureStates": [],
+  "finalizeDiagnostics": [],
+  "limits": [
+    "backend202 alone is not SDK acknowledgement",
+    "pass applies to two selected existing flows; no whole-story QA verdict"
+  ],
+  "workerAcceptance": {
+    "proofBasis": "Existing first case passed with source-bound actual worker profile, production dispatcher/client/verifier wiring, readiness, observed receipt, PASSED and fresh-value assertions",
+    "additionalBrowserFlows": 0,
+    "nonworkerReplayPassed": true,
+    "workerReplayPassed": true,
+    "workerContextClosed": true,
+    "threeOwnedExecutorDelegatesTerminated": true
+  }
+}

@@ -1,0 +1,536 @@
+{
+  "scope": "SOURCE_ONLY_FIXED_METHOD_FAMILY_AMENDMENT",
+  "disposition": "FROZEN_FOR_ROOT_DESIGN_REVIEW_NO_AUTHOR_RELEASE",
+  "supersedesOnly": "The two class-only appended source roles7/8 of the prior ab132 design. All original bounds/lifetime/physical-connection/default-off/error/target matching constraints remain required.",
+  "priorDesign": {
+    "path": "docs/qa/evidence/STUDIO-OBS-007/resume-d-c5-fixed-holder-binding-source-design.json",
+    "sha256": "ab1328754c7e06aaa16da3b74311252be5f2e603a8a1ddbe01c97e0b235f3383"
+  },
+  "sourceBindings": {
+    "GSS": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "cdb6d8ad2a822fb9bcf8af0e9cd7d738637f0ed507211b8b25113e6520b079c6"
+    },
+    "TRANSLATION": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "168d894dfca9bf33f780a07414f5a4cc3b17be01db3579b6f041f3da9434a2ad"
+    }
+  },
+  "sourceAllowlist": [
+    {
+      "appendedCode": 7,
+      "family": "CLAIM",
+      "allowedSourceMethods": [
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "claim",
+          "declarationLines": [
+            742
+          ]
+        }
+      ]
+    },
+    {
+      "appendedCode": 8,
+      "family": "TRANSLATION",
+      "allowedSourceMethods": [
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "translationQuestion",
+          "declarationLines": [
+            206,
+            216
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "reserveModel",
+          "declarationLines": [
+            1330
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "settleModel",
+          "declarationLines": [
+            1355
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "annotateLoginFailure",
+          "declarationLines": [
+            274
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "translationActions",
+          "declarationLines": [
+            312
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "plan",
+          "declarationLines": [
+            65
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "bootstrap",
+          "declarationLines": [
+            122
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "beginBootstrapDelivery",
+          "declarationLines": [
+            214
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "finishBootstrap",
+          "declarationLines": [
+            251
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "advance",
+          "declarationLines": [
+            444
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "context",
+          "declarationLines": [
+            587
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "replan",
+          "declarationLines": [
+            612
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "call",
+          "declarationLines": [
+            694
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "question",
+          "declarationLines": [
+            1232,
+            1240
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "recover",
+          "declarationLines": [
+            1455
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "admitAndDispatch",
+          "declarationLines": [
+            1477
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "complete",
+          "declarationLines": [
+            1501
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "completeCurrent",
+          "declarationLines": [
+            1529
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "acquireBeforeProposal",
+          "declarationLines": [
+            1668
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "observeAcquisition",
+          "declarationLines": [
+            1752
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "refresh",
+          "declarationLines": [
+            1790
+          ]
+        }
+      ]
+    },
+    {
+      "appendedCode": 9,
+      "family": "OBSERVATION_MATERIALIZATION",
+      "allowedSourceMethods": [
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "observe",
+          "declarationLines": [
+            869,
+            874
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "observeV2",
+          "declarationLines": [
+            1929
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "materialize",
+          "declarationLines": [
+            1625
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "allocateBinding",
+          "declarationLines": [
+            1644
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "runnerContext",
+          "declarationLines": [
+            1674
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "storePreparation",
+          "declarationLines": [
+            1691
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "bootstrap",
+          "declarationLines": [
+            1719
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "beginObservationRefresh",
+          "declarationLines": [
+            1773
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "committedObservationRefresh",
+          "declarationLines": [
+            1852
+          ]
+        }
+      ]
+    },
+    {
+      "appendedCode": 10,
+      "family": "CONSUME_OUTCOME",
+      "allowedSourceMethods": [
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "recordSecretDecision",
+          "declarationLines": [
+            350,
+            359
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "refuseResolvedSecret",
+          "declarationLines": [
+            429
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "admit",
+          "declarationLines": [
+            962
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "advance",
+          "declarationLines": [
+            1120
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "outcome",
+          "declarationLines": [
+            1159
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "outcomeV2",
+          "declarationLines": [
+            2046
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "completeStep",
+          "declarationLines": [
+            1225
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "recordEvidence",
+          "declarationLines": [
+            1454
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "consume",
+          "declarationLines": [
+            1990
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "lifecycle",
+          "declarationLines": [
+            2106
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "existingAdmission",
+          "declarationLines": [
+            1605
+          ]
+        }
+      ]
+    },
+    {
+      "appendedCode": 11,
+      "family": "READ_START_COMMAND",
+      "allowedSourceMethods": [
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "secretSession",
+          "declarationLines": [
+            461
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "start",
+          "declarationLines": [
+            465
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "read",
+          "declarationLines": [
+            573
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "clarify",
+          "declarationLines": [
+            611
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "clarificationSelection",
+          "declarationLines": [
+            688
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "publicCommand",
+          "declarationLines": [
+            706
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "prepareAssignment",
+          "declarationLines": [
+            1537
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "acknowledgeAssignment",
+          "declarationLines": [
+            1560
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "assignmentLifecycle",
+          "declarationLines": [
+            1573
+          ]
+        }
+      ]
+    },
+    {
+      "appendedCode": 12,
+      "family": "STOP_RECONCILE",
+      "allowedSourceMethods": [
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "secretRevoked",
+          "declarationLines": [
+            58
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "cancel",
+          "declarationLines": [
+            595
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "failTranslation",
+          "declarationLines": [
+            242
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "expire",
+          "declarationLines": [
+            1412
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "lostAcknowledgment",
+          "declarationLines": [
+            1427,
+            1441
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "stop",
+          "declarationLines": [
+            2247
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "finalizeSession",
+          "declarationLines": [
+            1285
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "publicationCommitted",
+          "declarationLines": [
+            2230
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.session.GuidedSessionService",
+          "method": "reconcileLateModelUsage",
+          "declarationLines": [
+            122
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "reconcile",
+          "declarationLines": [
+            1048
+          ]
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+          "method": "stopRejected",
+          "declarationLines": [
+            1064
+          ]
+        }
+      ]
+    }
+  ],
+  "classification": [
+    "Reuse ONLY the SAME bounded stack already acquired by the existing sampler for a member of the admitted Thread identity union. No callback-entry second stack read, global thread/stack search, new cycle or polling.",
+    "The genuine NEW outer callback binding comes only from the existing injected GuidedSessionRepository TransactionTemplate. In the already-acquired leaf-to-root stack find the OUTERMOST active exact GuidedSessionRepository.transaction frame; this corresponds to that original outer callback. Inner joined repository transitions do not rebind or replace its identity.",
+    "Inspect the immediate original business caller outward from that frame. Skip ONLY exact GSS.internal and GSS.translationTransaction delegation methods. Match the FIRST non-delegation caller against the closed exact class+method allowlist below. This selects the most-specific supported caller at the authentic outer transaction boundary; later ancestors do not override it.",
+    "An unsupported first caller, absent outer boundary, unavailable/truncated stack, inconsistent/ambiguous boundary or no allowlist match remains unclassified. Do not fall back to broad class-only roles or search past unsupported callers. Compiler-generated lambda method names are not wildcard source matches.",
+    "Examples: outer internal\u2192observe gives OBSERVATION_MATERIALIZATION even inside Translator.advance; outer translationTransaction\u2192Translator.call gives TRANSLATION; outer internal\u2192failTranslation gives STOP_RECONCILE; genuine claim outer callback stays CLAIM even while invoking a joined authorization sweep. Nested repository.lock/canonical/SQL/library work cannot relabel the outer source family.",
+    "Associate the fixed role sample only with the SAME immutable currently active binding under the existing gate. Original target binding and actual blocker PID must match exactly with target+holder identities active before and after original row inspection and at successful publication. Missing/ended/replaced/ambiguous/unconfirmed bindings never yield a family. Source family is not exclusive cost or proof of a particular inner operation."
+  ],
+  "arrayContract": {
+    "existingKey": "pgSnapshotBlockerStageCounts",
+    "sqlPartition": "indices0..6 are the exact original SQL classification and counters, untouched",
+    "sourcePartition": {
+      "7": "CLAIM",
+      "8": "TRANSLATION",
+      "9": "OBSERVATION_MATERIALIZATION",
+      "10": "CONSUME_OUTCOME",
+      "11": "READ_START_COMMAND",
+      "12": "STOP_RECONCILE"
+    },
+    "length": 13,
+    "counting": "Every unique actual blocker keeps its original SQL-bin increment. A confirmed source match supplements exactly ONE appended family count; unsupported/unmatched retains original query fallback with no appended count. The two partitions are explicitly independent; summing the full array is invalid and would double-count confirmed matches.",
+    "publication": "Appended counts provisional until original OBSERVED+joined status and exact target/holder pre/post identity, no failure/truncation/ambiguity/non-quiescence/bindingUnconfirmed. Zero appended counts mean no confirmed role matches, not no such callback activity."
+  },
+  "unchangedBoundsAndLifetime": [
+    "U is registered executing claims union active original outer-callback binding Threads by identity. BOTH admissions under SAME existing gate add an absent Thread only if size(U)<8; already-present membership does not add a Thread. Removal only shrinks U. This inductively proves COMBINED TOTAL8, never8 each.",
+    "Same original sampler<=8 snapshots,30s window,20ms cadence, once-only slow trigger/PG row query/max rows/stages/waits/18keys; no new observation, SQL, event, file family, key, timer, case or framework.",
+    "Keep original already-physical native session/manager/datasource/release-mode checks and private handshake PID; never acquire/borrow/SQL on missing physical connection. Retire SAME binding in original callback finally BEFORE superclass commit/rollback; metadata failure never replaces original callback/status/result/error.",
+    "Standalone Store/Sweep templates, ambient transactions and commit/rollback remain unknown. No require-all framework or new wrapper is proposed. Default-off flow is unchanged.",
+    "Never export raw stack/query/IDs/args/values/thread names; only documented fixed numeric family counters in the existing array."
+  ],
+  "limits": [
+    "The actual current ClientRead holder family is still UNOBSERVED. A future strict match gives one sampled callback-family attribution only, not measured cause/benefit or a passing1s budget.",
+    "If the original stack/physical binding cannot observe the authentic blocker within existing limits, retain UNKNOWN; do not broaden collection."
+  ],
+  "sourceAuthored": false,
+  "runtimeExecuted": false,
+  "newCases": 0,
+  "newObservations": 0,
+  "performanceClaim": false,
+  "whole19AcPass": false
+}

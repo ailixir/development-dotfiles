@@ -1,0 +1,361 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -277,6 +277,7 @@
+         c6PendingSamples;
+     volatile long c6FocusAt, c6PrimitiveAt, c6PendingAt, c6CutAt, c6DeadlineMarginMs;
+     volatile boolean c6NativeClose, c6FenceAvailable, c6InterruptedNotification, c6ProducerSealed;
++    volatile boolean c6BrowserTreeGone;
+     C5Capture c6Capture;
+     P8PendingTiming c6Timing;
+     List<P6OwnedPid> c6BrowserTree = List.of();
+@@ -7887,6 +7888,13 @@
+   }
+ 
+   private void p4SealPrivateProducersAfterOwnerCleanup(P4RevocationState state) throws Exception {
++    if (state.c6Kind == 3) {
++      assertThat(state.c6BrowserTreeGone && state.c6NativeClose).isTrue();
++      if (state.c6ProducerSealed) {
++        p8AssertManagedNativeState(state);
++        return; // Existing command already proved managed output closure, not raw SDK sealing.
++      }
++    }
+     Path root = TEMP.resolve("p4-revocation-producers");
+     p4RequirePrivateProducerRoot(root);
+     List<Integer> producers = state.path == 1 ? List.of(1) : List.of(2, 3);
+@@ -7951,7 +7959,18 @@
+             assertThat(p4Number(sample, "busy")).isBetween(0, 2);
+             assertThat(p4Number(sample, "restoreRefusal")).isBetween(0, 5);
+           }
+-          if (sample.path("sealed").booleanValue()) {
++          boolean managedLoss = state.c6Kind == 3 && producer == 1;
++          if (managedLoss
++              ? state.c6NativeClose && state.restored && state.closed
++                  && !sample.path("sealed").booleanValue()
++                  && p4Number(sample, "busy") == 0
++                  && p4Number(sample, "restoreAttempt") > 0
++                  && p4Number(sample, "restoreRefusal") == 0
++                  && p4Number(sample, "cdpCreationPending") == 0
++                  && p4Number(sample, "originalPending") == 0
++                  && p4Number(sample, "pending") == p4Number(sample, "highPending")
++                  && p4Number(sample, "sent") == p4Number(sample, "acked")
++              : sample.path("sealed").booleanValue()) {
+             finalSample = sample;
+             break;
+           }
+@@ -7962,7 +7981,13 @@
+           .as("actual producer final ACK/failure processing sample")
+           .isTrue();
+       assertThat(finalSample.path("failed").booleanValue()).isFalse();
+-      assertThat(p4Number(finalSample, "pending")).isZero();
++      if (state.c6Kind == 3 && producer == 1) {
++        assertThat(finalSample.path("sealed").booleanValue()).isFalse();
++        assertThat(p4Number(finalSample, "pending")).isEqualTo(p4Number(finalSample, "highPending"));
++        assertThat(p4Number(finalSample, "nativeActive")).isEqualTo(state.active.size());
++      } else {
++        assertThat(p4Number(finalSample, "pending")).isZero();
++      }
+       assertThat(p4Number(finalSample, "originalPending")).isZero();
+       assertThat(p4Number(finalSample, "sent")).isPositive();
+       assertThat(p4Number(finalSample, "acked")).isEqualTo(p4Number(finalSample, "sent"));
+@@ -8375,7 +8400,11 @@
+                 }
+               });
+         }
+-        p3AttemptTeardown(failures, () -> p6AwaitProcesses(owned.c6BrowserTree, true));
++        p3AttemptTeardown(failures, () -> {
++          assertThat(owned.c6BrowserTree.isEmpty()).isFalse();
++          p6AwaitProcesses(owned.c6BrowserTree, true);
++          owned.c6BrowserTreeGone = true;
++        });
+       }
+       // Independently attempt the EXISTING selected producer restoration/seal command even
+       // when original owner close failed. It cannot clear sticky failures or quarantine.
+@@ -8388,7 +8417,8 @@
+             });
+       }
+       if (!cleanupUnconfirmed) {
+-        if (owned != null && owned.c6Kind != 0 && (!owned.restored || !owned.active.isEmpty())) {
++        if (owned != null && owned.c6Kind != 0
++            && (!owned.restored || (owned.c6Kind != 3 && !owned.active.isEmpty()))) {
+           cleanupUnconfirmed = true;
+           failures.add(
+               new IllegalStateException(
+@@ -8631,6 +8661,13 @@
+                 owner))
+         .isZero();
+     p3AssertAuditScope(state.guidedSession, state.execution, scope);
++    if (kind == 3) {
++      // Existing seal command is authorized only after actual original stop and captured tree exit.
++      p6AwaitProcesses(browserTree, true);
++      state.c6BrowserTreeGone = true;
++      p4SealPrivateProducersAfterOwnerCleanup(state);
++      state.c6ProducerSealed = true; // Observer output closed; its raw SDK sealed field remains false.
++    }
+     p3CleanupOwnedResources();
+     p8AssertUnknownUsageLineage(state);
+     if (!browserTree.isEmpty()) p6AwaitProcesses(browserTree, true);
+@@ -8641,9 +8678,11 @@
+           .isPositive()
+           .isLessThanOrEqualTo(Duration.ofSeconds(2).toNanos());
+     }
+-    p4SealPrivateProducersAfterOwnerCleanup(state);
+-    state.c6ProducerSealed = true;
+-    assertThat(state.active).isEmpty();
++    if (!state.c6ProducerSealed) {
++      p4SealPrivateProducersAfterOwnerCleanup(state);
++      state.c6ProducerSealed = true;
++    }
++    p8AssertManagedNativeState(state);
+     assertThat(state.c6FillEntries).isEqualTo(kind == 4 ? 0 : 1);
+     assertThat(P3_RECEIPTS).isEmpty();
+     assertThat(P3_REPORT_REQUESTS.get()).isZero();
+@@ -8659,6 +8698,7 @@
+       assertThat(state.c6NativeClose).isTrue();
+       if (!state.c6FenceAvailable) assertThat(P8_C6_CLOSED_UNKNOWN).contains(state.c6Phase);
+       if (kind == 3) {
++        // This hook may observe managed CONTEXT_LOST; it supplies no genuine native-error credit.
+         assertThat(state.c6RawCalls).isEqualTo(1);
+         assertThat(state.c6LiteralHits).isZero();
+         assertThat(state.c6EncodedHits).isZero();
+@@ -8763,7 +8803,7 @@
+       synchronized (state) {
+         if (state.c6NativeClose
+             && state.restored
+-            && state.active.isEmpty()
++            && (state.c6Kind == 3 || state.active.isEmpty())
+             && (state.path == 2 || state.closed)) break;
+       }
+       Thread.sleep(20);
+@@ -8783,7 +8823,7 @@
+     assertThat(state.restored)
+         .as("exact descriptors restored after original dispatch lifetime")
+         .isTrue();
+-    assertThat(state.active).isEmpty();
++    p8AssertManagedNativeState(state);
+     if (state.path == 1) assertThat(state.closed).isTrue();
+     assertThat(state.failed).isFalse();
+     if (state.c6InterruptedNotification) {
+@@ -8802,6 +8842,20 @@
+     assertThat(Files.exists(TEMP.resolve("p4-native-observer-failed")))
+         .as("malformed ACK/fence and original close failures remain sticky")
+         .isFalse();
++  }
++
++  private static void p8AssertManagedNativeState(P4RevocationState state) {
++    if (state.c6Kind == 3) {
++      // The retained actual native map is raw-settlement evidence, never reset by managed close.
++      assertThat(state.active.size()).isLessThanOrEqualTo(1);
++      if (!state.active.isEmpty()) {
++        assertThat(state.active).containsOnlyKeys(state.inFlightOrdinal);
++        assertThat(state.active.get(state.inFlightOrdinal)).isEqualTo(1);
++      }
++      assertThat(state.closed && state.restored && state.c6NativeClose && state.c6BrowserTreeGone).isTrue();
++    } else {
++      assertThat(state.active).isEmpty();
++    }
+   }
+ 
+   private P6OwnedPid p8OwnedPrimaryBrowser(P4RevocationState state) throws Exception {
+@@ -9816,7 +9870,9 @@
+         let revLocalMode=null,revWatching=false,revC6Probed=0;
+         let revC6ProfileDev=0,revC6ProfileIno=0,revC6ContextBound=false;
+         let revC6RunDeadline=0,revC6StepMs=0,revC6Restored=false,revC6RetryRestore=null;
+-        const revActive=new Map(),revGroups=new Set();
++        let revActive=new Map();const revGroups=new Set();
++        let revLossLifetime=null;
++        const revManagedLoss=()=>revLossSelected()&&revLossLifetime?.retired===true;
+         const revMode=()=>{try{return revFs.existsSync(revStateFile)?JSON.parse(revFs.readFileSync(revStateFile,'utf8')):null;}catch{return null;}};
+         const revMarker=()=>{try{const fd=revFs.openSync(revFailedFile,
+           revFs.constants.O_WRONLY|revFs.constants.O_CREAT|revFs.constants.O_APPEND|revFs.constants.O_NOFOLLOW,0o600);
+@@ -9835,12 +9891,14 @@
+             if(mode.c6===3&&revProducer===1&&revLossRuntime){
+               const actualBusy=revLossRuntime.busy;revLossBusy=typeof actualBusy==='boolean'?Number(actualBusy):2;
+             }
++            // Retired raw status is the last actual observation, never fake settlement/zero.
++            const raw=revManagedLoss()?revLossLifetime.snapshot:null;
+             const body=JSON.stringify({case:mode.case,producer:revProducer,epoch:mode.epoch,role:revProducer,
+-              sent:revSeq,acked:revAcked,pending:revPending+revOriginalPending+revC6HighPending+revC6CdpPending,originalPending:revOriginalPending,
++              sent:revSeq,acked:revAcked,pending:revPending+revOriginalPending+(raw?.high??revC6HighPending)+revC6CdpPending,originalPending:revOriginalPending,
+               failed:revFailed,sealed,...(mode.c6?{profileDev:revC6ProfileDev,
+                 profileIno:revC6ProfileIno,contextBound:revC6ContextBound}:{}),
+-              ...(mode.c6===3&&revProducer===1?{highPending:revC6HighPending,cdpCreationPending:revC6CdpPending,
+-                nativeActive:revActive.size,busy:revLossBusy,restoreAttempt:revLossRestoreAttempt,
++              ...(mode.c6===3&&revProducer===1?{highPending:raw?.high??revC6HighPending,cdpCreationPending:revC6CdpPending,
++                nativeActive:raw?.active??revActive.size,busy:revLossBusy,restoreAttempt:revLossRestoreAttempt,
+                 restoreRefusal:revLossRestoreRefusal}:{})});
+             if(Buffer.byteLength(body)>1024)throw new Error('BOUND');
+             revCheckRoot();
+@@ -9853,14 +9911,19 @@
+         };
+         const revFail=()=>{revFailed=true;revMarker();if(revLocalMode)revPublish(revLocalMode,revSealed);};
+         const revMaybeSeal=()=>{
++          if(revManagedLoss())return; // This epoch explicitly has no normal raw SDK seal.
+           if(revSealing&&revPending===0&&revOriginalPending===0&&revC6HighPending===0&&revC6CdpPending===0){revSealed=true;revPublish(revLocalMode,true);}
+         };
+         const revInit=mode=>{
+           if(revCase===mode.case)return;
+-          if(revLocalMode&&!revSealed){revFail();return;}
++          if(revLocalMode&&!revSealed&&!revManagedLoss()){revFail();return;}
++          // The old map remains captured by its original pending callbacks; it is not erased.
++          if(revManagedLoss())revActive=new Map();
+           revCase=mode.case;revSeq=0;revPending=0;revAcked=0;revOriginalPending=0;
+           if(mode.c6){revNativeOrdinal=0;revC6Probed=0;revC6Restored=false;}
+-          if(mode.c6===3&&revProducer===1){revLossRuntime=null;revLossBusy=2;revLossRestoreAttempt=0;revLossRestoreRefusal=0;}
++          if(mode.c6===3&&revProducer===1){revLossRuntime=null;revLossBusy=2;revLossRestoreAttempt=0;revLossRestoreRefusal=0;
++            revLossLifetime={mode,active:revActive,high:0,operations:0,callbacks:0,cleanupAuthorized:false,retired:false,snapshot:null};}
++          else revLossLifetime=null;
+           if(mode.c6>=1&&mode.c6<=3){revStarted=false;revC6HighPending=0;revC6CdpPending=0;}
+           revTail=Promise.resolve();revLocalMode=mode;revSealing=false;revSealed=false;
+           if((revProducer!==3||mode.c6)&&!revWatching){
+@@ -9884,12 +9947,15 @@
+                 }
+                 if(Object.keys(seal).sort().join(',')!=='case,epoch,producer,seal'||seal.case!==mode.case
+                   ||seal.epoch!==mode.epoch||seal.producer!==revProducer||seal.seal!==true)throw new Error('EPOCH');
++                if(mode.c6===3&&revProducer===1&&revLossLifetime)revLossLifetime.cleanupAuthorized=true;
+                 if(mode.c6&&revC6RetryRestore){
+                   // Existing teardown seal retries the retained selected restoration task.
+                   // No action/stop/native authority is created by this observation command.
+                   const retry=revC6RetryRestore;
+                   retry().then(restored=>{if(!restored){revFail();return;}
+-                    revSealing=true;revFs.unwatchFile(command);revWatching=false;revMaybeSeal();
++                    revSealing=true;revFs.unwatchFile(command);revWatching=false;
++                    // Managed output closure is not normal raw-SDK settlement/sealing.
++                    if(revManagedLoss())revPublish(mode,false);else revMaybeSeal();
+                   },()=>{revFail();}).catch(()=>{revFail();});return;
+                 }
+                 revSealing=true;revFs.unwatchFile(command);revWatching=false;revMaybeSeal();
+@@ -9943,8 +10009,14 @@
+             const descriptor=Object.getOwnPropertyDescriptor(cap,name),original=cap[name];
+             const wrapped=function(...args){
+               if(cdpSelected&&name==='fillPassword'){
+-                revC6HighPending++;let result;
+-                const settled=()=>{revC6HighPending--;revPublish(mode,revSealed);revMaybeSeal();};
++                revC6HighPending++;let result;const lifetime=revLossSelected()?revLossLifetime:null;
++                if(lifetime)lifetime.high++;
++                const settled=()=>{
++                  if(lifetime)lifetime.high--;
++                  if(lifetime&&lifetime!==revLossLifetime)return;
++                  revC6HighPending--;
++                  if(lifetime?.retired)return; // Value-free observer retired, actual promise unchanged.
++                  revPublish(mode,revSealed);revMaybeSeal();};
+                 try{result=Reflect.apply(original,this,args);}catch(error){settled();throw error;}
+                 try{result.then(settled,settled).catch(()=>{revFail();});}catch{revFail();}
+                 return result;
+@@ -10020,6 +10092,19 @@
+                     throw new Error('C6_VALUES');const values=JSON.parse(revFs.readFileSync(c5ValuesFile,'utf8'));
+                   if(!Array.isArray(values)||values.length!==1||typeof values[0]!=='string'||values[0].length>4096)
+                     throw new Error('C6_VALUES');return values;};
++                if(mode.c6===3){
++                  const descriptor=Object.getOwnPropertyDescriptor(options,'callback'),original=options.callback;
++                  const lifetime=revLossLifetime;
++                  if(typeof original!=='function'||!descriptor||!lifetime)throw new Error('C6_CALLBACK');
++                  const wrapped=function(...args){
++                    lifetime.callbacks++;revOriginalPending++;let result;
++                    const done=()=>{lifetime.callbacks--;revOriginalPending--;revPublish(mode,revSealed);};
++                    try{result=Reflect.apply(original,this,args);}catch(error){done();throw error;}
++                    result.then(done,()=>{revFail();done();}).catch(()=>{revFail();});return result;
++                  };
++                  if(!Reflect.defineProperty(options,'callback',{...descriptor,value:wrapped}))throw new Error('C6_CALLBACK');
++                  group.methods.push(['callback',descriptor,wrapped]);
++                }
+                 const hooks={onRawFailure(error){try{const text=error instanceof Error?error.message:'';
+                   let literal=0,encoded=0;for(const value of comparisons()){
+                     if(text.includes(value))literal++;
+@@ -10037,6 +10122,18 @@
+               }
+               revEmit(mode,1,1);}catch{revFail();}},()=>{revFail();}).catch(()=>{revFail();});}
+           return result;};
++        // Selected kind3 observes actual managed promises without changing original results/errors.
++        for(const name of ['dispatch','refreshObservation']){
++          const original=RevRuntime.prototype[name];
++          RevRuntime.prototype[name]=function(...args){
++            const mode=revRuntimes.get(this),lifetime=mode?.c6===3?revLossLifetime:null;
++            if(!lifetime)return Reflect.apply(original,this,args);
++            lifetime.operations++;revOriginalPending++;let result;
++            const done=()=>{lifetime.operations--;revOriginalPending--;revPublish(mode,revSealed);};
++            try{result=Reflect.apply(original,this,args);}catch(error){done();throw error;}
++            result.then(done,()=>{revFail();done();}).catch(()=>{revFail();});return result;
++          };
++        }
+         const revCheck=RevOwnership.prototype.checkGrant;
+         RevOwnership.prototype.checkGrant=function(...args){
+           const selected=revFs.existsSync(c5ValuesFile),started=selected?performance.now():0;
+@@ -10067,13 +10164,18 @@
+                   if(restoring)return restoring;
+                   restoring=(async()=>{
+                     const deadline=performance.now()+10000;
+-                    while((runtime.busy||revActive.size||revC6HighPending||revC6CdpPending)&&performance.now()<deadline)
++                    const lifetime=mode.c6===3?revLossLifetime:null;
++                    if(lifetime&&(!lifetime.cleanupAuthorized||!closeSucceeded))return false;
++                    const pending=()=>runtime.busy||revC6CdpPending||(lifetime?
++                      lifetime.operations||lifetime.callbacks||revOriginalPending:revActive.size||revC6HighPending);
++                    while(pending()&&performance.now()<deadline)
+                       await new Promise(resolve=>setTimeout(resolve,10));
+-                    if(runtime.busy||revActive.size||revC6HighPending||revC6CdpPending){revLossRefuse(1);revFail();return false;}
++                    if(pending()||(lifetime&&runtime.active)){revLossRefuse(1);revFail();return false;}
+                     const restored=revRestore();revEmit(mode,6,1,0,0,restored);
+                     if(!restored){revFail();return false;}
+                     revC6Restored=true;
+                     if(closeSucceeded&&!closedRecorded){closedRecorded=true;revEmit(mode,9,1);}
++                    if(lifetime){lifetime.snapshot={high:revC6HighPending,active:revActive.size};lifetime.retired=true;}
+                     // Drop only after actual dispatch settlement and exact descriptor restore.
+                     revRuntimes.delete(runtime);
+                     if(revLossSelected()){const actualBusy=runtime.busy;
+@@ -10083,12 +10185,12 @@
+                   return restoring;
+                 };
+                 revC6RetryRestore=retry;
+-                result.then(()=>{closeSucceeded=true;return retry();},()=>{
++                result.then(()=>{closeSucceeded=true;return mode.c6===3?true:retry();},()=>{
+                   // Original rejection remains on the unchanged result; restoration is distinct.
+                   revLossRefuse(5);revFail();return retry();
+                 }).catch(()=>{revFail();});
+               } else {
+-                result.then(()=>revC6RetryRestore?.(),()=>{revLossRefuse(5);revFail();return revC6RetryRestore?.();})
++                result.then(()=>mode.c6===3?true:revC6RetryRestore?.(),()=>{revLossRefuse(5);revFail();return revC6RetryRestore?.();})
+                   .catch(()=>{revFail();});
+               }
+             } else {
+@@ -10388,8 +10490,12 @@
+                 &&holder.dev===revC6ProfileDev&&holder.ino===revC6ProfileIno&&revStarted
+                 &&(current.path===1?revC6ContextBound:revReady);
+               if(!owned){revFail();return result;}
+-              const ordinal=++revNativeOrdinal;revActive.set(ordinal,1);revEmit(holder.mode,2,ordinal,1);
+-              const settled=fulfilled=>{if(!revActive.delete(ordinal))revFail();revEmit(holder.mode,3,ordinal,1,0,fulfilled);};
++              const ordinal=++revNativeOrdinal,active=revActive,lifetime=revLossSelected()?revLossLifetime:null;
++              active.set(ordinal,1);revEmit(holder.mode,2,ordinal,1);
++              const settled=fulfilled=>{
++                const removed=active.delete(ordinal);
++                if(lifetime?.retired)return; // Exact actual settlement remains private; no late observer output.
++                if(!removed)revFail();revEmit(holder.mode,3,ordinal,1,0,fulfilled);};
+               try{result.then(()=>settled(true),()=>settled(false)).catch(()=>{revFail();});}catch{revFail();}
+             }
+             return result;
+@@ -10466,10 +10572,23 @@
+                     if(response.status!==200||Object.keys(ack).sort().join(',')!=='accepted,seq'
+                       ||ack.accepted!==true||ack.seq!==0)throw new Error('ACK');
+                   };
+-                  try{await Promise.race([fence(),new Promise((_,reject)=>{
+-                    timer=setTimeout(()=>reject(new Error('TIME')),Math.max(1,deadline-performance.now()));})]);}
+-                  finally{clearTimeout(timer);}
+-                  fenceSucceeded=true;
++                  const holder=selected?.c6===3&&selected.path===1?c6CdpHolders.get(context):null;
++                  const current=holder?revMode():null,browser=holder?context.browser():null;
++                  const unavailable=holder?.context===context&&holder.closed===false&&selected.active===true
++                    &&Number.isInteger(selected.case)&&selected.case>0&&selected.epoch===selected.case
++                    &&current?.active===true&&current.c6===3&&current.path===1
++                    &&current.case===selected.case&&current.epoch===selected.epoch
++                    &&holder.mode.case===selected.case&&holder.mode.epoch===selected.epoch
++                    &&holder.mode.c6===3&&holder.mode.path===1&&revLocalMode?.case===selected.case
++                    &&revLocalMode?.epoch===selected.epoch&&revC6ContextBound&&revStarted&&revC6Probed===2
++                    &&holder.dev===revC6ProfileDev&&holder.ino===revC6ProfileIno
++                    &&browser!==null&&typeof browser?.isConnected==='function'&&browser.isConnected()===false;
++                  if(!unavailable){
++                    try{await Promise.race([fence(),new Promise((_,reject)=>{
++                      timer=setTimeout(()=>reject(new Error('TIME')),Math.max(1,deadline-performance.now()));})]);}
++                    finally{clearTimeout(timer);}
++                    fenceSucceeded=true;
++                  } // Genuine bound disconnection supplies UNKNOWN, never a healthy page fence.
+                 }catch(error){
+                   // Only the deliberate in-flight cut may leave a destroyed/stalled realm.
+                   // Malformed ACK/fence failures remain sticky even in C6.

@@ -1,0 +1,145 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -525,7 +525,9 @@
+         var chain = descendant.putArray("ancestry"); child.ancestry().forEach(chain::add);
+       }
+       byte[] line = (GuidedContracts.canonical(row) + "\n").getBytes(StandardCharsets.UTF_8);
+-      if (ownedProcessEvents >= 4096 || ownedProcessEventBytes + line.length > 2096000) {
++      // w3-qa-ack02 item 6: 16,384 events / 8,388,608 bytes; supersedes the QA-reviewed 4096 / 2,096,000
++      // (checkpoint-owned-worker-generations01). Harness capacity only; still fail-closed.
++      if (ownedProcessEvents >= 16384 || ownedProcessEventBytes + line.length > 8388608) {
+         throw new IllegalStateException("Owned process metadata bound exceeded");
+       }
+       Path file = ownedFixtureTemp.resolve("owned-worker-generations.jsonl");
+@@ -564,7 +566,11 @@
+           for (OwnedFixtureProcess candidate : OWNED_FIXTURE_PROCESSES) {
+             try { recordOwnedDescendants(candidate); }
+             catch (Exception | AssertionError failure) {
+-              if (candidate.process.isAlive() && !candidate.stopping) OWNED_FIXTURE_FAILURES.add(failure);
++              // w3-d4 (c): a root that exits between isAlive() and commandLine() is a reaped or
++              // zombie process (macOS drops a zombie's command line), as in p8TerminatedUnsignalled:
++              // skip only that; any live unverifiable root is still a failure.
++              if (candidate.process.isAlive() && !candidate.stopping
++                  && !p8TerminatedUnsignalled(candidate.handle)) OWNED_FIXTURE_FAILURES.add(failure);
+             }
+           }
+         }, 0, 100, java.util.concurrent.TimeUnit.MILLISECONDS);
+@@ -2876,6 +2882,12 @@
+               .as("actual authenticated fixture cancellation")
+               .isEqualTo(202);
+           assertThat(C.parse(response.body()).path("state").asText()).isEqualTo("CANCELLED");
++        }
++        // w3-qa-ack02 §6 shared guard, read after the cancel: a session that ended before any
++        // assignment has no runtime to stop, so it never reaches CONFIRMED and blocks nothing.
++        if (neverAssignedSettled(owned.getKey())) {
++          cleanup.put("teardownStatus", "NOT_ASSIGNED").put("assigned", 0).put("materialized", 0);
++          continue;
+         }
+         long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+         String teardown;
+@@ -8291,16 +8303,31 @@
+             assertThat(manifestCopy.path("authoringSnapshot"))
+                 .as("manifest authoring copy equals the current snapshot authoring")
+                 .isEqualTo(current.path("authoring"));
+-            for (JsonNode entry : manifestCopy.path("authoringContext")) {
+-              assertThat(
+-                      entry.size() == 2
+-                          && entry.path("stepId").isTextual()
+-                          && entry.path("text").isTextual())
+-                  .as("authoringContext entry is exactly {stepId,text}")
+-                  .isTrue();
++            // w3-qa-ack02 §4.3: authoringContext must equal exactly the INPUT-POLICY-01-A
++            // projection rebuilt from the current authoring (GuidedSourceClassifier.safeContext
++            // order: global first, then each step), and that projection must carry the canary.
++            JsonNode currentAuthoring = current.path("authoring");
++            var expectedContext =
++                com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.arrayNode();
++            b2SafeContext(currentAuthoring.path("globalContext"), "global", expectedContext);
++            for (JsonNode authoredStep : currentAuthoring.path("steps")) {
++              b2SafeContext(
++                  authoredStep.path("context"), authoredStep.path("id").asText(), expectedContext);
+             }
++            assertThat(expectedContext.isEmpty())
++                .as("rebuilt authoringContext projection is non-empty")
++                .isFalse();
+             assertThat(
+                     containsBytes(
++                        expectedContext.toString().getBytes(StandardCharsets.UTF_8),
++                        ctxText.getBytes(StandardCharsets.UTF_8)))
++                .as("the rebuilt projection carries the context-text canary")
++                .isTrue();
++            assertThat(manifestCopy.path("authoringContext"))
++                .as("authoringContext equals exactly the projection rebuilt from current authoring")
++                .isEqualTo(expectedContext);
++            assertThat(
++                    containsBytes(
+                         manifestCopy
+                             .path("authoringContext")
+                             .toString()
+@@ -23819,26 +23846,51 @@
+    * when an assignment row exists must the H8 teardown reach CONFIRMED.
+    */
+   private void b3AwaitCancelSettled(String id) throws Exception {
+-    var row =
+-        jdbc.queryForMap(
+-            "SELECT s.state, s.progress->>'teardownStatus' AS teardown,"
+-                + " (SELECT count(*) FROM studio_guided_assignments a"
+-                + " WHERE a.session_id=s.session_id) AS assigned,"
+-                + " (SELECT count(*) FROM studio_guided_materializations m"
+-                + " WHERE m.session_id=s.session_id) AS materialized"
+-                + " FROM studio_guided_sessions s WHERE s.session_id=?",
+-            id);
+-    assertThat(row.get("state")).as("cancelled before any outcome").isEqualTo("CANCELLED");
+-    if (((Number) row.get("assigned")).longValue() == 0L) {
+-      assertThat(((Number) row.get("materialized")).longValue())
+-          .as("no runtime context without an assignment")
+-          .isZero();
+-      assertThat(row.get("teardown")).as("nothing to stop, so no teardown request").isNull();
++    assertThat(
++            jdbc.queryForObject(
++                "SELECT state FROM studio_guided_sessions WHERE session_id=?", String.class, id))
++        .as("cancelled before any outcome")
++        .isEqualTo("CANCELLED");
++    if (neverAssignedSettled(id)) {
+       return;
+     }
+     p3AwaitTeardown(id);
+   }
+ 
++  /**
++   * w3-qa-ack02 §6 shared guard (b3AwaitCancelSettled and the failed-test cleanup): one read that
++   * is true only for a terminal session that never had a runtime: 0 assignments, 0
++   * materializations, no teardownStatus and no teardownRequest. Everything else must reach
++   * CONFIRMED.
++   */
++  private boolean neverAssignedSettled(String id) {
++    return Boolean.TRUE.equals(
++        jdbc.queryForObject(
++            "SELECT s.state IN ('SUCCEEDED','PUBLICATION_CONFLICT','FAILED','UNKNOWN_OUTCOME',"
++                + "'CANCELLED','EXPIRED')"
++                + " AND NOT EXISTS (SELECT 1 FROM studio_guided_assignments a"
++                + " WHERE a.session_id=s.session_id)"
++                + " AND NOT EXISTS (SELECT 1 FROM studio_guided_materializations m"
++                + " WHERE m.session_id=s.session_id)"
++                + " AND COALESCE(s.progress->>'teardownStatus','')=''"
++                + " AND s.progress->'teardownRequest' IS NULL"
++                + " FROM studio_guided_sessions s WHERE s.session_id=?",
++            Boolean.class,
++            id));
++  }
++
++  /** w3-qa-ack02 §4.3: mirrors GuidedSourceClassifier.safeContext (kind text, non-empty value). */
++  private static void b2SafeContext(
++      JsonNode context, String stepId, com.fasterxml.jackson.databind.node.ArrayNode result) {
++    for (JsonNode entry : context.path("entries")) {
++      if (entry.path("kind").asText().equals("text")
++          && entry.path("value").isTextual()
++          && !entry.path("value").asText().isEmpty()) {
++        result.addObject().put("stepId", stepId).put("text", entry.path("value").asText());
++      }
++    }
++  }
++
+   private void p3AwaitTeardown(String id) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+     do {

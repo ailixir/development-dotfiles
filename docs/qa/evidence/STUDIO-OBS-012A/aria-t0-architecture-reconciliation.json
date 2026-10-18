@@ -1,0 +1,390 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "phase": "T0_ARCHITECTURAL_RECONCILIATION_ONLY",
+  "architect": "Aria",
+  "scopeDecision": "D-A single observed path and D-B one re-baseline remain binding; no legacy compatibility/fallback, new provider, deployment merge or OBS015 behavior added.",
+  "authority": {
+    "productEdits": false,
+    "testEdits": false,
+    "storyEdits": false,
+    "buildsOrSuitesExecuted": false,
+    "subagentsDispatched": false,
+    "rootOwns": "Lifecycle, baseline execution, product-lane release and shared integration; M author is data-engineer; independent QA owns final verdict.",
+    "sharedCeilingUsd": 500,
+    "billingTelemetry": "UNAVAILABLE"
+  },
+  "blockingPoReconciliation": {
+    "requiredBeforeBackendGatewayDeletion": true,
+    "reason": "AC1 names19 gateway classes as shared, but current guided production imports only GenAiGatewayTransport; ten named classes are compile proposal/artifact1 clients or their support. Relocating them verbatim retains CompileRequest/Response, CompileBudget, artifact-schema beans and retired recorded compiler corpus.",
+    "minimalAmendment": "Replace named relocation inventory with the nine actual shared classes below; explicitly retire compile-only gateway adapters/DTOs and preserve neutral credential deadline/cancellation and live authoring-validation/change guards. This changes removal accounting, not product scope.",
+    "alternativeRejected": "Renaming/reimplementing compile clients as a new guided provider merely to preserve class names creates extra feature scope. Keeping inert artifact1 parsing/aliases contradicts D-A.",
+    "decisionOwner": "Root obtains independent PO disposition; this report does not amend the story."
+  },
+  "gatewayDecision": {
+    "package": "com.citi.put.checks.studio.gateway",
+    "configurationPrefix": "studio.gateway",
+    "oldPrefixAlias": false,
+    "moveSharedClasses": [
+      "GenAiGatewayTransport",
+      "StudioGatewayConfig",
+      "StudioGatewayProperties",
+      "StudioGatewaySelectionProperties",
+      "BoundedCredentialProvider",
+      "BudgetedAuthTransport",
+      "GatewayFailureClassifier",
+      "GatewayOutcome",
+      "GatewayErrorCode"
+    ],
+    "deleteCompileOnlyClasses": [
+      "GatewayAuditLogger",
+      "GatewayErrorScrubber",
+      "GatewayPayloadSerializer",
+      "GatewayProvenance",
+      "GatewayResponseParser",
+      "LlmGatewayClient",
+      "GenAiLlmGatewayClient",
+      "DisabledLlmGatewayClient",
+      "RecordedFixtureGatewayClient",
+      "RecordedFixtureCorpus",
+      "CompileRequest",
+      "CompileResponse"
+    ],
+    "survivingCallChain": [
+      "GuidedTranslationConfiguration.guidedTranslationService -> GuidedLlmGatewayClient",
+      "StudioGatewayConfig.guidedLlmGatewayClient -> GenAiGuidedLlmGatewayClient",
+      "GenAiGuidedLlmGatewayClient.propose -> GenAiGatewayTransport.tryAcquire -> Lease.authenticate/generate",
+      "GenAiGatewayTransport -> BoundedCredentialProvider -> BudgetedAuthTransport",
+      "GenAiGatewayTransport.isTimeout -> GatewayFailureClassifier -> GatewayOutcome/GatewayErrorCode",
+      "GuidedResponseParser + GuidedContracts retain actual guided structured-output validation"
+    ],
+    "requiredCarve": "Remove compile client/parser/corpus bean factories from StudioGatewayConfig. Keep vertex transport, actual guided adapter, disabled-guided result and deployed enabled-UI provider guard. Remove recorded-fixture provider selection, not replace it with synthetic guided support. Remove artifact-schema/compile-only properties and obsolete temperature compatibility once callers are removed.",
+    "budget": "CompileBudget is genuinely shared through credential plumbing. Preserve only its monotonic remaining/cap/onCancel/cancel/isCancelled semantics needed by credentials in neutral gateway budget code; drop compile proposal/transport/usage accounting and compile adapter method. GuidedCallBudget remains proposal owner; no reset, retry or allocation authority moves into transport."
+  },
+  "validatorDecision": {
+    "move": "compile/validator/StudioRunnerProperties -> studio/dispatch/StudioRunnerProperties",
+    "currentSurvivingCallers": [
+      "HttpRunnerDispatchClient constructor/send/cancel",
+      "GuidedPublicationConfiguration.observedValidationClient"
+    ],
+    "keepClient": "GuidedPublicationConfiguration -> ObservedValidationClient -> /v2/validate-observed; GuidedPlanPublisher uses this client directly. No RunnerValidationClient dependency exists in this path.",
+    "delete": [
+      "RunnerValidationClient",
+      "RunnerDiagnostic",
+      "ValidationOutcome",
+      "compile-only CompileDiagnosticDto after its compile projections disappear"
+    ],
+    "routeHandoff": "Preserve cancellation: current observed executions still use HttpRunnerDispatchClient.cancel -> StudioRunnerProperties.runUrl -> DELETE /v1/runs/{id}. K backend and K runner must atomically retarget that surviving operation to DELETE /v2/runs/{id}, while removing POST /v1/runs and /v1/validate. No alias. Keep shared admission/report/control protocol and token guards.",
+    "deferred": "Do not fold GuidedRunnerClient/ObservedValidationClient/DispatchAuthorization families; ADR places those refactors in OBS011."
+  },
+  "otherLiveKeeps": [
+    {
+      "current": "compile/CredentialPatternScreen",
+      "target": "guided/translation/CredentialPatternScreen",
+      "callers": [
+        "GuidedSourceClassifier",
+        "GuidedTranslationConfiguration"
+      ],
+      "rule": "Retain exact current credential refusal semantics and both imports."
+    },
+    {
+      "current": "compile/AuthoringLimits",
+      "target": "studio/authoring live save-validation helper/properties",
+      "callers": [
+        "StudioAuthoringMapper",
+        "LegacyStudioAdapter"
+      ],
+      "rule": "Preserve step count/blank-line/line-length save guards; remove compile-only entrypoints and studio.compile properties. Do not mistake active CRUD shape projection for artifact1 runtime compatibility."
+    },
+    {
+      "current": "compile/ConfigurationChangeClassifier",
+      "target": "studio/authoring current source/configuration classifier",
+      "callers": [
+        "StudioService update path"
+      ],
+      "rule": "Preserve revision invalidation for existing source/config changes; no incremental NEEDS_RELEARN detection here."
+    },
+    {
+      "current": "authoring/AuthoringRevisionIdentity + DTOs AuthoringV2Request/AuthoringStep/AuthoringRevisionInputs",
+      "callers": [
+        "StudioService",
+        "GuidedSourceSnapshotRepository"
+      ],
+      "rule": "Stable step UUIDs/current authoring JSON and authoring_revision_inputs survive compile retirement. A name containing V2 is not proof of the guided contract generation or an artifact1 consumer."
+    }
+  ],
+  "ownership": {
+    "K_backend": {
+      "owns": [
+        "studio/compile removal/neutral gateway and authoring extraction",
+        "StudioController/StudioService compile route/method/DTO cleanup",
+        "dispatch HTTP observed-only job and cancel URL adaptation",
+        "readiness vocabulary and surviving CRUD/dispatch/scheduling callers",
+        "application*.yml neutral gateway prefix and retired properties",
+        "named compiler test drops and shared transport test ports"
+      ],
+      "needs": [
+        "PO exact gateway inventory disposition",
+        "M explicit entity field handoff",
+        "C frozen tuple/path targets"
+      ]
+    },
+    "K_runner": {
+      "owns": [
+        "artifact1 validator/executor/fixtures/tests by-name retirement",
+        "server/routes.ts, application.ts, runCoordinator.ts observed-only carve",
+        "run/childRuntime.ts, child.ts, protocol.ts, launcher.ts legacy IPC carve",
+        "compat/runtime version writers and pin-check scripts",
+        "shared cancellation route /v2/runs/{id}",
+        "confinement test whole-document pin after C OpenAPI freeze"
+      ],
+      "preserve": "Observed replay, secret use/redaction, deadline/cancel/tree/scratch/capacity/evidence/SSE infrastructure. StepReporter/StepStatus and ValueResolver/BrowserAdapter types still have observed/launcher/protocol consumers: port/reduce shared surfaces before removing artifact1 adapters. pageLocation currently has only legacy executor/adapter callers and can retire with that closure; bounds/diagnostics deletion must follow remaining runtime callers."
+    },
+    "C": {
+      "owns": [
+        "all v3 schema/fixture definitions, generation tool/checker and four generated TS/JSON outputs",
+        "one public OpenAPI, public /api/v1/studio/guided-sessions, one internal /internal/v2 guided mount",
+        "GuidedContracts/GuidedSessionService generation/tuple cleanup",
+        "PublicationContracts/ObservedReplayPins/GuidedPublicationRepository tuple and source-identity fields",
+        "v1 guided IT ports preserving current case names/counts",
+        "StudioContractTest op-count and contract pin re-anchor",
+        "backend processResources include(v3 only)"
+      ],
+      "preserve": "OBS007 native-schema validation semantics and TRACE performance fix. New schema epochs require exact known-root/child eligibility re-proof and existing independent native-oracle Wire tests; unknown-epoch fallback remains original native validation. Do not disable TRACE or soften immutable deadlines."
+    },
+    "M": {
+      "owns": [
+        "V12\u2013V18 re-baseline, old Studio migrations/cutover deletion",
+        "final entity/schema lockstep and per-step snapshot columns",
+        "Flyway-target test targets/DDL assertions and RDS parity",
+        "V1\u2013V11 byte identity/fresh install evidence"
+      ],
+      "phaseGate": "Draft at T0, apply only after K+C compile-green and root retakes a fresh backend baseline. No deployed-data migration invented under D-B."
+    }
+  },
+  "sharedFileSequence": [
+    {
+      "files": [
+        "GuidedSessionService.java",
+        "GuidedContracts.java"
+      ],
+      "owner": "C",
+      "sequence": "C ports existing guided cases and freezes tuple first; K hands over any readiness-call change rather than editing concurrently."
+    },
+    {
+      "files": [
+        "StudioContractTest.java",
+        "docs/specs/studio/openapi.yaml"
+      ],
+      "owner": "C",
+      "sequence": "K supplies exact removed compile operations/surviving cancel operation; C performs one surviving-op count/public-document edit, then runner K re-anchors full-document confinement hash."
+    },
+    {
+      "files": [
+        "GuidedPublicationConfiguration.java",
+        "GenAiGuidedLlmGatewayClient.java",
+        "GuidedTranslationConfiguration.java"
+      ],
+      "owner": "K_backend",
+      "sequence": "Neutral import/config move first; C may consume the completed move but does not independently rename it."
+    },
+    {
+      "files": [
+        "GuidedPublicationReplayIT.java",
+        "other mixed guided/dispatch tests"
+      ],
+      "owner": "C for combined contract/config port",
+      "sequence": "K supplies bounded neutral-prefix/import substitutions; C applies path/tuple ports once. Preserve OBS007 original case assertions and current37 case count; supporting cases do not become new mandatory E2E."
+    },
+    {
+      "files": [
+        "UITest.java",
+        "UITestRevision.java",
+        "UITestDto.java",
+        "PublicationContracts.java"
+      ],
+      "owner": "Root serializes K/C/M handoff",
+      "sequence": "CompileState/entity imports prevent a blind compile directory deletion. K/C remove live compile callsites first; either root lands the agreed entity dependency removal in the same compile-green sub-batch or retains only those dead field-support leaves until M removes fields. No compatibility route/fallback is introduced, and all compile leaves must be absent on final tree. M owns final schema/entity shape after its phase gate."
+    },
+    {
+      "files": [
+        "backend/build.gradle.kts"
+      ],
+      "owner": "C, then root/M",
+      "sequence": "C changes v3 resource include and generator-check wiring; M later updates migration-related verification only through that owner."
+    },
+    {
+      "files": [
+        "executor/observedOperations.ts",
+        "guided/types.ts",
+        "observedSchemas.json",
+        "guided/schemas.json",
+        "versions.ts"
+      ],
+      "owner": "C generated contracts; K_runner consumes",
+      "sequence": "Freeze v3 schema/tuple before regeneration; K runner removes legacy imports against those exports. Never hand-edit generated files."
+    }
+  ],
+  "contractAndMigrationHandoff": {
+    "versions": "Canonical versions {contract:3,build:<existing BuildIdentity>} removes nine independent pins. Preserve actual build equality, bundle/reference/image/browser checks.",
+    "acyclicProfile": "A build cannot contain the hash of a profile containing that same build. Prefer minimal profile descriptor {contract:3}, profileHash over that descriptor, and existing separate build equality; C freezes exact wire representation before M encodes predicates. No old profile generation fallback.",
+    "readiness": "Derived UNLEARNED/LEARNING/READY; do not add a replacement compile_status column. NEEDS_RELEARN type exists but is not emitted until OBS015.",
+    "snapshotColumns": "FINAL Aria/Dara direction: two nullable JSONB columns on UITestRevision (step_snapshot_hashes and step_reuse_provenance), keyed by stable AuthoringStep UUID and both NULL until OBS015. Preserve immutability and same-test/CSI provenance checks. This supersedes the earlier conversational child-relation suggestion: two columns match OBS015 entity ownership and avoid a new table/component-hash algorithm now; OBS015 owns hash composition/change detection. Data-engineer owns exact DDL.",
+    "externalResidual": "D-B external/internal-remote deployment confirmation remains root/user/Platform-SRE-owned. Root records actual ask/answer or unconfirmed; architect did not contact anyone."
+  },
+  "acceptanceSimplifications": [
+    {
+      "decision": "Use current generator --check instead of a new generator/check framework",
+      "evidence": "tools/build-studio-observed-schemas.cjs already supports --check for four byte-identical outputs; processResources copies source schemas at build time.",
+      "tradeoff": "Wire existing check into standard gate and v3-only packaging; preserve source of truth without duplicated generated Java schemas."
+    },
+    {
+      "decision": "Port current guided/security/bridge test methods before removing v1 fixtures",
+      "tradeoff": "Keeps concurrency/auth/atomicity coverage at defining tiers; no browser repetition for each removed generation."
+    },
+    {
+      "decision": "Port only actual transport/credential/privacy tests; delete compile proposal tests by name",
+      "tradeoff": "Maintains surviving authoring transport guarantees while allowing intentional test-count reduction. No raw count target or blanket deletion of the entire test package."
+    },
+    {
+      "decision": "Reuse current joined publication/replay/worker/concurrency/fault privacy anchors when affected paths are ported",
+      "tradeoff": "No new supporting-test promotion or version/profile/exit Cartesian E2E matrix; final story-required runner fixtures/deployment/full backend gates still run."
+    },
+    {
+      "decision": "Keep one temporary output directory or existing --check mode for generation verification",
+      "tradeoff": "No new server/profiler/recorder/CI framework; named deterministic byte comparison is sufficient for AC5."
+    }
+  ],
+  "existingTestsToReuse": [
+    "Actual guided transport callers: guided/publication/ObservedProfileDriftTest.java, guided/translation/GuidedGatewayPrivacyTest.java, guided/translation/GuidedTranslationTest.java, guided/translation/GuidedPlanningIntegrationTest.java, guided/translation/GuidedProviderEvaluationTest.java",
+    "compile/gateway/CredentialBudgetTest -> neutral credential deadline tests",
+    "compile/gateway/GatewayFailureClassifierTest -> neutral classification tests",
+    "compile/gateway/StudioGatewayPropertiesTest and StudioGatewayConfigTest -> guided-only wiring/config",
+    "compile/NoRuntimeLlmTest5 -> neutral boundary with authoring-only allowance",
+    "readiness/DeReadyCarryForwardTest8",
+    "GuidedSessionIT43, GuidedHttpSecurityIT6, GuidedBridgeIntegrationTest37 (one explicit sv1 bridge case), preserving names",
+    "GuidedWireContractTest7 native oracle and ObservedArtifactLowererTest36",
+    "GuidedPublicationReplayIT current37 cases, specifically existing nonsecret/secret/worker/concurrent/timeout/cancel anchors when relevant",
+    "runner confinement, observedReplay/observedChildRuntime, guided protocol/security, redaction/secret-control/process-tree tests at their existing tiers"
+  ],
+  "freshInventoryCorrections": {
+    "compileJavaFiles": 54,
+    "gatewayJavaFiles": 21,
+    "compileTestFiles": 60,
+    "standaloneTestAnnotationsInCompile": 372,
+    "annotationCountQualifier": "Static standalone @Test count only, not executed cases or old panel383; root fresh runtime baseline is authoritative and parameterized/skipped methods must be named separately.",
+    "guidedCurrentCounts": {
+      "GuidedSessionIT": 43,
+      "GuidedHttpSecurityIT": 6,
+      "GuidedBridgeIntegrationTest": 37
+    },
+    "flywayTargetSourceFiles": 20,
+    "flywayTargetFiles": [
+      "backend/src/test/java/com/citi/put/checks/studio/ErrorCodeConstraintMigrationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/LegacyDataMigrationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/RevisionMigrationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/authoring/StudioAuthoringMigrationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/compile/CompileStartedAtMigrationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/compile/IntentDerivationMigrationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/compile/ReferencePolicyMigrationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/LedgerStateMachineMigrationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationMigrationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioSchedulingSchemaIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/secrets/PlaintextSecretsDropMigrationIT.java"
+    ],
+    "resourceCorrection": "backend/src/main/resources/studio/observed-contracts is not generated source here; processResources copies contracts into build resources.",
+    "pathCorrections": [
+      "StudioAcceptanceService is in studio/dispatch, not scheduling",
+      "ExecutionVideoContractTest is under studio/evidence",
+      "GuidedTranslationConfiguration also imports CredentialPatternScreen"
+    ]
+  },
+  "baselineCommandsNotExecutedByArchitect": [
+    {
+      "cwd": "backend",
+      "command": "./gradlew test --tests 'com.citi.put.checks.studio.*' --rerun-tasks --no-build-cache --max-workers=1",
+      "note": "Root already owns fresh baseline invocation; use its exact receipts/skip inventory."
+    },
+    {
+      "cwd": "studio-runner",
+      "command": "npm test",
+      "note": "Record actual pass/fail/skips and actual runtime provenance; no assumption from directory labels."
+    },
+    {
+      "cwd": "studio-runner",
+      "command": "npm run type-check && npm run lint && npm run test:fixtures && npm run test:deployment",
+      "note": "Final required tiers; root serializes owned browser/runtime processes."
+    },
+    {
+      "cwd": ".",
+      "command": "node tools/build-studio-observed-schemas.cjs --check",
+      "note": "Existing deterministic check, now wire as named gate."
+    },
+    {
+      "cwd": ".",
+      "command": "node tools/check-studio-observed-contracts.cjs",
+      "note": "C makes it v3 + one public OpenAPI only."
+    },
+    {
+      "cwd": "backend",
+      "command": "./gradlew rdsParityLint --max-workers=1",
+      "note": "Run separately and quote result, then full check."
+    },
+    {
+      "cwd": "backend",
+      "command": "./gradlew check --max-workers=1",
+      "note": "Final whole gate after all lanes; do not claim complete if hang/unavailable."
+    },
+    {
+      "cwd": ".",
+      "command": "Compare sha256 of each V1\u2013V11 current file to git show d954a21c5:<exact relative file>; enumerate migration files V1\u2013V18",
+      "note": "Read-only exact per-file hash inventory; no broad destructive git command."
+    }
+  ],
+  "genuineRisks": [
+    "AC1 relocation list conflict requires narrowly recorded PO correction before deletion; no unilateral acceptance change.",
+    "Contract tuple/profileHash must remain acyclic and preserve build/authority equality; M cannot encode a guessed schema.",
+    "OBS007 frozen schema epochs will change when v3 shape changes; unchecked fallback alone could reintroduce proven TRACE-budget failures.",
+    "Current mixed runner infrastructure has observed consumers of types housed under artifact1 paths; deletion must follow dependency closure.",
+    "DELETE cancellation still uses v1 path; backend and runner cutover must be coherent.",
+    "Entity CompileState imports and live authoring revision guards couple K and M despite nominal lane split.",
+    "Panel test/migration counts are stale; root runtime baselines and named-drop/port ledgers are authoritative.",
+    "Frontend retirement is OBS012B; keep this story backend-facing path changes only and record remaining frontend ownership instead of expanding scope.",
+    "D-B external confirmation and real deployed image/provider/security gates remain external, not inferred from local source/tests."
+  ],
+  "sourceSha256": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012A.story.md": "5ca2220c952b579f4c0f21325fc7559bfd434160a6f825fbaf9a1399e184a325",
+    "docs/architecture/ADR-SC-005-single-path-observed-authoring.md": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiGatewayTransport.java": "344cfa9507fbf7c87082bdcf6c95ab052af195e6bcab961bc144226dd9ca52b2",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/StudioGatewayConfig.java": "d01f9921e922e14a735f3855e8ab5c49273767ff148155d1072b091246eb2b09",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/LlmGatewayClient.java": "4b30fc8be58811afabb06d407f9b606b20796950d38fc2d9ca68b98985f7fbb5",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/BoundedCredentialProvider.java": "0bc6df20d196de597995f8d702e6fa2f0261d6121d14c529b5e13fe68b43d6cd",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/BudgetedAuthTransport.java": "58e92739d5a1563903c802a3a86c71ab9a67dbf2c1157d644980b2a5f075bec0",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/CompileBudget.java": "a982be9ec393754f26f2a37191cc2d7fef32e07aeab8e8682129f2dc55336e85",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/AuthoringLimits.java": "cd3f53a4bc1bfe169befd3fd8b61a3d7942774e0500eeff8d4652a1020956c11",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/ConfigurationChangeClassifier.java": "a5fb66cf2916b14cbfa92c8c738b33f09fc52e796dcf90229d93db3852758fde",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GenAiGuidedLlmGatewayClient.java": "2c14465b287f575de17446a6effe51826e1c36ae48b73bdd61e3b4d636bc6526",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java": "beca0fefed65929abe514e2baed23735de26ff5e5e1576cae2b096c4ada6916e",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java": "3ba95cb84ae5ad534c9d1bb83265a5e890496a501cf8c7b23508a3cbbb5efb6f",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java": "db8eba667bb2858ce66dee903ed4f42cb60e28b26ad44b7fc836f6773380b23a",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceSnapshotRepository.java": "8d87928ce342c600189d77baae2c604947e9a086608fdb182e06b2827d1800f5",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "b278df113f0c55d081a35a839fc3a0eb79a8de26b7dbc840288b6f0aca69c1c4",
+    "tools/build-studio-observed-schemas.cjs": "43ac9855187f88ca00cb07655cdb4147ac29eba54b2eb31eb4198710cf59e099",
+    "backend/build.gradle.kts": "dab809b9129368c1643d80169bcdb773f9290af61e153a1e45069832f5db7289",
+    "studio-runner/src/server/routes.ts": "ea773cb3fad90f6c58fbfe50095296a20dfef0efd05cbc1d9d960042b2abd0b0",
+    "studio-runner/src/run/childRuntime.ts": "7c9ebf25168b13786dc32388a49a037f0f628ba46dc2bdcffaca48730e71af2f",
+    "studio-runner/src/run/protocol.ts": "9fb90fb92ab9864272c798930dcb2957b3815cbb166e76d5ef6d91e1225aa658",
+    "studio-runner/src/versions.ts": "e44fec7a6f4d9ca8630fc102287aa5900b7736700e408f63b828f62afd1d76d6"
+  },
+  "architectureVerdict": "T0 plan actionable; release disjoint K_runner/C preparation after baseline capture, gate K_backend destructive gateway work on PO inventory reconciliation, gate M application on K+C compile-green plus fresh baseline. No implementation or QA approval asserted.",
+  "baselineStatus": "Root reports pre-edit baseline migration/vocabulary failures; diagnosis and receipts remain root-owned. No fresh baseline green claimed by architect."
+}

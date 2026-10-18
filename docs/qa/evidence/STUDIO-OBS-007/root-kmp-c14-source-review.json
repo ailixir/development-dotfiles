@@ -1,0 +1,22 @@
+{
+  "scope": "INDEPENDENT_EXACT_KMP_C14_SOURCE_REVIEW",
+  "disposition": "APPROVE_SCOPED_INTEGRATION_COMPILE_SUPPORT_AND_ORIGINAL_RUNTIME",
+  "sourceSha": "c717603a297f0f19ca3a3ec9cb28a86258e133c3ee1bdfbfec12b711dd0a142e",
+  "reviewed": [
+    "Original bytes/inventory/bounds before only zero-state non-start skip",
+    "Unsigned octet map built from existing validated first bytes",
+    "Exact previous\u2192new state count includes original fullmatch prefix fallback",
+    "Final active-state consistency and map/count wipe",
+    "Existing support independent broken-prefix/reset/fullsuffix 7byte control; original other control vectors retained",
+    "Only actual public errorCode assertion and PASSWORDempty construction; TEXTcanary remains actualproducer"
+  ],
+  "correctness": "By induction positive-statecount equals actual positive states. Skip input cannot change any original zero state or produce a hit; all other bytes follow original KMP.",
+  "limits": [
+    "Actual speedup/cause attribution not established",
+    "No canary-positive scrubbing credit when PASSWORD produces none",
+    "All original deadlines/TRACE/sinkscan/closure and actual grade required",
+    "Old failure receipts remain archived"
+  ],
+  "runtime": "UNRUN",
+  "wholeAcceptanceClaim": false
+}

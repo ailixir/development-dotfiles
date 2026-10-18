@@ -1,0 +1,170 @@
+{
+  "story": "STUDIO-OBS-015",
+  "artifact": "Raw input detached record consistency source01",
+  "capturedAt": "2026-10-15T18:59:46.998352+00:00",
+  "state": "SOURCE_HOLD",
+  "compileStatus": "UNCOMPILED",
+  "executionStatus": "UNEXECUTED",
+  "qaVerdict": null,
+  "lifecycleTransition": null,
+  "ownedPaths": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java"
+  ],
+  "ownedAfter": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": {
+      "sha256": "9289948874fdce24bf319782fbc69a380d7936388b40bb6a4923ab6add0b01c6",
+      "bytes": 55794
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java": {
+      "sha256": "32e99e0c3793221e048abffe3c0280fa522d2e546c42cd868887c1827d214f1d",
+      "bytes": 57342
+    }
+  },
+  "productionChange": "Only five early basis() lines reconstruct latest normalizedsafe metadata and require orderedfullarray equality with detachedraw currentinputs beforeeffective filtering.",
+  "newTests": [
+    {
+      "selector": "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.detachedCurrentInputsMatchCompleteHistoryBeforeEffectiveFiltering",
+      "labels": [
+        "missing-unused-input",
+        "raw-row-order",
+        "same-id-metadata-substitution"
+      ],
+      "controls": [
+        "Full independent ordinary basis parent passes before eachattack",
+        "raw/current and normalized history3 actualinput rows; usedbasis/replayrecipe2 actualinputs",
+        "unusedinput-config retainedraw/history, absentfuture recipe",
+        "Only raw currentinput array changes; normalizedhistory/unrelatedfacts unchanged",
+        "EVIDENCE_MISMATCH422, no source repair/mutation",
+        "Restore exactwhole original array/order thenfullparent recovers"
+      ],
+      "proofLimit": "Detached record conformance, not SQL-committed corruption/private authority/native proof"
+    },
+    {
+      "selector": "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.appendedHistoricalHeadPreservesOriginalVersionsAndIndependentWholeBasis",
+      "controls": [
+        "Frozen appendedHistorical authority.privateInputs validates and reconstructs exactprivateversion1prefix count1 and finalcount3 hashes; safe metadata never substitutesprivatehashes",
+        "Originalbootstrap1/ACK/actions/proposals/preparations untouched",
+        "Local synthetic currenthead context2/materialization4 with version2birth3 and prepmetadata revisions2/4",
+        "Original navigation/read staycontext1/originalhashdifferentlatest; suffixactions context2/finalhash",
+        "Entire basis equals independentfrozenfixture+only independently constructedmanifest hash adjustment",
+        "Recipes matchoriginalfrozen expectedartifact, rawmetadata3 vs effective2, allinputs/frozen facts immutable"
+      ],
+      "expectedOracle": "Literal unchanged frozen independent basis/private inputs; no actual Java returned output used as expected",
+      "proofLimit": "Synthetic conformance only; original frozen lowerer artifact/hash remains separate opaque-manifest proof"
+    }
+  ],
+  "preservation": {
+    "productionOnlyBasisAuthorizedChange": true,
+    "existingBuilderTestsAndHelpersAllByteExact": true,
+    "brokenJoinsMissingSourceInputAndRefusalMethodByteExact": true,
+    "source04HelperIdentityOracleFixesByteExact": true,
+    "source02CommitmentsAndBoundaryHelper7958Unchanged": true,
+    "allOtherProtectedPathsAtCapturedIntervalUnchanged": true
+  },
+  "protectedPathCount": 764,
+  "concurrentProtectedChangesOutsideLease": {},
+  "globalTreeStabilityClaim": false,
+  "planningProvenance": {
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/feedback03-input-authority/manifest.json": {
+      "sha256": "edf4caa019130a312cd0286ce11ff865780a73c6084f9c5a2afe9b4c7f8f1413",
+      "bytes": 2789
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/feedback03-input-authority/review.md": {
+      "sha256": "41acf466e6474ff4bb55fd94a738daf3be6080d165d84d85fd2f612221794e59",
+      "bytes": 13687
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/feedback03-input-authority/checks.json": {
+      "sha256": "f75e074968c7bb50d4d9dcc11e2b116d3d5aa7d77a5d35c41e1b37dbd5a88ea4",
+      "bytes": 6915
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/feedback03-input-authority/source-inventory.json": {
+      "sha256": "f983b62a819ca1e6ca2bf38fb0c7b57398a94d30e6703417b0911ddb210afec2",
+      "bytes": 10379
+    }
+  },
+  "commandsRun": [
+    "Read-only shell/Python source and frozenJSON/hash inspection",
+    "apply_patch exactleasedBuilderproduction+BuilderTest",
+    "Python before/after/patch/methodpreservation,fixturefact+assertioninventory,protectedhash/checkpointexport"
+  ],
+  "commandsNotRun": [
+    "Runtime/tests/compiler/Gradle/build/Node",
+    "DB/native/service/process/decoder",
+    "Install/format/git/lifecycle/subagents"
+  ],
+  "futureFirstSelectors": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.refusesAlteredOriginalEvidence",
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.detachedCurrentInputsMatchCompleteHistoryBeforeEffectiveFiltering",
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.appendedHistoricalHeadPreservesOriginalVersionsAndIndependentWholeBasis"
+  ],
+  "futureFullClassSelectors": [
+    "com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest",
+    "com.citi.put.checks.studio.guided.publication.IncrementalMaterializationEvidenceTest",
+    "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+    "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+    "com.citi.put.checks.studio.authoring.ChangeDetectionTest"
+  ],
+  "remainingScope": [
+    "IndependentdeltaQA thenactual focusednew+preservedsubjects andfullBuilder/IncrementalMaterializationEvidence/Conformance/Lowerer/Change",
+    "Separate actualappendACKfix andCore cohorts",
+    "Fullconfiguredgates/coverage/private/Core/Vault/native/all86+24+55+35 and independent015closure then008",
+    "Originalitem85OPENunamended"
+  ],
+  "retained": {
+    "goal": "full015 then full008",
+    "acceptance": 86,
+    "IPC": 24,
+    "SQL": 55,
+    "joinedVariants": 35,
+    "privateCoreVaultNativeFullConfiguredGates": "REMAIN_REQUIRED",
+    "item85": "ORIGINAL_OPEN_PENDING_USER_UNAMENDED"
+  },
+  "runtimeOraclePolicy": "Only unchanged public frozenfixture JSON and existing independenttestcanonicalencoder supplyexpectedfacts. QA planning files are not runtime imports; noexpectedbasis/artifact/hash manufacturedfromactualproductionreturn.",
+  "payloads": {
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/assertion-inventory.json": {
+      "sha256": "378c32a4f4c3b3947f3fee886043323c134202a1be0529a6b3155d6c12c1f19b",
+      "bytes": 5842
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/before-inventory.json": {
+      "sha256": "351a760c75e5740251aef368e51c7aac07141d34f80d5bfe9be4f05e1cb14f7e",
+      "bytes": 154753
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/changes.patch": {
+      "sha256": "98994f5b83211355f5ee2a5a67cd095d1543d8a15ea2d8d94dc2e4419536ed65",
+      "bytes": 10868
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/fixture-facts.json": {
+      "sha256": "6912a2ac2b37ca2265140cf4a747d5fb471fb7b34c82dcd2550d1cb52a07633d",
+      "bytes": 5604
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/planning-provenance.json": {
+      "sha256": "50ee1a92314ed1f2ffc09c1533dc112dc8d988cd4eefb9e481478a4a3daf60ef",
+      "bytes": 946
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/preservation.json": {
+      "sha256": "4f9bfaa6d6f4230e0092a6aeb50df5e930a42f1235e8af817cf9f43dc3f0336b",
+      "bytes": 3221
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/source-after/GuidedPlanBuilder.java": {
+      "sha256": "9289948874fdce24bf319782fbc69a380d7936388b40bb6a4923ab6add0b01c6",
+      "bytes": 55794
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/source-after/GuidedPlanBuilderTest.java": {
+      "sha256": "32e99e0c3793221e048abffe3c0280fa522d2e546c42cd868887c1827d214f1d",
+      "bytes": 57342
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/source-before/GuidedPlanBuilder.java": {
+      "sha256": "ac801042dd7a94468ff68a5ad7e4efe48ab310a9f12a93d290730243d755d128",
+      "bytes": 55431
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/source-before/GuidedPlanBuilderTest.java": {
+      "sha256": "975026f4aaf4b6d890c088719205393230ddbab2789a0bcb53e21f6f8a600528",
+      "bytes": 47914
+    },
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/source-inventory.json": {
+      "sha256": "8d91c1030c4f73fe076cb55b117b8a64dd367396f08193300c15513ff18f0a1e",
+      "bytes": 154848
+    }
+  }
+}

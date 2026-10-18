@@ -1,0 +1,713 @@
+{
+  "story": "STUDIO-OBS-015",
+  "step": "final source-frozen gates (final-gates01)",
+  "agent": "Gage (@devops)",
+  "date": "2026-10-16",
+  "head": "734ad704f6ae508dbb10d9b5127a315bb0df5f81",
+  "env": [
+    "734ad704f6ae508dbb10d9b5127a315bb0df5f81",
+    "v23.10.0",
+    "10.33.0",
+    "27.4.0",
+    "v4.2.0+g0646808",
+    "openjdk version \"23.0.2\" 2025-01-21",
+    "15:56  up 20 days, 18:42, 12 users, load averages: 3.36 3.91 4.90"
+  ],
+  "freeze": {
+    "start": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/freeze-start.json",
+      "capturedAt": "2026-10-16T19:56:04.181970+00:00",
+      "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+      "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+    },
+    "end": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/freeze-end.json",
+      "capturedAt": "2026-10-16T21:44:29.414436+00:00",
+      "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+      "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+    },
+    "sourceUnchanged": true,
+    "distUnchanged": true
+  },
+  "binding": {
+    "S_F": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+    "D_F": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e",
+    "manifestsChecked": 25,
+    "allSourceEqualS_F": true,
+    "allDistEqualD_F": true
+  },
+  "approvedSkipsFile": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/approved-historical-skips.json",
+    "sha256": "5a0755a49408fdc1645f5f47ea2a6f44280f174b25c632c8b93f80225a907a81",
+    "derivedFrom": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/fullsuite-fix01/historical-skips-from-test04.json (byte copy)",
+    "entries": 25,
+    "equalsSkipMultisetOf": [
+      "final-w02-full-test04",
+      "fix01-full-test02"
+    ],
+    "disclosure": "Built by Gage on root instruction from the test04-derived list; Quinn qa-review01 s13 confirmed the multiset equality but noted nothing independently ratifies the list."
+  },
+  "gates": [
+    {
+      "gate": "backend-static-gradle",
+      "verdict": "FAIL",
+      "command": "(backend/) JAVA_HOME=<homebrew openjdk@21 path> caffeinate -i ./gradlew --no-daemon --continue spotlessCheck checkstyleMain checkstyleTest spotbugsMain",
+      "exit": 1,
+      "elapsedSeconds": 50,
+      "perTask": {
+        "spotlessCheck": "PASS (executed)",
+        "checkstyleMain": "PASS (466 files, 0 violations, main.html)",
+        "spotbugsMain": "PASS (task succeeded; ignoreFailures=false, HIGH; no report configured)",
+        "checkstyleTest": "FAIL: tool crash, not violations. \"An unexpected error occurred configuring and executing Checkstyle. > java.lang.Error: Error was thrown while processing .../support/GuidedPublicationEvidenceFixture.java\"; --stacktrace rerun: \"Caused by: java.lang.OutOfMemoryError: Java heap space\" (Checkstyle worker default heap)"
+      },
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/static01.log",
+      "stacktraceLog": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/static01-checkstyleTest-stacktrace.log",
+      "stacktraceExit": 1,
+      "manifestBefore": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/static01-before.json",
+        "capturedAt": "2026-10-16T19:56:15.351146+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "manifestAfter": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/static01-after.json",
+        "capturedAt": "2026-10-16T19:57:06.012573+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      }
+    },
+    {
+      "gate": "backend-checkstyle-cli (authoritative count)",
+      "verdict": "PASS",
+      "command": "java(jdk-21.0.10) -Xmx2g -cp <checkstyle 10.18.1 + deps from Gradle cache> com.puppycrawl.tools.checkstyle.Main -c config/checkstyle/checkstyle.xml -p <config_loc=backend/config/checkstyle> -f xml -o <out> src/{main,test}/java",
+      "exit": {
+        "main": 0,
+        "test": 0
+      },
+      "elapsedSeconds": 12,
+      "counts": {
+        "main": {
+          "files": 466,
+          "violations": 0
+        },
+        "test": {
+          "files": 332,
+          "violations": 0
+        }
+      },
+      "outputs": [
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/static01-checkstyle-cli-main.xml",
+        "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/static01-checkstyle-cli-test.xml"
+      ]
+    },
+    {
+      "gate": "diagnostic-only checkstyleTest with 2g heap (NOT A GATE)",
+      "verdict": "INFO",
+      "command": "./gradlew --no-daemon -I <scratch init script: Checkstyle maxHeapSize=2g> checkstyleTest --rerun-tasks",
+      "exit": 0,
+      "elapsedSeconds": 28,
+      "counts": {
+        "test": {
+          "files": 332,
+          "violations": 0
+        }
+      },
+      "initScript": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/diag-cs-heap.init.gradle",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/diag-checkstyleTest-heap2g.log",
+      "note": "Out-of-tree init script; repo build config not changed. Shows the Gradle failure is heap only."
+    },
+    {
+      "label": "runner-final-typecheck02",
+      "wrapper": "run-runner.py",
+      "command": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "run",
+        "type-check"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 7.37,
+      "sourceStable": true,
+      "distStable": true,
+      "manifestBefore": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-typecheck02-before.json",
+        "capturedAt": "2026-10-16T19:59:49.695643+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "manifestAfter": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-typecheck02-after.json",
+        "capturedAt": "2026-10-16T19:59:57.067785+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-typecheck02-results.json",
+      "resultsSha256": "5b6265227e698015823b3676ff90c2f64ce7beb97db7e615e812ae7fc72eda5a",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-typecheck02.log",
+      "gate": "runner-type-check",
+      "verdict": "PASS"
+    },
+    {
+      "label": "runner-final-lint02",
+      "wrapper": "run-runner.py",
+      "command": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "run",
+        "lint"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 11.14,
+      "sourceStable": true,
+      "distStable": true,
+      "manifestBefore": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-lint02-before.json",
+        "capturedAt": "2026-10-16T19:59:49.695641+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "manifestAfter": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-lint02-after.json",
+        "capturedAt": "2026-10-16T20:00:00.839600+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-lint02-results.json",
+      "resultsSha256": "55cd28817f34cdf08a1e6f7f29de8bdc1dfc4b4487e2bdda520be7c868a71596",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-lint02.log",
+      "gate": "runner-lint",
+      "verdict": "PASS"
+    },
+    {
+      "label": "runner-final-unit01",
+      "wrapper": "run-runner.py",
+      "command": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "run",
+        "test",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-unit01-vitest.json"
+      ],
+      "exit": 1,
+      "elapsedSeconds": 14.01,
+      "sourceStable": true,
+      "distStable": true,
+      "manifestBefore": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-unit01-before.json",
+        "capturedAt": "2026-10-16T20:00:05.833797+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "manifestAfter": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-unit01-after.json",
+        "capturedAt": "2026-10-16T20:00:19.840410+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-unit01-results.json",
+      "resultsSha256": "fff7b5c368019962f3fd3e42426659c3b2f6bcdec8a3211447bb4da2923ca563",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-unit01.log",
+      "vitest": {
+        "success": false,
+        "numPassedTests": 2228,
+        "numFailedTests": 1,
+        "numPendingTests": 29,
+        "numTotalTests": 2258,
+        "numPassedTestSuites": 340,
+        "numFailedTestSuites": 2
+      },
+      "gate": "runner-unit attempt01",
+      "verdict": "FAIL"
+    },
+    {
+      "label": "runner-final-unit02",
+      "wrapper": "run-runner.py",
+      "command": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "run",
+        "test",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-unit02-vitest.json"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 12.94,
+      "sourceStable": true,
+      "distStable": true,
+      "manifestBefore": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-unit02-before.json",
+        "capturedAt": "2026-10-16T20:00:34.701727+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "manifestAfter": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-unit02-after.json",
+        "capturedAt": "2026-10-16T20:00:47.638622+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-unit02-results.json",
+      "resultsSha256": "42369970c2c363e0b27de3c7b4817a223a6cd6758f41f110a55aaa3748cef3af",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-unit02.log",
+      "vitest": {
+        "success": true,
+        "numPassedTests": 2229,
+        "numFailedTests": 0,
+        "numPendingTests": 29,
+        "numTotalTests": 2258,
+        "numPassedTestSuites": 342,
+        "numFailedTestSuites": 0
+      },
+      "gate": "runner-unit attempt02",
+      "verdict": "PASS",
+      "firstFailureLines": [
+        "FAIL  test/observedReplayValidation.test.ts > independent composed canonical UTF-8 ceilings > accepts the lawful fully joined semantic 6291456-byte parent and refuses one legal byte before hashing",
+        "Error: Test timed out in 5000ms."
+      ],
+      "note": "Same test passed in attempt02 in 4274 ms (5000 ms timeout). Timing-sensitive; no coverage-summary written on the failed attempt."
+    },
+    {
+      "label": "runner-final-pins01",
+      "wrapper": "run-runner.py",
+      "command": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "run",
+        "check:pins"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 0.37,
+      "sourceStable": true,
+      "distStable": true,
+      "manifestBefore": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-pins01-before.json",
+        "capturedAt": "2026-10-16T20:01:09.248174+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "manifestAfter": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-pins01-after.json",
+        "capturedAt": "2026-10-16T20:01:09.616544+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-pins01-results.json",
+      "resultsSha256": "493ba1567b5f14c5b7869b0046086df679b3d12c2ff939bce3acf84b3acc701b",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-pins01.log",
+      "gate": "runner-check:pins (host)",
+      "verdict": "PASS",
+      "coverageSummary": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/runner-final-unit02-coverage-summary.json",
+      "coverageTotalPct": {
+        "lines": 97.25,
+        "statements": 97.25,
+        "functions": 97.12,
+        "branches": 89.1,
+        "branchesTrue": 100
+      }
+    },
+    {
+      "label": "runner-final-fixtures01",
+      "wrapper": "run-runner.py",
+      "command": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "run",
+        "test:fixtures",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-fixtures01-vitest.json"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 254.15,
+      "sourceStable": true,
+      "distStable": true,
+      "manifestBefore": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-fixtures01-before.json",
+        "capturedAt": "2026-10-16T20:01:22.292879+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "manifestAfter": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-fixtures01-after.json",
+        "capturedAt": "2026-10-16T20:05:36.451419+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-fixtures01-results.json",
+      "resultsSha256": "3ef3310398651af972ba631b5ea4ad15d90cbad36e2118fd31279ede6ccc9ec6",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-fixtures01.log",
+      "vitest": {
+        "success": true,
+        "numPassedTests": 252,
+        "numFailedTests": 0,
+        "numPendingTests": 9,
+        "numTotalTests": 261,
+        "numPassedTestSuites": 42,
+        "numFailedTestSuites": 0
+      },
+      "gate": "runner-test:fixtures (Chromium tier)",
+      "verdict": "PASS",
+      "mediaProtection": {
+        "script": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/protect_media.py",
+        "backedUp": 3238,
+        "changedAndRestored": 22,
+        "index": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/runner-final-fixtures01-artifact-index.json"
+      }
+    },
+    {
+      "label": "runner-final-deployment01",
+      "wrapper": "run-runner.py",
+      "command": [
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "run",
+        "test:deployment",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-deployment01-vitest.json"
+      ],
+      "exit": 0,
+      "elapsedSeconds": 44.19,
+      "sourceStable": true,
+      "distStable": true,
+      "manifestBefore": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-deployment01-before.json",
+        "capturedAt": "2026-10-16T20:06:13.559545+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "manifestAfter": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-deployment01-after.json",
+        "capturedAt": "2026-10-16T20:06:57.745714+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-deployment01-results.json",
+      "resultsSha256": "f98b8132866b6dbe530620964b9595c31e60d5dc491fb9e4098e36ff9d86b906",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-final-deployment01.log",
+      "vitest": {
+        "success": true,
+        "numPassedTests": 322,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTotalTests": 322,
+        "numPassedTestSuites": 38,
+        "numFailedTestSuites": 0
+      },
+      "gate": "runner-test:deployment",
+      "verdict": "PASS"
+    },
+    {
+      "gate": "contracts",
+      "verdict": "PASS",
+      "command": "node tools/check-studio-observed-contracts.cjs",
+      "exit": 0,
+      "elapsedSeconds": "<2.1 (with codegen check)",
+      "extra": {
+        "command": "node tools/build-studio-observed-schemas.cjs --check",
+        "exit": 0
+      },
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/contracts-final01.log",
+      "manifestBefore": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/contracts-final01-before.json",
+        "capturedAt": "2026-10-16T20:00:56.659985+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "manifestAfter": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/contracts-final01-after.json",
+        "capturedAt": "2026-10-16T20:00:58.736814+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      }
+    },
+    {
+      "gate": "runner-build",
+      "verdict": "PASS",
+      "command": "(studio-runner/) pnpm --config.package-manager-strict=false run build",
+      "exit": 0,
+      "elapsedSeconds": 2,
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/runner-final-build01.log",
+      "manifestBefore": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/runner-final-build01-before.json",
+        "capturedAt": "2026-10-16T20:01:03.096922+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "manifestAfter": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/runner-final-build01-after.json",
+        "capturedAt": "2026-10-16T20:01:05.271362+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "distUnchangedByBuild": true
+    },
+    {
+      "gate": "dist-freeze",
+      "manifest": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/final-dist-frozen.json",
+        "capturedAt": "2026-10-16T20:05:42.845705+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      }
+    },
+    {
+      "gate": "image-build",
+      "verdict": "PASS",
+      "commands": [
+        "docker build --progress=plain --target build --build-arg IMAGE_TAG=put-checks-studio-runner:obs015-final01-local -t put-checks-studio-runner:obs015-final01-buildstage-local studio-runner/",
+        "docker build --progress=plain --build-arg IMAGE_TAG=put-checks-studio-runner:obs015-final01-local -t put-checks-studio-runner:obs015-final01-local studio-runner/"
+      ],
+      "exit": {
+        "buildstage": 0,
+        "runtime": 0
+      },
+      "elapsedSeconds": {
+        "buildstage": 8,
+        "runtime": "<1 (all cached)"
+      },
+      "imageIds": {
+        "put-checks-studio-runner:obs015-final01-local": "sha256:e3a2d8bdcf74cb634cce0197a750cc16535b609f456e980f5d9527339eef4ea9",
+        "put-checks-studio-runner:obs015-final01-buildstage-local": "sha256:3ef3f96877fb5f7b8c6d7ae35c8b0065a7eb4d60f0efc9f88445184720245e2c"
+      },
+      "distParity": [
+        "put-checks-studio-runner:obs015-final01-buildstage-local f9f5f456a52ade50bfe8b6f8d8ac89ba795719c429520c3d07569443660095fe  -",
+        "put-checks-studio-runner:obs015-final01-local f9f5f456a52ade50bfe8b6f8d8ac89ba795719c429520c3d07569443660095fe  -"
+      ]
+    },
+    {
+      "gate": "image-check:pins --require-image (in build-stage image)",
+      "verdict": "FAIL (NOT_GREEN_EXTERNAL, ED-05 / O-2a)",
+      "command": "docker run --rm --entrypoint node put-checks-studio-runner:obs015-final01-buildstage-local scripts/check-pins.mjs --require-image --json",
+      "exit": 1,
+      "failures": [
+        "the Node major inside the pinned Playwright image disagrees with .nvmrc:\n      dist/runtime-versions.json node = v24.20.0 (major 24), recorded inside the image (chromiumBuild 1243)\n      .nvmrc                          = 22\n      ADR-001 §4.2 requires the Node inside the pinned image to match .nvmrc, and story\n      10.2's Change Log states that .nvmrc pins the image's Node major (the engines range\n      is wider only so the package installs on a newer developer machine).\n      FIX THE IMAGE, NOT THIS FILE: the internal Playwright image (ED-05) must be built on\n      the .nvmrc major. Widening .nvmrc to match whatever the base image happens to ship\n      would delete the only copy that pins Node, and is an ADR change, not a build fix."
+      ],
+      "output": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/image-final01-check-pins.json",
+      "runtimeVersions": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/image-final01-runtime-versions.json"
+    },
+    {
+      "gate": "frontend",
+      "verdict": "PASS",
+      "commands": {
+        "vitest": "(frontend/) pnpm --config.package-manager-strict=false exec vitest run --reporter=default --reporter=json --outputFile=<FG>/frontend-final01-vitest.json",
+        "type-check": "pnpm --config.package-manager-strict=false run type-check",
+        "lint": "pnpm --config.package-manager-strict=false run lint"
+      },
+      "exit": {
+        "vitest": 0,
+        "type-check": 0,
+        "lint": 0
+      },
+      "elapsedSeconds": {
+        "vitest": 108,
+        "type-check": 8,
+        "lint": 3
+      },
+      "vitest": {
+        "success": true,
+        "numPassedTests": 701,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTotalTests": 701,
+        "testFiles": "56 passed (56)"
+      },
+      "lint": "0 errors, 302 warnings",
+      "axeResultsSha256BeforeAfter": [
+        "51c29bb491b25aafb91240a1b7f875bd4670b980adb43b13d344d8d8e014e961",
+        "51c29bb491b25aafb91240a1b7f875bd4670b980adb43b13d344d8d8e014e961"
+      ],
+      "manifestBefore": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/frontend-final01-before.json",
+        "capturedAt": "2026-10-16T20:07:06.560050+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "manifestAfter": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/frontend-final01-after.json",
+        "capturedAt": "2026-10-16T20:09:05.764689+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      }
+    },
+    {
+      "gate": "backend-final-check (collector)",
+      "verdict": "FAIL",
+      "command": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-backend-tasked.py backend-final-check-attempt01 --test-tasks test,guidedIncrementalTest,crossReplicaTest --require-exec-tasks test,guidedIncrementalTest --allowed-skips-file docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/approved-historical-skips.json -- --no-daemon --continue check --rerun-tasks",
+      "launchedAt": "2026-10-16T20:09:31Z",
+      "exit": 1,
+      "gradleExit": 1,
+      "elapsedSeconds": 5649.84,
+      "gradleReported": "BUILD FAILED in 1h 34m 8s",
+      "sourceStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "taskCollectionErrors": [],
+      "counts": {
+        "total": 2476,
+        "passed": 2444,
+        "failed": 7,
+        "errors": 0,
+        "skipped": 25
+      },
+      "taskResults": {
+        "test": {
+          "counts": {
+            "total": 2412,
+            "passed": 2384,
+            "failed": 3,
+            "errors": 0,
+            "skipped": 25
+          },
+          "freshXmlFiles": 305,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": true,
+          "freshJoinCohorts": 1
+        },
+        "guidedIncrementalTest": {
+          "counts": {
+            "total": 62,
+            "passed": 58,
+            "failed": 4,
+            "errors": 0,
+            "skipped": 0
+          },
+          "freshXmlFiles": 1,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": true,
+          "freshJoinCohorts": 1
+        },
+        "crossReplicaTest": {
+          "counts": {
+            "total": 2,
+            "passed": 2,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "freshXmlFiles": 1,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": false,
+          "joinCasesPresent": false,
+          "freshJoinCohorts": 0
+        }
+      },
+      "failedCases": [
+        {
+          "task": "test",
+          "name": "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead()"
+        },
+        {
+          "task": "test",
+          "name": "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead()"
+        },
+        {
+          "task": "test",
+          "name": "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent()"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "name": "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence()"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "name": "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch()"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "name": "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce()"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "name": "incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation()"
+        }
+      ],
+      "skipMultisetEqualsApproved": true,
+      "skipped": 25,
+      "sql55": {
+        "class": "com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT",
+        "task": "test",
+        "total": 55,
+        "passed": 55,
+        "note": "ran inside check test lane; no separate SQL55 run"
+      },
+      "gradleTaskOutcomes": {
+        "spotlessCheck": "ran (no failure)",
+        "checkstyleMain": "ran (no failure)",
+        "checkstyleTest": "FAILED (same java.lang.Error on GuidedPublicationEvidenceFixture.java; heap)",
+        "spotbugsMain": "ran (no failure)",
+        "rdsParityLint": "ran (no failure)",
+        "antiRegressionCheck": "ran (no failure)",
+        "testcontainersAlignmentCheck": "ran (no failure)",
+        "test": "FAILED (3)",
+        "guidedIncrementalTest": "FAILED (4)",
+        "crossReplicaTest": "ran, 2/2",
+        "retainOriginalGuidedCohort": "ran",
+        "retainIncrementalGuidedCohort": "ran",
+        "requireFreshGuidedPartitions": "NOT RUN (upstream failure)",
+        "jacocoTestReport": "NOT RUN (upstream failure)",
+        "jacocoTestCoverageVerification": "NOT RUN (upstream failure)"
+      },
+      "firstFailureLines": [
+        "GuidedPublicationReplayIT > actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead() FAILED",
+        "    org.opentest4j.AssertionFailedError at GuidedPublicationReplayIT.java:26417",
+        "GuidedPublicationReplayIT > incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent() FAILED",
+        "    java.lang.AssertionError at GuidedPublicationReplayIT.java:10087",
+        "GuidedPublicationReplayIT > prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence() FAILED",
+        "    java.lang.AssertionError at GuidedPublicationReplayIT.java:11163"
+      ],
+      "rootCauseAnalysis": {
+        "verified": [
+          "ReplayIT:3038 credits validatorCountPredicate only when the GuidedProposalValidator.action stack frame line == 381; ReplayIT:26417 asserts it. In the live file the passwordControls POLICY_DENIED require(...) is at lines 384-387, line 381 is a REFERENCE_MISMATCH operand.",
+          "GuidedProposalValidator.java sha256 0a5f02e1... equals the w6-format01 spotlessApply sha256After (spotless rewrote it).",
+          "ReplayIT:10075 gates on GuidedTranslationService.advancePrefix stack frame line == 405; that file was changed by w6-format01 spotless and by w6-checkstyle-G2."
+        ],
+        "inferred": [
+          "All 7 failures are hard-coded source-line anchors in ReplayIT invalidated by the formatting window (line-table changes that the w6 javap neutrality method stripped). The 11163 sites were not traced to a specific line constant."
+        ]
+      },
+      "manifestBefore": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-final-check-attempt01-before.json",
+        "capturedAt": "2026-10-16T20:09:32.369828+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "manifestAfter": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-final-check-attempt01-after.json",
+        "capturedAt": "2026-10-16T21:43:42.206714+00:00",
+        "source": "1cd2c7817818720b711be15381709c84c02cc430290d6180a1e04834caf58d92",
+        "dist": "80d1ba1d43b3f571d9a882459676484bd165ab850143d2ac06b3bd781462467e"
+      },
+      "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-final-check-attempt01-results.json",
+      "resultsSha256": "dea9aee791c1ce7766d72ea98a0dc8e0768f9cac6742ab2c636827995af78b17",
+      "log": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-final-check-attempt01.log",
+      "collectorLog": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/backend-final-check-attempt01.collector.log",
+      "priorOutputsArchive": {
+        "files": [
+          "e0f8ebe85386990994c491e1fc857632ad696b3c66a60ab9ae356a7ddeab514f  docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/prior-backend-build-outputs-final01.tgz",
+          "4ccb330625fb87c9fbc0b1c42dfea9d2d22424a5079e5887f79d59aee866e9a6  docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/prior-planning-metrics-final01.tgz"
+        ],
+        "restored": false,
+        "note": "runbook 6d restore is root decision; not performed"
+      },
+      "postRunAudit": {
+        "processes": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/backend-final-check-attempt01-process-after.txt",
+        "processNote": "one pre-existing node studio-runner/dist/run/guidedMain.js PID 44737 started 2026-10-10 (not owned by this run; not signalled)",
+        "containers": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates01/backend-final-check-attempt01-docker-after.txt",
+        "containerNote": "no running Testcontainers containers; nothing removed"
+      }
+    }
+  ],
+  "noCommitsNoPushNoSourceEdits": true,
+  "labelNotes": [
+    "runner-final-typecheck01 / runner-final-lint01: harness error (zsh did not word-split the pnpm command; FileNotFoundError before the tool ran). Only -before.json and an empty .log exist. Rerun as ...02."
+  ]
+}

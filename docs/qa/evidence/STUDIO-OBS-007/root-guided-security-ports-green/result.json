@@ -1,0 +1,36 @@
+{
+  "story": "STUDIO-OBS-007",
+  "scope": "20 retained wire/JWT/mTLS/filter/public v3 scenarios; full GuidedSessionIT lifecycle port remains pending",
+  "command": "./gradlew test --tests *GuidedWireContractTest --tests *GuidedSecurityTest --tests *GuidedHttpSecurityIT",
+  "exitCode": 0,
+  "results": [
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSecurityTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedHttpSecurityIT",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "sourceSha256": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java": "5d26de1ae4d580a4ad2ca3674f3ee9a4be1f58f227b3f194fb20b97e0da4eaf8",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSecurityTest.java": "faf9f9b6a64adedce5883f6ae6f70270b9309b2da2cce326fb67cff3785066d7",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedHttpSecurityIT.java": "816d8a4e442394fa935d13d77c4aad93391690febd8dac5f4d70cf1b76224ca1"
+  },
+  "caseCountUnchanged": true,
+  "noUnavailablePassClaimed": true
+}

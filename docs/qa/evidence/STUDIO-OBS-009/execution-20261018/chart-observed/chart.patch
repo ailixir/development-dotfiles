@@ -1,0 +1,448 @@
+diff --git a/helm-chart/put-checks/templates/_helpers.tpl b/helm-chart/put-checks/templates/_helpers.tpl
+index 41fb421..8b5b2e4 100644
+--- a/helm-chart/put-checks/templates/_helpers.tpl
++++ b/helm-chart/put-checks/templates/_helpers.tpl
+@@ -152,15 +152,17 @@ and sharing an account with the API is how "nothing" silently becomes "whatever
+ `ACCEPTED_KEYS` loader (`studio-runner/src/server/config.ts`); a rendered name that is not one
+ would be a startup failure in the pod, and a values key that is not one fails the render below.
+ 
+-Deliberately a subset: the loader accepts fifty-seven keys (the 45 that predate STUDIO-OBS-009
+-plus the 12 of launch contract section 2: four listener keys and eight guided keys, the switch
+-included) and the deployment sets the ones a pod needs. What matters is that the list is closed at
+-both ends —
++Deliberately a subset: the loader accepts fifty-seven keys and this list names fifty-three of
++them. The other four (`INSTANCE_ID`, `SERVICE_IDENTITY`, `CALLBACK_IDENTITY`, `CALLBACK_BASE_URL`)
++are rendered directly by the runner Deployment or left to the runner, and are not reachable through
++`runnerEnv`. The five `STUDIO_RUNNER_OBSERVED_*` keys are on the list because the Deployment renders
++them (from `studioObserved.*`); they are chart-managed below, so no `runnerEnv` value reaches them.
++What matters is that the list is closed at both ends —
+ `PLAYWRIGHT_BROWSERS_PATH` and `HOME` are on neither side, and there is no chart path that emits
+ them.
+ */}}
+ {{- define "put-checks.studioRunner.acceptedEnvKeys" -}}
+-STUDIO_RUNNER_PORT STUDIO_RUNNER_HOST STUDIO_RUNNER_POOL_SIZE STUDIO_RUNNER_SCRATCH_DIR STUDIO_RUNNER_OBJECT_STORE_DIR STUDIO_RUNNER_OBJECT_STORE_PROVIDER STUDIO_RUNNER_OBJECT_STORE_ENDPOINT STUDIO_RUNNER_OBJECT_STORE_REGION STUDIO_RUNNER_OBJECT_STORE_BUCKET STUDIO_RUNNER_OBJECT_STORE_FORCE_PATH_STYLE STUDIO_RUNNER_OBJECT_STORE_ACCESS_KEY_ID_FILE STUDIO_RUNNER_OBJECT_STORE_SECRET_ACCESS_KEY_FILE STUDIO_RUNNER_OBJECT_STORE_MAX_ATTEMPTS STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS STUDIO_RUNNER_OBJECT_STORE_BACKOFF_MS STUDIO_RUNNER_ADMISSION_TIMEOUT_MS STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS STUDIO_RUNNER_TERMINAL_DELIVERY_MAX_ATTEMPTS STUDIO_RUNNER_TERMINAL_DELIVERY_BACKOFF_MS STUDIO_RUNNER_VALIDATE_TIMEOUT_MS STUDIO_RUNNER_MAX_REQUEST_BODY_BYTES STUDIO_RUNNER_RETRY_AFTER_SECONDS STUDIO_RUNNER_DRAIN_TIMEOUT_MS STUDIO_RUNNER_RECORDING_WIDTH STUDIO_RUNNER_RECORDING_HEIGHT STUDIO_RUNNER_BROWSER_LAUNCH_TIMEOUT_MS STUDIO_RUNNER_STEP_TIMEOUT_MS STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS STUDIO_RUNNER_MAX_REPORT_STEPS STUDIO_RUNNER_MAX_REPORT_LOG_ENTRIES STUDIO_RUNNER_MAX_REPORT_LOG_ENTRY_LENGTH STUDIO_RUNNER_MAX_REPORT_BODY_BYTES STUDIO_RUNNER_OBJECT_STORE_CREDENTIALS_DIRECTORY STUDIO_RUNNER_TLS_KEY_FILE STUDIO_RUNNER_TLS_CERT_FILE STUDIO_RUNNER_TLS_CA_FILE STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256 STUDIO_RUNNER_GUIDED_ENABLED STUDIO_RUNNER_GUIDED_WORKER_ID STUDIO_RUNNER_GUIDED_JOURNAL_DIR STUDIO_RUNNER_GUIDED_CONTROLLER_ISSUER STUDIO_RUNNER_GUIDED_CONTROLLER_SUBJECT STUDIO_RUNNER_GUIDED_CONTROLLER_PUBLIC_KEY_FILE STUDIO_RUNNER_GUIDED_CALLBACK_BASE_URL STUDIO_RUNNER_GUIDED_CALLBACK_TOKEN_FILE
++STUDIO_RUNNER_PORT STUDIO_RUNNER_HOST STUDIO_RUNNER_POOL_SIZE STUDIO_RUNNER_SCRATCH_DIR STUDIO_RUNNER_OBJECT_STORE_DIR STUDIO_RUNNER_OBJECT_STORE_PROVIDER STUDIO_RUNNER_OBJECT_STORE_ENDPOINT STUDIO_RUNNER_OBJECT_STORE_REGION STUDIO_RUNNER_OBJECT_STORE_BUCKET STUDIO_RUNNER_OBJECT_STORE_FORCE_PATH_STYLE STUDIO_RUNNER_OBJECT_STORE_ACCESS_KEY_ID_FILE STUDIO_RUNNER_OBJECT_STORE_SECRET_ACCESS_KEY_FILE STUDIO_RUNNER_OBJECT_STORE_MAX_ATTEMPTS STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS STUDIO_RUNNER_OBJECT_STORE_BACKOFF_MS STUDIO_RUNNER_ADMISSION_TIMEOUT_MS STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS STUDIO_RUNNER_TERMINAL_DELIVERY_MAX_ATTEMPTS STUDIO_RUNNER_TERMINAL_DELIVERY_BACKOFF_MS STUDIO_RUNNER_VALIDATE_TIMEOUT_MS STUDIO_RUNNER_MAX_REQUEST_BODY_BYTES STUDIO_RUNNER_RETRY_AFTER_SECONDS STUDIO_RUNNER_DRAIN_TIMEOUT_MS STUDIO_RUNNER_RECORDING_WIDTH STUDIO_RUNNER_RECORDING_HEIGHT STUDIO_RUNNER_BROWSER_LAUNCH_TIMEOUT_MS STUDIO_RUNNER_STEP_TIMEOUT_MS STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS STUDIO_RUNNER_MAX_REPORT_STEPS STUDIO_RUNNER_MAX_REPORT_LOG_ENTRIES STUDIO_RUNNER_MAX_REPORT_LOG_ENTRY_LENGTH STUDIO_RUNNER_MAX_REPORT_BODY_BYTES STUDIO_RUNNER_OBJECT_STORE_CREDENTIALS_DIRECTORY STUDIO_RUNNER_TLS_KEY_FILE STUDIO_RUNNER_TLS_CERT_FILE STUDIO_RUNNER_TLS_CA_FILE STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256 STUDIO_RUNNER_GUIDED_ENABLED STUDIO_RUNNER_GUIDED_WORKER_ID STUDIO_RUNNER_GUIDED_JOURNAL_DIR STUDIO_RUNNER_GUIDED_CONTROLLER_ISSUER STUDIO_RUNNER_GUIDED_CONTROLLER_SUBJECT STUDIO_RUNNER_GUIDED_CONTROLLER_PUBLIC_KEY_FILE STUDIO_RUNNER_GUIDED_CALLBACK_BASE_URL STUDIO_RUNNER_GUIDED_CALLBACK_TOKEN_FILE STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED STUDIO_RUNNER_OBSERVED_CATALOG_FILE STUDIO_RUNNER_OBSERVED_POLICY_FILE STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST
+ {{- end }}
+ 
+ {{/*
+@@ -183,6 +185,13 @@ deployment can be repointed with — so the deployment must refuse it loudly.
+ {{- if or (hasPrefix "STUDIO_RUNNER_GUIDED_" $key) (hasPrefix "STUDIO_RUNNER_TLS_" $key) (eq $key "STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256") }}
+ {{- fail (printf "%s is managed by the chart; use studioRunner.tls.* or studioRunner.guided.* values instead" $key) }}
+ {{- end }}
++{{- /* The observed-replay keys are chart-managed as well (B5 item 3): the flags, the catalog and policy
++       files and the image digest are single-sourced from `studioObserved.*`, which also feeds the
++       backend. A `runnerEnv` value would be a second, hand-maintained copy of the catalog. Prefix
++       test, so a future observed key is covered. */ -}}
++{{- if hasPrefix "STUDIO_RUNNER_OBSERVED_" $key }}
++{{- fail (printf "%s is managed by the chart; use studioObserved.* values instead" $key) }}
++{{- end }}
+ {{- /* The exec probe always dials 127.0.0.1 (launch contract section 5). A HOST that is neither
+        0.0.0.0 nor 127.0.0.1 would leave the pod Running and never Ready. */ -}}
+ {{- if and (eq $key "STUDIO_RUNNER_HOST") (not (has (toString $val) (list "0.0.0.0" "127.0.0.1"))) }}
+@@ -340,6 +349,156 @@ to 1 as well. The default is deliberately not changed.
+ {{- end -}}
+ {{- end }}
+ 
++{{/*
++------------------------------------------------------------------------------------------------
++Observed replay (STUDIO-OBS-009 residue; architect ruling OI-06, B5). One top-level `studioObserved`
++block feeds BOTH images, because the backend and the runner must hold the SAME catalog entry and
++policies: the runner's `STUDIO_RUNNER_OBSERVED_*` keys, and the backend's
++`studio.observed-replay.catalog-json` / `policies-json`. Without it a chart-deployed runner answers
++503 to every Studio run and the backend answers 409 RUNTIME_INCOMPATIBLE to every publication.
++------------------------------------------------------------------------------------------------
++*/}}
++
++{{/* "true" when either observed flag is on, empty otherwise. The guard below keeps both bool. */}}
++{{- define "put-checks.studioObserved.enabled" -}}
++{{- if or .Values.studioObserved.validationEnabled .Values.studioObserved.replayEnabled -}}true{{- end -}}
++{{- end }}
++
++{{/* The ConfigMap that carries the runner's catalog.json and policies.json (public hashes and trust
++     policy, not secrets). */}}
++{{- define "put-checks.studioObserved.configMapName" -}}
++{{ include "put-checks.fullname" . }}-studio-observed-trust
++{{- end }}
++
++{{/*
++Fails the render unless `.build` is a well-formed BuildIdentity (`replay-profile.schema.json`
++`#/definitions/BuildIdentity`: five required keys, no others; the four hashes and the image digest are
++64 lower-case hex characters, with no "sha256:" prefix). `.path` names the value in the message.
++Hashes must be YAML STRINGS: an all-digit hash written unquoted is a number, and loses digits.
++*/}}
++{{- define "put-checks.studioObserved.buildGuard" -}}
++{{- $path := .path -}}
++{{- $b := .build -}}
++{{- if not (kindIs "map" $b) -}}
++{{- fail (printf "%s.build must be a map with exactly profileHash, schemaBundleHash, referenceBundleHash, executableImageDigest and chromiumBuild" $path) -}}
++{{- end -}}
++{{- $want := "chromiumBuild,executableImageDigest,profileHash,referenceBundleHash,schemaBundleHash" -}}
++{{- if ne (join "," (keys $b | sortAlpha)) $want -}}
++{{- fail (printf "%s.build must have exactly the keys profileHash, schemaBundleHash, referenceBundleHash, executableImageDigest and chromiumBuild (got: %s)" $path (join ", " (keys $b | sortAlpha))) -}}
++{{- end -}}
++{{- range $k := list "profileHash" "schemaBundleHash" "referenceBundleHash" "executableImageDigest" -}}
++{{- $v := get $b $k -}}
++{{- if not (and (kindIs "string" $v) (regexMatch "^[a-f0-9]{64}$" $v)) -}}
++{{- fail (printf "%s.build.%s must be a quoted string of 64 lower-case hex characters, without a sha256: prefix (BuildIdentity pattern ^[a-f0-9]{64}$)" $path $k) -}}
++{{- end -}}
++{{- end -}}
++{{- $chromium := get $b "chromiumBuild" -}}
++{{- if not (and (kindIs "string" $chromium) (ge (len $chromium) 1) (le (len $chromium) 256)) -}}
++{{- fail (printf "%s.build.chromiumBuild must be a string of 1 to 256 characters" $path) -}}
++{{- end -}}
++{{- end }}
++
++{{/*
++Lists, one per line, every key in a (possibly nested) map whose normalised spelling is one of the
++backend's observed catalog/policy inputs. Same normalisation as `springConfig.validateProperties`
++(lower-case, alphanumerics only), so relaxed spellings and nested maps are caught. Both the Spring
++property names and the environment aliases `application.yml` reads are reserved.
++*/}}
++{{- define "put-checks.studioObserved.overrideHits" -}}
++{{- $reserved := list "studioobservedreplaycatalogjson" "studioobservedreplaypoliciesjson" "studioobservedcatalogjson" "studioobservedpoliciesjson" -}}
++{{- range $key, $value := .values -}}
++{{- $path := printf "%s.%s" $.path $key | trimPrefix "." -}}
++{{- $normalized := regexReplaceAll "[^a-z0-9]" (lower $path) "" -}}
++{{- if has $normalized $reserved -}}
++{{- $path }}{{ "\n" }}
++{{- end -}}
++{{- if kindIs "map" $value -}}
++{{- include "put-checks.studioObserved.overrideHits" (dict "values" $value "path" $path) -}}
++{{- end -}}
++{{- end -}}
++{{- end }}
++
++{{/*
++**The four observed-replay render guards** (B5 item 8), called first from the API Deployment (so
++`enabled` with the runner off cannot silently render nothing) and from the runner Deployment. Each
++is a `fail` naming the key and what to set.
++
++- G-O1: either flag on requires `studioRunner.enabled`.
++- G-O2: either flag on requires a well-formed `catalog` (exactly `build` and `profile`; the
++  BuildIdentity shape), and well-formed `additionalBackendCatalog` entries.
++- G-O3: either flag on requires non-empty `policies` within the BACKEND's bounds
++  (`ObservedReplayPins`: at most 16 entries, at most 65,536 bytes of JSON), which are tighter than
++  the runner's (32 entries, 2 MiB). The same bounds apply to the catalog list the backend reads.
++- G-O4: either flag on forbids a second source for the backend's catalog or policies in
++  `configOverrides` or `env` on either component, so the two images cannot drift apart.
++
++Before the four, and always: the flags must be real booleans. `--set-string` would give the string
++"false", which is truthy in a template and would switch the feature on while the manifest said off.
++*/}}
++{{- define "put-checks.studioObserved.guard" -}}
++{{- $o := .Values.studioObserved -}}
++{{- range $flag := list "validationEnabled" "replayEnabled" -}}
++{{- if not (kindIs "bool" (get $o $flag)) -}}
++{{- fail (printf "studioObserved.%s must be a boolean (true or false), not %s: a string \"false\" is truthy and would switch observed replay on" $flag (kindOf (get $o $flag))) -}}
++{{- end -}}
++{{- end -}}
++{{- if include "put-checks.studioObserved.enabled" . -}}
++{{- /* G-O1 */ -}}
++{{- if not .Values.studioRunner.enabled -}}
++{{- fail "studioObserved.validationEnabled or studioObserved.replayEnabled is true but studioRunner.enabled is false: observed replay is a mode of the runner and has no pod of its own. Set studioRunner.enabled: true, or turn both studioObserved flags off" -}}
++{{- end -}}
++{{- /* G-O2 */ -}}
++{{- $catalog := $o.catalog -}}
++{{- if not (kindIs "map" $catalog) -}}
++{{- fail "studioObserved.catalog must be a map with exactly the keys build and profile: the runner image's own catalog entry, generated by CI from the pushed image (supply it with -f observed-catalog.<digest>.yaml)" -}}
++{{- end -}}
++{{- if ne (join "," (keys $catalog | sortAlpha)) "build,profile" -}}
++{{- fail "studioObserved.catalog must have exactly the keys build and profile and no default: it is the runner image's own catalog entry, generated by CI from the pushed image (supply it with -f observed-catalog.<digest>.yaml)" -}}
++{{- end -}}
++{{- if not (kindIs "map" $catalog.profile) -}}
++{{- fail "studioObserved.catalog.profile must be a map (the replay profile)" -}}
++{{- end -}}
++{{- include "put-checks.studioObserved.buildGuard" (dict "build" $catalog.build "path" "studioObserved.catalog") -}}
++{{- if not (kindIs "slice" $o.additionalBackendCatalog) -}}
++{{- fail "studioObserved.additionalBackendCatalog must be a list of catalog entries" -}}
++{{- end -}}
++{{- range $i, $entry := $o.additionalBackendCatalog -}}
++{{- $where := printf "studioObserved.additionalBackendCatalog[%d]" $i -}}
++{{- if not (and (kindIs "map" $entry) (eq (join "," (keys $entry | sortAlpha)) "build,profile") (kindIs "map" $entry.profile)) -}}
++{{- fail (printf "%s must be a map with exactly the keys build and profile" $where) -}}
++{{- end -}}
++{{- include "put-checks.studioObserved.buildGuard" (dict "build" $entry.build "path" $where) -}}
++{{- end -}}
++{{- /* G-O3 */ -}}
++{{- if not (kindIs "slice" $o.policies) -}}
++{{- fail "studioObserved.policies must be a list of TrustedPolicy entries" -}}
++{{- end -}}
++{{- if eq (len $o.policies) 0 -}}
++{{- fail "studioObserved.policies must not be empty while observed replay is on: the backend refuses every policy lookup with 409 RUNTIME_INCOMPATIBLE and the runner has no policy to apply (supply the reviewed per-environment policy file)" -}}
++{{- end -}}
++{{- if gt (len $o.policies) 16 -}}
++{{- fail (printf "studioObserved.policies has %d entries; the backend accepts at most 16 (ObservedReplayPins)" (len $o.policies)) -}}
++{{- end -}}
++{{- if gt (len (toJson $o.policies)) 65536 -}}
++{{- fail (printf "studioObserved.policies is %d bytes as JSON; the backend accepts at most 65536 (ObservedReplayPins)" (len (toJson $o.policies))) -}}
++{{- end -}}
++{{- $backendCatalog := prepend $o.additionalBackendCatalog $catalog -}}
++{{- if gt (len $backendCatalog) 16 -}}
++{{- fail (printf "studioObserved.catalog plus additionalBackendCatalog is %d entries; the backend accepts at most 16 (ObservedReplayPins)" (len $backendCatalog)) -}}
++{{- end -}}
++{{- if gt (len (toJson $backendCatalog)) 65536 -}}
++{{- fail (printf "studioObserved.catalog plus additionalBackendCatalog is %d bytes as JSON; the backend accepts at most 65536 (ObservedReplayPins)" (len (toJson $backendCatalog))) -}}
++{{- end -}}
++{{- /* G-O4 */ -}}
++{{- range $label, $map := dict "backend.configOverrides" (.Values.backend.configOverrides | default dict) "worker.configOverrides" (.Values.worker.configOverrides | default dict) "backend.env" (.Values.backend.env | default dict) "worker.env" (.Values.worker.env | default dict) -}}
++{{- $hits := include "put-checks.studioObserved.overrideHits" (dict "values" $map "path" "") | trim -}}
++{{- if $hits -}}
++{{- fail (printf "%s sets %s while studioObserved is on: the backend's catalog and policies are rendered from studioObserved.catalog, additionalBackendCatalog and policies (one source for the backend and the runner). Remove it from %s" $label (replace "\n" ", " $hits) $label) -}}
++{{- end -}}
++{{- end -}}
++{{- end -}}
++{{- end }}
++
+ {{/*
+ The backend's (API and worker) side of the runner TLS chain: the Secret holding its key store, trust
+ store and their password FILES (read-only, mode 0440, directory mount with no `subPath`), and with
+@@ -443,6 +602,14 @@ worker only calls out (runner dispatch, stop re-drives, the translation coordina
+ {{- $_ := set $props "studio.guided-authoring.connector.port" (int $g.tlsConnector.port) -}}
+ {{- end -}}
+ {{- end -}}
++{{- if include "put-checks.studioObserved.enabled" $root -}}
++{{- /* One source for both images (B5 item 7). The runner's own entry is FIRST: `selected()` takes the
++       first element, and the rest are older builds the backend may still accept for retained
++       artifacts. The runner never sees `additionalBackendCatalog`. */ -}}
++{{- $o := $root.Values.studioObserved -}}
++{{- $_ := set $props "studio.observed-replay.catalog-json" (toJson (prepend $o.additionalBackendCatalog $o.catalog)) -}}
++{{- $_ := set $props "studio.observed-replay.policies-json" (toJson $o.policies) -}}
++{{- end -}}
+ {{- toYaml $props -}}
+ {{- end }}
+ 
+diff --git a/helm-chart/put-checks/templates/configmap.yaml b/helm-chart/put-checks/templates/configmap.yaml
+index 005897f..3189ca6 100644
+--- a/helm-chart/put-checks/templates/configmap.yaml
++++ b/helm-chart/put-checks/templates/configmap.yaml
+@@ -99,6 +99,27 @@ data:
+   {{ .Values.studioRunner.guided.controllerPublicKey.file }}: |
+     {{- .Values.studioRunner.guided.token.publicKey | trim | nindent 4 }}
+ {{- end }}
++{{- if include "put-checks.studioObserved.enabled" . }}
++---
++# The runner's observed-replay trust inputs: its own {profile, build} catalog entry and the trusted
++# policies, mounted as files (STUDIO_RUNNER_OBSERVED_CATALOG_FILE / _POLICY_FILE). Rendered from the
++# SAME `studioObserved` values that become the backend's `studio.observed-replay.*-json`, so the two
++# images cannot be configured apart. Public hashes and trust policy, not secrets. `|-` keeps the JSON
++# byte-exact with no trailing newline. (toJson escapes &, < and > as \u0026, \u003c, \u003e: the same
++# JSON value, which both consumers parse.)
++apiVersion: v1
++kind: ConfigMap
++metadata:
++  name: {{ include "put-checks.studioObserved.configMapName" . }}
++  labels:
++    {{- include "put-checks.labels" . | nindent 4 }}
++    {{- include "put-checks.studioRunner.selectorLabels" . | nindent 4 }}
++data:
++  catalog.json: |-
++    {{- toJson .Values.studioObserved.catalog | nindent 4 }}
++  policies.json: |-
++    {{- toJson .Values.studioObserved.policies | nindent 4 }}
++{{- end }}
+ {{- $_ := include "put-checks.studioAuditSiem.guard" . }}
+ {{- if .Values.studioAuditSiem.enabled }}
+ ---
+diff --git a/helm-chart/put-checks/templates/deployment.yaml b/helm-chart/put-checks/templates/deployment.yaml
+index 7258790..ee6b3a7 100644
+--- a/helm-chart/put-checks/templates/deployment.yaml
++++ b/helm-chart/put-checks/templates/deployment.yaml
+@@ -2,6 +2,9 @@
+        off must fail here, because nothing else would render and the values would be ignored. The
+        same guard runs first in the runner Deployment for the replica, autoscaler and PID-1 rules. */ -}}
+ {{- $_ := include "put-checks.studioRunner.guidedGuard" . }}
++{{- /* Observed replay (G-O1..G-O4) is checked here too, outside `backend.enabled`: `studioObserved`
++       on with `studioRunner.enabled: false` would otherwise render nothing and be ignored. */ -}}
++{{- $_ := include "put-checks.studioObserved.guard" . }}
+ {{- if .Values.backend.enabled }}
+ {{- include "put-checks.springConfig.validate" (index .Values "backend") }}
+ {{- $gatewayProvider := required "studioGateway.provider is required" .Values.studioGateway.provider -}}
+diff --git a/helm-chart/put-checks/templates/studio-runner-deployment.yaml b/helm-chart/put-checks/templates/studio-runner-deployment.yaml
+index 7416428..6b61c77 100644
+--- a/helm-chart/put-checks/templates/studio-runner-deployment.yaml
++++ b/helm-chart/put-checks/templates/studio-runner-deployment.yaml
+@@ -4,6 +4,9 @@
+        required-in-every-deployment rule of A3. */ -}}
+ {{- $_ := include "put-checks.studioRunner.guidedGuard" . }}
+ {{- $_ := include "put-checks.studioRunner.tlsGuard" . }}
++{{- /* The four observed-replay guards (G-O1..G-O4). Also run from the API Deployment, which renders
++       when the runner does not, so `studioObserved` on with the runner off still fails. */ -}}
++{{- $_ := include "put-checks.studioObserved.guard" . }}
+ {{- $name := include "put-checks.studioRunner.fullname" . }}
+ {{- $scratch := include "put-checks.studioRunner.scratchDir" . }}
+ {{- $guided := include "put-checks.studioRunner.guidedEnabled" . }}
+@@ -11,6 +14,9 @@
+ {{- $fileMode := include "put-checks.studioRunner.secretFileMode" . }}
+ {{- $tls := .Values.studioRunner.tls }}
+ {{- $g := .Values.studioRunner.guided }}
++{{- $observed := include "put-checks.studioObserved.enabled" . }}
++{{- $o := .Values.studioObserved }}
++{{- $trustDir := trimSuffix "/" $o.mountPath }}
+ {{- $tlsDir := trimSuffix "/" $tls.mountPath }}
+ {{- $journalMount := trimSuffix "/" $g.journal.mountPath }}
+ apiVersion: apps/v1
+@@ -46,6 +52,11 @@ spec:
+     metadata:
+       annotations:
+         checksum/runner-env: {{ .Values.studioRunner.runnerEnv | toYaml | sha256sum }}
++        {{- if $observed }}
++        # The catalog and policy files are read once at start-up, so a policy or catalog change must
++        # roll the pod. (A catalog change also changes the image reference; a policy change does not.)
++        checksum/studio-observed-trust: {{ list $o.catalog $o.policies | toJson | sha256sum }}
++        {{- end }}
+         {{- if $guided }}
+         # The controller public key is rendered by this chart (configmap.yaml) and mounted as a
+         # directory, so a key rotation must roll the pod: the runner reads the file once.
+@@ -107,7 +118,16 @@ spec:
+           type: {{ required "studioRunner.seccompProfile.type is required and is SPK-04's decision (ADR-001 O-4); it is never inherited and never Unconfined" .Values.studioRunner.seccompProfile.type }}
+       containers:
+         - name: studio-runner
++          {{- if $observed }}
++          # Pinned by the catalog's own digest while observed replay is on: the runner checks
++          # `STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST == catalog.build.executableImageDigest`, and both
++          # come from the same values file, so only the pull reference can bind them to the image
++          # that actually runs. A re-pushed tag would run under a catalog naming a different image.
++          # `studioRunner.image.tag` is ignored here.
++          image: "{{ .Values.studioRunner.image.repository }}@sha256:{{ $o.catalog.build.executableImageDigest }}"
++          {{- else }}
+           image: "{{ .Values.studioRunner.image.repository }}:{{ .Values.studioRunner.image.tag | default .Chart.AppVersion }}"
++          {{- end }}
+           imagePullPolicy: {{ .Values.studioRunner.image.pullPolicy }}
+           # No `command` and no `args`. The image's CMD is `sh -c "ulimit -c 0 && exec node
+           # dist/main.js"` (A6), whose `exec` keeps node as the container's main process so SIGTERM
+@@ -214,6 +234,23 @@ spec:
+             - name: STUDIO_RUNNER_GUIDED_CALLBACK_TOKEN_FILE
+               value: {{ printf "%s/%s" (trimSuffix "/" $g.callbackToken.mountPath) $g.callbackToken.key | quote }}
+             {{- end }}
++            # ── Observed replay: chart-managed, single-sourced from `studioObserved` ─────────────────
++            #
++            # Both flags are rendered in both directions (the runner accepts only "true", "false" or
++            # unset). The three file/digest keys render ONLY while either flag is on, like the guided
++            # keys: no half configuration. The digest is DERIVED from the catalog, never a second value.
++            - name: STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED
++              value: {{ $o.validationEnabled | toString | quote }}
++            - name: STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED
++              value: {{ $o.replayEnabled | toString | quote }}
++            {{- if $observed }}
++            - name: STUDIO_RUNNER_OBSERVED_CATALOG_FILE
++              value: {{ printf "%s/catalog.json" $trustDir | quote }}
++            - name: STUDIO_RUNNER_OBSERVED_POLICY_FILE
++              value: {{ printf "%s/policies.json" $trustDir | quote }}
++            - name: STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST
++              value: {{ $o.catalog.build.executableImageDigest | quote }}
++            {{- end }}
+             {{- include "put-checks.studioRunner.env" . | nindent 12 }}
+           # **No envFrom.** A ConfigMap or Secret reference here injects whatever keys it carries,
+           # which is precisely the open half SEC-2 exploits: the enumerated list above is the only
+@@ -264,6 +301,14 @@ spec:
+             - name: tls
+               mountPath: {{ $tls.mountPath }}
+               readOnly: true
++            {{- if $observed }}
++            # The catalog entry and the trusted policies: read-only, a DIRECTORY mount (no `subPath`).
++            # Public hashes and trust policy, not secrets, so a ConfigMap and not a Secret; this adds
++            # no Secret volume, so the `shareProcessNamespace` one-container bound is untouched.
++            - name: studio-observed-trust
++              mountPath: {{ $o.mountPath }}
++              readOnly: true
++            {{- end }}
+             {{- if $guided }}
+             # Guided-only mounts. `/tmp` is the guided browser profile and the recording scratch
+             # (`os.tmpdir()`, no TMPDIR variable). The journal mount is NOT the journal directory:
+@@ -329,6 +374,17 @@ spec:
+                 path: {{ $tls.certFile }}
+               - key: {{ $tls.caFile }}
+                 path: {{ $tls.caFile }}
++        {{- if $observed }}
++        - name: studio-observed-trust
++          configMap:
++            name: {{ include "put-checks.studioObserved.configMapName" . }}
++            defaultMode: {{ $fileMode }}
++            items:
++              - key: catalog.json
++                path: catalog.json
++              - key: policies.json
++                path: policies.json
++        {{- end }}
+         {{- if $guided }}
+         - name: guided-tmp
+           # Disk-backed on purpose: a memory-backed volume would count against the 2Gi container
+diff --git a/helm-chart/put-checks/values-uat.yaml b/helm-chart/put-checks/values-uat.yaml
+index 3453c56..e2261e5 100644
+--- a/helm-chart/put-checks/values-uat.yaml
++++ b/helm-chart/put-checks/values-uat.yaml
+@@ -203,6 +203,16 @@ studioRunner:
+ objectStore:
+   credentialsSecret: checks-api-object-store-uat
+ 
++# Observed replay is ON in UAT (STUDIO-OBS-009 residue, architect ruling OI-06 B5). `catalog` and
++# `policies` are NOT committed: the catalog entry is specific to one runner image, and the policies
++# are reviewed per-environment trust configuration. They come at deploy time, and the render fails
++# naming the key until both are supplied, as with the controller pin above:
++#   -f observed-catalog.<digest>.yaml   (generated by CI from the pushed runner image)
++#   -f observed-policies.uat.yaml       (the reviewed UAT policy file: `studioObserved.policies`)
++studioObserved:
++  validationEnabled: true
++  replayEnabled: true
++
+ # Plain-English authoring is a product capability in staging, so it uses the real Vertex AI
+ # provider. Endpoint, project and location are environment-owned ConfigMap values; workload
+ # identity supplies ADC. Recorded fixtures are rejected for this profile by the chart.
+diff --git a/helm-chart/put-checks/values.yaml b/helm-chart/put-checks/values.yaml
+index 96b9632..222c788 100644
+--- a/helm-chart/put-checks/values.yaml
++++ b/helm-chart/put-checks/values.yaml
+@@ -771,6 +771,53 @@ studioRunner:
+   tolerations: []
+   affinity: {}
+ 
++# ---------------------------------------------------------------------------
++# Observed replay (STUDIO-OBS-009 residue; architect ruling OI-06, B5).
++#
++# **One source of truth for both images.** The runner (`STUDIO_RUNNER_OBSERVED_*`) and the backend
++# (`studio.observed-replay.catalog-json` / `policies-json`) must hold the SAME catalog entry and the
++# SAME policies, so this one block feeds both; none of them is settable through `studioRunner.runnerEnv`
++# or the backend's `configOverrides` / `env` while this is on (the render fails). Under the single
++# path every Studio run is an observed run, so a runner with both flags off answers 503 to every run
++# (routes.ts `OBSERVED_VALIDATION_DISABLED`, runCoordinator.ts `OBSERVED_REPLAY_DISABLED`) and a
++# backend with an empty catalog answers 409 RUNTIME_INCOMPATIBLE to every publication.
++#
++# OFF by default in every values file; `values-uat.yaml` turns both on. While EITHER flag is on:
++#   - `studioRunner.enabled` must be true, `catalog` and `policies` must be supplied (the render fails
++#     naming the key otherwise);
++#   - the runner image is pinned by digest, `<repository>@sha256:<catalog.build.executableImageDigest>`,
++#     and `studioRunner.image.tag` is ignored. The runner checks that digest against the catalog, so
++#     pinning is what binds the catalog to the image that is actually pulled;
++#   - the runner gets `catalog.json` and `policies.json` from a ConfigMap this chart renders.
++#
++# **A runner image change ALWAYS comes with a new catalog values file**: the entry is specific to
++# one image.
++#
++# Security: catalog and policies are integrity-relevant, not secret. Whoever can edit them decides
++# which origins replay may touch. Treat `policies` as reviewed configuration under the same change
++# control as `values-uat.yaml`, never as runtime input.
++# ---------------------------------------------------------------------------
++studioObserved:
++  # Runner STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED (serves /v2/validate-observed) and
++  # STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED (serves /v2/runs). Real booleans: --set-string is refused.
++  validationEnabled: false
++  replayEnabled: false
++  # The runner image's OWN {profile, build} catalog entry, produced by CI from the pushed image
++  # (`build.executableImageDigest` is the 64-hex manifest digest, no "sha256:" prefix; the four
++  # hashes are 64 lower-case hex and must be QUOTED strings). No default: this repository cannot
++  # know it. Supply it per release with `-f observed-catalog.<digest>.yaml`.
++  catalog: {}
++  # Older builds the BACKEND may still accept (retained artifacts), same entry shape as `catalog`.
++  # The runner never sees these. The backend's catalog is `[catalog] + additionalBackendCatalog`, the
++  # runner's entry first, because the backend selects the first element.
++  additionalBackendCatalog: []
++  # TrustedPolicy list (replay-ipc.schema.json `#/definitions/TrustedPolicy`), per environment.
++  # Required and non-empty while on; at most 16 entries and 65,536 bytes of JSON (the backend's
++  # bounds, tighter than the runner's 32 entries and 2 MiB). Content owner: see the receipt, open item.
++  policies: []
++  # Where the runner mounts the ConfigMap (catalog.json, policies.json), read-only.
++  mountPath: /etc/studio-observed
++
+ # ---------------------------------------------------------------------------
+ # The object-store principal the API and the recovery path read with — **read-only**, and a
+ # different Secret from the runner's write-only one (§6.2, ED-03).

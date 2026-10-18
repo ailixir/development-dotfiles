@@ -1,0 +1,80 @@
+{
+  "schema": "d-async-stop-completion-plan/1",
+  "state": "REPORT_ONLY_PROPOSED_FOR_AUTHORIZATION_AND_INDEPENDENT_REVIEW",
+  "bindings": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "770a33a35c6d449e68bb356404eae131871fae6cee63e6842704ceecb15aa26b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d"
+  },
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-async-stop-plan-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-async-stop-plan-context.txt",
+    "docs/qa/evidence/STUDIO-OBS-007/fresh-owner-d-private-pg-route-repair-review.json"
+  ],
+  "observedPriorEvidence": "Coordinator reports genuine private-PG test PASS normal path only. Remaining D-PG-03 is a source-level failure cleanup gap; no new runtime performed by this author.",
+  "currentGap": {
+    "case": "A failed/interruptible observation wait is caught, then try-with-resources closes the route while the production common-pool stop/confirmation may still be running.",
+    "productionSequence": "GuidedSessionService.stop schedules runAsync only after actual terminal transaction commits; actual stopSender.accept returns, then the real repository transaction persists CONFIRMED; RuntimeException is swallowed without confirmation. Future is not exposed.",
+    "existingOwnershipLimit": "StopWork.finished covers sender only; idle bridges and persisted state do not own/join the separate confirmation operation."
+  },
+  "minimalProposedSeam": {
+    "ownedSource": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "components": [
+      "Test-local SourceStopOwner registered before the actual cancel transaction can commit/schedule, with per-attempt expected/start/sender-return/confirmation-return/failure stages, actual executing-thread identity, and completion handle.",
+      "Test-local original-forwarding TrackingTransactionTemplate supplied to the existing routed repository, retaining exactly the original routedSource/DataSourceTransactionManager. Override execute invokes super.execute(originalCallback) exactly once; no transaction body/status/commit substitution.",
+      "The installed sender delegates actual dispatcher.stop synchronously on the production task thread. On success it arms that owner on the same thread; only the immediately following matching template execute is the confirmation. On actual sender failure the handle records failed sender and no confirmation expected, preserving the original throw."
+    ],
+    "identity": "Per-case/session/stop-attempt ownership; thread-local arm plus the recorded originating task thread. Never classify arbitrary transactions, a second stop, a retry, or main-thread cancel as confirmation. Initial and reconstructed services share the tracking routed repository. One expected attempt is registered before cancellation; a never-started expected task cannot count as complete.",
+    "transactionCompletion": "A confirmation handle completes only after the exact original super.execute has actually returned or thrown, so JDBC transaction resource release is past its finally path. Capture that throwable even though production catches it. Remove the matching thread-local owner afterward. No owner completion at beforeCommit/afterCompletion entry, pending flag, bridge idleness, or timeout.",
+    "taskTailLimit": "The production outer CompletableFuture remains unexposed and its common-pool worker cannot be joined as an owned thread. The pinned production tail after sender failure or confirmation execute completion contains only catch/return, with no further I/O or retained fixture resource. This seam proves completed owned sender/confirmation operations, not shutdown of the JVM common pool. If independent review requires joining the entire outer Future rather than these exact operations, this test-only seam is insufficient and authoring must stop for a separate approved scheduling seam; do not invent a whole-task handle.",
+    "cleanupOrder": [
+      "Retain primary observation/assertion/interruption error.",
+      "Independently restore private route and interrupt/join original caller; captured arrays remain owned until caller actually reaped.",
+      "Initiate a genuine user cancellation when needed; register its expected stop owner before scheduling.",
+      "Separately drain every expected/started actual stop and confirmation handle. Drain failure is recorded, never used as completion. Temporarily clear cleanup-thread interruption only for this actual drain, remember all interrupts and restore afterward.",
+      "Only after actual owned work has returned/failed and all owned JDBC resources are released, perform assertions of real CONFIRMED/live=false for successful closure and idle proxy transfers. A genuine failed confirmation remains failed/unconfirmed; do not persist a replacement status.",
+      "Close the proxy only after that quiescence predicate; a catch around an observation deadline must not bypass this drain."
+    ],
+    "noBlindFinally": "Replace unconditional resource closure path with an owner-aware lifetime. In the supported closed-route fault scenario restoration and actual transport/JDBC return make drain finite. If an actual operation fails to terminate, retain its route while cancelling/awaiting that operation; report unreaped ownership rather than treating timeout as success and closing underneath it."
+  },
+  "optionalTestOnlyBoundedJdbcSeam": {
+    "reason": "An actual confirmation can otherwise wait on a server row or socket; a generic bounded cleanup guarantee cannot be inferred from the closed-route case.",
+    "proposal": "If needed before source authoring, configure only this case-owned DriverManagerDataSource real JDBC URL with explicit driver connectTimeout/socketTimeout and server session statement_timeout/lock_timeout options; retain the exact same DataSource object for repository, materializer, access, all stores and confirmation. Do not use mocked failures, extra reads, production configuration, or a second datasource.",
+    "interpretation": "These are effective test-fixture timeout settings requiring real PostgreSQL held-operation/return proof. They are not a general production JDBC deadline. Interrupt/cancel requests require actual return/resource-release before route destruction; Future.cancel/isDone or elapsed deadline is not proof.",
+    "decisionNeeded": "Coordinator/independent reviewer must approve the exact seam and timeout scope before authoring. Current design does not certify bounded cleanup of permanently blocked operations."
+  },
+  "springContextBeforePgTeardown": {
+    "current": "Static AfterAll currently stops relay/peer executor and PostgreSQL without explicitly closing the cached Spring context. Coordinator observed subsequent scheduled SQL after PG stopped.",
+    "proposal": [
+      "Capture the actual class-owned ConfigurableApplicationContext through test injection and verify its test Application identity; no global context selection.",
+      "After all actual case caller/stop/confirmation/relay jobs are drained, explicitly close that actual context before stopping PostgreSQL. Keep the relay available during any legitimate in-flight shutdown work.",
+      "Mark this class DirtiesContext AFTER_CLASS for cache eviction as well; annotation alone runs later than user AfterAll and does not fix the current ordering. Closing the actual context now and subsequent eviction must be idempotent.",
+      "For any actual task-scheduler/executor beans in this context, retain their real executor handles before close and use context-owned orderly shutdown/await followed by actual terminated-state verification. Do not infer termination from context.isActive=false or a elapsed await timeout. Determine the actual bean types at source authoring/current coordinator execution; no invented scheduler name or presumed auto-configured behavior.",
+      "Only after explicit context closure and actual owned executor/job termination, stop relay, shutdown/reap PEERS, stop the fixture PostgreSQL, and delete certificate files. Preserve failures independently; a context/job termination failure must block normal PG teardown beneath a live owner."
+    ],
+    "failureSemantics": "Spring context close or scheduler termination failures remain genuine cleanup failures; no silent postclass SQL, shared container stop, or late callback is classified as reaped."
+  },
+  "requiredFutureProof": [
+    "Original nine method/modes preserved and current matrix rerun.",
+    "Actual private-PG route case normal PASS remains separate from new failure cleanup proof.",
+    "Force observation-wait failure/interruption while a genuine sender or genuine confirmation is in flight, then release the controlled fixture gate and prove actual operation completion before route close; latch release is not a fabricated transport/DB result.",
+    "Actual sender throw and actual confirmation transaction refusal complete the correct handle with failure and never manufacture CONFIRMED.",
+    "Any optional held-row/driver timeout seam needs real two-connection proof and exact resource return, not a metadata-only counter.",
+    "Class teardown fresh logs/source binding prove class-owned context/executors closed before fixture PG stop and no scheduled JDBC work afterward."
+  ],
+  "execution": {
+    "sourceEdits": false,
+    "runtime": false,
+    "Gradle": false,
+    "Docker": false,
+    "tests": false,
+    "compilation": false,
+    "processActions": false,
+    "soleWrittenArtifact": "docs/qa/evidence/STUDIO-OBS-007/d-async-stop-completion-plan.json"
+  },
+  "limits": [
+    "No whole-Future/common-pool termination claim.",
+    "No general DB deadline, pool, primary outage, held-row PASS, full Core/browser, all19AC, QA or lifecycle verdict.",
+    "Only report proposed; all implementation/runtime belongs to a separately authorized coordinator batch."
+  ]
+}

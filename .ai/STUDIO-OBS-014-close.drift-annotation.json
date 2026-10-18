@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "kind": "close-file story-hash drift annotation (append-only sibling)",
+  "annotates": {
+    "path": ".ai/STUDIO-OBS-014-close.json",
+    "sha256": "e438b666a2e6fd9aeb36e5c7cd288d0973e902072e53dfb35d351cc1f9462ac7",
+    "unchanged": true
+  },
+  "story": "STUDIO-OBS-014",
+  "author": "Pax (@po)",
+  "annotatedAt": "2026-10-17T19:13:23.824932+00:00",
+  "whySiblingFile": "Adding a top-level field would change the close file's sha256, which other receipts bind byte-exact; a sibling keeps those bindings valid.",
+  "closeFileHashBoundIn": [
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/po-scope-readiness.json",
+    "docs/qa/evidence/STUDIO-OBS-014/strict-qa/strict-closure-receipt.json",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-closure-receipt.json"
+  ],
+  "recordedHashesRewritten": false,
+  "recordedStoryHash": {
+    "field": "storySha256After",
+    "sha256": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42"
+  },
+  "currentStoryHash": {
+    "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+    "sha256": "ba4f75fb2699cbfe7abae7637fefd47a541b68c056d066a5a717c8500c80fcf1"
+  },
+  "matches": false,
+  "reason": {
+    "summary": "Append-only @po placements after closure added text to the story; nothing that existed at closure was edited or removed.",
+    "date": "2026-10-16",
+    "source": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-bridge-disclosure/decision.json",
+      "sha256": "99b58e57446266a44db1498aff793024d5f5a98215bcd024c8469712cd614f6d",
+      "ruling": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w2-window01/aria-bridge-ruling01/ruling.md §5"
+    },
+    "changeLogRows": [
+      "| 2026-10-16 | 0.1.19 | Post-closure disclosure: GuidedBridgePlannedIT added to the AC-4 named exclusions ... | @po (Pax) |"
+    ],
+    "addedBlocks": [
+      {
+        "kind": "Change Log row 0.1.19 (blank separator + row)",
+        "firstLineCurrent": 455,
+        "lastLineCurrent": 456,
+        "sha256": "cabfdd563ee1f7a60a96473a8cbc02990492cbc2f49f48dd1b3a75f4dd2aeb9c"
+      },
+      {
+        "kind": "section \"## Post-closure disclosure — AC-4 named exclusions (2026-10-16)\" at end of file",
+        "firstLineCurrent": 476,
+        "lastLineCurrent": 483,
+        "sha256": "669ed93945b43c47324240a762b30920cb50a1a0fc0af84cae6ee882c93d75c8"
+      }
+    ]
+  },
+  "verification": {
+    "method": "Remove the exact post-closure blocks from the current story, then sha256 the result; per-section hashes are bytes from the \"## <name>\" heading to (excluding) the next \"## \" heading (reproduces the 014 close QAResultsSha256Before); line diff of reconstructed vs current with difflib.",
+    "reconstructedClosureSha256": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42",
+    "reconstructionEqualsRecorded": true,
+    "diffIsInsertOnly": true,
+    "sections": {
+      "QA Results": {
+        "atClosureSha256": "581045f5a93a7b72f6dfbe9a0da6da71519895785158c0588c408f77fb823ce4",
+        "currentSha256": "581045f5a93a7b72f6dfbe9a0da6da71519895785158c0588c408f77fb823ce4",
+        "byteIdentical": true
+      },
+      "Acceptance Criteria": {
+        "atClosureSha256": "80019c4dfb70c4a3c32971dfb2341d896d66101f57476024cce009e9bfde96de",
+        "currentSha256": "80019c4dfb70c4a3c32971dfb2341d896d66101f57476024cce009e9bfde96de",
+        "byteIdentical": true
+      },
+      "Tasks / Subtasks": {
+        "atClosureSha256": "19c5d24ab9bfb3e2664e1857cb95ddd8702b560d3a3b6fd189edd523419fce1f",
+        "currentSha256": "19c5d24ab9bfb3e2664e1857cb95ddd8702b560d3a3b6fd189edd523419fce1f",
+        "byteIdentical": true
+      },
+      "Story": {
+        "atClosureSha256": "eb00dd2e3c4bfb0e9a63182c07f64124c2bca541f22cb3e9d81f23ab56e89268",
+        "currentSha256": "eb00dd2e3c4bfb0e9a63182c07f64124c2bca541f22cb3e9d81f23ab56e89268",
+        "byteIdentical": true
+      },
+      "File List": {
+        "atClosureSha256": "d4d5c150b97064ac679bbcd235596c512ac0005f99ee36ece47927c8d3c6d4be",
+        "currentSha256": "d4d5c150b97064ac679bbcd235596c512ac0005f99ee36ece47927c8d3c6d4be",
+        "byteIdentical": true
+      },
+      "Dev Agent Record": {
+        "atClosureSha256": "e8e7be8076f8e87c220d5745c81bdef457d32dd7988ed2c34f4df9dbd147935a",
+        "currentSha256": "e8e7be8076f8e87c220d5745c81bdef457d32dd7988ed2c34f4df9dbd147935a",
+        "byteIdentical": true
+      }
+    },
+    "statusAtClosure": "**Done**",
+    "statusCurrent": "**Done**",
+    "qaResultsCurrentEqualsRecordedQAResultsSha256Before": true,
+    "qaResultsCurrentEqualsRecordedQAResultsSha256After": true,
+    "reverseAdministrativeNormalizationOnReconstructed": "253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140",
+    "reverseAdministrativeNormalizationEqualsRecordedNormalizedStorySha256": true,
+    "evidenceCopyOfClosureStory": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+      "sha256": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42",
+      "equalsRecorded": true
+    }
+  },
+  "statement": "The QA-reviewed sections are unchanged: QA Results, Acceptance Criteria, Tasks / Subtasks, Story, File List and Dev Agent Record are byte-identical between the closure-time story (reconstructed to the recorded hash) and the current story. Status is Done in both. The only differences are the appended post-closure blocks listed above.",
+  "idempotency": {
+    "closureKeyMarkerCountInStory": 1
+  },
+  "otherRecordedHashesStillValid": {
+    "storySha256Before": "unchanged meaning (pre-administration story at 2026-10-14)",
+    "normalizedStorySha256": "still reproduced: reconstructed closure story minus the recorded administrativeNormalization blocks = 253c153835f1ee463a614e7ab63e623f658a0049c21f7e418b996818efde0140",
+    "QAResultsSha256Before/After": "still equal to the current QA Results section"
+  }
+}

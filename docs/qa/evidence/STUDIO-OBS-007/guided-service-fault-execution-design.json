@@ -1,0 +1,182 @@
+{
+  "schema": "guided-service-fault-executable-design/1",
+  "story": "STUDIO-OBS-007",
+  "at": "2026-10-10T15:36:16.241736+00:00",
+  "status": "DESIGN_ONLY_UNEXECUTED",
+  "authority": "B-01-R1 remaining concern; b-nineflow-join-design B01 direction plus root accepted isolated actualservice/PG/mTLSrelay first batch",
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "77282bd5547b8daf91547b831a1fa4193a8e312667c650294efcd8f9f120586c",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java": "66f3665f63de906f5b1a4285aaf904b8527a3231066c28be7ee5c3f713a4bd02",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java": "6c95208b12a0776bcb478c094a1f0284c65cb3a646ce40e5d5b5a3d3b896ae8d",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java": "88ddd68e15fba59505e2856305f91fb5acfdc17c00af64b329e2a9bb01a8a52a",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java": "7313046e049f40ff860119f1927de1bd326dcb9897ce0a5835eb77b450c30833",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": "7c18cd04d8ff5765fd05a00bb274b3702a6ff04175c34c3ab34d1d2664590408",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java": "1d45909a1fbd9764a4086c109a796ddeb79a9deeddf65f6c0680cfdaaf0a1f7f",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedSecretByteBodyTest.java": "a1d66073ec6e2d1f72bf2f564136f5db1ceee8c1186c9505581b5109f57dd8af",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java": "b8d1013ebd2025fd7645e1be558f533acbe7aed36e60d8b25c55ea81c728ebc2"
+  },
+  "firstImplementation": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "package": "com.citi.put.checks.studio.guided.session",
+    "futureOwner": "Current D slot acting backend developer after exact root newclass release; B remains publication test only; root owns buffer test/Gradle; R immutable",
+    "scope": "One new class with nested lean Spring Application, PG-backed test source accessor, counted provider, authenticated mTLS relay and disposable fixture. No inherited test class, source extraction, existing test/production edits.",
+    "whyThisPackage": "GuidedInternalSecurity.Identity constructor and real role verifier are package-private; same package avoids production visibility change. Existing GuidedBridgeIntegrationTest declares this package despite bridge filesystem path.",
+    "whyNotExistingBridge": "Its actual worker static bootstrap is expensive and its fixture lacks resolver/audit; extending it inherits the entire suite. Copy only small setup patterns without inheriting methods or executing Node.",
+    "method": "@ParameterizedTest @MethodSource transportCases for nine actual service fault rows; fresh testId/session/scope per row, one real PG migrated through V34; no destructive append-only resets or skip-if-Docker missing."
+  },
+  "construction": {
+    "database": "PostgreSQLContainer postgres:15-alpine; Flyway actual current V1-V34, no trigger disable. Seed real users/CSI/ui_tests rows with fresh UUID test and declared PASS configuration; retain each completed scenario by distinct session/attempt instead of TRUNCATE audit.",
+    "serviceGraph": [
+      "GuidedContracts",
+      "GuidedSessionRepository(JdbcTemplate,TransactionTemplate(new DataSourceTransactionManager),contracts)",
+      "GuidedMaterializationService + GuidedPreparationStore + GuidedBindingStore + GuidedAssignmentStore",
+      "GuidedSessionService(repository,contracts,PG-backed Access,new GuidedSessionProperties(true,Map.of()),Clock.systemUTC())",
+      "service.installBridge(actual stores); service.installSecretAudit(new SecretAuditLifecycle(jdbc,new SecretUseAuditRecorder(jdbc)))",
+      "VaultStudioReferenceResolver(counted test StudioVaultProvider, independently scope-restricting StudioSecretUseAuthorization)",
+      "GuidedRunnerClient(relay HTTPS URI, actual mutualTLS SSLContext, RS256 controller token supplier, contracts)",
+      "GuidedDispatchService(service,materialization,client); installReferences(real resolver); installStopSender(dispatch::stop)"
+    ],
+    "spring": "Small @SpringBootTest RANDOM_PORT Application patterned on GuidedBridgeIntegrationTest.Application: actual GuidedInternalController/GuidedInternalSecurity/GuidedWireBodyAdvice, explicit DataSource/repository/services above, embedded backend HTTPS needs client certificate and configured issuer/publicKey. No ChecksApplication/translation/model/browser beans required for this isolated service boundary.",
+    "access": "Test accessor is trusted author/source fixture, not model output or CoreHTTP proof. Resolve actual BffAuthenticationToken user-1 and CSI ownership; PG-lock current source/configuration revisions FOR SHARE in checkSourceCurrent; reject wrong user/CSI/environment/test; derive scope/sourceSteps from persisted test. sources returns immutable step text and ref-PASS ConfigurationValue(null,password-step,secretRef,fill.value,actual scopeHash,false,PASS). Keep value absent.",
+    "source": "One authored password-step: Enter <secret PASS> as password. approvedOrigin equals controlled relay observation origin. Source manifest produced by actual materialize path; no INSERT fake action/admission/dispatchCount/secret release.",
+    "tls": "Reuse certificate generation/PKCS12 loading pattern from GuidedSecretByteBodyTest, local only, temp private directory. Relay HttpsServer SSLParameters.needClientAuth=true; verify actual peer certificate and signed RS256 issuer/audience/role/subject/expiry. Backend callback goes through real HTTPS guided internal security filter using owning-worker token; missing certificate/wrong audience negative must refuse without consumption/provider/POST.",
+    "instrumentation": "Parent counted provider keys kind,csi,environment,testId,secretId; increment only actual read method entry, independently count listSecretNames and mayUse calls. Return fresh VaultEntry char[] and opaque version with allowedOrigins. Retain owned provider array identity until assertion then erase. Parent relay increments only /dispatch POST, separately records stop/context/prepare/assign calls; never count backend stop POST as another dispatch. Snapshot PG consume command route v2-consume counts and action.document.dispatchCount independently.",
+    "ownedBytes": "Use existing package-private observeRequestBytes test hook by narrow reflection from session test, not a new production observer or altered sender. Capture original array reference without cloning/logging it; after call assert zero. Provider returns array adopted by SecretValue; assert actual char buffer zero and no value-bearing authoredInput/context/action/audit persistence. Root buffer-boundary cases separately prove internal response arrays/cap/late callbacks; do not rebrand unrelated arrays as service proof."
+  },
+  "authenticSetupSequence": [
+    "Fresh Bff actor + start request schemaVersion3/test UUID/source/config revisions/environment/application and current approved versions loaded from v3 fixture. service.start returns actual sessionId/scopeHash.",
+    "service.prepareAssignment(controller,id,key,worker-1); actual mutually authenticated relay assign claims through backend HTTPS using owning-worker JWT and returns exact AssignmentReceipt; service.acknowledgeAssignment commits it. No borrowed lease or caller-supplied owner proof.",
+    "service.materialize(controller,id,fence,key,[canonical configurationRef secretReference ref-PASS]); actual resolver creates value-less secretInput with sourceStepId/password-step and provenance.",
+    "Relay supplies closed generation1 trusted observation over actual worker callback, coverage.passwordControls=1 and no secret field/value. This is controlled preparation proof, explicitly no real DOM/browser effect claim.",
+    "Build v3 secretAction from canonical fixture and rebind only actual identity/context/evidenceHash/authoredInputsHash/coordinate/sourceInputId; target passwordControl actual documentId/generation, operation fill/secretRef.",
+    "dispatch.prepareAndAdmit invokes real names-only preflight, mTLS context/prepare, service.storePreparation and service.admit. Relay prepare returns actual scoped identity/preparationId/requestDigest/evidenceHash/authoredInputsHash/expiry. Assert ADMITTED dispatchCount0 and zero physical reads/dispatch POST.",
+    "Build advance from actual admission operationHash/admissionId/sessionId/ownerFence; call real dispatch.dispatch outside any ambient transaction. Provider/relay sample PG from another connection to prove consume committed count1 BEFORE physical read/POST."
+  ],
+  "matrix": [
+    {
+      "name": "complete200NoCallback",
+      "status": 200,
+      "peerBehavior": "complete valid BridgeOutcome body; no owner callback",
+      "expected": "UNKNOWN; HTTP200 never commits use/effect"
+    },
+    {
+      "name": "complete200OwnerOk",
+      "status": 200,
+      "peerBehavior": "authenticated callback outcomeV2 commits SUCCEEDED/OK before complete response",
+      "expected": "preserve SUCCEEDED/USED"
+    },
+    {
+      "name": "complete200OwnerFailed",
+      "status": 200,
+      "peerBehavior": "authenticated callback commits actual controlled worker FAILED outcome before response",
+      "expected": "preserve FAILED; released non-success stays audit UNKNOWN unless independent definite no-send fact"
+    },
+    {
+      "name": "complete503NoCallback",
+      "status": 503,
+      "peerBehavior": "complete error body, no callback",
+      "expected": "UNKNOWN; no retry"
+    },
+    {
+      "name": "complete503OwnerOk",
+      "status": 503,
+      "peerBehavior": "authenticated SUCCEEDED/OK callback commits before error response",
+      "expected": "preserve SUCCEEDED/USED despite transport exception"
+    },
+    {
+      "name": "partial200NoEof",
+      "status": 200,
+      "peerBehavior": "send chunked 200 headers and prefix, continuously flush whitespace until client closes; no callback",
+      "expected": "bounded UNKNOWN, peer observes cancellation"
+    },
+    {
+      "name": "partial503NoEof",
+      "status": 503,
+      "peerBehavior": "send chunked 503 headers and prefix, no EOF; no callback",
+      "expected": "bounded UNKNOWN, peer observes cancellation"
+    },
+    {
+      "name": "callerExpiryAfterConsumption",
+      "status": 200,
+      "peerBehavior": "actual maxSessionSeconds=3 configured before real session.start, stall response beyond actual hard deadline",
+      "expected": "one consume/read/POST then bounded UNKNOWN; no synthesized EXPIRED no-use"
+    },
+    {
+      "name": "interruptAfterHeaders",
+      "status": 200,
+      "peerBehavior": "caller interrupt only after relay records actual dispatch POST and flushed response headers",
+      "expected": "caller finishes bounded, interrupt restored; actual resulting PG state recorded and required honest settlement"
+    }
+  ],
+  "matrixOracle": {
+    "allPostConsumeRows": "Exactly one physical winning consume 0\u21921, one scoped secret value read, one actual /dispatch POST, one RESOLVED/version RELEASE. Never infer use from status or response text. Callback verdict if committed retains actual positive fact; otherwise real lostAcknowledgment/terminal audit yields honest linked UNKNOWN.",
+    "completion": "Relay complete200 response must be valid closed v3 BridgeOutcome with exact identity and ledger; use existing outcome fixture rebuilt from actual payload. Send response alone never invokes service.outcomeV2. Positive callback cases POST the exact worker-authenticated callback to backend HTTPS before response, then confirm committed action before releasing relay response.",
+    "errorPartial": "For stalled200 and503, bounded stream prefix never EOF; relay observes IO cancellation, client thread actually exits \u2264 min(15s,real remaining session deadline)+bounded scheduling allowance. Do not swallow timeout by closing peer first.",
+    "recovery": "After first result, reconstruct actual service/dispatch against same DB and unchanged live controller context. Invoke same key and new key with the identical real admission request. If session remains active after committed callback, require AlreadyConsumed historic action and zero additional read/POST. If lostAcknowledgment already made terminal UNKNOWN, require actual terminal authorization refusal and zero additional read/POST. Do not force AlreadyConsumed in a stopped session. Command cache count may increase for new key; winning count must not.",
+    "time": "Default row uses real maxSessionSeconds600 so complete stalled-body 15s bound is tested. Expiry row starts service with approved existing limits maxSessionSeconds3 before session start and systemUTC; no direct expiresAt update or frozen clock substituted for actual sender elapsed wall time. Preparation/setup must fit real deadline or fail honestly.",
+    "interruption": "Interrupt after actual headers barrier; preserve caller interrupt status and observe current actual PG outcome. If interrupted JDBC cannot commit lostAcknowledgment, retain failure and add genuine later service expire/owner lifecycle settlement proof; never clear interrupt to manufacture a passed service path.",
+    "sinks": "Scan only produced actual service PG JSON/context/materializations/commands/ledger/audit/session rows and captured test diagnostic outputs using planted canary and bounded encodings; collected wire oracle buffers are deliberately ephemeral and erased afterward. No model/gateway/browser/video/allSink coverage claim."
+  },
+  "separateFutureGuidedProcessCuts": {
+    "status": "Separate later root-preflighted scope, not included in first class release",
+    "suggestedPath": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedControllerProcessCrashIT.java",
+    "reuse": "Expose new first-batch test-only fixture package-private if later root authorizes; nested public Child reconstructs real repository/stores/service/dispatch from private0700 ephemeral DB/TLS/identity configuration. Adapt PID/classpath/barrier mechanics from ObservedResolverProcessCrashIT, not its observed-replay semantics.",
+    "barriers": [
+      {
+        "cut": "BEFORE_CONSUME",
+        "actualHook": "Child main pauses before invoking real dispatch; parent verifies actual ADMITTED/count0 and provider/POST0. Kill/reap genuine JVM; recovery only while original worker/context/preparation/lease live. Then real dispatch may win once/read1/send1; expired/stale/lost-context refuses without browser rebuild."
+      },
+      {
+        "cut": "AFTER_CONSUME_BEFORE_RESOLVE",
+        "actualHook": "Test delegating StudioReferenceResolver.resolve first entry pauses before delegate actual value read; dispatcher reaches it only after sessions.consume physically committed. Parent independent PG requires count1/committed command. Kill/reap. Fresh same-owner recovery AlreadyConsumed, read0/send0; actual service cancellation/expiry/stopped-owner lifecycle settles real consumed admission UNKNOWN with null resolution/release/version."
+      },
+      {
+        "cut": "AFTER_PHYSICAL_READ_BEFORE_DECISION",
+        "actualHook": "Parent counted HTTPS provider receives exact scoped read1; child provider wrapper decodes returned chars then pauses before VaultEntry returns to resolver/recordSecretDecision. Parent independently requires count1, no committed RELEASE, dispatchPOST0. Kill/reap. Recovery no second read/send; authentic terminal owner settles consumed/no-decision UNKNOWN, no fabricated version or bookkeeping read."
+      }
+    ],
+    "liveAuthority": "Parent relay registry/context and worker credential remain alive and independently match actual session/fence/context. Same fresh owner can renew existing live claim; do not use new worker takeover because actual service rejects consumed actions after lost lease. No unconditional recoverableContext=true.",
+    "safeBarrier": "Barrier file contains cut/session/admission/fence only or safe token; never secret bytes/hash. Preserve PID/start/kill/exit/time and parent-side counts; child finally erasure cannot be credited after SIGKILL.",
+    "terminalWinner": "Use actual GuidedSessionService.cancel(user,...), expire() after actual deadline, or owning-worker authenticated lifecycle through backend controller. No raw action state/dispatchCount/USAGE synthesis."
+  },
+  "futureOwnership": {
+    "firstRootReleaseRequested": [
+      "New GuidedServiceTransportFaultIT.java only to this backend executor; no production or existing tests modified"
+    ],
+    "laterSeparateRelease": [
+      "GuidedControllerProcessCrashIT.java and any package-private test helper visibility in new first-batch class only"
+    ],
+    "unchanged": [
+      "B GuidedPublicationReplayIT all9 and its counted ninth changes",
+      "root GuidedOwnedBufferBoundaryTest/Gradle/manifests",
+      "R source/dist/schema/corpus/Node/browser behavior",
+      "D V34/recorder/partition/data59 sources"
+    ],
+    "fallback": "If test accessor/session SQL lineage cannot initialize through real service methods, report exact blocked constructor/guard and request bounded fixture reuse; do not lower verifier or fabricate admitted rows."
+  },
+  "rootCommands": {
+    "cwd": "backend",
+    "first": [
+      "./gradlew compileJava compileTestJava processResources test --tests com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT --tests com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest --tests com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+      "Actual scoped Gradle Spotless + unchanged strictCheckstyle/SpotBugs checks on assigned new class"
+    ],
+    "later": [
+      "./gradlew test --tests com.citi.put.checks.studio.guided.session.GuidedControllerProcessCrashIT --tests com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "Join all9 publication/classical/full affected regressions only after current source/dist freeze"
+    ],
+    "authority": "Root serialized lane only. Capture exact sources/classpath/current XML multiplicities and beforeafter hashes; current264 and buffer4 preserved, no skips or oracle PASS from blocked tools."
+  },
+  "cleanup": [
+    "Bound all peer waits; close HTTPS exchange/body even in assertion failure, release barriers only after timeout/cancellation assertion, stop servers/executors and join actual caller thread",
+    "Close real Spring contexts/own PG fixtures; per-case source/session isolation leaves append-only guards on, no TRUNCATE audit",
+    "Remove private testcredentials/PKCS12/tempbarriers after processes exit; erase actual planted/captured wire and provider buffers, retain safe counts/source hashes only"
+  ],
+  "limitations": [
+    "First batch no Chromium/DOM/nativevideo/CoreHTTP/model/SIEM/enterpriseVault/pilot proof",
+    "Genuine guided process cuts are still separate unexecuted scope; existing observed JVM cuts cannot substitute",
+    "Root4 direct buffer cases remain exact buffer proof, not substitute for service consumption/recovery",
+    "All19AC/full QA/wave/status unchanged; no runtime tests or Gradle run by design author"
+  ]
+}

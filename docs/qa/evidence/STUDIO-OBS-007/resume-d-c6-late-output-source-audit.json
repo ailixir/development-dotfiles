@@ -1,0 +1,118 @@
+{
+  "scope": "PINNED_GUIDED_PASSWORD_PRIMITIVE_LATE_OUTPUT_SOURCE_DISPOSITION",
+  "disposition": "SOURCE_CONDITIONS_IDENTIFIED_NO_PRODUCTION_CHANGE_AUTHORIZED",
+  "sourceHashes": {
+    "studio-runner/src/guided/runtime.ts": "75fc33b1cd1cbc59bcb746811caff879d7217b22de8b08b374eec173dacf271c",
+    "studio-runner/src/guided/diagnostics.ts": "cd355ead668fc54953c8a06acf8da13a317b103ced1357d68eef516c6f2a7637",
+    "studio-runner/src/guided/transport.ts": "fc447a2efdf666c9b4ed319685e1d59875787fa11ec3a3e070171ae5da5ae3bf",
+    "studio-runner/src/guided/ownership.ts": "030443d7478791e2f980763a4e30a4b2daba922836d0c5ac9650e141995b31c4",
+    "studio-runner/src/run/passwordControl.ts": "5312b614a53ae14eedb574161831168ec404ff5f700875b0883eec083a045882",
+    "studio-runner/src/run/browser.ts": "a397ece7c7dec06e643bc82b6a4862c5accf154c1c6b28d314ad3c7fab4ac02d",
+    "studio-runner/src/run/guidedMain.ts": "5148b8915e48af7718ad5986c8053d7ba5e66c40bbe22e4487cb116708a94a2a",
+    "studio-runner/src/run/observationCollector.ts": "ba31be90d04885e6329ae02f6559205325740cbd46960a438150a890557c27a2",
+    "studio-runner/node_modules/playwright-core/lib/coreBundle.js": "549070af3acabb3efcc4f55bfe6210f9f7c2fcf633cf7eaa59bfe60719969171",
+    "studio-runner/node_modules/playwright-core/package.json": "f061c58427e47e843e26d201f0a57076c734e57c734ecbbd87d4a23b7a20db9b"
+  },
+  "sdkVersion": "1.63.0",
+  "hypothesis": "Genuine confirmed stop, original observation disposal and browser/context/profile closure, managed invocation already completed UNKNOWN, no next action, exact scope/audit/sole-primitive-pending at cut independently established. This hypothesis is not a fact proved by this report.",
+  "findings": [
+    {
+      "id": "LATE-01",
+      "anchors": [
+        "guided/runtime.ts:210-211",
+        "guided/runtime.ts:267-276",
+        "guided/diagnostics.ts:8-28"
+      ],
+      "currentFact": "An in-flight dispatch retains action-local values/redactor and diagnostics across stop clearing shared inventories. If the original await later rejects, current catch invokes optional onRawFailure with raw error before redaction, then diagnostic stderr/sidecar and outcome callback. Redaction precedes truncation/serialization/persistence. The finally clears action-local state only after this path finishes.",
+      "classification": "REAL_CURRENT_APPLICATION_OUTPUT_CONTINUATION; arbitrary optional raw observer is a trusted test hook, not a data-free sink. It cannot be relabeled names-only."
+    },
+    {
+      "id": "LATE-02",
+      "anchors": [
+        "run/passwordControl.ts:20-30",
+        "run/passwordControl.ts:36-40",
+        "run/browser.ts:287-293",
+        "run/browser.ts:350-355",
+        "run/browser.ts:513-519"
+      ],
+      "currentFact": "Late fulfilled original fillPassword CDP result passes assertLive before result.value parsing. Disposal sets closed synchronously; this produces fixed CONTEXT_LOST and blocks interpreting passwordWriteCompleted or accepting later success. An original CDP rejection bypasses outcome and may contain raw protocol/browser error information.",
+      "classification": "FULFILLMENT_AFTER_ACTUAL_DISPOSE_IS_FIXED_FAILURE; REJECTION_REQUIRES_LOSER_HANDLING_OR_ACTION_REDACTOR. No success/effect credit from raw fulfillment."
+    },
+    {
+      "id": "LATE-03",
+      "anchors": [
+        "playwright-core/lib/coreBundle.js:57559-57562",
+        "playwright-core/lib/coreBundle.js:57419-57449",
+        "playwright-core/lib/coreBundle.js:63864-63941",
+        "playwright-core/lib/coreBundle.js:19133-19167"
+      ],
+      "currentFact": "Raw CDPSession.send uses timeout-zero channel RPC. Pending continuations retain SDK callback/error and server call metadata including original parameters. Late server completion serializes its result/error over the internal SDK channel; client API wrapper mutates error message/stack and calls instrumentation. This internal channel is not an application report/model/diagnostic sink. Retained opaque strings/SDK buffers do not prove a late published secret or byte erasure.",
+      "classification": "INTERNAL_SDK_CONTINUATION_AND_OPAQUE_HEAP; NOT_AUTOMATIC_APPLICATION_OUTPUT. Never assert SDK promise settled or heap/buffer wipe."
+    },
+    {
+      "id": "LATE-04",
+      "anchors": [
+        "playwright-core/lib/coreBundle.js:57137-57140",
+        "playwright-core/lib/coreBundle.js:57273-57275",
+        "playwright-core/lib/coreBundle.js:57404-57448",
+        "playwright-core/lib/coreBundle.js:63414-63440",
+        "playwright-core/lib/coreBundle.js:21031-21040",
+        "playwright-core/lib/coreBundle.js:34941-34946",
+        "playwright-core/lib/coreBundle.js:63878-63888",
+        "playwright-core/lib/coreBundle.js:63913-63940"
+      ],
+      "currentFact": "Enabled protocol/channel logging serializes full command/response and can expose values; custom instrumentation receives raw parameters/errors. API logger itself prints API name with started/succeeded/failed, without parameters/error text, but API-zone error remains available to custom listeners. Default client instrumentation starts with an empty listener list; logger inherits an optional parent logger.",
+      "classification": "CONDITIONAL_REAL_SDK_OUTPUT_HAZARD; absent/default disabled routes are source-tier premises, not measured universal privacy."
+    },
+    {
+      "id": "LATE-05",
+      "anchors": [
+        "run/guidedMain.ts:19-30",
+        "guided/transport.ts:63-64",
+        "run/browser.ts:527-534",
+        "playwright-core/lib/coreBundle.js:25670-25674",
+        "playwright-core/lib/coreBundle.js:25955-25961"
+      ],
+      "currentFact": "Original production entry rejects DEBUG/PWDEBUG/NODE_DEBUG/NODE_OPTIONS; mounted config is closed and supplies no raw observer, custom SDK logger, instrumentation, tracing or recording options. Original guided launch supplies fixed context options with no logger/trace/video/HAR option. SDK tracing after-call only writes active calls tracked in a started tracing state; registration occurs when tracing starts. DEBUG_FILE can redirect debug output but does not enable a category on its own.",
+      "classification": "DEFAULT_SUPPORTED_CONFIGURATION_HAS_NO_IDENTIFIED_RAW_SDK_LOG_OR_TRACE_SINK. Cannot generalize to an embedding with custom listeners/logger, enabled debug categories, externally started tracing or changed configuration."
+    },
+    {
+      "id": "LATE-06",
+      "anchors": [
+        "guided/runtime.ts:242-265",
+        "guided/runtime.ts:292-305",
+        "guided/runtime.ts:309-333",
+        "guided/transport.ts:101-107",
+        "guided/transport.ts:129-153",
+        "run/browser.ts:538-544"
+      ],
+      "currentFact": "After successful native await dispatch checks live before counters/success/observation. collectObservation checks live before collection and again before callback. Closing stops authority, clears inventories, disposes/actually closes resources, and emits fixed identity/reason lifecycle. Transport failure response allowlists codes/reasons; no raw error is serialized. Outcome errorMessage may bear a redacted diagnostic, availability is names-only, password fill does not capture a value. Route/crash/disconnected handlers call fixed stop paths and do not print request/console content. No original page console/pageerror listener writes stdout or application logs.",
+      "classification": "GUARDED_NAMES_ONLY_CONTROL_TAIL_OR_REDACTED_ERROR_OUTPUT; in-flight outcome/diagnostic callbacks remain real output operations until managed completion acknowledges them."
+    }
+  ],
+  "hypotheticalManagedCompletionRequirements": [
+    "Signal only from genuine original stop/dispose/browser/resource closure, retaining same source/scope/document/authority guards and deadlines. UNKNOWN is authoritative uncertainty, not failed-effect or SDK settlement.",
+    "Race the original password-operation promise only at the managed invocation boundary; preserve original call/arguments/promise/rejection and ensure a losing rejection is observed. A Promise.race-installed rejection handler does not re-enter an already-completed dispatch catch when the losing raw promise later rejects. Any separate finally/then/catch hook must be audited; do not add raw onRawFailure or diagnostic emission to the losing branch.",
+    "Current dispatch catch runs once for the winning managed failure with original redactor alive, finishes redacted diagnostics/outcome callback and stop, then clears only action-local application values. Current onRawFailure remains a raw test-hook hazard for that winning failure; trusted fixture must retain closed safe output controls. Production entry does not install it.",
+    "Late native fulfillment after actual dispose is blocked by assertLive before result interpretation. Late raw SDK rejection must be swallowed by the already-settled managed race or a reviewed data-free terminal handler; no unhandled rejection/process warning, raw logger or late application diagnostic callback may be introduced.",
+    "No extra next step, observation, retry, provider call, success/USED rewrite or renewed authority. Existing independent effect/UNKNOWN linked usage and all produced sink evidence remain mandatory.",
+    "All actual late application callbacks/diagnostic writes that started before managed completion must finish before capture restoration. Raw SDK pending is kept honestly UNOBSERVED; application completion must not reset raw SDK counters or report seal/descriptor restoration that did not occur.",
+    "Source-tier default SDK routes may be classified residual metadata only after binding the actual unmodified production config/import and absence of debug/custom instrumentation/tracing; source alone does not grade current fixture raw observers or produced output privacy."
+  ],
+  "conclusion": "A permanently pending SDK promise alone is not a source proof of a future application secret-output producer and does not create a heap-wipe obligation. Current guided dispatch nevertheless has an actual connected raw-error/redacted-diagnostic callback tail, so its completion cannot presently be inferred from browser close. A narrowly reviewed managed race could separate that one managed operation from opaque SDK residual state if the listed losing-promise/output/config premises hold. No such production change or acceptance relaxation is authorized or proved here.",
+  "remainingPremises": [
+    "Actual current kind3 raw SDK settlement remains unobserved.",
+    "Actual managed race implementation, lifetime, callback completion and no-unhandled-rejection proof are absent; this report does not create them.",
+    "Actual fixture-specific observers/instrumentation/capture sinks must be independently source-bound and drained; default production configuration does not prove their behavior.",
+    "No full all19, Core/browser joined privacy, timing or QA verdict."
+  ],
+  "actions": {
+    "sourceChanges": 0,
+    "runtime": 0,
+    "newHooks": 0,
+    "newTests": 0,
+    "lifecycleChanges": 0
+  },
+  "wholeWaveCeilingUsd": 500,
+  "billingTelemetry": "UNAVAILABLE"
+}

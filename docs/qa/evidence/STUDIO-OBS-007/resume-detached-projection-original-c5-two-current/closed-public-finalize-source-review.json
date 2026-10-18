@@ -1,0 +1,32 @@
+{
+  "scope": "CLOSED_SOURCE_ONLY_ORIGINAL_PUBLIC_FINALIZE_FIRST_BOUNDARY",
+  "actualHttpStatus": 409,
+  "expectedHttpStatus": 200,
+  "actualPublicErrorCode": "UNOBSERVED",
+  "reasonErrorCodeUnavailable": "Actual response bytes were scanned/stored only in volatile C5Capture.produced; numeric receipt retains status counts, assertion exported only status, and capture erases body memory. No original response code is inferred from later session state or lifecycle.",
+  "firstProjectFrame": "publicCall14522 invoked by original finalize3713",
+  "earlierAwaitFinalizingReached": true,
+  "publicationReceiptReached": false,
+  "ordinaryReplaysReached": false,
+  "lastClaimHandlerMs": 2229.231542,
+  "laterOriginalLifecycleReason": "LEASE_LOST",
+  "publisherSha256": "87e9a1da8028ecf341aa3c7102069acb223ce44eb81d00e665c9650088a2a650",
+  "ownerCriticalSections": [
+    "Initial original session locked-read95; user scope check96 follows.",
+    "Original prepare transaction99\u2192265\u2013335 holds owner+source lock through current identity/base/source/access checks, evidence.read, builder.basis/learningProvenance, pins.selected, lowerer.lower, all identity/canonical hashes, clock clipping, reserveAttempt/progress/save.",
+    "Original validator call134\u2013135 is OUTSIDE prepare/claim transactions. No attribution of validator duration to owner lock is claimed.",
+    "Claim109\u2013118, verdict settlement136\u2013171, fresh precommit180\u2013190 and finalcommit transactions retain original locks/guards."
+  ],
+  "sourceFactNotCausality": "prepare performs substantial pure validation/lowering/hash work while holding owner lock. Current archive does not attribute the actual 2229ms waiter to a particular finalize transaction or exclusive cost; old RESERVE13 snapshot is different source/phase and cannot substitute.",
+  "capture": {
+    "encodedBytes": 190702163,
+    "canaryHits": 0,
+    "patterns": 30,
+    "finalCheckedClosed": true,
+    "SSEProduced": false
+  },
+  "runtimeExecutedByThisReview": false,
+  "candidateAuthored": false,
+  "repeatPlanned": false,
+  "wholeC5Accepted": false
+}

@@ -1,0 +1,465 @@
+{
+  "artifact": "Runner015 repaired six-increment + ARCH015-05 coherent source checkpoint",
+  "at": "2026-10-15T07:01:41.956702+00:00",
+  "owner": "/root/runner015_resume",
+  "status": "ATOMIC_SOURCE_HOLD_RETURNING_SLOT",
+  "sourceReadiness": "REPAIRED_SOURCE_READY_FOR_FULL_HELD_FEEDBACK_NOT_APPLICATION_READY",
+  "originalStory": "STUDIO-OBS-015; all original57cases/AC1-6/OBS007/013/014 remain required",
+  "contractBundle": "efaf885e804773f9ca42153f96dea4fad0b02284d4e5e8e27202ef70c517131a",
+  "contractSelectedStatus": "C-int05 one generation installed, final source/oracle/pin freeze pending root. No second generation or generated edit by runner.",
+  "boundDesignManifests": {
+    "original05": "fdd27c680631fc74f0e1c61868dddda3f36ccef0eef7e8fa3de3950923d13a31",
+    "addendum05": "e8880e8b5673fa574e2b9e2dc0adf51c3e2993e385c787823206ef49b7a21589",
+    "qa05": "a17eb3d9193e05c8a50cde80884d73aa457d9f9cb2376a2a27593c7436c59880"
+  },
+  "newTestsExecuted": 0,
+  "sourceFixesSinceFailedFeedback": [
+    {
+      "issue": "42module load failures",
+      "change": "Both schema engines implement property/schema/boolean dependencies (including empty dependency lists), full matching/traversal/cycle audit; guided contains + UUID format, observed dependencies + UUID format; unknown-keyword refusal preserved. New mocked-schema positive/negative tests exercise semantics, not an allowlist-only repair."
+    },
+    {
+      "issue": "21MiB aggregate external fixture examples",
+      "change": "Test-only allowlisted publication-fixtures.json document cap32MiB; other external schema docs8MiB. Exact reference traversal, strict parser/allowlist preserved; production basis6MiB/artifact1MiB/validation8MiB unchanged."
+    },
+    {
+      "issue": "retained zero-transfer binding cannot cross child",
+      "change": "Complete05 optional whole Artifact3 witness iff runtime zero-transfer exists; private immutable current acceptedLaunch in parent/child; exact canonical artifact/learned/policy/config/scope commitments and ordered runtime/input metadata projections; local retained read/sourceIntent/admission/guard/recipe/origin/ordered prefix joins. Same accepted context reaches executor revalidation. No exported caller-set or trust-flag bypass; strict no-context zero refuses."
+    },
+    {
+      "issue": "proof bounds",
+      "change": "Combined preflight3145792 before schema traversal; stripped Execute2MiB and artifact1MiB independently; ordinary cap2MiB unchanged; node/depth/Unicode preserved. Source tests include under-byte-limit combined1.03Mnodes."
+    },
+    {
+      "issue": "cumulative references vs effective recipes",
+      "change": "Effective2InputIndex entries match current obligations reference indices; all3raw current-plan references validated against retained materialization metadata. Raw evidence remains in basisHash; only effective recipes/config/secret refs enter artifact."
+    },
+    {
+      "issue": "WAIT/concurrency/drift callback gaps",
+      "change": "Added32fresh-WAIT ceiling tests, exact duplicate WAIT cache, concurrent input delivery BUSY, historical issued ACK after later metadata, both callback-loss paths terminal, policy refusal terminal, spent attempt0/replacement1 budgets. Pre-admission callback loss now closes UNKNOWN instead of leaving mode pending."
+    },
+    {
+      "issue": "predecessor safety",
+      "change": "Prefix startup now checks contiguous unique action membership/ordinals/guard-origin/locator against exact prefix program; actual prepared prefix secret path drops managed request secret before effect and retains withholding/redaction. Existing007/013/014oracles preserved."
+    }
+  ],
+  "increments": [
+    {
+      "id": "R1",
+      "status": "SOURCE_WRITTEN_NOT_APPLICATION_VALIDATED",
+      "mapping": [
+        "test/guided/ownership.test.ts",
+        "test/guided/transport.test.ts",
+        "test/guided/incrementalRuntime.test.ts"
+      ]
+    },
+    {
+      "id": "R2",
+      "status": "SOURCE_WRITTEN_WITH_WAIT_SOURCE_TESTS",
+      "mapping": [
+        "test/guided/incrementalRuntime.test.ts bounded33rd acquisition and same handle/session",
+        "test/fixtures-tier/mixed-mode-prefix.test.ts actual recorded prefix3/suffix7"
+      ]
+    },
+    {
+      "id": "R3",
+      "status": "SOURCE_WRITTEN_WITH_CONCURRENT_AND_HISTORICAL_ACK_TESTS",
+      "mapping": [
+        "test/guided/incrementalRuntime.test.ts withhold-before-issuedACK/current live lease/concurrent delivery/historical delivery/gap"
+      ]
+    },
+    {
+      "id": "R4",
+      "status": "SOURCE_WRITTEN_WITH_SPENT_AND_CALLBACK_FAILURE_TESTS",
+      "mapping": [
+        "test/guided/incrementalRuntime.test.ts pre/admitted drift, spent attempt1, native-start UNKNOWN, fsynced monotonic fence, callback loss/policy"
+      ]
+    },
+    {
+      "id": "R5",
+      "status": "SOURCE_WRITTEN_FULL_PURE_HISTORY_SNAPSHOT_GRAPH_PLUS_CHILD_BRANCH",
+      "mapping": [
+        "test/observedIncrementalValidation.test.ts complete-basis/snapshot/history/effective graph",
+        "test/retainedExecute.test.ts whole proof/source projections/limits",
+        "test/run/observedChildRuntime.test.ts exact accepted context through actual parent/child/executor"
+      ]
+    },
+    {
+      "id": "R6",
+      "status": "NATIVE_FIXTURE_AND_TWO_CORPUS_SOURCES_WRITTEN_NOT_EXECUTED",
+      "mapping": [
+        "test/fixtures-tier/mixed-mode-prefix.test.ts recorded10base/10mixed, stable fresh binding, one context/session/clock/video decode/duration/offset",
+        "evaluation/observed-authoring/cases/incremental-edit-step-4.json",
+        "evaluation/observed-authoring/cases/incremental-insert-step.json"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "command": "npm run type-check",
+      "log": "type-arch05-07.log",
+      "exitCode": 0,
+      "scope": "whole runner source/tests, no emitted output"
+    },
+    {
+      "command": "25path scoped eslint (source/test owned path list in lint command invocation)",
+      "log": "lint-arch05-06.log",
+      "exitCode": 0,
+      "scope": "read-only, no --fix"
+    }
+  ],
+  "testSourceCounts": {
+    "snapshotPositives": 5,
+    "snapshotNegatives": 36,
+    "classifiedGraphCases": 47,
+    "originalBasisCases": 29,
+    "frozenExecuteWitnesses": 50,
+    "frozenExecutePositive": 8,
+    "frozenExecuteNegative": 42,
+    "reviewed05Facets": 24
+  },
+  "reviewed05FacetMapping": [
+    {
+      "id": "P01",
+      "requiredCase": "deletedLastConsumerRetainsProvenPrefixRead publishes actual successful retained read with empty consumers",
+      "expected": "Full Java/basis publication accepted; original producer snapshot equal; subsequent ordinary replay accepted model0, read executes fresh once",
+      "testSourceMapping": [
+        "backend-owned full publication/joined ordinary replay; runner/test/observedIncrementalValidation.test.ts complete-basis cases"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Full backend/basis and real published revision ordinary replay, not only corpus or structural acceptance",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "P02",
+      "requiredCase": "excludedBindingConsumerRetainsRawIntentAndPublishesLiteralReplacement (admitted-pre-invocation and pre-admission variants)",
+      "expected": "Raw intent/edge/history preserved; effective empty graph valid; full pure artifact and subsequent ordinary replay succeed",
+      "testSourceMapping": [
+        "backend-owned full publication/actual ordinary replay; test/observedIncrementalValidation.test.ts + all50retainedExecute witnesses"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Full backend/basis and real published revision ordinary replay, not only corpus or structural acceptance",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "P03",
+      "requiredCase": "Boundary retained producer with final consumer deleted + partial drift-step earlier successful producer",
+      "expected": "Exact pinned proof accepted; each original read recaptures new bytes, withheld, no fabricated consumer or cached value; assertion/policy drift behavior unchanged",
+      "testSourceMapping": [
+        "test/observedIncrementalValidation.test.ts",
+        "test/retainedExecute.test.ts executor revalidates and recaptures read"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Pure/executor tests plus inherited real backend/native/secret regressions where required; static listing is not execution",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "P04",
+      "requiredCase": "Run same finalized merged revision twice through actual launcher->child boundary",
+      "expected": "Same IR; fresh read values each run; no model calls; original operation order and one Execute maintained",
+      "testSourceMapping": [
+        "test/run/observedChildRuntime.test.ts replays identical bytes twice through actual launcher/child browser-free seam with fresh values"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "P05",
+      "requiredCase": "Normal graph with consumers and existing wire fixture, no retainedArtifact",
+      "expected": "Existing strict frame succeeds unchanged; no optional proof emitted",
+      "testSourceMapping": [
+        "test/run/observedReplayProtocol.test.ts composed normal closed launch/execute",
+        "test/run/observedChildRuntime.test.ts existing ordinary lifecycle"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N01",
+      "requiredCase": "zeroConsumerRequiresRetainedActualProducer: missing/failed/unretained/new suffix producer, unknown base/program, changed recipe/origin/coordinate, hidden successful use",
+      "expected": "Backend/full-basis refuses; no admitted publishable artifact; raw model empty consumers refuses",
+      "testSourceMapping": [
+        "test/observedIncrementalValidation.test.ts complete-basis negatives",
+        "test/retainedExecute.test.ts local published joins",
+        "backend and C-int raw-model min1 gates remain distinct"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Pure/executor tests plus inherited real backend/native/secret regressions where required; static listing is not execution",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N02",
+      "requiredCase": "Zero binding but omitted/null proof or missing accepted Launch context (also direct executor call)",
+      "expected": "Reject before replay action",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts missing/null/no-context/direct executor"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N03",
+      "requiredCase": "Proof supplied for nonzero consumer graph; unknown outer key; proof trusted flag, value/code/source/recursive basis extension",
+      "expected": "Closed shape/presence refuses; existing artifact/source/code negatives remain",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts unknown/trusted/raw-source/recursive/unnecessary witness",
+        "test/run/observedReplayProtocol.test.ts unchanged forbidden fields"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N04",
+      "requiredCase": "Mutate artifact retained list/base ID/read recipe/producer provenance or any otherwise-valid metadata without changing retained Launch",
+      "expected": "Canonical artifact hash mismatch refuses even if supplied hashes are adjusted",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts altered artifact against unchanged Launch"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N05",
+      "requiredCase": "Supply valid artifact from other revision/run, replay prior proof under different admitted artifact, forge expected hash inside Execute",
+      "expected": "Unknown expected-hash field or retained Launch hash mismatch refuses; proof cannot replace Launch",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts crossed launch authority + all50frozen witnesses"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N06",
+      "requiredCase": "Mutate Execute actions/order/coordinate/guard metadata/recipe/origin/binding/transfer while artifact remains pinned; remove/extra/duplicate entries",
+      "expected": "Exact projection/graph refuses every variant",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts altered executable steps/guards/bindings/transfers"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N07",
+      "requiredCase": "Omit actual binding use/consumer transfer or add orphan RuntimeBinding/read",
+      "expected": "Exact artifact projection plus complete graph accounting refuses",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts complete projection/graph negatives + all50witnesses"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N08",
+      "requiredCase": "Change input ID/order/kind/step/slot/secret referenceName or add/drop input",
+      "expected": "Exact recipe metadata projection refuses; secret values remain separate",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts input order/ID/kind/step/slot/extra + secret referenceName"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N09",
+      "requiredCase": "Change run/attempt/config/profile/scope/principal/current policy/build; second Execute, Execute before Ready, launch replacement",
+      "expected": "Existing launch identity/state/policy/build checks refuse; proof is no authorization",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts run/attempt/config/profile/principal/scope/policy/build",
+        "test/run/observedChildRuntime.test.ts Execute-before-Launch/Launch replacement/one result"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N10",
+      "requiredCase": "Artifact with internally consistent forged retained membership but current accepted Launch still pins actual original artifact",
+      "expected": "Hash rejects; do not call schema-valid altered artifact evidence of historical failure/success",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts changed retained metadata still pinned to old artifact"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Pure/executor tests plus inherited real backend/native/secret regressions where required; static listing is not execution",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N11",
+      "requiredCase": "Actual read mismatches operation binding ID/coordinate/recipe/origin/guard/provenance admission/sourceIntentStepId; retained list duplicate/non-prefix/unknown admission; initial/effective boundary invalid",
+      "expected": "Local published joins refuse (hash fixture updated only through genuine test admission setup); no hidden basis proof claimed",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts duplicate/non-prefix/unknown/boundary/recipe/producer local joins with recomputed unit admission"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Pure/executor tests plus inherited real backend/native/secret regressions where required; static listing is not execution",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N12",
+      "requiredCase": "Live target drift/password read/invalid read rule/policy refusal/cross-origin/oversize read/cancel/timeout",
+      "expected": "Existing adapter/invocation checks unchanged and run stops; valid proof grants no live authority",
+      "testSourceMapping": [
+        "test/run/observedChildRuntime.test.ts original read/target/secret/cancel cases",
+        "test/observedReplayExecutor.test.ts inherited full live invocation/safety suite",
+        "test/guided/incrementalRuntime.test.ts native policy/started failure and callbacks",
+        "actual native/secret/policy regression remains later window"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Pure/executor tests plus inherited real backend/native/secret regressions where required; static listing is not execution",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N13",
+      "requiredCase": "Artifact-over1MiB, stripped Execute-over2MiB, combined-over3145792, combined depth>32/nodes>1000000, invalid Unicode",
+      "expected": "Each cap refuses before semantic work/action; ordinary frame remains2MiB",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts artifact/base/combined/depth/Unicode/node bounds; combined1.03Mnodes under both byte caps"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "P06",
+      "requiredCase": "JSON wrapper byte arithmetic and legal boundary component sizes incl nonASCII and escaping; ordinary near-cap frame",
+      "expected": "New witness adds exact20 wrapper bytes; admitted within each component and combined bounds accepted by bound preflight; schema/semantics separately required",
+      "testSourceMapping": [
+        "test/retainedExecute.test.ts exact2MiB/1MiB+20wrapper/UTF8 preflight"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "P07",
+      "requiredCase": "Launch accepted before startDeadline; legal Ready+Execute after startDeadline but before runDeadline",
+      "expected": "Do not invalidate accepted launch by reapplying startDeadline; existing live run timeout still stops",
+      "testSourceMapping": [
+        "test/run/observedChildRuntime.test.ts accepted Launch Ready then Execute after startDeadline",
+        "test/retainedExecute.test.ts validator accepted-start no recheck"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "N14",
+      "requiredCase": "Attempt to alter retained Launch object in same-process seam or reuse context after terminal; native replay call counts on malformed proof",
+      "expected": "Private accepted snapshot remains fixed; second/terminal use rejected by runtime; replay action count0 for malformed proofs (browser may already be open)",
+      "testSourceMapping": [
+        "test/run/observedChildRuntime.test.ts immutable accepted Launch after caller mutation + malformed proof zero invoke/navigation + one Execute"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Real launcher/child integration for P04; protocol/child tests and zero replay native-call counters for malformed-proof variants; inherited native proof remains required",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "P08",
+      "requiredCase": "Private canaries in fresh read/resolved secret/input values with retained proof",
+      "expected": "No proof enrichment; current withholding/clear/usage behavior; provider/log/report/result/media/argv/env outputs do not contain values",
+      "testSourceMapping": [
+        "test/run/observedChildRuntime.test.ts retained proof secret withholding/frame erasure/value-free result",
+        "test/retainedExecute.test.ts proof carries no released secret/read value"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "Pure/executor tests plus inherited real backend/native/secret regressions where required; static listing is not execution",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "C01",
+      "requiredCase": "One source pointer addition, four generator outputs/closures, exact old/new pins and complete full witnesses",
+      "expected": "Source/generated/type/fixture/oracle semantic parity; raw model full SHA and minItems1 unchanged; public operation count43",
+      "testSourceMapping": [
+        "C-int-owned generation/schema/pins; all50new fixture rows consumed by runner tests, no contract proof substitute"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "C-int authorized source/generated/fixture/pin full semantic parity",
+      "executedByRunnerThisRepair": false
+    },
+    {
+      "id": "C02",
+      "requiredCase": "Recompute build-bound basis/request/verdict/job/grant/admission/launch examples and every downstream digest under new bundle",
+      "expected": "Preserve witness scenario meaning; exact regenerated outputs match actual after pins; old SQL55 measured evidence remains its own tested snapshot",
+      "testSourceMapping": [
+        "C-int-owned canonical closure/build pins/fixture rebase; no dist build or SQL55 replay by runner"
+      ],
+      "status": "SOURCE_MAPPING_WRITTEN_APPLICATION_EXECUTION_PENDING",
+      "actualRequiredTier": "C-int authorized source/generated/fixture/pin full semantic parity",
+      "executedByRunnerThisRepair": false
+    }
+  ],
+  "remainingUnprovenScope": [
+    "Full default unit collection and normal coverage on repaired held source have not run. Prior feedback809/6/28 +42load failures remains historical failure, never replaced by type/lint. New source tests and every claimed repair require actual feedback and fixes.",
+    "C-int05 final selected source/oracle/build-pin freeze is pending; runner consumes frozen ABI only. Dist pin assertions will remain red until root-authorized later build. No bypass or pin rewrite.",
+    "Aria recipe-sourceHash interpretation and final C-int positive lineage freeze are external current design/fixture dependencies. Runner keeps current full sourceHash sourceSpan recipe rule; it has not adapted to Java output.",
+    "Aria V18 mapping/backend application/joined source work is outside runner ownership; no Java/SQL/public gate edits by runner.",
+    "All native fixture reliability, actual current-session explicit consent through real Spring+PG15+worker+Chromium, assertion/policy/secret/no-native/native-start fault branches, continuous playable media offsets and no-repeat guarantees still need actual serialized root windows.",
+    "Actual central10base/edit4/unchanged ordinary replay model0 and all original57 effective acceptance cases need joined execution and independent QA. Unit fake-browser pipeline and proposal-supply spy do not claim real gateway/backend/native authority.",
+    "Two corpus files are inputs only, not OBS009benchmark success. No story/QA/Done/coverage verdict."
+  ],
+  "runnableSelectors": [
+    {
+      "authority": "ROOT_WINDOW_REQUIRED",
+      "cwd": "repository root",
+      "command": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-runner.py runner-unit-feedback-attempt02 ./node_modules/.bin/vitest run",
+      "purpose": "complete default unit collection + unchanged normal coverage; command name only proposed, root owns exact captured window"
+    },
+    {
+      "authority": "LATER_ROOT_BUILD_NATIVE_WINDOW_REQUIRED",
+      "cwd": "studio-runner",
+      "command": "npm run test:fixtures -- test/fixtures-tier/mixed-mode-prefix.test.ts --maxWorkers=1 --fileParallelism=false",
+      "purpose": "new actual recorded browser fixture after exact authorized build; original007/013/014 native regressions remain mandatory"
+    },
+    {
+      "authority": "ROOT_JOINED_WINDOW_REQUIRED",
+      "command": "backend-owned full SpringHTTP+PG15+actual worker/Chromium joined selection; exact root harness",
+      "purpose": "all original acceptance and default-policy explicit consent, failed-prefix/no-native/native-start/secret/video and ordinary replay"
+    }
+  ],
+  "changedFiles": {
+    "studio-runner/evaluation/observed-authoring/cases/incremental-edit-step-4.json": "f04e70016563076decb46292ce0f18d6a819d488f94212bb2bdb11d4f6546b4a",
+    "studio-runner/evaluation/observed-authoring/cases/incremental-insert-step.json": "9a1831f52911dbddc8d7dc1575c7b6e22480b00098b11bea51b6f94f0bfabbc1",
+    "studio-runner/src/executor/observedReplay.ts": "8cfa04abae7de837854da1d68048b8e941332dcbfeb96e880eb4c0b5aa128050",
+    "studio-runner/src/guided/contracts.ts": "ced3f355c9dad5120de589323d0a8011493621b4a74e438fdfefccb2103fcd58",
+    "studio-runner/src/guided/evidence.ts": "03afea081e543fc920d2e8012b85951bde9ffd737eb5ba858af959c006340279",
+    "studio-runner/src/guided/journal.ts": "15da758e2e287926a7d404926323791ab3e1f72931bc3c4cb1741de8de9d86dd",
+    "studio-runner/src/guided/ownership.ts": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf",
+    "studio-runner/src/guided/runtime.ts": "299d0c46d676644a56d6058205f0032ee6dd62c4b7765888cb5ea55c5383796f",
+    "studio-runner/src/guided/transport.ts": "1e8627c5668ce8834bbc779002779b170d784bd6af5782aea763840e786424aa",
+    "studio-runner/src/run/childRuntime.ts": "0eb0c88a0d4a98b716fcc4dc0a070f5c2f0df028e4f6e668ca9ee0cd8526dd02",
+    "studio-runner/src/run/launcher.ts": "0dfeb39a76c046dd1df4b1b9df0cec238aa57c0c7b067b8824368ffc075e9fd7",
+    "studio-runner/src/run/loginRequired.ts": "f46ef274506a4e9ec51df04e081c2e321f1b1088e22a2732751845fe2b001b27",
+    "studio-runner/src/run/observedReplayAdapter.ts": "743d1564f192e865dd9377083037272031223607e33c31a5bcc57129567babb6",
+    "studio-runner/src/run/protocol.ts": "46e23a90e8c6e64a7fa94e68bcff02c9b9f51254f2fb3180ae4065deef682fb8",
+    "studio-runner/src/validator/observedHistory.ts": "21f41c3451f3158e458d5965cb50c43a47dd60bfface405f3028a4ffef7eb2d2",
+    "studio-runner/src/validator/observedReferencePolicy.ts": "e6a2565b31ebb7339cc0ed15f9e9d8532d3c473f65709491129f6059108aebdb",
+    "studio-runner/src/validator/observedReplay.ts": "357bd37c215f8bee52e5c17b733dfa38c5ec1448bec6c1ee596f66b5285452e7",
+    "studio-runner/src/validator/observedSnapshots.ts": "a8a53dedfa041aa9a671e1e03361fee5572cdfa9bc3abca91b5d53e160332928",
+    "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "f5b613f5486b43a70c043b01a801f4ec8590bd8db2cd3ace8bf5510ca8fed685",
+    "studio-runner/test/fixtures-tier/guided-recording.test.ts": "3522915df575e7a0e98e71e74728545bdcb96fcf9b48b3178762c2ab5cc23574",
+    "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "10d97ab585a5af13a69b128a231eab0c6fd5e18780aec17cb3abcb803f752fd6",
+    "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts": "d1d524272fba634063ec6cf9491b6e14179f8d66dbc53898cffb47c2a84a6186",
+    "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts": "d6af50904a1a3187ae5b9b49478dd4232b28cf0b44e97807db765609876194d8",
+    "studio-runner/test/fixtures-tier/guided-wire.test.ts": "082e00e6de1af226c2d20a907cf28da0d9a70c49844c483ed06f1e75641b3a8f",
+    "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts": "f974ba2c570fd025f039dfd7af77a537dc8efbdc77b30bfae531d176f7384c1e",
+    "studio-runner/test/fixtures-tier/secret-login.test.ts": "3edd5a500b3b9628b15f29fad5d6815bfa3d0fb64c80cdcc5b003d8895a4f322",
+    "studio-runner/test/fixtures/guided-dataflow/server.ts": "7b226210744c0531acace3309fdf661098c1455531e31ff4d0323faee35586eb",
+    "studio-runner/test/guided/incrementalRuntime.test.ts": "121b3fd091fb2c44e183b84c8c774db4dc78e659e5d2df3c5158a5e88ae7db7c",
+    "studio-runner/test/guided/runtime.test.ts": "13fc6c777789e54cff437a97fbc2cbc0094e492168ed7507c032afde99a21253",
+    "studio-runner/test/helpers/guided.ts": "af3c5687dcf62682253a58a2564177b507cfc0f61e57ee600cd81fda5255dc4d",
+    "studio-runner/test/helpers/openapi.ts": "ed49d9d76089f9a77ef5b7fd7fcbc9bd462b70ec7e4677c4731072f8853cfc68",
+    "studio-runner/test/helpers/retainedReplay.ts": "0ef0ebb4619283dc189361586f32f5c345857c2f28bb3112a16195bc2cd9d0ac",
+    "studio-runner/test/observedIncrementalValidation.test.ts": "be4dcb0e6f39c99e4ce4ec4691cc5b972b6c8469c1e8f7f0c229c416731437b8",
+    "studio-runner/test/retainedExecute.test.ts": "28c9f99b105bc1e81bee1eeda744a9069ad26f9718ee099859e60e3a3e455366",
+    "studio-runner/test/run/observedChildRuntime.test.ts": "d9fa80ce843238f949fee1509dc339515e70b3b17887d378aacda47bf7a43916",
+    "studio-runner/test/schemaSemantics.test.ts": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb"
+  },
+  "hold": "All owned source/test writes now atomically HELD. No tests/native/build/dist/Gradle/DB/schema/generated/pin/story/gate write after this evidence checkpoint until root explicit release."
+}

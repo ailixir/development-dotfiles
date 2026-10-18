@@ -1,0 +1,30 @@
+{
+  "mode": "PINNED_LOCAL_BYTECODE_READ_ONLY",
+  "runtimeGate": "fresh-owner-ordinary-scope-stop14-cache-current/result.json",
+  "domainPass": 15,
+  "syntheticExecutionErrors": 2,
+  "overallPass": false,
+  "zonky": {
+    "version": "2.5.1",
+    "order": 3800,
+    "afterTestClass": "resetDatabases\u2192forEachDatabase\u2192unconditional getApplicationContext before annotations filter"
+  },
+  "spring": {
+    "version": "6.1.14",
+    "afterClassOrder": "descending",
+    "managerClearsTestInstanceBeforeCallbacks": true,
+    "managerContinuesAllCallbacksAndAggregatesThrowable": true,
+    "DirtiesAfterClassOrder": 3000,
+    "lowerDefaultListenersNoAfterClassOverride": {
+      "Servlet": 1000,
+      "DirtiesBefore": 1500,
+      "ApplicationEvents": 1800,
+      "DependencyInjection": 2000,
+      "MicrometerObservation": 2500
+    }
+  },
+  "proposedSourceScope": "existing owned listener3500 retains injected B instance, invokes SAME teardown body after Zonky and before Dirties; clear reference finally; remove JUnitAfterAll only; all defaults retained",
+  "parentDisposition": "APPROVE exact source only",
+  "runtimeProof": "UNRUN",
+  "all19QA": "notclaimed"
+}

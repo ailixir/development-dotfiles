@@ -1,0 +1,70 @@
+  @Test
+  void refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation()
+      throws Exception {
+    String id = prepareSession();
+    dispatch.pushContext(controller, id, 1);
+    advance(id, admit(id, navigation(id)), "navigate");
+    ObjectNode request = refreshRequest(id);
+    ObjectNode wrong = request.deepCopy().put("contextId", "foreign-context");
+    assertThatThrownBy(() -> dispatch.observe(controller, id, 1, "wrong-context", wrong))
+        .hasMessage("STALE_FENCE");
+    repository.transaction(
+        () -> {
+          var current = repository.lock(id);
+          current.document().put("state", "AWAITING_CLARIFICATION");
+          repository.save(current);
+          return null;
+        });
+    assertThatThrownBy(() -> dispatch.observe(controller, id, 1, "paused-refresh", request))
+        .hasMessage("STALE_GENERATION");
+    repository.transaction(
+        () -> {
+          var current = repository.lock(id);
+          current.document().put("state", "PROPOSING");
+          current
+              .document()
+              .withObject("/counters")
+              .put(
+                  "observations",
+                  current.document().path("limits").path("maxObservations").asInt());
+          repository.save(current);
+          return null;
+        });
+    assertThatThrownBy(() -> dispatch.observe(controller, id, 1, "over-budget", request))
+        .hasMessage("BUDGET_EXCEEDED");
+    repository.transaction(
+        () -> {
+          var current = repository.lock(id);
+          current.document().withObject("/counters").put("observations", 1);
+          repository.save(current);
+          return null;
+        });
+    ObjectNode fill = proposal(id, 1, "fill", "destination");
+    fill.withObject("/operation")
+        .set(
+            "value",
+            CONTRACTS
+                .object()
+                .put("kind", "authoredLiteral")
+                .put(
+                    "sourceInputId",
+                    sessions
+                        .runnerContext(controller, id, 1)
+                        .path("authoredInputs")
+                        .path("inputs")
+                        .get(1)
+                        .path("inputId")
+                        .asText()));
+    admit(id, fill);
+    assertThatThrownBy(() -> dispatch.observe(controller, id, 1, "active-admission", request))
+        .hasMessage("STALE_GENERATION");
+    sessions.cancel(
+        user,
+        id,
+        "cancel",
+        CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
+    assertThatThrownBy(() -> dispatch.observe(controller, id, 1, "after-cancel", request))
+        .hasMessage("CANCELLED");
+    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(FILL_RECEIPTS.get()).isZero();
+  }

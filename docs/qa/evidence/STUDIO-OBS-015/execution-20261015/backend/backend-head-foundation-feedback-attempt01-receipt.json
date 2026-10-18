@@ -1,0 +1,937 @@
+{
+  "artifact": "Single authorized STUDIO-OBS-015 head/foundation feedback run",
+  "at": "2026-10-15T06:28:01.624537+00:00",
+  "owner": "Dex/backend015_resume",
+  "status": "FAILED_FEEDBACK_SOURCE_HELD_NO_RETRY",
+  "authorization": "Exact root NEW_TASK command, one invocation only. All owner holds acknowledged; root classified idle inherited processes as unrelated to selected SQL/pure window.",
+  "results": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-results.json",
+  "resultSha256": "d315792f8a47e8952b3bdd6db97a478a855d3a8000696e267451a56b218a6224",
+  "exit": 1,
+  "counts": {
+    "total": 200,
+    "passed": 166,
+    "failed": 34,
+    "errors": 0,
+    "skipped": 0
+  },
+  "elapsedSeconds": 125.43,
+  "compileJava": "PASS",
+  "compileTestJava": "PASS",
+  "engine": [
+    "PostgreSQL 15.19"
+  ],
+  "classes": [
+    {
+      "class": "com.citi.put.checks.studio.CanonicalStudioCodecTest",
+      "total": 8,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 8
+    },
+    {
+      "class": "com.citi.put.checks.studio.ErrorCodeConstraintMigrationIT",
+      "total": 5,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 5
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationIT",
+      "total": 4,
+      "failed": 3,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 1
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+      "total": 9,
+      "failed": 3,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 6
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.ChangeDetectionTest",
+      "total": 12,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 12
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.IncrementalHashTest",
+      "total": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 2
+    },
+    {
+      "class": "com.citi.put.checks.studio.authoring.IncrementalIdentityTest",
+      "total": 3,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 3
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedGovernanceMigrationIT",
+      "total": 26,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 26
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.GuidedRecordingMigrationIT",
+      "total": 8,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 8
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "total": 12,
+      "failed": 6,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 6
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "total": 23,
+      "failed": 13,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 10
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalMaterializationEvidenceTest",
+      "total": 4,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 4
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "total": 79,
+      "failed": 7,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 72
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest",
+      "total": 5,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 3
+    }
+  ],
+  "failures": [
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationIT",
+      "method": "revisionMustMatchCaptureAndProtectsEveryNewColumn()",
+      "type": "org.springframework.jdbc.BadSqlGrammarException",
+      "message": "org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT p.policy_id,v.version,v.document::text,v.observation_policy_hash FROM studio_guided_policies p JOIN studio_guided_policy_versions v ON v.policy_id=p.policy_id AND v.version=p.active_version JOIN studio_guided_policy_approvals a ON a.policy_id=v.policy_id AND a.version=v.version WHERE p.csi_id=? AND p.application_id=? AND p.environment_id=? FOR SHARE OF p]",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository.active(ObservationPolicyRepository.java:134)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$freezeSource$1(GuidedPublicationEvidenceFixture.java:43)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.freezeSource(GuidedPublicationEvidenceFixture.java:43)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.lambda$prepare$37(GuidedPublicationMigrationTest.java:1331)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.prepare(GuidedPublicationMigrationTest.java:1327)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.prepareObserved(GuidedPublicationMigrationTest.java:1263)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.publishObserved(GuidedPublicationMigrationTest.java:1194)",
+        "at app//com.citi.put.checks.studio.InferenceMigrationIT.publish(InferenceMigrationIT.java:290)",
+        "at app//com.citi.put.checks.studio.InferenceMigrationIT.revisionMustMatchCaptureAndProtectsEveryNewColumn(InferenceMigrationIT.java:138)"
+      ],
+      "causes": [
+        "Caused by: org.postgresql.util.PSQLException: ERROR: relation \"studio_guided_policies\" does not exist"
+      ],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.InferenceMigrationIT.xml",
+      "xmlSha256": "44bd128c1b071f034bd6ad5e0447aedf26358097099b6d050325ae6a79a69569"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationIT",
+      "method": "baselineIndexRequiresTruthfulFullMarkerAndSurvivesExecutionRetention()",
+      "type": "org.springframework.jdbc.BadSqlGrammarException",
+      "message": "org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT p.policy_id,v.version,v.document::text,v.observation_policy_hash FROM studio_guided_policies p JOIN studio_guided_policy_versions v ON v.policy_id=p.policy_id AND v.version=p.active_version JOIN studio_guided_policy_approvals a ON a.policy_id=v.policy_id AND a.version=v.version WHERE p.csi_id=? AND p.application_id=? AND p.environment_id=? FOR SHARE OF p]",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository.active(ObservationPolicyRepository.java:134)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$freezeSource$1(GuidedPublicationEvidenceFixture.java:43)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.freezeSource(GuidedPublicationEvidenceFixture.java:43)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.lambda$prepare$37(GuidedPublicationMigrationTest.java:1331)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.prepare(GuidedPublicationMigrationTest.java:1327)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.prepareObserved(GuidedPublicationMigrationTest.java:1263)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.publishObserved(GuidedPublicationMigrationTest.java:1194)",
+        "at app//com.citi.put.checks.studio.InferenceMigrationIT.publish(InferenceMigrationIT.java:290)",
+        "at app//com.citi.put.checks.studio.InferenceMigrationIT.baselineIndexRequiresTruthfulFullMarkerAndSurvivesExecutionRetention(InferenceMigrationIT.java:256)"
+      ],
+      "causes": [
+        "Caused by: org.postgresql.util.PSQLException: ERROR: relation \"studio_guided_policies\" does not exist"
+      ],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.InferenceMigrationIT.xml",
+      "xmlSha256": "44bd128c1b071f034bd6ad5e0447aedf26358097099b6d050325ae6a79a69569"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationIT",
+      "method": "reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot()",
+      "type": "org.springframework.jdbc.BadSqlGrammarException",
+      "message": "org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT p.policy_id,v.version,v.document::text,v.observation_policy_hash FROM studio_guided_policies p JOIN studio_guided_policy_versions v ON v.policy_id=p.policy_id AND v.version=p.active_version JOIN studio_guided_policy_approvals a ON a.policy_id=v.policy_id AND a.version=v.version WHERE p.csi_id=? AND p.application_id=? AND p.environment_id=? FOR SHARE OF p]",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository.active(ObservationPolicyRepository.java:134)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$freezeSource$1(GuidedPublicationEvidenceFixture.java:43)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.freezeSource(GuidedPublicationEvidenceFixture.java:43)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.lambda$prepare$37(GuidedPublicationMigrationTest.java:1331)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.prepare(GuidedPublicationMigrationTest.java:1327)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.prepareObserved(GuidedPublicationMigrationTest.java:1263)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.publishObserved(GuidedPublicationMigrationTest.java:1194)",
+        "at app//com.citi.put.checks.studio.InferenceMigrationIT.publish(InferenceMigrationIT.java:290)",
+        "at app//com.citi.put.checks.studio.InferenceMigrationIT.reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot(InferenceMigrationIT.java:183)"
+      ],
+      "causes": [
+        "Caused by: org.postgresql.util.PSQLException: ERROR: relation \"studio_guided_policies\" does not exist"
+      ],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.InferenceMigrationIT.xml",
+      "xmlSha256": "44bd128c1b071f034bd6ad5e0447aedf26358097099b6d050325ae6a79a69569"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+      "method": "everyObservedRevisionColumnRemainsImmutableOnTheHeadSchema()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.lambda$publishObserved$39(GuidedPublicationMigrationTest.java:1368)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.publishObserved(GuidedPublicationMigrationTest.java:1364)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.publishObserved(GuidedPublicationMigrationTest.java:1193)",
+        "at app//com.citi.put.checks.studio.InferenceMigrationLatestIT.publish(InferenceMigrationLatestIT.java:425)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.InferenceMigrationLatestIT.xml",
+      "xmlSha256": "bbc5af7d76258923cf9c51440d37761aadbca1062df7b699f5bc282e3a0edc0a"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+      "method": "confirmationSourceIsGuidedRunOnlyAndImmutable()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.lambda$publishObserved$39(GuidedPublicationMigrationTest.java:1368)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.publishObserved(GuidedPublicationMigrationTest.java:1364)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.publishObserved(GuidedPublicationMigrationTest.java:1193)",
+        "at app//com.citi.put.checks.studio.InferenceMigrationLatestIT.publish(InferenceMigrationLatestIT.java:425)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.InferenceMigrationLatestIT.xml",
+      "xmlSha256": "bbc5af7d76258923cf9c51440d37761aadbca1062df7b699f5bc282e3a0edc0a"
+    },
+    {
+      "class": "com.citi.put.checks.studio.InferenceMigrationLatestIT",
+      "method": "everyRevisionColumnIsImmutableOnTheHeadSchema()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.lambda$publishObserved$39(GuidedPublicationMigrationTest.java:1368)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.publishObserved(GuidedPublicationMigrationTest.java:1364)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.publishObserved(GuidedPublicationMigrationTest.java:1193)",
+        "at app//com.citi.put.checks.studio.InferenceMigrationLatestIT.publish(InferenceMigrationLatestIT.java:425)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.InferenceMigrationLatestIT.xml",
+      "xmlSha256": "bbc5af7d76258923cf9c51440d37761aadbca1062df7b699f5bc282e3a0edc0a"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "method": "halfRevisionAndMissingObservationCannotCommit()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.halfRevisionAndMissingObservationCannotCommit(GuidedPublicationMigrationTest.java:875)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.xml",
+      "xmlSha256": "d7131cf5f54631cf812e2f7ed07ab90623f950e0b88fbea55c0afbc8f7b3027e"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "method": "observedChoiceReceiptIsOptionalImmutableAndRollsBackWithPreparation()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: EVIDENCE_MISMATCH",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceRepository.capturePreparation(GuidedPublicationEvidenceRepository.java:339)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceTest.lambda$capture$1(GuidedPublicationEvidenceTest.java:136)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceTest.capture(GuidedPublicationEvidenceTest.java:121)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.observedChoiceReceiptIsOptionalImmutableAndRollsBackWithPreparation(GuidedPublicationMigrationTest.java:1960)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.xml",
+      "xmlSha256": "d7131cf5f54631cf812e2f7ed07ab90623f950e0b88fbea55c0afbc8f7b3027e"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "method": "claimIsSingleSendRenewalStableAndSessionBudgetCannotReset()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.claimIsSingleSendRenewalStableAndSessionBudgetCannotReset(GuidedPublicationMigrationTest.java:786)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.xml",
+      "xmlSha256": "d7131cf5f54631cf812e2f7ed07ab90623f950e0b88fbea55c0afbc8f7b3027e"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "method": "directSqlClaimsAndNewPartitionsKeepTheirIndependentGuards()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.directSqlClaimsAndNewPartitionsKeepTheirIndependentGuards(GuidedPublicationMigrationTest.java:1041)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.xml",
+      "xmlSha256": "d7131cf5f54631cf812e2f7ed07ab90623f950e0b88fbea55c0afbc8f7b3027e"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "method": "validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry(GuidedPublicationMigrationTest.java:899)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.xml",
+      "xmlSha256": "d7131cf5f54631cf812e2f7ed07ab90623f950e0b88fbea55c0afbc8f7b3027e"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest",
+      "method": "observedChoiceReceiptRejectsMissingExtraNullWrongTypesAndRowIdentity()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: EVIDENCE_MISMATCH",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceRepository.capturePreparation(GuidedPublicationEvidenceRepository.java:339)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceTest.lambda$capture$1(GuidedPublicationEvidenceTest.java:136)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceTest.capture(GuidedPublicationEvidenceTest.java:121)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.observedChoiceReceiptRejectsMissingExtraNullWrongTypesAndRowIdentity(GuidedPublicationMigrationTest.java:2026)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.xml",
+      "xmlSha256": "d7131cf5f54631cf812e2f7ed07ab90623f950e0b88fbea55c0afbc8f7b3027e"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "method": "concurrentRetryRefreshersHaveExactlyOneWinner()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:944)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:938)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "xmlSha256": "d4fd584f34b7fbeeb50b5c7e7dee9ac24306ac65a91d2fce54cee977cf71a3fa"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "method": "definiteRefusalAllowsOnlyOneOwnedFreshAttemptAndKeepsAcceptedIdentities()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:944)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:938)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "xmlSha256": "d4fd584f34b7fbeeb50b5c7e7dee9ac24306ac65a91d2fce54cee977cf71a3fa"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "method": "scopedReleaseUsageRetryAndAppendOnlyRowsNeverContainTheCanary()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:944)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:938)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "xmlSha256": "d4fd584f34b7fbeeb50b5c7e7dee9ac24306ac65a91d2fce54cee977cf71a3fa"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "method": "terminalRawBeforeImageScopeAndCompleteClassificationCannotBeForged()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:944)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:938)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "xmlSha256": "d4fd584f34b7fbeeb50b5c7e7dee9ac24306ac65a91d2fce54cee977cf71a3fa"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "method": "consumedAckLossIsEvidenceBoundAndMissingMaterializationCannotBecomeUnused()",
+      "type": "org.springframework.dao.DataIntegrityViolationException",
+      "message": "org.springframework.dao.DataIntegrityViolationException: StatementCallback; SQL [DELETE FROM studio_guided_materializations WHERE session_id='session']; ERROR: update or delete on table \"studio_guided_materializations\" violates foreign key constraint \"studio_guided_preparations_session_id_fkey\" on table \"studio_guided_preparations\"",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.consumedAckLossIsEvidenceBoundAndMissingMaterializationCannotBecomeUnused(GuidedSecretLoginMigrationTest.java:1724)"
+      ],
+      "causes": [
+        "Detail: Key (session_id)=(session) is still referenced from table \"studio_guided_preparations\".",
+        "Caused by: org.postgresql.util.PSQLException: ERROR: update or delete on table \"studio_guided_materializations\" violates foreign key constraint \"studio_guided_preparations_session_id_fkey\" on table \"studio_guided_preparations\"",
+        "Detail: Key (session_id)=(session) is still referenced from table \"studio_guided_preparations\"."
+      ],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "xmlSha256": "d4fd584f34b7fbeeb50b5c7e7dee9ac24306ac65a91d2fce54cee977cf71a3fa"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "method": "terminalCrossMonthClockCannotEvadeActualAttemptReceiptIdentity()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:944)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:938)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "xmlSha256": "d4fd584f34b7fbeeb50b5c7e7dee9ac24306ac65a91d2fce54cee977cf71a3fa"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "method": "unreachedNotUsedHasNoFabricatedResolutionAndRejectsOtherNullableVariants()",
+      "type": "org.springframework.jdbc.UncategorizedSQLException",
+      "message": "org.springframework.jdbc.UncategorizedSQLException: StatementCallback; uncategorized SQLException for SQL [INSERT INTO studio_guided_actions(admission_id,session_id,step_id,ordinal,document,proposal) VALUES ('unused-admission','session','unused-step',0,'{\"sessionId\":\"session\",\"coordinate\":{\"stepId\":\"unused-step\",\"ordinal\":0},\"admission\":{\"admissionId\":\"unused-admission\"},\"ownerFence\":1,\"state\":\"DISPATCHING\",\"dispatchCount\":1}','{\"operation\":{\"kind\":\"fill\",\"value\":{\"kind\":\"secretRef\",\"sourceInputId\":\"input-UNREACHED\"}}}')]; SQL state [P0001]; error code [0]; ERROR: action preparation version mismatch",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.unreachedNotUsedHasNoFabricatedResolutionAndRejectsOtherNullableVariants(GuidedSecretLoginMigrationTest.java:518)"
+      ],
+      "causes": [
+        "Where: PL/pgSQL function studio_015_action_attempt_guard() line 19 at RAISE",
+        "Caused by: org.postgresql.util.PSQLException: ERROR: action preparation version mismatch",
+        "Where: PL/pgSQL function studio_015_action_attempt_guard() line 19 at RAISE"
+      ],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "xmlSha256": "d4fd584f34b7fbeeb50b5c7e7dee9ac24306ac65a91d2fce54cee977cf71a3fa"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "method": "ordinaryReplayReleaseRequiresAcceptedDeclarationAndAuthenticAttempt()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:944)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:938)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "xmlSha256": "d4fd584f34b7fbeeb50b5c7e7dee9ac24306ac65a91d2fce54cee977cf71a3fa"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "method": "realNoSendOutageDecisionGrantsDifferentAuthorityAndCannotBeFabricated()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:944)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:938)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "xmlSha256": "d4fd584f34b7fbeeb50b5c7e7dee9ac24306ac65a91d2fce54cee977cf71a3fa"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "method": "rawTerminalReceiptCannotCommitWithoutCompleteExactSummaries()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:944)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:938)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "xmlSha256": "d4fd584f34b7fbeeb50b5c7e7dee9ac24306ac65a91d2fce54cee977cf71a3fa"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "method": "ordinaryWriterCannotAlterOrDropRetentionPartitions()",
+      "type": "org.postgresql.util.PSQLException",
+      "message": "org.postgresql.util.PSQLException: ERROR: permission denied for view studio_guided_materialization_snapshots",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.insert(GuidedSecretLoginMigrationTest.java:908)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.ordinaryWriterCannotAlterOrDropRetentionPartitions(GuidedSecretLoginMigrationTest.java:698)"
+      ],
+      "causes": [
+        "Where: SQL function \"studio_secret_guided_input_reference\" during startup"
+      ],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "xmlSha256": "d4fd584f34b7fbeeb50b5c7e7dee9ac24306ac65a91d2fce54cee977cf71a3fa"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "method": "replayUsageUsesClosedCodesAndTheActualExecutionScope()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:944)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:938)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "xmlSha256": "d4fd584f34b7fbeeb50b5c7e7dee9ac24306ac65a91d2fce54cee977cf71a3fa"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest",
+      "method": "releasedReplayUncertaintyRequiresRealScopedReleaseAndNeverFakeAckStatus()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.lambda$completeExistingSession$5(GuidedPublicationEvidenceFixture.java:149)",
+        "at app//com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(GuidedPublicationEvidenceFixture.java:73)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.lambda$finalizing$12(GuidedPublicationMigrationTest.java:477)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest$Database.finalizing(GuidedPublicationMigrationTest.java:471)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:944)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.publishedRetry(GuidedSecretLoginMigrationTest.java:938)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedSecretLoginMigrationTest.xml",
+      "xmlSha256": "d4fd584f34b7fbeeb50b5c7e7dee9ac24306ac65a91d2fce54cee977cf71a3fa"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "method": "snapshotCorrection:boundary",
+      "type": "org.opentest4j.AssertionFailedError",
+      "message": "org.opentest4j.AssertionFailedError: ",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.derivesCompleteIndependentArtifactWithoutMutatingRawEvidence(IncrementalPublicationConformanceTest.java:53)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.xml",
+      "xmlSha256": "4a9bee2c15d1fa291a8a63e32e3ecd3dbacf115fd1e4898d147a317a65e736db",
+      "artifactDifferences": [
+        {
+          "path": "/inputRecipes/length",
+          "expected": 2,
+          "actual": 3
+        },
+        {
+          "path": "/replayPolicy/inputs/length",
+          "expected": 2,
+          "actual": 3
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "method": "snapshotCorrection:empty-prefix-incomplete-base",
+      "type": "org.opentest4j.AssertionFailedError",
+      "message": "org.opentest4j.AssertionFailedError: ",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.derivesCompleteIndependentArtifactWithoutMutatingRawEvidence(IncrementalPublicationConformanceTest.java:53)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.xml",
+      "xmlSha256": "4a9bee2c15d1fa291a8a63e32e3ecd3dbacf115fd1e4898d147a317a65e736db",
+      "artifactDifferences": [
+        {
+          "path": "/inputRecipes/length",
+          "expected": 2,
+          "actual": 3
+        },
+        {
+          "path": "/replayPolicy/inputs/length",
+          "expected": 2,
+          "actual": 3
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "method": "snapshotCorrection:drift-at-first-step-retains-original-base-proof",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: EVIDENCE_MISMATCH",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedEffectiveGraph.validDriftAuthority(GuidedEffectiveGraph.java:136)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedEffectiveGraph.project(GuidedEffectiveGraph.java:43)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPlanBuilder.graph(GuidedPlanBuilder.java:820)",
+        "at app//com.citi.put.checks.studio.guided.publication.GuidedPlanBuilder.plan(GuidedPlanBuilder.java:992)",
+        "at app//com.citi.put.checks.studio.guided.publication.ObservedArtifactLowerer.lower(ObservedArtifactLowerer.java:34)",
+        "at app//com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.derivesCompleteIndependentArtifactWithoutMutatingRawEvidence(IncrementalPublicationConformanceTest.java:52)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.xml",
+      "xmlSha256": "4a9bee2c15d1fa291a8a63e32e3ecd3dbacf115fd1e4898d147a317a65e736db"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "method": "graphTimingConformance:admitted-binding-replacement",
+      "type": "org.opentest4j.AssertionFailedError",
+      "message": "org.opentest4j.AssertionFailedError: ",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.derivesCompleteIndependentArtifactWithoutMutatingRawEvidence(IncrementalPublicationConformanceTest.java:53)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.xml",
+      "xmlSha256": "4a9bee2c15d1fa291a8a63e32e3ecd3dbacf115fd1e4898d147a317a65e736db",
+      "artifactDifferences": [
+        {
+          "path": "/inputRecipes/0/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        },
+        {
+          "path": "/inputRecipes/1/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        },
+        {
+          "path": "/replayPolicy/inputs/0/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        },
+        {
+          "path": "/replayPolicy/inputs/1/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "method": "graphTimingConformance:pre-admission",
+      "type": "org.opentest4j.AssertionFailedError",
+      "message": "org.opentest4j.AssertionFailedError: ",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.derivesCompleteIndependentArtifactWithoutMutatingRawEvidence(IncrementalPublicationConformanceTest.java:53)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.xml",
+      "xmlSha256": "4a9bee2c15d1fa291a8a63e32e3ecd3dbacf115fd1e4898d147a317a65e736db",
+      "artifactDifferences": [
+        {
+          "path": "/inputRecipes/0/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        },
+        {
+          "path": "/inputRecipes/1/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        },
+        {
+          "path": "/replayPolicy/inputs/0/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        },
+        {
+          "path": "/replayPolicy/inputs/1/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "method": "graphTimingConformance:same-pair",
+      "type": "org.opentest4j.AssertionFailedError",
+      "message": "org.opentest4j.AssertionFailedError: ",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.derivesCompleteIndependentArtifactWithoutMutatingRawEvidence(IncrementalPublicationConformanceTest.java:53)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.xml",
+      "xmlSha256": "4a9bee2c15d1fa291a8a63e32e3ecd3dbacf115fd1e4898d147a317a65e736db",
+      "artifactDifferences": [
+        {
+          "path": "/inputRecipes/0/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        },
+        {
+          "path": "/inputRecipes/1/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        },
+        {
+          "path": "/replayPolicy/inputs/0/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        },
+        {
+          "path": "/replayPolicy/inputs/1/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest",
+      "method": "graphTimingConformance:unperformed-read",
+      "type": "org.opentest4j.AssertionFailedError",
+      "message": "org.opentest4j.AssertionFailedError: ",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.derivesCompleteIndependentArtifactWithoutMutatingRawEvidence(IncrementalPublicationConformanceTest.java:53)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.publication.IncrementalPublicationConformanceTest.xml",
+      "xmlSha256": "4a9bee2c15d1fa291a8a63e32e3ecd3dbacf115fd1e4898d147a317a65e736db",
+      "artifactDifferences": [
+        {
+          "path": "/inputRecipes/0/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        },
+        {
+          "path": "/inputRecipes/1/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        },
+        {
+          "path": "/replayPolicy/inputs/0/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        },
+        {
+          "path": "/replayPolicy/inputs/1/provenance/sourceHash",
+          "expected": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+          "actual": "b91dbc609472c99cd4608fb3b779e62ec2e07e9d264f58b41e6d258f847c1eb6"
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest",
+      "method": "obligationLinksCommitWithLedgerAndRejectCrossSessionOrWrongMeaning()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.guided.translation.GuidedPlanHistoryAudit.transition(GuidedPlanHistoryAudit.java:26)",
+        "at app//com.citi.put.checks.studio.guided.translation.GuidedTranslationStore.acceptPlan(GuidedTranslationStore.java:731)",
+        "at app//com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest.lambda$obligationLinksCommitWithLedgerAndRejectCrossSessionOrWrongMeaning$25(GuidedTranslationMigrationTest.java:366)",
+        "at app//com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest.obligationLinksCommitWithLedgerAndRejectCrossSessionOrWrongMeaning(GuidedTranslationMigrationTest.java:363)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest.xml",
+      "xmlSha256": "bbcd5eca0f11d53eed3a228f1b31260039046edcf5cc0775313c61a0697e2826"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest",
+      "method": "upgradePreservesRowsAndImmutableScopedConstraints()",
+      "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "message": "com.citi.put.checks.studio.guided.session.GuidedSessionException: INVALID_CONTRACT",
+      "applicationFrames": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validatedCanonical(GuidedContracts.java:104)",
+        "at app//com.citi.put.checks.studio.guided.session.GuidedContracts.validate(GuidedContracts.java:90)",
+        "at app//com.citi.put.checks.studio.guided.translation.GuidedPlanHistoryAudit.transition(GuidedPlanHistoryAudit.java:26)",
+        "at app//com.citi.put.checks.studio.guided.translation.GuidedTranslationStore.acceptPlan(GuidedTranslationStore.java:731)",
+        "at app//com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest.lambda$upgradePreservesRowsAndImmutableScopedConstraints$0(GuidedTranslationMigrationTest.java:128)",
+        "at app//com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest.upgradePreservesRowsAndImmutableScopedConstraints(GuidedTranslationMigrationTest.java:125)"
+      ],
+      "causes": [],
+      "xml": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-head-foundation-feedback-attempt01-xml/TEST-com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest.xml",
+      "xmlSha256": "bbcd5eca0f11d53eed3a228f1b31260039046edcf5cc0775313c61a0697e2826"
+    }
+  ],
+  "skippedCases": [],
+  "inputStability": {
+    "sourceStable": true,
+    "testInputStable": true,
+    "distStable": true,
+    "testInputDigestBefore": "da66d55828c8978529ffe3ee948ba7a385e118254740bd037afc40a0c3a1bd97",
+    "testInputDigestAfter": "da66d55828c8978529ffe3ee948ba7a385e118254740bd037afc40a0c3a1bd97"
+  },
+  "foundationRefresh": {
+    "methods": 25,
+    "passed": 25,
+    "failed": 0,
+    "skipped": 0,
+    "classes": [
+      "CanonicalStudioCodecTest",
+      "ChangeDetectionTest",
+      "IncrementalIdentityTest",
+      "IncrementalHashTest"
+    ]
+  },
+  "newMaterializationUnit": {
+    "total": 4,
+    "passed": 4,
+    "scope": "Private SQL-adapter reconstruction unit; not actual SQL authority/native evidence"
+  },
+  "conformance": {
+    "total": 79,
+    "passed": 72,
+    "failed": 7,
+    "scope": "Pure Java full-basis/artifact comparisons; all42 local graph negatives passed;7positive failures preserved"
+  },
+  "rootCauseSummary": [
+    {
+      "count": 17,
+      "owner": "Dara fixture helper lane",
+      "cause": "GuidedPublicationEvidenceFixture.completeExistingSession line149 bridge preparation fails current schema. Callers include head/publication/secret fixtures; actual source errors preserved."
+    },
+    {
+      "count": 2,
+      "owner": "Dara historical fixture lane, coordinate with backend history validator",
+      "cause": "Historical V14 minimal accepted-plan fixtures now reach GuidedPlanHistoryAudit.transition(source-selection validation); retain target and original subjects while porting complete shape."
+    },
+    {
+      "count": 3,
+      "owner": "Dara historical fixture lane",
+      "cause": "Historical V18 InferenceMigrationIT calls current fixture freezeSource which queries V19 policies absent at historical target; preserve historical target18."
+    },
+    {
+      "count": 2,
+      "owner": "Dara fixture lane",
+      "cause": "Observed-choice fixture captures initialBlank evidence for a noninitial/non-navigate proposal; production capturePreparation refuses EVIDENCE_MISMATCH line339."
+    },
+    {
+      "count": 3,
+      "owner": "Dara secret test lane",
+      "cause": "One attempted materialization DELETE blocked by preparation FK; one synthetic unused action lacks actual preparation/version identity; one least-privilege writer lacks SELECT view privilege. Preserve subject assertions/constraints."
+    },
+    {
+      "count": 6,
+      "owner": "Backend lowerer and C-int fixture authority coordination",
+      "cause": "Exact artifact differences:2snapshot positives export3recipes rather than expected2;4graph positives have input recipe provenance.sourceHash current rather than frozen expected old hash. Requires authority confirmation before any change."
+    },
+    {
+      "count": 1,
+      "owner": "Backend effective graph",
+      "cause": "Drift-at-first-step positive reaches unconditional validDriftAuthority first-suffix qualification; C-int scope is actual import-removal/unused-import/zero-consumer projection exception only."
+    }
+  ],
+  "inheritedIdleProcesses": {
+    "leftUntouched": [
+      22246,
+      44737,
+      13577,
+      13581
+    ],
+    "rootClassification": "idle GradleDaemon7h, old loopback guidedMain4days, old Chromium34h0CPU; no competing active test/build"
+  },
+  "noCommandsBeyondAuthorization": "No retry, fix, format, native/server connection, source generation/install/deploy/commit/push, schema/threshold/skip changes.",
+  "next": "Remain source/story HOLD pending exact root fix/release. This selected feedback does not count as full backend check, coverage, joined/native proof, QA verdict or Done."
+}

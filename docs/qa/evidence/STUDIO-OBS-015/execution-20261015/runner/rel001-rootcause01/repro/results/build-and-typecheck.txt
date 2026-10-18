@@ -1,0 +1,36 @@
+REL-001 patches: build, type-check, lint, unit tests (scratch copies only; nothing in the repo was built or edited)
+Run 2026-10-17 by Dex (@dev), Node v24.20.0 (fnm), via repro/prepare-scratch.sh.
+
+Patch base: working tree matched manifest.json (patchBaseFileSha256_workingTree) for both variants.
+git apply --check -p1: clean for fix-a-cause-preservation.patch (variant a) and fix.patch (variant ab = A+B).
+
+Variant a (patch A only)
+  tsc -p tsconfig.repro.json (src/**/*.ts + test/helpers/guided.ts) ........ exit 0
+  tsc -p tsconfig.json --noEmit (whole project: src + ALL tests) ............ exit 0, 0 "error TS" lines
+  eslint on the 11 patched files ............................................ clean
+  vitest run test/guided test/run/versionProbe.test.ts test/run/confinement.test.ts
+      (coverage disabled; the repo's coverage thresholds do not apply to a subset)
+      ............................................................................ 10 files / 171 tests passed
+  build check: dist-repro contains describeStartFailure, does NOT contain readVersionPaths
+
+Variant ab (patch A + B)
+  tsc -p tsconfig.repro.json ................................................. exit 0
+  tsc -p tsconfig.json --noEmit (whole project) ............................. exit 0, 0 "error TS" lines
+  eslint on the 13 patched files ............................................. clean
+  vitest run (same selection) ................................................ 11 files / 175 tests passed
+      (the extra file is test/run/versionProbe.test.ts from patch B: 4 tests)
+  build check: dist-repro contains describeStartFailure and readVersionPaths
+
+Notes
+  * The first --typecheck-full attempt printed ~10 TS2307 errors for
+    ../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json (plus one overload
+    error that followed from the unresolved import). Cause: the scratch root has no docs/ directory, which
+    the tests import by relative path. With a docs symlink in the scratch root the same command exits 0.
+    This is a scratch-layout artifact, not a patch defect. (The symlinks were removed again afterwards.)
+  * The same applies to the unit tests: the 171 / 175 passes above were run with that docs symlink in place.
+    Without it, test/guided shows 5 failures that are all ENOENT on <scratch>/docs/specs/... (evidence.test,
+    policyHash.test, transport.test); re-checked with the symlink restored: test/guided 9 files / 152 tests pass
+    on variant a. To repeat: ln -s <repo>/docs <scratch>/repro-run/{a,ab}/docs, then run vitest in
+    <scratch>/repro-run/{a,ab}/studio-runner with --coverage.enabled=false.
+  * NOT run: the rest of the runner unit suite, the fixtures tier, the deployment tier, the runner image,
+    Gradle / backend check, ReplayIT. The lead still owes those when the patches are applied to the repo.

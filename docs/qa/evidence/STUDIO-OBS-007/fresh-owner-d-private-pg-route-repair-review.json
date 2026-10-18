@@ -1,0 +1,158 @@
+{
+  "schema": "fresh-owner-d-private-pg-route-repair-review/1",
+  "verdict": "FINDINGS",
+  "reviewKind": "INDEPENDENT_EXACTREADONLY_SOURCE_RESOLUTION",
+  "reviewerIndependentOfCandidateAuthor": true,
+  "scope": "Resolution of D-PG-01, D-PG-02 and D-PG-03 in the exact immutable copied class and source.patch; preservation against formatted before.java. No broad story review.",
+  "candidate": {
+    "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "reviewedArtifact": "docs/qa/evidence/STUDIO-OBS-007/d-private-pg-route-repair/after.java",
+    "sourceSha256": "73c581743cce98fdf0ac8c7a8e1bff09f0cc34cf3f4e05034a9f82ff86a842ce",
+    "beforeSha256": "1a7ff1027c358ea4621ea45bd73a994892b20c3b1bd845b0e48994413de3d2e6",
+    "patchSha256": "4cbb1ef3e59b3305abe564104f11064b38a006eb07cb285ea35e04c2f68da672",
+    "matrixSha256": "9f0dc640344640cc13755746374e5d673e62f1b5fada1ccfe2bc44f7449722c4",
+    "reportSha256": "83330dd5fdebfb7314592f157a5639a662f747c9f746bb8e7cdb7c7d9ca9ba0e",
+    "hashesVerified": true,
+    "exactPatchReconstructsFrozenSource": true,
+    "allNineDiffHunkContextsAndCountsVerified": true,
+    "mutableWorkingTestRead": false,
+    "lineAuthority": "All candidate line numbers below refer to frozen after.java, including unchanged copied helpers; no line or identity binding to a formatted runtime copy.",
+    "physicalSourceLines": 1680
+  },
+  "resolutions": [
+    {
+      "finding": "D-PG-01",
+      "status": "SCOPED_SOURCE_RESOLUTION_PASS",
+      "evidence": "Lines 617-639 construct routedSource, routedJdbc, repository/transaction manager, materializer/access and initial dispatcher together. Recovery at 846-848 reuses routedJdbc/repository/materializer/access and passes routedMaterialization to the recovered dispatcher. Factory lines 317-336 routes preparation, binding, assignment and secret-audit stores through its supplied JdbcTemplate. Translation initialization at 696-715 is routed. Direct observation and authenticated callback beans use actualJdbc from the same DATABASE, intentionally separate."
+    },
+    {
+      "finding": "D-PG-02",
+      "status": "SCOPED_SOURCE_RESOLUTION_PASS",
+      "evidence": "Setup is protected from line 643. Restoration at 910-915 and caller interrupt/join at 918-930 are independent attempts. Caller cleanup still executes after failed reopen. Caller liveness is checked; captured byte/char buffers are cleared at 946-950 only when callerReaped. Primary exceptions retain cleanup failures at 951-958, with resource-close failures additionally preserved by try-with-resources. Bind/submission failure closes its listener at 1082-1090. Both sockets are registered before connection/transfer; failed closes remain registered, active transfers erase their own buffers and decrement in finally, and final close attempts listener/socket cleanup plus executor shutdown/termination and reports outstanding ownership at 1191-1219. This resolves the prior skipped-caller-cleanup defect; an error report is not proof that every resource was successfully reaped."
+    },
+    {
+      "finding": "D-PG-03",
+      "status": "PARTIAL_REMAINING_P2",
+      "evidence": "Installed senders at 666 and 857 call the actual dispatch.stop through StopWork, which records initiated/finished delivery and failures. Normal await at 903 and failure cleanup await at 940-944 require actual persisted CONFIRMED, no live materializations, finished send and idle routed sockets/transfers. They permit a genuine no-context cancellation separately. Successful waits fix the former normal-path race. A failed final wait still falls through to automatic route.close without reaping the external async task; see the remaining finding."
+    }
+  ],
+  "findings": [
+    {
+      "id": "D-PG-03",
+      "severity": "P2",
+      "title": "Failed final completion wait still destroys the route without reaping initiated asynchronous stop work",
+      "location": {
+        "path": "docs/qa/evidence/STUDIO-OBS-007/d-private-pg-route-repair/after.java",
+        "line": 940,
+        "endLine": 944
+      },
+      "detail": "The final cleanup catches any Exception or Error from awaitActualStop and only appends it to cleanupFailures. It then exits the inner finally, and the outer try-with-resources unconditionally invokes PrivatePgRoute.close. For example, if cleanup polling is interrupted in Thread.sleep at line 1004 while StopWork.send is in flight, this catch proceeds to close the listener and routed sockets at 1195 and shut down the bridges at 1197. StopWork counters do not provide a cancellation or join handle. The production stop/confirmation task was scheduled on CompletableFuture.runAsync and is not owned by bridges, so bridge termination cannot reap it. The same structural gap exists when the final completion wait expires before initiated work finishes.",
+      "impact": "This path retains the failure honestly but does not satisfy completion before proxy destruction on the failure path. The harness can itself destroy the route while the actual stop task is still sending or is about to run its confirmation transaction, and that task can outlive the case. This is a source-level cleanup ownership gap, not an observed runtime failure or a claim about a held row, pool, primary outage or a general database deadline.",
+      "references": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-007/d-private-pg-route-repair/after.java",
+          "line": 616
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-007/d-private-pg-route-repair/after.java",
+          "line": 964
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-007/d-private-pg-route-repair/after.java",
+          "line": 1004
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-007/d-private-pg-route-repair/after.java",
+          "line": 1006
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-007/d-private-pg-route-repair/after.java",
+          "line": 1195
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-007/d-private-pg-route-repair/after.java",
+          "line": 1197
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "line": 2208
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "line": 2222
+        }
+      ],
+      "requestedCorrection": "Make failure of the completion assertions independent of cleanup/reaping of already initiated stop work. Preserve the primary and wait failures, but retain the route while the actual sender and its confirmation work are observably completed or explicitly cancelled and reaped through owned handles. Do not count a timeout/error or bridge executor termination as completion of the separate task, and do not fabricate CONFIRMED or materialization closure."
+    }
+  ],
+  "preservation": {
+    "originalNineMethodByteIdentical": true,
+    "originalNineMethodSha256": "ec8ce679e86bd1c931aa3006e5d79af2fe7387fdfb4557874bd257303d2d724b",
+    "originalModeBlockByteIdentical": true,
+    "originalModeCount": 9,
+    "singleAddedTestPreserved": true,
+    "unchangedPrefixAndTailByteIdentical": true,
+    "evidence": [
+      {
+        "lines": "767-800",
+        "status": "SOURCE_ASSERTIONS_PRESERVED_RUNTIME_NOT_REVIEWED",
+        "detail": "Real caller/relay, reads=1, POST=1, certified received secret, consumed command and resolved RELEASE precede route cut. Direct SELECT 1 remains available; routed fresh connection must produce a causal actual PostgreSQL class-08 exception before caller interrupt. No synthetic SQLException or mock DataSource introduced."
+      },
+      {
+        "lines": "801-820",
+        "status": "SOURCE_ASSERTIONS_PRESERVED_RUNTIME_NOT_REVIEWED",
+        "detail": "Actual caller must end with CannotCreateTransactionException, causal class-08 driver failure, exactly one fixed suppressed UNKNOWN_OUTCOME/409, restored interrupt, non-null zeroed request/secret arrays and relay disconnection. These assertions precede manual cleanup erasure."
+      },
+      {
+        "lines": "821-845",
+        "status": "SOURCE_ASSERTIONS_PRESERVED_RUNTIME_NOT_REVIEWED",
+        "detail": "Before rescue the direct observer still requires action DISPATCHING, session ACTING, live materialization, one initial consume command, resolved RELEASE and zero terminal USAGE. Reopen keeps the same port and same routedSource."
+      },
+      {
+        "lines": "846-903",
+        "status": "SOURCE_ASSERTIONS_PRESERVED_RUNTIME_NOT_REVIEWED",
+        "detail": "Recovery uses actual lease/history for same/new consume keys or exact STALE_FENCE with counts unchanged. No renewal or fabricated authority. Genuine authorized cancellation is separate and requires CANCELLED, UNKNOWN_OUTCOME action and exactly one UNKNOWN_OUTCOME USAGE; later commits are not attributed to the failed helper."
+      }
+    ]
+  },
+  "narrowProductionReferences": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+      "methods": "cancel lines 595-608; stop lines 2184-2260",
+      "binding": "Current production reference only, outside frozen test identity; no production edits by this reviewer. Supplied repair patch contains no production changes."
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256": "ceeec5a8ef899dced36c556b44ce2e1099fefe65084b7ffc4e3b0f69c4bc68dd",
+      "methods": "reconciliation lines 253-284; actual stop lines 287-298",
+      "binding": "Current production reference only, outside frozen test identity."
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+      "sha256": "66f3665f63de906f5b1a4285aaf904b8527a3231066c28be7ee5c3f713a4bd02",
+      "methods": "send delegation lines 52-57; transport finally lines 219-244; deadline lines 247-266",
+      "binding": "Current production reference only, outside frozen test identity; transport bounds do not join the common-pool confirmation task."
+    }
+  ],
+  "execution": {
+    "sourceEdits": false,
+    "runtimeCommands": false,
+    "compilation": false,
+    "Gradle": false,
+    "builds": false,
+    "tests": false,
+    "Docker": false,
+    "browser": false,
+    "processCommands": false,
+    "modelOverrides": false,
+    "spawns": false,
+    "reviewIO": "Filesystem reads/hashing and pure JavaScript patch comparison only; sole write is this report."
+  },
+  "limits": [
+    "This verdict binds only frozen after.java SHA 73c581743cce98fdf0ac8c7a8e1bff09f0cc34cf3f4e05034a9f82ff86a842ce and matching source.patch/before/matrix/result. It does not bind any later formatter/repair or runtime copy.",
+    "No compile or runtime pass is claimed; coordinator execution and any later current-source hashes are outside this review.",
+    "Original-nine preservation is source equality, not fresh runtime verification.",
+    "No full-19/Core process, image, generic database bounds, broader old story, QA gate or lifecycle conclusion is made."
+  ]
+}

@@ -1,0 +1,159 @@
+{
+ "story": "STUDIO-OBS-015",
+ "step": "w6-checkstyle-G3",
+ "agent": "Dex (@dev)",
+ "date": "2026-10-16",
+ "group": "G3",
+ "tools": "checkstyle 10.18.1 CLI + backend/config/checkstyle/checkstyle.xml (config_loc set); google-java-format 1.22.0 CLI (--skip-reflowing-long-strings, matches spotless default); JDK 21 (Gradle toolchain jdk). Gradle not run.",
+ "result": {
+  "checkstyleViolationsBefore": 160,
+  "checkstyleViolationsAfter": 0,
+  "gjfDryRunSetExitIfChanged": "rc=0 (no file would change)",
+  "byRuleBefore": {
+   "LineLength": 74,
+   "NeedBraces": 84,
+   "WhitespaceAround": 2
+  }
+ },
+ "neutrality": {
+  "method": "javac -proc:none -g -parameters of the 10 files, before (snapshot) vs after, against backend/build/classes + gradle-cache jars; javap -c -p -constants with constant-pool indices stripped, all 55 classes concatenated",
+  "classesBefore": 55,
+  "classesAfter": 55,
+  "javapSha256Before": "2adbf64209194c975d562b888834ae853b840dbf582330d975599073a2823f11",
+  "javapSha256After": "2adbf64209194c975d562b888834ae853b840dbf582330d975599073a2823f11",
+  "identical": true
+ },
+ "files": [
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+   "set": "main",
+   "violationsBefore": 2,
+   "byRuleBefore": {
+    "LineLength": 2
+   },
+   "violationsAfter": 0,
+   "linesAdded": 6,
+   "linesRemoved": 3,
+   "sha256Before": "7aef470c9260db66ce3728526d102485cf2822cacc30afd60412844c9c5a7be9",
+   "sha256After": "a9f8bb521dc8797cafd06fb4edca1ce86e016f19b9a31f99b0d012d0489398c9"
+  },
+  {
+   "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+   "set": "main",
+   "violationsBefore": 1,
+   "byRuleBefore": {
+    "NeedBraces": 1
+   },
+   "violationsAfter": 0,
+   "linesAdded": 2,
+   "linesRemoved": 1,
+   "sha256Before": "bf27c74add7b2c85d8e1d0fcf93eb2c509989081d299812ef0e180c9aca7081f",
+   "sha256After": "cfb55a54e2068a48365af6b45ec3fc59141e83d7e48ca28826acace38125e603"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/authoring/IncrementalHashTest.java",
+   "set": "test",
+   "violationsBefore": 1,
+   "byRuleBefore": {
+    "LineLength": 1
+   },
+   "violationsAfter": 0,
+   "linesAdded": 2,
+   "linesRemoved": 1,
+   "sha256Before": "be6253d2598849edcda367c4da2f198348fe7713978fe175cd91b08b326bc4ff",
+   "sha256After": "fd0e2c71ee0dbfc2bbed2c5301088c0b8f662a990b3cb525e91d7739b5522e9e"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+   "set": "test",
+   "violationsBefore": 106,
+   "byRuleBefore": {
+    "LineLength": 60,
+    "NeedBraces": 46
+   },
+   "violationsAfter": 0,
+   "linesAdded": 244,
+   "linesRemoved": 106,
+   "sha256Before": "354243f5deef92876a82a986bfa1309183875bd954dd927dd5d5fd0f015929c3",
+   "sha256After": "e4f19fcf54556517447815af750a75e786cac0a376803347606d06b58fa3ea64"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+   "set": "test",
+   "violationsBefore": 11,
+   "byRuleBefore": {
+    "LineLength": 11
+   },
+   "violationsAfter": 0,
+   "linesAdded": 22,
+   "linesRemoved": 11,
+   "sha256Before": "de360326036e6dcbdadf1251558bfceb5b70c5db7d2ae1f570e581c38f7dc9bb",
+   "sha256After": "659853de0ec6be586f002a9c20231738dede4abc861f667d09b9d13b685693cc"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+   "set": "test",
+   "violationsBefore": 27,
+   "byRuleBefore": {
+    "NeedBraces": 27
+   },
+   "violationsAfter": 0,
+   "linesAdded": 62,
+   "linesRemoved": 27,
+   "sha256Before": "e439a563362f7a5b0c6b155d57002a976714cb95329bf1c698bb03d9f9c3de64",
+   "sha256After": "52924b33df54dc4339e6f2115f8fc34e3f6cd84f4e0a61b319aaf78124cf30fe"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+   "set": "test",
+   "violationsBefore": 7,
+   "byRuleBefore": {
+    "NeedBraces": 7
+   },
+   "violationsAfter": 0,
+   "linesAdded": 16,
+   "linesRemoved": 7,
+   "sha256Before": "76db6574fca3e3a6b625f5950909fc4f4470f47dba8951692856cbdcba59c222",
+   "sha256After": "f85bf21c5efc68a213ce0ac418b2ebd3f4884610513d4a1a68eded71f0c85205"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+   "set": "test",
+   "violationsBefore": 2,
+   "byRuleBefore": {
+    "WhitespaceAround": 2
+   },
+   "violationsAfter": 0,
+   "linesAdded": 4,
+   "linesRemoved": 1,
+   "sha256Before": "c464a4255550d3af5ea5eb383c5998730b82d7728a6ab8c0459742760817871e",
+   "sha256After": "47c18e4f652379d31e100cd84bada6fa1ca0e1be19e46fabde6a24e21e508676"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedAcceptedPlanTest.java",
+   "set": "test",
+   "violationsBefore": 2,
+   "byRuleBefore": {
+    "NeedBraces": 2
+   },
+   "violationsAfter": 0,
+   "linesAdded": 4,
+   "linesRemoved": 2,
+   "sha256Before": "33ce03fb1ab7ab04d34957a113121c5165aef0a5918170c0ff94187f9d9cb6cb",
+   "sha256After": "3bbe9891e4ce32b014d68517e14deeb28084afda0068cd40b1888898d9fc865f"
+  },
+  {
+   "path": "backend/src/test/java/com/citi/put/checks/studio/support/ObservedPublicationFixture.java",
+   "set": "test",
+   "violationsBefore": 1,
+   "byRuleBefore": {
+    "NeedBraces": 1
+   },
+   "violationsAfter": 0,
+   "linesAdded": 3,
+   "linesRemoved": 1,
+   "sha256Before": "991e16f9c5fbe0409c0687676562cd76a700586ea4d5148ae35ab444458e9dd2",
+   "sha256After": "b11b75c5fd221a3930c77ceb4b5a0f9cad121b64130df74afc6cce0b640a8d4a"
+  }
+ ]
+}

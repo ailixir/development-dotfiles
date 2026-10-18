@@ -1,0 +1,168 @@
+{
+  "story": "STUDIO-OBS-015",
+  "window": "w2-window01",
+  "artifact": "aria-bridge-ruling01",
+  "agent": "Aria (@architect)",
+  "date": "2026-10-16",
+  "nonCredit": true,
+  "committed": false,
+  "sourceChanged": false,
+  "gradleRun": false,
+  "commandsRun": [
+    "git status/log (read-only)",
+    "grep/sed/python read-only inspection",
+    "shasum -a 256"
+  ],
+  "notRun": [
+    "Gradle (any task)",
+    "runner vitest",
+    "CodeRabbit",
+    "synapse diagnostics (out of mission scope)"
+  ],
+  "inputs": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w2-window01/review.md",
+      "sha256": "ea5e3f31ff9afa687e4d4d842b497c9745ea50923ed4b9f64874c46bf3bb5a22"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w2-window01/w2.diff",
+      "sha256": "1ed5f834a7207da81944245de155e49eb62c049e847987a214e30cc50cf09fee"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w2-window01/manifest.json",
+      "sha256": "a855c940baacca7aac7cb151872e70f95dc32e98e01e92ca409c30ce5f442a5a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w2-w01-bridge-exp02-results.json",
+      "sha256": "d69dd28a30c60cc0c42d0132b6308c3dea2f757db7e30ebd543c65763a20925c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/w2-w01-bridge-exp02-xml/TEST-com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.xml",
+      "sha256": "ca4b74aec0a2afa6bc204262986a5096aef3e62edd35e995c640b838e43d76d5"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "sha256": "d48d4f0d9e61ba0c000b7013683858244873980d5fd9a1bb40c66e297d4ffc3f"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "sha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "sha256": "7d711a43135c6f1312fb0ee026fd1c78b0ce27ed9f0b530babf1abe143be01e9"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "sha256": "4c5236fd7056c292e9b9225340321282beed6589c5165ef02e8e97080613fa6a"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "702d1be901ab72b00cbad66bda9578d6e17376883b242c1359fff34eb0971a4d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "d10ec5cbfdecdfba4f8f8dabbeae21008e3d0192f16e6108791182d10d5f3eda"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "sha256": "84e049075099bf7685e42435d9d3d4888aeab591800a14208524665a5199a763"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "sha256": "745223f046be477593a8f701a2fc4ed24d29dcfab6d19d32acabb011ed181165"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "78b2fcd52a8d48e5bd28a5f74d6e6eaf966b1f41cd7823029a9e662ce277a6f0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java",
+      "sha256": "2411f9ac24c1d21db7b43ee22ae91055b3aaefbce7f7652b276d4fc3d21e8b40"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+      "sha256": "d7b56a9e930f01b00e7c2d24fd9bddad146b601cdc89812235f2c1b2c674deeb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java",
+      "sha256": "6e13ce0398ef27a2b5f704af511477228eaba574b4b898fea055495e818021ab"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java",
+      "sha256": "7a2bce45abe0483ba2f77f5a281a03697115983cf5eac8a8695f2bb5b8f271fd"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java",
+      "sha256": "d3ef363c54561f290c3d9629a7a7f9cdbdafdafd3bd0e1211a08853184ccd3a2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256": "cb6f3703b4a6be5a28e3e48b74c06feff0ad788847a7ad8106f8fa206025312b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java",
+      "sha256": "83ed8fa26c304d5b2b8d8df9be51681598908c36be27cf0791c20a632f07063b"
+    },
+    {
+      "path": "backend/build.gradle.kts",
+      "sha256": "6a2aba4b76e5b01365b67848539951b83a03f75c17b90b6a61c1650923baaa97"
+    },
+    {
+      "path": "studio-runner/test/guided/ownership.test.ts",
+      "sha256": "fc4cb4f4c617830c75a32572e8cc381cd933310b33ea0d3ee212e91f1f9865e4"
+    },
+    {
+      "path": "studio-runner/test/guided/runtime.test.ts",
+      "sha256": "dfd1bad817e5eb33aaa9e7e6357723544f182342b8203753712f212744a4e814"
+    },
+    {
+      "path": "studio-runner/test/guided/transport.test.ts",
+      "sha256": "923d54920369929b34b1ef5cca0dd60f935de2f0e9fba471363e3ce31026b3da"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "sha256": "4b9ae41d55efb26cd464b506ece8ad89de0e69737b9df3afdd26eff12d4de903"
+    },
+    {
+      "path": "docs/architecture/ADR-SC-005-single-path-observed-authoring.md",
+      "sha256": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-004.story.md",
+      "sha256": "eea724184c1499eb50caf562adf08001cf2e096c385339a7a49ebbc496a480d4"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012A.story.md",
+      "sha256": "b0b79c1354227da2882241272c3f77ade52507e91a3af3e01dc7336075ada150"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+      "sha256": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md",
+      "sha256": "6366821457996a9bd7813653c1d2b3891c37c3c958ff0e57c6718442980c0d25"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w2-window01/aria-bridge-ruling01/ruling.md",
+      "sha256": "353d896f94275ddf0642ef529add5257c03c3907e293c4a2cbeb31fb562817e5"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/w2-window01/aria-bridge-ruling01/ruling.json",
+      "sha256": "0c431939dd8cf25cb2fb43e33a6165c2c4f39e753297b6a0746116cfd2bb8ed4"
+    }
+  ],
+  "counts": {
+    "MIGRATE": 16,
+    "RETIRE": 12,
+    "RETIRE_OBSOLETE": 1,
+    "total": 29
+  },
+  "crossCheck": {
+    "rulingNamesEqualExp02FailSet": true,
+    "retainedEqualExp02PassSet": true
+  }
+}

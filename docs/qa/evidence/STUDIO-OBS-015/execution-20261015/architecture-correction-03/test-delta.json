@@ -1,0 +1,94 @@
+{
+  "artifact": "ARCH015-03 additional actual-test delta",
+  "status": "ALL_PLANNED_NOT_RUN",
+  "preserves": "Original57 acceptance,48 migration cases and01/02 correction cases; abstract proof is not a replacement.",
+  "additionalMigrationMethods": [
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.pendingPrefixAllowsOnlyExactServerSideEffectQuestion",
+      "assertions": "Legitimate current CLARIFY_FIRST + PREPARED request/marker/question permits AWAIT while continuation prefix; same-owner lease renewal remains valid after old volatile preparation expires.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.pendingPrefixRejectsGenericStaleOrForgedWaitProof",
+      "assertions": "Reject wrong reason/extra marker/request/status/coordinate/scope/doc/gen/owner/fence/context/input/source/config/deadline/policy stance; no generic clarification escape.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.pendingPrefixWaitFencesBothGatewaysAttemptInsertAndModelCounters",
+      "assertions": "SQL model INSERT and each model-counter update fail in AWAIT; actual both Java reservation entrypoints remain model0.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.pendingPrefixWaitCannotAdmitConsumeOrSwitch",
+      "assertions": "Reject action INSERT and generic state/continuation/proposal/REFRESH/SOURCE_PLAN escapes during wait; native0, original no-invocation/switch guards stay strict.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.currentAnswerResumesOnlySamePrefixIdentity",
+      "assertions": "Exact pending marker/question->sameID/digest CONFIRMED/removal/stateREPLAY allowed; changed owner/context, forged confirmation or absent old proof rejected.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.prefixWaitCancellationExpiryAndOwnerLossNeverResurrect",
+      "assertions": "Existing CANCELLED/EXPIRED/UNKNOWN stops allowed, late answer/fence/context rewrite never resumes; original immutable initial identity and model fences retained.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "GuidedReplayingPrefixMigrationIT.prefixConfirmationAmendmentPreservesPopulatedV20AndAllExistingGuards",
+      "assertions": "Actual V20->newV21 old-row byte preservation, all48 original cases and V1-V20 checksums; fixture receipt cycles repaired without weakening production FK.",
+      "status": "PLANNED_NOT_RUN"
+    }
+  ],
+  "additionalApplicationCases": [
+    {
+      "name": "IncrementalPolicyIT.defaultCurrentPolicyPromptsPrefixWithoutModelOrNative",
+      "tier": "Real Spring+PG+runner+Chromium",
+      "assertions": "Publish base under ALLOW/old consent; approve omitted-stance defaultCLARIFY_FIRST, edit4of10. New prefix asks one current AUTHORED question before admission/native, both gateways0; old consent ignored.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "IncrementalPolicyIT.confirmationResumesFreshSameBrowserThenSuffixWithoutSecondPrompt",
+      "tier": "Real joined",
+      "assertions": "Wait beyond old preparation deadline while same owner renews; exact answer -> fresh observation ACK/newrequest/preparation/currentguards -> one effect on same browser/clock/video; prefixmodel0, suffix afterswitch, no second stance prompt, pure finalize.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "IncrementalPolicyIT.prefixGuardDeniesGroundingDestructionAndDenyEvenAfterConsent",
+      "tier": "Real HTTP+PG+runner",
+      "assertions": "Fresh Save/Delete/unobserved-target/form-Enter guard cases under frozen policy stop POLICY_DENIED before effect/model, never drift reinterpretation, even current confirmed stance.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "IncrementalPolicyIT.waitingRecoveryCancellationAndAnswerRacesRemainAtMostOnce",
+      "tier": "HTTP+PG concurrency+runner",
+      "assertions": "Duplicate keys/controller restart preserve one question; wrong user/choice/gen/source/context/lease/fence reject; cancel/expiry wins, no late effect/new browser/clock/uncertain retry.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "IncrementalPolicyIT.directPrefixAdmissionCannotBypassConfirmation",
+      "tier": "HTTP+PG",
+      "assertions": "Unconfirmed direct internal admit is stale/state refusal with no action; normal coordinator asks instead of denying. Fresh post-answer proposal reruns actual guards; no model/private-marker injection.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "GuidedRecordingTimingsTest.distinctAdmissionsWithIdenticalMeasuredKeysRemainDistinct",
+      "tier": "Java+TS parity",
+      "assertions": "Equal measured keys/different admissions accepted in scalar ID order, six fields/readings exact; duplicate admission/unknown/dispatch0/wrong coordinate/unsorted reject.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "GuidedRecordingTimingsTest.tieEndSelectionAndUnicodeOrderMatchRunner",
+      "tier": "Java+TS",
+      "assertions": "BMP/astral codepoint order, null-first and original kind order; derived minimum start/actual selected end-null match old selection rule; no +1ms/rebase/reround/new wire field.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "name": "IncrementalRecordingIT.tieTolerancePreservesActualRecordedEvidence",
+      "tier": "Real joined recording+callback fixture",
+      "assertions": "Carry legal actually measured ties through manifest/backend/result and per-admission seek. Keep both measured attempts, never invent absent pre-native stamp; original continuous video/privacy/native proof still required.",
+      "status": "PLANNED_NOT_RUN"
+    }
+  ],
+  "actualMigrationBaseline": "Olda4e0SQL attempt03 actualPG15.19=48executed41PASS7FAIL0skip; historical only after amendment.",
+  "designEvidenceOnly": "32 abstract state +7 synthetic timing cases; no real guard/SQL/auth/native/clock/application execution."
+}

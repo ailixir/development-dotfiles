@@ -1,0 +1,309 @@
+{
+ "startedAt": "2026-10-18T20:53:18Z",
+ "tier": "all",
+ "frozenSourceDigest": "6fcc12eef193338ca3bc79adaa50660d93c245a4462a5f850a7256588d9fc91b",
+ "frozenDistDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+ "runs": [
+  {
+   "kind": "baseline",
+   "label": "c10-baseline",
+   "exit": 0,
+   "elapsedS": 123,
+   "counts": {
+    "total": 33,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+   },
+   "verdict": "GREEN",
+   "failed": []
+  },
+  {
+   "kind": "mutation",
+   "id": "S3",
+   "lane": "S-W3 (AC-6 b/c, R7 non-vacuity)",
+   "what": "scheduled acceptance no longer mints the background grant binding",
+   "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+   "exit": 1,
+   "elapsedS": 32,
+   "counts": {
+    "total": 9,
+    "failed": 5,
+    "errors": 0,
+    "skipped": 0
+   },
+   "red": [
+    "ObservedScheduleAuthorityIT.g3DoesNotRefuseASecretFreeObservedScheduleOnAProductionBackgroundSource",
+    "ObservedScheduleAuthorityIT.g3AcceptsTheSameSecretReferencingRunUnderTheLocalFixturePolicy",
+    "ObservedScheduleAuthorityIT.anObservedScheduleIsAcceptedUnderBackgroundAuthorityForTheSchedulePrincipal",
+    "ObservedScheduleAuthorityIT.g3HoldsAgainAtDispatchRecheckForARunThatWasAcceptedUnderTheFixturePolicy",
+    "StudioScheduleApiIT.editedWriterQueuedBehindAnAcceptanceKeepsExactlyTheAcceptedRevision"
+   ],
+   "redMessages": {
+    "ObservedScheduleAuthorityIT.g3DoesNotRefuseASecretFreeObservedScheduleOnAProductionBackgroundSource": "org.springframework.dao.DataIntegrityViolationException: PreparedStatementCallback; SQL [UPDATE studio_schedule_occurrences SET decision=?,code=?,retry_at=NULL,retry_attempts=0,updated_at=now() WHERE id=? AND decision='DEFERRED']; ERROR: new row for relation \"studio_schedule_occurrences\" violates ch",
+    "ObservedScheduleAuthorityIT.g3AcceptsTheSameSecretReferencingRunUnderTheLocalFixturePolicy": "org.springframework.dao.DataIntegrityViolationException: PreparedStatementCallback; SQL [UPDATE studio_schedule_occurrences SET decision=?,code=?,retry_at=NULL,retry_attempts=0,updated_at=now() WHERE id=? AND decision='DEFERRED']; ERROR: new row for relation \"studio_schedule_occurrences\" violates ch",
+    "ObservedScheduleAuthorityIT.anObservedScheduleIsAcceptedUnderBackgroundAuthorityForTheSchedulePrincipal": "org.springframework.dao.DataIntegrityViolationException: PreparedStatementCallback; SQL [UPDATE studio_schedule_occurrences SET decision=?,code=?,retry_at=NULL,retry_attempts=0,updated_at=now() WHERE id=? AND decision='DEFERRED']; ERROR: new row for relation \"studio_schedule_occurrences\" violates ch",
+    "ObservedScheduleAuthorityIT.g3HoldsAgainAtDispatchRecheckForARunThatWasAcceptedUnderTheFixturePolicy": "org.springframework.dao.DataIntegrityViolationException: PreparedStatementCallback; SQL [UPDATE studio_schedule_occurrences SET decision=?,code=?,retry_at=NULL,retry_attempts=0,updated_at=now() WHERE id=? AND decision='DEFERRED']; ERROR: new row for relation \"studio_schedule_occurrences\" violates ch",
+    "StudioScheduleApiIT.editedWriterQueuedBehindAnAcceptanceKeepsExactlyTheAcceptedRevision": "org.springframework.dao.DataIntegrityViolationException: PreparedStatementCallback; SQL [UPDATE studio_schedule_occurrences SET decision=?,code=?,retry_at=NULL,retry_attempts=0,updated_at=now() WHERE id=? AND decision='DEFERRED']; ERROR: new row for relation \"studio_schedule_occurrences\" violates ch"
+   },
+   "wrongReason": [],
+   "expectedMissing": [],
+   "collateralRed": [
+    "ObservedScheduleAuthorityIT.g3DoesNotRefuseASecretFreeObservedScheduleOnAProductionBackgroundSource",
+    "ObservedScheduleAuthorityIT.g3AcceptsTheSameSecretReferencingRunUnderTheLocalFixturePolicy",
+    "ObservedScheduleAuthorityIT.g3HoldsAgainAtDispatchRecheckForARunThatWasAcceptedUnderTheFixturePolicy"
+   ],
+   "exact": false,
+   "restoredShaMatchesFrozen": true,
+   "verdict": "RED_AS_EXPECTED"
+  },
+  {
+   "kind": "mutation",
+   "id": "S4",
+   "lane": "S-W3 (AC-6 d tripwire, grant check)",
+   "what": "the background-grant check is removed (the ReplayIT tripwire expects BACKGROUND_AUTHORIZATION_DENIED)",
+   "file": "backend/src/main/java/com/citi/put/checks/studio/scheduling/ConfiguredBackgroundAuthorization.java",
+   "exit": 1,
+   "elapsedS": 124,
+   "counts": {
+    "total": 10,
+    "failed": 3,
+    "errors": 0,
+    "skipped": 0
+   },
+   "red": [
+    "GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+    "GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+    "ObservedScheduleAuthorityIT.theRefusalNoLongerExistsAndAWithdrawnGrantStillFailsClosed"
+   ],
+   "redMessages": {
+    "GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues": "org.opentest4j.AssertionFailedError: expected: \"BACKGROUND_AUTHORIZATION_DENIED\" but was: \"ACCEPTED\" org.opentest4j.AssertionFailedError: expected: \"BACKGROUND_AUTHORIZATION_DENIED\" but was: \"ACCEPTED\" at java.base@21.0.10/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstr",
+    "GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel": "org.opentest4j.AssertionFailedError: expected: 1 but was: 2 org.opentest4j.AssertionFailedError: expected: 1 but was: 2 at java.base@21.0.10/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62) at java.base@21.0.10/java.lang.reflect.Constructor.ne",
+    "ObservedScheduleAuthorityIT.theRefusalNoLongerExistsAndAWithdrawnGrantStillFailsClosed": "org.opentest4j.AssertionFailedError: expected: \"BACKGROUND_AUTHORIZATION_DENIED\" but was: \"ACCEPTED\" org.opentest4j.AssertionFailedError: expected: \"BACKGROUND_AUTHORIZATION_DENIED\" but was: \"ACCEPTED\" at java.base@21.0.10/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstr"
+   },
+   "wrongReason": [],
+   "expectedMissing": [],
+   "collateralRed": [
+    "GuidedPublicationReplayIT.actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel"
+   ],
+   "exact": false,
+   "restoredShaMatchesFrozen": true,
+   "verdict": "RED_AS_EXPECTED"
+  },
+  {
+   "kind": "mutation",
+   "id": "B1",
+   "lane": "B-W3 / R1 d (and R1 a-c)",
+   "what": "evidence acceptance back to the head revision only (the pre-R1 behaviour)",
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceService.java",
+   "exit": 1,
+   "elapsedS": 213,
+   "counts": {
+    "total": 10,
+    "failed": 4,
+    "errors": 0,
+    "skipped": 0
+   },
+   "red": [
+    "GuidedEvidencePendingAppendIT.aSecondRecordingAtTheOtherAcceptedRevisionIsStillAConflict",
+    "GuidedEvidencePendingAppendIT.recordingAtThePreviousRevisionIsAcceptedWhileAnAppendIsPending",
+    "GuidedEvidencePendingAppendJoinedIT.aSessionEndedWhileAnAppendIsPendingKeepsARecordingThatSettlesPlaysAndSeeks",
+    "GuidedEvidencePendingAppendJoinedIT.aSessionLosingItsBrowserWhileAnAppendIsPendingStillRecordsTheRunnersOwnFact"
+   ],
+   "redMessages": {
+    "GuidedEvidencePendingAppendIT.aSecondRecordingAtTheOtherAcceptedRevisionIsStillAConflict": "org.opentest4j.AssertionFailedError: expected: null but was: com.citi.put.checks.studio.guided.session.GuidedSessionException: STALE_FENCE at com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67) at com.citi.put.checks.studio.guided.evidence.GuidedS",
+    "GuidedEvidencePendingAppendIT.recordingAtThePreviousRevisionIsAcceptedWhileAnAppendIsPending": "org.opentest4j.AssertionFailedError: [R1 is reproduced when this fails with STALE_FENCE: recording-evidence at v(n-1) is refused while an append delivery is PENDING] expected: null but was: com.citi.put.checks.studio.guided.session.GuidedSessionException: STALE_FENCE at com.citi.put.checks.studio.gu",
+    "GuidedEvidencePendingAppendJoinedIT.aSessionEndedWhileAnAppendIsPendingKeepsARecordingThatSettlesPlaysAndSeeks": "org.opentest4j.AssertionFailedError: [no recording fact: session state=CANCELLED, pending deliveries=1, runner log tail={\"ts\":\"2026-10-18T20:58:20.752Z\",\"level\":\"info\",\"event\":\"runner.started\",\"port\":37628,\"poolSize\":1,\"runnerInstanceId\":\"runner-mveb520u-nafkxscc\",\"guided\":true} ] expected: 1 but wa",
+    "GuidedEvidencePendingAppendJoinedIT.aSessionLosingItsBrowserWhileAnAppendIsPendingStillRecordsTheRunnersOwnFact": "org.opentest4j.AssertionFailedError: [no recording fact: session state=FAILED, pending deliveries=1, runner log tail={\"ts\":\"2026-10-18T20:59:56.436Z\",\"level\":\"info\",\"event\":\"runner.started\",\"port\":37628,\"poolSize\":1,\"runnerInstanceId\":\"runner-mveb73ut-nz7jbt99\",\"guided\":true} ] expected: 1 but was: "
+   },
+   "wrongReason": [],
+   "expectedMissing": [],
+   "collateralRed": [
+    "GuidedEvidencePendingAppendIT.aSecondRecordingAtTheOtherAcceptedRevisionIsStillAConflict"
+   ],
+   "exact": false,
+   "restoredShaMatchesFrozen": true,
+   "verdict": "RED_AS_EXPECTED"
+  },
+  {
+   "kind": "mutation",
+   "id": "B2",
+   "lane": "ADJ-1 c (joined)",
+   "what": "the revoked-ADMITTED disjunct is unreachable (the pre-ADJ-1 behaviour)",
+   "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+   "exit": 1,
+   "elapsedS": 89,
+   "counts": {
+    "total": 5,
+    "failed": 2,
+    "errors": 0,
+    "skipped": 0
+   },
+   "red": [
+    "PreReadyRevocationJoinedIT.aPreReadyRevocationOfARealHeldRunIsSettledAsAuthorizationRevoked",
+    "PreReadyRevocationProbeIT.aPreReadyRevocationIsSettledAsAuthorizationRevoked"
+   ],
+   "redMessages": {
+    "PreReadyRevocationJoinedIT.aPreReadyRevocationOfARealHeldRunIsSettledAsAuthorizationRevoked": "org.opentest4j.AssertionFailedError: Expecting value to be true but was false org.opentest4j.AssertionFailedError: Expecting value to be true but was false at java.base@21.0.10/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62) at java.base@21.0",
+    "PreReadyRevocationProbeIT.aPreReadyRevocationIsSettledAsAuthorizationRevoked": "org.assertj.core.error.AssertJMultipleFailuresError: Multiple Failures (9 failures) -- failure 1 -- [ADJ-1: the runner's recorded-revocation FINAL is accepted (before: 409)] expected: null but was: \"409 TRANSITION_REJECTED\" at PreReadyRevocationProbeIT.aPreReadyRevocationIsSettledAsAuthorizationRevo"
+   },
+   "wrongReason": [],
+   "expectedMissing": [],
+   "collateralRed": [],
+   "exact": false,
+   "restoredShaMatchesFrozen": true,
+   "verdict": "RED_AS_EXPECTED"
+  },
+  {
+   "kind": "mutation",
+   "id": "B3",
+   "lane": "ADJ-1 narrowness (security co-sign dependency)",
+   "what": "the outcome binding is dropped: any pre-Ready FINAL on a revoked row is accepted",
+   "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+   "exit": 1,
+   "elapsedS": 22,
+   "counts": {
+    "total": 4,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0
+   },
+   "red": [
+    "PreReadyRevocationProbeIT.aRevokedRowsOtherPreReadyFinalIsStillRefusedAndTheReaperSettlesIt"
+   ],
+   "redMessages": {
+    "PreReadyRevocationProbeIT.aRevokedRowsOtherPreReadyFinalIsStillRefusedAndTheReaperSettlesIt": "org.opentest4j.AssertionFailedError: expected: \"409 TRANSITION_REJECTED\" but was: null org.opentest4j.AssertionFailedError: expected: \"409 TRANSITION_REJECTED\" but was: null at java.base@21.0.10/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)"
+   },
+   "wrongReason": [],
+   "expectedMissing": [],
+   "collateralRed": [],
+   "exact": true,
+   "restoredShaMatchesFrozen": true,
+   "verdict": "RED_AS_EXPECTED"
+  },
+  {
+   "kind": "mutation",
+   "id": "F1",
+   "lane": "F (AC-11 ACK-loss leg)",
+   "what": "the dispatcher resends on an AMBIGUOUS answer",
+   "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+   "exit": 1,
+   "elapsedS": 26,
+   "counts": {
+    "total": 1,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0
+   },
+   "red": [
+    "ObservedCoRunIT.aLostAcknowledgmentIsNeverAResend"
+   ],
+   "redMessages": {
+    "ObservedCoRunIT.aLostAcknowledgmentIsNeverAResend": "org.opentest4j.AssertionFailedError: [dispatcher sends for ackLoss: [send:ACCEPTED, acknowledgment-lost, send:DEFINITE_REFUSAL]] expected: 1 but was: 2 org.opentest4j.AssertionFailedError: [dispatcher sends for ackLoss: [send:ACCEPTED, acknowledgment-lost, send:DEFINITE_REFUSAL]] expected: 1 but was"
+   },
+   "wrongReason": [],
+   "expectedMissing": [],
+   "collateralRed": [],
+   "exact": false,
+   "restoredShaMatchesFrozen": true,
+   "verdict": "RED_AS_EXPECTED"
+  },
+  {
+   "kind": "mutation",
+   "id": "S1",
+   "lane": "S-W3 (G-3 at dispatch recheck)",
+   "what": "the G-3 secret refusal at the dispatch recheck is skipped",
+   "file": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledDispatchAuthorization.java",
+   "exit": 1,
+   "elapsedS": 24,
+   "counts": {
+    "total": 8,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0
+   },
+   "red": [
+    "ObservedScheduleAuthorityIT.g3HoldsAgainAtDispatchRecheckForARunThatWasAcceptedUnderTheFixturePolicy"
+   ],
+   "redMessages": {
+    "ObservedScheduleAuthorityIT.g3HoldsAgainAtDispatchRecheckForARunThatWasAcceptedUnderTheFixturePolicy": "java.lang.AssertionError: Expecting code to raise a throwable. java.lang.AssertionError: Expecting code to raise a throwable. at com.citi.put.checks.studio.scheduling.ObservedScheduleAuthorityIT.g3HoldsAgainAtDispatchRecheckForARunThatWasAcceptedUnderTheFixturePolicy(ObservedScheduleAuthorityIT.java"
+   },
+   "wrongReason": [],
+   "expectedMissing": [],
+   "collateralRed": [],
+   "exact": false,
+   "restoredShaMatchesFrozen": true,
+   "verdict": "RED_AS_EXPECTED"
+  },
+  {
+   "kind": "mutation",
+   "id": "LR",
+   "lane": "BL / LR c (T0 C10 minimum)",
+   "what": "the lifecycle route ignores the reported reason again (EXPIRED ends FAILED)",
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+   "exit": 1,
+   "elapsedS": 16,
+   "counts": {
+    "total": 5,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0
+   },
+   "red": [
+    "GuidedLifecycleReasonIT.anExpiredReportAcceptedBeforeTheBackendExpiryEndsExpired"
+   ],
+   "redMessages": {
+    "GuidedLifecycleReasonIT.anExpiredReportAcceptedBeforeTheBackendExpiryEndsExpired": "org.opentest4j.AssertionFailedError: expected: \"EXPIRED\" but was: \"FAILED\" org.opentest4j.AssertionFailedError: expected: \"EXPIRED\" but was: \"FAILED\" at java.base@21.0.10/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62) at java.base@21.0.10/ja"
+   },
+   "wrongReason": [],
+   "expectedMissing": [],
+   "collateralRed": [],
+   "exact": false,
+   "restoredShaMatchesFrozen": true,
+   "verdict": "RED_AS_EXPECTED"
+  },
+  {
+   "kind": "mutation",
+   "id": "F2",
+   "lane": "F (AC-11 public-cancel leg)",
+   "what": "the guided stop sender is swallowed, so the runner is never told to stop",
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+   "exit": 1,
+   "elapsedS": 34,
+   "counts": {
+    "total": 1,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0
+   },
+   "red": [
+    "ObservedCoRunIT.aPublicCancelOfALiveGuidedBrowserMidActionTearsItDownAndFreesTheSlot"
+   ],
+   "redMessages": {
+    "ObservedCoRunIT.aPublicCancelOfALiveGuidedBrowserMidActionTearsItDownAndFreesTheSlot": "java.lang.AssertionError: [the runner was told to stop] Expecting actual: 0 to be greater than: 0 java.lang.AssertionError: [the runner was told to stop] Expecting actual: 0 to be greater than: 0 at com.citi.put.checks.corun.ObservedCoRunIT.aPublicCancelOfALiveGuidedBrowserMidActionTearsItDownAndFre"
+   },
+   "wrongReason": [],
+   "expectedMissing": [],
+   "collateralRed": [],
+   "exact": false,
+   "restoredShaMatchesFrozen": true,
+   "verdict": "RED_AS_EXPECTED"
+  },
+  {
+   "kind": "final",
+   "label": "c10-final",
+   "exit": 0,
+   "elapsedS": 125,
+   "counts": {
+    "total": 33,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+   },
+   "verdict": "GREEN",
+   "failed": []
+  }
+ ],
+ "allAsExpected": true,
+ "finishedAt": "2026-10-18T21:07:07Z"
+}

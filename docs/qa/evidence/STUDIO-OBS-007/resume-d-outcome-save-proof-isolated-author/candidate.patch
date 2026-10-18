@@ -1,0 +1,230 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java
+@@ -166,6 +166,23 @@
+     }
+   }
+ 
++  static boolean successfulSchemaMatches(
++      PreparedReport prepared, ObjectNode report, GuidedContracts expectedContracts) {
++    try {
++      return prepared != null
++          && prepared.owner != null
++          && prepared.owner.contracts == expectedContracts
++          && prepared.failure == null
++          && prepared.originalReport == report
++          && report.getClass() == ObjectNode.class
++          && standardOutcomeTree(report)
++          && report.equals(prepared.snapshot)
++          && report.toString().equals(prepared.representation);
++    } catch (RuntimeException unavailable) {
++      return false;
++    }
++  }
++
+   public void verifyReport(ObjectNode stored, ObjectNode report) {
+     contracts.validate("ledger", report);
+     verifyReportBody(stored, report);
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java
+@@ -161,6 +161,19 @@
+ 
+   public void saveAction(ObjectNode action) {
+     contracts.validate("ledger", action);
++    saveActionBody(action);
++  }
++
++  void saveAction(ObjectNode action, GuidedActionLedger.PreparedReport prepared) {
++    if (!GuidedActionLedger.successfulSchemaMatches(prepared, action, contracts)) {
++      saveAction(action);
++      return;
++    }
++    GuidedContracts.canonical(action);
++    saveActionBody(action);
++  }
++
++  private void saveActionBody(ObjectNode action) {
+     jdbc.update(
+         "UPDATE studio_guided_actions SET document=?::jsonb WHERE admission_id=?",
+         action.toString(),
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -2215,7 +2215,11 @@
+           if (stored.equals(report)) {
+             return session.document().deepCopy();
+           }
+-          repository.saveAction(report);
++          if (preparedReport == null) {
++            repository.saveAction(report);
++          } else {
++            repository.saveAction(report, preparedReport);
++          }
+           if (secretAudit != null) {
+             secretAudit.guidedOutcome(session.document(), report);
+           }
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedActionLedgerTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedActionLedgerTest.java
+@@ -204,4 +204,77 @@
+         .validate(org.mockito.ArgumentMatchers.eq("ledger"), org.mockito.ArgumentMatchers.any());
+     assertThatThrownBy(() -> current.prepareReport(report)).isSameAs(fatal);
+   }
++  @Test
++  void actionSaveReusesOnlySuccessfulSameContractAndExactOwnedReportProof() throws Exception {
++    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
++    GuidedActionLedger selected = new GuidedActionLedger(checked);
++    var jdbc = org.mockito.Mockito.mock(org.springframework.jdbc.core.JdbcTemplate.class);
++    var repository = org.mockito.Mockito.spy(new GuidedSessionRepository(
++        jdbc, new org.springframework.transaction.support.TransactionTemplate(), checked));
++    ObjectNode report = uncertainReport(stored());
++    var prepared = selected.prepareReport(report);
++    org.mockito.Mockito.clearInvocations(checked);
++    repository.saveAction(report, prepared);
++    org.mockito.Mockito.verify(checked, org.mockito.Mockito.never())
++        .validate(org.mockito.ArgumentMatchers.eq("ledger"), org.mockito.ArgumentMatchers.any());
++    org.mockito.Mockito.verify(repository, org.mockito.Mockito.never()).saveAction(report);
++    org.mockito.Mockito.verify(jdbc).update(
++        "UPDATE studio_guided_actions SET document=?::jsonb WHERE admission_id=?",
++        report.toString(), report.path("admission").path("admissionId").asText());
++
++    for (var proof : java.util.Arrays.asList(
++        (GuidedActionLedger.PreparedReport) null,
++        new GuidedActionLedger(new GuidedContracts()).prepareReport(report))) {
++      org.mockito.Mockito.clearInvocations(repository, checked);
++      repository.saveAction(report, proof);
++      org.mockito.Mockito.verify(repository).saveAction(report);
++      org.mockito.Mockito.verify(checked).validate("ledger", report);
++    }
++    ObjectNode copy = report.deepCopy();
++    org.mockito.Mockito.clearInvocations(repository, checked);
++    repository.saveAction(copy, prepared);
++    org.mockito.Mockito.verify(repository).saveAction(copy);
++    org.mockito.Mockito.verify(checked).validate("ledger", copy);
++    var sessionId = report.remove("sessionId");
++    report.set("sessionId", sessionId);
++    org.mockito.Mockito.clearInvocations(repository, checked);
++    repository.saveAction(report, prepared);
++    org.mockito.Mockito.verify(repository).saveAction(report);
++    org.mockito.Mockito.verify(checked).validate("ledger", report);
++  }
++
++  @Test
++  void failedProofCanonicalRefusalAndSqlFailureRetainOriginalSaveBehavior() throws Exception {
++    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
++    GuidedActionLedger selected = new GuidedActionLedger(checked);
++    var jdbc = org.mockito.Mockito.mock(org.springframework.jdbc.core.JdbcTemplate.class);
++    var repository = org.mockito.Mockito.spy(new GuidedSessionRepository(
++        jdbc, new org.springframework.transaction.support.TransactionTemplate(), checked));
++    ObjectNode report = uncertainReport(stored());
++    org.mockito.Mockito.doThrow(new GuidedSessionException("INVALID_CONTRACT", 422))
++        .when(checked).validate(org.mockito.ArgumentMatchers.eq("ledger"), org.mockito.ArgumentMatchers.any());
++    var failed = selected.prepareReport(report);
++    assertThat(failed).isNotNull();
++    org.mockito.Mockito.doCallRealMethod().when(checked)
++        .validate(org.mockito.ArgumentMatchers.eq("ledger"), org.mockito.ArgumentMatchers.any());
++    org.mockito.Mockito.clearInvocations(repository, checked);
++    repository.saveAction(report, failed);
++    org.mockito.Mockito.verify(repository).saveAction(report);
++    org.mockito.Mockito.verify(checked).validate("ledger", report);
++
++    var prepared = selected.prepareReport(report);
++    ObjectNode invalid = report.deepCopy().put("ownerFence", Double.NaN);
++    org.mockito.Mockito.clearInvocations(jdbc, repository, checked);
++    assertThatThrownBy(() -> repository.saveAction(invalid, prepared)).hasMessage("INVALID_CONTRACT");
++    org.mockito.Mockito.verify(repository).saveAction(invalid);
++    org.mockito.Mockito.verify(checked).validate("ledger", invalid);
++    org.mockito.Mockito.verifyNoInteractions(jdbc);
++
++    var sqlFailure = new org.springframework.dao.DataIntegrityViolationException("fixed-sql-control");
++    org.mockito.Mockito.doThrow(sqlFailure).when(jdbc).update(
++        org.mockito.ArgumentMatchers.anyString(),
++        org.mockito.ArgumentMatchers.any(Object.class), org.mockito.ArgumentMatchers.any(Object.class));
++    assertThatThrownBy(() -> repository.saveAction(report, prepared)).isSameAs(sqlFailure);
++  }
++
+ }
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
+@@ -1312,6 +1312,52 @@
+     assertThat(retainedGeneration).isEqualTo(1);
+   }
+ 
++  @Test
++  void outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite() {
++    String id = observing();
++    JsonNode dispatched = dispatch(id);
++    ObjectNode envelope = outcome(dispatched);
++    ObjectNode report = (ObjectNode) envelope.path("ledger");
++    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
++    var selectedRepository = org.mockito.Mockito.spy(new GuidedSessionRepository(
++        jdbc, new TransactionTemplate(new DataSourceTransactionManager(jdbc.getDataSource())), checked));
++    var prepared = new GuidedActionLedger(checked).prepareReport(report);
++    assertThat(prepared).isNotNull();
++    assertThatThrownBy(() -> selectedRepository.transaction(() -> {
++      selectedRepository.lock(id);
++      selectedRepository.saveAction(report, prepared);
++      jdbc.queryForObject("SELECT 1 / 0", Integer.class);
++      return null;
++    })).isInstanceOf(org.springframework.dao.DataAccessException.class);
++    assertThat(repository.actions(id).getFirst()).isEqualTo(dispatched);
++
++    var selectedService = new GuidedSessionService(
++        selectedRepository, checked, access, new GuidedSessionProperties(true, Map.of()), clock);
++    selectedService.installBridge(
++        materialization, new GuidedPreparationStore(jdbc, contracts),
++        new GuidedBindingStore(jdbc, contracts, materialization), assignments);
++    assertThatThrownBy(() -> selectedService.outcomeV2(worker, id, 2, "wrong-proof-fence", envelope))
++        .hasMessage("STALE_FENCE");
++    assertThat(repository.actions(id).getFirst()).isEqualTo(dispatched);
++    assertThat(jdbc.queryForObject(
++        "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND route='outcomes-v2'",
++        Integer.class, id)).isZero();
++
++    org.mockito.Mockito.clearInvocations(checked, selectedRepository);
++    JsonNode accepted = selectedService.outcomeV2(worker, id, 1, "proof-winner", envelope);
++    assertThat(accepted.path("state").asText()).isEqualTo("OBSERVING");
++    assertThat(repository.actions(id).getFirst()).isEqualTo(report);
++    org.mockito.Mockito.verify(checked).validate(
++        org.mockito.ArgumentMatchers.eq("ledger"), org.mockito.ArgumentMatchers.any());
++    org.mockito.Mockito.verify(selectedRepository, org.mockito.Mockito.never())
++        .saveAction(org.mockito.ArgumentMatchers.any(ObjectNode.class));
++    assertThat(selectedService.outcomeV2(worker, id, 1, "proof-winner", envelope)).isEqualTo(accepted);
++    assertThat(repository.actions(id).getFirst()).isEqualTo(report);
++    assertThat(jdbc.queryForObject(
++        "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND route='outcomes-v2'",
++        Integer.class, id)).isEqualTo(1);
++  }
++
+   private GuidedSessionService newService(GuidedSessionProperties properties) {
+     var result = new GuidedSessionService(repository, contracts, access, properties, clock);
+     materialization = new GuidedMaterializationService(jdbc, contracts);
+--- a/docs/specs/studio-observed-authoring/translation-design.md
++++ b/docs/specs/studio-observed-authoring/translation-design.md
+@@ -360,3 +360,29 @@
+ The second context repeats every original query, mapper, parse, live/worker/fence/singleton and complete21-property construction. Whole fresh canonicalization stays at the original validation point. Exact full JSON and representation match, INCLUDING lease and every nested array, may reuse only schema success under the same private no-eviction per-instance v3 runner-context cache epoch. Null/foreign/unavailable or ANY input mismatch runs the original full validation; legitimate lease renewal therefore falls back rather than refuses. Default/manual context and verify always remain strict. Fresh context is returned, never the snapshot. No extra transaction/query, parent-writer exclusion, lease composition, permission/result cache, new schema/epoch API or generalized certificate is introduced.
+ 
+ All original guarded callback/state/source/fence/hash/generation/origin/budget/accounting/audit/command/transaction behavior remains. Existing defining fixtures cover actual fresh queries, default/first identity errors, exact-match-only traversal reuse and fallback/refusal branches; no new mandatory Core/browser case is added. Changes invalidate the historical context132 source/debug presence pin until coordinator review. Genuine SDK secret1000ms and AC13 timing remain unchanged; no latency or acceptance guarantee is claimed.
++
++### Same-callback outcome save schema proof
++
++The selected `outcomeV2` callback may reuse its existing `PreparedReport` schema success
++at the later action save. The proof is private-constructor, call-local and bound to
++its original owned standard-Jackson report, full snapshot and serialized representation.
++Reuse requires successful preparation and the repository's exact same `GuidedContracts`
++instance (and therefore its unchanged, non-evicting ledger schema epoch). A fixed failure,
++null/foreign contract, changed reference/tree/representation or unavailable comparison
++invokes the original public `saveAction` and full schema validation. Legacy/public saves
++and null-token dependency invocations retain their original behavior.
++
++At the original save schema point, the successful path still canonicalizes the entire
++fresh report, then performs the original SQL update with that report. Every preceding
++fresh owner/source/materialization/action/proposal/assertion/binding/duplicate guard,
++transaction boundary and following audit/session/stop action remains unchanged. Neither
++report verification nor the current successful-read binding implementation mutates the
++report between verification and persistence; the complete match remains mandatory.
++
++This introduces private equality/serialization observations at the original save point.
++Unexpected nonfatal match failure falls back to original validation; fatal `Error`
++propagates without persistence or relabeling. Canonicalization and SQL failures preserve
++original rollback and propagation. There is no extra transaction/query, authority cache,
++new token or schema API. Copy/match work and fallback overhead remain; there is no latency,
++exclusive-cost or C5 acceptance guarantee. Repository debug line changes retire the
++previous own-claim line79 metadata until separately re-pinned before sampled reuse.

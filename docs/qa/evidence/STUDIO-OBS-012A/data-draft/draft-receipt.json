@@ -1,0 +1,108 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "stage": "T0 isolated draft static review",
+  "files": [
+    {
+      "file": "V12__tests_revisions.sql",
+      "sha256": "c05fb100cd791d208a8dd33c87d9e405f9fa90eaef5781462e21f7acbed8dfe1",
+      "bytes": 6475,
+      "balanced_quotes_and_dollar_bodies": true,
+      "top_level_statements": 16,
+      "unterminated_statement": false
+    },
+    {
+      "file": "V13__executions_ledger.sql",
+      "sha256": "7fffd5c23bed382cfa89e9b2fc94c43a2536fec4bedcf05063551a8bd36fbc20",
+      "bytes": 22203,
+      "balanced_quotes_and_dollar_bodies": true,
+      "top_level_statements": 39,
+      "unterminated_statement": false
+    },
+    {
+      "file": "V14__guided_sessions.sql",
+      "sha256": "e7bb3c4c8eaa6249ee60e8d3c00f01813ca22ac26db1b96149985372c1637426",
+      "bytes": 26352,
+      "balanced_quotes_and_dollar_bodies": true,
+      "top_level_statements": 55,
+      "unterminated_statement": false
+    },
+    {
+      "file": "V15__publication.sql",
+      "sha256": "268bd5b52c98218890d86b654c8ff927c37e292f0a589020276320cae3fb0598",
+      "bytes": 51743,
+      "balanced_quotes_and_dollar_bodies": true,
+      "top_level_statements": 47,
+      "unterminated_statement": false
+    },
+    {
+      "file": "V16__scheduling.sql",
+      "sha256": "f26088fb62fd653a07fc14516358664ed398cc1e66e16715d9f23eec9f99ec66",
+      "bytes": 23886,
+      "balanced_quotes_and_dollar_bodies": true,
+      "top_level_statements": 44,
+      "unterminated_statement": false
+    },
+    {
+      "file": "V17__secret_use_audit.sql",
+      "sha256": "b64da06a0ac582b4c5a9c9134be8f3bf6beb83813cdaa0ab04f9ff5bb03acc89",
+      "bytes": 57441,
+      "balanced_quotes_and_dollar_bodies": true,
+      "top_level_statements": 52,
+      "unterminated_statement": false
+    },
+    {
+      "file": "V18__drop_plaintext_secrets.sql",
+      "sha256": "e152e134e4718820a3bd9975dcefa17d770401f7446a5aa3fd55b042d1e22122",
+      "bytes": 703,
+      "balanced_quotes_and_dollar_bodies": true,
+      "top_level_statements": 1,
+      "unterminated_statement": false
+    }
+  ],
+  "drafts": 7,
+  "created_tables": [
+    "ui_test_revisions",
+    "studio_dispatch_ledger",
+    "studio_guided_sessions",
+    "studio_guided_actions",
+    "studio_guided_commands",
+    "studio_guided_evidence",
+    "studio_guided_assignments",
+    "studio_guided_materializations",
+    "studio_guided_preparations",
+    "studio_guided_allocations",
+    "studio_guided_producers",
+    "studio_guided_consumer_edges",
+    "studio_guided_source_manifests",
+    "studio_guided_translation_plans",
+    "studio_guided_translation_state",
+    "studio_guided_model_attempts",
+    "studio_guided_model_usage_audit",
+    "studio_guided_obligation_admissions",
+    "studio_guided_clarification_contexts",
+    "studio_guided_publication_bases",
+    "studio_guided_publication_observations",
+    "studio_guided_publication_preparations",
+    "studio_guided_publication_admissions",
+    "studio_guided_publication_attempts",
+    "studio_guided_publications",
+    "studio_schedules",
+    "studio_schedule_activations",
+    "studio_schedule_occurrences",
+    "studio_schedule_uncertainty_ack",
+    "studio_secret_use_audit",
+    "studio_observed_secret_read_entries",
+    "studio_observed_no_send_decisions",
+    "studio_observed_terminal_secret_settlements"
+  ],
+  "function_definitions": 63,
+  "duplicate_function_definitions": false,
+  "retired_state_occurrences": 0,
+  "all34_input_files_unchanged": true,
+  "v1_v11_baseline_identity": true,
+  "sql_engine_parse_or_execution": false,
+  "flyway_run": false,
+  "rds_parity_lint_run": false,
+  "production_or_test_source_writes": false,
+  "meaning": "Lexical/deterministic source checks only; root must execute PostgreSQL/Flyway and named existing tests afterK+C phasegate. Not runtime evidence."
+}

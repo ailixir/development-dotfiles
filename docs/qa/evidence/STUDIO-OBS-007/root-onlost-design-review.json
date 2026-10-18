@@ -1,0 +1,13 @@
+{
+  "scope": "SOURCE_ONLY_PRECEDENCE_REVIEW_NOT_FORMAL_QA",
+  "candidateSha256": "1030f20c1d8534a0b5bf8941bf3f73f973e32f3e2327ccf77eb7ef671331178a",
+  "disposition": "APPROVE_ISOLATED_AUTHORING_ONLOST_ONLY",
+  "verified": "Original runtime launch callback alone invokes loss stop; original browser manual close sets closed before context close so induced disconnect is suppressed. Original generic stop does not resolve private loss signal. Old generic-stop-inside-native diagnostic precedence remains intact without padding/assertion changes. Repeated genuine loss callbacks still memoize actual close via original stop.",
+  "requirements": [
+    "Signal only after same original stop promise fulfills; close failure stays unconfirmed.",
+    "Original sole password call and live/withhold/source/authority unchanged; race losing rejection cannot re-enter diagnostics.",
+    "Focused unit cases capture original supplied callback and gate actual fake close; test tier remains unit, not native proof.",
+    "Combined fixture still needs exact source review, actual identity/browser tree gone, managed callbacks and ACK tails, authentic descriptor restoration, honest raw pending/nonseal and sticky errors."
+  ],
+  "next": "D may finalize isolated minimal combined candidate for exact source review. No source apply/runtime/lifecycle authorization from this receipt."
+}

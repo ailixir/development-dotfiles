@@ -1,0 +1,104 @@
+{
+  "status": "ALL_SELECTED_SOURCE_CONTRACT_CHECKS_PASS",
+  "commands": {
+    "sourceChecks": [
+      {
+        "name": "oracle",
+        "command": "node tools/check-studio-observed-contracts.cjs",
+        "log": "contract-oracle.log",
+        "exitCode": 0,
+        "logSHA256": "9b1ea4bf5af9b47e0a921c486e391781ba6ddc4ff949baf7ba052b43d71334f6"
+      },
+      {
+        "name": "parity",
+        "command": "node tools/build-studio-observed-schemas.cjs --check",
+        "log": "generator-parity.log",
+        "exitCode": 0,
+        "logSHA256": "785745b252f39a1a2f24ec7875449b8ba3b4c9c77edf14aa0cd21db7a714eead"
+      },
+      {
+        "name": "source-pins",
+        "command": "node docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/check-pins.cjs",
+        "log": "source-pin-status.json",
+        "exitCode": 0,
+        "logSHA256": "e9c9ef8d63856b307dcb76a7565536708f00a2c071e30eb77bde7e6ae37d8ddf"
+      },
+      {
+        "name": "audit",
+        "command": "node docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-05/audit-selected.cjs",
+        "log": "selected-audit.json",
+        "exitCode": 0,
+        "logSHA256": "f56edf6a88bd0b4b93cdb64c0bf9dc7f3041fa4f8578ec405c5e9e5139e733d2"
+      }
+    ],
+    "ownedChecks": [
+      {
+        "name": "focused-contract-tests",
+        "command": "node node_modules/vitest/vitest.mjs run test/run/confinement.test.ts -t 'pins the entire reviewed OpenAPI document including observed routes|emits the RunnerEvidence.partial|keeps every runner-produced body closed' --coverage.enabled=false",
+        "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+        "log": "focused-contract-tests.log",
+        "exitCode": 0,
+        "scope": "OWNED_SOURCE_ONLY",
+        "logSHA256": "27fea57bd629beabecaac585a9f94318540a6b1a6eb072c518f66706bb411c7b"
+      },
+      {
+        "name": "owned-test-lint",
+        "command": "node node_modules/eslint/bin/eslint.js test/run/confinement.test.ts",
+        "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+        "log": "owned-test-lint.log",
+        "exitCode": 0,
+        "scope": "OWNED_SOURCE_ONLY",
+        "logSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "owned-test-typecheck",
+        "command": "node docs/qa/evidence/STUDIO-OBS-015/execution-20261015/contracts/correction-05/owned-test-typecheck.cjs",
+        "cwd": "repository root",
+        "log": "owned-test-typecheck.json",
+        "exitCode": 0,
+        "scope": "OWNED_SOURCE_ONLY",
+        "logSHA256": "b5ae8569d2f07db107352f97aaaa6f84ec0229a6316c6803f56233be733e4892"
+      },
+      {
+        "name": "package-pins-dist-diagnostic",
+        "command": "node scripts/check-pins.mjs --json",
+        "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+        "log": "package-pins-dist-diagnostic.json",
+        "exitCode": 1,
+        "scope": "ACTUAL_FAILED_DIST_DIAGNOSTIC_PENDING_ROOT_BUILD_NOT_SELECTED_SOURCE_GREEN",
+        "logSHA256": "fdf6083ccdbdcc4d58cf01a8737128f2f659626eae8c4300b28842074d4f9edb"
+      }
+    ]
+  },
+  "focusedVitest": {
+    "passed": 3,
+    "unselected": 16,
+    "coverageEnabled": false,
+    "fullSuiteCoverageCredit": false
+  },
+  "ownedFileTypecheck": {
+    "status": "PASS_OWNED_SOURCE_TYPECHECK",
+    "target": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/run/confinement.test.ts",
+    "ownedDiagnostics": [],
+    "scope": "Only C-int-owned confinement file strict semantic diagnostics; not a full package type-check or build",
+    "otherDependencyDiagnosticsNotCredited": [],
+    "noEmit": true
+  },
+  "distDiagnostic": {
+    "exitCode": 1,
+    "status": "REAL_FAILED_PREBUILD_DIST_DIAGNOSTIC_SEPARATE_FROM_SOURCE_GATE",
+    "failures": [
+      "Observed packaged reference bundle is stale.",
+      "Observed packaged schema bundle is stale."
+    ],
+    "notAsserted": [
+      "dist/runtime-versions.json chromiumBuild is not asserted (it is null): this build did not run inside the pinned Playwright image, or ran there without being told which image it was, so the browser build was not asserted (ED-05).",
+      "dist/runtime-versions.json image is not asserted (it is null): this build did not run inside the pinned Playwright image, or ran there without being told which image it was, so the browser build was not asserted (ED-05)."
+    ],
+    "logSHA256": "fdf6083ccdbdcc4d58cf01a8737128f2f659626eae8c4300b28842074d4f9edb"
+  },
+  "nativeCalls": 0,
+  "databaseCommands": 0,
+  "gradleCommands": 0,
+  "runtimeBuildCommands": 0
+}

@@ -1,0 +1,27 @@
+{
+  "scope": "INDEPENDENT_ROOT_ARCHITECTURE_DECISION_STATIC_SCHEMA_LIFETIME_NOT_QA_GATE",
+  "technicalSha256": "295b3ccecea899b3d8913ff2a7b21adb74c65a0b4c76d5518539c18c9ef03ed6",
+  "independentPoSha256": "cd5e2097d34dc24b15a1357d999e2c01b9a67ee6863a5134971847569cf307ff",
+  "decision": "B_INSTANCE_STARTUP_STATIC_SCHEMA_SNAPSHOT",
+  "disposition": "APPROVE_DOCUMENTATION_FIRST_ISOLATED_ARCHITECTURE_IMPLEMENTATION_PLAN",
+  "rationale": "Static root/output alreadyinstance lifetime; repeated identical provider transforms/provenance underownerlock are proved work. A coherent private immutable bundle removes that work without caching dynamic authority. B is explicit lifetime change, not failed-second-read equivalence or measured1s fix.",
+  "explicitAcceptedSemantics": [
+    "Complete allrequired static inputs/current3Kind provider schemas/provenance before assemblerinstance publication. Missing/malformed/transitive/canonical failures fail startup, including unconditionalbean/standaloneconstructor use. No partial/fallback bundle.",
+    "Resource updates require replacing/restarting assemblerinstance/applicationcontext. No supportedguidedhotreloadAPI found; developmentDevToolscontextrestart recreatesbundle. Deployed filesystem/image immutability NOTASSERTED.",
+    "SourceClassifier shares same startup bean; retainedoldconstructors maycreate their own once-per-instance snapshot, no newAssembler per classify.",
+    "Provider/provenance return freshdeepcopies EVERY call and never exposeprivate mutableJsonNodes. Exact originalschema expansion/$defs/Shape order/UTF8canonical/hash/output bytes unchanged.",
+    "Keep originalrequestgetter/pincomparison/source/permission/owner/fence/budget/clock/SQL/accounting/projection/catalog/replaypolicy guards. SnapshotNOauthorization/source/owner/projection/result/credential data."
+  ],
+  "documentationFirst": "D first records conciseaccepted lifetime/failure/restart semantics andcurrent\u2192new dependency/dataflow in existingtranslation-design section (no newconfig/YAML/framework/policyversion/ACwaiver). Rootreviewsdoc/isolatedcandidate beforeliveapply.",
+  "minimumImplementationScope": [
+    "GuidedPromptAssembler privatefinal staticmetadata instancebundle/currentalgorithm reuse",
+    "GuidedSourceClassifier constructorinjection/compatibleconstructor and sameexistingconfiguration bean",
+    "Nearest existing definingtests for allKindexactbaseline/$defs/hashes+mutationisolation/failedconstructionwhereexistingseam permits; no newloaderframework or mandatoryE2E"
+  ],
+  "validation": "ExistingfullTranslationTest/planningpinrefusal/accounting/strictwire/providerprivacy/conformance and exactoldassertions remain, then originalunprofiledC5fullROOTAPP30/1000ms aftersource/staticdefiningPASS. No performancebenefit promised or repeatedholderdiagnostic.",
+  "autonomy": "User repeatedlyauthorized autonomous plan execution; design decision documented withinthat scope, no duplicatepermissionrequest.",
+  "sourceApply": false,
+  "runtime": false,
+  "whole19AcPass": false,
+  "formalQA": false
+}

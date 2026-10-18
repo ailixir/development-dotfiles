@@ -1,0 +1,295 @@
+{
+  "story": "STUDIO-OBS-007",
+  "storyPath": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+  "task": "Independent PO acceptance-consistency delta during develop T0/T1; not draft lifecycle validation",
+  "actor": "Pax (@po)",
+  "validationDate": "2026-10-10",
+  "at": "2026-10-10T04:36:26.501151+00:00",
+  "verdict": "GO",
+  "scope": "Only AC-14 absence semantics for guided declared-but-unreached NOT_USED; prior full 19-AC scope and conditions retained",
+  "readinessScore": 9,
+  "scoreScale": 10,
+  "scoreScope": "Delta design readiness only; original XL execution risk and external gates unchanged",
+  "confidence": "High for acceptance consistency; runtime implementation unverified",
+  "statusBefore": "InProgress",
+  "statusAfter": "InProgress",
+  "lifecycleTransitionPerformed": false,
+  "storyVersionBefore": "0.3.2",
+  "storyVersionAfter": "0.3.3",
+  "storySha256Before": "b1a93e3d2f711a8ea438d0c87303f9392b5d81e26f9460e8f7530eccd343d0bc",
+  "storySha256After": "ea9ad03605ed14febb4006ddc53e532d07514ba788aa6a932bcaa96da7084c3a",
+  "sourceSha256": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "b1a93e3d2f711a8ea438d0c87303f9392b5d81e26f9460e8f7530eccd343d0bc",
+    "docs/specs/studio-observed-authoring/secret-login-design.md": "8c1cd118beed176b1e622a25ebe07f5c1d4ea406cf156535526ded6ca8b24d57",
+    "docs/specs/studio-observed-authoring/secret-login-security-review.md": "c5ce3be4543ae51618455b14909caabaf9cc46b9dd7fce0a2ff57516394cde49",
+    "docs/architecture/ADR-SC-005-single-path-observed-authoring.md": "39488993572a831b3dc4fac1eb8aa471d2703a4504b340bcd19f83952ca681f4",
+    ".ai/STUDIO-OBS-007-architect-t0-rulings.json": "df94f7d40de5f026856aa959427cbdb09ce71ba7f99a144c081f7f59e3d01cd2",
+    "docs/qa/evidence/STUDIO-OBS-007/t0-data-design.md": "bb906daa8c43cb91afb2c5ea87edee953374edddfe85c01f338f93a1364e83e9",
+    "docs/qa/evidence/STUDIO-OBS-007/t0-security-r3-delta.md": "627a3c3d0701b0881e1a285811b9ebbb5a2158a663fcdc6d2c42335a09dcbcc4",
+    ".ai/STUDIO-OBS-007-po-validation-r5.json": "60b3a45180604e9762c27a854041669cbf5324a6d2dc6d2ff136a3b984ae8da5",
+    ".codex/skills/aiox-po/SKILL.md": "7e4b06e70fd44658f3a9abb7b20ec0e8a31a2cb41ccddc0ec784c56cb41acff4",
+    ".aiox-core/development/agents/po.md": "f0090329fd2c2871d3b46d0b2ea1bb9ff3fe48c589fc25ed3d90cf2032621cfd",
+    ".aiox-core/development/tasks/validate-next-story.md": "277faba94cba30ac3773159d641fc2b8a345efd70dcfef6bae15f8a6280128ea",
+    ".claude/rules/story-lifecycle.md": "f5262020e0a3b614104881019550cb0b793907c6694d41e027fc9c1bbe2a2278",
+    ".aiox-core/core-config.yaml": "7bd8694cded2a845882f29e9c7b11d18ae531ad492a3cefb53a71100eb29bc31"
+  },
+  "storyAc14Before": "14. **AC-14 \u2014 Audit table and rows (SEC-9, I-C10).** `studio_secret_use_audit` is append-only (UPDATE/DELETE refused by trigger) with the \u00a74.1 columns (`path \u2208 {GUIDED, OBSERVED_REPLAY}`, `execution_id?`, `session_id?`, `admission_id?`, `principal_id`, `csi_id`, `environment`, `test_id`, `secret_id`, `vault_version?`) plus `row_kind \u2208 {RELEASE, USAGE}`, `release_id`, `attempt_id`, `release_seq`, `coordinate_step_id` + `coordinate_ordinal`, and `outcome \u2208 {RESOLVED, NOT_AUTHORIZED, REVOKED, UNAVAILABLE, VAULT_UNAVAILABLE, REVOKED_MID_RUN}`; never a value (canary scan of the table). Rows are written in the same transaction as the dispatch state change on both paths: one RELEASE row per release including every retry (two rows, two `attempt_id`s on a forced retry); one USAGE row per declared secret \u2014 guided joined from the ledger outcome by `admission_id`, replay from `RunnerReport.secretUse` \u2014 so a resolved-but-never-typed secret is `NOT_USED` (C-11). Retention: the existing retention pruner window (design \u00a78 Q3 default). DDL authored by @data-engineer as `V34__studio_guided_secret_login.sql` on the **current** baseline; OBS-012A re-homes it into `V17__secret_use_audit` (ADR-SC-005 D-B). [design \u00a74.1, \u00a74.6 I-C10, \u00a76 \"Migration\"; security review F-8]",
+  "storyAc14After": "14. **AC-14 \u2014 Audit table and rows (SEC-9, I-C10).** `studio_secret_use_audit` is append-only (UPDATE/DELETE refused by trigger) with the \u00a74.1 columns (`path \u2208 {GUIDED, OBSERVED_REPLAY}`, `execution_id?`, `session_id?`, `admission_id?`, `principal_id`, `csi_id`, `environment`, `test_id`, `secret_id`, `vault_version?`) plus `row_kind \u2208 {RELEASE, USAGE}`, `release_id`, `attempt_id`, `release_seq`, `coordinate_step_id` + `coordinate_ordinal`, and `outcome \u2208 {RESOLVED, NOT_AUTHORIZED, REVOKED, UNAVAILABLE, VAULT_UNAVAILABLE, REVOKED_MID_RUN}`; never a value (canary scan of the table). Rows are written in the same transaction as the dispatch state change on both paths: one RELEASE row per release including every retry (two rows, two `attempt_id`s on a forced retry); one USAGE row per declared secret \u2014 guided joined from the ledger outcome by `admission_id` when an admission exists, replay from `RunnerReport.secretUse` \u2014 so a resolved-but-never-typed secret is `NOT_USED` (C-11). Resolution `outcome` is nonnull for every actual RELEASE and linked USAGE and remains exactly the six outcomes above; `usage_outcome` records usage separately. **Sole absence variant:** a guided declared-but-unreached secret has one terminal `USAGE/NOT_USED` row with null `outcome`, `release_id`, `admission_id` and `vault_version`, exact declaring `coordinate_step_id`/`coordinate_ordinal` and session/attempt/principal/CSI/environment/test/secret identity, and duplicate/concurrent summaries refused. Null means no resolution decision occurred, never a new outcome code; no RELEASE, admission, version or resolution fact is fabricated and no Vault read or runner send occurs to satisfy the audit relationship. Every other USAGE requires its actual scoped RELEASE. C-11 proves this zero-read/zero-send absence case, distinct from resolved-but-not-typed usage, rejects null outcomes on actual RELEASE/linked USAGE and malformed or wrong-scope links, and retains the audit value-canary scan. Retention: the existing retention pruner window (design \u00a78 Q3 default). DDL authored by @data-engineer as `V34__studio_guided_secret_login.sql` on the **current** baseline; OBS-012A re-homes it into `V17__secret_use_audit` (ADR-SC-005 D-B). [design \u00a74.1, \u00a74.6 I-C10, \u00a76 \"Migration\"; security review F-8]",
+  "changeLogEntry": "| 2026-10-10 | 0.3.3 | PO audit delta GO: AC-14 explicitly represents unreached guided NOT_USED with no resolution/release/admission/version; exact nonnull outcomes and security oracles preserved. Status InProgress unchanged. Report `.ai/STUDIO-OBS-007-po-audit-delta.json` | @po (Pax) |",
+  "sourceBinding": {
+    "design": "secret-login-design R3 \u00a74.1, I-A1/I-A2/I-A3/I-C10, \u00a77 SEC-9/C-11",
+    "security": "security conditions 1\u20139, R1 tightenings and independent security T0 release; its historical pre-DDL note is resolved by subsequent architect/data ruling plus this PO acceptance clarification",
+    "architect": "RULING-6; RULING-1 keeps resolution and usage status separate; RULING-5 preserves original release-month retention",
+    "data": "t0-data-design Final audit edge semantics, including the sole nullable resolution-outcome variant",
+    "decisionOwner": "Root authorized exact clause amendment and reserved story edit lane before mutation"
+  },
+  "rationale": [
+    "Original one-USAGE-per-declared-secret obligation includes steps never reached; guided dispatch is just-in-time so that case truthfully has no resolved value or RELEASE.",
+    "Fabricating RESOLVED, a RELEASE, an admission or a Vault version would falsify audit evidence; reading Vault merely to populate those fields would violate right-moment delivery.",
+    "Nullable resolution outcome is permitted only for the fully constrained GUIDED terminal USAGE/NOT_USED absence shape. It adds no new resolution outcome code and never makes actual release facts optional.",
+    "Every actual RELEASE/linked USAGE remains nonnull in exactly RESOLVED, NOT_AUTHORIZED, REVOKED, UNAVAILABLE, VAULT_UNAVAILABLE, REVOKED_MID_RUN. All other usage requires the real scoped RELEASE.",
+    "Append-only metadata, complete authorization scope and declarative coordinates, uniqueness, retention window and value-canary coverage are preserved. No value, diagnostic text, new secret channel or account-provider feature is added.",
+    "AC-13 mid-run revocation remains required. RULING-6 live recheck event is safe metadata, linked to prior resolution, no send/value, immutable and unique; this PO delta does not claim SQL or runtime proof."
+  ],
+  "tenPointDeltaChecklist": [
+    {
+      "n": 1,
+      "item": "Clear title",
+      "result": "PASS",
+      "evidence": "Original single-path login title unchanged."
+    },
+    {
+      "n": 2,
+      "item": "Complete description",
+      "result": "PASS",
+      "evidence": "Original author-owned login and compliance need unchanged; absence is distinguished from actual resolution."
+    },
+    {
+      "n": 3,
+      "item": "Testable ACs",
+      "result": "PASS",
+      "evidence": "AC-14 adds sole null shape and exact C-11 zero-read/send, duplicate/concurrent and invalid-null/link negative cases."
+    },
+    {
+      "n": 4,
+      "item": "Bounded scope",
+      "result": "PASS",
+      "evidence": "Only AC-14, PO note and append-only log amended. Other 18 ACs and out-of-scope stories unchanged."
+    },
+    {
+      "n": 5,
+      "item": "Dependencies",
+      "result": "PASS",
+      "evidence": "Architect RULING-6/data final semantics durable; independent T0 security trace retained; root owns V34 release."
+    },
+    {
+      "n": 6,
+      "item": "Complexity",
+      "result": "PASS",
+      "evidence": "XL three-lane sizing retained; delta adds no new workflow or secret channel."
+    },
+    {
+      "n": 7,
+      "item": "Business value",
+      "result": "PASS",
+      "evidence": "Truthful audit of whether credentials were ever used; preserves author-owned login."
+    },
+    {
+      "n": 8,
+      "item": "Risks",
+      "result": "PASS",
+      "evidence": "Null allowed only for nonresolved guided NOT_USED; actual-release null rejection, scoped linking, concurrency and retention proof remain required."
+    },
+    {
+      "n": 9,
+      "item": "Done definition",
+      "result": "PASS",
+      "evidence": "T4 executed oracles/T5 evidence/T6 independent QA unchanged; no lifecycle gate here."
+    },
+    {
+      "n": 10,
+      "item": "PRD/epic alignment",
+      "result": "PASS",
+      "evidence": "R3 right-moment/never-logged and I-C10/C-11 intent preserved; ADR single path and CSI scope unchanged."
+    }
+  ],
+  "preservedSecurityConditions": [
+    {
+      "condition": 1,
+      "acs": [
+        4,
+        5,
+        7,
+        19
+      ],
+      "oracles": [
+        "SEC-6",
+        "C-1",
+        "C-18",
+        "C-19",
+        "C-20"
+      ],
+      "disposition": "Unchanged; isolated-world same-element password/origin/form-action guarantees."
+    },
+    {
+      "condition": 2,
+      "acs": [
+        2,
+        13,
+        14,
+        19
+      ],
+      "oracles": [
+        "C-4",
+        "C-11"
+      ],
+      "disposition": "Exact REVOKED_MID_RUN outcome and <=2s plus in-flight-step requirement unchanged; no second usage summary or invented send."
+    },
+    {
+      "condition": 3,
+      "acs": [
+        11,
+        19
+      ],
+      "oracles": [
+        "C-3"
+      ],
+      "disposition": "Unchanged; preferences and pre-cleanup disk canary."
+    },
+    {
+      "condition": 4,
+      "acs": [
+        9,
+        19
+      ],
+      "oracles": [
+        "C-5"
+      ],
+      "disposition": "Unchanged; streaming/read-write erase/TRACE sink coverage."
+    },
+    {
+      "condition": 5,
+      "acs": [
+        1,
+        12,
+        19
+      ],
+      "oracles": [
+        "C-13",
+        "SEC-4"
+      ],
+      "disposition": "Unchanged; 4096 bounds and longer-entry refusal."
+    },
+    {
+      "condition": 6,
+      "acs": [
+        8,
+        19
+      ],
+      "oracles": [
+        "C-14"
+      ],
+      "disposition": "Unchanged; password read refusal."
+    },
+    {
+      "condition": 7,
+      "acs": [
+        6,
+        19
+      ],
+      "oracles": [
+        "C-15"
+      ],
+      "disposition": "Unchanged;value-excluding digest plus safe identity binding."
+    },
+    {
+      "condition": 8,
+      "acs": [
+        2,
+        14,
+        19
+      ],
+      "oracles": [
+        "C-16"
+      ],
+      "disposition": "Unchanged;closed callback/control contracts and pin updates."
+    },
+    {
+      "condition": 9,
+      "acs": [
+        6,
+        10,
+        19
+      ],
+      "oracles": [
+        "C-6",
+        "C-17",
+        "SEC-1\u2026SEC-10",
+        "C-1\u2026C-7",
+        "C-11\u2026C-20"
+      ],
+      "disposition": "Every listed executed oracle retained; no skips introduced."
+    }
+  ],
+  "requiredImplementationOracles": [
+    {
+      "oracle": "C-11 additive absence case",
+      "given": "GUIDED session declares a secret at a known step/ordinal, but an earlier terminal stop prevents that step being reached",
+      "then": "Exactly one terminal USAGE/NOT_USED with null outcome/release/admission/version and exact safe scope/session-attempt-coordinate metadata; zero secret-value Vault reads and no credential frame/send for this never-reached secret; no fabricated resolution record."
+    },
+    {
+      "oracle": "C-11 negative absence shape",
+      "then": "Reject null outcome on actual RELEASE or linked USAGE; reject unlinked replay usage, USED/REFUSED, missing/wrong declaring scope, duplicate/sequential/concurrent summaries and malformed/wrong-scope links."
+    },
+    {
+      "oracle": "C-11 distinct actual release",
+      "then": "Resolved-but-not-typed usage remains linked with exact nonnull resolution fact and NOT_USED usage status; actual typed and refused usage remain distinguishable; forced retry has fresh actual attempts."
+    },
+    {
+      "oracle": "C-4 live revocation / RULING6",
+      "then": "Exactly one immutable LIVE_RECHECK REVOKED_MID_RUN decision points at original resolved release with exact scope and retention key; no duplicate terminal usage or extra runner send; cancellation timing and inventory disposal unchanged."
+    },
+    {
+      "oracle": "SEC-9/C-11 retention/isolation",
+      "then": "UPDATE/DELETE refusal, missing/wrong scoped release and concurrent uniqueness, month-boundary retention without orphan usage and audit-wide planted-value scan."
+    }
+  ],
+  "priorPoConditionsRetained": [
+    "C1 one compile-green T1 batch before T2/T3; per-lane peer review before T4",
+    "C2 all 19 AC oracle trace including C12 backend and implemented C17 branch",
+    "C3 TRACE spans outage/definite-refusal subruns",
+    "C4 KI1/KI2 File List and Dev Agent Record reconciliation",
+    "C5 Q3 existing retention window; separate PO revalidation if human changes window"
+  ],
+  "validationGuidance": {
+    "task": "validate-next-story steps0\u201311 adapted to authorized narrow delta; prior full R5 validation retained",
+    "lifecycle": "story-lifecycle 10-point checklist used. Draft\u2192Ready step12 deliberately not applied: root explicitly authorizes acceptance delta with InProgress preserved; this is not draft validation or QA gate.",
+    "template": "Original complete story sections retained; no placeholder/scope rework",
+    "codeRabbit": "Existing configuration/self-healing/manual-fallback rules preserved. Automated review is not invoked for this bounded document-only delta and no result is claimed."
+  },
+  "mechanicalVerification": {
+    "onlyAllowedStoryMutation": true,
+    "other18AcceptanceCriteriaUnchanged": true,
+    "statusUnchanged": true,
+    "checkboxesUnchanged": true,
+    "devAgentRecordUnchanged": true,
+    "qaResultsUnchanged": true
+  },
+  "filesChanged": [
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+    ".ai/STUDIO-OBS-007-po-audit-delta.json"
+  ],
+  "prohibitedActionsPerformed": {
+    "productSchemaTestEdits": false,
+    "testsOrGradle": false,
+    "subagents": false,
+    "pushDeploySchedule": false,
+    "externalContact": false,
+    "lifecycleReviewClose": false
+  },
+  "limitations": [
+    "Document acceptance consistency only; no SQL/schema/runtime oracle executed",
+    "Root holds independent SDC verification and decides V34 dispatch release after inspecting this report",
+    "Shared USD 500 wave ceiling; actual spend telemetry unavailable"
+  ]
+}

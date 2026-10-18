@@ -1,0 +1,494 @@
+{
+  "artifact": "Independent Quinn bounded008technical design readiness",
+  "story": "STUDIO-OBS-008",
+  "reviewer": "Quinn /root/quinn015_design independent from Aria/Uma/Pax owners",
+  "createdAt": "2026-10-15T04:07:32.260039+00:00",
+  "reviewKind": "DESIGN_READINESS_ONLY_NOT_IMPLEMENTATION_RELEASE_OR_STORY_QA",
+  "status": "DESIGN_READY_CONDITIONAL_ON015DONE_AND_ROOT_RELEASE",
+  "readyForImplementation": false,
+  "implementationReleased": false,
+  "storyQualityVerdict": null,
+  "storyDone": false,
+  "inputs": {
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/architect-rulings.json": "1476ce905c4927a827b2bf05319031fb55c67806cca63b78a3264b67b4e37a7d",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/architect-completion-receipt.json": "fe814e304efaaa71131f155bbd650523eaf0ac8441fee868f6fcb920d47029da",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/architect-public-projections.schema.json": "3bc546dc5700813c13591c757f0f7b5e71c7ee14af55bb7a9e089094a0305d2e",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/architect-ownership.json": "71767d0662a31db38294fdc540bc0c8e3e88840000e3cfb95d5079339f41b5d4",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/architect-test-delta.json": "ac3357c0f162b0d6b7891fe9c5696468c82bd4dbec83e881d6a24d362f1e49b4",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/ux-implementation-plan.json": "a2c33684fd58f6c9f77982f393337bb0ccdd8b8a73fbc9ca9aacc4da0c9d6753",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/po-scope-readiness.json": "62636d6ca6a3ec34ed534eb2a3ce3f39191b5482f7fa4c4854ebad15e502d0e2",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md": "9b7386d5e4230a1a2bff02bd474edb7796ace98e14ec0d047fa618038a3e4500",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/qa-readiness-final.json": "7e440341dc116d31c01704beae0d3158eefe3d09876619d45cd89953a1423370"
+  },
+  "frozenArtifactVerification": {
+    "rulingsExact": true,
+    "completionReceiptExact": true,
+    "receiptBoundFiles": 4,
+    "allBoundFileHashesExact": true,
+    "sourceSnapshots": 35,
+    "unchangedSourceSnapshots": 34,
+    "provisionalProductionDrift": [
+      {
+        "file": "docs/specs/studio/openapi.yaml",
+        "expected": "afec6c04cdd5bcc19e42b83f83656a342165c5e04407e90a7206de0b40c46183",
+        "actual": "70eab658558815565296e499dfab77aa789168cfc4c09ccf23fe67323fc86768",
+        "unchanged": false
+      }
+    ],
+    "classification": "Frozen008design artifact bytes exact. OpenAPIadvanced during authorizedactive015C-int; historicalsourcehash is not claimedcurrent. Rootmustfreeze post015productionbaseline before008sourceedit."
+  },
+  "prerequisiteReview": [
+    {
+      "id": "P1",
+      "status": "DESIGN_SUFFICIENT",
+      "scope": "AC5/9 runtime capability",
+      "assessment": "Per-saved-test /capabilities route is scope-derived from persisted nondeleted visible test. CSIcanRead and BFF authentication precede provider or governed-scope inspection; absence/denial indistinguishable403. Actual injected provider type, not health, defines vaultSecrets. No Vault call or credentials/config data. Client unknown/error/off fail unavailable; canWrite secretcreation and secret-use remain separate. ExistingStudioSecretsService:list/create andStudioVaultConfiguration confirm exact authority pattern. Route/client/handler/pins atomic, no allowlist.",
+      "plannedProof": "StudioCapabilitiesIT authorizesBeforeProviderAndScopedPolicyLookup/configurationIsNotProviderHealth; both existing runtime readers+templates/onboarding off/on/unknown cases."
+    },
+    {
+      "id": "P2",
+      "status": "DESIGN_SUFFICIENT_CONDITIONAL_ON_015_PROGRESS_CONTRACT",
+      "scope": "AC3/8 actual active N/M",
+      "assessment": "Required PublicProgress derived under session lock from frozen source count/order and durable progress.stepIndex. Exact source manifest authored sentence rendered escaped; no value expansion, private session serialization or counter/time inference. Invalid/terminal/finalizing active null; clarification coordinate agreement required. ExistingGuidedSessionService consumes and advances progress.stepIndex only through actual step processing; V19 retains stepIndex/detail after pruning. 015 prefix branch must maintain same durable coordinate before final008baseline.",
+      "plannedProof": "GuidedPublicPresentationIT activeCoordinateUsesFrozenSourceAndDurableProgress, invalidcoordinate and current-draft reorder negatives; AC8 actual aria-current/focus."
+    },
+    {
+      "id": "P3",
+      "status": "DESIGN_SUFFICIENT",
+      "scope": "AC5/6/7 actual per-session explanation and immutable timing join",
+      "assessment": "Required result-only PublicExplanation covers pending/failed/conflict as actual same-session admissions/outcomes and015relearn/version/binding facts. Published artifact reads exact receipt session/revision/hash, never current unrelated head. Controlled kind-to-label consts describe actual operations without inventing targets. Escaped reference IDs only; no values, locator/URL/page/model/proposal dump. Unique admission+step+ordinal+attempt identifies drift attempts; timing requires kindaction and exact admission/step/ordinal offset. Completed/learned/reused/drift fields require real verified effective proof; no unattempted success, fabricated reference edge or publication inference. Existingresultprojector provides receipt-first fresh authorization and separate history/currentreadiness; future projector preserves it.",
+      "plannedProof": "failedAndConflictExplanationNeverBorrowsCurrentHead; closedProjectionRejectsPrivateMaterial; actionTimingUsesExactAttemptAdmission; receiptAfterExpiryRetainsFreshReadAuthority; original failed/conflict/video/receipt+readiness view cases."
+    },
+    {
+      "id": "P4",
+      "status": "DESIGN_SUFFICIENT",
+      "scope": "AC1/2/3/9 start refusals and inherited014copy",
+      "assessment": "Pax0.3.6 explicitly places POLICY_NOT_APPROVED. Actual public code/messageCode feedback remains inline unsuccessfulstart with no invented session state. BASE_IDENTITY_INCOMPLETE stays REVISION_CONFLICT reason, explicit first-step full learn only; no implicitfallback. MISSING_SOURCE/ORIGIN_NOT_ALLOWED/RUNTIME_INCOMPATIBLE and actualbudgetretry distinctions reuse closed vocabulary. TerminalgovernedPOLICY_DENIED uses neutral text; password-only wording never guessed without a distinct landed discriminator. Refusedstart cannot poll/finalize/execute a nonexistent session.",
+      "plannedProof": "guidedRun.startRefusalsNeverCreateSessionStates plus original governedconfirmation/refusal and policy secret-discriminator tests; exact copy cites originalAC3/AC4/explicitUmaownedcopy."
+    },
+    {
+      "id": "P5",
+      "status": "DESIGN_SUFFICIENT_IMPLEMENTATION_BROWSER_PROOF_REQUIRED",
+      "scope": "AC8/9 test-onlyMSW realbrowser",
+      "assessment": "NodeMSWproxy with ViteSSR TSmodule loading is isolated to e2e code; production main/bootstrap no MSW imports/gate/worker/flag. Normal Viteproxy target set before config, loopbackstrictports, one shared-scenario worker, unhandledrequests502 before realnetwork; diagnostic metadata excludes bodies/cookies/secrets. Realvalid localmockWebM with range/MIME/206/416 and actual videoelement metadata/seek required. Existing realStudioStartup.test.ts production no-runtime-mock invariant explicitly retained. Browseraxe/layout/focus/reducedmotion proofs remain actual future gates, not jsdom conformance.",
+      "plannedProof": "actualauthorRunClarificationLoginRequired, learnFinalizeReplayAndMixedMode and guidedSurfacesContrastTargetsKeyboardReducedMotion; productionstartup tests; dependency and Chromiumcompatibility verification during authorized implementation."
+    },
+    {
+      "id": "P6",
+      "status": "DESIGN_SUFFICIENT",
+      "scope": "AC1/2/9 authorized unambiguous startcontext and recovery",
+      "assessment": "Capabilitiesclosed guidedStart supplies exact persistedtest/revision/environment and generatedversions after canRead/canExecute. Distinct governedCSI/env appcandidates intersect administrator-permitted scope and validatedtrustedpins; exactlyone selects actualID, zero/multiple/malformed failclosed. No firstcatalog/CSIcast/URL/default inference. Actualstart revalidates authority/revision/policy/budget. Persist exact ID-only closed startbody+key before request; lostresponse retries samebody/key even draftchanged; knownsession reconnectGETonly. 401safe pending,403clear; synchronouslatches and stablefinalize/cancel keys prevent doubleactivation. No drafttext/values/cookies/tokens/principal in recovery and no fabricatedsession after storage loss.",
+      "plannedProof": "startContextUsesExactPersistedScopeAndUniqueApplication; pendingResponseAndReloadPreserveLogicalRun; requestcounts under rapidclick/StrictMode/reload/cancel/401/503 and mismatchedrevision negatives."
+    },
+    {
+      "id": "P7",
+      "status": "DESIGN_SUFFICIENT_POST015_REBASELINE_REQUIRED",
+      "scope": "AC1/2 contract authority and no hidden finalizeexecution",
+      "assessment": "ActualpublicGuidedPublicationController and oneOpenAPI+publication.schema v3 override stale runbook/internalcommands. Exactclosed {schemaVersion:3,expectedSourceRevision,expectedConfigurationRevision}, ambientput_session, stableIdempotency-Key, encodedpath/baseonce. FINALIZINGautofinalize continues sameRun through deterministicpurevalidation/receipt; no model/browser/Vault/execute side effect. 401/Core503/validationrefusal neveroptimisticpublished. Expiredreceipt reads existingpublicresult with freshCore authority. Post015baseline and measured43->44capabilitycount/pins required; stale runbook corrected in sameC-int008unit.",
+      "plannedProof": "contractMatrixAndClosedFinalizeBody; nohiddenexecuterequestcounts and finalizeStrictMode/reconnect cases; originalreceiptread and everyrangeauthorization regression/loadmeasurement."
+    }
+  ],
+  "requirementsTraceability": {
+    "originalNineAc": [
+      {
+        "id": "AC1",
+        "requirements": "Typed v3 start/readSession/readResult/readClarification/clarify/cancel/finalize/video route builder; central API; schema-derived or document-asserted types; MSW every state fixture derived from frozen schemas; required idempotency on all guided mutating operations, execute and finalize. Native media path is browser request, not JSON/fetch.",
+        "owner": "A1",
+        "plannedEvidence": [
+          "existing studioContract.test.ts operation-to-method/handler matrix, zero classA remaining, stale entry negative",
+          "request-shape tests using schema refs for every operation and204clarification/202pending result",
+          "malformed extra fields/state union/code drift fail loud; no hard-coded fixture schema copies"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "AC2",
+        "requirements": "UNLEARNED guided; READY execute; NEEDS_RELEARN server boundary mixed guided; LEARNING disabled; save then fresh GET; no local lowered boundary; no hidden execute after learning; auto finalize once with same key on recovery; no optimistic publication.",
+        "owner": "A1/A2",
+        "plannedEvidence": [
+          "count server-observed start/execute/finalize calls for each mode",
+          "save failure/conflict prevents start; rapid clicks/StrictMode/remount/reconnect/cancel races do not duplicate",
+          "FINALIZING401/Core503/rejected validation remain pending/notready, no second browser",
+          "full edit4of10 mock flow prefix1-3 and learns4-10; drift2 effective suffix shown only when server says so"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "AC3",
+        "requirements": "Every exact canonical readiness/live/terminal narrative; safe PAGE labels; expiry60/20 consequence; unknown outcome no runagain; replay drift explicit learnagain; no account/selector/capture/DOMupload states.",
+        "owner": "A2",
+        "plannedEvidence": [
+          "table-driven exact copy assertions with file source citations",
+          "poll state changes/current step use actual public progress only",
+          "PAGE malicious markup renders as text with visible page-derived descriptor+role+region; AUTHORED/SAVED_INPUT not falsely labelledPAGE",
+          "expiry warnings60s20s then expired prohibits submission; no auto retry afterUNKNOWN_OUTCOME"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "AC4",
+        "requirements": "Guided and replay LOGIN_REQUIRED both loginStepsPresent variants, exact copy, Go to stepN focuses stable editor row; Open Variables opens dialog. Failed run remains failed.",
+        "owner": "A2",
+        "plannedEvidence": [
+          "four combinations guided/replay×false/true, both actions each; stableID-to-current-position mapping",
+          "focus assertion in RTL and real browser; no sign-in/account flow"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "AC5",
+        "requirements": "Server runtime Vault capability for page/wizard/onboarding/templates; unknown/error/off unavailable; ReferencePicker insert tokens from declared names; SecretInput creation/clear; secret value never retained or echoed.",
+        "owner": "A1/B1/A2",
+        "plannedEvidence": [
+          "off/on/error/unknown capability no simulated create; configured provider backend tests including read auth",
+          "var/secret token inserted at current cursor, preserves surrounding text and authoring step ID; no autocomplete",
+          "success and failure clear password input/state; response exactly name/version/allowedOrigins",
+          "secret canary absent rendered DOM/accessible names/clarification/result/explanation/MSW responses/browserstorage/debug logs and request-error retained config; ID present in each relevant view"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "AC6",
+        "requirements": "Read-only Steps as learned action/safe label/hidden producer→consumer reference flow; reused/relearned provenance; IDs not values; learned receipt distinct replay verified; historyPUBLISHED distinct currentReadiness; after expiry result route.",
+        "owner": "A2",
+        "plannedEvidence": [
+          "matching immutable receipt+artifact projection, never unrelated current head",
+          "reused1-3 and relearned4-10 plus driftj; failed/conflict evidence source per P3",
+          "publication historical true/current readyfalse displayed together; no synthetic ordinaryPASSEDexecution",
+          "expiry historical result read only; no internal route/worker/browser/model request"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "AC7",
+        "requirements": "Guided and replay native video; step/action named seek exact server offsets; processing/failed/unavailable/expired neutral copy; no fake media.",
+        "owner": "A2",
+        "plannedEvidence": [
+          "guided route and replay route URL tests preserve ambient session/no tokenquery/base once",
+          "action timing kind=action ordinal/stepId binding safe label from approved source; null/unattempted/beyond-end disabled; no clock rebasing",
+          "playable browser WebM fixture loadedmetadata+seek validates currentTime using known duration; artifact is local mock media, not live backend proof",
+          "failed/expired/availablepartial/error states independent of outcome"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "AC8",
+        "requirements": "WCAG2.1AA list; MUI sx tokens; single live announcer, stepcurrent, focused keyboard clarification, named seek, enabled contrast/targetsize, reducedmotion and narrowlayout; replace obsolete WCAG surfaces4/5 with distinct real states.",
+        "owner": "Q1/A2",
+        "plannedEvidence": [
+          "surface4guided-inflight and5clarification actually entered via Run, assert state before axe; keep other distinct page/list/progress/video surfaces and regenerate named baseline keys",
+          "explicit axe rules color-contrast:true,target-size:true in updated named suite; browser companion verifies layout-dependent answers, jsdom incompletes never claimedconformance",
+          "browser keyboard arrow/select/tab/escape/focus return; busy button accessible name includes visible label; Add-step aria-describedby relation; supplementarytooltip keyboard reachability",
+          "browser computed reduced-motion no progress animation; viewport375x812 and desktop1440x900 no horizontal clipping/overlap; control target bounds + visible focus/contrast evidence"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "AC9",
+        "requirements": "Full enumerated Vitest+MSW integration plus real browser first E2E author→Run→clarification→loginrequired; all project gates green.",
+        "owner": "Q1",
+        "plannedEvidence": [
+          "firstlearn/autofinalize/laterreplay/mixedprefix/clarificationPAGE/bothloginvariants/unknown/conflict/driftlearnagain/secretpolicy/budget/references/capability/canary/reconnect/narrow as separate named cases",
+          "Playwright config webServer Vite+test-onlyMSWserver; forbid unhandled API calls, no backend/network dependence",
+          "npx equivalent via npm run test:e2e actual Chromium result+trace/screenshots andbrowseraxe reports; zero skipped story-requiredcases",
+          "npm run type-check; npm run lint; npm run build; npm run test -- --run --minWorkers=1 --maxWorkers=3; dedicated defaultworker fullgate once resourcewindow available; npm run test:e2e"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      }
+    ],
+    "inheritedSeventeenRows": [
+      {
+        "id": "V2-a",
+        "requirements": "Create/save authoringSchemaVersion2/globalContext/AuthoringStep[]; IDs survive edit/reorder/save/reload, insert/copy/template replacement gets fresh IDs, delete drops only removed ID; keep contexts associated by ID.",
+        "owner": "A1/A2",
+        "plannedEvidence": [
+          "request capture create/edit/reorder/insert/copy/delete; unchanged IDs across saves and unchanged successor texts; empty creation v2; global+perstep context preserved"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "V2-b",
+        "requirements": "Remove v1 transport overloads and legacy adapter+test+legacy cases; one v2 signature, keep list summary distinction without v1 detail tolerance.",
+        "owner": "A1",
+        "plannedEvidence": [
+          "typecheck all readers; negative v1 request contract; no adapter import remains"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "V2-c",
+        "requirements": "Move all stringstepreaders RunGate/ScheduleDialog/StudioPage/CreateCheckPage to v2 detail; audit additional callers and report unexpected writes rather than shim.",
+        "owner": "A1/A2",
+        "plannedEvidence": [
+          "readiness/schedule/createcheck/page regression tests; source scan consumer inventory"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "V2-d",
+        "requirements": "MSW v1 body400INVALID_AUTHORING zero statewrite; delete AUTHORING_V2_REQUIRED/LEGACY_AUTHORING behavior.",
+        "owner": "A1",
+        "plannedEvidence": [
+          "request beforeafter state equality on malformed/v1; proper v2 success"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "V2-e",
+        "requirements": "Shared legacy-empty-context and mixedlegacy fixtures removed only by C-int in same migrationunit.",
+        "owner": "C-int",
+        "plannedEvidence": [
+          "all remaining fixture consumers ported; generated/parity tests"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "V2-f",
+        "requirements": "Clear frontend/src hits of original015M12 exact grep, quote command/results; no demo/deploy incompatible FE/BE.",
+        "owner": "A1/root",
+        "plannedEvidence": [
+          "capture exact source-authority M12 command after015; inspect and record all hits/zero legacy generation; no semantic waiver"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "POLICY-a",
+        "requirements": "Governed terminalPOLICY_DENIED gets neutral no-cause narrative, not password-only secret copy; reason remains private.",
+        "owner": "A2",
+        "plannedEvidence": [
+          "fixture errorCodePOLICY_DENIED no reason field→governed narrative; assert secretcopy absent and private reasons absent"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "POLICY-b",
+        "requirements": "SIDE_EFFECT_CONFIRMATION/CONFIRM_ACTION single AUTHORED choice rendered as confirmation, never disambiguation; v3generation/choice response unchanged.",
+        "owner": "A2",
+        "plannedEvidence": [
+          "one confirmation→continuation, no second confirmation in session; source-derived fixture validation; no invented boolconfirm/secret/role fields"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "POLICY-c",
+        "requirements": "Uma copy below is the owned exact proposed wording under inherited014; no change in API/state vocabulary.",
+        "owner": "Uma",
+        "plannedEvidence": [
+          "review strings/citations under guidedNarratives comments"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "POLICY-d",
+        "requirements": "Both governedrefusal andconfirmation are in AC9 integration set.",
+        "owner": "Q1",
+        "plannedEvidence": [
+          "independentQA requirement-to-test trace"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "POLICY-e",
+        "requirements": "POLICY_NOT_APPROVED not automatically covered by inherited item; root obtains explicit P4 placement/ruling.",
+        "owner": "Aria/PO",
+        "plannedEvidence": [
+          "source-anchored placement before coupled UI behavior"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "ALLOWLIST",
+        "requirements": "Remove all10classA entries together with actualhandlers; preserve classB/Cownership; capabilityclient+handlerneverallowlisted.",
+        "owner": "A1",
+        "plannedEvidence": [
+          "document-reading parity: public routes=handler or existingB/C only; stale entry negativenonvacuous; final exact allowlist quoted"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "FE-WORKERS",
+        "requirements": "Sharedhost boundedworkers1..3; dedicateddefaultgate behavior recorded with perfiletimeout attribution, no increasedtimeout as substitute.",
+        "owner": "root/dev gate",
+        "plannedEvidence": [
+          "fresh defaultworker execution in controlled window; genuinefailuresfixed or unresolved, not claimedgreen"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "FE-A11Y",
+        "requirements": "Distinct surfaces4/5 and realbrowser contrast/targetsize, focus/keyboard/busylabel/tooltip/Addstepdescription.",
+        "owner": "Uma/Q1",
+        "plannedEvidence": [
+          "AC8browser receipts"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "PLAYBACK-COST",
+        "requirements": "DatedAria ratification per-range controller-read authorization, identitybeforeidempotentecho,no-store-beforeexpired; measure Core/locking under repeatedrange load without bypass.",
+        "owner": "Aria/backend Dex",
+        "plannedEvidence": [
+          "local authorized playbackload receipt with concurrency/requestcount/statuses/Corecalls/latency/lock data and limits, actual production controller path; no stagingperformance claim"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "PLAYBACK-COPY",
+        "requirements": "Neutral recording wording sharedguided/replay preserves codes/statuses, coordinate010runbook followup.",
+        "owner": "Uma/A2",
+        "plannedEvidence": [
+          "assert no replay-only assumption in guidedmediaerror/expired; source neutralcopy below;010handoff record"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "id": "FE-CONSUMERS",
+        "requirements": "Real guided/secrets clients+mirrors,labelSource and governedconfirmation/refusal; no intermediate release.",
+        "owner": "A1/A2/root",
+        "plannedEvidence": [
+          "AC1/3/5 plus allowlist final inventory"
+        ],
+        "status": "PLANNED_NOT_RUN"
+      }
+    ],
+    "architectSixteenDelta": [
+      {
+        "name": "StudioCapabilitiesIT.authorizesBeforeProviderAndScopedPolicyLookup",
+        "ac": "AC-5",
+        "assertions": "401/403 absent/denied CSI indistinguishable; no provider query or outbound Vault/Core leakage; accepted savedtest canRead returns exact closed body; create secret still canWrite",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "StudioCapabilitiesIT.configurationIsNotProviderHealth",
+        "ac": "AC-5",
+        "assertions": "Disabledfalse; configured Hashicorptrue even unreachable; lookup/list/read never called by capability; unknown selection remains startupfailure, frontend503 unavailable",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "StudioCapabilitiesIT.startContextUsesExactPersistedScopeAndUniqueApplication",
+        "ac": "AC-2",
+        "assertions": "SavedCSI/environment exact row, numeric revisionstrings, generatedversions; exactone matching scoped configured app chosen; zero/multiple/malformed unavailable RUNTIME_INCOMPATIBLE; canRead without execute returns unavailable FORBIDDEN_SCOPE; no reservations/session/budget writes",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedPublicPresentationIT.activeCoordinateUsesFrozenSourceAndDurableProgress",
+        "ac": "AC-3/8",
+        "assertions": "Multiple actions per step cannot advance N; REPLAYING_PREFIX state uses actual durable coordinate; clarification same step ID/frozen authored text; reordered current draft never changes running source order; FINALIZING/terminal nullactive; invalidcoordinate failclosed",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedPublicPresentationIT.failedAndConflictExplanationNeverBorrowsCurrentHead",
+        "ac": "AC-6",
+        "assertions": "Real failed/conflict session actual actions/IDs/binding flow available independently of publication; newer unrelated confirmedhead ignored; step provenance actual 015fullyreplayedprefix/effectivej only; no unattempted success or phantomflow",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedPublicPresentationIT.closedProjectionRejectsPrivateMaterial",
+        "ac": "AC-5/6",
+        "assertions": "Canary private plain+secret values absent JSON; only whitelisted operation labels; no locator/URL/model/proposal/document/context bodies, no private governance reason; exact reference ID present; all public schemas reject extras",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedPublicPresentationIT.actionTimingUsesExactAttemptAdmission",
+        "ac": "AC-7",
+        "assertions": "Attempt0 positivelynoninvoked and attempt1actual action keep distinct admissionIDs; join timings only exact step/ordinal/admission; absent/null timing disabled not inferred; continuous serverclock unchanged",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedPublicPresentationIT.receiptAfterExpiryRetainsFreshReadAuthority",
+        "ac": "AC-2/6",
+        "assertions": "Published result afterworker/session expiry uses existing fresh CorecanRead before live checks, original principal; replayVerifiedfalse; historicPUBLISHED may currentReadinessfalse; no model/browser/worker call",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "GuidedPlaybackLoadIT.repeatedRangesPreserveAuthorityAndMeasureLocalCost",
+        "ac": "PLAYBACK-COST",
+        "assertions": "Actual controller path100ranges incl4concurrent, statuses/Corecalls/latency+locks measured; revoke/503 refusesbefore store; no authorization cache; results local, not staging",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "studioGuidedApi.contractMatrixAndClosedFinalizeBody",
+        "ac": "AC-1/2",
+        "assertions": "All8guided+video routes and capability +secrets methods/handlers alignedOpenAPI, zero class A; stableIdempotency execute/finalize, actual public schema 3 closed body never internal hashes/fence; capability never allowlisted",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "useGuidedSession.pendingResponseAndReloadPreserveLogicalRun",
+        "ac": "AC-2/9",
+        "assertions": "Persist safe closed startenvelope/key before request; lostresponse/reload/StrictMode retryexactbody/key; knownsessiononlyGET; finalize once same body/key; no hiddenexecute;401/503pending,403clear; cancelrace cannotrestart",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "guidedRun.startRefusalsNeverCreateSessionStates",
+        "ac": "AC-3/9",
+        "assertions": "POLICY_NOT_APPROVED threepublicmessageCodes, REVISION_CONFLICT reasonBASE_IDENTITY_INCOMPLETE, MISSING_SOURCE, ORIGIN_NOT_ALLOWED each exact inlinecopy; no inventedterminal/sessionID/poll/finalize/automaticretry",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "studioGuided.spec.authorRunClarificationLoginRequired",
+        "ac": "AC-9",
+        "assertions": "Actual browserauthorstablev2steps, Run, safe PAGE clarificationkeyboard, loginrequired both actions; real Vite+NodeMSWproxy/zero SW registration; no realbackendclaim",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "studioGuided.spec.learnFinalizeReplayAndMixedMode",
+        "ac": "AC-2/6/7",
+        "assertions": "Firstlearn auto-finalizes once; subsequentmanualRunordinary executeonly; changedstep4 mixedprefix1-3learn4-10; driftj factual; valid mock WebM metadata/seek serveroffsets; requestcountsprove no hiddenrun",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "studioGuidedAccessibility.spec.guidedSurfacesContrastTargetsKeyboardReducedMotion",
+        "ac": "AC-8",
+        "assertions": "Distinct realguided surfaces4/5; browser axe contrast/target size enabled, narrow 375×812 anddesktop 1440×900, keyboardfocus/radiogroup/liveannouncer/step current/labels/tooltips/description/reducedmotion actual computed checks",
+        "status": "PLANNED_NOT_RUN"
+      },
+      {
+        "name": "studioCapabilities.offOnUnknownAndSecretNeverEcho",
+        "ac": "AC-5/9",
+        "assertions": "Bothruntime readers andtemplates/onboarding receive selectedtestcapability; unknown/error/off disabled; insertvar/secret tokens atcursorpreservestableID; secretvalue clears success/failure; IDpresent/valueabsent DOM/accessiblenames/results/clarification/explanation/MSW/browserstorage/log/errorconfig",
+        "status": "PLANNED_NOT_RUN"
+      }
+    ],
+    "status": "ALL_PLANNED_NOT_RUN",
+    "qualification": "These are coverage/test-plan rows, not newly executed application test counts. OriginalAC3/AC4 exact canonicalcopy and everyinheritedv2/governedcopy/allowlist/accessibility/playback obligation retained. HistoricalUXplanP4 placementpending and oldsource snapshots are superseded only by boundPax0.3.6+AriaP1–P7 technicalrulings; never rewrite them as executionevidence."
+  },
+  "independentDesignChecks": {
+    "artifact": "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/qa-design/independent-projection-checks.json",
+    "sha256": "0cedec14e37ae31b97f07c96829fe3e1428cef0e6832d30d33de9738633f494c",
+    "status": "PASS",
+    "schemaCases": 57,
+    "kind": "syntheticclosed-schema designvalidation only",
+    "coverage": "Capability discriminator/exactcontext/requiredfields; no privateextras; safeprogress shape; operationkind fixedvocabularypositive+forgedlabelnegative; separateattemptidentities; value-free explanation/referenceflow and nestedextras negatives. Semantic source authorization/completion/timing joins require planned actual backend/UI tests.",
+    "applicationTestsExecuted": 0,
+    "databaseCommandsExecuted": 0,
+    "browserCommandsExecuted": 0,
+    "buildsExecuted": 0
+  },
+  "ownershipReview": {
+    "source": "architect-ownership.json exactboundhash",
+    "assessment": "OneC-int008 owns schemas/OpenAPI/exampledeletions/generatedoutputs/pins/runbook;BackendDex explicitlyowns minimalreadonlycapability/projection/context+loadmeasurement without015state-machine changes. A1 transport/v2/MSW/hookseam separated fromA2singlepage/run/evidenceowner; browserharnessdeveloper is not soleindependentreviewer. No parallelpage/sharedcontract/baselinewriters. Rootassignment and exactpost015filebaseline stillrequired."
+  },
+  "blockingTechnicalDesignFindings": [],
+  "holdsBeforeAny008Implementation": [
+    "015 reaches independent actualQAPASSDone; currentInProgress work is not completion.",
+    "Rootcloses015sharedcontract/backend/testwindows and records actualfinalproductioncontract/schema/generated/pin/sourcebaseline, resolving anyrealshape/source drift against this design.",
+    "Rootreconciles finalexpanded008ownership and dispatches C-int008first; dependentlanes onlyafter interfacefreeze."
+  ],
+  "notClaimed": [
+    "008sourceimplementation",
+    "Application/component/backend/PG/browser/build tests",
+    "BrowserWCAG2.1AA conformance",
+    "Realbackend/staging/model/Vault/SIEM/deployment evidence",
+    "Sharedproductioncontractfreeze after015",
+    "StoryPASS/Done or implementationrelease",
+    "Commit/push/deployment/install/DBaccess"
+  ],
+  "writeScope": [
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/qa-design-readiness.json",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/qa-design/**"
+  ],
+  "budget": {
+    "wholeWaveCeilingUSD": 500,
+    "actualBilling": "unavailable"
+  }
+}

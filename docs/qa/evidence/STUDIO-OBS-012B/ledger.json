@@ -1,0 +1,1628 @@
+{
+  "story": "STUDIO-OBS-012B",
+  "author": "Dex (@dev)",
+  "date": "2026-10-13",
+  "mode": "YOLO",
+  "tree": {
+    "head": "734ad704f6ae508dbb10d9b5127a315bb0df5f81",
+    "note": "HEAD plus uncommitted OBS-007/012A working tree; T0 per-file sha256 in t0-source-hashes.json (frontend/src, docs/specs/studio, axe-results.json). Pre-existing dirty FE files at T0 (012A): run/executionErrorNarratives.ts, run/pinnedExecutionErrorFacts.ts, run/refusals.test.tsx, studioTypes.ts, SplunkPrototypePage.test.tsx (last one not touched by 012B).",
+    "openapiAtT0": "f502160e0c7475eb5356d11c5644cea1b01e10b8d242ca747872b38b17e823e6",
+    "openapiDuringRun": "d40c744d924ceb3d90f1711d53c6d714105e95a37a85c54a0a270687cdf1608e (contract step C1 landed getGuidedSessionVideo at ~19:20; not edited by 012B)"
+  },
+  "commands": {
+    "vitestRunner": "pnpm exec vitest (pnpm worked; no fallback needed)",
+    "baseline": "cd frontend && pnpm exec vitest run --reporter=json --outputFile=../docs/qa/evidence/STUDIO-OBS-012B/fe-baseline.json",
+    "final": "cd frontend && pnpm exec vitest run --maxWorkers=3 --minWorkers=1 --reporter=json --outputFile=../docs/qa/evidence/STUDIO-OBS-012B/fe-final.json",
+    "finalDeviation": "--maxWorkers=3 --minWorkers=1 added: two default-worker full runs at host load 20-28 (other lanes' Gradle) produced 13 and 26 timeouts in different tests each run (SecretInput, StudioRunsPage, Splunk, page tests), all 'Test timed out'; isolated re-runs of those files passed except other random timeouts. With 3 workers the whole suite passed. No test timeout was changed.",
+    "tsc": "pnpm exec tsc --noEmit",
+    "eslint": "pnpm exec eslint src --ext .ts,.tsx",
+    "build": "pnpm run build"
+  },
+  "gates": {
+    "baseline": {
+      "vitest": {
+        "total": 854,
+        "passed": 826,
+        "failed": 28,
+        "filesFailedToLoad": [
+          "review/artifactSummary.test.ts",
+          "review/compileStates.test.tsx",
+          "review/confirmFlow.test.tsx",
+          "review/recompile.test.tsx",
+          "run/runGate.test.tsx"
+        ],
+        "cause": "012A removed compileStatus/compile routes from openapi.yaml and backend sources the FE tests read"
+      },
+      "tsc": "exit 0",
+      "eslint": "0 errors, 303 warnings",
+      "build": "exit 0"
+    },
+    "final": {
+      "vitest": {
+        "total": 695,
+        "passed": 695,
+        "failed": 0
+      },
+      "tsc": "exit 0, 0 errors",
+      "eslint": "0 errors, 302 warnings",
+      "build": "exit 0 (webpack compiled with 1 warning, same as baseline)",
+      "vitestSecondRun": {
+        "total": 695,
+        "passed": 695,
+        "failed": 0,
+        "command": "same as final (--maxWorkers=3 --minWorkers=1), output kept out of evidence"
+      }
+    }
+  },
+  "reconciliation": {
+    "formula": "after = baseline - named drops + named additions",
+    "baseline": 854,
+    "drops": 216,
+    "additions": 57,
+    "after": 695,
+    "finalReported": 695,
+    "notCountedInBaselineJson": "Four deleted files failed to load at baseline, so their cases are not in the 854 and not in the drops: review/artifactSummary.test.ts (static: 9 it + 1 it.each), review/compileStates.test.tsx (15 it + 5 it.each), review/confirmFlow.test.tsx (10 it), review/recompile.test.tsx (3 it + 1 it.each). run/runGate.test.tsx also failed to load at baseline, so all 19 of its final cases count as additions (17 static it at HEAD).",
+    "namedDrops": [
+      {
+        "file": "src/components/studio/confirmedSource.test.tsx",
+        "name": " readable confirmed revision source confirmation advances the pair together and later edits preserve it independently",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/confirmedSource.test.tsx",
+        "name": " readable confirmed revision source does not substitute candidate source when the confirmed pair is missing",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/confirmedSource.test.tsx",
+        "name": " readable confirmed revision source loads the detail projection and never exposes confirmed source in list summaries",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/confirmedSource.test.tsx",
+        "name": " readable confirmed revision source renders the confirmed artifact when candidate and draft both disagree",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring allocates a new ID for insert without changing existing identities",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring cannot confirm a response whose candidate identity disagrees with its attempt",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring config-only edits reuse code but require new confirmation and full execution",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring explicit full rebuild overrides eligible incremental work",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring identical regenerated code is labeled regenerated and never a reused step",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring missing passing evidence falls back to a full rebuild",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring regenerates the middle suffix and preserves only the earlier step",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring reloads stale confirmation and clears acknowledgement",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring reordering retains identity and clears scope",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring retains step IDs, reaffirms each edit, confirms all six fields and executes only on explicit Run",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring retries accepted execution status without starting another browser",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring scope-only edits invalidate confirmation; a no-op save preserves it",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring unknown/global scope rebuilds fully and never runs the historical revision",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/inference/InferenceStudio.test.tsx",
+        "name": " versioned inference authoring unsupported output cannot expose a partial candidate or run",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/accessibility.test.tsx",
+        "name": " AC-18a: every control has a role and an accessible name each expand control names the step it expands and reports its own state",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/accessibility.test.tsx",
+        "name": " AC-18a: every control has a role and an accessible name the confirm control is a button with a name, in every state",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/accessibility.test.tsx",
+        "name": " AC-18a: every control has a role and an accessible name the recompile control is a button with a name",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/accessibility.test.tsx",
+        "name": " AC-18a: keyboard alone reaches and operates the controls Space operates the expand control too",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/accessibility.test.tsx",
+        "name": " AC-18a: keyboard alone reaches and operates the controls tab reaches the expand control and Enter operates it",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/accessibility.test.tsx",
+        "name": " AC-18a: keyboard alone reaches and operates the controls the recompile control is reachable by keyboard and fires on Enter",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/accessibility.test.tsx",
+        "name": " AC-18a: state changes are announced and diagnostics are associated with their step a live region carries the state name",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/accessibility.test.tsx",
+        "name": " AC-18a: state changes are announced and diagnostics are associated with their step each step's diagnostics are programmatically associated with that step",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/accessibility.test.tsx",
+        "name": " AC-18a: state changes are announced and diagnostics are associated with their step the step list and the state region are landmarks with names",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/artifactReview.test.tsx",
+        "name": " AC-28: no artifact, no summary — and it says so keeps both slots unavailable when the draft carries no candidate artifact [FX-ARTIFACT-ABSENT]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/artifactReview.test.tsx",
+        "name": " AC-28: the expandable source is the artifact’s code, verbatim expands to the executable source the server produced [FX-ARTIFACT-TRANSLATED-TARGET]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/artifactReview.test.tsx",
+        "name": " AC-28: the summary is the validator’s reading, not the client’s is green on a corpus whose sentences already read like their operations — the negative control [FX-ARTIFACT-AGREEING-CONTROL]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/artifactReview.test.tsx",
+        "name": " AC-28: the summary is the validator’s reading, not the client’s renders the compiled assertion’s target rather than the sentence [FX-ARTIFACT-TRANSLATED-TARGET]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/artifactReview.test.tsx",
+        "name": " AC-28: the summary is the validator’s reading, not the client’s renders the compiled navigation target rather than the author’s description of it [FX-ARTIFACT-TRANSLATED-TARGET]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/artifactReview.test.tsx",
+        "name": " AC-28: the summary is the validator’s reading, not the client’s renders the compiled target, and never the sentence it was compiled from [FX-ARTIFACT-TRANSLATED-TARGET]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/artifactReview.test.tsx",
+        "name": " ADR-002 §21.7: an artifact that disagrees with the draft says so rather than being reconciled says nothing about divergence when the artifact and the steps agree [FX-ARTIFACT-AGREEING-CONTROL]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/artifactReview.test.tsx",
+        "name": " ADR-002 §21.7: an artifact that disagrees with the draft says so rather than being reconciled states the divergence and still renders what was validated [FX-ARTIFACT-DIVERGENT]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/compactReview.test.tsx",
+        "name": " compact translation review keeps the duplicate authored-step list hidden until the user asks to inspect translation details",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/compilePollBounds.test.ts",
+        "name": " AC-23: the COMPILING watch is bounded by a number the server already publishes a shorter window produces a shorter schedule — the count is derived, not typed",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/compilePollBounds.test.ts",
+        "name": " AC-23: the COMPILING watch is bounded by a number the server already publishes every compile state except COMPILING ends the watch",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/compilePollBounds.test.ts",
+        "name": " AC-23: the COMPILING watch is bounded by a number the server already publishes the schedule is finite and fits inside the window",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/compilePollBounds.test.ts",
+        "name": " AC-23: the COMPILING watch is bounded by a number the server already publishes the watch window is the shipped sweep threshold plus one shipped sweep interval",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/components/studio/review/confirmHash.test.tsx",
+        "name": " AC-27: no hash, no request — never a computed one confirms normally when the hash is there [FX-ARTIFACT-AGREEING-CONTROL]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/confirmHash.test.tsx",
+        "name": " AC-27: no hash, no request — never a computed one sends nothing at all when the body came back without a hash [FX-ARTIFACT-ABSENT]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/confirmHash.test.tsx",
+        "name": " AC-27: the accessor reads the declared field and derives nothing answers from currentCandidateArtifactHash alone, across the whole corpus",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/confirmHash.test.tsx",
+        "name": " AC-27: the accessor reads the declared field and derives nothing never fabricates, recomputes or defaults a hash [FX-ARTIFACT-ABSENT]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/confirmHash.test.tsx",
+        "name": " AC-27: the four fields are byte-identical to the one body they came from assembling the hash from a second read is visible here, which is the discriminating half",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/confirmHash.test.tsx",
+        "name": " AC-27: the four fields are byte-identical to the one body they came from byte-compares the request against the single GET body, and that body is read once",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/confirmInFlight.test.tsx",
+        "name": " AD2-1 obligation 1: the request-level guard, asserted where the attribute cannot hide it two activations in one synchronous turn send one request, with no control in the way",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/confirmInFlight.test.tsx",
+        "name": " AD2-1 obligation 2: the confirm control is unavailable while a confirm is in flight the confirm control becomes unavailable for the duration of the request and comes back after",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/confirmInFlight.test.tsx",
+        "name": " AD2-1 obligation 3: the in-flight state is announced, and that is a separate thing the confirm control carries aria-busy while the request is open and drops it afterwards",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-16a: with no artifact, both slots are unavailable and neither is filled from the English imports neither the legacy grammar parser nor the Python generator",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-16a: with no artifact, both slots are unavailable and neither is filled from the English names why rather than rendering an empty slot [FX-ARTIFACT-ABSENT]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-16a: with no artifact, both slots are unavailable and neither is filled from the English renders the unavailable summary for every step and never the English line inside the slot [FX-ARTIFACT-ABSENT]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-16a: with no artifact, both slots are unavailable and neither is filled from the English the import scanner sees every specifier form, so its silence means something",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-16a: with no artifact, both slots are unavailable and neither is filled from the English the pinned AC-2 expectations cannot be derived from the module they pin",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-6: one row per original step, index aligned attributes each reason to the line it belongs to, with an accepted step between two rejected ones [FX-ACCEPTED-BETWEEN-REJECTED]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-6: one row per original step, index aligned renders artifact-level rejections in their own region, attached to no step [FX-ARTIFACT-REJECTION]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-6: one row per original step, index aligned renders exactly one row per step for every fixture",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-6: one row per original step, index aligned surfaces a document that does not line up as a defect rather than padding it [FX-MISALIGNED-DOCUMENT]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-7: all three truncation levels, each on a fixture that actually carries it a document with no truncation renders no truncation flag",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-7: all three truncation levels, each on a fixture that actually carries it level 1 — a clamped message and excerpt keep the marker the bounder put there [FX-TRUNC-CLAMPED-STRING]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-7: all three truncation levels, each on a fixture that actually carries it level 2 — a step that lost diagnostics says so, in words distinct from \"nothing more was wrong\" [FX-TRUNC-STEP]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-7: all three truncation levels, each on a fixture that actually carries it level 3 — a document that shed whole steps says which fact that is [FX-TRUNC-DOCUMENT]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-8: attempts and exhausted render as what they mean exhausted: false with attempts: 1 does not imply a repair happened [FX-EXHAUSTED-FALSE]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-8: attempts and exhausted render as what they mean exhausted: true says the bound was reached and offers no retry [FX-EXHAUSTED-TRUE]",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/diagnostics.test.tsx",
+        "name": " AC-8: attempts and exhausted render as what they mean says the document is the last attempt only, never a history",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/poll.test.tsx",
+        "name": " AC-23: the COMPILING watch is bounded and stops out loud stops after a bounded number of reads and reports a give-up, not a failure",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/poll.test.tsx",
+        "name": " AC-23: the COMPILING watch is bounded and stops out loud stops on unmount",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/poll.test.tsx",
+        "name": " AC-23: the COMPILING watch is bounded and stops out loud stops the moment the compile reaches a terminal state",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/poll.test.tsx",
+        "name": " AC-23: the COMPILING watch is bounded and stops out loud stops when the read is refused rather than hammering a route saying no",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/refusalDiagnostics.test.tsx",
+        "name": " CODE tab review list keeps the server message for a validator code",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/refusalDiagnostics.test.tsx",
+        "name": " CODE tab review list renders each refusal in the row of the step it is about, described by that row",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/refusalDiagnostics.test.tsx",
+        "name": " CODE tab review list renders the model message as text, never as markup",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/refusalDiagnostics.test.tsx",
+        "name": " refusalNarrative keeps a truncation marker and drops an empty message cleanly",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/refusalDiagnostics.test.tsx",
+        "name": " refusalNarrative leaves validator codes and step-less diagnostics alone",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/refusalDiagnostics.test.tsx",
+        "name": " refusalNarrative words AMBIGUOUS_INTENT with the 1-based step and the model message",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/review/refusalDiagnostics.test.tsx",
+        "name": " refusalNarrative words UNSUPPORTED_CAPABILITY with the 1-based step and the model message",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/run/compileWait.test.tsx",
+        "name": " G1: the wait shows how long it has been, and says a long wait is normal Code tab: the Translating card shows the same elapsed time and hint",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/run/compileWait.test.tsx",
+        "name": " G1: the wait shows how long it has been, and says a long wait is normal Run: the elapsed time advances, and the hint appears once past the threshold",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/run/compileWait.test.tsx",
+        "name": " G1: the wait shows how long it has been, and says a long wait is normal Run: the elapsed time is gone once the compile settles",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/run/compileWait.test.tsx",
+        "name": " G1: the wait shows how long it has been, and says a long wait is normal formats elapsed time as m:ss",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/run/compileWait.test.tsx",
+        "name": " G3: Run backs off while a compile settles a 409 COMPILE_REQUIRED still compiles once more, and that wait restarts at 600ms",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/run/compileWait.test.tsx",
+        "name": " G3: Run backs off while a compile settles gives up at the wait budget — not before — with a bounded number of reads",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/run/compileWait.test.tsx",
+        "name": " G3: Run backs off while a compile settles reads on the backoff schedule and stops reading when the compile settles",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/run/compileWait.test.tsx",
+        "name": " G3: Run backs off while a compile settles the schedule starts at 600ms, grows to a 5s ceiling, and fits in the wait",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/run/compileWait.test.tsx",
+        "name": " G4: the client wait is the server watch window, and the number is pinned equals the abandonment threshold plus one sweep interval from the shipped config",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/components/studio/run/compileWait.test.tsx",
+        "name": " G4: the client wait is the server watch window, and the number is pinned outlasts the server attempt budget, so a healthy compile always settles inside it",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/components/studio/run/refusalOutcome.test.tsx",
+        "name": " Run outcome for refused steps lists each refusal with its step, as plain text, and links it to that step",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/run/refusalOutcome.test.tsx",
+        "name": " Run outcome for refused steps lists no refusal for validator-only diagnostics",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/run/refusals.test.tsx",
+        "name": " AC-4: every declared refusal of the execute route is handled distinctly renders a narrative for every declared 409 — FX-EXECUTE-409-COMPILE_REQUIRED, FX-EXECUTE-409-RUNTIME_INCOMPATIBLE, FX-EXECUTE-409-IDEMPOTENCY_KEY_REUSED, FX-EXECUTE-409-TEST_DELETED, FX-EXECUTE-409-TEST_QUARANTINED",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/components/studio/run/runActivation.test.tsx",
+        "name": " VAL-038: Run outcome alerts render in the slot the page provides puts \"Some steps need attention\" in the container, outside the control, and keeps \"Go to step N\"",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/components/studio/run/runActivation.test.tsx",
+        "name": " VAL-039: one Run action dispatches one execute keeps the 409 COMPILE_REQUIRED retry: compile, then one retry under a key of its own",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringReducer.test.ts",
+        "name": " Studio authoring reducer add/edit/reorder retain identity and preserve exact text",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringReducer.test.ts",
+        "name": " Studio authoring reducer context changes do not mutate source and reverting restores clean state",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringReducer.test.ts",
+        "name": " Studio authoring reducer copy creates a fresh identity and rebinds copied evidence",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringReducer.test.ts",
+        "name": " Studio authoring reducer copy then delete original retains copied context under its fresh ID",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringReducer.test.ts",
+        "name": " Studio authoring reducer delete clears only the selected step and its global evidence",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringReducer.test.ts",
+        "name": " Studio authoring reducer detaches and freezes hydrated input",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringReducer.test.ts",
+        "name": " Studio authoring reducer hydrates legacy text exactly and allocates IDs only at the boundary",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringReducer.test.ts",
+        "name": " Studio authoring reducer ignores stale actions even after selecting A, B, then A again",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringReducer.test.ts",
+        "name": " Studio authoring reducer keeps context clean for source-only add, reorder, copy and delete",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringReducer.test.ts",
+        "name": " Studio authoring reducer keeps global, local and sibling context isolated",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringReducer.test.ts",
+        "name": " Studio authoring reducer marks both dimensions when copying or deleting context-bearing steps",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringReducer.test.ts",
+        "name": " Studio authoring reducer rejects duplicate, missing and mixed identities during hydration",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringReducer.test.ts",
+        "name": " Studio authoring reducer source edits become clean again when reverted exactly",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringSelectors.test.ts",
+        "name": " Studio authoring selectors returns the selected immutable draft and ordered steps without generating IDs",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/features/studio/authoring/authoringSelectors.test.ts",
+        "name": " Studio authoring selectors selects global and step context by stable identity",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/pages/ChecksStudioPage/pageAuthoringUx.test.tsx",
+        "name": " VAL-038: the refusal alert renders below the header, not inside it keeps the title and actions in the header and links the step",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+        "name": " AC-2: the page’s own Run control is governed by the server and not by the editor shows only Save and Run while a saved test becomes runnable automatically",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+        "name": " VAL-042: the first Run press on a freshly opened saved test acts STALE: one press, with nothing touched first, compiles once and then executes once",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+        "name": " the Code tab shows saved source without restoring translation controls",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+        "name": " the draft the page sends carries a timeout the contract would accept VAL-009: a refused step in the Run outcome links to that step in the editor",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/pages/StudioTestsPage/StudioTestsPage.test.tsx",
+        "name": " Tests page — rows labels readiness AWAITING_CONFIRMATION as \"Needs confirmation\"",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/pages/StudioTestsPage/StudioTestsPage.test.tsx",
+        "name": " Tests page — rows labels readiness COMPILING as \"Translating\"",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/pages/StudioTestsPage/StudioTestsPage.test.tsx",
+        "name": " Tests page — rows labels readiness NEEDS_REVISION as \"Needs changes\"",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/pages/StudioTestsPage/StudioTestsPage.test.tsx",
+        "name": " Tests page — rows labels readiness READY as \"Ready to run\"",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/pages/StudioTestsPage/StudioTestsPage.test.tsx",
+        "name": " Tests page — rows labels readiness STALE as \"Not translated\"",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-ACCEPTED-BETWEEN-REJECTED is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-ACCEPTED-BETWEEN-REJECTED resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-ARTIFACT-ABSENT is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-ARTIFACT-ABSENT resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-ARTIFACT-AGREEING-CONTROL is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-ARTIFACT-AGREEING-CONTROL resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-ARTIFACT-DIVERGENT is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-ARTIFACT-DIVERGENT resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-ARTIFACT-REJECTION is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-ARTIFACT-REJECTION resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-ARTIFACT-TRANSLATED-TARGET is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-ARTIFACT-TRANSLATED-TARGET resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-CODE-DECLARED is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-CODE-DECLARED resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-CODE-UNDECLARED is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-CODE-UNDECLARED resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-CONFLICT-STALE_CANDIDATE is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-CONFLICT-STALE_CANDIDATE resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-CONFLICT-TEST_DELETED is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-CONFLICT-TEST_DELETED resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-CONFLICT-TEST_QUARANTINED is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-CONFLICT-TEST_QUARANTINED resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-EXHAUSTED-FALSE is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-EXHAUSTED-FALSE resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-EXHAUSTED-TRUE is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-EXHAUSTED-TRUE resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-MISALIGNED-DOCUMENT is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-MISALIGNED-DOCUMENT resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-REJECTION-INLINE_CREDENTIAL is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-REJECTION-INLINE_CREDENTIAL resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-REJECTION-SOURCE_LINE_TOO_LONG is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-REJECTION-SOURCE_LINE_TOO_LONG resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-REJECTION-SOURCE_TOO_LARGE is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-REJECTION-SOURCE_TOO_LARGE resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-REJECTION-SOURCE_TOO_MANY_STEPS is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-REJECTION-SOURCE_TOO_MANY_STEPS resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-SECRET-REF is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-SECRET-REF resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-STATE-AWAITING_CONFIRMATION is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-STATE-AWAITING_CONFIRMATION resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-STATE-COMPILING is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-STATE-COMPILING resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-STATE-NEEDS_REVISION is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-STATE-NEEDS_REVISION resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-STATE-READY is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-STATE-READY resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-STATE-STALE is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-STATE-STALE resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-TRUNC-CLAMPED-STRING is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-TRUNC-CLAMPED-STRING resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-TRUNC-DOCUMENT is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-TRUNC-DOCUMENT resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-TRUNC-STEP is named by the title of at least one test in this story's suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real FX-TRUNC-STEP resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real every required fixture id is unique",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/compileFixtureMatrix.test.ts",
+        "name": " AC-20: the required fixture set is enumerable, and each entry is real the matrix is not empty and the title scanner found this story's tests",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/diagnosticsBounds.test.ts",
+        "name": " the diagnostics caps and marker match the server that produces them leaves a string within the cap untouched, marker and all",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/diagnosticsBounds.test.ts",
+        "name": " the diagnostics caps and marker match the server that produces them the caps are the deployed defaults",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/diagnosticsBounds.test.ts",
+        "name": " the diagnostics caps and marker match the server that produces them the clamp is the bounder's arithmetic: exactly one cap long, ending in the marker",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/diagnosticsBounds.test.ts",
+        "name": " the diagnostics caps and marker match the server that produces them the marker is the one DiagnosticsBounder appends",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-EXECUTE-409-COMPILE_REQUIRED is named by the title of at least one test in this story’s suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-EXECUTE-409-COMPILE_REQUIRED resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-AWAITING_CONFIRMATION is named by the title of at least one test in this story’s suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-AWAITING_CONFIRMATION resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-COMPILING is named by the title of at least one test in this story’s suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-COMPILING resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-NEEDS_REVISION is named by the title of at least one test in this story’s suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-NEEDS_REVISION resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-STALE is named by the title of at least one test in this story’s suite",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-STALE resolves to a fixture that carries the property it exists for",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.10: the compile vocabularies are read from the document, never transcribed a compileStatus outside the document is an error rather than a generic state",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.10: the compile vocabularies are read from the document, never transcribed compile's conflict codes match the UI's, in both directions",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.10: the compile vocabularies are read from the document, never transcribed compile's four authoring-bound 400 codes are the four the UI words",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.10: the compile vocabularies are read from the document, never transcribed confirm-compile's conflict codes match the UI's, in both directions",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.10: the compile vocabularies are read from the document, never transcribed every compileStatus the document declares renders a distinct, named state",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.10: the compile vocabularies are read from the document, never transcribed the compileError code set matches x-compile-error-codes in both directions",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.10: the compile-review fixtures match the amended contract compileError and compileDiagnostics are never both present on one fixture",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.10: the compile-review fixtures match the amended contract every compile-review fixture validates against TestDto",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.10: the compile-review fixtures match the amended contract every diagnostics document validates against CompileDiagnostics",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.10: the compile-review fixtures match the amended contract no compile-review fixture carries a field the contract does not declare",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.11a: the run gate covers the compile states the document declares a compileStatus outside the document is an error rather than a permissive default",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.11a: the run gate covers the compile states the document declares every compileStatus maps to an action, and exactly one of them dispatches directly",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.11a: the run gate covers the compile states the document declares every other declared state is prepared by Run rather than blocking it",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.11a: the run gate covers the compile states the document declares exactly one state makes Run wait rather than act",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.11c: ADR-002 §21’s two properties, and the examples that carry them declares both properties on TestDto and neither on the list projection",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.11c: ADR-002 §21’s two properties, and the examples that carry them the candidate artifact in the ready example validates against artifact.schema.json",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.11c: ADR-002 §21’s two properties, and the examples that carry them the hash the client reads is declared as the value the confirm body sends",
+        "baselineStatus": "failed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " the mock artifact matches artifact.schema.json keeps one entry per source line, index aligned",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " the mock artifact matches artifact.schema.json rejects an artifact whose step lost its generated code",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " the mock artifact matches artifact.schema.json validates every example the schema itself declares",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " the mock artifact matches artifact.schema.json validates the fixture artifact",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " story 10.10: the compile-review corpus is served the way the contract declares compile answers 202 with the revisions it was asked about",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " story 10.10: the compile-review corpus is served the way the contract declares confirm-compile answers 409 STALE_CANDIDATE when the identity does not match",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " story 10.10: the compile-review corpus is served the way the contract declares confirm-compile answers 409 for a draft that is not awaiting confirmation",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " story 10.10: the compile-review corpus is served the way the contract declares confirm-compile refuses a body short of the four declared fields",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " story 10.10: the compile-review corpus is served the way the contract declares confirming the exact identity on screen moves the draft to READY",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " story 10.10: the compile-review corpus is served the way the contract declares the list never carries a review draft, so the projection stays the declared one",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " story 10.10: the compile-review corpus is served the way the contract declares the single-draft read carries the diagnostics document",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " write paths follow the contract advances the source revision and invalidates the candidate on a step change",
+        "baselineStatus": "passed"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " write paths follow the contract creates a draft that starts STALE with no confirmed revision",
+        "baselineStatus": "passed"
+      }
+    ],
+    "namedAdditions": [
+      {
+        "file": "src/components/studio/run/refusals.test.tsx",
+        "name": " AC-4: every declared refusal of the execute route is handled distinctly renders a narrative for every declared 409 — FX-EXECUTE-409-LEARN_REQUIRED, FX-EXECUTE-409-RUNTIME_INCOMPATIBLE, FX-EXECUTE-409-IDEMPOTENCY_KEY_REUSED, FX-EXECUTE-409-TEST_DELETED, FX-EXECUTE-409-TEST_QUARANTINED"
+      },
+      {
+        "file": "src/components/studio/run/runActivation.test.tsx",
+        "name": " VAL-038: Run outcome alerts render in the slot the page provides puts the refusal alert in the container, outside the control"
+      },
+      {
+        "file": "src/components/studio/run/runActivation.test.tsx",
+        "name": " VAL-039: one Run action dispatches one execute a 409 LEARN_REQUIRED is not retried: one execute, one key, and the refusal is shown"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " AC-1: Run replays a READY draft and only a READY draft a state the document does not declare is a loud failure rather than a permissive default"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " AC-1: Run replays a READY draft and only a READY draft enumerating every readiness the document declares — FX-RUNGATE-STATE-UNLEARNED, FX-RUNGATE-STATE-LEARNING, FX-RUNGATE-STATE-READY, FX-RUNGATE-STATE-NEEDS_RELEARN"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " AC-2: client-side English-grammar validation is no longer an execution gate a programmatic run request is governed by the same predicate as the button"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " AC-2: client-side English-grammar validation is no longer an execution gate a second activation while the first is in flight produces one request, not two"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " AC-2: client-side English-grammar validation is no longer an execution gate the companion half: the client’s opinion of the English still gates nothing — the server’s state decides what Run does"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " AC-2: client-side English-grammar validation is no longer an execution gate the discriminating half: a draft runs when the server says READY"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " AC-3(a): client-generated Python is retired renders no generator-derived text for any fixture"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (a) READY: Run sends one execute and nothing else"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (b) every non-READY readiness: Run is disabled and states the interim sentence, and sends nothing"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (c) a 409 LEARN_REQUIRED from execute is shown as itself, once, with no preparation narrative"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (d) a dirty READY draft whose save leaves it unlearned stops after the save and says why"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " STUDIO-OBS-012B AC-4: READY replays; every other state says learning is not yet available (e) the learned chip says \"Learned · ready to repeat\" for READY"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run a failed capabilities read is unknown, never a denial: Run stays enabled"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run a pending capabilities read does not disable Run"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run canManage false: Run stays visible, disabled, described by on-page text, and sends nothing"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run canManage true: Run is enabled and carries no reason"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run reads the capability once per selected test, not once per render or refresh"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B) imports neither the legacy grammar parser nor the Python generator"
+      },
+      {
+        "file": "src/components/studio/run/runGate.test.tsx",
+        "name": " story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B) the import scanner sees every specifier form, so its silence means something"
+      },
+      {
+        "file": "src/pages/ChecksStudioPage/pageAuthoringUx.test.tsx",
+        "name": " VAL-038: the refusal alert renders below the header, not inside it keeps the title and actions in the header and puts the refusal in the slot below it"
+      },
+      {
+        "file": "src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+        "name": " AC-2: the page’s own Run control is governed by the server and not by the editor STUDIO-OBS-012B: a draft with no steps shows the never-learned empty state verbatim"
+      },
+      {
+        "file": "src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+        "name": " AC-2: the page’s own Run control is governed by the server and not by the editor STUDIO-OBS-012B: an unlearned draft shows the interim state, with no Code tab and no review controls"
+      },
+      {
+        "file": "src/pages/StudioTestsPage/StudioTestsPage.test.tsx",
+        "name": " Tests page — rows labels readiness LEARNING as \"Learning\""
+      },
+      {
+        "file": "src/pages/StudioTestsPage/StudioTestsPage.test.tsx",
+        "name": " Tests page — rows labels readiness NEEDS_RELEARN as \"Steps changed\""
+      },
+      {
+        "file": "src/pages/StudioTestsPage/StudioTestsPage.test.tsx",
+        "name": " Tests page — rows labels readiness READY as \"Learned · ready to repeat\""
+      },
+      {
+        "file": "src/pages/StudioTestsPage/StudioTestsPage.test.tsx",
+        "name": " Tests page — rows labels readiness UNLEARNED as \"Not learned yet\""
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-EXECUTE-409-LEARN_REQUIRED is named by the title of at least one test in this story’s suite"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-EXECUTE-409-LEARN_REQUIRED resolves to a fixture that carries the property it exists for"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-LEARNING is named by the title of at least one test in this story’s suite"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-LEARNING resolves to a fixture that carries the property it exists for"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-NEEDS_RELEARN is named by the title of at least one test in this story’s suite"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-NEEDS_RELEARN resolves to a fixture that carries the property it exists for"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-UNLEARNED is named by the title of at least one test in this story’s suite"
+      },
+      {
+        "file": "src/services/mocks/studio/executionFixtureMatrix.test.ts",
+        "name": " AC-22: the required execution fixture set is enumerable, and each entry is real FX-RUNGATE-STATE-UNLEARNED resolves to a fixture that carries the property it exists for"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry derives the public operations from the document, so the check has something to cover"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry every allowlist entry carries a class, an owner and a reason"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry fails closed: a new public operation with no handler and no entry is reported"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry no handler for a route that no longer exists; every surviving public route has a handler"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " STUDIO-OBS-012B: every published artifact fixture is the v3 replay artifact every non-null confirmedRevisionArtifact fixture validates against contracts/v3/replay-artifact.schema.json"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " STUDIO-OBS-012B: the readiness fixtures match the contract every readiness fixture validates against TestDto"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " STUDIO-OBS-012B: the readiness fixtures match the contract no readiness fixture carries a field the contract does not declare"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " STUDIO-OBS-012B: the readiness vocabulary is read from the document, never transcribed LEARN_REQUIRED is the execute conflict a non-READY draft answers"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " STUDIO-OBS-012B: the readiness vocabulary is read from the document, never transcribed TestDto.readiness matches the runtime carrier in both directions"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " STUDIO-OBS-012B: the readiness vocabulary is read from the document, never transcribed the tests-list chip words every declared readiness, each distinctly"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.11a: the run gate covers the readiness states the document declares a readiness outside the document is an error rather than a permissive default"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.11a: the run gate covers the readiness states the document declares every other declared state needs a learning Run"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.11a: the run gate covers the readiness states the document declares every readiness maps to an action, and exactly one of them dispatches directly"
+      },
+      {
+        "file": "src/services/mocks/studio/studioContract.test.ts",
+        "name": " story 10.11c: ADR-002 §21’s two properties, and the examples that carry them declares the confirmed artifact pair on TestDto and nulls it on the list projection"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " STUDIO-OBS-012B: the single-path routes are served the way the contract declares execute answers 409 LEARN_REQUIRED for a readable draft that is not READY"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " STUDIO-OBS-012B: the single-path routes are served the way the contract declares the single-draft read serves every readiness fixture by id, and the list never carries one"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " STUDIO-OBS-012B: the single-path routes are served the way the contract declares validate-variables refuses an id the caller cannot read with the same 403 as the read"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " STUDIO-OBS-012B: the single-path routes are served the way the contract declares validate-variables reports undeclared, unvalued and unused references and writes nothing"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " write paths follow the contract advances the source revision and leaves the draft unlearned on a step change"
+      },
+      {
+        "file": "src/services/mocks/studio/studioHandlers.test.ts",
+        "name": " write paths follow the contract creates a draft that starts UNLEARNED with no confirmed revision"
+      }
+    ]
+  },
+  "poNamedItems": {
+    "SF-1": "review/artifactSummary.test.ts (failed to load at baseline; static 9 it + 1 it.each) and review/compilePollBounds.test.ts (4, in drops) deleted with review/**",
+    "SF-2 AC-4 oracles": "run/runGate.test.tsx describe 'STUDIO-OBS-012B AC-4' (a) READY → one execute, nothing else; (b) every non-READY readiness → disabled + exact interim sentence + accessible description; (c) 409 LEARN_REQUIRED shown once, no retry, no preparation narrative; (d) dirty READY → save → UNLEARNED stops; (e) learned chip. Page level: pageRunGate.test.tsx 'STUDIO-OBS-012B: an unlearned draft shows the interim state…'",
+    "artifactSchemaDrops": "studioContract 'the mock artifact matches artifact.schema.json' (4) + 'the candidate artifact in the ready example validates against artifact.schema.json' (1)",
+    "v3Addition": "studioContract 'every non-null confirmedRevisionArtifact fixture validates against contracts/v3/replay-artifact.schema.json'",
+    "validateTestVariablesHandlerAddition": "handlers.ts POST /tests/:id/validate-variables; tests: studioHandlers 'validate-variables reports undeclared, unvalued and unused references and writes nothing', 'validate-variables refuses an id the caller cannot read with the same 403 as the read'"
+  },
+  "retiredGuard": {
+    "from": "frontend/src/components/studio/review/diagnostics.test.tsx (deleted after relocation)",
+    "to": "frontend/src/components/studio/run/runGate.test.tsx describe 'story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B)' (2 cases); scope widened to components/studio/**, services/mocks/studio/**, services/api/** non-test modules",
+    "mutation": "appended one line \"// import { buildDefaultTestIR } from '@/utils/studio/ir/parseSteps';\" to run/runEnablement.ts; guard RED (mutation-red.txt); file restored, sha256 1f3d8eb6… before = after; guard GREEN (mutation-green.txt). Done before review/** was deleted."
+  },
+  "handlerCoverage": {
+    "assertion": "studioContract.test.ts describe 'STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a PO-ruled entry' (P1–P5)",
+    "publicOperationsAtRun": 30,
+    "allowlist": {
+      "A": [
+        "startGuidedSession",
+        "readGuidedSession",
+        "readGuidedResult",
+        "readGuidedClarification",
+        "clarifyGuidedSession",
+        "cancelGuidedSession",
+        "finalizeObservedPublication",
+        "getGuidedSessionVideo",
+        "listTestSecrets",
+        "createTestSecret"
+      ],
+      "B": [
+        "streamExecution"
+      ],
+      "C": []
+    },
+    "classAVideo": "getGuidedSessionVideo added during this run: contract step C1 landed it mid-run and the fail-closed P2 check went red on it; operationId quoted from openapi.yaml sha d40c744d…",
+    "pendingContractSteps": "Class C (OBS-014 policy operations, C2b) not in the document at this run — no entries added; root re-runs FE gates after C2b and the F-012B owner adds entries quoting operationIds from the landed document. C2a (getExecutionVideo 404/410/416 → shared $ref components, AR-1 E-1): the video refusal test now resolves either form; verified green against current literals and against a simulated $ref form (temporary in-test edit, restored byte-identical).",
+    "negativeControls": {
+      "P2": "removed handlers.ts GET /executions/:id block → 'P2: public getExecution … has no MSW handler' (negative-control-1-handler-removed.txt)",
+      "P4": "added dummy GET /guided-sessions/:id handler → 'P4: allowlist entry readGuidedSession (class A) is stale' (negative-control-2-dummy-allowlisted-handler.txt)",
+      "restore": "handlers.ts sha256 c548df0c… before = after; AC-3 block 4/4 green (negative-controls-restore.txt)"
+    }
+  },
+  "greps": {
+    "orphan": {
+      "command": "grep -rnE '(^|[^-])artifact\\.schema\\.json|inference\\.openapi\\.yaml|inference-proposal\\.schema\\.json' frontend/src backend/src studio-runner/src tools backend/build.gradle.kts",
+      "result": "0 lines (exit 1)"
+    },
+    "compile": {
+      "command": "grep -rniE 'compil' frontend/src",
+      "result": "12 lines, all listed exceptions",
+      "exceptions": [
+        {
+          "class": "E1 WCAG surface names kept by AC-6 (comment-only; OBS-008 AC-8 rewrites)",
+          "lines": [
+            "test/a11y/studioWcagAudit.test.tsx:99 'ChecksStudioPage/compile-review' pinned key",
+            "test/a11y/studioWcagAudit.test.tsx surface 4 test name",
+            "test/a11y/studioWcagAudit.test.tsx scan('ChecksStudioPage/compile-review')"
+          ]
+        },
+        {
+          "class": "E2 Ajv library API method ajv.compile(…) in contract harnesses",
+          "lines": [
+            "services/mocks/studio/studioContract.test.ts componentValidator",
+            "services/api/studioSchedulesApi.test.ts matchesContract"
+          ]
+        },
+        {
+          "class": "E3 escalation guard tests: dated ADR-002 §12 escalation history and the guard literal asserting the retired operation's absence",
+          "lines": [
+            "services/mocks/studio/studioEscalation.test.ts (5 comment lines + not.toContain('confirmCompile'))",
+            "services/mocks/studio/confirmedRevisionEscalation.test.ts (1 comment line)"
+          ]
+        }
+      ]
+    },
+    "historicalLinksNotRewritten": "ADR-002 dated rows; docs/architecture/studio-inference-contract-v1.md:7 and studio-execution.md:5 links (now dangling, historical); studio-runner/test/run/confinement.test.ts:136,158 comments (C-contract file, OBS-011 candidate)"
+  },
+  "sideEffects": {
+    "axe-results.json": "regenerated by running src/test/a11y/studioWcagAudit.test.tsx alone after the second full run (7/7); diff vs T0 is selector/node churn including the new interim-reason node; kept as the story's File List names it"
+  },
+  "notRun": [
+    "CodeRabbit (WSL wrapper not available on this macOS host; independent review fallback is @qa)",
+    "backend/runner gates (out of scope)",
+    "Playwright e2e (none configured; OBS-008)"
+  ],
+  "c2bRerun": {
+    "date": "2026-10-13",
+    "author": "Dex (@dev), F-012B owner",
+    "trigger": "Contract step C2b landed (docs/qa/evidence/STUDIO-OBS-014/c2b-contract/ledger.json): openapi.yaml sha256 afec6c04cdd5bcc19e42b83f83656a342165c5e04407e90a7206de0b40c46183 has five new public OBS-014 guided-policy operations (none x-internal). Before this re-run studioContract.test.ts had 2 failing tests (67/69): 'no handler for a route that no longer exists…' (P2 x5) and 'fails closed…' (5 extra P2 violations besides hypotheticalRead). Saved in c2b-pre-entries-red.txt.",
+    "authority": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/po-ruling-012B-allowlist.json ruling1 classC_conditional_noFrontendConsumerInWave",
+    "change": {
+      "file": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "sha256": [
+        "730dbca0af2b4c99992125a8a1eedbdc77ca1472a2a1b34334579728ce0cdd9e",
+        "fcc4bbad64e79db20d7472e79414a429825e0097b5d84a6bb3546df778ee0c6a"
+      ],
+      "classCEntries": [
+        {
+          "operationId": "lookupGuidedPolicy",
+          "route": "GET /api/v1/studio/guided-policies"
+        },
+        {
+          "operationId": "createGuidedPolicy",
+          "route": "POST /api/v1/studio/guided-policies"
+        },
+        {
+          "operationId": "readGuidedPolicy",
+          "route": "GET /api/v1/studio/guided-policies/{id}"
+        },
+        {
+          "operationId": "createGuidedPolicyVersion",
+          "route": "POST /api/v1/studio/guided-policies/{id}/versions"
+        },
+        {
+          "operationId": "approveGuidedPolicyVersion",
+          "route": "POST /api/v1/studio/guided-policies/{id}/versions/{version}/approval"
+        }
+      ],
+      "entryShape": "{class: 'C', owner: 'first story with a frontend policy client', reason: 'STUDIO-OBS-014 AC-1 policy …; no frontend consumer in this wave'}; operationIds quoted from openapi.yaml lines 1648, 1684, 1793, 1819, 1863 (sha afec6c04…). The block comment now says C2b landed and was entered; nothing else in the file changed. No handler, client or other file edited.",
+      "allowlistNow": {
+        "A": 10,
+        "B": 1,
+        "C": 5
+      }
+    },
+    "negativeControl": {
+      "kind": "P4 (stale entry) on a new class-C entry",
+      "mutation": "inserted one line \"http.get(`${BASE}/guided-policies`, () => HttpResponse.json({})),\" at the head of studioHandlers in handlers.ts",
+      "result": "'P4: allowlist entry lookupGuidedPolicy (class C) is stale — it has a handler now; remove the entry' (c2b-negative-control-classC-dummy-handler.txt, 1 failed)",
+      "restore": "handlers.ts restored from a scratch copy; sha256 c548df0c8a580186569cd5b949bdcd15a1128c5f3deb92dd31573a290edfc4c9 before = after (same as the first run's restore). AC-3 block 4/4 green (c2b-negative-control-restore.txt).",
+      "P2Direction": "the in-suite 'fails closed' test (hypotheticalRead → exactly one P2) is green again; it was red before the entries because the five policy ops added extra P2 violations."
+    },
+    "gates": {
+      "hostLoad": "load averages 6.98 at start, 13.27 before tsc, 10.95 at full-vitest start, 10.84 at end",
+      "tsc": "pnpm exec tsc --noEmit → exit 0",
+      "eslint": "pnpm exec eslint src --ext .ts,.tsx → 0 errors, 302 warnings (same as previous final)",
+      "build": "pnpm run build → exit 0, webpack compiled with 1 warning (same as previous final)",
+      "contractFile": "pnpm exec vitest run src/services/mocks/studio/studioContract.test.ts → 69/69",
+      "vitest": {
+        "command": "cd frontend && pnpm exec vitest run --maxWorkers=3 --minWorkers=1 --reporter=json --outputFile=../docs/qa/evidence/STUDIO-OBS-012B/fe-final-c2b.json",
+        "attempts": 1,
+        "total": 695,
+        "passed": 695,
+        "failed": 0,
+        "wall": "2:25",
+        "note": "--maxWorkers=3 used because load was above 10; first and only attempt passed. Repo prefix stripped from fe-final-c2b.json file names after the run."
+      },
+      "retiredGuard": "pnpm exec vitest run src/components/studio/run/runGate.test.tsx -t 'RETIRED guard' → 2 passed (17 skipped)"
+    },
+    "reconciliation": {
+      "previousFinal": 695,
+      "now": 695,
+      "namedAdditions": [],
+      "namedDrops": [],
+      "method": "fe-final.json vs fe-final-c2b.json keyed by (file under src/, fullName): 0 added, 0 removed, 0 status changes. The five class-C entries are data in an existing literal, not tests. The two tests red after C2b landed are the same two cases that were green in the previous final."
+    },
+    "greps": {
+      "orphan": "same command as greps.orphan → 0 lines",
+      "compile": "grep -rniE 'compil' frontend/src → 12 lines, identical to the listed E1/E2/E3 exceptions (studioWcagAudit 3, studioEscalation 6, confirmedRevisionEscalation 1, studioContract ajv.compile 1, studioSchedulesApi ajv.compile 1)"
+    },
+    "sideEffects": "docs/qa/accessibility/axe-results.json sha256 65da2253… before and after the full run (unchanged). openapi.yaml not edited (afec6c04… throughout).",
+    "notRun": [
+      "CodeRabbit (WSL wrapper not available on this macOS host)",
+      "backend/runner gates (out of scope)"
+    ],
+    "ledgerFormatting": "This section was appended by load → add key → json.dumps(indent=2, ensure_ascii=False). Every earlier key and value is unchanged (same parsed object plus this key), but the file was re-serialized, so the whitespace/escaping layout of earlier sections differs from the previous 79,284-byte file."
+  },
+  "uxGateFixes": {
+    "date": "2026-10-14",
+    "author": "Dex (@dev), F-012B owner",
+    "trigger": "docs/qa/evidence/STUDIO-OBS-012B/ux-gate.json (verdict CONCERNS) findings COPY-001..004 and UX-A11Y-001; QA draft gate COPY-001/COPY-002 close in the same files. Texts are the UX file's proposed_fix strings verbatim.",
+    "changes": [
+      {
+        "finding": "COPY-001",
+        "file": "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+        "to": "Run saves your steps and records proof."
+      },
+      {
+        "finding": "COPY-002",
+        "file": "frontend/src/components/studio/scheduling/schedulePresentation.ts",
+        "codes": [
+          "LEARN_REQUIRED",
+          "RUNTIME_INCOMPATIBLE"
+        ]
+      },
+      {
+        "finding": "COPY-002",
+        "file": "frontend/src/components/studio/scheduling/StudioScheduleDialog.tsx",
+        "lines": "blocked-alert (was :144) and never-learned info alert (was :174)"
+      },
+      {
+        "finding": "COPY-003",
+        "file": "frontend/src/components/studio/scheduling/schedulePresentation.ts",
+        "codes": [
+          "ACTIVATION_REVISION_MISMATCH"
+        ],
+        "to": "The learned steps changed. Reload and review them before resuming."
+      },
+      {
+        "finding": "COPY-004",
+        "file": "frontend/src/components/studio/run/RunControl.tsx",
+        "to": "CircularProgress aria-hidden=\"true\" (decorative; aria-label 'Preparing test' removed)"
+      },
+      {
+        "finding": "UX-A11Y-001",
+        "file": "frontend/src/components/studio/run/RunControl.tsx",
+        "to": "(1) learned chip only when action is execute and !isDirty; (2) interim caption inside an always-mounted Box role=status aria-live=polite (data-testid run-learning-unavailable-status); id and aria-describedby stay on the inner Typography. Optional item (3) (pre-activation dirty caption) not applied: not requested."
+      }
+    ],
+    "testsAdded": [
+      "runGate.test.tsx: AC-4 (f) UX-A11Y-001 - chip hidden while dirty; the same pre-mounted polite status region holds the interim sentence after the save stops Run; accessible description kept; 0 execute",
+      "runGate.test.tsx: AC-4 (g) COPY-004 - spinner aria-hidden, no progressbar role exposed, no aria-label matching /repar/",
+      "StudioScheduleDialog.test.tsx: COPY-002/COPY-003 scheduleError messages verbatim; no /with Run|confirm|compil|prepar/",
+      "StudioScheduleDialog.test.tsx: COPY-002 never-learned dialog shows 'Resume becomes available once a Run has learned the saved steps.'"
+    ],
+    "testsUpdated": [
+      "StudioScheduleDialog.test.tsx 'an enabled schedule blocked by executable edits...' asserts the new blocked-alert text",
+      "pageRunGate.test.tsx 'STUDIO-OBS-012B: an unlearned draft shows the interim state...' asserts the COPY-001 text and body !/prepar/i"
+    ],
+    "negativeControl": "UX-A11Y-001 chip guard reverted (learned = action === 'execute') -> runGate (f) 1 failed; RunControl.tsx restored from a scratch copy (grep confirms the guard).",
+    "retiredGuard": "Untouched; runGate.test.tsx RETIRED guard cases green in the full run.",
+    "gates": {
+      "tsc": "node_modules/.bin/tsc --noEmit -> exit 0",
+      "eslint": "node_modules/.bin/eslint src --ext .ts,.tsx -> exit 0, 0 errors / 302 warnings (unchanged)",
+      "vitest": "node_modules/.bin/vitest run --minWorkers=1 --maxWorkers=3 -> 699/699 passed, 0 failed/pending/todo, 210 suites, 1 attempt, host load ~9-11; no timeouts, so no isolated re-runs needed",
+      "report": "fe-final-ux-fixes.json (paths made repo-relative; sha256 005b9ec65da93d13cc0b90d5ed9bfdd0b32947d8ea5732caefb43ebe0eecf08e)"
+    },
+    "reconciliation": {
+      "previous": "fe-final-c2b.json 695",
+      "now": 699,
+      "added": 4,
+      "removed": 0,
+      "statusChanges": 0,
+      "formula": "695 + 4 = 699",
+      "keyedBy": "(src-relative file, fullName)"
+    },
+    "sideEffects": {
+      "axe-results.json": "regenerated by the full run: 65da2253b356bf15fc524328aabb7552bc8328fab57464bc5b082393bd942423 -> 51c29bb491b25aafb91240a1b7f875bd4670b980adb43b13d344d8d8e014e961. Only difference: the 'region' violation node '#:r..:-run-not-permitted-learning-unavailable' is gone from the two surfaces scanning unlearnedDraft, because the caption now sits inside a role=status live region. Kept as regenerated."
+    },
+    "sha256After": {
+      "frontend/src/components/studio/run/RunControl.tsx": "5d97d9431e22ea0acc790a34f51a46a4c051240e8ca8a6fb755ecae260002e67",
+      "frontend/src/components/studio/run/runGate.test.tsx": "ae0a484c359e9dc3edb4e770b3b5c9fbe8c5dd0ab8ba2a39551b06329ba34dee",
+      "frontend/src/components/studio/scheduling/schedulePresentation.ts": "ecca2b07fd456fbb4d022617b76f3dba8e3e8037be882580f37afad5bcae2a64",
+      "frontend/src/components/studio/scheduling/StudioScheduleDialog.tsx": "74908b5f2fd1308a3ff382bcf30d8d5ed003122176fc36143802975c35c79199",
+      "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx": "e871cf3f3cecd5e2c698a03960a7d703e5a78f5ed3df9c3a3cf54e3212a63e79",
+      "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": "0e51f09e439aaff95dc559c3fdd8a9b331c4b8559eab2882d3a10f63f08a6a48",
+      "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx": "46e00287bceca9e2a5a82ec1bf463a01627dd88c7292862a30a54aee9b401ab5"
+    },
+    "s4Note": "These edits change files after the QA phase-1 digest 5b83adfb...; S4 credit for the touched files needs a new run (QA next_steps).",
+    "notRun": "CodeRabbit (no WSL on this host). Build not re-run (not requested). Optional UX item (3) and observations OBS-UX-1..3 not applied (outside the requested scope)."
+  }
+}

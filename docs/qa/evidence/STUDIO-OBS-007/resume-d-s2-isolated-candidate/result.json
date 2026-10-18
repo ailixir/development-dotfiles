@@ -1,0 +1,104 @@
+{
+  "scope": "S2_ISOLATED_FIXTURE_ORGANIZATION_CLOSING_PREREQUISITE_FINDING",
+  "disposition": "NO_OPENING_IMPLEMENTATION_AUTHORED_CLOSING_PROOF_PREREQUISITE_UNSATISFIED",
+  "authority": [
+    "docs/qa/evidence/STUDIO-OBS-007/root-s2-opening-architecture-review.json",
+    "docs/qa/evidence/STUDIO-OBS-007/resume-d-s2-source-exposure-architecture-recommendation.json"
+  ],
+  "baseSha256": "a2fed633182be340236451f75575cb50112880e64d2e3a30b73cf763567fb926",
+  "candidateSha256": "a2fed633182be340236451f75575cb50112880e64d2e3a30b73cf763567fb926",
+  "candidateMeaning": "Unmodified isolated snapshot; not an implementation candidate or runtime proof",
+  "paths": {
+    "before": "docs/qa/evidence/STUDIO-OBS-007/resume-d-s2-isolated-candidate/before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "candidate": "docs/qa/evidence/STUDIO-OBS-007/resume-d-s2-isolated-candidate/candidate/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "patch": "docs/qa/evidence/STUDIO-OBS-007/resume-d-s2-isolated-candidate/candidate.patch"
+  },
+  "sourceBindings": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "a2fed633182be340236451f75575cb50112880e64d2e3a30b73cf763567fb926",
+    "studio-runner/src/guided/runtime.ts": "75fc33b1cd1cbc59bcb746811caff879d7217b22de8b08b374eec173dacf271c",
+    "studio-runner/src/guided/ownership.ts": "030443d7478791e2f980763a4e30a4b2daba922836d0c5ac9650e141995b31c4",
+    "studio-runner/src/guided/transport.ts": "fc447a2efdf666c9b4ed319685e1d59875787fa11ec3a3e070171ae5da5ae3bf",
+    "studio-runner/src/server/runCoordinator.ts": "f2fb612e7312cf26768d6bc3ccc687a7735b5182a4b4a1be1578b8b2548ac77b",
+    "studio-runner/src/reporting/reportClient.ts": "4815994d27338fcb2d4338de1f6008d74585947a534cbb6a98828ff85b82ec7f",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "0a26aeec0574fae1256ff15057fdb3c268de7a2f26b8977296b5e31c25d42ddd"
+  },
+  "preservation": {
+    "entireBaseEqualsSnapshot": true,
+    "inverseEntireBase": true,
+    "testBodiesAndGeneratedScripts": "All unchanged because entire isolated file is byte-identical",
+    "testAnnotationCount": 36,
+    "openingOrClosingSourceChanges": 0
+  },
+  "openingDisposition": "Exact ninth scope/capture/SECRET/PASS pre-delegate arming is approved in principle; intentionally not implemented without required complete closing proof. Existing capture and all logger/scanner/clock/lease/native protocols remain untouched.",
+  "existingHelperFacts": [
+    {
+      "anchor": "GuidedPublicationReplayIT.java:6790-6848,9271-9285",
+      "helper": "p3CleanupOwnedResources / p3AwaitTeardown",
+      "proves": "Original authenticated cancellation where needed; guided persisted teardownStatus CONFIRMED after original stop sender returns",
+      "doesNotProve": "Completion of every concurrent guided dispatch/observation callback and its per-action late diagnostic finally"
+    },
+    {
+      "anchor": "GuidedPublicationReplayIT.java:6851-6928",
+      "helper": "p3CleanupOrdinary",
+      "proves": "Actual terminal snapshot, streamComplete, matching ledger DONE, authenticated FINAL or genuine no-transport-entry proof",
+      "doesNotProve": "Original parent terminal delivery closure/inFlight task has returned after controller FINAL acceptance"
+    },
+    {
+      "anchor": "GuidedPublicationReplayIT.java:11848-11913",
+      "helper": "C5Capture.close",
+      "proves": "Sampler and owned SSE reader drainage, late/restoration scans and existing sticky cleanup flag",
+      "doesNotProve": "Independent worker operation or backend asynchronous stop task completion; it restores logger levels/output before its final clean assertions"
+    },
+    {
+      "anchor": "GuidedPublicationReplayIT.java:1221-1350",
+      "helper": "cancelFailedTestOwnedSessions @AfterEach",
+      "proves": "Original failed-case scoped stop acknowledgement",
+      "doesNotProve": "Earlier ninth finally capture restoration ordering; runs later"
+    },
+    {
+      "anchor": "GuidedPublicationReplayIT.java:13143-13437",
+      "helper": "stopOwnedApplicationJobs / stopOwnedProcessTree / stop",
+      "proves": "Class-level shared application/worker and endpoint teardown",
+      "cannotMove": "It shuts down shared application scheduling and both workers/provider/fixture/PostgreSQL; moving to ninth is not a minimum fixture opening organization and changes future case lifetimes"
+    }
+  ],
+  "concreteSourceCounterorders": [
+    {
+      "anchor": "studio-runner/src/guided/runtime.ts:212-276,309-332; ownership.ts:132-153; transport.ts:88-100",
+      "fact": "stop awaits closeResources/browser close/lifecycle callback, but does not await the already-running dispatch promise. Dispatch retains its action-local failureRedactor/diagnostics across awaits and may record its diagnostic/outcome before its own finally. Stop acknowledgement alone therefore does not establish that local late producer has returned.",
+      "qualification": "Source-permitted ordering only; no assertion that this happened in ninth or any actual value escaped"
+    },
+    {
+      "anchor": "studio-runner/src/reporting/reportClient.ts:204-218; server/runCoordinator.ts:963-975,1187",
+      "fact": "Controller accepts FINAL before client receives response; client then writes report.terminal_delivered and returns. Coordinator inFlight deletion occurs in task finally after execute returns. Existing controller-side P3_FINAL_REPORTS and ledger DONE may become visible before these final producer steps.",
+      "qualification": "Late log payload is names-only by source; this still cannot satisfy the explicit all-final-producer completion prerequisite through inference"
+    },
+    {
+      "anchor": "GuidedSessionService.java:2230-2267",
+      "fact": "Persisted CONFIRMED is written in an asynchronous stop continuation transaction. No original fixture-visible handle joins that continuation. Its visible commit is not an operation join."
+    }
+  ],
+  "minimalMissingPrerequisite": {
+    "required": "Existing authentic per-owner completion evidence that joins active guided invocation diagnostic/callback/finally and ordinary parent terminal delivery task, on success and failure, before capture.close restores output/levels.",
+    "availableCurrentScope": "Existing acknowledgement helpers can be reused for browser/resource and accepted-report authority but not relabeled operation completion.",
+    "notAuthorizedHere": "New watcher/channel/framework, new runtime instrumentation, production operation-completion API, global application teardown/restart or a scope waiver.",
+    "rootChoice": "Provide an already-approved authentic per-owner final completion seam, or independently dispose whether the existing acknowledged resource boundary plus later names-only logging meets the narrower canonical requirement. No such requirement change or helper proof is made by this receipt."
+  },
+  "primaryAndCleanup": "No altered cleanup flow. A future reviewed source organization must attempt original independent owner cleanups while capture remains active, attach cleanup errors to original primary, and retain quarantine when any required producer completion is unconfirmed; cannot close/restore merely because a wait elapsed.",
+  "actions": {
+    "isolatedSnapshots": 2,
+    "sourceEdits": 0,
+    "liveEdits": 0,
+    "runtime": 0,
+    "builds": 0,
+    "sql": 0,
+    "newTests": 0,
+    "models": 0
+  },
+  "fullTraceStatus": "Original red remains red; no runtime PASS or acceptance waiver",
+  "lifecycleVerdict": null,
+  "whole19AcPass": false,
+  "wholeWaveCeilingUsd": 500,
+  "billing": "UNAVAILABLE",
+  "privacy": "Only repository anchors, fixed categories and source hashes; no runtime identities, values, credentials, raw logs or payloads."
+}

@@ -1,0 +1,14 @@
+{
+  "actualMetadataShape": "ACTUAL_DISPATCH_DIAGNOSTICS[id].sendOutcome holds kind/retryable/classifiedHttpStatus",
+  "primaryFixtureRead": "p7FaultAndRetry5062 reads root fields instead; later5141 likewise",
+  "retainedClosedDispatchSummaries": [],
+  "outageCase": "UNREACHED because previous cleanupUnconfirmed @BeforeEach1096",
+  "primaryAndCleanupFailuresRetained": true,
+  "proposedExactFixtureOnlyFixes": [
+    "actual.path(\"sendOutcome\").deepCopy() in capacity assertion",
+    "ACTUAL_DISPATCH_DIAGNOSTICS.get(execution).path(\"sendOutcome\").path(\"kind\") for retried accepted result"
+  ],
+  "sourceWrites": 0,
+  "runtimeProbes": 0,
+  "createdAt": "2026-10-11T14:08:06.193285+00:00"
+}

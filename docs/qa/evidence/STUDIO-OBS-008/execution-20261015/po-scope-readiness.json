@@ -1,0 +1,776 @@
+{
+  "schema": 1,
+  "author": "Pax (@aiox-po)",
+  "createdUtc": "2026-10-15T03:56:47.104225+00:00",
+  "task": "Bounded preparatory008 product/backlog scope and readiness",
+  "decision": "GO_FOR_EXISTING_PRODUCT_SCOPE_AND_ARCHITECT_TECHNICAL_RESOLUTION;008_IMPLEMENTATION_HELD",
+  "readyForArchitectResolution": true,
+  "readyForImplementation": false,
+  "implementationReleaseCondition": "015 must be independently QA-approved Done; post015 interfaces/ownership and P1-P7 technical prerequisites must be resolved and root must explicitly release implementation. No wait for015 was needed for this scope review.",
+  "lifecycle": "Ready preserved; no validation/QA lifecycle transition",
+  "productChoicesNeededFromUser": [],
+  "originalNineAcPreserved": true,
+  "noNewStatesFeaturesOrAcceptanceThresholds": true,
+  "policyNotApprovedPlacement": {
+    "source": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json",
+      "pointer": "/AR-2/a_closedCodes/frontendCoupling"
+    },
+    "originalCodeTable": {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json",
+      "pointer": "/AR-2/a_closedCodes/table/0"
+    },
+    "landedPublicResponse": {
+      "path": "docs/specs/studio/openapi.yaml",
+      "line": 1221,
+      "paragraphContains": "`POLICY_NOT_APPROVED` (STUDIO-OBS-014 AC-1)"
+    },
+    "destination": "OBS008 T1 typed start /guidedNarratives UX +AC9 MSW integration",
+    "originalAcAnchors": [
+      "AC1",
+      "AC2",
+      "AC3",
+      "AC9"
+    ],
+    "newState": false,
+    "newContractFieldOrRoute": false,
+    "policyAdministrationUiOrClassCTakeover": false,
+    "copyOwner": "Uma (@ux-design-expert)",
+    "backendMeaning": "409 closed v3 envelope;retryablefalse; no session/base/budget charge; missing/unapproved/latest-pending policy. Author needs policy approval before learning can start.",
+    "sourceOfPriorGap": {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "line": 64,
+      "paragraphContains": "e. **Not placed by this record:**"
+    },
+    "resolution": "Separate inherited block preserves old omission as history and assigns existing014 coupling now; no new product backlog story needed."
+  },
+  "prerequisiteScopeTrace": [
+    {
+      "id": "P0",
+      "technicalOwner": "Orion",
+      "originalPlannedRequirement": "012B/013/014/015 Done with actual independent QA PASS; root closes shared code/contract windows before008. 015 currently unstarted in this preparation snapshot.",
+      "scopeDecision": "DEPENDENCY_HOLD",
+      "productRuling": "Original dependency/GO condition; preparation and technical rulings may proceed now. 012B/013/014 are Done;015 is Ready in this snapshot. No008 implementation or gate is released before015 Done and root closes shared windows.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 8,
+          "paragraphContains": "| Depends on |"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 199,
+          "paragraphContains": "**GO conditions:**"
+        }
+      ],
+      "technicalAcceptanceOrImplementationProofProvided": false
+    },
+    {
+      "id": "P1",
+      "technicalOwner": "Aria + backend Dex + C-int",
+      "originalPlannedRequirement": "Rule vaultSecrets route path, response shape, global-vs-per-test scope, authentication/CSI read authorization and fail-closed unknown/off behavior. Follow StudioScheduleController /tests/{id}/schedule/capabilities pattern without assuming its scheduling flags are secrets authority. Configured provider means not DisabledStudioVaultProvider, not current Vault health, and unavailable must never simulate secrets. Route/client/handler/oneOpenAPI/pins land atomically; no allowlist.",
+      "scopeDecision": "GO_FOR_ARCHITECT_TECHNICAL_RESOLUTION",
+      "productRuling": "Original AC5a expressly requires the runtime vaultSecrets capability and one backend co-execution. Aria decides route/scope/auth/shape and source; provider configuration is not health. Schedule canManage is not secrets authority. Unknown/unavailable must not simulate availability. No new capability feature is proposed.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 41,
+          "paragraphContains": "5. **AC-5"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 73,
+          "paragraphContains": "**T0 \u2014 Contract"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleController.java",
+          "line": 32,
+          "paragraphContains": "@GetMapping(\"/tests/{id}/schedule/capabilities\")"
+        }
+      ],
+      "technicalAcceptanceOrImplementationProofProvided": false
+    },
+    {
+      "id": "P2",
+      "technicalOwner": "Aria/C-int",
+      "originalPlannedRequirement": "Resolve public active-step projection: current session-view.schema#/definitions/PublicSession exposes state, IDs, expiry, counters only; no stepId/ordinal. AC3 requires exact N/M and aria-current. Never infer current step from action counters, polling count, delay, or client English parser. Recheck final015contracts; if still absent add approved minimal public safe progress projection in serialized contract window and backend implementation/tests.",
+      "scopeDecision": "GO_SCOPE_SAFE_PROGRESS_TECHNICAL_GAP_PENDING",
+      "productRuling": "AC3 explicitly requires actual step N/M and AC8 aria-current. The current PublicSession has state/IDs/expiry/counters without a current step projection. Aria/C-int must select an authorized safe source in landed post015 contracts or define the minimum public projection necessary for those existing ACs. Never infer step from action counters, timing, polling or English intent parsing. This does not authorize new states, telemetry or internal-ledger consumption.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 30,
+          "paragraphContains": "3. **AC-3"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 47,
+          "paragraphContains": "8. **AC-8"
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json",
+          "pointer": "/definitions/PublicSession"
+        }
+      ],
+      "technicalAcceptanceOrImplementationProofProvided": false
+    },
+    {
+      "id": "P3",
+      "technicalOwner": "Aria/C-int + Uma",
+      "originalPlannedRequirement": "Rule public safe explanation/action-label source and availability during failed/conflicted runs. result has actionTimings coordinates/startMs but no safeLabel or learned plan. GET test confirmedRevisionArtifact can expose learnedPlan only after publication and must be matched to receipt revision/artifact hash; a current unrelated head cannot stand in for failed/conflicted run evidence. No internal ledger/API consumer or placeholder labels. Need exact frozen source for safe action labels, reusedFrom, relearnedFrom and binding IDs without values.",
+      "scopeDecision": "GO_SCOPE_EXPLANATION_TECHNICAL_GAP_PENDING",
+      "productRuling": "AC6 already requires read-only Steps as learned, action kind/safe label/binding IDs and reusedFrom/relearnedFrom;AC7 requires safe named action seek. Aria/C-int must bind the actual run/immutable receipt revision to a safe public explanation source, including honest failed/conflict availability. A different current confirmed head, private ledger, fabricated replay success, placeholder safe labels or resolved values cannot supply the explanation. No editor of generated actions or new feature is authorized.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 43,
+          "paragraphContains": "6. **AC-6"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 45,
+          "paragraphContains": "7. **AC-7"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 41,
+          "paragraphContains": "5. **AC-5"
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json",
+          "pointer": "/properties"
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/contracts/v3/action-timing.schema.json"
+        }
+      ],
+      "technicalAcceptanceOrImplementationProofProvided": false
+    },
+    {
+      "id": "P4",
+      "technicalOwner": "Aria + PO",
+      "originalPlannedRequirement": "Place or explicitly resolve POLICY_NOT_APPROVED start-refusal UI coupling flagged outside inherited014 obligation; no new terminal state is implied. Existing v3 start409 supplies code/messageCode/retryable. Also decide approved feedback for existing start failures BASE_IDENTITY_INCOMPLETE/MISSING_SOURCE/ORIGIN_NOT_ALLOWED without inventing a state or automatic retry.",
+      "scopeDecision": "PRODUCT_PLACEMENT_RESOLVED_TECHNICAL_MAPPING_PENDING",
+      "productRuling": "POLICY_NOT_APPROVED now belongs to008 as an unsuccessful start response under AC1/2/3/9, not a new state. Other existing start refusals remain source-cited error feedback for the same Run: Aria/Uma map only the actually landed public code/messageCode, without automatic retry/repair, inferred success, privileged policy UI or invented recovery action. In015design BASE_IDENTITY_INCOMPLETE is a readinessReason/messageCode on REVISION_CONFLICT, not a new error-code enum or terminal state;MISSING_SOURCE and ORIGIN_NOT_ALLOWED already exist. Do not automatically lower k or invent a new full-learn control from this review.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 66,
+          "paragraphContains": "**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): `POLICY_NOT_APPROVED`"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json",
+          "pointer": "/AR-2/a_closedCodes/frontendCoupling"
+        },
+        {
+          "path": "docs/specs/studio/openapi.yaml",
+          "line": 1221,
+          "paragraphContains": "`POLICY_NOT_APPROVED` (STUDIO-OBS-014 AC-1)"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/implementation-ruling.md",
+          "line": 19,
+          "paragraphContains": "messageCode=BASE_IDENTITY_INCOMPLETE"
+        }
+      ],
+      "technicalAcceptanceOrImplementationProofProvided": false
+    },
+    {
+      "id": "P5",
+      "technicalOwner": "Aria + Uma + dev gate",
+      "originalPlannedRequirement": "Agree test-only browser MSW transport architecture that reuses handlers with real browser/Vite and keeps realStudioStartup.test.ts production no-mock constraints. Node MSW proxy with local test server is a candidate; production main/bootstrap/config must not gain mock gate or browser worker asset. Resolve Playwright test runner availability/dependency in008package ownership; no install performed by this plan.",
+      "scopeDecision": "GO_FOR_EXISTING_BROWSER_MSW_TEST_DESIGN",
+      "productRuling": "AC9 already mandates actual Playwright author\u2192Run\u2192clarification\u2192login-required against MSW and AC8 browser-dependent checks. Aria/Dex choose a test-only MSW transport and runner setup while retaining current production no-runtime-mock/worker constraints. No particular proxy/server approach or package install is approved by this product review. Test harness implementation and actual browser execution remain required later, never passed by this plan.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 49,
+          "paragraphContains": "9. **AC-9"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 47,
+          "paragraphContains": "8. **AC-8"
+        },
+        {
+          "path": "frontend/src/components/providers/realStudioStartup.test.ts",
+          "line": 16,
+          "paragraphContains": "has no runtime mock gate"
+        }
+      ],
+      "technicalAcceptanceOrImplementationProofProvided": false
+    },
+    {
+      "id": "P6",
+      "technicalOwner": "Aria + backend Dex",
+      "originalPlannedRequirement": "Rule frontend source of start applicationId/environmentId/versions from authorized persisted test/server context, exact v3 start schema and final015boundary. Do not hardcode app IDs, fixture versions or transform CSI to application without evidence. Live session recovery identifier can be retained without draft/secret content; exact recovery source must be agreed.",
+      "scopeDecision": "GO_SCOPE_START_CONTEXT_TECHNICAL_GAP_PENDING",
+      "productRuling": "AC1 typed start +AC2 readiness/scope demand actual applicationId/environmentId/versions and source/configuration revisions from an authorized test/server source. Existing commands.start requires them. Aria determines source and minimal ID-only reconnect ownership after015; hardcoded app IDs, CSI-to-app inference, fixture versions or secret/draft content recovery are not valid implementations. No new context selector or product state is authorized.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 26,
+          "paragraphContains": "1. **AC-1"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 28,
+          "paragraphContains": "2. **AC-2"
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/contracts/v3/commands.schema.json",
+          "pointer": "/definitions/start"
+        }
+      ],
+      "technicalAcceptanceOrImplementationProofProvided": false
+    },
+    {
+      "id": "P7",
+      "technicalOwner": "C-int + Orion",
+      "originalPlannedRequirement": "Freeze post015 production contracts and pin manifest. All015design references here are provisional until then. Current runbook finalize paragraph is stale /api/v3 and schema2; actual public OpenAPI/GuidedPublicationController use /api/v1 and publication.schema v3 closed {schemaVersion,expectedSourceRevision,expectedConfigurationRevision}. No internal commands.finalize hashes/fence may be submitted by FE; document source precedence and coordinate runbook correction.",
+      "scopeDecision": "GO_FOR_POST015_CONTRACT_FREEZE_SOURCE_PRECEDENCE",
+      "productRuling": "Original AC1 typed public transport and AC2 automatic finalize must use landed /api/v1 OpenAPI and closed v3 publication body. Aria/C-int reconcile stale /api/v3/schema2 runbook prose, measure post015 pins and retain one contract generation. No new path, copied internal finalize hashes/fence or frontend contract hand-edit is authorized. Exact root contract/backend ownership and File List must be reconciled before any implementation that needs an additional safe public projection.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 26,
+          "paragraphContains": "1. **AC-1"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 28,
+          "paragraphContains": "2. **AC-2"
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 93,
+          "paragraphContains": "### Copy source and sequencing"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/contract-edits.json"
+        }
+      ],
+      "technicalAcceptanceOrImplementationProofProvided": false
+    }
+  ],
+  "allOriginalAcInventory": [
+    {
+      "id": "AC1",
+      "plannedRequirement": "Typed v3 start/readSession/readResult/readClarification/clarify/cancel/finalize/video route builder; central API; schema-derived or document-asserted types; MSW every state fixture derived from frozen schemas; required idempotency on all guided mutating operations, execute and finalize. Native media path is browser request, not JSON/fetch.",
+      "state": "ORIGINAL_SCOPE_CONFIRMED_PLANNED_NOT_RUN",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 26,
+        "paragraphContains": "1. **AC-1"
+      }
+    },
+    {
+      "id": "AC2",
+      "plannedRequirement": "UNLEARNED guided; READY execute; NEEDS_RELEARN server boundary mixed guided; LEARNING disabled; save then fresh GET; no local lowered boundary; no hidden execute after learning; auto finalize once with same key on recovery; no optimistic publication.",
+      "state": "ORIGINAL_SCOPE_CONFIRMED_PLANNED_NOT_RUN",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 28,
+        "paragraphContains": "2. **AC-2"
+      }
+    },
+    {
+      "id": "AC3",
+      "plannedRequirement": "Every exact canonical readiness/live/terminal narrative; safe PAGE labels; expiry60/20 consequence; unknown outcome no runagain; replay drift explicit learnagain; no account/selector/capture/DOMupload states.",
+      "state": "ORIGINAL_SCOPE_CONFIRMED_PLANNED_NOT_RUN",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 30,
+        "paragraphContains": "3. **AC-3"
+      }
+    },
+    {
+      "id": "AC4",
+      "plannedRequirement": "Guided and replay LOGIN_REQUIRED both loginStepsPresent variants, exact copy, Go to stepN focuses stable editor row; Open Variables opens dialog. Failed run remains failed.",
+      "state": "ORIGINAL_SCOPE_CONFIRMED_PLANNED_NOT_RUN",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 39,
+        "paragraphContains": "4. **AC-4"
+      }
+    },
+    {
+      "id": "AC5",
+      "plannedRequirement": "Server runtime Vault capability for page/wizard/onboarding/templates; unknown/error/off unavailable; ReferencePicker insert tokens from declared names; SecretInput creation/clear; secret value never retained or echoed.",
+      "state": "ORIGINAL_SCOPE_CONFIRMED_PLANNED_NOT_RUN",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 41,
+        "paragraphContains": "5. **AC-5"
+      }
+    },
+    {
+      "id": "AC6",
+      "plannedRequirement": "Read-only Steps as learned action/safe label/hidden producer\u2192consumer reference flow; reused/relearned provenance; IDs not values; learned receipt distinct replay verified; historyPUBLISHED distinct currentReadiness; after expiry result route.",
+      "state": "ORIGINAL_SCOPE_CONFIRMED_PLANNED_NOT_RUN",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 43,
+        "paragraphContains": "6. **AC-6"
+      }
+    },
+    {
+      "id": "AC7",
+      "plannedRequirement": "Guided and replay native video; step/action named seek exact server offsets; processing/failed/unavailable/expired neutral copy; no fake media.",
+      "state": "ORIGINAL_SCOPE_CONFIRMED_PLANNED_NOT_RUN",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 45,
+        "paragraphContains": "7. **AC-7"
+      }
+    },
+    {
+      "id": "AC8",
+      "plannedRequirement": "WCAG2.1AA list; MUI sx tokens; single live announcer, stepcurrent, focused keyboard clarification, named seek, enabled contrast/targetsize, reducedmotion and narrowlayout; replace obsolete WCAG surfaces4/5 with distinct real states.",
+      "state": "ORIGINAL_SCOPE_CONFIRMED_PLANNED_NOT_RUN",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 47,
+        "paragraphContains": "8. **AC-8"
+      }
+    },
+    {
+      "id": "AC9",
+      "plannedRequirement": "Full enumerated Vitest+MSW integration plus real browser first E2E author\u2192Run\u2192clarification\u2192loginrequired; all project gates green.",
+      "state": "ORIGINAL_SCOPE_CONFIRMED_PLANNED_NOT_RUN",
+      "source": {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "line": 49,
+        "paragraphContains": "9. **AC-9"
+      }
+    }
+  ],
+  "allInheritedObligationInventory": [
+    {
+      "id": "V2-a",
+      "plannedRequirement": "Create/save authoringSchemaVersion2/globalContext/AuthoringStep[]; IDs survive edit/reorder/save/reload, insert/copy/template replacement gets fresh IDs, delete drops only removed ID; keep contexts associated by ID.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 51,
+          "paragraphContains": "**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): v2 authoring"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/po-t0-followups.json"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "V2-b",
+      "plannedRequirement": "Remove v1 transport overloads and legacy adapter+test+legacy cases; one v2 signature, keep list summary distinction without v1 detail tolerance.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 51,
+          "paragraphContains": "**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): v2 authoring"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/po-t0-followups.json"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "V2-c",
+      "plannedRequirement": "Move all stringstepreaders RunGate/ScheduleDialog/StudioPage/CreateCheckPage to v2 detail; audit additional callers and report unexpected writes rather than shim.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 51,
+          "paragraphContains": "**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): v2 authoring"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/po-t0-followups.json"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "V2-d",
+      "plannedRequirement": "MSW v1 body400INVALID_AUTHORING zero statewrite; delete AUTHORING_V2_REQUIRED/LEGACY_AUTHORING behavior.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 51,
+          "paragraphContains": "**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): v2 authoring"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/po-t0-followups.json"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "V2-e",
+      "plannedRequirement": "Shared legacy-empty-context and mixedlegacy fixtures removed only by C-int in same migrationunit.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 51,
+          "paragraphContains": "**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): v2 authoring"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/po-t0-followups.json"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "V2-f",
+      "plannedRequirement": "Clear frontend/src hits of original015M12 exact grep, quote command/results; no demo/deploy incompatible FE/BE.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 51,
+          "paragraphContains": "**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): v2 authoring"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/po-t0-followups.json"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "POLICY-a",
+      "plannedRequirement": "Governed terminalPOLICY_DENIED gets neutral no-cause narrative, not password-only secret copy; reason remains private.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 59,
+          "paragraphContains": "**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): author copy"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json",
+          "pointer": "/AR-2/a_closedCodes/frontendCoupling"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "POLICY-b",
+      "plannedRequirement": "SIDE_EFFECT_CONFIRMATION/CONFIRM_ACTION single AUTHORED choice rendered as confirmation, never disambiguation; v3generation/choice response unchanged.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 59,
+          "paragraphContains": "**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): author copy"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json",
+          "pointer": "/AR-2/a_closedCodes/frontendCoupling"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "POLICY-c",
+      "plannedRequirement": "Uma copy below is the owned exact proposed wording under inherited014; no change in API/state vocabulary.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 59,
+          "paragraphContains": "**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): author copy"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json",
+          "pointer": "/AR-2/a_closedCodes/frontendCoupling"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "POLICY-d",
+      "plannedRequirement": "Both governedrefusal andconfirmation are in AC9 integration set.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 59,
+          "paragraphContains": "**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): author copy"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json",
+          "pointer": "/AR-2/a_closedCodes/frontendCoupling"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "POLICY-e",
+      "plannedRequirement": "POLICY_NOT_APPROVED not automatically covered by inherited item; root obtains explicit P4 placement/ruling.",
+      "disposition": "PRODUCT_PLACEMENT_NOW_RESOLVED_IMPLEMENTATION_REQUIRED",
+      "ruling": "Earlier block(e) is historical and preserved. New inherited POLICY_NOT_APPROVED start-refusal placement/T1 sub-item resolvesP4 product ownership, not UX implementation or technical readiness.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 59,
+          "paragraphContains": "**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): author copy"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json",
+          "pointer": "/AR-2/a_closedCodes/frontendCoupling"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "ALLOWLIST",
+      "plannedRequirement": "Remove all10classA entries together with actualhandlers; preserve classB/Cownership; capabilityclient+handlerneverallowlisted.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 105,
+          "paragraphContains": "### Re-point obligation"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/po-ruling-012B-allowlist.json"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "FE-WORKERS",
+      "plannedRequirement": "Sharedhost boundedworkers1..3; dedicateddefaultgate behavior recorded with perfiletimeout attribution, no increasedtimeout as substitute.",
+      "disposition": "OLD_012B_WORKER_CONCERN_ALREADY_RESOLVED_008_OWN_GATES_STILL_REQUIRED",
+      "ruling": "Preserve strict012B701 default-worker proof; do not reopen it or impose a permanent worker override.008 still executes its own original full test gates in root-owned resource windows; current plan is not execution.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 207,
+          "paragraphContains": "**FE-WORKERS**"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "FE-A11Y",
+      "plannedRequirement": "Distinct surfaces4/5 and realbrowser contrast/targetsize, focus/keyboard/busylabel/tooltip/Addstepdescription.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 208,
+          "paragraphContains": "**FE-A11Y**"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "PLAYBACK-COST",
+      "plannedRequirement": "DatedAria ratification per-range controller-read authorization, identitybeforeidempotentecho,no-store-beforeexpired; measure Core/locking under repeatedrange load without bypass.",
+      "disposition": "RATIFICATIONS_ALREADY_RESOLVED_RANGE_LOAD_REMAINS_008",
+      "ruling": "A13-1/2/3 ratification and local conformance completed013. Do not demand re-ratification; repeated authorized playback locking/Core cost measurement remains original008 scope, without bypass or staging throughput claim.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 209,
+          "paragraphContains": "**PLAYBACK-COST**"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "PLAYBACK-COPY",
+      "plannedRequirement": "Neutral recording wording sharedguided/replay preserves codes/statuses, coordinate010runbook followup.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 210,
+          "paragraphContains": "**PLAYBACK-COPY**"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    },
+    {
+      "id": "FE-CONSUMERS",
+      "plannedRequirement": "Real guided/secrets clients+mirrors,labelSource and governedconfirmation/refusal; no intermediate release.",
+      "disposition": "ORIGINAL_008_OBLIGATION_STILL_REQUIRED_NO_IMPLEMENTATION_PROOF",
+      "ruling": "Keep existing obligation and source-derived implementation/test evidence; this review supplies scope only.",
+      "authority": [
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "line": 211,
+          "paragraphContains": "**FE-CONSUMERS**"
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json"
+        }
+      ],
+      "upstreamHistoryPreserved": true,
+      "implementationOrQaPassClaimed": false
+    }
+  ],
+  "copyAndPrivacyBoundaries": [
+    "Original AC3/AC4 are the canonical file-backed state/copy list; record this atT0, not a fabricated meeting artifact.",
+    "Uma owns added source-cited start-refusal and governed-confirmation wording. PO does not prescribe replacement literal UI strings.",
+    "Use only public safe step/label/binding/receipt fields. PAGE labels remain untrusted; secrets/saved values never rendered; IDs may appear.",
+    "Never infer active step from counters/time or expose private policy reasons/internal ledger; unavailable explanation/evidence must remain honest.",
+    "No new sign-in/account/selector/DOM upload/auto-repair flow. No hidden second execution or guessed boundary lowering."
+  ],
+  "ownershipCaveat": "The story currently lists backend co-execution for capability only and excludes guided services. P2/P3/P6 may reveal missing safe public projections. Their need derives from originalACs, not a new feature; Aria must first rule reuse/minimum surface and root/C-int/backend owner must explicitly reconcile actual File List/shared ownership before code. This review does not guess backend paths or grant unnamed runtime edits.",
+  "storyMutation": {
+    "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+    "versionBefore": "0.3.5",
+    "versionAfter": "0.3.6",
+    "beforeSha256": "ca999de607c239a4f0b00e61439e06ca370041cdf5f8c82f35659f15ee578296",
+    "afterSha256": "9b7386d5e4230a1a2bff02bd474edb7796ace98e14ec0d047fa618038a3e4500",
+    "originalAcBlockSha256": "0eb5c981644b67a983a40399e8ac08ea55218718bc352416c812ce0369e795b7",
+    "originalAcBlockByteExact": true,
+    "qaResultsSha256": "5f1d30a24deb1c74bf7454830f3a37b4eb5ad8114cebea6b4cf8e70009441403",
+    "QAResultsByteExact": true,
+    "statusLineBeforeAfter": "| Status | **Ready** |",
+    "fileListSha256": "a0872a765716bc88b22d093a8c3555a6ff1b46e00dd3ce0629e432e06ca01a2a",
+    "fileListByteExact": true,
+    "fileListReason": "Existing guidedNarratives/studioGuidedApi/guidedHandlers and colocated tests already cover this placed start error; no new path required. Architect-dependent projected surfaces remain unassigned until actual technical ruling.",
+    "exactInsertions": {
+      "inheritedBlockBeforeTasks": "**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): `POLICY_NOT_APPROVED` start-refusal feedback.** Placed by @po (Pax), 2026-10-15, from `AR-2.a_closedCodes.frontendCoupling` and its AC-1 code-table row in `docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json`, as landed in the public OpenAPI `startGuidedSession` 409 response. Record: `docs/qa/evidence/STUDIO-OBS-008/execution-20261015/po-scope-readiness.json`. The earlier governed-refusal block's item e records what that earlier placement omitted; this separate item now places the existing coupling in OBS-008 under AC-1/AC-2/AC-3/AC-9.\n   a. A failed start with public `code: POLICY_NOT_APPROVED` and `retryable: false` tells the author that the application/environment policy needs approval before learning can start. @ux-design-expert owns the exact source-cited wording. Do not confuse it with action-level `POLICY_DENIED`, secret-fill copy, an entitlement denial or a platform mismatch.\n   b. This is feedback for an unsuccessful start, not an added session or terminal state. Do not invent a session, success/publication, polling/finalize continuation or automatic retry. The existing refusal creates no session, publication base or budget charge; policy approval is outside this UI scope.\n   c. The typed transport and MSW mirror consume the existing closed v3 envelope, including the landed `GUIDED_POLICY_ABSENT`, `GUIDED_POLICY_UNAPPROVED` and `GUIDED_POLICY_PENDING_VERSION` message codes. AC-9 integration verifies the feedback and absence of a follow-on start/poll/finalize. Payloads derive from the landed contracts; no API field, policy-management client, class-C allowlist takeover or new product state is added.\n\n",
+      "T1SubitemBeforeT2": "  - [ ] Inherited start-refusal coupling (OBS-014 AR-2): typed `POLICY_NOT_APPROVED` start feedback and source-derived MSW cases; copy by @ux-design-expert; no invented session/state, automatic retry or follow-on poll/finalize; AC-9 integration (inherited item a\u2013c).\n",
+      "appendChangeLogRow": "| 2026-10-15 | 0.3.6 | Placed AR-2\u2019s existing `POLICY_NOT_APPROVED` start-refusal frontend coupling in a separate inherited item and T1 sub-item, completing the earlier item-e placement gap. Product scope supports architect resolution of safe progress/explanation/start context/runtime capability under original AC-1\u2026AC-9; implementation remains held until OBS-015 Done and technical interfaces resolved. No AC text/meaning, Ready status, QA Results, prior closure/carry-forward receipt or implementation File List changed. Record `execution-20261015/po-scope-readiness.json`. | @po (Pax) |\n"
+    },
+    "removeOnlyTheseInsertionsRestoresBeforeSha256": "ca999de607c239a4f0b00e61439e06ca370041cdf5f8c82f35659f15ee578296",
+    "exactReverseRestoresOriginalBytes": true,
+    "unifiedDiff": "--- docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md before\n+++ docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md after\n@@ -63,11 +63,17 @@\n    d. **Tests (AC-9 set):** Vitest + MSW cover a governed `POLICY_DENIED` result, showing the a narrative and not the secret copy, and one `SIDE_EFFECT_CONFIRMATION` question confirmed through to continuation. MSW payloads come from the landed v3 contracts and fixtures. Contract files are not hand-edited.\n    e. **Not placed by this record:** AR-2's `POLICY_NOT_APPROVED` start-refusal narrative, the other half of the same `frontendCoupling` line. It is flagged to the lead in the record. This block does not add it.\n \n+**Inherited obligation (not a new AC; AC-1\u2026AC-9 unchanged): `POLICY_NOT_APPROVED` start-refusal feedback.** Placed by @po (Pax), 2026-10-15, from `AR-2.a_closedCodes.frontendCoupling` and its AC-1 code-table row in `docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json`, as landed in the public OpenAPI `startGuidedSession` 409 response. Record: `docs/qa/evidence/STUDIO-OBS-008/execution-20261015/po-scope-readiness.json`. The earlier governed-refusal block's item e records what that earlier placement omitted; this separate item now places the existing coupling in OBS-008 under AC-1/AC-2/AC-3/AC-9.\n+   a. A failed start with public `code: POLICY_NOT_APPROVED` and `retryable: false` tells the author that the application/environment policy needs approval before learning can start. @ux-design-expert owns the exact source-cited wording. Do not confuse it with action-level `POLICY_DENIED`, secret-fill copy, an entitlement denial or a platform mismatch.\n+   b. This is feedback for an unsuccessful start, not an added session or terminal state. Do not invent a session, success/publication, polling/finalize continuation or automatic retry. The existing refusal creates no session, publication base or budget charge; policy approval is outside this UI scope.\n+   c. The typed transport and MSW mirror consume the existing closed v3 envelope, including the landed `GUIDED_POLICY_ABSENT`, `GUIDED_POLICY_UNAPPROVED` and `GUIDED_POLICY_PENDING_VERSION` message codes. AC-9 integration verifies the feedback and absence of a follow-on start/poll/finalize. Payloads derive from the landed contracts; no API field, policy-management client, class-C allowlist takeover or new product state is added.\n+\n ## Tasks / Subtasks\n \n - [ ] **T0 \u2014 Contract and ownership check.** Confirm OBS-012B/013/014/015 Done; read the one public OpenAPI; @architect rules the `vaultSecrets` capability route (path, shape, per-test vs global); @dev co-executes it; record the ruling.\n - [ ] **T1 \u2014 Lane a: transport and Run (AC-1, AC-2).** `studioGuidedApi.ts`, types, MSW handlers/fixtures, `useGuidedSession`, slice keys named; three Run modes; auto-finalize/poll/reconnect; `Idempotency-Key`.\n   - [ ] Inherited obligation (OBS-015 ruling 1): v2 authoring writes with stable step IDs in `CreateTestDialog`/`ChecksStudioPage`; one v2 transport signature; v1 adapter and legacy test cases deleted; string-step readers moved; MSW refuses v1 with `400 INVALID_AUTHORING`; shared legacy fixture cases deleted via C-int; M12 `frontend/src` hits re-run and recorded (items a\u2013f).\n+  - [ ] Inherited start-refusal coupling (OBS-014 AR-2): typed `POLICY_NOT_APPROVED` start feedback and source-derived MSW cases; copy by @ux-design-expert; no invented session/state, automatic retry or follow-on poll/finalize; AC-9 integration (inherited item a\u2013c).\n - [ ] **T2 \u2014 Lane a: states, login, explanation, video (AC-3, AC-4, AC-6, AC-7).** `components/studio/guided/{GuidedRunStatus, GuidedClarification, LoginRequiredNotice, GuidedCompletion, ReadinessChip, guidedNarratives}`; plan explanation; video/seek wiring.\n   - [ ] Inherited obligation (OBS-014 AR-SEC001-FM): governed `POLICY_DENIED` narrative distinct from the secret-fill copy; `SIDE_EFFECT_CONFIRMATION`/`CONFIRM_ACTION` rendered as a confirmation; copy by @ux-design-expert; AC-9 tests.\n - [ ] **T3 \u2014 Lane b: references and capability (AC-5).** Capability route consumption; `ReferencePicker`; `SecretInput` reuse; never-echo canaries; templates/onboarding copy.\n@@ -236,3 +242,4 @@\n | 2026-10-13 | 0.3.3 | Inherited obligation a\u2013f added after AC-9: v2 authoring writes with stable step IDs. Source is the STUDIO-OBS-015 T0 @architect ruling 1, `consumerItemForOBS008`, in `docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json`. The production FE creates and saves only v1 drafts. Guided start refuses them, and OBS-015 then refuses v1 writes with `400 INVALID_AUTHORING`. So this story writes v2 and preserves step IDs on edit and reorder, with new IDs on insert and copy, and deletes the v1 transport overloads, the adapter, the legacy test cases and the MSW v1 codes. It moves the string-step readers, deletes the shared legacy fixture cases via C-int, and clears the M12 `frontend/src` hits. The obligation closes before OBS-010 release readiness. A deploy constraint was recorded. Added a matching T1 sub-item and File List entries. AC-1\u2026AC-9 text and meaning are unchanged; Status unchanged (**Ready**). Record `docs/qa/evidence/STUDIO-OBS-015/po-t0-followups.json` | @po (Pax) |\n | 2026-10-14 | 0.3.4 | Inherited obligation a\u2013e added after the v2-authoring obligation: author copy for governed refusals and the side-effect confirmation. Sources are the STUDIO-OBS-014 @architect ruling AR-SEC001-FM option B (`docs/qa/evidence/STUDIO-OBS-014/ar-sec001-form-membership.json`) and AR-2 `a_closedCodes.frontendCoupling`. Ruling B makes the side-effect stance fail-closed. Under `DENY`, sessions now also end `POLICY_DENIED` on formless or unlabelled-form button clicks, click-toggles, label clicks and Enter. Under the default `CLARIFY_FIRST`, the one confirmation fires on those actions as well. This story had no narrative for either case: AC-3's only `POLICY_DENIED` copy is the secret-fill copy, and `frontend/src` has no `POLICY_DENIED` handling. (a) A governed `POLICY_DENIED` narrative that is not the secret copy and names no cause, because the reason is not public. (b) `SIDE_EFFECT_CONFIRMATION`/`CONFIRM_ACTION` is rendered as a confirmation. (c) Copy by @ux-design-expert. (d) AC-9 tests. (e) `POLICY_NOT_APPROVED` is not placed here. Added a T2 sub-item. No API field or contract change. AC-1\u2026AC-9 text and meaning are unchanged; Status unchanged (**Ready**). Record `docs/qa/evidence/STUDIO-OBSERVED-NEXT/po-sec001-ruling-b-ack.json` | @po (Pax) |\n | 2026-10-14 | 0.3.5 | Recorded owned resumed-QA follow-ups in the dated carried-review section; source `resume-20261014/po-closure-placements.json`. Existing AC/task text and meaning and Status Ready preserved; no follow-up or external approval marked complete. | @po (Pax) |\n+| 2026-10-15 | 0.3.6 | Placed AR-2\u2019s existing `POLICY_NOT_APPROVED` start-refusal frontend coupling in a separate inherited item and T1 sub-item, completing the earlier item-e placement gap. Product scope supports architect resolution of safe progress/explanation/start context/runtime capability under original AC-1\u2026AC-9; implementation remains held until OBS-015 Done and technical interfaces resolved. No AC text/meaning, Ready status, QA Results, prior closure/carry-forward receipt or implementation File List changed. Record `execution-20261015/po-scope-readiness.json`. | @po (Pax) |\n"
+  },
+  "preservedUpstreamAndCarryForwardArtifacts": {
+    "docs/stories/STUDIO-OBSERVED/README.md": "16dab7c4e79614beb7f09ec591693cb138f2bb15ae8f7dc16466f72c2e2e43b1",
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/MASTER-HANDOFF.md": "c4a384721d3fa63843980404992f98b42c17da2bc5f16709f5589a13a04e23aa",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-012B.story.md": "201b6e2acfda857f8e6c589799ce37f67de3bf083dcd91a9b917fd2d77cf7161",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-013.story.md": "65c2830b0fe8ac2703a00a11d74ff79d3c187e58d5d8fe1d19b14143150e9755",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md": "58a789ffb7e61196838e785f0e34b78a894890f5c91d1ab1d416caf46853ff42",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "0e3c81de45dc1b6ba39db082926d103728d16c9c5014db195ffda10ceea759a8",
+    ".ai/STUDIO-OBS-012B-close.json": "071b3f72f2c4b01c37b0c41d6b5a66a9f31d1e407ea30a455080622de49339b0",
+    ".ai/STUDIO-OBS-013-close.json": "4f10af05f26bb9dcb3b229d2260488f52c99a936157a73c6e36f2a99f051efcd",
+    ".ai/STUDIO-OBS-014-close.json": "e438b666a2e6fd9aeb36e5c7cd288d0973e902072e53dfb35d351cc1f9462ac7"
+  },
+  "sourceSnapshotBefore": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md": "ca999de607c239a4f0b00e61439e06ca370041cdf5f8c82f35659f15ee578296",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/ux-implementation-plan.json": "a2c33684fd58f6c9f77982f393337bb0ccdd8b8a73fbc9ca9aacc4da0c9d6753",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-2-3-obs014.json": "abcdf0b512d6a776a80b41badaab5f4b3a6b427512570cee98b4b4fc6bd9109a",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/po-sec001-ruling-b-ack.json": "9bdd4b2b70b60d8d3080245b2b9ca17b1e0883b92ea2766db284ab516367703a",
+    "docs/qa/evidence/STUDIO-OBS-015/t0-architect-rulings.json": "58a75633d2dcf1aa94f80e17172612fae6b31cab08f8fc498eda1ccac00cbf24",
+    "docs/qa/evidence/STUDIO-OBS-015/po-t0-followups.json": "985407bcb11a72c1aa1186e0b93d825566def90d0c0869858851b84c83fcf7d9",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/po-ruling-012B-allowlist.json": "79ce47970ec9dd7703385997756f1e97081d3e6a1f9ba430debf580e64935a00",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json": "201c2e617b4a80708da676862994d06bb8843f874e7fb44525fa9940ed25ff2e",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/administrative-closure-receipt.json": "32844fe76a06098ca1d186db5f418549ce14907fbfeb0410db0ad026b6ca4969",
+    "docs/specs/studio/openapi.yaml": "afec6c04cdd5bcc19e42b83f83656a342165c5e04407e90a7206de0b40c46183",
+    "docs/specs/studio-observed-authoring/contracts/v3/commands.schema.json": "2ca91eab97baaec1e00fbf57c608d0927c201b62b455c07eb22e48ad85b3589b",
+    "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json": "d7fe7f86bef759595ad82dea1cfccd627e3b5eb5150d5b5f766e794a666ead7f",
+    "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json": "b30feddf1f0ead9fcb2e39cddaf25b40166a1ef76fe80f251905b1bed7741cf9",
+    "docs/specs/studio-observed-authoring/contracts/v3/action-timing.schema.json": "d2cb597f799dfac20a020d26142e568524eed7c24986eb4ae1566c569c729e7d",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/contract-edits.json": "1cb17b5fb8217a7240d62f9b431a5f9fe6a16b1b23d643cdedff4d0023f669f3",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/architect/implementation-ruling.md": "23d87def447f08bbf6f8d305abbdf1d55b9ba53a11221d2201695f265e6a8feb",
+    "docs/qa/evidence/STUDIO-OBS-015/final-design/qa-readiness.json": "e16a1fe4896502ad8daf7bc340bc86963cd7d17ec46c4baebebd98b2007102c9",
+    "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleController.java": "16740822336d9e02e46d1df585953067f0a06e663cd66bc987c06f9a15e0c6d5",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/DisabledStudioVaultProvider.java": "5290faccc1d7a31f9a241977d009608855ae5b75ac6902728c38d1b11cb3f1bf",
+    "frontend/src/components/providers/realStudioStartup.test.ts": "455e152297897987705954905fa450e1e2630065a0b9068eda0ac895ad797ac5"
+  },
+  "originalUxPlanPreserved": {
+    "path": "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/ux-implementation-plan.json",
+    "sha256": "a2c33684fd58f6c9f77982f393337bb0ccdd8b8a73fbc9ca9aacc4da0c9d6753",
+    "prerequisites": 8,
+    "inheritedRowsReviewed": 17,
+    "coverageRowsReviewed": 9,
+    "note": "Original plan snapshot and earlier closure/carry receipts unchanged; this source-anchored scope ruling supersedes only its P4 placement gap and clarifies already-resolved012B/013 carry portions."
+  },
+  "notClaimed": [
+    "008 production implementation",
+    "008 integration, browser, accessibility or performance execution",
+    "008 QA verdict or Done",
+    "015 Done or final technical readiness",
+    "New public progress/explanation/capability contracts already landed",
+    "Live backend/provider/Sonic/Vault/SIEM/staging/manualC17/security/compliance/deployment approval"
+  ],
+  "budget": {
+    "declaredSharedCeilingUSD": 500,
+    "actualBilling": "unavailable"
+  },
+  "writeScope": [
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/po-scope-readiness.json"
+  ],
+  "noTestsBuildDbGitInstallExternalCommunicationOrSubagents": true,
+  "postWriteVerification": {
+    "storyHashMatches": true,
+    "protectedArtifactHashesUnchanged": true,
+    "allOtherReadSourceHashesUnchanged": true,
+    "nineAcCount": 9,
+    "ReadyAndQAResultsUnchanged": true,
+    "onlyAuthorizedStoryInsertions": true
+  }
+}

@@ -1,0 +1,143 @@
+--- before/backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java
++++ after/backend/src/test/java/com/citi/put/checks/studio/authoring/ChangeDetectionTest.java
+@@ -74,6 +74,11 @@
+     assertThat(IncrementalAuthoringIdentity.boundary(BASE, identity(BASE), config("Staging", 30),
+         BASE, identity(BASE), CONFIG)).isZero();
+     assertThat(IncrementalAuthoringIdentity.boundary(BASE, identity(BASE), config("Production", 31),
++        BASE, identity(BASE), CONFIG)).isZero();
++    // Pure envelope sensitivity only; the production codec still accepts Chromium exclusively.
++    var browser = CONFIG.deepCopy();
++    ((com.fasterxml.jackson.databind.node.ObjectNode) browser).put("browser", "firefox");
++    assertThat(IncrementalAuthoringIdentity.boundary(BASE, identity(BASE), browser,
+         BASE, identity(BASE), CONFIG)).isZero();
+   }
+ 
+--- before/backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java
++++ after/backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java
+@@ -3,6 +3,7 @@
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.assertj.core.api.Assertions.assertThatThrownBy;
+ 
++import com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity;
+ import com.citi.put.checks.studio.guided.session.GuidedContracts;
+ import com.citi.put.checks.studio.guided.session.GuidedSessionException;
+ import com.fasterxml.jackson.databind.JsonNode;
+@@ -263,6 +264,118 @@
+   }
+ 
+   @Test
++  void oldBasisCannotDistinguishUnexecutedContextChange() throws Exception {
++    JsonNode correction = document().path("snapshotCorrection");
++    JsonNode counterexample = correction.path("underdeterminationCounterexample");
++    JsonNode frozenBefore = counterexample.deepCopy();
++    JsonNode oldBasis = counterexample.path("oldBasis");
++    JsonNode identityA = counterexample.path("identityA"), identityB = counterexample.path("identityB");
++    assertThat(counterexample.path("equalBeforeCorrection").asBoolean()).isTrue();
++    assertThat(oldBasis.has("snapshotEvidence")).isFalse();
++
++    // The sole identity difference is the frozen unused ContextText at step two.
++    ObjectNode withoutHint = identityB.deepCopy();
++    ((ObjectNode) withoutHint.path("authoring").path("steps").get(1)).set("context",
++        identityA.path("authoring").path("steps").get(1).path("context"));
++    assertThat(withoutHint).isEqualTo(identityA);
++    assertThat(identityB.path("authoring").path("steps").get(1).path("context")
++        .path("entries").get(0).path("value").asText()).isEqualTo("A distinct unused authored hint");
++
++    JsonNode ordinary = correction.path("positives").get(0);
++    assertThat(ordinary.path("name").asText()).isEqualTo("ordinary");
++    JsonNode currentBasis = ordinary.path("basis"), currentBefore = currentBasis.deepCopy();
++    JsonNode expectedPlan = ordinary.path("expectedArtifact").path("learnedPlan");
++    // This current, complete control has its corrected manifest pin. The historical oldBasis
++    // is supplied-preimage evidence only; it is never claimed to be publishable today.
++    var control = new ObservedArtifactLowerer(C).lower(currentBasis,
++        ordinary.path("expectedArtifact").path("profile"));
++    assertThat(control.artifact()).isEqualTo(ordinary.path("expectedArtifact"));
++    for (String side : java.util.List.of("A", "B")) {
++      JsonNode identity = counterexample.path("identity" + side);
++      var source = IncrementalAuthoringIdentity.snapshot(identity);
++      JsonNode maps = IncrementalAuthoringIdentity.snapshots(source.authoring(), source.identity(),
++          oldBasis.path("configuration"), expectedPlan);
++      assertThat(maps).as("frozen supplied-preimage map %s", side)
++          .isEqualTo(counterexample.path("snapshotMap" + side));
++
++      ObjectNode corrected = currentBasis.deepCopy();
++      ((ObjectNode) corrected.path("snapshotEvidence")).set("current", identity.deepCopy());
++      ObjectNode sharedOldFacts = corrected.deepCopy();
++      sharedOldFacts.remove("snapshotEvidence");
++      // The frozen historical pin predates the correction. Do not relabel it as current validity.
++      sharedOldFacts.set("sourceManifestHash", oldBasis.path("sourceManifestHash"));
++      assertThat(sharedOldFacts).as("same exact frozen old facts for identity %s", side)
++          .isEqualTo(oldBasis);
++      JsonNode correctedBefore = corrected.deepCopy();
++      ObjectNode derivedPlan = expectedPlan.deepCopy();
++      new GuidedSnapshotDeriver(C).apply(corrected, derivedPlan);
++      assertThat(derivedPlan.path("stepSnapshotHashes")).as("current derivation map %s", side)
++          .isEqualTo(counterexample.path("snapshotMap" + side));
++      assertThat(corrected).isEqualTo(correctedBefore);
++    }
++    for (int index = 0; index < identityA.path("authoring").path("steps").size(); index++) {
++      String stepId = identityA.path("authoring").path("steps").get(index).path("id").asText();
++      if (index == 0) {
++        assertThat(counterexample.path("snapshotMapA").path(stepId))
++            .isEqualTo(counterexample.path("snapshotMapB").path(stepId));
++      } else {
++        assertThat(counterexample.path("snapshotMapA").path(stepId))
++            .isNotEqualTo(counterexample.path("snapshotMapB").path(stepId));
++      }
++    }
++    assertThat(counterexample).isEqualTo(frozenBefore);
++    assertThat(currentBasis).isEqualTo(currentBefore);
++  }
++
++  @ParameterizedTest(name = "normalized snapshot source refuses {0}")
++  @org.junit.jupiter.params.provider.ValueSource(strings = {
++      "numeric-captured-at", "lone-surrogate-context", "unsafe-evidence-revision"
++  })
++  void normalizedSnapshotSourceRejectsNumericTimeSurrogatesAndUnsafeRevision(String mutation)
++      throws Exception {
++    JsonNode correction = document().path("snapshotCorrection");
++    JsonNode normalized = correction.path("normalization").path("identity");
++    JsonNode normalizedBefore = normalized.deepCopy();
++    C.validate("v3/authoring-snapshot#/definitions/AuthoringSnapshotIdentity", normalized);
++    var source = IncrementalAuthoringIdentity.snapshot(normalized);
++    assertThat(source.authoring().steps()).hasSize(3);
++    assertThat(normalized.path("authoring").path("steps").get(1).path("context")
++        .path("evidenceReferences").get(0).path("capturedAt").asText())
++        .isEqualTo("2026-10-15T04:00:00.123456789Z");
++
++    JsonNode ordinary = correction.path("positives").get(0);
++    ObjectNode validBasis = ordinary.path("basis").deepCopy();
++    ((ObjectNode) validBasis.path("snapshotEvidence")).set("current", normalized.deepCopy());
++    ObjectNode validPlan = ordinary.path("expectedArtifact").path("learnedPlan").deepCopy();
++    new GuidedSnapshotDeriver(C).apply(validBasis, validPlan);
++
++    ObjectNode malformed = normalized.deepCopy();
++    ObjectNode secondContext = (ObjectNode) malformed.path("authoring").path("steps").get(1).path("context");
++    ObjectNode evidence = (ObjectNode) secondContext.path("evidenceReferences").get(0);
++    switch (mutation) {
++      case "numeric-captured-at" -> evidence.put("capturedAt", 1792036800L);
++      case "lone-surrogate-context" -> ((ObjectNode) malformed.path("authoring").path("steps")
++          .get(2).path("context").path("entries").get(1)).put("value", "\uD800");
++      case "unsafe-evidence-revision" -> evidence.put("revision", 9007199254740992L);
++      default -> throw new IllegalArgumentException(mutation);
++    }
++    JsonNode malformedBefore = malformed.deepCopy();
++    assertThatThrownBy(() -> C.validate(
++        "v3/authoring-snapshot#/definitions/AuthoringSnapshotIdentity", malformed))
++        .isInstanceOf(GuidedSessionException.class).hasMessage("INVALID_CONTRACT");
++    assertThatThrownBy(() -> IncrementalAuthoringIdentity.snapshot(malformed))
++        .isInstanceOf(GuidedSessionException.class).hasMessage("INVALID_CONTRACT");
++    ObjectNode invalidBasis = validBasis.deepCopy();
++    ((ObjectNode) invalidBasis.path("snapshotEvidence")).set("current", malformed);
++    ObjectNode unchangedPlan = validPlan.deepCopy();
++    assertThatThrownBy(() -> new GuidedSnapshotDeriver(C).apply(invalidBasis, validPlan))
++        .isInstanceOf(GuidedSessionException.class).hasMessage("INVALID_CONTRACT");
++    assertThat(validPlan).isEqualTo(unchangedPlan);
++    assertThat(malformed).isEqualTo(malformedBefore);
++    assertThat(normalized).isEqualTo(normalizedBefore);
++  }
++
++  @Test
+   void rawAllocationCommitmentCannotBeReplacedByItsEffectiveProjection() throws Exception {
+     JsonNode vector = document().path("graphTimingConformance").path("graphCases").get(0);
+     ObjectNode basis = vector.path("basis").deepCopy();

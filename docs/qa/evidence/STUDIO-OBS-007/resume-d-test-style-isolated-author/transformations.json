@@ -1,0 +1,1438 @@
+{
+  "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java": [
+    {
+      "kind": "brace-insertion",
+      "position": 3658,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 3623,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 3212,
+      "inserted": "\n      }\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 3199,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 3170,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 3124,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 3111,
+      "inserted": "{\n        "
+    }
+  ],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java": [
+    {
+      "kind": "literal-wrap",
+      "position": 17033,
+      "before": "\"INSERT INTO studio_guided_translation_plans(session_id,plan_revision,parent_revision,plan,plan_hash) VALUES (?,1,0,?::jsonb,?)\"",
+      "after": "(\"INSERT INTO studio_guided_translation_plans(session_id,\"\n                      + \"plan_revision,parent_revision,plan,plan_hash) VALUES \"\n                      + \"(?,1,0,?::jsonb,?)\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 16689,
+      "before": "\"UPDATE studio_guided_sessions SET state='FINALIZING',document=jsonb_set(jsonb_set(document,'{state}','\\\"FINALIZING\\\"'),'{owner}',?::jsonb) WHERE session_id=?\"",
+      "after": "(\"UPDATE studio_guided_sessions SET \"\n                      + \"state='FINALIZING',document=jsonb_set(jsonb_set(document,\"\n                      + \"'{state}','\\\"FINALIZING\\\"'),'{owner}',?::jsonb) WHERE \"\n                      + \"session_id=?\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 11125,
+      "before": "\"INSERT INTO ui_tests(id,name,csi_id,environment,browser,viewport_width,viewport_height,timeout_seconds,wait_strategy,steps,created_by,authoring,authoring_revision_inputs) \"",
+      "after": "(\"INSERT INTO ui_tests(id,name,csi_id,environment,browser,\"\n                + \"viewport_width,viewport_height,timeout_seconds,wait_strategy,\"\n                + \"steps,created_by,authoring,authoring_revision_inputs) \")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 10958,
+      "before": "\"VALUES (?,'Report fixture','unit','LOW','owner@example.test','Development') ON CONFLICT(id) DO NOTHING\"",
+      "after": "(\"VALUES (?,'Report fixture','unit','LOW','owner@example.test',\"\n                  + \"'Development') ON CONFLICT(id) DO NOTHING\")"
+    }
+  ],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": [
+    {
+      "kind": "brace-insertion",
+      "position": 606316,
+      "inserted": "\n      }\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 606283,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 606263,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 606226,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 606185,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 606121,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 606038,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 605214,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 605200,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 605096,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 605081,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 605033,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 605018,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 604849,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 604839,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 604799,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 604769,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 604493,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 604486,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 604088,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 604066,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 603777,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 603767,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 603536,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 603526,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 602889,
+      "inserted": "\n            }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 602879,
+      "inserted": "{\n              "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 602825,
+      "inserted": "\n              }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 602795,
+      "inserted": "{\n                "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 602214,
+      "inserted": "\n              }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 602152,
+      "inserted": "{\n                "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 601927,
+      "inserted": "\n            }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 601865,
+      "inserted": "{\n              "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 601748,
+      "inserted": "\n            }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 601688,
+      "inserted": "{\n              "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 601553,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 601483,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 591144,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 591084,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 587407,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 587337,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 587287,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 587238,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 582347,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 582338,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 581341,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 581334,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 581292,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 581285,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 564349,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 564323,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 564311,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 564285,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 557791,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 557756,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 557601,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 557567,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 557334,
+      "inserted": "\n            }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 557328,
+      "inserted": "{\n              "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 557012,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 556982,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 556755,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 556749,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 556444,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 556437,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 556240,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 556218,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 556115,
+      "inserted": "\n            }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 556087,
+      "inserted": "{\n              "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 555924,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 555896,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 555792,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 555766,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 555676,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 555651,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 555544,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 555517,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 555461,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 555439,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 555345,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 555318,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 554524,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 554503,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 553602,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 553575,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 553040,
+      "inserted": "\n                  }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 552999,
+      "inserted": "{\n                    "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 552842,
+      "inserted": "\n                  }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 552825,
+      "inserted": "{\n                    "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 552783,
+      "inserted": "\n                  }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 552766,
+      "inserted": "{\n                    "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 552735,
+      "inserted": "\n                  }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 552718,
+      "inserted": "{\n                    "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 552552,
+      "inserted": "\n                  }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 552532,
+      "inserted": "{\n                    "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 549653,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 549644,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 549381,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 549372,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 549279,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 549270,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 549210,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 549201,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 549124,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 549115,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 549024,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 549015,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 548892,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 548883,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 548748,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 548739,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 548522,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 548513,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 547079,
+      "inserted": "\n                    }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 547054,
+      "inserted": "{\n                      "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 546700,
+      "inserted": "\n                }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 546685,
+      "inserted": "{\n                  "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 546267,
+      "inserted": "\n              }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 546261,
+      "inserted": "{\n                "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 545219,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 545212,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 545145,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 545138,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 407695,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 407616,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 407353,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 407277,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 406911,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 406904,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 406805,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 406738,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 406687,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 406612,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 406539,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 406456,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 405587,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 405578,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 405408,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 405399,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 405134,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 405125,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 404917,
+      "inserted": "\n              }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 404908,
+      "inserted": "{\n                "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 401938,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 401932,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 399411,
+      "inserted": "\n    }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 399377,
+      "inserted": "{\n      "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 398568,
+      "inserted": "\n            }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 398562,
+      "inserted": "{\n              "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 395120,
+      "inserted": "\n    }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 395075,
+      "inserted": "{\n      "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 393479,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 393422,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 392311,
+      "inserted": "\n    }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 392275,
+      "inserted": "{\n      "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 389054,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 388985,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 387726,
+      "inserted": "\n                    }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 387719,
+      "inserted": "{\n                      "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 387161,
+      "inserted": "\n                    }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 387154,
+      "inserted": "{\n                      "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 386773,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 386764,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 384399,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 384365,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 381476,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 381444,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 381430,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 381389,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 378855,
+      "inserted": "\n                    }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 378782,
+      "inserted": "{\n                      "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 370120,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 370114,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 355002,
+      "inserted": "\n    }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 354973,
+      "inserted": "{\n      "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 352594,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 352576,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 348249,
+      "inserted": "\n            }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 348226,
+      "inserted": "{\n              "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 347439,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 347417,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 346807,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 346767,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 346025,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 345994,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 345978,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 345950,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 313655,
+      "inserted": "\n                }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 313646,
+      "inserted": "{\n                  "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 270837,
+      "inserted": "\n    }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 270818,
+      "inserted": "{\n      "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 270530,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 270498,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 270484,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 270443,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 228112,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 228043,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 227774,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 227699,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 226919,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 226840,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 226554,
+      "inserted": "\n          }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 226476,
+      "inserted": "{\n            "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 226071,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 226064,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 225895,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 225834,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 220484,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 220475,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 219834,
+      "inserted": "\n            }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 219827,
+      "inserted": "{\n              "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 219622,
+      "inserted": "\n            }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 219615,
+      "inserted": "{\n              "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 217162,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 217130,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 217116,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 217075,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 217004,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 216978,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 206754,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 206722,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 206708,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 206667,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 206604,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 206515,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 206493,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 206476,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 201687,
+      "inserted": "\n      }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 201650,
+      "inserted": "{\n        "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 200516,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 200449,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 199714,
+      "inserted": "\n        }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 199658,
+      "inserted": "{\n          "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 197859,
+      "inserted": "\n    }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 197806,
+      "inserted": "{\n      "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 46273,
+      "inserted": "\n              }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 46252,
+      "inserted": "{\n                "
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 46087,
+      "inserted": "\n              }"
+    },
+    {
+      "kind": "brace-insertion",
+      "position": 46033,
+      "inserted": "{\n                "
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 628349,
+      "before": "\"\"\"\n        import {validateObserved as cutValidate} from %s;\n        const cutRealSpawner=createForkSpawner(),cutReady=new Map(),cutStops=new Map();\n        const cutSpawner={spawn(request){\n          const handle=cutRealSpawner.spawn(request);\n          try{const selected=revMode();\n          if(selected?.childCut===true&&selected.c6===2&&selected.path===2){\n            const stop={pid:handle.pid,mode:selected,observed:false,result:null};\n            cutStops.set(handle,stop);\n            const original=handle.quiesce;\n            if(typeof original==='function'){\n              handle.quiesce=function(...args){\n                let result;try{result=Reflect.apply(original,this,args);}catch(error){stop.observed=true;stop.result=null;throw error;}\n                try{result.then(value=>{stop.observed=true;stop.result=typeof value==='boolean'?value:null;},\n                  ()=>{stop.observed=true;stop.result=null;}).catch(()=>{stop.observed=true;stop.result=null;});}\n                catch{stop.observed=true;stop.result=null;}return result;\n              };\n            }\n          }}catch{/* Missing observation remains unknown; original spawn and listeners continue. */}\n          handle.onMessage(message=>{\n            const mode=revMode();\n            if(mode?.childCut!==true||message?.kind!=='ready'||message.runId!==mode.executionId)return;\n            try{\n              const ready=cutValidate('replay-ipc#/definitions/Ready3',message,16384);\n              if(!Number.isSafeInteger(handle.pid)||handle.pid<1||cutReady.has(ready.runId))\n                throw new Error('IDENTITY');\n              cutReady.set(ready.runId,{pid:handle.pid,ready,stop:cutStops.get(handle)});\n            }catch{cutReady.set(mode.executionId,{failed:true});}\n          });\n          return handle;\n        }};\n        const cutOriginalSend=revHttp.send;\n        revHttp.send=function(...args){\n          let request=args[0];\n          const mode=revMode();\n          if(mode?.childCut===true&&request?.method==='POST'){\n            try{\n              const body=JSON.parse(request.body);\n              if(body.executionId===mode.executionId){\n                const witness=cutReady.get(body.executionId);\n                if(witness?.failed)request={...request,headers:{...request.headers,\n                  'X-Fixture-Child-Observer-Failed':'1'}};\n                else if(witness){\n                  if(body.attemptId!==witness.ready.attemptId||body.admissionId!==witness.ready.admissionId)\n                    throw new Error('IDENTITY');\n                  const encoded=Buffer.from(JSON.stringify(witness.ready),'utf8').toString('base64url');\n                  if(encoded.length>4096)throw new Error('BOUND');\n                  request={...request,headers:{...request.headers,\n                    'X-Fixture-Child-Pid':String(witness.pid),'X-Fixture-Child-Ready':encoded}};\n                }\n              }\n            }catch{request={...request,headers:{...request.headers,'X-Fixture-Child-Observer-Failed':'1'}};}\n          }\n          return Reflect.apply(cutOriginalSend,this,[request,...args.slice(1)]);\n        };\n\n        import {createFsScratchStore as cutFsScratchStore} from %s;\n        import {SCRATCH_SUBDIRECTORIES as cutScratchLayout} from %s;\n        import * as p4Fs from 'node:fs';import {join as cutJoin,dirname as cutDirname} from 'node:path';\n        const c5ValuesFile=%s,c5CountsFile=%s,cutProfileWitnessFile=%s,cutProducerRoot=%s;\n        %s\n        const cutCounts=()=>{\n          const stat=p4Fs.lstatSync(c5CountsFile);\n          if(stat.isSymbolicLink()||!stat.isFile()||(stat.mode&0o777)!==0o600||stat.size>1048576)throw new Error('COUNTS');\n          return p4Fs.readFileSync(c5CountsFile,'utf8').trimEnd().split('\\\\n');\n        };\n        const cutRecord=record=>{try{\n          if(p4Fs.existsSync(cutProfileWitnessFile)){const old=p4Fs.lstatSync(cutProfileWitnessFile);\n            if(old.isSymbolicLink()||!old.isFile()||(old.mode&0o777)!==0o600)throw new Error('WITNESS');}\n          const fd=p4Fs.openSync(cutProfileWitnessFile,p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|\n            p4Fs.constants.O_TRUNC|p4Fs.constants.O_NOFOLLOW,0o600);\n          try{p4Fs.writeSync(fd,JSON.stringify(record));}finally{p4Fs.closeSync(fd);}\n        }catch{try{const fd=p4Fs.openSync(c5CountsFile+'-failed',p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|\n          p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);try{p4Fs.writeSync(fd,'1');}finally{p4Fs.closeSync(fd);}}catch{}}};\n        const cutScratchStore=root=>{\n          const original=cutFsScratchStore(root);\n          return {create(...args){const result=Reflect.apply(original.create,original,args),selected=revMode(),admission=args[0];\n            if(selected?.childCut===true&&selected.c6===2&&selected.path===2){\n              try{result.then(run=>{\n                try{const descriptor=Object.getOwnPropertyDescriptor(run,'clear'),clear=run.clear;\n                  if(typeof clear!=='function')throw new Error('CLEAR');\n                  const wrapped=function(...clearArgs){\n                    const record={case:selected.case,epoch:selected.epoch,postFaultScratchProfileObserved:false,\n                      quiesceObserved:false,quiescentTrue:false,readyAllocationMatched:false,profileInodeMatched:false,\n                      observerFailed:false,profileSampleOrdinal:0};\n                    try{\n                      const mode=revMode(),witness=cutReady.get(selected.executionId),stop=witness?.stop;\n                      if(mode?.case!==selected.case||mode.epoch!==selected.epoch||mode.executionId!==selected.executionId\n                        ||!witness?.ready||witness.failed||witness.ready.runId!==selected.executionId\n                        ||witness.ready.admissionId!==admission||stop?.pid!==witness.pid\n                        ||stop.mode.case!==selected.case||stop.mode.epoch!==selected.epoch||stop.mode.executionId!==selected.executionId)throw new Error('IDENTITY');\n                      record.readyAllocationMatched=true;record.quiesceObserved=stop.observed===true;\n                      record.quiescentTrue=stop.observed===true&&stop.result===true;\n                      if(!record.quiescentTrue)throw new Error('QUIESCENCE');\n                      const allocated=p4Fs.realpathSync(run.path),rootPath=p4Fs.realpathSync(root),runStat=p4Fs.lstatSync(run.path);\n                      if(allocated!==run.path||cutDirname(allocated)!==rootPath||runStat.isSymbolicLink()\n                        ||!runStat.isDirectory()||runStat.uid!==process.getuid()||(runStat.mode&0o777)!==0o700\n                        ||cutJoin(rootPath,admission)!==allocated)throw new Error('ALLOCATION');\n                      const receipt=cutJoin(cutProducerRoot,selected.case+'-3.json'),stat=p4Fs.lstatSync(receipt);\n                      if(stat.isSymbolicLink()||!stat.isFile()||(stat.mode&0o777)!==0o600||stat.size>1024)throw new Error('PROFILE');\n                      const source=JSON.parse(p4Fs.readFileSync(receipt,'utf8'));\n                      if(source.case!==selected.case||source.epoch!==selected.epoch||source.producer!==3\n                        ||!Number.isSafeInteger(source.profileDev)||!Number.isSafeInteger(source.profileIno)\n                        ||source.profileIno<1)throw new Error('PROFILE');\n                      const profile=cutJoin(allocated,cutScratchLayout.profile),info=p4Fs.lstatSync(profile);\n                      if(info.isSymbolicLink()||!info.isDirectory()||p4Fs.realpathSync(profile)!==profile\n                        ||info.uid!==process.getuid()||(info.mode&0o777)!==0o700\n                        ||info.dev!==source.profileDev||info.ino!==source.profileIno)throw new Error('PROFILE');\n                      record.profileInodeMatched=true;\n                      const before=cutCounts().length;c5ProfileScan(profile);const after=cutCounts();\n                      if(after.length!==before+1)throw new Error('SCAN');\n                      const sample=JSON.parse(after[before]);\n                      if(sample.failed!==false||sample.hits!==0||!Number.isSafeInteger(sample.files)||sample.files<1\n                        ||!Number.isSafeInteger(sample.bytes)||sample.bytes<1)throw new Error('SCAN');\n                      record.profileSampleOrdinal=before+1;record.postFaultScratchProfileObserved=true;\n                    }catch{record.observerFailed=true;}\n                    cutRecord(record);\n                    // Observer refusal cannot prevent, retry or replace the original clear/error/promise.\n                    return Reflect.apply(clear,this,clearArgs);\n                  };\n                  if(!Reflect.defineProperty(run,'clear',{...(descriptor??{configurable:true,writable:true,enumerable:true}),value:wrapped}))throw new Error('CLEAR');\n                }catch{cutRecord({case:selected.case,epoch:selected.epoch,postFaultScratchProfileObserved:false,\n                  quiesceObserved:false,quiescentTrue:false,readyAllocationMatched:false,profileInodeMatched:false,\n                  observerFailed:true,profileSampleOrdinal:0});}\n              },()=>{}).catch(()=>{cutRecord({case:selected.case,epoch:selected.epoch,postFaultScratchProfileObserved:false,\n                quiesceObserved:false,quiescentTrue:false,readyAllocationMatched:false,profileInodeMatched:false,\n                observerFailed:true,profileSampleOrdinal:0});});}catch{}\n            }return result;},clearAll(...args){return Reflect.apply(original.clearAll,original,args);},\n            list(...args){return Reflect.apply(original.list,original,args);}};\n        };\n        \"\"\"",
+      "after": "\"\"\"\n        import {validateObserved as cutValidate} from %s;\n        const cutRealSpawner=createForkSpawner(),cutReady=new Map(),cutStops=new Map();\n        const cutSpawner={spawn(request){\n          const handle=cutRealSpawner.spawn(request);\n          try{const selected=revMode();\n          if(selected?.childCut===true&&selected.c6===2&&selected.path===2){\n            const stop={pid:handle.pid,mode:selected,observed:false,result:null};\n            cutStops.set(handle,stop);\n            const original=handle.quiesce;\n            if(typeof original==='function'){\n              handle.quiesce=function(...args){\n                let result;try{result=Reflect.apply(original,this,args);}catch(error){stop.observed=\\\n        true;stop.result=null;throw error;}\n                try{result.then(value=>{stop.observed=true;stop.result=typeof value==='boolean'?value:null;},\n                  ()=>{stop.observed=true;stop.result=null;}).catch(()=>{stop.observed=true;stop.res\\\n        ult=null;});}\n                catch{stop.observed=true;stop.result=null;}return result;\n              };\n            }\n          }}catch{/* Missing observation remains unknown; original spawn and listeners continue. */}\n          handle.onMessage(message=>{\n            const mode=revMode();\n            if(mode?.childCut!==true||message?.kind!=='ready'||message.runId!==mode.executionId)return;\n            try{\n              const ready=cutValidate('replay-ipc#/definitions/Ready3',message,16384);\n              if(!Number.isSafeInteger(handle.pid)||handle.pid<1||cutReady.has(ready.runId))\n                throw new Error('IDENTITY');\n              cutReady.set(ready.runId,{pid:handle.pid,ready,stop:cutStops.get(handle)});\n            }catch{cutReady.set(mode.executionId,{failed:true});}\n          });\n          return handle;\n        }};\n        const cutOriginalSend=revHttp.send;\n        revHttp.send=function(...args){\n          let request=args[0];\n          const mode=revMode();\n          if(mode?.childCut===true&&request?.method==='POST'){\n            try{\n              const body=JSON.parse(request.body);\n              if(body.executionId===mode.executionId){\n                const witness=cutReady.get(body.executionId);\n                if(witness?.failed)request={...request,headers:{...request.headers,\n                  'X-Fixture-Child-Observer-Failed':'1'}};\n                else if(witness){\n                  if(body.attemptId!==witness.ready.attemptId||body.admissionId!==witness.ready.admissionId)\n                    throw new Error('IDENTITY');\n                  const encoded=Buffer.from(JSON.stringify(witness.ready),'utf8').toString('base64url');\n                  if(encoded.length>4096)throw new Error('BOUND');\n                  request={...request,headers:{...request.headers,\n                    'X-Fixture-Child-Pid':String(witness.pid),'X-Fixture-Child-Ready':encoded}};\n                }\n              }\n            }catch{request={...request,headers:{...request.headers,'X-Fixture-Child-Observer-Failed':'1'}};}\n          }\n          return Reflect.apply(cutOriginalSend,this,[request,...args.slice(1)]);\n        };\n\n        import {createFsScratchStore as cutFsScratchStore} from %s;\n        import {SCRATCH_SUBDIRECTORIES as cutScratchLayout} from %s;\n        import * as p4Fs from 'node:fs';import {join as cutJoin,dirname as cutDirname} from 'node:path';\n        const c5ValuesFile=%s,c5CountsFile=%s,cutProfileWitnessFile=%s,cutProducerRoot=%s;\n        %s\n        const cutCounts=()=>{\n          const stat=p4Fs.lstatSync(c5CountsFile);\n          if(stat.isSymbolicLink()||!stat.isFile()||(stat.mode&0o777)!==0o600||stat.size>1048576)thr\\\n        ow new Error('COUNTS');\n          return p4Fs.readFileSync(c5CountsFile,'utf8').trimEnd().split('\\\\n');\n        };\n        const cutRecord=record=>{try{\n          if(p4Fs.existsSync(cutProfileWitnessFile)){const old=p4Fs.lstatSync(cutProfileWitnessFile);\n            if(old.isSymbolicLink()||!old.isFile()||(old.mode&0o777)!==0o600)throw new Error('WITNESS');}\n          const fd=p4Fs.openSync(cutProfileWitnessFile,p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|\n            p4Fs.constants.O_TRUNC|p4Fs.constants.O_NOFOLLOW,0o600);\n          try{p4Fs.writeSync(fd,JSON.stringify(record));}finally{p4Fs.closeSync(fd);}\n        }catch{try{const fd=p4Fs.openSync(c5CountsFile+'-failed',p4Fs.constants.O_WRONLY|p4Fs.consta\\\n        nts.O_CREAT|\n          p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);try{p4Fs.writeSync(fd,'1');}final\\\n        ly{p4Fs.closeSync(fd);}}catch{}}};\n        const cutScratchStore=root=>{\n          const original=cutFsScratchStore(root);\n          return {create(...args){const result=Reflect.apply(original.create,original,args),selected\\\n        =revMode(),admission=args[0];\n            if(selected?.childCut===true&&selected.c6===2&&selected.path===2){\n              try{result.then(run=>{\n                try{const descriptor=Object.getOwnPropertyDescriptor(run,'clear'),clear=run.clear;\n                  if(typeof clear!=='function')throw new Error('CLEAR');\n                  const wrapped=function(...clearArgs){\n                    const record={case:selected.case,epoch:selected.epoch,postFaultScratchProfileObs\\\n        erved:false,\n                      quiesceObserved:false,quiescentTrue:false,readyAllocationMatched:false,profile\\\n        InodeMatched:false,\n                      observerFailed:false,profileSampleOrdinal:0};\n                    try{\n                      const mode=revMode(),witness=cutReady.get(selected.executionId),stop=witness?.stop;\n                      if(mode?.case!==selected.case||mode.epoch!==selected.epoch||mode.executionId!=\\\n        =selected.executionId\n                        ||!witness?.ready||witness.failed||witness.ready.runId!==selected.executionId\n                        ||witness.ready.admissionId!==admission||stop?.pid!==witness.pid\n                        ||stop.mode.case!==selected.case||stop.mode.epoch!==selected.epoch||stop.mod\\\n        e.executionId!==selected.executionId)throw new Error('IDENTITY');\n                      record.readyAllocationMatched=true;record.quiesceObserved=stop.observed===true;\n                      record.quiescentTrue=stop.observed===true&&stop.result===true;\n                      if(!record.quiescentTrue)throw new Error('QUIESCENCE');\n                      const allocated=p4Fs.realpathSync(run.path),rootPath=p4Fs.realpathSync(root),r\\\n        unStat=p4Fs.lstatSync(run.path);\n                      if(allocated!==run.path||cutDirname(allocated)!==rootPath||runStat.isSymbolicLink()\n                        ||!runStat.isDirectory()||runStat.uid!==process.getuid()||(runStat.mode&0o777)!==0o700\n                        ||cutJoin(rootPath,admission)!==allocated)throw new Error('ALLOCATION');\n                      const receipt=cutJoin(cutProducerRoot,selected.case+'-3.json'),stat=p4Fs.lstat\\\n        Sync(receipt);\n                      if(stat.isSymbolicLink()||!stat.isFile()||(stat.mode&0o777)!==0o600||stat.size\\\n        >1024)throw new Error('PROFILE');\n                      const source=JSON.parse(p4Fs.readFileSync(receipt,'utf8'));\n                      if(source.case!==selected.case||source.epoch!==selected.epoch||source.producer!==3\n                        ||!Number.isSafeInteger(source.profileDev)||!Number.isSafeInteger(source.profileIno)\n                        ||source.profileIno<1)throw new Error('PROFILE');\n                      const profile=cutJoin(allocated,cutScratchLayout.profile),info=p4Fs.lstatSync(profile);\n                      if(info.isSymbolicLink()||!info.isDirectory()||p4Fs.realpathSync(profile)!==profile\n                        ||info.uid!==process.getuid()||(info.mode&0o777)!==0o700\n                        ||info.dev!==source.profileDev||info.ino!==source.profileIno)throw new \\\n        Error('PROFILE');\n                      record.profileInodeMatched=true;\n                      const before=cutCounts().length;c5ProfileScan(profile);const after=cutCounts();\n                      if(after.length!==before+1)throw new Error('SCAN');\n                      const sample=JSON.parse(after[before]);\n                      if(sample.failed!==false||sample.hits!==0||!Number.isSafeInteger(sample.files)\\\n        ||sample.files<1\n                        ||!Number.isSafeInteger(sample.bytes)||sample.bytes<1)throw new Error('SCAN');\n                      record.profileSampleOrdinal=before+1;record.postFaultScratchProfileObserved=true;\n                    }catch{record.observerFailed=true;}\n                    cutRecord(record);\n                    // Observer refusal cannot prevent, retry or replace the original clear/error/promise.\n                    return Reflect.apply(clear,this,clearArgs);\n                  };\n                  if(!Reflect.defineProperty(run,'clear',{...(descriptor??{configurable:true,writabl\\\n        e:true,enumerable:true}),value:wrapped}))throw new Error('CLEAR');\n                }catch{cutRecord({case:selected.case,epoch:selected.epoch,postFaultScratchProfileObs\\\n        erved:false,\n                  quiesceObserved:false,quiescentTrue:false,readyAllocationMatched:false,profileInod\\\n        eMatched:false,\n                  observerFailed:true,profileSampleOrdinal:0});}\n              },()=>{}).catch(()=>{cutRecord({case:selected.case,epoch:selected.epoch,postFaultScrat\\\n        chProfileObserved:false,\n                quiesceObserved:false,quiescentTrue:false,readyAllocationMatched:false,profileInodeM\\\n        atched:false,\n                observerFailed:true,profileSampleOrdinal:0});});}catch{}\n            }return result;},clearAll(...args){return Reflect.apply(original.clearAll,original,args);},\n            list(...args){return Reflect.apply(original.list,original,args);}};\n        };\n        \"\"\""
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 625830,
+      "before": "\");const app=createApplication(cutConfig,{launcher,http:revHttp,scratch:cutScratchStore(cutConfig.scratchDir),runtimeVersions:loadRuntimeVersions(),observed:{build,policies:[\"",
+      "after": "(\");const app=createApplication(cutConfig,{launcher,http:revHttp,\"\n                + \"scratch:cutScratchStore(cutConfig.scratchDir),\"\n                + \"runtimeVersions:loadRuntimeVersions(),observed:{build,policies:[\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 552858,
+      "before": "\" EXISTS(SELECT 1 FROM pg_locks l WHERE l.pid=a.pid AND l.relation='ui_tests'::regclass) AS source_relation\"",
+      "after": "(\" EXISTS(SELECT 1 FROM pg_locks l WHERE l.pid=a.pid AND \"\n                        + \"l.relation='ui_tests'::regclass) AS source_relation\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 552713,
+      "before": "\" EXISTS(SELECT 1 FROM pg_locks l WHERE l.pid=a.pid AND l.relation='studio_guided_sessions'::regclass) AS owner_relation,\"",
+      "after": "(\" EXISTS(SELECT 1 FROM pg_locks l WHERE l.pid=a.pid AND \"\n                        + \"l.relation='studio_guided_sessions'::regclass) AS owner_relation,\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 522232,
+      "before": "\"\"\"\n        <script>(()=>{\n          const s={sequence:0,pending:new Set(),failed:false,sealed:false,writes:0,submits:0};\n          const endpoint=kind=>'/p3/password-effects?document=%d&kind='+kind;\n          const request=async(kind,payload,deadline)=>{\n            const remaining=deadline-performance.now();if(remaining<=0)throw new Error('FENCE');\n            const response=await fetch(endpoint(kind),\n              {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),\n               signal:AbortSignal.timeout(Math.max(1,Math.floor(remaining)))});\n            const ack=await response.json();\n            if(response.status!==200||Object.keys(ack).sort().join(',')!=='accepted,seq'\n              ||ack.accepted!==true||ack.seq!==payload.seq)throw new Error('ACK');\n          };\n          const notify=kind=>{\n            if(s.sealed)s.failed=true;\n            const seq=++s.sequence;if(kind==='write')s.writes++;if(kind==='submit')s.submits++;\n            const deadline=performance.now()+1000;\n            const p=(async()=>{\n              await request(kind,{seq},deadline);\n              await request('ack',{seq},deadline);\n            })()\n              .catch(()=>{s.failed=true;});\n            s.pending.add(p);void p.finally(()=>{s.pending.delete(p);});return p;\n          };\n          let closing=null;\n          const seal=()=>closing??=(async()=>{\n            s.sealed=true;const deadline=performance.now()+2500;let timer;\n            try{\n              await Promise.race([Promise.all([...s.pending]),new Promise((_,reject)=>{\n                timer=setTimeout(()=>reject(new Error('PENDING')),Math.max(1,deadline-performance.now()));})]);\n              if(s.pending.size||s.failed)throw new Error('FAILED');\n              await request('fence',{seq:s.sequence,pending:s.pending.size,failed:s.failed,\n                writes:s.writes,submits:s.submits},deadline);\n              // Sent only after the page received and validated the real final fence ACK.\n              await request('fence-complete',{seq:s.sequence},deadline);\n              return {pending:0,failed:false,sequence:s.sequence};\n            }catch{ s.failed=true;throw new Error('FENCE'); }finally{clearTimeout(timer);}\n          })();\n          globalThis.__p4NativeObserver={seal};\n          document.addEventListener('input',event=>{\n            if(event.target instanceof HTMLInputElement&&event.target.type==='password')void notify('write');});\n          document.addEventListener('submit',()=>{void notify('submit');void seal().catch(()=>{s.failed=true;});});\n          %s\n          void notify('registered');\n        })();</script>\n        \"\"\"",
+      "after": "\"\"\"\n        <script>(()=>{\n          const s={sequence:0,pending:new Set(),failed:false,sealed:false,writes:0,submits:0};\n          const endpoint=kind=>'/p3/password-effects?document=%d&kind='+kind;\n          const request=async(kind,payload,deadline)=>{\n            const remaining=deadline-performance.now();if(remaining<=0)throw new Error('FENCE');\n            const response=await fetch(endpoint(kind),\n              {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),\n               signal:AbortSignal.timeout(Math.max(1,Math.floor(remaining)))});\n            const ack=await response.json();\n            if(response.status!==200||Object.keys(ack).sort().join(',')!=='accepted,seq'\n              ||ack.accepted!==true||ack.seq!==payload.seq)throw new Error('ACK');\n          };\n          const notify=kind=>{\n            if(s.sealed)s.failed=true;\n            const seq=++s.sequence;if(kind==='write')s.writes++;if(kind==='submit')s.submits++;\n            const deadline=performance.now()+1000;\n            const p=(async()=>{\n              await request(kind,{seq},deadline);\n              await request('ack',{seq},deadline);\n            })()\n              .catch(()=>{s.failed=true;});\n            s.pending.add(p);void p.finally(()=>{s.pending.delete(p);});return p;\n          };\n          let closing=null;\n          const seal=()=>closing??=(async()=>{\n            s.sealed=true;const deadline=performance.now()+2500;let timer;\n            try{\n              await Promise.race([Promise.all([...s.pending]),new Promise((_,reject)=>{\n                timer=setTimeout(()=>reject(new \\\n        Error('PENDING')),Math.max(1,deadline-performance.now()));})]);\n              if(s.pending.size||s.failed)throw new Error('FAILED');\n              await request('fence',{seq:s.sequence,pending:s.pending.size,failed:s.failed,\n                writes:s.writes,submits:s.submits},deadline);\n              // Sent only after the page received and validated the real final fence ACK.\n              await request('fence-complete',{seq:s.sequence},deadline);\n              return {pending:0,failed:false,sequence:s.sequence};\n            }catch{ s.failed=true;throw new Error('FENCE'); }finally{clearTimeout(timer);}\n          })();\n          globalThis.__p4NativeObserver={seal};\n          document.addEventListener('input',event=>{\n            if(event.target instanceof HTMLInputElement&&event.target.type==='password')void \\\n        notify('write');});\n          document.addEventListener('submit',()=>{void notify('submit');void \\\n        seal().catch(()=>{s.failed=true;});});\n          %s\n          void notify('registered');\n        })();</script>\n        \"\"\""
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 489698,
+      "before": "\"\"\"\n        import {chromium as p4Chromium} from %s;import * as p4Fs from 'node:fs';\n        const p4ModeFile=%s,p4FailedFile=%s,p4SettledFile=%s,p4Origin=%s;\n        const c5ValuesFile=%s,c5CountsFile=%s;\n        import {installObservationCollector as c6TrustedCollector} from %s;\n        %s\n        // Selected C6 observes the original SDK primitive; current-document authority stays in production guards.\n        const c6CdpHolders=new WeakMap();\n        const c6FillSource='function(target, origin, allowedOrigins, value) { return this.fillPasswordResult(target, origin, allowedOrigins, value); }';\n        const c6InstallSource=c6TrustedCollector.toString();\n        const c6Drop=state=>{state.objectId=null;state.world=null;};\n        const c6InstallSend=(holder,session,page)=>{\n          if(holder.sessions.has(session)){revFail();return;}holder.sessions.set(session,{page,frame:null,world:null,objectId:null});\n          const state=holder.sessions.get(session),descriptor=Object.getOwnPropertyDescriptor(session,'send'),original=session.send;\n          if(typeof original!=='function'){revFail();return;}\n          const group={cap:session,methods:[]};revGroups.add(group);\n          const wrapped=function(...args){\n            // Only fixed source/opaque receiver metadata is read. The arguments array and result.value are untouched.\n            const method=args[0],metadata=args[1],source=method==='Runtime.callFunctionOn'?metadata?.functionDeclaration:null;\n            const receiver=method==='Runtime.callFunctionOn'?metadata?.objectId:null;\n            const install=source===c6InstallSource,fill=source===c6FillSource;\n            const probe=source==='function() { return true; }'&&receiver===state.objectId;\n            const worldRequest=method==='Page.createIsolatedWorld'&&typeof metadata?.worldName==='string'\n              &&metadata.worldName.startsWith('checks-observation-');\n            const frame=worldRequest?metadata.frameId:null,world=install?metadata?.executionContextId:null;\n            if(worldRequest||source==='function() { this.dispose(); }'||method==='Runtime.releaseObjectGroup')c6Drop(state);\n            let result;try{result=Reflect.apply(original,this,args);}catch(error){if(probe)c6Drop(state);throw error;}\n            if(method==='Page.getFrameTree'||worldRequest||install||probe){\n              try{result.then(reply=>{try{\n                if(this!==session||holder.closed)throw new Error('C6_CDP_IDENTITY');\n                if(method==='Page.getFrameTree'){\n                  const id=reply?.frameTree?.frame?.id;if(typeof id!=='string')throw new Error('C6_CDP_FRAME');state.frame=id;\n                }else if(worldRequest){\n                  if(frame!==state.frame||!Number.isSafeInteger(reply?.executionContextId))throw new Error('C6_CDP_WORLD');\n                  state.world=reply.executionContextId;\n                }else if(install){\n                  const id=reply?.result?.objectId;\n                  if(world!==state.world||state.frame===null||typeof id!=='string'||reply?.exceptionDetails!==undefined)\n                    throw new Error('C6_CDP_INSTALL');\n                  state.objectId=id;\n                }\n              }catch{c6Drop(state);revFail();}},()=>{if(probe||install||worldRequest)c6Drop(state);})\n              .catch(()=>{c6Drop(state);revFail();});}catch{c6Drop(state);revFail();}\n            }\n            if(fill){\n              const current=revMode();\n              const owned=this===session&&!holder.closed&&receiver===state.objectId&&state.objectId!==null\n                &&state.world!==null&&state.frame!==null&&current?.active===true\n                &&current.case===holder.mode.case&&current.epoch===holder.mode.epoch\n                &&current.path===holder.mode.path&&current.c6===holder.mode.c6\n                &&holder.dev===revC6ProfileDev&&holder.ino===revC6ProfileIno&&revStarted\n                &&(current.path===1?revC6ContextBound:revReady);\n              if(!owned){revFail();return result;}\n              const ordinal=++revNativeOrdinal,active=revActive,lifetime=revLossSelected()?revLossLifetime:null;\n              active.set(ordinal,1);revEmit(holder.mode,2,ordinal,1);\n              const settled=fulfilled=>{\n                const removed=active.delete(ordinal);\n                if(lifetime?.retired)return; // Exact actual settlement remains private; no late observer output.\n                if(!removed)revFail();revEmit(holder.mode,3,ordinal,1,0,fulfilled);};\n              try{result.then(()=>settled(true),()=>settled(false)).catch(()=>{revFail();});}catch{revFail();}\n            }\n            return result;\n          };\n          try{if(!Reflect.defineProperty(session,'send',{...(descriptor??{configurable:true,writable:true,enumerable:true}),value:wrapped}))\n            throw new Error('C6_CDP_DESCRIPTOR');group.methods.push(['send',descriptor,wrapped]);}catch{revFail();}\n        };\n        const c6BindContext=(context,mode)=>{\n          revInit(mode);if(c6CdpHolders.has(context)){revFail();return;}\n          const holder={context,mode,dev:revC6ProfileDev,ino:revC6ProfileIno,closed:false,sessions:new Map()};\n          c6CdpHolders.set(context,holder);\n          const descriptor=Object.getOwnPropertyDescriptor(context,'newCDPSession'),original=context.newCDPSession;\n          if(typeof original!=='function'){revFail();return;}\n          const group={cap:context,methods:[]};revGroups.add(group);\n          const wrapped=function(...args){const page=args[0];revC6CdpPending++;let result;\n            try{result=Reflect.apply(original,this,args);}catch(error){revC6CdpPending--;revFail();throw error;}\n            try{result.then(session=>{try{\n              if(this!==context||holder.closed||!page||!session)throw new Error('C6_CDP_CONTEXT');\n              // The original SDK creation validates this Page under this same actual context.\n              c6InstallSend(holder,session,page);\n            }catch{revFail();}finally{revC6CdpPending--;revPublish(mode,revSealed);revMaybeSeal();}},\n            ()=>{revC6CdpPending--;revFail();revPublish(mode,revSealed);revMaybeSeal();}).catch(()=>{revFail();});}\n            catch{revFail();}return result;};\n          try{if(!Reflect.defineProperty(context,'newCDPSession',{...(descriptor??{configurable:true,writable:true,enumerable:true}),value:wrapped}))\n            throw new Error('C6_CDP_DESCRIPTOR');group.methods.push(['newCDPSession',descriptor,wrapped]);}catch{revFail();}\n        };\n        const c6ClosedContext=context=>{const holder=c6CdpHolders.get(context);if(holder){holder.closed=true;\n          for(const state of holder.sessions.values())c6Drop(state);}};\n        const p4NativeLaunch=p4Chromium.launchPersistentContext;\n        p4Chromium.launchPersistentContext=function(...args){\n          const launched=Reflect.apply(p4NativeLaunch,this,args);let mode=null;\n          try{if(p4Fs.existsSync(p4ModeFile))mode=JSON.parse(p4Fs.readFileSync(p4ModeFile,'utf8'));}catch{}\n          const c5Active=p4Fs.existsSync(c5ValuesFile);\n          if(mode?.active!==true&&!c5Active)return launched;\n          const phase=mode?.phase;\n          return launched.then(context=>{\n            const selected=revMode();\n            if(selected?.c6){try{\n              const actual=p4Fs.lstatSync(args[0]),canonical=p4Fs.realpathSync(args[0]);\n              if(actual.isSymbolicLink()||!actual.isDirectory()||canonical!==args[0]\n                ||actual.uid!==process.getuid()||(actual.mode&0o777)!==0o700\n                ||!Number.isSafeInteger(actual.dev)||!Number.isSafeInteger(actual.ino))throw new Error('C6_PROFILE');\n              revC6ProfileDev=actual.dev;revC6ProfileIno=actual.ino;\n            }catch(error){revFail();return Promise.resolve(Reflect.apply(context.close,context,[]))\n              .then(()=>{throw error;},closeFailure=>{revFail();throw closeFailure;});}}\n            if(selected?.c6>=1&&selected.c6<=3)c6BindContext(context,selected);\n            const originalClose=context.close;\n            context.close=function(...closeArgs){const receiver=this;\n              return (async()=>{\n                const fail=()=>{try{p4Fs.appendFileSync(p4FailedFile,'1\\\\n',{mode:0o600});}catch{}};\n                let fenceSucceeded=false;\n                try{\n                  if(c5Active){c5ProfileScan(args[0]);if(mode?.active!==true)return;}\n                  if(!Number.isInteger(phase)||phase<1)throw new Error('PHASE');\n                  const deadline=performance.now()+3000;let timer;\n                  const fence=async()=>{\n                    for(const page of context.pages()){\n                      const location=new URL(page.url());\n                      if(location.origin===p4Origin&&location.pathname.startsWith('/p3/')){\n                        const state=await page.evaluate(async()=>{\n                          const observer=globalThis.__p4NativeObserver;\n                          return observer?await observer.seal():null;\n                        });\n                        if(state!==null&&(Object.keys(state).sort().join(',')!=='failed,pending,sequence'\n                          ||state.failed!==false||state.pending!==0||!Number.isInteger(state.sequence)\n                          ||state.sequence<1))throw new Error('FENCE');\n                      }\n                    }\n                    const remaining=deadline-performance.now();if(remaining<=0)throw new Error('TIME');\n                    const response=await fetch(p4Origin+'/p3/password-effects?kind=closed&phase='+phase,\n                      {method:'POST',headers:{'content-type':'application/json'},body:'{\"seq\":0}',\n                       signal:AbortSignal.timeout(Math.max(1,Math.floor(remaining)))});\n                    const ack=await response.json();\n                    if(response.status!==200||Object.keys(ack).sort().join(',')!=='accepted,seq'\n                      ||ack.accepted!==true||ack.seq!==0)throw new Error('ACK');\n                  };\n                  const holder=selected?.c6===3&&selected.path===1?c6CdpHolders.get(context):null;\n                  const current=holder?revMode():null,browser=holder?context.browser():null;\n                  const unavailable=holder?.context===context&&holder.closed===false&&selected.active===true\n                    &&Number.isInteger(selected.case)&&selected.case>0&&selected.epoch===selected.case\n                    &&current?.active===true&&current.c6===3&&current.path===1\n                    &&current.case===selected.case&&current.epoch===selected.epoch\n                    &&holder.mode.case===selected.case&&holder.mode.epoch===selected.epoch\n                    &&holder.mode.c6===3&&holder.mode.path===1&&revLocalMode?.case===selected.case\n                    &&revLocalMode?.epoch===selected.epoch&&revC6ContextBound&&revStarted&&revC6Probed===2\n                    &&holder.dev===revC6ProfileDev&&holder.ino===revC6ProfileIno\n                    &&browser!==null&&typeof browser?.isConnected==='function'&&browser.isConnected()===false;\n                  if(!unavailable){\n                    try{await Promise.race([fence(),new Promise((_,reject)=>{\n                      timer=setTimeout(()=>reject(new Error('TIME')),Math.max(1,deadline-performance.now()));})]);}\n                    finally{clearTimeout(timer);}\n                    fenceSucceeded=true;\n                  } // Genuine bound disconnection supplies UNKNOWN, never a healthy page fence.\n                }catch(error){\n                  // Only the deliberate in-flight cut may leave a destroyed/stalled realm.\n                  // Malformed ACK/fence failures remain sticky even in C6.\n                  const unavailable=error instanceof Error&&(error.message==='TIME'\n                    ||error.message.includes('Target page, context or browser has been closed'));\n                  if(!selected?.c6||selected.c6===4||!unavailable)fail();\n                }\n                finally{\n                  let result;\n                  try{result=await Reflect.apply(originalClose,receiver,closeArgs);}\n                  catch(originalFailure){fail();throw originalFailure;}\n                  if(selected?.c6>=1&&selected.c6<=3)c6ClosedContext(receiver);\n                  if(selected?.c6){\n                    // Original close has settled, and the original native promise must also\n                    // settle before descriptor removal. Neither timeout nor Stop grants this.\n                    const observerDeadline=performance.now()+1000;\n                    if(selected.path===2){\n                      while((revActive.size||revC6HighPending||revC6CdpPending)&&performance.now()<observerDeadline)\n                        await new Promise(resolve=>setTimeout(resolve,10));\n                      if(revActive.size||revC6HighPending||revC6CdpPending)revFail();\n                      else{revC6Restored=revRestore();revEmit(selected,6,1,0,0,revC6Restored);}\n                    }\n                    revEmit(selected,13,phase,fenceSucceeded?1:0,0,true);\n                    // Reuse the same finite post-close observer budget for final ACK drain.\n                    let timer;try{const remaining=observerDeadline-performance.now();\n                      if(remaining<=0)throw new Error('C6_ACK_DRAIN');\n                      await Promise.race([revTail,new Promise((_,reject)=>{\n                        timer=setTimeout(()=>reject(new Error('C6_ACK_DRAIN')),remaining);})]);}\n                    catch{revFail();}finally{clearTimeout(timer);}\n                  }\n                  if(fenceSucceeded){try{p4Fs.appendFileSync(p4SettledFile,phase+'\\\\n',{mode:0o600});}\n                    catch{fail();}}\n                  return result;\n                }\n              })();\n            };\n            return context;\n          });\n        };\n        \"\"\"",
+      "after": "\"\"\"\n        import {chromium as p4Chromium} from %s;import * as p4Fs from 'node:fs';\n        const p4ModeFile=%s,p4FailedFile=%s,p4SettledFile=%s,p4Origin=%s;\n        const c5ValuesFile=%s,c5CountsFile=%s;\n        import {installObservationCollector as c6TrustedCollector} from %s;\n        %s\n        // Selected C6 observes the original SDK primitive; current-document authority stays in \\\n        production guards.\n        const c6CdpHolders=new WeakMap();\n        const c6FillSource='function(target, origin, allowedOrigins, value) { return \\\n        this.fillPasswordResult(target, origin, allowedOrigins, value); }';\n        const c6InstallSource=c6TrustedCollector.toString();\n        const c6Drop=state=>{state.objectId=null;state.world=null;};\n        const c6InstallSend=(holder,session,page)=>{\n          if(holder.sessions.has(session)){revFail();return;}holder.sessions.set(session,{page,frame\\\n        :null,world:null,objectId:null});\n          const state=holder.sessions.get(session),descriptor=Object.getOwnPropertyDescriptor(sessio\\\n        n,'send'),original=session.send;\n          if(typeof original!=='function'){revFail();return;}\n          const group={cap:session,methods:[]};revGroups.add(group);\n          const wrapped=function(...args){\n            // Only fixed source/opaque receiver metadata is read. The arguments array and \\\n        result.value are untouched.\n            const method=args[0],metadata=args[1],source=method==='Runtime.callFunctionOn'?metadata?\\\n        .functionDeclaration:null;\n            const receiver=method==='Runtime.callFunctionOn'?metadata?.objectId:null;\n            const install=source===c6InstallSource,fill=source===c6FillSource;\n            const probe=source==='function() { return true; }'&&receiver===state.objectId;\n            const worldRequest=method==='Page.createIsolatedWorld'&&typeof metadata?.worldName==='string'\n              &&metadata.worldName.startsWith('checks-observation-');\n            const frame=worldRequest?metadata.frameId:null,world=install?metadata?.executionContextId:null;\n            if(worldRequest||source==='function() { this.dispose(); \\\n        }'||method==='Runtime.releaseObjectGroup')c6Drop(state);\n            let result;try{result=Reflect.apply(original,this,args);}catch(error){if(probe)c6Drop(st\\\n        ate);throw error;}\n            if(method==='Page.getFrameTree'||worldRequest||install||probe){\n              try{result.then(reply=>{try{\n                if(this!==session||holder.closed)throw new Error('C6_CDP_IDENTITY');\n                if(method==='Page.getFrameTree'){\n                  const id=reply?.frameTree?.frame?.id;if(typeof id!=='string')throw new \\\n        Error('C6_CDP_FRAME');state.frame=id;\n                }else if(worldRequest){\n                  if(frame!==state.frame||!Number.isSafeInteger(reply?.executionContextId))throw \\\n        new Error('C6_CDP_WORLD');\n                  state.world=reply.executionContextId;\n                }else if(install){\n                  const id=reply?.result?.objectId;\n                  if(world!==state.world||state.frame===null||typeof \\\n        id!=='string'||reply?.exceptionDetails!==undefined)\n                    throw new Error('C6_CDP_INSTALL');\n                  state.objectId=id;\n                }\n              }catch{c6Drop(state);revFail();}},()=>{if(probe||install||worldRequest)c6Drop(state);})\n              .catch(()=>{c6Drop(state);revFail();});}catch{c6Drop(state);revFail();}\n            }\n            if(fill){\n              const current=revMode();\n              const owned=this===session&&!holder.closed&&receiver===state.objectId&&state.objectId!==null\n                &&state.world!==null&&state.frame!==null&&current?.active===true\n                &&current.case===holder.mode.case&&current.epoch===holder.mode.epoch\n                &&current.path===holder.mode.path&&current.c6===holder.mode.c6\n                &&holder.dev===revC6ProfileDev&&holder.ino===revC6ProfileIno&&revStarted\n                &&(current.path===1?revC6ContextBound:revReady);\n              if(!owned){revFail();return result;}\n              const ordinal=++revNativeOrdinal,active=revActive,lifetime=revLossSelected()?revLossLi\\\n        fetime:null;\n              active.set(ordinal,1);revEmit(holder.mode,2,ordinal,1);\n              const settled=fulfilled=>{\n                const removed=active.delete(ordinal);\n                if(lifetime?.retired)return; // Exact actual settlement remains private; no late \\\n        observer output.\n                if(!removed)revFail();revEmit(holder.mode,3,ordinal,1,0,fulfilled);};\n              try{result.then(()=>settled(true),()=>settled(false)).catch(()=>{revFail();});}catch{revFail();}\n            }\n            return result;\n          };\n          try{if(!Reflect.defineProperty(session,'send',{...(descriptor??{configurable:true,writable\\\n        :true,enumerable:true}),value:wrapped}))\n            throw new Error('C6_CDP_DESCRIPTOR');group.methods.push(['send',descriptor,wrapped]);}ca\\\n        tch{revFail();}\n        };\n        const c6BindContext=(context,mode)=>{\n          revInit(mode);if(c6CdpHolders.has(context)){revFail();return;}\n          const holder={context,mode,dev:revC6ProfileDev,ino:revC6ProfileIno,closed:false,sessions:new Map()};\n          c6CdpHolders.set(context,holder);\n          const descriptor=Object.getOwnPropertyDescriptor(context,'newCDPSession'),original=context\\\n        .newCDPSession;\n          if(typeof original!=='function'){revFail();return;}\n          const group={cap:context,methods:[]};revGroups.add(group);\n          const wrapped=function(...args){const page=args[0];revC6CdpPending++;let result;\n            try{result=Reflect.apply(original,this,args);}catch(error){revC6CdpPending--;revFail();t\\\n        hrow error;}\n            try{result.then(session=>{try{\n              if(this!==context||holder.closed||!page||!session)throw new Error('C6_CDP_CONTEXT');\n              // The original SDK creation validates this Page under this same actual context.\n              c6InstallSend(holder,session,page);\n            }catch{revFail();}finally{revC6CdpPending--;revPublish(mode,revSealed);revMaybeSeal();}},\n            ()=>{revC6CdpPending--;revFail();revPublish(mode,revSealed);revMaybeSeal();}).catch(()=>\\\n        {revFail();});}\n            catch{revFail();}return result;};\n          try{if(!Reflect.defineProperty(context,'newCDPSession',{...(descriptor??{configurable:true\\\n        ,writable:true,enumerable:true}),value:wrapped}))\n            throw new Error('C6_CDP_DESCRIPTOR');group.methods.push(['newCDPSession',descriptor,wrap\\\n        ped]);}catch{revFail();}\n        };\n        const c6ClosedContext=context=>{const holder=c6CdpHolders.get(context);if(holder){holder.closed=true;\n          for(const state of holder.sessions.values())c6Drop(state);}};\n        const p4NativeLaunch=p4Chromium.launchPersistentContext;\n        p4Chromium.launchPersistentContext=function(...args){\n          const launched=Reflect.apply(p4NativeLaunch,this,args);let mode=null;\n          try{if(p4Fs.existsSync(p4ModeFile))mode=JSON.parse(p4Fs.readFileSync(p4ModeFile,'utf8'));}catch{}\n          const c5Active=p4Fs.existsSync(c5ValuesFile);\n          if(mode?.active!==true&&!c5Active)return launched;\n          const phase=mode?.phase;\n          return launched.then(context=>{\n            const selected=revMode();\n            if(selected?.c6){try{\n              const actual=p4Fs.lstatSync(args[0]),canonical=p4Fs.realpathSync(args[0]);\n              if(actual.isSymbolicLink()||!actual.isDirectory()||canonical!==args[0]\n                ||actual.uid!==process.getuid()||(actual.mode&0o777)!==0o700\n                ||!Number.isSafeInteger(actual.dev)||!Number.isSafeInteger(actual.ino))throw new \\\n        Error('C6_PROFILE');\n              revC6ProfileDev=actual.dev;revC6ProfileIno=actual.ino;\n            }catch(error){revFail();return Promise.resolve(Reflect.apply(context.close,context,[]))\n              .then(()=>{throw error;},closeFailure=>{revFail();throw closeFailure;});}}\n            if(selected?.c6>=1&&selected.c6<=3)c6BindContext(context,selected);\n            const originalClose=context.close;\n            context.close=function(...closeArgs){const receiver=this;\n              return (async()=>{\n                const fail=()=>{try{p4Fs.appendFileSync(p4FailedFile,'1\\\\n',{mode:0o600});}catch{}};\n                let fenceSucceeded=false;\n                try{\n                  if(c5Active){c5ProfileScan(args[0]);if(mode?.active!==true)return;}\n                  if(!Number.isInteger(phase)||phase<1)throw new Error('PHASE');\n                  const deadline=performance.now()+3000;let timer;\n                  const fence=async()=>{\n                    for(const page of context.pages()){\n                      const location=new URL(page.url());\n                      if(location.origin===p4Origin&&location.pathname.startsWith('/p3/')){\n                        const state=await page.evaluate(async()=>{\n                          const observer=globalThis.__p4NativeObserver;\n                          return observer?await observer.seal():null;\n                        });\n                        if(state!==null&&(Object.keys(state).sort().join(',')!=='failed,pending,sequence'\n                          ||state.failed!==false||state.pending!==0||!Number.isInteger(state.sequence)\n                          ||state.sequence<1))throw new Error('FENCE');\n                      }\n                    }\n                    const remaining=deadline-performance.now();if(remaining<=0)throw new Error('TIME');\n                    const response=await fetch(p4Origin+'/p3/password-effects?kind=closed&phase='+phase,\n                      {method:'POST',headers:{'content-type':'application/json'},body:'{\"seq\":0}',\n                       signal:AbortSignal.timeout(Math.max(1,Math.floor(remaining)))});\n                    const ack=await response.json();\n                    if(response.status!==200||Object.keys(ack).sort().join(',')!=='accepted,seq'\n                      ||ack.accepted!==true||ack.seq!==0)throw new Error('ACK');\n                  };\n                  const holder=selected?.c6===3&&selected.path===1?c6CdpHolders.get(context):null;\n                  const current=holder?revMode():null,browser=holder?context.browser():null;\n                  const unavailable=holder?.context===context&&holder.closed===false&&selected.active===true\n                    &&Number.isInteger(selected.case)&&selected.case>0&&selected.epoch===selected.case\n                    &&current?.active===true&&current.c6===3&&current.path===1\n                    &&current.case===selected.case&&current.epoch===selected.epoch\n                    &&holder.mode.case===selected.case&&holder.mode.epoch===selected.epoch\n                    &&holder.mode.c6===3&&holder.mode.path===1&&revLocalMode?.case===selected.case\n                    &&revLocalMode?.epoch===selected.epoch&&revC6ContextBound&&revStarted&&revC6Probed===2\n                    &&holder.dev===revC6ProfileDev&&holder.ino===revC6ProfileIno\n                    &&browser!==null&&typeof browser?.isConnected==='function'&&browser.isConnected()===false;\n                  if(!unavailable){\n                    try{await Promise.race([fence(),new Promise((_,reject)=>{\n                      timer=setTimeout(()=>reject(new \\\n        Error('TIME')),Math.max(1,deadline-performance.now()));})]);}\n                    finally{clearTimeout(timer);}\n                    fenceSucceeded=true;\n                  } // Genuine bound disconnection supplies UNKNOWN, never a healthy page fence.\n                }catch(error){\n                  // Only the deliberate in-flight cut may leave a destroyed/stalled realm.\n                  // Malformed ACK/fence failures remain sticky even in C6.\n                  const unavailable=error instanceof Error&&(error.message==='TIME'\n                    ||error.message.includes('Target page, context or browser has been closed'));\n                  if(!selected?.c6||selected.c6===4||!unavailable)fail();\n                }\n                finally{\n                  let result;\n                  try{result=await Reflect.apply(originalClose,receiver,closeArgs);}\n                  catch(originalFailure){fail();throw originalFailure;}\n                  if(selected?.c6>=1&&selected.c6<=3)c6ClosedContext(receiver);\n                  if(selected?.c6){\n                    // Original close has settled, and the original native promise must also\n                    // settle before descriptor removal. Neither timeout nor Stop grants this.\n                    const observerDeadline=performance.now()+1000;\n                    if(selected.path===2){\n                      while((revActive.size||revC6HighPending||revC6CdpPending)&&performance.now()<o\\\n        bserverDeadline)\n                        await new Promise(resolve=>setTimeout(resolve,10));\n                      if(revActive.size||revC6HighPending||revC6CdpPending)revFail();\n                      else{revC6Restored=revRestore();revEmit(selected,6,1,0,0,revC6Restored);}\n                    }\n                    revEmit(selected,13,phase,fenceSucceeded?1:0,0,true);\n                    // Reuse the same finite post-close observer budget for final ACK drain.\n                    let timer;try{const remaining=observerDeadline-performance.now();\n                      if(remaining<=0)throw new Error('C6_ACK_DRAIN');\n                      await Promise.race([revTail,new Promise((_,reject)=>{\n                        timer=setTimeout(()=>reject(new Error('C6_ACK_DRAIN')),remaining);})]);}\n                    catch{revFail();}finally{clearTimeout(timer);}\n                  }\n                  if(fenceSucceeded){try{p4Fs.appendFileSync(p4SettledFile,phase+'\\\\n',{mode:0o600});}\n                    catch{fail();}}\n                  return result;\n                }\n              })();\n            };\n            return context;\n          });\n        };\n        \"\"\""
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 482758,
+      "before": "\"\"\"\n        const c5Variants=value=>{\n          const utf8=Buffer.from(value,'utf8'),le=Buffer.from(value,'utf16le'),be=Buffer.from(le);be.swap16();\n          const percent=[...utf8].map(byte=>String.fromCharCode(37)+byte.toString(16).padStart(2,'0').toUpperCase()).join('');\n          const unicode=[...Array(value.length)].map((_,index)=>String.fromCharCode(92)+'u'+value.charCodeAt(index).toString(16).padStart(4,'0')).join('');\n          const json=JSON.stringify(value),form=new URLSearchParams({v:value}).toString().slice(2);\n          return [utf8,le,be,...[utf8.toString('base64'),utf8.toString('hex'),utf8.toString('hex').toUpperCase(),\n            percent,percent.toLowerCase(),encodeURIComponent(value),form,form.replaceAll('+',String.fromCharCode(37)+'20'),\n            unicode,unicode.toUpperCase().replaceAll('U','u'),json,json.slice(1,-1)].map(text=>Buffer.from(text,'utf8'))];\n        };\n        const c5ProfileHitCategory=relative=>{\n          const parts=relative.split('/'),name=parts.at(-1);\n          if(parts.some(part=>['Cache','Cache_Data'].includes(part)))return 0;\n          if(parts.some(part=>['Code Cache','GPUCache','DawnCache','ShaderCache','GrShaderCache'].includes(part)))return 1;\n          if(parts.some(part=>['Local Storage','Session Storage','IndexedDB','WebStorage','CacheStorage'].includes(part)))return 2;\n          if(parts.includes('Sessions'))return 3;\n          if(['History','History-journal'].includes(name))return 4;\n          if(['Preferences','Secure Preferences','Local State'].includes(name))return 5;\n          return 6;\n        };\n        const c5ProfileScan=directory=>{\n          let files=0,bytes=0,hits=0,links=0,failed=false,stage=0,errno=0;\n          const hitCategories=Array(8).fill(0);\n          let linkName=0,linkRoot=false,linkType=0,linkBytes=0,linkTargetRead=false,linkTargetIsVersion=false;\n          try{\n            const root=p4Fs.realpathSync(directory),stat=p4Fs.lstatSync(directory);\n            const canonical=p4Fs.lstatSync(root);\n            if(stat.isSymbolicLink()||!stat.isDirectory()||stat.dev!==canonical.dev||stat.ino!==canonical.ino\n              ||stat.uid!==process.getuid())throw new Error('ROOT');\n            const valuesStat=p4Fs.lstatSync(c5ValuesFile);\n            if(valuesStat.isSymbolicLink()||!valuesStat.isFile()||(valuesStat.mode&0o777)!==0o600||valuesStat.size>32768)throw new Error('VALUES');\n            const values=JSON.parse(p4Fs.readFileSync(c5ValuesFile,'utf8'));\n            if(!Array.isArray(values)||values.length<1||values.length>16||values.some(value=>typeof value!=='string'||value.length>4096))throw new Error('VALUES');\n            const variants=values.flatMap(c5Variants),walk=path=>{\n              for(const entry of p4Fs.readdirSync(path,{withFileTypes:true})){\n                const child=path+'/'+entry.name,info=p4Fs.lstatSync(child);\n                if(info.isSymbolicLink()){\n                  if(path!==root||!['SingletonLock','SingletonCookie','SingletonSocket','RunningChromeVersion'].includes(entry.name)\n                    ||info.size>1024){\n                    linkName=['SingletonLock','SingletonCookie','SingletonSocket','RunningChromeVersion'].indexOf(entry.name)+1;\n                    linkRoot=path===root;linkType=1;linkBytes=Number.isFinite(info.size)?info.size:0;\n                    if(linkRoot&&linkName===4&&info.size<=1024){try{const target=p4Fs.readlinkSync(child);\n                      linkTargetRead=true;\n                      linkTargetIsVersion=target.length<=128&&/^[0-9]{1,4}(?:\\\\.[0-9]{1,6}){3}$/.test(target);\n                    }catch{/* Metadata loss cannot change the original SYMLINK rejection. */}}\n                    throw new Error('SYMLINK');\n                  }\n                  const text=Buffer.from(entry.name+' '+p4Fs.readlinkSync(child),'utf8');\n                  if(text.length>2048)throw new Error('LINKBOUND');\n                  links++;bytes+=text.length;\n                  for(const variant of variants)if(text.includes(variant)){hits++;hitCategories[7]++;}\n                  continue;\n                }\n                if(info.isDirectory()){walk(child);continue;}\n                if(!info.isFile()||info.size>67108864||bytes+info.size>268435456)throw new Error('BOUND');\n                const actual=p4Fs.realpathSync(child);if(!actual.startsWith(root+'/'))throw new Error('PATH');\n                const fd=p4Fs.openSync(child,p4Fs.constants.O_RDONLY|p4Fs.constants.O_NOFOLLOW);\n                try{\n                  const opened=p4Fs.fstatSync(fd);\n                  if(!opened.isFile()||opened.dev!==info.dev||opened.ino!==info.ino\n                    ||opened.size>67108864||bytes+opened.size>268435456)throw new Error('FD');\n                  const buffer=Buffer.alloc(opened.size+1);let length=0;\n                  while(length<buffer.length){const read=p4Fs.readSync(fd,buffer,length,buffer.length-length,null);\n                    if(read===0)break;length+=read;}\n                  const after=p4Fs.fstatSync(fd);\n                  if(length>opened.size||after.size!==length||after.dev!==opened.dev||after.ino!==opened.ino)\n                    throw new Error('CHANGED');\n                  const body=buffer.subarray(0,length);files++;bytes+=body.length;\n                  for(const variant of variants)if(body.includes(variant)){hits++;hitCategories[c5ProfileHitCategory(child.slice(root.length+1))]++;}\n                }finally{p4Fs.closeSync(fd);}\n              }\n            };walk(root);\n          }catch(error){\n            failed=true;\n            stage=['ROOT','VALUES','SYMLINK','LINKBOUND','BOUND','PATH','FD','CHANGED'].indexOf(error?.message)+1;\n            errno=['EACCES','EPERM','ENOENT','ELOOP','ENOTDIR','EISDIR','EIO','EBADF','EMFILE','ENFILE'].indexOf(error?.code)+1;\n            if(stage===0){const operation=['open','read','scandir','lstat','realpath','fstat','close','readlink'].indexOf(error?.syscall);\n              if(operation>=0)stage=9+operation;}\n          }\n          try{const fd=p4Fs.openSync(c5CountsFile,p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|\n            p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);\n            try{p4Fs.writeSync(fd,JSON.stringify({files,bytes,hits,links,failed,stage,errno,linkName,linkRoot,linkType,linkBytes,linkTargetRead,linkTargetIsVersion,hitCategories})+'\\\\n');}finally{p4Fs.closeSync(fd);}}\n          catch{try{const fd=p4Fs.openSync(c5CountsFile+'-failed',p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|\n            p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);try{p4Fs.writeSync(fd,'1');}finally{p4Fs.closeSync(fd);}}catch{}}\n        };\n        \"\"\"",
+      "after": "\"\"\"\n        const c5Variants=value=>{\n          const utf8=Buffer.from(value,'utf8'),le=Buffer.from(value,'utf16le'),be=Buffer.from(le);be.swap16();\n          const percent=[...utf8].map(byte=>String.fromCharCode(37)+byte.toString(16).padStart(2,'0'\\\n        ).toUpperCase()).join('');\n          const unicode=[...Array(value.length)].map((_,index)=>String.fromCharCode(92)+'u'+value.ch\\\n        arCodeAt(index).toString(16).padStart(4,'0')).join('');\n          const json=JSON.stringify(value),form=new URLSearchParams({v:value}).toString().slice(2);\n          return [utf8,le,be,...[utf8.toString('base64'),utf8.toString('hex'),utf8.toString('hex').t\\\n        oUpperCase(),\n            percent,percent.toLowerCase(),encodeURIComponent(value),form,form.replaceAll('+',String.\\\n        fromCharCode(37)+'20'),\n            unicode,unicode.toUpperCase().replaceAll('U','u'),json,json.slice(1,-1)].map(text=>Buffe\\\n        r.from(text,'utf8'))];\n        };\n        const c5ProfileHitCategory=relative=>{\n          const parts=relative.split('/'),name=parts.at(-1);\n          if(parts.some(part=>['Cache','Cache_Data'].includes(part)))return 0;\n          if(parts.some(part=>['Code Cache','GPUCache','DawnCache','ShaderCache','GrShaderCache'].in\\\n        cludes(part)))return 1;\n          if(parts.some(part=>['Local Storage','Session \\\n        Storage','IndexedDB','WebStorage','CacheStorage'].includes(part)))return 2;\n          if(parts.includes('Sessions'))return 3;\n          if(['History','History-journal'].includes(name))return 4;\n          if(['Preferences','Secure Preferences','Local State'].includes(name))return 5;\n          return 6;\n        };\n        const c5ProfileScan=directory=>{\n          let files=0,bytes=0,hits=0,links=0,failed=false,stage=0,errno=0;\n          const hitCategories=Array(8).fill(0);\n          let linkName=0,linkRoot=false,linkType=0,linkBytes=0,linkTargetRead=false,linkTargetIsVersion=false;\n          try{\n            const root=p4Fs.realpathSync(directory),stat=p4Fs.lstatSync(directory);\n            const canonical=p4Fs.lstatSync(root);\n            if(stat.isSymbolicLink()||!stat.isDirectory()||stat.dev!==canonical.dev||stat.ino!==canonical.ino\n              ||stat.uid!==process.getuid())throw new Error('ROOT');\n            const valuesStat=p4Fs.lstatSync(c5ValuesFile);\n            if(valuesStat.isSymbolicLink()||!valuesStat.isFile()||(valuesStat.mode&0o777)!==0o600||v\\\n        aluesStat.size>32768)throw new Error('VALUES');\n            const values=JSON.parse(p4Fs.readFileSync(c5ValuesFile,'utf8'));\n            if(!Array.isArray(values)||values.length<1||values.length>16||values.some(value=>typeof \\\n        value!=='string'||value.length>4096))throw new Error('VALUES');\n            const variants=values.flatMap(c5Variants),walk=path=>{\n              for(const entry of p4Fs.readdirSync(path,{withFileTypes:true})){\n                const child=path+'/'+entry.name,info=p4Fs.lstatSync(child);\n                if(info.isSymbolicLink()){\n                  if(path!==root||!['SingletonLock','SingletonCookie','SingletonSocket','RunningChro\\\n        meVersion'].includes(entry.name)\n                    ||info.size>1024){\n                    linkName=['SingletonLock','SingletonCookie','SingletonSocket','RunningChromeVers\\\n        ion'].indexOf(entry.name)+1;\n                    linkRoot=path===root;linkType=1;linkBytes=Number.isFinite(info.size)?info.size:0;\n                    if(linkRoot&&linkName===4&&info.size<=1024){try{const target=p4Fs.readlinkSync(child);\n                      linkTargetRead=true;\n                      linkTargetIsVersion=target.length<=128&&/^[0-9]{1,4}(?:\\\\.[0-9]{1,6}){3}$/.test(target);\n                    }catch{/* Metadata loss cannot change the original SYMLINK rejection. */}}\n                    throw new Error('SYMLINK');\n                  }\n                  const text=Buffer.from(entry.name+' '+p4Fs.readlinkSync(child),'utf8');\n                  if(text.length>2048)throw new Error('LINKBOUND');\n                  links++;bytes+=text.length;\n                  for(const variant of variants)if(text.includes(variant)){hits++;hitCategories[7]++;}\n                  continue;\n                }\n                if(info.isDirectory()){walk(child);continue;}\n                if(!info.isFile()||info.size>67108864||bytes+info.size>268435456)throw new Error('BOUND');\n                const actual=p4Fs.realpathSync(child);if(!actual.startsWith(root+'/'))throw new Error('PATH');\n                const fd=p4Fs.openSync(child,p4Fs.constants.O_RDONLY|p4Fs.constants.O_NOFOLLOW);\n                try{\n                  const opened=p4Fs.fstatSync(fd);\n                  if(!opened.isFile()||opened.dev!==info.dev||opened.ino!==info.ino\n                    ||opened.size>67108864||bytes+opened.size>268435456)throw new Error('FD');\n                  const buffer=Buffer.alloc(opened.size+1);let length=0;\n                  while(length<buffer.length){const \\\n        read=p4Fs.readSync(fd,buffer,length,buffer.length-length,null);\n                    if(read===0)break;length+=read;}\n                  const after=p4Fs.fstatSync(fd);\n                  if(length>opened.size||after.size!==length||after.dev!==opened.dev||after.ino!==opened.ino)\n                    throw new Error('CHANGED');\n                  const body=buffer.subarray(0,length);files++;bytes+=body.length;\n                  for(const variant of variants)if(body.includes(variant)){hits++;hitCategories[c5Pr\\\n        ofileHitCategory(child.slice(root.length+1))]++;}\n                }finally{p4Fs.closeSync(fd);}\n              }\n            };walk(root);\n          }catch(error){\n            failed=true;\n            stage=['ROOT','VALUES','SYMLINK','LINKBOUND','BOUND','PATH','FD','CHANGED'].indexOf(erro\\\n        r?.message)+1;\n            errno=['EACCES','EPERM','ENOENT','ELOOP','ENOTDIR','EISDIR','EIO','EBADF','EMFILE','ENFI\\\n        LE'].indexOf(error?.code)+1;\n            if(stage===0){const operation=['open','read','scandir','lstat','realpath','fstat','close\\\n        ','readlink'].indexOf(error?.syscall);\n              if(operation>=0)stage=9+operation;}\n          }\n          try{const fd=p4Fs.openSync(c5CountsFile,p4Fs.constants.O_WRONLY|p4Fs.constants.O_CREAT|\n            p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);\n            try{p4Fs.writeSync(fd,JSON.stringify({files,bytes,hits,links,failed,stage,errno,linkName\\\n        ,linkRoot,linkType,linkBytes,linkTargetRead,linkTargetIsVersion,hitCategories})+'\\\\n');}fina\\\n        lly{p4Fs.closeSync(fd);}}\n          catch{try{const fd=p4Fs.openSync(c5CountsFile+'-failed',p4Fs.constants.O_WRONLY|p4Fs.const\\\n        ants.O_CREAT|\n            p4Fs.constants.O_APPEND|p4Fs.constants.O_NOFOLLOW,0o600);try{p4Fs.writeSync(fd,'1');}fin\\\n        ally{p4Fs.closeSync(fd);}}catch{}}\n        };\n        \"\"\""
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 480794,
+      "before": "\"\"\"\n        import {validateObserved as revValidateObserved} from %s;\n        let revReady=false;\n        const revProcess={\n          on(event,listener){return Reflect.apply(process.on,process,[event,function(...args){\n            const mode=revMode(),message=args[0];\n            if(mode?.c6&&mode.path===2){\n              if(message?.kind==='launch')revC6RunDeadline=Math.min(Date.parse(message.admission?.runDeadlineAt),Date.now()+message.totalRuntimeMs);\n              if(message?.kind==='execute')revC6StepMs=message.stepTimeoutMs;\n            }\n            const result=Reflect.apply(listener,this,args);\n            if(mode?.active&&mode.path===2&&args[0]?.kind==='stop'){\n              try{revValidateObserved('replay-ipc#/definitions/Stop',args[0],128);\n                if(!revReady||!revStarted)throw new Error('READY');\n                if(!mode.c6)revEmit(mode,6,1,0,0,revRestore());\n                revEmit(mode,5,1,0,4);\n              }catch{revFail();}}return result;}]);},\n          send(...args){const result=Reflect.apply(process.send,process,args),mode=revMode();\n            if(mode?.active&&mode.path===2&&args[0]?.kind==='ready'){\n              try{const ready=revValidateObserved('replay-ipc#/definitions/Ready3',args[0],16384);\n                if(result!==true||ready.runId!==mode.executionId)throw new Error('BINDING');\n                revReady=true;revStarted=true;revEmit(mode,1,1);\n              }catch{revFail();}}return result;},\n          exit(...args){const mode=revMode();try{\n            if(mode?.active&&mode.path===2){revInit(mode);\n              if(mode.c6&&!revC6Restored)revFail();\n              revSealing=true;revSealed=true;revPublish(mode,true);}\n          }catch{revFail();}finally{return Reflect.apply(process.exit,process,args);}}\n        };\n        \"\"\"",
+      "after": "\"\"\"\n        import {validateObserved as revValidateObserved} from %s;\n        let revReady=false;\n        const revProcess={\n          on(event,listener){return Reflect.apply(process.on,process,[event,function(...args){\n            const mode=revMode(),message=args[0];\n            if(mode?.c6&&mode.path===2){\n              if(message?.kind==='launch')revC6RunDeadline=Math.min(Date.parse(message.admission?.ru\\\n        nDeadlineAt),Date.now()+message.totalRuntimeMs);\n              if(message?.kind==='execute')revC6StepMs=message.stepTimeoutMs;\n            }\n            const result=Reflect.apply(listener,this,args);\n            if(mode?.active&&mode.path===2&&args[0]?.kind==='stop'){\n              try{revValidateObserved('replay-ipc#/definitions/Stop',args[0],128);\n                if(!revReady||!revStarted)throw new Error('READY');\n                if(!mode.c6)revEmit(mode,6,1,0,0,revRestore());\n                revEmit(mode,5,1,0,4);\n              }catch{revFail();}}return result;}]);},\n          send(...args){const result=Reflect.apply(process.send,process,args),mode=revMode();\n            if(mode?.active&&mode.path===2&&args[0]?.kind==='ready'){\n              try{const ready=revValidateObserved('replay-ipc#/definitions/Ready3',args[0],16384);\n                if(result!==true||ready.runId!==mode.executionId)throw new Error('BINDING');\n                revReady=true;revStarted=true;revEmit(mode,1,1);\n              }catch{revFail();}}return result;},\n          exit(...args){const mode=revMode();try{\n            if(mode?.active&&mode.path===2){revInit(mode);\n              if(mode.c6&&!revC6Restored)revFail();\n              revSealing=true;revSealed=true;revPublish(mode,true);}\n          }catch{revFail();}finally{return Reflect.apply(process.exit,process,args);}}\n        };\n        \"\"\""
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 479179,
+      "before": "\"\"\"\n        import {createFetchHttpClient as revRealClient} from %s;\n        import {validSecretControl as revValidControl,ackRequestsCancel as revRequestsCancel} from %s;\n        const revHttp=revRealClient(),revSend=revHttp.send;\n        revHttp.send=function(...args){const mode=revMode();\n          const selected=mode?.active&&mode.path===2&&args[0]?.method==='GET'\n            &&args[0]?.url===mode.controlUrl;\n          if(selected){try{revInit(mode);}catch{revFail();}revOriginalPending++;}\n          let result;try{result=Reflect.apply(revSend,this,args);}catch(error){\n            if(selected){revOriginalPending--;revFail();revPublish(mode,revSealed);revMaybeSeal();}throw error;}\n          if(selected){result.then(outcome=>{try{\n            if(outcome.kind==='response'&&outcome.status===200&&revValidControl(outcome.body,mode.executionId)){\n              if(!revRequestsCancel(outcome.body))revEmit(mode,4,1);\n            }\n          }catch{revFail();}finally{revOriginalPending--;revPublish(mode,revSealed);revMaybeSeal();}},\n            ()=>{revOriginalPending--;revFail();revPublish(mode,revSealed);revMaybeSeal();})\n            .catch(()=>{revFail();});}\n          return result;};\n        \"\"\"",
+      "after": "\"\"\"\n        import {createFetchHttpClient as revRealClient} from %s;\n        import {validSecretControl as revValidControl,ackRequestsCancel as revRequestsCancel} from %s;\n        const revHttp=revRealClient(),revSend=revHttp.send;\n        revHttp.send=function(...args){const mode=revMode();\n          const selected=mode?.active&&mode.path===2&&args[0]?.method==='GET'\n            &&args[0]?.url===mode.controlUrl;\n          if(selected){try{revInit(mode);}catch{revFail();}revOriginalPending++;}\n          let result;try{result=Reflect.apply(revSend,this,args);}catch(error){\n            if(selected){revOriginalPending--;revFail();revPublish(mode,revSealed);revMaybeSeal();}t\\\n        hrow error;}\n          if(selected){result.then(outcome=>{try{\n            if(outcome.kind==='response'&&outcome.status===200&&revValidControl(outcome.body,mode.ex\\\n        ecutionId)){\n              if(!revRequestsCancel(outcome.body))revEmit(mode,4,1);\n            }\n          }catch{revFail();}finally{revOriginalPending--;revPublish(mode,revSealed);revMaybeSeal();}},\n            ()=>{revOriginalPending--;revFail();revPublish(mode,revSealed);revMaybeSeal();})\n            .catch(()=>{revFail();});}\n          return result;};\n        \"\"\""
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 461738,
+      "before": "\"\"\"\n        import {GuidedRuntime as RevRuntime} from %s;\n        import {GuidedOwnership as RevOwnership} from %s;\n        const revOwners=new WeakMap(),revRuntimes=new WeakMap();\n        const c5GrantFile=%s;let c5GrantOrdinal=0;\n        const c5GrantFail=()=>{void revFs.promises.open(c5GrantFile+'-failed',revFs.constants.O_WRONLY|\n          revFs.constants.O_CREAT|revFs.constants.O_APPEND|revFs.constants.O_NOFOLLOW,0o600).then(async fd=>{\n            try{await fd.writeFile('1');}finally{await fd.close();}}).catch(()=>undefined);};\n        const c5GrantRecord=(args,success,error,elapsedMs)=>{\n          try{\n            const entry=args[0],grant=args[1],now=Date.now();\n            const previous=Date.parse(entry?.grant?.owner?.leaseExpiresAt),next=Date.parse(grant?.owner?.leaseExpiresAt),\n              expiry=Date.parse(entry?.assignment?.expiresAt);\n            const valid=number=>Number.isFinite(number),delta=(left,right)=>valid(left)&&valid(right)?Math.trunc(left-right):0;\n            const code=success?0:['LEASE_LOST','CONTEXT_LOST','IDENTITY_MISMATCH','INVALID_CONTRACT','POLICY_DENIED',\n              'BUDGET_EXCEEDED','REVISION_CONFLICT','REVOKED','CLAIM_DENIED','CALLBACK_DENIED','BUSY'].indexOf(error?.message)+1;\n            const sample={ordinal:++c5GrantOrdinal,initial:args[2]===true,success,code,\n              previousValid:valid(previous),nextValid:valid(next),expiryValid:valid(expiry),\n              previousRemainingMs:delta(previous,now),nextRemainingMs:delta(next,now),\n              assignmentRemainingMs:delta(expiry,now),leaseAdvanceMs:delta(next,previous),\n              validationMicros:valid(elapsedMs)?Math.ceil(elapsedMs*1000):0};\n            void (async()=>{const fd=await revFs.promises.open(c5GrantFile,revFs.constants.O_WRONLY|\n              revFs.constants.O_CREAT|revFs.constants.O_APPEND|revFs.constants.O_NOFOLLOW,0o600);\n              try{await fd.writeFile(JSON.stringify(sample)+'\\\\n');}finally{await fd.close();}})().catch(c5GrantFail);\n          }catch{c5GrantFail();}\n        };\n        const revStart=RevRuntime.prototype.start;\n        RevRuntime.prototype.start=function(...args){const result=Reflect.apply(revStart,this,args),mode=revMode();\n          if(mode?.active&&mode.path===1){const runtime=this;\n            result.then(()=>{try{\n              if(mode.c6){revInit(mode);if(!revGroups.size&&!revC6RetryRestore)revStarted=false;}\n              if(!runtime.accepting||revStarted)throw new Error('OWNER');\n              if(mode.c6&&mode.path===1){const profile=revFs.lstatSync(runtime.browser.scratchDirectory+'/browser-profile');\n                if(profile.isSymbolicLink()||profile.dev!==revC6ProfileDev||profile.ino!==revC6ProfileIno)\n                  throw new Error('C6_CONTEXT');revC6ContextBound=true;}\n              revStarted=true;revRuntimes.set(runtime,mode);\n              if(mode.c6===3&&revProducer===1)revLossRuntime=runtime;\n              revObserveNative(runtime.browser?.observations,mode);\n              if(mode.c6&&mode.path===1){\n                const options=runtime.options,group={cap:options,methods:[]};\n                if(!options||Object.hasOwn(options,'onRawFailure')||Object.hasOwn(options,'beforeSecretFill'))\n                  throw new Error('C6_HOOK_COLLISION');revGroups.add(group);\n                const comparisons=()=>{const stat=revFs.lstatSync(c5ValuesFile);\n                  if(stat.isSymbolicLink()||!stat.isFile()||(stat.mode&0o777)!==0o600||stat.size>32768)\n                    throw new Error('C6_VALUES');const values=JSON.parse(revFs.readFileSync(c5ValuesFile,'utf8'));\n                  if(!Array.isArray(values)||values.length!==1||typeof values[0]!=='string'||values[0].length>4096)\n                    throw new Error('C6_VALUES');return values;};\n                if(mode.c6===3){\n                  const descriptor=Object.getOwnPropertyDescriptor(options,'callback'),original=options.callback;\n                  const lifetime=revLossLifetime;\n                  if(typeof original!=='function'||!descriptor||!lifetime)throw new Error('C6_CALLBACK');\n                  const wrapped=function(...args){\n                    lifetime.callbacks++;revOriginalPending++;let result;\n                    const done=()=>{lifetime.callbacks--;revOriginalPending--;revPublish(mode,revSealed);};\n                    try{result=Reflect.apply(original,this,args);}catch(error){done();throw error;}\n                    result.then(done,done).catch(()=>{revFail();});return result;\n                  };\n                  if(!Reflect.defineProperty(options,'callback',{...descriptor,value:wrapped}))throw new Error('C6_CALLBACK');\n                  group.methods.push(['callback',descriptor,wrapped]);\n                }\n                const hooks={onRawFailure(error){try{const text=error instanceof Error?error.message:'';\n                  let literal=0,encoded=0;for(const value of comparisons()){\n                    if(text.includes(value))literal++;\n                    for(const variant of [encodeURIComponent(value),Buffer.from(value).toString('base64')])\n                      if(text.includes(variant))encoded++;}\n                  revEmit(mode,11,1,literal,1,true,encoded);\n                  }catch{revFail();}}};\n                if(mode.c6===4)hooks.beforeSecretFill=value=>{\n                  if(comparisons()[0]!==value){revFail();throw new Error('C6_RELEASE_MISMATCH');}\n                  throw new Error('C6_RELEASED '+value+' '+encodeURIComponent(value)+' '\n                    +Buffer.from(value).toString('base64')+' '+ '\u754c'.repeat(3000));};\n                for(const [name,hook] of Object.entries(hooks)){const descriptor=Object.getOwnPropertyDescriptor(options,name);\n                  if(!Reflect.defineProperty(options,name,{configurable:true,writable:true,value:hook}))\n                    throw new Error('C6_HOOK');group.methods.push([name,descriptor,hook]);}\n              }\n              revEmit(mode,1,1);}catch{revFail();}},()=>{revFail();}).catch(()=>{revFail();});}\n          return result;};\n        // Selected kind3 observes actual managed promises without changing original results/errors.\n        for(const name of ['dispatch','refreshObservation']){\n          const original=RevRuntime.prototype[name];\n          RevRuntime.prototype[name]=function(...args){\n            const mode=revRuntimes.get(this),lifetime=mode?.c6===3?revLossLifetime:null;\n            if(!lifetime)return Reflect.apply(original,this,args);\n            lifetime.operations++;revOriginalPending++;let result;\n            const done=()=>{lifetime.operations--;revOriginalPending--;revPublish(mode,revSealed);};\n            try{result=Reflect.apply(original,this,args);}catch(error){done();throw error;}\n            result.then(done,()=>{revFail();done();}).catch(()=>{revFail();});return result;\n          };\n        }\n        const revCheck=RevOwnership.prototype.checkGrant;\n        RevOwnership.prototype.checkGrant=function(...args){\n          const selected=revFs.existsSync(c5ValuesFile),started=selected?performance.now():0;\n          let result;try{result=Reflect.apply(revCheck,this,args);}catch(error){\n            if(selected)c5GrantRecord(args,false,error,performance.now()-started);throw error;}\n          if(selected)c5GrantRecord(args,true,null,performance.now()-started);\n          const mode=revMode();\n          if(mode?.active&&mode.path===1){try{const entry=args[0];\n            if(entry.stopped!==false)throw new Error('OWNER');\n            if(args[2]===true)revOwners.set(entry,mode.case);\n            else if(revStarted&&revOwners.get(entry)===mode.case)revEmit(mode,4,1);\n          }catch{revFail();}}return result;};\n        const revInvalidate=RevOwnership.prototype.invalidate;\n        RevOwnership.prototype.invalidate=function(...args){const result=Reflect.apply(revInvalidate,this,args),mode=revMode();\n          if(mode?.active&&mode.path===1&&revOwners.get(args[0])===mode.case){\n            if(args[0].stopped===true){if(!mode.c6)revEmit(mode,5,1);}else revFail();}return result;};\n        const revStop=RevRuntime.prototype.stop;\n        RevRuntime.prototype.stop=function(...args){const mode=revRuntimes.get(this);\n          if(mode&&!mode.c6){const restored=revRestore();revEmit(mode,6,1,0,0,restored);}\n          const result=Reflect.apply(revStop,this,args);\n          if(mode){const reason=['REVOKED','LEASE_LOST','EXPIRED','CANCELLED','CONTEXT_LOST',...(mode.c6?['UNKNOWN_OUTCOME']:[])].indexOf(args[0])+1;\n            if(this.accepting===false&&reason>0)revEmit(mode,5,1,0,reason);else revFail();\n            const runtime=this;\n            if(mode.c6){\n              if(!revC6RetryRestore){\n                let restoring=null,closeSucceeded=false,closedRecorded=false;\n                const retry=()=>{\n                  if(restoring)return restoring;\n                  restoring=(async()=>{\n                    const deadline=performance.now()+10000;\n                    const lifetime=mode.c6===3?revLossLifetime:null;\n                    if(lifetime&&(!lifetime.cleanupAuthorized||!closeSucceeded))return false;\n                    const pending=()=>runtime.busy||revC6CdpPending||(lifetime?\n                      lifetime.operations||lifetime.callbacks||revOriginalPending:revActive.size||revC6HighPending);\n                    while(pending()&&performance.now()<deadline)\n                      await new Promise(resolve=>setTimeout(resolve,10));\n                    if(pending()||(lifetime&&runtime.active)){revLossRefuse(1);revFail();return false;}\n                    const restored=revRestore();revEmit(mode,6,1,0,0,restored);\n                    if(!restored){revFail();return false;}\n                    revC6Restored=true;\n                    if(closeSucceeded&&!closedRecorded){closedRecorded=true;revEmit(mode,9,1);}\n                    if(lifetime){lifetime.snapshot={high:revC6HighPending,active:revActive.size};lifetime.retired=true;}\n                    // Drop only after actual dispatch settlement and exact descriptor restore.\n                    revRuntimes.delete(runtime);\n                    if(revLossSelected()){const actualBusy=runtime.busy;\n                      revLossBusy=typeof actualBusy==='boolean'?Number(actualBusy):2;revLossRuntime=null;}\n                    revC6RetryRestore=null;return true;\n                  })().catch(()=>{revLossRefuse(4);revFail();return false;}).finally(()=>{restoring=null;});\n                  return restoring;\n                };\n                revC6RetryRestore=retry;\n                result.then(()=>{closeSucceeded=true;return mode.c6===3?true:retry();},()=>{\n                  // Original rejection remains on the unchanged result; restoration is distinct.\n                  revLossRefuse(5);revFail();return retry();\n                }).catch(()=>{revFail();});\n              } else {\n                result.then(()=>mode.c6===3?true:revC6RetryRestore?.(),()=>{revLossRefuse(5);revFail();return revC6RetryRestore?.();})\n                  .catch(()=>{revFail();});\n              }\n            } else {\n              result.then(()=>revEmit(mode,9,1),()=>{revFail();}).catch(()=>{revFail();});\n              revRuntimes.delete(this);\n            }}\n          return result;};\n\n        // S2 observes original operation completion only; no native/provider/model/callback call added.\n        const s2States=new Map(),s2Methods=[];\n        const s2Mode=()=>{const mode=revMode();return mode?.s2===true&&mode.active===false\n          &&Number.isInteger(mode.case)&&mode.case>0&&(mode.sessionId===null||typeof mode.sessionId==='string')?mode:null;};\n        const s2Publish=(state,closed=false,restored=false)=>{\n          try{revCheckRoot();const mode=s2Mode();if(!mode||mode.case!==state.epoch)throw new Error('S2_MODE');\n            const matches=[...s2States.values()].filter(item=>item.id===mode.sessionId).length;\n            const target=revLedgerRoot+'/s2-'+state.epoch+'-1.json',temporary=target+'.tmp';\n            if(revFs.existsSync(target)){const old=revFs.lstatSync(target);\n              if(old.isSymbolicLink()||!old.isFile()||(old.mode&0o777)!==0o600)throw new Error('S2_FILE');}\n            const bytes=JSON.stringify({case:state.epoch,producer:1,epoch:state.epoch,failed:state.failed,\n              closed,restored,stopFulfilled:state.stopFulfilled,active:state.runtime.active,busy:state.runtime.busy,\n              operations:state.operations,callbacks:state.callbacks,matches,starts:state.starts});\n            if(Buffer.byteLength(bytes)>1024)throw new Error('S2_BOUND');\n            const fd=revFs.openSync(temporary,revFs.constants.O_WRONLY|revFs.constants.O_CREAT|\n              revFs.constants.O_EXCL|revFs.constants.O_NOFOLLOW,0o600);\n            try{revFs.writeFileSync(fd,bytes);revFs.fsyncSync(fd);}finally{revFs.closeSync(fd);}\n            revCheckRoot();revFs.renameSync(temporary,target);\n          }catch{state.failed=true;revMarker();}\n        };\n        const s2Restore=state=>{\n          let restored=true;\n          for(const [object,name,descriptor,wrapped] of [[state.options,'callback',state.callbackDescriptor,state.callback],...s2Methods]){\n            if(Object.getOwnPropertyDescriptor(object,name)?.value!==wrapped\n              ||!Reflect.defineProperty(object,name,descriptor))restored=false;\n          }\n          return restored;\n        };\n        const s2Drain=state=>{\n          const mode=s2Mode();if(!mode||mode.case!==state.epoch||mode.sessionId!==state.id||state.draining||state.closed)return;\n          if(!state.stopFulfilled)return;state.draining=true;\n          void (async()=>{const deadline=performance.now()+10000;\n            while((state.operations||state.callbacks||state.runtime.busy)&&performance.now()<deadline)\n              await new Promise(resolve=>setTimeout(resolve,10));\n            if(state.failed||state.starts!==1||state.operations||state.callbacks||state.runtime.busy||state.runtime.active\n              ||s2States.size!==1||[...s2States.values()].filter(item=>item.id===mode.sessionId).length!==1)throw new Error('S2_PENDING');\n            const restored=s2Restore(state);if(!restored)throw new Error('S2_DESCRIPTOR');\n            state.closed=true;s2Publish(state,true,true);\n          })().catch(()=>{state.failed=true;s2Publish(state);}).finally(()=>{state.draining=false;});\n        };\n        const s2State=runtime=>{\n          const mode=s2Mode();if(!mode)return null;\n          let state=s2States.get(runtime);if(state){if(state.epoch!==mode.case){state.failed=true;s2Publish(state);return null;}return state;}\n          const options=runtime.options,descriptor=Object.getOwnPropertyDescriptor(options,'callback');\n          if(!descriptor||typeof descriptor.value!=='function'||descriptor.configurable!==true){revMarker();return null;}\n          state={runtime,options,id:runtime.currentIdentity.sessionId,epoch:mode.case,starts:0,operations:0,callbacks:0,\n            stopFulfilled:false,draining:false,closed:false,failed:false,callbackDescriptor:descriptor,callback:null};\n          const original=descriptor.value;\n          state.callback=function(...args){state.callbacks++;let result;\n            try{result=Reflect.apply(original,this,args);}catch(error){state.callbacks--;s2Drain(state);throw error;}\n            try{result.then(()=>{state.callbacks--;s2Drain(state);},()=>{state.callbacks--;s2Drain(state);}).catch(()=>{state.failed=true;s2Publish(state);});}\n            catch{state.failed=true;s2Publish(state);}return result;};\n          if(!Reflect.defineProperty(options,'callback',{...descriptor,value:state.callback})){revMarker();return null;}\n          s2States.set(runtime,state);return state;\n        };\n        for(const name of ['start','dispatch','refreshObservation','stop']){\n          const descriptor=Object.getOwnPropertyDescriptor(RevRuntime.prototype,name),original=descriptor?.value;\n          if(typeof original!=='function'||descriptor.configurable!==true)throw new Error('S2_DESCRIPTOR');\n          const wrapped=function(...args){const state=s2State(this);\n            if(state&&name!=='stop'){state.operations++;if(name==='start')state.starts++;}\n            let result;try{result=Reflect.apply(original,this,args);}catch(error){\n              if(state){if(name!=='stop')state.operations--;else state.failed=true;s2Drain(state);}throw error;}\n            if(state){const settled=fulfilled=>{if(name==='stop'){if(fulfilled)state.stopFulfilled=true;else{state.failed=true;s2Publish(state);}}\n                else state.operations--;s2Drain(state);};\n              try{result.then(()=>settled(true),()=>settled(false)).catch(()=>{state.failed=true;s2Publish(state);});}\n              catch{state.failed=true;s2Publish(state);}}\n            return result;};\n          if(!Reflect.defineProperty(RevRuntime.prototype,name,{...descriptor,value:wrapped}))throw new Error('S2_DESCRIPTOR');\n          s2Methods.push([RevRuntime.prototype,name,descriptor,wrapped]);\n        }\n        \"\"\"",
+      "after": "\"\"\"\n        import {GuidedRuntime as RevRuntime} from %s;\n        import {GuidedOwnership as RevOwnership} from %s;\n        const revOwners=new WeakMap(),revRuntimes=new WeakMap();\n        const c5GrantFile=%s;let c5GrantOrdinal=0;\n        const c5GrantFail=()=>{void revFs.promises.open(c5GrantFile+'-failed',revFs.constants.O_WRONLY|\n          revFs.constants.O_CREAT|revFs.constants.O_APPEND|revFs.constants.O_NOFOLLOW,0o600).then(async fd=>{\n            try{await fd.writeFile('1');}finally{await fd.close();}}).catch(()=>undefined);};\n        const c5GrantRecord=(args,success,error,elapsedMs)=>{\n          try{\n            const entry=args[0],grant=args[1],now=Date.now();\n            const previous=Date.parse(entry?.grant?.owner?.leaseExpiresAt),next=Date.parse(grant?.ow\\\n        ner?.leaseExpiresAt),\n              expiry=Date.parse(entry?.assignment?.expiresAt);\n            const valid=number=>Number.isFinite(number),delta=(left,right)=>valid(left)&&valid(right\\\n        )?Math.trunc(left-right):0;\n            const code=success?0:['LEASE_LOST','CONTEXT_LOST','IDENTITY_MISMATCH','INVALID_CONTRACT'\\\n        ,'POLICY_DENIED',\n              'BUDGET_EXCEEDED','REVISION_CONFLICT','REVOKED','CLAIM_DENIED','CALLBACK_DENIED','BUSY\\\n        '].indexOf(error?.message)+1;\n            const sample={ordinal:++c5GrantOrdinal,initial:args[2]===true,success,code,\n              previousValid:valid(previous),nextValid:valid(next),expiryValid:valid(expiry),\n              previousRemainingMs:delta(previous,now),nextRemainingMs:delta(next,now),\n              assignmentRemainingMs:delta(expiry,now),leaseAdvanceMs:delta(next,previous),\n              validationMicros:valid(elapsedMs)?Math.ceil(elapsedMs*1000):0};\n            void (async()=>{const fd=await revFs.promises.open(c5GrantFile,revFs.constants.O_WRONLY|\n              revFs.constants.O_CREAT|revFs.constants.O_APPEND|revFs.constants.O_NOFOLLOW,0o600);\n              try{await fd.writeFile(JSON.stringify(sample)+'\\\\n');}finally{await \\\n        fd.close();}})().catch(c5GrantFail);\n          }catch{c5GrantFail();}\n        };\n        const revStart=RevRuntime.prototype.start;\n        RevRuntime.prototype.start=function(...args){const \\\n        result=Reflect.apply(revStart,this,args),mode=revMode();\n          if(mode?.active&&mode.path===1){const runtime=this;\n            result.then(()=>{try{\n              if(mode.c6){revInit(mode);if(!revGroups.size&&!revC6RetryRestore)revStarted=false;}\n              if(!runtime.accepting||revStarted)throw new Error('OWNER');\n              if(mode.c6&&mode.path===1){const \\\n        profile=revFs.lstatSync(runtime.browser.scratchDirectory+'/browser-profile');\n                if(profile.isSymbolicLink()||profile.dev!==revC6ProfileDev||profile.ino!==revC6ProfileIno)\n                  throw new Error('C6_CONTEXT');revC6ContextBound=true;}\n              revStarted=true;revRuntimes.set(runtime,mode);\n              if(mode.c6===3&&revProducer===1)revLossRuntime=runtime;\n              revObserveNative(runtime.browser?.observations,mode);\n              if(mode.c6&&mode.path===1){\n                const options=runtime.options,group={cap:options,methods:[]};\n                if(!options||Object.hasOwn(options,'onRawFailure')||Object.hasOwn(options,'beforeSecretFill'))\n                  throw new Error('C6_HOOK_COLLISION');revGroups.add(group);\n                const comparisons=()=>{const stat=revFs.lstatSync(c5ValuesFile);\n                  if(stat.isSymbolicLink()||!stat.isFile()||(stat.mode&0o777)!==0o600||stat.size>32768)\n                    throw new Error('C6_VALUES');const \\\n        values=JSON.parse(revFs.readFileSync(c5ValuesFile,'utf8'));\n                  if(!Array.isArray(values)||values.length!==1||typeof \\\n        values[0]!=='string'||values[0].length>4096)\n                    throw new Error('C6_VALUES');return values;};\n                if(mode.c6===3){\n                  const descriptor=Object.getOwnPropertyDescriptor(options,'callback'),original=opti\\\n        ons.callback;\n                  const lifetime=revLossLifetime;\n                  if(typeof original!=='function'||!descriptor||!lifetime)throw new Error('C6_CALLBACK');\n                  const wrapped=function(...args){\n                    lifetime.callbacks++;revOriginalPending++;let result;\n                    const done=()=>{lifetime.callbacks--;revOriginalPending--;revPublish(mode,revSealed);};\n                    try{result=Reflect.apply(original,this,args);}catch(error){done();throw error;}\n                    result.then(done,done).catch(()=>{revFail();});return result;\n                  };\n                  if(!Reflect.defineProperty(options,'callback',{...descriptor,value:wrapped}))throw\\\n         new Error('C6_CALLBACK');\n                  group.methods.push(['callback',descriptor,wrapped]);\n                }\n                const hooks={onRawFailure(error){try{const text=error instanceof Error?error.message:'';\n                  let literal=0,encoded=0;for(const value of comparisons()){\n                    if(text.includes(value))literal++;\n                    for(const variant of [encodeURIComponent(value),Buffer.from(value).toString('base64')])\n                      if(text.includes(variant))encoded++;}\n                  revEmit(mode,11,1,literal,1,true,encoded);\n                  }catch{revFail();}}};\n                if(mode.c6===4)hooks.beforeSecretFill=value=>{\n                  if(comparisons()[0]!==value){revFail();throw new Error('C6_RELEASE_MISMATCH');}\n                  throw new Error('C6_RELEASED '+value+' '+encodeURIComponent(value)+' '\n                    +Buffer.from(value).toString('base64')+' '+ '\u754c'.repeat(3000));};\n                for(const [name,hook] of Object.entries(hooks)){const \\\n        descriptor=Object.getOwnPropertyDescriptor(options,name);\n                  if(!Reflect.defineProperty(options,name,{configurable:true,writable:true,value:hook}))\n                    throw new Error('C6_HOOK');group.methods.push([name,descriptor,hook]);}\n              }\n              revEmit(mode,1,1);}catch{revFail();}},()=>{revFail();}).catch(()=>{revFail();});}\n          return result;};\n        // Selected kind3 observes actual managed promises without changing original results/errors.\n        for(const name of ['dispatch','refreshObservation']){\n          const original=RevRuntime.prototype[name];\n          RevRuntime.prototype[name]=function(...args){\n            const mode=revRuntimes.get(this),lifetime=mode?.c6===3?revLossLifetime:null;\n            if(!lifetime)return Reflect.apply(original,this,args);\n            lifetime.operations++;revOriginalPending++;let result;\n            const done=()=>{lifetime.operations--;revOriginalPending--;revPublish(mode,revSealed);};\n            try{result=Reflect.apply(original,this,args);}catch(error){done();throw error;}\n            result.then(done,()=>{revFail();done();}).catch(()=>{revFail();});return result;\n          };\n        }\n        const revCheck=RevOwnership.prototype.checkGrant;\n        RevOwnership.prototype.checkGrant=function(...args){\n          const selected=revFs.existsSync(c5ValuesFile),started=selected?performance.now():0;\n          let result;try{result=Reflect.apply(revCheck,this,args);}catch(error){\n            if(selected)c5GrantRecord(args,false,error,performance.now()-started);throw error;}\n          if(selected)c5GrantRecord(args,true,null,performance.now()-started);\n          const mode=revMode();\n          if(mode?.active&&mode.path===1){try{const entry=args[0];\n            if(entry.stopped!==false)throw new Error('OWNER');\n            if(args[2]===true)revOwners.set(entry,mode.case);\n            else if(revStarted&&revOwners.get(entry)===mode.case)revEmit(mode,4,1);\n          }catch{revFail();}}return result;};\n        const revInvalidate=RevOwnership.prototype.invalidate;\n        RevOwnership.prototype.invalidate=function(...args){const \\\n        result=Reflect.apply(revInvalidate,this,args),mode=revMode();\n          if(mode?.active&&mode.path===1&&revOwners.get(args[0])===mode.case){\n            if(args[0].stopped===true){if(!mode.c6)revEmit(mode,5,1);}else revFail();}return result;};\n        const revStop=RevRuntime.prototype.stop;\n        RevRuntime.prototype.stop=function(...args){const mode=revRuntimes.get(this);\n          if(mode&&!mode.c6){const restored=revRestore();revEmit(mode,6,1,0,0,restored);}\n          const result=Reflect.apply(revStop,this,args);\n          if(mode){const reason=['REVOKED','LEASE_LOST','EXPIRED','CANCELLED','CONTEXT_LOST',...(mod\\\n        e.c6?['UNKNOWN_OUTCOME']:[])].indexOf(args[0])+1;\n            if(this.accepting===false&&reason>0)revEmit(mode,5,1,0,reason);else revFail();\n            const runtime=this;\n            if(mode.c6){\n              if(!revC6RetryRestore){\n                let restoring=null,closeSucceeded=false,closedRecorded=false;\n                const retry=()=>{\n                  if(restoring)return restoring;\n                  restoring=(async()=>{\n                    const deadline=performance.now()+10000;\n                    const lifetime=mode.c6===3?revLossLifetime:null;\n                    if(lifetime&&(!lifetime.cleanupAuthorized||!closeSucceeded))return false;\n                    const pending=()=>runtime.busy||revC6CdpPending||(lifetime?\n                      lifetime.operations||lifetime.callbacks||revOriginalPending:revActive.size||re\\\n        vC6HighPending);\n                    while(pending()&&performance.now()<deadline)\n                      await new Promise(resolve=>setTimeout(resolve,10));\n                    if(pending()||(lifetime&&runtime.active)){revLossRefuse(1);revFail();return false;}\n                    const restored=revRestore();revEmit(mode,6,1,0,0,restored);\n                    if(!restored){revFail();return false;}\n                    revC6Restored=true;\n                    if(closeSucceeded&&!closedRecorded){closedRecorded=true;revEmit(mode,9,1);}\n                    if(lifetime){lifetime.snapshot={high:revC6HighPending,active:revActive.size};lif\\\n        etime.retired=true;}\n                    // Drop only after actual dispatch settlement and exact descriptor restore.\n                    revRuntimes.delete(runtime);\n                    if(revLossSelected()){const actualBusy=runtime.busy;\n                      revLossBusy=typeof actualBusy==='boolean'?Number(actualBusy):2;revLossRuntime=null;}\n                    revC6RetryRestore=null;return true;\n                  })().catch(()=>{revLossRefuse(4);revFail();return false;}).finally(()=>{restoring=null;});\n                  return restoring;\n                };\n                revC6RetryRestore=retry;\n                result.then(()=>{closeSucceeded=true;return mode.c6===3?true:retry();},()=>{\n                  // Original rejection remains on the unchanged result; restoration is distinct.\n                  revLossRefuse(5);revFail();return retry();\n                }).catch(()=>{revFail();});\n              } else {\n                result.then(()=>mode.c6===3?true:revC6RetryRestore?.(),()=>{revLossRefuse(5);revFail\\\n        ();return revC6RetryRestore?.();})\n                  .catch(()=>{revFail();});\n              }\n            } else {\n              result.then(()=>revEmit(mode,9,1),()=>{revFail();}).catch(()=>{revFail();});\n              revRuntimes.delete(this);\n            }}\n          return result;};\n\n        // S2 observes original operation completion only; no native/provider/model/callback call added.\n        const s2States=new Map(),s2Methods=[];\n        const s2Mode=()=>{const mode=revMode();return mode?.s2===true&&mode.active===false\n          &&Number.isInteger(mode.case)&&mode.case>0&&(mode.sessionId===null||typeof \\\n        mode.sessionId==='string')?mode:null;};\n        const s2Publish=(state,closed=false,restored=false)=>{\n          try{revCheckRoot();const mode=s2Mode();if(!mode||mode.case!==state.epoch)throw new Error('S2_MODE');\n            const matches=[...s2States.values()].filter(item=>item.id===mode.sessionId).length;\n            const target=revLedgerRoot+'/s2-'+state.epoch+'-1.json',temporary=target+'.tmp';\n            if(revFs.existsSync(target)){const old=revFs.lstatSync(target);\n              if(old.isSymbolicLink()||!old.isFile()||(old.mode&0o777)!==0o600)throw new Error('S2_FILE');}\n            const bytes=JSON.stringify({case:state.epoch,producer:1,epoch:state.epoch,failed:state.failed,\n              closed,restored,stopFulfilled:state.stopFulfilled,active:state.runtime.active,busy:sta\\\n        te.runtime.busy,\n              operations:state.operations,callbacks:state.callbacks,matches,starts:state.starts});\n            if(Buffer.byteLength(bytes)>1024)throw new Error('S2_BOUND');\n            const fd=revFs.openSync(temporary,revFs.constants.O_WRONLY|revFs.constants.O_CREAT|\n              revFs.constants.O_EXCL|revFs.constants.O_NOFOLLOW,0o600);\n            try{revFs.writeFileSync(fd,bytes);revFs.fsyncSync(fd);}finally{revFs.closeSync(fd);}\n            revCheckRoot();revFs.renameSync(temporary,target);\n          }catch{state.failed=true;revMarker();}\n        };\n        const s2Restore=state=>{\n          let restored=true;\n          for(const [object,name,descriptor,wrapped] of \\\n        [[state.options,'callback',state.callbackDescriptor,state.callback],...s2Methods]){\n            if(Object.getOwnPropertyDescriptor(object,name)?.value!==wrapped\n              ||!Reflect.defineProperty(object,name,descriptor))restored=false;\n          }\n          return restored;\n        };\n        const s2Drain=state=>{\n          const mode=s2Mode();if(!mode||mode.case!==state.epoch||mode.sessionId!==state.id||state.dr\\\n        aining||state.closed)return;\n          if(!state.stopFulfilled)return;state.draining=true;\n          void (async()=>{const deadline=performance.now()+10000;\n            while((state.operations||state.callbacks||state.runtime.busy)&&performance.now()<deadline)\n              await new Promise(resolve=>setTimeout(resolve,10));\n            if(state.failed||state.starts!==1||state.operations||state.callbacks||state.runtime.busy\\\n        ||state.runtime.active\n              ||s2States.size!==1||[...s2States.values()].filter(item=>item.id===mode.sessionId).len\\\n        gth!==1)throw new Error('S2_PENDING');\n            const restored=s2Restore(state);if(!restored)throw new Error('S2_DESCRIPTOR');\n            state.closed=true;s2Publish(state,true,true);\n          })().catch(()=>{state.failed=true;s2Publish(state);}).finally(()=>{state.draining=false;});\n        };\n        const s2State=runtime=>{\n          const mode=s2Mode();if(!mode)return null;\n          let state=s2States.get(runtime);if(state){if(state.epoch!==mode.case){state.failed=true;s2\\\n        Publish(state);return null;}return state;}\n          const options=runtime.options,descriptor=Object.getOwnPropertyDescriptor(options,'callback');\n          if(!descriptor||typeof descriptor.value!=='function'||descriptor.configurable!==true){revM\\\n        arker();return null;}\n          state={runtime,options,id:runtime.currentIdentity.sessionId,epoch:mode.case,starts:0,opera\\\n        tions:0,callbacks:0,\n            stopFulfilled:false,draining:false,closed:false,failed:false,callbackDescriptor:descript\\\n        or,callback:null};\n          const original=descriptor.value;\n          state.callback=function(...args){state.callbacks++;let result;\n            try{result=Reflect.apply(original,this,args);}catch(error){state.callbacks--;s2Drain(sta\\\n        te);throw error;}\n            try{result.then(()=>{state.callbacks--;s2Drain(state);},()=>{state.callbacks--;s2Drain(s\\\n        tate);}).catch(()=>{state.failed=true;s2Publish(state);});}\n            catch{state.failed=true;s2Publish(state);}return result;};\n          if(!Reflect.defineProperty(options,'callback',{...descriptor,value:state.callback})){revMa\\\n        rker();return null;}\n          s2States.set(runtime,state);return state;\n        };\n        for(const name of ['start','dispatch','refreshObservation','stop']){\n          const descriptor=Object.getOwnPropertyDescriptor(RevRuntime.prototype,name),original=descr\\\n        iptor?.value;\n          if(typeof original!=='function'||descriptor.configurable!==true)throw new Error('S2_DESCRIPTOR');\n          const wrapped=function(...args){const state=s2State(this);\n            if(state&&name!=='stop'){state.operations++;if(name==='start')state.starts++;}\n            let result;try{result=Reflect.apply(original,this,args);}catch(error){\n              if(state){if(name!=='stop')state.operations--;else \\\n        state.failed=true;s2Drain(state);}throw error;}\n            if(state){const settled=fulfilled=>{if(name==='stop'){if(fulfilled)state.stopFulfilled=t\\\n        rue;else{state.failed=true;s2Publish(state);}}\n                else state.operations--;s2Drain(state);};\n              try{result.then(()=>settled(true),()=>settled(false)).catch(()=>{state.failed=true;s2P\\\n        ublish(state);});}\n              catch{state.failed=true;s2Publish(state);}}\n            return result;};\n          if(!Reflect.defineProperty(RevRuntime.prototype,name,{...descriptor,value:wrapped}))throw \\\n        new Error('S2_DESCRIPTOR');\n          s2Methods.push([RevRuntime.prototype,name,descriptor,wrapped]);\n        }\n        \"\"\""
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 449038,
+      "before": "\"\"\"\n        import * as revFs from 'node:fs';\n        const revStateFile=%s,revFailedFile=%s,revOrigin=%s,revProducer=%d,revLedgerRoot=%s;\n        let revCase=0,revSeq=0,revTail=Promise.resolve(),revStarted=false,revNativeOrdinal=0;\n        let revPending=0,revOriginalPending=0,revAcked=0,revFailed=false,revSealing=false,revSealed=false;\n        let revC6HighPending=0,revC6CdpPending=0;\n        let revLossRuntime=null,revLossBusy=2,revLossRestoreAttempt=0,revLossRestoreRefusal=0;\n        const revLossSelected=()=>revProducer===1&&revLocalMode?.c6===3;\n        const revLossRefuse=code=>{if(revLossSelected()&&revLossRestoreRefusal===0)revLossRestoreRefusal=code;};\n        let revLocalMode=null,revWatching=false,revC6Probed=0;\n        let revC6ProfileDev=0,revC6ProfileIno=0,revC6ContextBound=false;\n        let revC6RunDeadline=0,revC6StepMs=0,revC6Restored=false,revC6RetryRestore=null;\n        let revActive=new Map();const revGroups=new Set();\n        let revLossLifetime=null;\n        const revManagedLoss=()=>revLossSelected()&&revLossLifetime?.retired===true;\n        const revMode=()=>{try{return revFs.existsSync(revStateFile)?JSON.parse(revFs.readFileSync(revStateFile,'utf8')):null;}catch{return null;}};\n        const revMarker=()=>{try{const fd=revFs.openSync(revFailedFile,\n          revFs.constants.O_WRONLY|revFs.constants.O_CREAT|revFs.constants.O_APPEND|revFs.constants.O_NOFOLLOW,0o600);\n          try{revFs.writeSync(fd,'1\\\\n');}finally{revFs.closeSync(fd);}}catch{}};\n        const revCheckRoot=()=>{\n          const root=revFs.lstatSync(revLedgerRoot);\n          if(root.isSymbolicLink()||!root.isDirectory()||revFs.realpathSync(revLedgerRoot)!==revLedgerRoot\n            ||(root.mode&0o777)!==0o700||root.uid!==process.getuid())throw new Error('ROOT');\n        };\n        const revPublish=(mode,sealed)=>{\n          try{\n            revCheckRoot();\n            const target=revLedgerRoot+'/'+mode.case+'-'+revProducer+'.json',tmp=target+'.tmp';\n            if(revFs.existsSync(target)){const old=revFs.lstatSync(target);\n              if(old.isSymbolicLink()||!old.isFile()||(old.mode&0o777)!==0o600)throw new Error('FILE');}\n            if(mode.c6===3&&revProducer===1&&revLossRuntime){\n              const actualBusy=revLossRuntime.busy;revLossBusy=typeof actualBusy==='boolean'?Number(actualBusy):2;\n            }\n            // Retired raw status is the last actual observation, never fake settlement/zero.\n            const raw=revManagedLoss()?revLossLifetime.snapshot:null;\n            const body=JSON.stringify({case:mode.case,producer:revProducer,epoch:mode.epoch,role:revProducer,\n              sent:revSeq,acked:revAcked,pending:revPending+revOriginalPending+(raw?.high??revC6HighPending)+revC6CdpPending,originalPending:revOriginalPending,\n              failed:revFailed,sealed,...(mode.c6?{profileDev:revC6ProfileDev,\n                profileIno:revC6ProfileIno,contextBound:revC6ContextBound}:{}),\n              ...(mode.c6===3&&revProducer===1?{highPending:raw?.high??revC6HighPending,cdpCreationPending:revC6CdpPending,\n                nativeActive:raw?.active??revActive.size,busy:revLossBusy,restoreAttempt:revLossRestoreAttempt,\n                restoreRefusal:revLossRestoreRefusal}:{})});\n            if(Buffer.byteLength(body)>1024)throw new Error('BOUND');\n            revCheckRoot();\n            const fd=revFs.openSync(tmp,revFs.constants.O_WRONLY|revFs.constants.O_CREAT|revFs.constants.O_EXCL|\n              revFs.constants.O_NOFOLLOW,0o600);\n            try{revFs.writeFileSync(fd,body);revFs.fsyncSync(fd);}finally{revFs.closeSync(fd);}\n            revCheckRoot();\n            revFs.renameSync(tmp,target);\n          }catch{revFailed=true;revMarker();}\n        };\n        const revFail=()=>{revFailed=true;revMarker();if(revLocalMode)revPublish(revLocalMode,revSealed);};\n        const revMaybeSeal=()=>{\n          if(revManagedLoss())return; // This epoch explicitly has no normal raw SDK seal.\n          if(revSealing&&revPending===0&&revOriginalPending===0&&revC6HighPending===0&&revC6CdpPending===0){revSealed=true;revPublish(revLocalMode,true);}\n        };\n        const revInit=mode=>{\n          if(revCase===mode.case)return;\n          if(revLocalMode&&!revSealed&&!revManagedLoss()){revFail();return;}\n          // The old map remains captured by its original pending callbacks; it is not erased.\n          if(revManagedLoss())revActive=new Map();\n          revCase=mode.case;revSeq=0;revPending=0;revAcked=0;revOriginalPending=0;\n          if(mode.c6){revNativeOrdinal=0;revC6Probed=0;revC6Restored=false;}\n          if(mode.c6===3&&revProducer===1){revLossRuntime=null;revLossBusy=2;revLossRestoreAttempt=0;revLossRestoreRefusal=0;\n            revLossLifetime={mode,active:revActive,high:0,operations:0,callbacks:0,cleanupAuthorized:false,retired:false,snapshot:null};}\n          else revLossLifetime=null;\n          if(mode.c6>=1&&mode.c6<=3){revStarted=false;revC6HighPending=0;revC6CdpPending=0;}\n          revTail=Promise.resolve();revLocalMode=mode;revSealing=false;revSealed=false;\n          if((revProducer!==3||mode.c6)&&!revWatching){\n            revCheckRoot();\n            const command=revLedgerRoot+'/'+mode.case+'-'+revProducer+'-seal.json';revWatching=true;\n            revFs.watchFile(command,{interval:25,persistent:false},()=>{\n              try{revCheckRoot();if(!revFs.existsSync(command))return;\n                const stat=revFs.lstatSync(command);\n                if(stat.isSymbolicLink()||!stat.isFile()||stat.size>1024||(stat.mode&0o777)!==0o600)\n                  throw new Error('COMMAND');\n                revCheckRoot();\n                const seal=JSON.parse(revFs.readFileSync(command,'utf8'));\n                if(mode.c6&&Object.keys(seal).sort().join(',')==='case,epoch,probe,producer'\n                  &&seal.case===mode.case&&seal.epoch===mode.epoch&&seal.producer===revProducer&&Number.isInteger(seal.probe)&&seal.probe>=1&&seal.probe<=2){\n                  if(seal.probe<=revC6Probed)return;\n                  if(seal.probe!==revC6Probed+1)throw new Error('C6_PROBE_SEQUENCE');revC6Probed=seal.probe;\n                  const pending=[...revActive].filter(([,operation])=>operation===1);\n                  const margin=mode.path===2?Math.floor(revC6RunDeadline-Date.now()-revC6StepMs):0;\n                  revEmit(mode,10,pending.length===1?pending[0][0]:0,1,0,\n                    pending.length===1&&revActive.size===1,Math.max(0,margin));return;\n                }\n                if(Object.keys(seal).sort().join(',')!=='case,epoch,producer,seal'||seal.case!==mode.case\n                  ||seal.epoch!==mode.epoch||seal.producer!==revProducer||seal.seal!==true)throw new Error('EPOCH');\n                if(mode.c6===3&&revProducer===1&&revLossLifetime)revLossLifetime.cleanupAuthorized=true;\n                if(mode.c6&&revC6RetryRestore){\n                  // Existing teardown seal retries the retained selected restoration task.\n                  // No action/stop/native authority is created by this observation command.\n                  const retry=revC6RetryRestore;\n                  retry().then(restored=>{if(!restored){revFail();return;}\n                    revSealing=true;revFs.unwatchFile(command);revWatching=false;\n                    // Managed output closure is not normal raw-SDK settlement/sealing.\n                    if(revManagedLoss())revPublish(mode,false);else revMaybeSeal();\n                  },()=>{revFail();}).catch(()=>{revFail();});return;\n                }\n                revSealing=true;revFs.unwatchFile(command);revWatching=false;revMaybeSeal();\n              }catch{revFail();revSealing=true;revFs.unwatchFile(command);revWatching=false;revMaybeSeal();}\n            });\n          }\n        };\n        const revEmit=(mode,event,ordinal=0,operation=0,reason=0,ok=true,deltaMicros=0)=>{\n          if(!mode?.active)return;\n          try{revInit(mode);}catch{revFail();return;}\n          if(revSealing||revSealed){revFail();return;}\n          revPending++;\n          const body={case:mode.case,producer:revProducer,seq:++revSeq,event,ordinal,operation,reason,ok,deltaMicros};\n          const acknowledgedAt=performance.now();\n          revTail=revTail.then(async()=>{\n            const response=await fetch(revOrigin+'/p3/revocation-observer',{method:'POST',\n              headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(1000)});\n            const ack=await response.json();\n            if(response.status!==200||Object.keys(ack).sort().join(',')!=='accepted,flipped,seq'\n              ||ack.accepted!==true||ack.seq!==body.seq||typeof ack.flipped!=='boolean')throw new Error('OBSERVER');\n            revAcked++;\n            if(event===4&&ack.flipped)revEmit(mode,8,0,0,0,true,Math.ceil((performance.now()-acknowledgedAt)*1000));\n          }).catch(()=>{revFail();}).finally(()=>{\n            revPending--;revPublish(mode,revSealed);revMaybeSeal();\n          });\n        };\n        const revRestore=()=>{\n          if(revLossSelected())revLossRestoreAttempt++;\n          let restored=true;\n          for(const group of [...revGroups]){\n            for(const [name,descriptor,wrapped] of [...group.methods]){\n              const current=Object.getOwnPropertyDescriptor(group.cap,name);\n              let success=false;\n              try{if(current?.value===wrapped){success=descriptor?\n                Reflect.defineProperty(group.cap,name,descriptor):Reflect.deleteProperty(group.cap,name);\n                if(!success)revLossRefuse(3);\n              }else revLossRefuse(2);}catch{revLossRefuse(3);}\n              if(success)group.methods=group.methods.filter(item=>item[0]!==name);else{restored=false;revFail();}\n            }\n            if(!group.methods.length){group.cap=null;revGroups.delete(group);}\n          }\n          return restored;\n        };\n        const revObserveNative=(cap,mode)=>{\n          if(!mode?.active)return;\n          const cdpSelected=mode.c6>=1&&mode.c6<=3;\n          if(!cap||(!cdpSelected&&revGroups.size)||[...revGroups].some(group=>group.cap===cap)\n            ||typeof cap.fillPassword!=='function'||typeof cap.invoke!=='function'){revFail();return;}\n          const group={cap,methods:[]};revGroups.add(group);\n          for(const name of ['fillPassword','invoke']){\n            const descriptor=Object.getOwnPropertyDescriptor(cap,name),original=cap[name];\n            const wrapped=function(...args){\n              if(cdpSelected&&name==='fillPassword'){\n                revC6HighPending++;let result;const lifetime=revLossSelected()?revLossLifetime:null;\n                if(lifetime)lifetime.high++;\n                const settled=()=>{\n                  if(lifetime)lifetime.high--;\n                  if(lifetime&&lifetime!==revLossLifetime)return;\n                  revC6HighPending--;\n                  if(lifetime?.retired)return; // Value-free observer retired, actual promise unchanged.\n                  revPublish(mode,revSealed);revMaybeSeal();};\n                try{result=Reflect.apply(original,this,args);}catch(error){settled();throw error;}\n                try{result.then(settled,settled).catch(()=>{revFail();});}catch{revFail();}\n                return result;\n              }\n              const operation=name==='fillPassword'?1:args[0]?.operation?.kind==='click'?2:3;\n              const ordinal=++revNativeOrdinal;revActive.set(ordinal,operation);revEmit(mode,2,ordinal,operation);\n              const settled=ok=>{revActive.delete(ordinal);revEmit(mode,3,ordinal,operation,0,ok);};\n              let result;try{result=Reflect.apply(original,this,args);}catch(error){settled(false);throw error;}\n              try{result.then(()=>settled(true),()=>settled(false)).catch(()=>{revFail();});}catch{revFail();}\n              return result;\n            };\n            try{if(!Reflect.defineProperty(cap,name,{...(descriptor??{configurable:true,writable:true,enumerable:true}),value:wrapped}))throw new Error('DESCRIPTOR');\n              group.methods.push([name,descriptor,wrapped]);}catch{revFail();}\n          }\n        };\n        \"\"\"",
+      "after": "\"\"\"\n        import * as revFs from 'node:fs';\n        const revStateFile=%s,revFailedFile=%s,revOrigin=%s,revProducer=%d,revLedgerRoot=%s;\n        let revCase=0,revSeq=0,revTail=Promise.resolve(),revStarted=false,revNativeOrdinal=0;\n        let revPending=0,revOriginalPending=0,revAcked=0,revFailed=false,revSealing=false,revSealed=false;\n        let revC6HighPending=0,revC6CdpPending=0;\n        let revLossRuntime=null,revLossBusy=2,revLossRestoreAttempt=0,revLossRestoreRefusal=0;\n        const revLossSelected=()=>revProducer===1&&revLocalMode?.c6===3;\n        const revLossRefuse=code=>{if(revLossSelected()&&revLossRestoreRefusal===0)revLossRestoreRef\\\n        usal=code;};\n        let revLocalMode=null,revWatching=false,revC6Probed=0;\n        let revC6ProfileDev=0,revC6ProfileIno=0,revC6ContextBound=false;\n        let revC6RunDeadline=0,revC6StepMs=0,revC6Restored=false,revC6RetryRestore=null;\n        let revActive=new Map();const revGroups=new Set();\n        let revLossLifetime=null;\n        const revManagedLoss=()=>revLossSelected()&&revLossLifetime?.retired===true;\n        const revMode=()=>{try{return revFs.existsSync(revStateFile)?JSON.parse(revFs.readFileSync(r\\\n        evStateFile,'utf8')):null;}catch{return null;}};\n        const revMarker=()=>{try{const fd=revFs.openSync(revFailedFile,\n          revFs.constants.O_WRONLY|revFs.constants.O_CREAT|revFs.constants.O_APPEND|revFs.constants.\\\n        O_NOFOLLOW,0o600);\n          try{revFs.writeSync(fd,'1\\\\n');}finally{revFs.closeSync(fd);}}catch{}};\n        const revCheckRoot=()=>{\n          const root=revFs.lstatSync(revLedgerRoot);\n          if(root.isSymbolicLink()||!root.isDirectory()||revFs.realpathSync(revLedgerRoot)!==revLedgerRoot\n            ||(root.mode&0o777)!==0o700||root.uid!==process.getuid())throw new Error('ROOT');\n        };\n        const revPublish=(mode,sealed)=>{\n          try{\n            revCheckRoot();\n            const target=revLedgerRoot+'/'+mode.case+'-'+revProducer+'.json',tmp=target+'.tmp';\n            if(revFs.existsSync(target)){const old=revFs.lstatSync(target);\n              if(old.isSymbolicLink()||!old.isFile()||(old.mode&0o777)!==0o600)throw new Error('FILE');}\n            if(mode.c6===3&&revProducer===1&&revLossRuntime){\n              const actualBusy=revLossRuntime.busy;revLossBusy=typeof \\\n        actualBusy==='boolean'?Number(actualBusy):2;\n            }\n            // Retired raw status is the last actual observation, never fake settlement/zero.\n            const raw=revManagedLoss()?revLossLifetime.snapshot:null;\n            const body=JSON.stringify({case:mode.case,producer:revProducer,epoch:mode.epoch,role:revProducer,\n              sent:revSeq,acked:revAcked,pending:revPending+revOriginalPending+(raw?.high??revC6High\\\n        Pending)+revC6CdpPending,originalPending:revOriginalPending,\n              failed:revFailed,sealed,...(mode.c6?{profileDev:revC6ProfileDev,\n                profileIno:revC6ProfileIno,contextBound:revC6ContextBound}:{}),\n              ...(mode.c6===3&&revProducer===1?{highPending:raw?.high??revC6HighPending,cdpCreationP\\\n        ending:revC6CdpPending,\n                nativeActive:raw?.active??revActive.size,busy:revLossBusy,restoreAttempt:revLossRest\\\n        oreAttempt,\n                restoreRefusal:revLossRestoreRefusal}:{})});\n            if(Buffer.byteLength(body)>1024)throw new Error('BOUND');\n            revCheckRoot();\n            const fd=revFs.openSync(tmp,revFs.constants.O_WRONLY|revFs.constants.O_CREAT|revFs.const\\\n        ants.O_EXCL|\n              revFs.constants.O_NOFOLLOW,0o600);\n            try{revFs.writeFileSync(fd,body);revFs.fsyncSync(fd);}finally{revFs.closeSync(fd);}\n            revCheckRoot();\n            revFs.renameSync(tmp,target);\n          }catch{revFailed=true;revMarker();}\n        };\n        const revFail=()=>{revFailed=true;revMarker();if(revLocalMode)revPublish(revLocalMode,revSealed);};\n        const revMaybeSeal=()=>{\n          if(revManagedLoss())return; // This epoch explicitly has no normal raw SDK seal.\n          if(revSealing&&revPending===0&&revOriginalPending===0&&revC6HighPending===0&&revC6CdpPendi\\\n        ng===0){revSealed=true;revPublish(revLocalMode,true);}\n        };\n        const revInit=mode=>{\n          if(revCase===mode.case)return;\n          if(revLocalMode&&!revSealed&&!revManagedLoss()){revFail();return;}\n          // The old map remains captured by its original pending callbacks; it is not erased.\n          if(revManagedLoss())revActive=new Map();\n          revCase=mode.case;revSeq=0;revPending=0;revAcked=0;revOriginalPending=0;\n          if(mode.c6){revNativeOrdinal=0;revC6Probed=0;revC6Restored=false;}\n          if(mode.c6===3&&revProducer===1){revLossRuntime=null;revLossBusy=2;revLossRestoreAttempt=0\\\n        ;revLossRestoreRefusal=0;\n            revLossLifetime={mode,active:revActive,high:0,operations:0,callbacks:0,cleanupAuthorized\\\n        :false,retired:false,snapshot:null};}\n          else revLossLifetime=null;\n          if(mode.c6>=1&&mode.c6<=3){revStarted=false;revC6HighPending=0;revC6CdpPending=0;}\n          revTail=Promise.resolve();revLocalMode=mode;revSealing=false;revSealed=false;\n          if((revProducer!==3||mode.c6)&&!revWatching){\n            revCheckRoot();\n            const command=revLedgerRoot+'/'+mode.case+'-'+revProducer+'-seal.json';revWatching=true;\n            revFs.watchFile(command,{interval:25,persistent:false},()=>{\n              try{revCheckRoot();if(!revFs.existsSync(command))return;\n                const stat=revFs.lstatSync(command);\n                if(stat.isSymbolicLink()||!stat.isFile()||stat.size>1024||(stat.mode&0o777)!==0o600)\n                  throw new Error('COMMAND');\n                revCheckRoot();\n                const seal=JSON.parse(revFs.readFileSync(command,'utf8'));\n                if(mode.c6&&Object.keys(seal).sort().join(',')==='case,epoch,probe,producer'\n                  &&seal.case===mode.case&&seal.epoch===mode.epoch&&seal.producer===revProducer&&Num\\\n        ber.isInteger(seal.probe)&&seal.probe>=1&&seal.probe<=2){\n                  if(seal.probe<=revC6Probed)return;\n                  if(seal.probe!==revC6Probed+1)throw new Error('C6_PROBE_SEQUENCE');revC6Probed=seal.probe;\n                  const pending=[...revActive].filter(([,operation])=>operation===1);\n                  const margin=mode.path===2?Math.floor(revC6RunDeadline-Date.now()-revC6StepMs):0;\n                  revEmit(mode,10,pending.length===1?pending[0][0]:0,1,0,\n                    pending.length===1&&revActive.size===1,Math.max(0,margin));return;\n                }\n                if(Object.keys(seal).sort().join(',')!=='case,epoch,producer,seal'||seal.case!==mode.case\n                  ||seal.epoch!==mode.epoch||seal.producer!==revProducer||seal.seal!==true)throw \\\n        new Error('EPOCH');\n                if(mode.c6===3&&revProducer===1&&revLossLifetime)revLossLifetime.cleanupAuthorized=true;\n                if(mode.c6&&revC6RetryRestore){\n                  // Existing teardown seal retries the retained selected restoration task.\n                  // No action/stop/native authority is created by this observation command.\n                  const retry=revC6RetryRestore;\n                  retry().then(restored=>{if(!restored){revFail();return;}\n                    revSealing=true;revFs.unwatchFile(command);revWatching=false;\n                    // Managed output closure is not normal raw-SDK settlement/sealing.\n                    if(revManagedLoss())revPublish(mode,false);else revMaybeSeal();\n                  },()=>{revFail();}).catch(()=>{revFail();});return;\n                }\n                revSealing=true;revFs.unwatchFile(command);revWatching=false;revMaybeSeal();\n              }catch{revFail();revSealing=true;revFs.unwatchFile(command);revWatching=false;revMaybeSeal();}\n            });\n          }\n        };\n        const revEmit=(mode,event,ordinal=0,operation=0,reason=0,ok=true,deltaMicros=0)=>{\n          if(!mode?.active)return;\n          try{revInit(mode);}catch{revFail();return;}\n          if(revSealing||revSealed){revFail();return;}\n          revPending++;\n          const body={case:mode.case,producer:revProducer,seq:++revSeq,event,ordinal,operation,reaso\\\n        n,ok,deltaMicros};\n          const acknowledgedAt=performance.now();\n          revTail=revTail.then(async()=>{\n            const response=await fetch(revOrigin+'/p3/revocation-observer',{method:'POST',\n              headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSign\\\n        al.timeout(1000)});\n            const ack=await response.json();\n            if(response.status!==200||Object.keys(ack).sort().join(',')!=='accepted,flipped,seq'\n              ||ack.accepted!==true||ack.seq!==body.seq||typeof ack.flipped!=='boolean')throw new \\\n        Error('OBSERVER');\n            revAcked++;\n            if(event===4&&ack.flipped)revEmit(mode,8,0,0,0,true,Math.ceil((performance.now()-acknowl\\\n        edgedAt)*1000));\n          }).catch(()=>{revFail();}).finally(()=>{\n            revPending--;revPublish(mode,revSealed);revMaybeSeal();\n          });\n        };\n        const revRestore=()=>{\n          if(revLossSelected())revLossRestoreAttempt++;\n          let restored=true;\n          for(const group of [...revGroups]){\n            for(const [name,descriptor,wrapped] of [...group.methods]){\n              const current=Object.getOwnPropertyDescriptor(group.cap,name);\n              let success=false;\n              try{if(current?.value===wrapped){success=descriptor?\n                Reflect.defineProperty(group.cap,name,descriptor):Reflect.deleteProperty(group.cap,name);\n                if(!success)revLossRefuse(3);\n              }else revLossRefuse(2);}catch{revLossRefuse(3);}\n              if(success)group.methods=group.methods.filter(item=>item[0]!==name);else{restored=fals\\\n        e;revFail();}\n            }\n            if(!group.methods.length){group.cap=null;revGroups.delete(group);}\n          }\n          return restored;\n        };\n        const revObserveNative=(cap,mode)=>{\n          if(!mode?.active)return;\n          const cdpSelected=mode.c6>=1&&mode.c6<=3;\n          if(!cap||(!cdpSelected&&revGroups.size)||[...revGroups].some(group=>group.cap===cap)\n            ||typeof cap.fillPassword!=='function'||typeof cap.invoke!=='function'){revFail();return;}\n          const group={cap,methods:[]};revGroups.add(group);\n          for(const name of ['fillPassword','invoke']){\n            const descriptor=Object.getOwnPropertyDescriptor(cap,name),original=cap[name];\n            const wrapped=function(...args){\n              if(cdpSelected&&name==='fillPassword'){\n                revC6HighPending++;let result;const lifetime=revLossSelected()?revLossLifetime:null;\n                if(lifetime)lifetime.high++;\n                const settled=()=>{\n                  if(lifetime)lifetime.high--;\n                  if(lifetime&&lifetime!==revLossLifetime)return;\n                  revC6HighPending--;\n                  if(lifetime?.retired)return; // Value-free observer retired, actual promise unchanged.\n                  revPublish(mode,revSealed);revMaybeSeal();};\n                try{result=Reflect.apply(original,this,args);}catch(error){settled();throw error;}\n                try{result.then(settled,settled).catch(()=>{revFail();});}catch{revFail();}\n                return result;\n              }\n              const operation=name==='fillPassword'?1:args[0]?.operation?.kind==='click'?2:3;\n              const ordinal=++revNativeOrdinal;revActive.set(ordinal,operation);revEmit(mode,2,ordin\\\n        al,operation);\n              const settled=ok=>{revActive.delete(ordinal);revEmit(mode,3,ordinal,operation,0,ok);};\n              let result;try{result=Reflect.apply(original,this,args);}catch(error){settled(false);t\\\n        hrow error;}\n              try{result.then(()=>settled(true),()=>settled(false)).catch(()=>{revFail();});}catch{revFail();}\n              return result;\n            };\n            try{if(!Reflect.defineProperty(cap,name,{...(descriptor??{configurable:true,writable:tru\\\n        e,enumerable:true}),value:wrapped}))throw new Error('DESCRIPTOR');\n              group.methods.push([name,descriptor,wrapped]);}catch{revFail();}\n          }\n        };\n        \"\"\""
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 445476,
+      "before": "\"SELECT principal_id,csi_id,environment,test_id,secret_id FROM studio_secret_use_audit WHERE execution_id=?\"",
+      "after": "(\"SELECT principal_id,csi_id,environment,test_id,secret_id FROM \"\n                  + \"studio_secret_use_audit WHERE execution_id=?\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 445200,
+      "before": "\"SELECT principal_id,csi_id,environment,test_id,secret_id FROM studio_secret_use_audit WHERE session_id=?\"",
+      "after": "(\"SELECT principal_id,csi_id,environment,test_id,secret_id FROM \"\n                  + \"studio_secret_use_audit WHERE session_id=?\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 435384,
+      "before": "\" VALUES (?,'P3 controlled join',?,?,'chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,'fixture@example.invalid',now(),now())\"",
+      "after": "(\" VALUES (?,'P3 controlled \"\n                + \"join',?,?,'chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,\"\n                + \"'fixture@example.invalid',now(),now())\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 435226,
+      "before": "\"INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,authoring_revision_inputs,created_by,created_at,updated_at)\"",
+      "after": "(\"INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,\"\n            + \"variables,authoring,authoring_revision_inputs,created_by,\"\n            + \"created_at,updated_at)\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 435073,
+      "before": "\"[{\\\"name\\\":\\\"USER\\\",\\\"kind\\\":\\\"plain\\\",\\\"value\\\":\\\"p3-user\\\"},{\\\"name\\\":\\\"PASS\\\",\\\"kind\\\":\\\"secretRef\\\"}]\"",
+      "after": "(\"[{\\\"name\\\":\\\"USER\\\",\\\"kind\\\":\\\"plain\\\",\\\"value\\\":\\\"p3-user\\\"},\"\n                + \"{\\\"name\\\":\\\"PASS\\\",\\\"kind\\\":\\\"secretRef\\\"}]\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 292377,
+      "before": "\"SELECT document::text FROM studio_guided_consumer_edges WHERE session_id=? AND consumer_admission_id=?\"",
+      "after": "(\"SELECT document::text FROM studio_guided_consumer_edges WHERE \"\n                        + \"session_id=? AND consumer_admission_id=?\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 289247,
+      "before": "\"SELECT document::text FROM studio_guided_producers WHERE session_id=? AND binding_id=? AND admission_id=?\"",
+      "after": "(\"SELECT document::text FROM studio_guided_producers WHERE \"\n                        + \"session_id=? AND binding_id=? AND admission_id=?\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 287620,
+      "before": "\"SELECT document::text FROM studio_guided_allocations WHERE session_id=? AND binding_id=? AND need_id='c14-field'\"",
+      "after": "(\"SELECT document::text FROM studio_guided_allocations WHERE \"\n                        + \"session_id=? AND binding_id=? AND need_id='c14-field'\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 282962,
+      "before": "\"SELECT document::text AS ledger,proposal::text AS proposal FROM studio_guided_actions WHERE session_id=?\"",
+      "after": "(\"SELECT document::text AS ledger,proposal::text AS proposal FROM \"\n                      + \"studio_guided_actions WHERE session_id=?\")"
+    }
+  ],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java": [
+    {
+      "kind": "literal-wrap",
+      "position": 56409,
+      "before": "\"INSERT INTO studio_dispatch_ledger(execution_id,execution_accepted_at,test_id,csi_id,principal,pending_deadline_at) \"",
+      "after": "(\"INSERT INTO studio_dispatch_ledger(execution_id,\"\n            + \"execution_accepted_at,test_id,csi_id,principal,\"\n            + \"pending_deadline_at) \")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 55892,
+      "before": "\"INSERT INTO ui_test_executions(id,ui_test_id,status,started_at,revision_id,csi_id,principal,environment,observed_revision_binding,step_results) \"",
+      "after": "(\"INSERT INTO ui_test_executions(id,ui_test_id,status,started_at,\"\n            + \"revision_id,csi_id,principal,environment,\"\n            + \"observed_revision_binding,step_results) \")"
+    }
+  ],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": [
+    {
+      "kind": "literal-wrap",
+      "position": 44525,
+      "before": "\" OR EXISTS(SELECT 1 FROM studio_guided_assignments a WHERE a.session_id=s.session_id)) AS has_context \"",
+      "after": "(\" OR EXISTS(SELECT 1 FROM studio_guided_assignments a WHERE \"\n                              + \"a.session_id=s.session_id)) AS has_context \")"
+    }
+  ],
+  "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java": [
+    {
+      "kind": "literal-wrap",
+      "position": 25493,
+      "before": "\" VALUES (?,'Model default accounting','CSI-123','fixture','chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,'budget@example.invalid',now(),now())\"",
+      "after": "(\" VALUES (?,'Model default \"\n                + \"accounting','CSI-123','fixture','chromium',?::jsonb,'[]'::jsonb,\"\n                + \"?::jsonb,?::jsonb,'budget@example.invalid',now(),now())\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 25335,
+      "before": "\"INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,authoring_revision_inputs,created_by,created_at,updated_at)\"",
+      "after": "(\"INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,\"\n            + \"variables,authoring,authoring_revision_inputs,created_by,\"\n            + \"created_at,updated_at)\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 24955,
+      "before": "\"INSERT INTO users(id,sso_id,name,email,created_at) VALUES (?,'budget-user','Budget','budget@example.invalid',now())\"",
+      "after": "(\"INSERT INTO users(id,sso_id,name,email,created_at) VALUES \"\n            + \"(?,'budget-user','Budget','budget@example.invalid',now())\")"
+    },
+    {
+      "kind": "literal-wrap",
+      "position": 24594,
+      "before": "\"\\\"referencePolicy\\\":4,\\\"lowering\\\":2,\\\"artifact\\\":3,\\\"language\\\":\\\"observed-3\\\",\\\"executor\\\":\\\"observed-4\\\"}\"",
+      "after": "(\"\\\"referencePolicy\\\":4,\\\"lowering\\\":2,\\\"artifact\\\":3,\"\n                + \"\\\"language\\\":\\\"observed-3\\\",\\\"executor\\\":\\\"observed-4\\\"}\")"
+    }
+  ],
+  "backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java": [
+    {
+      "kind": "literal-wrap",
+      "position": 29932,
+      "before": "\"l.state,l.last_runner_sequence AS runner_sequence FROM ui_test_executions e JOIN studio_dispatch_ledger l ON l.execution_id=e.id \"",
+      "after": "(\"l.state,l.last_runner_sequence AS runner_sequence FROM \"\n                + \"ui_test_executions e JOIN studio_dispatch_ledger l ON \"\n                + \"l.execution_id=e.id \")"
+    }
+  ]
+}

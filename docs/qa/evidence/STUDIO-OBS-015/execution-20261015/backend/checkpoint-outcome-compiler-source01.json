@@ -1,0 +1,1002 @@
+{
+  "artifact": "STUDIO-OBS-015 phase1 outcome-only compiler/regression source checkpoint01",
+  "createdAt": "2026-10-15T12:02:24.495553+00:00",
+  "owner": "backend015_resume / Dex",
+  "phase": "IMMEDIATE_POST_OUTCOME_BEFORE_SEPARATELY_RELEASED_EPOCH_ALIGNMENT",
+  "sourceHold": false,
+  "continuation": "Root explicitly released separate current3epoch alignment in place; exact immediate source archived before it. Phase1 checkpoint is not final HOLD.",
+  "commandsLive": false,
+  "formalQAVerdict": null,
+  "lifecycleTransition": null,
+  "sourceStatus": "SOURCE_ONLY_UNCOMPILED_UNEXECUTED; no source-only pass",
+  "files": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "before": "c83be072b5b1ef2044be4eb5f81d34ba404d62de3781836d144ec058296943f3",
+      "after": "bdce4f2c6f7d172a28f6aac66e932724ea6f730b987a65591f3d7d198a2b749c"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java",
+      "before": "dd3af19d0a35461e5844786e9b1433bcdabafab8815720b70367a9e6cbb01b0c",
+      "after": "a3d47435a07ad3f9e63db80b5a80bee877cf3e6c03d274b60fa82fff4dd638d9"
+    }
+  ],
+  "immediatePostOutcomeSourceArchive": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-epoch-alignment-source01/source-before/GuidedContracts.java",
+      "sha256": "bdce4f2c6f7d172a28f6aac66e932724ea6f730b987a65591f3d7d198a2b749c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/current-epoch-alignment-source01/source-before/GuidedWireContractTest.java",
+      "sha256": "a3d47435a07ad3f9e63db80b5a80bee877cf3e6c03d274b60fa82fff4dd638d9"
+    }
+  ],
+  "existing4epochConstants": {
+    "SESSION_SCHEMA_EPOCH": {
+      "before": "e9f57e1e8ce11fdf76901a21047106655cd3342a435be61c9e1e26d1ce7e5b17",
+      "after": "e9f57e1e8ce11fdf76901a21047106655cd3342a435be61c9e1e26d1ce7e5b17"
+    },
+    "REPLAY_VALIDATION_SCHEMA_EPOCH": {
+      "before": "6ed940df7b77a0524bae9bb4e56550a82a16bc9f44f175f649b579a9ba4fb32d",
+      "after": "6ed940df7b77a0524bae9bb4e56550a82a16bc9f44f175f649b579a9ba4fb32d"
+    },
+    "LEDGER_SCHEMA_EPOCH": {
+      "before": "2f365ba04a6254df0fb6c3930b01bdcecea5a494415f25cae4653e1aa870d6cb",
+      "after": "2f365ba04a6254df0fb6c3930b01bdcecea5a494415f25cae4653e1aa870d6cb"
+    },
+    "OBSERVATION_SCHEMA_EPOCH": {
+      "before": "9be57abe1679bafcf7dbbcf3452a515dab7032c999ad630a241c7cbb856ac2d2",
+      "after": "9be57abe1679bafcf7dbbcf3452a515dab7032c999ad630a241c7cbb856ac2d2"
+    }
+  },
+  "existingFiniteCounts": "Original session14/ledger20/ValidationBasis33 and all other existing counts unchanged in this phase. Actual06 firstsession14expectedactual0 failure not hidden.",
+  "preservation": {
+    "testBaselineWithNativeControlSha256": "dd3af19d0a35461e5844786e9b1433bcdabafab8815720b70367a9e6cbb01b0c",
+    "removeNewBlocksAndOnly2OptionalAbsenceAssertionsRecoversBaselineBytes": true,
+    "original7methodsAnd100lineNativeControlUnchanged": true,
+    "existing4compileAlgorithmBodiesPreserved": "Original compileProperties/compileBasis/compileArray/withObservationNodes body text unchanged; legacy4arg constructor defaults new alternatives to empty. Outcome insertion precedes existing unchanged epoch selection."
+  },
+  "mode": {
+    "normalizedName": "v3/bridge#/definitions/outcome",
+    "epoch": "95f7878408ce7d089646898aef3d528bc2e3c62d7f2bf8f228134556dfe451e8",
+    "structure": "root oneOf only, exactly2complete objectbranches, native OneOfValidator compiled structure present",
+    "eligibility": [
+      "V7 specification +standard original meta schema",
+      "outcome-only failFastfalse",
+      "typeLoosefalse",
+      "all3defaultapplicationflags false",
+      "no custom execution context",
+      "no keyword/property/array item walklisteners",
+      "noOpenAPIdiscriminator",
+      "exactname/hash/root/branches/config identity"
+    ],
+    "aggregation": "Optional immutable List<JsonSchema>; evaluate both complete public native validate(JsonNode) calls and accept matches==1. No state/kind/diagnostic selector, context reuse, stripped leaf or exception-as-success.",
+    "fallback": "Complete original JsonSchema instance with optional alternatives empty for wrong name/hash/root/dialect/config/compiled structure or compilation unavailable. Config never mutated. Old4modes explicitly retain empty alternatives."
+  },
+  "caseMapping": [
+    {
+      "id": "MECH-01",
+      "kind": "actual-engine-prerequisite",
+      "javaMethod": "originalNativeOutcomeUnionRejectsLegalOrdinaryWhileFreshFullBranchAccepts",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.originalNativeOutcomeUnionRejectsLegalOrdinaryWhileFreshFullBranchAccepts",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": false,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "ORD-BLANK",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "ORD-OBS-READ",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "ORD-OBS-NULL",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "ORD-FAIL-DIAG",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "ORD-UNKNOWN-DIAG",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "PRE-NULL",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "ADMITTED-LEDGER",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "DIAG-success",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "DIAG-pending",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "DIAG-dispatch-zero",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "DIAG-other-state",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "DIAG-TYPE-nonstring",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "DIAG-TYPE-null",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "DIAG-TYPE-empty",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "DIAG-TYPE-oversize",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "DIAG-EXACT2048",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-blank-url",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-blank-origin",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-blank-generation",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-obs-kind",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-obs-origin",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-hash-length",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-hash-charset",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-negative-owner",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-negative-context",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-dispatch-over",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-attempt-over",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-old-version",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-tuple-extra",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-invalid-time",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-numeric-time",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "LEAF-offset-time",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "TIME-NANO",
+      "kind": "positive",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CLOSED-ORD-BLANK:root",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CLOSED-ORD-BLANK:/ledger",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CLOSED-ORD-BLANK:/ledger/admission",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CLOSED-ORD-BLANK:/ledger/executionEvidence",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CLOSED-ORD-OBS-READ:/availability",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CLOSED-PRE-NULL:/receipt",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CLOSED-PRE-NULL:root",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/versions",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/availability",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/versions/contract",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/preparationId",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/assertionPassed",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/admission/admittedAt",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/executionEvidence/creationId",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "REQUIRED-ORD-BLANK:/ledger/executionEvidence/bootstrapId",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "REQUIRED-ORD-OBS-NULL:/ledger/executionEvidence/observationHash",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "REQUIRED-ORD-OBS-READ:/availability/producerAdmissionId",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "REQUIRED-PRE-NULL:/receipt/requestDigest",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "REQUIRED-ADMITTED-LEDGER:/receipt/preparationId",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "AVAIL-MALFORMED",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 3,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "PHASE-pre-nonnull",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "PHASE-admitted-null",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "PHASE-admitted-malformed",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "PHASE-bad-envelopekind",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "PHASE-bad-phase",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "PHASE-native-started",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "PHASE-receipt-attempt",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "PHASE-receipt-fence",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "PHASE-receipt-context",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "HYBRID",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "ROOT-null",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "ROOT-[]",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "ROOT-1",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "ROOT-{}",
+      "kind": "negative",
+      "javaMethod": "outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeFullNativeBranchesRetainEveryFrozenConstraint",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "XOR-TT",
+      "kind": "private aggregate unit",
+      "javaMethod": "outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": false,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "XOR-TF",
+      "kind": "private aggregate unit",
+      "javaMethod": "outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": false,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "XOR-FT",
+      "kind": "private aggregate unit",
+      "javaMethod": "outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": false,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "XOR-FF",
+      "kind": "private aggregate unit",
+      "javaMethod": "outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": false,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "EXCEPTION",
+      "kind": "private aggregate unit",
+      "javaMethod": "outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomePrivateAggregationIsExactOneAndUsesFreshRealNativeContexts",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": false,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "FRESH-INTERLEAVING",
+      "kind": "mode+public",
+      "javaMethod": "outcomeCachedSchemasSupportRepeatedAndInterleavedPublicCalls",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeCachedSchemasSupportRepeatedAndInterleavedPublicCalls",
+      "sourceMultiplicity": "3 complete sequential passes +4workers*16 publicpairs, cached/shared and separate instances",
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CONFIG-type-loose",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CONFIG-fail-fast",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CONFIG-property-defaults",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CONFIG-null-defaults",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CONFIG-array-defaults",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CONFIG-context-customizer",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CONFIG-keyword-listener",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CONFIG-property-listener",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CONFIG-array-listener",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CONFIG-discriminator",
+      "kind": "native fallback",
+      "javaMethod": "outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeEligibilityRetainsCompleteNativeFallbackForEveryExcludedConfiguration",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "NAME",
+      "kind": "native fallback",
+      "javaMethod": "outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "SIBLING",
+      "kind": "native fallback",
+      "javaMethod": "outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "sourceMultiplicity": 2,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "OVERLAP-UNKNOWN",
+      "kind": "native fallback",
+      "javaMethod": "outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "CHANGED-BRANCH",
+      "kind": "native fallback",
+      "javaMethod": "outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "sourceMultiplicity": 5,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "WRONG-DIALECT",
+      "kind": "native fallback",
+      "javaMethod": "outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "selector": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeUnknownNameEpochSiblingBranchesAndDialectKeepOriginalNativeRoot",
+      "sourceMultiplicity": 1,
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    },
+    {
+      "id": "OLD-GATES",
+      "kind": "unchanged gates",
+      "javaMethod": "original7unchanged tests + enhanced assertNativePlan/assertFinitePlan optional-modeabsence + known-outcome method explicit old4no-mode",
+      "selector": null,
+      "sourceMultiplicity": "original7tests unchanged +4old-plan absence assertions",
+      "bothPublicEntryPointsRequired": true,
+      "status": "SOURCE_PRESENT_UNEXECUTED_AFTER_MODE_CHANGE",
+      "authorityLimit": "schema only; no private receipt/action/identity authorization inferred"
+    }
+  ],
+  "reviewedCaseCount": 91,
+  "runnableClass": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest",
+  "actualPrerequisite": {
+    "receipt": "backend/wire-outcome-repro-baseline-attempt06-receipt.json",
+    "sha256": "30f91d1b02a462cf47782ea1020de42d9a1952be06c003d35a941646d10b3d14",
+    "newControlPASS": true,
+    "class7PASS1FAIL": true,
+    "reporterEntryNotRetained": "Exact nonempty whole/prefix counts remain unavailable; no invented payload."
+  },
+  "protectedInputsCompared": 1632,
+  "only2OwnedSourcesDifferFromActual06Inputs": true,
+  "noRuntimeQAImports": true,
+  "separateAlignmentNext": "Only reviewed3literal replacements and paired literal-propertysets/64group regressions on archived current source; no archived production overwrite.",
+  "remaining": "All actual mode91/fullclass/currentJava/head/Core/browser/native/private/full86/24/55/35/B1R1B2B3B4R2/normalgates+coverage/independent015then008 closure; row85originalpendingunchanged"
+}

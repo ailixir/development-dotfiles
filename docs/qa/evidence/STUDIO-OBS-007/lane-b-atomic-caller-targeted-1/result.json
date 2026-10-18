@@ -1,0 +1,30 @@
+{
+  "session": 61090,
+  "exitCode": 0,
+  "tests": 9,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "com.citi.put.checks.studio.dispatch.StudioDispatcherFailureIT",
+      "names": [
+        "[1] outage=false",
+        "[2] outage=true",
+        "[1] change=expired",
+        "[2] change=different-owner",
+        "[3] change=different-attempt",
+        "[1] outage=false",
+        "[2] outage=true",
+        "[1] winner=cancel",
+        "[2] winner=reaper"
+      ]
+    }
+  ],
+  "sourceMismatchAgainstGate3": [],
+  "claim": "actual PG caller rollback/blocking winner/current attempt/lease identity plus counted provider reads and zero sends; no full Core/browser joins"
+}

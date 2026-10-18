@@ -1,0 +1,565 @@
+--- before/studio-runner/src/run/recordingScratch.ts
++++ after/studio-runner/src/run/recordingScratch.ts
+@@ -0,0 +1,195 @@
++/** Private guided-video scratch ownership. Only definite dead owners are reaped, before listen.
++ * No session IDs, content, paths or exception strings are logged. SIGKILL performs no cleanup:
++ * its next same-scope worker may reclaim verified residue. Profiles/journals are never swept. */
++import { createHash, randomBytes } from 'node:crypto';
++import { constants } from 'node:fs';
++import { lstat, mkdir, mkdtemp, open, opendir, realpath, rename, rmdir, unlink } from 'node:fs/promises';
++import type { Stats } from 'node:fs';
++import { tmpdir } from 'node:os';
++import { basename, dirname, join, resolve } from 'node:path';
++
++export const RECORDING_SCRATCH_LIMITS = Object.freeze({ candidates: 128, metadataBytes: 32 * 1024, entries: 512, depth: 4, deadlineMs: 5000, reclaimed: 16 });
++export interface RecordingScratch {
++  allocate(): Promise<string>;
++  close(): Promise<void>;
++  dispose(directory: string): Promise<void>;
++  readonly report: Readonly<{ inspected: number; reclaimed: number; skipped: number; bounded: boolean }>;
++}
++interface Marker { version: number; pid: number; nonce: string; scope: string }
++interface Options {
++  workerId: string;
++  journalDirectory: string;
++  evidenceRoot?: string;
++  /** Trusted test seams; neither is sourced from a request or mounted application policy. */
++  limits?: Partial<Record<keyof typeof RECORDING_SCRATCH_LIMITS, number>>;
++  probe?: (pid: number) => 'dead' | 'live' | 'unknown';
++  now?: () => number;
++  afterQuarantine?: () => Promise<void>;
++  removeFile?: (path: string) => Promise<void>;
++}
++const hash = (text: string): string => createHash('sha256').update(text).digest('hex');
++const nonce = (): string => randomBytes(24).toString('hex');
++const HEX = /^[a-f0-9]{48}$/u;
++const unavailable = (): Error => new Error('RECORDING_SCRATCH_UNAVAILABLE');
++class Bound extends Error {}
++const same = (a: Stats, b: Stats): boolean => a.dev === b.dev && a.ino === b.ino;
++function live(pid: number): 'dead' | 'live' | 'unknown' {
++  try { process.kill(pid, 0); return 'live'; } catch (error) {
++    return (error as NodeJS.ErrnoException).code === 'ESRCH' ? 'dead' : 'unknown';
++  }
++}
++
++export async function prepareRecordingScratch(options: Options): Promise<RecordingScratch> {
++  const uid = process.getuid?.();
++  if (uid === undefined) throw unavailable();
++  const limits = { ...RECORDING_SCRATCH_LIMITS, ...options.limits };
++  for (const [key, value] of Object.entries(limits)) if (!Number.isSafeInteger(value) || value < 1 || value > RECORDING_SCRATCH_LIMITS[key as keyof typeof limits]) throw unavailable();
++  const now = options.now ?? (() => performance.now()), end = now() + limits.deadlineMs;
++  const check = (): void => { if (now() >= end) throw new Bound(); };
++  const privateDirectory = async (path: string): Promise<Stats> => {
++    const s = await lstat(path);
++    if (!s.isDirectory() || s.isSymbolicLink() || s.uid !== uid || (s.mode & 0o077) !== 0) throw unavailable();
++    return s;
++  };
++  // The trusted parent may itself be a platform tmp alias (/var -> /private/var on macOS).
++  // Canonicalize it once; all managed children are checked without following links.
++  const parent = await realpath(options.evidenceRoot ?? process.env.TMPDIR ?? tmpdir());
++  await mkdir(options.journalDirectory, { recursive: true, mode: 0o700 });
++  const journal = await realpath(options.journalDirectory);
++  const scope = hash(JSON.stringify([options.workerId, journal]));
++  const root = join(parent, '.checks-guided-recordings');
++  const ensure = async (path: string): Promise<Stats> => {
++    await mkdir(path, { mode: 0o700 }).catch((error: unknown) => { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw unavailable(); });
++    return privateDirectory(path);
++  };
++  const rootStat = await ensure(root), namespacePath = join(root, scope), scopeStat = await ensure(namespacePath);
++  const scopeFd = await open(namespacePath, constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
++  if (!same(scopeStat, await scopeFd.stat())) { await scopeFd.close(); throw unavailable(); }
++  // Linux supports descriptor-relative traversal through /proc/self/fd. macOS uses checked
++  // private paths with O_NOFOLLOW handles and inode fences. This is not a sandbox against a
++  // malicious unsandboxed process sharing the trusted runner UID (portability ruling).
++  // deadlineMs is a cooperative elapsed-work budget between native filesystem calls.
++  const descriptorPaths = process.platform === 'linux';
++  if (!descriptorPaths) await scopeFd.close();
++  const namespace = descriptorPaths ? `/proc/self/fd/${String(scopeFd.fd)}` : namespacePath;
++  const fence = async (): Promise<void> => {
++    if (!same(rootStat, await privateDirectory(root)) || !same(scopeStat, await privateDirectory(namespacePath))) throw unavailable();
++  };
++  const marker = async (directory: string, expectedNonce: string): Promise<{ body: Marker; stat: Stats; owner: Stats } | null> => {
++    try {
++      const owner = await privateDirectory(directory);
++      const parentFd = await open(directory, constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
++      try {
++      if (!same(owner, await parentFd.stat())) return null;
++      const path = descriptorPaths ? `/proc/self/fd/${String(parentFd.fd)}/owner.json` : join(directory, 'owner.json');
++      const stat = await lstat(path);
++      if (!stat.isFile() || stat.isSymbolicLink() || stat.uid !== uid || (stat.mode & 0o077) !== 0 || stat.nlink !== 1 || stat.size > limits.metadataBytes) return null;
++      const fd = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW);
++      try {
++        if (!same(stat, await fd.stat())) return null;
++        const bytes = Buffer.alloc(limits.metadataBytes + 1), { bytesRead } = await fd.read(bytes, 0, bytes.length, 0);
++        if (bytesRead > limits.metadataBytes) return null;
++        const body: unknown = JSON.parse(bytes.subarray(0, bytesRead).toString('utf8'));
++        if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).sort().join(',') !== 'nonce,pid,scope,version') return null;
++        const m = body as Marker;
++        if (m.version !== 1 || !Number.isSafeInteger(m.pid) || m.pid <= 0 || m.nonce !== expectedNonce || m.scope !== scope || !HEX.test(m.nonce)) return null;
++        return { body: m, stat, owner };
++      } finally { await fd.close(); }
++      } finally { await parentFd.close(); }
++    } catch { return null; }
++  };
++  // Collect bounded no-follow deletion operations first; a depth/entry bound never authorizes a
++  // partial deletion. Every inode is rechecked before unlink/rmdir. Links are only unlinked.
++  const removeTree = async (directory: string, deadline: boolean): Promise<void> => {
++    const nodes: { path: string; stat: Stats; ownerMarker: boolean }[] = []; let count = 0;
++    const handles: Awaited<ReturnType<typeof open>>[] = [];
++    const walk = async (path: string, depth: number): Promise<void> => {
++      if (deadline) check();
++      if (++count > limits.entries || depth > limits.depth) throw new Bound();
++      const stat = await lstat(path);
++      if (stat.uid !== uid) throw unavailable();
++      if (stat.isDirectory() && !stat.isSymbolicLink()) {
++        if ((stat.mode & 0o077) !== 0) throw unavailable();
++        const fd = await open(path, constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW); handles.push(fd);
++        if (!same(stat, await fd.stat())) throw unavailable();
++        const anchored = descriptorPaths ? `/proc/self/fd/${String(fd.fd)}` : path, entries = await opendir(anchored);
++        if (!same(stat, await lstat(path)) || !same(stat, await fd.stat())) { await entries.close(); throw unavailable(); }
++        for await (const entry of entries) await walk(join(anchored, entry.name), depth + 1);
++      }
++      nodes.push({ path, stat, ownerMarker: depth === 1 && basename(path) === 'owner.json' });
++    };
++    try {
++    await walk(directory, 0);
++    const markerIndex = nodes.findIndex(node => node.ownerMarker);
++    if (markerIndex >= 0) { const [owner] = nodes.splice(markerIndex, 1); if (owner) nodes.splice(nodes.length - 1, 0, owner); }
++    let ownerRemoved = false;
++    for (const node of nodes) {
++      if (deadline && !ownerRemoved) check();
++      await fence();
++      if (!same(node.stat, await lstat(node.path))) throw unavailable();
++      if (node.stat.isDirectory() && !node.stat.isSymbolicLink()) await rmdir(node.path);
++      else await (options.removeFile ?? unlink)(node.path);
++      if (node.ownerMarker) ownerRemoved = true;
++    }
++    } finally { await Promise.all(handles.map(fd => fd.close())); }
++  };
++  try {
++  const report = { inspected: 0, reclaimed: 0, skipped: 0, bounded: false };
++  try {
++    const entries = await opendir(namespace);
++    for await (const entry of entries) {
++      check();
++      if (report.inspected >= limits.candidates || report.reclaimed >= limits.reclaimed) { report.bounded = true; break; }
++      report.inspected++;
++      const match = /^inc-([a-f0-9]{48})(?:-q-([1-9][0-9]{0,15})-([a-f0-9]{48}))?$/u.exec(entry.name);
++      if (!match?.[1]) { report.skipped++; continue; }
++      // The old owner remains deletion authority. A quarantine additionally fences its active
++      // reaper; another cooperating worker must not steal in-progress cleanup. PID reuse skips.
++      if (match[2] && (!Number.isSafeInteger(Number(match[2])) || (options.probe ?? live)(Number(match[2])) !== 'dead')) { report.skipped++; continue; }
++      const candidate = join(namespace, entry.name), prior = await marker(candidate, match[1]);
++      if (!prior || (options.probe ?? live)(prior.body.pid) !== 'dead') { report.skipped++; continue; }
++      await fence(); check();
++      const quarantine = join(namespace, `inc-${prior.body.nonce}-q-${String(process.pid)}-${nonce()}`);
++      try { await rename(candidate, quarantine); } catch (error) {
++        if ((error as NodeJS.ErrnoException).code === 'ENOENT') { report.skipped++; continue; }
++        throw unavailable();
++      }
++      await options.afterQuarantine?.();
++      const after = await marker(quarantine, prior.body.nonce);
++      if (!after || !same(after.owner, prior.owner) || !same(after.stat, prior.stat) || JSON.stringify(after.body) !== JSON.stringify(prior.body)) throw unavailable();
++      try { await removeTree(quarantine, true); } catch (error) {
++        if (error instanceof Bound) await rename(quarantine, candidate).catch(() => { throw unavailable(); });
++        throw error;
++      }
++      report.reclaimed++;
++    }
++  } catch (error) {
++    if (error instanceof Bound) report.bounded = true;
++    else throw unavailable();
++  }
++  await fence();
++  const incarnationNonce = nonce(), incarnation = join(namespace, `inc-${incarnationNonce}`), publicIncarnation = join(namespacePath, `inc-${incarnationNonce}`);
++  await mkdir(incarnation, { mode: 0o700 });
++  const ownerStat = await privateDirectory(incarnation);
++  const file = await open(join(incarnation, 'owner.json'), constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW, 0o600);
++  try { await file.writeFile(JSON.stringify({ version: 1, pid: process.pid, nonce: incarnationNonce, scope } satisfies Marker)); await file.sync(); } finally { await file.close(); }
++  const allocations = new Map<string, string>();
++  return {
++    report: Object.freeze(report),
++    close: () => descriptorPaths ? scopeFd.close() : Promise.resolve(),
++    async allocate() {
++      await fence();
++      if (!same(ownerStat, await privateDirectory(incarnation))) throw unavailable();
++      const anchored = await mkdtemp(join(incarnation, 'checks-recording-')), directory = join(publicIncarnation, basename(anchored)); allocations.set(directory, anchored); return directory;
++    },
++    async dispose(directory) {
++      if (!allocations.has(directory) || dirname(resolve(directory)) !== publicIncarnation || !basename(directory).startsWith('checks-recording-')) throw unavailable();
++      await fence();
++      if (!same(ownerStat, await privateDirectory(incarnation))) throw unavailable();
++      // A leaf substituted by a symlink is unlinked, never followed.
++      const anchored = allocations.get(directory); if (!anchored) throw unavailable();
++      await removeTree(anchored, false); allocations.delete(directory);
++    },
++  };
++  } catch (error) { if (descriptorPaths) await scopeFd.close(); throw error; }
++}
+--- before/studio-runner/src/run/guidedShutdown.ts
++++ after/studio-runner/src/run/guidedShutdown.ts
+@@ -0,0 +1,8 @@
++/** The standalone worker's graceful signal lifecycle. SIGKILL cannot call this handler. */
++export function installGuidedShutdown(close: () => Promise<void>, release: () => void): void {
++  let stopping: Promise<void> | undefined;
++  const stop = (): void => {
++    stopping ??= close().then(() => { process.exitCode = 0; }).catch(() => { process.exitCode = 1; }).finally(release);
++  };
++  process.once('SIGTERM', stop); process.once('SIGINT', stop);
++}
+--- before/studio-runner/src/run/browser.ts
++++ after/studio-runner/src/run/browser.ts
+@@ -537,7 +537,7 @@
+   const disposeScratch=async():Promise<void>=>{releaseBrowserProfile(preparedProfile);await rm(scratchDirectory,{recursive:true,force:true});};
+   try {
+   const profile = prepareBrowserProfile(scratchDirectory);preparedProfile=profile;requireBrowserPreferences(profile);
+-  context = await chromium.launchPersistentContext(profile, { channel:'chromium',headless: true, chromiumSandbox: true, args: [], acceptDownloads: false, serviceWorkers: 'block', ...(recording ? { recordVideo: { dir: recording.dir, size: { width: recording.size.width, height: recording.size.height } } } : {}), env: { PATH: process.env.PATH ?? '', HOME: process.env.HOME ?? '', TMPDIR: scratchDirectory } });
++  context = await chromium.launchPersistentContext(profile, { channel:'chromium',headless: true, handleSIGINT: false, handleSIGTERM: false, chromiumSandbox: true, args: [], acceptDownloads: false, serviceWorkers: 'block', ...(recording ? { recordVideo: { dir: recording.dir, size: { width: recording.size.width, height: recording.size.height } } } : {}), env: { PATH: process.env.PATH ?? '', HOME: process.env.HOME ?? '', TMPDIR: scratchDirectory } });
+   const browser = context.browser();
+   let page = context.pages()[0] ?? await context.newPage();
+   let video = recording ? page.video() : null;
+--- before/studio-runner/src/guided/evidence.ts
++++ after/studio-runner/src/guided/evidence.ts
+@@ -28,10 +28,10 @@
+  * backend (AR-1 R3 "forbidden"; AC-2). The keys appear only in the manifest written to the store.
+  */
+ import { randomUUID } from 'node:crypto';
+-import { mkdtemp, rm } from 'node:fs/promises';
++
++import { prepareRecordingScratch } from '../run/recordingScratch.js';
++import type { RecordingScratch } from '../run/recordingScratch.js';
+ import { tmpdir } from 'node:os';
+-import { join } from 'node:path';
+-
+ import { createRedactor } from '../executor/redaction.js';
+ import type { Clock } from '../executor/stepReporter.js';
+ import type { EvidenceFileSystem, EvidenceUploadBounds } from '../run/evidenceUpload.js';
+@@ -87,6 +87,8 @@
+   readonly sleep: (ms: number) => Promise<void>;
+   /** Parent of the per-session evidence directory; defaults to `TMPDIR`. Never the profile. */
+   readonly evidenceRoot?: string;
++  /** Prepared before worker readiness; lazy private ownership for embedded trusted callers. */
++  readonly recordingScratch?: RecordingScratch;
+   /** Same-body, same-key callback attempts, the first included. AR-1 R3: at most 3. */
+   readonly callbackAttempts?: number;
+   readonly callbackBackoffMs?: number;
+@@ -102,14 +104,16 @@
+ export const MAX_RECORDING_CALLBACK_ATTEMPTS = 3;
+ 
+ export function createGuidedRecorder(ports: GuidedRecorderPorts): GuidedRecorder {
++  let scratch: Promise<RecordingScratch> | undefined;
++  const owned = (): Promise<RecordingScratch> => scratch ??= ports.recordingScratch ? Promise.resolve(ports.recordingScratch) : prepareRecordingScratch({ workerId: 'embedded-recorder', journalDirectory: ports.evidenceRoot ?? process.env.TMPDIR ?? tmpdir(), ...(ports.evidenceRoot === undefined ? {} : { evidenceRoot: ports.evidenceRoot }) });
+   return {
+     async open(session) {
+       const keys = guidedRecordingKeys(session.csiId, session.sessionId);
+       let directory: string | null = null;
+       if (keys) {
+-        try { directory = await mkdtemp(join(ports.evidenceRoot ?? process.env.TMPDIR ?? tmpdir(), 'checks-recording-')); } catch { directory = null; }
+-      }
+-      return new GuidedSessionRecording(ports, session.sessionId, keys, directory, session.maxSessionSeconds);
++        try { directory = await (await owned()).allocate(); } catch { directory = null; }
++      }
++      return new GuidedSessionRecording(ports, session.sessionId, keys, directory, session.maxSessionSeconds, () => owned());
+     },
+   };
+ }
+@@ -164,6 +168,7 @@
+     readonly keys: GuidedRecordingKeys | null,
+     readonly directory: string | null,
+     private readonly maxSessionSeconds: number,
++    private readonly scratch: () => Promise<RecordingScratch>,
+   ) {}
+ 
+   /** The recorded-context request, or `null` when this session cannot be recorded at all. */
+@@ -240,7 +245,7 @@
+       await this.deliver(input, { ...input.identity, recordingId: this.recordingId, state, partial, timings });
+       return state;
+     } finally {
+-      if (this.directory !== null) await rm(this.directory, { recursive: true, force: true }).catch(() => undefined);
++      if (this.directory !== null) await (await this.scratch()).dispose(this.directory).catch(() => undefined);
+     }
+   }
+ 
+--- before/studio-runner/src/run/guidedMain.ts
++++ after/studio-runner/src/run/guidedMain.ts
+@@ -11,6 +11,8 @@
+ import { createGuidedRecorder } from '../guided/evidence.js';
+ import { createConfiguredObjectStore, evidenceBoundsFrom, NODE_EVIDENCE_FILE_SYSTEM } from './objectStoreFactory.js';
+ import { loadEvidenceConfig } from '../server/config.js';
++import { installGuidedShutdown } from './guidedShutdown.js';
++import { prepareRecordingScratch } from './recordingScratch.js';
+ import { systemOriginSource } from './timeline.js';
+ 
+ async function main(): Promise<void> {
+@@ -21,15 +23,15 @@
+   const tls = { key: await readFile(config.tlsKeyFile), cert: await readFile(config.tlsCertFile), ca: await readFile(config.tlsCaFile) };
+   // STUDIO-OBS-013: the same evidence keys, store and origin rule the replay runner uses.
+   const evidence = loadEvidenceConfig(process.env);
++  const recordingScratch = await prepareRecordingScratch({ workerId: config.workerId, journalDirectory: config.journalDirectory });
+   const objectStore = createConfiguredObjectStore(evidence);
+-  const recorder = createGuidedRecorder({ store: objectStore.store, fileSystem: NODE_EVIDENCE_FILE_SYSTEM, bounds: evidenceBoundsFrom(evidence), size: { width: evidence.recordingWidth, height: evidence.recordingHeight }, calibrationOffsetMs: evidence.seekOriginCalibrationMs, originSource: systemOriginSource, now: () => performance.now(), sleep: ms => new Promise<void>(resolve => { setTimeout(resolve, ms); }) });
++  const recorder = createGuidedRecorder({ recordingScratch, store: objectStore.store, fileSystem: NODE_EVIDENCE_FILE_SYSTEM, bounds: evidenceBoundsFrom(evidence), size: { width: evidence.recordingWidth, height: evidence.recordingHeight }, calibrationOffsetMs: evidence.seekOriginCalibrationMs, originSource: systemOriginSource, now: () => performance.now(), sleep: ms => new Promise<void>(resolve => { setTimeout(resolve, ms); }) });
+   const app = createGuidedServer({ workerId: config.workerId, journalDirectory: config.journalDirectory, tls,
+     controllerJwt: { issuer: config.controllerIssuer, subject: config.controllerSubject, publicKey: await readFile(config.controllerPublicKeyFile, 'utf8') },
+     controllerCertificateFingerprint256: config.controllerCertificateFingerprint256, launch: launchGuidedBrowser, recorder,
+     claim: guidedClaimClient({ baseUrl: config.callbackBaseUrl, tls, controllerCertificateFingerprint256: config.controllerCertificateFingerprint256, token: async () => (await readFile(config.callbackTokenFile, 'utf8')).trim() }),
+     callback: guidedCallback({ baseUrl: config.callbackBaseUrl, tls, controllerCertificateFingerprint256: config.controllerCertificateFingerprint256, token: async () => (await readFile(config.callbackTokenFile, 'utf8')).trim() }) });
+   await new Promise<void>((resolve, reject) => { app.server.once('error', reject); app.server.listen(config.port, config.host, resolve); });
+-  const stop = () => { void app.close().then(() => { process.exitCode = 0; }).catch(() => { process.exitCode = 1; }).finally(() => { objectStore.close(); }); };
+-  process.once('SIGTERM', stop); process.once('SIGINT', stop);
++  installGuidedShutdown(() => app.close(), () => { objectStore.close(); });
+ }
+ void main().catch(() => { process.stderr.write('GUIDED_WORKER_UNAVAILABLE\n'); process.exitCode = 1; });
+--- before/studio-runner/test/run/recordingScratch.test.ts
++++ after/studio-runner/test/run/recordingScratch.test.ts
+@@ -0,0 +1,100 @@
++import { mkdtemp, mkdir, writeFile, readdir, readFile, rm, symlink, lstat, chmod, link, rename } from 'node:fs/promises';
++import { tmpdir } from 'node:os';
++import { dirname, join, basename } from 'node:path';
++import { afterEach, expect, it } from 'vitest';
++import { prepareRecordingScratch } from '../../src/run/recordingScratch.js';
++const roots: string[] = [];
++afterEach(async () => { for (const root of roots.splice(0)) await rm(root, { recursive: true, force: true }); });
++async function fixture() {
++ const root = await mkdtemp(join(tmpdir(), 'owned-recording-')); roots.push(root);
++ const journalDirectory = join(root, 'journal'); await mkdir(journalDirectory);
++ return { root, options: { workerId: 'worker-one', journalDirectory, evidenceRoot: root } };
++}
++async function dead(options: Awaited<ReturnType<typeof fixture>>['options']) {
++ const first = await prepareRecordingScratch(options), leaf = await first.allocate(), incarnation = dirname(leaf), marker = join(incarnation, 'owner.json');
++ const body = JSON.parse(await readFile(marker, 'utf8')) as Record<string, unknown>;
++ body.pid = 2147483647; await writeFile(marker, JSON.stringify(body)); await writeFile(join(leaf, 'video.webm'), 'video-canary');
++ return { first, leaf, incarnation, marker };
++}
++async function exists(path: string): Promise<boolean> { return lstat(path).then(() => true, () => false); }
++it('disposes only allocated bytes, preserving another leaf and private closed ownership', async () => {
++ const {options}=await fixture(), scratch=await prepareRecordingScratch(options), a=await scratch.allocate(), b=await scratch.allocate();
++ await writeFile(join(a,'video.webm'),'video');await writeFile(join(b,'video.webm'),'other');await scratch.dispose(a);
++ expect(await exists(a)).toBe(false);expect(await readFile(join(b,'video.webm'),'utf8')).toBe('other');await expect(scratch.dispose(dirname(a))).rejects.toThrow('RECORDING_SCRATCH_UNAVAILABLE');
++ expect(Object.keys(JSON.parse(await readFile(join(dirname(b),'owner.json'),'utf8')) as object).sort()).toEqual(['nonce','pid','scope','version']);expect((await lstat(dirname(b))).mode & 0o077).toBe(0);
++});
++it('reclaims dead managed recordings while preserving direct legacy and other-scope bytes',async()=>{
++ const {root,options}=await fixture(),old=await dead(options),legacy=join(root,'checks-recording-legacy');await mkdir(legacy);await writeFile(join(legacy,'canary'),'legacy');const other=await dead({...options,workerId:'other'});
++ expect((await prepareRecordingScratch({...options,probe:()=> 'dead'})).report.reclaimed).toBe(1);expect(await exists(old.incarnation)).toBe(false);expect(await exists(other.leaf)).toBe(true);expect(await exists(legacy)).toBe(true);
++});
++it.each(['live','unknown'] as const)('preserves same-scope %s, including reused PID or EPERM uncertainty',async state=>{
++ const {options}=await fixture(),old=await dead(options);expect((await prepareRecordingScratch({...options,probe:()=>state})).report.reclaimed).toBe(0);expect(await exists(old.leaf)).toBe(true);
++});
++it('real liveness preserves active same-scope incarnation',async()=>{
++ const {options}=await fixture(),first=await prepareRecordingScratch(options),leaf=await first.allocate();expect((await prepareRecordingScratch(options)).report.reclaimed).toBe(0);expect(await exists(leaf)).toBe(true);
++});
++it.each(['missing','corrupt','oversized','extra-key','wrong-scope','wrong-nonce','public-mode'] as const)('preserves %s ownership',async mode=>{
++ const {options}=await fixture(),old=await dead(options);
++ if(mode==='missing')await rm(old.marker);else if(mode==='corrupt')await writeFile(old.marker,'{broken');else if(mode==='oversized')await writeFile(old.marker,'x'.repeat(32769));else if(mode==='public-mode')await chmod(old.marker,0o644);
++ else {const body=JSON.parse(await readFile(old.marker,'utf8')) as Record<string,unknown>;body[mode==='extra-key'?'unexpected':mode==='wrong-scope'?'scope':'nonce']='x';await writeFile(old.marker,JSON.stringify(body));}
++ expect((await prepareRecordingScratch({...options,probe:()=> 'dead'})).report.reclaimed).toBe(0);expect(await exists(old.leaf)).toBe(true);
++});
++it.each(['root','scope','incarnation','metadata','leaf','nested'] as const)('never follows a %s symlink or touches its external canary',async mode=>{
++ const {root,options}=await fixture(),outside=join(root,'outside');await mkdir(outside);await writeFile(join(outside,'CANARY'),'private-content');const old=await dead(options),scope=dirname(old.incarnation),managed=dirname(scope);
++ const target=mode==='root'?managed:mode==='scope'?scope:mode==='incarnation'?old.incarnation:mode==='metadata'?old.marker:mode==='leaf'?old.leaf:join(old.leaf,'nested');
++ if(mode!=='nested')await rm(target,{recursive:true,force:true});await symlink(outside,target);
++ if(mode==='root'||mode==='scope')await expect(prepareRecordingScratch({...options,probe:()=> 'dead'})).rejects.toThrow('RECORDING_SCRATCH_UNAVAILABLE');
++ else expect((await prepareRecordingScratch({...options,probe:()=> 'dead'})).report.reclaimed).toBe(mode==='leaf'||mode==='nested'?1:0);
++ expect(await readFile(join(outside,'CANARY'),'utf8')).toBe('private-content');
++});
++it('disposal unlinks a replaced allocated leaf link without traversal',async()=>{
++ const {root,options}=await fixture(),scratch=await prepareRecordingScratch(options),leaf=await scratch.allocate(),outside=join(root,'outside');await mkdir(outside);await writeFile(join(outside,'canary'),'safe');await rm(leaf,{recursive:true});await symlink(outside,leaf);await scratch.dispose(leaf);expect(await exists(leaf)).toBe(false);expect(await readFile(join(outside,'canary'),'utf8')).toBe('safe');
++});
++it('fails readiness with a fixed data-free code on owned-dead delete failure',async()=>{
++ const {options}=await fixture();await dead(options);await expect(prepareRecordingScratch({...options,probe:()=> 'dead',removeFile:()=>Promise.reject(Error('PRIVATE_PATH_CONTENT_CANARY'))})).rejects.toThrow(/^RECORDING_SCRATCH_UNAVAILABLE$/u);
++});
++it('bounds traversal, candidate count, reclamation count and startup deadline',async()=>{
++ const {options}=await fixture(),old=await dead(options);for(let i=0;i<5;i++)await writeFile(join(old.leaf,`file-${String(i)}`),'x');
++ expect((await prepareRecordingScratch({...options,probe:()=> 'dead',limits:{entries:3}})).report.bounded).toBe(true);expect(await exists(old.leaf)).toBe(true);
++ let time=0;expect((await prepareRecordingScratch({...options,probe:()=> 'dead',now:()=>time+=10,limits:{deadlineMs:1}})).report.bounded).toBe(true);
++ const candidates=await prepareRecordingScratch({...options,probe:()=> 'live',limits:{candidates:1}});expect(candidates.report.inspected).toBe(1);expect(candidates.report.bounded).toBe(true);
++ expect((await prepareRecordingScratch({...options,probe:pid=>pid===2147483647?'dead':'live',limits:{reclaimed:1}})).report.reclaimed).toBe(1);
++});
++it('depth bound preserves uninspected bytes',async()=>{
++ const {options}=await fixture(),old=await dead(options);let next=old.leaf;for(let i=0;i<5;i++){next=join(next,'deep');await mkdir(next,{mode:0o700});}await writeFile(join(next,'canary'),'keep');expect((await prepareRecordingScratch({...options,probe:()=> 'dead'})).report.bounded).toBe(true);
++});
++it('concurrent reapers tolerate a lost rename race and preserve new live allocations',async()=>{
++ const {options}=await fixture();await dead(options);const results=await Promise.allSettled([prepareRecordingScratch({...options,probe:pid=>pid===2147483647?'dead':'live'}),prepareRecordingScratch({...options,probe:pid=>pid===2147483647?'dead':'live'})]);for(const result of results)expect(result.status).toBe('fulfilled');
++ const names=await readdir(join(options.evidenceRoot,'.checks-guided-recordings'));expect(names).toHaveLength(1);for(const result of results)if(result.status==='fulfilled')expect(basename(await result.value.allocate())).toMatch(/^checks-recording-/u);
++});
++
++it('fresh startup creates absent trusted journal directory before canonical identity',async()=>{
++ const {root,options}=await fixture(),journalDirectory=join(root,'new','journal');await prepareRecordingScratch({...options,journalDirectory});expect(await exists(journalDirectory)).toBe(true);
++});
++it('bounded residue retains provable marker and completes on next bounded startup',async()=>{
++ const {options}=await fixture(),old=await dead(options);for(let i=0;i<5;i++)await writeFile(join(old.leaf,`video-${String(i)}`),'bytes');
++ const first=await prepareRecordingScratch({...options,probe:pid=>pid===2147483647?'dead':'live',limits:{entries:3}});expect(first.report).toMatchObject({reclaimed:0,bounded:true});expect(await exists(old.marker)).toBe(true);
++ const next=await prepareRecordingScratch({...options,probe:pid=>pid===2147483647?'dead':'live'});expect(next.report.reclaimed).toBe(1);expect(await exists(old.incarnation)).toBe(false);
++});
++
++it('live active quarantine is not adopted by a concurrent same-scope reaper',async()=>{
++ const {options}=await fixture();await dead(options);let entered:()=>void=()=>{throw Error('UNSET')},release:()=>void=()=>{throw Error('UNSET')};const blocked=new Promise<void>(r=>{release=r}),started=new Promise<void>(r=>{entered=r});
++ const a=prepareRecordingScratch({...options,probe:pid=>pid===2147483647?'dead':'live',afterQuarantine:async()=>{entered();await blocked;}});await started;
++ try {const b=await prepareRecordingScratch({...options,probe:pid=>pid===2147483647?'dead':'live'});expect(b.report.reclaimed).toBe(0);const leaf=await b.allocate();release();expect((await a).report.reclaimed).toBe(1);expect(await exists(leaf)).toBe(true);await b.close();}finally{release();await a.then(s=>s.close());}
++});
++it('a dead reaper quarantine is safely reclaimed after restart',async()=>{
++ const {options}=await fixture(),old=await dead(options),q=old.incarnation+'-q-2147483647-'+ 'a'.repeat(48);await rename(old.incarnation,q);expect((await prepareRecordingScratch({...options,probe:pid=>pid===2147483647?'dead':'live'})).report.reclaimed).toBe(1);expect(await exists(q)).toBe(false);
++});
++it('hardlinked metadata is unprovable and preserved',async()=>{
++ const {root,options}=await fixture(),old=await dead(options);await link(old.marker,join(root,'outside-marker'));expect((await prepareRecordingScratch({...options,probe:()=> 'dead'})).report.reclaimed).toBe(0);expect(await exists(old.leaf)).toBe(true);
++});
++it.each(['root','scope','incarnation'] as const)('refuses unsafe %s privacy without deleting recording bytes',async level=>{
++ const {options}=await fixture(),old=await dead(options),path=level==='incarnation'?old.incarnation:level==='scope'?dirname(old.incarnation):dirname(dirname(old.incarnation));await chmod(path,0o755);
++ if(level==='incarnation')expect((await prepareRecordingScratch({...options,probe:()=> 'dead'})).report.reclaimed).toBe(0);else await expect(prepareRecordingScratch({...options,probe:()=> 'dead'})).rejects.toThrow('RECORDING_SCRATCH_UNAVAILABLE');expect(await exists(old.leaf)).toBe(true);
++});
++it('observed incarnation inode replacement after quarantine refuses readiness',async()=>{
++ const {options}=await fixture(),old=await dead(options);await expect(prepareRecordingScratch({...options,probe:()=> 'dead',afterQuarantine:async()=>{const names=await readdir(dirname(old.incarnation)),name=names.find(n=>n.includes('-q-'));if(!name)throw Error('NO_Q');const q=join(dirname(old.incarnation),name);await rename(q,q+'-held');await mkdir(q,{mode:0o700});await writeFile(join(q,'owner.json'),await readFile(join(q+'-held','owner.json')),{mode:0o600});}})).rejects.toThrow('RECORDING_SCRATCH_UNAVAILABLE');
++});
++it('deadline during deletion retains marker, reports no reclamation and next startup completes',async()=>{
++ const {options}=await fixture(),old=await dead(options);let elapsed=0;const first=await prepareRecordingScratch({...options,probe:pid=>pid===2147483647?'dead':'live',now:()=>elapsed,limits:{deadlineMs:1},removeFile:async path=>{await rm(path);elapsed=2;}});expect(first.report).toMatchObject({bounded:true,reclaimed:0});expect(await exists(old.marker)).toBe(true);expect((await prepareRecordingScratch({...options,probe:pid=>pid===2147483647?'dead':'live'})).report.reclaimed).toBe(1);
++});
+--- before/studio-runner/test/guided/transport.test.ts
++++ after/studio-runner/test/guided/transport.test.ts
+@@ -134,7 +134,7 @@
+         // A replay of the refused request is still a definite refusal. Before any runtime exists the
+         // transport replay path answers IDENTITY_MISMATCH (pre-existing, transport.ts replay branch).
+         const again=await post(port,`${path}/context`,body,{key});
+-        expect(again.status).toBe(409);expect(()=>validate('bridge',again.body,'refusal')).not.toThrow();expect(['IDENTITY_MISMATCH','SCHEMA']).toContain((again.body as {code:string}).code);
++        expect(again.status).toBe(409);expect(()=>validate('bridge',again.body,'refusal')).not.toThrow();expect(again.body).toEqual({code: 'IDENTITY_MISMATCH'});
+       }
+       // Nothing changed: no launch, no callback, the assignment receipt is the same, and the bound context is then accepted once.
+       expect(launch).not.toHaveBeenCalled();expect(callbacks).toEqual([]);
+--- before/studio-runner/test/guided/evidence.test.ts
++++ after/studio-runner/test/guided/evidence.test.ts
+@@ -79,7 +79,7 @@
+     expect(Object.keys(manifest)).toEqual(['schemaVersion', 'kind', 'sessionId', 'recordingId', 'workerId', 'ownerFence', 'evidenceState', 'evidencePartial', 'videoKey', 'manifestKey', 'timings', 'disclosure']);
+     expect(manifest).toMatchObject({ schemaVersion: 1, kind: 'guidedRecording', evidenceState: 'STORED', evidencePartial: false, timings: call.body.timings, disclosure: GUIDED_RECORDING_DISCLOSURE });
+     expect(JSON.stringify(call.body)).not.toMatch(/studio\/|https?:|webm|manifest|[0-9]{4}-[0-9]{2}-[0-9]{2}T/u);
+-    expect(await readdir(h.ports.evidenceRoot ?? '')).toEqual([]);
++    expect(await stat(h.recording.directory ?? '').then(() => true, () => false)).toBe(false);
+     expect(await h.recording.settle({ identity: sessionIdentity(), videoPath: video, orderlyClose: true, callback: h.callback })).toBe('STORED');
+     expect(h.calls).toHaveLength(1); // settles once
+     expect(h.recording.begin('admission-3', 'next', 0)).toBeNull(); // nothing stamps after settlement
+--- before/studio-runner/test/fixtures-tier/guided-recording.test.ts
++++ after/studio-runner/test/fixtures-tier/guided-recording.test.ts
+@@ -24,7 +24,7 @@
+ // eslint-disable-next-line no-restricted-imports -- AR-QA SEC-001 T2 positive control only: a plain recorded context showing the real chrome:// probe pages.
+ import { chromium } from 'playwright';
+ import { existsSync } from 'node:fs';
+-import { mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'node:fs/promises';
++import { mkdir, realpath, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'node:fs/promises';
+ import { basename, join, resolve } from 'node:path';
+ import { tmpdir } from 'node:os';
+ import { launchGuidedBrowser } from '../../src/run/browser.js';
+@@ -244,8 +244,8 @@
+       const manifest = JSON.parse(await readFile(`${prefix}.manifest.json`, 'utf8')) as Record<string, unknown>;
+       expect(manifest).toMatchObject({ kind: 'guidedRecording', evidenceState: 'STORED', recordingId: body.recordingId, timings: body.timings, disclosure: GUIDED_RECORDING_DISCLOSURE });
+       expect(run.ordering[0]).toEqual({ key: `studio/fixture-csi/guided/${run.context.sessionId}.webm`, fileExists: true, scratchGone: true });
+-      expect(run.request?.dir.startsWith(run.evidenceRoot)).toBe(true); expect(run.scratch && run.request?.dir.startsWith(run.scratch)).toBe(false);
+-      expect(await readdir(run.evidenceRoot)).toEqual([]); expect(run.scratch && existsSync(run.scratch)).toBe(false);
++      expect(run.request?.dir.startsWith(await realpath(run.evidenceRoot))).toBe(true); expect(run.scratch && run.request?.dir.startsWith(run.scratch)).toBe(false);
++      expect(run.request && existsSync(run.request.dir)).toBe(false); expect(run.scratch && existsSync(run.scratch)).toBe(false);
+       expect(await scan(run.objects)).toEqual([]);
+       for (const value of [CANARY, encodeURIComponent(CANARY), Buffer.from(CANARY).toString('base64')]) expect(JSON.stringify(run.messages)).not.toContain(value);
+     } finally { await rm(run.root, { recursive: true, force: true }); }
+@@ -259,7 +259,7 @@
+       const prefix = join(run.objects, 'studio', 'fixture-csi', 'guided', run.context.sessionId);
+       expect(existsSync(`${prefix}.webm`)).toBe(false);
+       expect(JSON.parse(await readFile(`${prefix}.manifest.json`, 'utf8'))).toMatchObject({ evidenceState: 'UNAVAILABLE', timings: [] });
+-      expect(await readdir(run.evidenceRoot)).toEqual([]);
++      expect(run.request && existsSync(run.request.dir)).toBe(false);
+     } finally { await rm(run.root, { recursive: true, force: true }); }
+   });
+ 
+--- before/studio-runner/test/fixtures-tier/guided-recording-kill.test.ts
++++ after/studio-runner/test/fixtures-tier/guided-recording-kill.test.ts
+@@ -0,0 +1,50 @@
++// eslint-disable-next-line no-restricted-imports -- Subprocess kill witness imports only fixed helper; no artifact or app text becomes code.
++import {fork} from 'node:child_process';
++// eslint-disable-next-line no-restricted-imports -- Type for the fixed subprocess witness above.
++import type {ChildProcess} from 'node:child_process';
++import {mkdtemp,mkdir,readdir,readFile,rm,stat,symlink,writeFile} from 'node:fs/promises';
++import {tmpdir} from 'node:os';
++import {dirname,join,resolve} from 'node:path';
++import {expect,it} from 'vitest';
++import {descendantsOf,isAlive,signalProcessTree} from '../../src/run/tree.js';
++import {startSecretLoginFixture} from '../fixtures/secret-login/server.js';
++
++interface Message {kind:string;directory?:string;profile?:string;state?:string;report?:{reclaimed:number};handleSIGINT?:boolean;handleSIGTERM?:boolean}
++function worker(root:string,origin:string,mode='record') {
++ const child=fork(resolve('test/helpers/recordingScratchWorker.mjs'),[root,origin,mode],{stdio:['ignore','pipe','pipe','ipc'],env:{...process.env,DEBUG:'',PWDEBUG:'',NODE_DEBUG:'',NODE_OPTIONS:''}});
++ const messages:Message[]=[],output:string[]=[];child.on('message',(m:Message)=>messages.push(m));child.stdout?.on('data',(b:Buffer)=>output.push(b.toString()));child.stderr?.on('data',(b:Buffer)=>output.push(b.toString()));
++ return {child,messages,output};
++}
++async function until(test:()=>boolean|Promise<boolean>,ms=30000):Promise<void>{const end=Date.now()+ms;while(Date.now()<end){if(await test())return;await new Promise(r=>setTimeout(r,50));}throw Error('FIXTURE_TIMEOUT');}
++async function exists(path:string):Promise<boolean>{return stat(path).then(()=>true,()=>false);}
++async function exited(child:ChildProcess):Promise<void>{await until(()=>child.exitCode!==null||child.signalCode!==null);}
++async function bytes(directory:string):Promise<number>{return (await Promise.all((await readdir(directory)).map(async file=>(await stat(join(directory,file))).size))).reduce((a,b)=>a+b,0);}
++
++it.each([false,true])('parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=%s)',async link=>{
++ const fixture=await startSecretLoginFixture('kill-login-secret-canary'),root=await mkdtemp(join(tmpdir(),'recording-kill-'));await mkdir(join(root,'evidence'));
++ const workers:ReturnType<typeof worker>[]=[],pids=new Set<number>(),profiles=new Set<string>();
++ try{
++  const victim=worker(root,fixture.origin);workers.push(victim);await until(()=>victim.messages.some(m=>m.kind==='recording')||victim.child.exitCode!==null);expect(victim.child.exitCode,victim.output.join('')).toBeNull();expect(victim.messages.find(m=>m.kind==='signalOptions')).toMatchObject({handleSIGINT:false,handleSIGTERM:false});const v=victim.messages.find(m=>m.kind==='recording');if(!v?.directory)throw Error('VICTIM');if(v.profile)profiles.add(v.profile);const victimBytes=await bytes(v.directory);expect(victimBytes).toBeGreaterThan(128);
++  const live=worker(root,fixture.origin);workers.push(live);await until(()=>live.messages.some(m=>m.kind==='recording')||live.child.exitCode!==null);expect(live.child.exitCode,live.output.join('')).toBeNull();const l=live.messages.find(m=>m.kind==='recording');if(!l?.directory)throw Error('LIVE');if(l.profile)profiles.add(l.profile);
++  const victimTree=victim.child.pid?descendantsOf(victim.child.pid):[];expect(victimTree.length).toBeGreaterThan(0);for(const pid of victimTree)pids.add(pid);
++  victim.child.kill('SIGKILL');await exited(victim.child);expect(victim.child.signalCode).toBe('SIGKILL');expect(await bytes(v.directory)).toBeGreaterThan(128);expect(victim.messages.filter(m=>m.kind==='callback')).toEqual([]);
++  // The harness owns captured descendants. Production sweep never signals them and never gets
++  // credit for tree cleanup: stop known encoders first to freeze residue and separately prove gone.
++  for(const pid of [...victimTree].reverse())if(isAlive(pid))signalProcessTree(pid);await until(()=>victimTree.every(pid=>!isAlive(pid)));
++  const outside=join(root,'outside');await mkdir(outside);await writeFile(join(outside,'CANARY'),'outside-unchanged');if(link)await symlink(outside,join(v.directory,'external-link'));
++  const liveBytes=await bytes(l.directory),replacement=worker(root,fixture.origin,'sweep');workers.push(replacement);await until(()=>replacement.messages.some(m=>m.kind==='swept')||replacement.child.exitCode!==null);await exited(replacement.child);expect(replacement.child.exitCode,replacement.output.join('')).toBe(0);expect(replacement.messages.find(m=>m.kind==='swept')?.report?.reclaimed).toBe(1);
++  expect(await exists(dirname(v.directory))).toBe(false);expect(await bytes(l.directory)).toBeGreaterThanOrEqual(liveBytes);expect(await readFile(join(outside,'CANARY'),'utf8')).toBe('outside-unchanged');expect(victim.messages.some(m=>m.kind==='callback'||m.kind==='settled')).toBe(false);
++  expect(await exists(join(root,'objects','studio','fixture-csi','guided','kill-session.webm'))).toBe(false);
++  live.child.kill('SIGTERM');await exited(live.child);expect(live.child.exitCode,live.output.join('')).toBe(0);expect(live.messages.filter(m=>m.kind==='callback')).toHaveLength(1);expect(live.messages.find(m=>m.kind==='settled')?.state).toBe('STORED');expect(await exists(l.directory)).toBe(false);
++  await writeFile(resolve('../docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/kill-facts-'+String(link)+'.json'),JSON.stringify({platform:process.platform,parentOnlySignal:victim.child.signalCode,victimBytesBeforeKill:victimBytes,victimCallbackCount:0,victimSettlementCount:0,recordingDirectoryRemovedByRestart:true,ownedVictimDescendantCount:victimTree.length,ownedVictimDescendantsGone:victimTree.every(pid=>!isAlive(pid)),liveBytesBeforeSweep:liveBytes,liveCallbackCount:live.messages.filter(m=>m.kind==='callback').length,liveSettlement:live.messages.find(m=>m.kind==='settled')?.state,liveSignal:'SIGTERM',outsideCanaryPreserved:true,symlinkVariant:link,backendEvidenceProjection:'NOT_ASSERTED: recorder-only process fixture; no victim callback/upload invented'},null,2)+'\n');
++ }finally{
++  for(const w of workers)if(w.child.pid&&w.child.exitCode===null&&w.child.signalCode===null){for(const pid of descendantsOf(w.child.pid))pids.add(pid);signalProcessTree(w.child.pid);}
++  for(const pid of [...pids].reverse())if(isAlive(pid))signalProcessTree(pid);await until(()=>[...pids].every(pid=>!isAlive(pid)));for(const w of workers)await exited(w.child);for(const w of workers)for(const message of w.messages)if(message.profile)profiles.add(message.profile);for(const profile of profiles)await rm(profile,{recursive:true,force:true});await fixture.close();await rm(root,{recursive:true,force:true});
++ }
++});
++
++it('actual SIGINT gracefully settles real guided recorder and removes its owned recording bytes',async()=>{
++ const fixture=await startSecretLoginFixture('signal-login-canary'),root=await mkdtemp(join(tmpdir(),'recording-signal-'));await mkdir(join(root,'evidence'));const w=worker(root,fixture.origin),pids=new Set<number>();
++ try{await until(()=>w.messages.some(m=>m.kind==='recording')||w.child.exitCode!==null);expect(w.child.exitCode,w.output.join('')).toBeNull();expect(w.messages.find(m=>m.kind==='signalOptions')).toMatchObject({handleSIGINT:false,handleSIGTERM:false});const message=w.messages.find(m=>m.kind==='recording');if(!message?.directory)throw Error('RECORDING');expect(await bytes(message.directory)).toBeGreaterThan(128);if(w.child.pid)for(const pid of descendantsOf(w.child.pid))pids.add(pid);w.child.kill('SIGINT');await exited(w.child);expect(w.child.exitCode,w.output.join('')).toBe(0);expect(w.messages.filter(m=>m.kind==='callback')).toHaveLength(1);expect(w.messages.find(m=>m.kind==='settled')?.state).toBe('STORED');expect(await exists(message.directory)).toBe(false);await until(()=>[...pids].every(pid=>!isAlive(pid)));}
++ finally{if(w.child.pid&&w.child.exitCode===null&&w.child.signalCode===null){for(const pid of descendantsOf(w.child.pid))pids.add(pid);signalProcessTree(w.child.pid);}for(const pid of [...pids].reverse())if(isAlive(pid))signalProcessTree(pid);await until(()=>[...pids].every(pid=>!isAlive(pid)));await exited(w.child);for(const message of w.messages)if(message.profile)await rm(message.profile,{recursive:true,force:true});await fixture.close();await rm(root,{recursive:true,force:true});}
++});
+--- before/studio-runner/test/helpers/recordingScratchWorker.mjs
++++ after/studio-runner/test/helpers/recordingScratchWorker.mjs
+@@ -0,0 +1,41 @@
++// A subprocess witness: imports the compiled production recorder/browser/cleanup, never copies it.
++// eslint-disable-next-line no-restricted-imports -- Actual call witness verifies the fixed guided launch options then calls the original SDK.
++import {chromium} from 'playwright';
++import {readdir,stat} from 'node:fs/promises';
++import {join} from 'node:path';
++import {performance} from 'node:perf_hooks';
++import {prepareRecordingScratch} from '../../dist/run/recordingScratch.js';
++import {createGuidedRecorder} from '../../dist/guided/evidence.js';
++import {launchGuidedBrowser} from '../../dist/run/browser.js';
++import {installGuidedShutdown} from '../../dist/run/guidedShutdown.js';
++import {loadEvidenceConfig} from '../../dist/server/config.js';
++import {createConfiguredObjectStore,NODE_EVIDENCE_FILE_SYSTEM,evidenceBoundsFrom} from '../../dist/run/objectStoreFactory.js';
++import {systemOriginSource} from '../../dist/run/timeline.js';
++const actualLaunch=chromium.launchPersistentContext.bind(chromium);
++chromium.launchPersistentContext=async(profile,options)=>{if(options.handleSIGINT!==false||options.handleSIGTERM!==false)throw Error('SIGNAL_OWNER_MISMATCH');process.send?.({kind:'signalOptions',handleSIGINT:options.handleSIGINT,handleSIGTERM:options.handleSIGTERM});return actualLaunch(profile,options);};
++const [root,origin,mode]=process.argv.slice(2);
++const scratch=await prepareRecordingScratch({workerId:'kill-fixture-worker',journalDirectory:join(root,'journal'),evidenceRoot:join(root,'evidence')});
++if(mode==='sweep'){process.send?.({kind:'swept',report:scratch.report});process.disconnect();}
++else {
++ const settings=loadEvidenceConfig({STUDIO_RUNNER_OBJECT_STORE_DIR:join(root,'objects'),STUDIO_RUNNER_SCRATCH_DIR:join(root,'scratch')}),store=createConfiguredObjectStore(settings);
++ const recorder=createGuidedRecorder({recordingScratch:scratch,store:store.store,fileSystem:NODE_EVIDENCE_FILE_SYSTEM,bounds:evidenceBoundsFrom(settings),size:{width:1280,height:720},calibrationOffsetMs:0,originSource:systemOriginSource,now:()=>performance.now(),sleep:ms=>new Promise(resolve=>setTimeout(resolve,ms))});
++ const recording=await recorder.open({sessionId:'kill-session',csiId:'fixture-csi',maxSessionSeconds:600});
++ const browser=await launchGuidedBrowser({sessionId:'kill-session',scopeHash:'a'.repeat(64),approvedOrigins:[origin],rules:[],knownSecrets:[],applicationPolicy:{policyRuleId:'structural',allowStructuralDiscovery:true,readGrants:[]}},'kill-context',()=>{/* context loss is observed by the parent timeout */},recording.launchRequest());
++ await browser.navigateBlank(origin+'/login');
++ process.send?.({kind:'profile',profile:browser.scratchDirectory});
++ const observation=await browser.observations.observe();
++ if(observation.observation.coverage.passwordControls!==1)throw Error('LOGIN_NOT_OBSERVED');
++ // Fixed fixture-only animation forces encoder output while preserving the actual login form.
++ // eslint-disable-next-line no-undef -- This literal callback executes in the controlled browser fixture, not Node.
++ await browser.handle.page.evaluate(()=>{const canvas=document.createElement('canvas');canvas.width=256;canvas.height=128;document.body.append(canvas);const ctx=canvas.getContext('2d');let frame=0;setInterval(()=>{const image=ctx.createImageData(256,128);for(let i=0;i<image.data.length;i+=4){image.data[i]=(i*13+frame*37)%256;image.data[i+1]=(i*7+frame*53)%256;image.data[i+2]=(i*23+frame*17)%256;image.data[i+3]=255;}ctx.putImageData(image,0,0);frame++;},25);});
++ // Repeated real app frames give the encoder actual bytes; readiness is never a fabricated file.
++ const end=Date.now()+20000;let files=[];
++ while(Date.now()<end){files=await readdir(recording.directory);if((await Promise.all(files.map(file=>stat(join(recording.directory,file))))).some(s=>s.size>128))break;await new Promise(resolve=>setTimeout(resolve,100));}
++ if(!files.length||(await Promise.all(files.map(file=>stat(join(recording.directory,file))))).every(s=>s.size<=128))throw Error('VIDEO_NOT_WRITTEN');
++ process.send?.({kind:'recording',directory:recording.directory,profile:browser.scratchDirectory,files});
++ installGuidedShutdown(async()=>{
++  await browser.close();
++  const state=await recording.settle({identity:{schemaVersion:3,sessionId:'kill-session',workerId:'kill-fixture-worker',ownerFence:1,scopeHash:'a'.repeat(64),contextId:'kill-context',contextRevision:1,sourceRevision:'source-1',configurationRevision:'config-1',versions:{contract:3}},videoPath:await browser.recordedVideo(),orderlyClose:true,callback:async()=>{process.send?.({kind:'callback'});}});
++  process.send?.({kind:'settled',state});
++ },()=>{store.close();process.disconnect();});
++}

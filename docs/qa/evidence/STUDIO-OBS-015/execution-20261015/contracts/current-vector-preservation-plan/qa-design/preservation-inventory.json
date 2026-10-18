@@ -1,0 +1,844 @@
+{
+  "artifact": "Exact pre-repair vector/test intent inventory",
+  "activeReferenceFiles": {
+    "studio-runner/fixtures/observed-reference/accepted-observed-choice.json": {
+      "sha256": "7c90084a1f37b75d338cc1739640074567f92392d902a1f3adfa024bf6a8c044",
+      "bytes": 85580,
+      "keys": [
+        "description",
+        "basis",
+        "artifact",
+        "hashes",
+        "snapshotAuthority"
+      ]
+    },
+    "studio-runner/fixtures/observed-reference/control-value-reference.json": {
+      "sha256": "d6de790ae5d8c25cffcdce375150fbe3d5e9669781c5f2932512fee1baf1090c",
+      "bytes": 63130,
+      "keys": [
+        "description",
+        "basis",
+        "artifact",
+        "hashes"
+      ]
+    },
+    "studio-runner/fixtures/observed-reference/fresh-order-reference.json": {
+      "sha256": "3816e6fffceeab29ab7db71cf7c6bf47584b771369debebdf39b307ae874811a",
+      "bytes": 68909,
+      "keys": [
+        "description",
+        "basis",
+        "artifact",
+        "hashes",
+        "snapshotAuthority"
+      ]
+    },
+    "studio-runner/fixtures/observed-reference/manifest.json": {
+      "sha256": "7c0fb5418184dcb9a4a4d1b21af96263412fe06da1a998b1f31424654fbfb02a",
+      "bytes": 588915,
+      "keys": [
+        "schemaVersion",
+        "catalog",
+        "fixture",
+        "canonicalVectors"
+      ]
+    },
+    "studio-runner/fixtures/observed-reference/operation-mutations.json": {
+      "sha256": "6df9810b016e10eee3be490da2763c97807243649069e57c99fb167f111778c5",
+      "bytes": 320,
+      "keys": [
+        "schemaVersion",
+        "mutations"
+      ]
+    }
+  },
+  "canonicalPublicationFixtures": {
+    "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+    "sha256": "94bf808af88041f6e2a1cc90a1dcd97a8c5332f4f9f87cb8d8ce99abf5f64af9",
+    "bytes": 22410793
+  },
+  "operationMutationDeclarations": {
+    "schemaVersion": 1,
+    "mutations": [
+      "guard-role",
+      "guard-control-type",
+      "guard-locator",
+      "read-recipe",
+      "argument-slot",
+      "binding-producer",
+      "binding-consumer",
+      "source-provenance",
+      "configuration-reference",
+      "original-evidence",
+      "allocated-binding",
+      "profile"
+    ]
+  },
+  "canonicalArrayInventories": {
+    "snapshotCorrection/positives": [
+      {
+        "index": 0,
+        "name": "ordinary",
+        "expected": null
+      },
+      {
+        "index": 1,
+        "name": "boundary",
+        "expected": null
+      },
+      {
+        "index": 2,
+        "name": "empty-prefix-incomplete-base",
+        "expected": null
+      },
+      {
+        "index": 3,
+        "name": "base-historical-ordinary",
+        "expected": null
+      },
+      {
+        "index": 4,
+        "name": "drift-at-first-step-retains-original-base-proof",
+        "expected": null
+      }
+    ],
+    "snapshotCorrection/negatives": [
+      {
+        "index": 0,
+        "name": "missing-snapshot-evidence",
+        "expected": "REJECT"
+      },
+      {
+        "index": 1,
+        "name": "null-base-for-nonempty-original-prefix",
+        "expected": "REJECT"
+      },
+      {
+        "index": 2,
+        "name": "foreign-base-id",
+        "expected": "REJECT"
+      },
+      {
+        "index": 3,
+        "name": "foreign-test-base-identity",
+        "expected": "REJECT"
+      },
+      {
+        "index": 4,
+        "name": "forged-base-revision-digest",
+        "expected": "REJECT"
+      },
+      {
+        "index": 5,
+        "name": "forged-base-artifact-hash",
+        "expected": "REJECT"
+      },
+      {
+        "index": 6,
+        "name": "claimed-map-not-recomputed",
+        "expected": "REJECT"
+      },
+      {
+        "index": 7,
+        "name": "changed-base-context-retains-old-snapshot",
+        "expected": "REJECT"
+      },
+      {
+        "index": 8,
+        "name": "source-text-does-not-match-basis",
+        "expected": "REJECT"
+      },
+      {
+        "index": 9,
+        "name": "duplicate-reference-declaration",
+        "expected": "REJECT"
+      },
+      {
+        "index": 10,
+        "name": "missing-referenced-plain-identity",
+        "expected": "REJECT"
+      },
+      {
+        "index": 11,
+        "name": "private-resolved-value-in-declaration",
+        "expected": "REJECT"
+      },
+      {
+        "index": 12,
+        "name": "noncontiguous-original-prefix-program",
+        "expected": "REJECT"
+      },
+      {
+        "index": 13,
+        "name": "program-action-not-from-base",
+        "expected": "REJECT"
+      },
+      {
+        "index": 14,
+        "name": "current-prefix-context-cannot-be-reused",
+        "expected": "REJECT"
+      },
+      {
+        "index": 15,
+        "name": "base-authoring-identity-version-absent",
+        "expected": "REJECT"
+      },
+      {
+        "index": 16,
+        "name": "missing-current-global-context",
+        "expected": "REJECT"
+      },
+      {
+        "index": 17,
+        "name": "missing-step-evidence-reference-array",
+        "expected": "REJECT"
+      },
+      {
+        "index": 18,
+        "name": "claimed-current-step-input-is-forbidden",
+        "expected": "REJECT"
+      },
+      {
+        "index": 19,
+        "name": "recursive-past-basis-is-forbidden",
+        "expected": "REJECT"
+      },
+      {
+        "index": 20,
+        "name": "raw-configuration-values-in-current-evidence",
+        "expected": "REJECT"
+      },
+      {
+        "index": 21,
+        "name": "extra-snapshot-evidence-field",
+        "expected": "REJECT"
+      },
+      {
+        "index": 22,
+        "name": "missing-required-base-proof-null",
+        "expected": "REJECT"
+      },
+      {
+        "index": 23,
+        "name": "immutable-original-source-cannot-be-replaced",
+        "expected": "REJECT"
+      },
+      {
+        "index": 24,
+        "name": "private-plain-hash-must-match-before-freeze",
+        "expected": "REJECT"
+      },
+      {
+        "index": 25,
+        "name": "immutable-source-manifest-hash-is-exact",
+        "expected": "REJECT"
+      },
+      {
+        "index": 26,
+        "name": "candidate-snapshot-map-cannot-be-copied-even-if-resealed",
+        "expected": "REJECT"
+      },
+      {
+        "index": 27,
+        "name": "candidate-gap-in-reused-prefix",
+        "expected": "REJECT"
+      },
+      {
+        "index": 28,
+        "name": "candidate-older-same-test-revision-id",
+        "expected": "REJECT"
+      },
+      {
+        "index": 29,
+        "name": "candidate-suffix-reuse-is-forbidden",
+        "expected": "REJECT"
+      },
+      {
+        "index": 30,
+        "name": "base-operation-equivalence-is-recomputed",
+        "expected": "REJECT"
+      },
+      {
+        "index": 31,
+        "name": "base-claimed-map-resealed-still-not-source-derived",
+        "expected": "REJECT"
+      },
+      {
+        "index": 32,
+        "name": "original-immediate-base-authority-cannot-be-repinned",
+        "expected": "REJECT"
+      },
+      {
+        "index": 33,
+        "name": "empty-prefix-must-not-require-or-supply-old-proof",
+        "expected": "REJECT"
+      },
+      {
+        "index": 34,
+        "name": "nonempty-original-prefix-cannot-null-proof-after-drift-at-one",
+        "expected": "REJECT"
+      },
+      {
+        "index": 35,
+        "name": "immutable-current-configuration-cannot-change",
+        "expected": "REJECT"
+      }
+    ],
+    "incrementalContracts/basisCases": [
+      {
+        "index": 0,
+        "name": "ordinary",
+        "expected": "VALID"
+      },
+      {
+        "index": 1,
+        "name": "boundary",
+        "expected": "VALID"
+      },
+      {
+        "index": 2,
+        "name": "admittedDrift",
+        "expected": "VALID"
+      },
+      {
+        "index": 3,
+        "name": "preAdmissionDrift",
+        "expected": "VALID"
+      },
+      {
+        "index": 4,
+        "name": "emptyPrefix",
+        "expected": "VALID"
+      },
+      {
+        "index": 5,
+        "name": "appendedHistorical",
+        "expected": "VALID"
+      },
+      {
+        "index": 6,
+        "name": "wrong-private-input-hash",
+        "expected": "INPUT_HASH"
+      },
+      {
+        "index": 7,
+        "name": "header-hash-not-reconstructed",
+        "expected": "VERSION_RECONSTRUCTION"
+      },
+      {
+        "index": 8,
+        "name": "program-hash-not-pinned",
+        "expected": "PROGRAM_PIN"
+      },
+      {
+        "index": 9,
+        "name": "retained-admissions-not-exact",
+        "expected": "RETAINED_ADMISSIONS"
+      },
+      {
+        "index": 10,
+        "name": "foreign-prefix-session",
+        "expected": "INCREMENTAL_IDENTITY"
+      },
+      {
+        "index": 11,
+        "name": "wrong-proposal-digest",
+        "expected": "PROPOSAL_DIGEST"
+      },
+      {
+        "index": 12,
+        "name": "preparation-substitutes-birth-for-actual",
+        "expected": "PREPARATION_REVISION"
+      },
+      {
+        "index": 13,
+        "name": "historical-proof-uses-current-version",
+        "expected": "HISTORICAL_VERSION"
+      },
+      {
+        "index": 14,
+        "name": "omitted-spent-ledger",
+        "expected": "OMITTED_ATTEMPT"
+      },
+      {
+        "index": 15,
+        "name": "unrelated-failed-ledger-cannot-be-omitted",
+        "expected": "OMITTED_ATTEMPT"
+      },
+      {
+        "index": 16,
+        "name": "hash-is-not-transport-authentication",
+        "expected": "RECEIPT_AUTHENTICATION"
+      },
+      {
+        "index": 17,
+        "name": "forged-jwt-algorithm",
+        "expected": "RECEIPT_AUTHENTICATION"
+      },
+      {
+        "index": 18,
+        "name": "missing-mtls",
+        "expected": "RECEIPT_AUTHENTICATION"
+      },
+      {
+        "index": 19,
+        "name": "wrong-worker-subject",
+        "expected": "RECEIPT_AUTHENTICATION"
+      },
+      {
+        "index": 20,
+        "name": "stale-callback-owner",
+        "expected": "RECEIPT_AUTHENTICATION"
+      },
+      {
+        "index": 21,
+        "name": "wrong-assignment",
+        "expected": "RECEIPT_AUTHENTICATION"
+      },
+      {
+        "index": 22,
+        "name": "wrong-owner-fence",
+        "expected": "RECEIPT_AUTHENTICATION"
+      },
+      {
+        "index": 23,
+        "name": "changed-receipt-preparation",
+        "expected": "EXCLUDED_RECEIPT_JOIN"
+      },
+      {
+        "index": 24,
+        "name": "receipt-for-other-request",
+        "expected": "RECEIPT_REQUEST"
+      },
+      {
+        "index": 25,
+        "name": "replacement-attempt-0-refused",
+        "expected": "ATTEMPT_ORDINAL"
+      },
+      {
+        "index": 26,
+        "name": "non-drift-failure-is-not-excludable",
+        "expected": "EXCLUDED_ATTEMPT"
+      },
+      {
+        "index": 27,
+        "name": "excluded-action-tampered-after-capture",
+        "expected": "LEDGER_IMMUTABLE"
+      },
+      {
+        "index": 28,
+        "name": "drift-at-first-step-retains-original-base-proof",
+        "expected": "VALID"
+      }
+    ],
+    "graphTimingConformance/graphCases": [
+      {
+        "index": 0,
+        "name": "admitted-binding-replacement",
+        "expected": "ACCEPT"
+      },
+      {
+        "index": 1,
+        "name": "pre-admission",
+        "expected": "ACCEPT"
+      },
+      {
+        "index": 2,
+        "name": "same-pair",
+        "expected": "ACCEPT"
+      },
+      {
+        "index": 3,
+        "name": "unperformed-read",
+        "expected": "ACCEPT"
+      },
+      {
+        "index": 4,
+        "name": "unknown-raw-edge-admission",
+        "expected": "REJECT"
+      },
+      {
+        "index": 5,
+        "name": "raw-edge-cannot-name-pending-action",
+        "expected": "REJECT"
+      },
+      {
+        "index": 6,
+        "name": "native-started-edge-is-not-excludable",
+        "expected": "REJECT"
+      },
+      {
+        "index": 7,
+        "name": "policy-failure-is-not-edge-exclusion",
+        "expected": "REJECT"
+      },
+      {
+        "index": 8,
+        "name": "assertion-failure-is-not-edge-exclusion",
+        "expected": "REJECT"
+      },
+      {
+        "index": 9,
+        "name": "unknown-outcome-is-not-edge-exclusion",
+        "expected": "REJECT"
+      },
+      {
+        "index": 10,
+        "name": "second-excluded-attempt-forbidden",
+        "expected": "REJECT"
+      },
+      {
+        "index": 11,
+        "name": "pre-admission-cannot-acquire-failed-edge",
+        "expected": "REJECT"
+      },
+      {
+        "index": 12,
+        "name": "edge-wrong-origin",
+        "expected": "REJECT"
+      },
+      {
+        "index": 13,
+        "name": "edge-wrong-binding",
+        "expected": "REJECT"
+      },
+      {
+        "index": 14,
+        "name": "edge-wrong-producer-admission",
+        "expected": "REJECT"
+      },
+      {
+        "index": 15,
+        "name": "edge-wrong-coordinate",
+        "expected": "REJECT"
+      },
+      {
+        "index": 16,
+        "name": "edge-wrong-slot",
+        "expected": "REJECT"
+      },
+      {
+        "index": 17,
+        "name": "duplicate-raw-edge",
+        "expected": "REJECT"
+      },
+      {
+        "index": 18,
+        "name": "successful-same-pair-edge-cannot-disappear",
+        "expected": "REJECT"
+      },
+      {
+        "index": 19,
+        "name": "raw-allocation-cannot-be-replaced-with-effective-empty-copy",
+        "expected": "REJECT"
+      },
+      {
+        "index": 20,
+        "name": "raw-failed-edge-history-cannot-be-erased",
+        "expected": "REJECT"
+      },
+      {
+        "index": 21,
+        "name": "bootstrap-cannot-hash-effective-projection",
+        "expected": "REJECT"
+      },
+      {
+        "index": 22,
+        "name": "model-only-orphan-allocation-refused",
+        "expected": "REJECT"
+      },
+      {
+        "index": 23,
+        "name": "missing-base-proof-cannot-authorize-import",
+        "expected": "REJECT"
+      },
+      {
+        "index": 24,
+        "name": "foreign-base-pin-cannot-authorize-import",
+        "expected": "REJECT"
+      },
+      {
+        "index": 25,
+        "name": "prefix-read-must-match-verified-program",
+        "expected": "REJECT"
+      },
+      {
+        "index": 26,
+        "name": "missing-base-binding-cannot-authorize-zero-consumer",
+        "expected": "REJECT"
+      },
+      {
+        "index": 27,
+        "name": "producer-historical-availability-context-must-match",
+        "expected": "REJECT"
+      },
+      {
+        "index": 28,
+        "name": "producer-historical-availability-fence-must-match",
+        "expected": "REJECT"
+      },
+      {
+        "index": 29,
+        "name": "successful-read-producer-cannot-be-hidden",
+        "expected": "REJECT"
+      },
+      {
+        "index": 30,
+        "name": "unread-producer-cannot-be-fabricated",
+        "expected": "REJECT"
+      },
+      {
+        "index": 31,
+        "name": "retained-producer-provenance-required",
+        "expected": "REJECT"
+      },
+      {
+        "index": 32,
+        "name": "new-model-consumer-intent-cannot-use-import-exception",
+        "expected": "REJECT"
+      },
+      {
+        "index": 33,
+        "name": "final-need-identity-cannot-change",
+        "expected": "REJECT"
+      },
+      {
+        "index": 34,
+        "name": "first-suffix-acceptance-cannot-follow-frozen-head",
+        "expected": "REJECT"
+      },
+      {
+        "index": 35,
+        "name": "receipt-transport-authority-cannot-be-inferred-from-hash",
+        "expected": "REJECT"
+      },
+      {
+        "index": 36,
+        "name": "effective-transfer-cannot-disappear",
+        "expected": "REJECT"
+      },
+      {
+        "index": 37,
+        "name": "effective-transfer-producer-cannot-change",
+        "expected": "REJECT"
+      },
+      {
+        "index": 38,
+        "name": "excluded-failed-edge-is-not-executable-transfer",
+        "expected": "REJECT"
+      },
+      {
+        "index": 39,
+        "name": "candidate-policy-cannot-omit-successful-transfer",
+        "expected": "REJECT"
+      },
+      {
+        "index": 40,
+        "name": "candidate-policy-binding-cannot-drop-successful-consumer",
+        "expected": "REJECT"
+      },
+      {
+        "index": 41,
+        "name": "publication-preimage-must-commit-raw-failed-edge",
+        "expected": "REJECT"
+      },
+      {
+        "index": 42,
+        "name": "publication-preimage-envelope-cannot-change",
+        "expected": "REJECT"
+      },
+      {
+        "index": 43,
+        "name": "admission-preimage-must-exclude-spent-attempt",
+        "expected": "REJECT"
+      },
+      {
+        "index": 44,
+        "name": "admission-preimage-is-array-not-wrapper",
+        "expected": "REJECT"
+      },
+      {
+        "index": 45,
+        "name": "candidate-authorization-preimage-is-exact",
+        "expected": "REJECT"
+      },
+      {
+        "index": 46,
+        "name": "candidate-source-identity-cannot-be-substituted",
+        "expected": "REJECT"
+      }
+    ],
+    "graphTimingConformance/historyCases": [
+      {
+        "index": 0,
+        "name": "failed-consumer-replaced-with-literal-retains-zero-consumer-producer-synthetic-row-chain",
+        "expected": "ACCEPT"
+      },
+      {
+        "index": 1,
+        "name": "pre-admission-drift-drops-unperformed-import-intent-only-synthetic-row-chain",
+        "expected": "ACCEPT"
+      },
+      {
+        "index": 2,
+        "name": "successful-same-step-slot-use-cannot-be-hidden-by-later-failed-attempt-synthetic-row-chain",
+        "expected": "ACCEPT"
+      },
+      {
+        "index": 3,
+        "name": "never-executed-imported-producer-keeps-raw-allocation-only-synthetic-row-chain",
+        "expected": "ACCEPT"
+      },
+      {
+        "index": 4,
+        "name": "later-unperformed-obligation-cannot-disappear",
+        "expected": "REJECT"
+      },
+      {
+        "index": 5,
+        "name": "first-suffix-cannot-remove-successful-meaning",
+        "expected": "REJECT"
+      },
+      {
+        "index": 6,
+        "name": "later-plan-cannot-skip-parent",
+        "expected": "REJECT"
+      },
+      {
+        "index": 7,
+        "name": "first-suffix-acceptance-cannot-be-reused-for-later-delete",
+        "expected": "REJECT"
+      }
+    ],
+    "graphTimingConformance/timingCases": [
+      {
+        "index": 0,
+        "name": "legal-distinct-admission-tie",
+        "expected": "ACCEPT"
+      },
+      {
+        "index": 1,
+        "name": "duplicate-admission-still-rejected",
+        "expected": "REJECT"
+      },
+      {
+        "index": 2,
+        "name": "reversed-total-order-still-rejected",
+        "expected": "REJECT"
+      },
+      {
+        "index": 3,
+        "name": "wrong-ledger-coordinate",
+        "expected": "REJECT"
+      },
+      {
+        "index": 4,
+        "name": "undispatched-admission",
+        "expected": "REJECT"
+      },
+      {
+        "index": 5,
+        "name": "null-end-preserved-on-legal-tie",
+        "expected": "ACCEPT"
+      },
+      {
+        "index": 6,
+        "name": "admission-tie-break-is-codepoint-not-utf16-locale",
+        "expected": "ACCEPT"
+      },
+      {
+        "index": 7,
+        "name": "duplicate-admission-at-different-measured-time",
+        "expected": "REJECT"
+      },
+      {
+        "index": 8,
+        "name": "unknown-admission-cannot-acquire-stamp",
+        "expected": "REJECT"
+      },
+      {
+        "index": 9,
+        "name": "runner-cannot-submit-derived-step-kind",
+        "expected": "REJECT"
+      },
+      {
+        "index": 10,
+        "name": "end-before-start-refused",
+        "expected": "REJECT"
+      },
+      {
+        "index": 11,
+        "name": "original-session-time-ceiling-refused",
+        "expected": "REJECT"
+      },
+      {
+        "index": 12,
+        "name": "noninteger-reading-refused",
+        "expected": "REJECT"
+      },
+      {
+        "index": 13,
+        "name": "extra-timing-attempt-field-refused",
+        "expected": "REJECT"
+      },
+      {
+        "index": 14,
+        "name": "no-reading-means-no-fabricated-pre-native-stamp",
+        "expected": "ACCEPT"
+      }
+    ]
+  },
+  "catalogCanonicalVectorNames": [
+    "unicode-composed",
+    "unicode-decomposed",
+    "astral-span",
+    "escaped-controls",
+    "null-and-integer-limits",
+    "source-order",
+    "configuration-projection",
+    "publication-evidence",
+    "c0-controls",
+    "incremental/complete-authored-declarations",
+    "incremental/utf8-reference-order-BMP-before-astral",
+    "incremental/test-config",
+    "incremental/prefix-program",
+    "incremental/relearn-plan",
+    "incremental/materialization-full-v1",
+    "incremental/materialization-full-v2",
+    "incremental/materialization-header-v1",
+    "incremental/materialization-header-v2",
+    "incremental/prefix-request-identity",
+    "incremental/pre-admission-drift-body",
+    "incremental/admitted-drift-body",
+    "incremental/drift-switch",
+    "incremental/incremental-metadata",
+    "incremental/producer-before-consumer-deletion",
+    "incremental/producer-after-last-consumer-deletion",
+    "incremental/consumer-before-deletion",
+    "incremental/consumer-after-edge-removal",
+    "incremental/step-input",
+    "incremental/step-chain",
+    "incremental/learned-content",
+    "incremental/step-snapshot",
+    "incremental/exact-controls-no-normalization",
+    "incremental/incremental-evidence-pre-admission",
+    "incremental/complete-extended-validation-basis",
+    "incremental/publication-evidence-preimage",
+    "incremental/effective-admission-provenance-array",
+    "incremental/complete-incremental-boundary-validation-basis",
+    "incremental/incremental-publication-evidence-preimage",
+    "correction01/ordinary/snapshot-current",
+    "correction01/ordinary/publication-preimage",
+    "correction01/ordinary/snapshot-map",
+    "correction01/boundary/snapshot-current",
+    "correction01/boundary/publication-preimage",
+    "correction01/boundary/snapshot-map",
+    "correction01/empty-prefix-incomplete-base/snapshot-current",
+    "correction01/empty-prefix-incomplete-base/publication-preimage",
+    "correction01/empty-prefix-incomplete-base/snapshot-map",
+    "correction01/base-historical-ordinary/snapshot-current",
+    "correction01/base-historical-ordinary/publication-preimage",
+    "correction01/base-historical-ordinary/snapshot-map"
+  ],
+  "archiveRule": "C-int must archive these exact bytes outside active5file catalog before changing canonical/packaged vectors; old correction05 archives and all actual execution evidence remain immutable."
+}

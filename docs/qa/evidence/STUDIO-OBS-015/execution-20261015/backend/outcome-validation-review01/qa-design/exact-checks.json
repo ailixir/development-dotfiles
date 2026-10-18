@@ -1,0 +1,204 @@
+{
+  "artifact": "Quinn independent bounded outcome design checks",
+  "createdAt": "2026-10-15T11:43:04.063829+00:00",
+  "readiness": "REGRESSION_ONLY_READY; PRODUCTION_COMPILER_NOT_READY_BEFORE_ACTUAL_ENGINE_REPRODUCTION",
+  "parentManifestSha256": "6371990a0187f5e87f4dc8c9d6f1634e20a7ef755e7143eb39bf898db8e996cc",
+  "formalQAVerdict": null,
+  "lifecycleTransition": null,
+  "sourceReleaseGranted": false,
+  "checks": [
+    {
+      "id": "provenance",
+      "classification": "SOURCE_AND_CAPTURE_METADATA_VERIFIED",
+      "finding": "Parent manifest and every cited file/input match inspected bytes. Actual04 matched1852byte body SHA df249e3a41e16d33c4dff8b428007f3268c28f18b303a4cc874a8224162c65b7 accepted Node/rejected Java. Raw body absent; undisclosed scalars not independently certified. First trusted-ceiling initial session cohort only, not unavailable main-edit4 body. Expanded root hash stays UNAVAILABLE in capture.",
+      "references": [
+        "../manifest.json",
+        "../source-evidence.json"
+      ]
+    },
+    {
+      "id": "epoch",
+      "classification": "SOURCE_DERIVED_NOT_CAPTURED",
+      "finding": "Expanded original outcome root keys exactly[oneOf], two complete object branches, hash95f7878408ce7d089646898aef3d528bc2e3c62d7f2bf8f228134556dfe451e8; separately computed here from existing used build resources. Hash seen in native-node list is untagged and not promoted to captured root hash.",
+      "references": []
+    },
+    {
+      "id": "native-mechanism",
+      "classification": "SOURCE_ESTABLISHED_RUNTIME_PREDICTED",
+      "finding": "Exact1.4.0 source identifies shared matched-node state after false ordinary errorMessage condition inside outer oneOf; the condition failure and rejected alternative errors are expected. Static JAR metadata and referenced class evidence support version mapping, but no JVM reproduction is supplied.",
+      "references": [
+        {
+          "url": "https://raw.githubusercontent.com/networknt/json-schema-validator/1.4.0/src/main/java/com/networknt/schema/OneOfValidator.java",
+          "version": "1.4.0",
+          "purpose": "empty errors plus hasMatchedNode gate, lines50-98"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/networknt/json-schema-validator/1.4.0/src/main/java/com/networknt/schema/PropertiesValidator.java",
+          "version": "1.4.0",
+          "purpose": "complex missing required field sets unmatched, lines122-140"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/networknt/json-schema-validator/1.4.0/src/main/java/com/networknt/schema/IfValidator.java",
+          "version": "1.4.0",
+          "purpose": "condition errors discarded, only failFast restored, lines65-86"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/networknt/json-schema-validator/1.4.0/src/main/java/com/networknt/schema/AllOfValidator.java",
+          "version": "1.4.0",
+          "purpose": "returns aggregate errors without matched-state restoration, lines45-97"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/networknt/json-schema-validator/1.4.0/src/main/java/com/networknt/schema/JsonSchema.java",
+          "version": "1.4.0",
+          "purpose": "property ordering, shared execution state, fresh public validate context"
+        }
+      ]
+    },
+    {
+      "id": "legal-control",
+      "classification": "INDEPENDENT_FROZEN_CONTROL_NOT_EXECUTED",
+      "finding": "Unchanged fixtures documents/flow/outcomes/0 has complete ordinary closed shape, SUCCEEDED/OK, initialBlank/about:blank/nullorigin/generation0, nullavailability, noerrorMessage. Full ordinary expectedtrue, prefixfalse by frozen semantics; canonical controlSHA 6dd0ed43b9b77aba88c075c8a5b84064510baa3d330601f62c03b537d0c71d5b. This is not reconstructed actual04 body.",
+      "references": []
+    },
+    {
+      "id": "fresh-context",
+      "classification": "SOURCE_ESTABLISHED",
+      "finding": "Public native JsonSchema.validate(JsonNode) creates a fresh execution context; nested validate(ExecutionContext,...) reuses state. New mode must call each complete branch public overload independently for each validation and keep every original leaf/allOf/if/then/else/oneOf. No property-only or discriminator-selected substitute.",
+      "references": [
+        "https://raw.githubusercontent.com/networknt/json-schema-validator/1.4.0/src/main/java/com/networknt/schema/JsonSchema.java#L569-L640"
+      ]
+    },
+    {
+      "id": "failfast",
+      "classification": "REQUIRED_DESIGN_CORRECTION",
+      "finding": "Outcome-only eligibility must reject config.isFailFast()==true. Native outer oneOf temporarily suppresses fail-fast during alternatives, whereas independent public full-branch validation inherits config and can throw on the nonmatching branch. Do not change existing4 paths, mutate config, swallow exceptions, or infer a match from exception.",
+      "references": [
+        "https://raw.githubusercontent.com/networknt/json-schema-validator/1.4.0/src/main/java/com/networknt/schema/OneOfValidator.java#L60-L80"
+      ]
+    },
+    {
+      "id": "exact-one-test",
+      "classification": "REQUIRED_TEST_DESIGN_CORRECTION",
+      "finding": "Frozen ordinary and prefix envelopes are disjoint. Current positives/negatives plus unknown-overlap nativefallback alone cannot distinguish optimized XOR from OR/firstmatch. Test the actual private aggregation mode with complete native ordinary/prefix validators for TT/TF/FT/FF, including duplicate complete matching validators; verify both public validate calls per normally completing evaluation. Keep this test-only private-plan construction out of compiler/cache/public eligibility.",
+      "references": []
+    },
+    {
+      "id": "eligibility",
+      "classification": "BOUNDED_PLAN_COHERENT_WITH_CORRECTIONS",
+      "finding": "Only exact normalized name, exact expanded epoch, oneOf-only two-object-full-branch root, original V7 validation context and admissible config may use new mode. Existing typeLoose/defaults/customizer/listener/discriminator exclusions plus new outcome failFast exclusion apply. Unknown name/epoch/root/config/compiler structure returns complete original native baseline. Use original V7 factory/context config; do not replace with loose/default config or force a configured behavior.",
+      "references": []
+    },
+    {
+      "id": "fallback-mode-observability",
+      "classification": "REQUIRED_TEST_HELPER_ADDITION",
+      "finding": "Existing assertNativePlan only checks empty properties/objects/arrays. A new union mode can also have all three empty, so these checks alone cannot prove native fallback. Extend the same private reflection helper to assert the optional native-alternative collection is empty for fallback and all four old plans; assert known outcome mode has exactly two full original branch nodes/configs. Keep every old assertion. Unknown-root/config tests must inspect this mode and retain original complete root, not merely compare false results.",
+      "references": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java"
+      ]
+    },
+    {
+      "id": "authority",
+      "classification": "UNCHANGED_REQUIRED_BOUNDARY",
+      "finding": "Schema mode checks only frozen structure/grammar/conditionals. Valid64hex-but-wrong hashes, welltyped mismatched worker/fence/receiptledger equality, or body-only receipt do not become authenticated authority. Existing callback owner/mTLS/assignment/prep/action joins remain mandatory B1/etc. The compiler must not invent those schema constraints or authorize a prefix switch.",
+      "references": []
+    },
+    {
+      "id": "four-roots",
+      "classification": "PRESERVE_ALL_EXISTING_GATES",
+      "finding": "All four original epoch constants and existing compileProperties/compileBasis/array/observation paths remain unchanged. Preserve every original strict wire/canonical/mutation/conditional/nativefallback/positive test. Regressions use independent frozen expected semantics, never native outcome root as success oracle.",
+      "references": []
+    },
+    {
+      "id": "stale-ledger-baseline",
+      "classification": "SEPARATE_SOURCE_BASELINE_CONCERN_NOT_RUNTIME_FAILURE",
+      "finding": "Current built/source ledger has21 properties and source-expanded hashb1a71bd543c51f4eaebd849f99139d077e475caf3ca90efa84a4c9d9d062b80d, versus unchanged LEDGER_SCHEMA_EPOCH2f365ba04a6254df0fb6c3930b01bdcecea5a494415f25cae4653e1aa870d6cb and existing assertFinitePlan expects20. Correct unknown-epoch behavior is nativefallback. Existing finite-plan test appears stale; preserve it to capture actual baseline failure. Root routes four-root audit to Aria separately. This is not permission to re-epoch/delete/weaken/count-adjust within outcome repair.",
+      "references": []
+    },
+    {
+      "id": "scope",
+      "classification": "RETAINED",
+      "finding": "Only requested production/test2files are candidate implementation scope after regression prerequisite/root release. AllsourceHOLD. snapshot05pureJava19groupsPASS is separate and not engine proof. All86/24/55/35/B1/R1/B2/B3/B4R2/native/fullgates/independent015QA/adminclosurethen008 remain. Row85 unchanged pendinguser, no timing alternative.",
+      "references": []
+    }
+  ],
+  "sourceDerivedRoot": {
+    "hash": "95f7878408ce7d089646898aef3d528bc2e3c62d7f2bf8f228134556dfe451e8",
+    "keys": [
+      "oneOf"
+    ],
+    "branchCount": 2,
+    "branchHashes": [
+      "be738fd98792fed35821849ce6e9e50abbad334a03de282df3261494192497f1",
+      "3547f2fbe5f29e0197f7fa326eaa5a2e3da92bbe164a2deb9a74043751a872c0"
+    ],
+    "capturedExpandedRootHash": "UNAVAILABLE"
+  },
+  "localJar": {
+    "path": "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/com.networknt/json-schema-validator/1.4.0/8e7c5b0b0ed6b3eac2adfa9352ff4ca8187d9160/json-schema-validator-1.4.0.jar",
+    "sha256": "5d7b6ce4c7b2a3ed189511cbaa913808c7cd2b570d70b923426352785bffbdd0",
+    "bytes": 529981,
+    "pomProperties": [
+      "groupId=com.networknt",
+      "artifactId=json-schema-validator",
+      "version=1.4.0"
+    ],
+    "loadedJvmDependencyProof": "NOT_OBTAINED; futuretest must establish actual loaded JsonSchema codeSource/version/JAR SHA"
+  },
+  "futureStagePrerequisites": [
+    {
+      "stage": "R0 REGRESSION SOURCE ONLY",
+      "files": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java"
+      ],
+      "productionHashMustRemain": {
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "c83be072b5b1ef2044be4eb5f81d34ba404d62de3781836d144ec058296943f3"
+      },
+      "work": "Add least-scope unchanged-control mechanism regression, preserve every old test, no compiler mutation. No source release is granted here."
+    },
+    {
+      "stage": "R1 ACTUAL ENGINE REPRODUCTION",
+      "futureSelector": "cd backend; ./gradlew test --tests com.citi.put.checks.studio.guided.session.GuidedWireContractTest.outcomeNativeUnionDefectReproducesOnLoaded140",
+      "mustObserve": [
+        "actual loaded networknt1.4.0 codeSource JAR SHA matches5d7b6ce4c7b2a3ed189511cbaa913808c7cd2b570d70b923426352785bffbdd0; inspect JsonSchema/OneOf/If classes fromsame loaded source",
+        "unchanged frozen control canonicalSHA6dd0ed43b9b77aba88c075c8a5b84064510baa3d330601f62c03b537d0c71d5b",
+        "original expanded native root returns nonempty errors(false); fresh complete ordinary native branch empty(true); fresh complete prefix native branch nonempty(false)",
+        "value/schema bytes unchanged; no branch/leaf stripping; production file still exactbaselinehash"
+      ],
+      "ifAnyMissing": "NEED_EVIDENCE; no speculative production patch, no assumptions/skips/changed expectations. Obtain value-free perbranch returnedempty/errorcounts and matchedNode-before/after false if/rootcount, and specifically tagged expanded-root hash under separately released instrumentation; raw actual04 remains unavailable."
+    },
+    {
+      "stage": "R2 BOUNDED IMPLEMENTATION ONLY AFTER R1 AND ROOT RELEASE",
+      "files": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java"
+      ],
+      "work": "One optional full-native-branch mode, exact pinned root eligibility+sameconfig restrictions+outcome failFastfalse; both full branches independently validated, exactlyone emptyerrors. Existing constructor defaults retain four original paths. No schema/pin/dependency/limit/transport/runtime/authority change."
+    },
+    {
+      "stage": "R3 MEANINGFUL COMPILER VERIFICATION",
+      "futureSelector": "cd backend; ./gradlew test --tests com.citi.put.checks.studio.guided.session.GuidedWireContractTest",
+      "work": "Full regressionmatrix/public validate+validateAndCanonical, exactone privateaggregate, freshcontexts/config/unknownrootfallback and every unchanged oldpositive/mutation/wire gate. Preserve any actual stalefourroot failure and route separately; no claim that oldnative outcome root is positiveoracle."
+    },
+    {
+      "stage": "R4 ACTUAL APPLICATION FANIN",
+      "work": "Root authorized actual joined original response path on final heldsources must prove correctcallbacks plus browser/video/publication/replay without repeating uncertain nativeeffect. Full backend/runner configuredgates/coverage/deployment/privateauthority/independent015QA/adminclosure then008. No compiler-onlyPASS substitutes."
+    }
+  ],
+  "rootLatestRegressionOnlyWindow": {
+    "rootReportedAuthorization": "ONLY bounded unchanged-control native-engine regression source in GuidedWireContractTest; every old assertion retained; entireclassbaseline scheduled separately",
+    "productionCompilerHeldUntilActualReproduction": true,
+    "preservedTestBefore": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/outcome-regression-only01/source-before/GuidedWireContractTest.java",
+      "sha256": "4f14e9fd8bac3f831c81be2e8351551e1ce34e633ec1838bccfad805dc7f3549",
+      "bytes": 28538
+    },
+    "currentTestAtFinalRead": {
+      "sha256": "4f14e9fd8bac3f831c81be2e8351551e1ce34e633ec1838bccfad805dc7f3549",
+      "bytes": 28538
+    },
+    "reviewerSourceWrites": 0,
+    "reviewDoesNotGrantSourceRelease": true,
+    "actualSpecificRegressionMustPass": "loaded1.4.0 native-rootfalse/ordinarytrue/prefixfalse before any production compiler change",
+    "oldFinitePlanFailures": "record actualbaseline failures unchanged; route four-root audit separately"
+  }
+}

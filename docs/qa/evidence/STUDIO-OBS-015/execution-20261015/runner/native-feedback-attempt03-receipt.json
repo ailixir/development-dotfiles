@@ -1,0 +1,1590 @@
+{
+  "artifact": "STUDIO-OBS-015 actual four-file local native feedback03",
+  "at": "2026-10-15T16:22:03.666341+00:00",
+  "status": "PASS_AUTHORIZED_SELECTED_LOCAL_NATIVE_SCOPE_EXCLUDED_JAVA_SOURCE_DRIFT_FULL_SCOPE_OPEN",
+  "authorization": "Exactlyone complete fourfile native invocation. Root explicitly permits disjoint SOURCEONLY Backend JOIN+Gradle testfixture writer with exactlytwo exclusions; no Java/runtime/CPU/service overlap. Component feedback only,not finalglobalfreeze/Coreauthority.",
+  "outerCommand": "python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-runner.py runner-r1-native-feedback-attempt03 --source-exclusions .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/backend-budget-native-fixture-exclusions.json ./node_modules/.bin/vitest run --config vitest.fixtures.config.ts test/fixtures-tier/mixed-mode-prefix.test.ts test/fixtures-tier/secret-login.test.ts test/fixtures-tier/guided-dataflow.test.ts test/fixtures-tier/guided-secret-isolation.test.ts",
+  "liveHandle": 42607,
+  "actualCommand": {
+    "command": [
+      "./node_modules/.bin/vitest",
+      "run",
+      "--config",
+      "vitest.fixtures.config.ts",
+      "test/fixtures-tier/mixed-mode-prefix.test.ts",
+      "test/fixtures-tier/secret-login.test.ts",
+      "test/fixtures-tier/guided-dataflow.test.ts",
+      "test/fixtures-tier/guided-secret-isolation.test.ts",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/runner-r1-native-feedback-attempt03-vitest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-15T16:16:01.442934+00:00",
+    "elapsedSeconds": 43.81,
+    "exit": 0,
+    "sourceStable": false,
+    "distStable": true,
+    "logSha256": "ec4467e1ccda35380941d9fa7c57ba9f1eec5994cc1fc0c01c141d7758219aef",
+    "testInputStable": true,
+    "testInputDigestBefore": "7d1fd190c8118b43cd5bc3bac61ef9849ab2461b78a6c7a09a0972b347b24d4b",
+    "testInputDigestAfter": "7d1fd190c8118b43cd5bc3bac61ef9849ab2461b78a6c7a09a0972b347b24d4b",
+    "explicitDisjointValidationExclusions": {
+      "paths": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+        "backend/build.gradle.kts"
+      ],
+      "reason": "Explicit disjoint Java test/build fixture source writer during four local Node/Chromium native fixture files. Selected files and transitive runner helpers use local Node servers and runner source/dist, no Java test source or Gradle configuration. Fixtures globalSetup emits only studio-runner/src through tsconfig.build. Native02 actual process inventory observed Node/Chromium/ffmpeg, no new JVM/backend service; exact Java test/build paths are absent from runner runtime imports and file reads. Backend writer is SOURCE ONLY with no Gradle, JVM, tests, static CPU or service changes.",
+      "scope": "FOUR_LOCAL_NODE_NATIVE_FIXTURE_FEEDBACK_ONLY_NOT_CORE_PRIVATE_AUTHORITY_OR_FINAL_GLOBAL_STABILITY",
+      "globalSourceStableClaim": false,
+      "requiredFinalValidation": "All source held for final full configured native/backend gates. Preserve actual global sourceStable, selected testInputStable, distStable and the exact excluded file before/after hashes; do not turn component evidence into a full story or global freeze claim."
+    },
+    "excludedFileChanges": [
+      {
+        "path": "backend/build.gradle.kts",
+        "before": "4833ddd1f67b6d21f3c3ddec847349e2eea316bb8538386ef69f772a6157ce3b",
+        "after": "a04797ff32324faff9596ca14646292c618337f5ef18fc89cb83c1af83453fe1"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+        "before": "07818f2ec8eff469548a5c6d5720b950ffead21803ac28021ff5c7d0dd9c0c00",
+        "after": "07818f2ec8eff469548a5c6d5720b950ffead21803ac28021ff5c7d0dd9c0c00"
+      }
+    ],
+    "vitest": {
+      "success": true,
+      "numPassedTests": 48,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTests": 48,
+      "numPassedTestSuites": 7,
+      "numFailedTestSuites": 0
+    },
+    "vitestReportSha256": "5e6e17b799414d6ab938d598d6d955d15096f8d39417f5d7e2a8c2a05699b580"
+  },
+  "wrapper": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/run-runner.py",
+    "sha256": "51e38cd9b098e519618378acac28f03e867f53c9e4a25c4b4f2727bc463df3d0",
+    "exclusions": {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-015-008/backend-budget-native-fixture-exclusions.json",
+      "sha256": "526d87356cc7e599dfa455695892daa613432ae4b90d0c8a5856a9ea88725224"
+    }
+  },
+  "actualCounts": {
+    "collected": 48,
+    "passed": 48,
+    "failed": 0,
+    "skipped": 0,
+    "files": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "failedToLoad": 0,
+      "hookAborted": 0
+    },
+    "logicalSuites": {
+      "passed": 7,
+      "failed": 0
+    },
+    "unhandledErrors": 0,
+    "unhandledRejections": 0,
+    "suppression": false
+  },
+  "fileOutcomes": [
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+      "collected": 3,
+      "counts": {
+        "passed": 3
+      },
+      "fileErrorPresent": false
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+      "collected": 3,
+      "counts": {
+        "passed": 3
+      },
+      "fileErrorPresent": false
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+      "collected": 2,
+      "counts": {
+        "passed": 2
+      },
+      "fileErrorPresent": false
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "collected": 40,
+      "counts": {
+        "passed": 40
+      },
+      "fileErrorPresent": false
+    }
+  ],
+  "casePreservation": {
+    "exact48NameMultiplicitiesFromNative02": true,
+    "original42FromNative01Preserved": true,
+    "previous47PassesStillPass": true,
+    "soleStatusChange": [
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "measures actual GuidedRuntime native-guard failure and its diagnostic sinks in Chromium",
+        "before": "failed",
+        "after": "passed"
+      }
+    ],
+    "new8CurrentPasses": [
+      {
+        "file": "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+        "name": "retains actual read ordinal0 inside drift step2, spends only failed ordinal1, then natively recaptures twice under identical fixture artifact bytes",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: valid",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: bad-origin",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: zero-password",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: two-passwords",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: focus-typeflip",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: oversize-frame",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: stopped-lease",
+        "status": "passed"
+      }
+    ],
+    "shared6CurrentPasses": [
+      {
+        "file": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+        "name": "real guided Chromium dataflow proves regionVisible policy source\u2192consumer without value disclosure or duplicate invocation",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+        "name": "real guided Chromium dataflow proves regionControl policy source\u2192consumer without value disclosure or duplicate invocation",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+        "name": "real guided Chromium dataflow STUDIO-OBS-014 ar-mounted-rules oracle 2: the former exact-rule page exports only structural nodes under the governed policy and never the former rule target",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+        "name": "ISO1 rejects mounted capacity2 before worker TLS, claim, browser or secret effects",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+        "name": "ISO2 retains capacity1 through actual A close and writer quiescence before B",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+        "name": "ISO3 isolates fresh CSI-B PASS from genuine A producer, cookie, masking and profile state",
+        "status": "passed"
+      }
+    ],
+    "all48Outcomes": [
+      {
+        "file": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+        "name": "real guided Chromium dataflow proves regionVisible policy source\u2192consumer without value disclosure or duplicate invocation",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+        "name": "real guided Chromium dataflow proves regionControl policy source\u2192consumer without value disclosure or duplicate invocation",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+        "name": "real guided Chromium dataflow STUDIO-OBS-014 ar-mounted-rules oracle 2: the former exact-rule page exports only structural nodes under the governed policy and never the former rule target",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+        "name": "ISO1 rejects mounted capacity2 before worker TLS, claim, browser or secret effects",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+        "name": "ISO2 retains capacity1 through actual A close and writer quiescence before B",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+        "name": "ISO3 isolates fresh CSI-B PASS from genuine A producer, cookie, masking and profile state",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+        "name": "mixed prefix and suffix on one actual recorded guided session recaptures a stable binding, preserves exact prepared lineage, crosses at4 and records both modes",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+        "name": "retains actual read ordinal0 inside drift step2, spends only failed ordinal1, then natively recaptures twice under identical fixture artifact bytes",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts /login without exporting any password node",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts /two-passwords without exporting any password node",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts /no-password without exporting any password node",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts /shadow-login without exporting any password node",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses a pinned swap mutation without typing",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses a pinned reattach mutation without typing",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses a pinned type mutation without typing",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses /trap before a value is typed",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses /cross-origin-form before a value is typed",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary permits inert focus styling while retaining the same unique password input",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary requires both allowed and approved origin and scrubs later echoes",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses the native origin boundary at its first guard: nonempty-allowed-exclusion",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses the native origin boundary at its first guard: approved-exclusion",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary refuses the native origin boundary at its first guard: formless-declared-navigation",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts adversarial shadow-plus-light candidates identically at prepare",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts adversarial offscreen candidates identically at prepare",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts adversarial iframe candidates identically at prepare",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "isolated-world password control production boundary counts adversarial closed-shadow candidates identically at prepare",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "scans recorded and guided persistent profiles before close and cleanup",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "refuses an actual browser launch without the prewritten Preferences file",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "measures raw Playwright fill error text before the production redactor",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "measures actual GuidedRuntime native-guard failure and its diagnostic sinks in Chromium",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "measures actual GuidedRuntime injected-released-value failure and its diagnostic sinks in Chromium",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "uses structural login signature only; a passing registration assertion remains passing",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "settles a protected redirect on the reached login document instead of timing out",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes the actual replay LOGIN_REQUIRED oracle: no-login",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes the actual replay LOGIN_REQUIRED oracle: wrong-password",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes the actual replay LOGIN_REQUIRED oracle: registration",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: no-login",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: wrong-password",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "replays the published password-only guard against /two-passwords and refuses before typing",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "replays the published password-only guard against /no-password and refuses before typing",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "replays login twice without a model, records distinct receipts/video and uses rotated values",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: valid",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: bad-origin",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: zero-password",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: two-passwords",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: focus-typeflip",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: oversize-frame",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+        "name": "executes actual recorded password-only prefix guard: stopped-lease",
+        "status": "passed"
+      }
+    ],
+    "noSkipFilterTimeoutOraclePolicyChanges": true
+  },
+  "new8ActualReaches": {
+    "secretSeven": "Actual native secret-prefix branches,one recorded GuidedBrowser.handle/ObservationSession,closed password-only targets,prep/evidence/context lineage,no exported passwordnodes,once-before-real-close profile/DOM facts,strict full mixed journal identity/order/consumption/fence/operationHash/nullreceipt assertions,final owned-media privacy scans and masked export authorization ALL reached and passed.",
+    "validVersion": "Actual local actionv1/authoredInputsHash retained after append/ACKv2. Exact historical ACK idempotence and stale old prefix refusal. Not actual Vault RELEASE+USAGE historical DB lineage.",
+    "badOriginAndTypeFlip": "Actual UNKNOWN/POLICY_DENIED and UNKNOWN/TARGET_CHANGED,exactone fillINVOKING/native start with actual nullend,zeroDOMwrite/no drift/no extra native dispatch; never uncertain native retry.",
+    "zeroTwo": "Actual passwordcount0/2 and raw prepare absence/ambiguity,closed runtime/no fill consumption/fence/timing.",
+    "oversize": "Released-frame schema bound,no fill consumption/fence/timing; not Vault oversized read/release.",
+    "stoppedLease": "Actual owning runtime.stop LEASE_LOST then refusal/no fill; not Vault revocation or natural original expiry.",
+    "partialReadDrift": "Actual supported trusted labeledOUTPUTreadj0 in driftstep2; real DOM target replacement before j1 bindingfill; positive local admitted native0drift/spentattempt0,retained earlier successful producer/recipe/origin/availability/raw allocation/failededge,protected withholdACK wait/native0/no metadata or browser restart,exact historicalACK,fresh observation/preparation/replacementattempt1 on SAME handle/session/video. No reusedFrom for drift step.",
+    "ordinaryTwoFresh": "One immutable fixture-local artifact with effectivezero-consumer retained read and2effectiveinputs/raw3history, two fresh local Launch run/attempt/admission UUID tuples,two actual native read captures via original invoke passthrough,artifact bytes unchanged,both ordinary media decoded. Not Core-issued publication/PG history/gatewayauthority."
+  },
+  "olderNativeGuardCorrectedReach": {
+    "case": "measures actual GuidedRuntime native-guard failure and its diagnostic sinks in Chromium",
+    "status": "passed",
+    "actual": "Complete originalduplicate cloned and frozen dispatchschema/hash equality verified before first dispatch; after actualUNKNOWN/TARGET_CHANGED/dispatchCount1/acceptingfalse/nodrift, schema-valid duplicate refuses exactCONTEXT_LOST.",
+    "noWork": "Callback count,raw-failure count and journal bytes unchanged around duplicate; exactone fillconsumption/INVOKING matches admission/operation/session/context/owner/nullreceipt; zeroDOMwrite/profile facts; original and duplicate secret erased.",
+    "diagnostics": "All original raw failure/redactor/stderr/callback/persisted diagnostic/2048byte/no-canary assertions now reached and passed. No newrelease/admission/fetch or real native retry.",
+    "limits": "This older case has no recorder; no timestamp invented. Recorded focus-typeflip companion independently proves native-start/nullend. Its existing code-only native error disclosure remains: no native raw-error-canary authority inferred from injected hook or separate readonly probe."
+  },
+  "ordinaryPassword0Two": "Both old actual ordinary native zero/two candidate cases PASS POLICY_REFUSED/secretUseREFUSED plus emptyDOM/no login receipts after proper trusted preparation translation. Unknown/spoofed errors remain covered by Node14unit controls,not falsely promoted to native/Vault authority.",
+  "retention": {
+    "newManifests": 8,
+    "verifiedOriginalCopies": 11,
+    "maskedSecretClips": 7,
+    "decodedNonsecretClips": 4,
+    "secretDecoder": "NOT_REACHED",
+    "allSeekAndPNGs": "NOT_REACHED; no fabricated frames/timestamps/ties",
+    "missingMedia": 0,
+    "exportFailures": 0,
+    "actualManifestLogPaths": [
+      "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-valid-ZXgJI1/manifest.json",
+      "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-bad-origin-JwmJSN/manifest.json",
+      "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-zero-password-gAdMnv/manifest.json",
+      "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-two-passwords-i56Wqv/manifest.json",
+      "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-focus-typeflip-Pg1u60/manifest.json",
+      "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-oversize-frame-3BxwK4/manifest.json",
+      "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-stopped-lease-XX3vvI/manifest.json",
+      "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/partial-step-Xf5AyB/manifest.json"
+    ],
+    "perCaseSafeFacts": [
+      {
+        "case": "partial-step",
+        "manifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/partial-step-Xf5AyB/manifest.json",
+          "sha256": "c2a38ecd0568f4a362e8119b9b2d096834fb0eb145c4239b014e35d065a1d2a7"
+        },
+        "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+        "exportStatus": "VERIFIED_EXPORT",
+        "assertionPhaseStatus": "COMPLETED_NOT_FINAL_TEST_VERDICT",
+        "clips": [
+          {
+            "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/partial-step-Xf5AyB/base-guided.webm",
+            "byteLength": 16207,
+            "sha256": "c4fa20e26dab2b87ffb72a21d50c4b291eece7a4d7a691d4c5b02f13ae0434ee",
+            "matchesManifest": true,
+            "sourceCopyComparisonAtExport": "Executed by unchanged helper before success cleanup",
+            "privacy": "NONSECRET_FIXTURE",
+            "checks": {
+              "assertions": "PASSED",
+              "decoder": "PASSED",
+              "seek": "NOT_REACHED"
+            }
+          },
+          {
+            "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/partial-step-Xf5AyB/mixed-guided.webm",
+            "byteLength": 15873,
+            "sha256": "ce6ebb77588ecf29e6bab0ebcd6196b97435571b83b87beedf2c8c460cc76fb8",
+            "matchesManifest": true,
+            "sourceCopyComparisonAtExport": "Executed by unchanged helper before success cleanup",
+            "privacy": "NONSECRET_FIXTURE",
+            "checks": {
+              "assertions": "PASSED",
+              "decoder": "PASSED",
+              "seek": "NOT_REACHED"
+            }
+          },
+          {
+            "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/partial-step-Xf5AyB/ordinary-one.webm",
+            "byteLength": 15523,
+            "sha256": "e4218092bc55e1b5a511bc69fc1a7349e562fa3f59672cb293d5812b23c5ff96",
+            "matchesManifest": true,
+            "sourceCopyComparisonAtExport": "Executed by unchanged helper before success cleanup",
+            "privacy": "NONSECRET_FIXTURE",
+            "checks": {
+              "assertions": "PASSED",
+              "decoder": "PASSED",
+              "seek": "NOT_REACHED"
+            }
+          },
+          {
+            "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/partial-step-Xf5AyB/ordinary-two.webm",
+            "byteLength": 15626,
+            "sha256": "bcf95f51ab564654a25c050b472181c4cd5930d48309b6417a1a177aeb273aaa",
+            "matchesManifest": true,
+            "sourceCopyComparisonAtExport": "Executed by unchanged helper before success cleanup",
+            "privacy": "NONSECRET_FIXTURE",
+            "checks": {
+              "assertions": "PASSED",
+              "decoder": "PASSED",
+              "seek": "NOT_REACHED"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "role": "base-guided",
+            "media": "REGISTERED",
+            "seekFrames": "NOT_REACHED"
+          },
+          {
+            "role": "mixed-guided",
+            "media": "REGISTERED",
+            "seekFrames": "NOT_REACHED"
+          },
+          {
+            "role": "ordinary-one",
+            "media": "REGISTERED",
+            "seekFrames": "NOT_REACHED"
+          },
+          {
+            "role": "ordinary-two",
+            "media": "REGISTERED",
+            "seekFrames": "NOT_REACHED"
+          }
+        ],
+        "recordingProjection": [
+          {
+            "role": "base-guided",
+            "sessionId": "effa8477-77f8-4e48-aef3-e28f54f29479",
+            "contextId": "cfa7c812-b99c-4daf-965e-e965dacfe3b8",
+            "contextRevision": 1,
+            "recordingId": "efda33c7-4d20-4556-93ab-f70e17d3ac51",
+            "state": "STORED",
+            "partial": false,
+            "timings": [
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000001",
+                "admissionId": "201d2695-5879-41b6-993d-9dd61b6da5c6",
+                "ordinal": 0,
+                "startMs": 21,
+                "endMs": 34
+              },
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "admissionId": "96ab5278-3a05-453f-b00f-7070fd584597",
+                "ordinal": 0,
+                "startMs": 57,
+                "endMs": 58
+              },
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "admissionId": "588eac3f-1496-4f3e-bf2d-7984edf1d6f2",
+                "ordinal": 1,
+                "startMs": 68,
+                "endMs": 69
+              },
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000003",
+                "admissionId": "d95ac3c7-09ab-403b-adcc-60f2469bab31",
+                "ordinal": 0,
+                "startMs": 84,
+                "endMs": 87
+              },
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000004",
+                "admissionId": "3aebbaf9-6a4c-439b-81a2-517f0572c8fe",
+                "ordinal": 0,
+                "startMs": 94,
+                "endMs": 95
+              }
+            ]
+          },
+          {
+            "role": "mixed-guided",
+            "sessionId": "7c40be45-4f42-4c1f-9874-90d90c96ab4d",
+            "contextId": "ac783353-2a88-4c2b-bcc4-ac4a2adaa1f2",
+            "contextRevision": 2,
+            "recordingId": "590db6b0-cae0-46ad-8f66-f88632262a91",
+            "state": "STORED",
+            "partial": false,
+            "timings": [
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000001",
+                "admissionId": "88f008c9-3baa-4408-ac4a-270a48ad1963",
+                "ordinal": 0,
+                "startMs": 16,
+                "endMs": 28
+              },
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "admissionId": "6e289f65-0b0f-424a-b1df-b281f5b778c8",
+                "ordinal": 0,
+                "startMs": 53,
+                "endMs": 54
+              },
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000002",
+                "admissionId": "5cdcbc0b-b088-40e9-b861-0aad96b75bc4",
+                "ordinal": 1,
+                "startMs": 98,
+                "endMs": 99
+              },
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000003",
+                "admissionId": "3364c110-09fd-4af9-b1e8-865d6feccb70",
+                "ordinal": 0,
+                "startMs": 109,
+                "endMs": 122
+              },
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000004",
+                "admissionId": "98512f12-f430-4ec6-a5f7-605e4307d9f0",
+                "ordinal": 0,
+                "startMs": 128,
+                "endMs": 129
+              }
+            ]
+          }
+        ],
+        "outcomeProjection": [
+          {
+            "role": "base-guided",
+            "admissionId": "201d2695-5879-41b6-993d-9dd61b6da5c6",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000001",
+              "ordinal": 0
+            },
+            "state": "SUCCEEDED",
+            "outcomeCode": "OK",
+            "attemptOrdinal": 0,
+            "contextRevision": 1,
+            "operationHash": "3d7a26f98f2571d3a0dc9188e13c8972ee64f8f579e0aafba53705f42c7b03c1",
+            "authoredInputsHash": "27e2178c03a1c530f4d450142d6abad8ed2a08c77c220d13f2eefb3f10a4fa14"
+          },
+          {
+            "role": "base-guided",
+            "admissionId": "96ab5278-3a05-453f-b00f-7070fd584597",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "state": "SUCCEEDED",
+            "outcomeCode": "OK",
+            "attemptOrdinal": 0,
+            "contextRevision": 1,
+            "operationHash": "b5ca10519e98e5ccd8b020fc8a0a58d991736db5675229e4f9992620957b34c1",
+            "authoredInputsHash": "27e2178c03a1c530f4d450142d6abad8ed2a08c77c220d13f2eefb3f10a4fa14"
+          },
+          {
+            "role": "base-guided",
+            "admissionId": "588eac3f-1496-4f3e-bf2d-7984edf1d6f2",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 1
+            },
+            "state": "SUCCEEDED",
+            "outcomeCode": "OK",
+            "attemptOrdinal": 0,
+            "contextRevision": 1,
+            "operationHash": "7a72e91d4b46878039158d8c8634cd5b37f5112a112e1b8327d05c543153a05e",
+            "authoredInputsHash": "27e2178c03a1c530f4d450142d6abad8ed2a08c77c220d13f2eefb3f10a4fa14"
+          },
+          {
+            "role": "base-guided",
+            "admissionId": "d95ac3c7-09ab-403b-adcc-60f2469bab31",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000003",
+              "ordinal": 0
+            },
+            "state": "SUCCEEDED",
+            "outcomeCode": "OK",
+            "attemptOrdinal": 0,
+            "contextRevision": 1,
+            "operationHash": "9436e79846320858ce279c716cad813e79edf4e05e0a560ae0f3bbcbdf098784",
+            "authoredInputsHash": "27e2178c03a1c530f4d450142d6abad8ed2a08c77c220d13f2eefb3f10a4fa14"
+          },
+          {
+            "role": "base-guided",
+            "admissionId": "3aebbaf9-6a4c-439b-81a2-517f0572c8fe",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000004",
+              "ordinal": 0
+            },
+            "state": "SUCCEEDED",
+            "outcomeCode": "OK",
+            "attemptOrdinal": 0,
+            "contextRevision": 1,
+            "operationHash": "7da9737547fd377e675012508167009dc35f8dcfe064a691faba571fa7b25d8f",
+            "authoredInputsHash": "27e2178c03a1c530f4d450142d6abad8ed2a08c77c220d13f2eefb3f10a4fa14"
+          },
+          {
+            "role": "mixed-guided",
+            "admissionId": "88f008c9-3baa-4408-ac4a-270a48ad1963",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000001",
+              "ordinal": 0
+            },
+            "state": "SUCCEEDED",
+            "outcomeCode": "OK",
+            "attemptOrdinal": 0,
+            "contextRevision": 1,
+            "operationHash": "3d7a26f98f2571d3a0dc9188e13c8972ee64f8f579e0aafba53705f42c7b03c1",
+            "authoredInputsHash": "f0bd3a46a73bfa8461665a652c68feeaa7c74551742c10521e53e881fc3e5d5b"
+          },
+          {
+            "role": "mixed-guided",
+            "admissionId": "6e289f65-0b0f-424a-b1df-b281f5b778c8",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "state": "SUCCEEDED",
+            "outcomeCode": "OK",
+            "attemptOrdinal": 0,
+            "contextRevision": 1,
+            "operationHash": "b5ca10519e98e5ccd8b020fc8a0a58d991736db5675229e4f9992620957b34c1",
+            "authoredInputsHash": "f0bd3a46a73bfa8461665a652c68feeaa7c74551742c10521e53e881fc3e5d5b"
+          },
+          {
+            "role": "mixed-guided",
+            "admissionId": "5cdcbc0b-b088-40e9-b861-0aad96b75bc4",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 1
+            },
+            "state": "SUCCEEDED",
+            "outcomeCode": "OK",
+            "attemptOrdinal": 1,
+            "contextRevision": 2,
+            "operationHash": "db12cf69e6ed11a75c6e0f67d492bd80d4a67f59402ec861ef312d4c96e4af63",
+            "authoredInputsHash": "a98927d340bea4a12af1163bdd404ff11b100462178e22943add2197822abfad"
+          },
+          {
+            "role": "mixed-guided",
+            "admissionId": "3364c110-09fd-4af9-b1e8-865d6feccb70",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000003",
+              "ordinal": 0
+            },
+            "state": "SUCCEEDED",
+            "outcomeCode": "OK",
+            "attemptOrdinal": 0,
+            "contextRevision": 2,
+            "operationHash": "9436e79846320858ce279c716cad813e79edf4e05e0a560ae0f3bbcbdf098784",
+            "authoredInputsHash": "a98927d340bea4a12af1163bdd404ff11b100462178e22943add2197822abfad"
+          },
+          {
+            "role": "mixed-guided",
+            "admissionId": "98512f12-f430-4ec6-a5f7-605e4307d9f0",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000004",
+              "ordinal": 0
+            },
+            "state": "SUCCEEDED",
+            "outcomeCode": "OK",
+            "attemptOrdinal": 0,
+            "contextRevision": 2,
+            "operationHash": "7da9737547fd377e675012508167009dc35f8dcfe064a691faba571fa7b25d8f",
+            "authoredInputsHash": "a98927d340bea4a12af1163bdd404ff11b100462178e22943add2197822abfad"
+          },
+          {
+            "role": "mixed-guided",
+            "admissionId": "77b932a0-58c6-4cfc-b2e4-b19d0efee336",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 1
+            },
+            "state": "FAILED",
+            "outcomeCode": "TARGET_CHANGED",
+            "attemptOrdinal": 0,
+            "contextRevision": 1,
+            "operationHash": "7a72e91d4b46878039158d8c8634cd5b37f5112a112e1b8327d05c543153a05e",
+            "authoredInputsHash": "f0bd3a46a73bfa8461665a652c68feeaa7c74551742c10521e53e881fc3e5d5b"
+          }
+        ],
+        "freshLocalRunAdmissions": [
+          {
+            "role": "ordinary-one",
+            "kind": "FIXTURE_LOCAL_ADMISSION",
+            "runId": "e86f05eb-2b55-4d72-a6f0-75aa5e45b016",
+            "attemptId": "44acfe43-be2a-4da9-9f54-4ccd2726306f",
+            "admissionId": "e2d95372-d344-474b-b8b7-e6f346aba149"
+          },
+          {
+            "role": "ordinary-two",
+            "kind": "FIXTURE_LOCAL_ADMISSION",
+            "runId": "b368ee37-9d88-4a72-960f-56af457321ba",
+            "attemptId": "c7e033f3-a88b-4362-96f8-05f399d49b74",
+            "admissionId": "495e7ab2-2b86-460d-afc9-2bef8f6adbe5"
+          }
+        ],
+        "fixtureCommitments": {
+          "artifactHash": "5050a81b91de953f128502392ac2fed0179d8c0bd7043ef92dd5fe466b30f44f",
+          "learnedPlanHash": "998b183c634a11efd5d19887bd1e3c29056d9a5a2f92edc57a2ba7dc51986139",
+          "publicationEvidenceHash": "b69dc81fa74a55201156590489db75d9e0c3232abd2d3c682180a42af1affe3f",
+          "rawGraphHash": "9be000af0a686334ed0d32664744675111467750dab4d20ab3d567c9b4021b60",
+          "producerHash": "07b6a1ae0a3996553eb2dc96b78e125de9d9e40618ee7d82582099dda9baacd6",
+          "excludedHash": "42cb4fecc512b212ea51ea3884fbac4559b0ef8b11dda00a945bc36572de59dc",
+          "availabilityHash": "2997168e58be066bcff498a93e92120a616ba15819ecadda9a442ae419aaab2a",
+          "recipeHash": "e1b8eac14faf860664edbc661fa6e759bb32846cfbed0f1060298f4c5adf0391",
+          "originHash": "14e2e709a82681486c630f2db62784c35cc2af485f1fd3011644aa2e819fcee4"
+        },
+        "successOwnedTreeRemovedAfterVerifiedExport": true
+      },
+      {
+        "case": "secret-bad-origin",
+        "manifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-bad-origin-JwmJSN/manifest.json",
+          "sha256": "38adb678ac79c474004b6ce97b074cd1234f2a4c57b04c1c17b97a6d681c1ac6"
+        },
+        "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+        "exportStatus": "VERIFIED_EXPORT",
+        "assertionPhaseStatus": "COMPLETED_NOT_FINAL_TEST_VERDICT",
+        "clips": [
+          {
+            "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-bad-origin-JwmJSN/secret-prefix.webm",
+            "byteLength": 8089,
+            "sha256": "4af57e80b52a085f1d50f2b83a5ca693f13b622c74e4550d5888aaf71320def2",
+            "matchesManifest": true,
+            "sourceCopyComparisonAtExport": "Executed by unchanged helper before success cleanup",
+            "privacy": "VERIFIED_MASKED",
+            "checks": {
+              "assertions": "PASSED",
+              "decoder": "NOT_REACHED",
+              "seek": "NOT_REACHED"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "role": "secret-prefix",
+            "media": "REGISTERED",
+            "seekFrames": "NOT_REACHED"
+          }
+        ],
+        "recordingProjection": [
+          {
+            "role": "secret-prefix",
+            "sessionId": "9e7251b9-20f6-4cea-8773-0f127f82e1fb",
+            "contextId": "98d8606c-87f7-407a-8fe1-4f6e934fbde5",
+            "contextRevision": 1,
+            "recordingId": "103e7a67-b5c6-4638-ae75-417cbcc132c8",
+            "state": "STORED",
+            "partial": false,
+            "timings": [
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000801",
+                "admissionId": "44155780-95ca-4bbb-9bc5-e0d36a167c13",
+                "ordinal": 0,
+                "startMs": 19,
+                "endMs": 30
+              },
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000802",
+                "admissionId": "2c65f6e0-df28-4c9c-ba71-cc6cb765e825",
+                "ordinal": 0,
+                "startMs": 74,
+                "endMs": null
+              }
+            ]
+          }
+        ],
+        "outcomeProjection": [
+          {
+            "role": "secret-prefix",
+            "admissionId": "2c65f6e0-df28-4c9c-ba71-cc6cb765e825",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000802",
+              "ordinal": 0
+            },
+            "state": "UNKNOWN_OUTCOME",
+            "outcomeCode": "POLICY_DENIED",
+            "attemptOrdinal": 0,
+            "contextRevision": 1,
+            "operationHash": "0974d493ab2ca3870cab8c592671b9380d53436f3e0549f6f7cb748bfb5ceeda",
+            "authoredInputsHash": "9d760d71d664ed6aee5a426ea138b33088bd56b126af39bf73e1c429ac6e9cfd"
+          }
+        ],
+        "freshLocalRunAdmissions": [],
+        "fixtureCommitments": {},
+        "successOwnedTreeRemovedAfterVerifiedExport": true
+      },
+      {
+        "case": "secret-focus-typeflip",
+        "manifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-focus-typeflip-Pg1u60/manifest.json",
+          "sha256": "6ccaa5b7972d4d5520b5cba2c7a2ee8db0876a5cf0d1100ca6d545f03de21051"
+        },
+        "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+        "exportStatus": "VERIFIED_EXPORT",
+        "assertionPhaseStatus": "COMPLETED_NOT_FINAL_TEST_VERDICT",
+        "clips": [
+          {
+            "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-focus-typeflip-Pg1u60/secret-prefix.webm",
+            "byteLength": 9548,
+            "sha256": "77169fc08170496b1f5a4d5fe9a01c2c8280f6a3d766c1230ec2dc8996202976",
+            "matchesManifest": true,
+            "sourceCopyComparisonAtExport": "Executed by unchanged helper before success cleanup",
+            "privacy": "VERIFIED_MASKED",
+            "checks": {
+              "assertions": "PASSED",
+              "decoder": "NOT_REACHED",
+              "seek": "NOT_REACHED"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "role": "secret-prefix",
+            "media": "REGISTERED",
+            "seekFrames": "NOT_REACHED"
+          }
+        ],
+        "recordingProjection": [
+          {
+            "role": "secret-prefix",
+            "sessionId": "a36c961a-4050-4d06-a9d8-30ab96b382e6",
+            "contextId": "96fdacdf-8813-4557-a299-19cf3439faaa",
+            "contextRevision": 1,
+            "recordingId": "0c8a2beb-050a-47c8-a6b8-0739c6c2869a",
+            "state": "STORED",
+            "partial": false,
+            "timings": [
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000801",
+                "admissionId": "16712aed-64ad-491e-ba5f-215715bbf739",
+                "ordinal": 0,
+                "startMs": 19,
+                "endMs": 30
+              },
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000802",
+                "admissionId": "8f4b05d9-0809-4375-8310-dada6a7fcd93",
+                "ordinal": 0,
+                "startMs": 68,
+                "endMs": null
+              }
+            ]
+          }
+        ],
+        "outcomeProjection": [
+          {
+            "role": "secret-prefix",
+            "admissionId": "8f4b05d9-0809-4375-8310-dada6a7fcd93",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000802",
+              "ordinal": 0
+            },
+            "state": "UNKNOWN_OUTCOME",
+            "outcomeCode": "TARGET_CHANGED",
+            "attemptOrdinal": 0,
+            "contextRevision": 1,
+            "operationHash": "0974d493ab2ca3870cab8c592671b9380d53436f3e0549f6f7cb748bfb5ceeda",
+            "authoredInputsHash": "c12259b08ad7a07c316afd56db0fe245b556f7ab3ea8a77a3bda5dacd7d822fd"
+          }
+        ],
+        "freshLocalRunAdmissions": [],
+        "fixtureCommitments": {},
+        "successOwnedTreeRemovedAfterVerifiedExport": true
+      },
+      {
+        "case": "secret-oversize-frame",
+        "manifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-oversize-frame-3BxwK4/manifest.json",
+          "sha256": "7beea66aabce35a43b88be5e4e9b3ce833a62aac8df4c9c1d60c5208cf743ea3"
+        },
+        "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+        "exportStatus": "VERIFIED_EXPORT",
+        "assertionPhaseStatus": "COMPLETED_NOT_FINAL_TEST_VERDICT",
+        "clips": [
+          {
+            "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-oversize-frame-3BxwK4/secret-prefix.webm",
+            "byteLength": 8089,
+            "sha256": "f56319de1a32b6190fcc4d46b39aa02e1ae3028ef2681435360af660454f4639",
+            "matchesManifest": true,
+            "sourceCopyComparisonAtExport": "Executed by unchanged helper before success cleanup",
+            "privacy": "VERIFIED_MASKED",
+            "checks": {
+              "assertions": "PASSED",
+              "decoder": "NOT_REACHED",
+              "seek": "NOT_REACHED"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "role": "secret-prefix",
+            "media": "REGISTERED",
+            "seekFrames": "NOT_REACHED"
+          }
+        ],
+        "recordingProjection": [
+          {
+            "role": "secret-prefix",
+            "sessionId": "2145f2f3-d85e-49ef-afe0-0e83057e8800",
+            "contextId": "becef412-4f9b-4183-a332-d4e879810917",
+            "contextRevision": 1,
+            "recordingId": "2cd5f0ce-199c-41b1-9388-1eceef3b2e50",
+            "state": "STORED",
+            "partial": false,
+            "timings": [
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000801",
+                "admissionId": "e79b2b21-6b47-492d-9777-1b20c9829688",
+                "ordinal": 0,
+                "startMs": 27,
+                "endMs": 38
+              }
+            ]
+          }
+        ],
+        "outcomeProjection": [],
+        "freshLocalRunAdmissions": [],
+        "fixtureCommitments": {},
+        "successOwnedTreeRemovedAfterVerifiedExport": true
+      },
+      {
+        "case": "secret-stopped-lease",
+        "manifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-stopped-lease-XX3vvI/manifest.json",
+          "sha256": "7e241bb6eb8867208a56713039f008c6fb6a9df53bc12cf7ba5bf9c4212b1457"
+        },
+        "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+        "exportStatus": "VERIFIED_EXPORT",
+        "assertionPhaseStatus": "COMPLETED_NOT_FINAL_TEST_VERDICT",
+        "clips": [
+          {
+            "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-stopped-lease-XX3vvI/secret-prefix.webm",
+            "byteLength": 8089,
+            "sha256": "56b423e18f83ba26ee56fad13424d336d9bac95358ae5f2f4791a2997a947395",
+            "matchesManifest": true,
+            "sourceCopyComparisonAtExport": "Executed by unchanged helper before success cleanup",
+            "privacy": "VERIFIED_MASKED",
+            "checks": {
+              "assertions": "PASSED",
+              "decoder": "NOT_REACHED",
+              "seek": "NOT_REACHED"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "role": "secret-prefix",
+            "media": "REGISTERED",
+            "seekFrames": "NOT_REACHED"
+          }
+        ],
+        "recordingProjection": [
+          {
+            "role": "secret-prefix",
+            "sessionId": "38a5a59f-756d-44db-8a1b-4c325b3d4351",
+            "contextId": "00183d20-82e0-4f65-8335-70be5184c1ae",
+            "contextRevision": 1,
+            "recordingId": "b934623d-c36b-4845-9d54-08e8e336b06d",
+            "state": "STORED",
+            "partial": false,
+            "timings": [
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000801",
+                "admissionId": "cdeb6e3e-2089-4847-a8cf-fb9d44343384",
+                "ordinal": 0,
+                "startMs": 15,
+                "endMs": 27
+              }
+            ]
+          }
+        ],
+        "outcomeProjection": [],
+        "freshLocalRunAdmissions": [],
+        "fixtureCommitments": {},
+        "successOwnedTreeRemovedAfterVerifiedExport": true
+      },
+      {
+        "case": "secret-two-passwords",
+        "manifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-two-passwords-i56Wqv/manifest.json",
+          "sha256": "0dd1318c143a676ad5905ecb5c987bc24ce5442a6078b2c6ca6e70dd41c325e3"
+        },
+        "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+        "exportStatus": "VERIFIED_EXPORT",
+        "assertionPhaseStatus": "COMPLETED_NOT_FINAL_TEST_VERDICT",
+        "clips": [
+          {
+            "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-two-passwords-i56Wqv/secret-prefix.webm",
+            "byteLength": 8704,
+            "sha256": "233281c4a9931fe635c81290573c6a72c755d28463fe5e378ad0837324b8fe46",
+            "matchesManifest": true,
+            "sourceCopyComparisonAtExport": "Executed by unchanged helper before success cleanup",
+            "privacy": "VERIFIED_MASKED",
+            "checks": {
+              "assertions": "PASSED",
+              "decoder": "NOT_REACHED",
+              "seek": "NOT_REACHED"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "role": "secret-prefix",
+            "media": "REGISTERED",
+            "seekFrames": "NOT_REACHED"
+          }
+        ],
+        "recordingProjection": [
+          {
+            "role": "secret-prefix",
+            "sessionId": "50c565b3-19ce-4d35-903d-017cbceb04fb",
+            "contextId": "af459517-1b57-48f9-ad88-5e3b1b3b1366",
+            "contextRevision": 1,
+            "recordingId": "e8c02656-bd51-49ed-b405-8114962aea6a",
+            "state": "STORED",
+            "partial": false,
+            "timings": [
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000801",
+                "admissionId": "447d48ee-1542-45fe-a132-fd316310b42b",
+                "ordinal": 0,
+                "startMs": 27,
+                "endMs": 42
+              }
+            ]
+          }
+        ],
+        "outcomeProjection": [],
+        "freshLocalRunAdmissions": [],
+        "fixtureCommitments": {},
+        "successOwnedTreeRemovedAfterVerifiedExport": true
+      },
+      {
+        "case": "secret-valid",
+        "manifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-valid-ZXgJI1/manifest.json",
+          "sha256": "980e500b650838292114cf231457ed0a835ffeb1c82115d17f9d337f3df46112"
+        },
+        "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+        "exportStatus": "VERIFIED_EXPORT",
+        "assertionPhaseStatus": "COMPLETED_NOT_FINAL_TEST_VERDICT",
+        "clips": [
+          {
+            "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-valid-ZXgJI1/secret-prefix.webm",
+            "byteLength": 10599,
+            "sha256": "842526bac49c7d2f2aeeb5c2bd0a44c620609318107330ba1842ceaecc328a46",
+            "matchesManifest": true,
+            "sourceCopyComparisonAtExport": "Executed by unchanged helper before success cleanup",
+            "privacy": "VERIFIED_MASKED",
+            "checks": {
+              "assertions": "PASSED",
+              "decoder": "NOT_REACHED",
+              "seek": "NOT_REACHED"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "role": "secret-prefix",
+            "media": "REGISTERED",
+            "seekFrames": "NOT_REACHED"
+          }
+        ],
+        "recordingProjection": [
+          {
+            "role": "secret-prefix",
+            "sessionId": "b9bb5896-675c-4c67-8c6c-a7ce5cfa70a7",
+            "contextId": "0e80d55a-1130-4848-8b14-6513191dd324",
+            "contextRevision": 2,
+            "recordingId": "73d2e57e-e7f0-46d0-aaa7-e9650171f8b0",
+            "state": "STORED",
+            "partial": false,
+            "timings": [
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000801",
+                "admissionId": "a48bbccb-f4eb-4ae2-974d-33a324dba387",
+                "ordinal": 0,
+                "startMs": 18,
+                "endMs": 29
+              },
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000802",
+                "admissionId": "674e2d1f-c505-43cc-83f6-91798046dc60",
+                "ordinal": 0,
+                "startMs": 66,
+                "endMs": 68
+              }
+            ]
+          }
+        ],
+        "outcomeProjection": [
+          {
+            "role": "secret-prefix",
+            "admissionId": "674e2d1f-c505-43cc-83f6-91798046dc60",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000802",
+              "ordinal": 0
+            },
+            "state": "SUCCEEDED",
+            "outcomeCode": "OK",
+            "attemptOrdinal": 0,
+            "contextRevision": 1,
+            "operationHash": "0974d493ab2ca3870cab8c592671b9380d53436f3e0549f6f7cb748bfb5ceeda",
+            "authoredInputsHash": "9eb5f139b076335424dda70c745ebf26669b136f94f9d9c26858ef5de99cb682"
+          }
+        ],
+        "freshLocalRunAdmissions": [],
+        "fixtureCommitments": {},
+        "successOwnedTreeRemovedAfterVerifiedExport": true
+      },
+      {
+        "case": "secret-zero-password",
+        "manifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-zero-password-gAdMnv/manifest.json",
+          "sha256": "1805ee110b41eba024d90c1b8ee014784593887a4cb26942082032203bc23873"
+        },
+        "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+        "exportStatus": "VERIFIED_EXPORT",
+        "assertionPhaseStatus": "COMPLETED_NOT_FINAL_TEST_VERDICT",
+        "clips": [
+          {
+            "path": "docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1/secret-zero-password-gAdMnv/secret-prefix.webm",
+            "byteLength": 6162,
+            "sha256": "7d0d982cc823aa3085a3a583f8611d367b7ca770e20af3b0cb8ae92f775f19bd",
+            "matchesManifest": true,
+            "sourceCopyComparisonAtExport": "Executed by unchanged helper before success cleanup",
+            "privacy": "VERIFIED_MASKED",
+            "checks": {
+              "assertions": "PASSED",
+              "decoder": "NOT_REACHED",
+              "seek": "NOT_REACHED"
+            }
+          }
+        ],
+        "phases": [
+          {
+            "role": "secret-prefix",
+            "media": "REGISTERED",
+            "seekFrames": "NOT_REACHED"
+          }
+        ],
+        "recordingProjection": [
+          {
+            "role": "secret-prefix",
+            "sessionId": "ebc508b5-10c0-4836-8535-ec5283494e4c",
+            "contextId": "5e9f5ec8-8259-40d6-8295-55d8dc8870f4",
+            "contextRevision": 1,
+            "recordingId": "cb50482b-1b6f-4356-8124-dafaec4e6106",
+            "state": "STORED",
+            "partial": false,
+            "timings": [
+              {
+                "kind": "action",
+                "stepId": "00000000-0000-4000-8000-000000000801",
+                "admissionId": "b80082a5-5326-4078-bca6-7a333c742871",
+                "ordinal": 0,
+                "startMs": 19,
+                "endMs": 32
+              }
+            ]
+          }
+        ],
+        "outcomeProjection": [],
+        "freshLocalRunAdmissions": [],
+        "fixtureCommitments": {},
+        "successOwnedTreeRemovedAfterVerifiedExport": true
+      }
+    ],
+    "copyVerification": "Held unchanged helper compared original/target size/SHA and source reread before success cleanup. Independent copiedfiles size/SHA match manifests; successful original trees no longer claimed available.",
+    "priorHistory": "All28 prior permanentfiles from native01/02 unchanged; all8failedNative01owned originals remain privately exact; no lastcopy deletion.",
+    "privacyScan": {
+      "logContainsPlantedSecret": false,
+      "vitestJsonContainsPlantedSecret": false,
+      "newManifestContainsPlantedSecret": false,
+      "secretPNGExports": 0
+    },
+    "fullAudit": {
+      "path": "runner/native-feedback-attempt03-media-artifact-audit.json",
+      "sha256": "480a88b4c26bb7741a1f73d8bfaef4dd56b702100a05f1b9f2a70b34117f9b65"
+    },
+    "oldFixtureMediaLimits": "Old unrecorded diagnostics and older fixture transient media retain existing lifecycle limits; no absent permanent clip is claimed retained or decoded."
+  },
+  "fixed007And013": {
+    "backed": 3238,
+    "allRestoredByteExact": true,
+    "changedOutputsArchived": 11,
+    "newUntracked": [],
+    "index": {
+      "path": "execution/runner-r1-native-feedback-attempt03-artifact-index.json",
+      "sha256": "0554427b952d7f41c60a20c8d35c55971b44c29dfc8727ea2fddd483f814c14a"
+    },
+    "fullHashComparison": {
+      "path": "runner/native-feedback-attempt03-media-artifact-audit.json",
+      "sha256": "480a88b4c26bb7741a1f73d8bfaef4dd56b702100a05f1b9f2a70b34117f9b65"
+    }
+  },
+  "ownedProcesses": {
+    "observedExactOwned": 20,
+    "sameOwnedRemaining": 0,
+    "protectedInherited": [
+      {
+        "pid": 13577,
+        "sameIdentity": true,
+        "signalsSent": false,
+        "connected": false
+      },
+      {
+        "pid": 13581,
+        "sameIdentity": true,
+        "signalsSent": false,
+        "connected": false
+      },
+      {
+        "pid": 22246,
+        "sameIdentity": true,
+        "signalsSent": false,
+        "connected": false
+      },
+      {
+        "pid": 44737,
+        "sameIdentity": true,
+        "signalsSent": false,
+        "connected": false
+      },
+      {
+        "pid": 67717,
+        "sameIdentity": true,
+        "signalsSent": false,
+        "connected": false
+      }
+    ],
+    "birthWindowCandidates": [],
+    "signalsOrConnections": false,
+    "scope": "20observed exact PID/start/commandSHA wrapper/node/Chromium/ffmpeg identities gone;0same-window relevantcandidate. Snapshot cannot list every shortlived child between observations; no arbitraryPID/port/pattern kill."
+  },
+  "stability": {
+    "globalSourceStable": false,
+    "selectedTestInputStable": true,
+    "distStable": true,
+    "sourceBefore": "1023361432f42444717c692a5fb28eb84f3a7255ea976e6d255d0d551a179990",
+    "sourceAfter": "fdf3239c14340619abfb099f1f50f905cc0e98ecb04f578587d22c9d5b0aa339",
+    "selectedInputBefore": "7d1fd190c8118b43cd5bc3bac61ef9849ab2461b78a6c7a09a0972b347b24d4b",
+    "selectedInputAfter": "7d1fd190c8118b43cd5bc3bac61ef9849ab2461b78a6c7a09a0972b347b24d4b",
+    "distBefore": "9f2a53fdd175232db3104dc826c556bf85664e782026105085415141ff7de26d",
+    "distAfter": "9f2a53fdd175232db3104dc826c556bf85664e782026105085415141ff7de26d",
+    "exactExcludedFileBeforeAfter": [
+      {
+        "path": "backend/build.gradle.kts",
+        "before": "4833ddd1f67b6d21f3c3ddec847349e2eea316bb8538386ef69f772a6157ce3b",
+        "after": "a04797ff32324faff9596ca14646292c618337f5ef18fc89cb83c1af83453fe1"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+        "before": "07818f2ec8eff469548a5c6d5720b950ffead21803ac28021ff5c7d0dd9c0c00",
+        "after": "07818f2ec8eff469548a5c6d5720b950ffead21803ac28021ff5c7d0dd9c0c00"
+      }
+    ],
+    "actualGlobalDiff": [
+      {
+        "path": "backend/build.gradle.kts",
+        "before": "4833ddd1f67b6d21f3c3ddec847349e2eea316bb8538386ef69f772a6157ce3b",
+        "after": "a04797ff32324faff9596ca14646292c618337f5ef18fc89cb83c1af83453fe1"
+      }
+    ],
+    "nonExcludedDrift": [],
+    "componentScopeOnly": true,
+    "parallelWriterHonesty": "Global sourceStable is FALSE: authorized excluded backend/build.gradle.kts4833->a047 changed. JOIN07818unchanged during snapshot. Selected inputs and dist stable; no mask/coercion into global green/final freeze. Finalfullgates require allownerhold.",
+    "compilerEmit": "Authorized normal fixture TSAPIglobalSetup emitted byte-identical current build07dist9f2; no separate build/pins.",
+    "all52NodeAndProtectedHashesMatchDuplicateCheckpoint": true
+  },
+  "coverage": {
+    "evaluatedThisNativeRun": false,
+    "reason": "Fixtures config has no defaultV8normal global/scoped gate. Last Node14 scoped defaultcoveragePASS remains its captured source evidence; no fresh coverage inferred here.",
+    "lastNode14": {
+      "path": "runner/unit-feedback-attempt14-receipt.json",
+      "sha256": "2133f8418499b288b1d07babae6c302e85e40748bc716e9ae1228836321fa8b4"
+    }
+  },
+  "authorityLimits": "Local Node fixtures/fake provider and direct released frame/constructed local admission are not actual Core/JWT/mTLS/Vault RELEASE+USAGE/privatePG/history/gateway proof. Four selected files are not complete fullnative/deployment/storyQA gate. All15privatecompanions and full24 reviewed facets remain at prescribed actual tiers.",
+  "currentPinsLimit": "Build07/pins07 apply to unchanged compiledproduction; null image/chromiumBuild NOT_ASSERTED and no internal-image/deployment authority remain.",
+  "priorHistory": {
+    "native01": {
+      "path": "runner/native-feedback-attempt01-receipt.json",
+      "sha256": "19984c6818abd06ac9a0120eb035f67824d0a07adb7ad907e9a446170e75c09a"
+    },
+    "native02": {
+      "path": "runner/native-feedback-attempt02-receipt.json",
+      "sha256": "fda3b13e32bd3d2597a49f2190b22e766bd7c2eca6d14febfdaeb568b985e791"
+    },
+    "node13": {
+      "path": "runner/unit-feedback-attempt13-receipt.json",
+      "sha256": "af43f21a69b5a42ee6fe5b7e3fb16bbdd77e94475ac6d4dfae27a72202fe0050"
+    },
+    "node14": {
+      "path": "runner/unit-feedback-attempt14-receipt.json",
+      "sha256": "2133f8418499b288b1d07babae6c302e85e40748bc716e9ae1228836321fa8b4"
+    },
+    "allImmutable": true
+  },
+  "sourceCheckpoint": {
+    "path": "runner/checkpoint-native02-duplicate-fixture-repair01.json",
+    "sha256": "a71a6cdccde25934ffbba19d06170b5ed61a5b1e92fcdd5845d5e0aecadb2c35"
+  },
+  "nodeSourceHashes": {
+    "studio-runner/evaluation/observed-authoring/cases/incremental-edit-step-4.json": "f04e70016563076decb46292ce0f18d6a819d488f94212bb2bdb11d4f6546b4a",
+    "studio-runner/evaluation/observed-authoring/cases/incremental-insert-step.json": "9a1831f52911dbddc8d7dc1575c7b6e22480b00098b11bea51b6f94f0bfabbc1",
+    "studio-runner/src/executor/observedReplay.ts": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+    "studio-runner/src/guided/contracts.ts": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+    "studio-runner/src/guided/evidence.ts": "03afea081e543fc920d2e8012b85951bde9ffd737eb5ba858af959c006340279",
+    "studio-runner/src/guided/journal.ts": "15da758e2e287926a7d404926323791ab3e1f72931bc3c4cb1741de8de9d86dd",
+    "studio-runner/src/guided/ownership.ts": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf",
+    "studio-runner/src/guided/runtime.ts": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+    "studio-runner/src/guided/transport.ts": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+    "studio-runner/src/run/childRuntime.ts": "0eb0c88a0d4a98b716fcc4dc0a070f5c2f0df028e4f6e668ca9ee0cd8526dd02",
+    "studio-runner/src/run/launcher.ts": "0dfeb39a76c046dd1df4b1b9df0cec238aa57c0c7b067b8824368ffc075e9fd7",
+    "studio-runner/src/run/loginRequired.ts": "f46ef274506a4e9ec51df04e081c2e321f1b1088e22a2732751845fe2b001b27",
+    "studio-runner/src/run/observedReplayAdapter.ts": "473653e3ded3312d433cbe23c1304ef722a164bed3b15cd883d7b836773515f4",
+    "studio-runner/src/run/protocol.ts": "46e23a90e8c6e64a7fa94e68bcff02c9b9f51254f2fb3180ae4065deef682fb8",
+    "studio-runner/src/validator/observedHistory.ts": "3fac42d11a71c88387effb74ad9c8ade01dc1ae8dfd75121aea4c3556829e007",
+    "studio-runner/src/validator/observedReferencePolicy.ts": "e6a2565b31ebb7339cc0ed15f9e9d8532d3c473f65709491129f6059108aebdb",
+    "studio-runner/src/validator/observedReplay.ts": "875da7952c8fb1ece09fdad48ffca822861dfe6cb742694f924995c98e5675df",
+    "studio-runner/src/validator/observedSnapshots.ts": "a8a53dedfa041aa9a671e1e03361fee5572cdfa9bc3abca91b5d53e160332928",
+    "studio-runner/test/controlReferencePreservation.test.ts": "86a2d54b5dd4d6603d643812391ea2b9d59211c312b176e0e3da4e4bc7cca0bd",
+    "studio-runner/test/currentWorldFactories.test.ts": "c1e5ead9c29157187857d17ab4c435fc6a95ecdcfb1203d817bbe75f3bc45d14",
+    "studio-runner/test/documentJson.test.ts": "0ec384914250541f410c9e0a63ddacd3ce12257aa6fe7ab06019a25db27de393",
+    "studio-runner/test/fixtures-tier/guided-dataflow.test.ts": "f5b613f5486b43a70c043b01a801f4ec8590bd8db2cd3ace8bf5510ca8fed685",
+    "studio-runner/test/fixtures-tier/guided-recording.test.ts": "3522915df575e7a0e98e71e74728545bdcb96fcf9b48b3178762c2ab5cc23574",
+    "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts": "10d97ab585a5af13a69b128a231eab0c6fd5e18780aec17cb3abcb803f752fd6",
+    "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts": "d1d524272fba634063ec6cf9491b6e14179f8d66dbc53898cffb47c2a84a6186",
+    "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts": "d6af50904a1a3187ae5b9b49478dd4232b28cf0b44e97807db765609876194d8",
+    "studio-runner/test/fixtures-tier/guided-wire.test.ts": "082e00e6de1af226c2d20a907cf28da0d9a70c49844c483ed06f1e75641b3a8f",
+    "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts": "adf11ab62de6cade54be1427daf60519ae270dceb5ee08b382c828b75b6622a2",
+    "studio-runner/test/fixtures-tier/secret-login.test.ts": "c65db8941e89822efba639e9ea36d65405bef5d4732317750734d27f86c9a57d",
+    "studio-runner/test/fixtures/guided-dataflow/server.ts": "db44223ecd775115e3f8cd1ee1a87f4877be1d74d6646f24979426638deb3932",
+    "studio-runner/test/guided/incrementalRuntime.test.ts": "112def39b6fff4b2b6d4a45d180f5bb15d100f7b5e5d1494e1b84eca057cc519",
+    "studio-runner/test/guided/runtime.test.ts": "dfd1bad817e5eb33aaa9e7e6357723544f182342b8203753712f212744a4e814",
+    "studio-runner/test/guided/schemaAudit.test.ts": "c37d834a4956e379d289951e50365ac654c2f004c9df8b40bdef7e22de2e2f39",
+    "studio-runner/test/helpers/currentWorlds.ts": "1487feec0fa9f5e5ef3965e31648b8ab7671dbe7090750e9555677943a34d97c",
+    "studio-runner/test/helpers/documentJson.ts": "64f14fe565fdc562467781b85930025f61c0ee4a9a3ace3614dd769e1535a225",
+    "studio-runner/test/helpers/guided.ts": "af3c5687dcf62682253a58a2564177b507cfc0f61e57ee600cd81fda5255dc4d",
+    "studio-runner/test/helpers/incrementalNegativeBoundaries.ts": "94090a4d7e4a4f957cf8921007f57477c13c670786fe7fd318dcdf4de45fda16",
+    "studio-runner/test/helpers/openapi.ts": "e15c3b8295d0b30c5b2f0422121e8cd197af7ac6c9ca9fc882ac1f8fa533917d",
+    "studio-runner/test/helpers/publicationFixture.ts": "f9bf4c3afe0424275aecf1c256cb2528b99603e8655a68a89b4018f1d53e9773",
+    "studio-runner/test/helpers/retainedReplay.ts": "0ef0ebb4619283dc189361586f32f5c345857c2f28bb3112a16195bc2cd9d0ac",
+    "studio-runner/test/helpers/runner.ts": "4458ed1a65bca9016d2b1f9e396b09eb1a09bf5167a06ac74e8f383ffd65055e",
+    "studio-runner/test/observedIncrementalValidation.test.ts": "c140d89e3bcc397211b4283d8f9a9c83c60286b6ef0efb85c060461b25e92de4",
+    "studio-runner/test/retainedExecute.test.ts": "2aa49b583cd8c05a611d76d69537ca0abdba7657d962135a27ff935b4e5e7e0e",
+    "studio-runner/test/run/observedChildRuntime.test.ts": "d9fa80ce843238f949fee1509dc339515e70b3b17887d378aacda47bf7a43916",
+    "studio-runner/test/run/observedPreparedAdapter.test.ts": "3d5076e153008c06bc63418c4e2ddfdbf6cb6ff664863cd937b020a8861c5d88",
+    "studio-runner/test/run/secretReplay.test.ts": "dc43402d1c3c2f2e5fe4d520e16c2f8b6a188a58c363dcb0e2a6b19470041226",
+    "studio-runner/test/schemaSemantics.test.ts": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb",
+    "studio-runner/test/server/observedReplayAdmission.test.ts": "3a355a5216d7afcbf07b4afa5de494526bc92739763ddb5a7d2de827ab1c275d",
+    "studio-runner/test/server/observedReplayAuthorization.test.ts": "af79cffc7d66e57be89729e140ad9bed9960535529ec3fe8fd4e6d35853413fd",
+    "studio-runner/test/server/observedReplayRoutes.test.ts": "4ddc7d9bf32b2312e0c99bd778cbff17ee4b0d610cf696a4369e3bbab706d288",
+    "studio-runner/test/helpers/observedNativeEvidence.ts": "b3d0669bbbac9e9af56e9ae688b16e191750d279617a17ff8e7d5d7a69a2ee61",
+    "studio-runner/test/observedReplayExecutor.test.ts": "92672ba590eef959ecd52b6e55b2d8829ea61207b76cb19142a249f088a055ae"
+  },
+  "protectedInputs": {
+    "studio-runner/src/guided/runtime.ts": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615",
+    "studio-runner/src/guided/transport.ts": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344",
+    "studio-runner/src/run/observedReplayAdapter.ts": "473653e3ded3312d433cbe23c1304ef722a164bed3b15cd883d7b836773515f4",
+    "studio-runner/src/guided/contracts.ts": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+    "studio-runner/src/executor/observedReplay.ts": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+    "studio-runner/src/validator/observedHistory.ts": "3fac42d11a71c88387effb74ad9c8ade01dc1ae8dfd75121aea4c3556829e007",
+    "studio-runner/test/helpers/incrementalNegativeBoundaries.ts": "94090a4d7e4a4f957cf8921007f57477c13c670786fe7fd318dcdf4de45fda16",
+    "studio-runner/test/schemaSemantics.test.ts": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb",
+    "studio-runner/test/observedSnapshotPreimages.test.ts": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa",
+    "studio-runner/vitest.config.ts": "c833caed66dc39aed1677db7cab921e97a5eb5b36291429c5f5e90f1a28c08f8",
+    "studio-runner/vitest.fixtures.config.ts": "2d51915fec9757e34ed1c0c2311fd1362abab917bfa1c5bf8b70ab47cb2c3f87"
+  },
+  "artifacts": [
+    {
+      "path": "execution/runner-r1-native-feedback-attempt03-before.json",
+      "sha256": "d02e4946c082771ca69a7f97cb1d6fb4368c3000bc9dd023e75c58b8f1a2a544"
+    },
+    {
+      "path": "execution/runner-r1-native-feedback-attempt03-after.json",
+      "sha256": "cda89625277999db7dc23908baaa5ea43ff3f7b93d1e5af304327a51302d67b9"
+    },
+    {
+      "path": "execution/runner-r1-native-feedback-attempt03-results.json",
+      "sha256": "8613c9ec43a920ab634599fb94d59b84dede3dafc93fe33c6c2e17c998b064af"
+    },
+    {
+      "path": "execution/runner-r1-native-feedback-attempt03-vitest.json",
+      "sha256": "5e6e17b799414d6ab938d598d6d955d15096f8d39417f5d7e2a8c2a05699b580"
+    },
+    {
+      "path": "execution/runner-r1-native-feedback-attempt03.log",
+      "sha256": "ec4467e1ccda35380941d9fa7c57ba9f1eec5994cc1fc0c01c141d7758219aef"
+    },
+    {
+      "path": "execution/runner-r1-native-feedback-attempt03-artifact-index.json",
+      "sha256": "0554427b952d7f41c60a20c8d35c55971b44c29dfc8727ea2fddd483f814c14a"
+    },
+    {
+      "path": "runner/native-feedback-attempt03-process-before.json",
+      "sha256": "175e23607b5168f423c558a9d49b6648ea9c4e601739154e67f3e11f1e68a499"
+    },
+    {
+      "path": "runner/native-feedback-attempt03-process-during01.json",
+      "sha256": "9d88a486d656517edb1efeddce558ae0b802109a9ebd1ada44de36c074113373"
+    },
+    {
+      "path": "runner/native-feedback-attempt03-process-after.json",
+      "sha256": "ec60316703185bbaed0d7e817eb0124a1ab77cf6fb0d544ca897a89ebe3d9cc6"
+    },
+    {
+      "path": "runner/native-feedback-attempt03-media-before.json",
+      "sha256": "79af79f3c4644d2b3d5602755781fa3002953a40ca5a87e32c63bf7d01e756b0"
+    },
+    {
+      "path": "runner/native-feedback-attempt03-media-artifact-audit.json",
+      "sha256": "480a88b4c26bb7741a1f73d8bfaef4dd56b702100a05f1b9f2a70b34117f9b65"
+    }
+  ],
+  "executionLimits": "One native03invocation only. No sourceedits/retry/extra test/decoder/view/browser/Gradle/JVM/DB/staticCPU/separatebuild/install/download/format/commit/push/deploy/subagent/lifecycle/gate decisions. Only readonly metadata/hash/process audits and receipt archive after terminal.",
+  "remaining": "Fullfinalnative/Core-issuedArtifactLaunch/Vault/privatePG/history/15actualcompanions/6increments/86acceptance+24IPC+55SQL+35joined/B4/fullconfiguredqualitycoverage/crossReplica/deployment/independent015QA/PO/rootclosure then008 mandatory. Original85OPENpending/unamended; no tie/stamp fabrication,finalQA/Done or fullglobalfreeze claim.",
+  "hold": "AllNode source/tests/helpers/generated/specs/dist HOLD until rootrelease; returning slot. Backend two-path source authorization is separate."
+}

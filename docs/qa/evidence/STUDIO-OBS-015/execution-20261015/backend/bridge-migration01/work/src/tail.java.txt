@@ -1,0 +1,159 @@
+  ObjectNode proposal(String id, int ordinal, String kind, String testId) {
+    JsonNode evidence = progress(id).path("executionEvidence");
+    ObjectNode context = sessions.runnerContext(controller, id, 1);
+    ObjectNode p =
+        CONTRACTS
+            .object()
+            .put("schemaVersion", 3)
+            .put("sessionId", id)
+            .put("scopeHash", context.path("scopeHash").asText())
+            .put("generation", evidence.path("generation").asInt())
+            .put("evidenceHash", GuidedContracts.hash(evidence))
+            .put("authoredInputsHash", context.path("authoredInputsHash").asText())
+            .put("contextRevision", 1);
+    p.set("executionEvidence", evidence);
+    p.putObject("coordinate").put("stepId", stepId(id)).put("ordinal", ordinal);
+    p.putObject("operation").put("kind", kind);
+    ObjectNode target =
+        p.putObject("target")
+            .put("documentId", evidence.path("documentId").asText())
+            .put("generation", evidence.path("generation").asInt());
+    if (testId == null) {
+      target.put("kind", "page");
+    } else {
+      JsonNode selected = null;
+      for (JsonNode node : progress(id).path("observation").path("nodes")) {
+        for (JsonNode hint : node.path("locatorHints")) {
+          if (hint.path("kind").asText().equals("testId")
+              && hint.path("value").asText().equals(testId)) {
+            selected = node;
+          }
+        }
+      }
+      assertThat(selected).isNotNull();
+      target.put("nodeId", selected.path("nodeId").asText());
+      target.putObject("locator").put("kind", "testId").put("value", testId).put("exact", true);
+    }
+    return p;
+  }
+
+  JsonNode advance(String id, JsonNode ledger, String key) throws Exception {
+    return post(
+        id,
+        "advance",
+        CONTRACTS
+            .object()
+            .put("schemaVersion", 3)
+            .put("sessionId", id)
+            .put("ownerFence", 1)
+            .put("admissionId", ledger.path("admission").path("admissionId").asText())
+            .put("operationHash", ledger.path("operationHash").asText()),
+        key,
+        token("backend-controller", "controller-1", "studio-guided-controller"),
+        202);
+  }
+
+  JsonNode post(String id, String route, JsonNode body, String key, String token, int expected)
+      throws Exception {
+    var response =
+        HttpClient.newBuilder()
+            .sslContext(TLS)
+            .build()
+            .send(
+                HttpRequest.newBuilder(
+                        URI.create(
+                            "https://localhost:"
+                                + backendPort
+                                + "/internal/v2/studio/guided-sessions/"
+                                + id
+                                + "/"
+                                + route))
+                    .header("Authorization", "Bearer " + token)
+                    .header("Content-Type", "application/json")
+                    .header("Idempotency-Key", key)
+                    .header("X-Owner-Fence", "1")
+                    .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
+                    .timeout(Duration.ofSeconds(25))
+                    .build(),
+                HttpResponse.BodyHandlers.ofString());
+    assertThat(response.statusCode()).as("%s: %s", route, response.body()).isEqualTo(expected);
+    return CONTRACTS.parse(response.body());
+  }
+
+  JsonNode progress(String id) {
+    return CONTRACTS.parse(
+        jdbc.queryForObject(
+            "SELECT progress::text FROM studio_guided_sessions WHERE session_id=?",
+            String.class,
+            id));
+  }
+
+  static ObjectNode versions() {
+    return (ObjectNode) CONTRACTS.parse("{\"contract\":3}");
+  }
+
+  static String operationHash(JsonNode proposal) {
+    ObjectNode identity = CONTRACTS.object();
+    identity.set("coordinate", proposal.path("coordinate"));
+    identity.set("origin", proposal.path("executionEvidence").path("origin"));
+    identity.set(
+        "locator",
+        proposal.path("target").has("locator")
+            ? proposal.path("target").path("locator")
+            : com.fasterxml.jackson.databind.node.NullNode.instance);
+    identity.set("operation", proposal.path("operation"));
+    return GuidedContracts.hash(identity);
+  }
+
+  static String token(String role, String subject, String audience) {
+    try {
+      long now = Instant.now().getEpochSecond();
+      String header =
+          Base64.getUrlEncoder()
+              .withoutPadding()
+              .encodeToString(
+                  "{\"alg\":\"RS256\",\"typ\":\"JWT\"}".getBytes(StandardCharsets.UTF_8));
+      String claims =
+          CONTRACTS
+              .object()
+              .put("iss", "fixture-issuer")
+              .put("sub", subject)
+              .put("aud", audience)
+              .put("role", role)
+              .put("iat", now)
+              .put("exp", now + 300)
+              .toString();
+      String signed =
+          header
+              + "."
+              + Base64.getUrlEncoder()
+                  .withoutPadding()
+                  .encodeToString(claims.getBytes(StandardCharsets.UTF_8));
+      Signature signature = Signature.getInstance("SHA256withRSA");
+      signature.initSign(ISSUER.getPrivate());
+      signature.update(signed.getBytes(StandardCharsets.US_ASCII));
+      return signed
+          + "."
+          + Base64.getUrlEncoder().withoutPadding().encodeToString(signature.sign());
+    } catch (Exception failure) {
+      throw new IllegalStateException(failure);
+    }
+  }
+
+  static void command(String... arguments) throws Exception {
+    var process =
+        new ProcessBuilder(arguments)
+            .redirectErrorStream(true)
+            .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+            .start();
+    assertThat(process.waitFor()).isZero();
+  }
+
+  static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
+    long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+    while (!condition.getAsBoolean() && System.nanoTime() < end) {
+      Thread.sleep(25);
+    }
+    assertThat(condition.getAsBoolean()).isTrue();
+  }
+}

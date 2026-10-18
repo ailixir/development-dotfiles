@@ -1,0 +1,106 @@
+{
+  "scope": "READ_ONLY_REQUIRED_C5_CAPTURE_REUSE",
+  "sourceBindings": {
+    "publication": {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "228faa60695f62fe90056bd6ae663d09234d8136659ecc6b7a1b0669ad5fd6dc"
+    },
+    "support": [
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/config/IdempotencyFilter.java",
+        "sha256": "e49f84fa13c3734a15a1a40424c9067645c8a4603db86a71eb5f7fd491340216"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/config/SecurityConfig.java",
+        "sha256": "126355c3bb8b98a406ba5870a073690065760c16f02d4b1fb0f5d383f53403f2"
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/sse/ExecutionEventsController.java",
+        "sha256": "54e0d55bc15ca0b858753b875a7baaa6e20fc3f41531809f68f1a5f55810a236"
+      },
+      {
+        "path": "backend/src/main/resources/logback-spring.xml",
+        "sha256": "ea86a2075f19486361b270343ff191bc58582058bd7266968ec77fa3e7a922a3"
+      },
+      {
+        "path": "backend/src/main/resources/application.yml",
+        "sha256": "ea16a36dd5d426fc14580fc7747d4f698fb573f976d918f51480df6aa4a5afea"
+      }
+    ]
+  },
+  "reuse": {
+    "world": "Keep current ChecksApplication/test profile, actual Core HTTP authentication, actual PostgreSQL guards, counted scoped Vault, guided worker and ordinary compiled Chromium workers. Same cookies, paths, accepted artifact, original dispatch and owned cleanup; no new E2E framework or mandatory18-case matrix.",
+    "successMethod": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+    "currentCapture": "collectJoinedSinks plus actual snapshot/video byte capture in ninth; assertJoinedSinkAbsent private literal/UTF8/UTF16/JSON/unicode/percent/form/component/base64/hex variants; retain independent scanner control.",
+    "callbacks": "observedReportCapture already observes original authenticated progress requests with original chain once; publicCall/startLearning/p3Execute/awaitJoinedVideo carry actual user identity; do not synthesize responses or callback FINAL.",
+    "lifecycle": "OwnedContextCapture/stop and p3CleanupOwnedResources keep endpoints alive through actual owner/resource acknowledgements and drain before dirty context/DB close. Capture success and fault windows before destructive cleanup; restore observer/log levels in finally."
+  },
+  "sinkInventory": [
+    {
+      "sink": "Backend root/application logs, every installed appender",
+      "now": "UNOBSERVED_TRACE. Fixture explicitly logging.level.root=WARN. JSON_CONSOLE configured with real masking encoder; current collectJoinedSinks does not collect backend appender bytes.",
+      "smallestCapture": "Coordinator collects existing full encoded backend stdout/XML/runlog; test enumerates actual Logback logger/appender graph recursively and binds each unique real appender to its produced output. Exact fixture root and com.citi.put.checks TRACE for full two-path and C4 windows; preserve original encoder/threshold/filter/forwarding. Unknown/unmapped appender FAIL, not quiet zero-hit proof. No invented diagnostic marker as app production."
+    },
+    {
+      "sink": "Actual HTTP success/error/problem bodies",
+      "now": "Produced public JSON bodies and selected snapshots exist, but many calls parse/discard bytes and no comprehensive sink map. application/problem+json not assumed from generic JSON errors.",
+      "smallestCapture": "Retain actual HttpResponse<byte[]> body/status/content-type at existing test-owned calls before parsing; collect original resolver/advice errors without new error injection/raw throw. If problem+json never produced, label NOT_PRODUCED with actual endpoint/status/media inventory; ordinary application/json error remains separately scanned. Preserve same requests/results."
+    },
+    {
+      "sink": "SSE /api/v1/studio/executions/{id}/events",
+      "now": "UNOBSERVED; current test only polls snapshot.",
+      "smallestCapture": "Use existing owned HTTPS client/cookie against original SSE route for real accepted ordinary execution. Bounded original stream until genuine streamComplete/EOF or explicit bound failure; capture original framing/data bytes, assert at least actual execution.snapshot and correct terminal snapshot. Close subscription/client before owner cleanup; do not replay a JSON snapshot into a fabricated SSE string. Existing authorization/rate limits remain."
+    },
+    {
+      "sink": "/actuator/prometheus",
+      "now": "NOT_MOUNTED_API_PROFILE: application.yml intentionally excludes prometheus; worker profile exposes it. No current scrape.",
+      "smallestCapture": "Requires explicit narrow fixture-only actual endpoint exposure approval using existing actuator/Micrometer registry, existing HTTPS port/security; do not switch whole application to worker or alter production config. Actual200/prometheus content/nonempty produced metrics required. Direct registry.scrape is supporting evidence only, not the specified HTTP endpoint."
+    },
+    {
+      "sink": "IdempotencyFilter real cache",
+      "now": "UNOBSERVED; actual cache participates in ordinary execute/cancel paths. Guided /api/v3 is not a covered filter path, so it is not a guided cache claim.",
+      "smallestCapture": "Read existing named idempotencyCache bean via public Cache.asMap(); scan real CachedResponse.body and retained non-stripped header bytes in private memory. No cache-key/user/token export. Bind actual size/cache hit counters; existing normal accepted POST idempotency entry and byte-equivalent replay may be read after completion without extra dispatch. Preserve production stripped cookie/authorization/set-cookie rule. Missing applicable cache entry fails instead of fake insertion/reflection."
+    },
+    {
+      "sink": "PG/source/materialization/audit/history",
+      "now": "PRODUCED_COLLECTED current collectJoinedSinks queries13 safe named tables without value query parameters.",
+      "smallestCapture": "Reuse current collection, include actual C4 decision/no-send/retry receipt rows where applicable and count identities privately. No LIKE/canary query parameter under TRACE. Query only real rows; no fabricated audit rows."
+    },
+    {
+      "sink": "Model gateway source/requests",
+      "now": "PRODUCED_COLLECTED actual MODEL_WIRE; model0 on publication/replays asserted.",
+      "smallestCapture": "Reuse private scans and real scoped read/model counters; preserve clear distinction plain USER configuration and actual SECRET value effects."
+    },
+    {
+      "sink": "Guided/ordinary/child parent stdout stderr",
+      "now": "PRODUCED_COLLECTED guided.log/ordinary.log with merged stderr. Child capture completeness depends original parent relay; original child pipe bytes are not independently all observed.",
+      "smallestCapture": "Reuse original owned process redirection/real relay logs; do not add new child raw-body or secret-bearing debug channel. Label unretained child output UNOBSERVED rather than empty PASS; require actual production relay/failure outputs when they occur."
+    },
+    {
+      "sink": "Journal/diagnostic/manifests/objects/native videos",
+      "now": "PRODUCED_COLLECTED for surviving regular nonsymlink files under journal/scratch/objects, native video decoded and scanned. Missing/deleted file tree is not redaction evidence.",
+      "smallestCapture": "Collect available original generated files before existing erase/reap as well as after; diagnostic sidecar only when original failed/uncertain consumed action actually writes it. Keep fixture password receipt oracle excluded from product sinks."
+    },
+    {
+      "sink": "Profile/user-data before context close",
+      "now": "DISCARDED_OR_UNOBSERVED_PRE_CLOSE; current scratch walk occurs after completed cleanup.",
+      "smallestCapture": "Use only existing default-off public owned BrowserContext.close seam to privately scan actual confined profile tree before original close/clear, bind produced file count/bytes and zero hits. This needs narrowly reviewed privacy/forwarding source release; no new selector, DOM/value channel, watcher or clock reset. Empty postcleanup tree does not prove AC11/C5 privacy."
+    }
+  ],
+  "requiredC4Windows": {
+    "mustRemain": "C5 TRACE and actual API/SSE/metrics/cache sink capture spans genuine Vault outage\u2192next existing pass fresh value read and retryable definite refusal\u2192fresh accepted attempt/grant/value read; revoked-between-passes and ambiguous-no-resend guards remain.",
+    "capturePlacement": "One common C5 collector opens before real learn and initial resolution, stays active through original dispatcher/requeue/retry decisions and actual owner cleanup, snapshots per decision/window then restores in finally. Reuse successful fixture/artifact/CountedLoginVault/actual dispatcher and real HTTP clients; no separate18-case framework.",
+    "existingSupportingCases": "StudioDispatcherFailureIT and GuidedServiceTransportFaultIT historical frozen gates are supporting scoped service/owner/transport proofs; they do not automatically supply current compiled-worker two-path all-sink capture.",
+    "remainingSourceGap": "Publication fixture currently lacks actual outage/retryable-definite-refusal subrun orchestration in its secret ninth. Exact original provider failure seam and authentic retryable HTTP refusal construction must be authorized separately, preserving existing resolution/read/send/attempt counters. No fake accepted/refusal callback or stale job replay proposed.",
+    "unsafeOptionalD18": "Archived SOURCE_BLOCKED supporting source only; do not execute or copy its framework. No new acceptance obligation implied."
+  },
+  "privacyPrerequisites": [
+    "All canaries scanned privately; persisted evidence contains local numeric sink ordinals/counts/status/media/byte-size/hit-count and source/build hashes only.",
+    "Capture actual production bytes with original receiver/args/result/error/encoder behavior unchanged. Root TRACE may contain authentication/transport internals: no raw logs/headers/tokens/body dumps into public reports, and no unsafe string-valued telemetry labels.",
+    "Real fixture /__receipts intentionally contains submitted password; count/order/acceptance is test oracle only, excluded from product privacy credit.",
+    "Bound SSE/read/capture and teardown using existing deadlines; no rate-budget bypass, fabricated completion/receipt, timer reset, extra value/model calls or credential APIs."
+  ],
+  "smallestAuthoringRequest": "After independent source approval, extend only existing publication fixture capture helpers and fixture-local properties/selected existing HTTP seams; preserve25 bodies/names and original source/authority/clock/budgets. Shared helper reuse with named C4 subruns, not another test framework. Public actual metrics exposure and before-close profile capture require explicit narrow release; this report grants none.",
+  "unproved": "Required C5 is not closed by current postcleanup snapshots or scanner control. Actual current two-path TRACE/every-appender/API/SSE/metrics/cache plus C4 windows must execute under coordinator lease; unavailable/discarded evidence remains named.",
+  "actions": "Only this report written. No source/runtime/SQL/Node/browser/Gradle/check/model operations; all19 and wave scope remain open."
+}

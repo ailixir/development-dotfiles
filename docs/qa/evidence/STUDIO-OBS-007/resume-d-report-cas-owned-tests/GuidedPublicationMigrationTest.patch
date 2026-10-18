@@ -1,0 +1,159 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java before
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java source-only candidate
+@@ -9,6 +9,7 @@
+ import com.citi.put.checks.studio.guided.session.GuidedContracts;
+ import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
+ import com.fasterxml.jackson.databind.ObjectMapper;
++import com.fasterxml.jackson.databind.JsonNode;
+ import com.fasterxml.jackson.databind.node.ObjectNode;
+ import java.nio.file.Files;
+ import java.nio.file.Path;
+@@ -57,6 +58,9 @@
+     final UUID testId = UUID.randomUUID(), stepId = UUID.randomUUID();
+     final ObjectNode session;
+     final String sourceText;
++    private boolean ownsContainer = true;
++    private ObjectNode sharedBasis;
++    private String fixtureSession = "session";
+ 
+     Database() {
+       this(false);
+@@ -200,7 +204,90 @@
+           });
+     }
+ 
++    /** Uses the existing Spring transaction context; never migrates or owns its datasource. */
++    Database(JdbcTemplate sharedJdbc, TransactionTemplate sharedTransactions,
++        String namespace, ObjectNode canonicalBasis) {
++      if (namespace == null || !namespace.matches("[A-Za-z0-9_-]{1,100}")) {
++        throw new IllegalArgumentException("Invalid fixture namespace");
++      }
++      ownsContainer = false;
++      fixtureSession = namespace;
++      jdbc = sharedJdbc;
++      tx = sharedTransactions;
++      sharedBasis = canonicalBasis.deepCopy();
++      sharedBasis.put("sessionId", fixtureSession).put("testId", testId.toString());
++      var source = C.object().putArray("source");
++      var authored = new java.util.ArrayList<AuthoringStep>();
++      for (JsonNode step : sharedBasis.path("sourceSteps")) {
++        source.add(step.path("source").asText());
++        authored.add(new AuthoringStep(UUID.fromString(step.path("stepId").asText()),
++            step.path("source").asText(), null));
++      }
++      if (authored.isEmpty()) { throw new IllegalArgumentException("Missing observed source"); }
++      sourceText = authored.getFirst().text();
++      var authoring = new AuthoringV2Request(2, null, authored);
++      var mapper = new ObjectMapper().findAndRegisterModules();
++      String csi = sharedBasis.path("csiId").asText();
++      String environment = sharedBasis.path("replayRequirements").path("environment").asText();
++      ((ObjectNode) sharedBasis.path("replayRequirements")).put("csiId", csi);
++      jdbc.update("INSERT INTO users(sso_id,name,email) VALUES (?,?,?) ON CONFLICT(email) DO NOTHING",
++          "fixture-" + namespace, "Report fixture", "owner@example.test");
++      jdbc.update("INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) "
++          + "VALUES (?,'Report fixture','unit','LOW','owner@example.test','Development') ON CONFLICT(id) DO NOTHING", csi);
++      try {
++        jdbc.update("INSERT INTO ui_tests(id,name,csi_id,environment,browser,viewport_width,viewport_height,timeout_seconds,wait_strategy,steps,created_by,authoring,authoring_revision_inputs) "
++            + "VALUES (?,'Observed report fixture',?,?,?, ?,?,?,?,?::jsonb,'owner@example.test',?::jsonb,?::jsonb)",
++            testId, csi, environment, sharedBasis.path("configuration").path("browser").asText(),
++            sharedBasis.path("configuration").path("viewport").path("width").asInt(),
++            sharedBasis.path("configuration").path("viewport").path("height").asInt(),
++            sharedBasis.path("configuration").path("timeoutSeconds").asInt(),
++            sharedBasis.path("configuration").path("waitStrategy").asText(),
++            source.toString(), mapper.writeValueAsString(authoring),
++            mapper.writeValueAsString(AuthoringRevisionIdentity.create(authoring, Map.of())));
++      } catch (java.io.IOException failure) { throw new IllegalStateException("Observed fixture source unavailable", failure); }
++      sessions = new GuidedSessionRepository(jdbc, tx, C);
++      bases = new GuidedPublicationBaseRepository(jdbc, C);
++      publications = new GuidedPublicationRepository(jdbc, C);
++      evidence = new GuidedPublicationEvidenceRepository(jdbc, C);
++      session = C.object().put("sessionId", fixtureSession).put("testId", testId.toString())
++          .put("state", "PREPARING").put("expiresAt", Instant.now().plusSeconds(600).toString());
++      ObjectNode scope = sharedBasis.path("scope").deepCopy();
++      scope.put("principalId", "owner@example.test").put("csiId", csi)
++          .put("sourceRevision", "1").put("configurationRevision", "1");
++      session.set("scope", scope);
++      session.put("scopeHash", GuidedContracts.hash(scope));
++      sharedBasis.set("scope", scope.deepCopy());
++      session.putObject("owner").put("workerId", "unclaimed").put("fence", 0)
++          .put("leaseExpiresAt", Instant.now().toString());
++      session.putObject("runAuthorization").put("authorizationId", UUID.randomUUID().toString())
++          .put("kind", "scopedRun").put("principalId", "owner@example.test")
++          .put("scopeHash", GuidedContracts.hash(scope)).put("authorizedAt", Instant.now().toString());
++      var steps = session.putArray("sourceSteps");
++      authored.forEach(step -> steps.addObject().put("stepId", step.id().toString()).put("requiresAssertion", false));
++      tx.executeWithoutResult(status -> {
++        sessions.insert(session);
++        var manifest = C.object().put("testId", testId.toString()).put("sourceRevision", "1")
++            .put("configurationRevision", "1").put("policy", "INPUT-POLICY-01-A");
++        var sourceSteps = manifest.putArray("sourceSteps");
++        authored.forEach(step -> sourceSteps.addObject().put("stepId", step.id().toString()).put("text", step.text()));
++        manifest.set("configurationReferences", sharedBasis.path("configurationReferences").deepCopy());
++        manifest.putObject("configurationValues");
++        jdbc.update("INSERT INTO studio_guided_source_manifests(session_id,scope_hash,manifest,manifest_hash) "
++            + "VALUES (?,?,?::jsonb,?)", fixtureSession, session.path("scopeHash").asText(),
++            manifest.toString(), GuidedContracts.hash(manifest));
++        jdbc.update("INSERT INTO studio_guided_translation_state(session_id) VALUES (?)", fixtureSession);
++      });
++    }
++
++    String fixtureSession() { return fixtureSession; }
++
+     PublicationContracts.Base capture() {
++      if (sharedBasis != null) {
++        return tx.execute(status -> {
++          sessions.lock(fixtureSession);
++          return bases.capture(session, sharedBasis.path("replayRequirements"), Instant.now());
++        });
++      }
+       return tx.execute(
+           s -> {
+             sessions.lock("session");
+@@ -220,6 +307,18 @@
+     }
+ 
+     void finalizing() {
++      if (sharedBasis != null) {
++        tx.executeWithoutResult(status -> {
++          sessions.lock(fixtureSession);
++          var owner = C.object().put("workerId", "worker").put("fence", 1)
++              .put("leaseExpiresAt", Instant.now().plusSeconds(120).toString());
++          jdbc.update("UPDATE studio_guided_sessions SET state='FINALIZING',document=jsonb_set(jsonb_set(document,'{state}','\"FINALIZING\"'),'{owner}',?::jsonb) WHERE session_id=?", owner.toString(), fixtureSession);
++          JsonNode plan = sharedBasis.path("translationPlan");
++          jdbc.update("INSERT INTO studio_guided_translation_plans(session_id,plan_revision,parent_revision,plan,plan_hash) VALUES (?,1,0,?::jsonb,?)", fixtureSession, plan.toString(), GuidedContracts.hash(plan));
++          jdbc.update("UPDATE studio_guided_translation_state SET plan_revision=1 WHERE session_id=?", fixtureSession);
++        });
++        return;
++      }
+       tx.executeWithoutResult(
+           s -> {
+             sessions.lock("session");
+@@ -249,6 +348,19 @@
+     }
+ 
+     PublicationContracts.Snapshot snapshot(PublicationContracts.Base base) {
++      if (sharedBasis != null) {
++        var basis = sharedBasis.deepCopy();
++        for (String field : List.of("testId", "csiId", "sourceRevision", "configurationRevision", "sourceHash", "configurationHash", "authoringHash", "sourceManifestHash")) {
++          basis.set(field, base.document().path(field));
++        }
++        basis.set("runAuthorization", session.path("runAuthorization").deepCopy());
++        var identity = C.object().put("ownerWorkerId", "worker").put("ownerFence", 1)
++            .put("validationDeadline", PublicationContracts.time(Instant.now().plusSeconds(12)))
++            .put("translationHash", GuidedContracts.hash(sharedBasis.path("translationPlan")))
++            .put("basisHash", GuidedContracts.hash(basis));
++        identity.set("base", base.document());
++        return new PublicationContracts.Snapshot(identity, basis);
++      }
+       var b =
+           C.object()
+               .put("testId", testId.toString())
+@@ -284,7 +396,7 @@
+ 
+     @Override
+     public void close() {
+-      pg.stop();
++      if (ownsContainer) { pg.stop(); }
+     }
+   }
+ 

@@ -1,0 +1,416 @@
+{
+ "lane": "D3",
+ "wave": "W2",
+ "verdict": "GREEN",
+ "date": "2026-10-18",
+ "files": [
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+   "before": "9a4cd5655e5cb3b1f45872fbc71f70cacdec7dc4207ed8776a96d76530d3f6cf",
+   "after": "aeb3973501558664b2446a40afa760a92b6e4eb45ba0397448c9ad0d5fab4b75",
+   "lines": 547
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerProperties.java",
+   "before": "bc2dc656bac918189c66adf906eb7a79edcea9206a4447c7514ae970959597b6",
+   "after": "47ac8e9f5ddb383cfe26575261cd71581d3cca98db5512c5756016bf6afc4004",
+   "lines": 144
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+   "before": "3109936e2729573d631013563e0fdb47959335cc3509d66860637bc81f05a196",
+   "after": "7eeaa3b49107bc1436adf7d0107dedede12f6ad364a756bc41c716ad828c99ae",
+   "lines": 294
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+   "before": "98e15aa0351c9644e4e7196f1b66db5272c78b50e9634ab49691533cf5e8b934",
+   "after": "183aa6b998f17e42c77952f5889f5a1d74c7a66a58dabc647b5087d89e424991",
+   "lines": 345
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+   "before": "3d0c1ac367dd50f7fdf512f4a60f380e67898b3717d62bc016353f22b286846e",
+   "after": "c06279a35213c8b1eea5aca1e84b3b968cba20392e7cb06d6bae21a4d66b967b",
+   "lines": 166
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java",
+   "before": "74264a5c4eec19075688565a759813990e00879f3654ce6e20484b5a323b09eb",
+   "after": "886889ee7634bf67500f9511ac8647f294721fb6cd8a581bb50fcd7a5bcec7eb",
+   "lines": 51
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java",
+   "before": "0f99e12b18a6f59ea2d1d519f5925534967ac18384166def0bde683038e8249f",
+   "after": "b14e638d3dc0074c8ed44ad5023b702026ad1d3b62bcd5b5a73240c38e07df8d",
+   "lines": 143
+  },
+  {
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+   "before": "54748de0a795e37814c7c0b3cef9a5203f7a3eba377889d5fbd3da6d810885fc",
+   "after": "d0e365d51ab5b612300a0a39f9a707c27329a2ae3b8bf22c01c9706f524aed6e",
+   "lines": 204
+  },
+  {
+   "file": "backend/src/main/resources/application.yml",
+   "before": "272736619835ac434ff9d4c69e2e4a42009e57cd4091ee4fb9bf6769ca728494",
+   "after": "8c7427ef9e53f341f914c577d1d1bbe5bff7b023774c970c65400b6c9a1cd139",
+   "lines": 449
+  },
+  {
+   "file": "backend/src/main/resources/application-api.yml",
+   "before": "13016a85f3676bfb86d7ca86a79ace9b447aec6c2eb9bff50deeaafd50544db7",
+   "after": "dc64f398da2c84d75c7f2a470ee47c50ebef5103ebba4fa138a38ae3aa1d210a",
+   "lines": 18
+  },
+  {
+   "file": "backend/src/main/resources/application-worker.yml",
+   "before": "5195d5d6e7734370aacd46520ff56ec4858d4bafff89413d957a971f142bae41",
+   "after": "bf0c42d16bfdfbb1f7d5f7a5d9206f6ce98fe58e4c3bddd0f5bfff64160c3a65",
+   "lines": 41
+  },
+  {
+   "file": "backend/src/main/resources/application-prod.yml",
+   "before": "c6da46639087462703b0385c300ff02a842ac9fb833a959b50c1faeb51158176",
+   "after": "7e4f389822263caac8258c7f6447c5ece995123b8c1ce85ae2443ed72d148d00",
+   "lines": 24
+  },
+  {
+   "file": "backend/src/main/resources/application-staging.yml",
+   "before": "4f6319ec4f2236d724c7593148040a9f8cc4d749257b81f6e9e6f9b1e3248711",
+   "after": "533d530c57e47a9898b758a11c8b15647d9238bdcf6c24141068dc6dcd5d7b0a",
+   "lines": 22
+  },
+  {
+   "file": "backend/src/main/resources/application-dev.yml",
+   "before": "b8aee7b549f99473e02adb5eacac093a2b253703b6b30e59b24430a11b58ff13",
+   "after": "096248359497109d1f0f5afbc1e64e8f468aa3a480425595daa8167e3d6af251",
+   "lines": 34
+  },
+  {
+   "file": "backend/src/main/resources/application-local.yml",
+   "before": "99fad72e13f1fd9664367ce064cc7650a71e755ba1b0b8033c22a9ab5715338a",
+   "after": "e89396c3c714c441b051a062fa04ad994a1e9041e02eecae3e4c4f8b3190f281",
+   "lines": 97
+  },
+  {
+   "file": "backend/src/main/resources/application-test.yml",
+   "before": "eec357d5cec8d7b8fdc88f7f57b1a6f878e581c54af875b8450027e987045594",
+   "after": "c99ac391f0a29211cb254bc0c95d298f8c3ab4de647d7ce1b02b431f295683a2",
+   "lines": 62
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerTestTls.java",
+   "before": "d6722215d3d7d2ffd417e507eb5811970f24286a7984ac98df5e0cfddaaf1459",
+   "after": "ee3e35b7cde2df56b0ba041b9ac90e5d8a1fbd7966190c4accb5f5c48b01093c",
+   "lines": 747
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java",
+   "before": null,
+   "after": "e622272720f45a127f24f32d8b6c5a0c5d65d26a974737879ccdf8c632d0c065",
+   "lines": 490
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java",
+   "before": null,
+   "after": "9537e1649e46fd7b7e4f37e48725eccbaa5de30aa776c524fe4bd16c8a8b1c08",
+   "lines": 848
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedScheduledBeansProfileTest.java",
+   "before": null,
+   "after": "07bfefc019745e8a69c833920fcdbe415950efc409e061d3ccf4f12060dbe620",
+   "lines": 232
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/secrets/DatabaseCanaryScanIT.java",
+   "before": null,
+   "after": "db530c4d35d17a13f7c02f39b4711eb31b622de751d3e0db0ec9a4739884c7fc",
+   "lines": 454
+  },
+  {
+   "file": "backend/src/test/java/com/citi/put/checks/studio/secrets/VaultPolicyIT.java",
+   "before": null,
+   "after": "79725cad31982721a48573191c3836daec11568e60a3b652dfefa968bb1c9c08",
+   "lines": 42
+  }
+ ],
+ "runs": [
+  {
+   "label": "obs009-d3-01",
+   "counts": "130/126/3/1",
+   "note": "red: 3 test-side defects (reflection overload, Tomcat 400 on plaintext, uppercase scheme)",
+   "resultsSha256Prefix": "76ed74ad"
+  },
+  {
+   "label": "obs009-d3-02",
+   "counts": "130/129/0/1",
+   "note": "green (lane verify set + VaultPolicyIT)",
+   "resultsSha256Prefix": "458f9ea5"
+  },
+  {
+   "label": "obs009-d3-03",
+   "counts": "139/139/0/0",
+   "note": "green regression set (profiles, wiring, dispatch, secrets IT); collector exit 2 = sourceStable:false only",
+   "resultsSha256Prefix": "92440523"
+  },
+  {
+   "label": "obs009-d3-04",
+   "counts": "15/15/0/0",
+   "note": "green RunnerTlsClientCertIT incl. real-context connector test",
+   "resultsSha256Prefix": "0791fa6c"
+  },
+  {
+   "label": "obs009-d3-05",
+   "counts": "131/130/0/1",
+   "note": "final lane set; collector exit 2 = sourceStable:false only (Gradle exit 0)",
+   "resultsSha256Prefix": "6822a9e7"
+  }
+ ],
+ "staticGates": "spotlessCheck checkstyleMain checkstyleTest spotbugsMain BUILD SUCCESSFUL",
+ "tripwires": {
+  "SSLContext.getDefault": 0,
+  "@Disabled": 6,
+  "DEFERRED STUDIO-OBS-009": 0
+ },
+ "mutations": [
+  {
+   "id": "M1-strict-hop-without-tls-starts",
+   "applied": true,
+   "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+   "gradleExit": 1,
+   "testcases": 44,
+   "skipped": 0,
+   "failedCases": [
+    "StudioRunnerPropertiesProfileTest.aConfiguredRunnerHopOutsideLocalAndTestDoesNotStartWithoutTlsSettings()"
+   ],
+   "failedCount": 1,
+   "killed": true,
+   "tail": [
+    "* Try:",
+    "> Run with --scan to get full insights.",
+    "",
+    "BUILD FAILED in 9s"
+   ],
+   "restoredShaMatches": true
+  },
+  {
+   "id": "M2-plaintext-url-accepted-everywhere",
+   "applied": true,
+   "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerProperties.java",
+   "gradleExit": 1,
+   "testcases": 44,
+   "skipped": 0,
+   "failedCases": [
+    "StudioRunnerPropertiesProfileTest.[1] profiles=[prod]",
+    "StudioRunnerPropertiesProfileTest.[2] profiles=[staging]",
+    "StudioRunnerPropertiesProfileTest.[3] profiles=[dev]",
+    "StudioRunnerPropertiesProfileTest.[4] profiles=[api, prod]",
+    "StudioRunnerPropertiesProfileTest.[5] profiles=[worker, staging]",
+    "StudioRunnerPropertiesProfileTest.[6] profiles=[uat]",
+    "StudioRunnerPropertiesProfileTest.[7] profiles=[]",
+    "StudioRunnerPropertiesProfileTest.theSchemeCheckIsNotFooledByALookAlikeScheme()",
+    "StudioRunnerPropertiesProfileTest.[1] profiles=[prod]",
+    "StudioRunnerPropertiesProfileTest.[2] profiles=[staging]",
+    "StudioRunnerPropertiesProfileTest.[3] profiles=[dev]",
+    "StudioRunnerPropertiesProfileTest.[4] profiles=[api, prod]"
+   ],
+   "failedCount": 15,
+   "killed": true,
+   "tail": [
+    "* Try:",
+    "> Run with --scan to get full insights.",
+    "",
+    "BUILD FAILED in 16s"
+   ],
+   "restoredShaMatches": true
+  },
+  {
+   "id": "M3-reaper-profile-removed",
+   "applied": true,
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java",
+   "gradleExit": 1,
+   "testcases": 15,
+   "skipped": 0,
+   "failedCases": [
+    "GuidedScheduledBeansProfileTest.reaper under api,prod: present=false",
+    "GuidedScheduledBeansProfileTest.reaper under api,staging: present=false",
+    "GuidedScheduledBeansProfileTest.reaper under api: present=false",
+    "GuidedScheduledBeansProfileTest.reaper under api,dev: present=false",
+    "GuidedScheduledBeansProfileTest.reaper under local,api: present=false",
+    "GuidedScheduledBeansProfileTest.reaper under api,test: present=false",
+    "GuidedScheduledBeansProfileTest.bothGatesUseTheExpressionOfTheSchedulingCoordinator()"
+   ],
+   "failedCount": 7,
+   "killed": true,
+   "tail": [
+    "* Try:",
+    "> Run with --scan to get full insights.",
+    "",
+    "BUILD FAILED in 12s"
+   ],
+   "restoredShaMatches": true
+  },
+  {
+   "id": "M4-coordinator-profile-removed",
+   "applied": true,
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java",
+   "gradleExit": 1,
+   "testcases": 15,
+   "skipped": 0,
+   "failedCases": [
+    "GuidedScheduledBeansProfileTest.coordinator under api,prod: present=false",
+    "GuidedScheduledBeansProfileTest.coordinator under api,staging: present=false",
+    "GuidedScheduledBeansProfileTest.coordinator under api: present=false",
+    "GuidedScheduledBeansProfileTest.coordinator under api,dev: present=false",
+    "GuidedScheduledBeansProfileTest.coordinator under local,api: present=false",
+    "GuidedScheduledBeansProfileTest.coordinator under api,test: present=false",
+    "GuidedScheduledBeansProfileTest.bothGatesUseTheExpressionOfTheSchedulingCoordinator()"
+   ],
+   "failedCount": 7,
+   "killed": true,
+   "tail": [
+    "* Try:",
+    "> Run with --scan to get full insights.",
+    "",
+    "BUILD FAILED in 11s"
+   ],
+   "restoredShaMatches": true
+  },
+  {
+   "id": "M5-connector-accepts-no-client-certificate",
+   "applied": true,
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+   "gradleExit": 1,
+   "testcases": 1,
+   "skipped": 0,
+   "failedCases": [
+    "RunnerTlsClientCertIT.theGuidedConnectorDemandsAClientCertificateAndServesTheBackendCertificate()"
+   ],
+   "failedCount": 1,
+   "killed": true,
+   "tail": [
+    "* Try:",
+    "> Run with --scan to get full insights.",
+    "",
+    "BUILD FAILED in 10s"
+   ],
+   "restoredShaMatches": true
+  },
+  {
+   "id": "M6-issuer-not-required",
+   "applied": true,
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+   "gradleExit": 1,
+   "testcases": 44,
+   "skipped": 0,
+   "failedCases": [
+    "StudioRunnerPropertiesProfileTest.[3] part=studio.guided-authoring.service-issuer, named=service-issuer",
+    "StudioRunnerPropertiesProfileTest.aWorkerNeedsTheTokenFilesButNotTheReceivingHalfOfTheChain()"
+   ],
+   "failedCount": 2,
+   "killed": true,
+   "tail": [
+    "* Try:",
+    "> Run with --scan to get full insights.",
+    "",
+    "BUILD FAILED in 9s"
+   ],
+   "restoredShaMatches": true
+  },
+  {
+   "id": "M7-dispatch-client-ignores-tls",
+   "applied": true,
+   "file": "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+   "gradleExit": 1,
+   "testcases": 3,
+   "skipped": 0,
+   "failedCases": [
+    "RunnerTlsClientCertIT.submissionAndCancelSucceedOnlyWithTheBackendCertificateAndTheRunnerIssuer()"
+   ],
+   "failedCount": 1,
+   "killed": true,
+   "tail": [
+    "* Try:",
+    "> Run with --scan to get full insights.",
+    "",
+    "BUILD FAILED in 9s"
+   ],
+   "restoredShaMatches": true
+  },
+  {
+   "id": "M8-coordinator-ignores-tls",
+   "applied": true,
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+   "gradleExit": 1,
+   "testcases": 1,
+   "skipped": 0,
+   "failedCases": [
+    "RunnerTlsClientCertIT.theCoordinatorsControllerHopPresentsTheBackendCertificateAndRefusesAStrayServer()"
+   ],
+   "failedCount": 1,
+   "killed": true,
+   "tail": [
+    "* Try:",
+    "> Run with --scan to get full insights.",
+    "",
+    "BUILD FAILED in 9s"
+   ],
+   "restoredShaMatches": true
+  },
+  {
+   "id": "M10-validation-client-ignores-tls",
+   "applied": true,
+   "file": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+   "gradleExit": 1,
+   "testcases": 2,
+   "skipped": 0,
+   "failedCases": [
+    "RunnerTlsClientCertIT$OneIdentityInARealContext.allFourRunnerFacingClientsHoldTheOneConfiguredContext()"
+   ],
+   "failedCount": 1,
+   "killed": true,
+   "tail": [
+    "* Try:",
+    "> Run with --scan to get full insights.",
+    "",
+    "BUILD FAILED in 21s"
+   ],
+   "restoredShaMatches": true
+  },
+  {
+   "id": "M9-scanner-blind-to-jsonb",
+   "applied": true,
+   "file": "backend/src/test/java/com/citi/put/checks/studio/secrets/DatabaseCanaryScanIT.java",
+   "gradleExit": 1,
+   "testcases": 1,
+   "skipped": 0,
+   "failedCases": [
+    "DatabaseCanaryScanIT.theScannerReportsAPlantedCopyInEveryColumnTypeAndEveryEncoding()"
+   ],
+   "failedCount": 1,
+   "killed": true,
+   "tail": [
+    "* Try:",
+    "> Run with --scan to get full insights.",
+    "",
+    "BUILD FAILED in 23s"
+   ],
+   "restoredShaMatches": true
+  }
+ ],
+ "skips": "skips-d3-vaultpolicy.json",
+ "owed": [
+  "AC-4 dev-Vault policy test (U5)",
+  "chart values and connector port (D2)",
+  "PKCS12 issuance (Platform/SRE)"
+ ],
+ "batons": [
+  "ReplayIT needs studio.runner.tls.* (lane I/S)",
+  "approved-skips entry 8 name (QA)",
+  "F: CanaryScan after co-run; land main files together",
+  "D2: names table"
+ ]
+}

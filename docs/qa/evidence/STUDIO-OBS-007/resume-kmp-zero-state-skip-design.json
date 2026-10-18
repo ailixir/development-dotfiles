@@ -1,0 +1,17 @@
+{
+  "scope": "MINIMUM_EXISTING_KMP_ZERO_STATE_SKIP_SOURCE_DESIGN",
+  "sourceSha": "4a2220ed481fef2bd1edea28c97b1650df4534d11628876bf1a4942b6e74e465",
+  "observedProblem": "POOL originalAUTHORIZATION_EXPIRED check228 after30s grant; synchronous fixture matcher loops every pattern for every encoded byte. Exclusive cause unproved.",
+  "proposedDelta": [
+    "One fixed256boolean start-byte map built from each existing validated nonempty pattern first octet",
+    "One activeStates count initialized0, updated after ORIGINAL each-pattern KMP transition: +1 only0->positive, -1 onlypositive->0, unchanged otherwise",
+    "After existing encodedBytes increment and original inventory-integrity checks, skip loop ONLY activeStates==0 AND unsigned current octet cannot start ANY existing pattern",
+    "Keep original KMP loop/hit fallback/matching state for all other octets; wipe map/count with existingpatterns/states"
+  ],
+  "correctness": "Induction: activeStates equals number of positive KMP states. On skip all states0 and no pattern first byte matches; every original transition would stay0 and no hit is possible. Existing byte/call/invalid/overflow counters and cross-write prefixes remain exact.",
+  "bounds": "256booleans +oneint; max existing240patterns/16values/15variants unchanged. No buckets/trie/AC/newframework/library/retained rawbytes/disk/filter/capraise.",
+  "validation": "Existing single pure synthetic scanner support case: all15 encoded variants/all split boundaries/int/offset/latewrite/volume controls. Add only meaningful same-case overlapping-prefix/reset controls if needed, no new test/E2E. Then original isolatedPOOL and originalfullTRACEpair unprofiled to measure result, all30s/1s/2s authority bounds retained.",
+  "tradeoff": "Additional bounded map/count invariant; improvement depends on log bytes. No exclusive performance or product-cause claim until actual measurement.",
+  "authorStatus": "NOT_AUTHORED",
+  "acceptanceClaimsChanged": false
+}

@@ -1,0 +1,97 @@
+{
+  "schema": "d-held-row-lock-timeout-execution-design/1",
+  "state": "READONLY_PROPOSED_SINGLE_CASE_NO_IMPLEMENTATION_OR_EXECUTION",
+  "authority": [
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-held-row-design-intent.txt",
+    ".aiox/sdc/STUDIO-OBS-007/dispatch/fresh-owner-d-held-row-design-context.txt"
+  ],
+  "sourceBindings": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "cb9930b7a245dcf3ff2ac08129820e2767f06ed3e3e74adbef5b952dfaf0386a",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "ceeec5a8ef899dced36c556b44ce2e1099fefe65084b7ffc4e3b0f69c4bc68dd",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java": "66f3665f63de906f5b1a4285aaf904b8527a3231066c28be7ee5c3f713a4bd02"
+  },
+  "historicalScope": "Coordinator actual Transport14 and publication18 passed. Those prove their exact private-route/HTTP/context/controls only; no held-row, primary-outage, pool or general JDBC deadline proof.",
+  "actualBlockedOperation": {
+    "entry": "GuidedDispatchService.reconcileLostAcknowledgment clears a prior interrupt only around sessions.lostAcknowledgment(id, admissionId), restoring it in finally.",
+    "transaction": "GuidedSessionRepository.transaction calls original TransactionTemplate.execute. Admission-scoped lostAcknowledgment begins by repository.lock(id).",
+    "sql": "SELECT document::text,progress::text FROM studio_guided_sessions WHERE session_id=? FOR UPDATE",
+    "row": "Exactly the genuinely created case session_id; holder acquires only this row after committed consume/read/send/RESOLVED RELEASE and before actual caller interrupt. No publication/other execution rows or advisory-lock substitutes.",
+    "disposalOrder": "GuidedRunnerClient actual transport finally cancels its exchange/closes bounded subscriber, owned request byte stream and SecretValue; resolver try-with-resources closes values before outer dispatcher catch enters reconciliation. Already-cleared value/byte arrays can be observed while actual reconciliation is blocked; final caller interrupt restoration is asserted only after real helper returns.",
+    "primaryErrorTiming": "UNKNOWN_OUTCOME409 is the original transport result in the interrupted path. Existing Scenario.failure stores it only when the actual dispatch call returns: do not invent an in-flight captured primary Throwable. Assert that original primary code/status after holder release and actual reconciliation return; during blocking retain honest unresolved row/usage observations."
+  },
+  "sourceTimeoutInventory": {
+    "routedJdbcUrl": "DriverManagerDataSource URL supplies only loggerLevel=OFF; no connectTimeout/socketTimeout/options supplied. No pool is used.",
+    "jdbcTemplate": "new JdbcTemplate(source); no setQueryTimeout in this test/repository path.",
+    "transactionManagerAndTemplate": "new DataSourceTransactionManager(source) and original-forwarding TrackingTransactionTemplate; no setDefaultTimeout/setTimeout in this path. Original callback unchanged.",
+    "databaseSettings": "Owned postgres:15-alpine container plus V1-V34 migrations; effective session lock_timeout/statement_timeout/idle_in_transaction_session_timeout were not read in this report. Source does not establish effective inherited settings.",
+    "httpOnly": "GuidedRunnerClient connects within configured5seconds and transport uses min15seconds/session deadline; callback fixture HTTP has connect3seconds/request5seconds. These do not bound lostAcknowledgment JDBC lock wait.",
+    "conclusion": "No configured source-level SQL row-lock deadline is established. Treat a held dependency as unbounded until positively released; neither interrupt masking nor HTTP timeout supplies a JDBC deadline. Driver/default/server effective values require actual prerequisite observations, not guesses."
+  },
+  "smallestFutureCase": {
+    "ownedSourceProposal": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "method": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased",
+    "selector": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased",
+    "count": "One proposed new method; existing14 unchanged =>15 domain invocations if separately authorized.",
+    "graph": "Reuse actual existing scenario/CountedProvider/mTLS relay partial-response mode and same routedSource for repository/manager/tracker/materializer/access/stores/translation/dispatch. Direct observer uses same underlying owned PG. LockingConnection obtained from that same routedSource but remains a separately retained physical connection, never enlisted in dispatch transaction.",
+    "steps": [
+      "Create genuine source/manifest/materialized password admission through actual services. Install SourceStopOwner and original-forwarding tracker, same as existing fault case.",
+      "Start actual dispatch; await actual authenticated relay headers. Require read1/POST1/callback0/consume1, committed RESOLVED RELEASE and USAGE0. No fake runner ledger/callback.",
+      "Open own lockingConnection, setAutoCommit(false), get its own backend PID, execute target FOR UPDATE, require exactlyone matched genuine session. Direct observer must still see ACTING/DISPATCHING/live=true and actual caller alive; an already-terminal/expired race is failure, never repaired by clocks or state edits.",
+      "Preregister the eventual actual stop owner before interrupt. Interrupt actual dispatch caller once. Observe real driver session waiting on this holder PID and Lock event via separate observer; require chars/owned request bytes zero and relay disconnect even though dispatch call has not returned. Require original read/send/consume counts unchanged and still no terminal USAGE.",
+      "While holder is positively unreleased and authoritative blocker edge remains, do not assert finite JDBC completion or manually publish terminal UNKNOWN. An observation poll bound only bounds the harness wait for evidence, not the database operation.",
+      "In independent finally, release only own lockingConnection by real rollback and close, even if assertions/interruption fail. Do not terminate backend/server or release someone else's lock.",
+      "Join actual dispatch caller after dependency release and drain actual stop/confirmation owner handles while routed datasource/relay/PG remain alive. Assert original primary GuidedSessionException UNKNOWN_OUTCOME409 and restored actual caller interrupt, actual UNKNOWN_OUTCOME action/session and truthful linked UNKNOWN_OUTCOME USAGE from real service commit.",
+      "Same/new-key recovery must not resolve/send/consume again; all counters remain one and buffers zero. Actual context/scheduler/listener3500/cache/PG lifetime retained until all dependency/operation owners returned."
+    ],
+    "separateFailureBranches": "If actual inherited server/driver timeout fires, record its real SQLSTATE/resource return and primary/suppressed error topology; do not force the success-after-release branch or pretend class08 was a lock-timeout code. Such a different branch requires explicit case/settings disposition before authoring."
+  },
+  "futureDiagnosticSql": {
+    "effectiveSessionPrerequisites": [
+      "SHOW lock_timeout",
+      "SHOW statement_timeout",
+      "SHOW idle_in_transaction_session_timeout"
+    ],
+    "holderPid": "SELECT pg_backend_pid() -- on own retained lockingConnection",
+    "waiter": "SELECT pid,wait_event_type,wait_event,?=ANY(pg_blocking_pids(pid)) AS blocked_by_owned_holder FROM pg_stat_activity WHERE datname=current_database() AND state='active' AND wait_event_type='Lock' AND ?=ANY(pg_blocking_pids(pid)) AND pid<>pg_backend_pid()",
+    "locks": "SELECT pid,locktype,mode,granted,relation,transactionid FROM pg_locks WHERE pid IN (?,?) ORDER BY pid,locktype,mode",
+    "evidenceLimits": "Capture only numeric PID/count/OID and closed lock/event labels. Never export pg_stat_activity.query, authentication, source/secret/body, connection credentials or session documents. Correlate exact owned holder PID and actual target row acquisition; PostgreSQL row waits commonly expose transactionid/tuple lock events, so require actual positive blocker relationship, not an invented event string."
+  },
+  "dependencyLifetimeAndFailures": {
+    "release": "Retain original lockingConnection handle; rollback/close in independent cleanup, preserving original assertion/observation plus all release/drain failures with distinct suppression. No sharedPGstop, pg_terminate_backend, fake SQLException, lease renewal, manual terminal/audit/state or read-and-discard.",
+    "drain": "Actual caller join and sender/confirmation original-operation completion after dependency release are necessary. Elapsed await/Future cancel/socket bridges alone never count as reaped. Keep context/route/PG alive if actual operation remains unreaped; any external watchdog rescue is failed cleanup, not PASS.",
+    "interrupt": "Cleanup temporarily masks only its own interrupted flag for real release/drain and restores it; intentional caller interrupt is separate from external observation/cleanup interruption. Final actual caller flag is read only after real method return.",
+    "suppression": "Successful reconciliation after release leaves original UNKNOWN409 primary. A real reconciliation SQLException is primary according to existing dispatcher; original UNKNOWN409 becomes exactly its closed suppressed error. No fabricated provider exception or forced reconciliation failure."
+  },
+  "settingsPrerequisiteDisposition": {
+    "authorizedNow": "No source/settings change, authoring or execution. Optional JDBC timeouts remain explicitly unauthorized.",
+    "prerequisiteForUnboundedUntilReleaseCase": "Future coordinator must observe effective timeout settings on the exact relevant connections. A finite inherited server/driver lock deadline changes the branch; fail/report prerequisite rather than silently SET0 or skip. With no effective lock deadline, assert actual held dependency until own release, never an upper production wait bound.",
+    "ifBoundedSqlTerminationIsRequired": "Obtain a separate explicit test-only/product disposition first. Smallest candidate is targeted real PostgreSQL lock_timeout on exact reconciliation connection/transaction, with genuine55P03 and unchanged owner/audit authority; statement_timeout/transaction query timeout may produce57014, socketTimeout can produceclass08 and connection loss. Neither test-only option proves a production deadline absent production policy.",
+    "notSubstitutes": [
+      "HTTP/session/lease expiry",
+      "Hikari acquisition timeout for an already acquired connection",
+      "a5second test join",
+      "interrupt/restored flag",
+      "forced terminal/audit row",
+      "manufactured SQLException"
+    ]
+  },
+  "execution": {
+    "sourceEdits": false,
+    "SQLExecuted": false,
+    "Postgres": false,
+    "runtime": false,
+    "tests": false,
+    "checks": false,
+    "Gradle": false,
+    "Docker": false,
+    "processActions": [],
+    "soleWrittenArtifact": "docs/qa/evidence/STUDIO-OBS-007/d-held-row-lock-timeout-execution-design.json"
+  },
+  "limits": [
+    "This report binds actual source and proposes one genuine held-row construction; all planned runtime evidence is UNRUN.",
+    "No authorized optional timeout, bounded general JDBC/primary/pool failure guarantee, all19/Core/browser/QA/lifecycle claim.",
+    "Coordinator91550 runtime remains separate and untouched; B/R/source/model ownership unchanged."
+  ]
+}

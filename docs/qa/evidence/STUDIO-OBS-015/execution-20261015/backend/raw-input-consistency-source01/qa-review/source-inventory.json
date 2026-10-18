@@ -1,0 +1,169 @@
+{
+  "classification": "BOUNDED_NAMED_SOURCE_ARCHITECTURE_AND_PRIOR_RUNTIME_INPUTS",
+  "checkpoint": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/checkpoint-raw-input-consistency-source01.json",
+    "sha256": "d6c43963343124d9cd052596633266f074e2f5ab545c9d1204aeb04444129d85",
+    "bytes": 9473
+  },
+  "heldSources": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "sha256": "9289948874fdce24bf319782fbc69a380d7936388b40bb6a4923ab6add0b01c6",
+      "bytes": 55794,
+      "checkpointMatch": true,
+      "sourceAfterMatch": true
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java": {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java",
+      "sha256": "32e99e0c3793221e048abffe3c0280fa522d2e546c42cd868887c1827d214f1d",
+      "bytes": 57342,
+      "checkpointMatch": true,
+      "sourceAfterMatch": true
+    }
+  },
+  "beforeArchives": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/source-before/GuidedPlanBuilder.java",
+      "sha256": "ac801042dd7a94468ff68a5ad7e4efe48ab310a9f12a93d290730243d755d128",
+      "bytes": 55431,
+      "matchesImmutableFeedback03BeforeAfter": true
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/source-before/GuidedPlanBuilderTest.java",
+      "sha256": "975026f4aaf4b6d890c088719205393230ddbab2789a0bcb53e21f6f8a600528",
+      "bytes": 47914,
+      "matchesImmutableFeedback03BeforeAfter": true
+    }
+  },
+  "afterArchives": {
+    "GuidedPlanBuilder.java": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/source-after/GuidedPlanBuilder.java",
+      "sha256": "9289948874fdce24bf319782fbc69a380d7936388b40bb6a4923ab6add0b01c6",
+      "bytes": 55794
+    },
+    "GuidedPlanBuilderTest.java": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/source-after/GuidedPlanBuilderTest.java",
+      "sha256": "32e99e0c3793221e048abffe3c0280fa522d2e546c42cd868887c1827d214f1d",
+      "bytes": 57342
+    }
+  },
+  "sourceMetadata": {
+    "changes.patch": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/changes.patch",
+      "sha256": "98994f5b83211355f5ee2a5a67cd095d1543d8a15ea2d8d94dc2e4419536ed65",
+      "bytes": 10868
+    },
+    "preservation.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/preservation.json",
+      "sha256": "4f9bfaa6d6f4230e0092a6aeb50df5e930a42f1235e8af817cf9f43dc3f0336b",
+      "bytes": 3221
+    },
+    "fixture-facts.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/fixture-facts.json",
+      "sha256": "6912a2ac2b37ca2265140cf4a747d5fb471fb7b34c82dcd2550d1cb52a07633d",
+      "bytes": 5604
+    },
+    "assertion-inventory.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/assertion-inventory.json",
+      "sha256": "378c32a4f4c3b3947f3fee886043323c134202a1be0529a6b3155d6c12c1f19b",
+      "bytes": 5842
+    },
+    "planning-provenance.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/planning-provenance.json",
+      "sha256": "50ee1a92314ed1f2ffc09c1533dc112dc8d988cd4eefb9e481478a4a3daf60ef",
+      "bytes": 946
+    },
+    "source-inventory.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/raw-input-consistency-source01/source-inventory.json",
+      "sha256": "8d91c1030c4f73fe076cb55b117b8a64dd367396f08193300c15513ff18f0a1e",
+      "bytes": 154848
+    }
+  },
+  "architectureRecommendation": {
+    "manifest.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/feedback03-input-authority/manifest.json",
+      "sha256": "edf4caa019130a312cd0286ce11ff865780a73c6084f9c5a2afe9b4c7f8f1413",
+      "bytes": 2789
+    },
+    "review.md": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/feedback03-input-authority/review.md",
+      "sha256": "41acf466e6474ff4bb55fd94a738daf3be6080d165d84d85fd2f612221794e59",
+      "bytes": 13687
+    },
+    "checks.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/feedback03-input-authority/checks.json",
+      "sha256": "f75e074968c7bb50d4d9dcc11e2b116d3d5aa7d77a5d35c41e1b37dbd5a88ea4",
+      "bytes": 6915
+    },
+    "source-inventory.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/feedback03-input-authority/source-inventory.json",
+      "sha256": "f983b62a819ca1e6ca2bf38fb0c7b57398a94d30e6703417b0911ddb210afec2",
+      "bytes": 10379
+    }
+  },
+  "inspectedNamedSupport": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedMaterializationEvidence.java": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedMaterializationEvidence.java",
+      "sha256": "7fbefe9db5f02682c6468d3495617a2468748d5a6405affe6bc205197061ef6e",
+      "bytes": 6809
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java",
+      "sha256": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc",
+      "bytes": 6560
+    },
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java": {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java",
+      "sha256": "2e16253959c1cb97ac3ce895a0d59ed5f185603564d3a59d38b5d107ccb1be2b",
+      "bytes": 13036
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalMaterializationEvidenceTest.java": {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalMaterializationEvidenceTest.java",
+      "sha256": "5c5485adb197d7104a7868b2cd95a55702aaf6cea9aeeea50f1c65765ec76b40",
+      "bytes": 7067
+    },
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalBoundaryFixture.java": {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalBoundaryFixture.java",
+      "sha256": "7958ba808637442c244799061051017c0ff354fb0b31189be81884955d58fe7f",
+      "bytes": 27005
+    },
+    "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json": {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "sha256": "86e42679bda53a932905f444daf68b276868fb08c87fa9df20166674fa5ed9f2",
+      "bytes": 22720135
+    },
+    "studio-runner/fixtures/observed-reference/fresh-order-reference.json": {
+      "path": "studio-runner/fixtures/observed-reference/fresh-order-reference.json",
+      "sha256": "9de3139c8b5896f364cfcfca4a4492c91ba74c5754ba9519facb5ece9b582152",
+      "bytes": 68855
+    }
+  },
+  "immutablePriorActual": {
+    "-results.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-firstsuffix-b4a-core-feedback-attempt03-results.json",
+      "sha256": "57a54bd5dcb56a4aa3a865506e716891e995409eb6f9c7c44ec16f192a454f93",
+      "bytes": 77819
+    },
+    "-before.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-firstsuffix-b4a-core-feedback-attempt03-before.json",
+      "sha256": "c141a3cbdbbaa96a483fad60c9a109045f11989eeb140edc1259007f2190367d",
+      "bytes": 328335
+    },
+    "-after.json": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-firstsuffix-b4a-core-feedback-attempt03-after.json",
+      "sha256": "119deb42ed7ac9280d5756c461df9d2cfa4cf5b1161c3037d131d0da3cb689fb",
+      "bytes": 328335
+    }
+  },
+  "priorBuilderXml": {
+    "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-firstsuffix-b4a-core-feedback-attempt03-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.xml",
+    "sha256": "7a0be6be77abc444c9b9c2d30743c76291e6c4ef5448ffd33527b8ecc793c0a5",
+    "bytes": 31261,
+    "matchesResultReceipt": true
+  },
+  "checkpointPayloadAudit": {
+    "count": 11,
+    "mismatches": []
+  },
+  "concurrencyScope": "Backend separately owns JOIN and Planning tests. Those changing files are neither inspected as this delta nor bound as frozen current sources. The764-path producer inventory is bound only as a document; no global tree-stability/Runner-dist claim is made."
+}

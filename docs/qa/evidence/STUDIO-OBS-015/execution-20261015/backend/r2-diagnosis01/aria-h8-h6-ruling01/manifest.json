@@ -1,0 +1,165 @@
+{
+  "story": "STUDIO-OBS-015",
+  "owner": "Aria (@architect)",
+  "capturedAtUtc": "2026-10-16T07:58:10Z",
+  "hashAlgorithm": "SHA-256",
+  "creditReleased": false,
+  "sourceChanged": false,
+  "gradleRun": false,
+  "payloads": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r2-diagnosis01/aria-h8-h6-ruling01/ruling.md",
+      "sha256": "86a53bec8dd6e80fa504c4764239c9ff8c54ec6d61dc31f52677ac3e6762730a"
+    }
+  ],
+  "rulings": [
+    {
+      "id": "H8",
+      "classification": "backend-defect",
+      "runnerDefect": false,
+      "decision": "durable idempotent stop re-drive (progress.teardownRequest + reaper sweep + deterministic teardown-<hash> key + up to 2 immediate re-sends on UNKNOWN_OUTCOME); CONFIRMED only on validated runner 200",
+      "options": {
+        "a_retry": "ADOPTED (durable)",
+        "b_runner_immediate_answer": "REJECTED (fake ACK; bridge-design.md:155)",
+        "c_lifecycle_as_ack": "REJECTED (owner/lease auth refuses at expiry; contract change; lossy single send)",
+        "raise_15s_deadline": "REJECTED (runner 30 s socket idle timeout; close unbounded)"
+      },
+      "owner": "@dev backend",
+      "needsQuinn": true
+    },
+    {
+      "id": "H6",
+      "classification": "runner-defect (semantics)",
+      "decision": "containsText passes iff normalizeWhiteSpace(innerText) includes normalizeWhiteSpace(expected); Playwright 1.63 parity per inference-contract F4; read values stay byte-exact; hasValue unchanged; no EXECUTOR_VERSION bump",
+      "file": "studio-runner/src/run/observationCollector.ts invoke assert containsText",
+      "distRebuildRequired": true,
+      "owner": "@dev runner",
+      "needsQuinn": true,
+      "paxFlag": "whitespace-only expected now passes (parity)"
+    }
+  ],
+  "measurements": {
+    "probe": "scratchpad h8probe/probe.mjs; Playwright 1.63.0 launchPersistentContext recordVideo 1280x720, static page idle N s, time context.close(); unloaded dev Mac; no repo/dist byte touched",
+    "probeSha256": "5fa91a98136acf0bc957e8540e95e0b672559e56d54cac0b93b45c5f352ebd15",
+    "results": [
+      {
+        "idleSeconds": 5,
+        "closeMs": 346
+      },
+      {
+        "idleSeconds": 60,
+        "closeMs": 2632
+      },
+      {
+        "idleSeconds": 600,
+        "closeMs": 22979
+      }
+    ]
+  },
+  "inputsRelied": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r2-diagnosis01/review.md",
+      "sha256": "7232a8f026b784c8d0675c52a4959b922301e0aa9303914e716a0c596c285a3b"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/backend/r2-diagnosis01/manifest.json",
+      "sha256": "c22290a0d6a254e84f69cbaed11cc3308700cd4a295971b57023f5e6150e7a8f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "055081ff6551de8eb640e589ffa8f5dd6d18876f64fd7264c1a1a6d432d1e3f8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java",
+      "sha256": "67c62defc8411c77c62dabc4f66ff83997fe8daeb81d307e78d8011bebb3f48e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+      "sha256": "a7eccb02ba06e045717178679bd3b3d75725ecba5bf64fa1d20f5565fc712dc9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java",
+      "sha256": "3732d860c1388108b435004182e3d260b2c1a1cf30507b8e5f21d5b78e8010c0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalController.java",
+      "sha256": "b94aed29b8eea89d5e7cb460655d93581f3cafe649b48b4e413da7a85cb6b106"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256": "174d99ace9c47eeb85904002156eddc595c352590076917135e153411d5df963"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+      "sha256": "e4c48761e3b80561165bf7e51ee8b202c03ba9dfaf35a6ef52f9d77143a3de50"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V19__guided_governance.sql",
+      "sha256": "628b47efbb656aef8a3260f03e7dc77d988555a306652b4d433b8796e3424855"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "sha256": "17e2fb0550843763041529119840c31840ec18278f66ae6d77a2a89af4fd278b"
+    },
+    {
+      "path": "studio-runner/src/guided/ownership.ts",
+      "sha256": "81a19d27a4fa16747d1a93f2db3688403edd790bc5fe837e430e4112f6c6e3bf"
+    },
+    {
+      "path": "studio-runner/src/guided/runtime.ts",
+      "sha256": "23d89e6db89faad68f1c43007101decd2f4b2e3cc807f1f926728043ffd22615"
+    },
+    {
+      "path": "studio-runner/src/guided/transport.ts",
+      "sha256": "8b9f0d1079b6465df0d9e05a3a48d8aca2bca3efae72e840cfce03db4dbe7344"
+    },
+    {
+      "path": "studio-runner/src/guided/evidence.ts",
+      "sha256": "03afea081e543fc920d2e8012b85951bde9ffd737eb5ba858af959c006340279"
+    },
+    {
+      "path": "studio-runner/src/guided/contracts.ts",
+      "sha256": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d"
+    },
+    {
+      "path": "studio-runner/src/run/browser.ts",
+      "sha256": "19893b2aeda17b4d94b4ddb45977fb170cea45035a78cc4e6a1b3f904de21dd9"
+    },
+    {
+      "path": "studio-runner/src/run/observationCollector.ts",
+      "sha256": "ba31be90d04885e6329ae02f6559205325740cbd46960a438150a890557c27a2"
+    },
+    {
+      "path": "studio-runner/src/versions.ts",
+      "sha256": "797c9ca2a1918d3677997cdd858742937edede5ffc9a2c14ee092935ba966e79"
+    },
+    {
+      "path": "studio-runner/src/server/config.ts",
+      "sha256": "613f9bc237469295cef8d956aa398cd094e5385cba0d0f4b6b22e5e8751f9745"
+    },
+    {
+      "path": "studio-runner/test/run/observationCollectorInvoke.test.ts",
+      "sha256": "3c4ec9bc36287f1b4bee823ac20fe3413c83226a82002406d81e402bab9a60d7"
+    },
+    {
+      "path": "studio-runner/node_modules/playwright-core/lib/coreBundle.js",
+      "sha256": "549070af3acabb3efcc4f55bfe6210f9f7c2fcf633cf7eaa59bfe60719969171"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/bridge-design.md",
+      "sha256": "8510bb7426c17bd91e261d0a1960ca86b05a2e630254575086fd36b362445179"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/consensus-plan.md",
+      "sha256": "8533a334271403ac307e7ca7e8b780a16e02abb0d1283d0fe9c14f0f3b118ff2"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/README.md",
+      "sha256": "51808d1b16d5ffdb5ea9e65cfba00d522bfa7cd1dc71372514f34c82c5c7d7f1"
+    },
+    {
+      "path": "docs/architecture/studio-inference-contract-v1.md",
+      "sha256": "68f67d605102aa34932b68f0bd0785fbc1dd4d98b85859e09e7725b936953629"
+    }
+  ]
+}

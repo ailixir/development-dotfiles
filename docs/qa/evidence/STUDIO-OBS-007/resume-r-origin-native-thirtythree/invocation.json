@@ -1,0 +1,14 @@
+{
+  "command": [
+    "npm",
+    "run",
+    "test:fixtures",
+    "--",
+    "test/fixtures-tier/secret-login.test.ts",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-007/resume-r-origin-native-thirtythree/tests.json"
+  ],
+  "expected": 33,
+  "startedAt": "2026-10-11T08:49:20.473924+00:00"
+}

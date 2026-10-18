@@ -1,0 +1,1373 @@
+{
+  "mode": "worst-phase",
+  "productionControlExecuted": false,
+  "localCallbackOnly": true,
+  "backendRevocationAuditProved": false,
+  "artifactHash": "01ba6d4a4359e5fbb6de6d1d22dd54e23d04ebe13301e36c69717e575719b1d2",
+  "scopeHash": "c61dc908214e8bceada366f1625fbddbe2751ecf532c324e5694c59e422defc0",
+  "declaredRecipes": [
+    {
+      "inputId": "nav",
+      "stepId": "00000000-0000-4000-8000-000000000301",
+      "kind": "destination",
+      "intendedSlot": "navigate.destination",
+      "provenance": {
+        "kind": "sourceSpan",
+        "start": 0,
+        "end": 1,
+        "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055"
+      }
+    },
+    {
+      "inputId": "pass",
+      "stepId": "00000000-0000-4000-8000-000000000302",
+      "kind": "secretRef",
+      "intendedSlot": "fill.value",
+      "provenance": {
+        "kind": "configuration",
+        "referenceId": "reference-PASS",
+        "referenceName": "PASS"
+      }
+    },
+    {
+      "inputId": "next",
+      "stepId": "00000000-0000-4000-8000-000000000303",
+      "kind": "secretRef",
+      "intendedSlot": "fill.value",
+      "provenance": {
+        "kind": "configuration",
+        "referenceId": "reference-NEXT",
+        "referenceName": "NEXT"
+      }
+    }
+  ],
+  "artifact": {
+    "version": 3,
+    "kind": "observed",
+    "profile": {
+      "catalog": "observed-replay-3",
+      "playwright": "1.63.0",
+      "browserEngine": "chromium",
+      "contract": 3,
+      "learnedPlan": 3,
+      "observation": 3,
+      "guidedPolicy": 3,
+      "referencePolicy": 4,
+      "lowering": 2,
+      "artifact": 3,
+      "language": "observed-3",
+      "executor": "observed-4",
+      "publicationEvidence": 1,
+      "validationBasis": 1,
+      "validator": "observed-2",
+      "protocol": 3,
+      "replayAuthorization": 2
+    },
+    "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+    "configurationHash": "cee625334e0818f790c1ea4af155bd9f3dc502a58e1032f159defabd20589c8b",
+    "authoringHash": "e5e180ed2cfadcd2beaf593b3fe050e22349ae16658b24b7dd00596dee1ca4fe",
+    "learnedPlan": {
+      "schemaVersion": 3,
+      "planId": "plan-0e34aef57db50c870c3188f1e13967795de212985930e58b2aa5fdcb71c3ca01",
+      "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+      "sourceRevision": "1",
+      "configurationRevision": "1",
+      "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+      "initialContext": {
+        "kind": "initialBlank"
+      },
+      "sourceSteps": [
+        "00000000-0000-4000-8000-000000000301",
+        "00000000-0000-4000-8000-000000000302",
+        "00000000-0000-4000-8000-000000000303",
+        "00000000-0000-4000-8000-000000000304"
+      ],
+      "versions": {
+        "contract": 3,
+        "learnedPlan": 3,
+        "observation": 3,
+        "guidedPolicy": 3,
+        "referencePolicy": 4,
+        "lowering": 2,
+        "artifact": 3,
+        "language": "observed-3",
+        "executor": "observed-4"
+      },
+      "actions": [
+        {
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000301",
+            "ordinal": 0
+          },
+          "origin": null,
+          "locator": null,
+          "operation": {
+            "kind": "navigate",
+            "destinationInputId": "nav"
+          },
+          "admissionId": "control-admission-0",
+          "operationHash": "12cdaab365c618b864f72a725f94a15782ab804bf204563c9feb7dcc48d3d03e"
+        },
+        {
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000302",
+            "ordinal": 0
+          },
+          "origin": "http://127.0.0.1:61323",
+          "locator": null,
+          "operation": {
+            "kind": "fill",
+            "value": {
+              "kind": "secretRef",
+              "sourceInputId": "pass"
+            }
+          },
+          "admissionId": "control-admission-1",
+          "operationHash": "b410465e9dfb39f3fd4d6c4acdd752c31c2f50da04406aacf09513509ced94ab"
+        },
+        {
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000303",
+            "ordinal": 0
+          },
+          "origin": "http://127.0.0.1:61323",
+          "locator": null,
+          "operation": {
+            "kind": "fill",
+            "value": {
+              "kind": "secretRef",
+              "sourceInputId": "next"
+            }
+          },
+          "admissionId": "control-admission-2",
+          "operationHash": "de634db2ddeca827a6aba3ff52c587c9feca8bbe630fca8c2fda19a3e00bd806"
+        },
+        {
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000304",
+            "ordinal": 0
+          },
+          "origin": "http://127.0.0.1:61323",
+          "locator": {
+            "kind": "role",
+            "role": "button",
+            "name": "Continue",
+            "exact": true
+          },
+          "operation": {
+            "kind": "click"
+          },
+          "admissionId": "control-admission-3",
+          "operationHash": "befc06b094d52a58ecbe066ece34d21c412fa846a5361e7f117dca68adf55c8d"
+        }
+      ],
+      "bindings": []
+    },
+    "learnedPlanHash": "4a363f4b1430ae93769cea21cda60119d76d6d61fdc9d9c6d42cad061d539611",
+    "inputRecipes": [
+      {
+        "inputId": "nav",
+        "stepId": "00000000-0000-4000-8000-000000000301",
+        "kind": "destination",
+        "intendedSlot": "navigate.destination",
+        "provenance": {
+          "kind": "sourceSpan",
+          "start": 0,
+          "end": 1,
+          "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055"
+        }
+      },
+      {
+        "inputId": "pass",
+        "stepId": "00000000-0000-4000-8000-000000000302",
+        "kind": "secretRef",
+        "intendedSlot": "fill.value",
+        "provenance": {
+          "kind": "configuration",
+          "referenceId": "reference-PASS",
+          "referenceName": "PASS"
+        }
+      },
+      {
+        "inputId": "next",
+        "stepId": "00000000-0000-4000-8000-000000000303",
+        "kind": "secretRef",
+        "intendedSlot": "fill.value",
+        "provenance": {
+          "kind": "configuration",
+          "referenceId": "reference-NEXT",
+          "referenceName": "NEXT"
+        }
+      }
+    ],
+    "guards": [
+      {
+        "guardId": "g0",
+        "origin": null,
+        "target": {
+          "kind": "initialBlank"
+        }
+      },
+      {
+        "guardId": "g1",
+        "origin": "http://127.0.0.1:61323",
+        "target": {
+          "kind": "passwordControl"
+        }
+      },
+      {
+        "guardId": "g2",
+        "origin": "http://127.0.0.1:61323",
+        "target": {
+          "kind": "passwordControl"
+        }
+      },
+      {
+        "guardId": "g3",
+        "origin": "http://127.0.0.1:61323",
+        "target": {
+          "kind": "element",
+          "locator": {
+            "kind": "role",
+            "role": "button",
+            "name": "Continue",
+            "exact": true
+          },
+          "role": "button",
+          "elementType": "button",
+          "controlType": "none",
+          "classification": "structuralOnly",
+          "visible": true,
+          "actionable": true,
+          "readRuleId": null
+        }
+      }
+    ],
+    "replayPolicy": {
+      "schemaVersion": 4,
+      "learnedPlanHash": "4a363f4b1430ae93769cea21cda60119d76d6d61fdc9d9c6d42cad061d539611",
+      "admissionProvenanceHash": "ee441792b2a9cd89c522c5bbcc39f671a6d615f55055ffa19b4cc1ecc3ca94bf",
+      "publicationEvidenceHash": "66b9f53947527c3ec636acdab2cd9465249f5b7fa95b26b9d05fca70d1d4f720",
+      "runAuthorizationHash": "18714bc2b1a152d048d8999d0da9f259cb3891f82346a91e8d0984b1fa856235",
+      "scope": {
+        "csiId": "CSI-123",
+        "environment": "fixture",
+        "applicationId": "orders",
+        "allowedOrigins": [
+          "http://127.0.0.1:61323"
+        ],
+        "capabilities": [
+          "navigate",
+          "read",
+          "fill",
+          "click",
+          "assert"
+        ],
+        "policyId": "policy-orders",
+        "policyVersion": "observed-4-full-chromium-1",
+        "entryPolicyId": "entry-orders",
+        "initialContext": {
+          "kind": "initialBlank"
+        }
+      },
+      "inputs": [
+        {
+          "inputId": "nav",
+          "stepId": "00000000-0000-4000-8000-000000000301",
+          "kind": "destination",
+          "intendedSlot": "navigate.destination",
+          "provenance": {
+            "kind": "sourceSpan",
+            "start": 0,
+            "end": 1,
+            "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055"
+          }
+        },
+        {
+          "inputId": "pass",
+          "stepId": "00000000-0000-4000-8000-000000000302",
+          "kind": "secretRef",
+          "intendedSlot": "fill.value",
+          "provenance": {
+            "kind": "configuration",
+            "referenceId": "reference-PASS",
+            "referenceName": "PASS"
+          }
+        },
+        {
+          "inputId": "next",
+          "stepId": "00000000-0000-4000-8000-000000000303",
+          "kind": "secretRef",
+          "intendedSlot": "fill.value",
+          "provenance": {
+            "kind": "configuration",
+            "referenceId": "reference-NEXT",
+            "referenceName": "NEXT"
+          }
+        }
+      ],
+      "bindings": [],
+      "transfers": []
+    },
+    "steps": [
+      {
+        "stepIndex": 0,
+        "stepId": "00000000-0000-4000-8000-000000000301",
+        "operations": [
+          {
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000301",
+              "ordinal": 0
+            },
+            "guardId": "g0",
+            "operation": {
+              "kind": "navigate",
+              "destinationInputId": "nav"
+            }
+          }
+        ]
+      },
+      {
+        "stepIndex": 1,
+        "stepId": "00000000-0000-4000-8000-000000000302",
+        "operations": [
+          {
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000302",
+              "ordinal": 0
+            },
+            "guardId": "g1",
+            "operation": {
+              "kind": "fill",
+              "value": {
+                "kind": "secretRef",
+                "sourceInputId": "pass"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "stepIndex": 2,
+        "stepId": "00000000-0000-4000-8000-000000000303",
+        "operations": [
+          {
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000303",
+              "ordinal": 0
+            },
+            "guardId": "g2",
+            "operation": {
+              "kind": "fill",
+              "value": {
+                "kind": "secretRef",
+                "sourceInputId": "next"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "stepIndex": 3,
+        "stepId": "00000000-0000-4000-8000-000000000304",
+        "operations": [
+          {
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000304",
+              "ordinal": 0
+            },
+            "guardId": "g3",
+            "operation": {
+              "kind": "click"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "binding": {
+    "version": 1,
+    "executionId": "00000000-0000-4000-8000-000000000020",
+    "startedAt": "2026-10-10T16:11:54.624Z",
+    "attemptId": "00000000-0000-4000-8000-000000000021",
+    "revisionId": "00000000-0000-4000-8000-000000000022",
+    "revisionDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "testId": "00000000-0000-4000-8000-000000000010",
+    "csiId": "CSI-123",
+    "principalId": "new-principal",
+    "environment": "fixture",
+    "artifactHash": "01ba6d4a4359e5fbb6de6d1d22dd54e23d04ebe13301e36c69717e575719b1d2",
+    "configurationHash": "cee625334e0818f790c1ea4af155bd9f3dc502a58e1032f159defabd20589c8b",
+    "learnedPlanHash": "4a363f4b1430ae93769cea21cda60119d76d6d61fdc9d9c6d42cad061d539611",
+    "referencePolicyHash": "470fe7907739f4c632d607042cda2f40d2c972c728bd6f9c57d15f6f77377d53",
+    "publicationEvidenceHash": "66b9f53947527c3ec636acdab2cd9465249f5b7fa95b26b9d05fca70d1d4f720",
+    "requiredProfile": {
+      "catalog": "observed-replay-3",
+      "playwright": "1.63.0",
+      "browserEngine": "chromium",
+      "contract": 3,
+      "learnedPlan": 3,
+      "observation": 3,
+      "guidedPolicy": 3,
+      "referencePolicy": 4,
+      "lowering": 2,
+      "artifact": 3,
+      "language": "observed-3",
+      "executor": "observed-4",
+      "publicationEvidence": 1,
+      "validationBasis": 1,
+      "validator": "observed-2",
+      "protocol": 3,
+      "replayAuthorization": 2
+    },
+    "requiredBuild": {
+      "profileHash": "22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386",
+      "schemaBundleHash": "5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2",
+      "referenceBundleHash": "762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2",
+      "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "chromiumBuild": "1243"
+    },
+    "scope": {
+      "principalId": "new-principal",
+      "csiId": "CSI-123",
+      "environment": "fixture",
+      "applicationId": "orders",
+      "allowedOrigins": [
+        "http://127.0.0.1:61323"
+      ],
+      "capabilities": [
+        "navigate",
+        "read",
+        "fill",
+        "click",
+        "assert"
+      ],
+      "policyId": "policy-orders",
+      "policyVersion": "observed-4-full-chromium-1",
+      "entryPolicyId": "entry-orders",
+      "initialContext": {
+        "kind": "initialBlank"
+      }
+    },
+    "scopeHash": "c61dc908214e8bceada366f1625fbddbe2751ecf532c324e5694c59e422defc0",
+    "currentPolicyHash": "ace9b76e151ed74fd7cd8a4d4e356c135bfd35fc98d1e29f0470e2cd804c41d1",
+    "replayGrant": {
+      "version": 1,
+      "grantId": "00000000-0000-4000-8000-000000000024",
+      "executionId": "00000000-0000-4000-8000-000000000020",
+      "attemptId": "00000000-0000-4000-8000-000000000021",
+      "revisionId": "00000000-0000-4000-8000-000000000022",
+      "revisionDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "principalId": "new-principal",
+      "csiId": "CSI-123",
+      "scopeHash": "c61dc908214e8bceada366f1625fbddbe2751ecf532c324e5694c59e422defc0",
+      "profileHash": "22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386",
+      "buildHash": "789a69a8387d8046921b54959a325d3db0ffed5762ab17d0a1b6140e33481a15",
+      "currentPolicyHash": "ace9b76e151ed74fd7cd8a4d4e356c135bfd35fc98d1e29f0470e2cd804c41d1",
+      "issuedAt": "2026-10-10T16:11:54.624Z",
+      "expiresAt": "2026-10-10T16:12:24.624Z"
+    }
+  },
+  "jobSecretIds": [
+    "PASS",
+    "NEXT"
+  ],
+  "build": {
+    "profileHash": "22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386",
+    "schemaBundleHash": "5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2",
+    "referenceBundleHash": "762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2",
+    "executableImageDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "chromiumBuild": "1243"
+  },
+  "provenance": {
+    "channel": "chromium",
+    "headless": true,
+    "chromiumSandbox": true,
+    "args": [],
+    "platform": "darwin",
+    "arch": "arm64",
+    "revision": "1243",
+    "executableRelativePath": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+    "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+  },
+  "artifactSchemaValid": true,
+  "productionArtifactValidation": "PASS",
+  "admissionResponse": {
+    "status": 202,
+    "body": "{\"code\":\"ADMITTED\"}"
+  },
+  "controls": [
+    {
+      "started": 1570.567417,
+      "timeoutMs": 1000,
+      "completed": 1574.010459
+    },
+    {
+      "started": 2583.952,
+      "timeoutMs": 1000,
+      "completed": 2598.772542
+    },
+    {
+      "started": 3568.940459,
+      "timeoutMs": 1000,
+      "completed": 3584.897584
+    },
+    {
+      "started": 4568.480542,
+      "timeoutMs": 1000,
+      "completed": 4569.414459
+    },
+    {
+      "started": 5588.930959,
+      "timeoutMs": 1000,
+      "completed": 5603.0925
+    },
+    {
+      "started": 6567.414834,
+      "timeoutMs": 1000,
+      "completed": 6568.086167
+    },
+    {
+      "started": 7566.849542,
+      "timeoutMs": 1000,
+      "completed": 7567.627375
+    },
+    {
+      "started": 8580.945709,
+      "timeoutMs": 1000,
+      "completed": 8581.717334
+    },
+    {
+      "started": 9567.225167,
+      "timeoutMs": 1000,
+      "completed": 9568.100667
+    },
+    {
+      "started": 10578.463792,
+      "timeoutMs": 1000,
+      "completed": 10579.069042
+    }
+  ],
+  "stopSendAt": 10722.518584,
+  "nativeEntries": [
+    2328.569959
+  ],
+  "nativeEnds": [
+    10994.451542
+  ],
+  "inputEvents": 0,
+  "effects": 0,
+  "reports": [
+    {
+      "executionId": "00000000-0000-4000-8000-000000000020",
+      "attemptId": "00000000-0000-4000-8000-000000000021",
+      "admissionId": "4138c81f-a48d-4eab-b446-87156b387eca",
+      "runnerInstanceId": "secret-control-fixture",
+      "kind": "STARTED",
+      "runnerSequence": 1,
+      "reportedAt": "2026-10-10T16:11:56.284Z",
+      "browserStartedAt": "2026-10-10T16:11:56.254Z",
+      "steps": [],
+      "logs": [
+        {
+          "atMs": 0,
+          "level": "info",
+          "message": "browser started",
+          "stepIndex": null
+        }
+      ],
+      "logsTruncated": false,
+      "runtimeVersions": {
+        "playwright": "1.63.0",
+        "playwrightLocked": "1.63.0",
+        "playwrightImageTag": "1.63.0",
+        "chromiumBuild": null,
+        "node": "v23.10.0",
+        "nodeEngineRange": ">=22.11.0 <25.0.0",
+        "nodeMajorPin": "22",
+        "validatorSchema": "2.0.0",
+        "validatorParser": "typescript@5.9.3",
+        "syntaxReference": "2.1.0",
+        "executor": "2.1.0",
+        "artifact": 1,
+        "image": null,
+        "observedSchemaBundleHash": "5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2",
+        "observedReferenceBundleHash": "762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2",
+        "observedChromiumBuild": "1243",
+        "observedBrowserProvenance": {
+          "channel": "chromium",
+          "headless": true,
+          "chromiumSandbox": true,
+          "args": [],
+          "platform": "darwin",
+          "arch": "arm64",
+          "revision": "1243",
+          "executableRelativePath": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+          "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+        },
+        "observedBrowserLauncherSha256": "04daab389dfbb3d6ef0440e43e77f75004744c428f5198ba5d9781c8bfd1ce89",
+        "observedProfile": "{\"catalog\":\"observed-replay-3\",\"playwright\":\"1.63.0\",\"browserEngine\":\"chromium\",\"contract\":3,\"learnedPlan\":3,\"observation\":3,\"guidedPolicy\":3,\"referencePolicy\":4,\"lowering\":2,\"artifact\":3,\"language\":\"observed-3\",\"executor\":\"observed-4\",\"publicationEvidence\":1,\"validationBasis\":1,\"validator\":\"observed-2\",\"protocol\":3,\"replayAuthorization\":2}",
+        "observedBuild": "{\"profileHash\":\"22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386\",\"schemaBundleHash\":\"5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2\",\"referenceBundleHash\":\"762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2\",\"executableImageDigest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"chromiumBuild\":\"1243\"}"
+      },
+      "outcome": null,
+      "evidence": null
+    },
+    {
+      "executionId": "00000000-0000-4000-8000-000000000020",
+      "attemptId": "00000000-0000-4000-8000-000000000021",
+      "admissionId": "4138c81f-a48d-4eab-b446-87156b387eca",
+      "runnerInstanceId": "secret-control-fixture",
+      "kind": "PROGRESS",
+      "runnerSequence": 2,
+      "reportedAt": "2026-10-10T16:11:56.313Z",
+      "browserStartedAt": "2026-10-10T16:11:56.254Z",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "status": "RUNNING",
+          "startedAtMs": 32.37237500000015,
+          "finishedAtMs": null,
+          "durationMs": null,
+          "failure": null
+        }
+      ],
+      "logs": [
+        {
+          "atMs": 0,
+          "level": "info",
+          "message": "browser started",
+          "stepIndex": null
+        },
+        {
+          "atMs": 32.37237500000015,
+          "level": "info",
+          "message": "step 0 started",
+          "stepIndex": 0
+        }
+      ],
+      "logsTruncated": false,
+      "runtimeVersions": {
+        "playwright": "1.63.0",
+        "playwrightLocked": "1.63.0",
+        "playwrightImageTag": "1.63.0",
+        "chromiumBuild": null,
+        "node": "v23.10.0",
+        "nodeEngineRange": ">=22.11.0 <25.0.0",
+        "nodeMajorPin": "22",
+        "validatorSchema": "2.0.0",
+        "validatorParser": "typescript@5.9.3",
+        "syntaxReference": "2.1.0",
+        "executor": "2.1.0",
+        "artifact": 1,
+        "image": null,
+        "observedSchemaBundleHash": "5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2",
+        "observedReferenceBundleHash": "762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2",
+        "observedChromiumBuild": "1243",
+        "observedBrowserProvenance": {
+          "channel": "chromium",
+          "headless": true,
+          "chromiumSandbox": true,
+          "args": [],
+          "platform": "darwin",
+          "arch": "arm64",
+          "revision": "1243",
+          "executableRelativePath": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+          "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+        },
+        "observedBrowserLauncherSha256": "04daab389dfbb3d6ef0440e43e77f75004744c428f5198ba5d9781c8bfd1ce89",
+        "observedProfile": "{\"catalog\":\"observed-replay-3\",\"playwright\":\"1.63.0\",\"browserEngine\":\"chromium\",\"contract\":3,\"learnedPlan\":3,\"observation\":3,\"guidedPolicy\":3,\"referencePolicy\":4,\"lowering\":2,\"artifact\":3,\"language\":\"observed-3\",\"executor\":\"observed-4\",\"publicationEvidence\":1,\"validationBasis\":1,\"validator\":\"observed-2\",\"protocol\":3,\"replayAuthorization\":2}",
+        "observedBuild": "{\"profileHash\":\"22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386\",\"schemaBundleHash\":\"5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2\",\"referenceBundleHash\":\"762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2\",\"executableImageDigest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"chromiumBuild\":\"1243\"}"
+      },
+      "outcome": null,
+      "evidence": null
+    },
+    {
+      "executionId": "00000000-0000-4000-8000-000000000020",
+      "attemptId": "00000000-0000-4000-8000-000000000021",
+      "admissionId": "4138c81f-a48d-4eab-b446-87156b387eca",
+      "runnerInstanceId": "secret-control-fixture",
+      "kind": "PROGRESS",
+      "runnerSequence": 3,
+      "reportedAt": "2026-10-10T16:11:56.368Z",
+      "browserStartedAt": "2026-10-10T16:11:56.254Z",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "status": "PASS",
+          "startedAtMs": 32.37237500000015,
+          "finishedAtMs": 83.59683300000006,
+          "durationMs": 51.22445799999991,
+          "failure": null
+        }
+      ],
+      "logs": [
+        {
+          "atMs": 0,
+          "level": "info",
+          "message": "browser started",
+          "stepIndex": null
+        },
+        {
+          "atMs": 32.37237500000015,
+          "level": "info",
+          "message": "step 0 started",
+          "stepIndex": 0
+        },
+        {
+          "atMs": 83.59683300000006,
+          "level": "info",
+          "message": "step 0 PASS",
+          "stepIndex": 0
+        }
+      ],
+      "logsTruncated": false,
+      "runtimeVersions": {
+        "playwright": "1.63.0",
+        "playwrightLocked": "1.63.0",
+        "playwrightImageTag": "1.63.0",
+        "chromiumBuild": null,
+        "node": "v23.10.0",
+        "nodeEngineRange": ">=22.11.0 <25.0.0",
+        "nodeMajorPin": "22",
+        "validatorSchema": "2.0.0",
+        "validatorParser": "typescript@5.9.3",
+        "syntaxReference": "2.1.0",
+        "executor": "2.1.0",
+        "artifact": 1,
+        "image": null,
+        "observedSchemaBundleHash": "5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2",
+        "observedReferenceBundleHash": "762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2",
+        "observedChromiumBuild": "1243",
+        "observedBrowserProvenance": {
+          "channel": "chromium",
+          "headless": true,
+          "chromiumSandbox": true,
+          "args": [],
+          "platform": "darwin",
+          "arch": "arm64",
+          "revision": "1243",
+          "executableRelativePath": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+          "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+        },
+        "observedBrowserLauncherSha256": "04daab389dfbb3d6ef0440e43e77f75004744c428f5198ba5d9781c8bfd1ce89",
+        "observedProfile": "{\"catalog\":\"observed-replay-3\",\"playwright\":\"1.63.0\",\"browserEngine\":\"chromium\",\"contract\":3,\"learnedPlan\":3,\"observation\":3,\"guidedPolicy\":3,\"referencePolicy\":4,\"lowering\":2,\"artifact\":3,\"language\":\"observed-3\",\"executor\":\"observed-4\",\"publicationEvidence\":1,\"validationBasis\":1,\"validator\":\"observed-2\",\"protocol\":3,\"replayAuthorization\":2}",
+        "observedBuild": "{\"profileHash\":\"22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386\",\"schemaBundleHash\":\"5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2\",\"referenceBundleHash\":\"762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2\",\"executableImageDigest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"chromiumBuild\":\"1243\"}"
+      },
+      "outcome": null,
+      "evidence": null
+    },
+    {
+      "executionId": "00000000-0000-4000-8000-000000000020",
+      "attemptId": "00000000-0000-4000-8000-000000000021",
+      "admissionId": "4138c81f-a48d-4eab-b446-87156b387eca",
+      "runnerInstanceId": "secret-control-fixture",
+      "kind": "PROGRESS",
+      "runnerSequence": 4,
+      "reportedAt": "2026-10-10T16:11:56.403Z",
+      "browserStartedAt": "2026-10-10T16:11:56.254Z",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "status": "PASS",
+          "startedAtMs": 32.37237500000015,
+          "finishedAtMs": 83.59683300000006,
+          "durationMs": 51.22445799999991,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "status": "RUNNING",
+          "startedAtMs": 83.67008299999998,
+          "finishedAtMs": null,
+          "durationMs": null,
+          "failure": null
+        }
+      ],
+      "logs": [
+        {
+          "atMs": 0,
+          "level": "info",
+          "message": "browser started",
+          "stepIndex": null
+        },
+        {
+          "atMs": 32.37237500000015,
+          "level": "info",
+          "message": "step 0 started",
+          "stepIndex": 0
+        },
+        {
+          "atMs": 83.59683300000006,
+          "level": "info",
+          "message": "step 0 PASS",
+          "stepIndex": 0
+        },
+        {
+          "atMs": 83.67008299999998,
+          "level": "info",
+          "message": "step 1 started",
+          "stepIndex": 1
+        }
+      ],
+      "logsTruncated": false,
+      "runtimeVersions": {
+        "playwright": "1.63.0",
+        "playwrightLocked": "1.63.0",
+        "playwrightImageTag": "1.63.0",
+        "chromiumBuild": null,
+        "node": "v23.10.0",
+        "nodeEngineRange": ">=22.11.0 <25.0.0",
+        "nodeMajorPin": "22",
+        "validatorSchema": "2.0.0",
+        "validatorParser": "typescript@5.9.3",
+        "syntaxReference": "2.1.0",
+        "executor": "2.1.0",
+        "artifact": 1,
+        "image": null,
+        "observedSchemaBundleHash": "5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2",
+        "observedReferenceBundleHash": "762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2",
+        "observedChromiumBuild": "1243",
+        "observedBrowserProvenance": {
+          "channel": "chromium",
+          "headless": true,
+          "chromiumSandbox": true,
+          "args": [],
+          "platform": "darwin",
+          "arch": "arm64",
+          "revision": "1243",
+          "executableRelativePath": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+          "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+        },
+        "observedBrowserLauncherSha256": "04daab389dfbb3d6ef0440e43e77f75004744c428f5198ba5d9781c8bfd1ce89",
+        "observedProfile": "{\"catalog\":\"observed-replay-3\",\"playwright\":\"1.63.0\",\"browserEngine\":\"chromium\",\"contract\":3,\"learnedPlan\":3,\"observation\":3,\"guidedPolicy\":3,\"referencePolicy\":4,\"lowering\":2,\"artifact\":3,\"language\":\"observed-3\",\"executor\":\"observed-4\",\"publicationEvidence\":1,\"validationBasis\":1,\"validator\":\"observed-2\",\"protocol\":3,\"replayAuthorization\":2}",
+        "observedBuild": "{\"profileHash\":\"22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386\",\"schemaBundleHash\":\"5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2\",\"referenceBundleHash\":\"762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2\",\"executableImageDigest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"chromiumBuild\":\"1243\"}"
+      },
+      "outcome": null,
+      "evidence": null
+    },
+    {
+      "executionId": "00000000-0000-4000-8000-000000000020",
+      "attemptId": "00000000-0000-4000-8000-000000000021",
+      "admissionId": "4138c81f-a48d-4eab-b446-87156b387eca",
+      "runnerInstanceId": "secret-control-fixture",
+      "kind": "PROGRESS",
+      "runnerSequence": 5,
+      "reportedAt": "2026-10-10T16:12:05.151Z",
+      "browserStartedAt": "2026-10-10T16:11:56.254Z",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "status": "PASS",
+          "startedAtMs": 32.37237500000015,
+          "finishedAtMs": 83.59683300000006,
+          "durationMs": 51.22445799999991,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "status": "FAIL",
+          "startedAtMs": 83.67008299999998,
+          "finishedAtMs": 8877.169375000001,
+          "durationMs": 8793.499292,
+          "failure": "CANCELLED"
+        }
+      ],
+      "logs": [
+        {
+          "atMs": 0,
+          "level": "info",
+          "message": "browser started",
+          "stepIndex": null
+        },
+        {
+          "atMs": 32.37237500000015,
+          "level": "info",
+          "message": "step 0 started",
+          "stepIndex": 0
+        },
+        {
+          "atMs": 83.59683300000006,
+          "level": "info",
+          "message": "step 0 PASS",
+          "stepIndex": 0
+        },
+        {
+          "atMs": 83.67008299999998,
+          "level": "info",
+          "message": "step 1 started",
+          "stepIndex": 1
+        },
+        {
+          "atMs": null,
+          "level": "error",
+          "message": "The runner drained while this run was still in flight; the browser process tree is being stopped.",
+          "stepIndex": null
+        },
+        {
+          "atMs": 8877.169375000001,
+          "level": "error",
+          "message": "step 1 FAIL: CANCELLED",
+          "stepIndex": 1
+        },
+        {
+          "atMs": null,
+          "level": "info",
+          "message": "step 2 SKIPPED",
+          "stepIndex": 2
+        },
+        {
+          "atMs": null,
+          "level": "info",
+          "message": "step 3 SKIPPED",
+          "stepIndex": 3
+        }
+      ],
+      "logsTruncated": false,
+      "runtimeVersions": {
+        "playwright": "1.63.0",
+        "playwrightLocked": "1.63.0",
+        "playwrightImageTag": "1.63.0",
+        "chromiumBuild": null,
+        "node": "v23.10.0",
+        "nodeEngineRange": ">=22.11.0 <25.0.0",
+        "nodeMajorPin": "22",
+        "validatorSchema": "2.0.0",
+        "validatorParser": "typescript@5.9.3",
+        "syntaxReference": "2.1.0",
+        "executor": "2.1.0",
+        "artifact": 1,
+        "image": null,
+        "observedSchemaBundleHash": "5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2",
+        "observedReferenceBundleHash": "762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2",
+        "observedChromiumBuild": "1243",
+        "observedBrowserProvenance": {
+          "channel": "chromium",
+          "headless": true,
+          "chromiumSandbox": true,
+          "args": [],
+          "platform": "darwin",
+          "arch": "arm64",
+          "revision": "1243",
+          "executableRelativePath": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+          "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+        },
+        "observedBrowserLauncherSha256": "04daab389dfbb3d6ef0440e43e77f75004744c428f5198ba5d9781c8bfd1ce89",
+        "observedProfile": "{\"catalog\":\"observed-replay-3\",\"playwright\":\"1.63.0\",\"browserEngine\":\"chromium\",\"contract\":3,\"learnedPlan\":3,\"observation\":3,\"guidedPolicy\":3,\"referencePolicy\":4,\"lowering\":2,\"artifact\":3,\"language\":\"observed-3\",\"executor\":\"observed-4\",\"publicationEvidence\":1,\"validationBasis\":1,\"validator\":\"observed-2\",\"protocol\":3,\"replayAuthorization\":2}",
+        "observedBuild": "{\"profileHash\":\"22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386\",\"schemaBundleHash\":\"5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2\",\"referenceBundleHash\":\"762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2\",\"executableImageDigest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"chromiumBuild\":\"1243\"}"
+      },
+      "outcome": null,
+      "evidence": null
+    },
+    {
+      "executionId": "00000000-0000-4000-8000-000000000020",
+      "attemptId": "00000000-0000-4000-8000-000000000021",
+      "admissionId": "4138c81f-a48d-4eab-b446-87156b387eca",
+      "runnerInstanceId": "secret-control-fixture",
+      "kind": "PROGRESS",
+      "runnerSequence": 6,
+      "reportedAt": "2026-10-10T16:12:05.162Z",
+      "browserStartedAt": "2026-10-10T16:11:56.254Z",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "status": "PASS",
+          "startedAtMs": 32.37237500000015,
+          "finishedAtMs": 83.59683300000006,
+          "durationMs": 51.22445799999991,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "status": "FAIL",
+          "startedAtMs": 83.67008299999998,
+          "finishedAtMs": 8877.169375000001,
+          "durationMs": 8793.499292,
+          "failure": "CANCELLED"
+        },
+        {
+          "stepIndex": 2,
+          "status": "SKIPPED",
+          "startedAtMs": null,
+          "finishedAtMs": null,
+          "durationMs": null,
+          "failure": null
+        }
+      ],
+      "logs": [
+        {
+          "atMs": 0,
+          "level": "info",
+          "message": "browser started",
+          "stepIndex": null
+        },
+        {
+          "atMs": 32.37237500000015,
+          "level": "info",
+          "message": "step 0 started",
+          "stepIndex": 0
+        },
+        {
+          "atMs": 83.59683300000006,
+          "level": "info",
+          "message": "step 0 PASS",
+          "stepIndex": 0
+        },
+        {
+          "atMs": 83.67008299999998,
+          "level": "info",
+          "message": "step 1 started",
+          "stepIndex": 1
+        },
+        {
+          "atMs": null,
+          "level": "error",
+          "message": "The runner drained while this run was still in flight; the browser process tree is being stopped.",
+          "stepIndex": null
+        },
+        {
+          "atMs": 8877.169375000001,
+          "level": "error",
+          "message": "step 1 FAIL: CANCELLED",
+          "stepIndex": 1
+        },
+        {
+          "atMs": null,
+          "level": "info",
+          "message": "step 2 SKIPPED",
+          "stepIndex": 2
+        },
+        {
+          "atMs": null,
+          "level": "info",
+          "message": "step 3 SKIPPED",
+          "stepIndex": 3
+        }
+      ],
+      "logsTruncated": false,
+      "runtimeVersions": {
+        "playwright": "1.63.0",
+        "playwrightLocked": "1.63.0",
+        "playwrightImageTag": "1.63.0",
+        "chromiumBuild": null,
+        "node": "v23.10.0",
+        "nodeEngineRange": ">=22.11.0 <25.0.0",
+        "nodeMajorPin": "22",
+        "validatorSchema": "2.0.0",
+        "validatorParser": "typescript@5.9.3",
+        "syntaxReference": "2.1.0",
+        "executor": "2.1.0",
+        "artifact": 1,
+        "image": null,
+        "observedSchemaBundleHash": "5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2",
+        "observedReferenceBundleHash": "762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2",
+        "observedChromiumBuild": "1243",
+        "observedBrowserProvenance": {
+          "channel": "chromium",
+          "headless": true,
+          "chromiumSandbox": true,
+          "args": [],
+          "platform": "darwin",
+          "arch": "arm64",
+          "revision": "1243",
+          "executableRelativePath": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+          "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+        },
+        "observedBrowserLauncherSha256": "04daab389dfbb3d6ef0440e43e77f75004744c428f5198ba5d9781c8bfd1ce89",
+        "observedProfile": "{\"catalog\":\"observed-replay-3\",\"playwright\":\"1.63.0\",\"browserEngine\":\"chromium\",\"contract\":3,\"learnedPlan\":3,\"observation\":3,\"guidedPolicy\":3,\"referencePolicy\":4,\"lowering\":2,\"artifact\":3,\"language\":\"observed-3\",\"executor\":\"observed-4\",\"publicationEvidence\":1,\"validationBasis\":1,\"validator\":\"observed-2\",\"protocol\":3,\"replayAuthorization\":2}",
+        "observedBuild": "{\"profileHash\":\"22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386\",\"schemaBundleHash\":\"5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2\",\"referenceBundleHash\":\"762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2\",\"executableImageDigest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"chromiumBuild\":\"1243\"}"
+      },
+      "outcome": null,
+      "evidence": null
+    },
+    {
+      "executionId": "00000000-0000-4000-8000-000000000020",
+      "attemptId": "00000000-0000-4000-8000-000000000021",
+      "admissionId": "4138c81f-a48d-4eab-b446-87156b387eca",
+      "runnerInstanceId": "secret-control-fixture",
+      "kind": "PROGRESS",
+      "runnerSequence": 7,
+      "reportedAt": "2026-10-10T16:12:05.173Z",
+      "browserStartedAt": "2026-10-10T16:11:56.254Z",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "status": "PASS",
+          "startedAtMs": 32.37237500000015,
+          "finishedAtMs": 83.59683300000006,
+          "durationMs": 51.22445799999991,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "status": "FAIL",
+          "startedAtMs": 83.67008299999998,
+          "finishedAtMs": 8877.169375000001,
+          "durationMs": 8793.499292,
+          "failure": "CANCELLED"
+        },
+        {
+          "stepIndex": 2,
+          "status": "SKIPPED",
+          "startedAtMs": null,
+          "finishedAtMs": null,
+          "durationMs": null,
+          "failure": null
+        },
+        {
+          "stepIndex": 3,
+          "status": "SKIPPED",
+          "startedAtMs": null,
+          "finishedAtMs": null,
+          "durationMs": null,
+          "failure": null
+        }
+      ],
+      "logs": [
+        {
+          "atMs": 0,
+          "level": "info",
+          "message": "browser started",
+          "stepIndex": null
+        },
+        {
+          "atMs": 32.37237500000015,
+          "level": "info",
+          "message": "step 0 started",
+          "stepIndex": 0
+        },
+        {
+          "atMs": 83.59683300000006,
+          "level": "info",
+          "message": "step 0 PASS",
+          "stepIndex": 0
+        },
+        {
+          "atMs": 83.67008299999998,
+          "level": "info",
+          "message": "step 1 started",
+          "stepIndex": 1
+        },
+        {
+          "atMs": null,
+          "level": "error",
+          "message": "The runner drained while this run was still in flight; the browser process tree is being stopped.",
+          "stepIndex": null
+        },
+        {
+          "atMs": 8877.169375000001,
+          "level": "error",
+          "message": "step 1 FAIL: CANCELLED",
+          "stepIndex": 1
+        },
+        {
+          "atMs": null,
+          "level": "info",
+          "message": "step 2 SKIPPED",
+          "stepIndex": 2
+        },
+        {
+          "atMs": null,
+          "level": "info",
+          "message": "step 3 SKIPPED",
+          "stepIndex": 3
+        }
+      ],
+      "logsTruncated": false,
+      "runtimeVersions": {
+        "playwright": "1.63.0",
+        "playwrightLocked": "1.63.0",
+        "playwrightImageTag": "1.63.0",
+        "chromiumBuild": null,
+        "node": "v23.10.0",
+        "nodeEngineRange": ">=22.11.0 <25.0.0",
+        "nodeMajorPin": "22",
+        "validatorSchema": "2.0.0",
+        "validatorParser": "typescript@5.9.3",
+        "syntaxReference": "2.1.0",
+        "executor": "2.1.0",
+        "artifact": 1,
+        "image": null,
+        "observedSchemaBundleHash": "5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2",
+        "observedReferenceBundleHash": "762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2",
+        "observedChromiumBuild": "1243",
+        "observedBrowserProvenance": {
+          "channel": "chromium",
+          "headless": true,
+          "chromiumSandbox": true,
+          "args": [],
+          "platform": "darwin",
+          "arch": "arm64",
+          "revision": "1243",
+          "executableRelativePath": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+          "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+        },
+        "observedBrowserLauncherSha256": "04daab389dfbb3d6ef0440e43e77f75004744c428f5198ba5d9781c8bfd1ce89",
+        "observedProfile": "{\"catalog\":\"observed-replay-3\",\"playwright\":\"1.63.0\",\"browserEngine\":\"chromium\",\"contract\":3,\"learnedPlan\":3,\"observation\":3,\"guidedPolicy\":3,\"referencePolicy\":4,\"lowering\":2,\"artifact\":3,\"language\":\"observed-3\",\"executor\":\"observed-4\",\"publicationEvidence\":1,\"validationBasis\":1,\"validator\":\"observed-2\",\"protocol\":3,\"replayAuthorization\":2}",
+        "observedBuild": "{\"profileHash\":\"22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386\",\"schemaBundleHash\":\"5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2\",\"referenceBundleHash\":\"762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2\",\"executableImageDigest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"chromiumBuild\":\"1243\"}"
+      },
+      "outcome": null,
+      "evidence": null
+    },
+    {
+      "executionId": "00000000-0000-4000-8000-000000000020",
+      "attemptId": "00000000-0000-4000-8000-000000000021",
+      "admissionId": "4138c81f-a48d-4eab-b446-87156b387eca",
+      "runnerInstanceId": "secret-control-fixture",
+      "kind": "FINAL",
+      "runnerSequence": 8,
+      "reportedAt": "2026-10-10T16:12:05.221Z",
+      "browserStartedAt": "2026-10-10T16:11:56.254Z",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "status": "PASS",
+          "startedAtMs": 32.37237500000015,
+          "finishedAtMs": 83.59683300000006,
+          "durationMs": 51.22445799999991,
+          "failure": null
+        },
+        {
+          "stepIndex": 1,
+          "status": "FAIL",
+          "startedAtMs": 83.67008299999998,
+          "finishedAtMs": 8877.169375000001,
+          "durationMs": 8793.499292,
+          "failure": "CANCELLED"
+        },
+        {
+          "stepIndex": 2,
+          "status": "SKIPPED",
+          "startedAtMs": null,
+          "finishedAtMs": null,
+          "durationMs": null,
+          "failure": null
+        },
+        {
+          "stepIndex": 3,
+          "status": "SKIPPED",
+          "startedAtMs": null,
+          "finishedAtMs": null,
+          "durationMs": null,
+          "failure": null
+        }
+      ],
+      "logs": [
+        {
+          "atMs": 0,
+          "level": "info",
+          "message": "browser started",
+          "stepIndex": null
+        },
+        {
+          "atMs": 32.37237500000015,
+          "level": "info",
+          "message": "step 0 started",
+          "stepIndex": 0
+        },
+        {
+          "atMs": 83.59683300000006,
+          "level": "info",
+          "message": "step 0 PASS",
+          "stepIndex": 0
+        },
+        {
+          "atMs": 83.67008299999998,
+          "level": "info",
+          "message": "step 1 started",
+          "stepIndex": 1
+        },
+        {
+          "atMs": null,
+          "level": "error",
+          "message": "The runner drained while this run was still in flight; the browser process tree is being stopped.",
+          "stepIndex": null
+        },
+        {
+          "atMs": 8877.169375000001,
+          "level": "error",
+          "message": "step 1 FAIL: CANCELLED",
+          "stepIndex": 1
+        },
+        {
+          "atMs": null,
+          "level": "info",
+          "message": "step 2 SKIPPED",
+          "stepIndex": 2
+        },
+        {
+          "atMs": null,
+          "level": "info",
+          "message": "step 3 SKIPPED",
+          "stepIndex": 3
+        },
+        {
+          "atMs": null,
+          "level": "error",
+          "message": "run ERROR: RUN_ERROR",
+          "stepIndex": null
+        }
+      ],
+      "logsTruncated": false,
+      "runtimeVersions": {
+        "playwright": "1.63.0",
+        "playwrightLocked": "1.63.0",
+        "playwrightImageTag": "1.63.0",
+        "chromiumBuild": null,
+        "node": "v23.10.0",
+        "nodeEngineRange": ">=22.11.0 <25.0.0",
+        "nodeMajorPin": "22",
+        "validatorSchema": "2.0.0",
+        "validatorParser": "typescript@5.9.3",
+        "syntaxReference": "2.1.0",
+        "executor": "2.1.0",
+        "artifact": 1,
+        "image": null,
+        "observedSchemaBundleHash": "5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2",
+        "observedReferenceBundleHash": "762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2",
+        "observedChromiumBuild": "1243",
+        "observedBrowserProvenance": {
+          "channel": "chromium",
+          "headless": true,
+          "chromiumSandbox": true,
+          "args": [],
+          "platform": "darwin",
+          "arch": "arm64",
+          "revision": "1243",
+          "executableRelativePath": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+          "executableSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a"
+        },
+        "observedBrowserLauncherSha256": "04daab389dfbb3d6ef0440e43e77f75004744c428f5198ba5d9781c8bfd1ce89",
+        "observedProfile": "{\"catalog\":\"observed-replay-3\",\"playwright\":\"1.63.0\",\"browserEngine\":\"chromium\",\"contract\":3,\"learnedPlan\":3,\"observation\":3,\"guidedPolicy\":3,\"referencePolicy\":4,\"lowering\":2,\"artifact\":3,\"language\":\"observed-3\",\"executor\":\"observed-4\",\"publicationEvidence\":1,\"validationBasis\":1,\"validator\":\"observed-2\",\"protocol\":3,\"replayAuthorization\":2}",
+        "observedBuild": "{\"profileHash\":\"22fd3ebf2f13996b51b40fa9c122e10a6547104f897bd8bb0c9335ca9269e386\",\"schemaBundleHash\":\"5e88a7735d180a72032b1edc3bdaa2b8f4f7576ab897849a435b404b5c4da9c2\",\"referenceBundleHash\":\"762f9fcbfe7507a843e15f172ba2d3389b45482f705dc6a6a37b13e67fda5dd2\",\"executableImageDigest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"chromiumBuild\":\"1243\"}"
+      },
+      "outcome": {
+        "result": "ERROR",
+        "errorCode": "RUN_ERROR",
+        "errorMessage": "The runner drained while this run was still in flight; the browser process tree was stopped."
+      },
+      "secretUse": {
+        "NEXT": "NOT_USED"
+      },
+      "evidence": {
+        "videoKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.webm",
+        "manifestKey": "studio/CSI-123/00000000-0000-4000-8000-000000000010/00000000-0000-4000-8000-000000000020/00000000-0000-4000-8000-000000000021.result.json",
+        "state": "STORED",
+        "partial": false
+      }
+    }
+  ],
+  "pids": [
+    1772,
+    1929,
+    2717,
+    2209,
+    2210,
+    2257,
+    2589,
+    2700,
+    2701
+  ],
+  "allObservedPidsGone": true,
+  "capacityInUse": 0,
+  "scratchEntries": []
+}

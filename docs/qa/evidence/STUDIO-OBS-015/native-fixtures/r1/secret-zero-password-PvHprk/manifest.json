@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "authority": "LOCAL_NATIVE_FIXTURE_NOT_CORE_OR_VAULT_PG",
+  "caseName": "secret-zero-password",
+  "evidenceId": "d7dbc28c-7fc9-4513-9f54-f7adbcfe29ed",
+  "assertionPhaseStatus": "FAILED",
+  "exportStatus": "VERIFIED_EXPORT",
+  "privateRecoveryDirectory": "secret-prefix-native-ShAAKX",
+  "commitments": {},
+  "records": [
+    {
+      "role": "secret-prefix",
+      "sessionId": "e168fd0c-f978-412e-858d-74df44912d09",
+      "contextId": "bba1d584-f2ae-4f2e-947e-e52ad716afcd",
+      "contextRevision": 1,
+      "recordingId": "1f9ecb3e-37dd-41de-a09b-57bcc6ba328d",
+      "state": "STORED",
+      "partial": false,
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "00000000-0000-4000-8000-000000000801",
+          "admissionId": "4681061d-333e-4f39-92ad-d2b15d219399",
+          "ordinal": 0,
+          "startMs": 17,
+          "endMs": 29
+        }
+      ]
+    }
+  ],
+  "phases": [
+    {
+      "role": "secret-prefix",
+      "media": "REGISTERED",
+      "seekFrames": "NOT_REACHED"
+    }
+  ],
+  "files": [
+    {
+      "role": "secret-prefix",
+      "state": "PRIVATE_RETAINED_UNVERIFIED",
+      "byteLength": 6253,
+      "sha256": "5378e7f7cbc27ec00390a96e1d7c288eb68dbd49de895693891c82c15b624086",
+      "privacy": "UNVERIFIED",
+      "checks": {
+        "assertions": "FAILED",
+        "decoder": "NOT_REACHED",
+        "seek": "NOT_REACHED"
+      }
+    }
+  ],
+  "cleanupAllowed": false
+}

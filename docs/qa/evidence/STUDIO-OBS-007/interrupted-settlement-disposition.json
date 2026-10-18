@@ -1,0 +1,117 @@
+{
+  "capturedAtUtc": "2026-10-10T16:23:20.156690+00:00",
+  "story": "STUDIO-OBS-007",
+  "reviewer": "Independent Aria architect, read-only source/evidence disposition",
+  "disposition": "NARROW_TERMINAL_RECONCILIATION_INTERRUPT_MASK_RECOMMENDED_WITH_BOUND_LIMIT",
+  "actualFacts": {
+    "gate": "root-service-transport-gate-3",
+    "serviceRows": {
+      "pass": 7,
+      "fail": 2,
+      "skip": 0
+    },
+    "allSelected": {
+      "tests": 18,
+      "failures": 2,
+      "errors": 0,
+      "skips": 0
+    },
+    "targetRow": "[9] mode=INTERRUPT_AFTER_HEADERS",
+    "targetFailure": "Asserted expected GuidedSessionException UNKNOWN_OUTCOME but captured CannotCreateTransactionException opening JDBC transaction; dispatch invokes sessions.lostAcknowledgment after interrupted transport rejection. Saved assertion XML abbreviates throwable stack; current/archive source binds the lostAck call chain.",
+    "separateFailedRow": "[8] CALLER_EXPIRY_AFTER_CONSUME setup/expiry failure remains separate; no root-cause equivalence.",
+    "credit": "Row reached assertions for one consumed command, one provider read, one dispatch POST, owned provider chars/request bytes erased and restored interrupt before exception-type failure. Later terminal/audit/restart/dedup assertions were not reached and receive no credit. Dedicated byte-body5 and owned-buffer4 tests passed separately.",
+    "notCredited": [
+      "target interruption terminal/audit tail",
+      "full lifecycle QA",
+      "general unavailable/blocked database bound",
+      "new independent reviewer runtime"
+    ]
+  },
+  "sourceChain": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+      "source": "catch InterruptedException reinterrupts and throws code-only UNKNOWN_OUTCOME; finally cancels exchange, closes subscriber, erases owned request and secret. remaining(deadline) rejects interrupted/expired authority."
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "source": "dispatch consumed permit committed before resolution/send; sendSecret is inside resolved try-with-resources. RuntimeException catch executes after resource unwinding and calls sessions.lostAcknowledgment then rethrows. Restored interrupt reaches JDBC and a new transaction error masks the original transport exception."
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "source": "Admission-scoped lostAcknowledgment locks session and stops only if session nonterminal and exact admission action is still DISPATCHING. SUCCEEDED/FAILED owner callbacks and terminal sessions are not overwritten. stop changes only ADMITTED->REVOKED and DISPATCHING->UNKNOWN_OUTCOME, invalidates materialization/assignment, records terminal audit, schedules stop only after committed transaction."
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+      "source": "transaction delegates TransactionTemplate; row lock FOR UPDATE. Current repository/configuration does not explicitly set reconciliation transaction timeout; clearing interrupt is not by itself a blocked-pool/row-lock bound guarantee."
+    }
+  ],
+  "exactMinimalProductionOwnership": {
+    "owner": "Root must release B/backend author after current frozen gate; report author edits nothing.",
+    "paths": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java"
+    ],
+    "change": "Add one private admission-scoped terminal-reconciliation helper in GuidedDispatchService. Capture and clear current interrupt via Thread.interrupted() immediately before a single call to sessions.lostAcknowledgment(id, consumedAdmissionId), restore captured bit in finally using Thread.currentThread().interrupt(). If a new interrupt arrives during reconciliation, leave it asserted; never call Thread.interrupted again on exit. Use helper at both post-send failure and normal transport-ack lostAck callsites. It accepts only session/admission identity; no values/payload/context/permit/lease or callback authority.",
+    "placement": "Invoke only after sendSecret/resource unwinding erased owned buffers; never mask interruption across consume/preflight/reference resolver/read/record decision/materialization/network dispatch or any action authority check. No fresh permit and no retry.",
+    "failureSemantics": "On successful reconciliation, rethrow original transport failure (UNKNOWN_OUTCOME remains an unknown transport outcome). On actual reconciliation DB error, propagate the DB error honestly; retain original code-only transport failure as suppressed/cause if safe, without including secret payload/value. Restore interrupt in every path. Do not catch-and-ignore DB error or claim terminal persisted/teardown confirmed. Normal ack helper likewise must propagate real DB error.",
+    "nonChanges": [
+      "GuidedRunnerClient interruption/deadline checks, request/subscriber/secret erasure unchanged",
+      "lostAck exact admission row lock/state conditions unchanged",
+      "stop positive preservation and commit-only cleanup unchanged",
+      "No lease/admission/control refresh",
+      "No new provider/value read or dispatch POST",
+      "No wire/schema/config/pin/status changes",
+      "No retry/outbox/async terminal mutation authority added"
+    ]
+  },
+  "boundDisposition": {
+    "observedLane": "Existing INTERRUPT_AFTER_HEADERS test joins caller within5000ms and transport partial paths within their declared limits; narrow fix must retain those assertions and execute exact row.",
+    "limit": "The helper masks an already observed cancellation only for terminal persistence; it grants no execution time. Existing source has no explicit JDBC reconciliation timeout and no independently demonstrated pool-exhaustion/row-lock bound. Do not claim a general bounded database cleanup from masking alone.",
+    "requiredGuard": "Add a focused settlement-database-unavailable/failed-begin case: no retry/no new read/send/permit, restored interrupt, original code-only transport failure retained, real DB error visible and no forged terminal/audit success. Add independently controlled blocked-connection/row-lock bound check before claiming stop bound under those conditions.",
+    "ifBoundFails": "Do not broaden this disposition into global transaction/pool configuration or an unbounded/background worker. Return a separately owned bounded JDBC reconciliation design before release of extra production paths. Unreconciled DB state must remain explicit and recovery under existing reaper/owner authority; no false success."
+  },
+  "regressionGuards": [
+    "Execute original actual interrupted-after-headers service row unchanged apart from justified additional diagnostic assertions. Caller interrupt remains true; provider chars/owned request/subscriber bytes erased before reconciliation. Count consume/read/send exactly once; end-to-end caller join stays within original5s.",
+    "After successful exact-admission settlement, verify action UNKNOWN_OUTCOME and immutable RELEASE/RESOLVED + USAGE/UNKNOWN_OUTCOME rows; original HTTP exception still UNKNOWN_OUTCOME. Restart/dedup keys append/read/send nothing extra.",
+    "Owner-authenticated SUCCEEDED callback committed before interrupted/lost-ack settlement remains SUCCEEDED/USED and exact positive evidence preserved; terminal/no-longer-DISPATCHING action is never overwritten. Add true callback-vs-settlement serialized race and stale admission/newer admission negative.",
+    "Owner FAILED callback remains FAILED; complete200/no callback remains uncertain; HTTP503 with owner SUCCEEDED preserves actual positive. Existing seven passing service rows retained.",
+    "Real JDBC begin/commit/rollback failure while interrupted propagates honestly with flag restored and no fabricated terminal/audit rows or teardown confirmation. Test failure before commit triggers no stop sender; successful commit retains existing asynchronous stop and confirmed-teardown semantics.",
+    "No-interrupt path retains existing exception/outcome behavior; no Throwable-swallow, second consume, fresh dispatch key, provider reread, lease renewal or secret-bearing exception text.",
+    "Retain actual deadline/caller expiry guard and separate preconsume STALE_FENCE failure evidence; fixing interrupt does not supersede unrelated fixture expiry setup or static secret artifact guard. Root sequences all required final selected/broad gates after source freeze."
+  ],
+  "boundSources": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "77282bd5547b8daf91547b831a1fa4193a8e312667c650294efcd8f9f120586c",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java": "66f3665f63de906f5b1a4285aaf904b8527a3231066c28be7ee5c3f713a4bd02",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "be083d155aa1f16aeec1ebe8053d5a49bd09e9c7bc7a7b4f643eab5553bd863c",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java": "c6f424bab316112ed9b03cc07176df84afd87142a6804a91d7fa835ef8d97503",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "a274052e3f7494c9fe81dbb4a66a40ee13224614f7461e16469d01f5911bf792"
+  },
+  "archiveSourceMatches": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": true,
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java": true,
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": true,
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": true,
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java": true,
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": true
+  },
+  "evidenceHashes": {
+    "docs/qa/evidence/STUDIO-OBS-007/root-service-transport-gate-3/result.json": "edba0bb837d0fd7e289b422738d4042a38fe2062aa53d0d4d5fddb5e3e431b58",
+    "docs/qa/evidence/STUDIO-OBS-007/root-service-transport-gate-3/source-hashes.json": "fc22f2292febf064e86e4c13c150b6de92ee25961acce51fc40a4b7bded93771",
+    "docs/qa/evidence/STUDIO-OBS-007/root-service-transport-gate-3/sources.zip": "56d1dbad568799bc5eaa785c4720bafe5f22cecb7521aa723e7769c41c87cf83",
+    "docs/qa/evidence/STUDIO-OBS-007/root-service-transport-gate-3/TEST-com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.xml": "4b91074bc9e96ccae1bfc638a4a3881f0a2647c2a570aaa060a95e272585d9a4",
+    "docs/qa/evidence/STUDIO-OBS-007/root-service-transport-gate-3/TEST-com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest.xml": "99359649390ab9bc01da31d04881545e8e37df06d82d57ebc97eb1c5d0394bbf",
+    "docs/qa/evidence/STUDIO-OBS-007/root-service-transport-gate-3/TEST-com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest.xml": "abc1d4085578ed322c507cb806d8de53caa1077944c80a66ff34dcab234082bc",
+    "docs/qa/evidence/STUDIO-OBS-007/root-service-transport-gate-3/run.log": "49d51c1d4c2230c1f6dbe506aae604944f83b9c5a79161b636b2d8864edb2553"
+  },
+  "executionLimits": {
+    "sourceEdits": false,
+    "testEdits": false,
+    "runtimeOrBuilds": false,
+    "lifecycleChanges": false,
+    "wholeStoryQa": false,
+    "onlyWrite": "docs/qa/evidence/STUDIO-OBS-007/interrupted-settlement-disposition.json",
+    "wholeWaveCeilingUsd": 500,
+    "actualBillingAvailable": false
+  },
+  "unrelatedPreservedConcern": "Historical7290byte native white-pixel failure remains unclassified; unrelated."
+}

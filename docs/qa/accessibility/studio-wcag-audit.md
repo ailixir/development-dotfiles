@@ -1,5 +1,14 @@
 # Checks Studio — WCAG conformance audit
 
+> **Status 2026-10-17 (@architect, append-only): regression guard only per
+> [ADR-SC-006](../../architecture/ADR-SC-006-accessibility-scope-functional-only.md); not extended.**
+> User decision 2026-10-17: the project has no WCAG conformance target. This audit and
+> `frontend/src/test/a11y/studioWcagAudit.test.tsx` are kept green as a regression guard only. No
+> surfaces, rules, viewports or browser variant are added. If a change breaks it, fix the regression or
+> regenerate the baseline with the reason recorded in the story. The outstanding items below (manual
+> assistive-technology pass, contrast, target size) are descoped to a post-GA backlog. They are **not
+> passed and not waived**; story 10.19 AC-12 stays PARTIAL.
+
 > **Revalidation — 2026-09-20:** The two-panel Studio redesign removed all pinned
 > critical/serious violations from the five `ChecksStudioPage` states and from `StudioRunsPage`.
 > `StudioTestsPage` retains one `button-name` and one `aria-prohibited-attr` node. The automated

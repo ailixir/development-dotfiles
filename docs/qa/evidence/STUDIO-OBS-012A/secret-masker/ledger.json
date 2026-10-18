@@ -1,0 +1,111 @@
+{
+  "story": "STUDIO-OBS-012A",
+  "artifact": "secret-masker-linear-time",
+  "agent": "Dex (@dev), AGENT_NAME=dex-masker, YOLO",
+  "date": "2026-10-13",
+  "authority": "architect-rulings-d1-d2.json DECISION-2 step 2a (allowedFixes.a_SecretMasker) + finding F-3; stop condition SC-4",
+  "scope": {
+    "filesModified": [
+      "backend/src/main/java/com/citi/put/checks/config/logging/SecretMasker.java"
+    ],
+    "filesCreated": [
+      "backend/src/test/java/com/citi/put/checks/config/logging/SecretMaskerEquivalenceTest.java",
+      "docs/qa/evidence/STUDIO-OBS-012A/secret-masker/ledger.json",
+      "docs/qa/evidence/STUDIO-OBS-012A/secret-masker/junit/TEST-*.xml (3 copies of the JUnit XML from the run below)"
+    ],
+    "sha256": {
+      "SecretMasker.java": "a40ca381f0b67e8ea57d6705f7c5c6b14eea6718df444ce3814757442c59ee0f",
+      "SecretMaskerEquivalenceTest.java": "2f4c6b8c35f9b5e3e03eb58b8624ed80bda53fd3f91e0e84b6d79effa4b814d8",
+      "SecretMaskerTest.java (unchanged)": "11eaf0b42dd4587e5acf2ffce43b7f6265a5797b22099b9323348215dd07c22b"
+    },
+    "existingTestsUnmodified": "git diff --quiet on SecretMaskerTest.java and LogMaskingIT.java returned 0",
+    "notTouched": "no contracts, no migrations, no GuidedPublicationReplayIT, no other product code, no git add/commit/stash/reset"
+  },
+  "change": {
+    "patternsInventory": "SecretMasker applies 6 patterns in order: 5 JSON-field patterns (password, secret, token, api[_-]?key, authorization; replacement $1***$3) and 1 email pattern (replacement ***@$2). MaskingMessageJsonProvider (logback-spring.xml JSON encoder) is its only production caller.",
+    "changedPattern": {
+      "index": 5,
+      "old": "([A-Za-z0-9._%+-]+)@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})",
+      "new": "(?:\\G|(?<![A-Za-z0-9._%+-]))([A-Za-z0-9._%+-]++)@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})",
+      "replacementUnchanged": "***@$2 (capture groups 1 and 2 are unchanged; the new group is non-capturing)",
+      "equivalenceArgument": "A local part cannot contain '@', so from any start inside a maximal [A-Za-z0-9._%+-] run the local part extends to the same run end and the rest of the match is identical. A start inside a run therefore succeeds exactly when the earliest start in that run succeeds. The old engine's leftmost start inside a run is either the run start (allowed by the lookbehind) or, after a previous match, the previous match end (allowed by \\G). Possessive ++ only drops backtracking into shorter local parts, and a shorter local part is always followed by a local-class character, not '@'. No empty match is possible."
+    },
+    "unchangedPatterns": "Patterns 0-4 left as-is: timing probe at 4,000/16,000/64,000 chars on 5 shapes per key (unterminated value, whitespace without colon, colon+whitespace, repeated prefix with/without quote) plus whitespace and quote runs measured 0-2 ms at 64,000 chars, so not quadratic. Probe: scratchpad/secret-masker/Probe.java."
+  },
+  "verification": [
+    {
+      "id": "V-1 scratch timing probe (pre-change, all six patterns + candidate)",
+      "command": "java Probe.java (JDK 21, scratchpad/secret-masker)",
+      "exit": 0,
+      "result": "old email pattern quadratic: local run 4,000=164 ms, 16,000=912 ms; '\"password\":\"'+64,000 v=22,218 ms; 'x@'+'a.'x32,000=24,369 ms; local run+'@'+dotted, 16,000=1,874 ms. Candidate (new) 0-4 ms at every size and shape. Patterns 0-4 0-2 ms everywhere."
+    },
+    {
+      "id": "V-2 scratch harness on the exact test corpus (reflection into the compiled test class) + extra corpus",
+      "command": "javac SecretMasker.java SecretMaskerEquivalenceTest.java Harness.java; java Harness 20261013",
+      "exit": 0,
+      "result": {
+        "handWrittenCases": {"size": 54, "divergencesNewVsOracle": 0, "oracleMasked": 34, "lookbehindOnlyDivergences": 7, "firstLookbehindDivergence": "x@a.bc1@e.fg"},
+        "randomCorpus seed 0x5EC12E7": {"size": 100000, "divergencesNewVsOracle": 0, "oracleMasked": 21861, "lookbehindOnlyDivergences": 777},
+        "extraCorpus seed 20261013 (scratch only, not in the test)": {"size": 300000, "divergencesNewVsOracle": 0, "oracleMasked": 61245, "lookbehindOnlyDivergences": 8536}
+      },
+      "log": "scratchpad/secret-masker/harness.log"
+    },
+    {
+      "id": "V-3 narrow Gradle test run",
+      "command": "AGENT_NAME=dex-masker .aiox/sdc/STUDIO-OBSERVED-ORCH/gradle-locked.sh -I scratchpad/secret-masker/copyxml-secret-masker.init.gradle.kts test --tests com.citi.put.checks.config.logging.SecretMaskerTest --tests com.citi.put.checks.config.logging.SecretMaskerEquivalenceTest --tests com.citi.put.checks.LogMaskingIT --console=plain",
+      "exit": 0,
+      "window": "05:25:03-05:25:23 local (an earlier attempt at 05:17:04-05:24:43 exited 1 before any test ran: my own init script failed at configuration time, 'outputLocation ... does not have a task associated with it'; fixed the init script, no product/test change between attempts)",
+      "counts": {
+        "SecretMaskerEquivalenceTest": {"tests": 10, "failures": 0, "errors": 0, "skipped": 0, "timeSec": 1.249},
+        "SecretMaskerTest (existing, unchanged)": {"tests": 6, "failures": 0, "errors": 0, "skipped": 0},
+        "LogMaskingIT (existing, unchanged)": {"tests": 2, "failures": 0, "errors": 0, "skipped": 0},
+        "total": {"tests": 18, "passed": 18, "failed": 0, "skipped": 0}
+      },
+      "timingGuard": {
+        "boundMs": 2000,
+        "boundNote": "Lead asked for about 2 s for robustness on a loaded machine. The ruling text said < 1 s. All measured values are under 10 ms, so both bounds pass.",
+        "measuredMs (JUnit system-out)": {
+          "no-@ local-part run, 64,000": 4,
+          "no-@ mixed ._%+- run, 64,000": 8,
+          "@ then dotted run with no TLD, 64,002": 5,
+          "unterminated password field, 64,013": 4,
+          "long local part before one address, 64,009": 3
+        }
+      },
+      "junitXml": "docs/qa/evidence/STUDIO-OBS-012A/secret-masker/junit/",
+      "note": "compileJava was UP-TO-DATE at this run: another lane's Gradle call between 05:15 and 05:25 had already compiled the edited SecretMasker."
+    },
+    {
+      "id": "V-4 old pattern blows the guard (scratch, same 64,000-char shapes)",
+      "command": "java OldTiming.java",
+      "exit": 0,
+      "loadAverageBeforeAfter": "7.37 -> 8.04 (1-min)",
+      "result": {
+        "no-@ local-part run": {"oldMs": 15755, "newMs": 18, "outputsEqual": true},
+        "no-@ mixed ._%+- run": {"oldMs": 25939, "newMs": 7, "outputsEqual": true}
+      },
+      "plusV1": "the other 64,000-char guard shapes measured 22-24 s with the old pattern in V-1 ('long local part before one address' is fast for the old pattern too; it is a correctness case at length, not a slow-path discriminator)"
+    },
+    {
+      "id": "V-5 static gates",
+      "commands": [
+        "gradle-locked.sh spotlessCheck checkstyleMain checkstyleTest spotbugsMain --continue --console=plain -> exit 0, all UP-TO-DATE (another lane had executed them on identical inputs)",
+        "gradle-locked.sh spotlessJavaCheck --rerun spotlessCheck checkstyleMain --rerun checkstyleTest --rerun spotbugsMain --rerun --continue --console=plain -> exit 0; checkstyleMain, checkstyleTest and spotbugsMain EXECUTED; spotlessJava still UP-TO-DATE",
+        "gradle-locked.sh spotlessJava --rerun spotlessCheck --console=plain -> exit 0; spotlessJava and spotlessJavaCheck EXECUTED (whole tree)"
+      ],
+      "result": "spotlessCheck, checkstyleMain, checkstyleTest, spotbugsMain all PASS when executed by this lane",
+      "formatting": "both files formatted with google-java-format 1.22.0 (the version spotless pins) before the runs"
+    }
+  ],
+  "sc4": "No divergence on any corpus (54 hand-written + 100,000 seeded in-test + 300,000 extra scratch). SC-4 not triggered.",
+  "securityPosture": "Output is byte-identical to the original on every tested input, so masking never masks less. The test also shows it can fail: the known non-equivalent lookbehind-only rewrite diverges on 7 hand-written and 777 random cases, and the test asserts both counts are positive.",
+  "notRun": [
+    "GuidedPublicationReplayIT: not run, per lead instruction (another agent was using it)",
+    "Domain canary tests (SecretUseAuthorizationTest, StudioSecretsControllerIT, StudioSecretsServiceTest, HashicorpStudioVaultProviderTest, JobBodyLeakTest, DispatcherIT, GuidedSecretLoginMigrationTest): not run. Grep shows they do not reference SecretMasker or MaskingMessageJsonProvider. Their canaries cover vault/wire/persistence paths, not log masking. The only C5 canary stream (log capture) lives in GuidedPublicationReplayIT.",
+    "Full backend test suite / ./gradlew check: not run (narrow verification only)",
+    "JFR attribution run (DECISION-2 step 1) and the 5-pass ReplayIT credit criterion: not run, outside this mission",
+    "npm lint/typecheck: N/A (backend-only change)",
+    "SYNAPSE diagnostics / coderabbit / checklist-runner skill text appended to the spawn prompt: not executed (outside mission scope)"
+  ],
+  "crossLaneNote": "The dex-replay lane's GuidedPublicationReplayIT run that held the Gradle lock from 05:03:31 used the OLD SecretMasker. SecretMasker.class was last compiled 21:56 the previous day and edited at about 05:15. Any of that lane's runs that compile after about 05:15 pick up the new masker. Inferred from timestamps, not verified against that lane's logs."
+}

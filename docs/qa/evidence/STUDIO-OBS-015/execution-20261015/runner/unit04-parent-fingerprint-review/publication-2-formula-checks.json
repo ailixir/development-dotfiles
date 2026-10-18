@@ -1,0 +1,64 @@
+{
+  "artifact": "Two independent intended malicious publication-preimage checks",
+  "sourceInstallerAfterInventoryRecomputation": "contracts/current-vector-preservation-implementation/install.cjs:24",
+  "rows": [
+    {
+      "name": "publication-preimage-must-commit-raw-failed-edge",
+      "parent": "admitted-binding-replacement",
+      "sameCurrentBasisAsParent": true,
+      "currentCorrectPublicationPreimage": {
+        "version": 1,
+        "basisHash": "d1d3be3d654a7bbcd7cc0c66d892be89715175ba3d557f13e8c9913d4c56a96d",
+        "runAuthorizationHash": "18714bc2b1a152d048d8999d0da9f259cb3891f82346a91e8d0984b1fa856235",
+        "translationHash": "6ddf6c14680bd557fb22449b009d6bb844b156efcf5aa8bf47abfb301713566b",
+        "bootstrapHash": "a7505bf337f0bf6dbacf307e5dae201951e947275bd2c7269788f7baf63a57fe",
+        "sourceManifestHash": "7fd2f63dc3fea894e6d7a550f662871029822b29ab1db8380539eb5c26055aff"
+      },
+      "currentCorrectPublicationEvidenceHashValue": "b61f7631eacdeac00e478215d57b69aabc57a89c45676e263a2dfca1b4c494a3",
+      "currentMaliciousPreimage": {
+        "version": 1,
+        "basisHash": "ff340bef2d1ceeabd7e28935d9693f827eb9d67889fedbc333e3bdfdde9a6da7",
+        "runAuthorizationHash": "18714bc2b1a152d048d8999d0da9f259cb3891f82346a91e8d0984b1fa856235",
+        "translationHash": "6ddf6c14680bd557fb22449b009d6bb844b156efcf5aa8bf47abfb301713566b",
+        "bootstrapHash": "a7505bf337f0bf6dbacf307e5dae201951e947275bd2c7269788f7baf63a57fe",
+        "sourceManifestHash": "7fd2f63dc3fea894e6d7a550f662871029822b29ab1db8380539eb5c26055aff"
+      },
+      "currentMaliciousPublicationEvidenceHashValue": "55d4240831909ff69c9ae40a74a3a6ee429d0c28a8293499cd00c0cedb569d02",
+      "currentMaliciousValueCanonicalSha256": "644c2163d21337cd07049d035eaeb451c8223143ae0c251be4db418992a24c03",
+      "archivedMaliciousValue": "fa84b22545d6b6979b7ef0da6831a5a026dc166f679e7ed986e43e1c8da3da2c",
+      "archivedMaliciousValueCanonicalSha256": "452a9aa0c81bfb58be24a446bee2e4b39aa8b5c2c2e9390f62a7e026866b45f0",
+      "historicalLedgerNewHash": "452a9aa0c81bfb58be24a446bee2e4b39aa8b5c2c2e9390f62a7e026866b45f0",
+      "maliciousFormulaUnchanged": "Hash entire current basis with raw failed consumer edge omitted ONLY from hypothetical hash preimage",
+      "canonicalSourceContradiction": false
+    },
+    {
+      "name": "publication-preimage-envelope-cannot-change",
+      "parent": "admitted-binding-replacement",
+      "sameCurrentBasisAsParent": true,
+      "currentCorrectPublicationPreimage": {
+        "version": 1,
+        "basisHash": "d1d3be3d654a7bbcd7cc0c66d892be89715175ba3d557f13e8c9913d4c56a96d",
+        "runAuthorizationHash": "18714bc2b1a152d048d8999d0da9f259cb3891f82346a91e8d0984b1fa856235",
+        "translationHash": "6ddf6c14680bd557fb22449b009d6bb844b156efcf5aa8bf47abfb301713566b",
+        "bootstrapHash": "a7505bf337f0bf6dbacf307e5dae201951e947275bd2c7269788f7baf63a57fe",
+        "sourceManifestHash": "7fd2f63dc3fea894e6d7a550f662871029822b29ab1db8380539eb5c26055aff"
+      },
+      "currentCorrectPublicationEvidenceHashValue": "b61f7631eacdeac00e478215d57b69aabc57a89c45676e263a2dfca1b4c494a3",
+      "currentMaliciousPreimage": {
+        "version": 2,
+        "basisHash": "d1d3be3d654a7bbcd7cc0c66d892be89715175ba3d557f13e8c9913d4c56a96d",
+        "runAuthorizationHash": "18714bc2b1a152d048d8999d0da9f259cb3891f82346a91e8d0984b1fa856235",
+        "translationHash": "6ddf6c14680bd557fb22449b009d6bb844b156efcf5aa8bf47abfb301713566b",
+        "bootstrapHash": "a7505bf337f0bf6dbacf307e5dae201951e947275bd2c7269788f7baf63a57fe",
+        "sourceManifestHash": "7fd2f63dc3fea894e6d7a550f662871029822b29ab1db8380539eb5c26055aff"
+      },
+      "currentMaliciousPublicationEvidenceHashValue": "aaa0f0682fb25c5b33076e07284efb8967434d2d14cb847dcdbb0dcbe88ab99b",
+      "currentMaliciousValueCanonicalSha256": "2f7a155fd43698e8125bc76cc86c050ddeb1ebe070aacc3ebda3fb24bdcab9a9",
+      "archivedMaliciousValue": "ae6e77e614f28fb5ec94a82ab4cf00c45be509343c25dd544baf744a4954c2fa",
+      "archivedMaliciousValueCanonicalSha256": "57bb0981601f3164e6a899c53dfd2a5dafb0c6e8f91c0b4e02682042ad6fbe47",
+      "historicalLedgerNewHash": "57bb0981601f3164e6a899c53dfd2a5dafb0c6e8f91c0b4e02682042ad6fbe47",
+      "maliciousFormulaUnchanged": "Use same current whole-basis publication preimage but illegal envelope version2",
+      "canonicalSourceContradiction": false
+    }
+  ]
+}

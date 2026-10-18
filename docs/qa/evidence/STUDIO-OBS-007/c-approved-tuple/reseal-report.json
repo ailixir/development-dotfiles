@@ -1,0 +1,109 @@
+[
+  {
+    "file": "docs/specs/studio-observed-authoring/contracts/v3/wire-parity.fixtures.json",
+    "changed": false,
+    "beforeSha256": "38d30dc9fa01b7148bacf81be786f260457dfa59f283e116d38cef2dcde45629",
+    "afterSha256": "38d30dc9fa01b7148bacf81be786f260457dfa59f283e116d38cef2dcde45629",
+    "hashVectors": [],
+    "caseInventoriesRetained": true
+  },
+  {
+    "file": "docs/specs/studio-observed-authoring/contracts/v3/planning-fixtures.json",
+    "changed": true,
+    "beforeSha256": "6581bbdde54cc8a35200e9d3fa34831250ee221f06cb1f469ba389841928eeff",
+    "afterSha256": "5567de88601fd6f4a40ff86571b627b9dc1fc01d6cba959171cbe5af81892b87",
+    "hashVectors": [],
+    "caseInventoriesRetained": true
+  },
+  {
+    "file": "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json",
+    "changed": true,
+    "beforeSha256": "aeb3e6ec21edced3f080c4655dee84df700dd7d30efcbde6ebe97a6128c24551",
+    "afterSha256": "f9c45667673ed0462b974513ed3290432d7a65416b5119eb20f0254a23e9b749",
+    "hashVectors": [
+      {
+        "name": "non-ASCII authored input table",
+        "before": "0ed63c51745aa5ec7498e4dfbc7e0b071d2c6b68b7b4139744b408d08d963ae2",
+        "after": "0ed63c51745aa5ec7498e4dfbc7e0b071d2c6b68b7b4139744b408d08d963ae2",
+        "canonical": "{\"configurationRevision\":\"config-1\",\"inputs\":[{\"inputId\":\"input-destination\",\"intendedSlot\":\"navigate.destination\",\"kind\":\"destination\",\"provenance\":{\"endUtf16\":38,\"intendedSlot\":\"navigate.destination\",\"kind\":\"destination\",\"referenceKind\":\"sourceSpan\",\"sourceRevision\":\"source-1\",\"startUtf16\":5,\"stepId\":\"step-1\"},\"sourceStepId\":\"step-1\",\"value\":\"https://orders.example.test/start\"},{\"inputId\":\"input-label\",\"intendedSlot\":\"fill.value\",\"kind\":\"nonsecretText\",\"provenance\":{\"endUtf16\":24,\"intendedSlot\":\"fill.value\",\"kind\":\"nonsecretText\",\"referenceKind\":\"sourceSpan\",\"sourceRevision\":\"source-1\",\"startUtf16\":10,\"stepId\":\"step-3\"},\"sourceStepId\":\"step-3\",\"value\":\"  Café 🧪 é  \"},{\"inputId\":\"input-config\",\"intendedSlot\":\"fill.value\",\"kind\":\"nonsecretText\",\"provenance\":{\"configurationRevision\":\"config-1\",\"intendedSlot\":\"fill.value\",\"kind\":\"nonsecretText\",\"referenceId\":\"saved-label\",\"referenceKind\":\"configuration\",\"stepId\":\"step-3\"},\"sourceStepId\":\"step-3\",\"value\":\"\"}],\"schemaVersion\":3,\"scopeHash\":\"136041e6c1779580bc01fa950bf5a347535a0ec6f2d9e7b50920ec61980307ea\",\"sessionId\":\"session-1\",\"sourceRevision\":\"source-1\"}",
+        "verified": true
+      },
+      {
+        "name": "initial blank evidence",
+        "before": "d0cdaf24158c5890fe6e87f01a554efe5f1b86c8c3ce7b297a689e27ac483262",
+        "after": "d0cdaf24158c5890fe6e87f01a554efe5f1b86c8c3ce7b297a689e27ac483262",
+        "canonical": "{\"bootstrapId\":\"bootstrap-1\",\"contextId\":\"context-1\",\"creationId\":\"creation-1\",\"documentId\":\"blank-document-1\",\"generation\":0,\"kind\":\"initialBlank\",\"origin\":null,\"sessionId\":\"session-1\",\"url\":\"about:blank\"}",
+        "verified": true
+      },
+      {
+        "name": "initial navigation operation with actual null origin",
+        "before": "f7dfa564564c31a6d2f915f968694d59a03ff153ddecea7631217310539dee2e",
+        "after": "f7dfa564564c31a6d2f915f968694d59a03ff153ddecea7631217310539dee2e",
+        "canonical": "{\"coordinate\":{\"ordinal\":0,\"stepId\":\"step-1\"},\"locator\":null,\"operation\":{\"destinationInputId\":\"input-destination\",\"kind\":\"navigate\"},\"origin\":null}",
+        "verified": true
+      },
+      {
+        "name": "exact exercised plan with blank precondition",
+        "before": "410b4a982fa77f98faa982e50a7266b4085ad55a8cf041212b41140f3b29458a",
+        "after": "e4f8b40ee9081a4fca2d1776ba1cb4882c3c8f40e3d266ffd5c21fa272bcad81",
+        "canonical": "{\"actions\":[{\"admissionId\":\"admission-0\",\"coordinate\":{\"ordinal\":0,\"stepId\":\"step-1\"},\"locator\":null,\"operation\":{\"destinationInputId\":\"input-destination\",\"kind\":\"navigate\"},\"operationHash\":\"f7dfa564564c31a6d2f915f968694d59a03ff153ddecea7631217310539dee2e\",\"origin\":null},{\"admissionId\":\"admission-1\",\"coordinate\":{\"ordinal\":0,\"stepId\":\"step-2\"},\"locator\":{\"exact\":true,\"kind\":\"testId\",\"value\":\"reference\"},\"operation\":{\"bindingId\":\"binding-reference\",\"kind\":\"read\",\"recipe\":{\"classification\":\"permittedBusinessData\",\"kind\":\"visibleText\",\"policyRuleId\":\"business-reference\"}},\"operationHash\":\"550acf97ac8ceb79d64fc2df3aff2990558a5e2ade2fbbf99c2e41a91d725056\",\"origin\":\"https://orders.example.test\"},{\"admissionId\":\"admission-2\",\"coordinate\":{\"ordinal\":0,\"stepId\":\"step-3\"},\"locator\":{\"exact\":true,\"kind\":\"testId\",\"value\":\"destination\"},\"operation\":{\"kind\":\"fill\",\"value\":{\"bindingId\":\"binding-reference\",\"kind\":\"binding\"}},\"operationHash\":\"835b598a4aae41d6ff1bd438040b3b8c7137d6c87a6b69c6e9edc1e5b1e70977\",\"origin\":\"https://orders.example.test\"},{\"admissionId\":\"admission-3\",\"coordinate\":{\"ordinal\":1,\"stepId\":\"step-3\"},\"locator\":{\"exact\":true,\"kind\":\"testId\",\"value\":\"label-input\"},\"operation\":{\"kind\":\"fill\",\"value\":{\"kind\":\"authoredLiteral\",\"sourceInputId\":\"input-label\"}},\"operationHash\":\"e020b2a98d04bad566eb0065765e2a2fffe082eb9678869851da4156186c2568\",\"origin\":\"https://orders.example.test\"},{\"admissionId\":\"admission-4\",\"coordinate\":{\"ordinal\":2,\"stepId\":\"step-3\"},\"locator\":{\"exact\":true,\"kind\":\"testId\",\"value\":\"destination\"},\"operation\":{\"expected\":{\"bindingId\":\"binding-reference\",\"kind\":\"binding\"},\"kind\":\"assert\",\"predicate\":\"hasValue\"},\"operationHash\":\"153bfdca3afa6a0a2ee77595b1731341f0430ab0127b805d778ca1b69399d81f\",\"origin\":\"https://orders.example.test\"}],\"authoredInputsHash\":\"0ed63c51745aa5ec7498e4dfbc7e0b071d2c6b68b7b4139744b408d08d963ae2\",\"bindings\":[{\"bindingId\":\"binding-reference\",\"consumers\":[{\"argumentSlot\":\"fill.value\",\"bindingId\":\"binding-reference\",\"consumerAdmissionId\":\"admission-2\",\"coordinate\":{\"ordinal\":0,\"stepId\":\"step-3\"},\"destinationOrigin\":\"https://orders.example.test\",\"producerAdmissionId\":\"admission-1\",\"transferPolicy\":\"sameOrigin\"},{\"argumentSlot\":\"assert.expected\",\"bindingId\":\"binding-reference\",\"consumerAdmissionId\":\"admission-4\",\"coordinate\":{\"ordinal\":2,\"stepId\":\"step-3\"},\"destinationOrigin\":\"https://orders.example.test\",\"producerAdmissionId\":\"admission-1\",\"transferPolicy\":\"sameOrigin\"}],\"preserveBytes\":true,\"producer\":{\"ordinal\":0,\"stepId\":\"step-2\"},\"provenance\":{\"producerAdmissionId\":\"admission-1\",\"sessionId\":\"session-1\",\"sourceIntentStepId\":\"step-2\"},\"recipe\":{\"classification\":\"permittedBusinessData\",\"kind\":\"visibleText\",\"policyRuleId\":\"business-reference\"},\"schemaVersion\":3,\"sourceOrigin\":\"https://orders.example.test\",\"transferPolicy\":\"sameOrigin\",\"valueType\":\"string\"}],\"configurationRevision\":\"config-1\",\"initialContext\":{\"kind\":\"initialBlank\"},\"planId\":\"candidate-plan-1\",\"schemaVersion\":3,\"scopeHash\":\"136041e6c1779580bc01fa950bf5a347535a0ec6f2d9e7b50920ec61980307ea\",\"sourceRevision\":\"source-1\",\"sourceSteps\":[\"step-1\",\"step-2\",\"step-3\"],\"versions\":{\"artifact\":3,\"contract\":3,\"executor\":\"observed-4\",\"guidedPolicy\":3,\"language\":\"observed-3\",\"learnedPlan\":3,\"lowering\":2,\"observation\":3,\"referencePolicy\":4}}",
+        "verified": true
+      },
+      {
+        "name": "immutable assignment intent",
+        "before": "6eb77aa69617ffdfa360084a0955b08a44238cc98f0110c4db0784d179dfdedc",
+        "after": "e0063c1cb9a4503b8d82cf1b03874b78588b9bc60f4a7a57ca130e9b5776fce5",
+        "canonical": "{\"assignmentId\":\"assignment-1\",\"configurationRevision\":\"config-1\",\"expectedFence\":0,\"expiresAt\":\"2026-10-08T03:10:00Z\",\"schemaVersion\":3,\"scopeHash\":\"136041e6c1779580bc01fa950bf5a347535a0ec6f2d9e7b50920ec61980307ea\",\"sessionId\":\"session-1\",\"sourceRevision\":\"source-1\",\"versions\":{\"artifact\":3,\"contract\":3,\"executor\":\"observed-4\",\"guidedPolicy\":3,\"language\":\"observed-3\",\"learnedPlan\":3,\"lowering\":2,\"observation\":3,\"referencePolicy\":4},\"workerId\":\"worker-1\"}",
+        "verified": true
+      },
+      {
+        "name": "observation refresh callback correlation",
+        "before": "829ef246863ec5e3fa82581e7ed2704dabf0c09ab3c5e54646dd70c2d2ee530d",
+        "after": "731f369424340c1e233eab8d0a9eaca6b85710552d65d405b41a32f48e666d43",
+        "canonical": "{\"idempotencyKey\":\"refresh-step-2\",\"identity\":{\"configurationRevision\":\"config-1\",\"contextId\":\"context-1\",\"contextRevision\":1,\"ownerFence\":1,\"schemaVersion\":3,\"scopeHash\":\"136041e6c1779580bc01fa950bf5a347535a0ec6f2d9e7b50920ec61980307ea\",\"sessionId\":\"session-1\",\"sourceRevision\":\"source-1\",\"versions\":{\"artifact\":3,\"contract\":3,\"executor\":\"observed-4\",\"guidedPolicy\":3,\"language\":\"observed-3\",\"learnedPlan\":3,\"lowering\":2,\"observation\":3,\"referencePolicy\":4},\"workerId\":\"worker-1\"},\"requestDigest\":\"c4b64e5c986487948af74a7c80cde71ec1ef99007b6611bcdd0888ee563818bd\"}",
+        "verified": true
+      }
+    ],
+    "caseInventoriesRetained": true
+  },
+  {
+    "file": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+    "changed": true,
+    "beforeSha256": "3385c11f241e703947d35ea15c0b595de322493608c22eb173155e56497fb784",
+    "afterSha256": "90b9e9a386f26de7aeac52a478dd6f5a7602a1fac9e635e6e37c4211892ad8a1",
+    "hashVectors": [],
+    "caseInventoriesRetained": true
+  },
+  {
+    "file": "studio-runner/fixtures/observed-reference/fresh-order-reference.json",
+    "changed": true,
+    "beforeSha256": "6855fbc9d47fe6fc723c4fba5ffd4a180e43496a0b46611286b6c414c409d71f",
+    "afterSha256": "c00d283e5649c98667de75a59c30388a81d3e6f5918806b74fe9fa34f3159460",
+    "hashVectors": [],
+    "caseInventoriesRetained": true
+  },
+  {
+    "file": "studio-runner/fixtures/observed-reference/control-value-reference.json",
+    "changed": true,
+    "beforeSha256": "4ec202e0bcb7631073c628d6eb1f291c9024b8b5d1d716486fa197291967319d",
+    "afterSha256": "a5ac470082354ae8f8c3f6c003e2807a8093e88db961267dd48395161a235d4b",
+    "hashVectors": [],
+    "caseInventoriesRetained": true
+  },
+  {
+    "file": "studio-runner/fixtures/observed-reference/manifest.json",
+    "changed": false,
+    "beforeSha256": "6f408f2ea1313fe46793a155429d0699bedaafe81a1e62098c1495833d185ea3",
+    "afterSha256": "6f408f2ea1313fe46793a155429d0699bedaafe81a1e62098c1495833d185ea3",
+    "hashVectors": [],
+    "caseInventoriesRetained": true
+  },
+  {
+    "file": "studio-runner/fixtures/observed-reference/operation-mutations.json",
+    "changed": false,
+    "beforeSha256": "6df9810b016e10eee3be490da2763c97807243649069e57c99fb167f111778c5",
+    "afterSha256": "6df9810b016e10eee3be490da2763c97807243649069e57c99fb167f111778c5",
+    "hashVectors": [],
+    "caseInventoriesRetained": true
+  }
+]

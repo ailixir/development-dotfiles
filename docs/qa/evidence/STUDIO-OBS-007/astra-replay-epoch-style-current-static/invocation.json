@@ -1,0 +1,14 @@
+{
+  "command": [
+    "./gradlew",
+    "--init-script",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-007/astra-replay-epoch-style-current-static/scope.gradle",
+    "compileJava",
+    "compileTestJava",
+    "spotlessCheck",
+    "checkstyleMain",
+    "checkstyleTest",
+    "spotbugsMain"
+  ],
+  "priorFailure": "Arrow switch formatter/Checkstyle indentation conflict retained"
+}

@@ -1,0 +1,413 @@
+{
+  "story": "STUDIO-OBS-013",
+  "reviewer": "Quinn independent strict QA013",
+  "createdUtc": "2026-10-14T23:31:27.258472+00:00",
+  "decision": "ACCEPT_TEST_ONLY_CORRECTION_AND_FULL_UNIT_EXECUTION;FINAL_NATIVE_BACKEND_GATES_PENDING",
+  "doneAllowed": false,
+  "sourceFile": "studio-runner/test/guided/runtime.test.ts",
+  "beforeSha256": "f02b7386ecf352f3e4e925d0a4336c4a080b0100666f16c37ea1c5df159e4466",
+  "afterSha256": "40bd6cc24ccff8256026de4df12aaad2384b09545fa1867a0575d46d66c3cbd5",
+  "patchSha256": "057062dab4326496447575f4f728562a964efbdbce6fd66bbef0c91b76f6faff",
+  "patchMatchesActualBeforeAfter": true,
+  "testNamesPreserved": true,
+  "removedLinesAudited": [
+    "import { mkdtemp, rm, readFile, readdir, unlink, writeFile,mkdir } from 'node:fs/promises';",
+    "    let opening=0;const gated:GuidedRecorder={async open(session){opening++;await options.openGate;return recorder.open(session);}};",
+    "    return {context,runtime,messages,launches,objects,browser,evidenceRoot,opening:()=>opening};",
+    "    expect(await readdir(h.evidenceRoot)).toEqual([]);",
+    "    expect(await readdir(h.evidenceRoot)).toEqual([]);"
+  ],
+  "assertionAssessment": "Accept. Exactly two old evidenceRoot-empty assertions changed because private ownership metadata is intentionally persistent. Replacement captures actual allocated recording.directory at open, including stop-overtook-start without a browser; asserts one actual leaf ENOENT after settlement; recursively inspects entire residual hierarchy with exactly five nodes/depth four, one child per directory, 0700 same UID non-links, and only a closed 0600 nlink-one bounded marker bound to PID/nonce/scope. No filtering can hide video/content/unexpected files/extra keys. All original lifecycle/order/timings/upload/object keys/schema/secret-negative/cancelled-no-launch assertions unchanged.",
+  "productionAndOriginalOwnedSourcesUnchanged": [
+    {
+      "path": "studio-runner/src/run/recordingScratch.ts",
+      "sha256": "e83f9a26e862579112c423df4ddd687e068155fd953d7f9404c04c83c898c821"
+    },
+    {
+      "path": "studio-runner/src/run/guidedShutdown.ts",
+      "sha256": "31d7e9eb9c006e40a4470d8ba4fc5471349dd24193ebbb1ff12ff5f80e5ac303"
+    },
+    {
+      "path": "studio-runner/src/run/browser.ts",
+      "sha256": "19893b2aeda17b4d94b4ddb45977fb170cea45035a78cc4e6a1b3f904de21dd9"
+    },
+    {
+      "path": "studio-runner/src/guided/evidence.ts",
+      "sha256": "cf69ca5f59e392dc518638844c9777094648c8c0153f0862802cd7b288bc6a27"
+    },
+    {
+      "path": "studio-runner/src/run/guidedMain.ts",
+      "sha256": "3add4221c0bc51885be00b16fc2a9716e74b223efc154c6bc91b9d6fcb6cc666"
+    },
+    {
+      "path": "studio-runner/test/run/recordingScratch.test.ts",
+      "sha256": "4ef07c3cc581ace86be3ec0906842316dea1dc4ba7745e22e0cd1bc95df70ee5"
+    },
+    {
+      "path": "studio-runner/test/guided/transport.test.ts",
+      "sha256": "923d54920369929b34b1ef5cca0dd60f935de2f0e9fba471363e3ce31026b3da"
+    },
+    {
+      "path": "studio-runner/test/guided/evidence.test.ts",
+      "sha256": "69cc689da27b59737cb2a1b4661a4f5d423af76bd886e0947761d9ce19cf12ee"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-recording.test.ts",
+      "sha256": "75452ecd2686358e87144fafe03a5819262248bf755b7cb9cbeb0d84d6fc2cf7"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-recording-kill.test.ts",
+      "sha256": "fb9e1b2336ab2023fc7396c24c164da7185a768eac91bc30740e3260c3d13c1a"
+    },
+    {
+      "path": "studio-runner/test/helpers/recordingScratchWorker.mjs",
+      "sha256": "e6ad5a92455a5cf2f23432d86b041b8b18b4ade62692aa6339be34ba271ffa7f"
+    }
+  ],
+  "currentManifest": {
+    "sourceFiles": 1575,
+    "sourceDigest": "45a2b0816d6c5c1e427cd6abaa80a71c89b7a56827df5821c6c308e15c38591b",
+    "distFiles": 238,
+    "distDigest": "af2cf70c5ac7edbaeea8f7f3e2090a8e52a5a0f8136dfe6aab5b18197fe438f2",
+    "sourceHashMismatches": [],
+    "distHashMismatches": []
+  },
+  "actualFullUnit": {
+    "resultPath": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/execution/runner-unit-final-attempt02-results.json",
+    "exit": 0,
+    "passed": 1384,
+    "failed": 0,
+    "skippedUncredited": 29,
+    "reportSha256": "b74a2541c1b7420f2c4f425c1d2abdd1e3d3d622adf74c9d306a58a1dda33d24",
+    "rawLogSha256": "71002cd9fe07505bb6d2f692178bc4169e94e5397f829493f7665847f2d056b4",
+    "parsedSkipCount": 29,
+    "skips": [
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-05 / SPK-04 \u2014 the internal image and the sandbox, in-cluster AC-2b [ED-05, SPK-04, Platform/SRE] \u2014 the same pod spec APPLIED, with Chromium\u2019s sandbox observed active in-cluster: non-root under the cluster PodSecurity level, unprivileged user namespaces on the nodes, launch logs showing the sandbox active with no disabling flag, /dev/shm sized sufficiently, and a controlled-fixture run producing a readable webm from that pod. CARRIES story 10.12 AC-6b. There is NO fallback that disables the sandbox: if neither RuntimeDefault nor a Platform-approved Localhost profile works, this escalates to Platform/SRE and Security. Closes when docs/qa/spikes/SPK-04/ carries the evidence and ED-05 is updated.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-05 / SPK-04 \u2014 the internal image and the sandbox, in-cluster AC-3b [SPK-04 question 3, Platform/SRE + @architect] \u2014 the seccomp profile the spike selects, with its approval reference: whether RuntimeDefault permits the namespace-creating clone/unshare calls the sandbox needs without CAP_SYS_ADMIN, and if not, the Platform-approved Localhost profile file, its owner and its approval reference, committed under docs/qa/spikes/SPK-04/. ADR-001 open item O-4. The chart renders RuntimeDefault as a deliberate starting value, never inherited from the backend and never Unconfined.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-05 / SPK-04 \u2014 the internal image and the sandbox, in-cluster AC-4b [ED-05, SPK-04, Platform/SRE] \u2014 SEC-2 browser-path immutability on the INTERNAL image in-cluster, rather than on the public Playwright base ADR-001 \u00a78 permits for local development only. The attack itself is run and recorded against the local image in test/deployment/sec2.test.ts; what is deferred is running it against the image ED-05 delivers, inside a pod. CARRIES story 10.12 AC-6b with AC-2b.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-05 / SPK-04 \u2014 the internal image and the sandbox, in-cluster AC-5b [SPK-04 question 6, Platform/SRE] \u2014 in-cluster PID-1 reaping and slot recovery: under shareProcessNamespace, an orphaned grandchild is reaped by the pause container and a hung child is killed by the parent with the pod recovering its slot. CARRIES story 10.13 AC-11b. The mechanism is chosen and rendered (shareProcessNamespace: true) and the SIGNAL half is proven against the built image in 10.18a; the REAPING half cannot be proven outside a pod, because a pause container exists only in one. Stated rather than blurred, as AC-5a requires.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-04 / SPK-05 \u2014 egress enforcement and destination policy AC-8b [ED-04, SPK-05, Platform/SRE + an unnamed application owner] \u2014 enforcement proven FROM a runner pod with the policy applied: approved host reachable; unapproved host blocked; REDIRECT to an unapproved host blocked; subresources and authentication-provider hops to approved hosts allowed; cloud/cluster metadata and control endpoints, link-local ranges and local files unreachable; DNS behaviour for an unapproved name recorded; callback and object store reachable. If the spike finds only static L3/L4 policy exists, \u00a79.3 requires that per-run destination checks in the runner become the PRIMARY control and that Security accept that limitation EXPLICITLY \u2014 that acceptance, or its absence, is part of this criterion\u2019s evidence.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-04 / SPK-05 \u2014 egress enforcement and destination policy AC-9b [ED-04, ADR-002 O-6, @architect then the implementing story] \u2014 story 10.17\u2019s destination-misuse negative tests, un-skipped against the enforced mechanism. They are 10.17\u2019s tests, in 10.17\u2019s files, and this story does not rewrite them. CARRIES story 10.17 AC-16b with its gate note unchanged. The gate-shut tripwire over the production ACCEPTED_JOB_KEYS is re-run UNCHANGED and green in test/run/canary.test.ts; adding a policy field to the closed RunJob is ADR-002 Class B and no story may land it before an architect rules.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-03 / SPK-03 \u2014 the private object store AC-10b [ED-03, SPK-03, Platform/SRE] \u2014 the scopes DENIED IN FACT on the real store: the runner principal\u2019s GET and LIST denied, the API principal\u2019s PUT denied; plus path-style addressing, multipart upload, HEAD/GET with Range, server-side encryption defaults, and read-after-write consistency on a key the recovery path reads immediately after writing. CARRIES story 10.14 AC-18b. The DEPLOYMENT half \u2014 two distinct Secrets, no Get/List key name on the runner\u2019s side, the fixed \u00a76.2 prefix \u2014 is asserted over the rendered manifest in test/deployment/chart.test.ts. What is deferred is a denial observed on a real store.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-03 / SPK-03 \u2014 the private object store AC-11 [ED-03, SPK-03, Platform/SRE] \u2014 lifecycle, versioning and incomplete-upload behaviour with caveats recorded: whether bucket versioning is on and whether lifecycle rules expire noncurrent versions and delete markers; whether incomplete multipart uploads are aborted and after how long; the observed lag between lifecycle expiry and physical deletion; and whether a GET on an expired object fails or still serves. CARRIES story 10.14 AC-19b. A NEGATIVE result is a valid closure and is recorded as a caveat for Security, not worked around. Until then no artefact may claim exact-time physical deletion \u2014 asserted over this story\u2019s own rendered output in chart.test.ts.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-02 \u2014 identity, and the halves inherited from stories 10.7 and 10.17 AC-19b [ED-02, owner UNASSIGNED IN SOURCES] \u2014 credentialed acceptance through the real ingress: a real trusted-gateway identity resolving to a real user; a FORGED identity header denied at the gateway rather than at the application; a wrong-CSI request denied; access revocation terminating an open SSE stream within the configured refresh interval; and the real vault replacing the SecretsService REDACTED/plaintext stub. CARRIES story 10.17 AC-5b and AC-7b, and story 10.7 AC-4b, AC-6b and AC-37b. The CODE half (three bypass paths made configuration-driven and default-closed) is story 10.18b\u2019s. @po could not name an owner and said so; @pm raises ED-02 to Checks-squad engineering management via BRD \u00a78, with Security & Compliance accepting. Story 10.19 MAY NOT BE DRAFTED while ED-02\u2019s owner reads TBD.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18a \u2014 blocked criteria, recorded as skipped and never passed Not skips \u2014 pointers, so nothing is counted twice AC-17 IS NOT THIS STORY\u2019S and is not a skip here. @po moved it to story 10.19 at wave-6 validation: it depends on sibling story 10.15, it is blocked on ED-06/SPK-02 either way, 10.19\u2019s depends_on already lists both 10.15 and 10.18, and it duplicated story 10.15\u2019s AC-19b (\"deployment owner 10.18, integrated proof 10.19\"). Recorded in the manifest under 10.19\u2019s inherited_deferrals. This entry exists so a reader looking for AC-17 finds the pointer rather than concluding it was dropped. Dependency assumption D-3 is CLOSED.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18a \u2014 blocked criteria, recorded as skipped and never passed Not skips \u2014 pointers, so nothing is counted twice Story 10.14\u2019s AC-26 is DISCHARGED, not re-opened. It was recorded \"skipped, never passed\" in a merged story for want of an architect\u2019s ruling on promoting RunnerEvidence.partial to required. ADR-002 \u00a720 is that ruling and story 10.18a landed the edit; 10.14\u2019s own checkbox is left exactly as it merged, on the standing rule that a merged, gated story is not re-opened to close a deferral a later ruling unblocked.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18a \u2014 blocked criteria, recorded as skipped and never passed Not skips \u2014 pointers, so nothing is counted twice AC-13a, AC-16a, AC-18, AC-19a, AC-20, AC-21a, AC-22 and AC-23a are STORY 10.18b\u2019s and are IMPLEMENTED, not deferred: the streaming Ingress, CORS coherence, the envFrom key-validity check, the three bypass closures with their permit companions, the runbook disclosures, the CSRF finding, the measured backend baseline and the kill switch. This entry was a forward pointer when 10.18a shipped; it is kept, corrected, so that a reader comparing the two halves\u2019 skip counts is not left thinking the edge half deferred its own scope.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-13b [ED-06, SPK-02 question 3, Platform/SRE (ingress)] \u2014 TWO TIMED execution.snapshot EVENTS REACH A REAL BROWSER SEPARATELY, before response closure, through every proxy layer, captured as a HAR from a real browser on the staging hosts. The DEPLOYMENT half is done and asserted over the rendered manifest: a separate Ingress carrying only the two streaming paths, proxy-buffering off, and an idle timeout derived from the stream lifetime and compared against the rendered heartbeat in the same manifest. What is deferred is whether any of that survives the wire. A PASSING BACKEND TEST IS NOT EVIDENCE FOR THIS CRITERION and must not be offered as one \u2014 the SSE assessment says so directly: \"a buffered mock-controller response does not prove SSE delivery\". Closes when docs/qa/spikes/SPK-02/ carries the HAR and ED-06 is updated.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-14 [ED-06, SPK-02 question 4, Platform/SRE (ingress)] \u2014 a 15 s HEARTBEAT KEEPS AN IDLE STREAM OPEN across the ingress and any platform proxy, and the EFFECTIVE MAXIMUM STREAM LIFETIME is measured against the intended 60 s. If the effective maximum is BELOW the configured lifetime, the configured value moves to match the measurement and the change is recorded \u2014 studioSse.lifetimeSeconds is a \u00a78.5 starting value, not a commitment, and the ingress timeout is derived from it so it moves too. That is the mechanism working, not a criterion failing. Nothing in this repository can measure a proxy it has never crossed.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-15 [ED-06, SPK-02 question 5, Platform/SRE (ingress) + backend dev] \u2014 RECONNECT WITH Last-Event-ID TO A DIFFERENT API REPLICA restores the current snapshot. The evidence must show the two connections were served by DIFFERENT PODS: a reconnect that happens to land on the same replica proves nothing and is the way this criterion gets reported passed without being tested. Production runs three replicas scaling to six. The design answers this by reading committed state rather than by affinity, and **NO STICKY-SESSION OR SESSION-AFFINITY SETTING MAY BE INTRODUCED TO MAKE IT PASS** \u2014 story 10.18b introduced none, and the streaming Ingress it added carries no affinity annotation of any kind. Trading a design property for a deployment workaround would close this criterion by defeating the thing it exists to check.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-16b [ED-06, SPK-02 questions 1-2, Platform/SRE (ingress) + frontend dev] \u2014 THE PLATFORM\u2019S ACTUAL BROWSER-AUTH ROUTE, IN WRITING, COVERING FEDERATED MODE: which route carries the session cookie to the events and video paths \u2014 same-origin gateway path, or cross-origin with withCredentials plus exact-origin credentialed CORS \u2014 and whether it holds in BOTH standalone and federated (shell-hosted) modes, where the browser\u2019s origin is the PUT platform shell\u2019s and no values file in this chart can know it; and whether a bearer-only requirement exists anywhere on the path, in which case SSE needs the header-capable client inside the centralized API service (STORY 10.11\u2019s, not this one\u2019s) and <video> needs an ambient session regardless. The DEPLOYMENT half is done: exact-origin credentialed CORS compared against the rendered frontend host in the same manifest, never a wildcard, and no credential in any URL. A DEMONSTRATED GATEWAY INCOMPATIBILITY IS A VALID OUTCOME \u2014 it selects the documented GET fallback and changes no execution contract.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-21b [ED-06 / SPK-02 question 7, and ED-02; Platform/SRE + Security] \u2014 THE CSRF CONTROL THE PLATFORM ROUTE ACTUALLY PROVIDES, stated in writing by its owner, and whether the application must add one. The DECIDABLE half is done (AC-21a): the gap is recorded with the two facts that bound it \u2014 the put_session cookie and SecurityConfig.setAllowCredentials(true) with the MFE and API on different hosts \u2014 in SecurityConfig itself and in the runbook \u00a710 as an open launch prerequisite. This story deliberately did NOT enable Spring\u2019s CSRF filter or drop CORS credentials: either changes the public request contract of every existing Checks route, which is not a Studio story\u2019s to land.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18b \u2014 blocked criteria, recorded as skipped and never passed Staging \u2014 the deployed stack under load AC-23b [staging; ED-06/ED-05 and the spikes; Platform/SRE] \u2014 KILL SWITCH, DRAIN, RECOVERY AND BOUNDED OVERLOAD OBSERVED AGAINST THE DEPLOYED STACK, with ordinary REST/check service preserved. Bounded Studio load must not degrade the ordinary check path \u2014 a BRD success metric, not a nicety \u2014 and pod sizing is validated under that load before production templating (BRD \u00a78: \"Prove one runner pod in staging before templating production\"). The kill switch\u2019s behaviour is driven on the production path in both directions in backend StudioKillSwitchWiringTest, and its deployed wiring is asserted over the rendered manifest; what is deferred is the stack.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/deferred.test.ts",
+        "title": "10.18b \u2014 blocked criteria, recorded as skipped and never passed Not a skip \u2014 resolved configuration-delivery pointer AC-18 is resolved: test/deployment/envfrom-keys.test.ts is green across all value sets. The chart converts dotted configOverrides keys to Spring-compatible environment names and fails rendering on invalid or colliding names. This historical pointer remains to show that the earlier red escalation was closed rather than allowlisted.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/run/canary.test.ts",
+        "title": "Blocked halves \u2014 recorded as live skips, never as passes AC-13b (ED-02, owner 10.19, the other half of 10.13 AC-7b) \u2014 the same canaries through the integrated path with real vault material: nothing the API persists carries them, across progress rows, the persisted snapshot, structured log storage and 10.14\u2019s terminal result manifest. The runner can only assert on what leaves it; the API half needs real material, which needs a real vault. ED-02 is status: open.",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/run/canary.test.ts",
+        "title": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a variable URL resolving to an unapproved origin is refused at dispatch",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/run/canary.test.ts",
+        "title": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 the same resolved URL is refused again during execution",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/run/canary.test.ts",
+        "title": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a redirect from an approved origin to an unapproved one is refused",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/run/canary.test.ts",
+        "title": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a subresource request to an unapproved origin is refused",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/run/canary.test.ts",
+        "title": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a secret submitted to an approved origin over an unapproved scheme is refused",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/run/canary.test.ts",
+        "title": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a local file URL is refused",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/run/canary.test.ts",
+        "title": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a cloud metadata endpoint is refused",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/run/sandbox.test.ts",
+        "title": "AC-6b \u2014 the sandbox proven in-cluster starts sandboxed under the cluster PodSecurity level \u2014 deferred to ED-05/SPK-04/10.18",
+        "status": "skipped"
+      },
+      {
+        "file": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/test/server/drain.test.ts",
+        "title": "AC-12 \u2014 SIGTERM drains without abandoning an admitted attempt an admitted attempt survives SIGKILL \u2014 rests on story 10.7 reapers, not on this suite",
+        "status": "skipped"
+      }
+    ],
+    "sourceBeforeAfterStable": true,
+    "distBeforeAfterStable": true
+  },
+  "coverage": {
+    "summarySha256": "0fb8fb941e16dc339b5d0719d76ffdd8d7d0489e1915894f7e9e8c6f9f25e046",
+    "total": {
+      "lines": {
+        "total": 7102,
+        "covered": 6898,
+        "skipped": 0,
+        "pct": 97.12
+      },
+      "statements": {
+        "total": 7102,
+        "covered": 6898,
+        "skipped": 0,
+        "pct": 97.12
+      },
+      "functions": {
+        "total": 621,
+        "covered": 607,
+        "skipped": 0,
+        "pct": 97.74
+      },
+      "branches": {
+        "total": 4781,
+        "covered": 4212,
+        "skipped": 0,
+        "pct": 88.09
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "independentlyRecountedRequiredDirectoryGroups": {
+      "src/compat/": {
+        "lines": {
+          "total": 71,
+          "covered": 71,
+          "pct": 100.0
+        },
+        "statements": {
+          "total": 71,
+          "covered": 71,
+          "pct": 100.0
+        },
+        "functions": {
+          "total": 6,
+          "covered": 6,
+          "pct": 100.0
+        },
+        "branches": {
+          "total": 29,
+          "covered": 27,
+          "pct": 93.1
+        }
+      },
+      "scripts/": {
+        "lines": {
+          "total": 609,
+          "covered": 545,
+          "pct": 89.49
+        },
+        "statements": {
+          "total": 609,
+          "covered": 545,
+          "pct": 89.49
+        },
+        "functions": {
+          "total": 29,
+          "covered": 28,
+          "pct": 96.55
+        },
+        "branches": {
+          "total": 243,
+          "covered": 221,
+          "pct": 90.95
+        }
+      },
+      "src/server/": {
+        "lines": {
+          "total": 1386,
+          "covered": 1320,
+          "pct": 95.24
+        },
+        "statements": {
+          "total": 1386,
+          "covered": 1320,
+          "pct": 95.24
+        },
+        "functions": {
+          "total": 90,
+          "covered": 84,
+          "pct": 93.33
+        },
+        "branches": {
+          "total": 392,
+          "covered": 344,
+          "pct": 87.76
+        }
+      },
+      "src/reporting/": {
+        "lines": {
+          "total": 434,
+          "covered": 423,
+          "pct": 97.47
+        },
+        "statements": {
+          "total": 434,
+          "covered": 423,
+          "pct": 97.47
+        },
+        "functions": {
+          "total": 47,
+          "covered": 46,
+          "pct": 97.87
+        },
+        "branches": {
+          "total": 171,
+          "covered": 157,
+          "pct": 91.81
+        }
+      },
+      "src/run/": {
+        "lines": {
+          "total": 2524,
+          "covered": 2511,
+          "pct": 99.48
+        },
+        "statements": {
+          "total": 2524,
+          "covered": 2511,
+          "pct": 99.48
+        },
+        "functions": {
+          "total": 267,
+          "covered": 266,
+          "pct": 99.63
+        },
+        "branches": {
+          "total": 2200,
+          "covered": 1884,
+          "pct": 85.64
+        }
+      },
+      "src/main.ts": {
+        "lines": {
+          "total": 49,
+          "covered": 49,
+          "pct": 100.0
+        },
+        "statements": {
+          "total": 49,
+          "covered": 49,
+          "pct": 100.0
+        },
+        "functions": {
+          "total": 6,
+          "covered": 6,
+          "pct": 100.0
+        },
+        "branches": {
+          "total": 13,
+          "covered": 13,
+          "pct": 100.0
+        }
+      }
+    },
+    "allRequiredThresholdsMet": true,
+    "config": "Original studio-runner/vitest.config.ts thresholds unchanged; actual full unit exit zero with coverage enabled by default."
+  },
+  "priorFailure": "runner-unit-final-attempt01 retained 1382 passes, two failures and 29 skips; failed root-empty assertions remain historical red, never rewritten as passed.",
+  "remaining": [
+    "Current final native fixtures: guided recording oracle A/T1/T2/B/C, secrets/fault/parity, actual kill/signal cleanup",
+    "Runner deployment and final type/lint/pins/contract checks",
+    "Backend full clean check and JaCoCo, whole ordered GuidedPublicationReplayIT, shared execution regressions",
+    "Independent final all-planned-local-matrix fan-in; no PASS or Done until green"
+  ],
+  "reviewActions": "Read-only source/results/hash review. Only this evidence JSON written. No tests/builds/native/Gradle/git/CLI/lifecycle/subagents."
+}

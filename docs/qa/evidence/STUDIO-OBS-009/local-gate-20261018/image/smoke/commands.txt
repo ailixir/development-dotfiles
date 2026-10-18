@@ -1,0 +1,5 @@
+COMMON docker run args: --read-only --shm-size=512m --tmpfs /tmp:rw,mode=1777,size=512m --tmpfs /journal:rw,uid=1001,gid=1001,mode=0770,size=64m -v obs009-g9-smoke-tls:/tls:ro --env-file /var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T//obs009-g9-tls.rloCbG/env (env file contents never logged)
+docker run -d --init --name obs009-g9-smoke-init <COMMON> put-checks-studio-runner:obs009-g9-local
+docker run --name obs009-g9-smoke-noinit <COMMON> put-checks-studio-runner:obs009-g9-local   (no --init)
+docker run --init --name obs009-g9-smoke-nodeopts -e NODE_OPTIONS=--max-old-space-size=1024 <COMMON> put-checks-studio-runner:obs009-g9-local
+docker stop -t 30 obs009-g9-smoke-init  (exit=0, 0s)

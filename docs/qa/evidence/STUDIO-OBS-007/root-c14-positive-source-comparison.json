@@ -1,0 +1,22 @@
+{
+  "scope": "READONLY_C14_TEXT_POSITIVE_SOURCE_COMPARISON",
+  "sourceBindings": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "8e0611961e242daa9f5db15e5925f059acd4afddf59e58fab25a55ffeba54c53",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java": "0c9b1532ee790d7e9f76930705997d1374c7c76ae7f53b3fa35efe40c4f2ca33",
+    "docs/specs/studio-observed-authoring/contracts/v3/guided-model-response.schema.json": "775c90a1e7001bb742bd9ee0de05e270d9d27307016c8a5dac494653d90f5c0f"
+  },
+  "actualBoundary": "Published control fixture fails INVALID_CONTRACT before publication/password mutation; SOURCE_PLAN1/NEXT_ACTION3/actions2 reported by coordinator",
+  "verified": [
+    "Current controlValue recipe kind/classification/controlType/policyRuleId matches strict model response required fields",
+    "Current binding fill shape matches existing normal passing fixture kindbinding/bindingId construction",
+    "Original validator binds read and fill to real plan need, rejecting mismatches as BINDING_ORDER rather than accepting empty ID",
+    "Source model target uses actual exported node and original role/name locator construction"
+  ],
+  "conclusion": "No concrete source mismatch established by this bounded structural comparison. Actual third proposal/action status and first fixed schema/materialization/bridge code are needed; do not infer recipe failure from aggregate counts.",
+  "actions": {
+    "sourceEdits": 0,
+    "runtime": 0,
+    "newInfrastructure": 0
+  },
+  "wholeAcceptanceClaim": false
+}

@@ -1,0 +1,50 @@
+Timestamp               Ty Process[PID:TID]
+2026-10-16 20:26:01.578 Df runningboardd[365:3f7f71e] [com.apple.runningboard:process] Resolved pid 45441 to [anon<Google Chrome for Testing>(501):45441]
+2026-10-16 20:26:01.579 Df runningboardd[365:3f7f71e] [com.apple.runningboard:process] [anon<Google Chrome for Testing>(501):45441] This process will not be managed.
+2026-10-16 20:26:01.579 Df runningboardd[365:3f7f71e] [com.apple.runningboard:ttl] Now tracking process: [anon<Google Chrome for Testing>(501):45441]
+2026-10-16 20:26:01.579 Df runningboardd[365:3f7f71e] [com.apple.runningboard:ttl] Acquiring assertion targeting [anon<Google Chrome for Testing>(501):45441] from originator [osservice<com.apple.coreservices.launchservicesd>:334] with description <RBSAssertion
+	<RBSDomainAttribute| domain:"com.apple.launchservicesd" name:"RoleUserInteractiveNonFocal" sourceEnvironment:"(null)">
+	]>
+2026-10-16 20:26:01.579 Df runningboardd[365:3f7f71e] [com.apple.runningboard:ttl] Assertion 365-334-783134 (target:[anon<Google Chrome for Testing>(501):45441]) will be created as active
+2026-10-16 20:26:01.579 Df gamepolicyd[564:3f7f832] [com.apple.runningboard:process] Hit the server for a process handle aa36e390000b181 that resolved to: [anon<Google Chrome for Testing>(501):45441]
+2026-10-16 20:26:01.579 Df gamepolicyd[564:3f7f832] [com.apple.runningboard:monitor] Received state update for 45441 (anon<Google Chrome for Testing>(501), running-NotVisible
+2026-10-16 20:26:01.579 Df runningboardd[365:3f7fa08] [com.apple.runningboard:process] [anon<Google Chrome for Testing>(501):45441] Ignoring suspend because this process is not lifecycle managed
+2026-10-16 20:26:01.579 Df runningboardd[365:3f7fa07] [com.apple.runningboard:ttl] Acquiring assertion targeting [anon<Google Chrome for Testing>(501):45441] from originator [osservice<com.apple.coreservices.launchservicesd>:334] with description <RBSAssertion
+	<RBSDomainAttribute| domain:"com.apple.launchservicesd" name:"RoleUserInteractiveNonFocal" sourceEnvironment:"(null)">
+	]>
+2026-10-16 20:26:01.579 Df runningboardd[365:3f7fa07] [com.apple.runningboard:ttl] Assertion 365-334-783135 (target:[anon<Google Chrome for Testing>(501):45441]) will be created as active
+2026-10-16 20:26:01.579 Df runningboardd[365:3f7f71d] [com.apple.runningboard:ttl] Invalidating assertion 365-334-783134 (target:[anon<Google Chrome for Testing>(501):45441]) from originator [osservice<com.apple.coreservices.launchservicesd>:334]
+2026-10-16 20:26:01.579 Df runningboardd[365:3f7fa08] [com.apple.runningboard:ttl] [anon<Google Chrome for Testing>(501):45441] Set darwin role to: UserInteractiveNonFocal
+2026-10-16 20:26:01.579 Df runningboardd[365:3f7fa08] [com.apple.runningboard:process] [anon<Google Chrome for Testing>(501):45441] Ignoring GPU update because this process is not GPU managed
+2026-10-16 20:26:01.579 Df runningboardd[365:3f7fa08] [com.apple.runningboard:process] [anon<Google Chrome for Testing>(501):45441] Ignoring memory limit update because this process is not memory-managed
+2026-10-16 20:26:01.580 Df loginwindow[58561:38c6194] [com.apple.loginwindow.logging:TAL] -[PersistentAppsSupport applicationReady:] | App: Google Chrome for Testing, ready, updating active tracking timer
+2026-10-16 20:26:01.581 Df tccd[33570:3f7e8e4] [com.apple.TCC:access] AUTHREQ_ATTRIBUTION: msgID=45441.1, attribution={responsible={TCCDProcess: identifier=com.stablyai.orca, pid=59126, auid=501, euid=501, responsible_path=/Applications/Orca.app/Contents/MacOS
+2026-10-16 20:26:01.581 Df loginwindow[58561:38c6194] [com.apple.loginwindow.logging:Standard] -[ApplicationManager checkInAppContext:eventData:] | ApplicationManager: Checked in app : Google Chrome for Testing
+2026-10-16 20:26:01.601 Df tccd[33570:3f7fa5c] [com.apple.TCC:access] AUTHREQ_ATTRIBUTION: msgID=58538.13130, attribution={responsible={TCCDProcess: identifier=com.stablyai.orca, pid=59126, auid=501, euid=501, responsible_path=/Applications/Orca.app/Contents/M
+2026-10-16 20:26:01.601 Df tccd[33570:3f7fa5c] [com.apple.TCC:access] requestor: TCCDProcess: identifier=com.apple.WindowServer, pid=58538, auid=88, euid=88, binary_path=/System/Library/PrivateFrameworks/SkyLight.framework/Versions/A/Resources/WindowServer is 
+2026-10-16 20:26:01.621 Df runningboardd[365:3f7f71e] [com.apple.runningboard:ttl] Acquiring assertion targeting [anon<Google Chrome for Testing>(501):45441] from originator [osservice<com.apple.coreservices.launchservicesd>:334] with description <RBSAssertion
+	<RBSDomainAttribute| domain:"com.apple.launchservicesd" name:"RoleNonUserInteractive" sourceEnvironment:"(null)">
+	]>
+2026-10-16 20:26:01.621 Df runningboardd[365:3f7f71e] [com.apple.runningboard:ttl] Assertion 365-334-783137 (target:[anon<Google Chrome for Testing>(501):45441]) will be created as active
+2026-10-16 20:26:01.622 Df runningboardd[365:3f7f71e] [com.apple.runningboard:ttl] Invalidating assertion 365-334-783135 (target:[anon<Google Chrome for Testing>(501):45441]) from originator [osservice<com.apple.coreservices.launchservicesd>:334]
+2026-10-16 20:26:01.622 Df runningboardd[365:3f7f71e] [com.apple.runningboard:process] [anon<Google Chrome for Testing>(501):45441] Ignoring suspend because this process is not lifecycle managed
+2026-10-16 20:26:01.622 Df runningboardd[365:3f7f71e] [com.apple.runningboard:process] [anon<Google Chrome for Testing>(501):45441] Ignoring GPU update because this process is not GPU managed
+2026-10-16 20:26:01.622 Df runningboardd[365:3f7f71e] [com.apple.runningboard:process] [anon<Google Chrome for Testing>(501):45441] Ignoring memory limit update because this process is not memory-managed
+2026-10-16 20:26:01.646 Df kernel[0:3f7fa6c] (AppleMobileFileIntegrity) AMFI: '/Users/brunobuger/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/Frameworks/Google Chrome for Testing Framework.framework/Version
+2026-10-16 20:26:01.646 Df kernel[0:3f7fa6c] (AppleMobileFileIntegrity) AMFI: '/Users/brunobuger/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/Frameworks/Google Chrome for Testing Framework.framework/Version
+2026-10-16 20:26:01.685 Df runningboardd[365:3f7f71d] [com.apple.runningboard:process] [anon<Google Chrome for Testing>(501):45441] Ignoring suspend because this process is not lifecycle managed
+2026-10-16 20:26:01.685 Df gamepolicyd[564:3f7fa0c] [com.apple.runningboard:monitor] Received state update for 45441 (anon<Google Chrome for Testing>(501), running-NotVisible
+2026-10-16 20:26:01.685 Df gamepolicyd[564:3f7f832] [com.apple.runningboard:monitor] Received state update for 45441 (anon<Google Chrome for Testing>(501), running-NotVisible
+2026-10-16 20:26:01.685 Df runningboardd[365:3f7f71d] [com.apple.runningboard:ttl] [anon<Google Chrome for Testing>(501):45441] Set darwin role to: NonUserInteractive
+2026-10-16 20:26:01.685 Df runningboardd[365:3f7f71d] [com.apple.runningboard:process] [anon<Google Chrome for Testing>(501):45441] Ignoring GPU update because this process is not GPU managed
+2026-10-16 20:26:01.685 Df runningboardd[365:3f7f71d] [com.apple.runningboard:process] [anon<Google Chrome for Testing>(501):45441] Ignoring memory limit update because this process is not memory-managed
+2026-10-16 20:26:02.012 Df tccd[33570:3f7fa5c] [com.apple.TCC:access] AUTHREQ_ATTRIBUTION: msgID=45441.2, attribution={responsible={TCCDProcess: identifier=com.stablyai.orca, pid=59126, auid=501, euid=501, responsible_path=/Applications/Orca.app/Contents/MacOS
+2026-10-16 20:26:02.030 F  runningboardd[365:3f7fa07] [com.apple.runningboard:process] Two equal instances have unequal identities. <anon<Google Chrome for Testing>(501) pid=45441 AUID=501> and <anon<Google Chrome for Testing>(501)(0) pid=45441>
+2026-10-16 20:26:02.031 Sd runningboardd[365:0] (5E34155A-3DE1-3408-8EAD-2FBD2749B15B) RBAssertionManager
+<RBAssertionManager| assertionCount:98 systemState:<RBMutableSystemState| > eventQueueCount:0 processStates:{
+	anon<Docker Desktop>(501)="<RBProcessState| identity:anon<Docker Desktop>(501) role:UserInteractive>"
+	osservice<com.apple.softwareupdated(200)>="<RBProcessState| identity:osservice<com.apple.softwareupdated(200)> role:NonUserInteractive>"
+	anon<Google Chrome for Testing>(501)="<RBProcessState| identity:anon<Google Chrome for Testing>(501) role:NonUserInteractive>"
+	anon<com.docker.virtualization>(501)="<RBProcessState| identity:anon<com.docker.virtualization>(501) role:UserInteractive>"
+	osservice<com.apple.security.syspolicy>="<RBProcessState| identity:osservice<com.apple.security.syspolicy> role:None>"
+	osservice<com.apple.airportd>="<RBProcessState| identity:osservice<com.apple.airportd> role:None>"

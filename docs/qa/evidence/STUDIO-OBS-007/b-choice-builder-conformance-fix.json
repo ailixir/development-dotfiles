@@ -1,0 +1,20 @@
+{
+  "schema": "studio-observed-choice-builder-conformance-fix/1",
+  "recordedAt": "2026-10-10T20:32:23.043439+00:00",
+  "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+  "beforeSHA256": "e7f576597b8b3a30e56fb672b23138467d060b3677bb9ee4704edf8f4d7733d0",
+  "candidateSHA256": "a728166231f8e1508e88a6bcf91b67933a95a7c5587f41613ce2109200878b96",
+  "exactDiff": {
+    "before": "attempt.path(\"responseSchemaVersion\").asInt() == 2",
+    "after": "attempt.path(\"responseSchemaVersion\").asInt() == 3"
+  },
+  "authority": "fresh-owner-b-choice-builder-fix-intent/context, parent independent exact clause disposition",
+  "actualPriorFailure": "fresh-owner-contract-corrected-all9 actual9/8PASS1FAIL; finalize-exception-3/4/5 at effectiveObservedObligation474, stale clause480 despite actual accepted schema3",
+  "preserved": "All adjacent kind/status/request/response/choice/owner/fence/scope/hash/capture/time/locator/preparation guards, v1/v2 history, all9 test bodies, budgets, schema/corpus/generated/pins/runtime",
+  "validation": {
+    "sourceOnly": true,
+    "testsBuildGradleRuntimePerformed": false,
+    "coordinatorActualRegressionPending": true,
+    "full19Complete": false
+  }
+}

@@ -1,0 +1,350 @@
+{
+  "command": [
+    "caffeinate",
+    "-i",
+    "./gradlew",
+    "test",
+    "--tests",
+    "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+    "--tests",
+    "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+    "--tests",
+    "com.citi.put.checks.studio.EvidenceRetentionTest",
+    "--no-daemon"
+  ],
+  "cwd": "backend",
+  "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "started": "2026-10-17T19:36:40.402937+00:00",
+  "elapsedSeconds": 6.2,
+  "exit": 0,
+  "counts": {
+    "total": 60,
+    "passed": 60,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "testcases": [
+    {
+      "class": "com.citi.put.checks.studio.EvidenceRetentionTest",
+      "name": "aDifferentConfiguredRetentionMovesTheExpiryRatherThanBeingIgnored()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.EvidenceRetentionTest",
+      "name": "theThirtyDayRetentionIsDeclaredExactlyOnceAndTheDefaultAgreesWithIt()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.EvidenceRetentionTest",
+      "name": "theProjectionStampsExpiryFromThatValueAndOnlyOnAvailable()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "aCauseWithoutItsCoordinatesIsRefusedRatherThanPublished()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "withNoReadableStoreTheOtherEvidenceStatesAreReportedAsTheyAre()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "storedStepResultsAndLogsAreReadIntoTheTypedSnapshot()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "logicalExpiryIsEnforcedOnReadEvenBeforePhysicalDeletion()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "anAvailableRecordingIsExposedAsAProtectedApiPathOnly()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "aPersistedLoginCauseIsMappedWithItsLoginFlag()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "anAcceptedRunHasNoBrowserStartNoEndAndNoDuration()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "acceptedAtIsThePartitionKeyAndStartedAtIsTheBrowserStart()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "aPersistedDriftCauseOmitsTheLoginFlagOnTheWire()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "aRowWithNoCauseHasNullAndTheLabelledCopyKeepsTheCause()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "anEvidenceFailureNeverOverwritesAKnownOutcome()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "aLegacyRowExposesNullRevisionAndUnknownRuntime()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "anAvailableRecordingWithNoReadableStoreIsPublishedUnavailableWithoutAPath()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.ExecutionSnapshotMapperTest",
+      "name": "aTerminalOutcomeDoesNotCompleteTheStreamWhileEvidenceIsStillProcessing()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "untouchedStepsAreFilledPendingFromTheRevisionSoEveryOriginalStepHasAnEntry()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "theRunnersChromiumBuildKeyProjectsOntoRuntimeChromium()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "runnerSequenceIsNeverTheRevision()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "observedPreReadyRefusalNamesTheFirstFailedClauseOnly()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "aReportWithNoOriginCarriesNoReadingAndOneThatBreaksThatIsA400()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "stepLinesProjectTheirStepIndexAndRunLevelLinesStayNull()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "theApiRoundsOnceAtPersistence()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "aPreReadyTargetDriftNamesNothingBecauseNoStepOwnsIt()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "evidenceStateProjectsOntoVideoStatusAndExpiredIsNeverReported()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "otherFailuresNameNothing()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "theManifestKeyIsRecordedAndNotPublishedOnTheSnapshot()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "loginWhoseNamedStepIsNotFailIsA400InvalidReport()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "observedPreReadyOuterCancelledWithoutRecordedCancelIsRefused()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "observedPreReadyLaunchUnknownIsRefusedSoTheReasonSetDoesNotGrow()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "theOneMappingASourceFixesIsTheParentEnforcedTotalTimeout()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "aBodyWithoutStepIndexIsAnOlderRunnerAndDeserializesToNull()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "loginNamingAStepTheRevisionDoesNotHaveIsA400InvalidReport()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "loginRequiredFinalNamesTheFailedStepWithLoginStepsFalse()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "replayFailureCarriesNoReportedValueAndExactlyTheDeclaredKeys()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "theInstantIsBrowserStartedAtPlusAtMsAndNothingElse()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "targetDriftFinalNamesTheFailedStepAndCarriesNoLoginFlag()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "levelIsLowerCaseOnTheWireAndUpperCaseOnTheSnapshot()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "withNoOriginAndNoReadingsTheProjectionYieldsNullInstantsRatherThanAPartialDerivation()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "theApiAppliesNoCalibrationAndNeverRebasesAgainstTheFirstReadingItHasSeen()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "anUnknownRunnerLevelIsA400()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "aStepStatusFromTheRunOutcomeVocabularyIsA400AndNeverASilentCoercion()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "runtimeVersionsIsNarrowedToTheSection46Subset()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "runErrorIsNeverMappedToTheApiCancelledEvenWhenACancelWasRecorded()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "revocationUsesIndependentFactWithUserCancelPriorityAndNeverRewritesPassingOrFailingReports()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "targetDriftWhoseFailedStepCarriesAnotherFailureNamesNothing()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "zeroIsAPositionAndSurvivesTheProjectionDistinctlyFromNull()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "targetDriftWithADifferentReasonNamesNothing()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "loginRequiredFinalCarriesLoginStepsPresentTrueWhenAnEarlierStepFilledASecret()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "replayFailureRefusesTheShapesTheContractRefuses()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "aLogStepIndexTheRevisionDoesNotHaveIsA400()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "nonFinalReportsNameNothing()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "targetDriftWithTwoFailedStepsNamesNothing()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "cancelRevocationAndParentTimeoutNameNothing()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "originalTextComesFromTheRevisionAndIsNeverEchoedByTheRunner()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "observedPreReadySelfStopRunErrorCancelledIsAcceptedAndProjectsUnmappedError()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "noRevisionStepIdsMeansNoCauseAndNeverARefusal()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "outcomeResultBecomesStatusAndPendingAndRunningStayApiOwned()",
+      "status": "PASS"
+    },
+    {
+      "class": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "name": "aReaperOwnedCodeIsNeverObtainableByARunnerThatNamesIt()",
+      "status": "PASS"
+    }
+  ],
+  "xmlFiles": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/obs008-be-a1-unit02-xml/TEST-com.citi.put.checks.studio.EvidenceRetentionTest.xml",
+      "sha256": "e5669a844e95a98a614762671e0dc470f28009629bbfd397827182ca88c24e8f"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/obs008-be-a1-unit02-xml/TEST-com.citi.put.checks.studio.ExecutionSnapshotMapperTest.xml",
+      "sha256": "5f3531c595b1f9638cf717ecc3d27567c4b6b709828051a789e3f9f45bc05cea"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/obs008-be-a1-unit02-xml/TEST-com.citi.put.checks.studio.internal.RunnerReportProjectionTest.xml",
+      "sha256": "a64a275e17cadd7733723bf70a0075e054b44edf60e3d1876132c6d65a9e5e51"
+    }
+  ],
+  "guardTallies": [],
+  "logSha256": "c1190ad162462d2ed9a403e10ee7d480463e30ffc684f7e4b15f052c5fb863eb",
+  "sourceStable": true,
+  "distStable": true,
+  "testInputStable": true,
+  "testInputDigestBefore": "5a630bd084a4af1012761c0590ff8d210c79bffc0853c72360d49a3fdd7a3c4f",
+  "testInputDigestAfter": "5a630bd084a4af1012761c0590ff8d210c79bffc0853c72360d49a3fdd7a3c4f"
+}

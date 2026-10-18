@@ -1,0 +1,585 @@
+{
+ "id": "QLV-009-20261018",
+ "kind": "qa-local-validation-record-SKELETON",
+ "skeleton": true,
+ "targetPath": "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.{md,json}",
+ "author": "@qa (Quinn)",
+ "skeletonWrittenAt": "2026-10-18, during the G9 hold window; nothing below was executed by @qa",
+ "isVerdict": false,
+ "storyStatusChange": "none",
+ "doneClaimed": false,
+ "verdictVocabularyUsed": "none (no PASS / CONCERNS / FAIL / WAIVED)",
+ "specSource": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/qa/t0-qa-20261017.md section 2 (D2)",
+ "consumers": [
+  {
+   "who": "coordinator",
+   "use": "confirms the OBS-011 start condition before 011 T0"
+  },
+  {
+   "who": "OBS-010 T2",
+   "use": "starts or finalizes the Live surface list on the same trigger"
+  }
+ ],
+ "trigger": {
+  "value": null,
+  "allowed": [
+   "MET",
+   "NOT_MET"
+  ],
+  "decidedAt": null,
+  "rule": "MET only if every REQUIRED row is VALIDATED, steps C0-C10 meet their criteria, and the freeze held (capture-after identical to capture-before file by file, for source, dist and helm). Otherwise NOT_MET, with the failing rows named. External halves are OWED with an owner and never block, never pass. A start trigger, not a quality verdict.",
+  "notMetRows": [],
+  "preliminaryReading": {
+   "markedAt": "2026-10-18 hold window, from local-gate-20261018/status.txt as it then stood [V]",
+   "stepsSeenInStatusTxt": {
+    "C1": "exit 0",
+    "C2": "exit 0",
+    "C3": "exit 0",
+    "C4": "exit 1",
+    "C5-pins": "exit 0",
+    "C5-contracts": "exit 0",
+    "C5-codegen": "exit 0",
+    "C6": "exit 0",
+    "C8": "running",
+    "C9": "not yet"
+   },
+   "knownBlockerToMET": "C4 (see c4Decision)",
+   "note": "preliminary; the record is written from the final logs, not from this line"
+  }
+ },
+ "freeze": {
+  "tool": ".aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py (run by g9.sh C0 and C9)",
+  "helmSupplement": "g9.sh helm_digest(): sha256 over `find helm-chart -type f | sort | xargs shasum -a 256`; the tool itself does not cover helm-chart/",
+  "before": {
+   "file": "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/capture-before.json",
+   "sourceDigest": "6fcc12eef193338ca3bc79adaa50660d93c245a4462a5f850a7256588d9fc91b",
+   "files": 1805,
+   "distDigest": "4add1307afe80af5270a63dc809d43bb2d4d4dd51ab32a83330d3cbaf35fc3c3",
+   "helmDigest": "8dbe073c706c80b8e560ecc60593ceb550cc93fd6c4ca6486016829899dd04a6",
+   "mark": "V (capture-before.summary, status.txt)"
+  },
+  "after": {
+   "file": "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/capture-after.json",
+   "sourceDigest": null,
+   "distDigest": null,
+   "helmDigest": null,
+   "filesIdenticalToBefore": null,
+   "distIdentical": null,
+   "helmIdentical": null
+  },
+  "gitHead": null,
+  "approvedSkipsFileSha256": null,
+  "distRules": [
+   "studio-runner/dist/main.js present",
+   "studio-runner/dist/run/guidedMain.js ABSENT",
+   "every guided IT recorded distDigest == dist digest above (collector before/after and the harness-written worker json)"
+  ],
+  "voidedIfScopeChanged": true
+ },
+ "c4Decision": {
+  "decision": "C4 COUNTS AS NOT_MET FOR THE TRIGGER until the image-dependent tests run green at this frozen digest",
+  "observed": {
+   "file": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-g9-runner-deploy01-vitest.json",
+   "tests": 581,
+   "passed": 575,
+   "failed": 6,
+   "skipped": 0,
+   "sourceStable": true,
+   "distStable": true,
+   "mark": "V (vitest JSON read)"
+  },
+  "failedTests": [
+   "test/deployment/chart.test.ts: story 10.18a - the rendering harness itself has the built image, or FAILS (AC-4a part 2)",
+   "test/deployment/chart.test.ts: AC-4a parts 1-2 SEC-2 - no writable mount sits on the image's browser path or on its HOME",
+   "test/deployment/chart.test.ts: AC-4a parts 1-2 SEC-2 - the disjointness check is capable of failing",
+   "test/deployment/chart.test.ts: STUDIO-OBS-009 Q4 - a writable /tmp, and neither TMPDIR nor NODE_OPTIONS anywhere declares none of them in the image under test either",
+   "test/deployment/chart.test.ts: STUDIO-OBS-009 Q4 - ... keeps the new writable mounts off the browser registry and HOME",
+   "test/deployment/sec2.test.ts: SEC-2 - the shim browser registry attack, run in both directions"
+  ],
+  "commonCause": "all six fail with 'the image put-checks-studio-runner:10.18a-local does not exist locally'; the tier turns a missing image into a FAILURE on purpose, never a skip",
+  "causeIsDefect": false,
+  "reasoning": [
+   "The C4 criterion in my own D2 spec (t0-qa-20261017.md section 2.4) is '0 failed'. It is not met: 6 failed.",
+   "Two of the six are STUDIO-OBS-009 Q4 assertions about the image under test (writable /tmp; no TMPDIR or NODE_OPTIONS). The other four are the AC-4a SEC-2 browser-path checks. These are image facts of the 009 chart change, not generic noise, so the image-dependent half of AC-1/AC-4 is unproven.",
+   "The tier's authors made a missing image a failure so that nobody can read the tier as green without the image. Counting it MET with 'owed' tests would reverse that design after I saw the result, and I wrote the criterion. Only the user or @po may change an OBS-011 start condition, not me.",
+   "The cost of NOT_MET is small and mechanical: build the image, set STUDIO_RUNNER_IMAGE, re-run C4 alone (74 s in G9) at the same frozen digest. The build changes neither source nor dist, so the freeze is not disturbed [I: the build writes no repository file]. A delta addendum then flips C4 and the trigger to MET without repeating the long gate.",
+   "The 575 passing tests include every chart assertion that needs no image (no guided Deployment template, render-env subset, dump flags, PID-1 init values). They stay credited."
+  ],
+  "unblockedBy": [
+   "U22 (user): authorization to use Docker for the D2 image smoke (docker build; run --init, run without --init, stop)",
+   "[I, unknown] the Dockerfile base image mcr.microsoft.com/playwright:v1.63.0-noble must be cached locally or its pull authorized; w0/decisions.md says pulls are not authorized and only cached images are used. I did not run docker to check.",
+   "then: docker build -t put-checks-studio-runner:10.18a-local studio-runner/ (ci/stages.md stage 7); STUDIO_RUNNER_IMAGE set; re-run C4 via run-runner.py"
+  ],
+  "flipRule": "On a green C4 re-run with the tests above present by name and 0 failed, append a delta addendum (new C4 log, same digests) and set C4 MET. The trigger becomes MET only if every other row also holds.",
+  "alternativeNeedingAHumanDecision": "If the user or @po decides 011 may start without the image, they record that decision as a file; I then write C4 as OWED_BY_DECISION citing it and set the trigger on the remaining rows. Without that file the value is NOT_MET.",
+  "ifImageFlipsAnythingElse": "No other step depends on the image. AC-1 PID-1 c (informational) and the A6 drain re-record use the same docker authorization."
+ },
+ "steps": [
+  {
+   "id": "C0",
+   "what": "freeze capture, helm digest, listeners, checks-guided orphans, Gradle daemons, vm_stat",
+   "gateCommand": "g9.sh C0",
+   "pass": "digests recorded; no loopback-only java/postgres listener in the ephemeral range; no checks-guided orphan that is not on the protected list; no stale daemon",
+   "evidence": [
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/capture-before.json",
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/capture-before.summary",
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/helm-before.txt",
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/c0-listeners.txt",
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/c0-checks-guided.txt",
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/c0-gradle-daemons.txt",
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/c0-vmstat.txt"
+   ],
+   "qaReads": "the four pre-existing checks-guided PIDs (5083, 5095, 13577, 13581) are named as protected, not as a failure; any other entry is a finding",
+   "result": null
+  },
+  {
+   "id": "C1",
+   "what": "runner type-check and lint",
+   "gateCommand": "g9.sh C1",
+   "pass": "exit 0",
+   "evidence": [
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/c1.log"
+   ],
+   "seenInStatus": "exit 0",
+   "result": null
+  },
+  {
+   "id": "C2",
+   "what": "runner unit tier, default config",
+   "gateCommand": "g9.sh C2 via run-runner.py obs009-g9-runner-unit01",
+   "pass": "0 failed, 0 errors; coverage thresholds met; skipped count recorded against the F-merge baseline (2606 passed / 29 skipped at EP's last count)",
+   "evidence": [
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-g9-runner-unit01-*"
+   ],
+   "seenInStatus": "exit 0",
+   "result": null
+  },
+  {
+   "id": "C3",
+   "what": "runner fixtures tier (real Chromium)",
+   "gateCommand": "g9.sh C3 via run-runner.py obs009-g9-runner-fixtures01",
+   "pass": "0 failed; the new fixtures present by name: guidedCloseBound (F1-F4, H), the two renamed browser-profile-safety cases (F-R2-1), secret-control lost-control-body expecting RUN_ERROR",
+   "evidence": [
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-g9-runner-fixtures01-*"
+   ],
+   "seenInStatus": "exit 0",
+   "result": null,
+   "qaNote": "also confirm the 007/013 fixture media were protected and restored (run-runner.py) FocusMutationJoined is a backend IT: look for it in C8."
+  },
+  {
+   "id": "C4",
+   "what": "runner deployment tier",
+   "gateCommand": "g9.sh C4 via run-runner.py obs009-g9-runner-deploy01",
+   "pass": "0 failed",
+   "evidence": [
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-g9-runner-deploy01-results.json",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-g9-runner-deploy01-vitest.json"
+   ],
+   "seenInStatus": "exit 1 (575 passed / 6 failed)",
+   "result": "NOT_MET_PENDING_IMAGE",
+   "decision": "see c4Decision"
+  },
+  {
+   "id": "C5",
+   "what": "pins, contracts, schema codegen",
+   "gateCommand": "g9.sh C5 (three commands)",
+   "pass": "all exit 0; 'NOT ASSERTED' items listed and never counted as pass (check:pins reports the image digest as NOT ASSERTED on a local build)",
+   "evidence": [
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/c5-pins.log",
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/c5-contracts.log",
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/c5-codegen.log"
+   ],
+   "seenInStatus": "exit 0, 0, 0",
+   "result": null
+  },
+  {
+   "id": "C6",
+   "what": "frontend type-check, lint, vitest, build (host Node)",
+   "gateCommand": "g9.sh C6",
+   "pass": "exit 0, 0 failed (frontend is in the digest scope)",
+   "evidence": [
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/c6-frontend.log"
+   ],
+   "seenInStatus": "exit 0",
+   "result": null
+  },
+  {
+   "id": "C7",
+   "what": "tripwire greps",
+   "gateCommand": "g9.sh C7",
+   "pass": "P2 retired names 0; DEFERRED STUDIO-OBS-009 0; guidedMain src/dist 0 of 2 present; start:guided 0; studio-guided-worker templates 0; sameIdentity bodies exactly 1; SSLContext.getDefault 0; @Disabled (parsed) 6",
+   "evidence": [
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/c7-greps.txt"
+   ],
+   "seenInC7File": {
+    "P2": 0,
+    "DEFERRED": 0,
+    "guidedMain": 0,
+    "start:guided": 0,
+    "worker templates": 0,
+    "sameIdentity": 1,
+    "SSLContext.getDefault": 0,
+    "@Disabled": 6,
+    "mark": "V (file read)"
+   },
+   "gapInGateScript": "T0 also listed `grep 'studio.updateTest(' ` in StudioScheduleApiIT and SharedSchedulingIT (expected 0, trivial); QA adds it as a one-off",
+   "result": null
+  },
+  {
+   "id": "C8",
+   "what": "backend full check, all three Test tasks, --rerun-tasks, exact approved-skips multiset",
+   "gateCommand": "g9.sh C8 (collector obs009-g9-check01)",
+   "pass": "collector exit 0; XML 0 failed 0 errors; skipped multiset equals qa/approved-skips.json exactly (9 entries); jacocoTestCoverageVerification and requireFreshGuidedPartitions EXECUTED in the Gradle output (not UP-TO-DATE, FROM-CACHE or SKIPPED); guidedIncrementalTest and crossReplicaTest executed; GuidedPublicationReplayIT ran as a full class; every required class has >=1 executed test; dist digest recorded by the guided ITs equals the frozen dist digest",
+   "evidence": [
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/c8-backend.collector.log",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-g9-check01-*",
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/c8-test-results/",
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/c8-jacoco/"
+   ],
+   "requiredClasses": [
+    "StudioScheduleApiIT (16 re-enabled)",
+    "SharedSchedulingIT (2 re-enabled)",
+    "ObservedScheduleAuthorityIT",
+    "StudioRunnerPropertiesProfileTest",
+    "RunnerTlsClientCertIT",
+    "GuidedScheduledBeansProfileTest",
+    "DatabaseCanaryScanIT",
+    "GuidedBridgeIntegrationTest",
+    "GuidedBridgePlannedIT",
+    "GuidedPlanningIntegrationTest",
+    "GuidedPublicationReplayIT",
+    "GuidedEvidencePendingAppendIT",
+    "GuidedEvidencePendingAppendJoinedIT",
+    "PreReadyRevocationProbeIT",
+    "PreReadyRevocationJoinedIT",
+    "ObservedCoRunIT",
+    "RunnerReportProjectionTest",
+    "GuidedLifecycleReasonIT",
+    "GuidedSessionEvidenceTest",
+    "GuidedSchemaProbeIT",
+    "VaultPolicyIT",
+    "GuidedFocusMutationJoinedIT"
+   ],
+   "mustCopyBeforeAnyLaterGradle": "backend/build/test-results is copied by g9.sh to c8-test-results/ immediately; a later Gradle run wipes it",
+   "result": null,
+   "requiredClassesNote": "names are from the T0 spec and the lane receipts; several (StudioRunnerPropertiesProfileTest, GuidedScheduledBeansProfileTest, RunnerTlsClientCertIT) were planned names [I]. Confirm each against the XML by name and record the real name."
+  },
+  {
+   "id": "C9",
+   "what": "freeze check",
+   "gateCommand": "g9.sh C9",
+   "pass": "capture-after identical to capture-before file by file for source, dist and helm",
+   "evidence": [
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/capture-after.json",
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/capture-after.summary",
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/helm-after.txt"
+   ],
+   "result": null
+  },
+  {
+   "id": "C10",
+   "what": "mutation reproductions in a scratch copy",
+   "gateCommand": "qa/pre-g9-review/c10.sh run (after G9-DONE)",
+   "pass": "each mutation turns its named tests red (B3 only that one), file restored to the live sha, baseline and final green",
+   "evidence": [
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/qa/c10-run/c10-results.json",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/qa/c10-run/c10-results.txt"
+   ],
+   "plan": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/qa/pre-g9-review/c10-plan.md",
+   "tier": "core = S3, S4, B1, B2, B3, F1; extended adds S1, LR, F2",
+   "result": null,
+   "disclosedLimitToCarryIntoTheRecord": "S's M4 (drop the ui_tests row locks) is caught by no test; recorded as a limit of the R7 proof, not as a C10 failure"
+  }
+ ],
+ "requiredRows": [
+  {
+   "row": "AC-1",
+   "halves": "fold into one process/image/Deployment, one TLS listener, capacity and policy hash as config, unknown key refused, chart render env subset of accepted keys, no studio-guided-worker-* template, P2 a-d",
+   "evidenceFrom": [
+    "C1",
+    "C2",
+    "C3",
+    "C4 (chart tests that need no image)",
+    "C5",
+    "C7",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/d1/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/d1/launch-contract.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/d2/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/p2/",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/c9/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f-merge/prep-devops/receipt.md"
+   ],
+   "owedExternal": [
+    "deployed Deployment",
+    "PID-1 a-c on the deployed stack (informational)"
+   ],
+   "state": null
+  },
+  {
+   "row": "AC-2",
+   "halves": "chart and profile values for key, issuer, truststore; fail-closed negatives; rotation inputs",
+   "evidenceFrom": [
+    "C2",
+    "C8 (StudioRunnerPropertiesProfileTest)",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/d1/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/d2/rotation-and-cert-inputs.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/d3/receipt.md"
+   ],
+   "owedExternal": [
+    "G-1 'verified in a shared environment'"
+   ],
+   "state": null
+  },
+  {
+   "row": "AC-3",
+   "halves": "runner TLS and client-cert auth, validate() profile rule, self-signed-CA IT, client presents the cert, coordinator on StudioRunnerTls (SSLContext.getDefault = 0)",
+   "evidenceFrom": [
+    "C7",
+    "C8 (RunnerTlsClientCertIT incl. GuidedConnectorInARealContext)",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/d3/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f-merge/prep-dev/receipt.md"
+   ],
+   "owedExternal": [
+    "G-2 recorded in 010"
+   ],
+   "state": null
+  },
+  {
+   "row": "AC-4",
+   "halves": "dump flags and chart lint, runner STUDIO_RUNNER_VAULT_ADDRESS refusal, DB-wide canary scan, TF-5 b only",
+   "evidenceFrom": [
+    "C2",
+    "C4",
+    "C8 (DatabaseCanaryScanIT)",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/d3/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/d2/receipt.md"
+   ],
+   "owedExternal": [
+    "Vault policy test (U5, ED-02)",
+    "TF-5 a, c, e"
+   ],
+   "informational": "A18 Vault rehearsal is REHEARSAL_ONLY_NON_CREDITING and is skipped by name (approved-skips entry 8)",
+   "state": null
+  },
+  {
+   "row": "AC-5",
+   "halves": "profile gates and per-profile context test",
+   "evidenceFrom": [
+    "C8 (GuidedScheduledBeansProfileTest and the per-profile context test)",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/d3/receipt.md"
+   ],
+   "owedExternal": [
+    "SIEM sink"
+   ],
+   "state": null
+  },
+  {
+   "row": "AC-6",
+   "halves": "lift, G-3, the 18 re-enabled unchanged, R7 non-vacuous, 4 ports, tripwire, count reconciliation, R9-OBS-1 record",
+   "evidenceFrom": [
+    "C7 (@Disabled 6, DEFERRED 0)",
+    "C8 (full classes, 0 skipped among the 18)",
+    "C10 S3 S4 (S1)",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/s/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/s-w3/receipt.md"
+   ],
+   "owedExternal": [],
+   "disclose": "S M4 not caught by any test",
+   "state": null
+  },
+  {
+   "row": "AC-11",
+   "halves": "co-run legs; ADJ-1; R10c f-h; i; j; k; R1 a-d; D5 a-f; LR a-c",
+   "evidenceFrom": [
+    "C8 (ObservedCoRunIT, PreReadyRevocation*, GuidedEvidencePendingAppend*, RunnerReportProjectionTest, GuidedLifecycleReasonIT)",
+    "C3 (guidedCloseBound, secret-control)",
+    "C10 B1 B2 B3 F1 (LR F2)",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/b/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/b/w3/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/r1/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/r2/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/bl/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/i/receipt.md"
+   ],
+   "rulingsOnFile": [
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w1.5/ruling-part1.md (D5, D1.0)",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w1.5/ruling-part2.md (R1, ADJ-1 option (a))",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w3/pre-g9-rulings.md (RUN-ORPHAN-01, SEC-AUDIT-PREREADY-01)",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f-merge/pre-rulings.md (F-R2-1 and others)",
+    "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-rulings/ruling.md"
+   ],
+   "qaCoSigns": [
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/qa/pre-g9-review/adj1-security-cosign.md (SIGN-WITH-NOTES)",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/qa/pre-g9-review/f-r2-1-oracle-cosign.md (SIGN-WITH-NOTES)"
+   ],
+   "owedExternal": [
+    "live revocation",
+    "worker-profile dispatch on pods",
+    "R8.2 e",
+    "RUN-ORPHAN-01 in-pod check (@devops, unrun means 'unrun', never pass)"
+   ],
+   "g9WordingRules": [
+    "runner-kill leg is credited for 'zero repeats, settled STALE', not for 'no survivor'",
+    "ADJ-1 c is credited on the observed UNKNOWN_OUTCOME with the AUTHORIZATION_REVOKED label, never as NOT_USED",
+    "the survivor-handling property of the failed launch is proved on doubles plus a source pin, not on a real wedged browser"
+   ],
+   "state": null
+  },
+  {
+   "row": "AC-12 f-j",
+   "halves": "lsof preflight per backend run, RUNNER_PORT fix, dist dependency and digest, host-collision and startup-hang classification",
+   "evidenceFrom": [
+    "C0",
+    "C8",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/i/receipt.md",
+    "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/*/lsof-before-*.txt",
+    "build.gradle.kts verifyRunnerDist and runnerSpawningTestClasses (now lists both new joined classes [V])"
+   ],
+   "owedExternal": [],
+   "state": null
+  }
+ ],
+ "informationalRows": [
+  {
+   "row": "AC-1 PID-1 a-c",
+   "state": null
+  },
+  {
+   "row": "AC-4 Vault rehearsal (A18)",
+   "state": "skipped by name, REHEARSAL_ONLY_NON_CREDITING"
+  },
+  {
+   "row": "AC-11 EDGE a",
+   "state": null
+  },
+  {
+   "row": "AC-11 REL-001 pointer",
+   "ruling": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/qa/pre-g9-review/rel001-pointer-ruling.md",
+   "recordAs": "recurrences 0 by classification; PRE_START_REFUSAL lines N in M incremental full runs; 0 in the test lane; 0 in 42 co-run generations. Do not write '0 lines'.",
+   "state": null
+  },
+  {
+   "row": "AC-12 D4 15 s-edge counts",
+   "recordAs": "0 occurrences if no GUIDED_START_FAILED line has elapsedMs >= 15000 with a bootstrap UNKNOWN_OUTCOME",
+   "state": null
+  },
+  {
+   "row": "AC-12 a-d R10-rev2-2 IPC observation",
+   "recordAs": "denominator = full-lane runs; the performStop-grace SIGKILL of case 7 is the known baseline record (28 of 28), not a recurrence",
+   "state": null
+  },
+  {
+   "row": "AC-9 TF-3",
+   "state": null
+  },
+  {
+   "row": "AC-7 AUTHORED-ECHO-01",
+   "state": "not landed: no o-ae, c9-ae or fe9 receipt folder exists under execution-20261018 [V ls]; gates the first real call, not this trigger"
+  },
+  {
+   "row": "AC-7 FOCUS-MUTATION-01",
+   "state": "FocusMutationJoined 2/2 at F-merge (closes O-FM-W3)"
+  }
+ ],
+ "neverCovered": [
+  "AC-7 (benchmark)",
+  "AC-8 (live probe)",
+  "AC-10",
+  "live halves of AC-4/5/11/12",
+  "deployed-stack proofs",
+  "TF-5 a/c/e"
+ ],
+ "owed": [
+  {
+   "item": "Docker authorization for the image smoke and C4 re-run",
+   "owner": "user (U22)"
+  },
+  {
+   "item": "Gateway price list and thoughts-token billing",
+   "owner": "ED-01 gateway owner (TBD)"
+  },
+  {
+   "item": "Remaining headroom R under the USD 500 wave authorization",
+   "owner": "user (U17/U18)"
+  },
+  {
+   "item": "MODEL-SIZING ruling (per-call ceiling <= 2461 or a v3 limits change; schema max for maxModelOutputTokensTotal is 32000)",
+   "owner": "@architect + @pm"
+  },
+  {
+   "item": "B2, B3 rulings; N-RS1 case or disclosure sentence",
+   "owner": "@po, @architect"
+  },
+  {
+   "item": "Staging application, SSO case, dev Vault secret (D2, E1)",
+   "owner": "user, app owner, Platform/SRE (U3, ED-04, ED-02)"
+  },
+  {
+   "item": "AE-01 landing and U13 acknowledgement",
+   "owner": "@dev, user"
+  },
+  {
+   "item": "RUN-ORPHAN-01 in-pod check",
+   "owner": "@devops"
+  },
+  {
+   "item": "C-17 masked-video human reviewer",
+   "owner": "user"
+  }
+ ],
+ "carriedItems": [
+  {
+   "id": "RUN-ORPHAN-01",
+   "what": "replay child outlives a runner SIGKILL up to the step timeout",
+   "owner": "@dev runner; in-pod check @devops",
+   "source": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w3/pre-g9-rulings.md"
+  },
+  {
+   "id": "SEC-AUDIT-PREREADY-01",
+   "what": "pre-Ready revocation audits UNKNOWN_OUTCOME; joined IT asserts either value (weak)",
+   "owner": "@dev runner",
+   "source": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w3/pre-g9-rulings.md; qa/pre-g9-review/adj1-security-cosign.md"
+  },
+  {
+   "id": "RUNNER-LOG-REFUSAL-01",
+   "what": "GUIDED_START_FAILED also fires for plain pre-start refusals",
+   "owner": "@dev runner; placement @po",
+   "source": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/qa/pre-g9-review/rel001-pointer-ruling.md"
+  },
+  {
+   "id": "LEDGER-REVOKED-WRITE-ONCE (optional)",
+   "what": "no database trigger on studio_dispatch_ledger.revoked_at; write-once by statement discipline",
+   "owner": "@data-engineer",
+   "source": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/qa/pre-g9-review/adj1-security-cosign.md note 2"
+  },
+  {
+   "id": "EP-F1",
+   "what": "dead compile-era files under studio-runner/evaluation",
+   "owner": "root or 011",
+   "source": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/ep/receipt.md"
+  }
+ ],
+ "approvedSkips": {
+  "file": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/qa/approved-skips.json",
+  "entries": 9,
+  "rule": "the observed skipped (task, class, name) multiset equals the file exactly; the 18 AC-6 deferrals are not on it and must be PASS",
+  "newThisWave": [
+   "VaultPolicyIT rehearsal (A18)",
+   "GuidedSchemaProbeIT approvedGatewayProbeAcceptsEveryGuidedProjectionSchema (AC-8 external half)"
+  ]
+ },
+ "countReconciliation": {
+  "rule": "after = baseline - named drops - named deletions + named ports + named additions; the 18 move from skipped to passed; skipped is not passed",
+  "baseline": "the last credited full-check receipt before 009 W0 (expected: 008's final check); fallback 015 attempt04: test 2412 total / 2387 passed / 25 skipped, guidedIncrementalTest 62, crossReplicaTest 2 [V per t0-qa-20261017.md]. Fill from the receipt actually used.",
+  "afterFrom": "C8 collector results",
+  "state": null
+ },
+ "validity": "bound to the frozen digests above. A later edit to a file owned by a VALIDATED row voids that row. 011's own edits do not void a trigger already given. A delta addendum re-validates rows changed since (for example by AE-01 landing, the C4 re-run, or an external-proof fix). Before any 009 Done review, the addendum must be current.",
+ "firstLinesOfTheFinalMd": [
+  "This record is not a verdict and not a gate decision.",
+  "isVerdict: false. storyStatusChange: none. doneClaimed: false.",
+  "The 009 QA Results section is untouched unless @qa appends a non-verdict pointer line."
+ ]
+}

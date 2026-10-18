@@ -1,0 +1,544 @@
+{
+  "lane": "B14",
+  "story": "STUDIO-OBS-014",
+  "agent": "Dex (@dev)",
+  "date": "2026-10-13",
+  "status": "S3 B14 UNIT APPLIED (root GO after C2b). Compile green. Requested S3 classes green. Root may tell B13 to wire installEvidence. Guided end-to-end ITs not run by B14 (root's S3 window after dist rebuild). T2 next, after the S3 window.",
+  "storyStatus": "InProgress (Change Log 0.1.4 start, 0.1.6 B14 checkpoint)",
+  "t1a": {
+    "readyForC2a": true,
+    "compile": "AGENT_NAME=b14 gradle-locked.sh compileJava compileTestJava -q -> exit 0 (2026-10-13, after the AdmissionCasIT ambiguity fix; root's red-compile message predates this run)",
+    "mainChanges": {
+      "StudioInternalController": "claimAdmission (POST /{id}/admission) deleted with its two imports; bodyReader stays (used by /progress)",
+      "AdmissionCasService": "public claim() deleted; unused Clock field and package-private Clock ctor deleted (only claim() used them); claimAt/refusal/validate/requireRow/instant kept (live under claimObserved); cancel-close Javadoc moved to claimAt",
+      "internal/dto/AdmissionRequest, AdmissionResponse": "kept as internal value types of the CAS; Javadoc now 'Internal value type of the admission CAS; no wire contract'; @JsonIgnoreProperties removed (no wire read)",
+      "StrictInternalBodyReader": "Javadoc only ('two internal routes' -> 'internal progress route')",
+      "IdempotencyFilter": "deleted ONLY the /api/v2/studio/** COVERED_PATHS line; other matchers and EXCLUDED_PATHS byte-identical",
+      "StudioController.executeTest": "absent (or blank) Idempotency-Key -> throw StudioValidationException(\"IDEMPOTENCY_KEY_REQUIRED\", \"Idempotency-Key header is required\") before studioService.executeTest; header stays required=false; ChecksExceptionHandler untouched",
+      "GuidedTranslationService (clarification builder)": "choices[] now carry labelSource: source-phase secretRef or 'Saved input choice N' -> SAVED_INPUT; source-phase sourceSpan 'Use authored text: ...' -> AUTHORED; every observed-phase choice -> PAGE plus role (node.role, string) and region (node.regionId, string or null). AUTHORED/SAVED_INPUT choices carry NO role/region keys."
+    },
+    "contractShapeEmittedForCLane": {
+      "labelSource": "enum AUTHORED | SAVED_INPUT | PAGE, required on every choice",
+      "role": "string, present iff PAGE (node.role from the sanitized observation)",
+      "region": "string | null, present iff PAGE (node.regionId; null when the node has no region)",
+      "note": "C lane: please make the schema match exactly this shape (region nullable). Until C2a lands, contracts.validate(\"v3/clarification\") REFUSES these choices (additionalProperties:false), so every guided path that raises a clarification is red. This is the coupled C2a unit; do not run clarification ITs in between."
+    },
+    "testsChanged": {
+      "AdmissionCasIT": "16 -> 15. Dropped by name: legacyAdmissionCannotUseObservedPreReadyFailure (covering: StudioAuthorizationIT.theLegacyAdmissionRouteIsGoneAndWritesNothing). Renamed: anUnknownExecutionIsA409AndNeverA404 -> anUnknownExecutionIsRefusedAndNeverA404 (oracle 403 FORBIDDEN_SCOPE). All others re-pointed to prepareAdmission+claimObserved, same names. Oracles changed per S-7 (to be confirmed by run): aSupersededAttemptIsRefused -> GuidedSessionException FORBIDDEN_SCOPE 403, ledger unchanged; aSettledExecutionIsRefused -> GuidedSessionException CANCELLED 409 (check() treats state DONE as cancelled; ruling allowed 'record the actual'); aRowPastItsPendingDeadline -> ADMISSION_EXPIRED (back-dated via clock_timestamp in SQL). twoAdmissionsInterleaved uses SecondApplicationContext.observed and permits prepared outside the tx. observedSqlCannotBorrow setup -> direct statements.admit in TransactionTemplate. Unused ProgressReportService field removed.",
+      "StudioAuthorizationIT": "29 -> 30. Re-pointed /admission -> /observed-admission: bothCallbacksAreUnreachableWithoutServiceIdentity, aBlankMalformedOrWrongCredentialIsRefusedBeforeAnyHandlerWork, theRejectionBodyCarriesACodeAndNoExecutionDetail, theCredentialIsNotAcceptedFromAurlOrAQueryParameter, aValidServiceIdentityReachesTheHandler (v3 body, random attemptId; status in {403,409} AND body.code=FORBIDDEN_SCOPE, no 'error' key). Renamed aFieldTheClosedSchemaDoesNotNameIsA400 -> aFieldTheClosedSchemaDoesNotNameIsRefused (422 INVALID_CONTRACT). admit() helper -> POST /observed-admission with ObservedPublicationFixture.observedAdmissionRequest; dispatch() helper -> binding attempt. NEW theLegacyAdmissionRouteIsGoneAndWritesNothing (404|405; ledger state/attempt/admission/runner_instance_id/last_runner_sequence + execution status/receipt byte-identical; count(studio_secret_use_audit) unchanged). AC-9 consequence: all 8 unkeyed execute posts now go through a new execute(test, headers) helper with a fresh UUID key, so the asserted 403/409/429/202 stay the route's own decisions.",
+      "ObservedAdmissionSecurityIT (NOT in AR-3 list, hidden dependent found by compile)": "2 tests exercised the deleted /admission route and spied claim(). Re-pointed to /progress, the surviving StrictInternalBodyReader consumer, and renamed: ordinaryLegacyAdmissionRetainsRealTokenAndStrictReaderBoundary -> ordinaryProgressCallbackRetainsRealTokenAndStrictReaderBoundary (401 without token; with token reader.read(RunnerReport) and progress.apply reached, 200 from the mock); legacyStrictParserMustNotQuotePrivateMalformedIdentityValues -> strictParserMustNotQuotePrivateMalformedIdentityValues (400 INVALID_REPORT, no private value quoted, progress.apply never). Count unchanged. [AUTO-DECISION] re-point vs drop -> re-point (reason: the property is the strict reader's, which survives). Flag for @qa/@architect.",
+      "CancelIT": "admit() -> admitObserved. aCancelBetweenTheSendAndTheAdmissionIsRefusedAdmissionAndEndsCancelled: oracle EXECUTION_SETTLED -> GuidedSessionException CANCELLED 409 with zero writes (ledger stays DISPATCHING); the execution then ends ERROR/CANCELLED via RunningReaper.findUnfinishedCancels (DISPATCHING included) after back-dating the cancel past the margin. To be confirmed by run.",
+      "RecoveryIT, sse/SseStreamingIT, sse/SseCrossReplicaIT, internal/EvidencePartialCallbackIT, StudioOverloadIT": "setup re-pointed to ObservedPublicationFixture.admitObserved; dispatch attempt = binding attempt",
+      "ObservedPublicationFixture": "extracted public observedAdmissionRequest(binding, runner, admissionId) and bindingAttempt(observed, executionId); admitObserved uses it (behaviour unchanged)",
+      "config/StudioV2IdempotencyFilterTest -> config/StudioExecuteIdempotencyFilterTest": "rm'd old (1 method x 2 invocations); new 2 methods x 1: retriedExecuteReplaysResponseWithoutASecondMutation (POST /api/v1/studio/tests/{id}/execute, 1 mutation, replay header), theRemovedV2PrefixIsNoLongerCovered (shouldNotFilter true, chain runs twice)",
+      "StudioApiIT": "execute now sends a key; aRetriedExecuteWithTheSameKey... adds identical body + Idempotent-Replayed header; NEW anExecuteWithoutAnIdempotencyKeyIsRefusedBeforeAnyWrite (400 IDEMPOTENCY_KEY_REQUIRED, zero execution and ledger rows, keyed control 202). D-2b stays OPEN for @qa.",
+      "secrets/StudioSecretsControllerIT": "execute() helper sends a key (AC-9 consequence)",
+      "GuidedPlanningIntegrationTest": "labelSource assertions: observed choices PAGE+role+region; 'Use authored text: London' AUTHORED without role/region",
+      "GuidedPublicationEvidenceTest, GuidedBridgeIntegrationTest": "hand-built server questions gain labelSource PAGE + role + region:null (they are validated against v3/clarification; red until C2a, green after)"
+    },
+    "deadMatcherGrep": {
+      "command": "grep -rn \"api/v2/studio\" backend/src",
+      "output": "3 hits, all in backend/src/test/java/com/citi/put/checks/config/StudioExecuteIdempotencyFilterTest.java (:25, :27 Javadoc; :78 the request path of theRemovedV2PrefixIsNoLongerCovered). Zero hits in backend/src/main.",
+      "conflict": "The PO oracle (zero hits in backend/src) and AR-3c's required negative test (POST /api/v2/studio/tests) contradict each other. Not hidden by string tricks. For @po/@architect: either the oracle scope is backend/src/main, or the negative test is dropped."
+    },
+    "notYetRun": "superseded by runs below",
+    "openForC2aAndS2": [
+      "StudioContractTest is RED until C2a (openapi still declares claimAdmission; parity rows AdmissionRequest/AdmissionResponse still compile because the records are kept).",
+      "SAVED_INPUT labelSource has no direct test (no IT raises a saved-input source clarification); AUTHORED and PAGE are asserted in GuidedPlanningIntegrationTest."
+    ],
+    "runs": [
+      {
+        "when": "2026-10-13, after compile green",
+        "command": "AGENT_NAME=b14 gradle-locked.sh test -I <scratch>/copy.init.gradle.kts --tests StudioExecuteIdempotencyFilterTest --tests ObservedAdmissionSecurityIT --tests AdmissionCasIT --tests StudioApiIT --tests StudioAuthorizationIT --tests CancelIT",
+        "result": "BUILD SUCCESSFUL 1m24s",
+        "perClass": {
+          "StudioExecuteIdempotencyFilterTest": "2/0 fail",
+          "CancelIT": "16/0",
+          "StudioApiIT": "8/0",
+          "StudioAuthorizationIT": "28/0",
+          "ObservedAdmissionSecurityIT": "100/0 (parameterized invocations)",
+          "AdmissionCasIT": "14/0"
+        },
+        "s7OraclesConfirmed": "aSupersededAttemptIsRefused FORBIDDEN_SCOPE 403; aSettledExecutionIsRefused CANCELLED 409; anUnknownExecutionIsRefusedAndNeverA404 FORBIDDEN_SCOPE 403; CancelIT cancel-before-admission CANCELLED 409 then reaper ERROR/CANCELLED; theLegacyAdmissionRouteIsGoneAndWritesNothing green (404|405)",
+        "countNote": "AR-3 '29->30' and '16->15' are raw grep -c '@Test' counts, which also match @TestConfiguration/@Testcontainers. Executed test methods (XML, name-matched to source): StudioAuthorizationIT 27 -> 28 (+1 new), AdmissionCasIT 15 -> 14 (-1 dropped). Same deltas as ruled."
+      },
+      {
+        "command": "run.sh t1a-2: RecoveryIT, SseStreamingIT, SseCrossReplicaIT, EvidencePartialCallbackIT, StudioOverloadIT, StudioSecretsControllerIT",
+        "result": "BUILD FAILED: RecoveryIT.theDispatchCounterCanReachTwoAndTheReconciledLedgerStateIsWhatStopsIt expected 2 but was 1; SseCrossReplicaIT not run (excluded from `test`, runs in crossReplicaTest); others green: StudioOverloadIT 2/0, EvidencePartialCallbackIT 16/0, StudioSecretsControllerIT 12/0, SseStreamingIT 13/0, RecoveryIT 24/25"
+      },
+      {
+        "command": "gradle-locked.sh test --tests RecoveryIT crossReplicaTest",
+        "result": "BUILD SUCCESSFUL 1m21s; RecoveryIT 25/0; SseCrossReplicaIT 2/0",
+        "fixApplied": "RecoveryIT.theDispatchCounterCanReachTwo...: cause = the observed admission writes the immutable ui_test_executions.observed_admission_receipt, and lockObservedResolutionOwner requires it NULL, so the test's mutation control (reset the ledger row, counter must reach 2) can no longer fire; the V15 trigger forbids clearing the receipt. [AUTO-DECISION] admit THIS test at the statement level (StudioDispatchLedgerStatements.admit in a TransactionTemplate), which is exactly what the deleted legacy claim() did, following the AR-3 b precedent for AdmissionCasIT.observedSqlCannotBorrow...; assertions unchanged. Flag for @qa/@architect (S-7 class, not in AR-3's oracle list)."
+      }
+    ],
+    "pendingAtS2": [
+      "StudioContractTest (red until C2a)",
+      "GuidedPlanningIntegrationTest labelSource + GuidedBridgeIntegrationTest + GuidedPublicationEvidenceTest (red until C2a clarification schema)"
+    ]
+  },
+  "b13HunkApplied": {
+    "patch": "docs/qa/evidence/STUDIO-OBS-013/b13/queued-B14-GuidedSessionService.patch",
+    "baseSha256Verified": "b19449b90c0769d8f3cd1c7ab53c18194dddde32a518be19ae19bbf4ae0b590a (matched before apply)",
+    "how": "git apply --check then git apply (working tree only, nothing staged)",
+    "effect": "installEvidence(GuidedEvidenceProjection) added; result() literals actionTimings/evidence.video replaced by evidence.project(id,state).writeTo(out,id). Default NONE = today's literals. Note: key order in result() JSON moves actionTimings after publication (writeTo); canonical hashes unaffected if canonicalized, flag if any toString comparison breaks.",
+    "compile": "compileJava compileTestJava exit 0",
+    "nextForB13": "B13 may now wire guided.installEvidence(projection) in GuidedEvidenceConfiguration (method exists)."
+  },
+  "ar2R14Ruling1_canonical": {
+    "status": "LANDED (byte-neutral; ahead of C2b as the ruling allows)",
+    "main": "GuidedContracts.quote: Jackson writeValueAsString replaced by a hand-written normative escaper (quote, backslash, \\b \\t \\n \\f \\r, other C0 as \\u00 + lowercase hex, nothing else escaped); surrogate checks kept",
+    "testOracle": "GuidedPlanBuilderTest.canonical: keys and text values now use an independent codePoint-based escaper (String.format %04x), no longer Jackson TextNode.toString",
+    "newTests": [
+      "GuidedContractsCanonicalTest (new, pure unit): the 9 divergent code points lowercase; all 32 C0 forms; quote/backslash escaped and '/', U+007F, U+2028/2029, U+FEFF, non-ASCII raw; keys same escaping; lone surrogates INVALID_CONTRACT; VF-4 vector hashes to 461d598c...c119 (the Node/PostgreSQL digest; the old Jackson form was 97d40732... per the ruling, not re-run here)",
+      "GuidedPublicationMigrationTest.postgresReproducesEveryPositiveCanonicalVector (new): every positive vector through studio_publication_canonical/studio_publication_hash"
+    ],
+    "run": "gradle-locked.sh test (b14 run.sh canon): BUILD SUCCESSFUL 1m39s; GuidedContractsCanonicalTest 13/0, GuidedPlanBuilderTest 103/0, ObservedArtifactLowererTest 36/0, GuidedWireContractTest 7/0, GuidedPublicationMigrationTest 12/0",
+    "pendingC2b": "C-int adds 'c0-controls' vector and observationPolicyHashVectors; ObservedArtifactLowererTest and the new PG loop then cover them with no further edit."
+  },
+  "ar2R14Ruling2_contextRefusal": {
+    "status": "NOT STARTED; lands at S3 with C2b (needs bridge#/definitions/refusal)"
+  },
+  "stagedForS3": [
+    {
+      "patch": "docs/qa/evidence/STUDIO-OBS-014/b14/s3-b14-unit.patch",
+      "sha256": "a09606f79e3ccb42080ed963572696ed6353083b09fb513a3a9b4ec6a0770248",
+      "files": 24,
+      "supersedes": "s3-object-store-dir.patch (its three hunks are folded in; do NOT apply both)",
+      "applyCheck": "git apply --check OK against the working tree at 2026-10-13 ~20:30",
+      "how": "git apply docs/qa/evidence/STUDIO-OBS-014/b14/s3-b14-unit.patch (working tree only, nothing staged); then compileJava compileTestJava",
+      "content": {
+        "main": [
+          "GuidedSessionService.start: c2b order steps 3-8 (activeForStart -> POLICY_NOT_APPROVED ABSENT/UNAPPROVED/PENDING_VERSION or RUNTIME_INCOMPATIBLE; scope.approvedOrigins := governed allowedOrigins; GuidedCsiBudget.admitStart; freeze after insert); installGovernance(...) fail-closed",
+          "GuidedSessionService.modelReservationFitsLocked: per-CSI daily charge at the call's ceilings in the reservation transaction; zero-row verdict -> FAILED BUDGET_EXCEEDED",
+          "GuidedCsiBudget + GuidedCsiBudgetProperties (new): guard-row lock, live count under lock, Retry-After from SQL (min expires_at / next UTC midnight), requireFits start-up invariant",
+          "GuidedSessionConfiguration: budget bean + governance install",
+          "GuidedTranslationStore.recordLateUsage: unconditional per-CSI excess above the attempt ceiling",
+          "GuidedMaterializationService.assembleContext: applicationPolicy + policyHash from studio_guided_session_policies JOIN versions, hash recomputed defensively",
+          "GuidedRunnerClient: context 409 body read (4 KiB cap), validated against v3/bridge#/definitions/refusal; IDENTITY_MISMATCH|SCHEMA -> RUNTIME_INCOMPATIBLE messageCode RUNNER_CONTEXT_REFUSED retryable:false; WARN log {sessionId, contextHash, runnerCode} only; everything else UNKNOWN_OUTCOME",
+          "GuidedTranslationService bootstrap: definite refusal -> delivery marked REFUSED + failTranslation(RUNTIME_INCOMPATIBLE) in the same continuation; 3-delivery bound unchanged for uncertain outcomes",
+          "GuidedDispatchService.prepareAndAdmit: definite refusal -> failTranslation(RUNTIME_INCOMPATIBLE) before prepare",
+          "ObservationPolicyController (new): 5 routes, bodies validated against v3/guided-policy (422 mapped to 400 INVALID_POLICY), policyView validated on the way out, 404 GUIDED_POLICY_NOT_FOUND handler local",
+          "RateLimitClassifier: POST .../studio/guided-sessions$ -> EXECUTE"
+        ],
+        "tests": [
+          "RateLimitClassifierTest +1 (positive + GET + POST cancel negatives)",
+          "GuidedCsiBudgetIT (new, 4; two replicas via SecondApplicationContext.observed(ds, extraArgs))",
+          "GuidedRunnerContextRefusalTest (new, 3)",
+          "ObservationPolicyIT +2 (start freeze + narrowed origins; pending edit refuses start with nothing written)",
+          "ObservedPublicationFixture: ensurePolicy (create or append+approve), seedPolicy, installGovernance(hand-built services, concurrency 1000 documented), guidedDraft/guidedStart",
+          "SecondApplicationContext: observed(ds, String... extra) overload (additive)",
+          "Hand-built services governed: GuidedSessionIT, GuidedServiceTransportFaultIT (2 sites), GuidedDefaultModelReservationIT, GuidedPlanningIntegrationTest, GuidedBridgeIntegrationTest",
+          "ar-mounted-rules B14: Bridge IT rules + applicationPolicy blocks deleted, 3 recipes order-policy -> business-read, default /start source in <main aria-label='Operations'><output ...>, uniform governedPolicy(); Planning IT rules block + mounted applicationPolicy deleted, same per-test policy via ensurePolicy (kept :328 TrustedPolicy); ReplayIT mounted rules + applicationPolicy deleted, governed = trusted applicationPolicy for CSI-123/CSI-456 x fixture/fixture-other (kept :703)",
+          "ObservedProfileDriftTest: ensurePolicy for PROFILE-CSI/profile-app/Development",
+          "STUDIO_RUNNER_OBJECT_STORE_DIR in the three worker-spawning ITs"
+        ]
+      },
+      "scratchVerification": {
+        "kind": "PRE-CHECK in a scratch copy of the tree under the shared gradle lock; not S3 proof",
+        "compile": "compileJava compileTestJava exit 0",
+        "runs": {
+          "GuidedCsiBudgetIT": "4/0",
+          "ObservationPolicyIT": "10/0",
+          "ObservationPolicyDocumentsTest": "7/0",
+          "RateLimitClassifierTest": "5/0",
+          "GuidedRunnerContextRefusalTest": "3/0 ONLY with the c2b-spec bridgeRefusal definition simulated in the scratch docs copy (C-lane file not touched in the real tree)"
+        }
+      },
+      "notYetRunAwaitingC2b": [
+        "Every guided joined IT (Bridge, Planning, ReplayIT x2, SessionIT, TransportFault, DefaultModelReservation, ProfileDrift, StudioDispatcherFailureIT, GuidedSessionVideoIT): the materialized context now carries applicationPolicy/policyHash, which today's runner-context schema refuses until C2b",
+        "ObservationPolicyIT AR-2 g (approve v2 -> replay of a v1 revision binds the same currentPolicyHash) and the runner-accepts-only-v2 oracle",
+        "ObservationPolicyController route tests (needs guided-policy.schema.json and the openapi rows; StudioContractTest is C-lane)",
+        "bootstrap / prepareAndAdmit definite-refusal ITs (ruling 2 tests list) and the timeout negative control",
+        "S3 stop rule: any guided case that fails only because S3 exports more nodes is reported by name as a stop (ar-mounted-rules)"
+      ],
+      "risks": [
+        "Full-context ITs run with the production per-CSI concurrency default (3). A class that leaves >=3 live sessions on one CSI will see 429 CSI_CONCURRENT_SESSIONS_EXHAUSTED; report by name at S3, do not raise the limit silently",
+        "failTranslation requires translation state; production sessions always have it. If a bridge-only IT session lacks it, the refusal path rethrows RUNTIME_INCOMPATIBLE without ending the session -> record at S3 (ruling 2 STOP condition if it reproduces in production shape)",
+        "recordLateUsage excess uses two clock_timestamp() reads (insert/update); a call straddling UTC midnight could miss the excess charge (rounding to the earlier day). Accepted, documented."
+      ]
+    }
+  ],
+  "t3_ac3_pruner": {
+    "status": "LANDED in tree (additive; behaviour-neutral for existing tests: no test session is 30 days past expiry)",
+    "files": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/retention/GuidedRetentionProperties.java (new)",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/retention/GuidedObservationPruner.java (new)",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/retention/GuidedRetentionConfiguration.java (new)",
+      "backend/src/main/resources/application.yml (retention, csi-budget, policy keys)",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/retention/GuidedObservationPrunerIT.java (new)",
+      "backend/src/test/java/com/citi/put/checks/studio/support/ObservedPublicationFixture.java (publish() split into private learn(); new public learnWithoutPublishing(testId))"
+    ],
+    "design": "Thin pruner per AR-2 b: candidate SELECT ... FOR UPDATE SKIP LOCKED in one short tx, then studio_guided_prune_session(id, window) per session in its own tx; failure logs sessionId + SQLState only. Window validated >= PT24H at start-up (record compact ctor).",
+    "autoDecisions": [
+      "[AUTO-DECISION] @Scheduled also sets initialDelay = pruner-delay-ms (AR named fixedDelay only) -> no pass at every context start-up (reason: test contexts and restarts; the first production pass runs one delay after start)."
+    ],
+    "run": "run.sh prune3: GuidedObservationPrunerIT 3/3 green (19s). Earlier runs red on seeding only (fixture session lacked public-view fields; translation scope not approved in the context) -> fixed in the IT seeding, no product change.",
+    "oraclesCovered": [
+      "never-published FAILED LOGIN_REQUIRED: session-service result() and projector output byte-identical before/after; progress keys subset of the 7 retained; base row unchanged; copy tables 0 rows; second prune false",
+      "published: all six publication tables byte-identical (to_jsonb row sets); projector result identical; ObservedRevisionVerifier.verify(revision) passes before and after",
+      "inside window (1h old) not pruned; FINALIZING (31 days old) not pruned"
+    ],
+    "notCoveredHere": [
+      "safe_result -> NULL on terminal attempts and the FK-ordered delete of never-published copies with real rows: proven at SQL level by D-lane GuidedGovernanceMigrationIT (pruneRemovesEveryUnlistedKey..., pruneDeletesNeverPublishedCopiesAndKeepsBasesAndAttempts); this IT's copy-table check is trivially 0 because the synthetic session has no copies (disclosed)"
+    ],
+    "testOnlyConfig": "IT sets studio.guided-authoring.reaper-delay-ms=3600000 (keeps the reaper from racing the FINALIZING case) and approves the fixture application/environments for guided translation reads. No TTL/deadline relaxed.",
+    "s4": {
+      "finding": "finishAttempt and recordLateUsage (GuidedTranslationStore) are reachable for a pruned session in code (nothing gates them on pruned_at); in practice a pruned session is >= 30 days past expiry and model calls are bounded at 600 s. Without a guard a late CALLING settlement would hit the V19 trigger as a raw DataAccessException and a replayed settlement would see IDEMPOTENCY_CONFLICT (safe_result now NULL).",
+      "fix": "private requireNotPruned(sessionId) precheck (one SELECT pruned_at) at the top of both methods -> GuidedSessionException EXPIRED 409 (existing v3 code). Only a precheck; no other change, so S-4 does not STOP.",
+      "test": "GuidedObservationPrunerIT.aNeverPublishedFailedSessionIsPrunedAndItsResultIsUnchanged asserts both refuse EXPIRED after prune (run.sh prune4: 3/3 green, 27s)"
+    }
+  },
+  "c2aFollowUps": {
+    "status": "ALL THREE IN (2026-10-13). Ready for the combined S1+S2 window.",
+    "1_replayValidationEpoch": "GuidedContracts REPLAY_VALIDATION_SCHEMA_EPOCH 2a55e780...c519 -> 6ed940df7b77a0524bae9bb4e56550a82a16bc9f44f175f649b579a9ba4fb32d (value from c2a-contract/ledger.json). GuidedWireContractTest 7/7 green after (run.sh c2a2).",
+    "2_lowererArtifactHash": "ObservedArtifactLowererTest:685 0ec194f5...34961 -> 8623b2ad1f7d95cb7f50a6a4cf48bfbea6ba88d7ac4c4825d038debde0ba9242.",
+    "3_sessionItDocuments": "backend/src/test/resources/studio/guided/session-it-documents.json clarification choice: + labelSource PAGE, role textbox, region null (+ _comment note). GuidedSessionIT 43/43 green (run.sh c2a1).",
+    "otherRunsAfterC2a": "run.sh c2a1: StudioContractTest 13/0, StudioApiIT 8/0, GuidedPublicationEvidenceTest 5/0, GuidedTranslationTest 37/0, GuidedSessionIT 43/0.",
+    "rootActionNeeded_distStale": "ObservedArtifactLowererTest 36 tests / 15 FAILED in run.sh c2a2. All 15 are the compiled Node half (compiledNode / bothIndependentValidatorsRejectTheSameCoherentProofMutation, compiledNodeIndependentlyValidatesChoiceAgainstCurrentPackagedBuild). studio-runner/dist/validator/observedSchemas.json (18:47) differs from the regenerated src/validator/observedSchemas.json (19:52, C2a regen). RK-14: ROOT rebuilds dist, then re-run ObservedArtifactLowererTest. Not a B14 code issue; the Java half (21 tests) and GuidedPlanBuilderTest 103/0 are green."
+  },
+  "t3_ac10_audit": {
+    "status": "Emitter + logback + two emission points LANDED; GUIDED_ACTION_REFUSED emission waits for T2 (validator reasons); GuidedActionAuditCanaryIT (OBS-007 end-to-end with canaries) NOT written yet (needs the S3 guided run)",
+    "files": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/audit/StudioActionAudit.java (new)",
+      "backend/src/main/resources/logback-spring.xml (AUDIT_JSON appender + com.citi.put.checks.audit.studio logger, INFO, additivity=false)",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java (admit lambda: guidedActionAdmitted, emitted afterCommit)",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java (dispatchObserved: replayDispatched after runnerClient.send, ACCEPTED->DISPATCHED, DEFINITE_REFUSAL->DISPATCH_REFUSED, AMBIGUOUS->DISPATCH_UNKNOWN)",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/audit/StudioActionAuditTest.java (new)"
+    ],
+    "shape": "16 closed keys (StudioActionAudit.KEYS), all kv StructuredArguments, message = eventType. Unknown role -> none; page target -> page; unverified origin -> UNAPPROVED; label only as first 32 hex of sha256(scopeHash:label).",
+    "autoDecisions": [
+      "[AUTO-DECISION] Replay dispatch fields: obligationKind 'replayRun', targetRole 'none', origin/targetLabelHash null (a replay dispatch is a whole run, not one action; the closed key set is kept with nulls)."
+    ],
+    "runs": "run.sh audit1: StudioActionAuditTest 4/0. run.sh audit2: DispatcherIT 26/0, StudioDispatcherAuthorizationRecheckTest 4/0 (GuidedSessionIT 5 red there were the pre-fix C2a fixture, green in c2a1 after the session-it-documents.json fix)."
+  },
+  "t1b_policyCore": {
+    "files": [
+      "guided/policy/{GuidedPolicyProperties,ObservationPolicyDocuments,ObservationPolicyRepository,ObservationPolicyService,GuidedPolicyNotFoundException,GuidedPolicyConfiguration}.java (new)",
+      "guided/session/GuidedSessionException.java (messageCode, retryable, retryAfterSeconds; old 2-arg ctor byte-identical response)",
+      "guided/session/GuidedSessionController.java (Retry-After header when the exception carries one)",
+      "test: guided/policy/ObservationPolicyDocumentsTest (7), guided/policy/ObservationPolicyIT (8), support/ObservedPublicationFixture.seedApprovedPolicies/seedPolicies (RK-2 helper; not yet called by guided ITs: that switch is in the S3 patch)"
+    ],
+    "conformsTo": "c2b-spec.json guidedPolicySchema (stored policyDocument normalization, semantic INVALID_POLICY refusals), publicRoutes order/codes (GUIDED_POLICY_EXISTS, GUIDED_POLICY_NOT_FOUND after authz, approver-first approval order, approver may read), startGuidedSession step 3-4 (POLICY_NOT_APPROVED messageCodes ABSENT/UNAPPROVED/PENDING_VERSION; explicit trusted-origin subset check -> RUNTIME_INCOMPATIBLE without calling pins.policy with the narrowed origins)",
+    "run": "run.sh pol3: ObservationPolicyDocumentsTest 7/0, ObservationPolicyIT 8/0 (inserts pass the V19 document CHECK and both PG hash CHECKs, i.e. Java lowercase canonical hashes == studio_publication_hash), GuidedHttpSecurityIT 6/0 (exception handler change)",
+    "s8": "NOT triggered: approver membership = UserIdentity.roles() (Core-propagated, already used by CsiOwnershipEvaluator.isAdmin) intersected with studio.guided-authoring.policy.approver-groups (default empty = fail closed).",
+    "pendingForS3": [
+      "GuidedPolicyController (5 routes) + body validation against v3/guided-policy once C-int lands it",
+      "GuidedSessionService.start order 1-8 (freeze, approvedOrigins := governed, per-CSI budget)",
+      "runner context applicationPolicy + policyHash",
+      "GuidedRunnerClient definite refusal + bootstrap/prepareAndAdmit terminal path",
+      "guided ITs: seed policies, drop mounted applicationPolicy (RK-2), ar-mounted-rules edits, STUDIO_RUNNER_OBJECT_STORE_DIR patch",
+      "RateLimitClassifier start=EXECUTE"
+    ]
+  },
+  "t4_docs": {
+    "files": [
+      "docs/specs/studio-observed-authoring/guided-data-flow.md (new; AC-2 incl. X6 four-table disclosure, PO AC-2 clarification R-1/R-2 wording; staged/pending controls marked as such)",
+      "docs/specs/studio-observed-authoring/artifact-hmac-design-note.md (new; AC-11 design note; key custody Vault Transit vs platform KMS left OPEN for @architect, neither verified available)"
+    ],
+    "note": "Neither document marks the external OBS-010 approval obtained."
+  },
+  "openItems": [
+    "T2 not started: semantic grounding (AC-4), destructive-verb guard (AC-5), side-effect stance + SIDE_EFFECT_CONFIRMATION/CONFIRM_ACTION emitter (AC-6), GuidedPolicyReason, stopRejected terminal mapping, GUIDED_ACTION_REFUSED audit emission. Needs the frozen policy (post-S3) and calibration against the OBS-005/006 fixture corpus (AC-4 'no regression, counted'); S-6/S-9 stop conditions apply.",
+    "GuidedActionAuditCanaryIT (OBS-007 end-to-end with canaries) not written; needs the S3 guided run.",
+    "S3: apply s3-b14-unit.patch with C2b + R14 s3-cutover.patch + R13 hunk; then the S3 Gradle window (guided joined ITs, ObservationPolicyIT AR-2 g replay oracle, route tests, refusal ITs). Report by name any case failing only from the larger S3 export (ar-mounted-rules stop).",
+    "ROOT: rebuild studio-runner/dist (C2a regen) and re-run ObservedArtifactLowererTest (15 Node-half cases red on stale dist).",
+    "ROOT/B13: B13 can now wire guided.installEvidence(projection) in GuidedEvidenceConfiguration.",
+    "@po/@architect: the dead-matcher grep oracle vs AR-3 c negative test conflict (3 test-only hits).",
+    "@qa/@architect review flags: ObservedAdmissionSecurityIT 2 cases re-pointed to /progress; RecoveryIT counter case uses statement-level admission; S-7 oracle changes recorded in t1a.testsChanged.",
+    "SAVED_INPUT labelSource has no direct test.",
+    "D-2b (cached 2xx replay without re-authorization) stays OPEN for @qa (security)."
+  ],
+  "nothingStaged": "git diff --cached --stat empty at end of session; deletions via rm (StudioV2IdempotencyFilterTest.java)",
+  "arAc11AndRefusalCodes": {
+    "ruling": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/ar-ac11-and-refusal-codes.json",
+    "ac11": "artifact-hmac-design-note.md amended: custody 'Decided 2026-10-13 by @architect: Vault Transit' (option B rejected, fallback only); \u00a74.1 binding shape (ArtifactIntegrityKeys seam, studio.artifact-integrity.* config, Transit hmac/verify calls); \u00a74.2 per-environment behaviour (test fake key service; local provider=none with NULL tag, allow-unsigned-replay local/test only, WARN {revisionId, reason=UNSIGNED}, readiness NOT_CONFIGURED; deployed without key service -> app starts, every replay refused EVIDENCE_MISMATCH; Transit outage -> 503 VAULT_UNAVAILABLE); 'VAULT_UNAVAILABLE-style' replaced by 'VAULT_UNAVAILABLE (503, existing)'; \u00a75 backend min-key-version floor as authoritative retirement + emergency path; \u00a78 E1-E8 table, all UNCONFIRMED, owner Platform/SRE (E4 shared with ED-02 owner); entry/exit gates. Header status stays 'Design note only. Not implemented in this wave.' No AC-11 code, migration, contract or test.",
+    "r1": "AdmissionCasService.claimAt Javadoc corrected (comment only): refusal()'s cancel-close and DONE->EXECUTION_SETTLED branches are defence in depth, not reached through claimObserved because ObservedReplayAuthorization.check refuses cancelled/settled rows 409 CANCELLED under the same FOR UPDATE lock; RunningReaper settles the never-admitted cancelled run. Branches not deleted. compileJava exit 0 (gradle-locked.sh, after root's window).",
+    "refusalCodesRatified_forQA": [
+      {
+        "id": "2.1",
+        "test": "AdmissionCasIT.aSupersededAttemptIsRefused (name unchanged)",
+        "old": "409 ATTEMPT_SUPERSEDED (legacy CAS)",
+        "new": "403 FORBIDDEN_SCOPE (observed prepareAdmission), ledger unchanged"
+      },
+      {
+        "id": "2.2",
+        "test": "AdmissionCasIT.aSettledExecutionIsRefused (name unchanged)",
+        "old": "409 EXECUTION_SETTLED",
+        "new": "409 CANCELLED, zero writes"
+      },
+      {
+        "id": "2.3",
+        "test": "CancelIT.aCancelBetweenTheSendAndTheAdmissionIsRefusedAdmissionAndEndsCancelled (name unchanged)",
+        "old": "EXECUTION_SETTLED with immediate ERROR/CANCELLED close",
+        "new": "409 CANCELLED, zero writes; RunningReaper.findUnfinishedCancels then ends ERROR/CANCELLED"
+      },
+      {
+        "id": "2.4",
+        "renames": [
+          {
+            "old": "ObservedAdmissionSecurityIT.ordinaryLegacyAdmissionRetainsRealTokenAndStrictReaderBoundary",
+            "new": "ObservedAdmissionSecurityIT.ordinaryProgressCallbackRetainsRealTokenAndStrictReaderBoundary"
+          },
+          {
+            "old": "ObservedAdmissionSecurityIT.legacyStrictParserMustNotQuotePrivateMalformedIdentityValues",
+            "new": "ObservedAdmissionSecurityIT.strictParserMustNotQuotePrivateMalformedIdentityValues"
+          }
+        ],
+        "note": "re-pointed /admission -> /progress"
+      },
+      {
+        "id": "2.5",
+        "test": "RecoveryIT.theDispatchCounterCanReachTwoAndTheReconciledLedgerStateIsWhatStopsIt (name unchanged)",
+        "change": "admission at statement level (StudioDispatchLedgerStatements.admit) instead of admitObserved; assertions unchanged"
+      },
+      {
+        "otherRenames": [
+          {
+            "old": "AdmissionCasIT.anUnknownExecutionIsA409AndNeverA404",
+            "new": "AdmissionCasIT.anUnknownExecutionIsRefusedAndNeverA404 (403 FORBIDDEN_SCOPE)"
+          },
+          {
+            "old": "StudioAuthorizationIT.aFieldTheClosedSchemaDoesNotNameIsA400",
+            "new": "StudioAuthorizationIT.aFieldTheClosedSchemaDoesNotNameIsRefused (422 INVALID_CONTRACT)"
+          },
+          {
+            "old": "config.StudioV2IdempotencyFilterTest (1 method x 2)",
+            "new": "config.StudioExecuteIdempotencyFilterTest (2 methods x 1)"
+          }
+        ],
+        "dropped": [
+          "AdmissionCasIT.legacyAdmissionCannotUseObservedPreReadyFailure (covering: StudioAuthorizationIT.theLegacyAdmissionRouteIsGoneAndWritesNothing)"
+        ]
+      }
+    ],
+    "next": "T2 waits for root's go after the S3 unit lands."
+  },
+  "s3Applied": {
+    "when": "2026-10-13, after C2b (docs/qa/evidence/STUDIO-OBS-014/c2b-contract/ledger.json)",
+    "patch": "docs/qa/evidence/STUDIO-OBS-014/b14/s3-b14-unit.patch (sha256 a09606f7...0248) applied with git apply (working tree only; nothing staged). s3-object-store-dir.patch NOT applied (folded in).",
+    "compile": "AGENT_NAME=b14 gradle-locked.sh compileJava compileTestJava -q -> exit 0",
+    "run": "run.sh s3a: BUILD SUCCESSFUL 42s. StudioContractTest 13/0 (5 policy routes present), ObservationPolicyIT 10/0, GuidedCsiBudgetIT 4/0, GuidedRunnerContextRefusalTest 3/0 (now against the landed bridge#/definitions/refusal, not a simulation), RateLimitClassifierTest 5/0, GuidedWireContractTest 7/0.",
+    "notRunByB14": "GuidedBridgeIntegrationTest, GuidedPlanningIntegrationTest, GuidedSessionIT, GuidedPublicationReplayIT, GuidedServiceTransportFaultIT, GuidedDefaultModelReservationIT, ObservedProfileDriftTest, StudioDispatcherFailureIT, GuidedSessionVideoIT: root's S3 window after the dist rebuild.",
+    "stillOpenFromS3": [
+      "ObservationPolicyController route-level tests (body validation 400 INVALID_POLICY, 201/200/403/404/409 over HTTP) not written yet",
+      "ObservationPolicyIT AR-2 g replay oracle and the runner-accepts-only-v2 oracle",
+      "bootstrap/prepareAndAdmit definite-refusal ITs and the timeout negative control (ruling 2 tests list)"
+    ]
+  },
+  "t2Scope_added": "B13 F-1 (docs/qa/evidence/STUDIO-OBS-013/b13/ledger.json): jsonb key-order idempotent-echo in GuidedSessionService.internal() bridge routes; check for byte-for-byte reply consumers, canonicalize if any.",
+  "s3Fix_flywayTargets": {
+    "severity": "S3 defect in B14's own patch, found during T2 (not from a run)",
+    "finding": "Five ITs whose hand-built GuidedSessionService the S3 patch governs migrated their own databases only to Flyway target 18, so V19 (policy, session freeze, per-CSI budget tables) did not exist there. Every governed start would fail with a missing-relation error: GuidedSessionIT (setup), GuidedServiceTransportFaultIT, GuidedDefaultModelReservationIT, GuidedBridgeIntegrationTest, GuidedPlanningIntegrationTest.",
+    "fix": "Setup migrations moved to target \"20\" (head) in those five files. Migration-specific pins are unchanged (GuidedSessionIT.migrationPreservesExistingDataAndFreshInstallWorks keeps its V1-V18 fresh-install check; RevisionMigrationIT and GuidedPublicationMigrationTest untouched).",
+    "forRoot": "If the S3 window ran these five classes before this edit (about 20:5x), failures there that read 'relation \"studio_guided_policies\" does not exist' or similar are this defect. Please re-run them after this edit.",
+    "compileCheck": "Not compile-checked with Gradle yet (lock held by root-s3-window); a string-literal-only change."
+  },
+  "t2": {
+    "status": "IN PROGRESS",
+    "landedInTree": [
+      "guided/policy/GuidedPolicyReason.java (new)",
+      "guided/translation/GuidedActionGuard.java (new, pure)",
+      "GuidedTranslationService.guardAction (after validator.action, before reserveObligation) + stopRejected(GuidedSessionException): reason-carrying POLICY_DENIED -> terminal POLICY_DENIED; other POLICY_DENIED unchanged -> INVALID_CONTRACT",
+      "GuidedTranslationStore.frozenPolicy",
+      "GuidedSessionService: failTranslation allows POLICY_DENIED; sideEffectConfirmation(...) server-made question in progress only; clarify() branch for SIDE_EFFECT_CONFIRMATION (no context row, no model selection, no publication evidence)",
+      "StudioActionAudit: refusals emitted at decision (not afterCommit)",
+      "tests: GuidedActionGuardTest (new), StudioActionAuditTest +1"
+    ],
+    "precheck": "javac of the 6 main files + 2 test files outside Gradle: exit 0 (the main tree compiles). Gradle runs queued behind root's window.",
+    "designDecisions": [
+      "[AUTO-DECISION] Check order destructive -> grounding -> stance, so the AC-5 reason is reachable (with grounding first, a grounded destructive label almost never reaches the vocabulary check). The AC-4 planted 'Delete account' for 'Open reports' is refused as DESTRUCTIVE_VERB; a non-destructive ungrounded label is UNGROUNDED_TARGET.",
+      "[AUTO-DECISION] Side-effecting = click on a link (navigation), click on a button with a formId, press with a formId (submission); signals elementType/formId are already in the sanitized observation, so S-6 is not triggered.",
+      "[AUTO-DECISION] CLARIFY_FIRST confirmation kept out of the clarification-context store: an observed context row would enter the publication observedChoice witness, whose modelQuestion must equal a model output; a server-made confirmation has none. AR-2 f says the confirmation is recorded in progress; done so (pruned keys clarification + sideEffectConfirmation).",
+      "[AUTO-DECISION] Refused-action audit events are emitted at the decision: the rejected proposal's transaction always rolls back, so afterCommit would drop every refusal."
+    ],
+    "f1Finding": {
+      "question": "Does any consumer compare GuidedSessionService.internal()/publicCommand idempotent replies byte for byte (first reply in Java order vs replayed jsonb order)?",
+      "answer": "No production consumer does. Runner: guidedCallback checks only status 202; guidedClaimClient schema-validates the parsed body; every runner comparison in ownership.ts/runtime.ts/transport.ts uses canonical(). Backend in-process callers compare JsonNode (order-insensitive). So no canonicalization is needed; B13's route-specific fix covers the one test that asserted byte identity. Left unchanged."
+    },
+    "testsWritten": [
+      "guided/translation/GuidedActionGuardTest (new): AC-4 ungrounded, planted 'Delete account' for 'Open reports' refused (DESTRUCTIVE_VERB, guard order), whole-phrase/all-words/saved-input grounding, fill/navigate exempt; AC-5 'Click Save' with Save+Delete -> only Save eligible, authored destructive verb allowed, bare 'submit' not destructive but 'submit order' is; AC-6 DENY refuses a form-submit click, ALLOW passes, CLARIFY_FIRST asks once and not after confirmation, button outside a form not side-effecting, omitted stance = CLARIFY_FIRST; calibration corpus of the 5 joined-IT click targets (Planning IT :153/:2393, ReplayIT :462/:3715/:10698/:12640/:16764): 5/5 eligible under the default vocabulary (S-9 not triggered)",
+      "guided/audit/StudioActionAuditTest +1: refusal emitted at the decision inside a transaction",
+      "guided/bridge/GuidedDispatchContextRefusalTest (new): real GuidedRunnerClient against a stub runner; context 409 IDENTITY_MISMATCH/SCHEMA -> failTranslation(RUNTIME_INCOMPATIBLE), 'prepare' never sent, admit never called; 409 BUSY / non-JSON -> UNKNOWN_OUTCOME, nothing failed",
+      "guided/policy/ObservationPolicyRouteIT (new): 5 routes over HTTP: 201 create (stance materialized CLARIFY_FIRST), 200 read/lookup, 201 version, 409 STALE_REVISION, 403 STUDIO_FORBIDDEN for non-approver, 200 approval by approver role, 409 approving a non-latest version, 400 INVALID_POLICY for a closed-contract violation (message does not quote the body; nothing written), 400 for a malformed id, 403 for stranger create/read/lookup, 404 GUIDED_POLICY_NOT_FOUND only after authorization, 409 GUIDED_POLICY_EXISTS",
+      "guided/policy/ObservationPolicyIT +1 (AR-2 g): replay of an existing revision binds the same currentPolicyHash before and after approving a governed v2; the next learning session freezes v2's observation hash",
+      "guided/publication/GuidedPublicationReplayIT: AC-10 canary capture for the whole class (static ListAppender on the audit logger); the OBS-007 secret-login case registers canaries (secret value, rotated value, authored literal 'fixture-user', 'Sign in', 'Reports', step text); new @Order(39) auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass asserts admitted + replay events exist, closed 16-key set, <= 1 KiB each, zero canary hits. [AUTO-DECISION] placed in ReplayIT instead of a new GuidedActionAuditCanaryIT class, because the OBS-007 fixture end-to-end only exists there (a second copy of that harness would be ~1k lines)."
+    ],
+    "precheckTests": "javac (outside Gradle) of all new/changed test classes incl. ReplayIT: exit 0",
+    "queued": "run.sh t2a queued in background behind root-s3-window",
+    "openNotDone": [
+      "Bootstrap-path definite-refusal IT and the timeout negative control (ruling 2 tests list): not written. A faithful test needs the real session state machine behind translationTransaction plus a runner that refuses a context the backend would actually send; the bootstrap branch (refuseBootstrapDelivery + failTranslation) is covered by code review and the shared classifier tests only. Proposed: root's S3 live gate (fixtures tier with a forged policyHash), as the ruling lists.",
+      "GuidedSessionIT/Planning/Bridge/ReplayIT joined runs with T2 active: root's next window (T2 changes compiled after root's current window started, so that window ran pre-T2 classes)."
+    ]
+  },
+  "s3WindowTriage": {
+    "date": "2026-10-13",
+    "GuidedSessionIT": {
+      "rootFailures": 43,
+      "class": "fixture: hand-built Flyway target 18 lacks V19 governance tables -> BadSqlGrammar on policy SELECT",
+      "fix": "setup target 18->20 (also GuidedServiceTransportFaultIT, GuidedDefaultModelReservationIT)",
+      "verified": "compiles; not run by b14 (guided e2e reserved to root S3b)"
+    },
+    "GuidedBridgeIntegrationTest": {
+      "class": "same V18 target -> initializationError",
+      "fix": "target 18->20",
+      "verified": "compiles; root S3b to run"
+    },
+    "GuidedPlanningIntegrationTest": {
+      "class": "same V18 target -> initializationError",
+      "fix": "target 18->20",
+      "verified": "compiles; root S3b to run"
+    },
+    "GuidedPublicationReplayIT": {
+      "rootFailures": 18,
+      "noteOnMigration": "ReplayIT boots the full context (Flyway to head incl. V19/V20) and seeds governance via installGovernance/seedApprovedPolicies for its CSI; policy seeding/approval is not the cause",
+      "A_leadFailure": {
+        "where": "Order(1) historicalReplica: assertThat(evidence.video.isNull()).isTrue()",
+        "class": "stale assertion after C2b tightened evidence.video to a non-null object",
+        "fix": "assert video is object with status in {UNAVAILABLE, PROCESSING} (replica has no recording store)"
+      },
+      "B_finalizeForbiddenScope_x3": {
+        "tests": [
+          "Order(4) asynchronousReceipt...",
+          "Order(5) modelAndSourceQuestion...",
+          "Order(7) observedAlternateChoice..."
+        ],
+        "class": "cascade from A, not a product defect",
+        "mechanism": "Order(1) sets static coreRole=viewer (line ~2388) then fails in historicalReplica before publishedTestId is assigned; Order(2)/(3) fail their publishedTestId precondition before their coreRole=owner reset; Orders 4/5/7 inherit viewer, so GuidedPublicationAuthorization.fresh canExecute is false -> 403. Order(6) has no finalize call and did not fail, matching the pattern.",
+        "evidenceBasis": "code-path inference from test source + root's finalize exception at GuidedPublicationAuthorization.fresh:69; not yet re-observed in a run",
+        "fix": "@BeforeEach resets coreRole=owner (test isolation; no assertion changed)"
+      },
+      "C_unmappedAppender_x11": {
+        "class": "b14 T2 AUDIT_JSON appender on the audit logger not mapped by C5Capture",
+        "fix": "C5Capture maps audit logger appenders to {AUDIT_JSON, AUDIT_EVENTS}, wraps AUDIT_JSON stream with C5CanaryStream, restores and asserts clean at teardown"
+      },
+      "remainder": "remaining failures expected to be Order(2)/(3) precondition cascades from A; to be confirmed in root S3b",
+      "verified": "compiles; not run by b14 (reserved to root S3b)"
+    },
+    "GuidedTranslationMigrationTest.attemptsAreSingleSendTerminalAndLateUsageDoesNotRevive": {
+      "class": "b14 code path (GuidedTranslationStore.recordLateUsage excess-charge INSERT ran for a session with no scope.csiId -> NULL csi_id into studio_guided_csi_token_days)",
+      "notDLane": true,
+      "fix": "INSERT ... WHERE identity->'scope'->>'csiId' IS NOT NULL ON CONFLICT DO NOTHING",
+      "verified": "gradle-locked test: GuidedTranslationMigrationTest 5/5 PASS; GuidedCsiBudgetIT 4/4 PASS (late-excess path)"
+    },
+    "compile": "gradle-locked spotlessCheck compileTestJava: BUILD SUCCESSFUL (after re-wrapping one ReplayIT comment that spotless flagged)",
+    "readyForS3b": true
+  },
+  "s3bTriage": {
+    "date": "2026-10-14",
+    "GuidedBridgeIntegrationTest": {
+      "rootFailures": 37,
+      "class": "TEST",
+      "cause": "each test migrates a fresh isolated database; the governed policy was seeded only once at bean creation into the base database -> POLICY_NOT_APPROVED",
+      "fix": "seedPolicy(CSI-123, orders, fixture) in @BeforeEach after the per-test migration",
+      "followOn": [
+        {
+          "test": "actualServiceTransportRejectsWrongAudienceSubjectFenceAndTuple",
+          "class": "TEST (stale oracle)",
+          "fix": "incompatible context -> RUNTIME_INCOMPATIBLE / RUNNER_CONTEXT_REFUSED / retryable false per ar-2-r14-stops ruling 2 (stricter than the prior UNKNOWN_OUTCOME)"
+        },
+        {
+          "test": "configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules",
+          "class": "TEST (stale oracle)",
+          "fix": "worker.json has neither rules nor applicationPolicy (ar-mounted-rules qaOracle 3) replaces contains(\"rules\":[])"
+        }
+      ]
+    },
+    "GuidedSessionIT": {
+      "rootFailures": 7,
+      "class": "TEST",
+      "cause": "hand-built GuidedSessionService never had installEvidence; NONE projection's null video is invalid v3/result after C2b by design -> INVALID_CONTRACT in result()",
+      "fix": "newService installs RecordedGuidedEvidenceProjection as GuidedEvidenceConfiguration does",
+      "followOn": [
+        {
+          "test": "concurrentConflictingStartsHaveOneWinner",
+          "class": "TEST",
+          "cause": "the changed request (environmentId other) had no approved governed policy, so it was refused before the idempotency record and no conflict could occur",
+          "fix": "ObservedPublicationFixture.installGovernance multi-environment overload; GuidedSessionIT governs fixture and other"
+        }
+      ]
+    },
+    "GuidedPublicationReplayIT": {
+      "rootFailures": 5,
+      "budget429AndSecondLearningFailed": {
+        "class": "TEST (product behaviour as ruled)",
+        "cause": "AR-2 c charges each model call's ceiling (4000 output) to the CSI's UTC day with no refund (cap 640000 = 160 calls); all ~40 learning cases ran on CSI-123. Measured with a temporary per-test token-day print (since removed): CSI-123 reached 484000 output tokens after 16 tests; root's run exhausted it at Orders 33-38 (CSI_DAILY_TOKENS_EXHAUSTED: 429 at start, FAILED at reservation). Not a slot leak: concurrency is counted live, never decremented.",
+        "fix": "every P3 case learns in its own fresh CSI (primaryCsi, seeded csi_systems row + governed policies, Core identity/entitlement follow it, restored on confirmed cleanup). No limit changed; V19 append-only trigger untouched.",
+        "followOn": "BFF identityCache (60 s per cookie) kept COOKIE's previous ownership after rotation -> SSE watch 403; the fixture now invalidates COOKIE's entry on each rotation"
+      },
+      "auditCanary": {
+        "class": "TEST",
+        "cause": "capture attached once at class load; Spring Boot stops and resets logback on every context start (stop() also drops reset-resistant listeners), detaching the ListAppender",
+        "fix": "ensureAuditCapture() before every test and right after each nested replica context starts"
+      },
+      "transientSeen": "one intermediate run had a runner 503 on an ordinary dispatch (execution stayed PENDING) in actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection; not reproduced in the next three full-class runs; not root-caused"
+    },
+    "verified": {
+      "GuidedSessionIT": "43/43",
+      "GuidedBridgeIntegrationTest": "37/37",
+      "GuidedPublicationReplayIT": "39/39 twice consecutively (full class, second with --rerun)",
+      "T2": {
+        "GuidedActionGuardTest": "11/11",
+        "ObservationPolicyRouteIT": "3/3",
+        "ObservationPolicyIT (incl. AR-2 g replay-unchanged)": "11/11",
+        "GuidedDispatchContextRefusalTest": "2/2",
+        "GuidedRunnerContextRefusalTest": "3/3",
+        "StudioActionAuditTest": "5/5",
+        "auditCanary (ReplayIT Order 39)": "pass in both runs"
+      },
+      "fixtureRegression": {
+        "GuidedServiceTransportFaultIT": "21/21",
+        "GuidedDefaultModelReservationIT": "4/4",
+        "GuidedCsiBudgetIT": "4/4",
+        "GuidedTranslationMigrationTest": "5/5"
+      },
+      "notRerun": "GuidedPlanningIntegrationTest (single-environment installGovernance path unchanged, same trusted policyId)",
+      "build": "spotlessCheck compileTestJava green"
+    },
+    "assertionsWeakened": "none; two oracles replaced by the ruled stricter ones (cited)",
+    "limitsChanged": "none"
+  },
+  "qaFixes014": {
+    "date": "2026-10-14",
+    "source": "QA draft gate STUDIO-OBS-014 + po-qa014-rulings + S4 breaks",
+    "patchSet": "docs/qa/evidence/STUDIO-OBS-014/b14/qa-fixes/ (13 patches + README.json with sha256, apply order, verification); applied by B14 under the lock on root's instruction, not committed",
+    "status": {
+      "SEC-001": "FIXED in product (submit-capable controls in a form incl. input submit/image/reset, role=button, no-type button; role=link). Proven end to end: governed DENY refuses <input type=submit> and <button>. Residual for unlabelled forms (formId null) STOPPED under AR-2 S-6 and escalated to @architect.",
+      "SEC-002": "FIXED: unobserved element target refused UNGROUNDED_TARGET (ruled AC-4 code).",
+      "TEST-001": "DONE: session-level DENY (x2) and CLARIFY_FIRST ITs green.",
+      "TEST-002": "DONE: mid-session daily exhaustion IT.",
+      "TEST-004": "DONE: five policy routes 401.",
+      "AC-1 h1/h2/h3": "DONE: v2 context hash; bootstrap definite refusal (plus narrow plan() terminal return per ruling 2 tests[1]); timeout negative control.",
+      "AC-4 a1/a2": "DONE: assertion-backed GuardDecisionTally; unit denominator 6 with named exclusions.",
+      "S4 breaks": "GuidedOwnedBufferBoundaryTest fixed (+REFUSAL_LIMIT case); GuidedPlanBuilderTest and GuidedContractsCanonicalTest checkstyle fixed. Open: D-lane GuidedGovernanceMigrationIT:1093-1098 same checkstyle pattern (not B14's file)."
+    },
+    "verification": "see qa-fixes/README.json verification",
+    "governanceMigrationCheckstyle": {
+      "date": "2026-10-14",
+      "by": "B14 on root's request (D-lane file)",
+      "change": "GuidedGovernanceMigrationIT.tamper: nested type switch extracted to tamperByType; no behaviour change, no suppression",
+      "verified": "checkstyleMain checkstyleTest spotlessCheck compileTestJava green (includes ReplayIT with B13's patch); GuidedGovernanceMigrationIT 26/26"
+    }
+  },
+  "arSec001Fm": {
+    "date": "2026-10-14",
+    "ruling": "docs/qa/evidence/STUDIO-OBS-014/ar-sec001-form-membership.json (option B)",
+    "patch": "qa-fixes/14-ar-sec001-fm-fail-closed-side-effects.patch (applied)",
+    "namedTestChanges": [
+      "clarifyFirstAsksOnceBeforeTheFirstSideEffectAndNotAfterConfirmation: button(\"Next\", formId null) confirmFirst isFalse -> isTrue (U2 flip; a formless button cannot be told from an unlabelled form's submit)",
+      "nonSubmittingInputsInsideAFormStayEligibleUnderDeny -> provenNonActivatingTargetsStayEligibleOnClickUnderDeny (U4: textbox gains controlType text; checkbox/radio click cases moved to U3, now side-effecting)",
+      "submitAndImageInputsInsideAFormAreSideEffectingUnderDenyAndClarifyFirst -> submitResetAndButtonInputsInsideAFormAreSideEffectingUnderDenyAndClarifyFirst (V7: image/file inputs are never exported)"
+    ],
+    "newTests": [
+      "U1 submitControlsOfAnUnlabelledFormOrFormAttributeAreSideEffecting",
+      "U3 aSubmitInputGivenANonSubmittingRoleIsSideEffectingOnClick",
+      "U5 aClickOnALabelOrAChildOfAButtonIsSideEffecting",
+      "U6 anEnterPressIsSideEffectingOnAnyTargetAndOtherKeysOnlyInAForm",
+      "U7 theClosedWorldNonSideEffectingClickSetIsExactlyTheThreeTriples (2520 cases)",
+      "I-1 governedDenyRefusesAnUnlabelledOrFormAttributeSubmit (3)",
+      "I-2 governedClarifyFirstAsksOnceBeforeAnUnlabelledFormSubmit"
+    ],
+    "verification": "see qa-fixes/README.json verificationAfterRuling",
+    "blocker": "GuidedPublicationReplayIT Order 9 teardown failure not caused by this change (control run); routed to root/B13"
+  }
+}

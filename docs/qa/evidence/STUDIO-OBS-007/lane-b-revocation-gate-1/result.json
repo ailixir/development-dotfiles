@@ -1,0 +1,74 @@
+{
+  "session": 71282,
+  "exitCode": 0,
+  "tests": 35,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "com.citi.put.checks.studio.internal.RunnerReportProjectionTest",
+      "names": [
+        "untouchedStepsAreFilledPendingFromTheRevisionSoEveryOriginalStepHasAnEntry()",
+        "theRunnersChromiumBuildKeyProjectsOntoRuntimeChromium()",
+        "runnerSequenceIsNeverTheRevision()",
+        "aReportWithNoOriginCarriesNoReadingAndOneThatBreaksThatIsA400()",
+        "stepLinesProjectTheirStepIndexAndRunLevelLinesStayNull()",
+        "theApiRoundsOnceAtPersistence()",
+        "evidenceStateProjectsOntoVideoStatusAndExpiredIsNeverReported()",
+        "theManifestKeyIsRecordedAndNotPublishedOnTheSnapshot()",
+        "theOneMappingASourceFixesIsTheParentEnforcedTotalTimeout()",
+        "aBodyWithoutStepIndexIsAnOlderRunnerAndDeserializesToNull()",
+        "theInstantIsBrowserStartedAtPlusAtMsAndNothingElse()",
+        "levelIsLowerCaseOnTheWireAndUpperCaseOnTheSnapshot()",
+        "withNoOriginAndNoReadingsTheProjectionYieldsNullInstantsRatherThanAPartialDerivation()",
+        "theApiAppliesNoCalibrationAndNeverRebasesAgainstTheFirstReadingItHasSeen()",
+        "anUnknownRunnerLevelIsA400()",
+        "aStepStatusFromTheRunOutcomeVocabularyIsA400AndNeverASilentCoercion()",
+        "runtimeVersionsIsNarrowedToTheSection46Subset()",
+        "revocationUsesIndependentFactWithUserCancelPriorityAndNeverRewritesPassingOrFailingReports()",
+        "zeroIsAPositionAndSurvivesTheProjectionDistinctlyFromNull()",
+        "aLogStepIndexTheRevisionDoesNotHaveIsA400()",
+        "originalTextComesFromTheRevisionAndIsNeverEchoedByTheRunner()",
+        "outcomeResultBecomesStatusAndPendingAndRunningStayApiOwned()",
+        "aReaperOwnedCodeIsNeverObtainableByARunnerThatNamesIt()"
+      ]
+    },
+    {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "com.citi.put.checks.studio.secrets.SecretRevocationSweepIT",
+      "names": [
+        "terminalOwnerReceivesNoFreshAuthorizationCauseOrLiveAudit()",
+        "settledRefusalCannotBecomeMidRunRevocationWhileQueuedOrClaimedForNextPass()",
+        "actualCurrentReleaseDenyWritesOneFlagAndOneRecheckWithoutVaultReadsOrExtraUsage()"
+      ]
+    },
+    {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "com.citi.put.checks.studio.dispatch.StudioDispatcherFailureIT",
+      "names": [
+        "[1] outage=false",
+        "[2] outage=true",
+        "[1] change=expired",
+        "[2] change=different-owner",
+        "[3] change=different-attempt",
+        "[1] outage=false",
+        "[2] outage=true",
+        "[1] winner=cancel",
+        "[2] winner=reaper"
+      ]
+    }
+  ],
+  "tuple": "prior executor/language observed-3, catalog observed-replay-2",
+  "claim": "current-attempt names-only sweep3 + actual atomic caller9 + projection23; no bounded browser polling or full new joins"
+}

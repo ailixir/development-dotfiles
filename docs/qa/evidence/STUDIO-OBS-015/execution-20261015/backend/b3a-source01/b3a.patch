@@ -1,0 +1,434 @@
+--- backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java
++++ backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorityIT.java
+@@ -565,6 +565,431 @@
+       assertCommitRollback(db, writer, command, original);
+       assertThat(reads).hasValue(3);
+       assertThat(boundary.substitutions).isZero();
++    }
++  }
++
++  // ---- STUDIO-OBS-015 B3a design01: offered public basis vs actual stored private authority ----
++  // Tier disclosure (authority-tier-ruling01): actual head PostgreSQL, actual current writer and
++  // actual stored evidence reader. The parent's upstream rows (actions, preparations,
++  // materialization) are inserted by the shared relational fixture, and the validator verdict and
++  // publication grant are built here. Those are controlled inputs: not runner-validator, Core,
++  // HTTP or native proof, and not production-written private-authority rows in the T3 sense.
++
++  private record B3aGenuine(
++      PublicationContracts.Snapshot snapshot,
++      PublicationContracts.Candidate candidate,
++      JsonNode profile,
++      JsonNode build) {}
++
++  private static PublicationContracts.Snapshot b3aReseal(
++      JsonNode template,
++      ObjectNode basis,
++      PublicationContracts.Candidate candidate,
++      JsonNode build) {
++    ObjectNode identity = template.deepCopy();
++    identity
++        .put(
++            "validationDeadline",
++            PublicationContracts.time(
++                PublicationContracts.millisecond(Instant.now().plusSeconds(12))))
++        .put("basisHash", GuidedContracts.hash(basis))
++        .put("validationBuildHash", GuidedContracts.hash(build));
++    for (String field :
++        List.of(
++            "artifactHash",
++            "learnedPlanHash",
++            "referencePolicyHash",
++            "operationEquivalenceHash",
++            "publicationEvidenceHash",
++            "profileHash")) {
++      identity.set(field, candidate.hashes().path(field));
++    }
++    return new PublicationContracts.Snapshot(identity, basis);
++  }
++
++  private static B3aGenuine b3aGenuine(
++      GuidedPublicationMigrationTest.Database db, PublicationContracts.Base base) {
++    var captured = db.snapshot(base);
++    var profile = GuidedPublicationMigrationTest.currentProfile();
++    var build = GuidedPublicationMigrationTest.observedBuild(profile);
++    ObjectNode basis = (ObjectNode) captured.basis().deepCopy();
++    var candidate = new ObservedArtifactLowerer(C).lower(basis.deepCopy(), profile);
++    return new B3aGenuine(
++        b3aReseal(captured.identity(), basis, candidate, build), candidate, profile, build);
++  }
++
++  /** One rolled-back reserve/claim/finish/commit at the actual current writer; returns its code. */
++  private static String b3aStaged(
++      GuidedPublicationMigrationTest.Database db,
++      GuidedPublicationRepository writer,
++      PublicationContracts.Base base,
++      String label,
++      PublicationContracts.Snapshot snapshot,
++      PublicationContracts.Candidate candidate,
++      JsonNode profile,
++      JsonNode build) {
++    String id = db.fixtureSession();
++    String key = "b3a-" + label;
++    String digest = GuidedContracts.hash(C.object().put("b3a", label));
++    try {
++      db.tx.executeWithoutResult(
++          t -> {
++            t.setRollbackOnly();
++            var attempt =
++                writer.reserve(
++                    new PublicationContracts.Claim(id, key, digest, snapshot), Instant.now());
++            writer.claim(
++                id, attempt.attemptId(), attempt.claimId(), snapshot.hash(), Instant.now());
++            // Controlled relational-tier verdict: the existing prepareStored shape.
++            ObjectNode verdict =
++                C.object()
++                    .put("schemaVersion", 3)
++                    .put("ok", true)
++                    .putNull("errorCode")
++                    .put("attemptId", attempt.attemptId().toString())
++                    .put("claimId", attempt.claimId().toString())
++                    .put("snapshotHash", snapshot.hash())
++                    .put("basisHash", snapshot.identity().path("basisHash").asText());
++            for (String field :
++                List.of(
++                    "artifactHash",
++                    "learnedPlanHash",
++                    "referencePolicyHash",
++                    "operationEquivalenceHash",
++                    "admissionProvenanceHash",
++                    "publicationEvidenceHash")) {
++              verdict.set(field, candidate.hashes().path(field));
++            }
++            verdict.set("profile", profile);
++            verdict.set("build", build);
++            writer.finish(
++                id,
++                attempt.attemptId(),
++                attempt.claimId(),
++                snapshot.hash(),
++                PublicationContracts.AttemptStatus.VALIDATED,
++                verdict,
++                null,
++                Instant.now());
++            // Controlled grant from the stored base; the writer re-checks it.
++            var grant =
++                new PublicationContracts.Grant(
++                    id,
++                    base.document().path("originalPrincipalId").asText(),
++                    base.document().path("csiId").asText(),
++                    snapshot.hash(),
++                    attempt.validationDeadline());
++            var receipt =
++                writer.commit(
++                    new PublicationContracts.Commit(
++                        id,
++                        UUID.randomUUID(),
++                        attempt.attemptId(),
++                        attempt.claimId(),
++                        key,
++                        digest,
++                        snapshot,
++                        candidate,
++                        grant),
++                    Instant.now());
++            assertThat(receipt).isNotNull();
++            assertThat(
++                    db.jdbc.queryForObject(
++                        "SELECT count(*) FROM ui_test_revisions WHERE guided_session_id=?",
++                        Integer.class,
++                        id))
++                .isEqualTo(1);
++          });
++      return "COMMITTED";
++    } catch (GuidedSessionException refused) {
++      return refused.getMessage();
+     }
+   }
++
++  private static String b3aDifferentHash(String hash) {
++    String replacement = GuidedContracts.hash(C.object().put("b3a-substitute", hash));
++    assertThat(replacement).isNotEqualTo(hash).matches("[a-f0-9]{64}");
++    return replacement;
++  }
++
++  /** Stage oracle: a lowerer-refused basis never reaches the stored reader; else it refuses. */
++  private static String b3aRefused(
++      GuidedPublicationMigrationTest.Database db,
++      GuidedPublicationRepository writer,
++      PublicationContracts.Base base,
++      String label,
++      ObjectNode offered,
++      B3aGenuine genuine,
++      AtomicInteger reads,
++      String original) {
++    assertThat(offered.equals(genuine.snapshot().basis()))
++        .as("%s changes the offered basis", label)
++        .isFalse();
++    PublicationContracts.Candidate candidate = genuine.candidate();
++    String pure = null;
++    try {
++      candidate = new ObservedArtifactLowerer(C).lower(offered.deepCopy(), genuine.profile());
++    } catch (GuidedSessionException refused) {
++      pure = refused.getMessage();
++    }
++    var snapshot = b3aReseal(genuine.snapshot().identity(), offered, candidate, genuine.build());
++    int before = reads.get();
++    String outcome =
++        b3aStaged(db, writer, base, label, snapshot, candidate, genuine.profile(), genuine.build());
++    assertThat(outcome).as("%s is never adopted", label).isNotEqualTo("COMMITTED");
++    if (pure != null) {
++      assertThat(outcome)
++          .as("%s writer recomputation meets the same pure refusal", label)
++          .isEqualTo(pure);
++      assertThat(reads.get()).isEqualTo(before);
++    } else {
++      assertThat(outcome).as("%s stored re-read refusal", label).isEqualTo("PUBLICATION_CONFLICT");
++      assertThat(reads.get() - before).isEqualTo(1);
++    }
++    assertThat(privateAuthoritySnapshot(db))
++        .as("%s preserves every row and trigger", label)
++        .isEqualTo(original);
++    return pure == null ? "STORED" : "PURE:" + pure;
++  }
++
++  /**
++   * B3A-1 (ledger 31/52/60; private routes 1, 3, 6): exact original offered pointers that only the
++   * stored private preimage can refute. Relational tier with controlled inputs (see above).
++   */
++  @Test
++  void offeredBasisOriginalPointersRequireStoredPrivatePreimageAtCurrentCommit() throws Exception {
++    try (var owner = new GuidedPublicationMigrationTest.Database();
++        var db =
++            new GuidedPublicationMigrationTest.Database(
++                owner.jdbc, owner.tx, "b3a-offered", fixtures().path("basis").deepCopy())) {
++      var base = db.capture();
++      db.finalizing();
++      assertStoredPrivateProjection(db, base);
++      String original = privateAuthoritySnapshot(db);
++      var reads = new AtomicInteger();
++      var writer =
++          new GuidedPublicationRepository(
++              db.jdbc,
++              C,
++              () -> {
++                reads.incrementAndGet();
++                return db.evidence;
++              });
++      var genuine = b3aGenuine(db, base);
++      assertThat(
++              b3aStaged(
++                  db,
++                  writer,
++                  base,
++                  "positive-0",
++                  genuine.snapshot(),
++                  genuine.candidate(),
++                  genuine.profile(),
++                  genuine.build()))
++          .as("the genuine stored basis is adoptable at this exact boundary")
++          .isEqualTo("COMMITTED");
++      assertThat(reads).hasValue(1);
++      assertThat(privateAuthoritySnapshot(db)).isEqualTo(original);
++      var attacks = new java.util.LinkedHashMap<String, java.util.function.Consumer<ObjectNode>>();
++      attacks.put(
++          "wrong-private-input-hash",
++          basis -> {
++            ObjectNode entry =
++                (ObjectNode) basis.path("materializationEvidence").path("entries").get(0);
++            entry.put("inputHash", b3aDifferentHash(entry.path("inputHash").asText()));
++          });
++      attacks.put(
++          "immutable-source-manifest-hash-is-exact",
++          basis ->
++              basis.put(
++                  "sourceManifestHash",
++                  b3aDifferentHash(basis.path("sourceManifestHash").asText())));
++      attacks.put(
++          "immutable-original-source-cannot-be-replaced",
++          basis -> {
++            ObjectNode entry =
++                (ObjectNode)
++                    basis
++                        .path("snapshotEvidence")
++                        .path("current")
++                        .path("authoring")
++                        .path("steps")
++                        .get(2)
++                        .path("context")
++                        .path("entries")
++                        .get(1);
++            assertThat(entry.path("value").isTextual())
++                .as("the exact original context-value pointer exists")
++                .isTrue();
++            entry.put("value", "A different complete source");
++          });
++      int positives = 0;
++      for (var attack : attacks.entrySet()) {
++        ObjectNode offered = (ObjectNode) genuine.snapshot().basis().deepCopy();
++        attack.getValue().accept(offered);
++        String stage =
++            b3aRefused(db, writer, base, attack.getKey(), offered, genuine, reads, original);
++        assertThat(stage)
++            .as("%s: the public basis cannot recompute the private preimage", attack.getKey())
++            .isEqualTo("STORED");
++        var fresh = b3aGenuine(db, base);
++        assertThat(
++                b3aStaged(
++                    db,
++                    writer,
++                    base,
++                    "positive-" + (++positives),
++                    fresh.snapshot(),
++                    fresh.candidate(),
++                    fresh.profile(),
++                    fresh.build()))
++            .as("parity after %s", attack.getKey())
++            .isEqualTo("COMMITTED");
++        assertThat(privateAuthoritySnapshot(db)).isEqualTo(original);
++      }
++    }
++  }
++
++  /**
++   * B3A-2 (ledger 31): a foreign session/test/CSI basis and foreign admission IDs cannot borrow
++   * this session's stored authority. Relational tier with controlled inputs (see above).
++   */
++  @Test
++  void offeredBasisFromAnotherStoredSessionCannotBorrowItsAuthority() throws Exception {
++    ObjectNode foreignCanonical = (ObjectNode) fixtures().path("basis").deepCopy();
++    // Test-owned before-image; the shared fixture freezes actual source/base under this CSI.
++    foreignCanonical.put("csiId", "CSI-B3A-FOREIGN");
++    try (var owner = new GuidedPublicationMigrationTest.Database();
++        var foreign =
++            new GuidedPublicationMigrationTest.Database(
++                owner.jdbc, owner.tx, "b3a-foreign-a", foreignCanonical);
++        var db =
++            new GuidedPublicationMigrationTest.Database(
++                owner.jdbc, owner.tx, "b3a-foreign-b", fixtures().path("basis").deepCopy())) {
++      var foreignBase = foreign.capture();
++      foreign.finalizing();
++      var base = db.capture();
++      db.finalizing();
++      assertThat(foreignBase.document().path("csiId")).isNotEqualTo(base.document().path("csiId"));
++      assertThat(foreignBase.document().path("testId"))
++          .isNotEqualTo(base.document().path("testId"));
++      assertThat(foreignBase.document().path("sessionId"))
++          .isNotEqualTo(base.document().path("sessionId"));
++      String original = privateAuthoritySnapshot(db);
++      var reads = new AtomicInteger();
++      var writer =
++          new GuidedPublicationRepository(
++              db.jdbc,
++              C,
++              () -> {
++                reads.incrementAndGet();
++                return db.evidence;
++              });
++      var genuine = b3aGenuine(db, base);
++      var foreignGenuine = b3aGenuine(foreign, foreignBase);
++      assertThat(
++              b3aStaged(
++                  db,
++                  writer,
++                  base,
++                  "positive-b",
++                  genuine.snapshot(),
++                  genuine.candidate(),
++                  genuine.profile(),
++                  genuine.build()))
++          .isEqualTo("COMMITTED");
++      assertThat(privateAuthoritySnapshot(db)).isEqualTo(original);
++
++      // (1) Another session's complete actual stored basis, offered under this session's claim.
++      ObjectNode foreignBasis = (ObjectNode) foreignGenuine.snapshot().basis().deepCopy();
++      var foreignCandidate =
++          new ObservedArtifactLowerer(C).lower(foreignBasis.deepCopy(), genuine.profile());
++      var borrowed =
++          b3aReseal(genuine.snapshot().identity(), foreignBasis, foreignCandidate, genuine.build());
++      int before = reads.get();
++      assertThat(
++              b3aStaged(
++                  db,
++                  writer,
++                  base,
++                  "foreign-session-basis",
++                  borrowed,
++                  foreignCandidate,
++                  genuine.profile(),
++                  genuine.build()))
++          .as("foreign run authorization cannot join this stored base")
++          .isEqualTo("EVIDENCE_MISMATCH");
++      assertThat(reads.get())
++          .as("refused at the writer's candidate-to-stored-base join")
++          .isEqualTo(before);
++      assertThat(privateAuthoritySnapshot(db)).isEqualTo(original);
++
++      // (2) The same foreign basis resealed with this session's run authorization.
++      ObjectNode resealed = foreignBasis.deepCopy();
++      resealed.set(
++          "runAuthorization", genuine.snapshot().basis().path("runAuthorization").deepCopy());
++      b3aRefused(
++          db,
++          writer,
++          base,
++          "foreign-session-resealed-authorization",
++          resealed,
++          genuine,
++          reads,
++          original);
++
++      // (3) This session's basis naming the other session's actual successful admission identity.
++      String ownAdmission =
++          genuine
++              .snapshot()
++              .basis()
++              .path("actions")
++              .get(0)
++              .path("ledger")
++              .path("admission")
++              .path("admissionId")
++              .asText();
++      assertThat(ownAdmission).startsWith("b3a-foreign-b-");
++      String foreignAdmission =
++          "b3a-foreign-a-" + ownAdmission.substring("b3a-foreign-b-".length());
++      assertThat(
++              owner.jdbc.queryForObject(
++                  "SELECT count(*) FROM studio_guided_actions WHERE session_id='b3a-foreign-a'"
++                      + " AND admission_id=? AND document->>'state'='SUCCEEDED'",
++                  Integer.class,
++                  foreignAdmission))
++          .isEqualTo(1);
++      ObjectNode substituted =
++          (ObjectNode)
++              C.parse(
++                  genuine
++                      .snapshot()
++                      .basis()
++                      .toString()
++                      .replace("\"" + ownAdmission + "\"", "\"" + foreignAdmission + "\""));
++      b3aRefused(
++          db,
++          writer,
++          base,
++          "foreign-admission-substitution",
++          substituted,
++          genuine,
++          reads,
++          original);
++
++      var fresh = b3aGenuine(db, base);
++      assertThat(
++              b3aStaged(
++                  db,
++                  writer,
++                  base,
++                  "positive-b-after",
++                  fresh.snapshot(),
++                  fresh.candidate(),
++                  fresh.profile(),
++                  fresh.build()))
++          .isEqualTo("COMMITTED");
++      assertThat(privateAuthoritySnapshot(db)).isEqualTo(original);
++    }
++  }
+ }

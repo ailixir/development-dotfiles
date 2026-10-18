@@ -1,0 +1,62 @@
+{
+  "at": "2026-10-10T12:26:39.253963+00:00",
+  "status": "SOURCE_FROZEN_PENDING_ROOT_GRADLE_SPOTLESS_STRICTSTYLE_CURRENT17GATE",
+  "designBeforeCode": "t2-d-diagnostic-style-remediation.json",
+  "sources": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java",
+      "beforeSha256": "b6517335ad209a3bc1897af4e13af72f0c26e3a66b03ba029275d4e73ab466af",
+      "currentSha256": "e08be7184417d1f728d7f1e3b6f551b0960821bb16cb963a40b544ce288216da"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+      "beforeSha256": "088794b1f176b520b4c3e7202ea94a8a53277f48d9ad105c15fbf7f4923f5735",
+      "currentSha256": "d68f1c4e71c40c4546535a3dfc936000ee049037465e702250e15844c00c34c9"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+      "beforeSha256": "ca52a9ce8a5105ee31a932e21e6ece9f3cd1b62c98d2c0d46a736f7b8b80461b",
+      "currentSha256": "ca52a9ce8a5105ee31a932e21e6ece9f3cd1b62c98d2c0d46a736f7b8b80461b"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "beforeSha256": "fbb676f33f341f253f17742f98199a6758bf1e0fff464a1168eec42ed655978b",
+      "currentSha256": "f752983b312dcbdd8eeeffa026ce24831ad4729f133ca65cc75d4010ae8a49df"
+    }
+  ],
+  "caseNames": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+      "methodCount": 23,
+      "allNamesUnchanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "methodCount": 36,
+      "allNamesUnchanged": true
+    }
+  ],
+  "diagnostic": "Wrongcode/wrongtime require exact causal PSQLException P0001 server message authoritative history locator immutable and function studio_observed_terminal_history_update_guard(); receipt-only toptransaction assertion preserved",
+  "stringValueProof": {
+    "beforeManifest": ".aiox/sdc/STUDIO-OBS-007/probes/d-diagnostic-style/literal-values-before.log",
+    "afterStyleBeforeDiagnostic": ".aiox/sdc/STUDIO-OBS-007/probes/d-diagnostic-style/literal-values-after-style.log",
+    "current": ".aiox/sdc/STUDIO-OBS-007/probes/d-diagnostic-style/literal-values-current.log",
+    "fourFilesAllOrderedDecodedConstantValuesIdenticalAfterStyle": true,
+    "managerRecorderMigrationValuesStillIdentical": true,
+    "onlyDiagnosticAssertionsAddApprovedP0001MessageFunctionStrings": true
+  },
+  "scopeChecks": {
+    "V34Unedited": true,
+    "noRolesOrMigrationChanges": true,
+    "noTestCaseRemoval": true,
+    "noRulesOrThresholdWaivers": true,
+    "noSourceFormatterRunByD": true,
+    "noLiveProcess": true
+  },
+  "requestedRootGate": [
+    "Actual Gradle Spotless scoped4 assigned D files, no standalone long-string reflow",
+    "Strict style/checkstyle with unchanged rules",
+    "Current17 exactclasses suite after B/D freeze; original264instances retained, wrongtime iteration/rollback tail actually exercised"
+  ],
+  "runtimeCredit": "Prior264/1 remains red; current correction not yet executed"
+}

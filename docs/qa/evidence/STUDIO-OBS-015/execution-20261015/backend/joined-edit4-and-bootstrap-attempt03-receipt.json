@@ -1,0 +1,968 @@
+{
+  "artifact": "STUDIO-OBS-015 actualcombinedJava/bootstrap/Core attempt03 receipt",
+  "at": "2026-10-15T10:46:14.818967+00:00",
+  "owner": "Dex/backend015_resume execution-only",
+  "sourceHold": true,
+  "invocation": {
+    "oneAuthorizedInvocationOnly": true,
+    "command": [
+      "caffeinate",
+      "-i",
+      "./gradlew",
+      "test",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest",
+      "--tests",
+      "com.citi.put.checks.studio.guided.translation.GuidedBootstrapPlanHistoryIT",
+      "--tests",
+      "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+      "--tests",
+      "com.citi.put.checks.studio.guided.translation.GuidedTranslationConcurrencyTest",
+      "--tests",
+      "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+      "--rerun-tasks"
+    ],
+    "cwd": "backend",
+    "JAVA_HOME": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+    "handle": 25757,
+    "terminal": true,
+    "active": false,
+    "exit": 1,
+    "elapsedSeconds": 48.91,
+    "counts": {
+      "total": 27,
+      "passed": 25,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0
+    },
+    "perClass": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "tests": 1,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest",
+        "tests": 1,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 0
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 1
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 13
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedBootstrapPlanHistoryIT",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 7
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationConcurrencyTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 4
+      }
+    ],
+    "actualTestcases": [
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "name": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays()",
+        "status": "FAIL"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest",
+        "name": "reconstructsAllFiveHashEnvelopesFromCompleteSource()",
+        "status": "FAIL"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest",
+        "name": "baseArtifactAndRevisionDigestHaveExactPreimages()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "name": "pendingNewNeedUsesRawDefinitionAndCannotClaimAnUnconsumedImport()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "name": "duplicateServerIdentitiesCoordinatesAndUnknownFieldsAreRefused()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "name": "acceptedZeroConsumerShapeCannotReplaceActualRetainedProducerAuthority()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "name": "internal accepted plan rejects duplicate-coordinate",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "name": "internal accepted plan rejects duplicate-need-id",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "name": "internal accepted plan rejects duplicate-binding-id",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "name": "internal accepted plan rejects duplicate-consumer-pair",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "name": "internal accepted plan rejects reference-out-of-range",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "name": "internal accepted plan rejects unknown-need-property",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "name": "internal accepted plan rejects unknown-obligation-property",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "name": "internalServerIdentitiesRemainExactWhileRawWireRejectsThem()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "name": "beforeAllocationKeepsBoundImportedZeroNeedAndFreshRawNeedDistinct()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest",
+        "name": "ordinaryHistoryPreservesActualServerMeaningAndConsumerBytes()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedBootstrapPlanHistoryIT",
+        "name": "unboundBootstrapAcceptanceThenActualAllocationPreservesImmutableOriginalHistory()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedBootstrapPlanHistoryIT",
+        "name": "bootstrap history before-write refuses fresh-zero",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedBootstrapPlanHistoryIT",
+        "name": "bootstrap history before-write refuses duplicate-id",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedBootstrapPlanHistoryIT",
+        "name": "bootstrap history before-write refuses foreign-reference",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedBootstrapPlanHistoryIT",
+        "name": "bootstrap history before-write refuses foreign-producer",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedBootstrapPlanHistoryIT",
+        "name": "bootstrap history before-write refuses foreign-consumer",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedBootstrapPlanHistoryIT",
+        "name": "bootstrap history before-write refuses source-order",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationConcurrencyTest",
+        "name": "independentConnectionsSerializeAttemptAndSingleSendWinner()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationConcurrencyTest",
+        "name": "oldAttemptCannotSendOrApplyAfterLeaseGenerationOrPlanChange()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationConcurrencyTest",
+        "name": "obligationReservationRecoversIdentityAndCannotChangeProposalOrDropMeaning()",
+        "status": "PASS"
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationConcurrencyTest",
+        "name": "sessionThenSourceLockProducesCoherentSnapshotsWhileAnotherSessionAndEditorRun()",
+        "status": "PASS"
+      }
+    ],
+    "mainCompile": "PASS",
+    "allTestCompile": "PASS"
+  },
+  "stability": {
+    "sourceStable": true,
+    "testInputStable": true,
+    "distStable": true,
+    "sourceDigest": "1300c9332ed466e03e20e63fd974ac4f7b06d16109dae17f7b15cbd139d15a08",
+    "distDigest": "b817b4dabaa2ece706a7ec41e84c7b9efed8505e04716a8d4abc4b2884f4f839"
+  },
+  "actualEngine": {
+    "version": "PostgreSQL15.19",
+    "engineLogs": [
+      "06:40:37.138 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:57188/test (PostgreSQL 15.19)",
+      "{\"timestamp\":\"2026-10-15T06:40:41.652999-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57188/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:54.326599-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57302/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:54.767147-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57302/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:56.291887-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57322/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:56.640353-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57322/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:58.014984-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57360/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:58.334334-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57360/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:59.68464-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57401/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:00.015258-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57401/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:01.503396-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57430/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:01.92246-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57430/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:03.419148-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57460/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:03.760046-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57460/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:05.100137-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57500/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:05.432045-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57500/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:06.767467-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57539/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:07.102372-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57539/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:08.448761-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57566/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:08.823955-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57566/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:10.099812-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57581/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:10.427268-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57581/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:11.749946-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57606/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:12.126115-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.FlywayExecutor\",\"thread\":\"Test worker\",\"message\":\"Database: jdbc:postgresql://localhost:57606/test (PostgreSQL 15.19)\",\"service\":\"checks-backend\"}"
+    ],
+    "migrationLogs": [
+      "06:40:37.881 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 20 migrations to schema \"public\", now at version v20 (execution time 00:00.467s)",
+      "{\"timestamp\":\"2026-10-15T06:40:41.701603-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Migrating schema \\\"public\\\" to version \\\"21 - guided session replaying prefix\\\"\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:41.777065-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 1 migration to schema \\\"public\\\", now at version v21 (execution time 00:00.071s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:54.732087-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 14 migrations to schema \\\"public\\\", now at version v14 (execution time 00:00.236s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:55.047062-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Migrating schema \\\"public\\\" to version \\\"21 - guided session replaying prefix\\\"\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:55.105016-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 7 migrations to schema \\\"public\\\", now at version v21 (execution time 00:00.247s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:56.617291-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 14 migrations to schema \\\"public\\\", now at version v14 (execution time 00:00.208s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:56.885083-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Migrating schema \\\"public\\\" to version \\\"21 - guided session replaying prefix\\\"\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:56.938372-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 7 migrations to schema \\\"public\\\", now at version v21 (execution time 00:00.220s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:58.314163-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 14 migrations to schema \\\"public\\\", now at version v14 (execution time 00:00.193s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:58.57829-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Migrating schema \\\"public\\\" to version \\\"21 - guided session replaying prefix\\\"\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:58.630742-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 7 migrations to schema \\\"public\\\", now at version v21 (execution time 00:00.217s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:40:59.995208-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 14 migrations to schema \\\"public\\\", now at version v14 (execution time 00:00.197s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:00.303208-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Migrating schema \\\"public\\\" to version \\\"21 - guided session replaying prefix\\\"\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:00.376206-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 7 migrations to schema \\\"public\\\", now at version v21 (execution time 00:00.270s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:01.89604-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 14 migrations to schema \\\"public\\\", now at version v14 (execution time 00:00.240s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:02.196851-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Migrating schema \\\"public\\\" to version \\\"21 - guided session replaying prefix\\\"\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:02.248968-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 7 migrations to schema \\\"public\\\", now at version v21 (execution time 00:00.237s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:03.738411-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 14 migrations to schema \\\"public\\\", now at version v14 (execution time 00:00.209s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:04.008118-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Migrating schema \\\"public\\\" to version \\\"21 - guided session replaying prefix\\\"\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:04.059012-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 7 migrations to schema \\\"public\\\", now at version v21 (execution time 00:00.221s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:05.412732-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 14 migrations to schema \\\"public\\\", now at version v14 (execution time 00:00.200s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:05.670676-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Migrating schema \\\"public\\\" to version \\\"21 - guided session replaying prefix\\\"\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:05.722895-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 7 migrations to schema \\\"public\\\", now at version v21 (execution time 00:00.210s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:07.084429-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 14 migrations to schema \\\"public\\\", now at version v14 (execution time 00:00.202s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:07.33446-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Migrating schema \\\"public\\\" to version \\\"21 - guided session replaying prefix\\\"\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:07.386877-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 7 migrations to schema \\\"public\\\", now at version v21 (execution time 00:00.208s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:08.795252-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 14 migrations to schema \\\"public\\\", now at version v14 (execution time 00:00.203s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:09.09984-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Migrating schema \\\"public\\\" to version \\\"21 - guided session replaying prefix\\\"\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:09.151618-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 7 migrations to schema \\\"public\\\", now at version v21 (execution time 00:00.219s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:10.407297-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 14 migrations to schema \\\"public\\\", now at version v14 (execution time 00:00.203s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:10.665066-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Migrating schema \\\"public\\\" to version \\\"21 - guided session replaying prefix\\\"\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:10.718236-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 7 migrations to schema \\\"public\\\", now at version v21 (execution time 00:00.217s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:12.104368-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 14 migrations to schema \\\"public\\\", now at version v14 (execution time 00:00.222s)\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:12.379254-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Migrating schema \\\"public\\\" to version \\\"21 - guided session replaying prefix\\\"\",\"service\":\"checks-backend\"}",
+      "{\"timestamp\":\"2026-10-15T06:41:12.430791-04:00\",\"level\":\"INFO\",\"logger\":\"org.flywaydb.core.internal.command.DbMigrate\",\"thread\":\"Test worker\",\"message\":\"Successfully applied 7 migrations to schema \\\"public\\\", now at version v21 (execution time 00:00.210s)\",\"service\":\"checks-backend\"}"
+    ],
+    "meaning": "OwnedTestcontainers/Flyway actual PG15 at reviewed historical14->headstorefixtures and Core preboot20->21; no other DBconnection/commands run."
+  },
+  "bootstrapAndRetention": {
+    "GuidedBootstrapPlanHistoryIT": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "positive": "unboundBootstrapAcceptanceThenActualAllocationPreservesImmutableOriginalHistory",
+      "negativeLabels": [
+        "fresh-zero",
+        "duplicate-id",
+        "foreign-reference",
+        "foreign-producer",
+        "foreign-consumer",
+        "source-order"
+      ],
+      "scope": "RealPG modelvalidator/store/unboundimmutablehistory/actualallocator/boundhead/audit and zerowriteguards; no browser/model-send/publication claim."
+    },
+    "GuidedAcceptedPlanTest": {
+      "total": 13,
+      "passed": 13,
+      "originalSubjectsRetained": true
+    },
+    "GuidedTranslationConcurrencyTest": {
+      "total": 4,
+      "passed": 4,
+      "originalSubjectsRetained": true
+    }
+  },
+  "pure19Clauses": {
+    "sourceCheckpoint": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/snapshot-tests57-65/source-checkpoint03.json",
+    "sha256": "622cef690faea1874b9f1c76a6065888caa7b9285b6fb4bfb2800efe725f0912",
+    "clauseCount": 19,
+    "actualJUnitMethods": 2,
+    "mapping": [
+      {
+        "clauseId": "57/TestConfig",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/config/base",
+          "57/config/environment",
+          "57/config/viewport-width",
+          "57/config/viewport-height",
+          "57/config/timeout",
+          "57/config/wait",
+          "57/config/browser-included",
+          "57/config/global-literal",
+          "57/config/global-evidence",
+          "57/config/global-declaration"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "INCOMPLETE_FAILED_METHOD_PARTIAL_OR_UNREACHED",
+        "reached": "Goldenpositiveworldloop/independentbase/configurationAndInputMutations/scopedReferencesAndEmptyValues completed; firstnormalizationAndEvidence absent-context DTOequality at256 failed. Subsequenthint/evidence normalization,scopeOrderAndCoordinates,learnedProjection unreached; nofullclausePASS."
+      },
+      {
+        "clauseId": "57/StepInput",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/input/text",
+          "57/input/context-literal",
+          "57/input/targethint-null",
+          "57/input/targethint-false",
+          "57/input/scoped-reference",
+          "57/input/evidence-each-field"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "INCOMPLETE_FAILED_METHOD_PARTIAL_OR_UNREACHED",
+        "reached": "Goldenpositiveworldloop/independentbase/configurationAndInputMutations/scopedReferencesAndEmptyValues completed; firstnormalizationAndEvidence absent-context DTOequality at256 failed. Subsequenthint/evidence normalization,scopeOrderAndCoordinates,learnedProjection unreached; nofullclausePASS."
+      },
+      {
+        "clauseId": "57/StepChain",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/chain/all-golden-rows",
+          "57/chain/predecessor",
+          "57/chain/mutate-j",
+          "57/chain/wrong-wrapper"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "INCOMPLETE_FAILED_METHOD_PARTIAL_OR_UNREACHED",
+        "reached": "Goldenpositiveworldloop/independentbase/configurationAndInputMutations/scopedReferencesAndEmptyValues completed; firstnormalizationAndEvidence absent-context DTOequality at256 failed. Subsequenthint/evidence normalization,scopeOrderAndCoordinates,learnedProjection unreached; nofullclausePASS."
+      },
+      {
+        "clauseId": "57/LearnedContent",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/learned/all-golden-rows",
+          "57/learned/unsorted-multiple",
+          "57/learned/utf8-ties",
+          "57/learned/retained-semantic-fields",
+          "57/learned/removed-ids",
+          "57/learned/consumer-deletion"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "INCOMPLETE_FAILED_METHOD_PARTIAL_OR_UNREACHED",
+        "reached": "Goldenpositiveworldloop/independentbase/configurationAndInputMutations/scopedReferencesAndEmptyValues completed; firstnormalizationAndEvidence absent-context DTOequality at256 failed. Subsequenthint/evidence normalization,scopeOrderAndCoordinates,learnedProjection unreached; nofullclausePASS."
+      },
+      {
+        "clauseId": "57/StepSnapshot",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/snapshot/golden-all-steps",
+          "57/snapshot/normalized-metadata",
+          "57/snapshot/source-graph-preserved"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "INCOMPLETE_FAILED_METHOD_PARTIAL_OR_UNREACHED",
+        "reached": "Goldenpositiveworldloop/independentbase/configurationAndInputMutations/scopedReferencesAndEmptyValues completed; firstnormalizationAndEvidence absent-context DTOequality at256 failed. Subsequenthint/evidence normalization,scopeOrderAndCoordinates,learnedProjection unreached; nofullclausePASS."
+      },
+      {
+        "clauseId": "57/EmptyValue",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/value/empty",
+          "57/value/whitespace",
+          "57/value/missing",
+          "57/value/null"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "ASSERTIONS_COMPLETED_BEFORE_LATER_METHOD_FAILURE",
+        "reached": "scopedReferencesAndEmptyValues returnednormally includingempty/whitespace/missing/null loops. ParentJUnitmethod subsequentlyfailed; nofull57PASS."
+      },
+      {
+        "clauseId": "57/Normalization",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.reconstructsAllFiveHashEnvelopesFromCompleteSource",
+        "reviewedCaseLabels": [
+          "57/normalize/absent-context",
+          "57/normalize/null-context",
+          "57/normalize/empty-arrays",
+          "57/normalize/hint-null",
+          "57/normalize/hint-false",
+          "57/normalize/fractional-iso",
+          "57/normalize/unicode-order"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "INCOMPLETE_FAILED_METHOD_PARTIAL_OR_UNREACHED",
+        "reached": "Goldenpositiveworldloop/independentbase/configurationAndInputMutations/scopedReferencesAndEmptyValues completed; firstnormalizationAndEvidence absent-context DTOequality at256 failed. Subsequenthint/evidence normalization,scopeOrderAndCoordinates,learnedProjection unreached; nofullclausePASS."
+      },
+      {
+        "clauseId": "65/sourceHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/source/array",
+          "65/source/wrapper",
+          "65/source/omit-line",
+          "65/source/reorder",
+          "65/source/current-draft"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_THIS_PURE_JAVA_METHOD_SCOPE",
+        "reached": "Entiremethod andhelpers completednormally; private/historicalDBauthority not established bypureassertions."
+      },
+      {
+        "clauseId": "65/authoringHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/authoring/array",
+          "65/authoring/wrapper",
+          "65/authoring/omit-stepId",
+          "65/authoring/omit-ordinal",
+          "65/authoring/omit-source",
+          "65/authoring/reorder"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_THIS_PURE_JAVA_METHOD_SCOPE",
+        "reached": "Entiremethod andhelpers completednormally; private/historicalDBauthority not established bypureassertions."
+      },
+      {
+        "clauseId": "65/configurationHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/config/full",
+          "65/config/wrapper",
+          "65/config/each-required-omission",
+          "65/config/legal-field-change"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_THIS_PURE_JAVA_METHOD_SCOPE",
+        "reached": "Entiremethod andhelpers completednormally; private/historicalDBauthority not established bypureassertions."
+      },
+      {
+        "clauseId": "65/artifactHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/artifact/full",
+          "65/artifact/wrapper",
+          "65/artifact/subset",
+          "65/artifact/required-omission",
+          "65/artifact/valid-inner-change"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_THIS_PURE_JAVA_METHOD_SCOPE",
+        "reached": "Entiremethod andhelpers completednormally; private/historicalDBauthority not established bypureassertions."
+      },
+      {
+        "clauseId": "65/learnedPlanHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/plan/full",
+          "65/plan/wrapper",
+          "65/plan/required-omission",
+          "65/plan/semantic-change",
+          "65/plan/duplicate-field-mismatch"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_THIS_PURE_JAVA_METHOD_SCOPE",
+        "reached": "Entiremethod andhelpers completednormally; private/historicalDBauthority not established bypureassertions."
+      },
+      {
+        "clauseId": "65/referencePolicyHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/policy/full",
+          "65/policy/wrapper",
+          "65/policy/subset",
+          "65/policy/required-omission",
+          "65/policy/semantic-change"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_THIS_PURE_JAVA_METHOD_SCOPE",
+        "reached": "Entiremethod andhelpers completednormally; private/historicalDBauthority not established bypureassertions."
+      },
+      {
+        "clauseId": "65/profileHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/profile/full",
+          "65/profile/wrapper-claim",
+          "65/profile/omission",
+          "65/profile/unsupported-constant"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_THIS_PURE_JAVA_METHOD_SCOPE",
+        "reached": "Entiremethod andhelpers completednormally; private/historicalDBauthority not established bypureassertions."
+      },
+      {
+        "clauseId": "65/operationEquivalenceHash",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/equivalence/full",
+          "65/equivalence/wrapper",
+          "65/equivalence/omit-operations",
+          "65/equivalence/omit-guards",
+          "65/equivalence/omit-inputRecipes",
+          "65/equivalence/omit-bindings",
+          "65/equivalence/omit-transfers",
+          "65/equivalence/order"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_THIS_PURE_JAVA_METHOD_SCOPE",
+        "reached": "Entiremethod andhelpers completednormally; private/historicalDBauthority not established bypureassertions."
+      },
+      {
+        "clauseId": "65/RevisionIdentity",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/identity/exact16",
+          "65/identity/wrapper",
+          "65/identity/whole-revision",
+          "65/identity/unknown-field",
+          "65/identity/omit-version",
+          "65/identity/omit-testId",
+          "65/identity/omit-csiId",
+          "65/identity/omit-sourceRevision",
+          "65/identity/omit-configurationRevision",
+          "65/identity/omit-sourceHash",
+          "65/identity/omit-configurationHash",
+          "65/identity/omit-authoringHash",
+          "65/identity/omit-learnedPlanHash",
+          "65/identity/omit-artifactHash",
+          "65/identity/omit-referencePolicyHash",
+          "65/identity/omit-operationEquivalenceHash",
+          "65/identity/omit-admissionProvenanceHash",
+          "65/identity/omit-publicationEvidenceHash",
+          "65/identity/omit-runAuthorizationHash",
+          "65/identity/omit-profileHash"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_THIS_PURE_JAVA_METHOD_SCOPE",
+        "reached": "Entiremethod andhelpers completednormally; private/historicalDBauthority not established bypureassertions."
+      },
+      {
+        "clauseId": "65/PinProgram",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/pin/each-id-copy",
+          "65/pin/each-digest-copy",
+          "65/program/wrapper",
+          "65/program/required-omission",
+          "65/program/guard-resealed",
+          "65/program/action-resealed"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_THIS_PURE_JAVA_METHOD_SCOPE",
+        "reached": "Entiremethod andhelpers completednormally; private/historicalDBauthority not established bypureassertions."
+      },
+      {
+        "clauseId": "65/Maps",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/maps/resealed-claimed-map",
+          "65/maps/missing-key",
+          "65/maps/extra-key",
+          "65/maps/reuse-copy-mismatch"
+        ],
+        "privateAuthorityLimit": false,
+        "status": "PASS_THIS_PURE_JAVA_METHOD_SCOPE",
+        "reached": "Entiremethod andhelpers completednormally; private/historicalDBauthority not established bypureassertions."
+      },
+      {
+        "clauseId": "65/HistoricalReceipts",
+        "javaSelector": "com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.baseArtifactAndRevisionDigestHaveExactPreimages",
+        "reviewedCaseLabels": [
+          "65/receipt/admission-one-sided",
+          "65/receipt/publication-one-sided",
+          "65/receipt/authorization-one-sided",
+          "65/receipt/actual-stored-authority"
+        ],
+        "privateAuthorityLimit": true,
+        "status": "PASS_THIS_PURE_JAVA_METHOD_SCOPE",
+        "reached": "Entiremethod andhelpers completednormally; private/historicalDBauthority not established bypureassertions."
+      }
+    ],
+    "qualification": "65method1PASS/12clausesatpureJava scope;57method1FAIL/7clausespartialunreached,EmptyValuefunctioncompleted beforelaterfailure. No19JUnitcase claim or TSresultsubstitution."
+  },
+  "parityFailure": {
+    "owner": "NewDex exclusivelyowned JavaSnapshotBasisParityTest source; noeditbybackendexecutor",
+    "label": "57/normalize/absent-context",
+    "line": "SnapshotBasisParityTest.normalizationAndEvidence:256",
+    "actual": "AssertJ JsonNode.equals assertionfailed afterDTOread/mapper; displayedactual andexpectedJSON are textuallysame. GlobalContext03 previousschemafailurewasnotrepeated.",
+    "readOnlyInference": "AuthoringEvidenceReference.revision isprimitive long; ObjectMapper.valueToTree createsnumericnode type that maydifferfrom smallfixture IntNode whilecanonicalbytesagree. This is a likely testtree-equality issue, not established productioncounterexample; no runtime probe/newtest was run. Root assignednewDex correction separately."
+  },
+  "joinedFailure": {
+    "stage": "Initialtenstep fulllearn firstnavigation aftersuccessfulSOURCE_PLAN/bootstrap/metadata; beforebasepublication/edit4",
+    "assertion": "awaitFinalizing17562 expectedFINALIZING, actualUNKNOWN_OUTCOME atincrementalJoined2439/central2398",
+    "ledgerSummary": [
+      {
+        "operationKind": "navigate",
+        "state": "UNKNOWN_OUTCOME",
+        "outcomeCode": "ACK_LOST",
+        "stepId": "909c70ba-a416-38c6-87e2-e0b94fe8162f",
+        "admissionId": "823bbad8-c253-42db-ab39-734fdc9fb564",
+        "ordinal": 0,
+        "dispatchCount": 1,
+        "ownerFence": 1,
+        "generation": 0
+      }
+    ],
+    "exceptionCode": "INVALID_CONTRACT",
+    "originalDiagnosticStack": [
+      {
+        "class": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+        "method": "require",
+        "line": 67
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.session.GuidedContracts",
+        "method": "validatedCanonical",
+        "line": 104
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.session.GuidedContracts",
+        "method": "validate",
+        "line": 90
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient",
+        "method": "send",
+        "line": 245
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient",
+        "method": "send",
+        "line": 81
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchService",
+        "method": "dispatch",
+        "line": 182
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+        "method": "admitAndDispatch",
+        "line": 2147
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedTranslationService",
+        "method": "advance",
+        "line": 847
+      },
+      {
+        "class": "com.citi.put.checks.studio.guided.translation.GuidedPlanningController",
+        "method": "proposal",
+        "line": 50
+      },
+      {
+        "class": "jdk.internal.reflect.DirectMethodHandleAccessor",
+        "method": "invoke",
+        "line": 103
+      },
+      {
+        "class": "java.lang.reflect.Method",
+        "method": "invoke",
+        "line": 580
+      },
+      {
+        "class": "org.springframework.web.method.support.InvocableHandlerMethod",
+        "method": "doInvoke",
+        "line": 255
+      },
+      {
+        "class": "org.springframework.web.method.support.InvocableHandlerMethod",
+        "method": "invokeForRequest",
+        "line": 188
+      },
+      {
+        "class": "org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod",
+        "method": "invokeAndHandle",
+        "line": 118
+      },
+      {
+        "class": "org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter",
+        "method": "invokeHandlerMethod",
+        "line": 926
+      },
+      {
+        "class": "org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter",
+        "method": "handleInternal",
+        "line": 831
+      }
+    ],
+    "exactObservedBoundary": "GuidedRunnerClient.send245 rejects received dispatch reply using contracts.validate(v3/bridge#/definitions/outcome); DispatchService182/admitAndDispatch2147 subsequently leaves ACK_LOST UNKNOWN_OUTCOME.",
+    "ownerAssessment": "Backend GuidedRunnerClient/GuidedContracts versus Runner dispatch reply contract boundary requires jointdiagnosis. Full receivedreply bytes or schemafailurepointer not persisted; cannot honestlyassign malformedrunnerreply versus backendoneOfvalidation fromthisevidence alone. NotData10/bootstrapfailure. No genericunknown-native retry/relabel allowed.",
+    "sourceIndependentNativeEvidence": {
+      "journal": {
+        "source": "/private/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-2873349288017498039/journal/6bda3240ee3404f5a6412ae63555d66bcf3157561dbb66e2a225532adae10752.journal",
+        "sha256": "2e3d041a038934bb5bd482a6d4d1932a234da9d3cd364c67070238f1849732f4",
+        "nativeFenceEvents": [
+          {
+            "admissionId": "823bbad8-c253-42db-ab39-734fdc9fb564",
+            "contextId": "e1d617ac-53ac-44dd-87f3-c2fa1340697e",
+            "operationHash": "1536ad84735a47230e46d556d8895ab079ec19e57b47de57862c23cd9bf98319",
+            "ownerFence": 1,
+            "receiptHash": null,
+            "schemaVersion": 3,
+            "sessionId": "db9fc73a-a7bb-45cb-bbb2-01d15c758de7",
+            "state": "INVOKING"
+          }
+        ]
+      },
+      "manifest": {
+        "source": "/private/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-2873349288017498039/objects/studio/CSI-123/guided/db9fc73a-a7bb-45cb-bbb2-01d15c758de7.manifest.json",
+        "sha256": "7cd08c6425f499a8e2961f8412dfbd1cf6187ee2ed232eb1363c09ceea4f3558",
+        "document": {
+          "schemaVersion": 1,
+          "kind": "guidedRecording",
+          "sessionId": "db9fc73a-a7bb-45cb-bbb2-01d15c758de7",
+          "recordingId": "d0a0d069-e7cc-412a-b512-c377b1cbbf50",
+          "workerId": "worker-1",
+          "ownerFence": 1,
+          "evidenceState": "STORED",
+          "evidencePartial": false,
+          "videoKey": "studio/CSI-123/guided/db9fc73a-a7bb-45cb-bbb2-01d15c758de7.webm",
+          "manifestKey": "studio/CSI-123/guided/db9fc73a-a7bb-45cb-bbb2-01d15c758de7.manifest.json",
+          "timings": [
+            {
+              "kind": "action",
+              "stepId": "909c70ba-a416-38c6-87e2-e0b94fe8162f",
+              "admissionId": "823bbad8-c253-42db-ab39-734fdc9fb564",
+              "ordinal": 0,
+              "startMs": 471,
+              "endMs": 490
+            }
+          ],
+          "disclosure": "Password fills are rendered as masked dots (password-only rule). A page that later displays a secret in plain text is not protected by this recording."
+        }
+      },
+      "video": {
+        "source": "/private/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-2873349288017498039/objects/studio/CSI-123/guided/db9fc73a-a7bb-45cb-bbb2-01d15c758de7.webm",
+        "sha256": "cf2066b7b46de8e3cdf56db88291819de1fc91b9ce97737eb8ccb72914308adc",
+        "bytes": 3074
+      }
+    },
+    "nativeLimit": "DurableINVOKING andrecorded471..490ms nativeinterval showinvocationphase reached; no postnavigation observation/proof ofapplicationstate accepted. Browservideoexists, decoder/whiteframe/timing/privacyassertion helper wasnotreached, neverclaimedgreen."
+  },
+  "actualMainReached": {
+    "springCoreHttpMtls": true,
+    "mainMethodBody": true,
+    "draftTenStableStepsGetUnlearnedStart": true,
+    "sourcePlanAccepted": true,
+    "planRevision": 2,
+    "materializationPresent": true,
+    "bootstrapPhase": "READY",
+    "actualFixtureModelHttpCalls": 2,
+    "actualModelKinds": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 1,
+      "VERIFY_STEP": 0
+    },
+    "counters": {
+      "actions": 1,
+      "observations": 0,
+      "modelProposals": 2,
+      "modelInputTokens": 26582,
+      "modelOutputTokens": 8000,
+      "sanitizedEvidenceBytes": 0
+    },
+    "guidedLaunch": {
+      "registered": true,
+      "count": 1,
+      "lastRecordVideoDir": "/private/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/.checks-guided-recordings/8ade57f6ad0815b67372ed68f55f2047ea2965bdf8003807b2106ebe03f67135/inc-adf693dc1ce62015cf87f9f9a3943f055204929412aaaa91/checks-recording-Ckxo37"
+    },
+    "observations": 0,
+    "actions": 1,
+    "executions": 0,
+    "publicationSnapshotPresent": false,
+    "publicationRevisionPresent": false,
+    "media": {
+      "webm": 1,
+      "png": 0,
+      "manifest": 1,
+      "nativeEventsExists": false
+    }
+  },
+  "mainAssertions": [
+    {
+      "subject": "Initialtenstep actuallearn",
+      "status": "FAILED_AT_FIRST_NATIVE_DISPATCH_REPLY_VALIDATION"
+    },
+    {
+      "subject": "Initialbasepublish",
+      "status": "NOT_REACHED"
+    },
+    {
+      "subject": "Edit4/readiness/boundary/refusal",
+      "status": "NOT_REACHED"
+    },
+    {
+      "subject": "Samehandle+ObservationSessionmixedprefixsuffix",
+      "status": "NOT_REACHED"
+    },
+    {
+      "subject": "Prefix1to3model0/freshbinding",
+      "status": "NOT_REACHED"
+    },
+    {
+      "subject": "Suffix4to10alwaysrelearn",
+      "status": "NOT_REACHED"
+    },
+    {
+      "subject": "Mergedexactmaps/admissionprovenance/READY",
+      "status": "NOT_REACHED"
+    },
+    {
+      "subject": "Finalize0effects",
+      "status": "NOT_REACHED"
+    },
+    {
+      "subject": "Continuousdecodedvideo/offsets/privacy",
+      "status": "NOT_REACHED"
+    },
+    {
+      "subject": "Sameartifactordinaryreplaymodel0",
+      "status": "NOT_REACHED"
+    }
+  ],
+  "guardTallies": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-and-bootstrap-attempt03-guard-tally/GuidedPublicationReplayIT.json",
+      "sha256": "1db2b5078c5733d937fcb9fddac2f7b4a1037251e20852604075e2375fb472a2"
+    }
+  ],
+  "cleanup": {
+    "sessionCleanup": {
+      "testMethod": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+      "sessions": [
+        {
+          "sessionId": "db9fc73a-a7bb-45cb-bbb2-01d15c758de7",
+          "beforeState": "UNKNOWN_OUTCOME",
+          "teardownStatus": "CONFIRMED"
+        }
+      ],
+      "allActualTeardownsConfirmed": true
+    },
+    "ownedContextTeardown": {
+      "owningContextIdentity": 771346585,
+      "cancelledScheduledTasks": 12,
+      "fixedDelayTasks": 8,
+      "fixedRateTasks": 2,
+      "cronTasks": 2,
+      "terminatedSchedulerServices": 1,
+      "terminatedAsyncDelegates": 4,
+      "trackedSchedulerBodiesEmpty": true,
+      "contextClosed": true,
+      "afterClassCacheEvictionConfigured": true,
+      "actualFrameworkCacheEntryEvicted": true,
+      "commonPoolTerminationClaimed": false
+    },
+    "ownedProcessesRemaining": [],
+    "inheritedUntouchedPids": [
+      22246,
+      13577,
+      13581,
+      44737
+    ],
+    "noArbitraryKillOrConnection": true
+  },
+  "artifacts": {
+    "results": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-and-bootstrap-attempt03-results.json",
+      "sha256": "f22af96cbb1dc979ae83dd96a8f0c3dd76010d7ed4fc329eb723d752b6b41212"
+    },
+    "xml": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-and-bootstrap-attempt03-xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+        "sha256": "b100b13ce87bc687c2b9d19e9b93c3ef13e150e173235813dcac24b5d75a0fee"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-and-bootstrap-attempt03-xml/TEST-com.citi.put.checks.studio.guided.publication.SnapshotBasisParityTest.xml",
+        "sha256": "0e6d15b2efec3bdc9685c023c22bb6e8f8a8176b48a100931f414be4fc2ce93a"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-and-bootstrap-attempt03-xml/TEST-com.citi.put.checks.studio.guided.publication.SnapshotBasisValidationTest.xml",
+        "sha256": "f8cc7aae2d87a55bc31a269675144dbc45a46e0d117ca9dff5959d3323f656f1"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-and-bootstrap-attempt03-xml/TEST-com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlanTest.xml",
+        "sha256": "2af454212463278e2a05daf6489c454687fe7bc35645ebe58a2aaf98063d80cc"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-and-bootstrap-attempt03-xml/TEST-com.citi.put.checks.studio.guided.translation.GuidedBootstrapPlanHistoryIT.xml",
+        "sha256": "f7c0f7a97adf44d6dc5a025eecc84cb40efc79e425fb3bcfac7dc37f89572ec3"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-and-bootstrap-attempt03-xml/TEST-com.citi.put.checks.studio.guided.translation.GuidedTranslationConcurrencyTest.xml",
+        "sha256": "de4a28b05d4e86bacc2d7d76125e78fb4b4050c222dadf40ba7cd37150ce0777"
+      }
+    ],
+    "log": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-and-bootstrap-attempt03.log",
+      "sha256": "bd290505a615e3ee6d46cdb90017d7230e91c052cf58b12df1e93dff6dfd70ed"
+    },
+    "capture": {
+      "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-and-bootstrap-attempt03-artifacts/capture-manifest.json",
+      "sha256": "1eee8ddb48c123b13519363ce4e4e1cf7c02a5d4f3a6f9c77c8d11f50384df72"
+    },
+    "failureStacks": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-and-bootstrap-attempt03-artifacts/GuidedPublicationReplayIT-failure.txt",
+        "sha256": "e87956771a1f2872c0d7ae0242318c9b28638d41b79f789b61adf53855832e82"
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/backend-joined-edit4-and-bootstrap-attempt03-artifacts/SnapshotBasisParityTest-failure.txt",
+        "sha256": "e700a248c0d78506e15859ebb8f83afdc787cfc67b043f6b47827b97fb9a9ae0"
+      }
+    ],
+    "ownedTemp": "/private/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-2873349288017498039",
+    "copiedSafeFileCount": 17,
+    "excludedCredentialConfigCount": 15,
+    "fixedOriginalFilesRestored": 52,
+    "restoreMismatches": 0,
+    "preservation": "ExactWebM/manifest/datafreejournal andsanitizedcontrolledlogs copied;JWT/privatekeys/credentials/configscripts excluded. NooriginalTEMP/video/PNG/historicalevidence removedorrewritten. Before/afterfixedoutputs archived and52originalfiles restored byteexact0mismatch."
+  },
+  "remaining": "All86/24/55/35variants/private/fullconfiguredcheck+coverage/native/joined/secret/deployment/independentQA015close then008 remain. Row85originalsubjectOPEN/userchoicepending. Thissingleflowfailed, no sourcefix/retry/extra tests/Gradle/native/decode/build/dist/generation/format/install/commits/QA/lifecycle change."
+}

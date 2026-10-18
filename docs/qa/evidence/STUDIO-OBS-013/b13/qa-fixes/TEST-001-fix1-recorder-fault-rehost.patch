@@ -1,0 +1,292 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -4491,197 +4491,110 @@
+    * directory after the first dispatched action, as runner recorderFileLost) settles UNAVAILABLE,
+    * the session still finishes, and no video object exists. The store is the same one the happy
+    * path proves AVAILABLE with, so UNAVAILABLE here can only come from the injected fault.
++   *
++   * <p>Hosted on the class's plain (non-secret) learn fixture, not the secret-login one: the S2
++   * operation observer in the guided worker is single-use per worker process (its drain restores
++   * the wrapped RevRuntime prototype methods), and the secret-login test is its one case. A second
++   * secret-bearing S2 case here left the login test's teardown without its completion receipt.
++   * Whether the run logs in is irrelevant to the recorder fault under test.
+    */
+   @Test
+   @org.junit.jupiter.api.Order(9)
+   void guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes() throws Exception {
+-    coreRole = "owner";
+-    String canary = "JOINED-FAULT-" + UUID.randomUUID();
+-    var fixtureHttp = HttpClient.newHttpClient();
+-    fixtureHttp.send(
+-        HttpRequest.newBuilder(URI.create(SECRET_ORIGIN + "/__reset"))
+-            .POST(HttpRequest.BodyPublishers.noBody())
+-            .build(),
+-        HttpResponse.BodyHandlers.discarding());
+-    fixtureHttp.send(
+-        HttpRequest.newBuilder(URI.create(SECRET_ORIGIN + "/__rotate"))
+-            .POST(HttpRequest.BodyPublishers.ofString(canary))
+-            .build(),
+-        HttpResponse.BodyHandlers.discarding());
+-    UUID testId =
+-        createSource(
+-            List.of(
+-                "Open " + SECRET_ORIGIN + "/login.",
+-                "Enter <var USER> in User and <secret PASS> as password.",
+-                "Click Sign in, check Home, open Reports and check Reports appears."));
+-    jdbc.update(
+-        ("UPDATE ui_tests SET variables='[{\"name\":\"USER\",\"kind\":\"plain\","
+-            + "\"value\":\"fixture-user\"},{\"name\":\"PASS\",\"kind\":\"secretRef\"}]'::jsonb"
+-            + " WHERE id=?"),
+-        testId);
+-    var vaultScope =
+-        com.citi.put.checks.studio.secrets.VaultScope.of(primaryCsi, "fixture", testId);
+-    VAULT.rotate(
+-        com.citi.put.checks.studio.secrets.StudioVaultProvider.ReferenceKind.SECRET,
+-        vaultScope,
+-        "PASS",
+-        canary);
+-    VAULT.bindOrigins(
+-        com.citi.put.checks.studio.secrets.StudioVaultProvider.ReferenceKind.SECRET,
+-        vaultScope,
+-        "PASS",
+-        SECRET_ORIGIN);
+-    var canaries = new java.util.ArrayList<String>(List.of(canary));
+-    AUDIT_CANARIES.add(canary);
+-    var sinkBytes = new java.util.LinkedHashMap<String, byte[]>();
+-    C5Capture capture = new C5Capture(canaries, false);
+-    c5Capture = capture;
+-    Throwable c5PrimaryFailure = null;
+-    secretLoginScenario = true;
+-    s2TraceBinding = new S2TraceBinding(vaultScope, capture);
+-    try {
+-      capture.beginS2(++p3CaptureCaseOrdinal);
+-      capture.writeProfileValues();
+-      long launchesBefore = p3LaunchCounter().path("count").asLong();
+-      String sessionId = startLearning(testId);
++    UUID testId = createSource(TEXT);
++    long launchesBefore = p3LaunchCounter().path("count").asLong();
++    String sessionId = startLearning(testId);
+ 
+-      // Inject: after the first dispatched action, remove the live recording file.
+-      Path recorderDirectory = null;
+-      int removed = 0;
+-      long deadline = System.nanoTime() + Duration.ofSeconds(90).toNanos();
+-      while (System.nanoTime() < deadline) {
+-        JsonNode launches = p3LaunchCounter();
+-        Integer dispatched =
+-            jdbc.queryForObject(
+-                "SELECT count(*) FROM studio_guided_actions WHERE session_id=?"
+-                    + " AND (document->>'dispatchCount')::integer = 1",
+-                Integer.class,
+-                sessionId);
+-        if (launches.path("count").asLong() > launchesBefore
+-            && launches.path("lastRecordVideoDir").isTextual()
+-            && dispatched != null
+-            && dispatched > 0) {
+-          assertThat(
+-                  jdbc.queryForObject(
+-                      "SELECT state FROM studio_guided_sessions WHERE session_id=?",
+-                      String.class,
+-                      sessionId))
+-              .as("the fault lands mid-session, before the recording is closed")
+-              .isNotIn(
+-                  "FINALIZING",
+-                  "SUCCEEDED",
+-                  "PUBLICATION_CONFLICT",
+-                  "FAILED",
+-                  "UNKNOWN_OUTCOME",
+-                  "CANCELLED",
+-                  "EXPIRED");
+-          recorderDirectory = Path.of(launches.path("lastRecordVideoDir").asText());
+-          try (var files = Files.list(recorderDirectory)) {
+-            for (Path recorded : files.toList()) {
+-              Files.delete(recorded);
+-              removed++;
+-            }
++    // Inject: after the first dispatched action, remove the live recording file.
++    Path recorderDirectory = null;
++    int removed = 0;
++    long deadline = System.nanoTime() + Duration.ofSeconds(90).toNanos();
++    while (System.nanoTime() < deadline) {
++      JsonNode launches = p3LaunchCounter();
++      Integer dispatched =
++          jdbc.queryForObject(
++              "SELECT count(*) FROM studio_guided_actions WHERE session_id=?"
++                  + " AND (document->>'dispatchCount')::integer = 1",
++              Integer.class,
++              sessionId);
++      if (launches.path("count").asLong() > launchesBefore
++          && launches.path("lastRecordVideoDir").isTextual()
++          && dispatched != null
++          && dispatched > 0) {
++        assertThat(
++                jdbc.queryForObject(
++                    "SELECT state FROM studio_guided_sessions WHERE session_id=?",
++                    String.class,
++                    sessionId))
++            .as("the fault lands mid-session, before the recording is closed")
++            .isNotIn(
++                "FINALIZING",
++                "SUCCEEDED",
++                "PUBLICATION_CONFLICT",
++                "FAILED",
++                "UNKNOWN_OUTCOME",
++                "CANCELLED",
++                "EXPIRED");
++        recorderDirectory = Path.of(launches.path("lastRecordVideoDir").asText());
++        try (var files = Files.list(recorderDirectory)) {
++          for (Path recorded : files.toList()) {
++            Files.delete(recorded);
++            removed++;
+           }
+-          break;
+         }
+-        Thread.sleep(20);
++        break;
+       }
+-      assertThat(recorderDirectory)
+-          .as("guided recorder directory observed; logs %s", TEMP)
+-          .isNotNull();
+-      assertThat(removed).as("the live recording file was removed").isPositive();
++      Thread.sleep(20);
++    }
++    assertThat(recorderDirectory)
++        .as("guided recorder directory observed; logs %s", TEMP)
++        .isNotNull();
++    assertThat(removed).as("the live recording file was removed").isPositive();
+ 
+-      // The session still finishes.
+-      awaitFinalizing(sessionId);
+-      publicCall(
+-          "/api/v1/studio/guided-sessions/" + sessionId + "/finalize",
+-          C.object()
+-              .put("schemaVersion", 3)
+-              .put("expectedSourceRevision", "1")
+-              .put("expectedConfigurationRevision", "1"),
+-          200,
+-          UUID.randomUUID().toString());
++    // The session still finishes.
++    awaitFinalizing(sessionId);
++    publicCall(
++        "/api/v1/studio/guided-sessions/" + sessionId + "/finalize",
++        C.object()
++            .put("schemaVersion", 3)
++            .put("expectedSourceRevision", "1")
++            .put("expectedConfigurationRevision", "1"),
++        200,
++        UUID.randomUUID().toString());
+ 
+-      JsonNode result = awaitGuidedVideoSettled(sessionId);
+-      JsonNode video = result.path("evidence").path("video");
+-      assertThat(video.path("status").asText()).as(video.toString()).isEqualTo("UNAVAILABLE");
+-      assertThat(video.path("error").isNull()).isTrue();
+-      assertThat(video.path("expiresAt").isNull()).isTrue();
+-      assertThat(video.path("partial").isBoolean() && !video.path("partial").booleanValue())
+-          .isTrue();
+-      assertThat(result.path("actionTimings").isArray()).isTrue();
+-      assertThat(result.path("actionTimings")).isEmpty();
++    JsonNode result = awaitGuidedVideoSettled(sessionId);
++    JsonNode video = result.path("evidence").path("video");
++    assertThat(video.path("status").asText()).as(video.toString()).isEqualTo("UNAVAILABLE");
++    assertThat(video.path("error").isNull()).isTrue();
++    assertThat(video.path("expiresAt").isNull()).isTrue();
++    assertThat(video.path("partial").isBoolean() && !video.path("partial").booleanValue()).isTrue();
++    assertThat(result.path("actionTimings").isArray()).isTrue();
++    assertThat(result.path("actionTimings")).isEmpty();
+ 
+-      Map<String, Object> row = guidedRecordingRow(sessionId);
+-      assertThat(row.get("state")).isEqualTo("UNAVAILABLE");
+-      assertThat(row.get("partial")).isEqualTo(false);
+-      assertThat(row.get("has_expiry")).isEqualTo(false);
+-      assertThat(C.parse(String.valueOf(row.get("timings"))).isArray()).isTrue();
+-      assertThat(C.parse(String.valueOf(row.get("timings")))).isEmpty();
+-
+-      // No fake video: the object is absent, the manifest says UNAVAILABLE, the route says 404.
+-      Path objects = TEMP.resolve("objects");
+-      Path file = objects.resolve(String.valueOf(row.get("video_key"))).normalize();
+-      assertThat(file.startsWith(objects)).isTrue();
+-      assertThat(Files.notExists(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)).isTrue();
+-      Path manifest = objects.resolve(String.valueOf(row.get("manifest_key"))).normalize();
+-      assertThat(manifest.startsWith(objects)).isTrue();
+-      byte[] manifestBytes = Files.readAllBytes(manifest);
+-      JsonNode manifestBody = C.parse(new String(manifestBytes, StandardCharsets.UTF_8));
+-      assertThat(manifestBody.path("evidenceState").asText()).isEqualTo("UNAVAILABLE");
+-      assertThat(manifestBody.path("timings").isArray()).isTrue();
+-      assertThat(manifestBody.path("timings")).isEmpty();
+-      assertThat(manifestBody.path("disclosure").asText()).isEqualTo(GUIDED_DISCLOSURE);
+-      HttpResponse<byte[]> refused = guidedVideoRead(sessionId, null, true);
+-      assertThat(refused.statusCode()).isEqualTo(404);
+-      assertThat(C.parse(new String(refused.body(), StandardCharsets.UTF_8)).path("error").asText())
+-          .isEqualTo("VIDEO_UNAVAILABLE");
++    Map<String, Object> row = guidedRecordingRow(sessionId);
++    assertThat(row.get("state")).isEqualTo("UNAVAILABLE");
++    assertThat(row.get("partial")).isEqualTo(false);
++    assertThat(row.get("has_expiry")).isEqualTo(false);
++    assertThat(C.parse(String.valueOf(row.get("timings"))).isArray()).isTrue();
++    assertThat(C.parse(String.valueOf(row.get("timings")))).isEmpty();
+ 
+-      sinkBytes.put("fault-result", result.toString().getBytes(StandardCharsets.UTF_8));
+-      sinkBytes.put("fault-manifest", manifestBytes);
+-      collectJoinedSinks(sinkBytes);
+-      for (String value : canaries) {
+-        assertJoinedSinkAbsent(sinkBytes, value);
+-      }
+-      capture.writeNumericEvidence();
+-    } catch (Exception | Error original) {
+-      c5PrimaryFailure = original;
+-      throw original;
+-    } finally {
+-      var failures = new java.util.ArrayList<Throwable>();
+-      p3AttemptTeardown(failures, this::p3CleanupOwnedResources);
+-      p3AttemptTeardown(failures, capture::awaitS2Completion);
+-      if (failures.isEmpty() && !cleanupUnconfirmed) {
+-        p3AttemptTeardown(failures, () -> p3Scan(canaries));
+-        p3AttemptTeardown(failures, capture::writeNumericEvidence);
+-        p3AttemptTeardown(failures, capture::close);
+-        if (!cleanupUnconfirmed) {
+-          c5Capture = null;
+-          secretLoginScenario = false;
+-          s2TraceBinding = null;
+-          p3OwnedGuidedCookies.clear();
+-          p3OwnedOrdinaryCookies.clear();
+-          p3AttemptTeardown(
+-              failures,
+-              () ->
+-                  Files.writeString(
+-                      TEMP.resolve("p4-revocation-state.json"),
+-                      "{\"active\":false}",
+-                      StandardCharsets.UTF_8));
+-        }
+-      } else {
+-        cleanupUnconfirmed = true;
+-        failures.add(
+-            new IllegalStateException("S2 actual secret-bearing owner completion unconfirmed"));
+-      }
+-      if (!failures.isEmpty()) {
+-        if (c5PrimaryFailure != null) {
+-          failures.forEach(c5PrimaryFailure::addSuppressed);
+-        } else {
+-          throwTeardownFailures(failures);
+-        }
+-      }
+-    }
++    // No fake video: the object is absent, the manifest says UNAVAILABLE, the route says 404.
++    Path objects = TEMP.resolve("objects");
++    Path file = objects.resolve(String.valueOf(row.get("video_key"))).normalize();
++    assertThat(file.startsWith(objects)).isTrue();
++    assertThat(Files.notExists(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)).isTrue();
++    Path manifest = objects.resolve(String.valueOf(row.get("manifest_key"))).normalize();
++    assertThat(manifest.startsWith(objects)).isTrue();
++    byte[] manifestBytes = Files.readAllBytes(manifest);
++    JsonNode manifestBody = C.parse(new String(manifestBytes, StandardCharsets.UTF_8));
++    assertThat(manifestBody.path("evidenceState").asText()).isEqualTo("UNAVAILABLE");
++    assertThat(manifestBody.path("timings").isArray()).isTrue();
++    assertThat(manifestBody.path("timings")).isEmpty();
++    assertThat(manifestBody.path("disclosure").asText()).isEqualTo(GUIDED_DISCLOSURE);
++    HttpResponse<byte[]> refused = guidedVideoRead(sessionId, null, true);
++    assertThat(refused.statusCode()).isEqualTo(404);
++    assertThat(C.parse(new String(refused.body(), StandardCharsets.UTF_8)).path("error").asText())
++        .isEqualTo("VIDEO_UNAVAILABLE");
+   }
+ 
+   /** Test-only accounting at the existing provider seam; it never resolves an extra value. */
